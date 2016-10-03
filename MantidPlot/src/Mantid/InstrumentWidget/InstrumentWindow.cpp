@@ -47,7 +47,7 @@ InstrumentWindow::~InstrumentWindow() {}
  * @param fileVersion :: version of the Mantid project file
  * @return handle to the created instrument window
  */
-IProjectSerialisable *InstrumentWindow::loadFromProject(
+MantidQt::API::IProjectSerialisable *InstrumentWindow::loadFromProject(
     const std::string &lines, ApplicationWindow *app, const int fileVersion) {
   Q_UNUSED(fileVersion);
 

@@ -349,6 +349,8 @@ void CompositePeaksPresenter::zoomToPeak(
   auto subjectPresenter = *iterator;
   auto boundingBox = subjectPresenter->getBoundingBox(peakIndex);
   m_zoomablePlottingWidget->zoomToRectangle(boundingBox);
+  m_zoomedPeakIndex = peakIndex;
+  m_zoomedPresenter = subjectPresenter;
 }
 
 /**

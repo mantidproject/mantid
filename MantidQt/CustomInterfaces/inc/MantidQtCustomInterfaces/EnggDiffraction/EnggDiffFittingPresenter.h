@@ -76,6 +76,9 @@ public:
   void doFitting(const std::string &focusedRunNo,
                  const std::string &expectedPeaks);
 
+  void runLoadAlg(const std::string focusedFile,
+                  Mantid::API::MatrixWorkspace_sptr &focusedWS);
+
   void runFittingAlgs(std::string FocusedFitPeaksTableName,
                       std::string FocusedWSName);
 
@@ -83,6 +86,8 @@ public:
   functionStrFactory(Mantid::API::ITableWorkspace_sptr &paramTableWS,
                      std::string tableName, size_t row, std::string &startX,
                      std::string &endX);
+
+  void plotFocusedFile(bool plotSinglePeaks);
 
   void plotFitPeaksCurves();
 
@@ -115,7 +120,7 @@ public:
 
   void setDataToClonedWS(std::string &current_WS, const std::string &cloned_WS);
 
-  void setBankItems();
+  void setBankItems(const std::vector<std::string> &bankFiles);
 
   void setRunNoItems(const std::vector<std::string> &runNumVector,
                      bool multiRun);
@@ -125,6 +130,7 @@ public:
 
 protected:
   void processStart();
+  void processLoad();
   void processFitPeaks();
   void processFitAllPeaks();
   void processShutDown();
@@ -139,24 +145,30 @@ protected slots:
   void fittingRunNoChanged();
 
 private:
-  bool isDigit(std::string text);
+  bool isDigit(const std::string text) const;
 
   // Methods related single peak fits
   virtual void
   startAsyncFittingWorker(const std::vector<std::string> &focusedRunNo,
                           const std::string &expectedPeaks);
 
+  std::string getBaseNameFromStr(const std::string &filePath) const;
+
   std::string validateFittingexpectedPeaks(std::string &expectedPeaks) const;
 
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
                                 const std::string &expectedPeaks);
 
-  void updateFittingDirVec(const std::string &bankDir,
-                           const std::string &focusedFile,
-                           std::vector<std::string> &fittingRunNoDirVec);
+  // TODO make this const when the global is removed
+  bool findFilePathFromBaseName(const std::string &directoryToSearch,
+                                const std::string &baseFileNamesToFind,
+                                std::vector<std::string> &foundFullFilePath);
 
-  void enableMultiRun(std::string firstRun, std::string lastRun,
-                      std::vector<std::string> &fittingRunNoDirVec);
+  std::vector<std::string>
+  splitFittingDirectory(const std::string &selectedfPath);
+
+  std::vector<std::string> enableMultiRun(const std::string &firstRun,
+                                          const std::string &lastRun);
 
   void browsePeaksToFit();
 
@@ -168,20 +180,19 @@ private:
 
   void fittingWriteFile(const std::string &fileDir);
 
-  void browsedFile(const std::string strFocusedFile,
-                   std::vector<std::string> &runnoDirVector,
-                   const std::vector<std::string> &splitBaseName,
-                   std::vector<std::string> &runNoVec,
-                   const std::string &bankFileDir);
+  std::vector<std::string>
+  getAllBrowsedFilePaths(const std::string &inputFullPath,
+                         std::vector<std::string> &foundFullFilePaths);
 
-  void processMultiRun(const std::string strFocusedFile,
-                       std::vector<std::string> &runnoDirVector);
+  std::vector<std::string> processMultiRun(const std::string userInput);
 
-  void processSingleRun(const std::string &focusDir,
-                        const std::string &strFocusedFile,
-                        std::vector<std::string> &runnoDirVector,
-                        const std::vector<std::string> &splitBaseName,
-                        std::vector<std::string> &runNoVec);
+  std::vector<std::string>
+  processSingleRun(const std::string &userInputBasename,
+                   const std::vector<std::string> &splitBaseName);
+
+  std::vector<std::string>
+  processFullPathInput(const Poco::Path &pocoFilePath,
+                       const std::vector<std::string> &splitBaseName);
 
   // whether to use AlignDetectors to convert units
   static const bool g_useAlignDetectors;
@@ -193,6 +204,9 @@ private:
 
   // input run number - used for output file name
   std::vector<std::string> g_multi_run;
+
+  // Holds the previous user input so we can short circuit further checks
+  std::string m_previousInput;
 
   /// true if the last fitting completed successfully
   bool m_fittingFinishedOK;
@@ -210,6 +224,9 @@ private:
 
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffFittingView *const m_view;
+
+  /// Holds if the view is in the process of being closed
+  bool m_viewHasClosed;
 };
 
 } // namespace CustomInterfaces

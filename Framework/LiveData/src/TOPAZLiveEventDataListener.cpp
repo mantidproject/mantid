@@ -491,8 +491,10 @@ void TOPAZLiveEventDataListener::initWorkspace() {
 
   loadInst->execute();
 
-  m_eventBuffer->padSpectra(); // expands the workspace to the size of the just
-                               // loaded instrument
+  auto tmp = createWorkspace<DataObjects::EventWorkspace>(
+      m_eventBuffer->getInstrument()->getDetectorIDs(true).size(), 2, 1);
+  WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer, tmp, true);
+  m_eventBuffer = std::move(tmp);
 
   // Set the units
   m_eventBuffer->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");

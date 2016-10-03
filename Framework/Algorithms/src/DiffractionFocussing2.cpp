@@ -338,7 +338,8 @@ void DiffractionFocussing2::execEvent() {
   // Create a new outputworkspace with not much in it
   DataObjects::EventWorkspace_sptr out;
   out = boost::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1));
+      API::WorkspaceFactory::Instance().create("EventWorkspace",
+                                               m_validGroups.size(), 2, 1));
   // Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(m_matrixInputW, out,
                                                          true);
@@ -376,7 +377,7 @@ void DiffractionFocussing2::execEvent() {
   // This creates and reserves the space required
   for (size_t iGroup = 0; iGroup < this->m_validGroups.size(); iGroup++) {
     const int group = this->m_validGroups[iGroup];
-    EventList &groupEL = out->getOrAddEventList(iGroup);
+    EventList &groupEL = out->getSpectrum(iGroup);
     groupEL.switchTo(eventWtype);
     groupEL.reserve(size_required[iGroup]);
     groupEL.clearDetectorIDs();
@@ -391,7 +392,7 @@ void DiffractionFocussing2::execEvent() {
   if (this->m_validGroups.size() == 1) {
     g_log.information() << "Performing focussing on a single group\n";
     // Special case of a single group - parallelize differently
-    EventList &groupEL = out->getOrAddEventList(0);
+    EventList &groupEL = out->getSpectrum(0);
     const int group = m_validGroups[0];
     const std::vector<size_t> &indices = this->m_wsIndices[group];
 
@@ -439,7 +440,7 @@ void DiffractionFocussing2::execEvent() {
       const std::vector<size_t> &indices = this->m_wsIndices[group];
       for (auto wi : indices) {
         // In workspace index iGroup, put what was in the OLD workspace index wi
-        out->getOrAddEventList(iGroup) += m_eventW->getSpectrum(wi);
+        out->getSpectrum(iGroup) += m_eventW->getSpectrum(wi);
 
         prog->reportIncrement(1, "Appending Lists");
 

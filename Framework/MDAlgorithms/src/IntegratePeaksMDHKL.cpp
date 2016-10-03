@@ -249,7 +249,7 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
   }
   double ratio = float(peakPoints) / float(measuredPoints - peakPoints);
   intensity = peakSum - ratio * (measuredSum - peakSum);
-  errorSquared = errSqSum + ratio * (measuredErrSqSum - errSqSum);
+  errorSquared = errSqSum + ratio * ratio * (measuredErrSqSum - errSqSum);
   return;
 }
 
