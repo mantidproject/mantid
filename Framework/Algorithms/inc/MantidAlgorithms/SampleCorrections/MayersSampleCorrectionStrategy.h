@@ -23,6 +23,7 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 #include "MantidKernel/System.h"
+#include "MantidHistogramData/Histogram.h"
 #include <memory>
 #include <utility>
 #include <vector>
@@ -61,15 +62,15 @@ public:
   /// Constructor
   MayersSampleCorrectionStrategy(
       MayersSampleCorrectionStrategy::Parameters params,
-      const std::vector<double> &tof, const std::vector<double> &sigIn,
-      const std::vector<double> &errIn);
+      const Mantid::HistogramData::Histogram &histogram);
   /// Destructor - defined in cpp file to use forward declaration with
   /// unique_ptr
   ~MayersSampleCorrectionStrategy();
 
   /// Return the correction factors
-  void apply(std::vector<double> &sigOut, std::vector<double> &errOut);
-  /// Calculate the self-attentation factor for a single mu*r value
+  void apply(Mantid::HistogramData::HistogramY &histoY,
+             Mantid::HistogramData::HistogramE &histoE);
+  /// Calculate the self-attenuation factor for a single mu*r value
   double calculateSelfAttenuation(const double muR);
   /// Calculate the multiple scattering factor for a single mu*r value &
   /// absorption value

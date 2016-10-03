@@ -22,9 +22,9 @@ public:
 
   void test_Attentuaton_Correction_For_Fixed_Mur() {
     std::vector<double> dummy(2, 0.0);
+    Mantid::HistogramData::Histogram histo(dummy, dummy);
     dummy[1] = 1.0;
-    MayersSampleCorrectionStrategy mscat(createTestParameters(), dummy, dummy,
-                                         dummy);
+    MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
     auto absFactor = mscat.calculateSelfAttenuation(0.01);
 
     const double delta = 1e-8;
@@ -34,9 +34,9 @@ public:
   void
   test_Multiple_Scattering_With_Fixed_Mur_And_Absorption_Correction_Factor() {
     std::vector<double> dummy(2, 0.0);
+    Mantid::HistogramData::Histogram histo(dummy, dummy);
     dummy[1] = 1.0;
-    MayersSampleCorrectionStrategy mscat(createTestParameters(), dummy, dummy,
-                                         dummy);
+    MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
     const size_t irp(1);
     const double muR(0.01), abs(0.0003);
     auto absFactor = mscat.calculateMS(irp, muR, abs);
@@ -53,11 +53,15 @@ public:
     std::transform(signal.begin(), signal.end(), error.begin(),
                    (double (*)(double))sqrt);
     std::generate(tof.begin(), tof.end(), Incrementer(100.0));
-    MayersSampleCorrectionStrategy mscat(createTestParameters(), tof, signal,
-                                         error);
 
+    Mantid::HistogramData::Histogram histo(tof, signal, error);
+
+    MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
+
+    Mantid::HistogramData::HistogramY signalHistogram(signal);
+    Mantid::HistogramData::HistogramE errorHistogram(error);
     // Correct it
-    mscat.apply(signal, error);
+    mscat.apply(signalHistogram, errorHistogram);
 
     // Check some values
     const double delta(1e-06);
@@ -80,11 +84,13 @@ public:
                    (double (*)(double))sqrt);
     // Generate a histogram with the same mid points as the point data example
     std::generate(tof.begin(), tof.end(), Incrementer(99.5));
-    MayersSampleCorrectionStrategy mscat(createTestParameters(), tof, signal,
-                                         error);
+    Mantid::HistogramData::Histogram histo(tof, signal, error);
+    MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
 
+    Mantid::HistogramData::HistogramY signalHistogram(signal);
+    Mantid::HistogramData::HistogramE errorHistogram(error);
     // Correct it
-    mscat.apply(signal, error);
+    mscat.apply(signalHistogram, errorHistogram);
 
     // Check some values
     const double delta(1e-06);
@@ -107,11 +113,13 @@ public:
     // Generate a histogram with the same mid points as the point data example
     std::generate(tof.begin(), tof.end(), Incrementer(99.5));
     bool mscatOn(false);
-    MayersSampleCorrectionStrategy mscat(createTestParameters(mscatOn), tof,
-                                         signal, error);
+    Mantid::HistogramData::Histogram histo(tof, signal, error);
+    MayersSampleCorrectionStrategy mscat(createTestParameters(mscatOn), histo);
 
+    Mantid::HistogramData::HistogramY signalHistogram(signal);
+    Mantid::HistogramData::HistogramE errorHistogram(error);
     // Correct it
-    mscat.apply(signal, error);
+    mscat.apply(signalHistogram, errorHistogram);
 
     // Check some values
     const double delta(1e-06);
@@ -133,9 +141,10 @@ public:
     std::transform(signal.begin(), signal.end(), error.begin(),
                    (double (*)(double))sqrt);
     std::generate(tof.begin(), tof.end(), Decrementer(199.5));
-    TS_ASSERT_THROWS(MayersSampleCorrectionStrategy(createTestParameters(), tof,
-                                                    signal, error),
-                     std::invalid_argument);
+    Mantid::HistogramData::Histogram histo(tof, signal, error);
+    TS_ASSERT_THROWS(
+        MayersSampleCorrectionStrategy(createTestParameters(), histo),
+        std::invalid_argument);
   }
 
 private:

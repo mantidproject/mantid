@@ -80,14 +80,15 @@ namespace Algorithms {
  */
 MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(
     MayersSampleCorrectionStrategy::Parameters params,
-    const std::vector<double> &tof, const std::vector<double> &sigIn,
-    const std::vector<double> &errIn)
-    : m_pars(params), m_tof(tof), m_sigin(sigIn), m_errin(errIn),
-      m_histogram(tof.size() == sigIn.size() + 1),
+    const Mantid::HistogramData::Histogram &histogram)
+    : m_pars(params), m_tof(histogram.x().rawData()),
+      m_sigin(histogram.y().rawData()), m_errin(histogram.e().rawData()),
+      m_histogram(m_tof.size() == m_sigin.size() + 1),
       m_muRrange(calculateMuRange()), m_rng(new MersenneTwister(1)) {
+
   // Sanity check
-  assert(sigIn.size() == tof.size() || sigIn.size() == tof.size() - 1);
-  assert(errIn.size() == tof.size() || sigIn.size() == tof.size() - 1);
+  assert(m_sigin.size() == m_tof.size() || m_sigin.size() == m_tof.size() - 1);
+  assert(m_errin.size() == m_tof.size() || m_sigin.size() == m_tof.size() - 1);
 
   if (!(m_tof.front() < m_tof.back())) {
     throw std::invalid_argument(
@@ -107,12 +108,10 @@ MayersSampleCorrectionStrategy::~MayersSampleCorrectionStrategy() = default;
  * @param sigOut Signal values to correct [In/Out]
  * @param errOut Error values to correct [In/Out]
  */
-void MayersSampleCorrectionStrategy::apply(std::vector<double> &sigOut,
-                                           std::vector<double> &errOut) {
+void MayersSampleCorrectionStrategy::apply(
+    Mantid::HistogramData::HistogramY &histoY,
+    Mantid::HistogramData::HistogramE &histoE) {
   const size_t nsig(m_sigin.size());
-  // Sanity check
-  assert(sigOut.size() == m_sigin.size());
-  assert(errOut.size() == m_errin.size());
 
   // Temporary storage
   std::vector<double> xmur(N_MUR_PTS + 1, 0.0),
@@ -175,8 +174,8 @@ void MayersSampleCorrectionStrategy::apply(std::vector<double> &sigOut,
     }
     // apply correction
     const double yin(m_sigin[i]), ein(m_errin[i]);
-    sigOut[i] = yin * corrfact;
-    errOut[i] = sigOut[i] * ein / yin;
+    histoE[i] = yin * corrfact;
+    histoY[i] = histoE[i] * ein / yin;
   }
 }
 
