@@ -380,18 +380,18 @@ public:
     auto outWS =
         AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
 
-    double actualPeakRadius =
-        std::stod(outWS->mutableRun().getProperty("PeakRadius")->value().c_str());
+    double actualPeakRadius = std::stod(
+        outWS->mutableRun().getProperty("PeakRadius")->value().c_str());
     double actualBackgroundOutterRadius =
         std::stod(outWS->mutableRun()
-                 .getProperty("BackgroundOuterRadius")
-                 ->value()
-                 .c_str());
+                      .getProperty("BackgroundOuterRadius")
+                      ->value()
+                      .c_str());
     double actualBackgroundInnerRadius =
         std::stod(outWS->mutableRun()
-                 .getProperty("BackgroundInnerRadius")
-                 ->value()
-                 .c_str());
+                      .getProperty("BackgroundInnerRadius")
+                      ->value()
+                      .c_str());
 
     TS_ASSERT_EQUALS(peakRadius, actualPeakRadius);
     TS_ASSERT_EQUALS(backgroundOuterRadius, actualBackgroundOutterRadius);

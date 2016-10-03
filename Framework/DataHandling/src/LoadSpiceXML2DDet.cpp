@@ -673,7 +673,8 @@ bool LoadSpiceXML2DDet::getHB3AWavelength(MatrixWorkspace_sptr dataws,
     } else if (!ts) {
       g_log.warning("Log _m1 is not TimeSeriesProperty.  Treat it as a single "
                     "value property.");
-      double m1pos = std::stod(dataws->run().getProperty("_m1")->value().c_str());
+      double m1pos =
+          std::stod(dataws->run().getProperty("_m1")->value().c_str());
       if (fabs(m1pos - (-25.870000)) < 0.2) {
         wavelength = 1.003;
         haswavelength = true;

@@ -896,7 +896,7 @@ void IFunction::setMatrixWorkspace(
               if (fitParam.getConstraintPenaltyFactor().compare("")) {
                 try {
                   double penalty =
-					  std::stof(fitParam.getConstraintPenaltyFactor().c_str());
+                      std::stof(fitParam.getConstraintPenaltyFactor().c_str());
                   constraint->setPenaltyFactor(penalty);
                 } catch (...) {
                   g_log.warning()

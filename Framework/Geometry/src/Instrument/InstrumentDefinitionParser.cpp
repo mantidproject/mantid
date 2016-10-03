@@ -555,8 +555,8 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
   // Rotate coordinate system of this component
   if (pElem->hasAttribute("rot")) {
     double rotAngle =
-        angleConvertConst *
-        std::stod((pElem->getAttribute("rot")).c_str()); // assumed to be in degrees
+        angleConvertConst * std::stod((pElem->getAttribute("rot"))
+                                          .c_str()); // assumed to be in degrees
 
     double axis_x = 0.0;
     double axis_y = 0.0;
@@ -621,9 +621,9 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
     } // end translation
 
     if (rElem) {
-      double rotAngle =
-          angleConvertConst * std::stod((rElem->getAttribute("val"))
-                                       .c_str()); // assumed to be in degrees
+      double rotAngle = angleConvertConst *
+                        std::stod((rElem->getAttribute("val"))
+                                      .c_str()); // assumed to be in degrees
 
       double axis_x = 0.0;
       double axis_y = 0.0;
@@ -672,9 +672,9 @@ Kernel::V3D InstrumentDefinitionParser::getRelativeTranslation(
 
     if (pElem->hasAttribute("r"))
       R = std::stod((pElem->getAttribute("r")).c_str());
-	if (pElem->hasAttribute("t")) {
-		theta = angleConvertConst * atof((pElem->getAttribute("t")).c_str());
-	}
+    if (pElem->hasAttribute("t")) {
+      theta = angleConvertConst * atof((pElem->getAttribute("t")).c_str());
+    }
     if (pElem->hasAttribute("p"))
       phi = angleConvertConst * std::stod((pElem->getAttribute("p")).c_str());
 
