@@ -534,123 +534,14 @@ void FABADAMinimizer::finalize() {
     outputChains();
   }
 
-  // Create the workspace for the Probability Density Functions
-  int pdf_length = getProperty(
-      "NumberBinsPDF"); // histogram length for the PDF output workspace
-  if (pdf_length <= 0) {
-    g_log.warning() << "Non valid Number of bins for the PDF (<= 0)."
-                       " Default value (20 bins) taken\n";
-    pdf_length = 20;
-  }
-  API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", m_nParams + 1, pdf_length + 1, pdf_length);
-
-  // To store the most probable chi square value
-  double mostPchi2;
-
-  // Calculate the cost function Probability Density Function
-  if (conv_length > 0) {
-    std::sort(red_conv_chain[m_nParams].begin(),
-              red_conv_chain[m_nParams].end());
-    std::vector<double> pdf_y(pdf_length, 0);
-    double start = red_conv_chain[m_nParams][0];
-    double bin = (red_conv_chain[m_nParams][conv_length - 1] - start) /
-                 double(pdf_length);
-    size_t step = 0;
-    MantidVec &X = ws->dataX(m_nParams);
-    MantidVec &Y = ws->dataY(m_nParams);
-    X[0] = start;
-    for (size_t i = 1; i < static_cast<size_t>(pdf_length) + 1; i++) {
-      double bin_end = start + double(i) * bin;
-      X[i] = bin_end;
-      while (step < conv_length && red_conv_chain[m_nParams][step] <= bin_end) {
-        pdf_y[i - 1] += 1;
-        ++step;
-      }
-      // Divided by conv_length * bin to normalize
-      Y[i - 1] = pdf_y[i - 1] / (double(conv_length) * bin);
-    }
-
-    auto pos_MPchi2 = std::max_element(pdf_y.begin(), pdf_y.end());
-
-    mostPchi2 = X[pos_MPchi2 - pdf_y.begin()] + (bin / 2.0);
-
-    // Do one iteration for each parameter.
-    for (size_t j = 0; j < m_nParams; ++j) {
-      // Calculate the Probability Density Function
-      std::vector<double> pdf_y(pdf_length, 0);
-      double start = red_conv_chain[j][0];
-      double bin =
-          (red_conv_chain[j][conv_length - 1] - start) / double(pdf_length);
-      size_t step = 0;
-      MantidVec &X = ws->dataX(j);
-      MantidVec &Y = ws->dataY(j);
-      X[0] = start;
-      for (size_t i = 1; i < static_cast<size_t>(pdf_length) + 1; i++) {
-        double bin_end = start + double(i) * bin;
-        X[i] = bin_end;
-        while (step < conv_length && red_conv_chain[j][step] <= bin_end) {
-          pdf_y[i - 1] += 1;
-          ++step;
-        }
-        Y[i - 1] = pdf_y[i - 1] / (double(conv_length) * bin);
-      }
-
-      // Calculate the most probable value, from the PDF.
-      //*Not used (by the moment)
-      //*auto pos_MP = std::max_element(pdf_y.begin(), pdf_y.end());
-      //*double mostP = X[pos_MP - pdf_y.begin()] + (bin / 2.0);
-      //*m_leastSquares->setParameter(j, mostP);
-    }
-  } // if conv_length > 0
-  else {
-    g_log.warning() << "No points to create PDF. Empty Wokspace returned.\n";
-    mostPchi2 = -1;
-  }
-
-  // Set and name the PDF workspace.
-  setProperty("PDF", ws);
+  double mostPchi2 = outputPDF(conv_length, red_conv_chain);
 
   if (!getPropertyValue("ConvergedChain").empty()) {
     outputConvergedChains(conv_length, n_steps);
   }
 
-  // Read if necessary to show the workspace for the Chi square values.
-  const bool outputCostFunctionTable =
-      !getPropertyValue("CostFunctionTable").empty();
-
-  if (outputCostFunctionTable) {
-
-    // Create the workspace for the Chi square values.
-    API::ITableWorkspace_sptr wsChi2 =
-        API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-    wsChi2->addColumn("double", "Chi2min");
-    wsChi2->addColumn("double", "Chi2MP");
-    wsChi2->addColumn("double", "Chi2min_red");
-    wsChi2->addColumn("double", "Chi2MP_red");
-
-    // Obtain the quantity of the initial data.
-    API::FunctionDomain_sptr domain = m_leastSquares->getDomain();
-    size_t data_number = domain->size();
-
-    // Calculate the value for the reduced Chi square.
-    double Chi2min_red =
-        m_chi2 / (double(data_number - m_nParams)); // For de minimum value.
-    double mostPchi2_red;
-    if (conv_length > 0)
-      mostPchi2_red = mostPchi2 / (double(data_number - m_nParams));
-    else {
-      g_log.warning()
-          << "Most probable chi square not calculated. -1 is returned.\n"
-          << "Most probable reduced chi square not calculated. -1 is "
-             "returned.\n";
-      mostPchi2_red = -1;
-    }
-
-    // Add the information to the workspace and name it.
-    API::TableRow row = wsChi2->appendRow();
-    row << m_chi2 << mostPchi2 << Chi2min_red << mostPchi2_red;
-    setProperty("CostFunctionTable", wsChi2);
+  if (!getPropertyValue("CostFunctionTable").empty()) {
+    outputCostFunctionTable(conv_length, mostPchi2);
   }
 
   // Set the best parameter values
@@ -1070,6 +961,134 @@ void FABADAMinimizer::outputConvergedChains(size_t convLength, int nSteps) {
 
   // Set and name the workspace for the converged part of the chain.
   setProperty("ConvergedChain", wsConv);
+}
+
+/** Create the workspace containing chi2 values
+*
+* @param convLength :: length of the converged chain
+* @param mostProbableChi2 :: most probable chi2 value
+*correlation
+*/
+void FABADAMinimizer::outputCostFunctionTable(size_t convLength,
+                                              double mostProbableChi2) {
+  // Create the workspace for the Chi square values.
+  API::ITableWorkspace_sptr wsChi2 =
+      API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  wsChi2->addColumn("double", "Chi2min");
+  wsChi2->addColumn("double", "Chi2MP");
+  wsChi2->addColumn("double", "Chi2min_red");
+  wsChi2->addColumn("double", "Chi2MP_red");
+
+  // Obtain the quantity of the initial data.
+  API::FunctionDomain_sptr domain = m_leastSquares->getDomain();
+  size_t data_number = domain->size();
+
+  // Calculate the value for the reduced Chi square.
+  double Chi2min_red =
+      m_chi2 / (double(data_number - m_nParams)); // For de minimum value.
+  double mostPchi2_red;
+  if (convLength > 0)
+    mostPchi2_red = mostProbableChi2 / (double(data_number - m_nParams));
+  else {
+    g_log.warning()
+        << "Most probable chi square not calculated. -1 is returned.\n"
+        << "Most probable reduced chi square not calculated. -1 is "
+           "returned.\n";
+    mostPchi2_red = -1;
+  }
+
+  // Add the information to the workspace and name it.
+  API::TableRow row = wsChi2->appendRow();
+  row << m_chi2 << mostProbableChi2 << Chi2min_red << mostPchi2_red;
+  setProperty("CostFunctionTable", wsChi2);
+}
+
+/** Create the workspace containing PDF
+*
+* @param convLength :: length of the converged chain
+* @param reducedChain :: the reduced chain (will be sorted)
+* @return :: most probable chi square value
+*/
+double
+FABADAMinimizer::outputPDF(size_t convLength,
+                           std::vector<std::vector<double>> &reducedChain) {
+
+  // To store the most probable chi square value
+  double mostPchi2;
+
+  // Create the workspace for the Probability Density Functions
+  int pdf_length = getProperty(
+      "NumberBinsPDF"); // histogram length for the PDF output workspace
+  if (pdf_length <= 0) {
+    g_log.warning() << "Non valid Number of bins for the PDF (<= 0)."
+                       " Default value (20 bins) taken\n";
+    pdf_length = 20;
+  }
+  API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+      "Workspace2D", m_nParams + 1, pdf_length + 1, pdf_length);
+
+  // Calculate the cost function Probability Density Function
+  if (convLength > 0) {
+    std::sort(reducedChain[m_nParams].begin(), reducedChain[m_nParams].end());
+    std::vector<double> pdf_y(pdf_length, 0);
+    double start = reducedChain[m_nParams][0];
+    double bin =
+        (reducedChain[m_nParams][convLength - 1] - start) / double(pdf_length);
+    size_t step = 0;
+    MantidVec &X = ws->dataX(m_nParams);
+    MantidVec &Y = ws->dataY(m_nParams);
+    X[0] = start;
+    for (size_t i = 1; i < static_cast<size_t>(pdf_length) + 1; i++) {
+      double bin_end = start + double(i) * bin;
+      X[i] = bin_end;
+      while (step < convLength && reducedChain[m_nParams][step] <= bin_end) {
+        pdf_y[i - 1] += 1;
+        ++step;
+      }
+      // Divided by conv_length * bin to normalize
+      Y[i - 1] = pdf_y[i - 1] / (double(convLength) * bin);
+    }
+
+    auto pos_MPchi2 = std::max_element(pdf_y.begin(), pdf_y.end());
+
+    mostPchi2 = X[pos_MPchi2 - pdf_y.begin()] + (bin / 2.0);
+
+    // Do one iteration for each parameter.
+    for (size_t j = 0; j < m_nParams; ++j) {
+      // Calculate the Probability Density Function
+      std::vector<double> pdf_y(pdf_length, 0);
+      double start = reducedChain[j][0];
+      double bin =
+          (reducedChain[j][convLength - 1] - start) / double(pdf_length);
+      size_t step = 0;
+      MantidVec &X = ws->dataX(j);
+      MantidVec &Y = ws->dataY(j);
+      X[0] = start;
+      for (size_t i = 1; i < static_cast<size_t>(pdf_length) + 1; i++) {
+        double bin_end = start + double(i) * bin;
+        X[i] = bin_end;
+        while (step < convLength && reducedChain[j][step] <= bin_end) {
+          pdf_y[i - 1] += 1;
+          ++step;
+        }
+        Y[i - 1] = pdf_y[i - 1] / (double(convLength) * bin);
+      }
+
+      // Calculate the most probable value, from the PDF.
+      //*Not used (by the moment)
+      //*auto pos_MP = std::max_element(pdf_y.begin(), pdf_y.end());
+      //*double mostP = X[pos_MP - pdf_y.begin()] + (bin / 2.0);
+      //*m_leastSquares->setParameter(j, mostP);
+    }
+  } // if conv_length > 0
+  else {
+    g_log.warning() << "No points to create PDF. Empty Wokspace returned.\n";
+    mostPchi2 = -1;
+  }
+
+  // Set and name the PDF workspace.
+  setProperty("PDF", ws);
+  return mostPchi2;
 }
 
 } // namespace FuncMinimisers
