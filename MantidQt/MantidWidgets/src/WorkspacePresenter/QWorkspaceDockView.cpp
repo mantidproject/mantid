@@ -476,8 +476,7 @@ QWorkspaceDockView::SaveFileType QWorkspaceDockView::getSaveFileType() const {
   return m_saveFileType;
 }
 
-void QWorkspaceDockView::saveWorkspace(const std::string &wsName,
-                                       SaveFileType type) {
+void QWorkspaceDockView::saveWorkspace(SaveFileType type) {
   int version = -1;
   std::string algorithmName;
 
@@ -1603,7 +1602,6 @@ void QWorkspaceDockView::showColourFillPlot() {
   QStringList allWsNames;
 
   for (auto &item : items) {
-    auto mItem = dynamic_cast<MantidTreeWidgetItem *>(item);
     auto ws = item->data(0, Qt::UserRole).value<Workspace_sptr>();
 
     if (auto wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {

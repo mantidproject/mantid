@@ -74,13 +74,13 @@ void ADSAdapter::handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr) {
 }
 
 void ADSAdapter::handleDeleteWorkspace(
-    Mantid::API::WorkspacePostDeleteNotification_ptr pNf) {
+    Mantid::API::WorkspacePostDeleteNotification_ptr) {
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::WorkspaceDeleted);
 }
 
-void ADSAdapter::handleClearADS(Mantid::API::ClearADSNotification_ptr pNf) {
+void ADSAdapter::handleClearADS(Mantid::API::ClearADSNotification_ptr) {
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::WorkspacesCleared);
@@ -97,21 +97,21 @@ void ADSAdapter::handleRenameWorkspace(
 }
 
 void ADSAdapter::handleGroupWorkspaces(
-    Mantid::API::WorkspacesGroupedNotification_ptr pNf) {
+    Mantid::API::WorkspacesGroupedNotification_ptr) {
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::WorkspacesGrouped);
 }
 
 void ADSAdapter::handleUnGroupWorkspace(
-    Mantid::API::WorkspaceUnGroupingNotification_ptr pNf) {
+    Mantid::API::WorkspaceUnGroupingNotification_ptr) {
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::WorkspacesUngrouped);
 }
 
 void ADSAdapter::handleWorkspaceGroupUpdate(
-    Mantid::API::GroupUpdatedNotification_ptr pNf) {
+    Mantid::API::GroupUpdatedNotification_ptr) {
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::WorkspaceGroupUpdated);

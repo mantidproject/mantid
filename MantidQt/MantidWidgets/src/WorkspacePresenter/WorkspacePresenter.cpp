@@ -233,8 +233,7 @@ void WorkspacePresenter::deleteWorkspaces() {
 
 void WorkspacePresenter::saveSingleWorkspace() {
   auto view = lockView();
-  auto selected = view->getSelectedWorkspaceNames();
-  view->saveWorkspace(selected[0], view->getSaveFileType());
+  view->saveWorkspace(view->getSaveFileType());
 }
 
 void WorkspacePresenter::saveWorkspaceCollection() {

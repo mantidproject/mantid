@@ -4,6 +4,7 @@
 #include <MantidAPI/Workspace_fwd.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
+#include <map>
 
 namespace MantidQt {
 namespace MantidWidgets {

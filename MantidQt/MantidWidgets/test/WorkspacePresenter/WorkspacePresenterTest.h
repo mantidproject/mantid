@@ -193,8 +193,9 @@ public:
     ::testing::DefaultValue<StringList>::Set(StringList{"ws1", "ws2"});
 
     EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), groupWorkspaces(StringList{"ws1", "ws2"},
-                                                 "NewGroup")).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(),
+                groupWorkspaces(StringList{"ws1", "ws2"}, "NewGroup"))
+        .Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
 
@@ -221,8 +222,9 @@ public:
 
     EXPECT_CALL(*mockView.get(), askUserYesNo(_, _)).Times(1);
     EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), groupWorkspaces(StringList{"ws1", "ws2"},
-                                                 "NewGroup")).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(),
+                groupWorkspaces(StringList{"ws1", "ws2"}, "NewGroup"))
+        .Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
 
@@ -377,12 +379,10 @@ public:
 
   void testSaveSingleWorkspaceNexus() {
     using SaveFileType = IWorkspaceDockView::SaveFileType;
-    ::testing::DefaultValue<StringList>::Set(StringList{"ws"});
     ::testing::DefaultValue<SaveFileType>::Set(SaveFileType::Nexus);
 
     EXPECT_CALL(*mockView.get(), getSaveFileType()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), saveWorkspace("ws", SaveFileType::Nexus))
+    EXPECT_CALL(*mockView.get(), saveWorkspace(SaveFileType::Nexus))
         .Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
@@ -392,12 +392,10 @@ public:
 
   void testSaveSingleWorkspaceASCIIv1() {
     using SaveFileType = IWorkspaceDockView::SaveFileType;
-    ::testing::DefaultValue<StringList>::Set(StringList{"ws"});
     ::testing::DefaultValue<SaveFileType>::Set(SaveFileType::ASCIIv1);
 
     EXPECT_CALL(*mockView.get(), getSaveFileType()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), saveWorkspace("ws", SaveFileType::ASCIIv1))
+    EXPECT_CALL(*mockView.get(), saveWorkspace(SaveFileType::ASCIIv1))
         .Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
@@ -408,11 +406,9 @@ public:
   void testSaveSingleWorkspaceASCII() {
     using SaveFileType = IWorkspaceDockView::SaveFileType;
     ::testing::DefaultValue<SaveFileType>::Set(SaveFileType::ASCII);
-    ::testing::DefaultValue<StringList>::Set(StringList{"ws"});
 
     EXPECT_CALL(*mockView.get(), getSaveFileType()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), saveWorkspace("ws", SaveFileType::ASCII))
+    EXPECT_CALL(*mockView.get(), saveWorkspace(SaveFileType::ASCII))
         .Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
