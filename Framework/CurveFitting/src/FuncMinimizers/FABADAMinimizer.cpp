@@ -530,28 +530,8 @@ void FABADAMinimizer::finalize() {
           leastSquaresMaleable);
 
   // If required, output the complete chain
-  const bool outputChains = !getPropertyValue("Chains").empty();
-
-  if (outputChains) {
-
-    // Create the workspace for the complete parameters' chain (the last
-    // histogram is for the Chi square).
-    size_t chain_length = m_chain[0].size();
-    API::MatrixWorkspace_sptr wsC = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", m_nParams + 1, chain_length, chain_length);
-
-    // Do one iteration for each parameter plus one for Chi square.
-    for (size_t j = 0; j < m_nParams + 1; ++j) {
-      MantidVec &X = wsC->dataX(j);
-      MantidVec &Y = wsC->dataY(j);
-      for (size_t k = 0; k < chain_length; ++k) {
-        X[k] = double(k);
-        Y[k] = m_chain[j][k];
-      }
-    }
-
-    // Set and name the workspace for the complete chain
-    setProperty("Chains", wsC);
+  if (!getPropertyValue("Chains").empty()) {
+    outputChains();
   }
 
   // Create the workspace for the Probability Density Functions
@@ -1061,6 +1041,30 @@ bool FABADAMinimizer::iterationContinuation() {
   // can we even get here? -> Nope (we should not, so we do not want it to
   // continue)
   return false;
+}
+
+/** Create the workspace for the complete parameters chain (the last histogram
+*is for the Chi square).
+*
+*/
+void FABADAMinimizer::outputChains() {
+
+  size_t chain_length = m_chain[0].size();
+  API::MatrixWorkspace_sptr wsC = API::WorkspaceFactory::Instance().create(
+      "Workspace2D", m_nParams + 1, chain_length, chain_length);
+
+  // Do one iteration for each parameter plus one for Chi square.
+  for (size_t j = 0; j < m_nParams + 1; ++j) {
+    MantidVec &X = wsC->dataX(j);
+    MantidVec &Y = wsC->dataY(j);
+    for (size_t k = 0; k < chain_length; ++k) {
+      X[k] = double(k);
+      Y[k] = m_chain[j][k];
+    }
+  }
+
+  // Set and name the workspace for the complete chain
+  setProperty("Chains", wsC);
 }
 
 } // namespace FuncMinimisers

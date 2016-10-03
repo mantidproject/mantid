@@ -89,6 +89,8 @@ private:
   void simAnnealingRefrigeration();
   /// Decides wheather iteration must continue or not
   bool iterationContinuation();
+  /// Output Markov chains
+  void outputChains();
 
   // Variables declarations
   /// Pointer to the cost function. Must be the least squares.
