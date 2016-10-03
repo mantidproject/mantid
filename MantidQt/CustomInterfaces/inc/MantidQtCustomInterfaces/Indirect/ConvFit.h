@@ -66,10 +66,10 @@ private:
   void updatePlotOptions();
   void addParametersToTree(const QStringList &parameters,
                            const QString &currentFitFunction);
-  void addSampleLogsToWorkspace(const std::string workspaceName,
-                                const std::string logName,
-                                const std::string logText,
-                                const std::string logType);
+  void addSampleLogsToWorkspace(const std::string &workspaceName,
+                                const std::string &logName,
+                                const std::string &logText,
+                                const std::string &logType);
 
   Ui::ConvFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
@@ -93,8 +93,8 @@ private:
   QMap<QString, double> m_defaultParams;
   QMap<QString, double> createDefaultParamsMap(QMap<QString, double> map);
   QMap<QString, double>
-  constructFullPropertyMap(QMap<QString, double> defaultMap,
-                           const QStringList parameters,
+  constructFullPropertyMap(const QMap<QString, double> &defaultMap,
+                           const QStringList &parameters,
                            const QString &fitFunction);
 };
 } // namespace IDA

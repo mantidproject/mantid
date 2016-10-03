@@ -410,10 +410,10 @@ void ConvFit::algorithmComplete(bool error) {
  * @param logText		:: The information to match the title
  * @param logType		:: The type of information (String, Number)
  */
-void ConvFit::addSampleLogsToWorkspace(const std::string workspaceName,
-                                       const std::string logName,
-                                       const std::string logText,
-                                       const std::string logType) {
+void ConvFit::addSampleLogsToWorkspace(const std::string &workspaceName,
+                                       const std::string &logName,
+                                       const std::string &logText,
+                                       const std::string &logType) {
 
   auto addSampleLog = AlgorithmManager::Instance().create("AddSampleLog");
   addSampleLog->setLogging(false);
@@ -1710,8 +1710,8 @@ ConvFit::createDefaultParamsMap(QMap<QString, double> map) {
 * fitFunction.parametername and value is either from the default map or 0
 */
 QMap<QString, double>
-ConvFit::constructFullPropertyMap(const QMap<QString, double> defaultMap,
-                                  const QStringList parameters,
+ConvFit::constructFullPropertyMap(const QMap<QString, double> &defaultMap,
+                                  const QStringList &parameters,
                                   const QString &fitFunction) {
   QMap<QString, double> fullMap;
   QString fitFuncName = fitFunction;
