@@ -571,7 +571,7 @@ void ReflectometryReductionOneAuto::exec() {
     if (theta_in.is_initialized())
       setProperty("ThetaIn", theta_in.get());
     else
-      setProperty("ThetaIn", thetaOut1);
+      setProperty("ThetaIn", thetaOut1 / 2.);
 
   } else {
     throw std::runtime_error(
