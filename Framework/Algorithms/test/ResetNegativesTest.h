@@ -143,8 +143,8 @@ public:
 private:
   MatrixWorkspace_sptr generateInput(const double offset,
                                      const double delta = 0.) {
-    int nhist = 3;
-    int nbins = 256;
+    constexpr int nhist = 3;
+    constexpr int nbins = 256;
     MatrixWorkspace_sptr inputWS =
         WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, nbins, 1., .2);
     for (int i = 0; i < nhist; i++) {
@@ -155,6 +155,48 @@ private:
       }
     }
     AnalysisDataService::Instance().add(INPUT_WS_NAME, inputWS);
+    return inputWS;
+  }
+};
+
+class ResetNegativesTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ResetNegativesTestPerformance *createSuite() {
+    return new ResetNegativesTestPerformance();
+  }
+  static void destroySuite(ResetNegativesTestPerformance *suite) {
+    AnalysisDataService::Instance().clear();
+    delete suite;
+  }
+
+  void setUp() override { input = generateInput(-1.0, 0.01); }
+
+  void testPerformance() {
+    ResetNegatives alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", input);
+    alg.setPropertyValue("OutputWorkspace", "output");
+    alg.setProperty("AddMinimum", true);
+    alg.execute();
+  }
+
+private:
+  MatrixWorkspace_sptr input;
+  MatrixWorkspace_sptr generateInput(const double offset,
+                                     const double delta = 0.) {
+    constexpr int nhist = 50000;
+    constexpr int nbins = 1000;
+    MatrixWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, nbins, 1., .2);
+    for (int i = 0; i < nhist; i++) {
+      double value = offset + static_cast<double>(i);
+      auto &y = inputWS->mutableY(i);
+      for (size_t j = 0; j < y.size(); j++) {
+        y[j] = value + delta * static_cast<double>(j);
+      }
+    }
     return inputWS;
   }
 };
