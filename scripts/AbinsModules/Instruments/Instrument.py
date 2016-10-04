@@ -21,13 +21,12 @@ class Instrument(object):
         return None
 
 
-    def convolve_with_resolution_function(self, frequencies=None, s_dft=None, start=None):
+    def convolve_with_resolution_function(self, frequencies=None, s_dft=None):
         """
         Convolves discrete spectrum with the  resolution function for the particular instrument.
 
         @param frequencies: frequencies for which resolution function should be calculated (frequencies in cm-1)
         @param s_dft:  discrete S calculated directly from DFT
-        @param start: 3 if acoustic modes at Gamma point, otherwise this should be set to zero
 
        """
         return None

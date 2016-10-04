@@ -382,9 +382,12 @@ class ABINS(PythonAlgorithm):
             freq[:ws_x.size] = ws_x
             for partial_ws in local_partial_workspaces:
                 ws_y = mtd[partial_ws].dataY(0)
-                size = min (s_atoms.size, ws_y.size)
-                s_atoms[:size] += ws_y[:size]
-            self._fill_s_workspace(freq, s_atoms, total_workspace)
+                #size = min (s_atoms.size, ws_y.size)
+                #s_atoms[:size] += ws_y[:size]
+                s_atoms[:ws_y.size] += ws_y
+            freq_reduced, s_atoms_reduced = self._reduce_array_size(array_x=freq, array_y=s_atoms)
+
+            self._fill_s_workspace(freq_reduced, s_atoms_reduced, total_workspace)
 
         # Otherwise just repackage the workspace we have as the total
         else:
@@ -463,7 +466,7 @@ class ABINS(PythonAlgorithm):
         return experimental_wrk
 
 
-    def _reduce_array_size(self, array_x=None, array_y=None, ):
+    def _reduce_array_size(self, array_x=None, array_y=None):
         """Reduces size of two  1D numpy arrays  (first array is  x-values and second array is y-values).
         @param array_x: array with x-values which size should be reduced (type numpy.ndarray),
         @param array_y: array with y-values which size should be reduced (type numpy.ndarray),
@@ -484,7 +487,7 @@ class ABINS(PythonAlgorithm):
                 end = max(1,n)
                 break
 
-        return  local_array_x[:end], local_array_y[:end]
+        return local_array_x[:end], local_array_y[:end]
 
 
     def _set_workspace_units(self, wrk=None):

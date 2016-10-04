@@ -39,11 +39,11 @@ crystal_data_group = "Crystal"  # name of the group where CrystalData is stored
 
 S_data_group = "S"  # name of the group where dynamical factor is stored
 
-higher_order_quantum_effects = 3  # number of quantum order effects taken into account
+higher_order_quantum_effects = 1  # number of quantum order effects taken into account
 
 pkt_per_peak = 100  # number of points for each peak broadened by the experimental resolution
 bin_width = 0.2  # defines width of bins used in rebining of S
-max_wavenumber = 5000 # maximum wavenumber in cm^1 taken into account while creating workspaces (exclusive)
+max_wavenumber = 5000  # maximum wavenumber in cm^1 taken into account while creating workspaces (exclusive)
 
 ######################################ABINS internal parameters end ###########################
 
@@ -61,8 +61,8 @@ first_overtone = 2 # value of first overtone (n = 2)
 
 fundamentals = 1 # value of fundamental parameter  (n = 1)
 
-python_index_shift = 1 #  in Python first element starts at 0-th index. This is a shift to index which has to be included
-                       #  in array index calculation to write data in the proper position of array
+python_index_shift = 1  # in Python first element starts at 0-th index. This is a shift to index which has to be included
+                        # in array index calculation to write data in the proper position of array
 
 # symbols of all elements
 all_symbols = ["Ac", "Ag", "Al", "Am", "Ar",  "As", "At" , "Au" , "B"  , "Ba", "Be", "Bh", "Bi", "Bk", "Br", "C" , "Ca" ,
@@ -109,5 +109,7 @@ complex_id = np.dtype(np.complex).num
 complex_type = np.dtype(np.complex)
 
 total_workspace_size = int(round(max_wavenumber / bin_width, 0)) # maximum number of entries in the workspace
+
+max_quantum_order_array_size = 20000  # maximum size for storing frequencies for each quantum order
 
 ####################################### Constants end #################################

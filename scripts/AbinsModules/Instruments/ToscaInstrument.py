@@ -4,9 +4,9 @@ import math
 from Instrument import Instrument
 from AbinsModules import AbinsParameters
 from AbinsModules.KpointsData import KpointsData
-import AbinsModules.FrequencyGenerator as FrequencyGenerator
+from AbinsModules.FrequencyGenerator import FrequencyGenerator
 
-class ToscaInstrument(Instrument):
+class ToscaInstrument(Instrument, FrequencyGenerator):
     """
     Class for TOSCA and TOSCA-like instruments.
     """
@@ -23,7 +23,8 @@ class ToscaInstrument(Instrument):
             raise ValueError("Invalid value of overtones. Expected values are: True, False.")
 
         k_data = self._k_points_data.extract()
-        fundamental_frequencies = np.multiply(k_data["frequencies"][0], 1.0 / AbinsParameters.cm1_2_hartree)
+        first_optical_phonon = 3
+        fundamental_frequencies = np.multiply(k_data["frequencies"][0][first_optical_phonon:], 1.0 / AbinsParameters.cm1_2_hartree)
 
         # fundamentals and higher quantum order effects
         if overtones:
@@ -33,14 +34,13 @@ class ToscaInstrument(Instrument):
         else:
             q_dim = AbinsParameters.fundamentals
 
-        q_data= dict(order_1=None)
-        last_quantum_order = 1 # range function is exclusive with respect to the last element so need to add this
-        previous_frequencies = None
-        for quantum_order in range(AbinsParameters.fundamentals, q_dim + last_quantum_order):
+        q_data = dict(order_1=None)
+        last_quantum_order = 1  # range function is exclusive with respect to the last element so need to add this
 
-            local_frequencies =  FrequencyGenerator.expand_freq(previous_array=previous_frequencies, reference_array=fundamental_frequencies, quantum_order=quantum_order, start=3)
-            previous_frequencies = local_frequencies
-            q_data["order_%s"%quantum_order] = np.multiply(np.multiply(local_frequencies, local_frequencies),  AbinsParameters.TOSCA_constant)
+        local_freq = fundamental_frequencies
+        for quantum_order in range(AbinsParameters.fundamentals, q_dim + last_quantum_order):
+            local_freq = self.expand_freq(previous_array=local_freq, fundamentals_array=fundamental_frequencies, quantum_order=quantum_order)
+            q_data["order_%s" % quantum_order] = np.multiply(np.multiply(local_freq, local_freq),  AbinsParameters.TOSCA_constant)
 
         return q_data
 
@@ -57,12 +57,11 @@ class ToscaInstrument(Instrument):
         self._k_points_data = k_points_data
 
 
-    def convolve_with_resolution_function(self, frequencies=None, s_dft=None, start=None):
+    def convolve_with_resolution_function(self, frequencies=None, s_dft=None):
         """
         Convolves discrete DFT spectrum with the  resolution function for the TOSCA instrument (and TOSCA-like).
         @param frequencies:   DFT frequencies for which resolution function should be calculated (frequencies in cm-1)
         @param s_dft:  discrete S calculated directly from DFT
-        @param start: 3 if acoustic modes at Gamma point, otherwise this should be set to zero
         """
 
         # noinspection PyTypeChecker
@@ -71,11 +70,10 @@ class ToscaInstrument(Instrument):
         broadened_spectrum = np.zeros(shape=all_points, dtype=AbinsParameters.float_type)
         points_freq = np.zeros(shape=all_points, dtype=AbinsParameters.float_type)
 
-        start_broaden = start * AbinsParameters.pkt_per_peak
-        for indx, freq in np.ndenumerate(frequencies[start:]):
+        for indx, freq in np.ndenumerate(frequencies):
 
             sigma = AbinsParameters.TOSCA_A * freq * freq + AbinsParameters.TOSCA_B * freq + AbinsParameters.TOSCA_C
-            local_start = indx[0] * AbinsParameters.pkt_per_peak + start_broaden
+            local_start = indx[0] * AbinsParameters.pkt_per_peak
 
             temp = np.array(np.linspace(freq - AbinsParameters.fwhm * sigma,
                                         freq + AbinsParameters.fwhm * sigma,

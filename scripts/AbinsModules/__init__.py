@@ -21,6 +21,9 @@ algorithms and data objects that are:
 
 from IOmodule import IOmodule
 
+# Frequency generator
+from FrequencyGenerator import FrequencyGenerator
+
 # Loading modules
 from GeneralDFTProgram import GeneralDFTProgram
 from LoadCASTEP import LoadCASTEP

@@ -1,7 +1,6 @@
 import numpy as np
 import math
 from copy import copy
-
 from IOmodule import IOmodule
 from AbinsData import AbinsData
 from QData import QData
@@ -9,14 +8,15 @@ from CalculateQ import CalculateQ
 from InstrumentProducer import InstrumentProducer
 from CalculatePowder import CalculatePowder
 from CrystalData import CrystalData
-from PowderData import  PowderData
+from PowderData import PowderData
 from SData import SData
 from Instruments import Instrument
-import AbinsModules.FrequencyGenerator as FrequencyGenerator
+from AbinsModules import FrequencyGenerator
+
 
 import AbinsParameters
 
-class CalculateS(IOmodule):
+class CalculateS(IOmodule, FrequencyGenerator):
     """
     Class for calculating S(Q, omega)
     """
@@ -36,10 +36,10 @@ class CalculateS(IOmodule):
             raise ValueError("Temperature cannot be negative.")
         self._temperature = float(temperature)
 
-        if  sample_form in AbinsParameters.all_sample_forms:
+        if sample_form in AbinsParameters.all_sample_forms:
             self._sample_form = sample_form
         else:
-            raise  ValueError("Invalid sample form %s"%sample_form)
+            raise ValueError("Invalid sample form %s" % sample_form)
 
         if isinstance(abins_data, AbinsData):
             self._abins_data = abins_data
@@ -61,7 +61,7 @@ class CalculateS(IOmodule):
         else:
             raise ValueError("Unknown instrument %s" % instrument_name)
 
-        super(CalculateS, self).__init__(input_filename=filename, group_name=AbinsParameters.S_data_group + "/" + self._instrument_name + "/" + self._sample_form + "/%sK"%self._temperature + "/" + overtones_folder)
+        super(CalculateS, self).__init__(input_filename=filename, group_name=AbinsParameters.S_data_group + "/" + self._instrument_name + "/" + self._sample_form + "/%sK" % self._temperature + "/" + overtones_folder)
 
 
     def _calculate_s(self):
@@ -105,7 +105,7 @@ class CalculateS(IOmodule):
         @return: object of type SData with dynamical structure factors for the powder case
         """
         if not isinstance(q_data, QData):
-            raise ValueError("Input parameter 'q_data'  should be of type QData." )
+            raise ValueError("Input parameter 'q_data'  should be of type QData.")
 
         if not isinstance(powder_data, PowderData):
             raise ValueError("Input parameter 'powder_data' should be of type PowderData.")
@@ -122,9 +122,10 @@ class CalculateS(IOmodule):
         abins_data_extracted = self._abins_data.extract()
         atom_data = abins_data_extracted["atoms_data"]
         k_points_data = abins_data_extracted["k_points_data"]
-        num_phonons = k_points_data["frequencies"][0].shape[0] # number of phonons
-        fundamentals_freq = np.multiply(k_points_data["frequencies"][0], 1.0 / AbinsParameters.cm1_2_hartree)
-        last_overtone = 1 # range function is inclusive with respect to the last element so need to add this
+        num_phonons = k_points_data["frequencies"][0].shape[0]  # number of phonons
+        first_optical_phonon = 3  # correction for acoustic modes at Gamma point
+        fundamentals_freq = np.multiply(k_points_data["frequencies"][0][first_optical_phonon:], 1.0 / AbinsParameters.cm1_2_hartree)
+        last_overtone = 1  # range function is inclusive with respect to the last element so need to add this
         factorials = [np.math.factorial(n) for n in range(AbinsParameters.fundamentals, AbinsParameters.fundamentals + AbinsParameters.higher_order_quantum_effects + last_overtone)]
 
         if self._overtones:
@@ -132,24 +133,29 @@ class CalculateS(IOmodule):
         else:
             s_total_dim = AbinsParameters.fundamentals
 
-        #value_dft = np.zeros(shape=num_phonons, dtype=AbinsParameters.float_type) # DFT discrete peaks
-        # value_dft = np.zeros(shape=(s_total_dim, FrequencyGenerator.expand_freq_dim(quantum_order=s_total_dim, num_phonons=num_phonons)), dtype=AbinsParameters.float_type)
-        # num_broaden_freq = FrequencyGenerator.expand_freq_dim(quantum_order=s_total_dim, num_phonons=num_phonons) * AbinsParameters.pkt_per_peak
-        # s =  np.zeros(shape=(s_total_dim, num_broaden_freq), dtype=AbinsParameters.float_type) # stores S  for one atom (fundamentals and overtones)
-        # s_frequencies = np.zeros(shape=(s_total_dim, num_broaden_freq), dtype=AbinsParameters.float_type) #  x-coordinates  for the given atom  for  fundamentals and overtones
+        s = {"order_1": None}
+        s_frequencies = {"order_1": None}
 
-        s = {"order_1":None}
-        s_frequencies = {"order_1":None}
+        # calculate frequencies
+        prev_array = fundamentals_freq
+        generated_frequencies = []
+        scaling_factor = []
+        for exponential in range(AbinsParameters.fundamentals, s_total_dim + last_overtone):
 
-        start = 3 # correction for acoustic modes at Gamma point
+            local_frequencies = self.expand_freq(previous_array=prev_array,
+                                                 fundamentals_array=fundamentals_freq,
+                                                 quantum_order=exponential)
+
+            # factor to rescaled rebined spectra; to be improved in the future....
+            scaling_factor.append(math.pow(float(fundamentals_freq.size) / (local_frequencies.size * max(1.0, exponential - 1.0)), 0.65))
+
+            generated_frequencies.append(local_frequencies)
+            prev_array = local_frequencies
 
         for atom in range(num_atoms):
-
-            local_frequencies = None
-            prev_array = None
             for exponential in range(AbinsParameters.fundamentals, s_total_dim + last_overtone):
                 exponential_indx = exponential - AbinsParameters.python_index_shift
-                q =  extracted_q_data["order_%s"%exponential][start:]
+                q = extracted_q_data["order_%s" % exponential]
 
                 # coefficient used to evaluate S
                 factor_s = 1.0 / (factorials[exponential_indx] * 4 * np.pi)
@@ -157,23 +163,25 @@ class CalculateS(IOmodule):
                 # noinspection PyTypeChecker
                 value_dft = np.multiply(np.power(np.multiply(q, msd[atom]), exponential), np.exp(-np.multiply(q, dw[atom])))
 
-                local_frequencies =  FrequencyGenerator.expand_freq(previous_array=prev_array, reference_array=fundamentals_freq, quantum_order=exponential, start=start)
-                prev_array = local_frequencies
+                rebined_generated_freq, rebined_value_dft = self._rebin_data(array_x=generated_frequencies[exponential_indx], array_y=value_dft)
 
                 # convolve value with instrumental resolution; resulting spectrum has broadened peaks with Gaussian-like shape
-                freq, broad_spectrum = instrument.convolve_with_resolution_function(frequencies=local_frequencies, s_dft=np.copy(value_dft), start=start)
+                freq, broad_spectrum = instrument.convolve_with_resolution_function(frequencies=rebined_generated_freq, s_dft=np.multiply(rebined_value_dft, scaling_factor[exponential_indx]))
+
+                rebined_freq, rebined_broad_spectrum = self._rebin_data(array_x=freq, array_y=broad_spectrum)
+
                 if atom == 0:
 
-                    s_frequencies["order_%s"%exponential] = np.copy(freq)
+                    s_frequencies["order_%s" % exponential] = rebined_freq
 
-                s["order_%s"%exponential] = np.multiply(broad_spectrum, factor_s)
+                s["order_%s" % exponential] = np.multiply(rebined_broad_spectrum, factor_s)
 
             # correction to low frequencies (quasi inelastic region)
             self._low_freq_correction(extracted_q_data=extracted_q_data,
                                       extracted_frequencies=fundamentals_freq,
                                       msd=msd, dw=dw, instrument=instrument, atom=atom, s=s)
 
-            atom_items["atom_%s"%atom] = {"s": copy(s),
+            atom_items["atom_%s" % atom] = {"s": copy(s),
                                           "symbol": atom_data[atom]["symbol"],
                                           "sort":  atom_data[atom]["sort"]}
 
@@ -198,25 +206,25 @@ class CalculateS(IOmodule):
 
         index = 0
         end = 0
-        start = 3 # correction for acoustic modes at Gamma point
         # look only at Gamma  point (first k-point is assumed to be Gamma point)
         while extracted_frequencies[end] < AbinsParameters.low_freq:
             end += 1
         if end != 0:
-            q = extracted_q_data["order_1"][start:]
+            q = extracted_q_data["order_1"]
 
             # coefficient used to evaluate S
-            factor_s = 1.0 /  (16.0 * np.pi)
+            factor_s = 1.0 / (16.0 * np.pi)
 
             # noinspection PyTypeChecker
-            value_dft =  np.exp(-np.multiply(q, dw[atom]))
+            value_dft = np.exp(-np.multiply(q, dw[atom]))
 
             # convolve value with instrumental resolution; resulting spectrum has broadened peaks with Gaussian-like shape
-            freq, broad_spectrum = instrument.convolve_with_resolution_function(frequencies=extracted_frequencies, s_dft=value_dft, start=start)
-
+            freq, broad_spectrum = instrument.convolve_with_resolution_function(frequencies=extracted_frequencies, s_dft=value_dft)
             broad_spectrum[end * AbinsParameters.pkt_per_peak:].fill(0)
+            rebined_freq, rebined_broad_spectrum = self._rebin_data(array_x=freq, array_y=broad_spectrum)
+
             # store frequencies only for one atom to save memory and speed up (for other atoms is the same)
-            s["order_1"][:broad_spectrum.size] += np.multiply(broad_spectrum, factor_s)
+            s["order_1"][:broad_spectrum.size] += np.multiply(rebined_broad_spectrum, factor_s)
 
 
     def _calculate_s_crystal(self, crystal_data=None):
@@ -224,6 +232,19 @@ class CalculateS(IOmodule):
         if not isinstance(crystal_data, CrystalData):
             raise ValueError("Input parameter should be of type CrystalData.")
         # TODO: implement calculation of S for the single crystal scenario
+
+
+    def _rebin_data(self, array_x=None, array_y=None):
+
+        bins = np.arange(min(array_x), max(array_x), AbinsParameters.bin_width)
+        if bins.size > array_x.size:
+            return array_x, array_y
+        else:
+            inds = np.digitize(array_x, bins)
+            rebined_y = np.copy(bins)
+            rebined_y.fill(0)
+            for n in range(array_y.size): rebined_y[inds[n] - 1] += array_y[n]
+            return bins, rebined_y
 
 
     def calculateData(self):
