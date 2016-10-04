@@ -267,7 +267,7 @@ private:
     Mantid::MantidVec &x = ws2->dataX(0);
     Mantid::MantidVec &y = ws2->dataY(0);
     for (size_t i = 0; i < ws2->blocksize(); ++i) {
-      double xx = 2 * M_PI * i / 20;
+      double xx = 2.0 * M_PI * i / 20;
       x[i] = xx;
       y[i] = cos(xx);
     }
