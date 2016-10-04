@@ -171,7 +171,7 @@ void He3TubeEfficiency::correctForEfficiency(std::size_t spectraIndex) {
 
   Mantid::MantidVec &yout = this->outputWS->dataY(spectraIndex);
   Mantid::MantidVec &eout = this->outputWS->dataE(spectraIndex);
-  // Need the original values so this is not a referencegit 
+  // Need the original values so this is not a referencegit
   const Mantid::MantidVec yValues = this->inputWS->readY(spectraIndex);
   const Mantid::MantidVec eValues = this->inputWS->readE(spectraIndex);
 

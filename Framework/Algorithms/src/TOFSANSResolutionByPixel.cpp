@@ -121,8 +121,8 @@ void TOFSANSResolutionByPixel::exec() {
     auto collimationLengthEstimator = SANSCollimationLengthEstimator();
     LCollim = collimationLengthEstimator.provideCollimationLength(inWS);
     g_log.information() << "No collimation length was specified. A default "
-                           "collimation length was estimated to be "
-                        << LCollim << '\n';
+                           "collimation length was estimated to be " << LCollim
+                        << '\n';
   } else {
     g_log.information() << "The collimation length is  " << LCollim << '\n';
   }
