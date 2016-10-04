@@ -66,12 +66,9 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  void removeDecayError(const HistogramData::HistogramX &inX,
-                        const HistogramData::HistogramE &inE,
-                        HistogramData::HistogramE &outE);
-  void removeDecayData(const HistogramData::HistogramX &inX,
-                       const HistogramData::HistogramY &inY,
-                       HistogramData::HistogramY &outY);
+  // Remove exponential decay from Y and E
+  HistogramData::Histogram
+  removeDecay(const HistogramData::Histogram &histogram) const;
   // calculate Muon normalisation constant
   double calNormalisationConst(API::MatrixWorkspace_sptr ws, int wsIndex);
 };

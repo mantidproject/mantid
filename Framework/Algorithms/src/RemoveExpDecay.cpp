@@ -10,6 +10,7 @@
 #include "MantidKernel/ArrayProperty.h"
 
 #include <cmath>
+#include <numeric>
 #include <vector>
 
 namespace {
@@ -55,7 +56,6 @@ void MuonRemoveExpDecay::exec() {
   // Get original workspace
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   int numSpectra = static_cast<int>(inputWS->size() / inputWS->blocksize());
-
   // Create output workspace with same dimensions as input
   API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (inputWS != outputWS) {
@@ -66,89 +66,54 @@ void MuonRemoveExpDecay::exec() {
     outputWS->setSharedX(i, inputWS->sharedX(i));
   }
 
+  // No spectra specified = process all spectra
   if (spectra.empty()) {
+    std::vector<int> allSpectra(numSpectra);
+    std::iota(allSpectra.begin(), allSpectra.end(), 0);
+    spectra.swap(allSpectra);
+  }
 
-    Progress prog(this, 0.0, 1.0, numSpectra);
-    // Do all the spectra
+  Progress prog(this, 0.0, 1.0, numSpectra + spectra.size());
+  if (inputWS != outputWS) {
+
+    // Copy all the Y and E data
     PARALLEL_FOR2(inputWS, outputWS)
-    for (int i = 0; i < numSpectra; ++i) {
+    for (int64_t i = 0; i < int64_t(numSpectra); ++i) {
       PARALLEL_START_INTERUPT_REGION
       const auto index = static_cast<size_t>(i);
-      // Make sure reference to input X vector is obtained after output one
-      // because in the case
-      // where the input & output workspaces are the same, it might move if the
-      // vectors were shared.
-      const auto &xIn = inputWS->x(index);
-
-      auto &yOut = outputWS->mutableY(index);
-      auto &eOut = outputWS->mutableE(index);
-
-      removeDecayData(xIn, inputWS->y(index), yOut);
-      removeDecayError(xIn, inputWS->e(index), eOut);
-      double normConst = calNormalisationConst(outputWS, i);
-
-      // do scaling and substract by minus 1.0
-      const size_t nbins = outputWS->y(index).size();
-      for (size_t j = 0; j < nbins; j++) {
-        yOut[j] /= normConst;
-        yOut[j] -= 1.0;
-        eOut[j] /= normConst;
-      }
-
-      prog.report();
-      PARALLEL_END_INTERUPT_REGION
-    }
-    PARALLEL_CHECK_INTERUPT_REGION
-  } else {
-    Progress prog(this, 0.0, 1.0, numSpectra + spectra.size());
-    if (inputWS != outputWS) {
-
-      // Copy all the Y and E data
-      PARALLEL_FOR2(inputWS, outputWS)
-      for (int64_t i = 0; i < int64_t(numSpectra); ++i) {
-        PARALLEL_START_INTERUPT_REGION
-        const auto index = static_cast<size_t>(i);
-        outputWS->setSharedY(index, inputWS->sharedY(index));
-        outputWS->setSharedE(index, inputWS->sharedE(index));
-        prog.report();
-        PARALLEL_END_INTERUPT_REGION
-      }
-      PARALLEL_CHECK_INTERUPT_REGION
-    }
-
-    // Do the specified spectra only
-    int specLength = static_cast<int>(spectra.size());
-    PARALLEL_FOR2(inputWS, outputWS)
-    for (int i = 0; i < specLength; ++i) {
-      PARALLEL_START_INTERUPT_REGION
-      if (spectra[i] > numSpectra) {
-        g_log.error("Spectra size greater than the number of spectra!");
-        throw std::invalid_argument(
-            "Spectra size greater than the number of spectra!");
-      }
-      // Get references to the x data
-      const auto &xIn = inputWS->x(spectra[i]);
-      auto &yOut = outputWS->mutableY(spectra[i]);
-      auto &eOut = outputWS->mutableE(spectra[i]);
-
-      removeDecayData(xIn, inputWS->y(spectra[i]), yOut);
-      removeDecayError(xIn, inputWS->e(spectra[i]), eOut);
-
-      const double normConst = calNormalisationConst(outputWS, spectra[i]);
-
-      // do scaling and substract by minus 1.0
-      const size_t nbins = outputWS->y(i).size();
-      for (size_t j = 0; j < nbins; j++) {
-        yOut[j] /= normConst;
-        yOut[j] -= 1.0;
-        eOut[j] /= normConst;
-      }
-
+      outputWS->setSharedY(index, inputWS->sharedY(index));
+      outputWS->setSharedE(index, inputWS->sharedE(index));
       prog.report();
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
   }
+
+  // Do the specified spectra only
+  int specLength = static_cast<int>(spectra.size());
+  PARALLEL_FOR2(inputWS, outputWS)
+  for (int i = 0; i < specLength; ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    const auto specNum = static_cast<size_t>(spectra[i]);
+    if (spectra[i] > numSpectra) {
+      g_log.error("Spectra size greater than the number of spectra!");
+      throw std::invalid_argument(
+          "Spectra size greater than the number of spectra!");
+    }
+
+    // Remove decay from Y and E
+    outputWS->setHistogram(specNum, removeDecay(inputWS->histogram(specNum)));
+
+    // do scaling and subtract 1
+    const double normConst = calNormalisationConst(outputWS, spectra[i]);
+    outputWS->mutableY(specNum) /= normConst;
+    outputWS->mutableY(specNum) -= 1.0;
+    outputWS->mutableE(specNum) /= normConst;
+
+    prog.report();
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // Update Y axis units
   outputWS->setYUnit("Asymmetry");
@@ -156,44 +121,38 @@ void MuonRemoveExpDecay::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-/** This method corrects the errors for one spectrum.
- *	 The muon lifetime is in microseconds not seconds, i.e. 2.1969811 rather
- *   than 0.0000021969811.
- *   This is because the data is in microseconds.
- *   @param inX ::  The X vector
- *   @param inE ::  The input error vector
- *   @param outE :: The output error vector
+/**
+ * Corrects the data and errors for one spectrum.
+ * The muon lifetime is in microseconds, not seconds, because the data is in
+ * microseconds.
+ * @param histogram :: [input] Input histogram
+ * @returns :: Histogram with exponential removed from Y and E
  */
-void MuonRemoveExpDecay::removeDecayError(const HistogramData::HistogramX &inX,
-                                          const HistogramData::HistogramE &inE,
-                                          HistogramData::HistogramE &outE) {
-  // Do the removal
-  for (size_t i = 0; i < inE.size(); ++i) {
-    if (inE[i] != 0.0)
-      outE[i] = inE[i] * exp(inX[i] / MUON_LIFETIME_MICROSECONDS);
-    else
-      outE[i] = exp(inX[i] / MUON_LIFETIME_MICROSECONDS);
-  }
-}
+HistogramData::Histogram MuonRemoveExpDecay::removeDecay(
+    const HistogramData::Histogram &histogram) const {
+  HistogramData::Histogram result(histogram);
 
-/** This method corrects the data for one spectrum.
- *	 The muon lifetime is in microseconds not seconds, i.e. 2.1969811 rather
- *   than 0.0000021969811.
- *   This is because the data is in microseconds.
- *   @param inX ::  The X vector
- *   @param inY ::  The input data vector
- *   @param outY :: The output data vector
- */
-void MuonRemoveExpDecay::removeDecayData(const HistogramData::HistogramX &inX,
-                                         const HistogramData::HistogramY &inY,
-                                         HistogramData::HistogramY &outY) {
-  // Do the removal
-  for (size_t i = 0; i < inY.size(); ++i) {
-    if (inY[i] != 0.0)
-      outY[i] = inY[i] * exp(inX[i] / MUON_LIFETIME_MICROSECONDS);
-    else
-      outY[i] = 0.1 * exp(inX[i] / MUON_LIFETIME_MICROSECONDS);
+  auto &yData = result.mutableY();
+  auto &eData = result.mutableE();
+  assert(yData.size() == eData.size());
+  for (size_t i = 0; i < yData.size(); ++i) {
+    const double factor = exp(result.x()[i] / MUON_LIFETIME_MICROSECONDS);
+    // Correct the Y data
+    if (yData[i] != 0.0) {
+      yData[i] *= factor;
+    } else {
+      yData[i] = 0.1 * factor;
+    }
+
+    // Correct the E data
+    if (eData[i] != 0.0) {
+      eData[i] *= factor;
+    } else {
+      eData[i] = factor;
+    }
   }
+
+  return result;
 }
 
 /**
