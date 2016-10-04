@@ -133,7 +133,7 @@ string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
   for (size_t i = 0; i < numSpectra; ++i) {
     // determine ranges if necessary
     if (updateXMins || updateXMaxs) {
-      const auto &xvalues = inputWS->getSpectrum(i).x();
+      const auto &xvalues = inputWS->x(i);
       if (updateXMins) {
         if (boost::math::isnan(xvalues.front())) {
           xmins.push_back(xmin_wksp);
@@ -396,8 +396,8 @@ void ResampleX::exec() {
         el.generateHistogram(xValues, y_data, e_data);
 
         // Copy the data over.
-        outputWS->mutableY(wkspIndex).assign(y_data.begin(), y_data.end());
-        outputWS->mutableE(wkspIndex).assign(e_data.begin(), e_data.end());
+        outputWS->mutableY(wkspIndex) = std::move(y_data);
+        outputWS->mutableE(wkspIndex) = std::move(e_data);
 
         // Report progress
         prog.report(name());
@@ -412,8 +412,9 @@ void ResampleX::exec() {
       }
 
       // Copy the units over too.
-      for (int i = 0; i < outputWS->axes(); ++i)
+      for (int i = 0; i < outputWS->axes(); ++i) {
         outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
+      }
       outputWS->setYUnit(inputEventWS->YUnit());
       outputWS->setYUnitLabel(inputEventWS->YUnitLabel());
     }
