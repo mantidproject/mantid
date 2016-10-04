@@ -76,8 +76,8 @@ void Transpose::exec() {
       outF.resize(newYsize);
     }
 
+    progress.report("Swapping data values");
     for (int64_t j = 0; j < int64_t(newYsize); ++j) {
-      progress.report("Swapping data values");
       outY[j] = inputWorkspace->y(j)[i];
       outE[j] = inputWorkspace->e(j)[i];
       if (outRebinWorkspace) {
