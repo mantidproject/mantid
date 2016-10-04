@@ -12,7 +12,7 @@ class CalculateSampleTransmission(PythonAlgorithm):
 
     _bin_params = None
     _chemical_formula = None
-    _use_mass_density = None
+    _density_type = None
     _density = None
     _thickness = None
     _output_ws = None
@@ -34,11 +34,12 @@ class CalculateSampleTransmission(PythonAlgorithm):
                              validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
 
-        self.declareProperty(name = 'UseMassDensity', defaultValue=False,
-                             doc='Use Sample Mass Density (True) or Sample Number Density (False)')
+        self.declareProperty(name='DensityType', defaultValue = 'Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
+                             doc = 'Use of Mass density or Number denisty')
 
         self.declareProperty(name='Density', defaultValue=0.1,
-                             doc='Mass Density (g/cm^3) or Number denisty per atom (atoms/Angstrom^3)')
+                             doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3). Default=0.1')
 
         self.declareProperty(name='Thickness', defaultValue=0.1,
                              doc='Sample thickness (cm). Default=0.1')
@@ -70,7 +71,7 @@ class CalculateSampleTransmission(PythonAlgorithm):
         Rebin(InputWorkspace=self._output_ws, OutputWorkspace=self._output_ws,
               Params=self._bin_params)
 
-        if self._use_mass_density:
+        if self._density_type == 'Mass Density':
             builder = MaterialBuilder()
             mat = builder.setFormula(self._chemical_formula).setMassDensity(self._density).build()
             self._density = mat.numberDensity
@@ -101,8 +102,8 @@ class CalculateSampleTransmission(PythonAlgorithm):
 
         self._bin_params = self.getPropertyValue('WavelengthRange')
         self._chemical_formula = self.getPropertyValue('ChemicalFormula')
+        self._density_type = self.getPropertyValue('DensityType')
         self._density = self.getProperty('Density').value
-        self._use_mass_density = self.getProperty('UseMassDensity').value
         self._thickness = self.getProperty('Thickness').value
         self._output_ws = self.getPropertyValue('OutputWorkspace')
 

@@ -231,12 +231,12 @@
         <widget class="QComboBox" name="cbDensity">
          <item>
           <property name="text">
-           <string>Mass Density (g/cm³)</string>
+           <string>Mass Density</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Number Density (atoms/Å³)</string>
+           <string>Number Density</string>
           </property>
          </item>
         </widget>

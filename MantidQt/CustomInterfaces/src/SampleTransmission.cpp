@@ -135,14 +135,9 @@ void SampleTransmission::calculate() {
   // Set sample material properties
   transCalcAlg->setProperty("ChemicalFormula",
                             m_uiForm.leChemicalFormula->text().toStdString());
-  auto sampleDensityIndex = m_uiForm.cbDensity->currentIndex();
+
+  transCalcAlg->setProperty("DensityType", m_uiForm.cbDensity->currentText().toStdString());
   transCalcAlg->setProperty("Density", m_uiForm.spDensity->value());
-  if (sampleDensityIndex == 0) {
-    transCalcAlg->setProperty("UseMassDensity", true);
-  }
-  else {
-    transCalcAlg->setProperty("UseMassDensity", false);
-  }
 
   transCalcAlg->setProperty("Thickness", m_uiForm.spThickness->value());
 
