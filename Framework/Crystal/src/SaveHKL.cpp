@@ -11,7 +11,7 @@
 #include <fstream>
 
 #include <Poco/File.h>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -321,8 +321,7 @@ void SaveHKL::exec() {
       for (auto wi : ids) {
 
         Peak &p = peaks[wi];
-        if (p.getIntensity() == 0.0 || boost::math::isnan(p.getIntensity()) ||
-            boost::math::isnan(p.getSigmaIntensity())) {
+        if (p.getIntensity() == 0.0 || !(std::isfinite(p.getSigmaIntensity()))) {
           banned.insert(wi);
           continue;
         }

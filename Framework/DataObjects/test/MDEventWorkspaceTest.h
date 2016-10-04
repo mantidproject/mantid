@@ -28,7 +28,7 @@
 #include <memory>
 #include <vector>
 #include <typeinfo>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -287,10 +287,10 @@ public:
         "The box with 2 events",
         ew->getSignalAtCoord(coords2, Mantid::API::NoNormalization), 3.0, 1e-5);
     TSM_ASSERT("Out of bounds returns NAN",
-               boost::math::isnan(ew->getSignalAtCoord(
+               std::isnan(ew->getSignalAtCoord(
                    coords3, Mantid::API::NoNormalization)));
     TSM_ASSERT("Out of bounds returns NAN",
-               boost::math::isnan(ew->getSignalAtCoord(
+               std::isnan(ew->getSignalAtCoord(
                    coords4, Mantid::API::NoNormalization)));
   }
 
@@ -416,7 +416,7 @@ public:
         "Value ignoring mask is 0.0 as masking deletes the events",
         ew->getSignalAtCoord(coords1, Mantid::API::NoNormalization), 0.0, 1e-5);
     TSM_ASSERT("Masked returns NaN",
-               boost::math::isnan(ew->getSignalWithMaskAtCoord(
+               std::isnan(ew->getSignalWithMaskAtCoord(
                    coords1, Mantid::API::NoNormalization)));
   }
 

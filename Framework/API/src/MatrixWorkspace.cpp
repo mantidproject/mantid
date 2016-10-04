@@ -16,7 +16,7 @@
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/make_unique.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 #include <numeric>
 
@@ -699,7 +699,7 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
     const MantidVec &dataX = this->readX(workspaceIndex);
     const double xfront = dataX.front();
     const double xback = dataX.back();
-    if (boost::math::isfinite(xfront) && boost::math::isfinite(xback)) {
+    if (std::isfinite(xfront) && std::isfinite(xback)) {
       if (xfront < xmin)
         xmin = xfront;
       if (xback > xmax)
@@ -1019,8 +1019,8 @@ bool MatrixWorkspace::isCommonBins() const {
         }
 
         // handle Nan's and inf's
-        if ((boost::math::isinf(first) != boost::math::isinf(last)) ||
-            (boost::math::isnan(first) != boost::math::isnan(last))) {
+        if ((std::isinf(first) != std::isinf(last)) ||
+            (std::isnan(first) != std::isnan(last))) {
           m_isCommonBinsFlag = false;
         }
       }

@@ -6,7 +6,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Timer.h"
 #include <cmath>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidKernel/CPUTimer.h"
 
 using namespace Mantid;
@@ -555,8 +554,8 @@ public:
           int bini = static_cast<int>(tof / step);
           if (bini == 7) {
             // That was zeros
-            TS_ASSERT(boost::math::isnan(el.getEvent(i).weight()));
-            TS_ASSERT(boost::math::isnan(el.getEvent(i).errorSquared()));
+            TS_ASSERT(std::isnan(el.getEvent(i).weight()));
+            TS_ASSERT(std::isnan(el.getEvent(i).errorSquared()));
           } else {
             // Same weight error as dividing by a scalar with error before,
             // since we divided by 2+-0.5 again

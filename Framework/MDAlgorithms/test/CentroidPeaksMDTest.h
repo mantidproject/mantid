@@ -16,7 +16,6 @@
 #include "MantidKernel/UnitLabelTypes.h"
 
 #include <boost/math/distributions/normal.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/math/special_functions/pow.hpp>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>

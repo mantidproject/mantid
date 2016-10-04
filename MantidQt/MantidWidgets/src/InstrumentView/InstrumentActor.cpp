@@ -29,7 +29,7 @@
 #include "MantidKernel/V3D.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 #include <QMessageBox>
 #include <QSettings>
@@ -1152,7 +1152,7 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
         continue;
       }
       double sum = m_specIntegrs[i];
-      if (boost::math::isinf(sum) || boost::math::isnan(sum)) {
+      if (!std::isfinite(sum)) {
         throw std::runtime_error(
             "The workspace contains values that cannot be displayed (infinite "
             "or NaN).\n"
