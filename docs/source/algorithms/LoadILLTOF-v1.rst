@@ -21,6 +21,23 @@ be loaded from the Vanadium data.
 
 To date this algorithm only supports: IN4, IN5 and IN6
 
+Pulse Intervals
+---------------
+
+For IN4 and IN6 the algorithm also calculates the pulse interval.
+
+For the number of pulses:
+
+* **IN4:** :math:`n_{pulses} = \frac{v_{fc}}{4 v_{bc}}`
+   where :math:`n_{pulses}` is the number of pulses from the chopper per rotation, :math:`v_{fc}` the Fermi chopper speed and :math:`v_{bc}` the background chopper speed. Background chopper 1 and background chopper 2 must have the same speeds. All speeds are in units of rpm.
+
+* **IN6:** :math:`n_{pulses} = \frac{v_{fc}}{v_{sc}}`
+   where :math:`n_{pulses}` is the number of pulses from the chopper per rotation, :math:`v_{fc}` the Fermi chopper speed and :math:`v_{sc}` the suppressor chopper speed. All speeds are in units of rpm.
+
+The pulse interval, :math:`T_{pulse}` is then given by,
+
+:math:`T_{pulse} = \frac{60}{2 v_{fc}} n_{pulses}`.
+
 Usage
 -----
 
