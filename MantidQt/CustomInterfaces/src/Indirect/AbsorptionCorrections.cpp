@@ -47,15 +47,8 @@ void AbsorptionCorrections::run() {
   QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
   absCorAlgo->setProperty("SampleWorkspace", sampleWsName.toStdString());
 
-  double sampleDensity = m_uiForm.spSampleDensity->value();
-  auto sampleDensityIndex = m_uiForm.cbSampleDensity->currentIndex();
-  if (sampleDensityIndex == 0) {
-    absCorAlgo->setProperty("SampleMassDensity", sampleDensity);
-    absCorAlgo->setProperty("UseSampleMassDensity", true);
-  } else {
-    absCorAlgo->setProperty("SampleNumberDensity", sampleDensity);
-    absCorAlgo->setProperty("UseSampleMassDensity", false);
-  }
+  absCorAlgo->setProperty("SampleDensityType", m_uiForm.cbSampleDensity->currentText().toStdString());
+  absCorAlgo->setProperty("SampleDensity", m_uiForm.spSampleDensity->value());
 
   QString sampleChemicalFormula = m_uiForm.leSampleChemicalFormula->text();
   absCorAlgo->setProperty("SampleChemicalFormula",
@@ -102,15 +95,8 @@ void AbsorptionCorrections::run() {
 
     if (useCanCorrections) {
 
-      double canDensity = m_uiForm.spCanDensity->value();
-      auto canDensityIndex = m_uiForm.cbCanDensity->currentIndex();
-      if (canDensityIndex == 0) {
-        absCorAlgo->setProperty("CanMassDensity", canDensity);
-        absCorAlgo->setProperty("UseCanMassDensity", true);
-      } else {
-        absCorAlgo->setProperty("CanNumberDensity", canDensity);
-        absCorAlgo->setProperty("UseCanMassDensity", false);
-      }
+      absCorAlgo->setProperty("CanDensityType", m_uiForm.cbCanDensity->currentText().toStdString());
+      absCorAlgo->setProperty("CanDensity", m_uiForm.spCanDensity->value());
 
       QString canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
       absCorAlgo->setProperty("CanChemicalFormula",
@@ -221,7 +207,7 @@ bool AbsorptionCorrections::validate() {
 
   if (uiv.checkFieldIsNotEmpty("Sample Chemical Formula",
                                m_uiForm.leSampleChemicalFormula))
-    uiv.checkFieldIsValid("Sample Chamical Formula",
+    uiv.checkFieldIsValid("Sample Chemical Formula",
                           m_uiForm.leSampleChemicalFormula);
   const auto sampleChem =
       m_uiForm.leSampleChemicalFormula->text().toStdString();
@@ -246,9 +232,9 @@ bool AbsorptionCorrections::validate() {
 
     bool useCanCorrections = m_uiForm.ckUseCanCorrections->isChecked();
     if (useCanCorrections) {
-      if (uiv.checkFieldIsNotEmpty("Container Chamical Formula",
+      if (uiv.checkFieldIsNotEmpty("Container Chemical Formula",
                                    m_uiForm.leCanChemicalFormula))
-        uiv.checkFieldIsValid("Container Chamical Formula",
+        uiv.checkFieldIsValid("Container Chemical Formula",
                               m_uiForm.leCanChemicalFormula);
     }
   }
