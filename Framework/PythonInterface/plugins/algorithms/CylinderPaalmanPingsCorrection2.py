@@ -17,16 +17,13 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
     _use_sample_mass_density = None
     _sample_inner_radius = None
     _sample_outer_radius = None
+    _sample_density_type = None
     _sample_density = None
-    _sample_number_density = None
-    _sample_mass_density = None
 
     # Container variables
     _use_can = False
     _can_ws_name = None
-    _use_can_mass_density = None
-    _can_number_density = None
-    _can_mass_density = None
+    _can_density_type = None
     _can_density = None
     _can_outer_radius = None
 
@@ -72,16 +69,12 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                              validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
 
-        self.declareProperty(name='UseSampleMassDensity', defaultValue=False,
-                             doc='Use Sample Mass Density (True) or Sample Number Density (False)')
+        self.declareProperty(name='SampleDensityType', defaultValue = 'Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
+                             doc = 'Use of Mass density or Number denisty')
 
-        self.declareProperty(name='SampleNumberDensity', defaultValue=0.1,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Sample number density in atoms/Angstrom3')
-
-        self.declareProperty(name='SampleMassDensity', defaultValue=1.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Sample mass density in g/cm3')
+        self.declareProperty(name='SampleDensity', defaultValue=0.1,
+                             doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
 
         self.declareProperty(name='SampleInnerRadius', defaultValue=0.05,
                              validator=FloatBoundedValidator(0.0),
@@ -100,16 +93,12 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
                              doc='Can chemical formula')
 
-        self.declareProperty(name='CanNumberDensity', defaultValue=0.1,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Container number density in atoms/Angstrom3')
+        self.declareProperty(name='CanDensityType', defaultValue = 'Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
+                             doc = 'Use of Mass density or Number denisty')
 
-        self.declareProperty(name='CanMassDensity', defaultValue=1.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Container number density in g/cm3')
-
-        self.declareProperty(name='UseCanMassDensity', defaultValue=False,
-                             doc='Use Container Mass Density (True) or Container Number Density (False).')
+        self.declareProperty(name='CanDensity', defaultValue=0.1,
+                             doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
 
         self.declareProperty(name='CanOuterRadius', defaultValue=0.15,
                              validator=FloatBoundedValidator(0.0),
@@ -118,6 +107,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(name='BeamHeight', defaultValue=3.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Beam height')
+
         self.declareProperty(name='BeamWidth', defaultValue=2.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Beam width')
@@ -200,7 +190,8 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                         DataY=dataA1,
                         NSpec=len(self._angles),
                         UnitX='Wavelength',
-                        ParentWorkspace=self._sample_ws_name)
+                        ParentWorkspace=self._sample_ws_name,
+                        EnableLogging=False)
         workspaces = [ass_ws]
 
         if self._use_can:
@@ -212,7 +203,8 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                             DataY=dataA2,
                             NSpec=len(self._angles),
                             UnitX='Wavelength',
-                            ParentWorkspace=self._sample_ws_name)
+                            ParentWorkspace=self._sample_ws_name,
+                            EnableLogging=False)
 
             workflow_prog.report('Creating acsc Workspace')
             acsc_ws = self._output_ws_name + '_acsc'
@@ -222,7 +214,8 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                             DataY=dataA3,
                             NSpec=len(self._angles),
                             UnitX='Wavelength',
-                            ParentWorkspace=self._sample_ws_name)
+                            ParentWorkspace=self._sample_ws_name,
+                            EnableLogging=False)
 
             workflow_prog.report('Creating acc Workspace')
             acc_ws = self._output_ws_name + '_acc'
@@ -232,7 +225,8 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                             DataY=dataA4,
                             NSpec=len(self._angles),
                             UnitX='Wavelength',
-                            ParentWorkspace=self._sample_ws_name)
+                            ParentWorkspace=self._sample_ws_name,
+                            EnableLogging=False)
 
         if self._interpolate:
             self._interpolate_corrections(workspaces)
@@ -253,10 +247,10 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
         for ws_name in sample_log_workspaces:
             workflow_prog.report('Adding sample logs to %s' % ws_name)
-            AddSampleLogMultiple(Workspace=ws_name, LogNames=log_names, LogValues=log_values)
+            AddSampleLogMultiple(Workspace=ws_name, LogNames=log_names, LogValues=log_values, EnableLogging=False)
 
         workflow_prog.report('Create GroupWorkpsace Output')
-        GroupWorkspaces(InputWorkspaces=','.join(workspaces), OutputWorkspace=self._output_ws_name)
+        GroupWorkspaces(InputWorkspaces=','.join(workspaces), OutputWorkspace=self._output_ws_name, EnableLogging=False)
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
         workflow_prog.report('Algorithm complete')
 
@@ -266,18 +260,16 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         setup_prog = Progress(self, start=0.00, end=0.01, nreports=2)
         setup_prog.report('Obtaining input properties')
         self._sample_ws_name = self.getPropertyValue('SampleWorkspace')
-        self._sample_number_density = self.getProperty('SampleNumberDensity').value
-        self._sample_mass_density = self.getProperty('SampleMassDensity').value
-        self._use_sample_mass_density = self.getProperty('UseSampleMassDensity').value
+        self._sample_density_type = self.getPropertyValue('SampleDensityType')
+        self._sample_density = self.getProperty('SampleDensity').value
         self._sample_inner_radius = self.getProperty('SampleInnerRadius').value
         self._sample_outer_radius = self.getProperty('SampleOuterRadius').value
         self._number_can = 1
 
         self._can_ws_name = self.getPropertyValue('CanWorkspace')
         self._use_can = self._can_ws_name != ''
-        self._can_number_density = self.getProperty('CanNumberDensity').value
-        self._can_mass_density = self.getProperty('CanMassDensity').value
-        self._use_can_mass_density = self.getProperty('UseCanMassDensity').value
+        self._can_density_type = self.getPropertyValue('CanDensityType')
+        self._can_density = self.getProperty('CanDensity').value
         self._can_outer_radius = self.getProperty('CanOuterRadius').value
         if self._use_can:
             self._number_can = 2
@@ -332,14 +324,9 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
         sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
 
-        if self._use_sample_mass_density:
-            self._sample_density = self._sample_mass_density
-        else:
-            self._sample_density = self._sample_number_density
-
         sample_ws, self._sample_density = self._set_material(self._sample_ws_name,
                                                              sample_chemical_formula,
-                                                             self._use_sample_mass_density,
+                                                             self._sample_density_type,
                                                              self._sample_density)
 
         sample_material = sample_ws.sample().getMaterial()
@@ -358,14 +345,9 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
             can_chemical_formula = self.getPropertyValue('CanChemicalFormula')
 
-            if self._use_can_mass_density:
-                self._can_density = self._can_mass_density
-            else:
-                self._can_density = self._can_number_density
-
             can_ws, self._can_density = self._set_material(self._can_ws_name,
                                                            can_chemical_formula,
-                                                           self._use_can_mass_density,
+                                                           self._can_density_type,
                                                            self._can_density)
 
             can_material = can_ws.sample().getMaterial()
@@ -373,32 +355,30 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             self._sig_a[1] = can_material.absorbXSection()
             self._density[1] = self._can_density
 
-    def _set_material(self, ws_name, chemical_formula, use_mass, density):
+    def _set_material(self, ws_name, chemical_formula, denisty_type, density):
         """
         Sets the sample material for a given workspace
         @param ws_name              :: name of the workspace to set sample material for
         @param chemical_formula     :: Chemical formula of sample
-        @param density_type         :: 'Number' or 'Mass'
+        @param density_type         :: 'Mass Density' or 'Number Density'
         @param density              :: Density of sample
         @return pointer to the workspace with sample material set
                 AND
                 number density of the sample material
         """
-        if use_mass:
-            density_property = 'SampleMassDensity'
-        else:
-            density_property = 'SampleNumberDensity'
         set_material_alg = self.createChildAlgorithm('SetSampleMaterial')
-        set_material_alg.setProperty('InputWorkspace', ws_name)
-        set_material_alg.setProperty('ChemicalFormula', chemical_formula)
-        set_material_alg.setProperty(density_property, density)
-        set_material_alg.execute()
-        number_density = density
-        ws = set_material_alg.getProperty('InputWorkspace').value
-        if use_mass:
+        if denisty_type == 'Mass Density':
+            set_material_alg.setProperty('SampleMassDensity', density)
             builder = MaterialBuilder()
             mat = builder.setFormula(chemical_formula).setMassDensity(density).build()
             number_density = mat.numberDensity
+        else:
+            number_density = density
+        set_material_alg.setProperty('InputWorkspace', ws_name)
+        set_material_alg.setProperty('ChemicalFormula', chemical_formula)
+        set_material_alg.setProperty('SampleNumberDensity', number_density)
+        set_material_alg.execute()
+        ws = set_material_alg.getProperty('InputWorkspace').value
         return ws, number_density
 
 #------------------------------------------------------------------------------
@@ -434,7 +414,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         for idx in range(0, number_waves):
             wave_prog.report('Appending wave data: %i' % idx)
             self._waves.append(wave_min + idx * wave_bin)
-        DeleteWorkspace(wave_range)
+        DeleteWorkspace(wave_range, EnableLogging = False)
 
         if self._emode == 'Elastic':
             self._elastic = self._waves[int(len(self._waves) / 2)]
