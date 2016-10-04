@@ -167,6 +167,7 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
                                        CanDensityType='Number Density',
                                        CanDensity=0.5)
 
+        self._verify_workspaces_for_can()
 
     def test_mass_density_for_sample_can(self):
         """
@@ -183,6 +184,7 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
                                        CanDensityType='Mass Density',
                                        CanDensity=0.5)
 
+        self._verify_workspaces_for_can()
 
     def test_InterpolateDisabled(self):
         """

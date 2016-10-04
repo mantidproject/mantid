@@ -1,30 +1,31 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name,too-many-instance-attributes
 import math
 import numpy as np
 from mantid.simpleapi import *
-from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty, \
-                       WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator, Progress
-from mantid.kernel import StringListValidator, StringMandatoryValidator, IntBoundedValidator, \
-                          FloatBoundedValidator, Direction, logger, CompositeValidator, MaterialBuilder
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
+                        WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator, Progress)
+from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator,
+                           FloatBoundedValidator, Direction, logger, CompositeValidator, MaterialBuilder)
 
-#pylint: disable=too-many-instance-attributes
 class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
+    # Sample variables
     _sample_ws_name = None
     _sample_chemical_formula = None
-    _sample_number_density = None
-    _sample_mass_density = None
-    _use_sample_mass_density = None
+    _sample_density_type = None
+    _sample_density = None
     _sample_thickness = None
     _sample_angle = 0.0
+
+    # Container Variables
     _use_can = False
     _can_ws_name = None
     _can_chemical_formula = None
-    _can_number_density = None
-    _can_mass_density = None
-    _use_can_mass_density = None
+    _can_density_type = None
+    _can_density = None
     _can_front_thickness = None
     _can_back_thickness = None
+
     _number_wavelengths = 10
     _emode = None
     _efixed = 0.0
@@ -57,16 +58,12 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                              validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
 
-        self.declareProperty(name='SampleNumberDensity', defaultValue=0.1,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Sample number density in atoms/Angstrom3')
+        self.declareProperty(name='SampleDensityType', defaultValue = 'Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
+                             doc = 'Use of Mass density or Number denisty')
 
-        self.declareProperty(name='SampleMassDensity', defaultValue=1.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Sample mass density in g/cm3')
-
-        self.declareProperty(name='UseSampleMassDensity', defaultValue=False,
-                             doc='Use Sample Mass Density (True) or Sample Number Density (False)')
+        self.declareProperty(name='SampleDensity', defaultValue=0.1,
+                             doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
 
         self.declareProperty(name='SampleThickness', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
@@ -84,16 +81,12 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
                              doc='Container chemical formula')
 
-        self.declareProperty(name='CanNumberDensity', defaultValue=0.1,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Container number density in atoms/Angstrom3')
+        self.declareProperty(name='CanDensityType', defaultValue = 'Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
+                             doc = 'Use of Mass density or Number denisty')
 
-        self.declareProperty(name='CanMassDensity', defaultValue=1.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Container number density in g/cm3')
-
-        self.declareProperty(name='UseCanMassDensity', defaultValue=False,
-                             doc='Use Container Mass Density (True) or Container Number Density (False).')
+        self.declareProperty(name='CanDensity', defaultValue=0.1,
+                             doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
 
         self.declareProperty(name='CanFrontThickness', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
@@ -146,32 +139,18 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         setup_prog = Progress(self, start=0.0, end=0.2, nreports=2)
         # Set sample material form chemical formula
         setup_prog.report('Set sample material')
-        set_material_alg = self.createChildAlgorithm('SetSampleMaterial')
-        set_material_alg.setProperty('InputWorkspace', self._sample_ws_name)
-        set_material_alg.setProperty('ChemicalFormula', self._sample_chemical_formula)
-        if self._use_sample_mass_density:
-            set_material_alg.setProperty('SampleMassDensity', self._sample_mass_density)
-            builder = MaterialBuilder()
-            mat = builder.setFormula(self._sample_chemical_formula).setMassDensity(self._sample_mass_density).build()
-            self._sample_number_density = mat.numberDensity
-        else:
-            set_material_alg.setProperty('SampleNumberDensity', self._sample_number_density)
-        set_material_alg.execute()
+        self._sample_density = self._set_material(self._sample_ws_name,
+                                                  self._sample_chemical_formula,
+                                                  self._sample_density_type,
+                                                  self._sample_density)
 
         # If using a can, set sample material using chemical formula
         if self._use_can:
             setup_prog.report('Set contianer sample material')
-            set_material_alg = self.createChildAlgorithm('SetSampleMaterial')
-            set_material_alg.setProperty('InputWorkspace', self._can_ws_name)
-            set_material_alg.setProperty('ChemicalFormula', self._can_chemical_formula)
-            if self._use_can_mass_density:
-                set_material_alg.setProperty('SampleMassDensity', self._can_mass_density)
-                builder = MaterialBuilder()
-                mat = builder.setFormula(self._can_chemical_formula).setMassDensity(self._can_mass_density).build()
-                self._can_number_density = mat.numberDensity
-            else:
-                set_material_alg.setProperty('SampleNumberDensity', self._can_number_density)
-            set_material_alg.execute()
+            self._can_density = self._set_material(self._can_ws_name,
+                                                   self._can_chemical_formula,
+                                                   self._can_density_type,
+                                                   self._can_density)
 
         # Holders for the corrected data
         data_ass = []
@@ -209,7 +188,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                         NSpec=num_angles,
                         UnitX='Wavelength',
                         VerticalAxisUnit='SpectraNumber',
-                        ParentWorkspace=self._sample_ws_name)
+                        ParentWorkspace=self._sample_ws_name,
+                        EnableLogging = False)
         log_prog.report('Adding sample logs')
         self._add_sample_logs(ass_ws, sample_logs)
 
@@ -217,7 +197,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         if self._use_can:
             log_prog.report('Adding can smaple logs')
-            AddSampleLog(Workspace=ass_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
+            AddSampleLog(Workspace=ass_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name), EnableLogging = False)
 
             assc_ws = self._output_ws_name + '_assc'
             workspaces.append(assc_ws)
@@ -228,10 +208,11 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                             NSpec=num_angles,
                             UnitX='Wavelength',
                             VerticalAxisUnit='SpectraNumber',
-                            ParentWorkspace=self._sample_ws_name)
+                            ParentWorkspace=self._sample_ws_name,
+                            EnableLogging = False)
             log_prog.report('Adding assc sample logs')
             self._add_sample_logs(assc_ws, sample_logs)
-            AddSampleLog(Workspace=assc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
+            AddSampleLog(Workspace=assc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name), EnableLogging = False)
 
             acsc_ws = self._output_ws_name + '_acsc'
             workspaces.append(acsc_ws)
@@ -242,10 +223,11 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                             NSpec=num_angles,
                             UnitX='Wavelength',
                             VerticalAxisUnit='SpectraNumber',
-                            ParentWorkspace=self._sample_ws_name)
+                            ParentWorkspace=self._sample_ws_name,
+                            EnableLogging = False)
             log_prog.report('Adding acsc sample logs')
             self._add_sample_logs(acsc_ws, sample_logs)
-            AddSampleLog(Workspace=acsc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
+            AddSampleLog(Workspace=acsc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name), EnableLogging = False)
 
             acc_ws = self._output_ws_name + '_acc'
             workspaces.append(acc_ws)
@@ -256,15 +238,16 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                             NSpec=num_angles,
                             UnitX='Wavelength',
                             VerticalAxisUnit='SpectraNumber',
-                            ParentWorkspace=self._sample_ws_name)
+                            ParentWorkspace=self._sample_ws_name,
+                            EnableLogging = False)
             log_prog.report('Adding acc sample logs')
             self._add_sample_logs(acc_ws, sample_logs)
-            AddSampleLog(Workspace=acc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
+            AddSampleLog(Workspace=acc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name), EnableLogging = False)
 
         if self._interpolate:
             self._interpolate_corrections(workspaces)
         log_prog.report('Grouping Output Workspaces')
-        GroupWorkspaces(InputWorkspaces=','.join(workspaces), OutputWorkspace=self._output_ws_name)
+        GroupWorkspaces(InputWorkspaces=','.join(workspaces), OutputWorkspace=self._output_ws_name, EnableLogging = False)
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
 
 #------------------------------------------------------------------------------
@@ -272,9 +255,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     def _setup(self):
         self._sample_ws_name = self.getPropertyValue('SampleWorkspace')
         self._sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
-        self._sample_number_density = self.getProperty('SampleNumberDensity').value
-        self._sample_mass_density = self.getProperty('SampleMassDensity').value
-        self._use_sample_mass_density = self.getProperty('UseSampleMassDensity').value
+        self._sample_density_type = self.getPropertyValue('SampleDensityType')
+        self._sample_density = self.getProperty('SampleDensity').value
         self._sample_thickness = self.getProperty('SampleThickness').value
         self._sample_angle = self.getProperty('SampleAngle').value
 
@@ -282,9 +264,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self._use_can = self._can_ws_name != ''
 
         self._can_chemical_formula = self.getPropertyValue('CanChemicalFormula')
-        self._can_number_density = self.getProperty('CanNumberDensity').value
-        self._can_mass_density = self.getProperty('CanMassDensity').value
-        self._use_can_mass_density = self.getProperty('UseCanMassDensity').value
+        self._can_density_type = self.getPropertyValue('CanDensityType')
+        self._can_density = self.getProperty('CanDensity').value
         self._can_front_thickness = self.getProperty('CanFrontThickness').value
         self._can_back_thickness = self.getProperty('CanBackThickness').value
 
@@ -295,6 +276,33 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self._efixed = self.getProperty('Efixed').value
 
         self._output_ws_name = self.getPropertyValue('OutputWorkspace')
+
+#------------------------------------------------------------------------------
+
+    def _set_material(self, ws_name, chemical_formula, denisty_type, density):
+        """
+        Sets the sample material for a given workspace
+        @param ws_name              :: name of the workspace to set sample material for
+        @param chemical_formula     :: Chemical formula of sample
+        @param density_type         :: 'Mass Density' or 'Number Density'
+        @param density              :: Density of sample
+        @return pointer to the workspace with sample material set
+                AND
+                number density of the sample material
+        """
+        set_material_alg = self.createChildAlgorithm('SetSampleMaterial')
+        if denisty_type == 'Mass Density':
+            set_material_alg.setProperty('SampleMassDensity', density)
+            builder = MaterialBuilder()
+            mat = builder.setFormula(chemical_formula).setMassDensity(density).build()
+            number_density = mat.numberDensity
+        else:
+            number_density = density
+        set_material_alg.setProperty('InputWorkspace', ws_name)
+        set_material_alg.setProperty('ChemicalFormula', chemical_formula)
+        set_material_alg.setProperty('SampleNumberDensity', number_density)
+        set_material_alg.execute()
+        return number_density
 
 #------------------------------------------------------------------------------
 
@@ -330,7 +338,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             self._elastic = math.sqrt(81.787 / self._efixed)  # elastic wavelength
 
         logger.information('Elastic lambda %f' % self._elastic)
-        DeleteWorkspace(wave_range)
+        DeleteWorkspace(wave_range, EnableLogging = False)
 
 #------------------------------------------------------------------------------
 
@@ -368,7 +376,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             else:
                 log_type = 'String'
 
-            AddSampleLog(Workspace=ws, LogName=key, LogType=log_type, LogText=str(value))
+            AddSampleLog(Workspace=ws, LogName=key, LogType=log_type, LogText=str(value), EnableLogging = False)
 
 #------------------------------------------------------------------------------
 
@@ -413,7 +421,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         waves = np.array(self._waves)
 
         # Sample cross section
-        sample_x_section = (sam_material.totalScatterXSection() + sam_material.absorbXSection() * waves / 1.8) * self._sample_number_density
+        sample_x_section = (sam_material.totalScatterXSection() + sam_material.absorbXSection() * waves / 1.8) * self._sample_density
 
         vecFact = np.vectorize(self._fact)
         fs = vecFact(sample_x_section, self._sample_thickness, sec1, sec2)
@@ -430,7 +438,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             can_material = can_sample.getMaterial()
 
             # Calculate can cross section
-            can_x_section = (can_material.totalScatterXSection() + can_material.absorbXSection() * waves / 1.8) * self._can_number_density
+            can_x_section = (can_material.totalScatterXSection() + can_material.absorbXSection() * waves / 1.8) * self._can_density
             assc, acsc, acc = self._calculate_can(ass, can_x_section, sample_sect_1, sample_sect_2, [sec1, sec2])
 
         return ass, assc, acsc, acc
