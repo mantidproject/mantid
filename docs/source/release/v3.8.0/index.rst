@@ -2,12 +2,13 @@
 Mantid 3.8.0 Release Notes
 ==========================
 
-.. figure:: ../../images/ReleaseUnderConstruction.jpg
+.. figure:: ../../images/Release38.png
    :class: screenshot
-   :width: 550px
+   :width: 500px
    :align: right
 
-   Release image
+   Screenshot of a number of visulisation interfaces which can now be saved as a
+   Mantid project.
 
 .. contents:: Table of Contents
    :local:
