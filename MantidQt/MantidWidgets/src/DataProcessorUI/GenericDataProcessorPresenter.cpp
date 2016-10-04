@@ -42,6 +42,7 @@ namespace MantidWidgets {
 * @param processor : A DataProcessorProcessingAlgorithm
 * @param postprocessor : A DataProcessorPostprocessingAlgorithm
 * workspaces
+* @param loader : The algorithm responsible for loading data
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
