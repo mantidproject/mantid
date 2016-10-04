@@ -2,14 +2,58 @@
 #define MUONREMOVEEXPDECAYTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidAlgorithms/RemoveExpDecay.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using Mantid::MantidVec;
+using Mantid::Algorithms::MuonRemoveExpDecay;
 
 const std::string outputName = "MuonRemoveExpDecay_Output";
+
+namespace {
+MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
+
+  // Create a fake muon dataset
+  double a = 0.1; // Amplitude of the oscillations
+  double w = 25.; // Frequency of the oscillations
+  double tau = Mantid::PhysicalConstants::MuonLifetime *
+               1e6; // Muon life time in microseconds
+
+  MantidVec X;
+  MantidVec Y;
+  MantidVec E;
+  for (size_t s = 0; s < nspec; s++) {
+    for (size_t t = 0; t < maxt; t++) {
+      double x = static_cast<double>(t) / static_cast<double>(maxt);
+      double e = exp(-x / tau);
+      X.push_back(x);
+      Y.push_back(
+          a * sin(w * x +
+                  static_cast<double>(s) * M_PI / static_cast<double>(nspec)) *
+              e +
+          e);
+      E.push_back(0.005);
+    }
+  }
+
+  auto createWS = AlgorithmManager::Instance().create("CreateWorkspace");
+  createWS->initialize();
+  createWS->setChild(true);
+  createWS->setProperty("DataX", X);
+  createWS->setProperty("DataY", Y);
+  createWS->setProperty("DataE", E);
+  createWS->setProperty("NSpec", static_cast<int>(nspec));
+  createWS->setPropertyValue("OutputWorkspace", "ws");
+  createWS->execute();
+  MatrixWorkspace_sptr ws = createWS->getProperty("OutputWorkspace");
+
+  return ws;
+}
+}
 
 class RemoveExpDecayTest : public CxxTest::TestSuite {
 public:
@@ -143,44 +187,34 @@ public:
     TS_ASSERT_EQUALS(result->YUnitLabel(), "Asymmetry");
   }
 
-  MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
+};
 
-    // Create a fake muon dataset
-    double a = 0.1; // Amplitude of the oscillations
-    double w = 25.; // Frequency of the oscillations
-    double tau = Mantid::PhysicalConstants::MuonLifetime *
-                 1e6; // Muon life time in microseconds
-
-    MantidVec X;
-    MantidVec Y;
-    MantidVec E;
-    for (size_t s = 0; s < nspec; s++) {
-      for (size_t t = 0; t < maxt; t++) {
-        double x = static_cast<double>(t) / static_cast<double>(maxt);
-        double e = exp(-x / tau);
-        X.push_back(x);
-        Y.push_back(a * sin(w * x +
-                            static_cast<double>(s) * M_PI /
-                                static_cast<double>(nspec)) *
-                        e +
-                    e);
-        E.push_back(0.005);
-      }
-    }
-
-    auto createWS = AlgorithmManager::Instance().create("CreateWorkspace");
-    createWS->initialize();
-    createWS->setChild(true);
-    createWS->setProperty("DataX", X);
-    createWS->setProperty("DataY", Y);
-    createWS->setProperty("DataE", E);
-    createWS->setProperty("NSpec", static_cast<int>(nspec));
-    createWS->setPropertyValue("OutputWorkspace", "ws");
-    createWS->execute();
-    MatrixWorkspace_sptr ws = createWS->getProperty("OutputWorkspace");
-
-    return ws;
+class RemoveExpDecayTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static RemoveExpDecayTestPerformance *createSuite() {
+    return new RemoveExpDecayTestPerformance();
   }
+  static void destroySuite(RemoveExpDecayTestPerformance *suite) {
+    AnalysisDataService::Instance().clear();
+    delete suite;
+  }
+
+  RemoveExpDecayTestPerformance() { FrameworkManager::Instance(); }
+
+  void setUp() override { input = createWorkspace(1000, 100); }
+
+  void testExec2D() {
+    MuonRemoveExpDecay alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", input);
+    alg.setPropertyValue("OutputWorkspace", "output");
+    alg.execute();
+  }
+
+private:
+  MatrixWorkspace_sptr input;
 };
 
 #endif /*MUONREMOVEEXPDECAYTEST_H_*/
