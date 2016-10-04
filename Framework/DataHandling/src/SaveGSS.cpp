@@ -498,7 +498,8 @@ inline void writeBankLine(std::stringstream &out, const std::string &bintype,
 /** Fix error if value is less than zero or infinity
   */
 inline double fixErrorValue(const double value) {
-  if (value <= 0. || !std::isfinite(value)) // Negative errors cannot be read by GSAS
+  if (value <= 0. ||
+      !std::isfinite(value)) // Negative errors cannot be read by GSAS
     return 0.;
   else
     return value;

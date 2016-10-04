@@ -27,7 +27,6 @@
 #include <limits>
 #include <cmath>
 
-
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

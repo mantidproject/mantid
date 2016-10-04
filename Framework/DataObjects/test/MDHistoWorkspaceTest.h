@@ -566,8 +566,8 @@ public:
     TS_ASSERT(std::isnan(iws->getSignalAtVMD(VMD(0.5, 0.5))));
     TS_ASSERT(std::isnan(iws->getSignalWithMaskAtVMD(VMD(0.5, 0.5))));
 
-    TS_ASSERT(std::isnan(
-        iws->getSignalAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
+    TS_ASSERT(
+        std::isnan(iws->getSignalAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
     TS_ASSERT(std::isnan(
         iws->getSignalWithMaskAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
   }

@@ -287,11 +287,11 @@ public:
         "The box with 2 events",
         ew->getSignalAtCoord(coords2, Mantid::API::NoNormalization), 3.0, 1e-5);
     TSM_ASSERT("Out of bounds returns NAN",
-               std::isnan(ew->getSignalAtCoord(
-                   coords3, Mantid::API::NoNormalization)));
+               std::isnan(ew->getSignalAtCoord(coords3,
+                                               Mantid::API::NoNormalization)));
     TSM_ASSERT("Out of bounds returns NAN",
-               std::isnan(ew->getSignalAtCoord(
-                   coords4, Mantid::API::NoNormalization)));
+               std::isnan(ew->getSignalAtCoord(coords4,
+                                               Mantid::API::NoNormalization)));
   }
 
   void test_getBoxBoundaryBisectsOnLine() {
