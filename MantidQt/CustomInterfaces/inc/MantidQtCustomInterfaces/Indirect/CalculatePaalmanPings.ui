@@ -499,16 +499,16 @@
       </item>
       <item row="0" column="0">
        <widget class="QComboBox" name="cbSampleDensity">
-         <item>
-           <property name="text">
-             <string>Number Density</string>
-           </property>
-         </item>
-         <item>
-           <property name="text">
-             <string>Mass Density</string>
-           </property>
-         </item>
+        <item>
+         <property name="text">
+          <string>Mass Density</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Number Density</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="0" column="2">
@@ -564,16 +564,16 @@
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="0">
        <widget class="QComboBox" name="cbCanDensity">
-         <item>
-           <property name="text">
-             <string>Number Density</string>
-           </property>
-         </item>
-         <item>
-           <property name="text">
-             <string>Mass Density</string>
-           </property>
-         </item>
+        <item>
+         <property name="text">
+          <string>Mass Density</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Number Density</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="0" column="3">
@@ -723,9 +723,7 @@
   <tabstop>spAnnBeamHeight</tabstop>
   <tabstop>spAnnBeamWidth</tabstop>
   <tabstop>spAnnStepSize</tabstop>
-  <tabstop>spSampleNumberDensity</tabstop>
   <tabstop>leSampleChemicalFormula</tabstop>
-  <tabstop>spCanNumberDensity</tabstop>
   <tabstop>leCanChemicalFormula</tabstop>
   <tabstop>cbPlotOutput</tabstop>
   <tabstop>pbSave</tabstop>
