@@ -22,6 +22,7 @@
 #include <pqObjectBuilder.h>
 #include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
+#include <pqPipelineFilter.h>
 #include <pqRenderView.h>
 #include <pqServerManagerModel.h>
 #include <vtkDataObject.h>
@@ -638,7 +639,22 @@ void SplatterPlotView::destroyAllSourcesInView() {
 
 void SplatterPlotView::setView(pqRenderView *view) {
   clearRenderLayout(this->m_ui.renderFrame);
+
+  auto &activeObjects = pqActiveObjects::instance();
   this->m_view = view;
+
+  auto server = activeObjects.activeServer();
+  auto model = pqApplicationCore::instance()->getServerManagerModel();
+  auto filters = model->findItems<pqPipelineFilter *>(server);
+  auto result = std::find_if(
+      filters.begin(), filters.end(), [](const pqPipelineFilter *src) {
+        auto tagName = "MantidParaViewSplatterPlot";
+        return strcmp(src->getProxy()->GetXMLName(), tagName) == 0;
+      });
+
+  if(result != filters.end()) {
+    this->m_splatSource = result[0];
+  }
 
   QHBoxLayout *hbox = new QHBoxLayout(this->m_ui.renderFrame);
   hbox->setMargin(0);

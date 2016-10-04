@@ -913,11 +913,15 @@ void MdViewerWidget::loadFromProject(const std::string &lines) {
   TSVSerialiser tsv(lines);
 
   int viewType;
-  std::string viewName, sourceName;
+  std::string viewName, sourceName, originalSourceName, originalRepName;
   tsv.selectLine("ViewName");
   tsv >> viewName;
   tsv.selectLine("SourceName");
   tsv >> sourceName;
+  tsv.selectLine("OriginalSourceName");
+  tsv >> originalSourceName;
+  tsv.selectLine("OriginalRepresentationName");
+  tsv >> originalRepName;
   tsv.selectLine("ViewType");
   tsv >> viewType;
 
@@ -958,6 +962,9 @@ void MdViewerWidget::loadFromProject(const std::string &lines) {
 
   setActiveObjects(view, source);
   setupViewFromProject(vtype);
+  auto origSrcProxy = proxyManager->GetProxy("sources", originalSourceName.c_str());
+  auto origSrc = model->findItem<pqPipelineSource *>(origSrcProxy);
+  this->currentView->origSrc = qobject_cast<pqPipelineSource *>(origSrc);
 
   // Work around to force the update of the shader preset.
   auto rep = pqActiveObjects::instance().activeRepresentation()->getProxy();
@@ -973,6 +980,9 @@ void MdViewerWidget::loadFromProject(const std::string &lines) {
   // Don't call render on ViewBase here as that will reset the camera.
   // Instead just directly render the view proxy using render all.
   this->currentView->renderAll();
+  this->currentView->updateAnimationControls();
+  this->setDestroyedListener();
+  this->currentView->setVisibilityListener();
 }
 
 /**
@@ -1075,6 +1085,16 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
 
   contents.writeLine("ViewName") << viewName;
   contents.writeLine("SourceName") << sourceName;
+
+  if(this->currentView->origRep) {
+    auto repName = proxyManager->GetProxyName("representations", this->currentView->origRep->getProxy());
+    contents.writeLine("OriginalRepresentationName") << repName;
+  }
+
+  if(this->currentView->origSrc) {
+    auto srcName = proxyManager->GetProxyName("sources", this->currentView->origSrc->getProxy());
+    contents.writeLine("OriginalSourceName") << srcName;
+  }
 
   // Now serialise the color map
   contents.writeSection("colormap", ui.colorSelectionWidget->saveToProject());
