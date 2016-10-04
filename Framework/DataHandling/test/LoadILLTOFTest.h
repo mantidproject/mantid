@@ -16,9 +16,7 @@ public:
   static LoadILLTOFTest *createSuite() { return new LoadILLTOFTest(); }
   static void destroySuite(LoadILLTOFTest *suite) { delete suite; }
 
-  void tearDown() override {
-    AnalysisDataService::Instance().clear();
-  }
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void testName() {
     LoadILLTOF loader;
@@ -40,7 +38,8 @@ public:
    * This test only loads the Sample Data
    * The elastic peak is obtained on the fly from the sample data.
    */
-  MatrixWorkspace_sptr loadDataFile(const std::string dataFile, const int numberOfHistograms) {
+  MatrixWorkspace_sptr loadDataFile(const std::string dataFile,
+                                    const int numberOfHistograms) {
     LoadILLTOF loader;
     loader.initialize();
     loader.setPropertyValue("Filename", dataFile);
@@ -67,9 +66,7 @@ public:
     TS_ASSERT_DELTA(0.003, pulseInterval, 1e-10);
   }
 
-  void test_IN5_load() {
-    loadDataFile("ILL/IN5/104007.nxs", 98305);
-  }
+  void test_IN5_load() { loadDataFile("ILL/IN5/104007.nxs", 98305); }
 
   void test_IN6_load() {
     MatrixWorkspace_sptr ws = loadDataFile("ILL/IN6/164192.nxs", 340);

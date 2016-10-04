@@ -363,18 +363,24 @@ void LoadILLTOF::addPulseInterval() {
   double fermiChopperSpeed;
 
   if (m_instrumentName == "IN4") {
-    fermiChopperSpeed = runDetails.getPropertyAsSingleValue("FC.rotation_speed");
-    double bkgChopper1Speed = runDetails.getPropertyAsSingleValue("BC1.rotation_speed");
-    double bkgChopper2Speed = runDetails.getPropertyAsSingleValue("BC2.rotation_speed");
+    fermiChopperSpeed =
+        runDetails.getPropertyAsSingleValue("FC.rotation_speed");
+    double bkgChopper1Speed =
+        runDetails.getPropertyAsSingleValue("BC1.rotation_speed");
+    double bkgChopper2Speed =
+        runDetails.getPropertyAsSingleValue("BC2.rotation_speed");
 
     if (std::abs(bkgChopper1Speed - bkgChopper2Speed) > 1) {
-      throw std::invalid_argument("Background choppers 1 and 2 have different speeds");
+      throw std::invalid_argument(
+          "Background choppers 1 and 2 have different speeds");
     }
 
     n_pulses = fermiChopperSpeed / bkgChopper1Speed / 4;
   } else if (m_instrumentName == "IN6") {
-    fermiChopperSpeed = runDetails.getPropertyAsSingleValue("Fermi.rotation_speed");
-    double suppressorSpeed = runDetails.getPropertyAsSingleValue("Suppressor.rotation_speed");
+    fermiChopperSpeed =
+        runDetails.getPropertyAsSingleValue("Fermi.rotation_speed");
+    double suppressorSpeed =
+        runDetails.getPropertyAsSingleValue("Suppressor.rotation_speed");
 
     n_pulses = fermiChopperSpeed / suppressorSpeed;
   } else {
