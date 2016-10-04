@@ -806,7 +806,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws) {
   PARALLEL_CHECK_INTERUPT_REGION
 
   // Give the 0-th X bins to all the output spectra.
-  outWS->setAllX(HistogramData::BinEdges(inWS->refX(0)));
+  outWS->setAllX(HistogramData::BinEdges(inWS->sharedX(0)));
   if (expandSumAllPixels)
     spreadPixels(outWS);
 }

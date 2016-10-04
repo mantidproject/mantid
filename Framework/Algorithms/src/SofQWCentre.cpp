@@ -284,7 +284,7 @@ API::MatrixWorkspace_sptr SofQWCentre::setUpOutputWorkspace(
     API::MatrixWorkspace_const_sptr inputWorkspace,
     const std::vector<double> &binParams, std::vector<double> &newAxis) {
   // Create vector to hold the new X axis values
-  HistogramData::BinEdges xAxis(inputWorkspace->refX(0));
+  HistogramData::BinEdges xAxis(inputWorkspace->sharedX(0));
   const int xLength = static_cast<int>(xAxis.size());
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that
