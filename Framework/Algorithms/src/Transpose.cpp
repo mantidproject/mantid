@@ -79,6 +79,7 @@ void Transpose::exec() {
     }
 
     for (int64_t j = 0; j < int64_t(newYsize); ++j) {
+      progress.report();
       outY[j] = inputWorkspace->y(j)[i];
       outE[j] = inputWorkspace->e(j)[i];
       if (outRebinWorkspace) {
