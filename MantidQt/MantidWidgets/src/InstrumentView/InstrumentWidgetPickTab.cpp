@@ -11,6 +11,7 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DynamicFactory.h"
+#include "MantidKernel/Unit.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"

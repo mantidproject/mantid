@@ -22,6 +22,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
 
 #include <Poco/Path.h>
 

@@ -5,6 +5,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/Unit.h"
 
 #include <fstream>
 

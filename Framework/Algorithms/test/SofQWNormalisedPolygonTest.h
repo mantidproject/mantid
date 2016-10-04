@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidAPI/Axis.h"
+#include "MantidKernel/Unit.h"
 
 #include "SofQWTest.h"
 

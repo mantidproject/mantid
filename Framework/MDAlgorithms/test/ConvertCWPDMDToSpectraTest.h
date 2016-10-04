@@ -12,6 +12,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidDataHandling/LoadSpiceAscii.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
 
 using Mantid::MDAlgorithms::ConvertCWPDMDToSpectra;
 using Mantid::DataHandling::LoadSpiceAscii;

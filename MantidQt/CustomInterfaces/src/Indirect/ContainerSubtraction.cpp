@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid::API;
 

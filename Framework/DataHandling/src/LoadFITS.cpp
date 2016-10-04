@@ -7,6 +7,7 @@
 #include "MantidDataHandling/LoadFITS.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string.hpp>

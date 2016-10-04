@@ -8,6 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/Unit.h"
 
 #include <Poco/File.h>
 

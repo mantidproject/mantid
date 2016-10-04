@@ -10,6 +10,7 @@
 #include "MantidDataHandling/SaveAscii2.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Unit.h"
 
 #include <Poco/File.h>
 

@@ -11,6 +11,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidDataObjects/Workspace2D.h"
