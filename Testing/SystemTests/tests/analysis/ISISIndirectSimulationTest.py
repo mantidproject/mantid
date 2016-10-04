@@ -8,8 +8,6 @@ class MolDynCdlTest(stresstesting.MantidStressTest):
     def runTest(self):
         ms.MolDyn(Data='DISF_NaF.cdl',
                   Functions=['Fqt-total', 'Sqw-total'],
-                  Plot='None',
-                  Save=False,
                   OutputWorkspace='ISISIndirectSimulationTest_MolDynCdl')
 
 
@@ -57,8 +55,6 @@ class MolDynDatTest(stresstesting.MantidStressTest):
 
     def runTest(self):
         ms.MolDyn(Data='WSH_test.dat',
-                  Plot='None',
-                  Save=False,
                   OutputWorkspace='WSH_test_iqt')
 
 

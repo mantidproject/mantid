@@ -9,6 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/LibraryManager.h"
 #include <MantidKernel/StringTokenizer.h>
+#include <boost/lexical_cast.hpp>
 #include <sstream>
 
 namespace Mantid {
@@ -118,7 +119,13 @@ IFunction_sptr FunctionFactoryImpl::createSimple(
       parentAttributes[parName] = parValue;
     } else {
       // set initial parameter value
-      fun->setParameter(parName, atof(parValue.c_str()));
+      try {
+        fun->setParameter(parName, boost::lexical_cast<double>(parValue));
+      } catch (boost::bad_lexical_cast &) {
+        throw std::runtime_error(
+            "Error in value of parameter " + parName + ".\n" + parValue +
+            " cannot be interpreted as a floating point value.");
+      }
     }
   } // for term
 

@@ -5,6 +5,7 @@
 #include <MantidQtMantidWidgets/WidgetDllOption.h>
 
 #include "MantidQtAPI/GraphOptions.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 class MantidColorMap;
 
@@ -42,6 +43,10 @@ public:
   void setAxis(const QString &axisName);
   bool areAxesOn() const;
   void setupColorBar(const MantidColorMap &, double, double, double, bool);
+  /// Load the render window tab settings from file.
+  virtual void loadFromProject(const std::string &lines) override;
+  /// Save the render window tab settings to file.
+  std::string saveToProject() const override;
 
 signals:
   void rescaleColorMap();

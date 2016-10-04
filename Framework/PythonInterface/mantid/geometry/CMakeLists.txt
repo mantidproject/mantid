@@ -86,6 +86,8 @@ target_link_libraries ( PythonGeometryModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_L
             ${PYTHON_LIBRARIES}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}
+			${TBB_LIBRARIES} 
+			${TBB_MALLOC_LIBRARIES}
             )
 
 if (OSX_VERSION VERSION_GREATER 10.8)

@@ -1,12 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -14,9 +12,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
-
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
 
 #include <cfloat>
 
@@ -104,31 +99,30 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
                                           const std::string &targetUnit,
                                           API::MatrixWorkspace_sptr &inputWS,
                                           size_t nHist) {
-  // Set up binding to member funtion. Avoids condition as part of loop over
-  // nHistograms.
-  boost::function<double(const IDetector &)> thetaFunction;
+  // Not sure about default, previously there was a call to a null function?
+  bool signedTheta = false;
   if (targetUnit.compare("signed_theta") == 0 ||
       targetUnit.compare("SignedTheta") == 0) {
-    thetaFunction =
-        boost::bind(&MatrixWorkspace::detectorSignedTwoTheta, inputWS, _1);
+    signedTheta = true;
   } else if (targetUnit == "theta" || targetUnit == "Theta") {
-    thetaFunction =
-        boost::bind(&MatrixWorkspace::detectorTwoTheta, inputWS, _1);
+    signedTheta = false;
   }
 
   bool warningGiven = false;
 
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (size_t i = 0; i < nHist; ++i) {
-    try {
-      IDetector_const_sptr det = inputWS->getDetector(i);
-      // Invoke relevant member function.
-      m_indexMap.emplace(thetaFunction(*det) * rad2deg, i);
-    } catch (Exception::NotFoundError &) {
+    if (!spectrumInfo.hasDetectors(i)) {
       if (!warningGiven)
         g_log.warning("The instrument definition is incomplete - spectra "
                       "dropped from output");
       warningGiven = true;
+      continue;
     }
+    if (signedTheta)
+      m_indexMap.emplace(spectrumInfo.signedTwoTheta(i) * rad2deg, i);
+    else
+      m_indexMap.emplace(spectrumInfo.twoTheta(i) * rad2deg, i);
 
     progress.report("Converting to theta...");
   }

@@ -467,7 +467,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
 
   if (q_vectors.size() < 4) {
     throw std::invalid_argument(
-        "Find_UB(): Three or more indexed peaks needed to find UB");
+        "Find_UB(): Four or more indexed peaks needed to find UB");
   }
 
   if (min_d >= max_d || min_d <= 0) {

@@ -267,7 +267,6 @@ void DgsConvertToEnergyTransfer::exec() {
     moveInstComp->setProperty("Z", monPos.Z());
     moveInstComp->setProperty("RelativePosition", false);
     moveInstComp->executeAsChildAlg();
-    outputWS = moveInstComp->getProperty("Workspace");
   }
 
   const double binOffset = -monPeak;
