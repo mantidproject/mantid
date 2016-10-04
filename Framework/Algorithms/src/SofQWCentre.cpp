@@ -168,9 +168,9 @@ void SofQWCentre::exec() {
       const size_t numDets = detectors.size();
       const double numDets_d = static_cast<double>(
           numDets); // cache to reduce number of static casts
-      const MantidVec &Y = inputWorkspace->readY(i);
-      const MantidVec &E = inputWorkspace->readE(i);
-      const MantidVec &X = inputWorkspace->readX(i);
+      const auto &Y = inputWorkspace->y(i);
+      const auto &E = inputWorkspace->e(i);
+      const auto &X = inputWorkspace->x(i);
 
       // Loop over the detectors and for each bin calculate Q
       for (size_t idet = 0; idet < numDets; ++idet) {
@@ -233,10 +233,10 @@ void SofQWCentre::exec() {
 
           // And add the data and it's error to that bin, taking into account
           // the number of detectors contributing to this bin
-          outputWorkspace->dataY(qIndex)[j] += Y[j] / numDets_d;
+          outputWorkspace->mutableY(qIndex)[j] += Y[j] / numDets_d;
           // Standard error on the average
-          outputWorkspace->dataE(qIndex)[j] =
-              sqrt((pow(outputWorkspace->readE(qIndex)[j], 2) + pow(E[j], 2)) /
+          outputWorkspace->mutableE(qIndex)[j] =
+              sqrt((pow(outputWorkspace->e(qIndex)[j], 2) + pow(E[j], 2)) /
                    numDets_d);
         }
       }
@@ -327,8 +327,8 @@ void SofQWCentre::makeDistribution(API::MatrixWorkspace_sptr outputWS,
 
   const size_t numQBins = outputWS->getNumberHistograms();
   for (size_t i = 0; i < numQBins; ++i) {
-    MantidVec &Y = outputWS->dataY(i);
-    MantidVec &E = outputWS->dataE(i);
+    auto &Y = outputWS->mutableY(i);
+    auto &E = outputWS->mutableE(i);
     std::transform(Y.begin(), Y.end(), Y.begin(),
                    std::bind2nd(std::divides<double>(), widths[i + 1]));
     std::transform(E.begin(), E.end(), E.begin(),
