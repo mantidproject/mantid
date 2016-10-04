@@ -107,12 +107,12 @@ class IndirectCylinderAbsorptionTest(unittest.TestCase):
 
         corrected, fact = IndirectCylinderAbsorption(SampleWorkspace=self._red_ws,
                                        SampleChemicalFormula='H2-O',
-                                       UseSampleMassDensity=False,
-                                       SampleNumberDensity=0.5,
+                                       SampleDensityType='Number Density',
+                                       SampleDensity=0.5,
                                        CanWorkspace=self._can_ws,
                                        CanChemicalFormula='V',
-                                       UseCanMassDensity=False,
-                                       CanNumberDensity=0.5,
+                                       CanDensityType='Number Density',
+                                       CanDensity=0.5,
                                        Events = 200,
                                        UseCanCorrections = True)
 
@@ -126,12 +126,12 @@ class IndirectCylinderAbsorptionTest(unittest.TestCase):
 
         corrected, fact = IndirectCylinderAbsorption(SampleWorkspace=self._red_ws,
                                        SampleChemicalFormula='H2-O',
-                                       UseSampleMassDensity=True,
-                                       SampleMassDensity=0.5,
+                                       SampleDensityType='Mass Density',
+                                       SampleDensity=0.5,
                                        CanWorkspace=self._can_ws,
                                        CanChemicalFormula='V',
-                                       UseCanMassDensity=True,
-                                       CanMassDensity=0.5,
+                                       CanDensityType='Mass Density',
+                                       CanDensity=0.5,
                                        Events = 200,
                                        UseCanCorrections = True)
 
