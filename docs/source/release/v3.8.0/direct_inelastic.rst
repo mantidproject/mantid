@@ -36,3 +36,12 @@ Crystal Field
 
 - A fitting function was added (:ref:`CrystalFieldMultiSpectrum <func-CrystalFieldMultiSpectrum>`) that fits crystal field parameters to multiple spectra simultaneously.
 - A preliminary python interface to the Crystal Field functionality was added. It includes classes for defining a problem, performing a fit and basic plotting facilities.
+
+MLZ & TOFTOF
+------------
+
+- A workflow gui for TOFTOF data reduction (#17075).
+  The gui is accessible through the ``Interfaces / Direct / DGS Reduction`` menu.
+  The first time the user is presented with a choice of facilites and instruments -
+  choose MLZ / TOFTOF. The choice can be changed later from (any) reduction gui by
+  ``Tools / Change instrument ...``.
