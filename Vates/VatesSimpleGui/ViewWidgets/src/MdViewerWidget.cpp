@@ -975,6 +975,13 @@ void MdViewerWidget::loadFromProject(const std::string &lines) {
     tsv >> colorMapLines;
     ui.colorSelectionWidget->loadFromProject(colorMapLines);
   }
+
+  if (tsv.selectSection("rebinning")) {
+    std::string rebinningLines;
+    tsv >> rebinningLines;
+    m_rebinnedSourcesManager.loadFromProject(rebinningLines);
+  }
+
   currentView->show();
 
   // Don't call render on ViewBase here as that will reset the camera.
@@ -1096,8 +1103,8 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
     contents.writeLine("OriginalSourceName") << srcName;
   }
 
-  // Now serialise the color map
   contents.writeSection("colormap", ui.colorSelectionWidget->saveToProject());
+  contents.writeSection("rebinning", m_rebinnedSourcesManager.saveToProject());
   tsv.writeSection("vsi", contents.outputLines());
 
   return tsv.outputLines();
