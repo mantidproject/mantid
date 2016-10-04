@@ -1,4 +1,6 @@
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidCrystal/TOFExtinction.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -21,7 +23,6 @@ namespace Crystal {
 // Register the algorithm into the AlgorithmFactory
 // DECLARE_ALGORITHM(TOFExtinction)
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void TOFExtinction::init() {
@@ -50,7 +51,6 @@ void TOFExtinction::init() {
                   "Wavelength dependence of beam divergence");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void TOFExtinction::exec() {
