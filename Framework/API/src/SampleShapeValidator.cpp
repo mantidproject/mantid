@@ -1,6 +1,7 @@
 #include "MantidAPI/SampleShapeValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Objects/Object.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace API {

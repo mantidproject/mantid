@@ -1,13 +1,11 @@
 #ifndef MANTID_KERNEL_STARTSWITHVALIDATOR_H_
 #define MANTID_KERNEL_STARTSWITHVALIDATOR_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ListValidator.h"
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
 #endif
 #include <vector>
 

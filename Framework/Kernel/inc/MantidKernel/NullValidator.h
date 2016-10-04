@@ -1,10 +1,9 @@
 #ifndef MANTID_KERNEL_NULLVALIDATOR_H_
 #define MANTID_KERNEL_NULLVALIDATOR_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/IValidator.h"
+
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Kernel {

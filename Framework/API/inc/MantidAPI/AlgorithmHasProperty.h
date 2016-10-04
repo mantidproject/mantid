@@ -1,18 +1,13 @@
 #ifndef MANTID_API_ALGORITHMHASPROPERTY_H_
 #define MANTID_API_ALGORITHMHASPROPERTY_H_
 
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/TypedValidator.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace API {
 
-//------------------------------------------------------------------------------
-// Forward declaration
-//------------------------------------------------------------------------------
 class IAlgorithm;
 
 /**
