@@ -39,12 +39,12 @@ void Transpose::exec() {
       boost::dynamic_pointer_cast<DataObjects::RebinnedOutput>(outputWorkspace);
 
   size_t newNhist = outputWorkspace->getNumberHistograms();
-  size_t newXsize = outputWorkspace->readX(0).size();
+  size_t newXsize = outputWorkspace->x(0).size();
   size_t newYsize = outputWorkspace->blocksize();
 
   // Create a shareable X vector for the output workspace
   Axis *inputYAxis = getVerticalAxis(inputWorkspace);
-  MantidVec newXValues(newXsize);
+  std::vector<double> newXValues(newXsize);
   for (size_t i = 0; i < newXsize; ++i) {
     newXValues[i] = (*inputYAxis)(i);
   }
@@ -56,21 +56,23 @@ void Transpose::exec() {
   for (int64_t i = 0; i < static_cast<int64_t>(newNhist); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    outputWorkspace->setX(i, newXVector);
+    outputWorkspace->setSharedX(i, newXVector);
 
-    MantidVec &outY = outputWorkspace->dataY(i);
-    MantidVec &outE = outputWorkspace->dataE(i);
+    auto &outY = outputWorkspace->mutableY(i);
+    auto &outE = outputWorkspace->mutableE(i);
 
-    MantidVecPtr F;
-    MantidVec &outF = F.access();
+    // because setF wants a COW pointer
+    Kernel::cow_ptr<std::vector<double>> F;
+    std::vector<double> &outF = F.access();
+
     if (outRebinWorkspace) {
       outF.resize(newYsize);
     }
 
     for (int64_t j = 0; j < int64_t(newYsize); ++j) {
       progress.report("Swapping data values");
-      outY[j] = inputWorkspace->readY(j)[i];
-      outE[j] = inputWorkspace->readE(j)[i];
+      outY[j] = inputWorkspace->y(j)[i];
+      outE[j] = inputWorkspace->e(j)[i];
       if (outRebinWorkspace) {
         outF[j] = inRebinWorkspace->dataF(j)[i];
       }
@@ -93,7 +95,7 @@ API::MatrixWorkspace_sptr Transpose::createOutputWorkspace(
     API::MatrixWorkspace_const_sptr inputWorkspace) {
   Mantid::API::Axis *yAxis = getVerticalAxis(inputWorkspace);
   const size_t oldNhist = inputWorkspace->getNumberHistograms();
-  const MantidVec &inX = inputWorkspace->readX(0);
+  const auto &inX = inputWorkspace->x(0);
   const size_t oldYlength = inputWorkspace->blocksize();
   const size_t oldVerticalAxislength = yAxis->length();
 
@@ -107,9 +109,9 @@ API::MatrixWorkspace_sptr Transpose::createOutputWorkspace(
   // Values come from input X
   API::NumericAxis *newYAxis(nullptr);
   if (inputWorkspace->isHistogramData()) {
-    newYAxis = new API::BinEdgeAxis(inX);
+    newYAxis = new API::BinEdgeAxis(inX.rawData());
   } else {
-    newYAxis = new API::NumericAxis(inX);
+    newYAxis = new API::NumericAxis(inX.rawData());
   }
 
   newYAxis->unit() = inputWorkspace->getAxis(0)->unit();
