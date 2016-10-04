@@ -6,6 +6,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/AnalysisDataService.h"
 
 #include <Poco/File.h>
