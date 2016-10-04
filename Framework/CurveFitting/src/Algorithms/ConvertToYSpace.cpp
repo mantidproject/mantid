@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {
@@ -28,14 +29,12 @@ const double MASS_TO_MEV =
     0.5 * PhysicalConstants::NeutronMass / PhysicalConstants::meV;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
 */
 ConvertToYSpace::ConvertToYSpace()
     : Algorithm(), m_inputWS(), m_mass(0.0), m_l1(0.0), m_samplePos(),
       m_outputWS(), m_qOutputWS() {}
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertToYSpace::name() const { return "ConvertToYSpace"; }
 
@@ -47,9 +46,6 @@ const std::string ConvertToYSpace::category() const {
   return "Transforms\\Units";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /**
 * @param ws The workspace with attached instrument
 * @param index Index of the spectrum
