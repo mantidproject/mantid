@@ -1,12 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include <cmath>
 #include <vector>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
