@@ -10,6 +10,7 @@ Instrument & IDF
 
 - New CRISP filename format, full name + 8 digits, is now recognised
 - POLREF IDF has been updated
+- OFFSPEC IDF has been updated
 
 ReflectometryReductionOne
 -------------------------
