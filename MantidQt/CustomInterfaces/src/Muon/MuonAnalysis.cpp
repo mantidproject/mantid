@@ -2102,17 +2102,13 @@ void MuonAnalysis::allowLoading(bool enabled) {
 *   Check to see if the appending option is true when the previous button has
 * been pressed and acts accordingly
 */
-void MuonAnalysis::checkAppendingPreviousRun() {
-  checkAppendingRun(-1);
-}
+void MuonAnalysis::checkAppendingPreviousRun() { checkAppendingRun(-1); }
 
 /**
 *   Check to see if the appending option is true when the next button has been
 * pressed and acts accordingly
 */
-void MuonAnalysis::checkAppendingNextRun() {
-  checkAppendingRun(1);
-}
+void MuonAnalysis::checkAppendingNextRun() { checkAppendingRun(1); }
 
 /**
  * Check to see if the appending option is true when the next/previous button
