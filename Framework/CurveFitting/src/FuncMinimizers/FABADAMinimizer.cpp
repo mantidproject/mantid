@@ -924,8 +924,8 @@ void FABADAMinimizer::outputParameterTable(
 * @param reducedChain :: [output] the reduced chain
 * @param bestParameters :: [output] vector containing best values for fitting
 *parameters
-* @param errorsLeft :: [output] vector containing the errors (left)
-* @param errorsRight :: [output] vector containing the errors (right)
+* @param errorLeft :: [output] vector containing the errors (left)
+* @param errorRight :: [output] vector containing the errors (right)
 */
 void FABADAMinimizer::calculateConvChainAndBestParameters(
     size_t convLength, int nSteps,
