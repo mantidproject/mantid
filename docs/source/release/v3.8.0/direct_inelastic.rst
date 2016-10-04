@@ -23,7 +23,7 @@ Improvements
 
 - There is a new algorithm :ref:`MagFormFactorCorrection <algm-MagFormFactorCorrection>` which will scale an input workspace by 1/:math:`|F(Q)|^2` where :math:`F(Q)` is the magnetic form factor for a specified magnetic ion. 
 
-`Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+Direct+Inelastic%22>`_
+
 
 PyChop
 ------
@@ -45,3 +45,5 @@ MLZ & TOFTOF
   The first time the user is presented with a choice of facilites and instruments -
   choose MLZ / TOFTOF. The choice can be changed later from (any) reduction gui by
   ``Tools / Change instrument ...``.
+
+`Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+Direct+Inelastic%22>`_
