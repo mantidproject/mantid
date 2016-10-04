@@ -115,7 +115,7 @@ void StripVanadiumPeaks::exec() {
   // Get the width percentage
   double widthPercent = getProperty("PeakWidthPercent");
 
-  auto &midX = std::vector<double>();
+  std::vector<double> midX(nhists);
   for (int k = 0; k < nhists; ++k) {
     if ((!singleSpectrum) || (singleIndex == k)) {
       // Get the X and Y vectors

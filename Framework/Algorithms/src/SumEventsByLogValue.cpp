@@ -400,7 +400,9 @@ void SumEventsByLogValue::createBinnedOutput(
         log->maxValue() *
         1.000001); // Make it a tiny bit larger to cover full range
   }
-  auto XValues = std::vector<double>();
+
+  // XValues will be resized in createAxisFromRebinParams()
+  std::vector<double> XValues;
   const int XLength =
       VectorHelper::createAxisFromRebinParams(m_binningParams, XValues);
   assert((int)XValues.size() == XLength);
