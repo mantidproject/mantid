@@ -59,6 +59,8 @@ void Transpose::exec() {
 
   // }
   Progress progress(this, 0.0, 1.0, newNhist * newYsize);
+  progress.report("Swapping data values");
+
   PARALLEL_FOR2(inputWorkspace, outputWorkspace)
   for (int64_t i = 0; i < static_cast<int64_t>(newNhist); ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -76,7 +78,6 @@ void Transpose::exec() {
       outF.resize(newYsize);
     }
 
-    progress.report("Swapping data values");
     for (int64_t j = 0; j < int64_t(newYsize); ++j) {
       outY[j] = inputWorkspace->y(j)[i];
       outE[j] = inputWorkspace->e(j)[i];
