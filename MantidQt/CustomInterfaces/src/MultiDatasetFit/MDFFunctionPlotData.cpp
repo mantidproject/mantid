@@ -51,7 +51,7 @@ void MDFFunctionPlotData::setDomain(double startX, double endX, size_t nX) {
   Mantid::API::FunctionValues y(x);
   try {
     m_function->function(x, y);
-  } catch(std::invalid_argument&) {
+  } catch (std::invalid_argument &) {
     // Do nothing.
     // Maybe the function hasn't been set up yet.
   } catch (std::exception &e) {

@@ -315,7 +315,7 @@ protected slots:
   /// Called when a member of a vector attribute is changed
   void attributeVectorDoubleChanged(QtProperty *);
   /// Called when the size of a vector attribute is changed
-  void attributeVectorSizeChanged(QtProperty*);
+  void attributeVectorSizeChanged(QtProperty *);
   /// Called when a function parameter property is changed
   void parameterChanged(QtProperty *);
   /// Called when button in local parameter editor was clicked

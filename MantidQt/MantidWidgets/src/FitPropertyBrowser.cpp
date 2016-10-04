@@ -1781,11 +1781,11 @@ void FitPropertyBrowser::vectorDoubleChanged(QtProperty *prop) {
  * Slot. Responds to changing a vector attribute size
  * @param prop :: A property managed by m_vectorSizeManager.
  */
-void FitPropertyBrowser::vectorSizeChanged(QtProperty *prop)
-{
-    PropertyHandler* h = getHandler()->findHandler(prop);
-    if ( !h ) return;
-    h->setVectorAttribute(prop);
+void FitPropertyBrowser::vectorSizeChanged(QtProperty *prop) {
+  PropertyHandler *h = getHandler()->findHandler(prop);
+  if (!h)
+    return;
+  h->setVectorAttribute(prop);
 }
 
 /**

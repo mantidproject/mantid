@@ -1857,8 +1857,7 @@ void FunctionBrowser::attributeChanged(QtProperty *prop) {
 /** Called when the size of a vector attribute is changed
  * @param prop :: A property that was changed.
  */
-void FunctionBrowser::attributeVectorSizeChanged(QtProperty *prop) 
-{
+void FunctionBrowser::attributeVectorSizeChanged(QtProperty *prop) {
   QtProperty *vectorProp = m_properties[prop].parent;
   if (!vectorProp)
     throw std::logic_error("FunctionBrowser: inconsistency in vector "
@@ -1874,7 +1873,8 @@ void FunctionBrowser::attributeVectorSizeChanged(QtProperty *prop)
   auto attName = vectorProp->propertyName().toStdString();
   auto attribute = fun->getAttribute(attName).asVector();
   auto newSize = m_attributeSizeManager->value(prop);
-  if (newSize < 0) newSize = 0;
+  if (newSize < 0)
+    newSize = 0;
   if (attribute.size() != static_cast<size_t>(newSize)) {
     if (newSize == 0) {
       attribute.clear();

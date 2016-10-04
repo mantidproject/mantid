@@ -169,7 +169,7 @@ protected:
                                              static_cast<int>(b.size()));
     prop->addSubProperty(sizeProp);
     m_handler->m_vectorSizes << sizeProp;
-    //sizeProp->setEnabled(false);
+    // sizeProp->setEnabled(false);
     m_browser->m_vectorSizeManager->blockSignals(false);
     m_browser->m_vectorDoubleManager->blockSignals(true);
     QString dpName = "value[%1]";
@@ -750,7 +750,8 @@ private:
 /**
 * Set function attribute value read from a QtProperty
 * @param prop :: The property with the new attribute value
-* @param resetProperties :: Flag to reset all properties of the handled function.
+* @param resetProperties :: Flag to reset all properties of the handled
+* function.
 * @return true if successfull
 */
 bool PropertyHandler::setAttribute(QtProperty *prop, bool resetProperties) {
