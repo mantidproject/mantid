@@ -531,11 +531,11 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
               outws->dataE(j_row)[icol] = 1.0;
           }
 
-	  // record max count
-	  if (counts > max_counts){
-	    max_counts = counts;
-	  }
-	}
+          // record max count
+          if (counts > max_counts) {
+            max_counts = counts;
+          }
+        }
 
         // Update irow
         icol += 1;
