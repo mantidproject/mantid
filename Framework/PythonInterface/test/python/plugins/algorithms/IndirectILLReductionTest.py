@@ -147,6 +147,27 @@ class IndirectILLReductionTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
         self._workspace_properties(mtd['red'])
 
+    def _test_unmirror_1_2_3(self):
+        self._args['Run'] = '146007'
+
+        self._args['UnmirrorOption'] = 1
+        red = IndirectILLReduction(**self._args)
+
+        self._args['UnmirrorOption'] = 2
+        left = IndirectILLReduction(**self._args)
+
+        self._args['UnmirrorOption'] = 3
+        right = IndirectILLReduction(**self._args)
+
+        summed = Plus(left.getItem(0),right.getItem(0))
+
+        result = CompareWorkspaces(summed,red.getItem(0))
+
+        self._assertTrue(result[0],"Unmirror 1 should be the sum of 2 and 3")
+
+    def _test_unmirror_4_5(self):
+        pass
+
     def _test_unmirror_6_7(self):
         self._args['Run'] = '146007'
         self._args['UnmirrorOption'] = 6
@@ -158,7 +179,10 @@ class IndirectILLReductionTest(unittest.TestCase):
 
         vana7 = IndirectILLReduction(**self._args)
 
-        CheckWorkspacesMatch(mtd['vana6'].getItem(0),mtd['vana7'].getItem(0),0.0000001)
+        result = CompareWorkspaces(vana6.getItem(0),vana7.getItem(0))
+
+        self._assertTrue(result[0], "Unmirror 6 should be the same as 7 if "
+                                    "the same run is also defined as vanadium run")
 
     def _workspace_properties(self, ws):
 
