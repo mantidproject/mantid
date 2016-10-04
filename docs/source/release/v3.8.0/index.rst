@@ -35,11 +35,11 @@ Citation
 
 Please cite any usage of Mantid as follows:
 
-- *O. Arnold, et al., Mantid—Data analysis and visualization package for neutron scattering and μSR experiments, Nuclear Instruments and Methods in Physics Research Section A, Volume 764, 11 November 2014, Pages 156-166,* http://dx.doi.org/10.1016/j.nima.2014.07.029
+- *O. Arnold, et al., Mantid—Data analysis and visualization package for neutron scattering and μSR experiments, Nuclear Instruments and Methods in Physics Research Section A, Volume 764, 11 November 2014, Pages 156-166,* `doi: 10.1016/j.nima.2014.07.029 <http://dx.doi.org/10.1016/j.nima.2014.07.029>`_
 
 If you want to cite current release please use:
 
-- *Mantid 3.8: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. doi: http://dx.doi.org/10.5286/SOFTWARE/MANTID3.8
+- *Mantid 3.8: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. `doi:10.5286/SOFTWARE/MANTID3.8 <http://dx.doi.org/10.5286/SOFTWARE/MANTID3.8>`_
 
 Changes
 -------
