@@ -101,9 +101,9 @@ ReflGenericDataProcessorPresenterFactory::create() {
   DataProcessorPostprocessingAlgorithm postprocessor(
       "Stitch1DMany", "IvsQ_",
       std::set<std::string>{"InputWorkspaces", "OutputWorkspace"});
-  
+
   return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-								    whitelist, preprocessMap, processor, postprocessor, "LoadISISNexus");
+      whitelist, preprocessMap, processor, postprocessor, "LoadISISNexus");
 }
 }
 }

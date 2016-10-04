@@ -52,9 +52,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const std::string &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_whitelist(whitelist), m_preprocessMap(preprocessMap),
-      m_processor(processor), m_postprocessor(postprocessor),
-      m_loader(loader), m_postprocess(true), m_mainPresenter(),
-  m_tableDirty(false) {
+      m_processor(processor), m_postprocessor(postprocessor), m_loader(loader),
+      m_postprocess(true), m_mainPresenter(), m_tableDirty(false) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",

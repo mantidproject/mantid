@@ -59,7 +59,8 @@ public:
       const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
           preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
-      const DataProcessorPostprocessingAlgorithm &postprocessor, const std::string &loader = "Load");
+      const DataProcessorPostprocessingAlgorithm &postprocessor,
+      const std::string &loader = "Load");
   // Constructor: no pre-processing, post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
