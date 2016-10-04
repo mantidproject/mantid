@@ -51,13 +51,6 @@ void Transpose::exec() {
   auto newXVector =
       Kernel::make_cow<HistogramData::HistogramX>(std::move(newXValues));
 
-  // branch out
-  // if outRebinWorkspace
-  // if(outRebinWorkspace){
-  //   // do stuff
-  // }else{ // else, not rebin ws
-
-  // }
   Progress progress(this, 0.0, 1.0, newNhist * newYsize);
   progress.report("Swapping data values");
 

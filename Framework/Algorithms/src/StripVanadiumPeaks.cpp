@@ -89,9 +89,7 @@ void StripVanadiumPeaks::exec() {
   Progress progress(this, 0.0, 1.0, nhists * 2);
 
   for (int k = 0; k < nhists; ++k) {
-    outputWS->setSharedX(k, inputWS->sharedX(k));
-    outputWS->setSharedY(k, inputWS->sharedY(k));
-    outputWS->setSharedE(k, inputWS->sharedE(k));
+    outputWS->setHistogram(k, inputWS->histogram(k));
     progress.report();
   }
 
@@ -115,17 +113,14 @@ void StripVanadiumPeaks::exec() {
   // Get the width percentage
   double widthPercent = getProperty("PeakWidthPercent");
 
-  std::vector<double> midX(nhists);
   for (int k = 0; k < nhists; ++k) {
     if ((!singleSpectrum) || (singleIndex == k)) {
       // Get the X and Y vectors
-      auto &X = outputWS->mutableX(k);
+      const auto &X = outputWS->x(k);
       auto &Y = outputWS->mutableY(k);
 
-      // clear previous data, should be fast O(1) because primitive type
-      midX.clear();
       // Middle of each X bin
-      convertToBinCentre(X.rawData(), midX);
+      auto midX = outputWS->points(k);
 
       // This'll be the output
       auto &outY = Y;

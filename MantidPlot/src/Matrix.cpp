@@ -399,7 +399,7 @@ void Matrix::invert() {
         new MatrixSymmetryOperation(d_matrix_model, Invert, tr("Invert")));
 }
 
-void Matrix::transpose() {
+void Matrix::.c() {
   initWorkspace(numRows() * numCols());
   if (!d_workspace)
     return;

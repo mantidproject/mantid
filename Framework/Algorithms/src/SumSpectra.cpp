@@ -147,7 +147,7 @@ void SumSpectra::exec() {
     auto &outSpec = outputWorkspace->getSpectrum(0);
 
     // Copy over the bin boundaries
-    outSpec.mutableX() = localworkspace->x(0);
+    outSpec.setSharedX(localworkspace->sharedX(0));
 
     // Build a new spectra map
     outSpec.setSpectrumNo(m_outSpecNum);
@@ -162,10 +162,11 @@ void SumSpectra::exec() {
     }
 
     // Pointer to sqrt function
-    auto &YError = outSpec.mutableE();
     typedef double (*uf)(double);
     uf rs = std::sqrt;
-    // take the square root of all the accumulated squared errors - Assumes
+	
+	auto &YError = outSpec.mutableE();
+	// take the square root of all the accumulated squared errors - Assumes
     // Gaussian errors
     std::transform(YError.begin(), YError.end(), YError.begin(), rs);
 
@@ -479,7 +480,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   }
 
   // Set all X bins on the output
-  outputWorkspace->setAllX(HistogramData::BinEdges(localworkspace->sharedX(0)));
+  outputWorkspace->setAllX(localworkspace->binEdges(0));
 
   outputWorkspace->mutableRun().addProperty("NumAllSpectra", int(numSpectra),
                                             "", true);
