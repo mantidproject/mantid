@@ -284,7 +284,8 @@ void LoadSpiceAscii::parseSPICEAscii(
       } else {
         // Not supported
         std::stringstream wss;
-        wss << "File " << filename << ": line \"" << line << "\" cannot be parsed. It is ignored then.";
+        wss << "File " << filename << ": line \"" << line
+            << "\" cannot be parsed. It is ignored then.";
         g_log.warning(wss.str());
       }
     } // If for run info
