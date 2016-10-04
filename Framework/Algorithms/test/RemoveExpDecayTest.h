@@ -186,7 +186,6 @@ public:
     TS_ASSERT(result);
     TS_ASSERT_EQUALS(result->YUnitLabel(), "Asymmetry");
   }
-
 };
 
 class RemoveExpDecayTestPerformance : public CxxTest::TestSuite {
