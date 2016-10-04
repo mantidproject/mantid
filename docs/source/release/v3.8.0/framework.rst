@@ -5,17 +5,6 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
-- ``Facilities.xml`` was updated for changes to the SNS live data servers.
-
-- A cmake parameter ``ENABLE_MANTIDPLOT`` (default ``True``) was added to facilitate framework only builds.
-
-- The case search in ``DataService`` has been replaced with a case-insensitive comparison function. Behavior
-  is almost identical, but a small number of cases (such as adding the workspaces ``Z`` and ``z``) will work
-  in a more predictable manner.
-
-- A race condition when accessing a singleton from multiple threads was fixed.
-
-- Log file buffers are no longer flushed by default for each newline received, increasing the speed of some system tests on Windows by 4.5x.
 
 HistogramData
 -------------
@@ -105,8 +94,6 @@ Improved
 
 - :ref:`Mergeruns <algm-MergeRuns>` can now also deal with non-time series sample logs when merging. Behaviour can be to create a time series, a list of values and warn or fail if different.
 
-Deprecated
-##########
 
 MD Algorithms (VATES CLI)
 #########################
@@ -153,6 +140,10 @@ Performance
   In some cases, however, follow-up algorithms may run slower (typically this can happen for algorithms that do in-place modification of data).
   However, the total runtime (sum of the runtimes of the improved *and* the degraded algorithm) should be unchanged in the worst case.
 
+- A race condition when accessing a singleton from multiple threads was fixed.
+
+- Log file buffers are no longer flushed by default for each newline received, increasing the speed of some system tests on Windows by 4.5x.
+
 
 CurveFitting
 ------------
@@ -163,21 +154,17 @@ CurveFitting
 - The concept page for :ref:`Comparing fit minimizers <FittingMinimizers>` has been updated to include new
   minimizers and a comparison against neutron data examples.
 
-Improved
-########
+Others
+------
 
-Interfaces
-----------
+- ``Facilities.xml`` was updated for changes to the SNS live data servers.
 
-New
-###
+- A cmake parameter ``ENABLE_MANTIDPLOT`` (default ``True``) was added to facilitate framework only builds.
 
-- A workflow gui for TOFTOF data reduction (#17075).
-  The gui is accessible through the ``Interfaces / Direct / DGS Reduction`` menu.
-  The first time the user is presented with a choice of facilites and instruments -
-  choose MLZ / TOFTOF. The choice can be changed later from (any) reduction gui by
-  ``Tools / Change instrument ...``.
-
+- The case search in ``DataService`` has been replaced with a case-insensitive comparison function. Behavior
+  is almost identical, but a small number of cases (such as adding the workspaces ``Z`` and ``z``) will work
+  in a more predictable manner.
+  
 
 Python
 ------
