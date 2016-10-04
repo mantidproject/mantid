@@ -627,11 +627,11 @@ void SmoothNeighbours::execWorkspace2D() {
     auto &outSpec = outWS->getSpectrum(outWIi);
     // Reset the Y and E vectors
     outSpec.clearData();
-    MantidVec &outY = outSpec.dataY();
+    auto &outY = outSpec.mutableY();
     // We will temporarily carry the squared error
-    MantidVec &outE = outSpec.dataE();
+    auto &outE = outSpec.mutableE();
     // tmp to carry the X Data.
-    MantidVec &outX = outSpec.dataX();
+    auto &outX = outSpec.mutableX();
 
     // Which are the neighbours?
     std::vector<weightedNeighbour> &neighbours = m_neighbours[outWIi];
@@ -642,9 +642,9 @@ void SmoothNeighbours::execWorkspace2D() {
       double weightSquared = weight * weight;
 
       const auto &inSpec = inWS->getSpectrum(inWI);
-      const MantidVec &inY = inSpec.readY();
-      const MantidVec &inE = inSpec.readE();
-      const MantidVec &inX = inSpec.readX();
+      const auto &inY = inSpec.y();
+      const auto &inE = inSpec.e();
+      const auto &inX = inSpec.x();
 
       for (size_t i = 0; i < YLength; i++) {
         // Add the weighted signal
@@ -691,11 +691,6 @@ void SmoothNeighbours::setupNewInstrument(MatrixWorkspace_sptr outws) {
 
   for (int outWIi = 0; outWIi < int(numberOfSpectra); outWIi++) {
     auto &outSpec = outws->getSpectrum(outWIi);
-    /*
-    g_log.notice() << "[DBx555] Original spectrum number for wsindex " << outWIi
-                   << " = " << outSpec.getSpectrumNo() << '\n';
-    outSpec.setSpectrumNo(outWIi+1);
-    */
 
     // Reset detectors
     outSpec.clearDetectorIDs();
@@ -735,7 +730,7 @@ void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws) {
   for (int outWIi = 0; outWIi < int(numberOfSpectra); outWIi++) {
     const auto &inSpec = inWS->getSpectrum(outWIi);
     auto &outSpec2 = outws2->getSpectrum(outWIi);
-    outSpec2.dataX() = inSpec.dataX();
+    outSpec2.mutableX() = inSpec.x();
     outSpec2.addDetectorIDs(inSpec.getDetectorIDs());
     // Zero the Y and E vectors
     outSpec2.clearData();
@@ -746,15 +741,10 @@ void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws) {
   // Go through all the output workspace
   const size_t numberOfSpectra2 = outws->getNumberHistograms();
   for (int outWIi = 0; outWIi < int(numberOfSpectra2); outWIi++) {
-    const auto &outSpec = outws->getSpectrum(outWIi);
 
     // Which are the neighbours?
     for (const auto &neighbor : m_neighbours[outWIi]) {
-      auto &outSpec2 = outws2->getSpectrum(neighbor.first);
-      // Reset the Y and E vectors
-      outSpec2.dataY() = outSpec.dataY();
-      outSpec2.dataE() = outSpec.dataE();
-      outSpec2.dataX() = outSpec.dataX();
+      outws2->setHistogram(neighbor.first, outws->histogram(outWIi));
     }
   }
   this->setProperty("OutputWorkspace", outws2);
