@@ -2,6 +2,7 @@
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
 
 using namespace Mantid::API;
 

@@ -19,6 +19,7 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/Run.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_integration.h>
 #include <fstream>
@@ -35,7 +36,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksMD::init() {

@@ -48,6 +48,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/Run.h"
 
 #include <QMessageBox>
 #include <QTextEdit>

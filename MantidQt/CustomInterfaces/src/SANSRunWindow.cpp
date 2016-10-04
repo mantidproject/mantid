@@ -1,6 +1,3 @@
-//----------------------
-// Includes
-//----------------------
 #include "MantidQtCustomInterfaces/SANSRunWindow.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -16,6 +13,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
