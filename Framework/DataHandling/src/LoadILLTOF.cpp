@@ -377,6 +377,8 @@ void LoadILLTOF::addPulseInterval() {
     double suppressorSpeed = runDetails.getPropertyAsSingleValue("Suppressor.rotation_speed");
 
     n_pulses = fermiChopperSpeed / suppressorSpeed;
+  } else {
+    return;
   }
 
   pulseInterval = 60.0 / (2 * fermiChopperSpeed) * n_pulses;
