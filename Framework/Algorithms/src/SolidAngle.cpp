@@ -113,16 +113,16 @@ void SolidAngle::exec() {
       // Solid angle should be zero if detector is masked ('dead')
       double solidAngle = det->isMasked() ? 0.0 : det->solidAngle(samplePos);
 
-      outputWS->dataX(j)[0] = inputWS->readX(i).front();
-      outputWS->dataX(j)[1] = inputWS->readX(i).back();
-      outputWS->dataY(j)[0] = solidAngle;
-      outputWS->dataE(j)[0] = 0;
+      outputWS->mutableX(j)[0] = inputWS->x(i).front();
+      outputWS->mutableX(j)[1] = inputWS->x(i).back();
+      outputWS->mutableY(j)[0] = solidAngle;
+      outputWS->mutableE(j)[0] = 0;
     } catch (Exception::NotFoundError &) {
       // Get to here if exception thrown when calculating distance to detector
       failCount++;
-      outputWS->dataX(j).assign(outputWS->dataX(j).size(), 0.0);
-      outputWS->dataY(j).assign(outputWS->dataY(j).size(), 0.0);
-      outputWS->dataE(j).assign(outputWS->dataE(j).size(), 0.0);
+      outputWS->mutableX(j).assign(outputWS->x(j).size(), 0.0);
+      outputWS->mutableY(j).assign(outputWS->y(j).size(), 0.0);
+      outputWS->mutableE(j).assign(outputWS->e(j).size(), 0.0);
     }
 
     prog.report();
