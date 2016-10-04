@@ -170,6 +170,10 @@ public:
       const std::vector<SplittingInterval> &filter) const override;
   /// Calculate the time-weighted average of a property
   double timeAverageValue() const;
+  /// generate constant time-step histogram from the property values
+  void histogramData(const Kernel::DateAndTime &tMin,
+                     const Kernel::DateAndTime &tMax,
+                     std::vector<double> &counts) const;
 
   ///  Return the time series as a correct C++ map<DateAndTime, TYPE>. All
   ///  values

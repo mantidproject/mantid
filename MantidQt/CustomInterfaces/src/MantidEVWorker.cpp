@@ -163,7 +163,7 @@ bool MantidEVWorker::loadAndConvertToMD(
       alg->setProperty("Filename", file_name);
       alg->setProperty("OutputWorkspace", ev_ws_name);
       if (topaz) {
-        alg->setProperty("FilterByTofMin", 1000.0);
+        alg->setProperty("FilterByTofMin", 500.0);
         alg->setProperty("FilterByTofMax", 16666.0);
       }
       alg->setProperty("LoadMonitors", true);
