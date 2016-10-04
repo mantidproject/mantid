@@ -652,7 +652,7 @@ void SplatterPlotView::setView(pqRenderView *view) {
         return strcmp(src->getProxy()->GetXMLName(), tagName) == 0;
       });
 
-  if(result != filters.end()) {
+  if (result != filters.end()) {
     this->m_splatSource = result[0];
   }
 

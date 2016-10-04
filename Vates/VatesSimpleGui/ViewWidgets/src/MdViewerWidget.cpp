@@ -962,7 +962,8 @@ void MdViewerWidget::loadFromProject(const std::string &lines) {
 
   setActiveObjects(view, source);
   setupViewFromProject(vtype);
-  auto origSrcProxy = proxyManager->GetProxy("sources", originalSourceName.c_str());
+  auto origSrcProxy =
+      proxyManager->GetProxy("sources", originalSourceName.c_str());
   auto origSrc = model->findItem<pqPipelineSource *>(origSrcProxy);
   this->currentView->origSrc = qobject_cast<pqPipelineSource *>(origSrc);
 
@@ -1093,13 +1094,15 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
   contents.writeLine("ViewName") << viewName;
   contents.writeLine("SourceName") << sourceName;
 
-  if(this->currentView->origRep) {
-    auto repName = proxyManager->GetProxyName("representations", this->currentView->origRep->getProxy());
+  if (this->currentView->origRep) {
+    auto repName = proxyManager->GetProxyName(
+        "representations", this->currentView->origRep->getProxy());
     contents.writeLine("OriginalRepresentationName") << repName;
   }
 
-  if(this->currentView->origSrc) {
-    auto srcName = proxyManager->GetProxyName("sources", this->currentView->origSrc->getProxy());
+  if (this->currentView->origSrc) {
+    auto srcName = proxyManager->GetProxyName(
+        "sources", this->currentView->origSrc->getProxy());
     contents.writeLine("OriginalSourceName") << srcName;
   }
 
