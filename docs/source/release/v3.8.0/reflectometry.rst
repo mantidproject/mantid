@@ -34,6 +34,7 @@ ISIS Reflectometry (Polref)
 - Global settings have been moved to a separate tab ("Settings")
 - Transfer progress bar no longer gives impression of running when clicked if no runs are selected
 - Updated instrument definition files.
+- Files are now loaded into the interface using LoadISISNexus
 
 ISIS Reflectometry
 ##################
