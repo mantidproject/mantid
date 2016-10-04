@@ -119,6 +119,7 @@ void LoadILLTOF::exec() {
                            calculatedDetectorElasticPeakPosition);
 
   addEnergyToRun();
+  addPulseInterval();
 
   // load the instrument from the IDF if it exists
   runLoadInstrument();
@@ -350,6 +351,35 @@ void LoadILLTOF::addEnergyToRun() {
   API::Run &runDetails = m_localWorkspace->mutableRun();
   double ei = m_loader.calculateEnergy(m_wavelength);
   runDetails.addProperty<double>("Ei", ei, true); // overwrite
+}
+
+/**
+ * Calculate and add the pulse intervals for the run
+ */
+void LoadILLTOF::addPulseInterval() {
+  API::Run &runDetails = m_localWorkspace->mutableRun();
+  double pulseInterval;
+
+  if (m_instrumentName == "IN4") {
+    double fermiChopperSpeed = runDetails.getPropertyAsSingleValue("FC.rotation_speed");
+    double bkgChopper1Speed = runDetails.getPropertyAsSingleValue("BC1.rotation_speed");
+    double bkgChopper2Speed = runDetails.getPropertyAsSingleValue("BC2.rotation_speed");
+
+    if (std::abs(bkgChopper1Speed - bkgChopper2Speed) > 1) {
+      throw std::invalid_argument("Background choppers 1 and 2 have different speeds");
+    }
+
+    double n = fermiChopperSpeed / bkgChopper1Speed / 4;
+    pulseInterval = 60.0 / (2 * fermiChopperSpeed) * n;
+  } else if (m_instrumentName == "IN6") {
+    double fermiChopperSpeed = runDetails.getPropertyAsSingleValue("Fermi.rotation_speed");
+    double suppressorSpeed = runDetails.getPropertyAsSingleValue("Suppressor.rotation_speed");
+
+    double n = fermiChopperSpeed / suppressorSpeed;
+    pulseInterval = 60.0 / (2 * fermiChopperSpeed) * n;
+  }
+
+  runDetails.addProperty<double>("pulse_interval", pulseInterval);
 }
 
 /**
