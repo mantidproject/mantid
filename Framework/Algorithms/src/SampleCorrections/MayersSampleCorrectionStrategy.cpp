@@ -2,10 +2,10 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h"
-#include "MantidKernel/MersenneTwister.h"
-#include "MantidKernel/Statistics.h"
 #include "MantidKernel/Math/ChebyshevPolyFit.h"
 #include "MantidKernel/Math/Distributions/ChebyshevSeries.h"
+#include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/Statistics.h"
 #include <cassert>
 #include <cmath>
 
@@ -178,7 +178,6 @@ Mantid::HistogramData::Histogram MayersSampleCorrectionStrategy::apply(
     }
     // apply correction
     const double yin(m_sigin[i]), ein(m_errin[i]);
-    const double errVal = yin * corrfact;
     sigOut[i] = yin * corrfact;
     errOut[i] = sigOut[i] * ein / yin;
   }

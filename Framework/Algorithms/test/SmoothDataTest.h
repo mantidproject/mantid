@@ -1,14 +1,14 @@
 #ifndef SMOOTHDATATEST_H_
 #define SMOOTHDATATEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/CreateSampleWorkspace.h"
-#include "MantidAlgorithms/CreateGroupingWorkspace.h"
-#include "MantidAlgorithms/SmoothData.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/CreateGroupingWorkspace.h"
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidAlgorithms/SmoothData.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -194,7 +194,7 @@ public:
     auto &yVals = inputWs->mutableY(0);
     auto &eVals = inputWs->mutableE(0);
 
-    for (int i = 0; i < numBins; ++i) {
+    for (size_t i = 0; i < numBins; ++i) {
       yVals[i] = i + 1.0;
       eVals[i] = sqrt(i + 1.0);
     }
