@@ -37,6 +37,8 @@ Other fixes and enhancements:
 
 - A bug was fixed where, when plotting the log of counts and then switching to plot counts or asymmetry, the y axis was left as a logarithmic axis.
 
+- Fixed a bug where the "load next/previous" buttons appended runs in certain cases where this was not the intended behaviour.
+
 Algorithms
 ----------
 
