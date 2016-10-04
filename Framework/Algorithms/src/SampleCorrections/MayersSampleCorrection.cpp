@@ -111,8 +111,6 @@ void MayersSampleCorrection::exec() {
   for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    // Copy the X values over
-    outputWS->setSharedX(i, inputWS->sharedX(i));
     IDetector_const_sptr det;
     try {
       det = inputWS->getDetector(i);
@@ -135,7 +133,7 @@ void MayersSampleCorrection::exec() {
     params.cylHeight = height;
 
     MayersSampleCorrectionStrategy correction(params, inputWS->histogram(i));
-    correction.apply(outputWS->mutableY(i), outputWS->mutableE(i));
+    outputWS->setHistogram(i, correction.apply(std::move(inputWS->histogram(i))));
     prog.report();
 
     PARALLEL_END_INTERUPT_REGION

@@ -80,9 +80,9 @@ namespace Algorithms {
  */
 MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(
     MayersSampleCorrectionStrategy::Parameters params,
-    const Mantid::HistogramData::Histogram &histogram)
-    : m_pars(params), m_tof(histogram.x().rawData()),
-      m_sigin(histogram.y().rawData()), m_errin(histogram.e().rawData()),
+    const Mantid::HistogramData::Histogram &inputHist)
+    : m_pars(params), m_tof(inputHist.x().rawData()),
+      m_sigin(inputHist.y().rawData()), m_errin(inputHist.e().rawData()),
       m_histogram(m_tof.size() == m_sigin.size() + 1),
       m_muRrange(calculateMuRange()), m_rng(new MersenneTwister(1)) {
 
@@ -108,9 +108,8 @@ MayersSampleCorrectionStrategy::~MayersSampleCorrectionStrategy() = default;
  * @param sigOut Signal values to correct [In/Out]
  * @param errOut Error values to correct [In/Out]
  */
-void MayersSampleCorrectionStrategy::apply(
-    Mantid::HistogramData::HistogramY &histoY,
-    Mantid::HistogramData::HistogramE &histoE) {
+Mantid::HistogramData::Histogram MayersSampleCorrectionStrategy::apply(
+    const Mantid::HistogramData::Histogram &inputXVals) {
   const size_t nsig(m_sigin.size());
 
   // Temporary storage
@@ -161,6 +160,11 @@ void MayersSampleCorrectionStrategy::apply(
   const double rns = (vol * 1e6) * (m_pars.rho * 1e24) * 1e-22;
   ChebyshevSeries chebyPoly(N_POLY_ORDER);
 
+  auto outputHistogram = inputXVals;
+
+  auto &sigOut = outputHistogram.mutableY();
+  auto &errOut = outputHistogram.mutableE();
+
   for (size_t i = 0; i < nsig; ++i) {
     const double sigt = sigmaTotal(flightPath, tof(i));
     const double rmu = muR(sigt);
@@ -174,9 +178,11 @@ void MayersSampleCorrectionStrategy::apply(
     }
     // apply correction
     const double yin(m_sigin[i]), ein(m_errin[i]);
-    histoE[i] = yin * corrfact;
-    histoY[i] = histoE[i] * ein / yin;
+    const double errVal = yin * corrfact;
+	sigOut[i] = yin * corrfact;
+	errOut[i] = sigOut[i] * ein / yin;
   }
+  return outputHistogram;
 }
 
 /**

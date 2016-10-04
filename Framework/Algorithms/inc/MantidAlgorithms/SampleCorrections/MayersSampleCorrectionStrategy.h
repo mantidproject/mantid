@@ -62,14 +62,15 @@ public:
   /// Constructor
   MayersSampleCorrectionStrategy(
       MayersSampleCorrectionStrategy::Parameters params,
-      const Mantid::HistogramData::Histogram &histogram);
+      const Mantid::HistogramData::Histogram &inputHist);
   /// Destructor - defined in cpp file to use forward declaration with
   /// unique_ptr
   ~MayersSampleCorrectionStrategy();
 
   /// Return the correction factors
-  void apply(Mantid::HistogramData::HistogramY &histoY,
-             Mantid::HistogramData::HistogramE &histoE);
+  Mantid::HistogramData::Histogram
+  apply(const Mantid::HistogramData::Histogram &inputXVals);
+
   /// Calculate the self-attenuation factor for a single mu*r value
   double calculateSelfAttenuation(const double muR);
   /// Calculate the multiple scattering factor for a single mu*r value &

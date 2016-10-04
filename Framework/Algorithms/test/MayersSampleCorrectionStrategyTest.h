@@ -4,10 +4,12 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include <algorithm>
 #include <cmath>
 
 using Mantid::Algorithms::MayersSampleCorrectionStrategy;
+using namespace Mantid::HistogramData;
 
 class MayersSampleCorrectionStrategyTest : public CxxTest::TestSuite {
 public:
@@ -21,9 +23,7 @@ public:
   }
 
   void test_Attentuaton_Correction_For_Fixed_Mur() {
-    std::vector<double> dummy(2, 0.0);
-    Mantid::HistogramData::Histogram histo(dummy, dummy);
-    dummy[1] = 1.0;
+    Histogram histo(Points(2, LinearGenerator(0, 1)), Counts(2, 0));
     MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
     auto absFactor = mscat.calculateSelfAttenuation(0.01);
 
@@ -33,9 +33,7 @@ public:
 
   void
   test_Multiple_Scattering_With_Fixed_Mur_And_Absorption_Correction_Factor() {
-    std::vector<double> dummy(2, 0.0);
-    Mantid::HistogramData::Histogram histo(dummy, dummy);
-    dummy[1] = 1.0;
+    Histogram histo(Points(2, LinearGenerator(0, 1)), Counts(2, 0));
     MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
     const size_t irp(1);
     const double muR(0.01), abs(0.0003);
@@ -50,98 +48,117 @@ public:
     using std::sqrt;
     const size_t nypts(100);
     std::vector<double> signal(nypts, 2.0), tof(nypts), error(nypts);
+
     std::transform(signal.begin(), signal.end(), error.begin(),
                    (double (*)(double))sqrt);
     std::generate(tof.begin(), tof.end(), Incrementer(100.0));
 
-    Mantid::HistogramData::Histogram histo(tof, signal, error);
+    Points tofPoints(tof);
+    Histogram histo(tofPoints, Counts(signal), CountStandardDeviations(error));
 
     MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
 
-    Mantid::HistogramData::HistogramY signalHistogram(signal);
-    Mantid::HistogramData::HistogramE errorHistogram(error);
     // Correct it
-    mscat.apply(signalHistogram, errorHistogram);
+
+    auto outHisto = mscat.apply(histo);
+
+    auto tofVals = outHisto.x();
+    auto signalVals = outHisto.y();
+    auto errVals = outHisto.e();
 
     // Check some values
     const double delta(1e-06);
-    TS_ASSERT_DELTA(100.0, tof.front(), delta);
-    TS_ASSERT_DELTA(199.0, tof.back(), delta);
+    TS_ASSERT_DELTA(100.0, tofVals.front(), delta);
+    TS_ASSERT_DELTA(199.0, tofVals.back(), delta);
 
-    TS_ASSERT_DELTA(0.37497317, signal.front(), delta);
-    TS_ASSERT_DELTA(0.37629282, signal.back(), delta);
+    TS_ASSERT_DELTA(0.37497317, signalVals.front(), delta);
+    TS_ASSERT_DELTA(0.37629282, signalVals.back(), delta);
 
-    TS_ASSERT_DELTA(0.26514607, error.front(), delta);
-    TS_ASSERT_DELTA(0.2660792, error.back(), delta);
+    TS_ASSERT_DELTA(0.26514607, errVals.front(), delta);
+    TS_ASSERT_DELTA(0.2660792, errVals.back(), delta);
   }
 
   void
   test_Corrects_Both_Absorption_And_Multiple_Scattering_For_Histogram_Data() {
     using std::sqrt;
     const size_t nypts(100);
-    std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
+    std::vector<double> signal(nypts, 2.0), tof(nypts), error(nypts);
     std::transform(signal.begin(), signal.end(), error.begin(),
                    (double (*)(double))sqrt);
     // Generate a histogram with the same mid points as the point data example
     std::generate(tof.begin(), tof.end(), Incrementer(99.5));
-    Mantid::HistogramData::Histogram histo(tof, signal, error);
+
+    Points tofPoints(tof);
+    Histogram histo(tofPoints, Counts(signal), CountStandardDeviations(error));
     MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
 
-    Mantid::HistogramData::HistogramY signalHistogram(signal);
-    Mantid::HistogramData::HistogramE errorHistogram(error);
     // Correct it
-    mscat.apply(signalHistogram, errorHistogram);
+
+    auto outHisto = mscat.apply(histo);
+
+    auto tofVals = outHisto.x();
+    auto signalVals = outHisto.y();
+    auto errVals = outHisto.e();
 
     // Check some values
     const double delta(1e-06);
-    TS_ASSERT_DELTA(99.5, tof.front(), delta);
-    TS_ASSERT_DELTA(199.5, tof.back(), delta);
+    TS_ASSERT_DELTA(99.5, tofVals.front(), delta);
+    TS_ASSERT_DELTA(198.5, tofVals.back(), delta);
 
-    TS_ASSERT_DELTA(0.37497317, signal.front(), delta);
-    TS_ASSERT_DELTA(0.37629282, signal.back(), delta);
+    TS_ASSERT_DELTA(0.37496898, signalVals.front(), delta);
+    TS_ASSERT_DELTA(0.37628861, signalVals.back(), delta);
 
-    TS_ASSERT_DELTA(0.26514607, error.front(), delta);
-    TS_ASSERT_DELTA(0.2660792, error.back(), delta);
+    TS_ASSERT_DELTA(0.26514310, errVals.front(), delta);
+    TS_ASSERT_DELTA(0.26607623, errVals.back(), delta);
   }
 
   void test_Corrects_For_Absorption_For_Histogram_Data() {
     using std::sqrt;
     const size_t nypts(100);
-    std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
+    std::vector<double> signal(nypts, 2.0), tof(nypts), error(nypts);
     std::transform(signal.begin(), signal.end(), error.begin(),
                    (double (*)(double))sqrt);
     // Generate a histogram with the same mid points as the point data example
     std::generate(tof.begin(), tof.end(), Incrementer(99.5));
     bool mscatOn(false);
-    Mantid::HistogramData::Histogram histo(tof, signal, error);
+
+    Points tofPoints(tof);
+    Histogram histo(tofPoints, Counts(signal), CountStandardDeviations(error));
+
     MayersSampleCorrectionStrategy mscat(createTestParameters(mscatOn), histo);
 
-    Mantid::HistogramData::HistogramY signalHistogram(signal);
-    Mantid::HistogramData::HistogramE errorHistogram(error);
     // Correct it
-    mscat.apply(signalHistogram, errorHistogram);
+
+    auto outHisto = mscat.apply(histo);
+
+    auto tofVals = outHisto.x();
+    auto signalVals = outHisto.y();
+    auto errVals = outHisto.e();
 
     // Check some values
     const double delta(1e-06);
-    TS_ASSERT_DELTA(99.5, tof.front(), delta);
-    TS_ASSERT_DELTA(199.5, tof.back(), delta);
+    TS_ASSERT_DELTA(99.5, tofVals.front(), delta);
+    TS_ASSERT_DELTA(198.5, tofVals.back(), delta);
 
-    TS_ASSERT_DELTA(2.3440379, signal.front(), delta);
-    TS_ASSERT_DELTA(2.3489418, signal.back(), delta);
+    TS_ASSERT_DELTA(2.3440131, signalVals.front(), delta);
+    TS_ASSERT_DELTA(2.3489170, signalVals.back(), delta);
 
-    TS_ASSERT_DELTA(1.6574851, error.front(), delta);
-    TS_ASSERT_DELTA(1.6609527, error.back(), delta);
+    TS_ASSERT_DELTA(1.6574675, errVals.front(), delta);
+    TS_ASSERT_DELTA(1.6609351, errVals.back(), delta);
   }
 
   // ---------------------- Failure tests -----------------------------
   void test_Tof_Not_Monotonically_Increasing_Throws_Invalid_Argument() {
     using std::sqrt;
     const size_t nypts(10);
-    std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
+    std::vector<double> signal(nypts, 2.0), tof(nypts), error(nypts);
     std::transform(signal.begin(), signal.end(), error.begin(),
                    (double (*)(double))sqrt);
     std::generate(tof.begin(), tof.end(), Decrementer(199.5));
-    Mantid::HistogramData::Histogram histo(tof, signal, error);
+
+    Points tofPoints(tof);
+    Histogram histo(tofPoints, Counts(signal), CountStandardDeviations(error));
+
     TS_ASSERT_THROWS(
         MayersSampleCorrectionStrategy(createTestParameters(), histo),
         std::invalid_argument);
