@@ -206,24 +206,6 @@ protected:
   void initWorkspace();
 
 private:
-<<<<<<< HEAD
-  FitPropertyBrowser* m_browser;
-  boost::shared_ptr<Mantid::API::CompositeFunction> m_cf;//< if the function is composite holds pointer to it
-  boost::shared_ptr<Mantid::API::IPeakFunction> m_pf;//< if the function is peak holds pointer to it
-  boost::shared_ptr<Mantid::API::CompositeFunction> m_parent; //< if the function has parent holds pointer to it
-  QtProperty* m_type;
-  QtBrowserItem* m_item;//< the browser item
-  QList<QtProperty*> m_attributes; //< function attribute properties
-  QList<QtProperty*> m_parameters; //< function parameter properties
-  QMap<QString,QtProperty*> m_ties;//< tie properties
-  QMap<QString,std::pair<QtProperty*,QtProperty*> > m_constraints;//< constraints
-  QList<QtProperty*> m_vectorMembers; //< vector member properties
-  QList<QtProperty*> m_vectorSizes; //< vector size properties
-  bool m_isMultispectral; ///< true if fitting to multiple spectra using MultiBG function
-  QtProperty* m_workspace; ///< workspace name for multispectral fitting
-  QtProperty* m_workspaceIndex; ///< workspace index for multispectral fitting
-  double m_base; //< the baseline for a peak
-=======
   FitPropertyBrowser *m_browser;
   boost::shared_ptr<Mantid::API::CompositeFunction>
       m_cf; //< if the function is composite holds pointer to it
@@ -239,12 +221,12 @@ private:
   QMap<QString, std::pair<QtProperty *, QtProperty *>>
       m_constraints;                   //< constraints
   QList<QtProperty *> m_vectorMembers; //< vector member properties
+  QList<QtProperty*> m_vectorSizes; //< vector size properties
   bool m_isMultispectral; ///< true if fitting to multiple spectra using MultiBG
   /// function
   QtProperty *m_workspace;      ///< workspace name for multispectral fitting
   QtProperty *m_workspaceIndex; ///< workspace index for multispectral fitting
   double m_base;                //< the baseline for a peak
->>>>>>> master
   int m_ci; //< approximate index in the workspace at the peak centre
   // mutable FunctionCurve* m_curve;//< the curve to plot the handled function
   mutable bool m_hasPlot;
