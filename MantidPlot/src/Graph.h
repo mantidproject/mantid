@@ -290,7 +290,8 @@ public slots:
                          const QString &yColName, int style, int startRow = 0,
                          int endRow = -1);
   PlotCurve *insertCurve(QString workspaceName, int index, bool err = false,
-                         Graph::CurveType style = Graph::Unspecified);
+                         Graph::CurveType style = Graph::Unspecified,
+                         bool distribution = false);
   PlotCurve *insertCurve(PlotCurve *c, int lineWidth = -1,
                          int curveType = User);
   void insertPlotItem(QwtPlotItem *i, int type);

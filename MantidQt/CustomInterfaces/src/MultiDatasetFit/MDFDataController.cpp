@@ -237,58 +237,6 @@ MultiDatasetFit *DataController::owner() const {
   return static_cast<MultiDatasetFit *>(parent());
 }
 
-/**
- * Get list of log names from workspace i
- * @param i :: [input] index of dataset
- * @returns :: list of log names
- */
-std::vector<std::string> DataController::getWorkspaceLogNames(int i) const {
-  std::vector<std::string> logNames;
-
-  // validate input
-  if (i > getNumberOfSpectra()) {
-    std::ostringstream err;
-    err << "Index " << i << "greater than number of spectra ("
-        << getNumberOfSpectra() << ")";
-    throw std::invalid_argument(err.str());
-  }
-
-  // populate vector of names
-  auto &ads = Mantid::API::AnalysisDataService::Instance();
-  const auto &wsName = getWorkspaceName(i).toStdString();
-  if (ads.doesExist(wsName)) {
-    const auto &workspace =
-        ads.retrieveWS<Mantid::API::MatrixWorkspace>(wsName);
-    const auto &logs = workspace->run().getLogData();
-    for (const auto &log : logs) {
-      logNames.push_back(log->name());
-    }
-  }
-  return logNames;
-}
-
-/**
- * Get value of named log from workspace i
- * (Must be able to cast to double)
- * @param logName :: [input] Name of log
- * @param function :: [input] Function to apply to log e.g. min, max, mean...
- * @param i :: [input] index of dataset
- * @returns :: value of log cast to double
- */
-double DataController::getLogValue(const QString &logName,
-                                   const StatisticType &function, int i) const {
-  auto &ads = Mantid::API::AnalysisDataService::Instance();
-  const auto &wsName = getWorkspaceName(i).toStdString();
-  if (ads.doesExist(wsName)) {
-    const auto &workspace =
-        ads.retrieveWS<Mantid::API::MatrixWorkspace>(wsName);
-    return workspace->run().getLogAsSingleValue(logName.toStdString(),
-                                                function);
-  } else {
-    throw std::runtime_error("Workspace not found: " + wsName);
-  }
-}
-
 } // MDF
 } // CustomInterfaces
 } // MantidQt

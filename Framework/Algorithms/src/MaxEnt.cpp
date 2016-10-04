@@ -8,16 +8,24 @@
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceComplex.h"
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceReal.h"
 #include "MantidAlgorithms/MaxEnt/MaxentTransformFourier.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 #include <gsl/gsl_linalg.h>
+#include <numeric>
 
 namespace Mantid {
 namespace Algorithms {
 
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::HistogramData::Points;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::LinearGenerator;
 
 using namespace API;
 using namespace Kernel;
@@ -60,9 +68,8 @@ const std::string MaxEnt::category() const { return "Arithmetic\\FFT"; }
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string MaxEnt::summary() const {
   return "Runs Maximum Entropy method on every spectrum of an input workspace. "
-         "Note this algorithm is still in development, and its interface is "
-         "likely to change. It currently works for the case where data and "
-         "image are related by a 1D Fourier transform.";
+         "It currently works for the case where data and image are related by a"
+         " 1D Fourier transform.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -263,13 +270,15 @@ void MaxEnt::exec() {
 
   nspec = complexData ? nspec / 2 : nspec;
   outImageWS =
-      WorkspaceFactory::Instance().create(inWS, 2 * nspec, npointsX, npoints);
+      WorkspaceFactory::Instance().create(inWS, 2 * nspec, npoints, npoints);
   outDataWS =
       WorkspaceFactory::Instance().create(inWS, 2 * nspec, npointsX, npoints);
   outEvolChi = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
   outEvolTest = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
 
   npoints = complexImage ? npoints * 2 : npoints;
+
+  outEvolChi->setPoints(0, Points(niter, LinearGenerator(0.0, 1.0)));
   for (size_t s = 0; s < nspec; s++) {
 
     // Start distribution (flat background)
@@ -281,8 +290,8 @@ void MaxEnt::exec() {
       data = toComplex(inWS, s, false);  // false -> data
       errors = toComplex(inWS, s, true); // true -> errors
     } else {
-      data = inWS->readY(s);
-      errors = inWS->readE(s);
+      data = inWS->y(s).rawData();
+      errors = inWS->e(s).rawData();
     }
 
     // To record the algorithm's progress
@@ -342,13 +351,12 @@ void MaxEnt::exec() {
 
     // Populate workspaces recording the evolution of Chi and Test
     // X values
-    for (size_t it = 0; it < niter; it++) {
-      outEvolChi->dataX(s)[it] = static_cast<double>(it);
-      outEvolTest->dataX(s)[it] = static_cast<double>(it);
-    }
+    outEvolChi->setSharedX(s, outEvolChi->sharedX(0));
+    outEvolTest->setSharedX(s, outEvolChi->sharedX(0));
+
     // Y values
-    outEvolChi->dataY(s).assign(evolChi.begin(), evolChi.end());
-    outEvolTest->dataY(s).assign(evolTest.begin(), evolTest.end());
+    outEvolChi->setCounts(s, std::move(evolChi));
+    outEvolTest->setCounts(s, std::move(evolTest));
     // No errors
 
   } // Next spectrum
@@ -381,13 +389,13 @@ std::vector<double> MaxEnt::toComplex(const API::MatrixWorkspace_sptr &inWS,
 
   if (!errors) {
     for (size_t i = 0; i < inWS->blocksize(); i++) {
-      result[2 * i] = inWS->readY(spec)[i];
-      result[2 * i + 1] = inWS->readY(spec + nspec)[i];
+      result[2 * i] = inWS->y(spec)[i];
+      result[2 * i + 1] = inWS->y(spec + nspec)[i];
     }
   } else {
     for (size_t i = 0; i < inWS->blocksize(); i++) {
-      result[2 * i] = inWS->readE(spec)[i];
-      result[2 * i + 1] = inWS->readE(spec + nspec)[i];
+      result[2 * i] = inWS->e(spec)[i];
+      result[2 * i + 1] = inWS->e(spec + nspec)[i];
     }
   }
   return result;
@@ -669,14 +677,14 @@ void MaxEnt::populateImageWS(const MatrixWorkspace_sptr &inWS, size_t spec,
 
   int npoints = complex ? static_cast<int>(result.size() / 2)
                         : static_cast<int>(result.size());
-  int npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
-  MantidVec X(npointsX);
+  MantidVec X(npoints);
   MantidVec YR(npoints);
   MantidVec YI(npoints);
   MantidVec E(npoints, 0.);
 
-  double x0 = inWS->readX(spec)[0];
-  double dx = inWS->readX(spec)[1] - x0;
+  auto dataPoints = inWS->points(spec);
+  double x0 = dataPoints[0];
+  double dx = dataPoints[1] - x0;
 
   double delta = 1. / dx / npoints;
   int isOdd = (inWS->blocksize() % 2) ? 1 : 0;
@@ -689,8 +697,6 @@ void MaxEnt::populateImageWS(const MatrixWorkspace_sptr &inWS, size_t spec,
   for (int i = 0; i < npoints; i++) {
     X[i] = delta * (-npoints / 2 + i);
   }
-  if (npointsX == npoints + 1)
-    X[npoints] = X[npoints - 1] + delta;
 
   // Y values
   if (complex) {
@@ -732,12 +738,12 @@ void MaxEnt::populateImageWS(const MatrixWorkspace_sptr &inWS, size_t spec,
     }
   }
 
-  outWS->dataX(spec).assign(X.begin(), X.end());
-  outWS->dataY(spec).assign(YR.begin(), YR.end());
-  outWS->dataE(spec).assign(E.begin(), E.end());
-  outWS->dataX(nspec + spec).assign(X.begin(), X.end());
-  outWS->dataY(nspec + spec).assign(YI.begin(), YI.end());
-  outWS->dataE(nspec + spec).assign(E.begin(), E.end());
+  outWS->mutableX(spec) = std::move(X);
+  outWS->mutableY(spec) = std::move(YR);
+  outWS->mutableE(spec) = std::move(E);
+  outWS->setSharedX(nspec + spec, outWS->sharedX(spec));
+  outWS->mutableY(nspec + spec) = std::move(YI);
+  outWS->setSharedE(nspec + spec, outWS->sharedE(spec));
 }
 
 /** Populates the output workspaces
@@ -764,15 +770,13 @@ void MaxEnt::populateDataWS(const MatrixWorkspace_sptr &inWS, size_t spec,
   MantidVec YI(npoints);
   MantidVec E(npoints, 0.);
 
-  double x0 = inWS->readX(spec)[0];
-  double dx = inWS->readX(spec)[1] - x0;
+  double x0 = inWS->x(spec)[0];
+  double dx = inWS->x(spec)[1] - x0;
 
   // X values
-  for (int i = 0; i < npoints; i++) {
+  for (int i = 0; i < npointsX; i++) {
     X[i] = x0 + i * dx;
   }
-  if (npointsX == npoints + 1)
-    X[npoints] = x0 + npoints * dx;
 
   // Y values
   if (complex) {
@@ -787,12 +791,12 @@ void MaxEnt::populateDataWS(const MatrixWorkspace_sptr &inWS, size_t spec,
     }
   }
 
-  outWS->dataX(spec).assign(X.begin(), X.end());
-  outWS->dataY(spec).assign(YR.begin(), YR.end());
-  outWS->dataE(spec).assign(E.begin(), E.end());
-  outWS->dataX(nspec + spec).assign(X.begin(), X.end());
-  outWS->dataY(nspec + spec).assign(YI.begin(), YI.end());
-  outWS->dataE(nspec + spec).assign(E.begin(), E.end());
+  outWS->mutableX(spec) = std::move(X);
+  outWS->mutableY(spec) = std::move(YR);
+  outWS->mutableE(spec) = std::move(E);
+  outWS->setSharedX(nspec + spec, outWS->sharedX(spec));
+  outWS->mutableY(nspec + spec) = std::move(YI);
+  outWS->setSharedE(nspec + spec, outWS->sharedE(spec));
 }
 
 } // namespace Algorithms

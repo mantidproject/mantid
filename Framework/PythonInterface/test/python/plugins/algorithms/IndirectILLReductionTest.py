@@ -38,7 +38,7 @@ class IndirectILLReductionTest(unittest.TestCase):
         #config.setFacility(self._def_fac)
         #config.setDataSearchDirs(self._data_dirs)
         #reset output workspaces list
-        self._output_workspaces = []
+        #self._output_workspaces = []
 
     def test_multifiles(self):
         self._args['Run'] = self._multi_runs

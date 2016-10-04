@@ -230,7 +230,7 @@ void FunctionBrowser::createActions() {
   connect(m_actionRemoveConstraint, SIGNAL(triggered()), this,
           SLOT(removeConstraint()));
 
-  m_parameterManager->setErrorsEnabled(true);
+  setErrorsEnabled(true);
 }
 
 /**
@@ -1235,13 +1235,7 @@ void FunctionBrowser::addFunction() {
   }
 
   // Get new function type
-  SelectFunctionDialog dlg(this);
-  if (dlg.exec() == QDialog::Accepted) {
-    newFunction = dlg.getFunction();
-  } else {
-    return;
-  }
-
+  newFunction = getUserFunctionFromDialog();
   if (newFunction.isEmpty())
     return;
 
@@ -1270,6 +1264,19 @@ void FunctionBrowser::addFunction() {
     addFunction(NULL, f);
   }
   emit functionStructureChanged();
+}
+
+/**
+ * Ask user to select a function and return it
+ * @returns :: function string
+ */
+QString FunctionBrowser::getUserFunctionFromDialog() {
+  SelectFunctionDialog dlg(this);
+  if (dlg.exec() == QDialog::Accepted) {
+    return dlg.getFunction();
+  } else {
+    return QString();
+  }
 }
 
 /**
@@ -1525,9 +1532,12 @@ FunctionBrowser::getParameterProperty(const QString &funcIndex,
  *   type (composition) as the function in the browser.
  */
 void FunctionBrowser::updateParameters(const Mantid::API::IFunction &fun) {
-  auto paramNames = fun.getParameterNames();
-  for (auto par = paramNames.begin(); par != paramNames.end(); ++par) {
-    setParameter(QString::fromStdString(*par), fun.getParameter(*par));
+  const auto paramNames = fun.getParameterNames();
+  for (const auto parameter : paramNames) {
+    const QString qName = QString::fromStdString(parameter);
+    setParameter(qName, fun.getParameter(parameter));
+    const size_t index = fun.parameterIndex(parameter);
+    setParamError(qName, fun.getError(index));
   }
 }
 
@@ -2218,11 +2228,7 @@ void FunctionBrowser::updateMultiDatasetParameters(
         throw std::invalid_argument(
             "Multiple datasets, but function is single-domain");
       }
-      for (int j = 0; j < localParameters.size(); ++j) {
-        setLocalParameterValue(
-            localParameters[j], 0,
-            cfun->getParameter(localParameters[j].toStdString()));
-      }
+      updateParameters(*cfun);
     }
   } else {
     updateParameters(fun);
@@ -2243,6 +2249,19 @@ void FunctionBrowser::setColumnSizes(int s0, int s1, int s2) {
 void FunctionBrowser::globalChanged(QtProperty *, const QString &, bool) {
   emit globalsChanged();
 }
+
+/**
+ * Set display of parameter errors on/off
+ * @param enabled :: [input] On/off display of errors
+ */
+void FunctionBrowser::setErrorsEnabled(bool enabled) {
+  m_parameterManager->setErrorsEnabled(enabled);
+}
+
+/**
+ * Clear all errors, if they are set
+ */
+void FunctionBrowser::clearErrors() { m_parameterManager->clearErrors(); }
 
 } // MantidWidgets
 } // MantidQt

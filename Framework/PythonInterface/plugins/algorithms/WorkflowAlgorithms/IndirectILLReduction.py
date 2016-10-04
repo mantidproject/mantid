@@ -109,7 +109,18 @@ def select_fws(workspace):
     else:
         logger.error('Run {0} has no Doppler.velocity_profile'.format(run_number))
 
+    if run_object.hasProperty('Doppler.maximum_delta_energy'):
+        energy = run_object.getLogData('Doppler.maximum_delta_energy').value
+    elif run_object.hasProperty('Doppler.delta_energy'):
+        energy = run_object.getLogData('Doppler.delta_energy').value
+    else:
+        logger.error('Run {0} has neither Doppler.maximum_delta_energy nor Doppler.delta_energy'.
+                     format(run_number))
+
     if velocity_profile == 1:
+        fws = True
+        logger.information('Run {0} FWS data'.format(run_number))
+    elif energy == 0:
         fws = True
         logger.information('Run {0} FWS data'.format(run_number))
     else:

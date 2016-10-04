@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/IntegrateByComponent.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 
@@ -73,22 +74,18 @@ void IntegrateByComponent::exec() {
     std::vector<std::vector<size_t>> specmap = makeMap(integratedWS, parents);
     API::Progress prog(this, 0.3, 1.0, specmap.size());
     // calculate averages
+    const auto &spectrumInfo = integratedWS->spectrumInfo();
     for (auto hists : specmap) {
       prog.report();
       std::vector<double> averageYInput, averageEInput;
-      Geometry::Instrument_const_sptr instrument =
-          integratedWS->getInstrument();
 
       PARALLEL_FOR1(integratedWS)
       for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
         PARALLEL_START_INTERUPT_REGION
 
-        const auto &detids =
-            integratedWS->getSpectrum(hists[i])
-                .getDetectorIDs(); // should be only one detector per spectrum
-        if (instrument->isDetectorMasked(detids))
+        if (spectrumInfo.isMonitor(hists[i]))
           continue;
-        if (instrument->isMonitor(detids))
+        if (spectrumInfo.isMasked(hists[i]))
           continue;
 
         const double yValue = integratedWS->readY(hists[i])[0];
@@ -124,12 +121,9 @@ void IntegrateByComponent::exec() {
       PARALLEL_FOR1(integratedWS)
       for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
         PARALLEL_START_INTERUPT_REGION
-        const std::set<detid_t> &detids =
-            integratedWS->getSpectrum(hists[i])
-                .getDetectorIDs(); // should be only one detector per spectrum
-        if (instrument->isDetectorMasked(detids))
+        if (spectrumInfo.isMonitor(hists[i]))
           continue;
-        if (instrument->isMonitor(detids))
+        if (spectrumInfo.isMasked(hists[i]))
           continue;
 
         const double yValue = integratedWS->readY(hists[i])[0];

@@ -5,7 +5,9 @@
 // Includes
 //----------------------
 #include "ui_MuonAnalysis.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include <QTableWidget>
+#include <functional>
 
 namespace Ui {
 class MuonAnalysis;
@@ -14,6 +16,7 @@ class MuonAnalysis;
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace Muon {
+typedef QMap<QString, QMap<QString, double>> WSParameterList;
 
 /**
 This is a Helper class for MuonAnalysis. In particular this helper class deals
@@ -109,10 +112,12 @@ private:
   void storeUserSettings();
   void applyUserSettings();
   void populateLogsAndValues(const QStringList &fittedWsList);
-  void populateFittings(const QStringList &fittedWsList);
+  void populateFittings(
+      const QStringList &names,
+      std::function<Mantid::API::Workspace_sptr(const QString &)> wsFromName);
 
   /// Creates the results table
-  void createTable();
+  void createTable(bool multipleFits);
 
   /// Returns a list of workspaces which should be displayed in the table
   QStringList getFittedWorkspaces();
@@ -120,17 +125,15 @@ private:
   /// Returns a list individually fitted workspaces names
   QStringList getIndividualFitWorkspaces();
 
-  /// Returns a list of sequentially fitted workspaces names
-  QStringList getSequentialFitWorkspaces(const QString &label);
+  /// Returns a list of sequentially/simultaneously fitted workspaces names
+  QStringList getMultipleFitWorkspaces(const QString &label, bool sequential);
 
-  /// Returns a list of labels user has made sequential fits for
-  QStringList getSequentialFitLabels();
+  /// Returns a list of labels user has made sequential/simultaneous fits for
+  std::pair<QStringList, QStringList> getFitLabels();
 
-  bool haveSameParameters(const QStringList &wsList);
-  QStringList getSelectedWs();
+  QStringList getSelectedItemsToFit();
   QStringList getSelectedLogs();
   std::string getFileName();
-  QMap<int, int> getWorkspaceColors(const QStringList &wsList);
 
   Ui::MuonAnalysis &m_uiForm;
 

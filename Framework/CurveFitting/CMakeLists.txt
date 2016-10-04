@@ -122,7 +122,9 @@ set ( SRC_FILES
 	src/GSLMatrix.cpp
 	src/GSLVector.cpp
 	src/GeneralDomainCreator.cpp
+	src/HistogramDomainCreator.cpp
 	src/IFittingAlgorithm.cpp
+	src/IMWDomainCreator.cpp
 	src/LatticeDomainCreator.cpp
 	src/LatticeFunction.cpp
 	src/MSVesuvioHelpers.cpp
@@ -269,8 +271,10 @@ set ( INC_FILES
 	inc/MantidCurveFitting/GSLMatrix.h
 	inc/MantidCurveFitting/GSLVector.h
 	inc/MantidCurveFitting/GeneralDomainCreator.h
+	inc/MantidCurveFitting/HistogramDomainCreator.h
 	inc/MantidCurveFitting/HalfComplex.h
 	inc/MantidCurveFitting/IFittingAlgorithm.h
+	inc/MantidCurveFitting/IMWDomainCreator.h
 	inc/MantidCurveFitting/Jacobian.h
 	inc/MantidCurveFitting/LatticeDomainCreator.h
 	inc/MantidCurveFitting/LatticeFunction.h
@@ -401,6 +405,7 @@ set ( TEST_FILES
 	GSLMatrixTest.h
 	GSLVectorTest.h
 	GeneralDomainCreatorTest.h
+	HistogramDomainCreatorTest.h
 	IPeakFunctionCentreParameterNameTest.h
 	IPeakFunctionIntensityTest.h
 	LatticeDomainCreatorTest.h

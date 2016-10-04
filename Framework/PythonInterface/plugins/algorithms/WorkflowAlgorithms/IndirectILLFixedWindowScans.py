@@ -13,7 +13,7 @@ import IndirectILLReduction
 
 
 # possibility to replace by the use of SelectNexusFilesByMetadata
-def select_elastic(workspace):
+def select_inelastic(workspace):
     """
     Select fixed-window scan
     @param workspace :: input ws name
@@ -22,7 +22,7 @@ def select_elastic(workspace):
     run_object = mtd[workspace].getRun()
     run_number = mtd[workspace].getRunNumber()
 
-    velocity_profile = 1
+    velocity_profile = -1
     energy = -1
     frequency = -1
 
@@ -46,7 +46,7 @@ def select_elastic(workspace):
         logger.error('Run {0} has neither Doppler.maximum_delta_energy nor Doppler.delta_energy'.
                      format(run_number))
 
-    if (energy > 0.0 or frequency > 0.0):
+    if velocity_profile == 1 and (energy > 0.0 or frequency > 0.0):
         inelastic = True
         logger.information('Run {0} elastic FWS data'.format(run_number))
     else:
@@ -64,18 +64,10 @@ def select_elastic(workspace):
     run_object = mtd[workspace].getRun()
     run_number = mtd[workspace].getRunNumber()
 
-    velocity_profile = 1
     energy = -1
     frequency = -1
 
     elastic = False
-
-    # Doppler.speed
-
-    if run_object.hasProperty('Doppler.velocity_profile'):
-        velocity_profile = run_object.getLogData('Doppler.velocity_profile').value
-    else:
-        logger.error('Run {0} has no Doppler.velocity_profile'.format(run_number))
 
     if run_object.hasProperty('Doppler.frequency'):
         frequency = run_object.getLogData('Doppler.frequency').value
@@ -90,7 +82,7 @@ def select_elastic(workspace):
         logger.error('Run {0} has neither Doppler.maximum_delta_energy nor Doppler.delta_energy'.
                      format(run_number))
 
-    if (energy == 0.0 or frequency == 0.0):
+    if energy == 0.0 or frequency == 0.0:
         elastic = True
         logger.information('Run {0} inelastic FWS data'.format(run_number))
     else:

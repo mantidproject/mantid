@@ -54,6 +54,11 @@ public:
   QPointF getEndXY() const;
   int getXAxisDimensionIndex() const;
 
+  /// Load the state of the line viewer from a Mantid project file
+  void loadFromProject(const std::string &lines);
+  /// Save the state of the line viewer to a Mantid project file
+  std::string saveToProject() const;
+
 private:
   void createDimensionWidgets();
   void updateFreeDimensions();
@@ -90,6 +95,8 @@ private:
   Mantid::API::IAlgorithm_sptr
   applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
   void setupScaleEngine(MantidQwtWorkspaceData &curveData);
+  /// set the slice workspace from the ADS
+  void setSliceWorkspace(const std::string &name);
 
   // -------------------------- Widgets ----------------------------
 

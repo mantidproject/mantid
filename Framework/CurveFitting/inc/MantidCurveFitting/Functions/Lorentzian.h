@@ -72,6 +72,13 @@ protected:
                           const size_t nData) override;
   /// overwrite IFunction base class method, which declare function parameters
   void init() override;
+  /// Calculate histogram data.
+  void histogram1D(double *out, double left, const double *right,
+                   const size_t nBins) const override;
+  /// Devivatives of the histogram.
+  void histogramDerivative1D(API::Jacobian *jacobian, double left,
+                             const double *right,
+                             const size_t nBins) const override;
 
 private:
   /// When Amplitude is set via setHeight() and fwhm() == 0 height is made equal

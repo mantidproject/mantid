@@ -67,6 +67,8 @@ if ( NOT OPENGL_FOUND )
   message ( FATAL_ERROR "OpenGL was not found." )
 endif ()
 
+find_package(TBB REQUIRED)
+
 ###########################################################################
 # Set ParaView information since later items depend on it
 ###########################################################################
@@ -317,7 +319,7 @@ if ( ENABLE_CPACK )
                            "python-matplotlib,"
                            "python-scipy,"
                            "libtbb2,"
-                           "libpocofoundation11,libpocoutil11,libpoconet11,libpoconetssl11,libpococrypto11,libpocoxml11,"
+                           "libpocofoundation${POCO_SOLIB_VERSION},libpocoutil${POCO_SOLIB_VERSION},libpoconet${POCO_SOLIB_VERSION},libpoconetssl${POCO_SOLIB_VERSION},libpococrypto${POCO_SOLIB_VERSION},libpocoxml${POCO_SOLIB_VERSION},"
                            "python-pycifrw (>= 4.2.1)" )
         set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
         if( "${UNIX_CODENAME}" STREQUAL "xenial")

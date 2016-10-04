@@ -5,12 +5,8 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FuncMinimizers/DTRSMinimizer.h"
 #include "MantidCurveFitting/RalNlls/TrustRegion.h"
-
 #include "MantidAPI/FuncMinimizerFactory.h"
 
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 #include <algorithm>
 #include <limits>
 
@@ -20,7 +16,7 @@ namespace FuncMinimisers {
 
 // clang-format off
 ///@cond nodoc
-DECLARE_FUNCMINIMIZER(DTRSMinimizer, DTRS)
+DECLARE_FUNCMINIMIZER(DTRSMinimizer, Trust Region)
 ///@endcond
 // clang-format on
 
@@ -29,7 +25,7 @@ using namespace NLLS;
 DTRSMinimizer::DTRSMinimizer() : TrustRegionMinimizer() {}
 
 /// Name of the minimizer.
-std::string DTRSMinimizer::name() const { return "DTRS"; }
+std::string DTRSMinimizer::name() const { return "Trust Region"; }
 
 namespace {
 
