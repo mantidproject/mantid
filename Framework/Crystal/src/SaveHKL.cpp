@@ -322,6 +322,7 @@ void SaveHKL::exec() {
 
         Peak &p = peaks[wi];
         if (p.getIntensity() == 0.0 ||
+            !(std::isfinite(p.getIntensity())) ||
             !(std::isfinite(p.getSigmaIntensity()))) {
           banned.insert(wi);
           continue;
