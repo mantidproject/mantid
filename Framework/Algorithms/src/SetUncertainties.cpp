@@ -122,8 +122,8 @@ void SetUncertainties::exec() {
     if (errorType.compare(ONE_IF_ZERO) == 0) {
       outputWorkspace->setSharedE(i, inputWorkspace->sharedE(i));
     } else {
-		auto &errVals = outputWorkspace->mutableE(i);
-		std::fill(errVals.begin(), errVals.end(), 0);
+      auto &errVals = outputWorkspace->mutableE(i);
+      std::fill(errVals.begin(), errVals.end(), 0);
     }
 
     // ZERO mode doesn't calculate anything further
@@ -134,7 +134,7 @@ void SetUncertainties::exec() {
         std::transform(Y.begin(), Y.end(), E.begin(),
                        sqrterror(resetOne ? 1. : 0.));
       } else {
-        std::for_each(E.begin(), E.end(), resetzeroerror(1.));
+        std::transform(E.begin(), E.end(), E.begin(), resetzeroerror(1.));
       }
     }
 

@@ -26,9 +26,11 @@ public:
   API::MatrixWorkspace_sptr runAlg(const std::string &mode) {
     // random data mostly works
     auto inWksp = WorkspaceCreationHelper::Create1DWorkspaceRand(30);
-    auto E = inWksp->dataE(0);
-    E[0] = 0.; // stress oneIfZero
-    auto Y = inWksp->dataY(0);
+    // Ensure first elements of random workspace are zero so test don't
+    // pass randomly
+    auto &E = inWksp->mutableE(0);
+    E[0] = 0.;
+    auto &Y = inWksp->mutableY(0);
     Y[1] = 0.; // stress sqrtOrOne
 
     std::string outWSname = "SetUncertainties_" + mode;
@@ -41,7 +43,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    auto outWS =
+    const auto outWS =
         API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
             outWSname);
     TS_ASSERT(bool(outWS)); // non-null pointer
@@ -49,10 +51,10 @@ public:
   }
 
   void test_zero() {
-    auto outWS = runAlg("zero");
+    const auto outWS = runAlg("zero");
 
-    const auto E = outWS->readE(0);
-    for (auto item : E) {
+    const auto E = outWS->e(0);
+    for (const auto item : E) {
       TS_ASSERT_EQUALS(item, 0.);
     }
 
@@ -60,10 +62,10 @@ public:
   }
 
   void test_sqrt() {
-    auto outWS = runAlg("sqrt");
+    const auto outWS = runAlg("sqrt");
 
-    const auto E = outWS->readE(0);
-    const auto Y = outWS->readY(0);
+    const auto E = outWS->e(0);
+    const auto Y = outWS->y(0);
     for (size_t i = 0; i < E.size(); ++i) {
       TS_ASSERT_DELTA(Y[i], E[i] * E[i], .001);
     }
@@ -72,20 +74,20 @@ public:
   }
 
   void test_oneIfZero() {
-    auto outWS = runAlg("oneIfZero");
+    const auto outWS = runAlg("oneIfZero");
 
-    const auto E = outWS->readE(0);
-    for (auto item : E) {
+    const auto E = outWS->e(0);
+    for (const auto item : E) {
       TS_ASSERT(item > 0.);
     }
     API::AnalysisDataService::Instance().remove(outWS->name());
   }
 
   void test_sqrtOrOne() {
-    auto outWS = runAlg("sqrtOrOne");
+    const auto outWS = runAlg("sqrtOrOne");
 
-    const auto E = outWS->readE(0);
-    const auto Y = outWS->readY(0);
+    const auto E = outWS->e(0);
+    const auto Y = outWS->y(0);
     for (size_t i = 0; i < E.size(); ++i) {
       if (Y[i] == 0.) {
         TS_ASSERT_EQUALS(E[i], 1.);
