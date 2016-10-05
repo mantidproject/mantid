@@ -218,7 +218,7 @@ def identify_bad_detectors(workspace_name):
     """
     Identify detectors which should be masked
 
-    @param workspace_name Name of worksapce to use ot get masking detectors
+    @param workspace_name Name of workspace to use to get masking detectors
     @return List of masked spectra
     """
     from mantid.simpleapi import (IdentifyNoisyDetectors, DeleteWorkspace)
@@ -532,7 +532,7 @@ def fold_chopped(workspace_name):
 
 def rename_reduction(workspace_name, multiple_files):
     """
-    Renames a worksapce according to the naming policy in the Workflow.NamingConvention parameter.
+    Renames a workspace according to the naming policy in the Workflow.NamingConvention parameter.
 
     @param workspace_name Name of workspace
     @param multiple_files Insert the multiple file marker
@@ -553,7 +553,7 @@ def rename_reduction(workspace_name, multiple_files):
     try:
         convention = instrument.getStringParameter('Workflow.NamingConvention')[0]
     except IndexError:
-        # Defualt to run title if naming convention parameter not set
+        # Default to run title if naming convention parameter not set
         convention = 'RunTitle'
     logger.information('Naming convention for workspace %s is %s' % (workspace_name, convention))
 
@@ -629,11 +629,11 @@ def plot_reduction(workspace_name, plot_type):
 
 #-------------------------------------------------------------------------------
 
-def save_reduction(worksspace_names, formats, x_units='DeltaE'):
+def save_reduction(workspace_names, formats, x_units='DeltaE'):
     """
     Saves the workspaces to the default save directory.
 
-    @param worksspace_names List of workspace names to save
+    @param workspace_names List of workspace names to save
     @param formats List of formats to save in
     @param Output X units
     """
@@ -641,7 +641,7 @@ def save_reduction(worksspace_names, formats, x_units='DeltaE'):
                                   SaveAscii, Rebin, DeleteWorkspace,
                                   ConvertSpectrumAxis, SaveDaveGrp)
 
-    for workspace_name in worksspace_names:
+    for workspace_name in workspace_names:
         if 'spe' in formats:
             SaveSPE(InputWorkspace=workspace_name,
                     Filename=workspace_name + '.spe')
@@ -658,7 +658,8 @@ def save_reduction(worksspace_names, formats, x_units='DeltaE'):
             # Version 1 of SaveAscii produces output that works better with excel/origin
             # For some reason this has to be done with an algorithm object, using the function
             # wrapper with Version did not change the version that was run
-            saveAsciiAlg = AlgorithmManager.createUnmanaged('SaveAscii', 1)
+            # Changed to version 2 to enable re-loading of files into mantid
+            saveAsciiAlg = AlgorithmManager.createUnmanaged('SaveAscii', 2)
             saveAsciiAlg.initialize()
             saveAsciiAlg.setProperty('InputWorkspace', workspace_name)
             saveAsciiAlg.setProperty('Filename', workspace_name + '.dat')
