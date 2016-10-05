@@ -560,20 +560,18 @@ public:
   }
 
   void test_patch_nan_y_value_for_scaling() {
-    const size_t nspectrum = 1;
     HistogramX x(10, LinearGenerator(0, 1));
-    HistogramY y(nspectrum * (x.size() - 1), 1);
-    HistogramE e(nspectrum * (x.size() - 1), 1);
+    HistogramY y(9, 1);
+    HistogramE e(9, 1);
 
     double nan = std::numeric_limits<double>::quiet_NaN();
-    y[5] = nan; // Add a NAN
-    MatrixWorkspace_sptr lhsWS =
-        createWorkspace(x, y, e, static_cast<int>(nspectrum));
+    // Add a NAN
+    y[5] = nan;
+    MatrixWorkspace_sptr lhsWS = createWorkspace(x, y, e);
 
-    y[5] = y[4];
     // Remove NAN
-    MatrixWorkspace_sptr rhsWS =
-        createWorkspace(x, y, e, static_cast<int>(nspectrum));
+    y[5] = y[4];
+    MatrixWorkspace_sptr rhsWS = createWorkspace(x, y, e);
 
     auto ret = do_stitch1D(lhsWS, rhsWS);
 
@@ -584,20 +582,18 @@ public:
   }
 
   void test_patch_inf_y_value_for_scaling() {
-    const size_t nspectrum = 1;
     HistogramX x(10, LinearGenerator(0, 1));
-    HistogramY y(nspectrum * (x.size() - 1), 1);
-    HistogramE e(nspectrum * (x.size() - 1), 1);
+    HistogramY y(9, 1);
+    HistogramE e(9, 1);
 
     double inf = std::numeric_limits<double>::infinity();
-    y[5] = inf; // Add a Infinity
-    MatrixWorkspace_sptr lhsWS =
-        createWorkspace(x, y, e, static_cast<int>(nspectrum));
+    // Add a Infinity
+    y[5] = inf;
+    MatrixWorkspace_sptr lhsWS = createWorkspace(x, y, e);
 
-    y[5] = y[4];
     // Remove infinity
-    MatrixWorkspace_sptr rhsWS =
-        createWorkspace(x, y, e, static_cast<int>(nspectrum));
+    y[5] = y[4];
+    MatrixWorkspace_sptr rhsWS = createWorkspace(x, y, e);
 
     auto ret = do_stitch1D(lhsWS, rhsWS);
 
@@ -608,20 +604,18 @@ public:
   }
 
   void test_reset_nans() {
-    const size_t nspectrum = 1;
     HistogramX x(10, LinearGenerator(0, 1));
-    HistogramY y(nspectrum * (x.size() - 1), 1);
-    HistogramE e(nspectrum * (x.size() - 1), 1);
+    HistogramY y(9, 1);
+    HistogramE e(9, 1);
 
     double nan = std::numeric_limits<double>::quiet_NaN();
-    y[0] = nan; // Add a Infinity
-    MatrixWorkspace_sptr lhsWS =
-        createWorkspace(x, y, e, static_cast<int>(nspectrum));
+    // Add a Infinity
+    y[0] = nan;
+    MatrixWorkspace_sptr lhsWS = createWorkspace(x, y, e);
 
-    y[0] = y[1];
     // Remove infinity
-    MatrixWorkspace_sptr rhsWS =
-        createWorkspace(x, y, e, static_cast<int>(nspectrum));
+    y[0] = y[1];
+    MatrixWorkspace_sptr rhsWS = createWorkspace(x, y, e);
 
     auto ret = do_stitch1D(lhsWS, rhsWS);
 

@@ -166,8 +166,8 @@ void SofQWCentre::exec() {
       }
 
       const size_t numDets = detectors.size();
-      const double numDets_d = static_cast<double>(
-          numDets); // cache to reduce number of static casts
+      // cache to reduce number of static casts
+      const double numDets_d = static_cast<double>(numDets);
       const auto &Y = inputWorkspace->y(i);
       const auto &E = inputWorkspace->e(i);
       const auto &X = inputWorkspace->x(i);
