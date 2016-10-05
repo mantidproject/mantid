@@ -164,9 +164,9 @@ void SumSpectra::exec() {
     // Pointer to sqrt function
     typedef double (*uf)(double);
     uf rs = std::sqrt;
-	
-	auto &YError = outSpec.mutableE();
-	// take the square root of all the accumulated squared errors - Assumes
+
+    auto &YError = outSpec.mutableE();
+    // take the square root of all the accumulated squared errors - Assumes
     // Gaussian errors
     std::transform(YError.begin(), YError.end(), YError.begin(), rs);
 
