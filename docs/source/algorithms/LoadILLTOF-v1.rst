@@ -34,9 +34,9 @@ For the number of pulses:
 * **IN6:** :math:`n_{pulses} = \frac{v_{fc}}{v_{sc}}`
    where :math:`n_{pulses}` is the number of pulses from the chopper per rotation, :math:`v_{fc}` the Fermi chopper speed and :math:`v_{sc}` the suppressor chopper speed. All speeds are in units of rpm.
 
-The pulse interval, :math:`T_{pulse}` is then given by,
+The pulse interval, :math:`T_{pulse}` in seconds, is then given by,
 
-:math:`T_{pulse} = \frac{60}{2 v_{fc}} n_{pulses}`.
+:math:`T_{pulse} = \frac{60 \textrm{s}}{2 v_{fc}} n_{pulses}`.
 
 Usage
 -----
