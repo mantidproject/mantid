@@ -57,4 +57,61 @@ public:
   }
 };
 
+class SplineBackgroundTestPerformance : public CxxTest::TestSuite
+{
+
+public:
+	void setUp() {
+		constexpr size_t nspec = 1;
+		constexpr double xRangeStart = 0.1;
+		constexpr double xRangeEnd = 2500.1;
+		constexpr double xRangeStep = 0.1;
+
+
+		ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+			SinFunction(), nspec, xRangeStart, xRangeEnd, xRangeStep, true);
+		WorkspaceCreationHelper::addNoise(ws, 0.1);
+		// Mask some bins out to test that functionality
+		const size_t nbins = 101;
+		int toMask(static_cast<int>(0.75*nbins));
+
+		ws->maskBin(0, toMask - 1);
+		ws->maskBin(0, toMask);
+		ws->maskBin(0, toMask + 1);
+
+		ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
+		
+		WorkspaceCreationHelper::storeWS(inputWsName, ws);
+
+		SplineBackgroundAlg = Mantid::API::FrameworkManager::Instance().createAlgorithm(
+			"SplineBackground");
+		SplineBackgroundAlg->initialize();
+		SplineBackgroundAlg->setPropertyValue("InputWorkspace", inputWsName);
+		SplineBackgroundAlg->setPropertyValue("OutputWorkspace", outputWsName);
+		SplineBackgroundAlg->setPropertyValue("WorkspaceIndex", "0");
+		
+		SplineBackgroundAlg->setRethrows(true);
+	}
+
+	void testSplineBackgroundPerformance() {
+		TS_ASSERT_THROWS_NOTHING(SplineBackgroundAlg->execute());
+	}
+
+	void tearDown() {
+		WorkspaceCreationHelper::removeWS(inputWsName);
+		WorkspaceCreationHelper::removeWS(outputWsName);
+	}
+
+private:
+	IAlgorithm *SplineBackgroundAlg;
+
+	Mantid::DataObjects::Workspace2D_sptr ws;
+	const std::string inputWsName = "SplineBackground_points";
+	const std::string outputWsName = "SplineBackground_out";
+
+	struct SinFunction {
+		double operator()(double x, int) { return std::sin(x); }
+	};
+
+};
 #endif /*SPLINEBACKGROUNDTEST_H_*/
