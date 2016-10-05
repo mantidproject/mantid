@@ -63,7 +63,6 @@ MatrixWorkspace_sptr create1DWorkspace(const HistogramX &xData,
 
 class Stitch1DTest : public CxxTest::TestSuite {
 private:
-
   MatrixWorkspace_sptr a;
   MatrixWorkspace_sptr b;
   std::vector<double> x;
@@ -656,15 +655,15 @@ public:
   }
 
   void testExec() {
-	  Stitch1D alg;
-	  alg.setChild(true);
-	  alg.setRethrows(true);
-	  alg.initialize();
-	  alg.setProperty("LHSWorkspace", ws1);
-	  alg.setProperty("RHSWorkspace", ws2);
-	  alg.setProperty("Params", "0.2");
-	  alg.setPropertyValue("OutputWorkspace", "dummy_value");
-	  alg.execute();
+    Stitch1D alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("LHSWorkspace", ws1);
+    alg.setProperty("RHSWorkspace", ws2);
+    alg.setProperty("Params", "0.2");
+    alg.setPropertyValue("OutputWorkspace", "dummy_value");
+    alg.execute();
   }
 
 private:
