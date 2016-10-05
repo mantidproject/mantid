@@ -193,7 +193,7 @@ void SplatterPlotView::render() {
       builder->createDataRepresentation(src->getOutputPort(0), this->m_view);
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(renderType);
   if (!isPeaksWorkspace) {
-    vtkSMPropertyHelper(drep->getProxy(), "Opacity").Set(0.5);
+    vtkSMPropertyHelper(drep->getProxy(), "Opacity").Set(1.0);
     vtkSMPropertyHelper(drep->getProxy(), "GaussianRadius").Set(0.005);
   } else {
     vtkSMPropertyHelper(drep->getProxy(), "LineWidth").Set(2);
@@ -459,7 +459,7 @@ void SplatterPlotView::createPeaksFilter() {
         .Set("Point Gaussian");
     vtkSMPropertyHelper(dataRepresentation->getProxy(), "GaussianRadius")
         .Set(0.005);
-    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Opacity").Set(0.5);
+    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Opacity").Set(1.0);
     dataRepresentation->getProxy()->UpdateVTKObjects();
 
     if (!this->isPeaksWorkspace(this->origSrc)) {
