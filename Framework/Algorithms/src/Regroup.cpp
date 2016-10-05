@@ -16,6 +16,9 @@
 #include <numeric>
 
 namespace Mantid {
+using HistogramData::HistogramX;
+using HistogramData::HistogramY;
+using HistogramData::HistogramE;
 namespace Algorithms {
 
 // Register the class into the algorithm factory
@@ -66,11 +69,11 @@ void Regroup::exec() {
 
   int histnumber = static_cast<int>(inputW->getNumberHistograms());
   HistogramData::BinEdges XValues_new(0);
-  const MantidVec &XValues_old = inputW->readX(0);
+  auto &XValues_old = inputW->x(0);
   std::vector<int> xoldIndex; // indeces of new x in XValues_old
   // create new output X axis
-  int ntcnew =
-      newAxis(rb_params, XValues_old, XValues_new.mutableRawData(), xoldIndex);
+  int ntcnew = newAxis(rb_params, XValues_old.rawData(),
+                       XValues_new.mutableRawData(), xoldIndex);
 
   // make output Workspace the same type is the input, but with new length of
   // signal array
@@ -82,13 +85,13 @@ void Regroup::exec() {
     progress_step = 1;
   for (int hist = 0; hist < histnumber; hist++) {
     // get const references to input Workspace arrays (no copying)
-    const MantidVec &XValues = inputW->readX(hist);
-    const MantidVec &YValues = inputW->readY(hist);
-    const MantidVec &YErrors = inputW->readE(hist);
+    auto &XValues = inputW->x(hist);
+    auto &YValues = inputW->y(hist);
+    auto &YErrors = inputW->e(hist);
 
     // get references to output workspace data (no copying)
-    MantidVec &YValues_new = outputW->dataY(hist);
-    MantidVec &YErrors_new = outputW->dataE(hist);
+    auto &YValues_new = outputW->mutableY(hist);
+    auto &YErrors_new = outputW->mutableE(hist);
 
     // output data arrays are implicitly filled by function
     rebin(XValues, YValues, YErrors, xoldIndex, YValues_new, YErrors_new, dist);
@@ -129,12 +132,9 @@ void Regroup::exec() {
  * @throw runtime_error Thrown if algorithm cannot execute
  * @throw invalid_argument Thrown if input to function is incorrect
  **/
-void Regroup::rebin(const std::vector<double> &xold,
-                    const std::vector<double> &yold,
-                    const std::vector<double> &eold,
-                    const std::vector<int> &xoldIndex,
-                    std::vector<double> &ynew, std::vector<double> &enew,
-                    bool distribution) {
+void Regroup::rebin(const HistogramX &xold, const HistogramY &yold,
+                    const HistogramE &eold, std::vector<int> &xoldIndex,
+                    HistogramY &ynew, HistogramE &enew, bool distribution) {
 
   for (int i = 0; i < int(xoldIndex.size() - 1); i++) {
 

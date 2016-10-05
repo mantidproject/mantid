@@ -46,7 +46,7 @@ public:
     TS_ASSERT(regroup.isExecuted())
 
     MatrixWorkspace_sptr rebindata = regroup.getProperty("OutputWorkspace");
-    const Mantid::MantidVec outX = rebindata->dataX(0);
+    auto &outX = rebindata->x(0);
 
     TS_ASSERT_DELTA(outX[7], 12.5, 0.000001);
     TS_ASSERT_DELTA(outX[12], 20.75, 0.000001);
@@ -59,8 +59,9 @@ private:
   Workspace2D_sptr Create1DWorkspace(int size) {
     auto retVal = createWorkspace<Workspace2D>(1, size, size - 1);
     double j = 1.0;
+	auto &X = retVal->mutableX(0);
     for (int i = 0; i < size; i++) {
-      retVal->dataX(0)[i] = j * 0.5;
+      X[i] = j * 0.5;
       j += 1.5;
     }
     retVal->setCounts(0, size - 1, 3.0);
