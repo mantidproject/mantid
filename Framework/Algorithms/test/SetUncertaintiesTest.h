@@ -86,8 +86,8 @@ public:
   void test_sqrtOrOne() {
     const auto outWS = runAlg("sqrtOrOne");
 
-    const auto E = outWS->e(0);
-    const auto Y = outWS->y(0);
+    const auto &E = outWS->e(0);
+    const auto &Y = outWS->y(0);
     for (size_t i = 0; i < E.size(); ++i) {
       if (Y[i] == 0.) {
         TS_ASSERT_EQUALS(E[i], 1.);

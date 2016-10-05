@@ -25,7 +25,7 @@ public:
   void test_Attentuaton_Correction_For_Fixed_Mur() {
     Histogram histo(Points(2, LinearGenerator(0, 1)), Counts(2, 0));
     MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
-    auto absFactor = mscat.calculateSelfAttenuation(0.01);
+    double absFactor = mscat.calculateSelfAttenuation(0.01);
 
     const double delta = 1e-8;
     TS_ASSERT_DELTA(0.00030887, absFactor, delta);
@@ -62,9 +62,9 @@ public:
 
     auto outHisto = mscat.apply(histo);
 
-    auto tofVals = outHisto.x();
-    auto signalVals = outHisto.y();
-    auto errVals = outHisto.e();
+    const auto &tofVals = outHisto.x();
+    const auto &signalVals = outHisto.y();
+    const auto &errVals = outHisto.e();
 
     // Check some values
     const double delta(1e-06);
@@ -96,9 +96,9 @@ public:
 
     auto outHisto = mscat.apply(histo);
 
-    auto tofVals = outHisto.x();
-    auto signalVals = outHisto.y();
-    auto errVals = outHisto.e();
+    const auto &tofVals = outHisto.x();
+    const auto &signalVals = outHisto.y();
+    const auto &errVals = outHisto.e();
 
     // Check some values
     const double delta(1e-06);

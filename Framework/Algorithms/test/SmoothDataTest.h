@@ -114,9 +114,9 @@ public:
 
     MatrixWorkspace_const_sptr output = smooth.getProperty("OutputWorkspace");
     // as alg child is set true, wouldnt need to use AnalysisDataService
-    const auto Y = output->y(0);
-    const auto X = output->x(0);
-    const auto E = output->e(0);
+    const auto &Y = output->y(0);
+    const auto &X = output->x(0);
+    const auto &E = output->e(0);
     TS_ASSERT_EQUALS(Y[0], 0.3);
     TS_ASSERT_EQUALS(X[6], 1200);
     TS_ASSERT_DIFFERS(E[2], Y[2]);
@@ -158,8 +158,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputWS));
-    const auto Y = output->y(0);
-    const auto E = output->e(0);
+    const auto &Y = output->y(0);
+    const auto &E = output->e(0);
     TS_ASSERT_EQUALS(Y[0], 2);
     TS_ASSERT_DELTA(E[0], sqrt(Y[0] / 3.0), 0.0001);
     TS_ASSERT_EQUALS(Y[1], 2.5);

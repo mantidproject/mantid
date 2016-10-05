@@ -69,9 +69,9 @@ void RRFMuon::exec() {
 
   // Compute the RRF polarization
   const double twoPiFreq = 2. * M_PI * freq * factor;
-  const auto time = inputWs->x(0);  // X axis: time
-  const auto labRe = inputWs->y(0); // Lab-frame polarization (real part)
-  const auto labIm = inputWs->y(1); // Lab-frame polarization (imaginary part)
+  const auto &time = inputWs->x(0);  // X axis: time
+  const auto &labRe = inputWs->y(0); // Lab-frame polarization (real part)
+  const auto &labIm = inputWs->y(1); // Lab-frame polarization (imaginary part)
 
   MantidVec rrfRe(nData),
       rrfIm(nData); // Rotating Reference frame (RRF) polarizations
