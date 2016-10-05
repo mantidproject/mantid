@@ -358,6 +358,7 @@ void GetEiMonDet2::monitorDistanceAndTOF(const size_t monitorIndex,
   g_log.information() << "Monitor EPP: " << monitorEPP << ".\n";
 }
 
+namespace {
 /** Transforms detector and monitor indices according to given maps.
  *  @param detectors A vector of detector indices to be transformed
  *  @param monitor A monitor index to be transformed
@@ -387,6 +388,7 @@ void mapIndices(const std::vector<unsigned int> &detectors, const int monitor,
     throw std::runtime_error(PropertyNames::MONITOR + " out of range.");
   }
 }
+} // namespace anonymous
 
 /** Parser detector and monitor indices from user's input and
  *  transfrorms them to workspace indices.
