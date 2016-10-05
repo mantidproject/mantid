@@ -646,15 +646,14 @@ void SplatterPlotView::setView(pqRenderView *view) {
   auto server = activeObjects.activeServer();
   auto model = pqApplicationCore::instance()->getServerManagerModel();
   auto filters = model->findItems<pqPipelineFilter *>(server);
-  auto result = std::find_if(
-      filters.begin(), filters.end(), [](const pqPipelineFilter *src) {
-        auto tagName = "MantidParaViewSplatterPlot";
-        return strcmp(src->getProxy()->GetXMLName(), tagName) == 0;
-      });
-
-  if (result != filters.end()) {
-    this->m_splatSource = result[0];
-  }
+  this->m_splatSource = findFilter(
+      filters, MantidQt::API::MdConstants::MantidParaViewSplatterPlot);
+  this->m_peaksFilter = findFilter(
+      filters, MantidQt::API::MdConstants::MantidParaViewPeaksFilter);
+  this->m_threshSource =
+      findFilter(filters, MantidQt::API::MdConstants::Threshold);
+  this->m_probeSource =
+      findFilter(filters, MantidQt::API::MdConstants::ProbePoint);
 
   QHBoxLayout *hbox = new QHBoxLayout(this->m_ui.renderFrame);
   hbox->setMargin(0);
@@ -682,6 +681,31 @@ void SplatterPlotView::destroyFiltersForSplatterPlotView() {
   }
   if (this->m_splatSource) {
     builder->destroy(this->m_splatSource);
+  }
+}
+
+/* Find a pqPipelineFilter using the XML name of the proxy
+ *
+ * If there is more than one match only the first found is returned. If no items
+ * are matched a nullptr is returned.
+ *
+ * @param filters :: a list of filters to search
+ * @param name :: the XML name of the item to find
+ * @return pointer to the pqPipelineFilter found in filters
+ */
+pqPipelineFilter *
+SplatterPlotView::findFilter(const QList<pqPipelineFilter *> &filters,
+                             const QString &name) const {
+  auto result = std::find_if(filters.begin(), filters.end(),
+                             [&name](const pqPipelineFilter *src) {
+                               return strcmp(src->getProxy()->GetXMLName(),
+                                             name.toStdString().c_str()) == 0;
+                             });
+
+  if (result != filters.end()) {
+    return result[0];
+  } else {
+    return nullptr;
   }
 }
 

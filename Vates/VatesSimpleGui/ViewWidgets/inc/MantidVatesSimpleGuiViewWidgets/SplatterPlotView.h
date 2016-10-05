@@ -8,9 +8,10 @@
 #include "MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h"
 #include <boost/shared_ptr.hpp>
 
-#include <string>
 #include <QList>
 #include <QPointer>
+#include <pqPipelineFilter.h>
+#include <string>
 
 class QWidget;
 class QAction;
@@ -157,6 +158,9 @@ private:
   void updatePeaksFilter(pqPipelineSource *filter);
   /// Destroy splatter plot specific sources and filters
   void destroyFiltersForSplatterPlotView();
+  /// Find a filter in the proxy manager
+  pqPipelineFilter *findFilter(const QList<pqPipelineFilter *> &filters,
+                               const QString &name) const;
 
   bool m_noOverlay; ///< Flag to respond to overlay situation correctly
   QList<QPointer<pqPipelineSource>> m_peaksSource; ///< A list of peaks sources
