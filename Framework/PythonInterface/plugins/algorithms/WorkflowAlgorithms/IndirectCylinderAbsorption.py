@@ -143,7 +143,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
 
                 if self._sample_density_type == 'Mass Density':
                     builder = MaterialBuilder()
-                    mat = builder.setFormula(self._can_chemical_formula).setMassDensity(self._can_mass_density).build()
+                    mat = builder.setFormula(self._can_chemical_formula).setMassDensity(self._can_density).build()
                     self._can_density = mat.numberDensity
                 SetSampleMaterial(can_wave_ws, ChemicalFormula=self._can_chemical_formula, SampleNumberDensity=self._can_density)
 

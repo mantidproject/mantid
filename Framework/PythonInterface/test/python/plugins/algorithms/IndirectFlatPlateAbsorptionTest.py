@@ -132,8 +132,8 @@ class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
                                        CanChemicalFormula='V',
                                        CanDensityType='Mass Density',
                                        CanDensity=0.5,
-                                       Events = 200,
-                                       UseCanCorrections = True)
+                                       UseCanCorrections = True,
+                                       ElementSize = 1)
 
         self.assertEqual(fact.size(), 2)
         self._test_workspaces(corrected, fact)
