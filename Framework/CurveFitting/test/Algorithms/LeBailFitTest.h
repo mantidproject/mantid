@@ -2,23 +2,14 @@
 #define MANTID_CURVEFITTING_LEBAILFITTEST_H_
 
 #include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
-
-#include "MantidCurveFitting/Algorithms/LeBailFit.h"
-#include "MantidDataHandling/LoadAscii.h"
-
-#include <fstream>
 
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCurveFitting/Algorithms/LeBailFit.h"
+#include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/split.hpp>
-
-#include <cmath>
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
@@ -29,6 +20,7 @@ using namespace WorkspaceCreationHelper;
 using namespace std;
 
 using Mantid::CurveFitting::Algorithms::LeBailFit;
+
 
 namespace {
   //----------------------------------------------------------------------------------------------
@@ -958,7 +950,7 @@ public:
     TS_ASSERT(outws);
 
     // Check background (last point)
-    double bkgdx = outws->readX(1).back() * 0.001 + 101.0;
+    double bkgdx = outws->x(1).back() * 0.001 + 101.0;
     TS_ASSERT_DELTA(outws->readY(1).back(), bkgdx, 1.0);
 
     // Clean
@@ -1141,8 +1133,8 @@ public:
 
     // b) data
     dataws = createInputDataWorkspace(4);
-    std::cout << "[TESTx349] Data Workspace Range: " << dataws->readX(0)[0]
-              << ", " << dataws->readX(0).back() << '\n';
+    std::cout << "[TESTx349] Data Workspace Range: " << dataws->x(0)[0]
+              << ", " << dataws->x(0).back() << '\n';
 
     // c) Generate TableWorkspaces
     std::vector<double> pkheights(numpeaks, 1.0);
@@ -1318,19 +1310,15 @@ public:
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 9);
 
 #if 0
-    /*
-      for (size_t i = 0; i < outws->dataY(0).size(); ++i)
-        std::cout << outws->dataX(0)[i] << "\t\t" << outws->dataY(0)[i] << "\t\t" << outws->dataY(1)[i] << '\n';
-      */
 
     // 4. Calcualte data
     double y25 = 1360.20;
     double y59 = 0.285529;
     double y86 = 648.998;
 
-    TS_ASSERT_DELTA(outws->readY(1)[25], y25, 0.1);
-    TS_ASSERT_DELTA(outws->readY(1)[59], y59, 0.0001);
-    TS_ASSERT_DELTA(outws->readY(1)[86], y86, 0.001);
+    TS_ASSERT_DELTA(outws->y(1)[25], y25, 0.1);
+    TS_ASSERT_DELTA(outws->y(1)[59], y59, 0.0001);
+    TS_ASSERT_DELTA(outws->y(1)[86], y86, 0.001);
 #endif
 
     // 5. Clean
