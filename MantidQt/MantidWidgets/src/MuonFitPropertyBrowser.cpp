@@ -61,7 +61,8 @@ const std::string MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX{"MuonSimulFit_"};
 */
 MuonFitPropertyBrowser::MuonFitPropertyBrowser(QWidget *parent,
                                                QObject *mantidui)
-    : FitPropertyBrowser(parent, mantidui) {}
+    : FitPropertyBrowser(parent, mantidui), m_additionalLayout(nullptr),
+      m_widgetSplitter(nullptr) {}
 
 /**
 * Initialise the muon fit property browser.

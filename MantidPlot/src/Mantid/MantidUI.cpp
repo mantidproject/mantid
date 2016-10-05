@@ -332,6 +332,9 @@ void MantidUI::x_range_from_picker(double xmin, double xmax) {
 /// Updates the algorithms tree as this may have changed
 void MantidUI::updateAlgorithms() { m_exploreAlgorithms->update(); }
 
+/// Updates the workspace tree
+void MantidUI::updateWorkspaces() { m_exploreMantid->updateTree(); }
+
 /// Show / hide the AlgorithmDockWidget
 void MantidUI::showAlgWidget(bool on) {
   if (on) {
@@ -465,9 +468,6 @@ void MantidUI::deleteWorkspace(const QString &workspaceName) {
   executeAlgorithmAsync(alg);
 }
 
-/**
-getSelectedWorkspaceName
-*/
 QString MantidUI::getSelectedWorkspaceName() {
   QString str = m_exploreMantid->getSelectedWorkspaceName();
   if (str.isEmpty()) {
@@ -1505,7 +1505,11 @@ QStringList MantidUI::extractPyFiles(const QList<QUrl> &urlList) const {
 }
 
 /**
-executes Save Nexus
+Executes the Save Nexus dialogue from the right click context menu.
+
+The Save > Nexus function from the button in the Dock (with Load, Delete, Group,
+Sort, Save buttons) is in MantidDock in function handleShowSaveAlgorithm()
+
 saveNexus Input Dialog is a generic dialog.Below code is added to remove
 the workspaces except the selected workspace from the InputWorkspace combo
 
