@@ -70,7 +70,7 @@ void CentroidPeaks::integrate() {
   int MaxPeaks = -1;
   size_t Numberwi = inWS->getNumberHistograms();
   int NumberPeaks = peakWS->getNumberPeaks();
-  for (int i = 0; i < NumberPeaks; i++) {
+  for (int i = 0; i < NumberPeaks; ++i) {
     Peak &peak = peakWS->getPeaks()[i];
     int pixelID = peak.getDetectorID();
 
@@ -88,7 +88,7 @@ void CentroidPeaks::integrate() {
   int Edge = getProperty("EdgePixels");
   Progress prog(this, MinPeaks, 1.0, MaxPeaks);
   PARALLEL_FOR2(inWS, peakWS)
-  for (int i = MinPeaks; i <= MaxPeaks; i++) {
+  for (int i = MinPeaks; i <= MaxPeaks; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Get a direct ref to that peak.
     auto &peak = peakWS->getPeak(i);
@@ -207,7 +207,7 @@ void CentroidPeaks::integrateEvent() {
   size_t Numberwi = inWS->getNumberHistograms();
   int NumberPeaks = peakWS->getNumberPeaks();
 
-  for (int i = 0; i < NumberPeaks; i++) {
+  for (int i = 0; i < NumberPeaks; ++i) {
     auto &peak = peakWS->getPeak(i);
     int pixelID = peak.getDetectorID();
 
@@ -225,7 +225,7 @@ void CentroidPeaks::integrateEvent() {
   int Edge = getProperty("EdgePixels");
   Progress prog(this, MinPeaks, 1.0, MaxPeaks);
   PARALLEL_FOR2(inWS, peakWS)
-  for (int i = MinPeaks; i <= MaxPeaks; i++) {
+  for (int i = MinPeaks; i <= MaxPeaks; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Get a direct ref to that peak.
     auto &peak = peakWS->getPeak(i);
