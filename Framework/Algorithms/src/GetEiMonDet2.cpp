@@ -85,8 +85,8 @@ void GetEiMonDet2::init() {
   tofWorkspace->add<InstrumentValidator>();
   auto mandatoryStringProperty =
       boost::make_shared<MandatoryValidator<std::string>>();
-  auto mandatoryDetectorIdProperty =
-      boost::make_shared<MandatoryValidator<detid_t>>();
+  auto mandatoryIntProperty =
+      boost::make_shared<MandatoryValidator<int>>();
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
 
@@ -124,7 +124,7 @@ void GetEiMonDet2::init() {
       make_unique<EnabledWhenProperty>(PropertyNames::MONITOR_WORKSPACE.c_str(),
                                        IS_NOT_DEFAULT));
   declareProperty(PropertyNames::MONITOR, EMPTY_INT(),
-                  mandatoryDetectorIdProperty,
+                  mandatoryIntProperty,
                   "Monitor's detector id/spectrum number/workspace index.");
   declareProperty(PropertyNames::PULSE_INTERVAL, EMPTY_DBL(),
                   "Interval between neutron pulses, in microseconds.");
@@ -368,13 +368,13 @@ void GetEiMonDet2::monitorDistanceAndTOF(const size_t monitorIndex,
  *  @param monitorIndex Output parameter for the monitor
  *         workspace indices
  */
-template <typename T, typename Map>
-void mapIndices(const std::vector<unsigned int> &detectors, const T monitor,
+template <typename Map>
+void mapIndices(const std::vector<unsigned int> &detectors, const int monitor,
                 const Map &detectorIndexMap, const Map &monitorIndexMap,
                 std::vector<size_t> &detectorIndices, size_t &monitorIndex) {
   auto back = std::back_inserter(detectorIndices);
   std::transform(
-      detectors.cbegin(), detectors.cend(), back, [&detectorIndexMap](T i) {
+      detectors.cbegin(), detectors.cend(), back, [&detectorIndexMap](int i) {
         try {
           return detectorIndexMap.at(i);
         } catch (std::out_of_range &) {
@@ -398,34 +398,28 @@ void GetEiMonDet2::parseIndices(std::vector<size_t> &detectorIndices,
                                 size_t &monitorIndex) const {
   detectorIndices.clear();
   UserStringParser spectraListParser;
+  const auto detectors = VectorHelper::flattenVector(
+      spectraListParser.parse(getProperty(PropertyNames::DETECTORS)));
+  const int monitor = getProperty(PropertyNames::MONITOR);
   const std::string indexType = getProperty(PropertyNames::INDEX_TYPE);
   if (indexType == IndexTypes::DETECTOR_ID) {
-    const auto detectors = VectorHelper::flattenVector(
-        spectraListParser.parse(getProperty(PropertyNames::DETECTORS)));
-    const detid_t monitor = getProperty(PropertyNames::MONITOR);
     const auto detectorIndexMap =
         m_detectorWs->getDetectorIDToWorkspaceIndexMap();
     const auto monitorIndexMap =
         m_monitorWs->getDetectorIDToWorkspaceIndexMap();
-    mapIndices<detid_t>(detectors, monitor, detectorIndexMap, monitorIndexMap,
-                        detectorIndices, monitorIndex);
+    mapIndices(detectors, monitor, detectorIndexMap, monitorIndexMap,
+                   detectorIndices, monitorIndex);
   } else if (indexType == IndexTypes::SPECTRUM_NUMBER) {
-    const auto detectors(VectorHelper::flattenVector(
-        spectraListParser.parse(getProperty(PropertyNames::DETECTORS))));
-    const specnum_t monitor = getProperty(PropertyNames::MONITOR);
     const auto detectorIndexMap =
         m_detectorWs->getSpectrumToWorkspaceIndexMap();
     const auto monitorIndexMap = m_monitorWs->getSpectrumToWorkspaceIndexMap();
-    mapIndices<specnum_t>(detectors, monitor, detectorIndexMap, monitorIndexMap,
-                          detectorIndices, monitorIndex);
+    mapIndices(detectors, monitor, detectorIndexMap, monitorIndexMap,
+                   detectorIndices, monitorIndex);
   } else {
     // There is a type mismatch between what UserStringParser returns
     // (unsigned int) and workspace index (size_t), thus the copying.
-    auto detectors = VectorHelper::flattenVector(
-        spectraListParser.parse(getProperty(PropertyNames::DETECTORS)));
     auto back = std::back_inserter(detectorIndices);
     std::copy(detectors.begin(), detectors.end(), back);
-    int monitor = getProperty(PropertyNames::MONITOR);
     if (monitor < 0) {
       throw std::runtime_error("Monitor cannot be negative.");
     }
