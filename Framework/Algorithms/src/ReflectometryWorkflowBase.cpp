@@ -9,6 +9,7 @@
 #include "MantidKernel/RebinParamsValidator.h"
 
 using namespace Mantid::API;
+using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 
 namespace Mantid {
@@ -439,10 +440,10 @@ ReflectometryWorkflowBase::toLamDetector(const std::string &processingCommands,
 }
 
 MatrixWorkspace_sptr
-ReflectometryWorkflowBase::makeUnityWorkspace(const std::vector<double> &x) {
+ReflectometryWorkflowBase::makeUnityWorkspace(const HistogramX &x) {
   auto createWorkspaceAlg = this->createChildAlgorithm("CreateWorkspace");
   createWorkspaceAlg->initialize();
-  createWorkspaceAlg->setProperty("DataX", x);
+  createWorkspaceAlg->setProperty("DataX", x.rawData());
   createWorkspaceAlg->setProperty("DataY",
                                   std::vector<double>(x.size() - 1, 1.0));
   createWorkspaceAlg->setProperty("NSpec", 1);
@@ -482,7 +483,7 @@ ReflectometryWorkflowBase::toLam(MatrixWorkspace_sptr toConvert,
     monitorWS = toLamMonitor(toConvert, monitorIndex, backgroundMinMax);
   } else {
     // We don't have a monitor index, so we divide through by unity.
-    monitorWS = makeUnityWorkspace(detectorWS->readX(0));
+    monitorWS = makeUnityWorkspace(detectorWS->x(0));
   }
 
   // Rebin the Monitor Workspace to match the Detector Workspace.
