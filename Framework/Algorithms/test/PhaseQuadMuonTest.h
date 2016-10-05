@@ -33,7 +33,6 @@ namespace {
     // Set up PhaseQuad
     IAlgorithm_sptr phaseQuad =
       AlgorithmManager::Instance().create("PhaseQuad");
-    phaseQuad->setChild(true);
     phaseQuad->initialize();
     phaseQuad->setProperty("InputWorkspace", inputWs);
     phaseQuad->setProperty("PhaseTable", phaseTable);

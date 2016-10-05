@@ -16,7 +16,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidAlgorithms/PDFFourierTransform.h"
-#include "MantidAlgorithms/ConvertUnits.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::Kernel;
