@@ -73,10 +73,9 @@ namespace Algorithms {
 /**
  * Constructor
  * @param params Defines the required parameters for the correction
- * @param tof The TOF values corresponding to the signals to correct.
- *      Number of tof values must match number of signal/error or be 1 greater
- * @param sigIn Values of the signal that will be corrected
- * @param errIn Values of the errors that will be corrected
+ * @param inputHist A histogram containing the TOF values corresponding
+ * to the values to be corrected. The number of tof values must match
+ * number of signal/error or be 1 greater
  */
 MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(
     MayersSampleCorrectionStrategy::Parameters params,
@@ -105,8 +104,9 @@ MayersSampleCorrectionStrategy::~MayersSampleCorrectionStrategy() = default;
  * Correct the data for absorption and multiple scattering effects. Allows
  * both histogram or point data. For histogram the TOF is taken to be
  * the mid point of a bin
- * @param sigOut Signal values to correct [In/Out]
- * @param errOut Error values to correct [In/Out]
+ *
+ * @param inputXVals A histogram containing the tof values to use
+ * @return A histogram containing corrected values
  */
 Mantid::HistogramData::Histogram MayersSampleCorrectionStrategy::apply(
     const Mantid::HistogramData::Histogram &inputXVals) {
@@ -179,8 +179,8 @@ Mantid::HistogramData::Histogram MayersSampleCorrectionStrategy::apply(
     // apply correction
     const double yin(m_sigin[i]), ein(m_errin[i]);
     const double errVal = yin * corrfact;
-	sigOut[i] = yin * corrfact;
-	errOut[i] = sigOut[i] * ein / yin;
+    sigOut[i] = yin * corrfact;
+    errOut[i] = sigOut[i] * ein / yin;
   }
   return outputHistogram;
 }
