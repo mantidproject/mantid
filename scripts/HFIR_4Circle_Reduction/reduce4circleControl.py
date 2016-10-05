@@ -2238,7 +2238,9 @@ class CWSCDReductionControl(object):
                 try:
                     api.DownloadFile(Address=spice_file_url, Filename=spice_file_name)
                 except RuntimeError as download_error:
-                    print 'Unable to download scan %d due to %s.' % (scan_number, str(download_error))
+                    print 'Unable to download scan %d from %s due to %s.' % (scan_number,
+                                                                             spice_file_url,
+                                                                             str(download_error))
                     break
             else:
                 spice_file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
