@@ -7,6 +7,11 @@
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramX;
+class HistogramY;
+class HistogramE;
+}
 namespace Algorithms {
 /**
 
@@ -69,16 +74,26 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  void rebunch_hist(const std::vector<double> &xold,
-                    const std::vector<double> &yold,
-                    const std::vector<double> &eold, std::vector<double> &xnew,
-                    std::vector<double> &ynew, std::vector<double> &enew,
-                    const size_t n_bunch, const bool distribution);
-  void rebunch_point(const std::vector<double> &xold,
-                     const std::vector<double> &yold,
-                     const std::vector<double> &eold, std::vector<double> &xnew,
-                     std::vector<double> &ynew, std::vector<double> &enew,
-                     const int n_bunch);
+  void rebunch_hist_counts(const HistogramData::HistogramX &xold,
+                           const HistogramData::HistogramY &yold,
+                           const HistogramData::HistogramE &eold,
+                           HistogramData::HistogramX &xnew,
+                           HistogramData::HistogramY &ynew,
+                           HistogramData::HistogramE &enew,
+                           const size_t n_bunch);
+  void rebunch_hist_frequencies(const HistogramData::HistogramX &xold,
+                                const HistogramData::HistogramY &yold,
+                                const HistogramData::HistogramE &eold,
+                                HistogramData::HistogramX &xnew,
+                                HistogramData::HistogramY &ynew,
+                                HistogramData::HistogramE &enew,
+                                const size_t n_bunch);
+  void rebunch_point(const HistogramData::HistogramX &xold,
+                     const HistogramData::HistogramY &yold,
+                     const HistogramData::HistogramE &eold,
+                     HistogramData::HistogramX &xnew,
+                     HistogramData::HistogramY &ynew,
+                     HistogramData::HistogramE &enew, const size_t n_bunch);
 };
 
 } // namespace Algorithm
