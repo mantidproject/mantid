@@ -14,6 +14,8 @@
 #include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidHistogramData/HistogramX.h"
+#include "MantidHistogramData/HistogramY.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -138,15 +140,15 @@ private:
   double calculateD2TOFFunction(API::IFunction_sptr func,
                                 API::FunctionDomain1DVector domain,
                                 API::FunctionValues &values,
-                                const Mantid::MantidVec &rawY,
-                                const Mantid::MantidVec &rawE);
+                                const Mantid::HistogramData::HistogramY &rawY,
+                                const Mantid::HistogramData::HistogramE &rawE);
 
   /// Calculate d-space value from peak's miller index for thermal neutron
   // double calculateDspaceValue(std::vector<int> hkl, double lattice);
 
-  /// Calcualte value n for thermal neutron peak profile
+  /// Calculate value n for thermal neutron peak profile
   void calculateThermalNeutronSpecial(API::IFunction_sptr m_Function,
-                                      std::vector<double> vec_d,
+                                      const HistogramX &xVals,
                                       std::vector<double> &vec_n);
 
   //--------------- Class Variables -------------------
