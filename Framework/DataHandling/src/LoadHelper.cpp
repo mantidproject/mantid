@@ -307,8 +307,9 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
             int units_len = NX_MAXNAMELEN;
             int units_type = NX_CHAR;
 
-            units_status = NXgetattr(nxfileID, "units", units_sbuf, &units_len,
-                                     &units_type);
+            char unitsAttrName[] = "units";
+            units_status = NXgetattr(nxfileID, unitsAttrName, units_sbuf,
+                                     &units_len, &units_type);
             if (units_status != NX_ERROR) {
               g_log.debug() << indent_str << "[ " << property_name
                             << " has unit " << units_sbuf << " ]\n";
