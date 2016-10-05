@@ -83,9 +83,8 @@ bool SampleTransmission::validate(bool silent) {
                            m_uiForm.valChemicalFormula);
 
   // Ensure number density is not zero
-  uiv.setErrorLabel(
-      m_uiForm.valDensity,
-      uiv.checkNotEqual("Density", m_uiForm.spDensity->value()));
+  uiv.setErrorLabel(m_uiForm.valDensity,
+                    uiv.checkNotEqual("Density", m_uiForm.spDensity->value()));
 
   // Ensure thickness is not zero
   uiv.setErrorLabel(
@@ -136,7 +135,8 @@ void SampleTransmission::calculate() {
   transCalcAlg->setProperty("ChemicalFormula",
                             m_uiForm.leChemicalFormula->text().toStdString());
 
-  transCalcAlg->setProperty("DensityType", m_uiForm.cbDensity->currentText().toStdString());
+  transCalcAlg->setProperty("DensityType",
+                            m_uiForm.cbDensity->currentText().toStdString());
   transCalcAlg->setProperty("Density", m_uiForm.spDensity->value());
 
   transCalcAlg->setProperty("Thickness", m_uiForm.spThickness->value());

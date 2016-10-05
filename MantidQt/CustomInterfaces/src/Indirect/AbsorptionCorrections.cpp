@@ -47,7 +47,9 @@ void AbsorptionCorrections::run() {
   QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
   absCorAlgo->setProperty("SampleWorkspace", sampleWsName.toStdString());
 
-  absCorAlgo->setProperty("SampleDensityType", m_uiForm.cbSampleDensity->currentText().toStdString());
+  absCorAlgo->setProperty(
+      "SampleDensityType",
+      m_uiForm.cbSampleDensity->currentText().toStdString());
   absCorAlgo->setProperty("SampleDensity", m_uiForm.spSampleDensity->value());
 
   QString sampleChemicalFormula = m_uiForm.leSampleChemicalFormula->text();
@@ -95,7 +97,8 @@ void AbsorptionCorrections::run() {
 
     if (useCanCorrections) {
 
-      absCorAlgo->setProperty("CanDensityType", m_uiForm.cbCanDensity->currentText().toStdString());
+      absCorAlgo->setProperty(
+          "CanDensityType", m_uiForm.cbCanDensity->currentText().toStdString());
       absCorAlgo->setProperty("CanDensity", m_uiForm.spCanDensity->value());
 
       QString canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
