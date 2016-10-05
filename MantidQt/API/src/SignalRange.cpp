@@ -131,7 +131,7 @@ QwtDoubleInterval SignalRange::getRange(Mantid::API::IMDIterator *it) {
   do {
     double signal = it->getNormalizedSignal();
     // Skip any 'infs' as it screws up the color scale
-    if (signal != inf) {
+    if (!std::isinf(signal)) {
       if (signal < minSignal)
         minSignal = signal;
       if (signal > maxSignal)

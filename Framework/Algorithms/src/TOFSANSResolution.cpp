@@ -12,8 +12,6 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include "boost/math/special_functions/fpclassify.hpp"
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -203,7 +201,7 @@ void TOFSANSResolution::exec() {
       // By using only events with a positive weight, we use only the data
       // distribution and leave out the background events.
       // Note: we are looping over bins, therefore the xLength-1.
-      if (iq >= 0 && iq < xLength - 1 && !boost::math::isnan(dq_over_q) &&
+      if (iq >= 0 && iq < xLength - 1 && !std::isnan(dq_over_q) &&
           dq_over_q > 0 && YIn[j] > 0) {
         _dx[iq] += q * dq_over_q * YIn[j];
         _norm[iq] += YIn[j];

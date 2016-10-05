@@ -10,7 +10,6 @@
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidDataHandling/MaskDetectors.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -93,12 +92,12 @@ public:
     // empty bins are 0/0
     TS_ASSERT_DELTA(result->readY(0).front(), 2226533, 1)
     TS_ASSERT_DELTA(result->readY(0)[4], 946570.8, 0.1)
-    TS_ASSERT(boost::math::isnan(result->readY(0)[18]))
-    TS_ASSERT(boost::math::isnan(result->readY(0).back()))
+    TS_ASSERT(std::isnan(result->readY(0)[18]))
+    TS_ASSERT(std::isnan(result->readY(0).back()))
 
     TS_ASSERT_DELTA(result->readE(0)[1], 57964.04, 0.01)
     TS_ASSERT_DELTA(result->readE(0)[5], 166712.6, 0.1)
-    TS_ASSERT(boost::math::isnan(result->readE(0).back()))
+    TS_ASSERT(std::isnan(result->readE(0).back()))
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
@@ -196,12 +195,12 @@ public:
     TS_ASSERT_DELTA(result->readY(0).front(), 944237.8, 0.1)
     TS_ASSERT_DELTA(result->readY(0)[3], 1009296, 1)
     TS_ASSERT_DELTA(result->readY(0)[12], 620952.6, 0.1)
-    TS_ASSERT(boost::math::isnan(result->readY(0).back()))
+    TS_ASSERT(std::isnan(result->readY(0).back()))
 
     // empty bins are 0/0
     TS_ASSERT_DELTA(result->readE(0)[2], 404981, 10)
     TS_ASSERT_DELTA(result->readE(0)[10], 489710.39, 100)
-    TS_ASSERT(boost::math::isnan(result->readE(0)[7]))
+    TS_ASSERT(std::isnan(result->readE(0)[7]))
 
     TSM_ASSERT("Should not have a DX value", !result->hasDx(0))
   }
@@ -276,11 +275,11 @@ public:
 
     TS_ASSERT_DELTA(gravity->readY(0)[3], 1009296.4, 0.8)
     TS_ASSERT_DELTA(gravity->readY(0)[10], 891346.9, 0.1)
-    TS_ASSERT(boost::math::isnan(gravity->readY(0)[78]))
+    TS_ASSERT(std::isnan(gravity->readY(0)[78]))
 
     TS_ASSERT_DELTA(gravity->readE(0).front(), 329383, 1)
     TS_ASSERT_DELTA(gravity->readE(0)[10], 489708, 1) // 489710
-    TS_ASSERT(boost::math::isnan(gravity->readE(0)[77]))
+    TS_ASSERT(std::isnan(gravity->readE(0)[77]))
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
@@ -315,13 +314,13 @@ public:
     TS_ASSERT_EQUALS(result->readX(0).back(), 0.5)
 
     TS_ASSERT_DELTA(result->readY(0).front(), 1192471.95, 0.1)
-    TS_ASSERT(boost::math::isnan(result->readY(0)[3]))
+    TS_ASSERT(std::isnan(result->readY(0)[3]))
     TS_ASSERT_DELTA(result->readY(0)[12], 503242.79, 0.1)
-    TS_ASSERT(boost::math::isnan(result->readY(0).back()))
+    TS_ASSERT(std::isnan(result->readY(0).back()))
 
     TS_ASSERT_DELTA(result->readE(0)[2], 404980, 1)
     TS_ASSERT_DELTA(result->readE(0)[10], 489708, 100)
-    TS_ASSERT(boost::math::isnan(result->readE(0)[7]))
+    TS_ASSERT(std::isnan(result->readE(0)[7]))
   }
 
   // here the cut parameters are set but should only affect detectors with lower
@@ -356,8 +355,8 @@ public:
 
     for (size_t i = 0; i < nocuts->readY(0).size(); ++i) {
       TS_ASSERT_EQUALS(nocuts->readX(0)[i], noGrav->readX(0)[i])
-      if (!boost::math::isnan(nocuts->readY(0)[i]) &&
-          !boost::math::isnan(nocuts->readE(0)[i])) {
+      if (!std::isnan(nocuts->readY(0)[i]) &&
+          !std::isnan(nocuts->readE(0)[i])) {
         TS_ASSERT_EQUALS(nocuts->readY(0)[i], noGrav->readY(0)[i])
 
         TS_ASSERT_EQUALS(nocuts->readE(0)[i], noGrav->readE(0)[i])

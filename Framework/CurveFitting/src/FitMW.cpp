@@ -20,7 +20,7 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Matrix.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 #include <algorithm>
 
 namespace Mantid {
@@ -183,12 +183,12 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
       error /= binWidth;
     }
 
-    if (!boost::math::isfinite(y)) // nan or inf data
+    if (!std::isfinite(y)) // nan or inf data
     {
       if (!m_ignoreInvalidData)
         throw std::runtime_error("Infinte number or NaN found in input data.");
       y = 0.0; // leaving inf or nan would break the fit
-    } else if (!boost::math::isfinite(error)) // nan or inf error
+    } else if (!std::isfinite(error)) // nan or inf error
     {
       if (!m_ignoreInvalidData)
         throw std::runtime_error("Infinte number or NaN found in input data.");

@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <math.h>
 #include <boost/tuple/tuple.hpp>
-#include <boost/math/special_functions.hpp>
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
@@ -628,7 +627,7 @@ public:
     double scaleFactor = ret.get<1>();
 
     TSM_ASSERT("ScaleFactor should not be NAN",
-               !boost::math::isnan(scaleFactor));
+               !std::isnan(scaleFactor));
   }
 
   void test_patch_inf_y_value_for_scaling() {
@@ -658,7 +657,7 @@ public:
     double scaleFactor = ret.get<1>();
 
     TSM_ASSERT("ScaleFactor should not be Infinity",
-               !boost::math::isinf(scaleFactor));
+               !std::isinf(scaleFactor));
   }
 
   void test_reset_nans() {
@@ -674,7 +673,7 @@ public:
     auto e = MantidVec(nspectrum * (x.size() - 1), 1);
 
     double nan = std::numeric_limits<double>::quiet_NaN();
-    y[0] = nan; // Add a Infinity
+    y[0] = nan; // Add a nan
     MatrixWorkspace_sptr lhsWS =
         createWorkspace(x, y, e, static_cast<int>(nspectrum));
 
@@ -689,10 +688,10 @@ public:
     double scaleFactor = ret.get<1>();
 
     TSM_ASSERT("ScaleFactor should not be Infinity",
-               !boost::math::isinf(scaleFactor));
+               !std::isinf(scaleFactor));
 
     auto outY = outWs->readY(0);
-    TSM_ASSERT("Nans should be put back", boost::math::isnan(outY[0]));
+    TSM_ASSERT("Nans should be put back", std::isnan(outY[0]));
   }
 };
 

@@ -6,7 +6,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <sstream>
 
@@ -135,14 +134,14 @@ string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
     if (updateXMins || updateXMaxs) {
       const MantidVec &xvalues = inputWS->getSpectrum(i).dataX();
       if (updateXMins) {
-        if (boost::math::isnan(xvalues.front())) {
+        if (std::isnan(xvalues.front())) {
           xmins.push_back(xmin_wksp);
         } else {
           xmins.push_back(xvalues.front());
         }
       }
       if (updateXMaxs) {
-        if (boost::math::isnan(xvalues.back())) {
+        if (std::isnan(xvalues.back())) {
           xmaxs.push_back(xmax_wksp);
         } else {
           xmaxs.push_back(xvalues.back());

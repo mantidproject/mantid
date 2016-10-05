@@ -13,7 +13,6 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -235,7 +234,7 @@ void Qxy::exec() {
         double &outputBinY = outputWorkspace->dataY(yIndex)[xIndex];
         double &outputBinE = outputWorkspace->dataE(yIndex)[xIndex];
 
-        if (boost::math::isnan(outputBinY)) {
+        if (std::isnan(outputBinY)) {
           outputBinY = outputBinE = 0;
         }
         // Add the contents of the current bin to the 2D array.

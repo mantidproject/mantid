@@ -1146,7 +1146,7 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
 
       for (size_t i = 0; i < Y.size(); i++) {
         double aux = Y[i];
-        if (fabs(aux) == std::numeric_limits<double>::infinity() || aux != aux)
+        if (!std::isfinite(aux))
           continue;
         if (aux < local_min)
           local_min = aux;

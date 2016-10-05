@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST_H_
 #define MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST_H_
 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <cxxtest/TestSuite.h>
 #include <numeric>
+#include <cmath>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/UnitFactory.h"
@@ -116,7 +116,7 @@ public:
     TS_ASSERT_DELTA(R[249], 2.5, 0.0001);
     // make sure that nan didn' slip in
     TS_ASSERT(std::find_if(GofR.begin(), GofR.end(),
-                           boost::math::isnan<double>) == GofR.end());
+                           static_cast<bool (*)(double)>(std::isnan)) == GofR.end());
   }
 
   void test_filter() {

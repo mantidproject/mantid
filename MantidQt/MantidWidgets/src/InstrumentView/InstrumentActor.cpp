@@ -134,8 +134,7 @@ void InstrumentActor::setUpWorkspace(
   for (size_t i = 0; i < nHist; ++i) {
     const Mantid::MantidVec &values = sharedWorkspace->readX(i);
     double xtest = values.front();
-    if (xtest != std::numeric_limits<double>::infinity()) {
-
+    if (!std::isinf(xtest)) {
       if (xtest < m_WkspBinMinValue) {
         m_WkspBinMinValue = xtest;
       } else if (xtest > m_WkspBinMaxValue) {
@@ -145,7 +144,7 @@ void InstrumentActor::setUpWorkspace(
     }
 
     xtest = values.back();
-    if (xtest != std::numeric_limits<double>::infinity()) {
+    if (!std::isinf(xtest)) {
       if (xtest < m_WkspBinMinValue) {
         m_WkspBinMinValue = xtest;
       } else if (xtest > m_WkspBinMaxValue) {
