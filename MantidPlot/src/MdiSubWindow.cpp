@@ -31,7 +31,7 @@
 #include "ApplicationWindow.h"
 #include "Folder.h"
 
-#include "Mantid/IProjectSerialisable.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -121,9 +121,9 @@ void MdiSubWindow::updateCaption() {
 
 void MdiSubWindow::setLabel(const QString &label) { d_label = label; }
 
-IProjectSerialisable *MdiSubWindow::loadFromProject(const std::string &lines,
-                                                    ApplicationWindow *app,
-                                                    const int fileVersion) {
+MantidQt::API::IProjectSerialisable *
+MdiSubWindow::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                              const int fileVersion) {
   Q_UNUSED(lines);
   Q_UNUSED(app);
   Q_UNUSED(fileVersion);

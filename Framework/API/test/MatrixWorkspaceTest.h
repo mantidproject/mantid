@@ -6,6 +6,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument.h"
@@ -25,6 +26,7 @@
 #include <boost/make_shared.hpp>
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <functional>
 #include <numeric>
@@ -284,6 +286,62 @@ public:
       } else {
         TS_FAIL("No detector defined");
       }
+    }
+  }
+
+  void testWholeSpectraMasking_SpectrumInfo() {
+    // Workspace has 3 spectra, each 1 in length
+    const int numHist(3);
+    auto workspace = makeWorkspaceWithDetectors(numHist, 1);
+    workspace->maskWorkspaceIndex(1);
+    workspace->maskWorkspaceIndex(2);
+
+    const auto &spectrumInfo = workspace->spectrumInfo();
+    for (int i = 0; i < numHist; ++i) {
+      bool expectedMasked(false);
+      if (i == 0) {
+        expectedMasked = false;
+      } else {
+        expectedMasked = true;
+      }
+      TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), expectedMasked);
+    }
+  }
+
+  void test_spectrumInfo_works_unthreaded() {
+    const int numHist(3);
+    auto workspace = makeWorkspaceWithDetectors(numHist, 1);
+    std::atomic<bool> parallelException{false};
+    for (int i = 0; i < numHist; ++i) {
+      try {
+        static_cast<void>(workspace->spectrumInfo());
+      } catch (...) {
+        parallelException = true;
+      }
+    }
+    TS_ASSERT(!parallelException);
+  }
+
+  void test_spectrumInfo_fails_threaded() {
+    const int numHist(3);
+    auto workspace = makeWorkspaceWithDetectors(numHist, 1);
+    std::atomic<bool> parallelException{false};
+    std::atomic<int> threadCount{1};
+    PARALLEL_FOR1(workspace)
+    for (int i = 0; i < numHist; ++i) {
+      // Note: Cannot use INTERUPT_REGION macros since not inside an Algorithm.
+      threadCount = PARALLEL_NUMBER_OF_THREADS;
+      try {
+        static_cast<void>(workspace->spectrumInfo());
+      } catch (...) {
+        parallelException = true;
+      }
+    }
+    // If we actually had more than one thread this should throw.
+    if (threadCount > 1) {
+      TS_ASSERT(parallelException);
+    } else {
+      TS_ASSERT(!parallelException);
     }
   }
 
@@ -604,12 +662,10 @@ public:
   void test_getSpectrumToWorkspaceIndexMap() {
     WorkspaceTester ws;
     ws.initialize(2, 1, 1);
-    const auto map = ws.getSpectrumToWorkspaceIndexMap();
+    auto map = ws.getSpectrumToWorkspaceIndexMap();
+    TS_ASSERT_EQUALS(0, map[1]);
+    TS_ASSERT_EQUALS(1, map[2]);
     TS_ASSERT_EQUALS(map.size(), 2);
-    TS_ASSERT_EQUALS(map.begin()->first, 1);
-    TS_ASSERT_EQUALS(map.begin()->second, 0);
-    TS_ASSERT_EQUALS(map.rbegin()->first, 2);
-    TS_ASSERT_EQUALS(map.rbegin()->second, 1);
 
     // Check it throws for non-spectra axis
     ws.replaceAxis(1, new NumericAxis(1));
@@ -1491,12 +1547,14 @@ public:
     numberOfHistograms = sansInstrument->getNumberDetectors();
     m_workspaceSans.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
     m_workspaceSans.setInstrument(sansInstrument);
+    m_workspaceSans.getAxis(0)->setUnit("TOF");
+    m_workspaceSans.rebuildSpectraMapping();
+
     m_zRotation =
         Mantid::Kernel::Quat(180, V3D(0, 0, 1)); // rotate 180 degrees around z
 
     m_pos = Mantid::Kernel::V3D(1, 1, 1);
   }
-
   /// This test is equivalent to GeometryInfoFactoryTestPerformance, see there.
   void test_typical() {
     auto instrument = m_workspace.getInstrument();
@@ -1510,8 +1568,47 @@ public:
       result += detector->getDistance(*sample);
       result += m_workspace.detectorTwoTheta(*detector);
     }
-    // We are computing an using the result to fool the optimizer.
+    // We are computing and using the result to fool the optimizer.
     TS_ASSERT_DELTA(result, 5214709.740869, 1e-6);
+  }
+
+  void test_calculateL2() {
+
+    /*
+     * Simulate the L2 calculation performed via the Workspace/Instrument
+     * interface.
+     */
+    auto instrument = m_workspaceSans.getInstrument();
+    auto sample = instrument->getSample();
+    double l2 = 0;
+    for (size_t i = 0; i < m_workspaceSans.getNumberHistograms(); ++i) {
+      auto detector = m_workspaceSans.getDetector(i);
+      l2 += detector->getDistance(*sample);
+    }
+    // Prevent optimization
+    TS_ASSERT(l2 > 0);
+  }
+
+  void test_calculateL2_x10() {
+
+    /*
+     * Simulate the L2 calculation performed via the Workspace/Instrument
+     * interface. Repeat several times to benchmark any caching/optmisation that
+     * might be taken place in parameter maps.
+     */
+    auto instrument = m_workspaceSans.getInstrument();
+    auto sample = instrument->getSample();
+    double l2 = 0;
+    int count = 0;
+    while (count < 10) {
+      for (size_t i = 0; i < m_workspaceSans.getNumberHistograms(); ++i) {
+        auto detector = m_workspaceSans.getDetector(i);
+        l2 += detector->getDistance(*sample);
+      }
+      ++count;
+    }
+    // Prevent optimization
+    TS_ASSERT(l2 > 0);
   }
 
   /*
@@ -1561,6 +1658,42 @@ public:
       V3D pos;
       for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
         pos += m_workspaceSans.getDetector(i)->getPos();
+      }
+      ++count;
+    }
+  }
+
+  // As test_rotate_bank_and_read_positions_x10 but based on SpectrumInfo.
+  void test_rotate_bank_and_read_positions_SpectrumInfo_x10() {
+    int count = 0;
+    while (count < 10) {
+      // Rotate the bank
+      ComponentHelper::rotateComponent(
+          *m_sansBank, *m_paramMap, m_zRotation,
+          Mantid::Geometry::ComponentHelper::Relative);
+
+      V3D pos;
+      const auto &spectrumInfo = m_workspaceSans.spectrumInfo();
+      for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
+        pos += spectrumInfo.position(i);
+      }
+      ++count;
+    }
+  }
+
+  // As test_move_bank_and_read_positions_x10 but based on SpectrumInfo.
+  void test_move_bank_and_read_positions_SpectrumInfo_x10() {
+    int count = 0;
+    while (count < 10) {
+      // move the bank
+      ComponentHelper::moveComponent(
+          *m_sansBank, *m_paramMap, m_pos,
+          Mantid::Geometry::ComponentHelper::Relative);
+
+      V3D pos;
+      const auto &spectrumInfo = m_workspaceSans.spectrumInfo();
+      for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
+        pos += spectrumInfo.position(i);
       }
       ++count;
     }

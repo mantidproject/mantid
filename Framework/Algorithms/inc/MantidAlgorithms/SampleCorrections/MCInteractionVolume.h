@@ -8,6 +8,7 @@ namespace API {
 class Sample;
 }
 namespace Geometry {
+class BoundingBox;
 class Object;
 class SampleEnvironment;
 }
@@ -50,6 +51,7 @@ public:
   // the sample
   MCInteractionVolume(const API::Sample &&sample) = delete;
 
+  const Geometry::BoundingBox &getBoundingBox() const;
   double calculateAbsorption(Kernel::PseudoRandomNumberGenerator &rng,
                              const Kernel::V3D &startPos,
                              const Kernel::V3D &direc,

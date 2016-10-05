@@ -1,4 +1,3 @@
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -61,8 +60,8 @@ void SaveDiffFittingAscii::init() {
 }
 
 /**
-*   Executes the algorithm.
-*/
+ *   Executes the algorithm.
+ */
 void SaveDiffFittingAscii::exec() {
 
   // Retrieve the input workspace
@@ -94,19 +93,11 @@ bool SaveDiffFittingAscii::processGroups() {
           boost::dynamic_pointer_cast<ITableWorkspace>(inputGroup->getItem(i)));
     }
 
-    // Store output workspace in AnalysisDataService
-    if (!isChild())
-      this->store();
-
-    setExecuted(true);
-    notificationCenter().postNotification(
-        new FinishedNotification(this, this->isExecuted()));
-
     processAll(input_ws);
-  } catch (...) {
-    g_log.error()
-        << "Error while processing groups on SaveDiffFittingAscii algorithm. "
-        << '\n';
+  } catch (std::runtime_error &rexc) {
+    g_log.error(
+        std::string("Error while processing a group of workspaces. Details: ") +
+        rexc.what() + '\n');
   }
 
   return true;

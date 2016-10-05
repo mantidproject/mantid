@@ -338,11 +338,10 @@ void AnvredCorrection::execEvent() {
           static_cast<float>(itev->m_errorSquared * value * value);
       itev->m_weight *= static_cast<float>(value);
     }
-    correctionFactors->getOrAddEventList(i) += events;
+    correctionFactors->getSpectrum(i) += events;
 
     auto &dets = eventW->getSpectrum(i).getDetectorIDs();
-    for (auto const &det : dets)
-      correctionFactors->getOrAddEventList(i).addDetectorID(det);
+    correctionFactors->getSpectrum(i).addDetectorIDs(dets);
     // When focussing in place, you can clear out old memory from the input one!
     if (inPlace) {
       eventW->getSpectrum(i).clear();
