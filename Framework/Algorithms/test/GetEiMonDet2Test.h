@@ -229,11 +229,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("DetectorEPPTable", eppTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("IndexType", "WorkspaceIndex"))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("IndexType", "WorkspaceIndex"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Detectors", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "-1"))
     const std::string exceptionMessage("Monitor cannot be negative.");
-    TS_ASSERT_THROWS_EQUALS(algorithm.execute(), const std::runtime_error& e, e.what(), exceptionMessage)
+    TS_ASSERT_THROWS_EQUALS(algorithm.execute(), const std::runtime_error &e,
+                            e.what(), exceptionMessage)
     TS_ASSERT(!algorithm.isExecuted())
   }
 
