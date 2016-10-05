@@ -29,37 +29,40 @@ using Mantid::HistogramData::LinearGenerator;
 
 double roundSix(double i) { return floor(i * 1000000 + 0.5) / 1000000; }
 
+namespace {
+MatrixWorkspace_sptr createWorkspace(const HistogramX &xData,
+                                     const HistogramY &yData,
+                                     const HistogramE &eData,
+                                     const int nSpec = 1) {
+
+  Workspace2D_sptr outWS = boost::make_shared<Workspace2D>();
+  outWS->initialize(nSpec, xData.size(), yData.size());
+  for (int i = 0; i < nSpec; ++i) {
+    outWS->mutableY(i) = yData;
+    outWS->mutableE(i) = eData;
+    outWS->mutableX(i) = xData;
+  }
+
+  outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+
+  return outWS;
+}
+
+MatrixWorkspace_sptr create1DWorkspace(const HistogramX &xData,
+                                       const HistogramY &yData) {
+  Workspace2D_sptr outWS = boost::make_shared<Workspace2D>();
+  outWS->initialize(1, xData.size(), yData.size());
+  outWS->mutableY(0) = yData;
+  outWS->mutableX(0) = xData;
+
+  outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+
+  return outWS;
+}
+}
+
 class Stitch1DTest : public CxxTest::TestSuite {
 private:
-  MatrixWorkspace_sptr createWorkspace(const HistogramX &xData,
-                                       const HistogramY &yData,
-                                       const HistogramE &eData,
-                                       const int nSpec = 1) {
-
-    Workspace2D_sptr outWS = boost::make_shared<Workspace2D>();
-    outWS->initialize(nSpec, xData.size(), yData.size());
-    for (int i = 0; i < nSpec; ++i) {
-      outWS->mutableY(i) = yData;
-      outWS->mutableE(i) = eData;
-      outWS->mutableX(i) = xData;
-    }
-
-    outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
-
-    return outWS;
-  }
-
-  MatrixWorkspace_sptr create1DWorkspace(const HistogramX &xData,
-                                         const HistogramY &yData) {
-    Workspace2D_sptr outWS = boost::make_shared<Workspace2D>();
-    outWS->initialize(1, xData.size(), yData.size());
-    outWS->mutableY(0) = yData;
-    outWS->mutableX(0) = xData;
-
-    outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
-
-    return outWS;
-  }
 
   MatrixWorkspace_sptr a;
   MatrixWorkspace_sptr b;
@@ -628,6 +631,45 @@ public:
     auto outY = outWs->readY(0);
     TSM_ASSERT("Nans should be put back", boost::math::isnan(outY[0]));
   }
+};
+
+class Stitch1DTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static Stitch1DTestPerformance *createSuite() {
+    return new Stitch1DTestPerformance();
+  }
+  static void destroySuite(Stitch1DTestPerformance *suite) {
+    AnalysisDataService::Instance().clear();
+    delete suite;
+  }
+
+  void setUp() {
+    HistogramX x1(1000, LinearGenerator(0, 0.02));
+    HistogramX x2(1000, LinearGenerator(19, 0.02));
+    HistogramY y1(999, 1);
+    HistogramY y2(999, 2);
+
+    ws1 = create1DWorkspace(x1, y1);
+    ws2 = create1DWorkspace(x2, y2);
+  }
+
+  void testExec() {
+	  Stitch1D alg;
+	  alg.setChild(true);
+	  alg.setRethrows(true);
+	  alg.initialize();
+	  alg.setProperty("LHSWorkspace", ws1);
+	  alg.setProperty("RHSWorkspace", ws2);
+	  alg.setProperty("Params", "0.2");
+	  alg.setPropertyValue("OutputWorkspace", "dummy_value");
+	  alg.execute();
+  }
+
+private:
+  MatrixWorkspace_sptr ws1;
+  MatrixWorkspace_sptr ws2;
 };
 
 #endif /* MANTID_ALGORITHMS_STITCH1DTEST_H_ */

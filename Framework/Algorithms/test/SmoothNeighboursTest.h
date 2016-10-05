@@ -423,4 +423,43 @@ public:
   }
 };
 
+class SmoothNeighboursTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static SmoothNeighboursTestPerformance *createSuite() {
+    return new SmoothNeighboursTestPerformance();
+  }
+  static void destroySuite(SmoothNeighboursTestPerformance *suite) {
+    AnalysisDataService::Instance().clear();
+    delete suite;
+  }
+  SmoothNeighboursTestPerformance() { FrameworkManager::Instance(); }
+
+  void setUp() override {
+    inWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(500, 10);
+  }
+
+  void testNeighboursAndFlatWeighting() {
+    // Test with number of neighbours and flat weighting
+
+    SmoothNeighbours alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setProperty("OutputWorkspace", "testMW");
+    alg.setProperty("PreserveEvents", false);
+    alg.setProperty("WeightedSum", "Flat");
+    alg.setProperty("NumberOfNeighbours", 200);
+    alg.setProperty("IgnoreMaskedDetectors", true);
+    alg.setProperty("Radius", 10.0);
+    alg.setProperty("RadiusUnits", "NumberOfPixels");
+    alg.execute();
+  }
+
+private:
+  MatrixWorkspace_sptr inWS;
+};
+
 #endif /*SMOOTHNEIGHBOURSTEST_H_*/

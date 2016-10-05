@@ -85,4 +85,22 @@ public:
   }
 };
 
+class SofQWNormalisedPolygonTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static SofQWNormalisedPolygonTestPerformance *createSuite() {
+    return new SofQWNormalisedPolygonTestPerformance();
+  }
+  static void destroySuite(SofQWNormalisedPolygonTestPerformance *suite) {
+    AnalysisDataService::Instance().clear();
+    delete suite;
+  }
+
+  void testExec() {
+    auto result =
+        SofQWTest::runSQW<Mantid::Algorithms::SofQWNormalisedPolygon>();
+  }
+};
+
 #endif /* MANTID_ALGORITHMS_SOFQW2TEST_H_ */
