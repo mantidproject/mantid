@@ -68,10 +68,10 @@ public:
     Workspace2D_sptr ows = alg.getProperty("OutputWorkspace");
 
     for (size_t i = 0; i < ows->getNumberHistograms(); ++i) {
-      const auto &xs2 = ws2->readX(i);
-      const auto &xs = ows->readX(i);
-      const auto &ys2 = ws2->readY(i);
-      const auto &ys = ows->readY(i);
+      const auto &xs2 = ws2->x(i);
+      const auto &xs = ows->x(i);
+      const auto &ys2 = ws2->y(i);
+      const auto &ys = ows->y(i);
 
       // check output for consistency
       for (size_t j = 0; j < ys.size(); ++j) {
