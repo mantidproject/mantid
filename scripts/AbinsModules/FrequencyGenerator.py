@@ -8,7 +8,7 @@ class FrequencyGenerator(object):
         end = array.size
         for el in range(array.size - 1, 0, -1):
             if array[el] > AbinsParameters.eps:
-                end = el
+                end = el + 1 # we want to include first non-zero element from the end of array as well
                 break
         return array[:end]
 
@@ -51,9 +51,6 @@ class FrequencyGenerator(object):
 
                         new_array[current_position] = temp
                         current_position += 1
-
-                    else:
-                        break
 
             return self.truncate_array(array=new_array)
 

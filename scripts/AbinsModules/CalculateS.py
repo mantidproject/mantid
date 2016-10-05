@@ -147,6 +147,7 @@ class CalculateS(IOmodule, FrequencyGenerator):
                                                  quantum_order=exponential)
 
             # factor to rescaled rebined spectra; to be improved in the future....
+            # TODO: implement a better scaling factor!
             scaling_factor.append(math.pow(float(fundamentals_freq.size) / (local_frequencies.size * max(1.0, exponential - 1.0)), 0.65))
 
             generated_frequencies.append(local_frequencies)
@@ -235,8 +236,14 @@ class CalculateS(IOmodule, FrequencyGenerator):
 
 
     def _rebin_data(self, array_x=None, array_y=None):
+        """
+        Rebins S data so that all quantum effects have the same x-axis.
+        @param array_x: numpy array with frequncies
+        @param array_y: numpy array with S
+        @return: rebined frequencies, rebined S
+        """
 
-        bins = np.arange(min(array_x), max(array_x), AbinsParameters.bin_width)
+        bins = np.arange(0.0, AbinsParameters.max_wavenumber, AbinsParameters.bin_width)
         if bins.size > array_x.size:
             return array_x, array_y
         else:

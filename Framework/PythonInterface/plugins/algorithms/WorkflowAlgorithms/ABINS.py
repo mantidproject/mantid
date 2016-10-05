@@ -233,10 +233,6 @@ class ABINS(PythonAlgorithm):
         """
         s_data_extracted = s_data.extract()
 
-
-
-        #freq = s_data_extracted["frequencies"]
-
         # find max dimension of frequencies
         max_freq_dim = s_data_extracted["frequencies"]["order_1"].size
         for item in s_data_extracted["frequencies"]:
@@ -310,9 +306,8 @@ class ABINS(PythonAlgorithm):
         # only fundamentals
         if s_points.shape[0] == 1:
 
-            freq_0, s_points_0 = self._reduce_array_size(array_x=freq[0], array_y=s_points[0])
-            CreateWorkspace(DataX=freq_0,
-                            DataY=s_points_0,
+            CreateWorkspace(DataX=freq[0],
+                            DataY=s_points[0],
                             NSpec=1,
                             YUnitLabel="S",
                             OutputWorkspace=workspace,
@@ -324,9 +319,8 @@ class ABINS(PythonAlgorithm):
         # total workspaces
         elif len(s_points.shape) == 1:
 
-            freq_0, s_points_0 = self._reduce_array_size(array_x=freq, array_y=s_points)
-            CreateWorkspace(DataX=freq_0,
-                            DataY=s_points_0,
+            CreateWorkspace(DataX=freq,
+                            DataY=s_points,
                             NSpec=1,
                             YUnitLabel="S",
                             OutputWorkspace=workspace,
@@ -343,10 +337,9 @@ class ABINS(PythonAlgorithm):
             for n in range(dim):
 
                 wrk_name = workspace + "_quantum_order_effect_%s"%(n + 1) # here we count from 1 because n=1 is fundamental, n=2 first overtone etc....
-                freq_n, s_points_n = self._reduce_array_size(array_x=freq[n], array_y=s_points[n])
                 partial_wrk_names.append(wrk_name)
-                CreateWorkspace(DataX=freq_n,
-                                DataY=s_points_n,
+                CreateWorkspace(DataX=freq[n],
+                                DataY=s_points[n],
                                 NSpec=1,
                                 YUnitLabel="S",
                                 OutputWorkspace=wrk_name,
@@ -382,12 +375,9 @@ class ABINS(PythonAlgorithm):
             freq[:ws_x.size] = ws_x
             for partial_ws in local_partial_workspaces:
                 ws_y = mtd[partial_ws].dataY(0)
-                #size = min (s_atoms.size, ws_y.size)
-                #s_atoms[:size] += ws_y[:size]
                 s_atoms[:ws_y.size] += ws_y
-            freq_reduced, s_atoms_reduced = self._reduce_array_size(array_x=freq, array_y=s_atoms)
 
-            self._fill_s_workspace(freq_reduced, s_atoms_reduced, total_workspace)
+            self._fill_s_workspace(freq, s_atoms, total_workspace)
 
         # Otherwise just repackage the workspace we have as the total
         else:
@@ -464,30 +454,6 @@ class ABINS(PythonAlgorithm):
         self._set_workspace_units(wrk=experimental_wrk.getName())
 
         return experimental_wrk
-
-
-    def _reduce_array_size(self, array_x=None, array_y=None):
-        """Reduces size of two  1D numpy arrays  (first array is  x-values and second array is y-values).
-        @param array_x: array with x-values which size should be reduced (type numpy.ndarray),
-        @param array_y: array with y-values which size should be reduced (type numpy.ndarray),
-        """
-
-        # make sure we work on local copies
-        local_array_x = np.copy(array_x)
-        local_array_y = np.copy(array_y)
-
-        indices = local_array_x.argsort()
-        local_array_x = local_array_x[indices]
-        local_array_y = local_array_y[indices]
-        size = local_array_y.size - 1 # because first element of array has index 0
-        end = size
-        for n in range(size, 0, -1):
-
-            if local_array_x[n] < AbinsParameters.max_wavenumber:
-                end = max(1,n)
-                break
-
-        return local_array_x[:end], local_array_y[:end]
 
 
     def _set_workspace_units(self, wrk=None):

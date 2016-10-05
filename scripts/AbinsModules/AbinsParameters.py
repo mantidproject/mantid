@@ -39,11 +39,11 @@ crystal_data_group = "Crystal"  # name of the group where CrystalData is stored
 
 S_data_group = "S"  # name of the group where dynamical factor is stored
 
-higher_order_quantum_effects = 1  # number of quantum order effects taken into account
+higher_order_quantum_effects = 3  # number of quantum order effects taken into account
 
-pkt_per_peak = 100  # number of points for each peak broadened by the experimental resolution
-bin_width = 0.2  # defines width of bins used in rebining of S
-max_wavenumber = 5000  # maximum wavenumber in cm^1 taken into account while creating workspaces (exclusive)
+pkt_per_peak = 200  # number of points for each peak broadened by the experimental resolution
+bin_width = 0.5  # defines width of bins used in rebining of S
+max_wavenumber = 4000  # maximum wavenumber in cm^1 taken into account while creating workspaces (exclusive)
 
 ######################################ABINS internal parameters end ###########################
 
