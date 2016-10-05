@@ -573,8 +573,7 @@ void Stitch1D::exec() {
     }
     scaleFactor = ratio->readY(0).front();
     errorScaleFactor = ratio->readE(0).front();
-    if (scaleFactor < 1e-2 || scaleFactor > 1e2 ||
-        std::isnan(scaleFactor)) {
+    if (scaleFactor < 1e-2 || scaleFactor > 1e2 || std::isnan(scaleFactor)) {
       std::stringstream messageBuffer;
       messageBuffer << "Stitch1D calculated scale factor is: " << scaleFactor
                     << ". Check that in both input workspaces the integrated "

@@ -166,7 +166,7 @@ void RotationSurface::init() {
                           }
                           du = m_width_max;
                         }
-                        if (m_height_max > dv && std::isfinite( m_height_max)) {
+                        if (m_height_max > dv && std::isfinite(m_height_max)) {
                           if (dv > 0 && !(dV >= m_height_max)) {
                             m_height_max = dV;
                           }

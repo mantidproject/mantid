@@ -6,7 +6,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
-
 #include <sstream>
 
 namespace Mantid {

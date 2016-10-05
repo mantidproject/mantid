@@ -626,8 +626,7 @@ public:
 
     double scaleFactor = ret.get<1>();
 
-    TSM_ASSERT("ScaleFactor should not be NAN",
-               !std::isnan(scaleFactor));
+    TSM_ASSERT("ScaleFactor should not be NAN", !std::isnan(scaleFactor));
   }
 
   void test_patch_inf_y_value_for_scaling() {
@@ -656,8 +655,7 @@ public:
 
     double scaleFactor = ret.get<1>();
 
-    TSM_ASSERT("ScaleFactor should not be Infinity",
-               !std::isinf(scaleFactor));
+    TSM_ASSERT("ScaleFactor should not be Infinity", !std::isinf(scaleFactor));
   }
 
   void test_reset_nans() {
@@ -687,8 +685,7 @@ public:
     MatrixWorkspace_sptr outWs = ret.get<0>();
     double scaleFactor = ret.get<1>();
 
-    TSM_ASSERT("ScaleFactor should not be Infinity",
-               !std::isinf(scaleFactor));
+    TSM_ASSERT("ScaleFactor should not be Infinity", !std::isinf(scaleFactor));
 
     auto outY = outWs->readY(0);
     TSM_ASSERT("Nans should be put back", std::isnan(outY[0]));
