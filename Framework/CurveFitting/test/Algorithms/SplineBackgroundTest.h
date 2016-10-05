@@ -47,8 +47,8 @@ public:
     MatrixWorkspace_sptr outWS =
         WorkspaceCreationHelper::getWS<MatrixWorkspace>("SplineBackground_out");
 
-    const MantidVec &X = outWS->readX(0);
-    const MantidVec &Y = outWS->readY(0);
+    const auto &X = outWS->x(0);
+    const auto &Y = outWS->y(0);
 
     for (size_t i = 0; i < outWS->blocksize(); i++) {
       TS_ASSERT_DELTA(Y[i], std::sin(X[i]), 0.2);
