@@ -160,7 +160,7 @@ public:
     TS_ASSERT(ws);
     if (!ws)
       return;
-    TS_ASSERT_DELTA(ws->readY(5050)[5], 7.7142, 0.01);
+    TS_ASSERT_DELTA(ws->y(5050)[5], 7.7142, 0.01);
     AnalysisDataService::Instance().remove("TOPAZ");
   }
 

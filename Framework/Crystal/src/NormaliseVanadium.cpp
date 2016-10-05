@@ -74,15 +74,15 @@ void NormaliseVanadium::exec() {
     //    PARALLEL_START_INTERUPT_REGION //FIXME: Restore
 
     // Get a reference to the Y's in the output WS for storing the factors
-    MantidVec &Y = correctionFactors->dataY(i);
-    MantidVec &E = correctionFactors->dataE(i);
+    auto &Y = correctionFactors->mutableY(i);
+    auto &E = correctionFactors->mutableE(i);
 
     // Copy over bin boundaries
     const auto &inSpec = m_inputWS->getSpectrum(i);
-    const MantidVec &Xin = inSpec.readX();
-    correctionFactors->dataX(i) = Xin;
-    const MantidVec &Yin = inSpec.readY();
-    const MantidVec &Ein = inSpec.readE();
+    const auto &Xin = inSpec.x();
+    correctionFactors->setSharedX(i, inSpec.sharedX());
+    const auto &Yin = inSpec.y();
+    const auto &Ein = inSpec.e();
 
     // Get detector position
     IDetector_const_sptr det;
