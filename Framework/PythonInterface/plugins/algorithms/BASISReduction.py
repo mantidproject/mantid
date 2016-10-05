@@ -38,19 +38,24 @@ class BASISReduction(PythonAlgorithm):
     _long_inst = None
     _extension = None
     _doIndiv = None
-    _noMonNorm = None
+
     _groupDetOpt = None
     _overrideMask = None
     _dMask = None
     _run_list = None  # a list of runs, or a list of sets of runs
     _samWs = None
-    _samMonWs = None
+
     _samWsRun = None
     _samSqwWs = None
+    _debugMode = False  # set to True to prevent executing _cleanUp method
 
     def __init__(self):
         PythonAlgorithm.__init__(self)
         self._normalizeToFirst = False
+
+        # properties related to monitor
+        self._noMonNorm = None
+        self._samMonWs = None
 
         # properties related to the chosen reflection
         self._reflection = None  # entry in the reflections dictionary
@@ -245,6 +250,10 @@ class BASISReduction(PythonAlgorithm):
             processed_filename = self._makeRunName(self._samWsRun, False) + extension
             sapi.SaveNexus(Filename=processed_filename, InputWorkspace=self._samSqwWs)
 
+        # Clean up intemediate files
+        if not self._debugMode:
+            self._cleanUp()
+            
     def _getRuns(self, rlist, doIndiv=True):
         """
         Create sets of run numbers for analysis. A semicolon indicates a
@@ -276,9 +285,9 @@ class BASISReduction(PythonAlgorithm):
 
     def _makeRunFile(self, run):
         """
-        Make name like BSS24234
+        Make name like BSS_24234_event.nxs
         """
-        return self._short_inst + str(run)
+        return "{0}_{1}_event.nxs".format(self._short_inst,str(run))
 
     def _sumRuns(self, run_set, sam_ws, mon_ws, extra_ext=None):
         """
@@ -339,9 +348,9 @@ class BASISReduction(PythonAlgorithm):
         """
         wsName = self._makeRunName(run_set[0])
         wsName += extra_extension
-        wsMonName = wsName + "_monitors"
-        self._sumRuns(run_set, wsName, wsMonName, extra_extension)
-        self._calibData(wsName, wsMonName)
+        self._samMonWs = wsName + "_monitors"
+        self._sumRuns(run_set, wsName, self._samMonWs, extra_extension)
+        self._calibData(wsName, self._samMonWs)
         return wsName
 
     def _group_and_SofQW(self, wsName, etRebins, isSample=True):
@@ -378,6 +387,14 @@ class BASISReduction(PythonAlgorithm):
         workspace = sapi.mtd[wsName]
         maximumYvalue = workspace.dataY(0).max()
         sapi.Scale(InputWorkspace=wsName, OutputWorkspace=wsName, Factor=1./maximumYvalue, Operation="Multiply",)
+
+    def _cleanUp(self):
+        """
+        Delete intermediate workspaces
+        """
+        DeleteWorkspace("BASIS_MASK")  # delete the mask
+        DeleteWorkspace(self._samWs)  # delete the events
+        DeleteWorkspace(self._samMonWs)  # delete the monitors
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISReduction)
