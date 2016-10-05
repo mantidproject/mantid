@@ -1,23 +1,23 @@
-#ifndef MANTID_HISTOGRAMDATA_HISTOGRAMREBINTEST_H_
-#define MANTID_HISTOGRAMDATA_HISTOGRAMREBINTEST_H_
+#ifndef MANTID_HISTOGRAMDATA_REBINTEST_H_
+#define MANTID_HISTOGRAMDATA_REBINTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidHistogramData/Histogram.h"
-#include "MantidHistogramData/HistogramRebin.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidHistogramData/Rebin.h"
 
 #include <algorithm>
 #include <random>
 
 using namespace Mantid::HistogramData;
 
-class HistogramRebinTest : public CxxTest::TestSuite {
+class RebinTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static HistogramRebinTest *createSuite() { return new HistogramRebinTest(); }
-  static void destroySuite(HistogramRebinTest *suite) { delete suite; }
+  static RebinTest *createSuite() { return new RebinTest(); }
+  static void destroySuite(RebinTest *suite) { delete suite; }
 
   void testExecrebin() {
     TS_ASSERT_THROWS_NOTHING(
@@ -31,7 +31,7 @@ public:
 
   void testRebinNoYModeDefined() {
     BinEdges edges(5, LinearGenerator(0, 2));
-    // X Mode Counts
+    // X Mode Points
     TS_ASSERT_THROWS(
         rebin(Histogram(Histogram::XMode::Points, Histogram::YMode::Counts),
               edges),
@@ -42,8 +42,22 @@ public:
         std::runtime_error);
   }
 
-  void testRebinFailsBinEdgesInvalid() {
+  void testRebinFailsCentralBinEdgesInvalid() {
     std::vector<double> binEdges{1, 2, 3, 3, 5, 7};
+    BinEdges edges(binEdges);
+
+    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges), std::runtime_error);
+  }
+
+  void testRebinFailsStartBinEdgesInvalid() {
+    std::vector<double> binEdges{1, 1, 3, 4, 5, 7};
+    BinEdges edges(binEdges);
+
+    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges), std::runtime_error);
+  }
+
+  void testRebinEndCentralBinEdgesInvalid() {
+    std::vector<double> binEdges{1, 2, 3, 4, 5, 5};
     BinEdges edges(binEdges);
 
     TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges), std::runtime_error);
@@ -53,6 +67,14 @@ public:
     std::vector<double> binEdges{1, 2, 3, 3, 5, 7};
     Histogram hist(BinEdges(std::move(binEdges)), Counts(5, 10));
     BinEdges edges{1, 2, 3, 4, 5, 6};
+
+    TS_ASSERT_THROWS(rebin(hist, edges), std::runtime_error);
+  }
+
+  void testRebinFailsInputAndOutputBinEdgesInvalid() {
+    std::vector<double> binEdges{1, 2, 3, 3, 5, 7};
+    Histogram hist(BinEdges(binEdges), Counts(5, 10));
+    BinEdges edges(std::move(binEdges));
 
     TS_ASSERT_THROWS(rebin(hist, edges), std::runtime_error);
   }
@@ -78,7 +100,7 @@ public:
     auto histFreq = getFrequencyHistogram();
 
     auto outCounts = rebin(histCounts, BinEdges(10, LinearGenerator(30, 1)));
-    auto outFreq = rebin(histFreq, BinEdges(5, LinearGenerator(100, 2)));
+    auto outFreq = rebin(histFreq, BinEdges(10, LinearGenerator(30, 2)));
 
     TS_ASSERT(std::all_of(outCounts.y().cbegin(), outCounts.y().cend(),
                           [](const double i) { return i == 0; }));
@@ -363,18 +385,16 @@ private:
   }
 };
 
-class HistogramRebinTestPerformance : public CxxTest::TestSuite {
+class RebinTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static HistogramRebinTestPerformance *createSuite() {
-    return new HistogramRebinTestPerformance();
+  static RebinTestPerformance *createSuite() {
+    return new RebinTestPerformance();
   }
-  static void destroySuite(HistogramRebinTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(RebinTestPerformance *suite) { delete suite; }
 
-  HistogramRebinTestPerformance()
+  RebinTestPerformance()
       : hist(BinEdges(binSize, LinearGenerator(0, 1))),
         histFreq(BinEdges(binSize, LinearGenerator(0, 1))),
         smBins(binSize * 2, LinearGenerator(0, 0.5)),
@@ -411,23 +431,10 @@ private:
   BinEdges lgBins;
 
   void setupOutput() {
-    Counts counts(binSize - 1);
-    CountStandardDeviations countErrors(counts.size());
-    Frequencies freqs(binSize - 1);
-    FrequencyStandardDeviations freqErrors(freqs.size());
-
-    std::default_random_engine eng;
-    std::uniform_real_distribution<double> distr(100.0, 10000.0);
-
-    std::generate(counts.begin(), counts.end(),
-                  [distr, eng]() mutable { return distr(eng); });
-    std::generate(freqs.begin(), freqs.end(),
-                  [distr, eng]() mutable { return distr(eng); });
-
-    std::transform(counts.cbegin(), counts.cend(), countErrors.begin(),
-                   [](const double c) { return std::sqrt(c); });
-    std::transform(freqs.cbegin(), freqs.cend(), freqErrors.begin(),
-                   [](const double f) { return std::sqrt(f); });
+    Counts counts(binSize - 1, 0);
+    CountStandardDeviations countErrors(counts.size(), 0);
+    Frequencies freqs(binSize - 1, 0);
+    FrequencyStandardDeviations freqErrors(freqs.size(), 0);
 
     hist.setCounts(counts);
     hist.setCountStandardDeviations(countErrors);
@@ -436,4 +443,4 @@ private:
   }
 };
 
-#endif /* MANTID_HISTOGRAMDATA_HISTOGRAMREBINTEST_H_ */
+#endif /* MANTID_HISTOGRAMDATA_REBINTEST_H_ */

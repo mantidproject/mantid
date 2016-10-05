@@ -1,4 +1,4 @@
-#include "MantidHistogramData/HistogramRebin.h"
+#include "MantidHistogramData/Rebin.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Histogram.h"
 #include <algorithm>
@@ -15,12 +15,6 @@ using Mantid::HistogramData::FrequencyVariances;
 
 namespace {
 Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
-  if (input.yMode() != Histogram::YMode::Counts ||
-      input.xMode() != Histogram::XMode::BinEdges) {
-    throw std::runtime_error(
-        "Histogram  XMode should be BinEdges and YMode should be Counts.");
-  }
-
   auto &xold = input.x();
   auto &yold = input.y();
   auto &eold = input.e();
@@ -33,7 +27,8 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
 
   auto size_yold = yold.size();
   auto size_ynew = ynew.size();
-  size_t iold = 0, inew = 0;
+  size_t iold = 0;
+  size_t inew = 0;
 
   while ((inew < size_ynew) && (iold < size_yold)) {
     auto xo_low = xold[iold];
@@ -75,12 +70,6 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
 }
 
 Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
-  if (input.yMode() != Histogram::YMode::Frequencies ||
-      input.xMode() != Histogram::XMode::BinEdges) {
-    throw std::runtime_error(
-        "Histogram  XMode should be BinEdges and YMode should be Frequencies.");
-  }
-
   auto &xold = input.x();
   auto &yold = input.y();
   auto &eold = input.e();
@@ -93,7 +82,8 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
 
   auto size_yold = yold.size();
   auto size_ynew = ynew.size();
-  size_t iold = 0, inew = 0;
+  size_t iold = 0;
+  size_t inew = 0;
 
   while ((inew < size_ynew) && (iold < size_yold)) {
     auto xo_low = xold[iold];
@@ -141,6 +131,13 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
 namespace Mantid {
 namespace HistogramData {
 
+/** Rebins data according to a new set of bin edges.
+* @param input :: input histogram data to be rebinned.
+* @param binEdges :: input will be rebinned according to this set of bin edges.
+* @returns The rebinned histogram.
+* @throws std::runtime_error if the input histogram xmode is not BinEdges and
+* the input yMode is undefined.
+*/
 Histogram rebin(const Histogram &input, const BinEdges &binEdges) {
   if (input.xMode() != Histogram::XMode::BinEdges)
     throw std::runtime_error(
