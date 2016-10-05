@@ -8,6 +8,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -173,6 +174,40 @@ public:
 
     AnalysisDataService::Instance().remove(outputWS);
   }
+};
+
+class SmoothDataTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() {
+
+    // Set up a small workspace for testing
+    constexpr size_t numHistograms(1);
+    constexpr size_t numBins(1000000);
+
+    inputWs =
+        WorkspaceCreationHelper::Create2DWorkspace(numHistograms, numBins);
+
+    auto &yVals = inputWs->mutableY(0);
+    auto &eVals = inputWs->mutableE(0);
+
+    for (int i = 0; i < numBins; ++i) {
+      yVals[i] = i + 1.0;
+      eVals[i] = sqrt(i + 1.0);
+    }
+
+    smoothAlg.initialize();
+    smoothAlg.setProperty("InputWorkspace", inputWs);
+    smoothAlg.setPropertyValue("OutputWorkspace", "outputWS");
+    smoothAlg.setRethrows(true);
+  }
+
+  void testSmoothDataPerformance() {
+    TS_ASSERT_THROWS_NOTHING(smoothAlg.execute());
+  }
+
+private:
+  Workspace2D_sptr inputWs;
+  SmoothData smoothAlg;
 };
 
 #endif /*SMOOTHDATATEST_H_*/
