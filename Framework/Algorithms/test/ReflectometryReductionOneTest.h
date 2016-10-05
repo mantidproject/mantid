@@ -87,7 +87,7 @@ public:
     TS_ASSERT_EQUALS(map[specId1], 0);
 
     // Check the cropped x range
-    Mantid::MantidVec copyX = detectorWS->readX(0);
+    auto copyX = detectorWS->x(0);
     std::sort(copyX.begin(), copyX.end());
     TS_ASSERT(copyX.front() >= wavelengthMin);
     TS_ASSERT(copyX.back() <= wavelengthMax);
@@ -224,8 +224,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     MatrixWorkspace_sptr scaledWS = alg->getProperty("OutputWorkspace");
     // compare y data instead of workspaces.
-    auto scaledYData = scaledWS->readY(0);
-    auto nonScaledYData = nonScaledWS->readY(0);
+    auto &scaledYData = scaledWS->y(0);
+    auto &nonScaledYData = nonScaledWS->y(0);
     TS_ASSERT_EQUALS(scaledYData.front(), 2 * nonScaledYData.front());
     TS_ASSERT_EQUALS(scaledYData[scaledYData.size() / 2],
                      2 * nonScaledYData[nonScaledYData.size() / 2]);
@@ -242,7 +242,7 @@ public:
     inWS->setInstrument(m_tinyReflWS->getInstrument());
     inWS->getAxis(0)->setUnit("Wavelength");
     // Setup bad bin edges, Rebin will throw (not CalculateResolution?)
-    inWS->dataX(0).assign(inWS->readX(0).size(), inWS->readX(0)[0]);
+    inWS->mutableX(0) = inWS->x(0)[0];
     alg->setProperty("InputWorkspace", inWS);
     alg->setProperty("OutputWorkspace", "rebinnedWS");
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
@@ -257,7 +257,7 @@ public:
     alg->setProperty("OutputWorkspace", "rebinnedWS");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     MatrixWorkspace_sptr rebinnedIvsQWS = alg->getProperty("OutputWorkspace");
-    auto xData = rebinnedIvsQWS->readX(0);
+    auto &xData = rebinnedIvsQWS->x(0);
     // based off the equation for logarithmic binning X(i+1)=X(i)(1+|dX|)
     double binWidthFromLogarithmicEquation = fabs((xData[1] / xData[0]) - 1);
     TSM_ASSERT_DELTA("DQQ should be the same as abs(x[1]/x[0] - 1)",
@@ -277,7 +277,7 @@ public:
     alg->setProperty("OutputWorkspace", "rebinnedWS");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     MatrixWorkspace_sptr rebinnedIvsQWS = alg->getProperty("OutputWorkspace");
-    auto xData = rebinnedIvsQWS->readX(0);
+    auto &xData = rebinnedIvsQWS->x(0);
     TSM_ASSERT_EQUALS("QMin should be the same as first Param entry (1.0)",
                       xData[0], 1.0);
     // based off the equation for logarithmic binning X(i+1)=X(i)(1+|dX|)
@@ -299,7 +299,7 @@ public:
     alg->setProperty("OutputWorkspace", "rebinnedWS");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     MatrixWorkspace_sptr rebinnedIvsQWS = alg->getProperty("OutputWorkspace");
-    auto xData = rebinnedIvsQWS->readX(0);
+    auto &xData = rebinnedIvsQWS->x(0);
     TSM_ASSERT_DELTA("QMin should be the same as the first Param entry (1.577)",
                      xData[0], 1.577, 1e-06);
     TSM_ASSERT_DELTA("DQQ should the same as 0.2", xData[1] - xData[0], 0.2,
@@ -371,16 +371,16 @@ public:
     // convert from degrees to radians for sin() function
     double outThetaInRadians = outTheta * M_PI / 180;
 
-    double lamMin = inLam->readX(0).front();
-    double lamMax = inLam->readX(0).back();
+    double lamMin = inLam->x(0).front();
+    double lamMax = inLam->x(0).back();
 
     // Derive our QMin and QMax from the equation
     double qMinFromEQ = (4 * M_PI * sin(outThetaInRadians)) / lamMax;
     double qMaxFromEQ = (4 * M_PI * sin(outThetaInRadians)) / lamMin;
 
     // Get our QMin and QMax from the workspace
-    auto qMinFromWS = inQ->readX(0).front();
-    auto qMaxFromWS = inQ->readX(0).back();
+    auto qMinFromWS = inQ->x(0).front();
+    auto qMaxFromWS = inQ->x(0).back();
 
     // Compare the two values (they should be identical)
     TS_ASSERT_DELTA(qMinFromEQ, qMinFromWS, 0.00001);
