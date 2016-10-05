@@ -98,4 +98,41 @@ public:
   }
 };
 
+class SetUncertaintiesTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() {
+    algZero.initialize();
+    algCalc.initialize();
+
+    // This size controls the test time - and aims for
+    // 0.1-0.2 seconds for the algorithm execution time
+    constexpr size_t wsSize(1000000);
+
+    // random data mostly works
+    inputWs = WorkspaceCreationHelper::Create1DWorkspaceRand(wsSize);
+    algZero.setProperty("InputWorkspace", inputWs);
+    algZero.setProperty("SetError", "zero");
+    algZero.setProperty("OutputWorkspace", wsName);
+
+    algCalc.setProperty("InputWorkspace", inputWs);
+    algCalc.setProperty("SetError", "zero");
+    algCalc.setProperty("OutputWorkspace", wsName);
+
+    algZero.setRethrows(true);
+    algCalc.setRethrows(true);
+  }
+
+  void testSetUncertaintiesPerformance() {
+    // First run zeroing all errors
+    TS_ASSERT_THROWS_NOTHING(algZero.execute());
+    TS_ASSERT_THROWS_NOTHING(algCalc.execute());
+  }
+
+private:
+  SetUncertainties algZero;
+  SetUncertainties algCalc;
+  boost::shared_ptr<Mantid::DataObjects::Workspace2D> inputWs;
+  const std::string wsName = "outputWs";
+};
+
 #endif /* MANTID_ALGORITHMS_SETUNCERTAINTIESTEST_H_ */
