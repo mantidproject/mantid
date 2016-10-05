@@ -185,11 +185,15 @@ if ( GIT_FOUND )
                                                                       ${GIT_TOP_LEVEL}/.git/hooks )
       execute_process ( COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GIT_TOP_LEVEL}/.githooks/commit-msg
                                                                       ${GIT_TOP_LEVEL}/.git/hooks )
+      execute_process ( COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GIT_TOP_LEVEL}/.githooks/pre-push
+                                                                      ${GIT_TOP_LEVEL}/.git/hooks )
     else ()
       execute_process ( COMMAND ${CMAKE_COMMAND} -E create_symlink ${GIT_TOP_LEVEL}/.githooks/pre-commit
                                                                    ${GIT_TOP_LEVEL}/.git/hooks/pre-commit )
       execute_process ( COMMAND ${CMAKE_COMMAND} -E create_symlink ${GIT_TOP_LEVEL}/.githooks/commit-msg
                                                                    ${GIT_TOP_LEVEL}/.git/hooks/commit-msg )
+      execute_process ( COMMAND ${CMAKE_COMMAND} -E create_symlink ${GIT_TOP_LEVEL}/.githooks/pre-push
+                                                                   ${GIT_TOP_LEVEL}/.git/hooks/pre-push )
     endif ()
 
   endif()
