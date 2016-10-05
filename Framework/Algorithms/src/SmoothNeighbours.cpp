@@ -734,8 +734,6 @@ void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws) {
     outSpec2.addDetectorIDs(inSpec.getDetectorIDs());
     // Zero the Y and E vectors
     outSpec2.clearData();
-    outSpec2.dataY().assign(YLength, 0.0);
-    outSpec2.dataE().assign(YLength, 0.0);
   }
 
   // Go through all the output workspace
@@ -806,7 +804,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws) {
   PARALLEL_CHECK_INTERUPT_REGION
 
   // Give the 0-th X bins to all the output spectra.
-  outWS->setAllX(HistogramData::BinEdges(inWS->sharedX(0)));
+  outWS->setAllX(inWS->binEdges(0));
   if (expandSumAllPixels)
     spreadPixels(outWS);
 }

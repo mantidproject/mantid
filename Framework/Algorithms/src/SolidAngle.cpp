@@ -120,9 +120,9 @@ void SolidAngle::exec() {
     } catch (Exception::NotFoundError &) {
       // Get to here if exception thrown when calculating distance to detector
       failCount++;
-      outputWS->mutableX(j).assign(outputWS->x(j).size(), 0.0);
-      outputWS->mutableY(j).assign(outputWS->y(j).size(), 0.0);
-      outputWS->mutableE(j).assign(outputWS->e(j).size(), 0.0);
+      outputWS->mutableX(j) = 0;
+      outputWS->mutableY(j) = 0;
+      outputWS->mutableE(j) = 0;
     }
 
     prog.report();

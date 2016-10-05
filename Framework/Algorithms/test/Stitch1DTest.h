@@ -108,7 +108,7 @@ public:
   Stitch1DTest() {
 
     HistogramX x(11, LinearGenerator(-1, 0.2));
-    HistogramY y(std::vector<double>{0, 0, 0, 3, 3, 3, 3, 3, 3, 3});
+    HistogramY y({0, 0, 0, 3, 3, 3, 3, 3, 3, 3});
     HistogramE e(10, 0);
 
     // Pre-canned workspace to stitch
@@ -288,8 +288,8 @@ public:
   void test_stitching_determines_start_and_end_overlap() {
     HistogramX x1(8, LinearGenerator(-1., 0.2));
     HistogramX x2(8, LinearGenerator(-0.4, 0.2));
-    HistogramY y1(std::vector<double>{1, 1, 1, 3, 3, 3, 3});
-    HistogramY y2(std::vector<double>{1, 1, 1, 1, 3, 3, 3});
+    HistogramY y1({1, 1, 1, 3, 3, 3, 3});
+    HistogramY y2({1, 1, 1, 1, 3, 3, 3});
 
     MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
     MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
@@ -315,8 +315,8 @@ public:
   void test_stitching_forces_start_overlap() {
     HistogramX x1(8, LinearGenerator(-1, 0.2));
     HistogramX x2(8, LinearGenerator(-0.4, 0.2));
-    HistogramY y1(std::vector<double>{1, 1, 1, 3, 3, 3, 3});
-    HistogramY y2(std::vector<double>{1, 1, 1, 1, 3, 3, 3});
+    HistogramY y1({1, 1, 1, 3, 3, 3, 3});
+    HistogramY y2({1, 1, 1, 1, 3, 3, 3});
 
     MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
     MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
@@ -342,8 +342,8 @@ public:
   void test_stitching_forces_end_overlap() {
     HistogramX x1(8, LinearGenerator(-1, 0.2));
     HistogramX x2(8, LinearGenerator(-0.4, 0.2));
-    HistogramY y1(std::vector<double>{1, 1, 1, 3, 3, 3, 3});
-    HistogramY y2(std::vector<double>{1, 1, 1, 1, 3, 3, 3});
+    HistogramY y1({1, 1, 1, 3, 3, 3, 3});
+    HistogramY y2({1, 1, 1, 1, 3, 3, 3});
 
     MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
     MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
