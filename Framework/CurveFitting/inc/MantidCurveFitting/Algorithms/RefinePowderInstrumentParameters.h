@@ -147,9 +147,10 @@ private:
   // double calculateDspaceValue(std::vector<int> hkl, double lattice);
 
   /// Calculate value n for thermal neutron peak profile
-  void calculateThermalNeutronSpecial(API::IFunction_sptr m_Function,
-                                      const HistogramX &xVals,
-                                      std::vector<double> &vec_n);
+  void
+  calculateThermalNeutronSpecial(API::IFunction_sptr m_Function,
+                                 const Mantid::HistogramData::HistogramX &xVals,
+                                 std::vector<double> &vec_n);
 
   //--------------- Class Variables -------------------
   /// Output Workspace containing the dspacing ~ TOF peak positions

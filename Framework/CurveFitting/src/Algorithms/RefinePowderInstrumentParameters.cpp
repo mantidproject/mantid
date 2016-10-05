@@ -793,11 +793,10 @@ void RefinePowderInstrumentParameters::getD2TOFFuncParamNames(
 
 /** Calculate the function
   */
-double RefinePowderInstrumentParameters::calculateD2TOFFunction(API::IFunction_sptr func,
-                              API::FunctionDomain1DVector domain,
-                              API::FunctionValues &values,
-                              const Mantid::HistogramData::HistogramY &rawY,
-                              const Mantid::HistogramData::HistogramE &rawE) {
+double RefinePowderInstrumentParameters::calculateD2TOFFunction(
+    API::IFunction_sptr func, API::FunctionDomain1DVector domain,
+    API::FunctionValues &values, const Mantid::HistogramData::HistogramY &rawY,
+    const Mantid::HistogramData::HistogramE &rawE) {
   // 1. Check validity
   if (!func) {
     throw std::runtime_error("m_Function has not been initialized!");
