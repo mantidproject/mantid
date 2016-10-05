@@ -7,6 +7,9 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using namespace Mantid::API;
+using Mantid::Algorithms::PointByPointVCorrection;
+
 class PointByPointVCorrectionTest : public CxxTest::TestSuite {
 public:
   void testName() { TS_ASSERT_EQUALS(pbpv.name(), "PointByPointVCorrection"); }
@@ -19,22 +22,20 @@ public:
   }
 
   void testExec() {
-    using namespace Mantid::API;
-
     if (!pbpv.isInitialized())
       pbpv.initialize();
 
     MatrixWorkspace_sptr testSample =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 5, 0.5, 1.5);
+      WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 5, 0.5, 1.5);
     MatrixWorkspace_sptr testVanadium =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 5, 0.5, 1.5);
+      WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 5, 0.5, 1.5);
     // Make the instruments match
     Mantid::Geometry::Instrument_sptr inst(new Mantid::Geometry::Instrument);
     testSample->setInstrument(inst);
     testVanadium->setInstrument(inst);
     // Change the Y values
-    testSample->mutableY(1) = Mantid::MantidVec(5, 3.0);
-    testVanadium->mutableY(1) = Mantid::MantidVec(5, 5.5);
+    testSample->dataY(1) = Mantid::MantidVec(5, 3.0);
+    testVanadium->dataY(1) = Mantid::MantidVec(5, 5.5);
 
     pbpv.setProperty<MatrixWorkspace_sptr>("InputW1", testSample);
     pbpv.setProperty<MatrixWorkspace_sptr>("InputW2", testVanadium);
@@ -62,7 +63,49 @@ public:
   }
 
 private:
-  Mantid::Algorithms::PointByPointVCorrection pbpv;
+  PointByPointVCorrection pbpv;
+};
+
+class PointByPointVCorrectionTestPerformance : public CxxTest::TestSuite {
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static PointByPointVCorrectionTestPerformance *createSuite() {
+    return new PointByPointVCorrectionTestPerformance();
+  }
+
+  static void destroySuite(PointByPointVCorrectionTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    MatrixWorkspace_sptr testSample =
+      WorkspaceCreationHelper::Create2DWorkspaceBinned(20000, 5, 0.5, 1.5);
+    MatrixWorkspace_sptr testVanadium =
+      WorkspaceCreationHelper::Create2DWorkspaceBinned(20000, 5, 0.5, 1.5);
+    // Make the instruments match
+    Mantid::Geometry::Instrument_sptr inst(new Mantid::Geometry::Instrument);
+    testSample->setInstrument(inst);
+    testVanadium->setInstrument(inst);
+    // Change the Y values
+    testSample->dataY(1) = Mantid::MantidVec(5, 3.0);
+    testVanadium->dataY(1) = Mantid::MantidVec(5, 5.5);
+
+    pbpv.initialize();
+    pbpv.setProperty<MatrixWorkspace_sptr>("InputW1", testSample);
+    pbpv.setProperty<MatrixWorkspace_sptr>("InputW2", testVanadium);
+    pbpv.setPropertyValue("OutputWorkspace", "outputWS");
+  }
+
+  void tearDown() override {
+    Mantid::API::AnalysisDataService::Instance().remove("outputWS");
+  }
+
+  void testPerformanceWS() { pbpv.execute(); }
+
+private:
+  PointByPointVCorrection pbpv;
 };
 
 #endif /*POINTBYPOINTVCORRECTIONTEST_H_*/

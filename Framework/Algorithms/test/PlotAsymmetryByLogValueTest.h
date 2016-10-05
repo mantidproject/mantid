@@ -110,7 +110,7 @@ public:
   }
   static void destroySuite(PlotAsymmetryByLogValueTest *suite) { delete suite; }
   PlotAsymmetryByLogValueTest()
-      : firstRun("MUSR00015189.nxs"), 
+      : firstRun("MUSR00015189.nxs"),
         lastRun("MUSR00015190.nxs") {}
 
   /// Clear the ADS at the end of every test
@@ -586,6 +586,44 @@ public:
   }
 
 private:
+  std::string firstRun, lastRun;
+};
+
+class PlotAsymmetryByLogValueTestPerformance : public CxxTest::TestSuite {
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static PlotAsymmetryByLogValueTestPerformance *createSuite() {
+    return new PlotAsymmetryByLogValueTestPerformance();
+  }
+
+  static void destroySuite(PlotAsymmetryByLogValueTestPerformance *suite) {
+    delete suite;
+  }
+
+  PlotAsymmetryByLogValueTestPerformance()
+      : firstRun("MUSR00015189.nxs"),
+        lastRun("MUSR00015190.nxs") {}
+
+  void setUp() override {
+    alg.initialize();
+    alg.setPropertyValue("FirstRun", firstRun);
+    alg.setPropertyValue("LastRun", lastRun);
+    alg.setPropertyValue("OutputWorkspace", "outputWS");
+    alg.setPropertyValue("LogValue", "Field_Danfysik");
+    alg.setPropertyValue("Red", "2");
+    alg.setPropertyValue("Green", "1");
+  }
+
+  void tearDown() override {
+    Mantid::API::AnalysisDataService::Instance().remove("outputWS");
+  }
+
+  void testPerformanceWS() { alg.execute(); }
+
+private:
+  PlotAsymmetryByLogValue alg;
   std::string firstRun, lastRun;
 };
 

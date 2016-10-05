@@ -243,10 +243,6 @@ void PDFFourierTransform::exec() {
   } else if (inputXunit == "dSpacing") {
     // convert the x-units to Q/MomentumTransfer
     const double PI_2(2. * M_PI);
-    /*
-    for (auto it = inputQ.begin(); it != inputQ.end(); it++) {
-      [&PI_2](double &Q) { Q /= PI_2; };
-    }*/
     std::for_each(inputQ.begin(), inputQ.end(),
                   [&PI_2](double &Q) { Q /= PI_2; });
     std::transform(inputDQ.begin(), inputDQ.end(), inputQ.begin(),

@@ -11,6 +11,50 @@
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
+namespace {
+  void populatePhaseTable(ITableWorkspace_sptr phaseTable) {
+    phaseTable->addColumn("int", "DetectorID");
+    phaseTable->addColumn("double", "DetectorAsymmetry");
+    phaseTable->addColumn("double", "DetectorPhase");
+    for (int i = 0; i < 16; i++) {
+      TableRow phaseRow1 = phaseTable->appendRow();
+      phaseRow1 << i << 1. << 0.;
+      TableRow phaseRow2 = phaseTable->appendRow();
+      phaseRow2 << i << 1. << 1.57;
+    }
+  }
+
+  IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs) {
+    // Create and populate a detector table
+    boost::shared_ptr<ITableWorkspace> phaseTable(
+      new Mantid::DataObjects::TableWorkspace);
+    populatePhaseTable(phaseTable);
+
+    // Set up PhaseQuad
+    IAlgorithm_sptr phaseQuad =
+      AlgorithmManager::Instance().create("PhaseQuad");
+    phaseQuad->setChild(true);
+    phaseQuad->initialize();
+    phaseQuad->setProperty("InputWorkspace", inputWs);
+    phaseQuad->setProperty("PhaseTable", phaseTable);
+    phaseQuad->setPropertyValue("OutputWorkspace", "outputWs");
+    return phaseQuad;
+  }
+
+  MatrixWorkspace_sptr loadMuonDataset() {
+    IAlgorithm_sptr loader = AlgorithmManager::Instance().create("Load");
+    loader->setChild(true);
+    loader->initialize();
+    loader->setProperty("Filename", "emu00006473.nxs");
+    loader->setPropertyValue("OutputWorkspace", "outputWs");
+    loader->execute();
+    Workspace_sptr temp = loader->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr inputWs = 
+      boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+    return inputWs;
+  }
+}
+
 class PhaseQuadMuonTest : public CxxTest::TestSuite {
 public:
   void testTheBasics() {
@@ -23,30 +67,8 @@ public:
   }
 
   void testExecPhaseTable() {
-    // Load a muon dataset
-    IAlgorithm_sptr loader = AlgorithmManager::Instance().create("Load");
-    loader->setChild(true);
-    loader->initialize();
-    loader->setProperty("Filename", "emu00006473.nxs");
-    loader->setPropertyValue("OutputWorkspace", "out_ws");
-    loader->execute();
-    Workspace_sptr temp = loader->getProperty("OutputWorkspace");
-    MatrixWorkspace_sptr inputWs =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
-
-    // Create and populate a detector table
-    boost::shared_ptr<ITableWorkspace> phaseTable(
-        new Mantid::DataObjects::TableWorkspace);
-    populatePhaseTable(phaseTable);
-
-    // Run PhaseQuad
-    IAlgorithm_sptr phaseQuad =
-        AlgorithmManager::Instance().create("PhaseQuad");
-    phaseQuad->setChild(true);
-    phaseQuad->initialize();
-    phaseQuad->setProperty("InputWorkspace", inputWs);
-    phaseQuad->setProperty("PhaseTable", phaseTable);
-    phaseQuad->setPropertyValue("OutputWorkspace", "out_ws");
+    MatrixWorkspace_sptr inputWs = loadMuonDataset();
+    IAlgorithm_sptr phaseQuad = setupAlg(inputWs);
     TS_ASSERT_THROWS_NOTHING(phaseQuad->execute());
     TS_ASSERT(phaseQuad->isExecuted());
 
@@ -81,18 +103,35 @@ public:
     TS_ASSERT_DELTA(specImE[20], 0.0031, 0.0001);
     TS_ASSERT_DELTA(specImE[50], 0.0035, 0.0001);
   }
+};
 
-  void populatePhaseTable(ITableWorkspace_sptr phaseTable) {
-    phaseTable->addColumn("int", "DetectorID");
-    phaseTable->addColumn("double", "DetectorAsymmetry");
-    phaseTable->addColumn("double", "DetectorPhase");
-    for (int i = 0; i < 16; i++) {
-      TableRow phaseRow1 = phaseTable->appendRow();
-      phaseRow1 << i << 1. << 0.;
-      TableRow phaseRow2 = phaseTable->appendRow();
-      phaseRow2 << i << 1. << 1.57;
-    }
+class PhaseQuadMuonTestPerformance : public CxxTest::TestSuite {
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static PhaseQuadMuonTestPerformance *createSuite() {
+    return new PhaseQuadMuonTestPerformance();
   }
+
+  static void destroySuite(PhaseQuadMuonTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    inputWs = loadMuonDataset();
+    phaseQuad = setupAlg(inputWs);
+  }
+
+  void tearDown() override {
+    Mantid::API::AnalysisDataService::Instance().remove("outputWs");
+  }
+
+  void testPerformanceWs() { phaseQuad->execute(); }
+
+private:
+  MatrixWorkspace_sptr inputWs;
+  IAlgorithm_sptr phaseQuad;
 };
 
 #endif /* MANTID_ALGORITHMS_PHASEQUADMUONTEST_H_ */
