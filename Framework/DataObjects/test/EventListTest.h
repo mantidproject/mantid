@@ -69,7 +69,7 @@ public:
     el.setSpectrumNo(42);
     MantidVec x{0.1, 0.2, 0.3};
     el.setX(make_cow<HistogramX>(x));
-    el.setSharedDx(Kernel::make_cow<HistogramData::HistogramDx>(x));
+    el.setPointVariances(2);
 
     EventList other;
     other = el;
@@ -2492,8 +2492,9 @@ public:
     el.setHistogram(HistogramData::BinEdges{0, 2});
     TS_ASSERT_THROWS_NOTHING(el.setBinEdges(HistogramData::BinEdges{0, 2}));
     TS_ASSERT_THROWS(el.setPoints(1), std::runtime_error);
-    TS_ASSERT_THROWS(el.setPointVariances(1), std::runtime_error);
-    TS_ASSERT_THROWS(el.setPointStandardDeviations(1), std::runtime_error);
+    // Uncertainties for X are always for Points, this must work.
+    TS_ASSERT_THROWS_NOTHING(el.setPointVariances(1));
+    TS_ASSERT_THROWS_NOTHING(el.setPointStandardDeviations(1));
   }
 
   void test_setCounts_fails() {
