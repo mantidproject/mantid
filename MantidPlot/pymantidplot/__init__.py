@@ -301,6 +301,37 @@ def plotTableColumns(table, columns, type = -1):
     else:
         return graph
 
+# Set some aliases for Layer enumerations so that old code will still work
+Layer = _qti.Layer
+Layer.Log10 = mantidqtpython.GraphOptions.Log10
+Layer.Linear = mantidqtpython.GraphOptions.Linear
+Layer.Left = mantidqtpython.GraphOptions.Left
+Layer.Right = mantidqtpython.GraphOptions.Right
+Layer.Bottom = mantidqtpython.GraphOptions.Bottom
+Layer.Top = mantidqtpython.GraphOptions.Top
+Layer.Line = mantidqtpython.GraphOptions.Line
+Layer.Scatter = mantidqtpython.GraphOptions.Scatter
+Layer.LineSymbols = mantidqtpython.GraphOptions.LineSymbols
+Layer.VerticalBars = mantidqtpython.GraphOptions.VerticalBars
+Layer.Area = mantidqtpython.GraphOptions.Area
+Layer.Pie = mantidqtpython.GraphOptions.Pie
+Layer.VerticalDropLines = mantidqtpython.GraphOptions.VerticalDropLines
+Layer.Spline = mantidqtpython.GraphOptions.Spline
+Layer.HorizontalSteps = mantidqtpython.GraphOptions.HorizontalSteps
+Layer.Histogram = mantidqtpython.GraphOptions.Histogram
+Layer.HorizontalBars = mantidqtpython.GraphOptions.HorizontalBars
+Layer.VectXYXY = mantidqtpython.GraphOptions.VectXYXY
+Layer.ErrorBars = mantidqtpython.GraphOptions.ErrorBars
+Layer.Box = mantidqtpython.GraphOptions.Box
+Layer.VectXYAM = mantidqtpython.GraphOptions.VectXYAM
+Layer.VerticalSteps = mantidqtpython.GraphOptions.VerticalSteps
+Layer.ColorMap = mantidqtpython.GraphOptions.ColorMap
+Layer.GrayScale = mantidqtpython.GraphOptions.GrayScale
+Layer.ColorMapContour = mantidqtpython.GraphOptions.ColorMapContour
+Layer.Contour = mantidqtpython.GraphOptions.Contour
+Layer.Function = mantidqtpython.GraphOptions.Function
+Layer.ImagePlot = mantidqtpython.GraphOptions.ImagePlot
+Layer.User = mantidqtpython.GraphOptions.User
 
 # ----------------------------------------------------------------------------------------------------
 # IPython auto-complete can't handle enumerations as defaults
@@ -884,15 +915,6 @@ MantidUIImports = [
 # Update globals
 for name in MantidUIImports:
     globals()[name] = getattr(_qti.app.mantidUI, name)
-
-# Set some aliases for Layer enumerations so that old code will still work
-Layer = _qti.Layer
-Layer.Log10 = mantidqtpython.GraphOptions.Log10
-Layer.Linear = mantidqtpython.GraphOptions.Linear
-Layer.Left = mantidqtpython.GraphOptions.Left
-Layer.Right = mantidqtpython.GraphOptions.Right
-Layer.Bottom = mantidqtpython.GraphOptions.Bottom
-Layer.Top = mantidqtpython.GraphOptions.Top
 
 DistrFlag = mantidqtpython.MantidQt.DistributionFlag
 DistrFlag.DistrDefault = mantidqtpython.MantidQt.DistributionDefault
