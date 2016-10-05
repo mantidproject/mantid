@@ -85,8 +85,7 @@ void GetEiMonDet2::init() {
   tofWorkspace->add<InstrumentValidator>();
   auto mandatoryStringProperty =
       boost::make_shared<MandatoryValidator<std::string>>();
-  auto mandatoryIntProperty =
-      boost::make_shared<MandatoryValidator<int>>();
+  auto mandatoryIntProperty = boost::make_shared<MandatoryValidator<int>>();
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
 
@@ -123,8 +122,7 @@ void GetEiMonDet2::init() {
       PropertyNames::MONITOR_EPP_TABLE,
       make_unique<EnabledWhenProperty>(PropertyNames::MONITOR_WORKSPACE.c_str(),
                                        IS_NOT_DEFAULT));
-  declareProperty(PropertyNames::MONITOR, EMPTY_INT(),
-                  mandatoryIntProperty,
+  declareProperty(PropertyNames::MONITOR, EMPTY_INT(), mandatoryIntProperty,
                   "Monitor's detector id/spectrum number/workspace index.");
   declareProperty(PropertyNames::PULSE_INTERVAL, EMPTY_DBL(),
                   "Interval between neutron pulses, in microseconds.");
@@ -410,13 +408,13 @@ void GetEiMonDet2::parseIndices(std::vector<size_t> &detectorIndices,
     const auto monitorIndexMap =
         m_monitorWs->getDetectorIDToWorkspaceIndexMap();
     mapIndices(detectors, monitor, detectorIndexMap, monitorIndexMap,
-                   detectorIndices, monitorIndex);
+               detectorIndices, monitorIndex);
   } else if (indexType == IndexTypes::SPECTRUM_NUMBER) {
     const auto detectorIndexMap =
         m_detectorWs->getSpectrumToWorkspaceIndexMap();
     const auto monitorIndexMap = m_monitorWs->getSpectrumToWorkspaceIndexMap();
     mapIndices(detectors, monitor, detectorIndexMap, monitorIndexMap,
-                   detectorIndices, monitorIndex);
+               detectorIndices, monitorIndex);
   } else {
     // There is a type mismatch between what UserStringParser returns
     // (unsigned int) and workspace index (size_t), thus the copying.
