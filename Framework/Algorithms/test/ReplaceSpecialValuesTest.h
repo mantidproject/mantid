@@ -205,24 +205,21 @@ public:
         TS_ASSERT_EQUALS(result->dataX(i)[j - 1], inputWS->dataX(i)[j - 1]);
 
         if (infCheck &&
-            std::abs(inputWS->dataY(i)[j - 1]) ==
-                std::numeric_limits<double>::infinity()) {
-          if (std::abs(result->dataY(i)[j - 1]) ==
-              std::numeric_limits<double>::infinity()) {
+            std::isinf(inputWS->dataY(i)[j - 1])) {
+          if (std::isinf(result->dataY(i)[j - 1])) {
             TS_FAIL("Infinity detected that shold have been replaced");
           } else {
             TS_ASSERT_DELTA(result->dataY(i)[j - 1], 999.0, 1e-8);
             TS_ASSERT_DELTA(result->dataE(i)[j - 1], 0.00005, 1e-8);
           }
         } else if (naNCheck &&
-                   inputWS->dataY(i)[j - 1] !=
-                       inputWS->dataY(i)[j - 1]) // not equal to self == NaN
+                   std::isnan(inputWS->dataY(i)[j - 1]))
         {
           TS_ASSERT_DELTA(result->dataY(i)[j - 1], -99.0, 1e-8);
           TS_ASSERT_DELTA(result->dataE(i)[j - 1], -50.0, 1e-8);
         } else {
           if (!naNCheck &&
-              inputWS->dataY(i)[j - 1] != inputWS->dataY(i)[j - 1]) {
+              std::isnan(inputWS->dataY(i)[j - 1])) {
             TS_ASSERT_DIFFERS(result->dataY(i)[j - 1], result->dataY(i)[j - 1]);
           } else {
             TS_ASSERT_EQUALS(result->dataY(i)[j - 1], inputWS->dataY(i)[j - 1]);
