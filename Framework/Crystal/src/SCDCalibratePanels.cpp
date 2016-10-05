@@ -199,8 +199,7 @@ void SCDCalibratePanels::exec() {
     auto &yVec = outSpec.mutableY();
     auto &eVec = outSpec.mutableE();
     auto &xVec = outSpec.mutableX();
-    const std::vector<double> zeros(yVec.size(), 0.0);
-    yVec = std::move(zeros);
+    yVec = 0.0;
 
     for (int i = 0; i < nBankPeaks; i++) {
       const DataObjects::Peak &peak = local->getPeak(i);
@@ -438,8 +437,7 @@ void SCDCalibratePanels::findL1(int nPeaks,
   auto &yVec = outSp.mutableY();
   auto &eVec = outSp.mutableE();
   auto &xVec = outSp.mutableX();
-  const std::vector<double> zeros(yVec.size(), 0.0);
-  yVec = std::move(zeros);
+  yVec = 0.0;
 
   for (int i = 0; i < nPeaks; i++) {
     const DataObjects::Peak &peak = peaksWs->getPeak(i);
