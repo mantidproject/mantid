@@ -85,12 +85,10 @@ void GetEiMonDet2::init() {
   tofWorkspace->add<InstrumentValidator>();
   auto mandatoryStringProperty =
       boost::make_shared<MandatoryValidator<std::string>>();
-  auto mandatoryIntProperty =
-      boost::make_shared<MandatoryValidator<decltype(EMPTY_INT())>>();
-  auto mustBePositiveDouble = boost::make_shared<BoundedValidator<double>>();
-  mustBePositiveDouble->setLower(0);
-  auto mustBePositiveInt = boost::make_shared<BoundedValidator<int>>();
-  mustBePositiveInt->setLower(0);
+  auto mandatoryDetectorIdProperty =
+      boost::make_shared<MandatoryValidator<detid_t>>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  mustBePositive->setLower(0);
 
   declareProperty(make_unique<WorkspaceProperty<>>(
                       PropertyNames::DETECTOR_WORKSPACE.c_str(), "",
@@ -125,19 +123,16 @@ void GetEiMonDet2::init() {
       PropertyNames::MONITOR_EPP_TABLE,
       make_unique<EnabledWhenProperty>(PropertyNames::MONITOR_WORKSPACE.c_str(),
                                        IS_NOT_DEFAULT));
-  auto monitorValidator = boost::make_shared<CompositeValidator>();
-  monitorValidator->add(mandatoryIntProperty);
-  monitorValidator->add(mustBePositiveInt);
-  declareProperty(PropertyNames::MONITOR, EMPTY_INT(), monitorValidator,
+  declareProperty(PropertyNames::MONITOR, EMPTY_INT(),
+                  mandatoryDetectorIdProperty,
                   "Monitor's detector id/spectrum number/workspace index.");
   declareProperty(PropertyNames::PULSE_INTERVAL, EMPTY_DBL(),
                   "Interval between neutron pulses, in microseconds.");
   declareProperty(
-      PropertyNames::NOMINAL_ENERGY, EMPTY_DBL(), mustBePositiveDouble,
+      PropertyNames::NOMINAL_ENERGY, EMPTY_DBL(), mustBePositive,
       "Incident energy guess. Taken from the sample logs, if not specified.");
-  declareProperty(PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(),
-                  mustBePositiveDouble, "Calculated incident energy.",
-                  Direction::Output);
+  declareProperty(PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(), mustBePositive,
+                  "Calculated incident energy.", Direction::Output);
 }
 
 /** Executes the algorithm.
@@ -431,6 +426,9 @@ void GetEiMonDet2::parseIndices(std::vector<size_t> &detectorIndices,
     auto back = std::back_inserter(detectorIndices);
     std::copy(detectors.begin(), detectors.end(), back);
     int monitor = getProperty(PropertyNames::MONITOR);
+    if (monitor < 0) {
+      throw std::runtime_error("Monitor cannot be negative.");
+    }
     monitorIndex = static_cast<size_t>(monitor);
   }
 }
