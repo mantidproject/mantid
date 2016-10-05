@@ -17,12 +17,15 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#include "MantidHistogramData/BinEdges.h"
+
 #include <boost/math/special_functions/round.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using namespace Mantid::HistogramData;
 using namespace std;
 namespace Mantid {
 namespace Crystal {
@@ -277,8 +280,9 @@ void IntegratePeakTimeSlices::exec() {
     R = 2 * R; // Gets a few more background cells.
     int Chan;
 
-    const MantidVec &X = inpWkSpace->dataX(wsIndx);
-    int dChan = CalculateTimeChannelSpan(peak, dQ, X, int(wsIndx), Chan);
+    const auto &X = inpWkSpace->x(wsIndx);
+    int dChan =
+        CalculateTimeChannelSpan(peak, dQ, X, int(wsIndx), Chan);
 
     dChan = max<int>(dChan, MinTimeSpan);
 
@@ -811,7 +815,7 @@ IntegratePeakTimeSlices::CalculatePositionSpan(Geometry::IPeak const &peak,
  * @return The number of time channels around Centerchan to use
  */
 int IntegratePeakTimeSlices::CalculateTimeChannelSpan(
-    Geometry::IPeak const &peak, const double dQ, Mantid::MantidVec const &X,
+    Geometry::IPeak const &peak, const double dQ, const HistogramX &X,
     const int specNum, int &Centerchan) {
   UNUSED_ARG(specNum);
   double Q = peak.getQLabFrame().norm(); // getQ( peak)/2/M_PI;
@@ -1620,9 +1624,9 @@ void IntegratePeakTimeSlices::SetUpData1(
       if (row > NBadEdges && col > NBadEdges &&
           (m_NROWS < 0 || row < m_NROWS - NBadEdges) &&
           (m_NCOLS < 0 || col < m_NCOLS - NBadEdges)) {
-        Mantid::MantidVec histogram = inpWkSpace->readY(workspaceIndex);
+        auto &histogram = inpWkSpace->y(workspaceIndex);
 
-        Mantid::MantidVec histoerrs = inpWkSpace->readE(workspaceIndex);
+        auto &histoerrs = inpWkSpace->e(workspaceIndex);
         double intensity = 0;
         double variance = 0;
         for (int chan = chanMin; chan <= chanMax; chan++) {
@@ -1711,8 +1715,7 @@ void IntegratePeakTimeSlices::SetUpData1(
  * @param time  The desired time
  * @return the time channel
  */
-int IntegratePeakTimeSlices::find(Mantid::MantidVec const &X,
-                                  const double time) {
+int IntegratePeakTimeSlices::find(const HistogramX &X, const double time) {
   int sgn = 1;
 
   if (X[0] > X[1])
@@ -2086,8 +2089,8 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
       errs.push_back(0);
     }
 
-  } catch (std::exception &
-               Ex1) // ties or something else went wrong in BivariateNormal
+  } catch (std::exception
+               &Ex1) // ties or something else went wrong in BivariateNormal
   {
     done = true;
     g_log.error() << "Bivariate Error for PeakNum="
@@ -2253,7 +2256,8 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
 
     g_log.debug() << "   Bad Slice. Negative Counts= "
                   << m_AttributeValues->StatBaseVals(IIntensities) -
-                         params[Ibk] * ncells << '\n';
+                         params[Ibk] * ncells
+                  << '\n';
     ;
     return false;
   }
@@ -2268,7 +2272,8 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
                    // background
   {
     g_log.debug() << "   Bad Slice. Fitted Intensity & Observed "
-                     "Intensity(-back) too different. ratio=" << x << '\n';
+                     "Intensity(-back) too different. ratio="
+                  << x << '\n';
 
     return false;
   }
