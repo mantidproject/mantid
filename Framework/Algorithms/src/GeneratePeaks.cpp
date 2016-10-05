@@ -770,7 +770,7 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
 
   Indexing::IndexInfo indices(specNums.size());
   indices.setSpectrumNumbers(std::move(specNums));
-  return create<Workspace2D>(indices, Histogram(BinEdges(std::move(xarray))));
+  return create<Workspace2D>(indices, BinEdges(std::move(xarray)));
 }
 
 /** Add function's parameter names after peak function name

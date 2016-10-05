@@ -124,8 +124,7 @@ void RebinByTimeBase::exec() {
                  OutXValues_scaled.begin(), transformToRelativeT);
 
   outputWS = DataObjects::create<DataObjects::Workspace2D>(
-      *inWS, histnumber,
-      HistogramData::Histogram{HistogramData::BinEdges(*XValues_new)});
+      *inWS, histnumber, HistogramData::BinEdges(*XValues_new));
 
   // Copy all the axes
   for (int i = 1; i < inWS->axes(); i++) {

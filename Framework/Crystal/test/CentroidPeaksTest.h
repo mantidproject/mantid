@@ -68,8 +68,7 @@ public:
     }
 
     boost::shared_ptr<EventWorkspace> retVal = create<EventWorkspace>(
-        numPixels,
-        Histogram(BinEdges(numBins, LinearGenerator(0.0, binDelta))));
+        numPixels, BinEdges(numBins, LinearGenerator(0.0, binDelta)));
 
     // --------- Load the instrument -----------
     LoadInstrument *loadInst = new LoadInstrument();

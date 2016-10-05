@@ -184,12 +184,12 @@ Rebin2D::createOutputWorkspace(MatrixWorkspace_const_sptr parent,
   const int newYSize =
       createAxisFromRebinParams(getProperty("Axis2Binning"), newYBins);
   // and now the workspace
-  HistogramData::Histogram histogram{HistogramData::BinEdges(newXBins)};
+  HistogramData::BinEdges binEdges(newXBins);
   MatrixWorkspace_sptr outputWS;
   if (!useFractionalArea) {
-    outputWS = create<MatrixWorkspace>(*parent, newYSize - 1, histogram);
+    outputWS = create<MatrixWorkspace>(*parent, newYSize - 1, binEdges);
   } else {
-    outputWS = create<RebinnedOutput>(*parent, newYSize - 1, histogram);
+    outputWS = create<RebinnedOutput>(*parent, newYSize - 1, binEdges);
   }
   Axis *const verticalAxis = new BinEdgeAxis(newYBins);
   // Meta data

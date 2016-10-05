@@ -277,8 +277,7 @@ void ExportTimeSeriesLog::setupEventWorkspace(
     outsize = static_cast<size_t>(numentries);
 
   boost::shared_ptr<EventWorkspace> outEventWS = create<EventWorkspace>(
-      *m_inputWS, numberOfSpectra,
-      HistogramData::Histogram(HistogramData::BinEdges(2)));
+      *m_inputWS, numberOfSpectra, HistogramData::BinEdges(2));
   m_outWS = outEventWS;
 
   // Create the output event list (empty)

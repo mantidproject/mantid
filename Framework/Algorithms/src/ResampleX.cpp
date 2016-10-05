@@ -366,8 +366,7 @@ void ResampleX::exec() {
       g_log.information() << "Creating a Workspace2D from the EventWorkspace "
                           << inputEventWS->getName() << ".\n";
       outputWS = create<DataObjects::Workspace2D>(
-          *inputWS, numSpectra,
-          HistogramData::Histogram{HistogramData::BinEdges(m_numBins)});
+          *inputWS, numSpectra, HistogramData::BinEdges(m_numBins));
 
       // Initialize progress reporting.
       Progress prog(this, 0.0, 1.0, numSpectra);

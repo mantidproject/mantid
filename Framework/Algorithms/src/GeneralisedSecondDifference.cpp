@@ -89,7 +89,7 @@ void GeneralisedSecondDifference::exec() {
   // Create OuputWorkspace
   auto out = DataObjects::create<HistoWorkspace>(
       *inputWS, Indexing::extract(inputWS->indexInfo(), spec_min, spec_max),
-      HistogramData::Histogram(HistogramData::BinEdges(n_points + 1)));
+      HistogramData::BinEdges(n_points + 1));
 
   const int nsteps = 2 * n_av + 1;
 

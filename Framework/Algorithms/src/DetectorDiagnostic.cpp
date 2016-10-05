@@ -521,8 +521,8 @@ DataObjects::MaskWorkspace_sptr
 DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS) {
   // Create a new workspace for the results, copy from the input to ensure that
   // we copy over the instrument and current masking
-  auto maskWS = create<DataObjects::MaskWorkspace>(
-      *inputWS, HistogramData::Histogram(HistogramData::Points(1)));
+  auto maskWS =
+      create<DataObjects::MaskWorkspace>(*inputWS, HistogramData::Points(1));
   maskWS->setTitle(inputWS->getTitle());
 
   return std::move(maskWS);

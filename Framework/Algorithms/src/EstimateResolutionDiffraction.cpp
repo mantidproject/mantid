@@ -86,7 +86,7 @@ void EstimateResolutionDiffraction::exec() {
   retrieveInstrumentParameters();
 
   m_outputWS = DataObjects::create<DataObjects::Workspace2D>(
-      *m_inputWS, HistogramData::Histogram(HistogramData::Points(1)));
+      *m_inputWS, HistogramData::Points(1));
 
   estimateDetectorResolution();
 

@@ -337,7 +337,7 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
   int numXBins = numBins + 1;
   BinEdges x(numXBins, LinearGenerator(x0, binDelta));
 
-  auto retVal = create<EventWorkspace>(indexInfo, Histogram(x));
+  auto retVal = create<EventWorkspace>(indexInfo, x);
   retVal->setInstrument(inst);
 
   std::vector<double> xValues(x.cbegin(), x.cend() - 1);

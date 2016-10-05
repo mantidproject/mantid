@@ -275,7 +275,7 @@ void ExtractSpectra::execEvent() {
   auto outputWorkspace = create<EventWorkspace>(
       *m_inputWorkspace,
       Indexing::extract(m_inputWorkspace->indexInfo(), m_workspaceIndexList),
-      HistogramData::Histogram(XValues_new));
+      XValues_new);
   outputWorkspace->sortAll(TOF_SORT, nullptr);
 
   Progress prog(this, 0.0, 1.0, 2 * m_workspaceIndexList.size());

@@ -128,7 +128,7 @@ void AsymmetryCalc::exec() {
 
   // Create a point data workspace with only one spectra for forward
   auto outputWS = DataObjects::create<API::HistoWorkspace>(
-      *inputWS, 1, HistogramData::Histogram(tmpWS->points(forward)));
+      *inputWS, 1, tmpWS->points(forward));
 
   // Calculate asymmetry for each time bin
   // F-aB / F+aB

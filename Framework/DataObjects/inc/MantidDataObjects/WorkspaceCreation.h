@@ -2,14 +2,12 @@
 #define MANTID_DATAOBJECTS_WORKSPACECREATION_H_
 
 #include "MantidDataObjects/DllConfig.h"
+#include "MantidHistogramData/Histogram.h"
 
 #include <memory>
 #include <type_traits>
 
 namespace Mantid {
-namespace HistogramData {
-class Histogram;
-}
 namespace API {
 class MatrixWorkspace;
 class HistoWorkspace;
@@ -46,11 +44,11 @@ class Workspace2D;
     workspace.
   - A reference to an IndexInfo object, defining the number of spectra and
     spectrum number and detector IDs.
-  - A reference to a Histogram object, defining the size of the histograms as
-    well as whether the workspace stores point data or histogram data. This is a
-    replacement for an independent specification of the X and Y lengths. This is
-    also used to initialize the workspace with X data and (optionally) Y and E
-    data.
+  - A reference to a Histogram object (or alternatively BinEdges or Points),
+    defining the size of the histograms as well as whether the workspace stores
+    point data or histogram data. This is a replacement for an independent
+    specification of the X and Y lengths. This is also used to initialize the
+    workspace with X data and (optionally) Y and E data.
 
   Available variants are:
 
@@ -136,11 +134,11 @@ initializeFromParent(const API::MatrixWorkspace &parent,
                      API::MatrixWorkspace &ws);
 }
 
-template <class T, class P, class IndexArg,
+template <class T, class P, class IndexArg, class HistArg,
           class = typename std::enable_if<
               std::is_base_of<API::MatrixWorkspace, P>::value>::type>
 std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
-                          const HistogramData::Histogram &histogram) {
+                          const HistArg &histArg) {
   // Figure out (dynamic) target type:
   // - Type is same as parent if T is base of parent
   // - If T is not base of parent, conversion may occur. Currently only
@@ -160,20 +158,19 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
     }
   }
 
-  ws->initialize(indexArg, histogram);
+  ws->initialize(indexArg, HistogramData::Histogram(histArg));
   detail::initializeFromParent(parent, *ws);
 
   return ws;
 }
 
-template <class T, class IndexArg,
+template <class T, class IndexArg, class HistArg,
           typename std::enable_if<
               !std::is_base_of<API::MatrixWorkspace, IndexArg>::value>::type * =
               nullptr>
-std::unique_ptr<T> create(const IndexArg &indexArg,
-                          const HistogramData::Histogram &histogram) {
+std::unique_ptr<T> create(const IndexArg &indexArg, const HistArg &histArg) {
   auto ws = Kernel::make_unique<T>();
-  ws->initialize(indexArg, histogram);
+  ws->initialize(indexArg, HistogramData::Histogram(histArg));
   return std::move(ws);
 }
 
@@ -192,12 +189,31 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg) {
   return create<T>(parent, indexArg, detail::stripData(parent.histogram(0)));
 }
 
+// Templating with HistArg clashes with the IndexArg template above. Could be
+// fixed with many enable_if cases, but for now we simply provide 3 variants
+// (Histogram, BinEdges, Points) by hand.
 template <class T, class P,
           typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
                                                   P>::value>::type * = nullptr>
 std::unique_ptr<T> create(const P &parent,
                           const HistogramData::Histogram &histogram) {
   return create<T>(parent, parent.getNumberHistograms(), histogram);
+}
+
+template <class T, class P,
+          typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
+                                                  P>::value>::type * = nullptr>
+std::unique_ptr<T> create(const P &parent,
+                          const HistogramData::BinEdges &binEdges) {
+  return create<T>(parent, parent.getNumberHistograms(), binEdges);
+}
+
+template <class T, class P,
+          typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
+                                                  P>::value>::type * = nullptr>
+std::unique_ptr<T> create(const P &parent,
+                          const HistogramData::Points &points) {
+  return create<T>(parent, parent.getNumberHistograms(), points);
 }
 
 } // namespace DataObjects

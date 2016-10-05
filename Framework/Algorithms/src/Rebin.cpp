@@ -161,7 +161,7 @@ void Rebin::exec() {
       g_log.information() << "Creating a Workspace2D from the EventWorkspace "
                           << eventInputWS->getName() << ".\n";
       outputWS = DataObjects::create<DataObjects::Workspace2D>(
-          *inputWS, histnumber, HistogramData::Histogram(XValues_new));
+          *inputWS, histnumber, XValues_new);
 
       // Initialize progress reporting.
       Progress prog(this, 0.0, 1.0, histnumber);
@@ -223,8 +223,8 @@ void Rebin::exec() {
 
     // make output Workspace the same type is the input, but with new length of
     // signal array
-    outputWS = DataObjects::create<API::HistoWorkspace>(
-        *inputWS, histnumber, HistogramData::Histogram(XValues_new));
+    outputWS = DataObjects::create<API::HistoWorkspace>(*inputWS, histnumber,
+                                                        XValues_new);
 
     // Copy over the 'vertical' axis
     if (inputWS->axes() > 1)
