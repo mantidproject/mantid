@@ -193,8 +193,7 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
     }
 
     // Initialize chains
-    std::vector<double> v;
-    v.push_back(p);
+    std::vector<double> v{p};
     m_chain.push_back(v);
     m_max_iter = maxIterations;
 
@@ -212,8 +211,7 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
   }
   m_changesOld = m_changes;
   m_chi2 = m_leastSquares->val();
-  std::vector<double> v;
-  v.push_back(m_chi2);
+  std::vector<double> v{m_chi2};
   m_chain.push_back(v);
   m_converged = false;
   m_max_iter = maxIterations;
@@ -438,8 +436,7 @@ void FABADAMinimizer::finalize() {
   if (conv_length > 0) {
     // Write first element of the reduced chain
     for (size_t e = 0; e <= m_nParams; ++e) {
-      std::vector<double> v;
-      v.push_back(m_chain[e][m_conv_point]);
+      std::vector<double> v{m_chain[e][m_conv_point]};
       red_conv_chain.push_back(v);
     }
 
@@ -550,8 +547,8 @@ void FABADAMinimizer::finalize() {
 
     // Do one iteration for each parameter plus one for Chi square.
     for (size_t j = 0; j < m_nParams + 1; ++j) {
-      MantidVec &X = wsC->dataX(j);
-      MantidVec &Y = wsC->dataY(j);
+      auto &X = wsC->mutableX(j);
+      auto &Y = wsC->mutableY(j);
       for (size_t k = 0; k < chain_length; ++k) {
         X[k] = double(k);
         Y[k] = m_chain[j][k];
@@ -585,8 +582,8 @@ void FABADAMinimizer::finalize() {
     double bin = (red_conv_chain[m_nParams][conv_length - 1] - start) /
                  double(pdf_length);
     size_t step = 0;
-    MantidVec &X = ws->dataX(m_nParams);
-    MantidVec &Y = ws->dataY(m_nParams);
+    auto &X = ws->mutableX(m_nParams);
+    auto &Y = ws->mutableY(m_nParams);
     X[0] = start;
     for (size_t i = 1; i < static_cast<size_t>(pdf_length) + 1; i++) {
       double bin_end = start + double(i) * bin;
@@ -611,8 +608,8 @@ void FABADAMinimizer::finalize() {
       double bin =
           (red_conv_chain[j][conv_length - 1] - start) / double(pdf_length);
       size_t step = 0;
-      MantidVec &X = ws->dataX(j);
-      MantidVec &Y = ws->dataY(j);
+      auto &X = ws->mutableX(j);
+      auto &Y = ws->mutableY(j);
       X[0] = start;
       for (size_t i = 1; i < static_cast<size_t>(pdf_length) + 1; i++) {
         double bin_end = start + double(i) * bin;
@@ -663,8 +660,8 @@ void FABADAMinimizer::finalize() {
           m_chain[j].begin() + m_conv_point;
       std::vector<double>::const_iterator last = m_chain[j].end();
       std::vector<double> conv_chain(first, last);
-      MantidVec &X = wsConv->dataX(j);
-      MantidVec &Y = wsConv->dataY(j);
+      auto &X = wsConv->mutableX(j);
+      auto &Y = wsConv->mutableY(j);
       for (size_t k = 0; k < conv_length; ++k) {
         X[k] = double(k);
         Y[k] = conv_chain[n_steps * k];

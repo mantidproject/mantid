@@ -69,8 +69,8 @@ public:
     TS_ASSERT(wsPDF);
     TS_ASSERT_EQUALS(wsPDF->getNumberHistograms(), n + 1);
 
-    const Mantid::MantidVec &X = wsPDF->dataX(0);
-    const Mantid::MantidVec &Y = wsPDF->dataY(0);
+    const auto &X = wsPDF->mutableX(0);
+    const auto &Y = wsPDF->mutableY(0);
     TS_ASSERT_EQUALS(X.size(), 21);
     TS_ASSERT_EQUALS(Y.size(), 20);
 
@@ -104,7 +104,7 @@ public:
     TS_ASSERT(wsConv);
     TS_ASSERT_EQUALS(wsConv->getNumberHistograms(), n + 1);
 
-    const Mantid::MantidVec &Xconv = wsConv->dataX(0);
+    const auto &Xconv = wsConv->x(0);
     TS_ASSERT_EQUALS(Xconv.size(), 500);
     TS_ASSERT_EQUALS(Xconv[437], 437);
 
@@ -114,7 +114,7 @@ public:
     TS_ASSERT(wsChain);
     TS_ASSERT_EQUALS(wsChain->getNumberHistograms(), n + 1);
 
-    const Mantid::MantidVec &Xchain = wsChain->dataX(0);
+    const auto &Xchain = wsChain->x(0);
     TS_ASSERT_EQUALS(Xchain[5000], 5000);
 
     TS_ASSERT(Xconv.size() < Xchain.size());
@@ -168,8 +168,9 @@ private:
     ws2->initialize(2, 20, 20);
 
     for (size_t is = 0; is < ws2->getNumberHistograms(); ++is) {
-      Mantid::MantidVec &x = ws2->dataX(is);
-      Mantid::MantidVec &y = ws2->dataY(is);
+      
+      auto &x = ws2->mutableX(is);
+      auto &y = ws2->mutableY(is);
       for (size_t i = 0; i < ws2->blocksize(); ++i) {
         x[i] = 0.1 * double(i);
         y[i] = (10.0 + double(is)) * exp(-(x[i]) / (0.5 * (1 + double(is))));
