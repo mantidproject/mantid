@@ -21,6 +21,7 @@ class ABINS(PythonAlgorithm):
     _atoms = None
     _sum_contributions = None
     _overtones = None
+    _combinations = None
     _scale_by_cross_section = None
     _output_workspace_name = None
     _calc_partial = None
@@ -89,6 +90,9 @@ class ABINS(PythonAlgorithm):
         self.declareProperty(name="Overtones", defaultValue=False,
                              doc="In case it is set to True and sample has a form of  Powder workspaces for overtones will be calculated.")
 
+        self.declareProperty(name="Combinations", defaultValue=False,
+                             doc="In case it is set to True and sample has a form of  Powder workspaces for full quantum order effects will be calculated.")
+
         self.declareProperty(name="ScaleByCrossSection", defaultValue='Incoherent',
                              validator=StringListValidator(['Total', 'Incoherent', 'Coherent']),
                              doc="Scale the partial dynamical structure factors by the scattering cross section.")
@@ -126,6 +130,10 @@ class ABINS(PythonAlgorithm):
         sample_form = self.getProperty("SampleForm").value
         if overtones and (sample_form != "Powder"):
             issues["Overtones"] = "Workspaces with overtones can be created only for the Powder case scenario."
+
+        combinations =  self.getProperty("Combinations").value
+        if not overtones and combinations:
+            issues["Combinations"] = "Workspaces with higher order effects which contain both overtones and combinations can be created only in case overtones are also set to True."
 
         workspace_name = self.getPropertyValue("OutputWorkspace")
         if workspace_name == "":
@@ -233,43 +241,28 @@ class ABINS(PythonAlgorithm):
         """
         s_data_extracted = s_data.extract()
 
-        # find max dimension of frequencies
-        max_freq_dim = s_data_extracted["frequencies"]["order_1"].size
-        for item in s_data_extracted["frequencies"]:
-            temp = s_data_extracted["frequencies"][item].size
-            if temp > max_freq_dim:
-                max_freq_dim = temp
         if self._overtones:
-            s_total_dim = AbinsParameters.fundamentals + AbinsParameters.higher_order_quantum_effects
+            s_total_dim = AbinsParameters.fundamentals_dim + AbinsParameters.higher_order_quantum_effects_dim
         else:
-            s_total_dim = AbinsParameters.fundamentals
+            s_total_dim = AbinsParameters.fundamentals_dim
 
-        # initialize frequencies array
-        freq = np.zeros(shape=(s_total_dim, max_freq_dim), dtype=AbinsParameters.float_type)
-
-        last_order = 1
-        for order in range(AbinsParameters.fundamentals, s_total_dim + last_order):
-            order_indx = order - AbinsParameters.python_index_shift
-            temp_f = s_data_extracted["frequencies"]["order_%s"%order]
-            freq[order_indx, :temp_f.size] = temp_f
-
+        freq = s_data_extracted["frequencies"]
         atoms_data = s_data_extracted["atoms_data"]
         num_atoms = len(atoms_data)
 
         result_workspaces = []
-        s_atom_data = np.copy(freq)
-        temp_s_atom_data = np.copy(freq)
+        s_atom_data = np.tile(freq, (s_total_dim, 1))
+        temp_s_atom_data = np.copy(s_atom_data)
         for atom_symbol in atoms_symbols:
             # create partial workspaces for the given type of atom
             atom_workspaces = []
             s_atom_data.fill(0.0)
             for atom in range(num_atoms):
-                if atoms_data["atom_%s"%atom]["symbol"] == atom_symbol:
+                if atoms_data["atom_%s" % atom]["symbol"] == atom_symbol:
                     temp_s_atom_data.fill(0)
-                    for order in range(AbinsParameters.fundamentals, s_total_dim + last_order):
-                        order_indx = order - AbinsParameters.python_index_shift
-                        temp_order = atoms_data["atom_%s"%atom]["s"]["order_%s"%order]
-                        temp_s_atom_data[order_indx, :temp_order.size] = np.copy(temp_order)
+                    for order in range(AbinsParameters.fundamentals, s_total_dim):
+                        temp_order = atoms_data["atom_%s"%atom]["s"]["order_%s" % (order + 1)]
+                        temp_s_atom_data[order, :temp_order.size] = np.copy(temp_order)
                     np.add(s_atom_data, temp_s_atom_data, s_atom_data)  # sum S over the atoms of the same type
 
             atom_workspaces.append(self._create_workspace(atom_name=atom_symbol, frequencies=freq, s_points=np.copy(s_atom_data)))
@@ -306,7 +299,7 @@ class ABINS(PythonAlgorithm):
         # only fundamentals
         if s_points.shape[0] == 1:
 
-            CreateWorkspace(DataX=freq[0],
+            CreateWorkspace(DataX=freq,
                             DataY=s_points[0],
                             NSpec=1,
                             YUnitLabel="S",
@@ -338,7 +331,7 @@ class ABINS(PythonAlgorithm):
 
                 wrk_name = workspace + "_quantum_order_effect_%s"%(n + 1) # here we count from 1 because n=1 is fundamental, n=2 first overtone etc....
                 partial_wrk_names.append(wrk_name)
-                CreateWorkspace(DataX=freq[n],
+                CreateWorkspace(DataX=freq,
                                 DataY=s_points[n],
                                 NSpec=1,
                                 YUnitLabel="S",
@@ -578,6 +571,7 @@ class ABINS(PythonAlgorithm):
         self._atoms = self.getProperty("Atoms").value
         self._sum_contributions = self.getProperty("SumContributions").value
         self._overtones = self.getProperty("Overtones").value
+        self._combinations = self.getProperty("Combinations").value
         self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
         self._calc_partial = (len(self._atoms) > 0)
