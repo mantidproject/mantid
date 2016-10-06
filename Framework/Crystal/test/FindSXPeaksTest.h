@@ -14,7 +14,7 @@ using namespace Mantid::DataObjects;
 void overWriteSpectraY(size_t histo, Workspace2D_sptr workspace,
                        const std::vector<double> &Yvalues) {
 
-    workspace->dataY(histo) = Yvalues;
+  workspace->dataY(histo) = Yvalues;
 }
 
 // Helper method to make what will be recognised as a single peak.
