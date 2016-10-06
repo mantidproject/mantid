@@ -131,7 +131,7 @@ void AnvredCorrection::exec() {
     }
   }
 
-  std::string unitStr = m_inputWS->getAxis(0)->unit()->unitID();
+  const std::string &unitStr = m_inputWS->getAxis(0)->unit()->unitID();
 
   // Get the input parameters
   retrieveBaseProperties();
@@ -208,6 +208,7 @@ void AnvredCorrection::exec() {
 
     Mantid::Kernel::Units::Wavelength wl;
     std::vector<double> timeflight;
+    auto &points = m_inputWS->points(i);
     double depth = 0.2;
     double pathlength = 0.0;
     std::string bankName;
@@ -216,11 +217,17 @@ void AnvredCorrection::exec() {
 
     // Loop through the bins in the current spectrum
     for (int64_t j = 0; j < specSize; j++) {
-      timeflight.push_back((isHist ? (0.5 * (Xin[j] + Xin[j + 1])) : Xin[j]));
-      if (unitStr.compare("TOF") == 0)
-        wl.fromTOF(timeflight, timeflight, L1, L2, scattering, 0, 0, 0);
-      double lambda = timeflight[0];
-      timeflight.clear();
+
+      timeflight.push_back(points[j]);
+
+      // if (unitStr.compare("TOF") == 0)
+      double lambda =
+          (unitStr == "TOF")
+              ? wl.convertSingleFromTOF(points[j], L1, L2, scattering, 0, 0, 0)
+              : points[j];
+      // wl.fromTOF(timeflight, timeflight, L1, L2, scattering, 0, 0, 0);
+      // double lambda = timeflight[0];
+      // timeflight.clear();
 
       if (m_returnTransmissionOnly) {
         Y[j] = 1.0 / this->getEventWeight(lambda, scattering);
