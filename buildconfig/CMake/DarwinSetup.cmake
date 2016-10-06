@@ -84,6 +84,14 @@ if ( NOT TARGET mantidpython )
       ${CMAKE_CURRENT_BINARY_DIR}/mantidpython_osx
       ${PROJECT_BINARY_DIR}/bin/${CMAKE_CFG_INTDIR}/mantidpython
       COMMENT "Generating mantidpython" )
+  #Configure install script at the same time. Doing it later causes a warning from ninja.
+  if ( MAKE_VATES )
+    set ( PARAVIEW_PYTHON_PATHS ":\${SCRIPT_PATH}/../Libraries:\${SCRIPT_PATH}/../Python:\${SCRIPT_PATH}/../Python/vtk" )
+  else ()
+    set ( PARAVIEW_PYTHON_PATHS "" )
+  endif ()
+
+  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx ${CMAKE_CURRENT_BINARY_DIR}/mantidpython_osx_install @ONLY )
 endif ()
 
 ###########################################################################
@@ -165,20 +173,6 @@ if ( EXISTS ${PYQT4_PYTHONPATH}/_qt.so )
 endif ()
 
 install ( DIRECTORY ${PYQT4_PYTHONPATH}/uic DESTINATION ${BIN_DIR}/PyQt4 )
-
-# done as part of packaging step in 10.9+ builds.
-
-if ( MAKE_VATES )
-  set ( PARAVIEW_PYTHON_PATHS ":\${SCRIPT_PATH}/../Libraries:\${SCRIPT_PATH}/../Python:\${SCRIPT_PATH}/../Python/vtk" )
-else ()
-  set ( PARAVIEW_PYTHON_PATHS "" )
-endif ()
-
-install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPlot.icns
-          DESTINATION MantidPlot.app/Contents/Resources/
-)
-
-configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx ${CMAKE_CURRENT_BINARY_DIR}/mantidpython_osx_install @ONLY )
 
 # Add launcher script for mantid python
 install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantidpython_osx_install
