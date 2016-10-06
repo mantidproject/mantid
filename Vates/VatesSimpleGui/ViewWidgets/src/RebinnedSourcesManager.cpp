@@ -1,11 +1,12 @@
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
-#include "MantidVatesAPI/ADSWorkspaceProvider.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
@@ -18,16 +19,17 @@
 #include <pqPipelineSource.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
-#include <vtkSMPropertyHelper.h>
 #include <pqServerManagerModel.h>
 #include <pqUndoStack.h>
-#include <vtkSMSourceProxy.h>
-#include <vtkSMProxy.h>
-#include <vtkSMPropertyIterator.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMInputProperty.h>
-#include <vtkSMProxyProperty.h>
+#include <vtkSMPropertyHelper.h>
+#include <vtkSMPropertyIterator.h>
+#include <vtkSMProxy.h>
 #include <vtkSMProxyListDomain.h>
+#include <vtkSMProxyProperty.h>
+#include <vtkSMSessionProxyManager.h>
+#include <vtkSMSourceProxy.h>
 
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1170
@@ -684,6 +686,51 @@ bool RebinnedSourcesManager::isRebinnedSourceBeingTracked(
   } else {
     return false;
   }
+}
+
+std::string RebinnedSourcesManager::saveToProject() {
+  if (!m_inputSource || !m_rebinnedSource)
+    return "";
+
+  MantidQt::API::TSVSerialiser tsv;
+  auto &activeObjects = pqActiveObjects::instance();
+  auto proxyManager = activeObjects.activeServer()->proxyManager();
+  auto source = activeObjects.activeSource();
+
+  std::string rebinName, origName;
+  getStoredWorkspaceNames(source, origName, rebinName);
+
+  tsv.writeLine("RebinnedWorkspaceName") << rebinName;
+  tsv.writeLine("RebinnedProxyName")
+      << proxyManager->GetProxyName("sources", m_rebinnedSource->getProxy());
+  tsv.writeLine("OriginalWorkspaceName") << origName;
+
+  return tsv.outputLines();
+}
+
+void RebinnedSourcesManager::loadFromProject(const std::string &lines) {
+  MantidQt::API::TSVSerialiser tsv(lines);
+
+  std::string rebinWorkspaceName, originalWorkspaceName, rebinProxyName,
+      originalProxyName;
+  tsv.selectLine("RebinnedWorkspaceName");
+  tsv >> rebinWorkspaceName;
+  tsv.selectLine("OriginalWorkspaceName");
+  tsv >> originalWorkspaceName;
+  tsv.selectLine("RebinnedProxyName");
+  tsv >> rebinProxyName;
+
+  auto proxyManager =
+      pqActiveObjects::instance().activeServer()->proxyManager();
+  auto model = pqApplicationCore::instance()->getServerManagerModel();
+  auto rebinSourceProxy =
+      proxyManager->GetProxy("sources", rebinProxyName.c_str());
+  auto rebinSource = model->findItem<pqPipelineSource *>(rebinSourceProxy);
+
+  m_rebinnedSource = rebinSource;
+  m_newWorkspacePairBuffer.emplace(
+      originalWorkspaceName, std::make_pair(rebinWorkspaceName, rebinSource));
+  registerRebinnedSource(rebinSource);
 }
 
 /**

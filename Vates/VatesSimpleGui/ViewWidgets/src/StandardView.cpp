@@ -88,9 +88,11 @@ QMap<QString, QString> StandardView::g_actionToAlgName;
  * buttons and creates the rendering view.
  * @param parent the parent widget for the standard view
  * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
+ * @param createRenderProxy :: whether to create a render proxy for the view
  */
 StandardView::StandardView(QWidget *parent,
-                           RebinnedSourcesManager *rebinnedSourcesManager)
+                           RebinnedSourcesManager *rebinnedSourcesManager,
+                           bool createRenderProxy)
     : ViewBase(parent, rebinnedSourcesManager), m_binMDAction(NULL),
       m_sliceMDAction(NULL), m_cutMDAction(NULL), m_unbinAction(NULL) {
   this->m_ui.setupUi(this);
@@ -119,10 +121,12 @@ StandardView::StandardView(QWidget *parent,
   QObject::connect(this->m_ui.scaleButton, SIGNAL(clicked()), this,
                    SLOT(onScaleButtonClicked()));
 
-  this->m_view = this->createRenderView(this->m_ui.renderFrame);
+  if (createRenderProxy) {
+    this->m_view = this->createRenderView(this->m_ui.renderFrame);
 
-  QObject::connect(this->m_view.data(), SIGNAL(endRender()), this,
-                   SLOT(onRenderDone()));
+    QObject::connect(this->m_view.data(), SIGNAL(endRender()), this,
+                     SLOT(onRenderDone()));
+  }
 }
 
 StandardView::~StandardView() {}
@@ -286,6 +290,23 @@ void StandardView::updateUI() { this->m_ui.cutButton->setEnabled(true); }
 void StandardView::updateView() { this->m_cameraReset = true; }
 
 void StandardView::closeSubWindows() {}
+
+void StandardView::setView(pqRenderView *view) {
+  clearRenderLayout(this->m_ui.renderFrame);
+
+  this->m_view = view;
+
+  QHBoxLayout *hbox = new QHBoxLayout(this->m_ui.renderFrame);
+  hbox->setMargin(0);
+  hbox->addWidget(m_view->widget());
+
+  QObject::connect(this->m_view.data(), SIGNAL(endRender()), this,
+                   SLOT(onRenderDone()));
+}
+
+ModeControlWidget::Views StandardView::getViewType() {
+  return ModeControlWidget::Views::STANDARD;
+}
 
 /**
  * Check if the rebin and unbin buttons should be visible
