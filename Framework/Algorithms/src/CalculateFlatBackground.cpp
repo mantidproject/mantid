@@ -522,13 +522,12 @@ CalculateFlatBackground::movingAverage(API::MatrixWorkspace_const_sptr WS,
   // while adding a new point. Saves us summing all the points in the window.
   for (size_t i = 0; i < ys.size() - 1; ++i) {
     currentMin = std::min(currentMin, sum / static_cast<double>(windowWidth));
-    sum -= ys[i];
     size_t j = i + windowWidth;
     // Cyclic boundary conditions.
     if (j >= ys.size()) {
       j -= ys.size();
     }
-    sum += ys[j];
+    sum += ys[j] - ys[i];
   }
   currentMin = std::min(currentMin, sum / static_cast<double>(windowWidth));
   return currentMin;
