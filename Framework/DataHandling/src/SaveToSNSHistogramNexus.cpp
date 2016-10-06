@@ -18,7 +18,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_array.hpp>
 #include <Poco/File.h>
-//#include <hdf5.h> //This is troublesome on multiple platforms.
 
 #include <cstdlib>
 #include <cstring>
@@ -649,15 +648,20 @@ int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
   (void)is_definition;
 
   int status, i, attrLen, attrType;
+  int rank;
+  int dims[4];
   NXname attrName;
   void *attrBuffer;
 
   i = 0;
   do {
-    status = NXgetnextattr(inId, attrName, &attrLen, &attrType);
+    status = NXgetnextattra(inId, attrName, &rank, dims, &attrType);
     if (status == NX_ERROR)
       return NX_ERROR;
     if (status == NX_OK) {
+      if (rank != 1)
+        return NX_ERROR;
+      attrLen = dims[0];
       if (strcmp(attrName, "NeXus_version") &&
           strcmp(attrName, "XML_version") && strcmp(attrName, "HDF_version") &&
           strcmp(attrName, "HDF5_Version") && strcmp(attrName, "file_name") &&

@@ -418,11 +418,22 @@ void LoadHelper::dumpNexusAttributes(NXhandle nxfileID,
   // Attributes
   NXname pName;
   int iLength, iType;
+  int rank;
+  int dims[4];
   int nbuff = 127;
   boost::shared_array<char> buff(new char[nbuff + 1]);
 
-  while (NXgetnextattr(nxfileID, pName, &iLength, &iType) != NX_EOD) {
+  while (NXgetnextattra(nxfileID, pName, &rank, dims, &iType) != NX_EOD) {
     g_log.debug() << indentStr << '@' << pName << " = ";
+    if (rank > 1) { // mantid only supports single value attributes
+      throw std::runtime_error(
+          "Encountered attribute with multi-dimensional array value");
+    }
+    iLength = dims[0]; // to clarify things
+    if (iType != NX_CHAR && iLength != 1) {
+      throw std::runtime_error("Encountered attribute with array value");
+    }
+
     switch (iType) {
     case NX_CHAR: {
       if (iLength > nbuff + 1) {
