@@ -98,6 +98,10 @@ void SplineSmoothing::exec() {
     pgress.report();
   }
 
+  if (m_inputWorkspace->isHistogramData()) {
+    convertToHistogram();
+  }
+
   setProperty("OutputWorkspace", m_outputWorkspace);
 
   if (m_derivativeWorkspaceGroup->size() > 0) {
@@ -117,9 +121,21 @@ void SplineSmoothing::smoothSpectrum(int index) {
   selectSmoothingPoints(m_inputWorkspacePointData, index);
   performAdditionalFitting(m_inputWorkspacePointData, index);
 
-  // compare the data set against our spline
-  m_outputWorkspace->setX(index, m_inputWorkspace->refX(index));
+  if (m_inputWorkspace->isHistogramData()) {
+    m_outputWorkspace->setSharedX(index,
+                                  m_inputWorkspacePointData->sharedX(index));
+  } else {
+    m_outputWorkspace->setSharedX(index, m_inputWorkspace->sharedX(index));
+  }
+
   calculateSmoothing(m_inputWorkspacePointData, m_outputWorkspace, index);
+}
+
+void SplineSmoothing::convertToHistogram() {
+  auto alg = createChildAlgorithm("ConvertToHistogram");
+  alg->setProperty("InputWorkspace", m_outputWorkspace);
+  alg->execute();
+  m_outputWorkspace = alg->getProperty("OutputWorkspace");
 }
 
 /** Calculate the derivatives for each spectrum in the input workspace
@@ -133,7 +149,7 @@ void SplineSmoothing::calculateSpectrumDerivatives(int index, int order) {
         setupOutputWorkspace(m_inputWorkspace, order);
 
     for (int j = 0; j < order; ++j) {
-      derivs->setX(j, m_inputWorkspace->refX(index));
+      derivs->setSharedX(j, m_inputWorkspace->sharedX(index));
       calculateDerivatives(m_inputWorkspacePointData, derivs, j + 1, index);
     }
 
@@ -175,7 +191,7 @@ SplineSmoothing::setupOutputWorkspace(API::MatrixWorkspace_const_sptr inws,
   // create labels for output workspace
   auto tAxis = new API::TextAxis(size);
   for (int i = 0; i < size; ++i) {
-    std::string index = std::to_string(i);
+    const std::string index = std::to_string(i);
     tAxis->setLabel(i, "Y" + index);
   }
   outputWorkspace->replaceAxis(1, tAxis);
@@ -211,10 +227,10 @@ void SplineSmoothing::calculateSmoothing(
     MatrixWorkspace_const_sptr inputWorkspace,
     MatrixWorkspace_sptr outputWorkspace, size_t row) const {
   // define the spline's parameters
-  const auto &xIn = inputWorkspace->readX(row);
-  size_t nData = xIn.size();
-  const double *xValues = xIn.data();
-  double *yValues = outputWorkspace->dataY(row).data();
+  const auto &xIn = inputWorkspace->x(row);
+  const size_t nData = xIn.size();
+  const double *xValues = &(xIn[0]);
+  double *yValues = &(outputWorkspace->mutableY(row)[0]);
 
   // calculate the smoothing
   m_cspline->function1D(yValues, xValues, nData);
@@ -231,17 +247,16 @@ void SplineSmoothing::calculateSmoothing(
 void SplineSmoothing::calculateDerivatives(
     API::MatrixWorkspace_const_sptr inputWorkspace,
     API::MatrixWorkspace_sptr outputWorkspace, int order, size_t row) const {
-  const auto &xIn = inputWorkspace->readX(row);
-  const double *xValues = xIn.data();
-  double *yValues = outputWorkspace->dataY(order - 1).data();
-  size_t nData = xIn.size();
+  const auto &xIn = inputWorkspace->x(row);
+  const double *xValues = &(xIn[0]);
+  double *yValues = &(outputWorkspace->mutableY(order - 1)[0]);
+  const size_t nData = xIn.size();
 
   m_cspline->derivative1D(yValues, xValues, nData, order);
 }
 
 /** Checks if the difference of each data point between the smoothing points
- *falls within
- * the error tolerance.
+ * falls within the error tolerance.
  *
  * @param start :: The index of start checking accuracy at
  * @param end :: The index to stop checking accuracy at
@@ -305,8 +320,8 @@ void SplineSmoothing::addSmoothingPoints(const std::set<int> &points,
 void SplineSmoothing::selectSmoothingPoints(
     MatrixWorkspace_const_sptr inputWorkspace, size_t row) {
   std::set<int> smoothPts;
-  const auto &xs = inputWorkspace->readX(row);
-  const auto &ys = inputWorkspace->readY(row);
+  const auto &xs = inputWorkspace->x(row);
+  const auto &ys = inputWorkspace->y(row);
 
   // retrieving number of breaks
   int maxBreaks = static_cast<int>(getProperty("MaxNumberOfBreaks"));
@@ -349,12 +364,12 @@ void SplineSmoothing::selectSmoothingPoints(
       }
     }
 
-    addSmoothingPoints(smoothPts, xs.data(), ys.data());
+    addSmoothingPoints(smoothPts, &xs[0], &ys[0]);
     resmooth = false;
 
     // calculate the spline and retrieve smoothed points
     boost::shared_array<double> ysmooth(new double[xSize]);
-    m_cspline->function1D(ysmooth.get(), xs.data(), xSize);
+    m_cspline->function1D(ysmooth.get(), &xs[0], xSize);
 
     // iterate over smoothing points
     auto iter = smoothPts.cbegin();
@@ -364,8 +379,7 @@ void SplineSmoothing::selectSmoothingPoints(
       int end = *iter;
 
       // check each point falls within our range of error.
-      bool accurate =
-          checkSmoothingAccuracy(start, end, ys.data(), ysmooth.get());
+      bool accurate = checkSmoothingAccuracy(start, end, &ys[0], ysmooth.get());
 
       // if not, flag for resmoothing and add another point between these two
       // data points

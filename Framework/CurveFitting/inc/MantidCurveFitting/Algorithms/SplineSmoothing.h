@@ -63,6 +63,9 @@ private:
   /// smooth a single spectrum of the workspace
   void smoothSpectrum(int index);
 
+  /// Handle converting point data back to histograms
+  void convertToHistogram();
+
   /// calculate derivatives for a single spectrum
   void calculateSpectrumDerivatives(int index, int order);
 
