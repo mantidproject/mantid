@@ -460,7 +460,7 @@ void MantidUI::saveNexusWorkspace() { executeSaveNexus(); }
 */
 void MantidUI::deleteWorkspace(const QString &workspaceName) {
   auto workspaceNameStdString = workspaceName.toStdString();
-  auto& ads = Mantid::API::AnalysisDataService::Instance();
+  auto &ads = Mantid::API::AnalysisDataService::Instance();
   if (ads.doesExist(workspaceNameStdString)) {
     ads.remove(workspaceNameStdString);
   }
