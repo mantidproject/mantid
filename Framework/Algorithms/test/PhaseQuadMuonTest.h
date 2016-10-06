@@ -24,7 +24,7 @@ namespace {
     }
   }
 
-  IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs) {
+  IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg) {
     // Create and populate a detector table
     boost::shared_ptr<ITableWorkspace> phaseTable(
       new Mantid::DataObjects::TableWorkspace);
@@ -33,6 +33,7 @@ namespace {
     // Set up PhaseQuad
     IAlgorithm_sptr phaseQuad =
       AlgorithmManager::Instance().create("PhaseQuad");
+    phaseQuad->setChild(isChildAlg);
     phaseQuad->initialize();
     phaseQuad->setProperty("InputWorkspace", inputWs);
     phaseQuad->setProperty("PhaseTable", phaseTable);
@@ -67,7 +68,7 @@ public:
 
   void testExecPhaseTable() {
     MatrixWorkspace_sptr inputWs = loadMuonDataset();
-    IAlgorithm_sptr phaseQuad = setupAlg(inputWs);
+    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true);
     TS_ASSERT_THROWS_NOTHING(phaseQuad->execute());
     TS_ASSERT(phaseQuad->isExecuted());
 
@@ -119,7 +120,7 @@ public:
 
   void setUp() override {
     inputWs = loadMuonDataset();
-    phaseQuad = setupAlg(inputWs);
+    phaseQuad = setupAlg(inputWs, false);
   }
 
   void tearDown() override {

@@ -60,11 +60,11 @@ void PointByPointVCorrection::exec() {
 
     outputWS->setSharedX(i, inputWS1->sharedX(i));
 
-    const auto X = inputWS1->x(i);
-    const auto Y1 = inputWS1->y(i);
-    const auto Y2 = inputWS2->y(i);
-    const auto E1 = inputWS1->e(i);
-    const auto E2 = inputWS2->e(i);
+    const auto &X = inputWS1->x(i);
+    const auto &Y1 = inputWS1->y(i);
+    const auto &Y2 = inputWS2->y(i);
+    const auto &E1 = inputWS1->e(i);
+    const auto &E2 = inputWS2->e(i);
     auto &resultY = outputWS->mutableY(i);
     auto &resultE = outputWS->mutableE(i);
 
