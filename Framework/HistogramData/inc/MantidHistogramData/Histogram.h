@@ -204,12 +204,6 @@ private:
   void switchDxToBinEdges();
   void switchDxToPoints();
 
-  size_t size() const {
-    if (xMode() == XMode::BinEdges)
-      return m_x->size() - 1;
-    return m_x->size();
-  }
-
   XMode m_xMode;
   YMode m_yMode{YMode::Uninitialized};
 };
