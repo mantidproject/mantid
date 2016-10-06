@@ -146,11 +146,11 @@ public:
 
 class MaskPeaksWorkspaceTestPerformance : public CxxTest::TestSuite {
 public:
-  void setUp() {    
+  void setUp() {
     EventWorkspace_sptr inputWS = Mantid::DataObjects::MDEventsTestHelper::
-      createDiffractionEventWorkspace(1000, 10000, 16000);
+        createDiffractionEventWorkspace(1000, 10000, 16000);
     AnalysisDataService::Instance().addOrReplace(inputWSName, inputWS);
-    
+
     PeaksWorkspace_sptr peaksWS(new PeaksWorkspace());
     Mantid::DataObjects::Peak PeakObj(inputWS->getInstrument(), 1000, 100.);
     peaksWS->addPeak(PeakObj);
@@ -159,12 +159,10 @@ public:
     mpwAlg.setProperty("InputWorkspace", inputWS);
     mpwAlg.setProperty("InPeaksWorkspace", peaksWS);
   }
-  
+
   void testPerformance() { mpwAlg.execute(); }
 
-  void tearDown() {
-    AnalysisDataService::Instance().remove(inputWSName);
-  }
+  void tearDown() { AnalysisDataService::Instance().remove(inputWSName); }
 
 private:
   MaskPeaksWorkspace mpwAlg;

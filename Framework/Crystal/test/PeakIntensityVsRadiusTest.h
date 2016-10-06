@@ -157,10 +157,8 @@ public:
     TS_ASSERT_DELTA(ws->x(0)[2], 0.2, 1e-6);
 
     TS_ASSERT_LESS_THAN(ws->y(0)[5], 1000);
-    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[12], 1000,
-                     1e-6);
-    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000,
-                     1e-6);
+    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[12], 1000, 1e-6);
+    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000, 1e-6);
   }
 
   void test_VariableBackground() {
@@ -174,10 +172,8 @@ public:
     TS_ASSERT_DELTA(ws->y(0)[1], 0, 10);
     TS_ASSERT_DELTA(ws->y(0)[2], 0, 10);
     TS_ASSERT_DELTA(ws->y(0)[3], 0, 10);
-    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[12], 1000,
-                     1e-6);
-    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000,
-                     1e-6);
+    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[12], 1000, 1e-6);
+    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000, 1e-6);
   }
 
   void test_FixedBackground() {
@@ -192,10 +188,8 @@ public:
     TS_ASSERT_DELTA(ws->y(0)[1], 0, 10);
     TS_ASSERT_DELTA(ws->y(0)[2], 0, 10);
     TS_ASSERT_DELTA(ws->y(0)[3], 0, 10);
-    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[12], 1000,
-                     1e-6);
-    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000,
-                     1e-6);
+    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[12], 1000, 1e-6);
+    TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000, 1e-6);
   }
 };
 
