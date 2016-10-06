@@ -469,4 +469,78 @@ public:
   }
 };
 
+class RefinePowderInstrumentParameters3TestPerformance : public CxxTest::TestSuite {
+
+private:
+	Workspace2D_sptr posWS;
+	TableWorkspace_sptr profWS;
+
+public:
+	// This pair of boilerplate methods prevent the suite being created statically
+	// This means the constructor isn't called when running other tests
+	static RefinePowderInstrumentParameters3TestPerformance *createSuite() {
+		return new RefinePowderInstrumentParameters3TestPerformance();
+	}
+	static void destroySuite(RefinePowderInstrumentParameters3TestPerformance *suite) {
+		delete suite;
+	}
+
+        void setUp() {
+          posWS = generatePeakPositionWorkspace(1);
+          profWS = generateInstrumentProfileTableBank1();
+
+          AnalysisDataService::Instance().addOrReplace("Bank1PeakPositions",
+                                                       posWS);
+          AnalysisDataService::Instance().addOrReplace("Bank1ProfileParameters",
+                                                       profWS);
+        }
+
+        void tearDown() {
+
+          AnalysisDataService::Instance().remove("Bank1PeakPositions");
+          AnalysisDataService::Instance().remove("Bank1FittedPositions");
+          AnalysisDataService::Instance().remove("Bank1ProfileParameters");
+          AnalysisDataService::Instance().remove(
+              "Bank1FittedProfileParameters");
+        }
+        
+          void test_FitNonMonteCarlo() {
+        
+            RefinePowderInstrumentParameters3 alg;
+            alg.initialize();
+            alg.setPropertyValue("InputPeakPositionWorkspace",
+            "Bank1PeakPositions");
+            alg.setProperty("WorkspaceIndex", 0);
+            alg.setProperty("OutputPeakPositionWorkspace",
+            "Bank1FittedPositions");
+            alg.setProperty("InputInstrumentParameterWorkspace",
+                            "Bank1ProfileParameters");
+            alg.setProperty("OutputInstrumentParameterWorkspace",
+                            "Bank1FittedProfileParameters");
+            alg.setProperty("RefinementAlgorithm", "OneStepFit");
+            alg.setProperty("StandardError", "UseInputValue");
+            alg.execute();
+          }
+        
+          void test_FitMonteCarlo() {
+        
+            RefinePowderInstrumentParameters3 alg;
+            alg.initialize();
+            alg.setPropertyValue("InputPeakPositionWorkspace",
+            "Bank1PeakPositions");
+            alg.setProperty("WorkspaceIndex", 0);
+            alg.setProperty("OutputPeakPositionWorkspace",
+            "Bank1FittedPositions");
+            alg.setProperty("InputInstrumentParameterWorkspace",
+                            "Bank1ProfileParameters");
+            alg.setProperty("OutputInstrumentParameterWorkspace",
+                            "Bank1FittedProfileParameters");
+            alg.setProperty("RefinementAlgorithm", "MonteCarlo");
+            alg.setProperty("StandardError", "UseInputValue");
+            alg.setProperty("AnnealingTemperature", 100.0);
+            alg.setProperty("MonteCarloIterations", 100);
+            alg.execute();
+          }
+        
+};
 #endif /* MANTID_CURVEFITTING_RefinePowderInstrumentParameters3TEST_H_ */
