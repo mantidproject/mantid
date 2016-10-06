@@ -77,7 +77,8 @@ private:
 
   DataObjects::Workspace2D_sptr m_inputWS;
   API::MatrixWorkspace_sptr m_outputWS;
-  const API::SpectrumInfo *m_spectrumInfo;
+  // Provide hint to compiler that this should be default initialized to nullptr
+  const API::SpectrumInfo *m_spectrumInfo = nullptr;
 };
 
 } // namespace Algorithms

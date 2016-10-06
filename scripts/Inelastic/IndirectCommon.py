@@ -1,4 +1,7 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,redefined-builtin
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+
 import mantid.simpleapi as s_api
 from mantid import config, logger
 
@@ -419,7 +422,7 @@ def plotSpectra(ws, y_axis_title, indicies=None):
 
     if len(indicies) == 0:
         num_spectra = s_api.mtd[ws].getNumberHistograms()
-        indicies = range(num_spectra)
+        indicies = list(range(num_spectra))
 
     try:
         mtd_plot = import_mantidplot()
@@ -506,14 +509,14 @@ def transposeFitParametersTable(params_table, output_table=None):
     # Create columns with parameter names for headers
     column_names = ['.'.join(name.split('.')[1:]) for name in param_names[:num_params]]
     column_error_names = [name + '_Err' for name in column_names]
-    column_names = zip(column_names, column_error_names)
+    column_names = list(zip(column_names, column_error_names))
     table_ws.addColumn('double', 'axis-1')
     for name, error_name in column_names:
         table_ws.addColumn('double', name)
         table_ws.addColumn('double', error_name)
 
     # Output parameter values to table row
-    for i in xrange(0, params_table.rowCount() - 1, num_params):
+    for i in range(0, params_table.rowCount() - 1, num_params):
         row_values = param_values[i:i + num_params]
         row_errors = param_errors[i:i + num_params]
         row = [value for pair in zip(row_values, row_errors) for value in pair]

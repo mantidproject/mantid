@@ -124,9 +124,7 @@ void TOFSANSResolution::exec() {
   auto &TOFY = tofWS->mutableY(0);
 
   // Initialize Dq
-  auto &DxOut = iqWS->mutableDx(0);
-  for (int i = 0; i < xLength; i++)
-    DxOut[i] = 0.0;
+  HistogramData::HistogramDx DxOut(xLength - 1, 0.0);
 
   const int numberOfSpectra =
       static_cast<int>(reducedWS->getNumberHistograms());
@@ -236,6 +234,7 @@ void TOFSANSResolution::exec() {
     TOFY[i] /= XNorm[i];
     ThetaY[i] /= XNorm[i];
   }
+  iqWS->setPointStandardDeviations(0, std::move(DxOut));
 }
 } // namespace Algorithms
 } // namespace Mantid
