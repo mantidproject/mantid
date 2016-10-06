@@ -161,7 +161,7 @@ public:
   void test_filter() {
     API::MatrixWorkspace_sptr ws =
         createWS(200, 0.1, "filter", "MomentumTransfer");
-    MantidVec &SofQ = ws->dataY(0);
+    auto &SofQ = ws->mutableY(0);
     for (size_t i = 0; i < SofQ.size(); i++) {
       SofQ[i] = 1.0;
     }

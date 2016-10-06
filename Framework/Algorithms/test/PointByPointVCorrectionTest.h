@@ -34,8 +34,8 @@ public:
     testSample->setInstrument(inst);
     testVanadium->setInstrument(inst);
     // Change the Y values
-    testSample->dataY(1) = Mantid::MantidVec(5, 3.0);
-    testVanadium->dataY(1) = Mantid::MantidVec(5, 5.5);
+    testSample->mutableY(1) = Mantid::HistogramData::HistogramY(5, 3.0);
+    testVanadium->mutableY(1) = Mantid::HistogramData::HistogramY(5, 5.5);
 
     pbpv.setProperty<MatrixWorkspace_sptr>("InputW1", testSample);
     pbpv.setProperty<MatrixWorkspace_sptr>("InputW2", testVanadium);
@@ -89,8 +89,8 @@ public:
     testSample->setInstrument(inst);
     testVanadium->setInstrument(inst);
     // Change the Y values
-    testSample->dataY(1) = Mantid::MantidVec(5, 3.0);
-    testVanadium->dataY(1) = Mantid::MantidVec(5, 5.5);
+    testSample->mutableY(1) = Mantid::HistogramData::HistogramY(5, 3.0);
+    testVanadium->mutableY(1) = Mantid::HistogramData::HistogramY(5, 5.5);
 
     pbpv.initialize();
     pbpv.setProperty<MatrixWorkspace_sptr>("InputW1", testSample);

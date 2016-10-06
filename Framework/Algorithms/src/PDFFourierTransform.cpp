@@ -229,18 +229,19 @@ double PDFFourierTransform::determineRho0() {
 void PDFFourierTransform::exec() {
   // get input data
   API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  auto &inputQ = inputWS->mutableX(0);                      //  x for input
+  auto &inputQ = inputWS->mutableX(0);                   //  x for input
   HistogramData::HistogramDx inputDQ(inputQ.size(), 0.0); // dx for input
   if (inputWS->sharedDx(0))
     inputDQ = inputWS->dx(0);
-  auto &inputFOfQ = inputWS->mutableY(0);   //  y for input
-  auto &inputDfOfQ = inputWS->mutableE(0);   // dy for input
+  auto &inputFOfQ = inputWS->mutableY(0);  //  y for input
+  auto &inputDfOfQ = inputWS->mutableE(0); // dy for input
 
   // transform input data into Q/MomentumTransfer
   const std::string inputXunit = inputWS->getAxis(0)->unit()->unitID();
   if (inputXunit == "MomentumTransfer") {
     // nothing to do
   } else if (inputXunit == "dSpacing") {
+    // convert the x-units to Q/MomentumTransfer
     const double PI_2(2. * M_PI);
     std::for_each(inputQ.begin(), inputQ.end(),
                   [&PI_2](double &Q) { Q /= PI_2; });
