@@ -4,8 +4,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
-
 namespace Mantid {
 using namespace API;
 using namespace DataObjects;
@@ -67,8 +65,7 @@ void WeightedMeanOfWorkspace::exec() {
     MantidVec e = inputWS->dataE(i);
     double weight = 0.0;
     for (std::size_t j = 0; j < y.size(); ++j) {
-      if (!boost::math::isnan(y[j]) && !boost::math::isinf(y[j]) &&
-          !boost::math::isnan(e[j]) && !boost::math::isinf(e[j])) {
+      if (std::isfinite(y[j]) && std::isfinite(e[j])) {
         weight = 1.0 / (e[j] * e[j]);
         averageValue += (y[j] * weight);
         weightSum += weight;

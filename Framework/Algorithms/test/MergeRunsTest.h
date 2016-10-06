@@ -1340,6 +1340,24 @@ public:
         SampleLogsBehaviour::LIST_MERGE, "1, 2, 6, 7");
   }
 
+  void test_merging_single_workspace() {
+    std::string mergeType = SampleLogsBehaviour::TIME_SERIES_MERGE;
+
+    auto ws = create_group_workspace_with_sample_logs<double>(
+        mergeType, "prop1", 1.0, 2.0, 3.0, 4.0);
+
+    ws->remove("b1");
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspaces", ws->name());
+    alg.setPropertyValue("OutputWorkspace", "outWS1");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    do_test_mergeSampleLogs(ws, "prop1", mergeType, "2013-Jun-25 10:59:15  1\n",
+                            1);
+  }
+
 private:
   MergeRuns merge;
 };
