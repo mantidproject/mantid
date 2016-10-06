@@ -22,42 +22,42 @@ using namespace Mantid::Kernel;
 using namespace Mantid;
 
 namespace {
-  /**
-  * Create Workspace from 0 to N*dx
-  */
-  Mantid::API::MatrixWorkspace_sptr createWS(size_t n, double dx,
-    const std::string &name,
-    const std::string unitlabel,
-    const bool withBadValues = false) {
+/**
+* Create Workspace from 0 to N*dx
+*/
+Mantid::API::MatrixWorkspace_sptr createWS(size_t n, double dx,
+                                           const std::string &name,
+                                           const std::string unitlabel,
+                                           const bool withBadValues = false) {
 
-    Mantid::API::FrameworkManager::Instance();
-    Mantid::DataObjects::Workspace2D_sptr ws =
+  Mantid::API::FrameworkManager::Instance();
+  Mantid::DataObjects::Workspace2D_sptr ws =
       boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-        Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 1,
-          n, n));
+          Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 1, n,
+                                                           n));
 
-    auto &X = ws->mutableX(0);
-    auto &Y = ws->mutableY(0);
-    auto &E = ws->mutableE(0);
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
 
-    for (size_t i = 0; i < n; i++) {
-      X[i] = double(i) * dx;
-      Y[i] = X[i] + 1.0;
-      E[i] = sqrt(fabs(X[i]));
-    }
+  for (size_t i = 0; i < n; i++) {
+    X[i] = double(i) * dx;
+    Y[i] = X[i] + 1.0;
+    E[i] = sqrt(fabs(X[i]));
+  }
 
-    if (withBadValues) {
-      Y[0] = std::numeric_limits<double>::quiet_NaN();
-      Y[Y.size() - 1] = std::numeric_limits<double>::quiet_NaN();
-    }
+  if (withBadValues) {
+    Y[0] = std::numeric_limits<double>::quiet_NaN();
+    Y[Y.size() - 1] = std::numeric_limits<double>::quiet_NaN();
+  }
 
-    ws->getAxis(0)->unit() =
+  ws->getAxis(0)->unit() =
       Mantid::Kernel::UnitFactory::Instance().create(unitlabel);
 
-    Mantid::API::AnalysisDataService::Instance().add(name, ws);
+  Mantid::API::AnalysisDataService::Instance().add(name, ws);
 
-    return ws;
-  }
+  return ws;
+}
 }
 
 class PDFFourierTransformTest : public CxxTest::TestSuite {
@@ -211,7 +211,7 @@ public:
   void setUp() override {
     ws = createWS(2000000, 0.1, "inputWS", "MomentumTransfer");
     pdfft = Mantid::API::FrameworkManager::Instance().createAlgorithm(
-      "PDFFourierTransform");
+        "PDFFourierTransform");
 
     pdfft->initialize();
     pdfft->setProperty("InputWorkspace", ws);

@@ -110,8 +110,7 @@ public:
   }
   static void destroySuite(PlotAsymmetryByLogValueTest *suite) { delete suite; }
   PlotAsymmetryByLogValueTest()
-      : firstRun("MUSR00015189.nxs"),
-        lastRun("MUSR00015190.nxs") {}
+      : firstRun("MUSR00015189.nxs"), lastRun("MUSR00015190.nxs") {}
 
   /// Clear the ADS at the end of every test
   void tearDown() override { AnalysisDataService::Instance().clear(); }
@@ -603,8 +602,7 @@ public:
   }
 
   PlotAsymmetryByLogValueTestPerformance()
-      : firstRun("MUSR00015189.nxs"),
-        lastRun("MUSR00015190.nxs") {}
+      : firstRun("MUSR00015189.nxs"), lastRun("MUSR00015190.nxs") {}
 
   void setUp() override {
     alg.initialize();

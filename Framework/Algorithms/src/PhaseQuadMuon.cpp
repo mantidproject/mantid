@@ -220,7 +220,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
 
   // Create and populate output workspace
   API::MatrixWorkspace_sptr ows = API::WorkspaceFactory::Instance().create(
-    "Workspace2D", 2, npoints + 1, npoints);
+      "Workspace2D", 2, npoints + 1, npoints);
 
   // X
   ows->setSharedX(0, ws->sharedX(0));
@@ -239,8 +239,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
       const double X = ws->x(h)[i];
       const double Y = ws->y(h)[i] - n0[h] * exp(-(X - X0) / muLife);
       const double E = (ws->y(h)[i] > poissonLimit)
-        ? ws->e(h)[i]
-        : sqrt(n0[h] * exp(-(X - X0) / muLife));
+                           ? ws->e(h)[i]
+                           : sqrt(n0[h] * exp(-(X - X0) / muLife));
 
       realY[i] += aj[h] * Y;
       imagY[i] += bj[h] * Y;

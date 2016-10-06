@@ -21,26 +21,26 @@ using Mantid::API::AnalysisDataService;
 using Mantid::Algorithms::CreateSampleWorkspace;
 
 namespace {
-  /**
-  * Creates a workspace with peaks at 400, 800, 1300, 1600 us
-  */
-  void createSampleWS() {
-    CreateSampleWorkspace sampleWS;
-    sampleWS.initialize();
-    sampleWS.setPropertyValue("WorkspaceType", "Event");
-    sampleWS.setPropertyValue("Function", "User Defined");
-    sampleWS.setPropertyValue(
+/**
+* Creates a workspace with peaks at 400, 800, 1300, 1600 us
+*/
+void createSampleWS() {
+  CreateSampleWorkspace sampleWS;
+  sampleWS.initialize();
+  sampleWS.setPropertyValue("WorkspaceType", "Event");
+  sampleWS.setPropertyValue("Function", "User Defined");
+  sampleWS.setPropertyValue(
       "UserDefinedFunction",
       "name=Gaussian,Height=100,PeakCentre=400,Sigma=10;"
       "name=Gaussian,Height=80,PeakCentre=800,Sigma=12;"
       "name=Gaussian,Height=350,PeakCentre=1300,Sigma=12;"
       "name=Gaussian,Height=210,PeakCentre=1600,Sigma=15");
-    sampleWS.setProperty("XMin", 100.0);
-    sampleWS.setProperty("XMax", 2000.0);
-    sampleWS.setProperty("BinWidth", 1.0);
-    sampleWS.setPropertyValue("OutputWorkspace", "PDCalibrationTest_WS");
-    sampleWS.execute();
-  }
+  sampleWS.setProperty("XMin", 100.0);
+  sampleWS.setProperty("XMax", 2000.0);
+  sampleWS.setProperty("BinWidth", 1.0);
+  sampleWS.setPropertyValue("OutputWorkspace", "PDCalibrationTest_WS");
+  sampleWS.execute();
+}
 }
 
 class PDCalibrationTest : public CxxTest::TestSuite {
@@ -223,16 +223,15 @@ public:
 
   PDCalibrationTestPerformance() { FrameworkManager::Instance(); }
 
-  void setUp() override { 
+  void setUp() override {
     createSampleWS();
     pdc.initialize();
     pdc.setProperty("SignalWorkspace", "PDCalibrationTest_WS");
     pdc.setPropertyValue("TofBinning", "200,1.0,2000");
     pdc.setPropertyValue("PeakWindow", "1");
     pdc.setPropertyValue("OutputCalibrationTable", "outputWS");
-    pdc.setPropertyValue("PeakPositions",
-      "9.523809, 22.222222, "
-      "38.095238, 47.619047");
+    pdc.setPropertyValue("PeakPositions", "9.523809, 22.222222, "
+                                          "38.095238, 47.619047");
   }
 
   void tearDown() override {

@@ -12,47 +12,46 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
 namespace {
-  void populatePhaseTable(ITableWorkspace_sptr phaseTable) {
-    phaseTable->addColumn("int", "DetectorID");
-    phaseTable->addColumn("double", "DetectorAsymmetry");
-    phaseTable->addColumn("double", "DetectorPhase");
-    for (int i = 0; i < 16; i++) {
-      TableRow phaseRow1 = phaseTable->appendRow();
-      phaseRow1 << i << 1. << 0.;
-      TableRow phaseRow2 = phaseTable->appendRow();
-      phaseRow2 << i << 1. << 1.57;
-    }
+void populatePhaseTable(ITableWorkspace_sptr phaseTable) {
+  phaseTable->addColumn("int", "DetectorID");
+  phaseTable->addColumn("double", "DetectorAsymmetry");
+  phaseTable->addColumn("double", "DetectorPhase");
+  for (int i = 0; i < 16; i++) {
+    TableRow phaseRow1 = phaseTable->appendRow();
+    phaseRow1 << i << 1. << 0.;
+    TableRow phaseRow2 = phaseTable->appendRow();
+    phaseRow2 << i << 1. << 1.57;
   }
+}
 
-  IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg) {
-    // Create and populate a detector table
-    boost::shared_ptr<ITableWorkspace> phaseTable(
+IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg) {
+  // Create and populate a detector table
+  boost::shared_ptr<ITableWorkspace> phaseTable(
       new Mantid::DataObjects::TableWorkspace);
-    populatePhaseTable(phaseTable);
+  populatePhaseTable(phaseTable);
 
-    // Set up PhaseQuad
-    IAlgorithm_sptr phaseQuad =
-      AlgorithmManager::Instance().create("PhaseQuad");
-    phaseQuad->setChild(isChildAlg);
-    phaseQuad->initialize();
-    phaseQuad->setProperty("InputWorkspace", inputWs);
-    phaseQuad->setProperty("PhaseTable", phaseTable);
-    phaseQuad->setPropertyValue("OutputWorkspace", "outputWs");
-    return phaseQuad;
-  }
+  // Set up PhaseQuad
+  IAlgorithm_sptr phaseQuad = AlgorithmManager::Instance().create("PhaseQuad");
+  phaseQuad->setChild(isChildAlg);
+  phaseQuad->initialize();
+  phaseQuad->setProperty("InputWorkspace", inputWs);
+  phaseQuad->setProperty("PhaseTable", phaseTable);
+  phaseQuad->setPropertyValue("OutputWorkspace", "outputWs");
+  return phaseQuad;
+}
 
-  MatrixWorkspace_sptr loadMuonDataset() {
-    IAlgorithm_sptr loader = AlgorithmManager::Instance().create("Load");
-    loader->setChild(true);
-    loader->initialize();
-    loader->setProperty("Filename", "emu00006473.nxs");
-    loader->setPropertyValue("OutputWorkspace", "outputWs");
-    loader->execute();
-    Workspace_sptr temp = loader->getProperty("OutputWorkspace");
-    MatrixWorkspace_sptr inputWs = 
+MatrixWorkspace_sptr loadMuonDataset() {
+  IAlgorithm_sptr loader = AlgorithmManager::Instance().create("Load");
+  loader->setChild(true);
+  loader->initialize();
+  loader->setProperty("Filename", "emu00006473.nxs");
+  loader->setPropertyValue("OutputWorkspace", "outputWs");
+  loader->execute();
+  Workspace_sptr temp = loader->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr inputWs =
       boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
-    return inputWs;
-  }
+  return inputWs;
+}
 }
 
 class PhaseQuadMuonTest : public CxxTest::TestSuite {
