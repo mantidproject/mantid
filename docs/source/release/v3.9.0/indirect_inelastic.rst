@@ -14,6 +14,8 @@ Algorithms
 Data Analysis
 #############
 
+- :ref:`TeixeiraWaterSQE <func-TeixeiraWaterSQE>` models translation of water-like molecules (jump diffusion).
+
 Corrections
 ###########
 
