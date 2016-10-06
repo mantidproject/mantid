@@ -441,16 +441,14 @@ public:
     // into this
     // bin. We make sure that there is at least one bin with a count
     // of sqrt(1 + 0.5^2/12) ~ 1.01036297108
-    auto &dataDX = result->dx(0);
     unsigned int counter = 0;
-    for (auto it = dataDX.begin(); it != dataDX.end(); ++it) {
-
+    for (const auto &dx : result->dx(0)) {
       // Since we are dealing with a float it can be difficult to compare
       // our value with sqrt(1 + 0.5^2/12). Hence it is enough for us to confirm
       // that the values lie in an interval around this value
-      auto isZeroValue = *it == 0.0;
+      auto isZeroValue = dx == 0.0;
       auto isCloseToZeroPoint1DividedByRootTwelve =
-          (*it > 1.01035) && (*it < 1.01037);
+          (dx > 1.01035) && (dx < 1.01037);
       if (isCloseToZeroPoint1DividedByRootTwelve) {
         counter++;
       }
