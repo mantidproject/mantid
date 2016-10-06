@@ -37,8 +37,8 @@ Output:
 
 .. testoutput:: ExCalculateSampleTransmissionSimple
 
-    Transmission: 0.568102, 0.567976, 0.567851 ...
-    Scattering: 0.429309, 0.429309, 0.429309 ...
+    Transmission: 0.981276, 0.981268, 0.981261 ...
+    Scattering: 0.018575, 0.018575, 0.018575 ...
 
 
 **Example - Running CalculateSampleTransmission with a specified number density and thickness.**
@@ -47,7 +47,7 @@ Output:
 
     ws = CalculateSampleTransmission(WavelengthRange='2.0, 0.1, 10.0',
                                      ChemicalFormula='H2-O',
-                                     DensityType='Number Density'
+                                     DensityType='Number Density',
                                      Density=0.2,
                                      Thickness=0.58)
 
