@@ -240,7 +240,7 @@ void CentroidPeaks::integrateEvent() {
       continue;
 
     double tofstart = TOFPeakd * std::pow(1.004, -PeakRadius);
-    double tofend = TOFPeakd * std::pow(1.004, PeakRadius); 
+    double tofend = TOFPeakd * std::pow(1.004, PeakRadius);
     double rowcentroid = 0.0;
     int rowstart = std::max(0, row - PeakRadius);
     int rowend = row + PeakRadius;
