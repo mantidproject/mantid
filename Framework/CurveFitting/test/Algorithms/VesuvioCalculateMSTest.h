@@ -236,7 +236,7 @@ private:
                                    const double expectedMS) {
     using Mantid::API::MatrixWorkspace_sptr;
     const size_t checkIdx = 100;
-// OS X and GCC>=5 seems to do a terrible job with keep the same precision here.
+// OS X and GCC>=5 seems to do a terrible job with keeping the same precision here.
 #if defined(__APPLE__) || (__GNUC__ >= 5)
     const double tolerance(1e-4);
 #else
@@ -246,18 +246,18 @@ private:
     // Values for total scattering
     MatrixWorkspace_sptr totScatter = alg->getProperty("TotalScatteringWS");
     TS_ASSERT(totScatter);
-    const auto &totY = totScatter->readY(0);
+    const auto &totY = totScatter->y(0);
     TS_ASSERT_DELTA(expectedTotal, totY[checkIdx], tolerance);
-    const auto &totX = totScatter->readX(0);
+    const auto &totX = totScatter->x(0);
     TS_ASSERT_DELTA(150.0, totX[checkIdx],
                     tolerance); // based on workspace setup
 
     // Values for multiple scatters
     MatrixWorkspace_sptr multScatter = alg->getProperty("MultipleScatteringWS");
     TS_ASSERT(multScatter);
-    const auto &msY = multScatter->readY(0);
+    const auto &msY = multScatter->y(0);
     TS_ASSERT_DELTA(expectedMS, msY[checkIdx], tolerance);
-    const auto &msX = multScatter->readX(0);
+    const auto &msX = multScatter->x(0);
     TS_ASSERT_DELTA(150.0, msX[checkIdx],
                     tolerance); // based on workspace setup
   }
