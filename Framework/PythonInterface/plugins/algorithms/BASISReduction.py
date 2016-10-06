@@ -237,6 +237,13 @@ class BASISReduction(PythonAlgorithm):
             # Scale so that elastic line has Y-values ~ 1
             if self._normalizeToFirst:
                 self._ScaleY(self._samSqwWs)
+            # Transform the vertical axis to point data
+            Transpose(InputWorkspace=self._samSqwWs,
+                      OutputWorkspace=self._samSqwWs)  # Q-values are in X-axis now
+            ConvertToPointData(InputWorkspace=self._samSqwWs,
+                               OutputWorkspace=self._samSqwWs)  # from histo to point
+            Transpose(InputWorkspace=self._samSqwWs,
+                      OutputWorkspace=self._samSqwWs)  # Q-values back to vertical axis
             # Output Dave and Nexus files
             extension = "_divided.dat" if self._doNorm else ".dat"
             dave_grp_filename = self._makeRunName(self._samWsRun,
