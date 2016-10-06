@@ -69,7 +69,7 @@ public:
     el.setSpectrumNo(42);
     MantidVec x{0.1, 0.2, 0.3};
     el.setX(make_cow<HistogramX>(x));
-    el.setSharedDx(Kernel::make_cow<HistogramData::HistogramDx>(x));
+    el.setPointVariances(2);
 
     EventList other;
     other = el;
@@ -868,6 +868,14 @@ public:
     for (std::size_t i = 0; i < Y.size(); i++) {
       TS_ASSERT_EQUALS(Y[i], 2.0);
       TS_ASSERT_DELTA(E[i], M_SQRT2, 1e-5);
+    }
+
+    // check uniform counts histogram.
+    size_t hist1 = Y.size();
+    MantidVec Y1(hist1, 0);
+    eList.generateCountsHistogramPulseTime(X[0], X[hist1], Y1);
+    for (std::size_t i = 0; i < Y.size(); i++) {
+      TS_ASSERT_EQUALS(Y[i], Y1[i]);
     }
   }
 
@@ -2484,8 +2492,9 @@ public:
     el.setHistogram(HistogramData::BinEdges{0, 2});
     TS_ASSERT_THROWS_NOTHING(el.setBinEdges(HistogramData::BinEdges{0, 2}));
     TS_ASSERT_THROWS(el.setPoints(1), std::runtime_error);
-    TS_ASSERT_THROWS(el.setPointVariances(1), std::runtime_error);
-    TS_ASSERT_THROWS(el.setPointStandardDeviations(1), std::runtime_error);
+    // Uncertainties for X are always for Points, this must work.
+    TS_ASSERT_THROWS_NOTHING(el.setPointVariances(1));
+    TS_ASSERT_THROWS_NOTHING(el.setPointStandardDeviations(1));
   }
 
   void test_setCounts_fails() {

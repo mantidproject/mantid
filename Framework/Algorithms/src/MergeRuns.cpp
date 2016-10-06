@@ -107,8 +107,7 @@ void MergeRuns::exec() {
   }
 
   if (inputs.size() == 1) {
-    g_log.error("Only one input workspace specified");
-    throw std::invalid_argument("Only one input workspace specified");
+    g_log.warning("Only one input workspace specified");
   }
 
   // First, try as event workspaces
