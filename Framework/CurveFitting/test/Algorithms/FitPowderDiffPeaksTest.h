@@ -436,8 +436,18 @@ public:
     if (!peakdataws) {
       return;
     }
-
     TS_ASSERT_EQUALS(peakdataws->getNumberHistograms(), 5);
+    TS_ASSERT_EQUALS(peakdataws->blocksize(), 2284);
+    TS_ASSERT_EQUALS(peakdataws->x(0).rawData(), peakdataws->x(1).rawData());
+    TS_ASSERT_EQUALS(peakdataws->x(0).rawData(), peakdataws->x(2).rawData());
+    TS_ASSERT_EQUALS(peakdataws->x(0).rawData(), peakdataws->x(3).rawData());
+    TS_ASSERT_EQUALS(peakdataws->x(0).rawData(), peakdataws->x(4).rawData());
+    TS_ASSERT_DELTA(peakdataws->y(0)[0], 0.4302, 0.0001);
+    TS_ASSERT_DELTA(peakdataws->y(2)[0], 0.4302, 0.0001);
+    TS_ASSERT_DELTA(peakdataws->y(0)[500], 0.4163, 0.0001);
+    TS_ASSERT_DELTA(peakdataws->y(2)[500], 0.4163, 0.0001);
+    TS_ASSERT_DELTA(peakdataws->y(0)[1000], 0.4331, 0.0001);
+    TS_ASSERT_DELTA(peakdataws->y(2)[1000], 0.4331, 0.0001);
 
     // Output Bragg peaks parameters
     DataObjects::TableWorkspace_sptr outbraggws =
@@ -446,18 +456,18 @@ public:
     TS_ASSERT(outbraggws);
     if (!outbraggws) {
       return;
-    } else {
-      size_t numrows = outbraggws->rowCount();
-      TS_ASSERT_EQUALS(numrows, 11);
     }
+    TS_ASSERT_EQUALS(outbraggws->rowCount(), 11);
+    TS_ASSERT_EQUALS(outbraggws->columnCount(), 10);
+    TS_ASSERT_DELTA(outbraggws->Double(0, 9), 1.83, 0.01);
+    TS_ASSERT_DELTA(outbraggws->Double(4, 9), 0.44, 0.01);
+    TS_ASSERT_DELTA(outbraggws->Double(8, 9), 0.52, 0.01);
 
     AnalysisDataService::Instance().remove("DataWorkspace");
     AnalysisDataService::Instance().remove("PeakParameters");
     AnalysisDataService::Instance().remove("InstrumentParameters");
     AnalysisDataService::Instance().remove("FittedPeaks");
     AnalysisDataService::Instance().remove("PeaksParameterTable");
-
-    return;
   }
 };
 
