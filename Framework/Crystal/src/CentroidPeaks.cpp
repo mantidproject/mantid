@@ -238,7 +238,6 @@ void CentroidPeaks::integrateEvent() {
     double tofcentroid = 0.0;
     if (edgePixel(bankName, col, row, Edge))
       continue;
-    auto it = wi_to_detid_map.find(findPixelID(bankName, col, row));
 
     double tofstart = TOFPeakd * std::pow(1.004, -PeakRadius);
     double tofend = TOFPeakd * std::pow(1.004, PeakRadius);

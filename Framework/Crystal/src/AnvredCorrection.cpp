@@ -165,7 +165,7 @@ void AnvredCorrection::exec() {
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
   PARALLEL_FOR2(m_inputWS, correctionFactors)
-  for (auto i = 0; i < numHists; ++i) {
+  for (size_t i = 0; i < numHists; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     // Get detector position
@@ -202,7 +202,7 @@ void AnvredCorrection::exec() {
     }
 
     Mantid::Kernel::Units::Wavelength wl;
-    auto &points = m_inputWS->points(i);
+    auto points = m_inputWS->points(i);
 
     // Get a reference to the Y's in the output WS for storing the factors
     auto &Y = correctionFactors->mutableY(i);
@@ -216,7 +216,7 @@ void AnvredCorrection::exec() {
     const auto &Yin = inSpec.y();
     const auto &Ein = inSpec.x();
     // Loop through the bins in the current spectrum
-    for (auto j = 0; j < specSize; j++) {
+    for (size_t j = 0; j < specSize; j++) {
 
       double lambda =
           (unitStr == "TOF")
@@ -258,18 +258,12 @@ void AnvredCorrection::cleanup() {
 void AnvredCorrection::execEvent() {
 
   const auto numHists = m_inputWS->getNumberHistograms(); // number of vectors
-  const auto blocksize = m_inputWS->blocksize();          // YLen
-  const auto numBins = m_inputWS->x(0).size();
-
-  const auto evNumHists = eventW->getNumberHistograms(); // who tf knows
-  const auto evBlocksize = eventW->blocksize();
-  const auto evNumBins = eventW->x(0).size();
 
   const std::string unitStr = m_inputWS->getAxis(0)->unit()->unitID();
   // Create a new outputworkspace with not much in it
   auto correctionFactors = boost::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create("EventWorkspace", numHists,
-                                               numBins, blocksize));
+      API::WorkspaceFactory::Instance().create("EventWorkspace", numHists, 2,
+                                               1));
 
   correctionFactors->sortAll(TOF_SORT, nullptr);
   // Copy required stuff from it
@@ -290,7 +284,7 @@ void AnvredCorrection::execEvent() {
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
   PARALLEL_FOR2(eventW, correctionFactors)
-  for (auto i = 0; i < numHists; ++i) {
+  for (size_t i = 0; i < numHists; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     // share bin boundaries, and leave Y and E nullptr
