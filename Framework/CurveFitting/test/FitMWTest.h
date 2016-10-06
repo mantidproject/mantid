@@ -86,9 +86,9 @@ public:
     TS_ASSERT_EQUALS(axis->label(1), "Calc");
     TS_ASSERT_EQUALS(axis->label(2), "Diff");
 
-    const Mantid::MantidVec &Data = outWS->readY(0);
-    const Mantid::MantidVec &Calc = outWS->readY(1);
-    const Mantid::MantidVec &Diff = outWS->readY(2);
+    const auto &Data = outWS->y(0);
+    const auto &Calc = outWS->y(1);
+    const auto &Diff = outWS->y(2);
     for (size_t i = 0; i < outWS->blocksize(); ++i) {
       TS_ASSERT_EQUALS(Data[i] - Calc[i], Diff[i]);
     }
@@ -249,7 +249,7 @@ public:
             .retrieveWS<Mantid::API::MatrixWorkspace>("out_Workspace");
     TS_ASSERT(out_ws);
     TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 3);
-    auto &e = out_ws->readE(1);
+    auto &e = out_ws->e(1);
     for (size_t i = 0; i < e.size(); ++i) {
       TS_ASSERT(e[i] < 1.0);
     }
@@ -341,7 +341,7 @@ public:
       fitmw.setNormalise(true);
       fitmw.createDomain(domain, values);
 
-      auto &y = ws->readY(1);
+      auto &y = ws->y(1);
 
       for (size_t i = 0; i < values->size(); ++i) {
         TS_ASSERT_DELTA((*values).getFitData(i), y[i] / 0.1, 1e-8);
@@ -368,8 +368,8 @@ public:
     ws2->initialize(2, 11, 10);
 
     for (size_t is = 0; is < ws2->getNumberHistograms(); ++is) {
-      Mantid::MantidVec &x = ws2->dataX(is);
-      Mantid::MantidVec &y = ws2->dataY(is);
+      auto &x = ws2->mutableX(is);
+      auto &y = ws2->mutableY(is);
       // Mantid::MantidVec& e = ws2->dataE(is);
       for (size_t i = 0; i < ws2->blocksize(); ++i) {
         x[i] = 0.1 * double(i);
@@ -522,9 +522,9 @@ public:
         8.1873075308, 3.294074078, 4.893233452, 1.391615229, 1.902458849};
 
     for (size_t i = 0; i < nExpectedHist; ++i) {
-      TS_ASSERT_DELTA(outputWS->readY(i)[1], yValues[i], 1e-8);
-      TS_ASSERT_DELTA(outputWS->readE(i)[1], eValues[i], 1e-8);
-      TS_ASSERT_DELTA(outputWS->readX(i)[1], ws2->readX(0)[1], 1e-8);
+      TS_ASSERT_DELTA(outputWS->y(i)[1], yValues[i], 1e-8);
+      TS_ASSERT_DELTA(outputWS->e(i)[1], eValues[i], 1e-8);
+      TS_ASSERT_DELTA(outputWS->x(i)[1], ws2->readX(0)[1], 1e-8);
     }
   }
 
@@ -680,8 +680,10 @@ public:
     boost::shared_ptr<WorkspaceTester> data =
         boost::make_shared<WorkspaceTester>();
     data->init(1, 100, 100);
+
+    auto &xData = data->mutableX(0);
     for (size_t i = 0; i < data->blocksize(); i++) {
-      data->dataX(0)[i] = -10.0 + 0.2 * double(i);
+      xData[i] = -10.0 + 0.2 * double(i);
     }
 
     FunctionDomain_sptr domain;
@@ -741,7 +743,8 @@ public:
     TS_ASSERT_EQUALS(axis->label(3), "Convolution");
     TS_ASSERT_EQUALS(axis->label(4), "Convolution");
 
-    FunctionDomain1DView x(data->dataX(0).data(), data->dataX(0).size());
+    FunctionDomain1DView x(data->mutableX(0).rawData().data(),
+                           data->mutableX(0).size());
     FunctionValues gaus1Values(x);
     FunctionValues gaus2Values(x);
 
@@ -751,8 +754,8 @@ public:
     conv1.function(x, gaus1Values);
 
     for (size_t i = 0; i < data->blocksize(); i++) {
-      TS_ASSERT_EQUALS(outputWS->dataY(3)[i], gaus1Values[i]);
-      TS_ASSERT_DIFFERS(outputWS->dataY(3)[i], 0.0);
+      TS_ASSERT_EQUALS(outputWS->y(3)[i], gaus1Values[i]);
+      TS_ASSERT_DIFFERS(outputWS->y(3)[i], 0.0);
     }
 
     Convolution conv2;
@@ -761,9 +764,9 @@ public:
     conv2.function(x, gaus2Values);
 
     for (size_t i = 0; i < data->blocksize(); i++) {
-      TS_ASSERT_EQUALS(outputWS->dataY(4)[i], gaus2Values[i]);
-      TS_ASSERT_DIFFERS(outputWS->dataY(4)[i], 0.0);
-      TS_ASSERT_DIFFERS(outputWS->dataY(4)[i], outputWS->dataY(3)[i]);
+      TS_ASSERT_EQUALS(outputWS->y(4)[i], gaus2Values[i]);
+      TS_ASSERT_DIFFERS(outputWS->y(4)[i], 0.0);
+      TS_ASSERT_DIFFERS(outputWS->y(4)[i], outputWS->y(3)[i]);
     }
   }
 
@@ -783,8 +786,8 @@ private:
     ws2->initialize(2, nx, ny);
 
     for (size_t is = 0; is < ws2->getNumberHistograms(); ++is) {
-      Mantid::MantidVec &x = ws2->dataX(is);
-      Mantid::MantidVec &y = ws2->dataY(is);
+      auto &x = ws2->mutableX(is);
+      auto &y = ws2->mutableY(is);
       for (size_t i = 0; i < ws2->blocksize(); ++i) {
         x[i] = 0.1 * double(i);
         y[i] = (10.0 + double(is)) * exp(-(x[i]) / (0.5 * (1 + double(is))));
