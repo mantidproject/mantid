@@ -3,17 +3,32 @@ import math
 import numpy as np
 
 class FrequencyGenerator(object):
+    """
+    Class which generates frequencies for both overtones and combinations.
+    """
 
-    def truncate_array(self, array=None):
-        end = array.size
-        for el in range(array.size - 1, 0, -1):
-            if array[el] > AbinsParameters.eps:
-                end = el + 1 # we want to include first non-zero element from the end of array as well
-                break
-        return array[:end]
+    def __init__(self):
+        self._bins = np.arange(0.0, AbinsParameters.max_wavenumber, AbinsParameters.bin_width)
+        self._bin_size = len(self._bins)
+        super(FrequencyGenerator, self).__init__()
 
 
-    def expand_freq(self, previous_array=None, fundamentals_array=None, quantum_order=None):
+    def rebin_array(self, array=None):
+        """
+        Rebins array in order to save memory and speed up calculations.
+        @param array: array to be rebined
+        @return: rebined array
+        """
+        inds = np.digitize(array, self._bins)
+        new_array = np.asarray([array[inds == i].mean() for i in range(1, self._bin_size)])
+        return np.extract(np.isfinite(new_array), new_array)
+
+
+    def construct_freq_overtones(self, fundamentals=None, quantum_order=None):
+        return self.rebin_array(np.multiply(fundamentals, max(1, quantum_order)))
+
+
+    def construct_freq_combinations(self, previous_array=None, fundamentals_array=None, quantum_order=None):
         """
         Generates frequencies for the given order of quantum event.
         @param previous_array: array with frequencies for the previous quantum effect
@@ -22,8 +37,8 @@ class FrequencyGenerator(object):
         @return: array with frequencies quantum number
         """
         # case of fundamentals
-        if quantum_order == 1:
-            return fundamentals_array
+        if quantum_order == AbinsParameters.fundamentals:
+            return self.rebin_array(fundamentals_array)
 
         # higher order effects
         else:
@@ -38,7 +53,7 @@ class FrequencyGenerator(object):
                 for i in range(previous_size):
                     if new_array.size > AbinsParameters.max_quantum_order_array_size * quantum_order:
 
-                        return self.truncate_array(array=new_array)
+                        return self.rebin_array(array=new_array)
 
                     temp = previous_array[i] + fundamentals_array[j]
                     if 0 < temp < AbinsParameters.max_wavenumber:
@@ -52,7 +67,7 @@ class FrequencyGenerator(object):
                         new_array[current_position] = temp
                         current_position += 1
 
-            return self.truncate_array(array=new_array)
+            return self.rebin_array(array=new_array)
 
 
 
