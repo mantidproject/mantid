@@ -162,4 +162,58 @@ public:
   }
 };
 
+class SplineInterpolationTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() {
+
+    constexpr int order(2), spectra(1);
+    constexpr int xStartVal(0), xEndVal(100);
+    constexpr int xStepVal(1);
+
+    MatrixWorkspace_sptr matWs =
+        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+            SplineFunc(), spectra, xStartVal, xEndVal, xStepVal, false);
+
+    MatrixWorkspace_sptr inWs =
+        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+            SplineFunc(), spectra, xStartVal, xEndVal, (xStepVal * 0.1), false);
+
+    inputWs = inWs;
+    matrixWs = matWs;
+
+    splineInterpAlg.initialize();
+    splineInterpAlg.setPropertyValue("OutputWorkspace", outputWsName);
+    splineInterpAlg.setPropertyValue("OutputWorkspaceDeriv", outDerivWsName);
+
+    splineInterpAlg.setProperty("DerivOrder", order);
+
+    splineInterpAlg.setProperty("WorkspaceToInterpolate", inputWs);
+    splineInterpAlg.setProperty("WorkspaceToMatch", matrixWs);
+
+    splineInterpAlg.setRethrows(true);
+  }
+
+  void testSplineInterpolationPerformance() {
+    TS_ASSERT_THROWS_NOTHING(splineInterpAlg.execute());
+  }
+
+  void tearDown() {
+    AnalysisDataService::Instance().remove(outputWsName);
+    AnalysisDataService::Instance().remove(outDerivWsName);
+  }
+
+private:
+  SplineInterpolation splineInterpAlg;
+
+  MatrixWorkspace_sptr inputWs;
+  MatrixWorkspace_sptr matrixWs;
+
+  const std::string outputWsName = "outputWs";
+  const std::string outDerivWsName = "outputDerivativeWs";
+
+  // Functor to generate spline values
+  struct SplineFunc {
+    double operator()(double x, int) { return x * 2; }
+  };
+};
 #endif /* MANTID_CURVEFITTING_SPLINEINTERPOLATIONTEST_H_ */
