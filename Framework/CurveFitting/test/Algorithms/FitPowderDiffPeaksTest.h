@@ -461,4 +461,75 @@ public:
   }
 };
 
+class FitPowderDiffPeaksTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static FitPowderDiffPeaksTestPerformance *createSuite() {
+    return new FitPowderDiffPeaksTestPerformance();
+  }
+  static void destroySuite(FitPowderDiffPeaksTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() {
+    // Test workspace
+    dataws = createInputDataWorkspace(2);
+    // Bragg peaks
+    peakparamws = createReflectionWorkspace(1);
+    // Instrument profile
+    geomparamws = createInstrumentParameterWorkspace(1);
+
+    AnalysisDataService::Instance().addOrReplace("DataWorkspace", dataws);
+    AnalysisDataService::Instance().addOrReplace("PeakParameters", peakparamws);
+    AnalysisDataService::Instance().addOrReplace("InstrumentParameters",
+                                                 geomparamws);
+  }
+
+  void test_RobustFitPG3Bank1() {
+    /** Fit the parameters for PG3's bank 1 with
+    * 1. Quite-off starting values of instrumental geometry parameters.
+    * 2. Quite-close starting values of peak profile parameters.
+    */
+
+    // HKL = (331)
+    vector<int32_t> minhkl = {3, 3, 1};
+    // Right most peak (200)
+    vector<int> rightmostpeakhkl = {2, 0, 0};
+
+    FitPowderDiffPeaks alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", dataws);
+    alg.setProperty("OutputWorkspace", "FittedPeaks");
+    alg.setProperty("BraggPeakParameterWorkspace", peakparamws);
+    alg.setProperty("InstrumentParameterWorkspace", geomparamws);
+    alg.setProperty("OutputBraggPeakParameterWorkspace", "PeaksParameterTable");
+    alg.setProperty("OutputZscoreWorkspace", "ZscoreTable");
+    alg.setProperty("WorkspaceIndex", 0);
+    alg.setProperty("MinTOF", 19650.0);
+    alg.setProperty("MaxTOF", 49000.0);
+    alg.setProperty("MinimumHKL", minhkl);
+    alg.setProperty("NumberPeaksToFitBelowLowLimit", 2);
+    alg.setProperty("FittingMode", "Robust");
+    alg.setProperty("MinimumPeakHeight", 0.5);
+    alg.setProperty("RightMostPeakHKL", rightmostpeakhkl);
+    alg.setProperty("RightMostPeakLeftBound", 46300.0);
+    alg.setProperty("RightMostPeakRightBound", 47903.0);
+    alg.execute();
+  }
+
+  void tearDown() {
+    AnalysisDataService::Instance().remove("DataWorkspace");
+    AnalysisDataService::Instance().remove("PeakParameters");
+    AnalysisDataService::Instance().remove("InstrumentParameters");
+    AnalysisDataService::Instance().remove("FittedPeaks");
+    AnalysisDataService::Instance().remove("PeaksParameterTable");
+  }
+
+private:
+  API::MatrixWorkspace_sptr dataws;
+  DataObjects::TableWorkspace_sptr peakparamws;
+  DataObjects::TableWorkspace_sptr geomparamws;
+};
+
 #endif /* MANTID_CURVEFITTING_FITPOWDERDIFFPEAKSTEST_H_ */
