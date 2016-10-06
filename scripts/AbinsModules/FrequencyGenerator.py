@@ -17,11 +17,11 @@ class FrequencyGenerator(object):
         """
         Rebins array in order to save memory and speed up calculations.
         @param array: array to be rebined
-        @return: rebined array
+        @return: sorted rebined array
         """
         inds = np.digitize(array, self._bins)
         new_array = np.asarray([array[inds == i].mean() for i in range(1, self._bin_size)])
-        return np.extract(np.isfinite(new_array), new_array)
+        return np.sort(np.extract(np.isfinite(new_array), new_array))
 
 
     def construct_freq_overtones(self, fundamentals=None, quantum_order=None):
