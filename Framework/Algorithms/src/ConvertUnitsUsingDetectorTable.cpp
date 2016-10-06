@@ -12,12 +12,10 @@
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <algorithm>
 #include <numeric>
 #include <cfloat>
-#include <limits>
 
 namespace Mantid {
 namespace Algorithms {
