@@ -207,7 +207,6 @@ void AnvredCorrection::exec() {
     double scattering = dir.angle(V3D(0.0, 0.0, 1.0));
 
     Mantid::Kernel::Units::Wavelength wl;
-    std::vector<double> timeflight;
     auto &points = m_inputWS->points(i);
     double depth = 0.2;
     double pathlength = 0.0;
@@ -218,16 +217,10 @@ void AnvredCorrection::exec() {
     // Loop through the bins in the current spectrum
     for (int64_t j = 0; j < specSize; j++) {
 
-      timeflight.push_back(points[j]);
-
-      // if (unitStr.compare("TOF") == 0)
       double lambda =
           (unitStr == "TOF")
               ? wl.convertSingleFromTOF(points[j], L1, L2, scattering, 0, 0, 0)
               : points[j];
-      // wl.fromTOF(timeflight, timeflight, L1, L2, scattering, 0, 0, 0);
-      // double lambda = timeflight[0];
-      // timeflight.clear();
 
       if (m_returnTransmissionOnly) {
         Y[j] = 1.0 / this->getEventWeight(lambda, scattering);
@@ -326,6 +319,7 @@ void AnvredCorrection::execEvent() {
 
     Mantid::Kernel::Units::Wavelength wl;
     std::vector<double> timeflight;
+
     double depth = 0.2;
     double pathlength = 0.0;
     std::string bankName;
@@ -333,18 +327,25 @@ void AnvredCorrection::execEvent() {
       scale_init(det, inst, L2, depth, pathlength, bankName);
 
     // multiplying an event list by a scalar value
-    for (itev = events.begin(); itev != itev_end; ++itev) {
-      timeflight.push_back(itev->tof());
-      if (unitStr.compare("TOF") == 0)
-        wl.fromTOF(timeflight, timeflight, L1, L2, scattering, 0, 0, 0);
-      double value = this->getEventWeight(timeflight[0], scattering);
-      if (m_useScaleFactors)
-        scale_exec(bankName, timeflight[0], depth, inst, pathlength, value);
-      timeflight.clear();
-      itev->m_errorSquared =
-          static_cast<float>(itev->m_errorSquared * value * value);
-      itev->m_weight *= static_cast<float>(value);
+
+    for (auto &ev : events) {
+      double lambda;
+      auto eventTof = ev.tof();
+
+      if ("TOF" == unitStr) {
+        lambda = wl.convertSingleFromTOF(eventTof, L1, L2, scattering, 0, 0, 0);
+      }
+
+      double value = this->getEventWeight(eventTof, scattering);
+
+      if (m_useScaleFactors) {
+        scale_exec(bankName, eventTof, depth, inst, pathlength, value);
+      }
+
+      ev.m_errorSquared = static_cast<float>(ev.m_errorSquared * value * value);
+      ev.m_weight *= static_cast<float>(value);
     }
+
     correctionFactors->getSpectrum(i) += events;
 
     auto &dets = eventW->getSpectrum(i).getDetectorIDs();
@@ -379,13 +380,14 @@ void AnvredCorrection::retrieveBaseProperties() {
   m_radius = getProperty("Radius");            // in cm
   m_power_th = getProperty("PowerLambda");     // in cm
   const Material &sampleMaterial = m_inputWS->sample().getMaterial();
-  if (sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) !=
-      0.0) {
+
+  const double scatterXSection =
+      sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda);
+
+  if (scatterXSection != 0.0) {
     double rho = sampleMaterial.numberDensity();
     if (m_smu == EMPTY_DBL())
-      m_smu =
-          sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) *
-          rho;
+      m_smu = scatterXSection * rho;
     if (m_amu == EMPTY_DBL())
       m_amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
   } else // Save input in Sample with wrong atomic number and name
