@@ -15,7 +15,31 @@ public:
   static IndexInfoTest *createSuite() { return new IndexInfoTest(); }
   static void destroySuite(IndexInfoTest *suite) { delete suite; }
 
-  void test_constructor() { TS_ASSERT_THROWS_NOTHING(IndexInfo(3)); }
+  void test_size_constructor() { TS_ASSERT_THROWS_NOTHING(IndexInfo(3)); }
+
+  void test_size_constructor_sets_correct_indices() {
+    IndexInfo info(3);
+    TS_ASSERT_EQUALS(info.spectrumNumber(0), 1);
+    TS_ASSERT_EQUALS(info.spectrumNumber(1), 2);
+    TS_ASSERT_EQUALS(info.spectrumNumber(2), 3);
+    TS_ASSERT(info.detectorIDs(0).empty());
+    TS_ASSERT(info.detectorIDs(1).empty());
+    TS_ASSERT(info.detectorIDs(2).empty());
+  }
+
+  void test_vector_constructor() {
+    TS_ASSERT_THROWS_NOTHING(IndexInfo({3, 2, 1}, {{}, {10}, {20, 30}}));
+  }
+
+  void test_vector_constructor_sets_correct_indices() {
+    IndexInfo info({3, 2, 1}, {{}, {10}, {20, 30}});
+    TS_ASSERT_EQUALS(info.spectrumNumber(0), 3);
+    TS_ASSERT_EQUALS(info.spectrumNumber(1), 2);
+    TS_ASSERT_EQUALS(info.spectrumNumber(2), 1);
+    TS_ASSERT_EQUALS(info.detectorIDs(0), (std::vector<detid_t>{}));
+    TS_ASSERT_EQUALS(info.detectorIDs(1), (std::vector<detid_t>{10}));
+    TS_ASSERT_EQUALS(info.detectorIDs(2), (std::vector<detid_t>{20, 30}));
+  }
 
   void test_size() { TS_ASSERT_EQUALS(IndexInfo(3).size(), 3); }
 
