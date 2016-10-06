@@ -14,8 +14,26 @@ Algorithms
 Data Analysis
 #############
 
-Jump Fit
-~~~~~~~~
+Corrections
+###########
+
+CalculatePaalmanPings
+~~~~~~~~~~~~~~~~~~~~~
+
+- Option to calculate number density from mass density
+
+Absorption
+~~~~~~~~~~~
+
+- Option to calculate number density from mass density
+
+Tools
+#####
+
+Transmission
+~~~~~~~~~~~~
+
+- Option to calculate number density from mass density
 
 Improvements
 ------------

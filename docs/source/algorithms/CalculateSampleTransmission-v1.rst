@@ -14,8 +14,8 @@ given wavelength range.
 
 The sample chemical formula is input for the :ref:`SetSampleMaterial
 <algm-SetSampleMaterial>` algorithm to calculate the cross-sections. The sample
-number density & thickness is input to then calculate the percentage scattering
-& transmission.
+mass density/number density & thickness is input to then calculate the percentage
+scattering & transmission.
 
 A flat plate sample which is perpendicular to the beam is assumed.
 
@@ -47,7 +47,8 @@ Output:
 
     ws = CalculateSampleTransmission(WavelengthRange='2.0, 0.1, 10.0',
                                      ChemicalFormula='H2-O',
-                                     NumberDensity=0.2,
+                                     DensityType='Number Density'
+                                     Density=0.2,
                                      Thickness=0.58)
 
     print 'Transmission: %f, %f, %f ...' % tuple(ws.readY(0)[:3])
