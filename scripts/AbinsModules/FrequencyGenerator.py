@@ -21,7 +21,9 @@ class FrequencyGenerator(object):
         """
         inds = np.digitize(array, self._bins)
         new_array = np.asarray([array[inds == i].mean() for i in range(1, self._bin_size)])
-        return np.sort(np.extract(np.isfinite(new_array), new_array))
+        new_array = np.extract(np.isfinite(new_array), new_array) # remove nan from array
+        new_array = np.extract(new_array > 0, new_array ) # remove 0 from array
+        return np.sort(new_array)
 
 
     def construct_freq_overtones(self, fundamentals=None, quantum_order=None):
