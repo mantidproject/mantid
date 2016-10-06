@@ -84,8 +84,8 @@ public:
   size_t getNumberOfPeaks() const { return m_numPeaks; }
 
   /// Calculate
-  void function(std::vector<double> &out, const std::vector<double> &xvalues,
-                bool calpeaks, bool calbkgd) const;
+  std::vector<double> function(const std::vector<double> &xvalues,
+                               bool calpeaks, bool calbkgd) const;
 
   ///  Calculate a single peak's value
   void calPeak(size_t ipk, std::vector<double> &out,
