@@ -23,7 +23,6 @@ namespace Algorithms {
 //---------------------------------------------------------------------------
 struct DetectorParams;
 
-
 /**
 
 Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
