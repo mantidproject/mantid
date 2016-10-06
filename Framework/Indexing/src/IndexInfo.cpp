@@ -8,26 +8,19 @@
 namespace Mantid {
 namespace Indexing {
 
-// Create default translator. size is global size
-// Default implies 1:1 spectrum numbers and detector IDs, each defined as
-// (global) workspace index + 1
-//
-// Can we internally provide an optimization for the case of trivial mapping?
-// We want to avoid complicated maps if it is just a simple offset, i.e.,
-// SpectrumNumber = WorkspaceIndex + 1 (will always be more complex with
-// MPI?).
+/// Construct a default IndexInfo, with contiguous spectrum numbers starting at
+/// 1 and no detector IDs.
 IndexInfo::IndexInfo(const size_t globalSize)
-    : m_spectrumNumbers(Kernel::make_cow<std::vector<specnum_t>>(globalSize)) {
+    : m_spectrumNumbers(Kernel::make_cow<std::vector<specnum_t>>(globalSize)),
+      m_detectorIDs(
+          Kernel::make_cow<std::vector<std::vector<detid_t>>>(globalSize)) {
   // Default to spectrum numbers 1...globalSize
   auto &specNums = m_spectrumNumbers.access();
   std::iota(specNums.begin(), specNums.end(), 1);
-
-  // Default to detector IDs 1..globalSize, with 1:1 mapping to spectra
-  auto &detIDs = m_detectorIDs.access();
-  for (size_t i = 0; i < globalSize; ++i)
-    detIDs.emplace_back(1, static_cast<detid_t>(i));
 }
 
+/// Construct with given spectrum number and vector of detector IDs for each
+/// index.
 IndexInfo::IndexInfo(std::vector<specnum_t> &&spectrumNumbers,
                      std::vector<std::vector<detid_t>> &&detectorIDs) {
   if (spectrumNumbers.size() != detectorIDs.size())
@@ -37,6 +30,7 @@ IndexInfo::IndexInfo(std::vector<specnum_t> &&spectrumNumbers,
   m_detectorIDs.access() = std::move(detectorIDs);
 }
 
+/// Constructor for internal use by MatrixWorkspace (legacy mode).
 IndexInfo::IndexInfo(
     std::function<size_t()> getSize,
     std::function<specnum_t(const size_t)> getSpectrumNumber,
@@ -45,6 +39,7 @@ IndexInfo::IndexInfo(
       m_getSpectrumNumber(getSpectrumNumber), m_getDetectorIDs(getDetectorIDs) {
 }
 
+/// Copy constructor.
 IndexInfo::IndexInfo(const IndexInfo &other) {
   if (other.m_isLegacy) {
     // Workaround while IndexInfo is not holding index data stored in
@@ -86,7 +81,7 @@ std::vector<detid_t> IndexInfo::detectorIDs(const size_t index) const {
   return (*m_detectorIDs)[index];
 }
 
-/// Set a spectrum number for each indices.
+/// Set a spectrum number for each index.
 void IndexInfo::setSpectrumNumbers(std::vector<specnum_t> &&spectrumNumbers) & {
   // No test of m_isLegacy, we cannot have non-const access in that case.
   if (m_spectrumNumbers->size() != spectrumNumbers.size())
@@ -95,7 +90,7 @@ void IndexInfo::setSpectrumNumbers(std::vector<specnum_t> &&spectrumNumbers) & {
   m_spectrumNumbers.access() = std::move(spectrumNumbers);
 }
 
-/// Set a single detector ID for each indices.
+/// Set a single detector ID for each index.
 void IndexInfo::setDetectorIDs(const std::vector<detid_t> &detectorIDs) & {
   // No test of m_isLegacy, we cannot have non-const access in that case.
   if (m_detectorIDs->size() != detectorIDs.size())
@@ -107,7 +102,7 @@ void IndexInfo::setDetectorIDs(const std::vector<detid_t> &detectorIDs) & {
     detIDs[i] = {detectorIDs[i]};
 }
 
-/// Set a vector of detector IDs for each indices.
+/// Set a vector of detector IDs for each index.
 void IndexInfo::setDetectorIDs(
     // No test of m_isLegacy, we cannot have non-const access in that case.
     std::vector<std::vector<detid_t>> &&detectorIDs) & {
