@@ -147,6 +147,7 @@ class BASISReduction(PythonAlgorithm):
         self.setPropertySettings("NormWavelengthRange", ifDivideByVanadium)
         self.setPropertyGroup("NormWavelengthRange", titleDivideByVanadium)
 
+    #pylint: disable-msg=too-many-branches
     def PyExec(self):
         config['default.facility'] = "SNS"
         config['default.instrument'] = self._long_inst
@@ -259,7 +260,6 @@ class BASISReduction(PythonAlgorithm):
                 sapi.DeleteWorkspace("BASIS_NORM_MASK")  # delete vanadium mask
                 sapi.DeleteWorkspace(self._normWs)  # Delete vanadium S(Q)
 
-            
     def _getRuns(self, rlist, doIndiv=True):
         """
         Create sets of run numbers for analysis. A semicolon indicates a
