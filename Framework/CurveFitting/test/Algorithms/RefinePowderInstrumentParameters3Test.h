@@ -365,16 +365,16 @@ public:
     if (newgeomparamws) {
       std::map<std::string, double> fitparamvalues;
       parseParameterTableWorkspace(newgeomparamws, fitparamvalues);
-      map<string, double>::iterator mapiter;
-
-      stringstream msgss;
-      msgss << "[Unit Test]  Parameters: \n";
-      for (mapiter = fitparamvalues.begin(); mapiter != fitparamvalues.end();
-           ++mapiter) {
-        msgss << "  |  " << mapiter->first << "\t = \t" << mapiter->second
-              << "\t\n";
-      }
-      cout << msgss.str();
+	  TS_ASSERT_DELTA(fitparamvalues["Chi2_Init"], 118348, 1);
+	  TS_ASSERT_DELTA(fitparamvalues["Chi2_Result"], 4896, 1);
+	  TS_ASSERT_DELTA(fitparamvalues["Dtt1"], 22610, 1);
+	  TS_ASSERT_DELTA(fitparamvalues["Dtt1t"], 22747, 1);
+	  TS_ASSERT_DELTA(fitparamvalues["Dtt2"], 0, 0);
+	  TS_ASSERT_DELTA(fitparamvalues["Dtt2t"], 0.3, 0.1);
+	  TS_ASSERT_DELTA(fitparamvalues["Tcross"], 0.356, 0.010);
+	  TS_ASSERT_DELTA(fitparamvalues["Width"], 370, 1);
+	  TS_ASSERT_DELTA(fitparamvalues["Zero"], -23.4, 0.1);
+	  TS_ASSERT_DELTA(fitparamvalues["Zerot"], 90.7, 0.1);
     }
 
     // b) Data
@@ -445,13 +445,16 @@ public:
     if (newgeomparamws) {
       std::map<std::string, double> fitparamvalues;
       parseParameterTableWorkspace(newgeomparamws, fitparamvalues);
-      map<string, double>::iterator mapiter;
-
-      for (mapiter = fitparamvalues.begin(); mapiter != fitparamvalues.end();
-           ++mapiter) {
-        cout << "[P] " << mapiter->first << "\t = \t" << mapiter->second
-             << "\t\n";
-      }
+	  TS_ASSERT_DELTA(fitparamvalues["Chi2_Init"], 118348, 1);
+	  TS_ASSERT_DELTA(fitparamvalues["Chi2_Result"], 127307, 1);
+	  TS_ASSERT_DELTA(fitparamvalues["Dtt1"], 22778, 1);
+	  TS_ASSERT_DELTA(fitparamvalues["Dtt1t"], 22747, 1);
+	  TS_ASSERT_DELTA(fitparamvalues["Dtt2"], 0, 0);
+	  TS_ASSERT_DELTA(fitparamvalues["Dtt2t"], 0.3, 0.1);
+	  TS_ASSERT_DELTA(fitparamvalues["Tcross"], 0.356, 0.010);
+	  TS_ASSERT_DELTA(fitparamvalues["Width"], 1.1, 0.1);
+	  TS_ASSERT_DELTA(fitparamvalues["Zero"], 0, 0.1);
+	  TS_ASSERT_DELTA(fitparamvalues["Zerot"], 90.7, 0.1);
     }
 
     // b) Data
