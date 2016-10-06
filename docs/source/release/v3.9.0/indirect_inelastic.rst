@@ -11,6 +11,11 @@ New features
 Algorithms
 ##########
 
+Data Reduction
+##############
+
+- :ref: Q-vaues in `BASISReduction <algm-BASISReduction>` output are now point data so that their values display correctly when plotted
+
 Data Analysis
 #############
 
