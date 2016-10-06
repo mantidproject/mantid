@@ -462,10 +462,11 @@ void MantidUI::saveNexusWorkspace() { executeSaveNexus(); }
 @param workspaceName :: Name of the workspace to delete
 */
 void MantidUI::deleteWorkspace(const QString &workspaceName) {
-  auto alg = createAlgorithm("DeleteWorkspace");
-  alg->setLogging(false);
-  alg->setPropertyValue("Workspace", workspaceName.toStdString());
-  executeAlgorithmAsync(alg);
+  auto workspaceNameStdString = workspaceName.toStdString();
+  auto& ads = Mantid::API::AnalysisDataService::Instance();
+  if (ads.doesExist(workspaceNameStdString)) {
+    ads.remove(workspaceNameStdString);
+  }
 }
 
 QString MantidUI::getSelectedWorkspaceName() {
