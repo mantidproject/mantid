@@ -157,8 +157,6 @@ void AnvredCorrection::exec() {
   if (specSize < 3)
     throw std::runtime_error("Problem in AnvredCorrection::events not binned");
 
-  const bool isHist = m_inputWS->isHistogramData();
-
   // If sample not at origin, shift cached positions.
   const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
   const V3D pos = m_inputWS->getInstrument()->getSource()->getPos() - samplePos;
@@ -324,11 +322,7 @@ void AnvredCorrection::execEvent() {
     el.switchTo(WEIGHTED_NOTIME);
     std::vector<WeightedEventNoTime> events = el.getWeightedEventsNoTime();
 
-    std::vector<WeightedEventNoTime>::iterator itev;
-    auto itev_end = events.end();
-
     Mantid::Kernel::Units::Wavelength wl;
-    std::vector<double> timeflight;
 
     double depth = 0.2;
     double pathlength = 0.0;
@@ -339,17 +333,17 @@ void AnvredCorrection::execEvent() {
     // multiplying an event list by a scalar value
 
     for (auto &ev : events) {
-      double lambda;
-      auto eventTof = ev.tof();
+      // get the event's TOF
+      double lambda = ev.tof();
 
       if ("TOF" == unitStr) {
-        lambda = wl.convertSingleFromTOF(eventTof, L1, L2, scattering, 0, 0, 0);
+        lambda = wl.convertSingleFromTOF(lambda, L1, L2, scattering, 0, 0, 0);
       }
 
-      double value = this->getEventWeight(eventTof, scattering);
+      double value = this->getEventWeight(lambda, scattering);
 
       if (m_useScaleFactors) {
-        scale_exec(bankName, eventTof, depth, inst, pathlength, value);
+        scale_exec(bankName, lambda, depth, inst, pathlength, value);
       }
 
       ev.m_errorSquared = static_cast<float>(ev.m_errorSquared * value * value);
