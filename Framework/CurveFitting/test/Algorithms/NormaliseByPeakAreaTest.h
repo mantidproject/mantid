@@ -9,14 +9,14 @@
 using Mantid::CurveFitting::Algorithms::NormaliseByPeakArea;
 
 namespace {
-  
-  Mantid::API::MatrixWorkspace_sptr createTwoSpectrumWorkspace() {
-    double x0(50.0), x1(300.0), dx(0.5);
-    auto twoSpectrum = ComptonProfileTestHelpers::createTestWorkspace(
-								      2, x0, x1, dx, true, true);
-    return twoSpectrum;
-  }
-  
+
+Mantid::API::MatrixWorkspace_sptr
+createTwoSpectrumWorkspace(double x0 = 50, double x1 = 300, double dx = 0.5) {
+  auto twoSpectrum =
+      ComptonProfileTestHelpers::createTestWorkspace(2, x0, x1, dx, true, true);
+  return twoSpectrum;
+}
+
   Mantid::API::IAlgorithm_sptr createAlgorithm() {
     Mantid::API::IAlgorithm_sptr alg =
         boost::make_shared<NormaliseByPeakArea>();
@@ -292,7 +292,7 @@ public:
     using namespace Mantid::API;
 
     auto alg = createAlgorithm();
-    auto testWS = createTwoSpectrumWorkspace();
+    auto testWS = createTwoSpectrumWorkspace(50, 2000, 0.1);
     alg->setProperty("InputWorkspace", testWS);
     alg->setProperty("Mass", 1.0097);
     alg->setProperty("Sum", false);
@@ -303,7 +303,7 @@ public:
     using namespace Mantid::API;
 
     auto alg = createAlgorithm();
-    auto testWS = createTwoSpectrumWorkspace();
+    auto testWS = createTwoSpectrumWorkspace(50, 5000, 0.0005);
     alg->setProperty("InputWorkspace", testWS);
     alg->setProperty("Mass", 1.0097);
     alg->setProperty("Sum", true);
