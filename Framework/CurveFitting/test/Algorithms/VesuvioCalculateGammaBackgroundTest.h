@@ -259,4 +259,51 @@ private:
   }
 };
 
+// Clang format drops this down a line if namespace is used
+using namespace CxxTest;
+
+class VesuvioCalculateGammaBackgroundTestPerformance : public TestSuite {
+public:
+  void setUp() {
+    double x0(50.0), x1(300.0), dx(0.5);
+    constexpr int nhist = 1;
+
+    auto singleSpectrum = ComptonProfileTestHelpers::createTestWorkspace(
+        1, x0, x1, dx, true, true);
+    auto inWs =
+        Mantid::API::WorkspaceFactory::Instance().create(singleSpectrum, nhist);
+
+    for (size_t i = 0; i < nhist; ++i) {
+      inWs->setSharedX(i, singleSpectrum->sharedX(0));
+      inWs->setSharedY(i, singleSpectrum->sharedY(0));
+      inWs->setSharedE(i, singleSpectrum->sharedE(0));
+    }
+
+    // Bring spectrum numbers into checked range
+    inWs->getSpectrum(0).setSpectrumNo(135);
+
+    inputWs = inWs;
+
+    calcBackgroundAlg.initialize();
+    calcBackgroundAlg.setProperty("InputWorkspace", inputWs);
+    calcBackgroundAlg.setPropertyValue(
+        "ComptonFunction",
+        "name=GaussianComptonProfile,Mass=1.0079,Width=2.9e-2,Intensity=4.29");
+    calcBackgroundAlg.setProperty("BackgroundWorkspace", outBackWsName);
+    calcBackgroundAlg.setProperty("CorrectedWorkspace", outCorrWsName);
+
+    calcBackgroundAlg.setRethrows(true);
+  }
+
+  void testVesuvioCalculateGammaBackgroundPerformance() {
+    TS_ASSERT_THROWS_NOTHING(calcBackgroundAlg.execute());
+  }
+
+private:
+  VesuvioCalculateGammaBackground calcBackgroundAlg;
+  Mantid::API::MatrixWorkspace_sptr inputWs;
+
+  const std::string outBackWsName = "backgroundWs";
+  const std::string outCorrWsName = "correctedWs";
+};
 #endif /* MANTID_ALGORITHMS_VesuvioCalculateGammaBackgroundTEST_H_ */
