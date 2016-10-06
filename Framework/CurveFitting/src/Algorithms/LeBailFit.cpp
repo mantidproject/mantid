@@ -1,9 +1,3 @@
-/* COMMIT NOTES *
-  1. Rename calculateDiffractionPatternMC to calculateDiffractionPattern
-  2.
-
- * COMMIT NOTES */
-
 #include "MantidCurveFitting/Algorithms/LeBailFit.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/TableRow.h"
@@ -365,13 +359,14 @@ void LeBailFit::exec() {
   setProperty("OutputWorkspace", m_outputWS);
 
   // 8. Final statistic
-  Rfactor finalR = getRFactor(m_outputWS->readY(0), m_outputWS->readY(1),
-                              m_outputWS->readE(0));
+  Rfactor finalR =
+      getRFactor(m_outputWS->y(0).rawData(), m_outputWS->y(1).rawData(),
+                 m_outputWS->e(0).rawData());
   g_log.notice() << "\nFinal R factor: Rwp = " << finalR.Rwp
                  << ", Rp = " << finalR.Rp
-                 << ", Data points = " << m_outputWS->readY(1).size()
-                 << ", Range = " << m_outputWS->readX(0)[0] << ", "
-                 << m_outputWS->readX(0).back() << "\n";
+                 << ", Data points = " << m_outputWS->y(1).size()
+                 << ", Range = " << m_outputWS->x(0)[0] << ", "
+                 << m_outputWS->x(0).back() << "\n";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -453,8 +448,7 @@ void LeBailFit::processInputBackground() {
  */
 void LeBailFit::execPatternCalculation() {
   // Generate domain and values vectors
-  const MantidVec &vecX = m_dataWS->readX(m_wsIndex);
-  MantidVec &vecY = m_outputWS->dataY(CALDATAINDEX);
+  const auto &vecX = m_dataWS->x(m_wsIndex).rawData();
 
   // Calculate diffraction pattern
   Rfactor rfactor(-DBL_MAX, -DBL_MAX);
@@ -470,23 +464,24 @@ void LeBailFit::execPatternCalculation() {
 
   // Calculate peak intensities and diffraction pattern
   vector<double> emptyvec;
+  vector<double> vecY;
+  size_t numpts = m_outputWS->y(CALDATAINDEX).size();
   bool resultphysical = calculateDiffractionPattern(
-      m_dataWS->readX(m_wsIndex), m_dataWS->readY(m_wsIndex), true, true,
-      emptyvec, vecY, rfactor);
+      m_dataWS->x(m_wsIndex).rawData(), m_dataWS->y(m_wsIndex).rawData(), true,
+      true, emptyvec, vecY, rfactor);
+  m_outputWS->mutableY(CALDATAINDEX) = vecY;
 
-  size_t numpts = vecY.size();
   // Calculate background
-  MantidVec &vec_bkgd = m_outputWS->dataY(INPUTBKGDINDEX);
-  m_lebailFunction->function(vec_bkgd, vecX, false, true);
+  m_outputWS->mutableY(INPUTBKGDINDEX) =
+      m_lebailFunction->function(vecX, false, true);
   for (size_t i = 0; i < numpts; ++i)
-    m_outputWS->dataY(INPUTPUREPEAKINDEX)[i] =
-        m_outputWS->readY(OBSDATAINDEX)[i] -
-        m_outputWS->readY(INPUTBKGDINDEX)[i];
+    m_outputWS->mutableY(INPUTPUREPEAKINDEX)[i] =
+        m_outputWS->y(OBSDATAINDEX)[i] - m_outputWS->y(INPUTBKGDINDEX)[i];
 
   // Set up output workspaces
   for (size_t i = 0; i < numpts; ++i) {
-    m_outputWS->dataY(DATADIFFINDEX)[i] =
-        m_outputWS->readY(OBSDATAINDEX)[i] - m_outputWS->readY(CALDATAINDEX)[i];
+    m_outputWS->mutableY(DATADIFFINDEX)[i] =
+        m_outputWS->y(OBSDATAINDEX)[i] - m_outputWS->y(CALDATAINDEX)[i];
   }
 
   // Calcualte individual peaks
@@ -494,8 +489,9 @@ void LeBailFit::execPatternCalculation() {
   g_log.information() << "Output individual peaks  = " << ploteachpeak << ".\n";
   if (ploteachpeak) {
     for (size_t ipk = 0; ipk < m_lebailFunction->getNumberOfPeaks(); ++ipk) {
-      MantidVec &vecTemp = m_outputWS->dataY(9 + ipk);
+      vector<double> vecTemp;
       m_lebailFunction->calPeak(ipk, vecTemp, vecX);
+      m_outputWS->mutableY(9 + ipk) = vecTemp;
     }
   }
 
@@ -537,8 +533,8 @@ void LeBailFit::execRefineBackground() {
   }
 
   // 1. Generate domain and value
-  const MantidVec &vecX = m_dataWS->readX(m_wsIndex);
-  const MantidVec &vecY = m_dataWS->readY(m_wsIndex);
+  const auto &vecX = m_dataWS->x(m_wsIndex).rawData();
+  const auto &vecY = m_dataWS->y(m_wsIndex);
   vector<double> valueVec(vecX.size(), 0);
   size_t numpts = vecX.size();
 
@@ -551,15 +547,15 @@ void LeBailFit::execRefineBackground() {
   vector<double> backgroundvalues(numpts);
   for (size_t i = 0; i < numpts; ++i) {
     backgroundvalues[i] = values[i];
-    m_outputWS->dataY(INPUTPUREPEAKINDEX)[i] =
-        m_dataWS->readY(m_wsIndex)[i] - values[i];
-    m_outputWS->dataE(INPUTPUREPEAKINDEX)[i] = m_dataWS->readE(m_wsIndex)[i];
+    m_outputWS->mutableY(INPUTPUREPEAKINDEX)[i] =
+        m_dataWS->y(m_wsIndex)[i] - values[i];
+    m_outputWS->mutableE(INPUTPUREPEAKINDEX)[i] = m_dataWS->e(m_wsIndex)[i];
   }
   map<string, double> parammap = convertToDoubleMap(m_funcParameters);
   m_lebailFunction->setProfileParameterValues(parammap);
-  calculateDiffractionPattern(m_outputWS->readX(INPUTPUREPEAKINDEX),
-                              m_outputWS->readY(INPUTPUREPEAKINDEX), false,
-                              true, backgroundvalues, valueVec, currR);
+  calculateDiffractionPattern(m_outputWS->x(INPUTPUREPEAKINDEX).rawData(),
+                              m_outputWS->y(INPUTPUREPEAKINDEX).rawData(),
+                              false, true, backgroundvalues, valueVec, currR);
   Rfactor bestR = currR;
   storeBackgroundParameters(m_bestBkgdParams);
   stringstream bufss;
@@ -579,14 +575,14 @@ void LeBailFit::execRefineBackground() {
     m_backgroundFunction->function(domain, values);
     for (size_t i = 0; i < numpts; ++i) {
       backgroundvalues[i] = values[i];
-      m_outputWS->dataY(INPUTPUREPEAKINDEX)[i] =
-          m_dataWS->readY(m_wsIndex)[i] - values[i];
+      m_outputWS->mutableY(INPUTPUREPEAKINDEX)[i] =
+          m_dataWS->y(m_wsIndex)[i] - values[i];
     }
     map<string, double> parammap = convertToDoubleMap(m_funcParameters);
     m_lebailFunction->setProfileParameterValues(parammap);
-    calculateDiffractionPattern(m_outputWS->readX(INPUTPUREPEAKINDEX),
-                                m_outputWS->readY(INPUTPUREPEAKINDEX), false,
-                                true, backgroundvalues, valueVec, newR);
+    calculateDiffractionPattern(m_outputWS->x(INPUTPUREPEAKINDEX).rawData(),
+                                m_outputWS->y(INPUTPUREPEAKINDEX).rawData(),
+                                false, true, backgroundvalues, valueVec, newR);
 
     g_log.information() << "[DBx800] New Rwp = " << newR.Rwp
                         << ", Rp = " << newR.Rp << ".\n";
@@ -632,29 +628,29 @@ void LeBailFit::execRefineBackground() {
   m_backgroundFunction->function(domain, values);
   for (size_t i = 0; i < numpts; ++i) {
     backgroundvalues[i] = values[i];
-    m_outputWS->dataY(INPUTPUREPEAKINDEX)[i] =
-        m_dataWS->readY(m_wsIndex)[i] - values[i];
+    m_outputWS->mutableY(INPUTPUREPEAKINDEX)[i] =
+        m_dataWS->y(m_wsIndex)[i] - values[i];
   }
   parammap = convertToDoubleMap(m_funcParameters);
   m_lebailFunction->setProfileParameterValues(parammap);
-  calculateDiffractionPattern(m_outputWS->readX(INPUTPUREPEAKINDEX),
-                              m_outputWS->readY(INPUTPUREPEAKINDEX), false,
-                              true, backgroundvalues, valueVec, outputR);
+  calculateDiffractionPattern(m_outputWS->x(INPUTPUREPEAKINDEX).rawData(),
+                              m_outputWS->y(INPUTPUREPEAKINDEX).rawData(),
+                              false, true, backgroundvalues, valueVec, outputR);
 
   g_log.notice() << "[RefineBackground] Best Rwp = " << bestR.Rwp
                  << ",  vs. recovered best Rwp = " << outputR.Rwp << ".\n";
 
   // 4. Add data (0: experimental, 1: calcualted, 2: difference)
   for (size_t i = 0; i < numpts; ++i) {
-    m_outputWS->dataY(1)[i] = valueVec[i] + backgroundvalues[i];
-    m_outputWS->dataY(2)[i] = vecY[i] - (valueVec[i] + backgroundvalues[i]);
+    m_outputWS->mutableY(1)[i] = valueVec[i] + backgroundvalues[i];
+    m_outputWS->mutableY(2)[i] = vecY[i] - (valueVec[i] + backgroundvalues[i]);
   }
 
   //   (3: peak without background, 4: input background)
   // m_backgroundFunction->function(domain, values);
   for (size_t i = 0; i < values.size(); ++i) {
-    m_outputWS->dataY(CALBKGDINDEX)[i] = backgroundvalues[i];
-    m_outputWS->dataY(CALPUREPEAKINDEX)[i] = valueVec[i];
+    m_outputWS->mutableY(CALBKGDINDEX)[i] = backgroundvalues[i];
+    m_outputWS->mutableY(CALPUREPEAKINDEX)[i] = valueVec[i];
   }
 
   // 5. Output background to table workspace
@@ -735,7 +731,7 @@ void LeBailFit::createLeBailFunction() {
 
   // Add peaks
   if (!isEmpty(m_peakCentreTol)) {
-    const MantidVec &vecx = m_dataWS->readX(m_wsIndex);
+    const auto &vecx = m_dataWS->x(m_wsIndex).rawData();
     m_lebailFunction->setPeakCentreTolerance(m_peakCentreTol, vecx.front(),
                                              vecx.back());
   }
@@ -765,8 +761,8 @@ LeBailFit::cropWorkspace(API::MatrixWorkspace_sptr inpws, size_t wsindex) {
 
   double tof_min, tof_max;
   if (fitrange.empty()) {
-    tof_min = inpws->readX(wsindex)[0];
-    tof_max = inpws->readX(wsindex).back();
+    tof_min = inpws->x(wsindex)[0];
+    tof_max = inpws->x(wsindex).back();
   } else if (fitrange.size() == 2) {
     tof_min = fitrange[0];
     tof_max = fitrange[1];
@@ -774,8 +770,8 @@ LeBailFit::cropWorkspace(API::MatrixWorkspace_sptr inpws, size_t wsindex) {
     g_log.warning() << "Input FitRegion has more than 2 entries.  Using "
                        "default in stread.\n";
 
-    tof_min = inpws->readX(wsindex)[0];
-    tof_max = inpws->readX(wsindex).back();
+    tof_min = inpws->x(wsindex)[0];
+    tof_max = inpws->x(wsindex).back();
   }
 
   // Crop workspace
@@ -804,9 +800,9 @@ LeBailFit::cropWorkspace(API::MatrixWorkspace_sptr inpws, size_t wsindex) {
                         "ChildAlgorithm CropWorkspace");
   } else {
     g_log.debug() << "DBx307: Cropped Workspace... Range From "
-                  << cropws->readX(wsindex)[0] << " To "
-                  << cropws->readX(wsindex).back() << " of size "
-                  << cropws->readX(wsindex).size() << "\n";
+                  << cropws->x(wsindex)[0] << " To "
+                  << cropws->x(wsindex).back() << " of size "
+                  << cropws->x(wsindex).size() << "\n";
   }
 
   return cropws;
@@ -838,8 +834,8 @@ void LeBailFit::processInputProperties() {
   }
 
   m_dataWS = this->cropWorkspace(inpWS, m_wsIndex);
-  m_startX = m_dataWS->readX(0).front();
-  m_endX = m_dataWS->readX(0).back();
+  m_startX = m_dataWS->x(0).front();
+  m_endX = m_dataWS->x(0).back();
 
   // b) Minimizer
   std::string minim = getProperty("Minimizer");
@@ -1390,8 +1386,8 @@ void LeBailFit::createOutputDataWorkspace() {
   }
 
   // 2. Create workspace2D and set the data to spectrum 0 (common among all)
-  size_t nbinx = m_dataWS->readX(m_wsIndex).size();
-  size_t nbiny = m_dataWS->readY(m_wsIndex).size();
+  size_t nbinx = m_dataWS->x(m_wsIndex).size();
+  size_t nbiny = m_dataWS->y(m_wsIndex).size();
   m_outputWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
       API::WorkspaceFactory::Instance().create("Workspace2D", nspec, nbinx,
                                                nbiny));
@@ -1400,12 +1396,12 @@ void LeBailFit::createOutputDataWorkspace() {
   //    All X.
   for (size_t i = 0; i < nbinx; ++i)
     for (size_t j = 0; j < m_outputWS->getNumberHistograms(); ++j)
-      m_outputWS->dataX(j)[i] = m_dataWS->readX(m_wsIndex)[i];
+      m_outputWS->mutableX(j)[i] = m_dataWS->x(m_wsIndex)[i];
 
   //    Observation
   for (size_t i = 0; i < nbiny; ++i) {
-    m_outputWS->dataY(OBSDATAINDEX)[i] = m_dataWS->readY(m_wsIndex)[i];
-    m_outputWS->dataE(OBSDATAINDEX)[i] = m_dataWS->readE(m_wsIndex)[i];
+    m_outputWS->mutableY(OBSDATAINDEX)[i] = m_dataWS->y(m_wsIndex)[i];
+    m_outputWS->mutableE(OBSDATAINDEX)[i] = m_dataWS->e(m_wsIndex)[i];
   }
 
   // 4. Set axis
@@ -1446,12 +1442,11 @@ void LeBailFit::createOutputDataWorkspace() {
 void LeBailFit::execRandomWalkMinimizer(size_t maxcycles,
                                         map<string, Parameter> &parammap) {
   // Set up random walk parameters
-  const MantidVec &vecX = m_dataWS->readX(m_wsIndex);
-  const MantidVec &vecInY = m_dataWS->readY(m_wsIndex);
+  const auto &vecX = m_dataWS->x(m_wsIndex).rawData();
+  const auto &vecInY = m_dataWS->y(m_wsIndex);
   size_t numpts = vecInY.size();
 
-  const MantidVec &domain = m_dataWS->readX(m_wsIndex);
-  MantidVec vecCalPurePeaks(domain.size(), 0.0);
+  std::vector<double> vecCalPurePeaks(m_dataWS->x(m_wsIndex).size(), 0.0);
 
   //    Strategy and map
   TableWorkspace_sptr mctablews = getProperty("MCSetupWorkspace");
@@ -1478,19 +1473,20 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles,
   Rfactor startR(-DBL_MAX, -DBL_MAX);
 
   // Process background to make a pure peak spectrum in output workspace
-  MantidVec &vecBkgd = m_outputWS->dataY(INPUTBKGDINDEX);
-  m_lebailFunction->function(vecBkgd, vecX, false, true);
-  MantidVec &dataPurePeak = m_outputWS->dataY(INPUTPUREPEAKINDEX);
+  auto &vecBkgd = m_outputWS->mutableY(INPUTBKGDINDEX);
+  vecBkgd = m_lebailFunction->function(vecX, false, true);
+  auto &dataPurePeak = m_outputWS->mutableY(INPUTPUREPEAKINDEX);
   transform(vecInY.begin(), vecInY.end(), vecBkgd.begin(), dataPurePeak.begin(),
             ::minus<double>());
 
   // Calcualte starting Rwp and etc
-  const MantidVec &vecPurePeak = m_outputWS->readY(INPUTPUREPEAKINDEX);
+  const auto &vecPurePeak = m_outputWS->y(INPUTPUREPEAKINDEX).rawData();
 
   map<string, double> pardblmap = convertToDoubleMap(parammap);
   m_lebailFunction->setProfileParameterValues(pardblmap);
-  bool startvaluevalid = calculateDiffractionPattern(
-      vecX, vecPurePeak, false, false, vecBkgd, vecCalPurePeaks, startR);
+  bool startvaluevalid =
+      calculateDiffractionPattern(vecX, vecPurePeak, false, false,
+                                  vecBkgd.rawData(), vecCalPurePeaks, startR);
   if (!startvaluevalid) {
     // Throw exception if starting values are not valid for all
     throw runtime_error("Starting value of instrument profile parameters can "
@@ -1498,20 +1494,20 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles,
                         " unphyiscal parameters values.");
   }
 
-  doMarkovChain(parammap, vecX, vecPurePeak, vecBkgd, maxcycles, startR,
-                randomseed);
+  doMarkovChain(parammap, vecX, vecPurePeak, vecBkgd.rawData(), maxcycles,
+                startR, randomseed);
 
   // 5. Sum up: retrieve the best result from class variable: m_bestParameters
   Rfactor finalR(-DBL_MAX, -DBL_MAX);
   map<string, double> bestparams = convertToDoubleMap(m_bestParameters);
   m_lebailFunction->setProfileParameterValues(bestparams);
-  calculateDiffractionPattern(vecX, vecPurePeak, false, false, vecBkgd,
-                              vecCalPurePeaks, finalR);
+  calculateDiffractionPattern(vecX, vecPurePeak, false, false,
+                              vecBkgd.rawData(), vecCalPurePeaks, finalR);
 
-  MantidVec &vecCalY = m_outputWS->dataY(CALDATAINDEX);
-  MantidVec &vecDiff = m_outputWS->dataY(DATADIFFINDEX);
-  MantidVec &vecCalPurePeak = m_outputWS->dataY(CALPUREPEAKINDEX);
-  MantidVec &vecCalBkgd = m_outputWS->dataY(CALBKGDINDEX);
+  auto &vecCalY = m_outputWS->mutableY(CALDATAINDEX);
+  auto &vecDiff = m_outputWS->mutableY(DATADIFFINDEX);
+  auto &vecCalPurePeak = m_outputWS->mutableY(CALPUREPEAKINDEX);
+  auto &vecCalBkgd = m_outputWS->mutableY(CALBKGDINDEX);
   for (size_t i = 0; i < numpts; ++i) {
     // Calculated (refined) data
     vecCalY[i] = vecCalPurePeaks[i] + vecBkgd[i];
@@ -1979,11 +1975,11 @@ void LeBailFit::addParameterToMCMinimize(vector<string> &parnamesforMC,
  *
  * @return :: boolean value.  whether all the peaks' parameters are physical.
  */
-bool LeBailFit::calculateDiffractionPattern(const MantidVec &vecX,
-                                            const MantidVec &vecY,
+bool LeBailFit::calculateDiffractionPattern(const std::vector<double> &vecX,
+                                            const std::vector<double> &vecY,
                                             bool inputraw, bool outputwithbkgd,
-                                            const MantidVec &vecBkgd,
-                                            MantidVec &values,
+                                            const std::vector<double> &vecBkgd,
+                                            std::vector<double> &values,
                                             Rfactor &rfactor) {
   vector<double> veccalbkgd;
 
@@ -2017,7 +2013,7 @@ bool LeBailFit::calculateDiffractionPattern(const MantidVec &vecX,
                              "and newly calculated background. "
                           << ".\n";
       veccalbkgd.assign(vecY.size(), 0.);
-      m_lebailFunction->function(veccalbkgd, vecX, false, true);
+      veccalbkgd = m_lebailFunction->function(vecX, false, true);
       ::transform(vecY.begin(), vecY.end(), veccalbkgd.begin(),
                   vecPureY.begin(), ::minus<double>());
     }
@@ -2058,8 +2054,8 @@ bool LeBailFit::calculateDiffractionPattern(const MantidVec &vecX,
 
   // Calculate Rwp
   if (outputwithbkgd) {
-    rfactor = getRFactor(m_dataWS->readY(m_wsIndex), values,
-                         m_dataWS->readE(m_wsIndex));
+    rfactor = getRFactor(m_dataWS->y(m_wsIndex).rawData(), values,
+                         m_dataWS->e(m_wsIndex).rawData());
   } else {
     vector<double> caldata(values.size(), 0.0);
     if (vecBkgd.size() == vecY.size()) {
@@ -2073,8 +2069,8 @@ bool LeBailFit::calculateDiffractionPattern(const MantidVec &vecX,
       std::transform(values.begin(), values.end(), veccalbkgd.begin(),
                      caldata.begin(), std::plus<double>());
     }
-    rfactor = getRFactor(m_dataWS->readY(m_wsIndex), caldata,
-                         m_dataWS->readE(m_wsIndex));
+    rfactor = getRFactor(m_dataWS->y(m_wsIndex).rawData(), caldata,
+                         m_dataWS->e(m_wsIndex).rawData());
   }
 
   if (!peaksvalid) {
@@ -2414,15 +2410,16 @@ void LeBailFit::applyParameterValues(map<string, Parameter> &srcparammap,
  * @param values    values
  * @param background  background
  */
-void LeBailFit::fitBackground(size_t wsindex, FunctionDomain1DVector domain,
-                              FunctionValues values,
-                              vector<double> &background) {
-  UNUSED_ARG(background);
-
-  MantidVec &vecSmoothBkgd = m_outputWS->dataY(SMOOTHEDBKGDINDEX);
-
-  smoothBackgroundAnalytical(wsindex, domain, values, vecSmoothBkgd);
-}
+// vector<double> LeBailFit::fitBackground(size_t wsindex,
+// FunctionDomain1DVector domain,
+//                              FunctionValues values,
+//                              vector<double> &background) {
+//  UNUSED_ARG(background);
+//
+//  auto &vecSmoothBkgd = m_outputWS->mutableY(SMOOTHEDBKGDINDEX).rawData();
+//
+//  smoothBackgroundAnalytical(wsindex, domain, values, vecSmoothBkgd);
+//}
 
 //----------------------------------------------------------------------------------------------
 /** Smooth background by exponential smoothing algorithm
@@ -2436,16 +2433,16 @@ void LeBailFit::smoothBackgroundExponential(size_t wsindex,
                                             FunctionDomain1DVector domain,
                                             FunctionValues peakdata,
                                             vector<double> &background) {
-  const MantidVec &vecRawX = m_dataWS->readX(wsindex);
-  const MantidVec &vecRawY = m_dataWS->readY(wsindex);
+  size_t vecRawXSize = m_dataWS->x(wsindex).size();
+  size_t vecRawYSize = m_dataWS->y(wsindex).size();
 
   // 1. Check input
-  if (vecRawX.size() != domain.size() || vecRawY.size() != peakdata.size() ||
+  if (vecRawXSize != domain.size() || vecRawYSize != peakdata.size() ||
       background.size() != peakdata.size())
     throw runtime_error("Vector sizes cannot be matched.");
 
   // 2. Set up peak density
-  vector<double> peakdensity(vecRawX.size(), 1.0);
+  vector<double> peakdensity(vecRawXSize, 1.0);
   throw runtime_error("Need to figure out how to deal with this part!");
 
   //  for (size_t ipk = 0; ipk < m_lebailFunction->getNumberOfPeaks(); ++ipk)
@@ -2529,9 +2526,9 @@ void LeBailFit::smoothBackgroundAnalytical(size_t wsindex,
 
   /* Below is the original code to modifying from
   // 1. Make data ready
-  MantidVec& vecData = m_dataWS->dataY(wsindex);
-  MantidVec& vecFitBkgd = m_outputWS->dataY(CALBKGDINDEX);
-  MantidVec& vecFitBkgdErr = m_outputWS->dataE(CALBKGDINDEX);
+  MantidVec& vecData = m_dataWS->mutableY(wsindex);
+  MantidVec& vecFitBkgd = m_outputWS->mutableY(CALBKGDINDEX);
+  MantidVec& vecFitBkgdErr = m_outputWS->mutableE(CALBKGDINDEX);
   size_t numpts = vecFitBkgd.size();
   for (size_t i = 0; i < numpts; ++i)
   {
