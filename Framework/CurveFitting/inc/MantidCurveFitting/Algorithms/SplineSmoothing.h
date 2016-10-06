@@ -61,22 +61,24 @@ private:
   void exec() override;
 
   /// smooth a single spectrum of the workspace
-  void smoothSpectrum(int index);
-
-  /// Handle converting point data back to histograms
-  void convertToHistogram();
+  void smoothSpectrum(const int index);
 
   /// calculate derivatives for a single spectrum
-  void calculateSpectrumDerivatives(int index, int order);
+  void calculateSpectrumDerivatives(const int index, const int order);
 
   /// setup an output workspace using meta data from inws and taking a number of
   /// spectra
   API::MatrixWorkspace_sptr
-  setupOutputWorkspace(API::MatrixWorkspace_const_sptr inws, int size) const;
+  setupOutputWorkspace(API::MatrixWorkspace_const_sptr inws,
+                       const int size) const;
 
   /// convert a binned workspace to point data. Uses mean of the bins as point
   API::MatrixWorkspace_sptr
+
   convertBinnedData(API::MatrixWorkspace_sptr workspace);
+
+  /// Handle converting point data back to histograms
+  void convertToHistogram();
 
   /// set the points used in the spline for smoothing
   void setSmoothingPoint(const int index, const double xpoint,
@@ -84,17 +86,17 @@ private:
 
   /// choose points to define a spline and smooth the data
   void selectSmoothingPoints(API::MatrixWorkspace_const_sptr inputWorkspace,
-                             size_t row);
+                             const size_t row);
 
   /// calculate the spline based on the smoothing points chosen
   void calculateSmoothing(API::MatrixWorkspace_const_sptr inputWorkspace,
                           API::MatrixWorkspace_sptr outputWorkspace,
-                          size_t row) const;
+                          const size_t row) const;
 
   /// calculate the derivatives for a set of points on the spline
   void calculateDerivatives(API::MatrixWorkspace_const_sptr inputWorkspace,
                             API::MatrixWorkspace_sptr outputWorkspace,
-                            int order, size_t row) const;
+                            const int order, const size_t row) const;
 
   /// add a set of smoothing points to the spline
   void addSmoothingPoints(const std::set<int> &points, const double *xs,

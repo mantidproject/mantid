@@ -113,7 +113,7 @@ void SplineSmoothing::exec() {
  *
  * @param index :: index of the spectrum to smooth
  */
-void SplineSmoothing::smoothSpectrum(int index) {
+void SplineSmoothing::smoothSpectrum(const int index) {
   m_cspline = boost::make_shared<BSpline>();
   m_cspline->setAttributeValue("Uniform", false);
 
@@ -131,19 +131,13 @@ void SplineSmoothing::smoothSpectrum(int index) {
   calculateSmoothing(m_inputWorkspacePointData, m_outputWorkspace, index);
 }
 
-void SplineSmoothing::convertToHistogram() {
-  auto alg = createChildAlgorithm("ConvertToHistogram");
-  alg->setProperty("InputWorkspace", m_outputWorkspace);
-  alg->execute();
-  m_outputWorkspace = alg->getProperty("OutputWorkspace");
-}
-
 /** Calculate the derivatives for each spectrum in the input workspace
  *
  * @param index :: index of the spectrum
  * @param order :: order of derivatives to calculate
  */
-void SplineSmoothing::calculateSpectrumDerivatives(int index, int order) {
+void SplineSmoothing::calculateSpectrumDerivatives(const int index,
+                                                   const int order) {
   if (order > 0) {
     API::MatrixWorkspace_sptr derivs =
         setupOutputWorkspace(m_inputWorkspace, order);
@@ -184,7 +178,7 @@ void SplineSmoothing::performAdditionalFitting(MatrixWorkspace_sptr ws,
  */
 API::MatrixWorkspace_sptr
 SplineSmoothing::setupOutputWorkspace(API::MatrixWorkspace_const_sptr inws,
-                                      int size) const {
+                                      const int size) const {
   MatrixWorkspace_sptr outputWorkspace =
       WorkspaceFactory::Instance().create(inws, size);
 
@@ -214,6 +208,17 @@ SplineSmoothing::convertBinnedData(MatrixWorkspace_sptr workspace) {
   } else {
     return workspace;
   }
+}
+
+/**
+* Converts the output workspace back to histogram data if it was
+* converted to point data previously
+*/
+void SplineSmoothing::convertToHistogram() {
+  auto alg = createChildAlgorithm("ConvertToHistogram");
+  alg->setProperty("InputWorkspace", m_outputWorkspace);
+  alg->execute();
+  m_outputWorkspace = alg->getProperty("OutputWorkspace");
 }
 
 /** Calculate smoothing of the data using the spline
@@ -246,7 +251,8 @@ void SplineSmoothing::calculateSmoothing(
  */
 void SplineSmoothing::calculateDerivatives(
     API::MatrixWorkspace_const_sptr inputWorkspace,
-    API::MatrixWorkspace_sptr outputWorkspace, int order, size_t row) const {
+    API::MatrixWorkspace_sptr outputWorkspace, const int order,
+    const size_t row) const {
   const auto &xIn = inputWorkspace->x(row);
   const double *xValues = &(xIn[0]);
   double *yValues = &(outputWorkspace->mutableY(order - 1)[0]);
@@ -318,7 +324,7 @@ void SplineSmoothing::addSmoothingPoints(const std::set<int> &points,
  * @param row :: The row of spectra to use
  */
 void SplineSmoothing::selectSmoothingPoints(
-    MatrixWorkspace_const_sptr inputWorkspace, size_t row) {
+    MatrixWorkspace_const_sptr inputWorkspace, const size_t row) {
   std::set<int> smoothPts;
   const auto &xs = inputWorkspace->x(row);
   const auto &ys = inputWorkspace->y(row);
