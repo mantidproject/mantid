@@ -139,8 +139,6 @@ public:
 
     int numEventsPer = 100;
     MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
-    EventWorkspace_sptr in_ws =
-        boost::dynamic_pointer_cast<EventWorkspace>(inputW);
     inputW->getAxis(0)->setUnit("Wavelength");
 
     NormaliseVanadium alg;
