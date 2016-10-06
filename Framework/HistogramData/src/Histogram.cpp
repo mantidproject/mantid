@@ -253,13 +253,12 @@ template <> void Histogram::checkSize(const BinEdges &binEdges) const {
     throw std::logic_error("Histogram: size mismatch of BinEdges\n");
 }
 
-
 /** Resets the size of the internal x, dx, y, and e data structures
 
   The argument refers to the requested y length. All other lengths are
   then inferred automatically.*/
 void Histogram::resize(size_t n) {
-  auto newXSize = xMode() == XMode::Points? n : n + 1;
+  auto newXSize = xMode() == XMode::Points ? n : n + 1;
 
   m_x.access().mutableRawData().resize(newXSize);
   m_y.access().mutableRawData().resize(n);
@@ -269,7 +268,6 @@ void Histogram::resize(size_t n) {
     m_dx.access().mutableRawData().resize(n);
   }
 }
-
 
 } // namespace HistogramData
 } // namespace Mantid
