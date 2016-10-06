@@ -13,9 +13,10 @@ class ToscaInstrument(Instrument, FrequencyGenerator):
     def __init__(self, name):
         self._name = name
         self._k_points_data = None
+        super(ToscaInstrument, self).__init__()
 
 
-    def calculate_q_powder(self, overtones=None):
+    def calculate_q_powder(self, overtones=None, combinations=None):
         """
         Calculates squared Q vectors for TOSCA and TOSCA-like instruments.
         """
@@ -28,20 +29,31 @@ class ToscaInstrument(Instrument, FrequencyGenerator):
 
         # fundamentals and higher quantum order effects
         if overtones:
-            q_dim = AbinsParameters.fundamentals + AbinsParameters.higher_order_quantum_effects
+            q_dim = AbinsParameters.fundamentals_dim + AbinsParameters.higher_order_quantum_effects_dim
 
         # only fundamentals
         else:
-            q_dim = AbinsParameters.fundamentals
+            q_dim = AbinsParameters.fundamentals_dim
 
-        q_data = dict(order_1=None)
-        last_quantum_order = 1  # range function is exclusive with respect to the last element so need to add this
+        q_data = {}
 
         local_freq = fundamental_frequencies
-        for quantum_order in range(AbinsParameters.fundamentals, q_dim + last_quantum_order):
-            local_freq = self.expand_freq(previous_array=local_freq, fundamentals_array=fundamental_frequencies, quantum_order=quantum_order)
-            q_data["order_%s" % quantum_order] = np.multiply(np.multiply(local_freq, local_freq),  AbinsParameters.TOSCA_constant)
+        for quantum_order in range(AbinsParameters.fundamentals, q_dim):
+            if combinations:
+                local_freq = self.construct_freq_combinations(previous_array=local_freq, fundamentals_array=fundamental_frequencies, quantum_order=quantum_order)
+            else: # only fundamentals (and optionally overtones)
+                local_freq = self.construct_freq_overtones(fundamentals=fundamental_frequencies, quantum_order=quantum_order)
+            q_data["order_%s" % (quantum_order + 1)] = np.multiply(np.multiply(local_freq, local_freq),  AbinsParameters.TOSCA_constant)
 
+        return q_data
+
+
+    def q_powder_for_scaling(self, fundamental_frequencies=None, q_dim=None):
+        q_data = {}
+        local_freq = fundamental_frequencies
+        for quantum_order in range(AbinsParameters.fundamentals, q_dim):
+            local_freq = self.construct_freq_overtones(fundamentals=fundamental_frequencies, quantum_order=quantum_order)
+            q_data["order_%s" % (quantum_order + 1)] = np.multiply(np.multiply(local_freq, local_freq),  AbinsParameters.TOSCA_constant)
         return q_data
 
 
