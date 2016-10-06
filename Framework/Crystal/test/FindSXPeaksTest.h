@@ -12,24 +12,22 @@ using namespace Mantid::DataObjects;
 
 // Helper method to overwrite spectra.
 void overWriteSpectraY(size_t histo, Workspace2D_sptr workspace,
-                       const Mantid::MantidVec &Yvalues) {
-  Mantid::MantidVec &Y = workspace->dataY(histo);
-  for (size_t i = 0; i < Y.size(); i++) {
-    Y[i] = Yvalues[i];
-  }
+                       const std::vector<double> &Yvalues) {
+
+    workspace->dataY(histo) = Yvalues;
 }
 
 // Helper method to make what will be recognised as a single peak.
 void makeOnePeak(size_t histo, double peak_intensity, size_t at_bin,
                  Workspace2D_sptr workspace) {
-  size_t nBins = workspace->readY(0).size();
-  Mantid::MantidVec peaksInY(nBins);
+  size_t nBins = workspace->y(0).size();
+  std::vector<double> peaksInY(nBins);
 
   for (size_t i = 0; i < nBins; i++) {
     if (i == at_bin) {
       peaksInY[i] = peak_intensity; // overwrite with special value
     } else {
-      peaksInY[i] = workspace->readY(histo)[i];
+      peaksInY[i] = workspace->y(histo)[i];
     }
   }
   overWriteSpectraY(histo, workspace, peaksInY);

@@ -281,8 +281,7 @@ void IntegratePeakTimeSlices::exec() {
     int Chan;
 
     const auto &X = inpWkSpace->x(wsIndx);
-    int dChan =
-        CalculateTimeChannelSpan(peak, dQ, X, int(wsIndx), Chan);
+    int dChan = CalculateTimeChannelSpan(peak, dQ, X, int(wsIndx), Chan);
 
     dChan = max<int>(dChan, MinTimeSpan);
 
@@ -1233,9 +1232,9 @@ double DataModeHandler::getNewRCRadius() {
  * @param yvals   The y(row) values of the data to be considered
  * @param counts  The intensity at the given row and column (and timeslice)
  */
-void DataModeHandler::setHeightHalfWidthInfo(const MantidVec &xvals,
-                                             const MantidVec &yvals,
-                                             const MantidVec &counts) {
+void DataModeHandler::setHeightHalfWidthInfo(
+    const std::vector<double> &xvals, const std::vector<double> &yvals,
+    const std::vector<double> &counts) {
   double minCount, maxCount;
   const auto &X = xvals;
   const auto &Y = yvals;
@@ -1570,10 +1569,10 @@ void IntegratePeakTimeSlices::SetUpData1(
   for (int i = 0; i < NAttributes + 2; i++)
     StatBase.push_back(0);
 
-  Mantid::MantidVec yvalB;
-  Mantid::MantidVec errB;
-  Mantid::MantidVec xvalB;
-  Mantid::MantidVec YvalB;
+  std::vector<double> yvalB;
+  std::vector<double> errB;
+  std::vector<double> xvalB;
+  std::vector<double> YvalB;
 
   double TotBoundaryIntensities = 0;
   int nBoundaryCells = 0;
@@ -1586,7 +1585,7 @@ void IntegratePeakTimeSlices::SetUpData1(
 
   int jj = 0;
 
-  Mantid::MantidVec xRef;
+  std::vector<double> xRef;
   for (int i = 2; i < m_NeighborIDs[1]; i++) {
     int DetID = m_NeighborIDs[i];
 
