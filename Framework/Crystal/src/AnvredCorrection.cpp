@@ -152,9 +152,8 @@ void AnvredCorrection::exec() {
   MatrixWorkspace_sptr correctionFactors =
       WorkspaceFactory::Instance().create(m_inputWS);
 
-  const int64_t numHists =
-      static_cast<int64_t>(m_inputWS->getNumberHistograms());
-  const int64_t specSize = static_cast<int64_t>(m_inputWS->blocksize());
+  const auto numHists = m_inputWS->getNumberHistograms();
+  const auto specSize = m_inputWS->blocksize();
   if (specSize < 3)
     throw std::runtime_error("Problem in AnvredCorrection::events not binned");
 
@@ -168,20 +167,8 @@ void AnvredCorrection::exec() {
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
   PARALLEL_FOR2(m_inputWS, correctionFactors)
-  for (int64_t i = 0; i < int64_t(numHists); ++i) {
+  for (auto i = 0; i < numHists; ++i) {
     PARALLEL_START_INTERUPT_REGION
-
-    // Get a reference to the Y's in the output WS for storing the factors
-    MantidVec &Y = correctionFactors->dataY(i);
-    MantidVec &E = correctionFactors->dataE(i);
-
-    // Copy over bin boundaries
-    const auto &inSpec = m_inputWS->getSpectrum(i);
-
-    const MantidVec &Xin = inSpec.readX();
-    correctionFactors->dataX(i) = Xin;
-    const MantidVec &Yin = inSpec.readY();
-    const MantidVec &Ein = inSpec.readE();
 
     // Get detector position
     IDetector_const_sptr det;
@@ -206,16 +193,32 @@ void AnvredCorrection::exec() {
     // scattered beam
     double scattering = dir.angle(V3D(0.0, 0.0, 1.0));
 
+    double depth = 0.2;
+
+    double pathlength = 0.0;
+
+    std::string bankName;
+
+    if (m_useScaleFactors) {
+      scale_init(det, inst, L2, depth, pathlength, bankName);
+    }
+
     Mantid::Kernel::Units::Wavelength wl;
     auto &points = m_inputWS->points(i);
-    double depth = 0.2;
-    double pathlength = 0.0;
-    std::string bankName;
-    if (m_useScaleFactors)
-      scale_init(det, inst, L2, depth, pathlength, bankName);
 
+    // Get a reference to the Y's in the output WS for storing the factors
+    auto &Y = correctionFactors->mutableY(i);
+    auto &E = correctionFactors->mutableE(i);
+
+    // share bin boundaries
+    const auto &inSpec = m_inputWS->getSpectrum(i);
+    correctionFactors->setBinEdges(i, inSpec.binEdges());
+
+    // get references to input data for calculations
+    const auto &Yin = inSpec.y();
+    const auto &Ein = inSpec.x();
     // Loop through the bins in the current spectrum
-    for (int64_t j = 0; j < specSize; j++) {
+    for (auto j = 0; j < specSize; j++) {
 
       double lambda =
           (unitStr == "TOF")
@@ -226,8 +229,10 @@ void AnvredCorrection::exec() {
         Y[j] = 1.0 / this->getEventWeight(lambda, scattering);
       } else {
         double value = this->getEventWeight(lambda, scattering);
-        if (m_useScaleFactors)
+
+        if (m_useScaleFactors) {
           scale_exec(bankName, lambda, depth, inst, pathlength, value);
+        }
         Y[j] = Yin[j] * value;
         E[j] = Ein[j] * value;
       }
@@ -254,14 +259,20 @@ void AnvredCorrection::cleanup() {
 
 void AnvredCorrection::execEvent() {
 
-  const int64_t numHists =
-      static_cast<int64_t>(m_inputWS->getNumberHistograms());
-  std::string unitStr = m_inputWS->getAxis(0)->unit()->unitID();
+  const auto numHists = m_inputWS->getNumberHistograms(); // number of vectors
+  const auto blocksize = m_inputWS->blocksize();          // YLen
+  const auto numBins = m_inputWS->x(0).size();
+
+  const auto evNumHists = eventW->getNumberHistograms(); // who tf knows
+  const auto evBlocksize = eventW->blocksize();
+  const auto evNumBins = eventW->x(0).size();
+
+  const std::string unitStr = m_inputWS->getAxis(0)->unit()->unitID();
   // Create a new outputworkspace with not much in it
-  DataObjects::EventWorkspace_sptr correctionFactors;
-  correctionFactors = boost::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create("EventWorkspace", numHists, 2,
-                                               1));
+  auto correctionFactors = boost::dynamic_pointer_cast<EventWorkspace>(
+      API::WorkspaceFactory::Instance().create("EventWorkspace", numHists,
+                                               numBins, blocksize));
+
   correctionFactors->sortAll(TOF_SORT, nullptr);
   // Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(
@@ -281,12 +292,11 @@ void AnvredCorrection::execEvent() {
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
   PARALLEL_FOR2(eventW, correctionFactors)
-  for (int64_t i = 0; i < int64_t(numHists); ++i) {
+  for (auto i = 0; i < numHists; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    // Copy over bin boundaries
-    const MantidVec &X = eventW->readX(i);
-    correctionFactors->dataX(i) = X;
+    // share bin boundaries, and leave Y and E nullptr
+    correctionFactors->setHistogram(i, eventW->binEdges(i));
 
     // Get detector position
     IDetector_const_sptr det;
@@ -426,7 +436,7 @@ double AnvredCorrection::getEventWeight(double lamda, double two_theta) {
     return transinv;
 
   // Resolution of the lambda table
-  size_t lamda_index = static_cast<size_t>(STEPS_PER_ANGSTROM * lamda);
+  auto lamda_index = static_cast<size_t>(STEPS_PER_ANGSTROM * lamda);
 
   if (lamda_index >= m_lamda_weight.size())
     lamda_index = m_lamda_weight.size() - 1;
@@ -550,11 +560,12 @@ void AnvredCorrection::BuildLamdaWeights() {
       m_lamda_weight.push_back(1.);
   }
 
-  for (size_t i = 0; i < m_lamda_weight.size(); i++) {
+  for (size_t i = 0; i < m_lamda_weight.size(); ++i) {
     double lamda = static_cast<double>(i) / STEPS_PER_ANGSTROM;
     m_lamda_weight[i] *= (1 / std::pow(lamda, power));
   }
 }
+
 void AnvredCorrection::scale_init(IDetector_const_sptr det,
                                   Instrument_const_sptr inst, double &L2,
                                   double &depth, double &pathlength,
@@ -562,13 +573,11 @@ void AnvredCorrection::scale_init(IDetector_const_sptr det,
   bankName = det->getParent()->getParent()->getName();
   // Distance to center of detector
   boost::shared_ptr<const IComponent> det0 = inst->getComponentByName(bankName);
-  if (inst->getName().compare("CORELLI") ==
-      0) // for Corelli with sixteenpack under bank
+  if ("CORELLI" == inst->getName()) // for Corelli with sixteenpack under bank
   {
     std::vector<Geometry::IComponent_const_sptr> children;
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-            inst->getComponentByName(bankName));
+    auto asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+        inst->getComponentByName(bankName));
     asmb->getChildren(children, false);
     det0 = children[0];
   }
@@ -576,6 +585,7 @@ void AnvredCorrection::scale_init(IDetector_const_sptr det,
   double cosA = det0->getDistance(*sample) / L2;
   pathlength = depth / cosA;
 }
+
 void AnvredCorrection::scale_exec(std::string &bankName, double &lambda,
                                   double &depth, Instrument_const_sptr inst,
                                   double &pathlength, double &value) {
