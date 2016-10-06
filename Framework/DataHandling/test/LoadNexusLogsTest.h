@@ -11,6 +11,9 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/PhysicalConstants.h"
 
+#include <H5Cpp.h>
+#include <hdf5.h>
+
 using namespace Mantid;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -20,9 +23,96 @@ using namespace Mantid::DataHandling;
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/WorkspaceGroup.h"
 
+//----------------------------------------------------------------------------
+// This is a region to prototype the HDF5 file readers
+
+/**
+ * @brief file_info
+ * @param loc_id
+ * @param name
+ * @param linfo
+ * @param opdata
+ * @return
+ */
+herr_t getFileInfo(hid_t loc_id, const char *name, const H5L_info_t *linfo,
+                   void *opdata) {
+
+  // find out if this is a group
+  H5O_info_t object_info;
+  H5Oget_info_by_name(loc_id, name, &object_info, H5P_DEFAULT);
+
+  std::string entry_type("");
+  if (object_info.type == H5O_TYPE_GROUP)
+    entry_type = "NXGroup";
+  else if (object_info.type == H5O_TYPE_DATASET)
+    entry_type = "NXData";
+  else if (object_info.type == H5O_TYPE_NAMED_DATATYPE)
+    entry_type = "NXNameDataType";
+  else if (object_info.type == H5O_TYPE_UNKNOWN)
+    entry_type = "UNKNOWN";
+  else
+    entry_type = "No Definition";
+
+  std::string nameStr(name);
+
+  std::cout << "name: " << nameStr << ", "
+            << "type: " << entry_type << "\n";
+
+  if ((object_info).type != H5O_TYPE_GROUP) {
+    return 0;
+  }
+
+  if (nameStr.find("_events") != std::string::npos) {
+    // std::cout << nameStr << std::endl;
+
+    hid_t group = H5Gopen2(loc_id, name, H5P_DEFAULT);
+    //   read_data<uint32_t>(group, "event_id", H5T_NATIVE_UINT);
+    //  read_data<uint64_t>(group, "event_index", H5T_NATIVE_ULONG);
+    //  read_data<float>(group, "event_time_offset", H5T_NATIVE_FLOAT);
+    //  read_data<double>(group, "event_time_zero", H5T_NATIVE_DOUBLE);
+
+    H5Gclose(group);
+  }
+
+  // open the group
+
+  return 0;
+}
+
+/*
+ * Operator function.
+ */
+herr_t file_info(hid_t loc_id, const char *name, const H5L_info_t *linfo,
+                 void *opdata) {
+  hid_t group;
+  /*
+   * Open the group using its name.
+   */
+  group = H5Gopen2(loc_id, name, H5P_DEFAULT);
+  /*
+   * Display group name.
+   */
+  std::cout << "Name : " << name << std::endl;
+
+  int *opdata_int = reinterpret_cast<int *>(opdata);
+  (*opdata_int) = (*opdata_int) + 1;
+
+  H5Gclose(group);
+  return 0;
+}
+
+std::map<std::string, std::string> getEntries(hid_t entry_id) {
+  std::map<std::string, std::string> entry_map;
+  return entry_map;
+}
+
+size_t numEvents() { return 0; }
+
+//----------------------------------------------------------------------------
+
 class LoadNexusLogsTest : public CxxTest::TestSuite {
 public:
-  void test_File_With_DASLogs() {
+  void Ptest_File_With_DASLogs() {
     Mantid::API::FrameworkManager::Instance();
     LoadNexusLogs ld;
     std::string outws_name = "REF_L_instrument";
@@ -70,7 +160,7 @@ public:
     // Now the stats
   }
 
-  void test_File_With_Runlog_And_Selog() {
+  void Ptest_File_With_Runlog_And_Selog() {
     LoadNexusLogs loader;
     loader.initialize();
     MatrixWorkspace_sptr testWS = createTestWorkspace();
@@ -115,7 +205,7 @@ public:
     TS_ASSERT_EQUALS(dlog->size(), 172);
   }
 
-  void test_extract_nperiod_log_from_event_nexus() {
+  void Ptest_extract_nperiod_log_from_event_nexus() {
 
     auto testWS = createTestWorkspace();
     auto run = testWS->run();
@@ -139,7 +229,7 @@ public:
     }
   }
 
-  void test_extract_periods_log_from_event_nexus() {
+  void Ptest_extract_periods_log_from_event_nexus() {
 
     auto testWS = createTestWorkspace();
     auto run = testWS->run();
@@ -169,7 +259,7 @@ public:
                       uniquePeriods.size());
   }
 
-  void test_log_non_default_entry() {
+  void Ptest_log_non_default_entry() {
     auto testWS = createTestWorkspace();
     LoadNexusLogs loader;
 
@@ -201,6 +291,122 @@ public:
     TS_ASSERT(pclog);
     TS_ASSERT_EQUALS(pclog->size(), 24150);
     TS_ASSERT(pclog->getStatistics().duration < 3e9);
+  }
+
+  void test_h5_cpp() {
+    std::string filename("/home/wzz/Projects/workspaces/Mantid/"
+                         "15840_LoadEventNexus/PG3_29571.nxs.h5");
+
+    H5::H5File mfile(filename, H5F_ACC_RDONLY);
+    std::cout << "Is HDF5?: " << mfile.isHdf5(filename.c_str()) << "\n";
+
+    std::vector<std::string> child_names;
+    size_t num_children(0);
+    herr_t idx = H5Literate(mfile.getId(), H5_INDEX_NAME, H5_ITER_INC, NULL,
+                            file_info, &num_children);
+    std::cout << "under file number of children = " << num_children << "\n";
+
+    std::cout << "number object under root = " << mfile.getNumObjs() << "\n";
+    std::cout << "first object name = " << mfile.getObjnameByIdx(0) << "\n";
+
+    std::cout << mfile.getNumAttrs() << ", " << mfile.getNumObjs() << "\n";
+
+    hid_t obj_counts = mfile.getObjCount(H5F_OBJ_GROUP);
+    std::cout << obj_counts << "\n";
+    obj_counts = mfile.getObjCount(H5F_OBJ_ALL);
+    std::cout << obj_counts << "\n";
+    std::cout << mfile.getObjCount(H5F_OBJ_FILE) << "\n";
+    std::cout << mfile.getObjCount(H5F_OBJ_DATASET) << "\n";
+    std::cout << mfile.getObjCount(H5F_OBJ_DATATYPE) << "\n";
+    std::cout << mfile.getObjCount(H5F_OBJ_ATTR) << "\n";
+
+    hid_t oid_list[1000];
+    mfile.getObjIDs(H5F_OBJ_ALL, 1000, &oid_list[0]);
+    std::cout << "obj ID: " << oid_list[0] << "\n";
+    /* this cause fault!
+    std::string obj_name = mfile.getObjnameByIdx(oid_list[0]);
+    std::cout << "obj name: " << obj_name << "\n";
+    */
+
+    H5::Group group_entry = mfile.openGroup("entry");
+    hid_t entry_id = group_entry.getId();
+    std::cout << "entry ID: " << entry_id << "\n";
+    auto num_entries = group_entry.getNumObjs();
+    for (size_t i = 0; i < num_entries; ++i)
+      std::cout << group_entry.getObjnameByIdx(i) << "\n";
+
+    mfile.close();
+
+    TS_ASSERT_EQUALS(1, 3);
+  }
+
+  void Ptest_hdf5_lib() {
+    std::string filename("/home/wzz/Projects/workspaces/Mantid/"
+                         "15840_LoadEventNexus/PG3_29571.nxs.h5");
+
+    /* Open an existing file. */
+    hid_t file_id = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+
+    // open a group
+    hid_t entry_id = H5Gopen(file_id, "/entry", H5P_DEFAULT); // SNS
+
+    // number of objects
+    hsize_t numobjs;
+    H5Gget_num_objs(entry_id, &numobjs);
+    TS_ASSERT_EQUALS(numobjs, 100);
+
+    // info
+    H5G_info_t info;
+    H5Gget_info(entry_id, &info);
+    std::cout << info.nlinks << ", " << info.max_corder << "\n";
+
+    hsize_t index;
+    //  H5Literate(entry_id, H5_INDEX_NAME, H5_ITER_INC, &index, file_info,
+    //  NULL);
+    H5Literate(entry_id, H5_INDEX_NAME, H5_ITER_INC, NULL, getFileInfo, NULL);
+
+    // close a group
+    H5Gclose(entry_id);
+
+    H5close();
+
+    /*
+    // hid_t entry_id1 = H5Gopen(file_id, "/raw_data_1", H5P_DEFAULT); // ISIS
+    hid_t entry_id1 = H5Gopen(file_id, "/mantid_workspace_1", H5P_DEFAULT); //
+    ISIS
+
+    // put together a list of NXevent_data
+    // H5Literate(entry_id1, H5_INDEX_NAME, H5_ITER_INC, NULL, file_info, NULL);
+
+    hid_t entry_logs = H5Gopen(file_id, "/mantid_workspace_1/logs",
+    H5P_DEFAULT);
+
+    // TRYING: reading log files
+    std::string nxsname = read_string_data(entry_id1, "logs/Filename/value");
+    std::cout << "Nexus :" << nxsname << "\n\n";
+
+    std::string currperiod = read_string_data(entry_logs,
+    "current_period/value");
+    std::cout << "Period: " << currperiod << "\n\n";
+    // std::string nxsname = read_string_data(file_id,
+    "/mantid_workspace_1/workspace/axis1"); ///Filename");
+    // read_data<std::string>(entry_logs, "Filename", H5T_NATIVE_UINT);
+    //
+    //
+
+    // READ DATA:
+    hid_t group = H5Gopen2(entry_id1, "workspace", H5P_DEFAULT);
+    std::vector<uint32_t> axis1 =  read_data<uint32_t>(group, "axis1",
+    H5T_NATIVE_UINT);
+    std::cout << axis1.size() << "\n";
+
+
+    H5Gclose(entry_id1);
+
+    herr_t status = H5Fclose(file_id);
+    */
+
+    TS_ASSERT_EQUALS(1, 2);
   }
 
 private:

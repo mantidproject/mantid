@@ -23,6 +23,8 @@
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 
+#include <H5Cpp.h>
+
 #include <memory>
 #include <mutex>
 #include <boost/lexical_cast.hpp>
@@ -273,10 +275,10 @@ private:
   void createSpectraList(int32_t min, int32_t max);
 
   /// Set the top entry field name
-  void setTopEntryName();
+  void setTopEntryName(H5::H5File &h5file);
 
   /// to open the nexus file with specific exception handling/message
-  void safeOpenFile(const std::string fname);
+  H5::H5File safeOpenFile(const std::string fname);
 
   Kernel::DateAndTime loadNexusLogs(
       API::Progress *const prog, int &nPeriods,

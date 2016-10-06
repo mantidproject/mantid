@@ -25,6 +25,9 @@
 #include <boost/shared_array.hpp>
 #include <boost/function.hpp>
 
+#include "MantidDataHandling/H5Util.h"
+#include <H5Cpp.h>
+
 #include <functional>
 
 using std::map;
@@ -32,6 +35,7 @@ using std::string;
 using std::vector;
 
 using namespace ::NeXus;
+using namespace H5;
 
 namespace Mantid {
 namespace DataHandling {
@@ -378,10 +382,10 @@ void LoadEventNexus::exec() {
   bool load_monitors = this->getProperty("LoadMonitors");
 
   // this must make absolutely sure that m_file is a valid (and open)
-  // NeXus::File object: m_file
-  safeOpenFile(m_filename);
+  H5File h5file = safeOpenFile(m_filename);
 
-  setTopEntryName();
+  // setTopEntryName();
+  setTopEntryName(h5file);
 
   // Initialize progress reporting.
   int reports = 3;
@@ -424,7 +428,7 @@ void LoadEventNexus::exec() {
  * 2. entry
  * 3. raw_data_1
 */
-void LoadEventNexus::setTopEntryName() {
+void LoadEventNexus::setTopEntryName(H5::H5File &h5file) {
 
   // HDF5-REFACTOR
 
@@ -438,7 +442,8 @@ void LoadEventNexus::setTopEntryName() {
   try {
     string_map_t::const_iterator it;
     // assume we're at the top, otherwise: m_file->openPath("/");
-    string_map_t entries = m_file->getEntries();
+    //  string_map_t entries = m_file->getEntries();
+    string_map_t entries = H5Util::getFileEntries(h5file);
 
     // Choose the first entry as the default
     m_top_entry_name = entries.begin()->first;
@@ -446,6 +451,9 @@ void LoadEventNexus::setTopEntryName() {
     //  << ", " << entries.begin()->second << "\n";
 
     for (it = entries.begin(); it != entries.end(); ++it) {
+      g_log.warning() << "[DB] entry name = " << it->first
+                      << ", entry type = " << it->second << "\n";
+
       if (((it->first == "entry") || (it->first == "raw_data_1")) &&
           (it->second == "NXentry")) {
         m_top_entry_name = it->first;
@@ -459,6 +467,8 @@ void LoadEventNexus::setTopEntryName() {
                      "\"entry\".\n";
     m_top_entry_name = "entry";
   }
+
+  g_log.warning() << "[DB] top entry name = " << m_top_entry_name << "\n";
 
   return;
 }
@@ -504,8 +514,9 @@ void LoadEventNexus::filterDuringPause<EventWorkspaceCollection_sptr>(
  *
  * @param fname name of the nexus file to open
  */
-void LoadEventNexus::safeOpenFile(const std::string fname) {
+H5File LoadEventNexus::safeOpenFile(const std::string fname) {
   // FIXME/TODO - HDF5 Refactor
+  /*
   try {
     m_file = new ::NeXus::File(m_filename, NXACC_READ);
   } catch (std::runtime_error &e) {
@@ -519,6 +530,13 @@ void LoadEventNexus::safeOpenFile(const std::string fname) {
                              "file: " +
                              fname);
   }
+  // close file to make sure that the file is loadable
+  m_file->close();
+  */
+
+  H5File h5_file(fname, H5F_ACC_RDONLY);
+
+  return h5_file;
 }
 
 void LoadEventNexus::loadMonitorsToEventWS(Progress &prog) {
@@ -639,6 +657,10 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     const std::string &nexusfilename, T localWorkspace, API::Algorithm &alg,
     bool returnpulsetimes, int &nPeriods,
     std::unique_ptr<const TimeSeriesProperty<int>> &periodLog) {
+
+  // VZ/TODO/FIXME/NEXT ISSUE 17304: continue from here... working on
+  // LoadEventLog now
+
   // --------------------- Load DAS Logs -----------------
   // The pulse times will be empty if not specified in the DAS logs.
   // BankPulseTimes * out = NULL;
@@ -803,16 +825,21 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   vector<string> bankNames;
   vector<std::size_t> bankNumEvents;
   size_t total_events = 0;
+  // FIXME/TODO-HDF5
   map<string, string> entries = m_file->getEntries();
+  // ------------------>
   map<string, string>::const_iterator it = entries.begin();
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
-  ::NeXus::Info info;
+  //  ::NeXus::Info info;
   bool oldNeXusFileNames(false);
   bool hasTotalCounts(true);
   m_haveWeights = false;
+
+  // loop over all entries under the top entry
   for (; it != entries.end(); ++it) {
     std::string entry_name(it->first);
     std::string entry_class(it->second);
+    g_log.warning() << "Entries: " << entry_name << ", " << entry_class << "\n";
     if (entry_class == classType) {
       // open the group
       m_file->openGroup(entry_name, classType);
