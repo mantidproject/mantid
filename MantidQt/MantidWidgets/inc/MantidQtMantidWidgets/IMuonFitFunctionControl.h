@@ -46,6 +46,7 @@ signals:
   virtual void functionUpdateRequested() = 0;
   virtual void functionUpdateAndFitRequested(bool sequential) = 0;
   virtual void userChangedDatasetIndex(int index) = 0;
+  virtual void fitRawDataClicked(bool enabled) = 0;
 };
 
 } // namespace MantidWidgets

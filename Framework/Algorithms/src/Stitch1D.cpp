@@ -33,12 +33,6 @@ MinMaxTuple calculateXIntersection(MatrixWorkspace_sptr lhsWS,
 }
 
 bool isNonzero(double i) { return (0 != i); }
-
-bool isNan(const double &value) { return boost::math::isnan(value); }
-
-bool isInf(const double &value) {
-  return std::abs(value) == std::numeric_limits<double>::infinity();
-}
 }
 
 namespace Mantid {
@@ -320,18 +314,18 @@ MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input,
     for (size_t j = 0; j < sourceY.size(); ++j) {
       const double &value = sourceY[j];
       const double &eValue = sourceE[j];
-      if (isNan(value)) {
+      if (std::isnan(value)) {
         nanYIndexes.push_back(j);
         sourceY[j] = 0;
-      } else if (isInf(value)) {
+      } else if (std::isinf(value)) {
         infYIndexes.push_back(j);
         sourceY[j] = 0;
       }
 
-      if (isNan(eValue)) {
+      if (std::isnan(eValue)) {
         nanEIndexes.push_back(j);
         sourceE[j] = 0;
-      } else if (isInf(eValue)) {
+      } else if (std::isinf(eValue)) {
         infEIndexes.push_back(j);
         sourceE[j] = 0;
       }
@@ -581,8 +575,7 @@ void Stitch1D::exec() {
     }
     scaleFactor = ratio->y(0).front();
     errorScaleFactor = ratio->e(0).front();
-    if (scaleFactor < 1e-2 || scaleFactor > 1e2 ||
-        boost::math::isnan(scaleFactor)) {
+    if (scaleFactor < 1e-2 || scaleFactor > 1e2 ||std::isnan(scaleFactor)) {
       std::stringstream messageBuffer;
       messageBuffer << "Stitch1D calculated scale factor is: " << scaleFactor
                     << ". Check that in both input workspaces the integrated "
