@@ -81,16 +81,16 @@ private:
   void convertToHistogram();
 
   /// choose points to define a spline and smooth the data
-  void selectSmoothingPoints(const API::MatrixWorkspace_sptr &inputWorkspace,
+  void selectSmoothingPoints(const API::MatrixWorkspace &inputWorkspace,
                              const size_t row);
 
   /// calculate the spline based on the smoothing points chosen
-  void calculateSmoothing(const API::MatrixWorkspace_sptr &inputWorkspace,
+  void calculateSmoothing(const API::MatrixWorkspace &inputWorkspace,
                           API::MatrixWorkspace_sptr outputWorkspace,
                           const size_t row) const;
 
   /// calculate the derivatives for a set of points on the spline
-  void calculateDerivatives(const API::MatrixWorkspace_sptr &inputWorkspace,
+  void calculateDerivatives(const API::MatrixWorkspace &inputWorkspace,
                             API::MatrixWorkspace_sptr outputWorkspace,
                             const int order, const size_t row) const;
 
