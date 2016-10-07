@@ -79,7 +79,7 @@ SliceViewer Improvements
 
 VSI Improvements
 ----------------
-* ParaView updated to version 5.1.0
+* ParaView updated to version 5.1.2
 
 Multi-dataset fitting interface improvements
 --------------------------------------------

@@ -148,11 +148,13 @@ Performance
 CurveFitting
 ------------
 
-- Added two new minimizers belonging to the trust region family of algorithms: DTRS and More-Sorensen.
+- Added a new minimizer belonging to the trust region family of algorithms developped for Mantid by the SCD
+  Numerical Analysis Group at RAL. It has better performance characteristics compared to the existing
+  minimizers especially when applied to the most difficult fitting problems.
 - Added new property `EvaluationType` to Fit algorithm. If set to "Histogram" and the input dataset 
   is a histogram with large bins it can improve accuracy of the fit.
-- The concept page for :ref:`Comparing fit minimizers <FittingMinimizers>` has been updated to include new
-  minimizers and a comparison against neutron data examples.
+- The concept page for :ref:`Comparing fit minimizers <FittingMinimizers>` has been updated to include the new
+  minimizer and a comparison against neutron data examples.
 
 Others
 ------
