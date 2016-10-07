@@ -95,9 +95,9 @@ void NXObject::getAttributes() {
 #else
   while (NXgetnextattra(m_fileID, pName, &rank, dims, &iType) != NX_EOD) {
 #endif
-    // std::cerr<<"--------------------------\n";
-    // std::cerr<<"name="<<path()<<'\n';
-    // std::cerr<<pName<<' ' <<iLength<<' '<<iType<<'\n';
+// std::cerr<<"--------------------------\n";
+// std::cerr<<"name="<<path()<<'\n';
+// std::cerr<<pName<<' ' <<iLength<<' '<<iType<<'\n';
 #ifndef NEXUS43
     if (rank > 1) { // mantid only supports single value attributes
       throw std::runtime_error(
