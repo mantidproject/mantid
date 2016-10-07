@@ -162,7 +162,10 @@ void PlotAsymmetryByLogValue::exec() {
   for (size_t i = is; i <= ie; i++) {
 
     // Check if run i was already loaded
-    if (!m_logValue.count(i)) {
+    std::ostringstream logMessage;
+    if (m_logValue.count(i)) {
+      logMessage << "Found run " << i;
+    } else {
       // Load run, apply dead time corrections and detector grouping
       Workspace_sptr loadedWs = doLoad(i);
 
@@ -170,8 +173,9 @@ void PlotAsymmetryByLogValue::exec() {
         // Analyse loadedWs
         doAnalysis(loadedWs, i);
       }
+      logMessage << "Loaded run " << i;
     }
-    progress.report();
+    progress.report(logMessage.str());
   }
 
   // Create the 2D workspace for the output

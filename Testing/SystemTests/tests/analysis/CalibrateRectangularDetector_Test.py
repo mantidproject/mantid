@@ -95,10 +95,14 @@ class PG3CCCalibration(stresstesting.MantidStressTest):
         LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName=self.saved_cal_file,
                     WorkspaceName="PG3_2538", MakeGroupingWorkspace=False)
         MaskDetectors(Workspace="PG3_2538_offsets",MaskedWorkspace="PG3_2538_mask")
+        MaskBTP(Workspace="PG3_2538_offsets", Pixel="0,6")
+        MaskBTP(Workspace="PG3_2538_offsets",Tube="0-24,129-153")
         # load golden cal file
         LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName="PG3_goldenCC.cal",
                     WorkspaceName="PG3_2538_golden", MakeGroupingWorkspace=False)
         MaskDetectors(Workspace="PG3_2538_golden_offsets",MaskedWorkspace="PG3_2538_golden_mask")
+        MaskBTP(Workspace="PG3_2538_golden_offsets",Pixel="0,6")
+        MaskBTP(Workspace="PG3_2538_golden_offsets",Tube="0-24,129-153")
 
     def validateMethod(self):
         return "ValidateWorkspaceToWorkspace"

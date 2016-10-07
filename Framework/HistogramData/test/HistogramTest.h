@@ -12,6 +12,7 @@ using Mantid::HistogramData::HistogramY;
 using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::getHistogramXMode;
 using Mantid::HistogramData::Points;
+using Mantid::HistogramData::PointStandardDeviations;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountVariances;
@@ -361,15 +362,14 @@ public:
     TS_ASSERT_THROWS(h.setPoints(x), std::logic_error);
   }
 
-  void test_setPoints_changesDxStorageMode() {
+  void test_setPoints_keepsDxStorageMode() {
     Histogram hist(BinEdges{1.0, 2.0, 3.0});
-    auto dx = {1.0, 2.0, 3.0};
-    hist.setBinEdgeStandardDeviations(dx);
-    TS_ASSERT_EQUALS(hist.dx().size(), 3);
+    auto dx = {1.0, 2.0};
+    hist.setPointStandardDeviations(dx);
     hist.setPoints(Points{1.0, 2.0});
     TS_ASSERT_EQUALS(hist.dx().size(), 2);
-    TS_ASSERT_DELTA(hist.dx()[0], 1.5, 1e-14);
-    TS_ASSERT_DELTA(hist.dx()[1], 2.5, 1e-14);
+    TS_ASSERT_EQUALS(hist.dx()[0], 1.0);
+    TS_ASSERT_EQUALS(hist.dx()[1], 2.0);
   }
 
   void test_edges_from_edges() {
@@ -514,16 +514,14 @@ public:
     TS_ASSERT_THROWS(h.setBinEdges(x), std::logic_error);
   }
 
-  void test_setBinEdges_changesDxStorageMode() {
+  void test_setBinEdges_keepsDxStorageMode() {
     Histogram hist(Points{1.0, 2.0});
     auto dx = {1.0, 2.0};
     hist.setPointStandardDeviations(dx);
-    TS_ASSERT_EQUALS(hist.dx().size(), 2);
     hist.setBinEdges(BinEdges{1.0, 2.0, 3.0});
-    TS_ASSERT_EQUALS(hist.dx().size(), 3);
-    TS_ASSERT_DELTA(hist.dx()[0], 0.5, 1e-14);
-    TS_ASSERT_DELTA(hist.dx()[1], 1.5, 1e-14);
-    TS_ASSERT_DELTA(hist.dx()[2], 2.5, 1e-14);
+    TS_ASSERT_EQUALS(hist.dx().size(), 2);
+    TS_ASSERT_EQUALS(hist.dx()[0], 1.0);
+    TS_ASSERT_EQUALS(hist.dx()[1], 2.0);
   }
 
   void test_setCounts_size_mismatch() {
@@ -886,6 +884,67 @@ public:
     Histogram hist{BinEdges(0)};
     hist.setCountStandardDeviations(data1);
     TS_ASSERT_THROWS(hist.setSharedE(data2), std::logic_error);
+  }
+
+  void test_setPointStandardDeviations_point_data() {
+    Histogram hist(Points(2));
+    TS_ASSERT_THROWS_NOTHING(
+        hist.setPointStandardDeviations(std::vector<double>{1.0, 2.0}));
+    TS_ASSERT_EQUALS(hist.dx().size(), 2);
+    TS_ASSERT_EQUALS(hist.dx()[0], 1.0);
+    TS_ASSERT_EQUALS(hist.dx()[1], 2.0);
+  }
+
+  void test_setPointStandardDeviations_point_data_size_mismatch() {
+    Histogram hist(Points(2));
+    TS_ASSERT_THROWS(
+        hist.setPointStandardDeviations(PointStandardDeviations(0)),
+        std::logic_error);
+    TS_ASSERT_THROWS(
+        hist.setPointStandardDeviations(PointStandardDeviations(1)),
+        std::logic_error);
+    TS_ASSERT_THROWS(
+        hist.setPointStandardDeviations(PointStandardDeviations(3)),
+        std::logic_error);
+  }
+
+  void test_setPointStandardDeviations_histogram_data() {
+    Histogram hist(BinEdges(3));
+    TS_ASSERT_THROWS_NOTHING(
+        hist.setPointStandardDeviations(std::vector<double>{1.0, 2.0}));
+    TS_ASSERT_EQUALS(hist.dx().size(), 2);
+    TS_ASSERT_EQUALS(hist.dx()[0], 1.0);
+    TS_ASSERT_EQUALS(hist.dx()[1], 2.0);
+  }
+
+  void test_setPointStandardDeviations_histogram_data_size_mismatch() {
+    Histogram hist(BinEdges(3));
+    TS_ASSERT_THROWS(
+        hist.setPointStandardDeviations(PointStandardDeviations(0)),
+        std::logic_error);
+    TS_ASSERT_THROWS(
+        hist.setPointStandardDeviations(PointStandardDeviations(1)),
+        std::logic_error);
+    TS_ASSERT_THROWS(
+        hist.setPointStandardDeviations(PointStandardDeviations(3)),
+        std::logic_error);
+  }
+
+  void test_setPointStandardDeviations_can_set_null() {
+    Histogram hist(Points(2));
+    hist.setPointStandardDeviations(2);
+    PointStandardDeviations null;
+    TS_ASSERT(hist.sharedDx());
+    TS_ASSERT_THROWS_NOTHING(hist.setPointStandardDeviations(null));
+    TS_ASSERT(!hist.sharedDx());
+  }
+
+  void test_setPointStandardDeviations_accepts_default_construction() {
+    Histogram hist(Points(2));
+    hist.setPointStandardDeviations(2);
+    TS_ASSERT(hist.sharedDx());
+    TS_ASSERT_THROWS_NOTHING(hist.setPointStandardDeviations());
+    TS_ASSERT(!hist.sharedDx());
   }
 
   void test_yMode() {

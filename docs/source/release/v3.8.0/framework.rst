@@ -5,17 +5,6 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
-- ``Facilities.xml`` was updated for changes to the SNS live data servers.
-
-- A cmake parameter ``ENABLE_MANTIDPLOT`` (default ``True``) was added to facilitate framework only builds.
-
-- The case search in ``DataService`` has been replaced with a case-insensitive comparison function. Behavior
-  is almost identical, but a small number of cases (such as adding the workspaces ``Z`` and ``z``) will work
-  in a more predictable manner.
-
-- A race condition when accessing a singleton from multiple threads was fixed.
-
-- Log file buffers are no longer flushed by default for each newline received, increasing the speed of some system tests on Windows by 4.5x.
 
 HistogramData
 -------------
@@ -95,7 +84,7 @@ Improved
 
 - :ref:`FindSXPeaks <algm-FindSXPeaks>`: Fixed a bug where peaks with an incorrect TOF would stored for some intrument geometries.
 
-- :ref: `LoadILL <algm-LoadILL>` was renamed to `LoadILLTOF <algm-LoadILLTOF>` to better reflect what it does. The new algorithm can also handle cases where the monitor IDs are greater than the detector IDs.
+- :ref:`LoadILL <algm-LoadILL>` was renamed to `LoadILLTOF <algm-LoadILLTOF>` to better reflect what it does. The new algorithm can also handle cases where the monitor IDs are greater than the detector IDs.
 
 - :ref:`FFT <algm-FFT>` deals correctly with histogram input data. Internally, it converts to point data, and the output is always a point data workspace. (It can be converted to histogram data using :ref:`ConvertToHistogram <algm-ConvertToHistogram>` if required).
 
@@ -105,8 +94,6 @@ Improved
 
 - :ref:`Mergeruns <algm-MergeRuns>` can now also deal with non-time series sample logs when merging. Behaviour can be to create a time series, a list of values and warn or fail if different.
 
-Deprecated
-##########
 
 MD Algorithms (VATES CLI)
 #########################
@@ -153,29 +140,33 @@ Performance
   In some cases, however, follow-up algorithms may run slower (typically this can happen for algorithms that do in-place modification of data).
   However, the total runtime (sum of the runtimes of the improved *and* the degraded algorithm) should be unchanged in the worst case.
 
+- A race condition when accessing a singleton from multiple threads was fixed.
+
+- Log file buffers are no longer flushed by default for each newline received, increasing the speed of some system tests on Windows by 4.5x.
+
 
 CurveFitting
 ------------
 
-- Added two new minimizers belonging to the trust region family of algorithms: DTRS and More-Sorensen.
+- Added a new minimizer belonging to the trust region family of algorithms developped for Mantid by the SCD
+  Numerical Analysis Group at RAL. It has better performance characteristics compared to the existing
+  minimizers especially when applied to the most difficult fitting problems.
 - Added new property `EvaluationType` to Fit algorithm. If set to "Histogram" and the input dataset 
   is a histogram with large bins it can improve accuracy of the fit.
+- The concept page for :ref:`Comparing fit minimizers <FittingMinimizers>` has been updated to include the new
+  minimizer and a comparison against neutron data examples.
 
-Improved
-########
+Others
+------
 
-Interfaces
-----------
+- ``Facilities.xml`` was updated for changes to the SNS live data servers.
 
-New
-###
+- A cmake parameter ``ENABLE_MANTIDPLOT`` (default ``True``) was added to facilitate framework only builds.
 
-- A workflow gui for TOFTOF data reduction (#17075).
-  The gui is accessible through the ``Interfaces / Direct / DGS Reduction`` menu.
-  The first time the user is presented with a choice of facilites and instruments -
-  choose MLZ / TOFTOF. The choice can be changed later from (any) reduction gui by
-  ``Tools / Change instrument ...``.
-
+- The case search in ``DataService`` has been replaced with a case-insensitive comparison function. Behavior
+  is almost identical, but a small number of cases (such as adding the workspaces ``Z`` and ``z``) will work
+  in a more predictable manner.
+  
 
 Python
 ------

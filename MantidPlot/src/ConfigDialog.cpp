@@ -2821,8 +2821,19 @@ void ConfigDialog::updateMantidOptionsTab() {
 
   // invisible workspaces options
   QString showinvisible_ws = m_invisibleWorkspaces->isChecked() ? "1" : "0";
-  cfgSvc.setString("MantidOptions.InvisibleWorkspaces",
-                   showinvisible_ws.toStdString());
+
+  // store it if it has changed
+  if (showinvisible_ws.toStdString() !=
+      cfgSvc.getString("MantidOptions.InvisibleWorkspaces")) {
+    cfgSvc.setString("MantidOptions.InvisibleWorkspaces",
+                     showinvisible_ws.toStdString());
+
+    // update the workspace tree
+    if (ApplicationWindow *app =
+            dynamic_cast<ApplicationWindow *>(this->parentWidget())) {
+      app->mantidUI->updateWorkspaces();
+    }
+  }
 
   // OpenGL option
   QString setting = m_useOpenGL->isChecked() ? "On" : "Off";

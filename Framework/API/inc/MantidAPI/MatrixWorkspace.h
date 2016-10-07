@@ -200,10 +200,6 @@ public:
   HistogramData::BinEdges binEdges(const size_t index) const {
     return getSpectrum(index).binEdges();
   }
-  HistogramData::BinEdgeStandardDeviations
-  binEdgeStandardDeviations(const size_t index) const {
-    return getSpectrum(index).binEdgeStandardDeviations();
-  }
   HistogramData::Points points(const size_t index) const {
     return getSpectrum(index).points();
   }
@@ -214,14 +210,6 @@ public:
   template <typename... T>
   void setBinEdges(const size_t index, T &&... data) & {
     getSpectrum(index).setBinEdges(std::forward<T>(data)...);
-  }
-  template <typename... T>
-  void setBinEdgeVariances(const size_t index, T &&... data) & {
-    getSpectrum(index).setBinEdgeVariances(std::forward<T>(data)...);
-  }
-  template <typename... T>
-  void setBinEdgeStandardDeviations(const size_t index, T &&... data) & {
-    getSpectrum(index).setBinEdgeStandardDeviations(std::forward<T>(data)...);
   }
   template <typename... T> void setPoints(const size_t index, T &&... data) & {
     getSpectrum(index).setPoints(std::forward<T>(data)...);

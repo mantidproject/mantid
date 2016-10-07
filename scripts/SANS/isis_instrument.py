@@ -1,4 +1,4 @@
-﻿# pylint: disable=too-many-lines, invalid-name, bare-except
+﻿# pylint: disable=too-many-lines, invalid-name, bare-except, too-many-instance-attributes
 import math
 import os
 import re
@@ -419,7 +419,7 @@ class DetectorBank(object):
 class ISISInstrument(BaseInstrument):
     lowAngDetSet = None
 
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, m4_instrument_component_name = None):
         """
             Reads the instrument definition xml file
             @param filename: the name of the instrument definition file to read
@@ -499,6 +499,9 @@ class ISISInstrument(BaseInstrument):
         isis = config.getFacility('ISIS')
         # Number of digits in standard file name
         self.run_number_width = isis.instrument(self._NAME).zeroPadding(0)
+
+        # Set a flag if the instrument has an M4 monitor or not
+        self.has_m4_monitor = self._has_m4_monitor_in_idf(m4_instrument_component_name)
 
         # this variable isn't used again and stops the instrument from being deep copied if this instance is deep copied
         self.definition = None
@@ -878,6 +881,21 @@ class ISISInstrument(BaseInstrument):
                                ParameterType=type_to_save,
                                Value=str(value[0]))
 
+    def get_m4_monitor_det_ID(self):
+        """
+        Gets the detecor ID assoicated with Monitor 4
+        @returns: teh det ID of Monitor 4
+        """
+        raise RuntimeError("Monitor 4 does not seem to be implemented.")
+
+    def _has_m4_monitor_in_idf(self, m4_name):
+        """
+        Checks if the instrument contains a component with the M4 name
+        @param m4_name: the name of the M4 component
+        @returns true if it has an M4 component, else false
+        """
+        return False if self.definition.getComponentByName(m4_name) is None else True
+
 
 class LOQ(ISISInstrument):
     """
@@ -895,10 +913,18 @@ class LOQ(ISISInstrument):
             @param idf_path: the idf file
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """
-        super(LOQ, self).__init__(idf_path)
+        # The det id for the M4 monitor in LOQ
+        self._m4_det_id = 17788
+        self._m4_monitor_name = "monitor4"
+        super(LOQ, self).__init__(idf_path, self._m4_monitor_name)
         # relates the numbers of the monitors to their names in the instrument definition file
         self.monitor_names = {1: 'monitor1',
                               2: 'monitor2'}
+
+        if self.has_m4_monitor:
+            self.monitor_names.update({self._m4_det_id: self._m4_monitor_name})
+        elif self._m4_det_id in self.monitor_names.keys():
+            del self.monitor_names[self._m4_det_id]
 
     def move_components(self, ws, xbeam, ybeam):
         """
@@ -972,8 +998,15 @@ class LOQ(ISISInstrument):
         """
             Loads information about the setup used for LOQ transmission runs
         """
-        trans_definition_file = os.path.join(config.getString('instrumentDefinition.directory'),
-                                             self._NAME + '_trans_Definition.xml')
+        ws = mtd[ws_trans]
+        instrument = ws.getInstrument()
+        has_m4 = instrument.getComponentByName(self._m4_monitor_name)
+        if has_m4 is None:
+            trans_definition_file = os.path.join(config.getString('instrumentDefinition.directory'),
+                                                 self._NAME + '_trans_Definition.xml')
+        else:
+            trans_definition_file = os.path.join(config.getString('instrumentDefinition.directory'),
+                                                 self._NAME + '_trans_Definition_M4.xml')
         LoadInstrument(Workspace=ws_trans, Filename=trans_definition_file, RewriteSpectraMap=False)
         LoadInstrument(Workspace=ws_direct, Filename=trans_definition_file, RewriteSpectraMap=False)
 
@@ -984,6 +1017,8 @@ class LOQ(ISISInstrument):
         cent_pos = 317.5 / 1000.0
         return [cent_pos - pos.getX(), cent_pos - pos.getY()]
 
+    def get_m4_monitor_det_ID(self):
+        return self._m4_det_id
 
 class SANS2D(ISISInstrument):
     """
@@ -995,7 +1030,10 @@ class SANS2D(ISISInstrument):
     WAV_RANGE_MAX = 14.0
 
     def __init__(self, idf_path=None):
-        super(SANS2D, self).__init__(idf_path)
+        # The detector ID for the M4 monitor
+        self._m4_det_id = 4
+        self._m4_monitor_name = "monitor4"
+        super(SANS2D, self).__init__(idf_path, self._m4_monitor_name)
 
         self._marked_dets = []
         # set to true once the detector positions have been moved to the locations given in the sample logs
@@ -1008,7 +1046,7 @@ class SANS2D(ISISInstrument):
         self.monitor_names = {1: 'monitor1',
                               2: 'monitor2',
                               3: 'monitor3',
-                              4: 'monitor4'}
+                              self._m4_det_id: self._m4_monitor_name}
 
     def set_up_for_run(self, base_runno):
         """
@@ -1388,13 +1426,19 @@ class SANS2D(ISISInstrument):
 
         ISISInstrument.on_load_sample(self, ws_name, beamcentre, isSample)
 
+    def get_m4_monitor_det_ID(self):
+        return self._m4_det_id
+
 
 class LARMOR(ISISInstrument):
     _NAME = 'LARMOR'
     WAV_RANGE_MIN = 0.5
     WAV_RANGE_MAX = 13.5
     def __init__(self, idf_path=None):
-        super(LARMOR,self).__init__(idf_path)
+        # The detector ID for the M4 monitor
+        self._m4_det_id = 4
+        self._m4_monitor_name = "monitor4"
+        super(LARMOR,self).__init__(idf_path, self._m4_monitor_name)
         self._marked_dets = []
         # set to true once the detector positions have been moved to the locations given in the sample logs
         self.corrections_applied = False
@@ -1763,6 +1807,8 @@ class LARMOR(ISISInstrument):
             run_num = ws_ref.getRun().getLogData('run_number').value
         return run_num
 
+    def get_m4_monitor_det_ID(self):
+        return self._m4_det_id
 
 if __name__ == '__main__':
     pass
