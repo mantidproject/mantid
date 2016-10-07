@@ -49,13 +49,14 @@ endif()
 # all listed variables are TRUE
 include ( FindPackageHandleStandardArgs )
 if (NEXUS_VERSION)
-  message (status "NeXus version ${NEXUS_VERSION}")
+  message (STATUS "NeXus version ${NEXUS_VERSION}")
   find_package_handle_standard_args( Nexus REQUIRED_VARS NEXUS_LIBRARIES NEXUS_INCLUDE_DIR
                                     VERSION_VAR NEXUS_VERSION )
-  if ($<VERSION_EQUAL:$<NEXUS_VERSION>,4.3.3>)
+  # this and related code should go away when libraries are upgraded
+  if (NEXUS_VERSION VERSION_LESS 4.4)
     add_definitions(-DNEXUS43)
   endif ()
 else (NEXUS_VERSION)
-  message (status "Failed to determine version: Ignoring version requirement")
+  message (WARNING "Failed to determine version: Ignoring version requirement")
   find_package_handle_standard_args( Nexus DEFAULT_MSG NEXUS_LIBRARIES NEXUS_INCLUDE_DIR )
 endif (NEXUS_VERSION)
