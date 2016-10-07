@@ -240,7 +240,7 @@ void GroupDetectors2::execEvent() {
   }
 
   // Set all X bins on the output
-  auto &binEdges = inputWS->binEdges(0);
+  auto binEdges = inputWS->binEdges(0);
   outputWS->setAllX(binEdges);
 
   g_log.information() << name() << " algorithm has finished\n";
