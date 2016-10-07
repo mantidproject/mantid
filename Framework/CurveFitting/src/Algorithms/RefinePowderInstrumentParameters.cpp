@@ -323,8 +323,8 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
     m_dataWS->mutableY(2)[i] = m_dataWS->y(0)[i] - values[i];
   }
 
-  double selfchi2 = calculateD2TOFFunction(m_Function, domain, values,
-                                           rawY.rawData(), rawE.rawData());
+  double selfchi2 =
+      calculateD2TOFFunction(m_Function, domain, values, rawY, rawE);
   cout << "Homemade Chi^2 = " << selfchi2 << '\n';
 
   // 5. Update fitted parameters

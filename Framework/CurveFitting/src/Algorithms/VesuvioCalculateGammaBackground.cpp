@@ -385,7 +385,7 @@ std::vector<double> VesuvioCalculateGammaBackground::calculateTofSpectrum(
     const std::vector<double> &inSpectrum, std::vector<double> &tmpWork,
     const size_t wsIndex, const DetectorParams &detpar,
     const ResolutionParams &respar) {
-  assert(result.size() == tmpWork.size());
+  assert(inSpectrum.size() == tmpWork.size());
 
   // Assumes the input is in seconds, transform it temporarily
   auto &tseconds = m_backgroundWS->mutableX(wsIndex);
@@ -398,7 +398,7 @@ std::vector<double> VesuvioCalculateGammaBackground::calculateTofSpectrum(
   auto profileFunction = boost::dynamic_pointer_cast<CompositeFunction>(
       FunctionFactory::Instance().createInitialized(m_profileFunction));
 
-  std::vector<double> correctedVals(result);
+  std::vector<double> correctedVals(inSpectrum);
 
   for (size_t i = 0; i < m_npeaks; ++i) {
     auto profile =

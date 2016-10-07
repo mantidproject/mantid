@@ -47,7 +47,7 @@ public:
   const std::string category() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Smoothes a set of spectra using a cubic spline. Optionally, this "
+    return "Smooths a set of spectra using a cubic spline. Optionally, this "
            "algorithm can also calculate derivatives up to order 2 as a side "
            "product";
   }
@@ -56,7 +56,7 @@ private:
   /// number of smoothing points to start with
   const int M_START_SMOOTH_POINTS;
 
-  // Overriden methods
+  // Overridden methods
   void init() override;
   void exec() override;
 
@@ -69,7 +69,7 @@ private:
   /// setup an output workspace using meta data from inws and taking a number of
   /// spectra
   API::MatrixWorkspace_sptr
-  setupOutputWorkspace(API::MatrixWorkspace_const_sptr inws,
+  setupOutputWorkspace(const API::MatrixWorkspace_sptr &inws,
                        const int size) const;
 
   /// convert a binned workspace to point data. Uses mean of the bins as point
@@ -80,21 +80,17 @@ private:
   /// Handle converting point data back to histograms
   void convertToHistogram();
 
-  /// set the points used in the spline for smoothing
-  void setSmoothingPoint(const int index, const double xpoint,
-                         const double ypoint) const;
-
   /// choose points to define a spline and smooth the data
-  void selectSmoothingPoints(API::MatrixWorkspace_const_sptr inputWorkspace,
+  void selectSmoothingPoints(const API::MatrixWorkspace_sptr &inputWorkspace,
                              const size_t row);
 
   /// calculate the spline based on the smoothing points chosen
-  void calculateSmoothing(API::MatrixWorkspace_const_sptr inputWorkspace,
+  void calculateSmoothing(const API::MatrixWorkspace_sptr &inputWorkspace,
                           API::MatrixWorkspace_sptr outputWorkspace,
                           const size_t row) const;
 
   /// calculate the derivatives for a set of points on the spline
-  void calculateDerivatives(API::MatrixWorkspace_const_sptr inputWorkspace,
+  void calculateDerivatives(const API::MatrixWorkspace_sptr &inputWorkspace,
                             API::MatrixWorkspace_sptr outputWorkspace,
                             const int order, const size_t row) const;
 

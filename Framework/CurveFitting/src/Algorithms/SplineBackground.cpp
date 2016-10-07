@@ -46,9 +46,7 @@ void SplineBackground::exec() {
   if (spec > static_cast<int>(inWS->getNumberHistograms()))
     throw std::out_of_range("WorkspaceIndex is out of range.");
 
-  const auto &xInputVals = inWS->x(spec);
   const auto &yInputVals = inWS->y(spec);
-  const auto &eInputVals = inWS->e(spec);
   const bool isHistogram = inWS->isHistogramData();
 
   const int ncoeffs = getProperty("NCoeff");
@@ -94,14 +92,13 @@ void SplineBackground::exec() {
   mw = gsl_multifit_linear_alloc(n, ncoeffs);
 
   /* this is the data to be fitted */
+  const auto &eInputVals = inWS->e(spec);
+  const auto &xInputPoints = inWS->points(spec);
   int j = 0;
   for (MantidVec::size_type i = 0; i < yInputVals.size(); ++i) {
     if (isMasked && masked[i])
       continue;
-    gsl_vector_set(x, j,
-                   (isHistogram
-                        ? (0.5 * (xInputVals[i] + xInputVals[i + 1]))
-                        : xInputVals[i])); // Middle of the bins, if a histogram
+	gsl_vector_set(x, j, xInputPoints[i]);
     gsl_vector_set(y, j, yInputVals[i]);
     gsl_vector_set(
         w, j, eInputVals[i] > 0. ? 1. / (eInputVals[i] * eInputVals[i]) : 0.);
@@ -122,6 +119,8 @@ void SplineBackground::exec() {
 
     throw std::runtime_error("Assertion failed: n != j");
   }
+
+  const auto &xInputVals = inWS->x(spec);
 
   double xStart = xInputVals.front();
   double xEnd = xInputVals.back();

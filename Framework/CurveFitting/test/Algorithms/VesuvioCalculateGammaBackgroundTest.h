@@ -252,9 +252,7 @@ private:
         Mantid::API::WorkspaceFactory::Instance().create(singleSpectrum, nhist);
     // Copy data
     for (size_t i = 0; i < nhist; ++i) {
-      twoSpectrum->setSharedX(i, singleSpectrum->sharedX(0));
-      twoSpectrum->setSharedY(i, singleSpectrum->sharedY(0));
-      twoSpectrum->setSharedE(i, singleSpectrum->sharedE(0));
+      twoSpectrum->setHistogram(i, singleSpectrum->histogram(0));
     }
     return twoSpectrum;
   }
@@ -275,9 +273,7 @@ public:
         Mantid::API::WorkspaceFactory::Instance().create(singleSpectrum, nhist);
 
     for (size_t i = 0; i < nhist; ++i) {
-      inWs->setSharedX(i, singleSpectrum->sharedX(0));
-      inWs->setSharedY(i, singleSpectrum->sharedY(0));
-      inWs->setSharedE(i, singleSpectrum->sharedE(0));
+      inWs->setHistogram(i, singleSpectrum->histogram(0));
     }
 
     // Bring spectrum numbers into checked range

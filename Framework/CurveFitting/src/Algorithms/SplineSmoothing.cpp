@@ -121,12 +121,7 @@ void SplineSmoothing::smoothSpectrum(const int index) {
   selectSmoothingPoints(m_inputWorkspacePointData, index);
   performAdditionalFitting(m_inputWorkspacePointData, index);
 
-  if (m_inputWorkspace->isHistogramData()) {
-    m_outputWorkspace->setSharedX(index,
-                                  m_inputWorkspacePointData->sharedX(index));
-  } else {
-    m_outputWorkspace->setSharedX(index, m_inputWorkspace->sharedX(index));
-  }
+  m_outputWorkspace->setPoints(index, m_inputWorkspace->points(index));
 
   calculateSmoothing(m_inputWorkspacePointData, m_outputWorkspace, index);
 }
@@ -177,7 +172,7 @@ void SplineSmoothing::performAdditionalFitting(MatrixWorkspace_sptr ws,
  * @return The pointer to the newly created workspace
  */
 API::MatrixWorkspace_sptr
-SplineSmoothing::setupOutputWorkspace(API::MatrixWorkspace_const_sptr inws,
+SplineSmoothing::setupOutputWorkspace(const API::MatrixWorkspace_sptr &inws,
                                       const int size) const {
   MatrixWorkspace_sptr outputWorkspace =
       WorkspaceFactory::Instance().create(inws, size);
@@ -229,7 +224,7 @@ void SplineSmoothing::convertToHistogram() {
  * @param row :: The row of spectra to use
  */
 void SplineSmoothing::calculateSmoothing(
-    MatrixWorkspace_const_sptr inputWorkspace,
+    const MatrixWorkspace_sptr &inputWorkspace,
     MatrixWorkspace_sptr outputWorkspace, size_t row) const {
   // define the spline's parameters
   const auto &xIn = inputWorkspace->x(row);
@@ -250,7 +245,7 @@ void SplineSmoothing::calculateSmoothing(
  * @param row :: The row of spectra to use
  */
 void SplineSmoothing::calculateDerivatives(
-    API::MatrixWorkspace_const_sptr inputWorkspace,
+    const API::MatrixWorkspace_sptr &inputWorkspace,
     API::MatrixWorkspace_sptr outputWorkspace, const int order,
     const size_t row) const {
   const auto &xIn = inputWorkspace->x(row);
@@ -324,7 +319,7 @@ void SplineSmoothing::addSmoothingPoints(const std::set<int> &points,
  * @param row :: The row of spectra to use
  */
 void SplineSmoothing::selectSmoothingPoints(
-    MatrixWorkspace_const_sptr inputWorkspace, const size_t row) {
+    const MatrixWorkspace_sptr &inputWorkspace, const size_t row) {
   std::set<int> smoothPts;
   const auto &xs = inputWorkspace->x(row);
   const auto &ys = inputWorkspace->y(row);
