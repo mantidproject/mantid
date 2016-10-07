@@ -1156,7 +1156,7 @@ bool NexusFileIO::checkEntryAtLevelByAttribute(const std::string &attribute,
 bool NexusFileIO::writeNexusBinMasking(
     API::MatrixWorkspace_const_sptr ws) const {
   std::vector<int> spectra;
-  std::vector<size_t> bins;
+  std::vector<std::size_t> bins;
   std::vector<double> weights;
   int spectra_count = 0;
   int offset = 0;

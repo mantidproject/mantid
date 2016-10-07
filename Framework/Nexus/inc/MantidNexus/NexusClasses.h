@@ -479,7 +479,7 @@ typedef NXDataSetTyped<double> NXDouble;
 /// The char dataset type
 typedef NXDataSetTyped<char> NXChar;
 /// The size_t dataset type
-typedef NXDataSetTyped<size_t> NXSize;
+typedef NXDataSetTyped<std::size_t> NXSize;
 
 //-------------------- classes --------------------------//
 
@@ -584,7 +584,7 @@ public:
   *   @return The size_t
   */
   NXSize openNXSize(const std::string &name) const {
-    return openNXDataSet<size_t>(name);
+    return openNXDataSet<std::size_t>(name);
   }
   /**  Returns a string
   *   @param name :: The name of the NXChar dataset
