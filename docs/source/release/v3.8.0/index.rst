@@ -12,16 +12,14 @@ Mantid 3.8.0 Release Notes
 .. contents:: Table of Contents
    :local:
 
-We are proud to announce version 3.8 of Mantid, this release contains the much requested improvements to project saving, so now all of the state of your graphs, tables, matrices, event the instrument view, sliceviewer and VSI will reload just as you saved it.
+We are proud to announce version 3.8 of Mantid. This release contains major improvements to project saving, so now all of the state of your graphs, tables, matrices, instrumentview, sliceviewer, and VSI will reload just as you saved it.
 
 This is just one of many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
 important changes and improvements in many areas. The development team
-has put a great effort into making all of these improvements within
-Mantid, and we would like to thank all of our beta testers for their
-time and effort helping us to make this another reliable version of Mantid.
+has put a great effort into making all of these improvements as part of this Mantid release. We would like to thank all of our beta testers for their time and effort helping us to make this another reliable version of Mantid.
 
-Throughout the Mantid project we put a lot of effort into ensuring
+Throughout the Mantid development, we put a lot of effort into ensuring
 Mantid is a robust and reliable product. Thank you to everyone that has
 reported any issues to us. Please keep on reporting any problems you
 have, or crashes that occur on our `forum`_.
