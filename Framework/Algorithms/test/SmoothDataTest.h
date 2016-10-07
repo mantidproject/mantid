@@ -194,9 +194,11 @@ public:
     auto &yVals = inputWs->mutableY(0);
     auto &eVals = inputWs->mutableE(0);
 
+    double currentVal(0.0);
     for (size_t i = 0; i < numBins; ++i) {
-      yVals[i] = i + 1.0;
-      eVals[i] = sqrt(i + 1.0);
+      yVals[i] = currentVal + 1.0;
+      eVals[i] = sqrt(currentVal + 1.0);
+      currentVal++;
     }
 
     smoothAlg.initialize();
