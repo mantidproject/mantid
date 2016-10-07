@@ -256,15 +256,22 @@ template <> void Histogram::checkSize(const BinEdges &binEdges) const {
 /** Resets the size of the internal x, dx, y, and e data structures
 
   The argument refers to the requested y length. All other lengths are
-  then inferred automatically.*/
+  then inferred automatically. The resize behaviour follows
+  std::vector::resize which either truncates the current values
+  or applies zero padding. */
 void Histogram::resize(size_t n) {
   auto newXSize = xMode() == XMode::Points ? n : n + 1;
 
   m_x.access().mutableRawData().resize(newXSize);
-  m_y.access().mutableRawData().resize(n);
-  m_e.access().mutableRawData().resize(n);
+  if (m_y) {
+      m_y.access().mutableRawData().resize(n);
+  }
 
-  if (m_dx.use_count() > 0) {
+  if (m_e) {
+    m_e.access().mutableRawData().resize(n);
+  }
+
+  if (m_dx) {
     m_dx.access().mutableRawData().resize(n);
   }
 }

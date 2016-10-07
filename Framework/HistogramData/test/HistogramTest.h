@@ -1046,9 +1046,7 @@ public:
     TS_ASSERT(isSizeAsSpecified(h, 1));
 
     TS_ASSERT_EQUALS(h.x()[0], 1);
-
     TS_ASSERT_EQUALS(h.y()[0], 3);
-
     TS_ASSERT_EQUALS(h.dx()[0], 5);
   }
 
@@ -1078,8 +1076,38 @@ public:
     TS_ASSERT(isSizeAsSpecified(h, 1));
     TS_ASSERT_EQUALS(h.x()[0], 1);
     TS_ASSERT_EQUALS(h.x()[1], 2);
-
     TS_ASSERT_EQUALS(h.y()[0], 3);
+  }
+
+  void test_that_can_change_histogram_size_when_only_x_is_present() {
+    Histogram h(BinEdges{1, 2, 3});
+    auto isSizeAsSpecified = [](const Histogram &h, size_t n) {
+      return (h.x().size() == (n + 1));
+    };
+    TS_ASSERT(isSizeAsSpecified(h, 2));
+
+    // Increase the size
+    h.resize(3);
+    TS_ASSERT(isSizeAsSpecified(h, 3));
+
+    TS_ASSERT_EQUALS(h.x()[0], 1);
+    TS_ASSERT_EQUALS(h.x()[1], 2);
+    TS_ASSERT_EQUALS(h.x()[2], 3);
+    TS_ASSERT_EQUALS(h.x()[3], 0);
+
+    TS_ASSERT(!h.sharedY());
+    TS_ASSERT(!h.sharedE());
+    TS_ASSERT(!h.sharedDx());
+
+    // Decrease the size
+    h.resize(1);
+    TS_ASSERT(isSizeAsSpecified(h, 1));
+    TS_ASSERT_EQUALS(h.x()[0], 1);
+    TS_ASSERT_EQUALS(h.x()[1], 2);
+
+    TS_ASSERT(!h.sharedY());
+    TS_ASSERT(!h.sharedE());
+    TS_ASSERT(!h.sharedDx());
   }
 };
 
