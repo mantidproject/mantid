@@ -6,7 +6,7 @@
 #include "MantidKernel/VMD.h"
 #include "MantidAPI/Run.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 #include <boost/type_traits/integral_constant.hpp>
 
 #include <map>
@@ -270,9 +270,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     // peak.
     signal_t thresholdDensity = ws->getBox()->getSignalNormalized() *
                                 DensityThresholdFactor * m_densityScaleFactor;
-    if (boost::math::isnan(thresholdDensity) ||
-        (thresholdDensity == std::numeric_limits<double>::infinity()) ||
-        (thresholdDensity == -std::numeric_limits<double>::infinity())) {
+    if (std::isfinite(thresholdDensity)) {
       g_log.warning()
           << "Infinite or NaN overall density found. Your input data "
              "may be invalid. Using a 0 threshold instead.\n";
@@ -468,9 +466,7 @@ void FindPeaksMD::findPeaksHisto(
     double thresholdDensity =
         (totalSignal * ws->getInverseVolume() / double(numBoxes)) *
         DensityThresholdFactor * m_densityScaleFactor;
-    if ((thresholdDensity != thresholdDensity) ||
-        (thresholdDensity == std::numeric_limits<double>::infinity()) ||
-        (thresholdDensity == -std::numeric_limits<double>::infinity())) {
+    if (!std::isfinite(thresholdDensity)) {
       g_log.warning()
           << "Infinite or NaN overall density found. Your input data "
              "may be invalid. Using a 0 threshold instead.\n";

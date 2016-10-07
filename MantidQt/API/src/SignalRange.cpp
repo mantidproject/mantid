@@ -1,7 +1,7 @@
 #include "MantidQtAPI/SignalRange.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidKernel/MultiThreaded.h"
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 namespace MantidQt {
 namespace API {
 //-------------------------------------------------------------------------
@@ -85,13 +85,13 @@ QwtDoubleInterval SignalRange::getRange(
 
         double signal;
         signal = intervals[i].minValue();
-        if (boost::math::isnan(signal) || boost::math::isinf(signal))
+        if (!std::isfinite(signal))
           continue;
         if (signal < minSignal)
           minSignal = signal;
 
         signal = intervals[i].maxValue();
-        if (boost::math::isnan(signal) || boost::math::isinf(signal))
+        if (!std::isfinite(signal))
           continue;
         if (signal > maxSignal)
           maxSignal = signal;
@@ -131,7 +131,7 @@ QwtDoubleInterval SignalRange::getRange(Mantid::API::IMDIterator *it) {
   do {
     double signal = it->getNormalizedSignal();
     // Skip any 'infs' as it screws up the color scale
-    if (signal != inf) {
+    if (!std::isinf(signal)) {
       if (signal < minSignal)
         minSignal = signal;
       if (signal > maxSignal)

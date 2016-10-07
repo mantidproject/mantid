@@ -18,7 +18,6 @@
 #include "MantidGeometry/Surfaces/Sphere.h"
 
 #include <boost/regex.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <map>
 #include <sstream>
@@ -287,7 +286,7 @@ void LoadNXSPE::exec() {
     itdataend = itdata + numBins;
     iterrorend = iterror + numBins;
     outputWS->dataX(i) = energies;
-    if ((!boost::math::isfinite(*itdata)) || (*itdata <= -1e10)) // masked bin
+    if ((!std::isfinite(*itdata)) || (*itdata <= -1e10)) // masked bin
     {
       outputWS->dataY(i) = std::vector<double>(numBins, 0);
       outputWS->dataE(i) = std::vector<double>(numBins, 0);

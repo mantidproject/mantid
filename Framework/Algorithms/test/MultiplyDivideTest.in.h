@@ -970,7 +970,7 @@ public:
         TS_ASSERT_EQUALS(det->isMasked(), true);
         double yValue = output->readY(i)[0];
         TS_ASSERT_EQUALS(yValue, yValue );
-        TS_ASSERT_DIFFERS(yValue, std::numeric_limits<double>::infinity() );
+        TS_ASSERT( !std::isinf(yValue) );
       }
     }
     AnalysisDataService::Instance().remove(lhs);
