@@ -27,6 +27,7 @@ DECLARE_ALGORITHM(Q1D2)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace HistogramData;
 
 Q1D2::Q1D2() : API::Algorithm(), m_dataWS(), m_doSolidAngle(false) {}
 
@@ -117,9 +118,9 @@ void Q1D2::exec() {
   // FIXME: how to examine the wavePixelAdj?
   g_log.debug() << "All input workspaces were found to be valid\n";
   // normalization as a function of wavelength (i.e. centers of x-value bins)
-  double const *const binNorms = waveAdj ? &(waveAdj->readY(0)[0]) : nullptr;
+  double const *const binNorms = waveAdj ? &(waveAdj->y(0)[0]) : nullptr;
   // error on the wavelength normalization
-  double const *const binNormEs = waveAdj ? &(waveAdj->readE(0)[0]) : nullptr;
+  double const *const binNormEs = waveAdj ? &(waveAdj->e(0)[0]) : nullptr;
 
   // define the (large number of) data objects that are going to be used in all
   // iterations of the loop below
@@ -131,16 +132,15 @@ void Q1D2::exec() {
   MatrixWorkspace_sptr outputWS =
       setUpOutputWorkspace(getProperty("OutputBinning"));
 
-  const MantidVec &QOut = outputWS->readX(0);
-  MantidVec &YOut = outputWS->dataY(0);
-  MantidVec &EOutTo2 = outputWS->dataE(0);
+  auto QOut = outputWS->x(0);
+  auto &YOut = outputWS->mutableY(0);
+  auto &EOutTo2 = outputWS->mutableE(0);
   // normalisation that is applied to counts in each Q bin
-  MantidVec normSum(YOut.size(), 0.0);
+  HistogramY normSum(YOut.size(), 0.0);
   // the error on the normalisation
-  MantidVec normError2(YOut.size(), 0.0);
-
+  HistogramE normError2(EOutTo2.size(), 0.0);
   // the averaged Q resolution.
-  HistogramData::HistogramDx qResolutionOut(QOut.size(), 0.0);
+  HistogramDx qResolutionOut(QOut.size(), 0.0);
 
   const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
   Progress progress(this, 0.05, 1.0, numSpec + 1);
@@ -164,16 +164,16 @@ void Q1D2::exec() {
     // const size_t wavStart = waveLengthCutOff(i);
     const size_t wavStart = helper.waveLengthCutOff(
         m_dataWS, getProperty("RadiusCut"), getProperty("WaveCut"), i);
-    if (wavStart >= m_dataWS->readY(i).size()) {
+    if (wavStart >= m_dataWS->y(i).size()) {
       // all the spectra in this detector are out of range
       continue;
     }
 
-    const size_t numWavbins = m_dataWS->readY(i).size() - wavStart;
+    const size_t numWavbins = m_dataWS->y(i).size() - wavStart;
     // make just one call to new to reduce CPU overhead on each thread, access
     // to these
     // three "arrays" is via iterators
-    MantidVec _noDirectUseStorage_(3 * numWavbins);
+    HistogramY _noDirectUseStorage_(3 * numWavbins);
     // normalization term
     auto norms = _noDirectUseStorage_.begin();
     // the error on these weights, it contributes to the error calculation on
@@ -191,8 +191,8 @@ void Q1D2::exec() {
                    getProperty("ExtraLength"));
 
     // Pointers to the counts data and it's error
-    auto YIn = m_dataWS->readY(i).cbegin() + wavStart;
-    auto EIn = m_dataWS->readE(i).cbegin() + wavStart;
+    auto YIn = m_dataWS->y(i).cbegin() + wavStart;
+    auto EIn = m_dataWS->e(i).cbegin() + wavStart;
 
     // Pointers to the QResolution data. Note that the xdata was initially the
     // same, hence
@@ -201,14 +201,14 @@ void Q1D2::exec() {
     // that does not matter, as
     // we won't use it
     auto QResIn =
-        useQResolution ? (qResolution->readY(i).cbegin() + wavStart) : YIn;
+        useQResolution ? (qResolution->y(i).cbegin() + wavStart) : YIn;
 
     // when finding the output Q bin remember that the input Q bins (from the
     // convert to wavelength) start high and reduce
     auto loc = QOut.cend();
     // sum the Q contributions from each individual spectrum into the output
     // array
-    const auto end = m_dataWS->readY(i).cend();
+    const auto end = m_dataWS->y(i).cend();
     for (; YIn != end; ++YIn, ++EIn, ++QIn, ++norms, ++normETo2s) {
       // find the output bin that each input y-value will fall into, remembering
       // there is one more bin boundary than bins
@@ -279,21 +279,21 @@ void Q1D2::exec() {
   if (doOutputParts) {
     MatrixWorkspace_sptr ws_sumOfCounts =
         WorkspaceFactory::Instance().create(outputWS);
-    ws_sumOfCounts->dataX(0) = outputWS->dataX(0);
-    ws_sumOfCounts->dataY(0) = outputWS->dataY(0);
+    ws_sumOfCounts->setSharedX(0, outputWS->sharedX(0));
+    // Copy now as YOut is modified in normalize
+    ws_sumOfCounts->mutableY(0) = YOut;
     ws_sumOfCounts->setSharedDx(0, outputWS->sharedDx(0));
-    for (size_t i = 0; i < outputWS->dataE(0).size(); i++) {
-      ws_sumOfCounts->dataE(0)[i] = sqrt(outputWS->dataE(0)[i]);
-    }
+    auto outputE = outputWS->e(0);
+    std::transform(outputE.cbegin(), outputE.cend(),
+                   ws_sumOfCounts->mutableE(0).begin(), sqrt);
 
     MatrixWorkspace_sptr ws_sumOfNormFactors =
         WorkspaceFactory::Instance().create(outputWS);
-    ws_sumOfNormFactors->dataX(0) = outputWS->dataX(0);
+    ws_sumOfNormFactors->setSharedX(0, outputWS->sharedX(0));
+    ws_sumOfNormFactors->mutableY(0) = normSum;
     ws_sumOfNormFactors->setSharedDx(0, outputWS->sharedDx(0));
-    for (size_t i = 0; i < ws_sumOfNormFactors->dataY(0).size(); i++) {
-      ws_sumOfNormFactors->dataY(0)[i] = normSum[i];
-      ws_sumOfNormFactors->dataE(0)[i] = sqrt(normError2[i]);
-    }
+    std::transform(normError2.cbegin(), normError2.cend(),
+                   ws_sumOfNormFactors->mutableE(0).begin(), sqrt);
 
     helper.outputParts(this, ws_sumOfCounts, ws_sumOfNormFactors);
   }
@@ -356,12 +356,12 @@ void Q1D2::calculateNormalization(const size_t wavStart, const size_t wsIndex,
                                   API::MatrixWorkspace_const_sptr wavePixelAdj,
                                   double const *const binNorms,
                                   double const *const binNormEs,
-                                  const MantidVec::iterator norm,
-                                  const MantidVec::iterator normETo2) const {
+                                  const HistogramData_iter norm,
+                                  const HistogramData_iter normETo2) const {
   double detectorAdj, detAdjErr;
   pixelWeight(pixelAdj, wsIndex, detectorAdj, detAdjErr);
   // use that the normalization array ends at the start of the error array
-  for (MantidVec::iterator n = norm, e = normETo2; n != normETo2; ++n, ++e) {
+  for (HistogramData_iter n = norm, e = normETo2; n != normETo2; ++n, ++e) {
     *n = detectorAdj;
     *e = detAdjErr *detAdjErr;
   }
@@ -370,8 +370,8 @@ void Q1D2::calculateNormalization(const size_t wavStart, const size_t wsIndex,
     if (wavePixelAdj)
       // pass the iterator for the wave pixel Adj dependent
       addWaveAdj(binNorms + wavStart, binNormEs + wavStart, norm, normETo2,
-                 wavePixelAdj->readY(wsIndex).begin() + wavStart,
-                 wavePixelAdj->readE(wsIndex).begin() + wavStart);
+                 wavePixelAdj->y(wsIndex).begin() + wavStart,
+                 wavePixelAdj->e(wsIndex).begin() + wavStart);
     else
       addWaveAdj(binNorms + wavStart, binNormEs + wavStart, norm, normETo2);
   }
@@ -425,8 +425,8 @@ void Q1D2::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,
 * before the WavelengthAdj term
 */
 void Q1D2::addWaveAdj(const double *c, const double *Dc,
-                      MantidVec::iterator bInOut,
-                      MantidVec::iterator e2InOut) const {
+                      HistogramData_iter bInOut,
+                      HistogramData_iter e2InOut) const {
   // normalize by the wavelength dependent correction, keeping the percentage
   // errors the same
   // the error when a = b*c, the formula for Da, the error on a, in terms of Db,
@@ -438,7 +438,7 @@ void Q1D2::addWaveAdj(const double *c, const double *Dc,
 
   // use the fact that error array follows straight after the normalization
   // array
-  const MantidVec::const_iterator end = e2InOut;
+  const HistogramData_const_iter end = e2InOut;
   for (; bInOut != end; ++e2InOut, ++c, ++Dc, ++bInOut) {
     // first the error
     *e2InOut =
@@ -464,9 +464,9 @@ void Q1D2::addWaveAdj(const double *c, const double *Dc,
 * for each detector pixel.
 */
 void Q1D2::addWaveAdj(const double *c, const double *Dc,
-                      MantidVec::iterator bInOut, MantidVec::iterator e2InOut,
-                      MantidVec::const_iterator wavePixelAdjData,
-                      MantidVec::const_iterator wavePixelAdjError) const {
+                      HistogramData_iter bInOut, HistogramData_iter e2InOut,
+                      HistogramData_const_iter wavePixelAdjData,
+                      HistogramData_const_iter wavePixelAdjError) const {
   // normalize by the wavelength dependent correction, keeping the percentage
   // errors the same
   // the error when a = b*c*e, the formula for Da, the error on a, in terms of
@@ -488,7 +488,7 @@ void Q1D2::addWaveAdj(const double *c, const double *Dc,
 
   // use the fact that error array follows straight after the normalization
   // array
-  const MantidVec::const_iterator end = e2InOut;
+  const HistogramData_const_iter end = e2InOut;
   for (; bInOut != end; ++e2InOut, ++c, ++Dc, ++bInOut, ++wavePixelAdjData,
                         ++wavePixelAdjError) {
     // first the error
@@ -513,8 +513,8 @@ void Q1D2::addWaveAdj(const double *c, const double *Dc,
 * uncertainty in the normalization
 */
 void Q1D2::normToMask(const size_t offSet, const size_t wsIndex,
-                      const MantidVec::iterator theNorms,
-                      const MantidVec::iterator errorSquared) const {
+                      const HistogramData_iter theNorms,
+                      const HistogramData_iter errorSquared) const {
   // if any bins are masked it is normally a small proportion
   if (m_dataWS->hasMaskedBins(wsIndex)) {
     // Get a reference to the list of masked bins
@@ -552,14 +552,14 @@ void Q1D2::normToMask(const size_t offSet, const size_t wsIndex,
 */
 void Q1D2::convertWavetoQ(const SpectrumInfo &spectrumInfo, const size_t wsInd,
                           const bool doGravity, const size_t offset,
-                          MantidVec::iterator Qs,
+                          HistogramData_iter Qs,
                           const double extraLength) const {
   static const double FOUR_PI = 4.0 * M_PI;
 
   // wavelengths (lamda) to be converted to Q
-  auto waves = m_dataWS->readX(wsInd).cbegin() + offset;
+  auto waves = m_dataWS->x(wsInd).cbegin() + offset;
   // going from bin boundaries to bin centered x-values the size goes down one
-  const MantidVec::const_iterator end = m_dataWS->readX(wsInd).end() - 1;
+  const HistogramData_const_iter end = m_dataWS->x(wsInd).end() - 1;
   if (doGravity) {
     GravitySANSHelper grav(spectrumInfo, wsInd, extraLength);
     for (; waves != end; ++Qs, ++waves) {
@@ -597,8 +597,8 @@ void Q1D2::convertWavetoQ(const SpectrumInfo &spectrumInfo, const size_t wsInd,
 * checking the value of loc passed and then all the bins _downwards_ through the
 * array
 */
-void Q1D2::getQBinPlus1(const MantidVec &OutQs, const double QToFind,
-                        MantidVec::const_iterator &loc) const {
+void Q1D2::getQBinPlus1(const HistogramX &OutQs, const double QToFind,
+                        HistogramData_const_iter &loc) const {
   if (loc != OutQs.end()) {
     while (loc != OutQs.begin()) {
       if ((QToFind >= *(loc - 1)) && (QToFind < *loc)) {
@@ -633,8 +633,8 @@ void Q1D2::getQBinPlus1(const MantidVec &OutQs, const double QToFind,
 *  @param[in, out] errors input the _square_ of the error on each bin, output
 * the total error (unsquared)
 */
-void Q1D2::normalize(const MantidVec &normSum, const MantidVec &normError2,
-                     MantidVec &counts, MantidVec &errors) const {
+void Q1D2::normalize(const HistogramY &normSum, const HistogramE &normError2,
+                     HistogramY &counts, HistogramE &errors) const {
   for (size_t k = 0; k < counts.size(); ++k) {
     // the normalisation is a = b/c where b = counts c =normalistion term
     const double c = normSum[k];

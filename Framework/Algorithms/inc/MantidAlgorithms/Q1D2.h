@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidHistogramData/Histogram.h"
 
 namespace Mantid {
 namespace API {
@@ -55,6 +56,10 @@ public:
   const std::string category() const override { return "SANS"; }
 
 private:
+  // typedefs for histogram data iterator types
+  typedef std::vector<double>::iterator HistogramData_iter;
+  typedef std::vector<double>::const_iterator HistogramData_const_iter;
+
   /// the experimental workspace with counts across the detector
   API::MatrixWorkspace_const_sptr m_dataWS;
   bool m_doSolidAngle;
@@ -72,25 +77,27 @@ private:
                               API::MatrixWorkspace_const_sptr wavePixelAdj,
                               double const *const binNorms,
                               double const *const binNormEs,
-                              const MantidVec::iterator norm,
-                              const MantidVec::iterator normETo2) const;
+                              const HistogramData_iter norm,
+                              const HistogramData_iter normETo2) const;
   void pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,
                    const size_t wsIndex, double &weight, double &error) const;
-  void addWaveAdj(const double *c, const double *Dc, MantidVec::iterator bInOut,
-                  MantidVec::iterator e2InOut) const;
-  void addWaveAdj(const double *c, const double *Dc, MantidVec::iterator bInOut,
-                  MantidVec::iterator e2InOut, MantidVec::const_iterator,
-                  MantidVec::const_iterator) const;
+  void addWaveAdj(const double *c, const double *Dc, HistogramData_iter bInOut,
+                  HistogramData_iter e2InOut) const;
+  void addWaveAdj(const double *c, const double *Dc, HistogramData_iter bInOut,
+                  HistogramData_iter e2InOut, HistogramData_const_iter,
+                  HistogramData_const_iter) const;
   void normToMask(const size_t offSet, const size_t wsIndex,
-                  const MantidVec::iterator theNorms,
-                  const MantidVec::iterator errorSquared) const;
+                  const HistogramData_iter theNorms,
+                  const HistogramData_iter errorSquared) const;
   void convertWavetoQ(const API::SpectrumInfo &spectrumInfo, const size_t wsInd,
                       const bool doGravity, const size_t offset,
-                      MantidVec::iterator Qs, const double extraLength) const;
-  void getQBinPlus1(const MantidVec &OutQs, const double QToFind,
-                    MantidVec::const_iterator &loc) const;
-  void normalize(const MantidVec &normSum, const MantidVec &normError2,
-                 MantidVec &counts, MantidVec &errors) const;
+                      HistogramData_iter Qs, const double extraLength) const;
+  void getQBinPlus1(const HistogramData::HistogramX &OutQs, const double QToFind,
+                    HistogramData_const_iter &loc) const;
+  void normalize(const HistogramData::HistogramY &normSum,
+                 const HistogramData::HistogramE &normError2,
+                 HistogramData::HistogramY &counts,
+                 HistogramData::HistogramE &errors) const;
 };
 
 } // namespace Algorithms
