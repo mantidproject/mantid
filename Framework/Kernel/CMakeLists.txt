@@ -586,15 +586,19 @@ foreach ( SUBDIR ${SCRIPT_SUBDIRS} )
   endif()
 endforeach()
 
-# For an mpi-enabled build, don't log to file and format console output (which winds up in a file) differently
+# For an mpi-enabled build, do not log to file, format console output (which winds up in a file) differently
 # These settings carry down to the installation configuration below
 if ( MPI_BUILD )
-  set ( FILECHANNEL NullChannel )
   set ( CONSOLEPATTERN "%H:%M:%S,%i [%N:%P] %p %s - %t")
   set ( PV_PLUGINS "" )
   set ( IGNORE_PARAVIEW "1" )
 else ()
-  set ( FILECHANNEL FileChannel )
+  option ( ENABLE_FILE_LOGGING "Enable logging to file for development builds. It is always enabled for packages" ON )
+  if ( ENABLE_FILE_LOGGING )
+    set ( FILELOGGER_CHANNEL fileFilterChannel )
+  else ()
+    set ( FILELOGGER_CHANNEL "" )
+  endif ()
   set ( CONSOLEPATTERN "%s-[%p] %t" )
 endif ()
 
@@ -624,8 +628,11 @@ else ()
   set ( MANTID_ROOT .. )
 endif ()
 
-set (ENABLE_WEB_UPDATES 1)
-
+# Log to file for installed packages but not mpi
+if ( NOT MPI_BUILD )
+  set ( FILELOGGER_CHANNEL fileFilterChannel )
+endif ()
+set ( ENABLE_WEB_UPDATES 1 )
 set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
 set ( UPDATE_INSTRUMENT_DEFINTITIONS "${ENABLE_WEB_UPDATES}" )

@@ -3001,9 +3001,9 @@ void Table::showAllColumns() {
   }
 }
 
-IProjectSerialisable *Table::loadFromProject(const std::string &lines,
-                                             ApplicationWindow *app,
-                                             const int fileVersion) {
+MantidQt::API::IProjectSerialisable *
+Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                       const int fileVersion) {
   Q_UNUSED(fileVersion);
 
   std::vector<std::string> lineVec, valVec;

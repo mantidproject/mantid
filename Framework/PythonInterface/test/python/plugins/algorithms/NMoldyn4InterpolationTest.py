@@ -1,6 +1,9 @@
 #Author: Alex Phimister 08/2016
 #pylint disable: invalid-name
 import unittest
+
+from sys import version_info
+
 from mantid.simpleapi import *
 from mantid.api import *
 
@@ -34,8 +37,8 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
         self.assertNotEqual(len(inter_X), sim.getAxis(0).length())
         self.assertEqual(inter_Q_length, osiris_Q_length)
         self.assertNotEqual(inter_Q_length, sim.getNumberHistograms())
-        self.assertEqual(sample_Y_data[0], 0.020095312677012457)
-        self.assertEqual(sample_Y_data[30], 1.7310334927635238)
+        self.assertAlmostEqual(sample_Y_data[0], 0.020095312677012457, 12)
+        self.assertAlmostEqual(sample_Y_data[30], 1.7310334927635238, 12)
 
 
     def test_X_min_too_big(self):
@@ -99,4 +102,9 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
                           OutputWorkspace='__NMoldyn4Interpolation_test')
 
 if __name__=="__main__":
-    unittest.main()
+    python_version = version_info
+    if python_version < (2,7,0):
+        logger.warning("Not running this test as it requires Python >= 2.7. Version found: {0}".
+                        format(python_version))
+    else:
+        unittest.main()

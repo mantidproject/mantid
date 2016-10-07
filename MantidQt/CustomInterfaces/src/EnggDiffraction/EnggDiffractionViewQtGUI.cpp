@@ -1099,6 +1099,7 @@ void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {
   if (answer == QMessageBox::AcceptRole && m_ui.pushButton_close->isEnabled()) {
     m_presenter->notify(IEnggDiffractionPresenter::ShutDown);
     delete m_splashMsg;
+    m_splashMsg = nullptr;
     event->accept();
   } else {
     event->ignore();
