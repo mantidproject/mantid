@@ -98,7 +98,7 @@ void SplineBackground::exec() {
   for (MantidVec::size_type i = 0; i < yInputVals.size(); ++i) {
     if (isMasked && masked[i])
       continue;
-	gsl_vector_set(x, j, xInputPoints[i]);
+    gsl_vector_set(x, j, xInputPoints[i]);
     gsl_vector_set(y, j, yInputVals[i]);
     gsl_vector_set(
         w, j, eInputVals[i] > 0. ? 1. / (eInputVals[i] * eInputVals[i]) : 0.);
