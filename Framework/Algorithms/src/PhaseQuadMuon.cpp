@@ -224,7 +224,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
 
   // X
   ows->setSharedX(0, ws->sharedX(0));
-  ows->setSharedX(1, ws->sharedX(1));
+  ows->setSharedX(1, ws->sharedX(0));
 
   // Phase quadrature
   auto &realY = ows->mutableY(0);

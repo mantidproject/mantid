@@ -7,6 +7,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidHistogramData/LinearGenerator.h"
 
 #include <cmath>
 #include <sstream>
@@ -15,6 +16,7 @@ namespace Mantid {
 namespace Algorithms {
 
 using std::string;
+using namespace HistogramData;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PDFFourierTransform)
@@ -335,10 +337,10 @@ void PDFFourierTransform::exec() {
   outputWS->mutableRun().addProperty("Qmax", inputQ[qmax_index], "Angstroms^-1",
                                      true);
 
+  BinEdges edges(sizer+1, LinearGenerator(rdelta, rdelta));
+  outputWS->setBinEdges(0, edges);
+
   auto &outputR = outputWS->mutableX(0);
-  for (size_t i = 0; i < sizer; i++) {
-    outputR[i] = rdelta * static_cast<double>(1 + i);
-  }
   g_log.information() << "Using rmin = " << outputR.front()
                       << "Angstroms and rmax = " << outputR.back()
                       << "Angstroms\n";
