@@ -382,7 +382,7 @@ void VesuvioCalculateGammaBackground::calculateBackgroundSingleFoil(
 * @param respar Struct containing parameters about the resolution
 */
 std::vector<double> VesuvioCalculateGammaBackground::calculateTofSpectrum(
-    const std::vector<double> &result, std::vector<double> &tmpWork,
+    const std::vector<double> &inSpectrum, std::vector<double> &tmpWork,
     const size_t wsIndex, const DetectorParams &detpar,
     const ResolutionParams &respar) {
   assert(result.size() == tmpWork.size());
