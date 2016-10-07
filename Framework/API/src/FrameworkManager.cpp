@@ -55,7 +55,7 @@ void NexusErrorFunction(void *data, char *text) {
  * Print current backtrace to the given stream
  * @param os A reference to an output stream
  */
- void backtraceToStream(std::ostream & os) {
+void backtraceToStream(std::ostream &os) {
   void *trace_elems[32];
   int trace_elem_count(backtrace(trace_elems, 32));
   char **stack_syms(backtrace_symbols(trace_elems, trace_elem_count));
