@@ -143,8 +143,8 @@ void GroupDetectors2::exec() {
 
   auto outputWS = boost::dynamic_pointer_cast<Workspace2D>(
       WorkspaceFactory::Instance().create(
-          inputWS, m_GroupWsInds.size() + numUnGrouped,
-          inputWS->readX(0).size(), inputWS->blocksize()));
+          inputWS, m_GroupWsInds.size() + numUnGrouped, inputWS->x(0).size(),
+          inputWS->blocksize()));
   // The cast might fail if the input is a WorkspaceSingleValue. That does not
   // seem to make sense for this algorithm, so we throw.
   if (!outputWS)
@@ -215,7 +215,7 @@ void GroupDetectors2::execEvent() {
   EventWorkspace_sptr outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
       WorkspaceFactory::Instance().create(
           "EventWorkspace", m_GroupWsInds.size() + numUnGrouped,
-          inputWS->readX(0).size(), inputWS->blocksize()));
+          inputWS->x(0).size(), inputWS->blocksize()));
   // Copy geometry over.
   WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, true);
 
@@ -240,7 +240,7 @@ void GroupDetectors2::execEvent() {
   }
 
   // Set all X bins on the output
-  auto XValues = HistogramData::BinEdges(inputWS->readX(0));
+  auto &XValues = HistogramData::BinEdges(inputWS->x(0));
   outputWS->setAllX(XValues);
 
   g_log.information() << name() << " algorithm has finished\n";
@@ -588,7 +588,7 @@ void GroupDetectors2::processGroupingWorkspace(
   const size_t nspec = groupWS->getNumberHistograms();
   for (size_t i = 0; i < nspec; ++i) {
     // read spectra from groupingws
-    size_t groupid = static_cast<int>(groupWS->readY(i)[0]);
+    size_t groupid = static_cast<int>(groupWS->y(i)[0]);
     // group 0 is are unused spectra - don't process them
     if (groupid > 0) {
       if (group2WSIndexSetmap.find(groupid) == group2WSIndexSetmap.end()) {
@@ -851,7 +851,7 @@ void GroupDetectors2::readSpectraIndexes(std::string line,
       spec2index_map::const_iterator ind = specs2index.find(spectrumNum);
       if (ind == specs2index.end()) {
         g_log.debug() << name() << ": spectrum number " << spectrumNum
-                      << " refered to in the input file was not found in the "
+                      << " referred to in the input file was not found in the "
                          "input workspace\n";
         throw std::invalid_argument("Spectrum number " +
                                     std::to_string(spectrumNum) + " not found");
@@ -936,23 +936,23 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
 
     // Copy over X data from first spectrum, the bin boundaries for all spectra
     // are assumed to be the same here
-    outSpec.dataX() = inputWS->readX(0);
+    outSpec.setSharedX(inputWS->sharedX(0));
 
     // the Y values and errors from spectra being grouped are combined in the
     // output spectrum
-    MantidVec &firstY = outSpec.dataY();
+    auto &firstY = outSpec.mutableY();
     // Keep track of number of detectors required for masking
     size_t nonMaskedSpectra(0);
-    beh->dataX(outIndex)[0] = 0.0;
-    beh->dataE(outIndex)[0] = 0.0;
+    beh->mutableX(outIndex)[0] = 0.0;
+    beh->mutableE(outIndex)[0] = 0.0;
     for (auto originalWI : it->second) {
       // detectors to add to firstSpecNum
       const auto &fromSpectrum = inputWS->getSpectrum(originalWI);
 
       // Add up all the Y spectra and store the result in the first one
-      auto fEit = outSpec.dataE().begin();
-      auto Yit = fromSpectrum.dataY().cbegin();
-      auto Eit = fromSpectrum.dataE().cbegin();
+      auto &fEit = outSpec.mutableE().begin();
+      auto &Yit = fromSpectrum.y().cbegin();
+      auto &Eit = fromSpectrum.e().cbegin();
       for (auto fYit = firstY.begin(); fYit != firstY.end();
            ++fYit, ++fEit, ++Yit, ++Eit) {
         *fYit += *Yit;
@@ -975,7 +975,7 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
       ++nonMaskedSpectra; // Avoid possible divide by zero
     if (!requireDivide)
       requireDivide = (nonMaskedSpectra > 1);
-    beh->dataY(outIndex)[0] = static_cast<double>(nonMaskedSpectra);
+    beh->mutableY(outIndex)[0] = static_cast<double>(nonMaskedSpectra);
 
     // make regular progress reports and check for cancelling the algorithm
     if (outIndex % INTERVAL == 0) {
@@ -1048,8 +1048,8 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
     // output spectrum
     // Keep track of number of detectors required for masking
     size_t nonMaskedSpectra(0);
-    beh->dataX(outIndex)[0] = 0.0;
-    beh->dataE(outIndex)[0] = 0.0;
+    beh->mutableX(outIndex)[0] = 0.0;
+    beh->mutableE(outIndex)[0] = 0.0;
     for (auto originalWI : it->second) {
       const EventList &fromEL = inputWS->getSpectrum(originalWI);
       // Add the event lists with the operator
@@ -1070,7 +1070,7 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
       ++nonMaskedSpectra; // Avoid possible divide by zero
     if (!requireDivide)
       requireDivide = (nonMaskedSpectra > 1);
-    beh->dataY(outIndex)[0] = static_cast<double>(nonMaskedSpectra);
+    beh->mutableY(outIndex)[0] = static_cast<double>(nonMaskedSpectra);
 
     // make regular progress reports and check for cancelling the algorithm
     if (outIndex % INTERVAL == 0) {

@@ -20,6 +20,8 @@
 #include "MantidDataHandling/LoadMuonNexus1.h"
 #include "MantidDataHandling/MaskDetectors.h"
 
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
+
 #include <Poco/Path.h>
 
 #include <fstream>
@@ -30,6 +32,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using Mantid::detid_t;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Histogram;
@@ -116,7 +119,7 @@ public:
     MatrixWorkspace_sptr outputWS = grouper.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     for (size_t i = 0; i < 3; ++i) {
-      TS_ASSERT_DELTA(outputWS->readY(0)[0], 2.0, 1e-12);
+      TS_ASSERT_DELTA(outputWS->y(0)[0], 2.0, 1e-12);
     }
   }
 
@@ -136,12 +139,12 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
-    std::vector<double> tens{10, 11, 12, 13, 14};
+    HistogramX tens{10, 11, 12, 13, 14};
     std::vector<double> ones(NBINS, 1.0);
-    TS_ASSERT_EQUALS(outputWS->dataX(0), tens);
-    TS_ASSERT_EQUALS(outputWS->dataY(0), std::vector<double>(NBINS, 1 + 4));
+    TS_ASSERT_EQUALS(outputWS->x(0), tens);
+    TS_ASSERT_EQUALS(outputWS->y(0), HistogramY(NBINS, 1 + 4));
     for (int i = 0; i < NBINS; ++i) {
-      TS_ASSERT_DELTA(outputWS->dataE(0)[i], std::sqrt(double(2)), 0.0001);
+      TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(double(2)), 0.0001);
     }
 
     boost::shared_ptr<const IDetector> det;
@@ -171,13 +174,12 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
-    std::vector<double> tens{10, 11, 12, 13, 14};
+    HistogramX tens{10, 11, 12, 13, 14};
     std::vector<double> ones(NBINS, 1.0);
-    TS_ASSERT_EQUALS(outputWS->dataX(0), tens);
-    TS_ASSERT_EQUALS(outputWS->dataY(0),
-                     std::vector<double>(NBINS, (3 + 4 + 5 + 6)));
+    TS_ASSERT_EQUALS(outputWS->x(0), tens);
+    TS_ASSERT_EQUALS(outputWS->y(0), HistogramY(NBINS, (3 + 4 + 5 + 6)));
     for (int i = 0; i < NBINS; ++i) {
-      TS_ASSERT_DELTA(outputWS->dataE(0)[i], std::sqrt(4.0), 0.0001);
+      TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(4.0), 0.0001);
     }
 
     boost::shared_ptr<const IDetector> det;
@@ -204,16 +206,15 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
-    std::vector<double> tens{10, 11, 12, 13, 14};
+    HistogramX tens{10, 11, 12, 13, 14};
     std::vector<double> ones(NBINS, 1.0);
-    TS_ASSERT_EQUALS(outputWS->dataX(0), tens);
-    TS_ASSERT_EQUALS(outputWS->dataY(0),
-                     std::vector<double>(NBINS, (3 + 1) + (1 + 1) + (4 + 1) +
-                                                    (0 + 1) + (2 + 1) +
-                                                    (5 + 1)));
+    TS_ASSERT_EQUALS(outputWS->x(0), tens);
+    TS_ASSERT_EQUALS(outputWS->y(0),
+                     HistogramY(NBINS, (3 + 1) + (1 + 1) + (4 + 1) + (0 + 1) +
+                                           (2 + 1) + (5 + 1)));
     for (int i = 0; i < NBINS; ++i) { // assume that we have grouped all the
                                       // spectra in the input workspace
-      TS_ASSERT_DELTA(outputWS->dataE(0)[i], std::sqrt(double(NHIST)), 0.0001);
+      TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(double(NHIST)), 0.0001);
     }
 
     boost::shared_ptr<const IDetector> det;
@@ -243,42 +244,40 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), NHIST - 1);
-    std::vector<double> tens{10, 11, 12, 13, 14};
-    std::vector<double> ones(NBINS, 1.0);
+    HistogramX tens{10, 11, 12, 13, 14};
+    Mantid::HistogramData::HistogramE ones(NBINS, 1.0);
     // check the two grouped spectra
-    TS_ASSERT_EQUALS(outputWS->dataX(0), tens);
-    TS_ASSERT_EQUALS(outputWS->dataY(0),
-                     std::vector<double>(NBINS, 1 + 3)); // 1+3 = 4
+    TS_ASSERT_EQUALS(outputWS->x(0), tens);
+    TS_ASSERT_EQUALS(outputWS->y(0), HistogramY(NBINS, 1 + 3)); // 1+3 = 4
     for (int i = 0; i < NBINS; ++i) {
-      TS_ASSERT_DELTA(outputWS->dataE(0)[i], std::sqrt(static_cast<double>(2)),
+      TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(static_cast<double>(2)),
                       1e-6);
     }
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->spectraNo(0), 1);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(0).getSpectrumNo(), 1);
 
-    TS_ASSERT_EQUALS(outputWS->dataX(1), tens);
-    TS_ASSERT_EQUALS(outputWS->dataY(1),
-                     std::vector<double>(NBINS, 4)); // Directly # 4
-    TS_ASSERT_EQUALS(outputWS->dataE(1), ones);
+    TS_ASSERT_EQUALS(outputWS->x(1), tens);
+    TS_ASSERT_EQUALS(outputWS->y(1), HistogramY(NBINS, 4)); // Directly # 4
+    TS_ASSERT_EQUALS(outputWS->e(1), ones);
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->spectraNo(1), 2);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(1).getSpectrumNo(), 2);
 
     // check the unmoved spectra
-    TS_ASSERT_EQUALS(outputWS->dataX(2), tens);
-    TS_ASSERT_EQUALS(outputWS->dataY(2), std::vector<double>(NBINS, 2));
-    TS_ASSERT_EQUALS(outputWS->dataE(2), ones);
+    TS_ASSERT_EQUALS(outputWS->x(2), tens);
+    TS_ASSERT_EQUALS(outputWS->y(2), HistogramY(NBINS, 2));
+    TS_ASSERT_EQUALS(outputWS->e(2), ones);
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->spectraNo(2), 2);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(2).getSpectrumNo(), 2);
 
-    TS_ASSERT_EQUALS(outputWS->dataX(3), tens);
-    TS_ASSERT_EQUALS(outputWS->dataY(3), std::vector<double>(NBINS, 5));
-    TS_ASSERT_EQUALS(outputWS->dataE(3), ones);
+    TS_ASSERT_EQUALS(outputWS->x(3), tens);
+    TS_ASSERT_EQUALS(outputWS->y(3), HistogramY(NBINS, 5));
+    TS_ASSERT_EQUALS(outputWS->e(3), ones);
 
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->spectraNo(3), 5);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(3).getSpectrumNo(), 5);
 
-    TS_ASSERT_EQUALS(outputWS->dataY(4), std::vector<double>(NBINS, 6));
-    TS_ASSERT_EQUALS(outputWS->dataE(4), ones);
+    TS_ASSERT_EQUALS(outputWS->y(4), HistogramY(NBINS, 6));
+    TS_ASSERT_EQUALS(outputWS->e(4), ones);
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->spectraNo(4), 6);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(4).getSpectrumNo(), 6);
 
@@ -320,30 +319,30 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), NHIST - 3);
-    std::vector<double> tens{10, 11, 12, 13, 14};
-    std::vector<double> ones(NBINS, 1.0);
+    HistogramX tens{10, 11, 12, 13, 14};
+    Mantid::HistogramData::HistogramE ones(NBINS, 1.0);
     // check the first grouped spectrum
-    TS_ASSERT_EQUALS(outputWS->dataX(0), tens);
-    TS_ASSERT_EQUALS(outputWS->dataY(0), std::vector<double>(NBINS, 1 + 2 + 3));
+    TS_ASSERT_EQUALS(outputWS->x(0), tens);
+    TS_ASSERT_EQUALS(outputWS->y(0), HistogramY(NBINS, 1 + 2 + 3));
     for (int i = 0; i < NBINS; ++i) {
-      TS_ASSERT_DELTA(outputWS->dataE(0)[i], std::sqrt(static_cast<double>(3)),
+      TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(static_cast<double>(3)),
                       1e-6);
     }
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->spectraNo(0), 1);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(0).getSpectrumNo(), 1);
 
     // check the second grouped spectrum
-    TS_ASSERT_EQUALS(outputWS->dataX(1), tens);
-    TS_ASSERT_EQUALS(outputWS->dataY(1), std::vector<double>(NBINS, 4));
-    TS_ASSERT_EQUALS(outputWS->dataE(1), ones);
+    TS_ASSERT_EQUALS(outputWS->x(1), tens);
+    TS_ASSERT_EQUALS(outputWS->y(1), HistogramY(NBINS, 4));
+    TS_ASSERT_EQUALS(outputWS->e(1), ones);
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->spectraNo(1), 2);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(1).getSpectrumNo(), 2);
 
     // check the third grouped spectrum
-    TS_ASSERT_EQUALS(outputWS->dataX(2), tens);
-    TS_ASSERT_EQUALS(outputWS->dataY(2), std::vector<double>(NBINS, 5 + 6));
+    TS_ASSERT_EQUALS(outputWS->x(2), tens);
+    TS_ASSERT_EQUALS(outputWS->y(2), HistogramY(NBINS, 5 + 6));
     for (int i = 0; i < NBINS; ++i) {
-      TS_ASSERT_DELTA(outputWS->dataE(2)[i], std::sqrt(static_cast<double>(2)),
+      TS_ASSERT_DELTA(outputWS->e(2)[i], std::sqrt(static_cast<double>(2)),
                       1e-6);
     }
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->spectraNo(2), 3);
@@ -534,7 +533,7 @@ public:
             "GroupDetectors2_testAverageBehaviour_Output");
 
     // Result should be 1 + 2  / 2 = 1.5
-    TS_ASSERT_EQUALS(output->readY(0)[1], 1.5);
+    TS_ASSERT_EQUALS(output->y(0)[1], 1.5);
 
     AnalysisDataService::Instance().remove(
         "GroupDetectors2_testAverageBehaviour_Output");
@@ -567,10 +566,9 @@ public:
     TS_ASSERT(output);
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(output->getNumberEvents(), (2 + 3 + 4) * numEvents);
-    TS_ASSERT_EQUALS(input->readX(0).size(), output->readX(0).size());
-    TS_ASSERT_DELTA(
-        (input->readY(2)[0] + input->readY(3)[0] + input->readY(4)[0]) / 3,
-        output->readY(0)[0], 0.00001);
+    TS_ASSERT_EQUALS(input->x(0).size(), output->x(0).size());
+    TS_ASSERT_DELTA((input->y(2)[0] + input->y(3)[0] + input->y(4)[0]) / 3,
+                    output->y(0)[0], 0.00001);
     AnalysisDataService::Instance().remove("GDEventsOut");
   }
 
@@ -643,7 +641,7 @@ public:
     }
     for (size_t pix = 0; pix < groupW->getNumberHistograms(); pix++) {
       size_t groupNo = startingGroupNo + (pix / pixPerGroup);
-      groupW->dataY(pix)[0] = static_cast<double>(groupNo);
+      groupW->mutableY(pix)[0] = static_cast<double>(groupNo);
     }
 
     // ------------ Create a grouping workspace by name -------------
