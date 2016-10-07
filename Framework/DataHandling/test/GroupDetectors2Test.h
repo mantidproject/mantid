@@ -7,25 +7,14 @@
 
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/LoadMuonNexus1.h"
 #include "MantidDataHandling/MaskDetectors.h"
-
 #include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 #include <Poco/Path.h>
-
-#include <fstream>
-#include <numeric>
 
 using Mantid::DataHandling::GroupDetectors2;
 using namespace Mantid::Kernel;
