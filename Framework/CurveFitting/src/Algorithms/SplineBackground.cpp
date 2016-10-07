@@ -47,8 +47,6 @@ void SplineBackground::exec() {
     throw std::out_of_range("WorkspaceIndex is out of range.");
 
   const auto &yInputVals = inWS->y(spec);
-  const bool isHistogram = inWS->isHistogramData();
-
   const int ncoeffs = getProperty("NCoeff");
   const int k = 4; // order of the spline + 1 (cubic)
   const int nbreak = ncoeffs - (k - 2);
