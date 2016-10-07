@@ -5,7 +5,6 @@
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
 #include "MantidVatesAPI/ProgressAction.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 
 using Mantid::API::IMDWorkspace;
 using Mantid::Kernel::CPUTimer;

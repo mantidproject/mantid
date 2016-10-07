@@ -66,6 +66,7 @@ set ( TEST_PY_FILES
   MaskAngleTest.py
   MaskBTPTest.py
   MaskWorkspaceToCalFileTest.py
+  MatchPeaksTest.py
   MeanTest.py
   MergeCalFilesTest.py
   MolDynTest.py

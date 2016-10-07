@@ -20,7 +20,6 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Matrix.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <algorithm>
 
 namespace Mantid {

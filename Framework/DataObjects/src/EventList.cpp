@@ -198,10 +198,6 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
   // Fresh start
   this->clear(true);
 
-  // Cached values for later checks
-  double inf = std::numeric_limits<double>::infinity();
-  double ninf = -inf;
-
   // Get the input histogram
   const MantidVec &X = inSpec->readX();
   const MantidVec &Y = inSpec->readY();
@@ -219,12 +215,10 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
 
   for (size_t i = 0; i < X.size() - 1; i++) {
     double weight = Y[i];
-    if ((weight != 0.0 || GenerateZeros) && (weight == weight) /*NAN check*/
-        && (weight != inf) && (weight != ninf)) {
+    if ((weight != 0.0 || GenerateZeros) && std::isfinite(weight)) {
       double error = E[i];
       // Also check that the error is not a bad number
-      if ((error == error) /*NAN check*/
-          && (error != inf) && (error != ninf)) {
+      if (std::isfinite(error)) {
         if (GenerateMultipleEvents) {
           // --------- Multiple events per bin ----------
           double errorSquared = error * error;

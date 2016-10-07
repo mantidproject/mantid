@@ -2,20 +2,17 @@
 Mantid 3.8.0 Release Notes
 ==========================
 
-.. figure:: ../../images/Release38.png
+.. figure:: ../../images/release38.png
    :class: screenshot
    :width: 500px
    :align: right
 
-   Screenshot of a number of visulisation interfaces which can now be saved as a
-   Mantid project.
+   Mantid project saving now includes all features of the visualization windows in Mantid.
 
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
-**TODO: Add paragraph summarizing big changes**
+We are proud to announce version 3.8 of Mantid, this release contains the much requested improvements to project saving, so now all of the state of your graphs, tables, matrices, event the instrument view, sliceviewer and VSI will reload just as you saved it.
 
 This is just one of many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
@@ -38,7 +35,11 @@ Citation
 
 Please cite any usage of Mantid as follows:
 
-- *Mantid 3.8: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. doi: http://dx.doi.org/10.5286/SOFTWARE/MANTID3.8
+- *O. Arnold, et al., Mantid—Data analysis and visualization package for neutron scattering and μSR experiments, Nuclear Instruments and Methods in Physics Research Section A, Volume 764, 11 November 2014, Pages 156-166,* `doi: 10.1016/j.nima.2014.07.029 <http://dx.doi.org/10.1016/j.nima.2014.07.029>`_
+
+If you want to cite current release please use:
+
+- *Mantid 3.8: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. `doi:10.5286/SOFTWARE/MANTID3.8 <http://dx.doi.org/10.5286/SOFTWARE/MANTID3.8>`_
 
 Changes
 -------

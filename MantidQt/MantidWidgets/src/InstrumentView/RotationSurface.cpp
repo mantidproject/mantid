@@ -160,17 +160,13 @@ void RotationSurface::init() {
                         double dV = fabs(m_v_max - m_v_min);
                         double du = dU * 0.05;
                         double dv = dV * 0.05;
-                        if (m_width_max > du &&
-                            m_width_max !=
-                                std::numeric_limits<double>::infinity()) {
+                        if (m_width_max > du && std::isfinite(m_width_max)) {
                           if (du > 0 && !(dU >= m_width_max)) {
                             m_width_max = dU;
                           }
                           du = m_width_max;
                         }
-                        if (m_height_max > dv &&
-                            m_height_max !=
-                                std::numeric_limits<double>::infinity()) {
+                        if (m_height_max > dv && std::isfinite(m_height_max)) {
                           if (dv > 0 && !(dV >= m_height_max)) {
                             m_height_max = dV;
                           }
