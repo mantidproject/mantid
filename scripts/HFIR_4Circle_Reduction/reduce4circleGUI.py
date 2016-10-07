@@ -291,47 +291,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return self._myControl
 
-    def action_save_project(self):
-        """
-        Save project
-        :return:
-        """
-        project_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Specify Project File', os.getcwd()))
-        self._myControl.export_project(project_file_name)
-
-        # register
-        self.ui.label_last1Path.setText(project_file_name)
-
-        return
-
-    def action_load_project(self):
-        """
-        Load project
-        :return:
-        """
-        project_file_name = str(QtGui.QFileDialog.getOpenFileName(self, 'Choose Project File', os.getcwd()))
-
-        self._myControl.load_project(project_file_name)
-
-        return
-
-    def evt_show_survey(self):
-        """
-        Show survey result
-        :return:
-        """
-        if self.ui.tableWidget_surveyTable.rowCount() == 0:
-            # do nothing if the table is empty
-            return
-
-        max_number = int(self.ui.lineEdit_numSurveyOutput.text())
-        if max_number != self.ui.tableWidget_surveyTable.rowCount():
-            # re-show survey
-            self.ui.tableWidget_surveyTable.remove_all_rows()
-            self.ui.tableWidget_surveyTable.show_reflections(max_number)
-
-        return
-
     def _init_widgets(self):
         """ Initialize the table widgets
         :return:
@@ -350,6 +309,14 @@ class MainWindow(QtGui.QMainWindow):
 
         # Radio buttons
         self.ui.radioButton_ubFromTab1.setChecked(True)
+        # group for the source of UB matrix to import
+        ub_source_group = QtGui.QButtonGroup(self)
+        ub_source_group.addButton(self.ui.radioButton_ubFromList)
+        ub_source_group.addButton(self.ui.radioButton_ubFromTab1)
+        # group for the UB matrix's style
+        ub_style_group = QtGui.QButtonGroup(self)
+        ub_style_group.addButton(self.ui.radioButton_ubMantidStyle)
+        ub_style_group.addButton(self.ui.radioButton_ubSpiceStyle)
 
         # combo-box
         self.ui.comboBox_kVectors.clear()
@@ -441,6 +408,30 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_alphaError.setText('%.5f' % lattice_error[3])
         self.ui.lineEdit_betaError.setText('%.5f' % lattice_error[4])
         self.ui.lineEdit_gammaError.setText('%.5f' % lattice_error[5])
+
+        return
+
+    def action_save_project(self):
+        """
+        Save project
+        :return:
+        """
+        project_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Specify Project File', os.getcwd()))
+        self._myControl.export_project(project_file_name)
+
+        # register
+        self.ui.label_last1Path.setText(project_file_name)
+
+        return
+
+    def action_load_project(self):
+        """
+        Load project
+        :return:
+        """
+        project_file_name = str(QtGui.QFileDialog.getOpenFileName(self, 'Choose Project File', os.getcwd()))
+
+        self._myControl.load_project(project_file_name)
 
         return
 
@@ -2200,45 +2191,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return ub_matrix
 
-    def set_ub_from_text(self):
-        """ Purpose: Set UB matrix in use from plain text edit plainTextEdit_ubInput.
-        Requirements:
-          1. the string in the plain text edit must be able to be split to 9 floats by ',', ' ', '\t' and '\n'
-        Guarantees: the matrix will be set up the UB matrix in use
-        :return:
-        """
-        # get the string for ub matrix
-        ub_str = str(self.ui.plainTextEdit_ubInput.toPlainText())
-        status, ret_obj = gutil.parse_float_array(ub_str)
-
-        # check whether the ub matrix in text editor is valid
-        if status is False:
-            # unable to parse to float arrays
-            self.pop_one_button_dialog(ret_obj)
-            return
-        elif len(ret_obj) != 9:
-            # number of floats is not 9
-            self.pop_one_button_dialog('Requiring 9 floats for UB matrix.  Only %d are given.' % len(ret_obj))
-            return
-
-        # in good UB matrix format
-        ub_str = ret_obj
-        if self.ui.radioButton_ubMantidStyle.isChecked():
-            # UB matrix in mantid style
-            mantid_ub = gutil.convert_str_to_matrix(ub_str, (3, 3))
-
-        elif self.ui.radioButton_ubSpiceStyle.isChecked():
-            # UB matrix in SPICE style
-            spice_ub = gutil.convert_str_to_matrix(ub_str, (3, 3))
-            mantid_ub = r4c.convert_spice_ub_to_mantid(spice_ub)
-
-        else:
-            # not defined
-            self.pop_one_button_dialog('Neither Mantid or SPICE-styled UB is checked!')
-            return
-
-        return mantid_ub
-
     def do_show_ub_in_box(self):
         """ Get UB matrix in table tableWidget_ubMergeScan and write to plain text edit plainTextEdit_ubInput
         :return:
@@ -2313,14 +2265,14 @@ class MainWindow(QtGui.QMainWindow):
             # get ub matrix from tab 'Calculate UB Matrix'
             ub_matrix = self.ui.tableWidget_ubMatrix.get_matrix()
 
-        elif self.ui.radioButton_loadUBmatrix.isChecked():
-            # load ub matrix from a file
-            # VZ-FUTURE: Implement this next!
-            ub_matrix = read_ub_from_file()
+        # elif self.ui.radioButton_loadUBmatrix.isChecked():
+        #     # load ub matrix from a file
+        # ISSUE 001 VZ-FUTURE: Implement this next!
+        #     raise NotImplementedError('This tab is not implemented, because the file format has not been decided.')
 
         elif self.ui.radioButton_ubFromList.isChecked():
             # load ub matrix from text editor
-            ub_matrix = self.set_ub_from_text()
+            ub_matrix = self.get_ub_from_text()
 
         else:
             raise RuntimeError('None radio button is selected for UB')
@@ -2526,6 +2478,95 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def evt_show_survey(self):
+        """
+        Show survey result
+        :return:
+        """
+        if self.ui.tableWidget_surveyTable.rowCount() == 0:
+            # do nothing if the table is empty
+            return
+
+        max_number = int(self.ui.lineEdit_numSurveyOutput.text())
+        if max_number != self.ui.tableWidget_surveyTable.rowCount():
+            # re-show survey
+            self.ui.tableWidget_surveyTable.remove_all_rows()
+            self.ui.tableWidget_surveyTable.show_reflections(max_number)
+
+        return
+
+    def get_ub_from_text(self):
+        """ Purpose: Set UB matrix in use from plain text edit plainTextEdit_ubInput.
+        Requirements:
+          1. the string in the plain text edit must be able to be split to 9 floats by ',', ' ', '\t' and '\n'
+        Guarantees: the matrix will be set up the UB matrix in use
+        :return:
+        """
+        # get the string for ub matrix
+        ub_str = str(self.ui.plainTextEdit_ubInput.toPlainText())
+
+        # check the float list string
+        status, ret_obj = gutil.parse_float_array(ub_str)
+        # check whether the ub matrix in text editor is valid
+        if status is False:
+            # unable to parse to float arrays
+            self.pop_one_button_dialog(ret_obj)
+            return
+        elif len(ret_obj) != 9:
+            # number of floats is not 9
+            self.pop_one_button_dialog('Requiring 9 floats for UB matrix.  Only %d are given.' % len(ret_obj))
+            return
+
+        # in good UB matrix format
+        if self.ui.radioButton_ubMantidStyle.isChecked():
+            # UB matrix in mantid style
+            mantid_ub = gutil.convert_str_to_matrix(ub_str, (3, 3))
+
+        elif self.ui.radioButton_ubSpiceStyle.isChecked():
+            # UB matrix in SPICE style
+            spice_ub = gutil.convert_str_to_matrix(ub_str, (3, 3))
+            mantid_ub = r4c.convert_spice_ub_to_mantid(spice_ub)
+
+        else:
+            # not defined
+            self.pop_one_button_dialog('Neither Mantid or SPICE-styled UB is checked!')
+            return
+
+        return mantid_ub
+
+    def load_session(self, filename=None):
+        """
+        To load a session, i.e., read it back:
+        :param filename:
+        :return:
+        """
+        if filename is None:
+            filename = 'session_backup.csv'
+            filename = os.path.join(os.path.expanduser('~/.mantid/'), filename)
+
+        in_file = open(filename, 'r')
+        reader = csv.reader(in_file)
+        my_dict = dict(x for x in reader)
+
+        # set the data from saved file
+        for key, value in my_dict.items():
+            if key.startswith('lineEdit') is True:
+                self.ui.__getattribute__(key).setText(value)
+            elif key.startswith('plainText') is True:
+                self.ui.__getattribute__(key).setPlainText(value)
+            elif key.startswith('comboBox') is True:
+                self.ui.__getattribute__(key).setCurrentIndex(int(value))
+            else:
+                self.pop_one_button_dialog('Error! Widget name %s is not supported' % key)
+        # END-FOR
+
+        # set the experiment
+        self._myControl.set_local_data_dir(str(self.ui.lineEdit_localSpiceDir.text()))
+        self._myControl.set_working_directory(str(self.ui.lineEdit_workDir.text()))
+        self._myControl.set_server_url(str(self.ui.lineEdit_url.text()))
+
+        return
+
     def ui_apply_lorentz_correction_mt(self):
         """
         Apply Lorentz corrections to the integrated peak intensities of all the selected peaks
@@ -2615,39 +2656,6 @@ class MainWindow(QtGui.QMainWindow):
         for key, value in save_dict.items():
             writer.writerow([key, value])
         ofile.close()
-
-        return
-
-    def load_session(self, filename=None):
-        """
-        To load a session, i.e., read it back:
-        :param filename:
-        :return:
-        """
-        if filename is None:
-            filename = 'session_backup.csv'
-            filename = os.path.join(os.path.expanduser('~/.mantid/'), filename)
-
-        in_file = open(filename, 'r')
-        reader = csv.reader(in_file)
-        my_dict = dict(x for x in reader)
-
-        # set the data from saved file
-        for key, value in my_dict.items():
-            if key.startswith('lineEdit') is True:
-                self.ui.__getattribute__(key).setText(value)
-            elif key.startswith('plainText') is True:
-                self.ui.__getattribute__(key).setPlainText(value)
-            elif key.startswith('comboBox') is True:
-                self.ui.__getattribute__(key).setCurrentIndex(int(value))
-            else:
-                self.pop_one_button_dialog('Error! Widget name %s is not supported' % key)
-        # END-FOR
-
-        # set the experiment
-        self._myControl.set_local_data_dir(str(self.ui.lineEdit_localSpiceDir.text()))
-        self._myControl.set_working_directory(str(self.ui.lineEdit_workDir.text()))
-        self._myControl.set_server_url(str(self.ui.lineEdit_url.text()))
 
         return
 

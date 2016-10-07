@@ -18,7 +18,8 @@ def convert_str_to_matrix(matrix_str, matrix_shape):
     :return: numpy.ndarray, len(shape) == 2
     """
     # check
-    assert isinstance(matrix_str, str)
+    assert isinstance(matrix_str, str), 'Input matrix (string) %s is not a string but of type %s.' \
+                                        '' % (str(matrix_str), matrix_str.__class__.__name__)
     assert isinstance(matrix_shape, tuple) and len(matrix_shape) == 2
 
     # split matrix string to 9 elements and check
@@ -32,9 +33,9 @@ def convert_str_to_matrix(matrix_str, matrix_shape):
     assert matrix_shape[0] * matrix_shape[1] == len(matrix_terms)
     matrix = numpy.ndarray(shape=matrix_shape, dtype='float')
     term_index = 0
-    for i_row in xrange(len(matrix_shape[0])):
-        for j_col in xrange(len(matrix_shape[1])):
-            matrix_shape[i_row][j_col] = matrix_terms[term_index]
+    for i_row in xrange(matrix_shape[0]):
+        for j_col in xrange(matrix_shape[1]):
+            matrix[i_row][j_col] = matrix_terms[term_index]
             term_index += 1
 
     return matrix
