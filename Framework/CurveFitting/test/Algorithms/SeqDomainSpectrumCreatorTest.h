@@ -18,6 +18,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
