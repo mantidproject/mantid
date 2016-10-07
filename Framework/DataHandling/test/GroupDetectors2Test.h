@@ -845,4 +845,73 @@ private:
   }
 };
 
+class GroupDetectors2TestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() {
+    constexpr int numGroups = 2;
+    // This controls speed of test
+    constexpr int bankPixelWidth = 30;
+
+    inputWs = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
+        numGroups, bankPixelWidth);
+    AnalysisDataService::Instance().addOrReplace(nxsWSname, inputWs);
+
+    // Create an axis for each pixel.
+    for (size_t pix = 0; pix < inputWs->getNumberHistograms(); pix++) {
+      size_t xAxisSize = inputWs->x(pix).size();
+      Mantid::HistogramData::HistogramX axisVals(xAxisSize, 1.0);
+      inputWs->mutableX(pix) = axisVals;
+      inputWs->getSpectrum(pix).addEventQuickly(TofEvent(1000.0));
+    }
+
+    setupGroupWS(numGroups);
+
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", nxsWSname);
+    alg.setPropertyValue("OutputWorkspace", outputws);
+    alg.setPropertyValue("CopyGroupingFromWorkspace", groupWSName);
+
+    alg.setRethrows(true);
+  }
+
+  void testGroupDetectors2Performance() {
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+  }
+
+  void tearDown() {
+    AnalysisDataService::Instance().remove(groupWSName);
+    AnalysisDataService::Instance().remove(nxsWSname);
+    AnalysisDataService::Instance().remove(outputws);
+  }
+
+  void setupGroupWS(const size_t numGroups) {
+
+    // ------------ Create a grouping workspace to match -------------
+    groupWs = boost::make_shared<GroupingWorkspace>(inputWs->getInstrument());
+    AnalysisDataService::Instance().addOrReplace(groupWSName, groupWs);
+
+    // fill in some groups
+    constexpr size_t startingGroupNo = 1;
+    const size_t targetGroupNo = numGroups;
+    const size_t targetSpectraCount = numGroups;
+    size_t pixPerGroup = 0;
+    pixPerGroup = groupWs->getNumberHistograms() / targetGroupNo;
+
+    for (size_t pix = 0; pix < groupWs->getNumberHistograms(); pix++) {
+      size_t groupNo = startingGroupNo + (pix / pixPerGroup);
+      groupWs->mutableY(pix)[0] = static_cast<double>(groupNo);
+    }
+  }
+
+private:
+  const std::string nxsWSname = "GroupDetectors2TestTarget_ws";
+  const std::string groupWSName = nxsWSname + "_GROUP";
+  const std::string outputws = nxsWSname + "_grouped";
+
+  EventWorkspace_sptr inputWs;
+  GroupingWorkspace_sptr groupWs;
+
+  GroupDetectors2 alg;
+};
+
 #endif /*GROUPDETECTORS2TEST_H_*/
