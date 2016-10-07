@@ -7,7 +7,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSplitter.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -565,7 +565,7 @@ public:
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 1.75, 0.001);
 
     // Check the correct behaviour of empty of single value logs.
-    TS_ASSERT(boost::math::isnan(dProp->averageValueInFilter(filter)));
+    TS_ASSERT(std::isnan(dProp->averageValueInFilter(filter)));
     iProp->addValue(DateAndTime("2010-11-30T16:17:25"), 99);
     TS_ASSERT_EQUALS(iProp->averageValueInFilter(filter), 99.0);
 
@@ -710,12 +710,12 @@ public:
     TimeSeriesProperty<double> *log =
         new TimeSeriesProperty<double>("MydoubleLog");
     TimeSeriesPropertyStatistics stats = log->getStatistics();
-    TS_ASSERT(boost::math::isnan(stats.minimum));
-    TS_ASSERT(boost::math::isnan(stats.maximum));
-    TS_ASSERT(boost::math::isnan(stats.median));
-    TS_ASSERT(boost::math::isnan(stats.mean));
-    TS_ASSERT(boost::math::isnan(stats.standard_deviation));
-    TS_ASSERT(boost::math::isnan(stats.duration));
+    TS_ASSERT(std::isnan(stats.minimum));
+    TS_ASSERT(std::isnan(stats.maximum));
+    TS_ASSERT(std::isnan(stats.median));
+    TS_ASSERT(std::isnan(stats.mean));
+    TS_ASSERT(std::isnan(stats.standard_deviation));
+    TS_ASSERT(std::isnan(stats.duration));
 
     delete log;
   }

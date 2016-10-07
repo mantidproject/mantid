@@ -39,7 +39,7 @@ void IndirectTransmission::setup() {}
 void IndirectTransmission::run() {
   QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
   QString canWsName = m_uiForm.dsCanInput->getCurrentDataName();
-  QString outWsName = sampleWsName + "_trans";
+  QString outWsName = sampleWsName + "_transmission";
 
   IAlgorithm_sptr transAlg =
       AlgorithmManager::Instance().create("IndirectTransmissionMonitor", -1);
@@ -78,7 +78,7 @@ void IndirectTransmission::dataLoaded() {
 void IndirectTransmission::previewPlot() {
   QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
   QString canWsName = m_uiForm.dsCanInput->getCurrentDataName();
-  QString outWsName = sampleWsName + "_trans";
+  QString outWsName = sampleWsName + "_transmission";
 
   IAlgorithm_sptr transAlg =
       AlgorithmManager::Instance().create("IndirectTransmissionMonitor", -1);
@@ -99,7 +99,7 @@ void IndirectTransmission::transAlgDone(bool error) {
     return;
 
   QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
-  QString outWsName = sampleWsName + "_trans";
+  QString outWsName = sampleWsName + "_transmission";
 
   WorkspaceGroup_sptr resultWsGroup =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
@@ -136,7 +136,8 @@ void IndirectTransmission::instrumentSet() {
  * Handle saving of workspace
  */
 void IndirectTransmission::saveClicked() {
-  QString outputWs = (m_uiForm.dsSampleInput->getCurrentDataName() + "_trans");
+  QString outputWs =
+      (m_uiForm.dsSampleInput->getCurrentDataName() + "_transmission");
 
   if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), false))
     addSaveWorkspaceToQueue(outputWs);
@@ -147,7 +148,8 @@ void IndirectTransmission::saveClicked() {
  * Handle mantid plotting
  */
 void IndirectTransmission::plotClicked() {
-  QString outputWs = (m_uiForm.dsSampleInput->getCurrentDataName() + "_trans");
+  QString outputWs =
+      (m_uiForm.dsSampleInput->getCurrentDataName() + "_transmission");
   if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), true))
     plotSpectrum(outputWs);
 }

@@ -13,9 +13,6 @@ Windows
 
 * IPython has been upgraded to version 3.2.1
 
-OS X
-####
-
 User Interface
 --------------
 
@@ -36,9 +33,7 @@ Plotting Improvements
 
   - When this option is used for a workspace group, each workspace will its own subplot, with all specified spectra in it.
   - When the option is used for a single workspace, each of the specified spectra will have its own subplot.
-
-Algorithm Toolbox
-#################
+* Using the Label Tool on a plot to add Sample Logs as labels now opens up a dialogue for the selected workspace with all the available Sample Logs listed and the ability to import the selected one onto the plot as a label.
 
 Algorithms
 ##########
@@ -55,13 +50,11 @@ Scripting Window
 
  - All `matplotlib` examples now work out of the box when run inside the MantidPlot scripting environment.
 
-
 Progress Reporting
 ##################
 
 - The progress reporting for algorithms has been improved, so that the progress is reported correctly when processing workspace groups or multi-period workspaces.
 - The progress reporting for algorithms has been improved, so that the progress is reported correctly when processin workspace groups or multi-period workspaces.
-
 
 Documentation
 #############
@@ -72,10 +65,9 @@ Options Window
 ###############
 - Within Preferences->Mantid->Options ticking a category off/on will now untick/tick all subcategories. Also having some subcategories on and off will now show a partially ticked box for that category. 
 
-
 Bugs Resolved
 -------------
-- Floating windows now always stay on top of the main window in OSX
+- Floating windows now always stay on top of the main window in OSX.
 - The sliceviewer will now rebin an existing binned workspace correctly.
 - 2D plots now display correctly for point data workspaces as well as for histogram data
 - Cuts aligned with an axis no longer generate an empty integrated line plot.

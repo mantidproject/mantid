@@ -310,12 +310,19 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
 
   // Set the final unit that our output workspace will have
   outputWS->getAxis(0)->unit() = m_outputUnit;
+  storeEModeOnWorkspace(outputWS);
+
+  return outputWS;
+}
+
+/** Stores the emode in the provided workspace
+*  @param outputWS The workspace
+*/
+void ConvertUnits::storeEModeOnWorkspace(API::MatrixWorkspace_sptr outputWS) {
   // Store the emode
   const bool overwrite(true);
   outputWS->mutableRun().addProperty("deltaE-mode", getPropertyValue("EMode"),
                                      overwrite);
-
-  return outputWS;
 }
 
 /** Convert the workspace units according to a simple output = a * (input^b)
@@ -667,7 +674,7 @@ const std::vector<double> ConvertUnits::calculateRebinParams(
         auto &XData = workspace->x(i);
         double xfront = XData.front();
         double xback = XData.back();
-        if (boost::math::isfinite(xfront) && boost::math::isfinite(xback)) {
+        if (std::isfinite(xfront) && std::isfinite(xback)) {
           if (xfront < XMin)
             XMin = xfront;
           if (xback > XMax)
@@ -693,7 +700,6 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
   if (WorkspaceHelpers::commonBoundaries(WS) && !isInputEvents) {
     auto reverseX = make_cow<HistogramData::HistogramX>(WS->x(0).crbegin(),
                                                         WS->x(0).crend());
-
     for (size_t j = 0; j < numberOfSpectra; ++j) {
       WS->setSharedX(j, reverseX);
       std::reverse(WS->dataY(j).begin(), WS->dataY(j).end());

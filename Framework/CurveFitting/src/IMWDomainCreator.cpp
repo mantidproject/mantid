@@ -20,7 +20,6 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Matrix.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <algorithm>
 
 namespace Mantid {
@@ -43,6 +42,8 @@ public:
   double get(size_t iY, size_t iP) override {
     return m_data[iY * m_nParams + iP];
   }
+  /// Zero
+  void zero() override { m_data.assign(m_data.size(), 0.0); }
 
 private:
   size_t m_nParams;           ///< number of parameters / second dimension

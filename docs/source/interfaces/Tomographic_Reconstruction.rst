@@ -26,10 +26,9 @@ login and through its `web portal
 ISIS users.
 
 .. warning:: This interface is undergoing heavy works. The tabs are
-			 subject to changes and reorganization.New
-             functionality is being added and the pre-post-processing
-             and reconstruction workflow is being modified based on
-             feedback from initial test data.
+  subject to changes and reorganization. New functionality is being added
+  and the pre-post-processing and reconstruction workflow is being
+  modified based on feedback from initial test data.
 
 Interface at a glance
 ---------------------
@@ -87,7 +86,7 @@ SCARF and some ISIS machines:
 * `TomoPy
   <https://www1.aps.anl.gov/Science/Scientific-Software/TomoPy>`_
 
-* `Astra Toolbox <http://visielab.uantwerpen.be/software>`_ found from
+* `Astra Toolbox <http://visielab.uantwerpen.be/astra-toolbox>`_ found from
   `here <http://sourceforge.net/p/astra-toolbox/wiki/Home/>`_.
 
 References for the Astra Toolbox:

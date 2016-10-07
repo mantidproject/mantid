@@ -19,6 +19,9 @@ using namespace Mantid::CurveFitting::Functions;
 
 class CrystalFieldSpectrumTest : public CxxTest::TestSuite {
 public:
+  // Conversion factor from barn to milibarn/steradian
+  const double c_mbsr = 79.5774715459;
+
   void test_function() {
     CrystalFieldSpectrum fun;
     fun.setParameter("B20", 0.37737);
@@ -65,15 +68,18 @@ public:
     TS_ASSERT(fun.isActive(i));
 
     TS_ASSERT_DELTA(fun.getParameter("f0.PeakCentre"), 0.0, 1e-3);
-    TS_ASSERT_DELTA(fun.getParameter("f0.Amplitude"), 2.749, 1e-3);
+    TS_ASSERT_DELTA(fun.getParameter("f0.Amplitude"), 2.749 * c_mbsr,
+                    1e-3 * c_mbsr);
     TS_ASSERT_DELTA(fun.getParameter("f0.FWHM"), 1.5, 1e-3);
 
     TS_ASSERT_DELTA(fun.getParameter("f1.PeakCentre"), 29.3261, 1e-3);
-    TS_ASSERT_DELTA(fun.getParameter("f1.Amplitude"), 0.7204, 1e-3);
+    TS_ASSERT_DELTA(fun.getParameter("f1.Amplitude"), 0.7204 * c_mbsr,
+                    1e-3 * c_mbsr);
     TS_ASSERT_DELTA(fun.getParameter("f1.FWHM"), 1.5, 1e-3);
 
     TS_ASSERT_DELTA(fun.getParameter("f2.PeakCentre"), 44.3412, 1e-3);
-    TS_ASSERT_DELTA(fun.getParameter("f2.Amplitude"), 0.4298, 1e-3);
+    TS_ASSERT_DELTA(fun.getParameter("f2.Amplitude"), 0.4298 * c_mbsr,
+                    1e-3 * c_mbsr);
     TS_ASSERT_DELTA(fun.getParameter("f2.FWHM"), 1.5, 1e-3);
   }
 
@@ -87,11 +93,12 @@ public:
     fun->setParameter("B44", -0.12544);
     fun->setAttributeValue("Ion", "Ce");
     fun->setAttributeValue("Temperature", 44.0);
-    fun->setAttributeValue("ToleranceIntensity", 0.001);
+    fun->setAttributeValue("ToleranceIntensity", 0.001 * c_mbsr);
     fun->buildTargetFunction();
     fun->setParameter("f0.FWHM", 2.0);
     fun->setParameter("f1.FWHM", 20.0);
     fun->setParameter("f2.FWHM", 20.0);
+    fun->setParameter("IntensityScaling", 1 / c_mbsr);
     FunctionDomain1DVector x(0.0, 55.0, 100);
     FunctionValues y(x);
     fun->function(x, y);
@@ -118,12 +125,13 @@ public:
     fun->setParameter("B44", -0.12544);
     fun->setAttributeValue("Ion", "Ce");
     fun->setAttributeValue("Temperature", 44.0);
-    fun->setAttributeValue("ToleranceIntensity", 0.001);
+    fun->setAttributeValue("ToleranceIntensity", 0.001 * c_mbsr);
     fun->setAttributeValue("PeakShape", "Gaussian");
     fun->buildTargetFunction();
     fun->setParameter("f0.Sigma", 10.0);
     fun->setParameter("f1.Sigma", 2.0);
     fun->setParameter("f2.Sigma", 3.0);
+    fun->setParameter("IntensityScaling", 1 / c_mbsr);
     FunctionDomain1DVector x(0.0, 55.0, 100);
     FunctionValues y(x);
     fun->function(x, y);

@@ -1503,21 +1503,13 @@ def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
     @param output_ws: the output workspace
     '''
     def divide_q_resolution_by_counts(q_res, counts):
-        # We are dividing DX by Y. Note that len(DX) = len(Y) + 1
-        # Unfortunately, we need some knowlege about the Q1D algorithm here.
-        # The two last entries of DX are duplicate in Q1D and this is how we
-        # treat it here.
-        q_res_buffer = np.divide(q_res[0:-1],counts)
-        q_res_buffer = np.append(q_res_buffer, q_res_buffer[-1])
+        # We are dividing DX by Y.
+        q_res_buffer = np.divide(q_res,counts)
         return q_res_buffer
 
     def multiply_q_resolution_by_counts(q_res, counts):
-         # We are dividing DX by Y. Note that len(DX) = len(Y) + 1
-        # Unfortunately, we need some knowlege about the Q1D algorithm here.
-        # The two last entries of DX are duplicate in Q1D and this is how we
-        # treat it here.
-        q_res_buffer = np.multiply(q_res[0:-1],counts)
-        q_res_buffer = np.append(q_res_buffer, q_res_buffer[-1])
+         # We are dividing DX by Y.
+        q_res_buffer = np.multiply(q_res,counts)
         return q_res_buffer
 
     if count_ws_rear.getNumberHistograms() != 1:
@@ -1763,6 +1755,14 @@ def quaternion_to_angle_and_axis(quaternion):
         axis.append(quaternion[2]/s_parameter)
         axis.append(quaternion[3]/s_parameter)
     return math.degrees(angle), axis
+
+def get_unfitted_transmission_workspace_name(workspace_name):
+    suffix = "_unfitted"
+    if workspace_name.endswith(suffix):
+        unfitted_workspace_name = workspace_name
+    else:
+        unfitted_workspace_name = workspace_name + suffix
+    return unfitted_workspace_name
 
 
 ###############################################################################
