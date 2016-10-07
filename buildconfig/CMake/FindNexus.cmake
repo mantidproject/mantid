@@ -49,6 +49,7 @@ endif()
 # all listed variables are TRUE
 include ( FindPackageHandleStandardArgs )
 if (NEXUS_VERSION)
+  message (status "NeXus version ${NEXUS_VERSION}")
   find_package_handle_standard_args( Nexus REQUIRED_VARS NEXUS_LIBRARIES NEXUS_INCLUDE_DIR
                                     VERSION_VAR NEXUS_VERSION )
   if ($<VERSION_EQUAL:$<NEXUS_VERSION>,4.3.3>)
