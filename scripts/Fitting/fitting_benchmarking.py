@@ -91,7 +91,7 @@ def do_fitting_benchmark(include_nist=True, include_cutest=True, data_groups_dir
     @param minimizers :: list of minimizers to test
     @param use_errors :: whether to use observational errors as weights in the cost function
     """
-    if data_groups_dir:
+    if data_groups_dirs:
         search_dir = os.path.split(data_groups_dirs[0])[0]
     else:
         search_dir = os.getcwd()
