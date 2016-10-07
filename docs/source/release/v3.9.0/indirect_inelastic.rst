@@ -11,13 +11,13 @@ New features
 Algorithms
 ##########
 
+- A new algorithm :ref:`NMoldyn4Interpolation <algm-NMoldyn4Interpolation>` which interpolates simulated data onto reference OSIRIS data
+
 Data Analysis
 #############
 
 - :ref:`TeixeiraWaterSQE <func-TeixeiraWaterSQE>` models translation of water-like molecules (jump diffusion).
 
-Jump Fit
-~~~~~~~~
 
 Improvements
 ------------
