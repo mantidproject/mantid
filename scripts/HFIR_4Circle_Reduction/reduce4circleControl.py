@@ -2266,7 +2266,11 @@ class CWSCDReductionControl(object):
                 l_col_index = col_name_list.index('l')
                 col_2theta_index = col_name_list.index('2theta')
                 m1_col_index = col_name_list.index('m1')
-                tsample_col_index = col_name_list.index('tsample')
+                # optional as T-Sample
+                if 'tsample' in col_name_list:
+                    tsample_col_index = col_name_list.index('tsample')
+                else:
+                    tsample_col_index = None
 
                 max_count = 0
                 max_row = 0
@@ -2284,8 +2288,12 @@ class CWSCDReductionControl(object):
                         max_k = spice_table_ws.cell(i_row, k_col_index)
                         max_l = spice_table_ws.cell(i_row, l_col_index)
                         two_theta = spice_table_ws.cell(i_row, col_2theta_index)
-                        max_tsample = spice_table_ws.cell(i_row, tsample_col_index)
                         m1 = spice_table_ws.cell(i_row, m1_col_index)
+                        # t-sample is not a mandatory sample log in SPICE
+                        if tsample_col_index is None:
+                            max_tsample = 0.
+                        else:
+                            max_tsample = spice_table_ws.cell(i_row, tsample_col_index)
                 # END-FOR
 
                 # calculate wavelength
