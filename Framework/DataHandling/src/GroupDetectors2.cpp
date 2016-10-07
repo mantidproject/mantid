@@ -240,8 +240,8 @@ void GroupDetectors2::execEvent() {
   }
 
   // Set all X bins on the output
-  auto &XValues = HistogramData::BinEdges(inputWS->x(0));
-  outputWS->setAllX(XValues);
+  auto &binEdges = inputWS->binEdges(0);
+  outputWS->setAllX(binEdges);
 
   g_log.information() << name() << " algorithm has finished\n";
 
@@ -950,9 +950,9 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
       const auto &fromSpectrum = inputWS->getSpectrum(originalWI);
 
       // Add up all the Y spectra and store the result in the first one
-      auto &fEit = outSpec.mutableE().begin();
-      auto &Yit = fromSpectrum.y().cbegin();
-      auto &Eit = fromSpectrum.e().cbegin();
+      auto fEit = outSpec.mutableE().begin();
+      auto Yit = fromSpectrum.y().cbegin();
+      auto Eit = fromSpectrum.e().cbegin();
       for (auto fYit = firstY.begin(); fYit != firstY.end();
            ++fYit, ++fEit, ++Yit, ++Eit) {
         *fYit += *Yit;
