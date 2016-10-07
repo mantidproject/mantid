@@ -491,7 +491,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         total_workspace = None
 
         # Output each contribution to it's own workspace
-        for ion_name, ions in list(partial_ions.items()):
+        for ion_name, ions in partial_ions.items():
             partial_ws_name = self._out_ws_name + '_'
 
             partial_ws = self._compute_partial(ions, frequencies, eigenvectors, weights)

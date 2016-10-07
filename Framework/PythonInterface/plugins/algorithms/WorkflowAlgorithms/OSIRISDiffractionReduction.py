@@ -444,7 +444,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             result.setE(i,resultE)
 
         # Delete all workspaces we've created, except the result.
-        for wrksp in list(self._van_ws_map.getMap().values()):
+        for wrksp in self._van_ws_map.getMap().values():
             DeleteWorkspace(Workspace=wrksp)
 
         self.setProperty("OutputWorkspace", result)

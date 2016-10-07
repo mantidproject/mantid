@@ -138,7 +138,7 @@ class ResNorm(PythonAlgorithm):
         params = {'XScaling':'Stretch', 'Scaling':'Intensity'}
         result_workspaces = []
         prog_process = Progress(self, start=0.94, end=1.0, nreports=3)
-        for param_name, output_name in list(params.items()):
+        for param_name, output_name in params.items():
             result_workspaces.append(self._process_fit_params(fit_params, param_name, v_values, v_unit, output_name))
             prog_process.report('Processing Fit data')
 
