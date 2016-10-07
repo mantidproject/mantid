@@ -35,7 +35,7 @@ Crystal Field
 -------------
 
 - A fitting function was added (:ref:`CrystalFieldMultiSpectrum <func-CrystalFieldMultiSpectrum>`) that fits crystal field parameters to multiple spectra simultaneously.
-- A preliminary python interface to the Crystal Field functionality was added. It includes classes for defining a problem, performing a fit and basic plotting facilities.
+- A preliminary python interface to the Crystal Field functionality was added (:ref:`Crystal Field Python Interface`). It includes classes for defining a problem, performing a fit and basic plotting facilities.
 
 MLZ & TOFTOF
 ------------
