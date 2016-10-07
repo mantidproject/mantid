@@ -235,7 +235,7 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
     loadInstrument(instName->c_str(), eventBuffer);
   else
     g_log.warning(
-        "Empty instrument name recieved. Continuing without instrument");
+        "Empty instrument name received. Continuing without instrument");
 
   auto &mutableRun = eventBuffer->mutableRun();
   // Run start. Cache locally for computing frame times
