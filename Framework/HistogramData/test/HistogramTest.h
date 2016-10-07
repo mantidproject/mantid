@@ -1081,9 +1081,8 @@ public:
 
   void test_that_can_change_histogram_size_when_only_x_is_present() {
     Histogram h(BinEdges{1, 2, 3});
-    auto isSizeAsSpecified = [](const Histogram &h, size_t n) {
-      return (h.x().size() == (n + 1));
-    };
+    auto isSizeAsSpecified =
+        [](const Histogram &h, size_t n) { return (h.x().size() == (n + 1)); };
     TS_ASSERT(isSizeAsSpecified(h, 2));
 
     // Increase the size

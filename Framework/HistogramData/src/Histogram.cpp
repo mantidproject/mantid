@@ -264,7 +264,7 @@ void Histogram::resize(size_t n) {
 
   m_x.access().mutableRawData().resize(newXSize);
   if (m_y) {
-      m_y.access().mutableRawData().resize(n);
+    m_y.access().mutableRawData().resize(n);
   }
 
   if (m_e) {
