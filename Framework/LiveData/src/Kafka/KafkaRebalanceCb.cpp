@@ -21,9 +21,9 @@ bool endsWith(std::string const &fullString, std::string const &ending) {
 }
 }
 
-const std::string KafkaRebalanceCb::EVENT_TOPIC_SUFFIX = "_event_topic";
-const std::string KafkaRebalanceCb::RUN_TOPIC_SUFFIX = "_run_topic";
-const std::string KafkaRebalanceCb::DET_SPEC_TOPIC_SUFFIX = "_det_spec_topic";
+const std::string KafkaRebalanceCb::EVENT_TOPIC_SUFFIX = "_events";
+const std::string KafkaRebalanceCb::RUN_TOPIC_SUFFIX = "_runInfo";
+const std::string KafkaRebalanceCb::DET_SPEC_TOPIC_SUFFIX = "_detSpecMap";
 
 void KafkaRebalanceCb::rebalance_cb(
     RdKafka::KafkaConsumer *consumer, RdKafka::ErrorCode err,
