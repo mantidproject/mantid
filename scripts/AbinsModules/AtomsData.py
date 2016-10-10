@@ -1,6 +1,6 @@
 import numpy as np
 from GeneralData import GeneralData
-import AbinsParameters
+import AbinsConstants
 
 class AtomsDaTa(GeneralData):
 
@@ -22,11 +22,11 @@ class AtomsDaTa(GeneralData):
         if not isinstance(item, dict):
             raise  ValueError("Every element of AtomsData has  a form of the dictionary.")
 
-        if not sorted(item.keys()) == sorted(AbinsParameters.all_keywords_atoms_data):
+        if not sorted(item.keys()) == sorted(AbinsConstants.all_keywords_atoms_data):
             raise ValueError("Invalid structure of the dictionary to be added.")
 
         # "symbol"
-        if not item["symbol"] in AbinsParameters.all_symbols:
+        if not item["symbol"] in AbinsConstants.all_symbols:
             raise ValueError("Invalid value of symbol.")
 
         # "fract_coord"
@@ -37,7 +37,7 @@ class AtomsDaTa(GeneralData):
             raise ValueError("Coordinates should have a form of 1D numpy array.")
         if fract_coord.shape[0] != 3:
             raise ValueError("Coordinates should have a form of numpy array with three elements.")
-        if fract_coord.dtype.num !=  AbinsParameters.float_id:
+        if fract_coord.dtype.num !=  AbinsConstants.float_id:
             raise ValueError("All coordinates should be real numbers.")
 
         # "atom"

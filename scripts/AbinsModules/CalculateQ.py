@@ -2,6 +2,7 @@ import numpy as np
 
 # ABINS modules
 import AbinsParameters
+import AbinsConstants
 from IOmodule import IOmodule
 from QData import  QData
 from KpointsData import KpointsData
@@ -13,19 +14,20 @@ class CalculateQ(IOmodule):
     Class for calculating Q vectors for instrument of choice.
     """
 
-    def __init__(self, filename=None, instrument=None, sample_form=None, k_points_data=None, overtones=None):
+    def __init__(self, filename=None, instrument=None, sample_form=None, k_points_data=None, overtones=None, combinations=None):
         """
         @param filename: name of input filename (CASTEP: foo.phonon)
         @param instrument: object of type  Instrument
         @param sample_form: form in which sample is (Powder or SingleCrystal)
         @param k_points_data: object of type KpointsData with data from DFT calculations
         @param overtones: True if overtones should be included in calculations, otherwise False
+        @param combinations: True if combinations should be calculated, otherwise False
         """
         if not isinstance(instrument, Instrument):
             raise ValueError("Invalid instrument.")
         self._instrument = instrument
             
-        if not sample_form in AbinsParameters.all_sample_forms:
+        if not sample_form in AbinsConstants.all_sample_forms:
             raise ValueError("Invalid value of the sample form. Please specify one of the two options: 'SingleCrystal', 'Powder'.")
         self._sample_form = sample_form
 
@@ -36,16 +38,26 @@ class CalculateQ(IOmodule):
         if isinstance(overtones, bool):
             self._overtones = overtones
         else:
-            raise ValueError("Invalid value of overtones. Expected values are: True, False ")
+            raise ValueError("Invalid value of overtones. Expected values are: True, False.")
+
+        if isinstance(combinations, bool):
+            self._combinations = combinations
+        else:
+            raise ValueError("Invalid value of combinations. Expected values are: True, False.")
 
         if self._overtones:
             overtones_folder = "overtones_true"
+            if self._combinations:
+                combinations_folder = "combinations_true"
+            else:
+                combinations_folder = "combinations_false"
         else:
             overtones_folder = "overtones_false"
+            combinations_folder = "combinations_false"
 
         self._Qvectors = None # data with Q vectors
 
-        super(CalculateQ, self).__init__(input_filename=filename, group_name=AbinsParameters.Q_data_group + "/%s"%self._instrument + "/" + self._sample_form + "/" + overtones_folder)
+        super(CalculateQ, self).__init__(input_filename=filename, group_name=AbinsParameters.Q_data_group + "/%s"%self._instrument + "/" + self._sample_form + "/" + overtones_folder + "/" + combinations_folder)
 
 
     def _calculate_qvectors_instrument(self):
@@ -56,7 +68,7 @@ class CalculateQ(IOmodule):
         self._Qvectors = QData(num_k=num_k, overtones=self._overtones)
         self._instrument.collect_K_data(k_points_data=self._k_points_data)
         if self._sample_form == "Powder":
-            self._Qvectors.set(self._instrument.calculate_q_powder(overtones=self._overtones))
+            self._Qvectors.set(self._instrument.calculate_q_powder(overtones=self._overtones, combinations=self._combinations))
         else:
             raise ValueError("SingleCrystal user case is not implemented.")
 

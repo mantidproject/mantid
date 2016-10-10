@@ -4,8 +4,7 @@ import numpy as np
 from DwCrystalData import DwCrystalData
 from AbinsData import AbinsData
 from IOmodule import  IOmodule
-
-import AbinsParameters
+import AbinsConstants
 
 
 class CalculateDWCrystal(IOmodule):
@@ -37,6 +36,7 @@ class CalculateDWCrystal(IOmodule):
         self._num_k = extracted_k_data["atomic_displacements"].shape[0]
         self._num_atoms = extracted_k_data["atomic_displacements"].shape[1]
         self._num_freq = extracted_k_data["atomic_displacements"].shape[2]
+        super(CalculateDWCrystal, self).__init__()
 
 
     def _calculate_DW(self):
@@ -51,7 +51,7 @@ class CalculateDWCrystal(IOmodule):
         _data = self._abins_data.extract()
         _mass_hartree_factor = np.asarray([1.0 / ( atom["mass"] * 2)  for atom in _data["atoms_data"]])
         _frequencies_hartree = _data["k_points_data"]["frequencies"]
-        _temperature_hartree = self._temperature * AbinsParameters.k_2_hartree
+        _temperature_hartree = self._temperature * AbinsConstants.k_2_hartree
 
         _weights = _data["k_points_data"]["weights"]
         _atomic_displacements = _data["k_points_data"]["atomic_displacements"]
@@ -61,8 +61,8 @@ class CalculateDWCrystal(IOmodule):
         _tanh =  np.tanh(np.multiply(_coth_factor,  _frequencies_hartree))
         _coth_over_omega = np.divide(1.0, np.multiply(_tanh ,_frequencies_hartree)) # coth(...)/omega
 
-        _item_k = np.zeros((3, 3), dtype=AbinsParameters.float_type) # stores DW for one atom
-        _item_freq = np.zeros((3, 3), dtype=AbinsParameters.float_type)
+        _item_k = np.zeros((3, 3), dtype=AbinsConstants.float_type) # stores DW for one atom
+        _item_freq = np.zeros((3, 3), dtype=AbinsConstants.float_type)
 
         for num in range(self._num_atoms):
             _item_k.fill(0.0) # erase stored information so that it can be filled with content for the next atom
@@ -70,7 +70,7 @@ class CalculateDWCrystal(IOmodule):
             for k in range(self._num_k):
 
                 # correction for acoustic modes at Gamma point
-                if np.linalg.norm(_data["k_points_data"]["k_vectors"][k]) < AbinsParameters.small_k: start = 3
+                if np.linalg.norm(_data["k_points_data"]["k_vectors"][k]) < AbinsConstants.small_k: start = 3
                 else: start = 0
 
                 _item_freq.fill(0.0)

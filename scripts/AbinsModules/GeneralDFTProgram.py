@@ -7,6 +7,7 @@ from KpointsData import KpointsData
 from AtomsData import  AtomsDaTa
 from AbinsData import AbinsData
 import AbinsParameters
+import AbinsConstants
 
 class GeneralDFTProgram(IOmodule):
     """
@@ -152,7 +153,7 @@ class GeneralDFTProgram(IOmodule):
             gamma_pkt_index = -1
             # look for index of Gamma point
             for k in range(self._num_k):
-                if np.linalg.norm(data["k_vectors"][k]) < AbinsParameters.small_k:
+                if np.linalg.norm(data["k_vectors"][k]) < AbinsConstants.small_k:
                     gamma_pkt_index = k
                     break
             if gamma_pkt_index == -1:
@@ -161,7 +162,7 @@ class GeneralDFTProgram(IOmodule):
             k_points = KpointsData(num_atoms=self._num_atoms, num_k=1)
             k_points.set({"weights": np.asarray([data["weights"][gamma_pkt_index]]),
                           "k_vectors": np.asarray([data["k_vectors"][gamma_pkt_index]]),
-                          "frequencies": np.asarray([data["frequencies"][gamma_pkt_index]]) * AbinsParameters.cm1_2_hartree,
+                          "frequencies": np.asarray([data["frequencies"][gamma_pkt_index]]) * AbinsConstants.cm1_2_hartree,
                           "atomic_displacements": np.asarray([data["atomic_displacements"][gamma_pkt_index]])})
         # for Single crystal  use case use all k-points
         else:
@@ -169,13 +170,13 @@ class GeneralDFTProgram(IOmodule):
             k_points = KpointsData(num_atoms=self._num_atoms, num_k=self._num_k)
             k_points.set({"weights": data["weights"],  # 1D [k] (one entry corresponds to weight of one k-point)
                           "k_vectors": data["k_vectors"],  # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
-                          "frequencies": data["frequencies"] * AbinsParameters.cm1_2_hartree,  # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
+                          "frequencies": data["frequencies"] * AbinsConstants.cm1_2_hartree,  # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
                           "atomic_displacements": data["atomic_displacements"]}) # 4D array [k][atom_n][freq][3] (one entry corresponds to one coordinate for atom atom_n, frequency  freq and k-point k )
 
 
         atoms = AtomsDaTa(num_atoms=self._num_atoms)
         for atom in data["atoms"]:
-            atom["mass"] = atom["mass"] * AbinsParameters.m_2_hartree
+            atom["mass"] = atom["mass"] * AbinsConstants.m_2_hartree
         atoms.set(data["atoms"])
 
         result_data = AbinsData()

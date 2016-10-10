@@ -1,5 +1,5 @@
 from Instruments import ToscaInstrument, NoneInstrument
-from AbinsModules import AbinsParameters
+from AbinsModules import AbinsConstants
 
 class InstrumentProducer(object):
     def __init__(self):
@@ -7,7 +7,7 @@ class InstrumentProducer(object):
 
     def produceInstrument(self, name=None):
 
-        if not name in AbinsParameters.all_instruments:
+        if not name in AbinsConstants.all_instruments:
             raise ValueError("Unknown instrument: %s"%name)
         elif name == "TOSCA":
             return ToscaInstrument("TOSCA")

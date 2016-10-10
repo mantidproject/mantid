@@ -22,7 +22,7 @@ algorithms and data objects that are:
 from IOmodule import IOmodule
 
 # Frequency generator
-from FrequencyGenerator import FrequencyGenerator
+from FrequencyPowderGenerator import FrequencyPowderGenerator
 
 # Loading modules
 from GeneralDFTProgram import GeneralDFTProgram

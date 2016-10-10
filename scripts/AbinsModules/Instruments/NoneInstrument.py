@@ -10,7 +10,7 @@ class NoneInstrument(Instrument):
         self._name = name
         self._k_points_data = None
         self._sigma = AbinsParameters.delta_width
-
+        super(NoneInstrument, self).__init__()
 
     def collect_K_data(self, k_points_data=None):
         """
@@ -24,7 +24,7 @@ class NoneInstrument(Instrument):
         self._k_points_data = k_points_data
 
 
-    def calculate_q_powder(self):
+    def calculate_q_powder(self, fundamental_frequencies=None, q_dim=None):
         """
         Calculates squared Q vectors for None instrument.
         """

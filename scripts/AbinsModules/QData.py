@@ -1,6 +1,5 @@
 import numpy as np
 from GeneralData import GeneralData
-import AbinsParameters
 
 class QData(GeneralData):
     """

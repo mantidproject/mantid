@@ -4,7 +4,7 @@ import re
 # ABINS modules
 from GeneralDFTProgram import GeneralDFTProgram
 from AbinsData import AbinsData
-import AbinsParameters
+import AbinsConstants
 
 class LoadCASTEP(GeneralDFTProgram):
     """
@@ -19,7 +19,7 @@ class LoadCASTEP(GeneralDFTProgram):
         """
         super(LoadCASTEP, self).__init__(input_DFT_filename=input_DFT_filename)
 
-        if  sample_form in AbinsParameters.all_sample_forms:
+        if  sample_form in AbinsConstants.all_sample_forms:
             self._sample_form = sample_form
         else:
             raise  ValueError("Invalid sample form %s"%sample_form)
@@ -145,7 +145,7 @@ class LoadCASTEP(GeneralDFTProgram):
         """
 
         dim = 3 # we have 3D space
-        vectors = np.zeros((self._num_atoms, self._num_phonons, dim), dtype=AbinsParameters.complex_type) # in general case eigenvectors are complex
+        vectors = np.zeros((self._num_atoms, self._num_phonons, dim), dtype=AbinsConstants.complex_type) # in general case eigenvectors are complex
         for freq in range(self._num_phonons):
             for atom in range(self._num_atoms):
 

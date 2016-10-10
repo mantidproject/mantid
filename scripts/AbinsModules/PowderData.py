@@ -1,8 +1,7 @@
-
 import numpy as np
 
 from GeneralData import  GeneralData
-import  AbinsParameters
+import  AbinsConstants
 
 class PowderData(GeneralData):
     """
@@ -24,8 +23,8 @@ class PowderData(GeneralData):
         else:
             raise ValueError("Invalid value of atoms.")
 
-        self._data = {"msd": np.zeros(self._num_atoms, dtype=AbinsParameters.float_type),  # value of mean square displacements
-                      "dw":  np.zeros(self._num_atoms, dtype=AbinsParameters.float_type)} # Debye-Waller factor for that mean square displacements
+        self._data = {"msd": np.zeros(self._num_atoms, dtype=AbinsConstants.float_type),  # value of mean square displacements
+                      "dw":  np.zeros(self._num_atoms, dtype=AbinsConstants.float_type)} # Debye-Waller factor for that mean square displacements
 
 
     def _append(self, num_atom=None, powder_atom=None):
@@ -33,9 +32,9 @@ class PowderData(GeneralData):
             raise ValueError("Invalid number of atom.")
 
         if not isinstance(powder_atom, dict):
-            raise ValueError("Invalid value. Dictionary with the following entries : %s" % AbinsParameters.all_keywords_powder_data + " was expected")
+            raise ValueError("Invalid value. Dictionary with the following entries : %s" % AbinsConstants.all_keywords_powder_data + " was expected")
 
-        if sorted(powder_atom.keys()) != sorted(AbinsParameters.all_keywords_powder_data):
+        if sorted(powder_atom.keys()) != sorted(AbinsConstants.all_keywords_powder_data):
             raise ValueError("Invalid structure of the dictionary.")
 
         if isinstance(powder_atom["msd"], float):
@@ -63,9 +62,9 @@ class PowderData(GeneralData):
     def _check_items(self, items=None):
 
          if not isinstance(items, dict):
-             raise ValueError("Invalid value. Dictionary with the following entries : %s" % AbinsParameters.all_keywords_powder_data + " was expected")
+             raise ValueError("Invalid value. Dictionary with the following entries : %s" % AbinsConstants.all_keywords_powder_data + " was expected")
 
-         if sorted(items.keys()) != sorted(AbinsParameters.all_keywords_powder_data):
+         if sorted(items.keys()) != sorted(AbinsConstants.all_keywords_powder_data):
             raise ValueError("Invalid structure of the dictionary.")
 
          if not isinstance(items["msd"], np.ndarray):
