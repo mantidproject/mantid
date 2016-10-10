@@ -17,17 +17,16 @@ createTwoSpectrumWorkspace(double x0 = 50, double x1 = 300, double dx = 0.5) {
   return twoSpectrum;
 }
 
-  Mantid::API::IAlgorithm_sptr createAlgorithm() {
-    Mantid::API::IAlgorithm_sptr alg =
-        boost::make_shared<NormaliseByPeakArea>();
-    alg->initialize();
-    alg->setChild(true);
-    alg->setPropertyValue("OutputWorkspace", "__UNUSED__");
-    alg->setPropertyValue("YSpaceDataWorkspace", "__UNUSED__");
-    alg->setPropertyValue("FittedWorkspace", "__UNUSED__");
-    alg->setPropertyValue("SymmetrisedWorkspace", "__UNUSED__");
-    return alg;
-  }
+Mantid::API::IAlgorithm_sptr createAlgorithm() {
+  Mantid::API::IAlgorithm_sptr alg = boost::make_shared<NormaliseByPeakArea>();
+  alg->initialize();
+  alg->setChild(true);
+  alg->setPropertyValue("OutputWorkspace", "__UNUSED__");
+  alg->setPropertyValue("YSpaceDataWorkspace", "__UNUSED__");
+  alg->setPropertyValue("FittedWorkspace", "__UNUSED__");
+  alg->setPropertyValue("SymmetrisedWorkspace", "__UNUSED__");
+  return alg;
+}
 }
 
 class NormaliseByPeakAreaTest : public CxxTest::TestSuite {
@@ -282,12 +281,12 @@ public:
   static NormaliseByPeakAreaTestPerformance *createSuite() {
     return new NormaliseByPeakAreaTestPerformance();
   }
-  static void destroySuite(NormaliseByPeakAreaTestPerformance *suite) { delete suite; }
-
-  void setUp() {
-    testWS = createTwoSpectrumWorkspace();
+  static void destroySuite(NormaliseByPeakAreaTestPerformance *suite) {
+    delete suite;
   }
-  
+
+  void setUp() { testWS = createTwoSpectrumWorkspace(); }
+
   void test_sum_false() {
     using namespace Mantid::API;
 

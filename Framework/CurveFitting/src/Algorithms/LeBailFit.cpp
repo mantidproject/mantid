@@ -499,7 +499,7 @@ void LeBailFit::execPatternCalculation() {
     for (size_t ipk = 0; ipk < m_lebailFunction->getNumberOfPeaks(); ++ipk) {
       std::vector<double> vecTemp(m_outputWS->y(9 + ipk).size(), 0);
       m_lebailFunction->calPeak(ipk, vecTemp, vecX);
-	  m_outputWS->mutableY(9 + ipk) = vecTemp;
+      m_outputWS->mutableY(9 + ipk) = vecTemp;
     }
   }
 
@@ -1403,7 +1403,7 @@ void LeBailFit::createOutputDataWorkspace() {
   // 3. Add values
   //    All X.
   for (size_t j = 0; j < m_outputWS->getNumberHistograms(); ++j)
-	  m_outputWS->setSharedX(j, m_dataWS->sharedX(m_wsIndex));
+    m_outputWS->setSharedX(j, m_dataWS->sharedX(m_wsIndex));
 
   //    Observation
   m_outputWS->setSharedY(OBSDATAINDEX, m_dataWS->sharedY(m_wsIndex));
@@ -1482,8 +1482,7 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles,
   std::vector<double> vecBkgd(m_outputWS->y(INPUTBKGDINDEX).size(), 0);
   m_lebailFunction->function(vecBkgd, vecX, false, true);
   m_outputWS->mutableY(INPUTBKGDINDEX) = vecBkgd;
-  std::vector<double> dataPurePeak(m_outputWS->y(INPUTPUREPEAKINDEX).size(),
-                                   0);
+  std::vector<double> dataPurePeak(m_outputWS->y(INPUTPUREPEAKINDEX).size(), 0);
   transform(vecInY.begin(), vecInY.end(), vecBkgd.begin(), dataPurePeak.begin(),
             ::minus<double>());
   m_outputWS->mutableY(INPUTPUREPEAKINDEX) = dataPurePeak;
@@ -2418,12 +2417,13 @@ void LeBailFit::applyParameterValues(map<string, Parameter> &srcparammap,
 * @param values    values
 * @param background  background
 */
-//void LeBailFit::fitBackground(size_t wsindex, FunctionDomain1DVector domain,
+// void LeBailFit::fitBackground(size_t wsindex, FunctionDomain1DVector domain,
 //                              FunctionValues values,
 //                              vector<double> &background) {
 //  UNUSED_ARG(background);
 //
-//  std::vector<double> &vecSmoothBkgd = m_outputWS->mutableY(SMOOTHEDBKGDINDEX);
+//  std::vector<double> &vecSmoothBkgd =
+//  m_outputWS->mutableY(SMOOTHEDBKGDINDEX);
 //
 //  smoothBackgroundAnalytical(wsindex, domain, values, vecSmoothBkgd);
 //}

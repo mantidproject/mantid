@@ -621,9 +621,8 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
   stringstream dbss;
   dbss << "[DBx203] Removed background peak data: \n";
   for (size_t i = 0; i < peakws->x(peak_wsindex).size(); ++i)
-    dbss << peakws->x(peak_wsindex)[i] << "\t\t"
-         << peakws->y(peak_wsindex)[i] << "\t\t"
-         << peakws->e(peak_wsindex)[i] << '\n';
+    dbss << peakws->x(peak_wsindex)[i] << "\t\t" << peakws->y(peak_wsindex)[i]
+         << "\t\t" << peakws->e(peak_wsindex)[i] << '\n';
   g_log.debug(dbss.str());
 
   // 3. Estimate FWHM, peak centre, and height
@@ -1237,9 +1236,8 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   stringstream dbss2;
   dbss2 << "[T] Partial workspace No Background: \n";
   for (size_t i = 0; i < peakdataws->x(1).size(); ++i)
-    dbss2 << peakdataws->x(1)[i] << "\t\t" << peakdataws->y(1)[i]
-          << "\t\t" << peakdataws->e(1)[i] << "\t\t"
-          << peakdataws->y(0)[i] << '\n';
+    dbss2 << peakdataws->x(1)[i] << "\t\t" << peakdataws->y(1)[i] << "\t\t"
+          << peakdataws->e(1)[i] << "\t\t" << peakdataws->y(0)[i] << '\n';
   g_log.notice(dbss2.str());
 
   // 3. Estimate peak heights
@@ -1760,8 +1758,8 @@ bool FitPowderDiffPeaks::doFit1PeakSequential(
                    << ", Minimizer = " << minimizer
                    << ", Max Iterations = " << maxiteration
                    << ", Workspace Index = " << workspaceindex
-                   << ", Data Range = " << dataws->x(workspaceindex)[0]
-                   << ", " << dataws->x(workspaceindex).back() << '\n';
+                   << ", Data Range = " << dataws->x(workspaceindex)[0] << ", "
+                   << dataws->x(workspaceindex).back() << '\n';
 
     storeFunctionParameters(peakfunction, parambeforefit);
 
@@ -3027,9 +3025,8 @@ void FitPowderDiffPeaks::cropWorkspace(double tofmin, double tofmax) {
     g_log.error(errmsg.str());
     throw std::runtime_error(errmsg.str());
   } else {
-    cout << "[DBx211] Cropped Workspace Range: "
-         << m_dataWS->x(m_wsIndex)[0] << ", "
-         << m_dataWS->x(m_wsIndex).back() << '\n';
+    cout << "[DBx211] Cropped Workspace Range: " << m_dataWS->x(m_wsIndex)[0]
+         << ", " << m_dataWS->x(m_wsIndex).back() << '\n';
   }
 }
 

@@ -235,11 +235,12 @@ private:
                                 std::string parname);
 
   /// Calculate diffraction pattern in Le Bail algorithm for MC Random walk
-  bool calculateDiffractionPattern(
-      const std::vector<double> &vecX,
-      const std::vector<double> &vecY, bool inputraw,
-      bool outputwithbkgd, const std::vector<double> &vecBkgd,
-      std::vector<double> &values, Kernel::Rfactor &rfactor);
+  bool calculateDiffractionPattern(const std::vector<double> &vecX,
+                                   const std::vector<double> &vecY,
+                                   bool inputraw, bool outputwithbkgd,
+                                   const std::vector<double> &vecBkgd,
+                                   std::vector<double> &values,
+                                   Kernel::Rfactor &rfactor);
 
   /// Calculate powder diffraction statistic Rwp
   // void calculatePowderPatternStatistic(const MantidVec &values, const
@@ -271,7 +272,7 @@ private:
   //--------------  Background function Suite
   //----------------------------------------
   /// Re-fit background according to the new values
-  //std::vector<double> fitBackground(size_t wsindex,
+  // std::vector<double> fitBackground(size_t wsindex,
   //                                  API::FunctionDomain1DVector domain,
   //                                  API::FunctionValues values);
 

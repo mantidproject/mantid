@@ -365,16 +365,16 @@ public:
     if (newgeomparamws) {
       std::map<std::string, double> fitparamvalues;
       parseParameterTableWorkspace(newgeomparamws, fitparamvalues);
-	  TS_ASSERT_DELTA(fitparamvalues["Chi2_Init"], 118348, 1);
-	  TS_ASSERT_DELTA(fitparamvalues["Chi2_Result"], 4896, 1);
-	  TS_ASSERT_DELTA(fitparamvalues["Dtt1"], 22610, 1);
-	  TS_ASSERT_DELTA(fitparamvalues["Dtt1t"], 22747, 1);
-	  TS_ASSERT_DELTA(fitparamvalues["Dtt2"], 0, 0);
-	  TS_ASSERT_DELTA(fitparamvalues["Dtt2t"], 0.3, 0.1);
-	  TS_ASSERT_DELTA(fitparamvalues["Tcross"], 0.356, 0.010);
-	  TS_ASSERT_DELTA(fitparamvalues["Width"], 370, 1);
-	  TS_ASSERT_DELTA(fitparamvalues["Zero"], -23.4, 0.1);
-	  TS_ASSERT_DELTA(fitparamvalues["Zerot"], 90.7, 0.1);
+      TS_ASSERT_DELTA(fitparamvalues["Chi2_Init"], 118348, 1);
+      TS_ASSERT_DELTA(fitparamvalues["Chi2_Result"], 4896, 1);
+      TS_ASSERT_DELTA(fitparamvalues["Dtt1"], 22610, 1);
+      TS_ASSERT_DELTA(fitparamvalues["Dtt1t"], 22747, 1);
+      TS_ASSERT_DELTA(fitparamvalues["Dtt2"], 0, 0);
+      TS_ASSERT_DELTA(fitparamvalues["Dtt2t"], 0.3, 0.1);
+      TS_ASSERT_DELTA(fitparamvalues["Tcross"], 0.356, 0.010);
+      TS_ASSERT_DELTA(fitparamvalues["Width"], 370, 1);
+      TS_ASSERT_DELTA(fitparamvalues["Zero"], -23.4, 0.1);
+      TS_ASSERT_DELTA(fitparamvalues["Zerot"], 90.7, 0.1);
     }
 
     // b) Data
@@ -445,16 +445,16 @@ public:
     if (newgeomparamws) {
       std::map<std::string, double> fitparamvalues;
       parseParameterTableWorkspace(newgeomparamws, fitparamvalues);
-	  TS_ASSERT_DELTA(fitparamvalues["Chi2_Init"], 118348, 1);
-	  TS_ASSERT_DELTA(fitparamvalues["Chi2_Result"], 127307, 1);
-	  TS_ASSERT_DELTA(fitparamvalues["Dtt1"], 22778, 1);
-	  TS_ASSERT_DELTA(fitparamvalues["Dtt1t"], 22747, 1);
-	  TS_ASSERT_DELTA(fitparamvalues["Dtt2"], 0, 0);
-	  TS_ASSERT_DELTA(fitparamvalues["Dtt2t"], 0.3, 0.1);
-	  TS_ASSERT_DELTA(fitparamvalues["Tcross"], 0.356, 0.010);
-	  TS_ASSERT_DELTA(fitparamvalues["Width"], 1.1, 0.1);
-	  TS_ASSERT_DELTA(fitparamvalues["Zero"], 0, 0.1);
-	  TS_ASSERT_DELTA(fitparamvalues["Zerot"], 90.7, 0.1);
+      TS_ASSERT_DELTA(fitparamvalues["Chi2_Init"], 118348, 1);
+      TS_ASSERT_DELTA(fitparamvalues["Chi2_Result"], 127307, 1);
+      TS_ASSERT_DELTA(fitparamvalues["Dtt1"], 22778, 1);
+      TS_ASSERT_DELTA(fitparamvalues["Dtt1t"], 22747, 1);
+      TS_ASSERT_DELTA(fitparamvalues["Dtt2"], 0, 0);
+      TS_ASSERT_DELTA(fitparamvalues["Dtt2t"], 0.3, 0.1);
+      TS_ASSERT_DELTA(fitparamvalues["Tcross"], 0.356, 0.010);
+      TS_ASSERT_DELTA(fitparamvalues["Width"], 1.1, 0.1);
+      TS_ASSERT_DELTA(fitparamvalues["Zero"], 0, 0.1);
+      TS_ASSERT_DELTA(fitparamvalues["Zerot"], 90.7, 0.1);
     }
 
     // b) Data
@@ -472,78 +472,73 @@ public:
   }
 };
 
-class RefinePowderInstrumentParameters3TestPerformance : public CxxTest::TestSuite {
+class RefinePowderInstrumentParameters3TestPerformance
+    : public CxxTest::TestSuite {
 
 private:
-	Workspace2D_sptr posWS;
-	TableWorkspace_sptr profWS;
+  Workspace2D_sptr posWS;
+  TableWorkspace_sptr profWS;
 
 public:
-	// This pair of boilerplate methods prevent the suite being created statically
-	// This means the constructor isn't called when running other tests
-	static RefinePowderInstrumentParameters3TestPerformance *createSuite() {
-		return new RefinePowderInstrumentParameters3TestPerformance();
-	}
-	static void destroySuite(RefinePowderInstrumentParameters3TestPerformance *suite) {
-		delete suite;
-	}
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static RefinePowderInstrumentParameters3TestPerformance *createSuite() {
+    return new RefinePowderInstrumentParameters3TestPerformance();
+  }
+  static void
+  destroySuite(RefinePowderInstrumentParameters3TestPerformance *suite) {
+    delete suite;
+  }
 
-        void setUp() {
-          posWS = generatePeakPositionWorkspace(1);
-          profWS = generateInstrumentProfileTableBank1();
+  void setUp() {
+    posWS = generatePeakPositionWorkspace(1);
+    profWS = generateInstrumentProfileTableBank1();
 
-          AnalysisDataService::Instance().addOrReplace("Bank1PeakPositions",
-                                                       posWS);
-          AnalysisDataService::Instance().addOrReplace("Bank1ProfileParameters",
-                                                       profWS);
-        }
+    AnalysisDataService::Instance().addOrReplace("Bank1PeakPositions", posWS);
+    AnalysisDataService::Instance().addOrReplace("Bank1ProfileParameters",
+                                                 profWS);
+  }
 
-        void tearDown() {
+  void tearDown() {
 
-          AnalysisDataService::Instance().remove("Bank1PeakPositions");
-          AnalysisDataService::Instance().remove("Bank1FittedPositions");
-          AnalysisDataService::Instance().remove("Bank1ProfileParameters");
-          AnalysisDataService::Instance().remove(
-              "Bank1FittedProfileParameters");
-        }
-        
-          void test_FitNonMonteCarlo() {
-        
-            RefinePowderInstrumentParameters3 alg;
-            alg.initialize();
-            alg.setPropertyValue("InputPeakPositionWorkspace",
-            "Bank1PeakPositions");
-            alg.setProperty("WorkspaceIndex", 0);
-            alg.setProperty("OutputPeakPositionWorkspace",
-            "Bank1FittedPositions");
-            alg.setProperty("InputInstrumentParameterWorkspace",
-                            "Bank1ProfileParameters");
-            alg.setProperty("OutputInstrumentParameterWorkspace",
-                            "Bank1FittedProfileParameters");
-            alg.setProperty("RefinementAlgorithm", "OneStepFit");
-            alg.setProperty("StandardError", "UseInputValue");
-            alg.execute();
-          }
-        
-          void test_FitMonteCarlo() {
-        
-            RefinePowderInstrumentParameters3 alg;
-            alg.initialize();
-            alg.setPropertyValue("InputPeakPositionWorkspace",
-            "Bank1PeakPositions");
-            alg.setProperty("WorkspaceIndex", 0);
-            alg.setProperty("OutputPeakPositionWorkspace",
-            "Bank1FittedPositions");
-            alg.setProperty("InputInstrumentParameterWorkspace",
-                            "Bank1ProfileParameters");
-            alg.setProperty("OutputInstrumentParameterWorkspace",
-                            "Bank1FittedProfileParameters");
-            alg.setProperty("RefinementAlgorithm", "MonteCarlo");
-            alg.setProperty("StandardError", "UseInputValue");
-            alg.setProperty("AnnealingTemperature", 100.0);
-            alg.setProperty("MonteCarloIterations", 100);
-            alg.execute();
-          }
-        
+    AnalysisDataService::Instance().remove("Bank1PeakPositions");
+    AnalysisDataService::Instance().remove("Bank1FittedPositions");
+    AnalysisDataService::Instance().remove("Bank1ProfileParameters");
+    AnalysisDataService::Instance().remove("Bank1FittedProfileParameters");
+  }
+
+  void test_FitNonMonteCarlo() {
+
+    RefinePowderInstrumentParameters3 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputPeakPositionWorkspace", "Bank1PeakPositions");
+    alg.setProperty("WorkspaceIndex", 0);
+    alg.setProperty("OutputPeakPositionWorkspace", "Bank1FittedPositions");
+    alg.setProperty("InputInstrumentParameterWorkspace",
+                    "Bank1ProfileParameters");
+    alg.setProperty("OutputInstrumentParameterWorkspace",
+                    "Bank1FittedProfileParameters");
+    alg.setProperty("RefinementAlgorithm", "OneStepFit");
+    alg.setProperty("StandardError", "UseInputValue");
+    alg.execute();
+  }
+
+  void test_FitMonteCarlo() {
+
+    RefinePowderInstrumentParameters3 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputPeakPositionWorkspace", "Bank1PeakPositions");
+    alg.setProperty("WorkspaceIndex", 0);
+    alg.setProperty("OutputPeakPositionWorkspace", "Bank1FittedPositions");
+    alg.setProperty("InputInstrumentParameterWorkspace",
+                    "Bank1ProfileParameters");
+    alg.setProperty("OutputInstrumentParameterWorkspace",
+                    "Bank1FittedProfileParameters");
+    alg.setProperty("RefinementAlgorithm", "MonteCarlo");
+    alg.setProperty("StandardError", "UseInputValue");
+    alg.setProperty("AnnealingTemperature", 100.0);
+    alg.setProperty("MonteCarloIterations", 100);
+    alg.execute();
+  }
 };
 #endif /* MANTID_CURVEFITTING_RefinePowderInstrumentParameters3TEST_H_ */

@@ -974,8 +974,8 @@ bool RefinePowderInstrumentParameters3::doFitFunction(
   outss << "Fit function: " << m_positionFunc->asString()
         << "\nData To Fit: \n";
   for (size_t i = 0; i < dataws->x(0).size(); ++i)
-    outss << dataws->x(wsindex)[i] << "\t\t" << dataws->y(wsindex)[i]
-          << "\t\t" << dataws->e(wsindex)[i] << "\n";
+    outss << dataws->x(wsindex)[i] << "\t\t" << dataws->y(wsindex)[i] << "\t\t"
+          << dataws->e(wsindex)[i] << "\n";
   g_log.information() << outss.str();
 
   // 1. Create and setup fit algorithm
