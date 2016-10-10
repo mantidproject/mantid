@@ -34,6 +34,7 @@ class IndirectILLReductionTest(unittest.TestCase):
         self._run = ws_loaded
 
     def tearDown(self):
+        pass
         # set cached facility and datasearch directory
         #config.setFacility(self._def_fac)
         #config.setDataSearchDirs(self._data_dirs)
@@ -99,12 +100,12 @@ class IndirectILLReductionTest(unittest.TestCase):
 
         # Further workspace characteristics
         self.assertEqual(size / 2, mtd['red'].getItem(0).blocksize())
-        self.assertEqual(size    , mtd['red_raw'].getItem(0).blocksize())
+        self.assertEqual(size, mtd['red_raw'].getItem(0).blocksize())
         self.assertEqual(size / 2, mtd['red_left'].getItem(0).blocksize())
         self.assertEqual(size / 2, mtd['red_right'].getItem(0).blocksize())
-        self.assertEqual(size    , mtd['red_monitor'].getItem(0).blocksize())
-        self.assertEqual(size    , mtd['red_mnorm'].getItem(0).blocksize())
-        self.assertEqual(size    , mtd['red_detgrouped'].getItem(0).blocksize())
+        self.assertEqual(size, mtd['red_monitor'].getItem(0).blocksize())
+        self.assertEqual(size, mtd['red_mnorm'].getItem(0).blocksize())
+        self.assertEqual(size, mtd['red_detgrouped'].getItem(0).blocksize())
 
         self.assertEqual(self._run.getNumberHistograms(), mtd['red_raw'].getItem(0).getNumberHistograms())
         self.assertEqual("Success!", CheckWorkspacesMatch(self._run, mtd['red_raw'].getItem(0)))

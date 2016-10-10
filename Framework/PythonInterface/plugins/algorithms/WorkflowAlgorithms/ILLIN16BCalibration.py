@@ -22,7 +22,7 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
 
 
     def summary(self):
-        return 'Creates a calibration workspace in energy trnasfer for IN16B.'
+        return 'Creates a calibration workspace in energy transfer for IN16B.'
 
 
     def PyInit(self):
