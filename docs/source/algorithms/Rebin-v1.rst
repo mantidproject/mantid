@@ -196,5 +196,5 @@ Output:
 .. categories::
 
 .. sourcelink::
-	:h: ../../../Framework/Algorithms/inc/MantidAlgorithms/Rebin.h
-	:cpp: ../../../Framework/Algorithms/src/Rebin.cpp
+	:h: ../Framework/Algorithms/inc/MantidAlgorithms/Rebin.h
+	:cpp: ../Framework/Algorithms/src/Rebin.cpp
