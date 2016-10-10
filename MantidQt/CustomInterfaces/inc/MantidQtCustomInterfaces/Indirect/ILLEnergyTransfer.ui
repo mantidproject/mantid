@@ -284,6 +284,9 @@
         <property name="label" stdset="0">
          <string>Background Run</string>
         </property>
+        <property name="multipleFiles" stdset="0">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
      </layout>
@@ -413,6 +416,9 @@
         </property>
         <property name="algorithmAndProperty" stdset="0">
          <string>IndirectILLReduction|VanadiumRun</string>
+        </property>
+        <property name="multipleFiles" stdset="0">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -680,6 +686,38 @@
     <hint type="destinationlabel">
      <x>354</x>
      <y>314</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>gbOptions</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>218</x>
+     <y>112</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>295</x>
+     <y>359</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>gbOptions</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>85</x>
+     <y>112</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>295</x>
+     <y>359</y>
     </hint>
    </hints>
   </connection>

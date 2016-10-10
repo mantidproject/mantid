@@ -370,14 +370,14 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(MultipleFileProperty('Run',extensions=['nxs']),
                              doc='File path of run (s).')
 
-        self.declareProperty(FileProperty('VanadiumRun', '',
-                                          action=FileAction.OptionalLoad,
-                                          extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('VanadiumRun',
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=['nxs']),
                              doc='File path of vanadium run. Used for UnmirrorOption=[5, 7]')
 
-        self.declareProperty(FileProperty('BackgroundRun', '',
-                                          action=FileAction.OptionalLoad,
-                                          extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('BackgroundRun',
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=['nxs']),
                              doc='File path of background run.')
 
         self.declareProperty(FileProperty('MapFile', '',
@@ -494,8 +494,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     def setUp(self):
 
         self._run_file = self.getPropertyValue('Run')
-        self._vanadium_file = self.getPropertyValue('VanadiumRun')
-        self._background_file = self.getPropertyValue('BackgroundRun')
+        self._vanadium_file = self.getPropertyValue('VanadiumRun').replace(',','+')
+        self._background_file = self.getPropertyValue('BackgroundRun').replace(',','+')
         self._analyser = self.getPropertyValue('Analyser')
         self._map_file = self.getPropertyValue('MapFile')
         self._calib_ws = _ws_or_none(self.getPropertyValue('CalibrationWorkspace'))
