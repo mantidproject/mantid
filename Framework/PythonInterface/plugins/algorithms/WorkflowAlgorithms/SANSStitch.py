@@ -1,5 +1,7 @@
 ﻿# pylint: disable=no-init,invalid-name,too-many-arguments,too-few-public-methods
 
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, AnalysisDataService
 from mantid.kernel import Direction, Property, StringListValidator, UnitFactory, \
@@ -67,7 +69,7 @@ class SANSStitch(DataProcessorAlgorithm):
             MatrixWorkspaceProperty('LABNormCan', '', optional=PropertyMode.Optional, direction=Direction.Input),
             doc='Low angle bank normalization workspace in Q')
 
-        allowedModes = StringListValidator(self._make_mode_map().keys())
+        allowedModes = StringListValidator(list(self._make_mode_map().keys()))
 
         self.declareProperty('Mode', 'None', validator=allowedModes, direction=Direction.Input,
                              doc='What to fit. Free parameter(s).')

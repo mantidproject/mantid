@@ -1,5 +1,7 @@
 #pylint: disable=no-init,invalid-name
 # Algorithm to start Bayes programs
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, \
                        WorkspaceGroupProperty, Progress
