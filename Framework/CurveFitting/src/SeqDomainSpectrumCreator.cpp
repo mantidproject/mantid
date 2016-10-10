@@ -145,7 +145,7 @@ Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(
 
   // Assign x-values on all histograms
   for (size_t i = 0; i < m_matrixWorkspace->getNumberHistograms(); ++i) {
-	outputWs->setSharedX(i, m_matrixWorkspace->sharedX(i));
+    outputWs->setSharedX(i, m_matrixWorkspace->sharedX(i));
   }
 
   if (m_manager && !outputWorkspacePropertyName.empty()) {
