@@ -77,7 +77,7 @@ if ( NOT TARGET mantidpython )
   else ()
     set ( PARAVIEW_PYTHON_PATHS "" )
   endif ()
-  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx ${CMAKE_CURRENT_BINARY_DIR}/mantidpython_osx @ONLY )
+  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx ${PROJECT_BINARY_DIR}/mantidpython_osx @ONLY )
 
   add_custom_target ( mantidpython ALL
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -175,7 +175,7 @@ endif ()
 install ( DIRECTORY ${PYQT4_PYTHONPATH}/uic DESTINATION ${BIN_DIR}/PyQt4 )
 
 # Add launcher script for mantid python
-install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantidpython_osx_install
+install ( PROGRAMS ${PROJECT_BINARY_DIR}/mantidpython_osx_install
           DESTINATION MantidPlot.app/Contents/MacOS/
           RENAME mantidpython )
 # Add launcher application for a Mantid IPython console
