@@ -1,6 +1,12 @@
 #pylint: disable=no-init,too-many-instance-attributes,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
+from mantid.simpleapi import *
+from mantid.kernel import StringListValidator, Direction
+from mantid.api import DataProcessorAlgorithm, PropertyMode, AlgorithmFactory, \
+                       FileProperty, FileAction, MatrixWorkspaceProperty
+from mantid import config, logger, mtd
+
 import os.path
 import numpy as np
 from mantid.simpleapi import *

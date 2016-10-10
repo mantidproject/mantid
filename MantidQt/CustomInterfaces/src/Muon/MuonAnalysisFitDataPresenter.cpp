@@ -24,6 +24,33 @@ typedef MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MuonAnalysisFitDataPresenter");
+/// log a warning
+void logWarning(const std::string &message) { g_log.warning(message); }
+
+/// suffix for raw data workspaces
+const std::string RAW_DATA_SUFFIX("_Raw");
+const size_t RAW_SUFFIX_LENGTH(4);
+
+/// Test if workspace contains raw data
+bool isRawData(const std::string &name) {
+  const size_t nameLength = name.length();
+  if (nameLength > RAW_SUFFIX_LENGTH) {
+    return 0 ==
+           name.compare(nameLength - RAW_SUFFIX_LENGTH, RAW_SUFFIX_LENGTH,
+                        RAW_DATA_SUFFIX);
+  } else {
+    return false;
+  }
+}
+
+/// Take off the "_Raw" suffix, if present
+std::string removeRawSuffix(const std::string &name) {
+  if (isRawData(name)) {
+    return name.substr(0, name.length() - RAW_SUFFIX_LENGTH);
+  } else {
+    return name;
+  }
+}
 }
 
 namespace MantidQt {
@@ -81,7 +108,8 @@ MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
     const RebinOptions &rebinArgs)
     : m_fitBrowser(fitBrowser), m_dataSelector(dataSelector),
       m_dataLoader(dataLoader), m_timeZero(timeZero), m_rebinArgs(rebinArgs),
-      m_grouping(grouping), m_plotType(plotType) {
+      m_grouping(grouping), m_plotType(plotType),
+      m_fitRawData(fitBrowser->rawData()), m_overwrite(false) {
   // Ensure this is set correctly at the start
   handleSimultaneousFitLabelChanged();
   doConnect();
@@ -102,6 +130,8 @@ void MuonAnalysisFitDataPresenter::doConnect() {
             SLOT(openSequentialFitDialog()));
     connect(fitBrowser, SIGNAL(functionUpdateAndFitRequested(bool)), this,
             SLOT(checkAndUpdateFitLabel(bool)));
+    connect(fitBrowser, SIGNAL(fitRawDataClicked(bool)), this,
+            SLOT(handleFitRawData(bool)));
   }
   if (const QObject *dataSelector = dynamic_cast<QObject *>(m_dataSelector)) {
     connect(dataSelector, SIGNAL(dataPropertiesChanged()), this,
@@ -139,6 +169,7 @@ void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(bool overwrite) {
     createWorkspacesToFit(names);
     updateWorkspaceNames(names);
     m_fitBrowser->allowSequentialFits(!isMultipleRuns());
+    updateFitLabelFromRuns();
   }
 }
 
@@ -244,6 +275,11 @@ MuonAnalysisFitDataPresenter::generateWorkspaceNames(bool overwrite) const {
 std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
     const std::string &instrument, const std::string &runString,
     bool overwrite) const {
+  // If no instrument or runs, no workspaces needed
+  if (instrument.empty() || runString.empty()) {
+    return {};
+  }
+
   // From view, get names of all workspaces needed
   std::vector<std::string> workspaceNames;
   const auto groups = m_dataSelector->getChosenGroups();
@@ -301,7 +337,8 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
         const std::string wsName =
             overwrite ? MuonAnalysisHelper::generateWorkspaceName(params)
                       : getUniqueName(params);
-        workspaceNames.push_back(wsName);
+        workspaceNames.push_back(m_fitRawData ? wsName + RAW_DATA_SUFFIX
+                                              : wsName);
       }
     }
   }
@@ -321,7 +358,7 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
   Mantid::API::Workspace_sptr outputWS;
 
   // parse name to get runs, periods, groups etc
-  auto params = MuonAnalysisHelper::parseWorkspaceName(name);
+  auto params = MuonAnalysisHelper::parseWorkspaceName(removeRawSuffix(name));
 
   // load original data - need to get filename(s) of individual run(s)
   QStringList filenames;
@@ -354,8 +391,9 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
       }
     }
 
-    // Rebin params: use the same as MuonAnalysis uses
-    analysisOptions.rebinArgs = getRebinParams(correctedData);
+    // Rebin params: use the same as MuonAnalysis uses, UNLESS this is raw data
+    analysisOptions.rebinArgs =
+        isRawData(name) ? "" : getRebinParams(correctedData);
     analysisOptions.loadedTimeZero = loadedData.timeZero;
     analysisOptions.timeZero = m_timeZero;
     analysisOptions.timeLimits.first = m_dataSelector->getStartTime();
@@ -374,22 +412,34 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
 }
 
 /**
- * Generates rebin parameter string from options passed in by MuonAnalysis
+ * Generates rebin parameter string from options passed in by MuonAnalysis.
+ * On error, returns empty params (no rebinning).
  * @param ws :: [input] Workspace to get bin size from
  * @returns :: parameter string for rebinning
  */
 std::string MuonAnalysisFitDataPresenter::getRebinParams(
     const Mantid::API::Workspace_sptr ws) const {
+  // First check for workspace group. If it is, use first entry
+  if (const auto &group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+    if (group->size() > 0) {
+      return getRebinParams(group->getItem(0));
+    } else {
+      logWarning("Could not get rebin params from empty group");
+      return "";
+    }
+  }
+
   std::string params = "";
   if (m_rebinArgs.first == RebinType::FixedRebin) {
     try {
       const double step = std::stod(m_rebinArgs.second);
-      auto mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+      const auto &mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
       if (mws) {
         const double binSize = mws->dataX(0)[1] - mws->dataX(0)[0];
         params = boost::lexical_cast<std::string>(step * binSize);
       }
-    } catch (const std::exception &) {
+    } catch (const std::exception &err) {
+      logWarning("Could not get rebin params: " + std::string(err.what()));
       params = "";
     }
   } else if (m_rebinArgs.first == RebinType::VariableRebin) {
@@ -615,10 +665,16 @@ void MuonAnalysisFitDataPresenter::openSequentialFitDialog() {
  * If user chooses not to overwrite, increment the label to avoid overwriting
  * the previous fit.
  *
- * @param seq :: [input] Whether fit is sequential (UNUSED)
+ * If fit is sequential, do nothing because we will not use this label. Instead,
+ * user will choose a label in the sequential fit dialog.
+ *
+ * @param sequentialFit :: [input] Whether fit is sequential or not
  */
-void MuonAnalysisFitDataPresenter::checkAndUpdateFitLabel(bool seq) {
-  Q_UNUSED(seq);
+void MuonAnalysisFitDataPresenter::checkAndUpdateFitLabel(bool sequentialFit) {
+  if (sequentialFit) {
+    return; // label not used so no need to check it
+  }
+
   if (isSimultaneousFit()) {
     auto &ads = AnalysisDataService::Instance();
     const auto &label = m_dataSelector->getSimultaneousFitLabel().toStdString();
@@ -694,8 +750,18 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(const QString &wsName) {
   m_dataSelector->setWorkspaceIndex(0u); // always has only one spectrum
 
   // Set selected groups/pairs and periods here too
-  m_dataSelector->setChosenGroup(QString::fromStdString(wsParams.itemName));
-  m_dataSelector->setChosenPeriod(QString::fromStdString(wsParams.periods));
+  // (unless extra groups/periods are already selected, in which case don't
+  // unselect them)
+  const QString &groupToSet = QString::fromStdString(wsParams.itemName);
+  const QString &periodToSet = QString::fromStdString(wsParams.periods);
+  const auto &groups = m_dataSelector->getChosenGroups();
+  const auto &periods = m_dataSelector->getPeriodSelections();
+  if (!groups.contains(groupToSet)) {
+    m_dataSelector->setChosenGroup(groupToSet);
+  }
+  if (!periodToSet.isEmpty() && !periods.contains(periodToSet)) {
+    m_dataSelector->setChosenPeriod(periodToSet);
+  }
 }
 
 /**
@@ -704,6 +770,43 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(const QString &wsName) {
  */
 bool MuonAnalysisFitDataPresenter::isMultipleRuns() const {
   return m_dataSelector->getRuns().contains(QRegExp("-|,"));
+}
+
+/**
+ * Handle "fit raw data" selected/deselected
+ * Update stored value
+ * Create raw workspaces if necessary
+ * @param enabled :: [input] Whether option has been selected or unselected
+ * @param updateWorkspaces :: [input] Whether to create workspaces if they don't
+ * exist
+ */
+void MuonAnalysisFitDataPresenter::handleFitRawData(bool enabled,
+                                                    bool updateWorkspaces) {
+  m_fitRawData = enabled;
+  if (updateWorkspaces) {
+    handleSelectedDataChanged(m_overwrite);
+  }
+}
+
+/**
+ * When run numbers are changed, update the simultaneous fit label.
+ * If it's a user-set label, leave it alone, otherwise set the label to the run
+ * number string.
+ *
+ * Assume labels with digits, '-', ',' are default (e.g. "15189-91") and
+ * anything else is user-set.
+ */
+void MuonAnalysisFitDataPresenter::updateFitLabelFromRuns() {
+  // Don't change the fit label if it's a user-set one
+  const auto &label = m_dataSelector->getSimultaneousFitLabel().toStdString();
+  const bool isDefault =
+      label.find_first_not_of("0123456789-,") == std::string::npos;
+  if (isDefault) {
+    // replace with current run string
+    const auto &runString = m_dataSelector->getRuns();
+    m_dataSelector->setSimultaneousFitLabel(runString);
+    m_fitBrowser->setSimultaneousLabel(runString.toStdString());
+  }
 }
 
 } // namespace CustomInterfaces

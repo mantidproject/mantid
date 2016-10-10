@@ -80,6 +80,9 @@ void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
  * @param max The upper end of the color scale.
  */
 void ColorUpdater::colorScaleChange(double min, double max) {
+  if (min >= max)
+    return;
+
   this->m_minScale = min;
   this->m_maxScale = max;
 
