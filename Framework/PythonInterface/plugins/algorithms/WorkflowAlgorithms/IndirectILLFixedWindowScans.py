@@ -122,6 +122,7 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
     _out_ws = None
     _analyser = None
     _reflection = None
+    selected_runs = None
 
     def category(self):
         return 'Workflow\\Reduction'

@@ -13,7 +13,6 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -122,6 +121,8 @@ void Qxy::exec() {
   // Set the progress bar (1 update for every one percent increase in progress)
   Progress prog(this, 0.05, 1.0, numSpec);
 
+  const auto &spectrumInfo = inputWorkspace->spectrumInfo();
+
   //  PARALLEL_FOR2(inputWorkspace,outputWorkspace)
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
     //    PARALLEL_START_INTERUPT_REGION
@@ -192,8 +193,7 @@ void Qxy::exec() {
     // constructed once per spectrum
     GravitySANSHelper grav;
     if (doGravity) {
-      grav = GravitySANSHelper(inputWorkspace->spectrumInfo(), i,
-                               getProperty("ExtraLength"));
+      grav = GravitySANSHelper(spectrumInfo, i, getProperty("ExtraLength"));
     }
 
     for (int j = static_cast<int>(numBins) - 1; j >= static_cast<int>(wavStart);
@@ -235,7 +235,7 @@ void Qxy::exec() {
         double &outputBinY = outputWorkspace->dataY(yIndex)[xIndex];
         double &outputBinE = outputWorkspace->dataE(yIndex)[xIndex];
 
-        if (boost::math::isnan(outputBinY)) {
+        if (std::isnan(outputBinY)) {
           outputBinY = outputBinE = 0;
         }
         // Add the contents of the current bin to the 2D array.

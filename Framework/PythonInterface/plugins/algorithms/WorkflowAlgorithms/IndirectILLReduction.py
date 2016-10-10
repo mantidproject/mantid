@@ -8,7 +8,6 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid import config, mtd, logger
 
-# first the helpers
 
 ws_or_none = lambda s: mtd[s] if s != '' else None
 
@@ -179,8 +178,8 @@ def energy_formula(ws):
     size = len(x)
     mid = float((size - 1) / 2)
     gRun = mtd[ws].getRun()
-    delta_energy = 0
-    scale = 1.e-3  # from micro ev to milli ev
+    delta_energy = 0.
+    scale = 1000 # from micro ev to milli ev
 
     if gRun.hasProperty('Doppler.maximum_delta_energy'):
         delta_energy = gRun.getLogData('Doppler.maximum_delta_energy').value  # max energy in micro eV
@@ -193,8 +192,7 @@ def energy_formula(ws):
         logger.warning('Doppler maximum delta energy is 0 micro eV')
 
     if delta_energy != 0:
-        formula = '(x-{0})*{1}'.format(mid, delta_energy / mid * scale)
-
+        formula = '(x/{0} - 1)*{1}'.format(mid, delta_energy / mid * scale)
         logger.information('Energy transform formula: ' + formula)
     else:
         # Center the data for elastic fixed window scan, for integration over the elastic peak
@@ -302,6 +300,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
     # Integer
     _unmirror_option = None
+    _mirror_sense = None
 
     # Other
     _instrument_name = None
@@ -427,13 +426,25 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                              doc="Group name for the left workspace(s).")
 
     def validateInputs(self):
-
-        # this is run before setUp, so need to get properties also here!
+        # This is run before setUp, so need to get properties also here!
         issues = dict()
         # Unmirror options 5 and 7 require a Vanadium run as input workspace
         if (self.getProperty('UnmirrorOption').value == 5 or self.getProperty('UnmirrorOption').value == 7) \
-                and self.getPropertyValue('VanadiumRun') == "":
+                and not self.getPropertyValue('VanadiumRun'):
             issues['VanadiumRun'] = 'Given unmirror option requires vanadium run to be set'
+
+        # Check if calibration workspace seems of correct shape, if specified
+        if self.getPropertyValue('CalibrationWorkspace'):
+            __calib = mtd[self.getPropertyValue('CalibrationWorkspace')]
+            if __calib is None:
+                issues['CalibrationWorkspace'] = 'Calibration workspace does not exist.'
+            else:
+                if isinstance(__calib,WorkspaceGroup):
+                    issues['CalibrationWorkspace'] = 'Calibration workspace should not be a workspace group.'
+                else:
+                    if __calib.blocksize() != 1:
+                        issues['CalibrationWorkspace'] = 'Calibration workspace should contain only ' \
+                                                         'one column of calibration constants.'
 
         return issues
 
@@ -471,7 +482,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     def PyExec(self):
 
         self.setUp()
-        # this must be Load, to be able to treat multiple files
+        # This must be Load, to be able to treat multiple files
         Load(Filename=self._run_file, OutputWorkspace=self._red_ws)
 
         self.log().information('Loaded .nxs file(s) : {0}'.format(self._run_file))
@@ -578,19 +589,19 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.log().notice('Loading vanadium run #{0}'.format(self._vanadium_file))
         # call IndirectILLReduction for vanadium run with unmirror 2 and 3 to get left and right
 
-        left_van = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
-                                        Reflection=self._reflection, SumRuns=True, UnmirrorOption=2)
+        left_vanadium = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
+                                             Reflection=self._reflection, SumRuns=True, UnmirrorOption=2)
 
-        right_van = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
-                                         Reflection=self._reflection, SumRuns=True, UnmirrorOption=3)
+        right_vanadium = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
+                                              Reflection=self._reflection, SumRuns=True, UnmirrorOption=3)
 
         # if vanadium run is not of QENS type, output will be empty, exit with error
-        if not left_van or not right_van:
+        if not left_vanadium or not right_vanadium:
             self.log().error('Failed to load vanadium run #{0}. Not a QENS type? Aborting.'.format(self._vanadium_file))
         else:
             # note, that run number will be prepended, so need to rename
-            RenameWorkspace(left_van.getItem(0).getName(),'left_van')
-            RenameWorkspace(right_van.getItem(0).getName(), 'right_van')
+            RenameWorkspace(left_vanadium.getItem(0).getName(),'left_van')
+            RenameWorkspace(right_vanadium.getItem(0).getName(), 'right_van')
 
     def load_background_run(self):
         """
@@ -685,22 +696,24 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # Calibrate to vanadium calibration workspace if specified
         # note, this is a one-column calibration workspace
         if self._calib_ws is not None:
-            Divide(LHSWorkspace=red, RHSWorkspace=self._calib_ws, OutputWorkspace=red)
-            self._debug(red, vnorm)
+            if self._calib_ws.getNumberHistograms() == mtd[red].getNumberHistograms():
+                Divide(LHSWorkspace=red, RHSWorkspace=self._calib_ws, OutputWorkspace=red)
+                self._debug(red, vnorm)
+            else:
+                self.log().error("Calibration workspace has wrong dimensions.")
 
         # For all kind of data
         if self._scan_type == 'FWS':
             ReplaceSpecialValues(InputWorkspace=red, OutputWorkspace=red, NaNValue=0, NaNError=0)
 
         # Check mirror_sense
-        mirror_sense = 0
         if mtd[red].getRun().hasProperty('Doppler.mirror_sense'):
             # Get mirror_sense from run
             # mirror_sense 14 : two wings
             # mirror_sense 16 : one wing
-            mirror_sense = mtd[red].getRun().getLogData('Doppler.mirror_sense').value
+            self._mirror_sense = mtd[red].getRun().getLogData('Doppler.mirror_sense').value
 
-        if mirror_sense == 14:
+        if self._mirror_sense == 14:
             # Number of bins
             size = mtd[red].blocksize()
 
@@ -726,36 +739,31 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 mask_reduced_ws(mtd[left], xmin_left, xmax_left)
                 mask_reduced_ws(mtd[right], xmin_right, xmax_right)
 
-                # Convert left and right wing to energy (there was a reason to do it here and not after the perform_unmirror)
+                # Convert left and right wing axis conversions, vanadium runs are already converted
                 convert_to_energy(left)
                 convert_to_energy(right)
-                left = ConvertSpectrumAxis(InputWorkspace=left, Target='Theta', EMode='Indirect')
-                right = ConvertSpectrumAxis(InputWorkspace=right, Target='Theta', EMode='Indirect')
+                ConvertSpectrumAxis(InputWorkspace=left, OutputWorkspace=left, Target='Theta', EMode='Indirect')
+                ConvertSpectrumAxis(InputWorkspace=right, OutputWorkspace=right, Target='Theta', EMode='Indirect')
 
         # Energy transfer according to mirror_sense and unmirror_option
         start_bin = 0
         end_bin = 0
 
-        if mirror_sense == 14 and self._unmirror_option == 0:
+        if self._mirror_sense == 14 and self._unmirror_option == 0:
             self.log().warning('Input run #{0} has two wings, no energy transfer can be performed'.format(run))
-        elif mirror_sense == 14 and self._unmirror_option > 0:
+        elif self._mirror_sense == 14 and self._unmirror_option > 0:
             # QENS: Reduced workspace will be in energy transfer since both, left and right workspaces are in energy transfer
             # FWS: Reduced workspace will not be in energy transfer since Vanadium will not be used -- good
             start_bin, end_bin = perform_unmirror(red, left, right, self._unmirror_option)
-        elif mirror_sense == 16:
+        elif self._mirror_sense == 16:
             self.log().information('Input run #{0} has one wing, perform energy transfer'.format(run))
             convert_to_energy(red)
         else:
             self.log().warning('Input run #{0}: no Doppler.mirror_sense defined'.format(run))
             convert_to_energy(red)
 
-        ConvertSpectrumAxis(InputWorkspace=red, OutputWorkspace=red, Target='Theta', EMode='Indirect')
-
         # Mask corrupted bins according to shifted workspaces or monitor range
-        # Reload X-values (now in meV, except for unmirror=0 and mirro_sense=14)
-
-
-        # Initialisation, please note that masking with these values does not work
+        # Initialisation
         xmin = 0
         xmax = mtd[red].blocksize()
 
@@ -766,7 +774,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             # Shifted workspaces
             xmin = np.maximum(xmin, start_bin)
             xmax = np.minimum(xmax, end_bin)
-        elif mirror_sense == 14 and self._unmirror_option == 0:
+        elif self._mirror_sense == 14 and self._unmirror_option == 0:
+            # Reload X-values (now in meV)
             x = mtd[red].readX(0)
             xmin = xmin_left
             xmax = xmax_right + int(x[-1] / 2)
@@ -774,10 +783,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 # Mask mid bins
                 self.log().debug('Mask red ws bins between {0}, {1}'.format(xmax_left, int(size / 2) + xmin_right - 1))
                 MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[xmax_left], XMax=x[int(size / 2) + xmin_right])
-        elif mirror_sense == 14 and self._unmirror_option > 0:
+        elif self._mirror_sense == 14 and self._unmirror_option > 0:
             xmin = np.maximum(xmin_left, xmin_right)
             xmax = np.minimum(xmax_left, xmax_right)
-        elif mirror_sense == 16:
+        elif self._mirror_sense == 16:
             # One wing, no right workspace
             xmin, xmax = monitor_range(mon)
 
@@ -787,12 +796,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # cleanup by-products if not needed
         if not self._debug_mode:
             DeleteWorkspace(mon)
-            if mirror_sense == 14:
+            if self._mirror_sense == 14:
                 DeleteWorkspace(left)
                 DeleteWorkspace(right)
-        if mirror_sense == 14:
-            DeleteWorkspace('__left_mon')
-            DeleteWorkspace('__right_mon')
 
     def _debug(self, ws, name):
         """
@@ -823,8 +829,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.log().debug(str(output))
 
         if output.size == 0:
-            self.log().error('Runs were neither of QENS nor of FWS type.')
-            raise RuntimeError('Runs were neither of QENS nor of FWS type.')
+            self.log().error('No runs found for input option {0}'.format(self._scan_type))
+            raise RuntimeError('No runs found for input option {0}'.format(self._scan_type))
 
         # group and set the main output
         GroupWorkspaces(InputWorkspaces=output[:, 0], OutputWorkspace=self._out_suffixes[0])
@@ -833,23 +839,28 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # group optional ws in debug mode
         if self._debug_mode:
 
-            for i in range(1, len(self._out_suffixes)):
+            for i in range(1, 5):
                 GroupWorkspaces(InputWorkspaces=output[:, i], OutputWorkspace=self._out_suffixes[i])
             self.setProperty('RawWorkspace', self._out_suffixes[1])
             self.setProperty('DetWorkspace', self._out_suffixes[2])
             self.setProperty('MonitorWorkspace', self._out_suffixes[3])
             self.setProperty('MnormWorkspace', self._out_suffixes[4])
-            if self._scan_type == 'QENS':
+
+            if self._scan_type == 'QENS' and self._mirror_sense == 14:
                 self.setProperty('LeftWorkspace', self._out_suffixes[5])
+                GroupWorkspaces(InputWorkspaces=output[:, 5], OutputWorkspace=self._out_suffixes[5])
                 self.setProperty('RightWorkspace', self._out_suffixes[6])
+                GroupWorkspaces(InputWorkspaces=output[:, 6], OutputWorkspace=self._out_suffixes[6])
 
             if self._background_file:
                 GroupWorkspaces(InputWorkspaces=output[:, 7], OutputWorkspace=self._out_suffixes[7])
                 self.setProperty('BsubWorkspace', self._out_suffixes[7])
+                GroupWorkspaces(InputWorkspaces=output[:, 7], OutputWorkspace=self._out_suffixes[7])
 
             if self._calib_ws is not None:
                 GroupWorkspaces(InputWorkspaces=output[:, 8], OutputWorkspace=self._out_suffixes[8])
                 self.setProperty('VnormWorkspace', self._out_suffixes[8])
+                GroupWorkspaces(InputWorkspaces=output[:, 8], OutputWorkspace=self._out_suffixes[8])
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLReduction)

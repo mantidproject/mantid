@@ -10,7 +10,6 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "PropertyManagerHelper.h"
 
@@ -112,29 +111,6 @@ public:
     matrixWS.init(5, 5, 5);
     TSM_ASSERT_EQUALS("The expected number of points have not been returned.",
                       25, matrixWS.getNPoints());
-  }
-
-  void testGetHistogramIndex() {
-    MatrixWSIndexCalculator indexCalculator(5);
-    HistogramIndex histogramIndexA = indexCalculator.getHistogramIndex(4);
-    HistogramIndex histogramIndexB = indexCalculator.getHistogramIndex(5);
-    HistogramIndex histogramIndexC = indexCalculator.getHistogramIndex(10);
-    TSM_ASSERT_EQUALS("histogram index has not been calculated correctly.", 0,
-                      histogramIndexA);
-    TSM_ASSERT_EQUALS("histogram index has not been calculated correctly.", 1,
-                      histogramIndexB);
-    TSM_ASSERT_EQUALS("histogram index has not been calculated correctly.", 2,
-                      histogramIndexC);
-  }
-
-  void testGetBinIndex() {
-    MatrixWSIndexCalculator indexCalculator(5);
-    BinIndex binIndexA = indexCalculator.getBinIndex(4, 0);
-    BinIndex binIndexB = indexCalculator.getBinIndex(12, 2);
-    TSM_ASSERT_EQUALS("bin index has not been calculated correctly.", 4,
-                      binIndexA);
-    TSM_ASSERT_EQUALS("bin index has not been calculated correctly.", 2,
-                      binIndexB);
   }
 
   /**

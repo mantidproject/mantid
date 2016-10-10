@@ -10,10 +10,10 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <fstream>
+#include <cmath>
 
 namespace Mantid {
 namespace DataHandling {
@@ -498,8 +498,8 @@ inline void writeBankLine(std::stringstream &out, const std::string &bintype,
 /** Fix error if value is less than zero or infinity
   */
 inline double fixErrorValue(const double value) {
-  if (value <= 0. || boost::math::isnan(value) ||
-      boost::math::isinf(value)) // Negative errors cannot be read by GSAS
+  if (value <= 0. ||
+      !std::isfinite(value)) // Negative errors cannot be read by GSAS
     return 0.;
   else
     return value;
@@ -516,7 +516,7 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
   double bc2 = (X[1] - X[0]) * 32;
   // Logarithmic step
   double bc4 = (X[1] - X[0]) / X[0];
-  if (boost::math::isnan(fabs(bc4)) || boost::math::isinf(bc4))
+  if (!std::isfinite(bc4))
     bc4 = 0; // If X is zero for BANK
 
   // Write out the data header
