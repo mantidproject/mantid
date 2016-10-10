@@ -13,7 +13,6 @@ namespace Mantid {
 //----------------------------------------------------------------------------
 namespace Geometry {
 class ParameterMap;
-class NearestNeighbours;
 }
 
 namespace API {
@@ -96,27 +95,6 @@ public:
   //@}
 
   void populateInstrumentParameters() override;
-
-  /** @name Nearest neighbours */
-  /// Build and populate the NearestNeighbours object
-  void buildNearestNeighbours(const bool ignoreMaskedDetectors = false) const;
-  /// Causes the nearest neighbours map to be rebuilt
-  void rebuildNearestNeighbours();
-  /// Query the NearestNeighbours object for a detector
-  std::map<specnum_t, Mantid::Kernel::V3D>
-  getNeighbours(const Geometry::IDetector *comp, const double radius = 0.0,
-                const bool ignoreMaskedDetectors = false) const;
-  /// Query the NearestNeighbours object for a given spectrum number using a
-  /// search radius
-  std::map<specnum_t, Mantid::Kernel::V3D>
-  getNeighbours(specnum_t spec, const double radius,
-                const bool ignoreMaskedDetectors = false) const;
-  /// Query the NearestNeighbours object for a given spectrum number using the
-  /// direct number of nearest neighbours
-  std::map<specnum_t, Mantid::Kernel::V3D>
-  getNeighboursExact(specnum_t spec, const int nNeighbours,
-                     const bool ignoreMaskedDetectors = false) const;
-  //@}
 
   virtual void updateSpectraUsing(const SpectrumDetectorMapping &map);
   /// Build the default spectra mapping, most likely wanted after an instrument
@@ -607,10 +585,6 @@ private:
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfo;
 
 protected:
-  /// Shared pointer to NearestNeighbours object
-  mutable boost::shared_ptr<Mantid::Geometry::NearestNeighbours>
-      m_nearestNeighbours;
-
   /// Getter for the dimension id based on the axis.
   std::string getDimensionIdFromAxis(const int &axisIndex) const;
 };
