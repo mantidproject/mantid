@@ -205,7 +205,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/FitParameter.h
 	inc/MantidGeometry/Instrument/Goniometer.h
 	inc/MantidGeometry/Instrument/IDFObject.h
-	inc/MantidGeometry/Instrument/INearestNeighbours.h
 	inc/MantidGeometry/Instrument/InstrumentDefinitionParser.h
 	inc/MantidGeometry/Instrument/NearestNeighbours.h
 	inc/MantidGeometry/Instrument/ObjCompAssembly.h

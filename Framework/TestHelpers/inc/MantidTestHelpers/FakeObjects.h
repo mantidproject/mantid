@@ -29,7 +29,6 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/INearestNeighbours.h"
 #include "MantidKernel/cow_ptr.h"
 
 using namespace Mantid::API;

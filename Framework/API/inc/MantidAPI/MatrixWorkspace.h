@@ -13,7 +13,7 @@ namespace Mantid {
 //----------------------------------------------------------------------------
 namespace Geometry {
 class ParameterMap;
-class INearestNeighbours;
+class NearestNeighbours;
 }
 
 namespace API {
@@ -608,7 +608,7 @@ private:
 
 protected:
   /// Shared pointer to NearestNeighbours object
-  mutable boost::shared_ptr<Mantid::Geometry::INearestNeighbours>
+  mutable boost::shared_ptr<Mantid::Geometry::NearestNeighbours>
       m_nearestNeighbours;
 
   /// Getter for the dimension id based on the axis.
