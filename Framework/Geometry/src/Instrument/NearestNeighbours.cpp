@@ -253,7 +253,7 @@ NearestNeighbours::getSpectraDetectors(
     const std::vector<detid_t> detIDs(citr->second.begin(), citr->second.end());
     IDetector_const_sptr det = instrument->getDetectorG(detIDs);
     // Always ignore monitors and ignore masked detectors if requested.
-    bool heedMasking = !m_bIgnoreMaskedDetectors && det->isMasked();
+    bool heedMasking = m_bIgnoreMaskedDetectors && det->isMasked();
     if (!det->isMonitor() && !heedMasking) {
       spectra.emplace(citr->first, det);
     }
