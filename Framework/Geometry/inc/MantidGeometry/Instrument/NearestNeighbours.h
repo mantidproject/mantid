@@ -55,13 +55,13 @@ public:
   /// Constructor with an instrument and a spectra map
   NearestNeighbours(boost::shared_ptr<const Instrument> instrument,
                     const ISpectrumDetectorMapping &spectraMap,
-                    bool ignoreMaskedDetectors = true);
+                    bool ignoreMaskedDetectors = false);
 
   /// Constructor with an instrument and a spectra map and number of neighbours
   NearestNeighbours(int nNeighbours,
                     boost::shared_ptr<const Instrument> instrument,
                     const ISpectrumDetectorMapping &spectraMap,
-                    bool ignoreMaskedDetectors = true);
+                    bool ignoreMaskedDetectors = false);
 
   // Neighbouring spectra by radius
   std::map<specnum_t, Mantid::Kernel::V3D>
