@@ -1,43 +1,11 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPyDialog.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-TomoToolConfigTomoPyDialog::TomoToolConfigTomoPyDialog(QWidget *parent)
-    : QDialog(parent) {
-  labelRun = new QLabel("Runnable script");
-  editRun = new QLineEdit("/work/imat/");
-  hRun = new QHBoxLayout();
-  hRun->addWidget(labelRun);
-  hRun->addWidget(editRun);
-
-  labelOpt = new QLabel("Command line options");
-  editOpt = new QLineEdit("/work/imat");
-  hOpt = new QHBoxLayout();
-  hOpt->addWidget(labelOpt);
-
-  hOpt->addWidget(editOpt);
-
-  okButton = new QPushButton("Ok");
-  cancelButton = new QPushButton("Cancel");
-  hBut = new QHBoxLayout();
-  hBut->insertStretch(0, 1);
-  hBut->addWidget(okButton);
-  hBut->addWidget(cancelButton);
-
-  layout = new QGridLayout();
-  layout->addLayout(hRun, 0, 0);
-  layout->addLayout(hOpt, 1, 0);
-  layout->addLayout(hOpt, 2, 0);
-
-  connect(okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
-  connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancelClicked()));
-}
-
-TomoToolConfigTomoPyDialog::~TomoToolConfigTomoPyDialog() {}
-
-void TomoToolConfigTomoPyDialog::setUpDialog() {
+void TomoToolConfigTomoPyDialog::setupDialogUi() {
   m_tomoPyUi.setupUi(this);
   m_tomoPyUi.comboBox_method->clear();
 
@@ -48,14 +16,23 @@ void TomoToolConfigTomoPyDialog::setUpDialog() {
   }
 }
 
-int TomoToolConfigTomoPyDialog::execute() {
-  // TODO enum?
-  return this->exec();
+/** Calls the execute of the QDialog
+*/
+int TomoToolConfigTomoPyDialog::executeQt() { return this->exec(); }
+
+void TomoToolConfigTomoPyDialog::setupToolConfig() {
+  // move to member/global variable and use more space OR keep here
+  const auto methods = ToolConfigTomoPy::methods();
+
+  int mi = m_tomoPyUi.comboBox_method->currentIndex();
+  // TODO: for the output path, probably better to take the sample path,
+  // then up one level
+  m_toolSettings.tomoPy = ToolConfigTomoPy(
+      m_runPath, m_pathOut + m_localOutNameAppendix, m_paths.pathDarks(),
+      m_paths.pathOpenBeam(), m_paths.pathSamples());
+  // maybe comboBox_method->currentText
+  m_toolMethod = methods[mi].first;
 }
-
-void TomoToolConfigTomoPyDialog::okClicked() {}
-
-void TomoToolConfigTomoPyDialog::cancelClicked() {}
 
 } // Custominterfaces
 } // MantidQt

@@ -4,36 +4,26 @@
 #include "ui_TomoToolConfigTomoPy.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 
-#include <QLabel>
-#include <QLineEdit>
-#include <QHBoxLayout>
-#include <QPushButton>
-#include <QGridLayout>
-
 namespace MantidQt {
 namespace CustomInterfaces {
-class TomoToolConfigTomoPyDialog : public QDialog, public TomoToolConfigDialogBase {
+class TomoToolConfigTomoPyDialog : public QDialog,
+                                   public TomoToolConfigDialogBase {
   Q_OBJECT
 
 public:
-  TomoToolConfigTomoPyDialog(QWidget *parent = 0);
-  ~TomoToolConfigTomoPyDialog() override;
-
-  void setUpDialog() override;
-  int execute() override;
-
-private slots:
-  void okClicked();
-  void cancelClicked();
+  TomoToolConfigTomoPyDialog(QWidget *parent = 0)
+	  : QDialog(parent), TomoToolConfigDialogBase(DEFAULT_TOOL_METHOD) {}
+  ~TomoToolConfigTomoPyDialog() override {}
 
 private:
-  Ui::TomoToolConfigTomoPy m_tomoPyUi;
+  void setupToolConfig() override;
+  void setupDialogUi() override;
+  int executeQt() override;
 
-  QLabel *labelRun, *labelOpt;
-  QLineEdit *editRun, *editOpt;
-  QHBoxLayout *hRun, *hOpt, *hBut;
-  QGridLayout *layout;
-  QPushButton *okButton, *cancelButton;
+  const std::string DEFAULT_TOOL_NAME = "TomoPy";
+  const std::string DEFAULT_TOOL_METHOD = "gridrec";
+
+  Ui::TomoToolConfigTomoPy m_tomoPyUi;
 };
 } // CustomInterfaces
 } // MantidQt

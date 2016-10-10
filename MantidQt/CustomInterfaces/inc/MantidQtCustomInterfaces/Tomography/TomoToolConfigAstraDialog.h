@@ -4,35 +4,26 @@
 #include "ui_TomoToolConfigAstra.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 
-#include <QLabel>
-#include <QLineEdit>
-#include <QHBoxLayout>
-#include <QPushButton>
-#include <QGridLayout>
-
 namespace MantidQt {
 namespace CustomInterfaces {
-class TomoToolConfigAstraDialog : public QDialog, public TomoToolConfigDialogBase {
+class TomoToolConfigAstraDialog : public QDialog,
+                                  public TomoToolConfigDialogBase {
   Q_OBJECT
 public:
-  TomoToolConfigAstraDialog(QWidget *parent = 0);
-  ~TomoToolConfigAstraDialog();
+  TomoToolConfigAstraDialog(QWidget *parent = 0)
+      : QDialog(parent), TomoToolConfigDialogBase(DEFAULT_TOOL_METHOD) {}
 
-  void setUpDialog() override;
-  int execute() override;
-
-private slots:
-  void okClicked();
-  void cancelClicked();
+  ~TomoToolConfigAstraDialog() {}
 
 private:
-  Ui::TomoToolConfigAstra m_astraUi;
+  void setupToolConfig() override;
+  void setupDialogUi() override;
+  int executeQt() override;
 
-  QLabel *labelRun, *labelOpt;
-  QLineEdit *editRun, *editOpt;
-  QHBoxLayout *hRun, *hOpt, *hBut;
-  QGridLayout *layout;
-  QPushButton *okButton, *cancelButton;
+  const std::string DEFAULT_TOOL_NAME = "Astra";
+  const std::string DEFAULT_TOOL_METHOD = "FBP3D_CUDA";
+
+  Ui::TomoToolConfigAstra m_astraUi;
 };
 
 } // CustomInterfaces

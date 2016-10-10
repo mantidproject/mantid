@@ -1,45 +1,25 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigCustomDialog.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 TomoToolConfigCustomDialog::TomoToolConfigCustomDialog(QWidget *parent)
-    : QDialog(parent) {
-  labelRun = new QLabel("Runnable script");
-  editRun = new QLineEdit("/work/imat/");
-  hRun = new QHBoxLayout();
-  hRun->addWidget(labelRun);
-  hRun->addWidget(editRun);
-
-  labelOpt = new QLabel("Command line options");
-  editOpt = new QLineEdit("/work/imat");
-  hOpt = new QHBoxLayout();
-  hOpt->addWidget(labelOpt);
-
-  hOpt->addWidget(editOpt);
-
-  okButton = new QPushButton("Ok");
-  cancelButton = new QPushButton("Cancel");
-  hBut = new QHBoxLayout();
-  hBut->insertStretch(0, 1);
-  hBut->addWidget(okButton);
-  hBut->addWidget(cancelButton);
-
-  layout = new QGridLayout();
-  layout->addLayout(hRun, 0, 0);
-  layout->addLayout(hOpt, 1, 0);
-  layout->addLayout(hOpt, 2, 0);
-
-  connect(okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
-  connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancelClicked()));
-}
+    : QDialog(parent) {}
 
 TomoToolConfigCustomDialog::~TomoToolConfigCustomDialog() {}
 
-void TomoToolConfigCustomDialog::setUpDialog() { m_customUi.setupUi(this); }
-int TomoToolConfigCustomDialog::execute() { return this->exec(); }
+void TomoToolConfigCustomDialog::setupToolConfig() {
 
-void TomoToolConfigCustomDialog::okClicked() {}
+  // None of the other paths really matter, because the user could've changed
+  // them, so ignore them and load the current ones on the dialogue
+  QString run = m_customUi.lineEdit_runnable->text();
+  QString opts = m_customUi.textEdit_cl_opts->toPlainText();
 
-void TomoToolConfigCustomDialog::cancelClicked() {}
+  m_toolSettings.custom =
+      ToolConfigCustom(run.toStdString(), opts.toStdString());
+}
 
+void TomoToolConfigCustomDialog::setupDialogUi() { m_customUi.setupUi(this); }
+
+int TomoToolConfigCustomDialog::executeQt() { return this->exec(); }
 } // CustomInterfaces
 } // MantidQt

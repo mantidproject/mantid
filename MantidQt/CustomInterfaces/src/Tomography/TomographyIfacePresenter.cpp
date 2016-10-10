@@ -207,7 +207,36 @@ void TomographyIfacePresenter::processToolChanged() {
     m_view->enableConfigTool(true);
   }
 
+  // if no tool is selected
+  if("" == tool) {
+	  return;
+  }
+
+  // initialise tool dialogue
+  // if null, hasnt been initialised yet
+  if (!m_configDialog.get()){
+	m_configDialog = std::unique_ptr<TomoToolConfigDialogBase>(
+	  TomoToolConfigDialogBase::getCorrectDialogForToolFromString(
+		  tool));
+	std::cout << "initialising dialogue" + tool + "\n";
+
+  }else { // if not null, we've changed to a new dialogue
+	  std::cout << "Resetting dialogue\n";
+	  m_configDialog.reset();
+	  m_configDialog = std::unique_ptr<TomoToolConfigDialogBase>(
+		  TomoToolConfigDialogBase::getCorrectDialogForToolFromString(
+			  tool));
+  }
+
+  // set selected tool
   m_model->usingTool(tool);
+
+  std::cout << "Set the selected tool successfully\n";
+
+  // and getSelectedToolMethod will give the default tool, as it was just initialised
+  m_model->setCurrentToolMethod(m_configDialog->getSelectedToolMethod());
+  std::cout << "Set the selected METHOD successfully" + m_configDialog->getSelectedToolMethod()+ "\n";
+
 }
 
 /**
@@ -364,16 +393,22 @@ void TomographyIfacePresenter::processLogout() {
 
 void TomographyIfacePresenter::processSetupReconTool() {
   const std::string &currentReconTool = m_view->currentReconTool();
+  // save currentReconTool string to model
+  // retrieve, if the same, don't create a new Dialog pointer
+  // if not the same, create new Dialog
   if (TomographyIfaceModel::g_CCPiTool != currentReconTool) {
 
+	// TODO save previous state?
     // wrap in unique_ptr
-    auto base = std::unique_ptr<TomoToolConfigDialogBase>(
-        TomoToolConfigDialogBase::getCorrectDialogForToolFromString(
-            currentReconTool));
 
-    // give pointer to showToolConfig
-    m_view->showToolConfig(base.get());
-    m_model->updateReconToolsSettings(m_view->reconToolsSettings());
+	// give pointer to showToolConfig, so it can run the dialogue
+    m_view->showToolConfig(m_configDialog.get());
+
+	// update the reconstruction setting for the tool
+    m_model->updateReconToolsSettings(m_configDialog->getReconToolSettings());
+
+	// update the selected method
+	m_model->setCurrentToolMethod(m_configDialog->getSelectedToolMethod());
 
     // TODO: this would make sense if the reconstruct action/button
     // was only enabled after setting up at least one tool
@@ -397,9 +432,21 @@ void TomographyIfacePresenter::processRunRecon() {
   m_model->updatePrePostProcSettings(m_view->prePostProcSettings());
   // center of rotation and regions
   m_model->updateImageStackPreParams(m_view->currentROIEtcParams());
+
+  // TODO just update & get m_selectedToolMethod
+  // actually this should be updated when setup has been clicked
+  // WHAT do we do if the setup hasn't been clicked, and the new tool is
+  // selected, but the method change hasn't been reflected?!
+  // ^ get method from dialog??
+  //m_model->updateToolMethod(toolMethodHere);
   m_model->updateTomopyMethod(m_view->tomopyMethod());
   m_model->updateAstraMethod(m_view->astraMethod());
+
+  std::cout << "Current tool:" << m_model->usingTool() << " and Current method: " << m_model->getCurrentToolMethod();
+  return;
   const std::string &resource = m_view->currentComputeResource();
+
+  // todo test single method & tool
   if (m_model->localComputeResource() == resource) {
     subprocessRunReconLocal();
   } else {

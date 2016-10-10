@@ -122,6 +122,9 @@ private:
   // for periodic update of the job status table/tree
   QTimer *m_keepAliveTimer;
   QThread *m_keepAliveThread;
+
+  std::unique_ptr<TomoToolConfigDialogBase> m_configDialog;
+
 };
 
 } // namespace CustomInterfaces

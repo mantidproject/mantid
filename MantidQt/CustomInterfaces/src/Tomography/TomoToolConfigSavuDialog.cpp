@@ -1,4 +1,6 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigSavuDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
+
 #include <MantidAPI/TableRow.h>
 #include <MantidAPI/WorkspaceFactory.h>
 #include <Poco/String.h>
@@ -22,18 +24,24 @@ TomoToolConfigSavuDialog::TomoToolConfigSavuDialog(QWidget *parent)
   m_currPlugins->addColumns("str", "name", 4);
 }
 
-void TomoToolConfigSavuDialog::setUpDialog() {
-  m_savuUi.setupUi(this);
-  initSavuWindow();
-  this->setWindowModality(Qt::ApplicationModal);
-}
-
-int TomoToolConfigSavuDialog::execute() {
+int TomoToolConfigSavuDialog::executeQt() {
   this->show();
   QEventLoop el;
   connect(this, SIGNAL(destroyed()), &el, SLOT(quit()));
   return el.exec();
 }
+
+void TomoToolConfigSavuDialog::setupToolConfig() {
+  throw Mantid::Kernel::Exception::NotImplementedError(
+      "setupToolConfig not implemented");
+}
+
+void TomoToolConfigSavuDialog::setupDialogUi() {
+  m_savuUi.setupUi(this);
+  initSavuWindow();
+  this->setWindowModality(Qt::ApplicationModal);
+}
+
 void TomoToolConfigSavuDialog::initSavuWindow() {
   // geometry, etc. niceties
   // on the left (just plugin names) 1/2, right: 2/3

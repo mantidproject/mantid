@@ -66,7 +66,6 @@ const std::string TomographyIfaceViewQtGUI::g_styleSheetOnline =
     "QPushButton:pressed { background-color: rgb(120, 255, 120); "
     "}";
 
-
 // For paths where Python third party tools are installed, if they're
 // not included in the system python path. For example you could have
 // put the AstraToolbox package in
@@ -168,7 +167,7 @@ DECLARE_SUBWINDOW(TomographyIfaceViewQtGUI)
 TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), ITomographyIfaceView(), m_tabROIW(nullptr),
       m_tabImggFormats(nullptr), m_processingJobsIDs(), m_currentComputeRes(""),
-      m_currentReconTool(""), m_imgPath(""), m_logMsgs(), m_systemSettings(),
+      m_currentReconTool("TomoPy"), m_imgPath(""), m_logMsgs(), m_systemSettings(),
       m_toolsSettings(), m_settings(),
       m_settingsGroup("CustomInterfaces/Tomography"),
       m_settingsSubGroupEnergy(m_settingsGroup + "/EnergyBands"),
@@ -242,17 +241,16 @@ void TomographyIfaceViewQtGUI::initLayout() {
 
 // Build a unique (and hidden) name for the table ws
 std::string TomographyIfaceViewQtGUI::createUniqueNameHidden() {
-	std::string name;
-	do {
-		// with __ prefix => hidden
-		name = "__TomoConfigTableWS_Seq_" +
-			boost::lexical_cast<std::string>(g_nameSeqNo++);
-	} while (AnalysisDataService::Instance().doesExist(name));
+  std::string name;
+  do {
+    // with __ prefix => hidden
+    name = "__TomoConfigTableWS_Seq_" +
+           boost::lexical_cast<std::string>(g_nameSeqNo++);
+  } while (AnalysisDataService::Instance().doesExist(name));
 
-	return name;
+  return name;
 }
 size_t TomographyIfaceViewQtGUI::g_nameSeqNo = 0;
-
 
 void TomographyIfaceViewQtGUI::doSetupGeneralWidgets() {
   // Menu Items
@@ -993,7 +991,9 @@ void TomographyIfaceViewQtGUI::compResourceIndexChanged(int /* i */) {
 
 void TomographyIfaceViewQtGUI::runToolIndexChanged(int /* i */) {
   QComboBox *rt = m_uiTabRun.comboBox_run_tool;
-  if (!rt)
+  std::cout << "runToolIndexChanged\n";
+  // this shouldn't segfault for nullptr, because lazy evaluation
+  if (!rt || rt->count() < 1)
     return;
 
   m_currentReconTool = rt->currentText().toStdString();
@@ -1123,18 +1123,27 @@ void TomographyIfaceViewQtGUI::updateSystemSettings(
  */
 void TomographyIfaceViewQtGUI::showToolConfig(
     TomoToolConfigDialogBase *dialog) {
-  const std::string name = "Astra";
-  QString run = "/work/imat/phase_commissioning/scripts/Imaging/IMAT/"
-                "tomo_reconstruct.py"; // m_uiAstra.lineEdit_runnable->text();
-  static size_t reconIdx = 1;
 
+  // set up all the information we need for the dialog
+  std::string run =
+      m_uiTabSystemSettings.lineEdit_remote_scripts_base_dir->text()
+          .toStdString() +
+      "/scripts/Imaging/IMAT/" + "tomo_reconstruct.py";
+  TomoPathsConfig paths = currentPathsConfig();
+  std::string pathOut = Poco::Path::expand(
+      g_defOutPathLocal + "/" +
+      m_uiTabRun.lineEdit_experiment_reference->text().toStdString());
+  static size_t reconIdx = 1;
   const std::string localOutNameAppendix =
       std::string("/processed/") + "reconstruction_" + std::to_string(reconIdx);
 
-  dialog->setUpDialog();
+  dialog->setupDialog(run, paths, pathOut, localOutNameAppendix);
+
+  // do we do anything with the parameter?
   int res = dialog->execute();
 
-  // TODO resolve result here? or notify presenter (it will have to keep the pointer somewhere)
+  // TODO resolve result here? or notify presenter (it will have to keep the
+  // pointer somewhere)
   //  if (g_TomoPyTool == name) {
   //	 dialog->setUpDialog();
   //    int res = dialog->execute();
@@ -1275,32 +1284,30 @@ void TomographyIfaceViewQtGUI::jobCancelClicked() {
 * Uses the algorithm LoadSavuTomoConfig
 */
 void TomographyIfaceViewQtGUI::loadSavuTomoConfig(
-	std::string &filePath, Mantid::API::ITableWorkspace_sptr &currentPlugins) {
-	// try to load tomo reconstruction parametereization file
-	auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-		"LoadSavuTomoConfig");
-	alg->initialize();
-	alg->setPropertyValue("Filename", filePath);
-	alg->setPropertyValue("OutputWorkspace", createUniqueNameHidden());
-	try {
-		alg->execute();
-	}
-	catch (std::runtime_error &e) {
-		throw std::runtime_error(
-			std::string("Error when trying to load tomographic reconstruction "
-				"parameter file: ") +
-			e.what());
-	}
+    std::string &filePath, Mantid::API::ITableWorkspace_sptr &currentPlugins) {
+  // try to load tomo reconstruction parametereization file
+  auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "LoadSavuTomoConfig");
+  alg->initialize();
+  alg->setPropertyValue("Filename", filePath);
+  alg->setPropertyValue("OutputWorkspace", createUniqueNameHidden());
+  try {
+    alg->execute();
+  } catch (std::runtime_error &e) {
+    throw std::runtime_error(
+        std::string("Error when trying to load tomographic reconstruction "
+                    "parameter file: ") +
+        e.what());
+  }
 
-	// new processing plugins list
-	try {
-		currentPlugins = alg->getProperty("OutputWorkspace");
-	}
-	catch (std::exception &e) {
-		userError("Could not load config file", "Failed to load the file "
-			"with the following error: " +
-			std::string(e.what()));
-	}
+  // new processing plugins list
+  try {
+    currentPlugins = alg->getProperty("OutputWorkspace");
+  } catch (std::exception &e) {
+    userError("Could not load config file", "Failed to load the file "
+                                            "with the following error: " +
+                                                std::string(e.what()));
+  }
 }
 
 /**

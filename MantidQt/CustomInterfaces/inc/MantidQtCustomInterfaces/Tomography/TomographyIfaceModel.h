@@ -153,6 +153,8 @@ public:
 
   void updateTomoPathsConfig(const TomoPathsConfig &tc) { m_pathsConfig = tc; }
 
+  void setCurrentToolMethod(std::string toolMethod);
+  std::string getCurrentToolMethod() { return m_currentToolMethod; }
   // tools not yet available/supported - TODO
   static const std::string g_CCPiTool;
   static const std::string g_SavuTool;
@@ -240,6 +242,7 @@ private:
 
   std::string m_tomopyMethod;
   std::string m_astraMethod;
+  std::string m_currentToolMethod;
 
   // Settings for the pre-/post-processing filters
   TomoReconFiltersSettings m_prePostProcSettings;

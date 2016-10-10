@@ -78,6 +78,10 @@ void TomographyIfaceModel::cleanup() {
   }
 }
 
+void TomographyIfaceModel::setCurrentToolMethod(std::string toolMethod) {
+  m_currentToolMethod = toolMethod;
+}
+
 /**
  * Check that the selected compute resource is listed as supported and
  * usable for the remote manager (if it is not local). Local jobs are
@@ -840,6 +844,8 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
 
   opts.emplace_back("--input-path=" + adaptInputPathForExecution(
                                           m_pathsConfig.pathSamples(), local));
+
+  // TODO i think this is where we check which tool is used
   std::string alg = "alg";
   if (g_TomoPyTool == usingTool())
     alg = m_tomopyMethod;
