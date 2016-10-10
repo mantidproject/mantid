@@ -76,8 +76,7 @@ public:
   neighboursInRadius(specnum_t spectrum, double radius = 0.0) const;
 
   // Neighbouring spectra by
-  std::map<specnum_t, Mantid::Kernel::V3D>
-  neighbours(specnum_t spectrum) const;
+  std::map<specnum_t, Mantid::Kernel::V3D> neighbours(specnum_t spectrum) const;
 
 protected:
   /// Get the spectra associated with all in the instrument

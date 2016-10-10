@@ -331,8 +331,7 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
     DetConstPtr detector = workspace->getDetector(i);
     g_log.debug() << "Current histogram: " << i << '\n';
     specnum_t inSpec = workspace->getSpectrum(i).getSpectrumNo();
-    SpectraDistanceMap neighbours =
-        neighbourInfo.getNeighboursExact(inSpec);
+    SpectraDistanceMap neighbours = neighbourInfo.getNeighboursExact(inSpec);
 
     g_log.debug() << "Current ID: " << inSpec << '\n';
     // Convert from spectrum numbers to workspace indices
