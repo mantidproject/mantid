@@ -1,9 +1,7 @@
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
@@ -23,10 +21,6 @@ using Kernel::V3D;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MayersSampleCorrection)
-
-//------------------------------------------------------------------------------
-// Public members
-//------------------------------------------------------------------------------
 
 /**
  * Constructor

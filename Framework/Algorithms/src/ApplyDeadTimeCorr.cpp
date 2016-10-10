@@ -1,10 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/ApplyDeadTimeCorr.h"
 #include "MantidAPI/EqualBinSizesValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
@@ -24,7 +22,6 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ApplyDeadTimeCorr)
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
    */
 void ApplyDeadTimeCorr::init() {
@@ -44,7 +41,6 @@ void ApplyDeadTimeCorr::init() {
       "The name of the output workspace containing corrected counts");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
    */
 void ApplyDeadTimeCorr::exec() {

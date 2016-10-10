@@ -4,6 +4,7 @@
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataHandling/SaveDetectorsGrouping.h"
 #include "MantidKernel/System.h"
 
