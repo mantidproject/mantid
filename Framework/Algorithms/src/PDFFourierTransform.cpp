@@ -231,7 +231,7 @@ double PDFFourierTransform::determineRho0() {
 void PDFFourierTransform::exec() {
   // get input data
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  auto inputQ = inputWS->dataX(0);                    //  x for input
+  auto inputQ = inputWS->dataX(0);                        //  x for input
   HistogramData::HistogramDx inputDQ(inputQ.size(), 0.0); // dx for input
   if (inputWS->sharedDx(0))
     inputDQ = inputWS->dx(0);
