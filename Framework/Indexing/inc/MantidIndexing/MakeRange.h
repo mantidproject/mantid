@@ -9,7 +9,9 @@
 namespace Mantid {
 namespace Indexing {
 
-/** MakeRange : TODO: DESCRIPTION
+/** Helper function for generating a vector with a range of integers, similar to
+  Python's range(). Return a vector of integers starting at 'first' and eding
+  with 'last' with increments of 1.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
