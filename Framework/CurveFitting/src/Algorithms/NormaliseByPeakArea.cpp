@@ -154,7 +154,6 @@ void NormaliseByPeakArea::createOutputWorkspaces(
       WorkspaceFactory::Instance().create(m_inputWS); // TOF data is not resized
 
   const size_t nhist = m_sumResults ? 1 : yspaceIn->getNumberHistograms();
-  const size_t npts = yspaceIn->blocksize();
 
   m_yspaceWS = WorkspaceFactory::Instance().create(yspaceIn, nhist);
   m_fittedWS = WorkspaceFactory::Instance().create(yspaceIn, nhist);
