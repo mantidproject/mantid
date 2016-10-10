@@ -50,8 +50,9 @@ or, if creating using an already existing vector:
 File Properties
 ~~~~~~~~~~~~~~~
 
-These properties are for capturing and holding the path and filename to
-an external file. File properties have a FileAction property that
+There are two file properties: ``FileProperty`` and ``MultipleFileProperty``.
+These properties are for capturing and holding the path and filenames to
+external file (s). File properties have a FileAction property that
 controls it's purpose and behaviour.
 
 Save :to specify a file to write to, the file may or may not exist
@@ -64,6 +65,8 @@ exist
 If the file property is has a FileAction of Load as is given a relative
 path (such as "input.txt" or "\\data\\input.txt" as its value it will
 search for matching files in this order:
+
+Note, that ``MultipleFileProperty`` supports only Load (default) and OptionalLoad actions.
 
 #. The current directory
 #. The entries in order from the datasearch.directories entry in the
@@ -158,6 +161,8 @@ The validators currently included in Mantid are:
    set of values.
 -  FileValidator - ensures that a file (given as a string property)
    exists (used internally by the FileProperty).
+-  MultiFileValidator - ensures that each file in a given list exists
+   (used internally by the MultipleFileProperty).
 
 In addition, there are a number of validators specifically for use with
 Workspace properties:

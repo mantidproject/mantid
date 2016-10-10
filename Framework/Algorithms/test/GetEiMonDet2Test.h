@@ -215,6 +215,30 @@ public:
     TS_ASSERT(!algorithm.isExecuted())
   }
 
+  void testFailureOnNegativeMonitorWorkspaceIndex() {
+    const double realEi = EI;
+    const auto peaks =
+        peakCentres(100, realEi, std::numeric_limits<double>::max());
+    std::vector<bool> successes(peaks.size(), true);
+    auto eppTable = createEPPTable(peaks, successes);
+    auto ws = createWorkspace();
+    GetEiMonDet2 algorithm;
+    algorithm.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
+    TS_ASSERT(algorithm.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("DetectorEPPTable", eppTable))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("IndexType", "WorkspaceIndex"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Detectors", "1"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "-1"))
+    const std::string exceptionMessage("Monitor cannot be negative.");
+    TS_ASSERT_THROWS_EQUALS(algorithm.execute(), const std::runtime_error &e,
+                            e.what(), exceptionMessage)
+    TS_ASSERT(!algorithm.isExecuted())
+  }
+
   void testFailuroOnNonexistentDetectorIndex() {
     const double realEi = EI;
     const auto peaks =

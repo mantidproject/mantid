@@ -76,10 +76,16 @@ SliceViewer Improvements
 ------------------------
 * When opening the SliceViewer, it will default to showing the first two non-integrated dimensions
 * The SliceViewer now uses bin centres instead of bin edges when slicing on a histogram workspace
+* The SliceViewer will now save the state of the window to a Mantid project file.
 
 VSI Improvements
 ----------------
-* ParaView updated to version 5.1.0
+* ParaView updated to version 5.1.2
+* VSI will now save the state of the window to a Mantid project file.
+
+SpectrumViewer Improvements
+---------------------------
+* The SpectrumViewer will now save the state of the window to a Mantid project file.
 
 Multi-dataset fitting interface improvements
 --------------------------------------------
