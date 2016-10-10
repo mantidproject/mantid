@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/SmoothNeighbours.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/NearestNeighbourInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -315,12 +316,6 @@ void SmoothNeighbours::findNeighboursRectangular() {
 void SmoothNeighbours::findNeighboursUbiqutious() {
   g_log.debug(
       "SmoothNeighbours processing NOT assuming rectangular detectors.");
-  /*
-    This will cause the Workspace to rebuild the nearest neighbours map, so that
-    we can pick-up any of the properties specified
-    for this algorithm in the constructor for the NearestNeighboursObject.
-  */
-  inWS->rebuildNearestNeighbours();
 
   m_prog->resetNumSteps(inWS->getNumberHistograms(), 0.2, 0.5);
   this->progress(0.2, "Building Neighbour Map");
@@ -332,6 +327,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
   m_neighbours.resize(inWS->getNumberHistograms());
 
   bool ignoreMaskedDetectors = getProperty("IgnoreMaskedDetectors");
+  NearestNeighbourInfo neighbourInfo(*inWS, ignoreMaskedDetectors, nNeighbours);
 
   // Cull by radius
   RadiusFilter radiusFilter(Radius);
@@ -377,8 +373,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
     specnum_t inSpec = inWS->getSpectrum(wi).getSpectrumNo();
 
     // Step one - Get the number of specified neighbours
-    SpectraDistanceMap insideGrid =
-        inWS->getNeighboursExact(inSpec, nNeighbours, ignoreMaskedDetectors);
+    SpectraDistanceMap insideGrid = neighbourInfo.getNeighboursExact(inSpec);
 
     // Step two - Filter the results by the radius cut off.
     SpectraDistanceMap neighbSpectra = radiusFilter.apply(insideGrid);
