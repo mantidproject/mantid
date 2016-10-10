@@ -402,39 +402,30 @@ CompositeFunction_sptr IqtFit::createFunction(bool tie) {
 IFunction_sptr IqtFit::createExponentialFunction(const QString &name, bool tie) {
   IFunction_sptr result =
     FunctionFactory::Instance().createFunction("ExpDecay");
-    if (name.startsWith("Exp")) {
-      result->setParameter("Height", m_dblManager->value(m_properties["Intensity"]));
-      result->setParameter("Lifetime", m_dblManager->value(m_properties["Tau"]));
-      result->tie("Height", (m_properties["Intensity"])->valueText().toStdString());
-      result->tie("LifeTime", m_properties["Tau"]->valueText().toStdString());
+  if (name.startsWith("Exp")) {
+    result->setParameter("Height", m_dblManager->value(m_properties[name + ".Intensity"]));
+    result->setParameter("Lifetime", m_dblManager->value(m_properties[name + ".Tau"]));
+    if (tie) {
+      result->tie("Height", m_properties[name + ".Intensity"]->valueText().toStdString());
+      result->tie("Lifetime", m_properties[name + ".Tau"]->valueText().toStdString());
     }
-    else {
-      IFunction_sptr result =
-        FunctionFactory::Instance().createFunction("UserFunction");
-      std::string formula;
-      formula = "Intensity*exp(-(x/Tau)^Beta)";
-      IFunction::Attribute att(formula);
-      result->setAttribute("Formula", att);
-
-
-      QList<QtProperty *> props = m_properties[name]->subProperties();
-      for (int i = 0; i < props.size(); i++) {
-        std::string propName = props[i]->propertyName().toStdString();
-        if (!(name.startsWith("Exp"))) {
-          result->setParameter(propName, m_dblManager->value(props[i]));
-        }
-
-        // add tie if parameter is fixed
-        if (tie || !props[i]->subProperties().isEmpty()) {
-          std::string value = props[i]->valueText().toStdString();
-          result->tie(propName, value);
-        }
-      }
+  }
+  else {
+    IFunction_sptr result =
+      FunctionFactory::Instance().createFunction("StretchExp");
+    result->setParameter("Height", m_dblManager->value(m_properties["Intensity"]));
+    result->setParameter("Lifetime", m_dblManager->value(m_properties["Tau"]));
+    result->setParameter("Stretching", m_dblManager->value(m_properties["Beta"]));
+    if (tie) {
+      result->tie("Height", m_properties[name + ".Intensity"]->valueText().toStdString());
+      result->tie("Lifetime", m_properties[name + ".Tau"]->valueText().toStdString());
+      result->tie("Stretching", m_properties[name + ".Beta"]->valueText().toStdString());
     }
-
-    result->applyTies();
-    return result;
+  }
+  result->applyTies();
+  return result;
 }
+
 
 QtProperty *IqtFit::createExponential(const QString &name) {
   QtProperty *expGroup = m_grpManager->addProperty(name);
@@ -722,7 +713,7 @@ void IqtFit::checkBoxUpdate(QtProperty *prop, bool checked) {
 }
 
 void IqtFit::constrainIntensities(CompositeFunction_sptr func) {
-  std::string paramName = "f1.Intensity";
+  std::string paramName = "f1.Height";
   size_t index = func->parameterIndex(paramName);
 
   switch (m_uiForm.cbFitType->currentIndex()) {
