@@ -771,9 +771,9 @@ class ISISReducer(Reducer):
         idf_path_reducer = self.get_idf_file_path()
         idf_path_reducer = os.path.normpath(idf_path_reducer)
 
-        # Now check if both idf paths and underlying files. If they are, then don't do anything
+        # Now check both underlying files. If they are equal, then don't do anything
         # else switch the underlying instrument
-        if idf_path_reducer == idf_path_workspace and su.are_two_files_identical(idf_path_reducer, idf_path_reducer):
+        if su.are_two_files_identical(idf_path_reducer, idf_path_reducer):
             return
         else:
             logger.notice("Updating the IDF of the Reducer. Switching from " +
