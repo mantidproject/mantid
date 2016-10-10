@@ -45,7 +45,7 @@ Usage
 -----
 
 
-**Example - Calculate Count Rate **
+**Example - Calculate Count Rate**
 
 .. testcode:: ExCalcCountRate
 
