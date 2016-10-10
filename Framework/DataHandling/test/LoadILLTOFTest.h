@@ -53,6 +53,15 @@ public:
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), numberOfHistograms);
 
+    // Check all detectors have a unique and defined detector ID >= 0
+
+    Mantid::detid2index_map detectorMap;
+    TS_ASSERT_THROWS_NOTHING(detectorMap = output->getDetectorIDToWorkspaceIndexMap(true));
+
+    for (auto value : detectorMap){
+      TS_ASSERT(value.first >= 0);
+    }
+
     AnalysisDataService::Instance().clear();
   }
 
