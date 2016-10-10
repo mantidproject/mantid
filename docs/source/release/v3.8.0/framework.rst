@@ -5,6 +5,11 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+Supported Operating Systems
+---------------------------
+
+- We now support Ubuntu Xenial Xerus (16.04) and this will be the final release to support Trusty Tahr (14.04).
+- We now support OS X Yosemite (10.10) and support for OS X Mavericks (10.9) has been dropped.
 
 HistogramData
 -------------
