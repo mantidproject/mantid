@@ -400,30 +400,33 @@ CompositeFunction_sptr IqtFit::createFunction(bool tie) {
 }
 
 IFunction_sptr IqtFit::createExponentialFunction(const QString &name, bool tie) {
-  IFunction_sptr result =
-    FunctionFactory::Instance().createFunction("ExpDecay");
+  IFunction_sptr result;
   if (name.startsWith("Exp")) {
+    IFunction_sptr result =
+      FunctionFactory::Instance().createFunction("ExpDecay");
     result->setParameter("Height", m_dblManager->value(m_properties[name + ".Intensity"]));
     result->setParameter("Lifetime", m_dblManager->value(m_properties[name + ".Tau"]));
     if (tie) {
       result->tie("Height", m_properties[name + ".Intensity"]->valueText().toStdString());
       result->tie("Lifetime", m_properties[name + ".Tau"]->valueText().toStdString());
     }
+    result->applyTies();
+    return result;
   }
   else {
     IFunction_sptr result =
       FunctionFactory::Instance().createFunction("StretchExp");
-    result->setParameter("Height", m_dblManager->value(m_properties["Intensity"]));
-    result->setParameter("Lifetime", m_dblManager->value(m_properties["Tau"]));
-    result->setParameter("Stretching", m_dblManager->value(m_properties["Beta"]));
+    result->setParameter("Height", m_dblManager->value(m_properties[name + ".Intensity"]));
+    result->setParameter("Lifetime", m_dblManager->value(m_properties[name + ".Tau"]));
+    result->setParameter("Stretching", m_dblManager->value(m_properties[name + ".Beta"]));
     if (tie) {
       result->tie("Height", m_properties[name + ".Intensity"]->valueText().toStdString());
       result->tie("Lifetime", m_properties[name + ".Tau"]->valueText().toStdString());
       result->tie("Stretching", m_properties[name + ".Beta"]->valueText().toStdString());
     }
+    result->applyTies();
+    return result;
   }
-  result->applyTies();
-  return result;
 }
 
 
@@ -731,11 +734,11 @@ void IqtFit::constrainIntensities(CompositeFunction_sptr func) {
   case 1: // 2 Exp
   case 3: // 1 Exp & 1 Str
     if (!func->isFixed(index)) {
-      func->tie(paramName, "1-f2.Intensity-f0.A0");
+      func->tie(paramName, "1-f2.Height-f0.A0");
     } else {
       std::string paramValue =
           boost::lexical_cast<std::string>(func->getParameter(paramName));
-      func->tie(paramName, "1-f2.Intensity-f0.A0");
+      func->tie(paramName, "1-f2.Height-f0.A0");
       func->tie(paramName, paramValue);
     }
     break;
