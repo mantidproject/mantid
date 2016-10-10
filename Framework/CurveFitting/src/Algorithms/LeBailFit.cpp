@@ -1452,7 +1452,7 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles,
   size_t numpts = vecInY.size();
 
   const auto &domain = m_dataWS->x(m_wsIndex).rawData();
-  MantidVec vecCalPurePeaks(domain.size(), 0.0);
+  std::vector<double> vecCalPurePeaks(domain.size(), 0.0);
 
   //    Strategy and map
   TableWorkspace_sptr mctablews = getProperty("MCSetupWorkspace");
@@ -1549,7 +1549,7 @@ void LeBailFit::doMarkovChain(const map<string, Parameter> &parammap,
   map<string, Parameter> mapCurrParameter = parammap;
   map<string, Parameter> newparammap = mapCurrParameter;
   // Output vector from
-  MantidVec veccalpurepeaks(vecX.size(), 0.0);
+  std::vector<double> veccalpurepeaks(vecX.size(), 0.0);
 
   // Set starting parameters
   currR = startR;
@@ -1983,11 +1983,11 @@ void LeBailFit::addParameterToMCMinimize(vector<string> &parnamesforMC,
 *
 * @return :: boolean value.  whether all the peaks' parameters are physical.
 */
-bool LeBailFit::calculateDiffractionPattern(const MantidVec &vecX,
-                                            const MantidVec &vecY,
+bool LeBailFit::calculateDiffractionPattern(const std::vector<double> &vecX,
+                                            const std::vector<double> &vecY,
                                             bool inputraw, bool outputwithbkgd,
-                                            const MantidVec &vecBkgd,
-                                            MantidVec &values,
+                                            const std::vector<double> &vecBkgd,
+                                            std::vector<double> &values,
                                             Rfactor &rfactor) {
   vector<double> veccalbkgd;
 
@@ -2423,7 +2423,7 @@ void LeBailFit::applyParameterValues(map<string, Parameter> &srcparammap,
 //                              vector<double> &background) {
 //  UNUSED_ARG(background);
 //
-//  MantidVec &vecSmoothBkgd = m_outputWS->mutableY(SMOOTHEDBKGDINDEX);
+//  std::vector<double> &vecSmoothBkgd = m_outputWS->mutableY(SMOOTHEDBKGDINDEX);
 //
 //  smoothBackgroundAnalytical(wsindex, domain, values, vecSmoothBkgd);
 //}
@@ -2533,9 +2533,9 @@ void LeBailFit::smoothBackgroundAnalytical(size_t wsindex,
 
   /* Below is the original code to modifying from
   // 1. Make data ready
-  MantidVec& vecData = m_dataWS->mutableY(wsindex);
-  MantidVec& vecFitBkgd = m_outputWS->mutableY(CALBKGDINDEX);
-  MantidVec& vecFitBkgdErr = m_outputWS->mutableE(CALBKGDINDEX);
+  std::vector<double>& vecData = m_dataWS->mutableY(wsindex);
+  std::vector<double>& vecFitBkgd = m_outputWS->mutableY(CALBKGDINDEX);
+  std::vector<double>& vecFitBkgdErr = m_outputWS->mutableE(CALBKGDINDEX);
   size_t numpts = vecFitBkgd.size();
   for (size_t i = 0; i < numpts; ++i)
   {
