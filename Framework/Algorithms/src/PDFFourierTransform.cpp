@@ -143,8 +143,8 @@ std::map<string, string> PDFFourierTransform::validateInputs() {
 }
 
 size_t
-PDFFourierTransform::determineQminIndex(const HistogramData::HistogramX &Q,
-                                        const HistogramData::HistogramY &FofQ) {
+PDFFourierTransform::determineQminIndex(const std::vector<double> &Q,
+                                        const std::vector<double> &FofQ) {
   double qmin = getProperty("Qmin");
 
   // check against available Q-range
@@ -176,8 +176,8 @@ PDFFourierTransform::determineQminIndex(const HistogramData::HistogramX &Q,
 }
 
 size_t
-PDFFourierTransform::determineQmaxIndex(const HistogramData::HistogramX &Q,
-                                        const HistogramData::HistogramY &FofQ) {
+PDFFourierTransform::determineQmaxIndex(const std::vector<double> &Q,
+                                        const std::vector<double> &FofQ) {
   double qmax = getProperty("Qmax");
 
   // check against available Q-range
@@ -230,13 +230,13 @@ double PDFFourierTransform::determineRho0() {
 */
 void PDFFourierTransform::exec() {
   // get input data
-  API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  auto &inputQ = inputWS->mutableX(0);                    //  x for input
+  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  auto inputQ = inputWS->dataX(0);                    //  x for input
   HistogramData::HistogramDx inputDQ(inputQ.size(), 0.0); // dx for input
   if (inputWS->sharedDx(0))
     inputDQ = inputWS->dx(0);
-  auto &inputFOfQ = inputWS->mutableY(0);  //  y for input
-  auto &inputDfOfQ = inputWS->mutableE(0); // dy for input
+  auto inputFOfQ = inputWS->dataY(0);  //  y for input
+  auto inputDfOfQ = inputWS->dataE(0); // dy for input
 
   // transform input data into Q/MomentumTransfer
   const std::string inputXunit = inputWS->getAxis(0)->unit()->unitID();
