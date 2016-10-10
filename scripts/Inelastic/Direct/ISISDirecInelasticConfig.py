@@ -164,7 +164,7 @@ class UserProperties(object):
         return os.path.basename(self._rb_dirs[exp_date])
     #
     def get_rb_dir(self,exp_date):
-        """Returns full name name of user's RB folder correspinding to the
+        """Returns full name name of user's RB folder corresponding to the
            experiment, with the data provided.
         """
         return self._rb_dirs[exp_date]
@@ -244,13 +244,17 @@ class UserProperties(object):
             raise RuntimeError("Instrument {0} has to be one of " \
                                "ISIS inelastic instruments".format(instrument))
         if isinstance(start_date, str):
-            start_date = start_date.replace('-', '')
-            if len(start_date) != 8:
-                start_date = '20' + start_date
-            if len(start_date) == 8:
+            if start_date == 'None': # the date of express -- let's make it long in past
+                start_date = '19800101'
                 error = False
             else:
-                error = True
+                start_date = start_date.replace('-', '')
+                if len(start_date) != 8:
+                    start_date = '20' + start_date
+                if len(start_date) == 8:
+                    error = False
+                else:
+                    error = True
         else:
             error = True
         if error:
@@ -308,6 +312,10 @@ class UserProperties(object):
     def get_all_cycles(self):
         """Return list of all cycles the user participates in"""
         return self._instrument.keys()
+    def get_all_rb(self):
+        """Return list of all rb folders the user participates in"""
+        return self._rb_dirs.values()
+
 
 #
 # --------------------------------------------------------------------#
@@ -509,16 +517,18 @@ class MantidConfigDirectInelastic(object):
         return full_source, full_target
 
     #
-    def copy_reduction_sample(self, user_file_description=None,cycle_id=None):
+    def copy_reduction_sample(self, user_file_description=None,cycle_id=None,rb_group=None):
         """copy sample reduction scripts from Mantid script repository
            to user folder.
         """
         if user_file_description is None:
             user_file_description = self.get_user_file_description()
+        if rb_group is None:
+            rb_group = self._user.userID
 
         info_to_copy = self._parse_user_files_description(user_file_description,cycle_id)
         for source_file,dest_file,subst_list in info_to_copy:
-            self._copy_user_file_job(source_file,dest_file,subst_list)
+            self._copy_user_file_job(source_file,dest_file,rb_group,subst_list)
 
     def _copy_and_parse_user_file(self, input_file, output_file, replacemets_list):
         """Method processes file provided for user and replaces list of keywords, describing user
@@ -538,7 +548,7 @@ class MantidConfigDirectInelastic(object):
         fh_targ.close()
 
     #
-    def _copy_user_file_job(self, input_file, output_file, replacement_list=None):
+    def _copy_user_file_job(self, input_file, output_file, rb_group,replacement_list=None):
         """Method copies file provided into the requested destination
            and replaces keys specified in replacement list dictionary with their
            values if replacement_list is provided.
@@ -557,8 +567,9 @@ class MantidConfigDirectInelastic(object):
             self._copy_and_parse_user_file(input_file, output_file, replacement_list)
         os.chmod(output_file, 0777)
 
+        ownership_str = "chown {0}:{1} {2}".format(self._user.userID,rb_group, output_file)
         if platform.system() != 'Windows':
-            os.system("chown {0}:{1} {2}".format(self._user.userID, self._user.rb_id, output_file))
+            os.system(ownership_str)
         # Set up the file creation and modification dates to the users start date
         start_date = self._user.start_date
         file_time = time.mktime(start_date.timetuple())
@@ -704,7 +715,8 @@ class MantidConfigDirectInelastic(object):
             raise RuntimeError("User with fedID {0} does not exist. Create such user folder first".format(self._fedid))
         # pylint: disable=W0212
         # bad practice but I need all rb_dires, not the current one
-        for rb_folder in theUser._rb_dirs.values():
+        all_rbf = theUser.get_all_rb();
+        for rb_folder in all_rbf:
             if not os.path.exists(str(rb_folder)):
                 raise RuntimeError(
                     "Experiment folder with {0} does not exist. Create such folder first".format(rb_folder))
@@ -801,15 +813,14 @@ class MantidConfigDirectInelastic(object):
         for folder in all_data_folders[1:]:
             data_dir += ';' + os.path.abspath('{0}'.format(folder))
 
-        # pylint: disable=W0212
-        all_rb_folders = self._user._rb_dirs
-        for folder in all_rb_folders.values():
+        all_rb_folders = self._user.get_all_rb()
+        for folder in all_rb_folders:
             data_dir += ';' + os.path.abspath('{0}'.format(folder))
 
         self._dynamic_configuration.append('datasearch.directories=' + map_mask_dir + ';' + data_dir)
 
     #
-    def generate_config(self):
+    def generate_config(self,key_users_list=None):
         """Save generated Mantid configuration file into user's home folder
            and copy other files, necessary for Mantid to work properly
         """
@@ -830,10 +841,18 @@ class MantidConfigDirectInelastic(object):
         self.make_map_mask_links(user_path)
 
         users_cycles = self._user.get_all_cycles()
+        users_rb     = self._user.get_all_rb();
+        # extract rb folder without path
+        users_rb     = map(lambda x : os.path.basename(x),users_rb)
         #
-        for cycle in users_cycles:
+        for cycle,rb in zip(users_cycles,users_rb):
+            if key_users_list:
+                key_user = str(key_users_list[rb])
+                if self._fedid != key_user:
+                    continue
+
             instr = self._user.get_instrument(cycle)
-            self.copy_reduction_sample(self.get_user_file_description(instr),cycle)
+            self.copy_reduction_sample(self.get_user_file_description(instr),cycle,rb)
         #
 
 
