@@ -116,7 +116,7 @@ class VesuvioResolution(PythonAlgorithm):
         fit = mantid.api.AlgorithmManager.createUnmanaged('Fit')
         fit.initialize()
         fit.setChild(True)
-        mantid.simpleapi.set_properties(fit, Function=function, InputWorkspace=workspace, MaxIterations=0,
+        mantid.simpleapi.set_properties(fit, function, InputWorkspace=workspace, MaxIterations=0,
                                         CreateOutput=True, Output=fit_naming_stem,
                                         WorkspaceIndex=self._workspace_index,
                                         OutputCompositeMembers=True)
