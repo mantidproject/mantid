@@ -2358,7 +2358,6 @@ FitPowderDiffPeaks::genOutputFittedPatternWorkspace(std::vector<double> pattern,
                                                     int workspaceindex) {
   // 1. Init
   const auto &X = m_dataWS->x(workspaceindex);
-  const auto &Y = m_dataWS->y(workspaceindex);
 
   if (pattern.size() != X.size()) {
     stringstream errmsg;
