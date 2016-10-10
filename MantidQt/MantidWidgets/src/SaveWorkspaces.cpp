@@ -265,20 +265,22 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem *> &wspaces,
       MatrixWorkspace_sptr matrix_workspace =
           boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
       if (matrix_workspace) {
-        if (matrix_workspace->getInstrument()->getName() == "SANS2D")
+        if (matrix_workspace->getInstrument()->getName() == "SANS2D") {
           saveCommands += "'front-detector, rear-detector'";
-        if (matrix_workspace->getInstrument()->getName() == "LOQ")
+        }
+        if (matrix_workspace->getInstrument()->getName() == "LOQ") {
           saveCommands += "'HAB, main-detector-bank'";
-      } else {
-        // g_log.wa
+        }
+
+        // Add the geometry information
+        emit updateGeometryInformation();
+        // Remove the first three characters, since they are unwanted
+        saveCommands += ", Geometry='" + m_geometryID + "', SampleHeight=" +
+                        m_sampleHeight + ", SampleWidth=" + m_sampleWidth +
+                        ", SampleThickness=" + m_sampleThickness;
       }
     }
-    // Add the geometry information
-    emit updateGeometryInformation();
-    // Remove the first three characters, since they are unwanted
-    saveCommands += ", Geometry='" + m_geometryID + "', SampleHeight=" +
-                    m_sampleHeight + ", SampleWidth=" + m_sampleWidth +
-                    ", SampleThickness=" + m_sampleThickness;
+
     saveCommands += ")\n";
   }
   return saveCommands;

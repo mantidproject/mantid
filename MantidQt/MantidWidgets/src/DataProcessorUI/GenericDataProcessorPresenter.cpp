@@ -42,16 +42,18 @@ namespace MantidWidgets {
 * @param processor : A DataProcessorProcessingAlgorithm
 * @param postprocessor : A DataProcessorPostprocessingAlgorithm
 * workspaces
+* @param loader : The algorithm responsible for loading data
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
     const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
         preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
-    const DataProcessorPostprocessingAlgorithm &postprocessor)
+    const DataProcessorPostprocessingAlgorithm &postprocessor,
+    const std::string &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_whitelist(whitelist), m_preprocessMap(preprocessMap),
-      m_processor(processor), m_postprocessor(postprocessor),
+      m_processor(processor), m_postprocessor(postprocessor), m_loader(loader),
       m_postprocess(true), m_mainPresenter(), m_tableDirty(false) {
 
   // Column Options must be added to the whitelist
@@ -526,7 +528,7 @@ GenericDataProcessorPresenter::loadRun(const std::string &run,
   // We'll just have to load it ourselves
   const std::string filename = instrument + run;
   const std::string outputName = prefix + run;
-  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create("Load");
+  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create(m_loader);
   algLoadRun->initialize();
   algLoadRun->setProperty("Filename", filename);
   algLoadRun->setProperty("OutputWorkspace", outputName);
