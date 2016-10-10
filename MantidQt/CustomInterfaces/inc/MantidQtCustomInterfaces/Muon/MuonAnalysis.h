@@ -244,6 +244,9 @@ private slots:
   /// Called when compatibility mode is turned on/off
   void compatibilityModeChanged(int state);
 
+  /// Called when "overwrite" is changed
+  void updateDataPresenterOverwrite(int state);
+
 private:
   /// Initialize local Python environment
   void initLocalPython() override;

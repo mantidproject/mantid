@@ -61,7 +61,8 @@ const std::string MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX{"MuonSimulFit_"};
 */
 MuonFitPropertyBrowser::MuonFitPropertyBrowser(QWidget *parent,
                                                QObject *mantidui)
-    : FitPropertyBrowser(parent, mantidui) {}
+    : FitPropertyBrowser(parent, mantidui), m_additionalLayout(nullptr),
+      m_widgetSplitter(nullptr) {}
 
 /**
 * Initialise the muon fit property browser.
@@ -227,6 +228,19 @@ void MuonFitPropertyBrowser::doubleChanged(QtProperty *prop) {
     } else { // it could be an attribute
       h->setAttribute(prop);
     }
+  }
+}
+
+/** Called when a bool property changed
+ * @param prop :: A pointer to the property
+ */
+void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
+  if (prop == m_rawData) {
+    const bool val = m_boolManager->value(prop);
+    emit fitRawDataClicked(val);
+  } else {
+    // defer to parent class
+    FitPropertyBrowser::boolChanged(prop);
   }
 }
 
