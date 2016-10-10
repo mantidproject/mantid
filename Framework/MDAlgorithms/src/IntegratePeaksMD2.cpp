@@ -21,7 +21,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/Progress.h"
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 #include <gsl/gsl_integration.h>
 #include <fstream>
 
@@ -587,7 +587,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         signal = 0.0;
         if (integrationOption.compare("Sum") == 0) {
           for (size_t j = peakMin; j <= peakMax; j++)
-            if (!boost::math::isnan(yy[j]) && !boost::math::isinf(yy[j]))
+            if (std::isfinite(yy[j]))
               signal += yy[j];
         } else {
           gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);

@@ -115,7 +115,7 @@ public:
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-PDCalibration::PDCalibration() {}
+PDCalibration::PDCalibration() : m_tofMin(0), m_tofMax(0), m_hasDasIds(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

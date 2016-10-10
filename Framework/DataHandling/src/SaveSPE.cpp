@@ -12,7 +12,7 @@
 #include "MantidKernel/CompositeValidator.h"
 
 #include "Poco/File.h"
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 #include <cstdio>
 #include <cmath>
@@ -272,7 +272,7 @@ void SaveSPE::check_and_copy_spectra(const MantidVec &inSignal,
     Error.resize(inSignal.size());
   }
   for (size_t i = 0; i < inSignal.size(); i++) {
-    if (boost::math::isnan(inSignal[i]) || boost::math::isinf(inSignal[i])) {
+    if (!std::isfinite(inSignal[i])) {
       Signal[i] = SaveSPE::MASK_FLAG;
       Error[i] = SaveSPE::MASK_ERROR;
     } else {

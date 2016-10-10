@@ -1,4 +1,6 @@
 #pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *

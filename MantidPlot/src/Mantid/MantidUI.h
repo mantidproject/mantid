@@ -208,6 +208,8 @@ public:
   AlgorithmMonitor *getAlgMonitor() { return m_algMonitor; }
   /// updates the algorithms tree
   void updateAlgorithms();
+  /// updates the workspaces tree
+  void updateWorkspaces();
   /// Show the algorithm dock widget
   void showAlgWidget(bool on = true);
 
@@ -513,6 +515,8 @@ public slots:
   void clearAllMemory(const bool prompt = true);
   // Ticket #672
   void saveNexusWorkspace();
+
+  void setVatesSubWindow(QMdiSubWindow *vatesUI) { m_vatesSubWindow = vatesUI; }
 
 #ifdef _WIN32
 public:
