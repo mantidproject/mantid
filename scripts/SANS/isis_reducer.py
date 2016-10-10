@@ -18,8 +18,11 @@ import SANSUtility as su
 import os
 import copy
 import sys
+from collections import namedtuple
 
 logger = Logger("ISISReducer")
+
+temp_reduction_framework_settings = namedtuple('temp_reduction_framework_settings', 'incident_monitor')
 
 ################################################################################
 # Avoid a bug with deepcopy in python 2.6, details and workaround here:
@@ -783,6 +786,10 @@ class ISISReducer(Reducer):
             old_detector_selection = old_instrument.get_detector_selection()
 
             if instrument is not None:
+                # Read the values of some variables which are set on the reduction
+                # framework.
+                temp_settings = self.get_values_from_reduction_framework()
+
                 self.set_instrument(instrument)
 
                 # We need to update the instrument, by reloading the user file.
@@ -790,8 +797,27 @@ class ISISReducer(Reducer):
                 # seems to be the only reasonable way to do this.
                 self.user_settings.execute(self)
 
+                # Apply the settings to reloaded reduction framework
+                self.apply_values_from_reduction_framework(temp_settings)
+
                 # Now we set the correct detector, this is also being done in the GUI
                 self.get_instrument().setDetector(old_detector_selection)
+
+    def get_values_from_reduction_framework(self):
+        """
+        This method extracts some settings of the current reduction framework which
+        we want to apply later on.
+        """
+        # Get the incident monitor
+        incident_monitor = self.instrument.get_incident_mon()
+        temp_settings = temp_reduction_framework_settings(incident_monitor=incident_monitor)
+
+        return temp_settings
+
+    def apply_values_from_reduction_framework(self, temp_settings):
+        # Set the incident monitor
+        incident_monitor = temp_settings.incident_monitor
+        self.instrument.set_incident_mon(incident_monitor)
 
     def _get_correct_instrument(self, instrument_name, idf_path = None):
         '''
