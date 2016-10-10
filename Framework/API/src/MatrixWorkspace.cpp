@@ -721,16 +721,6 @@ double MatrixWorkspace::detectorTwoTheta(const Geometry::IDetector &det) const {
   return det.getTwoTheta(samplePos, beamLine);
 }
 
-/** Add parameters to the instrument parameter map that are defined in
-* instrument
-*   definition file and for which logfile data are available. Logs must be
-* loaded
-*   before running this method.
-*/
-void MatrixWorkspace::populateInstrumentParameters() {
-  ExperimentInfo::populateInstrumentParameters();
-}
-
 /// @return The number of axes which this workspace has
 int MatrixWorkspace::axes() const { return static_cast<int>(m_axes.size()); }
 

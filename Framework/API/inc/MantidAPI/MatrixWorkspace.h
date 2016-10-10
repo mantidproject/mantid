@@ -94,8 +94,6 @@ public:
 
   //@}
 
-  void populateInstrumentParameters() override;
-
   virtual void updateSpectraUsing(const SpectrumDetectorMapping &map);
   /// Build the default spectra mapping, most likely wanted after an instrument
   /// update
