@@ -12,8 +12,6 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
-
 namespace Mantid {
 namespace Algorithms {
 

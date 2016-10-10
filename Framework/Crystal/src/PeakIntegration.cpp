@@ -11,7 +11,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 #include <boost/math/special_functions/round.hpp>
 
 namespace Mantid {
@@ -251,7 +251,7 @@ void PeakIntegration::exec() {
 
       // Calculate intensity
       for (iTOF = 0; iTOF < n; iTOF++)
-        if (!boost::math::isnan(y[iTOF]) && !boost::math::isinf(y[iTOF]))
+        if (std::isfinite(y[iTOF]))
           I += y[iTOF];
     } else
       for (iTOF = TOFmin; iTOF <= TOFmax; iTOF++)

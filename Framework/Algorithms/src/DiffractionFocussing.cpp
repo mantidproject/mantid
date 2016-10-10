@@ -211,8 +211,7 @@ void DiffractionFocussing::calculateRebinParams(
     auto &xVec = workspace->x(i);
     const double &localMin = xVec.front();
     const double &localMax = xVec.back();
-    if (localMin != std::numeric_limits<double>::infinity() &&
-        localMax != std::numeric_limits<double>::infinity()) {
+    if (std::isfinite(localMin) && std::isfinite(localMax)) {
       min = std::min(min, localMin);
       max = std::max(max, localMax);
     }
