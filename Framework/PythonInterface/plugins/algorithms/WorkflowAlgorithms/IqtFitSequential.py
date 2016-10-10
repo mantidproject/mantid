@@ -155,7 +155,7 @@ class IqtFitSequential(PythonAlgorithm):
         fit_prog.report('Fitting complete')
 
         conclusion_prog = Progress(self, start=0.8, end=1.0, nreports=5)
-        # Remove unsused workspaces
+        # Remove unused workspaces
         delete_alg = self.createChildAlgorithm("DeleteWorkspace")
         delete_alg.setProperty("Workspace", output_workspace + '_NormalisedCovarianceMatrices')
         delete_alg.execute()

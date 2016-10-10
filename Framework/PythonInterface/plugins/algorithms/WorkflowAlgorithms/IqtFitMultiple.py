@@ -125,7 +125,7 @@ class IqtFitMultiple(PythonAlgorithm):
         setup_prog = Progress(self, start=0.0, end=0.1, nreports=4)
         setup_prog.report('generating output name')
         output_workspace = self._fit_group_name
-        # check if the naming convention used is alreay correct
+        # check if the naming convention used is already correct
         chopped_name = self._fit_group_name.split('_')
         if 'WORKSPACE' in chopped_name[-1].upper():
             output_workspace = ('_').join(chopped_name[:-1])
@@ -151,7 +151,7 @@ class IqtFitMultiple(PythonAlgorithm):
         setup_prog.report('Convert to Elastic Q')
         convertToElasticQ(tmp_fit_workspace)
 
-        #fit multi-domian functino to workspace
+        #fit multi-domain function to workspace
         fit_prog = Progress(self, start=0.1, end=0.8, nreports=2)
         multi_domain_func, kwargs = self._create_mutli_domain_func(self._function, tmp_fit_workspace)
         fit_prog.report('Fitting...')
@@ -229,7 +229,7 @@ class IqtFitMultiple(PythonAlgorithm):
                 kwargs['InputWorkspace_' + str(i)] = input_ws
 
                 #tie beta for every spectrum
-                tie = 'f%d.f1.Beta=f0.f1.Beta' % i
+                tie = 'f%d.f1.Stretching=f0.f1.Stretching' % i
                 ties.append(tie)
 
         ties = ','.join(ties)
