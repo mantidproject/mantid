@@ -189,7 +189,8 @@ void TomographyIfacePresenter::processCompResourceChanged() {
 }
 
 void TomographyIfacePresenter::processToolChanged() {
-  const std::string tool = m_view->currentReconTool();
+	const std::string tool = "Astra";
+	//const std::string tool = m_view->currentReconTool();
 
   // disallow reconstruct on tools that don't run yet: Savu and CCPi
   if (TomographyIfaceModel::g_CCPiTool == tool) {
@@ -215,27 +216,26 @@ void TomographyIfacePresenter::processToolChanged() {
   // initialise tool dialogue
   // if null, hasnt been initialised yet
   if (!m_configDialog.get()){
-	m_configDialog = std::unique_ptr<TomoToolConfigDialogBase>(
-	  TomoToolConfigDialogBase::getCorrectDialogForToolFromString(
-		  tool));
-	std::cout << "initialising dialogue" + tool + "\n";
+	  m_configDialog = std::unique_ptr<TomoToolConfigDialogBase>(TomoToolConfigDialogBase::getCorrectDialogForToolFromString(
+		tool));
+	std::cout << "DEBUG: initialising dialogue" + tool + "\n";
 
   }else { // if not null, we've changed to a new dialogue
-	  std::cout << "Resetting dialogue\n";
+	  std::cout << "DEBUG: Resetting dialogue\n";
 	  m_configDialog.reset();
 	  m_configDialog = std::unique_ptr<TomoToolConfigDialogBase>(
 		  TomoToolConfigDialogBase::getCorrectDialogForToolFromString(
 			  tool));
   }
 
-  // set selected tool
+  // update selected tool in the model
   m_model->usingTool(tool);
 
-  std::cout << "Set the selected tool successfully\n";
+  std::cout << "DEBUG: Set the selected tool successfully\n";
 
   // and getSelectedToolMethod will give the default tool, as it was just initialised
   m_model->setCurrentToolMethod(m_configDialog->getSelectedToolMethod());
-  std::cout << "Set the selected METHOD successfully" + m_configDialog->getSelectedToolMethod()+ "\n";
+  std::cout << "DEBUG: Set the selected METHOD successfully" + m_configDialog->getSelectedToolMethod()+ "\n";
 
 }
 
