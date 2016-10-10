@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
@@ -240,8 +241,7 @@ void GroupDetectors2::execEvent() {
   }
 
   // Set all X bins on the output
-  auto binEdges = inputWS->binEdges(0);
-  outputWS->setAllX(binEdges);
+  outputWS->setAllX(inputWS->binEdges(0));
 
   g_log.information() << name() << " algorithm has finished\n";
 
@@ -950,12 +950,13 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
       const auto &fromSpectrum = inputWS->getSpectrum(originalWI);
 
       // Add up all the Y spectra and store the result in the first one
+
+      firstY += fromSpectrum.y();
+
       auto fEit = outSpec.mutableE().begin();
-      auto Yit = fromSpectrum.y().cbegin();
       auto Eit = fromSpectrum.e().cbegin();
       for (auto fYit = firstY.begin(); fYit != firstY.end();
-           ++fYit, ++fEit, ++Yit, ++Eit) {
-        *fYit += *Yit;
+           ++fYit, ++fEit, ++Eit) {
         // Assume 'normal' (i.e. Gaussian) combination of errors
         *fEit = std::sqrt((*fEit) * (*fEit) + (*Eit) * (*Eit));
       }

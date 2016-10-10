@@ -187,8 +187,7 @@ void CreateSimulationWorkspace::createOutputWorkspace() {
   PARALLEL_FOR1(m_outputWS)
   for (int64_t i = 0; i < static_cast<int64_t>(nhistograms); ++i) {
     m_outputWS->setBinEdges(i, binBoundaries);
-    Mantid::HistogramData::HistogramY yOut(ylength, 1.0);
-    m_outputWS->mutableY(i) = yOut;
+    m_outputWS->mutableY(i) = 1.0;
 
     m_progress->report("Setting X values");
   }
