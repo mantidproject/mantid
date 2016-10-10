@@ -34,7 +34,6 @@ using std::size_t;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using namespace testing;
 
 // Declare into the factory.
 DECLARE_WORKSPACE(WorkspaceTester)
