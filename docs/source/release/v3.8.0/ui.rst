@@ -65,12 +65,6 @@ Options Window
 ###############
 - Within Preferences->Mantid->Options ticking a category off/on will now untick/tick all subcategories. Also having some subcategories on and off will now show a partially ticked box for that category. 
 
-Bugs Resolved
--------------
-- Floating windows now always stay on top of the main window in OSX.
-- The sliceviewer will now rebin an existing binned workspace correctly.
-- 2D plots now display correctly for point data workspaces as well as for histogram data
-- Cuts aligned with an axis no longer generate an empty integrated line plot.
 
 SliceViewer Improvements
 ------------------------
@@ -97,7 +91,14 @@ Multi-dataset fitting interface improvements
 
 * "Set to log" and "Set all to log" options have been added to the parameter editing dialog. These enable a parameter to be set to a value from a sample log for one or all spectra.
 
-|
+Bugs Resolved
+-------------
+- Floating windows now always stay on top of the main window in OSX.
+- The sliceviewer will now rebin an existing binned workspace correctly.
+- 2D plots now display correctly for point data workspaces as well as for histogram data
+- Cuts aligned with an axis no longer generate an empty integrated line plot.
+
+
 
 Full list of
 `GUI <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+GUI%22>`_
