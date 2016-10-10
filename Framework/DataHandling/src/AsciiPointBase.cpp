@@ -13,8 +13,7 @@ GUI
 
 #include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
-
+#include <cmath>
 #include <fstream>
 
 namespace Mantid {
@@ -112,8 +111,8 @@ void AsciiPointBase::data(std::ofstream &file, const std::vector<double> &XData,
  */
 void AsciiPointBase::outputval(double val, std::ofstream &file,
                                bool leadingSep) {
-  bool nancheck = checkIfNan(val);
-  bool infcheck = checkIfInfinite(val);
+  bool nancheck = std::isnan(val);
+  bool infcheck = std::isinf(val);
   if (leadingSep) {
     file << sep();
   }
@@ -128,18 +127,5 @@ void AsciiPointBase::outputval(double val, std::ofstream &file,
   }
 }
 
-/** checks if a value is Not A Number
- *  @returns boolean true if the supplied value was Not a Number
- */
-bool AsciiPointBase::checkIfNan(const double &value) const {
-  return (boost::math::isnan(value));
-}
-
-/** checks if a value is Infinite
- *  @returns boolean true if the supplied value was Infinite
- */
-bool AsciiPointBase::checkIfInfinite(const double &value) const {
-  return (std::abs(value) == std::numeric_limits<double>::infinity());
-}
 } // namespace DataHandling
 } // namespace Mantid

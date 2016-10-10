@@ -6197,6 +6197,9 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
         * to the graph for us, and then loading the settings into the
         * spectrogram.
         */
+      if (!s)
+        continue;
+
       plotSpectrogram(s, Graph::ColorMap);
       s->loadFromProject(*it);
       curveID++;

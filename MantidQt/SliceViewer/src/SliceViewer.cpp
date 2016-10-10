@@ -3,7 +3,6 @@
 #include <sstream>
 #include <vector>
 #include <boost/make_shared.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
 
 #include "MantidKernel/UsageService.h"
 #include "MantidAPI/CoordTransform.h"
@@ -728,8 +727,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
       max = min;
       min = tmp;
     }
-    if (boost::math::isnan(min) || boost::math::isinf(min) ||
-        boost::math::isnan(max) || boost::math::isinf(max)) {
+    if (!std::isfinite(min) || !std::isfinite(max)) {
       mess << "Dimension " << m_ws->getDimension(d)->getName()
            << " has a bad range: (";
       mess << min << ", " << max << ")\n";

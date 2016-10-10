@@ -24,6 +24,9 @@ using namespace Mantid::CurveFitting::Functions;
 
 class CrystalFieldMultiSpectrumTest : public CxxTest::TestSuite {
 public:
+  // Conversion factor from barn to milibarn/steradian
+  const double c_mbsr = 79.5774715459;
+
   void test_function() {
     CrystalFieldMultiSpectrum fun;
     fun.setParameter("B20", 0.37737);
@@ -74,15 +77,18 @@ public:
     TS_ASSERT_DELTA(fun.getParameter("f0.f0.A0"), 0.0, 1e-3);
 
     TS_ASSERT_DELTA(fun.getParameter("f0.f1.PeakCentre"), 0.0, 1e-3);
-    TS_ASSERT_DELTA(fun.getParameter("f0.f1.Amplitude"), 2.749, 1e-3);
+    TS_ASSERT_DELTA(fun.getParameter("f0.f1.Amplitude"), 2.749 * c_mbsr,
+                    1e-3 * c_mbsr);
     TS_ASSERT_DELTA(fun.getParameter("f0.f1.FWHM"), 1.5, 1e-3);
 
     TS_ASSERT_DELTA(fun.getParameter("f0.f2.PeakCentre"), 29.3261, 1e-3);
-    TS_ASSERT_DELTA(fun.getParameter("f0.f2.Amplitude"), 0.7204, 1e-3);
+    TS_ASSERT_DELTA(fun.getParameter("f0.f2.Amplitude"), 0.7204 * c_mbsr,
+                    1e-3 * c_mbsr);
     TS_ASSERT_DELTA(fun.getParameter("f0.f2.FWHM"), 1.5, 1e-3);
 
     TS_ASSERT_DELTA(fun.getParameter("f0.f3.PeakCentre"), 44.3412, 1e-3);
-    TS_ASSERT_DELTA(fun.getParameter("f0.f3.Amplitude"), 0.4298, 1e-3);
+    TS_ASSERT_DELTA(fun.getParameter("f0.f3.Amplitude"), 0.4298 * c_mbsr,
+                    1e-3 * c_mbsr);
     TS_ASSERT_DELTA(fun.getParameter("f0.f3.FWHM"), 1.5, 1e-3);
   }
 
@@ -105,16 +111,16 @@ public:
         "Workspace_0");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
-    TS_ASSERT_DELTA(out->readY(1)[0], 1.094, 0.001);
-    TS_ASSERT_DELTA(out->readY(1)[1], 0.738, 0.001);
-    TS_ASSERT_DELTA(out->readY(1)[2], 0.373, 0.001);
+    TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[2], 0.373 * c_mbsr, 0.001 * c_mbsr);
     out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         "Workspace_1");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
-    TS_ASSERT_DELTA(out->readY(1)[0], 1.094, 0.001);
-    TS_ASSERT_DELTA(out->readY(1)[1], 0.738, 0.001);
-    TS_ASSERT_DELTA(out->readY(1)[2], 0.373, 0.001);
+    TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[2], 0.373 * c_mbsr, 0.001 * c_mbsr);
     AnalysisDataService::Instance().clear();
   }
 
@@ -138,16 +144,16 @@ public:
         "Workspace_0");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
-    TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * 2.0, 0.001);
-    TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * 2.0, 0.001);
-    TS_ASSERT_DELTA(out->readY(1)[2], 0.373 * 2.0, 0.001);
+    TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * 2.0 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * 2.0 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[2], 0.373 * 2.0 * c_mbsr, 0.001 * c_mbsr);
     out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         "Workspace_1");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
-    TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * 3.3, 0.001);
-    TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * 3.3, 0.001);
-    TS_ASSERT_DELTA(out->readY(1)[2], 0.3734 * 3.3, 0.001);
+    TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * 3.3 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * 3.3 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[2], 0.3734 * 3.3 * c_mbsr, 0.001 * c_mbsr);
     AnalysisDataService::Instance().clear();
   }
 
@@ -209,16 +215,16 @@ public:
         "Workspace_0");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
-    TS_ASSERT_DELTA(out->readY(1)[0], 2.9202, 0.001);
-    TS_ASSERT_DELTA(out->readY(1)[1], 2.4691, 0.001);
-    TS_ASSERT_DELTA(out->readY(1)[2], 1.3817, 0.001);
+    TS_ASSERT_DELTA(out->readY(1)[0], 2.9202 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[1], 2.4691 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[2], 1.3817 * c_mbsr, 0.001 * c_mbsr);
     out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         "Workspace_1");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
-    TS_ASSERT_DELTA(out->readY(1)[0], 2.9192, 0.001);
-    TS_ASSERT_DELTA(out->readY(1)[1], 2.4647, 0.001);
-    TS_ASSERT_DELTA(out->readY(1)[2], 1.3791, 0.001);
+    TS_ASSERT_DELTA(out->readY(1)[0], 2.9192 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[1], 2.4647 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[2], 1.3791 * c_mbsr, 0.001 * c_mbsr);
     AnalysisDataService::Instance().clear();
   }
 

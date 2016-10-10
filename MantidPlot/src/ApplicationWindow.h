@@ -1133,6 +1133,8 @@ private:
   bool shouldExecuteAndQuit(const QString &arg);
   bool isSilentStartup(const QString &arg);
   void handleConfigDir();
+  /// Save the working directory to QSettings
+  void cacheWorkingDirectory() const;
 
 private slots:
   //! \name Initialization
