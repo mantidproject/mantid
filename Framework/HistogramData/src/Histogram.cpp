@@ -28,24 +28,6 @@ BinEdges Histogram::binEdges() const {
     return BinEdges(Points(m_x));
 }
 
-/// Returns the variances of the bin edges of the Histogram.
-BinEdgeVariances Histogram::binEdgeVariances() const {
-  // Currently data is always stored as standard deviations, need to convert.
-  // TODO Figure out and define right conversion order.
-  if (xMode() == XMode::BinEdges)
-    return BinEdgeVariances(BinEdgeStandardDeviations(m_dx));
-  else
-    return BinEdgeVariances(PointVariances(PointStandardDeviations(m_dx)));
-}
-
-/// Returns the standard deviations of the bin edges of the Histogram.
-BinEdgeStandardDeviations Histogram::binEdgeStandardDeviations() const {
-  if (xMode() == XMode::BinEdges)
-    return BinEdgeStandardDeviations(m_dx);
-  else
-    return BinEdgeStandardDeviations(PointStandardDeviations(m_dx));
-}
-
 /** Returns the points (or bin centers) of the Histogram.
 
   If the histogram stores bin edges, the points are computed based on them.
@@ -61,20 +43,13 @@ Points Histogram::points() const {
 /// Returns the variances of the points (or bin centers) of the Histogram.
 PointVariances Histogram::pointVariances() const {
   // Currently data is always stored as standard deviations, need to convert.
-  // TODO Figure out and define right conversion order.
-  if (xMode() == XMode::BinEdges)
-    return PointVariances(BinEdgeVariances(BinEdgeStandardDeviations(m_dx)));
-  else
-    return PointVariances(PointStandardDeviations(m_dx));
+  return PointVariances(PointStandardDeviations(m_dx));
 }
 
 /// Returns the standard deviations of the points (or bin centers) of the
 /// Histogram.
 PointStandardDeviations Histogram::pointStandardDeviations() const {
-  if (xMode() == XMode::BinEdges)
-    return PointStandardDeviations(BinEdgeStandardDeviations(m_dx));
-  else
-    return PointStandardDeviations(m_dx);
+  return PointStandardDeviations(m_dx);
 }
 
 /** Returns the counts of the Histogram.
@@ -180,9 +155,10 @@ void Histogram::setSharedE(const Kernel::cow_ptr<HistogramE> &e) & {
 void Histogram::setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) & {
   // Setting a NULL Dx is fine, this disables x errors.
   // Note that we compare with m_x -- m_dx might be NULL.
-  if (Dx && m_x->size() != Dx->size())
-    throw std::logic_error("Histogram::setSharedDx: size mismatch\n");
-  m_dx = Dx;
+  PointStandardDeviations points(Dx);
+  if (points)
+    checkSize(points);
+  m_dx = points.cowData();
 }
 
 /// Converts the histogram storage mode into YMode::Counts
@@ -275,20 +251,6 @@ template <> void Histogram::checkSize(const BinEdges &binEdges) const {
     target++;
   if (target != binEdges.size())
     throw std::logic_error("Histogram: size mismatch of BinEdges\n");
-}
-
-/// Switch the Dx storage mode. Must be called *before* changing m_xMode!
-void Histogram::switchDxToBinEdges() {
-  if (xMode() == XMode::BinEdges || !m_dx)
-    return;
-  m_dx = BinEdgeStandardDeviations(PointStandardDeviations(m_dx)).cowData();
-}
-
-/// Switch the Dx storage mode. Must be called *before* changing m_xMode!
-void Histogram::switchDxToPoints() {
-  if (xMode() == XMode::Points || !m_dx)
-    return;
-  m_dx = PointStandardDeviations(BinEdgeStandardDeviations(m_dx)).cowData();
 }
 
 } // namespace HistogramData

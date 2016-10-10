@@ -550,6 +550,8 @@ public slots:
   // Ticket #672
   void saveNexusWorkspace();
 
+  void setVatesSubWindow(QMdiSubWindow *vatesUI) { m_vatesSubWindow = vatesUI; }
+
 #ifdef _WIN32
 public:
   // Shows 2D plot of current memory usage.

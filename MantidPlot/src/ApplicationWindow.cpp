@@ -316,6 +316,19 @@ void ApplicationWindow::handleConfigDir() {
   }
 #endif
 }
+/**
+ * Cache the working directory in the QSettings.
+ *
+ * store the working directory in the settings so it may be accessed
+ * elsewhere in the Qt layer.
+ *
+ */
+void ApplicationWindow::cacheWorkingDirectory() const {
+  QSettings settings;
+  settings.beginGroup("/Project");
+  settings.setValue("/WorkingDirectory", workingDir);
+  settings.endGroup();
+}
 
 /**
  * Calls QCoreApplication::exit(m_exitCode)
@@ -4574,13 +4587,7 @@ void ApplicationWindow::openRecentProject(QAction *action) {
     // Have to change the working directory here because that is used when
     // finding the nexus files to load
     workingDir = QFileInfo(f).absolutePath();
-
-    // store the working directory in the settings so it may be accessed
-    // elsewhere in the Qt layer.
-    QSettings settings;
-    settings.beginGroup("/Project");
-    settings.setValue("/WorkingDirectory", workingDir);
-    settings.endGroup();
+    cacheWorkingDirectory();
 
     ApplicationWindow *a = open(fn, false, false);
     if (a && (fn.endsWith(".qti", Qt::CaseInsensitive) ||
@@ -4616,13 +4623,7 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
   newProject();
   m_mantidmatrixWindows.clear();
 
-  // store the working directory in the settings so it may be accessed
-  // elsewhere in the Qt layer.
-  QSettings settings;
-  settings.beginGroup("/Project");
-  settings.setValue("/WorkingDirectory", workingDir);
-  settings.endGroup();
-
+  cacheWorkingDirectory();
   projectname = filename;
   setWindowTitle("MantidPlot - " + filename);
 
@@ -6119,6 +6120,7 @@ void ApplicationWindow::saveProjectAs(const QString &fileName, bool compress) {
       }
 
       workingDir = directory.absolutePath();
+      cacheWorkingDirectory();
       QString projectFileName = directory.dirName();
       projectFileName.append(".mantid");
       projectname = directory.absoluteFilePath(projectFileName);
