@@ -231,12 +231,12 @@ double PDFFourierTransform::determineRho0() {
 void PDFFourierTransform::exec() {
   // get input data
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  auto inputQ = inputWS->dataX(0);                        //  x for input
+  auto inputQ = inputWS->x(0).rawData();                    //  x for input
   HistogramData::HistogramDx inputDQ(inputQ.size(), 0.0); // dx for input
   if (inputWS->sharedDx(0))
     inputDQ = inputWS->dx(0);
-  auto inputFOfQ = inputWS->dataY(0);  //  y for input
-  auto inputDfOfQ = inputWS->dataE(0); // dy for input
+  auto inputFOfQ = inputWS->y(0).rawData();  //  y for input
+  auto inputDfOfQ = inputWS->e(0).rawData(); // dy for input
 
   // transform input data into Q/MomentumTransfer
   const std::string inputXunit = inputWS->getAxis(0)->unit()->unitID();
@@ -337,7 +337,7 @@ void PDFFourierTransform::exec() {
   outputWS->mutableRun().addProperty("Qmax", inputQ[qmax_index], "Angstroms^-1",
                                      true);
 
-  BinEdges edges(sizer + 1, LinearGenerator(rdelta, rdelta));
+  BinEdges edges(sizer+1, LinearGenerator(rdelta, rdelta));
   outputWS->setBinEdges(0, edges);
 
   auto &outputR = outputWS->mutableX(0);
