@@ -337,7 +337,7 @@ void PDFFourierTransform::exec() {
   outputWS->mutableRun().addProperty("Qmax", inputQ[qmax_index], "Angstroms^-1",
                                      true);
 
-  BinEdges edges(sizer+1, LinearGenerator(rdelta, rdelta));
+  BinEdges edges(sizer + 1, LinearGenerator(rdelta, rdelta));
   outputWS->setBinEdges(0, edges);
 
   auto &outputR = outputWS->mutableX(0);
