@@ -38,12 +38,12 @@ options are available:
 
   A `Gauss-Newton <https://en.wikipedia.org/wiki/Gauss–Newton_algorithm#Improved_versions>`__ algorithm with damping.
 - :ref:`FABADA <FABADA>`
-- `DTRS <https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls>`__
-
-  A trust region minimizer (not listed in the comparison table)
-- `Mose-Sorensen <https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls>`__
-  
-  A trust region minimizer (not listed in the comparison table)
+- `Trust region
+  <https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls>`__: a `trust
+  region algorithm <https://en.wikipedia.org/wiki/Trust_region>`__ that,
+  at each iteration, calculates and returns the step that reduces the
+  model by an acceptable amount by solving (or approximating a
+  solution to) the trust-region subproblem
 
 All these algorithms are `iterative
 <https://en.wikipedia.org/wiki/Iterative_method>`__.  The *Simplex*
@@ -59,8 +59,8 @@ function to drive the iterative process towards a local minimum.
 
 BFGS and the Levenberg-Marquardt algorithms belong to the second-order
 class of algorithms, in the sense that they use second-order
-information of the cost function (second derivatives or the Hessian
-matrix). Some algorithms like BFGS approximate the Hessian by the
+information of the cost function (second-order partial derivatives of 
+a Hessian matrix). Some algorithms like BFGS approximate the Hessian by the
 gradient values of successive iterations. The Levenberg-Marquard
 algorithm is a modified Gauss-Newton that introduces an adaptive term
 to prevent unstability when the approximated Hessian is not positive
@@ -74,7 +74,9 @@ analysis. It is excluded from the comparison described below, as it is
 a substantially different algorithm.
 
 In most cases, the implementation of these algorithms is based on the
-`GNU Scientific Libraty routines for least-squares fitting
+`GSL (GNU Scientific Library) library
+<https://www.gnu.org/software/gsl/>`__, and more specifically on the
+`GSL routines for least-squares fitting
 <https://www.gnu.org/software/gsl/manual/html_node/Least_002dSquares-Fitting.html#Least_002dSquares-Fitting>`__
 
 
@@ -104,8 +106,7 @@ exception of FABADA which belongs to a different class of methods and
 would not be compared in a fair manner. For all the minimizers
 compared here the algorithm :ref:`Fit <algm-Fit>` was run using the
 same initialization or starting points for test every problem, as
-specified in the test problem definitions. No constraints or ties were
-added.
+specified in the test problem definitions.
 
 Accuracy is measured using the sum of squared fitting errors as
 metric, or "ChiSquared" as defined in :ref:`Fit
@@ -113,9 +114,10 @@ metric, or "ChiSquared" as defined in :ref:`Fit
 difference between the expected outputs and the outputs calculated by
 the model fitted: :math:`\chi_{1}^{2} = \sum_{i} (y_i - f_i)^2` (see
 :ref:`CalculateChiSquared <algm-CalculateChiSquared>` for full details
-and different variants).  Run time is measured for the execution of
-the :ref:`Fit <algm-Fit>` algorithm for an equation and dataset
-previously created.
+and different variants).  Run time is measured as the time it takes to
+execute the :ref:`Fit <algm-Fit>` algorithm, i.e. the time it takes to
+fit one model with one set of initial values of the model parameters against 
+one dataset
 
 .. There would be two alternative for the errors:
    1. Without errors, as it is
@@ -131,20 +133,28 @@ Benchmark problems
 Each test problem included in this comparison is defined by the
 following information:
 
-- Input data (:math:`x_i` values)
-- Output data (:math:`y_i` values)
+- Dataset in the form of any number of pairs :math:`x_i`, :math:`y_i` with optional :math:`y_i` error estimates
 - Function to fit, with parameters
-- Starting point or initial values of the function parameters
-- Certified or reference best values for the parameters, with an associated residual of the certified or best model 
+- Initial values (starting point) of the function parameters
+- Optional: reference best values for the parameters (some may refer to these as certified values), i.e. target parameter values for the minimizers   
 
-The problems have been obtained from the following benchmark:
+The current problems have been obtained from the following benchmarks and sources:
 
-- `NIST nonlinear regression problems <http://itl.nist.gov/div898/strd/general/dataarchive.html>`__.
+- `NIST nonlinear regression problems
+  <http://itl.nist.gov/div898/strd/general/dataarchive.html>`__.
+- `CUTEst Constrained and Unconstrained Testing Environment on
+  steroids <https://ccpforge.cse.rl.ac.uk/gf/project/cutest/wiki/>`__
+- A set of problems extracted from Mantid usage examples and system
+  tests called here *Neutron data*. This is a first attempt at
+  evaluating different minimizers using specific neutron datasets with
+  real spectra and observational errors. Significant improvements are
+  expected for next releases of Mantid
 
-As the test problems do not define observational errors this
-comparison does not use the weights of the least squares cost
-function.  An :ref:`alternative comparison using simulated errors is
-also available <Minimizers_weighted_comparison>`, with similar results
+As the NIST and CUTEst test problems do not define observational
+errors the comparison shown below does not use the weights of the
+least squares cost function.  An :ref:`alternative comparison that
+uses observational errors as weights in the cost function is also
+available <Minimizers_weighted_comparison>`, with similar results
 overall.
 
 Comparison in terms of accuracy
@@ -156,7 +166,8 @@ Summary, median ranking
 
 The summary table shows the median ranking across all the test
 problems. See :ref:`detailed results by test problem (accuracy)
-<Minimizers_unweighted_comparison_in_terms_of_accuracy>`.
+<Minimizers_unweighted_comparison_in_terms_of_accuracy>` (also
+accessible by clicking on the cells of the table).
 
 Alternatively, see the :ref:`detailed results when using weighted
 least squares as cost function
@@ -170,7 +181,7 @@ least squares as cost function
 
 .. summary splitting the NIST problems into three blocks as originally done in the NIST pages
 
-.. include:: minimizers_comparison/v3.7.0/comparison_unweighted_v3.7_acc_summary.txt
+.. include:: minimizers_comparison/v3.8.0/comparison_unweighted_v3.8_acc_summary.txt
 
 
 Comparison in terms of run time
@@ -187,8 +198,21 @@ Alternatively, see the :ref:`detailed results when using weighted
 least squares as cost function
 <Minimizers_weighted_comparison_in_terms_of_run_time>`.
 
-.. include:: minimizers_comparison/v3.7.0/comparison_unweighted_v3.7_runtime_summary.txt
+.. include:: minimizers_comparison/v3.8.0/comparison_unweighted_v3.8_runtime_summary.txt
 
+
+Technical details for reproducibility
+#####################################
+
+Note that fitting results may be sensitive to the platform and
+versions of the algorithms and underlying libraries used.  All the
+results shown here have been produced using the same version of Mantid
+and on the same system:
+
+- Mantid release 3.8
+
+- Debian 8 GNU/Linux system with an Intel Core i7-4790 processor,
+  using `GSL <https://www.gnu.org/software/gsl/>`__ version 1.16.
 
 References:
              

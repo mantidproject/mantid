@@ -1,6 +1,5 @@
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 #include "MantidVatesAPI/ProgressAction.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/Crystal/PeakShape.h"

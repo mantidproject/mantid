@@ -21,11 +21,12 @@ MultiFileValidator::MultiFileValidator(const MultiFileValidator &mfv)
 
 /** Constructor
  *  @param extensions :: The permitted file extensions (e.g. .RAW)
+ *  @param testFilesExist :: If to check if files exist
  */
 MultiFileValidator::MultiFileValidator(
-    const std::vector<std::string> &extensions)
+    const std::vector<std::string> &extensions, bool testFilesExist)
     : TypedValidator<std::vector<std::vector<std::string>>>(),
-      m_fileValidator(extensions, true) {}
+      m_fileValidator(extensions, testFilesExist) {}
 
 /// Returns the set of valid values
 std::vector<std::string> MultiFileValidator::allowedValues() const {

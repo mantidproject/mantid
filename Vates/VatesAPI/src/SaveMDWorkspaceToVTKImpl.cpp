@@ -121,7 +121,6 @@ void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
     vtkNew<vtkFloatArray> signal;
     signal->SetNumberOfComponents(1);
     signal->SetNumberOfTuples(imageSize);
-
     auto oldSignal = structuredGrid->GetCellData()->GetScalars();
     for (vtkIdType index = 0; index < imageSize; ++index) {
       if (structuredGrid->IsCellVisible(index)) {

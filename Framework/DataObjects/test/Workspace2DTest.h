@@ -173,7 +173,7 @@ public:
   }
 
   void testDataDx() {
-    TS_ASSERT_EQUALS(ws->readDx(0).size(), 6);
+    TS_ASSERT_EQUALS(ws->readDx(0).size(), 5);
     TS_ASSERT_EQUALS(ws->readDx(6)[3], 0.0);
 
     TS_ASSERT_THROWS_NOTHING(ws->dataDx(6)[3] = 9.9);

@@ -332,6 +332,9 @@ void MantidUI::x_range_from_picker(double xmin, double xmax) {
 /// Updates the algorithms tree as this may have changed
 void MantidUI::updateAlgorithms() { m_exploreAlgorithms->update(); }
 
+/// Updates the workspace tree
+void MantidUI::updateWorkspaces() { m_exploreMantid->updateTree(); }
+
 /// Show / hide the AlgorithmDockWidget
 void MantidUI::showAlgWidget(bool on) {
   if (on) {
@@ -459,10 +462,8 @@ void MantidUI::saveNexusWorkspace() { executeSaveNexus(); }
 @param workspaceName :: Name of the workspace to delete
 */
 void MantidUI::deleteWorkspace(const QString &workspaceName) {
-  auto alg = createAlgorithm("DeleteWorkspace");
-  alg->setLogging(false);
-  alg->setPropertyValue("Workspace", workspaceName.toStdString());
-  executeAlgorithmAsync(alg);
+  auto &ads = Mantid::API::AnalysisDataService::Instance();
+  ads.remove(workspaceName.toStdString());
 }
 
 QString MantidUI::getSelectedWorkspaceName() {
@@ -839,6 +840,8 @@ void MantidUI::showVatesSimpleInterface() {
         m_vatesSubWindow->setWidget(vsui);
         m_vatesSubWindow->widget()->show();
         vsui->renderWorkspace(wsName, wsType, instrumentName);
+        // Keep and handle to the window for later serialisation
+        appWindow()->addSerialisableWindow(vsui);
         appWindow()->modifiedProject();
       } else {
         delete m_vatesSubWindow;
