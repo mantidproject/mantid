@@ -111,7 +111,7 @@ class IqtFitSequential(PythonAlgorithm):
 
         setup_prog.report('Cropping workspace')
         tmp_fit_name = "__IqtFit_ws"
-        crop_alg = self.createChildAlgorithm("CropWorkspace")
+        crop_alg = self.createChildAlgorithm("CropWorkspace", enableLogging=False)
         crop_alg.setProperty("InputWorkspace", self._input_ws)
         crop_alg.setProperty("OutputWorkspace", tmp_fit_name)
         crop_alg.setProperty("XMin", self._start_x)
@@ -128,7 +128,7 @@ class IqtFitSequential(PythonAlgorithm):
                                                       self._spec_max)
 
         setup_prog.report('Converting to Histogram')
-        convert_to_hist_alg = self.createChildAlgorithm("ConvertToHistogram")
+        convert_to_hist_alg = self.createChildAlgorithm("ConvertToHistogram", enableLogging=False)
         convert_to_hist_alg.setProperty("InputWorkspace", crop_alg.getProperty("OutputWorkspace").value)
         convert_to_hist_alg.setProperty("OutputWorkspace", tmp_fit_name)
         convert_to_hist_alg.execute()
@@ -156,7 +156,7 @@ class IqtFitSequential(PythonAlgorithm):
 
         conclusion_prog = Progress(self, start=0.8, end=1.0, nreports=5)
         # Remove unused workspaces
-        delete_alg = self.createChildAlgorithm("DeleteWorkspace")
+        delete_alg = self.createChildAlgorithm("DeleteWorkspace", enableLogging=False)
         delete_alg.setProperty("Workspace", output_workspace + '_NormalisedCovarianceMatrices')
         delete_alg.execute()
         delete_alg.setProperty("Workspace", output_workspace + '_Parameters')
@@ -166,7 +166,7 @@ class IqtFitSequential(PythonAlgorithm):
 
         conclusion_prog.report('Renaming workspaces')
         # rename workspaces to match user input
-        rename_alg = self.createChildAlgorithm("RenameWorkspace")
+        rename_alg = self.createChildAlgorithm("RenameWorkspace", enableLogging=False)
         if output_workspace + "_Workspaces" != self._fit_group_name:
             rename_alg.setProperty("InputWorkspace", output_workspace + "_Workspaces")
             rename_alg.setProperty("OutputWorkspace", self._fit_group_name)
@@ -177,7 +177,7 @@ class IqtFitSequential(PythonAlgorithm):
             rename_alg.execute()
 
         # Create *_Result workspace
-        parameter_names = 'A0,Intensity,Tau,Beta'
+        parameter_names = 'A0,Height,Lifetime,Stretching'
         conclusion_prog.report('Processing indirect fit parameters')
         pifp_alg = self.createChildAlgorithm("ProcessIndirectFitParameters")
         pifp_alg.setProperty("InputWorkspace", self._parameter_name)
@@ -215,7 +215,7 @@ class IqtFitSequential(PythonAlgorithm):
         sample_logs  = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type,
                         'intensities_constrained': self._intensities_constrained, 'beta_constrained': False}
 
-        copy_log_alg = self.createChildAlgorithm("CopyLogs")
+        copy_log_alg = self.createChildAlgorithm("CopyLogs", enableLogging=False)
         copy_log_alg.setProperty("InputWorkspace", self._input_ws)
         copy_log_alg.setProperty("OutputWorkspace", self._fit_group_name)
         copy_log_alg.execute()
@@ -226,7 +226,7 @@ class IqtFitSequential(PythonAlgorithm):
         log_names = [item for item in sample_logs]
         log_values = [sample_logs[item] for item in sample_logs]
 
-        add_sample_log_multi = self.createChildAlgorithm("AddSampleLogMultiple")
+        add_sample_log_multi = self.createChildAlgorithm("AddSampleLogMultiple", enableLogging=False)
         add_sample_log_multi.setProperty("Workspace", self._result_ws.getName())
         add_sample_log_multi.setProperty("LogNames", log_names)
         add_sample_log_multi.setProperty("LogValues", log_values)

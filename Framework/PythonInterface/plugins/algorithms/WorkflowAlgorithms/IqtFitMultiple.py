@@ -1,10 +1,10 @@
-#pylint: disable=no-init, too-many-instance-attributes
+#pylint: disable=no-init, too-many-instance-attributes, too-many-locals
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
                         ITableWorkspaceProperty, WorkspaceGroupProperty, Progress)
 from mantid.kernel import Direction, FloatBoundedValidator, IntBoundedValidator, logger
-from mantid.simpleapi import *
+import mantid.simpleapi as ms
 
 
 class IqtFitMultiple(PythonAlgorithm):
@@ -138,16 +138,29 @@ class IqtFitMultiple(PythonAlgorithm):
         #prepare input workspace for fitting
         tmp_fit_workspace = "__Iqtfit_fit_ws"
         if self._spec_max is None:
-            CropWorkspace(InputWorkspace=self._input_ws, OutputWorkspace=tmp_fit_workspace,
-                          XMin=self._start_x, XMax=self._end_x,
-                          StartWorkspaceIndex=self._spec_min)
+            crop_alg = self.createChildAlgorithm("CropWorkspace", enableLogging=False)
+            crop_alg.setProperty("InputWorkspace", self._input_ws)
+            crop_alg.setProperty("OutputWorkspace", tmp_fit_workspace)
+            crop_alg.setProperty("XMin", self._start_x)
+            crop_alg.setProperty("XMax", self._end_x)
+            crop_alg.setProperty("StartWorkspaceIndex", self._spec_min)
+            crop_alg.execute()
         else:
-            CropWorkspace(InputWorkspace=self._input_ws, OutputWorkspace=tmp_fit_workspace,
-                          XMin=self._start_x, XMax=self._end_x,
-                          StartWorkspaceIndex=self._spec_min, EndWorkspaceIndex=self._spec_max)
+            crop_alg = self.createChildAlgorithm("CropWorkspace", enableLogging=False)
+            crop_alg.setProperty("InputWorkspace", self._input_ws)
+            crop_alg.setProperty("OutputWorkspace", tmp_fit_workspace)
+            crop_alg.setProperty("XMin", self._start_x)
+            crop_alg.setProperty("XMax", self._end_x)
+            crop_alg.setProperty("StartWorkspaceIndex", self._spec_min)
+            crop_alg.setProperty("EndWorkspaceIndex", self._spec_max)
+            crop_alg.execute()
 
         setup_prog.report('Converting to Histogram')
-        ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
+        convert_to_hist_alg = self.createChildAlgorithm("ConvertToHistogram", enableLogging=False)
+        convert_to_hist_alg.setProperty("InputWorkspace", crop_alg.getProperty("OutputWorkspace").value)
+        convert_to_hist_alg.setProperty("OutputWorkspace", tmp_fit_workspace)
+        convert_to_hist_alg.execute()
+        mtd.addOrReplace(tmp_fit_workspace, convert_to_hist_alg.getProperty("OutputWorkspace").value)
         setup_prog.report('Convert to Elastic Q')
         convertToElasticQ(tmp_fit_workspace)
 
@@ -155,26 +168,28 @@ class IqtFitMultiple(PythonAlgorithm):
         fit_prog = Progress(self, start=0.1, end=0.8, nreports=2)
         multi_domain_func, kwargs = self._create_mutli_domain_func(self._function, tmp_fit_workspace)
         fit_prog.report('Fitting...')
-        Fit(Function=multi_domain_func,
-            InputWorkspace=tmp_fit_workspace,
-            WorkspaceIndex=0,
-            Output=output_workspace,
-            CreateOutput=True,
-            Minimizer=self._minimizer,
-            MaxIterations=self._max_iterations,
-            **kwargs)
+        ms.Fit(Function=multi_domain_func,
+               InputWorkspace=tmp_fit_workspace,
+               WorkspaceIndex=0,
+               Output=output_workspace,
+               CreateOutput=True,
+               Minimizer=self._minimizer,
+               MaxIterations=self._max_iterations,
+               **kwargs)
         fit_prog.report('Fitting complete')
 
         conclusion_prog = Progress(self, start=0.8, end=1.0, nreports=5)
         conclusion_prog.report('Renaming workspaces')
         # rename workspaces to match user input
+        rename_alg = self.createChildAlgorithm("RenameWorkspace", enableLogging=False)
         if output_workspace + "_Workspaces" != self._fit_group_name:
-            RenameWorkspace(InputWorkspace=output_workspace + "_Workspaces",
-                            OutputWorkspace=self._fit_group_name)
+            rename_alg.setProperty("InputWorkspace", output_workspace + "_Workspaces")
+            rename_alg.setProperty("OutputWorkspace", self._fit_group_name)
+            rename_alg.execute()
         if output_workspace + "_Parameters" != self._parameter_name:
-            RenameWorkspace(InputWorkspace=output_workspace + "_Parameters",
-                            OutputWorkspace=self._parameter_name)
-
+            rename_alg.setProperty("InputWorkspace", output_workspace + "_Parameters")
+            rename_alg.setProperty("OutputWorkspace", self._parameter_name)
+            rename_alg.execute()
         conclusion_prog.report('Tansposing parameter table')
         transposeFitParametersTable(self._parameter_name)
 
@@ -185,28 +200,50 @@ class IqtFitMultiple(PythonAlgorithm):
             mtd[self._parameter_name].setCell('axis-1', i, value)
 
         #convert parameters to matrix workspace
-        parameter_names = 'A0,Intensity,Tau,Beta'
+        parameter_names = 'A0,Height,Lifetime,Stretching'
         conclusion_prog.report('Processing indirect fit parameters')
-        result_workspace = ProcessIndirectFitParameters(InputWorkspace=self._parameter_name,
-                                                        ColumnX="axis-1", XAxisUnit="MomentumTransfer",
-                                                        ParameterNames=parameter_names,
-                                                        OutputWorkspace=self._result_name)
+        pifp_alg = self.createChildAlgorithm("ProcessIndirectFitParameters")
+        pifp_alg.setProperty("InputWorkspace", self._parameter_name)
+        pifp_alg.setProperty("ColumnX", "axis-1")
+        pifp_alg.setProperty("XAxisUnit", "MomentumTransfer")
+        pifp_alg.setProperty("ParameterNames", parameter_names)
+        pifp_alg.setProperty("OutputWorkspace", self._result_name)
+        pifp_alg.execute()
+        result_workspace = pifp_alg.getProperty("OutputWorkspace").value
+
+        mtd.addOrReplace(self._result_name, result_workspace)
+
 
         # create and add sample logs
         sample_logs  = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type[:-2],
                         'intensities_constrained': self._intensities_constrained, 'beta_constrained': True}
 
         conclusion_prog.report('Copying sample logs')
-        CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=result_workspace)
-        CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=self._fit_group_name)
+        copy_log_alg = self.createChildAlgorithm("CopyLogs", enableLogging=False)
+        copy_log_alg.setProperty("InputWorkspace", self._input_ws)
+        copy_log_alg.setProperty("OutputWorkspace", result_workspace)
+        copy_log_alg.execute()
+        copy_log_alg.setProperty("InputWorkspace", self._input_ws)
+        copy_log_alg.setProperty("OutputWorkspace", self._fit_group_name)
+        copy_log_alg.execute()
 
         log_names = [item for item in sample_logs]
         log_values = [sample_logs[item] for item in sample_logs]
-        conclusion_prog.report('Adding sample logs')
-        AddSampleLogMultiple(Workspace=result_workspace, LogNames=log_names, LogValues=log_values)
-        AddSampleLogMultiple(Workspace=self._fit_group_name, LogNames=log_names, LogValues=log_values)
 
-        DeleteWorkspace(tmp_fit_workspace)
+        conclusion_prog.report('Adding sample logs')
+        add_sample_log_multi = self.createChildAlgorithm("AddSampleLogMultiple", enableLogging=False)
+        add_sample_log_multi.setProperty("Workspace", result_workspace)
+        add_sample_log_multi.setProperty("LogNames", log_names)
+        add_sample_log_multi.setProperty("LogValues", log_values)
+        add_sample_log_multi.execute()
+        add_sample_log_multi.setProperty("Workspace", self._fit_group_name)
+        add_sample_log_multi.setProperty("LogNames", log_names)
+        add_sample_log_multi.setProperty("LogValues", log_values)
+        add_sample_log_multi.execute()
+
+        delete_alg = self.createChildAlgorithm("DeleteWorkspace", enableLogging=False)
+        delete_alg.setProperty("Workspace", tmp_fit_workspace)
+        delete_alg.execute()
 
         self.setProperty('OutputResultWorkspace', result_workspace)
         self.setProperty('OutputParameterWorkspace', self._parameter_name)
@@ -236,6 +273,5 @@ class IqtFitMultiple(PythonAlgorithm):
         multi += 'ties=(' + ties + ')'
 
         return multi, kwargs
-
 
 AlgorithmFactory.subscribe(IqtFitMultiple)
