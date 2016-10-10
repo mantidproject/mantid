@@ -152,8 +152,10 @@ void AnvredCorrection::exec() {
   MatrixWorkspace_sptr correctionFactors =
       WorkspaceFactory::Instance().create(m_inputWS);
 
-  const auto numHists = m_inputWS->getNumberHistograms();
-  const auto specSize = m_inputWS->blocksize();
+  // needs to be a signed because OpenMP gives an error otherwise
+  const int64_t numHists =
+      static_cast<int64_t>(m_inputWS->getNumberHistograms());
+  const int64_t specSize = static_cast<int64_t>(m_inputWS->blocksize());
   if (specSize < 3)
     throw std::runtime_error("Problem in AnvredCorrection::events not binned");
 
@@ -165,7 +167,7 @@ void AnvredCorrection::exec() {
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
   PARALLEL_FOR2(m_inputWS, correctionFactors)
-  for (size_t i = 0; i < numHists; ++i) {
+  for (int64_t i = 0; i < int64_t(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     // Get detector position
@@ -257,7 +259,8 @@ void AnvredCorrection::cleanup() {
 
 void AnvredCorrection::execEvent() {
 
-  const auto numHists = m_inputWS->getNumberHistograms(); // number of vectors
+  const int64_t numHists =
+      static_cast<int64_t>(m_inputWS->getNumberHistograms());
 
   const std::string unitStr = m_inputWS->getAxis(0)->unit()->unitID();
   // Create a new outputworkspace with not much in it
@@ -284,7 +287,7 @@ void AnvredCorrection::execEvent() {
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
   PARALLEL_FOR2(eventW, correctionFactors)
-  for (size_t i = 0; i < numHists; ++i) {
+  for (int64_t i = 0; i < int64_t(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     // share bin boundaries, and leave Y and E nullptr
