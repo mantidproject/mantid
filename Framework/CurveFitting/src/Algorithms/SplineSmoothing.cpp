@@ -123,7 +123,7 @@ void SplineSmoothing::smoothSpectrum(const int index) {
 
   m_outputWorkspace->setPoints(index, m_inputWorkspace->points(index));
 
-  calculateSmoothing(*m_inputWorkspacePointData, m_outputWorkspace, index);
+  calculateSmoothing(*m_inputWorkspacePointData, *m_outputWorkspace, index);
 }
 
 /** Calculate the derivatives for each spectrum in the input workspace
@@ -139,7 +139,7 @@ void SplineSmoothing::calculateSpectrumDerivatives(const int index,
 
     for (int j = 0; j < order; ++j) {
       derivs->setSharedX(j, m_inputWorkspace->sharedX(index));
-      calculateDerivatives(*m_inputWorkspacePointData, derivs, j + 1, index);
+      calculateDerivatives(*m_inputWorkspacePointData, *derivs, j + 1, index);
     }
 
     m_derivativeWorkspaceGroup->addWorkspace(derivs);
@@ -167,13 +167,15 @@ void SplineSmoothing::performAdditionalFitting(MatrixWorkspace_sptr ws,
  *it with the desired number of spectra.
  * Also labels the axis of each spectra with Yi, where i is the index
  *
- * @param inws :: The input workspace
+ * @param inws :: The input workspace as a shared pointer
  * @param size :: The number of spectra the workspace should be created with
  * @return The pointer to the newly created workspace
  */
 API::MatrixWorkspace_sptr
 SplineSmoothing::setupOutputWorkspace(const MatrixWorkspace_sptr &inws,
                                       const int size) const {
+  // Must pass a shared pointer instead of a reference as the
+  // workspace factory will not accept raw pointers.
   MatrixWorkspace_sptr outputWorkspace =
       WorkspaceFactory::Instance().create(inws, size);
 
@@ -224,13 +226,13 @@ void SplineSmoothing::convertToHistogram() {
  * @param row :: The row of spectra to use
  */
 void SplineSmoothing::calculateSmoothing(const MatrixWorkspace &inputWorkspace,
-                                         MatrixWorkspace_sptr outputWorkspace,
+                                         MatrixWorkspace &outputWorkspace,
                                          size_t row) const {
   // define the spline's parameters
   const auto &xIn = inputWorkspace.x(row);
   const size_t nData = xIn.size();
   const double *xValues = &(xIn[0]);
-  double *yValues = &(outputWorkspace->mutableY(row)[0]);
+  double *yValues = &(outputWorkspace.mutableY(row)[0]);
 
   // calculate the smoothing
   m_cspline->function1D(yValues, xValues, nData);
@@ -246,11 +248,11 @@ void SplineSmoothing::calculateSmoothing(const MatrixWorkspace &inputWorkspace,
  */
 void SplineSmoothing::calculateDerivatives(
     const MatrixWorkspace &inputWorkspace,
-    API::MatrixWorkspace_sptr outputWorkspace, const int order,
+    API::MatrixWorkspace &outputWorkspace, const int order,
     const size_t row) const {
   const auto &xIn = inputWorkspace.x(row);
   const double *xValues = &(xIn[0]);
-  double *yValues = &(outputWorkspace->mutableY(order - 1)[0]);
+  double *yValues = &(outputWorkspace.mutableY(order - 1)[0]);
   const size_t nData = xIn.size();
 
   m_cspline->derivative1D(yValues, xValues, nData, order);
