@@ -25,7 +25,6 @@ using namespace API;
 using namespace Kernel;
 using namespace CurveFitting;
 using namespace CurveFitting::Functions;
-using namespace BOOST_FUNCTION_STD_NS;
 using namespace std;
 
 // Subscription
