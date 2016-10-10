@@ -167,8 +167,8 @@ DECLARE_SUBWINDOW(TomographyIfaceViewQtGUI)
 TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), ITomographyIfaceView(), m_tabROIW(nullptr),
       m_tabImggFormats(nullptr), m_processingJobsIDs(), m_currentComputeRes(""),
-      m_currentReconTool("TomoPy"), m_imgPath(""), m_logMsgs(), m_systemSettings(),
-      m_toolsSettings(), m_settings(),
+      m_currentReconTool("TomoPy"), m_imgPath(""), m_logMsgs(),
+      m_systemSettings(), m_toolsSettings(), m_settings(),
       m_settingsGroup("CustomInterfaces/Tomography"),
       m_settingsSubGroupEnergy(m_settingsGroup + "/EnergyBands"),
       m_aggAlgRunner(), m_availPlugins(), m_currPlugins(), m_currentParamPath(),
@@ -991,11 +991,6 @@ void TomographyIfaceViewQtGUI::compResourceIndexChanged(int /* i */) {
 
 void TomographyIfaceViewQtGUI::runToolIndexChanged(int /* i */) {
   QComboBox *rt = m_uiTabRun.comboBox_run_tool;
-  std::cout << "runToolIndexChanged\n";
-  // this shouldn't segfault for nullptr, because lazy evaluation
-  if (!rt || rt->count() < 1)
-    return;
-
   m_currentReconTool = rt->currentText().toStdString();
   m_presenter->notify(ITomographyIfacePresenter::ToolChanged);
 }
@@ -1356,8 +1351,8 @@ void TomographyIfaceViewQtGUI::browseImageClicked() {
  */
 void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
     const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-        localStatus) {
+    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+        &localStatus) {
 
   QTableWidget *t = m_uiTabRun.tableWidget_run_jobs;
   bool sort = t->isSortingEnabled();

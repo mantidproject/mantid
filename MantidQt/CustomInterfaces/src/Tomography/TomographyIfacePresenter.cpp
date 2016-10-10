@@ -208,35 +208,24 @@ void TomographyIfacePresenter::processToolChanged() {
     m_view->enableConfigTool(true);
   }
 
-  // if no tool is selected
+  // return if empty string
   if ("" == tool) {
     return;
   }
 
-  // initialise tool dialogue
-  // if null, hasnt been initialised yet
-  if (!m_configDialog.get()) {
-    m_configDialog = std::unique_ptr<TomoToolConfigDialogBase>(
-        TomoToolConfigDialogBase::getCorrectDialogForToolFromString(tool));
-    std::cout << "DEBUG: initialising dialogue" + tool + "\n";
+  std::cout << "DEBUG: initialising dialogue: " + tool + "\n";
 
-  } else { // if not null, we've changed to a new dialogue
-    std::cout << "DEBUG: Resetting dialogue\n";
-    m_configDialog.reset();
-    m_configDialog = std::unique_ptr<TomoToolConfigDialogBase>(
-        TomoToolConfigDialogBase::getCorrectDialogForToolFromString(tool));
-  }
+  // free the previous dialogue pointer if any
+  m_configDialog.reset();
+  m_configDialog = std::unique_ptr<TomoToolConfigDialogBase>(
+      TomoToolConfigDialogBase::getCorrectDialogForToolFromString(tool));
 
   // update selected tool in the model
   m_model->usingTool(tool);
 
-  std::cout << "DEBUG: Set the selected tool successfully\n";
-
-  // and getSelectedToolMethod will give the default tool, as it was just
+  // and getSelectedToolMethod will give its default tool, as it was just
   // initialised
   m_model->setCurrentToolMethod(m_configDialog->getSelectedToolMethod());
-  std::cout << "DEBUG: Set the selected METHOD successfully" +
-                   m_configDialog->getSelectedToolMethod() + "\n";
 }
 
 /**
