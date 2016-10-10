@@ -20,8 +20,9 @@ private:
   void setupDialogUi() override;
   int executeQt() override;
 
-  const std::string DEFAULT_TOOL_NAME = "Astra";
-  const std::string DEFAULT_TOOL_METHOD = "FBP3D_CUDA";
+  // initialised in .cpp file
+  static const std::string DEFAULT_TOOL_NAME;
+  static const std::string DEFAULT_TOOL_METHOD;
 
   Ui::TomoToolConfigAstra m_astraUi;
 };

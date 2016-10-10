@@ -13,6 +13,7 @@ TomoToolConfigDialogBase::getCorrectDialogForToolFromString(
   std::cout << toolName << '\n';
   // TODO move to global STRINGS from View!
 
+  auto *pp = new QDialog;
   if (toolName == "TomoPy") {
     return new TomoToolConfigTomoPyDialog;
   }

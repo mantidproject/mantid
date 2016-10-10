@@ -5,6 +5,9 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+const std::string TomoToolConfigTomoPyDialog::DEFAULT_TOOL_NAME = "TomoPy";
+const std::string TomoToolConfigTomoPyDialog::DEFAULT_TOOL_METHOD = "gridrec";
+
 void TomoToolConfigTomoPyDialog::setupDialogUi() {
   m_tomoPyUi.setupUi(this);
   m_tomoPyUi.comboBox_method->clear();

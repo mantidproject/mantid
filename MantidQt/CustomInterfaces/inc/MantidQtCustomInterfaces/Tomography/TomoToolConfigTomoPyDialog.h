@@ -21,8 +21,9 @@ private:
   void setupDialogUi() override;
   int executeQt() override;
 
-  const std::string DEFAULT_TOOL_NAME = "TomoPy";
-  const std::string DEFAULT_TOOL_METHOD = "gridrec";
+  // initialised in .cpp file
+  static const std::string DEFAULT_TOOL_NAME;
+  static const std::string DEFAULT_TOOL_METHOD;
 
   Ui::TomoToolConfigTomoPy m_tomoPyUi;
 };

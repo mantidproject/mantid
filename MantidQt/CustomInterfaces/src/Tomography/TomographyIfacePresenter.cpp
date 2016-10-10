@@ -189,8 +189,8 @@ void TomographyIfacePresenter::processCompResourceChanged() {
 }
 
 void TomographyIfacePresenter::processToolChanged() {
-	const std::string tool = "Astra";
-	//const std::string tool = m_view->currentReconTool();
+  //	const std::string tool = "Astra";
+  const std::string tool = m_view->currentReconTool();
 
   // disallow reconstruct on tools that don't run yet: Savu and CCPi
   if (TomographyIfaceModel::g_CCPiTool == tool) {
@@ -209,23 +209,22 @@ void TomographyIfacePresenter::processToolChanged() {
   }
 
   // if no tool is selected
-  if("" == tool) {
-	  return;
+  if ("" == tool) {
+    return;
   }
 
   // initialise tool dialogue
   // if null, hasnt been initialised yet
-  if (!m_configDialog.get()){
-	  m_configDialog = std::unique_ptr<TomoToolConfigDialogBase>(TomoToolConfigDialogBase::getCorrectDialogForToolFromString(
-		tool));
-	std::cout << "DEBUG: initialising dialogue" + tool + "\n";
+  if (!m_configDialog.get()) {
+    m_configDialog = std::unique_ptr<TomoToolConfigDialogBase>(
+        TomoToolConfigDialogBase::getCorrectDialogForToolFromString(tool));
+    std::cout << "DEBUG: initialising dialogue" + tool + "\n";
 
-  }else { // if not null, we've changed to a new dialogue
-	  std::cout << "DEBUG: Resetting dialogue\n";
-	  m_configDialog.reset();
-	  m_configDialog = std::unique_ptr<TomoToolConfigDialogBase>(
-		  TomoToolConfigDialogBase::getCorrectDialogForToolFromString(
-			  tool));
+  } else { // if not null, we've changed to a new dialogue
+    std::cout << "DEBUG: Resetting dialogue\n";
+    m_configDialog.reset();
+    m_configDialog = std::unique_ptr<TomoToolConfigDialogBase>(
+        TomoToolConfigDialogBase::getCorrectDialogForToolFromString(tool));
   }
 
   // update selected tool in the model
@@ -233,10 +232,11 @@ void TomographyIfacePresenter::processToolChanged() {
 
   std::cout << "DEBUG: Set the selected tool successfully\n";
 
-  // and getSelectedToolMethod will give the default tool, as it was just initialised
+  // and getSelectedToolMethod will give the default tool, as it was just
+  // initialised
   m_model->setCurrentToolMethod(m_configDialog->getSelectedToolMethod());
-  std::cout << "DEBUG: Set the selected METHOD successfully" + m_configDialog->getSelectedToolMethod()+ "\n";
-
+  std::cout << "DEBUG: Set the selected METHOD successfully" +
+                   m_configDialog->getSelectedToolMethod() + "\n";
 }
 
 /**
@@ -398,17 +398,17 @@ void TomographyIfacePresenter::processSetupReconTool() {
   // if not the same, create new Dialog
   if (TomographyIfaceModel::g_CCPiTool != currentReconTool) {
 
-	// TODO save previous state?
+    // TODO save previous state?
     // wrap in unique_ptr
 
-	// give pointer to showToolConfig, so it can run the dialogue
+    // give pointer to showToolConfig, so it can run the dialogue
     m_view->showToolConfig(m_configDialog.get());
 
-	// update the reconstruction setting for the tool
+    // update the reconstruction setting for the tool
     m_model->updateReconToolsSettings(m_configDialog->getReconToolSettings());
 
-	// update the selected method
-	m_model->setCurrentToolMethod(m_configDialog->getSelectedToolMethod());
+    // update the selected method
+    m_model->setCurrentToolMethod(m_configDialog->getSelectedToolMethod());
 
     // TODO: this would make sense if the reconstruct action/button
     // was only enabled after setting up at least one tool
@@ -438,11 +438,12 @@ void TomographyIfacePresenter::processRunRecon() {
   // WHAT do we do if the setup hasn't been clicked, and the new tool is
   // selected, but the method change hasn't been reflected?!
   // ^ get method from dialog??
-  //m_model->updateToolMethod(toolMethodHere);
+  // m_model->updateToolMethod(toolMethodHere);
   m_model->updateTomopyMethod(m_view->tomopyMethod());
   m_model->updateAstraMethod(m_view->astraMethod());
 
-  std::cout << "Current tool:" << m_model->usingTool() << " and Current method: " << m_model->getCurrentToolMethod();
+  std::cout << "Current tool:" << m_model->usingTool()
+            << " and Current method: " << m_model->getCurrentToolMethod();
   return;
   const std::string &resource = m_view->currentComputeResource();
 

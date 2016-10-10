@@ -5,6 +5,9 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+	const std::string TomoToolConfigAstraDialog::DEFAULT_TOOL_NAME = "Astra";
+	const std::string TomoToolConfigAstraDialog::DEFAULT_TOOL_METHOD = "FBP3D_CUDA";
+
 void TomoToolConfigAstraDialog::setupToolConfig() {
   const auto methods = ToolConfigTomoPy::methods();
 
