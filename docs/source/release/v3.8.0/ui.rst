@@ -48,7 +48,7 @@ Algorithms
 Scripting Window
 ################
 
- - All `matplotlib` examples now work out of the box when run inside the MantidPlot scripting environment.
+- All `matplotlib` examples now work out of the box when run inside the MantidPlot scripting environment.
 
 Progress Reporting
 ##################
