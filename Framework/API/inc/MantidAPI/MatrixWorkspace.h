@@ -1,10 +1,6 @@
 #ifndef MANTID_API_MATRIXWORKSPACE_H_
 #define MANTID_API_MATRIXWORKSPACE_H_
 
-#ifndef Q_MOC_RUN
-#include <boost/scoped_ptr.hpp>
-#endif
-
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -18,7 +14,6 @@ namespace Mantid {
 namespace Geometry {
 class ParameterMap;
 class INearestNeighbours;
-class INearestNeighboursFactory;
 }
 
 namespace API {

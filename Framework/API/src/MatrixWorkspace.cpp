@@ -8,7 +8,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
+#include "MantidGeometry/Instrument/NearestNeighbours.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"

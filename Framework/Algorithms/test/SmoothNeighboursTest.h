@@ -7,7 +7,6 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Instrument/INearestNeighboursFactory.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"

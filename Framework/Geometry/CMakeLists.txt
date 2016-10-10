@@ -54,7 +54,6 @@ set ( SRC_FILES
 	src/Instrument/IDFObject.cpp
 	src/Instrument/InstrumentDefinitionParser.cpp
 	src/Instrument/NearestNeighbours.cpp
-	src/Instrument/NearestNeighboursFactory.cpp
 	src/Instrument/ObjCompAssembly.cpp
 	src/Instrument/ObjComponent.cpp
 	src/Instrument/ParComponentFactory.cpp
@@ -207,10 +206,8 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/Goniometer.h
 	inc/MantidGeometry/Instrument/IDFObject.h
 	inc/MantidGeometry/Instrument/INearestNeighbours.h
-	inc/MantidGeometry/Instrument/INearestNeighboursFactory.h
 	inc/MantidGeometry/Instrument/InstrumentDefinitionParser.h
 	inc/MantidGeometry/Instrument/NearestNeighbours.h
-	inc/MantidGeometry/Instrument/NearestNeighboursFactory.h
 	inc/MantidGeometry/Instrument/ObjCompAssembly.h
 	inc/MantidGeometry/Instrument/ObjComponent.h
 	inc/MantidGeometry/Instrument/ParComponentFactory.h
@@ -354,7 +351,6 @@ set ( TEST_FILES
 	MathSupportTest.h
 	MatrixVectorPairParserTest.h
 	MatrixVectorPairTest.h
-	NearestNeighboursFactoryTest.h
 	NearestNeighboursTest.h
 	NiggliCellTest.h
 	NullImplicitFunctionTest.h

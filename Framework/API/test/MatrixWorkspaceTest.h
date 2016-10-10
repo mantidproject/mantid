@@ -14,7 +14,6 @@
 #include "MantidKernel/make_cow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
-#include "MantidTestHelpers/FakeGmockObjects.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
