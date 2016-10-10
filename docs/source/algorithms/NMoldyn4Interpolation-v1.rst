@@ -20,7 +20,7 @@ Usage
 **Example 1 - Interpolate a simulated data set onto the axes of an experimental
 set**
 
-.. testcode:: ExNMoldyn4InterpolationSimple
+.. code-block:: python
 
     #create a simulated S(Q,E) workspace of a sin function
     x_data = np.arange(-2., 2., 0.05)
@@ -44,7 +44,7 @@ set**
 
 Output:
 
-.. testoutput:: ExNMoldyn4InterpolationSimple
+.. code-block:: python
 
     No. of Q-values in simulation = 8
     No. of Q-values in reference = 11
