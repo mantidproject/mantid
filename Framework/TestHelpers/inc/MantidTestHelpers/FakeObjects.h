@@ -101,8 +101,6 @@ private:
 //===================================================================================================================
 class WorkspaceTester : public MatrixWorkspace {
 public:
-  WorkspaceTester(Mantid::Geometry::INearestNeighboursFactory *nnFactory)
-      : MatrixWorkspace(nnFactory), spec(0) {}
   WorkspaceTester() : MatrixWorkspace(), spec(0) {}
   ~WorkspaceTester() override {}
 

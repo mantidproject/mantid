@@ -562,8 +562,7 @@ protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MatrixWorkspace(const MatrixWorkspace &other);
 
-  MatrixWorkspace(
-      Mantid::Geometry::INearestNeighboursFactory *nnFactory = nullptr);
+  MatrixWorkspace();
 
   /// Initialises the workspace. Sets the size and lengths of the arrays. Must
   /// be overloaded.
@@ -590,7 +589,7 @@ private:
                 const MantidImage &image, size_t start, bool parallelExecution);
 
   /// Has this workspace been initialised?
-  bool m_isInitialized;
+  bool m_isInitialized{false};
 
   /// The unit for the data values (e.g. Counts)
   std::string m_YUnit;
@@ -599,9 +598,9 @@ private:
 
   /// Flag indicating whether the m_isCommonBinsFlag has been set. False by
   /// default
-  mutable bool m_isCommonBinsFlagSet;
+  mutable bool m_isCommonBinsFlagSet{false};
   /// Flag indicating whether the data has common bins. False by default
-  mutable bool m_isCommonBinsFlag;
+  mutable bool m_isCommonBinsFlag{false};
 
   /// The set of masked bins in a map keyed on workspace index
   std::map<int64_t, MaskList> m_masks;
@@ -613,10 +612,6 @@ private:
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfo;
 
 protected:
-  /// Scoped pointer to NearestNeighbours factory
-  boost::scoped_ptr<Mantid::Geometry::INearestNeighboursFactory>
-      m_nearestNeighboursFactory;
-
   /// Shared pointer to NearestNeighbours object
   mutable boost::shared_ptr<Mantid::Geometry::INearestNeighbours>
       m_nearestNeighbours;

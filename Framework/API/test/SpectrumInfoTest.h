@@ -21,7 +21,7 @@ public:
   static SpectrumInfoTest *createSuite() { return new SpectrumInfoTest(); }
   static void destroySuite(SpectrumInfoTest *suite) { delete suite; }
 
-  SpectrumInfoTest() : m_workspace(nullptr) {
+  SpectrumInfoTest() : m_workspace() {
     size_t numberOfHistograms = 5;
     size_t numberOfBins = 1;
     m_workspace.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
@@ -241,7 +241,7 @@ public:
   }
   static void destroySuite(SpectrumInfoTestPerformance *suite) { delete suite; }
 
-  SpectrumInfoTestPerformance() : m_workspace(nullptr) {
+  SpectrumInfoTestPerformance() : m_workspace() {
     size_t numberOfHistograms = 10000;
     size_t numberOfBins = 1;
     m_workspace.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
