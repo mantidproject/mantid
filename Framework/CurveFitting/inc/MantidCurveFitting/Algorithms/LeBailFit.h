@@ -12,6 +12,9 @@
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidHistogramData/HistogramX.h"
+#include "MantidHistogramData/HistogramY.h"
+
 #include <gsl/gsl_sf_erf.h>
 
 namespace Mantid {
@@ -232,9 +235,11 @@ private:
                                 std::string parname);
 
   /// Calculate diffraction pattern in Le Bail algorithm for MC Random walk
-  bool calculateDiffractionPattern(const MantidVec &vecX, const MantidVec &vecY,
+  bool calculateDiffractionPattern(const std::vector<double> &vecX,
+                                   const std::vector<double> &vecY,
                                    bool inputraw, bool outputwithbkgd,
-                                   const MantidVec &vecBkgd, MantidVec &values,
+                                   const std::vector<double> &vecBkgd,
+                                   std::vector<double> &values,
                                    Kernel::Rfactor &rfactor);
 
   /// Calculate powder diffraction statistic Rwp
@@ -267,9 +272,9 @@ private:
   //--------------  Background function Suite
   //----------------------------------------
   /// Re-fit background according to the new values
-  void fitBackground(size_t wsindex, API::FunctionDomain1DVector domain,
-                     API::FunctionValues values,
-                     std::vector<double> &background);
+  // std::vector<double> fitBackground(size_t wsindex,
+  //                                  API::FunctionDomain1DVector domain,
+  //                                  API::FunctionValues values);
 
   /// Smooth background by exponential smoothing algorithm
   void smoothBackgroundExponential(size_t wsindex,
