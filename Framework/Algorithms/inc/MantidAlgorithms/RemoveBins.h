@@ -2,10 +2,15 @@
 #define MANTID_ALGORITHMS_REMOVEBINS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramX;
+class HistogramY;
+class HistogramE;
+}
 namespace API {
 class SpectrumInfo;
 }
@@ -82,11 +87,13 @@ private:
   void transformRangeUnit(const int index, double &startX, double &endX);
   void calculateDetectorPosition(const int index, double &l1, double &l2,
                                  double &twoTheta);
-  int findIndex(const double &value, const MantidVec &vec);
-  void RemoveFromEnds(int start, int end, MantidVec &Y, MantidVec &E);
+  int findIndex(const double &value, const HistogramData::HistogramX &vec);
+  void RemoveFromEnds(int start, int end, HistogramData::HistogramY &Y,
+                      HistogramData::HistogramE &E);
   void RemoveFromMiddle(const int &start, const int &end,
                         const double &startFrac, const double &endFrac,
-                        MantidVec &Y, MantidVec &E);
+                        HistogramData::HistogramY &Y,
+                        HistogramData::HistogramE &E);
 
   API::MatrixWorkspace_const_sptr m_inputWorkspace; ///< The input workspace
   const API::SpectrumInfo *m_spectrumInfo;
