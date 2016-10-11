@@ -938,28 +938,16 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
     // are assumed to be the same here
     outSpec.setSharedX(inputWS->sharedX(0));
 
-    // the Y values and errors from spectra being grouped are combined in the
-    // output spectrum
-    auto &firstY = outSpec.mutableY();
     // Keep track of number of detectors required for masking
     size_t nonMaskedSpectra(0);
-    beh->mutableX(outIndex)[0] = 0.0;
-    beh->mutableE(outIndex)[0] = 0.0;
+
     for (auto originalWI : it->second) {
       // detectors to add to firstSpecNum
       const auto &fromSpectrum = inputWS->getSpectrum(originalWI);
 
       // Add up all the Y spectra and store the result in the first one
 
-      firstY += fromSpectrum.y();
-
-      auto fEit = outSpec.mutableE().begin();
-      auto Eit = fromSpectrum.e().cbegin();
-      for (auto fYit = firstY.begin(); fYit != firstY.end();
-           ++fYit, ++fEit, ++Eit) {
-        // Assume 'normal' (i.e. Gaussian) combination of errors
-        *fEit = std::sqrt((*fEit) * (*fEit) + (*Eit) * (*Eit));
-      }
+      outSpec.setHistogram(outSpec.histogram() += fromSpectrum.histogram());
 
       // detectors to add to the output spectrum
       outSpec.addDetectorIDs(fromSpectrum.getDetectorIDs());
