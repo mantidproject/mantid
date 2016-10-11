@@ -12,6 +12,8 @@ class FindEPP(PythonAlgorithm):
         """
         PythonAlgorithm.__init__(self)
         self.workspace = None
+        self.xmin = None
+        self.xmax = None
 
 
     def category(self):
@@ -23,10 +25,28 @@ class FindEPP(PythonAlgorithm):
     def summary(self):
         return "Performs Gaussian fit of all spectra to find the elastic peak position."
 
+    def validateInputs(self):
+        issues = dict()
+
+        self.xmin = self.getProperty("Xmin").value
+        self.xmax = self.getProperty("Xmax").value
+
+        if (self.xmin != 0. or self.xmax != 0.) and self.xmax <= self.xmin:
+            issues['Xmin'] = 'Xmin must be less than Xmax'
+            issues['Xmax'] = 'Xmax must be more than Xmin'
+
+        return issues
+
     def PyInit(self):
         # input
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input),
                              doc="Input Sample or Vanadium workspace")
+
+        # start X
+        self.declareProperty("XMin",0.,doc="Lower bound of peak range")
+
+        # end X
+        self.declareProperty("XMax",0.,doc="Upper bound of peak range")
 
         # output
         self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),
@@ -72,8 +92,24 @@ class FindEPP(PythonAlgorithm):
         # execute Fit algorithm
         tryCentre = x_values[imax]
         fitFun = "name=Gaussian,PeakCentre=%s,Height=%s,Sigma=%s" % (tryCentre,height,sigma)
-        startX = tryCentre - 3.0*fwhm
-        endX   = tryCentre + 3.0*fwhm
+
+        if self.xmin != 0. or self.xmax != 0.:
+            # meaning user has given a range
+            if self.xmin < x_values[0]:
+                self.log().information('Xmin is out of range for spectrum #%d, taking x[0]=%s' % (index,x_values[0]))
+                startX = x_values[0]
+            else:
+                startX = self.xmin
+
+            if self.xmax > x_values[-1]:
+                self.log().information('Xmax is out of range for spectrum #%d, taking x[-1]=%s' % (index,x_values[-1]))
+                endX = x_values[-1]
+            else:
+                endX = self.xmax
+        else:
+            # user has not given a range, guess
+            startX = tryCentre - 3.0*fwhm
+            endX   = tryCentre + 3.0*fwhm
 
         # pylint: disable=assignment-from-none
         # result = fitStatus, chiSq, covarianceTable, paramTable
@@ -83,7 +119,7 @@ class FindEPP(PythonAlgorithm):
         return result
 
     def PyExec(self):
-        self.workspace   = self.getProperty("InputWorkspace").value
+        self.workspace = self.getProperty("InputWorkspace").value
         outws_name = self.getPropertyValue("OutputWorkspace")
 
         # create table and columns
