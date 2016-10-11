@@ -137,6 +137,8 @@ public:
   void setSharedE(const Kernel::cow_ptr<HistogramE> &e) & ;
   void setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) & ;
 
+  void resize(size_t n);
+
   // Temporary legacy interface to X
   void setX(const Kernel::cow_ptr<HistogramX> &X) & { m_x = X; }
   MantidVec &dataX() & { return m_x.access().mutableRawData(); }
