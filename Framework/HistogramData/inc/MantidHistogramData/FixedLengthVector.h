@@ -157,6 +157,11 @@ public:
   double &back() { return m_data.back(); }
   const double &front() const { return m_data.front(); }
   const double &back() const { return m_data.back(); }
+
+  // expose typedefs for the iterator types in the underlying container
+  typedef std::vector<double>::iterator iterator;
+  typedef std::vector<double>::const_iterator const_iterator;
+
 };
 
 } // namespace detail
