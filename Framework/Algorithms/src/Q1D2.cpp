@@ -356,12 +356,12 @@ void Q1D2::calculateNormalization(const size_t wavStart, const size_t wsIndex,
                                   API::MatrixWorkspace_const_sptr wavePixelAdj,
                                   double const *const binNorms,
                                   double const *const binNormEs,
-                                  const HistogramData_iter norm,
-                                  const HistogramData_iter normETo2) const {
+                                  HistogramY::iterator norm,
+                                  HistogramY::iterator normETo2) const {
   double detectorAdj, detAdjErr;
   pixelWeight(pixelAdj, wsIndex, detectorAdj, detAdjErr);
   // use that the normalization array ends at the start of the error array
-  for (HistogramData_iter n = norm, e = normETo2; n != normETo2; ++n, ++e) {
+  for (auto n = norm, e = normETo2; n != normETo2; ++n, ++e) {
     *n = detectorAdj;
     *e = detAdjErr *detAdjErr;
   }
@@ -425,8 +425,8 @@ void Q1D2::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,
 * before the WavelengthAdj term
 */
 void Q1D2::addWaveAdj(const double *c, const double *Dc,
-                      HistogramData_iter bInOut,
-                      HistogramData_iter e2InOut) const {
+                      HistogramY::iterator bInOut,
+                      HistogramY::iterator e2InOut) const {
   // normalize by the wavelength dependent correction, keeping the percentage
   // errors the same
   // the error when a = b*c, the formula for Da, the error on a, in terms of Db,
@@ -438,7 +438,7 @@ void Q1D2::addWaveAdj(const double *c, const double *Dc,
 
   // use the fact that error array follows straight after the normalization
   // array
-  const HistogramData_const_iter end = e2InOut;
+  const auto end = e2InOut;
   for (; bInOut != end; ++e2InOut, ++c, ++Dc, ++bInOut) {
     // first the error
     *e2InOut =
@@ -464,9 +464,10 @@ void Q1D2::addWaveAdj(const double *c, const double *Dc,
 * for each detector pixel.
 */
 void Q1D2::addWaveAdj(const double *c, const double *Dc,
-                      HistogramData_iter bInOut, HistogramData_iter e2InOut,
-                      HistogramData_const_iter wavePixelAdjData,
-                      HistogramData_const_iter wavePixelAdjError) const {
+                      HistogramY::iterator bInOut,
+                      HistogramY::iterator e2InOut,
+                      HistogramY::const_iterator wavePixelAdjData,
+                      HistogramE::const_iterator wavePixelAdjError) const {
   // normalize by the wavelength dependent correction, keeping the percentage
   // errors the same
   // the error when a = b*c*e, the formula for Da, the error on a, in terms of
@@ -488,7 +489,7 @@ void Q1D2::addWaveAdj(const double *c, const double *Dc,
 
   // use the fact that error array follows straight after the normalization
   // array
-  const HistogramData_const_iter end = e2InOut;
+  const auto end = e2InOut;
   for (; bInOut != end; ++e2InOut, ++c, ++Dc, ++bInOut, ++wavePixelAdjData,
                         ++wavePixelAdjError) {
     // first the error
@@ -513,8 +514,8 @@ void Q1D2::addWaveAdj(const double *c, const double *Dc,
 * uncertainty in the normalization
 */
 void Q1D2::normToMask(const size_t offSet, const size_t wsIndex,
-                      const HistogramData_iter theNorms,
-                      const HistogramData_iter errorSquared) const {
+                      const HistogramY::iterator theNorms,
+                      const HistogramY::iterator errorSquared) const {
   // if any bins are masked it is normally a small proportion
   if (m_dataWS->hasMaskedBins(wsIndex)) {
     // Get a reference to the list of masked bins
@@ -552,14 +553,14 @@ void Q1D2::normToMask(const size_t offSet, const size_t wsIndex,
 */
 void Q1D2::convertWavetoQ(const SpectrumInfo &spectrumInfo, const size_t wsInd,
                           const bool doGravity, const size_t offset,
-                          HistogramData_iter Qs,
+                          HistogramY::iterator Qs,
                           const double extraLength) const {
   static const double FOUR_PI = 4.0 * M_PI;
 
   // wavelengths (lamda) to be converted to Q
   auto waves = m_dataWS->x(wsInd).cbegin() + offset;
   // going from bin boundaries to bin centered x-values the size goes down one
-  const HistogramData_const_iter end = m_dataWS->x(wsInd).end() - 1;
+  const auto end = m_dataWS->x(wsInd).end() - 1;
   if (doGravity) {
     GravitySANSHelper grav(spectrumInfo, wsInd, extraLength);
     for (; waves != end; ++Qs, ++waves) {
@@ -598,7 +599,7 @@ void Q1D2::convertWavetoQ(const SpectrumInfo &spectrumInfo, const size_t wsInd,
 * array
 */
 void Q1D2::getQBinPlus1(const HistogramX &OutQs, const double QToFind,
-                        HistogramData_const_iter &loc) const {
+                        HistogramX::const_iterator &loc) const {
   if (loc != OutQs.end()) {
     while (loc != OutQs.begin()) {
       if ((QToFind >= *(loc - 1)) && (QToFind < *loc)) {
