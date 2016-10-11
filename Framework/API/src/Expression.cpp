@@ -285,7 +285,6 @@ void Expression::tokenize() {
         size_t prec = canBeBinary ? m_operators->precedence[op] : 0;
         if (!prec) // operator does not exist
         {
-          std::ostringstream mess;
           bool error = true;
           // check if it's a binary and a unary operators together
           if (op.size() == 2) {
