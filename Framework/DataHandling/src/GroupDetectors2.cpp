@@ -943,23 +943,16 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
 
     for (auto originalWI : it->second) {
       // detectors to add to firstSpecNum
-      const auto &fromSpectrum = inputWS->getSpectrum(originalWI);
+      const auto &inputSpectrum = inputWS->getSpectrum(originalWI);
 
-      // Add up all the Y spectra and store the result in the first one
+      outSpec.setHistogram(outSpec.histogram() += inputSpectrum.histogram());
+      outSpec.addDetectorIDs(inputSpectrum.getDetectorIDs());
 
-      outSpec.setHistogram(outSpec.histogram() += fromSpectrum.histogram());
-
-      // detectors to add to the output spectrum
-      outSpec.addDetectorIDs(fromSpectrum.getDetectorIDs());
-      try {
-        Geometry::IDetector_const_sptr det = inputWS->getDetector(originalWI);
-        if (!det->isMasked())
-          ++nonMaskedSpectra;
-      } catch (Exception::NotFoundError &) {
-        // If a detector cannot be found, it cannot be masked
+      if (!isMaskedDetector(*inputWS->getDetector(originalWI))) {
         ++nonMaskedSpectra;
       }
     }
+
     if (nonMaskedSpectra == 0)
       ++nonMaskedSpectra; // Avoid possible divide by zero
     if (!requireDivide)
@@ -1085,6 +1078,16 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
   g_log.debug() << name() << " created " << outIndex
                 << " new grouped spectra\n";
   return outIndex;
+}
+
+bool GroupDetectors2::isMaskedDetector(
+    const Geometry::IDetector &detector) const {
+  try {
+    return detector.isMasked();
+  } catch (Exception::NotFoundError &) {
+    // If a detector cannot be found, it cannot be masked
+    return false;
+  }
 }
 
 // RangeHelper
