@@ -147,10 +147,10 @@ void VesuvioCalculateGammaBackground::exec() {
 bool VesuvioCalculateGammaBackground::calculateBackground(
     const size_t inputIndex, const size_t outputIndex) {
   // Copy X values
-  m_backgroundWS->setX(outputIndex, m_inputWS->refX(inputIndex));
-  m_correctedWS->setX(outputIndex, m_inputWS->refX(inputIndex));
+  m_backgroundWS->setSharedX(outputIndex, m_inputWS->sharedX(inputIndex));
+  m_correctedWS->setSharedX(outputIndex, m_inputWS->sharedX(inputIndex));
   // Copy errors to corrected
-  m_correctedWS->dataE(outputIndex) = m_inputWS->readE(inputIndex);
+  m_correctedWS->setSharedE(outputIndex, m_inputWS->sharedE(inputIndex));
 
   try {
     const auto &inSpec = m_inputWS->getSpectrum(inputIndex);
@@ -165,7 +165,7 @@ bool VesuvioCalculateGammaBackground::calculateBackground(
       g_log.information("Spectrum " + std::to_string(spectrumNo) +
                         " not in forward scatter range. Skipping correction.");
       // Leave background at 0 and just copy data to corrected
-      m_correctedWS->dataY(outputIndex) = m_inputWS->readY(inputIndex);
+      m_correctedWS->setSharedY(outputIndex, m_inputWS->sharedY(inputIndex));
     }
     return true;
   } catch (Exception::NotFoundError &) {
@@ -195,11 +195,11 @@ void VesuvioCalculateGammaBackground::applyCorrection(
   // Compute total counts from input data, (detector-foil) contributions
   // assume constant binning
   const size_t nbins = m_correctedWS->blocksize();
-  const auto &inY = m_inputWS->readY(inputIndex);
-  auto &detY = m_correctedWS->dataY(outputIndex);
-  auto &foilY = m_backgroundWS->dataY(outputIndex);
-  const double deltaT = m_correctedWS->readX(outputIndex)[1] -
-                        m_correctedWS->readX(outputIndex)[0];
+  const auto &inY = m_inputWS->y(inputIndex);
+  auto &detY = m_correctedWS->mutableY(outputIndex);
+  auto &foilY = m_backgroundWS->mutableY(outputIndex);
+  const double deltaT =
+      m_correctedWS->x(outputIndex)[1] - m_correctedWS->x(outputIndex)[0];
 
   double dataCounts(0.0), simulCounts(0.0);
   for (size_t j = 0; j < nbins; ++j) {
@@ -240,9 +240,10 @@ void VesuvioCalculateGammaBackground::calculateSpectrumFromDetector(
   // Compute a time of flight spectrum convolved with a Voigt resolution
   // function for each mass
   // at the detector point & sum to a single spectrum
-  auto &ctdet = m_correctedWS->dataY(outputIndex);
+  auto &ctdet = m_correctedWS->mutableY(outputIndex);
   std::vector<double> tmpWork(ctdet.size());
-  calculateTofSpectrum(ctdet, tmpWork, outputIndex, detPar, detRes);
+  ctdet = calculateTofSpectrum(ctdet.rawData(), tmpWork, outputIndex, detPar,
+                               detRes);
   // Correct for distance to the detector: 0.5/l2^2
   const double detDistCorr = 0.5 / detPar.l2 / detPar.l2;
   std::transform(ctdet.begin(), ctdet.end(), ctdet.begin(),
@@ -267,7 +268,7 @@ void VesuvioCalculateGammaBackground::calculateBackgroundFromFoils(
 
   const size_t nxvalues = m_backgroundWS->blocksize();
   std::vector<double> foilSpectrum(nxvalues);
-  auto &ctfoil = m_backgroundWS->dataY(outputIndex);
+  auto &ctfoil = m_backgroundWS->mutableY(outputIndex);
 
   // Compute (C1 - C0) where C1 is counts in pos 1 and C0 counts in pos 0
   assert(m_foils0.size() == m_foils1.size());
@@ -350,7 +351,8 @@ void VesuvioCalculateGammaBackground::calculateBackgroundSingleFoil(
 
       // Spectrum for this position
       singleElement.assign(nvalues, 0.0);
-      calculateTofSpectrum(singleElement, tmpWork, wsIndex, foilPar, foilRes);
+      singleElement = calculateTofSpectrum(singleElement, tmpWork, wsIndex,
+                                           foilPar, foilRes);
 
       // Correct for absorption & distance
       const double den = (elementPos.Z() * cos(thetaZeroRad) +
@@ -371,21 +373,21 @@ void VesuvioCalculateGammaBackground::calculateBackgroundSingleFoil(
 
 /**
 * Uses the compton profile functions to compute a particular mass spectrum
-* @param result [Out] The value of the computed spectrum
-* @param tmpWork [In] Pre-allocated working area that will be overwritten
+* @param inSpectrum The value of the computed spectrum
+* @param tmpWork Pre-allocated working area that will be overwritten
 * @param wsIndex Index on the output background workspace that gives the X
 * values to use
 * @param detpar Struct containing parameters about the detector
 * @param respar Struct containing parameters about the resolution
 */
-void VesuvioCalculateGammaBackground::calculateTofSpectrum(
-    std::vector<double> &result, std::vector<double> &tmpWork,
+std::vector<double> VesuvioCalculateGammaBackground::calculateTofSpectrum(
+    const std::vector<double> &inSpectrum, std::vector<double> &tmpWork,
     const size_t wsIndex, const DetectorParams &detpar,
     const ResolutionParams &respar) {
-  assert(result.size() == tmpWork.size());
+  assert(inSpectrum.size() == tmpWork.size());
 
   // Assumes the input is in seconds, transform it temporarily
-  auto &tseconds = m_backgroundWS->dataX(wsIndex);
+  auto &tseconds = m_backgroundWS->mutableX(wsIndex);
   std::transform(tseconds.begin(), tseconds.end(), tseconds.begin(),
                  std::bind2nd(std::multiplies<double>(), 1e-6));
 
@@ -394,6 +396,8 @@ void VesuvioCalculateGammaBackground::calculateTofSpectrum(
   // we can't static_cast though due to the virtual inheritance with IFunction
   auto profileFunction = boost::dynamic_pointer_cast<CompositeFunction>(
       FunctionFactory::Instance().createInitialized(m_profileFunction));
+
+  std::vector<double> correctedVals(inSpectrum);
 
   for (size_t i = 0; i < m_npeaks; ++i) {
     auto profile =
@@ -405,17 +409,19 @@ void VesuvioCalculateGammaBackground::calculateTofSpectrum(
     // Fix the Mass parameter
     profile->fix(0);
 
-    profile->cacheYSpaceValues(tseconds, false, detpar, respar);
+    profile->cacheYSpaceValues(tseconds.rawData(), false, detpar, respar);
 
     profile->massProfile(tmpWork.data(), tmpWork.size());
     // Add to final result
-    std::transform(result.begin(), result.end(), tmpWork.begin(),
-                   result.begin(), std::plus<double>());
+
+    std::transform(correctedVals.begin(), correctedVals.end(), tmpWork.begin(),
+                   correctedVals.begin(), std::plus<double>());
     m_progress->report();
   }
   // Put X back microseconds
   std::transform(tseconds.begin(), tseconds.end(), tseconds.begin(),
                  std::bind2nd(std::multiplies<double>(), 1e6));
+  return correctedVals;
 }
 
 /**
