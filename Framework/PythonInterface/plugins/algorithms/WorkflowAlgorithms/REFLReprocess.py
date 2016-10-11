@@ -1,4 +1,6 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -77,7 +79,7 @@ class REFLReprocess(PythonAlgorithm):
                                          q_min=options.get_state().data_sets[0].q_min,
                                          q_step=options.get_state().data_sets[0].q_step)
                     except:
-                        Logger("REFLReprocess").error(str(sys.exc_value))
+                        Logger("REFLReprocess").error(str(sys.exc_info()[1]))
         else:
             Logger("REFLReprocess").error("%s not a valid directory" % ipts_dir)
 
@@ -109,9 +111,9 @@ class REFLReprocess(PythonAlgorithm):
                 _list_name.append(item)
                 _list_ts.append(_ts)
 
-        _name_ts = zip(_list_ts, _list_name)
+        _name_ts = list(zip(_list_ts, _list_name))
         _name_ts.sort()
-        _ts_sorted, workspace_list = zip(*_name_ts)
+        _ts_sorted, workspace_list = list(zip(*_name_ts))
 
         # Stitch the data
         s = Stitcher()

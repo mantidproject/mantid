@@ -10,7 +10,6 @@
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidDataHandling/MaskDetectors.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -93,12 +92,12 @@ public:
     // empty bins are 0/0
     TS_ASSERT_DELTA(result->y(0).front(), 2226533, 1)
     TS_ASSERT_DELTA(result->y(0)[4], 946570.8, 0.1)
-    TS_ASSERT(boost::math::isnan(result->y(0)[18]))
-    TS_ASSERT(boost::math::isnan(result->y(0).back()))
+    TS_ASSERT(std::isnan(result->y(0)[18]))
+    TS_ASSERT(std::isnan(result->y(0).back()))
 
     TS_ASSERT_DELTA(result->e(0)[1], 57964.04, 0.01)
     TS_ASSERT_DELTA(result->e(0)[5], 166712.6, 0.1)
-    TS_ASSERT(boost::math::isnan(result->e(0).back()))
+    TS_ASSERT(std::isnan(result->e(0).back()))
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
@@ -191,16 +190,16 @@ public:
     TS_ASSERT_DELTA(result->x(0)[3], 0.1061208, 1e-6)
     TS_ASSERT_DELTA(result->x(0)[56], 0.3031165, 1e-5)
     TS_ASSERT_EQUALS(result->x(0).back(), 0.5)
-
+    
     TS_ASSERT_DELTA(result->y(0).front(), 944237.8, 0.1)
     TS_ASSERT_DELTA(result->y(0)[3], 1009296, 1)
     TS_ASSERT_DELTA(result->y(0)[12], 620952.6, 0.1)
-    TS_ASSERT(boost::math::isnan(result->y(0).back()))
+    TS_ASSERT(std::isnan(result->y(0).back()))
 
     // empty bins are 0/0
     TS_ASSERT_DELTA(result->e(0)[2], 404981, 10)
     TS_ASSERT_DELTA(result->e(0)[10], 489710.39, 100)
-    TS_ASSERT(boost::math::isnan(result->e(0)[7]))
+    TS_ASSERT(std::isnan(result->e(0)[7]))
 
     TSM_ASSERT("Should not have a DX value", !result->hasDx(0))
   }
@@ -275,11 +274,11 @@ public:
 
     TS_ASSERT_DELTA(gravity->y(0)[3], 1009296.4, 0.8)
     TS_ASSERT_DELTA(gravity->y(0)[10], 891346.9, 0.1)
-    TS_ASSERT(boost::math::isnan(gravity->y(0)[78]))
+    TS_ASSERT(std::isnan(gravity->y(0)[78]))
 
     TS_ASSERT_DELTA(gravity->e(0).front(), 329383, 1)
     TS_ASSERT_DELTA(gravity->e(0)[10], 489708, 1) // 489710
-    TS_ASSERT(boost::math::isnan(gravity->e(0)[77]))
+    TS_ASSERT(std::isnan(gravity->e(0)[77]))
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
@@ -314,13 +313,13 @@ public:
     TS_ASSERT_EQUALS(result->x(0).back(), 0.5)
 
     TS_ASSERT_DELTA(result->y(0).front(), 1192471.95, 0.1)
-    TS_ASSERT(boost::math::isnan(result->y(0)[3]))
+    TS_ASSERT(std::isnan(result->y(0)[3]))
     TS_ASSERT_DELTA(result->y(0)[12], 503242.79, 0.1)
-    TS_ASSERT(boost::math::isnan(result->y(0).back()))
+    TS_ASSERT(std::isnan(result->y(0).back()))
 
     TS_ASSERT_DELTA(result->e(0)[2], 404980, 1)
     TS_ASSERT_DELTA(result->e(0)[10], 489708, 100)
-    TS_ASSERT(boost::math::isnan(result->e(0)[7]))
+    TS_ASSERT(std::isnan(result->e(0)[7]))
   }
 
   // here the cut parameters are set but should only affect detectors with lower
@@ -355,8 +354,8 @@ public:
 
     for (size_t i = 0; i < nocuts->y(0).size(); ++i) {
       TS_ASSERT_EQUALS(nocuts->x(0)[i], noGrav->x(0)[i])
-      if (!boost::math::isnan(nocuts->y(0)[i]) &&
-          !boost::math::isnan(nocuts->e(0)[i])) {
+      if (!std::isnan(nocuts->y(0)[i]) &&
+          !std::isnan(nocuts->e(0)[i])) {
         TS_ASSERT_EQUALS(nocuts->y(0)[i], noGrav->y(0)[i])
 
         TS_ASSERT_EQUALS(nocuts->e(0)[i], noGrav->e(0)[i])
@@ -440,16 +439,14 @@ public:
     // into this
     // bin. We make sure that there is at least one bin with a count
     // of sqrt(1 + 0.5^2/12) ~ 1.01036297108
-    auto &dataDX = result->dx(0);
     unsigned int counter = 0;
-    for (auto it = dataDX.begin(); it != dataDX.end(); ++it) {
-
+    for (const auto &dx : result->dx(0)) {
       // Since we are dealing with a float it can be difficult to compare
       // our value with sqrt(1 + 0.5^2/12). Hence it is enough for us to confirm
       // that the values lie in an interval around this value
-      auto isZeroValue = *it == 0.0;
+      auto isZeroValue = dx == 0.0;
       auto isCloseToZeroPoint1DividedByRootTwelve =
-          (*it > 1.01035) && (*it < 1.01037);
+          (dx > 1.01035) && (dx < 1.01037);
       if (isCloseToZeroPoint1DividedByRootTwelve) {
         counter++;
       }

@@ -17,6 +17,7 @@
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Utils.h"
+#include "MantidKernel/make_unique.h"
 
 namespace {
 template <typename MDE, size_t nd>

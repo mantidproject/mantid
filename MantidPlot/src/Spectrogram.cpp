@@ -969,8 +969,7 @@ QImage Spectrogram::renderImage(const QwtScaleMap &xMap,
       double xmin, xmax;
       mantidFun->getRowXRange(row, xmin, xmax);
       int jmin = -1;
-      if (xmin != std::numeric_limits<double>::infinity() && xmin == xmin &&
-          xmax != std::numeric_limits<double>::infinity() && xmax == xmax) {
+      if (std::isfinite(xmin) && std::isfinite(xmax)) {
         jmin = xMap.transform(xmin) - rect.left();
       } else {
         continue;
