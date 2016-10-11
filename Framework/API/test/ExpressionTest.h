@@ -401,6 +401,13 @@ public:
     TS_ASSERT_EQUALS(e[1].name(), ",");
   }
 
+  void test_tie_expression_with_brackets_1() {
+    Expression e;
+    e.parse("ties=(a0 = 2,  Height = Sigma/(0.5 * 0.5))");
+    TS_ASSERT_EQUALS(e.str(), "ties=(a0=2,Height=Sigma/(0.5*0.5))");
+    TS_ASSERT_EQUALS(e[1].name(), ",");
+  }
+
   void test_bad_brackets() {
     Expression e;
     try {

@@ -495,6 +495,8 @@ std::string Expression::str() const {
     brackets = true;
   } else if (m_op == "-" && m_funct == "+") {
     brackets = true;
+  } else if (m_op == "/" && m_funct == "*") {
+    brackets = true;
   }
 
   if (!m_terms.empty()) {

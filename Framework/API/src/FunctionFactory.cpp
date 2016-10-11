@@ -113,9 +113,9 @@ IFunction_sptr FunctionFactoryImpl::createSimple(
       fun->setAttribute(parName, att);
     } else if (parName.size() >= 10 && parName.substr(0, 10) == "constraint") {
       // or it can be a list of constraints
-      addConstraints(fun, (*term)[1]);
+      addConstraints(fun, (*term)[1].bracketsRemoved());
     } else if (parName == "ties") {
-      addTies(fun, (*term)[1]);
+      addTies(fun, (*term)[1].bracketsRemoved());
     } else if (!parName.empty() && parName[0] == '$') {
       parName.erase(0, 1);
       parentAttributes[parName] = parValue;
@@ -213,10 +213,10 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
     } else {
       std::string parName = term[0].name();
       if (parName.size() >= 10 && parName.substr(0, 10) == "constraint") {
-        addConstraints(cfun, term[1]);
+        addConstraints(cfun, term[1].bracketsRemoved());
         continue;
       } else if (parName == "ties") {
-        addTies(cfun, term[1]);
+        addTies(cfun, term[1].bracketsRemoved());
         continue;
       } else {
         fun = createSimple(term, pAttributes);

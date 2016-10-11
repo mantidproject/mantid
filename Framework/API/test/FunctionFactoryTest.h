@@ -353,6 +353,16 @@ public:
     TS_ASSERT_EQUALS(funa->getParameter("a1"), 16);
   }
 
+  void testCreateWithTies4() {
+    std::string fnString =
+        "name=FunctionFactoryTest_FunctA,ties=(a0=2,a1=a0/(2*2))";
+    IFunction_sptr funa =
+        FunctionFactory::Instance().createInitialized(fnString);
+    TS_ASSERT(funa);
+    TS_ASSERT_EQUALS(funa->getParameter("a0"), 2);
+    TS_ASSERT_EQUALS(funa->getParameter("a1"), 0.5);
+  }
+
   void testCreateCompositeWithTies() {
     std::string fnString = "name=FunctionFactoryTest_FunctA,ties=(a0=a1=14);"
                            "name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2;ties="
@@ -385,6 +395,20 @@ public:
     TS_ASSERT_EQUALS(fun1->getParameter(1), 14.);
     TS_ASSERT_EQUALS(fun1->getParameter(2), 28.);
     TS_ASSERT_EQUALS(fun1->getParameter(3), 789);
+  }
+
+  void testCreateCompositeWithTies1() {
+    std::string fnString = "name=FunctionFactoryTest_FunctA,ties=(a0=a1=16);"
+                           "name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2;ties="
+                           "(f1.b1=f0.a1/(2*2))";
+
+    IFunction_sptr fun =
+        FunctionFactory::Instance().createInitialized(fnString);
+    TS_ASSERT(fun);
+    TS_ASSERT_EQUALS(fun->getParameter(0), 16.);
+    TS_ASSERT_EQUALS(fun->getParameter(1), 16.);
+    TS_ASSERT_EQUALS(fun->getParameter(2), 0.2);
+    TS_ASSERT_EQUALS(fun->getParameter(3), 4.);
   }
 
   void test_MultiDomainFunction_creation() {
