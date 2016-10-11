@@ -227,7 +227,7 @@ private:
 
 class CreateSimulationWorkspaceTestPerformance : public CxxTest::TestSuite {
 public:
-  void setUp() {
+  void setUp() override{
 
     // Starting bin, bin width, last bin
     const std::string binParams("-30,3,279");
@@ -245,7 +245,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
   }
 
-  void tearDown() {
+  void tearDown() override{
     Mantid::API::AnalysisDataService::Instance().remove(outWsName);
   }
 

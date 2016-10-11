@@ -834,7 +834,7 @@ private:
 
 class GroupDetectors2TestPerformance : public CxxTest::TestSuite {
 public:
-  void setUp() {
+  void setUp() override {
     constexpr int numGroups = 2;
     // This controls speed of test
     constexpr int bankPixelWidth = 30;
@@ -865,7 +865,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
   }
 
-  void tearDown() {
+  void tearDown() override {
     AnalysisDataService::Instance().remove(groupWSName);
     AnalysisDataService::Instance().remove(nxsWSname);
     AnalysisDataService::Instance().remove(outputws);
@@ -880,7 +880,6 @@ public:
     // fill in some groups
     constexpr size_t startingGroupNo = 1;
     const size_t targetGroupNo = numGroups;
-    const size_t targetSpectraCount = numGroups;
     size_t pixPerGroup = 0;
     pixPerGroup = groupWs->getNumberHistograms() / targetGroupNo;
 
