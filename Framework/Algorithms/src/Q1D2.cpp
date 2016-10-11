@@ -464,8 +464,7 @@ void Q1D2::addWaveAdj(const double *c, const double *Dc,
 * for each detector pixel.
 */
 void Q1D2::addWaveAdj(const double *c, const double *Dc,
-                      HistogramY::iterator bInOut,
-                      HistogramY::iterator e2InOut,
+                      HistogramY::iterator bInOut, HistogramY::iterator e2InOut,
                       HistogramY::const_iterator wavePixelAdjData,
                       HistogramE::const_iterator wavePixelAdjError) const {
   // normalize by the wavelength dependent correction, keeping the percentage

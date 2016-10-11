@@ -170,7 +170,8 @@ public:
   std::string m_inputWS;
   std::string m_outputWS;
 
-  QxyTestPerformance() : m_inputWS("QxyTest_input_in_wav"), m_outputWS("result") {}
+  QxyTestPerformance()
+      : m_inputWS("QxyTest_input_in_wav"), m_outputWS("result") {}
 
   void setUp() override {
     Mantid::DataHandling::LoadRaw3 loader;
@@ -185,7 +186,6 @@ public:
     convert.setPropertyValue("OutputWorkspace", m_inputWS);
     convert.setPropertyValue("Target", "Wavelength");
     convert.execute();
-
   }
 
   void tearDown() override {

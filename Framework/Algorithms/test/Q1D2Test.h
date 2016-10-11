@@ -149,8 +149,7 @@ public:
 
     TS_ASSERT_DELTA(result->e(0)[1], 57964.04, 0.01)
     TS_ASSERT_DELTA(sumOfCounts->e(0)[1], 31.888, 0.01)
-    TS_ASSERT_DELTA(sumOfNormFactors->e(0)[1], 3.6381851288154988e-005,
-                    0.01)
+    TS_ASSERT_DELTA(sumOfNormFactors->e(0)[1], 3.6381851288154988e-005, 0.01)
 
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
     TS_ASSERT_EQUALS(sumOfCounts->getNumberHistograms(), 1)
