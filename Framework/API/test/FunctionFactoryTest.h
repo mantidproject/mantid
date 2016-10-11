@@ -343,6 +343,16 @@ public:
     TS_ASSERT_EQUALS(funa->getParameter("a1"), 4);
   }
 
+  void testCreateWithTies3() {
+    std::string fnString =
+        "name=FunctionFactoryTest_FunctA,ties=(a0=2,a1=4*(2+2))";
+    IFunction_sptr funa =
+        FunctionFactory::Instance().createInitialized(fnString);
+    TS_ASSERT(funa);
+    TS_ASSERT_EQUALS(funa->getParameter("a0"), 2);
+    TS_ASSERT_EQUALS(funa->getParameter("a1"), 16);
+  }
+
   void testCreateCompositeWithTies() {
     std::string fnString = "name=FunctionFactoryTest_FunctA,ties=(a0=a1=14);"
                            "name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2;ties="

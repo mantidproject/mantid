@@ -14,6 +14,55 @@ typedef Mantid::Kernel::StringTokenizer tokenizer;
 const std::string DEFAULT_OPS_STR[] = {";", ",", "=", "== != > < <= >=",
                                        "&& || ^^", "+ -", "* /", "^"};
 
+namespace {
+/// Make the full text of the error message
+/// @param msg :: The text of the error message.
+/// @param expr :: An expression string that caused the error.
+/// @param i :: An index of a symbol in expr that may help identify the location
+///             of the error.
+std::string makeErrorMessage(const std::string &msg, const std::string &expr,
+                             size_t i) {
+  const size_t MAX_LEFT_SIZE = 10;
+  const size_t MAX_RIGHT_SIZE = 10;
+  std::ostringstream res;
+  res << msg << " at\n\n";
+  size_t j = i;
+  size_t skip = 0;
+  size_t n = expr.size();
+  std::string leftEllipsis = "";
+  if (i > MAX_LEFT_SIZE) {
+    skip = i - MAX_LEFT_SIZE;
+    leftEllipsis = "...";
+    j = MAX_LEFT_SIZE + leftEllipsis.size();
+    n -= skip;
+  }
+  std::string rightEllipsis = "";
+  if (n - j > MAX_RIGHT_SIZE) {
+    n = i + MAX_RIGHT_SIZE;
+    rightEllipsis = "...";
+  }
+  // Write a substring of expr around the error indicator at symbol #i.
+  res << leftEllipsis << expr.substr(skip, n) << rightEllipsis << '\n';
+  res << std::string(j, ' ') << '^' << '\n';
+  return res.str();
+}
+
+} // namespace
+
+/// Constructor
+/// @param msg :: The text of the error message.
+/// @param expr :: An expression string that caused the error.
+/// @param i :: An index of a symbol in expr that may help identify the location
+///             of the error.
+Expression::ParsingError::ParsingError(const std::string &msg,
+                                       const std::string &expr, size_t i)
+    : std::runtime_error(makeErrorMessage(msg, expr, i)) {}
+
+/// Constructor
+/// @param msg :: The text of the error message.
+Expression::ParsingError::ParsingError(const std::string &msg)
+    : std::runtime_error(msg) {}
+
 Expression::Expression() {
 
   m_operators.reset(new Operators());
@@ -217,10 +266,7 @@ void Expression::tokenize() {
             m_expr.resize(last);
             break;
           } else {
-            throw std::runtime_error(
-                "Syntax error in expression.\n\nA binary "
-                "operator isn't followed by a value:\n    " +
-                m_expr);
+            throw ParsingError("A binary operator isn't followed by a value", m_expr, i);
           }
         }
 
@@ -231,7 +277,7 @@ void Expression::tokenize() {
         }
 
         if (is1 > last) {
-          throw std::runtime_error("Expression: syntax error");
+          throw ParsingError("Syntax error", m_expr, last);
         }
 
         std::string op = m_expr.substr(i, is1 - i);
@@ -254,8 +300,7 @@ void Expression::tokenize() {
               if (is_op_symbol(m_expr[is1 + 1])) {
                 uop += m_expr[is1 + 1];
                 if (is1 + 2 > last) {
-                  mess << "Expression: syntax error at " << is1 + 1;
-                  throw std::runtime_error(mess.str());
+                  throw ParsingError("Syntax error", m_expr, is1 + 1);
                 }
               }
               if (is_unary(uop)) {
@@ -274,8 +319,7 @@ void Expression::tokenize() {
             error = false;
           }
           if (error) {
-            mess << "Expression: unrecognized operator " << op;
-            throw std::runtime_error(mess.str());
+            throw ParsingError("Unrecognized operator", m_expr, i);
           }
         }
 
@@ -302,7 +346,7 @@ void Expression::tokenize() {
         if (lvl)
           lvl--;
         else {
-          throw std::runtime_error("Unmatched brackets");
+          throw ParsingError("Unmatched bracket", m_expr, 0);
         }
       }
     } // !inString || skip
@@ -390,7 +434,7 @@ void Expression::setFunct(const std::string &name) {
   m_funct = name;
   trim(m_funct);
   if (m_funct.empty()) {
-    throw std::runtime_error("Expression: Syntax error");
+    throw ParsingError("Empty function name");
   }
 
   // Check if the function has arguments
@@ -412,7 +456,7 @@ void Expression::setFunct(const std::string &name) {
   if (i != std::string::npos) {
     std::string::size_type j = name.find_last_of(')');
     if (j == std::string::npos || j < i) {
-      throw std::runtime_error("Unmatched brackets");
+      throw ParsingError("Unmatched bracket", name, i);
     }
 
     if (j > i + 1) // nonzero argument list
@@ -425,6 +469,9 @@ void Expression::setFunct(const std::string &name) {
       if (!tmp.isFunct() || tmp.name() != ",") {
         m_terms.push_back(tmp);
       } else {
+        if (f.empty() && tmp.name() == ",") {
+          f = ",";
+        }
         std::string my_op = m_op;
         *this = tmp;
         m_op = my_op;
@@ -445,6 +492,8 @@ std::string Expression::str() const {
     }
   } else if (!prec) { // function with a name
     res << m_funct;
+    brackets = true;
+  } else if (m_op == "-" && m_funct == "+") {
     brackets = true;
   }
 
