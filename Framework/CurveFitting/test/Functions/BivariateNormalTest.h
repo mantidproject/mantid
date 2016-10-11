@@ -91,7 +91,7 @@ public:
 
     bool CalcVariances = 0;
 
-    Mantid::MantidVec xvals, yvals, data;
+    std::vector<double> xvals, yvals, data;
     int sgn1 = 1;
     int sgn2 = 1;
     for (int i = 0; i < nCells; i++) {
@@ -125,9 +125,9 @@ public:
     NormalFit.setAttributeValue("CalcVariances", CalcVariances);
 
     ws->setPoints(0, nCells, LinearGenerator(0.0, 1.0));
-    ws->dataY(0) = data;
-    ws->dataY(1) = xvals;
-    ws->dataY(2) = yvals;
+    ws->mutableY(0) = data;
+    ws->mutableY(1) = xvals;
+    ws->mutableY(2) = yvals;
 
     NormalFit.setMatrixWorkspace(ws, 0, 0.0, 30.0);
 

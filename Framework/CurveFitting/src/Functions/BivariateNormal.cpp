@@ -85,9 +85,9 @@ void BivariateNormal::function1D(double *out, const double *xValues,
 
   API::MatrixWorkspace_const_sptr ws = getMatrixWorkspace();
 
-  const MantidVec &D = ws->dataY(0);
-  const MantidVec &X = ws->dataY(1);
-  const MantidVec &Y = ws->dataY(2);
+  const auto &D = ws->y(0);
+  const auto &X = ws->y(1);
+  const auto &Y = ws->y(2);
   int K = 1;
 
   if (nParams() > 4)
@@ -95,8 +95,9 @@ void BivariateNormal::function1D(double *out, const double *xValues,
 
   getConstraint(IBACK)->setPenaltyFactor(K * 3000);
 
-  double badParams = initCoeff(D, X, Y, coefNorm, expCoeffx2, expCoeffy2,
-                               expCoeffxy, NCells, Varxx, Varxy, Varyy);
+  double badParams =
+      initCoeff(D.rawData(), X.rawData(), Y.rawData(), coefNorm, expCoeffx2,
+                expCoeffy2, expCoeffxy, NCells, Varxx, Varxy, Varyy);
 
   std::ostringstream inf;
   inf << "F Parameters=";
@@ -141,8 +142,6 @@ void BivariateNormal::function1D(double *out, const double *xValues,
       }
     }
     double diff = out[x] - D[x];
-    // inf<<"("<<Y[i]<<","<<X[i]<<","<<out[x]<<","<<
-    //       D[x]<<")";
     chiSq += diff * diff;
 
     x++;
@@ -184,8 +183,8 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
   }
   */
   API::MatrixWorkspace_const_sptr ws = getMatrixWorkspace();
-  MantidVec X = ws->dataY(1);
-  MantidVec Y = ws->dataY(2);
+  const auto &X = ws->y(1);
+  const auto &Y = ws->y(2);
 
   for (int x = 0; x < NCells; x++) {
 
@@ -399,9 +398,9 @@ double BivariateNormal::initCommon() {
     CommonsOK = false;
 
   API::MatrixWorkspace_const_sptr ws = getMatrixWorkspace();
-  MantidVec D = ws->dataY(0);
-  MantidVec X = ws->dataY(1);
-  MantidVec Y = ws->dataY(2);
+  const auto &D = ws->y(0);
+  const auto &X = ws->y(1);
+  const auto &Y = ws->y(2);
 
   if (NCells < 0) {
     NCells = static_cast<int>(
@@ -557,8 +556,9 @@ double BivariateNormal::initCommon() {
     double Varxx, Varxy, Varyy;
 
     Varxx = Varxy = Varyy = -1;
-    penalty = initCoeff(D, X, Y, coefNorm, expCoeffx2, expCoeffy2, expCoeffxy,
-                        NCells1, Varxx, Varxy, Varyy);
+    penalty =
+        initCoeff(D.rawData(), X.rawData(), Y.rawData(), coefNorm, expCoeffx2,
+                  expCoeffy2, expCoeffxy, NCells1, Varxx, Varxy, Varyy);
 
     if (Varx0 < 0 && penalty <= 0) {
       Varx0 = Varxx;
@@ -583,11 +583,12 @@ double BivariateNormal::initCommon() {
   return penalty;
 }
 
-double BivariateNormal::initCoeff(const MantidVec &D, const MantidVec &X,
-                                  const MantidVec &Y, double &coefNorm,
-                                  double &expCoeffx2, double &expCoeffy2,
-                                  double &expCoeffxy, int &NCells,
-                                  double &Varxx, double &Varxy,
+double BivariateNormal::initCoeff(const std::vector<double> &D,
+                                  const std::vector<double> &X,
+                                  const std::vector<double> &Y,
+                                  double &coefNorm, double &expCoeffx2,
+                                  double &expCoeffy2, double &expCoeffxy,
+                                  int &NCells, double &Varxx, double &Varxy,
                                   double &Varyy) const {
 
   double Background = getParameter("Background");
