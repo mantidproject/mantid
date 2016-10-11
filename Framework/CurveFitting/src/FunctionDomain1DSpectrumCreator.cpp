@@ -1,4 +1,6 @@
 #include "MantidCurveFitting/FunctionDomain1DSpectrumCreator.h"
+#include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/Points.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -6,7 +8,7 @@ namespace Mantid {
 namespace CurveFitting {
 
 using namespace API;
-
+using namespace HistogramData;
 /**
  * Default Constructor.
  */
@@ -56,14 +58,14 @@ void FunctionDomain1DSpectrumCreator::createDomain(
   throwIfWorkspaceInvalid();
 
   if (m_matrixWorkspace->isHistogramData()) {
-    domain.reset(new FunctionDomain1DSpectrum(
-        m_workspaceIndex,
-        m_matrixWorkspace->points(m_workspaceIndex).mutableRawData()));
-    // new FunctionDomain1DSpectrum(m_workspaceIndex, getVectorHistogram()));
+    auto &vector = getVectorHistogram();
+    domain.reset(new FunctionDomain1DSpectrum(m_workspaceIndex,
+                                              vector.mutableRawData()));
   } else {
-    domain.reset(new FunctionDomain1DSpectrum(
-        m_workspaceIndex,
-        m_matrixWorkspace->binEdges(m_workspaceIndex).mutableRawData()));
+    auto &vector = getVectorNonHistogram();
+
+    domain.reset(new FunctionDomain1DSpectrum(m_workspaceIndex,
+                                              vector.mutableRawData()));
   }
 
   if (!values) {
@@ -117,39 +119,33 @@ void FunctionDomain1DSpectrumCreator::throwIfWorkspaceInvalid() const {
   }
 }
 
-// /// Returns vector with x-values of spectrum if MatrixWorkspace contains
-// /// histogram data.
-// MantidVec FunctionDomain1DSpectrumCreator::getVectorHistogram() const {
-//   const auto wsXData = m_matrixWorkspace->x(m_workspaceIndex);
-//   size_t wsXSize = wsXData.size();
+/// Returns vector with x-values of spectrum if MatrixWorkspace contains
+/// histogram data.
+Points FunctionDomain1DSpectrumCreator::getVectorHistogram() const {
+  const auto &wsXData = m_matrixWorkspace->points(m_workspaceIndex);
+  size_t wsXSize = wsXData.size();
 
-//   if (wsXSize < 2) {
-//     throw std::invalid_argument("Histogram Workspace2D with less than two "
-//                                 "x-values cannot be processed.");
-//   }
+  if (wsXSize < 1) {
+    throw std::invalid_argument("Histogram Workspace2D with less than two "
+                                "x-values cannot be processed.");
+  }
 
-//   MantidVec x(wsXSize - 1);
+  return wsXData;
+}
 
-//   for (size_t i = 0; i < x.size(); ++i) {
-//     x[i] = (wsXData[i] + wsXData[i + 1]) / 2.0;
-//   }
+/// Returns vector with x-values of spectrum if MatrixWorkspace does not contain
+/// histogram data.
+BinEdges FunctionDomain1DSpectrumCreator::getVectorNonHistogram() const {
+  const auto &wsXData = m_matrixWorkspace->binEdges(m_workspaceIndex);
+  size_t wsXSize = wsXData.size();
 
-//   return m_matrixWorkspace->points(m_workspaceIndex); // this should be points
-// }
+  if (wsXSize < 2) {
+    throw std::invalid_argument(
+        "Workspace2D with less than one x-value cannot be processed.");
+  }
 
-// /// Returns vector with x-values of spectrum if MatrixWorkspace does not contain
-// /// histogram data.
-// MantidVec FunctionDomain1DSpectrumCreator::getVectorNonHistogram() const {
-//   const MantidVec wsXData = m_matrixWorkspace->readX(m_workspaceIndex);
-//   size_t wsXSize = wsXData.size();
-
-//   if (wsXSize < 1) {
-//     throw std::invalid_argument(
-//         "Workspace2D with less than one x-value cannot be processed.");
-//   }
-
-//   return MantidVec(wsXData);
-// }
+  return wsXData;
+}
 
 } // namespace CurveFitting
 } // namespace Mantid
