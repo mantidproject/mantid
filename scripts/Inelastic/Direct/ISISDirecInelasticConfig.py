@@ -103,6 +103,7 @@ class UserProperties(object):
         for prop in USER_PROPERTIES:
             try:
                 ind = str_parts.index(prop)
+            # pylint: disable=W0703
             except Exception:
                 ind = None
             if not ind is None:
@@ -237,7 +238,8 @@ class UserProperties(object):
     def userID(self, val):
         self._user_id = str(val)
 
-    #
+    # number of branches as necessary
+    # pylint: disable=R0912
     def check_input(self, instrument, start_date, cycle, rb_folder_or_id):
         """Verify that input is correct"""
         if not instrument in INELASTIC_INSTRUMENTS:
@@ -245,7 +247,7 @@ class UserProperties(object):
                                "ISIS inelastic instruments".format(instrument))
         if isinstance(start_date, str):
             # the date of express -- let's make it long in the past
-            if start_date.lower() == 'none': 
+            if start_date.lower() == 'none':
                 start_date = '19800101'
                 error = False
             else:
@@ -635,6 +637,8 @@ class MantidConfigDirectInelastic(object):
         # user files description is not there
         try:
             domObj = minidom.parse(job_description_file)
+        # have no idea what minidom specific exception is:
+        # pylint: disable=W0703
         except Exception:
             input_file, output_file = self._fullpath_to_copy(None,None,cycle_id)
             filenames_to_copy.append((input_file, output_file, None))
@@ -714,9 +718,8 @@ class MantidConfigDirectInelastic(object):
         user_folder = os.path.join(self._home_path, self._fedid)
         if not os.path.exists(user_folder):
             raise RuntimeError("User with fedID {0} does not exist. Create such user folder first".format(self._fedid))
-        # pylint: disable=W0212
-        # bad practice but I need all rb_dires, not the current one
-        all_rbf = theUser.get_all_rb();
+        # get RB folders for all experiments user participates in.
+        all_rbf = theUser.get_all_rb()
         for rb_folder in all_rbf:
             if not os.path.exists(str(rb_folder)):
                 raise RuntimeError(
@@ -828,9 +831,7 @@ class MantidConfigDirectInelastic(object):
         user_path = os.path.join(self._home_path, self._fedid)
         config_path = os.path.join(user_path, '.mantid')
         if not os.path.exists(config_path):
-            err = os.makedirs(config_path)
-            if err:
-                raise RuntimeError('can not find or create Mantid configuration path {0}'.format(config_path))
+            os.makedirs(config_path)
 
         config_file = os.path.join(config_path, 'Mantid.user.properties')
         if self.config_need_replacing(config_file):
@@ -842,18 +843,18 @@ class MantidConfigDirectInelastic(object):
         self.make_map_mask_links(user_path)
 
         users_cycles = self._user.get_all_cycles()
-        users_rb     = self._user.get_all_rb();
-        # extract rb folder without path
-        users_rb     = map(lambda x : os.path.basename(x),users_rb)
+        users_rb     = self._user.get_all_rb()
+        # extract rb folder without path, which gives RB group name
+        users_rb     = map(os.path.basename,users_rb)
         #
-        for cycle,rb in zip(users_cycles,users_rb):
+        for cycle,rb_name in zip(users_cycles,users_rb):
             if key_users_list:
-                key_user = str(key_users_list[rb])
+                key_user = str(key_users_list[rb_name])
                 if self._fedid.lower() != key_user.lower():
                     continue
 
             instr = self._user.get_instrument(cycle)
-            self.copy_reduction_sample(self.get_user_file_description(instr),cycle,rb)
+            self.copy_reduction_sample(self.get_user_file_description(instr),cycle,rb_name)
         #
 
 
@@ -941,7 +942,8 @@ if __name__ == "__main__":
         analysisDir = "/instrument/"
 
     # initialize Mantid configuration
-
+    # its testing route under main so it rightly imports itself
+    #pylint: disable=W0406
     from ISISDirecInelasticConfig import MantidConfigDirectInelastic, UserProperties
 
     mcf = MantidConfigDirectInelastic(MantidDir, rootDir, UserScriptRepoDir, MapMaskDir)
