@@ -360,6 +360,13 @@ void TomographyIfaceModel::doSubmitReconstructionJob(
         "(empty string). You need to setup the reconstruction tool.");
   }
 
+  std::string allOpts;
+  for (const auto &option : args) {
+    allOpts += option + " ";
+  }
+  std::cout << "\n\nDEBUG: full argument string: " << allOpts << "\n\n";
+  return; // DEBUG end here to prevent any outgoing connections
+
   // with SCARF we use one (pseudo)-transaction for every submission
   auto transAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "StartRemoteTransaction");
@@ -382,14 +389,13 @@ void TomographyIfaceModel::doSubmitReconstructionJob(
   submitAlg->setProperty("TaskName", "Mantid tomographic reconstruction job");
   submitAlg->setProperty("TransactionID", tid);
   submitAlg->setProperty("ScriptName", run);
-  std::string allOpts;
-  for (const auto &option : args) {
-    allOpts += option + " ";
-  }
+  // std::string allOpts;
+  // for (const auto &option : args) {
+  //   allOpts += option + " ";
+  // }
   submitAlg->setProperty("ScriptParams", allOpts);
   try {
-    std::cout << "DEBUG: Submission of algorithm disabled\n";
-    // submitAlg->execute();
+    submitAlg->execute();
   } catch (std::runtime_error &e) {
     throw std::runtime_error(
         "Error when trying to submit a reconstruction job: " +
@@ -693,14 +699,15 @@ TomographyIfaceModel::makeTomoRecScriptOptions(bool local) const {
     opts.emplace_back(base.toString());
   }
 
+  // TODO add
   const std::string toolName = usingTool();
   if (g_TomoPyTool == toolName) {
     opts.emplace_back("--tool=tomopy");
-    opts.emplace_back("--algorithm=" + m_tomopyMethod);
   } else if (g_AstraTool == toolName) {
     opts.emplace_back("--tool=astra");
-    opts.emplace_back("--algorithm=" + m_astraMethod);
   }
+
+  opts.emplace_back("--algorithm=" + m_currentToolMethod);
 
   if (g_TomoPyTool != toolName || m_tomopyMethod != "gridred" ||
       m_tomopyMethod != "fbp")
