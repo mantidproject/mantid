@@ -100,7 +100,6 @@ set ( TEST_PY_FILES
   SANSDarkRunBackgroundCorrectionTest.py
   SANSSubtractTest.py
   TimeSliceTest.py
-  TOFTOFConvertTofToDeltaETest.py
   TOFTOFCropWorkspaceTest.py
   TOFTOFMergeRunsTest.py
   TOSCABankCorrectionTest.py
