@@ -132,7 +132,7 @@ void Q1D2::exec() {
   MatrixWorkspace_sptr outputWS =
       setUpOutputWorkspace(getProperty("OutputBinning"));
 
-  auto QOut = outputWS->x(0);
+  auto &QOut = outputWS->x(0);
   auto &YOut = outputWS->mutableY(0);
   auto &EOutTo2 = outputWS->mutableE(0);
   // normalisation that is applied to counts in each Q bin
@@ -279,16 +279,14 @@ void Q1D2::exec() {
     ws_sumOfCounts->mutableY(0) = YOut;
     ws_sumOfCounts->setSharedDx(0, outputWS->sharedDx(0));
     auto outputE = outputWS->e(0);
-    std::transform(outputE.cbegin(), outputE.cend(),
-                   ws_sumOfCounts->mutableE(0).begin(), sqrt);
+    ws_sumOfCounts->setFrequencyVariances(0, outputWS->e(0));
 
     MatrixWorkspace_sptr ws_sumOfNormFactors =
         WorkspaceFactory::Instance().create(outputWS);
     ws_sumOfNormFactors->setSharedX(0, outputWS->sharedX(0));
     ws_sumOfNormFactors->mutableY(0) = normSum;
     ws_sumOfNormFactors->setSharedDx(0, outputWS->sharedDx(0));
-    std::transform(normError2.cbegin(), normError2.cend(),
-                   ws_sumOfNormFactors->mutableE(0).begin(), sqrt);
+    ws_sumOfNormFactors->setFrequencyVariances(0, normError2);
 
     helper.outputParts(this, ws_sumOfCounts, ws_sumOfNormFactors);
   }

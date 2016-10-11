@@ -190,9 +190,9 @@ void Q1DWeighted::exec() {
         continue;
 
       // Get the current spectrum for both input workspaces
-      auto XIn = inputWS->x(i);
-      auto YIn = inputWS->y(i);
-      auto EIn = inputWS->e(i);
+      auto &XIn = inputWS->x(i);
+      auto &YIn = inputWS->y(i);
+      auto &EIn = inputWS->e(i);
 
       // Each pixel is sub-divided in the number of pixels given as input
       // parameter (NPixelDivision)
@@ -296,8 +296,8 @@ void Q1DWeighted::exec() {
         // Normalize wedges
         for (int iWedge = 0; iWedge < nWedges; iWedge++) {
           if (wedge_XNorm[iWedge][k] > 0) {
-            auto wedgeYOut = wedgeWorkspaces[iWedge]->mutableY(0);
-            auto wedgeEOut = wedgeWorkspaces[iWedge]->mutableE(0);
+            auto &wedgeYOut = wedgeWorkspaces[iWedge]->mutableY(0);
+            auto &wedgeEOut = wedgeWorkspaces[iWedge]->mutableE(0);
             wedgeYOut[k] += wedge_lambda_iq[iWedge][k] / wedge_XNorm[iWedge][k];
             wedgeEOut[k] += wedge_lambda_iq_err[iWedge][k] /
                             wedge_XNorm[iWedge][k] / wedge_XNorm[iWedge][k];
@@ -317,8 +317,8 @@ void Q1DWeighted::exec() {
   }
   for (int iWedge = 0; iWedge < nWedges; iWedge++) {
     for (int i = 0; i < sizeOut - 1; i++) {
-      auto wedgeYOut = wedgeWorkspaces[iWedge]->mutableY(0);
-      auto wedgeEOut = wedgeWorkspaces[iWedge]->mutableE(0);
+      auto &wedgeYOut = wedgeWorkspaces[iWedge]->mutableY(0);
+      auto &wedgeEOut = wedgeWorkspaces[iWedge]->mutableE(0);
       wedgeYOut[i] /= wedge_XNormLambda[iWedge][i];
       wedgeEOut[i] = sqrt(wedgeEOut[i]) / wedge_XNormLambda[iWedge][i];
     }

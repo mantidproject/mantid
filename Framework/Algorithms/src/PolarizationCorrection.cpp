@@ -78,8 +78,8 @@ void validateInputWorkspace(WorkspaceGroup_sptr &ws) {
                                       "WorkspaceGroup");
         }
 
-        auto currentX = ws2d->x(0);
-        auto lastX = lastWS->x(0);
+        auto &currentX = ws2d->x(0);
+        auto &lastX = lastWS->x(0);
         auto xMatches =
             std::equal(lastX.cbegin(), lastX.cend(), currentX.cbegin());
         if (!xMatches) {

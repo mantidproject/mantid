@@ -133,14 +133,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
-    /*    for (int i = 0 ; i < 30; i ++)
-        {
-        std::cout << i << '\n';
-        for (int j = 0 ; j < 30; j ++)
-        {
-        std::cout << result->y(i)[j] << " ";
-        }
-      }*/
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 100)
     TS_ASSERT_EQUALS(result->blocksize(), 100)
     TS_ASSERT_EQUALS((*(result->getAxis(1)))(0), -0.1)

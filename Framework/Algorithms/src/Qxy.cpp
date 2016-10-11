@@ -8,7 +8,6 @@
 #include "MantidAlgorithms/GravitySANSHelper.h"
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidHistogramData/HistogramMath.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -392,8 +391,12 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   // Fill the X vectors in the output workspace
   for (int i = 0; i < bins - 1; ++i) {
     outputWorkspace->setBinEdges(i, axis);
-    outputWorkspace->mutableY(i) = std::numeric_limits<double>::quiet_NaN();
-    outputWorkspace->mutableE(i) = std::numeric_limits<double>::quiet_NaN();
+    for (int j = 0; j < bins - j; ++j) {
+      outputWorkspace->mutableY(i)[j] =
+          std::numeric_limits<double>::quiet_NaN();
+      outputWorkspace->mutableE(i)[j] =
+          std::numeric_limits<double>::quiet_NaN();
+    }
   }
 
   // Set the axis units
