@@ -217,8 +217,9 @@ private:
                          DataObjects::EventWorkspace_sptr outputWS,
                          const double prog4Copy);
 
-  /// Returns if the detector is masked or false if its impossible
-  bool isMaskedDetector(const Geometry::IDetector &detector) const;
+  /// Returns true if detectors exists and is masked
+  bool isMaskedDetector(const API::SpectrumInfo &detector,
+                        const size_t index) const;
 
   /// Copy the ungrouped spectra from the input workspace to the output
   template <class TIn, class TOut>

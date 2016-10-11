@@ -6,6 +6,7 @@
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -937,21 +938,25 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
     // Copy over X data from first spectrum, the bin boundaries for all spectra
     // are assumed to be the same here
     outSpec.setSharedX(inputWS->sharedX(0));
+    auto outputHistogram = outSpec.histogram();
 
     // Keep track of number of detectors required for masking
     size_t nonMaskedSpectra(0);
+    const auto &spectrumInfo = inputWS->spectrumInfo();
 
     for (auto originalWI : it->second) {
       // detectors to add to firstSpecNum
       const auto &inputSpectrum = inputWS->getSpectrum(originalWI);
 
-      outSpec.setHistogram(outSpec.histogram() += inputSpectrum.histogram());
+      outputHistogram += inputSpectrum.histogram();
       outSpec.addDetectorIDs(inputSpectrum.getDetectorIDs());
 
-      if (!isMaskedDetector(*inputWS->getDetector(originalWI))) {
+      if (!isMaskedDetector(spectrumInfo, originalWI)) {
         ++nonMaskedSpectra;
       }
     }
+
+    outSpec.setHistogram(outputHistogram);
 
     if (nonMaskedSpectra == 0)
       ++nonMaskedSpectra; // Avoid possible divide by zero
@@ -1080,12 +1085,12 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
   return outIndex;
 }
 
-bool GroupDetectors2::isMaskedDetector(
-    const Geometry::IDetector &detector) const {
-  try {
-    return detector.isMasked();
-  } catch (Exception::NotFoundError &) {
-    // If a detector cannot be found, it cannot be masked
+bool GroupDetectors2::isMaskedDetector(const API::SpectrumInfo &spectrum,
+                                       const size_t index) const {
+  if (spectrum.hasDetectors(index)) {
+    return spectrum.isMasked(index);
+  } else {
+    // Can't be masked if it doesn't exist
     return false;
   }
 }
