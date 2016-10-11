@@ -60,8 +60,6 @@ void NormaliseVanadium::exec() {
       static_cast<int64_t>(m_inputWS->getNumberHistograms());
   const int64_t specSize = static_cast<int64_t>(m_inputWS->blocksize());
 
-  const bool isHist = m_inputWS->isHistogramData();
-
   // If sample not at origin, shift cached positions.
   const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
   const V3D pos = m_inputWS->getInstrument()->getSource()->getPos() - samplePos;
@@ -79,7 +77,6 @@ void NormaliseVanadium::exec() {
 
     // Copy over bin boundaries
     const auto &inSpec = m_inputWS->getSpectrum(i);
-    const auto &Xin = inSpec.x();
     correctionFactors->setSharedX(i, inSpec.sharedX());
     const auto &Yin = inSpec.y();
     const auto &Ein = inSpec.e();
@@ -108,7 +105,7 @@ void NormaliseVanadium::exec() {
     double scattering = dir.angle(V3D(0.0, 0.0, 1.0));
 
     Mantid::Kernel::Units::Wavelength wl;
-    std::vector<double> timeflight;
+    auto timeflight = inSpec.points(); 
 
     // Loop through the bins in the current spectrum
     double lambp = 0;
@@ -116,10 +113,10 @@ void NormaliseVanadium::exec() {
     double normp = 0;
     double normm = 0;
     for (int64_t j = 0; j < specSize; j++) {
-      timeflight.push_back((isHist ? (0.5 * (Xin[j] + Xin[j + 1])) : Xin[j]));
       if (unitStr.compare("TOF") == 0)
-        wl.fromTOF(timeflight, timeflight, L1, L2, scattering, 0, 0, 0);
-      const double lambda = timeflight[0];
+        wl.fromTOF(timeflight.mutableRawData(), timeflight.mutableRawData(), L1,
+          L2, scattering, 0, 0, 0);
+      const double lambda = timeflight[j];
       if (lambda > lambdanorm) {
         lambp = lambda;
         normp = Yin[j];
@@ -127,7 +124,6 @@ void NormaliseVanadium::exec() {
       }
       lambm = lambda;
       normm = Yin[j];
-      timeflight.clear();
     }
     double normvalue =
         normm + (lambdanorm - lambm) * (normp - normm) / (lambp - lambm);
