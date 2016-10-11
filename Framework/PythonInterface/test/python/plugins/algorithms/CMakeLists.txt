@@ -90,7 +90,6 @@ set ( TEST_PY_FILES
   SortDetectorsTest.py
   SortXAxisTest.py
   StatisticsOfTableWorkspaceTest.py
-  Stitch1DManyTest.py
   StringToPngTest.py
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
