@@ -190,7 +190,7 @@ public:
     TS_ASSERT_DELTA(result->x(0)[3], 0.1061208, 1e-6)
     TS_ASSERT_DELTA(result->x(0)[56], 0.3031165, 1e-5)
     TS_ASSERT_EQUALS(result->x(0).back(), 0.5)
-    
+
     TS_ASSERT_DELTA(result->y(0).front(), 944237.8, 0.1)
     TS_ASSERT_DELTA(result->y(0)[3], 1009296, 1)
     TS_ASSERT_DELTA(result->y(0)[12], 620952.6, 0.1)
@@ -354,8 +354,7 @@ public:
 
     for (size_t i = 0; i < nocuts->y(0).size(); ++i) {
       TS_ASSERT_EQUALS(nocuts->x(0)[i], noGrav->x(0)[i])
-      if (!std::isnan(nocuts->y(0)[i]) &&
-          !std::isnan(nocuts->e(0)[i])) {
+      if (!std::isnan(nocuts->y(0)[i]) && !std::isnan(nocuts->e(0)[i])) {
         TS_ASSERT_EQUALS(nocuts->y(0)[i], noGrav->y(0)[i])
 
         TS_ASSERT_EQUALS(nocuts->e(0)[i], noGrav->e(0)[i])
