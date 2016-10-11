@@ -63,6 +63,8 @@ private:
   void initMonitorProperties();
   // Initialize direct beam properties
   void initDirectBeamProperties();
+  // Initialize transmission properties
+  void initTransmissionProperties();
   // Convert a workspace to wavelength
   Mantid::API::MatrixWorkspace_sptr
   convertToWavelength(Mantid::API::MatrixWorkspace_sptr inputWS);
@@ -72,6 +74,9 @@ private:
   // Create a monitor workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
   makeMonitorWS(Mantid::API::MatrixWorkspace_sptr inputWS);
+  // Create a transmission workspace
+  Mantid::API::MatrixWorkspace_sptr
+  makeTransmissionWS(Mantid::API::MatrixWorkspace_sptr detectorWS);
 };
 
 } // namespace Algorithms
