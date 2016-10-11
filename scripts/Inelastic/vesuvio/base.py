@@ -14,6 +14,12 @@ class VesuvioBase(Algorithm):
 
     def _execute_child_alg(self, name, **kwargs):
         alg = self.createChildAlgorithm(name)
+        # Function needs to be set before input ws for fit algs
+        function_key = 'Function'
+        if function_key in kwargs:
+            alg.setProperty(function_key, kwargs[function_key])
+            del kwargs[function_key]
+
         for name, value in iteritems(kwargs):
             alg.setProperty(name, value)
         alg.execute()

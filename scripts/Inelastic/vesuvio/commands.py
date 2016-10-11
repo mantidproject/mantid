@@ -307,7 +307,7 @@ def _update_masses_from_params(old_masses, param_ws):
     @return The modified mass dictionary
     """
     for mass in old_masses:
-        for param in list(mass.keys()):
+        for param in mass.keys():
             params_list = ['value', 'function', 'hermite_coeffs',
                            'k_free', 'sears_flag', 'width']
             if param.lower() not in params_list:
