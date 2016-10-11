@@ -22,6 +22,7 @@ Instrument View
 
 Plotting Improvements
 #####################
+- Fixed a bug where left and right Y axes went out of sync when a fit was run.
 
 Algorithm Toolbox
 #################

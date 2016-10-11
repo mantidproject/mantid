@@ -13,7 +13,6 @@ ALC
 
 Muon Analysis
 #############
-- Fixed a bug where left and right Y axes went out of sync when a fit was run.
 
 
 Algorithms
