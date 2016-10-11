@@ -540,4 +540,91 @@ private:
   size_t m_testno;
 };
 
+class LoadAscii2TestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    setupFile();
+    loadAlg.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(loadAlg.setPropertyValue("Filename", filename));
+    loadAlg.setPropertyValue("OutputWorkspace", outputName);
+    loadAlg.setPropertyValue("Separator", sep);
+    loadAlg.setPropertyValue("CustomSeparator", custsep);
+    loadAlg.setPropertyValue("CommentIndicator", comment);
+
+    loadAlg.setRethrows(true);
+  }
+
+  void testLoadAscii2Performance() {
+    TS_ASSERT_THROWS_NOTHING(loadAlg.execute());
+  }
+
+  void tearDown() override {
+    TS_ASSERT_THROWS_NOTHING(Poco::File(filename).remove());
+    AnalysisDataService::Instance().remove(outputName);
+  }
+
+private:
+  LoadAscii2 loadAlg;
+
+  const std::string outputName = "outWs";
+  std::string filename;
+
+  // Common saving/loading parameters
+  const std::string &sep = "CSV";
+  const std::string &custsep = "";
+  const std::string &comment = "#";
+
+  void setupFile() {
+    constexpr int numVecs = 100;
+    constexpr int xyLen = 100;
+
+    Mantid::DataObjects::Workspace2D_sptr wsToSave =
+        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+            WorkspaceFactory::Instance().create("Workspace2D", numVecs, xyLen,
+                                                xyLen));
+
+    for (int i = 0; i < numVecs; i++) {
+      std::vector<double> &X = wsToSave->dataX(i);
+      std::vector<double> &Y = wsToSave->dataY(i);
+      std::vector<double> &E = wsToSave->dataE(i);
+      for (int j = 0; j < xyLen; j++) {
+        X[j] = 1.5 * j / 0.9;
+        Y[j] = (i + 1) * (2. + 4. * X[j]);
+        E[j] = 1.;
+      }
+    }
+
+    const std::string name = "SaveAsciiWS";
+    AnalysisDataService::Instance().add(name, wsToSave);
+
+    SaveAscii2 save;
+    save.initialize();
+
+    save.initialize();
+    TS_ASSERT_EQUALS(save.isInitialized(), true);
+
+    const bool scientific = true;
+    const int precision = -1;
+
+    save.setPropertyValue("Filename", "testFile");
+    save.setPropertyValue("InputWorkspace", name);
+    save.setPropertyValue("CommentIndicator", comment);
+    save.setPropertyValue("ScientificFormat",
+                          boost::lexical_cast<std::string>(scientific));
+    save.setPropertyValue("ColumnHeader",
+                          boost::lexical_cast<std::string>(true));
+    save.setPropertyValue("WriteXError",
+                          boost::lexical_cast<std::string>(false));
+    save.setPropertyValue("Separator", sep);
+    save.setPropertyValue("CustomSeparator", custsep);
+    save.setRethrows(true);
+
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    AnalysisDataService::Instance().remove(name);
+    filename = save.getPropertyValue("Filename");
+  }
+};
+
 #endif // LOADASCIITEST_H_
