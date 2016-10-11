@@ -244,7 +244,8 @@ class UserProperties(object):
             raise RuntimeError("Instrument {0} has to be one of " \
                                "ISIS inelastic instruments".format(instrument))
         if isinstance(start_date, str):
-            if start_date == 'None': # the date of express -- let's make it long in past
+            # the date of express -- let's make it long in the past
+            if start_date.lower() == 'none': 
                 start_date = '19800101'
                 error = False
             else:
@@ -848,7 +849,7 @@ class MantidConfigDirectInelastic(object):
         for cycle,rb in zip(users_cycles,users_rb):
             if key_users_list:
                 key_user = str(key_users_list[rb])
-                if self._fedid != key_user:
+                if self._fedid.lower() != key_user.lower():
                     continue
 
             instr = self._user.get_instrument(cycle)
