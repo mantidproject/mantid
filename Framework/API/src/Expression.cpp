@@ -266,7 +266,8 @@ void Expression::tokenize() {
             m_expr.resize(last);
             break;
           } else {
-            throw ParsingError("A binary operator isn't followed by a value", m_expr, i);
+            throw ParsingError("A binary operator isn't followed by a value",
+                               m_expr, i);
           }
         }
 

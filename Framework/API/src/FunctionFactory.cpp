@@ -47,7 +47,7 @@ FunctionFactoryImpl::createInitialized(const std::string &input) const {
   Expression expr;
   try {
     expr.parse(input);
-  } catch (Expression::ParsingError& e) {
+  } catch (Expression::ParsingError &e) {
     inputError(input + "\n    " + e.what());
   } catch (...) {
     inputError(input);
