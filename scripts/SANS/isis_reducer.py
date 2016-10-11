@@ -773,7 +773,7 @@ class ISISReducer(Reducer):
 
         # Now check both underlying files. If they are equal, then don't do anything
         # else switch the underlying instrument
-        if su.are_two_files_identical(idf_path_reducer, idf_path_reducer):
+        if su.are_two_files_identical(idf_path_workspace, idf_path_reducer):
             return
         else:
             logger.notice("Updating the IDF of the Reducer. Switching from " +
