@@ -778,10 +778,10 @@ void ImggAggregateWavelengths::aggImage(API::MatrixWorkspace_sptr accum,
   }
 
   for (size_t row = 0; row < sizeY; row++) {
-    auto &dataY = accum->dataY(row);
-    const auto &dataYIn = toAdd->readY(row);
-    std::transform(dataY.begin(), dataY.end(), dataYIn.cbegin(), dataY.begin(),
-                   std::plus<double>());
+    auto &outputY = accum->mutableY(row);
+    const auto &yValsInput = toAdd->y(row);
+    std::transform(outputY.begin(), outputY.end(), yValsInput.cbegin(),
+                   outputY.begin(), std::plus<double>());
   }
 }
 
