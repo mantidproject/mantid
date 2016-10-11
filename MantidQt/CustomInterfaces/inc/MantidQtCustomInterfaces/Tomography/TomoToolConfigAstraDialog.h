@@ -11,9 +11,8 @@ class TomoToolConfigAstraDialog : public QDialog,
   Q_OBJECT
 public:
   TomoToolConfigAstraDialog(QWidget *parent = 0)
-      : QDialog(parent), TomoToolConfigDialogBase(DEFAULT_TOOL_METHOD) {}
-
-  ~TomoToolConfigAstraDialog() {}
+      : QDialog(parent),
+        TomoToolConfigDialogBase(DEFAULT_TOOL_NAME, DEFAULT_TOOL_METHOD) {}
 
 private:
   void setupToolConfig() override;

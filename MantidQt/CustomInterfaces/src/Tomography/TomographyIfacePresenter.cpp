@@ -136,6 +136,11 @@ void TomographyIfacePresenter::notify(
 
 void TomographyIfacePresenter::processSystemSettingsUpdated() {
   m_model->updateSystemSettings(m_view->systemSettings());
+
+  // this will also update the paths
+  auto *dialogPtrForCheck = m_configDialog.get();
+  if (dialogPtrForCheck)
+    setupConfigDialogSettingsAndUpdateModel(dialogPtrForCheck);
 }
 
 void TomographyIfacePresenter::processSetupResourcesAndTools() {
@@ -213,19 +218,62 @@ void TomographyIfacePresenter::processToolChanged() {
     return;
   }
 
-  std::cout << "DEBUG: initialising dialogue: " + tool + "\n";
+  createConfigDialogUsingToolName(tool);
+  // this will set the default settings for the dialog
+  setupConfigDialogSettingsAndUpdateModel(m_configDialog.get());
+}
 
+void TomographyIfacePresenter::setupConfigDialogSettingsAndUpdateModel(
+    TomoToolConfigDialogBase *dialog) {
+  setupConfigDialogSettings(dialog);
+  updateModelAfterToolChanged(dialog);
+}
+void TomographyIfacePresenter::createConfigDialogUsingToolName(
+    const std::string &tool) {
   // free the previous dialogue pointer if any
   m_configDialog.reset();
   m_configDialog = std::unique_ptr<TomoToolConfigDialogBase>(
       TomoToolConfigDialogBase::getCorrectDialogForToolFromString(tool));
+}
 
-  // update selected tool in the model
-  m_model->usingTool(tool);
+void TomographyIfacePresenter::setupConfigDialogSettings(
+    TomoToolConfigDialogBase *dialog) {
+  m_view->setupConfigDialogSettings(dialog);
+}
 
-  // and getSelectedToolMethod will give its default tool, as it was just
-  // initialised
-  m_model->setCurrentToolMethod(m_configDialog->getSelectedToolMethod());
+/** Updated all of the model's information about the current tool
+*/
+void TomographyIfacePresenter::updateModelAfterToolChanged(
+    TomoToolConfigDialogBase *dialog) {
+
+  // if passed an empty string don't remove the name
+  updateModelCurrentToolName(dialog);
+  updateModelCurrentToolMethod(dialog);
+  updateModelCurrentToolSettings(dialog);
+}
+
+/** Sets the model's current tool name by getting the tool name from the
+* dialogue itself
+*/
+void TomographyIfacePresenter::updateModelCurrentToolName(
+    TomoToolConfigDialogBase *dialog) {
+  m_model->usingTool(dialog->getSelectedToolName());
+}
+/** Sets the model's current tool method by coyping the
+* string over to the model, getting it from the dialogue itself
+*/
+void TomographyIfacePresenter::updateModelCurrentToolMethod(
+    TomoToolConfigDialogBase *dialog) {
+  m_model->setCurrentToolMethod(dialog->getSelectedToolMethod());
+}
+
+/** Shares the pointer with the model's tool settings. We don't want a
+* unique_ptr, because the dialogs don't die after they are closed, they die if
+* the tool is changed or the whole interface is closed
+*/
+void TomographyIfacePresenter::updateModelCurrentToolSettings(
+    TomoToolConfigDialogBase *dialog) {
+  m_model->setCurrentToolSettings(dialog->getSelectedToolConfig());
 }
 
 /**
@@ -393,11 +441,7 @@ void TomographyIfacePresenter::processSetupReconTool() {
     // give pointer to showToolConfig, so it can run the dialogue
     m_view->showToolConfig(m_configDialog.get());
 
-    // update the reconstruction setting for the tool
-    m_model->updateReconToolsSettings(m_configDialog->getReconToolSettings());
-
-    // update the selected method
-    m_model->setCurrentToolMethod(m_configDialog->getSelectedToolMethod());
+    updateModelAfterToolChanged(m_configDialog.get());
 
     // TODO: this would make sense if the reconstruct action/button
     // was only enabled after setting up at least one tool
@@ -422,18 +466,11 @@ void TomographyIfacePresenter::processRunRecon() {
   // center of rotation and regions
   m_model->updateImageStackPreParams(m_view->currentROIEtcParams());
 
-  // TODO just update & get m_selectedToolMethod
-  // actually this should be updated when setup has been clicked
-  // WHAT do we do if the setup hasn't been clicked, and the new tool is
-  // selected, but the method change hasn't been reflected?!
-  // ^ get method from dialog??
-  // m_model->updateToolMethod(toolMethodHere);
-  m_model->updateTomopyMethod(m_view->tomopyMethod());
-  m_model->updateAstraMethod(m_view->astraMethod());
+  // m_model->updateTomopyMethod(m_view->tomopyMethod());
+  // m_model->updateAstraMethod(m_view->astraMethod());
 
   std::cout << "Current tool:" << m_model->usingTool()
             << " and Current method: " << m_model->getCurrentToolMethod();
-  return;
   const std::string &resource = m_view->currentComputeResource();
 
   // todo test single method & tool

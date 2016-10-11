@@ -1119,11 +1119,20 @@ void TomographyIfaceViewQtGUI::updateSystemSettings(
 void TomographyIfaceViewQtGUI::showToolConfig(
     TomoToolConfigDialogBase *dialog) {
 
+  setupConfigDialogSettings(dialog);
+  // do we do anything with the parameter?
+  int res = dialog->execute();
+}
+
+// TODO do we want this moved out into presenter/mode?
+void TomographyIfaceViewQtGUI::setupConfigDialogSettings(
+    TomoToolConfigDialogBase *dialog) {
   // set up all the information we need for the dialog
   std::string run =
       m_uiTabSystemSettings.lineEdit_remote_scripts_base_dir->text()
           .toStdString() +
-      "/scripts/Imaging/IMAT/" + "tomo_reconstruct.py";
+      "/scripts/Imaging/IMAT/tomo_reconstruct.py";
+  std::cout << "DEBUG: " << run << "\n";
   TomoPathsConfig paths = currentPathsConfig();
   std::string pathOut = Poco::Path::expand(
       g_defOutPathLocal + "/" +
@@ -1133,89 +1142,6 @@ void TomographyIfaceViewQtGUI::showToolConfig(
       std::string("/processed/") + "reconstruction_" + std::to_string(reconIdx);
 
   dialog->setupDialog(run, paths, pathOut, localOutNameAppendix);
-
-  // do we do anything with the parameter?
-  int res = dialog->execute();
-
-  // TODO resolve result here? or notify presenter (it will have to keep the
-  // pointer somewhere)
-  //  if (g_TomoPyTool == name) {
-  //	 dialog->setUpDialog();
-  //    int res = dialog->execute();
-  //
-  //    if (QDialog::Accepted == res) {
-  //      // TODO: move this
-  //      int mi = m_uiTomoPy.comboBox_method->currentIndex();
-  //
-  //      TomoPathsConfig paths = currentPathsConfig();
-  //      // TODO: for the output path, probably better to take the sample path,
-  //      // then up one level
-  //      m_toolsSettings.tomoPy = ToolConfigTomoPy(
-  //          run.toStdString(),
-  //          g_defOutPathLocal + "/" +
-  //              m_uiTabRun.lineEdit_experiment_reference->text().toStdString()
-  //              +
-  //              localOutNameAppendix,
-  //          paths.pathDarks(), paths.pathOpenBeam(), paths.pathSamples());
-  //      //m_tomopyMethod = methods[mi].first;
-  //    }
-  //  } else if (g_AstraTool == name) {
-  //	  dialog->setUpDialog();
-  //	  int res = dialog->execute();
-  ///*
-  //    TomoToolConfigAstraDialog astra;
-  //    m_uiAstra.setupUi(&astra);
-  //    m_uiAstra.comboBox_method->clear();
-  //    const auto methods = ToolConfigAstraToolbox::methods();
-  //    for (size_t i = 0; i < methods.size(); i++) {
-  //      m_uiAstra.comboBox_method->addItem(
-  //          QString::fromStdString(methods[i].second));
-  //    }
-  //    int res = astra.exec();*/
-  //
-  //    if (QDialog::Accepted == res) {
-  //      // TODO: move this
-  //      int mi = m_uiAstra.comboBox_method->currentIndex();
-  //
-  //      TomoPathsConfig paths = currentPathsConfig();
-  //      // TODO: for the output path, probably better to take the sample path,
-  //      // then up one level
-  //      m_toolsSettings.astra = ToolConfigAstraToolbox(
-  //          run.toStdString(),
-  //          Poco::Path::expand(
-  //              g_defOutPathLocal + "/" +
-  //              m_uiTabRun.lineEdit_experiment_reference->text().toStdString()
-  //              +
-  //              localOutNameAppendix),
-  //          paths.pathDarks(), paths.pathOpenBeam(), paths.pathSamples());
-  ////      m_astraMethod = methods[mi].first;
-  //    }
-  //  } else if (g_SavuTool == name) {
-  ////    // TODO: savu not ready. This is a temporary kludge, it just shows
-  ////    // the setup dialog so we can chat about it.
-  ////    TomographyIfaceViewQtGUI savu;
-  ////    m_uiSavu.setupUi(&savu);
-  ////    doSetupSavu();
-  ////    savu.setWindowModality(Qt::ApplicationModal);
-  ////    savu.show();
-  ////    QEventLoop el;
-  ////    connect(this, SIGNAL(destroyed()), &el, SLOT(quit()));
-  ////    el.exec();
-  ////  } else if (g_customCmdTool == name) {
-  ////    TomoToolConfigCustomDialog cmd;
-  ////    m_uiCustom.setupUi(&cmd);
-  ////    int res = cmd.exec();
-  ////
-  ////    if (QDialog::Accepted == res) {
-  ////      // TODO: move this
-  ////      QString run = m_uiCustom.lineEdit_runnable->text();
-  ////      QString opts = m_uiCustom.textEdit_cl_opts->toPlainText();
-  ////
-  ////      m_toolsSettings.custom =
-  ////          ToolConfigCustom(run.toStdString(), opts.toStdString());
-  ////    }
-  //  }
-  // TODO: 'CCPi CGLS' tool maybe in the future. Tool not ready.
 }
 
 /**

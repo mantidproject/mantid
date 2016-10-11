@@ -9,6 +9,7 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconFiltersSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 // Qt classes forward declarations
@@ -83,9 +84,21 @@ public:
 
   /// Username last logged in, if any.
   std::string loggedIn() const { return m_loggedInUser; }
+
   // TODO: add companion currentComputeResource where LoggedIn() is in
   void usingTool(const std::string &tool) { m_currentTool = tool; }
   std::string usingTool() const { return m_currentTool; }
+
+  void setCurrentToolMethod(std::string toolMethod);
+  std::string getCurrentToolMethod() { return m_currentToolMethod; }
+
+  void setCurrentToolSettings(std::shared_ptr<TomoRecToolConfig> settings) {
+    m_currentToolSettings = settings;
+  }
+
+  TomoRecToolConfig *getCurrentToolSettings() {
+    return m_currentToolSettings.get();
+  }
 
   /// ping the (remote) compute resource
   bool doPing(const std::string &compRes);
@@ -153,8 +166,6 @@ public:
 
   void updateTomoPathsConfig(const TomoPathsConfig &tc) { m_pathsConfig = tc; }
 
-  void setCurrentToolMethod(std::string toolMethod);
-  std::string getCurrentToolMethod() { return m_currentToolMethod; }
   // tools not yet available/supported - TODO
   static const std::string g_CCPiTool;
   static const std::string g_SavuTool;
@@ -239,6 +250,9 @@ private:
 
   // Settings for the third party (tomographic reconstruction) tools
   TomoReconToolsUserSettings m_toolsSettings;
+
+  // copy of the tool settings, might need to keep a shared pointer
+  std::shared_ptr<TomoRecToolConfig> m_currentToolSettings;
 
   std::string m_tomopyMethod;
   std::string m_astraMethod;

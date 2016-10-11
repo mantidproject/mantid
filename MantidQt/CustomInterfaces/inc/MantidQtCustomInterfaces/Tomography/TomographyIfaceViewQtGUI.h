@@ -26,8 +26,6 @@
 #include "ui_TomoToolConfigCustom.h"
 #include "ui_TomoToolConfigSavu.h"
 #include "ui_TomoToolConfigTomoPy.h"
-
-
 #include <boost/scoped_ptr.hpp>
 #include <json/json.h>
 
@@ -35,8 +33,7 @@
 class ImageROIViewQtWidget;
 
 // Tomography Dialog Base class
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
-//class TomoToolConfigDialogBase;
+class MantidQt::CustomInterfaces::TomoToolConfigDialogBase;
 
 // Qt classes forward declarations
 class QMutex;
@@ -134,8 +131,8 @@ public:
 
   void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-          localStatus) override;
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+          &localStatus) override;
 
   std::vector<std::string> processingJobsIDs() const override {
     return m_processingJobsIDs;
@@ -283,8 +280,11 @@ private:
 
   void updatePathsConfig(const TomoPathsConfig &cfg) override;
 
-  void showToolConfig(TomoToolConfigDialogBase * dialog) override;
+  void showToolConfig(
+      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog) override;
 
+  void setupConfigDialogSettings(
+      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog) override;
   void closeEvent(QCloseEvent *ev) override;
 
   void processPathBrowseClick(QLineEdit *le, std::string &data);
@@ -369,6 +369,7 @@ private:
   ImageROIViewQtWidget *m_tabROIW;
   ImggFormatsConvertViewQtWidget *m_tabImggFormats;
 
+  // TODO remove from header and cpp
   /// Tool specific setup dialogs
   Ui::TomoToolConfigAstra m_uiAstra;
   Ui::TomoToolConfigCustom m_uiCustom;

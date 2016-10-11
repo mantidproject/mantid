@@ -2,7 +2,6 @@
 #define MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGTOMOPYDIALOG_H_
 
 #include "ui_TomoToolConfigTomoPy.h"
-#include <QDialog>
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 
 namespace MantidQt {
@@ -13,8 +12,8 @@ class TomoToolConfigTomoPyDialog : public QDialog,
 
 public:
   TomoToolConfigTomoPyDialog(QWidget *parent = 0)
-	  : QDialog(parent), TomoToolConfigDialogBase(DEFAULT_TOOL_METHOD) {}
-  ~TomoToolConfigTomoPyDialog() override {}
+      : QDialog(parent),
+        TomoToolConfigDialogBase(DEFAULT_TOOL_NAME, DEFAULT_TOOL_METHOD) {}
 
 private:
   void setupToolConfig() override;

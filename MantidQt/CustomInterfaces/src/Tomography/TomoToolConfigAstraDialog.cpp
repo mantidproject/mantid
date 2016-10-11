@@ -5,20 +5,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-	const std::string TomoToolConfigAstraDialog::DEFAULT_TOOL_NAME = "Astra";
-	const std::string TomoToolConfigAstraDialog::DEFAULT_TOOL_METHOD = "FBP3D_CUDA";
-
-void TomoToolConfigAstraDialog::setupToolConfig() {
-  const auto methods = ToolConfigTomoPy::methods();
-
-  int mi = m_astraUi.comboBox_method->currentIndex();
-
-  m_toolSettings.astra = ToolConfigAstraToolbox(
-      m_runPath, m_pathOut + m_localOutNameAppendix, m_paths.pathDarks(),
-      m_paths.pathOpenBeam(), m_paths.pathSamples());
-
-  m_toolMethod = methods[mi].first;
-}
+const std::string TomoToolConfigAstraDialog::DEFAULT_TOOL_NAME = "Astra";
+const std::string TomoToolConfigAstraDialog::DEFAULT_TOOL_METHOD = "FBP3D_CUDA";
 
 void TomoToolConfigAstraDialog::setupDialogUi() {
   m_astraUi.setupUi(this);
@@ -30,6 +18,18 @@ void TomoToolConfigAstraDialog::setupDialogUi() {
   }
 }
 
+void TomoToolConfigAstraDialog::setupToolConfig() {
+  const auto methods = ToolConfigTomoPy::methods();
+
+  int mi = m_astraUi.comboBox_method->currentIndex();
+
+  m_tempSettings =
+      std::unique_ptr<ToolConfigAstraToolbox>(new ToolConfigAstraToolbox(
+          m_runPath, m_pathOut + m_localOutNameAppendix, m_paths.pathDarks(),
+          m_paths.pathOpenBeam(), m_paths.pathSamples()));
+
+  m_toolMethod = methods[mi].first;
+}
 int TomoToolConfigAstraDialog::executeQt() { return this->exec(); }
 } // CustomInterfaces
 } // MantidQt

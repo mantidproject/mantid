@@ -11,7 +11,8 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
-//class TomoToolConfigDialogBase; Why does it not work with forward declaration?
+// class TomoToolConfigDialogBase; Why does it not work with forward
+// declaration?
 // maybe it has to be in namespaces!
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -293,7 +294,16 @@ public:
    *
    * @param name human readable name of the tool, as a string
    */
-  virtual void showToolConfig(TomoToolConfigDialogBase * dialog) = 0;
+  virtual void showToolConfig(TomoToolConfigDialogBase *dialog) = 0;
+
+  /**
+  * Setup the tool's run path, the paths out, the reconstruction index and
+  * the localOutNameAppendix
+  *
+  * @param name human readable name of the tool, as a string
+  */
+  virtual void setupConfigDialogSettings(
+      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog) = 0;
 
   /**
    * Refresh the table, tree etc. that displays info on the running/finished
@@ -306,8 +316,8 @@ public:
    */
   virtual void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-          localStatus) = 0;
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+          &localStatus) = 0;
 
   /**
    * Save settings (normally when closing the interface). This refers

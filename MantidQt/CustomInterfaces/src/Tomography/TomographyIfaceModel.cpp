@@ -255,7 +255,8 @@ bool TomographyIfaceModel::doPing(const std::string &compRes) {
     tid = alg->getPropertyValue("TransactionID");
     g_log.information() << "Pinged '" << compRes
                         << "'succesfully. Checked that a transaction could "
-                           "be created, with ID: " << tid << '\n';
+                           "be created, with ID: "
+                        << tid << '\n';
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Error. Failed to ping and start a transaction on "
                              "the remote resource." +
@@ -387,7 +388,8 @@ void TomographyIfaceModel::doSubmitReconstructionJob(
   }
   submitAlg->setProperty("ScriptParams", allOpts);
   try {
-    submitAlg->execute();
+    std::cout << "DEBUG: Submission of algorithm disabled\n";
+    // submitAlg->execute();
   } catch (std::runtime_error &e) {
     throw std::runtime_error(
         "Error when trying to submit a reconstruction job: " +
@@ -607,29 +609,42 @@ void TomographyIfaceModel::makeRunnableWithOptions(
   const std::string tool = usingTool();
   // Special case. Just pass on user inputs.
   if (tool == g_customCmdTool) {
-    const std::string cmd = m_toolsSettings.custom.toCommand();
+    const std::string cmd = m_currentToolSettings->toCommand();
+    std::cout << "DEBUG: LOCAL to command -> " << cmd << "\n\n";
 
     opt.resize(1);
     splitCmdLine(cmd, run, opt[0]);
     return;
   }
 
+  // dont think u should be called cmddddddddddddddddddddddddddddddd
   std::string cmd;
+
+  cmd = m_currentToolSettings->toCommand();
+  std::cout << "\nDEBUG: NOT LOCAL to command -> " << cmd << "\n\n";
+
   bool local = false;
   // TODO this is still incomplete, not all tools ready
   if ("local" == comp) {
+
+    // if local get the local reconstruction path
     local = true;
     cmd = m_systemSettings.m_local.m_reconScriptsPath +
           g_mainReconstructionScript;
+    std::cout << "\nDEBUG: LOCAL? to command -> " << cmd << "\n\n";
+
   } else if (tool == g_TomoPyTool) {
-    cmd = m_toolsSettings.tomoPy.toCommand();
+    // cmd = m_toolsSettings.tomoPy.toCommand();
+    cmd = m_currentToolSettings->toCommand();
+    std::cout << "\nDEBUG: tomopy to command -> " << cmd << "\n\n";
     // this will make something like:
     // run = "/work/imat/z-tests-fedemp/scripts/tomopy/imat_recon_FBP.py";
     // opt = "--input_dir " + base + currentPathFITS() + " " + "--dark " +
     // base +
     //      currentPathDark() + " " + "--white " + base + currentPathFlat();
   } else if (tool == g_AstraTool) {
-    cmd = m_toolsSettings.astra.toCommand();
+    cmd = m_currentToolSettings->toCommand();
+    std::cout << "\nDEBUG: ASTRA to command -> " << cmd << "\n\n";
     // this will produce something like this:
     // run = "/work/imat/scripts/astra/astra-3d-SIRT3D.py";
     // opt = base + currentPathFITS();

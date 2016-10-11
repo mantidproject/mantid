@@ -18,6 +18,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 class TomoPathsConfig;
+class TomoToolConfigDialogBase;
 
 /**
 Tomography GUI. Presenter for the GUI (as in the MVP
@@ -105,10 +106,33 @@ protected:
 
   /// Starts a periodic query just to keep sessions alive when logged in
   void startKeepAliveMechanism(int period);
+
   /// Stops/kills the periodic query (for example if the user logs out)
   void killKeepAliveMechanism();
 
 private:
+  /// sets up the config dialog settings using the view and updates the model
+  void
+  setupConfigDialogSettingsAndUpdateModel(TomoToolConfigDialogBase *dialog);
+  /// creates the correct dialog pointer and sets it to the member variable
+  void createConfigDialogUsingToolName(const std::string &tool);
+
+  /// configures up the dialog using the view
+  void setupConfigDialogSettings(
+      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog);
+
+  /// update all the model information after the tool's been changed
+  void updateModelAfterToolChanged(TomoToolConfigDialogBase *dialog);
+
+  /// update the model's current tool name using the dialog
+  void updateModelCurrentToolName(TomoToolConfigDialogBase *dialog);
+
+  /// update the model's current tool method using the dialog
+  void updateModelCurrentToolMethod(TomoToolConfigDialogBase *dialog);
+
+  /// update the model's current tool settings using the dialog
+  void updateModelCurrentToolSettings(TomoToolConfigDialogBase *dialog);
+
   /// Associated view for this presenter (MVP pattern)
   ITomographyIfaceView *const m_view;
 
@@ -124,7 +148,6 @@ private:
   QThread *m_keepAliveThread;
 
   std::unique_ptr<TomoToolConfigDialogBase> m_configDialog;
-
 };
 
 } // namespace CustomInterfaces
