@@ -10,6 +10,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Sample.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Crystal;

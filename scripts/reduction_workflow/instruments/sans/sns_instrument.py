@@ -2,7 +2,9 @@
 """
     Instrument-specific utility functions for EQSANS
 """
-from hfir_instrument import _get_pixel_info
+from __future__ import (absolute_import, division, print_function)
+
+from .hfir_instrument import _get_pixel_info
 
 
 def get_pixel_from_coordinate(x, y, workspace):
@@ -50,13 +52,13 @@ def get_masked_pixels(nx_low, nx_high, ny_low, ny_high, workspace):
     """
     nx_pixels, ny_pixels, pixel_size_x, pixel_size_y = _get_pixel_info(workspace)
     if nx_low<0 or nx_high<0 or ny_low<0 or ny_high<0:
-        raise RuntimeError, "Pixel edges should be greater than zero"
+        raise RuntimeError("Pixel edges should be greater than zero")
 
-    masked_x = range(0, nx_low)
-    masked_x.extend(range(nx_pixels-nx_high, nx_pixels))
+    masked_x = list(range(0, nx_low))
+    masked_x.extend(list(range(nx_pixels-nx_high, nx_pixels)))
 
-    masked_y = range(0, ny_low)
-    masked_y.extend(range(ny_pixels-ny_high, ny_pixels))
+    masked_y = list(range(0, ny_low))
+    masked_y.extend(list(range(ny_pixels-ny_high, ny_pixels)))
 
     masked_pts = []
     for y in masked_y:

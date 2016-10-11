@@ -1,3 +1,7 @@
+#pylint: disable=redefined-builtin
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+
 import re
 import numpy as np
 
@@ -105,7 +109,7 @@ def _parse_castep_freq_block(f_handle, num_branches, ir_or_raman):
     @param f_handle - handle to the file.
     """
 
-    for _ in xrange(num_branches):
+    for _ in range(num_branches):
         line = f_handle.readline()
         line_data = line.strip().split()[1:-1]
         freq = line_data[1]

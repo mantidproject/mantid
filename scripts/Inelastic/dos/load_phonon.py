@@ -1,3 +1,7 @@
+#pylint: disable=redefined-builtin
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+
 import re
 import numpy as np
 
@@ -55,7 +59,7 @@ def parse_phonon_file(file_name, record_eigenvectors):
                     eigenvectors.append(vectors)
                 else:
                     # Skip over eigenvectors
-                    for _ in xrange(file_data['num_ions'] * file_data['num_branches']):
+                    for _ in range(file_data['num_ions'] * file_data['num_branches']):
                         line = f_handle.readline()
                         if not line:
                             raise IOError("Bad file format. Uexpectedly reached end of file.")
@@ -105,7 +109,7 @@ def _parse_phonon_file_header(f_handle):
                 raise IOError("Failed to parse file. Invalid file header.")
 
             # Extract the mode number for each of the ion in the data file
-            for _ in xrange(file_data['num_ions']):
+            for _ in range(file_data['num_ions']):
                 line = f_handle.readline()
                 line_data = line.strip().split()
 
@@ -132,7 +136,7 @@ def _parse_phonon_freq_block(f_handle, num_branches):
 
     @param f_handle - handle to the file.
     """
-    for _ in xrange(num_branches):
+    for _ in range(num_branches):
         line = f_handle.readline()
         line_data = line.strip().split()[1:]
         line_data = [float(x) for x in line_data]
@@ -160,7 +164,7 @@ def _parse_phonon_unit_cell_vectors(f_handle):
 
 def _parse_phonon_eigenvectors(f_handle, num_ions, num_branches):
     vectors = []
-    for _ in xrange(num_ions * num_branches):
+    for _ in range(num_ions * num_branches):
         line = f_handle.readline()
 
         if not line:

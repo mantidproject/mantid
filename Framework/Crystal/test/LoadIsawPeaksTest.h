@@ -8,6 +8,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidAPI/Run.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;

@@ -3,12 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/make_unique.h"
 
 #include <memory>
 #include <boost/make_shared.hpp>
 
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::DataHandling;

@@ -8,9 +8,6 @@
  *higher
  *  than DataObjects (e.g. any algorithm), even if going via the factory.
  *********************************************************************************/
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
@@ -19,6 +16,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataObjects/PeaksWorkspace.h"

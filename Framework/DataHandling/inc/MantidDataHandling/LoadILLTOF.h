@@ -70,6 +70,7 @@ private:
   void initInstrumentSpecific();
   void addAllNexusFieldsAsProperties(std::string filename);
   void addEnergyToRun();
+  void addPulseInterval();
 
   int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
   void loadTimeDetails(NeXus::NXEntry &entry);
