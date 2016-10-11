@@ -125,7 +125,7 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
     selected_runs = None
 
     def category(self):
-        return 'Workflow\\Reduction'
+        return 'Workflow\\MIDAS;Inelastic\\Reduction'
 
     def summary(self):
         return 'Reduction for IN16B elastic and inelastic fixed-window scans.'

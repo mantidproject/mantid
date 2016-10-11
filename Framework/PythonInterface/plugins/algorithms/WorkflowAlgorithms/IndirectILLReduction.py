@@ -643,6 +643,21 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         bsub = temp_run_ws_list[7]
         vnorm = temp_run_ws_list[8]
 
+        # Get mirror_sense
+        if mtd[red].getRun().hasProperty('Doppler.mirror_sense'):
+            # Get mirror_sense from run
+            # mirror_sense 14 : two wings
+            # mirror_sense 16 : one wing
+            self._mirror_sense = mtd[red].getRun().getLogData('Doppler.mirror_sense').value
+
+        # Get Doppler energy
+        if mtd[red].getRun().hasProperty('Doppler.maximum_delta_energy'):
+            energy = mtd[red].getRun().getLogData('Doppler.maximum_delta_energy').value
+        elif mtd[red].getRun().hasProperty('Doppler.delta_energy'):
+            energy = mtd[red].getRun().getLogData('Doppler.delta_energy').value
+        else:
+            energy = -1
+
         self._debug(red, raw)
 
         LoadParameterFile(Workspace=red, Filename=self._parameter_file)
@@ -654,10 +669,18 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._debug(red, det)
 
         if self._scan_type == 'QENS':
+            # Use default bin by bin normalisation to monitor
             NormaliseToMonitor(InputWorkspace=red, OutputWorkspace=red, MonitorWorkspace=mon)
-        elif self._scan_type == 'FWS':
-            size = mtd[red].blocksize()
+        elif self._scan_type == 'FWS' and energy == 0.0:
+            # Integrate over the elastic peak range
+            x = mtd[red].readX(0)
+            xmin = x[0]
+            xmax = x[-1]
+            NormaliseToMonitor(InputWorkspace=red, OutputWorkspace=red, IntegrationRangeMin=xmin,
+                                IntegrationRangeMax=xmax, MonitorWorkspace=mon)
+        elif self._scan_type == 'FWS' and energy > 0.0:
             # Normalise over the left and right peak of inelastic scans and add the normalised values
+            size = mtd[red].blocksize()
             x_start, x_stop = monitor_range(red)
             x_start -= 1
             x = mtd[red].readX(0)
@@ -670,13 +693,12 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             extract_workspace(red, '__red_right', int(size / 2), size)
             # Normalise over left and right ranges
             self.log().information('IFWS scan ranges (bin numbers) [{0} {1}] and [{2} {3}]'.format
-                                   (x[0], xmin, xmax, x[len(x) - 1]))
+                                    (x[0], xmin, xmax, x[len(x) - 1]))
             NormaliseToMonitor(InputWorkspace='__red_left', OutputWorkspace='__mon_left', IntegrationRangeMin=x[0],
-                               IntegrationRangeMax=xmin, MonitorWorkspace=mon)
+                                IntegrationRangeMax=xmin, MonitorWorkspace=mon)
             NormaliseToMonitor(InputWorkspace='__red_right', OutputWorkspace='__mon_right',
-                               IntegrationRangeMin=xmax, IntegrationRangeMax=x[len(x) - 1],
-                               MonitorWorkspace=mon)
-            Plus(LHSWorkspace='__mon_left', RHSWorkspace='__mon_right', OutputWorkspace=mon)
+                                IntegrationRangeMin=xmax, IntegrationRangeMax=x[len(x) - 1], MonitorWorkspace=mon)
+            Plus(LHSWorkspace='__mon_left', RHSWorkspace='__mon_right', OutputWorkspace=red)
 
         self._debug(red, mnorm)
 
@@ -702,16 +724,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             else:
                 self.log().error("Calibration workspace has wrong dimensions.")
 
-        # For all kind of data
         if self._scan_type == 'FWS':
             ReplaceSpecialValues(InputWorkspace=red, OutputWorkspace=red, NaNValue=0, NaNError=0)
-
-        # Check mirror_sense
-        if mtd[red].getRun().hasProperty('Doppler.mirror_sense'):
-            # Get mirror_sense from run
-            # mirror_sense 14 : two wings
-            # mirror_sense 16 : one wing
-            self._mirror_sense = mtd[red].getRun().getLogData('Doppler.mirror_sense').value
 
         if self._mirror_sense == 14:
             # Number of bins
@@ -846,7 +860,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self.setProperty('MonitorWorkspace', self._out_suffixes[3])
             self.setProperty('MnormWorkspace', self._out_suffixes[4])
 
-            if self._scan_type == 'QENS' and self._mirror_sense == 14:
+            if self._mirror_sense == 14:
                 self.setProperty('LeftWorkspace', self._out_suffixes[5])
                 GroupWorkspaces(InputWorkspaces=output[:, 5], OutputWorkspace=self._out_suffixes[5])
                 self.setProperty('RightWorkspace', self._out_suffixes[6])

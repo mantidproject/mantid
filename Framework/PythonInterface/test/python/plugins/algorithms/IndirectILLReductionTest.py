@@ -37,10 +37,10 @@ class IndirectILLReductionTest(unittest.TestCase):
 
     def tearDown(self):
         # set cached facility and datasearch directory
-        config['default.facility'] = cls._def_fac
-        config['default.instrument'] = cls._def_inst
-        config['datasearch.directories'] = cls._data_dirs
-        cls._output_workspaces = []
+        config['default.facility'] = self._def_fac
+        config['default.instrument'] = self._def_inst
+        config['datasearch.directories'] = self._data_dirs
+        self._output_workspaces = []
 
     def test_multifiles(self):
         self._args['Run'] = self._multi_runs
