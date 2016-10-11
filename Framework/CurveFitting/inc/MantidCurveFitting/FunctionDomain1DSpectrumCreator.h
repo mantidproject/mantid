@@ -59,8 +59,8 @@ public:
 protected:
   void throwIfWorkspaceInvalid() const;
 
-  MantidVec getVectorHistogram() const;
-  MantidVec getVectorNonHistogram() const;
+  // MantidVec getVectorHistogram() const;
+  // MantidVec getVectorNonHistogram() const;
 
   API::MatrixWorkspace_sptr m_matrixWorkspace;
   size_t m_workspaceIndex;

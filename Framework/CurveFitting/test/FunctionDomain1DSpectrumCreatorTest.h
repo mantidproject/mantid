@@ -58,9 +58,9 @@ public:
     creator.setMatrixWorkspace(matrixWs);
 
     TS_ASSERT_EQUALS(creator.m_matrixWorkspace->getNumberHistograms(), 10);
-    TS_ASSERT_EQUALS(creator.m_matrixWorkspace->readX(0).size(), 15);
-    TS_ASSERT_EQUALS(creator.m_matrixWorkspace->readX(0)[0], 1.0);
-    TS_ASSERT_EQUALS(creator.m_matrixWorkspace->readX(4)[0], 1.0);
+    TS_ASSERT_EQUALS(creator.m_matrixWorkspace->x(0).size(), 15);
+    TS_ASSERT_EQUALS(creator.m_matrixWorkspace->x(0)[0], 1.0);
+    TS_ASSERT_EQUALS(creator.m_matrixWorkspace->x(4)[0], 1.0);
   }
 
   void testThrowIfWorkspaceInvalid() {
@@ -88,7 +88,7 @@ public:
         WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 5, 0.0, 1.0));
     creator.setWorkspaceIndex(0);
 
-    std::vector<double> xValues = creator.getVectorHistogram();
+    auto &xValues = creator.getVectorHistogram();
 
     TS_ASSERT_EQUALS(xValues.size(), 5);
     for (size_t i = 0; i < xValues.size(); ++i) {
@@ -102,11 +102,11 @@ public:
         WorkspaceCreationHelper::Create2DWorkspace123(1, 5));
     creator.setWorkspaceIndex(0);
 
-    std::vector<double> xValues = creator.getVectorNonHistogram();
+    auto &xValues = creator.getVectorNonHistogram();
 
     TS_ASSERT_EQUALS(xValues.size(), 5);
 
-    std::vector<double> xValuesWs = creator.m_matrixWorkspace->readX(0);
+    auto &xValuesWs = creator.m_matrixWorkspace->x(0);
 
     for (size_t i = 0; i < xValues.size(); ++i) {
       TS_ASSERT_EQUALS(xValues[i], xValuesWs[i]);
