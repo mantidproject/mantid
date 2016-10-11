@@ -105,7 +105,7 @@ void NormaliseVanadium::exec() {
     double scattering = dir.angle(V3D(0.0, 0.0, 1.0));
 
     Mantid::Kernel::Units::Wavelength wl;
-    auto timeflight = inSpec.points(); 
+    auto timeflight = inSpec.points();
 
     // Loop through the bins in the current spectrum
     double lambp = 0;
@@ -115,7 +115,7 @@ void NormaliseVanadium::exec() {
     for (int64_t j = 0; j < specSize; j++) {
       if (unitStr.compare("TOF") == 0)
         wl.fromTOF(timeflight.mutableRawData(), timeflight.mutableRawData(), L1,
-          L2, scattering, 0, 0, 0);
+                   L2, scattering, 0, 0, 0);
       const double lambda = timeflight[j];
       if (lambda > lambdanorm) {
         lambp = lambda;
