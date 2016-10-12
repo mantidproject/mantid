@@ -53,8 +53,7 @@ void PointByPointVCorrection::exec() {
   const int nHist = static_cast<int>(inputWS1->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, nHist);
 
-  PARALLEL_FOR_IF(
-      Kernel::threadSafe(inputWS1.get(), inputWS2.get(), outputWS.get()))
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS1, *inputWS2, *outputWS))
   for (int i = 0; i < nHist; i++) // Looping on all histograms
   {
     PARALLEL_START_INTERUPT_REGION

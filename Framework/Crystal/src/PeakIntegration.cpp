@@ -124,7 +124,7 @@ void PeakIntegration::exec() {
   }
 
   Progress prog(this, MinPeaks, 1.0, NumberPeaks);
-  PARALLEL_FOR_IF(Kernel::threadSafe(inputW.get(), peaksW.get(), outputW.get()))
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputW, *peaksW, *outputW))
   for (int i = MinPeaks; i < NumberPeaks; i++) {
 
     PARALLEL_START_INTERUPT_REGION

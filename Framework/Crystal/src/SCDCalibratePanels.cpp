@@ -371,8 +371,7 @@ void SCDCalibratePanels::exec() {
   DblMatrix UB = lattice.getUB();
   // sort again since edge peaks can trace to other banks
   peaksWs->sort(criteria);
-  PARALLEL_FOR_IF(
-      Kernel::threadSafe(ColWksp.get(), RowWksp.get(), TofWksp.get()))
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ColWksp, *RowWksp, *TofWksp))
   for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
     const std::string &bankName = *std::next(MyBankNames.begin(), i);

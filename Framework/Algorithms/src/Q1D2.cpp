@@ -146,8 +146,7 @@ void Q1D2::exec() {
   Progress progress(this, 0.05, 1.0, numSpec + 1);
 
   const auto &spectrumInfo = m_dataWS->spectrumInfo();
-  PARALLEL_FOR_IF(
-      Kernel::threadSafe(m_dataWS.get(), outputWS.get(), pixelAdj.get()))
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_dataWS, *outputWS, *pixelAdj))
   for (int i = 0; i < numSpec; ++i) {
     PARALLEL_START_INTERUPT_REGION
     if (!spectrumInfo.hasDetectors(i)) {
