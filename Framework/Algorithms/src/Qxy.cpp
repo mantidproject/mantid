@@ -315,7 +315,8 @@ void Qxy::exec() {
   size_t numHist = weights->getNumberHistograms();
   for (size_t i = 0; i < numHist; i++) {
     auto &weightsE = weights->mutableE(i);
-    std::transform(weightsE.cbegin(), weightsE.cend(), weightsE.begin(), sqrt);
+    std::transform(weightsE.cbegin(), weightsE.cend(), weightsE.begin(),
+                   [&](double val){ return sqrt(val); });
   }
 
   bool doOutputParts = getProperty("OutputParts");
