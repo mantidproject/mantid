@@ -169,7 +169,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
     auto lastX = x.back();
     auto dx = x[dataSize - 1] - x[dataSize - 2];
 
-    auto& y = inputWS->y(wsIndex);
+    auto &y = inputWS->y(wsIndex);
     size_t newSize = y.size() + 1;
 
     auto histogram = inputWS->histogram(wsIndex);
@@ -182,9 +182,9 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
     auto sizeYResized = yResized.size();
     auto sizeEResized = eResized.size();
 
-    xResized[sizeXResized-1] = lastX + dx;
-    yResized[sizeYResized-1] = yResized[sizeYResized-2];
-    eResized[sizeEResized-1] = eResized[sizeEResized-2];
+    xResized[sizeXResized - 1] = lastX + dx;
+    yResized[sizeYResized - 1] = yResized[sizeYResized - 2];
+    eResized[sizeEResized - 1] = eResized[sizeEResized - 2];
     inputWS->setHistogram(wsIndex, histogram);
   }
 
@@ -384,13 +384,13 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
     histogram.resize(newSize);
     out->setHistogram(0, histogram);
 
-    auto& xOut = out->mutableX(0);
+    auto &xOut = out->mutableX(0);
     xOut.assign(X.begin(), X.end() - 1);
-    auto& eOut = out->mutableE(0);
+    auto &eOut = out->mutableE(0);
     eOut.assign(E.begin(), E.end() - 1);
   } else {
     out->mutableX(0) = X;
-    auto& eOut = out->mutableE(0);
+    auto &eOut = out->mutableE(0);
     eOut.assign(E.begin(), E.end());
   }
 
@@ -405,8 +405,9 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
  *   centres are used.
  * @return :: A pair of start x and end x.
  */
-std::pair<double, double> WienerSmooth::getStartEnd(const Mantid::HistogramData::HistogramX &X,
-                                                    bool isHistogram) const {
+std::pair<double, double>
+WienerSmooth::getStartEnd(const Mantid::HistogramData::HistogramX &X,
+                          bool isHistogram) const {
   const size_t n = X.size();
   if (n < 3) {
     // 3 is the smallest number for this method to work without breaking

@@ -175,8 +175,7 @@ void UnwrapMonitor::exec() {
  * ranges start & end
  */
 const std::vector<int>
-UnwrapMonitor::unwrapX(MantidVec &newX,
-                       const int &spectrum, const double &Ld) {
+UnwrapMonitor::unwrapX(MantidVec &newX, const int &spectrum, const double &Ld) {
   // Create and initalise the vector that will store the bin ranges, and will be
   // returned
   // Elements are: 0 - Lower range start, 1 - Lower range end, 2 - Upper range
@@ -258,9 +257,9 @@ UnwrapMonitor::unwrapX(MantidVec &newX,
 /** Deals with the (rare) case where the flightpath is longer than the reference
  *  Note that in this case both T1 & T2 will be greater than Tmax
  */
-std::pair<int, int>
-UnwrapMonitor::handleFrameOverlapped(const Mantid::HistogramData::HistogramX &xdata, const double &Ld,
-                                     std::vector<double> &tempX) {
+std::pair<int, int> UnwrapMonitor::handleFrameOverlapped(
+    const Mantid::HistogramData::HistogramX &xdata, const double &Ld,
+    std::vector<double> &tempX) {
   // Calculate the interval to exclude
   const double Dt = (m_Tmax - m_Tmin) * (1 - (m_LRef / Ld));
   // This gives us new minimum & maximum tof values
@@ -300,8 +299,7 @@ UnwrapMonitor::handleFrameOverlapped(const Mantid::HistogramData::HistogramX &xd
 void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
                                 const int &spectrum,
                                 const std::vector<int> &rangeBounds,
-                                MantidVec &newY,
-                                MantidVec& newE) {
+                                MantidVec &newY, MantidVec &newE) {
   // Copy over the relevant ranges of Y & E data
   MantidVec &Y = newY;
   MantidVec &E = newE;

@@ -151,8 +151,7 @@ void UnwrapSNS::exec() {
       const double Ld = L1 + spectrumInfo.l2(workspaceIndex);
       // fix the x-axis
       MantidVec timeBins;
-      size_t pivot = this->unwrapX(m_inputWS->x(workspaceIndex),
-                                   timeBins, Ld);
+      size_t pivot = this->unwrapX(m_inputWS->x(workspaceIndex), timeBins, Ld);
       outputWS->setBinEdges(workspaceIndex, timeBins);
 
       pivot++; // one-off difference between x and y
@@ -163,7 +162,8 @@ void UnwrapSNS::exec() {
 
       auto lengthFirstPartY = std::distance(yIn.begin() + pivot, yIn.end());
       std::copy(yIn.begin() + pivot, yIn.end(), yOut.begin());
-      std::copy(yIn.begin(), yIn.begin() + pivot, yOut.begin() + lengthFirstPartY);
+      std::copy(yIn.begin(), yIn.begin() + pivot,
+                yOut.begin() + lengthFirstPartY);
 
       // fix the uncertainties using the pivot point
       auto &eIn = m_inputWS->e(workspaceIndex);
@@ -171,7 +171,8 @@ void UnwrapSNS::exec() {
 
       auto lengthFirstPartE = std::distance(eIn.begin() + pivot, eIn.end());
       std::copy(eIn.begin() + pivot, eIn.end(), eOut.begin());
-      std::copy(eIn.begin(), eIn.begin() + pivot, eOut.begin() + lengthFirstPartE);
+      std::copy(eIn.begin(), eIn.begin() + pivot,
+                eOut.begin() + lengthFirstPartE);
     }
     m_progress->report();
     PARALLEL_END_INTERUPT_REGION
@@ -241,8 +242,8 @@ void UnwrapSNS::execEvent() {
   this->runMaskDetectors();
 }
 
-int UnwrapSNS::unwrapX(const Mantid::HistogramData::HistogramX &datain, MantidVec &dataout,
-                       const double &Ld) {
+int UnwrapSNS::unwrapX(const Mantid::HistogramData::HistogramX &datain,
+                       MantidVec &dataout, const double &Ld) {
   MantidVec tempX_L; // lower half - to be frame wrapped
   tempX_L.reserve(m_XSize);
   tempX_L.clear();
