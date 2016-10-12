@@ -32,11 +32,12 @@ threadSafe(Arg workspace) {
   */
 template <typename Arg, typename... Args>
 inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type
-threadSafe(const Arg &workspace, Args... others) {
+threadSafe(Arg workspace, Args &&... others) {
   static_assert(
       std::is_base_of<DataItem, typename std::remove_pointer<Arg>::type>::value,
       "Parameter must be derived from Mantid::Kernel::DataItem!");
-  return (!workspace || workspace->threadSafe()) && threadSafe(others...);
+  return (!workspace || workspace->threadSafe()) &&
+         threadSafe(std::forward<Args>(others)...);
 }
 
 /** Thread-safety check
