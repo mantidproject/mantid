@@ -1790,8 +1790,13 @@ class LARMOR(ISISInstrument):
         try:
             run_num = LARMOR.get_run_number_from_workspace_reference(workspace_ref)
         except:
+            # If the workspace does not contain logs from which we can get the run number
+            # then we get the run number from the workspace name which has the form
+            # [\d]+_[sans|trans]_[\d+]. The first set of digits is the one we are after.
+            # The end set of digits corresponds to the period number.
+            # Previously this method looked for the last set. It is not clear why.
             ws_name = workspace_ref.name()
-            run_num = int(re.findall(r'\d+', str(ws_name))[-1])
+            run_num = int(re.findall(r'\d+', str(ws_name))[0])
         if int(run_num) >= 2217:
             return True
         else:
