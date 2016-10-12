@@ -222,9 +222,7 @@ void FitPowderDiffPeaks::exec() {
   m_indexGoodFitPeaks.clear();
   m_chi2GoodFitPeaks.clear();
   size_t numpts = m_dataWS->x(m_wsIndex).size();
-  m_peakData.reserve(numpts);
-  for (size_t i = 0; i < numpts; ++i)
-    m_peakData.push_back(0.0);
+  m_peakData.resize(numpts);
 
   g_log.information() << "[FitPeaks] Total Number of Peak = "
                       << m_vecPeakFunctions.size() << '\n';
@@ -1861,23 +1859,6 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   g_log.information() << "[DBx133] Fitted Gaussian Parameters: \n" << infofit
                       << '\n';
 
-  // DB output for data
-  /*
-  API::MatrixWorkspace_sptr outdataws = fitalg->getProperty("OutputWorkspace");
-  const MantidVec& allX = outdataws->x(0);
-  const MantidVec& fitY = outdataws->y(1);
-  const MantidVec& rawY = outdataws->y(0);
-
-  std::stringstream datass;
-  for (size_t i = 0; i < fitY.size(); ++i)
-  {
-    datass << allX[i] << setw(5) << " " << fitY[i] << "  " << rawY[i] <<
-  '\n';
-  }
-  std::cout << "Fitted Gaussian Peak:  Index, Fittet, Raw\n" << datass.str() <<
-  ".........................\n";
-  */
-
   return true;
 }
 
@@ -2442,10 +2423,10 @@ Workspace2D_sptr FitPowderDiffPeaks::genPeakParameterDataWorkspace() {
     paramws->mutableX(j) = vecdh;
     paramws->mutableE(j) = vecchi2;
   }
-  paramws->mutableY(0) = vectofh;
-  paramws->mutableY(1) = vecalpha;
-  paramws->mutableY(2) = vecbeta;
-  paramws->mutableY(3) = vecsigma;
+  paramws->mutableY(0) = std::move(vectofh);
+  paramws->mutableY(1) = std::move(vecalpha);
+  paramws->mutableY(2) = std::move(vecbeta);
+  paramws->mutableY(3) = std::move(vecsigma);
 
   // 4. Set Axis label
   paramws->getAxis(0)->setUnit("dSpacing");
@@ -3197,7 +3178,7 @@ void estimateBackgroundCoarse(DataObjects::Workspace2D_sptr dataws,
   background->function(domain, values);
 
   dataws->mutableY(wsindexbkgd) = values.toVector();
-  dataws->mutableY(wsindexpeak) = dataws->y(wsindexraw) - values.toVector();
+  dataws->mutableY(wsindexpeak) = dataws->y(wsindexraw) - dataws->y(wsindexbkgd);
   dataws->mutableE(wsindexpeak) = dataws->e(wsindexraw);
 }
 
@@ -3316,17 +3297,9 @@ bool observePeakParameters(Workspace2D_sptr dataws, size_t wsindex,
  * @return index of the maximum value
  */
 size_t findMaxValue(const std::vector<double> &Y) {
-  size_t imax = 0;
-  double maxy = Y[imax];
 
-  for (size_t i = 0; i < Y.size(); ++i) {
-    if (Y[i] > maxy) {
-      maxy = Y[i];
-      imax = i;
-    }
-  }
-
-  return imax;
+  auto maxIt = std::max_element(Y.begin(), Y.end());
+  return std::distance(Y.begin(), maxIt);
 }
 
 //----------------------------------------------------------------------------------------------
