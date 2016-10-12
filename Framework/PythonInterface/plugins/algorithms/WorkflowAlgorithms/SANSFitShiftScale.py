@@ -1,5 +1,7 @@
 # pylint: disable=no-init,invalid-name,too-many-arguments,too-few-public-methods
 
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, AnalysisDataService
 from mantid.kernel import Direction, Property, StringListValidator, UnitFactory
@@ -38,7 +40,7 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
             MatrixWorkspaceProperty('LABWorkspace', '', optional=PropertyMode.Mandatory, direction=Direction.Input),
             doc='Low angle bank workspace in Q')
 
-        allowedModes = StringListValidator(self._make_mode_map().keys())
+        allowedModes = StringListValidator(list(self._make_mode_map().keys()))
 
         self.declareProperty('Mode', 'None', validator=allowedModes, direction=Direction.Input,
                              doc='What to fit. Free parameter(s).')
@@ -174,8 +176,8 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
         # 2. Shift in x direction
         # 3. Scaling in x direction
         # 4. Shift in y direction
-        row0 = param.row(0).items()
-        row3 = param.row(3).items()
+        row0 = list(param.row(0).items())
+        row3 = list(param.row(3).items())
 
         scale = row0[1][1]
 

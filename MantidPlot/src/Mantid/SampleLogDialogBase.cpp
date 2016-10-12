@@ -1,23 +1,24 @@
-//----------------------------------
-// Includes
-//----------------------------------
-
 #include "SampleLogDialogBase.h"
 
 // Mantid API
 #include <MantidAPI/MultipleExperimentInfos.h>
 #include <MantidAPI/IMDWorkspace.h>
+#include "MantidAPI/Run.h"
 
 // Mantid Kernel
 #include <MantidKernel/TimeSeriesProperty.h>
 #include <MantidKernel/ArrayProperty.h>
 
 // Qt
-#include <QTreeWidget>
-#include <QHeaderView>
-#include <QFileInfo>
-#include <QLineEdit>
 #include <QMenu>
+#include <QFileInfo>
+#include <QHeaderView>
+#include <QTreeWidget>
+#include <QPushButton>
+#include <QLabel>
+#include <QSpinBox>
+#include <QLineEdit>
+#include <QLayout>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -47,12 +48,10 @@ SampleLogDialogBase::SampleLogDialogBase(const QString &wsname,
                                          QWidget *parentContainer,
                                          Qt::WFlags flags,
                                          size_t experimentInfoIndex)
-    : QDialog(parentContainer, flags), m_tree(nullptr),
+    : QDialog(parentContainer, flags), m_tree(new QTreeWidget()),
       m_parentContainer(parentContainer), m_wsname(wsname.toStdString()),
       m_experimentInfoIndex(experimentInfoIndex), buttonPlot(nullptr),
       buttonClose(nullptr), m_spinNumber(nullptr) {
-
-  m_tree = new QTreeWidget();
 
   for (size_t i = 0; i < NUM_STATS; ++i) {
     statValues[i] = nullptr;
@@ -180,6 +179,19 @@ void SampleLogDialogBase::popupMenu(const QPoint &pos) {
   menu->addAction(action);
 
   menu->popup(QCursor::pos());
+}
+
+//------------------------------------------------------------------------------------------------
+/** Slot called when selecting a different experiment info number
+*
+*	@author Martyn Gigg, Tessella Support Services plc
+*	@date 05/11/2009
+*/
+void SampleLogDialogBase::selectExpInfoNumber(int num) {
+  m_experimentInfoIndex = size_t(num);
+  m_tree->blockSignals(true);
+  this->init();
+  m_tree->blockSignals(false);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -342,14 +354,102 @@ void SampleLogDialogBase::init() {
   m_tree->sortByColumn(0, Qt::AscendingOrder);
 }
 
-/** Slot called when selecting a different experiment info number
-*
-*	@author Martyn Gigg, Tessella Support Services plc
-*	@date 05/11/2009
+//------------------------------------------------------------------------------------------------
+/** Sets the Sample Log Dialog window title
+*	@param wsname The workspace name
 */
-void SampleLogDialogBase::selectExpInfoNumber(int num) {
-  m_experimentInfoIndex = size_t(num);
-  m_tree->blockSignals(true);
-  this->init();
-  m_tree->blockSignals(false);
+void SampleLogDialogBase::setDialogWindowTitle(const QString &wsname) {
+  std::stringstream ss;
+  ss << "MantidPlot - " << wsname.toStdString().c_str() << " sample logs";
+  QWidget::setWindowTitle(QString::fromStdString(ss.str()));
+}
+
+//------------------------------------------------------------------------------------------------
+/** Sets the member QTreeWidget column names
+*/
+void SampleLogDialogBase::setTreeWidgetColumnNames() {
+  QStringList titles;
+  titles << "Name"
+         << "Type"
+         << "Value"
+         << "Units";
+  m_tree->setHeaderLabels(titles);
+  m_tree->setSelectionMode(QAbstractItemView::SingleSelection);
+  QHeaderView *hHeader = (QHeaderView *)m_tree->header();
+  hHeader->setResizeMode(2, QHeaderView::Stretch);
+  hHeader->setStretchLastSection(false);
+}
+
+//------------------------------------------------------------------------------------------------
+/** Adds the import and close buttons to the parameter layout
+*	@param qLayout The Layout to which the import and close buttons will be
+*					added
+*/
+void SampleLogDialogBase::addImportAndCloseButtonsTo(QBoxLayout *qLayout) {
+  // -------------- The Import/Close buttons ------------------------
+  QHBoxLayout *topButtons = new QHBoxLayout;
+  buttonPlot = new QPushButton(tr("&Import selected log"));
+  buttonPlot->setAutoDefault(true);
+  buttonPlot->setToolTip(
+      "Import log file as a table and construct a 1D graph if appropriate");
+  topButtons->addWidget(buttonPlot);
+
+  buttonClose = new QPushButton(tr("Close"));
+  buttonClose->setToolTip("Close dialog");
+  topButtons->addWidget(buttonClose);
+  qLayout->addLayout(topButtons);
+
+  connect(buttonPlot, SIGNAL(clicked()), this, SLOT(importSelectedLogs()));
+  connect(buttonClose, SIGNAL(clicked()), this, SLOT(close()));
+}
+//------------------------------------------------------------------------------------------------
+/** Adds the Experiment Info Selector to the paramenter layout
+*	@param qLayout The Layout to which the experiment info selector labels
+*					will be added
+*/
+void SampleLogDialogBase::addExperimentInfoSelectorTo(QBoxLayout *qLayout) {
+  // -------------- The ExperimentInfo selector------------------------
+  boost::shared_ptr<Mantid::API::MultipleExperimentInfos> mei =
+      AnalysisDataService::Instance().retrieveWS<MultipleExperimentInfos>(
+          m_wsname);
+
+  if (mei) {
+    if (mei->getNumExperimentInfo() > 0) {
+      QHBoxLayout *numSelectorLayout = new QHBoxLayout;
+      QLabel *lbl = new QLabel("Experiment Info #");
+      m_spinNumber = new QSpinBox;
+      m_spinNumber->setMinimum(0);
+      m_spinNumber->setMaximum(int(mei->getNumExperimentInfo()) - 1);
+      m_spinNumber->setValue(int(m_experimentInfoIndex));
+      numSelectorLayout->addWidget(lbl);
+      numSelectorLayout->addWidget(m_spinNumber);
+      // Double-click imports a log file
+      connect(m_spinNumber, SIGNAL(valueChanged(int)), this,
+              SLOT(selectExpInfoNumber(int)));
+      qLayout->addLayout(numSelectorLayout);
+    }
+  }
+}
+
+//------------------------------------------------------------------------------------------------
+/** Sets up the QTreeWidget Qt connections for necessary functionality
+*/
+void SampleLogDialogBase::setUpTreeWidgetConnections() {
+  // want a custom context menu
+  m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint &)), this,
+          SLOT(popupMenu(const QPoint &)));
+
+  // Double-click imports a log file
+  connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this,
+          SLOT(importItem(QTreeWidgetItem *)));
+
+  // Selecting shows the stats of it
+  connect(m_tree, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this,
+          SLOT(showLogStatistics()));
+
+  // Selecting shows the stats of it
+  connect(m_tree,
+          SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)),
+          this, SLOT(showLogStatistics()));
 }

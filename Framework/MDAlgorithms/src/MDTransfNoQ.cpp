@@ -1,6 +1,7 @@
 #include "MantidMDAlgorithms/MDTransfNoQ.h"
 #include "MantidMDAlgorithms/DisplayNormalizationSetter.h"
-//
+#include "MantidKernel/Unit.h"
+
 namespace Mantid {
 namespace MDAlgorithms {
 

@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.kernel import Direction, FloatArrayProperty
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty)
 

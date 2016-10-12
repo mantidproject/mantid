@@ -1,6 +1,7 @@
 #include "MantidDataHandling/LoadLogsForSNSPulsedMagnet.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
@@ -21,7 +22,6 @@ DECLARE_ALGORITHM(LoadLogsForSNSPulsedMagnet)
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 LoadLogsForSNSPulsedMagnet::LoadLogsForSNSPulsedMagnet()
@@ -29,7 +29,6 @@ LoadLogsForSNSPulsedMagnet::LoadLogsForSNSPulsedMagnet()
       m_delayfileinoldformat(false), m_numpulses(0), m_numchoppers(0),
       m_delaytimes(nullptr), m_pulseidseconds(), m_pulseidnanoseconds(), WS() {}
 
-//----------------------------------------------------------------------------------------------
 /** Destructor
  */
 LoadLogsForSNSPulsedMagnet::~LoadLogsForSNSPulsedMagnet() {
@@ -38,9 +37,6 @@ LoadLogsForSNSPulsedMagnet::~LoadLogsForSNSPulsedMagnet() {
   delete[] m_delaytimes;
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadLogsForSNSPulsedMagnet::init() {

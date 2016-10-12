@@ -109,6 +109,7 @@ set ( SRC_FILES
 	src/Functions/StretchExp.cpp
 	src/Functions/StretchExpMuon.cpp
 	src/Functions/TabulatedFunction.cpp
+	src/Functions/TeixeiraWaterSQE.cpp
 	src/Functions/ThermalNeutronBk2BkExpAlpha.cpp
 	src/Functions/ThermalNeutronBk2BkExpBeta.cpp
 	src/Functions/ThermalNeutronBk2BkExpConvPVoigt.cpp
@@ -255,6 +256,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/StretchExp.h
 	inc/MantidCurveFitting/Functions/StretchExpMuon.h
 	inc/MantidCurveFitting/Functions/TabulatedFunction.h
+	inc/MantidCurveFitting/Functions/TeixeiraWaterSQE.h
 	inc/MantidCurveFitting/Functions/ThermalNeutronBk2BkExpAlpha.h
 	inc/MantidCurveFitting/Functions/ThermalNeutronBk2BkExpBeta.h
 	inc/MantidCurveFitting/Functions/ThermalNeutronBk2BkExpConvPVoigt.h
@@ -392,6 +394,7 @@ set ( TEST_FILES
 	Functions/StretchExpMuonTest.h
 	Functions/StretchExpTest.h
 	Functions/TabulatedFunctionTest.h
+    Functions/TeixeiraWaterSQETest.h
 	Functions/ThermalNeutronBk2BkExpAlphaTest.h
 	Functions/ThermalNeutronBk2BkExpBetaTest.h
 	Functions/ThermalNeutronBk2BkExpConvPVoigtTest.h

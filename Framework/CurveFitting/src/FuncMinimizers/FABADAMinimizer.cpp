@@ -26,7 +26,7 @@
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/version.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -204,7 +204,7 @@ bool FABADAMinimizer::iterate(size_t) {
     // the user should be aware of that.
 
     // Set the new value in order to calculate the new Chi square value
-    if (boost::math::isnan(new_value)) {
+    if (std::isnan(new_value)) {
       throw std::runtime_error("Parameter value is NaN.");
     }
     new_parameters.set(i, new_value);
@@ -423,7 +423,7 @@ void FABADAMinimizer::tieApplication(const size_t &parameterIndex,
       API::ParameterTie *tie = m_fitFunction->getTie(j);
       if (tie) {
         newValue = tie->eval();
-        if (boost::math::isnan(newValue)) { // maybe not needed
+        if (std::isnan(newValue)) { // maybe not needed
           throw std::runtime_error("Parameter value is NaN.");
         }
         newParameters.set(j, newValue);
@@ -435,7 +435,7 @@ void FABADAMinimizer::tieApplication(const size_t &parameterIndex,
   API::ParameterTie *tie = m_fitFunction->getTie(i);
   if (tie) {
     newValue = tie->eval();
-    if (boost::math::isnan(newValue)) { // maybe not needed
+    if (std::isnan(newValue)) { // maybe not needed
       throw std::runtime_error("Parameter value is NaN.");
     }
     newParameters.set(i, newValue);

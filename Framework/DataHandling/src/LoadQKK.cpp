@@ -14,8 +14,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
-
 #include <Poco/File.h>
 
 #include <fstream>
