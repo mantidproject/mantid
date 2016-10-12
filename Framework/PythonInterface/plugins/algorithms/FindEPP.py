@@ -12,9 +12,6 @@ class FindEPP(PythonAlgorithm):
         """
         PythonAlgorithm.__init__(self)
         self.workspace = None
-        self.xmin = None
-        self.xmax = None
-
 
     def category(self):
         return "Workflow\\MLZ\\TOFTOF;Utility"
@@ -25,28 +22,10 @@ class FindEPP(PythonAlgorithm):
     def summary(self):
         return "Performs Gaussian fit of all spectra to find the elastic peak position."
 
-    def validateInputs(self):
-        issues = dict()
-
-        self.xmin = self.getProperty("Xmin").value
-        self.xmax = self.getProperty("Xmax").value
-
-        if (self.xmin != 0. or self.xmax != 0.) and self.xmax <= self.xmin:
-            issues['Xmin'] = 'Xmin must be less than Xmax'
-            issues['Xmax'] = 'Xmax must be more than Xmin'
-
-        return issues
-
     def PyInit(self):
         # input
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input),
                              doc="Input Sample or Vanadium workspace")
-
-        # start X
-        self.declareProperty("XMin",0.,doc="Lower bound of peak range")
-
-        # end X
-        self.declareProperty("XMax",0.,doc="Upper bound of peak range")
 
         # output
         self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),
@@ -71,45 +50,36 @@ class FindEPP(PythonAlgorithm):
             self.log().warning("Workspace %s, detector %d has maximum <= 0" % (self.workspace.getName(), index))
             return result
 
-        # guess sigma (assume the signal is sufficiently smooth)
-        # the _only_ peak is at least three samples wide
-        # selecting samples above .5 ("full width at half maximum")
-        indices  = np.argwhere(y_values > 0.5*height)
-        nentries = len(indices)
+        # Get the positions around the max, where the y value first drops down 0.5*height
+        # This is a better approach when there is a higher noise in the tails in real data
+        y_right = y_values[imax+1:]
+        y_left = y_values[0:imax]
+        y_left = y_left[::-1]
+        fwhm_right = np.argmax(y_right < 0.5 * height)
+        fwhm_left = np.argmax(y_left < 0.5 * height)
+        fwhm_pos = np.minimum(imax+fwhm_right,x_values.size-1)
+        fwhm_neg = np.maximum(imax-fwhm_left,0)
 
-        if nentries < 3:
+        self.log().debug("(spectrum %d) : FWHM lower edge is %d" % (index,fwhm_neg))
+        self.log().debug("(spectrum %d) : FWHM upper edge is %d" % (index,fwhm_pos))
+
+        if fwhm_pos - fwhm_neg + 1 < 3:
             self.log().warning("Spectrum " + str(index) + " in workspace " + self.workspace.getName() +
                                " has a too narrow peak. Cannot guess sigma. Check your data.")
             return result
 
-        minIndex = indices[0,0]
-        maxIndex = indices[-1,0]
+        fwhm = x_values[fwhm_pos] - x_values[fwhm_neg]
 
-        # full width at half maximum: fwhm = sigma * (2.*np.sqrt(2.*np.log(2.)))
-        fwhm  = np.fabs(x_values[maxIndex] - x_values[minIndex])
+        self.log().debug("(spectrum %d) : FWHM is %f" % (index, fwhm))
+
         sigma = fwhm / (2.*np.sqrt(2.*np.log(2.)))
 
         # execute Fit algorithm
         tryCentre = x_values[imax]
         fitFun = "name=Gaussian,PeakCentre=%s,Height=%s,Sigma=%s" % (tryCentre,height,sigma)
 
-        if self.xmin != 0. or self.xmax != 0.:
-            # meaning user has given a range
-            if self.xmin < x_values[0]:
-                self.log().information('Xmin is out of range for spectrum #%d, taking x[0]=%s' % (index,x_values[0]))
-                startX = x_values[0]
-            else:
-                startX = self.xmin
-
-            if self.xmax > x_values[-1]:
-                self.log().information('Xmax is out of range for spectrum #%d, taking x[-1]=%s' % (index,x_values[-1]))
-                endX = x_values[-1]
-            else:
-                endX = self.xmax
-        else:
-            # user has not given a range, guess
-            startX = tryCentre - 3.0*fwhm
-            endX   = tryCentre + 3.0*fwhm
+        startX = tryCentre - 3.0*fwhm
+        endX   = tryCentre + 3.0*fwhm
 
         # pylint: disable=assignment-from-none
         # result = fitStatus, chiSq, covarianceTable, paramTable
