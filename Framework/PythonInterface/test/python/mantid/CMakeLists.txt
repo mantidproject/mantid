@@ -8,6 +8,7 @@ add_subdirectory( dataobjects )
 
 set ( TEST_PY_FILES
   ImportModuleTest.py
+  PVPythonTest.py
   SimpleAPITest.py
   SimpleAPILoadTest.py
   SimpleAPIFitTest.py

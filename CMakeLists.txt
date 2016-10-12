@@ -35,6 +35,23 @@ set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #e
 set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 
 ###########################################################################
+# Set ParaView information since later items depend on it
+###########################################################################
+# VATES flag. Requires ParaView
+set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
+if ( ENABLE_MANTIDPLOT AND MAKE_VATES )
+  find_package( ParaView )
+  if( ParaView_FOUND )
+    add_definitions ( -DMAKE_VATES )
+    # Poco::File throws an exception when a backslash is used.
+    string ( REPLACE "\\" "/" ParaView_DIR ${ParaView_DIR} )
+  endif ()
+endif ()
+if ( ENABLE_MANTIDPLOT )
+  include ( ParaViewSetup )
+endif ()
+
+###########################################################################
 # Bootstrap any dependencies
 ###########################################################################
 include ( Bootstrap )
@@ -68,13 +85,6 @@ if ( NOT OPENGL_FOUND )
 endif ()
 
 find_package(TBB REQUIRED)
-
-###########################################################################
-# Set ParaView information since later items depend on it
-###########################################################################
-if (ENABLE_MANTIDPLOT)
-  include ( ParaViewSetup )
-endif ()
 
 # We probably don't want this to run on every build.
 option(COVERALLS "Generate coveralls data" OFF)
@@ -128,16 +138,6 @@ set( DOCS_BUILDDIR ${CMAKE_BINARY_DIR}/docs )
 # Framework Build options
 set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each package run together")
 set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to the list of tests run by ctest?")
-
-
-# VATES flag. Requires ParaView
-set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
-if (ENABLE_MANTIDPLOT AND MAKE_VATES )
-  find_package(ParaView)
-  if(ParaView_FOUND)
-    add_definitions ( -DMAKE_VATES )
-  endif()
-endif()
 
 add_subdirectory ( Framework )
 
