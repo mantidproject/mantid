@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidHistogramData/HistogramX.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -69,13 +70,13 @@ private:
   void init() override;
   void exec() override;
 
-  const std::vector<int> unwrapX(const API::MatrixWorkspace_sptr &tempWS,
+  const std::vector<int> unwrapX(MantidVec & newX,
                                  const int &spectrum, const double &Ld);
-  std::pair<int, int> handleFrameOverlapped(const MantidVec &xdata,
+  std::pair<int, int> handleFrameOverlapped(const Mantid::HistogramData::HistogramX &xdata,
                                             const double &Ld,
                                             std::vector<double> &tempX);
   void unwrapYandE(const API::MatrixWorkspace_sptr &tempWS, const int &spectrum,
-                   const std::vector<int> &rangeBounds);
+                   const std::vector<int> &rangeBounds, MantidVec &newY, MantidVec& newE);
   API::MatrixWorkspace_sptr rebin(const API::MatrixWorkspace_sptr &workspace,
                                   const double &min, const double &max,
                                   const int &numBins);
