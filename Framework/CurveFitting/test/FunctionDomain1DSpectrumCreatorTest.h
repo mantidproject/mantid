@@ -106,8 +106,7 @@ public:
 
     TS_ASSERT_EQUALS(xValues.size(), 6);
 
-    const auto &xValuesWs = creator.m_matrixWorkspace->
-		x(0);
+    const auto &xValuesWs = creator.m_matrixWorkspace->x(0);
 
     for (size_t i = 0; i < xValues.size(); ++i) {
       TS_ASSERT_EQUALS(xValues[i], xValuesWs[i]);

@@ -168,7 +168,7 @@ private:
     ws2->initialize(2, 20, 20);
 
     for (size_t is = 0; is < ws2->getNumberHistograms(); ++is) {
-      
+
       auto &x = ws2->mutableX(is);
       auto &y = ws2->mutableY(is);
       for (size_t i = 0; i < ws2->blocksize(); ++i) {
