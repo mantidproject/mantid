@@ -281,7 +281,7 @@ def improvingCalibrationOfListOfTubes(filename):
                     245: [9.88089, 93.0593, 136.911, 179.5, 255], # the third peak was bad
                     273: [18.3711, 105.5, 145.5, 181.6, 243.252], # lost first and third peaks
                     345: [4.6084, 87.0351, 128.125, 169.923, 245.3] # the last one was bad
-                    }
+                   }
     calibrationTable, peakTable= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
                                                 fitPar=fitPar, outputPeak=True, overridePeaks=define_peaks)
 

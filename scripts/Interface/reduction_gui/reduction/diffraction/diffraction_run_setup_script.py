@@ -224,19 +224,22 @@ class RunSetupScript(BaseScriptElement):
             self.bkgdrunnumber = BaseScriptElement.getStringElement(instrument_dom,
                                                                     "backgroundnumber", default=RunSetupScript.bkgdrunnumber)
             tempbool = BaseScriptElement.getStringElement(instrument_dom,
-                                                          "disablebackgroundcorrection", default=str(int(RunSetupScript.disablebkgdcorrection)))
+                                                          "disablebackgroundcorrection",
+                                                          default=str(int(RunSetupScript.disablebkgdcorrection)))
             self.disablebkgdcorrection = bool(int(tempbool))
 
             self.vanrunnumber = BaseScriptElement.getStringElement(instrument_dom,
                                                                    "vanadiumnumber", default=RunSetupScript.vanrunnumber)
             tempbool = BaseScriptElement.getStringElement(instrument_dom,
-                                                          "disablevanadiumcorrection", default=str(int(RunSetupScript.disablevancorrection)))
+                                                          "disablevanadiumcorrection",
+                                                          default=str(int(RunSetupScript.disablevancorrection)))
             self.disablevancorrection = bool(int(tempbool))
 
             self.vanbkgdrunnumber = BaseScriptElement.getStringElement(instrument_dom,
                                                                        "vanadiumbackgroundnumber", default=RunSetupScript.vanbkgdrunnumber)
             tempbool = BaseScriptElement.getStringElement(instrument_dom,
-                                                          "disablevanadiumbackgroundcorrection", default=str(int(RunSetupScript.disablevanbkgdcorrection)))
+                                                          "disablevanadiumbackgroundcorrection",
+                                                          default=str(int(RunSetupScript.disablevanbkgdcorrection)))
             self.disablevanbkgdcorrection = bool(int(tempbool))
 
             # tempint = BaseScriptElement.getStringElement(instrument_dom,

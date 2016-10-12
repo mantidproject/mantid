@@ -72,43 +72,43 @@ def analisePeakTable(pTable, peaksName='Peaks'):
 
 
 def calibrateMerlin(filename):
-  # == Set parameters for calibration ==
+    # == Set parameters for calibration ==
 
     rangeLower = 3000 # Integrate counts in each spectra from rangeLower to rangeUpper
     rangeUpper = 20000 #
 
-  # Get calibration raw file and integrate it
+    # Get calibration raw file and integrate it
     rawCalibInstWS = LoadRaw(filename)    #'raw' in 'rawCalibInstWS' means unintegrated.
     print "Integrating Workspace"
     CalibInstWS = Integration( rawCalibInstWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
     DeleteWorkspace(rawCalibInstWS)
     print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate"
 
-  # the known positions are given in pixels inside the tubes and transformed to provide the positions
-  # with the center of the tube as the origin
+    # the known positions are given in pixels inside the tubes and transformed to provide the positions
+    # with the center of the tube as the origin
     knownPositions = 2.92713867188*(numpy.array([27.30074322, 92.5, 294.65178585, 362.37861919,
                                                  512.77103043, 663.41425323, 798.3223896, 930.9, 997.08480835])/1024 - 0.5)
     funcForm = numpy.array([2,2,1,1,1,1,1,2,2],numpy.int8)
-  # The calibration will follow different steps for sets of tubes
+    # The calibration will follow different steps for sets of tubes
 
-  # For the door9, the best points to define the known positions are the 1st edge, 5 peaks, last edge.
+    # For the door9, the best points to define the known positions are the 1st edge, 5 peaks, last edge.
     points7 = knownPositions[[0,2,3,4,5,6,8]]
     points7func = funcForm[[0,2,3,4,5,6,8]]
 
     door9pos = points7
     door9func = points7func
     CalibratedComponent = 'MERLIN/door9'    # door9
-  # == Get the calibration and put results into calibration table ==
-  # also put peaks into PeakFile
+    # == Get the calibration and put results into calibration table ==
+    # also put peaks into PeakFile
     calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, door9pos, door9func,
                                                  outputPeak=True,
                                                  margin=30,
                                                  rangeList=range(20) # because 20, 21, 22, 23 are defective detectors
-                                                 )
+                                                )
     print "Got calibration (new positions of detectors) and put slit peaks into file TubeDemoMerlin01.txt"
     analisePeakTable(peakTable, 'door9_tube1_peaks')
 
-  # For the door8, the best points to define the known positions are the 1st edge, 5 peaks, last_edge
+    # For the door8, the best points to define the known positions are the 1st edge, 5 peaks, last_edge
     door8pos = points7
     door8func = points7func
     CalibratedComponent = 'MERLIN/door8'

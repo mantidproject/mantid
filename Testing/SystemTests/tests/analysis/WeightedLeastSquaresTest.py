@@ -220,7 +220,7 @@ class VanadiumPatternFromENGINXSmoothing(unittest.TestCase):
                            46.150107399338026, 33.49607446438909, 27.023391825663943, 19.660388795715143,
                            14.846016985914035, 9.65919973049868, 5.724008517073549, 1.9527932349469075,
                            -0.9197805852038337, 10.656047152998436, 0.0
-                           ]
+                          ]
 
         # Note: ignoring parameter errors. Note the higher tolerance so that it works on all platforms
         fitted_params, _ = run_fit(self.workspace, function_definition)
@@ -235,7 +235,7 @@ class VanadiumPatternFromENGINXSmoothing(unittest.TestCase):
                            1572.450059153195, 836.417481475315, 361.6875979793134, 240.00983642384153,
                            132.46098325093416, 63.95362315830608, 17.41805806345004, 0.8684078907341928,
                            -5.204195324981802
-                           ]
+                          ]
 
         # Note: ignoring parameter errors. Note the higher tolerance so that it works on all platforms
         fitted_params, _ = run_fit(self.workspace, function_definition)

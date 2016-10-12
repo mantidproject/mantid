@@ -29,7 +29,7 @@ INSTRUMENT_DICT = {"HFIR": {"BIOSANS": HFIRInterface,
                             "PG3": DiffractionInterface,
                             "NOM": DiffractionInterface,
                             "VULCAN": DiffractionInterface}
-                   }
+                  }
 
 
 def instrument_factory(instrument_name, settings=None):

@@ -28,7 +28,8 @@ class DSFinterp(PythonAlgorithm):
         self.declareProperty('LoadErrors', True, direction=Direction.Input,
                              doc='Do we load error data contained in the workspaces?')
         self.declareProperty(FloatArrayProperty('ParameterValues', values=[],
-                                                validator=FloatArrayMandatoryValidator(),direction=Direction.Input), doc='list of input parameter values')
+                                                validator=FloatArrayMandatoryValidator(),direction=Direction.Input),
+                             doc='list of input parameter values')
         self.setPropertyGroup('Workspaces', lrg)
         self.setPropertyGroup('LoadErrors', lrg)
         self.setPropertyGroup('ParameterValues', lrg)

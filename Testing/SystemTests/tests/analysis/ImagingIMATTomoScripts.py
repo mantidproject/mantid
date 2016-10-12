@@ -29,7 +29,7 @@ class ImagingIMATTomoTests(unittest.TestCase):
                       'LARMOR00005330_Metals_000_SummedImg_3.fits',
                       'LARMOR00005331_Metals_000_SummedImg_4.fits',
                       'LARMOR00005332_Metals_000_SummedImg_5.fits'
-                      ]
+                     ]
 
         # a name for the stack / group of workspaces
         _data_wsname = 'small_img_stack'

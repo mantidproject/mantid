@@ -237,7 +237,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         self.declareProperty(FileProperty('CalFile', '', action=FileAction.Load),
                              doc='Filename of the .cal file to use in the [[AlignDetectors]] and '+
-                                 '[[DiffractionFocussing]] child algorithms.')
+                             '[[DiffractionFocussing]] child algorithms.')
 
         self.declareProperty('SpectraMin', 3, doc='Minimum Spectrum to Load from (Must be more than 3)')
 
@@ -245,7 +245,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output),
                              doc="Name to give the output workspace. If no name is provided, "+
-                                 "one will be generated based on the run numbers.")
+                             "one will be generated based on the run numbers.")
 
         self.declareProperty(name='LoadLogFiles', defaultValue=True,
                              doc='Load log files when loading runs')

@@ -1000,12 +1000,12 @@ class MainWindow(QtGui.QMainWindow):
         fastLog = self.ui.checkBox_fastLog.isChecked()
 
         splitws, infows = api.GenerateEventsFilter(
-                InputWorkspace      = self._dataWS,
-                UnitOfTime          = "Seconds",
-                TitleOfSplitters    = title,
-                OutputWorkspace     = splitwsname,
-                FastLog             = fastLog,
-                InformationWorkspace = splitinfowsname, **kwargs)
+            InputWorkspace      = self._dataWS,
+            UnitOfTime          = "Seconds",
+            TitleOfSplitters    = title,
+            OutputWorkspace     = splitwsname,
+            FastLog             = fastLog,
+            InformationWorkspace = splitinfowsname, **kwargs)
 
         self.splitWksp(splitws, infows)
 
@@ -1061,13 +1061,13 @@ class MainWindow(QtGui.QMainWindow):
         title = str(self.ui.lineEdit_title.text())
 
         splitws, infows = api.GenerateEventsFilter(
-                InputWorkspace      = self._dataWS,
-                UnitOfTime          = "Seconds",
-                TitleOfSplitters    = title,
-                OutputWorkspace     = splitwsname,
-                LogName             = samplelog,
-                FastLog             = fastLog,
-                InformationWorkspace = splitinfowsname, **kwargs)
+            InputWorkspace      = self._dataWS,
+            UnitOfTime          = "Seconds",
+            TitleOfSplitters    = title,
+            OutputWorkspace     = splitwsname,
+            LogName             = samplelog,
+            FastLog             = fastLog,
+            InformationWorkspace = splitinfowsname, **kwargs)
 
         try:
             self.splitWksp(splitws, infows)
@@ -1102,17 +1102,17 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_outwsname.setText(outbasewsname)
 
         api.FilterEvents(
-                InputWorkspace          = self._dataWS,
-                SplitterWorkspace       = splitws,
-                InformationWorkspace    = infows,
-                OutputWorkspaceBaseName = outbasewsname,
-                GroupWorkspaces         = dogroupws,
-                FilterByPulseTime       = filterbypulse,
-                CorrectionToSample      = corr2sample,
-                SpectrumWithoutDetector = how2skip,
-                SplitSampleLogs         = splitsamplelog,
-                OutputWorkspaceIndexedFrom1     = startfrom1,
-                OutputTOFCorrectionWorkspace    = 'TOFCorrTable', **kwargs)
+            InputWorkspace          = self._dataWS,
+            SplitterWorkspace       = splitws,
+            InformationWorkspace    = infows,
+            OutputWorkspaceBaseName = outbasewsname,
+            GroupWorkspaces         = dogroupws,
+            FilterByPulseTime       = filterbypulse,
+            CorrectionToSample      = corr2sample,
+            SpectrumWithoutDetector = how2skip,
+            SplitSampleLogs         = splitsamplelog,
+            OutputWorkspaceIndexedFrom1     = startfrom1,
+            OutputTOFCorrectionWorkspace    = 'TOFCorrTable', **kwargs)
 
         return
 

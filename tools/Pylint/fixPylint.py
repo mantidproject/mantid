@@ -82,7 +82,7 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
                                      epilog=choices_help,
                                      description='Fix some pylint warnings. It is STRONGLY RECOMMENDED to '+
-                                                 'rerun the pylintcheck between fixes')
+                                     'rerun the pylintcheck between fixes')
     parser.add_argument('-fix','--fix', default='simple',
                         choices=choices,
                         help='Select things to fix (default: simple). \nSee the choices options below.')

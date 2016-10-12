@@ -91,8 +91,8 @@ def build_xml_form(doi, relationships, creator_name_list, version_str):
     root.set('xmlns',              'http://datacite.org/schema/kernel-3')
     root.set('xmlns:xsi',          'http://www.w3.org/2001/XMLSchema-instance')
     root.set('xsi:schemaLocation', 'http://datacite.org/schema/kernel-3 ht' +
-                                   'tp://schema.datacite.org/meta/kernel-3' +
-                                   '/metadata.xsd')
+             'tp://schema.datacite.org/meta/kernel-3' +
+             '/metadata.xsd')
 
     # "The identifier is a unique string that identifies a resource." In our
     # case, the actual DOI. "Format should be '10.1234/foo'."
@@ -555,13 +555,13 @@ if __name__ == "__main__":
         '--main',
         action='store_true',
         help='Create the "main" DOI for Mantid.  Once it is created, this ' +
-             'will only have to run again if it needs to be updated.'
+        'will only have to run again if it needs to be updated.'
     )
     parser.add_argument(
         '--delete',
         action='store_true',
         help='Delete ("make inactive") the DOI metadata with the given ' +
-             'details.  Note that this does NOT delete the DOI.'
+        'details.  Note that this does NOT delete the DOI.'
     )
 
     run(parser.parse_args())

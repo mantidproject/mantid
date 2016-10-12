@@ -59,7 +59,8 @@ class BASISAutoReductionTest(stresstesting.MantidStressTest):
         CorrectKiKf(InputWorkspace=autows, OutputWorkspace=autows,EMode='Indirect')
 
         Rebin(InputWorkspace=autows, OutputWorkspace=autows, Params='-0.12,0.0004,0.12')
-                #GroupDetectors(InputWorkspace=autows, OutputWorkspace=autows, MapFile='/SNS/BSS/shared/autoreduce/BASIS_Grouping.xml', Behaviour='Sum')
+                #GroupDetectors(InputWorkspace=autows, OutputWorkspace=autows, MapFile='/SNS/BSS/shared/autoreduce/BASIS_Grouping.xml',
+                #Behaviour='Sum')
         SofQW3(InputWorkspace=autows, OutputWorkspace=autows+'_sqw', QAxisBinning='0.2,0.2,2.0', EMode='Indirect', EFixed='2.082')
                 #SaveDaveGrp(Filename=dave_grp_filename, InputWorkspace=autows+'_sqw', ToMicroEV=True)
                 #SaveNexus(Filename="basis_auto_sqw.nxs", InputWorkspace=autows+'_sqw')

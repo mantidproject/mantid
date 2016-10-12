@@ -52,7 +52,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         self.declareProperty(FileProperty('CalFile', '', action=FileAction.OptionalLoad),
                              doc='Filename of the .cal file to use in the [[AlignDetectors]] and '+
-                                 '[[DiffractionFocussing]] child algorithms.')
+                             '[[DiffractionFocussing]] child algorithms.')
 
         self.declareProperty(name='SumFiles', defaultValue=False,
                              doc='Enabled to sum spectra from each input file.')

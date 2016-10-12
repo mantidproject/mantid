@@ -67,7 +67,7 @@ def load_monitors(self, property_manager):
         alg_props = {"Filename": filename,
                      "OutputWorkspace": output_ws,
                      "ReductionProperties": property_manager_name,
-                     }
+                    }
         if beam_center_x is not None and beam_center_y is not None:
             alg_props["BeamCenterX"] = beam_center_x
             alg_props["BeamCenterY"] = beam_center_y
@@ -119,7 +119,7 @@ def load_monitors(self, property_manager):
     alg = _execute("FindDetectorsInShape",
                    {"Workspace": sample_ws,
                     "ShapeXML": cylXML
-                    })
+                   })
     det_list = alg.getProperty("DetectorList").value
     first_det = det_list[0]
 
@@ -139,7 +139,7 @@ def load_monitors(self, property_manager):
                            {"InputWorkspace": workspace,
                             "OutputWorkspace": workspace,
                             "ReductionProperties": property_manager_name
-                            },
+                           },
                            is_name=False)
             msg = ''
             if alg.existsProperty("OutputMessage"):
@@ -165,19 +165,19 @@ def load_monitors(self, property_manager):
                        {"InputWorkspace": empty_ws,
                         "OutputWorkspace": '__reference_binning',
                         "WorkspaceIndex": det_list[0]
-                        })
+                       })
         reference_ws = alg.getProperty("OutputWorkspace").value
         alg = _execute("RebinToWorkspace",
                        {"WorkspaceToRebin": empty_ws,
                         "WorkspaceToMatch": reference_ws,
                         "OutputWorkspace": empty_ws_name
-                        })
+                       })
         empty_ws = alg.getProperty("OutputWorkspace").value
         alg = _execute("RebinToWorkspace",
                        {"WorkspaceToRebin": sample_ws,
                         "WorkspaceToMatch": reference_ws,
                         "OutputWorkspace": sample_ws_name
-                        })
+                       })
         sample_ws = alg.getProperty("OutputWorkspace").value
 
     alg = _execute("GroupDetectors",
@@ -185,7 +185,7 @@ def load_monitors(self, property_manager):
                     "OutputWorkspace": empty_mon_ws_name,
                     "DetectorList": det_list,
                     "KeepUngroupedSpectra": True
-                    })
+                   })
     empty_mon_ws = alg.getProperty("OutputWorkspace").value
 
     alg = _execute("GroupDetectors",
@@ -193,26 +193,26 @@ def load_monitors(self, property_manager):
                     "OutputWorkspace": sample_mon_ws_name,
                     "DetectorList": det_list,
                     "KeepUngroupedSpectra": True
-                    })
+                   })
     sample_mon_ws = alg.getProperty("OutputWorkspace").value
 
     alg = _execute("ConvertToMatrixWorkspace",
                    {"InputWorkspace": empty_mon_ws,
                     "OutputWorkspace": empty_mon_ws_name
-                    })
+                   })
     empty_mon_ws = alg.getProperty("OutputWorkspace").value
 
     alg = _execute("ConvertToMatrixWorkspace",
                    {"InputWorkspace": sample_mon_ws,
                     "OutputWorkspace": sample_mon_ws_name
-                    })
+                   })
     sample_mon_ws = alg.getProperty("OutputWorkspace").value
 
     alg = _execute("RebinToWorkspace",
                    {"WorkspaceToRebin": empty_mon_ws,
                     "WorkspaceToMatch": sample_mon_ws,
                     "OutputWorkspace": empty_mon_ws_name
-                    })
+                   })
     empty_mon_ws = alg.getProperty("OutputWorkspace").value
 
     return sample_mon_ws, empty_mon_ws, first_det, output_str, monitor_det_ID
@@ -288,7 +288,7 @@ def apply_transmission(self, workspace, trans_workspace):
                     "WorkspaceToMatch": workspace,
                     "OutputWorkspace": '__trans_rebin',
                     "PreserveEvents": False
-                    })
+                   })
     rebinned_ws = alg.getProperty("OutputWorkspace").value
 
     # Apply angle-dependent transmission correction using the zero-angle transmission
@@ -299,7 +299,7 @@ def apply_transmission(self, workspace, trans_workspace):
                     "TransmissionWorkspace": rebinned_ws,
                     "OutputWorkspace": '__corrected_output',
                     "ThetaDependent": theta_dependent
-                    })
+                   })
     output_ws = alg.getProperty("OutputWorkspace").value
     return output_ws
 
@@ -328,7 +328,7 @@ def subtract_dark_current(self, workspace, property_manager):
             alg_props = {"InputWorkspace": ws,
                          "PersistentCorrection": False,
                          "ReductionProperties": property_manager_name
-                         }
+                        }
             if dark_current_file is not None:
                 alg_props["Filename"] = dark_current_file
 

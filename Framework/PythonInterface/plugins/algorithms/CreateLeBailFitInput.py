@@ -92,9 +92,9 @@ class CreateLeBailFitInput(PythonAlgorithm):
         hklwsname = self.getPropertyValue("BraggPeakParameterWorkspace")
 
         api.LoadFullprofFile(
-                Filename=hklfilename,
-                PeakParameterWorkspace = hklwsname,
-                OutputWorkspace = dummywsname)
+            Filename=hklfilename,
+            PeakParameterWorkspace = hklwsname,
+            OutputWorkspace = dummywsname)
 
         hklws = AnalysisDataService.retrieve(hklwsname)
         if hklws is None:

@@ -37,16 +37,16 @@ class AbsoluteUnitsWidget(BaseWidget):
     def initialize_content(self):
         # Constraints
         for widget in [
-                       self._content.ei_edit,
-                       self._content.van_mass_edit,
-                       self._content.sample_mass_edit,
-                       self._content.sample_rmm_edit,
-                       self._content.median_test_high_edit,
-                       self._content.median_test_low_edit,
-                       self._content.median_test_out_high_edit,
-                       self._content.median_test_out_low_edit,
-                       self._content.errorbar_crit_edit,
-                       ]:
+                self._content.ei_edit,
+                self._content.van_mass_edit,
+                self._content.sample_mass_edit,
+                self._content.sample_rmm_edit,
+                self._content.median_test_high_edit,
+                self._content.median_test_low_edit,
+                self._content.median_test_out_high_edit,
+                self._content.median_test_out_low_edit,
+                self._content.errorbar_crit_edit,
+        ]:
 
             dvp = QtGui.QDoubleValidator(widget)
             dvp.setBottom(0.0)

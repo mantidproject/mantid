@@ -148,7 +148,7 @@ class StretchedExpFT(IFunction1D):
         dp = {'Tau': 1.0,  # change by 1ps
               'Beta': 0.01,
               'Centre': 0.0001  # change by 0.1 micro-eV
-              }
+             }
         for name in dp.keys():
             pp = copy.copy(p)
             pp[name] += dp[name]

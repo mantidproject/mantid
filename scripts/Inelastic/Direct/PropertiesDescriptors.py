@@ -1012,7 +1012,7 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
             return (False,2,'monovan integration range limits = [{0}:{1}] are wrong'.format(the_range[0],the_range[1]))
         if the_range[0] < -100 * ei or the_range[0] > 100 * ei:
             return (False,1,'monovan integration is suspiciously wide: [{0}:{1}]. This may be incorrect'
-                            .format(the_range[0],the_range[1]))
+                    .format(the_range[0],the_range[1]))
         return (True,0,'')
 #end MonovanIntegrationRange
 

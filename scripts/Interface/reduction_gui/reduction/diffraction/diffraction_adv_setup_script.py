@@ -213,7 +213,8 @@ class AdvancedSetupScript(BaseScriptElement):
                                                    AdvancedSetupScript.vanadiumpeaktol)
 
             self.vanadiumsmoothparams = BaseScriptElement.getStringElement(instrument_dom,
-                                                                           "vanadiumsmoothparams", default=AdvancedSetupScript.vanadiumsmoothparams)
+                                                                           "vanadiumsmoothparams",
+                                                                           default=AdvancedSetupScript.vanadiumsmoothparams)
 
             self.extension = BaseScriptElement.getStringElement(instrument_dom,
                                                                 "extension", default=AdvancedSetupScript.extension)

@@ -85,7 +85,7 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt',
                 'Vesuvio_IP_file_test.par',
                 'IP0004_10.par'
-                ]
+               ]
 
 EXPECTED_EXT = '.expected'
 

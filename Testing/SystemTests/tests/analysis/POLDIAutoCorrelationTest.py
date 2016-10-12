@@ -34,7 +34,8 @@ class POLDIAutoCorrelationTest(stresstesting.MantidStressTest):
 
             self.assertEqual(calculatedData.shape[0], referenceData.shape[0],
                              "Number of d-values does not match for %s (is: %i, should: %i)" % (dataFile,
-                                                                                                calculatedData.shape[0], referenceData.shape[0]))
+                                                                                                calculatedData.shape[0],
+                                                                                                referenceData.shape[0]))
 
             CreateWorkspace(referenceData, calculatedData, OutputWorkspace=workspaceNameTemplate)
 

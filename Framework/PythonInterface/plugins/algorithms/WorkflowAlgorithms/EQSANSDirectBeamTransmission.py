@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+#Pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
 import os
@@ -180,14 +180,14 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
                                                           "OutputWorkspace": "__sample_mon_"+suffix,
                                                           "Params": rebin_params,
                                                           "PreserveEvents": False
-                                                          })
+                                                         })
                 sample_ws = alg.getProperty("OutputWorkspace").value
                 alg = TransmissionUtils.simple_algorithm("Rebin",
                                                          {"InputWorkspace": empty_mon_ws,
                                                           "OutputWorkspace": "__empty_mon_"+suffix,
                                                           "Params": rebin_params,
                                                           "PreserveEvents": False
-                                                          })
+                                                         })
                 empty_ws = alg.getProperty("OutputWorkspace").value
                 trans_ws, raw_ws = TransmissionUtils.calculate_transmission(self,
                                                                             sample_ws,
@@ -199,14 +199,14 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
                                                           "WorkspaceToMatch": workspace,
                                                           "OutputWorkspace": "__transmission_"+suffix,
                                                           "PreserveEvents": False
-                                                          })
+                                                         })
                 trans_ws = alg.getProperty("OutputWorkspace").value
                 alg = TransmissionUtils.simple_algorithm("RebinToWorkspace",
                                                          {"WorkspaceToRebin": raw_ws,
                                                           "WorkspaceToMatch": workspace,
                                                           "OutputWorkspace": "__transmission_unfitted_"+suffix,
                                                           "PreserveEvents": False
-                                                          })
+                                                         })
                 raw_ws = alg.getProperty("OutputWorkspace").value
 
                 return trans_ws, raw_ws
@@ -221,7 +221,7 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
                                                      {"LHSWorkspace": trans_frame_1,
                                                       "RHSWorkspace": trans_frame_2,
                                                       "OutputWorkspace": "__transmission",
-                                                      })
+                                                     })
             trans_ws = alg.getProperty("OutputWorkspace").value
             self.setPropertyValue("TransmissionWorkspace", trans_ws_name)
             self.setProperty("TransmissionWorkspace", trans_ws)
@@ -230,7 +230,7 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
                                                      {"LHSWorkspace": raw_frame_1,
                                                       "RHSWorkspace": raw_frame_2,
                                                       "OutputWorkspace": "__transmission_unfitted",
-                                                      })
+                                                     })
             raw_ws = alg.getProperty("OutputWorkspace").value
             raw_ws_name = "__transmission_raw_%s" % input_ws_name
             self.setPropertyValue("RawTransmissionWorkspace", raw_ws_name)

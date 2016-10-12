@@ -495,7 +495,7 @@ class DataReflWidget(BaseWidget):
                     f.write(content)
                     f.close()
                     QtGui.QMessageBox.information(self, "Automated reduction script saved",
-                                                        "The automated reduction script has been updated")
+                                                  "The automated reduction script has been updated")
                 except IOError, fileError:
                     _report_error("Failed to open file: " + fileError.filename())
             else:

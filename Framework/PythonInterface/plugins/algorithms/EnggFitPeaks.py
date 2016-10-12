@@ -501,7 +501,7 @@ class EnggFitPeaks(PythonAlgorithm):
                 (0 != fitted_params['X0_Err'] and 0 != fitted_params['A_Err'] and
                  0 != fitted_params['B_Err'] and 0 != fitted_params['S_Err'] and
                  0 != fitted_params['I_Err'])
-                )
+               )
 
     def _add_parameters_to_map(self, param_map, param_table):
         """

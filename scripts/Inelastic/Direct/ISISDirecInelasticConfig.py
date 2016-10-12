@@ -600,13 +600,13 @@ class MantidConfigDirectInelastic(object):
         if len(source) == 0:
             raise InvalidArgument(
                 '"replace" field of {0} file for instrument {1} has to contain attribute "var" and its value'
-                    .format(self._user_files_descr, self._user.instrument))
+                .format(self._user_files_descr, self._user.instrument))
         # what should be placed instead of the replacement
         dest = repl_info.getAttribute("by_var")
         if len(dest) == 0:
             raise InvalidArgument(
                 '"replace" field of {0} file for instrument {1} has to contain attribute "by_var" and its value'
-                    .format(self._user_files_descr, self._user.instrument))
+                .format(self._user_files_descr, self._user.instrument))
 
         # replace use-specific variables by their values
         if '$' in dest:

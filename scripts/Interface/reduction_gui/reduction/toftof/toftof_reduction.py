@@ -350,19 +350,19 @@ class TOFTOFScriptElement(BaseScriptElement):
             if self.vanRuns:
                 wsVanNorm = wsVan + 'Norm'
                 l("{} = Scale({}, 1.0 / float({}), 'Multiply')"
-                    .format(wsVanNorm, wsVan, get_time(wsVan)))
+                  .format(wsVanNorm, wsVan, get_time(wsVan)))
 
             if self.ecRuns:
                 wsECNorm = wsEC + 'Norm'
                 l("{} = Scale({}, 1.0 / float({}), 'Multiply')"
-                    .format(wsECNorm, wsEC, get_time(wsEC)))
+                  .format(wsECNorm, wsEC, get_time(wsEC)))
 
             l("names = []")
             l("for ws in {}:" .format(gDataRuns))
             l("    name = ws.getName() + 'Norm'")
             l("    names.append(name)")
             l("    Scale(ws, 1.0 / float({}), 'Multiply', OutputWorkspace=name)"
-                .format(get_time('ws')))
+              .format(get_time('ws')))
             l()
             l("{} = GroupWorkspaces(names)" .format(gDataNorm))
 
@@ -382,7 +382,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("# subtract empty can")
             l("ecFactor = {:.3f}" .format(self.ecFactor))
             l("{} = Scale({}, Factor=ecFactor, Operation='Multiply')"
-                .format(scaledEC, wsECNorm))
+              .format(scaledEC, wsECNorm))
             l("{} = Minus({}, {})" .format(gDataSubEC, gDataNorm, scaledEC))
             if self.subtractECVan:
                 wsVanSubEC = wsVan + 'SubEC'
@@ -395,7 +395,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         if self.vanRuns:
             wsVanNorm = wsVanSubEC if self.subtractECVan else wsVanNorm
             l("{} = GroupWorkspaces({}list({}.getNames()))"
-                .format(gData, group_list([wsVanNorm], ' + '), gDataSource))
+              .format(gData, group_list([wsVanNorm], ' + '), gDataSource))
         else:
             l("{} = CloneWorkspace({})" .format(gData, gDataSource))
         l()
@@ -415,7 +415,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         gDataCleanFrame = gData + 'CleanFrame'
         l("# remove half-filled time bins (clean frame)")
         l("{} = TOFTOFCropWorkspace({})"
-            .format(gDataCleanFrame, gDataCorr if self.vanRuns else gData))
+          .format(gDataCleanFrame, gDataCorr if self.vanRuns else gData))
         l()
 
         gData2 = gData + 'TofCorr'
@@ -437,7 +437,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         gDataDeltaE = gData + 'DeltaE'
         l("# convert units")
         l("{} = ConvertUnits({}, Target='DeltaE', EMode='Direct', EFixed=Ei)"
-            .format(gDataDeltaE, gData2))
+          .format(gDataDeltaE, gData2))
         l("ConvertToDistribution({})" .format(gDataDeltaE))
         l()
 
@@ -456,7 +456,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             gDataBinE = gData + 'BinE'
             l("# energy binning")
             l("rebinEnergy = '{:.3f}, {:.3f}, {:.3f}'"
-                .format(self.binEstart, self.binEstep, self.binEend))
+              .format(self.binEstart, self.binEstep, self.binEend))
             l("{} = Rebin({}, Params=rebinEnergy)" .format(gDataBinE, gLast))
             l()
             gLast = gDataBinE
@@ -465,23 +465,23 @@ class TOFTOFScriptElement(BaseScriptElement):
             gDataBinQ = gData + 'SQW'
             l("# calculate momentum transfer Q for sample data")
             l("rebinQ = '{:.3f}, {:.3f}, {:.3f}'"
-                .format(self.binQstart, self.binQstep, self.binQend))
+              .format(self.binQstart, self.binQstep, self.binQend))
             l("{} = SofQW3({}, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei)"
-                .format(gDataBinQ, gLast))
+              .format(gDataBinQ, gLast))
             l()
 
         l("# make nice workspace names")
         l("for ws in {}:" .format(gDataS))
         l("    RenameWorkspace(ws, OutputWorkspace='{}_S_' + ws.getComment())"
-            .format(self.prefix))
+          .format(self.prefix))
         if self.binEon:
             l("for ws in {}:" .format(gDataBinE))
             l("    RenameWorkspace(ws, OutputWorkspace='{}_E_' + ws.getComment())"
-                .format(self.prefix))
+              .format(self.prefix))
         if self.binQon:
             l("for ws in {}:" .format(gDataBinQ))
             l("    RenameWorkspace(ws, OutputWorkspace='{}_SQW_' + ws.getComment())"
-                .format(self.prefix))
+              .format(self.prefix))
 
         return script[0]
 
