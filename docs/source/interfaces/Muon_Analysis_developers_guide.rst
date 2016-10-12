@@ -148,7 +148,88 @@ It will also keep any "plot guesses", which are recognised by the name ``Composi
 
 Fitting data
 ^^^^^^^^^^^^
-(fitting tab - architecture and testing)
+
+The Muon Analysis fitting ("Data Analysis") tab was updated in Mantid 3.8 to support multi-dataset fitting.
+Its features are described in the user documentation; this section concentrates on its architecture.
+
+Prior to Mantid 3.8, this tab contained one thing: a ``FitPropertyBrowser`` (actually a ``MuonFitPropertyBrowser``).
+
+.. image::  ../images/MuonAnalysisDataAnalysis.png
+   :align: center
+
+This is still there, but only the bottom section ("Settings") and the three buttons at the top are visible.
+The "Function" and "Data" sections are hidden.
+In their place are two new widgets - this is achieved by inserting an extra ``Layout`` into the muon fit property browser and adding the widgets to this layout.
+
+Since the ``MuonFitPropertyBrowser`` is all still there underneath, this is how "Compatibility mode" works - an option on the Settings tab that hides the new widgets and shows the previously hidden sections of the fit browser.
+
+This tab can be thought of as something like an MVP (model-view-presenter) architecture.
+Of course, it's not *properly* MVP, as that would have required a rewrite - the focus was on reusing as much existing code as possible!
+
+.. topic:: "MVP-like" design
+
+    .. image:: ../images/MuonAnalysisDevDocs/mvp_muon.png
+       :align: center
+
+    **Model:** the ``MuonFitPropertyBrowser``. Still performs the actual fit, keeps track of the workspace(s) fitted, and raises events (Qt signals) to notify the presenters.
+
+    This model is shared between two presenter/view pairs, one to deal with the fitting function and one to deal with the data that will be fitted.
+
+    It inherits from two new abstract base classes (i.e. implements two interfaces), so that it can be mocked when testing the two presenters.
+
+    **Views:** 
+
+    - Fit function: ``FunctionBrowser`` - the same one used in the general multi-fitting interface. It is reused here, with the only change being to restrict the range of functions shown to only those that are of interest to muon scientists.
+
+      The ``FunctionBrowser``, as a pre-existing Mantid widget, is not a very humble view and has some logic inside it which unfortunately cannot be tested.
+
+    - Data: a ``MuonFitDataSelector``, a new widget written as a humble view. It does as little as possible and leaves all the logic to the presenter.
+
+    Both these views inherit from abstract base classes - this is for mocking purposes when testing the presenters.
+
+    **Presenters:**
+
+    - Fit function: ``MuonAnalysisFitFunctionPresenter``
+
+    - Data: ``MuonAnalysisFitDataPresenter``
+
+    Both presenters have unit tests. The relevant views, and relevant part of the model, are mocked out for this purpose.
+
+
+Fit function
+############
+
+The actual function that is going to be fitted to the data is stored in the ``MuonFitPropertyBrowser`` (model) and, after the fit, this function will have the correct parameter values.
+
+It is therefore the job of the presenter to 
+
+- Update the model's function when the user changes the function in the view
+- Update the view's displayed function parameters when the fit has finished.
+
+There are also some signals that come from the data presenter, when the user has used the ``<<`` or ``>>`` buttons to change datasets, or changed the number of workspaces to fit. In these cases the ``FunctionBrowser`` must be updated with this information, to set the number of datasets or to change which dataset's parameters are being displayed.
+
+Data
+####
+
+When the user changes something in the ``MuonFitDataSelector`` view, for example the runs to fit, selected groups/periods, fit type (single/co-add/simultaneous) or simultaneous fit label, an event is raised to notify the presenter.
+This gets the relevant information from the view and updates the model with it.
+
+(In a couple of cases, the signal actually goes via ``MuonAnalysis`` itself - because the grouping and plot type may have been changed by the user in that GUI, and so they need to be updated too).
+
+If the user's chosen runs/groups/periods include datasets that haven't had workspaces created for them yet, they will be created at that point, rather than just before the fit.
+Note that, when "Fit raw data" has been ticked, two workspaces must be created per dataset - one binned and one raw.
+The data presenter uses a ``MuonAnalysisDataLoader`` (see earlier) to create the analysis workspaces.
+
+The case where the user updates the fitting range by dragging lines on the graph is also dealt with by the data presenter.
+
+When a new dataset is loaded on the Home tab, this assigns a new "first run".
+(Intended use case is that the first run will always be the one specified on the Home tab).
+The presenter therefore updates the view's selected group/period in this case.
+
+When a fit is finished, the data presenter is notified so that it can process the results.
+This is only relevant in the case of a simultaneous fit, because the :ref:`algm-Fit` algorithm produces output in a very different form to its regular output format.
+The presenter reorganises the output workspaces so that they are in the same format as they would have been for a regular fit - and then they can be easily read by the "Results table" tab.
+
 
 Generating results tables
 ^^^^^^^^^^^^^^^^^^^^^^^^^
