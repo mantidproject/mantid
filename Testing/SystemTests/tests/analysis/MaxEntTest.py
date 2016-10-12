@@ -2,6 +2,7 @@
 import stresstesting
 from mantid.simpleapi import *
 
+
 class MaxEntTest(stresstesting.MantidStressTest):
     '''Tests the MaxEnt algorithm on a MUSR workspace'''
 

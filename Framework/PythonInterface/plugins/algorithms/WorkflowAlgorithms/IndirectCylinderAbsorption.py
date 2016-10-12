@@ -6,6 +6,8 @@ from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspace
 from mantid.kernel import StringMandatoryValidator, Direction, logger, FloatBoundedValidator, IntBoundedValidator
 
 #pylint: disable=too-many-instance-attributes
+
+
 class IndirectCylinderAbsorption(DataProcessorAlgorithm):
 
     _sample_ws_name = None
@@ -24,14 +26,11 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
     _ass_ws = None
     _acc_ws = None
 
-
     def category(self):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
-
     def summary(self):
         return "Calculates indirect absorption corrections for a cylinder sample shape."
-
 
     def PyInit(self):
         # Sample options
@@ -219,7 +218,6 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
         else:
             self._ass_ws = self._abs_ws + '_ass'
             self._acc_ws = self._abs_ws + '_acc'
-
 
     def validateInputs(self):
         """

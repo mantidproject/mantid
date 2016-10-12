@@ -3,6 +3,7 @@ import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
 
+
 class LOQTransFitWorkspace2D(stresstesting.MantidStressTest):
     """
         Tests the SANS interface commands TransFit() and TransWorkspace(). Also tests

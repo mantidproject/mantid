@@ -11,15 +11,14 @@ from mantid import logger
 import os.path
 import numpy as np
 
+
 class SofQWMoments(DataProcessorAlgorithm):
 
     def category(self):
         return "Workflow\\MIDAS"
 
-
     def summary (self):
         return "Calculates the nth moment of y(q,w)"
-
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("Sample", "", Direction.Input),

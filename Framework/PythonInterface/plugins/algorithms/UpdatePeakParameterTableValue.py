@@ -7,6 +7,7 @@ import mantid.api
 import mantid.kernel
 import mantid.simpleapi
 
+
 class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
     """ Class to generate grouping file
     """
@@ -35,7 +36,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
 
         colchoices = ["Value", "FitOrTie", "Min", "Max", "StepSize"]
         self.declareProperty("Column", "Value", mantid.kernel.StringListValidator(colchoices),
-                             "Column name of the cell to have value updated.  Choices include 'FitOrTie', "+\
+                             "Column name of the cell to have value updated.  Choices include 'FitOrTie', "+
                              "'Max', 'Min', 'StepSize' and 'Value'")
 
         rowprop = mantid.kernel.IntArrayProperty("Rows", [])
@@ -82,8 +83,8 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         if colname in colnamedict:
             icolumn = colnamedict[colname]
         else:
-            raise NotImplementedError("Column name %s does not exist in TableWorkspace %s"\
-                    % (colname, tablews.name()))
+            raise NotImplementedError("Column name %s does not exist in TableWorkspace %s"
+                                      % (colname, tablews.name()))
 
         # 3. Set value
         if colname in ["FitOrTie", "Name"]:

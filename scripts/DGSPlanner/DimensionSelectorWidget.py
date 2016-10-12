@@ -18,6 +18,7 @@ def returnValid(validity,teststring,pos):
 class EmptyOrDoubleValidator(QtGui.QValidator):
     def __init__(self, dummy_parent):
         super(EmptyOrDoubleValidator,self).__init__()
+
     def validate(self,teststring, pos):
         if len(str(teststring))==0:
             return returnValid(QtGui.QValidator.Acceptable,teststring,pos)
@@ -32,6 +33,7 @@ class EmptyOrDoubleValidator(QtGui.QValidator):
                     return returnValid(QtGui.QValidator.Intermediate,teststring,pos)
                 except ValueError:
                     return returnValid(QtGui.QValidator.Invalid,teststring,pos)
+
 
 class V3DValidator(QtGui.QValidator):
     def __init__(self, dummy_parent):
@@ -57,11 +59,13 @@ class V3DValidator(QtGui.QValidator):
                     return returnValid(QtGui.QValidator.Invalid,teststring,pos)
         return returnValid(QtGui.QValidator.Intermediate,teststring,pos)
 
+
 def FloatToQString(value):
     if numpy.isfinite(value):
         return QString(format(value,'.3f'))
     else:
         return QString("")
+
 
 def translation(number,character):
     if number==0:
@@ -75,6 +79,7 @@ def translation(number,character):
 
 class DimensionSelectorWidget(QtGui.QWidget):
     changed=QtCore.pyqtSignal(dict)
+
     def __init__(self,parent=None):
         # pylint: disable=unused-argument,super-on-old-class
         super(DimensionSelectorWidget,self).__init__()
@@ -326,7 +331,6 @@ class DimensionSelectorWidget(QtGui.QWidget):
         self._comboDim3.setCurrentIndex(2)
         self._comboDim4.setCurrentIndex(3)
         self.inhibitSignal=False
-
 
     def updateChanges(self):
         d=dict()

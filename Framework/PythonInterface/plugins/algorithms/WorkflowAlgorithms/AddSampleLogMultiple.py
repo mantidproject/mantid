@@ -11,10 +11,8 @@ class AddSampleLogMultiple(PythonAlgorithm):
     def category(self):
         return 'DataHandling\\Logs'
 
-
     def summary(self):
         return 'Add multiple sample logs to a workspace'
-
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('Workspace', '', direction=Direction.InOut),
@@ -31,7 +29,6 @@ class AddSampleLogMultiple(PythonAlgorithm):
 
         self.declareProperty('ParseType', True,
                              doc='Determine the value type by parsing the string')
-
 
     def PyExec(self):
         workspace = self.getPropertyValue('Workspace')
@@ -69,7 +66,6 @@ class AddSampleLogMultiple(PythonAlgorithm):
             alg.setProperty('LogText', value)
             alg.setProperty('LogUnit', unit)
             alg.execute()
-
 
     def validateInputs(self):
         issues = dict()

@@ -16,6 +16,7 @@ from mantid import logger
 # Mass profile base class
 # --------------------------------------------------------------------------------
 
+
 class MassProfile(object):
 
     cfunction = None
@@ -112,6 +113,7 @@ class MassProfile(object):
 # Gaussian profile
 # --------------------------------------------------------------------------------
 
+
 class GaussianMassProfile(MassProfile):
 
     cfunction = "GaussianComptonProfile"
@@ -178,6 +180,7 @@ class GaussianMassProfile(MassProfile):
 # --------------------------------------------------------------------------------
 # MultivariateGaussian profile
 # --------------------------------------------------------------------------------
+
 
 class MultivariateGaussianMassProfile(MassProfile):
 
@@ -250,9 +253,9 @@ class MultivariateGaussianMassProfile(MassProfile):
         :param param_prefix: An optional prefix for the parameter name
         """
         constraints = "{0}Intensity > 0.0,".format(param_prefix) \
-                    + "{0}SigmaX > 0.0,".format(param_prefix) \
-                    + "{0}SigmaY > 0.0,".format(param_prefix) \
-                    + "{0}SigmaZ > 0.0".format(param_prefix)
+            + "{0}SigmaX > 0.0,".format(param_prefix) \
+            + "{0}SigmaY > 0.0,".format(param_prefix) \
+            + "{0}SigmaZ > 0.0".format(param_prefix)
         return constraints
 
     def create_ties_str(self, param_prefix=""):
@@ -262,6 +265,7 @@ class MultivariateGaussianMassProfile(MassProfile):
 # --------------------------------------------------------------------------------
 # GramCharlier profile
 # --------------------------------------------------------------------------------
+
 
 class GramCharlierMassProfile(MassProfile):
 

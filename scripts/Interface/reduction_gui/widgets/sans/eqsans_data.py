@@ -7,6 +7,7 @@ from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_eqsans_sample_data
 
+
 class DataSetsWidget(BaseWidget):
     """
         Widget that presents the transmission options to the user
@@ -370,7 +371,6 @@ class DataSetsWidget(BaseWidget):
 
         self._content.bck_beam_radius_label.setEnabled(is_checked)
         self._content.bck_beam_radius_edit.setEnabled(is_checked)
-
 
     def _get_data_files(self):
         """

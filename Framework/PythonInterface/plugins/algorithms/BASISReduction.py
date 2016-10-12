@@ -30,6 +30,8 @@ REFLECTIONS_DICT = {"silicon111": {"name": "silicon111",
                                    "default_energy": 7.6368}}
 
 #pylint: disable=too-many-instance-attributes
+
+
 class BASISReduction(PythonAlgorithm):
 
     _short_inst = None
@@ -93,8 +95,7 @@ class BASISReduction(PythonAlgorithm):
 
         # Properties affected by the reflection selected
         titleReflection = "Reflection Selector"
-        available_reflections = list(REFLECTIONS_DICT.keys())
-        available_reflections.sort()  # preserve order in which they are presented
+        available_reflections = sorted(REFLECTIONS_DICT.keys())
         default_reflection = REFLECTIONS_DICT["silicon111"]
         self.declareProperty("ReflectionType", default_reflection["name"],
                              StringListValidator(available_reflections),

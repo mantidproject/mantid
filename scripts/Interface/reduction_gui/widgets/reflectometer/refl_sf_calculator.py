@@ -21,6 +21,7 @@ try:
 except:
     pass
 
+
 class DataReflSFCalculatorWidget(BaseRefWidget):
     """
         Widget that present instrument details to the user
@@ -315,8 +316,8 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
                 state.scaling_factor_file = self._summary.cfg_scaling_factor_file_name.text()
 
                 #incident medium
-                _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j))\
-                                          for j in range(self._summary.incident_medium_combobox.count())]
+                _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j))
+                                         for j in range(self._summary.incident_medium_combobox.count())]
                 _incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
 
                 _incident_medium_string = (',').join(_incident_medium_list)
@@ -430,8 +431,8 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         state_list = []
 
         #common incident medium
-        m.incident_medium_list = [self._summary.incident_medium_combobox.itemText(i)\
-                                for i in range(self._summary.incident_medium_combobox.count())]
+        m.incident_medium_list = [self._summary.incident_medium_combobox.itemText(i)
+                                  for i in range(self._summary.incident_medium_combobox.count())]
 
         m.incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
 
@@ -517,7 +518,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         """
             returns the height and units of the slit #1
         """
-        if mt != None:
+        if mt is not None:
             _h  = self.getSheight(mt, '1')
             return _h
         return None, ''
@@ -526,7 +527,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         """
             returns the height of the slit #2
         """
-        if mt != None:
+        if mt is not None:
             _h = self.getSheight(mt, '2')
             return _h
         return None
@@ -555,7 +556,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         """
             returns the width and units of the slit #1
         """
-        if mt != None:
+        if mt is not None:
             _w = self.getSwidth(mt, '1')
             return _w
         return None, ''
@@ -564,7 +565,7 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         """
             returns the width and units of the slit #2
         """
-        if mt != None:
+        if mt is not None:
             _w = self.getSwidth(mt, '2')
             return _w
         return None
@@ -596,6 +597,3 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         lambdaRequest = "%2.2f" %(_lambda_value[0])
 
         return S1H, S2H, S1W, S2W, lambdaRequest
-
-
-

@@ -19,6 +19,7 @@ except ImportError:
     logging.basicConfig()#level=logging.DEBUG)
     logger = logging.getLogger("data_cat")
 
+
 class DataType(object):
     TABLE_NAME = "datatype"
 
@@ -35,8 +36,8 @@ class DataType(object):
                             id integer primary key,
                             type_id integer,
                             dataset_id integer,
-                            foreign key(dataset_id) references %s(id))""" \
-                            % (cls.TABLE_NAME, data_set_table))
+                            foreign key(dataset_id) references %s(id))"""
+                       % (cls.TABLE_NAME, data_set_table))
 
     @classmethod
     def add(cls, dataset_id, type_id, cursor):
@@ -47,8 +48,8 @@ class DataType(object):
             raise RuntimeError("DataType got an unknown type ID: %s" % type_id)
 
         t = (type_id, dataset_id,)
-        cursor.execute("insert into %s(type_id, dataset_id) values (?,?)" \
-        % cls.TABLE_NAME, t)
+        cursor.execute("insert into %s(type_id, dataset_id) values (?,?)"
+                       % cls.TABLE_NAME, t)
 
     @classmethod
     def get_likely_type(cls, dataset_id, cursor):
@@ -58,6 +59,7 @@ class DataType(object):
         if len(rows)>1:
             return cls.DATA_TYPES[rows[len(rows)-1][0]]
         return None
+
 
 class DataSet(object):
     TABLE_NAME = "dataset"
@@ -168,6 +170,7 @@ class DataSet(object):
         t = (self.run_number, self.title, self.run_start, self.duration, self.sdd,)
         cursor.execute('insert into %s(run, title, start, duration,sdd) values (?,?,?,?,?)'%self.TABLE_NAME, t)
         return cursor.lastrowid
+
 
 class DataCatalog(object):
     """

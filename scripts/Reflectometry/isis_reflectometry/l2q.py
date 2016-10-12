@@ -3,6 +3,7 @@
 import math
 from mantid.simpleapi import *  # New API
 
+
 def l2q(ws,whichDet,theta, sample_component_name):
     '''
     call signature::call signature::
@@ -58,4 +59,3 @@ def l2q(ws,whichDet,theta, sample_component_name):
     # Now convert to momentum transfer
     IvsQ = ConvertUnits(InputWorkspace=ws,OutputWorkspace="IvsQ",Target="MomentumTransfer")
     return IvsQ
-

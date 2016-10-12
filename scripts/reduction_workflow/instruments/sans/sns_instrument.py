@@ -24,6 +24,7 @@ def get_pixel_from_coordinate(x, y, workspace):
     return [-x/pixel_size_x*1000.0 + nx_pixels/2.0-0.5,
             y/pixel_size_y*1000.0 + ny_pixels/2.0-0.5]
 
+
 def get_coordinate_from_pixel(x, y, workspace):
     """
         Returns the real-space coordinates corresponding to the
@@ -40,6 +41,7 @@ def get_coordinate_from_pixel(x, y, workspace):
 
     return [(nx_pixels/2.0-0.5-x) * pixel_size_x/1000.0,
             (y-ny_pixels/2.0+0.5) * pixel_size_y/1000.0]
+
 
 def get_masked_pixels(nx_low, nx_high, ny_low, ny_high, workspace):
     """
@@ -68,6 +70,7 @@ def get_masked_pixels(nx_low, nx_high, ny_low, ny_high, workspace):
 
     return masked_pts
 
+
 def _get_pixel_info(workspace):
     """
         Get the pixel size and number of pixels from the workspace
@@ -83,6 +86,7 @@ def _get_pixel_info(workspace):
 
     return nx_pixels, ny_pixels, pixel_size_x, pixel_size_y
 
+
 def get_detector_from_pixel(pixel_list, workspace):
     """
         Returns a list of detector IDs from a list of [x,y] pixels,
@@ -91,4 +95,3 @@ def get_detector_from_pixel(pixel_list, workspace):
     """
     nx_pixels, ny_pixels, pixel_size_x, pixel_size_y = _get_pixel_info(workspace)
     return [ ny_pixels*p[0] + p[1] for p in pixel_list ]
-

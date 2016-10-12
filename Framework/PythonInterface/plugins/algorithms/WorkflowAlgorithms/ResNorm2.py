@@ -19,10 +19,8 @@ class ResNorm(PythonAlgorithm):
     _out_ws = None
     _out_ws_table = None
 
-
     def category(self):
         return "Workflow\\MIDAS"
-
 
     def summary(self):
         return """Creates a group normalisation file by taking a resolution file
@@ -31,7 +29,6 @@ class ResNorm(PythonAlgorithm):
 
     def version(self):
         return 2
-
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('ResolutionWorkspace', '',
@@ -63,7 +60,6 @@ class ResNorm(PythonAlgorithm):
                                                      direction=Direction.Output),
                              doc='Table workspace of fit parameters')
 
-
     def validateInputs(self):
         self._get_properties()
         issues = dict()
@@ -83,7 +79,6 @@ class ResNorm(PythonAlgorithm):
 
         return issues
 
-
     def _get_properties(self):
         self._res_ws = self.getPropertyValue('ResolutionWorkspace')
         self._van_ws = self.getPropertyValue('VanadiumWorkspace')
@@ -91,7 +86,6 @@ class ResNorm(PythonAlgorithm):
         self._e_max = self.getProperty('EnergyMax').value
         self._create_output = self.getProperty('CreateOutput').value
         self._out_ws = self.getPropertyValue('OutputWorkspace')
-
 
     def PyExec(self):
         res_clone_name = '__' + self._res_ws
@@ -185,7 +179,6 @@ class ResNorm(PythonAlgorithm):
         DeleteWorkspace(norm_res_ws)
 
         return mtd[ws_name]
-
 
     #pylint: disable=too-many-arguments
     def _process_fit_params(self, fit_params, parameter_name, x_axis, x_unit, workspace_suffix=None):

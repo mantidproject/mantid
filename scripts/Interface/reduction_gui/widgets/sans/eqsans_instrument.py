@@ -9,6 +9,7 @@ from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_eqsans_instrument
 import ui.sans.ui_eqsans_info
 
+
 class SANSInstrumentWidget(BaseWidget):
     """
         Widget that present instrument details to the user

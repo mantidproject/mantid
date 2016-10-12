@@ -12,6 +12,7 @@ from mantid.simpleapi import CloneWorkspace, MaskDetectors
 class CorrectTOF (PythonAlgorithm):
     """ Apply time-of-flight correction
     """
+
     def __init__(self):
         PythonAlgorithm.__init__(self)
 

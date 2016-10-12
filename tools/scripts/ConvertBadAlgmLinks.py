@@ -1,5 +1,8 @@
 #pylint: disable=invalid-name
-import re, glob, os
+import re
+import glob
+import os
+
 
 def grep(patt,lines):
     """ finds patt in file - patt is a compiled regex
@@ -38,6 +41,3 @@ for filename in files:
             if results:
                 print filename
                 print results
-
-
-

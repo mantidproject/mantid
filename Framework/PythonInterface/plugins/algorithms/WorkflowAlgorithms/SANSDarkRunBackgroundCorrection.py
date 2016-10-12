@@ -6,6 +6,7 @@ from mantid.kernel import *
 from mantid.api import *
 import numpy as np
 
+
 class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
     def category(self):
         return "Workflow\\SANS\\UsesPropertyManager"
@@ -42,6 +43,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
                              "List of selected detector IDs of monitors to which the "
                              "correction should be applied. If empty, all monitors will "
                              "be corrected, if ApplyToMonitors has been selected.")
+
     def PyExec(self):
         # Get the workspaces
         workspace = self.getProperty("InputWorkspace").value
@@ -258,6 +260,7 @@ class DarkRunMonitorAndDetectorRemover(object):
     This class can set detecors or monitors to 0. Either all monitors can be seletected or only
     a single one.
     '''
+
     def __init__(self):
         super(DarkRunMonitorAndDetectorRemover, self).__init__()
 
@@ -417,6 +420,7 @@ class DarkRunMonitorAndDetectorRemover(object):
             counter += 1
         return dark_run
     #pylint: disable=too-many-arguments
+
     def _set_only_selected_monitors(self, dark_run, list_dataY, list_dataE,
                                     monitor_list, selected_monitors):
         '''

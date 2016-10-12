@@ -7,6 +7,7 @@ from mantid.kernel import *
 import math
 import numpy
 
+
 class USANSSimulation(PythonAlgorithm):
 
     def category(self):
@@ -20,8 +21,8 @@ class USANSSimulation(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty("TwoTheta", 0.01, "Scattering angle in degrees")
-        self.declareProperty(FloatArrayProperty("WavelengthPeaks", values=[0.72, 0.9, 1.2, 1.8, 3.6],\
-                             direction=Direction.Input), "Wavelength peaks out of the monochromator")
+        self.declareProperty(FloatArrayProperty("WavelengthPeaks", values=[0.72, 0.9, 1.2, 1.8, 3.6],
+                                                direction=Direction.Input), "Wavelength peaks out of the monochromator")
         self.declareProperty("CountTime", 1000.0, "Fake count time")
 
         # Model parameters

@@ -37,7 +37,6 @@ import plot3dwindow
 from multi_threads_helpers import *
 
 
-
 # import line for the UI python class
 from ui_MainWindow import Ui_MainWindow
 

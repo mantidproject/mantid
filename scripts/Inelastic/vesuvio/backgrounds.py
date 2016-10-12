@@ -10,6 +10,7 @@ import ast
 # Background
 # --------------------------------------------------------------------------------
 
+
 class Background(object):
     """Base class"""
     pass
@@ -17,6 +18,7 @@ class Background(object):
 # --------------------------------------------------------------------------------
 # Polynomial
 # --------------------------------------------------------------------------------
+
 
 class PolynomialBackground(object):
 
@@ -65,6 +67,7 @@ class PolynomialBackground(object):
 # --------------------------------------------------------------------------------
 # Factory function
 # --------------------------------------------------------------------------------
+
 
 def create_from_str(func_str):
     """Try and parse the function string to give the required background object
