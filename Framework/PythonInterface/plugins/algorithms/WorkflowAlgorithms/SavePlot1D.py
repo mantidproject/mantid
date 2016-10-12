@@ -1,4 +1,7 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name,redefined-builtin
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+
 import mantid
 from mantid.kernel import Direction, StringArrayProperty, StringListValidator
 import sys
@@ -159,7 +162,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 
     def toScatterAndLabels(self, wksp, spectraNames):
         data = []
-        for i in xrange(wksp.getNumberHistograms()):
+        for i in range(wksp.getNumberHistograms()):
             if len(spectraNames) > i:
                 (x, y, label) = self.getData(wksp, i, spectraNames[i])
             else:

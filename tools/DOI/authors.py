@@ -124,7 +124,15 @@ _translations = {
     'Tom Perkins'             : 'Perkins, Tom',
     'Jan Burle'               : 'Burle, Jan',
     'Duc Le'                  : 'Le, Duc',
-    'David Fairbrother'       : 'Fairbrother, David'
+    'David Fairbrother'       : 'Fairbrother, David',
+    'DavidFair'               : 'Fairbrother, David',
+    'Eltayeb Ahmed'           : 'Ahmed, Eltayeb',
+    'Dimitar Tasev'           : 'Tasev, Dimitar',
+    'Antti Soininen'          : 'Soininen, Antti',
+    'Pranav Bahuguna'         : 'Bahuguna, Pranav',
+    'Louise McCann'           : 'McCann, Louise',
+    'louisemccann'            : 'McCann, Louise',
+    'Gagik Vardanyan'         : 'Vardanyan, Gagik'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT

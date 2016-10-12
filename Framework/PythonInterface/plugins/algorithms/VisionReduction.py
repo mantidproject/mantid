@@ -1,4 +1,6 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 #from mantid.api import AlgorithmFactory
 #from mantid.simpleapi import PythonAlgorithm, WorkspaceProperty
 # from mantid.kernel import Direction
@@ -84,10 +86,10 @@ class VisionReduction(PythonAlgorithm):
 
         #*********************************************************************
 
-        PXs=range(2*128+48,2*128+80)+  \
-            range(3*128+32,3*128+96)+  \
-            range(4*128+32,4*128+96)+  \
-            range(5*128+48,5*128+80)
+        PXs=list(range(2*128+48,2*128+80))+  \
+            list(range(3*128+32,3*128+96))+  \
+            list(range(4*128+32,4*128+96))+  \
+            list(range(5*128+48,5*128+80))
         for i in BanksForward:
             offset=(i-1)*1024
             self.ListPX=self.ListPX+[j+offset for j in PXs]
@@ -117,20 +119,20 @@ class VisionReduction(PythonAlgorithm):
             CalTab[j][0]=tab[i][2]
             CalTab[j][1]=tab[i][3]
 
-        print 'Loading inelastic banks from', NexusFile
+        logger.information('Loading inelastic banks from', NexusFile)
         bank_list = ["bank%d" % i for i in range(1, 15)]
         bank_property = ",".join(bank_list)
         LoadEventNexus(Filename=NexusFile, BankName=bank_property, OutputWorkspace='__IED_T', LoadMonitors='0')
         LoadInstrument(Workspace='__IED_T',Filename='/SNS/VIS/shared/autoreduce/VISION_Definition_no_efixed.xml',RewriteSpectraMap=True)
         MaskDetectors(Workspace='__IED_T', DetectorList=MaskPX)
 
-        print "Title:", mtd['__IED_T'].getTitle()
-        print "Proton charge:", mtd['__IED_T'].getRun().getProtonCharge()
+        logger.information("Title:", mtd['__IED_T'].getTitle())
+        logger.information("Proton charge:", mtd['__IED_T'].getRun().getProtonCharge())
         if "Temperature" in mtd['__IED_T'].getTitle():
-            print "Error: Non-equilibrium runs will not be reduced"
+            logger.error("Error: Non-equilibrium runs will not be reduced")
             # sys.exit()
         if mtd['__IED_T'].getRun().getProtonCharge() < 5.0:
-            print "Error: Proton charge is too low"
+            logger.error("Error: Proton charge is too low")
             # sys.exit()
 
         NormaliseByCurrent(InputWorkspace='__IED_T',OutputWorkspace='__IED_T')

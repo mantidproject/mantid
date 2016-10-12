@@ -1,14 +1,13 @@
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
 #include "MantidDataHandling/SaveGSS.h"
 
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -48,9 +47,6 @@ bool isConstantDelta(const MantidVec &xAxis) {
   return true;
 }
 
-//---------------------------------------------------
-// Private member functions
-//---------------------------------------------------
 /** Initialise the algorithm
   */
 void SaveGSS::init() {
@@ -92,7 +88,6 @@ void SaveGSS::init() {
       "otherwise, the continous bank IDs are applied. ");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Determine the focused position for the supplied spectrum. The position
  * (l1, l2, tth) is returned via the references passed in.
  */
@@ -128,7 +123,6 @@ void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum,
           (PhysicalConstants::h * 1.e4));
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm
   */
 void SaveGSS::exec() {
@@ -186,7 +180,6 @@ void SaveGSS::exec() {
                 outputFormat);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Write GSAS file based on user-specified request
   */
 void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
@@ -330,7 +323,6 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Ensures that when a workspace group is passed as output to this workspace
    *  everything is saved to one file and the bank number increments for each
    *  group member.
@@ -357,7 +349,6 @@ void SaveGSS::setOtherProperties(IAlgorithm *alg,
     Algorithm::setOtherProperties(alg, propertyName, propertyValue, periodNum);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Write value from a RunInfo property (i.e., log) to a stream
     */
 void writeLogValue(std::ostream &os, const Run &runinfo,
@@ -481,7 +472,6 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
   os.flags(fflags);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Write a single line for bank
   */
 inline void writeBankLine(std::stringstream &out, const std::string &bintype,
@@ -494,7 +484,6 @@ inline void writeBankLine(std::stringstream &out, const std::string &bintype,
   out.flags(fflags);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Fix error if value is less than zero or infinity
   */
 inline double fixErrorValue(const double value) {
@@ -505,7 +494,6 @@ inline double fixErrorValue(const double value) {
     return value;
 }
 
-//--------------------------------------------------------------------------------------------
 /**
   */
 void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
