@@ -138,7 +138,7 @@ void FrameworkManagerImpl::UpdateInstrumentDefinitions() {
     IAlgorithm *algDownloadInstrument =
         this->createAlgorithm("DownloadInstrument");
     algDownloadInstrument->setAlgStartupLogging(false);
-    Poco::ActiveResult<bool> result = algDownloadInstrument->executeAsync();
+    algDownloadInstrument->executeAsync();
   } catch (Kernel::Exception::NotFoundError &) {
     g_log.debug() << "DowndloadInstrument algorithm is not available - cannot "
                      "update instrument definitions.\n";
@@ -150,7 +150,7 @@ void FrameworkManagerImpl::CheckIfNewerVersionIsAvailable() {
   try {
     IAlgorithm *algCheckVersion = this->createAlgorithm("CheckMantidVersion");
     algCheckVersion->setAlgStartupLogging(false);
-    Poco::ActiveResult<bool> result = algCheckVersion->executeAsync();
+    algCheckVersion->executeAsync();
   } catch (Kernel::Exception::NotFoundError &) {
     g_log.debug() << "CheckMantidVersion algorithm is not available - cannot "
                      "check if a newer version is available.\n";

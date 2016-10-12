@@ -3,8 +3,6 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -236,8 +234,7 @@ int DetectorEfficiencyVariation::doDetectorTests(
     const double signal2 = counts2->y(i)[0];
 
     // Mask out NaN and infinite
-    if (boost::math::isinf(signal1) || boost::math::isnan(signal1) ||
-        boost::math::isinf(signal2) || boost::math::isnan(signal2)) {
+    if (!std::isfinite(signal1) || !std::isfinite(signal2)) {
       maskWS->mutableY(i)[0] = deadValue;
       PARALLEL_ATOMIC
       ++numFailed;

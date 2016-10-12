@@ -13,9 +13,6 @@ Windows
 
 * IPython has been upgraded to version 3.2.1
 
-OS X
-####
-
 User Interface
 --------------
 
@@ -38,9 +35,6 @@ Plotting Improvements
   - When the option is used for a single workspace, each of the specified spectra will have its own subplot.
 * Using the Label Tool on a plot to add Sample Logs as labels now opens up a dialogue for the selected workspace with all the available Sample Logs listed and the ability to import the selected one onto the plot as a label.
 
-Algorithm Toolbox
-#################
-
 Algorithms
 ##########
 
@@ -56,13 +50,11 @@ Scripting Window
 
  - All `matplotlib` examples now work out of the box when run inside the MantidPlot scripting environment.
 
-
 Progress Reporting
 ##################
 
 - The progress reporting for algorithms has been improved, so that the progress is reported correctly when processing workspace groups or multi-period workspaces.
 - The progress reporting for algorithms has been improved, so that the progress is reported correctly when processin workspace groups or multi-period workspaces.
-
 
 Documentation
 #############
@@ -84,10 +76,16 @@ SliceViewer Improvements
 ------------------------
 * When opening the SliceViewer, it will default to showing the first two non-integrated dimensions
 * The SliceViewer now uses bin centres instead of bin edges when slicing on a histogram workspace
+* The SliceViewer will now save the state of the window to a Mantid project file.
 
 VSI Improvements
 ----------------
-* ParaView updated to version 5.1.0
+* ParaView updated to version 5.1.2
+* VSI will now save the state of the window to a Mantid project file.
+
+SpectrumViewer Improvements
+---------------------------
+* The SpectrumViewer will now save the state of the window to a Mantid project file.
 
 Multi-dataset fitting interface improvements
 --------------------------------------------

@@ -10,16 +10,19 @@
 //----------------------------------
 // Forward declarations
 //----------------------------------
+class MantidUI;
+class ApplicationWindow;
 
+// Qt
+class QBoxLayout;
+class QRadioButton;
 class QTreeWidgetItem;
 class QTreeWidget;
 class QPushButton;
-class QRadioButton;
-class MantidUI;
-class ApplicationWindow;
 class QLabel;
 class QSpinBox;
 class QLineEdit;
+class QLayout;
 
 /**
 This is the base class for the Sample Log Dialog.
@@ -85,6 +88,21 @@ protected:
   /// without overriding
   /// This function initalises everything in the tree widget
   void init();
+
+  /// Sets the dialog's window title
+  void setDialogWindowTitle(const QString &wsname);
+
+  /// Sets the QTreeWidget column names to the default values
+  void setTreeWidgetColumnNames();
+
+  /// Adds the import and close button to the layout and connects them
+  void addImportAndCloseButtonsTo(QBoxLayout *qLayout);
+
+  /// Adds the experiment info selector to the layout
+  void addExperimentInfoSelectorTo(QBoxLayout *qLayout);
+
+  /// Sets up the QTreeWidget's connections for functionality
+  void setUpTreeWidgetConnections();
 
   /// A tree widget
   QTreeWidget *m_tree;
