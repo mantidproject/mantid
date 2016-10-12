@@ -136,12 +136,16 @@ public:
     BeforeReplaceNotification(const std::string &name,
                               const boost::shared_ptr<T> obj,
                               const boost::shared_ptr<T> newObj)
-        : DataServiceNotification(name, obj), m_newObject(newObj) {}
+        : DataServiceNotification(name, obj), m_newObject(newObj),
+          m_oldObject(obj) {}
     const boost::shared_ptr<T> newObject() const {
       return m_newObject;
     } ///< Returns the pointer to the new object.
+    const boost::shared_ptr<T> oldObject() const { return m_oldObject; }
+
   private:
     boost::shared_ptr<T> m_newObject; ///< shared pointer to the object
+    boost::shared_ptr<T> m_oldObject;
   };
 
   /// AfterReplaceNotification is sent after an object is replaced in the
@@ -318,29 +322,30 @@ public:
     // Make DataService access thread-safe
     std::unique_lock<std::recursive_mutex> lock(m_mutex);
 
-    auto oldNameIter = datamap.find(oldName);
-    if (oldNameIter == datamap.end()) {
+    auto existingNameIter = datamap.find(oldName);
+    if (existingNameIter == datamap.end()) {
       lock.unlock();
       g_log.warning(" rename '" + oldName + "' cannot be found");
       return;
     }
 
-    auto oldNameWsObject = std::move(oldNameIter->second);
-    auto newNameWsIter = datamap.find(newName);
+    auto existingNameObject = std::move(existingNameIter->second);
+    auto targetNameIter = datamap.find(newName);
 
     // If we are overriding send a notification for observers
-    if (newNameWsIter != datamap.end()) {
-      auto newNameObject = newNameWsIter->second;
+    if (targetNameIter != datamap.end()) {
+      auto targetNameObject = targetNameIter->second;
+      // As we are renaming the existing name turns into the new name
       notificationCenter.postNotification(new BeforeReplaceNotification(
-          newName, newNameObject, oldNameWsObject));
+          newName, targetNameObject, existingNameObject));
     }
 
-    datamap.erase(oldNameIter);
+    datamap.erase(existingNameIter);
 
-    if (newNameWsIter != datamap.end()) {
-      newNameWsIter->second = std::move(oldNameWsObject);
+    if (targetNameIter != datamap.end()) {
+      targetNameIter->second = std::move(existingNameObject);
     } else {
-      if (!(datamap.emplace(newName, std::move(oldNameWsObject)).second)) {
+      if (!(datamap.emplace(newName, std::move(existingNameObject)).second)) {
         // should never happen
         lock.unlock();
         std::string error =

@@ -288,23 +288,20 @@ void WorkspaceGroup::workspaceBeforeReplaceHandle(
     Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice) {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
-  const std::string replacedName = notice->objectName();
+  const auto oldObject = notice->oldObject();
 
   for (auto &workspace : m_workspaces) {
-    if ((*workspace).name() == replacedName) {
+    if (workspace == oldObject) {
       workspace = notice->newObject();
       break;
     }
   }
 
-  // If the names aren't blank (as some algorithms use anonymously named
-  // workspaces as pointers) and match probably a duplicate
-  auto endIter = std::unique(
-      m_workspaces.begin(), m_workspaces.end(),
-      [](const Mantid::API::Workspace_sptr &ws1,
-         const Mantid::API::Workspace_sptr &ws2) -> bool {
-        return (!ws1->name().empty()) && (ws2->name() == ws1->name());
-      });
+  // Remove any duplicate pointers
+  auto endIter =
+      std::unique(m_workspaces.begin(), m_workspaces.end(),
+                  [](const Workspace_sptr &sptr1, const Workspace_sptr &sptr2)
+                      -> bool { return (sptr1 == sptr2); });
 
   if (endIter != m_workspaces.end()) {
     m_workspaces.resize(std::distance(m_workspaces.begin(), endIter));
