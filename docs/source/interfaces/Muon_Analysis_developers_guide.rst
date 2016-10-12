@@ -122,6 +122,22 @@ There is, however, a namespace called ``MuonAnalysisHelper`` which contains non-
 
 As noted above, data loading/processing is handled with ``MuonAnalysisDataLoader``, which is also tested.
 
+.. topic:: Workspace names in MuonAnalysis
+
+    ``MuonAnalysisHelper`` is also where the generation and parsing of workspace names is done.
+    In the Muon Analysis interface, these follow a strict format delimited by semicolons:
+    
+    ``INST00012345; Pair; long; Asym;[ 1;] #1``
+
+    1. Run label, made up of instrument and run number.
+    2. "Item type": Group (e.g. *fwd*, *bwd*) or Pair (e.g. *long*).
+    3. Name of the group or pair.
+    4. Plot type: Counts, Logs (logarithm) or Asym (asymmetry).
+    5. **Optional:** Period number, or combination like ``1+2``. If not present, data is single-period OR all periods are summed together.
+    6. Version: always ``#1`` if overwrite is on (Settings tab of interface), otherwise auto-increments.
+
+    The suffix ``_Raw`` is appended if rebinning is used, to denote the un-rebinned data.
+
 Plotting data
 ^^^^^^^^^^^^^
 
