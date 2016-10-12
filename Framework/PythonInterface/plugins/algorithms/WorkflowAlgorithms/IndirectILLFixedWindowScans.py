@@ -216,7 +216,7 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
                 else:
                     not_selected_runs.append(input_ws)
         else:
-            self.log().error('Group workspace expected as output of IndirectILLReduction.')
+            self.log().error('Group workspace expected.')
 
         # Remove any loaded non-QENS type data if was given:
         for not_selected_ws in not_selected_runs:

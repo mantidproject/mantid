@@ -13,7 +13,7 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
     _out_ws = None
     _map_file = None
     _peak_range = None
-    _intensity_scale = None
+    _intensity_scale = 1.0
 
 
 
@@ -52,7 +52,7 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         __temp = IndirectILLReduction(Run=self._input_file,
                                       MapFile=self._map_file,
                                       SumRuns=True,
-                                      UnmirrorOption=1)
+                                      UnmirrorOption=6)
 
         # Integrate within peak range
         __ws_name = __temp.getItem(0).getName()

@@ -27,11 +27,11 @@ class ILLIndirectReductionTest(stresstesting.MantidStressTest):
 
     def requiredFiles(self):
 
-        return ["136553.nxs","136554.nxs", # calibration vanadium files
-                "136555.nxs","136556.nxs","136557.nxs", # alignment vanadium files
-                "136599.nxs","136600.nxs", # background (empty can)
-                "136558.nxs","136559.nxs","136560.nxs", # sample
-                "136645.nxs","136646.nxs","136647.nxs"] # D20
+        return ["136553.nxs","136554.nxs",  # calibration vanadium files
+                "136555.nxs","136556.nxs","136557.nxs",  # alignment vanadium files
+                "136599.nxs","136600.nxs",  # background (empty can)
+                "136558.nxs","136559.nxs","136560.nxs",  # sample
+                "136645.nxs","136646.nxs","136647.nxs"]  # D20
 
     def runTest(self):
 

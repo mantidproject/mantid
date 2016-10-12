@@ -137,16 +137,17 @@ def mask_reduced_ws(ws_to_mask, xstart, xend):
         xend:     MaskBins between x[xend] and x[-1]
 
     """
-    x_values = ws_to_mask.readX(0)
+    x_values = mtd[ws_to_mask].readX(0)
 
     if xstart > 0:
         logger.debug('Mask bins smaller than {0}'.format(xstart))
-        MaskBins(InputWorkspace=ws_to_mask, OutputWorkspace=ws_to_mask, XMin=x_values[0], XMax=x_values[xstart])
+        MaskBins(InputWorkspace=mtd[ws_to_mask], OutputWorkspace=mtd[ws_to_mask], XMin=x_values[0],
+                 XMax=x_values[xstart])
     else:
         logger.debug('No masking due to x bin <= 0!: {0}'.format(xstart))
     if xend < len(x_values) - 1:
         logger.debug('Mask bins larger than {0}'.format(xend))
-        MaskBins(InputWorkspace=ws_to_mask, OutputWorkspace=ws_to_mask, XMin=x_values[xend + 1], XMax=x_values[-1])
+        MaskBins(InputWorkspace=mtd[ws_to_mask], OutputWorkspace=ws_to_mask, XMin=x_values[xend + 1], XMax=x_values[-1])
     else:
         logger.debug('No masking due to x bin >= len(x_values) - 1!: {0}'.format(xend))
 
@@ -179,7 +180,7 @@ def energy_formula(ws):
     mid = float((size - 1) / 2)
     gRun = mtd[ws].getRun()
     delta_energy = 0.
-    scale = 1000 # from micro ev to milli ev
+    scale = 1000  # from micro ev to milli ev
 
     if gRun.hasProperty('Doppler.maximum_delta_energy'):
         delta_energy = gRun.getLogData('Doppler.maximum_delta_energy').value  # max energy in micro eV
@@ -192,7 +193,7 @@ def energy_formula(ws):
         logger.warning('Doppler maximum delta energy is 0 micro eV')
 
     if delta_energy != 0:
-        formula = '(x/{0} - 1)*{1}'.format(mid, delta_energy / mid * scale)
+        formula = '(x/{0} - 1)*{1}'.format(mid, delta_energy / scale)
         logger.information('Energy transform formula: ' + formula)
     else:
         # Center the data for elastic fixed window scan, for integration over the elastic peak
@@ -231,34 +232,30 @@ def perform_unmirror(red, left, right, option):
 
     elif option == 4:
         logger.information('Unmirror 4: Shift the right according to left')
-        _bin_range = 'bin_range'
+        _bin_range = '__bin_range'
         MatchPeaks(InputWorkspace=right, OutputWorkspace=right, InputWorkspace2=left, BinRangeTable=_bin_range)
         bin_table = mtd[_bin_range].row(0)
         start_bin = bin_table['MinBin']
         end_bin = bin_table['MaxBin']
-        DeleteWorkspace(_bin_range)
 
     elif option == 5:
         logger.information('Unmirror 5: Shift the right according to right of the vanadium and sum to left')
-        _bin_range = 'bin_range'
+        _bin_range = '__bin_range'
         MatchPeaks(InputWorkspace=right, InputWorkspace2='right_van', OutputWorkspace=left, BinRangeTable=_bin_range)
         bin_table = mtd[_bin_range].row(0)
         start_bin = bin_table['MinBin']
         end_bin = bin_table['MaxBin']
-        DeleteWorkspace(_bin_range)
 
     elif option == 6:
         logger.information('Unmirror 6: Center both the right and the left')
-        _bin_range_left = 'bin_range_left'
-        _bin_range_right = 'bin_range_right'
+        _bin_range_left = '__bin_range_left'
+        _bin_range_right = '__bin_range_right'
         MatchPeaks(InputWorkspace=left, OutputWorkspace=left, BinRangeTable=_bin_range_left)
         MatchPeaks(InputWorkspace=right, OutputWorkspace=right, BinRangeTable=_bin_range_right)
         left_table = mtd[_bin_range_left].row(0)
         right_table = mtd[_bin_range_right].row(0)
         start_bin = np.max([left_table['MinBin'], right_table['MinBin']])
         end_bin = np.min([left_table['MaxBin'], right_table['MaxBin']])
-        DeleteWorkspace(_bin_range_left)
-        DeleteWorkspace(_bin_range_right)
 
     elif option == 7:
         logger.information('Unmirror 7: Shift both the right and the left according to vanadium and sum')
@@ -573,7 +570,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # load background run if needed
         if self._background_file:
             self.load_background_run()
-            self.log().information('Loaded background run: {0}'.foramt(self._background_file))
+            self.log().information('Loaded background run: {0}'.format(self._background_file))
 
         # load vanadium run if needed
         if self._unmirror_option == 5 or self._unmirror_option == 7:
@@ -650,14 +647,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             # mirror_sense 16 : one wing
             self._mirror_sense = mtd[red].getRun().getLogData('Doppler.mirror_sense').value
 
-        # Get Doppler energy
-        if mtd[red].getRun().hasProperty('Doppler.maximum_delta_energy'):
-            energy = mtd[red].getRun().getLogData('Doppler.maximum_delta_energy').value
-        elif mtd[red].getRun().hasProperty('Doppler.delta_energy'):
-            energy = mtd[red].getRun().getLogData('Doppler.delta_energy').value
-        else:
-            energy = -1
-
         self._debug(red, raw)
 
         LoadParameterFile(Workspace=red, Filename=self._parameter_file)
@@ -667,6 +656,127 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         GroupDetectors(InputWorkspace=red, OutputWorkspace=red, MapFile=self._map_file, Behaviour='Sum')
 
         self._debug(red, det)
+
+        self._normalisation(red, mon)
+
+        self._debug(red, mnorm)
+
+        self._background_subtraction(red)
+
+        self._debug(red, bsub)
+
+        self._vanadium_calibration(red)
+
+        self._debug(red, vnorm)
+
+        if self._mirror_sense == 14:
+            # Number of bins
+            size = mtd[red].blocksize()
+
+            # Get the left and right wings
+            extract_workspace(red, left, 0, int(size / 2))
+            extract_workspace(red, right, int(size / 2), size)
+            # Get the left and right monitors, needed to identify the masked bins
+            extract_workspace(mon, '__left_mon', 0, int(size / 2))
+            extract_workspace(mon, '__right_mon', int(size / 2), size)
+
+            # Initialisation monitor range
+            xmin_left = 0
+            xmin_right = 0
+            xmax_left = mtd[left].blocksize()
+            xmax_right = mtd[left].blocksize()
+
+            if self._scan_type == 'QENS':
+                # Mask bins out of monitor range (zero bins) for left and right wings
+                xmin_left, xmax_left = monitor_range('__left_mon')
+                xmin_right, xmax_right = monitor_range('__right_mon')
+
+                # left and right must be masked here, such that perform_unmirror will work ok
+                mask_reduced_ws(left, xmin_left, xmax_left)
+                mask_reduced_ws(right, xmin_right, xmax_right)
+
+                # Convert left and right wing axis conversions, vanadium runs are already converted
+                convert_to_energy(left)
+                convert_to_energy(right)
+                ConvertSpectrumAxis(InputWorkspace=left, OutputWorkspace=left, Target='Theta', EMode='Indirect')
+                ConvertSpectrumAxis(InputWorkspace=right, OutputWorkspace=right, Target='Theta', EMode='Indirect')
+
+        # Energy transfer according to mirror_sense and unmirror_option
+        start_bin = 0
+        end_bin = 0
+
+        if self._mirror_sense == 14 and self._unmirror_option == 0:
+            self.log().warning('Input run #{0} has two wings, no energy transfer can be performed'.format(run))
+        elif self._mirror_sense == 14 and self._unmirror_option > 0:
+            # QENS: Reduced workspace will be in energy transfer since both, left and right workspaces are in energy transfer
+            # FWS: Reduced workspace will not be in energy transfer since Vanadium will not be used -- good
+            start_bin, end_bin = perform_unmirror(red, left, right, self._unmirror_option)
+        elif self._mirror_sense == 16:
+            self.log().information(
+                'Input run #{0} has one wing, perform energy transfer, no unmirroring will happen'.format(run))
+            convert_to_energy(red)
+            ConvertSpectrumAxis(InputWorkspace=red, OutputWorkspace=red, Target='Theta', EMode='Indirect')
+        else:
+            self.log().warning('Input run #{0}: no Doppler.mirror_sense defined, assuming one wing.'.format(run))
+            convert_to_energy(red)
+            ConvertSpectrumAxis(InputWorkspace=red, OutputWorkspace=red, Target='Theta', EMode='Indirect')
+
+        # Mask corrupted bins according to shifted workspaces or monitor range
+        # Initialisation
+        xmin = 0
+        xmax = mtd[red].blocksize()
+
+        # Mask bins out of final energy or monitor range
+        if start_bin != 0 or end_bin != 0:
+            xmin = np.maximum(xmin_left, xmin_right)
+            xmax = np.minimum(xmax_left, xmax_right)
+            # Shifted workspaces
+            xmin = np.maximum(xmin, start_bin)
+            xmax = np.minimum(xmax, end_bin)
+        elif self._mirror_sense == 14 and self._unmirror_option == 0:
+            # Reload X-values (now in meV)
+            x = mtd[red].readX(0)
+            xmin = xmin_left
+            xmax = xmax_right + int(x[-1] / 2)
+            if xmin_right < size and xmax_left < size:
+                # Mask mid bins
+                self.log().debug('Mask red ws bins between {0}, {1}'.format(xmax_left, int(size / 2) + xmin_right - 1))
+                MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[xmax_left], XMax=x[int(size / 2) + xmin_right])
+        elif self._mirror_sense == 14 and self._unmirror_option > 0:
+            xmin = np.maximum(xmin_left, xmin_right)
+            xmax = np.minimum(xmax_left, xmax_right)
+        elif self._mirror_sense == 16:
+            # One wing, no right workspace
+            xmin, xmax = monitor_range(mon)
+
+        if self._scan_type == 'QENS':
+            mask_reduced_ws(red, xmin, xmax)
+
+        # cleanup by-products if not needed
+        if not self._debug_mode:
+            DeleteWorkspace(mon)
+            if self._mirror_sense == 14:
+                DeleteWorkspace(left)
+                DeleteWorkspace(right)
+
+    def _normalisation(self, red, mon):
+        '''
+        Args:
+            red: input workspace to be normalised to monitor
+            mon: monitor
+
+        Returns:
+            normalised to monitor workspace
+
+        '''
+
+        # Get Doppler energy
+        if mtd[red].getRun().hasProperty('Doppler.maximum_delta_energy'):
+            energy = mtd[red].getRun().getLogData('Doppler.maximum_delta_energy').value
+        elif mtd[red].getRun().hasProperty('Doppler.delta_energy'):
+            energy = mtd[red].getRun().getLogData('Doppler.delta_energy').value
+        else:
+            energy = -1
 
         if self._scan_type == 'QENS':
             # Use default bin by bin normalisation to monitor
@@ -700,119 +810,37 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                                 IntegrationRangeMin=xmax, IntegrationRangeMax=x[len(x) - 1], MonitorWorkspace=mon)
             Plus(LHSWorkspace='__mon_left', RHSWorkspace='__mon_right', OutputWorkspace=red)
 
-        self._debug(red, mnorm)
+        if self._scan_type == 'FWS':
+            ReplaceSpecialValues(InputWorkspace=red, OutputWorkspace=red, NaNValue=0, NaNError=0)
 
+        return red
+
+    def _background_subtraction(self, red):
         # subtract the background if specified
         if self._background_file:
             Minus(LHSWorkspace=red, RHSWorkspace='background', OutputWorkspace=red)
-            self._debug(red, bsub)
             # check the integral after subtraction
             __temp = ReplaceSpecialValues(InputWorkspace=red, NaNValue='0')
             __temp = Integration(InputWorkspace=__temp)
             for i in range(__temp.getNumberHistograms()):
                 if __temp.dataY(i)[0] < 0:
-                    self.log().warning('Integral of spectrum #%d is negative after background subtraction.'
-                                       'Check the background run {0}'.format(i))
+                    self.log().warning('Integral of spectrum #{0} is negative after background subtraction.'
+                                       'Check the background run {1}'.format(i, self._background_file))
             DeleteWorkspace(__temp)
 
+        return red
+
+    def _vanadium_calibration(self, red):
         # Calibrate to vanadium calibration workspace if specified
         # note, this is a one-column calibration workspace
         if self._calib_ws is not None:
             if self._calib_ws.getNumberHistograms() == mtd[red].getNumberHistograms():
                 Divide(LHSWorkspace=red, RHSWorkspace=self._calib_ws, OutputWorkspace=red)
-                self._debug(red, vnorm)
             else:
                 self.log().error("Calibration workspace has wrong dimensions.")
 
-        if self._scan_type == 'FWS':
-            ReplaceSpecialValues(InputWorkspace=red, OutputWorkspace=red, NaNValue=0, NaNError=0)
-
-        if self._mirror_sense == 14:
-            # Number of bins
-            size = mtd[red].blocksize()
-
-            # Get the left and right wings
-            extract_workspace(red, left, 0, int(size / 2))
-            extract_workspace(red, right, int(size / 2), size)
-            # Get the left and right monitors, needed to identify the masked bins
-            extract_workspace(mon, '__left_mon', 0, int(size / 2))
-            extract_workspace(mon, '__right_mon', int(size / 2), size)
-
-            # Initialisation monitor range
-            xmin_left = 0
-            xmin_right = 0
-            xmax_left = mtd[left].blocksize()
-            xmax_right = mtd[left].blocksize()
-
-            if self._scan_type == 'QENS':
-                # Mask bins out of monitor range (zero bins) for left and right wings
-                xmin_left, xmax_left = monitor_range('__left_mon')
-                xmin_right, xmax_right = monitor_range('__right_mon')
-
-                # left and right must be masked here, such that perform_unmirror will work ok
-                mask_reduced_ws(mtd[left], xmin_left, xmax_left)
-                mask_reduced_ws(mtd[right], xmin_right, xmax_right)
-
-                # Convert left and right wing axis conversions, vanadium runs are already converted
-                convert_to_energy(left)
-                convert_to_energy(right)
-                ConvertSpectrumAxis(InputWorkspace=left, OutputWorkspace=left, Target='Theta', EMode='Indirect')
-                ConvertSpectrumAxis(InputWorkspace=right, OutputWorkspace=right, Target='Theta', EMode='Indirect')
-
-        # Energy transfer according to mirror_sense and unmirror_option
-        start_bin = 0
-        end_bin = 0
-
-        if self._mirror_sense == 14 and self._unmirror_option == 0:
-            self.log().warning('Input run #{0} has two wings, no energy transfer can be performed'.format(run))
-        elif self._mirror_sense == 14 and self._unmirror_option > 0:
-            # QENS: Reduced workspace will be in energy transfer since both, left and right workspaces are in energy transfer
-            # FWS: Reduced workspace will not be in energy transfer since Vanadium will not be used -- good
-            start_bin, end_bin = perform_unmirror(red, left, right, self._unmirror_option)
-        elif self._mirror_sense == 16:
-            self.log().information('Input run #{0} has one wing, perform energy transfer'.format(run))
-            convert_to_energy(red)
-        else:
-            self.log().warning('Input run #{0}: no Doppler.mirror_sense defined'.format(run))
-            convert_to_energy(red)
-
-        # Mask corrupted bins according to shifted workspaces or monitor range
-        # Initialisation
-        xmin = 0
-        xmax = mtd[red].blocksize()
-
-        # Mask bins out of final energy or monitor range
-        if start_bin != 0 or end_bin != 0:
-            xmin = np.maximum(xmin_left, xmin_right)
-            xmax = np.minimum(xmax_left, xmax_right)
-            # Shifted workspaces
-            xmin = np.maximum(xmin, start_bin)
-            xmax = np.minimum(xmax, end_bin)
-        elif self._mirror_sense == 14 and self._unmirror_option == 0:
-            # Reload X-values (now in meV)
-            x = mtd[red].readX(0)
-            xmin = xmin_left
-            xmax = xmax_right + int(x[-1] / 2)
-            if xmin_right < size and xmax_left < size:
-                # Mask mid bins
-                self.log().debug('Mask red ws bins between {0}, {1}'.format(xmax_left, int(size / 2) + xmin_right - 1))
-                MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[xmax_left], XMax=x[int(size / 2) + xmin_right])
-        elif self._mirror_sense == 14 and self._unmirror_option > 0:
-            xmin = np.maximum(xmin_left, xmin_right)
-            xmax = np.minimum(xmax_left, xmax_right)
-        elif self._mirror_sense == 16:
-            # One wing, no right workspace
-            xmin, xmax = monitor_range(mon)
-
-        if self._scan_type == 'QENS':
-            mask_reduced_ws(mtd[red], xmin, xmax)
-
-        # cleanup by-products if not needed
-        if not self._debug_mode:
-            DeleteWorkspace(mon)
-            if self._mirror_sense == 14:
-                DeleteWorkspace(left)
-                DeleteWorkspace(right)
+    def _masking(self, ws):
+        pass
 
     def _debug(self, ws, name):
         """
@@ -834,10 +862,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         if self._unmirror_option == 5 or self._unmirror_option == 7:
             DeleteWorkspace('left_van')
             DeleteWorkspace('right_van')
-
-        # remove background run
-        if self._background_file:
-            DeleteWorkspace('background')
 
         output = np.array(out_ws_names)
         self.log().debug(str(output))
