@@ -10,6 +10,7 @@ Preamble
 ^^^^^^^^^
 This document is intended for Mantid developers as a guide to the architecture of the Muon Analysis custom interface.
 User documentation for this interface can be found at :ref:`Muon_Analysis-ref`.
+There is also an unscripted testing guide for developers at :ref:`Muon_Analysis_TestGuide-ref`.
 
 There will be a particular focus on the *Data Analysis* tab, which has been significantly changed for Mantid 3.8.
 
@@ -78,18 +79,72 @@ The interface allows users to analyse one period at a time, or a sum/difference 
 Loading data
 ^^^^^^^^^^^^
 
-(NeXus v0,1,2 - see alg documentation)
-(Dead times, grouping, different kinds of plots etc)
-(Loader - new - and grouping)
-(Load current data - Windows only - where the data is - ISIS)
-(Windows - Origin and WiMDA)
-(MuonAnalysisHelper - tests)
+Data is loaded into the interface as NeXus files. This is the only file type supported at the moment.
+
+.. note:: Converters exist to translate most other formats (e.g. older ISIS files) to NeXus. PSI have a program called ``any2many`` that will convert their ``BIN`` files to NeXus.
+
+Muon NeXus files come in two versions, v1 and v2, and there are two versions of the :ref:`algm-LoadMuonNexus` algorithm to handle them. 
+Both v1 and v2 are in active use (in fact most ISIS data is v1 at the moment).
+The schema can be found on the `muon group website <http://www.isis.stfc.ac.uk/groups/muons/muons3385.html>`_, and Steve Cottrell is the best person to ask about NeXus-related questions at ISIS.
+Version 2 files support multiple detectors per spectrum, which version 1 files don't. This isn't used on any instruments at ISIS at the time of writing.
+
+Which data is loaded from which place in the NeXus file, and where it is put in the workspace/run object, is well documented for both versions of the algorithm in their algorithm doc pages.
+
+There are also some "version 0" muon NeXus files. These are old, pre-NeXus files that have been converted to NeXus.
+These mostly load OK into Mantid, but sometimes may be missing something that the loader is expecting.
+In one case, there used to be an instrument at ISIS called DEVA, which is not there any more and does not have an IDF (at the moment there is a hack to allow old DEVA files to be loaded).
+
+The class ``MuonAnalysisDataLoader`` handles loading files and creating analysis workspaces using :ref:`algm-MuonProcess`.
+It is fully tested, in addition to the tests that the algorithms themselves have.
+
+The grouping is stored in a ``Mantid::API::Grouping`` struct. The user can specify their own grouping on the "Grouping Options" tab, and a ``MuonGroupingHelper`` object is used to deal with this. (This is not tested as it is too coupled to the GUI - needs refactoring).
+
+Load current run 
+################
+
+**ISIS only**
+
+Scientists at ISIS often use the "load current run" feature - a button on the front tab that will load the most recent data file from the selected instrument. The button is not enabled at other facilities, where this feature is not available.
+
+The location of the current run is kept in ``\\<instrument>\data\autosave.run``, a file that points to another file in the same directory where the data is.
+For example, ``\\MUSR\data\autosave.run`` might contain the file name ``auto_B.tmp``, meaning that the current data is in ``\\MUSR\data\auto_B.tmp``. 
+
+After loading the current run, the left/right buttons are used to cycle through recent datasets.
+
+At present the "load current run" feature is Windows only, due to how the shared data folder is accessed - at the moment this is OK, as most muon scientists at ISIS tend to use Windows, but it would be good to fix in the long run.
+
+MuonAnalysisHelper
+##################
+
+On the whole, the main part of MuonAnalysis uses the "big ball of mud" design pattern.
+It is very difficult to write tests because the logic is mixed up with the GUI code.
+There is, however, a namespace called ``MuonAnalysisHelper`` which contains non-GUI MuonAnalysis-related functions, and these do have tests.
+
+As noted above, data loading/processing is handled with ``MuonAnalysisDataLoader``, which is also tested.
 
 Plotting data
 ^^^^^^^^^^^^^
-(plotting - Python code)
-(Different Plot buttons on grouping tab, auto-update vs plot button)
-(Raw data vs rebinning)
+
+To plot data, Muon Analysis uses a hard-coded Python script in the ``plotSpectrum`` method, which is run via the ``runPythonScript`` method common to all Mantid custom interfaces.
+(I wonder if there is a better way to do this? It is difficult to maintain the plotting script when it is a string within a C++ method).
+
+There are various options set on the Settings page - see the user docs for more information on these:
+
+- Use a new window each time, or the previous window
+- Whether it replots automatically, or waits for the "Plot" button to be pressed
+- Y autoscale or fixed scale
+- Curve type and errors on/off
+
+Note that, as well as plotting from the front tab, there are "Plot" buttons on the "Grouping Options" tab too.
+
+Another important point is the setting for "rebin options" on the settings page.
+If set, rebinned data will be plotted, and analysis workspaces will be created for *both* rebinned and raw data.
+Often, scientists will use the rebinning option but choose the "Fit to raw data" option on the fitting tab.
+
+If reusing the previous plot window, previous fit curves are kept when new raw data is loaded.
+The number of such curves kept is user-configurable.
+The script recognises which curves are fits by their name: ``Workspace-Calc``.
+It will also keep any "plot guesses", which are recognised by the name ``CompositeFunction``.
 
 Fitting data
 ^^^^^^^^^^^^
