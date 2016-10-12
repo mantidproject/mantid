@@ -212,6 +212,21 @@ public:
     m_workspace.getSpectrum(1).setDetectorID(2);
   }
 
+  void test_detector() {
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    TS_ASSERT_THROWS_NOTHING(spectrumInfo.detector(0));
+    TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(), 1);
+    TS_ASSERT_EQUALS(spectrumInfo.detector(1).getID(), 2);
+    TS_ASSERT_EQUALS(spectrumInfo.detector(2).getID(), 3);
+    TS_ASSERT_EQUALS(spectrumInfo.detector(3).getID(), 4);
+    TS_ASSERT_EQUALS(spectrumInfo.detector(4).getID(), 5);
+  }
+
+  void test_no_detector() {
+    const auto &spectrumInfo = m_workspaceNoInstrument.spectrumInfo();
+    TS_ASSERT_THROWS(spectrumInfo.detector(0), std::runtime_error);
+  }
+
 private:
   WorkspaceTester m_workspace;
   WorkspaceTester m_workspaceNoInstrument;

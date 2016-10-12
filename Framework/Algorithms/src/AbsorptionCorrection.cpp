@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/AbsorptionCorrection.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/IDetector.h"
@@ -126,10 +127,12 @@ void AbsorptionCorrection::exec() {
   g_log.information(message.str());
   message.str("");
 
+
   // Calculate the cached values of L1 and element volumes.
   initialiseCachedDistances();
   // If sample not at origin, shift cached positions.
-  const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const V3D samplePos = spectrumInfo.samplePosition();
   if (samplePos != V3D(0, 0, 0)) {
     for (auto &elementPosition : m_elementPositions) {
       elementPosition += samplePos;
@@ -145,20 +148,10 @@ void AbsorptionCorrection::exec() {
     // Copy over bin boundaries
     correctionFactors->setSharedX(i, m_inputWS->sharedX(i));
 
-    // Get detector position
-    IDetector_const_sptr det;
-    try {
-      det = m_inputWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
-    }
-    // If no detector found, skip onto the next spectrum
-    if (!det)
+    if (!spectrumInfo.hasDetectors(i))
       continue;
+
+    const auto &det = spectrumInfo.detector(i);
 
     std::vector<double> L2s(m_numVolumeElements);
     calculateDistances(det, L2s);
@@ -167,7 +160,7 @@ void AbsorptionCorrection::exec() {
     double lambda_f = m_lambdaFixed;
     if (m_emode == 2) {
       try {
-        Parameter_sptr par = pmap.get(det.get(), "Efixed");
+        Parameter_sptr par = pmap.get(&det, "Efixed");
         if (par) {
           Unit_const_sptr energy = UnitFactory::Instance().create("Energy");
           double factor, power;
@@ -317,15 +310,15 @@ void AbsorptionCorrection::constructSample(API::Sample &sample) {
 /// @param L2s :: A vector of the sample-detector distance for  each segment of
 /// the sample
 void AbsorptionCorrection::calculateDistances(
-    const IDetector_const_sptr &detector, std::vector<double> &L2s) const {
-  V3D detectorPos(detector->getPos());
-  if (detector->nDets() > 1) {
+    const IDetector &detector, std::vector<double> &L2s) const {
+  V3D detectorPos(detector.getPos());
+  if (detector.nDets() > 1) {
     // We need to make sure this is right for grouped detectors - should use
     // average theta & phi
     detectorPos.spherical(detectorPos.norm(),
-                          detector->getTwoTheta(V3D(), V3D(0, 0, 1)) * 180.0 /
+                          detector.getTwoTheta(V3D(), V3D(0, 0, 1)) * 180.0 /
                               M_PI,
-                          detector->getPhi() * 180.0 / M_PI);
+                          detector.getPhi() * 180.0 / M_PI);
   }
 
   for (size_t i = 0; i < m_numVolumeElements; ++i) {
