@@ -573,9 +573,9 @@ private:
   std::string filename;
 
   // Common saving/loading parameters
-  const std::string &sep = "CSV";
-  const std::string &custsep = "";
-  const std::string &comment = "#";
+  const std::string sep = "CSV";
+  const std::string custsep = "";
+  const std::string comment = "#";
 
   void setupFile() {
     constexpr int numVecs = 100;
@@ -607,7 +607,6 @@ private:
     TS_ASSERT_EQUALS(save.isInitialized(), true);
 
     const bool scientific = true;
-    const int precision = -1;
 
     save.setPropertyValue("Filename", "testFile");
     save.setPropertyValue("InputWorkspace", name);

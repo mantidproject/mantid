@@ -122,7 +122,7 @@ public:
   }
 
   void tearDown() override {
-    for (int i = 0; i < loadAlgPtrArray.size(); i++) {
+    for (size_t i = 0; i < loadAlgPtrArray.size(); i++) {
       delete loadAlgPtrArray[i];
     }
     loadAlgPtrArray.clear();
