@@ -218,7 +218,7 @@ void AnvredCorrection::exec() {
     const auto &Yin = inSpec.y();
     const auto &Ein = inSpec.x();
     // Loop through the bins in the current spectrum
-    for (size_t j = 0; j < specSize; j++) {
+    for (int64_t j = 0; j < specSize; j++) {
 
       double lambda =
           (unitStr == "TOF")
