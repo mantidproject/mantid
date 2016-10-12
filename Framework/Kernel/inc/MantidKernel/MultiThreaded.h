@@ -61,10 +61,10 @@ threadSafe(const Arg &workspace) {
  */
 template <typename Arg, typename... Args>
 inline typename std::enable_if<!std::is_pointer<Arg>::value, bool>::type
-threadSafe(const Arg &workspace, Args... others) {
+threadSafe(const Arg &workspace, Args &&... others) {
   static_assert(std::is_base_of<DataItem, Arg>::value,
                 "Parameter must be derived from Mantid::Kernel::DataItem!");
-  return workspace.threadSafe() && threadSafe(others...);
+  return workspace.threadSafe() && threadSafe(std::forward<Args>(others)...);
 }
 
 } // namespace Kernel
