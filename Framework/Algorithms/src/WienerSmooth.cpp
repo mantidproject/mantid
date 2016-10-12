@@ -165,33 +165,21 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
     inputWS = copyInput(inputWS, wsIndex);
     wsIndex = 0;
 
-    auto &x = inputWS->x(wsIndex);
-    auto lastX = x.back();
-    auto dx = x[dataSize - 1] - x[dataSize - 2];
-
-    auto &y = inputWS->y(wsIndex);
-    size_t newSize = y.size() + 1;
-
+    auto &X = inputWS->x(wsIndex);
+    auto &Y = inputWS->y(wsIndex);
+    auto &E = inputWS->e(wsIndex);
+    double dx = X[dataSize - 1] - X[dataSize - 2];
     auto histogram = inputWS->histogram(wsIndex);
-    histogram.resize(newSize);
-
-    auto &xResized = histogram.mutableX();
-    auto &yResized = histogram.mutableY();
-    auto &eResized = histogram.mutableE();
-    auto sizeXResized = xResized.size();
-    auto sizeYResized = yResized.size();
-    auto sizeEResized = eResized.size();
-
-    xResized[sizeXResized - 1] = lastX + dx;
-    yResized[sizeYResized - 1] = yResized[sizeYResized - 2];
-    eResized[sizeEResized - 1] = eResized[sizeEResized - 2];
+    histogram.resize(histogram.size() + 1);
+    histogram.mutableX().back() = X.back() + dx;
+    histogram.mutableY().back() = Y.back();
+    histogram.mutableE().back() = E.back();
     inputWS->setHistogram(wsIndex, histogram);
   }
 
   // the input vectors
   auto &X = inputWS->x(wsIndex);
   auto &Y = inputWS->y(wsIndex);
-  auto &E = inputWS->e(wsIndex);
 
   // Digital fourier transform works best for data oscillating around 0.
   // Fit a spline with a small number of break points to the data.
@@ -383,16 +371,9 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
     auto newSize = histogram.y().size() - 1;
     histogram.resize(newSize);
     out->setHistogram(0, histogram);
-
-    auto &xOut = out->mutableX(0);
-    xOut.assign(X.begin(), X.end() - 1);
-    auto &eOut = out->mutableE(0);
-    eOut.assign(E.begin(), E.end() - 1);
-  } else {
-    out->mutableX(0) = X;
-    auto &eOut = out->mutableE(0);
-    eOut.assign(E.begin(), E.end());
   }
+  out->setSharedX(0, inputWS->sharedX(wsIndex));
+  out->setSharedE(0, inputWS->sharedE(wsIndex));
 
   return out;
 }

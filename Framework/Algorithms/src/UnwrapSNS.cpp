@@ -145,14 +145,14 @@ void UnwrapSNS::exec() {
       g_log.debug() << "Detector information for workspace index "
                     << workspaceIndex << " is not available.\n";
       outputWS->setSharedX(workspaceIndex, m_inputWS->sharedX(workspaceIndex));
-      outputWS->mutableY(workspaceIndex).assign(m_XSize - 1, 0.0);
-      outputWS->mutableE(workspaceIndex).assign(m_XSize - 1, 0.0);
+      outputWS->mutableY(workspaceIndex) = 0.0;
+      outputWS->mutableE(workspaceIndex) = 0.0;
     } else {
       const double Ld = L1 + spectrumInfo.l2(workspaceIndex);
       // fix the x-axis
       MantidVec timeBins;
       size_t pivot = this->unwrapX(m_inputWS->x(workspaceIndex), timeBins, Ld);
-      outputWS->setBinEdges(workspaceIndex, timeBins);
+      outputWS->setBinEdges(workspaceIndex, std::move(timeBins));
 
       pivot++; // one-off difference between x and y
 
@@ -217,7 +217,7 @@ void UnwrapSNS::execEvent() {
     MantidVec time_bins;
     if (outW->x(0).size() > 2) {
       this->unwrapX(m_inputWS->x(workspaceIndex), time_bins, Ld);
-      outW->setBinEdges(workspaceIndex, time_bins);
+      outW->setBinEdges(workspaceIndex, std::move(time_bins));
     } else {
       outW->setSharedX(workspaceIndex, m_inputWS->sharedX(workspaceIndex));
     }

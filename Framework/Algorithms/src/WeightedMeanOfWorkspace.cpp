@@ -61,8 +61,8 @@ void WeightedMeanOfWorkspace::exec() {
     if (spectrumInfo.hasDetectors(i))
       if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
         continue;
-    auto &y = inputWS->mutableY(i);
-    auto &e = inputWS->mutableE(i);
+    auto &y = inputWS->y(i);
+    auto &e = inputWS->e(i);
     double weight = 0.0;
     for (std::size_t j = 0; j < y.size(); ++j) {
       if (std::isfinite(y[j]) && std::isfinite(e[j])) {

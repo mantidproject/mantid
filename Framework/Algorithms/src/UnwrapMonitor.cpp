@@ -109,33 +109,42 @@ void UnwrapMonitor::exec() {
       // If the detector flightpath is missing, zero the data
       g_log.debug() << "Detector information for workspace index " << i
                     << " is not available.\n";
-      tempWS->mutableX(i).assign(tempWS->x(i).size(), 0.0);
-      tempWS->mutableY(i).assign(tempWS->y(i).size(), 0.0);
-      tempWS->mutableE(i).assign(tempWS->e(i).size(), 0.0);
+      tempWS->mutableX(i) = 0.0;
+      tempWS->mutableY(i) = 0.0;
+      tempWS->mutableE(i) = 0.0;
       continue;
     }
+
+    // Getting the unwrapped data is a three step process.
+    // 1. We ge the unwrapped version of the x data.
+    // 2. Then we get the unwrapped version of the y and e data for
+    //    which we require the x data from the previous step
+    // 3. Finally we need to set the newly unwrapped data on the
+    //    histogram
 
     // Unwrap the x data. Returns the bin ranges that end up being used
     const double Ld = L1 + spectrumInfo.l2(i);
     MantidVec newX;
     const std::vector<int> rangeBounds = this->unwrapX(newX, i, Ld);
+
     // Unwrap the y & e data according to the ranges found above
     MantidVec newY;
     MantidVec newE;
     this->unwrapYandE(tempWS, i, rangeBounds, newY, newE);
 
-    // Now set the new X, Y and E values on the histogram
+    // Now set the new X, Y and E values on the Histogram
     auto histogram = tempWS->histogram(i);
-    histogram.resize(newY.size());
-    auto &resizedX = histogram.mutableX();
-    auto &resizedY = histogram.mutableY();
-    auto &resizedE = histogram.mutableE();
-    std::copy(newX.begin(), newX.end(), resizedX.begin());
-    std::copy(newY.begin(), newY.end(), resizedY.begin());
-    std::copy(newE.begin(), newE.end(), resizedE.begin());
-    tempWS->setHistogram(i, histogram);
-
-    assert(tempWS->x(i).size() == tempWS->y(i).size() + 1);
+    if (histogram.yMode() == Mantid::HistogramData::Histogram::YMode::Counts) {
+        tempWS->setHistogram(
+            i, Mantid::HistogramData::BinEdges(std::move(newX)),
+            Mantid::HistogramData::Counts(std::move(newY)),
+            Mantid::HistogramData::CountStandardDeviations(std::move(newE)));
+    } else {
+        tempWS->setHistogram(
+            i, Mantid::HistogramData::BinEdges(std::move(newX)),
+            Mantid::HistogramData::Frequencies(std::move(newY)),
+            Mantid::HistogramData::FrequencyStandardDeviations(std::move(newE)));
+    }
 
     // Get the maximum number of bins (excluding monitors) for the rebinning
     // below
@@ -167,8 +176,7 @@ void UnwrapMonitor::exec() {
 }
 
 /** Unwraps an X array, converting the units to wavelength along the way.
- *  @param tempWS ::   A pointer to the temporary workspace in which the results
- * are being stored
+ *  @param newX ::   A reference to a container which stores our unwrapped x data.
  *  @param spectrum :: The workspace index
  *  @param Ld ::       The flightpath for the detector related to this spectrum
  *  @return A 3-element vector containing the bins at which the upper and lower
@@ -193,9 +201,8 @@ UnwrapMonitor::unwrapX(MantidVec &newX, const int &spectrum, const double &Ld) {
       m_XSize); // Doing this possible gives a small efficiency increase
   // Create a vector for the upper range. Make it a reference to the output
   // histogram to save an assignment later
-  MantidVec &tempX_U = newX;
-  tempX_U.clear();
-  tempX_U.reserve(m_XSize);
+  newX.clear();
+  newX.reserve(m_XSize);
 
   // Get a reference to the input x data
   const auto &xdata = m_inputWS->x(spectrum);
@@ -219,10 +226,10 @@ UnwrapMonitor::unwrapX(MantidVec &newX, const int &spectrum, const double &Ld) {
     else if (tof > T1) {
       const double velocity = Ld / (tof - m_Tmax + m_Tmin);
       const double wavelength = m_conversionConstant / velocity;
-      tempX_U.push_back(wavelength);
+      newX.push_back(wavelength);
       // Remove the duplicate boundary bin
       if (tof == m_Tmax && std::abs(wavelength - tempX_L.front()) < 1.0e-5)
-        tempX_U.pop_back();
+        newX.pop_back();
       // Record the bins that fall in this range for copying over the data &
       // errors
       if (binRange[2] == -1)
@@ -249,7 +256,7 @@ UnwrapMonitor::unwrapX(MantidVec &newX, const int &spectrum, const double &Ld) {
   }
 
   // Append first vector to back of second
-  tempX_U.insert(tempX_U.end(), tempX_L.begin(), tempX_L.end());
+  newX.insert(newX.end(), tempX_L.begin(), tempX_L.end());
 
   return binRange;
 }
@@ -295,6 +302,8 @@ std::pair<int, int> UnwrapMonitor::handleFrameOverlapped(
  * results are being stored
  *  @param spectrum ::    The workspace index
  *  @param rangeBounds :: The upper and lower ranges for the unwrapping
+ *  @param newY :: A reference to a container which stores our unwrapped y data.
+ *  @param newY :: A reference to a container which stores our unwrapped e data.
  */
 void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
                                 const int &spectrum,
