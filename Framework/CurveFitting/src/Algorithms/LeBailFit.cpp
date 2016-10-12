@@ -1,9 +1,3 @@
-/* COMMIT NOTES *
-1. Rename calculateDiffractionPatternMC to calculateDiffractionPattern
-2.
-
-* COMMIT NOTES */
-
 #include "MantidCurveFitting/Algorithms/LeBailFit.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/TableRow.h"
@@ -59,7 +53,6 @@ LeBailFit::LeBailFit()
       m_inputPeakInfoVec(), m_backgroundFunction(), m_funcParameters(),
       m_origFuncParameters(), m_peakType(), m_backgroundType(),
       m_backgroundParameters(), m_backgroundParameterNames(), m_bkgdorder(0),
-      mPeakGroupMap(), mPeakGroupFitChi2Map(), mPeakGroupFitStatusMap(),
       mPeakRadius(0), m_lebailFitChi2(0.), m_lebailCalChi2(0.), mMinimizer(),
       m_dampingFactor(0.), m_inputParameterPhysical(false), m_fitMode(),
       m_indicatePeakHeight(0.), m_MCGroups(), m_numMCGroups(0), m_bestRwp(0.),
@@ -1679,8 +1672,8 @@ void LeBailFit::doMarkovChain(const map<string, Parameter> &parammap,
         }
       }
 
-      // e) Debug output
-      // exportDomainValueToFile(domain, values, "mc_step0_group0.dat");
+      // e) Debug output?
+
     } // END FOR Group
 
     // v. Improve the background
@@ -2406,189 +2399,6 @@ void LeBailFit::applyParameterValues(map<string, Parameter> &srcparammap,
   }
 }
 
-//===============================  Background Functions
-//========================================
-//----------------------------------------------------------------------------------------------
-/** Re-fit background according to the new values
-* FIXME: Still in development
-*
-* @param wsindex   raw data's workspace index
-* @param domain    domain of X's
-* @param values    values
-* @param background  background
-*/
-// void LeBailFit::fitBackground(size_t wsindex, FunctionDomain1DVector domain,
-//                              FunctionValues values,
-//                              vector<double> &background) {
-//  UNUSED_ARG(background);
-//
-//  std::vector<double> &vecSmoothBkgd =
-//  m_outputWS->mutableY(SMOOTHEDBKGDINDEX);
-//
-//  smoothBackgroundAnalytical(wsindex, domain, values, vecSmoothBkgd);
-//}
-
-//----------------------------------------------------------------------------------------------
-/** Smooth background by exponential smoothing algorithm
-*
-* @param wsindex  :  raw data's workspace index
-* @param domain      domain of X's
-* @param peakdata:   pattern of pure peaks
-* @param background: output of smoothed background
-*/
-void LeBailFit::smoothBackgroundExponential(size_t wsindex,
-                                            FunctionDomain1DVector domain,
-                                            FunctionValues peakdata,
-                                            vector<double> &background) {
-  const auto &vecRawX = m_dataWS->x(wsindex);
-  const auto &vecRawY = m_dataWS->y(wsindex);
-
-  // 1. Check input
-  if (vecRawX.size() != domain.size() || vecRawY.size() != peakdata.size() ||
-      background.size() != peakdata.size())
-    throw runtime_error("Vector sizes cannot be matched.");
-
-  // 2. Set up peak density
-  vector<double> peakdensity(vecRawX.size(), 1.0);
-  throw runtime_error("Need to figure out how to deal with this part!");
-
-  //  for (size_t ipk = 0; ipk < m_lebailFunction->getNumberOfPeaks(); ++ipk)
-  //  {
-
-  /* Below are original code for modifying from
-  ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
-  double height = thispeak->height();
-  if (height > m_minimumPeakHeight)
-  {
-  // a) Calculate boundary
-  double fwhm = thispeak->fwhm();
-  double centre = thispeak->centre();
-  double leftbound = centre-3*fwhm;
-  double rightbound = centre+3*fwhm;
-
-  // b) Locate boundary positions
-  vector<double>::const_iterator viter;
-  viter = find(vecRawX.begin(), vecRawX.end(), leftbound);
-  int ileft = static_cast<int>(viter-vecRawX.begin());
-  viter = find(vecRawX.begin(), vecRawX.end(), rightbound);
-  int iright = static_cast<int>(viter-vecRawX.begin());
-  if (iright >= static_cast<int>(vecRawX.size()))
-  -- iright;
-
-  // c) Update peak density
-  for (int i = ileft; i <= iright; ++i)
-  {
-  peakdensity[i] += 1.0;
-  }*/
-  //     }
-
-  /*}
-
-  // FIXME : What is bk_prm2???
-  double bk_prm2 = 1.0;
-
-  // 3. Get starting and end points value
-  size_t numdata = peakdata.size();
-
-  background[0] = vecRawY[0] - peakdata[0];
-  background.back() = vecRawY.back() - peakdata[numdata-1];
-
-  // 4. Calculate the backgrouind points
-  for (size_t i = numdata-2; i >0; --i)
-  {
-  double bk_prm1 = (bk_prm2 * (7480.0/vecRawX[i])) / sqrt(peakdensity[i] +
-  1.0);
-  background[i] = bk_prm1*(vecRawY[i]-peakdata[i]) +
-  (1.0-bk_prm1)*background[i+1];
-  if (background[i] < 0)
-  background[i] = 0.0;
-  }
-
-  return;*/
-}
-
-//----------------------------------------------------------------------------------------------
-/** Smooth background by fitting the background to specified background function
-* Algorithm: 1. calculate background by removing calculated peaks from raw
-* data
-*            2. fit background by a specified background function.
-* @param wsindex  :  raw data's workspace index
-* @param domain      domain of X's
-* @param peakdata:   pattern of pure peaks
-* @param background: output of smoothed background
-*/
-void LeBailFit::smoothBackgroundAnalytical(size_t wsindex,
-                                           FunctionDomain1DVector domain,
-                                           FunctionValues peakdata,
-                                           vector<double> &background) {
-  // FIXME - This method may not be a good solution.
-  // TODO  - Create a new ticket to use the algorithm in ProcessBackground here.
-
-  UNUSED_ARG(wsindex);
-  UNUSED_ARG(peakdata);
-  UNUSED_ARG(domain);
-  UNUSED_ARG(background);
-
-  throw runtime_error("Need to re-consider this method.");
-
-  /* Below is the original code to modifying from
-  // 1. Make data ready
-  std::vector<double>& vecData = m_dataWS->mutableY(wsindex);
-  std::vector<double>& vecFitBkgd = m_outputWS->mutableY(CALBKGDINDEX);
-  std::vector<double>& vecFitBkgdErr = m_outputWS->mutableE(CALBKGDINDEX);
-  size_t numpts = vecFitBkgd.size();
-  for (size_t i = 0; i < numpts; ++i)
-  {
-  vecFitBkgd[i] = vecData[i] - peakdata[i];
-  if (vecFitBkgd[i] > 1.0)
-  vecFitBkgdErr[i] = sqrt(vecFitBkgd[i]);
-  else
-  vecFitBkgdErr[i] = 1.0;
-  }
-
-  // 2. Fit
-  Chebyshev_sptr bkgdfunc(new Chebyshev);
-  bkgdfunc->setAttributeValue("n", 6);
-
-  API::IAlgorithm_sptr calalg = this->createChildAlgorithm("Fit", -1.0, -1.0,
-  true);
-  calalg->initialize();
-  calalg->setProperty("Function", boost::shared_ptr<API::IFunction>(bkgdfunc));
-  calalg->setProperty("InputWorkspace", m_outputWS);
-  calalg->setProperty("WorkspaceIndex", CALDATAINDEX);
-  calalg->setProperty("StartX", domain[0]);
-  calalg->setProperty("EndX", domain[numpts-1]);
-  calalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
-  calalg->setProperty("CostFunction", "Least squares");
-  calalg->setProperty("MaxIterations", 1000);
-  calalg->setProperty("CreateOutput", false);
-
-  // 3. Result
-  bool successfulfit = calalg->execute();
-  if (!calalg->isExecuted() || ! successfulfit)
-  {
-  // Early return due to bad fit
-  stringstream errss;
-  errss << "Fit to Chebyshev background failed in
-  smoothBackgroundAnalytical.";
-  g_log.error(errss.str());
-  throw runtime_error(errss.str());
-  }
-
-  double chi2 = calalg->getProperty("OutputChi2overDoF");
-  g_log.information() << "Fit to chebysheve background successful with chi^2 = "
-  << chi2 << "\n";
-
-  // 4. Output
-  FunctionValues values(domain);
-  bkgdfunc->function(domain, values);
-
-  for (size_t i = 0; i < numpts; ++i)
-  background[i] = values[i];
-  */
-}
-
-//----------------------------------------------------------------------------------------------
 /// Convert a map of Parameter to a map of double
 std::map<std::string, double>
 LeBailFit::convertToDoubleMap(std::map<std::string, Parameter> &inmap) {
