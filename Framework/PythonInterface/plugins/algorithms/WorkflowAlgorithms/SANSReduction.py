@@ -1,4 +1,6 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -71,6 +73,8 @@ class SANSReduction(PythonAlgorithm):
                     output_str += self._load_data(data_file[i], workspace, property_manager, property_manager_name)
                     continue
                 output_str += self._load_data(data_file[i], '__tmp_wksp', property_manager, property_manager_name)
+                api.RebinToWorkspace(WorkspaceToRebin='__tmp_wksp', WorkspaceToMatch=workspace,
+                                     OutputWorkspace='__tmp_wksp')
                 api.Plus(LHSWorkspace=workspace, RHSWorkspace='__tmp_wksp', OutputWorkspace=workspace)
             if AnalysisDataService.doesExist('__tmp_wksp'):
                 AnalysisDataService.remove('__tmp_wksp')

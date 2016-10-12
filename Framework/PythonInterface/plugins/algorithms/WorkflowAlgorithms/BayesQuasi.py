@@ -1,4 +1,8 @@
-#pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
+#pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,redefined-builtin
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+from six import next
+
 import os
 import numpy as np
 
@@ -253,39 +257,39 @@ class BayesQuasi(PythonAlgorithm):
 
         group = ''
         workflow_prog = Progress(self, start=0.3, end=0.7, nreports=nsam*3)
-        for m in range(0,nsam):
-            logger.information('Group ' +str(m)+ ' at angle '+ str(theta[m]))
-            nsp = m+1
+        for spectrum in range(0,nsam):
+            logger.information('Group ' +str(spectrum)+ ' at angle '+ str(theta[spectrum]))
+            nsp = spectrum+1
 
-            nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(self._samWS,m,erange,nbin)
+            nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(self._samWS,spectrum,erange,nbin)
             Ndat = nout[0]
             Imin = nout[1]
             Imax = nout[2]
             if prog == 'QLd':
-                mm = m
+                mm = spectrum
             else:
                 mm = 0
             Nb,Xb,Yb,Eb = GetXYE(self._resWS,mm,array_len)     # get resolution data
             numb = [nsam, nsp, ntc, Ndat, nbin, Imin, Imax, Nb, nrbin]
             rscl = 1.0
-            reals = [efix, theta[m], rscl, bnorm]
+            reals = [efix, theta[spectrum], rscl, bnorm]
 
             if prog == 'QLr':
-                workflow_prog.report('Processing Sample number %i as Lorentzian' % nsam)
+                workflow_prog.report('Processing Sample number %i as Lorentzian' % spectrum)
                 nd,xout,yout,eout,yfit,yprob=QLr.qlres(numb,Xv,Yv,Ev,reals,fitOp,
                                                        Xdat,Xb,Yb,Wy,We,dtn,xsc,
                                                        wrks,wrkr,lwrk)
                 message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])+' '+str(yprob[2])+' '+str(yprob[3])
                 logger.information(message)
             if prog == 'QLd':
-                workflow_prog.report('Processing Sample number %i' % nsam)
+                workflow_prog.report('Processing Sample number %i' % spectrum)
                 nd,xout,yout,eout,yfit,yprob=QLd.qldata(numb,Xv,Yv,Ev,reals,fitOp,
                                                         Xdat,Xb,Yb,Eb,Wy,We,
                                                         wrks,wrkr,lwrk)
                 message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])+' '+str(yprob[2])+' '+str(yprob[3])
                 logger.information(message)
             if prog == 'QSe':
-                workflow_prog.report('Processing Sample number %i as Stretched Exp' % nsam)
+                workflow_prog.report('Processing Sample number %i as Stretched Exp' % spectrum)
                 nd,xout,yout,eout,yfit,yprob=Qse.qlstexp(numb,Xv,Yv,Ev,reals,fitOp,\
                                                         Xdat,Xb,Yb,Wy,We,dtn,xsc,\
                                                         wrks,wrkr,lwrk)
@@ -328,7 +332,7 @@ class BayesQuasi(PythonAlgorithm):
 
             # create result workspace
             fitWS = fname+'_Workspaces'
-            fout = fname+'_Workspace_'+ str(m)
+            fout = fname+'_Workspace_'+ str(spectrum)
 
             workflow_prog.report('Creating OutputWorkspace')
             s_api.CreateWorkspace(OutputWorkspace=fout, DataX=datX, DataY=datY, DataE=datE,
@@ -663,7 +667,7 @@ class BayesQuasi(PythonAlgorithm):
 
         #iterate over each block of fit parameters in the file
         #each block corresponds to a single column in the final workspace
-        for block_num in xrange(num_blocks):
+        for block_num in range(num_blocks):
             lower_index = header_offset+(block_size*block_num)
             upper_index = lower_index+block_size
 
@@ -671,12 +675,12 @@ class BayesQuasi(PythonAlgorithm):
             line_pointer = self._yield_floats(asc[lower_index:upper_index])
 
             #Q,AMAX,HWHM,BSCL,GSCL
-            line = line_pointer.next()
+            line = next(line_pointer)
             Q, AMAX, HWHM, _, _ = line
             q_data.append(Q)
 
             #A0,A1,A2,A4
-            line = line_pointer.next()
+            line = next(line_pointer)
             block_height = AMAX*line[0]
 
             #parse peak data from block
@@ -684,7 +688,7 @@ class BayesQuasi(PythonAlgorithm):
             block_amplitude = []
             for _ in range(nl):
                 #Amplitude,FWHM for each peak
-                line = line_pointer.next()
+                line = next(line_pointer)
                 amp = AMAX*line[0]
                 FWHM = 2.*HWHM*line[1]
                 block_amplitude.append(amp)
@@ -692,7 +696,7 @@ class BayesQuasi(PythonAlgorithm):
 
             #next parse error data from block
             #SIG0
-            line = line_pointer.next()
+            line = next(line_pointer)
             block_height_e = line[0]
 
             block_FWHM_e = []
@@ -700,12 +704,12 @@ class BayesQuasi(PythonAlgorithm):
             for _ in range(nl):
                 #Amplitude error,FWHM error for each peak
                 #SIGIK
-                line = line_pointer.next()
+                line = next(line_pointer)
                 amp = AMAX*math.sqrt(math.fabs(line[0])+1.0e-20)
                 block_amplitude_e.append(amp)
 
                 #SIGFK
-                line = line_pointer.next()
+                line = next(line_pointer)
                 FWHM = 2.0*HWHM*math.sqrt(math.fabs(line[0])+1.0e-20)
                 block_FWHM_e.append(FWHM)
 

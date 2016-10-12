@@ -3,6 +3,8 @@
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/ModeratorModel.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -62,7 +64,7 @@ ExperimentInfo::ExperimentInfo(const ExperimentInfo &source) {
  */
 void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   m_sample = other->m_sample;
-  m_run = other->m_run;
+  m_run = other->m_run->clone();
   this->setInstrument(other->getInstrument());
   if (other->m_moderatorModel)
     m_moderatorModel = other->m_moderatorModel->clone();

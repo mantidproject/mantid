@@ -9,6 +9,9 @@
 #include <utility> // std::pair
 
 namespace Mantid {
+namespace API {
+class SpectrumInfo;
+}
 namespace Algorithms {
 
 /** ConvertEmptyToTof :
@@ -64,8 +67,6 @@ private:
   bool doFitGaussianPeak(int, double &, double &, double &, double, double);
   std::pair<int, double> findAverageEppAndEpTof(const std::map<int, int> &);
 
-  double getL1(API::MatrixWorkspace_const_sptr);
-  double getL2(API::MatrixWorkspace_const_sptr, int);
   double calculateTOF(double, double);
   bool areEqual(double, double, double);
   template <typename T>
@@ -76,6 +77,8 @@ private:
 
   DataObjects::Workspace2D_sptr m_inputWS;
   API::MatrixWorkspace_sptr m_outputWS;
+  // Provide hint to compiler that this should be default initialized to nullptr
+  const API::SpectrumInfo *m_spectrumInfo = nullptr;
 };
 
 } // namespace Algorithms

@@ -94,6 +94,7 @@ private:
   public:
     MOCK_METHOD3(set, void(size_t, size_t, double));
     MOCK_METHOD2(get, double(size_t, size_t));
+    MOCK_METHOD0(zero, void());
   };
 
   // Mock domain to simulate a wrong domain type

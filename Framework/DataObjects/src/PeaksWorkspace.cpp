@@ -3,6 +3,8 @@
 #include "MantidAPI/Column.h"
 #include "MantidAPI/ColumnFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Peak.h"
@@ -190,7 +192,7 @@ const Peak &PeaksWorkspace::getPeak(const int peakNum) const {
  * @return a pointer to a new Peak object.
  */
 Geometry::IPeak *
-PeaksWorkspace::createPeak(Kernel::V3D QLabFrame,
+PeaksWorkspace::createPeak(const Kernel::V3D &QLabFrame,
                            boost::optional<double> detectorDistance) const {
   Geometry::Goniometer goniometer = this->run().getGoniometer();
 
@@ -222,7 +224,7 @@ PeaksWorkspace::createPeak(Kernel::V3D QLabFrame,
  *         value.
  */
 std::vector<std::pair<std::string, std::string>>
-PeaksWorkspace::peakInfo(Kernel::V3D qFrame, bool labCoords) const {
+PeaksWorkspace::peakInfo(const Kernel::V3D &qFrame, bool labCoords) const {
   std::vector<std::pair<std::string, std::string>> Result;
   std::ostringstream oss;
   oss << std::setw(12) << std::fixed << std::setprecision(3) << (qFrame.norm());
@@ -393,7 +395,7 @@ PeaksWorkspace::peakInfo(Kernel::V3D qFrame, bool labCoords) const {
  * @param HKL : reciprocal lattice vector coefficients
  * @return Fully formed peak.
  */
-Peak *PeaksWorkspace::createPeakHKL(V3D HKL) const {
+Peak *PeaksWorkspace::createPeakHKL(const V3D &HKL) const {
   /*
    The following allows us to add peaks where we have a single UB to work from.
    */
@@ -437,7 +439,8 @@ Peak *PeaksWorkspace::createPeakHKL(V3D HKL) const {
  *form for the corresponding
  *         value.
  */
-int PeaksWorkspace::peakInfoNumber(Kernel::V3D qFrame, bool labCoords) const {
+int PeaksWorkspace::peakInfoNumber(const Kernel::V3D &qFrame,
+                                   bool labCoords) const {
   std::vector<std::pair<std::string, std::string>> Result;
   std::ostringstream oss;
   oss << std::setw(12) << std::fixed << std::setprecision(3) << (qFrame.norm());
@@ -852,6 +855,13 @@ API::LogManager_sptr PeaksWorkspace::logs() {
 
   m_logCash = API::LogManager_sptr(&(this->mutableRun()), NullDeleter());
   return m_logCash;
+}
+
+/** Get constant access to shared pointer containing workspace porperties;
+ * Copies logs into new LogManager variable Meaningfull only for some
+ * multithereaded methods when a thread wants to have its own copy of logs */
+API::LogManager_const_sptr PeaksWorkspace::getLogs() const {
+  return API::LogManager_const_sptr(new API::LogManager(this->run()));
 }
 
 ITableWorkspace *

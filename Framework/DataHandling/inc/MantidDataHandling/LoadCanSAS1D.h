@@ -102,6 +102,9 @@ protected:
   /// Loads data into the run log
   void createLogs(const Poco::XML::Element *const sasEntry,
                   API::MatrixWorkspace_sptr wSpace) const;
+  /// Loads the information about hhe sample
+  void createSampleInformation(const Poco::XML::Element *const sasEntry,
+                               Mantid::API::MatrixWorkspace_sptr wSpace) const;
 };
 }
 }

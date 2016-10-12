@@ -95,6 +95,16 @@ namespace API {
 
   ------------------------------------------------------------------------------------------------------
 
+  The value returned by getProperty is of type
+  std::vector<std::vector<std::string>>. While the property itself does
+  expand ranges, the value needs some intepretation by the client code.
+  Specifically, values inside the same std::vector<std::string> should
+  be added together, while values between them should be treated
+  separately. In other words, if the value was [[a1,a2], [b1,b2]]. The
+  results should be two workspaces, a1+a2 and b1+b2.
+
+  ------------------------------------------------------------------------------------------------------
+
   Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
@@ -119,21 +129,22 @@ namespace API {
 class DLLExport MultipleFileProperty
     : public Kernel::PropertyWithValue<std::vector<std::vector<std::string>>> {
 public:
-  /// Constructor
+  MultipleFileProperty(
+      const std::string &name, unsigned int action,
+      const std::vector<std::string> &exts = std::vector<std::string>());
+
   MultipleFileProperty(
       const std::string &name,
       const std::vector<std::string> &exts = std::vector<std::string>());
 
-  /// 'Virtual copy constructor
   MultipleFileProperty *clone() const override {
     return new MultipleFileProperty(*this);
   }
 
-  /// Overridden functions to accomodate std::vector<std::vector<std::string>>>
-  /// structure of this property.
   std::string setValue(const std::string &propValue) override;
   std::string value() const override;
   std::string getDefault() const override;
+  bool isOptional() const;
 
   /// @return the vector of suggested extensions. For use in GUIs showing files.
   std::vector<std::string> getExts() const { return m_exts; }
@@ -145,12 +156,9 @@ public:
   using Kernel::PropertyWithValue<std::vector<std::vector<std::string>>>::
   operator=;
 
-  /// Return a "flattened" vector with the contents of the given vector of
-  /// vectors.
-  static std::vector<std::string>
-  flattenFileNames(const std::vector<std::vector<std::string>> &fileNames);
-
 private:
+  /// Returns a string depending on whether an empty value is valid
+  std::string isEmptyValueValid() const;
   std::string setValueAsSingleFile(const std::string &propValue);
   std::string setValueAsMultipleFiles(const std::string &propValue);
   /// Whether or not the user has turned on multifile loading.
@@ -163,6 +171,9 @@ private:
   /// The default file extension associated with the type of file this property
   /// will handle
   std::string m_defaultExt;
+  /// The action type of this property
+  /// Load (dafault) or OptionalLoad are supported
+  unsigned int m_action;
 };
 
 } // namespace API

@@ -30,32 +30,32 @@
 #include "ApplicationWindow.h"
 #include "Bar.h"
 #include "Cone3D.h"
-#include "MyParser.h"
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidMatrixFunction.h"
-#include "MantidQtAPI/PlotAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtAPI/PlotAxis.h"
 #include "MatrixModel.h"
+#include "MyParser.h"
 #include "UserFunction.h" //Mantid
 
 #include "MantidQtAPI/TSVSerialiser.h"
 
 #include <QApplication>
-#include <QMessageBox>
-#include <QFileDialog>
-#include <QPrinter>
-#include <QPrintDialog>
-#include <QClipboard>
-#include <QPixmap>
 #include <QBitmap>
+#include <QClipboard>
 #include <QCursor>
+#include <QFileDialog>
 #include <QImageWriter>
+#include <QMessageBox>
+#include <QPixmap>
+#include <QPrintDialog>
+#include <QPrinter>
 
-#include <qwt3d_io_gl2ps.h>
 #include <qwt3d_coordsys.h>
+#include <qwt3d_io_gl2ps.h>
 
-#include <gsl/gsl_vector.h>
 #include <fstream>
+#include <gsl/gsl_vector.h>
 
 // Register the window into the WindowFactory
 DECLARE_WINDOW(Graph3D)
@@ -2494,9 +2494,9 @@ Graph3D::~Graph3D() {
     delete d_surface;
 }
 
-IProjectSerialisable *Graph3D::loadFromProject(const std::string &lines,
-                                               ApplicationWindow *app,
-                                               const int fileVersion) {
+MantidQt::API::IProjectSerialisable *
+Graph3D::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                         const int fileVersion) {
   Q_UNUSED(fileVersion);
   auto graph = new Graph3D("", app, "", 0);
 
@@ -2548,6 +2548,10 @@ IProjectSerialisable *Graph3D::loadFromProject(const std::string &lines,
 
   if (tsv.selectLine("grids")) {
     graph->setGrid(tsv.asInt(1));
+  }
+
+  if (tsv.selectLine(("ScaleType"))) {
+    graph->readScaleType(tsv.lineAsString("ScaleType"));
   }
 
   if (tsv.selectLine("title")) {
@@ -2644,6 +2648,12 @@ IProjectSerialisable *Graph3D::loadFromProject(const std::string &lines,
     graph->setOrthogonal(tsv.asInt(1));
   }
 
+  if (tsv.selectLine("animated")) {
+    int animated;
+    tsv >> animated;
+    graph->animate(animated);
+  }
+
   if (tsv.selectLine("Style")) {
     QString qStyle = QString::fromUtf8(tsv.lineAsString("Style").c_str());
     QStringList sl = qStyle.split("\t");
@@ -2660,7 +2670,6 @@ IProjectSerialisable *Graph3D::loadFromProject(const std::string &lines,
   graph->setIgnoreFonts(true);
   app->restoreWindowGeometry(
       app, graph, QString::fromStdString(tsv.lineAsString("geometry")));
-
   return graph;
 }
 
@@ -2757,7 +2766,7 @@ void Graph3D::setupPlotSurface(ApplicationWindow *app,
   setWindowTitle(label);
   setName(label);
   app->customPlot3D(this);
-  addFunction(QString::fromStdString(params.xFormula), params.xStart,
+  addFunction(QString::fromStdString(params.formula), params.xStart,
               params.xStop, params.yStart, params.yStop, params.zStart,
               params.zStop, params.columns, params.rows);
 
@@ -2860,7 +2869,9 @@ int Graph3D::read3DPlotStyle(MantidQt::API::TSVSerialiser &tsv) {
 
 Graph3D::SurfaceFunctionParams
 Graph3D::readSurfaceFunction(MantidQt::API::TSVSerialiser &tsv) {
-  SurfaceFunctionParams params;
+  // We cant use {0} to zero initialise as GCC incorrectly thinks
+  // the members are still uninitialised
+  SurfaceFunctionParams params = SurfaceFunctionParams();
   tsv >> params.formula;
   params.type = readSurfaceFunctionType(params.formula);
 
@@ -2927,6 +2938,27 @@ Graph3D::readSurfaceFunctionType(const std::string &formula) {
   return type;
 }
 
+void Graph3D::readScaleType(const std::string &scaleTypes) {
+  TSVSerialiser tsv(scaleTypes);
+  tsv.selectLine("ScaleType");
+
+  int x, y, z;
+  tsv >> x >> y >> z;
+
+  SCALETYPE xScale, yScale, zScale;
+  xScale = static_cast<SCALETYPE>(x);
+  yScale = static_cast<SCALETYPE>(y);
+  zScale = static_cast<SCALETYPE>(z);
+
+  sp->coordinates()->axes[X1].setScale(xScale);
+  sp->coordinates()->axes[Y1].setScale(yScale);
+  sp->coordinates()->axes[Z1].setScale(zScale);
+
+  scaleType[0] = x;
+  scaleType[1] = y;
+  scaleType[2] = z;
+}
+
 std::string Graph3D::saveToProject(ApplicationWindow *app) {
   MantidQt::API::TSVSerialiser tsv;
   tsv.writeRaw("<SurfacePlot>");
@@ -2961,6 +2993,8 @@ std::string Graph3D::saveToProject(ApplicationWindow *app) {
   sp->coordinates()->axes[Z1].limits(start, stop);
   surfFunc += QString::number(start) + "\t";
   surfFunc += QString::number(stop);
+
+  tsv.writeLine("ScaleType") << scaleType[0] << scaleType[1] << scaleType[2];
 
   tsv.writeLine("SurfaceFunction") << surfFunc.toStdString();
 
@@ -3063,6 +3097,7 @@ std::string Graph3D::saveToProject(ApplicationWindow *app) {
   tsv.writeLine("LineWidth") << sp->meshLineWidth();
   tsv.writeLine("WindowLabel") << windowLabel() << captionPolicy();
   tsv.writeLine("Orthogonal") << sp->ortho();
+  tsv.writeLine("animated") << isAnimated();
 
   tsv.writeRaw("</SurfacePlot>");
   return tsv.outputLines();

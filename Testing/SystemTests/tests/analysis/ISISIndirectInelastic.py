@@ -327,106 +327,6 @@ class IRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
 
 #==============================================================================
 
-class ISISIndirectInelasticReductionOutput(stresstesting.MantidStressTest):
-
-    def runTest(self):
-        self.file_formats = ['nxs', 'spe', 'nxspe', 'ascii', 'aclimax']
-        self.file_extensions = ['.nxs', '.spe', '.nxspe', '.dat', '_aclimax.dat']
-
-        self.instr_name = 'TOSCA'
-        self.detector_range = [1, 140]
-        self.data_files = ['TSC15352.raw']
-        self.rebin_string = '-2.5,0.015,3,-0.005,1000'
-
-        reductions = ISISIndirectEnergyTransfer(Instrument=self.instr_name,
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                InputFiles=self.data_files,
-                                                SpectraRange=self.detector_range,
-                                                RebinString=self.rebin_string,
-                                                SaveFormats=self.file_formats)
-
-        self.result_name = reductions[0].getName()
-
-    def validate(self):
-        self.output_file_names = self._get_file_names()
-        self.assert_reduction_output_exists(self.output_file_names)
-        self.assert_ascii_file_matches()
-        self.assert_aclimax_file_matches()
-        self.assert_spe_file_matches()
-
-    def cleanup(self):
-        mtd.clear()
-
-        for file_path in self.output_file_names.itervalues():
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-
-    def assert_ascii_file_matches(self):
-        expected_result = [
-            'X , Y0 , E0 , Y1 , E1 , Y2 , E2',
-            '-2.4925,0,0,0.617579,0.362534,0.270868,0.159006',
-            '-2.4775,0.375037,0.273017,0,0,0.210547,0.153272'
-        ]
-        self.assert_file_format_matches_expected(expected_result, self.output_file_names['ascii'],
-                                                 "Output of ASCII format did not match expected result.")
-
-    def assert_aclimax_file_matches(self):
-        expected_result = [
-            '# X \t Y \t E',
-            '0',
-            '3.0075\t0.175435\t0.115017'
-        ]
-        self.assert_file_format_matches_expected(expected_result, self.output_file_names['aclimax'],
-                                                 "Output of aclimax format did not match expected result.")
-
-    def assert_spe_file_matches(self):
-        #Old SPE format:
-        #   '       3    1532',
-        #   '### Phi Grid',
-        #   ' 5.000E-01 1.500E+00 2.500E+00 3.500E+00',
-        #   '### Energy Grid',
-        #   '-2.500E+00-2.485E+00-2.470E+00-2.455E+00-2.440E+00-2.425E+00-2.410E+00-2.395E+00'
-        #
-        # New SPE format:
-        expected_result = [
-            '       3    1532',
-            '### Phi Grid',
-            '0.5       1.5       2.5       3.5',
-            '### Energy Grid',
-            '-2.5      -2.485    -2.47     -2.455    -2.44     -2.425    -2.41     -2.395'
-        ]
-        self.assert_file_format_matches_expected(expected_result, self.output_file_names['spe'],
-                                                 "Output of SPE format did not match expected result.")
-
-    def assert_reduction_output_exists(self, output_file_names):
-        for file_path in output_file_names.itervalues():
-            self.assertTrue(os.path.exists(file_path), "File does not exist in the default save directory")
-            self.assertTrue(os.path.isfile(file_path), "Output file of reduction output is not a file.")
-
-    def assert_file_format_matches_expected(self, expected_result, file_path, msg=""):
-        num_lines = len(expected_result)
-        actual_result = self._read_ascii_file(file_path, num_lines)
-        self.assertTrue(actual_result == expected_result, msg + " (%s != %s)" % (actual_result, expected_result))
-
-    def _read_ascii_file(self, path, num_lines):
-        with open(path,'rb') as file_handle:
-            lines = [file_handle.readline().rstrip() for _ in xrange(num_lines)]
-            return lines
-
-    def _get_file_names(self):
-        working_directory = config['defaultsave.directory']
-
-        output_names = {}
-        for file_format, ext in zip(self.file_formats, self.file_extensions):
-            output_file_name = self.result_name + ext
-            output_file_name = os.path.join(working_directory, output_file_name)
-            output_names[file_format] = output_file_name
-
-        return output_names
-
-#==============================================================================
-
 class ISISIndirectInelasticCalibration(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic calibration tests
 
@@ -674,7 +574,7 @@ class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
 
         SofQWMoments(Sample=self.input_workspace, EnergyMin=self.e_min,
                      EnergyMax=self.e_max, Scale=self.scale,
-                     Plot=False, Save=False, OutputWorkspace=self.input_workspace + '_Moments')
+                     OutputWorkspace=self.input_workspace + '_Moments')
 
         self.result_names = [self.input_workspace + '_Moments']
 
@@ -741,7 +641,7 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
             Load(Filename=filename, OutputWorkspace=filename)
         GroupWorkspaces(InputWorkspaces=self.files, OutputWorkspace=elwin_input)
 
-        ElasticWindowMultiple(InputWorkspaces=elwin_input, Plot=False,
+        ElasticWindowMultiple(InputWorkspaces=elwin_input,
                               IntegrationRangeStart=self.eRange[0], IntegrationRangeEnd=self.eRange[1],
                               OutputInQ=elwin_results[0], OutputInQSquared=elwin_results[1],
                               OutputELF=elwin_results[2])
@@ -758,8 +658,7 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
         msdfit_result = MSDFit(InputWorkspace=eq2_file,
                                XStart=self.startX,
                                XEnd=self.endX,
-                               SpecMax=1,
-                               Plot=False)
+                               SpecMax=1)
 
         # Clean up the intermediate files.
         for filename in int_files:
@@ -901,14 +800,16 @@ class OSIRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.num_bins = 4
 
         # Iqt Seq Fit
-        self.func = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
-                     'Intensity=0.304185,Tau=100;ties=(f1.Intensity=1-f0.A0)'
+        self.func = r'composite=CompositeFunction,NumDeriv=1;name=LinearBackground,A0=0,A1=0,ties=(A1=0);'\
+                    'name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
+                    'Intensity=0.304185,Tau=100;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
         self.spec_max = 41
-        self.startx = 0.022861
+        self.startx = 0.0
         self.endx = 0.118877
 
     def get_reference_files(self):
+        self.tolerance = 1e-4
         return ['II.OSIRISFury.nxs',
                 'II.OSIRISFuryFitSeq.nxs']
 
@@ -927,14 +828,16 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.num_bins = 4
 
         # Iqt Seq Fit
-        self.func = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
-                     'Intensity=0.355286,Tau=100;ties=(f1.Intensity=1-f0.A0)'
+        self.func = r'composite=CompositeFunction,NumDeriv=1;name=LinearBackground,A0=0,A1=0,ties=(A1=0);'\
+                    'name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
+                    'Intensity=0.355286,Tau=100;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
         self.spec_max = 50
-        self.startx = 0.013717
+        self.startx = 0.0
         self.endx = 0.169171
 
     def get_reference_files(self):
+        self.tolerance = 1e-4
         return ['II.IRISFury.nxs',
                 'II.IRISFuryFitSeq.nxs']
 
@@ -1032,6 +935,7 @@ class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.spec_max = 41
 
     def get_reference_files(self):
+        self.tolerance = 1e-3
         return ['II.OSIRISIqt.nxs',
                 'II.OSIRISIqtFitMulti.nxs']
 
@@ -1053,12 +957,13 @@ class IRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
 
         # Iqt Fit
         self.func = r'name=LinearBackground,A0=0.584488,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp( -(x/Tau)^Beta),'\
-                     'Intensity=0.415512,Tau=4.848013e-14,Beta=0.022653;ties=(f1.Intensity=1-f0.A0)'
+                     'Intensity=0.415512,Beta=0.022653;ties=(f1.Intensity=1-f0.A0,f1.Tau=0.05)'
         self.ftype = '1S_s'
         self.startx = 0.0
         self.endx = 0.156250
 
     def get_reference_files(self):
+        self.tolerance = 1e-4
         return ['II.IRISFury.nxs',
                 'II.IRISFuryFitMulti.nxs']
 
@@ -1122,7 +1027,8 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
         self.resolution = FileFinder.getFullPath('osi97935_graphite002_res.nxs')
         #ConvFit fit function
         self.func = 'name=LinearBackground,A0=0,A1=0;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
-                    'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=2,PeakCentre=0,FWHM=0.05)' % self.resolution
+                    'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=2,FWHM=0.002,ties=(PeakCentre=0)'\
+                    ',constraints=(FWHM>0.002))' % self.resolution
         self.startx = -0.2
         self.endx = 0.2
         self.bg = 'Fit Linear'
@@ -1133,6 +1039,7 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
         self.result_names = ['osi97935_graphite002_conv_1LFitL_s0_to_41_Result']
 
     def get_reference_files(self):
+        self.tolerance = 0.015
         return ['II.OSIRISConvFitSeq.nxs']
 
 #------------------------- IRIS tests -----------------------------------------
@@ -1144,9 +1051,11 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         self.sample = 'irs53664_graphite002_red.nxs'
         self.resolution = FileFinder.getFullPath('irs53664_graphite002_res.nxs')
         #ConvFit fit function
-        self.func = 'name=LinearBackground,A0=0.060623,A1=0.001343;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
-                    'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=1.033150,PeakCentre=-0.000841,FWHM=0.001576)'\
-                    % (self.resolution)
+        self.func = 'name=LinearBackground,A0=0.060623,A1=0.001343;' \
+                    '(composite=Convolution,FixResolution=true,NumDeriv=true;' \
+                    'name=Resolution,Workspace="%s";name=Lorentzian,Amplitude=1.033150,FWHM=0.001576,'\
+                    'ties=(PeakCentre=0.0),constraints=(FWHM>0.001))' % self.resolution
+
         self.startx = -0.2
         self.endx = 0.2
         self.bg = 'Fit Linear'
@@ -1157,6 +1066,7 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         self.result_names = ['irs53664_graphite002_conv_1LFitL_s0_to_50_Result']
 
     def get_reference_files(self):
+        self.tolerance = 0.13
         return ['II.IRISConvFitSeq.nxs']
 
 #==============================================================================

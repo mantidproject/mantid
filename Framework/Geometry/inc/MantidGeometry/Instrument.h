@@ -256,7 +256,7 @@ public:
 private:
   /// Save information about a set of detectors to Nexus
   void saveDetectorSetInfoToNexus(::NeXus::File *file,
-                                  std::vector<detid_t> detIDs) const;
+                                  const std::vector<detid_t> &detIDs) const;
 
   /// Private copy assignment operator
   Instrument &operator=(const Instrument &);

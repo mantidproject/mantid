@@ -48,6 +48,10 @@ IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
   // Update the preview plot when the algorithm completes
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(momentsAlgComplete(bool)));
+
+  // Plot and save
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -64,9 +68,6 @@ void IndirectMoments::run() {
   double eMin = m_dblManager->value(m_properties["EMin"]);
   double eMax = m_dblManager->value(m_properties["EMax"]);
 
-  bool plot = m_uiForm.ckPlot->isChecked();
-  bool save = m_uiForm.ckSave->isChecked();
-
   std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
 
   IAlgorithm_sptr momentsAlg =
@@ -75,8 +76,6 @@ void IndirectMoments::run() {
   momentsAlg->setProperty("Sample", workspaceName.toStdString());
   momentsAlg->setProperty("EnergyMin", eMin);
   momentsAlg->setProperty("EnergyMax", eMax);
-  momentsAlg->setProperty("Plot", plot);
-  momentsAlg->setProperty("Save", save);
   momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
 
   if (m_uiForm.ckScale->isChecked())
@@ -85,7 +84,7 @@ void IndirectMoments::run() {
   // Set the workspace name for Python script export
   m_pythonExportWsName = outputWorkspaceName + "_M0";
 
-  // Execute algorithm on seperate thread
+  // Execute algorithm on separate thread
   runAlgorithm(momentsAlg);
 }
 
@@ -120,11 +119,10 @@ void IndirectMoments::handleSampleInputReady(const QString &filename) {
   QPair<double, double> range = m_uiForm.ppRawPlot->getCurveRange("Raw");
 
   auto xRangeSelector = m_uiForm.ppRawPlot->getRangeSelector("XRange");
-  setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"],
-                   range);
   setPlotPropertyRange(xRangeSelector, m_properties["EMin"],
                        m_properties["EMax"], range);
-
+  setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"],
+                   range);
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateProperties(QtProperty *, double)));
 }
@@ -143,7 +141,7 @@ void IndirectMoments::rangeChanged(double min, double max) {
 /**
  * Handles when properties in the property manager are updated.
  *
- * Performs validation and uodated preview plot.
+ * Performs validation and updated preview plot.
  *
  * @param prop :: The property being updated
  * @param val :: The new value for the property
@@ -192,10 +190,37 @@ void IndirectMoments::momentsAlgComplete(bool error) {
   m_uiForm.ppMomentsPreview->addSpectrum(
       "M0", QString::fromStdString(resultWsNames[0]), 0, Qt::green);
   m_uiForm.ppMomentsPreview->addSpectrum(
-      "M1", QString::fromStdString(resultWsNames[2]), 0, Qt::black);
+      "M1", QString::fromStdString(resultWsNames[1]), 0, Qt::black);
   m_uiForm.ppMomentsPreview->addSpectrum(
-      "M2", QString::fromStdString(resultWsNames[3]), 0, Qt::red);
+      "M2", QString::fromStdString(resultWsNames[2]), 0, Qt::red);
   m_uiForm.ppMomentsPreview->resizeX();
+
+  // Enable plot and save buttons
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+}
+
+/**
+ * Handle mantid plotting
+ */
+void IndirectMoments::plotClicked() {
+  QString outputWs =
+      getWorkspaceBasename(m_uiForm.dsInput->getCurrentDataName()) + "_Moments";
+  if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), true)) {
+    plotSpectrum(outputWs + "_M0");
+    plotSpectrum({outputWs + "_M2", outputWs + "_M4"});
+  }
+}
+
+/**
+ * Handles saving of workspaces
+ */
+void IndirectMoments::saveClicked() {
+  QString outputWs =
+      getWorkspaceBasename(m_uiForm.dsInput->getCurrentDataName()) + "_Moments";
+  if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), false))
+    addSaveWorkspaceToQueue(outputWs);
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
 } // namespace CustomInterfaces

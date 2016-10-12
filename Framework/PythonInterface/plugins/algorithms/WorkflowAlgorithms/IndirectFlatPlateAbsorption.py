@@ -1,4 +1,6 @@
 #pylint: disable=no-init,too-many-instance-attributes,too-many-branches
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress, WorkspaceGroupProperty
 from mantid.kernel import StringMandatoryValidator, Direction, logger, FloatBoundedValidator
@@ -20,7 +22,6 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
     _can_back_thickness = None
     _can_scale = None
     _element_size = None
-    _plot = None
     _output_ws = None
     _abs_ws = None
     _ass_ws = None
@@ -80,8 +81,6 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='ElementSize', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Element size in mm')
-        self.declareProperty(name='Plot', defaultValue=False,
-                             doc='Plot options')
 
         # Output
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
@@ -122,8 +121,6 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                             EFixed=efixed,
                             NumberOfWavelengthPoints=10)
 
-        plot_data = [self._output_ws, self._sample_ws]
-        plot_corr = [self._ass_ws]
         group = self._ass_ws
 
         if self._can_ws_name is not None:
@@ -151,7 +148,6 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
 
                 Divide(LHSWorkspace=can_wave_ws, RHSWorkspace=self._acc_ws, OutputWorkspace=can_wave_ws)
                 Minus(LHSWorkspace=sample_wave_ws, RHSWorkspace=can_wave_ws, OutputWorkspace=sample_wave_ws)
-                plot_corr.append(self._acc_ws)
                 group += ',' + self._acc_ws
 
             else:
@@ -160,7 +156,6 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                 Divide(LHSWorkspace=sample_wave_ws, RHSWorkspace=self._ass_ws, OutputWorkspace=sample_wave_ws)
 
             DeleteWorkspace(can_wave_ws)
-            plot_data.append(self._can_ws_name)
 
         else:
             Divide(LHSWorkspace=sample_wave_ws, RHSWorkspace=self._ass_ws, OutputWorkspace=sample_wave_ws)
@@ -203,14 +198,6 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
             GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=self._abs_ws)
             self.setProperty('CorrectionsWorkspace', self._abs_ws)
 
-        if self._plot:
-            from IndirectImport import import_mantidplot
-            mantid_plot = import_mantidplot()
-            mantid_plot.plotSpectrum(plot_data, 0)
-            if self._abs_ws != '':
-                mantid_plot.plotSpectrum(plot_corr, 0)
-
-
     def _setup(self):
         """
         Get algorithm properties.
@@ -234,7 +221,6 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         self._can_scale = self.getProperty('CanScaleFactor').value
 
         self._element_size = self.getProperty('ElementSize').value
-        self._plot = self.getProperty('Plot').value
         self._output_ws = self.getPropertyValue('OutputWorkspace')
 
         self._abs_ws = self.getPropertyValue('CorrectionsWorkspace')

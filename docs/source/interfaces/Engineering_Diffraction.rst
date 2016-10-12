@@ -1,3 +1,5 @@
+.. _Engineering_Diffraction-ref:
+
 Engineering Diffraction
 =======================
 
@@ -35,7 +37,7 @@ Close
   Close the interface
 
 Status at the bottom of the interface
-  Here there will be a short message that indicates whether the last
+  A short message will be displayed which indicates whether the last
   important calculations finished successfully, and when the interface
   is busy calculating (calibrating, focusing, fitting, etc.).
 
@@ -76,8 +78,8 @@ box has been enabled.
 
 The plot Calibrated Workspace check-box will enable user to plot
 vanadium curves and Ceria peaks. For Ceria peaks there will be two
-workspace generated and plotted, one for each bank, whereas for a
-cropped calibration there will only be only one workspace generated
+workspaces generated and plotted, one for each bank, whereas for a
+cropped calibration there will only be one workspace generated
 and plotted, depending on the selected bank or provided Spectrum
 IDs. The workspace contains difc and tzero data which is then
 utilised to plot the Ceria peaks per bank, the graph will plot Peaks
@@ -89,7 +91,7 @@ The calibration files are written into two different output
 directories. First, they are written to a user specific directory
 which for the ENGIN-X instrument on Windows systems is:
 
-`C:/EnginX_Mantid/<Username>/<RBNumber>/Calibration`
+`C:\\EnginX_Mantid\\<Username>\\<RBNumber>\\Calibration`
 
 On UNIX based platforms this path is:
 
@@ -97,7 +99,7 @@ On UNIX based platforms this path is:
 
 They are also copied into a general (all) output directory:
 
-`C:/EnginX_Mantid/Calibration` on Windows or
+`C:\\EnginX_Mantid\\Calibration` on Windows or
 
 `~/EnginX_Mantid/Calibration` on UNIX platforms.
 
@@ -217,8 +219,8 @@ number of focus runs that could not be processed.
 The focused data files are saved in NeXus format into the user
 specific and general directories (as with the calibration output
 files). That is the files are written into
-`C:/EnginX_Mantid/User/<RBNumber>/Calibration` and
-`C:/EnginX_Mantid/Calibration` on Windows, or
+`C:\\EnginX_Mantid\\User\\<RBNumber>\\Calibration` and
+`C:\\EnginX_Mantid\\Calibration` on Windows, or
 `~/EnginX_Mantid/User/<RBNumber>/Calibration` and
 `~/EnginX_Mantid/Calibration` on UNIX platforms.  See below for
 additional, optional outputs.
@@ -266,13 +268,13 @@ files by clicking the Output Files checkbox. This will generate three
 different files for each focused output workspace in Mantid. These
 files can be found with appropriate name within:
 
-`C:\EnginX_Mantid\<User>\<RBNumber>\Focus` on Windows or
+`C:\\EnginX_Mantid\\<User>\\<RBNumber>\\Focus` on Windows or
 
 `~/EnginX_Mantid/Foxus` on UNIX systems.
 
 The files are also copied to the general (all) output directory which is
 
-`C:\EnginX_Mantid\Focus` on Windows
+`C:\\EnginX_Mantid\\Focus` on Windows
 
 `~/EnginX_Mantid/Focus` under on UNIX systems
 
@@ -319,7 +321,7 @@ convention:
 
 - *engggui_preproc_by_pulse_time_ws*
 
-Focussing uses the algorithms :ref:`Rebin <algm-Rebin>` and :ref:`Rebin
+Focussing uses the algorithms :ref:`Rebin <algm-Rebin>` and :ref:`RebinByPulseTimes
 <algm-RebinByPulseTimes>` to bin the data in different ways when
 converting event data into histogram data.
 
@@ -339,12 +341,14 @@ providing a list of dSpacing values where Bragg peaks are expected.
 The algorithm :ref:`EnggFitPeaks<algm-EnggFitPeaks>` is used to
 background fit peaks in those areas using a peak fitting function.
 
-To use the Fitting tab, user is required to provide:
+To use the Fitting tab, user is required to follow these steps:
 
 1. A focused file as Focus Run input by browsing or entering single/multi
-   run number
-2. List of expected peaks which can be either by browsing a (*CSV*) file
-   or entering within the text-field
+   run number, *User may click Load button to load the focused file to the
+   canvas*
+2. List of expected peaks which can be either by browsing a (*CSV*) file,
+   manually selecting peaks from the canvas using peak picker tool after
+   loading the focused file or by entering the peaks list within the text-field
 3. Next click on the *Fit* button if you would like to fit single focused
    file or you can click *Fit All* button which will enable user to
    batch-process all the runs and banks when a range of run number is given,
@@ -435,9 +439,9 @@ Preview
 ^^^^^^^
 Once the fitting process has completed and you are able to view a
 focused workspace with listed expected peaks on the data plot, the *Select
-Peak* button should also be enabled. If the fitting fails with
-the given peaks then the focused workspace will still be plotted so
-that user can select peaks manually.
+Peak* button should also be enabled. If the user choose to load the focus
+workspace or if fitting fails with the given peaks then the focused
+workspace will be plotted so that the user can select the peaks manually.
 
 By clicking Select Peak button the peak picker tool can be activated.
 To select a peak simply hold *Shift* key and left-click on the graph
@@ -449,7 +453,7 @@ as well. Users may also zoom-in to the graph by holding left-click
 and dragging a box on the plot, and zoom-out by left-clicking on
 the plot.
 
-When user is satisfied with the center position of the peak, you may
+When user is happy with the center position of the peak, you may
 add the selected peak to :ref:`ExpectedPeaks-Engineering_Diffraction-ref`
 list by clicking Add Peak button. User may rerun Fit process by
 clearing peaks list using Clear button and manually selecting peaking

@@ -1,0 +1,25 @@
+=============
+Muon Analysis
+=============
+
+.. contents:: Table of Contents
+   :local:
+
+Interfaces
+----------
+
+Muon Analysis
+#############
+
+- Fixed a bug where the "load next/previous" buttons appended runs in certain cases where this was not the intended behaviour.
+
+Algorithms
+----------
+
+Fit Functions
+-------------
+
+|
+
+`Full list of changes <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Muon%22>`_
+on GitHub.

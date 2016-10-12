@@ -58,6 +58,9 @@ public Q_SLOTS:
   /// Clears error of the property, if one was set
   void clearError(QtProperty* property);
 
+  /// Clears errors from all properties, if set
+  void clearErrors();
+
   /// Enabled/disables error display
   void setErrorsEnabled(bool enabled);
 

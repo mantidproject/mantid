@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.kernel import Direction, StringArrayProperty, StringArrayLengthValidator
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, WorkspaceGroup
 import mantid.simpleapi as api
@@ -9,7 +11,7 @@ class TOFTOFMergeRuns(PythonAlgorithm):
     """ Clean the Sample Logs of workspace after merging for TOFTOF instrument
     """
 
-    mandatory_properties = ['channel_width', 'chopper_ratio', 'chopper_speed', 'Ei', 'wavelength', 'full_channels', 'EPP']
+    mandatory_properties = ['chopper_speed', 'channel_width', 'chopper_ratio',  'Ei', 'wavelength', 'full_channels', 'EPP']
     optional_properties = ['temperature', 'run_title']
     properties_to_merge = ['temperature', 'monitor_counts', 'duration', 'run_number', 'run_start', 'run_end']
     must_have_properties = ['monitor_counts', 'duration', 'run_number', 'run_start', 'run_end']
@@ -75,9 +77,16 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         Checks whether given workspaces can be merged
         """
         # mandatory properties must be identical
-        result = api.CompareSampleLogs(wsnames, self.mandatory_properties, 0.01)
+        result = api.CompareSampleLogs(wsnames, self.mandatory_properties[1:], 0.01)
         if len(result) > 0:
             raise RuntimeError("Sample logs " + result + " do not match!")
+            
+        # chopper_speed can vary about 10 and for some reason it is string (will be corrected in the future)
+        cstable = api.CreateLogPropertyTable(wsnames, 'chopper_speed')
+        chopper_speeds = [int(val) for val in cstable.column(0)]
+        if max(chopper_speeds) - min(chopper_speeds) > 10: # not within tolerance of 10 rpm
+            self.log().warning("Chopper speeds do not match! Chopper speeds are: " + " ,".join([str(val) for val in chopper_speeds]))
+        api.DeleteWorkspace(cstable)
 
         # timing (x-axis binning) must match
         # is it possible to use WorkspaceHelpers::matchingBins from python?
@@ -111,7 +120,7 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         wsOutput = self.getPropertyValue("OutputWorkspace")
 
         if workspaceCount < 2:
-            api.CloneWorkspace(InputWorkspace=self.wsNames[0], OutputWorkspace=wsOutput)
+            api.CloneWorkspace(InputWorkspace=input_workspace_list[0], OutputWorkspace=wsOutput)
             self.log().warning("Cannot merge one workspace. Clone is produced.")
             return
 
@@ -151,7 +160,7 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         zeros = np.where(np.array(mcounts) == 0)[0]
         if len(zeros) > 0:
             for index in zeros:
-                self.log().warning("Workspace " + self.wsNames[index] + " has zero monitor counts.")
+                self.log().warning("Workspace " + input_workspace_list[index] + " has zero monitor counts.")
         # create sample log
         api.AddSampleLog(Workspace=wsOutput, LogName='monitor_counts', LogText=str(sum(mcounts)),
                          LogType='Number')

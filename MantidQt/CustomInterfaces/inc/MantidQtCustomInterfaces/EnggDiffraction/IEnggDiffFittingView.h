@@ -71,18 +71,6 @@ public:
   virtual void setPeakList(const std::string &peakList) const = 0;
 
   /**
-   * Splits the file name in to sections of '_' and 'ENGINX' text
-   * within the filename
-   *
-   * @param selectedfPath is the selected file's path
-   *
-   * @return std::vector<std::string> of splitted file name with run
-   * number & bank
-   */
-  virtual std::vector<std::string>
-  splitFittingDirectory(std::string &selectedfPath) = 0;
-
-  /**
    * adds the number of banks to the combo-box widget on the interface
    *
    * @param bankID the bank number to add to combo-box
@@ -273,6 +261,11 @@ public:
    */
   virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                              bool focused, bool plotSinglePeaks) = 0;
+
+  /**
+   * resets the canvas to avoid multiple plotting
+   */
+  virtual void resetCanvas() = 0;
 
   /**
    * Messages that this view wants to send to the logging system.

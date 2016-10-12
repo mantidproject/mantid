@@ -1,6 +1,4 @@
 set ( SRC_FILES
-	src/BinEdgeStandardDeviations.cpp
-	src/BinEdgeVariances.cpp
 	src/BinEdges.cpp
 	src/CountStandardDeviations.cpp
 	src/CountVariances.cpp
@@ -11,15 +9,11 @@ set ( SRC_FILES
 	src/Histogram.cpp
 	src/HistogramMath.cpp
 	src/Rebin.cpp
-	src/PointStandardDeviations.cpp
-	src/PointVariances.cpp
 	src/Points.cpp
 )
 
 set ( INC_FILES
 	inc/MantidHistogramData/Addable.h
-	inc/MantidHistogramData/BinEdgeStandardDeviations.h
-	inc/MantidHistogramData/BinEdgeVariances.h
 	inc/MantidHistogramData/BinEdges.h
 	inc/MantidHistogramData/CountStandardDeviations.h
 	inc/MantidHistogramData/CountVariances.h
@@ -39,6 +33,7 @@ set ( INC_FILES
 	inc/MantidHistogramData/Iterable.h
 	inc/MantidHistogramData/LinearGenerator.h
 	inc/MantidHistogramData/LogarithmicGenerator.h
+	inc/MantidHistogramData/Multipliable.h
 	inc/MantidHistogramData/Offsetable.h
 	inc/MantidHistogramData/PointStandardDeviations.h
 	inc/MantidHistogramData/PointVariances.h
@@ -54,8 +49,6 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	AddableTest.h
-	BinEdgeStandardDeviationsTest.h
-	BinEdgeVariancesTest.h
 	BinEdgesTest.h
 	CountStandardDeviationsTest.h
 	CountVariancesTest.h
@@ -75,6 +68,7 @@ set ( TEST_FILES
 	IterableTest.h
 	LinearGeneratorTest.h
 	LogarithmicGeneratorTest.h
+	MultipliableTest.h
 	OffsetableTest.h
 	PointStandardDeviationsTest.h
 	PointVariancesTest.h

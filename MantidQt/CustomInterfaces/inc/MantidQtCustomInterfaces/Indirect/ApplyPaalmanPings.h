@@ -28,6 +28,9 @@ private slots:
   void absCorComplete(bool error);
   /// Handle convert units and save algorithm completion
   void postProcessComplete(bool error);
+  /// Handles mantid plot and save
+  void saveClicked();
+  void plotClicked();
 
 private:
   void setup() override;

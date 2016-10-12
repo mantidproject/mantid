@@ -12,6 +12,8 @@ python doi.py --username=[] --password=[] --main 3.0.0
 Then at every release, the script will run again without the "--main" flag to
 generate a DOI pointing to the release notes for that particular version.
 
+If a password is not provided then it is prompted.
+
 Using the "--test" flag will run the script and post DOI's to the DataCite test
 server at https://test.datacite.org/mds/doi/10.5286/Software/.
 
@@ -55,6 +57,7 @@ USEFUL LINKS:
 """
 
 import argparse
+import getpass
 import os
 import xml.etree.ElementTree as ET
 
@@ -413,6 +416,9 @@ def run(args):
     else:
         server_url_base = 'https://mds.datacite.org/'
 
+    if not args.password:
+        args.password = getpass.getpass()
+
     if args.delete:
         delete_doi(server_url_base, doi, args)
         quit()
@@ -516,12 +522,6 @@ if __name__ == "__main__":
         help='Version of Mantid whose DOI is to be created/updated in the form "major.minor.patch"'
     )
     parser.add_argument(
-        '--password',
-        type=str,
-        required=True,
-        help='Password. This should be hidden in the Jenkins\' job logs.'
-    )
-    parser.add_argument(
         '--username',
         type=str,
         required=True,
@@ -529,6 +529,11 @@ if __name__ == "__main__":
     )
 
     # OPTIONAL
+    parser.add_argument(
+        '--password',
+        type=str,
+        help='Password for the server. If missing then a prompt is displayed requesting input'
+    )
     parser.add_argument(
         '--test',
         action='store_true',

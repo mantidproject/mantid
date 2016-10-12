@@ -5,6 +5,7 @@ Assumes that mantid can be imported and the data paths
 are configured to find the Vesuvio data
 """
 from __future__ import (absolute_import, division, print_function)
+from six import iteritems
 
 import unittest
 import numpy as np
@@ -58,6 +59,25 @@ class VesuvioTOFFitTest(unittest.TestCase):
         # Check second spectra matches expected
         self.assertTrue(self._equal_within_tolerance(expected_peak_height_spec2, peak_height_spec2))
         self.assertTrue(self._equal_within_tolerance(expected_bin_index_spec2, bin_index_spec2))
+
+
+    def test_single_run_index0_kfixed_no_background_with_ties(self):
+        profiles = "function=GramCharlier,width=[2, 5, 7],hermite_coeffs=[1, 0, 0],k_free=0,sears_flag=1;"\
+                   "function=Gaussian,width=10;function=Gaussian,width=13;function=Gaussian,width=30;"
+        ties = "f2.Intensity=f3.Intensity"
+
+        alg = self._create_algorithm(InputWorkspace=self._test_ws, WorkspaceIndex=0,
+                                     Masses=[1.0079, 16, 27, 133],
+                                     MassProfiles=profiles,
+                                     Ties=ties,
+                                     IntensityConstraints="[0,1,0,-4]")
+        alg.execute()
+        fit_params = alg.getProperty("FitParameters").value
+        f2_intensity = fit_params.row(9)
+        f3_intensity = fit_params.row(12)
+
+        # Ensure the value of the f2.Intensity and f3.Intensity fit parameters are tied
+        self.assertAlmostEqual(f2_intensity['Value'], f3_intensity['Value'])
 
 
     def test_single_run_produces_correct_output_workspace_index1_kfixed_no_background(self):
@@ -162,7 +182,7 @@ class VesuvioTOFFitTest(unittest.TestCase):
         alg.setChild(True)
         alg.setProperty("OutputWorkspace", "__unused")
         alg.setProperty("FitParameters", "__unused")
-        for key, value in kwargs.iteritems():
+        for key, value in iteritems(kwargs):
             alg.setProperty(key, value)
         return alg
 

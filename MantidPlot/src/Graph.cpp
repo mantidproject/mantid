@@ -1388,9 +1388,7 @@ void Graph::setAxisScale(int axis, double start, double end, int scaleType,
     updateSecondaryAxis(QwtPlot::xTop);
     updateSecondaryAxis(QwtPlot::yRight);
   }
-  d_plot->replot();
-  ////keep markers on canvas area
-  updateMarkersBoundingRect();
+
   d_plot->replot();
   d_plot->axisWidget(axis)->repaint();
 }
@@ -2836,9 +2834,9 @@ PlotCurve *Graph::insertCurve(Table *w, const QString &xColName,
 }
 
 PlotCurve *Graph::insertCurve(QString workspaceName, int index, bool err,
-                              Graph::CurveType style) {
+                              Graph::CurveType style, bool distribution) {
   return (new MantidMatrixCurve(workspaceName, this, index,
-                                MantidMatrixCurve::Spectrum, err, false,
+                                MantidMatrixCurve::Spectrum, err, distribution,
                                 style));
 }
 
@@ -5793,12 +5791,6 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
     loadAxesOptions(axesOptions);
   }
 
-  if (tsv.selectLine("EnabledAxes")) {
-    size_t n = tsv.values("EnabledAxes").size();
-    for (size_t i = 0; i < n - 1; ++i)
-      enableAxis((int)i, tsv.asInt(i + 1));
-  }
-
   if (tsv.selectLine("EnabledTicks")) {
     QStringList sl =
         QString::fromUtf8(tsv.lineAsString("EnabledTicks").c_str()).split("\t");
@@ -5930,17 +5922,6 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
     setTitle(title);
     setTitleColor(QColor(color));
     setTitleAlignment((Qt::AlignmentFlag)alignment);
-  }
-
-  for (int i = 0; tsv.selectLine("scale", i); ++i) {
-    QStringList scl =
-        QString::fromUtf8(tsv.lineAsString("scale", i).c_str()).split("\t");
-    scl.pop_front();
-    if (scl.count() >= 8) {
-      setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(),
-               scl[3].toDouble(), scl[4].toInt(), scl[5].toInt(),
-               scl[6].toInt(), bool(scl[7].toInt()));
-    }
   }
 
   for (int i = 0; i < 4; ++i) {
@@ -6184,11 +6165,11 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
     std::vector<std::string> specSections = tsv.sections("spectrogram");
     for (auto it = specSections.begin(); it != specSections.end(); ++it) {
       MantidQt::API::TSVSerialiser specTSV(*it);
+      Spectrogram *s = nullptr;
 
       if (specTSV.selectLine("workspace")) {
         std::string wsName;
         specTSV >> wsName;
-
         Mantid::API::IMDWorkspace_const_sptr wsPtr =
             Mantid::API::AnalysisDataService::Instance()
                 .retrieveWS<Mantid::API::IMDWorkspace>(wsName);
@@ -6197,32 +6178,31 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
         if (!wsPtr.get())
           continue;
 
-        /* You may notice we plot the spectrogram before loading it.
+        s = new Spectrogram(QString::fromUtf8(wsName.c_str()), wsPtr);
+      } else if (specTSV.selectLine("matrix")) {
+        std::string wsName;
+        specTSV >> wsName;
+        Matrix *m = app->matrix(QString::fromStdString(wsName));
+
+        if (!m)
+          continue;
+
+        s = new Spectrogram(m);
+      }
+
+      /* You may notice we plot the spectrogram before loading it.
         * Why? Because plotSpectrogram overrides the spectrograms' settings
         * based off the second parameter (which has been chosen arbitrarily
         * in this case). We're just use plotSpectrogram to add the spectrogram
         * to the graph for us, and then loading the settings into the
         * spectrogram.
         */
-        Spectrogram *s =
-            new Spectrogram(QString::fromUtf8(wsName.c_str()), wsPtr);
-        plotSpectrogram(s, Graph::ColorMap);
-        s->loadFromProject(*it);
-        curveID++;
-      } else if (specTSV.selectLine("matrix")) {
-        std::string matrixName;
-        specTSV >> matrixName;
+      if (!s)
+        continue;
 
-        Matrix *m = app->matrix(QString::fromStdString(matrixName));
-
-        if (!m)
-          continue;
-
-        Spectrogram *s = new Spectrogram(m);
-        plotSpectrogram(s, Graph::ColorMap);
-        s->loadFromProject(*it);
-        curveID++;
-      }
+      plotSpectrogram(s, Graph::ColorMap);
+      s->loadFromProject(*it);
+      curveID++;
     }
 
     //<SkipPoints>, <CurveLabels>, and <MantidYErrors> all apply to the
@@ -6300,6 +6280,27 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
     updateDataCurves();
   }
 
+  // Enabling/disbling axes should be applied after plots are loaded as some
+  // types (i.e. Spectrogram) force axes to be enabled.
+  if (tsv.selectLine("EnabledAxes")) {
+    size_t n = tsv.values("EnabledAxes").size();
+    for (size_t i = 0; i < n - 1; ++i)
+      enableAxis((int)i, tsv.asInt(i + 1));
+  }
+
+  // Scaling axes should be applied after all plot types have been loaded
+  // to avoid incorrectly updating one.
+  for (int i = 0; tsv.selectLine("scale", i); ++i) {
+    QStringList scl =
+        QString::fromUtf8(tsv.lineAsString("scale", i).c_str()).split("\t");
+    scl.pop_front();
+    if (scl.count() >= 8) {
+      setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(),
+               scl[3].toDouble(), scl[4].toInt(), scl[5].toInt(),
+               scl[6].toInt(), bool(scl[7].toInt()));
+    }
+  }
+
   replot();
   blockSignals(false);
 
@@ -6310,9 +6311,7 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
 std::string Graph::saveToProject() {
   MantidQt::API::TSVSerialiser tsv;
 
-  tsv.writeLine("ggeometry") << pos().x() << pos().y()
-                             << frameGeometry().width()
-                             << frameGeometry().height();
+  tsv.writeLine("ggeometry") << x() << y() << width() << height();
 
   tsv.writeLine("PlotTitle");
   tsv << d_plot->title().text().replace("\n", "<br>");

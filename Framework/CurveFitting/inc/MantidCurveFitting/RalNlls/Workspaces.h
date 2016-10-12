@@ -146,7 +146,7 @@ struct nlls_options {
   bool scale_trim_min = true;
   bool scale_trim_max = true;
   bool scale_require_increase = false;
-  bool calculate_svd_J = true;
+  bool calculate_svd_J = false;
 
   /// M O R E - S O R E N S E N   C O N T R O L S
   int more_sorensen_maxits = 500;
@@ -255,9 +255,10 @@ struct solve_general_work {
   IntFortranVector ipiv;
 };
 
-/// workspace for subroutine evaluate_model
+/// workspace for subroutine evaluateModel
 struct evaluate_model_work {
   DoubleFortranVector Jd, Hd;
+  double md_gn = 0.0;
 };
 
 /// workspace for subroutine solve_LLS
@@ -273,12 +274,12 @@ struct min_eig_symm_work {
   IntFortranVector iwork, ifail;
 };
 
-/// workspace for subroutine all_eig_symm
+/// workspace for subroutine allEigSymm
 struct all_eig_symm_work {
   DoubleFortranVector work;
 };
 
-/// workspace for subrouine apply_scaling
+/// workspace for subrouine applyScaling
 struct apply_scaling_work {
   DoubleFortranVector diag;
   DoubleFortranMatrix ev;
@@ -294,7 +295,7 @@ struct solve_dtrs_work {
   apply_scaling_work apply_scaling_ws;
 };
 
-/// workspace for subroutine more_sorensen
+/// workspace for subroutine moreSorensen
 struct more_sorensen_work {
   DoubleFortranMatrix A, LtL, AplusSigma;
   DoubleFortranVector v, q, y1;
@@ -302,13 +303,13 @@ struct more_sorensen_work {
   apply_scaling_work apply_scaling_ws;
 };
 
-/// workspace for subroutine calculate_step
+/// workspace for subroutine calculateStep
 struct calculate_step_work {
   more_sorensen_work more_sorensen_ws;
   solve_dtrs_work solve_dtrs_ws;
 };
 
-/// workspace for subroutine get_svd_J
+/// workspace for subroutine getSvdJ
 struct get_svd_J_work {
   DoubleFortranVector Jcopy, S, work;
 };

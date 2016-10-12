@@ -281,6 +281,7 @@ class MARIReductionMonSeparate(ISISDirectInelasticReduction):
 
     def runTest(self):
         """Defines the workflow for the test"""
+
         # temporary fix cross-influence of tests for MARI. changes to nex ticket make this unnecessary
         PropertyManager.mono_correction_factor.set_cash_mono_run_number(None)
         #pylint: disable=unused-variable

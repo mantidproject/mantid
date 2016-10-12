@@ -1,4 +1,6 @@
 #pylint: disable=no-init,invalid-name,too-many-branches
+from __future__ import (absolute_import, division, print_function)
+
 import os
 import mantid.simpleapi as api
 from mantid.api import *
@@ -448,7 +450,8 @@ class HFIRSANSReduction(PythonAlgorithm):
         # Save I(Q), including all wedges
         ws_list = AnalysisDataService.getObjectNames()
         for item in ws_list:
-            if iq_output is not None and item.startswith(iq_output) and not item.startswith(iqxy_output):
+            if iq_output is not None and item.startswith(iq_output) and \
+                (iqxy_output is None or not item.startswith(iqxy_output)):
                 filename = _save_ws(item)
                 if filename is not None:
                     output_msg += "I(Q) saved in %s\n" % (filename)

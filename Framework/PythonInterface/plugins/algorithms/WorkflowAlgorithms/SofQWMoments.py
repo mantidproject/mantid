@@ -1,5 +1,7 @@
 #pylint: disable=no-init,invalid-name
 # Algorithm to start Bayes programs
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, \
                        WorkspaceGroupProperty, Progress
@@ -28,11 +30,6 @@ class SofQWMoments(DataProcessorAlgorithm):
                              doc='Maximum energy for fit. Default=0.5')
         self.declareProperty(name='Scale', defaultValue=1.0,
                              doc='Scale factor to multiply y(Q,w). Default=1.0')
-        self.declareProperty(name='Plot', defaultValue=False,
-                             doc='Switch Plot Off/On')
-        self.declareProperty(name='Save', defaultValue=False,
-                             doc='Switch Save result to nxs file Off/On')
-
         self.declareProperty(WorkspaceGroupProperty("OutputWorkspace", "", Direction.Output),
                              doc="group_workspace workspace that includes all calculated moments.")
 
@@ -48,10 +45,6 @@ class SofQWMoments(DataProcessorAlgorithm):
         emin = self.getProperty('EnergyMin').value
         emax = self.getProperty('EnergyMax').value
         erange = [emin, emax]
-
-        Plot = self.getProperty('Plot').value
-        Save = self.getProperty('Save').value
-
         workflow_prog.report('Validating input')
         num_spectra,num_w = CheckHistZero(sample_workspace)
 
@@ -134,27 +127,8 @@ class SofQWMoments(DataProcessorAlgorithm):
         group_workspaces = ','.join([output_workspace+ext for ext in extensions])
         GroupWorkspaces(InputWorkspaces=group_workspaces, OutputWorkspace=output_workspace)
 
-        if Save:
-            workflow_prog.report('Saving Workspace')
-            workdir = getDefaultWorkingDirectory()
-            opath = os.path.join(workdir,output_workspace+'.nxs')
-            SaveNexusProcessed(InputWorkspace=output_workspace, Filename=opath)
-            logger.information('Output file : ' + opath)
-
-        if Plot:
-            workflow_prog.report('Plotting Workspace')
-            self._plot_moments(output_workspace)
-
         self.setProperty("OutputWorkspace", output_workspace)
         workflow_prog.report('Algorithm complete')
-
-
-    def _plot_moments(self, inputWS):
-        from IndirectImport import import_mantidplot
-        mtd_plot = import_mantidplot()
-
-        mtd_plot.plotSpectrum(inputWS+'_M0', 0)
-        mtd_plot.plotSpectrum([inputWS+'_M2', inputWS+'_M4'], 0)
 
 
 # Register algorithm with Mantid

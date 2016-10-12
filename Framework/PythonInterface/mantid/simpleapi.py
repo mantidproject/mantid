@@ -237,6 +237,9 @@ def fitting_algorithm(f):
         # Create and execute
         algm = _create_algorithm_object(function_name)
         _set_logging_option(algm, kwargs)
+        if 'EvaluationType' in kwargs:
+            algm.setProperty('EvaluationType', kwargs['EvaluationType'])
+            del kwargs['EvaluationType']
         algm.setProperty('Function', Function) # Must be set first
         if InputWorkspace is not None:
             algm.setProperty('InputWorkspace', InputWorkspace)
@@ -783,6 +786,7 @@ def set_properties(alg_object, *args, **kwargs):
         :param *args: Positional arguments
         :param **kwargs: Keyword arguments
     """
+    args_dict = {}
     if len(args) > 0:
         mandatory_props = alg_object.mandatoryProperties()
         # Remove any already in kwargs
@@ -795,13 +799,24 @@ def set_properties(alg_object, *args, **kwargs):
         if len(mandatory_props) > 0:
             # Now pair up the properties & arguments
             for (key, arg) in zip(mandatory_props[:len(args)], args):
-                kwargs[key] = arg
+                args_dict[key] = arg
         else:
             raise RuntimeError("Positional argument(s) provided but none are required. Check function call.")
 
-    # Set the properties of the algorithm.
-    for key in kwargs.keys():
-        value = kwargs[key]
+    # As dictionaries are no longer ordered in Python 3 we need to
+    # pass the positional arguments before the keyword arguments as some
+    # algorithms require the positional args to be set first
+    _set_alg_properties(arguments=args_dict, algorithm=alg_object)
+    _set_alg_properties(arguments=kwargs, algorithm=alg_object)
+
+def _set_alg_properties(arguments, algorithm):
+    """
+    Loops over all keys in a dictionary passing the values to the algorithm
+    :param arguments: Dictionary containing key-value arguments to set
+    :param algorithm: The algorithm to pass these to
+    """
+    for key in arguments.keys():
+        value = arguments[key]
         if value is None:
             continue
         # The correct parent/child relationship is not quite set up yet: #5157
@@ -809,9 +824,9 @@ def set_properties(alg_object, *args, **kwargs):
         # ADS meaning we cannot just set DataItem properties by value. At the moment
         # they are just set with strings
         if isinstance(value, _kernel.DataItem):
-            alg_object.setPropertyValue(key, value.name())
+            algorithm.setPropertyValue(key, value.name())
         else:
-            alg_object.setProperty(key, value)
+            algorithm.setProperty(key, value)
 
 
 def _create_algorithm_function(name, version, algm_object):

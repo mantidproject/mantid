@@ -178,6 +178,38 @@ Fitting to data in a MatrixWorkspace
 The error values in the input workspace are used to weight the data in
 the fit. Zero error values are not allowed and are replaced with ones.
 
+Fitting to histogram data
+#########################
+
+If the input MatrixWorkspace contains histogram data then there are two
+ways to evaluate the fit function on it and it can be set via the `EvaluationType`
+property. If `EvaluationType` is "CentrePoint" (which is the default) the
+function is evaluated at the centre of the bin. If `EvaluationType` is set to
+"Histogram" then the function is integrated within each bin and these integrals
+are used to evaluate the cost function.
+
+The "Histogram" evaluation type will typically give more accurate results when fitting
+histograms with very large bins. It also less sensitive to a particular binning.
+
+For the next example a spectrum was generated and rebinned to different bin sizes.
+Each binned spectrum was fitted using both "CentrePoint" (left column) and "Histogram" 
+evaluation (right column). As it can be seen form the plots the "Histogram" fitting
+gives more consistent results which are also closer to the correct values (Amplitude=20.0,
+PeakCentre=0.0, FWHM=1.0).
+
+.. figure:: /images/HistogramFit.png
+
+Currently only the following functions can be used in a fit with "Histogram" evaluation:
+
+- :ref:`func-Gaussian`
+- :ref:`func-Lorentzian`
+- :ref:`func-FlatBackground`
+- :ref:`func-LinearBackground`
+
+If any other functions need to be included in the list please leave a request at the
+`Forum <http://forum.mantidproject.org/>`_.
+
+
 Output
 ######
 

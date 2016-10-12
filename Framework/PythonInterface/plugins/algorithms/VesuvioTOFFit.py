@@ -1,4 +1,6 @@
 # pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.kernel import *
 from mantid.api import *
 
@@ -43,6 +45,9 @@ class VesuvioTOFFit(VesuvioBase):
         self.declareProperty("IntensityConstraints", "",
                              doc="A semi-colon separated list of intensity constraints defined "
                                  "as lists e.g [0,1,0,-4];[1,0,-2,0]")
+
+        self.declareProperty("Ties", "",
+                             doc="A string representing the ties to be applied to the fit")
 
         self.declareProperty("FitMode", "bank", StringListValidator(list(_FIT_MODES)),
                              doc="Fit either bank-by-bank or detector-by-detector")
@@ -111,6 +116,9 @@ class VesuvioTOFFit(VesuvioBase):
             function_str = fit_options.create_function_str()
             constraints = fit_options.create_constraints_str()
             ties = fit_options.create_ties_str()
+            user_ties = self.getProperty('Ties').value
+            if user_ties != "":
+                ties = ties + ',' + user_ties
 
             _, params, fitted_data = self._do_fit(function_str, data_ws, workspace_index,
                                                   constraints, ties,

@@ -30,7 +30,6 @@
 #include <vtkVertex.h>
 
 #include <algorithm>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <iterator>
 #include <qwt_double_interval.h>
 

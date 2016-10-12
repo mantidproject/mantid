@@ -64,6 +64,7 @@ set ( SRC_FILES
 	src/MultiDatasetFit/MDFFunctionPlotData.cpp
 	src/MultiDatasetFit/MDFLocalParameterEditor.cpp
 	src/MultiDatasetFit/MDFLocalParameterItemDelegate.cpp
+	src/MultiDatasetFit/MDFLogValueFinder.cpp
 	src/MultiDatasetFit/MDFPlotController.cpp
 	src/MultiDatasetFit/MultiDatasetFit.cpp
 	src/Muon/ALCBaselineModellingModel.cpp
@@ -79,10 +80,15 @@ set ( SRC_FILES
 	src/Muon/ALCPeakFittingView.cpp
 	src/Muon/IO_MuonGrouping.cpp
 	src/Muon/MuonAnalysis.cpp
+	src/Muon/MuonAnalysisDataLoader.cpp
+	src/Muon/MuonAnalysisFitDataPresenter.cpp
 	src/Muon/MuonAnalysisFitDataTab.cpp
+	src/Muon/MuonAnalysisFitFunctionPresenter.cpp
 	src/Muon/MuonAnalysisHelper.cpp
 	src/Muon/MuonAnalysisOptionTab.cpp
+	src/Muon/MuonAnalysisResultTableCreator.cpp
 	src/Muon/MuonAnalysisResultTableTab.cpp
+	src/Muon/MuonSequentialFitDialog.cpp
 	src/Reflectometry/MeasurementItem.cpp
 	src/Reflectometry/QtReflMainWindowView.cpp
 	src/Reflectometry/QtReflRunsTabView.cpp
@@ -111,10 +117,10 @@ set ( SRC_FILES
 	src/Tomography/EnergyBandsViewQtGUI.cpp
 	src/Tomography/ImageROIPresenter.cpp
 	src/Tomography/ImageROIViewQtWidget.cpp
-	src/Tomography/ImggFormatsConvertPresenter.cpp
-	src/Tomography/ImggFormatsConvertViewQtWidget.cpp
 	src/Tomography/ImageStackPreParams.cpp
 	src/Tomography/ImggFormats.cpp
+	src/Tomography/ImggFormatsConvertPresenter.cpp
+	src/Tomography/ImggFormatsConvertViewQtWidget.cpp
 	src/Tomography/SavuConfigDialog.cpp
 	src/Tomography/StackOfImagesDirs.cpp
 	src/Tomography/TomoPathsConfig.cpp
@@ -149,8 +155,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/DynamicPDF/DisplayCurveFitTest.h
 	inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h
-	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresenter.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresWorker.h
+	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresenter.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingViewQtWidget.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
@@ -209,6 +215,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFFunctionPlotData.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterEditor.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterItemDelegate.h
+	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLogValueFinder.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFPlotController.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h
 	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h
@@ -229,28 +236,33 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h
 	inc/MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.h
+	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisDataLoader.h
+	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h
+	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionPresenter.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
+	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableCreator.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
+	inc/MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/MeasurementItem.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainWindowView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QtReflRunsTabView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h
-	inc/MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h
-	inc/MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h
-	inc/MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMainWindowPresenter.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflRunsTabPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMeasurementItemSource.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflRunsTabPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h
@@ -273,10 +285,10 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h
 	inc/MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h
 	inc/MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h
-	inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertPresenter.h
-	inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertViewQtWidget.h
 	inc/MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h
 	inc/MantidQtCustomInterfaces/Tomography/ImggFormats.h
+	inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertPresenter.h
+	inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertViewQtWidget.h
 	inc/MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h
@@ -378,10 +390,13 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h
                 inc/MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.h
+				inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h
+				inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionPresenter.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
+                inc/MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h
                 inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflRunsTabView.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflSettingsTabView.h
@@ -457,6 +472,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Muon/ALCInterface.ui
                inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingView.ui
                inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.ui
+			   inc/MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflMainWindowWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflRunsTabWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflSettingsTabWidget.ui
@@ -494,8 +510,13 @@ set ( TEST_FILES
 	IO_MuonGroupingTest.h
 	ImageROIPresenterTest.h
 	ImggFormatsConvertPresenterTest.h
+	MDFLogValueFinderTest.h
 	MeasurementItemTest.h
+	MuonAnalysisDataLoaderTest.h
+	MuonAnalysisFitDataPresenterTest.h
+	MuonAnalysisFitFunctionPresenterTest.h
 	MuonAnalysisHelperTest.h
+	MuonAnalysisResultTableCreatorTest.h
 	ReflLegacyTransferStrategyTest.h
 	ReflMainWindowPresenterTest.h
 	ReflMeasureTransferStrategyTest.h
@@ -503,6 +524,7 @@ set ( TEST_FILES
 	ReflRunsTabPresenterTest.h
 	ReflSettingsTabPresenterTest.h
 	StackOfImagesDirsTest.h
+	TomographyIfaceModelTest.h
 	TomographyIfacePresenterTest.h
 	UserInputValidatorTest.h
 )

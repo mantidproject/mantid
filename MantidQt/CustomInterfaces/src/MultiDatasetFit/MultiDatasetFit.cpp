@@ -8,6 +8,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidQtAPI/AlgorithmRunner.h"
@@ -22,10 +23,12 @@ namespace {
 // tool options pages
 const int zoomToolPage = 0;
 const int rangeToolPage = 1;
+Mantid::Kernel::Logger g_log("MultiDatasetFit");
 }
 
 namespace MantidQt {
 namespace CustomInterfaces {
+using Mantid::Kernel::Math::StatisticType;
 
 // Register the class with the factory
 DECLARE_SUBWINDOW(MultiDatasetFit)
@@ -712,6 +715,10 @@ void MultiDatasetFit::showParameterPlot() {
 void MultiDatasetFit::updateGuessFunction(const QString &, const QString &) {
   m_plotController->updateGuessFunction(*m_functionBrowser->getFunction());
 }
+
+/// Log a warning
+/// @param msg :: A warning message to log.
+void MultiDatasetFit::logWarning(const std::string &msg) { g_log.warning(msg); }
 
 } // CustomInterfaces
 } // MantidQt

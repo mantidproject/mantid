@@ -3,6 +3,8 @@
 Defines functions and classes to start the processing of Vesuvio data.
 The main entry point that most users should care about is fit_tof().
 """
+from __future__ import (absolute_import, division, print_function)
+from six import iteritems
 
 import copy
 import re
@@ -63,7 +65,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
             iteration_flags['masses'] = _update_masses_from_params(copy.deepcopy(flags['masses']),
                                                                    last_results[2])
 
-        print "=== Iteration {0} out of a possible {1}".format(iteration, iterations)
+        print("=== Iteration {0} out of a possible {1}".format(iteration, iterations))
         results = fit_tof_iteration(sample_data, container_data, runs, iteration_flags)
         exit_iteration += 1
 
@@ -72,10 +74,10 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
             chi2 = np.array(results[3])
             chi2_delta = last_chi2 - chi2
             max_chi2_delta = np.abs(np.max(chi2_delta))
-            print "Cost function change: {0}".format(max_chi2_delta)
+            print("Cost function change: {0}".format(max_chi2_delta))
 
             if max_chi2_delta <= convergence_threshold:
-                print "Stopped at iteration {0} due to minimal change in cost function".format(exit_iteration)
+                print("Stopped at iteration {0} due to minimal change in cost function".format(exit_iteration))
                 last_results = results
                 break
 
@@ -106,6 +108,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         mass_values, profiles_strs = _create_profile_strs_and_mass_list(flags['masses'])
     background_str = _create_background_str(flags.get('background', None))
     intensity_constraints = _create_intensity_constraint_str(flags['intensity_constraints'])
+    ties = _create_user_defined_ties_str(flags['masses'])
 
     num_spec = sample_data.getNumberHistograms()
     pre_correct_pars_workspace = None
@@ -138,6 +141,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
                          MassProfiles=profiles,
                          Background=background_str,
                          IntensityConstraints=intensity_constraints,
+                         Ties=ties,
                          OutputWorkspace=corrections_fit_name,
                          FitParameters=pre_correction_pars_name,
                          MaxIterations=max_fit_iterations,
@@ -181,6 +185,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
                                       MassProfiles=profiles,
                                       Background=background_str,
                                       IntensityConstraints=intensity_constraints,
+                                      Ties=ties,
                                       OutputWorkspace=fit_ws_name,
                                       FitParameters=pars_name,
                                       MaxIterations=max_fit_iterations,
@@ -385,7 +390,7 @@ def _create_profile_strs_and_mass_list(profile_flags):
     for mass_prop in profile_flags:
         function_props = ["function={0}".format(mass_prop["function"])]
         del mass_prop["function"]
-        for key, value in mass_prop.iteritems():
+        for key, value in iteritems(mass_prop):
             if key == 'value':
                 mass_values.append(value)
             else:
@@ -404,7 +409,7 @@ def _create_background_str(background_flags):
     if background_flags:
         background_props = ["function={0}".format(background_flags["function"])]
         del background_flags["function"]
-        for key, value in background_flags.iteritems():
+        for key, value in iteritems(background_flags):
             background_props.append("{0}={1}".format(key, value))
         background_str = ",".join(background_props)
     else:
@@ -428,3 +433,23 @@ def _create_intensity_constraint_str(intensity_constraints):
         intensity_constraints_str = ""
 
     return intensity_constraints_str
+
+def _create_user_defined_ties_str(masses):
+    """
+    Creates the internal ties for each mass profile as defined by the user to be used when fitting the data
+    @param masses   :: The mass profiles for the data which contain the the ties
+    @return         :: A string to be passed as the Ties input to fitting
+    """
+    user_defined_ties = []
+    for index, mass in enumerate(masses):
+        if 'ties' in mass:
+           ties = mass['ties'].split(',')
+           function_dependant_ties= []
+           function_indentifier = 'f' + str(index) + '.'
+           for t in ties:
+               tie_str = function_indentifier + t
+               equal_pos = tie_str.index('=') + 1
+               tie_str = tie_str[:equal_pos] + function_indentifier + tie_str[equal_pos:]
+               user_defined_ties.append(tie_str)
+    user_defined_ties = ','.join(user_defined_ties)
+    return user_defined_ties

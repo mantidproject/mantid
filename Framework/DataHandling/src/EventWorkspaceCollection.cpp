@@ -1,8 +1,11 @@
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include <vector>
 #include <set>
@@ -38,13 +41,11 @@ void copyLogs(const EventWorkspace_sptr &from, EventWorkspace_sptr &to) {
 }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 EventWorkspaceCollection::EventWorkspaceCollection()
     : m_WsVec(1, createEmptyEventWorkspace()) {}
 
-//-----------------------------------------------------------------------------
 /**
 * Create a blank event workspace
 * @returns A shared pointer to a new empty EventWorkspace object
@@ -221,16 +222,37 @@ void EventWorkspaceCollection::setAllX(const HistogramData::BinEdges &x) {
 size_t EventWorkspaceCollection::getNumberEvents() const {
   return m_WsVec[0]->getNumberEvents(); // Should be the sum across all periods?
 }
+
 void EventWorkspaceCollection::resizeTo(const size_t size) {
   for (auto &ws : m_WsVec) {
-    ws->resizeTo(size); // Creates the EventLists
+    auto tmp = createWorkspace<DataObjects::EventWorkspace>(size, 2, 1);
+    WorkspaceFactory::Instance().initializeFromParent(ws, tmp, true);
+    ws = std::move(tmp);
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i)
+      ws->getSpectrum(i).setSpectrumNo(static_cast<specnum_t>(i + 1));
   }
 }
+
 void EventWorkspaceCollection::padSpectra(const std::vector<int32_t> &padding) {
-  for (auto &ws : m_WsVec) {
-    ws->padSpectra(padding); // Set detector ids and spectrum numbers
+  if (padding.empty()) {
+    const std::vector<detid_t> pixelIDs = getInstrument()->getDetectorIDs(true);
+    resizeTo(pixelIDs.size());
+    for (auto &ws : m_WsVec)
+      for (size_t i = 0; i < pixelIDs.size(); ++i)
+        ws->getSpectrum(i).setDetectorID(pixelIDs[i]);
+  } else {
+    resizeTo(padding.size());
+    for (auto &ws : m_WsVec) {
+      for (size_t i = 0; i < padding.size(); ++i) {
+        // specList ranges from 1, ..., N
+        // detector ranges from 0, ..., N-1
+        ws->getSpectrum(i).setDetectorID(padding[i] - 1);
+        ws->getSpectrum(i).setSpectrumNo(padding[i]);
+      }
+    }
   }
 }
+
 void EventWorkspaceCollection::setInstrument(
     const Geometry::Instrument_const_sptr &inst) {
   for (auto &ws : m_WsVec) {
