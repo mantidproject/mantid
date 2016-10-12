@@ -164,7 +164,7 @@ public:
 
 class SplineInterpolationTestPerformance : public CxxTest::TestSuite {
 public:
-  void setUp() {
+  void setUp() override {
 
     constexpr int order(2), spectra(1);
     constexpr int xStartVal(0), xEndVal(100);
@@ -197,7 +197,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(splineInterpAlg.execute());
   }
 
-  void tearDown() {
+  void tearDown() override {
     AnalysisDataService::Instance().remove(outputWsName);
     AnalysisDataService::Instance().remove(outDerivWsName);
   }
