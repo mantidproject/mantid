@@ -11,6 +11,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
+#include "MantidHistogramData/LinearGenerator.h"
+
 #include <boost/foreach.hpp>
 
 #include <cmath>
@@ -151,14 +153,7 @@ std::vector<double> RadiusSum::processNumericImageRadiusSum() {
   g_log.debug() << "Define the X positions of the pixels\n";
   auto &refX = inputWS->getSpectrum(0).x();
   auto &refY = inputWS->getSpectrum(0).y();
-  std::vector<double> x_pos(refY.size());
-
-  if (refY.size() == refX.size()) { // non-histogram workspace X has n values
-    std::copy(refX.cbegin(), refX.cend(), x_pos.begin());
-  } else { // histogram based workspace X has n+1 values
-    for (size_t ind = 0; ind < x_pos.size(); ind++)
-      x_pos[ind] = (refX[ind] + refX[ind + 1]) / 2.0;
-  }
+  auto x_pos = inputWS->points(0);
 
   g_log.debug() << "For every pixel define its bin position and sum them up\n";
   // for each row in the image
@@ -513,7 +508,8 @@ void RadiusSum::numBinsIsReasonable() {
                        "resolution (detector size). "
                     << "A resonable number is smaller than "
                     << static_cast<int>((max_radius - min_radius) /
-                                        min_bin_size) << '\n';
+                                        min_bin_size)
+                    << '\n';
 }
 
 double RadiusSum::getMinBinSizeForInstrument(API::MatrixWorkspace_sptr inWS) {
@@ -620,16 +616,16 @@ void RadiusSum::setUpOutputWorkspace(std::vector<double> &values) {
       inputWS, 1, values.size() + 1, values.size());
 
   g_log.debug() << "Set the data\n";
-  auto &refY = outputWS->mutableY(0);
-  std::copy(values.cbegin(), values.cend(), refY.begin());
+  outputWS->mutableY(0) = values;
 
   g_log.debug() << "Set the bins limits\n";
-  auto &refX = outputWS->mutableX(0);
 
+  auto xSize = outputWS->mutableX(0).size();
   double bin_size = (max_radius - min_radius) / num_bins;
-  for (int i = 0; i < (static_cast<int>(refX.size())) - 1; ++i)
-    refX[i] = min_radius + i * bin_size;
-  refX.back() = max_radius;
+  outputWS->setBinEdges(0, xSize,
+                        HistogramData::LinearGenerator(min_radius, bin_size));
+
+  outputWS->mutableX(0).back() = max_radius;
 
   // configure the axis:
   // for numeric images, the axis are the same as the input workspace, and are
@@ -638,7 +634,7 @@ void RadiusSum::setUpOutputWorkspace(std::vector<double> &values) {
   // for instrument related, the axis Y (1) continues to be the same.
   // it is necessary to change only the axis X. We have to change it to radius.
   if (inputWorkspaceHasInstrumentAssociated(inputWS)) {
-    API::Axis *const horizontal = new API::NumericAxis(refX.size());
+    API::Axis *const horizontal = new API::NumericAxis(xSize);
     auto labelX = UnitFactory::Instance().create("Label");
     boost::dynamic_pointer_cast<Units::Label>(labelX)->setLabel("Radius");
     horizontal->unit() = labelX;
