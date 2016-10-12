@@ -135,15 +135,15 @@ void UnwrapMonitor::exec() {
     // Now set the new X, Y and E values on the Histogram
     auto histogram = tempWS->histogram(i);
     if (histogram.yMode() == Mantid::HistogramData::Histogram::YMode::Counts) {
-        tempWS->setHistogram(
-            i, Mantid::HistogramData::BinEdges(std::move(newX)),
-            Mantid::HistogramData::Counts(std::move(newY)),
-            Mantid::HistogramData::CountStandardDeviations(std::move(newE)));
+      tempWS->setHistogram(
+          i, Mantid::HistogramData::BinEdges(std::move(newX)),
+          Mantid::HistogramData::Counts(std::move(newY)),
+          Mantid::HistogramData::CountStandardDeviations(std::move(newE)));
     } else {
-        tempWS->setHistogram(
-            i, Mantid::HistogramData::BinEdges(std::move(newX)),
-            Mantid::HistogramData::Frequencies(std::move(newY)),
-            Mantid::HistogramData::FrequencyStandardDeviations(std::move(newE)));
+      tempWS->setHistogram(
+          i, Mantid::HistogramData::BinEdges(std::move(newX)),
+          Mantid::HistogramData::Frequencies(std::move(newY)),
+          Mantid::HistogramData::FrequencyStandardDeviations(std::move(newE)));
     }
 
     // Get the maximum number of bins (excluding monitors) for the rebinning
@@ -176,7 +176,8 @@ void UnwrapMonitor::exec() {
 }
 
 /** Unwraps an X array, converting the units to wavelength along the way.
- *  @param newX ::   A reference to a container which stores our unwrapped x data.
+ *  @param newX ::   A reference to a container which stores our unwrapped x
+ * data.
  *  @param spectrum :: The workspace index
  *  @param Ld ::       The flightpath for the detector related to this spectrum
  *  @return A 3-element vector containing the bins at which the upper and lower
