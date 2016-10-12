@@ -27,6 +27,8 @@ Plotting Improvements
 Algorithm Toolbox
 #################
 
+ - Add compressorType option to SaveMDWorkspaceToVTK.
+
 Scripting Window
 ################
 
