@@ -344,6 +344,8 @@ public:
 
     if (targetNameIter != datamap.end()) {
       targetNameIter->second = std::move(existingNameObject);
+      notificationCenter.postNotification(
+          new AfterReplaceNotification(newName, targetNameIter->second));
     } else {
       if (!(datamap.emplace(newName, std::move(existingNameObject)).second)) {
         // should never happen
