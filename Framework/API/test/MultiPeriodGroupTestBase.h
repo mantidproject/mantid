@@ -9,6 +9,7 @@
 #define MANTID_API_MULTIPERIODGROUPTESTBASE_H_
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PropertyWithValue.h"

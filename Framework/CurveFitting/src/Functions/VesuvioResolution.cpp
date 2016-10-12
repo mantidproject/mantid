@@ -1,11 +1,9 @@
-//-----------------------------------------------------------------------------
-// Includes
-//-----------------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include <gsl/gsl_poly.h>
 
@@ -26,10 +24,6 @@ const double STDDEV_TO_HWHM = std::sqrt(std::log(4.0));
 
 // Register into factory
 DECLARE_FUNCTION(VesuvioResolution)
-
-//---------------------------------------------------------------------------
-// Static functions
-//---------------------------------------------------------------------------
 
 /**
 * @param ws The workspace with attached instrument
@@ -64,10 +58,6 @@ ResolutionParams VesuvioResolution::getResolutionParameters(
   return respar;
 }
 
-//---------------------------------------------------------------------------
-// Member functions
-//---------------------------------------------------------------------------
-
 VesuvioResolution::VesuvioResolution()
     : API::ParamFunction(), API::IFunction1D(), m_log("VesuvioResolution"),
       m_wsIndex(0), m_mass(0.0), m_voigt(), m_resolutionSigma(0.0),
@@ -77,9 +67,6 @@ VesuvioResolution::VesuvioResolution()
  * @returns A string containing the name of the function
  */
 std::string VesuvioResolution::name() const { return "VesuvioResolution"; }
-
-//-------------------------------------- Function evaluation
-//-----------------------------------------
 
 /*
  * Creates the internal caches

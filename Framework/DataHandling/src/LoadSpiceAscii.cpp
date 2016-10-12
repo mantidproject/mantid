@@ -5,6 +5,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"

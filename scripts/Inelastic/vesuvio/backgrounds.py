@@ -1,6 +1,9 @@
-# pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods,redefined-builtin
 """Holds classes that define the backgrounds for fitting
 """
+from __future__ import (absolute_import, division, print_function)
+from six import iteritems
+
 import ast
 
 # --------------------------------------------------------------------------------
@@ -74,9 +77,9 @@ def create_from_str(func_str):
     for cls in known_types:
         try:
             return cls.from_str(func_str)
-        except TypeError, exc:
+        except TypeError as exc:
             errors[str(cls)] = str(exc)
 
     # if we get here we were unable to parse anything acceptable
-    msgs = ["{0}: {1}".format(name, error) for name, error in errors.iteritems()]
+    msgs = ["{0}: {1}".format(name, error) for name, error in iteritems(errors)]
     raise ValueError("\n".join(msgs))

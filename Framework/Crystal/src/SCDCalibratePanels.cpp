@@ -11,6 +11,7 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidCrystal/SCDPanelErrors.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Sample.h"
 #include <fstream>
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -196,10 +197,10 @@ void SCDCalibratePanels::exec() {
             "Workspace2D", 1, 3 * nBankPeaks, 3 * nBankPeaks));
 
     auto &outSpec = q3DWS->getSpectrum(0);
-    MantidVec &yVec = outSpec.dataY();
-    MantidVec &eVec = outSpec.dataE();
-    MantidVec &xVec = outSpec.dataX();
-    std::fill(yVec.begin(), yVec.end(), 0.0);
+    auto &yVec = outSpec.mutableY();
+    auto &eVec = outSpec.mutableE();
+    auto &xVec = outSpec.mutableX();
+    yVec = 0.0;
 
     for (int i = 0; i < nBankPeaks; i++) {
       const DataObjects::Peak &peak = local->getPeak(i);
@@ -382,12 +383,12 @@ void SCDCalibratePanels::exec() {
     ColWksp->getSpectrum(i).setSpectrumNo(specnum_t(bank));
     RowWksp->getSpectrum(i).setSpectrumNo(specnum_t(bank));
     TofWksp->getSpectrum(i).setSpectrumNo(specnum_t(bank));
-    Mantid::MantidVec &ColX = ColWksp->dataX(i);
-    Mantid::MantidVec &ColY = ColWksp->dataY(i);
-    Mantid::MantidVec &RowX = RowWksp->dataX(i);
-    Mantid::MantidVec &RowY = RowWksp->dataY(i);
-    Mantid::MantidVec &TofX = TofWksp->dataX(i);
-    Mantid::MantidVec &TofY = TofWksp->dataY(i);
+    auto &ColX = ColWksp->mutableX(i);
+    auto &ColY = ColWksp->mutableY(i);
+    auto &RowX = RowWksp->mutableX(i);
+    auto &RowY = RowWksp->mutableY(i);
+    auto &TofX = TofWksp->mutableX(i);
+    auto &TofY = TofWksp->mutableY(i);
     int icount = 0;
     for (int j = 0; j < nPeaks; j++) {
       Peak peak = peaksWs->getPeak(j);
@@ -435,10 +436,10 @@ void SCDCalibratePanels::findL1(int nPeaks,
                                                3 * nPeaks));
 
   auto &outSp = L1WS->getSpectrum(0);
-  MantidVec &yVec = outSp.dataY();
-  MantidVec &eVec = outSp.dataE();
-  MantidVec &xVec = outSp.dataX();
-  std::fill(yVec.begin(), yVec.end(), 0.0);
+  auto &yVec = outSp.mutableY();
+  auto &eVec = outSp.mutableE();
+  auto &xVec = outSp.mutableX();
+  yVec = 0.0;
 
   for (int i = 0; i < nPeaks; i++) {
     const DataObjects::Peak &peak = peaksWs->getPeak(i);

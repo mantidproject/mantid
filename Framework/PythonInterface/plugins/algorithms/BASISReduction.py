@@ -1,9 +1,10 @@
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
-import mantid.simpleapi as api
-from mantid.api import *
-from mantid.kernel import *
+import mantid.simpleapi as sapi
+from mantid.api import PythonAlgorithm, AlgorithmFactory, FileProperty, FileAction
+from mantid.kernel import IntArrayProperty, StringListValidator, FloatArrayProperty, EnabledWhenProperty,\
+    FloatArrayLengthValidator, Direction, PropertyCriterion
 from mantid import config
 from os.path import join as pjoin
 
@@ -166,13 +167,12 @@ class BASISReduction(PythonAlgorithm):
             config.appendDataSearchDir(DEFAULT_MASK_GROUP_DIR)
             self._maskFile = self._reflection["mask_file"]
 
-        api.LoadMask(Instrument='BASIS', OutputWorkspace='BASIS_MASK',
-                     InputFile=self._maskFile)
+        sapi.LoadMask(Instrument='BASIS', OutputWorkspace='BASIS_MASK', InputFile=self._maskFile)
 
         # Work around length issue
-        _dMask = api.ExtractMask('BASIS_MASK')
+        _dMask = sapi.ExtractMask('BASIS_MASK')
         self._dMask = _dMask[1]
-        api.DeleteWorkspace(_dMask[0])
+        sapi.DeleteWorkspace(_dMask[0])
 
         ############################
         ##  Process the Vanadium  ##
@@ -196,59 +196,53 @@ class BASISReduction(PythonAlgorithm):
             if self._normalizationType == "by detectorID":
                 normRange = self.getProperty("NormWavelengthRange").value
                 self._normRange = [normRange[0], normRange[1]-normRange[0], normRange[1]]
-                api.Rebin(InputWorkspace=self._normWs, OutputWorkspace=self._normWs,
-                          Params=self._normRange)
+                sapi.Rebin(InputWorkspace=self._normWs, OutputWorkspace=self._normWs, Params=self._normRange)
 
             # FindDetectorsOutsideLimits to be substituted by MedianDetectorTest
-            api.FindDetectorsOutsideLimits(InputWorkspace=self._normWs,
-                                           OutputWorkspace="BASIS_NORM_MASK")
+            sapi.FindDetectorsOutsideLimits(InputWorkspace=self._normWs, OutputWorkspace="BASIS_NORM_MASK")
 
             # additional reduction steps when normalizing by Q slice
             if self._normalizationType == "by Q slice":
-                self._normWs = self._group_and_SofQW(self._normWs,
-                                                     DEFAULT_VANADIUM_BINS,
-                                                     isSample=False)
+                self._normWs = self._group_and_SofQW(self._normWs, DEFAULT_VANADIUM_BINS, isSample=False)
 
         ##########################
         ##  Process the sample  ##
         ##########################
-        self._run_list = self._getRuns(self.getProperty("RunNumbers").value,
-                                       doIndiv=self._doIndiv)
+        self._run_list = self._getRuns(self.getProperty("RunNumbers").value, doIndiv=self._doIndiv)
         for run_set in self._run_list:
             self._samWs = self._sum_and_calibrate(run_set)
             self._samWsRun = str(run_set[0])
             # Mask detectors with insufficient Vanadium signal
             if self._doNorm:
-                api.MaskDetectors(Workspace=self._samWs,
-                                  MaskedWorkspace='BASIS_NORM_MASK')
+                sapi.MaskDetectors(Workspace=self._samWs, MaskedWorkspace='BASIS_NORM_MASK')
             # Divide by Vanadium
             if self._normalizationType == "by detector ID":
-                api.Divide(LHSWorkspace=self._samWs, RHSWorkspace=self._normWs,
-                           OutputWorkspace=self._samWs)
+                sapi.Divide(LHSWorkspace=self._samWs, RHSWorkspace=self._normWs, OutputWorkspace=self._samWs)
             # additional reduction steps
             self._samSqwWs = self._group_and_SofQW(self._samWs, self._etBins, isSample=True)
             # Divide by Vanadium
             if self._normalizationType == "by Q slice":
-                api.Divide(LHSWorkspace=self._samSqwWs, RHSWorkspace=self._normWs,
-                           OutputWorkspace=self._samSqwWs)
+                sapi.Divide(LHSWorkspace=self._samSqwWs, RHSWorkspace=self._normWs, OutputWorkspace=self._samSqwWs)
             # Clear mask from reduced file. Needed for binary operations
             # involving this S(Q,w)
-            api.ClearMaskFlag(Workspace=self._samSqwWs)
+            sapi.ClearMaskFlag(Workspace=self._samSqwWs)
             # Scale so that elastic line has Y-values ~ 1
             if self._normalizeToFirst:
                 self._ScaleY(self._samSqwWs)
+            # Transform the vertical axis to point data
+            sapi.Transpose(InputWorkspace=self._samSqwWs,
+                           OutputWorkspace=self._samSqwWs)  # Q-values are in X-axis now
+            sapi.ConvertToPointData(InputWorkspace=self._samSqwWs,
+                                    OutputWorkspace=self._samSqwWs)  # from histo to point
+            sapi.Transpose(InputWorkspace=self._samSqwWs,
+                           OutputWorkspace=self._samSqwWs)  # Q-values back to vertical axis
             # Output Dave and Nexus files
             extension = "_divided.dat" if self._doNorm else ".dat"
-            dave_grp_filename = self._makeRunName(self._samWsRun,
-                                                  False) + extension
-            api.SaveDaveGrp(Filename=dave_grp_filename,
-                            InputWorkspace=self._samSqwWs,
-                            ToMicroEV=True)
+            dave_grp_filename = self._makeRunName(self._samWsRun, False) + extension
+            sapi.SaveDaveGrp(Filename=dave_grp_filename, InputWorkspace=self._samSqwWs, ToMicroEV=True)
             extension = "_divided_sqw.nxs" if self._doNorm else "_sqw.nxs"
-            processed_filename = self._makeRunName(self._samWsRun,
-                                                   False) + extension
-            api.SaveNexus(Filename=processed_filename,
-                          InputWorkspace=self._samSqwWs)
+            processed_filename = self._makeRunName(self._samWsRun, False) + extension
+            sapi.SaveNexus(Filename=processed_filename, InputWorkspace=self._samSqwWs)
 
     def _getRuns(self, rlist, doIndiv=True):
         """
@@ -305,55 +299,35 @@ class BASISReduction(PythonAlgorithm):
                 kwargs = {"BankName": "bank2"}  # 311 analyzers only in bank2
             else:
                 kwargs = {}
-            api.LoadEventNexus(Filename=run_file, OutputWorkspace=ws_name, **kwargs)
+            sapi.LoadEventNexus(Filename=run_file, OutputWorkspace=ws_name, **kwargs)
 
             if not self._noMonNorm:
-                api.LoadNexusMonitors(Filename=run_file,
-                                      OutputWorkspace=mon_ws_name)
+                sapi.LoadNexusMonitors(Filename=run_file, OutputWorkspace=mon_ws_name)
             if sam_ws != ws_name:
-                api.Plus(LHSWorkspace=sam_ws, RHSWorkspace=ws_name,
-                         OutputWorkspace=sam_ws)
-                api.DeleteWorkspace(ws_name)
+                sapi.Plus(LHSWorkspace=sam_ws, RHSWorkspace=ws_name, OutputWorkspace=sam_ws)
+                sapi.DeleteWorkspace(ws_name)
             if mon_ws != mon_ws_name and not self._noMonNorm:
-                api.Plus(LHSWorkspace=mon_ws,
-                         RHSWorkspace=mon_ws_name,
-                         OutputWorkspace=mon_ws)
-                api.DeleteWorkspace(mon_ws_name)
+                sapi.Plus(LHSWorkspace=mon_ws, RHSWorkspace=mon_ws_name, OutputWorkspace=mon_ws)
+                sapi.DeleteWorkspace(mon_ws_name)
 
     def _calibData(self, sam_ws, mon_ws):
-        api.MaskDetectors(Workspace=sam_ws,
-                          DetectorList=self._dMask)
-                          #MaskedWorkspace='BASIS_MASK')
-        api.ModeratorTzeroLinear(InputWorkspace=sam_ws,\
-                           OutputWorkspace=sam_ws)
-        api.LoadParameterFile(Workspace=sam_ws,
-                              Filename=pjoin(DEFAULT_CONFIG_DIR,
-                                             self._reflection["parameter_file"]))
-        api.ConvertUnits(InputWorkspace=sam_ws,
-                         OutputWorkspace=sam_ws,
-                         Target='Wavelength', EMode='Indirect')
+        sapi.MaskDetectors(Workspace=sam_ws, DetectorList=self._dMask)  # MaskedWorkspace='BASIS_MASK')
+        sapi.ModeratorTzeroLinear(InputWorkspace=sam_ws, OutputWorkspace=sam_ws)
+        sapi.LoadParameterFile(Workspace=sam_ws,
+                               Filename=pjoin(DEFAULT_CONFIG_DIR, self._reflection["parameter_file"]))
+        sapi.ConvertUnits(InputWorkspace=sam_ws, OutputWorkspace=sam_ws, Target='Wavelength', EMode='Indirect')
 
         if not self._noMonNorm:
-            api.ModeratorTzeroLinear(InputWorkspace=mon_ws,\
-                               OutputWorkspace=mon_ws)
-            api.Rebin(InputWorkspace=mon_ws,
-                      OutputWorkspace=mon_ws, Params='10')
-            api.ConvertUnits(InputWorkspace=mon_ws,
-                             OutputWorkspace=mon_ws,
-                             Target='Wavelength')
-            api.OneMinusExponentialCor(InputWorkspace=mon_ws,
-                                       OutputWorkspace=mon_ws,
-                                       C='0.20749999999999999',
-                                       C1='0.001276')
-            api.Scale(InputWorkspace=mon_ws,
-                      OutputWorkspace=mon_ws,
-                      Factor='9.9999999999999995e-07')
-            api.RebinToWorkspace(WorkspaceToRebin=sam_ws,
-                                 WorkspaceToMatch=mon_ws,
-                                 OutputWorkspace=sam_ws)
-            api.Divide(LHSWorkspace=sam_ws,
-                       RHSWorkspace=mon_ws,
-                       OutputWorkspace=sam_ws)
+            sapi.ModeratorTzeroLinear(InputWorkspace=mon_ws, OutputWorkspace=mon_ws)
+            sapi.Rebin(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Params='10')
+            sapi.ConvertUnits(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Target='Wavelength')
+            sapi.OneMinusExponentialCor(InputWorkspace=mon_ws,
+                                        OutputWorkspace=mon_ws,
+                                        C='0.20749999999999999',
+                                        C1='0.001276')
+            sapi.Scale(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Factor='1e-06')
+            sapi.RebinToWorkspace(WorkspaceToRebin=sam_ws, WorkspaceToMatch=mon_ws, OutputWorkspace=sam_ws)
+            sapi.Divide(LHSWorkspace=sam_ws, RHSWorkspace=mon_ws, OutputWorkspace=sam_ws)
 
     def _sum_and_calibrate(self, run_set, extra_extension=""):
         """
@@ -376,15 +350,9 @@ class BASISReduction(PythonAlgorithm):
         @param isSample: discriminates between sample and vanadium
         @return: S(Q,E)
         """
-        api.ConvertUnits(InputWorkspace=wsName,
-                         OutputWorkspace=wsName,
-                         Target='DeltaE', EMode='Indirect')
-        api.CorrectKiKf(InputWorkspace=wsName,
-                        OutputWorkspace=wsName,
-                        EMode='Indirect')
-        api.Rebin(InputWorkspace=wsName,
-                  OutputWorkspace=wsName,
-                  Params=etRebins)
+        sapi.ConvertUnits(InputWorkspace=wsName, OutputWorkspace=wsName, Target='DeltaE', EMode='Indirect')
+        sapi.CorrectKiKf(InputWorkspace=wsName, OutputWorkspace=wsName, EMode='Indirect')
+        sapi.Rebin(InputWorkspace=wsName, OutputWorkspace=wsName, Params=etRebins)
         if self._groupDetOpt != "None":
             if self._groupDetOpt == "Low-Resolution":
                 grp_file = "BASIS_Grouping_LR.xml"
@@ -394,14 +362,10 @@ class BASISReduction(PythonAlgorithm):
             # location to search paths
             if self._overrideMask:
                 config.appendDataSearchDir(DEFAULT_MASK_GROUP_DIR)
-                api.GroupDetectors(InputWorkspace=wsName,
-                                   OutputWorkspace=wsName,
-                                   MapFile=grp_file, Behaviour="Sum")
+                sapi.GroupDetectors(InputWorkspace=wsName, OutputWorkspace=wsName, MapFile=grp_file, Behaviour="Sum")
         wsSqwName = wsName+'_divided_sqw' if isSample and self._doNorm else wsName+'_sqw'
-        api.SofQW3(InputWorkspace=wsName,
-                   OutputWorkspace=wsSqwName,
-                   QAxisBinning=self._qBins, EMode='Indirect',
-                   EFixed=self._reflection["default_energy"])
+        sapi.SofQW3(InputWorkspace=wsName, QAxisBinning=self._qBins, EMode='Indirect',
+                    EFixed=self._reflection["default_energy"], OutputWorkspace=wsSqwName)
         return wsSqwName
 
     def _ScaleY(self, wsName):
@@ -410,11 +374,9 @@ class BASISReduction(PythonAlgorithm):
         is rescaled to 1
         @param wsName: name of the workspace to rescale
         """
-        workspace = mtd[wsName]
+        workspace = sapi.mtd[wsName]
         maximumYvalue = workspace.dataY(0).max()
-        api.Scale(InputWorkspace=wsName,
-                  OutputWorkspace=wsName,
-                  Factor=1./maximumYvalue, Operation="Multiply",)
+        sapi.Scale(InputWorkspace=wsName, OutputWorkspace=wsName, Factor=1./maximumYvalue, Operation="Multiply",)
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISReduction)

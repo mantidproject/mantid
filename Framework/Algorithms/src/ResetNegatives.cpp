@@ -37,7 +37,7 @@ void ResetNegatives::init() {
                   "An output workspace.");
   declareProperty(
       "AddMinimum", true,
-      "Add the minumum value of the spectrum to bring it up to zero.");
+      "Add the minimum value of the spectrum to bring it up to zero.");
   declareProperty("ResetValue", 0.,
                   "Reset negative values to this number (default=0)");
   setPropertySettings("ResetValue", make_unique<EnabledWhenProperty>(
@@ -60,7 +60,7 @@ void ResetNegatives::exec() {
   int64_t nHist = static_cast<int64_t>(minWS->getNumberHistograms());
   bool hasNegative = false;
   for (int64_t i = 0; i < nHist; i++) {
-    if (minWS->readY(i)[0] < 0) {
+    if (minWS->y(i)[0] < 0.0) {
       hasNegative = true;
       break;
     }
@@ -96,9 +96,8 @@ void ResetNegatives::exec() {
   PARALLEL_FOR2(inputWS, outputWS)
   for (int64_t i = 0; i < nHist; i++) {
     PARALLEL_START_INTERUPT_REGION
-    outputWS->dataY(i) = inputWS->readY(i);
-    outputWS->dataE(i) = inputWS->readE(i);
-    outputWS->setX(i, inputWS->refX(i)); // share the pointer more
+    const auto index = static_cast<size_t>(i);
+    outputWS->setHistogram(index, inputWS->histogram(index));
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   }
@@ -142,10 +141,10 @@ void ResetNegatives::pushMinimum(MatrixWorkspace_const_sptr minWS,
   PARALLEL_FOR2(wksp, minWS)
   for (int64_t i = 0; i < nHist; i++) {
     PARALLEL_START_INTERUPT_REGION
-    double minValue = minWS->readY(i)[0];
+    double minValue = minWS->y(i)[0];
     if (minValue <= 0) {
       minValue *= -1.;
-      MantidVec &y = wksp->dataY(i);
+      auto &y = wksp->mutableY(i);
       for (double &value : y) {
         value = fixZero(value + minValue);
       }
@@ -174,10 +173,10 @@ void ResetNegatives::changeNegatives(MatrixWorkspace_const_sptr minWS,
   PARALLEL_FOR2(minWS, wksp)
   for (int64_t i = 0; i < nHist; i++) {
     PARALLEL_START_INTERUPT_REGION
-    if (minWS->readY(i)[0] <=
+    if (minWS->y(i)[0] <=
         0.) // quick check to see if there is a reason to bother
     {
-      MantidVec &y = wksp->dataY(i);
+      auto &y = wksp->mutableY(i);
       for (double &value : y) {
         if (value < 0.) {
           value = spectrumNegativeValues;
