@@ -398,9 +398,9 @@ private:
           boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
               WorkspaceFactory::Instance().create("Workspace2D", 5, 4, 4));
       for (int i = 0; i < 5; i++) {
-        std::vector<double> &X = wsToSave->dataX(i);
-        std::vector<double> &Y = wsToSave->dataY(i);
-        std::vector<double> &E = wsToSave->dataE(i);
+        auto &X = wsToSave->mutableX(i);
+        auto &Y = wsToSave->mutableY(i);
+        auto &E = wsToSave->mutableE(i);
         for (int j = 0; j < 4; j++) {
           X[j] = 1.5 * j / 0.9;
           Y[j] = (i + 1) * (2. + 4. * X[j]);
@@ -498,33 +498,33 @@ private:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 5);
     TS_ASSERT_EQUALS(outputWS->blocksize(), 4);
 
-    TS_ASSERT_DELTA(outputWS->readX(0)[0], 0, 1e-6);
-    TS_ASSERT_DELTA(outputWS->readY(0)[0], 2, 1e-6);
+    TS_ASSERT_DELTA(outputWS->x(0)[0], 0, 1e-6);
+    TS_ASSERT_DELTA(outputWS->y(0)[0], 2, 1e-6);
 
-    TS_ASSERT_DELTA(outputWS->readX(0)[1], 1.666667, 1e-6);
-    TS_ASSERT_DELTA(outputWS->readY(0)[1], 8.666667, 1e-6);
+    TS_ASSERT_DELTA(outputWS->x(0)[1], 1.666667, 1e-6);
+    TS_ASSERT_DELTA(outputWS->y(0)[1], 8.666667, 1e-6);
 
-    TS_ASSERT_DELTA(outputWS->readX(1)[2], 3.333333, 1e-6);
-    TS_ASSERT_DELTA(outputWS->readY(1)[2], 30.66667, 1e-6);
+    TS_ASSERT_DELTA(outputWS->x(1)[2], 3.333333, 1e-6);
+    TS_ASSERT_DELTA(outputWS->y(1)[2], 30.66667, 1e-6);
 
-    TS_ASSERT_DELTA(outputWS->readX(3)[3], 5, 1e-6);
-    TS_ASSERT_DELTA(outputWS->readY(3)[3], 88, 1e-6);
+    TS_ASSERT_DELTA(outputWS->x(3)[3], 5, 1e-6);
+    TS_ASSERT_DELTA(outputWS->y(3)[3], 88, 1e-6);
     if (cols == 3 || cols == 4) {
-      TS_ASSERT_DELTA(outputWS->readE(0)[0], 1, 1e-6);
+      TS_ASSERT_DELTA(outputWS->e(0)[0], 1, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readE(0)[1], 1, 1e-6);
+      TS_ASSERT_DELTA(outputWS->e(0)[1], 1, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readE(1)[2], 1, 1e-6);
+      TS_ASSERT_DELTA(outputWS->e(1)[2], 1, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readE(3)[3], 1, 1e-6);
+      TS_ASSERT_DELTA(outputWS->e(3)[3], 1, 1e-6);
     } else {
-      TS_ASSERT_DELTA(outputWS->readE(0)[0], 0, 1e-6);
+      TS_ASSERT_DELTA(outputWS->e(0)[0], 0, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readE(0)[1], 0, 1e-6);
+      TS_ASSERT_DELTA(outputWS->e(0)[1], 0, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readE(1)[2], 0, 1e-6);
+      TS_ASSERT_DELTA(outputWS->e(1)[2], 0, 1e-6);
 
-      TS_ASSERT_DELTA(outputWS->readE(3)[3], 0, 1e-6);
+      TS_ASSERT_DELTA(outputWS->e(3)[3], 0, 1e-6);
     }
     if (cols == 4) {
       TS_ASSERT_DELTA(outputWS->dx(0)[0], 1, 1e-6);
@@ -587,9 +587,9 @@ private:
                                                 xyLen));
 
     for (int i = 0; i < numVecs; i++) {
-      std::vector<double> &X = wsToSave->dataX(i);
-      std::vector<double> &Y = wsToSave->dataY(i);
-      std::vector<double> &E = wsToSave->dataE(i);
+      auto &X = wsToSave->mutableX(i);
+      auto &Y = wsToSave->mutableY(i);
+      auto &E = wsToSave->mutableE(i);
       for (int j = 0; j < xyLen; j++) {
         X[j] = 1.5 * j / 0.9;
         Y[j] = (i + 1) * (2. + 4. * X[j]);
