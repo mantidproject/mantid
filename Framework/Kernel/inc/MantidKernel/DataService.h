@@ -318,14 +318,14 @@ public:
     // Make DataService access thread-safe
     std::unique_lock<std::recursive_mutex> lock(m_mutex);
 
-    auto oldNameWsIter = datamap.find(oldName);
-    if (oldNameWsIter == datamap.end()) {
+    auto oldNameIter = datamap.find(oldName);
+    if (oldNameIter == datamap.end()) {
       lock.unlock();
       g_log.warning(" rename '" + oldName + "' cannot be found");
       return;
     }
 
-    auto oldNameWsObject = std::move(oldNameWsIter->second);
+    auto oldNameWsObject = std::move(oldNameIter->second);
     auto newNameWsIter = datamap.find(newName);
 
     // If we are overriding send a notification for observers
@@ -335,12 +335,7 @@ public:
           newName, newNameObject, oldNameWsObject));
     }
 
-    datamap.erase(oldNameWsIter);
-
-    // Set the oldNameWsIter to end to ensure nobody invokes undefined behavior
-    oldNameWsIter = datamap.end();
-    // Call find again as iterators have been invalidated
-    newNameWsIter = datamap.find(newName);
+    datamap.erase(oldNameIter);
 
     if (newNameWsIter != datamap.end()) {
       newNameWsIter->second = std::move(oldNameWsObject);
