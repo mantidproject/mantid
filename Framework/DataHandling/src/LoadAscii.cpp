@@ -199,11 +199,15 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
     }
 
     for (size_t i = 0; i < numSpectra; ++i) {
-      spectra[i].dataX().push_back(values[0]);
-      spectra[i].dataY().push_back(values[i * 2 + 1]);
+      auto resizedHistogram = spectra[i].histogram();
+      const size_t newPosition = resizedHistogram.x().size();
+      resizedHistogram.resize(newPosition + 1);
+      resizedHistogram.mutableX()[newPosition] = values[0];
+      resizedHistogram.mutableY()[newPosition] = values[i * 2 + 1];
       if (haveErrors) {
-        spectra[i].dataE().push_back(values[i * 2 + 2]);
+        resizedHistogram.mutableE()[newPosition] = values[i * 2 + 2];
       }
+      spectra[i].setHistogram(resizedHistogram);
     }
     if (haveXErrors) {
       // Note: we only have X errors with 4-column files.
@@ -231,16 +235,8 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
   }
 
   for (size_t i = 0; i < numSpectra; ++i) {
-    localWorkspace->dataX(i) = spectra[i].dataX();
-    localWorkspace->dataY(i) = spectra[i].dataY();
-    /* If Y or E errors are not there, DON'T copy across as the 'spectra'
-       vectors
-       have not been filled above. The workspace will by default have vectors of
-       the right length filled with zeroes. */
-    if (haveErrors)
-      localWorkspace->dataE(i) = spectra[i].dataE();
-    if (haveXErrors)
-      localWorkspace->setSharedDx(i, spectra[i].sharedDx());
+    localWorkspace->setHistogram(i, spectra[i].histogram());
+
     // Just have spectrum number start at 1 and count up
     localWorkspace->getSpectrum(i).setSpectrumNo(static_cast<specnum_t>(i) + 1);
   }
