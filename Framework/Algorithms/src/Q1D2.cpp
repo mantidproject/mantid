@@ -27,7 +27,6 @@ DECLARE_ALGORITHM(Q1D2)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
-using namespace HistogramData;
 
 Q1D2::Q1D2() : API::Algorithm(), m_dataWS(), m_doSolidAngle(false) {}
 
@@ -136,11 +135,11 @@ void Q1D2::exec() {
   auto &YOut = outputWS->mutableY(0);
   auto &EOutTo2 = outputWS->mutableE(0);
   // normalisation that is applied to counts in each Q bin
-  HistogramY normSum(YOut.size(), 0.0);
+  HistogramData::HistogramY normSum(YOut.size(), 0.0);
   // the error on the normalisation
-  HistogramE normError2(EOutTo2.size(), 0.0);
+  HistogramData::HistogramE normError2(EOutTo2.size(), 0.0);
   // the averaged Q resolution.
-  HistogramDx qResolutionOut(YOut.size(), 0.0);
+  HistogramData::HistogramDx qResolutionOut(YOut.size(), 0.0);
 
   const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
   Progress progress(this, 0.05, 1.0, numSpec + 1);
@@ -173,7 +172,7 @@ void Q1D2::exec() {
     // make just one call to new to reduce CPU overhead on each thread, access
     // to these
     // three "arrays" is via iterators
-    HistogramY _noDirectUseStorage_(3 * numWavbins);
+    HistogramData::HistogramY _noDirectUseStorage_(3 * numWavbins);
     // normalization term
     auto norms = _noDirectUseStorage_.begin();
     // the error on these weights, it contributes to the error calculation on
@@ -278,7 +277,6 @@ void Q1D2::exec() {
     // Copy now as YOut is modified in normalize
     ws_sumOfCounts->mutableY(0) = YOut;
     ws_sumOfCounts->setSharedDx(0, outputWS->sharedDx(0));
-    auto outputE = outputWS->e(0);
     ws_sumOfCounts->setFrequencyVariances(0, outputWS->e(0));
 
     MatrixWorkspace_sptr ws_sumOfNormFactors =
@@ -344,13 +342,12 @@ Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
 *  @param normETo2 [out] this pointer must point to the end of the norm array,
 * it will be filled with the total of the error on the normalization
 */
-void Q1D2::calculateNormalization(const size_t wavStart, const size_t wsIndex,
-                                  API::MatrixWorkspace_const_sptr pixelAdj,
-                                  API::MatrixWorkspace_const_sptr wavePixelAdj,
-                                  double const *const binNorms,
-                                  double const *const binNormEs,
-                                  HistogramY::iterator norm,
-                                  HistogramY::iterator normETo2) const {
+void Q1D2::calculateNormalization(
+    const size_t wavStart, const size_t wsIndex,
+    API::MatrixWorkspace_const_sptr pixelAdj,
+    API::MatrixWorkspace_const_sptr wavePixelAdj, double const *const binNorms,
+    double const *const binNormEs, HistogramData::HistogramY::iterator norm,
+    HistogramData::HistogramY::iterator normETo2) const {
   double detectorAdj, detAdjErr;
   pixelWeight(pixelAdj, wsIndex, detectorAdj, detAdjErr);
   // use that the normalization array ends at the start of the error array
@@ -418,8 +415,8 @@ void Q1D2::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,
 * before the WavelengthAdj term
 */
 void Q1D2::addWaveAdj(const double *c, const double *Dc,
-                      HistogramY::iterator bInOut,
-                      HistogramY::iterator e2InOut) const {
+                      HistogramData::HistogramY::iterator bInOut,
+                      HistogramData::HistogramY::iterator e2InOut) const {
   // normalize by the wavelength dependent correction, keeping the percentage
   // errors the same
   // the error when a = b*c, the formula for Da, the error on a, in terms of Db,
@@ -456,10 +453,12 @@ void Q1D2::addWaveAdj(const double *c, const double *Dc,
 * @param[in] wavePixelAdjError normalization correction incertainty for each bin
 * for each detector pixel.
 */
-void Q1D2::addWaveAdj(const double *c, const double *Dc,
-                      HistogramY::iterator bInOut, HistogramY::iterator e2InOut,
-                      HistogramY::const_iterator wavePixelAdjData,
-                      HistogramE::const_iterator wavePixelAdjError) const {
+void Q1D2::addWaveAdj(
+    const double *c, const double *Dc,
+    HistogramData::HistogramY::iterator bInOut,
+    HistogramData::HistogramY::iterator e2InOut,
+    HistogramData::HistogramY::const_iterator wavePixelAdjData,
+    HistogramData::HistogramE::const_iterator wavePixelAdjError) const {
   // normalize by the wavelength dependent correction, keeping the percentage
   // errors the same
   // the error when a = b*c*e, the formula for Da, the error on a, in terms of
@@ -505,9 +504,10 @@ void Q1D2::addWaveAdj(const double *c, const double *Dc,
 *  @param[in,out] errorSquared the running total of the square of the
 * uncertainty in the normalization
 */
-void Q1D2::normToMask(const size_t offSet, const size_t wsIndex,
-                      const HistogramY::iterator theNorms,
-                      const HistogramY::iterator errorSquared) const {
+void Q1D2::normToMask(
+    const size_t offSet, const size_t wsIndex,
+    const HistogramData::HistogramY::iterator theNorms,
+    const HistogramData::HistogramY::iterator errorSquared) const {
   // if any bins are masked it is normally a small proportion
   if (m_dataWS->hasMaskedBins(wsIndex)) {
     // Get a reference to the list of masked bins
@@ -545,7 +545,7 @@ void Q1D2::normToMask(const size_t offSet, const size_t wsIndex,
 */
 void Q1D2::convertWavetoQ(const SpectrumInfo &spectrumInfo, const size_t wsInd,
                           const bool doGravity, const size_t offset,
-                          HistogramY::iterator Qs,
+                          HistogramData::HistogramY::iterator Qs,
                           const double extraLength) const {
   static const double FOUR_PI = 4.0 * M_PI;
 
@@ -590,8 +590,9 @@ void Q1D2::convertWavetoQ(const SpectrumInfo &spectrumInfo, const size_t wsInd,
 * checking the value of loc passed and then all the bins _downwards_ through the
 * array
 */
-void Q1D2::getQBinPlus1(const HistogramX &OutQs, const double QToFind,
-                        HistogramX::const_iterator &loc) const {
+void Q1D2::getQBinPlus1(const HistogramData::HistogramX &OutQs,
+                        const double QToFind,
+                        HistogramData::HistogramX::const_iterator &loc) const {
   if (loc != OutQs.end()) {
     while (loc != OutQs.begin()) {
       if ((QToFind >= *(loc - 1)) && (QToFind < *loc)) {
@@ -626,8 +627,10 @@ void Q1D2::getQBinPlus1(const HistogramX &OutQs, const double QToFind,
 *  @param[in, out] errors input the _square_ of the error on each bin, output
 * the total error (unsquared)
 */
-void Q1D2::normalize(const HistogramY &normSum, const HistogramE &normError2,
-                     HistogramY &counts, HistogramE &errors) const {
+void Q1D2::normalize(const HistogramData::HistogramY &normSum,
+                     const HistogramData::HistogramE &normError2,
+                     HistogramData::HistogramY &counts,
+                     HistogramData::HistogramE &errors) const {
   for (size_t k = 0; k < counts.size(); ++k) {
     // the normalisation is a = b/c where b = counts c =normalistion term
     const double c = normSum[k];
