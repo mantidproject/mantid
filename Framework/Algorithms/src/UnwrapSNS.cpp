@@ -106,7 +106,7 @@ void UnwrapSNS::exec() {
   // Get the "reference" flightpath (currently passed in as a property)
   m_LRef = getProperty("LRef");
 
-  m_XSize = static_cast<int>(m_inputWS->dataX(0).size());
+  m_XSize = static_cast<int>(m_inputWS->x(0).size());
   m_numberOfSpectra = static_cast<int>(m_inputWS->getNumberHistograms());
   g_log.debug() << "Number of spectra in input workspace: " << m_numberOfSpectra
                 << "\n";
@@ -144,29 +144,34 @@ void UnwrapSNS::exec() {
       // If the detector flightpath is missing, zero the data
       g_log.debug() << "Detector information for workspace index "
                     << workspaceIndex << " is not available.\n";
-      outputWS->dataX(workspaceIndex) = m_inputWS->dataX(workspaceIndex);
-      outputWS->dataY(workspaceIndex).assign(m_XSize - 1, 0.0);
-      outputWS->dataE(workspaceIndex).assign(m_XSize - 1, 0.0);
+      outputWS->setSharedX(workspaceIndex, m_inputWS->sharedX(workspaceIndex));
+      outputWS->mutableY(workspaceIndex).assign(m_XSize - 1, 0.0);
+      outputWS->mutableE(workspaceIndex).assign(m_XSize - 1, 0.0);
     } else {
       const double Ld = L1 + spectrumInfo.l2(workspaceIndex);
       // fix the x-axis
-      size_t pivot = this->unwrapX(m_inputWS->readX(workspaceIndex),
-                                   outputWS->dataX(workspaceIndex), Ld);
+      MantidVec timeBins;
+      size_t pivot = this->unwrapX(m_inputWS->x(workspaceIndex),
+                                   timeBins, Ld);
+      outputWS->setBinEdges(workspaceIndex, timeBins);
+
       pivot++; // one-off difference between x and y
 
       // fix the counts using the pivot point
-      MantidVec yIn = m_inputWS->readY(workspaceIndex);
-      MantidVec &yOut = outputWS->dataY(workspaceIndex);
-      yOut.clear();
-      yOut.insert(yOut.begin(), yIn.begin() + pivot, yIn.end());
-      yOut.insert(yOut.end(), yIn.begin(), yIn.begin() + pivot);
+      auto &yIn = m_inputWS->y(workspaceIndex);
+      auto &yOut = outputWS->mutableY(workspaceIndex);
+
+      auto lengthFirstPartY = std::distance(yIn.begin() + pivot, yIn.end());
+      std::copy(yIn.begin() + pivot, yIn.end(), yOut.begin());
+      std::copy(yIn.begin(), yIn.begin() + pivot, yOut.begin() + lengthFirstPartY);
 
       // fix the uncertainties using the pivot point
-      MantidVec eIn = m_inputWS->readE(workspaceIndex);
-      MantidVec &eOut = outputWS->dataE(workspaceIndex);
-      eOut.clear();
-      eOut.insert(eOut.begin(), eIn.begin() + pivot, eIn.end());
-      eOut.insert(eOut.end(), eIn.begin(), eIn.begin() + pivot);
+      auto &eIn = m_inputWS->e(workspaceIndex);
+      auto &eOut = outputWS->mutableE(workspaceIndex);
+
+      auto lengthFirstPartE = std::distance(eIn.begin() + pivot, eIn.end());
+      std::copy(eIn.begin() + pivot, eIn.end(), eOut.begin());
+      std::copy(eIn.begin(), eIn.begin() + pivot, eOut.begin() + lengthFirstPartE);
     }
     m_progress->report();
     PARALLEL_END_INTERUPT_REGION
@@ -209,11 +214,11 @@ void UnwrapSNS::execEvent() {
       Ld = L1 + spectrumInfo.l2(workspaceIndex);
 
     MantidVec time_bins;
-    if (outW->dataX(0).size() > 2) {
-      this->unwrapX(m_inputWS->dataX(workspaceIndex), time_bins, Ld);
+    if (outW->x(0).size() > 2) {
+      this->unwrapX(m_inputWS->x(workspaceIndex), time_bins, Ld);
       outW->setBinEdges(workspaceIndex, time_bins);
     } else {
-      outW->setX(workspaceIndex, m_inputWS->refX(workspaceIndex));
+      outW->setSharedX(workspaceIndex, m_inputWS->sharedX(workspaceIndex));
     }
     if (numEvents > 0) {
       MantidVec times(numEvents);
@@ -236,7 +241,7 @@ void UnwrapSNS::execEvent() {
   this->runMaskDetectors();
 }
 
-int UnwrapSNS::unwrapX(const MantidVec &datain, MantidVec &dataout,
+int UnwrapSNS::unwrapX(const Mantid::HistogramData::HistogramX &datain, MantidVec &dataout,
                        const double &Ld) {
   MantidVec tempX_L; // lower half - to be frame wrapped
   tempX_L.reserve(m_XSize);
