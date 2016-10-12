@@ -16,7 +16,6 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 
-
 using Mantid::DataHandling::GroupDetectors;
 using Mantid::MantidVecPtr;
 using namespace Mantid::Kernel;
@@ -114,10 +113,10 @@ public:
             "GroupTestWS");
     const HistogramX tens{10, 11, 12, 13, 14, 15};
     const HistogramY yOnes(5, 1.0);
-	const HistogramE eOnes(5, 1.0);
+    const HistogramE eOnes(5, 1.0);
     const HistogramY threes(5, 3.0);
     const HistogramY yZeroes(5, 0.0);
-	const HistogramE eZeroes(5, 0.0);
+    const HistogramE eZeroes(5, 0.0);
     TS_ASSERT_EQUALS(outputWS->x(0), tens);
     TS_ASSERT_EQUALS(outputWS->y(0), threes);
     for (int i = 0; i < 5; ++i) {
