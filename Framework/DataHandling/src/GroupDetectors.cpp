@@ -83,12 +83,8 @@ void GroupDetectors::exec() {
     return;
   }
 
-  const size_t vectorSize = WS->blocksize();
-
   const specnum_t firstIndex = static_cast<specnum_t>(indexList[0]);
   auto &firstSpectrum = WS->getSpectrum(firstIndex);
-  auto &firstY = WS->mutableY(firstIndex);
-
   setProperty("ResultIndex", firstIndex);
 
   // loop over the spectra to group
