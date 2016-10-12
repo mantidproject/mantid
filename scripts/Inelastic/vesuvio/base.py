@@ -4,6 +4,7 @@ from six import iteritems
 
 from mantid.api import Algorithm
 
+
 class VesuvioBase(Algorithm):
 
     # There seems to be a problem with Python algorithms
@@ -35,6 +36,8 @@ class VesuvioBase(Algorithm):
 # Helper to translate from an table workspace to a dictionary. Should be on the workspace
 # really ...
 # -----------------------------------------------------------------------------------------
+
+
 class TableWorkspaceDictionaryFacade(object):
     """
     Allows an underlying table workspace to be treated like a read-only dictionary

@@ -35,7 +35,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     def category(self):
         return 'Diffraction\\Reduction'
 
-
     def summary(self):
         return 'Performs a diffraction reduction for a set of raw run files for an ISIS indirect spectrometer'
 
@@ -52,7 +51,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                              doc='Factor by which to scale the container runs.')
 
         self.declareProperty(FileProperty('CalFile', '', action=FileAction.OptionalLoad),
-                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and '+\
+                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and '+
                                  '[[DiffractionFocussing]] child algorithms.')
 
         self.declareProperty(name='SumFiles', defaultValue=False,
@@ -271,7 +270,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             else:
                 logger.information('SumFiles options is ignored when only one file is provided')
 
-
     def _apply_calibration(self):
         """
         Checks to ensure a calibration file has been given
@@ -285,7 +283,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 DiffractionFocussing(InputWorkspace=ws_name,
                                      OutputWorkspace=ws_name,
                                      GroupingFileName=self._cal_file)
-
 
     def _load_and_scale_container(self, scale_factor, load_opts):
         """

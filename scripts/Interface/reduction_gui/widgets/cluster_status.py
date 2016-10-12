@@ -14,9 +14,12 @@ from mantid.kernel import ConfigService, DateAndTime, Logger
 from mantid.api import AlgorithmManager
 
 from reduction_gui.reduction.scripter import BaseScriptElement
+
+
 class RemoteJobs(BaseScriptElement):
     def __init__(self):
         pass
+
 
 class RemoteJobsWidget(BaseWidget):
     """
@@ -112,7 +115,7 @@ class RemoteJobsWidget(BaseWidget):
                     break
 
         if self._settings.cluster_user is not None \
-            and self._settings.cluster_pass is not None:
+                and self._settings.cluster_pass is not None:
             self._content.username_edit.setText(self._settings.cluster_user)
             self._content.password_edit.setText(self._settings.cluster_pass)
 
@@ -238,7 +241,6 @@ class RemoteJobsWidget(BaseWidget):
             call_back = partial(self._remove_job, is_running=is_running, job_id=job_id, trans_id=job_list[i][5])
             self.connect(btn, QtCore.SIGNAL("clicked()"), call_back)
             self._content.job_table.setCellWidget(i, 5, btn)
-
 
         self._content.job_table.setSortingEnabled(True)
         self._content.job_table.sortItems(3, 1)

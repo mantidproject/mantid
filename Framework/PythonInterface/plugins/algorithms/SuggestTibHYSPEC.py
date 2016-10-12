@@ -9,6 +9,7 @@ import numpy
 class SuggestTibHYSPEC(PythonAlgorithm):
     """ Check if certain sample logs exists on a workspace
     """
+
     def category(self):
         """ Return category
         """
@@ -115,7 +116,6 @@ class SuggestTibHYSPEC(PythonAlgorithm):
             logger.debug('I cannot find a good TIB range')
             TIB_low_us = 0.0
             TIB_high_us = 0.0
-
 
         #return the result
         self.setProperty("TibMin",TIB_low_us)

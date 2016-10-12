@@ -37,14 +37,11 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
     _background_range_start = None
     _background_range_end = None
 
-
     def category(self):
         return 'Workflow\\Inelastic;Inelastic\\Indirect'
 
-
     def summary(self):
         return 'Performs the ElasticWindow algorithm over multiple input workspaces'
-
 
     def PyInit(self):
         self.declareProperty(WorkspaceGroupProperty('InputWorkspaces', '', Direction.Input),
@@ -82,7 +79,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                                                PropertyMode.Optional),
                              doc='Output workspace ELT')
 
-
     def validateInputs(self):
         issues = dict()
 
@@ -96,7 +92,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             issues['BackgroundRangeStart'] = 'If background range end was given and background range start must also be provided.'
 
         return issues
-
 
     def PyExec(self):
         from IndirectImport import import_mantidplot
@@ -254,7 +249,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self.setProperty('OutputInQ', self._q_workspace)
         self.setProperty('OutputInQSquared', self._q2_workspace)
 
-
     def _setup(self):
         """
         Gets algorithm properties.
@@ -274,7 +268,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         self._background_range_start = self.getProperty('BackgroundRangeStart').value
         self._background_range_end = self.getProperty('BackgroundRangeEnd').value
-
 
     def _get_temperature(self, ws_name):
         """
@@ -301,7 +294,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             tmp = run[self._sample_log_name].value
             value_action = {'last_value': lambda x: x[len(x)-1],
                             'average': lambda x: x.mean()
-                           }
+                            }
             temp = value_action[self._sample_log_value](tmp)
             logger.debug('Temperature %d K found for run: %s' % (temp, run_name))
             return temp

@@ -9,6 +9,7 @@ import dos.load_helper as load_helper
 
 element_isotope = dict()
 
+
 def parse_phonon_file(file_name, record_eigenvectors):
     """
     Read frequencies from a <>.phonon file
@@ -53,7 +54,7 @@ def parse_phonon_file(file_name, record_eigenvectors):
             if vector_match:
                 if record_eigenvectors:
                     # Parse eigenvectors for partial dos
-                    vectors = _parse_phonon_eigenvectors(f_handle, 
+                    vectors = _parse_phonon_eigenvectors(f_handle,
                                                          file_data['num_ions'],
                                                          file_data['num_branches'])
                     eigenvectors.append(vectors)
@@ -82,6 +83,7 @@ def parse_phonon_file(file_name, record_eigenvectors):
     return file_data, element_isotope
 
 #----------------------------------------------------------------------------------------
+
 
 def _parse_phonon_file_header(f_handle):
     """
@@ -130,6 +132,7 @@ def _parse_phonon_file_header(f_handle):
 
 #----------------------------------------------------------------------------------------
 
+
 def _parse_phonon_freq_block(f_handle, num_branches):
     """
     Iterator to parse a block of frequencies from a .phonon file.
@@ -143,6 +146,7 @@ def _parse_phonon_freq_block(f_handle, num_branches):
         yield line_data
 
 #----------------------------------------------------------------------------------------
+
 
 def _parse_phonon_unit_cell_vectors(f_handle):
     """
@@ -162,6 +166,7 @@ def _parse_phonon_unit_cell_vectors(f_handle):
 
 #----------------------------------------------------------------------------------------
 
+
 def _parse_phonon_eigenvectors(f_handle, num_ions, num_branches):
     vectors = []
     for _ in range(num_ions * num_branches):
@@ -178,4 +183,3 @@ def _parse_phonon_eigenvectors(f_handle, num_ions, num_branches):
     return np.asarray(vectors)
 
 #----------------------------------------------------------------------------------------
-

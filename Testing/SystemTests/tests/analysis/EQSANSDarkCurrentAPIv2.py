@@ -6,17 +6,18 @@ from mantid.api import *
 
 import os
 
+
 class EQSANSDarkCurrent(stresstesting.MantidStressTest):
     """
         Analysis Tests for EQSANS
         Testing that the I(Q) output of is correct
     """
+
     def cleanup(self):
         absfile = FileFinder.getFullPath("EQSANS_1466_event_reduction.log")
         if os.path.exists(absfile):
             os.remove(absfile)
         return True
-
 
     def runTest(self):
         configI = ConfigService.Instance()
@@ -47,4 +48,3 @@ class EQSANSDarkCurrent(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
 
         return "EQSANS_1466_event_Iq", 'EQSANSDarkCurrent.nxs'
-

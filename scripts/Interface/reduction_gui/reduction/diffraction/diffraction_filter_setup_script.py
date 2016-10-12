@@ -10,6 +10,7 @@ import xml.dom.minidom
 
 from reduction_gui.reduction.scripter import BaseScriptElement
 
+
 class FilterSetupScript(BaseScriptElement):
     """ Run setup script for tab 'Run Setup'
     """
@@ -80,7 +81,6 @@ class FilterSetupScript(BaseScriptElement):
         """
 
         return
-
 
     def buildParameterDict(self):
         """ Create a dictionary for parameter and parameter values for SNSPowderReductionPlus()
@@ -175,8 +175,8 @@ class FilterSetupScript(BaseScriptElement):
             self.minimumlogvalue = self.getFloatElement(instrument_dom, "minimumlogvalue", FilterSetupScript.minimumlogvalue)
             self.maximumlogvalue = self.getFloatElement(instrument_dom, "maximumlogvalue", FilterSetupScript.maximumlogvalue)
             self.logvalueinterval = self.getFloatElement(instrument_dom, "logvalueinterval", FilterSetupScript.logvalueinterval)
-            self.filterlogvaluebychangingdirection = self.getStringElement(instrument_dom, "filterlogvaluebychangingdirection",\
-                    FilterSetupScript.filterlogvaluebychangingdirection)
+            self.filterlogvaluebychangingdirection = self.getStringElement(instrument_dom, "filterlogvaluebychangingdirection",
+                                                                           FilterSetupScript.filterlogvaluebychangingdirection)
             self.timetolerance = self.getFloatElement(instrument_dom, "timetolerance", FilterSetupScript.timetolerance)
             self.logboundary = self.getStringElement(instrument_dom, "logboundary", FilterSetupScript.logboundary)
 
@@ -254,4 +254,3 @@ class FilterSetupScript(BaseScriptElement):
         value = BaseScriptElement.getStringElement(instrument_dom, xmlname, default)
 
         return value
-

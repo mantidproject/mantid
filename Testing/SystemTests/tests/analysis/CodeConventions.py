@@ -68,6 +68,7 @@ FUNC_BAD_PARAMS = {
                                  "f0.f2.Amplitude","f0.f2.PeakCentre","f0.f2.FWHM")
     }
 
+
 class Algorithms(stresstesting.MantidStressTest):
 
     def __init__(self):
@@ -145,7 +146,6 @@ class Algorithms(stresstesting.MantidStressTest):
                     if not self.verifyProperty(alg_descr, prop.name):
                         self.__ranOk += 1
 
-
     def validate(self):
         if self.__ranOk > 0:
             print "Found %d errors. Coding conventions found at" % self.__ranOk,\
@@ -153,6 +153,7 @@ class Algorithms(stresstesting.MantidStressTest):
             return False
 
         return True
+
 
 class FitFunctions(stresstesting.MantidStressTest):
     def __init__(self):

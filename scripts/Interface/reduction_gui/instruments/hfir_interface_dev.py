@@ -25,6 +25,7 @@ try:
 except:
     pass
 
+
 class HFIRInterface(InstrumentInterface):
     """
         Defines the widgets for HFIR reduction

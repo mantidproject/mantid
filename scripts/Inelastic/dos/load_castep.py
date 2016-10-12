@@ -7,6 +7,7 @@ import numpy as np
 
 import dos.load_helper as load_helper
 
+
 def parse_castep_file(file_name, ir_or_raman):
     """
     Read frequencies from a <>.castep file
@@ -27,7 +28,6 @@ def parse_castep_file(file_name, ir_or_raman):
     data_lists = (frequencies, ir_intensities, raman_intensities)
     with open(file_name, 'rU') as f_handle:
         file_data.update(_parse_castep_file_header(f_handle))
-
 
         while True:
             line = f_handle.readline()
@@ -76,6 +76,7 @@ def parse_castep_file(file_name, ir_or_raman):
 
 #----------------------------------------------------------------------------------------
 
+
 def _parse_castep_file_header(f_handle):
     """
     Read information from the header of a <>.castep file
@@ -101,6 +102,7 @@ def _parse_castep_file_header(f_handle):
             return file_data
 
 #----------------------------------------------------------------------------------------
+
 
 def _parse_castep_freq_block(f_handle, num_branches, ir_or_raman):
     """
@@ -150,6 +152,7 @@ def _find_castep_freq_block(f_handle, data_regex):
             return
 
 #----------------------------------------------------------------------------------------
+
 
 def _parse_castep_bond(bond_match):
     """

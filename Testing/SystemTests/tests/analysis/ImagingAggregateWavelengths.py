@@ -6,11 +6,14 @@ import mantid.simpleapi as msapi
 from mantid import config
 
 #pylint: disable=too-many-public-methods
+
+
 class ImagingAggregateTests(unittest.TestCase):
     """
     Tests aggregation of wavelengths/energy bands, which at the moment
     is done by the algorithm msapi.ImggAggregateWavelengths.
     """
+
     def setUp(self):
         # example files to make a stack of images
         data_root = config['datasearch.directories'].split(';')[0]
@@ -19,7 +22,7 @@ class ImagingAggregateTests(unittest.TestCase):
                                     'wavelength_dependent_images/angle1/',
                                     'wavelength_dependent_images/angle2/',
                                     'wavelength_dependent_images/angle5/'
-                                  ]
+                                    ]
 
         self._out_dir = os.path.join(os.getcwd(), 'summed_wavelengths_metals')
 
@@ -30,7 +33,7 @@ class ImagingAggregateTests(unittest.TestCase):
             'sum_projection_00002_bands_idx_0_to_2.fits',
             'sum_projection_00003_bands_idx_0_to_1.fits'
             ]
-        self._expected_out_fnames = [os.path.join(self._expected_out_dir, exp)\
+        self._expected_out_fnames = [os.path.join(self._expected_out_dir, exp)
                                      for exp in self._expected_out_fnames]
 
     def tearDown(self):
@@ -87,6 +90,8 @@ class ImagingAggregateTests(unittest.TestCase):
         self._cleanup_dirs_files()
 
 # Runs the unittest tests defined above in the mantid stress testing framework
+
+
 class ImagingAggregateWavelengths(stresstesting.MantidStressTest):
 
     _success = False
@@ -112,7 +117,7 @@ class ImagingAggregateWavelengths(stresstesting.MantidStressTest):
                                'wavelength_dependent_images/angle5/LARMOR00005333_Metals_000_00690.fits',
                                'wavelength_dependent_images/angle5/bogus.txt',
                                'wavelength_dependent_images/angle5/more_bogus',
-                             ]
+                               ]
 
     def requiredFiles(self):
         return set(self._raw_in_files)

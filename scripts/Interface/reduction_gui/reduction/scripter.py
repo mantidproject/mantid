@@ -205,6 +205,7 @@ class BaseScriptElement(object):
         from mantid.api import Algorithm
 
         dom = xml.dom.minidom.parseString(xml_str)
+
         def _process_setup_info(process_dom_):
             setup_alg_str = BaseScriptElement.getStringElement(process_dom_, 'SetupInfo', '')
             if len(setup_alg_str) == 0:

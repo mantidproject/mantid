@@ -7,6 +7,7 @@ from mantid.kernel import *
 import os
 from reduction_workflow.find_data import find_data
 
+
 class SANSBeamSpreaderTransmission(PythonAlgorithm):
 
     def category(self):

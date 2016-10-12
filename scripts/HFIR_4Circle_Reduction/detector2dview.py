@@ -263,6 +263,3 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         self.plot_roi()
 
         return
-
-
-

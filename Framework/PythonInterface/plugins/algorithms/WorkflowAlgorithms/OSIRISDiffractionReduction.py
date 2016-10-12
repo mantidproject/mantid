@@ -8,6 +8,8 @@ from mantid.api import *
 from mantid.simpleapi import *
 
 #pylint: disable=too-few-public-methods
+
+
 class DRange(object):
     """
     A class to represent a dRange.
@@ -38,6 +40,7 @@ TIME_REGIME_TO_DRANGE = {
     20.63e4: DRange(12.2, 13.8)
 }
 
+
 class DRangeToWorkspaceMap(object):
     """
     A "wrapper" class for a map, which maps workspaces from their corresponding
@@ -61,8 +64,7 @@ class DRangeToWorkspaceMap(object):
 
         # Get the time regime of the workspace, and use it to find the DRange.
         time_regime = wrksp.dataX(0)[0]
-        time_regimes = list(TIME_REGIME_TO_DRANGE.keys())
-        time_regimes.sort()
+        time_regimes = sorted(TIME_REGIME_TO_DRANGE.keys())
 
         for idx in range(len(time_regimes)):
             if idx == len(time_regimes) - 1:
@@ -209,7 +211,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
     _spec_min = None
     _spec_max = None
 
-
     def category(self):
         return 'Diffraction\\Reduction'
 
@@ -217,7 +218,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         return "This Python algorithm performs the operations necessary for the reduction of diffraction data "+\
                "from the Osiris instrument at ISIS "+\
                "into dSpacing, by correcting for the monitor and linking the various d-ranges together."
-
 
     def PyInit(self):
         runs_desc='The list of run numbers that are part of the sample run. '+\
@@ -236,7 +236,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                              doc='Factor by which to scale the container')
 
         self.declareProperty(FileProperty('CalFile', '', action=FileAction.Load),
-                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and '+\
+                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and '+
                                  '[[DiffractionFocussing]] child algorithms.')
 
         self.declareProperty('SpectraMin', 3, doc='Minimum Spectrum to Load from (Must be more than 3)')
@@ -244,7 +244,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self.declareProperty('SpectraMax', 962, doc='Maximum Spectrum to Load from file (Must be less than 962)')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output),
-                             doc="Name to give the output workspace. If no name is provided, "+\
+                             doc="Name to give the output workspace. If no name is provided, "+
                                  "one will be generated based on the run numbers.")
 
         self.declareProperty(name='LoadLogFiles', defaultValue=True,
@@ -263,7 +263,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         self._sam_ws_map = DRangeToWorkspaceMap()
         self._van_ws_map = DRangeToWorkspaceMap()
-
 
     def _get_properties(self):
         self._load_logs = self.getProperty('LoadLogFiles').value
@@ -286,7 +285,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         if not self.getProperty("DetectDRange").value:
             self._man_d_range = self.getProperty("DRange").value - 1
 
-
     def validateInputs(self):
         self._get_properties()
         issues = dict()
@@ -303,7 +301,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 issues['Container'] = 'You must input the same number of sample and container runs'
 
         return issues
-
 
     #pylint: disable=too-many-branches
     def PyExec(self):
@@ -449,7 +446,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", result)
 
-
     def _find_runs(self, runs):
         """
         Use the FileFinder to find search for the runs given by the string of
@@ -466,7 +462,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 raise RuntimeError("Could not locate sample file: " + run)
 
         return run_files
-
 
     def _rebin_to_smallest(self, samWS, vanWS):
         """

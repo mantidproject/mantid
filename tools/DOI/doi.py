@@ -76,6 +76,7 @@ SUCCESS_RESPONSE = r'^OK( \((.+)\))?$'
 # Point all "deleted" DOIs to here:
 INVALID_URL = 'http://www.datacite.org/invalidDOI'
 
+
 def build_xml_form(doi, relationships, creator_name_list, version_str):
     '''Builds the xml form containing the metadata for the DOI.  Where helpful,
     comments showing the definition / allowed values of the data fields have
@@ -89,8 +90,8 @@ def build_xml_form(doi, relationships, creator_name_list, version_str):
     root = ET.Element('resource')
     root.set('xmlns',              'http://datacite.org/schema/kernel-3')
     root.set('xmlns:xsi',          'http://www.w3.org/2001/XMLSchema-instance')
-    root.set('xsi:schemaLocation', 'http://datacite.org/schema/kernel-3 ht' + \
-                                   'tp://schema.datacite.org/meta/kernel-3' + \
+    root.set('xsi:schemaLocation', 'http://datacite.org/schema/kernel-3 ht' +
+                                   'tp://schema.datacite.org/meta/kernel-3' +
                                    '/metadata.xsd')
 
     # "The identifier is a unique string that identifies a resource." In our
@@ -187,6 +188,7 @@ def build_xml_form(doi, relationships, creator_name_list, version_str):
 
     return ET.tostring(root, encoding='utf-8')
 
+
 def _http_request(body, method, url, options):
     '''Issue an HTTP request with the given options.
 
@@ -226,6 +228,7 @@ def _http_request(body, method, url, options):
     print "Server Response: " + str(result)
     return result
 
+
 def delete_doi(base, doi, options):
     '''Will attempt to delete the given DOI.  Note that this does not actually
     remove the DOI from the DataCite servers; it makes its metadata "inactive"
@@ -253,6 +256,7 @@ def delete_doi(base, doi, options):
     if not re.match(SUCCESS_RESPONSE, result[0]):
         raise RuntimeError('Pointing DOI to invalid page was unsuccessful.')
 
+
 def create_or_update_metadata(xml_form, base, doi, options):
     '''Attempts to create some new metadata for the doi of the given address.
     Metadata must be created before a doi can be created.  If the metadata
@@ -268,6 +272,7 @@ def create_or_update_metadata(xml_form, base, doi, options):
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
         raise RuntimeError('Creation/updating metadata unsuccessful.  Quitting.')
+
 
 def create_or_update_doi(base, doi, destination, options):
     '''Attempts to create a new DOI of the given address.  Metadata must be
@@ -286,6 +291,7 @@ def create_or_update_doi(base, doi, destination, options):
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
         raise RuntimeError('Creation/updating DOI unsuccessful.  Quitting.')
+
 
 def check_if_doi_exists(base, doi, destination, options):
     '''Attempts to check if the given doi exists by querying the server and
@@ -312,6 +318,7 @@ def check_if_doi_exists(base, doi, destination, options):
         raise RuntimeError(
             "Unexpected result back from server: \"" + result[0] + "\"")
 
+
 def check_for_curl():
     '''A check to see whether we can call cURL on the command line.
     '''
@@ -328,8 +335,8 @@ def check_for_curl():
         found = False
 
     if not found:
-        raise RuntimeError('This script requires that cURL be installed and ' + \
-                        'available on the PATH.')
+        raise RuntimeError('This script requires that cURL be installed and ' +
+                           'available on the PATH.')
 
 
 def get_urls_for_doi(version_str,  shortened_version_str,
@@ -547,13 +554,13 @@ if __name__ == "__main__":
     parser.add_argument(
         '--main',
         action='store_true',
-        help='Create the "main" DOI for Mantid.  Once it is created, this ' + \
+        help='Create the "main" DOI for Mantid.  Once it is created, this ' +
              'will only have to run again if it needs to be updated.'
     )
     parser.add_argument(
         '--delete',
         action='store_true',
-        help='Delete ("make inactive") the DOI metadata with the given ' + \
+        help='Delete ("make inactive") the DOI metadata with the given ' +
              'details.  Note that this does NOT delete the DOI.'
     )
 

@@ -6,6 +6,7 @@ from reduction_gui.reduction.inelastic.dgs_data_corrections_script import DataCo
 import reduction_gui.widgets.util as util
 import ui.inelastic.ui_dgs_data_corrections
 
+
 class DataCorrectionsWidget(BaseWidget):
     """
         Widget that presents data correction options to the user.
