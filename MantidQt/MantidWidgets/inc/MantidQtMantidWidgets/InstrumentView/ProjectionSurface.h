@@ -66,6 +66,7 @@ public:
     PickSingleMode,
     PickTubeMode,
     AddPeakMode,
+    ComparePeakMode,
     DrawRegularMode,
     DrawFreeMode,
     ErasePeakMode,
@@ -271,6 +272,7 @@ signals:
   // peaks
   void peaksWorkspaceAdded();
   void peaksWorkspaceDeleted();
+  void comparePeaks(const std::pair<Mantid::Geometry::IPeak*, Mantid::Geometry::IPeak*> &);
 
   // other
   void redrawRequired(); ///< request redrawing of self
@@ -286,6 +288,7 @@ protected slots:
   void pickComponentAt(int x, int y);
   void touchComponentAt(int x, int y);
   void erasePeaks(const QRect &rect);
+  void comparePeaks(const QRect &rect);
 
   void colorMapChanged();
 
@@ -334,6 +337,8 @@ protected:
   mutable bool m_showPeakLabels;    ///< flag to show peak hkl labels
   bool m_showPeakRelativeIntensity; ///< flag to show peak hkl labels
   mutable int m_peakShapesStyle; ///< index of a default PeakMarker2D style to
+  std::pair<Mantid::Geometry::IPeak*,
+            Mantid::Geometry::IPeak*> m_selectedPeaks;
   /// use with a new PeakOverlay.
 
 private:

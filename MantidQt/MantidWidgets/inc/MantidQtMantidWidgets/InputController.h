@@ -263,9 +263,29 @@ private:
   void setPosition(const QPoint &pos) override;
   void resize() override;
 
-  QRect m_rect;
+protected:
   QPixmap *m_image;
+  QRect m_rect;
+
 };
+
+/**
+    Controller for comparing peaks on an unwrapped surface.
+  */
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerCompare
+    : public InputControllerErase {
+  Q_OBJECT
+
+public:
+  InputControllerCompare(QObject *parent);
+
+signals:
+  void compare(const QRect &);
+
+private:
+  void signalLeftClick() override;
+};
+
 
 /**
     Controller for drawing and erasing arbitrary shapes on an unwrapped surface.

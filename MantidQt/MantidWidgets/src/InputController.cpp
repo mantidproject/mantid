@@ -379,6 +379,15 @@ void InputControllerErase::resize() {
 
 //--------------------------------------------------------------------------------
 
+InputControllerCompare::InputControllerCompare(QObject *parent)
+    : InputControllerErase(parent) {
+  m_image = new QPixmap(":/PickTools/selection-pointer.png");
+}
+
+void InputControllerCompare::signalLeftClick() { emit compare(m_rect); }
+
+//--------------------------------------------------------------------------------
+
 InputControllerDrawAndErase::InputControllerDrawAndErase(QObject *parent)
     : InputControllerDraw(parent), m_pos(0, 0), m_rect(8), m_creating(false) {
   makePolygon();

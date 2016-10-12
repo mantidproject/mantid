@@ -226,6 +226,12 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_peakSelect->setIcon(QIcon(":/PickTools/eraser.png"));
   m_peakSelect->setToolTip("Erase single crystal peak(s)");
 
+  m_peakCompare = new QPushButton();
+  m_peakCompare->setCheckable(true);
+  m_peakCompare->setAutoExclusive(true);
+  m_peakCompare->setIcon(QIcon(":/PickTools/selection-peak.png"));
+  m_peakCompare->setToolTip("Compare single crystal peak(s)");
+
   QGridLayout *toolBox = new QGridLayout();
   toolBox->addWidget(m_zoom, 0, 0);
   toolBox->addWidget(m_edit, 0, 1);
@@ -238,6 +244,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   toolBox->addWidget(m_tube, 1, 1);
   toolBox->addWidget(m_peak, 1, 2);
   toolBox->addWidget(m_peakSelect, 1, 3);
+  toolBox->addWidget(m_peakCompare, 1, 4);
   toolBox->setColumnStretch(6, 1);
   toolBox->setSpacing(2);
   connect(m_zoom, SIGNAL(clicked()), this, SLOT(setSelectionType()));
@@ -245,6 +252,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   connect(m_tube, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_peak, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_peakSelect, SIGNAL(clicked()), this, SLOT(setSelectionType()));
+  connect(m_peakCompare, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_rectangle, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_ellipse, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_ring_ellipse, SIGNAL(clicked()), this, SLOT(setSelectionType()));
@@ -402,6 +410,10 @@ void InstrumentWidgetPickTab::setSelectionType() {
     m_selectionType = ErasePeak;
     m_activeTool->setText("Tool: Erase crystal peak(s)");
     surfaceMode = ProjectionSurface::ErasePeakMode;
+  } else if (m_peakCompare->isChecked()) {
+    m_selectionType = ComparePeak;
+    m_activeTool->setText("Tool: Compare crystal peak(s)");
+    surfaceMode = ProjectionSurface::ComparePeakMode;
   } else if (m_rectangle->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Rectangle");
@@ -527,6 +539,8 @@ void InstrumentWidgetPickTab::initSurface() {
           SLOT(singleComponentTouched(size_t)));
   connect(surface, SIGNAL(singleComponentPicked(size_t)), this,
           SLOT(singleComponentPicked(size_t)));
+  connect(surface, SIGNAL(comparePeaks(std::pair<Mantid::Geometry::IPeak*, Mantid::Geometry::IPeak*>)), this,
+          SLOT(comparePeaks(std::pair<Mantid::Geometry::IPeak*, Mantid::Geometry::IPeak*>)));
   connect(surface, SIGNAL(peaksWorkspaceAdded()), this,
           SLOT(updateSelectionInfoDisplay()));
   connect(surface, SIGNAL(peaksWorkspaceDeleted()), this,
@@ -617,6 +631,8 @@ void InstrumentWidgetPickTab::selectTool(const ToolType tool) {
   case PeakSelect:
     m_peak->setChecked(true);
     break;
+  case PeakCompare:
+    m_peakCompare->setChecked(true);
   case PeakErase:
     m_peakSelect->setChecked(true);
     break;
@@ -650,6 +666,10 @@ void InstrumentWidgetPickTab::singleComponentPicked(size_t pickID) {
   m_infoController->displayInfo(pickID);
   m_plotController->setPlotData(pickID);
   m_plotController->updatePlot();
+}
+
+void InstrumentWidgetPickTab::comparePeaks(const std::pair<Mantid::Geometry::IPeak*, Mantid::Geometry::IPeak*> &peaks) {
+  m_infoController->displayComparePeaksInfo(peaks);
 }
 
 /**
@@ -869,6 +889,15 @@ QString ComponentInfoController::displayNonDetectorInfo(
           QString::number(p) + '\n';
   text += getParameterInfo(component);
   return text;
+}
+
+void ComponentInfoController::displayComparePeaksInfo(std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks)
+{
+  std::stringstream text;
+  auto peak1 = peaks.first;
+  auto peak2 = peaks.second;
+
+  m_selectionInfoDisplay->setText(QString::fromStdString(text.str()));
 }
 
 /**

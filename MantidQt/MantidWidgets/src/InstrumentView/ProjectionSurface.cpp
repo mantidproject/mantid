@@ -109,6 +109,11 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
   InputControllerErase *eraseController = new InputControllerErase(this);
   setInputController(ErasePeakMode, eraseController);
   connect(eraseController, SIGNAL(erase(QRect)), this, SLOT(erasePeaks(QRect)));
+
+  // create and connect the peak compare controller
+  InputControllerCompare *compareController = new InputControllerCompare(this);
+  setInputController(ComparePeakMode, compareController);
+  connect(compareController, SIGNAL(compare(QRect)), this, SLOT(comparePeaks(QRect)));
 }
 
 ProjectionSurface::~ProjectionSurface() {
@@ -460,6 +465,8 @@ QString ProjectionSurface::getInfoText() const {
   case DrawFreeMode:
     return "Draw by holding the left button down. "
            "Erase with the right button.";
+  case ComparePeakMode:
+    return "Click on one peak, then click on another to compare peaks.";
   case ErasePeakMode:
     return "Click and move the mouse to erase peaks. "
            "Rotate the wheel to resize the cursor.";
@@ -698,6 +705,39 @@ void ProjectionSurface::erasePeaks(const QRect &rect) {
   foreach (PeakOverlay *po, m_peakShapes) {
     po->selectIn(rect);
     po->removeSelectedShapes();
+  }
+}
+
+void ProjectionSurface::comparePeaks(const QRect &rect) {
+  // Find the selected peak across all of the peak overlays.
+  // If more than one peak was found in the selection area just
+  // take the first peak.
+  Mantid::Geometry::IPeak *peak = nullptr;
+  foreach (PeakOverlay *po, m_peakShapes) {
+    po->selectIn(rect);
+    const auto peaks = po->getSelectedPeaks();
+    if (peaks.length() > 0) {
+      peak = peaks.first();
+      break;
+    }
+  }
+
+  if (!m_selectedPeaks.first) {
+    // No peaks have been selected yet
+    m_selectedPeaks.first = peak;
+  } else if (!m_selectedPeaks.second) {
+    // Two peaks have now been selected
+    m_selectedPeaks.second = peak;
+  } else if (m_selectedPeaks.first && m_selectedPeaks.second) {
+    // Two peaks have already been selected. Clear the pair and store
+    // the new peak as the first entry
+    m_selectedPeaks.first = peak;
+    m_selectedPeaks.second = nullptr;
+  }
+
+  // Only emit the signal to update when we have two peaks
+  if (m_selectedPeaks.first && m_selectedPeaks.second) {
+    emit comparePeaks(m_selectedPeaks);
   }
 }
 

@@ -8,6 +8,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 
 class Instrument3DWidget;
 
@@ -59,6 +60,7 @@ public:
     Single = 0,
     AddPeak,
     ErasePeak,
+    ComparePeak,
     SingleDetectorSelection,
     Tube,
     Draw
@@ -69,6 +71,7 @@ public:
     TubeSelect,
     PeakSelect,
     PeakErase,
+    PeakCompare,
     DrawEllipse,
     DrawRectangle,
     DrawFree,
@@ -101,6 +104,8 @@ private slots:
   void removeCurve(const QString &);
   void singleComponentTouched(size_t pickID);
   void singleComponentPicked(size_t pickID);
+  void comparePeaks(const std::pair<Mantid::Geometry::IPeak*,
+                    Mantid::Geometry::IPeak*> &peaks);
   void updateSelectionInfoDisplay();
   void shapeCreated();
   void updatePlotMultipleDetectors();
@@ -118,6 +123,7 @@ private:
   QPushButton *m_tube; ///< Button switching on detector's parent selection mode
   QPushButton *m_peak; ///< Button switching on peak creation mode
   QPushButton *m_peakSelect; ///< Button switching on peak selection mode
+  QPushButton *m_peakCompare; ///< Button switching on peak comparison mode
   QPushButton *m_rectangle;  ///< Button switching on drawing a rectangular
   /// selection region
   QPushButton *
@@ -178,6 +184,7 @@ public:
                           InstrumentActor *instrActor, QTextEdit *infoDisplay);
 public slots:
   void displayInfo(size_t pickID);
+  void displayComparePeaksInfo(std::pair<Mantid::Geometry::IPeak*, Mantid::Geometry::IPeak*> peaks);
   void clear();
 
 private:

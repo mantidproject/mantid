@@ -337,6 +337,20 @@ Mantid::Geometry::IPeak &PeakOverlay::getPeak(int i) {
   return m_peaksWorkspace->getPeak(i);
 }
 
+QList<Mantid::Geometry::IPeak *> PeakOverlay::getSelectedPeaks()
+{
+  QList<Mantid::Geometry::IPeak*> peaks;
+  for (auto &shape : m_selectedShapes) {
+    auto marker = dynamic_cast<PeakMarker2D *>(shape);
+    if (!marker)
+      throw std::logic_error("Wrong shape type found.");
+    auto peak = getPeaksWorkspace()->getPeakPtr(marker->getRow());
+    peaks.append(peak);
+  }
+
+  return peaks;
+}
+
 /// Sets the scaler that is used to determine the size of peak markers.
 void PeakOverlay::setShowRelativeIntensityFlag(bool yes) {
   if (yes) {
