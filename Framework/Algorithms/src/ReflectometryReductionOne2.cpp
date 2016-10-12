@@ -124,6 +124,9 @@ void ReflectometryReductionOne2::init() {
   // Init properties for transmission normalization
   initTransmissionProperties();
 
+  // Init properties for algorithmic corrections
+  initAlgorithmicProperties();
+
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspaceWavelength",
                                                    "", Direction::Output,
                                                    PropertyMode::Optional),
@@ -153,7 +156,7 @@ void ReflectometryReductionOne2::initMonitorProperties() {
       "Wavelength maximum for monitor background subtraction in angstroms.");
 
   // Normalization by integrated monitors
-  declareProperty("NormalizeByIntegratedMonitors", false,
+  declareProperty("NormalizeByIntegratedMonitors", true,
                   "Normalize by dividing by the integrated monitors.");
 
   // Minimum wavelength for monitor integration
@@ -213,17 +216,46 @@ void ReflectometryReductionOne2::initTransmissionProperties() {
                                              Direction::Input),
       "End wavelength (angstroms) for stitching transmission runs together");
 
+  declareProperty(make_unique<PropertyWithValue<bool>>("StrictSpectrumChecking",
+	  true, Direction::Input),
+	  "Enforces spectrum number checking prior to normalization by "
+	  "transmission workspace. Applies to input workspace and "
+	  "transmission workspace.");
+
   setPropertyGroup("FirstTransmissionRun", "Transmission");
   setPropertyGroup("SecondTransmissionRun", "Transmission");
   setPropertyGroup("Params", "Transmission");
   setPropertyGroup("StartOverlap", "Transmission");
   setPropertyGroup("EndOverlap", "Transmission");
+  setPropertyGroup("StrictSpectrumChecking", "Transmission");
+}
 
-  declareProperty(make_unique<PropertyWithValue<bool>>("StrictSpectrumChecking",
-                                                       true, Direction::Input),
-                  "Enforces spectrum number checking prior to normalization by "
-                  "transmission workspace. Applies to input workspace and "
-                  "transmission workspace.");
+/** Initialize algorithmic correction properties
+*/
+void ReflectometryReductionOne2::initAlgorithmicProperties() {
+
+  std::vector<std::string> correctionAlgorithms = {
+      "None", "PolynomialCorrection", "ExponentialCorrection"};
+  declareProperty("CorrectionAlgorithm", "None",
+                  boost::make_shared<StringListValidator>(correctionAlgorithms),
+                  "The type of correction to perform.");
+
+  declareProperty(make_unique<ArrayProperty<double>>("Polynomial"),
+                  "Coefficients to be passed to the PolynomialCorrection"
+                  " algorithm.");
+
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("C0", 0.0, Direction::Input),
+      "C0 value to be passed to the ExponentialCorrection algorithm.");
+
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("C1", 0.0, Direction::Input),
+      "C1 value to be passed to the ExponentialCorrection algorithm.");
+
+  setPropertyGroup("CorrectionAlgorithm", "Polynomial Corrections");
+  setPropertyGroup("Polynomial", "Polynomial Corrections");
+  setPropertyGroup("C0", "Polynomial Corrections");
+  setPropertyGroup("C1", "Polynomial Corrections");
 }
 
 /** Validate inputs
@@ -319,8 +351,11 @@ void ReflectometryReductionOne2::exec() {
 
   Property *transmissionProperty = getProperty("FirstTransmissionRun");
   if (!transmissionProperty->isDefault()) {
-    auto transmissionWS = makeTransmissionWS(IvsLam);
-    IvsLam = divide(IvsLam, transmissionWS);
+    IvsLam = transmissionCorrection(IvsLam);
+  } else if (getPropertyValue("CorrectionAlgorithm") != "None") {
+    IvsLam = algorithmicCorrection(IvsLam);
+  } else {
+    g_log.warning("No transmission correction will be applied.");
   }
 
   setProperty("OutputWorkspaceWavelength", IvsLam);
@@ -459,11 +494,12 @@ ReflectometryReductionOne2::makeMonitorWS(MatrixWorkspace_sptr inputWS) {
   return integratedMonitor;
 }
 
-/** Creates a transmission workspace by running 'CreateTransmissionWorkspace' as
- * a child algorithm.
- * @return :: the transmission workspace
+/** Perform transmission correction by running 'CreateTransmissionWorkspace' on
+* the input workspace
+* @detectorWS :: the input workspace
+* @return :: the input workspace normalized by transmission
 */
-MatrixWorkspace_sptr ReflectometryReductionOne2::makeTransmissionWS(
+MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     MatrixWorkspace_sptr detectorWS) {
 
   auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
@@ -524,7 +560,38 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeTransmissionWS(
     }
   }
 
-  return transWS;
+  MatrixWorkspace_sptr normalized = divide(detectorWS, transWS);
+  return normalized;
 }
+
+/**
+* Perform transmission correction using alternative correction algorithms
+* @param detectorWS : workspace in wavelength which is to be normalized by the
+* results of the transmission corrections.
+* @return : corrected workspace
+*/
+MatrixWorkspace_sptr ReflectometryReductionOne2::algorithmicCorrection(
+    MatrixWorkspace_sptr detectorWS) {
+
+  const std::string corrAlgName = getProperty("CorrectionAlgorithm");
+
+  IAlgorithm_sptr corrAlg = createChildAlgorithm(corrAlgName);
+  corrAlg->initialize();
+  if (corrAlgName == "PolynomialCorrection") {
+    corrAlg->setPropertyValue("Coefficients", getPropertyValue("Polynomial"));
+  } else if (corrAlgName == "ExponentialCorrection") {
+    corrAlg->setPropertyValue("C0", getPropertyValue("C0"));
+    corrAlg->setPropertyValue("C1", getPropertyValue("C1"));
+  } else {
+    throw std::runtime_error("Unknown correction algorithm: " + corrAlgName);
+  }
+
+  corrAlg->setProperty("InputWorkspace", detectorWS);
+  corrAlg->setProperty("Operation", "Divide");
+  corrAlg->execute();
+
+  return corrAlg->getProperty("OutputWorkspace");
+}
+
 } // namespace Algorithms
 } // namespace Mantid
