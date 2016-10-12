@@ -24,6 +24,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
+#include "MantidHistogramData/LinearGenerator.h"
 namespace Mantid {
 namespace Algorithms {
 
@@ -155,40 +156,38 @@ void RealFFT::exec() {
     outWS->replaceAxis(1, tAxis);
 
     gsl_fft_real_workspace *workspace = gsl_fft_real_workspace_alloc(yOutSize);
-    boost::shared_array<double> newData(new double[yOutSize]);
 
     auto &xData = outWS->mutableX(0);
+    auto &yData = outWS->mutableY(0);
     auto &y0 = inWS->mutableY(0);
     auto &y1 = inWS->mutableY(1);
     for (int i = 0; i < ySize; i++) {
       int j = i * 2;
       xData[i] = df * i;
       if (i != 0) {
-        newData[j - 1] = y0[i];
+        yData[j - 1] = y0[i];
         if (odd || i != ySize - 1) {
-          newData[j] = y1[i];
+          yData[j] = y1[i];
         }
       } else {
-        newData[0] = y0[0];
+        yData[0] = y0[0];
       }
     }
 
     gsl_fft_halfcomplex_wavetable *wavetable =
         gsl_fft_halfcomplex_wavetable_alloc(yOutSize);
-    gsl_fft_halfcomplex_inverse(newData.get(), 1, yOutSize, wavetable,
-                                workspace);
+
+    // &(yData[0]) because gsl func wants non const double data[]
+    gsl_fft_halfcomplex_inverse(&(yData[0]), 1, yOutSize, wavetable, workspace);
     gsl_fft_halfcomplex_wavetable_free(wavetable);
     gsl_fft_real_workspace_free(workspace);
 
-    auto &y = outWS->mutableY(0);
-    for (int i = 0; i < yOutSize; i++) {
-      double x = df * i;
-      xData[i] = x; // xData used from above
-      y[i] = newData[i] / df;
-    }
+    std::generate(xData.begin(), xData.end(),
+                  HistogramData::LinearGenerator(0, df));
+    yData /= df;
+
     if (outWS->isHistogramData())
       outWS->mutableX(0)[yOutSize] = outWS->mutableX(0)[yOutSize - 1] + df;
-    // outWS->getAxis(1)->spectraNo(0)=inWS->getAxis(1)->spectraNo(spec);
   }
 
   setProperty("OutputWorkspace", outWS);
