@@ -10,7 +10,9 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Functions/CrystalFieldSpectrum.h"
+#include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/SimpleChebfun.h"
 
 using namespace Mantid;
@@ -248,16 +250,25 @@ public:
       auto c = fun.getParameter("f0.PeakCentre");
       auto w = fun.getParameter("f0.FWHM");
       TS_ASSERT_EQUALS(w, checkW(c));
+      auto ct = getBounds(fun, "f0.FWHM");
+      TS_ASSERT_DELTA(ct.first, 0.9, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 1.1, 1e-4);
     }
     {
       auto c = fun.getParameter("f1.PeakCentre");
       auto w = fun.getParameter("f1.FWHM");
       TS_ASSERT_EQUALS(w, checkW(c));
+      auto ct = getBounds(fun, "f1.FWHM");
+      TS_ASSERT_DELTA(ct.first, 1.4865, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 1.6865, 1e-4);
     }
     {
       auto c = fun.getParameter("f2.PeakCentre");
       auto w = fun.getParameter("f2.FWHM");
       TS_ASSERT_EQUALS(w, checkW(c));
+      auto ct = getBounds(fun, "f2.FWHM");
+      TS_ASSERT_DELTA(ct.first, 1.7868, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 1.9868, 1e-4);
     }
     {
       auto c = fun.getParameter("f3.PeakCentre");
@@ -371,6 +382,128 @@ public:
       TS_ASSERT_EQUALS(w, 0.0);
     }
 
+  }
+
+  void test_calculated_widths_gaussian() {
+    CrystalFieldSpectrum fun;
+    fun.setParameter("B20", 0.37737);
+    fun.setParameter("B22", 3.9770);
+    fun.setParameter("B40", -0.031787);
+    fun.setParameter("B42", -0.11611);
+    fun.setParameter("B44", -0.12544);
+    fun.setAttributeValue("Ion", "Ce");
+    fun.setAttributeValue("Temperature", 44.0);
+    fun.setAttributeValue("PeakShape", "Gaussian");
+
+    std::vector<double> x {0.0, 50.0};
+    std::vector<double> y {1.0, 2.0};
+    fun.setAttributeValue("WidthX", x);
+    fun.setAttributeValue("WidthY", y);
+    auto checkW = [&x, &y](double c) {
+      return y.front() +
+             (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
+    };
+
+    fun.buildTargetFunction();
+    Gaussian gauss;
+    gauss.initialize();
+    {
+      auto c = fun.getParameter("f0.PeakCentre");
+      auto w = fun.getParameter("f0.Sigma");
+      gauss.setFwhm(checkW(c));
+      TS_ASSERT_EQUALS(w, gauss.getParameter("Sigma"));
+      auto ct = getBounds(fun, "f0.Sigma");
+      TS_ASSERT_DELTA(ct.first, 0.3821, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 0.4671, 1e-4);
+    }
+    {
+      auto c = fun.getParameter("f1.PeakCentre");
+      auto w = fun.getParameter("f1.Sigma");
+      gauss.setFwhm(checkW(c));
+      TS_ASSERT_EQUALS(w, gauss.getParameter("Sigma"));
+      auto ct = getBounds(fun, "f1.Sigma");
+      TS_ASSERT_DELTA(ct.first, 0.6312, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 0.7162, 1e-4);
+    }
+    {
+      auto c = fun.getParameter("f2.PeakCentre");
+      auto w = fun.getParameter("f2.Sigma");
+      gauss.setFwhm(checkW(c));
+      TS_ASSERT_EQUALS(w, gauss.getParameter("Sigma"));
+      auto ct = getBounds(fun, "f2.Sigma");
+      TS_ASSERT_DELTA(ct.first, 0.7587, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 0.8437, 1e-4);
+    }
+    {
+      auto c = fun.getParameter("f3.PeakCentre");
+      auto w = fun.getParameter("f3.Sigma");
+      TS_ASSERT_EQUALS(w, 0.0);
+    }
+  }
+
+  void test_calculated_widths_non_default_bounds() {
+    CrystalFieldSpectrum fun;
+    fun.setParameter("B20", 0.37737);
+    fun.setParameter("B22", 3.9770);
+    fun.setParameter("B40", -0.031787);
+    fun.setParameter("B42", -0.11611);
+    fun.setParameter("B44", -0.12544);
+    fun.setAttributeValue("Ion", "Ce");
+    fun.setAttributeValue("Temperature", 44.0);
+    fun.setAttributeValue("WidthVariation", 1.1);
+
+    std::vector<double> x {0.0, 50.0};
+    std::vector<double> y {1.0, 2.0};
+    fun.setAttributeValue("WidthX", x);
+    fun.setAttributeValue("WidthY", y);
+    auto checkW = [&x, &y](double c) {
+      return y.front() +
+             (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
+    };
+    fun.buildTargetFunction();
+    {
+      auto c = fun.getParameter("f0.PeakCentre");
+      auto w = fun.getParameter("f0.FWHM");
+      TS_ASSERT_EQUALS(w, checkW(c));
+      auto ct = getBounds(fun, "f0.FWHM");
+      TS_ASSERT_DELTA(ct.first, 0.0, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 2.1, 1e-4);
+    }
+    {
+      auto c = fun.getParameter("f1.PeakCentre");
+      auto w = fun.getParameter("f1.FWHM");
+      TS_ASSERT_EQUALS(w, checkW(c));
+      auto ct = getBounds(fun, "f1.FWHM");
+      TS_ASSERT_DELTA(ct.first, 0.4865, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 2.6865, 1e-4);
+    }
+    {
+      auto c = fun.getParameter("f2.PeakCentre");
+      auto w = fun.getParameter("f2.FWHM");
+      TS_ASSERT_EQUALS(w, checkW(c));
+      auto ct = getBounds(fun, "f2.FWHM");
+      TS_ASSERT_DELTA(ct.first, 0.7868, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 2.9868, 1e-4);
+    }
+    {
+      auto c = fun.getParameter("f3.PeakCentre");
+      auto w = fun.getParameter("f3.FWHM");
+      TS_ASSERT_EQUALS(w, 0.0);
+    }
+  }
+
+private:
+
+  std::pair<double, double> getBounds(API::IFunction& fun, const std::string& parName) {
+    auto ct = fun.getConstraint(fun.parameterIndex(parName));
+    if (ct == nullptr) {
+      throw std::runtime_error("Parameter " + parName + " doesn't have constraint");
+    }
+    auto bc = dynamic_cast<Constraints::BoundaryConstraint*>(ct);
+    if (ct == nullptr) {
+      throw std::runtime_error("Parameter " + parName + " doesn't have boundary constraint");
+    }
+    return std::make_pair(bc->lower(), bc->upper());
   }
 
 };

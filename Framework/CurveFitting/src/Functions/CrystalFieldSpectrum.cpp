@@ -58,8 +58,8 @@ void setWidthConstraint(API::IPeakFunction& peak, double width, double widthVari
   double lowerBound = width - widthVariation;
   bool fix = lowerBound == upperBound;
   if (!fix) {
-    if (lowerBound <= 0.0) {
-      lowerBound = widthVariation;
+    if (lowerBound < 0.0) {
+      lowerBound = 0.0;
     }
     if (lowerBound >= upperBound) {
       lowerBound = upperBound / 2;
@@ -72,7 +72,7 @@ void setWidthConstraint(API::IPeakFunction& peak, double width, double widthVari
     }
     auto constraint = new Constraints::BoundaryConstraint(&peak, "FWHM", lowerBound, upperBound);
     peak.addConstraint(constraint);
-  } else if (peak.name() == "Gausian") {
+  } else if (peak.name() == "Gaussian") {
     if (fix) {
       peak.fixParameter("Sigma");
       return;
