@@ -115,8 +115,7 @@ void Rebin2D::exec() {
   }
 
   // Progress reports & cancellation
-  const size_t nreports(static_cast<size_t>(inputWS->getNumberHistograms() *
-                                            inputWS->blocksize()));
+  const size_t nreports(static_cast<size_t>(numYBins));
   m_progress = boost::shared_ptr<API::Progress>(
       new API::Progress(this, 0.0, 1.0, nreports));
 
