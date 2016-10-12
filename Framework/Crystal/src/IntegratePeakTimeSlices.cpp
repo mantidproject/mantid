@@ -591,7 +591,7 @@ void IntegratePeakTimeSlices::exec() {
           if (!done) {
 
             // Now set up the center for this peak
-            int i = find("Mrow", names);
+            int i = findNameInVector("Mrow", names);
             if (i < 0) {
               throw std::runtime_error("Inconsistency found in algorithm "
                                        "execution. The index for the parameter "
@@ -599,7 +599,7 @@ void IntegratePeakTimeSlices::exec() {
             }
 
             lastRow = static_cast<int>(params[i] + .5);
-            i = find("Mcol", names);
+            i = findNameInVector("Mcol", names);
             if (i >= 0)
               lastCol = static_cast<int>(params[i] + .5);
             prog.report();
@@ -821,11 +821,11 @@ int IntegratePeakTimeSlices::CalculateTimeChannelSpan(
 
   double time = peak.getTOF();
   double dtime = dQ / Q * time;
-  int chanCenter = find(X, time);
+  int chanCenter = findTimeChannel(X, time);
 
   Centerchan = chanCenter;
-  int chanLeft = find(X, time - dtime);
-  int chanRight = find(X, time + dtime);
+  int chanLeft = findTimeChannel(X, time - dtime);
+  int chanRight = findTimeChannel(X, time + dtime);
   int dchan = abs(chanCenter - chanLeft);
 
   if (abs(chanRight - chanCenter) > dchan)
@@ -1714,7 +1714,8 @@ void IntegratePeakTimeSlices::SetUpData1(
  * @param time  The desired time
  * @return the time channel
  */
-int IntegratePeakTimeSlices::find(const HistogramX &X, const double time) {
+int IntegratePeakTimeSlices::findTimeChannel(const HistogramX &X,
+                                             const double time) {
   int sgn = 1;
 
   if (X[0] > X[1])
@@ -1799,8 +1800,8 @@ std::string IntegratePeakTimeSlices::CalculateFunctionProperty_Fit() {
  *
  *  @return the position in the vector of oneName or -1.
  */
-int IntegratePeakTimeSlices::find(std::string const &oneName,
-                                  std::vector<std::string> const &nameList)
+int IntegratePeakTimeSlices::findNameInVector(
+    std::string const &oneName, std::vector<std::string> const &nameList)
 
 {
   for (size_t i = 0; i < nameList.size(); i++)
@@ -2088,8 +2089,8 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
       errs.push_back(0);
     }
 
-  } catch (std::exception &
-               Ex1) // ties or something else went wrong in BivariateNormal
+  } catch (std::exception
+               &Ex1) // ties or something else went wrong in BivariateNormal
   {
     done = true;
     g_log.error() << "Bivariate Error for PeakNum="
@@ -2198,7 +2199,7 @@ void IntegratePeakTimeSlices::PreFit(MatrixWorkspace_sptr &Data,
   }
   vector<std::string> ParNames(m_ParameterNames, m_ParameterNames + NParams);
   for (int i = 0; i < NParams; i++) {
-    int k = find(Bestnames[i], ParNames);
+    int k = findNameInVector(Bestnames[i], ParNames);
     if (k >= 0 && k < NParams)
       m_ParameterValues[k] = Bestparams[k];
   }
@@ -2221,13 +2222,13 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
                                         std::vector<double> const &errs,
                                         std::vector<std::string> const &names,
                                         double chisqOverDOF) {
-  int Ibk = find("Background", names);
+  int Ibk = findNameInVector("Background", names);
   if (Ibk < 0)
     throw std::runtime_error(
         "Irrecoverable inconsistency found. The index for the "
         "parameter 'Background' is lower than zero.");
 
-  int IIntensity = find("Intensity", names);
+  int IIntensity = findNameInVector("Intensity", names);
   if (IIntensity < 0)
     throw std::runtime_error(
         "Irrecoverable inconsistency found. The index for the "
@@ -2255,7 +2256,8 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
 
     g_log.debug() << "   Bad Slice. Negative Counts= "
                   << m_AttributeValues->StatBaseVals(IIntensities) -
-                         params[Ibk] * ncells << '\n';
+                         params[Ibk] * ncells
+                  << '\n';
     ;
     return false;
   }
@@ -2270,7 +2272,8 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
                    // background
   {
     g_log.debug() << "   Bad Slice. Fitted Intensity & Observed "
-                     "Intensity(-back) too different. ratio=" << x << '\n';
+                     "Intensity(-back) too different. ratio="
+                  << x << '\n';
 
     return false;
   }
@@ -2499,13 +2502,13 @@ int IntegratePeakTimeSlices::UpdateOutputWS(
     std::vector<double> const &params, std::vector<double> const &errs,
     std::vector<std::string> const &names, const double Chisq,
     const double time, string spec_idList) {
-  int Ibk = find("Background", names);
-  int IIntensity = find("Intensity", names);
-  int IVx = find("SScol", names);
-  int IVy = find("SSrow", names);
-  int IVxy = find("SSrc", names);
-  int Irow = find("Mrow", names);
-  int Icol = find("Mcol", names);
+  int Ibk = findNameInVector("Background", names);
+  int IIntensity = findNameInVector("Intensity", names);
+  int IVx = findNameInVector("SScol", names);
+  int IVy = findNameInVector("SSrow", names);
+  int IVxy = findNameInVector("SSrc", names);
+  int Irow = findNameInVector("Mrow", names);
+  int Icol = findNameInVector("Mcol", names);
 
   if (Ibk < 0 || IIntensity < 0 || IVx < 0 || IVy < 0 || IVxy < 0 || Irow < 0 ||
       Icol < 0) {
