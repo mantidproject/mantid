@@ -212,7 +212,9 @@ private:
 class Rebin2DTestPerformance : public CxxTest::TestSuite {
 
 public:
-  Rebin2DTestPerformance() { m_inputWS = makeInputWS(false, true); }
+  Rebin2DTestPerformance() {
+    m_inputWS = makeInputWS(distribution, perf_test, small_bins);
+  }
 
   void test_On_Large_Workspace() {
     runAlgorithm(m_inputWS, "100,200,41000", "-0.5,2,499.5");
@@ -220,6 +222,10 @@ public:
 
 private:
   MatrixWorkspace_sptr m_inputWS;
+
+  const bool distribution = false;
+  const bool perf_test = true;
+  const bool small_bins = false;
 };
 
 #endif /* MANTID_ALGORITHMS_REBIN2DTEST_H_ */

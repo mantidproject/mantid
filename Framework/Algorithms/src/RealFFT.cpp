@@ -25,6 +25,7 @@
 #include "MantidKernel/ListValidator.h"
 
 #include "MantidHistogramData/LinearGenerator.h"
+
 namespace Mantid {
 namespace Algorithms {
 

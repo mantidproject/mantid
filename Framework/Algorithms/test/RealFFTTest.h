@@ -64,6 +64,129 @@ void deleteWorkspacesFromADS() {
   FrameworkManager::Instance().deleteWorkspace("RealFFT_WS_forward");
   FrameworkManager::Instance().deleteWorkspace("RealFFT_WS_backward");
 }
+
+void doTestForward(const int N, const double dX, const double XX,
+                   bool performance = false) {
+  IAlgorithm *fft =
+      Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
+  fft->initialize();
+  fft->setPropertyValue("InputWorkspace", "RealFFT_WS");
+  fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_forward");
+  fft->setPropertyValue("WorkspaceIndex", "0");
+  fft->execute();
+
+  if (!performance) {
+    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("RealFFT_WS_forward"));
+
+    const auto &X = fWS->x(0);
+    const auto &Yr = fWS->y(0);
+    const auto &Yi = fWS->y(1);
+
+    double h = sqrt(M_PI / 3);
+    double a = M_PI * M_PI / 3;
+    double dx = 1 / (XX);
+
+    for (int i = 0; i < N / 4; i++) {
+      double x = X[i];
+      double tmp = sqrt(Yr[i] * Yr[i] + Yi[i] * Yi[i]);
+      // std::cerr<<x<<' '<<tmp<<' '<<h*exp(-a*x*x)<<'\n';
+      TS_ASSERT_DELTA(x, dx * i, 0.00001);
+      TS_ASSERT_DELTA(tmp / (h * exp(-a * x * x)), 1., 0.001);
+      TS_ASSERT_DELTA(Yi[i], 0.0, 0.00001);
+    }
+  }
+}
+
+void doTestBackward(const int N, const double dX, const double XX,
+                    bool performance = false) {
+  IAlgorithm *fft =
+      Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
+  fft->initialize();
+  fft->setPropertyValue("InputWorkspace", "RealFFT_WS_forward");
+  fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_backward");
+  fft->setPropertyValue("Transform", "Backward");
+  fft->execute();
+
+  if (!performance) {
+    MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("RealFFT_WS"));
+
+    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("RealFFT_WS_backward"));
+
+    const auto &Y0 = WS->y(0);
+
+    const auto &X = fWS->x(0);
+    const auto &Y = fWS->y(0);
+
+    for (int i = 0; i < N; i++) {
+      TS_ASSERT_DELTA(X[i], dX * i, 0.00001);
+      TS_ASSERT_DELTA(Y[i], Y0[i], 0.00001);
+    }
+  }
+}
+
+void doTestForwardHistogram(const int N, const double dX, const double XX,
+                            bool performance = false) {
+  IAlgorithm *fft =
+      Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
+  fft->initialize();
+  fft->setPropertyValue("InputWorkspace", "RealFFT_WS_hist");
+  fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_forward_hist");
+  fft->setPropertyValue("WorkspaceIndex", "0");
+  fft->execute();
+
+  MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      AnalysisDataService::Instance().retrieve("RealFFT_WS_forward_hist"));
+
+  if (!performance) {
+    const auto &X = fWS->x(0);
+    const auto &Yr = fWS->y(0);
+    const auto &Yi = fWS->y(1);
+
+    double h = sqrt(M_PI / 3);
+    double a = M_PI * M_PI / 3;
+    double dx = 1 / (XX);
+
+    for (int i = 0; i < N / 4; i++) {
+      double x = X[i];
+      double tmp = sqrt(Yr[i] * Yr[i] + Yi[i] * Yi[i]);
+      // std::cerr<<x<<' '<<tmp<<' '<<h*exp(-a*x*x)<<'\n';
+      TS_ASSERT_DELTA(x, dx * i, 0.00001);
+      TS_ASSERT_DELTA(tmp / (h * exp(-a * x * x)), 1., 0.001);
+      TS_ASSERT_DELTA(Yi[i], 0.0, 0.00001);
+    }
+  }
+}
+
+void doTestBackwardHistogram(const int N, const double dX, const double XX,
+                             bool performance = false) {
+  IAlgorithm *fft =
+      Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
+  fft->initialize();
+  fft->setPropertyValue("InputWorkspace", "RealFFT_WS_forward_hist");
+  fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_backward_hist");
+  fft->setPropertyValue("Transform", "Backward");
+  fft->execute();
+
+  MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      AnalysisDataService::Instance().retrieve("RealFFT_WS"));
+
+  MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      AnalysisDataService::Instance().retrieve("RealFFT_WS_backward_hist"));
+
+  if (!performance) {
+    const auto &Y0 = WS->y(0);
+    const auto &X = fWS->x(0);
+    const auto &Y = fWS->y(0);
+
+    for (int i = 0; i < N; i++) {
+      TS_ASSERT_DELTA(X[i], dX * i, 0.00001);
+      TS_ASSERT_DELTA(Y[i], Y0[i], 0.00001);
+    }
+  }
+}
 }
 
 class RealFFTTest : public CxxTest::TestSuite {
@@ -74,131 +197,39 @@ public:
   RealFFTTest() : N(116), dX(0.3), XX(N * dX) { setupWorkspaces(N, dX); }
   ~RealFFTTest() override { deleteWorkspacesFromADS(); }
 
-  void dotestForward(std::string IgnoreXBins, bool performance = false) {
-    UNUSED_ARG(IgnoreXBins);
-    IAlgorithm *fft =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
-    fft->initialize();
-    fft->setPropertyValue("InputWorkspace", "RealFFT_WS");
-    fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_forward");
-    fft->setPropertyValue("WorkspaceIndex", "0");
-    fft->execute();
+  void testForward() { doTestForward(N, dX, XX); }
+  void testBackward() { doTestBackward(N, dX, XX); }
+  void testForwardHistogram() { doTestForwardHistogram(N, dX, XX); }
+  void testBackwardHistogram() { doTestBackwardHistogram(N, dX, XX); }
 
-    if (!performance) {
-      MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          AnalysisDataService::Instance().retrieve("RealFFT_WS_forward"));
+private:
+  const int N;
+  const double dX, XX;
+};
 
-      const auto &X = fWS->x(0);
-      const auto &Yr = fWS->y(0);
-      const auto &Yi = fWS->y(1);
-
-      double h = sqrt(M_PI / 3);
-      double a = M_PI * M_PI / 3;
-      double dx = 1 / (XX);
-
-      for (int i = 0; i < N / 4; i++) {
-        double x = X[i];
-        double tmp = sqrt(Yr[i] * Yr[i] + Yi[i] * Yi[i]);
-        // std::cerr<<x<<' '<<tmp<<' '<<h*exp(-a*x*x)<<'\n';
-        TS_ASSERT_DELTA(x, dx * i, 0.00001);
-        TS_ASSERT_DELTA(tmp / (h * exp(-a * x * x)), 1., 0.001);
-        TS_ASSERT_DELTA(Yi[i], 0.0, 0.00001);
-      }
-    }
+class RealFFTTestPerformance : public CxxTest::TestSuite {
+public:
+  static RealFFTTestPerformance *createSuite() {
+    return new RealFFTTestPerformance();
   }
+  static void destroySuite(RealFFTTestPerformance *suite) { delete suite; }
 
-  void testForward() { dotestForward("0"); }
-
-  void testForward_IgnoringX() { dotestForward("1"); }
-
-  void testBackward(bool performance = false) {
-    IAlgorithm *fft =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
-    fft->initialize();
-    fft->setPropertyValue("InputWorkspace", "RealFFT_WS_forward");
-    fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_backward");
-    fft->setPropertyValue("Transform", "Backward");
-    fft->execute();
-
-    if (!performance) {
-      MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          AnalysisDataService::Instance().retrieve("RealFFT_WS"));
-
-      MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          AnalysisDataService::Instance().retrieve("RealFFT_WS_backward"));
-
-      const auto &Y0 = WS->y(0);
-
-      const auto &X = fWS->x(0);
-      const auto &Y = fWS->y(0);
-
-      for (int i = 0; i < N; i++) {
-        TS_ASSERT_DELTA(X[i], dX * i, 0.00001);
-        TS_ASSERT_DELTA(Y[i], Y0[i], 0.00001);
-      }
-    }
+  RealFFTTestPerformance() : N(116), dX(0.3), XX(N * dX) {
+    setupWorkspaces(N, dX);
   }
+  ~RealFFTTestPerformance() override { deleteWorkspacesFromADS(); }
 
-  void testForwardHistogram(bool performance = false) {
-    IAlgorithm *fft =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
-    fft->initialize();
-    fft->setPropertyValue("InputWorkspace", "RealFFT_WS_hist");
-    fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_forward_hist");
-    fft->setPropertyValue("WorkspaceIndex", "0");
-    fft->execute();
-
-    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("RealFFT_WS_forward_hist"));
-
-    if (!performance) {
-      const auto &X = fWS->x(0);
-      const auto &Yr = fWS->y(0);
-      const auto &Yi = fWS->y(1);
-
-      double h = sqrt(M_PI / 3);
-      double a = M_PI * M_PI / 3;
-      double dx = 1 / (XX);
-
-      for (int i = 0; i < N / 4; i++) {
-        double x = X[i];
-        double tmp = sqrt(Yr[i] * Yr[i] + Yi[i] * Yi[i]);
-        // std::cerr<<x<<' '<<tmp<<' '<<h*exp(-a*x*x)<<'\n';
-        TS_ASSERT_DELTA(x, dx * i, 0.00001);
-        TS_ASSERT_DELTA(tmp / (h * exp(-a * x * x)), 1., 0.001);
-        TS_ASSERT_DELTA(Yi[i], 0.0, 0.00001);
-      }
-    }
+  void testForward() { doTestForward(N, dX, XX, performance); }
+  void testBackward() { doTestBackward(N, dX, XX, performance); }
+  void testForwardHistogram() {
+    doTestForwardHistogram(N, dX, XX, performance);
   }
-
-  void testBackwardHistogram(bool performance = false) {
-    IAlgorithm *fft =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
-    fft->initialize();
-    fft->setPropertyValue("InputWorkspace", "RealFFT_WS_forward_hist");
-    fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_backward_hist");
-    fft->setPropertyValue("Transform", "Backward");
-    fft->execute();
-
-    MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("RealFFT_WS"));
-
-    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("RealFFT_WS_backward_hist"));
-
-    if (!performance) {
-      const auto &Y0 = WS->y(0);
-      const auto &X = fWS->x(0);
-      const auto &Y = fWS->y(0);
-
-      for (int i = 0; i < N; i++) {
-        TS_ASSERT_DELTA(X[i], dX * i, 0.00001);
-        TS_ASSERT_DELTA(Y[i], Y0[i], 0.00001);
-      }
-    }
+  void testBackwardHistogram() {
+    doTestBackwardHistogram(N, dX, XX, performance);
   }
 
 private:
+  const bool performance = true;
   const int N;
   const double dX, XX;
 };
