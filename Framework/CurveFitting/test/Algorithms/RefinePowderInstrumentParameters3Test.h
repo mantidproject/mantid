@@ -472,8 +472,8 @@ public:
   }
 };
 
-class RefinePowderInstrumentParameters3TestPerformance
-    : public CxxTest::TestSuite {
+using CxxTest::TestSuite;
+class RefinePowderInstParams3TestPerformance : public TestSuite {
 
 private:
   Workspace2D_sptr posWS;
@@ -482,11 +482,10 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RefinePowderInstrumentParameters3TestPerformance *createSuite() {
-    return new RefinePowderInstrumentParameters3TestPerformance();
+  static RefinePowderInstParams3TestPerformance *createSuite() {
+    return new RefinePowderInstParams3TestPerformance();
   }
-  static void
-  destroySuite(RefinePowderInstrumentParameters3TestPerformance *suite) {
+  static void destroySuite(RefinePowderInstParams3TestPerformance *suite) {
     delete suite;
   }
 
