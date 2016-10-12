@@ -261,21 +261,10 @@ void TabulatedFunction::setupData() const {
   g_log.debug() << "Setting up " << m_workspace->name() << " index " << index
                 << '\n';
 
-  const bool hist = m_workspace->isHistogramData();
-  const size_t nbins = m_workspace->blocksize();
-  m_xData.resize(nbins);
-  m_yData.resize(nbins);
-
-  for (size_t i = 0; i < nbins; i++) {
-    double x = 0.0;
-    m_yData[i] = m_workspace->readY(index)[i];
-    auto &xvec = m_workspace->readX(index);
-    if (hist)
-      x = (xvec[i] + xvec[i + 1]) / 2;
-    else
-      x = xvec[i];
-    m_xData[i] = x;
-  }
+  auto &xData = m_workspace->points(index);
+  auto &yData = m_workspace->y(index);
+  m_xData.assign(xData.begin(), xData.end());
+  m_yData.assign(yData.begin(), yData.end());
 
   m_workspace.reset();
   m_setupFinished = true;

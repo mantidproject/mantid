@@ -52,7 +52,7 @@ private:
       return std::vector<size_t>();
     }
     size_t fillConstraintMatrix(Mantid::Kernel::DblMatrix &, const size_t,
-                                const std::vector<double> &) const override {
+                                const Mantid::HistogramData::HistogramE &) const override {
       return 0;
     }
 

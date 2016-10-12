@@ -386,7 +386,7 @@ void VesuvioCalculateGammaBackground::calculateTofSpectrum(
   assert(result.size() == tmpWork.size());
 
   // Assumes the input is in seconds, transform it temporarily
-  auto &tseconds = m_backgroundWS->dataX(wsIndex);
+  auto &tseconds = m_backgroundWS->mutableX(wsIndex);
   std::transform(tseconds.begin(), tseconds.end(), tseconds.begin(),
                  std::bind2nd(std::multiplies<double>(), 1e-6));
 
@@ -406,7 +406,7 @@ void VesuvioCalculateGammaBackground::calculateTofSpectrum(
     // Fix the Mass parameter
     profile->fix(0);
 
-    profile->cacheYSpaceValues(tseconds, false, detpar, respar);
+    profile->cacheYSpaceValues(m_backgroundWS->points(wsIndex), false, detpar, respar);
 
     profile->massProfile(tmpWork.data(), tmpWork.size());
     // Add to final result

@@ -74,12 +74,12 @@ public:
     IFunction_sptr func = createFunctionNoBackground();
     double x0(165.0), x1(166.0), dx(0.5);
     auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx);
-    auto &dataX = testWS->dataX(0);
+    auto &dataX = testWS->mutableX(0);
     std::transform(
         dataX.begin(), dataX.end(), dataX.begin(),
         std::bind2nd(std::multiplies<double>(), 1e-06)); // to seconds
     func->setMatrixWorkspace(testWS, 0, dataX.front(), dataX.back());
-    FunctionDomain1DView domain(dataX.data(), dataX.size());
+    FunctionDomain1DView domain(&dataX.front(), dataX.size());
     FunctionValues values(domain);
 
     TS_ASSERT_THROWS_NOTHING(func->function(domain, values));
@@ -96,13 +96,13 @@ public:
     IFunction_sptr func = createFunctionWithBackground();
     double x0(165.0), x1(166.0), dx(0.5);
     auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx);
-    auto &dataX = testWS->dataX(0);
+    auto &dataX = testWS->mutableX(0);
     std::transform(
         dataX.begin(), dataX.end(), dataX.begin(),
         std::bind2nd(std::multiplies<double>(), 1e-06)); // to seconds
     func->setMatrixWorkspace(testWS, 0, dataX.front(), dataX.back());
 
-    FunctionDomain1DView domain(dataX.data(), dataX.size());
+    FunctionDomain1DView domain(&dataX.front(), dataX.size());
     FunctionValues values(domain);
 
     TS_ASSERT_THROWS_NOTHING(func->function(domain, values));
@@ -120,7 +120,7 @@ public:
     IFunction_sptr func = createFunctionNoBackground();
     double x0(165.0), x1(166.0), dx(0.5);
     auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx);
-    auto &dataX = testWS->dataX(0);
+    auto &dataX = testWS->mutableX(0);
     std::transform(
         dataX.begin(), dataX.end(), dataX.begin(),
         std::bind2nd(std::multiplies<double>(), 1e-06)); // to seconds
@@ -144,7 +144,7 @@ public:
 
     double x0(165.0), x1(166.0), dx(0.5);
     auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx);
-    auto &dataX = testWS->dataX(0);
+    auto &dataX = testWS->mutableX(0);
     std::transform(
         dataX.begin(), dataX.end(), dataX.begin(),
         std::bind2nd(std::multiplies<double>(), 1e-06)); // to seconds
@@ -168,7 +168,7 @@ public:
 
     double x0(165.0), x1(166.0), dx(0.5);
     auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx);
-    auto &dataX = testWS->dataX(0);
+    auto &dataX = testWS->mutableX(0);
     std::transform(
         dataX.begin(), dataX.end(), dataX.begin(),
         std::bind2nd(std::multiplies<double>(), 1e-06)); // to seconds
@@ -197,7 +197,7 @@ public:
 
     double x0(165.0), x1(166.0), dx(0.5);
     auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx);
-    auto &dataX = testWS->dataX(0);
+    auto &dataX = testWS->mutableX(0);
     std::transform(
         dataX.begin(), dataX.end(), dataX.begin(),
         std::bind2nd(std::multiplies<double>(), 1e-06)); // to seconds
@@ -231,7 +231,7 @@ private:
 
     size_t fillConstraintMatrix(Mantid::Kernel::DblMatrix &cmatrix,
                                 const size_t start,
-                                const std::vector<double> &) const override {
+                                const Mantid::HistogramData::HistogramE &) const override {
       for (size_t i = 0; i < cmatrix.numRows(); ++i) {
         cmatrix[i][start] = 1.0;
       }
@@ -262,7 +262,7 @@ private:
     }
     size_t fillConstraintMatrix(Mantid::Kernel::DblMatrix &cmatrix,
                                 const size_t start,
-                                const std::vector<double> &) const override {
+                                const Mantid::HistogramData::HistogramE &) const override {
       for (size_t i = 0; i < cmatrix.numRows(); ++i) {
         for (size_t j = start; j < start + 2; ++j) {
           cmatrix[i][j] = 1.0;

@@ -16,6 +16,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Kernel;
 using namespace Mantid::DataObjects;
+using namespace HistogramData;
 
 class ProcessBackgroundTest : public CxxTest::TestSuite {
 public:
@@ -34,8 +35,8 @@ public:
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
             API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
     for (size_t i = 0; i < 10; ++i) {
-      inpws->dataX(0)[i] = double(i);
-      inpws->dataY(0)[i] = double(i) * double(i);
+      inpws->mutableX(0)[i] = double(i);
+      inpws->mutableY(0)[i] = double(i) * double(i);
     }
     API::AnalysisDataService::Instance().addOrReplace("Background1", inpws);
 
@@ -58,7 +59,7 @@ public:
     DataObjects::Workspace2D_sptr outws =
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
             API::AnalysisDataService::Instance().retrieve("NewBackground"));
-    size_t newsize = outws->dataX(0).size();
+    size_t newsize = outws->mutableX(0).size();
 
     TS_ASSERT_EQUALS(newsize, 8);
 
@@ -77,8 +78,8 @@ public:
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
             API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
     for (size_t i = 0; i < 10; ++i) {
-      inpws->dataX(0)[i] = double(i);
-      inpws->dataY(0)[i] = double(i) * double(i);
+      inpws->mutableX(0)[i] = double(i);
+      inpws->mutableY(0)[i] = double(i) * double(i);
     }
     API::AnalysisDataService::Instance().addOrReplace("Background2", inpws);
 
@@ -86,8 +87,8 @@ public:
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
             API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
     for (size_t i = 0; i < 10; ++i) {
-      refws->dataX(0)[i] = double(i) * 0.3 + 1.01;
-      refws->dataY(0)[i] = double(i) * double(i);
+      refws->mutableX(0)[i] = double(i) * 0.3 + 1.01;
+      refws->mutableY(0)[i] = double(i) * double(i);
     }
     API::AnalysisDataService::Instance().addOrReplace("RefBackground", refws);
 
@@ -111,7 +112,7 @@ public:
     DataObjects::Workspace2D_sptr outws =
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
             API::AnalysisDataService::Instance().retrieve("NewBackground"));
-    size_t newsize = outws->dataX(0).size();
+    size_t newsize = outws->mutableX(0).size();
 
     TS_ASSERT_EQUALS(newsize, 14);
 
@@ -176,8 +177,8 @@ public:
             API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1000,
                                                      1000));
     for (size_t i = 0; i < 1000; ++i) {
-      dataws->dataX(0)[i] = double(i);
-      dataws->dataY(0)[i] = double(i) * double(i);
+      dataws->mutableX(0)[i] = double(i);
+      dataws->mutableY(0)[i] = double(i) * double(i);
     }
 
     API::AnalysisDataService::Instance().addOrReplace("DiffractionData",
@@ -213,7 +214,7 @@ public:
                 "SelectedBackgroundPoints"));
     TS_ASSERT(bkgdws);
     if (bkgdws) {
-      TS_ASSERT_EQUALS(bkgdws->readX(0).size(), bkgdpts.size());
+      TS_ASSERT_EQUALS(bkgdws->x(0).size(), bkgdpts.size());
     }
 
     AnalysisDataService::Instance().remove("DiffractionData");
@@ -232,8 +233,8 @@ public:
             API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1000,
                                                      1000));
     for (size_t i = 0; i < 1000; ++i) {
-      dataws->dataX(0)[i] = double(i);
-      dataws->dataY(0)[i] =
+      dataws->mutableX(0)[i] = double(i);
+      dataws->mutableY(0)[i] =
           double(i) * double(i) + sin(double(i) / 180. * 3.14);
     }
     API::AnalysisDataService::Instance().addOrReplace("DiffractionData2",
@@ -284,7 +285,7 @@ public:
                 "SelectedBackgroundPoints2"));
     TS_ASSERT(bkgdws);
     if (bkgdws) {
-      TS_ASSERT(bkgdws->readX(0).size() > 10);
+      TS_ASSERT(bkgdws->x(0).size() > 10);
       TS_ASSERT_EQUALS(bkgdws->getNumberHistograms(), 3);
     }
 
@@ -305,33 +306,25 @@ public:
    */
   DataObjects::Workspace2D_sptr createWorkspace2D(std::string filename) {
     // 1. Read data
-    std::vector<double> vecx, vecy, vece;
-    importDataFromColumnFile(filename, vecx, vecy, vece);
+    auto data = importDataFromColumnFile(filename);
 
     // 2. Create workspace
-    size_t datasize = vecx.size();
+    size_t datasize = data.x().size();
     DataObjects::Workspace2D_sptr dataws =
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
             API::WorkspaceFactory::Instance().create("Workspace2D", 1, datasize,
                                                      datasize));
+    dataws->setHistogram(0, data);
 
-    for (size_t i = 0; i < vecx.size(); ++i) {
-      dataws->dataX(0)[i] = vecx[i];
-      dataws->dataY(0)[i] = vecy[i];
-      dataws->dataE(0)[i] = vece[i];
-    }
-
-    std::cout << "DBT505  dataX range: " << vecx[0] << ", " << vecx.back()
-              << " sized " << vecx.size() << '\n';
+    std::cout << "DBT505  dataX range: " << data.x()[0] << ", "
+              << data.x().back() << " sized " << data.x().size() << '\n';
 
     return dataws;
   }
 
   /** Import data from a column data file
    */
-  void importDataFromColumnFile(std::string filename, std::vector<double> &vecX,
-                                std::vector<double> &vecY,
-                                std::vector<double> &vecE) {
+  HistogramData::Histogram importDataFromColumnFile(std::string filename) {
     // 1. Open file
     std::ifstream ins;
     ins.open(filename.c_str());
@@ -342,22 +335,23 @@ public:
 
     // 2. Read file
     char line[256];
+    std::vector<double> vx, vy, ve;
     while (ins.getline(line, 256)) {
       if (line[0] != '#') {
         double x, y;
         std::stringstream ss;
         ss.str(line);
         ss >> x >> y;
-        vecX.push_back(x);
-        vecY.push_back(y);
         double e = 1.0;
         if (y > 1.0E-5)
           e = std::sqrt(y);
-        vecE.push_back(e);
+        vx.push_back(x);
+        vy.push_back(y);
+        ve.push_back(e);
       }
     }
 
-    return;
+    return Histogram(Points(vx), Counts(vy), CountStandardDeviations(ve));
   }
 };
 

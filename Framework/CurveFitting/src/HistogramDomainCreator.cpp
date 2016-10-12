@@ -45,7 +45,7 @@ void HistogramDomainCreator::createDomain(
         "Cannot create non-simple domain for histogram fitting.");
   }
 
-  const Mantid::MantidVec &X = m_matrixWorkspace->readX(m_workspaceIndex);
+  const auto &X = m_matrixWorkspace->x(m_workspaceIndex);
 
   // find the fitting interval: from -> to
   size_t endIndex = 0;
@@ -63,8 +63,8 @@ void HistogramDomainCreator::createDomain(
   }
 
   // set the data to fit to
-  const Mantid::MantidVec &Y = m_matrixWorkspace->readY(m_workspaceIndex);
-  const Mantid::MantidVec &E = m_matrixWorkspace->readE(m_workspaceIndex);
+  const auto &Y = m_matrixWorkspace->y(m_workspaceIndex);
+  const auto &E = m_matrixWorkspace->e(m_workspaceIndex);
   if (endIndex > Y.size()) {
     throw std::runtime_error("FitMW: Inconsistent MatrixWorkspace");
   }
@@ -132,8 +132,8 @@ boost::shared_ptr<API::Workspace> HistogramDomainCreator::createOutputWorkspace(
         // skip the diff spectrum
         continue;
       }
-      auto &y = mws.dataY(iSpec);
-      auto &e = mws.dataE(iSpec);
+      auto &y = mws.mutableY(iSpec);
+      auto &e = mws.mutableE(iSpec);
       double left = bins.leftBoundary();
       for (size_t i = 0; i < bins.size(); ++i) {
         double right = bins[i];

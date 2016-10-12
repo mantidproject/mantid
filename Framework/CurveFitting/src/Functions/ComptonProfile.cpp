@@ -107,11 +107,11 @@ void ComptonProfile::buildCaches() {
 
   Algorithms::DetectorParams detpar =
       ConvertToYSpace::getDetectorParameters(m_workspace, m_wsIndex);
-  this->cacheYSpaceValues(m_workspace->readX(m_wsIndex),
+  this->cacheYSpaceValues(m_workspace->points(m_wsIndex),
                           m_workspace->isHistogramData(), detpar);
 }
 
-void ComptonProfile::cacheYSpaceValues(const std::vector<double> &tseconds,
+void ComptonProfile::cacheYSpaceValues(const HistogramData::Points &tseconds,
                                        const bool isHistogram,
                                        const Algorithms::DetectorParams &detpar,
                                        const ResolutionParams &respar) {
@@ -126,7 +126,7 @@ void ComptonProfile::cacheYSpaceValues(const std::vector<double> &tseconds,
  * @param detpar Structure containing detector parameters
  */
 void ComptonProfile::cacheYSpaceValues(
-    const std::vector<double> &tseconds, const bool isHistogram,
+    const HistogramData::Points &tseconds, const bool isHistogram,
     const Algorithms::DetectorParams &detpar) {
   // ------ Fixed coefficients related to resolution & Y-space transforms
   // ------------------
@@ -144,8 +144,7 @@ void ComptonProfile::cacheYSpaceValues(
   m_modQ.resize(nData);
   m_yspace.resize(nData);
   for (size_t i = 0; i < nData; ++i) {
-    const double tsec =
-        (isHistogram) ? 0.5 * (tseconds[i] + tseconds[i + 1]) : tseconds[i];
+    const double tsec = tseconds[i];
     ConvertToYSpace::calculateY(m_yspace[i], m_modQ[i], m_e0[i], m_mass, tsec,
                                 k1, v1, detpar);
   }
