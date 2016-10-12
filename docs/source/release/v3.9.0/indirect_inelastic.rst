@@ -16,12 +16,11 @@ Data Analysis
 
 - :ref:`TeixeiraWaterSQE <func-TeixeiraWaterSQE>` models translation of water-like molecules (jump diffusion).
 
-Jump Fit
-~~~~~~~~
 
 Improvements
 ------------
 
+- When plotting from interfaces the plots now display error bars as standard
 
 Bugfixes
 --------
