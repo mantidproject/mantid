@@ -10,6 +10,9 @@ Bug Fixes
 
 |
 
+- Fix for LARMOR multi-period loading. The initial rotation was not correctly applied to all child workspaces.:wq
+
+
 X uncertainties (delta-Q)
 -------------------------
 
