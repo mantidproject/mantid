@@ -148,12 +148,9 @@ void VesuvioCalculateMS::exec() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   for (size_t i = 0; i < nhist; ++i) {
 
-    // Copy over the X-values
-    const auto &xValues = m_inputWS->x(i);
+    // set common X-values
     totalsc->setSharedX(i, m_inputWS->sharedX(i));
     multsc->setSharedX(i, m_inputWS->sharedX(i));
-    // totalsc->dataX(i) = xValues;
-    // multsc->dataX(i) = xValues;
 
     // Final detector position
     if (!spectrumInfo.hasDetectors(i)) {
@@ -227,7 +224,7 @@ void VesuvioCalculateMS::cacheInputs() {
   if (nInputAtomProps != nExptdAtomProp * nmasses) {
     std::ostringstream os;
     os << "Inconsistent AtomicProperties list defined. Expected "
-       << nExptdAtomProp *nmasses << " values, however, only "
+       << nExptdAtomProp * nmasses << " values, however, only "
        << sampleInfo.size() << " have been given.";
     throw std::invalid_argument(os.str());
   }
