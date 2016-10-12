@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/GetAllEi.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistoWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"

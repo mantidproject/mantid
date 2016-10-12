@@ -97,21 +97,21 @@ public:
     TS_ASSERT_EQUALS(numberOfSpectra, (int)Nhist);
     for (size_t i = 0; i < numberOfSpectra - 1; ++i) {
       // all of the values should fall in this range for INES
-      TS_ASSERT_DELTA(output2D->readY(i)[0], 0.00139, 0.00001);
+      TS_ASSERT_DELTA(output2D->y(i)[0], 0.00139, 0.00001);
 
-      TS_ASSERT_DELTA(output2D->readX(i)[0], 0.0, 0.000001);
-      TS_ASSERT_DELTA(output2D->readX(i)[1], 10000.0, 0.000001);
-      TS_ASSERT_DELTA(output2D->readE(i)[0], 0.0, 0.000001);
+      TS_ASSERT_DELTA(output2D->x(i)[0], 0.0, 0.000001);
+      TS_ASSERT_DELTA(output2D->x(i)[1], 10000.0, 0.000001);
+      TS_ASSERT_DELTA(output2D->e(i)[0], 0.0, 0.000001);
     }
 
     // some specific, more accurate values
-    TS_ASSERT_DELTA(output2D->readY(5)[0], 0.00139822, 0.0000001);
-    TS_ASSERT_DELTA(output2D->readY(10)[0], 0.00139822, 0.0000001);
-    TS_ASSERT_DELTA(output2D->readY(20)[0], 0.00139822, 0.0000001);
-    TS_ASSERT_DELTA(output2D->readY(50)[0], 0.00139822, 0.0000001);
+    TS_ASSERT_DELTA(output2D->y(5)[0], 0.00139822, 0.0000001);
+    TS_ASSERT_DELTA(output2D->y(10)[0], 0.00139822, 0.0000001);
+    TS_ASSERT_DELTA(output2D->y(20)[0], 0.00139822, 0.0000001);
+    TS_ASSERT_DELTA(output2D->y(50)[0], 0.00139822, 0.0000001);
 
     // Check 'dead' detector spectrum gives zero solid angle
-    TS_ASSERT_EQUALS(output2D->readY(143).front(), 0);
+    TS_ASSERT_EQUALS(output2D->y(143).front(), 0);
   }
 
   void testExecSubset() {
@@ -142,11 +142,11 @@ public:
     TS_ASSERT_EQUALS(numberOfSpectra, 10);
     for (size_t i = 0; i < numberOfSpectra; ++i) {
       // all of the values should fall in this range for INES
-      TS_ASSERT_DELTA(output2D->readY(i)[0], 0.0013, 0.0001);
+      TS_ASSERT_DELTA(output2D->y(i)[0], 0.0013, 0.0001);
 
-      TS_ASSERT_DELTA(output2D->readX(i)[0], 0.0, 0.000001);
-      TS_ASSERT_DELTA(output2D->readX(i)[1], 10000.0, 0.000001);
-      TS_ASSERT_DELTA(output2D->readE(i)[0], 0.0, 0.000001);
+      TS_ASSERT_DELTA(output2D->x(i)[0], 0.0, 0.000001);
+      TS_ASSERT_DELTA(output2D->x(i)[1], 10000.0, 0.000001);
+      TS_ASSERT_DELTA(output2D->e(i)[0], 0.0, 0.000001);
     }
   }
 

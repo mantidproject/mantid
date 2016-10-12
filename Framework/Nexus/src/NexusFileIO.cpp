@@ -1194,7 +1194,7 @@ bool NexusFileIO::writeNexusBinMasking(
 
   // save masked bin indices
   dimensions[0] = static_cast<int>(bins.size());
-  status = NXmakedata(fileID, "masked_bins", NX_INT32, 1, dimensions);
+  status = NXmakedata(fileID, "masked_bins", NX_UINT64, 1, dimensions);
   if (status == NX_ERROR)
     return false;
   NXopendata(fileID, "masked_bins");

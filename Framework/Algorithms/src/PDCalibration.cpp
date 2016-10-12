@@ -2,6 +2,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IEventList.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -44,7 +45,6 @@ namespace { // anonymous
 const auto isNonZero = [](const double value) { return value != 0.; };
 }
 
-//----------------------------------------------------------------------------------------------
 /// private inner class
 class PDCalibration::FittedPeaks {
 public:

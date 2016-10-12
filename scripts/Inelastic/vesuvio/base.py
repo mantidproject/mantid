@@ -1,4 +1,7 @@
-# pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods,redefined-builtin
+from __future__ import (absolute_import, division, print_function)
+from six import iteritems
+
 from mantid.api import Algorithm
 
 class VesuvioBase(Algorithm):
@@ -11,7 +14,13 @@ class VesuvioBase(Algorithm):
 
     def _execute_child_alg(self, name, **kwargs):
         alg = self.createChildAlgorithm(name)
-        for name, value in kwargs.iteritems():
+        # Function needs to be set before input ws for fit algs
+        function_key = 'Function'
+        if function_key in kwargs:
+            alg.setProperty(function_key, kwargs[function_key])
+            del kwargs[function_key]
+
+        for name, value in iteritems(kwargs):
             alg.setProperty(name, value)
         alg.execute()
         outputs = list()

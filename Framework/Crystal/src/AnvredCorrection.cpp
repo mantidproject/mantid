@@ -1,6 +1,8 @@
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"

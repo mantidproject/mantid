@@ -1,4 +1,6 @@
 #pylint: disable=no-init,too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
+
 import mantid.simpleapi as s_api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, \
                        PropertyMode, MatrixWorkspace, Progress

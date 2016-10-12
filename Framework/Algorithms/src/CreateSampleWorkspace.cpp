@@ -4,6 +4,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionProperty.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -37,17 +38,14 @@ using Mantid::MantidVecPtr;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateSampleWorkspace)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 CreateSampleWorkspace::CreateSampleWorkspace() : m_randGen(nullptr) {}
 
-//----------------------------------------------------------------------------------------------
 /** Destructor
  */
 CreateSampleWorkspace::~CreateSampleWorkspace() { delete m_randGen; }
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CreateSampleWorkspace::name() const {
   return "CreateSampleWorkspace";
@@ -61,7 +59,6 @@ const std::string CreateSampleWorkspace::category() const {
   return "Utility\\Workspaces";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CreateSampleWorkspace::init() {

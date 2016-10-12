@@ -4,6 +4,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include <vector>
@@ -40,13 +41,11 @@ void copyLogs(const EventWorkspace_sptr &from, EventWorkspace_sptr &to) {
 }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 EventWorkspaceCollection::EventWorkspaceCollection()
     : m_WsVec(1, createEmptyEventWorkspace()) {}
 
-//-----------------------------------------------------------------------------
 /**
 * Create a blank event workspace
 * @returns A shared pointer to a new empty EventWorkspace object

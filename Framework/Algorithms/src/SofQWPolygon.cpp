@@ -58,7 +58,7 @@ void SofQWPolygon::exec() {
   this->initCachedValues(inputWS);
 
   const size_t nTheta = m_thetaPts.size();
-  const MantidVec &X = inputWS->readX(0);
+  const auto &X = inputWS->x(0);
 
   // Holds the spectrum-detector mapping
   std::vector<specnum_t> specNumberMapping;

@@ -8,6 +8,8 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <fstream>

@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/FilterByLogValue.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -21,7 +22,6 @@ using DataObjects::EventWorkspace_const_sptr;
 std::string CENTRE("Centre");
 std::string LEFT("Left");
 
-//-----------------------------------------------------------------------
 void FilterByLogValue::init() {
   declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
@@ -106,7 +106,6 @@ std::map<std::string, std::string> FilterByLogValue::validateInputs() {
   return errors;
 }
 
-//-----------------------------------------------------------------------
 /** Executes the algorithm
  */
 void FilterByLogValue::exec() {

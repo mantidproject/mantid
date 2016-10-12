@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"

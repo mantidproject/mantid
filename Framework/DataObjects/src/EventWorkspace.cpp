@@ -1,4 +1,5 @@
 #include "MantidAPI/RefAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceProperty.h"

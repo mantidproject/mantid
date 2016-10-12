@@ -96,7 +96,7 @@ void SofQWNormalisedPolygon::exec() {
     this->initAngularCachesPSD(inputWS);
   }
 
-  const MantidVec &X = inputWS->readX(0);
+  const auto &X = inputWS->x(0);
   int emode = m_EmodeProperties.m_emode;
 
   const auto &inputIndices = inputWS->indexInfo();
