@@ -151,8 +151,6 @@ std::vector<double> RadiusSum::processNumericImageRadiusSum() {
   // or the center of the bin, if it is a histogram.
 
   g_log.debug() << "Define the X positions of the pixels\n";
-  auto &refX = inputWS->getSpectrum(0).x();
-  auto &refY = inputWS->getSpectrum(0).y();
   auto x_pos = inputWS->points(0);
 
   g_log.debug() << "For every pixel define its bin position and sum them up\n";
@@ -508,7 +506,8 @@ void RadiusSum::numBinsIsReasonable() {
                        "resolution (detector size). "
                     << "A resonable number is smaller than "
                     << static_cast<int>((max_radius - min_radius) /
-                                        min_bin_size) << '\n';
+                                        min_bin_size)
+                    << '\n';
 }
 
 double RadiusSum::getMinBinSizeForInstrument(API::MatrixWorkspace_sptr inWS) {
