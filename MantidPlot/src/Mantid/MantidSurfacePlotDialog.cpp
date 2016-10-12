@@ -1,6 +1,7 @@
 #include "MantidSurfacePlotDialog.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/Run.h"
 #include <QMessageBox>
 
 using Mantid::API::IMDWorkspace;

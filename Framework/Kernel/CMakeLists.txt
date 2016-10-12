@@ -43,7 +43,6 @@ set ( SRC_FILES
 	src/Interpolation.cpp
 	src/LibraryManager.cpp
 	src/LibraryWrapper.cpp
-	src/ListValidator.cpp
 	src/LogFilter.cpp
 	src/LogParser.cpp
 	src/Logger.cpp
@@ -72,6 +71,7 @@ set ( SRC_FILES
 	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusDescriptor.cpp
+	src/NullValidator.cpp
 	src/OptionalBool.cpp
 	src/ParaViewVersion.cpp
 	src/ProgressBase.cpp

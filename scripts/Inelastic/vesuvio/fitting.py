@@ -86,7 +86,7 @@ class FittingOptions(object):
         """
         all_free = (default_vals is not None)
 
-        if all_free:
+        if all_free or (self.intensity_constraints is None):
             function_str = "composite=CompositeFunction,NumDeriv=1;"
         else:
             function_str = "composite=ComptonScatteringCountRate,NumDeriv=1%s;"

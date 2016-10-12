@@ -21,5 +21,6 @@ set ( CPACK_RPM_PACKAGE_LICENSE GPLv3+ )
 set ( CPACK_RPM_PACKAGE_RELEASE 1 )
 set ( CPACK_RPM_PACKAGE_GROUP Applications/Engineering )
 
-# DEB information - only used if generating a deb
-set ( CPACK_DEBIAN_PACKAGE_RELEASE 1 )
+# DEB informatin - the package does not have an original
+# in debian archives so the debian release is 0
+set ( CPACK_DEBIAN_PACKAGE_RELEASE 0 )

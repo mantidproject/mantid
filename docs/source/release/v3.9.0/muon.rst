@@ -11,6 +11,8 @@ Interfaces
 Muon Analysis
 #############
 
+- Fixed a bug where the "load next/previous" buttons appended runs in certain cases where this was not the intended behaviour.
+
 Algorithms
 ----------
 

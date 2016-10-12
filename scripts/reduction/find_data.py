@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,redefined-builtin
 import os
 import mantid.api as api
 from mantid.simpleapi import *

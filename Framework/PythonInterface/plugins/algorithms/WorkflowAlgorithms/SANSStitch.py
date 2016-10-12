@@ -1,5 +1,7 @@
 ﻿# pylint: disable=no-init,invalid-name,too-many-arguments,too-few-public-methods
 
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, AnalysisDataService
 from mantid.kernel import Direction, Property, StringListValidator, UnitFactory, \
@@ -67,7 +69,7 @@ class SANSStitch(DataProcessorAlgorithm):
             MatrixWorkspaceProperty('LABNormCan', '', optional=PropertyMode.Optional, direction=Direction.Input),
             doc='Low angle bank normalization workspace in Q')
 
-        allowedModes = StringListValidator(self._make_mode_map().keys())
+        allowedModes = StringListValidator(list(self._make_mode_map().keys()))
 
         self.declareProperty('Mode', 'None', validator=allowedModes, direction=Direction.Input,
                              doc='What to fit. Free parameter(s).')
@@ -359,21 +361,13 @@ class QErrorCorrectionForMergedWorkspaces(object):
         super(QErrorCorrectionForMergedWorkspaces, self).__init__()
 
     def _divide_q_resolution_by_counts(self, q_res, counts):
-        # We are dividing DX by Y. Note that len(DX) = len(Y) + 1
-        # Unfortunately, we need some knowlege about the Q1D algorithm here.
-        # The two last entries of DX are duplicate in Q1D and this is how we
-        # treat it here.
-        q_res_buffer = np.divide(q_res[0:-1], counts)
-        q_res_buffer = np.append(q_res_buffer, q_res_buffer[-1])
+        # We are dividing DX by Y.
+        q_res_buffer = np.divide(q_res, counts)
         return q_res_buffer
 
     def _multiply_q_resolution_by_counts(self, q_res, counts):
-        # We are dividing DX by Y. Note that len(DX) = len(Y) + 1
-        # Unfortunately, we need some knowlege about the Q1D algorithm here.
-        # The two last entries of DX are duplicate in Q1D and this is how we
-        # treat it here.
-        q_res_buffer = np.multiply(q_res[0:-1], counts)
-        q_res_buffer = np.append(q_res_buffer, q_res_buffer[-1])
+        # We are dividing DX by Y.
+        q_res_buffer = np.multiply(q_res, counts)
         return q_res_buffer
 
     def correct_q_resolution_for_merged(self, count_ws_front, count_ws_rear,

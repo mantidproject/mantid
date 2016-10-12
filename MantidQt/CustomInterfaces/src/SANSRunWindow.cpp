@@ -1,6 +1,3 @@
-//----------------------
-// Includes
-//----------------------
 #include "MantidQtCustomInterfaces/SANSRunWindow.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -16,6 +13,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -4038,9 +4036,9 @@ bool SANSRunWindow::isValidWsForRemovingZeroErrors(QString &wsName) {
   bool isValid = true;
   if (result != m_constants.getPythonSuccessKeyword()) {
     result.replace(m_constants.getPythonSuccessKeyword(), "");
-    g_log.warning("Not a valid workspace for zero error replacement. Will save "
-                  "original workspace. More info: " +
-                  result.toStdString());
+    g_log.notice("Not a valid workspace for zero error replacement. Will save "
+                 "original workspace. More info: " +
+                 result.toStdString());
     isValid = false;
   }
   return isValid;

@@ -250,8 +250,8 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
                                            SpectrumType='DOS',
                                            Ions='H:P,C:P,O')
         self.assertEqual(3, wks_grp.size())
-        self.assertEqual('wks_grp_C(13)', wks_grp.getItem(0).getName())
-        self.assertEqual('(C13)', wks_grp.getItem(0).sample().getMaterial().name())
+        self.assertTrue(_is_name_material_in_group(wks_group = wks_grp, \
+                                                   name_to_find = 'wks_grp_C(13)', material_to_find = '(C13)'))
 
 
     def test_non_isotpe_element_indices_loading(self):
@@ -264,9 +264,9 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
                                            CalculateIonIndices=True,
                                            Ions='H,C,O')
         self.assertEqual(20, len(wks_grp))
-        self.assertEqual('wks_grp_H_0' , wks_grp.getItem(0).getName())
-        self.assertEqual('wks_grp_C_4' , wks_grp.getItem(4).getName())
-        self.assertEqual('wks_grp_O_12', wks_grp.getItem(12).getName())
+        self.assertTrue(_is_name_in_group(wks_group=wks_grp, name_to_find='wks_grp_H_0'))
+        self.assertTrue(_is_name_in_group(wks_group=wks_grp, name_to_find='wks_grp_C_4'))
+        self.assertTrue(_is_name_in_group(wks_group=wks_grp, name_to_find='wks_grp_O_12'))
 
 
     def test_isotope_element_indices_loading(self):
@@ -277,9 +277,57 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
                                            CalculateIonIndices=True,
                                            Ions='H:P,C:P')
         self.assertEqual(2, len(wks_grp))
-        self.assertEqual('wks_grp_C(13)_0', wks_grp.getItem(0).getName())
-        self.assertEqual('wks_grp_H(2)_1' , wks_grp.getItem(1).getName())
+        self.assertTrue(_is_name_in_group(wks_group=wks_grp, name_to_find='wks_grp_C(13)_0'))
+        self.assertTrue(_is_name_in_group(wks_group=wks_grp, name_to_find='wks_grp_H(2)_1'))
 
+
+def _is_name_material_in_group(wks_group, name_to_find, material_to_find):
+    """
+    Checks all elements in a group as the order is not guaranteed in Python 3
+    that both the name exist and the associated material is correct
+    :param wks_group: The group to check all elements of
+    :param name_to_find: The name to find in that group
+    :param material_to_find: The correct material for that name
+    :return: True is both parts are correct, else false
+    """
+
+    found_ws = _perform_group_name_search(wks_group, name_to_find)
+    if found_ws == None:
+        return False
+
+    if found_ws.sample().getMaterial().name() == material_to_find:
+        return True
+    else:
+        return False
+
+
+def _is_name_in_group(wks_group, name_to_find):
+    """
+    Checks that the name specified exists in the group specified.
+    :param wks_group: The group to search for the name
+    :param name_to_find: The name to search for
+    :return: True if the name exists in the group, else false
+    """
+
+    found_ws = _perform_group_name_search(wks_group, name_to_find)
+
+    if found_ws == None:
+        return False
+    else:
+        return True
+
+def _perform_group_name_search(wks_group, name_to_find):
+    """
+    Performs the search for a name in a group and returns
+    the element if found
+    :param wks_group: The group to search in
+    :param name_to_find: The name to find
+    :return: The first element with that name
+    """
+
+    for workspace in wks_group:
+        if workspace.getName() == name_to_find:
+            return workspace
 
 if __name__=="__main__":
     unittest.main()

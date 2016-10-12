@@ -48,6 +48,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/Run.h"
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -331,6 +332,9 @@ void MantidUI::x_range_from_picker(double xmin, double xmax) {
 
 /// Updates the algorithms tree as this may have changed
 void MantidUI::updateAlgorithms() { m_exploreAlgorithms->update(); }
+
+/// Updates the workspace tree
+void MantidUI::updateWorkspaces() { m_exploreMantid->updateTree(); }
 
 /// Show / hide the AlgorithmDockWidget
 void MantidUI::showAlgWidget(bool on) {
@@ -839,6 +843,8 @@ void MantidUI::showVatesSimpleInterface() {
         m_vatesSubWindow->setWidget(vsui);
         m_vatesSubWindow->widget()->show();
         vsui->renderWorkspace(wsName, wsType, instrumentName);
+        // Keep and handle to the window for later serialisation
+        appWindow()->addSerialisableWindow(vsui);
         appWindow()->modifiedProject();
       } else {
         delete m_vatesSubWindow;
