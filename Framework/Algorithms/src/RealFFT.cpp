@@ -132,10 +132,8 @@ void RealFFT::exec() {
     if (inWS->isHistogramData()) {
       outWS->mutableX(0)[yOutSize] = outWS->mutableX(0)[yOutSize - 1] + df;
     }
-    outWS->mutableX(1) = outWS->mutableX(0);
-    outWS->mutableX(2) = outWS->mutableX(0);
-    // outWS->getAxis(1)->spectraNo(0)=inWS->getAxis(1)->spectraNo(spec);
-    // outWS->getAxis(1)->spectraNo(1)=inWS->getAxis(1)->spectraNo(spec);
+    outWS->setSharedX(1, outWS->sharedX(0));
+    outWS->setSharedX(2, outWS->sharedX(0));
   } else // Backward
   {
 
@@ -157,7 +155,7 @@ void RealFFT::exec() {
     outWS->replaceAxis(1, tAxis);
 
     gsl_fft_real_workspace *workspace = gsl_fft_real_workspace_alloc(yOutSize);
-    boost::shared_array<double> data(new double[yOutSize]);
+    boost::shared_array<double> newData(new double[yOutSize]);
 
     auto &xData = outWS->mutableX(0);
     auto &y0 = inWS->mutableY(0);
@@ -166,18 +164,19 @@ void RealFFT::exec() {
       int j = i * 2;
       xData[i] = df * i;
       if (i != 0) {
-        data[j - 1] = y0[i];
+        newData[j - 1] = y0[i];
         if (odd || i != ySize - 1) {
-          data[j] = y1[i];
+          newData[j] = y1[i];
         }
       } else {
-        data[0] = y0[0];
+        newData[0] = y0[0];
       }
     }
 
     gsl_fft_halfcomplex_wavetable *wavetable =
         gsl_fft_halfcomplex_wavetable_alloc(yOutSize);
-    gsl_fft_halfcomplex_inverse(data.get(), 1, yOutSize, wavetable, workspace);
+    gsl_fft_halfcomplex_inverse(newData.get(), 1, yOutSize, wavetable,
+                                workspace);
     gsl_fft_halfcomplex_wavetable_free(wavetable);
     gsl_fft_real_workspace_free(workspace);
 
@@ -185,7 +184,7 @@ void RealFFT::exec() {
     for (int i = 0; i < yOutSize; i++) {
       double x = df * i;
       xData[i] = x; // xData used from above
-      y[i] = data[i] / df;
+      y[i] = newData[i] / df;
     }
     if (outWS->isHistogramData())
       outWS->mutableX(0)[yOutSize] = outWS->mutableX(0)[yOutSize - 1] + df;
