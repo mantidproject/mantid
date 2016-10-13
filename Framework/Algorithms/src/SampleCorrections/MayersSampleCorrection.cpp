@@ -133,8 +133,7 @@ void MayersSampleCorrection::exec() {
     params.cylHeight = height;
 
     MayersSampleCorrectionStrategy correction(params, inputWS->histogram(i));
-    outputWS->setHistogram(i,
-                           correction.apply(std::move(inputWS->histogram(i))));
+    outputWS->setHistogram(i, correction.getCorrectedHisto());
     prog.report();
 
     PARALLEL_END_INTERUPT_REGION

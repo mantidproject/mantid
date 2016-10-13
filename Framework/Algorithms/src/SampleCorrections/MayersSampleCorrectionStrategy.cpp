@@ -74,25 +74,23 @@ namespace Algorithms {
  * Constructor
  * @param params Defines the required parameters for the correction
  * @param inputHist A histogram containing the TOF values corresponding
- * to the values to be corrected. The number of tof values must match
- * number of signal/error or be 1 greater
+ * to the values to be corrected.
  */
 MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(
     MayersSampleCorrectionStrategy::Parameters params,
     const Mantid::HistogramData::Histogram &inputHist)
-    : m_pars(params), m_tof(inputHist.x().rawData()),
-      m_sigin(inputHist.y().rawData()), m_errin(inputHist.e().rawData()),
-      m_histogram(m_tof.size() == m_sigin.size() + 1),
-      m_muRrange(calculateMuRange()), m_rng(new MersenneTwister(1)) {
+    : m_pars(params), m_histogram(inputHist),
+      m_histoYSize(inputHist.y().size()), m_muRrange(calculateMuRange()),
+      m_rng(new MersenneTwister(1)) {
 
-  // Sanity check
-  assert(m_sigin.size() == m_tof.size() || m_sigin.size() == m_tof.size() - 1);
-  assert(m_errin.size() == m_tof.size() || m_sigin.size() == m_tof.size() - 1);
-
-  if (!(m_tof.front() < m_tof.back())) {
-    throw std::invalid_argument(
-        "TOF values are expected to be monotonically increasing");
-  }
+  double lastVal = m_histogram.x().front();
+  for (const auto &val : m_histogram.x())
+    if (val < lastVal) {
+      throw std::invalid_argument(
+          "TOF values are expected to be monotonically increasing");
+    } else {
+      lastVal = val;
+    }
 }
 
 /**
@@ -105,12 +103,10 @@ MayersSampleCorrectionStrategy::~MayersSampleCorrectionStrategy() = default;
  * both histogram or point data. For histogram the TOF is taken to be
  * the mid point of a bin
  *
- * @param inputXVals A histogram containing the tof values to use
  * @return A histogram containing corrected values
  */
-Mantid::HistogramData::Histogram MayersSampleCorrectionStrategy::apply(
-    const Mantid::HistogramData::Histogram &inputXVals) {
-  const size_t nsig(m_sigin.size());
+Mantid::HistogramData::Histogram
+MayersSampleCorrectionStrategy::getCorrectedHisto() {
 
   // Temporary storage
   std::vector<double> xmur(N_MUR_PTS + 1, 0.0),
@@ -160,12 +156,12 @@ Mantid::HistogramData::Histogram MayersSampleCorrectionStrategy::apply(
   const double rns = (vol * 1e6) * (m_pars.rho * 1e24) * 1e-22;
   ChebyshevSeries chebyPoly(N_POLY_ORDER);
 
-  auto outputHistogram = inputXVals;
+  auto outputHistogram = m_histogram;
 
   auto &sigOut = outputHistogram.mutableY();
   auto &errOut = outputHistogram.mutableE();
 
-  for (size_t i = 0; i < nsig; ++i) {
+  for (size_t i = 0; i < m_histoYSize; ++i) {
     const double sigt = sigmaTotal(flightPath, tof(i));
     const double rmu = muR(sigt);
     // Varies between [-1,+1]
@@ -177,7 +173,7 @@ Mantid::HistogramData::Histogram MayersSampleCorrectionStrategy::apply(
       corrfact *= (1.0 - beta) / rns;
     }
     // apply correction
-    const double yin(m_sigin[i]), ein(m_errin[i]);
+    const double yin(m_histogram.y()[i]), ein(m_histogram.e()[i]);
     sigOut[i] = yin * corrfact;
     errOut[i] = sigOut[i] * ein / yin;
   }
@@ -294,7 +290,7 @@ MayersSampleCorrectionStrategy::calculateMS(const size_t irp, const double muR,
 std::pair<double, double>
 MayersSampleCorrectionStrategy::calculateMuRange() const {
   const double flightPath(m_pars.l1 + m_pars.l2);
-  const double tmin(tof(0)), tmax(tof(m_sigin.size() - 1));
+  const double tmin(tof(0)), tmax(tof(m_histoYSize - 1));
   return std::make_pair(muR(flightPath, tmin), muR(flightPath, tmax));
 }
 
@@ -342,7 +338,7 @@ double MayersSampleCorrectionStrategy::sigmaTotal(const double flightPath,
  * @return The associated TOF value
  */
 double MayersSampleCorrectionStrategy::tof(const size_t i) const {
-  return m_histogram ? 0.5 * (m_tof[i] + m_tof[i + 1]) : m_tof[i];
+  return m_histogram.points()[i];
 }
 
 /**

@@ -60,7 +60,7 @@ public:
 
     // Correct it
 
-    auto outHisto = mscat.apply(histo);
+    auto outHisto = mscat.getCorrectedHisto();
 
     const auto &tofVals = outHisto.x();
     const auto &signalVals = outHisto.y();
@@ -94,7 +94,7 @@ public:
 
     // Correct it
 
-    auto outHisto = mscat.apply(histo);
+    auto outHisto = mscat.getCorrectedHisto();
 
     const auto &tofVals = outHisto.x();
     const auto &signalVals = outHisto.y();
@@ -129,7 +129,7 @@ public:
 
     // Correct it
 
-    auto outHisto = mscat.apply(histo);
+    auto outHisto = mscat.getCorrectedHisto();
 
     auto tofVals = outHisto.x();
     auto signalVals = outHisto.y();

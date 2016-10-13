@@ -68,8 +68,7 @@ public:
   ~MayersSampleCorrectionStrategy();
 
   /// Return the correction factors
-  Mantid::HistogramData::Histogram
-  apply(const Mantid::HistogramData::Histogram &inputXVals);
+  Mantid::HistogramData::Histogram getCorrectedHisto();
 
   /// Calculate the self-attenuation factor for a single mu*r value
   double calculateSelfAttenuation(const double muR);
@@ -89,16 +88,13 @@ private:
   double tof(const size_t i) const;
   void seedRNG(const size_t seed);
 
+  // Holds histogram to process
+  const HistogramData::Histogram &m_histogram;
+
   /// A copy of the correction parameters
   const Parameters m_pars;
-  /// A reference to the tof vluaes
-  const std::vector<double> &m_tof;
-  /// A reference to the input signal values
-  const std::vector<double> &m_sigin;
-  /// A reference to the input error values
-  const std::vector<double> &m_errin;
-  // True if we have binned TOF values
-  const bool m_histogram;
+  /// Holds the number of Y vals to process
+  const size_t m_histoYSize;
   /// Limits for the range of mu*r values to cover
   const std::pair<double, double> m_muRrange;
   /// Random number generator
