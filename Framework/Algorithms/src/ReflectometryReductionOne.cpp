@@ -657,8 +657,7 @@ void ReflectometryReductionOne::exec() {
     // if the DQQ is not given for this run.
     // we will use CalculateResoltion to produce this value
     // for us.
-    IAlgorithm_sptr calcResAlg =
-        AlgorithmManager::Instance().create("CalculateResolution");
+    IAlgorithm_sptr calcResAlg = createChildAlgorithm("CalculateResolution");
     calcResAlg->setProperty("Workspace", runWS);
     calcResAlg->setProperty("TwoTheta", theta.get());
     calcResAlg->execute();

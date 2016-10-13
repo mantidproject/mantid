@@ -67,6 +67,8 @@ private:
   void initTransmissionProperties();
   // Initialize algorithmic correction properties
   void initAlgorithmicProperties();
+  // Initialize momentum transfer properties
+  void initMomentumTransferProperties();
   // Convert a workspace to wavelength
   Mantid::API::MatrixWorkspace_sptr
   convertToWavelength(Mantid::API::MatrixWorkspace_sptr inputWS);
@@ -82,6 +84,9 @@ private:
   // Performs transmission corrections using alternative correction algorithms
   Mantid::API::MatrixWorkspace_sptr
   algorithmicCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS);
+  // convert to momentum transfer, rebin and scale
+  Mantid::API::MatrixWorkspace_sptr
+  convertToQ(Mantid::API::MatrixWorkspace_sptr inputWS);
 };
 
 } // namespace Algorithms

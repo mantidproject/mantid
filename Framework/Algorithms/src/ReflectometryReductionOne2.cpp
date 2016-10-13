@@ -127,10 +127,16 @@ void ReflectometryReductionOne2::init() {
   // Init properties for algorithmic corrections
   initAlgorithmicProperties();
 
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Output Workspace IvsQ.");
+
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspaceWavelength",
                                                    "", Direction::Output,
                                                    PropertyMode::Optional),
                   "Output Workspace IvsLam. Intermediate workspace.");
+
+  initMomentumTransferProperties();
 }
 
 /** Initialize properties related to monitors
@@ -258,6 +264,30 @@ void ReflectometryReductionOne2::initAlgorithmicProperties() {
   setPropertyGroup("C1", "Polynomial Corrections");
 }
 
+/** Initialize momentum transfer properties
+*/
+void ReflectometryReductionOne2::initMomentumTransferProperties() {
+
+  declareProperty("MomentumTransferMin", Mantid::EMPTY_DBL(),
+                  "Minimum Q value in IvsQ "
+                  "Workspace. Used for Rebinning "
+                  "the IvsQ Workspace",
+                  Direction::Input);
+  declareProperty("MomentumTransferStep", Mantid::EMPTY_DBL(),
+                  "Resolution value in IvsQ Workspace. Used for Rebinning the "
+                  "IvsQ Workspace. This value will be made minus to apply "
+                  "logarithmic rebinning. If you wish to have linear "
+                  "bin-widths then please provide a negative DQQ",
+                  Direction::Input);
+  declareProperty("MomentumTransferMax", Mantid::EMPTY_DBL(),
+                  "Maximum Q value in IvsQ "
+                  "Workspace. Used for Rebinning "
+                  "the IvsQ Workspace",
+                  Direction::Input);
+  declareProperty("ScaleFactor", Mantid::EMPTY_DBL(),
+                  "Factor you wish to scale Q workspace by.", Direction::Input);
+}
+
 /** Validate inputs
 */
 std::map<std::string, std::string>
@@ -329,12 +359,10 @@ void ReflectometryReductionOne2::exec() {
     IvsLam = convertToWavelength(runWS);
 
     // Detector workspace
-
     auto detectorWS = makeDetectorWS(IvsLam);
 
     // Monitor workspace (only if I0MonitorIndex, MonitorBackgroundWavelengthMin
     // and MonitorBackgroundWavelengthMax have been given)
-
     Property *monProperty = getProperty("I0MonitorIndex");
     Property *backgroundMinProperty =
         getProperty("MonitorBackgroundWavelengthMin");
@@ -349,6 +377,7 @@ void ReflectometryReductionOne2::exec() {
     }
   }
 
+  // Transmission correction
   Property *transmissionProperty = getProperty("FirstTransmissionRun");
   if (!transmissionProperty->isDefault()) {
     IvsLam = transmissionCorrection(IvsLam);
@@ -358,7 +387,11 @@ void ReflectometryReductionOne2::exec() {
     g_log.warning("No transmission correction will be applied.");
   }
 
+  // Convert to Q
+  auto IvsQ = convertToQ(IvsLam);
+
   setProperty("OutputWorkspaceWavelength", IvsLam);
+  setProperty("OutputWorkspace", IvsQ);
 }
 
 /** Converts an input workspace in TOF to wavelength and crops to specified
@@ -591,6 +624,67 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::algorithmicCorrection(
   corrAlg->execute();
 
   return corrAlg->getProperty("OutputWorkspace");
+}
+
+/**
+* The input workspace (in wavelength) to convert to Q
+* @param inputWS : the input workspace to convert
+* @return : output workspace in Q
+*/
+MatrixWorkspace_sptr
+ReflectometryReductionOne2::convertToQ(MatrixWorkspace_sptr inputWS) {
+
+  // Convert to Q
+  auto convertUnits = this->createChildAlgorithm("ConvertUnits");
+  convertUnits->initialize();
+  convertUnits->setProperty("InputWorkspace", inputWS);
+  convertUnits->setProperty("Target", "MomentumTransfer");
+  convertUnits->execute();
+  MatrixWorkspace_sptr IvsQ = convertUnits->getProperty("OutputWorkspace");
+
+  // Rebin (optional)
+  Property *qStepProp = getProperty("MomentumTransferStep");
+  if (!qStepProp->isDefault()) {
+    double qstep = getProperty("MomentumTransferStep");
+	qstep = -qstep;
+
+    std::vector<double> qparams;
+    Property *qMin = getProperty("MomentumTransferMin");
+    Property *qMax = getProperty("MomentumTransferMax");
+    if (!qMin->isDefault() && !qMax->isDefault()) {
+      double qmin = getProperty("MomentumTransferMin");
+      double qmax = getProperty("MomentumTransferMax");
+      qparams.push_back(qmin);
+      qparams.push_back(qstep);
+      qparams.push_back(qmax);
+    } else {
+      g_log.information("MomentumTransferMin and MomentumTransferMax will not "
+                        "be used to regin IvsQ workspace");
+      qparams.push_back(qstep);
+    }
+    IAlgorithm_sptr algRebin = createChildAlgorithm("Rebin");
+    algRebin->initialize();
+    algRebin->setProperty("InputWorkspace", IvsQ);
+    algRebin->setProperty("OutputWorkspace", IvsQ);
+    algRebin->setProperty("Params", qparams);
+    algRebin->execute();
+    IvsQ = algRebin->getProperty("OutputWorkspace");
+  }
+
+  // Scale (optional)
+  Property *scaleProp = getProperty("ScaleFactor");
+  if (!scaleProp->isDefault()) {
+    double scaleFactor = getProperty("ScaleFactor");
+    IAlgorithm_sptr algScale = createChildAlgorithm("Scale");
+    algScale->initialize();
+    algScale->setProperty("InputWorkspace", IvsQ);
+    algScale->setProperty("OutputWorkspace", IvsQ);
+    algScale->setProperty("Factor", 1.0 / scaleFactor);
+    algScale->execute();
+    IvsQ = algScale->getProperty("OutputWorkspace");
+  }
+
+  return IvsQ;
 }
 
 } // namespace Algorithms
