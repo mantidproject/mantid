@@ -49,8 +49,14 @@ double SpectrumInfo::l2(const size_t index) const {
     return getDetector(index).getDistance(getSource()) - l1();
 }
 
-/// Returns 2 theta (angle w.r.t. to beam direction).
+/** Returns the scattering angle 2 theta (angle w.r.t. to beam direction).
+ *
+ * For monitors this is defined as 0.
+ */
 double SpectrumInfo::twoTheta(const size_t index) const {
+  if (isMonitor(index))
+    return 0.0;
+
   // Note: This function has big overlap with the method
   // MatrixWorkspace::detectorTwoTheta(). The plan is to eventually remove the
   // latter, once SpectrumInfo is in widespread use.
@@ -65,8 +71,15 @@ double SpectrumInfo::twoTheta(const size_t index) const {
   return getDetector(index).getTwoTheta(samplePos, beamLine);
 }
 
-/// Returns signed 2 theta (signed angle w.r.t. to beam direction).
+/** Returns the signed scattering angle 2 theta (angle w.r.t. to beam
+ * direction).
+ *
+ * For monitors this is defined as 0.
+ */
 double SpectrumInfo::signedTwoTheta(const size_t index) const {
+  if (isMonitor(index))
+    return 0.0;
+
   // Note: This function has big overlap with the method
   // MatrixWorkspace::detectorSignedTwoTheta(). The plan is to eventually remove
   // the latter, once SpectrumInfo is in widespread use.
