@@ -58,9 +58,9 @@ public:
     TS_ASSERT(rebin.isExecuted());
     MatrixWorkspace_sptr rebindata =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
-    const Mantid::MantidVec outX = rebindata->readX(0);
-    const Mantid::MantidVec outY = rebindata->readY(0);
-    const Mantid::MantidVec outE = rebindata->readE(0);
+    auto &outX = rebindata->x(0);
+    auto &outY = rebindata->y(0);
+    auto &outE = rebindata->e(0);
 
     TS_ASSERT_DELTA(outX[7], 15.5, 0.000001);
     TS_ASSERT_DELTA(outY[7], 3.0, 0.000001);
@@ -93,9 +93,9 @@ public:
     MatrixWorkspace_sptr rebindata =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
 
-    const Mantid::MantidVec outX = rebindata->readX(0);
-    const Mantid::MantidVec outY = rebindata->readY(0);
-    const Mantid::MantidVec outE = rebindata->readE(0);
+    auto &outX = rebindata->x(0);
+    auto &outY = rebindata->y(0);
+    auto &outE = rebindata->e(0);
 
     TS_ASSERT_DELTA(outX[7], 15.5, 0.000001);
     TS_ASSERT_DELTA(outY[7], 8.0, 0.000001);
@@ -130,9 +130,9 @@ public:
     TS_ASSERT(rebin.isExecuted());
     MatrixWorkspace_sptr rebindata =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
-    const Mantid::MantidVec outX = rebindata->readX(0);
-    const Mantid::MantidVec outY = rebindata->readY(0);
-    const Mantid::MantidVec outE = rebindata->readE(0);
+    auto &outX = rebindata->x(0);
+    auto &outY = rebindata->y(0);
+    auto &outE = rebindata->e(0);
 
     TS_ASSERT_EQUALS(outX.size(), 11);
     TS_ASSERT_DELTA(outX[0], 1.0, 1e-5);
@@ -161,9 +161,9 @@ public:
     MatrixWorkspace_sptr rebindata =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
 
-    const Mantid::MantidVec outX = rebindata->readX(5);
-    const Mantid::MantidVec outY = rebindata->readY(5);
-    const Mantid::MantidVec outE = rebindata->readE(5);
+	auto &outX = rebindata->x(5);
+	auto &outY = rebindata->y(5);
+	auto &outE = rebindata->e(5);
     TS_ASSERT_DELTA(outX[7], 15.5, 0.000001);
     TS_ASSERT_DELTA(outY[7], 3.0, 0.000001);
     TS_ASSERT_DELTA(outE[7], sqrt(4.5) / 2.0, 0.000001);
@@ -230,9 +230,9 @@ public:
         TS_ASSERT(eventOutWS == test_in);
     }
 
-    const MantidVec &X = outWS->readX(0);
-    const MantidVec &Y = outWS->readY(0);
-    const MantidVec &E = outWS->readE(0);
+    auto &X = outWS->x(0);
+    auto &Y = outWS->y(0);
+    auto &E = outWS->e(0);
 
     TS_ASSERT_EQUALS(X.size(), 26);
     TS_ASSERT_DELTA(X[0], 0.0, 1e-5);
@@ -334,9 +334,9 @@ public:
     TS_ASSERT(!outWS->isHistogramData());
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 1);
 
-    TS_ASSERT_EQUALS(outWS->readX(0)[0], 7.3750);
-    TS_ASSERT_EQUALS(outWS->readX(0)[10], 14.8750);
-    TS_ASSERT_EQUALS(outWS->readX(0)[20], 22.3750);
+    TS_ASSERT_EQUALS(outWS->x(0)[0], 7.3750);
+    TS_ASSERT_EQUALS(outWS->x(0)[10], 14.8750);
+    TS_ASSERT_EQUALS(outWS->x(0)[20], 22.3750);
 
     AnalysisDataService::Instance().remove("test_RebinPointDataInput");
     AnalysisDataService::Instance().remove("test_RebinPointDataOutput");
@@ -358,14 +358,14 @@ public:
     MatrixWorkspace_sptr rebindata =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "test_Rebin_masked_ws");
-    const MantidVec &outX = rebindata->readX(0);
-    const MantidVec &outY = rebindata->readY(0);
+    auto &outX = rebindata->x(0);
+    auto &outY = rebindata->y(0);
 
     MatrixWorkspace_sptr input =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "test_Rebin_mask_dist");
-    const MantidVec &inX = input->readX(0);
-    const MantidVec &inY = input->readY(0);
+    auto &inX = input->x(0);
+    auto &inY = input->y(0);
 
     const MatrixWorkspace::MaskList &mask = rebindata->maskedBins(0);
 
@@ -412,8 +412,8 @@ public:
     MatrixWorkspace_sptr input =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "test_Rebin_unmasked");
-    const Mantid::MantidVec inX = input->readX(0);
-    const Mantid::MantidVec inY = input->readY(0);
+    auto &inX = input->x(0);
+    auto &inY = input->y(0);
 
     maskFirstBins("test_Rebin_mask_raw", "test_Rebin_masked_ws", 10.0);
 
@@ -424,8 +424,8 @@ public:
     MatrixWorkspace_sptr masked =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "test_Rebin_masked_ws");
-    const Mantid::MantidVec outX = masked->readX(0);
-    const Mantid::MantidVec outY = masked->readY(0);
+    auto &outX = masked->x(0);
+    auto &outY = masked->y(0);
 
     const MatrixWorkspace::MaskList &mask = masked->maskedBins(0);
 
@@ -538,11 +538,11 @@ private:
       return; // Nothing else to check
     }
 
-    auto xValues = ws->readX(0);
-    TS_ASSERT_DELTA(xValues, xExpected, 0.001);
+    auto &xValues = ws->x(0);
+    TS_ASSERT_DELTA(xValues.rawData(), xExpected, 0.001);
 
-    auto yValues = ws->readY(0);
-    TS_ASSERT_DELTA(yValues, yExpected, 0.001);
+    auto &yValues = ws->y(0);
+    TS_ASSERT_DELTA(yValues.rawData(), yExpected, 0.001);
   }
 };
 

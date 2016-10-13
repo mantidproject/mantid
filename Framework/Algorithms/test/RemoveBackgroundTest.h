@@ -240,7 +240,7 @@ private:
   API::MatrixWorkspace_sptr cloneSourceWS() {
     auto cloneWS = API::WorkspaceFactory::Instance().create(SourceWS);
 
-	cloneWS->setHistogram(0, SourceWS->histogram(0));
+    cloneWS->setHistogram(0, SourceWS->histogram(0));
 
     return cloneWS;
   }
@@ -274,7 +274,7 @@ public:
     bkgRem.setPropertyValue("BkgWorkspace", BgWS->getName());
     bkgRem.setPropertyValue("EMode", "Direct");
 
-	bkgRem.execute();
+    bkgRem.execute();
   }
 
 private:

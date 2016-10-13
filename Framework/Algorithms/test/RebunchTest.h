@@ -155,15 +155,9 @@ private:
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(1, size, size - 1);
     BinEdges x(static_cast<size_t>(size), LinearGenerator(0.5, 0.75));
-    Counts y(size - 1);
-    CountVariances e(size - 1);
+    Counts y(size - 1, 1.0);
 
-    std::iota(y.begin(), y.end(), 1.0);
-    std::iota(e.begin(), e.end(), 1.0);
-
-    retVal->setBinEdges(0, x);
-    retVal->setCounts(0, y);
-    retVal->setCountVariances(0, e);
+    retVal->setHistogram(0, x, y);
 
     return retVal;
   }
@@ -172,15 +166,9 @@ private:
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(1, size, size);
     Points x(size, LinearGenerator(0.5, 0.5));
-    Counts y(size);
-    CountVariances e(size);
+    Counts y(size, 1.0);
 
-    std::iota(y.begin(), y.end(), 1.0);
-    std::iota(e.begin(), e.end(), 1.0);
-
-    retVal->setPoints(0, x);
-    retVal->setCounts(0, y);
-    retVal->setCountVariances(0, e);
+    retVal->setHistogram(0, x, y);
 
     return retVal;
   }
@@ -191,15 +179,10 @@ private:
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen, xlen, xlen - 1);
 
-    Counts y1(xlen - 1);
-    CountVariances e1(xlen - 1);
-    std::iota(y1.begin(), y1.end(), 1.0);
-    std::iota(e1.begin(), e1.end(), 1.0);
+    Counts y1(xlen - 1, 1.0);
 
     for (int i = 0; i < ylen; i++) {
-      retVal->setBinEdges(i, x1);
-      retVal->setCounts(i, y1);
-      retVal->setCountVariances(i, e1);
+      retVal->setHistogram(i, x1, y1);
     }
 
     return retVal;
@@ -211,15 +194,10 @@ private:
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen, xlen, xlen);
 
-    Counts y1(xlen);
-    std::iota(y1.begin(), y1.end(), 0.0);
-    y1 = 1.5 * y1 + 1.0;
-    CountVariances e1(y1.begin(), y1.end());
+    Counts y1(xlen, LinearGenerator(1.0, 1.5));
 
     for (int i = 0; i < ylen; i++) {
-      retVal->setPoints(i, x1);
-      retVal->setCounts(i, y1);
-      retVal->setCountVariances(i, e1);
+      retVal->setHistogram(i, x1, y1);
     }
 
     return retVal;

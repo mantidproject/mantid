@@ -193,8 +193,8 @@ void Rebin::exec() {
         el.generateHistogram(XValues_new.rawData(), y_data, e_data);
 
         // Copy the data over.
-        outputWS->dataY(i).assign(y_data.begin(), y_data.end());
-        outputWS->dataE(i).assign(e_data.begin(), e_data.end());
+        outputWS->mutableY(i) = std::move(y_data);
+        outputWS->mutableE(i) = std::move(e_data);
 
         // Report progress
         prog.report(name());
@@ -251,9 +251,9 @@ void Rebin::exec() {
     for (int hist = 0; hist < histnumber; ++hist) {
       PARALLEL_START_INTERUPT_REGION
       // get const references to input Workspace arrays (no copying)
-      const MantidVec &XValues = inputWS->readX(hist);
-      const MantidVec &YValues = inputWS->readY(hist);
-      const MantidVec &YErrors = inputWS->readE(hist);
+      auto &XValues = inputWS->x(hist).rawData();
+      auto &YValues = inputWS->y(hist).rawData();
+      auto &YErrors = inputWS->e(hist).rawData();
 
       // get references to output workspace data (no copying)
       MantidVec &YValues_new = outputWS->dataY(hist);
@@ -307,14 +307,6 @@ void Rebin::exec() {
 
   } // END ---- Workspace2D
 }
-//
-//    /** Continue execution for EventWorkspace scenario */
-//    void Rebin::execEvent()
-//    {
-//      // retrieve the properties
-//      std::vector<double> rb_params=getProperty("Params");
-//
-//    }
 
 /** Takes the masks in the input workspace and apportions the weights into the
 *new bins that overlap

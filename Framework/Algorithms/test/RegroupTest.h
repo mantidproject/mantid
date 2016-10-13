@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAlgorithms/Regroup.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAlgorithms/Regroup.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/LinearGenerator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
@@ -59,27 +59,21 @@ private:
   Workspace2D_sptr Create1DWorkspace(int size) {
     auto retVal = createWorkspace<Workspace2D>(1, size, size - 1);
     double j = 1.0;
-	auto &X = retVal->mutableX(0);
-    for (int i = 0; i < size; i++) {
-      X[i] = j * 0.5;
-      j += 1.5;
-    }
-    retVal->setCounts(0, size - 1, 3.0);
-    retVal->setCountVariances(0, size - 1, 3.0);
+    BinEdges x(size, LinearGenerator(0.5, 0.75));
+    Counts y(size - 1, 3.0);
+
+    retVal->setHistogram(0, x, y);
     return retVal;
   }
 
   Workspace2D_sptr Create2DWorkspace(int xlen, int ylen) {
     BinEdges x1(xlen, LinearGenerator(0.5, 0.75));
     Counts y1(xlen - 1, 3.0);
-    CountStandardDeviations e1(xlen - 1, sqrt(3.0));
 
     auto retVal = createWorkspace<Workspace2D>(ylen, xlen, xlen - 1);
 
     for (int i = 0; i < ylen; i++) {
-      retVal->setBinEdges(i, x1);
-      retVal->setCounts(i, y1);
-      retVal->setCountStandardDeviations(i, e1);
+      retVal->setHistogram(i, x1, y1);
     }
 
     return retVal;
