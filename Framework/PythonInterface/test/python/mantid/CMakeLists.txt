@@ -8,12 +8,15 @@ add_subdirectory( dataobjects )
 
 set ( TEST_PY_FILES
   ImportModuleTest.py
-  PVPythonTest.py
   SimpleAPITest.py
   SimpleAPILoadTest.py
   SimpleAPIFitTest.py
   SimpleAPIRenameWorkspaceTest.py  
 )
+
+if ( MAKE_VATES )
+ list  ( TEST_PY_FILES PVPythonTest.py )
+endif ()
 
 # Prefix for test=PythonInterface
 pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonInterface ${TEST_PY_FILES} )

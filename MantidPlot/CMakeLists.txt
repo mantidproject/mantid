@@ -893,8 +893,11 @@ set ( MANTIDPLOT_TEST_PY_FILES
     MantidPlotTiledWindowTest.py
     MantidPlotInputArgsCheck.py
     MantidPlotPyplotGeneralTest.py
-    MantidPlotPVPythonTest.py
 )
+
+if ( MAKE_VATES )
+ list  ( MANTIDPLOT_TEST_PY_FILES MantidPlotPVPythonTest.py )
+endif ()
 
 if ( 0 )
 	message (STATUS "Your CMAKE_SYSTEM string is '${CMAKE_SYSTEM}'")
