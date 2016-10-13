@@ -221,7 +221,7 @@ private:
                     std::string &opts) const;
 
   /// process the tool name to be appropriate for the command line arg
-  void prepareToolNameForArgs(const std::string &toolName);
+  std::string prepareToolNameForArgs(const std::string &toolName) const;
 
   void checkDataPathsSet() const;
 

@@ -369,13 +369,11 @@ private:
 
   // TODO remove from header and cpp
   /// Tool specific setup dialogs
-  Ui::TomoToolConfigAstra m_uiAstra;
-  Ui::TomoToolConfigCustom m_uiCustom;
   Ui::TomoToolConfigSavu m_uiSavu;
-  Ui::TomoToolConfigTomoPy m_uiTomoPy;
 
   std::vector<std::string> m_processingJobsIDs;
 
+  // TODO remove, use functionality from MODEL
   std::string m_currentComputeRes;
   std::string m_currentReconTool;
 
@@ -392,6 +390,7 @@ private:
   static const std::string g_defOutPathLocal;
   static const std::string g_defOutPathRemote;
 
+  // todo remove after moving into static strings
   static const std::string g_TomoPyTool;
   static const std::string g_AstraTool;
   static const std::string g_CCPiTool;

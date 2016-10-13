@@ -647,7 +647,7 @@ void TomographyIfaceModel::makeRunnableWithOptions(
     cmd = m_currentToolSettings->toCommand();
 
 #ifdef MODEL_DEBUG
-    std::cout << "\n\n DEBUG: Expected CMD value: "
+    std::cout << "\n\n DEBUG: Expected RUN value: "
               << m_systemSettings.m_local.m_reconScriptsPath +
                      g_mainReconstructionScript
               << "\n BUT GOT: " << cmd << "\n\n";
