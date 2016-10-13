@@ -1,9 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -51,9 +49,6 @@ int LoadAscii::confidence(Kernel::FileDescriptor &descriptor) const {
   return confidence;
 }
 
-//--------------------------------------------------------------------------
-// Protected methods
-//--------------------------------------------------------------------------
 /**
 * Process the header information. This implementation just skips it entirely.
 * @param file :: A reference to the file stream

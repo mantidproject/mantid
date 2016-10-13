@@ -138,7 +138,7 @@ void IMWDomainCreator::declareDatasetProperties(const std::string &suffix,
  */
 std::pair<size_t, size_t> IMWDomainCreator::getXInterval() const {
 
-  const Mantid::MantidVec &X = m_matrixWorkspace->readX(m_workspaceIndex);
+  const auto &X = m_matrixWorkspace->x(m_workspaceIndex);
   if (X.empty()) {
     throw std::runtime_error("Workspace contains no data.");
   }
@@ -318,8 +318,8 @@ boost::shared_ptr<API::Workspace> IMWDomainCreator::createOutputWorkspace(
   }
 
   // Set the difference spectrum
-  MantidVec &Ycal = ws->dataY(1);
-  MantidVec &Diff = ws->dataY(2);
+  auto &Ycal = ws->mutableY(1);
+  auto &Diff = ws->mutableY(2);
   const size_t nData = values->size();
   for (size_t i = 0; i < nData; ++i) {
     Diff[i] = values->getFitData(i) - Ycal[i];
@@ -467,8 +467,8 @@ void IMWDomainCreator::addFunctionValuesToWS(
     }
 
     double chi2 = function->getChiSquared();
-    MantidVec &yValues = ws->dataY(wsIndex);
-    MantidVec &eValues = ws->dataE(wsIndex);
+    auto &yValues = ws->mutableY(wsIndex);
+    auto &eValues = ws->mutableE(wsIndex);
     for (size_t i = 0; i < nData; i++) {
       yValues[i] = resultValues->getCalculated(i);
       eValues[i] = std::sqrt(E[i] * chi2);
@@ -477,8 +477,8 @@ void IMWDomainCreator::addFunctionValuesToWS(
   } else {
     // otherwise use the parameter errors which is OK for uncorrelated
     // parameters
-    MantidVec &yValues = ws->dataY(wsIndex);
-    MantidVec &eValues = ws->dataE(wsIndex);
+    auto &yValues = ws->mutableY(wsIndex);
+    auto &eValues = ws->mutableE(wsIndex);
     for (size_t i = 0; i < nData; i++) {
       yValues[i] = resultValues->getCalculated(i);
       double err = 0.0;

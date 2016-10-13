@@ -8,6 +8,7 @@ import numpy as np
 
 #-------------------------------------------------------------------------------
 
+
 def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, load_logs=True, load_opts=None):
     """
     Loads a set of files and extracts just the spectra we care about (i.e. detector range and monitor).
@@ -109,6 +110,7 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
 
 #-------------------------------------------------------------------------------
 
+
 def sum_regular_runs(workspace_names):
     """
     Sum runs with single workspace data.
@@ -161,6 +163,7 @@ def sum_regular_runs(workspace_names):
     return [summed_detector_ws_name]
 
 #-------------------------------------------------------------------------------
+
 
 def sum_chopped_runs(workspace_names):
     """
@@ -215,6 +218,7 @@ def sum_chopped_runs(workspace_names):
 
 #-------------------------------------------------------------------------------
 
+
 def identify_bad_detectors(workspace_name):
     """
     Identify detectors which should be masked
@@ -252,6 +256,7 @@ def identify_bad_detectors(workspace_name):
     return masked_spec
 
 #-------------------------------------------------------------------------------
+
 
 def unwrap_monitor(workspace_name):
     """
@@ -315,6 +320,7 @@ def unwrap_monitor(workspace_name):
 
 #-------------------------------------------------------------------------------
 
+
 def process_monitor_efficiency(workspace_name):
     """
     Process monitor efficiency for a given workspace.
@@ -344,6 +350,7 @@ def process_monitor_efficiency(workspace_name):
 
 #-------------------------------------------------------------------------------
 
+
 def scale_monitor(workspace_name):
     """
     Scale monitor intensity by a factor given as the Workflow.MonitorScalingFactor parameter.
@@ -368,6 +375,7 @@ def scale_monitor(workspace_name):
               Operation='Multiply')
 
 #-------------------------------------------------------------------------------
+
 
 def scale_detectors(workspace_name, e_mode='Indirect'):
     """
@@ -394,6 +402,7 @@ def scale_detectors(workspace_name, e_mode='Indirect'):
            OutputWorkspace=workspace_name)
 
 #-------------------------------------------------------------------------------
+
 
 def group_spectra(workspace_name, masked_detectors, method, group_file=None, group_ws=None):
     """
@@ -480,6 +489,7 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
 
 #-------------------------------------------------------------------------------
 
+
 def fold_chopped(workspace_name):
     """
     Folds multiple frames of a data set into one workspace.
@@ -530,6 +540,7 @@ def fold_chopped(workspace_name):
     DeleteWorkspace(Workspace=scaling_ws)
 
 #-------------------------------------------------------------------------------
+
 
 def rename_reduction(workspace_name, multiple_files):
     """
@@ -606,6 +617,7 @@ def rename_reduction(workspace_name, multiple_files):
 
 #-------------------------------------------------------------------------------
 
+
 def plot_reduction(workspace_name, plot_type):
     """
     Plot a given workspace based on the Plot property.
@@ -630,7 +642,9 @@ def plot_reduction(workspace_name, plot_type):
 
 #-------------------------------------------------------------------------------
 
+
 def save_reduction(workspace_names, formats, x_units='DeltaE'):
+
     """
     Saves the workspaces to the default save directory.
 
@@ -689,6 +703,7 @@ def save_reduction(workspace_names, formats, x_units='DeltaE'):
 
 #-------------------------------------------------------------------------------
 
+
 def get_multi_frame_rebin(workspace_name, rebin_string):
     """
     Creates a rebin string for rebinning multiple frames data.
@@ -717,6 +732,7 @@ def get_multi_frame_rebin(workspace_name, rebin_string):
     return None, None
 
 #-------------------------------------------------------------------------------
+
 
 def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_bins):
     """

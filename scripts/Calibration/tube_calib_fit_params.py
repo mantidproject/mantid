@@ -1,6 +1,7 @@
 from mantid.simpleapi import *
 from mantid.kernel import *
 
+
 class TubeCalibFitParams(object):
 
 # This class is to take the fitting method and parameters for fitting the peaks crated by the calibration slits etc
@@ -9,7 +10,6 @@ class TubeCalibFitParams(object):
 # Author: Karl Palmen ISIS
 
     def __init__(self, peaks, height=1000.0, width=30.0, threePointMethod=False, outEdge=30.0,  inEdge=50.0, edgeGrad=6.0, margin=15):
-
         """
         Holds the parameters needed for fitting the positions of the peaks formed by the slits or edges.
 
@@ -68,4 +68,3 @@ class TubeCalibFitParams(object):
 
     def __str__(self):
         return 'peaks'+str(self.peaks)+'height'+str(self.height)+'width'+str(self.width)+'margin'+str(self.margin)+'outedge'+str(self.outEdge)+'inedge'+str(self.inEdge)+'edgegrad'+str(self.edgeGrad       )
-

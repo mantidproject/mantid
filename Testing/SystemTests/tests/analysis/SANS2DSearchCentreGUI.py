@@ -10,6 +10,7 @@ import isis_instrument
 import isis_reduction_steps
 import SANS2DReductionGUI as sansgui
 
+
 class SANS2DGUISearchCentre(sansgui.SANS2DGUIReduction):
 
     def checkCentreResult(self):
@@ -35,4 +36,3 @@ class SANS2DGUISearchCentre(sansgui.SANS2DGUIReduction):
 if __name__ == "__main__":
     test = SANS2DGUISearchCentre()
     test.execute()
-

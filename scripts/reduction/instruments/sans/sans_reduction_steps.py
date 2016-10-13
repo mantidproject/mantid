@@ -56,10 +56,10 @@ class BaseBeamFinder(ReductionStep):
         if self._beam_center_x is not None and self._beam_center_y is not None:
             return "Using Beam Center at: %g %g" % (self._beam_center_x, self._beam_center_y)
 
-        beam_x, beam_y, msg = SANSBeamFinder(Filename=self._datafile, \
-                                             UseDirectBeamMethod=direct_beam, \
-                                             BeamRadius=self._beam_radius, \
-                                             PersistentCorrection=self._persistent, \
+        beam_x, beam_y, msg = SANSBeamFinder(Filename=self._datafile,
+                                             UseDirectBeamMethod=direct_beam,
+                                             BeamRadius=self._beam_radius,
+                                             PersistentCorrection=self._persistent,
                                              ReductionProperties=reducer.get_reduction_table_name())
 
         self._beam_center_x = beam_x

@@ -6,6 +6,7 @@ from reduction_gui.reduction.inelastic.dgs_pd_sc_conversion_script import PdAndS
 import ui.inelastic.ui_dgs_pd_sc_conversion
 import reduction_gui.widgets.util as util
 
+
 class PdAndScConversionWidget(BaseWidget):
     """
         Widget that presents powder and single crystal data conversion options

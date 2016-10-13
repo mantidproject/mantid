@@ -8,6 +8,7 @@ try:
 except:
     HAS_MANTID = False
 
+
 class DataProxy(object):
     """
         Class used to load a data file temporarily to extract header information

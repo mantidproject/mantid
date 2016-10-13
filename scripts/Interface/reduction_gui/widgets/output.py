@@ -3,6 +3,7 @@ from reduction_gui.reduction.output_script import Output
 from base_widget import BaseWidget
 import ui.ui_hfir_output
 
+
 class OutputWidget(BaseWidget):
     """
         Widget that presents the transmission options to the user

@@ -29,17 +29,14 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
     def category(self):
         return 'Utility\\Workspaces'
 
-
     def summary(self):
         return 'Calcuates columns statistics of a table workspace.'
-
 
     def PyInit(self):
         self.declareProperty(ITableWorkspaceProperty('InputWorkspace', '', Direction.Input),
                              doc='Input table workspace.')
         self.declareProperty(ITableWorkspaceProperty('OutputWorkspace', '', Direction.Output),
                              doc='Output workspace contatining column statitics.')
-
 
     def PyExec(self):
         in_ws = mtd[self.getPropertyValue('InputWorkspace')]

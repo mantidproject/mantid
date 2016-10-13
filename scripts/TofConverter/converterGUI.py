@@ -4,6 +4,7 @@ from PyQt4 import QtCore, QtGui
 import math
 import TofConverter.convertUnits
 
+
 class MainWindow(QtGui.QMainWindow):
     needsThetaInputList = ['Momentum transfer (Q Angstroms^-1)', 'd-spacing (Angstroms)']
     needsThetaOutputList = ['Momentum transfer (Q Angstroms^-1)', 'd-spacing (Angstroms)']

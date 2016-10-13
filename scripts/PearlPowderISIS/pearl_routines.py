@@ -209,7 +209,7 @@ def PEARL_getfilename(run_number, ext):
 
 
 def PearlLoad(files, ext, outname):
-    if type(files) is int:
+    if isinstance(files, int):
         infile = PEARL_getfilename(files, ext)
         print "loading ", infile, "into ", outname
         print "--DEBUGGING: ", LoadRaw.func_code.co_filename
@@ -238,7 +238,7 @@ def PearlLoad(files, ext, outname):
 
 
 def PearlLoadMon(files, ext, outname):
-    if type(files) is int:
+    if isinstance(files, int):
         infile = PEARL_getfilename(files, ext)
         mspectra = PEARL_getmonitorspectrum(files)
         print "loading ", infile, "into ", outname
@@ -361,7 +361,7 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
     print "Tof binning", tofbinning
     work = "work"
     focus = "focus"
-    if type(number) is int:
+    if isinstance(number, int):
         outfile = userdataprocessed + "PRL" + str(number) + ".nxs"
         gssfile = userdataprocessed + "PRL" + str(number) + ".gss"
         tof_xye_file = userdataprocessed + "PRL" + str(number) + "_tof_xye.dat"
@@ -641,7 +641,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     if (debug != True):
         mtd.remove(wempty)
 
-    if (absorb == True):
+    if (absorb):
         print "Correcting Vanadium for absorbtion"
         ConvertUnits(InputWorkspace=wvan, OutputWorkspace=wvan, Target="Wavelength")
         print "This will create", vabsorbfile
@@ -664,7 +664,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     # tmin,tmax=PEARL_gettofrange()
     # print "Cropping TOF range to ",tmin,tmax
     # CropWorkspace(wvan,wvan,XMin=tmin,XMax=tmax)
-    if (debug == True):
+    if (debug):
         print "About to focus"
     vanfoc = "vanfoc_" + cycle
     AlignDetectors(InputWorkspace=wvan, OutputWorkspace=wvan, CalibrationFile=calfile)

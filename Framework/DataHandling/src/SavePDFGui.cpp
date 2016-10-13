@@ -3,7 +3,9 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/Unit.h"
 
 #include <fstream>
 
@@ -15,8 +17,6 @@ using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SavePDFGui)
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SavePDFGui::name() const { return "SavePDFGui"; }
@@ -32,7 +32,6 @@ const std::string SavePDFGui::summary() const {
   return "Save files readable by PDFGui";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SavePDFGui::init() {
@@ -64,7 +63,6 @@ std::map<std::string, std::string> SavePDFGui::validateInputs() {
   return result;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SavePDFGui::exec() {

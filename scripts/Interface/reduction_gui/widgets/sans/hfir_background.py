@@ -8,6 +8,7 @@ from reduction_gui.widgets.base_widget import BaseWidget
 from hfir_sample_data import BeamSpreader, DirectBeam
 import ui.sans.ui_hfir_background
 
+
 class BckDirectBeam(DirectBeam):
 
     def __init__(self, parent=None, state=None, settings=None, data_type=None, data_proxy=None):
@@ -40,7 +41,6 @@ class BckBeamSpreader(BeamSpreader):
 
     def set_state(self, state):
         super(BckBeamSpreader, self).set_state(state)
-
 
 
 class BackgroundWidget(BaseWidget):
@@ -76,7 +76,6 @@ class BackgroundWidget(BaseWidget):
 
         self._last_direct_state = None
         self._last_spreader_state = None
-
 
     def initialize_content(self):
         """
@@ -152,7 +151,6 @@ class BackgroundWidget(BaseWidget):
             self._content.theta_dep_chk.setChecked(state.theta_dependent)
             self._content.trans_dark_current_edit.setText(str(state.trans_dark_current))
             self._calculate_clicked(state.calculate_transmission)
-
 
     def get_state(self):
         """
@@ -266,4 +264,3 @@ class BackgroundWidget(BaseWidget):
                 util._check_and_get_float_line_edit(self._content.wavelength_edit, min=0.0)
             if dataproxy.wavelength_spread is not None:
                 self._content.wavelength_spread_edit.setText(str(dataproxy.wavelength_spread))
-

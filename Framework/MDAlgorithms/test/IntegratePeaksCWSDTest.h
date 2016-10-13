@@ -3,6 +3,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidMDAlgorithms/IntegratePeaksCWSD.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/V3D.h"

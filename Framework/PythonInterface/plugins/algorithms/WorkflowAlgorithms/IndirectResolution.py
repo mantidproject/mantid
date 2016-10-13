@@ -7,6 +7,8 @@ from mantid.kernel import *
 from mantid import logger
 
 #pylint: disable=too-many-instance-attributes
+
+
 class IndirectResolution(DataProcessorAlgorithm):
 
     _input_files = None
@@ -23,10 +25,8 @@ class IndirectResolution(DataProcessorAlgorithm):
     def category(self):
         return 'Workflow\\Inelastic;Inelastic\\Indirect'
 
-
     def summary(self):
         return 'Creates a resolution workspace for an indirect inelastic instrument.'
-
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
@@ -47,7 +47,6 @@ class IndirectResolution(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0.0, 0.0]),
                              doc='Energy range to use as background.')
 
-
         self.declareProperty(name='RebinParam', defaultValue='',
                              doc='Rebinning parameters (min,width,max)')
         self.declareProperty(name='ScaleFactor', defaultValue=1.0,
@@ -59,7 +58,6 @@ class IndirectResolution(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                direction=Direction.Output),
                              doc='Output resolution workspace.')
-
 
     def PyExec(self):
         self._setup()
@@ -104,7 +102,6 @@ class IndirectResolution(DataProcessorAlgorithm):
         self._post_process()
         self.setProperty('OutputWorkspace', self._out_ws)
 
-
     def _setup(self):
         """
         Gets algorithm properties.
@@ -147,7 +144,6 @@ class IndirectResolution(DataProcessorAlgorithm):
         log_alg.setProperty('LogValues',[log[1] for log in sample_logs])
         self.setProperty('OutputWorkspace', self._out_ws)
         log_alg.execute()
-
 
 
 AlgorithmFactory.subscribe(IndirectResolution)
