@@ -754,8 +754,8 @@ void InstrumentWidgetMaskTab::sumDetsToWorkspace() {
 }
 
 void InstrumentWidgetMaskTab::saveIncludeGroupToFile() {
-  QString fname = m_instrWidget->getSaveFileName(
-      "Save grouping file", "XML files (*.xml);;All (*)");
+  QString fname = m_instrWidget->getSaveFileName("Save grouping file",
+                                                 "XML files (*.xml);;All (*)");
   if (!fname.isEmpty()) {
     QList<int> dets;
     m_instrWidget->getSurface()->getMaskedDetectors(dets);
@@ -764,8 +764,8 @@ void InstrumentWidgetMaskTab::saveIncludeGroupToFile() {
 }
 
 void InstrumentWidgetMaskTab::saveExcludeGroupToFile() {
-  QString fname = m_instrWidget->getSaveFileName(
-      "Save grouping file", "XML files (*.xml);;All (*)");
+  QString fname = m_instrWidget->getSaveFileName("Save grouping file",
+                                                 "XML files (*.xml);;All (*)");
   if (!fname.isEmpty()) {
     QList<int> dets;
     m_instrWidget->getSurface()->getMaskedDetectors(dets);
