@@ -896,7 +896,7 @@ set ( MANTIDPLOT_TEST_PY_FILES
 )
 
 if ( MAKE_VATES )
- list  ( MANTIDPLOT_TEST_PY_FILES MantidPlotPVPythonTest.py )
+ list  ( APPEND MANTIDPLOT_TEST_PY_FILES MantidPlotPVPythonTest.py )
 endif ()
 
 if ( 0 )
