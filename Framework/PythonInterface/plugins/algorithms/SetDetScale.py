@@ -4,6 +4,7 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, Workspac
 from mantid.kernel import Direction, StringArrayProperty
 import mantid.simpleapi as api
 
+
 class SetDetScale(PythonAlgorithm):
     """
     Class to set instrument detScale for SaveHKL and AnvredCorrection
@@ -38,8 +39,6 @@ class SetDetScale(PythonAlgorithm):
         self.declareProperty(StringArrayProperty("DetScaleList",
                                                  direction=Direction.Input),
                              doc="Comma separated list detectorNumbers:detScales eg. 13:1.046504,14:1.259293")
-
-
 
     def PyExec(self):
         ws = self.getProperty("Workspace").value

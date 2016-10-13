@@ -13,10 +13,12 @@ import ISISCommandInterface as i
 MASKFILE = FileFinder.getFullPath('MaskSANS2DReductionGUI.txt')
 BATCHFILE = FileFinder.getFullPath('sans2d_reduction_gui_batch.csv')
 
+
 class SANS2DMinimalBatchReductionSliced(stresstesting.MantidStressTest):
     def __init__(self):
         super(SANS2DMinimalBatchReductionSliced, self).__init__()
         config['default.instrument']='SANS2D'
+
     def runTest(self):
         import SANSBatchMode as batch
         i.SANS2D()
@@ -29,6 +31,7 @@ class SANS2DMinimalBatchReductionSliced(stresstesting.MantidStressTest):
         self.tolerance_is_reller=True
         self.disableChecking.append('Instrument')
         return str(mtd['trans_test_rear'][0]), 'SANSReductionGUI.nxs'
+
 
 class SANS2DMinimalSingleReductionSliced(SANS2DMinimalBatchReductionSliced):
     def runTest(self):

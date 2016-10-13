@@ -5,7 +5,7 @@ import pearl_routines
 
 
 def get_cycle_dir(number, currentdatadir):
-    if type(number) is int:
+    if isinstance(number, int):
         runno = number
     else:
         num = number.split("_")

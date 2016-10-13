@@ -5,6 +5,7 @@ from mantid.kernel import Direction
 from mantid.simpleapi import Fit, CreateEmptyTableWorkspace
 import numpy as np
 
+
 class FindEPP(PythonAlgorithm):
     def __init__(self):
         """

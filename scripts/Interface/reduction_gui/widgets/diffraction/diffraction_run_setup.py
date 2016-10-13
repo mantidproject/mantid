@@ -19,9 +19,11 @@ try:
 except:
     pass
 
+
 def generateRegExpValidator(widget, expression):
     rx = QtCore.QRegExp(expression)
     return QtGui.QRegExpValidator(rx, widget)
+
 
 class RunSetupWidget(BaseWidget):
     """ Widget that presents run setup including sample run, optional vanadium run and etc.
@@ -37,6 +39,7 @@ class RunSetupWidget(BaseWidget):
         class RunSetFrame(QtGui.QFrame, ui.diffraction.ui_diffraction_run_setup.Ui_Frame):
             """ Define class linked to UI Frame
             """
+
             def __init__(self, parent=None):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
@@ -147,20 +150,20 @@ class RunSetupWidget(BaseWidget):
         #self.connect(self._content.override_vanbkgdrun_checkBox, QtCore.SIGNAL("clicked()"),
         #        self._overridevanbkgdrun_clicked)
 
-        self.connect(self._content.disablebkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),\
-                self._disablebkgdcorr_clicked)
-        self.connect(self._content.disablevancorr_chkbox, QtCore.SIGNAL("clicked()"),\
-                self._disablevancorr_clicked)
-        self.connect(self._content.disablevanbkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),\
-                self._disablevanbkgdcorr_clicked)
+        self.connect(self._content.disablebkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),
+                     self._disablebkgdcorr_clicked)
+        self.connect(self._content.disablevancorr_chkbox, QtCore.SIGNAL("clicked()"),
+                     self._disablevancorr_clicked)
+        self.connect(self._content.disablevanbkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),
+                     self._disablevanbkgdcorr_clicked)
 
-        self.connect(self._content.usebin_button, QtCore.SIGNAL("clicked()"),\
-                self._usebin_clicked)
-        self.connect(self._content.resamplex_button, QtCore.SIGNAL("clicked()"),\
-                self._resamplex_clicked)
+        self.connect(self._content.usebin_button, QtCore.SIGNAL("clicked()"),
+                     self._usebin_clicked)
+        self.connect(self._content.resamplex_button, QtCore.SIGNAL("clicked()"),
+                     self._resamplex_clicked)
 
-        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),\
-                self._show_help)
+        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),
+                     self._show_help)
 
         # Validated widgets
 
@@ -237,7 +240,6 @@ class RunSetupWidget(BaseWidget):
 
         return
 
-
     def get_state(self):
         """ Returns a RunSetupScript with the state of Run_Setup_Interface
         Set up all the class parameters in RunSetupScrpt with values in the content
@@ -304,7 +306,6 @@ class RunSetupWidget(BaseWidget):
 
         return s
 
-
     def _calfile_browse(self):
         """ Event handing for browsing calibrtion file
         """
@@ -361,7 +362,7 @@ class RunSetupWidget(BaseWidget):
         """
         currindex = self._content.bintype_combo.currentIndex()
         curbinning = self._content.binning_edit.text()
-        if curbinning != "" and curbinning != None:
+        if curbinning != "" and curbinning is not None:
             curbinning = float(curbinning)
             if currindex == 0:
                 self._content.binning_edit.setText(str(abs(curbinning)))

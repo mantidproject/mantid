@@ -9,6 +9,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import *
 
+
 class PeakReport(object):
     """
     Peak Report is a class used to creating one or more peak integration reports as PDFs.
@@ -158,4 +159,3 @@ class PeakReport(object):
             parts.append(Spacer(0,10))
 
         doc.build(parts)
-

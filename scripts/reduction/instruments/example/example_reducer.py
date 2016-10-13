@@ -10,6 +10,7 @@ from reduction import validate_step, validate_loader
 import mantid
 from mantid.simpleapi import *
 
+
 class ExampleReducer(Reducer):
 
     # Place holders for the reduction steps
@@ -108,8 +109,3 @@ if __name__ == '__main__':
     r.set_second_step(step)
 
     r.reduce()
-
-
-
-
-

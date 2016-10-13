@@ -138,9 +138,9 @@ void LoadIsawSpectrum::exec() {
       for (int k = 0; k < detList[i]->ypixels(); k++)
         outSpec.addDetectorID(
             static_cast<detid_t>(detList[i]->getDetectorIDAtXY(j, k)));
-    MantidVec &outY = outSpec.dataY();
-    MantidVec &outE = outSpec.dataE();
-    MantidVec &outX = outSpec.dataX();
+    auto &outX = outSpec.mutableX();
+    auto &outY = outSpec.mutableY();
+    auto &outE = outSpec.mutableE();
     // This is the scattered beam direction
     V3D dir = detList[i]->getPos() - samplePos;
 

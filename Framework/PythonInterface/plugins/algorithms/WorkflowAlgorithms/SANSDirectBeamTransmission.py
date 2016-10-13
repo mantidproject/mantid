@@ -5,6 +5,7 @@ from mantid.api import *
 from mantid.kernel import *
 import os
 
+
 class SANSDirectBeamTransmission(PythonAlgorithm):
 
     def category(self):

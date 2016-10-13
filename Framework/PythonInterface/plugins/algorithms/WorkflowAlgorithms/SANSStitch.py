@@ -301,7 +301,6 @@ class SANSStitch(DataProcessorAlgorithm):
     def validateInputs(self):
         errors = dict()
 
-
         # Mode compatibility checks
         scale_factor_property = self.getProperty('ScaleFactor')
         shift_factor_property = self.getProperty('ShiftFactor')

@@ -20,6 +20,7 @@ import sys
     Code contributed by Jean Bilheux (SNS)
 """
 
+
 class LoadSNSRoi:
 
     x_list = []
@@ -103,6 +104,3 @@ class LoadSNSRoi:
         for i in _list:
             _formated_string += " " + str(i)
         return _formated_string
-
-
-

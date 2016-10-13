@@ -24,6 +24,7 @@ from mantid.api import MatrixWorkspace
 
 import unittest
 
+
 def run_fit(wks, function, minimizer='Levenberg-Marquardt', cost_function='Least squares'):
     """
     Fits the data in a workspace with a function, using the algorithm Fit.
@@ -46,6 +47,7 @@ def run_fit(wks, function, minimizer='Levenberg-Marquardt', cost_function='Least
     errors = param_table.column(2)[:-1]
 
     return params, errors
+
 
 def compare_relative_errors(values_fitted, reference_values, tolerance=1e-6):
     """
@@ -86,6 +88,7 @@ def compare_relative_errors(values_fitted, reference_values, tolerance=1e-6):
             raise RuntimeError("Some results were not as accurate as expected. Please check the log "
                                "messages for details")
 
+
 def load_fitting_test_file_ascii(filename):
     """
     Loads an ascii file in with X,Y,E columns
@@ -100,6 +103,8 @@ def load_fitting_test_file_ascii(filename):
     return wks
 
 # pylint: disable=too-many-public-methods
+
+
 class TwoGaussPeaksEVSData(unittest.TestCase):
     """
     Load a processed ISIS Vesuvio data.
@@ -179,6 +184,7 @@ class SineLikeMuonExperimentAsymmetry(unittest.TestCase):
         fitted_params, _ = run_fit(self.workspace, function_definition)
         compare_relative_errors(fitted_params, expected_params)
 
+
 class VanadiumPatternFromENGINXSmoothing(unittest.TestCase):
     """
     Tests the fitting of data from a Vanadium run on the instrument ENGIN-X. This uses data
@@ -234,6 +240,7 @@ class VanadiumPatternFromENGINXSmoothing(unittest.TestCase):
         # Note: ignoring parameter errors. Note the higher tolerance so that it works on all platforms
         fitted_params, _ = run_fit(self.workspace, function_definition)
         compare_relative_errors(fitted_params, expected_params, tolerance=1e-4)
+
 
 class WeightedLeastSquaresTest(stresstesting.MantidStressTest):
 

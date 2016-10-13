@@ -1014,6 +1014,100 @@ public:
     Counts counts(1);
     TS_ASSERT_THROWS(hist.setSharedY(counts.cowData()), std::logic_error);
   }
+
+  void test_that_can_change_histogram_size_for_points_with_dx() {
+    Histogram h(Points{1, 2}, Counts{3, 4});
+    h.setPointStandardDeviations(std::vector<double>{5.0, 6.0});
+    auto isSizeAsSpecified = [](Histogram &h, size_t n) {
+      return (h.x().size() == n && h.y().size() == n && h.e().size() == n &&
+              h.dx().size() == n);
+    };
+
+    TS_ASSERT(isSizeAsSpecified(h, 2));
+
+    // Increase the size
+    h.resize(3);
+    TS_ASSERT(isSizeAsSpecified(h, 3));
+
+    TS_ASSERT_EQUALS(h.x()[0], 1);
+    TS_ASSERT_EQUALS(h.x()[1], 2);
+    TS_ASSERT_EQUALS(h.x()[2], 0);
+
+    TS_ASSERT_EQUALS(h.y()[0], 3);
+    TS_ASSERT_EQUALS(h.y()[1], 4);
+    TS_ASSERT_EQUALS(h.y()[2], 0);
+
+    TS_ASSERT_EQUALS(h.dx()[0], 5);
+    TS_ASSERT_EQUALS(h.dx()[1], 6);
+    TS_ASSERT_EQUALS(h.dx()[2], 0);
+
+    // Decrease the size
+    h.resize(1);
+    TS_ASSERT(isSizeAsSpecified(h, 1));
+
+    TS_ASSERT_EQUALS(h.x()[0], 1);
+    TS_ASSERT_EQUALS(h.y()[0], 3);
+    TS_ASSERT_EQUALS(h.dx()[0], 5);
+  }
+
+  void test_that_can_change_histogram_size_for_bin_edges_without_dx() {
+    Histogram h(BinEdges{1, 2, 3}, Counts{3, 4});
+    auto isSizeAsSpecified = [](const Histogram &h, size_t n) {
+      return (h.x().size() == (n + 1) && h.y().size() == n &&
+              h.e().size() == n);
+    };
+    TS_ASSERT(isSizeAsSpecified(h, 2));
+
+    // Increase the size
+    h.resize(3);
+    TS_ASSERT(isSizeAsSpecified(h, 3));
+
+    TS_ASSERT_EQUALS(h.x()[0], 1);
+    TS_ASSERT_EQUALS(h.x()[1], 2);
+    TS_ASSERT_EQUALS(h.x()[2], 3);
+    TS_ASSERT_EQUALS(h.x()[3], 0);
+
+    TS_ASSERT_EQUALS(h.y()[0], 3);
+    TS_ASSERT_EQUALS(h.y()[1], 4);
+    TS_ASSERT_EQUALS(h.y()[2], 0);
+
+    // Decrease the size
+    h.resize(1);
+    TS_ASSERT(isSizeAsSpecified(h, 1));
+    TS_ASSERT_EQUALS(h.x()[0], 1);
+    TS_ASSERT_EQUALS(h.x()[1], 2);
+    TS_ASSERT_EQUALS(h.y()[0], 3);
+  }
+
+  void test_that_can_change_histogram_size_when_only_x_is_present() {
+    Histogram h(BinEdges{1, 2, 3});
+    auto isSizeAsSpecified =
+        [](const Histogram &h, size_t n) { return (h.x().size() == (n + 1)); };
+    TS_ASSERT(isSizeAsSpecified(h, 2));
+
+    // Increase the size
+    h.resize(3);
+    TS_ASSERT(isSizeAsSpecified(h, 3));
+
+    TS_ASSERT_EQUALS(h.x()[0], 1);
+    TS_ASSERT_EQUALS(h.x()[1], 2);
+    TS_ASSERT_EQUALS(h.x()[2], 3);
+    TS_ASSERT_EQUALS(h.x()[3], 0);
+
+    TS_ASSERT(!h.sharedY());
+    TS_ASSERT(!h.sharedE());
+    TS_ASSERT(!h.sharedDx());
+
+    // Decrease the size
+    h.resize(1);
+    TS_ASSERT(isSizeAsSpecified(h, 1));
+    TS_ASSERT_EQUALS(h.x()[0], 1);
+    TS_ASSERT_EQUALS(h.x()[1], 2);
+
+    TS_ASSERT(!h.sharedY());
+    TS_ASSERT(!h.sharedE());
+    TS_ASSERT(!h.sharedDx());
+  }
 };
 
 class HistogramTestPerformance : public CxxTest::TestSuite {

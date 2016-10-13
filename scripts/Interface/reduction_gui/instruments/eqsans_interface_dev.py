@@ -25,6 +25,7 @@ try:
 except:
     pass
 
+
 class EQSANSInterface(InstrumentInterface):
     """
         Defines the widgets for EQSANS reduction

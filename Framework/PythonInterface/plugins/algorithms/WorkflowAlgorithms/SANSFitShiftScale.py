@@ -7,6 +7,7 @@ from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, Property
 from mantid.kernel import Direction, Property, StringListValidator, UnitFactory
 import numpy as np
 
+
 class Mode(object):
     class ShiftOnly(object):
         pass
@@ -19,6 +20,7 @@ class Mode(object):
 
     class NoneFit(object):
         pass
+
 
 class SANSFitShiftScale(DataProcessorAlgorithm):
     def _make_mode_map(self):
@@ -232,6 +234,7 @@ class ErrorTransferFromModelToData(object):
     Handles the error transfer from the model workspace to the
     data workspace
     '''
+
     def __init__(self):
         super(ErrorTransferFromModelToData, self).__init__()
 

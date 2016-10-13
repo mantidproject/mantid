@@ -10,6 +10,7 @@ import scipy as sp
 class ComputeCalibrationCoefVan(PythonAlgorithm):
     """ Calculate coefficients to normalize by Vanadium and correct Debye Waller factor
     """
+
     def __init__(self):
         """
         Init
