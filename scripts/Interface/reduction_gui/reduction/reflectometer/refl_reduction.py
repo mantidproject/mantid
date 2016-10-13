@@ -6,6 +6,7 @@ import time
 import os
 from reduction_gui.reduction.scripter import BaseReductionScripter
 
+
 class REFLReductionScripter(BaseReductionScripter):
     """
         Reduction scripter for REFL
@@ -48,5 +49,3 @@ class REFLReductionScripter(BaseReductionScripter):
             f.close()
 
         return script
-
-

@@ -54,6 +54,8 @@ start_time = time.time()
 # ProcessThread is a simple local class.  Each instance of ProcessThread is
 # a thread that starts a command line process to reduce one run.
 #
+
+
 class ProcessThread ( threading.Thread ):
     command = ""
 
@@ -123,7 +125,7 @@ for r_num in run_nums:
     if slurm_queue_name is not None:
         console_file = output_directory + "/" + str(r_num) + "_output.txt"
         cmd =  'srun -p ' + slurm_queue_name + \
-           ' --cpus-per-task=3 -J ReduceSCD_Parallel.py -o ' + console_file + ' ' + cmd
+            ' --cpus-per-task=3 -J ReduceSCD_Parallel.py -o ' + console_file + ' ' + cmd
     procList[index].setCommand( cmd )
     index = index + 1
 
@@ -270,8 +272,8 @@ if not use_cylindrical_integration:
             conventional_integrate_file = conv_name + ".integrate"
         conventional_matrix_file = conv_name + ".mat"
 
-        SelectCellOfType( PeaksWorkspace=peaks_ws, CellType=cell_type, Centering=centering,\
-                      AllowPermutations=allow_perm, Apply=True, Tolerance=tolerance )
+        SelectCellOfType( PeaksWorkspace=peaks_ws, CellType=cell_type, Centering=centering,
+                          AllowPermutations=allow_perm, Apply=True, Tolerance=tolerance )
         if output_nexus:
             SaveNexus( InputWorkspace=peaks_ws, Filename=conventional_integrate_file )
         else:

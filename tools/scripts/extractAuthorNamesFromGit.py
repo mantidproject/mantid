@@ -6,7 +6,9 @@
 # was original used in connection with creating usage examples for algorithms
 # and creating an algorithm list for each developer to have a go at
 
-import string, os, re
+import string
+import os
+import re
 
 import subprocess
 

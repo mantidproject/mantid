@@ -4,6 +4,7 @@ from mantid.kernel import Direction, IntBoundedValidator
 from mantid.simpleapi import Fit
 import numpy as np
 
+
 class FitGaussian(PythonAlgorithm):
     # pylint: disable = no-init
 

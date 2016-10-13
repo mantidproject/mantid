@@ -13,7 +13,7 @@ class TOFTOFMergeRunsTest(unittest.TestCase):
         input_ws = Load(Filename="TOFTOFTestdata.nxs")
         self._input_ws_base = input_ws
         self._input_good = input_ws
-        AddSampleLogMultiple(Workspace=self._input_good, LogNames=['run_number'], LogValues=[001])
+        AddSampleLogMultiple(Workspace=self._input_good, LogNames=['run_number'], LogValues=['001'])
 
         self._input_bad_entry = input_ws+0
         # remove a compulsory entry in Logs

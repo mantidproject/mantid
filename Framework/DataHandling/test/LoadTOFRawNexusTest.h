@@ -9,6 +9,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Unit.h"
 
 #include <cxxtest/TestSuite.h>
 #include <Poco/File.h>

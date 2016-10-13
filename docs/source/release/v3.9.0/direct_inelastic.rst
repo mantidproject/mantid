@@ -8,7 +8,7 @@ Direct Inelastic Changes
 Improvements
 ------------
 
-- New algorithm :ref:`CalcCountRate <algm-CalcCountRate>` allows to calculate instrument counting rate as function of the experiment 
+- New algorithm :ref:`CalculateCountRate <algm-CalculateCountRate>` allows to calculate instrument counting rate as function of the experiment 
   time to be able to filter spurions, which may sometimes appear on ISIS instruments. It can also be used to evaluate changes
   of sample reflectivity as function of some slow changing experiment's parameter e.g. temperature, magnetic field or pressure.
 

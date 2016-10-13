@@ -1,4 +1,6 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -40,7 +42,6 @@ class VesuvioResolution(PythonAlgorithm):
                                                optional=PropertyMode.Optional),
                              doc='Output resolution workspace in ySpace')
 
-
     def validateInputs(self):
         """
         Does basic validation for inputs.
@@ -66,7 +67,6 @@ class VesuvioResolution(PythonAlgorithm):
             issues['OutputWorkspaceYSpace'] = warning_message
 
         return issues
-
 
     def PyExec(self):
         sample_ws = self.getProperty('Workspace').value
@@ -95,7 +95,6 @@ class VesuvioResolution(PythonAlgorithm):
             res_ysp = self._calculate_resolution(mtd['__yspace_sample'], out_ws_ysp)
             self.setProperty('OutputWorkspaceYSpace', res_ysp)
             DeleteWorkspace('__yspace_sample')
-
 
     def _calculate_resolution(self, workspace, output_ws_name):
         """

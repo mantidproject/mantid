@@ -1,7 +1,5 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/CreatePSDBleedMask.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -25,16 +23,8 @@ using API::MatrixWorkspace_sptr;
 using API::MatrixWorkspace_const_sptr;
 using DataObjects::MaskWorkspace_sptr;
 
-//----------------------------------------------------------------------
-// Public methods
-//----------------------------------------------------------------------
-
 /// Default constructor
 CreatePSDBleedMask::CreatePSDBleedMask() {}
-
-//----------------------------------------------------------------------
-// Private methods
-//----------------------------------------------------------------------
 
 /// Initialize the algorithm properties
 void CreatePSDBleedMask::init() {

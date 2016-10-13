@@ -8,6 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid;
 using Mantid::DataHandling::LoadGSS;

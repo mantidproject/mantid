@@ -72,7 +72,6 @@ void MaskPeaksWorkspace::init() {
 void MaskPeaksWorkspace::exec() {
   retrieveProperties();
 
-  MantidVecPtr XValues;
   PeaksWorkspace_const_sptr peaksW = getProperty("InPeaksWorkspace");
 
   // To get the workspace index from the detector ID
@@ -120,7 +119,7 @@ void MaskPeaksWorkspace::exec() {
     size_t wi = this->getWkspIndex(pixel_to_wi, comp, xPeak, yPeak);
     if (wi !=
         static_cast<size_t>(EMPTY_INT())) { // scope limit the workspace index
-      this->getTofRange(x0, xf, peak.getTOF(), m_inputW->readX(wi));
+      this->getTofRange(x0, xf, peak.getTOF(), m_inputW->x(wi));
       tofRangeSet = true;
     }
 
@@ -135,7 +134,7 @@ void MaskPeaksWorkspace::exec() {
           continue;
         spectra.insert(wj);
         if (!tofRangeSet) { // scope limit the workspace index
-          this->getTofRange(x0, xf, peak.getTOF(), m_inputW->readX(wj));
+          this->getTofRange(x0, xf, peak.getTOF(), m_inputW->x(wj));
           tofRangeSet = true;
         }
       }
@@ -255,7 +254,7 @@ size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi,
  */
 void MaskPeaksWorkspace::getTofRange(double &tofMin, double &tofMax,
                                      const double tofPeak,
-                                     const MantidVec &tof) {
+                                     const HistogramData::HistogramX &tof) {
   tofMin = tof.front();
   tofMax = tof.back() - 1;
   if (!isEmpty(m_tofMin)) {

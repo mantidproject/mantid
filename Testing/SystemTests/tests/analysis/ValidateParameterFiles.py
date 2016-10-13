@@ -6,6 +6,7 @@ import glob
 
 EXPECTED_EXT = '.expected'
 
+
 class ValidateParameterFiles(stresstesting.MantidStressTest):
 
     xsdFile=''
@@ -57,12 +58,11 @@ class ValidateParameterFiles(stresstesting.MantidStressTest):
             print "SUMMARY OF FAILED FILES"
             for filename in failed:
                 print filename
-            raise RuntimeError("Failed Validation for %d of %d files" \
-                                   % (len(failed), len(files)))
+            raise RuntimeError("Failed Validation for %d of %d files"
+                               % (len(failed), len(files)))
         else:
             print "Succesfully Validated %d files" % len(files)
 
 if __name__ == '__main__':
     valid = ValidateParameterFiles()
     valid.runTest()
-

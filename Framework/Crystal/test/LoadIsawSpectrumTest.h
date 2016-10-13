@@ -47,10 +47,10 @@ public:
     TS_ASSERT(ws);
     if (!ws)
       return;
-    TS_ASSERT_DELTA(ws->readX(0)[9], 413.65, 0.01);
-    TS_ASSERT_DELTA(ws->readY(0)[9], -0.0219, 0.01);
-    TS_ASSERT_DELTA(ws->readX(12)[5], 407.2, 0.01);
-    TS_ASSERT_DELTA(ws->readY(12)[5], 0.0182, 0.01);
+    TS_ASSERT_DELTA(ws->x(0)[9], 413.65, 0.01);
+    TS_ASSERT_DELTA(ws->y(0)[9], -0.0219, 0.01);
+    TS_ASSERT_DELTA(ws->x(12)[5], 407.2, 0.01);
+    TS_ASSERT_DELTA(ws->y(12)[5], 0.0182, 0.01);
 
     AnalysisDataService::Instance().remove("LoadIsawSpectrumTest_ws");
   }

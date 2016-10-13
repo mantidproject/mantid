@@ -38,6 +38,7 @@ DEBUG = False
 QRESOLUTION_WORKSPACE_NAME = "Q_Resolution_ISIS_SANS"
 QRESOLUTION_MODERATOR_WORKSPACE_NAME = "Q_Resolution_MODERATOR_ISIS_SANS"
 
+
 def _issueWarning(msg):
     """
         Prints a message to the log marked as warning
@@ -956,7 +957,7 @@ class Mask_ISIS(ReductionStep):
             @param angle: angle of line in xy-plane in units of degrees
             @return: return xml shape string
         '''
-        return self._finite_cylinder(startPoint, width / 2000.0, length, \
+        return self._finite_cylinder(startPoint, width / 2000.0, length,
                                      [math.cos(angle * math.pi / 180.0), math.sin(angle * math.pi / 180.0), 0.0], "arm")
 
     def get_phi_limits_tag(self):
@@ -1061,8 +1062,8 @@ class Mask_ISIS(ReductionStep):
                 det = ws.getInstrument().getComponentByName(component_name)
                 det_Z = det.getPos().getZ()
                 start_point = [self.arm_x, self.arm_y, det_Z]
-                MaskDetectorsInShape(Workspace=workspace, ShapeXML= \
-                    self._mask_line(start_point, 1e6, self.arm_width, self.arm_angle))
+                MaskDetectorsInShape(Workspace=workspace, ShapeXML=
+                                     self._mask_line(start_point, 1e6, self.arm_width, self.arm_angle))
 
         _output_ws, detector_list = ExtractMask(InputWorkspace=workspace, OutputWorkspace="__mask")
         _issueInfo("Mask check %s: %g masked pixels" % (workspace, len(detector_list)))
@@ -1165,6 +1166,7 @@ class Mask_ISIS(ReductionStep):
                '    global time mask: ', str(self.time_mask) + '\n' + \
                '    rear time mask: ', str(self.time_mask_r) + '\n' + \
                '    front time mask: ', str(self.time_mask_f) + '\n'
+
 
 class LoadSample(LoadRun):
     """
@@ -1819,6 +1821,7 @@ class DarkRunSubtraction(object):
                                                                  mon = False,
                                                                  mon_numbers = None)
     #pylint: disable=too-many-arguments
+
     def _get_final_setting_monitors(self, run_number, use_mean, use_time, mon_numbers, indices):
         '''
         Get the final settings for monitors
@@ -1867,6 +1870,7 @@ class DarkRunSubtraction(object):
                                                                  mon = True,
                                                                  mon_numbers = monitor_mon_numbers)
 
+
 class CropDetBank(ReductionStep):
     """
         Takes the spectra range of the current detector from the instrument object
@@ -1898,7 +1902,6 @@ class CropDetBank(ReductionStep):
             monitor_ws = reducer.get_sample().get_monitor()
             monitor_name = monitor_ws.name()
 
-
             # Run the subtraction
             was_event_workspace = reducer.is_based_on_event()
             scatter_ws, monitor_ws = reducer.dark_run_subtraction.execute(scatter_ws, monitor_ws,
@@ -1908,6 +1911,7 @@ class CropDetBank(ReductionStep):
             # We need to replace the workspaces in the ADS
             mtd.addOrReplace(scatter_name, scatter_ws)
             mtd.addOrReplace(monitor_name, monitor_ws)
+
 
 class NormalizeToMonitor(ReductionStep):
     """
@@ -2045,7 +2049,7 @@ class TransmissionCalc(ReductionStep):
             return
         select += "::"
 
-        if not override and self.fit_settings.has_key(select + FITMETHOD) and self.fit_settings[select + FITMETHOD]:
+        if not override and select + FITMETHOD in self.fit_settings and self.fit_settings[select + FITMETHOD]:
             # it was already configured and this request does not want to override
             return
 
@@ -2066,7 +2070,7 @@ class TransmissionCalc(ReductionStep):
         # get variables for this selector
         sel_settings = dict()
         for prop in self.fit_props:
-            sel_settings[prop] = self.fit_settings[select + prop] if self.fit_settings.has_key(select + prop) else \
+            sel_settings[prop] = self.fit_settings[select + prop] if select + prop in self.fit_settings else \
                 self.fit_settings['both::' + prop]
 
         # copy fit_method
@@ -2086,12 +2090,12 @@ class TransmissionCalc(ReductionStep):
             for selector_ in ['sample::', 'can::']:
                 for prop_ in self.fit_props:
                     prop_name = selector_ + prop_
-                    if self.fit_settings.has_key(prop_name):
+                    if prop_name in self.fit_settings:
                         del self.fit_settings[prop_name]
 
     def isSeparate(self):
         """ Returns true if the can or sample was given and false if just both was used"""
-        return self.fit_settings.has_key('sample::fit_method') or self.fit_settings.has_key('can::fit_method')
+        return 'sample::fit_method' in self.fit_settings or 'can::fit_method' in self.fit_settings
 
     def setup_wksp(self, inputWS, inst, wavbining, trans_det_ids, reducer):
         """
@@ -2271,7 +2275,7 @@ class TransmissionCalc(ReductionStep):
         # get variables for this selector
         sel_settings = dict()
         for prop in self.fit_props:
-            sel_settings[prop] = self.fit_settings[select + prop] if self.fit_settings.has_key(select + prop) else \
+            sel_settings[prop] = self.fit_settings[select + prop] if select + prop in self.fit_settings else \
                 self.fit_settings['both::' + prop]
 
         pre_sample = reducer.instrument.incid_mon_4_trans_calc
@@ -2310,10 +2314,10 @@ class TransmissionCalc(ReductionStep):
         wavbin += ',' + str(translambda_max)
 
         # set up the input workspaces
-        trans_tmp_out = self.setup_wksp(trans_raw, reducer.instrument, \
-            wavbin, trans_det_ids, reducer)
-        direct_tmp_out = self.setup_wksp(direct_raw, reducer.instrument, \
-            wavbin, trans_det_ids, reducer)
+        trans_tmp_out = self.setup_wksp(trans_raw, reducer.instrument,
+                                        wavbin, trans_det_ids, reducer)
+        direct_tmp_out = self.setup_wksp(direct_raw, reducer.instrument,
+                                         wavbin, trans_det_ids, reducer)
 
         # Where a ROI has been specified, it is useful to keep a copy of the
         # summed ROI spectra around for the scientists to look at, so that they
@@ -2327,7 +2331,7 @@ class TransmissionCalc(ReductionStep):
                        OutputWorkspace=direct_raw + "_den",
                        StartWorkspaceIndex=EXCLUDE_INIT_BEAM)
 
-        fittedtransws, unfittedtransws = self.get_wksp_names( \
+        fittedtransws, unfittedtransws = self.get_wksp_names(
             trans_raw, translambda_min, translambda_max, reducer)
 
         # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
@@ -2393,7 +2397,7 @@ class TransmissionCalc(ReductionStep):
         return fitted_name, unfitted
 
     def _get_fit_property(self, selector, property_name):
-        if self.fit_settings.has_key(selector + '::' + property_name):
+        if selector + '::' + property_name in self.fit_settings:
             return self.fit_settings[selector + '::' + property_name]
         else:
             return self.fit_settings['both::' + property_name]
@@ -2427,6 +2431,7 @@ class TransmissionCalc(ReductionStep):
             trans_ws = mtd[workspace_name]
             trans_ws = reducer.dark_run_subtraction.execute_transmission(trans_ws, trans_det_ids)
             mtd.addOrReplace(workspace_name, trans_ws)
+
 
 class AbsoluteUnitsISIS(ReductionStep):
     DEFAULT_SCALING = 100.0
@@ -2701,8 +2706,8 @@ class ConvertToQISIS(ReductionStep):
         if reducer.wide_angle_correction and reducer.transmission_calculator.output_wksp:
             # calculate the transmission wide angle correction
             _issueWarning("sans solid angle correction execution")
-            SANSWideAngleCorrection(SampleData=workspace, \
-                                    TransmissionData=reducer.transmission_calculator.output_wksp, \
+            SANSWideAngleCorrection(SampleData=workspace,
+                                    TransmissionData=reducer.transmission_calculator.output_wksp,
                                     OutputWorkspace='transmissionWorkspace')
             wavepixeladj = 'transmissionWorkspace'
         # create normalization workspaces
@@ -2730,7 +2735,7 @@ class ConvertToQISIS(ReductionStep):
             sanslog.warning("W2 : %s" % str(self._q_resolution_w2))
             sanslog.warning("LCol: %s" % str(self._q_resolution_collimation_length))
             sanslog.warning("DR : %s" % str(self._q_resolution_delta_r))
-            sanslog.warning("Exists: %s" % str(qResolution != None))
+            sanslog.warning("Exists: %s" % str(qResolution is not None))
 
         try:
             if self._Q_alg == 'Q1D':
@@ -3044,7 +3049,7 @@ class UnitsConvert(ReductionStep):
             bin_alg = self.rebin_alg
 
         rebin_com = bin_alg + '(workspace, "' + \
-                    self._get_rebin(low_wav, self.wav_step, high_wav) + '", OutputWorkspace=workspace)'
+            self._get_rebin(low_wav, self.wav_step, high_wav) + '", OutputWorkspace=workspace)'
         eval(rebin_com)
 
     def _get_rebin(self, low, step, high):
@@ -3129,6 +3134,7 @@ class SliceEvent(ReductionStep):
             binning = ""
         _hist, (_tot_t, tot_c, _part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor, binning)
         self.scale = part_c / tot_c
+
 
 class BaseBeamFinder(ReductionStep):
     """
@@ -3230,7 +3236,7 @@ class UserFile(ReductionStep):
             if not os.path.isfile(user_file):
                 user_file = FileFinder.getFullPath(self.filename)
                 if not os.path.isfile(user_file):
-                    raise RuntimeError, "Cannot read mask. File path '%s' does not exist or is not in the user path." % self.filename
+                    raise RuntimeError("Cannot read mask. File path '%s' does not exist or is not in the user path." % self.filename)
 
         reducer.user_file_path = os.path.dirname(user_file)
         # Re-initializes default values
@@ -3499,7 +3505,7 @@ class UserFile(ReductionStep):
                 _issueWarning("General wave re-bin lines are not implemented, line ignored \"" + limit_line + "\"")
                 return
             else:
-                reducer.to_wavelen.set_rebin( \
+                reducer.to_wavelen.set_rebin(
                     minval, step_type + step_size, maxval, override=False)
         elif limit_type.upper() == 'Q':
             if rebin_str:
@@ -3976,8 +3982,8 @@ class UserFile(ReductionStep):
             reducer.instrument.setCalibrationWorkspace(__calibrationWs)
         except:
             # If we throw a runtime here, then we cannot execute 'Load Data'.
-            raise RuntimeError("Invalid input for tube calibration file (" + path2file + " ).\n" \
-                   "Please do not run a reduction as it will not successfully complete.\n")
+            raise RuntimeError("Invalid input for tube calibration file (" + path2file + " ).\n"
+                               "Please do not run a reduction as it will not successfully complete.\n")
 
     def _read_maskfile_line(self, line, reducer):
         try:

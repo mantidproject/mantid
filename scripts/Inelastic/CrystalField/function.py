@@ -199,6 +199,7 @@ class PeaksFunction(object):
     @param name: A name of the individual peak function, such as 'Lorentzian' or 'Gaussian'.
         If None then the default function is used (currently 'Lorentzian')
     """
+
     def __init__(self, name=None, firstIndex=0):
         """
         Constructor.

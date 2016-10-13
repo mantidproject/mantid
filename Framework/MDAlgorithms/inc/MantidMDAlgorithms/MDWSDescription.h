@@ -104,7 +104,7 @@ public: // for the time being
   std::string getWSName() const { return m_InWS->name(); }
   bool isPowder() const;
   bool isQ3DMode() const;
-  bool hasLattice() const { return m_InWS->sample().hasOrientedLattice(); }
+  bool hasLattice() const;
 
   boost::shared_ptr<Geometry::OrientedLattice> getLattice() const {
     return getOrientedLattice(m_InWS);

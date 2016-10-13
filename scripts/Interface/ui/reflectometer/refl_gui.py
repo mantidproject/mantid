@@ -32,7 +32,6 @@ except AttributeError:
 canMantidPlot = True
 
 
-
 class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
     current_instrument = None
@@ -119,7 +118,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         settings.setValue(self.__group_tof_workspaces_key, self.__group_tof_workspaces)
         settings.setValue(self.__alg_migration_key, self.__alg_migrate)
         settings.setValue(self.__stitch_right_key, self.__scale_right)
-
 
         settings.endGroup()
 
@@ -385,7 +383,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         self.actionRefl_Gui_Options.triggered.connect(self._options_dialog)
         self.actionSlit_Calculator.triggered.connect(self._show_slit_calculator)
 
-
     def __valid_rb(self):
         # Ensure that you cannot put zero in for an rb search
         rbSearchValidator = QtGui.QIntValidator(self)
@@ -399,7 +396,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             if current_text:
                 logger.warning("RB search restricted to numbers > 0")
             return False
-
 
     def _populate_runs_list(self):
         """
@@ -593,7 +589,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             logger.warning("Cannot paste, no editable cells selected")
 
     def _transfer(self):
-
         """
         Transfer run numbers to the table
         """
@@ -651,7 +646,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
             # If ICAT is being used for download, then files must be downloaded at the same time as they are transferred
 
-
             contents = str(idx.text()).strip()
             file_id, _runnumber, file_name = self.icat_file_map[contents]
             active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId()
@@ -666,15 +660,12 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             if save_location not in current_search_dirs:
                 config.appendDataSearchDir(save_location)
 
-
-
     def _set_all_stitch(self, state):
         """
         Set the checkboxes in the Stitch? column to the same
         """
         for row in range(self.tableMain.rowCount()):
             self.tableMain.cellWidget(row, self.stitch_col).children()[1].setCheckState(state)
-
 
     def __checked_row_stiched(self, row):
         return self.tableMain.cellWidget(row, self.stitch_col).children()[1].checkState() > 0
@@ -828,7 +819,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                                               _overallQMin, _overallQMax, -dqq, 1, keep=True,
                                                               scale_right=self.__scale_right)
 
-
                         # Enable the plot button
                         plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
                         plotbutton.setProperty('runno', runno)
@@ -903,12 +893,11 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 self.__graphs[wksp[i]] = base_graph
 
                 titl = groupGet(ws_name_binned, 'samp', 'run_title')
-                if type(titl) == str:
+                if isinstance(titl, str):
                     base_graph.activeLayer().setTitle(titl)
                 base_graph.activeLayer().setAxisScale(Layer.Left, _Imin * 0.1, _Imax * 10, Layer.Log10)
                 base_graph.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
                 base_graph.activeLayer().setAutoScale()
-
 
         # Create and plot stitched outputs
         if self.__checked_row_stiched(row):
@@ -932,7 +921,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 stitched_graph.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
                 self.__graphs[outputwksp] = stitched_graph
 
-
     def __name_trans(self, transrun):
         """
         From a comma or colon separated string of run numbers
@@ -951,8 +939,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             for t in split_trans:
                 name += '_' + str(t)
         return name
-
-
 
     def _do_run(self, runno, row, which):
         """
@@ -1310,10 +1296,11 @@ def getLogValue(wksp, field=''):
     ws = getWorkspace(wksp)
     log = ws.getRun().getLogData(field).value
 
-    if type(log) is int or type(log) is str:
+    if isinstance(log, int) or isinstance(log, str):
         return log
     else:
         return log[-1]
+
 
 def getWorkspace(wksp, report_error=True):
     """
