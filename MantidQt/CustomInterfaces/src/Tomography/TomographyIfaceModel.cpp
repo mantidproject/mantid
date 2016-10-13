@@ -15,6 +15,10 @@
 #include <sys/wait.h>
 #endif
 
+#ifdef _DEBUG
+#define MODEL_DEBUG
+#endif
+
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
@@ -60,7 +64,7 @@ TomographyIfaceModel::TomographyIfaceModel()
   m_SCARFtools.push_back(g_SavuTool);
   m_SCARFtools.push_back(g_customCmdTool);
 
-  m_currentTool = m_SCARFtools.front();
+  m_currentToolName = m_SCARFtools.front();
 
   m_statusMutex = new QMutex();
 }
@@ -360,12 +364,14 @@ void TomographyIfaceModel::doSubmitReconstructionJob(
         "(empty string). You need to setup the reconstruction tool.");
   }
 
+#ifdef MODEL_DEBUG
   std::string allOpts;
   for (const auto &option : args) {
     allOpts += option + " ";
   }
-  std::cout << "\n\nDEBUG: full argument string: " << allOpts << "\n\n";
-  return; // DEBUG end here to prevent any outgoing connections
+  std::cout << "\n\n DEBUG: full argument string: " << allOpts << "\n\n";
+  return; // end here to prevent any outgoing connections
+#endif    // MODEL_DEBUG
 
   // with SCARF we use one (pseudo)-transaction for every submission
   auto transAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
@@ -389,10 +395,13 @@ void TomographyIfaceModel::doSubmitReconstructionJob(
   submitAlg->setProperty("TaskName", "Mantid tomographic reconstruction job");
   submitAlg->setProperty("TransactionID", tid);
   submitAlg->setProperty("ScriptName", run);
-  // std::string allOpts;
-  // for (const auto &option : args) {
-  //   allOpts += option + " ";
-  // }
+
+#ifndef MODEL_DEBUG
+  std::string allOpts;
+  for (const auto &option : args) {
+    allOpts += option + " ";
+  }
+#endif // MODEL_DEBUG
   submitAlg->setProperty("ScriptParams", allOpts);
   try {
     submitAlg->execute();
@@ -615,66 +624,80 @@ void TomographyIfaceModel::makeRunnableWithOptions(
   const std::string tool = usingTool();
   // Special case. Just pass on user inputs.
   if (tool == g_customCmdTool) {
+
+    // TODO leave that case for now
+    // fails for local
     const std::string cmd = m_currentToolSettings->toCommand();
-    std::cout << "DEBUG: LOCAL to command -> " << cmd << "\n\n";
+#ifdef MODEL_DEBUG
+    std::cout << "DEBUG: CUSTOM to command -> " << cmd << "\n\n";
+#endif // MODEL_DEBUG
 
     opt.resize(1);
     splitCmdLine(cmd, run, opt[0]);
     return;
   }
 
-  // dont think u should be called cmddddddddddddddddddddddddddddddd
   std::string cmd;
-
-  cmd = m_currentToolSettings->toCommand();
-  std::cout << "\nDEBUG: NOT LOCAL to command -> " << cmd << "\n\n";
-
   bool local = false;
-  // TODO this is still incomplete, not all tools ready
+  // TODO need to support local paths somewhere else
   if ("local" == comp) {
 
     // if local get the local reconstruction path
     local = true;
-    cmd = m_systemSettings.m_local.m_reconScriptsPath +
-          g_mainReconstructionScript;
-    std::cout << "\nDEBUG: LOCAL? to command -> " << cmd << "\n\n";
+    cmd = m_currentToolSettings->toCommand();
 
-  } else if (tool == g_TomoPyTool) {
-    // cmd = m_toolsSettings.tomoPy.toCommand();
-    cmd = m_currentToolSettings->toCommand();
-    std::cout << "\nDEBUG: tomopy to command -> " << cmd << "\n\n";
-    // this will make something like:
-    // run = "/work/imat/z-tests-fedemp/scripts/tomopy/imat_recon_FBP.py";
-    // opt = "--input_dir " + base + currentPathFITS() + " " + "--dark " +
-    // base +
-    //      currentPathDark() + " " + "--white " + base + currentPathFlat();
-  } else if (tool == g_AstraTool) {
-    cmd = m_currentToolSettings->toCommand();
-    std::cout << "\nDEBUG: ASTRA to command -> " << cmd << "\n\n";
-    // this will produce something like this:
-    // run = "/work/imat/scripts/astra/astra-3d-SIRT3D.py";
-    // opt = base + currentPathFITS();
+#ifdef MODEL_DEBUG
+    std::cout << "\n\n DEBUG: Expected CMD value: "
+              << m_systemSettings.m_local.m_reconScriptsPath +
+                     g_mainReconstructionScript
+              << "\n BUT GOT: " << cmd << "\n\n";
+#endif // MODEL_DEBUG
+
+#ifdef MODEL_DEBUG
+    std::cout << "\n\n DEBUG: LOCAL? to command -> " << cmd << "\n\n";
+#endif // MODEL_DEBUG
+
   } else {
-    throw std::runtime_error(
-        "Unable to use this tool. "
-        "I do not know how to submit jobs to use this tool: " +
-        tool + ". It seems that this interface is "
-               "misconfigured or there has been an unexpected "
-               "failure.");
+    cmd = m_currentToolSettings->toCommand();
+
+#ifdef MODEL_DEBUG
+    std::cout << "\n\n DEBUG: TOOL:" << m_currentToolName << " to command -> "
+              << cmd << "\n\n";
+#endif // MODEL_DEBUG
   }
+  // DEAD CODE left for future reference
+  // if tool == TOMOPY branch
+  // this will make something like:
+  // run = "/work/imat/z-tests-fedemp/scripts/tomopy/imat_recon_FBP.py";
+  // opt = "--input_dir " + base + currentPathFITS() + " " + "--dark " +
+  // base +
+  //      currentPathDark() + " " + "--white " + base + currentPathFlat();
+  // } else if (tool == g_AstraTool) {
+  //   cmd = m_currentToolSettings->toCommand();
+  //   std::cout << "\n DEBUG: ASTRA to command -> " << cmd << "\n\n";
+  // this will produce something like this:
+  // run = "/work/imat/scripts/astra/astra-3d-SIRT3D.py";
+  // opt = base + currentPathFITS();
 
   std::string longOpt;
   splitCmdLine(cmd, run, longOpt);
-  checkWarningToolNotSetup(tool, cmd);
+  checkIfToolIsSetupProperly(tool, cmd);
 
+  // TODO need to support local paths somewhere else
   if (local) {
-    run = m_systemSettings.m_local.m_externalInterpreterPath;
-  } else {
-    // intentionally not using local style paths, as this goes to a server with
-    // unix file system
-    run = m_systemSettings.m_remote.m_basePathReconScripts +
-          g_mainReconstructionScript;
+#ifdef MODEL_DEBUG
+    std::cout << "\n\n DEBUG: Expected RUN value: "
+              << m_systemSettings.m_local.m_externalInterpreterPath
+              << "\n BUT GOT: " << run << "\n\n";
+#endif // MODEL_DEBUG
   }
+  // else {
+  //   // intentionally not using local style paths, as this goes to a server
+  //   with
+  //   // unix file system
+  //   run = m_systemSettings.m_remote.m_basePathReconScripts +
+  //         g_mainReconstructionScript;
+  // }
   opt = makeTomoRecScriptOptions(local);
 }
 
@@ -699,24 +722,35 @@ TomographyIfaceModel::makeTomoRecScriptOptions(bool local) const {
     opts.emplace_back(base.toString());
   }
 
-  // TODO add
-  const std::string toolName = usingTool();
-  if (g_TomoPyTool == toolName) {
-    opts.emplace_back("--tool=tomopy");
-  } else if (g_AstraTool == toolName) {
-    opts.emplace_back("--tool=astra");
-  }
+  const std::string currentTool = usingTool();
+  const std::string toolNameArg = prepareToolNameForArgs(currentTool);
+
+  const std::string toolArgument = "--tool=" + toolNameArg;
+
+  opts.emplace_back(toolArgument);
 
   opts.emplace_back("--algorithm=" + m_currentToolMethod);
 
-  if (g_TomoPyTool != toolName || m_tomopyMethod != "gridred" ||
-      m_tomopyMethod != "fbp")
-    opts.emplace_back("--num-iter=5");
+  // TODO fix proper iterations reading from the interface
+  opts.emplace_back("--num-iter=5");
 
   filtersCfgToCmdOpts(m_prePostProcSettings, m_imageStackPreParams, local,
                       opts);
 
   return opts;
+}
+
+/** Processes the tool name so that it is appropriate for the command line when
+ * executed
+ */
+std::string TomographyIfaceModel::prepareToolNameForArgs(
+    const std::string &toolName) const {
+
+  // the only processing we have for now is converting it to lower case
+  std::string outputString = toolName; // copy over the string
+  std::transform(toolName.cbegin(), toolName.cend(), outputString.begin(),
+                 ::tolower);
+  return outputString;
 }
 
 /**
@@ -727,7 +761,7 @@ TomographyIfaceModel::makeTomoRecScriptOptions(bool local) const {
  * @param tool Name of the tool this warning applies to
  * @param cmd command/script/executable derived from the settings
  */
-void TomographyIfaceModel::checkWarningToolNotSetup(
+void TomographyIfaceModel::checkIfToolIsSetupProperly(
     const std::string &tool, const std::string &cmd) const {
   if (tool.empty() || cmd.empty()) {
     const std::string detail =
@@ -923,7 +957,7 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
   // one name for this particular reconstruction, like:
   // out_reconstruction_TomoPy_gridrec_
   const std::string reconName =
-      "reconstruction_" + m_currentTool + "_" + alg + "_" + timeAppendix;
+      "reconstruction_" + m_currentToolName + "_" + alg + "_" + timeAppendix;
 
   const std::string outOpt = outBase + "/" + reconName;
 

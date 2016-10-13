@@ -29,7 +29,7 @@ void TomoToolConfigTomoPyDialog::setupToolConfig() {
   int mi = m_tomoPyUi.comboBox_method->currentIndex();
   // TODO: for the output path, probably better to take the sample path,
   // then up one level
-  m_tempSettings = std::unique_ptr<ToolConfigTomoPy>(new ToolConfigTomoPy(
+  m_tempSettings = std::shared_ptr<ToolConfigTomoPy>(new ToolConfigTomoPy(
       m_runPath, m_pathOut + m_localOutNameAppendix, m_paths.pathDarks(),
       m_paths.pathOpenBeam(), m_paths.pathSamples()));
 

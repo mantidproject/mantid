@@ -12,10 +12,6 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPyDialog.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigAstraDialog.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigCustomDialog.h"
-#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -779,9 +775,9 @@ void TomographyIfaceViewQtGUI::readSettings() {
   TomoSystemSettings sysSettings;
   streamSys >> sysSettings;
   if (QDataStream::Ok == streamSys.status()) {
-    updateSystemSettings(sysSettings);
+    updateSystemSettingsTabFields(sysSettings);
   } else {
-    updateSystemSettings(TomoSystemSettings());
+    updateSystemSettingsTabFields(TomoSystemSettings());
   }
 
   // Get input paths (sample/dark/flats)
@@ -1063,7 +1059,7 @@ void TomographyIfaceViewQtGUI::updatePathsConfig(const TomoPathsConfig &cfg) {
  * Updates the view/forms with new system settings (local and remote,
  * including multiple paths and path components)
  */
-void TomographyIfaceViewQtGUI::updateSystemSettings(
+void TomographyIfaceViewQtGUI::updateSystemSettingsTabFields(
     const TomoSystemSettings &setts) {
   // paths and related
   m_uiTabSystemSettings.lineEdit_path_comp_1st->setText(
@@ -1119,29 +1115,8 @@ void TomographyIfaceViewQtGUI::updateSystemSettings(
 void TomographyIfaceViewQtGUI::showToolConfig(
     TomoToolConfigDialogBase *dialog) {
 
-  setupConfigDialogSettings(dialog);
   // do we do anything with the parameter?
   int res = dialog->execute();
-}
-
-// TODO do we want this moved out into presenter/mode?
-void TomographyIfaceViewQtGUI::setupConfigDialogSettings(
-    TomoToolConfigDialogBase *dialog) {
-  // set up all the information we need for the dialog
-  std::string run =
-      m_uiTabSystemSettings.lineEdit_remote_scripts_base_dir->text()
-          .toStdString() +
-      "/scripts/Imaging/IMAT/tomo_reconstruct.py";
-  std::cout << "DEBUG: " << run << "\n";
-  TomoPathsConfig paths = currentPathsConfig();
-  std::string pathOut = Poco::Path::expand(
-      g_defOutPathLocal + "/" +
-      m_uiTabRun.lineEdit_experiment_reference->text().toStdString());
-  static size_t reconIdx = 1;
-  const std::string localOutNameAppendix =
-      std::string("/processed/") + "reconstruction_" + std::to_string(reconIdx);
-
-  dialog->setupDialog(run, paths, pathOut, localOutNameAppendix);
 }
 
 /**
@@ -1779,6 +1754,8 @@ TomographyIfaceViewQtGUI::grabSystemSettingsFromUser() const {
   setts.m_local.m_reconScriptsPath =
       m_uiTabSystemSettings.lineEdit_local_recon_scripts->text().toStdString();
 
+  setts.m_experimentReference =
+      m_uiTabRun.lineEdit_experiment_reference->text().toStdString();
   return setts;
 }
 
@@ -2039,7 +2016,7 @@ void TomographyIfaceViewQtGUI::resetSystemSettings() {
   if (reply == QMessageBox::Yes) {
     // From factory defaults
     TomoSystemSettings defaults;
-    updateSystemSettings(defaults);
+    updateSystemSettingsTabFields(defaults);
   }
 }
 

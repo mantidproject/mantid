@@ -86,8 +86,11 @@ public:
   std::string loggedIn() const { return m_loggedInUser; }
 
   // TODO: add companion currentComputeResource where LoggedIn() is in
-  void usingTool(const std::string &tool) { m_currentTool = tool; }
-  std::string usingTool() const { return m_currentTool; }
+  //--------------------------------------------
+  // Current tool Settings
+  //--------------------------------------------
+  void usingTool(const std::string &tool) { m_currentToolName = tool; }
+  std::string usingTool() const { return m_currentToolName; }
 
   void setCurrentToolMethod(std::string toolMethod);
   std::string getCurrentToolMethod() { return m_currentToolMethod; }
@@ -99,6 +102,31 @@ public:
   TomoRecToolConfig *getCurrentToolSettings() {
     return m_currentToolSettings.get();
   }
+
+  //--------------------------------------------
+  // Access to the system settings information
+  //--------------------------------------------
+  // get the remote scripts base dir from the system settings
+  std::string getCurrentRemoteScriptsBaseDir() {
+    return m_systemSettings.m_remote.m_basePathTomoData;
+  }
+
+  /// get the local paths from the system settings
+  std::string getCurrentLocalScriptsBaseDir() {
+    return m_systemSettings.m_local.m_reconScriptsPath;
+  }
+
+  std::string getExeternalInterpreterPath() {
+    return m_systemSettings.m_local.m_externalInterpreterPath;
+  }
+
+  /// get the experiment reference currently selected
+  std::string getCurrentExperimentReference() {
+    return m_systemSettings.m_experimentReference;
+  }
+
+  /// returns the tomo script location paths so that we have consistency
+  std::string getTomoScriptLocationPath() { return m_tomoScriptLocationPath; }
 
   /// ping the (remote) compute resource
   bool doPing(const std::string &compRes);
@@ -180,8 +208,8 @@ private:
   void makeRunnableWithOptions(const std::string &comp, std::string &run,
                                std::vector<std::string> &opt) const;
 
-  void checkWarningToolNotSetup(const std::string &tool,
-                                const std::string &cmd) const;
+  void checkIfToolIsSetupProperly(const std::string &tool,
+                                  const std::string &cmd) const;
 
   std::vector<std::string> makeTomoRecScriptOptions(bool local) const;
 
@@ -191,6 +219,9 @@ private:
 
   void splitCmdLine(const std::string &cmd, std::string &run,
                     std::string &opts) const;
+
+  /// process the tool name to be appropriate for the command line arg
+  void prepareToolNameForArgs(const std::string &toolName);
 
   void checkDataPathsSet() const;
 
@@ -241,22 +272,33 @@ private:
   // Name of the remote compute resource
   static const std::string g_SCARFName;
 
-  std::string m_currentTool;
-
   TomoPathsConfig m_pathsConfig;
 
   // System settting including several paths and parameters (local and remote)
   TomoSystemSettings m_systemSettings;
 
-  // Settings for the third party (tomographic reconstruction) tools
+  // DEPRECATED Settings for the third party (tomographic reconstruction) tools
   TomoReconToolsUserSettings m_toolsSettings;
 
-  // copy of the tool settings, might need to keep a shared pointer
+  //--------------------------------
+  // Current tool variables
+  //--------------------------------
+
+  // current tool's name, updated from the presenter on change
+  std::string m_currentToolName;
+
+  // the tool settings so we can use it for reconstruction params
   std::shared_ptr<TomoRecToolConfig> m_currentToolSettings;
 
+  // current tool's method, updated from the presenter on change
+  std::string m_currentToolMethod;
+
+  const std::string m_tomoScriptLocationPath =
+      "/scripts/Imaging/IMAT/tomo_reconstruct.py";
+
+  // DEPRECATED
   std::string m_tomopyMethod;
   std::string m_astraMethod;
-  std::string m_currentToolMethod;
 
   // Settings for the pre-/post-processing filters
   TomoReconFiltersSettings m_prePostProcSettings;

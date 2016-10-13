@@ -11,16 +11,19 @@ class TomoToolConfigCustomDialog : public QDialog,
   Q_OBJECT
 public:
   TomoToolConfigCustomDialog(QWidget *parent = 0)
-      : QDialog(parent), TomoToolConfigDialogBase() {}
+      : QDialog(parent),
+        TomoToolConfigDialogBase(DEFAULT_TOOL_NAME, DEFAULT_TOOL_METHOD) {}
 
 private:
   void setupToolConfig() override;
   void setupDialogUi() override;
+  void handleDialogResult(int result) override;
   int executeQt() override;
 
   // initialised in .cpp file
   static const std::string DEFAULT_TOOL_NAME;
   static const std::string DEFAULT_TOOL_METHOD;
+  static std::string m_backupCommandLine;
 
   Ui::TomoToolConfigCustom m_customUi;
 };

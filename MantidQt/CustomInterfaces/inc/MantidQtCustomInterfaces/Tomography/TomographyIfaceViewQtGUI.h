@@ -276,15 +276,13 @@ private:
   /// for the energy bands tab/widget
   void saveSettingsEnergy() const;
 
-  void updateSystemSettings(const TomoSystemSettings &setts);
+  void updateSystemSettingsTabFields(const TomoSystemSettings &setts);
 
   void updatePathsConfig(const TomoPathsConfig &cfg) override;
 
   void showToolConfig(
       MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog) override;
 
-  void setupConfigDialogSettings(
-      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog) override;
   void closeEvent(QCloseEvent *ev) override;
 
   void processPathBrowseClick(QLineEdit *le, std::string &data);

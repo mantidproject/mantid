@@ -297,15 +297,6 @@ public:
   virtual void showToolConfig(TomoToolConfigDialogBase *dialog) = 0;
 
   /**
-  * Setup the tool's run path, the paths out, the reconstruction index and
-  * the localOutNameAppendix
-  *
-  * @param name human readable name of the tool, as a string
-  */
-  virtual void setupConfigDialogSettings(
-      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog) = 0;
-
-  /**
    * Refresh the table, tree etc. that displays info on the running/finished
    *jobs.
    *

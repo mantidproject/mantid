@@ -24,7 +24,7 @@ void TomoToolConfigAstraDialog::setupToolConfig() {
   int mi = m_astraUi.comboBox_method->currentIndex();
 
   m_tempSettings =
-      std::unique_ptr<ToolConfigAstraToolbox>(new ToolConfigAstraToolbox(
+      std::shared_ptr<ToolConfigAstraToolbox>(new ToolConfigAstraToolbox(
           m_runPath, m_pathOut + m_localOutNameAppendix, m_paths.pathDarks(),
           m_paths.pathOpenBeam(), m_paths.pathSamples()));
 

@@ -110,15 +110,26 @@ protected:
   /// Stops/kills the periodic query (for example if the user logs out)
   void killKeepAliveMechanism();
 
+  bool isLocalResourceSelected();
+
 private:
-  /// sets up the config dialog settings using the view and updates the model
+  /// sets up the dialog and uses the settings to update the model
   void
   setupConfigDialogSettingsAndUpdateModel(TomoToolConfigDialogBase *dialog);
+
   /// creates the correct dialog pointer and sets it to the member variable
   void createConfigDialogUsingToolName(const std::string &tool);
 
   /// configures up the dialog using the view
   void setupConfigDialogSettings(
+      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog);
+
+  /// does the actual path configuration for local resource
+  void setupConfigDialogSettingsForLocal(
+      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog);
+
+  /// does the actual path configuration for remote resource
+  void setupConfigDialogSettingsForRemote(
       MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog);
 
   /// update all the model information after the tool's been changed
@@ -148,6 +159,9 @@ private:
   QThread *m_keepAliveThread;
 
   std::unique_ptr<TomoToolConfigDialogBase> m_configDialog;
+
+  static const std::string g_defOutPathLocal;
+  static const std::string g_defOutPathRemote;
 };
 
 } // namespace CustomInterfaces

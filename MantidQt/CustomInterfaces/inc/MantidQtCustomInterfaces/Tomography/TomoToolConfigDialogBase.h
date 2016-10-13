@@ -55,12 +55,12 @@ public:
                    const std::string &pathOut,
                    const std::string &localOutNameAppendix) {
 
+    setupPaths(runPath, paths, pathOut, localOutNameAppendix);
     if (!m_isInitialised) {
       // set up the tool's method on the first run
       setupDialogUi();
       m_isInitialised = true;
     }
-    setupPaths(runPath, paths, pathOut, localOutNameAppendix);
     setupToolConfig();
   }
 
@@ -83,6 +83,8 @@ public:
   std::string getSelectedToolName() const { return m_toolName; }
 
 protected:
+  virtual void handleDialogResult(int result);
+
   virtual void setScriptRunPath(const std::string run) { m_runPath = run; }
 
   virtual void setTomoPathsConfig(const TomoPathsConfig paths) {
@@ -109,8 +111,6 @@ protected:
 
   /// setup the tool config with the correct paths
   virtual void setupToolConfig() = 0;
-
-  virtual void handleDialogResult(int result);
 
   /// provided virtual function to add Qt execute behaviour as necessary
   virtual int executeQt() = 0; // this class doesn't inherit from Qt and doesnt

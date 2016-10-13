@@ -20,11 +20,29 @@
 #include <QTimer>
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 
+#ifdef _DEBUG
+#define PRESENTER_DEBUG
+#endif
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+const std::string TomographyIfacePresenter::g_defOutPathLocal =
+#ifdef _WIN32
+    "D:/imat-data/";
+#else
+    "~/imat/";
+#endif
+
+// TODO: could use ConfigService::isNetworkDrive(const std::string &)
+const std::string TomographyIfacePresenter::g_defOutPathRemote =
+#ifdef _WIN32
+    "I:/imat/imat-data/";
+#else
+    "~/imat-data/";
+#endif
 
 TomographyIfacePresenter::TomographyIfacePresenter(ITomographyIfaceView *view)
     : m_view(view), m_model(new TomographyIfaceModel()), m_statusMutex(NULL),
@@ -194,7 +212,6 @@ void TomographyIfacePresenter::processCompResourceChanged() {
 }
 
 void TomographyIfacePresenter::processToolChanged() {
-  //	const std::string tool = "Astra";
   const std::string tool = m_view->currentReconTool();
 
   // disallow reconstruct on tools that don't run yet: Savu and CCPi
@@ -228,6 +245,7 @@ void TomographyIfacePresenter::setupConfigDialogSettingsAndUpdateModel(
   setupConfigDialogSettings(dialog);
   updateModelAfterToolChanged(dialog);
 }
+
 void TomographyIfacePresenter::createConfigDialogUsingToolName(
     const std::string &tool) {
   // free the previous dialogue pointer if any
@@ -236,9 +254,61 @@ void TomographyIfacePresenter::createConfigDialogUsingToolName(
       TomoToolConfigDialogBase::getCorrectDialogForToolFromString(tool));
 }
 
+/**
+* Setup the tool's run path, the paths out, the reconstruction index and
+* the localOutNameAppendix
+*
+* @param dialog The dialog pointer that will be set up
+*/
 void TomographyIfacePresenter::setupConfigDialogSettings(
     TomoToolConfigDialogBase *dialog) {
-  m_view->setupConfigDialogSettings(dialog);
+
+  if (isLocalResourceSelected()) {
+    setupConfigDialogSettingsForLocal(dialog);
+  } else {
+    setupConfigDialogSettingsForRemote(dialog);
+  }
+}
+
+void TomographyIfacePresenter::setupConfigDialogSettingsForLocal(
+    TomoToolConfigDialogBase *dialog) {
+  // set up all the information we need for the dialog
+  std::string run = m_model->getExeternalInterpreterPath() + " " +
+                    m_model->getCurrentLocalScriptsBaseDir() +
+                    m_model->getTomoScriptLocationPath();
+
+#ifdef PRESENTER_DEBUG
+  std::cout << "DEBUG: LOCAL config dialog settings " << run << "\n";
+#endif // PRESENTER_DEBUG
+
+  // TODO get the proper paths for the local reconstruct
+  TomoPathsConfig paths = m_view->currentPathsConfig();
+
+  std::string pathOut = Poco::Path::expand(
+      g_defOutPathLocal + "/" + m_model->getCurrentExperimentReference());
+  static size_t reconIdx = 1;
+  const std::string localOutNameAppendix =
+      std::string("/processed/") + "reconstruction_" + std::to_string(reconIdx);
+
+  dialog->setupDialog(run, paths, pathOut, localOutNameAppendix);
+}
+
+void TomographyIfacePresenter::setupConfigDialogSettingsForRemote(
+    TomoToolConfigDialogBase *dialog) {
+  // set up all the information we need for the dialog
+  std::string run = m_model->getCurrentRemoteScriptsBaseDir() +
+                    m_model->getTomoScriptLocationPath();
+#ifdef PRESENTER_DEBUG
+  std::cout << "DEBUG: REMOTE config dialog settings" << run << "\n";
+#endif // PRESENTER_DEBUG
+  TomoPathsConfig paths = m_view->currentPathsConfig();
+  std::string pathOut = Poco::Path::expand(
+      g_defOutPathLocal + "/" + m_model->getCurrentExperimentReference());
+  static size_t reconIdx = 1;
+  const std::string localOutNameAppendix =
+      std::string("/processed/") + "reconstruction_" + std::to_string(reconIdx);
+
+  dialog->setupDialog(run, paths, pathOut, localOutNameAppendix);
 }
 
 /** Updated all of the model's information about the current tool
@@ -466,21 +536,23 @@ void TomographyIfacePresenter::processRunRecon() {
   // center of rotation and regions
   m_model->updateImageStackPreParams(m_view->currentROIEtcParams());
 
-  // m_model->updateTomopyMethod(m_view->tomopyMethod());
-  // m_model->updateAstraMethod(m_view->astraMethod());
-
-  std::cout << "Current tool:" << m_model->usingTool()
+#ifdef PRESENTER_DEBUG
+  std::cout << "\n\n DEBUG: Current tool:" << m_model->usingTool()
             << " and Current method: " << m_model->getCurrentToolMethod();
-  const std::string &resource = m_view->currentComputeResource();
 
-  // todo test single method & tool
-  if (m_model->localComputeResource() == resource) {
+#endif // PRESENTER_DEBUG
+
+  if (isLocalResourceSelected()) {
     subprocessRunReconLocal();
   } else {
     subprocessRunReconRemote();
   }
 
   processRefreshJobs();
+}
+
+bool TomographyIfacePresenter::isLocalResourceSelected() {
+  return m_model->localComputeResource() == m_view->currentComputeResource();
 }
 
 void TomographyIfacePresenter::subprocessRunReconRemote() {
