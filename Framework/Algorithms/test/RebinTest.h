@@ -161,9 +161,9 @@ public:
     MatrixWorkspace_sptr rebindata =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
 
-	auto &outX = rebindata->x(5);
-	auto &outY = rebindata->y(5);
-	auto &outE = rebindata->e(5);
+    auto &outX = rebindata->x(5);
+    auto &outY = rebindata->y(5);
+    auto &outE = rebindata->e(5);
     TS_ASSERT_DELTA(outX[7], 15.5, 0.000001);
     TS_ASSERT_DELTA(outY[7], 3.0, 0.000001);
     TS_ASSERT_DELTA(outE[7], sqrt(4.5) / 2.0, 0.000001);
