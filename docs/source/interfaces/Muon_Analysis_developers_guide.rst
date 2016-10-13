@@ -263,6 +263,8 @@ On pressing the Fit button, the ``startFit`` method is called - this starts runn
 When the ``MWRunFiles`` widget signals that it has found the relevant files, only then does the fit process continue in ``continueFit``.
 The reason for this is because users can type a range of runs into the box and then immediately hit Return or click Fit, without first clicking outside the box - and we need time to do the file search before starting.
 
+.. note:: Despite their names, ``MuonSequentialFitDialog`` does *not* inherit from ``SequentialFitDialog`` - they are completely separate classes. I assume this is for historical reasons. Amongst other differences, the muon sequential fit dialog calls :ref:`algm-Fit` multiple times while the general sequential fit dialog uses :ref:`algm-PlotPeakByLogValue`.
+
 After a fit
 ^^^^^^^^^^^
 
@@ -302,7 +304,28 @@ Probably it would be best to make this automatic when a multiple fit ends, or pr
 
 Generating results tables
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-(How the results tables work + testing)
+
+The "Results table" tab is structured with ``MuonAnalysisResultTableTab`` handling the GUI parts - populating the tables and getting the user's choice - and uses a ``MuonAnalysisResultTableCreator`` object to actually create the table.
+
+The ``MuonAnalysisResultTableCreator`` is tested as it doesn't use the GUI, but the tab class itself does not have tests.
+
+The user can tick time-series logs to add to the table, and a few non-timeseries logs are available too. These are:
+
+- ``run_number``
+- ``run_start``, ``run_end``: either as seconds relative to first run start, or ISO-formatted text
+- ``sample_temp``
+- ``sample_magn_field``
+- ``group`` and ``period`` - these are not logs from the NeXus file but, in the case of a simultaneous fit, the ``MuonFitDataPresenter`` adds them to the fitted workspace (in ``addSpecialLogs``).
+
+The results table creator must check the workspaces have the same fit model, add the right columns and populate them with values.
+The columns must have the correct plot type (X, Y, YError or Label).
+If a parameter was fixed in the fit, its error will be zero for each row - so that error column can be removed.
+
+The *Multiple* option is a little different to the others.
+While the single, sequential or simultaneous fit tables have one row per dataset, the multiple fit table has one row per label - showing many fits in the same table, one row per fit.
+A *global* parameter has just one value column and one error column, while other (non-global) parameters have one value and one error column per dataset.
+
+The results table creator can recognise a global parameter by the fact that it has the same value for all datasets.
 
 Miscellaneous notable points
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -326,6 +349,7 @@ When no graph is being read, the toolbar appears as an empty black box, as above
 
 Future work
 ^^^^^^^^^^^
-(Plotting, squashograms, frequency mode)
 
+Open muon issues can be found on Github with the `Component: Muon <https://github.com/mantidproject/mantid/issues?q=is%3Aopen+is%3Aissue+label%3A%22Component%3A+Muon%22>`_ label.
+Those marked ``Misc: Roadmap`` are the most important.
 
