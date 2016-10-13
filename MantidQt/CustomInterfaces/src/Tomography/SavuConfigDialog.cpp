@@ -242,7 +242,7 @@ void TomographyIfaceViewQtGUI::removeClicked() {
 void TomographyIfaceViewQtGUI::menuOpenClicked() {
   QString s =
       QFileDialog::getOpenFileName(0, "Open file", QDir::currentPath(),
-                                   "NeXus files (*.nxs);;All files (*.*)",
+                                   "NeXus files (*.nxs);;All files (*)",
                                    new QString("NeXus files (*.nxs)"));
   std::string name = s.toStdString();
 
@@ -301,7 +301,7 @@ void TomographyIfaceViewQtGUI::menuSaveClicked() {
 void TomographyIfaceViewQtGUI::menuSaveAsClicked() {
   QString s =
       QFileDialog::getSaveFileName(0, "Save file", QDir::currentPath(),
-                                   "NeXus files (*.nxs);;All files (*.*)",
+                                   "NeXus files (*.nxs);;All files (*)",
                                    new QString("NeXus files (*.nxs)"));
   std::string name = s.toStdString();
   if ("" == name)

@@ -564,7 +564,7 @@ void MuonAnalysis::runSaveGroupButton() {
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
-  filter += ";;AllFiles (*.*)";
+  filter += ";;AllFiles (*)";
   QString groupingFile = MantidQt::API::FileDialogHandler::getSaveFileName(
       this, "Save Grouping file as", prevPath, filter);
 
@@ -603,7 +603,7 @@ void MuonAnalysis::runLoadGroupButton() {
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
-  filter += ";;AllFiles (*.*)";
+  filter += ";;AllFiles (*)";
   QString groupingFile = QFileDialog::getOpenFileName(
       this, "Load Grouping file", prevPath, filter);
   if (groupingFile.isEmpty() || QFileInfo(groupingFile).isDir())

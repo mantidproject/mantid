@@ -678,7 +678,7 @@ void InstrumentWidget::saveImage(QString filename) {
 QString InstrumentWidget::getSaveGroupingFilename() {
   QString filename = MantidQt::API::FileDialogHandler::getSaveFileName(
       this, "Save grouping file", m_savedialog_dir,
-      "Grouping (*.xml);;All files (*.*)");
+      "Grouping (*.xml);;All files (*)");
 
   // If its empty, they cancelled the dialog
   if (!filename.isEmpty()) {
