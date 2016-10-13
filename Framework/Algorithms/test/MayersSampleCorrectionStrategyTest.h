@@ -82,13 +82,13 @@ public:
   test_Corrects_Both_Absorption_And_Multiple_Scattering_For_Histogram_Data() {
     using std::sqrt;
     const size_t nypts(100);
-    std::vector<double> signal(nypts, 2.0), tof(nypts), error(nypts);
+    std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
     std::transform(signal.begin(), signal.end(), error.begin(),
                    (double (*)(double))sqrt);
     // Generate a histogram with the same mid points as the point data example
     std::generate(tof.begin(), tof.end(), Incrementer(99.5));
 
-    Points tofPoints(tof);
+    BinEdges tofPoints(tof);
     Histogram histo(tofPoints, Counts(signal), CountStandardDeviations(error));
     MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
 
@@ -103,26 +103,26 @@ public:
     // Check some values
     const double delta(1e-06);
     TS_ASSERT_DELTA(99.5, tofVals.front(), delta);
-    TS_ASSERT_DELTA(198.5, tofVals.back(), delta);
+    TS_ASSERT_DELTA(199.5, tofVals.back(), delta);
 
-    TS_ASSERT_DELTA(0.37496898, signalVals.front(), delta);
-    TS_ASSERT_DELTA(0.37628861, signalVals.back(), delta);
+    TS_ASSERT_DELTA(0.37497317, signalVals.front(), delta);
+    TS_ASSERT_DELTA(0.37629281, signalVals.back(), delta);
 
-    TS_ASSERT_DELTA(0.26514310, errVals.front(), delta);
-    TS_ASSERT_DELTA(0.26607623, errVals.back(), delta);
+    TS_ASSERT_DELTA(0.26514607, errVals.front(), delta);
+    TS_ASSERT_DELTA(0.26607920, errVals.back(), delta);
   }
 
   void test_Corrects_For_Absorption_For_Histogram_Data() {
     using std::sqrt;
     const size_t nypts(100);
-    std::vector<double> signal(nypts, 2.0), tof(nypts), error(nypts);
+    std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
     std::transform(signal.begin(), signal.end(), error.begin(),
                    (double (*)(double))sqrt);
     // Generate a histogram with the same mid points as the point data example
     std::generate(tof.begin(), tof.end(), Incrementer(99.5));
     bool mscatOn(false);
 
-    Points tofPoints(tof);
+    BinEdges tofPoints(tof);
     Histogram histo(tofPoints, Counts(signal), CountStandardDeviations(error));
 
     MayersSampleCorrectionStrategy mscat(createTestParameters(mscatOn), histo);
@@ -138,13 +138,13 @@ public:
     // Check some values
     const double delta(1e-06);
     TS_ASSERT_DELTA(99.5, tofVals.front(), delta);
-    TS_ASSERT_DELTA(198.5, tofVals.back(), delta);
+    TS_ASSERT_DELTA(199.5, tofVals.back(), delta);
 
-    TS_ASSERT_DELTA(2.3440131, signalVals.front(), delta);
-    TS_ASSERT_DELTA(2.3489170, signalVals.back(), delta);
+    TS_ASSERT_DELTA(2.3440378, signalVals.front(), delta);
+    TS_ASSERT_DELTA(2.3489418, signalVals.back(), delta);
 
-    TS_ASSERT_DELTA(1.6574675, errVals.front(), delta);
-    TS_ASSERT_DELTA(1.6609351, errVals.back(), delta);
+    TS_ASSERT_DELTA(1.6574850, errVals.front(), delta);
+    TS_ASSERT_DELTA(1.6609527, errVals.back(), delta);
   }
 
   // ---------------------- Failure tests -----------------------------
