@@ -299,7 +299,7 @@ public:
   void testRenameWorkspaceConsecutiveDuplicates() {
     // Tests that setting a workspace to the name of an existing
     // workspace in a group is correctly handled by the workspace group
-	// when they are consecutive
+    // when they are consecutive
 
     constexpr int nHist = 20, nBins = 10;
     // Register the workspace in the data service
@@ -310,7 +310,7 @@ public:
 
     const std::string ws1Name = "test_ws1";
     const std::string ws2Name = "test_ws2";
-	const std::string wsGroupName = "test_group";
+    const std::string wsGroupName = "test_group";
 
     WorkspaceGroup_sptr wsSptr = WorkspaceGroup_sptr(new WorkspaceGroup);
     if (wsSptr) {
@@ -330,56 +330,106 @@ public:
     TS_ASSERT_EQUALS(wsSptr->contains(work_in2), true);
     TS_ASSERT_EQUALS(wsSptr->contains(work_in1), false);
 
-	AnalysisDataService::Instance().remove(ws1Name);
-	AnalysisDataService::Instance().remove(wsGroupName);
+    AnalysisDataService::Instance().remove(ws1Name);
+    AnalysisDataService::Instance().remove(wsGroupName);
   }
 
   void testRenameWorkspaceNonConsecutiveDuplicates() {
-	  // Performs the same test as testRenameWorkspaceConsecutiveDuplicates
-	  // but for workspaces where the duplicates are not adjacent
-	  
-	  // If this test fails but the aforementioned test passes it means
-	  // the algorithm is only considering consecutive workspaces
+    // Performs the same test as testRenameWorkspaceConsecutiveDuplicates
+    // but for workspaces where the duplicates are not adjacent
 
-		  constexpr int nHist = 20, nBins = 10;
-		  // Register the workspace in the data service
-		  MatrixWorkspace_sptr work_in1 =
-			  WorkspaceCreationHelper::Create2DWorkspace123(nHist, nBins);
-		  MatrixWorkspace_sptr work_in2 =
-			  WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins);
-		  MatrixWorkspace_sptr work_in3 =
-			  WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins);
+    // If this test fails but the aforementioned test passes it means
+    // the algorithm is only considering consecutive workspaces
 
-		  const std::string ws1Name = "test_ws1";
-		  const std::string ws2Name = "test_ws2";
-		  const std::string ws3Name = "test_ws3";
-		  const std::string wsGroupName = "test_group";
+    constexpr int nHist = 20, nBins = 10;
+    // Register the workspace in the data service
+    MatrixWorkspace_sptr work_in1 =
+        WorkspaceCreationHelper::Create2DWorkspace123(nHist, nBins);
+    MatrixWorkspace_sptr work_in2 =
+        WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins);
+    MatrixWorkspace_sptr work_in3 =
+        WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins);
 
-		  WorkspaceGroup_sptr wsSptr = WorkspaceGroup_sptr(new WorkspaceGroup);
-		  if (wsSptr) {
-			  AnalysisDataService::Instance().add(wsGroupName, wsSptr);
-			  AnalysisDataService::Instance().add(ws1Name, work_in1);
-			  wsSptr->add(ws1Name);
-			  AnalysisDataService::Instance().add(ws2Name, work_in2);
-			  wsSptr->add(ws2Name);
-			  AnalysisDataService::Instance().add(ws3Name, work_in3);
-			  wsSptr->add(ws3Name);
-		  }
+    const std::string ws1Name = "test_ws1";
+    const std::string ws2Name = "test_ws2";
+    const std::string ws3Name = "test_ws3";
+    const std::string wsGroupName = "test_group";
 
-		  TS_ASSERT_EQUALS(wsSptr->getNumberOfEntries(), 3);
+    WorkspaceGroup_sptr wsSptr = WorkspaceGroup_sptr(new WorkspaceGroup);
+    if (wsSptr) {
+      AnalysisDataService::Instance().add(wsGroupName, wsSptr);
+      AnalysisDataService::Instance().add(ws1Name, work_in1);
+      wsSptr->add(ws1Name);
+      AnalysisDataService::Instance().add(ws2Name, work_in2);
+      wsSptr->add(ws2Name);
+      AnalysisDataService::Instance().add(ws3Name, work_in3);
+      wsSptr->add(ws3Name);
+    }
 
-		  // Rename wsName3 to wsName1
-		  AnalysisDataService::Instance().rename(ws3Name, ws1Name);
+    TS_ASSERT_EQUALS(wsSptr->getNumberOfEntries(), 3);
 
-		  TS_ASSERT_EQUALS(wsSptr->getNumberOfEntries(), 2);
-		  TS_ASSERT_EQUALS(wsSptr->contains(work_in3), true);
-		  TS_ASSERT_EQUALS(wsSptr->contains(work_in2), true);
-		  TS_ASSERT_EQUALS(wsSptr->contains(work_in1), false);
+    // Rename wsName3 to wsName1
+    AnalysisDataService::Instance().rename(ws3Name, ws1Name);
 
-		  AnalysisDataService::Instance().remove(ws1Name);
-		  AnalysisDataService::Instance().remove(ws2Name);
-		  AnalysisDataService::Instance().remove(wsGroupName);
+    TS_ASSERT_EQUALS(wsSptr->getNumberOfEntries(), 2);
+    TS_ASSERT_EQUALS(wsSptr->contains(work_in3), true);
+    TS_ASSERT_EQUALS(wsSptr->contains(work_in2), true);
+    TS_ASSERT_EQUALS(wsSptr->contains(work_in1), false);
 
+    AnalysisDataService::Instance().remove(ws1Name);
+    AnalysisDataService::Instance().remove(ws2Name);
+    AnalysisDataService::Instance().remove(wsGroupName);
+  }
+
+  void testRenameWorkspaceDuplicateNotInGroup() {
+    // Tests renaming a workspace that is part of a group
+    // to a name that exists but not in a group
+
+    constexpr int nHist = 20, nBins = 10;
+    // Register the workspace in the data service
+    MatrixWorkspace_sptr inGroupWs1 =
+        WorkspaceCreationHelper::Create2DWorkspace123(nHist, nBins);
+    MatrixWorkspace_sptr inGroupWs2 =
+        WorkspaceCreationHelper::Create2DWorkspace123(nHist, nBins);
+    MatrixWorkspace_sptr notInGroupWs =
+        WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins);
+
+    const std::string inGroupWsName1 = "test_ws1";
+    const std::string inGroupWsName2 = "test_ws2";
+    const std::string notInGroupWsName = "test_outOfGroup";
+    const std::string wsGroupName = "test_group";
+
+    WorkspaceGroup_sptr wsSptr = WorkspaceGroup_sptr(new WorkspaceGroup);
+    if (wsSptr) {
+      AnalysisDataService::Instance().add(wsGroupName, wsSptr);
+      AnalysisDataService::Instance().add(inGroupWsName1, inGroupWs1);
+      wsSptr->add(inGroupWsName1);
+      AnalysisDataService::Instance().add(inGroupWsName2, inGroupWs2);
+      wsSptr->add(inGroupWsName2);
+      AnalysisDataService::Instance().add(notInGroupWsName, notInGroupWs);
+    }
+
+    TS_ASSERT_EQUALS(wsSptr->getNumberOfEntries(), 2);
+    TS_ASSERT_EQUALS(
+        AnalysisDataService::Instance().doesExist(notInGroupWsName), true);
+
+    // Rename groupWs to use a name outside of group
+    AnalysisDataService::Instance().rename(inGroupWsName1, notInGroupWsName);
+
+    // Test the group didn't change size or pointers only names
+    TS_ASSERT_EQUALS(wsSptr->getNumberOfEntries(), 2);
+    TS_ASSERT_EQUALS(wsSptr->contains(inGroupWs1), true);
+    TS_ASSERT_EQUALS(wsSptr->contains(notInGroupWs), false);
+    const auto &groupNames = wsSptr->getNames();
+    TS_ASSERT_EQUALS(doesExistInVector(groupNames, inGroupWsName1), false);
+    TS_ASSERT_EQUALS(doesExistInVector(groupNames, notInGroupWsName), true);
+
+    // Test the workspace outside the group was deleted
+    const auto &allSptrs = AnalysisDataService::Instance().getObjects();
+    TS_ASSERT_EQUALS(doesExistInVector(allSptrs, notInGroupWs), false);
+
+    AnalysisDataService::Instance().remove(inGroupWsName1);
+    AnalysisDataService::Instance().remove(wsGroupName);
   }
 
   void testTwoGroupWorkspaces() {
@@ -690,6 +740,13 @@ public:
     AnalysisDataService::Instance().remove("test_out_2");
     AnalysisDataService::Instance().remove("test_out_3");
     AnalysisDataService::Instance().remove("test_out_4");
+  }
+
+private:
+  template <typename VT, typename VA, typename T>
+  bool doesExistInVector(const std::vector<VT, VA> &vec, const T &val) const {
+    // Where VA is for custom VectorAllocators
+    return (std::find(vec.cbegin(), vec.cend(), val)) != vec.cend();
   }
 };
 
