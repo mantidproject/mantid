@@ -1,20 +1,20 @@
 .. _Muon_Analysis_DevelopersGuide-ref:
 
-Muon Analysis: guide for Mantid developers 
-==========================================
+Muon Analysis: a guide for Mantid developers 
+============================================
 
 .. contents:: Table of Contents
     :local:
     
-Preamble
-^^^^^^^^^
+Introduction
+^^^^^^^^^^^^
 This document is intended for Mantid developers as a guide to the architecture of the Muon Analysis custom interface.
 User documentation for this interface can be found at :ref:`Muon_Analysis-ref`.
 There is also an unscripted testing guide for developers at :ref:`Muon_Analysis_TestGuide-ref`.
 
 There will be a particular focus on the *Data Analysis* tab, which has been significantly changed for Mantid 3.8.
 
-There is also another custom interface for muons: ALC. Development on this is much easier as it has an MVP architecture and is far better tested, so it will not be covered in this document.
+Note that there is also another custom interface for muons: ALC. Development on this is much easier as it has an MVP architecture and is far better tested, so it will not be covered in this document.
 
 What the interface is for
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -245,6 +245,59 @@ The presenter therefore updates the view's selected group/period in this case.
 When a fit is finished, the data presenter is notified so that it can process the results.
 This is only relevant in the case of a simultaneous fit, because the :ref:`algm-Fit` algorithm produces output in a very different form to its regular output format.
 The presenter reorganises the output workspaces so that they are in the same format as they would have been for a regular fit - and then they can be easily read by the "Results table" tab.
+
+Sequential fit dialog
+^^^^^^^^^^^^^^^^^^^^^
+
+This is opened when the user selects *Fit/Sequential Fit*.
+A sequential fit runs the same fit (either one group/period or a simultaneous fit over groups/periods for one run) for one run at a time, over several runs in sequence.
+For example, fits group *fwd*, period 1 for run 15189, then the same group/period for run 15190, then run 15191...
+
+The dialog ``MuonSequentialFitDialog`` is part of the ``CustomInterfaces`` project.
+It holds pointers to the ``MuonAnalysisFitDataPresenter`` (which creates the workspaces to fit and processes the fitted workspaces) and to the ``MuonFitPropertyBrowser`` ("Model" - the dialog gets the fit function and properties from here).
+
+The actual fit is done by calling the :ref:`algm-Fit` algorithm from the sequential fit dialog.
+
+One point to note is that the fit is done in two stages.
+On pressing the Fit button, the ``startFit`` method is called - this starts running the file search from the ``MWRunFiles`` (run number input widget).
+When the ``MWRunFiles`` widget signals that it has found the relevant files, only then does the fit process continue in ``continueFit``.
+The reason for this is because users can type a range of runs into the box and then immediately hit Return or click Fit, without first clicking outside the box - and we need time to do the file search before starting.
+
+After a fit
+^^^^^^^^^^^
+
+After fitting a single dataset, the plot is automatically updated with the fit curve and difference (if "Plot Difference" is selected).
+This is done by the ``PeakPickerTool`` from MantidPlot, not by anything within Muon Analysis.
+
+(The ``PeakPickerTool`` is set to the plot when the Data Analysis tab is selected - see box below.)
+
+The ``PeakPickerTool`` can recognise muon data by noticing that the fit property browser is a ``MuonFitPropertyBrowser``. 
+In this case it doesn't remove previous fit curves like it would for other graphs, because this is handled by Muon Analysis instead - we have the option there to keep *n* previous fits as selected by the user...
+
+If it notes that the fit was a *simultaneous* fit of muon data, then **nothing is plotted**.
+This is a temporary solution.
+In the long run, we need to discuss with scientists what they would like to be plotted when a simultaneous fit ends.
+(N.B. We need to avoid the situation of automatically trying to make a tiled plot of hundreds of datasets at once!)
+
+What users can currently do to plot the results of a simultaneous or sequential fit is to right-click on the workspace group (``MuonSimulFit_<Label>`` or ``MuonSeqFit_<Label>``) and select *Plot Spectrum...*, then use the *Tiled Plot* option.
+Probably it would be best to make this automatic when a multiple fit ends, or provide a "Plot" button in Muon Analysis - this would most likely require exposing the relevant tiled plot functionality to Python first.
+
+.. topic:: Changing tabs in Muon Analysis
+    
+    Changing tabs is handled by the ``changeTab`` method in ``MuonAnalysis.cpp``.
+    When entering the *Data Analysis* tab:
+
+    - The ``MuonFitPropertyBrowser`` on this tab is set as the default, rather than Mantid's general fit property browser
+    - Fitting range (start/end) is initialised, unless one is already set
+    - The ``PeakPickerTool`` is attached to the current plot
+    - The currently selected workspace is set in the fit data presenter
+    - The current value of the Mantid-wide setting ``curvefitting.peakRadius`` is cached, and its value is changed to 99. Muon scientists requested this as they don't fit peaks on this tab. The change is localised only to while the *Data Analysis* tab is open, and the cached value will be restored on leaving this tab.
+
+    When leaving the *Data Analysis* tab, the reverse happens:
+
+    - Default fit browser in MantidPlot is reset to Mantid's default
+    - The config option ``curvefitting.peakRadius`` is reset to its cached value
+    - The ``PeakPickerTool`` is disconnected from the plot
 
 
 Generating results tables
