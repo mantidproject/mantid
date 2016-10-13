@@ -298,14 +298,13 @@ void WorkspaceGroup::workspaceBeforeReplaceHandle(
   }
 
   // Remove any duplicate pointers
+  std::sort(m_workspaces.begin(), m_workspaces.end());
   auto endIter =
       std::unique(m_workspaces.begin(), m_workspaces.end(),
                   [](const Workspace_sptr &sptr1, const Workspace_sptr &sptr2)
                       -> bool { return (sptr1 == sptr2); });
 
-  if (endIter != m_workspaces.end()) {
-    m_workspaces.resize(std::distance(m_workspaces.begin(), endIter));
-  }
+  m_workspaces.erase(endIter, m_workspaces.end());
 }
 
 /**
