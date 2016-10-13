@@ -23,8 +23,10 @@ try:
 except:
     IN_MANTIDPLOT = False
 
+
 class EQSANSDataType(DataType):
     TABLE_NAME="eqsans_datatype"
+
 
 class EQSANSDataSet(DataSet):
     TABLE_NAME="eqsans_dataset"
@@ -73,6 +75,7 @@ class EQSANSDataSet(DataSet):
                 return str(ws_object.getRun().getProperty(prop).value)
             except:
                 return ""
+
         def read_series(prop):
             try:
                 ws_object = AnalysisDataService.retrieve(ws)

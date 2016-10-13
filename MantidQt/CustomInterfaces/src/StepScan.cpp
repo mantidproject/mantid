@@ -1,11 +1,9 @@
-//----------------------
-// Includes
-//----------------------
 #include "MantidQtCustomInterfaces/StepScan.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <QFileInfo>

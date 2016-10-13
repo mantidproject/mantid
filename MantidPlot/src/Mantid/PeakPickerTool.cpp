@@ -561,6 +561,13 @@ void PeakPickerTool::algorithmFinished(const QString &out) {
   }
 
   graph()->replot();
+
+  // New curve(s) inserted: Y scale may have changed.
+  // If we need to keep left/right Y in sync, do so now.
+  if (graph()->hasSynchronizedScaleDivisions()) {
+    graph()->updateSecondaryAxis(QwtPlot::Axis::yRight);
+    graph()->replot();
+  }
 }
 
 /**

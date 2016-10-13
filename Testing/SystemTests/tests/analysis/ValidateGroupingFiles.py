@@ -6,6 +6,7 @@ import glob
 
 EXPECTED_EXT = '.expected'
 
+
 class ValidateGroupingFiles(stresstesting.MantidStressTest):
 
     xsdFile =''
@@ -58,7 +59,7 @@ class ValidateGroupingFiles(stresstesting.MantidStressTest):
             print "SUMMARY OF FAILED FILES"
             for filename in failed:
                 print filename
-            raise RuntimeError("Failed Validation for %d of %d files" \
-                                   % (len(failed), len(files)))
+            raise RuntimeError("Failed Validation for %d of %d files"
+                               % (len(failed), len(files)))
         else:
             print "Succesfully Validated %d files" % len(files)

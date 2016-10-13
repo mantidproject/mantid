@@ -3,6 +3,7 @@ import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
 
+
 class SANSQResolutionWithoutGravity(stresstesting.MantidStressTest):
     def runTest(self):
         SANS2D()
@@ -27,6 +28,7 @@ class SANSQResolutionWithoutGravity(stresstesting.MantidStressTest):
     def validate(self):
         self.disableChecking.append('Instrument')
         return True
+
 
 class SANSQResolutionWithGravity(stresstesting.MantidStressTest):
     def runTest(self):

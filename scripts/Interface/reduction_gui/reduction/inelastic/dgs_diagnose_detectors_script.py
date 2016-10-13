@@ -10,6 +10,7 @@ import xml.dom.minidom
 
 from reduction_gui.reduction.scripter import BaseScriptElement
 
+
 class DiagnoseDetectorsScript(BaseScriptElement):
 
     high_counts = 1.0e+10
@@ -176,9 +177,9 @@ class DiagnoseDetectorsScript(BaseScriptElement):
             self.sambkg_errorbar_criterion = BaseScriptElement.getFloatElement(instrument_dom,
                                                                                "sambkg_errorbar_criterion",
                                                                                default=DiagnoseDetectorsScript.sambkg_errorbar_criterion)
-            self.tof_start = BaseScriptElement.getIntElement(instrument_dom,\
-                                                              "background_tof_start",\
-                                                              default=DiagnoseDetectorsScript.tof_start)
+            self.tof_start = BaseScriptElement.getIntElement(instrument_dom,
+                                                             "background_tof_start",
+                                                             default=DiagnoseDetectorsScript.tof_start)
             self.tof_end = BaseScriptElement.getIntElement(instrument_dom,
                                                            "background_tof_end",
                                                            default=DiagnoseDetectorsScript.tof_end)

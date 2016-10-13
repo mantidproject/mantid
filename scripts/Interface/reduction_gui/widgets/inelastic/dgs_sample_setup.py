@@ -15,6 +15,7 @@ try:
 except:
     pass
 
+
 class SampleSetupWidget(BaseWidget):
     """
         Widget that presents sample setup options to the user.
@@ -148,10 +149,10 @@ class SampleSetupWidget(BaseWidget):
             self._content.grouping_edit.setText(fname)
 
     def _savedir_browse(self):
-        save_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",\
-                                                            os.path.expanduser('~'),\
-                                                            QtGui.QFileDialog.ShowDirsOnly\
-                                                            | QtGui.QFileDialog.DontResolveSymlinks)
+        save_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
+                                                          os.path.expanduser('~'),
+                                                          QtGui.QFileDialog.ShowDirsOnly
+                                                          | QtGui.QFileDialog.DontResolveSymlinks)
         if save_dir:
             self._content.savedir_edit.setText(save_dir)
 

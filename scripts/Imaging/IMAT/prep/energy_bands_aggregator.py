@@ -86,6 +86,8 @@ except ImportError:
 _USING_PLUGIN_TIFFFILE = False
 
 #pylint: disable=too-many-instance-attributes
+
+
 class EnergyBandsAggregator(object):
     """
     Combines energy bands, producing stacks of images with one image per projection angle from

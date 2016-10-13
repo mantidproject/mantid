@@ -5,9 +5,11 @@ import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
 
+
 class SaveVulcanGSS(PythonAlgorithm):
     """ Save GSS file for VULCAN
     """
+
     def category(self):
         """
         """
@@ -26,17 +28,17 @@ class SaveVulcanGSS(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
-                "Focussed diffraction workspace to be exported to GSAS file. ")
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
+                             "Focussed diffraction workspace to be exported to GSAS file. ")
 
-        self.declareProperty(FileProperty("BinFilename","", FileAction.Load, ['.dat']),\
-                "Name of a data file containing the bin boundaries in Log(TOF). ")
+        self.declareProperty(FileProperty("BinFilename","", FileAction.Load, ['.dat']),
+                             "Name of a data file containing the bin boundaries in Log(TOF). ")
 
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),\
-                "Name of rebinned matrix workspace. ")
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
+                             "Name of rebinned matrix workspace. ")
 
-        self.declareProperty(FileProperty("GSSFilename","", FileAction.Save, ['.gda']),\
-                "Name of the output GSAS file. ")
+        self.declareProperty(FileProperty("GSSFilename","", FileAction.Save, ['.gda']),
+                             "Name of the output GSAS file. ")
 
         self.declareProperty("IPTS", 0, "IPTS number")
 
@@ -82,7 +84,6 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         return
 
-
     def _loadRefLogBinFile(self, logbinfilename):
         """ Create a vector of bin in TOF value
         Arguments:
@@ -115,7 +116,6 @@ class SaveVulcanGSS(PythonAlgorithm):
             vecPow10X.append(p10x)
 
         return vecPow10X
-
 
     def _rebinVdrive(self, inputws, vec_refT, outputwsname):
         """ Rebin to match VULCAN's VDRIVE-generated GSAS file
@@ -156,11 +156,10 @@ class SaveVulcanGSS(PythonAlgorithm):
             # ENDFOR (i)
         # ENDFOR (iws)
         api.DeleteWorkspace(Workspace=tempws)
-        gsaws = api.CreateWorkspace(DataX=newvecx, DataY=newvecy, DataE=newvece, NSpec=numhist,\
-                UnitX="TOF", ParentWorkspace=inputws, OutputWorkspace=outputwsname)
+        gsaws = api.CreateWorkspace(DataX=newvecx, DataY=newvecy, DataE=newvece, NSpec=numhist,
+                                    UnitX="TOF", ParentWorkspace=inputws, OutputWorkspace=outputwsname)
 
         return gsaws
-
 
     def _saveGSAS(self, gsaws, gdafilename):
         """ Save file
@@ -169,11 +168,10 @@ class SaveVulcanGSS(PythonAlgorithm):
         gsaws = api.ConvertToHistogram(InputWorkspace=gsaws, OutputWorkspace=str(gsaws))
 
         # Save
-        api.SaveGSS(InputWorkspace=gsaws, Filename=gdafilename, SplitFiles=False, Append=False,\
-                Format="SLOG", MultiplyByBinWidth=False, ExtendedHeader=False, UseSpectrumNumberAsBankID=True)
+        api.SaveGSS(InputWorkspace=gsaws, Filename=gdafilename, SplitFiles=False, Append=False,
+                    Format="SLOG", MultiplyByBinWidth=False, ExtendedHeader=False, UseSpectrumNumberAsBankID=True)
 
         return gsaws
-
 
     def _rewriteGSSFile(self, gssfilename, newheader):
         """ Re-write GSAS file including header and header for each bank
@@ -224,7 +222,6 @@ class SaveVulcanGSS(PythonAlgorithm):
         ofile.close()
 
         return
-
 
     def _genVulcanGSSHeader(self, ws, gssfilename, ipts, parmfname):
         """
@@ -290,7 +287,6 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         return newheader
 
-
     def _rewriteOneBankData(self, banklines):
         """ first line is for bank information
         """
@@ -335,7 +331,6 @@ class SaveVulcanGSS(PythonAlgorithm):
         # ENDFOR
 
         return wbuf
-
 
 
 # Register algorithm with Mantid

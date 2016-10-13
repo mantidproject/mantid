@@ -2,6 +2,7 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -18,7 +19,6 @@ DECLARE_ALGORITHM(PreprocessDetectorsToMD)
 PreprocessDetectorsToMD::PreprocessDetectorsToMD()
     : m_getEFixed(false), m_getIsMasked(false) {}
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties. */
 void PreprocessDetectorsToMD::init() {
   auto ws_valid = boost::make_shared<Kernel::CompositeValidator>();

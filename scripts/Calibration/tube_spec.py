@@ -8,6 +8,7 @@ from mantid.kernel import *
 
 # Author: Karl Palmen ISIS
 
+
 class TubeSpec:
     """
     The python class :class:`~tube_spec.TubeSpec` provides a way of specifying a set of tubes for
@@ -36,6 +37,7 @@ class TubeSpec:
         This may differ from the order they appear in the workspace indices.
 
     """
+
     def __init__(self,ws):
         """
         The constructor creates empty tube specification for specified instrument.
@@ -49,7 +51,6 @@ class TubeSpec:
         self.minNumDetsInTube = 200
         self.tubes = []
         self.delimiter = '/' # delimiter between parts of string in tree
-
 
     def setTubeSpecByString(self, tubeSpecString ):
         """
@@ -75,7 +76,6 @@ class TubeSpec:
         self.componentNameArray.append(tubeSpecString)
         self.numTubes = -1  # Negative value forces tubes to be searched and counted
 
-
     def setTubeSpecByStringArray( self, tubeSpecArray ):
         """
         Define the sets of tube from the workspace with an array of strings.
@@ -93,7 +93,6 @@ class TubeSpec:
         """
         for i in range(len(tubeSpecArray)):
             self.setTubeSpecByString(tubeSpecArray[i])
-
 
     def getInstrumentName (self):
         return self.inst.getName()
@@ -129,7 +128,6 @@ class TubeSpec:
                 for i in range(comp.nelements()):
                     self.searchForTubes(comp[i])
 
-
     def getNumTubes(self):
         """
         Returns number of tubes specified. May also save info about these tubes
@@ -150,7 +148,6 @@ class TubeSpec:
         self.numTubes = len(self.tubes)
         return self.numTubes
 
-
     def getComponent ( self ):
         """
         Returns instrument component corresponding to specification
@@ -169,7 +166,6 @@ class TubeSpec:
             self.componentArray.append(comp)
 
         return self.componentArray[0]
-
 
     def getComponents ( self ):
         """
@@ -301,8 +297,6 @@ class TubeSpec:
             print self.componentNameArray[0], tubeIx, "not found"
             return "Unknown"
 
-
-
     def getTubeByString(self, tubeIx):
         """
         Returns list of workspace indices of a tube set that has been specified by string
@@ -354,7 +348,6 @@ class TubeSpec:
             self.numTubes = 0
         return wkIds, skipped
 
-
     def getTube(self, tubeIx):
         """
         Returns list of workspace indices of a tube
@@ -368,6 +361,3 @@ class TubeSpec:
             return self.getTubeByString(tubeIx)
         else:
             print "Tube", tubeIx, "out of range 0 to",self.numTubes,"."
-
-
-

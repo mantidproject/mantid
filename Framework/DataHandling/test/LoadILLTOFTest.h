@@ -16,6 +16,8 @@ public:
   static LoadILLTOFTest *createSuite() { return new LoadILLTOFTest(); }
   static void destroySuite(LoadILLTOFTest *suite) { delete suite; }
 
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
+
   void testName() {
     LoadILLTOF loader;
     TS_ASSERT_EQUALS(loader.name(), "LoadILLTOF");
@@ -36,7 +38,8 @@ public:
    * This test only loads the Sample Data
    * The elastic peak is obtained on the fly from the sample data.
    */
-  void loadDataFile(const std::string dataFile, const int numberOfHistograms) {
+  MatrixWorkspace_sptr loadDataFile(const std::string dataFile,
+                                    const int numberOfHistograms) {
     LoadILLTOF loader;
     loader.initialize();
     loader.setPropertyValue("Filename", dataFile);
@@ -53,12 +56,24 @@ public:
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), numberOfHistograms);
 
-    AnalysisDataService::Instance().clear();
+    return output2D;
   }
 
-  void test_IN4_load() { loadDataFile("ILL/IN4/084446.nxs", 397); }
+  void test_IN4_load() {
+    MatrixWorkspace_sptr ws = loadDataFile("ILL/IN4/084446.nxs", 397);
+
+    double pulseInterval = ws->run().getLogAsSingleValue("pulse_interval");
+    TS_ASSERT_DELTA(0.003, pulseInterval, 1e-10);
+  }
+
   void test_IN5_load() { loadDataFile("ILL/IN5/104007.nxs", 98305); }
-  void test_IN6_load() { loadDataFile("ILL/IN6/164192.nxs", 340); }
+
+  void test_IN6_load() {
+    MatrixWorkspace_sptr ws = loadDataFile("ILL/IN6/164192.nxs", 340);
+
+    double pulseInterval = ws->run().getLogAsSingleValue("pulse_interval");
+    TS_ASSERT_DELTA(0.0060337892, pulseInterval, 1e-10);
+  }
 };
 
 //------------------------------------------------------------------------------

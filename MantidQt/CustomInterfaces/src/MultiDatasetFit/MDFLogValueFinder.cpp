@@ -1,5 +1,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFLogValueFinder.h"
 #include <ostream>
 

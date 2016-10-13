@@ -21,14 +21,11 @@ class TransformToIqt(PythonAlgorithm):
     _output_workspace = None
     _dry_run = None
 
-
     def category(self):
         return "Workflow\\Inelastic;Workflow\\MIDAS"
 
-
     def summary(self):
         return 'Transforms an inelastic reduction to I(Q, t)'
-
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
@@ -62,7 +59,6 @@ class TransformToIqt(PythonAlgorithm):
         self.declareProperty(name='DryRun', defaultValue=False,
                              doc='Only calculate and output the parameters')
 
-
     def PyExec(self):
         self._setup()
 
@@ -81,7 +77,6 @@ class TransformToIqt(PythonAlgorithm):
 
         self.setProperty('ParameterWorkspace', self._parameter_table)
         self.setProperty('OutputWorkspace', self._output_workspace)
-
 
     def _setup(self):
         """
@@ -107,7 +102,6 @@ class TransformToIqt(PythonAlgorithm):
 
         self._dry_run = self.getProperty('DryRun').value
 
-
     def validateInputs(self):
         """
         Validate input properties.
@@ -124,7 +118,6 @@ class TransformToIqt(PythonAlgorithm):
             issues['EnergyMax'] = energy_swapped
 
         return issues
-
 
     def _calculate_parameters(self):
         """
@@ -193,7 +186,6 @@ class TransformToIqt(PythonAlgorithm):
 
         self.setProperty('ParameterWorkspace', param_table)
 
-
     def _add_logs(self):
         sample_logs = [('iqt_sample_workspace', self._sample),
                        ('iqt_resolution_workspace', self._resolution),
@@ -205,7 +197,6 @@ class TransformToIqt(PythonAlgorithm):
         log_alg.setProperty('LogNames',[item[0] for item in sample_logs])
         log_alg.setProperty('LogValues', [item[1] for item in sample_logs])
         log_alg.execute()
-
 
     def _transform(self):
         """

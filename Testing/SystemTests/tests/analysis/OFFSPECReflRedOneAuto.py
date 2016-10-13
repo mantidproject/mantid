@@ -7,6 +7,7 @@ ReflectometryReductionOneAuto
 import stresstesting
 from mantid.simpleapi import *
 
+
 class OFFSPECReflRedOneAuto(stresstesting.MantidStressTest):
     def runTest(self):
         offspec75 = Load("OFFSPEC00027575.raw") #th=0.35
