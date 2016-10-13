@@ -155,8 +155,8 @@ private:
 
   /// Work on Markov chain to 'solve' LeBail function
   void doMarkovChain(const std::map<std::string, Parameter> &parammap,
-                     const std::vector<double> &vecX,
-                     const std::vector<double> &vecPurePeak,
+                     const Mantid::HistogramData::HistogramX &vecX,
+                     const Mantid::HistogramData::HistogramY &vecPurePeak,
                      const std::vector<double> &vecBkgd, size_t maxcycles,
                      const Kernel::Rfactor &startR, int randomseed);
 
@@ -171,12 +171,11 @@ private:
                                 std::string parname);
 
   /// Calculate diffraction pattern in Le Bail algorithm for MC Random walk
-  bool calculateDiffractionPattern(const std::vector<double> &vecX,
-                                   const std::vector<double> &vecY,
-                                   bool inputraw, bool outputwithbkgd,
-                                   const std::vector<double> &vecBkgd,
-                                   std::vector<double> &values,
-                                   Kernel::Rfactor &rfactor);
+  bool calculateDiffractionPattern(
+      const Mantid::HistogramData::HistogramX &vecX,
+      const Mantid::HistogramData::HistogramY &vecY, bool inputraw,
+      bool outputwithbkgd, const std::vector<double> &vecBkgd,
+      std::vector<double> &values, Kernel::Rfactor &rfactor);
 
   /// Determine whether the proposed value should be accepted or denied
   bool acceptOrDeny(Kernel::Rfactor currR, Kernel::Rfactor newR);

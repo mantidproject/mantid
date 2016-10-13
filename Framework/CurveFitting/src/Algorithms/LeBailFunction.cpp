@@ -139,8 +139,10 @@ void LeBailFunction::function(std::vector<double> &out,
 
 /**  Calculate a single peak's value
 */
-void LeBailFunction::calPeak(size_t ipk, std::vector<double> &out,
-                             const std::vector<double> &xvalues) const {
+std::vector<double> LeBailFunction::calPeak(size_t ipk,
+                                            const std::vector<double> &xvalues,
+                                            size_t ySize) const {
+
   if (ipk >= m_numPeaks) {
     stringstream errss;
     errss << "Try to calculate peak indexed " << ipk
@@ -149,9 +151,10 @@ void LeBailFunction::calPeak(size_t ipk, std::vector<double> &out,
     throw runtime_error(errss.str());
   }
 
-  ::fill(out.begin(), out.end(), 0.);
+  std::vector<double> out(ySize, 0);
   IPowderDiffPeakFunction_sptr peak = m_vecPeaks[ipk];
   peak->function(out, xvalues);
+  return out;
 }
 
 //----------------------------------------------------------------------------------------------

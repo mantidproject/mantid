@@ -88,8 +88,8 @@ public:
                 bool calpeaks, bool calbkgd) const;
 
   ///  Calculate a single peak's value
-  void calPeak(size_t ipk, std::vector<double> &out,
-               const std::vector<double> &xvalues) const;
+  std::vector<double> calPeak(size_t ipk, const std::vector<double> &xvalues,
+                              size_t ySize) const;
 
   /// Return the composite function
   API::IFunction_sptr getFunction();
