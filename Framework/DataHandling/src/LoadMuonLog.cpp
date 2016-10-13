@@ -1,12 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMuonLog.h"
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-//#include "MantidKernel/LogParser.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 
 #include <ctime>
 

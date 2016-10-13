@@ -56,6 +56,7 @@ from mantid.simpleapi import *
 import tube
 import numpy
 
+
 def loadingStep(filename):
     filename = str(filename)
     rangeLower = 2000 # Integrate counts in each spectra from rangeLower to rangeUpper
@@ -95,6 +96,7 @@ def minimalInput(filename):
     # == Apply the Calibation ==
     ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
 
+
 def provideTheExpectedValue(filename):
     """
     Giving the expected value for the position of the peaks in pixel.
@@ -121,6 +123,7 @@ def provideTheExpectedValue(filename):
                                       fitPar=fitPar)
     # == Apply the Calibation ==
     ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
+
 
 def changeMarginAndExpectedValue(filename):
     """
@@ -213,7 +216,6 @@ def improvingCalibrationSingleTube(filename):
 
     ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
 
-
     # reload to reset the calibration applied
     CalibInstWS = loadingStep(filename)
     # looking into the second line of calibrationTable, you will see that it defines the peaks for the first position
@@ -285,6 +287,7 @@ def improvingCalibrationOfListOfTubes(filename):
 
     ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
 
+
 def calibrateB2Window(filename):
     """
     There are among the B2 window tubes, some tubes that are showing only 2 strips.
@@ -318,11 +321,10 @@ def calibrateB2Window(filename):
     fitPar.setAutomatic(True)
 
     # == Get the calibration and put results into calibration table ==
-    calibrationTable, peakTable= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,\
-                fitPar=fitPar, outputPeak=True, plotTube=[b2_range[0], b2_range[-1]], rangeList=b2_range)
+    calibrationTable, peakTable= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
+                                                fitPar=fitPar, outputPeak=True, plotTube=[b2_range[0], b2_range[-1]], rangeList=b2_range)
 
     ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
-
 
 
 def findThoseTubesThatNeedSpecialCareForCalibration(filename):
@@ -403,8 +405,8 @@ def findThoseTubesThatNeedSpecialCareForCalibration(filename):
     print 'Calibrating again only these tubes'
     #let's confir that our suspect works
     CalibInstWS = loadingStep(filename)
-    calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,\
-    	fitPar=fitPar, rangeList= problematic_tubes, plotTube=problematic_tubes)
+    calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
+                                      fitPar=fitPar, rangeList= problematic_tubes, plotTube=problematic_tubes)
     # plot the FittedTube agains TubePlot for each detector and you will see that there were problems on those tubes.
 
 
@@ -424,7 +426,6 @@ def completeCalibration(filename):
     from tube_calib_fit_params import TubeCalibFitParams
     CalibInstWS = loadingStep(filename)
 
-
     # == Set parameters for calibration ==
     # Set what we want to calibrate (e.g whole intrument or one door )
     CalibratedComponent = 'MAPS'  # Calibrate all
@@ -436,7 +437,6 @@ def completeCalibration(filename):
     expectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0]
     fitPar = TubeCalibFitParams(expectedPositions)
     fitPar.setAutomatic(True)
-
 
     #execute the improvingCalibrationOfListOfTubes excluding the range of b2 window
     # correct the definition of the peaks for the folowing indexes
@@ -451,17 +451,17 @@ def completeCalibration(filename):
     #	245: [9.88089, 93.0593, 136.911, 179.5, 255], # the third peak was bad
     #	273: [18.3711, 105.5, 145.5, 181.6, 243.252],# lost first and third peaks
     #	345: [4.6084, 87.0351, 128.125, 169.923, 245.3]} # the last one was bad
-    define_peaks = {19:[10, 80.9771, 123.221, 164.993, 245.717],\
-    	37: [6.36, 80.9347, 122.941, 165.104, 248.32],\
-    	71: [8.62752, 85.074, 124.919, 164.116, 246.82 ],\
-    	75: [14.4285, 90.087, 128.987, 167.047, 242.62],\
-    	181: [11.726, 94.0496, 137.816,  180, 255],\
-    	186:[11.9382, 71.5203, 107, 147.727, 239.041],\
-    	234: [4.84, 82.7824, 123.125, 163.945, 241.877],\
-    	235: [4.84, 80.0077, 121.002, 161.098, 238.502],\
-    	245: [9.88089, 93.0593, 136.911, 179.5, 255],\
-    	273: [18.3711, 105.5, 145.5, 181.6, 243.252],\
-    	345: [4.6084, 87.0351, 128.125, 169.923, 245.3]}
+    define_peaks = {19:[10, 80.9771, 123.221, 164.993, 245.717],
+                    37: [6.36, 80.9347, 122.941, 165.104, 248.32],
+                    71: [8.62752, 85.074, 124.919, 164.116, 246.82 ],
+                    75: [14.4285, 90.087, 128.987, 167.047, 242.62],
+                    181: [11.726, 94.0496, 137.816,  180, 255],
+                    186:[11.9382, 71.5203, 107, 147.727, 239.041],
+                    234: [4.84, 82.7824, 123.125, 163.945, 241.877],
+                    235: [4.84, 80.0077, 121.002, 161.098, 238.502],
+                    245: [9.88089, 93.0593, 136.911, 179.5, 255],
+                    273: [18.3711, 105.5, 145.5, 181.6, 243.252],
+                    345: [4.6084, 87.0351, 128.125, 169.923, 245.3]}
 
     b2_window = range(196,212) + range(222,233)
 
@@ -473,8 +473,8 @@ def completeCalibration(filename):
     # the group that have 3 stripts are all the tubes except the b2 window and e window.
     range_3_strips = numpy.setdiff1d(aux, e1_window)
 
-    calibrationTable, peak3Table= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,\
-    	fitPar=fitPar, outputPeak=True, overridePeaks=define_peaks, rangeList=range_3_strips)
+    calibrationTable, peak3Table= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
+                                                 fitPar=fitPar, outputPeak=True, overridePeaks=define_peaks, rangeList=range_3_strips)
 
     # now calibrate the b2_window REMOVE SECOND PEAK
     # define the known positions and function factor (edge, peak, peak, edge)
@@ -501,9 +501,6 @@ def completeCalibration(filename):
     #print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMapsResult.nxs"
 
 
-
-
-
 ####
 ## Uncomment one of the following lines to execute one of the examples
 #####
@@ -518,4 +515,3 @@ if __name__ == "__main__":
     #calibrateB2Window(filename)
     completeCalibration(filename)
     #findThoseTubesThatNeedSpecialCareForCalibration(filename)
-

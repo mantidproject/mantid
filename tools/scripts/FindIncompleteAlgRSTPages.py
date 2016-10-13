@@ -1,6 +1,8 @@
 #pylint: disable=invalid-name
-import os,  re
+import os
+import re
 import urllib2
+
 
 def readWebPage(url):
     proxy = urllib2.ProxyHandler({'http': 'wwwcache.rl.ac.uk:8080'})
@@ -9,6 +11,7 @@ def readWebPage(url):
     aResp =urllib2.urlopen(url)
     web_pg = aResp.read()
     return web_pg
+
 
 def ticketExists(alg, ticketHash):
     retVal = ""
@@ -19,6 +22,7 @@ def ticketExists(alg, ticketHash):
             retVal = str(ticket)
             break
     return retVal
+
 
 def outputError(alg, algVersion, description, notes=""):
     print "%s, %i, %s, %s" % (alg, algVersion, description, notes)
@@ -43,7 +47,7 @@ for alg in algs:
         with open (filename, "r") as algRst:
             fileFound = True
             algText = algRst.read()
-            if (usagePattern.search(algText) == None) and (excusesPattern.search(algText) == None):
+            if (usagePattern.search(algText) is None) and (excusesPattern.search(algText) is None):
                 #check if already in a ticket
                 usageTicket = ticketExists(alg,ticketHash)
                 outputError(alg, algVersion, "No usage section", usageTicket)

@@ -3,6 +3,7 @@
 #include "MantidGeometry/Crystal/ScalarUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -14,7 +15,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SelectCellWithForm::init() {
@@ -95,7 +95,6 @@ Kernel::Matrix<double> SelectCellWithForm::DetermineErrors(
     return newUB1;
 }
 
-//--------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SelectCellWithForm::exec() {

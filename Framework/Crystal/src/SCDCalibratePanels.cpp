@@ -11,6 +11,7 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidCrystal/SCDPanelErrors.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Sample.h"
 #include <fstream>
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"

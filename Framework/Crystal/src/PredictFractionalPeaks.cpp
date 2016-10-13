@@ -5,6 +5,7 @@
 *      Author: ruth
 */
 #include "MantidCrystal/PredictFractionalPeaks.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"

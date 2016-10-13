@@ -27,14 +27,11 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
     _ass_ws = None
     _acc_ws = None
 
-
     def category(self):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
-
     def summary(self):
         return "Calculates indirect absorption corrections for a flat sample shape."
-
 
     def PyInit(self):
         # Sample
@@ -89,7 +86,6 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceGroupProperty('CorrectionsWorkspace', '', direction=Direction.Output,
                                                     optional=PropertyMode.Optional),
                              doc='The workspace group to save correction factors')
-
 
     def PyExec(self):
         from IndirectCommon import getEfixed
@@ -230,7 +226,6 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         else:
             self._ass_ws = self._abs_ws + '_ass'
             self._acc_ws = self._abs_ws + '_acc'
-
 
     def validateInputs(self):
         """

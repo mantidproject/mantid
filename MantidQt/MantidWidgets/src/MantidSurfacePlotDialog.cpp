@@ -2,6 +2,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtMantidWidgets/MantidDisplayBase.h"
+#include "MantidAPI/Run.h"
 #include <QMessageBox>
 #include <QPushButton>
 

@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <algorithm>
 
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -36,6 +37,7 @@ using namespace testing;
 /// Mock data selector widget
 class MockDataSelector : public IMuonFitDataSelector {
 public:
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_CONST_METHOD0(getFilenames, QStringList());
   MOCK_CONST_METHOD0(getWorkspaceIndex, unsigned int());
   MOCK_CONST_METHOD0(getStartTime, double());
@@ -61,11 +63,13 @@ public:
   MOCK_METHOD1(setDatasetNames, void(const QStringList &));
   MOCK_CONST_METHOD0(getDatasetName, QString());
   MOCK_METHOD0(askUserWhetherToOverwrite, bool());
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 /// Mock fit property browser
 class MockFitBrowser : public IWorkspaceFitControl {
 public:
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD1(setWorkspaceName, void(const QString &));
   MOCK_METHOD1(setStartX, void(double));
   MOCK_METHOD1(setEndX, void(double));
@@ -76,6 +80,7 @@ public:
   MOCK_METHOD1(setSimultaneousLabel, void(const std::string &));
   MOCK_METHOD1(userChangedDataset, void(int));
   MOCK_CONST_METHOD0(rawData, bool());
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 class MuonAnalysisFitDataPresenterTest : public CxxTest::TestSuite {

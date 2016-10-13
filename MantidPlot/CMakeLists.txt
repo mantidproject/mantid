@@ -880,6 +880,7 @@ set ( MANTIDPLOT_TEST_PY_FILES
     MantidPlotTiledWindowTest.py
     MantidPlotInputArgsCheck.py
     MantidPlotPyplotGeneralTest.py
+    MantidPlotPVPythonTest.py
 )
 
 if ( 0 )

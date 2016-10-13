@@ -53,9 +53,10 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include <QApplication>
-#include <QInputDialog>
+#include "MantidAPI/Run.h"
+
+#include <QMessageBox>
+#include <QTextEdit>
 #include <QListWidget>
 #include <QMdiArea>
 #include <QMenu>
@@ -472,8 +473,10 @@ void MantidUI::saveNexusWorkspace() { executeSaveNexus(); }
 @param workspaceName :: Name of the workspace to delete
 */
 void MantidUI::deleteWorkspace(const QString &workspaceName) {
-  auto &ads = Mantid::API::AnalysisDataService::Instance();
-  ads.remove(workspaceName.toStdString());
+  auto alg = createAlgorithm("DeleteWorkspace");
+  alg->setLogging(false);
+  alg->setPropertyValue("Workspace", workspaceName.toStdString());
+  executeAlgorithmAsync(alg);
 }
 
 void MantidUI::deleteWorkspaces(const QStringList &wsNames) {

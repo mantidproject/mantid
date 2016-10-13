@@ -4,6 +4,7 @@ from mantid.api import *
 from mantid.kernel import *
 import numpy as np
 
+
 class SANSPatchSensitivity(PythonAlgorithm):
     """
        Calculate the detector sensitivity and patch the pixels that are masked in a second workspace.
@@ -38,7 +39,6 @@ class SANSPatchSensitivity(PythonAlgorithm):
 
         self.declareProperty("OutputMessage", "",
                              direction=Direction.Output, doc="Output message")
-
 
     def PyExec(self):
         in_ws = self.getProperty("InputWorkspace").value
@@ -111,23 +111,22 @@ class SANSPatchSensitivity(PythonAlgorithm):
 
         degree = self.getProperty("DegreeOfThePolynomial").value
         # Returns coeffcients for the polynomial fit
-        
+
         if len(id_to_calculate_fit) <= 50 :
             Logger("SANSPatchSensitivity").warning("Tube %s has not enough data for polyfit." % tube_in_input_ws.getFullName())
             return
-            
+
         py =  np.polyfit(id_to_calculate_fit, y_to_calculate_fit, degree)
         pe =  np.polyfit(id_to_calculate_fit, e_to_calculate_fit, degree)
 
         for id_ in id_to_fit:
             # HUGE hack. There's no detector_id to spectrum_idx possibility
-            # spect_idx for biosans / gpsans is detector_id -1 
+            # spect_idx for biosans / gpsans is detector_id -1
             spec_idx = id_ - 1
             vy = np.polyval(py,[id_])
             ve = np.polyval(pe,[id_])
             in_ws.setY(spec_idx,vy)
             in_ws.setE(spec_idx,ve)
-
 
 
 AlgorithmFactory.subscribe(SANSPatchSensitivity())
