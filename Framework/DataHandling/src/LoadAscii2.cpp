@@ -429,13 +429,11 @@ void LoadAscii2::addToCurrentSpectra(std::list<std::string> &columns) {
   m_spectraStart = false;
   fillInputValues(values, columns);
   // add X and Y
-  const size_t newPosition = m_curSpectra->x().size(); // For 0 based index
-  const size_t newSize = newPosition + 1;
-  auto resizedHisto = m_curSpectra->histogram();
-  resizedHisto.resize(newSize);
+  auto histo = m_curSpectra->histogram();
+  histo.resize(histo.size() + 1);
 
-  resizedHisto.mutableX()[newPosition] = values[0];
-  resizedHisto.mutableY()[newPosition] = values[1];
+  histo.mutableX().back() = values[0];
+  histo.mutableY().back() = values[1];
 
   // check for E and DX
   switch (m_baseCols) {
@@ -443,17 +441,17 @@ void LoadAscii2::addToCurrentSpectra(std::list<std::string> &columns) {
   // workspace, omit DX
   case 3: {
     // E in file, include it, omit DX
-    resizedHisto.mutableE()[newPosition] = values[2];
+    histo.mutableE().back() = values[2];
     break;
   }
   case 4: {
     // E and DX in file, include both
-    resizedHisto.mutableE()[newPosition] = values[2];
+    histo.mutableE().back() = values[2];
     m_curDx.push_back(values[3]);
     break;
   }
   }
-  m_curSpectra->setHistogram(resizedHisto);
+  m_curSpectra->setHistogram(histo);
   m_curBins++;
 }
 

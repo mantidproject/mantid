@@ -199,15 +199,14 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
     }
 
     for (size_t i = 0; i < numSpectra; ++i) {
-      auto resizedHistogram = spectra[i].histogram();
-      const size_t newPosition = resizedHistogram.x().size();
-      resizedHistogram.resize(newPosition + 1);
-      resizedHistogram.mutableX()[newPosition] = values[0];
-      resizedHistogram.mutableY()[newPosition] = values[i * 2 + 1];
+      auto hist = spectra[i].histogram();
+      hist.resize(hist.size() + 1);
+      hist.mutableX().back() = values[0];
+      hist.mutableY().back() = values[i * 2 + 1];
       if (haveErrors) {
-        resizedHistogram.mutableE()[newPosition] = values[i * 2 + 2];
+        hist.mutableE().back() = values[i * 2 + 2];
       }
-      spectra[i].setHistogram(resizedHistogram);
+      spectra[i].setHistogram(hist);
     }
     if (haveXErrors) {
       // Note: we only have X errors with 4-column files.

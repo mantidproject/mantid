@@ -586,17 +586,6 @@ private:
             WorkspaceFactory::Instance().create("Workspace2D", numVecs, xyLen,
                                                 xyLen));
 
-    for (int i = 0; i < numVecs; i++) {
-      auto &X = wsToSave->mutableX(i);
-      auto &Y = wsToSave->mutableY(i);
-      auto &E = wsToSave->mutableE(i);
-      for (int j = 0; j < xyLen; j++) {
-        X[j] = 1.5 * j / 0.9;
-        Y[j] = (i + 1) * (2. + 4. * X[j]);
-        E[j] = 1.;
-      }
-    }
-
     const std::string name = "SaveAsciiWS";
     AnalysisDataService::Instance().add(name, wsToSave);
 
