@@ -52,11 +52,26 @@ class FindEPP(PythonAlgorithm):
 
         # Get the positions around the max, where the y value first drops down 0.5*height
         # This is a better approach when there is a higher noise in the tails in real data
-        y_right = y_values[imax+1:]
-        y_left = y_values[0:imax]
-        y_left = y_left[::-1]
-        fwhm_right = np.argmax(y_right < 0.5 * height)
-        fwhm_left = np.argmax(y_left < 0.5 * height)
+        fwhm_right = 0
+        fwhm_left = 0
+
+        if imax < y_values.size - 1:
+            y_right = y_values[imax+1:]
+            y_right_below = np.argwhere(y_right < 0.5 * height)
+            if y_right_below.size == 0:
+                fwhm_right = y_values.size - imax
+            else:
+                fwhm_right = y_right_below[0][0]
+
+        if imax > 0:
+            y_left = y_values[:imax]
+            y_left = y_left[::-1]
+            y_left_below = np.argwhere(y_left < 0.5 * height)
+            if y_left_below.size == 0:
+                fwhm_left = 0
+            else:
+                fwhm_left = y_left_below[0][0]
+
         fwhm_pos = np.minimum(imax+fwhm_right,x_values.size-1)
         fwhm_neg = np.maximum(imax-fwhm_left,0)
 
