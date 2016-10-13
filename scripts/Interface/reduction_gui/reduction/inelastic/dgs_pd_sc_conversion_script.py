@@ -9,6 +9,7 @@ import xml.dom.minidom
 
 from reduction_gui.reduction.scripter import BaseScriptElement
 
+
 class PdAndScConversionScript(BaseScriptElement):
 
     do_pd_convert = False

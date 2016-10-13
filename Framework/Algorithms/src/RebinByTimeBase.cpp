@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/RebinByTimeBase.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -33,7 +34,6 @@ public:
   }
 };
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void RebinByTimeBase::init() {

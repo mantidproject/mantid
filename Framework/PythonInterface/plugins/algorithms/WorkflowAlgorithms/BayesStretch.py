@@ -12,6 +12,7 @@ import numpy as np
 if is_supported_f2py_platform():
     Que     = import_f2py("Quest")
 
+
 class BayesStretch(PythonAlgorithm):
 
     _sam_name = None
@@ -28,7 +29,6 @@ class BayesStretch(PythonAlgorithm):
 
     _erange = None
     _nbins = None
-
 
     def category(self):
         return "Workflow\\MIDAS"
@@ -77,7 +77,6 @@ class BayesStretch(PythonAlgorithm):
                                                     direction=Direction.Output),
                              doc='The name of the contour output workspaces')
 
-
     def validateInputs(self):
         self._get_properties()
         issues = dict()
@@ -95,7 +94,6 @@ class BayesStretch(PythonAlgorithm):
             issues['EMax'] = 'EMax must be less than the maximum x range of the data'
 
         return issues
-
 
     #pylint: disable=too-many-locals
     def PyExec(self):
@@ -127,7 +125,7 @@ class BayesStretch(PythonAlgorithm):
         nsam,ntc = CheckHistZero(self._sam_name)
 
         #check if we're performing a sequential fit
-        if self._loop != True:
+        if not self._loop:
             nsam = 1
 
         logger.information('Version is Stretch')
@@ -275,7 +273,6 @@ class BayesStretch(PythonAlgorithm):
             logger.information('Defaulting to current working Directory: ' + workdir)
         return workdir
 
-
     #pylint: disable=too-many-arguments
     def _create_workspace(self, name, xye, num_spec, vert_axis, is_zp_ws = False):
         """
@@ -309,7 +306,6 @@ class BayesStretch(PythonAlgorithm):
             else:
                 unitx.setLabel('sigma', '')
 
-
     def _add_sample_logs(self, workspace, erange, sample_binning):
         """
         Add the Bayes Stretch specific values to the sample logs
@@ -327,7 +323,6 @@ class BayesStretch(PythonAlgorithm):
         add_log.setProperty('LogValues', log_values)
         add_log.setProperty('ParseType', True) # Should determine String/Number type
         add_log.execute()
-
 
     def _get_properties(self):
         self._sam_name = self.getPropertyValue('SampleWorkspace')

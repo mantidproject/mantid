@@ -3,6 +3,7 @@ from HFIR_4Circle_Reduction import reduce4circleGUI
 from PyQt4 import QtGui
 import sys
 
+
 def qapp():
     if QtGui.QApplication.instance():
         _app = QtGui.QApplication.instance()

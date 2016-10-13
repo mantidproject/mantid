@@ -88,7 +88,6 @@ class VelocityAutoCorrelations(PythonAlgorithm):
 
         logger.information(str(time.time()-start_time) + " s")
 
-
         logger.information("Transforming coordinates...")
         start_time=time.time()
 
@@ -116,7 +115,6 @@ class VelocityAutoCorrelations(PythonAlgorithm):
 
         logger.information(str(time.time()-start_time) + " s")
 
-
         logger.information("Calculating velocities...")
         start_time=time.time()
 
@@ -137,7 +135,6 @@ class VelocityAutoCorrelations(PythonAlgorithm):
                               for j in range(n_timesteps-1)] for i in range(n_particles)])
         logger.information(str(time.time()-start_time) + " s")
 
-
         logger.information("Calculating velocity auto-correlations (resource intensive calculation)...")
         start_time=time.time()
 
@@ -156,7 +153,6 @@ class VelocityAutoCorrelations(PythonAlgorithm):
             correlation_count[k,k]+=1
 
         logger.information(str(time.time()-start_time) + " s")
-
 
         # Neutron incoherent scattering lengths (fm) weighted by isotope abundancies
         # Sources:
@@ -259,7 +255,6 @@ class VelocityAutoCorrelations(PythonAlgorithm):
                'am':1.0,
                'cm':1.0}
 
-
         logger.information("Averaging auto-correlations...")
         start_time=time.time()
 
@@ -269,7 +264,6 @@ class VelocityAutoCorrelations(PythonAlgorithm):
                 correlations[i,j]=correlations[i,j]*Coh_b[elements[i]]*Coh_b[elements[j]]/correlation_count[i,j]
 
         logger.information(str(time.time()-start_time) + " s")
-
 
         # Generate a list of row names according to the atomic species present in the simulation
         row_names=[]
@@ -297,7 +291,6 @@ class VelocityAutoCorrelations(PythonAlgorithm):
         # Set output workspace to output_ws
         self.setProperty('OutputWorkspace',output_ws)
 
-
     def auto_correlation(self,u):
         # Returns auto-correlation of a 3-vectors
         n=np.shape(u)[0]
@@ -311,7 +304,6 @@ class VelocityAutoCorrelations(PythonAlgorithm):
         C+=np.divide(np.correlate(u[:,2],u[:,2],"same"),norm)
 
         return C
-
 
     def fold_correlation(self,w):
         # Folds an array with symmetrical values into half by averaging values around the centre

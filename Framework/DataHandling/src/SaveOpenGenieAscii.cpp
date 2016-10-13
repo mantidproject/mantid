@@ -1,10 +1,8 @@
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
 #include "MantidDataHandling/SaveOpenGenieAscii.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/VisibleWhenProperty.h"
@@ -30,9 +28,6 @@ DECLARE_ALGORITHM(SaveOpenGenieAscii)
 /// Empty constructor
 SaveOpenGenieAscii::SaveOpenGenieAscii() : Mantid::API::Algorithm() {}
 
-//---------------------------------------------------
-// Private member functions
-//---------------------------------------------------
 /**
  * Initialise the algorithm
  */

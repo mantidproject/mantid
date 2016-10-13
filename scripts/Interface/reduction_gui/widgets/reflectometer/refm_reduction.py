@@ -22,6 +22,7 @@ try:
 except:
     pass
 
+
 class DataReflWidget(BaseWidget):
     """
         Widget that present instrument details to the user
@@ -363,8 +364,8 @@ class DataReflWidget(BaseWidget):
                     f = open(file_path,'w')
                     f.write(content)
                     f.close()
-                    QtGui.QMessageBox.information(self, "Automated reduction script saved",\
-                                           "The automated reduction script has been updated")
+                    QtGui.QMessageBox.information(self, "Automated reduction script saved",
+                                                  "The automated reduction script has been updated")
                 except:
                     _report_error()
             else:
@@ -852,8 +853,8 @@ class DataReflWidget(BaseWidget):
         m.DataPeakPixels = [int(self._summary.data_peak_from_pixel.text()),
                             int(self._summary.data_peak_to_pixel.text())]
 
-        m.data_x_range = [int(self._summary.x_min_edit.text()),\
-                     int(self._summary.x_max_edit.text())]
+        m.data_x_range = [int(self._summary.x_min_edit.text()),
+                          int(self._summary.x_max_edit.text())]
         m.data_x_range_flag = self._summary.data_low_res_range_switch.isChecked()
 
         m.norm_x_range = [int(self._summary.norm_x_min_edit.text()),
@@ -996,11 +997,3 @@ class DataReflWidget(BaseWidget):
         self._summary.data_background_to_pixel1.setText("%-d" % int(backmax))
         self._summary.data_from_tof.setText("%-d" % int(tofmin))
         self._summary.data_to_tof.setText("%-d" % int(tofmax))
-
-
-
-
-
-
-
-

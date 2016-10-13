@@ -3,6 +3,7 @@ import stresstesting
 from mantid.simpleapi import *
 import numpy as np
 
+
 class POLDIPeakSearchTest(stresstesting.MantidStressTest):
     '''This test checks that the results of PoldiAutoCorrelation match the expected outcome.'''
 

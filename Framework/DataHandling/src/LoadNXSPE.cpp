@@ -3,6 +3,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
@@ -30,8 +31,6 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXSPE)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-
-//----------------------------------------------------------------------------------------------
 
 /**
  * Calculate the confidence in the string value. This is used for file
@@ -78,7 +77,6 @@ int LoadNXSPE::confidence(Kernel::NexusDescriptor &descriptor) const {
   return confidence;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadNXSPE::init() {
@@ -91,7 +89,6 @@ void LoadNXSPE::init() {
                   "The name of the workspace that will be created.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void LoadNXSPE::exec() {

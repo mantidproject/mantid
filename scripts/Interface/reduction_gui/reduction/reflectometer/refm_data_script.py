@@ -6,6 +6,7 @@ import os
 import time
 from reduction_gui.reduction.scripter import BaseScriptElement
 
+
 class DataSets(BaseScriptElement):
 
     DataPeakPixels = [215, 225]
@@ -247,7 +248,6 @@ class DataSets(BaseScriptElement):
         self.DataPeakPixels = [BaseScriptElement.getIntElement(instrument_dom, "from_peak_pixels"),
                                BaseScriptElement.getIntElement(instrument_dom, "to_peak_pixels")]
 
-
         #low resolution range
         self.data_x_range_flag = BaseScriptElement.getBoolElement(instrument_dom, "x_range_flag",
                                                                   default=DataSets.data_x_range_flag)
@@ -381,4 +381,3 @@ class DataSets(BaseScriptElement):
         self.direct_pixel = DataSets.direct_pixel
 
         self.output_dir = DataSets.output_dir
-
