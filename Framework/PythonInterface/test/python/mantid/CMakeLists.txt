@@ -15,7 +15,7 @@ set ( TEST_PY_FILES
 )
 
 if ( MAKE_VATES )
- list  ( TEST_PY_FILES PVPythonTest.py )
+ list  ( APPEND TEST_PY_FILES PVPythonTest.py )
 endif ()
 
 # Prefix for test=PythonInterface
