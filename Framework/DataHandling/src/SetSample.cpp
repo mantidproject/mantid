@@ -1,6 +1,7 @@
 #include "MantidDataHandling/SetSample.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -8,6 +9,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerProperty.h"
 
 #include <boost/algorithm/string/case_conv.hpp>

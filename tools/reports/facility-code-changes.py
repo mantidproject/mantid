@@ -10,6 +10,7 @@ import argparse
 import os
 import time
 
+
 def generate_file_changes_data(year_start, year_end):
 
     current_year = int(datetime.datetime.now().strftime("%Y"))
@@ -34,6 +35,7 @@ def generate_file_changes_data(year_start, year_end):
             f.flush()
             os.fsync(f.fileno())
             f.close()
+
 
 def generate_commit_data(year_start, year_end):
 
@@ -60,7 +62,6 @@ def generate_commit_data(year_start, year_end):
             f.flush()
             os.fsync(f.fileno())
             f.close()
-
 
 
 if __name__ == '__main__':

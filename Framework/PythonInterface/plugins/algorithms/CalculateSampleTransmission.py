@@ -19,10 +19,8 @@ class CalculateSampleTransmission(PythonAlgorithm):
     def category(self):
         return 'Sample'
 
-
     def summary(self):
         return 'Calculates the scattering & transmission for a given sample material and size over a given wavelength range.'
-
 
     def PyInit(self):
         self.declareProperty(name='WavelengthRange', defaultValue='',
@@ -42,7 +40,6 @@ class CalculateSampleTransmission(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output),
                              doc='Outputs the sample transmission over the wavelength range as a function of wavelength.')
 
-
     def validateInputs(self):
         issues = dict()
 
@@ -55,7 +52,6 @@ class CalculateSampleTransmission(PythonAlgorithm):
             issues['Thickness'] = 'Thickness must be positive'
 
         return issues
-
 
     def PyExec(self):
         self._setup()
@@ -84,7 +80,6 @@ class CalculateSampleTransmission(PythonAlgorithm):
 
         self.setProperty('OutputWorkspace', self._output_ws)
 
-
     def _setup(self):
         """
         Gets algorithm properties.
@@ -95,7 +90,6 @@ class CalculateSampleTransmission(PythonAlgorithm):
         self._density = self.getProperty('NumberDensity').value
         self._thickness = self.getProperty('Thickness').value
         self._output_ws = self.getPropertyValue('OutputWorkspace')
-
 
     def _calculate_at_wavelength(self, wavelength):
         """
@@ -114,7 +108,6 @@ class CalculateSampleTransmission(PythonAlgorithm):
         scattering = 1.0 - math.exp(-self._density * material.totalScatterXSection() * self._thickness)
 
         return transmission, scattering
-
 
 
 # Register algorithm with Mantid

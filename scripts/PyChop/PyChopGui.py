@@ -18,6 +18,7 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as Navigatio
 from matplotlib.figure import Figure
 from matplotlib.widgets import Slider
 
+
 class PyChopGui(QtGui.QMainWindow):
     """
     GUI Class using PyQT for PyChop to help users plan inelastic neutron experiments
@@ -184,7 +185,8 @@ class PyChopGui(QtGui.QMainWindow):
             Eis = self.engine.getAllowedEi()
             inst = self.engine.instname
             freq = self.engine.getFrequency()
-            if hasattr(freq, '__len__'): freq = freq[0]
+            if hasattr(freq, '__len__'):
+                freq = freq[0]
             self.resaxes.hold(True)
             for ie, Ei in enumerate(Eis):
                 # For LET ignore reps above 40 meV in energy as there is no flux there.
@@ -193,7 +195,8 @@ class PyChopGui(QtGui.QMainWindow):
                 en = np.linspace(0, 0.95*Ei, 200)
                 line, = self.resaxes.plot(en, self.res[ie])
                 line.set_label('%s_%3.2fmeV_%dHz_Flux=%fn/cm2/s' % (inst, Ei, freq, self.flux[ie]))
-                if Ei > self.xlim: self.xlim = Ei
+                if Ei > self.xlim:
+                    self.xlim = Ei
             self.resaxes.hold(False)
         else:
             en = np.linspace(0, 0.95*self.engine.getEi(), 200)
@@ -202,9 +205,11 @@ class PyChopGui(QtGui.QMainWindow):
             chopper = self.engine.getChopper()
             ei = self.engine.getEi()
             freq = self.engine.getFrequency()
-            if hasattr(freq, '__len__'): freq = freq[-1]
+            if hasattr(freq, '__len__'):
+                freq = freq[-1]
             line.set_label('%s_%s_%3.2fmeV_%dHz_Flux=%fn/cm2/s' % (inst, chopper, ei, freq, self.flux))
-            if ei > self.xlim: self.xlim = ei
+            if ei > self.xlim:
+                self.xlim = ei
         self.resaxes.set_xlim([0, self.xlim])
         lg = self.resaxes.legend()
         lg.draggable()
@@ -220,7 +225,8 @@ class PyChopGui(QtGui.QMainWindow):
         chop = self.engine.getChopper()
         freq = self.engine.getFrequency()
         overplot = self.widgets['HoldCheck'].isChecked()
-        if hasattr(freq, '__len__'): freq = freq[-1]
+        if hasattr(freq, '__len__'):
+            freq = freq[-1]
         update = kwargs['update'] if 'update' in kwargs.keys() else False
         # Do not recalculate if all relevant parameters still the same.
         _, labels = self.flxaxes2.get_legend_handles_labels()
@@ -389,7 +395,8 @@ class PyChopGui(QtGui.QMainWindow):
             eis = obj.getAllowedEi()
             enmr = np.linspace(0, 0.95, 10)
             resmr = obj.getMultiRepResolution(enmr)
-            if not hasattr(resmr, '__len__'): resmr = [[resmr]]
+            if not hasattr(resmr, '__len__'):
+                resmr = [[resmr]]
             txt = '# ------------------------------------------------------------- #\n'
             txt += '# Resolution calculation for LET %s\n' % (chtyp)
             txt += '#   with the resolution chopper at %3i Hz,\n' % (freqs[-1])
@@ -697,6 +704,7 @@ class PyChopGui(QtGui.QMainWindow):
         self.setInstrument('MAPS')
         self.xlim = 0
         self.isFramePlotted = 0
+
 
 def show():
     """

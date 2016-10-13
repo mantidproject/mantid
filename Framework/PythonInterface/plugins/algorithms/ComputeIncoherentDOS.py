@@ -7,8 +7,10 @@ from mantid.kernel import CompositeValidator, Direction, FloatBoundedValidator
 from mantid.api import mtd, AlgorithmFactory, CommonBinsValidator, HistogramValidator, MatrixWorkspaceProperty, PythonAlgorithm
 from mantid.simpleapi import *
 
+
 def evaluateEbin(Emin, Emax, Ei, strn):
     return [eval(estr) for estr in strn.split(',')]
+
 
 def evaluateQRange(Qmin, Qmax, strn):
     return [eval(qstr) for qstr in strn.split(',')]

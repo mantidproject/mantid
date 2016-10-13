@@ -5,6 +5,7 @@ from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
 
+
 class CompareTwoNXSDataForSFcalculator(object):
     """
         will return -1, 0 or 1 according to the position of the nexusToPosition in relation to the
@@ -69,6 +70,7 @@ class CompareTwoNXSDataForSFcalculator(object):
 
     def result(self):
         return self.resultComparison
+
 
 def sorter_function(r1, r2):
     """

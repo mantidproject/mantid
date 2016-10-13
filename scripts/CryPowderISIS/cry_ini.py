@@ -288,7 +288,7 @@ class Files:
                 for line in fvan:
                     p_lst = re.compile("bank")
                     m_lst = p_lst.search(line)
-                    if m_lst != None:
+                    if m_lst is not None:
                         self.VanPeakList.append([])
                         b_int = b_int + 1
                         continue
@@ -341,7 +341,7 @@ class Files:
             pattern2match = label + '[ ]*(.*)'
             p_lst = re.compile(pattern2match)
             m_lst = p_lst.match(line)
-            if m_lst != None:
+            if m_lst is not None:
                 found = True
                 break
         fin.close()
@@ -363,7 +363,7 @@ class Files:
             pattern2match = '(' + label + '[ ]+)'
             p_lst = re.compile(pattern2match)
             m_lst = p_lst.match(line)
-            if m_lst != None:
+            if m_lst is not None:
                 line = m_lst.group() + value + "\n"
             fileline.append(line)
         fin.close()

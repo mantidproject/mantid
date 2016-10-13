@@ -10,6 +10,7 @@ import xml.dom.minidom
 
 from reduction_gui.reduction.scripter import BaseScriptElement
 
+
 class AbsoluteUnitsScript(BaseScriptElement):
 
     do_absolute_units = False

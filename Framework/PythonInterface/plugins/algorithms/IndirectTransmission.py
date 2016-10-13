@@ -30,10 +30,8 @@ class IndirectTransmission(PythonAlgorithm):
     def category(self):
         return "Workflow\\MIDAS"
 
-
     def summary(self):
         return "Calculates the scattering & transmission for Indirect Geometry spectrometers."
-
 
     def PyInit(self):
         self.declareProperty(name='Instrument', defaultValue='IRIS',
@@ -150,7 +148,6 @@ class IndirectTransmission(PythonAlgorithm):
         DeleteWorkspace(workspace)
 
         self.setProperty("OutputWorkspace", table_ws)
-
 
     def _get_efixed(self, workspace):
         """

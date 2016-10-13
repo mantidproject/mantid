@@ -2,8 +2,10 @@ import xml.etree.ElementTree as XML
 import os.path
 from mantid.simpleapi import *
 
+
 class MissingSettings(Exception):
     pass
+
 
 class Settings(object):
 
@@ -24,8 +26,6 @@ class Settings(object):
             self.__extract_to_dictionary(doc)
         except:
             raise ValueError("The file %s does not contain valid XML" % filename)
-
-
 
     def __check_file(self, filename):
         path, extension = os.path.splitext(filename)
@@ -55,5 +55,3 @@ class Settings(object):
 
     def get_contents_file(self):
         return self.__filename
-
-

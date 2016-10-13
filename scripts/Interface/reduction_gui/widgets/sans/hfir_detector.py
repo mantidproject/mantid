@@ -16,6 +16,7 @@ try:
 except:
     pass
 
+
 class DetectorWidget(BaseWidget):
     """
         Widget that presents the detector options to the user
@@ -84,7 +85,6 @@ class DetectorWidget(BaseWidget):
         self._sensitivity_clicked(self._content.sensitivity_chk.isChecked())
         self._use_sample_center_changed(self._content.use_sample_center_checkbox.isChecked())
 
-
         self.connect(self._content.sensitivity_plot_button, QtCore.SIGNAL("clicked()"), self._sensitivity_plot_clicked)
         self.connect(self._content.data_file_plot_button, QtCore.SIGNAL("clicked()"), self._data_file_plot_clicked)
         self.connect(self._content.sensitivity_dark_plot_button, QtCore.SIGNAL("clicked()"), self._sensitivity_dark_plot_clicked)
@@ -135,8 +135,8 @@ class DetectorWidget(BaseWidget):
 
     def _draw_patch(self):
         if IS_IN_MANTIDPLOT:
-            self.show_instrument(self._content.sensitivity_file_edit.text,\
-              workspace=self.patch_ws, tab=2, reload=True, data_proxy=None)
+            self.show_instrument(self._content.sensitivity_file_edit.text,
+                                 workspace=self.patch_ws, tab=2, reload=True, data_proxy=None)
 
     def _create_sensitivity(self):
         if IS_IN_MANTIDPLOT and self.options_callback is not None:
@@ -266,7 +266,6 @@ class DetectorWidget(BaseWidget):
         self._content.use_beam_finder_checkbox_2.setEnabled(not is_checked)
         self._flood_use_beam_finder_changed(self._content.use_beam_finder_checkbox_2.isChecked(), not is_checked)
 
-
     def _flood_use_beam_finder_changed(self, is_checked, is_flood_ctr=True):
         # Center by hand
         self._content.x_pos_edit_2.setEnabled(not is_checked and is_flood_ctr)
@@ -283,8 +282,6 @@ class DetectorWidget(BaseWidget):
         self._content.data_file_browse_button_2.setEnabled(is_checked and is_flood_ctr)
         self._content.data_file_plot_button_2.setEnabled(is_checked and is_flood_ctr)
         self._flood_center_method_changed(is_checked and is_flood_ctr)
-
-
 
     def _center_method_changed(self, finder_checked=True):
         is_direct_beam = self._content.direct_beam.isChecked()
@@ -351,7 +348,6 @@ class DetectorWidget(BaseWidget):
             self._content.draw_patch_button.setEnabled(False)
             self._content.create_sensitivity_button.setEnabled(False)
 
-
     def _sensitivity_browse(self):
         fname = self.data_browse_dialog(data_type="Sensitivity files *.xml *.nxs (*.xml *.nxs)")
         if fname:
@@ -361,4 +357,3 @@ class DetectorWidget(BaseWidget):
         fname = self.data_browse_dialog()
         if fname:
             self._content.sensitivity_dark_file_edit.setText(fname)
-

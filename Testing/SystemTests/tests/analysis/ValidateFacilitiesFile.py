@@ -6,6 +6,7 @@ import stresstesting
 
 EXPECTED_EXT = '.expected'
 
+
 class ValidateFacilitiesFile(stresstesting.MantidStressTest):
 
     def skipTests(self):
@@ -15,7 +16,6 @@ class ValidateFacilitiesFile(stresstesting.MantidStressTest):
         except ImportError:
             return True
         return False
-
 
     def runTest(self):
         """Main entry point for the test suite"""

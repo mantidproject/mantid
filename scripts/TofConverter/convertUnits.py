@@ -2,12 +2,15 @@
 import math
 # Used by converter GUI to do unit conversions
 
+
 def doConversion(inputval, inOption, outOption, theta, flightpath):
     stage1output = input2energy(float(inputval), inOption, theta, flightpath)
     stage2output = energy2output(stage1output, outOption, theta, flightpath)
     return stage2output
 
 # Convert input value to intermediate energy
+
+
 def input2energy(inputval, inOption, theta, flightpath):
     e2lam = 81.787 #using lambda=h/p  p: momentum, h: planck's const, lambda: wavelength
     e2nu = 4.139 # using h/(m*lambda^2) m: mass of neutron

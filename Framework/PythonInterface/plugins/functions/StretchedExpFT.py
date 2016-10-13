@@ -32,6 +32,7 @@ from scipy.fftpack import fft, fftfreq
 from scipy.special import gamma
 from mantid.api import IFunction1D, FunctionFactory
 
+
 class StretchedExpFT(IFunction1D):
     # Class variables
     _planck_constant = scipy.constants.Planck/scipy.constants.e*1E15  # meV*psec

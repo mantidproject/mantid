@@ -9,6 +9,7 @@ from mantid.kernel import *
 class SavePlot1DAsJson(PythonAlgorithm):
     """ Save 1D plottable data in json format from workspace.
     """
+
     def category(self):
         """
         """
@@ -38,7 +39,7 @@ class SavePlot1DAsJson(PythonAlgorithm):
         self.require()
 
         self.declareProperty(
-            MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
+            MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
             "Workspace that contains plottable data")
 
         self.declareProperty(
@@ -104,6 +105,7 @@ class SavePlot1DAsJson(PythonAlgorithm):
         # axes
         # .. helper
         label = lambda axis: axis.getUnit().caption()
+
         def unit(axis):
             s = axis.getUnit().symbol()
             try:
@@ -123,4 +125,3 @@ class SavePlot1DAsJson(PythonAlgorithm):
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SavePlot1DAsJson)
-
