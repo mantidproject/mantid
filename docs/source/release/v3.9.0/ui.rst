@@ -19,6 +19,7 @@ User Interface
 
 Instrument View
 ###############
+ - New peak comparison tool on the pick tab. The user can select two peaks and information relating to their properties and the angles between them.
 
 Plotting Improvements
 #####################
