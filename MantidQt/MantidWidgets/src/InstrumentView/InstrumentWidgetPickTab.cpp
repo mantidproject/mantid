@@ -12,6 +12,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/V3D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -229,7 +230,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_peakCompare = new QPushButton();
   m_peakCompare->setCheckable(true);
   m_peakCompare->setAutoExclusive(true);
-  m_peakCompare->setIcon(QIcon(":/PickTools/selection-peak.png"));
+  m_peakCompare->setIcon(QIcon(":/PickTools/selection-peaks.png"));
   m_peakCompare->setToolTip("Compare single crystal peak(s)");
 
   QGridLayout *toolBox = new QGridLayout();
@@ -896,6 +897,63 @@ void ComponentInfoController::displayComparePeaksInfo(std::pair<Mantid::Geometry
   std::stringstream text;
   auto peak1 = peaks.first;
   auto peak2 = peaks.second;
+
+  auto instrument = peak1->getInstrument();
+  auto sample = instrument->getSample()->getPos();
+  auto source = instrument->getSource()->getPos();
+  auto L1 = (sample - source);
+
+  const auto conversion = (180 / M_PI);
+  auto detector1 = peak1->getDetector();
+  auto twoTheta1 = detector1->getTwoTheta(sample, L1) * conversion;
+  auto d1 = peak1->getDSpacing();
+  auto hkl1 = peak1->getHKL();
+
+  text << "First Peak \n";
+  text << "d: " << d1 << "\n";
+  text << "2 Theta: " << twoTheta1 << "\n";
+  text << "Theta: " << (twoTheta1 / 2.) << "\n";
+  text << "H: " << hkl1[0];
+  text << " K: " << hkl1[1];
+  text << " L: " << hkl1[2];
+  text << "\n";
+
+  text << "-------------------------------\n";
+
+  auto detector2 = peak2->getDetector();
+  auto twoTheta2 = detector2->getTwoTheta(sample, L1) * conversion;
+  auto d2 = peak2->getDSpacing();
+  auto hkl2 = peak2->getHKL();
+
+  text << "Second Peak \n";
+  text << "d: " << d2 << "\n";
+  text << "2 Theta: " << twoTheta2 << "\n";
+  text << "Theta: " << (twoTheta2 / 2.) << "\n";
+  text << "H: " << hkl2[0];
+  text << " K: " << hkl2[1];
+  text << " L: " << hkl2[2];
+  text << "\n";
+
+  text << "-------------------------------\n";
+
+  auto peakPos1 = detector1->getPos();
+  auto peakPos2 = detector2->getPos();
+
+  auto angle = peakPos1.angle(peakPos2) * conversion;
+  auto distance = peakPos1 - peakPos2;
+  auto dirAngles = distance.directionAngles();
+
+  text << "Angle between: " << angle << "\n";
+  text << "Distance Parts: ";
+  text << " x: " << distance[0];
+  text << " y: " << distance[1];
+  text << " z: " << distance[2];
+  text << "\n";
+  text << "Direction angles: ";
+  text << " a: " << dirAngles[0];
+  text << " b: " << dirAngles[1];
+  text << " c: " << dirAngles[2];
+  text << "\n";
 
   m_selectionInfoDisplay->setText(QString::fromStdString(text.str()));
 }
