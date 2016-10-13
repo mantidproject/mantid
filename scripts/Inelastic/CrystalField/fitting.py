@@ -182,6 +182,15 @@ class CrystalField(object):
         if self._FWHM is not None:
             out += ',FWHM=%s' % self._getFWHM(i)
         out += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
+        if self._resolutionModel is not None:
+            n = len(self._resolutionModel)
+            if n < 2:
+                raise RuntimeError('ResolutionModel must be a tuple of length 2 or 3')
+            if n >= 2:
+                out += ',WidthX=%s,WidthY=%s' % tuple(map(tuple, self._resolutionModel[:2]))
+            if n > 2:
+                out += ',WidthVariation=%s' % self._resolutionModel[2]
+
         peaks = self.getPeak(i)
         params = peaks.paramString('', 0)
         if len(params) > 0:
@@ -688,10 +697,16 @@ class CrystalField(object):
         alg.setProperty('WorkspaceIndex', ws_index)
         alg.setProperty('OutputWorkspace', 'dummy')
         alg.execute()
+        fun = alg.getProperty('Function').value
+        if not self._isMultiSpectra():
+            self.update(fun)
         out = alg.getProperty('OutputWorkspace').value
         # Create copies of the x and y because `out` goes out of scope when this method returns
         # and x and y get deallocated
         return np.array(out.readX(0)), np.array(out.readY(1))
+
+    def _isMultiSpectra(self):
+        return hasattr(self._temperature, '__len__')
 
     def calc_xmin_xmax(self, i):
         """Calculate the x-range containing interesting features of a spectrum (for plotting)

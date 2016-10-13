@@ -983,5 +983,58 @@ class CrystalFieldFitTest(unittest.TestCase):
         s = cf.makeSpectrumFunction()
         self.assertRaises(RuntimeError, FunctionFactory.createInitialized, s)
 
+    def test_resolution_single_spectrum(self):
+        from CrystalField import CrystalField
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                      Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 50], [1, 2]))
+        sp = cf.getSpectrum()
+        self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.0, 8)
+        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.58101468, 8)
+        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.884945866, 8)
+
+    def test_resolution_single_spectrum_fit(self):
+        from CrystalField import CrystalField, CrystalFieldFit
+        from CrystalField.fitting import makeWorkspace
+        origin = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                      Temperature=44.0, FWHM=1.0)
+        origin.peaks.param[0]['FWHM'] = 1.01
+        origin.peaks.param[1]['FWHM'] = 1.4
+        origin.peaks.param[2]['FWHM'] = 1.8
+
+        x, y = origin.getSpectrum()
+        ws = makeWorkspace(x, y)
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                          Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 50], [1, 2]))
+
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=ws)
+        fit.fit()
+
+        self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.0047, 4)
+        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.4816, 4)
+        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.8368, 4)
+
+    def test_resolution_single_spectrum_fit_variation(self):
+        from CrystalField import CrystalField, CrystalFieldFit
+        from CrystalField.fitting import makeWorkspace
+        origin = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                      Temperature=44.0, FWHM=1.0)
+        origin.peaks.param[0]['FWHM'] = 1.01
+        origin.peaks.param[1]['FWHM'] = 1.4
+        origin.peaks.param[2]['FWHM'] = 1.8
+
+        x, y = origin.getSpectrum()
+        ws = makeWorkspace(x, y)
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                          Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 50], [1, 2], 0.3))
+
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=ws)
+        fit.fit()
+
+        self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.01, 4)
+        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.4, 4)
+        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.8, 4)
+
 if __name__ == "__main__":
     unittest.main()
