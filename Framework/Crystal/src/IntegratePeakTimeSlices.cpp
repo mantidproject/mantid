@@ -2089,8 +2089,8 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
       errs.push_back(0);
     }
 
-  } catch (std::exception
-               &Ex1) // ties or something else went wrong in BivariateNormal
+  } catch (std::exception &
+               Ex1) // ties or something else went wrong in BivariateNormal
   {
     done = true;
     g_log.error() << "Bivariate Error for PeakNum="
@@ -2256,8 +2256,7 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
 
     g_log.debug() << "   Bad Slice. Negative Counts= "
                   << m_AttributeValues->StatBaseVals(IIntensities) -
-                         params[Ibk] * ncells
-                  << '\n';
+                         params[Ibk] * ncells << '\n';
     ;
     return false;
   }
@@ -2272,8 +2271,7 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
                    // background
   {
     g_log.debug() << "   Bad Slice. Fitted Intensity & Observed "
-                     "Intensity(-back) too different. ratio="
-                  << x << '\n';
+                     "Intensity(-back) too different. ratio=" << x << '\n';
 
     return false;
   }
