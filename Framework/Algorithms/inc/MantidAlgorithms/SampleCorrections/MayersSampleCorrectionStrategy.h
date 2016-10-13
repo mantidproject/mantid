@@ -85,11 +85,11 @@ private:
   double muR(const double flightPath, const double tof) const;
   double muR(const double sigt) const;
   double sigmaTotal(const double flightPath, const double tof) const;
-  double tof(const size_t i) const;
   void seedRNG(const size_t seed);
 
   // Holds histogram to process
   const HistogramData::Histogram &m_histogram;
+  const HistogramData::Points m_tofVals;
 
   /// A copy of the correction parameters
   const Parameters m_pars;

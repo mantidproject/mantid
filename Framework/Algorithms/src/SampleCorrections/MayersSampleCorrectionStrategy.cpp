@@ -79,18 +79,15 @@ namespace Algorithms {
 MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(
     MayersSampleCorrectionStrategy::Parameters params,
     const Mantid::HistogramData::Histogram &inputHist)
-    : m_pars(params), m_histogram(inputHist),
+    : m_pars(params), m_histogram(inputHist), m_tofVals(inputHist.points()),
       m_histoYSize(inputHist.y().size()), m_muRrange(calculateMuRange()),
       m_rng(new MersenneTwister(1)) {
 
-  double lastVal = m_histogram.x().front();
-  for (const auto &val : m_histogram.x())
-    if (val < lastVal) {
-      throw std::invalid_argument(
-          "TOF values are expected to be monotonically increasing");
-    } else {
-      lastVal = val;
-    }
+	const auto &xVals = m_histogram.x();
+  if (!(xVals.front() < xVals.back())) {
+    throw std::invalid_argument(
+        "TOF values are expected to be monotonically increasing");
+  }
 }
 
 /**
@@ -162,7 +159,7 @@ MayersSampleCorrectionStrategy::getCorrectedHisto() {
   auto &errOut = outputHistogram.mutableE();
 
   for (size_t i = 0; i < m_histoYSize; ++i) {
-    const double sigt = sigmaTotal(flightPath, tof(i));
+    const double sigt = sigmaTotal(flightPath, m_tofVals[i]);
     const double rmu = muR(sigt);
     // Varies between [-1,+1]
     const double xcap = ((rmu - muMin) - (muMax - rmu)) / (muMax - muMin);
@@ -290,7 +287,7 @@ MayersSampleCorrectionStrategy::calculateMS(const size_t irp, const double muR,
 std::pair<double, double>
 MayersSampleCorrectionStrategy::calculateMuRange() const {
   const double flightPath(m_pars.l1 + m_pars.l2);
-  const double tmin(tof(0)), tmax(tof(m_histoYSize - 1));
+  const double tmin(m_tofVals[0]), tmax(m_tofVals[m_histoYSize - 1]);
   return std::make_pair(muR(flightPath, tmin), muR(flightPath, tmax));
 }
 
@@ -328,17 +325,6 @@ double MayersSampleCorrectionStrategy::sigmaTotal(const double flightPath,
   // sigabs = sigabs(@2200(m/s)^-1)*2200 * velocity;
   const double sigabs = m_pars.sigmaAbs * 2200.0 * tof * 1e-6 / flightPath;
   return sigabs + m_pars.sigmaSc;
-}
-
-/**
- * Return the TOF for the given index of the signal value, taking into account
- * if we have a histogram. Histograms will use the mid point of the bin
- * as the TOF value. Note that there is no range check for the index.
- * @param i Index of the signal value
- * @return The associated TOF value
- */
-double MayersSampleCorrectionStrategy::tof(const size_t i) const {
-  return m_histogram.points()[i];
 }
 
 /**
