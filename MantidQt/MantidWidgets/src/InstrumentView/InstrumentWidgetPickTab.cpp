@@ -674,9 +674,8 @@ void InstrumentWidgetPickTab::singleComponentPicked(size_t pickID) {
   m_plotController->updatePlot();
 }
 
-void InstrumentWidgetPickTab::comparePeaks(
-    const std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *>
-        &peaks) {
+void InstrumentWidgetPickTab::comparePeaks(const std::pair<
+    Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &peaks) {
   m_infoController->displayComparePeaksInfo(peaks);
 }
 

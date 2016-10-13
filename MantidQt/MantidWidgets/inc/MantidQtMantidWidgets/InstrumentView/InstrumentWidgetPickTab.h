@@ -122,9 +122,9 @@ private:
   QPushButton *m_one;   ///< Button switching on single detector selection mode
   QPushButton *m_tube; ///< Button switching on detector's parent selection mode
   QPushButton *m_peak; ///< Button switching on peak creation mode
-  QPushButton *m_peakSelect; ///< Button switching on peak selection mode
+  QPushButton *m_peakSelect;  ///< Button switching on peak selection mode
   QPushButton *m_peakCompare; ///< Button switching on peak comparison mode
-  QPushButton *m_rectangle;  ///< Button switching on drawing a rectangular
+  QPushButton *m_rectangle;   ///< Button switching on drawing a rectangular
   /// selection region
   QPushButton *
       m_ellipse; ///< Button switching on drawing a elliptical selection region
