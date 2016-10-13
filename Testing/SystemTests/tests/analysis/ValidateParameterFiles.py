@@ -13,8 +13,8 @@ class ValidateParameterFiles(stresstesting.MantidStressTest):
 
     def skipTests(self):
         try:
-            from genxmlif import GenXmlIfError
-            from minixsv import pyxsval
+            from genxmlif import GenXmlIfError # noqa
+            from minixsv import pyxsval # noqa
         except ImportError:
             return True
         return False
@@ -34,7 +34,6 @@ class ValidateParameterFiles(stresstesting.MantidStressTest):
 
     def runTest(self):
         """Main entry point for the test suite"""
-        from minixsv import pyxsval
         direc = config['instrumentDefinition.directory']
         print direc
         self.xsdFile =  os.path.join(direc,'Schema/ParameterFile/1.0/','ParameterFileSchema.xsd')

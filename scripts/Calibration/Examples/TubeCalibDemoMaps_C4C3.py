@@ -7,7 +7,6 @@
 
 #
 import tube
-from mantid.api import WorkspaceFactory  # For table worskspace of calibrations
 from tube_spec import TubeSpec
 #from tube_calib_fit_params import  # To handle fit parameters
 

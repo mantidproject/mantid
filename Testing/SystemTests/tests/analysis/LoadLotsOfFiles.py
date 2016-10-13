@@ -196,7 +196,6 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
 
         # Eval statement will use current scope. Allow access to
         # mantid module
-        import mantid
 
         print "Found an expected file '%s' file" % expected
         expectedfile = open(expected)
@@ -218,7 +217,6 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
         print "----------------------------------------"
         print "Loading '%s'" % filename
         from mantid.api import Workspace
-        from mantid.api import IMDEventWorkspace
         # Output can be a tuple if the Load algorithm has extra output properties
         # but the output workspace should always be the first argument
         outputs = Load(filename)
