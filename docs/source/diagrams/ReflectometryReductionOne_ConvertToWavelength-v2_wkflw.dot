@@ -1,0 +1,77 @@
+digraph ReflectometryReductionOne {
+label = "ReflectometryReductionOne ConvertToWavelength Flowchart"
+rankdir = TB;
+ $global_style
+
+subgraph params {
+ $param_style
+  inputWS             [label="InputWorkspace"]
+  outputWS            [label="OutputWorkspace"]
+  procCommands        [label="ProcessingCommands"]
+  wavMin              [label="WavelengthMin", group=gwav]
+  wavMax              [label="WavelengthMax", group=gwav]
+  monitorIndex        [label="I0MonitorIndex"]
+  regionOfDirectBeam  [label="RegionOf-\nDirectBeam"]
+  monIntWavMax        [label="MonitorIntegration-\nWavelengthMax"]
+  monIntWavMin        [label="MonitorIntegration-\nWavelengthMin"]
+  monBackWavMin       [label="MonitorBackground-\nWavelengthMin"]
+  monBackWavMax       [label="MonitorBackground-\nWavelengthMax"]
+}
+
+subgraph decisions {
+ $decision_style
+}
+
+subgraph algorithms {
+ $algorithm_style
+  convertWav    [label="ConvertUnits\n(AlignBins = True)", group=g1]
+  cropWav       [label="CropWorkspace", group=g1]
+  groupDet      [label="GroupDetectors"]
+  cropMonWS     [label="CropWorkspace", group=g11]
+  calcFlatBg    [label="CalculateFlatBackground", group=g11]
+  intMon        [label="Integration", group=g11]
+  groupDetRDB   [label="GroupDetectors"]
+  divideDetMon  [label="Divide\n(Detectors / Monitors)"]
+  divideDetRDB    [label="Divide\n(Detectors / DirectBeam)"]
+}
+
+subgraph processes {
+ $process_style
+}
+
+subgraph values {
+ $value_style
+  valWav        [label="I(&lambda;)"]
+}
+
+inputWS             -> convertWav
+wavMin              -> cropWav
+convertWav          -> cropWav
+wavMax              -> cropWav
+cropWav             -> valWav
+valWav              -> groupDet       [label="Detectors"]
+procCommands        -> groupDet
+
+valWav              -> groupDetRDB    [label="Direct Beam"]
+regionOfDirectBeam  -> groupDetRDB
+groupDetRDB         -> divideDetRDB
+groupDet            -> divideDetRDB
+
+valWav              -> cropMonWS      [label="Monitors"]
+monitorIndex        -> cropMonWS
+cropMonWS           -> calcFlatBg
+monBackWavMin       -> calcFlatBg
+monBackWavMax       -> calcFlatBg
+calcFlatBg          -> intMon
+monIntWavMin        -> intMon
+monIntWavMax        -> intMon
+
+divideDetRDB        -> divideDetMon
+intMon              -> divideDetMon
+divideDetMon        -> outputWS
+
+
+{rank=same; monIntWavMin; monIntWavMax}
+{rank=same; divideDetRDB; intMon}
+{rank=same; monBackWavMin; monBackWavMax}
+}

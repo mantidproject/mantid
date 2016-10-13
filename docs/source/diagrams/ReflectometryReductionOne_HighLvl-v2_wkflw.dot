@@ -1,0 +1,40 @@
+digraph ReflectometryReductionOne {
+label = "ReflectometryReductionOne High Level Flowchart"
+ $global_style
+
+subgraph params {
+ $param_style
+  inputWS       [label="InputWorkspace"]
+  outputWSWL    [label="OutputWorkspaceWavelength"]
+  outputWSFinal [label="OutputWorkspace"]
+}
+
+subgraph decisions {
+ $decision_style
+  checkXUnit      [label="X axis in &lambda;?"]
+}
+
+subgraph algorithms {
+ $algorithm_style
+}
+
+subgraph processes {
+ $process_style
+  convertUnits    [label="Convert to &lambda; and\ndivide Detectors\nby Monitors"]
+  applyCorrTrans  [label="Apply transmission\n correction"]
+  convertMom      [label="Convert to momentum\ntransfer, rebin and scale"]
+}
+
+subgraph values {
+ $value_style
+}
+
+inputWS         -> checkXUnit
+checkXUnit      -> applyCorrTrans [label="Yes"]
+checkXUnit      -> convertUnits   [label="No"]
+convertUnits    -> applyCorrTrans
+applyCorrTrans  -> outputWSWL
+
+outputWSWL      -> convertMom
+convertMom      -> outputWSFinal
+}
