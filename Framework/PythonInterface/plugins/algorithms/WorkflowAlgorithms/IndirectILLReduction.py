@@ -263,7 +263,7 @@ def energy_formula(ws):
         logger.warning('Input run has no property Doppler.mirror_sense. Check your input file.')
         logger.warning('Doppler maximum delta energy is 0 micro eV')
 
-    formula = '(x/%f-1)*%f' % (mid, delta_energy / scale)
+    formula = '(x/%f-1)*%f' % (mid, (delta_energy / scale) * (size-1)/(size-2))
 
     logger.information('Energy transform formula: ' + formula)
 
