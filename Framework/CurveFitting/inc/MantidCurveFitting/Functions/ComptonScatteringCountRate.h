@@ -86,7 +86,7 @@ private:
   std::string m_bkgdOrderAttr;
   /// The order of the background
   int m_bkgdPolyN;
-  /// The matrix workspace being cached for use 
+  /// The matrix workspace being cached for use
   boost::shared_ptr<const API::MatrixWorkspace> matrix;
   /// The workspace index being worked on
   size_t wsIndex;

@@ -312,18 +312,20 @@ void ProcessBackground::deleteRegion() {
   // Find the dimensions of the region excluded by m_lowerBound and m_upperBound
   std::vector<size_t> incIndexes;
   for (size_t i = 0; i < dataY.size(); i++) {
-    if (dataX[i] < m_lowerBound || dataX[i] > m_upperBound) { 
+    if (dataX[i] < m_lowerBound || dataX[i] > m_upperBound) {
       incIndexes.push_back(i);
     }
   }
   size_t sizex, sizey;
   sizex = sizey = incIndexes.size();
-  if (dataX.size() > dataY.size()) { sizex++; }
+  if (dataX.size() > dataY.size()) {
+    sizex++;
+  }
 
   // Create a new workspace with these dimensions and copy data from the defined
   // region
   API::MatrixWorkspace_sptr mws =
-    API::WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
+      API::WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
   m_outputWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(mws);
   m_outputWS->getAxis(0)->setUnit(m_dataWS->getAxis(0)->unit()->unitID());
 
@@ -412,8 +414,8 @@ void ProcessBackground::addRegion() {
   }
 
   // Check
-  for (auto it = vx.begin()+1; it != vx.end(); ++it) {
-    if (*it <= *it-1) {
+  for (auto it = vx.begin() + 1; it != vx.end(); ++it) {
+    if (*it <= *it - 1) {
       g_log.error()
           << "The vector X with value inserted is not ordered incrementally\n";
       throw std::runtime_error("Build new vector error!");
@@ -425,7 +427,8 @@ void ProcessBackground::addRegion() {
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, vx.size(),
                                                vy.size()));
   m_outputWS->getAxis(0)->setUnit(m_dataWS->getAxis(0)->unit()->unitID());
-  m_outputWS->setHistogram(0, Histogram(Points(vx), Counts(vy), CountStandardDeviations(ve)));
+  m_outputWS->setHistogram(
+      0, Histogram(Points(vx), Counts(vy), CountStandardDeviations(ve)));
 
   // Write out dummy output workspaces
   setupDummyOutputWSes();
@@ -513,8 +516,8 @@ void ProcessBackground::selectFromGivenXValues() {
   size_t wsSize = realIndexes.size();
   DataObjects::Workspace2D_sptr bkgdWS =
       boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          API::WorkspaceFactory::Instance().create("Workspace2D", 1,
-                                                   wsSize, wsSize));
+          API::WorkspaceFactory::Instance().create("Workspace2D", 1, wsSize,
+                                                   wsSize));
   for (size_t i = 0; i < wsSize; ++i) {
     size_t index = realIndexes[i];
     bkgdWS->mutableX(0)[i] = vecX[index];
@@ -587,11 +590,10 @@ ProcessBackground::autoBackgroundSelection(Workspace2D_sptr bkgdWS) {
   bkgdfunction->setAttributeValue("n", bkgdorder);
   bkgdfunction->initialize();
 
-  g_log.information() << "Input background points has "
-                      << bkgdWS->x(0).size() << " data points for fit "
-                      << bkgdorder << "-th order " << bkgdfunction->name()
-                      << " (background) function" << bkgdfunction->asString()
-                      << "\n";
+  g_log.information() << "Input background points has " << bkgdWS->x(0).size()
+                      << " data points for fit " << bkgdorder << "-th order "
+                      << bkgdfunction->name() << " (background) function"
+                      << bkgdfunction->asString() << "\n";
 
   // Fit input (a few) background pionts to get initial guess
   API::IAlgorithm_sptr fit;
@@ -721,16 +723,15 @@ ProcessBackground::filterForBackground(BackgroundFunction_sptr bkgdfunction) {
   }
   size_t wsSize = selectedIndexes.size();
   g_log.information() << "Found " << wsSize << " background points out of "
-                      << m_dataWS->x(m_wsIndex).size()
-                      << " total data points. "
+                      << m_dataWS->x(m_wsIndex).size() << " total data points. "
                       << "\n";
 
   // Build new workspace for OutputWorkspace
   size_t nspec = 3;
   Workspace2D_sptr outws =
       boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          API::WorkspaceFactory::Instance().create("Workspace2D", nspec,
-                                                   wsSize, wsSize));
+          API::WorkspaceFactory::Instance().create("Workspace2D", nspec, wsSize,
+                                                   wsSize));
   for (size_t i = 0; i < wsSize; ++i) {
     size_t index = selectedIndexes[i];
     for (size_t j = 0; j < nspec; ++j) {
@@ -910,8 +911,8 @@ RemovePeaks::removePeaks(API::MatrixWorkspace_const_sptr dataws, int wsindex,
   vector<bool> vec_useX(sizex, true);
 
   // Exclude regions
-  size_t numbkgdpoints =
-      excludePeaks(vecX.rawData(), vec_useX, m_vecPeakCentre, m_vecPeakFWHM, numfwhm);
+  size_t numbkgdpoints = excludePeaks(vecX.rawData(), vec_useX, m_vecPeakCentre,
+                                      m_vecPeakFWHM, numfwhm);
   size_t numbkgdpointsy = numbkgdpoints;
   size_t sizey = vecY.size();
   if (sizex > sizey)

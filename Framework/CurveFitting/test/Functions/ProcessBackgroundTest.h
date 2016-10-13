@@ -20,14 +20,13 @@ using namespace Mantid::DataObjects;
 using namespace HistogramData;
 
 namespace {
-  Workspace2D_sptr createInputWS(std::string name, size_t sizex, size_t sizey) {
-    Workspace2D_sptr inputWS =
-      boost::dynamic_pointer_cast<Workspace2D>(
-        WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey));
-    AnalysisDataService::Instance().addOrReplace(name, inputWS);
+Workspace2D_sptr createInputWS(std::string name, size_t sizex, size_t sizey) {
+  Workspace2D_sptr inputWS = boost::dynamic_pointer_cast<Workspace2D>(
+      WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey));
+  AnalysisDataService::Instance().addOrReplace(name, inputWS);
 
-    return inputWS;
-  }
+  return inputWS;
+}
 }
 
 class ProcessBackgroundTest : public CxxTest::TestSuite {
@@ -65,9 +64,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // 3. Check
-    Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<Workspace2D>(
-            AnalysisDataService::Instance().retrieve("NewBackground"));
+    Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>(
+        AnalysisDataService::Instance().retrieve("NewBackground"));
     size_t newsize = outws->mutableX(0).size();
 
     TS_ASSERT_EQUALS(newsize, 8);
@@ -112,9 +110,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // 3. Check
-    Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<Workspace2D>(
-            AnalysisDataService::Instance().retrieve("NewBackground"));
+    Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>(
+        AnalysisDataService::Instance().retrieve("NewBackground"));
     size_t newsize = outws->x(0).size();
 
     TS_ASSERT_EQUALS(newsize, 14);
@@ -136,8 +133,7 @@ public:
     // 1. Prepare for data
     std::string datafile("/home/wzz/Mantid/Code/debug/MyTestData/4862b7.inp");
     Workspace2D_sptr dataws = createWorkspace2D(datafile);
-    AnalysisDataService::Instance().addOrReplace("DiffractionData",
-                                                      dataws);
+    AnalysisDataService::Instance().addOrReplace("DiffractionData", dataws);
     /// Background points for bank 7
     std::vector<double> bkgdpts = {57741.0,  63534.0,  69545.0,
                                    89379.0,  89379.0,  115669.0,
@@ -162,10 +158,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // 3. Check the result
-    Workspace2D_sptr bkgdws =
-        boost::dynamic_pointer_cast<Workspace2D>(
-            AnalysisDataService::Instance().retrieve(
-                "SelectedBackgroundPoints"));
+    Workspace2D_sptr bkgdws = boost::dynamic_pointer_cast<Workspace2D>(
+        AnalysisDataService::Instance().retrieve("SelectedBackgroundPoints"));
     TS_ASSERT(bkgdws);
 
     return;
@@ -207,10 +201,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // 3. Check the result
-    Workspace2D_sptr bkgdws =
-        boost::dynamic_pointer_cast<Workspace2D>(
-            AnalysisDataService::Instance().retrieve(
-                "SelectedBackgroundPoints"));
+    Workspace2D_sptr bkgdws = boost::dynamic_pointer_cast<Workspace2D>(
+        AnalysisDataService::Instance().retrieve("SelectedBackgroundPoints"));
     TS_ASSERT(bkgdws);
     if (bkgdws) {
       TS_ASSERT_EQUALS(bkgdws->x(0).size(), bkgdpts.size());
@@ -231,8 +223,8 @@ public:
     auto dataws = createInputWS("DiffractionData2", wsSize, wsSize);
     for (size_t i = 0; i < wsSize; ++i) {
       dataws->mutableX(0)[i] = double(i);
-      dataws->mutableY(0)[i] = 
-        double(i) * double(i) + sin(double(i) / 180. * 3.14);
+      dataws->mutableY(0)[i] =
+          double(i) * double(i) + sin(double(i) / 180. * 3.14);
     }
 
     // Create background function
@@ -274,10 +266,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // 3. Check the result
-    Workspace2D_sptr bkgdws =
-        boost::dynamic_pointer_cast<Workspace2D>(
-            AnalysisDataService::Instance().retrieve(
-                "SelectedBackgroundPoints2"));
+    Workspace2D_sptr bkgdws = boost::dynamic_pointer_cast<Workspace2D>(
+        AnalysisDataService::Instance().retrieve("SelectedBackgroundPoints2"));
     TS_ASSERT(bkgdws);
     if (bkgdws) {
       TS_ASSERT(bkgdws->x(0).size() > 10);
@@ -285,8 +275,7 @@ public:
     }
 
     TableWorkspace_sptr bkgdparws = boost::dynamic_pointer_cast<TableWorkspace>(
-        AnalysisDataService::Instance().retrieve(
-            "OutBackgroundParameters"));
+        AnalysisDataService::Instance().retrieve("OutBackgroundParameters"));
     TS_ASSERT(bkgdparws);
 
     AnalysisDataService::Instance().remove("DiffractionData2");
@@ -416,7 +405,7 @@ public:
     pb3.setProperty("OutputWorkspace", "SelectedBackgroundPoints");
     pb3.setProperty("Options", "SelectBackgroundPoints");
     pb3.setProperty("BackgroundPointSelectMode",
-      "Input Background Points Only");
+                    "Input Background Points Only");
     pb3.setProperty("SelectionMode", "FitGivenDataPoints");
     pb3.setProperty("BackgroundType", "Polynomial");
     pb3.setProperty("BackgroundPoints", bkgdpts);
@@ -428,7 +417,7 @@ public:
     for (size_t i = 0; i < 50000; ++i) {
       dataws->mutableX(0)[i] = double(i);
       dataws->mutableY(0)[i] =
-        double(i) * double(i) + sin(double(i) / 180. * 3.14);
+          double(i) * double(i) + sin(double(i) / 180. * 3.14);
     }
 
     // Create background function
@@ -442,7 +431,7 @@ public:
     TableRow row2 = functablews->appendRow();
     row2 << "A2" << 1.;
     AnalysisDataService::Instance().addOrReplace("BackgroundParameters",
-      functablews);
+                                                 functablews);
 
     // Create and set up algorithm
     pb4.initialize();
@@ -454,7 +443,7 @@ public:
     pb4.setProperty("SelectionMode", "UserFunction");
     pb4.setProperty("BackgroundTableWorkspace", functablews);
     pb4.setProperty("OutputBackgroundParameterWorkspace",
-      "OutBackgroundParameters");
+                    "OutBackgroundParameters");
     pb4.setProperty("UserBackgroundWorkspace", "VisualWS");
     pb4.setProperty("OutputBackgroundType", "Chebyshev");
     pb4.setProperty("OutputBackgroundOrder", 6);
@@ -470,7 +459,7 @@ public:
     AnalysisDataService::Instance().remove("BackgroundParameters");
   }
 
-  void testPerformanceWS() { 
+  void testPerformanceWS() {
     pb1.execute();
     pb2.execute();
     pb3.execute();

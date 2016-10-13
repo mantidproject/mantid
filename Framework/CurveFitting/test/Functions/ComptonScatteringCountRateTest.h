@@ -229,9 +229,9 @@ private:
       return std::vector<size_t>(1, 1);
     }
 
-    size_t fillConstraintMatrix(Mantid::Kernel::DblMatrix &cmatrix,
-                                const size_t start,
-                                const Mantid::HistogramData::HistogramE &) const override {
+    size_t fillConstraintMatrix(
+        Mantid::Kernel::DblMatrix &cmatrix, const size_t start,
+        const Mantid::HistogramData::HistogramE &) const override {
       for (size_t i = 0; i < cmatrix.numRows(); ++i) {
         cmatrix[i][start] = 1.0;
       }
@@ -260,9 +260,9 @@ private:
       indices[1] = 2;                    // index 2
       return indices;
     }
-    size_t fillConstraintMatrix(Mantid::Kernel::DblMatrix &cmatrix,
-                                const size_t start,
-                                const Mantid::HistogramData::HistogramE &) const override {
+    size_t fillConstraintMatrix(
+        Mantid::Kernel::DblMatrix &cmatrix, const size_t start,
+        const Mantid::HistogramData::HistogramE &) const override {
       for (size_t i = 0; i < cmatrix.numRows(); ++i) {
         for (size_t j = start; j < start + 2; ++j) {
           cmatrix[i][j] = 1.0;
