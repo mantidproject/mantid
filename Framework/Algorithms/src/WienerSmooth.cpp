@@ -378,7 +378,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
   } else {
     out->setSharedX(0, inputWS->sharedX(wsIndex));
     out->setSharedE(0, inputWS->sharedE(wsIndex));
-}
+  }
 
   return out;
 }

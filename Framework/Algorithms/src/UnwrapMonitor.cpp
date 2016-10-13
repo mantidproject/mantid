@@ -134,9 +134,10 @@ void UnwrapMonitor::exec() {
 
     // Now set the new X, Y and E values on the Histogram
     auto histogram = tempWS->histogram(i);
-    tempWS->setHistogram(i, Mantid::HistogramData::BinEdges(std::move(newX)),
-                         Mantid::HistogramData::Counts(std::move(newY)),
-                         Mantid::HistogramData::CountStandardDeviations(std::move(newE)));
+    tempWS->setHistogram(
+        i, Mantid::HistogramData::BinEdges(std::move(newX)),
+        Mantid::HistogramData::Counts(std::move(newY)),
+        Mantid::HistogramData::CountStandardDeviations(std::move(newE)));
 
     // Get the maximum number of bins (excluding monitors) for the rebinning
     // below
