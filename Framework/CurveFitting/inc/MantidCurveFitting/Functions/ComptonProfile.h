@@ -6,7 +6,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidHistogramData/Histogram.h"
 
 namespace Mantid {
 namespace CurveFitting {
