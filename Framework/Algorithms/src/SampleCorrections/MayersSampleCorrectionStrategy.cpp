@@ -83,7 +83,7 @@ MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(
       m_histoYSize(inputHist.y().size()), m_muRrange(calculateMuRange()),
       m_rng(new MersenneTwister(1)) {
 
-	const auto &xVals = m_histogram.x();
+  const auto &xVals = m_histogram.x();
   if (!(xVals.front() < xVals.back())) {
     throw std::invalid_argument(
         "TOF values are expected to be monotonically increasing");
