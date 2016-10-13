@@ -55,13 +55,13 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Run.h"
 
-#include <QMessageBox>
-#include <QTextEdit>
 #include <QListWidget>
 #include <QMdiArea>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QMessageBox>
+#include <QTextEdit>
 #include <QTextEdit>
 #include <QToolBar>
 
@@ -3566,8 +3566,6 @@ void MantidUI::plotLayerOfMultilayer(MultiLayer *multi, const bool plotErrors,
       layer->setYAxisTitle(QString::null);
     }
   };
-
-  const bool isFitResult = workspaceIsFitResult(wsName);
 
   const int layerIndex = row * nCols + col + 1; // layers numbered from 1
   auto *layer = multi->layer(layerIndex);
