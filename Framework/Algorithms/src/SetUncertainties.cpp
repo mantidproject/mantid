@@ -122,8 +122,7 @@ void SetUncertainties::exec() {
     if (errorType.compare(ONE_IF_ZERO) == 0) {
       outputWorkspace->setSharedE(i, inputWorkspace->sharedE(i));
     } else {
-      auto &errVals = outputWorkspace->mutableE(i);
-      std::fill(errVals.begin(), errVals.end(), 0);
+      outputWorkspace->mutableE(i) = 0.0;
     }
 
     // ZERO mode doesn't calculate anything further

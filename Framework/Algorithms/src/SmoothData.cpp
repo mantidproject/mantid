@@ -96,15 +96,15 @@ void SmoothData::exec() {
 
     // Now get references to the Y & E vectors in the input and output
     // workspaces
-    const auto &Y = inputWorkspace->y(i);
-    const auto &E = inputWorkspace->e(i);
-    auto &newY = outputWorkspace->mutableY(i);
-    auto &newE = outputWorkspace->mutableE(i);
     if (npts == 0) {
       outputWorkspace->setSharedY(i, inputWorkspace->sharedY(i));
       outputWorkspace->setSharedE(i, inputWorkspace->sharedE(i));
       continue;
     }
+    const auto &Y = inputWorkspace->y(i);
+    const auto &E = inputWorkspace->e(i);
+    auto &newY = outputWorkspace->mutableY(i);
+    auto &newE = outputWorkspace->mutableE(i);
     // Use total to help hold our moving average
     double total = 0.0, totalE = 0.0;
     // First push the values ahead of the current point onto total
