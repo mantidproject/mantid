@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name,too-many-branches,too-many-arguments,deprecated-module,no-name-in-module,too-many-locals
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
@@ -12,7 +13,7 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
     Loads a set of files and extracts just the spectra we care about (i.e. detector range and monitor).
 
     @param data_files List of data file names
-    @param ipf_filename FIle path/name for the instrument parameter file to load
+    @param ipf_filename File path/name for the instrument parameter file to load
     @param spec_min Minimum spectra ID to load
     @param spec_max Maximum spectra ID to load
     @param sum_files Sum loaded files
@@ -66,7 +67,7 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
             chopped_data =  x_max > chop_threshold
         except IndexError:
             chopped_data = False
-        logger.information('Workspace %s need data chop: %s' % (ws_name, str(chopped_data)))
+        logger.information('Workspace {0} need data chop: {1}'.format(ws_name, str(chopped_data)))
 
         workspaces = [ws_name]
         if chopped_data:
@@ -655,9 +656,7 @@ def save_reduction(workspace_names, formats, x_units='DeltaE'):
                       Filename=workspace_name + '.nxspe')
 
         if 'ascii' in formats:
-            # Version 1 of SaveAscii produces output that works better with excel/origin
-            # For some reason this has to be done with an algorithm object, using the function
-            # wrapper with Version did not change the version that was run
+
             # Changed to version 2 to enable re-loading of files into mantid
             saveAsciiAlg = AlgorithmManager.createUnmanaged('SaveAscii', 2)
             saveAsciiAlg.initialize()
