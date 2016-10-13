@@ -3721,8 +3721,12 @@ bool MantidUI::workspacesDockPlot1To1() {
  * @returns :: Name of selected workspace group, or empty if no group selected
  */
 QString MantidUI::getSelectedGroupName() const {
-  const QString &sel =
-      QString::fromStdString(m_exploreMantid->getSelectedWorkspaceNames()[0]);
+  auto selNames = m_exploreMantid->getSelectedWorkspaceNames();
+  QString sel;
+
+  if (selNames.size() > 0)
+    sel = QString::fromStdString(selNames[0]);
+
   WorkspaceGroup_const_sptr gWs;
   if (!sel.isEmpty() &&
       AnalysisDataService::Instance().doesExist(sel.toStdString())) {
