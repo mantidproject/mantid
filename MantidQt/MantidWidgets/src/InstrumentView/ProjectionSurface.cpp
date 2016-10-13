@@ -113,7 +113,8 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
   // create and connect the peak compare controller
   InputControllerCompare *compareController = new InputControllerCompare(this);
   setInputController(ComparePeakMode, compareController);
-  connect(compareController, SIGNAL(compare(QRect)), this, SLOT(comparePeaks(QRect)));
+  connect(compareController, SIGNAL(compare(QRect)), this,
+          SLOT(comparePeaks(QRect)));
 }
 
 ProjectionSurface::~ProjectionSurface() {

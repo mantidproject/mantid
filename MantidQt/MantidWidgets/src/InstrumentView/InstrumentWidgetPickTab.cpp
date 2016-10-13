@@ -9,19 +9,19 @@
 #include "MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h"
 
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DynamicFactory.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidKernel/V3D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DynamicFactory.h"
+#include "MantidKernel/V3D.h"
 
 #include "qwt_scale_widget.h"
 #include "qwt_scale_div.h"
@@ -540,8 +540,13 @@ void InstrumentWidgetPickTab::initSurface() {
           SLOT(singleComponentTouched(size_t)));
   connect(surface, SIGNAL(singleComponentPicked(size_t)), this,
           SLOT(singleComponentPicked(size_t)));
-  connect(surface, SIGNAL(comparePeaks(std::pair<Mantid::Geometry::IPeak*, Mantid::Geometry::IPeak*>)), this,
-          SLOT(comparePeaks(std::pair<Mantid::Geometry::IPeak*, Mantid::Geometry::IPeak*>)));
+  connect(
+      surface,
+      SIGNAL(comparePeaks(
+          std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *>)),
+      this,
+      SLOT(comparePeaks(
+          std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *>)));
   connect(surface, SIGNAL(peaksWorkspaceAdded()), this,
           SLOT(updateSelectionInfoDisplay()));
   connect(surface, SIGNAL(peaksWorkspaceDeleted()), this,
@@ -669,7 +674,9 @@ void InstrumentWidgetPickTab::singleComponentPicked(size_t pickID) {
   m_plotController->updatePlot();
 }
 
-void InstrumentWidgetPickTab::comparePeaks(const std::pair<Mantid::Geometry::IPeak*, Mantid::Geometry::IPeak*> &peaks) {
+void InstrumentWidgetPickTab::comparePeaks(
+    const std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *>
+        &peaks) {
   m_infoController->displayComparePeaksInfo(peaks);
 }
 
@@ -892,8 +899,8 @@ QString ComponentInfoController::displayNonDetectorInfo(
   return text;
 }
 
-void ComponentInfoController::displayComparePeaksInfo(std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks)
-{
+void ComponentInfoController::displayComparePeaksInfo(
+    std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks) {
   std::stringstream text;
   auto peak1 = peaks.first;
   auto peak2 = peaks.second;

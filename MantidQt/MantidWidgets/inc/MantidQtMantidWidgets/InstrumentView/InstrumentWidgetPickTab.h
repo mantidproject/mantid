@@ -6,9 +6,9 @@
 #include <MantidQtMantidWidgets/WidgetDllOption.h>
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidGeometry/Crystal/IPeak.h"
 
 class Instrument3DWidget;
 
@@ -104,8 +104,8 @@ private slots:
   void removeCurve(const QString &);
   void singleComponentTouched(size_t pickID);
   void singleComponentPicked(size_t pickID);
-  void comparePeaks(const std::pair<Mantid::Geometry::IPeak*,
-                    Mantid::Geometry::IPeak*> &peaks);
+  void comparePeaks(const std::pair<Mantid::Geometry::IPeak *,
+                                    Mantid::Geometry::IPeak *> &peaks);
   void updateSelectionInfoDisplay();
   void shapeCreated();
   void updatePlotMultipleDetectors();
@@ -184,7 +184,8 @@ public:
                           InstrumentActor *instrActor, QTextEdit *infoDisplay);
 public slots:
   void displayInfo(size_t pickID);
-  void displayComparePeaksInfo(std::pair<Mantid::Geometry::IPeak*, Mantid::Geometry::IPeak*> peaks);
+  void displayComparePeaksInfo(
+      std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks);
   void clear();
 
 private:

@@ -337,9 +337,8 @@ Mantid::Geometry::IPeak &PeakOverlay::getPeak(int i) {
   return m_peaksWorkspace->getPeak(i);
 }
 
-QList<Mantid::Geometry::IPeak *> PeakOverlay::getSelectedPeaks()
-{
-  QList<Mantid::Geometry::IPeak*> peaks;
+QList<Mantid::Geometry::IPeak *> PeakOverlay::getSelectedPeaks() {
+  QList<Mantid::Geometry::IPeak *> peaks;
   for (auto &shape : m_selectedShapes) {
     auto marker = dynamic_cast<PeakMarker2D *>(shape);
     if (!marker)

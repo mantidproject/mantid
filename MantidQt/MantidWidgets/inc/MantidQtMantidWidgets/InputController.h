@@ -266,7 +266,6 @@ private:
 protected:
   QPixmap *m_image;
   QRect m_rect;
-
 };
 
 /**
@@ -285,7 +284,6 @@ signals:
 private:
   void signalLeftClick() override;
 };
-
 
 /**
     Controller for drawing and erasing arbitrary shapes on an unwrapped surface.
