@@ -303,3 +303,29 @@ Probably it would be best to make this automatic when a multiple fit ends, or pr
 Generating results tables
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 (How the results tables work + testing)
+
+Miscellaneous notable points
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For a long time, using the Muon Analysis interface has produced a mysterious black box in the toolbars of MantidPlot:
+
+
+.. image:: ../images/MuonAnalysisDevDocs/blackbox.png
+   :align: center
+
+This is caused by using the "Hide Toolbars" option on the Settings tab.
+If selected, MantidPlot emits a ``setToolbarsHidden(true)`` signal, which is caught by MantidPlot, hiding all the toolbars.
+The option is meant to be helpful for users with small laptop screens.
+
+However, when the interface is closed/hidden, the reverse ``setToolbarsHidden(false)`` tells MantidPlot to show *all* the toolbars, even ones that the user didn't have displayed in the first place!
+There is no cache of which toolbars were displayed, and no control over which to show - it's all or none.
+
+The "black box" seen in the image is, in fact, one of the toolbars - the "Data Display" one.
+This is used by the "Screen reader" feature in MantidPlot, which displays coordinates from a graph.
+When no graph is being read, the toolbar appears as an empty black box, as above.
+
+Future work
+^^^^^^^^^^^
+(Plotting, squashograms, frequency mode)
+
+
