@@ -151,12 +151,12 @@ public:
   void test_Tof_Not_Monotonically_Increasing_Throws_Invalid_Argument() {
     using std::sqrt;
     const size_t nypts(10);
-    std::vector<double> signal(nypts, 2.0), tof(nypts), error(nypts);
+    std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
     std::transform(signal.begin(), signal.end(), error.begin(),
                    (double (*)(double))sqrt);
     std::generate(tof.begin(), tof.end(), Decrementer(199.5));
 
-    Points tofPoints(tof);
+    BinEdges tofPoints(tof);
     Histogram histo(tofPoints, Counts(signal), CountStandardDeviations(error));
 
     TS_ASSERT_THROWS(
