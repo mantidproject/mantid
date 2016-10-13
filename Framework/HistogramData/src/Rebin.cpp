@@ -50,9 +50,6 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
       auto delta = xo_high < xn_high ? xo_high : xn_high;
       delta -= xo_low > xn_low ? xo_low : xn_low;
 
-      if (delta <= 0.0) {
-        throw std::runtime_error("Negative or zero overlaps not allowed.");
-      }
       auto factor = 1 / owidth;
       ynew[inew] += yold[iold] * delta * factor;
       enew[inew] += eold[iold] * eold[iold] * delta * factor;
@@ -106,10 +103,6 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
       auto delta = xo_high < xn_high ? xo_high : xn_high;
       delta -= xo_low > xn_low ? xo_low : xn_low;
 
-      if (delta <= 0.0) {
-        throw std::runtime_error("Negative or zero bin overlaps not allowed.");
-      }
-
       ynew[inew] += yold[iold] * delta;
       enew[inew] += eold[iold] * eold[iold] * delta * owidth;
 
@@ -135,8 +128,8 @@ namespace HistogramData {
 * @param input :: input histogram data to be rebinned.
 * @param binEdges :: input will be rebinned according to this set of bin edges.
 * @returns The rebinned histogram.
-* @throws std::runtime_error if the input histogram xmode is not BinEdges and
-* the input yMode is undefined.
+* @throws std::runtime_error if the input histogram xmode is not BinEdges,
+* the input yMode is undefined, or for non-positive input/output bin widths
 */
 Histogram rebin(const Histogram &input, const BinEdges &binEdges) {
   if (input.xMode() != Histogram::XMode::BinEdges)

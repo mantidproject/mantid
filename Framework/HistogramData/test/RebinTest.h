@@ -6,6 +6,7 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidHistogramData/Rebin.h"
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 #include <algorithm>
 #include <random>
@@ -31,11 +32,11 @@ public:
 
   void testRebinNoYModeDefined() {
     BinEdges edges(5, LinearGenerator(0, 2));
+    Points points(5, LinearGenerator(0, 1));
+    Counts counts{10, 1, 3, 4, 7};
     // X Mode Points
-    TS_ASSERT_THROWS(
-        rebin(Histogram(Histogram::XMode::Points, Histogram::YMode::Counts),
-              edges),
-        std::runtime_error);
+    TS_ASSERT_THROWS(rebin(Histogram(points, counts), edges),
+                     std::runtime_error);
     // No YMode set
     TS_ASSERT_THROWS(
         rebin(Histogram(BinEdges(10, LinearGenerator(0, 0.5))), edges),
@@ -86,13 +87,13 @@ public:
     auto outCounts = rebin(histCounts, histCounts.binEdges());
     auto outFreq = rebin(histFreq, histFreq.binEdges());
 
-    TS_ASSERT_EQUALS(outCounts.x().rawData(), histCounts.x().rawData());
-    TS_ASSERT_EQUALS(outCounts.y().rawData(), histCounts.y().rawData());
-    TS_ASSERT_EQUALS(outCounts.e().rawData(), histCounts.e().rawData());
+    TS_ASSERT_EQUALS(outCounts.x(), histCounts.x());
+    TS_ASSERT_EQUALS(outCounts.y(), histCounts.y());
+    TS_ASSERT_EQUALS(outCounts.e(), histCounts.e());
 
-    TS_ASSERT_EQUALS(outFreq.x().rawData(), histFreq.x().rawData());
-    TS_ASSERT_EQUALS(outFreq.y().rawData(), histFreq.y().rawData());
-    TS_ASSERT_EQUALS(outFreq.e().rawData(), histFreq.e().rawData());
+    TS_ASSERT_EQUALS(outFreq.x(), histFreq.x());
+    TS_ASSERT_EQUALS(outFreq.y(), histFreq.y());
+    TS_ASSERT_EQUALS(outFreq.e(), histFreq.e());
   }
 
   void testBinEdgesOutsideInputBins() {
@@ -103,6 +104,8 @@ public:
     auto outFreq = rebin(histFreq, BinEdges(10, LinearGenerator(30, 2)));
 
     TS_ASSERT(std::all_of(outCounts.y().cbegin(), outCounts.y().cend(),
+                          [](const double i) { return i == 0; }));
+    TS_ASSERT(std::all_of(outCounts.e().cbegin(), outCounts.e().cend(),
                           [](const double i) { return i == 0; }));
     TS_ASSERT(std::all_of(outFreq.y().cbegin(), outFreq.y().cend(),
                           [](const double i) { return i == 0; }));
@@ -123,11 +126,11 @@ public:
 
     for (size_t i = 0; i < outCounts.y().size(); i++) {
       TS_ASSERT_EQUALS(outCounts.y()[i], 5.0);
-      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(5), 1e-5);
+      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(5), 1e-14);
       TS_ASSERT_EQUALS(outFreq.y()[i], 12.0);
       TS_ASSERT_DELTA(outFreq.e()[i],
                       std::sqrt(outFreq.y()[i] / (edges[i + 1] - edges[i])),
-                      1e-5);
+                      1e-14);
     }
   }
 

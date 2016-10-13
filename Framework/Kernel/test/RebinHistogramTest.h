@@ -102,11 +102,6 @@ private:
     errors.resize(binSize - 1);
 
     std::iota(binEdges.begin(), binEdges.end(), 0);
-    std::generate(counts.begin(), counts.end(),
-                  []() { return static_cast<double>(rand() % 1000); });
-
-    std::transform(counts.cbegin(), counts.cend(), errors.begin(),
-                   [](const double count) { return sqrt(count); });
   }
 
   void setupOutput() {
