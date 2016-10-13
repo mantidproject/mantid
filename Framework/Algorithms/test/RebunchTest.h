@@ -155,7 +155,7 @@ private:
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(1, size, size - 1);
     BinEdges x(static_cast<size_t>(size), LinearGenerator(0.5, 0.75));
-    Counts y(size - 1, 1.0);
+    Counts y(size - 1, LinearGenerator(1.0, 1.0));
 
     retVal->setHistogram(0, x, y);
 
@@ -166,7 +166,7 @@ private:
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(1, size, size);
     Points x(size, LinearGenerator(0.5, 0.5));
-    Counts y(size, 1.0);
+    Counts y(size, LinearGenerator(1.0, 1.0));
 
     retVal->setHistogram(0, x, y);
 
@@ -179,7 +179,7 @@ private:
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen, xlen, xlen - 1);
 
-    Counts y1(xlen - 1, 1.0);
+    Counts y1(xlen - 1, LinearGenerator(1.0, 1.0));
 
     for (int i = 0; i < ylen; i++) {
       retVal->setHistogram(i, x1, y1);

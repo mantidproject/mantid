@@ -123,10 +123,10 @@ void Regroup::exec() {
 /** Regroup the data according to new output X array
  *
  * @param xold :: old x array of data
- * @param xoldIndex :: indeces of new x in XValues_old
  * @param yold :: old y array of data
- * @param ynew :: new y array of data
  * @param eold :: old error array of data
+ * @param xoldIndex :: indeces of new x in XValues_old
+ * @param ynew :: new y array of data
  * @param enew :: new error array of data
  * @param distribution :: flag defining if distribution data (1) or not (0)
  * @throw runtime_error Thrown if algorithm cannot execute

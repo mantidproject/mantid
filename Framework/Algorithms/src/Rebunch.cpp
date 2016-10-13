@@ -124,10 +124,13 @@ void Rebunch::exec() {
 
 /** Rebunches histogram data data according to n_bunch input
  *
- * @param oldHist :: old histogram data
+ * @param xold :: old x data
+ * @param yold :: old y data
+ * @param eold :: old e data
+ * @param xnew :: new x data
+ * @param ynew :: new y data
+ * @param enew :: new e data
  * @param n_bunch :: number of data points to bunch together for each new point
- * @param nx :: new x size
- * @param ny :: new y/e size
  * @throw runtime_error Thrown if algorithm cannot execute
  * @throw invalid_argument Thrown if input to function is incorrect
  **/
@@ -184,10 +187,13 @@ void Rebunch::rebunch_hist_counts(const HistogramX &xold,
 
 /** Rebunches histogram data data according to n_bunch input
 *
-* @param oldHist :: old histogram data
+* @param xold :: old x data
+* @param yold :: old y data
+* @param eold :: old e data
+* @param xnew :: new x data
+* @param ynew :: new y data
+* @param enew :: new e data
 * @param n_bunch :: number of data points to bunch together for each new point
-* @param nx :: new x size
-* @param ny :: new y/e size
 * @throw runtime_error Thrown if algorithm cannot execute
 * @throw invalid_argument Thrown if input to function is incorrect
 **/
@@ -253,15 +259,16 @@ void Rebunch::rebunch_hist_frequencies(const HistogramX &xold,
 
 /** Rebunches point data data according to n_bunch input
  *
- * @param oldHist :: old histogram data
+ * @param xold :: old x data
+ * @param yold :: old y data
+ * @param eold :: old e data
+ * @param xnew :: new x data
+ * @param ynew :: new y data
+ * @param enew :: new e data
  * @param n_bunch :: number of data points to bunch together for each new point
- * @param nx :: new x size
- * @param ny :: new y size
  * @throw runtime_error Thrown if algorithm cannot execute
  * @throw invalid_argument Thrown if input to function is incorrect
- * @return Rebunched histogram data
  **/
-
 void Rebunch::rebunch_point(const HistogramX &xold, const HistogramY &yold,
                             const HistogramE &eold, HistogramX &xnew,
                             HistogramY &ynew, HistogramE &enew,
