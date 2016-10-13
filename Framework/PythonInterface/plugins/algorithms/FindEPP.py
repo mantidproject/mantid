@@ -53,31 +53,26 @@ class FindEPP(PythonAlgorithm):
 
         # Get the positions around the max, where the y value first drops down 0.5*height
         # This is a better approach when there is a higher noise in the tails in real data
-        fwhm_right = 0
-        fwhm_left = 0
+        fwhm_right = x_values.size - 1 - imax # number of bins from max to the right end
+        fwhm_left = imax                      # number of bins from max to the left end
 
         if imax < y_values.size - 1:
             y_right = y_values[imax+1:]
             y_right_below = np.argwhere(y_right < 0.5 * height)
-            if y_right_below.size == 0:
-                fwhm_right = y_values.size - imax
-            else:
+            if y_right_below.size != 0:
                 fwhm_right = y_right_below[0][0]
 
         if imax > 0:
             y_left = y_values[:imax]
             y_left = y_left[::-1]
             y_left_below = np.argwhere(y_left < 0.5 * height)
-            if y_left_below.size == 0:
-                fwhm_left = 0
-            else:
+            if y_left_below.size != 0:
                 fwhm_left = y_left_below[0][0]
 
         fwhm_pos = np.minimum(imax+fwhm_right,x_values.size-1)
         fwhm_neg = np.maximum(imax-fwhm_left,0)
 
-        self.log().debug("(spectrum %d) : FWHM lower edge is %d" % (index,fwhm_neg))
-        self.log().debug("(spectrum %d) : FWHM upper edge is %d" % (index,fwhm_pos))
+        self.log().debug("(spectrum %d) : FWHM lower edge is %d, upper edge is %d" % (index,fwhm_neg,fwhm_pos))
 
         if fwhm_pos - fwhm_neg + 1 < 3:
             self.log().warning("Spectrum " + str(index) + " in workspace " + self.workspace.getName() +
