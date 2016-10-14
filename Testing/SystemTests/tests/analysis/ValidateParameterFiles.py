@@ -34,6 +34,7 @@ class ValidateParameterFiles(stresstesting.MantidStressTest):
 
     def runTest(self):
         """Main entry point for the test suite"""
+        from minixsv import pyxsval # noqa
         direc = config['instrumentDefinition.directory']
         print direc
         self.xsdFile =  os.path.join(direc,'Schema/ParameterFile/1.0/','ParameterFileSchema.xsd')

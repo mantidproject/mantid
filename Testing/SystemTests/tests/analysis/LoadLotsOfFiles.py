@@ -196,6 +196,7 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
 
         # Eval statement will use current scope. Allow access to
         # mantid module
+        import mantid # noqa
 
         print "Found an expected file '%s' file" % expected
         expectedfile = open(expected)
