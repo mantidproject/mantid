@@ -261,8 +261,8 @@ void TabulatedFunction::setupData() const {
   g_log.debug() << "Setting up " << m_workspace->name() << " index " << index
                 << '\n';
 
-  auto &xData = m_workspace->points(index);
-  auto &yData = m_workspace->y(index);
+  const auto &xData = m_workspace->points(index);
+  const auto &yData = m_workspace->y(index);
   m_xData.assign(xData.begin(), xData.end());
   m_yData.assign(yData.begin(), yData.end());
 
