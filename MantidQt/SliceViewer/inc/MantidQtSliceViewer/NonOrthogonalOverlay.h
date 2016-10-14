@@ -48,7 +48,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER NonOrthogonalOverlay : public QWidget {
 	Q_OBJECT
 
 public:
-	NonOrthogonalOverlay(QwtPlot *plot, QWidget *parent, Mantid::API::IMDWorkspace_sptr *ws);
+	NonOrthogonalOverlay(QwtPlot *plot, QWidget *parent);
 	~NonOrthogonalOverlay() override;
 	/// First point of the line (in coordinates of the plot)
 	QPointF m_pointA;
@@ -69,7 +69,7 @@ public:
 	QSize size() const;
 	int height() const;
 	int width() const;
-	void calculateAxesSkew();
+	void calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws);
 	Mantid::API::IMDWorkspace_sptr *m_ws;
 	void setAxesPoints();
 	Mantid::Kernel::DblMatrix m_skewMatrix;

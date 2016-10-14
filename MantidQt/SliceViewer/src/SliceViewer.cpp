@@ -160,7 +160,7 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   updateDisplay();
 
-  
+  m_nonOrthogonalOverlay = new NonOrthogonalOverlay(m_plot, m_plot->canvas());
 
   // -------- Line Overlay ----------------
   m_lineOverlay = new LineOverlay(m_plot, m_plot->canvas());
@@ -1692,10 +1692,6 @@ void SliceViewer::checkForHKLDimension() {
 			switchQWTRaster(useNonOrthogonal);
 		}
 		emit setNonOrthogonalbtn();
-		//Orthogonal Overlay
-		m_nonOrthogonalOverlay = new NonOrthogonalOverlay(m_plot, m_plot->canvas(), &m_ws);
-		//need to move it from here
-
 	}
 	
 }
@@ -2377,6 +2373,8 @@ void SliceViewer::setNonOrthogonalbtn()
 	bool isNonOrthogonalWS = API::requiresSkewMatrix(m_ws);
 	bool canShowSkewedWS = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
 	ui.btnNonOrthogonalToggle->setDisabled(!canShowSkewedWS);
+	//Orthogonal Overlay axes calculated and appear
+	m_nonOrthogonalOverlay->calculateAxesSkew(&m_ws); //set this later so only appears if nonOrth
 	emit disableOrthogonalAnalysisTools(ui.btnNonOrthogonalToggle->isChecked());
 
 }

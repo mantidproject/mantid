@@ -17,7 +17,7 @@ namespace MantidQt {
 		//----------------------------------------------------------------------------------------------
 		/** Constructor
 		 */
-		NonOrthogonalOverlay::NonOrthogonalOverlay(QwtPlot *plot, QWidget *parent, Mantid::API::IMDWorkspace_sptr *ws)
+		NonOrthogonalOverlay::NonOrthogonalOverlay(QwtPlot *plot, QWidget *parent)
 			: QWidget(parent), m_plot(plot), m_showLine(true) {
 			m_CompskewMatrix[0] = 1.0;
 			m_CompskewMatrix[1] = 0.0;
@@ -28,12 +28,12 @@ namespace MantidQt {
 			m_CompskewMatrix[6] = 0.0;
 			m_CompskewMatrix[7] = 0.0;
 			m_CompskewMatrix[8] = 1.0;
-			m_ws = ws;
+			//m_ws = ws;
 			
 			m_pointA = QPointF(0, 0);
-			m_pointB = QPointF(1 , 0);
+			m_pointB = QPointF(1, 0);
 			m_pointC = QPointF(0, 1);
-			calculateAxesSkew();
+			//calculateAxesSkew();
 			m_width = 0.1;
 
 		}
@@ -103,14 +103,16 @@ namespace MantidQt {
 			auto theta = std::acos(dotProduct);
 			//auto cross = 
 			//return dotProduct;
+			return 0;
 		}
 
-		void NonOrthogonalOverlay::calculateAxesSkew() {
+		void NonOrthogonalOverlay::calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws) {
 			//to get the angle
 			// figure out which dims interested in. if H/X then compare first column of skew against 1, 0, 0 (find dot product)
 			// K/Y second column, then against 0, 1, 0
 			// L/ third column skew against 0, 0, 1
 			// then figure out cross product of the two chosen vectors
+			m_ws = ws;
 			setAxesPoints();
 			// dimensions interested in currently hardcoded
 			int dimX = 1;
