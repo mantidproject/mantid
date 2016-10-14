@@ -1,6 +1,7 @@
 #ifndef MANTID_KERNEL_MANDATORYVALIDATOR_H_
 #define MANTID_KERNEL_MANDATORYVALIDATOR_H_
 
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/TypedValidator.h"
 #include <boost/make_shared.hpp>
 #include <vector>
@@ -14,6 +15,10 @@ template <typename T> DLLExport bool checkIsEmpty(const T &);
 /// Specialization for any vector type
 template <typename T> bool checkIsEmpty(const std::vector<T> &value) {
   return value.empty();
+}
+
+template <typename T> DLLExport bool checkIsEmpty(const ArrayProperty<T> &property) {
+  return property.value().empty();
 }
 
 /// Defines the concept of emptiness
