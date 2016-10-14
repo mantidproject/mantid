@@ -63,9 +63,12 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   // Global options
   auto globalOptions = m_view->getReductionOptions();
   if (!globalOptions.empty())
-    options.push_back(m_view->getReductionOptions());
+    options.push_back(globalOptions);
+
   // Add analysis mode
-  options.push_back("AnalysisMode=" + m_view->getAnalysisMode());
+  auto analysisMode = m_view->getAnalysisMode();
+  if (!analysisMode.empty())
+	  options.push_back("AnalysisMode=" + analysisMode);
 
   return boost::algorithm::join(options, ",");
 }
