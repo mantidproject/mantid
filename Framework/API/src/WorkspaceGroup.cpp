@@ -297,10 +297,17 @@ void WorkspaceGroup::workspaceBeforeReplaceHandle(
     }
   }
 
-  // Remove any duplicate pointers
-  std::sort(m_workspaces.begin(), m_workspaces.end());
-  auto endIter = std::unique(m_workspaces.begin(), m_workspaces.end());
-  m_workspaces.erase(endIter, m_workspaces.end());
+  // Have to use boost implementation with boost shared pointers
+  boost::unordered_set<API::Workspace_sptr> seenWorkspaces;
+  for (auto it = m_workspaces.begin(); it != m_workspaces.end();) {
+    if (seenWorkspaces.find(*it) != seenWorkspaces.end()) {
+      // Duplicate
+      it = m_workspaces.erase(it);
+    } else {
+      seenWorkspaces.insert(*it);
+      ++it;
+    }
+  }
 }
 
 /**
