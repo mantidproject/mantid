@@ -62,6 +62,16 @@ class MatchPeaksTest(unittest.TestCase):
                               XUnit='DeltaE', XMin=0, XMax=7, BinWidth=0.099,
                               OutputWorkspace=self._ws_in_2)
 
+        # Input workspace 3
+        self._ws_in_3 = 'in_3'
+        func4 = "name=LinearBackground, A0=0.3; name=Gaussian, PeakCentre=2.5, Height=7, Sigma=0.15"
+        CreateSampleWorkspace(Function='User Defined',
+                              WorkspaceType='Histogram',
+                              UserDefinedFunction=func4,
+                              NumBanks=4, BankPixelWidth=1,
+                              XUnit='DeltaE', XMin=0, XMax=7, BinWidth=0.099,
+                              OutputWorkspace=self._ws_in_3)
+
         # Input workspaces that are incompatible
         self._in1 = 'wrong_number_of_histograms'
         CreateSampleWorkspace(Function='Flat background',
@@ -75,7 +85,6 @@ class MatchPeaksTest(unittest.TestCase):
                               NumBanks=4, BankPixelWidth=1,
                               XUnit='DeltaE', XMin=0, XMax=8, BinWidth=0.1,
                               OutputWorkspace=self._in2)
-
 
         # mtd[self._ws_shift].blocksize() = 70
         # mid = 35
@@ -263,6 +272,30 @@ class MatchPeaksTest(unittest.TestCase):
         # Bin range
         self.assertEqual(0, bin_range_table.row(0)["MinBin"])
         self.assertEqual(62, bin_range_table.row(0)["MaxBin"])
+        self._workspace_properties(shifted)
+        DeleteWorkspace(shifted)
+        DeleteWorkspace(fit_table)
+        DeleteWorkspace(bin_range_table)
+
+    def testMatchInput3(self):
+        #               right shifts
+        # spectrum 0:   25 - 42 = -17 (right shift)
+        # spectrum 1:   25 - 42 = -17 (right shift)
+        # spectrum 2:   25 - 42 = -17 (right shift)
+        # spectrum 3:   25 - 42 = -17 (right shift)
+        self._args['InputWorkspace'] = self._ws_shift
+        self._args['InputWorkspace2'] = self._ws_in_2
+        self._args['InputWorkspace3'] = self._ws_in_3
+        alg_test = run_algorithm('MatchPeaks', **self._args)
+        self.assertTrue(alg_test.isExecuted())
+        shifted = AnalysisDataService.retrieve('output')
+        bin_range_table = AnalysisDataService.retrieve('bin_range')
+        fit_table = FindEPP(shifted)
+        self.assertEqual(32+17, shifted.binIndexOf(fit_table.row(0)["PeakCentre"]))
+        self.assertEqual(40+17, np.argmax(shifted.readY(2)))
+        # Bin range
+        self.assertEqual(17, bin_range_table.row(0)["MinBin"])
+        self.assertEqual(70, bin_range_table.row(0)["MaxBin"])
         self._workspace_properties(shifted)
         DeleteWorkspace(shifted)
         DeleteWorkspace(fit_table)
