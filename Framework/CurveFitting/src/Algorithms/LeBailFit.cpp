@@ -19,11 +19,12 @@ const int OBSDATAINDEX(0);
 const int CALDATAINDEX(1);
 const int DATADIFFINDEX(2);
 const int CALPUREPEAKINDEX(3);
-const int CALBKGDINDEX(4);   // Output workspace background at ws index 4
-const int INPUTBKGDINDEX(6); // Input background
-const int INPUTPUREPEAKINDEX(
-    7); // Output workspace:  pure peak (data with background removed)
-const int SMOOTHEDBKGDINDEX(8); //  Smoothed background
+// Output workspace background at ws index 4
+const int CALBKGDINDEX(4);
+// Input background
+const int INPUTBKGDINDEX(6);
+// Output workspace:  pure peak (data with background removed)
+const int INPUTPUREPEAKINDEX(7);
 
 const double NOBOUNDARYLIMIT(1.0E10);
 const double EPSILON(1.0E-10);

@@ -187,8 +187,6 @@ public:
     const vector<double> vecX = testws->readX(0);
     const vector<double> vecY = testws->readY(0);
 
-    size_t nData = vecX.size();
-
     // Calculate peak intensities
     vector<double> summedpeaksvalue(vecY.size(), 0.);
     lebailfunction.calculatePeaksIntensities(vecX, vecY, summedpeaksvalue);

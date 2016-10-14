@@ -30,9 +30,6 @@ Workspace2D_sptr generatePeakPositionWorkspace(int bankid) {
 
   if (bankid != 1) {
     throw runtime_error("generatePeakPositionWorkspace supports bank 1 only.");
-    // string
-    // filename("/home/wzz/Mantid/Code/debug/MyTestData/bank1peakpositions.dat");
-    // importDataFromColumnFile(filename, vecDsp, vecTof, vecError);
   }
 
   // 1. Generate vectors, bank 1's peak positions
@@ -66,40 +63,6 @@ Workspace2D_sptr generatePeakPositionWorkspace(int bankid) {
   }
 
   return dataws;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Import data from a column data file
-*/
-void importDataFromColumnFile(string filename, vector<double> &vecX,
-                              vector<double> &vecY, vector<double> &vecE) {
-  std::ifstream ins;
-  ins.open(filename.c_str());
-
-  if (!ins.is_open()) {
-    std::cout << "Data file " << filename << " cannot be opened. \n";
-    throw std::invalid_argument("Unable to open data fiile. ");
-  } else {
-    std::cout << "Data file " << filename << " is opened for parsing. \n";
-  }
-
-  char line[256];
-  while (ins.getline(line, 256)) {
-    if (line[0] != '#') {
-      double x, y, e;
-      std::stringstream ss;
-      ss.str(line);
-      ss >> x >> y >> e;
-      vecX.push_back(x);
-      vecY.push_back(y);
-      if (e < 0.00001) {
-        e = std::max(1.0, std::sqrt(y));
-      }
-      vecE.push_back(e);
-    }
-  }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -217,73 +180,6 @@ int getIndex(vector<string> vecstrs, string value) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Generate a table workspace for holding instrument parameters
-*/
-TableWorkspace_sptr generateInstrumentProfileTable(int bankid) {
-  // 1. Import
-  vector<string> colnames;
-  vector<vector<string>> strparams;
-
-  if (bankid == 1) {
-    string filename("/home/wzz/Mantid/Code/debug/MyTestData/bank1profile.txt");
-    importTableTextFile(filename, strparams, colnames, 6);
-  } else {
-    throw runtime_error("generateInstrumentProfile supports bank 1 only.");
-  }
-
-  // 2. Generate workspace
-  DataObjects::TableWorkspace *tablews = new DataObjects::TableWorkspace();
-  DataObjects::TableWorkspace_sptr geomws =
-      DataObjects::TableWorkspace_sptr(tablews);
-
-  tablews->addColumn("str", "Name");
-  tablews->addColumn("double", "Value");
-  tablews->addColumn("str", "FitOrTie");
-  tablews->addColumn("double", "Min");
-  tablews->addColumn("double", "Max");
-  tablews->addColumn("double", "StepSize");
-
-  // 3. Set up workspace
-  int iname, ivalue, ifit, imin, imax, istep;
-  iname = getIndex(colnames, "Name");
-  ivalue = getIndex(colnames, "Value");
-  ifit = getIndex(colnames, "FitOrTie");
-  imin = getIndex(colnames, "Min");
-  imax = getIndex(colnames, "Max");
-  istep = getIndex(colnames, "StepSize");
-
-  for (size_t ir = 0; ir < strparams.size(); ++ir) {
-    // For each row
-    API::TableRow newrow = geomws->appendRow();
-    vector<string> &strvalues = strparams[ir];
-
-    string parname = strvalues[iname];
-    double parvalue = atof(strvalues[ivalue].c_str());
-    string fitstr = strvalues[ifit];
-    double minvalue = -DBL_MAX;
-    if (imin >= 0)
-      minvalue = atof(strvalues[imin].c_str());
-    double maxvalue = DBL_MAX;
-    if (imax >= 0)
-      maxvalue = atof(strvalues[imax].c_str());
-    double stepsize = 1.0;
-    if (istep >= 0)
-      stepsize = atof(strvalues[istep].c_str());
-
-    newrow << parname << parvalue << fitstr << minvalue << maxvalue << stepsize;
-
-    /*
-    cout << "newrow = geomws->appendRow();\n";
-    cout << "newrow << \"" <<  parname << "\" << " << parvalue << " << \"" <<
-    fitstr << "\" << " << minvalue << " << "
-    << maxvalue << " << " << stepsize << "; \n";
-    */
-  }
-
-  return geomws;
-}
-
-//----------------------------------------------------------------------------------------------
 /** Parse Table Workspace to a map of string, double pair
 */
 void parseParameterTableWorkspace(TableWorkspace_sptr paramws,
@@ -322,7 +218,6 @@ public:
 
     // a) Generate workspaces
     Workspace2D_sptr posWS = generatePeakPositionWorkspace(bankid);
-    // TableWorkspace_sptr profWS = generateInstrumentProfileTable(bankid);
     TableWorkspace_sptr profWS = generateInstrumentProfileTableBank1();
 
     // z) Set to data service
@@ -398,7 +293,6 @@ public:
 
     // a) Generate workspaces
     Workspace2D_sptr posWS = generatePeakPositionWorkspace(bankid);
-    // TableWorkspace_sptr profWS = generateInstrumentProfileTable(bankid);
     TableWorkspace_sptr profWS = generateInstrumentProfileTableBank1();
 
     // z) Set to data service

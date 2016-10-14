@@ -511,43 +511,6 @@ API::MatrixWorkspace_sptr createInputDataWorkspace(int option) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Import text file containing reflections (HKL)
- */
-void importReflectionTxtFile(std::string filename,
-                             std::vector<std::vector<int>> &hkls) {
-  std::ifstream ins;
-  ins.open(filename.c_str());
-  if (!ins.is_open()) {
-    stringstream errss;
-    errss << "File " << filename << " cannot be opened. ";
-    std::cout << errss.str() << '\n';
-    throw std::invalid_argument(errss.str());
-  } else {
-    std::cout << "[TEST] Import file " << filename
-              << " for reflections (HKL).\n";
-  }
-
-  char line[256];
-  while (ins.getline(line, 256)) {
-    if (line[0] != '#') {
-      int h, k, l;
-      std::vector<int> hkl;
-      std::stringstream ss;
-      ss.str(line);
-      ss >> h >> k >> l;
-      hkl.push_back(h);
-      hkl.push_back(k);
-      hkl.push_back(l);
-      hkls.push_back(hkl);
-    }
-  }
-
-  ins.close();
-
-  return;
-}
-
-//----------------------------------------------------------------------------------------------
 /** Create parameter workspace for peak calculation.
   * If a parameter is to be modifed by absolute value, then this parameter
  * will be fit.
@@ -1095,7 +1058,6 @@ public:
 
     // a)  Reflections
     std::vector<std::vector<int>> hkls;
-    // importReflectionTxtFile("PG3_Bank7_Peaks.hkl", hkls);
     // (222)
     vector<int> r222(3, 2);
     hkls.push_back(r222);
