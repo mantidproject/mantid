@@ -58,6 +58,8 @@ public:
   std::string getCRho() const override;
   /// Return CAlpha
   std::string getCAlpha() const override;
+  /// Return CAp
+  std::string getCAp() const override;
 
   /// Creates hints for 'Plus'
   void

@@ -80,6 +80,11 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   if (!calpha.empty())
 	  options.push_back("CAlpha=" + calpha);
 
+  // Add CAp
+  auto cap = m_view->getCAp();
+  if (!cap.empty())
+    options.push_back("CAp=" + cap);
+
   return boost::algorithm::join(options, ",");
 }
 

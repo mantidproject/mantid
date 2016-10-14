@@ -59,11 +59,19 @@ public:
         .Times(Exactly(1))
         .WillOnce(Return("MultiDetectorAnalysis"));
     EXPECT_CALL(mockView, getCRho()).Times(Exactly(1)).WillOnce(Return("2.5"));
-	EXPECT_CALL(mockView, getCAlpha()).Times(Exactly(1)).WillOnce(Return("0.6"));
+    EXPECT_CALL(mockView, getCAlpha())
+        .Times(Exactly(1))
+        .WillOnce(Return("0.6"));
+    EXPECT_CALL(mockView, getCAp()).Times(Exactly(1)).WillOnce(Return("100.0"));
     auto options = presenter.getReductionOptions();
 
-    TS_ASSERT_EQUALS(options,
-                     "AnalysisMode=MultiDetectorAnalysis,CRho=2.5,CAlpha=0.6");
+    std::vector<std::string> optionsVec;
+    boost::split(optionsVec, options, boost::is_any_of(","));
+    TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
+    TS_ASSERT_EQUALS(optionsVec[1], "CRho=2.5");
+    TS_ASSERT_EQUALS(optionsVec[2], "CAlpha=0.6");
+    TS_ASSERT_EQUALS(optionsVec[3], "CAp=100.0");
+
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 

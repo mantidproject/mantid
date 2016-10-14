@@ -133,5 +133,13 @@ std::string QtReflSettingsTabView::getCAlpha() const {
   return m_ui.expSettingsCAlphaEdit->text().toStdString();
 }
 
+/** Return CAp
+* @return :: polarization correction CAp
+*/
+std::string QtReflSettingsTabView::getCAp() const {
+
+	return m_ui.expSettingsCApEdit->text().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid
