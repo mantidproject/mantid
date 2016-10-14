@@ -3178,7 +3178,8 @@ void estimateBackgroundCoarse(DataObjects::Workspace2D_sptr dataws,
   background->function(domain, values);
 
   dataws->mutableY(wsindexbkgd) = values.toVector();
-  dataws->mutableY(wsindexpeak) = dataws->y(wsindexraw) - dataws->y(wsindexbkgd);
+  dataws->mutableY(wsindexpeak) =
+      dataws->y(wsindexraw) - dataws->y(wsindexbkgd);
   dataws->mutableE(wsindexpeak) = dataws->e(wsindexraw);
 }
 
