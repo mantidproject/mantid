@@ -74,5 +74,5 @@ for alg in algs:
                 with open (filename, "w") as algRst:
                     algRst.write(algText)
 
-    if fileFound==False:
+    if not fileFound:
         outputError(alg, algVersion, "File not found")

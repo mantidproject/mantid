@@ -51,5 +51,5 @@ for alg in algs:
                 #check if already in a ticket
                 usageTicket = ticketExists(alg,ticketHash)
                 outputError(alg, algVersion, "No usage section", usageTicket)
-    if fileFound==False:
+    if not fileFound:
         outputError(alg, algVersion, "File not found")

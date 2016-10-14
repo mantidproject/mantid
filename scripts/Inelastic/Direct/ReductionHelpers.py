@@ -292,7 +292,7 @@ def check_instrument_name(old_name,new_name):
     """ function checks if new instrument name is acceptable instrument name"""
 
     if new_name is None:
-        if not old_name is None:
+        if old_name is not None:
             return (None,None,config.getFacility())
         else:
             raise KeyError("No instrument name is defined")

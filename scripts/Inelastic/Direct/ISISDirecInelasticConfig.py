@@ -104,7 +104,7 @@ class UserProperties(object):
             # pylint: disable=W0703
             except Exception:
                 ind = None
-            if not ind is None:
+            if ind is not None:
                 str_parts[ind] = str(getattr(self, prop))
         data_string = "".join(str_parts)
         return data_string

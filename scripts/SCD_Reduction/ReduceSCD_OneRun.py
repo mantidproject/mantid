@@ -342,14 +342,14 @@ else:
 
 # Print warning if user is trying to integrate using the cylindrical method and transorm the cell
 if use_cylindrical_integration:
-    if (not cell_type is None) or (not centering is None):
+    if (cell_type is not None) or (centering is not None):
         print "WARNING: Cylindrical profiles are NOT transformed!!!"
 #
 # If requested, also switch to the specified conventional cell and save the
 # corresponding matrix and integrate file
 #
 else:
-    if (not cell_type is None) and (not centering is None) :
+    if (cell_type is not None) and (centering is not None) :
         run_conventional_matrix_file = output_directory + "/" + run + "_" +        \
                                    cell_type + "_" + centering + ".mat"
         if output_nexus:

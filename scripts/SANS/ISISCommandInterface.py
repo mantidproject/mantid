@@ -411,7 +411,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         else:
             combineDet = 'rear'
 
-    if not full_trans_wav is None:
+    if full_trans_wav is not None:
         ReductionSingleton().full_trans_wav = full_trans_wav
 
     ReductionSingleton().to_wavelen.set_range(wav_start, wav_end)
@@ -964,7 +964,7 @@ def PlotResult(workspace, canvas=None):
     else:
         graph = mantidplot.importMatrixWorkspace(workspace.getName()).plotGraph2D()
 
-    if not canvas is None:
+    if canvas is not None:
         # we were given a handle to an existing graph, use it
         mantidplot.mergePlots(canvas, graph)
         graph = canvas
@@ -1526,7 +1526,7 @@ def set_q_resolution_use(use):
     '''
     if use:
         ReductionSingleton().to_Q.set_use_q_resolution(True)
-    elif use == False:
+    elif not use:
         ReductionSingleton().to_Q.set_use_q_resolution(False)
     else:
         sanslog.warning('Warning: Could could not set useage of QResolution')

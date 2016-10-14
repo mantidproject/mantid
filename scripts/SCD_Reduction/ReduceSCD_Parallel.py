@@ -264,7 +264,7 @@ if not use_cylindrical_integration:
 # corresponding matrix and integrate file
 #
 if not use_cylindrical_integration:
-    if (not cell_type is None) and (not centering is None) :
+    if (cell_type is not None) and (centering is not None) :
         conv_name = output_directory + "/" + exp_name + "_" + cell_type + "_" + centering
         if output_nexus:
             conventional_integrate_file = conv_name + ".nxs"
@@ -281,7 +281,7 @@ if not use_cylindrical_integration:
         SaveIsawUB( InputWorkspace=peaks_ws, Filename=conventional_matrix_file )
 
 if use_cylindrical_integration:
-    if (not cell_type is None) or (not centering is None):
+    if (cell_type is not None) or (centering is not None):
         print "WARNING: Cylindrical profiles are NOT transformed!!!"
   # Combine *.profiles files
     filename = output_directory + '/' + exp_name + '.profiles'

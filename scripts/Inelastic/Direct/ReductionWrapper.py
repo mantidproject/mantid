@@ -205,7 +205,7 @@ class ReductionWrapper(object):
             or workspace name to validate results against.
         """
 #pylint: disable=protected-access
-        if not PropertyManager.save_file_name._file_name is None:
+        if PropertyManager.save_file_name._file_name is not None:
 #pylint: disable=protected-access
             file_name = PropertyManager.save_file_name._file_name
             if isinstance(file_name,api.Workspace):
@@ -378,7 +378,7 @@ class ReductionWrapper(object):
             instead of pause in debug mode
         """
 
-        if not self._debug_wait_for_files_operation is None:
+        if self._debug_wait_for_files_operation is not None:
 # it is callable and the main point of this method is that it is callable
 #pylint: disable=E1102
             self._debug_wait_for_files_operation()
@@ -706,7 +706,7 @@ def iliad(reduce):
             pass # we should set already set up variables using
 
         custom_print_function = host.set_custom_output_filename()
-        if not custom_print_function is None:
+        if custom_print_function is not None:
             PropertyManager.save_file_name.set_custom_print(custom_print_function)
         #
         rez = reduce(*args)
