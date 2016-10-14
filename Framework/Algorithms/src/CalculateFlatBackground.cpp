@@ -41,13 +41,6 @@ void CalculateFlatBackground::init() {
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "Name to use for the output workspace.");
-  std::vector<std::string> modeOptions{"Linear Fit", "Mean", "Moving Average"};
-  declareProperty("Mode", "Linear Fit",
-                  boost::make_shared<StringListValidator>(modeOptions),
-                  "The background count rate is estimated either by taking a "
-                  "mean, doing a linear fit, or taking the\n"
-                  "minimum of a moving average (default: Linear Fit)");
-
   declareProperty("StartX", Mantid::EMPTY_DBL(),
                   "The X value at which to start the background fit. Mandatory "
                   "for the Linear Fit and Mean modes, ignored by Moving "
@@ -60,16 +53,16 @@ void CalculateFlatBackground::init() {
                   "Average.");
   setPropertySettings("EndX", make_unique<EnabledWhenProperty>(
                                   "Mode", IS_NOT_EQUAL_TO, "Moving Average"));
-  declareProperty("AveragingWindowWidth", Mantid::EMPTY_INT(),
-                  "The width of the moving average window in bins. Mandatory "
-                  "for the Moving Average mode.");
-  setPropertySettings(
-      "AveragingWindowWidth",
-      make_unique<EnabledWhenProperty>("Mode", IS_EQUAL_TO, "Moving Average"));
   declareProperty(
       make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
       "Indices of the spectra that will have their background removed\n"
       "default: modify all spectra");
+  std::vector<std::string> modeOptions{"Linear Fit", "Mean", "Moving Average"};
+  declareProperty("Mode", "Linear Fit",
+                  boost::make_shared<StringListValidator>(modeOptions),
+                  "The background count rate is estimated either by taking a "
+                  "mean, doing a linear fit, or taking the\n"
+                  "minimum of a moving average (default: Linear Fit)");
   // Property to determine whether we subtract the background or just return the
   // background.
   std::vector<std::string> outputOptions{"Subtract Background",
@@ -94,6 +87,12 @@ void CalculateFlatBackground::init() {
                   "is added to the error. If false, the signal and errors are "
                   "left unchanged",
                   Direction::Input);
+  declareProperty("AveragingWindowWidth", Mantid::EMPTY_INT(),
+                  "The width of the moving average window in bins. Mandatory "
+                  "for the Moving Average mode.");
+  setPropertySettings(
+      "AveragingWindowWidth",
+      make_unique<EnabledWhenProperty>("Mode", IS_EQUAL_TO, "Moving Average"));
 }
 
 void CalculateFlatBackground::exec() {
