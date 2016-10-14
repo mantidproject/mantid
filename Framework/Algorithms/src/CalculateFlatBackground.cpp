@@ -201,9 +201,6 @@ void CalculateFlatBackground::exec() {
         }
       }
 
-      // Only if Mean() is called will variance be changed
-      double variance = -1;
-
       // Now call the function the user selected to calculate the background
       double background = -1;
       switch (mode) {
@@ -211,7 +208,7 @@ void CalculateFlatBackground::exec() {
         background = LinearFit(outputWS, currentSpec, startX, endX);
         break;
       case Modes::MEAN:
-        background = Mean(outputWS, currentSpec, startX, endX, variance);
+        background = Mean(outputWS, currentSpec, startX, endX);
         break;
       case Modes::MOVING_AVERAGE:
         background = movingAverage(outputWS, currentSpec, windowWidth);
@@ -228,17 +225,9 @@ void CalculateFlatBackground::exec() {
         backgroundTotal += background;
       }
 
-      auto &E = outputWS->mutableE(currentSpec);
-      // only the Mean() function calculates the variance
-      // cppcheck-suppress knownConditionTrueFalse
-      if (variance > 0) {
-        // adjust the errors using the variance (variance = error^2)
-        std::transform(
-            E.begin(), E.end(), E.begin(),
-            std::bind2nd(VectorHelper::AddVariance<double>(), variance));
-      }
       // Get references to the current spectrum
       auto &Y = outputWS->mutableY(currentSpec);
+      auto &E = outputWS->mutableE(currentSpec);
       // Now subtract the background from the data
       for (int j = 0; j < blocksize; ++j) {
         if (removeBackground) {
@@ -371,29 +360,25 @@ void CalculateFlatBackground::getWsInds(std::vector<int> &output,
   }
 }
 /** Gets the mean number of counts in each bin the background region and the
-* variance (error^2) of that
-*  number
+* variance (error^2) of that number. Adjusts the y errors accordingly.
 *  @param WS :: points to the input workspace
 *  @param wsInd :: index of the spectrum to process
 *  @param startX :: a X-value in the first bin that will be considered, must not
 * be greater endX
 *  @param endX :: a X-value in the last bin that will be considered, must not
 * less than startX
-*  @param variance :: will be set to the number of counts divided by the number
-* of bins squared (= error^2)
 *  @return the mean number of counts in each bin the background region
 *  @throw out_of_range if either startX or endX are out of the range of X-values
 * in the specified spectrum
 *  @throw invalid_argument if endX has the value of first X-value one of the
 * spectra
 */
-double CalculateFlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS,
+double CalculateFlatBackground::Mean(const API::MatrixWorkspace_sptr WS,
                                      const int wsInd, const double startX,
-                                     const double endX,
-                                     double &variance) const {
+                                     const double endX) const {
   auto &XS = WS->x(wsInd);
   auto &YS = WS->y(wsInd);
-  auto &ES = WS->e(wsInd);
+  auto &ES = WS->mutableE(wsInd);
   // the function checkRange should already have checked that startX <= endX,
   // but we still need to check values weren't out side the ranges
   if (endX > XS.back() || startX < XS.front()) {
@@ -434,9 +419,13 @@ double CalculateFlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS,
   // is taken as the sqrt the total number counts. To get the the error on the
   // counts in each bin just divide this by the number of bins. The variance =
   // error^2 that is the total variance divide by the number of bins _squared_.
-  variance = std::accumulate(ES.begin() + startInd, ES.begin() + endInd + 1,
+  const double variance = std::accumulate(ES.begin() + startInd, ES.begin() + endInd + 1,
                              0.0, VectorHelper::SumSquares<double>()) /
              (numBins * numBins);
+  // adjust the errors using the variance (variance = error^2)
+  std::transform(
+      ES.begin(), ES.end(), ES.begin(),
+      std::bind2nd(VectorHelper::AddVariance<double>(), variance));
   // return mean number of counts in each bin, the sum of the number of counts
   // in all the bins divided by the number of bins used in that sum
   return background;

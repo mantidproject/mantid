@@ -87,8 +87,8 @@ private:
   void restoreDistributionState(API::MatrixWorkspace_sptr workspace);
   void checkRange(double &startX, double &endX);
   void getWsInds(std::vector<int> &output, const int workspaceTotal);
-  double Mean(const API::MatrixWorkspace_const_sptr WS, const int wsInd,
-              const double startX, const double endX, double &variance) const;
+  double Mean(const API::MatrixWorkspace_sptr WS, const int wsInd,
+              const double startX, const double endX) const;
   double LinearFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX,
                    double endX);
   double movingAverage(API::MatrixWorkspace_const_sptr WS, int wsIndex,
