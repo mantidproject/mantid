@@ -177,4 +177,43 @@ private:
   }
 };
 
+class LoadGSSTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    for (int i = 0; i < numberOfIterations; ++i) {
+      loadAlgPtrs.emplace_back(setupAlg());
+    }
+  }
+
+  void testLoadGSSPerformance() {
+    for (auto alg : loadAlgPtrs) {
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
+    }
+  }
+
+  void tearDown() override {
+    for (int i = 0; i < numberOfIterations; i++) {
+      delete loadAlgPtrs[i];
+      loadAlgPtrs[i] = nullptr;
+    }
+    API::AnalysisDataService::Instance().remove(outWsName);
+  }
+
+private:
+  std::vector<LoadGSS *> loadAlgPtrs;
+  const int numberOfIterations = 100;
+  const std::string outWsName = "TestWS";
+
+  LoadGSS *setupAlg() {
+    LoadGSS *loadAlg = new LoadGSS();
+    loadAlg->initialize();
+
+    loadAlg->setPropertyValue("Filename", "gss1.txt");
+    loadAlg->setProperty("OutputWorkspace", outWsName);
+    loadAlg->setProperty("UseBankIDasSpectrumNumber", true);
+
+    loadAlg->setRethrows(true);
+    return loadAlg;
+  }
+};
 #endif // LOADGSSTEST_H_
