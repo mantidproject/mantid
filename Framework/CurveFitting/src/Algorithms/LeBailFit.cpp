@@ -469,11 +469,9 @@ void LeBailFit::execPatternCalculation() {
       vecY, rfactor);
   m_outputWS->mutableY(CALDATAINDEX) = vecY;
 
-  size_t numpts = vecY.size();
   // Calculate background
-  std::vector<double> vec_bkgd(m_outputWS->y(INPUTBKGDINDEX).size(), 0);
-  m_lebailFunction->function(vec_bkgd, vecX, false, true);
-  m_outputWS->mutableY(INPUTBKGDINDEX) = vec_bkgd;
+  m_outputWS->mutableY(INPUTBKGDINDEX) =
+      m_lebailFunction->function(vecX, false, true);
 
   m_outputWS->mutableY(INPUTPUREPEAKINDEX) =
       m_outputWS->y(OBSDATAINDEX) - m_outputWS->y(INPUTBKGDINDEX);
@@ -569,7 +567,7 @@ void LeBailFit::execRefineBackground() {
     proposeNewBackgroundValues();
     Rfactor newR(DBL_MAX, DBL_MAX);
     m_backgroundFunction->function(domain, values);
-	backgroundvalues = values.toVector();
+    backgroundvalues = values.toVector();
     for (size_t i = 0; i < numpts; ++i) {
       m_outputWS->mutableY(INPUTPUREPEAKINDEX)[i] =
           m_dataWS->y(m_wsIndex)[i] - values[i];
@@ -1467,8 +1465,8 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles,
   Rfactor startR(-DBL_MAX, -DBL_MAX);
 
   // Process background to make a pure peak spectrum in output workspace
-  std::vector<double> vecBkgd(m_outputWS->y(INPUTBKGDINDEX).size(), 0);
-  m_lebailFunction->function(vecBkgd, vecX.rawData(), false, true);
+  std::vector<double> vecBkgd =
+      m_lebailFunction->function(vecX.rawData(), false, true);
   m_outputWS->mutableY(INPUTBKGDINDEX) = vecBkgd;
   std::vector<double> dataPurePeak(m_outputWS->y(INPUTPUREPEAKINDEX).size(), 0);
   transform(vecInY.begin(), vecInY.end(), vecBkgd.begin(), dataPurePeak.begin(),
@@ -2007,15 +2005,14 @@ bool LeBailFit::calculateDiffractionPattern(
       g_log.information() << "Calculate diffraction pattern from input data "
                              "and newly calculated background. "
                           << ".\n";
-      veccalbkgd.assign(vecY.size(), 0.);
-      m_lebailFunction->function(veccalbkgd, vecX.rawData(), false, true);
+      veccalbkgd = m_lebailFunction->function(vecX.rawData(), false, true);
       ::transform(vecY.begin(), vecY.end(), veccalbkgd.begin(),
                   vecPureY.begin(), ::minus<double>());
     }
 
     // Calculate peak intensity
-    peaksvalid =
-        m_lebailFunction->calculatePeaksIntensities(vecX.rawData(), vecPureY, values);
+    peaksvalid = m_lebailFunction->calculatePeaksIntensities(vecX.rawData(),
+                                                             vecPureY, values);
   } // [input is raw]
   else {
     // Calculate peaks intensities

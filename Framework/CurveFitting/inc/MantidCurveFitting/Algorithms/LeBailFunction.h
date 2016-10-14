@@ -8,6 +8,9 @@
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramX;
+}
 namespace CurveFitting {
 namespace Algorithms {
 
@@ -84,8 +87,8 @@ public:
   size_t getNumberOfPeaks() const { return m_numPeaks; }
 
   /// Calculate
-  void function(std::vector<double> &out, const std::vector<double> &xvalues,
-                bool calpeaks, bool calbkgd) const;
+  std::vector<double> function(const Mantid::HistogramData::HistogramX &xvalues,
+                               bool calpeaks, bool calbkgd) const;
 
   ///  Calculate a single peak's value
   std::vector<double> calPeak(size_t ipk, const std::vector<double> &xvalues,

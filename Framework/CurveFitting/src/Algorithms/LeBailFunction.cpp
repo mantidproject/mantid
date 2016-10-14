@@ -1,9 +1,10 @@
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/Algorithms/LeBailFunction.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidHistogramData/HistogramX.h"
 
 #include <sstream>
 
@@ -91,20 +92,19 @@ API::IFunction_sptr LeBailFunction::getFunction() {
 
 //----------------------------------------------------------------------------------------------
 /** Calculate powder diffraction pattern by Le Bail algorithm
-* @param out :: output vector
 * @param xvalues :: input vector
 * @param calpeaks :: if true, calculate peaks
 * @param calbkgd :: if true, then calculate background and add to output.
 * otherwise, assume zero background
+* @return :: output vector
 */
-void LeBailFunction::function(std::vector<double> &out,
-                              const std::vector<double> &xvalues, bool calpeaks,
-                              bool calbkgd) const {
-  if (out.size() != xvalues.size())
-    throw runtime_error("xvalues and out have different sizes.");
+std::vector<double>
+LeBailFunction::function(const Mantid::HistogramData::HistogramX &xvalues,
+                         bool calpeaks, bool calbkgd) const {
 
   // Reset output elements to zero
-  std::fill(out.begin(), out.end(), 0.0);
+  std::vector<double> out(xvalues.size(), 0);
+  auto xvals = xvalues.rawData();
 
   vector<double> temp(xvalues.size());
 
@@ -114,7 +114,7 @@ void LeBailFunction::function(std::vector<double> &out,
       // Reset temporary vector for output
       ::fill(temp.begin(), temp.end(), 0.);
       IPowderDiffPeakFunction_sptr peak = m_vecPeaks[ipk];
-      peak->function(temp, xvalues);
+      peak->function(temp, xvals);
       transform(out.begin(), out.end(), temp.begin(), out.begin(),
                 ::plus<double>());
     }
@@ -126,7 +126,7 @@ void LeBailFunction::function(std::vector<double> &out,
       throw runtime_error("Must define background first!");
     }
 
-    FunctionDomain1DVector domain(xvalues);
+    FunctionDomain1DVector domain(xvals);
     FunctionValues values(domain);
     g_log.information() << "Background function (in LeBailFunction): "
                         << m_background->asString() << ".\n";
@@ -135,6 +135,8 @@ void LeBailFunction::function(std::vector<double> &out,
     for (size_t i = 0; i < numpts; ++i)
       out[i] += values[i];
   }
+
+  return out;
 }
 
 /**  Calculate a single peak's value
