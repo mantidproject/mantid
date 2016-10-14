@@ -75,6 +75,11 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   if (!crho.empty())
     options.push_back("CRho=" + crho);
 
+  // Add CAlpha
+  auto calpha = m_view->getCAlpha();
+  if (!calpha.empty())
+	  options.push_back("CAlpha=" + calpha);
+
   return boost::algorithm::join(options, ",");
 }
 

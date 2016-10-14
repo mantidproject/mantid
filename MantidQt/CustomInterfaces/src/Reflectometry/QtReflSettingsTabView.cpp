@@ -125,5 +125,13 @@ std::string QtReflSettingsTabView::getCRho() const {
   return m_ui.expSettingsCRhoEdit->text().toStdString();
 }
 
+/** Return CAlpha
+* @return :: polarization correction CAlpha
+*/
+std::string QtReflSettingsTabView::getCAlpha() const {
+
+  return m_ui.expSettingsCAlphaEdit->text().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid

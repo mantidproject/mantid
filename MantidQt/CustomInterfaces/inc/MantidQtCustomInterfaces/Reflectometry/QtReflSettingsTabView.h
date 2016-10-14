@@ -56,6 +56,8 @@ public:
   std::string getAnalysisMode() const override;
   /// Return CRho
   std::string getCRho() const override;
+  /// Return CAlpha
+  std::string getCAlpha() const override;
 
   /// Creates hints for 'Plus'
   void
