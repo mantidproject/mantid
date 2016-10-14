@@ -93,10 +93,7 @@ void importDataFromColumnFile(string filename, vector<double> &vecX,
       vecX.push_back(x);
       vecY.push_back(y);
       if (e < 0.00001) {
-        if (y > 1.0)
-          e = std::sqrt(y);
-        else
-          e = 1.0;
+        e = std::max(1.0, std::sqrt(y));
       }
       vecE.push_back(e);
     }
