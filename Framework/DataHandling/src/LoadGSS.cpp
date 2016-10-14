@@ -22,6 +22,7 @@
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
+using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 
 namespace Mantid {
@@ -113,7 +114,10 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   std::vector<int> detectorIDs;
 
   // Vectors to store data
-  std::vector<std::vector<double>> gsasDataX, gsasDataY, gsasDataE;
+  std::vector<HistogramData::BinEdges> gsasDataX;
+  std::vector<HistogramData::Counts> gsasDataY;
+  std::vector<HistogramData::CountStandardDeviations> gsasDataE;
+
   std::vector<double> vecX, vecY, vecE;
 
   // progress
@@ -258,9 +262,9 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
         std::vector<double> storeY = vecY;
         std::vector<double> storeE = vecE;
 
-        gsasDataX.push_back(storeX);
-        gsasDataY.push_back(storeY);
-        gsasDataE.push_back(storeE);
+        gsasDataX.emplace_back(storeX);
+        gsasDataY.emplace_back(storeY);
+        gsasDataE.emplace_back(storeE);
         vecX.clear();
         vecY.clear();
         vecE.clear();
@@ -398,9 +402,9 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
   // Push the vectors (X, Y, E) of the last bank to gsasData
   if (!vecX.empty()) { // Put final spectra into data
-    gsasDataX.push_back(vecX);
-    gsasDataY.push_back(vecY);
-    gsasDataE.push_back(vecE);
+    gsasDataX.emplace_back(vecX);
+    gsasDataY.emplace_back(vecY);
+    gsasDataE.emplace_back(vecE);
   }
   input.close();
 
@@ -436,9 +440,9 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
   for (int i = 0; i < nHist; ++i) {
     // Move data across
-    outputWorkspace->dataX(i) = gsasDataX[i];
-    outputWorkspace->dataY(i) = gsasDataY[i];
-    outputWorkspace->dataE(i) = gsasDataE[i];
+    outputWorkspace->setHistogram(
+        i, BinEdges(std::move(gsasDataX[i])), Counts(std::move(gsasDataY[i])),
+        CountStandardDeviations(std::move(gsasDataE[i])));
 
     // Reset spectrum number if
     if (useBankAsSpectrum) {
