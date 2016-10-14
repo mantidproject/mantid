@@ -639,6 +639,7 @@ ReflectometryReductionOne2::convertToQ(MatrixWorkspace_sptr inputWS) {
   convertUnits->initialize();
   convertUnits->setProperty("InputWorkspace", inputWS);
   convertUnits->setProperty("Target", "MomentumTransfer");
+  convertUnits->setProperty("AlignBins", true);
   convertUnits->execute();
   MatrixWorkspace_sptr IvsQ = convertUnits->getProperty("OutputWorkspace");
 
