@@ -58,9 +58,10 @@ public:
     EXPECT_CALL(mockView, getAnalysisMode())
         .Times(Exactly(1))
         .WillOnce(Return("MultiDetectorAnalysis"));
+	EXPECT_CALL(mockView, getCRho()).Times(Exactly(1)).WillOnce(Return("2.5"));
     auto options = presenter.getReductionOptions();
 
-    TS_ASSERT_EQUALS(options, "AnalysisMode=MultiDetectorAnalysis");
+    TS_ASSERT_EQUALS(options, "AnalysisMode=MultiDetectorAnalysis,CRho=2.5");
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 

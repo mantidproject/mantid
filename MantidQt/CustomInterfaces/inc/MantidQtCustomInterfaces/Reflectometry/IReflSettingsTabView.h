@@ -59,6 +59,7 @@ public:
   virtual void
   createReductionHints(const std::map<std::string, std::string> &hints) = 0;
   virtual std::string getAnalysisMode() const = 0;
+  virtual std::string getCRho() const = 0;
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
   virtual void

@@ -70,6 +70,11 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   if (!analysisMode.empty())
 	  options.push_back("AnalysisMode=" + analysisMode);
 
+  // Add CRho
+  auto crho = m_view->getCRho();
+  if (!crho.empty())
+    options.push_back("CRho=" + crho);
+
   return boost::algorithm::join(options, ",");
 }
 

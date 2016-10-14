@@ -117,5 +117,13 @@ std::string QtReflSettingsTabView::getAnalysisMode() const {
   return m_ui.analysisModeComboBox->currentText().toStdString();
 }
 
+/** Return CRho
+* @return :: polarization correction CRho
+*/
+std::string QtReflSettingsTabView::getCRho() const {
+
+  return m_ui.expSettingsCRhoEdit->text().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid

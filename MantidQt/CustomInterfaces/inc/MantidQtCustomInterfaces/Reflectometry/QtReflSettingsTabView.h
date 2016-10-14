@@ -54,6 +54,8 @@ public:
   std::string getStitchOptions() const override;
   /// Return selected analysis mode
   std::string getAnalysisMode() const override;
+  /// Return CRho
+  std::string getCRho() const override;
 
   /// Creates hints for 'Plus'
   void
