@@ -47,6 +47,9 @@ class OptimizeLatticeWindow(QtGui.QMainWindow):
         if parent is not None:
             self.mySignal.connect(parent.refine_ub_lattice)  # connect to the updateTextEdit slot defined in app1.py
 
+        # flag to trace back its previous step
+        self._prevIndexByFFT = False
+
         return
 
     def do_ok(self):
@@ -59,8 +62,11 @@ class OptimizeLatticeWindow(QtGui.QMainWindow):
         if tolerance is None:
             raise RuntimeError('Tolerance cannot be left blank!')
 
-        sigVal = 1000
-        self.mySignal.emit(sigVal)
+        if self._prevIndexByFFT:
+            signal_value = 1001
+        else:
+            signal_value = 1000
+        self.mySignal.emit(signal_value)
 
         # quit
         self.do_quit()
@@ -114,3 +120,12 @@ class OptimizeLatticeWindow(QtGui.QMainWindow):
 
         return tab_index
 
+    def set_prev_ub_refine_method(self, use_fft=False):
+        """
+
+        :param use_fft:
+        :return:
+        """
+        self._prevIndexByFFT = use_fft
+
+        return

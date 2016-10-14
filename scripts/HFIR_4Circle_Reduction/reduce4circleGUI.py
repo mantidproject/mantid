@@ -34,7 +34,8 @@ import guiutility as gutil
 import fourcircle_utility as hb3a
 import plot3dwindow
 from multi_threads_helpers import *
-import absorption
+import optimizelatticewindow as ol_window
+# import absorption
 
 # import line for the UI python class
 from ui_MainWindow import Ui_MainWindow
@@ -149,6 +150,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_refine_ub_fft)
         self.connect(self.ui.pushButton_findUBLattice, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub_lattice)
+        self.connect(self.ui.pushButton_findUBLattice_copy, QtCore.SIGNAL('clicked()'),
+                     self.do_refine_ub_lattice_after_fft)
 
         # Tab 'Setup'
         self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
@@ -352,7 +355,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def _build_peak_info_list(self):
         """ Build a list of PeakInfo to build peak workspace
-        :return:
+        :return: list of peak information, which is a PeakProcessHelper instance
         """
         # Collecting all peaks that will be used to refine UB matrix
         row_index_list = self.ui.tableWidget_peaksCalUB.get_selected_rows(True)
@@ -1754,10 +1757,25 @@ class MainWindow(QtGui.QMainWindow):
         Calculate UB matrix constrained by lattice parameters
         :return:
         """
-        import optimizelatticewindow as ol_window
-
         # launch the set up window
-        self._refineConfigWindow = ol_window.OptimizeLatticeWindow(self)
+        if self._refineConfigWindow is None:
+            self._refineConfigWindow = ol_window.OptimizeLatticeWindow(self)
+
+        self._refineConfigWindow.set_prev_ub_refine_method(False)
+        self._refineConfigWindow.show()
+
+        return
+
+    def do_refine_ub_lattice_after_fft(self):
+        """
+        Refine UB matrix by constaining lattice parameters after FFT-refine-UB is called
+        :return:
+        """
+        if self._refineConfigWindow is None:
+            self._refineConfigWindow = ol_window.OptimizeLatticeWindow(self)
+
+        self._refineConfigWindow.set_prev_ub_refine_method(True)
+
         self._refineConfigWindow.show()
 
         return
@@ -1766,10 +1784,21 @@ class MainWindow(QtGui.QMainWindow):
     @QtCore.pyqtSlot(dict)
     def refine_ub_lattice(self, val):
         """
+        Refine UB matrix by constraining on lattice type.
+        Required inputs:
+          1. unit cell type
+          2. peak information include
         :param val:
         :return:
         """
-        assert val == 1000, 'It is not an authorized signal.'
+        # check signal
+        if val == 1000:
+            use_spice_hkl = True
+        elif val == 1001:
+            use_spice_hkl = False
+        else:
+            raise RuntimeError('It is not an authorized signal value %s.' % str(val))
+        print '[DB...BAT] Use SPICE HKL: ', use_spice_hkl
 
         # it is supposed to get the information back from the window
         unit_cell_type = self._refineConfigWindow.get_unit_cell_type()
@@ -1781,8 +1810,10 @@ class MainWindow(QtGui.QMainWindow):
         # get the UB matrix value
         ub_src_tab = self._refineConfigWindow.get_ub_source()
         if ub_src_tab == 3:
+            print '[INFO] UB matrix comes from tab "Calculate UB".'
             ub_matrix = self.ui.tableWidget_ubMatrix.get_matrix_str()
         elif ub_src_tab == 4:
+            print '[INFO] UB matrix comes from tab "UB Matrix".'
             ub_matrix = self.ui.tableWidget_ubInUse.get_matrix_str()
         else:
             self.pop_one_button_dialog('UB source tab %s is not supported.' % str(ub_src_tab))
@@ -1790,7 +1821,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # refine UB matrix by constraint on lattice parameters
         status, error_message = self._myControl.refine_ub_matrix_by_lattice(peak_info_list, set_hkl_int,
-                                                                            ub_matrix, unit_cell_type)
+                                                                            ub_matrix, unit_cell_type, use_spice_hkl)
         if status:
             # successfully refine the lattice and UB matrix
             self._show_refined_ub_result()

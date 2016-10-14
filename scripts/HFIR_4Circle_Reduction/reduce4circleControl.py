@@ -1812,17 +1812,19 @@ class CWSCDReductionControl(object):
 
         return
 
-    def refine_ub_matrix_by_lattice(self, peak_info_list, set_hkl_int,  ub_matrix_str, unit_cell_type):
+    def refine_ub_matrix_by_lattice(self, peak_info_list, set_hkl_int,  ub_matrix_str, unit_cell_type,
+                                    use_spice_hkl):
         """
         Refine UB matrix by fixing unit cell type
         :param peak_info_list:
         :param set_hkl_int:
         :param ub_matrix_str:
         :param unit_cell_type:
+        :param use_spice_hkl:
         :return:
         """
         # check inputs and return if not good
-        assert isinstance(peak_info_list, list)
+        assert isinstance(peak_info_list, list), 'peak_info_list must be a list but not %s.' % type(peak_info_list)
         if len(peak_info_list) < 6:
             return False, 'There must be at least 6 peaks for refining UB. Now only %d is given.' % len(peak_info_list)
         assert isinstance(ub_matrix_str, str)
@@ -1833,7 +1835,11 @@ class CWSCDReductionControl(object):
 
         # construct a new workspace by combining all single peaks
         ub_peak_ws_name = 'TempRefineUBLatticePeaks'
-        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name, False, set_hkl_int)
+        if use_spice_hkl:
+            zero_hkl = False
+        else:
+            zero_hkl = True
+        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name, zero_hkl, set_hkl_int)
 
         # set UB matrix from input string. It is UB(0, 0), UB(0, 1), UB(0, 2), UB(1, 0), ..., UB(3, 3)
         api.SetUB(Workspace=ub_peak_ws_name,
@@ -1910,9 +1916,9 @@ class CWSCDReductionControl(object):
         :return:
         """
         # check
-        assert isinstance(peak_info_list, list)
-        assert len(peak_info_list) > 0
-        assert isinstance(peak_ws_name, str)
+        assert isinstance(peak_info_list, list), 'Peak Info List must be a list.'
+        assert len(peak_info_list) > 0, 'Peak Info List cannot be empty.'
+        assert isinstance(peak_ws_name, str), 'Peak workspace name must be a string.'
 
         # create an empty
         api.CreatePeaksWorkspace(NumberOfPeaks=0, OutputWorkspace=peak_ws_name)
@@ -1936,6 +1942,7 @@ class CWSCDReductionControl(object):
             if zero_hkl is True:
                 h = k = l = 0.
             else:
+                # FIXME/TODO/NOW/ - it should use zero_hkl?
                 h, k, l = peak_info_i.get_spice_hkl()
                 if hkl_to_int:
                     # convert hkl to integer

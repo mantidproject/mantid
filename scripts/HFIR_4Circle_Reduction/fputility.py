@@ -28,12 +28,13 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
     fp_buffer = ''
 
     # user defined header
-    header = '%s' % user_header.strip()
+    header = 'COMM %s' % user_header.strip()
     # fixed file format line
+    # FIXME/TODO/NOW - Only  magnetic case use 4i4,2f8,...
     if with_absorption:
-        file_format = '(4i4,2f8.2,i4,3f8.5)'
+        file_format = '(3i4,2f8.2,i4,6f8.5)'
     else:
-        file_format = '(4i4,2f8.2,i4)'
+        file_format = '(3i4,2f8.2,i4)'
     # wave length
     lambda_line = '%.4f  0  0' % wave_length
 
