@@ -289,24 +289,22 @@ void WorkspaceGroup::workspaceBeforeReplaceHandle(
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
   const auto oldObject = notice->oldObject();
+  const auto newObject = notice->newObject();
 
-  for (auto &workspace : m_workspaces) {
+  auto it = m_workspaces.begin();
+  auto duplicateIter = m_workspaces.end();
+  bool foundOld(false);
+  for (; it != m_workspaces.end(); ++it) {
+    auto &workspace = *it;
     if (workspace == oldObject) {
-      workspace = notice->newObject();
-      break;
+      workspace = newObject;
+      foundOld = true;
+    } else if (workspace == newObject) {
+      duplicateIter = it;
     }
   }
-
-  // Have to use boost implementation with boost shared pointers
-  boost::unordered_set<API::Workspace_sptr> seenWorkspaces;
-  for (auto it = m_workspaces.begin(); it != m_workspaces.end();) {
-    if (seenWorkspaces.find(*it) != seenWorkspaces.end()) {
-      // Duplicate
-      it = m_workspaces.erase(it);
-    } else {
-      seenWorkspaces.insert(*it);
-      ++it;
-    }
+  if (foundOld && duplicateIter != m_workspaces.end()) {
+    m_workspaces.erase(duplicateIter);
   }
 }
 
