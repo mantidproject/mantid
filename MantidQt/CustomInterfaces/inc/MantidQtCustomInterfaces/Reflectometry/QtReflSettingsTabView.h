@@ -60,6 +60,8 @@ public:
   std::string getCAlpha() const override;
   /// Return CAp
   std::string getCAp() const override;
+  /// Return Cpp
+  std::string getCPp() const override;
 
   /// Creates hints for 'Plus'
   void

@@ -62,6 +62,7 @@ public:
   virtual std::string getCRho() const = 0;
   virtual std::string getCAlpha() const = 0;
   virtual std::string getCAp() const = 0;
+  virtual std::string getCPp() const = 0;
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
   virtual void

@@ -85,6 +85,11 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   if (!cap.empty())
     options.push_back("CAp=" + cap);
 
+  // Add CPp
+  auto cpp = m_view->getCPp();
+  if (!cpp.empty())
+	  options.push_back("CPp=" + cpp);
+
   return boost::algorithm::join(options, ",");
 }
 

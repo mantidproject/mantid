@@ -63,6 +63,7 @@ public:
         .Times(Exactly(1))
         .WillOnce(Return("0.6"));
     EXPECT_CALL(mockView, getCAp()).Times(Exactly(1)).WillOnce(Return("100.0"));
+    EXPECT_CALL(mockView, getCPp()).Times(Exactly(1)).WillOnce(Return("0.54"));
     auto options = presenter.getReductionOptions();
 
     std::vector<std::string> optionsVec;
@@ -71,6 +72,7 @@ public:
     TS_ASSERT_EQUALS(optionsVec[1], "CRho=2.5");
     TS_ASSERT_EQUALS(optionsVec[2], "CAlpha=0.6");
     TS_ASSERT_EQUALS(optionsVec[3], "CAp=100.0");
+    TS_ASSERT_EQUALS(optionsVec[4], "CPp=0.54");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
