@@ -1435,7 +1435,6 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles,
   // Set up random walk parameters
   const auto &vecX = m_dataWS->x(m_wsIndex);
   const auto &vecInY = m_dataWS->y(m_wsIndex);
-  size_t numpts = vecInY.size();
 
   const auto &domain = m_dataWS->x(m_wsIndex).rawData();
   std::vector<double> vecCalPurePeaks(domain.size(), 0.0);
