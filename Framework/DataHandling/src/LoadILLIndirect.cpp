@@ -10,6 +10,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <nexus/napi.h>
+#include <numeric>
 
 namespace Mantid {
 namespace DataHandling {
@@ -46,7 +47,7 @@ const std::string LoadILLIndirect::category() const {
 //----------------------------------------------------------------------------------------------
 
 /**
-* Return the confidence with with this algorithm can load the file
+* Return the confidence with this algorithm can load the file
 * @param descriptor A descriptor for the file
 * @returns An integer specifying the confidence level. 0 indicates it will not
 * be used
@@ -149,7 +150,7 @@ void LoadILLIndirect::loadDataDetails(NeXus::NXEntry &entry) {
 
   m_numberOfTubes = static_cast<size_t>(data.dim0());
   m_numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
-  m_numberOfChannels = static_cast<size_t>(data.dim2());
+  m_numberOfChannels = static_cast<size_t>(data.dim2()) + 1; // +1 For bin edges
 
   NXData dataSDGroup = entry.openNXData("dataSD");
   NXInt dataSD = dataSDGroup.openIntData();
@@ -209,7 +210,7 @@ void LoadILLIndirect::initWorkSpace(
   m_localWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D",
       m_numberOfHistograms + monitorsData.size() + m_numberOfSimpleDetectors,
-      m_numberOfChannels + 1, m_numberOfChannels);
+      m_numberOfChannels, m_numberOfChannels);
 
   m_localWorkspace->getAxis(0)->unit() =
       UnitFactory::Instance().create("Empty");
@@ -240,8 +241,6 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   dataSD.load();
 
   // Assign calculated bins to first X axis
-  ////  m_localWorkspace->dataX(0).assign(detectorTofBins.begin(),
-  /// detectorTofBins.end());
 
   size_t spec = 0;
   size_t nb_monitors = monitorsData.size();
@@ -250,21 +249,20 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube +
                                     nb_monitors + nb_SD_detectors);
 
-  // Assign fake values to first X axis <<to be completed>>
-  for (size_t i = 0; i <= m_numberOfChannels; ++i) {
-    m_localWorkspace->dataX(0)[i] = double(i);
-  }
+  std::vector<double> increasingVals(m_numberOfChannels);
+  std::iota(increasingVals.begin(), increasingVals.end(), 1);
+  m_localWorkspace->mutableX(0) = increasingVals;
 
   // First, Monitor
   for (size_t im = 0; im < nb_monitors; im++) {
 
     if (im > 0) {
-      m_localWorkspace->dataX(im) = m_localWorkspace->readX(0);
+      m_localWorkspace->setSharedX(im, m_localWorkspace->sharedX(0));
     }
 
     // Assign Y
     int *monitor_p = monitorsData[im].data();
-    m_localWorkspace->dataY(im)
+    m_localWorkspace->mutableY(im)
         .assign(monitor_p, monitor_p + m_numberOfChannels);
 
     progress.report();
@@ -275,15 +273,15 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
 
       // just copy the time binning axis to every spectra
-      m_localWorkspace->dataX(spec + nb_monitors) = m_localWorkspace->readX(0);
+      m_localWorkspace->setSharedX((spec + nb_monitors),m_localWorkspace->sharedX(0));
 
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      m_localWorkspace->dataY(spec + nb_monitors)
+      m_localWorkspace->mutableY(spec + nb_monitors)
           .assign(data_p, data_p + m_numberOfChannels);
 
       // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec + nb_monitors);
+      auto &E = m_localWorkspace->mutableE(spec + nb_monitors);
       std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
                      LoadILLIndirect::calculateError);
 
@@ -296,12 +294,11 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   for (int i = 0; i < dataSD.dim0(); ++i) {
 
     // just copy again the time binning axis to every spectra
-    m_localWorkspace->dataX(spec + nb_monitors + i) =
-        m_localWorkspace->readX(0);
+    m_localWorkspace->setSharedX((spec + nb_monitors + i),m_localWorkspace->sharedX(0));
 
     // Assign Y
     int *dataSD_p = &dataSD(i, 0, 0);
-    m_localWorkspace->dataY(spec + nb_monitors + i)
+    m_localWorkspace->mutableY(spec + nb_monitors + i)
         .assign(dataSD_p, dataSD_p + m_numberOfChannels);
 
     progress.report();
