@@ -1490,7 +1490,7 @@ public:
     
   MultiLayer *plotSubplots(const QList<QString>& wsNames, const QList<int> &indexList, 
                            MantidQt::DistributionFlag distr = MantidQt::DistributionDefault, 
-                           bool errs = false);
+                           bool errs = false, MultiLayer *plotWindow = NULL);
 
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   void convertToWaterfall(MultiLayer*);

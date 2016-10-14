@@ -223,17 +223,17 @@ public:
   MultiLayer *
   plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
                MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
-               bool errs = false);
+               bool errs = false, MultiLayer *plotWindow = nullptr);
 
   MultiLayer *
   plotSubplots(const QMultiMap<QString, int> &toPlot,
                MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
-               bool errs = false);
+               bool errs = false, MultiLayer *plotWindow = nullptr);
 
   MultiLayer *
   plotSubplots(const QStringList &wsNames, const QList<int> &indexList,
                MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
-               bool errs = false);
+               bool errs = false, MultiLayer *plotWindow = nullptr);
 
 public slots:
   // Create a 1d graph form specified MatrixWorkspace and index
