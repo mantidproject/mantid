@@ -86,13 +86,6 @@ void ReflectometryReductionOne2::init() {
                       "InputWorkspace", "", Direction::Input),
                   "Run to reduce.");
 
-  // Incident theta
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "ThetaIn", Mantid::EMPTY_DBL(), Direction::Input),
-                  "Final theta value in degrees. Optional, this value will be "
-                  "calculated internally and provided as ThetaOut if not "
-                  "provided.");
-
   // Processing instructions
   declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "",
