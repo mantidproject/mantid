@@ -31,9 +31,9 @@ public:
     API::MatrixWorkspace_const_sptr ws = loader->getProperty("OutputWorkspace");
     // Check a few things in the workspace
     checkWorkspace(ws, 8, 816);
-    auto x1 = ws->readX(0)[99];
-    auto x2 = ws->readX(0)[100];
-    auto y = ws->readY(0)[99];
+    auto x1 = ws->x(0)[99];
+    auto x2 = ws->x(0)[100];
+    auto y = ws->y(0)[99];
     TS_ASSERT_DELTA((x1 + x2) / 2, 40844.0625, 1e-6);
     TS_ASSERT_DELTA(y, 145304004.625, 1e-6);
   }
@@ -71,16 +71,16 @@ public:
     TS_ASSERT(loader->execute());
     TS_ASSERT_EQUALS(loader->isExecuted(), true);
     API::MatrixWorkspace_const_sptr ws = loader->getProperty("OutputWorkspace");
-    auto x1 = ws->readX(0)[0];
-    auto x2 = ws->readX(0)[1];
+    auto x1 = ws->x(0)[0];
+    auto x2 = ws->x(0)[1];
     auto dx = x2 - x1;
-    auto y = ws->readY(0)[0] * dx;
+    auto y = ws->y(0)[0] * dx;
     TS_ASSERT_DELTA((x1 + x2) / 2, 115202.20029, 1e-6);
     TS_ASSERT_DELTA(y, 123456.00000002, 1e-10);
-    x1 = ws->readX(0)[3];
-    x2 = ws->readX(0)[4];
+    x1 = ws->x(0)[3];
+    x2 = ws->x(0)[4];
     dx = x2 - x1;
-    y = ws->readY(0)[3] * dx;
+    y = ws->y(0)[3] * dx;
     TS_ASSERT_DELTA(y, 123456789.00000005, 1e-10);
 
     const auto source = ws->getInstrument()->getSource();
