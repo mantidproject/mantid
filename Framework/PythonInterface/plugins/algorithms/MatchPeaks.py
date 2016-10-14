@@ -5,7 +5,6 @@ from mantid.simpleapi import *
 from mantid.kernel import Direction
 import numpy as np
 
-
 def mask_ws(ws_to_mask, xstart, xend):
     """
     Calls MaskBins twice, for masking the first and last bins of a workspace
@@ -40,6 +39,7 @@ class MatchPeaks(PythonAlgorithm):
 
         # Mandatory workspaces
         self._input_ws = None
+        self._output_ws = None
 
         # Optional workspace
         self._input_2_ws = None
@@ -47,7 +47,7 @@ class MatchPeaks(PythonAlgorithm):
         self._output_bin_range = None
 
         # Bool flags
-        self._masking = None
+        self._masking = False
         self._match_option = None
 
     def category(self):
@@ -193,7 +193,7 @@ class MatchPeaks(PythonAlgorithm):
 
         # This is a left shift, bins at the end of the workspace may be masked
         if np.min(-to_shift) < 0:
-            max_bin = size - 1 - abs(np.min(-to_shift))
+            max_bin = size - 1 + np.min(-to_shift)
 
         # This is a right shift, bins at the beginning of the workspace may be masked
         if np.max(-to_shift) > 0:

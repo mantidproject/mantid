@@ -212,7 +212,7 @@ class MatchPeaksTest(unittest.TestCase):
         alg_test = run_algorithm('MatchPeaks', **self._args)
         self.assertTrue(alg_test.isExecuted())
         not_masked = AnalysisDataService.retrieve('output')
-        self.assertNotEquals(0, not_masked.readY(0)[0])
+        self.assertNotEqual(0, not_masked.readY(0)[0])
         DeleteWorkspace(not_masked)
 
     def testMatchInput2(self):

@@ -21,8 +21,8 @@ Enabling `MaskBins` will mask out these bins automatically.
 Restrictions
 ############
 
-The input workspaces should have one peak (see :ref:`FindEPP <algm-FindEPP>`).
-Moreover the peak position is expected to be around the x-axis center, at most quarter of the number of bins away from the center, otherwise no shift will be performed.
+The input workspaces should have one peak (see :ref:`FindEPP <algm-FindEPP>`), hence `NaN` and `Inf` values will be zeroed, so peak finding can succeed.
+The peak position is expected to be around the x-axis center, at most quarter of the number of bins away from the center, otherwise no shift will be performed.
 Furthermore, input workspaces should have the same number of bins and spectra as well as identical x-axes.
 
 Usage
