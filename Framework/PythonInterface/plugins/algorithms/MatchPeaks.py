@@ -6,7 +6,7 @@ from mantid.kernel import Direction
 import numpy as np
 
 
-def mask_reduced_ws(ws_to_mask, xstart, xend):
+def mask_ws(ws_to_mask, xstart, xend):
     """
     Calls MaskBins twice, for masking the first and last bins of a workspace
     Args:
@@ -29,8 +29,8 @@ def mask_reduced_ws(ws_to_mask, xstart, xend):
         logger.debug('No masking due to x bin >= len(x_values) - 1!: {0}'.format(xend))
 
     if xstart > 0 and xend < len(x_values) - 1:
-        logger.notice('Bins out of range {0} {1} [Unit of X-axis] are masked'.format(x_values[xstart],
-                                                                                     x_values[xend + 1]))
+        logger.information('Bins out of range {0} {1} [Unit of X-axis] are masked'.format
+                           (x_values[xstart],x_values[xend + 1]))
 
 
 class MatchPeaks(PythonAlgorithm):
@@ -43,6 +43,7 @@ class MatchPeaks(PythonAlgorithm):
 
         # Optional workspace
         self._input_2_ws = None
+        self._input_3_ws = None
         self._output_bin_range = None
 
         # Bool flags
@@ -53,8 +54,7 @@ class MatchPeaks(PythonAlgorithm):
         return "Transforms"
 
     def summary(self):
-        return 'Shift the data of the input workspace to align each spectrum peaks with each other at the centre of ' \
-               'x-axis or, if requested, according to the positions, specified by the second input workspace.'
+        return 'Circular shifts (numpy.roll) the data of the input workspace to align peaks without modifying the x-axis.'
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace',
@@ -66,12 +66,13 @@ class MatchPeaks(PythonAlgorithm):
                                                      defaultValue='',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
-                             doc='Input workspace as source of the peak positions to align with')
+                             doc='Input workspace to align peaks with')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace',
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace3',
                                                      defaultValue='',
-                                                     direction=Direction.Output),
-                             doc='Shifted output workspace')
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='Input workspace to align peaks with')
 
         self.declareProperty('MaskBins',
                              defaultValue=False,
@@ -79,27 +80,56 @@ class MatchPeaks(PythonAlgorithm):
 
         self.declareProperty('MatchInput2ToCenter',
                              defaultValue=False,
-                             doc='Match peak bins such that InputWorkspace2 would be centered')
+                             doc='Match peaks such that InputWorkspace2 would be centered')
+
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace',
+                                                     defaultValue='',
+                                                     direction=Direction.Output),
+                             doc='Shifted output workspace')
 
         self.declareProperty(ITableWorkspaceProperty('BinRangeTable',
                                                      defaultValue='',
                                                      direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
-                             doc='Table workspace that contains two values defining a range. Bins inside this range '
-                                 'were not circular shifted. Bins outside this range can be masked.')
+                             doc='Table workspace that contains two values defining a range. '
+                                 'Bins outside this range are overflown out of range due to circular shift'
+                                 'and can be masked.')
 
     def setUp(self):
         self._input_ws = self.getPropertyValue('InputWorkspace')
         self._input_2_ws = self.getPropertyValue('InputWorkspace2')
+        self._input_3_ws = self.getPropertyValue('InputWorkspace3')
         self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._masking = self.getProperty('MaskBins').value
         self._match_option = self.getProperty('MatchInput2ToCenter').value
         self._output_bin_range = self.getPropertyValue('BinRangeTable')
 
+        if self._input_ws:
+            ReplaceSpecialValues(self._input_ws,NaNValue=0,InfinityValue=0)
+
+        if self._input_2_ws:
+            ReplaceSpecialValues(self._input_2_ws, NaNValue=0, InfinityValue=0)
+
+        if self._input_3_ws:
+            ReplaceSpecialValues(self._input_3_ws, NaNValue=0, InfinityValue=0)
+
     def validateInputs(self):
         issues = dict()
         input1 = self.getPropertyValue('InputWorkspace')
         input2 = self.getPropertyValue('InputWorkspace2')
+        input3 = self.getPropertyValue('InputWorkspace3')
+
+        if input3:
+            if not input2:
+                issues['InputWorkspace2'] = 'When input 3 is given, input 2 is also required.'
+            else:
+                if mtd[input3].blocksize() != mtd[input2].blocksize():
+                    issues['InputWorkspace3'] = 'Incompatible same number of bins'
+                if mtd[input3].getNumberHistograms() != mtd[input2].getNumberHistograms():
+                    issues['InputWorkspace3'] = 'Incompatible number of spectra'
+                if np.all(mtd[input3].extractX() - mtd[input2].extractX()):
+                    issues['InputWorkspace3'] = 'Incompatible x-values'
+
         if input2:
             if mtd[input1].blocksize() != mtd[input2].blocksize():
                 issues['InputWorkspace2'] = 'Incompatible same number of bins'
@@ -107,24 +137,6 @@ class MatchPeaks(PythonAlgorithm):
                 issues['InputWorkspace2'] = 'Incompatible number of spectra'
             if np.all(mtd[input1].extractX() - mtd[input2].extractX()):
                 issues['InputWorkspace2'] = 'Incompatible x-values'
-
-            if np.any(np.isnan(mtd[input2].extractY())):
-                issues['InputWorkspace2'] = 'Y-values contain nans'
-            if np.any(np.isnan(mtd[input2].extractE())):
-                issues['InputWorkspace2'] = 'E-values contain nans'
-            if np.any(np.isinf(mtd[input2].extractY())):
-                issues['InputWorkspace2'] = 'Y-values contain infs'
-            if np.any(np.isinf(mtd[input2].extractE())):
-                issues['InputWorkspace2'] = 'E-values contain infs'
-        if input1:
-            if np.any(np.isnan(mtd[input1].extractY())):
-                issues['InputWorkspace'] = 'Y-values contain nans'
-            if np.any(np.isnan(mtd[input1].extractY())):
-                issues['InputWorkspace'] = 'E-values contain nans'
-            if np.any(np.isinf(mtd[input1].extractY())):
-                issues['InputWorkspace'] = 'Y-values contain infs'
-            if np.any(np.isinf(mtd[input1].extractY())):
-                issues['InputWorkspace'] = 'E-values contain infs'
 
         return issues
 
@@ -146,21 +158,33 @@ class MatchPeaks(PythonAlgorithm):
             peak_bins2 = self._get_peak_position(mtd[self._input_2_ws])
             self.log().notice('Peak bins {0}: {1}'.format(self._input_2_ws, peak_bins2))
 
+        # Find peak positions in third input workspace
+        if self._input_3_ws:
+            peak_bins3 = self._get_peak_position(mtd[self._input_3_ws])
+            self.log().notice('Peak bins {0}: {1}'.format(self._input_3_ws, peak_bins3))
+
         # All bins must be positive and larger than zero
         if not self._input_2_ws:
             # Input workspace will match center
             to_shift = peak_bins1 - mid_bin * np.ones(mtd[self._input_ws].getNumberHistograms())
-        elif self._match_option:
-            # Input workspace will be shifted according to centered peak of second input workspace
-            to_shift = peak_bins2 - mid_bin * np.ones(mtd[self._input_ws].getNumberHistograms())
         else:
-            # Input workspace will be shifted according to peak position of second input workspace
-            to_shift = peak_bins1 - peak_bins2
+            if not self._input_3_ws:
+                if self._match_option:
+                    # Input workspace will be shifted according to centered peak of second input workspace
+                    to_shift = peak_bins2 - mid_bin * np.ones(mtd[self._input_ws].getNumberHistograms())
+                else:
+                    # Input workspace will be shifted according to peak position of second input workspace
+                    to_shift = peak_bins1 - peak_bins2
+            else:
+                # Input workspace will be shifted according to the difference of peak positions between second and third
+                to_shift = peak_bins3 - peak_bins2
 
+        # perform actual shift
         for i in range(output_ws.getNumberHistograms()):
             # Shift Y and E values of spectrum i
             output_ws.setY(i, np.roll(output_ws.readY(i), int(-to_shift[i])))
             output_ws.setE(i, np.roll(output_ws.readE(i), int(-to_shift[i])))
+
         self.log().debug('Shift array: {0}'.format(-to_shift))
 
         # Final treatment of bins (masking, produce output)
@@ -176,7 +200,7 @@ class MatchPeaks(PythonAlgorithm):
             min_bin = np.max(-to_shift)
 
         if self._masking:
-            mask_reduced_ws(output_ws, min_bin, max_bin)
+            mask_ws(output_ws, min_bin, max_bin)
 
         if self._output_bin_range != '':
             # Create table with its columns containing bin range
@@ -189,8 +213,6 @@ class MatchPeaks(PythonAlgorithm):
 
         # Set output properties
         self.setProperty('OutputWorkspace', output_ws)
-
-        DeleteWorkspace(output_ws)
 
         return
 
@@ -249,20 +271,15 @@ class MatchPeaks(PythonAlgorithm):
                 logger.debug('Peak x-value {0} < x-begin {1}, do not shift spectrum'.format(peak_pos_error,
                                                                                             x_values[0]))
 
-        # Delete unused TableWorkspaces
-        try:
+        # Clean-up unused TableWorkspaces
+        if mtd['EPPfit_Parameters']:
             DeleteWorkspace('EPPfit_Parameters')
-        except ValueError:
-            logger.debug('No EPPfit_Parameters table available for deletion')
 
-        try:
+        if mtd['EPPfit_NormalisedCovarianceMatrix']:
             DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
-        except ValueError:
-            logger.debug('No EPPfit_NormalisedCovarianceMatrix table available for deletion')
 
         DeleteWorkspace(fit_table)
 
         return peak_bin
-
 
 AlgorithmFactory.subscribe(MatchPeaks)

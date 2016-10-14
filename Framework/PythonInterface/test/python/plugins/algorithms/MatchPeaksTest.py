@@ -1,13 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
+import sys
 import unittest
-from mantid.simpleapi import *
-from mantid.api import *
 import numpy as np
 from mantid.simpleapi import *
+from mantid.api import *
 from testhelpers import run_algorithm
-import sys
-
 
 class MatchPeaksTest(unittest.TestCase):
 
@@ -22,16 +20,16 @@ class MatchPeaksTest(unittest.TestCase):
         _input_ws_0 = 'spectrum0'  # Gaussian
         _input_ws_1 = 'spectrum1'  # Gaussian outside tolerance interval
         _input_ws_2 = 'spectrum2'  # Gaussian, too narrow peak
-        self._input_ws_3 = 'spectrum3'  # Flat background
+        _input_ws_3 = 'spectrum3'  # Flat background
 
         self._ws_shift = 'to_be_shifted'
 
         spectrum_0 = CreateSampleWorkspace(Function='User Defined',
-                                               WorkspaceType='Histogram',
-                                               UserDefinedFunction=func0,
-                                               NumBanks=1, BankPixelWidth=1,
-                                               XUnit='DeltaE', XMin=0, XMax=7, BinWidth=0.099,
-                                               OutputWorkspace=_input_ws_0)
+                                           WorkspaceType='Histogram',
+                                           UserDefinedFunction=func0,
+                                           NumBanks=1, BankPixelWidth=1,
+                                           XUnit='DeltaE', XMin=0, XMax=7, BinWidth=0.099,
+                                           OutputWorkspace=_input_ws_0)
         spectrum_1 = CreateSampleWorkspace(Function='User Defined',
                                            WorkspaceType='Histogram',
                                            UserDefinedFunction=func1,
@@ -48,7 +46,7 @@ class MatchPeaksTest(unittest.TestCase):
                                            WorkspaceType='Histogram',
                                            NumBanks=1, BankPixelWidth=1,
                                            XUnit='DeltaE', XMin=0, XMax=7, BinWidth=0.099,
-                                           OutputWorkspace=self._input_ws_3)
+                                           OutputWorkspace=_input_ws_3)
 
         AppendSpectra(InputWorkspace1=spectrum_0, InputWorkspace2=spectrum_1, OutputWorkspace=self._ws_shift)
         AppendSpectra(InputWorkspace1=self._ws_shift, InputWorkspace2=spectrum_2, OutputWorkspace=self._ws_shift)
@@ -127,7 +125,6 @@ class MatchPeaksTest(unittest.TestCase):
         self._args['InputWorkspace'] = self._ws_shift
         alg_test = run_algorithm('MatchPeaks', **self._args)
         self.assertTrue(alg_test.isExecuted())
-        self._FindEPPtables_deleted
 
     def testValidatorInput2(self):
         self._args['InputWorkspace'] = self._ws_shift
@@ -156,7 +153,6 @@ class MatchPeaksTest(unittest.TestCase):
         self._args['InputWorkspace2'] = self._ws_in_2
         alg_test = run_algorithm('MatchPeaks', **self._args)
         self.assertTrue(alg_test.isExecuted())
-        self._FindEPPtables_deleted
 
     def testMatchCenter(self):
         # Input workspace should match its center
@@ -175,7 +171,6 @@ class MatchPeaksTest(unittest.TestCase):
         self.assertEqual(35, shifted.binIndexOf(fit_table.row(0)["PeakCentre"]))
         self.assertEqual(35, np.argmax(shifted.readY(2)))
         self._workspace_properties(shifted)
-        self._FindEPPtables_deleted
         DeleteWorkspace(shifted)
         DeleteWorkspace(fit_table)
 
@@ -195,7 +190,6 @@ class MatchPeaksTest(unittest.TestCase):
         self.assertEqual(3, bin_range_table.row(0)["MinBin"])
         self.assertEqual(64, bin_range_table.row(0)["MaxBin"])
         DeleteWorkspace(bin_range_table)
-        self._FindEPPtables_deleted
 
     def testMasking(self):
         self._args['InputWorkspace'] = self._ws_shift
@@ -210,7 +204,6 @@ class MatchPeaksTest(unittest.TestCase):
             for k in range(65, 70):
                 self.assertEqual(0.0, masked.readY(i)[k], 'Mask spectrum {0} bin {1} failed'.format(i, k))
         DeleteWorkspace(masked)
-        self._FindEPPtables_deleted
 
     def testNoMasking(self):
         self._args['InputWorkspace'] = self._ws_shift
@@ -219,7 +212,7 @@ class MatchPeaksTest(unittest.TestCase):
         alg_test = run_algorithm('MatchPeaks', **self._args)
         self.assertTrue(alg_test.isExecuted())
         not_masked = AnalysisDataService.retrieve('output')
-        self.assertTrue(1.0, not_masked.readY(2)[0])
+        self.assertNotEquals(0, not_masked.readY(0)[0])
         DeleteWorkspace(not_masked)
 
     def testMatchInput2(self):
@@ -245,7 +238,6 @@ class MatchPeaksTest(unittest.TestCase):
         self.assertEqual(10, bin_range_table.row(0)["MinBin"])
         self.assertEqual(70, bin_range_table.row(0)["MaxBin"])
         self._workspace_properties(shifted)
-        self._FindEPPtables_deleted
         DeleteWorkspace(shifted)
         DeleteWorkspace(fit_table)
         DeleteWorkspace(bin_range_table)
@@ -272,7 +264,6 @@ class MatchPeaksTest(unittest.TestCase):
         self.assertEqual(0, bin_range_table.row(0)["MinBin"])
         self.assertEqual(62, bin_range_table.row(0)["MaxBin"])
         self._workspace_properties(shifted)
-        self._FindEPPtables_deleted
         DeleteWorkspace(shifted)
         DeleteWorkspace(fit_table)
         DeleteWorkspace(bin_range_table)
@@ -284,38 +275,7 @@ class MatchPeaksTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
         shifted = AnalysisDataService.retrieve('to_be_shifted')
         self.assertFalse(np.all(mtd['to_be_shifted'].extractY() - shifted.extractY()))
-        self._FindEPPtables_deleted
         DeleteWorkspace(shifted)
-
-    def _FindEPPtables_deleted(self):
-        if sys.version_info >= (2, 7):
-            with self.assertRaises(ValueError):
-                run_algorithm('DeleteWorkspace', Workspace='EPPfit_Parameters')
-            with self.assertRaises(ValueError):
-                run_algorithm('DeleteWorkspace', Workspace='EPPfit_NormalisedCovarianceMatrix')
-            with self.assertRaises(ValueError):
-                run_algorithm('DeleteWorkspace', Workspace='fit_table')
-        else:
-            deleted_fit_params = False
-            try:
-                run_algorithm('DeleteWorkspace', Workspace='EPPfit_Parameters')
-            except ValueError:
-                deleted_fit_params = True
-            self.assertTrue(deleted_fit_params, "Should raise a value error")
-
-            deleted_fit_matrix = False
-            try:
-                run_algorithm('DeleteWorkspace', Workspace='EPPfit_NormalisedCovarianceMatrix')
-            except ValueError:
-                deleted_fit_matrix = True
-            self.assertTrue(deleted_fit_matrix, "Should raise a value error")
-
-            deleted_fit_table = False
-            try:
-                run_algorithm('DeleteWorkspace', Workspace='fit_table')
-            except ValueError:
-                deleted_fit_table = True
-            self.assertTrue(deleted_fit_table, "Should raise a value error")
 
     def _workspace_properties(self, test_ws):
         self.assertTrue(isinstance(test_ws, MatrixWorkspace), "Should be a matrix workspace")
