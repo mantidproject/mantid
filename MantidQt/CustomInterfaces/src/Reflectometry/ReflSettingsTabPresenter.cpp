@@ -58,7 +58,16 @@ std::string ReflSettingsTabPresenter::getTransmissionOptions() const {
 */
 std::string ReflSettingsTabPresenter::getReductionOptions() const {
 
-  return m_view->getReductionOptions();
+  std::vector<std::string> options;
+
+  // Global options
+  auto globalOptions = m_view->getReductionOptions();
+  if (!globalOptions.empty())
+    options.push_back(m_view->getReductionOptions());
+  // Add analysis mode
+  options.push_back("AnalysisMode=" + m_view->getAnalysisMode());
+
+  return boost::algorithm::join(options, ",");
 }
 
 /** Returns global options for 'Stitch1DMany'

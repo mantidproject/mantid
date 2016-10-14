@@ -68,6 +68,7 @@ public:
   MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
+  MOCK_CONST_METHOD0(getAnalysisMode, std::string());
 
   // Calls we don't care about
   void

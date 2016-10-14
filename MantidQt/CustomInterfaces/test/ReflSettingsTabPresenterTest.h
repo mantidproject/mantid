@@ -52,8 +52,15 @@ public:
     MockSettingsTabView mockView;
     ReflSettingsTabPresenter presenter(&mockView);
 
-    EXPECT_CALL(mockView, getReductionOptions()).Times(Exactly(1));
-    presenter.getReductionOptions();
+    EXPECT_CALL(mockView, getReductionOptions())
+        .Times(Exactly(1))
+        .WillOnce(Return(""));
+    EXPECT_CALL(mockView, getAnalysisMode())
+        .Times(Exactly(1))
+        .WillOnce(Return("MultiDetectorAnalysis"));
+    auto options = presenter.getReductionOptions();
+
+    TS_ASSERT_EQUALS(options, "AnalysisMode=MultiDetectorAnalysis");
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 

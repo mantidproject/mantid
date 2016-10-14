@@ -109,5 +109,13 @@ void QtReflSettingsTabView::createStitchHints(
   m_ui.optionsLayout->addWidget(new HintingLineEdit(this, hints), 4, 2);
 }
 
+/** Return selected analysis mode
+* @return :: selected analysis mode
+*/
+std::string QtReflSettingsTabView::getAnalysisMode() const {
+
+  return m_ui.analysisModeComboBox->currentText().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid

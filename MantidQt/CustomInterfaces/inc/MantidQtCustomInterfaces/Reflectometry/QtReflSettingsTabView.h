@@ -52,6 +52,8 @@ public:
   std::string getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions() const override;
+  /// Return selected analysis mode
+  std::string getAnalysisMode() const override;
 
   /// Creates hints for 'Plus'
   void
