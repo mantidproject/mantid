@@ -419,13 +419,13 @@ double CalculateFlatBackground::Mean(const API::MatrixWorkspace_sptr WS,
   // is taken as the sqrt the total number counts. To get the the error on the
   // counts in each bin just divide this by the number of bins. The variance =
   // error^2 that is the total variance divide by the number of bins _squared_.
-  const double variance = std::accumulate(ES.begin() + startInd, ES.begin() + endInd + 1,
-                             0.0, VectorHelper::SumSquares<double>()) /
-             (numBins * numBins);
+  const double variance =
+      std::accumulate(ES.begin() + startInd, ES.begin() + endInd + 1, 0.0,
+                      VectorHelper::SumSquares<double>()) /
+      (numBins * numBins);
   // adjust the errors using the variance (variance = error^2)
-  std::transform(
-      ES.begin(), ES.end(), ES.begin(),
-      std::bind2nd(VectorHelper::AddVariance<double>(), variance));
+  std::transform(ES.begin(), ES.end(), ES.begin(),
+                 std::bind2nd(VectorHelper::AddVariance<double>(), variance));
   // return mean number of counts in each bin, the sum of the number of counts
   // in all the bins divided by the number of bins used in that sum
   return background;
