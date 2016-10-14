@@ -381,9 +381,6 @@ void ComptonScatteringCountRate::createConstraintMatrices() {
   }
 }
 
-/**
- * @param xValues The X data for the fitted spectrum
- */
 void ComptonScatteringCountRate::createPositivityCM() {
   // -- Constraint matrix for J(y) > 0 --
   // The first N columns are filled with J(y) for each mass + N_h for the first
