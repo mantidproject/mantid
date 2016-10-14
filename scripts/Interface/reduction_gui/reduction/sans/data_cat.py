@@ -44,7 +44,7 @@ class DataType(object):
         """
             Add a data type entry to the datatype table
         """
-        if not type_id in cls.DATA_TYPES.keys():
+        if type_id not in cls.DATA_TYPES.keys():
             raise RuntimeError("DataType got an unknown type ID: %s" % type_id)
 
         t = (type_id, dataset_id,)

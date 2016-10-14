@@ -260,7 +260,7 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
         UseMap(ascWS, map)
     if rejectZ:
         RejectZero(ascWS, tot)
-    if useM == False and rejectZ == False:
+    if not useM and not rejectZ:
         CloneWorkspace(InputWorkspace=ascWS, OutputWorkspace=outWS)
     if Save:
         opath = os.path.join(workdir, outWS + '.nxs')
@@ -354,7 +354,7 @@ def InxStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):
         UseMap(ascWS, map)
     if rejectZ:
         RejectZero(ascWS, tot)
-    if useM == False and rejectZ == False:
+    if not useM and not rejectZ:
         CloneWorkspace(InputWorkspace=ascWS, OutputWorkspace=outWS)
     if Save:
         opath = os.path.join(workdir, outWS + '.nxs')

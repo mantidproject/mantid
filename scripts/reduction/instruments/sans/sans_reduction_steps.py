@@ -707,7 +707,7 @@ class GetSampleGeom(ReductionStep):
         self._use_wksp_height = False
 
         # For a cylinder and sphere the height=width=radius
-        if (not self._shape is None) and (self._shape.startswith('cylinder')):
+        if (self._shape is not None) and (self._shape.startswith('cylinder')):
             self._width = self._height
         self._use_wksp_widtht = False
 

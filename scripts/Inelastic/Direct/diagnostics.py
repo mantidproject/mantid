@@ -77,7 +77,7 @@ def diagnose(white_int,**kwargs):
     # process subsequent calls to this routine, when white mask is already defined
     white= kwargs.get('white_mask',None) # and white beam is not changed
     #white mask assumed to be global so no sectors in there
-    if not white is None and isinstance(white,RunDescriptor.RunDescriptor):
+    if white is not None and isinstance(white,RunDescriptor.RunDescriptor):
         hardmask_file = None
         white_mask,num_failed = white.get_masking(2)
         add_masking(white_int, white_mask)
@@ -86,7 +86,7 @@ def diagnose(white_int,**kwargs):
         white_mask = None
         van_mask = CloneWorkspace(white_int)
 
-    if not hardmask_file is None:
+    if hardmask_file is not None:
         if parser.mapmask_ref_ws is None:
             ref_ws = white_int
         else:
