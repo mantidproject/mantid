@@ -1243,7 +1243,15 @@ def plotSubplots(source, indices, distribution = mantidqtpython.MantidQt.Distrib
     """
 
     workspace_names = getWorkspaceNames(source)
-    __checkPlotWorkspaces(workspace_names)
+   
+    # Deal with workspace groups that may contain various types:
+    # Only want to plot MatrixWorkspaces
+    to_plot = []
+    for name in workspace_names:
+        if isinstance(mantid.api.mtd[name], mantid.api.MatrixWorkspace):
+            to_plot.append(name)
+            
+    __checkPlotWorkspaces(to_plot)
     # check spectrum indices
     index_list = __getWorkspaceIndices(indices)
     if len(index_list) == 0:
@@ -1251,7 +1259,7 @@ def plotSubplots(source, indices, distribution = mantidqtpython.MantidQt.Distrib
     for idx in index_list:
         if idx < 0:
             raise ValueError("Wrong spectrum index (<0): %d" % idx)
-    for name in workspace_names:
+    for name in to_plot:
         max_spec = workspace(name).getNumberHistograms() - 1
         for idx in index_list:
             if idx > max_spec:
@@ -1259,7 +1267,7 @@ def plotSubplots(source, indices, distribution = mantidqtpython.MantidQt.Distrib
                                  " number of spectra in this workspace - 1 (%d)" % (name, idx, max_spec))
     
     graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotSubplots,
-                                          workspace_names, index_list, distribution, error_bars))
+                                          to_plot, index_list, distribution, error_bars))
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
     else:
