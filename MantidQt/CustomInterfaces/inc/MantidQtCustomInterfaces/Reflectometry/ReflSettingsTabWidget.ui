@@ -51,7 +51,7 @@
               </widget>
             </item>
             <item row="0" column="2">
-              <spacer name="instSettingsSpacer">
+              <spacer name="expSettingsSpacer">
                 <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                 </property>
@@ -118,6 +118,39 @@
             <property name="margin">
               <number>10</number>
             </property>
+            <item row="0" column="0">
+              <widget class="QLabel" name="instSettingsMonIntMinLabel">
+                <property name="text">
+                  <string>MonitorIntegralMin</string>
+                </property>
+              </widget>
+            </item>
+            <item row="0" column="1">
+              <widget class="QLineEdit" name="instSettingsMonIntMinEdit"/>
+            </item>
+            <item row="0" column="2">
+              <widget class="QLabel" name="instSettingsMonIntMaxLabel">
+                <property name="text">
+                  <string>MonitorIntegralMax</string>
+                </property>
+              </widget>
+            </item>
+            <item row="0" column="3">
+              <widget class="QLineEdit" name="instSettingsMonIntMaxEdit"/>
+            </item>
+            <item row="0" column="4">
+              <spacer name="instSettingsSpacer">
+                <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                  <size>
+                    <width>40</width>
+                    <height>20</height>
+                  </size>
+                </property>
+              </spacer>
+            </item>
           </layout>
         </widget>
       </item>
