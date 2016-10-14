@@ -87,12 +87,11 @@ private:
   double sigmaTotal(const double flightPath, const double tof) const;
   void seedRNG(const size_t seed);
 
+  /// A copy of the correction parameters
+  const Parameters m_pars;
   // Holds histogram to process
   const HistogramData::Histogram &m_histogram;
   const HistogramData::Points m_tofVals;
-
-  /// A copy of the correction parameters
-  const Parameters m_pars;
   /// Holds the number of Y vals to process
   const size_t m_histoYSize;
   /// Limits for the range of mu*r values to cover
