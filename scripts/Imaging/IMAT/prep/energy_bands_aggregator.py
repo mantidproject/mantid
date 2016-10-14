@@ -59,7 +59,7 @@ except RuntimeError:
             _USING_PLUGIN_TIFFFILE = True
         except ImportError:
             try:
-                import tifffile
+                import tifffile # noqa
                 _USING_PLUGIN_TIFFFILE = True
             except ImportError:
                 raise ImportError("Cannot find the package 'tifffile' in the system or together with this "

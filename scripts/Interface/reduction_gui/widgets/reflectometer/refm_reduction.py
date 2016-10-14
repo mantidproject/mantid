@@ -1,20 +1,17 @@
 #pylint: disable=invalid-name, too-many-arguments
-from PyQt4 import QtGui, uic, QtCore
+from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
 import math
 import os
-import time
-import sys
 from functools import partial
 from reduction_gui.reduction.reflectometer.refm_data_script import DataSets as REFMDataSets
 from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
-from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.reflectometer.ui_refm_reduction
 
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
+    import mantidplot # noqa
     from mantid.api import *
     #TODO: this will need to change once we get rid of the old python API
     from reduction.instruments.reflectometer import data_manipulation

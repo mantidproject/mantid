@@ -1,7 +1,6 @@
 #pylint: disable=invalid-name
 import os
 import re
-import urllib2
 
 concepts = ['Algorithm',
             'Analysis_Data_Service',

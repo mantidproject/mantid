@@ -12,7 +12,7 @@ import traceback
 # Only way that I have found to use the logger from both the command line
 # and mantiplot
 try:
-    import mantidplot
+    import mantidplot # noqa
     from mantid.kernel import logger
 except ImportError:
     import logging

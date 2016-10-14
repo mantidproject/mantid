@@ -4,9 +4,7 @@ from mantid.simpleapi import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
                         ITableWorkspaceProperty, PropertyMode, Progress)
 from mantid.kernel import Direction, logger
-from mantid import config
 import math
-import os
 
 
 class TransformToIqt(PythonAlgorithm):

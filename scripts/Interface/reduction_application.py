@@ -9,7 +9,7 @@ import traceback
 # Check whether Mantid is available
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
+    import mantidplot # noqa
     IS_IN_MANTIDPLOT = True
     from mantid.kernel import ConfigService
     from mantid.api import AlgorithmFactory

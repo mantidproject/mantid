@@ -1,6 +1,5 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
-import os
+from PyQt4 import QtGui, QtCore
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.ui_data_catalog

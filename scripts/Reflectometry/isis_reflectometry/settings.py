@@ -1,6 +1,5 @@
 import xml.etree.ElementTree as XML
 import os.path
-from mantid.simpleapi import *
 
 
 class MissingSettings(Exception):

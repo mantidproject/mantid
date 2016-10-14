@@ -8,7 +8,7 @@ from isis_reflectometry.quick import *
 from isis_reflectometry.procedures import *
 from isis_reflectometry.combineMulti import *
 from isis_reflectometry.saveModule import *
-from isis_reflectometry.settings import MissingSettings, Settings
+from isis_reflectometry.settings import Settings
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
