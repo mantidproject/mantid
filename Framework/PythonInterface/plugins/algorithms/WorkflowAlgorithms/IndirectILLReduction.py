@@ -259,8 +259,8 @@ def perform_unmirror(red, left, right, option):
 
     elif option == 7:
         logger.information('Unmirror 7: Shift both the right and the left according to vanadium and sum')
-        _bin_range_left = 'bin_range_left'
-        _bin_range_right = 'bin_range_right'
+        _bin_range_left = '__bin_range_left'
+        _bin_range_right = '__bin_range_right'
         MatchPeaks(InputWorkspace=left, InputWorkspace2='left_van', OutputWorkspace=left, MatchInput2ToCenter=True,
                    BinRangeTable=_bin_range_left)
         MatchPeaks(InputWorkspace=right, InputWorkspace2='right_van', OutputWorkspace=right, MatchInput2ToCenter=True,
@@ -640,13 +640,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         bsub = temp_run_ws_list[7]
         vnorm = temp_run_ws_list[8]
 
-        # Get mirror_sense
-        if mtd[red].getRun().hasProperty('Doppler.mirror_sense'):
-            # Get mirror_sense from run
-            # mirror_sense 14 : two wings
-            # mirror_sense 16 : one wing
-            self._mirror_sense = mtd[red].getRun().getLogData('Doppler.mirror_sense').value
-
         self._debug(red, raw)
 
         LoadParameterFile(Workspace=red, Filename=self._parameter_file)
@@ -668,6 +661,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._vanadium_calibration(red)
 
         self._debug(red, vnorm)
+
+        # Get mirror_sense
+        if mtd[red].getRun().hasProperty('Doppler.mirror_sense'):
+            # Get mirror_sense from run
+            # mirror_sense 14 : two wings
+            # mirror_sense 16 : one wing
+            self._mirror_sense = mtd[red].getRun().getLogData('Doppler.mirror_sense').value
 
         if self._mirror_sense == 14:
             # Number of bins
@@ -695,11 +695,14 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 mask_reduced_ws(left, xmin_left, xmax_left)
                 mask_reduced_ws(right, xmin_right, xmax_right)
 
-                # Convert left and right wing axis conversions, vanadium runs are already converted
-                convert_to_energy(left)
-                convert_to_energy(right)
-                ConvertSpectrumAxis(InputWorkspace=left, OutputWorkspace=left, Target='Theta', EMode='Indirect')
-                ConvertSpectrumAxis(InputWorkspace=right, OutputWorkspace=right, Target='Theta', EMode='Indirect')
+            # Convert left and right wing axis conversions, vanadium runs are already converted
+            convert_to_energy(left)
+            convert_to_energy(right)
+
+            ConvertSpectrumAxis(InputWorkspace=left, OutputWorkspace=left, Target='Theta', EMode='Indirect')
+            ConvertSpectrumAxis(InputWorkspace=right, OutputWorkspace=right, Target='Theta', EMode='Indirect')
+
+        ConvertSpectrumAxis(InputWorkspace=red, OutputWorkspace=red, Target='Theta', EMode='Indirect')
 
         # Energy transfer according to mirror_sense and unmirror_option
         start_bin = 0
@@ -715,11 +718,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self.log().information(
                 'Input run #{0} has one wing, perform energy transfer, no unmirroring will happen'.format(run))
             convert_to_energy(red)
-            ConvertSpectrumAxis(InputWorkspace=red, OutputWorkspace=red, Target='Theta', EMode='Indirect')
         else:
             self.log().warning('Input run #{0}: no Doppler.mirror_sense defined, assuming one wing.'.format(run))
             convert_to_energy(red)
-            ConvertSpectrumAxis(InputWorkspace=red, OutputWorkspace=red, Target='Theta', EMode='Indirect')
 
         # Mask corrupted bins according to shifted workspaces or monitor range
         # Initialisation
@@ -733,18 +734,24 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             # Shifted workspaces
             xmin = np.maximum(xmin, start_bin)
             xmax = np.minimum(xmax, end_bin)
-        elif self._mirror_sense == 14 and self._unmirror_option == 0:
-            # Reload X-values (now in meV)
-            x = mtd[red].readX(0)
-            xmin = xmin_left
-            xmax = xmax_right + int(x[-1] / 2)
-            if xmin_right < size and xmax_left < size:
-                # Mask mid bins
-                self.log().debug('Mask red ws bins between {0}, {1}'.format(xmax_left, int(size / 2) + xmin_right - 1))
-                MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[xmax_left], XMax=x[int(size / 2) + xmin_right])
-        elif self._mirror_sense == 14 and self._unmirror_option > 0:
-            xmin = np.maximum(xmin_left, xmin_right)
-            xmax = np.minimum(xmax_left, xmax_right)
+
+        elif self._mirror_sense == 14:
+
+            if self._unmirror_option == 0:
+                # Reload X-values (now in meV)
+                x = mtd[red].readX(0)
+                xmin = xmin_left
+                xmax = xmax_right + int(x[-1] / 2)
+                if xmin_right < size and xmax_left < size:
+                    # Mask mid bins
+                    self.log().debug('Mask red ws bins between {0}, {1}'.
+                                     format(xmax_left, int(size / 2) + xmin_right - 1))
+                    MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[xmax_left],
+                             XMax=x[int(size / 2) + xmin_right])
+            else:
+                xmin = np.maximum(xmin_left, xmin_right)
+                xmax = np.minimum(xmax_left, xmax_right)
+
         elif self._mirror_sense == 16:
             # One wing, no right workspace
             xmin, xmax = monitor_range(mon)
@@ -760,15 +767,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 DeleteWorkspace(right)
 
     def _normalisation(self, red, mon):
-        '''
-        Args:
-            red: input workspace to be normalised to monitor
-            mon: monitor
-
-        Returns:
-            normalised to monitor workspace
-
-        '''
+        """
+        @param red: input workspace to be normalised to monitor
+        @param mon: monitor
+        @return   : normalised to monitor workspace
+        """
 
         # Get Doppler energy
         if mtd[red].getRun().hasProperty('Doppler.maximum_delta_energy'):
@@ -781,36 +784,38 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         if self._scan_type == 'QENS':
             # Use default bin by bin normalisation to monitor
             NormaliseToMonitor(InputWorkspace=red, OutputWorkspace=red, MonitorWorkspace=mon)
-        elif self._scan_type == 'FWS' and energy == 0.0:
-            # Integrate over the elastic peak range
-            x = mtd[red].readX(0)
-            xmin = x[0]
-            xmax = x[-1]
-            NormaliseToMonitor(InputWorkspace=red, OutputWorkspace=red, IntegrationRangeMin=xmin,
-                                IntegrationRangeMax=xmax, MonitorWorkspace=mon)
-        elif self._scan_type == 'FWS' and energy > 0.0:
-            # Normalise over the left and right peak of inelastic scans and add the normalised values
-            size = mtd[red].blocksize()
-            x_start, x_stop = monitor_range(red)
-            x_start -= 1
-            x = mtd[red].readX(0)
-            # Take into account varying blocksize and define integration range for normalisation
-            int_interval = int(len(x) / 50)
-            xmin = x_start + int_interval
-            xmax = x_stop - int_interval
-            # Split the reduced workspace in left and right
-            extract_workspace(red, '__red_left', 0, int(size / 2))
-            extract_workspace(red, '__red_right', int(size / 2), size)
-            # Normalise over left and right ranges
-            self.log().information('IFWS scan ranges (bin numbers) [{0} {1}] and [{2} {3}]'.format
-                                    (x[0], xmin, xmax, x[len(x) - 1]))
-            NormaliseToMonitor(InputWorkspace='__red_left', OutputWorkspace='__mon_left', IntegrationRangeMin=x[0],
-                                IntegrationRangeMax=xmin, MonitorWorkspace=mon)
-            NormaliseToMonitor(InputWorkspace='__red_right', OutputWorkspace='__mon_right',
-                                IntegrationRangeMin=xmax, IntegrationRangeMax=x[len(x) - 1], MonitorWorkspace=mon)
-            Plus(LHSWorkspace='__mon_left', RHSWorkspace='__mon_right', OutputWorkspace=red)
 
-        if self._scan_type == 'FWS':
+        elif self._scan_type == 'FWS':
+            if energy == 0.0:
+                # Integrate over the elastic peak range
+                x = mtd[red].readX(0)
+                xmin = x[0]
+                xmax = x[-1]
+                NormaliseToMonitor(InputWorkspace=red, OutputWorkspace=red, IntegrationRangeMin=xmin,
+                                    IntegrationRangeMax=xmax, MonitorWorkspace=mon)
+
+            else:
+                # Normalise over the left and right peak of inelastic scans and add the normalised values
+                size = mtd[red].blocksize()
+                x_start, x_stop = monitor_range(red)
+                x_start -= 1
+                x = mtd[red].readX(0)
+                # Take into account varying blocksize and define integration range for normalisation
+                int_interval = int(len(x) / 50)
+                xmin = x_start + int_interval
+                xmax = x_stop - int_interval
+                # Split the reduced workspace in left and right
+                extract_workspace(red, '__red_left', 0, int(size / 2))
+                extract_workspace(red, '__red_right', int(size / 2), size)
+                # Normalise over left and right ranges
+                self.log().information('IFWS scan ranges (bin numbers) [{0} {1}] and [{2} {3}]'.format
+                                        (x[0], xmin, xmax, x[len(x) - 1]))
+                NormaliseToMonitor(InputWorkspace='__red_left', OutputWorkspace='__mon_left', IntegrationRangeMin=x[0],
+                                    IntegrationRangeMax=xmin, MonitorWorkspace=mon)
+                NormaliseToMonitor(InputWorkspace='__red_right', OutputWorkspace='__mon_right',
+                                    IntegrationRangeMin=xmax, IntegrationRangeMax=x[len(x) - 1], MonitorWorkspace=mon)
+                Plus(LHSWorkspace='__mon_left', RHSWorkspace='__mon_right', OutputWorkspace=red)
+
             ReplaceSpecialValues(InputWorkspace=red, OutputWorkspace=red, NaNValue=0, NaNError=0)
 
         return red
@@ -831,6 +836,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         return red
 
     def _vanadium_calibration(self, red):
+        """
+        @param red: reduced workspace that will be calibrated
+        """
         # Calibrate to vanadium calibration workspace if specified
         # note, this is a one-column calibration workspace
         if self._calib_ws is not None:
@@ -838,9 +846,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 Divide(LHSWorkspace=red, RHSWorkspace=self._calib_ws, OutputWorkspace=red)
             else:
                 self.log().error("Calibration workspace has wrong dimensions.")
-
-    def _masking(self, ws):
-        pass
 
     def _debug(self, ws, name):
         """
@@ -862,6 +867,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         if self._unmirror_option == 5 or self._unmirror_option == 7:
             DeleteWorkspace('left_van')
             DeleteWorkspace('right_van')
+
+        if self._background_file:
+            DeleteWorkspace('background')
 
         output = np.array(out_ws_names)
         self.log().debug(str(output))
