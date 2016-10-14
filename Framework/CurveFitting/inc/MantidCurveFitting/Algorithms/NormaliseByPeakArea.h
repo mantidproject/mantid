@@ -5,6 +5,12 @@
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
+
+namespace HistogramData {
+class HistogramY;
+class HistogramE;
+}
+
 namespace CurveFitting {
 namespace Algorithms {
 
@@ -65,8 +71,9 @@ private:
   void normaliseTOFData(const double area, const size_t index);
   /// Stores/accumulates the results
   void saveToOutput(const API::MatrixWorkspace_sptr &accumWS,
-                    const std::vector<double> &yValues,
-                    const std::vector<double> &eValues, const size_t index);
+                    const Mantid::HistogramData::HistogramY &yValues,
+                    const Mantid::HistogramData::HistogramE &eValues,
+                    const size_t index);
   /// Symmetrises the data in yspace about the origin
   void symmetriseYSpace();
 

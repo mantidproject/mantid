@@ -8,6 +8,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidHistogramData/HistogramY.h"
+#include "MantidHistogramData/HistogramE.h"
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -121,8 +123,7 @@ void NormaliseByPeakArea::exec() {
 
     double peakArea = fitToMassPeak(yspaceIn, static_cast<size_t>(i));
     normaliseTOFData(peakArea, i);
-    saveToOutput(m_yspaceWS, yspaceIn->y(i).rawData(), yspaceIn->e(i).rawData(),
-                 i);
+    saveToOutput(m_yspaceWS, yspaceIn->y(i), yspaceIn->e(i), i);
 
     m_progress->report();
   }
@@ -262,8 +263,7 @@ double NormaliseByPeakArea::fitToMassPeak(const MatrixWorkspace_sptr &yspace,
   alg->execute();
 
   MatrixWorkspace_sptr fitOutputWS = alg->getProperty("OutputWorkspace");
-  saveToOutput(m_fittedWS, fitOutputWS->y(1).rawData(),
-               yspace->e(index).rawData(), index);
+  saveToOutput(m_fittedWS, fitOutputWS->y(1), yspace->e(index), index);
 
   double area = func->getParameter("Intensity");
   if (g_log.is(Logger::Priority::PRIO_INFORMATION)) {
@@ -281,17 +281,8 @@ double NormaliseByPeakArea::fitToMassPeak(const MatrixWorkspace_sptr &yspace,
 */
 void NormaliseByPeakArea::normaliseTOFData(const double area,
                                            const size_t index) {
-  const auto &inY = m_inputWS->y(index);
-  std::vector<double> outY(m_normalisedWS->y(index).size());
-  std::transform(inY.begin(), inY.end(), outY.begin(),
-                 std::bind2nd(std::divides<double>(), area));
-  m_normalisedWS->mutableY(index) = outY;
-
-  const auto &inE = m_inputWS->e(index);
-  std::vector<double> outE(m_normalisedWS->e(index).size());
-  std::transform(inE.begin(), inE.end(), outE.begin(),
-                 std::bind2nd(std::divides<double>(), area));
-  m_normalisedWS->mutableE(index) = outE;
+  m_normalisedWS->mutableY(index) = m_inputWS->y(index) / area;
+  m_normalisedWS->mutableE(index) = m_inputWS->e(index) / area;
 }
 
 /**
@@ -301,8 +292,8 @@ void NormaliseByPeakArea::normaliseTOFData(const double area,
 * @param index Index of the workspace. Only used when not summing.
 */
 void NormaliseByPeakArea::saveToOutput(const API::MatrixWorkspace_sptr &accumWS,
-                                       const std::vector<double> &yValues,
-                                       const std::vector<double> &eValues,
+                                       const HistogramData::HistogramY &yValues,
+                                       const HistogramData::HistogramE &eValues,
                                        const size_t index) {
   assert(yValues.size() == eValues.size());
 
@@ -310,12 +301,12 @@ void NormaliseByPeakArea::saveToOutput(const API::MatrixWorkspace_sptr &accumWS,
     const size_t npts(accumWS->blocksize());
     auto &accumY = accumWS->mutableY(0);
     auto &accumE = accumWS->mutableE(0);
-    const auto accumYCopy = accumWS->y(0);
-    const auto accumECopy = accumWS->e(0);
 
     for (size_t j = 0; j < npts; ++j) {
-      double accumYj(accumYCopy[j]), accumEj(accumECopy[j]);
-      double rhsYj(yValues[j]), rhsEj(eValues[j]);
+      double accumYj = accumWS->y(0)[j];
+      double accumEj = accumWS->e(0)[j];
+      double rhsYj = yValues[j];
+      double rhsEj = eValues[j];
       if (accumEj < 1e-12 || rhsEj < 1e-12)
         continue;
       double err = 1.0 / (accumEj * accumEj) + 1.0 / (rhsEj * rhsEj);
@@ -351,16 +342,15 @@ void NormaliseByPeakArea::symmetriseYSpace() {
     const auto &xsym = m_symmetrisedWS->x(i);
     auto &ySymOut = m_symmetrisedWS->mutableY(i);
     auto &eSymOut = m_symmetrisedWS->mutableE(i);
-    const auto yIn = m_yspaceWS->y(i); // copy
-    const auto eIn = m_yspaceWS->e(i); // copy
 
     for (size_t j = 0; j < npts; ++j) {
-      const double ein = eIn[j];
+      const double ein = m_yspaceWS->e(i)[j];
       const double absXj = fabs(xsym[j]);
 
       double yout(0.0), eout(1e8);
       for (size_t k = 0; k < npts; ++k) {
-        const double yk(yIn[k]), ek(eIn[k]);
+        const double yk = m_yspaceWS->y(i)[k];
+        const double ek = m_yspaceWS->e(i)[k];
         const double absXk = fabs(xsym[k]);
         if (absXj >= (absXk - dy) && absXj <= (absXk + dy) && ein != 0.0) {
 
