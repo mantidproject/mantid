@@ -394,7 +394,7 @@ void CalculateCoverageDGS::exec() {
     }
   }
 
-  m_normWS = MDHistoWorkspace_sptr(new MDHistoWorkspace(binDimensions));
+  m_normWS = boost::make_shared<MDHistoWorkspace>(binDimensions);
   m_normWS->setTo(0., 0., 0.);
   setProperty("OutputWorkspace",
               boost::dynamic_pointer_cast<Workspace>(m_normWS));
