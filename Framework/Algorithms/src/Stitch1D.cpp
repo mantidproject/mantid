@@ -60,7 +60,7 @@ MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2,
                                           MatrixWorkspace_sptr &source) {
   MatrixWorkspace_sptr product = WorkspaceFactory::Instance().create(source);
   const int histogramCount = static_cast<int>(source->getNumberHistograms());
-  PARALLEL_FOR2(source, product)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*source, *product))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy over the bin boundaries

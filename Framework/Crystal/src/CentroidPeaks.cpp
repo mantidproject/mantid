@@ -87,7 +87,7 @@ void CentroidPeaks::integrate() {
 
   int Edge = getProperty("EdgePixels");
   Progress prog(this, MinPeaks, 1.0, MaxPeaks);
-  PARALLEL_FOR2(inWS, peakWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *peakWS))
   for (int i = MinPeaks; i <= MaxPeaks; i++) {
     PARALLEL_START_INTERUPT_REGION
     // Get a direct ref to that peak.
@@ -223,7 +223,7 @@ void CentroidPeaks::integrateEvent() {
 
   int Edge = getProperty("EdgePixels");
   Progress prog(this, MinPeaks, 1.0, MaxPeaks);
-  PARALLEL_FOR2(inWS, peakWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *peakWS))
   for (int i = MinPeaks; i <= MaxPeaks; i++) {
     PARALLEL_START_INTERUPT_REGION
     // Get a direct ref to that peak.

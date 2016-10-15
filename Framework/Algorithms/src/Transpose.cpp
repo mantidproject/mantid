@@ -52,7 +52,7 @@ void Transpose::exec() {
       Kernel::make_cow<HistogramData::HistogramX>(std::move(newXValues));
 
   Progress progress(this, 0.0, 1.0, newNhist * newYsize);
-  PARALLEL_FOR2(inputWorkspace, outputWorkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
   for (int64_t i = 0; i < static_cast<int64_t>(newNhist); ++i) {
     PARALLEL_START_INTERUPT_REGION
 

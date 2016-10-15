@@ -136,7 +136,7 @@ void UnwrapSNS::exec() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const double L1 = spectrumInfo.l1();
 
-  PARALLEL_FOR2(m_inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *outputWS))
   for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
        workspaceIndex++) {
     PARALLEL_START_INTERUPT_REGION
@@ -199,10 +199,8 @@ void UnwrapSNS::execEvent() {
   const double L1 = spectrumInfo.l1();
 
   // do the actual work
-  //  PARALLEL_FOR2(m_inputWS, outW)
   for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
        workspaceIndex++) {
-    //    PARALLEL_START_INTERUPT_REGION
     std::size_t numEvents = outW->getSpectrum(workspaceIndex).getNumberEvents();
     double Ld = -1.0;
     if (spectrumInfo.hasDetectors(workspaceIndex))
@@ -228,9 +226,7 @@ void UnwrapSNS::execEvent() {
       outW->getSpectrum(workspaceIndex).setTofs(times);
     }
     m_progress->report();
-    //    PARALLEL_END_INTERUPT_REGION
   }
-  //  PARALLEL_CHECK_INTERUPT_REGION
 
   outW->clearMRU();
   this->runMaskDetectors();

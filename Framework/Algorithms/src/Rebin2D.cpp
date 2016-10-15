@@ -118,7 +118,7 @@ void Rebin2D::exec() {
   m_progress = boost::shared_ptr<API::Progress>(
       new API::Progress(this, 0.0, 1.0, nreports));
 
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(numYBins);
        ++i) // signed for openmp
   {

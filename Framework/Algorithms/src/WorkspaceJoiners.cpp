@@ -50,7 +50,7 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
 
   // Loop over the input workspaces in turn copying the data into the output one
   const int64_t &nhist1 = ws1->getNumberHistograms();
-  PARALLEL_FOR2(ws1, output)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws1, *output))
   for (int64_t i = 0; i < nhist1; ++i) {
     PARALLEL_START_INTERUPT_REGION
     auto &outSpec = output->getSpectrum(i);
@@ -80,7 +80,7 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
   // For second loop we use the offset from the first
   const int64_t &nhist2 = ws2->getNumberHistograms();
   const auto &spectrumInfo = ws2->spectrumInfo();
-  PARALLEL_FOR2(ws2, output)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws2, *output))
   for (int64_t j = 0; j < nhist2; ++j) {
     PARALLEL_START_INTERUPT_REGION
     // The spectrum in the output workspace

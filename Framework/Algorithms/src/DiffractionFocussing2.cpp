@@ -170,9 +170,8 @@ void DiffractionFocussing2::exec() {
   Progress *prog;
   prog = new API::Progress(this, 0.2, 1.00,
                            static_cast<int>(totalHistProcess) + nGroups);
-#ifndef __APPLE__
-  PARALLEL_FOR2(m_matrixInputW, out)
-#endif
+
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_matrixInputW, *out))
   for (int outWorkspaceIndex = 0;
        outWorkspaceIndex < static_cast<int>(m_validGroups.size());
        outWorkspaceIndex++) {
@@ -181,9 +180,8 @@ void DiffractionFocussing2::exec() {
 
     // Get the group
     auto it = group2xvector.find(group);
-    group2vectormap::difference_type dif =
-        std::distance(group2xvector.begin(), it);
-    auto &Xout = (*it).second;
+    auto dif = std::distance(group2xvector.begin(), it);
+    auto &Xout = it->second;
 
     // Assign the new X axis only once (i.e when this group is encountered the
     // first time)

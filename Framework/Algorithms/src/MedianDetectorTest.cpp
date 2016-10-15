@@ -314,7 +314,7 @@ int MedianDetectorTest::doDetectorTests(
                     (instrument->getSample() != nullptr));
   }
 
-  PARALLEL_FOR2(countsWS, maskWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*countsWS, *maskWS))
   for (int j = 0; j < static_cast<int>(indexmap.size()); ++j) {
     std::vector<size_t> hists = indexmap.at(j);
     double median = medianvec.at(j);

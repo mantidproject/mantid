@@ -96,7 +96,7 @@ void CorrectKiKf::exec() {
   // Get the parameter map
   const ParameterMap &pmap = outputWS->constInstrumentParameters();
 
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i) {
     PARALLEL_START_INTERUPT_REGION
     double Efi = 0;

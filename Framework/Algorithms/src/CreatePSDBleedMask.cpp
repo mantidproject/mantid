@@ -149,11 +149,10 @@ void CreatePSDBleedMask::exec() {
 
   progress.resetNumSteps(numTubes, 0, 1);
 
-  PARALLEL_FOR2(inputWorkspace, outputWorkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
   for (int i = 0; i < numTubes; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    auto current = tubeMap.begin();
-    std::advance(current, i);
+    auto current = std::next(tubeMap.begin(), i);
     const TubeIndex::mapped_type tubeIndices = current->second;
     bool mask = performBleedTest(tubeIndices, inputWorkspace, maxRate,
                                  numIgnoredPixels);

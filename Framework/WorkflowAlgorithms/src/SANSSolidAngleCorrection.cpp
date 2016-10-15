@@ -110,7 +110,7 @@ void SANSSolidAngleCorrection::exec() {
   // Number of X bins
   const int xLength = static_cast<int>(inputWS->readY(0).size());
 
-  PARALLEL_FOR2(outputWS, inputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS, *inputWS))
   for (int i = 0; i < numHists; ++i) {
     PARALLEL_START_INTERUPT_REGION
     outputWS->dataX(i) = inputWS->readX(i);

@@ -114,7 +114,7 @@ void ConvertAxesToRealSpace::exec() {
 
   const auto &spectrumInfo = summedWs->spectrumInfo();
   // for each spectra
-  PARALLEL_FOR2(summedWs, outputWs)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*summedWs, *outputWs))
   for (int i = 0; i < nHist; ++i) {
     try {
       V3D pos = spectrumInfo.position(i);

@@ -123,9 +123,7 @@ void Qxy::exec() {
 
   const auto &spectrumInfo = inputWorkspace->spectrumInfo();
 
-  //  PARALLEL_FOR2(inputWorkspace,outputWorkspace)
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
-    //    PARALLEL_START_INTERUPT_REGION
     // Get the pixel relating to this spectrum
     IDetector_const_sptr det;
     try {
@@ -290,9 +288,7 @@ void Qxy::exec() {
 
     prog.report("Calculating Q");
 
-    //    PARALLEL_END_INTERUPT_REGION
   } // loop over all spectra
-  //  PARALLEL_CHECK_INTERUPT_REGION
 
   // take sqrt of error weight values
   // left to be executed here for computational efficiency

@@ -101,7 +101,7 @@ void SolidAngle::exec() {
   Progress prog(this, 0.0, 1.0, numberOfSpectra);
 
   // Loop over the histograms (detector spectra)
-  PARALLEL_FOR2(outputWS, inputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS, *inputWS))
   for (int j = 0; j <= loopIterations; ++j) {
     PARALLEL_START_INTERUPT_REGION
     int i = j + m_MinSpec;

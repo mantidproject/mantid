@@ -117,7 +117,7 @@ void He3TubeEfficiency::exec() {
   std::size_t numHists = this->inputWS->getNumberHistograms();
   this->progress = new API::Progress(this, 0.0, 1.0, numHists);
 
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
 

@@ -131,7 +131,7 @@ void ModeratorTzeroLinear::exec() {
   // do the shift in X
   const size_t numHists = inputWS->getNumberHistograms();
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
     double t_f, L_i;

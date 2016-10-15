@@ -123,7 +123,7 @@ void ScaleX::exec() {
   }
 
   // do the shift in X
-  PARALLEL_FOR2(inputW, outputW)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputW, *outputW))
   for (int i = 0; i < histnumber; ++i) {
     PARALLEL_START_INTERUPT_REGION
 

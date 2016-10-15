@@ -620,7 +620,7 @@ void SmoothNeighbours::execWorkspace2D() {
   // API::WorkspaceFactory::Instance().initializeFromParent(inWS, outWS, false);
 
   // Go through all the output workspace
-  PARALLEL_FOR2(inWS, outWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *outWS))
   for (int outWIi = 0; outWIi < int(numberOfSpectra); outWIi++) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -772,7 +772,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws) {
                     boost::dynamic_pointer_cast<MatrixWorkspace>(outWS));
 
   // Go through all the output workspace
-  PARALLEL_FOR2(ws, outWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws, *outWS))
   for (int outWIi = 0; outWIi < int(numberOfSpectra); outWIi++) {
     PARALLEL_START_INTERUPT_REGION
 
