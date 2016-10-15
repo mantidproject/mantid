@@ -186,7 +186,7 @@ void ModeratorTzeroLinear::execEvent() {
   // Loop over the spectra
   const size_t numHists = outputWS->getNumberHistograms();
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     size_t wsIndex = static_cast<size_t>(i);
     PARALLEL_START_INTERUPT_REGION

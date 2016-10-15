@@ -145,14 +145,6 @@ threadSafe(const Arg &workspace, Args &&... others) {
 #define PARALLEL_FOR_NO_WSP_CHECK_FIRSTPRIVATE2(variable1, variable2)          \
   PRAGMA(omp parallel for firstprivate(variable1, variable2) )
 
-/** Includes code to add OpenMP commands to run the next for loop in parallel.
-*		The workspace is checked to ensure it is suitable for
-*multithreaded access
-*   NULL workspaces are assumed suitable
-*/
-#define PARALLEL_FOR1(workspace1)                                              \
-    PRAGMA(omp parallel for if ( !workspace1 || workspace1->threadSafe() ) )
-
 /** Ensures that the next execution line or block is only executed if
 * there are multple threads execting in this region
 */
@@ -207,7 +199,6 @@ threadSafe(const Arg &workspace, Args &&... others) {
 #define PARALLEL_FOR_NO_WSP_CHECK()
 #define PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE(variable)
 #define PARALLEL_FOR_NO_WSP_CHECK_FIRSTPRIVATE2(variable1, variable2)
-#define PARALLEL_FOR1(workspace1)
 #define IF_PARALLEL if (false)
 #define IF_NOT_PARALLEL
 #define PARALLEL_CRITICAL(name)

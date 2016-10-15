@@ -110,7 +110,7 @@ void FindSXPeaks::exec() {
   // unlikely to have more than this.
   entries.reserve(1000);
   // Count the peaks so that we can resize the peakvector at the end.
-  PARALLEL_FOR1(localworkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace))
   for (int i = static_cast<int>(m_MinSpec); i <= static_cast<int>(m_MaxSpec);
        ++i) {
     PARALLEL_START_INTERUPT_REGION

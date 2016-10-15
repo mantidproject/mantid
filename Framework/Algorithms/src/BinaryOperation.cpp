@@ -835,7 +835,7 @@ void BinaryOperation::propagateBinMasks(
 void BinaryOperation::applyMaskingToOutput(API::MatrixWorkspace_sptr out) {
   int64_t nindices = static_cast<int64_t>(m_indicesToMask.size());
   ParameterMap &pmap = out->instrumentParameters();
-  PARALLEL_FOR1(out)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*out))
   for (int64_t i = 0; i < nindices; ++i) {
     if (!m_parallelException && !m_cancel) {
       try {

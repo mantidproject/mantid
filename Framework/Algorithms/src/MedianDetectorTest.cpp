@@ -251,7 +251,7 @@ int MedianDetectorTest::maskOutliers(
     std::vector<size_t> &hists = indexmap[i];
     double median = medianvec[i];
 
-    PARALLEL_FOR1(countsWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*countsWS))
     for (int j = 0; j < static_cast<int>(hists.size()); ++j) { // NOLINT
       const double value = countsWS->y(hists[j])[0];
       if ((value == 0.) && checkForMask) {

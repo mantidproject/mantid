@@ -188,7 +188,7 @@ void SANSSolidAngleCorrection::execEvent() {
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
   progress.report("Solid Angle Correction");
 
-  PARALLEL_FOR1(outputEventWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputEventWS))
   for (int i = 0; i < numberOfSpectra; i++) {
     PARALLEL_START_INTERUPT_REGION
     IDetector_const_sptr det;

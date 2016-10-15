@@ -366,18 +366,18 @@ void CalculateCoverageDGS::exec() {
   Mantid::Geometry::GeneralFrame frame2("Q2", "");
   Mantid::Geometry::GeneralFrame frame3("Q3", "");
   Mantid::Geometry::GeneralFrame frame4("meV", "");
-  MDHistoDimension_sptr out1(
-      new MDHistoDimension("Q1", "Q1", frame1, static_cast<coord_t>(q1min),
-                           static_cast<coord_t>(q1max), q1NumBins));
-  MDHistoDimension_sptr out2(
-      new MDHistoDimension("Q2", "Q2", frame2, static_cast<coord_t>(q2min),
-                           static_cast<coord_t>(q2max), q2NumBins));
-  MDHistoDimension_sptr out3(
-      new MDHistoDimension("Q3", "Q3", frame3, static_cast<coord_t>(q3min),
-                           static_cast<coord_t>(q3max), q3NumBins));
-  MDHistoDimension_sptr out4(new MDHistoDimension(
+  auto out1 = boost::make_shared<MDHistoDimension>(
+      "Q1", "Q1", frame1, static_cast<coord_t>(q1min),
+      static_cast<coord_t>(q1max), q1NumBins);
+  auto out2 = boost::make_shared<MDHistoDimension>(
+      "Q2", "Q2", frame2, static_cast<coord_t>(q2min),
+      static_cast<coord_t>(q2max), q2NumBins);
+  auto out3 = boost::make_shared<MDHistoDimension>(
+      "Q3", "Q3", frame3, static_cast<coord_t>(q3min),
+      static_cast<coord_t>(q3max), q3NumBins);
+  auto out4 = boost::make_shared<MDHistoDimension>(
       "DeltaE", "DeltaE", frame4, static_cast<coord_t>(m_dEmin),
-      static_cast<coord_t>(m_dEmax), dENumBins));
+      static_cast<coord_t>(m_dEmax), dENumBins);
 
   for (size_t row = 0; row <= 3; row++) {
     if (affineMat[row][0] == 1.) {
@@ -403,7 +403,7 @@ void CalculateCoverageDGS::exec() {
 
   const int64_t ndets = static_cast<int64_t>(tt.size());
 
-  PARALLEL_FOR1(inputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(inputWS))
   for (int64_t i = 0; i < ndets; i++) {
     PARALLEL_START_INTERUPT_REGION
     auto intersections = calculateIntersections(tt[i], phi[i]);

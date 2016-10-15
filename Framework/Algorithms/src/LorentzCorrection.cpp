@@ -67,7 +67,7 @@ void LorentzCorrection::exec() {
   const auto &spectrumInfo = inWS->spectrumInfo();
   Progress prog(this, 0, 1, numHistos);
 
-  PARALLEL_FOR1(inWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inWS))
   for (int64_t i = 0; i < int64_t(numHistos); ++i) {
     PARALLEL_START_INTERUPT_REGION
 

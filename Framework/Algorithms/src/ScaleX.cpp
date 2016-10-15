@@ -182,7 +182,7 @@ void ScaleX::execEvent() {
 
   const std::string op = getPropertyValue("Operation");
   int numHistograms = static_cast<int>(outputWS->getNumberHistograms());
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < numHistograms; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Do the offsetting

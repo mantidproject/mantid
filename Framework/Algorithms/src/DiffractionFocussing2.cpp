@@ -431,7 +431,7 @@ void DiffractionFocussing2::execEvent() {
     // ------ PARALLELIZE BY GROUPS -------------------------
 
     int nValidGroups = static_cast<int>(this->m_validGroups.size());
-    PARALLEL_FOR1(m_eventW)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_eventW))
     for (int iGroup = 0; iGroup < nValidGroups; iGroup++) {
       PARALLEL_START_INTERUPT_REGION
       const int group = this->m_validGroups[iGroup];
