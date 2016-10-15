@@ -74,7 +74,7 @@ void ExtractMask::exec() {
     MantidVecPtr xValues;
     xValues.access() = MantidVec(1, 0.0);
 
-    PARALLEL_FOR_IF(Kernel::threadSafe((*inputWS, *maskWS))
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *maskWS))
     for (int i = 0; i < nHist; ++i) {
       PARALLEL_START_INTERUPT_REGION
 
