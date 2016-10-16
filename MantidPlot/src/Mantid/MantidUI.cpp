@@ -1267,7 +1267,7 @@ Table *MantidUI::createDetectorTable(
                                  // value should be displayed
   QVector<QList<QVariant>> tableColValues;
   tableColValues.resize(nrows);
-  PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
+  PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
   for (int row = 0; row < nrows; ++row) {
     // Note PARALLEL_START_INTERUPT_REGION & friends apparently not needed (like
     // in algorithms)
