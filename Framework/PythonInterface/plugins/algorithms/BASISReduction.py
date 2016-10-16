@@ -237,10 +237,15 @@ class BASISReduction(PythonAlgorithm):
                                     OutputWorkspace=self._samSqwWs)  # from histo to point
             sapi.Transpose(InputWorkspace=self._samSqwWs,
                            OutputWorkspace=self._samSqwWs)  # Q-values back to vertical axis
-            # Output Dave and Nexus files
+            # Assign units of MomentumTransfer to the vertical axis
+            ws = sapi.mtd[self._samSqwWs]
+            axis = ws.getAxis(1)
+            axis.setUnit("MomentumTransfer")
+            # Output Dave file
             extension = "_divided.dat" if self._doNorm else ".dat"
             dave_grp_filename = self._makeRunName(self._samWsRun, False) + extension
             sapi.SaveDaveGrp(Filename=dave_grp_filename, InputWorkspace=self._samSqwWs, ToMicroEV=True)
+            # Output Nexus file
             extension = "_divided_sqw.nxs" if self._doNorm else "_sqw.nxs"
             processed_filename = self._makeRunName(self._samWsRun, False) + extension
             sapi.SaveNexus(Filename=processed_filename, InputWorkspace=self._samSqwWs)
