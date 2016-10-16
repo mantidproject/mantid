@@ -1614,7 +1614,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       if (mT0 != 0.0) {
         int64_t numHistograms =
             static_cast<int64_t>(m_ws->getNumberHistograms());
-        PARALLEL_FOR_NO_WSP_CHECK()
+        PARALLEL_FOR_IF(m_ws->threadsafe())
         for (int64_t i = 0; i < numHistograms; ++i) {
           PARALLEL_START_INTERUPT_REGION
           // Do the offsetting
