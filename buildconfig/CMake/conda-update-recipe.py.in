@@ -17,8 +17,9 @@ def checkout(repo_path):
 
 
 def update_meta_yaml(repo_path, recipe_path=None):
-    if recipe_path is None:
-        recipe_path = os.path.join(repo_path, 'framework')
+    recipe_path = recipe_path or 'framework'
+    if not os.path.isabs(recipe_path):
+        recipe_path = os.path.join(repo_path, recipe_path)
     # change framework meta.yaml
     path = os.path.join(recipe_path, 'meta.yaml')
     header = []
