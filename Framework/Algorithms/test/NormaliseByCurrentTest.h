@@ -18,71 +18,36 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 
-class NormaliseByCurrentTest : public CxxTest::TestSuite {
-private:
-  /// Helper method to add necessary log values to simulate multi-period data.
-  /// The algorithm uses these logs to determien how to normalise by the
-  /// current.
-  void addMultiPeriodLogsTo(MatrixWorkspace_sptr ws, int period,
-                            const std::string &protonCharges) {
-    ArrayProperty<double> *chargeProp =
-        new ArrayProperty<double>("proton_charge_by_period", protonCharges);
-    PropertyWithValue<int> *nperiodsProp =
-        new PropertyWithValue<int>("nperiods", 3);
-    PropertyWithValue<int> *currentPeriodProp =
-        new PropertyWithValue<int>("current_period", period);
+namespace {
+MatrixWorkspace_const_sptr doTest(MatrixWorkspace_sptr inWS,
+                                  std::string wsNameOut, double expectedY,
+                                  double expectedE, bool performance = false) {
+  NormaliseByCurrent norm1;
+  if (!norm1.isInitialized())
+    norm1.initialize();
 
-    ws->mutableRun().addLogData(chargeProp);
-    ws->mutableRun().addLogData(nperiodsProp);
-    ws->mutableRun().addLogData(currentPeriodProp);
+  const auto &Y = inWS->y(0);
+  double initValue = Y[0];
+  bool checkNormFactor = true;
+  if (initValue <= 0) {
+    checkNormFactor = false;
   }
+  double normFactor = initValue / expectedY;
 
-public:
-  void testName() { TS_ASSERT_EQUALS(norm.name(), "NormaliseByCurrent"); }
+  TS_ASSERT_THROWS_NOTHING(norm1.setProperty("InputWorkspace", inWS));
+  TS_ASSERT_THROWS_NOTHING(
+      norm1.setPropertyValue("OutputWorkspace", wsNameOut));
 
-  void testVersion() { TS_ASSERT_EQUALS(norm.version(), 1); }
+  TS_ASSERT_THROWS_NOTHING(norm1.execute());
+  TS_ASSERT(norm1.isExecuted());
 
-  void testInit() {
-    TS_ASSERT_THROWS_NOTHING(norm.initialize());
-    TS_ASSERT(norm.isInitialized());
-  }
+  MatrixWorkspace_const_sptr output;
+  TS_ASSERT_THROWS_NOTHING(
+      output =
+          AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(
+              wsNameOut));
 
-  void testNotInitialized() {
-    if (!norm.isInitialized())
-      norm.initialize();
-
-    // Check it fails if properties haven't been set
-    TS_ASSERT_THROWS(norm.execute(), std::runtime_error);
-    TS_ASSERT(!norm.isExecuted());
-  }
-
-  MatrixWorkspace_const_sptr doTest(MatrixWorkspace_sptr inWS,
-                                    std::string wsNameOut, double expectedY,
-                                    double expectedE) {
-    NormaliseByCurrent norm1;
-    if (!norm1.isInitialized())
-      norm1.initialize();
-
-    const auto &Y = inWS->y(0);
-    double initValue = Y[0];
-    bool checkNormFactor = true;
-    if (initValue <= 0) {
-      checkNormFactor = false;
-    }
-    double normFactor = initValue / expectedY;
-
-    TS_ASSERT_THROWS_NOTHING(norm1.setProperty("InputWorkspace", inWS));
-    TS_ASSERT_THROWS_NOTHING(
-        norm1.setPropertyValue("OutputWorkspace", wsNameOut));
-
-    TS_ASSERT_THROWS_NOTHING(norm1.execute());
-    TS_ASSERT(norm1.isExecuted());
-
-    MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output =
-            AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(
-                wsNameOut));
+  if (!performance) {
 
     for (size_t i = 0; i < output->getNumberHistograms(); i++) {
       const auto &inX = inWS->x(i);
@@ -109,25 +74,70 @@ public:
       double realFactor = (*pFactor)();
       TS_ASSERT_DELTA(realFactor, normFactor, 1.e-5);
     }
+  }
+  return output;
+}
 
-    return output;
+MatrixWorkspace_const_sptr doTest(std::string wsNameIn, std::string wsNameOut,
+                                  double expectedY, double expectedE,
+                                  bool performance = false) {
+  MatrixWorkspace_sptr inWS =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsNameIn);
+
+  // Now set the charge
+  inWS->mutableRun().setProtonCharge(2.0);
+  inWS->getAxis(0)->unit() =
+      Mantid::Kernel::UnitFactory::Instance().create("TOF");
+  inWS->setYUnit("Counts");
+
+  return doTest(inWS, wsNameOut, expectedY, expectedE, performance);
+}
+
+/// Helper method to add necessary log values to simulate multi-period data.
+/// The algorithm uses these logs to determien how to normalise by the
+/// current.
+void addMultiPeriodLogsTo(MatrixWorkspace_sptr ws, int period,
+                          const std::string &protonCharges) {
+  ArrayProperty<double> *chargeProp =
+      new ArrayProperty<double>("proton_charge_by_period", protonCharges);
+  PropertyWithValue<int> *nperiodsProp =
+      new PropertyWithValue<int>("nperiods", 3);
+  PropertyWithValue<int> *currentPeriodProp =
+      new PropertyWithValue<int>("current_period", period);
+
+  ws->mutableRun().addLogData(chargeProp);
+  ws->mutableRun().addLogData(nperiodsProp);
+  ws->mutableRun().addLogData(currentPeriodProp);
+}
+}
+class NormaliseByCurrentTest : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static NormaliseByCurrentTest *createSuite() {
+    return new NormaliseByCurrentTest();
+  }
+  static void destroySuite(NormaliseByCurrentTest *suite) { delete suite; }
+
+  void test_name() { TS_ASSERT_EQUALS(norm.name(), "NormaliseByCurrent"); }
+
+  void test_version() { TS_ASSERT_EQUALS(norm.version(), 1); }
+
+  void test_init() {
+    TS_ASSERT_THROWS_NOTHING(norm.initialize());
+    TS_ASSERT(norm.isInitialized());
   }
 
-  MatrixWorkspace_const_sptr doTest(std::string wsNameIn, std::string wsNameOut,
-                                    double expectedY, double expectedE) {
-    MatrixWorkspace_sptr inWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsNameIn);
+  void test_notInitialized() {
+    if (!norm.isInitialized())
+      norm.initialize();
 
-    // Now set the charge
-    inWS->mutableRun().setProtonCharge(2.0);
-    inWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    inWS->setYUnit("Counts");
-
-    return doTest(inWS, wsNameOut, expectedY, expectedE);
+    // Check it fails if properties haven't been set
+    TS_ASSERT_THROWS(norm.execute(), std::runtime_error);
+    TS_ASSERT(!norm.isExecuted());
   }
 
-  void testExec() {
+  void test_exec() {
     AnalysisDataService::Instance().add(
         "normIn", WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 3, 1));
     doTest("normIn", "normOut", 1.0, 0.5 * M_SQRT2);
@@ -135,7 +145,7 @@ public:
     AnalysisDataService::Instance().remove("normOut");
   }
 
-  void testMultiPeriodData() {
+  void test_multiPeriodData() {
     const std::string protonChargeByPeriod = "2.0, 4.0, 8.0";
 
     // Note that CreateWorkspace123 creates uniform signal value of 2.0, and
@@ -265,14 +275,14 @@ public:
                !alg.isExecuted());
   }
 
-  void testExec_InPlace() {
+  void test_execInPlace() {
     AnalysisDataService::Instance().add(
         "normIn", WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 3, 1));
     doTest("normIn", "normIn", 1.0, 0.5 * M_SQRT2);
     AnalysisDataService::Instance().remove("normIn");
   }
 
-  void testExecEvent() {
+  void test_execEvent() {
     AnalysisDataService::Instance().add(
         "normInEvent",
         WorkspaceCreationHelper::CreateEventWorkspace(10, 3, 100, 0.0, 1.0, 2));
@@ -287,7 +297,7 @@ public:
     AnalysisDataService::Instance().remove("normOutEvent");
   }
 
-  void testExecEvent_InPlace() {
+  void test_execEventInPlace() {
     AnalysisDataService::Instance().add(
         "normInEvent",
         WorkspaceCreationHelper::CreateEventWorkspace(10, 3, 100, 0.0, 1.0, 2));
@@ -301,7 +311,7 @@ public:
     AnalysisDataService::Instance().remove("normInEvent");
   }
 
-  void testExecZero() {
+  void test_execZero() {
     AnalysisDataService::Instance().add(
         "normIn", WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1));
 
@@ -332,4 +342,116 @@ private:
   NormaliseByCurrent norm;
 };
 
+class NormaliseByCurrentTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static NormaliseByCurrentTestPerformance *createSuite() {
+    return new NormaliseByCurrentTestPerformance();
+  }
+  static void destroySuite(NormaliseByCurrentTestPerformance *suite) {
+    delete suite;
+  }
+
+  /// Set up all the test workspaces
+  NormaliseByCurrentTestPerformance(int nHist = 1000, int nBins = 3000,
+                                    int nPixels = 200) {
+    // test_execPerformance
+    AnalysisDataService::Instance().add(
+        execWSIn,
+        WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist, nBins, 1));
+
+    // test_execInPlacePerformance
+    AnalysisDataService::Instance().add(
+        execInPlaceWSIn,
+        WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist, nBins, 1));
+
+    // test_execEventPerformance
+    AnalysisDataService::Instance().add(
+        execEventWSIn, WorkspaceCreationHelper::CreateEventWorkspace(
+                           nHist, nBins, nPixels, 0.0, 1.0, 2));
+
+    // test_execEventInPlacePerformance
+    AnalysisDataService::Instance().add(
+        execEventInPlaceWSIn, WorkspaceCreationHelper::CreateEventWorkspace(
+                                  nHist, nBins, nPixels, 0.0, 1.0, 2));
+
+    // test_multiPeriodDataPerformance
+    const std::string protonChargeByPeriod = "2.0, 4.0, 8.0";
+
+    // Note that CreateWorkspace123 creates uniform signal value of 2.0, and
+    // uniform error value of 3.0.
+    multiPeriodWS1 =
+        WorkspaceCreationHelper::Create2DWorkspace123(nHist, nBins, 1);
+    multiPeriodWS1->setYUnit("Counts");
+    addMultiPeriodLogsTo(multiPeriodWS1, 1, protonChargeByPeriod);
+
+    multiPeriodWS2 =
+        WorkspaceCreationHelper::Create2DWorkspace123(nHist, nBins, 1);
+    multiPeriodWS2->setYUnit("Counts");
+    addMultiPeriodLogsTo(multiPeriodWS2, 2, protonChargeByPeriod);
+
+    multiPeriodWS3 =
+        WorkspaceCreationHelper::Create2DWorkspace123(nHist, nBins, 1);
+    multiPeriodWS3->setYUnit("Counts");
+    addMultiPeriodLogsTo(multiPeriodWS3, 3, protonChargeByPeriod);
+  }
+
+  ~NormaliseByCurrentTestPerformance() {
+    // test_execPerformance
+    AnalysisDataService::Instance().remove(execWSIn);
+    AnalysisDataService::Instance().remove(execWSOut);
+
+    // test_execInPlacePerformance
+    AnalysisDataService::Instance().remove(execInPlaceWSIn);
+
+    // test_execEventPerformance
+    AnalysisDataService::Instance().remove(execEventWSIn);
+    AnalysisDataService::Instance().remove(execEventWSOut);
+
+    // test_execEventInPlacePerformance
+    AnalysisDataService::Instance().remove(execEventInPlaceWSIn);
+  }
+
+  void test_execPerformance() {
+    doTest(execWSIn, execWSOut, 1.0, 0.5 * M_SQRT2, performance);
+  }
+  void test_execInPlacePerformance() {
+    doTest(execInPlaceWSIn, execInPlaceWSIn, 1.0, 0.5 * M_SQRT2, performance);
+  }
+
+  void test_execEventPerformance() {
+    EventWorkspace_const_sptr outputEvent;
+    outputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(
+        doTest(execEventWSIn, execEventWSOut, 1.0, 0.5 * M_SQRT2, performance));
+  }
+  void test_execEventInPlacePerformance() {
+    EventWorkspace_const_sptr outputEvent;
+    outputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(
+        doTest(execEventInPlaceWSIn, execEventInPlaceWSIn, 1.0, 0.5 * M_SQRT2,
+               performance));
+  }
+  void test_multiPeriodDataPerformance() {
+
+    // Check that normalisation has used the protonChargeByPeriod data. i.e Yout
+    // = Yin/2.0, Yout = Yin/4.0, ... for each period workspace.
+    doTest(multiPeriodWS1, "period1", 1.00, 1.500, performance); // 2/2, 3/2
+    doTest(multiPeriodWS2, "period2", 0.50, 0.750, performance); // 2/4, 3/4
+    doTest(multiPeriodWS3, "period3", 0.25, 0.375, performance); // 2/8, 3/8
+  }
+
+private:
+  const std::string execWSIn = "execWSIn";
+  const std::string execWSOut = "execWSOut";
+  const std::string execInPlaceWSIn = "execInPlaceWSIn";
+  const std::string execEventWSIn = "execEventWSIn";
+  const std::string execEventWSOut = "execEventWSOut";
+  const std::string execEventInPlaceWSIn = "execEventInPlaceWSIn";
+
+  MatrixWorkspace_sptr multiPeriodWS1;
+  MatrixWorkspace_sptr multiPeriodWS2;
+  MatrixWorkspace_sptr multiPeriodWS3;
+
+  const bool performance = true;
+};
 #endif /*NORMALISEBYCURRENTTEST_H_*/
