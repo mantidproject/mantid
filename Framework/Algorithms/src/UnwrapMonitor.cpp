@@ -124,12 +124,12 @@ void UnwrapMonitor::exec() {
 
     // Unwrap the x data. Returns the bin ranges that end up being used
     const double Ld = L1 + spectrumInfo.l2(i);
-    MantidVec newX;
+    std::vector<double> newX;
     const std::vector<int> rangeBounds = this->unwrapX(newX, i, Ld);
 
     // Unwrap the y & e data according to the ranges found above
-    MantidVec newY;
-    MantidVec newE;
+    std::vector<double> newY;
+    std::vector<double> newE;
     this->unwrapYandE(tempWS, i, rangeBounds, newY, newE);
 
     // Now set the new X, Y and E values on the Histogram
@@ -177,7 +177,7 @@ void UnwrapMonitor::exec() {
  * ranges start & end
  */
 const std::vector<int>
-UnwrapMonitor::unwrapX(MantidVec &newX, const int &spectrum, const double &Ld) {
+UnwrapMonitor::unwrapX(std::vector<double> &newX, const int &spectrum, const double &Ld) {
   // Create and initalise the vector that will store the bin ranges, and will be
   // returned
   // Elements are: 0 - Lower range start, 1 - Lower range end, 2 - Upper range
@@ -302,10 +302,10 @@ std::pair<int, int> UnwrapMonitor::handleFrameOverlapped(
 void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
                                 const int &spectrum,
                                 const std::vector<int> &rangeBounds,
-                                MantidVec &newY, MantidVec &newE) {
+                                std::vector<double> &newY, std::vector<double> &newE) {
   // Copy over the relevant ranges of Y & E data
-  MantidVec &Y = newY;
-  MantidVec &E = newE;
+  std::vector<double> &Y = newY;
+  std::vector<double> &E = newE;
   // Get references to the input data
   const auto &YIn = m_inputWS->y(spectrum);
   const auto &EIn = m_inputWS->e(spectrum);
