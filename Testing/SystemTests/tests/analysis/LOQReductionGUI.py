@@ -16,7 +16,7 @@ class LOQMinimalBatchReduction(stresstesting.MantidStressTest):
         import SANSBatchMode as batch
         i.LOQ()
         i.MaskFile(MASKFILE)
-        fit_settings = batch.BatchReduce(BATCHFILE, '.nxs', combineDet='merged', saveAlgs={})
+        batch.BatchReduce(BATCHFILE, '.nxs', combineDet='merged', saveAlgs={})
 
     def validate(self):
         # note increased tolerance to something which quite high

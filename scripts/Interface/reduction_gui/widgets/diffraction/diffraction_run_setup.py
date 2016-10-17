@@ -279,7 +279,7 @@ class RunSetupWidget(BaseWidget):
             s.doresamplex = False
             try:
                 s.binning = float(self._content.binning_edit.text())
-            except ValueError as e:
+            except ValueError:
                 raise RuntimeError('Binning parameter is not given!')
 
             if s.binning < 0. and bintypestr.startswith('Linear'):

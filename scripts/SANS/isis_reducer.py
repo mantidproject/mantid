@@ -847,7 +847,7 @@ class ISISReducer(Reducer):
         if self.is_can():
             sample = self.get_can()
             try:
-                dummy_ws = mtd[can.loader.wksp_name + "_monitors"]
+                mtd[can.loader.wksp_name + "_monitors"]
                 was_event = True
             # pylint: disable=bare-except
             except:
@@ -855,7 +855,7 @@ class ISISReducer(Reducer):
         else:
             sample = self.get_sample()
             try:
-                dummy_ws = mtd[sample.loader.wksp_name + "_monitors"]
+                mtd[sample.loader.wksp_name + "_monitors"]
                 was_event = True
             # pylint: disable=bare-except
             except:

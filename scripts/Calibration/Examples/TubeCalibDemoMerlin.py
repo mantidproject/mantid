@@ -65,7 +65,7 @@ def analisePeakTable(pTable, peaksName='Peaks'):
     #calculate how far from the expected position each peak position is
     distance_from_expected =  numpy.abs(data - expected_peak_pos)
 
-    Peaks = CreateWorkspace(range(n),distance_from_expected,NSpec=peaks, OutputWorkspace=peaksName)
+    CreateWorkspace(range(n),distance_from_expected,NSpec=peaks, OutputWorkspace=peaksName)
     check = numpy.where(distance_from_expected > 10)[0]
     problematic_tubes = list(set(check))
     print 'Tubes whose distance is far from the expected value: ', problematic_tubes

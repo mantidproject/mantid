@@ -34,7 +34,7 @@ class ISIS_ReductionWebLike(stresstesting.MantidStressTest):
         mr.web_var.advanced_vars['save_format']='nxs'
         # web services currently needs input file to be defined
         input_file = 'MAR11001.RAW'
-        dummy_rez = mr.main(input_file,web_var_folder)
+        mr.main(input_file,web_var_folder)
 
         #  verify if result was indeed written
         self.rd.reducer.sample_run = input_file
@@ -55,7 +55,7 @@ class ISIS_ReductionWebLike(stresstesting.MantidStressTest):
             return 'outWS'
         saveFileName = self.rd.reducer.save_file_name
 #pylint: disable=unused-variable
-        outWS = Load(Filename=saveFileName+'.nxs')
+        outWS = Load(Filename=saveFileName+'.nxs') # noqa
         #outWS *= 0.997979227566217
         fullRezPath =FileFinder.getFullPath(saveFileName+'.nxs')
         os.remove(fullRezPath)

@@ -44,6 +44,7 @@ LAST_SAMPLE = None
 
 def SetVerboseMode(state):
     # TODO: this needs to be on the reducer
+    global _VERBOSE_
     _VERBOSE_ = state
 
 

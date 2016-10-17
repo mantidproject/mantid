@@ -243,7 +243,6 @@ class DataReflWidget(BaseWidget):
         self._edit_event(ctrl=self._summary.data_run_number_edit)
 
     def _edit_event(self, text=None, ctrl=None):
-        _text = text
         self._summary.edited_warning_label.show()
         util.set_edited(ctrl, True)
 
@@ -648,7 +647,6 @@ class DataReflWidget(BaseWidget):
             For REFM, this is X
             For REFL, this is Y
         """
-        _is_peak = is_peak
         minimum, maximum = self._integrated_plot(True, self._summary.data_run_number_edit,
                                                  self._summary.data_peak_from_pixel,
                                                  self._summary.data_peak_to_pixel)

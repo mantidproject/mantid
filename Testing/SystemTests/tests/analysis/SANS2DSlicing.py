@@ -24,7 +24,7 @@ class SANS2DMinimalBatchReductionSliced(stresstesting.MantidStressTest):
         i.SANS2D()
         i.MaskFile(MASKFILE)
         i.SetEventSlices("0.0-451, 5-10")
-        fit_settings = batch.BatchReduce(BATCHFILE, '.nxs',saveAlgs={}, combineDet='rear')
+        batch.BatchReduce(BATCHFILE, '.nxs',saveAlgs={}, combineDet='rear')
 
     def validate(self):
         self.tolerance = 0.02

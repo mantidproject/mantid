@@ -900,7 +900,6 @@ class PlusWorkspaces(object):
         @param output_workspace :: the output workspace
         @param time_shift :: unused parameter
         """
-        dummy_shift = time_shift
         lhs_ws = self._get_workspace(LHS_workspace)
         rhs_ws = self._get_workspace(RHS_workspace)
 
@@ -1324,7 +1323,7 @@ def is_convertible_to_int(input_value):
     @param input_value :: a general input
     '''
     try:
-        dummy_converted = int(input_value)
+        int(input_value)
     except ValueError:
         return False
     return True
@@ -1341,7 +1340,7 @@ def is_convertible_to_float(input_value):
         is_convertible = False
     else:
         try:
-            dummy_converted = float(input_value)
+            float(input_value)
             is_convertible = True
         except ValueError:
             is_convertible = False
@@ -1543,7 +1542,6 @@ def correct_q_resolution_for_can(original_workspace, can_workspace, subtracted_w
     @param can_workspace: the can workspace
     @param subtracted_workspace: the subtracted workspace
     '''
-    dummy1 = can_workspace
     if original_workspace.getNumberHistograms() == 1 and original_workspace.hasDx(0):
         subtracted_workspace.setDx(0, original_workspace.dataDx(0))
 
@@ -1656,7 +1654,7 @@ class MeasurementTimeFromNexusFileExtractor(object):
                     sanslog.warning("Failed to retrieve the measurement time for " + str(filename_full))
                 finally:
                     nxs_file.close()
-            except ValueError, NeXusError:
+            except ValueError:
                 sanslog.warning("Failed to open the file: " + str(filename_full))
         return measurement_time
 
@@ -1752,7 +1750,6 @@ def is_valid_user_file_extension(user_file):
 
     filename, file_extension = os.path.splitext(user_file)
     file_extension = file_extension.upper()
-    dummy_file = filename
     is_allowed = False
     if file_extension in allowed_values or re.match(pattern, file_extension):
         is_allowed = True

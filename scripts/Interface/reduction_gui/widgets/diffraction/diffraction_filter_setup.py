@@ -332,7 +332,7 @@ class FilterSetupWidget(BaseWidget):
         # Get property
         run = self._metaws.getRun()
         try:
-            logproperty = run.getProperty(str(logname))
+            run.getProperty(str(logname))
         except RuntimeError:
             # Unable to plot
             msg3 = str("Error! Workspace %s does not contain log %s. " % (str(self._metaws),

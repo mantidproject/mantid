@@ -31,7 +31,7 @@ def generate_file_changes_data(year_start, year_end):
 
             f = open('facility-file-changes-{0}.stdout'.format(date_key),'w',buffering=0)
             arg_changes = ['git', 'log', '--pretty=format:"%aE"', '--shortstat', since, until]
-            sub = subprocess.Popen(arg_changes, stdout=f, stderr=subprocess.PIPE, cwd=repolocation)
+            subprocess.Popen(arg_changes, stdout=f, stderr=subprocess.PIPE, cwd=repolocation)
             f.flush()
             os.fsync(f.fileno())
             f.close()
@@ -58,7 +58,7 @@ def generate_commit_data(year_start, year_end):
 
             f = open('facility-commits-{0}.stdout'.format(date_key),'w',buffering=0)
             args_commits = ['git', 'log', '--pretty=format:"%aE"', since, until]
-            sub = subprocess.Popen(args_commits, stdout=f, stderr=subprocess.PIPE, cwd=repolocation)
+            subprocess.Popen(args_commits, stdout=f, stderr=subprocess.PIPE, cwd=repolocation)
             f.flush()
             os.fsync(f.fileno())
             f.close()
