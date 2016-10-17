@@ -80,7 +80,7 @@ private:
                    std::vector<double> &newE);
   API::MatrixWorkspace_sptr rebin(const API::MatrixWorkspace_sptr &workspace,
                                   const double &min, const double &max,
-                                  const int &numBins);
+                                  const size_t &numBins);
 
   double m_conversionConstant; ///< The constant used in the conversion from TOF
   /// to wavelength

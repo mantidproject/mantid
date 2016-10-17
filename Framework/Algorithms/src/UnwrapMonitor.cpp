@@ -109,9 +109,9 @@ void UnwrapMonitor::exec() {
       // If the detector flightpath is missing, zero the data
       g_log.debug() << "Detector information for workspace index " << i
                     << " is not available.\n";
-	  tempWS->mutableX(i).assign(tempWS->x.size(i), 0.0);
-      tempWS->mutableY(i).assign(tempWS->y.size(i), 0.0);
-      tempWS->mutableE(i).assign(tempWS->e.size(i), 0.0);
+	  tempWS->mutableX(i).assign(tempWS->x(i).size(), 0.0);
+      tempWS->mutableY(i).assign(tempWS->y(i).size(), 0.0);
+      tempWS->mutableE(i).assign(tempWS->e(i).size(), 0.0);
       continue;
     }
 
@@ -360,7 +360,7 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
  */
 API::MatrixWorkspace_sptr
 UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &workspace,
-                     const double &min, const double &max, const int &numBins) {
+                     const double &min, const double &max, const size_t &numBins) {
   // Calculate the width of a bin
   const double step = (max - min) / numBins;
 

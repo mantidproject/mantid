@@ -367,18 +367,16 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
   // copy the x-values and errors from the original spectrum
   // remove the last values for odd-sized inputs
 
+  out->setSharedX(0, inputWS->sharedX(wsIndex));
+  out->setSharedE(0, inputWS->sharedE(wsIndex));
+
   if (isOddSize) {
     auto histogram = out->histogram(0);
-    histogram.setSharedX(inputWS->sharedX(wsIndex));
-    histogram.setSharedE(inputWS->sharedE(wsIndex));
     auto newSize = histogram.y().size() - 1;
 
     histogram.resize(newSize);
     out->setHistogram(0, histogram);
-  } else {
-    out->setSharedX(0, inputWS->sharedX(wsIndex));
-    out->setSharedE(0, inputWS->sharedE(wsIndex));
-  }
+  } 
 
   return out;
 }
