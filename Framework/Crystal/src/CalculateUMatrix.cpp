@@ -2,6 +2,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -14,7 +15,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::Geometry::OrientedLattice;
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CalculateUMatrix::init() {
@@ -41,7 +41,6 @@ void CalculateUMatrix::init() {
                         "Lattice parameter gamma");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void CalculateUMatrix::exec() {

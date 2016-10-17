@@ -12,6 +12,8 @@ from mantid.kernel import StringListValidator, StringMandatoryValidator, IntBoun
                           FloatBoundedValidator, Direction, logger, CompositeValidator
 
 #pylint: disable=too-many-instance-attributes
+
+
 class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
     _sample_ws_name = None
@@ -38,7 +40,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
     def category(self):
         return "Workflow\\MIDAS;CorrectionFunctions\\AbsorptionCorrections"
-
 
     def summary(self):
         return "Calculates absorption corrections for a flat plate sample using Paalman & Pings format."

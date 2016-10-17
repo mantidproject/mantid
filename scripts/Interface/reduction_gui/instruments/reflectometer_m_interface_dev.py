@@ -7,6 +7,7 @@ try:
 except:
     HAS_STITCHER = False
 
+
 class REFMInterface(InstrumentInterface):
     """
         Defines the widgets for REF_M reduction

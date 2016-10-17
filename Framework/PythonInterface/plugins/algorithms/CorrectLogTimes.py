@@ -5,6 +5,7 @@ import mantid.simpleapi
 import mantid.api
 import mantid.kernel
 
+
 class CorrectLogTimes(mantid.api.PythonAlgorithm):
     """ Class to shift log times to match proton charge
     """
@@ -45,7 +46,6 @@ class CorrectLogTimes(mantid.api.PythonAlgorithm):
                 else:
                     logList.append(value)
 
-
         if len(logList)==0:
             logList=list(self.ws.getRun().keys())
 
@@ -56,7 +56,6 @@ class CorrectLogTimes(mantid.api.PythonAlgorithm):
                 #pylint: disable= bare-except
                 except:
                     pass
-
 
     def ShiftTime(self, logName):
         """

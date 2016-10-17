@@ -5,6 +5,7 @@ the TobyFitResolutionModel
 from stresstesting import MantidStressTest
 from mantid.simpleapi import *
 
+
 def create_cuboid_xml(xlength,ylength,zlength):
     xml = """<cuboid id="sample0">
 <left-front-bottom-point x="%(xpt)f" y="-%(ypt)f" z="-%(zpt)f"  />
@@ -15,6 +16,7 @@ def create_cuboid_xml(xlength,ylength,zlength):
 <algebra val="sample0" />
 """
     return xml % {"xpt": xlength/2.0,"ypt":ylength/2.0,"zpt":zlength/2.0}
+
 
 class TobyFitResolutionSimulationTest(MantidStressTest):
 
@@ -122,4 +124,3 @@ class TobyFitResolutionSimulationTest(MantidStressTest):
 
     def validate(self):
         return self._success
-

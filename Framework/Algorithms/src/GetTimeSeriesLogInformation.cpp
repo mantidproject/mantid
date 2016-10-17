@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/GetTimeSeriesLogInformation.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -20,7 +21,7 @@ namespace Mantid {
 namespace Algorithms {
 
 DECLARE_ALGORITHM(GetTimeSeriesLogInformation)
-//----------------------------------------------------------------------------------------------
+
 /** Constructor
  */
 GetTimeSeriesLogInformation::GetTimeSeriesLogInformation()
