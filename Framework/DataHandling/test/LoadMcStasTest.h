@@ -111,4 +111,32 @@ private:
   std::string outputSpace;
 };
 
+class LoadMcStasTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoadMcStasTestPerformance *createSuite() {
+    return new LoadMcStasTestPerformance();
+  }
+
+  static void destroySuite(LoadMcStasTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    loadFile.initialize();
+    loadFile.setProperty("Filename", "mcstas_event_hist.h5");
+    loadFile.setProperty("OutputWorkspace", "outputWS");
+  }
+
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("outputWS");
+  }
+
+  void testDefaultLoad() { loadFile.execute(); }
+
+private:
+  LoadMcStas loadFile;
+};
+
 #endif /*LoadMcStasTEST_H_*/

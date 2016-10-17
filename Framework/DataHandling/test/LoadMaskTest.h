@@ -279,6 +279,7 @@ public:
       TS_ASSERT_EQUALS(maskSourceDet[i], maskTargDet[i]);
     }
   }
+
   void test_IDF_acceptedAsFileName() {
     auto ws_creator = AlgorithmManager::Instance().createUnmanaged(
         "CreateSimulationWorkspace");
@@ -506,6 +507,39 @@ public:
 
     return ScopedFileHelper::ScopedFile(ss.str(), maskfilename);
   }
+};
+
+//------------------------------------------------------------------------------
+// Performance test
+//------------------------------------------------------------------------------
+
+class LoadMaskTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoadMaskTestPerformance *createSuite() {
+    return new LoadMaskTestPerformance();
+  }
+   
+  static void destroySuite(LoadMaskTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    loadFile.initialize();
+    loadFile.setProperty("Instrument", "POWGEN");
+    loadFile.setProperty("InputFile", "testmasking.xml");
+    loadFile.setProperty("OutputWorkspace", "outputWS");
+  }
+
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("outputWS");    
+  }
+
+  void testDefaultLoad() { loadFile.execute(); }
+
+private:
+  LoadMask loadFile;
 };
 
 #endif /* MANTID_DATAHANDLING_LOADMASKINGFILETEST_H_ */
