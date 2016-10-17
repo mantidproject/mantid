@@ -256,12 +256,13 @@ LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
         positionsBinning.push_back(static_cast<double>(i));
 
       // Assign X
-      m_localWorkspace->dataX(firstIndex)
+      m_localWorkspace->mutableX(firstIndex)
           .assign(positionsBinning.begin(), positionsBinning.end());
       // Assign Y
-      m_localWorkspace->dataY(firstIndex).assign(data(), data() + data.dim2());
+      m_localWorkspace->mutableY(firstIndex)
+          .assign(data(), data() + data.dim2());
       // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(firstIndex);
+      auto &E = m_localWorkspace->mutableE(firstIndex);
       std::transform(data(), data() + data.dim2(), E.begin(),
                      LoadHelper::calculateStandardError);
 
@@ -303,8 +304,10 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromHorizontalTubes(
 
   Progress progress(this, 0, 1, data.dim0() * data.dim1());
 
-  m_localWorkspace->dataX(firstIndex)
+  m_localWorkspace->mutableX(firstIndex)
       .assign(timeBinning.begin(), timeBinning.end());
+
+  auto &sharedXFirstIndex = m_localWorkspace->sharedX(firstIndex);
 
   size_t spec = firstIndex;
   for (size_t i = 0; i < numberOfTubes; ++i) { // iterate tubes
@@ -312,14 +315,14 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromHorizontalTubes(
          ++j) { // iterate pixels in the tube 256
       if (spec > firstIndex) {
         // just copy the time binning axis to every spectra
-        m_localWorkspace->dataX(spec) = m_localWorkspace->readX(firstIndex);
+        m_localWorkspace->setSharedX(spec, sharedXFirstIndex);
       }
       // Assign Y
       int *data_p = &data(static_cast<int>(j), static_cast<int>(i), 0);
-      m_localWorkspace->dataY(spec).assign(data_p, data_p + data.dim2());
+      m_localWorkspace->mutableY(spec).assign(data_p, data_p + data.dim2());
 
       // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec);
+      auto &E = m_localWorkspace->mutableE(spec);
       std::transform(data_p, data_p + data.dim2(), E.begin(),
                      LoadHelper::calculateStandardError);
 
@@ -355,8 +358,10 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
 
   Progress progress(this, 0, 1, data.dim0() * data.dim1());
 
-  m_localWorkspace->dataX(firstIndex)
+  m_localWorkspace->mutableX(firstIndex)
       .assign(timeBinning.begin(), timeBinning.end());
+
+  auto &sharedXFirstIndex = m_localWorkspace->sharedX(firstIndex);
 
   size_t spec = firstIndex;
   for (size_t i = 0; i < numberOfTubes; ++i) { // iterate tubes
@@ -364,14 +369,14 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
          ++j) { // iterate pixels in the tube 256
       if (spec > firstIndex) {
         // just copy the time binning axis to every spectra
-        m_localWorkspace->dataX(spec) = m_localWorkspace->readX(firstIndex);
+        m_localWorkspace->setSharedX(spec, sharedXFirstIndex);
       }
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      m_localWorkspace->dataY(spec).assign(data_p, data_p + data.dim2());
+      m_localWorkspace->mutableY(spec).assign(data_p, data_p + data.dim2());
 
       // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec);
+      auto &E = m_localWorkspace->mutableE(spec);
       std::transform(data_p, data_p + data.dim2(), E.begin(),
                      LoadHelper::calculateStandardError);
 
@@ -597,7 +602,7 @@ std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
   for (std::size_t i = 0; i < nHist; ++i) {
     Geometry::IDetector_const_sptr det = m_localWorkspace->getDetector(i);
     if (!det->isMonitor()) {
-      const MantidVec &lambdaBinning = m_localWorkspace->readX(i);
+      const auto &lambdaBinning = m_localWorkspace->x(i);
       Kernel::V3D detPos = det->getPos();
       double r, theta, phi;
       detPos.getSpherical(r, theta, phi);
