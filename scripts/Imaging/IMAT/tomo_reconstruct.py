@@ -54,7 +54,7 @@ from sys import path
 import os
 from os import path
 # So insert in the path the directory that contains this file
-sys.path.insert(0, os.path.split(path.dirname(__file__))[0])
+sys.path.insert(0, os.path.split(path.dirname(__file__))[0]) # noqa
 
 from IMAT.tomorec import reconstruction_command as tomocmd
 import IMAT.tomorec.configs as tomocfg

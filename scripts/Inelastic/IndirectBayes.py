@@ -8,7 +8,7 @@ Output : the Fortran numpy array is sliced to Python length using dataY = yout[:
 """
 
 from IndirectImport import *
-if is_supported_f2py_platform():
+if is_supported_f2py_platform(): # noqa
     QLr     = import_f2py("QLres")
     QLd     = import_f2py("QLdata")
     Qse     = import_f2py("QLse")

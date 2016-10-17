@@ -7,10 +7,10 @@ from mantid.simpleapi import *
 import sys
 import os
 sys.path.insert(0,os.path.dirname(__file__))
-import sfCalculator
+import sfCalculator # noqa
 sys.path.pop(0)
 
-from mantid.kernel import *
+from mantid.kernel import * # noqa
 
 
 class RefLReduction(PythonAlgorithm):
