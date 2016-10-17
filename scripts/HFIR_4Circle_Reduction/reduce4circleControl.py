@@ -362,9 +362,8 @@ class CWSCDReductionControl(object):
         if os.path.exists(local_xml_file_name) is False:
             return False, "Unable to locate downloaded file %s." % local_xml_file_name
 
-        # FIXME/TODO - This is a temporary fix for unsupported strings in XML
-        if True:
-            os.system("sed -i -e 's/0<x<1/0 x 1/g' %s" % local_xml_file_name)
+        # NEXT ISSUE - This is a temporary fix for unsupported strings in XML
+        os.system("sed -i -e 's/0<x<1/0 x 1/g' %s" % local_xml_file_name)
 
         return True, local_xml_file_name
 
@@ -746,9 +745,11 @@ class CWSCDReductionControl(object):
 
         # Get column for Pt.
         col_name_list = table_ws.getColumnNames()
-        i_pt = col_name_list.index('Pt.')
-        if i_pt < 0 or i_pt >= len(col_name_list):
+        if 'Pt.' not in col_name_list:
             return False, 'No column with name Pt. can be found in SPICE table.'
+
+        i_pt = col_name_list.index('Pt.')
+        assert 0 <= i_pt < len(col_name_list), 'Impossible to have assertion error!'
 
         pt_number_list = []
         num_rows = table_ws.rowCount()
@@ -2316,7 +2317,7 @@ class CWSCDReductionControl(object):
 
             except RuntimeError as e:
                 print e
-                return False, str(e)
+                return False, None, str(e)
             except ValueError as e:
                 # Unable to import a SPICE file without necessary information
                 error_message += 'Scan %d: unable to locate column h, k, or l. See %s.' % (scan_number, str(e))
@@ -2334,7 +2335,10 @@ class CWSCDReductionControl(object):
 
         :return:
         """
-        # TODO/NOW - need to check the project file name and etc.
+        # check inputs' validity
+        assert isinstance(project_file_name, str), 'Project file name must be a string but not of type ' \
+                                                   '%s.' % type(project_file_name)
+
         project = project_manager.ProjectManager(mode='export', project_file_path=project_file_name)
 
         project.add_workspaces(self._myMDWsList)
@@ -2346,16 +2350,21 @@ class CWSCDReductionControl(object):
 
     def load_project(self, project_file_name):
         """
-
+        Load project from a project file suite
         :param project_file_name:
         :return:
         """
-        # TODO/NOW - need to check the project file name and etc.
+        # check validity
+        assert isinstance(project_file_name, str), 'Project file name must be a string but not of type ' \
+                                                   '%s.' % type(project_file_name)
+
+        # instantiate a project mananger instance and load the project
         saved_project = project_manager.ProjectManager(mode='import', project_file_path=project_file_name)
         saved_project.load()
 
         # set current value
         self._dataDir = saved_project.get('data dir')
+        # NEXT ISSUE loading more project parameters
 
         return
 

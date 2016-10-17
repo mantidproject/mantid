@@ -1,7 +1,5 @@
 import os
 
-import mantid.api
-from mantid.api import AnalysisDataService
 import mantid.simpleapi as mantidsimple
 import pickle
 
@@ -81,9 +79,9 @@ class ProjectManager(object):
             md_file_name = os.path.join(self._wsDir, ws_name + '.nxs')
             mantidsimple.SaveMD(InputWorkspace=ws_name, Filename=md_file_name)
 
-        with open(self._projectPath, 'w') as f:
-            pickle.dump(self._variableDict, f, pickle.HIGHEST_PROTOCOL)
-            pickle.dump(self._wsList, f, pickle.HIGHEST_PROTOCOL)
+        with open(self._projectPath, 'w') as pickle_file:
+            pickle.dump(self._variableDict, pickle_file, pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self._wsList, pickle_file, pickle.HIGHEST_PROTOCOL)
 
         return
 
