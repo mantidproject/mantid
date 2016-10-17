@@ -26,37 +26,36 @@ class ABINSCalculatePowderTest(unittest.TestCase):
 
     # data
     # Use case: one k-point
-    C6H6 = path.relpath(_core + "benzene")
+    C6H6 = path.relpath(_core + "benzene_CalculatePowder")
 
     #  Use case: many k-points
-    Si2 = path.relpath(_core + "Si2-sc")
+    Si2 = path.relpath(_core + "Si2-sc_CalculatePowder")
 
     #     test input
     def test_wrong_input(self):
 
         filename = self.Si2 + ".phonon"
 
-        _castep_reader =  LoadCASTEP(input_DFT_filename=filename)
+        _castep_reader = LoadCASTEP(input_DFT_filename=filename)
         _good_data = _castep_reader.readPhononFile()
 
         # wrong filename
         with self.assertRaises(ValueError):
-            _poor_tester = CalculatePowder(filename=1, temperature=self._temperature, abins_data=_good_data)
+            _poor_tester = CalculatePowder(filename=1, abins_data=_good_data, temperature=self._temperature)
 
         # wrong temperature
         with self.assertRaises(ValueError):
-            _poor_tester = CalculatePowder(filename=filename, temperature=-10, abins_data=_good_data)
+            _poor_tester = CalculatePowder(filename=filename, abins_data=_good_data, temperature=-10)
 
         # data from object of type AtomsData instead of object of type AbinsData
         bad_data = _good_data.extract()["atoms_data"]
         with self.assertRaises(ValueError):
-            _poor_tester = CalculatePowder(filename=filename, temperature=self._temperature, abins_data=bad_data)
+            _poor_tester = CalculatePowder(filename=filename, abins_data=bad_data, temperature=self._temperature)
 
             #       main test
     def test_good_case(self):
         self._good_case(name=self.C6H6)
         self._good_case(name=self.Si2)
-
 
 
     #       helper functions
@@ -66,15 +65,18 @@ class ABINSCalculatePowderTest(unittest.TestCase):
         # calculation of powder data
         _good_data = self._get_good_data(filename=name)
 
-        _good_tester = CalculatePowder(filename=name + ".phonon", temperature=self._temperature, abins_data=_good_data["DFT"])
+        _good_tester = CalculatePowder(filename=name + ".phonon", abins_data=_good_data["DFT"],
+                                       temperature=self._temperature)
         calculated_data = _good_tester.calculateData().extract()
 
         # check if evaluated powder data  is correct
         for key in _good_data["powder"]:
+
             self.assertEqual(True, np.allclose(_good_data["powder"][key], calculated_data[key]))
 
         # check if loading powder data is correct
-        new_tester =  CalculatePowder(filename=name + ".phonon", temperature=self._temperature, abins_data=_good_data["DFT"])
+        new_tester = CalculatePowder(filename=name + ".phonon", abins_data=_good_data["DFT"],
+                                     temperature=self._temperature)
         loaded_data = new_tester.loadData().extract()
         for key in _good_data["powder"]:
             self.assertEqual(True, np.allclose(calculated_data[key], loaded_data[key]))

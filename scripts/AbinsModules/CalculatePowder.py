@@ -19,6 +19,7 @@ class CalculatePowder(IOmodule):
     def __init__(self, filename=None, abins_data=None, temperature=None):
         """
 
+
         @param filename:  name of input DFT filename
         @param abins_data: object of type AbinsData with data from input DFT file
         @param temperature:  temperature in K
@@ -44,7 +45,6 @@ class CalculatePowder(IOmodule):
         MSD are expressed in Hartree atomic units. Additionally DW are calculated. DW are MSD multiplied by
         coth(omega/2T)^2 for every frequency.
         """
-
         _data = self._abins_data.extract()
 
         weights = _data["k_points_data"]["weights"]
@@ -62,12 +62,16 @@ class CalculatePowder(IOmodule):
 
         _powder = PowderData(temperature=self._temperature, num_atoms=num_atoms)
 
-        _powder_atom = {"msd": 0.0, "dw":0}
 
+        _powder_atom = {"msd": 0.0, "dw": 0.0}
+
+        # noinspection PyTypeChecker
         _coth = np.divide(1.0, np.tanh(np.multiply(_coth_factor, freq_hartree)))
         _coth_square = np.multiply(_coth, _coth)
+        # noinspection PyTypeChecker
         expm1 = np.expm1(np.multiply(exp_factor, freq_hartree))
 
+        # noinspection PyTypeChecker
         one_over_freq = np.divide(1.0, freq_hartree)
         two_over_freq_n = np.divide(2.0, np.multiply(freq_hartree, expm1))
 
@@ -95,6 +99,7 @@ class CalculatePowder(IOmodule):
                 weight_k = weights[k]
                 temp_msd_k += temp_msd_freq *  weight_k
                 temp_dw_k += temp_dw_freq * weight_k
+
 
             mass_factor = mass_hartree_factor[atom]
             _powder_atom["msd"] = temp_msd_k * mass_factor

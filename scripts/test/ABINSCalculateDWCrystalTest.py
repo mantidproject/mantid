@@ -26,17 +26,17 @@ class ABINSCalculateDWCrystalTest(unittest.TestCase):
 
     # data
     # Use case: one k-point
-    C6H6 = path.relpath(_core + "benzene")
+    C6H6 = path.relpath(_core + "benzene_CalculateDWCrystal")
 
     #  Use case: many k-points
-    Si2 = path.relpath(_core + "Si2-sc")
+    Si2 = path.relpath(_core + "Si2-sc_CalculateDWCrystal")
 
 
     #      simple tests
     def test_wrong_input(self):
         filename = self.Si2 + ".phonon"
 
-        _castep_reader =  LoadCASTEP(input_DFT_filename=filename)
+        _castep_reader = LoadCASTEP(input_DFT_filename=filename)
 
         _good_data = _castep_reader.readPhononFile()
 
@@ -54,7 +54,6 @@ class ABINSCalculateDWCrystalTest(unittest.TestCase):
     def test_good_case(self):
         self._good_case(name=self.C6H6)
         self._good_case(name=self.Si2)
-
 
 
     #       helper functions

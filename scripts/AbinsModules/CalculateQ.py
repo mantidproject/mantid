@@ -60,14 +60,41 @@ class CalculateQ(IOmodule):
         super(CalculateQ, self).__init__(input_filename=filename, group_name=AbinsParameters.Q_data_group + "/%s"%self._instrument + "/" + self._sample_form + "/" + overtones_folder + "/" + combinations_folder)
 
 
+    def _get_gamma_data(self, k_data_obj=None):
+        """
+        Extracts k points data only for Gamma point.
+        @param k_data_obj:  object of type KpointsData
+        @return: KpointsData object only with data for Gamma point
+        """
+        if not isinstance(k_data_obj, KpointsData):
+            raise ValueError("Invalid value of k-points data.")
+
+        gamma_pkt_index = -1
+        k_data = k_data_obj.extract()
+        num_k = k_data["k_vectors"].shape[0]
+        # look for index of Gamma point
+        for k in range(num_k):
+            if np.linalg.norm(k_data["k_vectors"][k]) < AbinsConstants.small_k:
+                gamma_pkt_index = k
+                break
+            if gamma_pkt_index == -1:
+                raise ValueError("Gamma point not found.")
+
+        k_points =   {"weights": np.asarray([k_data["weights"][gamma_pkt_index]]),
+                      "k_vectors": np.asarray([k_data["k_vectors"][gamma_pkt_index]]),
+                      "frequencies": np.asarray([k_data["frequencies"][gamma_pkt_index]]),
+                      "atomic_displacements": np.asarray([k_data["atomic_displacements"][gamma_pkt_index]])}
+
+        return k_points
+
+
     def _calculate_qvectors_instrument(self):
         """
         Calculates Q vectors for the given instrument.
         """
-        num_k = self._k_points_data.extract()["k_vectors"].shape[0]
-        self._Qvectors = QData(num_k=num_k, overtones=self._overtones)
-        self._instrument.collect_K_data(k_points_data=self._k_points_data)
         if self._sample_form == "Powder":
+            self._instrument.collect_K_data(k_points_data=self._get_gamma_data(k_data_obj=self._k_points_data))
+            self._Qvectors = QData(overtones=self._overtones)
             self._Qvectors.set(self._instrument.calculate_q_powder(overtones=self._overtones, combinations=self._combinations))
         else:
             raise ValueError("SingleCrystal user case is not implemented.")
@@ -96,7 +123,7 @@ class CalculateQ(IOmodule):
         @return: QData object
         """
         data = self.load(list_of_datasets=["data"])
-        results = QData(num_k = self._k_points_data.extract()["k_vectors"].shape[0])
+        results = QData(overtones=self._overtones)
         results.set(data["datasets"]["data"])
 
         return results

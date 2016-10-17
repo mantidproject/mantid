@@ -25,17 +25,17 @@ class ABINSCalculateCrystalTest(unittest.TestCase):
 
     # data
     # Use case: one k-point
-    C6H6 = path.relpath(_core + "benzene")
+    C6H6 = path.relpath(_core + "benzene_CalculateCrystal")
 
     #  Use case: many k-points
-    Si2 = path.relpath(_core + "Si2-sc")
+    Si2 = path.relpath(_core + "Si2-sc_CalculateCrystal")
 
     #     test input
     def test_wrong_input(self):
 
         filename = self.Si2 + ".phonon"
 
-        _castep_reader =  LoadCASTEP(input_DFT_filename=filename)
+        _castep_reader = LoadCASTEP(input_DFT_filename=filename)
         _good_data = _castep_reader.readPhononFile()
 
         # wrong filename
@@ -70,7 +70,7 @@ class ABINSCalculateCrystalTest(unittest.TestCase):
         calculated_data = _good_tester.calculateData().extract()
 
         # check if evaluated crystal data  is correct
-        self.assertEqual(True, np.allclose(_good_data["dw_crystal_data"], calculated_data['dw_crystal_data']))
+        self.assertEqual(True, np.allclose(_good_data["dw_crystal_data"], calculated_data["dw_crystal_data"]))
 
         # check if loading crystal data is correct
         new_tester =  CalculateCrystal(filename=name + ".phonon", temperature=self._temperature, abins_data=_good_data["DFT"])

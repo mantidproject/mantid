@@ -68,7 +68,7 @@ class ABINSPowderDataTest(unittest.TestCase):
     def test_good_case(self):
 
         good_msd = {"msd": np.asarray([0.01, 0.001]), "dw": np.asarray([0.01, 0.001])}
-        good_tester = PowderData(num_atoms=2, temperature=2)
+        good_tester = PowderData(temperature=2, num_atoms=2)
         good_tester.set(items=good_msd)
 
         extracted_data = good_tester.extract()

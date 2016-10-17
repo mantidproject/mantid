@@ -23,8 +23,8 @@ class PowderData(GeneralData):
         else:
             raise ValueError("Invalid value of atoms.")
 
-        self._data = {"msd": np.zeros(self._num_atoms, dtype=AbinsConstants.float_type),  # value of mean square displacements
-                      "dw":  np.zeros(self._num_atoms, dtype=AbinsConstants.float_type)} # Debye-Waller factor for that mean square displacements
+        self._data = {"msd": np.zeros(shape=self._num_atoms, dtype=AbinsConstants.float_type),  # value of mean square displacements
+                      "dw":  np.zeros(shape=self._num_atoms, dtype=AbinsConstants.float_type)} # Debye-Waller factor for that mean square displacements
 
 
     def _append(self, num_atom=None, powder_atom=None):
@@ -74,8 +74,8 @@ class PowderData(GeneralData):
 
          if items["msd"].shape != (self._num_atoms,):
             raise ValueError("Invalid size of mean square displacements.")
-         if items["dw"].shape != (self._num_atoms,):
-             raise ValueError("Invalid size of Debye-Waller factors.")
+         if items["dw"].shape != (self._num_atoms, ):
+            raise ValueError("Invalid size of Debye-Waller factors.")
 
 
     def __str__(self):

@@ -143,35 +143,17 @@ class GeneralDFTProgram(IOmodule):
     def _rearrange_data(self, data=None):
         """
         This method rearranges data read from phonon DFT file. It converts  masses and frequencies Hartree atomic units.
+        It converts atomic displacements from atomic units to Angstroms
 
         @param k_data: dictionary with the data to rearrange
         @return: Returns an object of type AbinsData
         """
 
-        # in case sample is in the from of powder use only data for Gamma point
-        if self._sample_form == "Powder":
-            gamma_pkt_index = -1
-            # look for index of Gamma point
-            for k in range(self._num_k):
-                if np.linalg.norm(data["k_vectors"][k]) < AbinsConstants.small_k:
-                    gamma_pkt_index = k
-                    break
-            if gamma_pkt_index == -1:
-                raise ValueError("Gamma point not found.")
-
-            k_points = KpointsData(num_atoms=self._num_atoms, num_k=1)
-            k_points.set({"weights": np.asarray([data["weights"][gamma_pkt_index]]),
-                          "k_vectors": np.asarray([data["k_vectors"][gamma_pkt_index]]),
-                          "frequencies": np.asarray([data["frequencies"][gamma_pkt_index]]) * AbinsConstants.cm1_2_hartree,
-                          "atomic_displacements": np.asarray([data["atomic_displacements"][gamma_pkt_index]])})
-        # for Single crystal  use case use all k-points
-        else:
-
-            k_points = KpointsData(num_atoms=self._num_atoms, num_k=self._num_k)
-            k_points.set({"weights": data["weights"],  # 1D [k] (one entry corresponds to weight of one k-point)
-                          "k_vectors": data["k_vectors"],  # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
-                          "frequencies": data["frequencies"] * AbinsConstants.cm1_2_hartree,  # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
-                          "atomic_displacements": data["atomic_displacements"]}) # 4D array [k][atom_n][freq][3] (one entry corresponds to one coordinate for atom atom_n, frequency  freq and k-point k )
+        k_points = KpointsData(num_atoms=self._num_atoms, num_k=self._num_k)
+        k_points.set({"weights": data["weights"],  # 1D [k] (one entry corresponds to weight of one k-point)
+                      "k_vectors": data["k_vectors"],  # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
+                      "frequencies": np.multiply(data["frequencies"], AbinsConstants.cm1_2_hartree),  # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
+                      "atomic_displacements": np.multiply(data["atomic_displacements"], AbinsConstants.atomic_length_2_angstrom)}) # 4D array [k][atom_n][freq][3] (one entry corresponds to one coordinate for atom atom_n, frequency  freq and k-point k )
 
 
         atoms = AtomsDaTa(num_atoms=self._num_atoms)

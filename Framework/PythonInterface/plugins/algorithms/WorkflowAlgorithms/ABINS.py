@@ -6,7 +6,7 @@ from mantid.api._api import WorkspaceGroup
 from mantid.simpleapi import CreateWorkspace, CloneWorkspace, GroupWorkspaces, Scale, SetSampleMaterial, DeleteWorkspace, Rebin, Load, SaveAscii
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty
 
-from AbinsModules import LoadCASTEP, CalculateS, AbinsParameters
+from AbinsModules import LoadCASTEP, CalculateS, AbinsParameters, AbinsConstants
 
 class ABINS(PythonAlgorithm):
 
@@ -136,7 +136,9 @@ class ABINS(PythonAlgorithm):
             issues["Combinations"] = "Workspaces with higher order effects which contain both overtones and combinations can be created only in case overtones are also set to True."
 
         workspace_name = self.getPropertyValue("OutputWorkspace")
-        if workspace_name == "":
+        if workspace_name in mtd:
+            issues["OutputWorkspace"] = "Workspace with name " + workspace_name + " already in use; please give a different name for workspace."
+        elif workspace_name == "":
             issues["OutputWorkspace"] = "Please specify name of workspace."
 
         return issues
@@ -159,7 +161,7 @@ class ABINS(PythonAlgorithm):
 
         if self._dft_program == "CASTEP":
 
-            dft_reader = LoadCASTEP(input_DFT_filename=self._phononFile, sample_form=self._sampleForm)
+            dft_reader = LoadCASTEP(input_DFT_filename=self._phononFile)
 
         else:
 
@@ -172,7 +174,8 @@ class ABINS(PythonAlgorithm):
         # 3) calculate S
         s_calculator = CalculateS(filename=self._phononFile, temperature=self._temperature,
                                   instrument_name=self._instrument, abins_data=dft_data,
-                                  sample_form=self._sampleForm, overtones=self._overtones)
+                                  sample_form=self._sampleForm, overtones=self._overtones,
+                                  combinations=self._combinations)
 
         s_data = s_calculator.getData()
 
@@ -242,16 +245,28 @@ class ABINS(PythonAlgorithm):
         s_data_extracted = s_data.extract()
 
         if self._overtones:
-            s_total_dim = AbinsParameters.fundamentals_dim + AbinsParameters.higher_order_quantum_effects_dim
+            s_total_dim = AbinsConstants.fundamentals_dim + AbinsConstants.higher_order_quantum_effects_dim
         else:
-            s_total_dim = AbinsParameters.fundamentals_dim
+            s_total_dim = AbinsConstants.fundamentals_dim
 
-        freq = s_data_extracted["frequencies"]
+        freq_dic = s_data_extracted["frequencies"]
+        max_size = freq_dic["order_%s" % AbinsConstants.fundamentals].size
+        items = freq_dic.keys()
+        items.remove("order_%s" % AbinsConstants.fundamentals)
+        for item in items:
+            if max_size < freq_dic[item].size:
+                max_size = freq_dic[item].size
+        freq = np.zeros((s_total_dim, max_size))
+
+        for exponential in range(AbinsConstants.fundamentals, s_total_dim + AbinsConstants.s_last_index):
+            exponential_indx = exponential - AbinsConstants.python_index_shift
+            temp_freq = freq_dic["order_%s" % exponential]
+            freq[exponential_indx][:temp_freq.size] = temp_freq
+
+        s_atom_data = np.copy(freq)
         atoms_data = s_data_extracted["atoms_data"]
         num_atoms = len(atoms_data)
-
         result_workspaces = []
-        s_atom_data = np.tile(freq, (s_total_dim, 1))
         temp_s_atom_data = np.copy(s_atom_data)
         for atom_symbol in atoms_symbols:
             # create partial workspaces for the given type of atom
@@ -260,9 +275,10 @@ class ABINS(PythonAlgorithm):
             for atom in range(num_atoms):
                 if atoms_data["atom_%s" % atom]["symbol"] == atom_symbol:
                     temp_s_atom_data.fill(0)
-                    for order in range(AbinsParameters.fundamentals, s_total_dim):
-                        temp_order = atoms_data["atom_%s"%atom]["s"]["order_%s" % (order + 1)]
-                        temp_s_atom_data[order, :temp_order.size] = np.copy(temp_order)
+                    for order in range(AbinsConstants.fundamentals, s_total_dim + AbinsConstants.s_last_index):
+                        order_indx = order - AbinsConstants.python_index_shift
+                        temp_order = atoms_data["atom_%s"%atom]["s"]["order_%s" % order]
+                        temp_s_atom_data[order_indx, :temp_order.size] = temp_order
                     np.add(s_atom_data, temp_s_atom_data, s_atom_data)  # sum S over the atoms of the same type
 
             atom_workspaces.append(self._create_workspace(atom_name=atom_symbol, frequencies=freq, s_points=np.copy(s_atom_data)))
@@ -299,21 +315,23 @@ class ABINS(PythonAlgorithm):
         # only fundamentals
         if s_points.shape[0] == 1:
 
-            CreateWorkspace(DataX=freq,
-                            DataY=s_points[0],
+            temp_freq, temp_s  = self._rearrange_freq(freq=freq[0], s_array=s_points[0])
+            CreateWorkspace(DataX=temp_freq,
+                            DataY=temp_s,
                             NSpec=1,
                             YUnitLabel="S",
                             OutputWorkspace=workspace,
                             EnableLogging=False)
-
+            #
             # Set correct units on workspace
             self._set_workspace_units(wrk=workspace)
 
         # total workspaces
         elif len(s_points.shape) == 1:
 
-            CreateWorkspace(DataX=freq,
-                            DataY=s_points,
+            temp_freq, temp_s  = self._rearrange_freq(freq=freq, s_array=s_points)
+            CreateWorkspace(DataX=temp_freq,
+                            DataY=temp_s,
                             NSpec=1,
                             YUnitLabel="S",
                             OutputWorkspace=workspace,
@@ -327,12 +345,21 @@ class ABINS(PythonAlgorithm):
 
             dim = s_points.shape[0]
             partial_wrk_names = []
-            for n in range(dim):
 
-                wrk_name = workspace + "_quantum_order_effect_%s"%(n + 1) # here we count from 1 because n=1 is fundamental, n=2 first overtone etc....
+            for n in range(dim):
+                if self._overtones and self._combinations:
+                    seed = "quantum_order_effect_%s" % (n + 1)
+                elif n == 0:
+                    seed = "fundamentals"
+                else:
+                    seed = "overtone_%s"% n  # here we count from 1 because n=1 is fundamental, n=2 first overtone etc....
+
+                wrk_name = workspace + "_" + seed
                 partial_wrk_names.append(wrk_name)
-                CreateWorkspace(DataX=freq,
-                                DataY=s_points[n],
+                temp_freq, temp_s  = self._rearrange_freq(freq=freq[n], s_array=s_points[n])
+
+                CreateWorkspace(DataX=temp_freq,
+                                DataY=temp_s,
                                 NSpec=1,
                                 YUnitLabel="S",
                                 OutputWorkspace=wrk_name,
@@ -362,8 +389,8 @@ class ABINS(PythonAlgorithm):
 
         if len(local_partial_workspaces) > 1:
 
-            freq = np.zeros(AbinsParameters.total_workspace_size, dtype=AbinsParameters.float_type)
-            s_atoms = np.zeros(AbinsParameters.total_workspace_size, dtype=AbinsParameters.float_type)
+            freq = np.zeros(AbinsConstants.total_workspace_size, dtype=AbinsConstants.float_type)
+            s_atoms = np.zeros(AbinsConstants.total_workspace_size, dtype=AbinsConstants.float_type)
             ws_x = mtd[local_partial_workspaces[0]].dataX(0) # all total workspaces have the same x values
             freq[:ws_x.size] = ws_x
             for partial_ws in local_partial_workspaces:
@@ -396,7 +423,7 @@ class ABINS(PythonAlgorithm):
         self._fill_s_workspace(freq=frequencies, s_points=s_points, workspace=ws_name)
 
         # rebining
-        Rebin(InputWorkspace=ws_name, Params=[AbinsParameters.bin_width], OutputWorkspace=ws_name)
+        Rebin(InputWorkspace=ws_name, Params=[AbinsParameters.min_wavenumber, AbinsParameters.bin_width, AbinsParameters.max_wavenumber], OutputWorkspace=ws_name)
 
         if s_points.shape[0] == 1:
             self._scale_workspace(atom_name=atom_name, ws_name=ws_name)
@@ -447,6 +474,20 @@ class ABINS(PythonAlgorithm):
         self._set_workspace_units(wrk=experimental_wrk.getName())
 
         return experimental_wrk
+
+
+    def _rearrange_freq(self, freq=None, s_array=None):
+
+        # arrays will be modified so make sure we work on their copies
+        local_freq = np.copy(freq)
+        local_s = np.copy(s_array)
+
+        # sort arrays
+        sorted_indx = local_freq.argsort()
+        local_freq = local_freq[sorted_indx]
+        local_s = local_s[sorted_indx]
+
+        return local_freq, local_s
 
 
     def _set_workspace_units(self, wrk=None):

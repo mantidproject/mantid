@@ -24,8 +24,7 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         if not isinstance(overtones, bool):
             raise ValueError("Invalid value of overtones. Expected values are: True, False.")
 
-        k_data = self._k_points_data.extract()
-        fundamental_frequencies = np.multiply(k_data["frequencies"][0], 1.0 / AbinsConstants.cm1_2_hartree)
+        fundamental_frequencies = np.multiply(self._k_points_data["frequencies"][0], 1.0 / AbinsConstants.cm1_2_hartree)
 
         # fundamentals and higher quantum order effects
         if overtones:
@@ -37,22 +36,18 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
 
         q_data = {}
 
-        local_freq = None
-        for quantum_order in range(AbinsConstants.fundamentals, q_dim):
+        local_freq = fundamental_frequencies
+        for quantum_order in range(AbinsConstants.fundamentals, q_dim + AbinsConstants.q_last_index):
             if combinations:
                 local_freq = self.construct_freq_combinations(previous_array=local_freq, fundamentals_array=fundamental_frequencies, quantum_order=quantum_order)
             else: # only fundamentals (and optionally overtones)
-                local_freq = self.construct_freq_overtones(fundamentals=fundamental_frequencies, quantum_order=quantum_order)
-            q_data["order_%s" % quantum_order] = np.multiply(np.multiply(local_freq, local_freq),  AbinsParameters.TOSCA_constant)
+                local_freq = self.construct_freq_overtones(fundamentals_array=fundamental_frequencies, quantum_order=quantum_order)
 
-        return q_data
+            k2_i = (local_freq + AbinsParameters.TOSCA_final_neutron_energy) * AbinsParameters.TOSCA_constant
+            k2_f = AbinsParameters.TOSCA_final_neutron_energy * AbinsParameters.TOSCA_constant
+            q_data["order_%s" % quantum_order] = k2_i + k2_f - 2 * np.power(k2_i * k2_f, 0.5) * AbinsParameters.TOSCA_cos_scattering_angle
 
 
-    def q_powder_for_scaling(self, fundamental_frequencies=None, q_dim=None):
-        q_data = {}
-        for quantum_order in range(AbinsConstants.fundamentals, q_dim):
-            local_freq = self.construct_freq_overtones(fundamentals=fundamental_frequencies, quantum_order=quantum_order)
-            q_data["order_%s" % quantum_order] = np.multiply(np.multiply(local_freq, local_freq),  AbinsParameters.TOSCA_constant)
         return q_data
 
 
@@ -61,9 +56,6 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         Collect k-points data from DFT calculations.
         @param k_points_data: object of type KpointsData with data from DFT calculations
         """
-
-        if not isinstance(k_points_data, KpointsData):
-            raise ValueError("Invalid value of k-points data.")
 
         self._k_points_data = k_points_data
 

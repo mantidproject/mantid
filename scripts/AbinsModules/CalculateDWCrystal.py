@@ -3,11 +3,10 @@ import numpy as np
 # ABINS modules
 from DwCrystalData import DwCrystalData
 from AbinsData import AbinsData
-from IOmodule import  IOmodule
 import AbinsConstants
 
 
-class CalculateDWCrystal(IOmodule):
+class CalculateDWCrystal(object):
     """
     Class for calculating Debye-Waller factors for single crystals (sample form is SingleCrystal).
     """

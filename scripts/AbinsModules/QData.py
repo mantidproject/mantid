@@ -5,17 +5,11 @@ class QData(GeneralData):
     """
     Class for storing Q data.
     """
-    def __init__(self, num_k=None, overtones=None):
+    def __init__(self, overtones=None):
         """
-        @param num_k: number of k-points
         @param overtones: True if overtones should be included in calculations, otherwise False
         """
         super(QData, self).__init__()
-        if isinstance(num_k, int) and num_k > 0 :
-            self._num_k = num_k
-        else:
-            raise ValueError("Invalid number of k-points.")
-
         if isinstance(overtones, bool):
             self._overtones = overtones
         else:
