@@ -202,11 +202,12 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
   const size_t size_new = xNew.size() - 1; // -1 because BinEdges
 
   // get the bin centres of the input data
-  std::vector<double> xCensOld(size_new);
-  VectorHelper::convertToBinCentre(oldHistogram.x().rawData(), xCensOld);
+  auto xCensOld = oldHistogram.points();
+  VectorHelper::convertToBinCentre(oldHistogram.x().rawData(),
+                                   xCensOld.mutableRawData());
   // the centres of the output data
-  std::vector<double> xCensNew(size_new);
-  VectorHelper::convertToBinCentre(xNew.rawData(), xCensNew);
+  Points xCensNew(size_new);
+  VectorHelper::convertToBinCentre(xNew.rawData(), xCensNew.mutableRawData());
 
   // find the range of input values whose x-values just suround the output
   // x-values
@@ -219,7 +220,7 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
         1e-8 * (xCensOld.back() - xCensOld.front())) {
       oldIn1 = 1;
       // make what should be a very small correction
-      xCensNew.front() = xCensOld.front();
+      xCensNew.mutableRawData().front() = xCensOld.front();
     }
   }
 
@@ -233,7 +234,7 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
         1e-8 * (xCensOld.back() - xCensOld.front())) {
       oldIn2 = size_old - 1;
       // make what should be a very small correction
-      xCensNew.back() = xCensOld.back();
+      xCensNew.mutableRawData().back() = xCensOld.back();
     }
   }
 
@@ -314,7 +315,6 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
       throw std::runtime_error("Error setting up GSL spline functions");
     }
 
-    // todo std transform?
     for (size_t i = 0; i < size_new; ++i) {
       yNew[i] = gsl_spline_eval(spline, xCensNew[i], acc);
       //(basic) error estimate the based on a weighted mean of the errors of the
@@ -354,10 +354,12 @@ Histogram InterpolatingRebin::noInterpolation(const Histogram &oldHistogram,
 
   yNew.assign(yNew.size(), oldHistogram.y().front());
 
-  const auto &xOldData = oldHistogram.x().rawData();
+  const auto &xPointData = oldHistogram.points();
   const auto &eOld = oldHistogram.e();
-  std::transform(xNew.cbegin(), xNew.cend(), eNew.begin(),
-                 [&](double x) { return estimateError(xOldData, eOld, x); });
+
+  // -1 because xNew.size is 1 bigger than eNew
+  std::transform(xNew.cbegin(), xNew.cend() - 1, eNew.begin(),
+                 [&](double x) { return estimateError(xPointData, eOld, x); });
 
   return newHistogram;
 }
@@ -373,7 +375,7 @@ Histogram InterpolatingRebin::noInterpolation(const Histogram &oldHistogram,
 *  @param[in] xNew the value of x for at the point of interest
 *  @return the estimated error at that point
 */
-double InterpolatingRebin::estimateError(const std::vector<double> &xsOld,
+double InterpolatingRebin::estimateError(const Points &xsOld,
                                          const HistogramE &esOld,
                                          const double xNew) const {
 
