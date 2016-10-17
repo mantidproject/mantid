@@ -52,7 +52,7 @@ const std::string LoadILLReflectometry::category() const {
 }
 
 /**
- * Return the confidence with with this algorithm can load the file
+ * Return the confidence with this algorithm can load the file
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
@@ -286,9 +286,6 @@ void LoadILLReflectometry::loadDataIntoTheWorkSpace(
   data.load();
 
   // Assign calculated bins to first X axis
-  ////  m_localWorkspace->dataX(0).assign(detectorTofBins.begin(),
-  /// detectorTofBins.end());
-
   size_t spec = 0;
   size_t nb_monitors = monitorsData.size();
 
@@ -368,24 +365,25 @@ void LoadILLReflectometry::loadDataIntoTheWorkSpace(
   }
   g_log.debug() << "t_TOF2: " << t_TOF2 << '\n';
 
+  auto &xVals = m_localWorkspace->mutableX(0);
   // 2) Compute tof values
   for (size_t timechannelnumber = 0; timechannelnumber <= m_numberOfChannels;
        ++timechannelnumber) {
     double t_TOF1 =
         (static_cast<int>(timechannelnumber) + 0.5) * m_channelWidth +
         tof_delay;
-    m_localWorkspace->dataX(0)[timechannelnumber] = t_TOF1 + t_TOF2;
+    xVals[timechannelnumber] = t_TOF1 + t_TOF2;
   }
 
   // Load monitors
   for (size_t im = 0; im < nb_monitors; im++) {
     if (im > 0) {
-      m_localWorkspace->dataX(im) = m_localWorkspace->readX(0);
+      m_localWorkspace->setSharedX(im, m_localWorkspace->sharedX(0));
     }
 
     // Assign Y
     int *monitor_p = monitorsData[im].data();
-    m_localWorkspace->dataY(im)
+    m_localWorkspace->mutableY(im)
         .assign(monitor_p, monitor_p + m_numberOfChannels);
 
     progress.report();
@@ -396,15 +394,16 @@ void LoadILLReflectometry::loadDataIntoTheWorkSpace(
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
 
       // just copy the time binning axis to every spectra
-      m_localWorkspace->dataX(spec + nb_monitors) = m_localWorkspace->readX(0);
+      m_localWorkspace->setSharedX(spec + nb_monitors,
+                                   m_localWorkspace->sharedX(0));
 
       //// Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      m_localWorkspace->dataY(spec + nb_monitors)
+      m_localWorkspace->mutableY(spec + nb_monitors)
           .assign(data_p, data_p + m_numberOfChannels);
 
       // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec + nb_monitors);
+      auto &E = m_localWorkspace->mutableE(spec + nb_monitors);
       std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
                      LoadHelper::calculateStandardError);
 
