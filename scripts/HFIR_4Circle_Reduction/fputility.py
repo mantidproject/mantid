@@ -51,7 +51,7 @@ def load_scd_fullprof_int_file(file_name):
 
     # open file
     scd_int_file = open(file_name, 'r')
-    raw_lines = scd_int_file.readline()
+    raw_lines = scd_int_file.readlines()
     scd_int_file.close()
 
     # parse file
@@ -75,7 +75,7 @@ def load_scd_fullprof_int_file(file_name):
             continue
         elif line.endswith('0  0'):
             # line 3 as wave lengh line
-            wave_length = int(line.split()[0])
+            wave_length = float(line.split()[0])
         elif k_index < num_k_vector:
             # k-vector line: (num_k_vector) line right after k-indication line
             k_index += 1
@@ -131,6 +131,7 @@ def convert_to_peak_dict_list(refection_dict):
         peak_dict_list.append(peak_dict)
 
     return peak_dict_list
+
 
 def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dict_list, fp_file_name,
                                with_absorption):
@@ -269,7 +270,7 @@ def main(argv):
     # get input
     if len(argv) < 4:
         print 'Calculate the difference of two measuremnts:\n'
-        print '> %s [intensity file 1]  [intensity file 2]  [output intensity file]' % len(argv)
+        print '> %s [intensity file 1]  [intensity file 2]  [output intensity file]' % argv[0]
         return
     else:
         int_file_1 = argv[1]
@@ -278,9 +279,9 @@ def main(argv):
 
     intensity_dict1, error_message1 = load_scd_fullprof_int_file(int_file_1)
     intensity_dict2, error_message2 = load_scd_fullprof_int_file(int_file_2)
-    diff_dict = calculate_intensity_difference(intensity_dict1, int_file_2)
+    diff_dict = calculate_intensity_difference(intensity_dict1, intensity_dict2)
     diff_peak_list = convert_to_peak_dict_list(diff_dict)
-    write_scd_fullprof_kvector('difference', wave_length=0.0, k_vector_dict=None, peak_dict_list=diff_peak_list,
+    write_scd_fullprof_kvector('difference', wave_length=0.0, k_vector_dict=dict(), peak_dict_list=diff_peak_list,
                                fp_file_name=out_file_name, with_absorption=False)
 
     return
