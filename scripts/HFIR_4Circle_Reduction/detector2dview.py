@@ -293,6 +293,3 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
             self._myParentWindow.do_apply_roi()
 
         return
-
-
-

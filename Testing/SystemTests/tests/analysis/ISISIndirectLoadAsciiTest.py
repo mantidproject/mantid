@@ -3,6 +3,8 @@ import stresstesting
 import mantid.simpleapi as ms
 
 #====================================================================================================
+
+
 class IN10SiliconTest(stresstesting.MantidStressTest):
 
     def runTest(self):
@@ -24,6 +26,8 @@ class IN10SiliconTest(stresstesting.MantidStressTest):
         return 'IN10_P3OT_350K_silicon111_red', 'ISISIndirectLoadAscii_IN10SiliconTest.nxs'
 
 #====================================================================================================
+
+
 class IN13CaFTest(stresstesting.MantidStressTest):
 
     def runTest(self):
@@ -94,4 +98,3 @@ class IN16SiliconTest(stresstesting.MantidStressTest):
         self.disableChecking.append("SpectraMap")
         self.disableChecking.append("Instrument")
         return 'IN16_65722_silicon111_red', 'ISISIndirectLoadAscii_IN16SiliconTest.nxs'
-

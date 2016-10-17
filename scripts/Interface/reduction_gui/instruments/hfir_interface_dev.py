@@ -19,11 +19,12 @@ from reduction_gui.reduction.sans.hfir_data_proxy import DataProxy
 
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
+    import mantidplot # noqa
     from reduction_gui.widgets.sans.stitcher import StitcherWidget
     IS_IN_MANTIDPLOT = True
 except:
     pass
+
 
 class HFIRInterface(InstrumentInterface):
     """

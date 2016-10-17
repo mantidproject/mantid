@@ -8,10 +8,10 @@ import numpy as np
 
 import EnggUtils
 
+
 class EnggVanadiumCorrections(PythonAlgorithm):
     # banks (or groups) to which the pixel-by-pixel correction should be applied
     _ENGINX_BANKS_FOR_PIXBYPIX_CORR = [1,2]
-
 
     def category(self):
         return ("Diffraction\\Engineering;CorrectionFunctions\\BackgroundCorrections;"

@@ -664,5 +664,3 @@ def round_hkl(hkl):
     mi_l = round(hkl[2])
 
     return mi_h, mi_k, mi_l
-
-

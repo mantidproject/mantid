@@ -41,7 +41,6 @@ def CalibrateWish(run_per_panel_list):
     whole_instrument = LoadRaw(str(run_per_panel_list[0][0]))
     whole_instrument = Integration(whole_instrument)
 
-
     for (run_number, panel_name) in run_per_panel_list:
         panel_name = str(panel_name)
         run_number = str(run_number)

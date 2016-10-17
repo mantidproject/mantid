@@ -35,6 +35,8 @@ FORWARD = 1
 _LOGGING_ = False
 
 #pylint: disable=too-many-instance-attributes
+
+
 class LoadVesuvio(LoadEmptyVesuvio):
 
     _ws_index = None
@@ -106,6 +108,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """
         return 'DataHandling\\Raw'
 #----------------------------------------------------------------------------------------
+
     def PyInit(self):
         self.declareProperty(RUN_PROP, "", StringMandatoryValidator(),
                              doc="The run numbers that should be loaded. E.g."
@@ -379,8 +382,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
     def _load_single_run_spec_and_mon(self, all_spectra, run_str):
         # check if the monitor spectra are already in the spectra list
-        filtered_spectra = [i for i in all_spectra if i <= self._mon_spectra[-1]]
-        filtered_spectra.sort()
+        filtered_spectra = sorted([i for i in all_spectra if i <= self._mon_spectra[-1]])
         if filtered_spectra == self._mon_spectra and self._load_monitors:
             # Load monitors in workspace if defined by user
             self._load_monitors = False
@@ -722,7 +724,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self.sum1 = self.foil_map.reorder(self.sum1)
 
 
-
 #----------------------------------------------------------------------------------------
 
     def _create_foil_workspaces(self):
@@ -865,6 +866,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         wsindex = self._ws_index
         # inner function to apply normalization
+
         def monitor_normalization(foil_ws, mon_ws):
             """
             Applies monitor normalization to the given foil spectrum from the given
@@ -1058,6 +1060,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             ms.DeleteWorkspace(SUMMED_WS + '_monitors',EnableLogging=_LOGGING_)
 
 #########################################################################################
+
 
 class SpectraToFoilPeriodMap(object):
     """Defines the mapping between a spectrum number

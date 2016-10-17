@@ -2,6 +2,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -16,7 +17,7 @@
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/make_unique.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 #include <numeric>
 
@@ -44,7 +45,7 @@ MatrixWorkspace::MatrixWorkspace(
     Mantid::Geometry::INearestNeighboursFactory *nnFactory)
     : IMDWorkspace(), ExperimentInfo(), m_axes(), m_isInitialized(false),
       m_YUnit(), m_YUnitLabel(), m_isCommonBinsFlagSet(false),
-      m_isCommonBinsFlag(false), m_masks(), m_indexCalculator(),
+      m_isCommonBinsFlag(false), m_masks(),
       m_nearestNeighboursFactory(
           (nnFactory == nullptr) ? new NearestNeighboursFactory : nnFactory),
       m_nearestNeighbours() {}
@@ -61,7 +62,6 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
   m_isCommonBinsFlagSet = other.m_isCommonBinsFlagSet;
   m_isCommonBinsFlag = other.m_isCommonBinsFlag;
   m_masks = other.m_masks;
-  m_indexCalculator = other.m_indexCalculator;
   // I think it is necessary to create our own copy of the factory, since we do
   // not know who owns the factory in other and how its lifetime is controlled.
   m_nearestNeighboursFactory.reset(new NearestNeighboursFactory);
@@ -147,7 +147,6 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
     throw;
   }
 
-  m_indexCalculator = MatrixWSIndexCalculator(this->blocksize());
   // Indicate that this workspace has been initialized to prevent duplicate
   // attempts.
   m_isInitialized = true;
@@ -699,7 +698,7 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
     const MantidVec &dataX = this->readX(workspaceIndex);
     const double xfront = dataX.front();
     const double xback = dataX.back();
-    if (boost::math::isfinite(xfront) && boost::math::isfinite(xback)) {
+    if (std::isfinite(xfront) && std::isfinite(xback)) {
       if (xfront < xmin)
         xmin = xfront;
       if (xback > xmax)
@@ -1019,8 +1018,8 @@ bool MatrixWorkspace::isCommonBins() const {
         }
 
         // handle Nan's and inf's
-        if ((boost::math::isinf(first) != boost::math::isinf(last)) ||
-            (boost::math::isnan(first) != boost::math::isnan(last))) {
+        if ((std::isinf(first) != std::isinf(last)) ||
+            (std::isnan(first) != std::isnan(last))) {
           m_isCommonBinsFlag = false;
         }
       }

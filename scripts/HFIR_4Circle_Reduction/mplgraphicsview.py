@@ -55,6 +55,7 @@ class IndicatorManager(object):
     - 1: vertical. moving along X-direction. [x, x], [y_min, y_max];
     - 2: 2-way. moving in any direction. [x_min, x_max], [y, y], [x, x], [y_min, y_max].
     """
+
     def __init__(self):
         """
 
@@ -170,7 +171,7 @@ class IndicatorManager(object):
         :param line_id:
         :return:
         """
-        assert self._indicatorTypeDict.has_key(line_id)
+        assert line_id in self._indicatorTypeDict
         assert self._indicatorTypeDict[line_id] == 2
 
         vec_set = [self._lineManager[line_id][0:2], self._lineManager[line_id][2:4]]
@@ -350,6 +351,7 @@ class MplGraphicsView(QtGui.QWidget):
 
     Note: Merged with HFIR_Powder_Reduction.MplFigureCAnvas
     """
+
     def __init__(self, parent):
         """ Initialization
         """
@@ -559,7 +561,6 @@ class MplGraphicsView(QtGui.QWidget):
         self._myCanvas.addPlot2D(array2d, x_min, x_max, y_min, y_max, hold_prev_image, y_tick_label)
 
         return
-
 
     def addImage(self, imagefilename):
         """ Add an image by file
@@ -843,6 +844,7 @@ class Qt4MplCanvas(FigureCanvas):
     """  A customized Qt widget for matplotlib figure.
     It can be used to replace GraphicsView of QtGui
     """
+
     def __init__(self, parent):
         """  Initialization
         """
@@ -1138,12 +1140,10 @@ class Qt4MplCanvas(FigureCanvas):
 
         return
 
-
     def getLastPlotIndexKey(self):
         """ Get the index/key of the last added line
         """
         return self._lineIndex-1
-
 
     def getPlot(self):
         """ reture figure's axes to expose the matplotlib figure to PyQt client
@@ -1241,7 +1241,6 @@ class Qt4MplCanvas(FigureCanvas):
         """
         """
         return MplLineStyles
-
 
     def getLineMarkerList(self):
         """
@@ -1398,4 +1397,3 @@ class MyNavigationToolbar(NavigationToolbar2):
         self._myParent.evt_view_updated()
 
         return
-

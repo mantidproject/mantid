@@ -674,7 +674,7 @@ const std::vector<double> ConvertUnits::calculateRebinParams(
         auto &XData = workspace->x(i);
         double xfront = XData.front();
         double xback = XData.back();
-        if (boost::math::isfinite(xfront) && boost::math::isfinite(xback)) {
+        if (std::isfinite(xfront) && std::isfinite(xback)) {
           if (xfront < XMin)
             XMin = xfront;
           if (xback > XMax)

@@ -129,3 +129,4 @@ class OptimizeLatticeWindow(QtGui.QMainWindow):
         self._prevIndexByFFT = use_fft
 
         return
+

@@ -227,6 +227,7 @@ class UBMatrixTable(tableBase.NTableWidget):
     """
     Extended table for UB matrix
     """
+
     def __init__(self, parent):
         """
 
@@ -353,6 +354,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
     """
     Extended table for peaks used to calculate UB matrix
     """
+
     def __init__(self, parent):
         """
 
