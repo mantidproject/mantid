@@ -393,7 +393,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         """
         if False:
             reply = QtGui.QMessageBox.question(self, 'Message',
-                                               "Are you sure you want to quit this application?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+                                               "Are you sure you want to quit this application?",
+                                               QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
 
             if reply == QtGui.QMessageBox.Yes:
                 event.accept()

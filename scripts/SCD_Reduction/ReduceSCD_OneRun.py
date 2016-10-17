@@ -326,8 +326,7 @@ elif use_cylindrical_integration:
                                  Cylinder='1', CylinderLength = cylinder_length,
                                  PercentBackground = '20', ProfileFunction = 'NoFit',
                                  ProfilesFile = profiles_filename,
-                                 PeaksWorkspace=peaks_ws,
-                               )
+                                 PeaksWorkspace=peaks_ws)
 
 #
 # Save the final integrated peaks, using the Niggli reduced cell.

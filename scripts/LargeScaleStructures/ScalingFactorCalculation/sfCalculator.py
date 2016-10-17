@@ -914,8 +914,7 @@ def calculate(string_runs=None,
 
                 recordSettings(a, b, error_a, error_b, name, cal)
 
-                if (i < (len(list_runs) - 1) and
-                    list_attenuator[i + 1] == (_attenuator+1)):
+                if (i < (len(list_runs) - 1) and list_attenuator[i + 1] == (_attenuator+1)):
                     list_objects.append(cal)
 
             #record S1H and S2H
