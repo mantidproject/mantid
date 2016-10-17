@@ -5,6 +5,7 @@ from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
 
+
 class ConjoinSpectra(PythonAlgorithm):
     """
     Conjoins spectra from several workspaces into a single workspace
@@ -24,17 +25,16 @@ class ConjoinSpectra(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty("InputWorkspaces","", validator=StringMandatoryValidator(),
-                             doc="Comma seperated list of workspaces to use, group workspaces "+\
+                             doc="Comma seperated list of workspaces to use, group workspaces "+
                              "will automatically include all members.")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
                              doc="Name the workspace that will contain the result")
         self.declareProperty("WorkspaceIndex", 0, doc="The workspace index of the spectra in each workspace to extract. Default: 0")
-        self.declareProperty("LabelUsing", "", doc="The name of a log value used to label the resulting spectra. "+\
+        self.declareProperty("LabelUsing", "", doc="The name of a log value used to label the resulting spectra. "+
                              "Default: The source workspace name")
         labelValueOptions =  ["Mean","Median","Maximum","Minimum","First Value"]
         self.declareProperty("LabelValue", "Mean", validator=StringListValidator(labelValueOptions),
                              doc="How to derive the value from a time series property")
-
 
     def PyExec(self):
         # get parameter values
@@ -54,7 +54,7 @@ class ConjoinSpectra(PythonAlgorithm):
         #check the ws is in mantid
             ws = mtd[wsName.strip()]
             #if we cannot find the ws then stop
-            if ws == None:
+            if ws is None:
                 raise RuntimeError ("Cannot find workspace '" + wsName.strip() + "', aborting")
             if isinstance(ws, WorkspaceGroup):
                 wsNames.extend(ws.getNames())
@@ -88,7 +88,6 @@ class ConjoinSpectra(PythonAlgorithm):
         wsOut = mtd[wsOutput]
         #replace the spectrun axis
         wsOut.replaceAxis(1,ta)
-
 
         self.setProperty("OutputWorkspace",wsOut)
 

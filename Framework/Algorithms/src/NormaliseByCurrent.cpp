@@ -1,6 +1,4 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+#include "MantidAPI/Run.h"
 #include "MantidAlgorithms/NormaliseByCurrent.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"

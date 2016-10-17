@@ -6,6 +6,7 @@ from reduction_workflow.instruments.sans.hfir_command_interface import *
 
 import os
 
+
 def do_cleanup():
     Files = ["BioSANS_test_data_reduction.log",
              "BioSANS_test_data_Iq.xml",
@@ -16,6 +17,7 @@ def do_cleanup():
         if os.path.exists(absfile):
             os.remove(absfile)
     return True
+
 
 class HFIREffAPIv2(stresstesting.MantidStressTest):
 
@@ -45,6 +47,7 @@ class HFIREffAPIv2(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIREff.nxs'
+
 
 class HFIRSensitivityDirectBeamCenter(stresstesting.MantidStressTest):
 
@@ -77,6 +80,7 @@ class HFIRSensitivityDirectBeamCenter(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRSensitivityDirectBeamCenter.nxs'
 
+
 class HFIRSensitivityScatteringBeamCenter(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -107,6 +111,3 @@ class HFIRSensitivityScatteringBeamCenter(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRSensitivityScatteringBeamCenter.nxs'
-
-
-

@@ -24,9 +24,11 @@ DEFAULT_INSTRUMENT = 'hb2a'
 DEFAULT_WAVELENGTH = 2.4100
 #-------------------------------------------
 
+
 class EmptyError(Exception):
     """ Exception for finding empty input for integer or float
     """
+
     def __init__(self, value):
         """ Init
         """
@@ -247,10 +249,10 @@ class MainWindow(QtGui.QMainWindow):
         # Define signal-event handling
 
         # define event handlers for matplotlib canvas
-        self.ui.graphicsView_mergeRun.canvas.mpl_connect('button_press_event', \
-                self.on_mouseDownEvent)
-        self.ui.graphicsView_mergeRun.canvas.mpl_connect('motion_notify_event', \
-                self.on_mouseMotion)
+        self.ui.graphicsView_mergeRun.canvas.mpl_connect('button_press_event',
+                                                         self.on_mouseDownEvent)
+        self.ui.graphicsView_mergeRun.canvas.mpl_connect('motion_notify_event',
+                                                         self.on_mouseMotion)
 
         # Widget type definition
         validator0 = QtGui.QIntValidator(self.ui.lineEdit_expNo)
@@ -424,7 +426,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
     #-- Event Handling ----------------------------------------------------
 
     def doBrowseCache(self):
@@ -484,7 +485,6 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.QMessageBox.information(self, "Click!", msg)
         return
 
-
     def doChangeSrcLocation(self):
         """ Source file location is changed
         """
@@ -495,7 +495,7 @@ class MainWindow(QtGui.QMainWindow):
         print "Use Local : ", uselocal
 
         if (useserver is True and uselocal is True) or \
-            (useserver is False and uselocal is False):
+                (useserver is False and uselocal is False):
             raise NotImplementedError("Impossible for radio buttons")
 
         self._srcAtLocal = uselocal
@@ -514,7 +514,6 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.pushButton_browseLocalSrc.setDisabled(True)
 
         return
-
 
     def doCheckSrcServer(self):
         """" Check source data server's availability
@@ -541,13 +540,12 @@ class MainWindow(QtGui.QMainWindow):
         # Clear all lines on canvas
         self.ui.graphicsView_indvDet.clearAllLines()
         # Remove their references in dictionary
-        if self._tabLineDict.has_key(self.ui.graphicsView_indvDet):
+        if self.ui.graphicsView_indvDet in self._tabLineDict:
             self._tabLineDict[self.ui.graphicsView_indvDet] = []
         # Reset colur schedule
         self.ui.graphicsView_indvDet.resetLineColorStyle()
 
         return
-
 
     def doClearMultiRunCanvas(self):
         """ Clear the canvas in tab 'Multiple Run'
@@ -559,7 +557,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
     def doClearRawDetCanvas(self):
         """ Clear the canvas in tab 'Raw Detector':
         only need to clear lines
@@ -569,14 +566,12 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
     def doClearVanadiumCanvas(self):
         """ Clear the canvas in tab 'Vanadium'
         """
         self.ui.graphicsView_vanPeaks.clearAllLines()
 
         return
-
 
     def doExist(self):
         """ Exist the application
@@ -857,7 +852,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
     def doLoadReduceScanPrev(self):
         """ Load and reduce previous scan for tab 'Normalized'
         """
@@ -883,7 +877,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
     def doLoadReduceScanNext(self):
         """ Load and reduce next scan for tab 'Normalized'
         """
@@ -908,7 +901,6 @@ class MainWindow(QtGui.QMainWindow):
         self._uiReducePlotNoramlized(self._currUnit)
 
         return
-
 
     def doMergeScans(self):
         """ Merge several scans for tab 'merge'
@@ -953,7 +945,6 @@ class MainWindow(QtGui.QMainWindow):
         self._lastMergeLabel = label
 
         return
-
 
     def doMergeScanView1D(self):
         """ Change the multiple runs to 1D
@@ -1032,8 +1023,8 @@ class MainWindow(QtGui.QMainWindow):
         # Plot
         holdprev=False
         self.ui.graphicsView_mergeRun.clearAllLines()
-        self.ui.graphicsView_mergeRun.addPlot2D(dim2array, xmin=xmin, xmax=xmax, ymin=0, \
-            ymax=len(vecylist), holdprev=holdprev, yticklabels=yticklabels)
+        self.ui.graphicsView_mergeRun.addPlot2D(dim2array, xmin=xmin, xmax=xmax, ymin=0,
+                                                ymax=len(vecylist), holdprev=holdprev, yticklabels=yticklabels)
 
         return
 
@@ -1053,7 +1044,6 @@ class MainWindow(QtGui.QMainWindow):
         self._plotMergedReducedData(mkey=self._lastMergeIndex, label=self._lastMergeLabel)
 
         return
-
 
     def doPlotIndvDetMain(self):
         """ Plot individual detector
@@ -1217,7 +1207,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
     def doPlotRawPtMain(self):
         """ Plot current raw detector signal for a specific Pt.
         """
@@ -1251,7 +1240,6 @@ class MainWindow(QtGui.QMainWindow):
             print "[Error] Execution fails with signal %s. " % (str(execstatus))
 
         return
-
 
     def doPlotRawPtNext(self):
         """ Plot next raw detector signals
@@ -1323,7 +1311,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
     def doReduce2Theta(self):
         """ Rebin the data and plot in 2theta for tab 'Normalized'
         """
@@ -1331,7 +1318,6 @@ class MainWindow(QtGui.QMainWindow):
         self._uiReducePlotNoramlized(unit)
 
         return
-
 
     def doReduceDSpacing(self):
         """ Rebin the data and plot in d-spacing for tab 'Normalized'
@@ -1342,7 +1328,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
     def doReduceQ(self):
         """ Rebin the data and plot in momentum transfer Q for tab 'Normalized'
         """
@@ -1350,7 +1335,6 @@ class MainWindow(QtGui.QMainWindow):
         self._uiReducePlotNoramlized(unit)
 
         return
-
 
     def doReduceSetData(self):
         """ Reduce multiple data
@@ -1392,7 +1376,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
     def doReduceVanadium2Theta(self):
         """ Rebin MDEventWorkspaces in 2-theta. for pushButton_rebinD
         in vanadium peak strip tab
@@ -1424,7 +1407,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return good
 
-
     def doSaveData(self):
         """ Save data
         """
@@ -1436,7 +1418,7 @@ class MainWindow(QtGui.QMainWindow):
             filetype = str(self.ui.comboBox_outputFormat.currentText())
             # file name
             savedatadir = str(self.ui.lineEdit_outputFileName.text()).strip()
-            if savedatadir != None and os.path.exists(savedatadir) is True:
+            if savedatadir is not None and os.path.exists(savedatadir) is True:
                 homedir = savedatadir
             else:
                 homedir = os.getcwd()
@@ -1461,7 +1443,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
     def doSaveMultipleScans(self):
         """ Save multiple scans
         """
@@ -1481,7 +1462,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
     def doSaveVanRun(self):
         """ Save the vanadium run with peaks removed
         """
@@ -1500,7 +1480,6 @@ class MainWindow(QtGui.QMainWindow):
         self._myControl.saveProcessedVanadium(expno, scanno, sfilename)
 
         return
-
 
     def doSmoothVanadiumData(self):
         """ Smooth vanadium spectrum
@@ -1541,7 +1520,6 @@ class MainWindow(QtGui.QMainWindow):
         self._myControl.applySmoothVanadium(expno, scanno, True)
 
         return
-
 
     def doSmoothVanadiumUndo(self):
         """ Undo smoothing vanadium
@@ -1586,9 +1564,7 @@ class MainWindow(QtGui.QMainWindow):
             label="Exp %d Scan %d Bin = %.5f Vanadium Stripped" % (expno, scanno, binsize)
             self._plotVanadiumRun(expno, scanno, xlabel, label, False)
 
-
         return
-
 
     def doUpdateWavelength(self):
         """ Update the wavelength to line edit
@@ -1625,7 +1601,6 @@ class MainWindow(QtGui.QMainWindow):
         x = event.xdata
         y = event.ydata
         button = event.button
-
 
         if x is not None and y is not None:
             # mouse is clicked within graph
@@ -1758,7 +1733,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Canvas and line information
         canvas = self.ui.graphicsView_indvDet
-        if self._tabLineDict.has_key(canvas) is False:
+        if (canvas in self._tabLineDict) is False:
             self._tabLineDict[canvas] = []
 
         # get data
@@ -1814,7 +1789,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return True
 
-
     def _plotPeakIndicators(self, canvas, peakposlist):
         """ Plot indicators for peaks
         """
@@ -1832,7 +1806,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
     def _plotRawDetSignal(self, expno, scanno, plotmode, ptno, dooverplot):
         """ Plot the counts of all detectors of a certain Pt. in an experiment
         """
@@ -1842,7 +1815,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Set up canvas and dictionary
         canvas = self.ui.graphicsView_Raw
-        if self._tabLineDict.has_key(canvas) is False:
+        if (canvas in self._tabLineDict) is False:
             self._tabLineDict[canvas] = []
 
         # Check whether data exists
@@ -1893,8 +1866,8 @@ class MainWindow(QtGui.QMainWindow):
                 continue
 
             marker, color = canvas.getNextLineMarkerColorCombo()
-            canvas.add_plot1d(vecx, vecy, marker=marker, color=color, x_label=unit, \
-                    y_label='intensity',label=label)
+            canvas.add_plot1d(vecx, vecy, marker=marker, color=color, x_label=unit,
+                              y_label='intensity',label=label)
 
             # set up line tuple
             self._tabLineDict[canvas].append( (expno, scanno, ptno) )
@@ -1913,7 +1886,6 @@ class MainWindow(QtGui.QMainWindow):
             canvas.setXYLimit(xmin-dx*0.0001, xmax+dx*0.0001, ymin-dy*0.0001, ymax+dy*0.0001)
 
         return True
-
 
     def _plotMergedReducedData(self, mkey, label):
         """ Plot the reduced data from merged ...
@@ -2045,8 +2017,8 @@ class MainWindow(QtGui.QMainWindow):
 
         label = samplelogname
 
-        canvas.add_plot1d(vecx, vecy, marker=marker, color=color, x_label=xlabel, \
-            y_label='Counts',label=label)
+        canvas.add_plot1d(vecx, vecy, marker=marker, color=color, x_label=xlabel,
+                          y_label='Counts',label=label)
 
         # auto setup for image boundary
         xmin = min(vecx)
@@ -2059,7 +2031,6 @@ class MainWindow(QtGui.QMainWindow):
         canvas.setXYLimit(xmin-dx*0.0001, xmax+dx*0.0001, ymin-dy*0.0001, ymax+dy*0.0001)
 
         return True
-
 
     def _plotVanadiumRun(self, exp, scan, xlabel, label, clearcanvas=False, TempData=False):
         """ Plot processed vanadium data
@@ -2126,7 +2097,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
     def _uiDownloadDataFile(self, exp, scan):
         """ Download data file according to its exp and scan
         Either download the data from a server or copy the data file from local
@@ -2149,7 +2119,7 @@ class MainWindow(QtGui.QMainWindow):
             if self._serverAddress.endswith('/') is False:
                 self._serverAddress += '/'
             fullurl = "%s%s/exp%d/Datafiles/%s_exp%04d_scan%04d.dat" % (self._serverAddress,
-                    self._instrument.lower(), exp, self._instrument.upper(), exp, scan)
+                                                                        self._instrument.lower(), exp, self._instrument.upper(), exp, scan)
             print "URL: ", fullurl
 
             cachedir = str(self.ui.lineEdit_cache.text()).strip()
@@ -2180,7 +2150,6 @@ class MainWindow(QtGui.QMainWindow):
                 Nor from local drive")
 
         return (rvalue,srcFileName)
-
 
     def _uiGetBinningParams(self, itab):
         """ Get binning parameters
@@ -2228,7 +2197,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return (xmin, binsize, xmax)
 
-
     def _uiGetExcludedDetectors(self):
         """ Get excluded detectors from input line edit
 
@@ -2248,8 +2216,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return excludedetidlist
 
-
-
     def _uiGetExpScanNumber(self):
         """ Get experiment number and scan number from widgets for merged
         """
@@ -2263,7 +2229,6 @@ class MainWindow(QtGui.QMainWindow):
                 is not set up right as integer." % (expnostr, scannostr))
 
         return (expno, scanno)
-
 
     def _uiGetExpScanTabMultiScans(self):
         """ Get exp number and scans from tab 3
@@ -2294,7 +2259,6 @@ class MainWindow(QtGui.QMainWindow):
             scanslist.remove(scan)
 
         return (expno, sorted(scanslist))
-
 
     def _uiIsBinParamsChange(self, itab, binparams):
         """ Check whether current bin parameters are same
@@ -2330,7 +2294,6 @@ class MainWindow(QtGui.QMainWindow):
             print "[DB] Rebin = False"
 
         return change
-
 
     def _uiReduceData(self, itab, unit, expno=None, scanno=None):
         """ Rebin and plot by reading GUI widgets' value
@@ -2387,7 +2350,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return (True, expno, scanno)
 
-
     def _uiReducePlotNoramlized(self, unit):
         """ Support Reduce2Theta, ReduceDspacing and ReduceQ
         """
@@ -2435,13 +2397,10 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
-
     def _logDebug(self, dbinfo):
         """ Log debug information
         """
         print dbinfo
-
 
     def _logError(self, errinfo):
         """ Log error information
@@ -2455,7 +2414,6 @@ class MainWindow(QtGui.QMainWindow):
         print msg
         # QtGui.QMessageBox.information(self, "Click!", msg)
 
-
     def _logWarning(self, warning_info):
         """ Log error information
         """
@@ -2463,7 +2421,6 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.QMessageBox.information(self, "OK!", msg)
 
         return
-
 
     def _getFloat(self, lineedit):
         """ Get integer from line edit
@@ -2480,7 +2437,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return value
 
-
     def _getInteger(self, lineedit):
         """ Get integer from line edit
         """
@@ -2494,7 +2450,6 @@ class MainWindow(QtGui.QMainWindow):
             raise e
 
         return value
-
 
     def _getIntArray(self, intliststring):
         """ Validate whether the string can be divided into integer strings.
@@ -2572,7 +2527,6 @@ class MainWindow(QtGui.QMainWindow):
             return (False, errmsg)
 
         return (True, intlist)
-
 
     def _getXLabelFromUnit(self, unit):
         """ Get X-label from unit

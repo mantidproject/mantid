@@ -1,6 +1,7 @@
 
 from ReflectometerCors import *
 
+
 def quick(run):
     '''Mantid version of quick:lam'''
 
@@ -25,6 +26,3 @@ def quick(run):
 
 #quick("D:/data/cycle_09_4/POLREF00003015.raw")
 quick("D:/data/cycle_09_4/POLREF00003014.raw")
-
-
-

@@ -5,6 +5,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidCrystal/ClearUB.h"
+#include "MantidAPI/Sample.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidDataObjects/TableWorkspace.h"

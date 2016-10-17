@@ -1,9 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/IPropertyManager.h"
 

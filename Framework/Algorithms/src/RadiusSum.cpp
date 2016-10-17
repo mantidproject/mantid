@@ -7,6 +7,7 @@
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IObjComponent.h"
