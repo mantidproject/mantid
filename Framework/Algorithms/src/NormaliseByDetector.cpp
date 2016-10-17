@@ -144,7 +144,7 @@ void NormaliseByDetector::processHistogram(size_t wsIndex,
     Y[i] = values[i];
   }
 
-  denominatorWS->mutableE(wsIndex).assign(wavelengths.size(), 0);
+  denominatorWS->mutableE(wsIndex) = 0.0;
 
   prog.report();
 }

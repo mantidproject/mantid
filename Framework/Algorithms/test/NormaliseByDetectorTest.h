@@ -101,8 +101,8 @@ private:
 
     // Create a parameter file, with a root equation that will apply to all
     // detectors.
-    const std::string parameterFileContents = boost::str(
-        boost::format("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
+    const std::string parameterFileContents =
+        boost::str(boost::format("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
        <parameter-file instrument = \"%1%\" date = \"2012-01-31T00:00:00\">\n\
           <component-link name=\"%1%\">\n\
            <parameter name=\"LinearBackground:A0\" type=\"fitting\">\n\
@@ -115,7 +115,7 @@ private:
            </parameter>\n\
            </component-link>\n\
         </parameter-file>\n") %
-        instrumentName % result_unit);
+                   instrumentName % result_unit);
 
     // Create a temporary Instrument Parameter file.
     ScopedFile file(parameterFileContents, instrumentName + "_Parameters.xml");
@@ -141,8 +141,8 @@ private:
 
     // Create a parameter file, with a root equation that will apply to all
     // detectors. NOTE THAT A0 IS SPECIFIED, but A1 IS NOT.
-    const std::string parameterFileContents = boost::str(
-        boost::format("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
+    const std::string parameterFileContents =
+        boost::str(boost::format("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
        <parameter-file instrument = \"%1%\" date = \"2012-01-31T00:00:00\">\n\
           <component-link name=\"%1%\">\n\
            <parameter name=\"LinearBackground:A0\" type=\"fitting\">\n\
@@ -151,7 +151,7 @@ private:
            </parameter>\n\
            </component-link>\n\
         </parameter-file>\n") %
-        instrumentName);
+                   instrumentName);
 
     // Create a temporary Instrument Parameter file.
     ScopedFile file(parameterFileContents, instrumentName + "_Parameters.xml");
@@ -363,8 +363,8 @@ public:
       TS_ASSERT_EQUALS(3, eValues.size());
       TS_ASSERT_EQUALS(4, xValues.size());
 
-      auto &yInputValues = inputWS->mutableY(wsIndex);
-      auto &eInputValues = inputWS->mutableE(wsIndex);
+      const auto &yInputValues = inputWS->y(wsIndex);
+      const auto &eInputValues = inputWS->e(wsIndex);
 
       const auto &wavelength = outWS->points(wsIndex);
       for (size_t binIndex = 0; binIndex < (xValues.size() - 1); ++binIndex) {
@@ -553,18 +553,6 @@ Performance Tests
 
 */
 class NormaliseByDetectorTestPerformance : public CxxTest::TestSuite {
-private:
-  MatrixWorkspace_sptr ws;
-
-  /// Helper method to run common sanity checks.
-  void do_basic_checks(MatrixWorkspace_sptr normalisedWS) {
-    TS_ASSERT(normalisedWS != NULL);
-    TS_ASSERT(ws->getNumberHistograms() == normalisedWS->getNumberHistograms());
-    TS_ASSERT(ws->x(0).size() == normalisedWS->x(0).size());
-    TS_ASSERT(ws->y(0).size() == normalisedWS->y(0).size());
-    TS_ASSERT(ws->e(0).size() == normalisedWS->e(0).size());
-  }
-
 public:
   static NormaliseByDetectorTestPerformance *createSuite() {
     return new NormaliseByDetectorTestPerformance();
@@ -651,6 +639,18 @@ public:
     // Run some basic sanity checks
     do_basic_checks(normalisedWS);
   }
+
+private:
+  /// Helper method to run common sanity checks.
+  void do_basic_checks(MatrixWorkspace_sptr normalisedWS) {
+    TS_ASSERT(normalisedWS != NULL);
+    TS_ASSERT(ws->getNumberHistograms() == normalisedWS->getNumberHistograms());
+    TS_ASSERT(ws->x(0).size() == normalisedWS->x(0).size());
+    TS_ASSERT(ws->y(0).size() == normalisedWS->y(0).size());
+    TS_ASSERT(ws->e(0).size() == normalisedWS->e(0).size());
+  }
+
+  MatrixWorkspace_sptr ws;
 };
 
 #endif /* MANTID_ALGORITHMS_NORMALISEBYDETECTORTEST_H_ */

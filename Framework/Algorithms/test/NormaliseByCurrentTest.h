@@ -63,7 +63,7 @@ public:
     if (!norm1.isInitialized())
       norm1.initialize();
 
-    const auto &Y = inWS->readY(0);
+    const auto &Y = inWS->y(0);
     double initValue = Y[0];
     bool checkNormFactor = true;
     if (initValue <= 0) {
