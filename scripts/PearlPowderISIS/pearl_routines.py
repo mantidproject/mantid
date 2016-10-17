@@ -262,7 +262,7 @@ def PearlLoadMon(files, ext, outname):
     return
 
 
-def PEARL_getmonitor(number, ext, spline_terms=20, g_debug=False):
+def PEARL_getmonitor(number, ext, spline_terms=20):
     works = "monitor" + str(number)
     PearlLoadMon(number, ext, works)
     mantid.ConvertUnits(InputWorkspace=works, OutputWorkspace=works, Target="Wavelength")
@@ -274,27 +274,12 @@ def PEARL_getmonitor(number, ext, spline_terms=20, g_debug=False):
     ex_regions[:, 2] = [2.1, 2.26]
     ex_regions[:, 3] = [1.73, 1.98]
     # ConvertToDistribution(works)
-    if (g_debug):
-        print "The masked regions are"
-        for i in range(0, 4):
-            print ex_regions[0, i], ex_regions[1, i]
-            # x,y,z=mtdplt.getnarray(works,0)
-            # p.plot(x,y)
 
     for reg in range(0, 4):
         mantid.MaskBins(InputWorkspace=works, OutputWorkspace=works, XMin=ex_regions[0, reg], XMax=ex_regions[1, reg])
 
-    if (g_debug):
-        mantid.CloneWorkspace(InputWorkspace=works, OutputWorkspace="mask")
-    # x,y,z=mtdplt.getnarray(works,0)
-    # p.plot(x,y)
     mantid.SplineBackground(InputWorkspace=works, OutputWorkspace=works, WorkspaceIndex=0, NCoeff=spline_terms)
-    # if (g_debug):
-    # x,y,z=mtdplt.getnarray(works,0)
-    # p.plot(x,y)
-    # p.show()
-    # SmoothData(works,works,50)
-    # ConvertFromDistribution(works)
+
     return works
 
 
@@ -303,7 +288,7 @@ def PEARL_read(number, ext, outname):
     mantid.ConvertUnits(InputWorkspace=outname, OutputWorkspace=outname, Target="Wavelength")
     # lmin,lmax=WISH_getlambdarange()
     # CropWorkspace(output,output,XMin=lmin,XMax=lmax)
-    monitor = PEARL_getmonitor(number, ext, spline_terms=20, g_debug=False)
+    monitor = PEARL_getmonitor(number, ext, spline_terms=20)
     # NormaliseToMonitor(InputWorkspace=outname,OutputWorkspace=outname,MonitorWorkspace=monitor)
     mantid.NormaliseToMonitor(InputWorkspace=outname, OutputWorkspace=outname, MonitorWorkspace=monitor,
                        IntegrationRangeMin=0.6, IntegrationRangeMax=5.0)
@@ -585,8 +570,7 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
 
 
 def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
-                    nvanfile="P:\Mantid\\Calibration\\van_spline_all_cycle_11_1.nxs", nspline=60, absorb=True,
-                    g_debug=False):
+                    nvanfile="P:\Mantid\\Calibration\\van_spline_all_cycle_11_1.nxs", nspline=60, absorb=True):
     global mode
     global tt_mode
     mode = fmode
@@ -906,7 +890,7 @@ def PEARL_sumspec_lam(number, ext, minlam=0.1, maxlam=4, minspec=8, maxspec=943)
     return
 
 
-def PEARL_atten(work, outwork, g_debug=False):
+def PEARL_atten(work, outwork):
     # attenfile="P:\Mantid\\Attentuation\\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"
     print "Correct for attenuation using", attenfile
     wc_atten = mantid.PearlMCAbsorption(attenfile)
