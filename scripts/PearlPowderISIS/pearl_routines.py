@@ -668,7 +668,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     if (debug):
         print "About to focus"
     vanfoc = "vanfoc_" + cycle
-    mantid.mantid.AlignDetectors(InputWorkspace=wvan, OutputWorkspace=wvan, CalibrationFile=calfile)
+    mantid.AlignDetectors(InputWorkspace=wvan, OutputWorkspace=wvan, CalibrationFile=calfile)
     mantid.DiffractionFocussing(InputWorkspace=wvan, OutputWorkspace=vanfoc, GroupingFileName=groupfile)
     mantid.ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace=vanfoc, Target="TOF")
     trange = "150,-0.0006,19900"
@@ -888,7 +888,7 @@ def PEARL_createcal_Si(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal"):
     PEARL_read(calruns, "raw", wcal)
 
     if instver == "new" or instver == "new2":
-        mantid.mantid.Rebin(InputWorkspace=wcal, OutputWorkspace=wcal, Params="100,-0.0006,19950")
+        mantid.Rebin(InputWorkspace=wcal, OutputWorkspace=wcal, Params="100,-0.0006,19950")
 
     mantid.ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
 
