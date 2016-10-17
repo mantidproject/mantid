@@ -207,7 +207,7 @@ void ComptonScatteringCountRate::updateCMatrixValues() const {
   for (size_t i = 0, start = 0; i < nprofiles; ++i) {
     auto *profile = m_profiles[i];
     const size_t numFilled =
-        profile->fillConstraintMatrix(m_cmatrix, start, matrix->e(wsIndex));
+        profile->fillConstraintMatrix(m_cmatrix, start, m_hist->e());
     start += numFilled;
   }
   // Using different minimizer for background constraints as the original is not
@@ -240,10 +240,11 @@ void ComptonScatteringCountRate::setMatrixWorkspace(
     double startX, double endX) {
   CompositeFunction::setMatrixWorkspace(matrix, wsIndex, startX, endX);
 
-  this->matrix = matrix;
+  this->m_hist = boost::make_shared<HistogramData::Histogram>(
+    matrix->histogram(wsIndex));
   this->wsIndex = wsIndex;
-  const auto &values = matrix->y(wsIndex);
-  const auto &errors = matrix->e(wsIndex);
+  const auto &values = m_hist->y();
+  const auto &errors = m_hist->e();
   // Keep the errors for the constraint calculation
   m_dataErrorRatio.resize(errors.size());
   std::transform(values.begin(), values.end(), errors.begin(),
@@ -387,8 +388,8 @@ void ComptonScatteringCountRate::createPositivityCM() {
   // mass hermite
   // terms included + (n+1) for each termn the background of order n
   // The background columns are filled with x^j/error where j=(1,n+1)
-  const auto &xValues = matrix->x(wsIndex);
-  const auto &errors = matrix->e(wsIndex);
+  const auto &xValues = m_hist->x();
+  const auto &errors = m_hist->e();
 
   const size_t nrows(xValues.size());
   size_t nColsCMatrix(m_fixedParamIndices.size());

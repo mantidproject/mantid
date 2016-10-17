@@ -76,8 +76,7 @@ private:
   setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
                      size_t wi, double startX, double endX) override;
   /// Pre-calculate the Y-space values
-  void cacheYSpaceValues(const HistogramData::Points &tseconds,
-                         const bool isHistogram,
+  void cacheYSpaceValues(const HistogramData::HistogramX &tseconds,
                          const Algorithms::DetectorParams &detpar) override;
 
   /// The active hermite coefficents

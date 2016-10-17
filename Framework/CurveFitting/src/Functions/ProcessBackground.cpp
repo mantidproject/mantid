@@ -316,8 +316,8 @@ void ProcessBackground::deleteRegion() {
       incIndexes.push_back(i);
     }
   }
-  size_t sizex, sizey;
-  sizex = sizey = incIndexes.size();
+  size_t sizex = incIndexes.size();
+  size_t sizey = incIndexes.size();
   if (dataX.size() > dataY.size()) {
     sizex++;
   }
@@ -417,7 +417,7 @@ void ProcessBackground::addRegion() {
   for (auto it = vx.begin() + 1; it != vx.end(); ++it) {
     if (*it <= *it - 1) {
       g_log.error()
-          << "The vector X with value inserted is not ordered incrementally\n";
+        << "The vector X with value inserted is not ordered incrementally\n";
       throw std::runtime_error("Build new vector error!");
     }
   }
@@ -734,11 +734,10 @@ ProcessBackground::filterForBackground(BackgroundFunction_sptr bkgdfunction) {
                                                    wsSize));
   for (size_t i = 0; i < wsSize; ++i) {
     size_t index = selectedIndexes[i];
-    for (size_t j = 0; j < nspec; ++j) {
+    for (size_t j = 0; j < nspec; ++j)
       outws->mutableX(j)[i] = domain[index];
-      outws->mutableY(0)[i] = m_dataWS->y(m_wsIndex)[index];
-      outws->mutableE(0)[i] = m_dataWS->e(m_wsIndex)[index];
-    }
+    outws->mutableY(0)[i] = m_dataWS->y(m_wsIndex)[index];
+    outws->mutableE(0)[i] = m_dataWS->e(m_wsIndex)[index];
   }
 
   return outws;

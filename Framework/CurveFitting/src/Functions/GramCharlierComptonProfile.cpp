@@ -364,13 +364,12 @@ void GramCharlierComptonProfile::setMatrixWorkspace(
 
 /**
  * @param tseconds A vector containing the time-of-flight values in seconds
- * @param isHistogram True if histogram tof values have been passed in
  * @param detpar Structure containing detector parameters
  */
 void GramCharlierComptonProfile::cacheYSpaceValues(
-    const HistogramData::Points &tseconds, const bool isHistogram,
+    const HistogramData::HistogramX &tseconds,
     const Algorithms::DetectorParams &detpar) {
-  ComptonProfile::cacheYSpaceValues(tseconds, isHistogram,
+  ComptonProfile::cacheYSpaceValues(tseconds,
                                     detpar); // base-class calculations
 
   // Is FSE fixed at the moment?

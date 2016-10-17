@@ -66,14 +66,12 @@ public:
   void buildCaches();
 
   /// Pre-calculate the Y-space values with specified resolution parameters
-  void cacheYSpaceValues(const HistogramData::Points &tseconds,
-                         const bool isHistogram,
+  void cacheYSpaceValues(const HistogramData::HistogramX &tseconds,
                          const Algorithms::DetectorParams &detpar,
                          const ResolutionParams &respar);
 
   /// Pre-calculate the Y-space values
-  virtual void cacheYSpaceValues(const HistogramData::Points &tseconds,
-                                 const bool isHistogram,
+  virtual void cacheYSpaceValues(const HistogramData::HistogramX &tseconds,
                                  const Algorithms::DetectorParams &detpar);
   /// Turn off logger
   void disableLogging() { m_log.setEnabled(false); }

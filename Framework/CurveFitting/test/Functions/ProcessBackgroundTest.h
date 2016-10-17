@@ -66,7 +66,7 @@ public:
     // 3. Check
     Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>(
         AnalysisDataService::Instance().retrieve("NewBackground"));
-    size_t newsize = outws->mutableX(0).size();
+    size_t newsize = outws->x(0).size();
 
     TS_ASSERT_EQUALS(newsize, 8);
 
@@ -339,35 +339,57 @@ public:
   }
 };
 
-class ProcessBackgroundTestPerformance : public CxxTest::TestSuite {
+class ProcessBackgroundDeleteRegionTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProcessBackgroundTestPerformance *createSuite() {
-    return new ProcessBackgroundTestPerformance();
+  static ProcessBackgroundDeleteRegionTestPerformance *createSuite() {
+    return new ProcessBackgroundDeleteRegionTestPerformance();
   }
 
-  static void destroySuite(ProcessBackgroundTestPerformance *suite) {
+  static void destroySuite(ProcessBackgroundDeleteRegionTestPerformance *suite) {
     delete suite;
   }
 
   void setUp() override {
-    // 1. Set up delete region test
     auto inpws = createInputWS("Background1", 1000000, 1000000);
     for (size_t i = 0; i < 1000000; ++i) {
       inpws->mutableX(0)[i] = double(i);
       inpws->mutableY(0)[i] = double(i) * double(i);
     }
 
-    pb1.initialize();
-    pb1.setProperty("InputWorkspace", inpws);
-    pb1.setProperty("OutputWorkspace", "NewBackground");
-    pb1.setProperty("Options", "DeleteRegion");
-    pb1.setProperty("LowerBound", 450000.0);
-    pb1.setProperty("UpperBound", 630000.0);
+    dr.initialize();
+    dr.setProperty("InputWorkspace", inpws);
+    dr.setProperty("OutputWorkspace", "NewBackground");
+    dr.setProperty("Options", "DeleteRegion");
+    dr.setProperty("LowerBound", 450000.0);
+    dr.setProperty("UpperBound", 630000.0);
+  }
 
-    // 2. Set up add region test
-    inpws = createInputWS("Background2", 80000, 80000);
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("Background1");
+  }
+
+  void testPerformanceWS() { dr.execute(); }
+
+private:
+  ProcessBackground dr;
+};
+
+class ProcessBackgroundAddRegionTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ProcessBackgroundAddRegionTestPerformance *createSuite() {
+    return new ProcessBackgroundAddRegionTestPerformance();
+  }
+
+  static void destroySuite(ProcessBackgroundAddRegionTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    auto inpws = createInputWS("Background2", 80000, 80000);
     for (size_t i = 0; i < 80000; ++i) {
       inpws->mutableX(0)[i] = double(i);
       inpws->mutableY(0)[i] = double(i) * double(i);
@@ -379,16 +401,40 @@ public:
       refws->mutableY(0)[i] = double(i) * double(i);
     }
 
-    pb2.initialize();
-    pb2.setProperty("InputWorkspace", inpws);
-    pb2.setProperty("OutputWorkspace", "NewBackground");
-    pb2.setProperty("ReferenceWorkspace", refws);
-    pb2.setProperty("Options", "AddRegion");
-    pb2.setProperty("LowerBound", 8000.0);
-    pb2.setProperty("UpperBound", 16000.0);
+    ar.initialize();
+    ar.setProperty("InputWorkspace", inpws);
+    ar.setProperty("OutputWorkspace", "NewBackground");
+    ar.setProperty("ReferenceWorkspace", refws);
+    ar.setProperty("Options", "AddRegion");
+    ar.setProperty("LowerBound", 8000.0);
+    ar.setProperty("UpperBound", 16000.0);
+  }
 
-    // 3. Set up simple background generation test
-    inpws = createInputWS("DiffractionData1", 1000000, 1000000);
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("Background2");
+    AnalysisDataService::Instance().remove("RefBackground");
+  }
+
+  void testPerformanceWS() { ar.execute(); }
+
+private:
+  ProcessBackground ar;
+};
+
+class ProcessBackgroundSimpleBackgroundGenerationTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ProcessBackgroundSimpleBackgroundGenerationTestPerformance *createSuite() {
+    return new ProcessBackgroundSimpleBackgroundGenerationTestPerformance();
+  }
+
+  static void destroySuite(ProcessBackgroundSimpleBackgroundGenerationTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    auto inpws = createInputWS("DiffractionData1", 1000000, 1000000);
     for (size_t i = 0; i < 1000000; ++i) {
       inpws->mutableX(0)[i] = double(i);
       inpws->mutableY(0)[i] = double(i) * double(i);
@@ -400,24 +446,47 @@ public:
       *it = mt.nextValue();
     }
 
-    pb3.initialize();
-    pb3.setProperty("InputWorkspace", inpws);
-    pb3.setProperty("OutputWorkspace", "SelectedBackgroundPoints");
-    pb3.setProperty("Options", "SelectBackgroundPoints");
-    pb3.setProperty("BackgroundPointSelectMode",
-                    "Input Background Points Only");
-    pb3.setProperty("SelectionMode", "FitGivenDataPoints");
-    pb3.setProperty("BackgroundType", "Polynomial");
-    pb3.setProperty("BackgroundPoints", bkgdpts);
-    pb3.setProperty("WorkspaceIndex", 0);
-    pb3.setProperty("NoiseTolerance", 100.0);
+    sbg.initialize();
+    sbg.setProperty("InputWorkspace", inpws);
+    sbg.setProperty("OutputWorkspace", "SelectedBackgroundPoints");
+    sbg.setProperty("Options", "SelectBackgroundPoints");
+    sbg.setProperty("BackgroundPointSelectMode",
+      "Input Background Points Only");
+    sbg.setProperty("SelectionMode", "FitGivenDataPoints");
+    sbg.setProperty("BackgroundType", "Polynomial");
+    sbg.setProperty("BackgroundPoints", bkgdpts);
+    sbg.setProperty("WorkspaceIndex", 0);
+    sbg.setProperty("NoiseTolerance", 100.0);
+  }
 
-    // 4. Set up select background from input function test
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("DiffractionData1");
+  }
+
+  void testPerformanceWS() { sbg.execute(); }
+
+private:
+  ProcessBackground sbg;
+};
+
+class ProcessBackgroundSelectBackgroundFromInputFunctionTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ProcessBackgroundSelectBackgroundFromInputFunctionTestPerformance *createSuite() {
+    return new ProcessBackgroundSelectBackgroundFromInputFunctionTestPerformance();
+  }
+
+  static void destroySuite(ProcessBackgroundSelectBackgroundFromInputFunctionTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
     auto dataws = createInputWS("DiffractionData2", 50000, 50000);
     for (size_t i = 0; i < 50000; ++i) {
       dataws->mutableX(0)[i] = double(i);
       dataws->mutableY(0)[i] =
-          double(i) * double(i) + sin(double(i) / 180. * 3.14);
+        double(i) * double(i) + sin(double(i) / 180. * 3.14);
     }
 
     // Create background function
@@ -431,43 +500,34 @@ public:
     TableRow row2 = functablews->appendRow();
     row2 << "A2" << 1.;
     AnalysisDataService::Instance().addOrReplace("BackgroundParameters",
-                                                 functablews);
+      functablews);
 
     // Create and set up algorithm
-    pb4.initialize();
-    pb4.setProperty("InputWorkspace", dataws);
-    pb4.setProperty("WorkspaceIndex", 0);
-    pb4.setProperty("OutputWorkspace", "SelectedBackgroundPoints2");
-    pb4.setProperty("Options", "SelectBackgroundPoints");
-    pb4.setProperty("BackgroundType", "Polynomial");
-    pb4.setProperty("SelectionMode", "UserFunction");
-    pb4.setProperty("BackgroundTableWorkspace", functablews);
-    pb4.setProperty("OutputBackgroundParameterWorkspace",
-                    "OutBackgroundParameters");
-    pb4.setProperty("UserBackgroundWorkspace", "VisualWS");
-    pb4.setProperty("OutputBackgroundType", "Chebyshev");
-    pb4.setProperty("OutputBackgroundOrder", 6);
-    pb4.setProperty("NoiseTolerance", 0.25);
+    sbfif.initialize();
+    sbfif.setProperty("InputWorkspace", dataws);
+    sbfif.setProperty("WorkspaceIndex", 0);
+    sbfif.setProperty("OutputWorkspace", "SelectedBackgroundPoints2");
+    sbfif.setProperty("Options", "SelectBackgroundPoints");
+    sbfif.setProperty("BackgroundType", "Polynomial");
+    sbfif.setProperty("SelectionMode", "UserFunction");
+    sbfif.setProperty("BackgroundTableWorkspace", functablews);
+    sbfif.setProperty("OutputBackgroundParameterWorkspace",
+      "OutBackgroundParameters");
+    sbfif.setProperty("UserBackgroundWorkspace", "VisualWS");
+    sbfif.setProperty("OutputBackgroundType", "Chebyshev");
+    sbfif.setProperty("OutputBackgroundOrder", 6);
+    sbfif.setProperty("NoiseTolerance", 0.25);
   }
 
   void tearDown() override {
-    AnalysisDataService::Instance().remove("Background1");
-    AnalysisDataService::Instance().remove("Background2");
-    AnalysisDataService::Instance().remove("RefBackground");
-    AnalysisDataService::Instance().remove("DiffractionData1");
     AnalysisDataService::Instance().remove("DiffractionData2");
     AnalysisDataService::Instance().remove("BackgroundParameters");
   }
 
-  void testPerformanceWS() {
-    pb1.execute();
-    pb2.execute();
-    pb3.execute();
-    pb4.execute();
-  }
+  void testPerformanceWS() { sbfif.execute(); }
 
 private:
-  ProcessBackground pb1, pb2, pb3, pb4;
+  ProcessBackground sbfif;
 };
 
 #endif /* MANTID_ALGORITHMS_PROCESSBACKGROUNDTEST_H_ */

@@ -63,8 +63,8 @@ void HistogramDomainCreator::createDomain(
   }
 
   // set the data to fit to
-  const auto &Y = m_matrixWorkspace->y(m_workspaceIndex);
-  const auto &E = m_matrixWorkspace->e(m_workspaceIndex);
+  const auto &Y = m_matrixWorkspace->counts(m_workspaceIndex);
+  const auto &E = m_matrixWorkspace->countStandardDeviations(m_workspaceIndex);
   if (endIndex > Y.size()) {
     throw std::runtime_error("FitMW: Inconsistent MatrixWorkspace");
   }
@@ -76,13 +76,6 @@ void HistogramDomainCreator::createDomain(
     double y = Y[i];
     double error = E[i];
     double weight = 0.0;
-
-    if (isDistribution) {
-      // If workspace is a distribution, convert data to histogram
-      auto dx = X[i + 1] - X[i];
-      y *= dx;
-      error *= dx;
-    }
 
     if (!std::isfinite(y)) // nan or inf data
     {
