@@ -22,7 +22,7 @@ Data Analysis
 - :ref:`TeixeiraWaterSQE <func-TeixeiraWaterSQE>` models translation of water-like molecules (jump diffusion).
 
 - :ref:`IsoRotDiff <func-IsoRotDiff>` models isotropic rotational diffusion of a particle
-tethered to the origin at a constant distance.
+  tethered to the origin at a constant distance.
 
 Jump Fit
 ~~~~~~~~
