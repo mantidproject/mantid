@@ -102,7 +102,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
             return ""
 
     # in case of event file force it into a histogram workspace
-        if isFirstDataSetEvent and saveAsEvent == False:
+        if isFirstDataSetEvent and not saveAsEvent:
             wsInMonitor = mtd['AddFilesSumTempory_monitors']
             if binning == 'Monitors':
                 monX = wsInMonitor.dataX(0)

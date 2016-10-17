@@ -1,6 +1,4 @@
 #pylint: disable=invalid-name
-from mantid.simpleapi import *
-from mantid.kernel import *
 
 # This class is to take a specification of a set of tubes for an instrument provided by a user
 # and then provide a list of workspace index ranges corresponding to each of the specified tubes

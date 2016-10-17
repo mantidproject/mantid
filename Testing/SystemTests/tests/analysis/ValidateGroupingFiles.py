@@ -13,8 +13,7 @@ class ValidateGroupingFiles(stresstesting.MantidStressTest):
 
     def skipTests(self):
         try:
-            import genxmlif
-            import minixsv
+            import minixsv # noqa
         except ImportError:
             return True
         return False
@@ -35,7 +34,6 @@ class ValidateGroupingFiles(stresstesting.MantidStressTest):
 
     def runTest(self):
         """Main entry point for the test suite"""
-        from genxmlif import GenXmlIfError
         from minixsv import pyxsval
         direc = config['instrumentDefinition.directory']
         self.xsdFile =  os.path.join(direc,'Schema/Grouping/1.0/','GroupingSchema.xsd')

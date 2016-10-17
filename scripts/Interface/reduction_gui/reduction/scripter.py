@@ -3,6 +3,7 @@
     Reduction scripter used to take reduction parameters
     end produce a Mantid reduction script
 """
+from __future__ import (absolute_import, division, print_function)
 # Check whether Mantid is available
 # Disable unused import warning
 # pylint: disable=W0611
@@ -613,7 +614,7 @@ class BaseReductionScripter(object):
         if HAS_MANTIDPLOT:
             mantidplot.runPythonScript(script, True)
         else:
-            exec script
+            exec(script)
 
     def reset(self):
         """

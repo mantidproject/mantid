@@ -116,7 +116,7 @@ class DSFinterp(PythonAlgorithm):
 #############################################################################################
 #pylint: disable=unused-import
 try:
-    import dsfinterp
+    import dsfinterp # noqa
     AlgorithmFactory.subscribe(DSFinterp)
 except ImportError:
     logger.debug('Failed to subscribe algorithm DSFinterp; Python package dsfinterp'

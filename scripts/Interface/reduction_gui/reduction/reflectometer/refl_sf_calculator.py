@@ -9,7 +9,7 @@ import sys
 
 # Check whether Mantid is available
 try:
-    import mantidplot
+    import mantidplot # noqa
     HAS_MANTID = True
 except:
     HAS_MANTID = False

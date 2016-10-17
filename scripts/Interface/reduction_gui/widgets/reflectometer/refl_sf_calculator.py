@@ -1,20 +1,17 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
+from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
 import math
 import os
-import time
-import sys
 from functools import partial
 from reduction_gui.reduction.reflectometer.refl_sf_calculator_data_script import DataSets as REFLDataSets
 from reduction_gui.reduction.reflectometer.refl_sf_calculator_data_series import DataSeries
-from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget as BaseRefWidget
 import ui.reflectometer.ui_refl_sf_calculator
 
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
+    import mantidplot # noqa
     from mantid.simpleapi import *
     from reduction.instruments.reflectometer import data_manipulation
     IS_IN_MANTIDPLOT = True

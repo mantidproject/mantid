@@ -188,7 +188,7 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         propman.load_monitors_with_workspace = False
 
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
-        self.assertTrue(not mon_ws is None)
+        self.assertTrue(mon_ws is not None)
 
         ws = PropertyManager.sample_run.get_workspace()
         self.assertTrue(isinstance(ws,Workspace))
@@ -201,7 +201,7 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         propman.sample_run  = 6398
 
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
-        self.assertTrue(not mon_ws is None)
+        self.assertTrue(mon_ws is not None)
         ws = PropertyManager.sample_run.get_workspace()
         self.assertTrue(isinstance(ws,Workspace))
         self.assertEqual(ws.getNumberHistograms(),69641)
@@ -211,7 +211,7 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         propman.det_cal_file = None
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
         self.assertTrue('SR_MER018492' in mtd)
-        self.assertTrue(not mon_ws is None)
+        self.assertTrue(mon_ws is not None)
         ws = PropertyManager.sample_run.get_workspace()
         self.assertTrue(isinstance(ws,Workspace))
         self.assertEqual(ws.getNumberHistograms(),69641)
@@ -229,7 +229,7 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         propman.load_monitors_with_workspace = False
         propman.det_cal_file = None
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
-        self.assertTrue(not mon_ws is None)
+        self.assertTrue(mon_ws is not None)
         self.assertTrue('SR_MER018492_monitors' in mtd)
 
         ws = PropertyManager.sample_run.get_workspace()
@@ -287,7 +287,7 @@ class ISISLoadFilesLET(stresstesting.MantidStressTest):
         self.assertEqual(propman.ei_mon1_spec,40966)
 
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
-        self.assertTrue(not mon_ws is None)
+        self.assertTrue(mon_ws is not None)
 
         self.assertTrue(isinstance(ws,IEventWorkspace))
         self.assertEqual(ws.getNumberHistograms(),40960)

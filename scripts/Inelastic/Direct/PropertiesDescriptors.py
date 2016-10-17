@@ -475,7 +475,7 @@ class SaveFileName(PropDescriptor):
 
         if instance is None:
             return self
-        if not self._custom_print is None:
+        if self._custom_print is not None:
             return self._custom_print()
 
         if self._file_name:
@@ -796,7 +796,7 @@ class MapMaskFile(PropDescriptor):
         self._file_ext = file_ext
         self._prop_name = prop_name
 
-        if not doc_string is None:
+        if doc_string is not None:
             self.__doc__ = doc_string
 
     def __get__(self,instance,class_type=None):
@@ -806,7 +806,7 @@ class MapMaskFile(PropDescriptor):
         return self._file_name
 
     def __set__(self,instance,value):
-        if not value is None:
+        if value is not None:
 #pylint: disable=unused-variable
             fileName, fileExtension = os.path.splitext(value)
             if not fileExtension:

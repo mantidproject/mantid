@@ -9,7 +9,7 @@ import traceback
 # Check whether Mantid is available
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
+    import mantidplot # noqa
     IS_IN_MANTIDPLOT = True
     from mantid.kernel import ConfigService
     from mantid.api import AlgorithmFactory
@@ -272,7 +272,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
 
         recent_files = []
         for fname in self._recent_files:
-            if fname != self._filename and QtCore.QFile.exists(fname) and not fname in recent_files:
+            if fname != self._filename and QtCore.QFile.exists(fname) and fname not in recent_files:
                 recent_files.append(fname)
 
         if len(recent_files)>0:

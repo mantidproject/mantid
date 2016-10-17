@@ -1,6 +1,5 @@
 # pylint: disable=anomalous-backslash-in-string, too-many-branches, superfluous-parens
 
-from mantid.simpleapi import *
 import pearl_routines
 
 

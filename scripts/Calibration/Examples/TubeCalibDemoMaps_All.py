@@ -197,7 +197,6 @@ def improvingCalibrationSingleTube(filename):
     This example shows how to use **overridePeaks** option
     """
     from tube_calib_fit_params import TubeCalibFitParams
-    import time
     CalibInstWS = loadingStep(filename)
     # == Set parameters for calibration ==
     # Set what we want to calibrate (e.g whole intrument or one door )
