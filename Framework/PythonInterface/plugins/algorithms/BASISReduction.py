@@ -238,8 +238,8 @@ class BASISReduction(PythonAlgorithm):
             sapi.Transpose(InputWorkspace=self._samSqwWs,
                            OutputWorkspace=self._samSqwWs)  # Q-values back to vertical axis
             # Assign units of MomentumTransfer to the vertical axis
-            ws = sapi.mtd[self._samSqwWs]
-            axis = ws.getAxis(1)
+            workspace = sapi.mtd[self._samSqwWs]
+            axis = workspace.getAxis(1)
             axis.setUnit("MomentumTransfer")
             # Output Dave file
             extension = "_divided.dat" if self._doNorm else ".dat"
