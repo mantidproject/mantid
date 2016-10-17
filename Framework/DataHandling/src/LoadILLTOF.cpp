@@ -527,20 +527,18 @@ void LoadILLTOF::loadDataIntoTheWorkSpace(
   // Calculate the real tof (t1+t2) put it in tof array
   auto &X0 = m_localWorkspace->mutableX(0);
   for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-    X0[i] =
-        theoreticalElasticTOF +
-        m_channelWidth *
-            static_cast<double>(static_cast<int>(i) -
-                                calculatedDetectorElasticPeakPosition) -
-        m_channelWidth /
-            2; // to make sure the bin is in the middle of the elastic peak
+    X0[i] = theoreticalElasticTOF +
+            m_channelWidth *
+                static_cast<double>(static_cast<int>(i) -
+                                    calculatedDetectorElasticPeakPosition) -
+            m_channelWidth /
+                2; // to make sure the bin is in the middle of the elastic peak
   }
 
   g_log.information() << "T1+T2 : Theoretical = " << theoreticalElasticTOF;
-  g_log.information()
-      << " ::  Calculated bin = ["
-      << X0[calculatedDetectorElasticPeakPosition] << ","
-      << X0[calculatedDetectorElasticPeakPosition + 1] << "]\n";
+  g_log.information() << " ::  Calculated bin = ["
+                      << X0[calculatedDetectorElasticPeakPosition] << ","
+                      << X0[calculatedDetectorElasticPeakPosition + 1] << "]\n";
 
   // The binning for monitors is considered the same as for detectors
   size_t spec = 0;
@@ -611,11 +609,13 @@ void LoadILLTOF::loadSpectra(size_t &spec, size_t firstSpec,
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
       if (spec > firstSpec) {
         // just copy the time binning axis to every spectra
-        m_localWorkspace->setSharedX(spec, m_localWorkspace->sharedX(firstSpec));
+        m_localWorkspace->setSharedX(spec,
+                                     m_localWorkspace->sharedX(firstSpec));
       }
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      m_localWorkspace->mutableY(spec).assign(data_p, data_p + m_numberOfChannels);
+      m_localWorkspace->mutableY(spec)
+          .assign(data_p, data_p + m_numberOfChannels);
 
       // Assign Error
       auto &E = m_localWorkspace->mutableE(spec);

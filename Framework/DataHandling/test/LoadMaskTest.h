@@ -520,10 +520,8 @@ public:
   static LoadMaskTestPerformance *createSuite() {
     return new LoadMaskTestPerformance();
   }
-   
-  static void destroySuite(LoadMaskTestPerformance *suite) {
-    delete suite;
-  }
+
+  static void destroySuite(LoadMaskTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     loadFile.initialize();
@@ -533,7 +531,7 @@ public:
   }
 
   void tearDown() override {
-    AnalysisDataService::Instance().remove("outputWS");    
+    AnalysisDataService::Instance().remove("outputWS");
   }
 
   void testDefaultLoad() { loadFile.execute(); }

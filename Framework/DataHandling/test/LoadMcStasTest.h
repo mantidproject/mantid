@@ -119,9 +119,7 @@ public:
     return new LoadMcStasTestPerformance();
   }
 
-  static void destroySuite(LoadMcStasTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(LoadMcStasTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     loadFile.initialize();
