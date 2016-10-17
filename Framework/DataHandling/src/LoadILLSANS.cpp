@@ -575,14 +575,6 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
     m_defaultBinning[0] = wavelength - wavelengthRes * wavelength * 0.01 / 2;
     m_defaultBinning[1] = wavelength + wavelengthRes * wavelength * 0.01 / 2;
   }
-
-  // Put the detector distances:
-  //	std::string detectorPath(instrumentNamePath + "/detector");
-  //	// Just for Sample - RearDetector
-  //	double sampleDetectorDistance =
-  // m_loader.getDoubleFromNexusPath(entry,detectorPath + "/det2_calc");
-  //	runDetails.addProperty("sample_detector_distance",
-  // sampleDetectorDistance);
 }
 
 /**
@@ -608,9 +600,6 @@ std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
       detPos.getSpherical(r, theta, phi);
       double v1 = calculateQ(*(lambdaBinning.begin()), theta);
       double v2 = calculateQ(*(lambdaBinning.end() - 1), theta);
-      // std::cout << "i=" << i << " theta="<<theta << " lambda_i=" <<
-      // *(lambdaBinning.begin()) << " lambda_f=" << *(lambdaBinning.end()-1) <<
-      // " v1=" << v1 << " v2=" << v2 << '\n';
       if (i == 0) {
         min = v1;
         max = v1;
