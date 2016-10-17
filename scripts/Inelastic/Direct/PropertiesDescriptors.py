@@ -472,33 +472,39 @@ class SaveFileName(PropDescriptor):
         self._custom_print = None
 
     def __get__(self,instance,owner=None):
-
+        # getter functional interface.
         if instance is None:
             return self
+
+        # if custom file name provided, use it
+        if self._file_name:
+            return self._file_name
+
+        # if custom function to generate file name is proivede, use this function
         if self._custom_print is not None:
             return self._custom_print()
 
-        if self._file_name:
-            return self._file_name
+        # user provided nothing.
+        # calculate default target file name from 
+        # instrument, energy and run number.
+        if instance.instr_name:
+            name = instance.short_inst_name
         else:
-            if instance.instr_name:
-                name = instance.short_inst_name
-            else:
-                name = '_EMPTY'
+            name = '_EMPTY'
 
-            sr = owner.sample_run.run_number()
-            if not sr:
-                sr = 0
-            try:
-                ei = owner.incident_energy.get_current()
-                name +='{0:0<5}Ei{1:<4.2f}meV'.format(sr,ei)
-                if instance.sum_runs:
-                    name +='sum'
-                if owner.monovan_run.run_number():
-                    name +='_Abs'
-                name = name.replace('.','d')
+        sr = owner.sample_run.run_number()
+        if not sr:
+            sr = 0
+        try:
+            ei = owner.incident_energy.get_current()
+            name +='{0:0<5}Ei{1:<_4.2f}meV'.format(sr,ei)
+            if instance.sum_runs:
+                name +='sum'
+            if owner.monovan_run.run_number():
+                name +='_Abs'
+            name = name.replace('.','d')
 #pylint: disable=bare-except
-            except:
+        except:
                 name = None
         return name
 
@@ -506,6 +512,8 @@ class SaveFileName(PropDescriptor):
 
         if value is None:
             self._file_name = None
+        elif callable(value):
+            self._custom_print = value
         else:
             self._file_name = str(value)
 
