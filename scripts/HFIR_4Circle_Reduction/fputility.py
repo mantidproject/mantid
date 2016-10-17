@@ -4,6 +4,7 @@ import os
 import sys
 import math
 
+
 def calculate_intensity_difference(reflection_dict1, reflection_dict2):
     """
     Calculate the difference of the intensities on same reflection between 2 sets of measurements
@@ -38,7 +39,7 @@ def calculate_intensity_difference(reflection_dict1, reflection_dict2):
     return out_dict
 
 
-def load_scd_fullprof_int_file(file_name):
+def load_scd_fullprof_intensity_file(file_name):
     """
     load a single crystal diffraction Fullprof intensity file
     :param file_name:
@@ -55,7 +56,7 @@ def load_scd_fullprof_int_file(file_name):
     scd_int_file.close()
 
     # parse file
-    header = None
+    wave_length = 0.
     num_k_vector = 0
     k_index = 0
     error_buffer = ''
@@ -66,10 +67,10 @@ def load_scd_fullprof_int_file(file_name):
         if len(line) == 0:
             continue
 
-        #
         if line_index == 0:
             # line 1 as header
             header = line
+            print '[INFO] Header: %s' % header
         elif line.startswith('('):
             # line 2 format line, skip
             continue
@@ -107,7 +108,7 @@ def load_scd_fullprof_int_file(file_name):
         # END-IF-ELSE
     # END-FOR
 
-    return reflection_dict, error_buffer
+    return reflection_dict, wave_length, error_buffer
 
 
 def convert_to_peak_dict_list(refection_dict):
@@ -277,11 +278,11 @@ def main(argv):
         int_file_2 = argv[2]
         out_file_name = argv[3]
 
-    intensity_dict1, error_message1 = load_scd_fullprof_int_file(int_file_1)
-    intensity_dict2, error_message2 = load_scd_fullprof_int_file(int_file_2)
+    intensity_dict1, wave_length1, error_message1 = load_scd_fullprof_intensity_file(int_file_1)
+    intensity_dict2, wave_length2, error_message2 = load_scd_fullprof_intensity_file(int_file_2)
     diff_dict = calculate_intensity_difference(intensity_dict1, intensity_dict2)
     diff_peak_list = convert_to_peak_dict_list(diff_dict)
-    write_scd_fullprof_kvector('difference', wave_length=0.0, k_vector_dict=dict(), peak_dict_list=diff_peak_list,
+    write_scd_fullprof_kvector('difference', wave_length=wave_length1, k_vector_dict=dict(), peak_dict_list=diff_peak_list,
                                fp_file_name=out_file_name, with_absorption=False)
 
     return
