@@ -376,7 +376,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
 
     histogram.resize(newSize);
     out->setHistogram(0, histogram);
-  } 
+  }
 
   return out;
 }

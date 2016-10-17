@@ -76,8 +76,8 @@ private:
   handleFrameOverlapped(const Mantid::HistogramData::HistogramX &xdata,
                         const double &Ld, std::vector<double> &tempX);
   void unwrapYandE(const API::MatrixWorkspace_sptr &tempWS, const int &spectrum,
-                   const std::vector<int> &rangeBounds, std::vector<double> &newY,
-                   std::vector<double> &newE);
+                   const std::vector<int> &rangeBounds,
+                   std::vector<double> &newY, std::vector<double> &newE);
   API::MatrixWorkspace_sptr rebin(const API::MatrixWorkspace_sptr &workspace,
                                   const double &min, const double &max,
                                   const size_t &numBins);

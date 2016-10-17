@@ -273,7 +273,8 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
 
       // just copy the time binning axis to every spectra
-      m_localWorkspace->setSharedX((spec + nb_monitors),m_localWorkspace->sharedX(0));
+      m_localWorkspace->setSharedX((spec + nb_monitors),
+                                   m_localWorkspace->sharedX(0));
 
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
@@ -294,7 +295,8 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   for (int i = 0; i < dataSD.dim0(); ++i) {
 
     // just copy again the time binning axis to every spectra
-    m_localWorkspace->setSharedX((spec + nb_monitors + i),m_localWorkspace->sharedX(0));
+    m_localWorkspace->setSharedX((spec + nb_monitors + i),
+                                 m_localWorkspace->sharedX(0));
 
     // Assign Y
     int *dataSD_p = &dataSD(i, 0, 0);

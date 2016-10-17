@@ -109,7 +109,7 @@ void UnwrapMonitor::exec() {
       // If the detector flightpath is missing, zero the data
       g_log.debug() << "Detector information for workspace index " << i
                     << " is not available.\n";
-	  tempWS->mutableX(i).assign(tempWS->x(i).size(), 0.0);
+      tempWS->mutableX(i).assign(tempWS->x(i).size(), 0.0);
       tempWS->mutableY(i).assign(tempWS->y(i).size(), 0.0);
       tempWS->mutableE(i).assign(tempWS->e(i).size(), 0.0);
       continue;
@@ -176,8 +176,9 @@ void UnwrapMonitor::exec() {
  *  @return A 3-element vector containing the bins at which the upper and lower
  * ranges start & end
  */
-const std::vector<int>
-UnwrapMonitor::unwrapX(std::vector<double> &newX, const int &spectrum, const double &Ld) {
+const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX,
+                                              const int &spectrum,
+                                              const double &Ld) {
   // Create and initalise the vector that will store the bin ranges, and will be
   // returned
   // Elements are: 0 - Lower range start, 1 - Lower range end, 2 - Upper range
@@ -302,7 +303,8 @@ std::pair<int, int> UnwrapMonitor::handleFrameOverlapped(
 void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
                                 const int &spectrum,
                                 const std::vector<int> &rangeBounds,
-                                std::vector<double> &newY, std::vector<double> &newE) {
+                                std::vector<double> &newY,
+                                std::vector<double> &newE) {
   // Copy over the relevant ranges of Y & E data
   std::vector<double> &Y = newY;
   std::vector<double> &E = newE;
@@ -360,7 +362,8 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
  */
 API::MatrixWorkspace_sptr
 UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &workspace,
-                     const double &min, const double &max, const size_t &numBins) {
+                     const double &min, const double &max,
+                     const size_t &numBins) {
   // Calculate the width of a bin
   const double step = (max - min) / numBins;
 
