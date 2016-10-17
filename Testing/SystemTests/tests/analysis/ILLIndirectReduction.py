@@ -35,8 +35,8 @@ class ILLIndirectReductionTest(stresstesting.MantidStressTest):
 
     def runTest(self):
 
-        self.tolerance = 1e-6
-        self.disableChecking = ['Masking']
+        self.tolerance = 1e-4
+        self.disableChecking = ['Masking','Instrument']
 
         calib = ILLIN16BCalibration("136553-136554")
         result = IndirectILLReduction(Run="136558-136560",
