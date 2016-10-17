@@ -5,15 +5,12 @@ from mantid.simpleapi import *
 from mantid import *
 import os
 import numpy as n
-from abc import ABCMeta, abstractmethod
 
 #pylint: disable=too-many-instance-attributes
 
 
 class PEARL_Reduction(stresstesting.MantidStressTest):
     '''Test adapted from actual script used by the scientists'''
-
-    __metaclass__ = ABCMeta # Mark as an abstract class
     validate=None
 
     def __init__(self):
@@ -93,7 +90,7 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
         else:
             loop=0
             num=files.split("_")
-            frange=range(int(num[0]),int(num[1])+1)
+            frange=list(range(int(num[0]),int(num[1])+1))
             for i in frange:
                 infile=self.PEARL_getfilename(i,ext)
                 outwork="run"+str(i)
@@ -120,7 +117,7 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
         else:
             loop=0
             num=files.split("_")
-            frange=range(int(num[0]),int(num[1])+1)
+            frange=list(range(int(num[0]),int(num[1])+1))
             mspectra=self.PEARL_getmonitorspectrum(int(num[0]))
             for i in frange:
                 infile=self.PEARL_getfilename(i,ext)
@@ -333,7 +330,7 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
             mtd.remove(output)
 
         else:
-            print "Sorry I don't know that mode", mode
+            print("Sorry I don't know that mode", mode)
             return
 
         LoadNexus(Filename=outfile,OutputWorkspace=outwork)

@@ -62,14 +62,14 @@ def PEARL_startup(usern="matt", thiscycle='11_1'):
 
     PEARL_setdatadir(raw_data_directory)
 
-    print "Output cycle is set to", thiscycle
-    print "Processed Data in : ", userdataprocessed
-    print "Offset file set to :", calfile
-    print "Grouping file set to :", groupfile
-    print "Vanadium file is :", vanfile
-    print "The default focusing mode is :", mode
-    print "Time of flight binning set to :", tofbinning
-    print
+    print("Output cycle is set to", thiscycle)
+    print("Processed Data in : ", userdataprocessed)
+    print("Offset file set to :", calfile)
+    print("Grouping file set to :", groupfile)
+    print("Vanadium file is :", vanfile)
+    print("The default focusing mode is :", mode)
+    print("Time of flight binning set to :", tofbinning)
+    print()
     return
 
 
@@ -90,12 +90,12 @@ def PEARL_getmonitorspectrum(runno):
         elif (mode == "novan"):
             mspectra = 2721
         else:
-            print "Sorry mode not supported"
+            print("Sorry mode not supported")
             sys.exit(0)
     else:
         mspectra = 1
 
-    print "Monitor spectrum is", mspectra
+    print("Monitor spectrum is", mspectra)
 
     return mspectra
 
@@ -107,7 +107,7 @@ def PEARL_getcycle(number):
 
     cycle, instver, datadir = pearl_cycle_factory.get_cycle_dir(number, currentdatadir)
 
-    print "ISIS cycle is set to", cycle
+    print("ISIS cycle is set to", cycle)
 
     return
 
@@ -119,7 +119,7 @@ def PEARL_getcalibfiles():
     global vabsorbfile
     global vanfile
 
-    print "Setting calibration for cycle", cycle
+    print("Setting calibration for cycle", cycle)
 
     calfile, groupfile, vabsorbfile, vanfile, instver = \
         pearl_calib_factory.get_calibration_dir(cycle, tt_mode, pearl_file_dir)
@@ -130,7 +130,7 @@ def PEARL_getcalibfiles():
 def pearl_initial_dir(directory='P:\Mantid\\'):
     global pearl_file_dir
     pearl_file_dir = directory
-    print "Set pearl_file_dir directory to ", directory
+    print("Set pearl_file_dir directory to ", directory)
     return
 
 
@@ -138,7 +138,7 @@ def pearl_initial_dir(directory='P:\Mantid\\'):
 def pearl_set_currentdatadir(directory="I:\\"):
     global currentdatadir
     currentdatadir = directory
-    print "Set currentdatadir directory to ", directory
+    print("Set currentdatadir directory to ", directory)
     return
 
 
@@ -146,14 +146,14 @@ def pearl_set_currentdatadir(directory="I:\\"):
 def pearl_set_userdataoutput_dir(directory="P:\\users\\MantidOutput\\"):
     global userdataprocessed
     userdataprocessed = directory
-    print "Set userdataprocessed directory to ", directory
+    print("Set userdataprocessed directory to ", directory)
     return
 
 
 def PEARL_setdatadir(directory="C:\PEARL\RAW\\"):
     global pearl_datadir
     pearl_datadir = directory
-    print "Set pearl_datadir directory to ", directory
+    print("Set pearl_datadir directory to ", directory)
     return
 
 
@@ -161,7 +161,7 @@ def PEARL_setdatadir(directory="C:\PEARL\RAW\\"):
 def PEARL_setattenfile(new_atten="P:\Mantid\\Attentuation\\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"):
     global attenfile
     attenfile = new_atten
-    print "Set attenuation file to ", attenfile
+    print("Set attenuation file to ", attenfile)
     return
 
 
@@ -201,7 +201,7 @@ def PEARL_getfilename(run_number, ext):
     # Check if file exists in default data folder & if not use alternate folder stored in "datadir"...
     #
     if not os.path.exists(full_filename):
-        print "No such file as ", full_filename, "; trying X-drive folder..."
+        print("No such file as ", full_filename, "; trying X-drive folder...")
 
         full_filename = datadir + filename
 
@@ -211,16 +211,16 @@ def PEARL_getfilename(run_number, ext):
 def PearlLoad(files, ext, outname):
     if isinstance(files, int):
         infile = PEARL_getfilename(files, ext)
-        print "loading ", infile, "into ", outname
-        print "--g_debugGING: ", mantid.LoadRaw.func_code.co_filename
+        print("loading ", infile, "into ", outname)
+        print("--g_debugGING: ", mantid.LoadRaw.__code__.co_filename)
         mantid.LoadRaw(Filename=infile, OutputWorkspace=outname, LoadLogFiles="0")
     else:
         loop = 0
         num = files.split("_")
-        frange = range(int(num[0]), int(num[1]) + 1)
+        frange = list(range(int(num[0]), int(num[1]) + 1))
         for i in frange:
             infile = PEARL_getfilename(i, ext)
-            print "loading ", infile
+            print("loading ", infile)
             outwork = "run" + str(i)
             mantid.LoadRaw(Filename=infile, OutputWorkspace=outwork, LoadLogFiles="0")
             loop = loop + 1
@@ -241,17 +241,17 @@ def PearlLoadMon(files, ext, outname):
     if isinstance(files, int):
         infile = PEARL_getfilename(files, ext)
         mspectra = PEARL_getmonitorspectrum(files)
-        print "loading ", infile, "into ", outname
+        print("loading ", infile, "into ", outname)
         mantid.LoadRaw(Filename=infile, OutputWorkspace=outname, SpectrumMin=mspectra, SpectrumMax=mspectra,
                   LoadLogFiles="0")
     else:
         loop = 0
         num = files.split("_")
-        frange = range(int(num[0]), int(num[1]) + 1)
+        frange = list(range(int(num[0]), int(num[1]) + 1))
         mspectra = PEARL_getmonitorspectrum(int(num[0]))
         for i in frange:
             infile = PEARL_getfilename(i, ext)
-            print "loading ", infile
+            print("loading ", infile)
             outwork = "mon" + str(i)
             mantid.LoadRaw(Filename=infile, OutputWorkspace=outwork, SpectrumMin=mspectra, SpectrumMax=mspectra,
                     LoadLogFiles="0")
@@ -319,7 +319,7 @@ def PEARL_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van
     PEARL_getcycle(number)
 
 
-    print "Instrument version is:", instver
+    print("Instrument version is:", instver)
     if (instver == "new2"):
         outwork = pearl_run_focus(number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm, version=2)
     else:
@@ -342,11 +342,11 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
     PEARL_getcycle(number)
     PEARL_getcalibfiles()
 
-    print "Focussing mode is:", fmode
-    print "Two theta mode is:", tt_mode
-    print "Group file is", groupfile
-    print "Calibration file is", calfile
-    print "Tof binning", tofbinning
+    print("Focussing mode is:", fmode)
+    print("Two theta mode is:", tt_mode)
+    print("Group file is", groupfile)
+    print("Calibration file is", calfile)
+    print("Tof binning", tofbinning)
 
     if isinstance(number, int):
         outfile = userdataprocessed + "PRL" + str(number) + ".nxs"
@@ -375,7 +375,7 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
         rdata = "rdata" + str(i + 1)
 
         if (van_norm):
-            print "Using vanadium file", vanfile
+            print("Using vanadium file", vanfile)
             mantid.LoadNexus(Filename=vanfile, OutputWorkspace=van, EntryNumber=i + 1)
             mantid.ExtractSingleSpectrum(InputWorkspace=focus, OutputWorkspace=rdata, WorkspaceIndex=i)
             # ConvertUnits(van,van,"TOF")
@@ -386,7 +386,7 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
             mantid.CropWorkspace(InputWorkspace=output, OutputWorkspace=output, XMin=0.1)
             mantid.Scale(InputWorkspace=output, OutputWorkspace=output, Factor=10)
         else:
-            print "Not Using vanadium file"
+            print("Not Using vanadium file")
             # LoadNexus(Filename=vanfile,OutputWorkspace=van,EntryNumber=i+1)
             mantid.ExtractSingleSpectrum(InputWorkspace=focus, OutputWorkspace=rdata, WorkspaceIndex=i)
             # ConvertUnits(van,van,"TOF")
@@ -569,7 +569,7 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
             _remove_inter_ws(ws_to_remove=output)
 
     else:
-        print "Sorry I don't know that mode", fmode
+        print("Sorry I don't know that mode", fmode)
         return
 
     mantid.LoadNexus(Filename=outfile, OutputWorkspace=outwork)
@@ -590,18 +590,18 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     PEARL_getcalibfiles()
     wvan = "wvan"
     wempty = "wempty"
-    print "Creating ", nvanfile
+    print("Creating ", nvanfile)
     PEARL_read(van, ext, wvan)
     PEARL_read(empty, ext, wempty)
     mantid.Minus(LHSWorkspace=wvan, RHSWorkspace=wempty, OutputWorkspace=wvan)
-    print "read van and empty"
+    print("read van and empty")
 
     _remove_inter_ws(ws_to_remove=wempty)
 
     if (absorb):
-        print "Correcting Vanadium for absorbtion"
+        print("Correcting Vanadium for absorbtion")
         mantid.ConvertUnits(InputWorkspace=wvan, OutputWorkspace=wvan, Target="Wavelength")
-        print "This will create", vabsorbfile
+        print("This will create", vabsorbfile)
         # Comment out 3 lines below if absorbtion file exists and uncomment the load line
         # CreateSampleShape(wvan,'<sphere id="sphere_1"> <centre x="0" y="0" z= "0" />
         # <radius val="0.005" /> </sphere>')
@@ -618,7 +618,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
 
     mantid.ConvertUnits(InputWorkspace=wvan, OutputWorkspace=wvan, Target="TOF")
     trange = "100,-0.0006,19990"
-    print "Cropping TOF range to ", trange
+    print("Cropping TOF range to ", trange)
     mantid.Rebin(InputWorkspace=wvan, OutputWorkspace=wvan, Params=trange)
     # tmin,tmax=PEARL_gettofrange()
     # print "Cropping TOF range to ",tmin,tmax
@@ -629,7 +629,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     mantid.DiffractionFocussing(InputWorkspace=wvan, OutputWorkspace=vanfoc, GroupingFileName=groupfile)
     mantid.ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace=vanfoc, Target="TOF")
     trange = "150,-0.0006,19900"
-    print "Cropping TOF range to ", trange
+    print("Cropping TOF range to ", trange)
     mantid.Rebin(InputWorkspace=vanfoc, OutputWorkspace=vanfoc, Params=trange)
     mantid.ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace=vanfoc, Target="dSpacing")
 
@@ -641,30 +641,30 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
 
         # remove bragg peaks before spline
 
-        print "About to strip Work=0"
+        print("About to strip Work=0")
         mantid.StripPeaks(InputWorkspace="vanmask", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=0)
 
         for i in range(1, 12):
-            print "About to strip Work=" + str(i)
+            print("About to strip Work=" + str(i))
             mantid.StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8,
                            WorkspaceIndex=i)
 
         # run twice on low angle as peaks are very broad
         print("About to strip work=12 and work=13 twice")
         for i in range(0, 2):
-            print "About to strip Work=12"
+            print("About to strip Work=12")
             mantid.StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=100, Tolerance=10,
                         WorkspaceIndex=12)
-            print "About to strip Work=13"
+            print("About to strip Work=13")
             mantid.StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=60, Tolerance=10,
                          WorkspaceIndex=13)
 
-        print "Finished striping-out peaks..."
+        print("Finished striping-out peaks...")
 
         _remove_inter_ws(ws_to_remove="vanmask")
         mantid.ConvertUnits(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", Target="TOF")
 
-        print "Starting splines..."
+        print("Starting splines...")
 
         for i in range(0, 14):
             mantid.SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline" + str(i + 1), WorkspaceIndex=i,
@@ -775,7 +775,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
             _remove_inter_ws(ws_to_remove="spline" + str(i))
 
     else:
-        print "Sorry I don't know that mode"
+        print("Sorry I don't know that mode")
         return
 
     mantid.LoadNexus(Filename=nvanfile, OutputWorkspace="Van_data")
@@ -787,7 +787,7 @@ def PEARL_createcal(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal",
                     groupfile="P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"):
     PEARL_getcycle(calruns)
 
-    print "Instrument version is ", instver
+    print("Instrument version is ", instver)
 
     wcal = "cal_raw"
     PEARL_read(calruns, "raw", wcal)
@@ -899,7 +899,7 @@ def PEARL_sumspec_lam(number, ext, minlam=0.1, maxlam=4, minspec=8, maxspec=943)
 
 def PEARL_atten(work, outwork):
     # attenfile="P:\Mantid\\Attentuation\\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"
-    print "Correct for attenuation using", attenfile
+    print("Correct for attenuation using", attenfile)
     wc_atten = mantid.PearlMCAbsorption(attenfile)
     mantid.ConvertToHistogram(InputWorkspace="wc_atten", OutputWorkspace="wc_atten")
     mantid.RebinToWorkspace(WorkspaceToRebin="wc_atten", WorkspaceToMatch=work, OutputWorkspace="wc_atten")
