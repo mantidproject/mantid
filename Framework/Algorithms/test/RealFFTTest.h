@@ -49,7 +49,7 @@ void setupWorkspaces(int N, double dX) {
 
   auto &X1 = ws1->mutableX(0);
 
-  std::copy(X.begin(), X.end(), X1.begin());
+  std::copy(X.cbegin(), X.cend(), X1.begin());
   X1.back() = X.back() + dX;
   ws1->mutableY(0) = Y;
   ws1->mutableE(0) = E;
@@ -65,8 +65,7 @@ void deleteWorkspacesFromADS() {
   FrameworkManager::Instance().deleteWorkspace("RealFFT_WS_backward");
 }
 
-void doTestForward(const int N, const double dX, const double XX,
-                   bool performance = false) {
+void doTestForward(const int N, const double XX, bool performance = false) {
   IAlgorithm *fft =
       Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
   fft->initialize();
@@ -98,8 +97,7 @@ void doTestForward(const int N, const double dX, const double XX,
   }
 }
 
-void doTestBackward(const int N, const double dX, const double XX,
-                    bool performance = false) {
+void doTestBackward(const int N, const double dX, bool performance = false) {
   IAlgorithm *fft =
       Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
   fft->initialize();
@@ -127,7 +125,7 @@ void doTestBackward(const int N, const double dX, const double XX,
   }
 }
 
-void doTestForwardHistogram(const int N, const double dX, const double XX,
+void doTestForwardHistogram(const int N, const double XX,
                             bool performance = false) {
   IAlgorithm *fft =
       Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
@@ -160,7 +158,7 @@ void doTestForwardHistogram(const int N, const double dX, const double XX,
   }
 }
 
-void doTestBackwardHistogram(const int N, const double dX, const double XX,
+void doTestBackwardHistogram(const int N, const double dX,
                              bool performance = false) {
   IAlgorithm *fft =
       Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
@@ -197,10 +195,10 @@ public:
   RealFFTTest() : N(116), dX(0.3), XX(N * dX) { setupWorkspaces(N, dX); }
   ~RealFFTTest() override { deleteWorkspacesFromADS(); }
 
-  void testForward() { doTestForward(N, dX, XX); }
-  void testBackward() { doTestBackward(N, dX, XX); }
-  void testForwardHistogram() { doTestForwardHistogram(N, dX, XX); }
-  void testBackwardHistogram() { doTestBackwardHistogram(N, dX, XX); }
+  void testForward() { doTestForward(N, XX); }
+  void testBackward() { doTestBackward(N, dX); }
+  void testForwardHistogram() { doTestForwardHistogram(N, XX); }
+  void testBackwardHistogram() { doTestBackwardHistogram(N, dX); }
 
 private:
   const int N;
@@ -219,14 +217,10 @@ public:
   }
   ~RealFFTTestPerformance() override { deleteWorkspacesFromADS(); }
 
-  void testForward() { doTestForward(N, dX, XX, performance); }
-  void testBackward() { doTestBackward(N, dX, XX, performance); }
-  void testForwardHistogram() {
-    doTestForwardHistogram(N, dX, XX, performance);
-  }
-  void testBackwardHistogram() {
-    doTestBackwardHistogram(N, dX, XX, performance);
-  }
+  void testForward() { doTestForward(N, XX, performance); }
+  void testBackward() { doTestBackward(N, dX, performance); }
+  void testForwardHistogram() { doTestForwardHistogram(N, XX, performance); }
+  void testBackwardHistogram() { doTestBackwardHistogram(N, dX, performance); }
 
 private:
   const bool performance = true;

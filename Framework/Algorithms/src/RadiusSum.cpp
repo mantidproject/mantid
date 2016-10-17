@@ -507,7 +507,8 @@ void RadiusSum::numBinsIsReasonable() {
                        "resolution (detector size). "
                     << "A resonable number is smaller than "
                     << static_cast<int>((max_radius - min_radius) /
-                                        min_bin_size) << '\n';
+                                        min_bin_size)
+                    << '\n';
 }
 
 double RadiusSum::getMinBinSizeForInstrument(API::MatrixWorkspace_sptr inWS) {
@@ -622,8 +623,6 @@ void RadiusSum::setUpOutputWorkspace(std::vector<double> &values) {
   double bin_size = (max_radius - min_radius) / num_bins;
   outputWS->setBinEdges(0, xSize,
                         HistogramData::LinearGenerator(min_radius, bin_size));
-
-  outputWS->mutableX(0).back() = max_radius;
 
   // configure the axis:
   // for numeric images, the axis are the same as the input workspace, and are
