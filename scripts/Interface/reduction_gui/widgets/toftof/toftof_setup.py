@@ -11,6 +11,7 @@ from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement
 
 #-------------------------------------------------------------------------------
 
+
 class TOFTOFSetupWidget(BaseWidget):
     ''' The one and only tab page. '''
     name = 'TOFTOF Reduction'
@@ -371,12 +372,12 @@ class TOFTOFSetupWidget(BaseWidget):
         elem.subtractECVan = self.chkSubtractECVan.isChecked()
 
         elem.normalise     = elem.NORM_MONITOR    if self.rbtNormaliseMonitor.isChecked() else \
-                             elem.NORM_TIME       if self.rbtNormaliseTime.isChecked()    else \
-                             elem.NORM_NONE
+            elem.NORM_TIME       if self.rbtNormaliseTime.isChecked()    else \
+            elem.NORM_NONE
 
         elem.correctTof    = elem.CORR_TOF_VAN    if self.rbtCorrectTOFVan.isChecked()    else \
-                             elem.CORR_TOF_SAMPLE if self.rbtCorrectTOFSample.isChecked() else \
-                             elem.CORR_TOF_NONE
+            elem.CORR_TOF_SAMPLE if self.rbtCorrectTOFSample.isChecked() else \
+            elem.CORR_TOF_NONE
         return elem
 
     def set_state(self, toftofScriptElement):

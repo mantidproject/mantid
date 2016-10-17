@@ -2,6 +2,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IEventList.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -28,7 +29,6 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(ExportTimeSeriesLog)
 
-//----------------------------------------------------------------------------------------------
 /** Definition of all input arguments
  */
 void ExportTimeSeriesLog::init() {
@@ -73,7 +73,6 @@ void ExportTimeSeriesLog::init() {
                                             "is Workspace2D.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Main execution
  */
 void ExportTimeSeriesLog::exec() {

@@ -2,6 +2,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Unit.h"
 
 namespace MantidQt {
 namespace API {

@@ -2,6 +2,7 @@
 import os
 from mantid.simpleapi import *
 
+
 def tof_distribution(file_path, callback=None,
                      range_min=None, range_max=None):
     """
@@ -137,13 +138,13 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
             if is_pixel_y:
                 grouping_file = os.path.join(instr_dir, "Grouping",
                                              "REFL_Detector_Grouping_Sum_X.xml")
-                output_2d = GroupDetectors(InputWorkspace=output_2d,\
-                               MapFile=grouping_file)
+                output_2d = GroupDetectors(InputWorkspace=output_2d,
+                                           MapFile=grouping_file)
             else:
                 grouping_file = os.path.join(instr_dir, "Grouping",
                                              "REFL_Detector_Grouping_Sum_Y.xml")
-                output_2d = GroupDetectors(InputWorkspace=output_2d,\
-                               MapFile=grouping_file)
+                output_2d = GroupDetectors(InputWorkspace=output_2d,
+                                           MapFile=grouping_file)
 
     if instrument=="REFM":
         for p in ['Off_Off', 'On_Off', 'Off_On', 'On_On']:
@@ -199,6 +200,7 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
     mean = (min_id+max_id)/2.0
     return mean-2*sigma, mean+2*sigma
 
+
 def get_logs(instrument, run):
     sangle = 0
     dangle = 0
@@ -240,4 +242,3 @@ def get_logs(instrument, run):
             "DANGLE0":dangle0,
             "DIRPIX":direct_beam_pix,
             "DET_DISTANCE":det_distance}
-

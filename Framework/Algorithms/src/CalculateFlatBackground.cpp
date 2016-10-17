@@ -8,6 +8,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -26,6 +27,8 @@ DECLARE_ALGORITHM(CalculateFlatBackground)
 using namespace Kernel;
 using namespace API;
 
+enum class Modes { LINEAR_FIT, MEAN, MOVING_AVERAGE };
+
 void CalculateFlatBackground::init() {
   declareProperty(
       make_unique<WorkspaceProperty<>>(
@@ -38,22 +41,28 @@ void CalculateFlatBackground::init() {
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "Name to use for the output workspace.");
-  auto mustHaveValue = boost::make_shared<MandatoryValidator<double>>();
-
-  declareProperty("StartX", Mantid::EMPTY_DBL(), mustHaveValue,
-                  "The X value at which to start the background fit");
-  declareProperty("EndX", Mantid::EMPTY_DBL(), mustHaveValue,
-                  "The X value at which to end the background fit");
+  declareProperty("StartX", Mantid::EMPTY_DBL(),
+                  "The X value at which to start the background fit. Mandatory "
+                  "for the Linear Fit and Mean modes, ignored by Moving "
+                  "Average.");
+  setPropertySettings("StartX", make_unique<EnabledWhenProperty>(
+                                    "Mode", IS_NOT_EQUAL_TO, "Moving Average"));
+  declareProperty("EndX", Mantid::EMPTY_DBL(),
+                  "The X value at which to end the background fit. Mandatory "
+                  "for the Linear Fit and Mean modes, ignored by Moving "
+                  "Average.");
+  setPropertySettings("EndX", make_unique<EnabledWhenProperty>(
+                                  "Mode", IS_NOT_EQUAL_TO, "Moving Average"));
   declareProperty(
       make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
       "Indices of the spectra that will have their background removed\n"
       "default: modify all spectra");
-  std::vector<std::string> modeOptions{"Linear Fit", "Mean"};
+  std::vector<std::string> modeOptions{"Linear Fit", "Mean", "Moving Average"};
   declareProperty("Mode", "Linear Fit",
                   boost::make_shared<StringListValidator>(modeOptions),
                   "The background count rate is estimated either by taking a "
-                  "mean or doing a\n"
-                  "linear fit (default: Linear Fit)");
+                  "mean, doing a linear fit, or taking the\n"
+                  "minimum of a moving average (default: Linear Fit)");
   // Property to determine whether we subtract the background or just return the
   // background.
   std::vector<std::string> outputOptions{"Subtract Background",
@@ -78,6 +87,12 @@ void CalculateFlatBackground::init() {
                   "is added to the error. If false, the signal and errors are "
                   "left unchanged",
                   Direction::Input);
+  declareProperty("AveragingWindowWidth", Mantid::EMPTY_INT(),
+                  "The width of the moving average window in bins. Mandatory "
+                  "for the Moving Average mode.");
+  setPropertySettings(
+      "AveragingWindowWidth",
+      make_unique<EnabledWhenProperty>("Mode", IS_EQUAL_TO, "Moving Average"));
 }
 
 void CalculateFlatBackground::exec() {
@@ -93,13 +108,46 @@ void CalculateFlatBackground::exec() {
 
   m_skipMonitors = getProperty("SkipMonitors");
   m_nullifyNegative = getProperty("NullifyNegativeValues");
-  // Get the required X range
+  std::string modeString = getProperty("Mode");
+  Modes mode = Modes::LINEAR_FIT;
+  if (modeString == "Mean") {
+    mode = Modes::MEAN;
+  } else if (modeString == "Moving Average") {
+    mode = Modes::MOVING_AVERAGE;
+  }
   double startX, endX;
-  this->checkRange(startX, endX);
+  int windowWidth = 0;
+  switch (mode) {
+  case Modes::LINEAR_FIT:
+  case Modes::MEAN:
+    if (getPointerToProperty("StartX")->isDefault()) {
+      throw std::runtime_error("StartX property not set to any value");
+    }
+    if (getPointerToProperty("EndX")->isDefault()) {
+      throw std::runtime_error("EndX property not set to any value");
+    }
+    // Get the required X range
+    checkRange(startX, endX);
+    break;
+  case Modes::MOVING_AVERAGE:
+    if (getPointerToProperty("AveragingWindowWidth")->isDefault()) {
+      throw std::runtime_error(
+          "AveragingWindowWidth property not set to any value");
+    }
+    windowWidth = getProperty("AveragingWindowWidth");
+    if (windowWidth <= 0) {
+      throw std::runtime_error("AveragingWindowWidth zero or negative");
+    }
+    if (blocksize < windowWidth) {
+      throw std::runtime_error("AveragingWindowWidth is larger than the number "
+                               "of bins in InputWorkspace");
+    }
+    break;
+  }
 
   std::vector<int> wsInds = getProperty("WorkspaceIndexList");
   // check if the user passed an empty list, if so all of spec will be processed
-  this->getWsInds(wsInds, numHists);
+  getWsInds(wsInds, numHists);
 
   // Are we removing the background?
   const bool removeBackground =
@@ -153,15 +201,19 @@ void CalculateFlatBackground::exec() {
         }
       }
 
-      // Only if Mean() is called will variance be changed
-      double variance = -1;
-
       // Now call the function the user selected to calculate the background
-      const double background =
-          std::string(getProperty("mode")) == "Mean"
-              ? this->Mean(outputWS, currentSpec, startX, endX, variance)
-              : this->LinearFit(outputWS, currentSpec, startX, endX);
-
+      double background = -1;
+      switch (mode) {
+      case Modes::LINEAR_FIT:
+        background = LinearFit(outputWS, currentSpec, startX, endX);
+        break;
+      case Modes::MEAN:
+        background = Mean(outputWS, currentSpec, startX, endX);
+        break;
+      case Modes::MOVING_AVERAGE:
+        background = movingAverage(outputWS, currentSpec, windowWidth);
+        break;
+      }
       if (background < 0) {
         g_log.warning() << "Problem with calculating the background number of "
                            "counts spectrum with index " << currentSpec
@@ -173,17 +225,9 @@ void CalculateFlatBackground::exec() {
         backgroundTotal += background;
       }
 
-      auto &E = outputWS->mutableE(currentSpec);
-      // only the Mean() function calculates the variance
-      // cppcheck-suppress knownConditionTrueFalse
-      if (variance > 0) {
-        // adjust the errors using the variance (variance = error^2)
-        std::transform(
-            E.begin(), E.end(), E.begin(),
-            std::bind2nd(VectorHelper::AddVariance<double>(), variance));
-      }
       // Get references to the current spectrum
       auto &Y = outputWS->mutableY(currentSpec);
+      auto &E = outputWS->mutableE(currentSpec);
       // Now subtract the background from the data
       for (int j = 0; j < blocksize; ++j) {
         if (removeBackground) {
@@ -316,29 +360,25 @@ void CalculateFlatBackground::getWsInds(std::vector<int> &output,
   }
 }
 /** Gets the mean number of counts in each bin the background region and the
-* variance (error^2) of that
-*  number
+* variance (error^2) of that number. Adjusts the y errors accordingly.
 *  @param WS :: points to the input workspace
 *  @param wsInd :: index of the spectrum to process
 *  @param startX :: a X-value in the first bin that will be considered, must not
 * be greater endX
 *  @param endX :: a X-value in the last bin that will be considered, must not
 * less than startX
-*  @param variance :: will be set to the number of counts divided by the number
-* of bins squared (= error^2)
 *  @return the mean number of counts in each bin the background region
 *  @throw out_of_range if either startX or endX are out of the range of X-values
 * in the specified spectrum
 *  @throw invalid_argument if endX has the value of first X-value one of the
 * spectra
 */
-double CalculateFlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS,
+double CalculateFlatBackground::Mean(const API::MatrixWorkspace_sptr WS,
                                      const int wsInd, const double startX,
-                                     const double endX,
-                                     double &variance) const {
+                                     const double endX) const {
   auto &XS = WS->x(wsInd);
   auto &YS = WS->y(wsInd);
-  auto &ES = WS->e(wsInd);
+  auto &ES = WS->mutableE(wsInd);
   // the function checkRange should already have checked that startX <= endX,
   // but we still need to check values weren't out side the ranges
   if (endX > XS.back() || startX < XS.front()) {
@@ -379,9 +419,13 @@ double CalculateFlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS,
   // is taken as the sqrt the total number counts. To get the the error on the
   // counts in each bin just divide this by the number of bins. The variance =
   // error^2 that is the total variance divide by the number of bins _squared_.
-  variance = std::accumulate(ES.begin() + startInd, ES.begin() + endInd + 1,
-                             0.0, VectorHelper::SumSquares<double>()) /
-             (numBins * numBins);
+  const double variance =
+      std::accumulate(ES.begin() + startInd, ES.begin() + endInd + 1, 0.0,
+                      VectorHelper::SumSquares<double>()) /
+      (numBins * numBins);
+  // adjust the errors using the variance (variance = error^2)
+  std::transform(ES.begin(), ES.end(), ES.begin(),
+                 std::bind2nd(VectorHelper::AddVariance<double>(), variance));
   // return mean number of counts in each bin, the sum of the number of counts
   // in all the bins divided by the number of bins used in that sum
   return background;
@@ -441,6 +485,40 @@ double CalculateFlatBackground::LinearFit(API::MatrixWorkspace_sptr WS,
   // Calculate the value of the flat background by taking the value at the
   // centre point of the fit
   return slope * centre + intercept;
+}
+
+/**
+* Utilizes cyclic boundary conditions when calculating the
+* average in the window.
+* @param WS The workspace to operate on
+* @param wsIndex The workspace index to operate on
+* @param windowWidth Width of the averaging window in bins
+* @return Minimum
+*/
+double
+CalculateFlatBackground::movingAverage(API::MatrixWorkspace_const_sptr WS,
+                                       int wsIndex, size_t windowWidth) const {
+  const auto &ys = WS->y(wsIndex);
+  double currentMin = std::numeric_limits<double>::max();
+
+  // Initialize sum.
+  double sum = 0;
+  for (size_t i = 0; i < windowWidth; ++i) {
+    sum += ys[i];
+  }
+  // When moving the window, we need to subtract the single point "falling off"
+  // while adding a new point. Saves us summing all the points in the window.
+  for (size_t i = 0; i < ys.size() - 1; ++i) {
+    currentMin = std::min(currentMin, sum / static_cast<double>(windowWidth));
+    size_t j = i + windowWidth;
+    // Cyclic boundary conditions.
+    if (j >= ys.size()) {
+      j -= ys.size();
+    }
+    sum += ys[j] - ys[i];
+  }
+  currentMin = std::min(currentMin, sum / static_cast<double>(windowWidth));
+  return currentMin;
 }
 
 } // namespace Algorithms

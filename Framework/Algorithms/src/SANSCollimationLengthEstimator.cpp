@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"

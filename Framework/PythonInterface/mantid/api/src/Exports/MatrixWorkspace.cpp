@@ -1,5 +1,6 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"

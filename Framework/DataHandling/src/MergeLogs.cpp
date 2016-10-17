@@ -2,6 +2,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
