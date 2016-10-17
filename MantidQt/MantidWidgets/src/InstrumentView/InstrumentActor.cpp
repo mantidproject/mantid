@@ -29,7 +29,7 @@
 #include "MantidKernel/V3D.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 #include <QMessageBox>
 #include <QSettings>
@@ -134,8 +134,7 @@ void InstrumentActor::setUpWorkspace(
   for (size_t i = 0; i < nHist; ++i) {
     const Mantid::MantidVec &values = sharedWorkspace->readX(i);
     double xtest = values.front();
-    if (xtest != std::numeric_limits<double>::infinity()) {
-
+    if (!std::isinf(xtest)) {
       if (xtest < m_WkspBinMinValue) {
         m_WkspBinMinValue = xtest;
       } else if (xtest > m_WkspBinMaxValue) {
@@ -145,7 +144,7 @@ void InstrumentActor::setUpWorkspace(
     }
 
     xtest = values.back();
-    if (xtest != std::numeric_limits<double>::infinity()) {
+    if (!std::isinf(xtest)) {
       if (xtest < m_WkspBinMinValue) {
         m_WkspBinMinValue = xtest;
       } else if (xtest > m_WkspBinMaxValue) {
@@ -1152,7 +1151,7 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
         continue;
       }
       double sum = m_specIntegrs[i];
-      if (boost::math::isinf(sum) || boost::math::isnan(sum)) {
+      if (!std::isfinite(sum)) {
         throw std::runtime_error(
             "The workspace contains values that cannot be displayed (infinite "
             "or NaN).\n"

@@ -38,20 +38,18 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(
   if (start.getNumDims() == 1 && end.getNumDims() == 1) {
     if (start[0] == 0.0 && end[0] == 0.0) {
       // Default start and end. Find the limits
-      Mantid::Geometry::VecIMDDimension_const_sptr nonIntegDims =
-          m_workspace->getNonIntegratedDimensions();
-      std::string alongDim = "";
+      auto nonIntegDims = m_workspace->getNonIntegratedDimensions();
+      std::string alongDim;
       if (!nonIntegDims.empty())
         alongDim = nonIntegDims[0]->getName();
       else
         alongDim = m_workspace->getDimension(0)->getName();
-
       size_t nd = m_workspace->getNumDims();
       m_start = VMD(nd);
       m_end = VMD(nd);
       for (size_t d = 0; d < nd; d++) {
         IMDDimension_const_sptr dim = m_workspace->getDimension(d);
-        if (dim->getDimensionId() == alongDim) {
+        if (dim->getName() == alongDim) {
           // All the way through in the single dimension
           m_start[d] = dim->getMinimum();
           m_end[d] = dim->getMaximum();
@@ -81,7 +79,7 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(
 MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(
     const MantidQwtIMDWorkspaceData &data)
     : MantidQwtWorkspaceData(data) {
-  this->operator=(data);
+  copyData(data);
 }
 
 //-----------------------------------------------------------------------------
@@ -91,23 +89,7 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(
  */
 MantidQwtIMDWorkspaceData &MantidQwtIMDWorkspaceData::
 operator=(const MantidQwtIMDWorkspaceData &data) {
-  if (this != &data) {
-    static_cast<MantidQwtWorkspaceData &>(*this) = data;
-    m_workspace = data.m_workspace;
-    m_preview = data.m_preview;
-    m_start = data.m_start;
-    m_end = data.m_end;
-    m_dir = data.m_dir;
-    m_normalization = data.m_normalization;
-    m_isDistribution = data.m_isDistribution;
-    m_originalWorkspace = data.m_originalWorkspace;
-    m_transform = NULL;
-    m_plotAxis = data.m_plotAxis;
-    m_currentPlotAxis = data.m_currentPlotAxis;
-    if (data.m_transform)
-      m_transform = data.m_transform->clone();
-    this->cacheLinePlot();
-  }
+  copyData(data);
   return *this;
 }
 
@@ -132,6 +114,33 @@ MantidQwtIMDWorkspaceData *MantidQwtIMDWorkspaceData::copy(
   out->m_currentPlotAxis = this->m_currentPlotAxis;
   out->setPreviewMode(m_preview);
   return out;
+}
+
+/**
+  * Handles copying member variables for the copy constructor and
+  * assignment operator
+  *
+  * @param data The pointer to the object to copy from
+  */
+void MantidQwtIMDWorkspaceData::copyData(
+    const MantidQwtIMDWorkspaceData &data) {
+  if (this != &data) {
+    static_cast<MantidQwtWorkspaceData &>(*this) = data;
+    m_workspace = data.m_workspace;
+    m_preview = data.m_preview;
+    m_start = data.m_start;
+    m_end = data.m_end;
+    m_dir = data.m_dir;
+    m_normalization = data.m_normalization;
+    m_isDistribution = data.m_isDistribution;
+    m_originalWorkspace = data.m_originalWorkspace;
+    m_plotAxis = data.m_plotAxis;
+    m_currentPlotAxis = data.m_currentPlotAxis;
+    m_transform = nullptr;
+    if (data.m_transform)
+      m_transform = data.m_transform->clone();
+    this->cacheLinePlot();
+  }
 }
 
 //-----------------------------------------------------------------------------

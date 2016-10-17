@@ -5,6 +5,8 @@
 set ( TEST_PY_FILES
   AddSampleLogMultipleTest.py
   AlignComponentsTest.py
+  AngularAutoCorrelationsSingleAxisTest.py
+  AngularAutoCorrelationsTwoAxesTest.py
   ApplyPaalmanPingsCorrectionTest.py
   BayesQuasiTest.py
   BayesStretchTest.py
@@ -64,6 +66,7 @@ set ( TEST_PY_FILES
   MaskAngleTest.py
   MaskBTPTest.py
   MaskWorkspaceToCalFileTest.py
+  MatchPeaksTest.py
   MeanTest.py
   MergeCalFilesTest.py
   MolDynTest.py
@@ -79,6 +82,7 @@ set ( TEST_PY_FILES
   SavePlot1DTest.py
   SavePlot1DAsJsonTest.py
   SaveVulcanGSSTest.py
+  ExtractMonitorsTest.py
   SetDetScaleTest.py
   SimulatedDensityOfStatesTest.py
   SortByQVectorsTest.py
@@ -104,6 +108,8 @@ set ( TEST_PY_FILES
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
   PoldiMergeTest.py
+  VelocityCrossCorrelationsTest.py
+  VelocityAutoCorrelationsTest.py
   SelectNexusFilesByMetadataTest.py
   VesuvioDiffractionReductionTest.py
   VesuvioPreFitTest.py

@@ -161,8 +161,6 @@ void SCDCalibratePanels::exec() {
   int nPeaks = static_cast<int>(peaksWs->getNumberPeaks());
   bool changeL1 = getProperty("ChangeL1");
   bool changeSize = getProperty("ChangePanelSize");
-  std::vector<std::string> fit_workspaces;
-  std::vector<std::string> parameter_workspaces;
 
   if (changeL1)
     findL1(nPeaks, peaksWs);
@@ -170,6 +168,9 @@ void SCDCalibratePanels::exec() {
   for (int i = 0; i < nPeaks; ++i) {
     MyBankNames.insert(peaksWs->getPeak(i).getBankName());
   }
+
+  std::vector<std::string> fit_workspaces(MyBankNames.size(), "fit_");
+  std::vector<std::string> parameter_workspaces(MyBankNames.size(), "params_");
 
   PARALLEL_FOR1(peaksWs)
   for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
@@ -195,10 +196,10 @@ void SCDCalibratePanels::exec() {
             "Workspace2D", 1, 3 * nBankPeaks, 3 * nBankPeaks));
 
     auto &outSpec = q3DWS->getSpectrum(0);
-    MantidVec &yVec = outSpec.dataY();
-    MantidVec &eVec = outSpec.dataE();
-    MantidVec &xVec = outSpec.dataX();
-    std::fill(yVec.begin(), yVec.end(), 0.0);
+    auto &yVec = outSpec.mutableY();
+    auto &eVec = outSpec.mutableE();
+    auto &xVec = outSpec.mutableX();
+    yVec = 0.0;
 
     for (int i = 0; i < nBankPeaks; i++) {
       const DataObjects::Peak &peak = local->getPeak(i);
@@ -285,16 +286,23 @@ void SCDCalibratePanels::exec() {
       scaleHeight = paramsWS->getRef<double>("Value", 7);
     }
     AnalysisDataService::Instance().remove(bankName);
-    PARALLEL_CRITICAL(afterFit2) {
-      SCDPanelErrors det;
-      det.moveDetector(xShift, yShift, zShift, xRotate, yRotate, zRotate,
-                       scaleWidth, scaleHeight, iBank, peaksWs);
-      parameter_workspaces.push_back("params_" + iBank);
-      fit_workspaces.push_back("fit_" + iBank);
-    }
+    SCDPanelErrors det;
+    det.moveDetector(xShift, yShift, zShift, xRotate, yRotate, zRotate,
+                     scaleWidth, scaleHeight, iBank, peaksWs);
+    parameter_workspaces[i] += iBank;
+    fit_workspaces[i] += iBank;
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+  // remove skipped banks
+  fit_workspaces.erase(
+      std::remove(fit_workspaces.begin(), fit_workspaces.end(), "fit_"),
+      fit_workspaces.end());
+  parameter_workspaces.erase(std::remove(parameter_workspaces.begin(),
+                                         parameter_workspaces.end(), "params_"),
+                             parameter_workspaces.end());
+
   // Try again to optimize L1
   if (changeL1)
     findL1(nPeaks, peaksWs);
@@ -373,12 +381,12 @@ void SCDCalibratePanels::exec() {
     ColWksp->getSpectrum(i).setSpectrumNo(specnum_t(bank));
     RowWksp->getSpectrum(i).setSpectrumNo(specnum_t(bank));
     TofWksp->getSpectrum(i).setSpectrumNo(specnum_t(bank));
-    Mantid::MantidVec &ColX = ColWksp->dataX(i);
-    Mantid::MantidVec &ColY = ColWksp->dataY(i);
-    Mantid::MantidVec &RowX = RowWksp->dataX(i);
-    Mantid::MantidVec &RowY = RowWksp->dataY(i);
-    Mantid::MantidVec &TofX = TofWksp->dataX(i);
-    Mantid::MantidVec &TofY = TofWksp->dataY(i);
+    auto &ColX = ColWksp->mutableX(i);
+    auto &ColY = ColWksp->mutableY(i);
+    auto &RowX = RowWksp->mutableX(i);
+    auto &RowY = RowWksp->mutableY(i);
+    auto &TofX = TofWksp->mutableX(i);
+    auto &TofY = TofWksp->mutableY(i);
     int icount = 0;
     for (int j = 0; j < nPeaks; j++) {
       Peak peak = peaksWs->getPeak(j);
@@ -426,10 +434,10 @@ void SCDCalibratePanels::findL1(int nPeaks,
                                                3 * nPeaks));
 
   auto &outSp = L1WS->getSpectrum(0);
-  MantidVec &yVec = outSp.dataY();
-  MantidVec &eVec = outSp.dataE();
-  MantidVec &xVec = outSp.dataX();
-  std::fill(yVec.begin(), yVec.end(), 0.0);
+  auto &yVec = outSp.mutableY();
+  auto &eVec = outSp.mutableE();
+  auto &xVec = outSp.mutableX();
+  yVec = 0.0;
 
   for (int i = 0; i < nPeaks; i++) {
     const DataObjects::Peak &peak = peaksWs->getPeak(i);

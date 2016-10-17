@@ -138,6 +138,15 @@ public:
       const std::string &wsName,
       boost::shared_ptr<Mantid::API::IPeaksWorkspace> &changedPeaksWS);
 
+  /// Load the state of the slice viewer from a Mantid project file
+  void loadFromProject(const std::string &lines);
+  /// Save the state of the slice viewer to a Mantid project file
+  std::string saveToProject() const;
+  /// Load the state of the dimension widgets from a Mantid project file
+  void loadDimensionWidgets(const std::string &lines);
+  /// Save the state of the dimension widgets to a Mantid project file
+  std::string saveDimensionWidgets() const;
+
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed
   void changedShownDim(size_t dimX, size_t dimY);
@@ -275,8 +284,6 @@ private:
 
   /// The LineOverlay widget for drawing the outline of the rebinned workspace
   LineOverlay *m_overlayWSOutline;
-
-  // PeakOverlay * m_peakOverlay;
 
   /// Object for running algorithms in the background
   MantidQt::API::AlgorithmRunner *m_algoRunner;

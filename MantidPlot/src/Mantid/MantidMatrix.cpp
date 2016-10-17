@@ -25,8 +25,8 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <limits>
+#include <cmath>
 
-#include <boost/math/special_functions/fpclassify.hpp>
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -206,11 +206,6 @@ void MantidMatrix::viewChanged(int index) {
     activeView()->horizontalScrollBar()->setValue(hValue);
     activeView()->verticalScrollBar()->setValue(vValue);
   }
-}
-
-/// Checks if d is not infinity or a NaN
-bool isANumber(volatile const double &d) {
-  return d != std::numeric_limits<double>::infinity() && !boost::math::isnan(d);
 }
 
 void MantidMatrix::setup(Mantid::API::MatrixWorkspace_const_sptr ws, int start,
@@ -590,7 +585,7 @@ QwtDoubleRect MantidMatrix::boundingRect() {
         x_end = X[m_workspace->blocksize()];
       else
         x_end = X[m_workspace->blocksize() - 1];
-      if (!isANumber(x_start) || !isANumber(x_end)) {
+      if (!std::isfinite(x_start) || !std::isfinite(x_end)) {
         x_start = x_end = 0;
       }
       i0++;
@@ -619,13 +614,13 @@ QwtDoubleRect MantidMatrix::boundingRect() {
           const Mantid::MantidVec &X = m_workspace->readX(i);
           if (X.front() < x_start) {
             double xs = X.front();
-            if (!isANumber(xs))
+            if (!std::isfinite(xs))
               continue;
             x_start = xs;
           }
           if (X.back() > x_end) {
             double xe = X.back();
-            if (!isANumber(xe))
+            if (!std::isfinite(xe))
               continue;
             x_end = xe;
           }
@@ -1151,7 +1146,7 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
 
       for (size_t i = 0; i < Y.size(); i++) {
         double aux = Y[i];
-        if (fabs(aux) == std::numeric_limits<double>::infinity() || aux != aux)
+        if (!std::isfinite(aux))
           continue;
         if (aux < local_min)
           local_min = aux;
@@ -1185,9 +1180,9 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
   }
 }
 
-IProjectSerialisable *MantidMatrix::loadFromProject(const std::string &lines,
-                                                    ApplicationWindow *app,
-                                                    const int fileVersion) {
+MantidQt::API::IProjectSerialisable *
+MantidMatrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                              const int fileVersion) {
   Q_UNUSED(fileVersion);
   TSVSerialiser tsv(lines);
 

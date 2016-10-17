@@ -98,12 +98,12 @@ protected:
     return "InputWorkspace";
   }
 
-private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
 
   void setupMemberVariables(const API::MatrixWorkspace_const_sptr inputWS);
+  virtual void storeEModeOnWorkspace(API::MatrixWorkspace_sptr outputWS);
   API::MatrixWorkspace_sptr
   setupOutputWorkspace(const API::MatrixWorkspace_const_sptr inputWS);
 
@@ -128,7 +128,7 @@ private:
 
   /// Convert the workspace units using TOF as an intermediate step in the
   /// conversion
-  API::MatrixWorkspace_sptr
+  virtual API::MatrixWorkspace_sptr
   convertViaTOF(Kernel::Unit_const_sptr fromUnit,
                 API::MatrixWorkspace_const_sptr inputWS);
 

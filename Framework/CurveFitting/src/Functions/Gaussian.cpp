@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidAPI/FunctionFactory.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <cmath>
 #include <numeric>
@@ -83,7 +82,7 @@ double Gaussian::intensity() const {
   auto sigma = getParameter("Sigma");
   if (sigma == 0.0) {
     auto height = getParameter("Height");
-    if (boost::math::isfinite(height)) {
+    if (std::isfinite(height)) {
       m_intensityCache = height;
     }
   } else {
@@ -119,6 +118,69 @@ void Gaussian::fixIntensity() {
 }
 
 void Gaussian::unfixIntensity() { removeTie("Height"); }
+
+/// Calculate histogram data for the given bin boundaries.
+/// @param out :: Output bin values (size == nBins) - integrals of the function
+///    inside each bin.
+/// @param left :: The left-most bin boundary.
+/// @param right :: A pointer to an array of successive right bin boundaries
+/// (size = nBins).
+/// @param nBins :: Number of bins.
+void Gaussian::histogram1D(double *out, double left, const double *right,
+                           const size_t nBins) const {
+
+  double amplitude = intensity();
+  const double peakCentre = getParameter("PeakCentre");
+  const double sigma2 = getParameter("Sigma") * sqrt(2.0);
+
+  auto cumulFun = [sigma2, peakCentre](double x) {
+    return 0.5 * erf((x - peakCentre) / sigma2);
+  };
+  double cLeft = cumulFun(left);
+  for (size_t i = 0; i < nBins; ++i) {
+    double cRight = cumulFun(right[i]);
+    out[i] = amplitude * (cRight - cLeft);
+    cLeft = cRight;
+  }
+}
+
+/// Derivatives of the histogram.
+/// @param jacobian :: The output Jacobian.
+/// @param left :: The left-most bin boundary.
+/// @param right :: A pointer to an array of successive right bin boundaries
+/// (size = nBins).
+/// @param nBins :: Number of bins.
+void Gaussian::histogramDerivative1D(Jacobian *jacobian, double left,
+                                     const double *right,
+                                     const size_t nBins) const {
+  const double h = getParameter("Height");
+  const double c = getParameter("PeakCentre");
+  const double s = getParameter("Sigma");
+  const double w = pow(1 / s, 2);
+  const double sw = sqrt(w);
+
+  auto cumulFun = [sw, c](double x) {
+    return sqrt(M_PI / 2) / sw * erf(sw / sqrt(2.0) * (x - c));
+  };
+  auto fun = [w, c](double x) { return exp(-w / 2 * pow(x - c, 2)); };
+
+  double xl = left;
+  double fLeft = fun(left);
+  double cLeft = cumulFun(left);
+  const double h_over_2w = h / (2 * w);
+  for (size_t i = 0; i < nBins; ++i) {
+    double xr = right[i];
+    double fRight = fun(xr);
+    double cRight = cumulFun(xr);
+    jacobian->set(i, 0, cRight - cLeft);        // height
+    jacobian->set(i, 1, -h * (fRight - fLeft)); // centre
+    jacobian->set(i, 2, h_over_2w * ((xr - c) * fRight - (xl - c) * fLeft +
+                                     cLeft - cRight)); // weight
+    fLeft = fRight;
+    cLeft = cRight;
+    xl = xr;
+  }
+}
 
 } // namespace Functions
 } // namespace CurveFitting

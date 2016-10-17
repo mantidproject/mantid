@@ -1,4 +1,6 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.kernel import *
 from mantid.api import (WorkspaceProperty, FileProperty, MultipleFileProperty, FileAction,
                         DataProcessorAlgorithm, AlgorithmFactory)
@@ -64,6 +66,7 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
               Factor=self._intensity_scale,
               Operation='Multiply')
 
+        DeleteWorkspace(__temp)
         DeleteWorkspace(__ws_name)
 
         self.setProperty('OutputWorkspace', self._out_ws)

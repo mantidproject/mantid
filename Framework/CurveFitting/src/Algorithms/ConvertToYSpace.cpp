@@ -235,12 +235,12 @@ bool ConvertToYSpace::convert(const size_t index) {
     const double k1 = std::sqrt(detPar.efixed /
                                 PhysicalConstants::E_mev_toNeutronWavenumberSq);
 
-    auto &outX = m_outputWS->dataX(index);
-    auto &outY = m_outputWS->dataY(index);
-    auto &outE = m_outputWS->dataE(index);
-    const auto &inX = m_inputWS->readX(index);
-    const auto &inY = m_inputWS->readY(index);
-    const auto &inE = m_inputWS->readE(index);
+    auto &outX = m_outputWS->mutableX(index);
+    auto &outY = m_outputWS->mutableY(index);
+    auto &outE = m_outputWS->mutableE(index);
+    const auto &inX = m_inputWS->x(index);
+    const auto &inY = m_inputWS->y(index);
+    const auto &inE = m_inputWS->e(index);
 
     // The t->y mapping flips the order of the axis so we need to reverse it to
     // have a monotonically increasing axis
@@ -255,8 +255,8 @@ bool ConvertToYSpace::convert(const size_t index) {
       outE[outIndex] = prefactor * inE[j];
 
       if (m_qOutputWS) {
-        m_qOutputWS->dataX(index)[outIndex] = ys;
-        m_qOutputWS->dataY(index)[outIndex] = qs;
+        m_qOutputWS->mutableX(index)[outIndex] = ys;
+        m_qOutputWS->mutableY(index)[outIndex] = qs;
       }
     }
     return true;

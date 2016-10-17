@@ -98,8 +98,8 @@ void MaxMin::exec() {
         .copyInfoFrom(localworkspace->getSpectrum(i));
 
     // Retrieve the spectrum into a vector
-    const MantidVec &X = localworkspace->readX(i);
-    const MantidVec &Y = localworkspace->readY(i);
+    auto &X = localworkspace->x(i);
+    auto &Y = localworkspace->y(i);
 
     // Find the range [min,max]
     MantidVec::const_iterator lowit, highit;
@@ -133,10 +133,10 @@ void MaxMin::exec() {
     }
     MantidVec::difference_type d = std::distance(Y.begin(), maxY);
     // X boundaries for the max/min element
-    outputWorkspace->dataX(newindex)[0] = *(X.begin() + d);
-    outputWorkspace->dataX(newindex)[1] =
+    outputWorkspace->mutableX(newindex)[0] = *(X.begin() + d);
+    outputWorkspace->mutableX(newindex)[1] =
         *(X.begin() + d + 1); // This is safe since X is of dimension Y+1
-    outputWorkspace->dataY(newindex)[0] = *maxY;
+    outputWorkspace->mutableY(newindex)[0] = *maxY;
     progress.report();
     PARALLEL_END_INTERUPT_REGION
   }

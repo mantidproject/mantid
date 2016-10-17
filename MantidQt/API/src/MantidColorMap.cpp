@@ -13,7 +13,6 @@
 #include <QRgb>
 #include <limits>
 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidKernel/ConfigService.h"
 #include <qfiledialog.h>
 
@@ -255,7 +254,7 @@ void MantidColorMap::setupDefaultMap() {
 double MantidColorMap::normalize(const QwtDoubleInterval &interval,
                                  double value) const {
   // nan numbers have the property that nan != nan, treat nan as being invalid
-  if (interval.isNull() || m_num_colors == 0 || boost::math::isnan(value))
+  if (interval.isNull() || m_num_colors == 0 || std::isnan(value))
     return m_nan;
 
   const double width = interval.width();

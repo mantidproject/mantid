@@ -81,7 +81,7 @@ private slots:
   void showDetectorTable();
   void convertToMatrixWorkspace();
   void convertMDHistoToMatrixWorkspace();
-  void updateTree();
+  void updateTreeOnADSUpdate();
   void incrementUpdateCount();
   void recordWorkspaceRename(QString, QString);
   void clearUB();
@@ -93,6 +93,7 @@ private:
   void addSaveMenuOption(QString algorithmString, QString menuEntryName = "");
   void setTreeUpdating(const bool state);
   inline bool isTreeUpdating() const { return m_treeUpdating; }
+  void updateTree();
   void populateTopLevel(
       const std::map<std::string, Mantid::API::Workspace_sptr> &topLevelItems,
       const QStringList &expanded);
@@ -120,6 +121,7 @@ private:
   void addClearMenuItems(QMenu *menu, const QString &wsName);
 
   void excludeItemFromSort(MantidTreeWidgetItem *item);
+  void doPlotSpectra(bool errors);
 
 protected:
   MantidTreeWidget *m_tree;
@@ -175,7 +177,8 @@ public:
   QStringList getSelectedWorkspaceNames() const;
   MantidWSIndexWidget::UserInput
   chooseSpectrumFromSelected(bool showWaterfallOpt = true,
-                             bool showPlotAll = true) const;
+                             bool showPlotAll = true,
+                             bool showTiledOpt = true) const;
   void setSortScheme(MantidItemSortScheme);
   void setSortOrder(Qt::SortOrder);
   MantidItemSortScheme getSortScheme() const;

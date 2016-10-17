@@ -45,6 +45,9 @@ public:
   };
   std::string name() override { return m_name; }
   std::string icon() override { return std::string("://worksheet.png"); }
+  std::string tooltip() override { return std::string("Table Workspace"); }
+  std::string whatsthis() override { return std::string("Table Workspace"); }
+  std::string shortcut() override { return std::string(); }
 
 private:
   std::string m_name;

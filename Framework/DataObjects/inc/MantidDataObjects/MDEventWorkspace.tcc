@@ -908,7 +908,7 @@ TMDE(API::IMDWorkspace::LinePlot MDEventWorkspace)
         if (!box->getIsMasked()) {
           line.x.push_back(line_pos);
           signal_t signal = this->getNormalizedSignal(box, normalize);
-          if (boost::math::isinf(signal)) {
+          if (std::isinf(signal)) {
             // The plotting library (qwt) doesn't like infs.
             signal = std::numeric_limits<signal_t>::quiet_NaN();
           }

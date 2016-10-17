@@ -18,15 +18,17 @@ class IndirectILLReductionTest(unittest.TestCase):
     _run = None
     # cache the def instrument and data search dirs
     _def_fac = config['default.facility']
+    _def_inst = config['default.instrument']
     _data_dirs = config['datasearch.directories']
 
     def setUp(self):
         # set instrument and append datasearch directory
-        #config.setFacility('ILL')
-        #config.appendDataSearchSubdirs('ILL/IN16B')
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'IN16B'
+        config.appendDataSearchSubDir('ILL/IN16B/')
 
-        self._run_name = 'ILL/IN16B/146191.nxs'
-        self._multi_runs = 'ILL/IN16B/146191.nxs,ILL/IN16B/146192.nxs'
+        self._run_name = '146191'
+        self._multi_runs = '146191,146192'
         self._old_run = 'ILLIN16B_034745.nxs'
 
         # Reference workspace after loading (comparisons using blocksize(), getNumberHistograms(), ( SampleLogs, ...))
@@ -35,9 +37,9 @@ class IndirectILLReductionTest(unittest.TestCase):
 
     def tearDown(self):
         # set cached facility and datasearch directory
-        #config.setFacility(cls._def_fac)
-        #config.setDataSearchDirs(cls._data_dirs)
-        #reset output workspaces list
+        config['default.facility'] = self._def_fac
+        config['default.instrument'] = self._def_inst
+        config['datasearch.directories'] = self._data_dirs
         self._output_workspaces = []
 
     def test_multifiles(self):
@@ -142,6 +144,43 @@ class IndirectILLReductionTest(unittest.TestCase):
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
         self._workspace_properties(mtd['red'])
+
+    def _test_unmirror_1_2_3(self):
+        self._args['Run'] = '146007'
+
+        self._args['UnmirrorOption'] = 1
+        red = IndirectILLReduction(**self._args)
+
+        self._args['UnmirrorOption'] = 2
+        left = IndirectILLReduction(**self._args)
+
+        self._args['UnmirrorOption'] = 3
+        right = IndirectILLReduction(**self._args)
+
+        summed = Plus(left.getItem(0),right.getItem(0))
+
+        result = CompareWorkspaces(summed,red.getItem(0))
+
+        self._assertTrue(result[0],"Unmirror 1 should be the sum of 2 and 3")
+
+    def _test_unmirror_4_5(self):
+        pass
+
+    def _test_unmirror_6_7(self):
+        self._args['Run'] = '146007'
+        self._args['UnmirrorOption'] = 6
+
+        vana6 = IndirectILLReduction(**self._args)
+
+        self._args['VanadiumRun'] = '146007'
+        self._args['UnmirrorOption'] = 7
+
+        vana7 = IndirectILLReduction(**self._args)
+
+        result = CompareWorkspaces(vana6.getItem(0),vana7.getItem(0))
+
+        self._assertTrue(result[0], "Unmirror 6 should be the same as 7 if "
+                                    "the same run is also defined as vanadium run")
 
     def _workspace_properties(self, ws):
 

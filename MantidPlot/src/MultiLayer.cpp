@@ -43,6 +43,8 @@
 #include <QSpinBox>
 #include <QSize>
 
+#include <cmath>
+#include <limits>
 #include <set>
 
 #if QT_VERSION >= 0x040300
@@ -81,6 +83,10 @@ using namespace Mantid;
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MultiLayer");
+
+const double MAXIMUM = std::numeric_limits<double>::max();
+const double MINIMUM = std::numeric_limits<double>::min();
+constexpr int AXIS_X(0), AXIS_Y(1);
 }
 
 LayerButton::LayerButton(const QString &text, QWidget *parent)
@@ -562,8 +568,8 @@ QSize MultiLayer::arrangeLayers(bool userSize) {
       gr->setAutoscaleFonts(false);
     }
 
-    gr->setGeometry(QRect(x, y, w, h));
-    gr->plotWidget()->resize(QSize(w, h));
+    gr->setGeometry(QRect(x, y, std::abs(w), std::abs(h)));
+    gr->plotWidget()->resize(QSize(std::abs(w), std::abs(h)));
 
     if (!userSize)
       gr->setAutoscaleFonts(autoscaleFonts); // restore user settings
@@ -583,32 +589,19 @@ QSize MultiLayer::arrangeLayers(bool userSize) {
   return size;
 }
 
+/**
+ * Find best layout for a multilayer plot, given the number of layers
+ * @param d_rows :: [output] Number of rows
+ * @param d_cols :: [output] Number of columns
+ */
 void MultiLayer::findBestLayout(int &d_rows, int &d_cols) {
-  int NumGraph = graphsList.size();
-  if (NumGraph % 2 == 0) // NumGraph is an even number
-  {
-    if (NumGraph <= 2)
-      d_cols = NumGraph / 2 + 1;
-    else if (NumGraph > 2)
-      d_cols = NumGraph / 2;
-
-    if (NumGraph < 8)
-      d_rows = NumGraph / 4 + 1;
-    if (NumGraph >= 8)
-      d_rows = NumGraph / 4;
-  } else if (NumGraph % 2 != 0) // NumGraph is an odd number
-  {
-    int Num = NumGraph + 1;
-
-    if (Num <= 2)
-      d_cols = 1;
-    else if (Num > 2)
-      d_cols = Num / 2;
-
-    if (Num < 8)
-      d_rows = Num / 4 + 1;
-    if (Num >= 8)
-      d_rows = Num / 4;
+  const int numGraphs = graphsList.size();
+  const int root =
+      static_cast<int>(std::ceil(std::sqrt(static_cast<double>(numGraphs))));
+  d_rows = root;
+  d_cols = root;
+  if (d_rows * d_cols - numGraphs > d_rows) {
+    --d_rows;
   }
 }
 
@@ -1726,9 +1719,9 @@ void WaterfallFillDialog::setFillMode() {
   }
 }
 
-IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
-                                                  ApplicationWindow *app,
-                                                  const int fileVersion) {
+MantidQt::API::IProjectSerialisable *
+MultiLayer::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                            const int fileVersion) {
   std::string multiLayerLines = lines;
 
   // The very first line of a multilayer section has some important settings,
@@ -1871,4 +1864,34 @@ std::string MultiLayer::saveToProject(ApplicationWindow *app) {
   tsv.writeRaw("</multiLayer>");
 
   return tsv.outputLines();
+}
+
+/**
+ * Sets axes for all layers to the same scales, which are set to encompass the
+ * widest range of data.
+ */
+void MultiLayer::setCommonAxisScales() {
+  double lowestX(MAXIMUM), lowestY(MAXIMUM), highestX(MINIMUM),
+      highestY(MINIMUM);
+
+  // Find the lowest, highest X and Y values
+  // N.B. Layers are 1-indexed
+  for (int i = 1; i < layers() + 1; ++i) {
+    const auto *plot = layer(i)->plotWidget();
+    const auto xmin = plot->axisScaleDiv(AXIS_X)->lowerBound();
+    const auto xmax = plot->axisScaleDiv(AXIS_X)->upperBound();
+    const auto ymin = plot->axisScaleDiv(AXIS_Y)->lowerBound();
+    const auto ymax = plot->axisScaleDiv(AXIS_Y)->upperBound();
+    lowestX = xmin < lowestX ? xmin : lowestX;
+    highestX = xmax < highestX ? highestX : xmax;
+    lowestY = ymin < lowestY ? ymin : lowestY;
+    highestY = ymax < highestY ? highestY : ymax;
+  }
+
+  // Set axes for all layers
+  for (int i = 1; i < layers() + 1; ++i) {
+    auto *plot = layer(i)->plotWidget();
+    plot->setAxisScale(AXIS_X, lowestX, highestX);
+    plot->setAxisScale(AXIS_Y, lowestY, highestY);
+  }
 }

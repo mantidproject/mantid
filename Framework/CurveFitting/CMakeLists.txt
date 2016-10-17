@@ -109,6 +109,7 @@ set ( SRC_FILES
 	src/Functions/StretchExp.cpp
 	src/Functions/StretchExpMuon.cpp
 	src/Functions/TabulatedFunction.cpp
+	src/Functions/TeixeiraWaterSQE.cpp
 	src/Functions/ThermalNeutronBk2BkExpAlpha.cpp
 	src/Functions/ThermalNeutronBk2BkExpBeta.cpp
 	src/Functions/ThermalNeutronBk2BkExpConvPVoigt.cpp
@@ -122,7 +123,9 @@ set ( SRC_FILES
 	src/GSLMatrix.cpp
 	src/GSLVector.cpp
 	src/GeneralDomainCreator.cpp
+	src/HistogramDomainCreator.cpp
 	src/IFittingAlgorithm.cpp
+	src/IMWDomainCreator.cpp
 	src/LatticeDomainCreator.cpp
 	src/LatticeFunction.cpp
 	src/MSVesuvioHelpers.cpp
@@ -253,6 +256,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/StretchExp.h
 	inc/MantidCurveFitting/Functions/StretchExpMuon.h
 	inc/MantidCurveFitting/Functions/TabulatedFunction.h
+	inc/MantidCurveFitting/Functions/TeixeiraWaterSQE.h
 	inc/MantidCurveFitting/Functions/ThermalNeutronBk2BkExpAlpha.h
 	inc/MantidCurveFitting/Functions/ThermalNeutronBk2BkExpBeta.h
 	inc/MantidCurveFitting/Functions/ThermalNeutronBk2BkExpConvPVoigt.h
@@ -269,8 +273,10 @@ set ( INC_FILES
 	inc/MantidCurveFitting/GSLMatrix.h
 	inc/MantidCurveFitting/GSLVector.h
 	inc/MantidCurveFitting/GeneralDomainCreator.h
+	inc/MantidCurveFitting/HistogramDomainCreator.h
 	inc/MantidCurveFitting/HalfComplex.h
 	inc/MantidCurveFitting/IFittingAlgorithm.h
+	inc/MantidCurveFitting/IMWDomainCreator.h
 	inc/MantidCurveFitting/Jacobian.h
 	inc/MantidCurveFitting/LatticeDomainCreator.h
 	inc/MantidCurveFitting/LatticeFunction.h
@@ -388,6 +394,7 @@ set ( TEST_FILES
 	Functions/StretchExpMuonTest.h
 	Functions/StretchExpTest.h
 	Functions/TabulatedFunctionTest.h
+    Functions/TeixeiraWaterSQETest.h
 	Functions/ThermalNeutronBk2BkExpAlphaTest.h
 	Functions/ThermalNeutronBk2BkExpBetaTest.h
 	Functions/ThermalNeutronBk2BkExpConvPVoigtTest.h
@@ -401,6 +408,7 @@ set ( TEST_FILES
 	GSLMatrixTest.h
 	GSLVectorTest.h
 	GeneralDomainCreatorTest.h
+	HistogramDomainCreatorTest.h
 	IPeakFunctionCentreParameterNameTest.h
 	IPeakFunctionIntensityTest.h
 	LatticeDomainCreatorTest.h

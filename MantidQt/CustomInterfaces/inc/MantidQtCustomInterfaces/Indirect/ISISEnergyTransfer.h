@@ -62,6 +62,9 @@ private slots:
   // files.
   void plotRawComplete(
       bool error); //< Called when the Plot Raw algorithmm chain completes
+  /// Handles plotting and saving
+  void plotClicked();
+  void saveClicked();
 
 private:
   Ui::ISISEnergyTransfer m_uiForm;
@@ -70,6 +73,8 @@ private:
       const QString &
           groupType); ///< create the mapping file with which to group results
   std::vector<std::string> getSaveFormats(); ///< get a vector of save formats
+  std::vector<std::string>
+      m_outputWorkspaces; ///< get a vector of workspaces to plot
 };
 } // namespace CustomInterfaces
 } // namespace Mantid
