@@ -2,7 +2,6 @@
 #define TRANSPOSETEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <boost/math/special_functions/fpclassify.hpp>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

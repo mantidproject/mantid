@@ -46,7 +46,6 @@ class ReflOptions(QtGui.QDialog, ui_refl_options_window.Ui_OptionsDialog):
         self.checkGroupTOFWorkspaces.setChecked(def_group_tof_workspaces)
         self.checkScaleRight.setChecked(def_stitch_right)
 
-
         # connect update signals to functions
         self.dspinFrequency.valueChanged.connect(self.__update_frequency)
         self.comboAccMethod.activated.connect(self.__update_method)

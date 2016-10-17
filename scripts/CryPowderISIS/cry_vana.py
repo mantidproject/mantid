@@ -19,16 +19,16 @@ def create_vana(EXPR_FILE, NoAbs=False, write_existingv=True):
     Divide(LHSWorkspace="Vanadium_align", RHSWorkspace="Corr", OutputWorkspace="Vanadium_corr")
     if not NoAbs:
         print " => Van Absortption correction"
-        cry_utils.correct_abs(InputWkspc="Vanadium_corr", outputWkspc="Transmission", \
-                             TheCylinderSampleHeight=EXPR_FILE.VHeight, \
-                             TheCylinderSampleRadius=EXPR_FILE.VRadius, \
-                             TheAttenuationXSection=EXPR_FILE.VAttenuationXSection, \
-                             TheScatteringXSection=EXPR_FILE.VScatteringXSection, \
-                             TheSampleNumberDensity=EXPR_FILE.VanaNumberDensity, \
-                             TheNumberOfSlices=EXPR_FILE.VNumberOfSlices, \
-                             TheNumberOfAnnuli=EXPR_FILE.VNumberOfAnnuli, \
-                             TheNumberOfWavelengthPoints=EXPR_FILE.VNumberOfWavelengthPoints, \
-                             TheExpMethod=EXPR_FILE.VExpMethod)
+        cry_utils.correct_abs(InputWkspc="Vanadium_corr", outputWkspc="Transmission",
+                              TheCylinderSampleHeight=EXPR_FILE.VHeight,
+                              TheCylinderSampleRadius=EXPR_FILE.VRadius,
+                              TheAttenuationXSection=EXPR_FILE.VAttenuationXSection,
+                              TheScatteringXSection=EXPR_FILE.VScatteringXSection,
+                              TheSampleNumberDensity=EXPR_FILE.VanaNumberDensity,
+                              TheNumberOfSlices=EXPR_FILE.VNumberOfSlices,
+                              TheNumberOfAnnuli=EXPR_FILE.VNumberOfAnnuli,
+                              TheNumberOfWavelengthPoints=EXPR_FILE.VNumberOfWavelengthPoints,
+                              TheExpMethod=EXPR_FILE.VExpMethod)
     # --- Alternative way.
     # ConvertUnits(InputWorkspace="Vanadium", OutputWorkspace="Vanadium", Target="Wavelength")
     # CylinderAbsorption(InputWorkspace="Vanadium", OutputWorkspace="Vanadium",
@@ -145,4 +145,3 @@ def van_spline_only(EXPR_FILE):
                          NCoeff=int(EXPR_FILE.VanSplineCoef))
         SaveFocusedXYE(Filename=EXPR_FILE.CorrVanFile + "-" + str(spec) + "_.dat", InputWorkspace="Vanadium-" + str(i),
                        SplitFiles=False)
-

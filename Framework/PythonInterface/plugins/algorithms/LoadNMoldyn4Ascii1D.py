@@ -126,7 +126,6 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
             data = self.del_symmetry(data)
         return (data, header_data[0], header_data[1], header_data[2])
 
-
     def _parse_header_data(self, line, header_data):
         """
         Attempts to parse current line as unit, function_name or x_axis

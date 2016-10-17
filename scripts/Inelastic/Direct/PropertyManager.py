@@ -98,14 +98,12 @@ class PropertyManager(NonIDF_Properties):
         for key,val in descr_dict.iteritems():
             object.__setattr__(self,key,val)
 
-
         # file properties -- the properties described files which should exist for reduction to work.
         object.__setattr__(self,class_dec+'file_properties',['det_cal_file','map_file','hard_mask_file'])
         object.__setattr__(self,class_dec+'abs_norm_file_properties',['monovan_mapfile'])
 
         # Clear caches on construction to make class more like usual class then singleton (and cashes are dangerous)
         PropertyManager.mono_correction_factor.set_cash_mono_run_number(None)
-
 
     def _convert_params_to_properties(self,param_list,detine_subst_dict=True,descr_list=[]):
         """ method processes parameters obtained from IDF and modifies the IDF properties
@@ -123,7 +121,6 @@ class PropertyManager(NonIDF_Properties):
             del param_list['synonims']
         #end
 
-
         # build properties list and descriptors list with their initial values
         param_dict,descr_dict =  prop_helpers.build_properties_dict(param_list,self.__dict__[subst_name],descr_list)
         return (param_dict,descr_dict)
@@ -138,7 +135,6 @@ class PropertyManager(NonIDF_Properties):
         for key,val in prop_dict.iteritems():
             new_key = class_decor+key
             object.__setattr__(self,new_key,val)
-
 
     def __setattr__(self,name0,val):
         """ Overloaded generic set method, disallowing non-existing properties being set.
@@ -160,7 +156,7 @@ class PropertyManager(NonIDF_Properties):
         #end
 
         # replace common substitutions for string value
-        if type(val) is str :
+        if isinstance(val, str) :
             val1 = val.lower()
             if val1 == 'none' or len(val1) == 0:
                 val = None
@@ -172,8 +168,7 @@ class PropertyManager(NonIDF_Properties):
             if val1 in ['false','no']:
                 val = False
 
-
-        if type(val) is list and len(val) == 0:
+        if isinstance(val, list) and len(val) == 0:
             val = None
 
         # set property value:
@@ -211,7 +206,7 @@ class PropertyManager(NonIDF_Properties):
     det_cal_file    = DetCalFile()
     #
     map_file        = MapMaskFile('map_file','.map',"""Mapping file for the sample run.\n
-                                   The file used to group various spectra together to obtain appropriate instrument configuration 
+                                   The file used to group various spectra together to obtain appropriate instrument configuration
                                    and improve statistics.""")
     #
     monovan_mapfile = MapMaskFile('monovan_map_file','.map',"""Mapping file for the monovanadium integrals calculation.\n
@@ -252,11 +247,13 @@ class PropertyManager(NonIDF_Properties):
     motor_offset   = MotorOffset()
     psi = RotationAngle(motor_log_names,motor_offset)
 #----------------------------------------------------------------------------------------------------------------
+
     def getChangedProperties(self):
         """ method returns set of the properties changed from defaults """
         decor_prop = '_'+type(self).__name__+'__changed_properties'
         return self.__dict__[decor_prop]
     #
+
     def setChangedProperties(self,value=set([])):
         """ Method to clear changed properties list"""
         if isinstance(value,set):
@@ -265,13 +262,15 @@ class PropertyManager(NonIDF_Properties):
         else:
             raise KeyError("Changed properties can be initialized by appropriate properties set only")
     #
+
     @property
     def relocate_dets(self) :
-        if self.det_cal_file != None:
+        if self.det_cal_file is not None:
             return True
         else:
             return False
     #
+
     def set_input_parameters_ignore_nan(self,**kwargs):
         """ Like similar method set_input_parameters this one is used to
             set changed parameters from dictionary of parameters.
@@ -283,9 +282,10 @@ class PropertyManager(NonIDF_Properties):
         """
 
         for par_name,value in kwargs.items() :
-            if not value is None:
+            if value is not None:
                 setattr(self,par_name,value)
     #
+
     def set_input_parameters(self,**kwargs):
         """ Set input properties from a dictionary of parameters
 
@@ -295,6 +295,7 @@ class PropertyManager(NonIDF_Properties):
 
         return self.getChangedProperties()
     #
+
     def get_used_monitors_list(self):
         """ Method returns list of monitors ID used during reduction """
 
@@ -309,6 +310,7 @@ class PropertyManager(NonIDF_Properties):
             if case(): # default, could also just omit condition or 'if True'
                 pass
         #
+
         def add_ei_monitors(used_mon,ei_mon_list):
             if isinstance(ei_mon_list,Iterable) :
                 for mon_sp in ei_mon_list:
@@ -323,17 +325,18 @@ class PropertyManager(NonIDF_Properties):
 
         return used_mon
     #
+
     def get_diagnostics_parameters(self):
         """ Return the dictionary of the properties used in diagnostics with their values defined in IDF
 
             if some values are not in IDF, default values are used instead
         """
 
-        diag_param_list ={'tiny':1e-10, 'huge':1e10, 'samp_zero':False, 'samp_lo':0.0, 'samp_hi':2,'samp_sig':3,\
-                           'van_out_lo':0.01, 'van_out_hi':100., 'van_lo':0.1, 'van_hi':1.5, 'van_sig':0.0, 'variation':1.1,\
-                           'bleed_test':False,'bleed_pixels':0,'bleed_maxrate':0,\
-                           'hard_mask_file':None,'use_hard_mask_only':False,'background_test_range':None,\
-                           'instr_name':'','print_diag_results':True,'mapmask_ref_ws':None}
+        diag_param_list ={'tiny':1e-10, 'huge':1e10, 'samp_zero':False, 'samp_lo':0.0, 'samp_hi':2,'samp_sig':3,
+                          'van_out_lo':0.01, 'van_out_hi':100., 'van_lo':0.1, 'van_hi':1.5, 'van_sig':0.0, 'variation':1.1,
+                          'bleed_test':False,'bleed_pixels':0,'bleed_maxrate':0,
+                          'hard_mask_file':None,'use_hard_mask_only':False,'background_test_range':None,
+                          'instr_name':'','print_diag_results':True,'mapmask_ref_ws':None}
         result = {}
 
         for key,val in diag_param_list.iteritems():
@@ -346,6 +349,7 @@ class PropertyManager(NonIDF_Properties):
         return result
     #
 #pylint: disable=too-many-branches
+
     def update_defaults_from_instrument(self,pInstrument,ignore_changes=False):
         """ Method used to update default parameters from the same instrument (with different parameters).
 
@@ -363,8 +367,8 @@ class PropertyManager(NonIDF_Properties):
         """
         if self.instr_name != pInstrument.getName():
             self.log("*** WARNING: Setting reduction properties of the instrument {0} from the instrument {1}.\n"
-                     "*** This only works if both instruments have the same reduction properties!"\
-                      .format(self.instr_name,pInstrument.getName()),'warning')
+                     "*** This only works if both instruments have the same reduction properties!"
+                     .format(self.instr_name,pInstrument.getName()),'warning')
 
         # Retrieve the properties, changed from interface earlier
         old_changes_list  = self.getChangedProperties()
@@ -373,11 +377,10 @@ class PropertyManager(NonIDF_Properties):
         for prop_name in old_changes_list:
             old_changes[prop_name] = getattr(self,prop_name)
 
-
         param_list = prop_helpers.get_default_idf_param_list(pInstrument,self.__subst_dict)
         # remove old changes which are not related to IDF (not to reapply it again)
         for prop_name in old_changes:
-            if not prop_name in param_list:
+            if prop_name not in param_list:
                 try:
                     dependencies = getattr(PropertyManager,prop_name).dependencies()
 #pylint: disable=bare-except
@@ -405,7 +408,7 @@ class PropertyManager(NonIDF_Properties):
         # Assignment to descriptors should accept the form, descriptor is written in IDF
         changed_descriptors = set()
         for key,val in descr_dict.iteritems():
-            if not key in old_changes_list:
+            if key not in old_changes_list:
                 try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains
                    # properties, not present in recent IDF.
                     cur_val = getattr(self,key)
@@ -418,15 +421,15 @@ class PropertyManager(NonIDF_Properties):
 #pylint: disable=bare-except
                     except:
                         cur_val = "Undefined"
-                    self.log("Retrieving or reapplying script property {0} failed. Property value remains: {1}"\
-                       .format(key,cur_val),'warning')
+                    self.log("Retrieving or reapplying script property {0} failed. Property value remains: {1}"
+                             .format(key,cur_val),'warning')
                     continue
                 if isinstance(new_val,api.Workspace) and isinstance(cur_val,api.Workspace):
                 # do simplified workspace comparison which is appropriate here
                     if new_val.name() == cur_val.name() and \
-                     new_val.getNumberHistograms() == cur_val.getNumberHistograms() and \
-                     new_val.getNEvents() == cur_val.getNEvents() and \
-                     new_val.getAxis(0).getUnit().unitID() == cur_val.getAxis(0).getUnit().unitID():
+                            new_val.getNumberHistograms() == cur_val.getNumberHistograms() and \
+                            new_val.getNEvents() == cur_val.getNEvents() and \
+                            new_val.getAxis(0).getUnit().unitID() == cur_val.getAxis(0).getUnit().unitID():
                         new_val = 1
                         cur_val = 1
                    #
@@ -462,7 +465,7 @@ class PropertyManager(NonIDF_Properties):
             else:
                 # no complex properties left so we have simple key-value pairs
                 public_name = key
-            if not public_name in old_changes_list:
+            if public_name not in old_changes_list:
                 if isinstance(val,prop_helpers.ComplexProperty):
                     prop_idf_val = val.__get__(param_list)
                 else:
@@ -473,8 +476,8 @@ class PropertyManager(NonIDF_Properties):
                     cur_val = getattr(self,public_name)
 #pylint: disable=bare-except
                 except:
-                    self.log("Can not retrieve property {0} value from existing reduction parameters. Ignoring this property"\
-                        .format(public_name),'warning')
+                    self.log("Can not retrieve property {0} value from existing reduction parameters. Ignoring this property"
+                             .format(public_name),'warning')
                     continue
 
                 if prop_idf_val !=cur_val :
@@ -493,7 +496,6 @@ class PropertyManager(NonIDF_Properties):
                 # delete dependent properties not to deal with them again
                 del sorted_param[dep_name]
         #end
-
 
         new_changes_list  = self.getChangedProperties()
         self.setChangedProperties(set())
@@ -517,6 +519,7 @@ class PropertyManager(NonIDF_Properties):
         else:
             return None
     #end
+
     def _get_properties_with_files(self):
         """ Method returns list of properties, which may have
             files as their values
@@ -528,7 +531,7 @@ class PropertyManager(NonIDF_Properties):
         run_files_prop=['wb_run','monovan_run','mask_run','wb_for_monovan_run','second_white']
         map_mask_prop =['det_cal_file','map_file','hard_mask_file']
 
-        abs_units = not self.monovan_run is None
+        abs_units = self.monovan_run is not None
         files_to_check =[]
         # run files to check
         for prop_name in run_files_prop:
@@ -537,7 +540,7 @@ class PropertyManager(NonIDF_Properties):
                 if theProp.is_existing_ws(): # it is loaded workspace
                     continue   # we do not care if it has file or not
                 val = theProp.__get__(self,PropertyManager)
-                if not val is None :
+                if val is not None :
                     files_to_check.append(prop_name)
 
         # other files to check:
@@ -548,11 +551,12 @@ class PropertyManager(NonIDF_Properties):
         # Absolute units files (only one?)
         if abs_units:
             val = self.monovan_mapfile
-            if not val is None :
+            if val is not None :
                 files_to_check.append('monovan_mapfile')
         #
         return files_to_check
     #
+
     def find_files_to_sum(self,num_files=None):
         """ method searches for run files in run list to sum and returns
             list of runs with run-files missing or ok and empty list if all files
@@ -570,6 +574,7 @@ class PropertyManager(NonIDF_Properties):
         ok,not_found_list,found_list = PropertyManager.sample_run.find_run_files(runs)
         return (ok,not_found_list,found_list)
     #
+
     def _check_file_properties(self):
         """ Method verifies if all files necessary for a reduction are available.
 
@@ -596,6 +601,7 @@ class PropertyManager(NonIDF_Properties):
         result = (len(file_errors)==0)
         return (result,file_errors)
     #
+
     def _check_ouptut_dir(self):
         """ check if default save directory is accessible for writing """
         targ_dir = config['defaultsave.directory']
@@ -610,6 +616,7 @@ class PropertyManager(NonIDF_Properties):
             return (False,'Can not write to default save directory {0}.\n Reduction results can be lost'.format(targ_dir))
     #
 #pylint: disable=too-many-branches
+
     def validate_properties(self,fail_on_errors=True):
         """ Method validates if some properties values for
             properties set up in the property manager are correct
@@ -675,6 +682,7 @@ class PropertyManager(NonIDF_Properties):
             OK = True
         return (OK,error_level,error_list)
     #
+
     def _check_monovan_par_changed(self):
         """ method verifies, if properties necessary for monovanadium reduction have indeed been changed  from defaults """
 
@@ -683,7 +691,7 @@ class PropertyManager(NonIDF_Properties):
         changed_prop = self.getChangedProperties()
         non_changed = []
         for prop in momovan_properties:
-            if not prop in changed_prop:
+            if prop not in changed_prop:
                 non_changed.append(prop)
         return non_changed
 
@@ -698,7 +706,7 @@ class PropertyManager(NonIDF_Properties):
       """
         if display_header:
         # we may want to run absolute units normalization and this function has been called with monovan run or helper procedure
-            if self.monovan_run != None :
+            if self.monovan_run is not None :
             # check if mono-vanadium is provided as multiple files list or just put in brackets occasionally
                 self.log("****************************************************************",'notice')
                 self.log('*** Output will be in absolute units of mb/str/mev/fu','notice')
@@ -707,10 +715,9 @@ class PropertyManager(NonIDF_Properties):
                     for prop in non_changed:
                         value = getattr(self,prop)
                         message = "\n***WARNING!: Abs units norm. parameter : {0} not changed from default val: {1}"\
-                              "\n             This may need to change for correct absolute units reduction\n"
+                            "\n             This may need to change for correct absolute units reduction\n"
 
                         self.log(message.format(prop,value),'warning')
-
 
           # now let's report on normal run.
             if PropertyManager.incident_energy.multirep_mode():
@@ -740,15 +747,14 @@ class PropertyManager(NonIDF_Properties):
 
         save_dir = config.getString('defaultsave.directory')
         self.log("****************************************************************",log_level)
-        if self.monovan_run != None and not 'van_mass' in changed_Keys:  # This output is Adroja request from may 2014
+        if self.monovan_run is not None and 'van_mass' not in changed_Keys:  # This output is Adroja request from may 2014
             self.log("*** Monochromatic vanadium mass used : {0} ".format(self.van_mass),log_level)
       #
         self.log("*** By default results are saved into: {0}".format(save_dir),log_level)
         self.log("*** Output will be normalized to {0}".format(self.normalise_method),log_level)
-        if  self.map_file == None:
+        if  self.map_file is None:
             self.log('*** one2one map selected',log_level)
         self.log("****************************************************************",log_level)
-
 
     #def help(self,keyword=None) :
     #    """function returns help on reduction parameters.
@@ -760,5 +766,3 @@ class PropertyManager(NonIDF_Properties):
 
 if __name__=="__main__":
     pass
-
-

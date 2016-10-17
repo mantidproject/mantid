@@ -10,6 +10,7 @@ ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]
 ENGINX_MASK_BIN_MAXS = [5300, 20400, 40450, 62000, 82670]
 
+
 def default_ceria_expected_peaks():
     """
     Get the list of expected Ceria peaks, which can be a good default for the expected peaks
@@ -27,6 +28,7 @@ def default_ceria_expected_peaks():
                             ]
 
     return _CERIA_EXPECTED_PEAKS
+
 
 def read_in_expected_peaks(filename, expectedGiven):
     """
@@ -77,6 +79,7 @@ def read_in_expected_peaks(filename, expectedGiven):
 
     return expectedPeaksD
 
+
 def getWsIndicesFromInProperties(ws, bank, detIndices):
     """
     Get the detector indices that the user requests, either through the input property 'Bank' or
@@ -126,8 +129,7 @@ def parseSpectrumIndices(ws, specNumbers):
     segments = [ s.split("-") for s in specNumbers.split(",") ]
     indices = [ idx for s in segments for idx in range(int(s[0]), int(s[-1])+1) ]
     # remove duplicates and sort
-    indices = list(set(indices))
-    indices.sort()
+    indices = sorted(set(indices))
     maxIdx = ws.getNumberHistograms()
     if indices[-1] >= maxIdx:
         raise ValueError("A workspace index equal or bigger than the number of histograms available in the "
@@ -135,6 +137,7 @@ def parseSpectrumIndices(ws, specNumbers):
                          ") has been given. Please check the list of indices.")
     # and finally traslate from 'spectrum numbers' to 'workspace indices'
     return [ws.getIndexFromSpectrumNumber(sn) for sn in indices]
+
 
 def getWsIndicesForBank(ws, bank):
     """
@@ -155,6 +158,7 @@ def getWsIndicesForBank(ws, bank):
             return False
 
     return [i for i in range(0, ws.getNumberHistograms()) if isIndexInBank(i)]
+
 
 def getDetIDsForBank(bank):
     """
@@ -187,7 +191,6 @@ def getDetIDsForBank(bank):
 
     detIDs = set()
 
-   
     # less then zero indicates both banks, from line 98
     bank_int = int(bank)
     if(bank_int < 0):
@@ -209,6 +212,7 @@ def getDetIDsForBank(bank):
 
     return detIDs
 
+
 def generateOutputParTable(name, difa, difc, tzero):
     """
     Produces a table workspace with the two fitted calibration parameters
@@ -223,6 +227,7 @@ def generateOutputParTable(name, difa, difc, tzero):
     tbl.addColumn('double', 'DIFZ')
     tbl.addColumn('double', 'TZERO')
     tbl.addRow([float(difa), float(difc), float(tzero)])
+
 
 def applyVanadiumCorrections(parent, ws, indices, vanWS, vanIntegWS, vanCurvesWS):
     """
@@ -263,6 +268,7 @@ def applyVanadiumCorrections(parent, ws, indices, vanWS, vanIntegWS, vanCurvesWS
         alg.setProperty('CurvesWorkspace', vanCurvesWS)
     alg.execute()
 
+
 def convertToDSpacing(parent, ws):
     """
     Converts a workspace to dSpacing using 'ConvertUnits' as a child algorithm.
@@ -287,6 +293,7 @@ def convertToDSpacing(parent, ws):
     alg.execute()
     return alg.getProperty('OutputWorkspace').value
 
+
 def convertToToF(parent, ws):
     """
     Converts workspace to Time-of-Flight using 'ConvertUnits' as a child algorithm.
@@ -301,6 +308,7 @@ def convertToToF(parent, ws):
     alg.setProperty('Target', 'TOF')
     alg.execute()
     return alg.getProperty('OutputWorkspace').value
+
 
 def cropData(parent, ws, indices):
     """
@@ -324,6 +332,7 @@ def cropData(parent, ws, indices):
 
     return alg.getProperty('OutputWorkspace').value
 
+
 def sumSpectra(parent, ws):
     """
     Focuses/sums up all the spectra into a single one (calls the SumSpectra algorithm)
@@ -338,6 +347,7 @@ def sumSpectra(parent, ws):
     alg.execute()
 
     return alg.getProperty('OutputWorkspace').value
+
 
 def write_ENGINX_GSAS_iparam_file(output_file, difc, tzero, bank_names=None,
                                   ceria_run=241391, vanadium_run=236516,
@@ -386,7 +396,6 @@ def write_ENGINX_GSAS_iparam_file(output_file, difc, tzero, bank_names=None,
     temp_lines = []
     with open(template_file) as tf:
         temp_lines = tf.readlines()
-
 
     def replace_patterns(line, patterns, replacements):
         """

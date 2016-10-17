@@ -1,37 +1,20 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidLiveData/TOPAZLiveEventDataListener.h"
 #include "MantidLiveData/Exception.h"
-//#include "MantidDataObjects/Events.h"
-//#include "MantidKernel/DateAndTime.h"
-//#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-//#include "MantidKernel/WriteLock.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 #include <Poco/Net/NetException.h>
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/SocketAddress.h>
-//#include <Poco/Net/SocketStream.h>
-//#include <Poco/Timestamp.h>
 
-// Includes for parsing the XML device descriptions
-//#include "Poco/DOM/DOMParser.h"
-//#include "Poco/DOM/Document.h"
-//#include "Poco/DOM/AutoPtr.h"
-//#include "Poco/DOM/NodeList.h"
-//#include "Poco/DOM/NamedNodeMap.h"
-
-//#include <Poco/Thread.h>
-//#include <Poco/Runnable.h>
-
-//#include <time.h>
-//#include <sstream> // for ostringstream
 #include <string>
 #include <fstream>
 #include <exception>

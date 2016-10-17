@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/EQSANSTofStructure.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Events.h"

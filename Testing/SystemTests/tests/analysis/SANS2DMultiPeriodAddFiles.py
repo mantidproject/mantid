@@ -4,6 +4,7 @@ from mantid.simpleapi import *
 from mantid import config
 from ISISCommandInterface import *
 
+
 class SANS2DMultiPeriodAddFiles(stresstesting.MantidStressTest):
 
     def requiredMemoryMB(self):

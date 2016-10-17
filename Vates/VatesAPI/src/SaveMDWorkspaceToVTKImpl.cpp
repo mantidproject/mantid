@@ -1,13 +1,13 @@
-#include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h"
+#include "MantidVatesAPI/Normalization.h"
 
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
 
+#include "MantidVatesAPI/FactoryChains.h"
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingViewSimple.h"
-#include "MantidVatesAPI/FactoryChains.h"
 #include "MantidVatesAPI/PresenterFactories.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/SingleWorkspaceProvider.h"
@@ -15,6 +15,7 @@
 
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/make_unique.h"
 
 #include "vtkFloatArray.h"
@@ -68,17 +69,31 @@ SaveMDWorkspaceToVTKImpl::SaveMDWorkspaceToVTKImpl() { setupMembers(); }
  * @param normalization: the visual normalization option
  * @param thresholdRange: a plolicy for the threshold range
  * @param recursionDepth: the recursion depth for MDEvent Workspaces determines
+ * @param compressorType: the compression type used by VTK
  * from which level data should be displayed
  */
 void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
-    Mantid::API::IMDWorkspace_sptr workspace, std::string filename,
+    Mantid::API::IMDWorkspace_sptr workspace, const std::string &filename,
     VisualNormalization normalization, ThresholdRange_scptr thresholdRange,
-    int recursionDepth) const {
+    int recursionDepth, const std::string &compressorType) const {
   auto isHistoWorkspace =
       boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(workspace) !=
       nullptr;
   auto fullFilename = getFullFilename(filename, isHistoWorkspace);
 
+  const vtkXMLWriter::CompressorType compressor = [&compressorType] {
+    if (compressorType == "NONE") {
+      return vtkXMLWriter::NONE;
+    } else if (compressorType == "ZLIB") {
+      return vtkXMLWriter::ZLIB;
+    } else {
+      // This should never happen.
+      Mantid::Kernel::Logger g_log("SaveMDWorkspaceToVTK");
+      g_log.warning("Incorrect CompressorType: " + compressorType +
+                    ". Using CompressorType=NONE.");
+      return vtkXMLWriter::NONE;
+    }
+  }();
   // Define a time slice.
   auto time = selectTimeSliceValue(workspace);
 
@@ -119,7 +134,8 @@ void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
 
   // Write the data to the file
   vtkSmartPointer<vtkXMLWriter> writer = getXMLWriter(isHistoWorkspace);
-  auto writeSuccessFlag = writeDataSetToVTKFile(writer, dataSet, fullFilename);
+  auto writeSuccessFlag =
+      writeDataSetToVTKFile(writer, dataSet, fullFilename, compressor);
   if (!writeSuccessFlag) {
     throw std::runtime_error("SaveMDWorkspaceToVTK: VTK could not write "
                              "your data set to a file.");
@@ -184,12 +200,17 @@ SaveMDWorkspaceToVTKImpl::getPresenter(bool isHistoWorkspace,
  * @param writer: a vtk xml writer
  * @param dataSet: the data set which is to be saved out
  * @param filename: the file name
+ * @param compressor: the compression type used by VTK
  * @returns a vtk error flag
  */
 int SaveMDWorkspaceToVTKImpl::writeDataSetToVTKFile(
-    vtkXMLWriter *writer, vtkDataSet *dataSet, std::string filename) const {
+    vtkXMLWriter *writer, vtkDataSet *dataSet, const std::string &filename,
+    vtkXMLWriter::CompressorType compressor) const {
   writer->SetFileName(filename.c_str());
   writer->SetInputData(dataSet);
+  writer->SetCompressorType(compressor);
+  // Required for large (>4GB?) files.
+  writer->SetHeaderTypeToUInt64();
   return writer->Write();
 }
 

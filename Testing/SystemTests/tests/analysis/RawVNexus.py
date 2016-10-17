@@ -2,6 +2,7 @@
 import stresstesting
 from mantid.simpleapi import *
 
+
 class RawVNexus(stresstesting.MantidStressTest):
     ''' Simply tests that our LoadRaw and LoadISISNexus algorithms produce the same workspace'''
 
