@@ -339,16 +339,17 @@ public:
   }
 };
 
-class ProcessBackgroundDeleteRegionTestPerformance : public CxxTest::TestSuite {
+// Performance test for "Delete Region" option
+class ProcessBackgroundDRTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProcessBackgroundDeleteRegionTestPerformance *createSuite() {
-    return new ProcessBackgroundDeleteRegionTestPerformance();
+  static ProcessBackgroundDRTestPerformance *createSuite() {
+    return new ProcessBackgroundDRTestPerformance();
   }
 
   static void
-  destroySuite(ProcessBackgroundDeleteRegionTestPerformance *suite) {
+  destroySuite(ProcessBackgroundDRTestPerformance *suite) {
     delete suite;
   }
 
@@ -377,15 +378,16 @@ private:
   ProcessBackground dr;
 };
 
-class ProcessBackgroundAddRegionTestPerformance : public CxxTest::TestSuite {
+// Performance test for "Add Region" option
+class ProcessBackgroundARTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProcessBackgroundAddRegionTestPerformance *createSuite() {
-    return new ProcessBackgroundAddRegionTestPerformance();
+  static ProcessBackgroundARTestPerformance *createSuite() {
+    return new ProcessBackgroundARTestPerformance();
   }
 
-  static void destroySuite(ProcessBackgroundAddRegionTestPerformance *suite) {
+  static void destroySuite(ProcessBackgroundARTestPerformance *suite) {
     delete suite;
   }
 
@@ -422,18 +424,18 @@ private:
   ProcessBackground ar;
 };
 
-class ProcessBackgroundSimpleBackgroundGenerationTestPerformance
-    : public CxxTest::TestSuite {
+// Performance test for Simple Background Generation
+class ProcessBackgroundSBGTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProcessBackgroundSimpleBackgroundGenerationTestPerformance *
+  static ProcessBackgroundSBGTestPerformance *
   createSuite() {
-    return new ProcessBackgroundSimpleBackgroundGenerationTestPerformance();
+    return new ProcessBackgroundSBGTestPerformance();
   }
 
   static void destroySuite(
-      ProcessBackgroundSimpleBackgroundGenerationTestPerformance *suite) {
+      ProcessBackgroundSBGTestPerformance *suite) {
     delete suite;
   }
 
@@ -473,8 +475,8 @@ private:
   ProcessBackground sbg;
 };
 
-class ProcessBackgroundSelectBackgroundFromInputFunctionTestPerformance
-    : public CxxTest::TestSuite {
+// Performance test for Select Background From Input Function
+class ProcessBackgroundSBFIFTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
