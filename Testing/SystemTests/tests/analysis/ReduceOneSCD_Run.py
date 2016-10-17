@@ -21,6 +21,7 @@ import os
 from mantid.api import *
 from mantid.simpleapi import *
 
+
 class ReduceOneSCD_Run( stresstesting.MantidStressTest):
 
     __reduced_ws_name=""
@@ -34,7 +35,6 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
 
     def runTest(self):
         start_time = time.time()
-
 
         instrument_name             = "TOPAZ"
         calibration_file_1          = "TOPAZ_2011_02_16.DetCal"
@@ -195,7 +195,7 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
 # If requested, also switch to the specified conventional cell and save the
 # corresponding matrix and integrate file
 #
-        if (not cell_type is None) and (not centering is None) :
+        if (cell_type is not None) and (centering is not None) :
             self.run_conventional_matrix_file = self.output_directory + "/" + run + "_" +    \
                                  cell_type + "_" + centering + ".mat"
         #    run_conventional_integrate_file = self.output_directory + "/" + run + "_" + \
@@ -211,7 +211,6 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
         end_time = time.time()
 
         CreateSingleValuedWorkspace(OutputWorkspace="XX1",DataValue="3")
-
 
         LoadIsawUB(InputWorkspace="XX1",Filename=self.run_conventional_matrix_file )
         s1 = mtd["XX1"].sample()
@@ -246,4 +245,3 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
 
     def validate(self):
         return [self.__reduced_ws_name,'PeaksP']
-

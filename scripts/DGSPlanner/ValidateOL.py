@@ -2,8 +2,9 @@
 import mantid
 import numpy
 
+
 def ValidateOL(ol):
-    if type(ol)==mantid.geometry.OrientedLattice:
+    if isinstance(ol, mantid.geometry.OrientedLattice):
         if ol.a()<0.1 or ol.b()<0.1 or ol.c()<0.1:
             return False
         if ol.alpha()<5 or ol.alpha()>175:
@@ -15,6 +16,7 @@ def ValidateOL(ol):
         return True
     return False
 
+
 def ValidateUB(UBMatrix):
     if numpy.linalg.det(UBMatrix)<0:
         return False
@@ -24,4 +26,3 @@ def ValidateUB(UBMatrix):
     except:
         return False
     return ValidateOL(__tempol)
-

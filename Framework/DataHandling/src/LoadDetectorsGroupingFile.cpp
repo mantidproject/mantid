@@ -9,6 +9,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
 
 #include <Poco/DOM/Document.h>

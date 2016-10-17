@@ -1,6 +1,4 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+#include "MantidAPI/Run.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAlgorithms/NormaliseByCurrent.h"

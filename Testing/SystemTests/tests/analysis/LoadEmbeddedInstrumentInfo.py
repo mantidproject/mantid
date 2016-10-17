@@ -12,6 +12,8 @@ from mantid.simpleapi import *
 # here test against a custom made ISIS raw hist nexus file created by Freddie
 # where the A1_window has be, for the purpose of testing, been put at a
 # completely wrong location of (0,3,0)
+
+
 class ISISRawHistNexus(stresstesting.MantidStressTest):
 
     def runTest(self):

@@ -127,6 +127,7 @@ def get_masked_ids(
             (component.getName(), component.type()))
     return IDs
 
+
 def get_masked_pixels(
         nx_low,
         nx_high,

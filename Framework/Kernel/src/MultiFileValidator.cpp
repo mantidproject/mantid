@@ -1,4 +1,6 @@
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileValidator.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Kernel {

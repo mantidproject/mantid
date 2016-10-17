@@ -2,6 +2,7 @@
 #define MANTID_MD_CONVERT2_QxyzDE_TEST_H_
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/make_unique.h"

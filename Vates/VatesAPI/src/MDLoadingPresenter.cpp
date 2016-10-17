@@ -1,5 +1,9 @@
 #include "MantidVatesAPI/MDLoadingPresenter.h"
 
+namespace {
+Mantid::Kernel::Logger g_log("MDLoadingPresenter");
+}
+
 namespace Mantid {
 namespace VATES {
 /**

@@ -1,11 +1,11 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
+from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
 import os
 from reduction_gui.reduction.sans.eqsans_data_script import DataSets
-from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_eqsans_sample_data
+
 
 class DataSetsWidget(BaseWidget):
     """
@@ -370,7 +370,6 @@ class DataSetsWidget(BaseWidget):
 
         self._content.bck_beam_radius_label.setEnabled(is_checked)
         self._content.bck_beam_radius_edit.setEnabled(is_checked)
-
 
     def _get_data_files(self):
         """

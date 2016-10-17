@@ -1,11 +1,14 @@
 #include "MantidAlgorithms/PDFFourierTransform.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <cmath>
@@ -50,9 +53,6 @@ const std::string PDFFourierTransform::category() const {
   return "Diffraction\\Utility";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
 */
 void PDFFourierTransform::init() {

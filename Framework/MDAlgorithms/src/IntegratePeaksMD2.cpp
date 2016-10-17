@@ -21,6 +21,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/Run.h"
 #include <cmath>
 #include <gsl/gsl_integration.h>
 #include <fstream>
@@ -37,7 +38,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksMD2::init() {

@@ -4,6 +4,7 @@
 #include "MantidKernel/DataItem.h"
 #include "MantidKernel/TypedValidator.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 
 namespace {

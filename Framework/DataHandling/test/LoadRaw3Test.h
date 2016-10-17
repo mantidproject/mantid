@@ -11,6 +11,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
