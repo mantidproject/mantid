@@ -223,7 +223,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>4</number>
+           <number>3</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -690,19 +690,31 @@ p, li { white-space: pre-wrap; }
                <string>Instrument Calibration</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_16">
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_33">
-                 <property name="text">
-                  <string>Standard Detector Sample Distance</string>
+               <item row="0" column="7">
+                <spacer name="horizontalSpacer_26">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
                  </property>
-                </widget>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
                </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_38">
-                 <property name="text">
-                  <string>Calibrated Detector Sample Distance</string>
+               <item row="1" column="7">
+                <spacer name="horizontalSpacer_16">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
                  </property>
-                </widget>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
                </item>
                <item row="0" column="1">
                 <widget class="QLineEdit" name="lineEdit">
@@ -720,13 +732,10 @@ p, li { white-space: pre-wrap; }
                  </property>
                 </widget>
                </item>
-               <item row="1" column="1">
-                <widget class="QLineEdit" name="lineEdit_2">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_38">
+                 <property name="text">
+                  <string>Calibrated Detector Sample Distance</string>
                  </property>
                 </widget>
                </item>
@@ -737,10 +746,30 @@ p, li { white-space: pre-wrap; }
                  </property>
                 </widget>
                </item>
-               <item row="1" column="3">
-                <spacer name="horizontalSpacer_16">
+               <item row="1" column="1">
+                <widget class="QLineEdit" name="lineEdit_2">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="4">
+                <widget class="QLabel" name="label_36">
+                 <property name="text">
+                  <string>Wavelength</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="3">
+                <spacer name="horizontalSpacer_29">
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Preferred</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -749,6 +778,30 @@ p, li { white-space: pre-wrap; }
                   </size>
                  </property>
                 </spacer>
+               </item>
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_33">
+                 <property name="text">
+                  <string>Standard Detector Sample Distance</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="5">
+                <widget class="QLineEdit" name="lineEdit_userWaveLength">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="6">
+                <widget class="QPushButton" name="pushButton_applyUserWavelength">
+                 <property name="text">
+                  <string>Apply</string>
+                 </property>
+                </widget>
                </item>
               </layout>
              </widget>
@@ -1808,7 +1861,7 @@ p, li { white-space: pre-wrap; }
                     </font>
                    </property>
                    <property name="text">
-                    <string>Load HKL from file</string>
+                    <string>Load HKL from Spice file</string>
                    </property>
                   </widget>
                  </item>
@@ -1857,6 +1910,9 @@ p, li { white-space: pre-wrap; }
                   </item>
                   <item>
                    <widget class="QCheckBox" name="checkBox_ubNuclearPeaks">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
                     <property name="font">
                      <font>
                       <pointsize>9</pointsize>
@@ -1870,6 +1926,9 @@ p, li { white-space: pre-wrap; }
                   </item>
                   <item>
                    <widget class="QCheckBox" name="checkBox_ubMagneticPeaks">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
                     <property name="font">
                      <font>
                       <pointsize>9</pointsize>
@@ -1929,6 +1988,16 @@ p, li { white-space: pre-wrap; }
                     </property>
                     <property name="text">
                      <string>Plot Scan</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_clearIndexing">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clear all the index (HKL) to zero&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>Clear Index</string>
                     </property>
                    </widget>
                   </item>
@@ -2116,6 +2185,19 @@ p, li { white-space: pre-wrap; }
                       <string/>
                      </property>
                     </column>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="label_ubInformation">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>TextLabel</string>
+                    </property>
                    </widget>
                   </item>
                   <item>
