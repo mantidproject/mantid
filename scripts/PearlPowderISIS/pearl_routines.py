@@ -374,7 +374,7 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
     mantid.AlignDetectors(InputWorkspace=work, OutputWorkspace=work, CalibrationFile=calfile)
     mantid.DiffractionFocussing(InputWorkspace=work, OutputWorkspace=focus, GroupingFileName=groupfile)
 
-    _debug_remove_ws(wsNameToRemove=work)
+    _remove_inter_ws(ws_to_remove=work)
 
     for i in range(0, alg_range):
 
@@ -403,8 +403,8 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
             mantid.Rebin(InputWorkspace=rdata, OutputWorkspace=output, Params=tofbinning)
             # Divide(rdata,van,output)
             mantid.CropWorkspace(InputWorkspace=output, OutputWorkspace=output, XMin=0.1)
-    if not g_debug:
-        mantid.mtd.remove(focus)
+
+    _remove_inter_ws(focus)
 
     if (fmode == "all"):
 
@@ -435,17 +435,11 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
 
             mantid.SaveNexus(Filename=outfile, InputWorkspace=tosave, Append=True)
 
-        if not g_debug:
-
-            for i in range(0, alg_range):
-                output = outwork + "_mod" + str(i + 1)
-                van = "van" + str(i + 1)
-                rdata = "rdata" + str(i + 1)
-                mantid.mtd.remove(rdata)
-                mantid.mtd.remove(van)
-                mantid.mtd.remove(output)
-
-            mantid.mtd.remove(name)
+        for i in range(0, alg_range):
+            _remove_inter_ws(ws_to_remove=(outwork + "_mod" + str(i + 1)))
+            _remove_inter_ws(ws_to_remove=("van" + str(i + 1)))
+            _remove_inter_ws(ws_to_remove="rdata" + str(i + 1))
+            _remove_inter_ws(ws_to_remove=name)
 
     elif (fmode == "groups"):
 
@@ -504,18 +498,13 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
 
             mantid.SaveNexus(Filename=outfile, InputWorkspace=tosave, Append=True)
 
-        if not g_debug:
-
-            for i in range(0, alg_range):
-                output = outwork + "_mod" + str(i + 1)
-                van = "van" + str(i + 1)
-                rdata = "rdata" + str(i + 1)
-                mantid.mtd.remove(rdata)
-                mantid.mtd.remove(van)
-                mantid.mtd.remove(output)
-
-            for i in range(1, 4):
-                mantid.mtd.remove(name[i])
+        for i in range(0, alg_range):
+            _remove_inter_ws(ws_to_remove=(outwork + "_mod" + str(i + 1)))
+            _remove_inter_ws(ws_to_remove=("van" + str(i + 1)))
+            _remove_inter_ws(ws_to_remove=("rdata" + str(i + 1)))
+            _remove_inter_ws(ws_to_remove=output)
+        for i in range(1, 4):
+            _remove_inter_ws(ws_to_remove=name[i])
 
     elif (fmode == "trans"):
 
@@ -555,15 +544,12 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
             mantid.ConvertUnits(InputWorkspace=tosave, OutputWorkspace=tosave, Target="dSpacing")
             mantid.SaveNexus(Filename=outfile, InputWorkspace=tosave, Append=True)
 
-        if not g_debug:
-            for i in range(0, alg_range):
-                output = outwork + "_mod" + str(i + 1)
-                van = "van" + str(i + 1)
-                rdata = "rdata" + str(i + 1)
-                mantid.mtd.remove(rdata)
-                mantid.mtd.remove(van)
-                mantid.mtd.remove(output)
-            mantid.mtd.remove(name)
+        for i in range(0, alg_range):
+            _remove_inter_ws(ws_to_remove=(outwork + "_mod" + str(i + 1)))
+            _remove_inter_ws(ws_to_remove=("van" + str(i + 1)))
+            _remove_inter_ws(ws_to_remove=("rdata" + str(i + 1)))
+            _remove_inter_ws(ws_to_remove=output)
+        _remove_inter_ws(ws_to_remove=name)
 
     elif (fmode == "mods"):
 
@@ -586,10 +572,9 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
 
             mantid.SaveNexus(Filename=outfile, InputWorkspace=output, Append=status)
 
-            if not g_debug:
-                mantid.mtd.remove(rdata)
-                mantid.mtd.remove(van)
-                mantid.mtd.remove(output)
+            _remove_inter_ws(ws_to_remove=rdata)
+            _remove_inter_ws(ws_to_remove=van)
+            _remove_inter_ws(ws_to_remove=output)
 
     else:
         print "Sorry I don't know that mode", fmode
@@ -619,8 +604,8 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     PEARL_read(empty, ext, wempty)
     mantid.Minus(LHSWorkspace=wvan, RHSWorkspace=wempty, OutputWorkspace=wvan)
     print "read van and empty"
-    if not g_debug:
-        mantid.mtd.remove(wempty)
+
+    _remove_inter_ws(ws_to_remove=wempty)
 
     if (absorb):
         print "Correcting Vanadium for absorbtion"
@@ -632,11 +617,13 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         # AbsorptionCorrection(InputWorkspace=wvan,OutputWorkspace="T",AttenuationXSection="5.08",
         # ScatteringXSection="5.1",SampleNumberDensity="0.072",NumberOfWavelengthPoints="25",ElementSize="0.05")
         # SaveNexus(Filename=vabsorbfile,InputWorkspace="T",Append=False)
+        # TODO Change out name from T to something meaningful
         mantid.LoadNexus(Filename=vabsorbfile, OutputWorkspace="T")
         mantid.RebinToWorkspace(WorkspaceToRebin=wvan, WorkspaceToMatch="T", OutputWorkspace=wvan)
         mantid.Divide(LHSWorkspace=wvan, RHSWorkspace="T", OutputWorkspace=wvan)
-        if not g_debug:
-            mantid.mtd.remove("T")
+        _remove_inter_ws(ws_to_remove="T")
+
+
 
     mantid.ConvertUnits(InputWorkspace=wvan, OutputWorkspace=wvan, Target="TOF")
     trange = "100,-0.0006,19990"
@@ -645,8 +632,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     # tmin,tmax=PEARL_gettofrange()
     # print "Cropping TOF range to ",tmin,tmax
     # CropWorkspace(wvan,wvan,XMin=tmin,XMax=tmax)
-    if (g_debug):
-        print "About to focus"
+
     vanfoc = "vanfoc_" + cycle
     mantid.AlignDetectors(InputWorkspace=wvan, OutputWorkspace=wvan, CalibrationFile=calfile)
     mantid.DiffractionFocussing(InputWorkspace=wvan, OutputWorkspace=vanfoc, GroupingFileName=groupfile)
@@ -656,13 +642,11 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     mantid.Rebin(InputWorkspace=vanfoc, OutputWorkspace=vanfoc, Params=trange)
     mantid.ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace=vanfoc, Target="dSpacing")
 
-    if not g_debug:
-        mantid.mtd.remove(wvan)
+    _remove_inter_ws(ws_to_remove=wvan)
 
     if (instver == "new2"):
         mantid.ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace="vanmask", Target="dSpacing")
-        if not g_debug:
-            mantid.mtd.remove(vanfoc)
+        _remove_inter_ws(ws_to_remove=vanfoc)
 
         # remove bragg peaks before spline
 
@@ -686,12 +670,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
 
         print "Finished striping-out peaks..."
 
-        if not g_debug:
-            mantid.mtd.remove("vanmask")
-
-        if not g_debug:
-            print "Not in g_debug mode so will delete all temporary workspaces"
-
+        _remove_inter_ws(ws_to_remove="vanmask")
         mantid.ConvertUnits(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", Target="TOF")
 
         print "Starting splines..."
@@ -718,15 +697,13 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         for i in range(2, 15):
             mantid.SaveNexus(Filename=nvanfile, InputWorkspace="spline" + str(i), Append=True)
 
-        if not g_debug:
-            mantid.mtd.remove("vanstrip")
-            for i in range(1, 15):
-                mantid.mtd.remove("spline" + str(i))
+        _remove_inter_ws(ws_to_remove="vanstrip")
+        for i in range(1, 15):
+            _remove_inter_ws(ws_to_remove=("spline" + str(i)))
 
     elif (instver == "new"):
         mantid.ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace="vanmask", Target="dSpacing")
-        if not g_debug:
-            mantid.mtd.remove(vanfoc)
+        _remove_inter_ws(ws_to_remove=vanfoc)
 
         # remove bragg peaks before spline
         mantid.StripPeaks(InputWorkspace="vanmask", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=0)
@@ -735,11 +712,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
             mantid.StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8,
                            WorkspaceIndex=i)
 
-        if not g_debug:
-            mantid.mtd.remove("vanmask")
-
-        if not g_debug:
-            print "Not in g_debug mode so will delete all temporary workspaces"
+        _remove_inter_ws(ws_to_remove="vanmask")
         mantid.ConvertUnits(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", Target="TOF")
 
         for i in range(0, 12):
@@ -764,16 +737,13 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         for i in range(2, 13):
             mantid.SaveNexus(Filename=nvanfile, InputWorkspace="spline" + str(i), Append=True)
 
-        if not g_debug:
-            mantid.mtd.remove("vanstrip")
-
-            for i in range(1, 13):
-                mantid.mtd.remove("spline" + str(i))
+        _remove_inter_ws(ws_to_remove="vanstrip")
+        for i in range(1, 13):
+            _remove_inter_ws(ws_to_remove=("spline" + str(i)))
 
     elif (instver == "old"):
         mantid.ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace="vanmask", Target="dSpacing")
-        if not g_debug:
-            mantid.mtd.remove(vanfoc)
+        _remove_inter_ws(ws_to_remove=vanfoc)
 
         # remove bragg peaks before spline
         mantid.StripPeaks(InputWorkspace="vanmask", OutputWorkspace="vanstrip", FWHM=15, Tolerance=6, WorkspaceIndex=0)
@@ -782,8 +752,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         mantid.StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=40, Tolerance=12, WorkspaceIndex=1)
         mantid.StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=60, Tolerance=12, WorkspaceIndex=1)
 
-        if not g_debug:
-            mantid.mtd.remove("vanmask")
+        _remove_inter_ws(ws_to_remove="vanmask")
 
         # Mask low d region that is zero before spline
         for reg in range(0, 4):
@@ -791,9 +760,6 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
                 mantid.MaskBins(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", XMin=0, XMax=0.14, SpectraList=reg)
             else:
                 mantid.MaskBins(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", XMin=0, XMax=0.06, SpectraList=reg)
-
-        if not g_debug:
-            print "Not in g_debug mode so will delete all temporary workspaces"
 
         mantid.ConvertUnits(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", Target="TOF")
 
@@ -813,10 +779,9 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         for i in range(1, 4):
             mantid.SaveNexus(Filename=nvanfile, InputWorkspace="spline" + str(i), Append=True)
 
-        if not g_debug:
-            mantid.mtd.remove("vanstrip")
-            for i in range(1, 5):
-                mantid.mtd.remove("spline" + str(i))
+        _remove_inter_ws(ws_to_remove="vanstrip")
+        for i in range(1, 5):
+            _remove_inter_ws(ws_to_remove="spline" + str(i))
 
     else:
         print "Sorry I don't know that mode"
@@ -948,8 +913,7 @@ def PEARL_atten(work, outwork, g_debug=False):
     mantid.ConvertToHistogram(InputWorkspace="wc_atten", OutputWorkspace="wc_atten")
     mantid.RebinToWorkspace(WorkspaceToRebin="wc_atten", WorkspaceToMatch=work, OutputWorkspace="wc_atten")
     mantid.Divide(LHSWorkspace=work, RHSWorkspace="wc_atten", OutputWorkspace=outwork)
-    if not g_debug:
-        mantid.mtd.remove("wc_atten")
+    _remove_inter_ws(ws_to_remove="wc_atten")
     return
 
 
@@ -979,6 +943,12 @@ def PEARL_add(a_name, a_spectra, a_outname, atten=True):
 
     return
 
-def _debug_remove_ws(wsNameToRemove):
+
+def _remove_inter_ws(ws_to_remove):
+    """
+    Removes any intermediate workspaces if debug is set to false
+        @param ws_to_remove: The workspace to remove from the ADS
+    """
     if not g_debug:
-        mantid.mtd.remove(wsNameToRemove)
+        mantid.mtd.remove(ws_to_remove)
+
