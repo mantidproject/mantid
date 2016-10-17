@@ -140,13 +140,13 @@ void Q1D2::exec() {
   MantidVec normError2(YOut.size(), 0.0);
 
   // the averaged Q resolution.
-  HistogramData::HistogramDx qResolutionOut(QOut.size(), 0.0);
+  HistogramData::HistogramDx qResolutionOut(QOut.size() - 1, 0.0);
 
   const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
   Progress progress(this, 0.05, 1.0, numSpec + 1);
 
   const auto &spectrumInfo = m_dataWS->spectrumInfo();
-  PARALLEL_FOR3(m_dataWS, outputWS, pixelAdj)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_dataWS, *outputWS, pixelAdj.get()))
   for (int i = 0; i < numSpec; ++i) {
     PARALLEL_START_INTERUPT_REGION
     if (!spectrumInfo.hasDetectors(i)) {
@@ -267,12 +267,7 @@ void Q1D2::exec() {
         *qResolutionIterator = (*qResolutionIterator) / (*countsIterator);
       }
     }
-    // Now duplicate write the second to last element into the last element of
-    // the deltaQ vector
-    if (qResolutionOut.size() > 1) {
-      qResolutionOut.rbegin()[0] = qResolutionOut.rbegin()[1];
-    }
-    outputWS->setBinEdgeStandardDeviations(0, std::move(qResolutionOut));
+    outputWS->setPointStandardDeviations(0, std::move(qResolutionOut));
   }
 
   bool doOutputParts = getProperty("OutputParts");

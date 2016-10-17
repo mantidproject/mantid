@@ -1,14 +1,15 @@
 //----------------------
 // Includes
 //----------------------
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysis.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/ScopedWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/IComponent.h"
@@ -23,16 +24,15 @@
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
-#include "MantidQtCustomInterfaces/Muon/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionPresenter.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h"
 #include "MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h"
-#include "MantidQtMantidWidgets/MuonFunctionBrowser.h"
 #include "MantidQtMantidWidgets/MuonFitDataSelector.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/MuonFunctionBrowser.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -42,20 +42,20 @@
 
 #include <algorithm>
 
-#include <QLineEdit>
-#include <QVariant>
-#include <QtProperty>
+#include <QApplication>
 #include <QFileDialog>
 #include <QHash>
+#include <QHeaderView>
+#include <QInputDialog>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QSettings>
+#include <QSignalMapper>
+#include <QTemporaryFile>
 #include <QTextStream>
 #include <QTreeWidgetItem>
-#include <QSettings>
-#include <QMessageBox>
-#include <QInputDialog>
-#include <QSignalMapper>
-#include <QHeaderView>
-#include <QApplication>
-#include <QTemporaryFile>
+#include <QVariant>
+#include <QtProperty>
 
 #include <fstream>
 
@@ -101,7 +101,8 @@ MuonAnalysis::MuonAnalysis(QWidget *parent)
       m_resultTableTab(NULL), // Will be created in initLayout()
       m_dataTimeZero(0.0), m_dataFirstGoodData(0.0),
       m_currentLabel("NoLabelSet"), m_numPeriods(0),
-      m_groupingHelper(this->m_uiForm),
+      m_groupingHelper(this->m_uiForm), m_functionBrowser(nullptr),
+      m_dataSelector(nullptr),
       m_dataLoader(Muon::DeadTimesType::None, // will be replaced by correct
                                               // instruments later
                    {"MUSR", "HIFI", "EMU", "ARGUS", "CHRONUS"}) {}
@@ -2080,6 +2081,9 @@ void MuonAnalysis::loadFittings() {
           SLOT(dataToFitChanged()));
   connect(m_dataSelector, SIGNAL(workspaceChanged()), this,
           SLOT(dataToFitChanged()));
+  connect(m_uiForm.plotCreation, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(updateDataPresenterOverwrite(int)));
+  m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
   // Set compatibility mode on/off as appropriate
   const bool isCompMode = m_optionTab->getCompatibilityMode();
   m_fitFunctionPresenter->setCompatibilityMode(isCompMode);
@@ -2099,36 +2103,32 @@ void MuonAnalysis::allowLoading(bool enabled) {
 *   Check to see if the appending option is true when the previous button has
 * been pressed and acts accordingly
 */
-void MuonAnalysis::checkAppendingPreviousRun() {
-  if (m_uiForm.mwRunFiles->getText().isEmpty()) {
-    return;
-  }
-
-  allowLoading(false);
-
-  if (m_uiForm.mwRunFiles->getText().contains("-")) {
-    setAppendingRun(-1);
-  } else {
-    // Subtact one from the current run and load
-    changeRun(-1);
-  }
-}
+void MuonAnalysis::checkAppendingPreviousRun() { checkAppendingRun(-1); }
 
 /**
 *   Check to see if the appending option is true when the next button has been
 * pressed and acts accordingly
 */
-void MuonAnalysis::checkAppendingNextRun() {
-  if (m_uiForm.mwRunFiles->getText().isEmpty())
+void MuonAnalysis::checkAppendingNextRun() { checkAppendingRun(1); }
+
+/**
+ * Check to see if the appending option is true when the next/previous button
+ * has been pressed, and load accordingly
+ * @param direction :: +1 for "next", -1 for "previous"
+ */
+void MuonAnalysis::checkAppendingRun(const int direction) {
+  const auto &runPath = m_uiForm.mwRunFiles->getText();
+  if (runPath.isEmpty()) {
     return;
+  }
 
+  const int sign = direction < 0 ? -1 : 1;
   allowLoading(false);
-
-  if (m_uiForm.mwRunFiles->getText().contains("-")) {
-    setAppendingRun(1);
+  const auto runString = runPath.split(Poco::Path::separator()).last();
+  if (runString.contains("-")) {
+    setAppendingRun(sign); // append next/previous run
   } else {
-    // Add one to current run and laod
-    changeRun(1);
+    changeRun(sign); // replace with next/previous run
   }
 }
 
@@ -2965,6 +2965,17 @@ void MuonAnalysis::setLoadCurrentRunEnabled(bool enabled) {
 void MuonAnalysis::compatibilityModeChanged(int state) {
   m_fitFunctionPresenter->setCompatibilityMode(state ==
                                                Qt::CheckState::Checked);
+}
+
+/**
+ * Update the fit data presenter with current overwrite setting
+ * @param state :: [input] (not used) Setting of combo box
+ */
+void MuonAnalysis::updateDataPresenterOverwrite(int state) {
+  Q_UNUSED(state);
+  if (m_fitDataPresenter) {
+    m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
+  }
 }
 
 } // namespace MantidQt

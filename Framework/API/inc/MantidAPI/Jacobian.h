@@ -50,6 +50,10 @@ public:
   */
   virtual double get(size_t iY, size_t iP) = 0;
 
+  /** Zero all matrix elements.
+  */
+  virtual void zero() = 0;
+
   ///@cond do not document
   /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
   *   @param value :: Value to add

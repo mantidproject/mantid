@@ -5,6 +5,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <limits>

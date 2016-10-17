@@ -1,7 +1,10 @@
 #pylint: disable=no-init
 # Algorithm to start Bayes programs
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import StringListValidator, StringMandatoryValidator
+
 
 class MuscatData(PythonAlgorithm):
 

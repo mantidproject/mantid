@@ -7,6 +7,8 @@
  */
 #include "MantidCrystal/OptimizeCrystalPlacement.h"
 
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"

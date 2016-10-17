@@ -8,6 +8,7 @@ import numpy as np
 import re
 import time
 
+
 class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
 
     def category(self):
@@ -43,7 +44,6 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
 
         # Load trajectory file
         trajectory=netcdf.netcdf_file(file_name,mode="r")
-
 
         logger.information("Loading particle id's, molecule id's and coordinate array...")
         start_time=time.time()
@@ -134,7 +134,6 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
 
         logger.information(str(time.time()-start_time) + " s")
 
-
         logger.information("Transforming coordinates...")
         start_time=time.time()
 
@@ -161,7 +160,6 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
                                            for j in range(n_timesteps)] for i in range(n_particles)])
 
         logger.information(str(time.time()-start_time) + " s")
-
 
         logger.information("Calculating orientation vectors...")
         start_time=time.time()
@@ -250,7 +248,6 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
 
         logger.information(str(time.time()-start_time) + " s")
 
-
         logger.information("Calculating angular auto-correlations...")
         start_time=time.time()
 
@@ -269,7 +266,6 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
         R_avg_axis2=1.0*R_avg_axis2/n_molecules
 
         logger.information(str(time.time()-start_time)+" s")
-
 
         # Initialise & populate the output_ws workspace
         nrows=2
@@ -299,7 +295,6 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
                                      DataE=evals,NSpec=nrows,VerticalAxisUnit="Text",VerticalAxisValues=["FT Axis 1","FT Axis 2"])
         self.setProperty("OutputWorkspaceFT",FT_output_ws)
 
-
     def auto_correlation(self, vector):
         # Returns angular auto-correlation of a normalised time-dependent 3-vector
         num=np.shape(vector)[0]
@@ -314,7 +309,6 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
         autoCorr+=np.divide(np.correlate(vector[:,2],vector[:,2],"same"),norm)
 
         return autoCorr
-
 
     def fold_correlation(self,omega):
         # Folds an array with symmetrical values into half by averaging values around the centre

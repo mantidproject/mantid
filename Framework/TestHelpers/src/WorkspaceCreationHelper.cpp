@@ -8,9 +8,6 @@
  *higher
  *  than DataObjects (e.g. any algorithm), even if going via the factory.
  *********************************************************************************/
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
@@ -19,6 +16,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -43,13 +41,9 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::HistogramData;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
-using HistogramData::BinEdges;
-using HistogramData::Counts;
-using HistogramData::CountStandardDeviations;
-using HistogramData::HistogramX;
-using HistogramData::LinearGenerator;
 
 MockAlgorithm::MockAlgorithm(size_t nSteps) {
   m_Progress = Mantid::Kernel::make_unique<API::Progress>(this, 0, 1, nSteps);
@@ -181,10 +175,9 @@ Workspace2D_sptr Create2DWorkspaceWithValuesAndXerror(
     const std::set<int64_t> &maskedWorkspaceIndices) {
   auto ws = Create2DWorkspaceWithValues(
       nHist, nBins, isHist, maskedWorkspaceIndices, xVal, yVal, eVal);
-  auto dx1 = Kernel::make_cow<HistogramData::HistogramDx>(
-      isHist ? nBins + 1 : nBins, dxVal);
+  PointStandardDeviations dx1(nBins, dxVal);
   for (int i = 0; i < nHist; i++) {
-    ws->setSharedDx(i, dx1);
+    ws->setPointStandardDeviations(i, dx1);
   }
   return ws;
 }

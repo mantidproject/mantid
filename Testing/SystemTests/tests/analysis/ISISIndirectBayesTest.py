@@ -7,6 +7,7 @@ import platform
 
 #==============================================================================
 
+
 def _cleanup_files(dirname, filenames):
     """
        Attempts to remove each filename from
@@ -20,6 +21,7 @@ def _cleanup_files(dirname, filenames):
             pass
 
 #==============================================================================
+
 
 class QLresTest(stresstesting.MantidStressTest):
 
@@ -64,6 +66,7 @@ class QLresTest(stresstesting.MantidStressTest):
 
 #==============================================================================
 
+
 class ResNormTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
@@ -94,6 +97,7 @@ class ResNormTest(stresstesting.MantidStressTest):
         _cleanup_files(config['defaultsave.directory'], filenames)
 
 #==============================================================================
+
 
 class QuestTest(stresstesting.MantidStressTest):
 
@@ -132,6 +136,7 @@ class QuestTest(stresstesting.MantidStressTest):
         _cleanup_files(config['defaultsave.directory'], filenames)
 
 #==============================================================================
+
 
 class QSeTest(stresstesting.MantidStressTest):
 
@@ -174,6 +179,7 @@ class QSeTest(stresstesting.MantidStressTest):
 
 #==============================================================================
 
+
 class QLDataTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
@@ -187,7 +193,6 @@ class QLDataTest(stresstesting.MantidStressTest):
         background = 'Sloping'
         fixed_width = False
         loopOp = False
-
 
         spath = sname+'.nxs'    # path name for sample nxs file
         LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
@@ -217,6 +222,7 @@ class QLDataTest(stresstesting.MantidStressTest):
         _cleanup_files(config['defaultsave.directory'], filenames)
 
 #==============================================================================
+
 
 class QLResNormTest(stresstesting.MantidStressTest):
 
@@ -265,6 +271,7 @@ class QLResNormTest(stresstesting.MantidStressTest):
 
 #==============================================================================
 
+
 class QLWidthTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
@@ -307,6 +314,7 @@ class QLWidthTest(stresstesting.MantidStressTest):
         _cleanup_files(config['defaultsave.directory'], filenames)
 
 #==============================================================================
+
 
 class JumpFitFunctionTestBase(stresstesting.MantidStressTest):
 
@@ -355,6 +363,7 @@ class JumpFitFunctionTestBase(stresstesting.MantidStressTest):
 
 #==============================================================================
 
+
 class JumpCETest(JumpFitFunctionTestBase):
 
     def __init__(self):
@@ -367,6 +376,7 @@ class JumpCETest(JumpFitFunctionTestBase):
         return 'ISISIndirectBayes_JumpCETest.nxs'
 
 #==============================================================================
+
 
 class JumpHallRossTest(JumpFitFunctionTestBase):
 
@@ -381,6 +391,7 @@ class JumpHallRossTest(JumpFitFunctionTestBase):
 
 #==============================================================================
 
+
 class JumpFickTest(JumpFitFunctionTestBase):
 
     def __init__(self):
@@ -393,6 +404,7 @@ class JumpFickTest(JumpFitFunctionTestBase):
         return 'ISISIndirectBayes_JumpFickTest.nxs'
 
 #==============================================================================
+
 
 class JumpTeixeiraTest(JumpFitFunctionTestBase):
 

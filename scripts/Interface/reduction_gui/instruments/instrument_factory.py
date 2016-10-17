@@ -31,6 +31,7 @@ INSTRUMENT_DICT = {"HFIR": {"BIOSANS": HFIRInterface,
                             "VULCAN": DiffractionInterface}
                   }
 
+
 def instrument_factory(instrument_name, settings=None):
     for facility in INSTRUMENT_DICT:
         for instrument in INSTRUMENT_DICT[facility]:

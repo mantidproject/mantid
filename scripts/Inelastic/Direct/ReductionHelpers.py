@@ -5,8 +5,11 @@ import os
 """
 Set of functions to assist with processing instrument parameters relevant to reduction.
 """
+
+
 class ComplexProperty(object):
     """ Class describes property which depends on other properties and stores/receives values in other properties """
+
     def __init__(self,other_prop_list):
         self._other_prop = other_prop_list
 
@@ -27,6 +30,7 @@ class ComplexProperty(object):
         else:
             return rez
     #
+
     def __set__(self,instance,value):
         try:
             lv = len(value)
@@ -45,6 +49,7 @@ class ComplexProperty(object):
             spec_dict[key] =val
                 #changed_prop.append(key);
         #return changed_prop;
+
     def dependencies(self):
         """ returns the list of other properties names, this property depends on"""
         return self._other_prop
@@ -54,6 +59,7 @@ class ComplexProperty(object):
 
         return len(self._other_prop)
 #end ComplexProperty
+
 
 def findFile(fileName):
     """ Simple search within Mantid data search directories for
@@ -96,6 +102,7 @@ def get_default_parameter(instrument, name):
 
     return val[0]
 
+
 def get_default_idf_param_list(pInstrument,synonims_list=None):
     """ Obtain default reduction parameters list from the instrument """
 
@@ -111,9 +118,7 @@ def get_default_idf_param_list(pInstrument,synonims_list=None):
             key_name = name
         par_list[key_name] = get_default_parameter(pInstrument,name)
 
-
     return par_list
-
 
 
 def build_properties_dict(param_map,synonims,descr_list=[]) :
@@ -197,6 +202,7 @@ def extract_non_system_names(names_list,prefix='_'):
             result.append(name)
     return result
 
+
 def build_subst_dictionary(synonims_list=None) :
     """Function to process "synonims_list" in the instrument parameters string, used to support synonyms in the reduction script
 
@@ -208,9 +214,9 @@ def build_subst_dictionary(synonims_list=None) :
     """
     if not synonims_list :  # nothing to do
         return dict()
-    if type(synonims_list) == dict : # all done
+    if isinstance(synonims_list, dict) : # all done
         return synonims_list
-    if type(synonims_list) != str :
+    if not isinstance(synonims_list, str) :
         raise AttributeError("The synonyms field of Reducer object has to be special format string or the dictionary")
         # we are in the right place and going to transform string into dictionary
 
@@ -231,6 +237,7 @@ def build_subst_dictionary(synonims_list=None) :
 
     return rez
 
+
 def gen_getter(keyval_dict,key):
     """ function returns value from dictionary with substitution
 
@@ -238,9 +245,9 @@ def gen_getter(keyval_dict,key):
         gen_getter(keyval_dict,A) == 10;  gen_getter(keyval_dict,B) == 20;
         and gen_getter(keyval_dict,C) == [10,20];
     """
-    if not key in keyval_dict:
+    if key not in keyval_dict:
         name = '_'+key
-        if not name in keyval_dict:
+        if name not in keyval_dict:
             raise KeyError('Property with name: {0} is not among the class properties '.format(key))
     else:
         name = key
@@ -254,7 +261,6 @@ def gen_getter(keyval_dict,key):
 #end
 
 
-
 def gen_setter(keyval_dict,key,val):
     """ function sets value to dictionary with substitution
 
@@ -265,9 +271,9 @@ def gen_setter(keyval_dict,key,val):
         and gen_getter(keyval_dict,C,[1,2]) causes keyval_dict[A] == 1 and keyval_dict[B] == 2
     """
 
-    if not key in keyval_dict:
+    if key not in keyval_dict:
         name = '_'+key
-        if not name in keyval_dict:
+        if name not in keyval_dict:
             raise KeyError(' Property name: {0} is not defined'.format(key))
     else:
         name = key
@@ -285,9 +291,8 @@ def gen_setter(keyval_dict,key,val):
 def check_instrument_name(old_name,new_name):
     """ function checks if new instrument name is acceptable instrument name"""
 
-
     if new_name is None:
-        if not old_name is None:
+        if old_name is not None:
             return (None,None,config.getFacility())
         else:
             raise KeyError("No instrument name is defined")
@@ -325,6 +330,7 @@ def check_instrument_name(old_name,new_name):
     #config['default.instrument'] = full_name
     return (new_name,full_name,facility)
 
+
 def parse_single_name(filename):
     """ Process single run name into """
     filepath,fname = os.path.split(filename)
@@ -345,7 +351,6 @@ def parse_single_name(filename):
             fext = ext1*len(number)
 
         return (filepath,number,fext)
-
 
     fname,fext  = os.path.splitext(fname)
     fnumber = filter(lambda x: x.isdigit(), fname)
@@ -386,6 +391,8 @@ def parse_run_file_name(run_string):
     # extensions should be either all the same or all defined
     return (filepath,filenum,fext)
 #
+
+
 def process_prop_list(workspace,logName="CombinedSpectraIDList"):
     """Method process log, which discribes list of spectra, attached to
        the workspace
@@ -400,4 +407,3 @@ def process_prop_list(workspace,logName="CombinedSpectraIDList"):
     else:
         spec_list = []
     return spec_list
-

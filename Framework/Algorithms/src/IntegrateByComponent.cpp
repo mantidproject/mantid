@@ -90,9 +90,7 @@ void IntegrateByComponent::exec() {
         const double yValue = integratedWS->y(hists[i])[0];
         const double eValue = integratedWS->e(hists[i])[0];
 
-        if (boost::math::isnan(yValue) || boost::math::isinf(yValue) ||
-            boost::math::isnan(eValue) ||
-            boost::math::isinf(eValue)) // NaNs/Infs
+        if (!std::isfinite(yValue) || !std::isfinite(eValue)) // NaNs/Infs
           continue;
 
         // Now we have a good value
@@ -127,9 +125,7 @@ void IntegrateByComponent::exec() {
 
         const double yValue = integratedWS->y(hists[i])[0];
         const double eValue = integratedWS->e(hists[i])[0];
-        if (boost::math::isnan(yValue) || boost::math::isinf(yValue) ||
-            boost::math::isnan(eValue) ||
-            boost::math::isinf(eValue)) // NaNs/Infs
+        if (!std::isfinite(yValue) || !std::isfinite(eValue)) // NaNs/Infs
           continue;
 
         // Now we have a good value

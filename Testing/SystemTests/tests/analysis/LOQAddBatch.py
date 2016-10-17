@@ -9,6 +9,7 @@ import SANSadd2 as sansadd
 
 import os
 
+
 class SANSAddBatch(stresstesting.MantidStressTest):
     output_file = '99630sannotrans'
     csv_file = 'input.csv'
@@ -63,8 +64,6 @@ class SANSAddBatch(stresstesting.MantidStressTest):
         print 'validating', self.result, self.output_file
         return self.result,self.output_file+'.nxs'
 
-
-
     def __del__(self):
       # remove all created files.
         defaultsave = config['defaultsave.directory']
@@ -73,4 +72,3 @@ class SANSAddBatch(stresstesting.MantidStressTest):
                 os.remove(os.path.join(defaultsave,file_name))
             except:
                 pass
-

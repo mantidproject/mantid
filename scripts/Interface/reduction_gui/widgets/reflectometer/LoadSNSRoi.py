@@ -1,5 +1,4 @@
 #pylint: disable=invalid-name
-import sys
 
 """
     This algorithm reads the SNS ROI files (used in M. Reuter data reduction).
@@ -19,6 +18,7 @@ import sys
 
     Code contributed by Jean Bilheux (SNS)
 """
+
 
 class LoadSNSRoi:
 
@@ -103,6 +103,3 @@ class LoadSNSRoi:
         for i in _list:
             _formated_string += " " + str(i)
         return _formated_string
-
-
-

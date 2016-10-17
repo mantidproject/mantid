@@ -223,7 +223,7 @@ public:
   bool plotCompositeMembers() const;
 
   /// Returns true if the fit should be done against binned (bunched) data.
-  bool rawData() const;
+  bool rawData() const override;
 
   void setADSObserveEnabled(bool enabled);
 
@@ -294,11 +294,12 @@ signals:
 protected slots:
   /// Get the registered function names
   virtual void populateFunctionNames();
+  /// Called when a bool property is changed
+  virtual void boolChanged(QtProperty *prop);
 
 private slots:
 
   void enumChanged(QtProperty *prop);
-  void boolChanged(QtProperty *prop);
   void intChanged(QtProperty *prop);
   virtual void doubleChanged(QtProperty *prop);
   /// Called when one of the parameter values gets changed
