@@ -307,7 +307,7 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromHorizontalTubes(
   m_localWorkspace->mutableX(firstIndex)
       .assign(timeBinning.begin(), timeBinning.end());
 
-  auto &sharedXFirstIndex = m_localWorkspace->sharedX(firstIndex);
+  auto sharedXFirstIndex = m_localWorkspace->sharedX(firstIndex);
 
   size_t spec = firstIndex;
   for (size_t i = 0; i < numberOfTubes; ++i) { // iterate tubes
@@ -361,7 +361,7 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
   m_localWorkspace->mutableX(firstIndex)
       .assign(timeBinning.begin(), timeBinning.end());
 
-  auto &sharedXFirstIndex = m_localWorkspace->sharedX(firstIndex);
+  auto sharedXFirstIndex = m_localWorkspace->sharedX(firstIndex);
 
   size_t spec = firstIndex;
   for (size_t i = 0; i < numberOfTubes; ++i) { // iterate tubes
