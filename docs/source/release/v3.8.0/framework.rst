@@ -5,6 +5,11 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+Supported Operating Systems
+---------------------------
+
+- We now support Ubuntu Xenial Xerus (16.04) and this will be the final release to support Trusty Tahr (14.04).
+- We now support OS X Yosemite (10.10) and support for OS X Mavericks (10.9) has been dropped.
 
 HistogramData
 -------------
@@ -46,7 +51,7 @@ New
 
 - :ref:`UnwrapMonitorsInTOF <algm-UnwrapMonitorsInTOF>` handles the data which was collected beyond the end of a frame.
 
-- :ref:`ExtractMonitors <algm-ExtractMonitors>` an algorithm to extract the monitor spectra into a new workspace. Can also be 
+- :ref:`ExtractMonitors <algm-ExtractMonitors>` an algorithm to extract the monitor spectra into a new workspace. Can also be
   used to create a workspace with just the detectors, or two workspaces, one with the monitors and one with the detectors.
 
 Improved
@@ -80,28 +85,13 @@ Improved
 - :ref:`ConvertUnits <algm-ConvertUnits>` now has the option to take a workspace with Points as input.
   A property has been added that will make the algorithm convert the workspace to Bins automatically. The output space will be converted back to Points.
 
-- :ref:`ConvertToHistogram <algm-ConvertToHistogram>`: Performance improvement using new HistogramData module,
-  3x to 4x speedup.
-
-- :ref:`ConvertToPointData <algm-ConvertToPointData>`: Performance improvement using new HistogramData module,
-  3x to 4x speedup.
-
 - :ref:`RenameWorkspace <algm-RenameWorkspace>` and `RenameWorkspaces <algm-RenameWorkspaces>`
   now check if a Workspace with that name already exists in the ADS and gives
   the option to override it.
 
-<<<<<<< HEAD
-- :ref:`FindSXPeaks <algm-FindSXPeaks>`: Fixed a bug where peaks with an incorrect TOF would stored for some intrument geometries.
-
-- :ref: `LoadILL <algm-LoadILL>` was renamed to `LoadILLTOF <algm-LoadILLTOF>` to better reflect what it does. The new algorithm can also handle cases where the monitor IDs are greater than the detector IDs.
-=======
-- :ref:`LoadILLIndirect <algm-LoadILLIndirect>` now checks in the ``.nxs`` files which single detectors (SD) are
-  enabled, and loads only those instead of all.
-
 - :ref:`FindSXPeaks <algm-FindSXPeaks>`: Fixed a bug where peaks with an incorrect TOF would stored for some intrument geometries.
 
 - :ref:`LoadILL <algm-LoadILL>` was renamed to `LoadILLTOF <algm-LoadILLTOF>` to better reflect what it does. The new algorithm can also handle cases where the monitor IDs are greater than the detector IDs.
->>>>>>> b7ed2d5effc07adb51eea9f1ca3e32e533786200
 
 - :ref:`FFT <algm-FFT>` deals correctly with histogram input data. Internally, it converts to point data, and the output is always a point data workspace. (It can be converted to histogram data using :ref:`ConvertToHistogram <algm-ConvertToHistogram>` if required).
 
@@ -144,8 +134,7 @@ Performance
   - :ref:`ModeratorTzero <algm-ModeratorTzero>`: 30% speedup
   - :ref:`ModeratorTzeroLinear <algm-ModeratorTzeroLinear>`: 40% speedup
   - :ref:`RebinByPulseTimes <algm-RebinByPulseTimes>`: 5-10% speedup
-  - :ref:`ScaleX <algm-ScaleX>`: 20% speedup 
-  - :ref:`StripPeaks <algm-StripPeaks>` has a slight performance improvement from these
+  - :ref:`ScaleX <algm-ScaleX>`: 20% speedup
 
   In most of these cases memory consumption has also reduced.
   The performance improvements will vary from machine to machine, and will be different or even non-existent depending on the type and size of the input workspace and algorithm parameters.
@@ -169,7 +158,7 @@ CurveFitting
 - Added a new minimizer belonging to the trust region family of algorithms developped for Mantid by the SCD
   Numerical Analysis Group at RAL. It has better performance characteristics compared to the existing
   minimizers especially when applied to the most difficult fitting problems.
-- Added new property `EvaluationType` to Fit algorithm. If set to "Histogram" and the input dataset 
+- Added new property `EvaluationType` to Fit algorithm. If set to "Histogram" and the input dataset
   is a histogram with large bins it can improve accuracy of the fit.
 - The concept page for :ref:`Comparing fit minimizers <FittingMinimizers>` has been updated to include the new
   minimizer and a comparison against neutron data examples.
@@ -184,7 +173,7 @@ Others
 - The case search in ``DataService`` has been replaced with a case-insensitive comparison function. Behavior
   is almost identical, but a small number of cases (such as adding the workspaces ``Z`` and ``z``) will work
   in a more predictable manner.
-  
+
 
 Python
 ------
