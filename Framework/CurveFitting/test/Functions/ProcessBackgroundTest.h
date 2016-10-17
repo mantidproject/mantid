@@ -348,8 +348,7 @@ public:
     return new ProcessBackgroundDRTestPerformance();
   }
 
-  static void
-  destroySuite(ProcessBackgroundDRTestPerformance *suite) {
+  static void destroySuite(ProcessBackgroundDRTestPerformance *suite) {
     delete suite;
   }
 
@@ -429,13 +428,11 @@ class ProcessBackgroundSBGTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProcessBackgroundSBGTestPerformance *
-  createSuite() {
+  static ProcessBackgroundSBGTestPerformance *createSuite() {
     return new ProcessBackgroundSBGTestPerformance();
   }
 
-  static void destroySuite(
-      ProcessBackgroundSBGTestPerformance *suite) {
+  static void destroySuite(ProcessBackgroundSBGTestPerformance *suite) {
     delete suite;
   }
 
@@ -480,14 +477,11 @@ class ProcessBackgroundSBFIFTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProcessBackgroundSBFIFTestPerformance *
-  createSuite() {
+  static ProcessBackgroundSBFIFTestPerformance *createSuite() {
     return new ProcessBackgroundSBFIFTestPerformance();
   }
 
-  static void destroySuite(
-      ProcessBackgroundSBFIFTestPerformance *
-          suite) {
+  static void destroySuite(ProcessBackgroundSBFIFTestPerformance *suite) {
     delete suite;
   }
 
