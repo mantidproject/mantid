@@ -417,7 +417,7 @@ void ProcessBackground::addRegion() {
   for (auto it = vx.begin() + 1; it != vx.end(); ++it) {
     if (*it <= *it - 1) {
       g_log.error()
-        << "The vector X with value inserted is not ordered incrementally\n";
+          << "The vector X with value inserted is not ordered incrementally\n";
       throw std::runtime_error("Build new vector error!");
     }
   }

@@ -240,8 +240,8 @@ void ComptonScatteringCountRate::setMatrixWorkspace(
     double startX, double endX) {
   CompositeFunction::setMatrixWorkspace(matrix, wsIndex, startX, endX);
 
-  this->m_hist = boost::make_shared<HistogramData::Histogram>(
-    matrix->histogram(wsIndex));
+  this->m_hist =
+      boost::make_shared<HistogramData::Histogram>(matrix->histogram(wsIndex));
   this->wsIndex = wsIndex;
   const auto &values = m_hist->y();
   const auto &errors = m_hist->e();

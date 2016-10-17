@@ -347,7 +347,8 @@ public:
     return new ProcessBackgroundDeleteRegionTestPerformance();
   }
 
-  static void destroySuite(ProcessBackgroundDeleteRegionTestPerformance *suite) {
+  static void
+  destroySuite(ProcessBackgroundDeleteRegionTestPerformance *suite) {
     delete suite;
   }
 
@@ -421,15 +422,18 @@ private:
   ProcessBackground ar;
 };
 
-class ProcessBackgroundSimpleBackgroundGenerationTestPerformance : public CxxTest::TestSuite {
+class ProcessBackgroundSimpleBackgroundGenerationTestPerformance
+    : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProcessBackgroundSimpleBackgroundGenerationTestPerformance *createSuite() {
+  static ProcessBackgroundSimpleBackgroundGenerationTestPerformance *
+  createSuite() {
     return new ProcessBackgroundSimpleBackgroundGenerationTestPerformance();
   }
 
-  static void destroySuite(ProcessBackgroundSimpleBackgroundGenerationTestPerformance *suite) {
+  static void destroySuite(
+      ProcessBackgroundSimpleBackgroundGenerationTestPerformance *suite) {
     delete suite;
   }
 
@@ -451,7 +455,7 @@ public:
     sbg.setProperty("OutputWorkspace", "SelectedBackgroundPoints");
     sbg.setProperty("Options", "SelectBackgroundPoints");
     sbg.setProperty("BackgroundPointSelectMode",
-      "Input Background Points Only");
+                    "Input Background Points Only");
     sbg.setProperty("SelectionMode", "FitGivenDataPoints");
     sbg.setProperty("BackgroundType", "Polynomial");
     sbg.setProperty("BackgroundPoints", bkgdpts);
@@ -469,15 +473,19 @@ private:
   ProcessBackground sbg;
 };
 
-class ProcessBackgroundSelectBackgroundFromInputFunctionTestPerformance : public CxxTest::TestSuite {
+class ProcessBackgroundSelectBackgroundFromInputFunctionTestPerformance
+    : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProcessBackgroundSelectBackgroundFromInputFunctionTestPerformance *createSuite() {
+  static ProcessBackgroundSelectBackgroundFromInputFunctionTestPerformance *
+  createSuite() {
     return new ProcessBackgroundSelectBackgroundFromInputFunctionTestPerformance();
   }
 
-  static void destroySuite(ProcessBackgroundSelectBackgroundFromInputFunctionTestPerformance *suite) {
+  static void destroySuite(
+      ProcessBackgroundSelectBackgroundFromInputFunctionTestPerformance *
+          suite) {
     delete suite;
   }
 
@@ -486,7 +494,7 @@ public:
     for (size_t i = 0; i < 50000; ++i) {
       dataws->mutableX(0)[i] = double(i);
       dataws->mutableY(0)[i] =
-        double(i) * double(i) + sin(double(i) / 180. * 3.14);
+          double(i) * double(i) + sin(double(i) / 180. * 3.14);
     }
 
     // Create background function
@@ -500,7 +508,7 @@ public:
     TableRow row2 = functablews->appendRow();
     row2 << "A2" << 1.;
     AnalysisDataService::Instance().addOrReplace("BackgroundParameters",
-      functablews);
+                                                 functablews);
 
     // Create and set up algorithm
     sbfif.initialize();
@@ -512,7 +520,7 @@ public:
     sbfif.setProperty("SelectionMode", "UserFunction");
     sbfif.setProperty("BackgroundTableWorkspace", functablews);
     sbfif.setProperty("OutputBackgroundParameterWorkspace",
-      "OutBackgroundParameters");
+                      "OutBackgroundParameters");
     sbfif.setProperty("UserBackgroundWorkspace", "VisualWS");
     sbfif.setProperty("OutputBackgroundType", "Chebyshev");
     sbfif.setProperty("OutputBackgroundOrder", 6);
