@@ -25,61 +25,52 @@ ProcessBankData::ProcessBankData(
   m_cost = static_cast<double>(numEvents);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Run the data processing
- * FIXME/TODO - split run() into readable methods
-*/
-void ProcessBankData::run() { // override {
-  // Local tof limits
-  double my_shortest_tof =
-      static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
-  double my_longest_tof = 0.;
-  // A count of "bad" TOFs that were too high
-  size_t badTofs = 0;
-  size_t my_discarded_events(0);
-
-  prog->report(entry_name + ": precount");
-  // ---- Pre-counting events per pixel ID ----
+/** Pre-allocate the events-vector size for each spectrum
+ * @brief ProcessBankData::preCount
+ */
+void ProcessBankData::preAllocate() {
   auto &outputWS = *(alg->m_ws);
-  if (alg->precount) {
 
-    std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
-    for (size_t i = 0; i < numEvents; i++) {
-      detid_t thisId = detid_t(event_id[i]);
-      if (thisId >= m_min_id && thisId <= m_max_id)
-        counts[thisId - m_min_id]++;
-    }
+  std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
+  for (size_t i = 0; i < numEvents; i++) {
+    detid_t thisId = detid_t(event_id[i]);
+    if (thisId >= m_min_id && thisId <= m_max_id)
+      counts[thisId - m_min_id]++;
+  }
 
-    // Now we pre-allocate (reserve) the vectors of events in each pixel
-    // counted
-    const size_t numEventLists = outputWS.getNumberHistograms();
-    for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++) {
-      if (counts[pixID - m_min_id] > 0) {
-        // Find the the workspace index corresponding to that pixel ID
-        size_t wi = pixelID_to_wi_vector[pixID + pixelID_to_wi_offset];
-        // Allocate it
-        if (wi < numEventLists) {
-          outputWS.reserveEventListAt(wi, counts[pixID - m_min_id]);
-        }
-        if (alg->getCancel())
-          break; // User cancellation
+  // Now we pre-allocate (reserve) the vectors of events in each pixel
+  // counted
+  const size_t numEventLists = outputWS.getNumberHistograms();
+  for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++) {
+    if (counts[pixID - m_min_id] > 0) {
+      // Find the the workspace index corresponding to that pixel ID
+      size_t wi = pixelID_to_wi_vector[pixID + pixelID_to_wi_offset];
+      // Allocate it
+      if (wi < numEventLists) {
+        outputWS.reserveEventListAt(wi, counts[pixID - m_min_id]);
       }
+      if (alg->getCancel())
+        break; // User cancellation
     }
   }
+}
 
-  // Check for canceled algorithm
-  if (alg->getCancel()) {
-    return;
-  }
-
-  // Default pulse time (if none are found)
-  Mantid::Kernel::DateAndTime pulsetime;
-  int periodNumber = 1;
-  int periodIndex = 0;
-  Mantid::Kernel::DateAndTime lastpulsetime(0);
-
-  bool pulsetimesincreasing = true;
-
+/**
+ * @brief ProcessBankData::processEvents
+ * @param pulsetimesincreasing
+ * @param my_discarded_events
+ * @param my_shortest_tof
+ * @param my_longest_tof
+ * @param badTofs
+ * @param compress
+ * @param usedDetIds
+ */
+void ProcessBankData::processEvents(bool &pulsetimesincreasing,
+                                    size_t &my_discarded_events,
+                                    double &my_shortest_tof,
+                                    double &my_longest_tof, size_t &badTofs,
+                                    bool compress,
+                                    std::vector<bool> &usedDetIds) {
   // Index into the pulse array
   int pulse_i = 0;
 
@@ -95,17 +86,12 @@ void ProcessBankData::run() { // override {
     pulse_i = numPulses + 1;
   }
 
-  prog->report(entry_name + ": filling events");
+  // Default pulse time (if none are found)
+  Mantid::Kernel::DateAndTime pulsetime;
+  int periodNumber = 1;
+  int periodIndex = 0;
+  Mantid::Kernel::DateAndTime lastpulsetime(0);
 
-  // Will we need to compress?
-  bool compress = (alg->compressTolerance >= 0);
-
-  // Which detector IDs were touched? - only matters if compress is on
-  std::vector<bool> usedDetIds;
-  if (compress)
-    usedDetIds.assign(m_max_id - m_min_id + 1, false);
-
-  // Go through all events in the list
   for (std::size_t i = 0; i < numEvents; i++) {
     //------ Find the pulse time for this event index ---------
     if (pulse_i < numPulses - 1) {
@@ -195,8 +181,17 @@ void ProcessBankData::run() { // override {
 
     } // valid detector IDs
   }   //(for each event)
+}
 
-  //------------ Compress Events (or set sort order) ------------------
+/** compress events or set the order of events in a sepctrum
+ * @brief ProcessBankData::compressEvents
+ * @param compress
+ * @param usedDetIds
+ */
+void ProcessBankData::compressEvents(bool compress,
+                                     const std::vector<bool> &usedDetIds) {
+  auto &outputWS = *(alg->m_ws);
+
   // Do it on all the detector IDs we touched
   if (compress) {
     for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++) {
@@ -204,17 +199,59 @@ void ProcessBankData::run() { // override {
         // Find the the workspace index corresponding to that pixel ID
         size_t wi = pixelID_to_wi_vector[pixID + pixelID_to_wi_offset];
         auto &el = outputWS.getSpectrum(wi);
-        if (compress)
-          el.compressEvents(alg->compressTolerance, &el);
-        else {
-          if (pulsetimesincreasing)
-            el.setSortOrder(DataObjects::PULSETIME_SORT);
-          else
-            el.setSortOrder(DataObjects::UNSORTED);
-        }
+
+        el.compressEvents(alg->compressTolerance, &el);
       }
     }
   }
+
+  return;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Run the data processing on a subset of pixel IDs
+*/
+void ProcessBankData::run() {
+  // Local tof limits
+  double my_shortest_tof =
+      static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
+  double my_longest_tof = 0.;
+  // A count of "bad" TOFs that were too high
+  size_t badTofs = 0;
+  size_t my_discarded_events(0);
+  prog->report(entry_name + ": precount");
+
+  // Pre-counting events per pixel ID and allocate the memory ----
+  // auto &outputWS = *(alg->m_ws);
+  if (alg->precount) {
+    preAllocate();
+  }
+
+  // Check for canceled algorithm
+  if (alg->getCancel()) {
+    return;
+  }
+
+  bool pulsetimesincreasing = true;
+
+  prog->report(entry_name + ": filling events");
+
+  // Will we need to compress?
+  bool compress = (alg->compressTolerance >= 0);
+
+  // Which detector IDs were touched? - only matters if compress is on
+  std::vector<bool> usedDetIds;
+  if (compress)
+    usedDetIds.assign(m_max_id - m_min_id + 1, false);
+
+  // Go through all events in the list
+  // NEW NEW NEW .............................................
+  processEvents(pulsetimesincreasing, my_discarded_events, my_shortest_tof,
+                my_longest_tof, badTofs, compress, usedDetIds);
+
+  //------------ Compress Events (or set sort order) ------------------
+  compressEvents(compress, usedDetIds);
+
   prog->report(entry_name + ": filled events");
 
   alg->getLogger().debug() << entry_name

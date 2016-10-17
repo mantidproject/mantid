@@ -7,6 +7,7 @@
 #include <array>
 #include <boost/numeric/conversion/cast.hpp>
 #include <iostream>
+#include <sstream>
 
 using namespace H5;
 
@@ -199,6 +200,29 @@ void writeArray1D(Group &group, const std::string &name,
 // -------------------------------------------------------------------
 // read methods
 // -------------------------------------------------------------------
+std::map<std::string, std::string> getFileEntries(H5File &file) {
+  std::map<std::string, std::string> entries;
+
+  auto num_entries = file.getNumObjs();
+  for (auto hindex = 0; hindex < num_entries; ++hindex) {
+    std::string obj_name = file.getObjnameByIdx(hindex);
+    H5G_obj_t type = file.getObjTypeByIdx(hindex);
+    if (type == H5G_GROUP) {
+      // it is a group, open the group and check attribute
+      Group group = file.openGroup(obj_name);
+
+      std::string nx_type = readAttributeAsString(group, NX_ATTR_CLASS);
+
+      g_log.warning() << "Number of attribute: " << group.getNumAttrs() << "\n";
+
+      entries.insert(std::make_pair(obj_name, nx_type));
+
+      group.close();
+    }
+  }
+
+  return entries;
+}
 
 std::string readString(H5::H5File &file, const std::string &path) {
   try {

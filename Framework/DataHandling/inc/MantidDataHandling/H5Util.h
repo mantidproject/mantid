@@ -105,6 +105,9 @@ template <typename NumT>
 void writeArray1D(H5::Group &group, const std::string &name,
                   const std::vector<NumT> &values);
 
+MANTID_DATAHANDLING_DLL std::map<std::string, std::string>
+getFileEntries(H5::H5File &file);
+
 MANTID_DATAHANDLING_DLL std::string readString(H5::H5File &file,
                                                const std::string &path);
 

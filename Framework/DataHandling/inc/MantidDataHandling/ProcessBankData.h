@@ -52,6 +52,15 @@ public:
 
   void run() override;
 
+  void preAllocate();
+
+  void processEvents(bool &pulsetimesincreasing, size_t &my_discarded_events,
+                     double &my_shortest_tof, double &my_longest_tof,
+                     size_t &badTofs, bool compress,
+                     std::vector<bool> &usedDetIds);
+
+  void compressEvents(bool compress, const std::vector<bool> &usedDetIds);
+
 private:
   /// Algorithm being run
   LoadEventNexus *alg;

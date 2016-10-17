@@ -5,14 +5,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/BankPulseTimes.h"
+#include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidDataHandling/EventWorkspaceCollection.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #ifdef _WIN32 // fixing windows issue causing conflict between
 // winnt char and nexus char
@@ -21,6 +22,8 @@
 
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+
+#include <H5Cpp.h>
 
 #include <memory>
 #include <mutex>
@@ -206,6 +209,8 @@ public:
 
   /// name of top level NXentry to use
   std::string m_top_entry_name;
+
+  // NEW...NEW...NEW... Replace m_file by hdf5 handler
   ::NeXus::File *m_file;
 
   /// whether or not to launch multiple ProcessBankData jobs per bank
@@ -264,14 +269,20 @@ private:
                             size_t end_wi = 0);
   template <typename T> void filterDuringPause(T workspace);
 
+  void loadMonitorsToEventWS(API::Progress &prog);
+
   // Validate the optional spectra input properties and initialize m_specList
   void createSpectraList(int32_t min, int32_t max);
 
   /// Set the top entry field name
-  void setTopEntryName();
+  void setTopEntryName(H5::H5File &h5file);
 
   /// to open the nexus file with specific exception handling/message
-  void safeOpenFile(const std::string fname);
+  H5::H5File safeOpenFile(const std::string fname);
+
+  Kernel::DateAndTime loadNexusLogs(
+      API::Progress *const prog, int &nPeriods,
+      std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog);
 
   /// Was the instrument loaded?
   bool m_instrument_loaded_correctly;
