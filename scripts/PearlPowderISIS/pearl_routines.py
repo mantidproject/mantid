@@ -13,49 +13,55 @@ import pearl_cycle_factory
 
 
 def PEARL_startup(usern="matt", thiscycle='11_1'):
-    global pearl_file_dir
     global attenfile
     global currentdatadir
-    global tt_mode
-    global userdataprocessed
     global tofbinning
+    global tt_mode
+    global pearl_file_dir
+    global userdataprocessed
 
+    # ------ User modifiable ----- #
+    # TODO - Do we change this to be set from the outside i.e. params
 
-    # global variables are continuously and excessively used within the script
-    # the script is also familiar to Pearl scientists hence leaving as it is for now
+    # Directories
+    calibration_directory = "D:\\PEARL\\"  # TODO remove my hardcoded path and generic it
+    raw_data_directory = "D:\\PEARL\\"
+    live_data_directory = None  # Is this even used?
 
-    # import Mantid_plotting as mtdplt
-    # The lines below set the default value for the rest of the focussing routines
-    # currentdatadir="C:\PEARL\RAW\\"
-    # currentdatadir="X:\data\cycle_11_1\\"
+    output_directory = "D:\\PEARL\\output\\"
 
-    # directory where the files are going to be found
-    # Calib directory?
-    pearl_file_dir = "D:\\PEARL\\"
+    # File names
+    atten_file_name = "PRL112_DC25_10MM_FF.OUT"
+    cal_file_name = "pearl_offset_11_2.cal"
+    group_file_name = "pearl_group_11_2_TT88.cal"
+    van_absorb_file_name = "van_spline_all_cycle_11_1.nxs"
+    van_file_name = "van_spline_all_cycle_11_1.nxs"
 
-    currentdatadir = "D:\\PEARL\\"
-    livedatadir = "I:\\"
-    # calfile="C:\PEARL\\pearl_offset_11_2.cal"
-    calfile = pearl_file_dir + "pearl_offset_11_2.cal"
-    groupfile = pearl_file_dir + "pearl_group_11_2_TT88.cal"
-    # groupfile=pearl_file_dir + "test_cal_group_mods_11_1.cal"
-    vabsorbfile = pearl_file_dir + "pearl_absorp_sphere_10mm_newinst_long.nxs"
-    vanfile = pearl_file_dir + "van_spline_all_cycle_11_1.nxs"
-    attenfile = currentdatadir + "PRL112_DC25_10MM_FF.OUT"
+    # Script settings
     mode = "all"
     tt_mode = "TT88"
     tofbinning = "1500,-0.0006,19900"
-    PEARL_setdatadir(currentdatadir)
-    print "Raw Data in :   ", currentdatadir
-    cycle = thiscycle
-    instver = "new2"
-    # userdataprocessed is the data output directory
-    userdataprocessed = currentdatadir + "ouput\\" + "Cycle_" + thiscycle + "\\" + usern + "\\"
-    # sys.path.append(userdataprocessed)
-    # userdataprocessed="C:\PEARL\\"
-    # PEARL_setuserdir(directory=userdataprocessed)
-    print "Cycle is set to", cycle
-    print "Instrument version is set to ", instver
+
+    # ---- Script setup ---- #
+    # Setup globals
+    pearl_file_dir = calibration_directory
+    currentdatadir = raw_data_directory
+    livedatadir = live_data_directory
+    userdataprocessed = output_directory + "Cycle_" + thiscycle + "\\" + usern + "\\"
+
+
+    # Gen full paths to files
+    attenfile = calibration_directory + atten_file_name  # Is this in calibration folder or raw data folder?
+    calfile = calibration_directory + cal_file_name
+    groupfile = calibration_directory + group_file_name
+    vabsorbfile = calibration_directory + van_absorb_file_name
+    vanfile = calibration_directory + van_file_name
+
+    # TODO now would be a good time to check they all exist
+
+    PEARL_setdatadir(raw_data_directory)
+
+    print "Output cycle is set to", thiscycle
     print "Processed Data in : ", userdataprocessed
     print "Offset file set to :", calfile
     print "Grouping file set to :", groupfile
