@@ -69,8 +69,6 @@ void HistogramDomainCreator::createDomain(
     throw std::runtime_error("FitMW: Inconsistent MatrixWorkspace");
   }
 
-  bool isDistribution = m_matrixWorkspace->isDistribution();
-
   for (size_t i = m_startIndex; i < endIndex; ++i) {
     size_t j = i - m_startIndex + i0;
     double y = Y[i];
