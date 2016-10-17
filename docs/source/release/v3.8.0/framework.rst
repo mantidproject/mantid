@@ -90,12 +90,18 @@ Improved
   now check if a Workspace with that name already exists in the ADS and gives
   the option to override it.
 
+<<<<<<< HEAD
+- :ref:`FindSXPeaks <algm-FindSXPeaks>`: Fixed a bug where peaks with an incorrect TOF would stored for some intrument geometries.
+
+- :ref: `LoadILL <algm-LoadILL>` was renamed to `LoadILLTOF <algm-LoadILLTOF>` to better reflect what it does. The new algorithm can also handle cases where the monitor IDs are greater than the detector IDs.
+=======
 - :ref:`LoadILLIndirect <algm-LoadILLIndirect>` now checks in the ``.nxs`` files which single detectors (SD) are
   enabled, and loads only those instead of all.
 
 - :ref:`FindSXPeaks <algm-FindSXPeaks>`: Fixed a bug where peaks with an incorrect TOF would stored for some intrument geometries.
 
 - :ref:`LoadILL <algm-LoadILL>` was renamed to `LoadILLTOF <algm-LoadILLTOF>` to better reflect what it does. The new algorithm can also handle cases where the monitor IDs are greater than the detector IDs.
+>>>>>>> b7ed2d5effc07adb51eea9f1ca3e32e533786200
 
 - :ref:`FFT <algm-FFT>` deals correctly with histogram input data. Internally, it converts to point data, and the output is always a point data workspace. (It can be converted to histogram data using :ref:`ConvertToHistogram <algm-ConvertToHistogram>` if required).
 

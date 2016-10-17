@@ -11,6 +11,8 @@ New features
 Algorithms
 ##########
 
+- :ref:`IndirectILLFixedWindowScans <algm-IndirectILLFixedWindowScans>` treats elastic and inelastic fixed-window scan ILL data of the instrument IN16B.
+
 Data Analysis
 #############
 
