@@ -352,8 +352,8 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
         alg_range = 14
         save_range = 5
 
-    global mode
-    global tt_mode
+    #global mode
+    #global tt_mode
     tt_mode = ttmode
     mode = fmode
     PEARL_getcycle(number)
