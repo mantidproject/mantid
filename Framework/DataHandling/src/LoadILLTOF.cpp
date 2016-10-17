@@ -525,9 +525,9 @@ void LoadILLTOF::loadDataIntoTheWorkSpace(
                                  1e6; // microsecs
 
   // Calculate the real tof (t1+t2) put it in tof array
-  std::vector<double> detectorTofBins(m_numberOfChannels + 1);
+  auto &X0 = m_localWorkspace->mutableX(0);
   for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-    detectorTofBins[i] =
+    X0[i] =
         theoreticalElasticTOF +
         m_channelWidth *
             static_cast<double>(static_cast<int>(i) -
@@ -539,8 +539,8 @@ void LoadILLTOF::loadDataIntoTheWorkSpace(
   g_log.information() << "T1+T2 : Theoretical = " << theoreticalElasticTOF;
   g_log.information()
       << " ::  Calculated bin = ["
-      << detectorTofBins[calculatedDetectorElasticPeakPosition] << ","
-      << detectorTofBins[calculatedDetectorElasticPeakPosition + 1] << "]\n";
+      << X0[calculatedDetectorElasticPeakPosition] << ","
+      << X0[calculatedDetectorElasticPeakPosition + 1] << "]\n";
 
   // The binning for monitors is considered the same as for detectors
   size_t spec = 0;
@@ -549,39 +549,33 @@ void LoadILLTOF::loadDataIntoTheWorkSpace(
   std::vector<detid_t> monitorIDs = instrument->getMonitors();
 
   for (const auto &monitor : monitors) {
-    m_localWorkspace->dataX(spec)
-        .assign(detectorTofBins.begin(), detectorTofBins.end());
     // Assign Y
-    m_localWorkspace->dataY(spec).assign(monitor.begin(), monitor.end());
+    m_localWorkspace->mutableY(spec).assign(monitor.begin(), monitor.end());
     // Assign Error
-    MantidVec &E = m_localWorkspace->dataE(spec);
+    auto &E = m_localWorkspace->mutableE(spec);
     std::transform(monitor.begin(), monitor.end(), E.begin(),
                    LoadILLTOF::calculateError);
     m_localWorkspace->getSpectrum(spec).setDetectorID(monitorIDs[spec]);
-    ++spec;
+    m_localWorkspace->setSharedX(++spec, m_localWorkspace->sharedX(0));
   }
 
   std::vector<detid_t> detectorIDs = instrument->getDetectorIDs(true);
-
-  // Assign calculated bins to first X axis
   size_t firstSpec = spec;
   size_t numberOfMonitors = monitors.size();
-  m_localWorkspace->dataX(firstSpec)
-      .assign(detectorTofBins.begin(), detectorTofBins.end());
 
   Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
   for (size_t i = 0; i < m_numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
       if (spec > firstSpec) {
         // just copy the time binning axis to every spectra
-        m_localWorkspace->dataX(spec) = m_localWorkspace->readX(firstSpec);
+        m_localWorkspace->setSharedX(spec, m_localWorkspace->sharedX(firstSpec));
       }
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      m_localWorkspace->dataY(spec).assign(data_p, data_p + m_numberOfChannels);
+      m_localWorkspace->mutableY(spec).assign(data_p, data_p + m_numberOfChannels);
 
       // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec);
+      auto &E = m_localWorkspace->mutableE(spec);
       std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
                      LoadILLTOF::calculateError);
       m_localWorkspace->getSpectrum(spec)
@@ -611,15 +605,15 @@ void LoadILLTOF::loadDataIntoTheWorkSpace(
     for (size_t i = 0; i < numberOfTubes; ++i) {
       for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
         // just copy the time binning axis to every spectra
-        m_localWorkspace->dataX(spec) = m_localWorkspace->readX(firstSpec);
+        m_localWorkspace->setSharedX(spec, m_localWorkspace->sharedX(firstSpec));
 
         // Assign Y
         int *data_p = &dataRosace(static_cast<int>(i), static_cast<int>(j), 0);
-        m_localWorkspace->dataY(spec)
+        m_localWorkspace->mutableY(spec)
             .assign(data_p, data_p + m_numberOfChannels);
 
         // Assign Error
-        MantidVec &E = m_localWorkspace->dataE(spec);
+        auto &E = m_localWorkspace->mutableE(spec);
         std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
                        LoadILLTOF::calculateError);
 

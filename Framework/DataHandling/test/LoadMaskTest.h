@@ -91,7 +91,7 @@ public:
 
     // 3. Check
     for (size_t iws = 0; iws < maskws->getNumberHistograms(); iws++) {
-      double y = maskws->dataY(iws)[0];
+      double y = maskws->y(iws)[0];
       if (iws == 34 || iws == 1000 || iws == 2000) {
         // These 3 workspace index are masked
         TS_ASSERT_DELTA(y, 1.0, 1.0E-5);
@@ -143,7 +143,7 @@ public:
     // 3. Check
     size_t errorcounts = 0;
     for (size_t iws = 0; iws < maskws->getNumberHistograms(); iws++) {
-      double y = maskws->dataY(iws)[0];
+      double y = maskws->y(iws)[0];
       if (iws == 34 || iws == 1000 || iws == 2000 || (iws >= 36 && iws <= 39) ||
           (iws >= 1001 && iws <= 1004)) {
         // All these workspace index are masked
@@ -266,7 +266,7 @@ public:
       if (source_masked) {
         maskSourceDet.push_back(source->getDetector(i)->getID());
       }
-      bool targ_masked = (maskWs->getSpectrum(i).readY()[0] > 0.5);
+      bool targ_masked = (maskWs->getSpectrum(i).y()[0] > 0.5);
       if (targ_masked) {
         maskTargDet.push_back(maskWs->getDetector(i)->getID());
       }
