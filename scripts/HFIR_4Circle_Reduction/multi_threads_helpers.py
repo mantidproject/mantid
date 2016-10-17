@@ -1,4 +1,4 @@
-#pylint: disable=W0403,R0913
+#pylint: disable=W0403,R0913,R0902
 
 from PyQt4 import QtCore
 from PyQt4.QtCore import QThread

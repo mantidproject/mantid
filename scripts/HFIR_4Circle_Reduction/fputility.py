@@ -1,6 +1,136 @@
-#pylint: disable=R0914
+#pylint: disable=R0914,R0912,R0913
 # Utility methods for Fullprof
+import os
+import sys
+import math
 
+def calculate_intensity_difference(reflection_dict1, reflection_dict2):
+    """
+    Calculate the difference of the intensities on same reflection between 2 sets of measurements
+    :param reflection_dict1:
+    :param reflection_dict2:
+    :return:
+    """
+    # check validity
+    assert isinstance(reflection_dict1, dict), 'Input 1 must be a dictionary'
+    assert isinstance(reflection_dict2, dict), 'Input 2 must be a dictionary'
+
+    # get a list of HKL
+    hkl_list = sorted(reflection_dict1.keys())
+
+    # output
+    out_dict = dict()
+
+    for hkl in hkl_list:
+        # skip if the HKL does not exist in both sets
+        if hkl not in reflection_dict2:
+            continue
+
+        intensity_1, var_1 = reflection_dict1[hkl]
+        intensity_2, var_2 = reflection_dict2[hkl]
+
+        diff_intensity = intensity_1 - intensity_2
+        diff_var = math.sqrt(var_1**2 + var_2**2)
+
+        out_dict[hkl] = (diff_intensity, diff_var)
+    # END-FOR
+
+    return out_dict
+
+
+def load_scd_fullprof_int_file(file_name):
+    """
+    load a single crystal diffraction Fullprof intensity file
+    :param file_name:
+    :return: 2-tuple.  dictionary for reflection (key = hkl, value = (intensity, error)); string as error message
+    """
+    # check validity
+    assert isinstance(file_name, str), 'Fullprof SCD intensity file %s must be a string but not of type %s.' \
+                                       '' % (str(file_name), type(file_name))
+    assert os.path.exists(file_name), 'Fullprof SCD intensity file %s cannot be found.' % file_name
+
+    # open file
+    scd_int_file = open(file_name, 'r')
+    raw_lines = scd_int_file.readline()
+    scd_int_file.close()
+
+    # parse file
+    header = None
+    num_k_vector = 0
+    k_index = 0
+    error_buffer = ''
+    reflection_dict = dict()   # key: 3-tuple as (h, k, l)
+    for line_index, raw_line in enumerate(raw_lines):
+        # clean the line
+        line = raw_line.strip()
+        if len(line) == 0:
+            continue
+
+        #
+        if line_index == 0:
+            # line 1 as header
+            header = line
+        elif line.startswith('('):
+            # line 2 format line, skip
+            continue
+        elif line.endswith('0  0'):
+            # line 3 as wave lengh line
+            wave_length = int(line.split()[0])
+        elif k_index < num_k_vector:
+            # k-vector line: (num_k_vector) line right after k-indication line
+            k_index += 1
+        else:
+            # split
+            terms = line.split()
+            if len(terms) == 1:
+                # k-vector
+                num_k_vector = int(terms[0])
+                continue
+
+            # line that cannot be parsed
+            if len(terms) < 5:
+                # some line may have problem. print out and warning
+                error_buffer += 'unable to parse line %-3d: %s\n' % (line_index, line)
+                continue
+
+            try:
+                h = int(terms[0])
+                k = int(terms[1])
+                l = int(terms[2])
+                intensity = float(terms[3])
+                variation = float(terms[4])
+            except ValueError:
+                error_buffer += 'unable to parse line %-3d: %s\n' % (line_index, line)
+            else:
+                reflection_dict[(h, k, l)] = (intensity, variation)
+
+        # END-IF-ELSE
+    # END-FOR
+
+    return reflection_dict, error_buffer
+
+
+def convert_to_peak_dict_list(refection_dict):
+    """
+    Convert Reflection dictionary to peak dictionary for writing out to Fullprof format
+    :param refection_dict:
+    :return:
+    """
+    # check validity
+    assert isinstance(refection_dict, dict)
+
+    peak_dict_list = list()
+    # loop around all HKL
+    for hkl in sorted(refection_dict.keys()):
+        intensity, sigma = refection_dict[hkl]
+        peak_dict = {'hkl': hkl,
+                     'kindex': 0,
+                     'intensity': intensity,
+                     'sigma': sigma}
+
+        peak_dict_list.append(peak_dict)
+
+    return peak_dict_list
 
 def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dict_list, fp_file_name,
                                with_absorption):
@@ -23,6 +153,9 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
     assert isinstance(wave_length, float), 'Neutron wave length must be a float.'
     assert isinstance(k_vector_dict, dict), 'K-vector list must be a dictionary.'
     assert isinstance(peak_dict_list, list), 'Peak-dictionary list must be a list.'
+
+    # check k-vector dictionary
+    print '[DB...FIXME] Input k-vector keys:', k_vector_dict.keys()
 
     # set up all lines
     fp_buffer = ''
@@ -74,29 +207,19 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
         m_h, m_k, m_l = peak_dict['hkl']
         if is_magnetic:
             k_index = peak_dict['kindex']
-            kx, ky, kz = k_vector_dict[k_index]
+            k_x, k_y, k_z = k_vector_dict[k_index]
         else:
-            kx = ky = kz = 0.0
+            k_x = k_y = k_z = 0.0
             k_index = 0
 
         # remove the magnetic k-shift vector from HKL
-        part1 = '%4d%4d%4d' % (nearest_int(m_h-kx), nearest_int(m_k-ky), nearest_int(m_l-kz))
+        part1 = '%4d%4d%4d' % (nearest_int(m_h-k_x), nearest_int(m_k-k_y), nearest_int(m_l-k_z))
 
         # k index
         if is_magnetic:
             part2 = '%4d' % k_index
         else:
             part2 = ''
-        """
-        if num_k_vectors > 0:
-            k_index = peak_dict['kindex']
-            if k_index > 0:
-                part2 = '%4d' % k_index
-            else:
-                part2 = ''
-        else:
-            part2 = ''
-        """
         # END-IF-ELSE
 
         # peak intensity and sigma
@@ -130,8 +253,38 @@ def nearest_int(number):
     """
     """
     if number > 0:
-        ni = int(number + 0.5)
+        answer = int(number + 0.5)
     else:
-        ni = int(number - 0.5)
+        answer = int(number - 0.5)
 
-    return ni
+    return answer
+
+
+def main(argv):
+    """
+    main to calculate difference
+    :param argv:
+    :return:
+    """
+    # get input
+    if len(argv) < 4:
+        print 'Calculate the difference of two measuremnts:\n'
+        print '> %s [intensity file 1]  [intensity file 2]  [output intensity file]' % len(argv)
+        return
+    else:
+        int_file_1 = argv[1]
+        int_file_2 = argv[2]
+        out_file_name = argv[3]
+
+    intensity_dict1, error_message1 = load_scd_fullprof_int_file(int_file_1)
+    intensity_dict2, error_message2 = load_scd_fullprof_int_file(int_file_2)
+    diff_dict = calculate_intensity_difference(intensity_dict1, int_file_2)
+    diff_peak_list = convert_to_peak_dict_list(diff_dict)
+    write_scd_fullprof_kvector('difference', wave_length=0.0, k_vector_dict=None, peak_dict_list=diff_peak_list,
+                               fp_file_name=out_file_name, with_absorption=False)
+
+    return
+
+
+if __name__ == '__main__':
+    main(sys.argv)

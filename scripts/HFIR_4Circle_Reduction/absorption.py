@@ -1,4 +1,4 @@
-#pylint: disable=R0913,R0913
+#pylint: disable=R0913,W0403,R0903,C0103
 import numpy
 import numpy.linalg
 import math
@@ -23,12 +23,12 @@ class Lattice(object):
         :param beta:
         :param gamma:
         """
-        self.a = a
-        self.b = b
-        self.c = c
-        self.alpha = alpha
-        self.beta = beta
-        self.gamma = gamma
+        self._a = a
+        self._b = b
+        self._c = c
+        self._alpha = alpha
+        self._beta = beta
+        self._gamma = gamma
 
         return
 
@@ -37,7 +37,49 @@ class Lattice(object):
         Customized output
         :return:
         """
-        return '%f, %f, %f, %f, %f, %f' % (self.a, self.b, self.c, self.alpha, self.beta, self.gamma)
+        return '%f, %f, %f, %f, %f, %f' % (self._a, self._b, self._c, self._alpha, self._beta, self._gamma)
+
+    def get_a(self):
+        """
+        get lattice a
+        :return:
+        """
+        return self._a
+
+    def get_b(self):
+        """
+        get lattice B
+        :return:
+        """
+        return self._b
+
+    def get_c(self):
+        """
+        get lattice C
+        :return:
+        """
+        return self._c
+
+    def get_alpha(self):
+        """
+        get lattice alpha
+        :return:
+        """
+        return self._alpha
+
+    def get_beta(self):
+        """
+        get lattice beta
+        :return:
+        """
+        return self._beta
+
+    def get_gamma(self):
+        """
+        get lattice gamma
+        :return:
+        """
+        return self._gamma
 
 
 def m_sin(degree):
@@ -124,24 +166,24 @@ def calculate_reciprocal_lattice(lattice):
     lattice_star = Lattice(1, 1, 1, 0, 0, 0)
 
     # calculate volume
-    volume = 2 * lattice.a * lattice.b * lattice.c * numpy.sqrt(
-        m_sin((lattice.alpha + lattice.beta + lattice.gamma) / 2) *
-        m_sin((-lattice.alpha + lattice.beta + lattice.gamma) / 2) *
-        m_sin((lattice.alpha - lattice.beta + lattice.gamma) / 2) *
-        m_sin((lattice.alpha + lattice.beta - lattice.gamma) / 2))
+    volume = 2 * lattice.get_a() * lattice.get_b() * lattice.get_c() * numpy.sqrt(
+        m_sin((lattice.get_alpha() + lattice.get_beta() + lattice.get_gamma()) / 2) *
+        m_sin((-lattice.get_alpha() + lattice.get_beta() + lattice.get_gamma()) / 2) *
+        m_sin((lattice.get_alpha() - lattice.get_beta() + lattice.get_gamma()) / 2) *
+        m_sin((lattice.get_alpha() + lattice.get_beta() - lattice.get_gamma()) / 2))
     #  v_start = (2 * numpy.pi) ** 3. / volume
 
     # calculate a*, b*, c*
-    lattice_star.a = 2 * numpy.pi * lattice.b * lattice.c * m_sin(lattice.alpha) / volume
-    lattice_star.b = 2 * numpy.pi * lattice.a * lattice.c * m_sin(lattice.beta) / volume
-    lattice_star.c = 2 * numpy.pi * lattice.b * lattice.a * m_sin(lattice.gamma) / volume
+    lattice_star._a = 2 * numpy.pi * lattice.get_b() * lattice.get_c() * m_sin(lattice.get_alpha()) / volume
+    lattice_star._b = 2 * numpy.pi * lattice.get_a() * lattice.get_c() * m_sin(lattice.get_beta()) / volume
+    lattice_star._c = 2 * numpy.pi * lattice.get_b() * lattice.get_a() * m_sin(lattice.get_gamma()) / volume
 
-    lattice_star.alpha = math.acos((m_cos(lattice.beta) * m_cos(lattice.gamma) - m_cos(lattice.alpha)) /
-                                   (m_sin(lattice.beta) * m_sin(lattice.gamma))) * 180. / numpy.pi
-    lattice_star.beta = math.acos((m_cos(lattice.alpha) * m_cos(lattice.gamma) - m_cos(lattice.beta)) /
-                                  (m_sin(lattice.alpha) * m_sin(lattice.gamma))) * 180. / numpy.pi
-    lattice_star.gamma = math.acos((m_cos(lattice.alpha) * m_cos(lattice.beta) - m_cos(lattice.gamma)) /
-                                   (m_sin(lattice.alpha) * m_sin(lattice.beta))) * 180. / numpy.pi
+    lattice_star._alpha = math.acos((m_cos(lattice.get_beta()) * m_cos(lattice.get_gamma()) - m_cos(lattice.get_alpha())) /
+                                    (m_sin(lattice.get_beta()) * m_sin(lattice.get_gamma()))) * 180. / numpy.pi
+    lattice_star._beta = math.acos((m_cos(lattice.get_alpha()) * m_cos(lattice.get_gamma()) - m_cos(lattice.get_beta())) /
+                                   (m_sin(lattice.get_alpha()) * m_sin(lattice.get_gamma()))) * 180. / numpy.pi
+    lattice_star._gamma = math.acos((m_cos(lattice.get_alpha()) * m_cos(lattice.get_beta()) - m_cos(lattice.get_gamma())) /
+                                    (m_sin(lattice.get_alpha()) * m_sin(lattice.get_beta()))) * 180. / numpy.pi
 
     return lattice_star
 
@@ -161,15 +203,15 @@ def calculate_b_matrix(lattice):
 
     b_matrix = numpy.ndarray(shape=(3, 3), dtype='float')
 
-    b_matrix[0, 0] = lattice_star.a / (0.5 * numpy.pi)
-    b_matrix[0, 1] = lattice_star.b * m_cos(lattice_star.gamma) / (0.5 * numpy.pi)
-    b_matrix[0, 2] = lattice_star.c * m_cos(lattice_star.beta) / (0.5 * numpy.pi)
+    b_matrix[0, 0] = lattice_star.get_a() / (0.5 * numpy.pi)
+    b_matrix[0, 1] = lattice_star.get_b() * m_cos(lattice_star.get_gamma()) / (0.5 * numpy.pi)
+    b_matrix[0, 2] = lattice_star.get_c() * m_cos(lattice_star.get_beta()) / (0.5 * numpy.pi)
     b_matrix[1, 0] = 0
-    b_matrix[1, 1] = lattice_star.b * m_sin(lattice_star.gamma) / (0.5 * numpy.pi)
-    b_matrix[1, 2] = -lattice_star.c * m_sin(lattice_star.beta) * m_cos(lattice_star.alpha) / (0.5 * numpy.pi)
+    b_matrix[1, 1] = lattice_star.get_b() * m_sin(lattice_star.get_gamma()) / (0.5 * numpy.pi)
+    b_matrix[1, 2] = -lattice_star.get_c() * m_sin(lattice_star.get_beta()) * m_cos(lattice_star.get_alpha()) / (0.5 * numpy.pi)
     b_matrix[2, 0] = 0
     b_matrix[2, 1] = 0
-    b_matrix[2, 2] = 1 / lattice.c
+    b_matrix[2, 2] = 1 / lattice.get_c()
 
     #  print '[DB...TEST] B matrix: determination = ', numpy.linalg.det(b_matrix), '\n', b_matrix
 
@@ -330,7 +372,7 @@ def calculate_absorption_correction_2(exp_number, scan_number, spice_ub_matrix):
     h1c = matrix_q[:, 0]
     h2c = matrix_q[:, 1]
     h3c = matrix_q[:, 2]
- 
+
     t1c = h1c/(math.sqrt(h1c[1]**2+h1c[2]**2+h1c[0]**2))
     t2c = h2c/(math.sqrt(h2c[1]**2+h2c[2]**2+h2c[0]**2))
     t3c = h3c/(math.sqrt(h3c[1]**2+h3c[2]**2+h3c[0]**2))
@@ -344,14 +386,5 @@ def calculate_absorption_correction_2(exp_number, scan_number, spice_ub_matrix):
     us_cart[0] = numpy.dot(us_phi, t1c)
     us_cart[1] = numpy.dot(us_phi, t2c)
     us_cart[2] = numpy.dot(us_phi, t3c)
-    
-    return up_cart, us_cart
 
-# Test ... ...
-# test_lattice = Lattice(4.32765, 4.32765, 11.25736, 90., 90., 90.)
-# ub_matrix = numpy.array([[-0.1482003, -0.0376897, 0.0665967], [-0.0494848, 0.2256107, 0.0025953],[-0.1702423, -0.0327691, -0.0587285]])
-# # ub_matrix_5k = convert_mantid_ub_to_spice(ub_matrix)
-# ub_matrix_5k = numpy.array([[-0.149514, -0.036502, 0.066258], [0.168508, 0.028803, 0.059636], [-0.045800, 0.225134, 0.003113]])
-# upcart, uscart = calculate_absorption_correction_2(522, 52,  ub_matrix_5k)
-# print upcart
-# print uscart
+    return up_cart, us_cart

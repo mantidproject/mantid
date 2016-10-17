@@ -273,6 +273,7 @@ class MainWindow(QtGui.QMainWindow):
         # Sub window
         self._my3DWindow = None
         self._refineConfigWindow = None
+        self._baseTitle = 'Title is not initialized'
 
         # Timing and thread 'global'
         self._startMeringScans = time.clock()
@@ -419,7 +420,14 @@ class MainWindow(QtGui.QMainWindow):
         Save project
         :return:
         """
+        # read project file name
         project_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Specify Project File', os.getcwd()))
+        # NEXT ISSUE - consider to allow incremental project saving technique
+        if os.path.exists(project_file_name):
+            self.pop_one_button_dialog('Project file %s does exist. Choose another name.' % project_file_name)
+            return
+
+        # export/save project
         self._myControl.export_project(project_file_name)
 
         # register
@@ -2903,7 +2911,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             error_msg = roi
             # self.pop_one_button_dialog(error_msg)
-            print '[DB] %s' % error_message
+            print '[Error] %s' % error_msg
         # END-IF
 
         # Information
