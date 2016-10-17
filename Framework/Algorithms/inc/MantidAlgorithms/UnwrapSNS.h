@@ -68,7 +68,7 @@ private:
   void execEvent();
   void runMaskDetectors();
 
-  int unwrapX(const Mantid::HistogramData::HistogramX &, MantidVec &,
+  int unwrapX(const Mantid::HistogramData::HistogramX &, std::vector<double> &dataout,
               const double &Ld);
   void getTofRangeData(const bool);
   double m_conversionConstant; ///< The constant used in the conversion from TOF
