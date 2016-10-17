@@ -17,27 +17,25 @@
 #include "MantidQtMantidWidgets/pythonCalc.h"
 #include "MantidQtMantidWidgets/MWDiag.h"
 #include "MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisDataLoader.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
 #include <map>
 
 namespace MantidQt {
+namespace MantidWidgets {
+class FunctionBrowser;
+class MuonFitDataSelector;
+}
 namespace CustomInterfaces {
+class MuonAnalysisFitDataPresenter;
+class MuonAnalysisFitFunctionPresenter;
 
 namespace Muon {
 // Tab classes
 class MuonAnalysisOptionTab;
 class MuonAnalysisFitDataTab;
 class MuonAnalysisResultTableTab;
-
-struct LoadResult {
-  Mantid::API::Workspace_sptr loadedWorkspace;
-  Mantid::API::Workspace_sptr loadedGrouping;
-  Mantid::API::Workspace_sptr loadedDeadTimes;
-  std::string mainFieldDirection;
-  double timeZero;
-  double firstGoodData;
-  std::string label;
-};
 
 struct GroupResult {
   bool usedExistGrouping;
@@ -84,6 +82,9 @@ public:
 
   /// Default Constructor
   MuonAnalysis(QWidget *parent = 0);
+
+  /// Destructor
+  ~MuonAnalysis();
 
   /// Sets index of group or pair to plot
   /// and causes a replot
@@ -178,7 +179,8 @@ private slots:
   void settingsTabUpdatePlot();
 
   /// Update the plot based on changes on the grouping options tab
-  void groupTabUpdatePlot();
+  void groupTabUpdatePlotGroup();
+  void groupTabUpdatePlotPair();
 
   /// Sets plot type combo box on the Home tab to the same value as the one
   /// under Group Table
@@ -230,25 +232,22 @@ private slots:
   /// Saves the value of the widget which called the slot
   void saveWidgetValue();
 
-  /// Opens a sequential fit dialog
-  void openSequentialFitDialog();
-
   /// Update front
   void updateFront();
 
   /// Opens the managed directory dialog for easier access for the user.
   void openDirectoryDialog();
 
+  /// Called when selected workspace/groups/periods to fit changes
+  void dataToFitChanged();
+
+  /// Called when compatibility mode is turned on/off
+  void compatibilityModeChanged(int state);
+
+  /// Called when "overwrite" is changed
+  void updateDataPresenterOverwrite(int state);
+
 private:
-  /// Types of entities we are dealing with
-  enum ItemType { Pair, Group };
-
-  /// Possible plot types users might request
-  enum PlotType { Asymmetry, Counts, Logarithm };
-
-  /// Types of periods
-  enum PeriodType { First, Second };
-
   /// Initialize local Python environment
   void initLocalPython() override;
 
@@ -270,9 +269,6 @@ private:
   /// Input file changed - update GUI accordingly
   void inputFileChanged(const QStringList &filenames);
 
-  /// Loads the given list of files
-  boost::shared_ptr<Muon::LoadResult> load(const QStringList &files) const;
-
   /// Get grouping for the loaded workspace
   boost::shared_ptr<Muon::GroupResult>
   getGrouping(boost::shared_ptr<Muon::LoadResult> loadResult) const;
@@ -284,20 +280,20 @@ private:
   bool isGroupingSet() const;
 
   /// Creates workspace for specified group/pair and plots it
-  void plotItem(ItemType itemType, int tableRow, PlotType plotType);
+  void plotItem(Muon::ItemType itemType, int tableRow, Muon::PlotType plotType);
 
   /// Creates workspace ready for analysis and plotting
-  Mantid::API::Workspace_sptr createAnalysisWorkspace(ItemType itemType,
+  Mantid::API::Workspace_sptr createAnalysisWorkspace(Muon::ItemType itemType,
                                                       int tableRow,
-                                                      PlotType type,
+                                                      Muon::PlotType type,
                                                       bool isRaw = false);
 
   /// Returns PlotType as chosen using given selector
-  PlotType parsePlotType(QComboBox *selector);
+  Muon::PlotType parsePlotType(QComboBox *selector);
 
   /// Finds a name for new analysis workspace
-  std::string getNewAnalysisWSName(ItemType itemType, int tableRow,
-                                   PlotType plotType);
+  std::string getNewAnalysisWSName(Muon::ItemType itemType, int tableRow,
+                                   Muon::PlotType plotType);
 
   /// Update front anc pair combo box
   void updateFrontAndCombo();
@@ -326,21 +322,6 @@ private:
 
   /// Returns custom dead time table file name as set on the interface
   std::string deadTimeFilename() const;
-
-  /// Loads dead time table (group of tables) from the file.
-  Mantid::API::Workspace_sptr loadDeadTimes(const std::string &filename) const;
-
-  /// Convert dead times workspace to table workspace
-  Mantid::API::ITableWorkspace_sptr
-  deadTimesToTable(const Mantid::API::Workspace_sptr &deadTimes) const;
-
-  /// Gets table of dead time corrections from the loaded workspace
-  Mantid::API::ITableWorkspace_sptr
-  getDeadTimeCorrection(boost::shared_ptr<Muon::LoadResult> loadResult) const;
-
-  /// Creates and algorithm with all the properties set according to widget
-  /// values on the interface
-  Mantid::API::Algorithm_sptr createLoadAlgorithm();
 
   /// Plots specific WS spectrum (used by plotPair and plotGroup)
   void plotSpectrum(const QString &wsName, bool logScale = false);
@@ -427,6 +408,9 @@ private:
   /// Returns params string which can be passed to Rebin, according to what user
   /// specified
   std::string rebinParams(Mantid::API::Workspace_sptr wsForRebin);
+
+  /// Updates rebin params in the fit data presenter
+  void updateRebinParams();
 
   /// title of run
   std::string m_title;
@@ -534,6 +518,34 @@ private:
 
   /// Get period number string in subtracted set
   std::string getSubtractedPeriods() const;
+
+  /// Run "Plot" button from group or pair table
+  void runTablePlotButton(Muon::ItemType itemType);
+
+  /// Cached value of config setting
+  std::string m_cachedPeakRadius;
+  static const std::string PEAK_RADIUS_CONFIG;
+
+  /// Function browser widget for fit tab
+  MantidQt::MantidWidgets::FunctionBrowser *m_functionBrowser;
+
+  /// Data selector widget for fit tab
+  MantidQt::MantidWidgets::MuonFitDataSelector *m_dataSelector;
+
+  /// Presenter to get data to fit
+  std::unique_ptr<MuonAnalysisFitDataPresenter> m_fitDataPresenter;
+
+  /// Presenter to get fit function
+  std::unique_ptr<MuonAnalysisFitFunctionPresenter> m_fitFunctionPresenter;
+
+  /// Helper class to load data
+  MuonAnalysisDataLoader m_dataLoader;
+
+  /// Get list of supported instruments
+  QStringList getSupportedInstruments();
+
+  /// Enable/disable "load current run" - if allowed
+  void setLoadCurrentRunEnabled(bool enabled);
 };
 }
 }

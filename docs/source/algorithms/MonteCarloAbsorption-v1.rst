@@ -51,7 +51,8 @@ The algorithm proceeds as follows. For each spectrum:
 
    * for each event in `NEvents`:
 
-     - generate a random point on the beam face define by the input height & width
+     - generate a random point on the beam face defined by the input height & width. If the point is outside of the
+       area defined by the face of the sample then it is pulled to the boundary of this area
 
      - assume the neutron travels in the direction defined by the `samplePos - srcPos` and define a `Track`
 
@@ -89,7 +90,8 @@ Usage
    data = ConvertUnits(data, Target="Wavelength")
    # Default up axis is Y
    SetSample(data, Geometry={'Shape': 'Cylinder', 'Height': 5.0, 'Radius': 1.0,
-                     'Center': [0.0,0.0,0.0]}, Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6'})
+                     'Center': [0.0,0.0,0.0]},
+                   Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6', 'SampleNumberDensity': 0.07})
    # Simulating every data point can be slow. Use a smaller set and interpolate
    abscor = MonteCarloAbsorption(data, NumberOfWavelengthPoints=50)
    corrected = data/abscor
@@ -102,7 +104,8 @@ Usage
    data = ConvertUnits(data, Target="Wavelength")
    # Default up axis is Y
    SetSample(data, Geometry={'Shape': 'Cylinder', 'Height': 5.0, 'Radius': 1.0,
-                     'Center': [0.0,0.0,0.0]}, Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6'})
+                     'Center': [0.0,0.0,0.0]},
+                     Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6', 'SampleNumberDensity': 0.07})
    SetBeam(data, Geometry={'Shape': 'Slit', 'Width': 0.8, 'Height': 1.0})
    # Simulating every data point can be slow. Use a smaller set and interpolate
    abscor = MonteCarloAbsorption(data, NumberOfWavelengthPoints=50)
@@ -135,7 +138,7 @@ default facility and instrument respectively. The definition can be found at
    # we just define the height
    SetSample(data, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
              Geometry={'Height': 4.0},
-             Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6'})
+             Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6', 'SampleNumberDensity': 0.07})
    # Simulating every data point can be slow. Use a smaller set and interpolate
    abscor = MonteCarloAbsorption(data, NumberOfWavelengthPoints=30)
    corrected = data/abscor

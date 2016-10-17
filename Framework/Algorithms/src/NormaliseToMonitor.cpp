@@ -1,10 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -340,8 +338,7 @@ void NormaliseToMonitor::checkProperties(
   // Check that the 'monitor' spectrum actually relates to a monitor - warn if
   // not
   try {
-    Geometry::IDetector_const_sptr mon = m_monitor->getDetector(0);
-    if (!mon->isMonitor()) {
+    if (!m_monitor->spectrumInfo().isMonitor(0)) {
       g_log.warning() << "The spectrum N: " << spec_num
                       << " in MonitorWorkspace does not refer to a monitor.\n"
                       << "Continuing with normalization regardless.";

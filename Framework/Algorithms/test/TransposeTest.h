@@ -2,7 +2,6 @@
 #define TRANSPOSETEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <boost/math/special_functions/fpclassify.hpp>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -121,8 +120,8 @@ public:
     TS_ASSERT_EQUALS(outputWS->dataF(0).size(), 4);
     TS_ASSERT_EQUALS(outputWS->dataF(3)[1], inputWS->dataF(1)[3]);
     // Check a nan
-    bool inNan = boost::math::isnan(inputWS->dataY(0)[5]);
-    bool outNan = boost::math::isnan(outputWS->dataY(5)[0]);
+    bool inNan = std::isnan(inputWS->dataY(0)[5]);
+    bool outNan = std::isnan(outputWS->dataY(5)[0]);
     TS_ASSERT_EQUALS(outNan, inNan);
 
     delete transpose;

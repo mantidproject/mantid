@@ -35,7 +35,7 @@
 #include "MatrixCommand.h"
 #include "pixmaps.h"
 #include "ScriptingEnv.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include <QtGlobal>
 #include <QTextStream>
@@ -1508,9 +1508,9 @@ Matrix::~Matrix() {
   delete d_matrix_model;
 }
 
-IProjectSerialisable *Matrix::loadFromProject(const std::string &lines,
-                                              ApplicationWindow *app,
-                                              const int fileVersion) {
+MantidQt::API::IProjectSerialisable *
+Matrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                        const int fileVersion) {
   Q_UNUSED(fileVersion);
   std::vector<std::string> lineVec;
   boost::split(lineVec, lines, boost::is_any_of("\n"));
@@ -1534,7 +1534,7 @@ IProjectSerialisable *Matrix::loadFromProject(const std::string &lines,
   Mantid::Kernel::Strings::convert<int>(values[1], rows);
   Mantid::Kernel::Strings::convert<int>(values[2], cols);
 
-  TSVSerialiser tsv(newLines);
+  MantidQt::API::TSVSerialiser tsv(newLines);
   std::string gStr;
   if (tsv.hasLine("geometry")) {
     gStr = tsv.lineAsString("geometry");
@@ -1642,7 +1642,7 @@ IProjectSerialisable *Matrix::loadFromProject(const std::string &lines,
 }
 
 std::string Matrix::saveToProject(ApplicationWindow *app) {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
 
   tsv.writeRaw("<matrix>");
   tsv.writeLine(objectName().toStdString()) << numRows() << numCols()

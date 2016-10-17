@@ -43,13 +43,9 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::HistogramData;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
-using HistogramData::BinEdges;
-using HistogramData::Counts;
-using HistogramData::CountStandardDeviations;
-using HistogramData::HistogramX;
-using HistogramData::LinearGenerator;
 
 MockAlgorithm::MockAlgorithm(size_t nSteps) {
   m_Progress = Mantid::Kernel::make_unique<API::Progress>(this, 0, 1, nSteps);
@@ -181,10 +177,9 @@ Workspace2D_sptr Create2DWorkspaceWithValuesAndXerror(
     const std::set<int64_t> &maskedWorkspaceIndices) {
   auto ws = Create2DWorkspaceWithValues(
       nHist, nBins, isHist, maskedWorkspaceIndices, xVal, yVal, eVal);
-  auto dx1 = Kernel::make_cow<HistogramData::HistogramDx>(
-      isHist ? nBins + 1 : nBins, dxVal);
+  PointStandardDeviations dx1(nBins, dxVal);
   for (int i = 0; i < nHist; i++) {
-    ws->setSharedDx(i, dx1);
+    ws->setPointStandardDeviations(i, dx1);
   }
   return ws;
 }
@@ -525,6 +520,7 @@ void createInstrumentForWorkspaceWithDistances(
     instrument->markAsDetector(det);
 
     // Link it to the workspace
+    workspace->getSpectrum(i).clearDetectorIDs();
     workspace->getSpectrum(i).addDetectorID(det->getID());
   }
 }
@@ -632,15 +628,15 @@ CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
                             double binDelta, double xOffset) {
 
   auto retVal = boost::make_shared<EventWorkspace>();
-  retVal->initialize(1, 2, 1);
+  retVal->initialize(groups.size(), 2, 1);
 
   for (size_t g = 0; g < groups.size(); g++) {
-    retVal->getOrAddEventList(g).clearDetectorIDs();
+    retVal->getSpectrum(g).clearDetectorIDs();
     std::vector<int> dets = groups[g];
     for (auto det : dets) {
       for (int i = 0; i < numBins; i++)
-        retVal->getOrAddEventList(g) += TofEvent((i + 0.5) * binDelta, 1);
-      retVal->getOrAddEventList(g).addDetectorID(det);
+        retVal->getSpectrum(g) += TofEvent((i + 0.5) * binDelta, 1);
+      retVal->getSpectrum(g).addDetectorID(det);
     }
   }
 
@@ -958,8 +954,8 @@ createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS,
   Mantid::DataObjects::EventWorkspace_sptr outputWS =
       Mantid::DataObjects::EventWorkspace_sptr(
           new DataObjects::EventWorkspace());
-  // outputWS->setName(wsname);
-  outputWS->initialize(1, 1, 1);
+  outputWS->initialize(sourceWS->getInstrument()->getDetectorIDs(true).size(),
+                       1, 1);
 
   // 2. Set the units
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
@@ -1000,25 +996,16 @@ createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS,
       detid_max = it->first;
 
   // c) Pad all the pixels and Set to zero
-  std::vector<std::size_t> pixel_to_wkspindex;
-  pixel_to_wkspindex.reserve(
-      detid_max + 1); // starting at zero up to and including detid_max
-  pixel_to_wkspindex.assign(detid_max + 1, 0);
   size_t workspaceIndex = 0;
   for (it = detector_map.begin(); it != detector_map.end(); ++it) {
     if (!it->second->isMonitor()) {
-      pixel_to_wkspindex[it->first] = workspaceIndex;
-      DataObjects::EventList &spec =
-          outputWS->getOrAddEventList(workspaceIndex);
+      auto &spec = outputWS->getSpectrum(workspaceIndex);
       spec.addDetectorID(it->first);
       // Start the spectrum number at 1
       spec.setSpectrumNo(specnum_t(workspaceIndex + 1));
       workspaceIndex += 1;
     }
   }
-
-  // Clear
-  pixel_to_wkspindex.clear();
 
   return outputWS;
 }

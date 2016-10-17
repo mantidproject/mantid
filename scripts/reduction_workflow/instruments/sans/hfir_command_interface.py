@@ -1,14 +1,19 @@
-# pylint: disable=invalid-name
+#pylint: disable=invalid-name,unused-import,unused-argument,ungrouped-imports
 """
-    List of common user commands for HFIR SANS
-"""
-from reduction_workflow.command_interface import *
-from reduction_workflow.find_data import *
-from reduction_workflow.instruments.sans import hfir_instrument
-from mantid.kernel import Logger
-import os
 
-## List of user commands ######################################################
+List of common user commands for HFIR SANS
+
+"""
+
+import os.path
+import mantid
+
+from reduction_workflow.command_interface import ReductionSingleton, Clear, OutputPath, Reduce1D, Reduce, AppendDataFile, ClearDataFiles
+from reduction_workflow.find_data import find_data
+from reduction_workflow.instruments.sans import hfir_instrument
+
+from mantid.kernel import Logger
+from mantid.simpleapi import Load
 
 
 def BIOSANS():
@@ -20,7 +25,6 @@ def BIOSANS():
     SolidAngle()
     AzimuthalAverage()
 
-
 def GPSANS():
     Clear()
     ReductionSingleton().set_instrument("GPSANS",
@@ -30,12 +34,10 @@ def GPSANS():
     SolidAngle()
     AzimuthalAverage()
 
-
 def DataPath(path):
     ReductionSingleton().set_data_path(path)
     ReductionSingleton().set_output_path(path)
     ReductionSingleton().reduction_properties["OutputDirectory"] = path
-
 
 def DirectBeamCenter(datafile):
     datafile = find_data(
@@ -44,7 +46,6 @@ def DirectBeamCenter(datafile):
     ReductionSingleton().reduction_properties[
         "BeamCenterMethod"] = "DirectBeam"
     ReductionSingleton().reduction_properties["BeamCenterFile"] = datafile
-
 
 def ScatteringBeamCenter(datafile, beam_radius=3.0):
     datafile = find_data(
@@ -55,7 +56,6 @@ def ScatteringBeamCenter(datafile, beam_radius=3.0):
     ReductionSingleton().reduction_properties["BeamRadius"] = beam_radius
     ReductionSingleton().reduction_properties["BeamCenterFile"] = datafile
 
-
 def SetBeamCenter(x, y):
     ReductionSingleton().reduction_properties["BeamCenterMethod"] = "Value"
     ReductionSingleton().reduction_properties["BeamCenterX"] = x
@@ -65,10 +65,8 @@ def SetBeamCenter(x, y):
 def TimeNormalization():
     ReductionSingleton().reduction_properties["Normalisation"] = "Timer"
 
-
 def MonitorNormalization():
     ReductionSingleton().reduction_properties["Normalisation"] = "Monitor"
-
 
 def NoNormalization():
     ReductionSingleton().reduction_properties["Normalisation"] = "None"
@@ -590,7 +588,7 @@ def SetWedges(number_of_wedges=2, wedge_angle=30.0, wedge_offset=0.0):
     ReductionSingleton().reduction_properties["WedgeOffset"] = wedge_offset
 
 
-def Stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
+def Stitch(data_list=None, q_min=None, q_max=None, output_workspace=None,
            scale=None, save_output=False):
     """
         Stitch a set of SANS data sets
@@ -610,6 +608,8 @@ def Stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
                       latter will assign the given scaling factors to the data sets.
         @param save_output: If true, the output will be saved in the current working directory.
     """
+    if data_list is None:
+        data_list = []
     from LargeScaleStructures.data_stitching import stitch
     stitch(
         data_list,
@@ -618,3 +618,63 @@ def Stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
         output_workspace=output_workspace,
         scale=scale,
         save_output=save_output)
+
+def beam_center_gravitational_drop(beam_center_file, sdd=1.13):
+    '''
+    This method is used for correcting for gravitational drop
+    @param beam_center_file :: file where the beam center was found
+    @param sdd :: sample detector distance to apply the beam center
+    '''
+    def calculate_neutron_drop(path_length, wavelength):
+        '''
+        Calculate the gravitational drop of the neutrons
+        path_length in meters
+        wavelength in Angstrom
+        '''
+        wavelength *= 1e-10
+        neutron_mass = 1.674927211e-27
+        gravity = 9.80665
+        h_planck = 6.62606896e-34
+        l_2 = (gravity * neutron_mass**2 / (2.0 * h_planck**2 )) * path_length**2
+        return wavelength**2 * l_2
+
+    # Get beam center used in the previous reduction
+    pm = mantid.PropertyManagerDataService[ReductionSingleton().property_manager]
+    beam_center_x = pm['LatestBeamCenterX'].value
+    beam_center_y = pm['LatestBeamCenterY'].value
+    Logger("CommandInterface").information("Beam Center before: [%.2f, %.2f] pixels" % (beam_center_x, beam_center_y))
+
+    try:
+        # check if the workspace still exists
+        wsname = "__beam_finder_" + os.path.splitext(beam_center_file)[0]
+        ws = mantid.mtd[wsname]
+        Logger("CommandInterface").debug("Using Workspace: %s." % (wsname))
+    except KeyError:
+        # Let's try loading the file. For some reason the beamcenter ws is not there...
+        try:
+            ws = Load(beam_center_file)
+            Logger("CommandInterface").debug("Using filename %s." % (beam_center_file))
+        except IOError:
+            Logger("CommandInterface").error("Cannot read input file %s." % beam_center_file)
+            return
+
+    i = ws.getInstrument()
+    y_pixel_size_mm = i.getNumberParameter('y-pixel-size')[0]
+    Logger("CommandInterface").debug("Y Pixel size = %.2f mm" % y_pixel_size_mm)
+    y_pixel_size = y_pixel_size_mm * 1e-3  # In meters
+    distance_detector1 = i.getComponentByName("detector1").getPos()[2]
+    path_length = distance_detector1 - sdd
+    Logger("CommandInterface").debug("SDD detector1 = %.3f meters. SDD for wing = %.3f meters." % (distance_detector1, sdd))
+    Logger("CommandInterface").debug("Path length for gravitational drop = %.3f meters." % (path_length))
+    r = ws.run()
+    wavelength = r.getProperty("wavelength").value
+    Logger("CommandInterface").debug("Wavelength = %.2f A." % (wavelength))
+
+    drop = calculate_neutron_drop(path_length, wavelength)
+    Logger("CommandInterface").debug("Gravitational drop = %.6f meters." % (drop))
+    # 1 pixel -> y_pixel_size
+    # x pixel -> drop
+    drop_in_pixels = drop / y_pixel_size
+    new_beam_center_y = beam_center_y + drop_in_pixels
+    Logger("CommandInterface").information("Beam Center after:   [%.2f, %.2f] pixels" % (beam_center_x, new_beam_center_y))
+    return beam_center_x, new_beam_center_y

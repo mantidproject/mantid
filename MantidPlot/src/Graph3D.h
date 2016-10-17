@@ -29,8 +29,8 @@
 #ifndef GRAPH3D_H
 #define GRAPH3D_H
 
-#include "Mantid/IProjectSerialisable.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 
 #include <qwt3d_surfaceplot.h>
 #include <qwt3d_function.h>
@@ -42,7 +42,7 @@
 
 #include "Table.h"
 #include "Matrix.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 class MantidMatrix;
 class UserFunction2D;
@@ -299,9 +299,9 @@ public slots:
   void exportVector(const QString &fileName);
   void exportToFile(const QString &fileName);
 
-  static IProjectSerialisable *loadFromProject(const std::string &lines,
-                                               ApplicationWindow *app,
-                                               const int fileVersion);
+  static MantidQt::API::IProjectSerialisable *
+  loadFromProject(const std::string &lines, ApplicationWindow *app,
+                  const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
 
   void zoomChanged(double);
@@ -416,13 +416,15 @@ signals:
   void modified();
 
 private:
-  Graph3D::SurfaceFunctionParams readSurfaceFunction(TSVSerialiser &tsv);
+  Graph3D::SurfaceFunctionParams
+  readSurfaceFunction(MantidQt::API::TSVSerialiser &tsv);
   Graph3D::SurfaceFunctionType
   readSurfaceFunctionType(const std::string &formula);
   MantidMatrix *readWorkspaceForPlot(ApplicationWindow *app,
-                                     TSVSerialiser &tsv);
-  int read3DPlotStyle(TSVSerialiser &tsv);
-  void setupMantidMatrixPlot3D(ApplicationWindow *app, TSVSerialiser &tsv);
+                                     MantidQt::API::TSVSerialiser &tsv);
+  int read3DPlotStyle(MantidQt::API::TSVSerialiser &tsv);
+  void setupMantidMatrixPlot3D(ApplicationWindow *app,
+                               MantidQt::API::TSVSerialiser &tsv);
   void setupPlot3D(ApplicationWindow *app, const QString &caption,
                    const SurfaceFunctionParams &params);
   void setupPlotXYZ(ApplicationWindow *app, const QString &caption,
@@ -433,6 +435,7 @@ private:
                         const SurfaceFunctionParams &params);
   void setupMatrixPlot3D(ApplicationWindow *app, const QString &caption,
                          const SurfaceFunctionParams &params);
+  void readScaleType(const std::string &scaleTypes);
 
   //! Wait this many msecs before redraw 3D plot (used for animations)
   int animation_redraw_wait;

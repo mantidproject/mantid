@@ -54,9 +54,11 @@ public:
    * Default constructor.
    * @param parent the parent widget for the threeslice view
    * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
+   * @param createRenderProxy :: Whether to create a render proxy for this view
    */
   ThreeSliceView(QWidget *parent = 0,
-                 RebinnedSourcesManager *rebinnedSourcesManager = 0);
+                 RebinnedSourcesManager *rebinnedSourcesManager = 0,
+                 bool createRenderProxy = true);
   /// Default destructor.
   ~ThreeSliceView() override;
 
@@ -89,6 +91,11 @@ public:
    * ViewBase::resetDisplay()
    */
   void resetDisplay() override;
+
+  /// @see ViewBase::setView
+  void setView(pqRenderView *view) override;
+  /// @see ViewBase::getViewType
+  ModeControlWidget::Views getViewType() override;
 
 private:
   Q_DISABLE_COPY(ThreeSliceView)

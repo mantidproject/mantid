@@ -8,6 +8,7 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionParam.h"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -53,7 +54,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTIDQT_CUSTOMINTERFACES_DLL EnggDiffractionPresenter
     : public QObject,
       public IEnggDiffractionPresenter,
-      public IEnggDiffractionCalibration {
+      public IEnggDiffractionCalibration,
+      public IEnggDiffractionParam {
   // Q_OBJECT for 'connect' with thread/worker
   Q_OBJECT
 
@@ -146,6 +148,13 @@ private:
   void doCalib(const EnggDiffCalibSettings &cs, const std::string &vanNo,
                const std::string &ceriaNo, const std::string &outFilename,
                const std::string &specNos);
+
+  void appendCalibInstPrefix(const std::string vanNo,
+                             std::string &outVanName) const;
+
+  void appendCalibInstPrefix(const std::string vanNo, const std::string cerNo,
+                             std::string &outVanName,
+                             std::string &outCerName) const;
 
   std::string
   buildCalibrateSuggestedFilename(const std::string &vanNo,
@@ -263,9 +272,12 @@ private:
 
   // returns a directory as a path, creating it if not found, and checking
   // errors
-  Poco::Path outFilesUserDir(const std::string &addToDir);
+  Poco::Path outFilesUserDir(const std::string &addToDir) override;
   Poco::Path outFilesGeneralDir(const std::string &addComponent);
   Poco::Path outFilesRootDir();
+
+  std::string appendToPath(const std::string &path,
+                           const std::string &toAppend) const;
 
   /// convenience methods to copy files to different destinations
   void copyToGeneral(const Poco::Path &source, const std::string &pathComp);
@@ -358,6 +370,9 @@ private:
 
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffractionView *const m_view;
+
+  /// Tracks if the view has started to shut down following a close signal
+  bool m_viewHasClosed;
 
   /// Associated model for this presenter (MVP pattern)
   // const boost::scoped_ptr<EnggDiffractionModel> m_model;

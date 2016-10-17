@@ -194,6 +194,18 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
   setMinimumWidth(750);
   setGeometry(50, 150, 540, 380);
 
+#ifdef Q_OS_MAC
+  // Work around to ensure that floating windows remain on top of the main
+  // application window, but below other applications on Mac
+  // Note: Qt::Tool cannot have both a max and min button on OSX
+  Qt::WindowFlags flags = windowFlags();
+  flags |= Qt::Tool;
+  flags |= Qt::CustomizeWindowHint;
+  flags |= Qt::WindowMinimizeButtonHint;
+  flags |= Qt::WindowCloseButtonHint;
+  setWindowFlags(flags);
+#endif
+
   // Create a tree widget to display the algorithm names in the workspace
   // history
   m_Historytree = new AlgHistoryTreeWidget(this);

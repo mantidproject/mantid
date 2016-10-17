@@ -1316,11 +1316,14 @@ def ConvertFromPythonStringList(to_convert):
 ###################### Accessor functions for Transmission
 def GetTransmissionMonitorSpectrum():
     """
-        Gets the transmission monitor spectrum
+        Gets the transmission monitor spectrum. In the case of 4 or 17788 (for LOQ)
+        the result is 4.
         @return: tranmission monitor spectrum
     """
-    return ReductionSingleton().transmission_calculator.trans_mon
-
+    transmission_monitor = ReductionSingleton().transmission_calculator.trans_mon
+    if ReductionSingleton().instrument._NAME == "LOQ" and transmission_monitor == 17788:
+        transmission_monitor = 4
+    return transmission_monitor
 
 def SetTransmissionMonitorSpectrum(trans_mon):
     """
@@ -1328,10 +1331,12 @@ def SetTransmissionMonitorSpectrum(trans_mon):
         @param trans_mon :: The spectrum to set.
     """
     if su.is_convertible_to_int(trans_mon):
-        ReductionSingleton().transmission_calculator.trans_mon = int(trans_mon)
+        transmission_monitor = int(trans_mon)
+        if transmission_monitor == 4:
+            transmission_monitor = ReductionSingleton().instrument.get_m4_monitor_det_ID()
+        ReductionSingleton().transmission_calculator.trans_mon = transmission_monitor
     else:
         sanslog.warning('Warning: Could not convert the transmission monitor spectrum to int.')
-
 
 def UnsetTransmissionMonitorSpectrum():
     """

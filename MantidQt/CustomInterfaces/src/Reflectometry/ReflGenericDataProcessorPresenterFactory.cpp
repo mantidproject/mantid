@@ -97,11 +97,13 @@ ReflGenericDataProcessorPresenterFactory::create() {
            std::set<std::string>{"FirstTransmissionRun",
                                  "SecondTransmissionRun", "OutputWorkspace"})}};
 
-  // The post-processor algorithm's name, 'Stitch1DMany' by default
-  DataProcessorPostprocessingAlgorithm postprocessor;
+  // The post-processing algorithm
+  DataProcessorPostprocessingAlgorithm postprocessor(
+      "Stitch1DMany", "IvsQ_",
+      std::set<std::string>{"InputWorkspaces", "OutputWorkspace"});
 
   return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-      whitelist, preprocessMap, processor, postprocessor);
+      whitelist, preprocessMap, processor, postprocessor, "LoadISISNexus");
 }
 }
 }

@@ -283,6 +283,12 @@ class DataSet(object):
                 point_data_ws = '%s_' % self._ws_name
                 ConvertToPointData(InputWorkspace=self._ws_name,
                                    OutputWorkspace=point_data_ws)
+                # Copy over the resolution
+                dq_original = mtd[self._ws_name].readDx(0)
+                dq_points = mtd[point_data_ws].dataDx(0)
+                for i in range(len(dq_points)):
+                    dq_points[i] = dq_original[i]
+
                 self._ws_name = point_data_ws
             self._ws_scaled = self._ws_name+"_scaled"
             if update_range:
@@ -518,9 +524,7 @@ class Stitcher(object):
                 _dx = mtd[ws].dataDx(0)
                 if len(_x) == len(_y)+1:
                     xtmp = [(_x[i]+_x[i+1])/2.0 for i in range(len(_y))]
-                    dxtmp = [(_dx[i]+_dx[i+1])/2.0 for i in range(len(_y))]
                     _x = xtmp
-                    _dx = dxtmp
 
                 _x, _y, _e, _dx = self.trim_zeros(_x, _y, _e, _dx)
                 x.extend(_x)
@@ -544,7 +548,7 @@ class Stitcher(object):
         dxtmp = mtd[ws_combined].dataDx(0)
 
         # Fill out dQ
-        npts = len(x)
+        npts = len(dxtmp)
         for i in range(npts):
             dxtmp[i] = dx[i]
 
@@ -636,12 +640,12 @@ def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
         xmin, xmax = d.get_range()
         if is_q_range_limited:
             if i == 0:
-                xmax = q_max[i]
+                xmax = min(q_max[i], xmax)
             elif i < n_data_sets-1:
-                xmin = q_min[i-1]
-                xmax = q_max[i]
+                xmin = max(q_min[i-1], xmin)
+                xmax = min(q_max[i], xmax)
             elif i == n_data_sets-1:
-                xmin = q_min[i-1]
+                xmin = max(q_min[i-1], xmin)
 
         d.set_range(xmin, xmax)
 
