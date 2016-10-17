@@ -97,7 +97,7 @@ void UnwrapMonitor::exec() {
 
   // This will be used later to store the maximum number of bin BOUNDARIES for
   // the rebinning
-  int max_bins = 0;
+  size_t max_bins = 0;
 
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const double L1 = spectrumInfo.l1();
@@ -109,9 +109,9 @@ void UnwrapMonitor::exec() {
       // If the detector flightpath is missing, zero the data
       g_log.debug() << "Detector information for workspace index " << i
                     << " is not available.\n";
-      tempWS->mutableX(i) = 0.0;
-      tempWS->mutableY(i) = 0.0;
-      tempWS->mutableE(i) = 0.0;
+	  tempWS->mutableX(i).assign(tempWS->x.size(i), 0.0);
+      tempWS->mutableY(i).assign(tempWS->y.size(i), 0.0);
+      tempWS->mutableE(i).assign(tempWS->e.size(i), 0.0);
       continue;
     }
 
@@ -142,7 +142,7 @@ void UnwrapMonitor::exec() {
     // Get the maximum number of bins (excluding monitors) for the rebinning
     // below
     if (!spectrumInfo.isMonitor(i)) {
-      const int XLen = static_cast<int>(tempWS->x(i).size());
+      const size_t XLen = static_cast<int>(tempWS->x(i).size());
       if (XLen > max_bins)
         max_bins = XLen;
     }
