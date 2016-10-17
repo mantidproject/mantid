@@ -15,6 +15,26 @@
   <value val="111,311" />
 </parameter>
 
+<!-- Sample log merging behaviour -->
+<parameter name="sample_logs_time_series" type="string">
+    <value val="sample.temperature, sample.pressure" />
+</parameter>
+<parameter name="sample_logs_list" type="string">
+    <value val="run_number" />
+</parameter>
+<parameter name="sample_logs_warn" type="string">
+    <value val="EPP, Fermi.phase, sample.temperature" />
+</parameter>
+<parameter name="sample_logs_warn_tolerances" type="string">
+    <value val="5, 0.001, 50" />
+</parameter>
+<parameter name="sample_logs_fail" type="string">
+    <value val="experiment_identifier, Ei, Fermi.rotation_speed" />
+</parameter>
+<parameter name="sample_logs_fail_tolerances" type="string">
+    <value val="0, 0.1, 2" />
+</parameter>
+
 
 <!-- Reduction workflow parameters under this line -->
 <parameter name="Workflow.beam-width" type="string">
