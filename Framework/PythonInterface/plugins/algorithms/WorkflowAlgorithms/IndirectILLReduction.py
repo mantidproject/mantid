@@ -580,7 +580,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[xmax_left],
                          XMax=x[int(x[-1] / 2) + xmin_right])
 
-        if self._scan_type == 'QENS':
+        if self._reduction_type == 'QENS':
             mask_reduced_ws(red, xmin, xmax)
 
         # cleanup by-products if not needed
@@ -634,7 +634,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         if self._mirror_sense == 14:
             if self._unmirror_option == 0:
                 self.log().warning('Input run for #{0} has two wings, no energy transfer can be performed'.format(red))
-                if self._scan_type == 'QENS':
+                if self._reduction_type == 'QENS':
                     xmin = xmin_left
                     xmax = xmax_right + int(size / 2)
             else:
@@ -644,7 +644,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 CloneWorkspace(InputWorkspace=left, OutputWorkspace='__left_clone')
                 CloneWorkspace(InputWorkspace=right, OutputWorkspace='__right_clone')
                 start_bin, end_bin = perform_unmirror(red, '__left_clone', '__right_clone', self._unmirror_option)
-                if self._scan_type == 'QENS':
+                if self._reduction_type == 'QENS':
                     xmin = np.maximum(mon_start_bin, start_bin)
                     xmax = np.minimum(mon_end_bin, end_bin)
         else:
