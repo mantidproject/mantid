@@ -2,6 +2,7 @@ import unittest
 from mantid.simpleapi import *
 from reduction_settings import *
 
+
 class BasicSettingsObjectUsageTest(unittest.TestCase):
     def setUp(self):
         self.settings = get_settings_object("BasicSettingsObjectUsageTest")

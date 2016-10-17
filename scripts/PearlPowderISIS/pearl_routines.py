@@ -39,8 +39,10 @@ def PEARL_startup(usern="matt", thiscycle='11_1'):
     # currentdatadir="X:\data\cycle_11_1\\"
 
     # directory where the files are going to be found
-    pearl_file_dir = "P:\Mantid\\Calibration\\"
-    currentdatadir = "I:\\"
+    # Calib directory?
+    pearl_file_dir = "D:\\PEARL\\"
+
+    currentdatadir = "D:\\PEARL\\"
     livedatadir = "I:\\"
     # calfile="C:\PEARL\\pearl_offset_11_2.cal"
     calfile = pearl_file_dir + "pearl_offset_11_2.cal"
@@ -48,7 +50,7 @@ def PEARL_startup(usern="matt", thiscycle='11_1'):
     # groupfile=pearl_file_dir + "test_cal_group_mods_11_1.cal"
     vabsorbfile = pearl_file_dir + "pearl_absorp_sphere_10mm_newinst_long.nxs"
     vanfile = pearl_file_dir + "van_spline_all_cycle_11_1.nxs"
-    attenfile = "P:\Mantid\\Attentuation\\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"
+    attenfile = currentdatadir + "PRL112_DC25_10MM_FF.OUT"
     mode = "all"
     tt_mode = "TT88"
     tofbinning = "1500,-0.0006,19900"
@@ -57,7 +59,7 @@ def PEARL_startup(usern="matt", thiscycle='11_1'):
     cycle = thiscycle
     instver = "new2"
     # userdataprocessed is the data output directory
-    userdataprocessed = "P:\\users\\" + "Cycle_" + thiscycle + "\\" + usern + "\\"
+    userdataprocessed = currentdatadir + "ouput\\" + "Cycle_" + thiscycle + "\\" + usern + "\\"
     # sys.path.append(userdataprocessed)
     # userdataprocessed="C:\PEARL\\"
     # PEARL_setuserdir(directory=userdataprocessed)
@@ -342,10 +344,11 @@ def PEARL_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van
 
 
 def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False,
-                    focus_mode=1):
-    alg_range = 12
-    save_range = 3
-    if focus_mode == 2:
+                    version=1):
+    if version == 1:
+        alg_range = 12
+        save_range = 3
+    elif version == 2:
         alg_range = 14
         save_range = 5
 
@@ -375,7 +378,6 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
         d_xye_file = userdataprocessed + "PRL" + number + "_d_xye.dat"
 
         outwork = "PRL" + number
-
     PEARL_read(number, ext, work)
     mantid.Rebin(InputWorkspace=work, OutputWorkspace=work, Params=tofbinning)
     mantid.AlignDetectors(InputWorkspace=work, OutputWorkspace=work, CalibrationFile=calfile)
@@ -495,9 +497,9 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
             if i is 0:
                 append = False
 
-            if focus_mode == 1:
+            if version == 1:
                 mantid.SaveGSS(InputWorkspace=name[i], Filename=gssfile, Append=append, Bank=i + 1)
-            elif focus_mode == 2:
+            elif version == 2:
                 mantid.SaveGSS(InputWorkspace=name[i], Filename=gssfile, Append=False, Bank=i + 1)
 
             mantid.ConvertUnits(InputWorkspace=name[i], OutputWorkspace=name[i], Target="dSpacing")
@@ -609,13 +611,13 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
 
 def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False):
     outwork = pearl_run_focus(number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm, debug=debug,
-                              focus_mode=1)
+                              version=1)
     return outwork
 
 
 def PEARL_focus_v2(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False):
     outwork = pearl_run_focus(number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm, debug=debug,
-                              focus_mode=2)
+                              version=2)
     return outwork
 
 

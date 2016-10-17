@@ -34,6 +34,7 @@ set ( TEST_PY_FILES
       test/DirectEnergyConversionTest.py
       test/ISISDirecInelasticConfigTest.py
       test/IndirectCommonTests.py
+      test/PearlRoutinesTest.py
       test/PyChopTest.py
       test/ReductionWrapperTest.py
       test/ReflectometryQuickAuxiliaryTest.py
