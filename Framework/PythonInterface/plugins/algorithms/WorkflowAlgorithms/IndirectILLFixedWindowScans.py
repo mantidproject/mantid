@@ -191,32 +191,27 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
 
         self.log().information('Call IndirectILLReduction for .nxs file(s) : {0}'.format(self._run_file))
         IndirectILLReduction(Run=self._run_file, MapFile=self._map_file, Analyser=self._analyser,
-                             Reflection=self._reflection, ScanType='FWS', DebugMode=self._debug_mode,
-                             SumRuns=False, UnmirrorOption=1, OutputWorkspace=self._out_ws)
+                             Reflection=self._reflection, ReductionType='FWS', DebugMode=self._debug_mode,
+                             UnmirrorOption=1, OutputWorkspace=self._out_ws)
 
         not_selected_runs = []
         self.selected_runs = []
 
-        # IndirectILLReduction is used and should return a GroupWorkspace
-        if isinstance(mtd[self._out_ws], WorkspaceGroup):
+        # Figure out number of progress reports, i.e. one for each input workspace/file
+        progress = Progress(self, start=0.0, end=1.0, nreports=mtd[self._out_ws].size())
 
-            # Figure out number of progress reports, i.e. one for each input workspace/file
-            progress = Progress(self, start=0.0, end=1.0, nreports=mtd[self._out_ws].size())
+        # Traverse over items in workspace group and reduce individually
+        for i in range(mtd[self._out_ws].size()):
+            # Get name of the i-th workspace
+            input_ws = format(mtd[self._out_ws].getItem(i).getName())
 
-            # Traverse over items in workspace group and reduce individually
-            for i in range(mtd[self._out_ws].size()):
-                # Get name of the i-th workspace
-                input_ws = format(mtd[self._out_ws].getItem(i).getName())
+            progress.report("Reducing run #" + input_ws)
 
-                progress.report("Reducing run #" + input_ws)
-
-                if select_elastic(input_ws) or select_inelastic(input_ws):
-                    self._reduce_run(input_ws)
-                    self.selected_runs.append(input_ws)
-                else:
-                    not_selected_runs.append(input_ws)
-        else:
-            self.log().error('Group workspace expected.')
+            if select_elastic(input_ws) or select_inelastic(input_ws):
+                self._reduce_run(input_ws)
+                self.selected_runs.append(input_ws)
+            else:
+                not_selected_runs.append(input_ws)
 
         # Remove any loaded non-QENS type data if was given:
         for not_selected_ws in not_selected_runs:

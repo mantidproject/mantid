@@ -44,90 +44,6 @@ def monitor_range(ws):
     return x[imin], x[imax]
 
 
-# possibility to replace by the use of SelectNexusFilesByMetadata
-def check_QENS(ws):
-    """
-    Checks if the given ws is of QENS type
-    @param ws :: input ws name
-    @return   :: True if it is, False otherwise
-    """
-    runobject = mtd[ws].getRun()
-    runnumber = mtd[ws].getRunNumber()
-    result = True
-
-    if not runobject.hasProperty('Doppler.maximum_delta_energy'):
-        if not runobject.hasProperty('Doppler.velocity_profile'):
-            logger.warning('Run #%s has no Doppler.velocity_profile neither '
-                           'Doppler.maximum_delta_energy. Assuming QENS type.' % runnumber)
-        else:
-            profile = runobject.getLogData('Doppler.velocity_profile').value
-            if profile == 0:
-                logger.warning('Run #%s has no Doppler.maximum_delta_energy but '
-                               'Doppler.velocity_profile is 0. Assuming QENS type.' % runnumber)
-            else:
-                logger.warning('Run #%s has no Doppler.maximum_delta_energy but '
-                               'Doppler.velocity_profile is not 0. Not a QENS data. Skipping.' % runnumber)
-                result = False
-    else:
-        energy = runobject.getLogData('Doppler.maximum_delta_energy').value
-        if energy == 0:
-            logger.warning('Run #%s has Doppler.maximum_delta_energy 0. Not a QENS data. Skipping.' % runnumber)
-            result = False
-        else:
-            if not runobject.hasProperty('Doppler.velocity_profile'):
-                logger.warning('Run #%s has no Doppler.velocity_profile but '
-                               'Doppler.maximum_delta_energy is not 0. Assuming QENS data.' % runnumber)
-            else:
-                profile = runobject.getLogData('Doppler.velocity_profile').value
-                if profile != 0:
-                    logger.warning('Run #%s has Doppler.velocity_profile not 0. Not a QENS data. Skipping.'
-                                   % runnumber)
-                    result = False
-
-    return result
-
-
-# possibility to replace by the use of SelectNexusFilesByMetadata
-def select_fws(workspace):
-    """
-    Select fixed-window scan
-    @param workspace :: input ws name
-    @return   :: bool
-    """
-    run_object = mtd[workspace].getRun()
-    run_number = mtd[workspace].getRunNumber()
-
-    # Only older Nexus files seem to have a Doppler.frequency defined
-
-    velocity_profile = 1
-    energy = -1
-
-    if run_object.hasProperty('Doppler.velocity_profile'):
-        velocity_profile = run_object.getLogData('Doppler.velocity_profile').value
-    else:
-        logger.debug('Run {0} has no Doppler.velocity_profile'.format(run_number))
-
-    if run_object.hasProperty('Doppler.maximum_delta_energy'):
-        energy = run_object.getLogData('Doppler.maximum_delta_energy').value
-    elif run_object.hasProperty('Doppler.delta_energy'):
-        energy = run_object.getLogData('Doppler.delta_energy').value
-    else:
-        logger.error('Run {0} has neither Doppler.maximum_delta_energy nor Doppler.delta_energy'.
-                     format(run_number))
-
-    if velocity_profile == 1:
-        fws = True
-        logger.information('Run {0} FWS data'.format(run_number))
-    elif energy == 0:
-        fws = True
-        logger.information('Run {0} FWS data'.format(run_number))
-    else:
-        fws = False
-        logger.information('Run {0} not FWS data'.format(run_number))
-
-    return fws
-
-
 def mask_reduced_ws(ws_to_mask, xstart, xend):
     """
     Calls MaskBins twice, for masking the first and last bins of a workspace
@@ -287,7 +203,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
     # Bool flags
     _debug_mode = None
-    _scan_type = None
+    _reduction_type = None
     _sum_runs = None
 
     # Integer
@@ -345,10 +261,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                              validator=StringListValidator(['111','311']),
                              doc='Analyser reflection.')
 
-        self.declareProperty(name='ScanType',
+        self.declareProperty(name='ReductionType',
                              defaultValue='QENS',
                              validator=StringListValidator(['QENS', 'FWS']),
-                             doc='Select quasi-elastic scan QENS or fixed-window scan (FWS) data.')
+                             doc='Select quasi-elastic (QENS) or fixed-window scan (FWS) data.')
 
         self.declareProperty(name='SumRuns',
                              defaultValue=False,
@@ -450,7 +366,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._calib_ws = _ws_or_none(self.getPropertyValue('CalibrationWorkspace'))
         self._reflection = self.getPropertyValue('Reflection')
         self._debug_mode = self.getProperty('DebugMode').value
-        self._scan_type = self.getProperty('ScanType').value
+        self._reduction_type = self.getProperty('ReductionType').value
         self._sum_runs = self.getProperty('SumRuns').value
         self._unmirror_option = self.getProperty('UnmirrorOption').value
 
@@ -471,15 +387,16 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._out_suffixes = [self._red_ws, self._raw_ws, self._det_ws, self._monitor_ws, self._mnorm_ws,
                               self._left_ws, self._right_ws, self._bsub_ws, self._vnorm_ws]
 
+
     def PyExec(self):
 
         self.setUp()
+
         # This must be Load, to be able to treat multiple files
         Load(Filename=self._run_file, OutputWorkspace=self._red_ws)
 
         self.log().information('Loaded .nxs file(s) : {0}'.format(self._run_file))
 
-        not_selected_runs = []
         out_ws_names = []
 
         # check if it is a workspace or workspace group and perform reduction correspondingly
@@ -508,11 +425,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 RenameWorkspace(InputWorkspace=name, OutputWorkspace=ws)
 
                 progress.report("Reducing run #" + run)
-                # check if the run is QENS type and call reduction for each run
-                if (check_QENS(ws) and self._scan_type == 'QENS') or (select_fws(ws) and self._scan_type == 'FWS'):
-                    self._reduce_run(run, out_ws_names)
-                else:
-                    not_selected_runs.append(run)
+                #call reduction for each run
+                self._reduce_run(run, out_ws_names)
         else:
             # get instrument name and load config files
             self._instrument = mtd[self._red_ws].getInstrument()
@@ -524,15 +438,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             # prepend run number
             RenameWorkspace(InputWorkspace=self._red_ws, OutputWorkspace=ws)
 
-            # check if the run is QENS type and call reduction
-            if (check_QENS(ws) and self._scan_type == 'QENS') or (select_fws(ws) and self._scan_type == 'FWS'):
-                self._reduce_run(run, out_ws_names)
-            else:
-                not_selected_runs.append(run)
-
-        # remove any loaded non-QENS type data if was given:
-        for not_selected_ws in not_selected_runs:
-            DeleteWorkspace(not_selected_ws + '_' + self._red_ws)
+            # call reduction
+            self._reduce_run(run, out_ws_names)
 
         # wrap up the output
         self._finalize(out_ws_names)
@@ -587,9 +494,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         right_vanadium = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
                                               Reflection=self._reflection, SumRuns=True, UnmirrorOption=3)
 
-        # if vanadium run is not of QENS type, output will be empty, exit with error
         if not left_vanadium or not right_vanadium:
-            self.log().error('Failed to load vanadium run #{0}. Not a QENS type? Aborting.'.format(self._vanadium_file))
+            self.log().error('Failed to load vanadium run #{0}. Aborting.'.format(self._vanadium_file))
         else:
             # note, that run number will be prepended, so need to rename
             RenameWorkspace(left_vanadium.getItem(0).getName(),'left_van')
@@ -603,6 +509,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         LoadParameterFile(Workspace=background, Filename=self._parameter_file)
         NormaliseToMonitor(InputWorkspace=background, OutputWorkspace=background, MonitorSpectrum=1)
         GroupDetectors(InputWorkspace=background, OutputWorkspace=background, MapFile=self._map_file, Behaviour='Sum')
+
 
     def _reduce_run(self, run, ws_names):
         """
@@ -678,7 +585,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             xmax_left = mtd[left].blocksize()
             xmax_right = mtd[left].blocksize()
 
-            if self._scan_type == 'QENS':
+            if self._reduction_type == 'QENS':
                 # Mask bins out of monitor range (zero bins) for left and right wings
                 xmin_left, xmax_left = monitor_range('__left_mon')
                 xmin_right, xmax_right = monitor_range('__right_mon')
@@ -748,7 +655,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             # One wing, no right workspace
             xmin, xmax = monitor_range(mon)
 
-        if self._scan_type == 'QENS':
+        if self._reduction_type == 'QENS':
             mask_reduced_ws(red, xmin, xmax)
 
         # cleanup by-products if not needed
@@ -773,11 +680,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         else:
             energy = -1
 
-        if self._scan_type == 'QENS':
+        if self._reduction_type == 'QENS':
             # Use default bin by bin normalisation to monitor
             NormaliseToMonitor(InputWorkspace=red, OutputWorkspace=red, MonitorWorkspace=mon)
 
-        elif self._scan_type == 'FWS':
+        elif self._reduction_type == 'FWS':
             if energy == 0.0:
                 # Integrate over the elastic peak range
                 x = mtd[red].readX(0)
@@ -870,8 +777,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.log().debug(str(output))
 
         if output.size == 0:
-            self.log().error('No runs found for input option {0}'.format(self._scan_type))
-            raise RuntimeError('No runs found for input option {0}'.format(self._scan_type))
+            self.log().error('No runs found for input option {0}'.format(self._reduction_type))
+            raise RuntimeError('No runs found for input option {0}'.format(self._reduction_type))
 
         # group and set the main output
         GroupWorkspaces(InputWorkspaces=output[:, 0], OutputWorkspace=self._out_suffixes[0])
