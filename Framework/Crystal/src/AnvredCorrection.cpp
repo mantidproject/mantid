@@ -208,17 +208,17 @@ void AnvredCorrection::exec() {
     Mantid::Kernel::Units::Wavelength wl;
     auto points = m_inputWS->points(i);
 
-    // Get a reference to the Y's in the output WS for storing the factors
-    auto &Y = correctionFactors->mutableY(i);
-    auto &E = correctionFactors->mutableE(i);
-
     // share bin boundaries
     const auto &inSpec = m_inputWS->getSpectrum(i);
-    correctionFactors->setBinEdges(i, inSpec.binEdges());
+    correctionFactors->setSharedX(i, inSpec.sharedX());
 
     // get references to input data for calculations
     const auto &Yin = inSpec.y();
     const auto &Ein = inSpec.x();
+
+    // Get a reference to the Y's in the output WS for storing the factors
+    auto &Y = correctionFactors->mutableY(i);
+    auto &E = correctionFactors->mutableE(i);
     // Loop through the bins in the current spectrum
     for (int64_t j = 0; j < specSize; j++) {
 
