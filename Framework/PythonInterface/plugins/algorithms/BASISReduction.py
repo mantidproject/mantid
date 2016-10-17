@@ -147,7 +147,7 @@ class BASISReduction(PythonAlgorithm):
         self.setPropertySettings("NormWavelengthRange", ifDivideByVanadium)
         self.setPropertyGroup("NormWavelengthRange", titleDivideByVanadium)
 
-    #pylint: disable-msg=too-many-branches
+    #pylint: disable=too-many-branches
     def PyExec(self):
         config['default.facility'] = "SNS"
         config['default.instrument'] = self._long_inst
