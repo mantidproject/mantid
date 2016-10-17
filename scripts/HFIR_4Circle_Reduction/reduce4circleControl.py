@@ -260,9 +260,8 @@ class CWSCDReductionControl(object):
 
         # Construct a new peak workspace by combining all single peak
         ub_peak_ws_name = 'Temp_UB_Peak'
-        zero_hkl = False
-        hkl_to_int = True
-        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name, zero_hkl, hkl_to_int)
+        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name,
+                                    index_from_spice=True, hkl_to_int=True)
 
         # Calculate UB matrix
         try:
@@ -1785,7 +1784,7 @@ class CWSCDReductionControl(object):
         return True, ''
 
     def refine_ub_matrix_indexed_peaks(self, peak_info_list, set_hkl_int):
-        """ Refine UB matrix by indexed peaks
+        """ Refine UB matrix by SPICE-indexed peaks
         Requirements: input is a list of PeakInfo objects and there are at least 3
                         non-degenerate peaks
         Guarantees: UB matrix is refined.  Refined UB matrix and lattice parameters
@@ -1801,7 +1800,8 @@ class CWSCDReductionControl(object):
 
         # Construct a new peak workspace by combining all single peak
         ub_peak_ws_name = 'TempUBIndexedPeaks'
-        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name, False, set_hkl_int)
+        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name, index_from_spice=True,
+                                    hkl_to_int=set_hkl_int)
 
         # Calculate UB matrix
         try:
@@ -1837,12 +1837,8 @@ class CWSCDReductionControl(object):
 
         # construct a new workspace by combining all single peaks
         ub_peak_ws_name = 'TempRefineUBLatticePeaks'
-        if use_spice_hkl:
-            zero_hkl = False
-        else:
-            zero_hkl = True
-        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name, zero_hkl, set_hkl_int)
-
+        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name, index_from_spice=use_spice_hkl,
+                                    hkl_to_int=set_hkl_int)
         # set UB matrix from input string. It is UB(0, 0), UB(0, 1), UB(0, 2), UB(1, 0), ..., UB(3, 3)
         api.SetUB(Workspace=ub_peak_ws_name,
                   UB=ub_matrix_str)
@@ -1908,19 +1904,24 @@ class CWSCDReductionControl(object):
         return result_tuple
 
     @staticmethod
-    def _build_peaks_workspace(peak_info_list, peak_ws_name, zero_hkl, hkl_to_int):
-        """ From a list of PeakInfo, using the averaged peak centre of each of them
+    def _build_peaks_workspace(peak_info_list, peak_ws_name, index_from_spice, hkl_to_int):
+        """
+        From a list of PeakInfo, using the averaged peak centre of each of them
         to build a new PeaksWorkspace
         Requirements: a list of PeakInfo
         Guarantees: a PeaksWorkspace is created in AnalysisDataService.
-        :param peak_info_list:
+        :param peak_info_list: peak information list.  only peak center in Q-sample is required
         :param peak_ws_name:
+        :param index_from_spice: boolean
+        :param hkl_to_int:
         :return:
         """
         # check
         assert isinstance(peak_info_list, list), 'Peak Info List must be a list.'
         assert len(peak_info_list) > 0, 'Peak Info List cannot be empty.'
         assert isinstance(peak_ws_name, str), 'Peak workspace name must be a string.'
+        assert isinstance(index_from_spice, bool), 'Indexing (hkl) source must be a boolean but not of ' \
+                                                   '%s' % type(index_from_spice)
 
         # create an empty
         api.CreatePeaksWorkspace(NumberOfPeaks=0, OutputWorkspace=peak_ws_name)
@@ -1934,24 +1935,28 @@ class CWSCDReductionControl(object):
             peak_info_i = peak_info_list[i_peak_info]
             peak_ws_i = peak_info_i.get_peak_workspace()
             assert peak_ws_i.getNumberPeaks() > 0
-            # get any peak to add
+
+            # get any peak to add. assuming that each peak workspace has one and only one peak
             peak_temp = peak_ws_i.getPeak(0)
             peak_ws.addPeak(peak_temp)
-
-            # set the peak in ub peak workspace right
             peak_i = peak_ws.getPeak(i_peak_info)
-            # user HKL
-            if zero_hkl is True:
-                h = k = l = 0.
-            else:
-                # FIXME/TODO/NOW/ - it should use zero_hkl?
+
+            # set the peak indexing to each pear
+            if index_from_spice:
+                # get HKL from spice
                 h, k, l = peak_info_i.get_spice_hkl()
-                if hkl_to_int:
-                    # convert hkl to integer
-                    h = float(math.copysign(1, h)*int(abs(h)+0.5))
-                    k = float(math.copysign(1, k)*int(abs(k)+0.5))
-                    l = float(math.copysign(1, l)*int(abs(l)+0.5))
+            else:
+                # get HKL from user setup
+                h, k, l = peak_info_i.get_user_index()
             # END-IF
+
+            if hkl_to_int:
+                # convert hkl to integer
+                h = float(math.copysign(1, h) * int(abs(h) + 0.5))
+                k = float(math.copysign(1, k) * int(abs(k) + 0.5))
+                l = float(math.copysign(1, l) * int(abs(l) + 0.5))
+            # END-IF
+
             peak_i.setHKL(h, k, l)
             # q-sample
             q_x, q_y, q_z = peak_info_i.get_peak_centre()
