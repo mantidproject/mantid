@@ -12,6 +12,7 @@ from mantid import config, mtd, logger
 
 _ws_or_none = lambda s: mtd[s] if s != '' else None
 
+
 def extract_workspace(ws, ws_out, x_start, x_end):
     """
     Extracts a part of the workspace
@@ -22,6 +23,7 @@ def extract_workspace(ws, ws_out, x_start, x_end):
     """
     CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws_out, XMin=x_start, XMax=x_end)
     ScaleX(InputWorkspace=ws_out, OutputWorkspace=ws_out, Factor=-x_start, Operation='Add')
+
 
 def monitor_range(ws):
     """
@@ -39,8 +41,9 @@ def monitor_range(ws):
     # Maximum position left
     imin = np.nanargmax(np.array(y[0:mid]))
     # Maximum position right
-    imax = np.nanargmax(np.array(y[mid:size])) + 1 + mid + 1
+    imax = np.nanargmax(np.array(y[mid:size])) + 1 + mid
     return x[imin], x[imax]
+
 
 # possibility to replace by the use of SelectNexusFilesByMetadata
 def check_QENS(ws):
@@ -94,7 +97,7 @@ def mask_reduced_ws(ws_to_mask, xstart, xend):
         xend:     MaskBins between x[xend] and x[-1]
 
     """
-    x_values = ws_to_mask.readX(0)
+    x_values = mtd[ws_to_mask].readX(0)
 
     if xstart > 0:
         logger.debug('Mask bins smaller than {0}'.format(xstart))
@@ -124,6 +127,7 @@ def convert_to_energy(ws):
     xnew = mtd[ws].readX(0)  # energy array
     logger.information('Energy range : %f to %f' % (xnew[0], xnew[-1]))
 
+
 def energy_formula(ws):
     """
     Calculate the formula for channel number to energy transfer transformation
@@ -135,7 +139,7 @@ def energy_formula(ws):
     mid = float((size - 1) / 2)
     gRun = mtd[ws].getRun()
     delta_energy = 0.
-    scale = 1000 # from micro ev to milli ev
+    scale = 1000  # from micro ev to milli ev
 
     if gRun.hasProperty('Doppler.maximum_delta_energy'):
         delta_energy = gRun.getLogData('Doppler.maximum_delta_energy').value  # max energy in micro eV
@@ -152,6 +156,7 @@ def energy_formula(ws):
     logger.information('Energy transform formula: ' + formula)
 
     return formula
+
 
 def perform_unmirror(red, left, right, option):
     """
@@ -234,6 +239,7 @@ def perform_unmirror(red, left, right, option):
         Scale(InputWorkspace=red, OutputWorkspace=red, Factor=0.5, Operation='Multiply')
 
     return start_bin, end_bin
+
 
 class IndirectILLReduction(DataProcessorAlgorithm):
 
