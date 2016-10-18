@@ -11,10 +11,10 @@
 import csv
 import math
 import random
-import os
+import numpy
 
 from fourcircle_utility import *
-from peakprocesshelper import PeakProcessHelper
+from peakprocesshelper import PeakProcessRecord
 import fputility
 import project_manager
 
@@ -226,7 +226,7 @@ class CWSCDReductionControl(object):
         assert AnalysisDataService.doesExist(peak_ws_name)
 
         # calculate the peaks with weight
-        helper = PeakProcessHelper(exp_number, scan_number, peak_ws_name)
+        helper = PeakProcessRecord(exp_number, scan_number, peak_ws_name)
         helper.calculate_peak_center()
         peak_center = helper.get_peak_centre()
         # set the merged peak information to data structure
@@ -254,9 +254,9 @@ class CWSCDReductionControl(object):
         if num_peak_info < 2:
             return False, 'Too few peaks are input to calculate UB matrix.  Must be >= 2.'
         for peak_info in peak_info_list:
-            if isinstance(peak_info, PeakProcessHelper) is False:
+            if isinstance(peak_info, PeakProcessRecord) is False:
                 raise NotImplementedError('Input PeakList is of type %s.' % str(type(peak_info_list[0])))
-            assert isinstance(peak_info, PeakProcessHelper)
+            assert isinstance(peak_info, PeakProcessRecord)
 
         # Construct a new peak workspace by combining all single peak
         ub_peak_ws_name = 'Temp_UB_Peak'
@@ -614,7 +614,7 @@ class CWSCDReductionControl(object):
         for scan_number in scan_number_list:
             peak_dict = dict()
             try:
-                peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)]. get_current_hkl()
+                peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)]. get_hkl(user_hkl=True)
             except RuntimeError as run_err:
                 return False, str('Peak index error: %s.' % run_err)
 
@@ -1136,9 +1136,10 @@ class CWSCDReductionControl(object):
                                'considered. Contact developer for this issue.')
         else:
             hkl_v3d = temp_index_ws.getPeak(0).getHKL()
-            hkl = [hkl_v3d.X(), hkl_v3d.Y(), hkl_v3d.Z()]
+            hkl = numpy.array([hkl_v3d.X(), hkl_v3d.Y(), hkl_v3d.Z()])
 
-        peak_info.set_indexed_hkl(hkl)
+        # set HKL to peak
+        peak_info.set_hkl(hkl)
 
         # delete temporary workspace
         api.DeleteWorkspace(Workspace=temp_index_ws_name)
@@ -1584,6 +1585,9 @@ class CWSCDReductionControl(object):
             except RuntimeError as e:
                 err_msg += 'Unable to convert scan %d data to Q-sample MDEvents due to %s' % (scan_no, str(e))
                 return False, err_msg
+            except ValueError as e:
+                err_msg += 'Unable to convert scan %d data to Q-sample MDEvents due to %s.' % (scan_no, str(e))
+                return False, err_msg
             # END-TRY
 
         else:
@@ -1783,14 +1787,13 @@ class CWSCDReductionControl(object):
 
         return True, ''
 
-    def refine_ub_matrix_indexed_peaks(self, peak_info_list, set_hkl_int):
+    def refine_ub_matrix_indexed_peaks(self, peak_info_list):
         """ Refine UB matrix by SPICE-indexed peaks
         Requirements: input is a list of PeakInfo objects and there are at least 3
                         non-degenerate peaks
         Guarantees: UB matrix is refined.  Refined UB matrix and lattice parameters
                     with errors are returned
         :param peak_info_list: list of PeakInfo
-        :param set_hkl_int: set HKL to nearest integer
         :return: 2-tuple: (True, (ub matrix, lattice parameters, lattice parameters errors))
                           (False, error message)
         """
@@ -1904,7 +1907,7 @@ class CWSCDReductionControl(object):
         return result_tuple
 
     @staticmethod
-    def _build_peaks_workspace(peak_info_list, peak_ws_name, hkl_to_int):
+    def _build_peaks_workspace(peak_info_list, peak_ws_name):
         """
         From a list of PeakInfo, using the averaged peak centre of each of them
         to build a new PeaksWorkspace
@@ -2090,7 +2093,7 @@ class CWSCDReductionControl(object):
         assert isinstance(md_ws_name, str)
 
         # create a PeakInfo instance if it does not exist
-        peak_info = PeakProcessHelper(exp_number, scan_number, peak_ws_name)
+        peak_info = PeakProcessRecord(exp_number, scan_number, peak_ws_name)
         self._myPeakInfoDict[(exp_number, scan_number)] = peak_info
 
         # set the other information

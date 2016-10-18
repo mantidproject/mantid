@@ -147,7 +147,7 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_view_data_set_3d)
 
         self.connect(self.ui.pushButton_refineUB, QtCore.SIGNAL('clicked()'),
-                     self.do_refine_ub)
+                     self.do_refine_ub_indexed_peaks)
         self.connect(self.ui.pushButton_refineUBFFT, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub_fft)
         self.connect(self.ui.pushButton_findUBLattice, QtCore.SIGNAL('clicked()'),
@@ -191,7 +191,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_selectAllScans2Merge, QtCore.SIGNAL('clicked()'),
                      self.do_select_merged_scans)
         self.connect(self.ui.pushButton_indexMergedScans, QtCore.SIGNAL('clicked()'),
-                     self.do_set_peaks_hkl)
+                     self.do_index_merged_scans_peaks)
         self.connect(self.ui.pushButton_applyKShift, QtCore.SIGNAL('clicked()'),
                      self.do_apply_k_shift)
         self.connect(self.ui.pushButton_clearMergeScanTable, QtCore.SIGNAL('clicked()'),
@@ -356,7 +356,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def _build_peak_info_list(self, zero_hkl):
         """ Build a list of PeakInfo to build peak workspace
-        :return: list of peak information, which is a PeakProcessHelper instance
+        :return: list of peak information, which is a PeakProcessRecord instance
         """
         # Collecting all peaks that will be used to refine UB matrix
         row_index_list = self.ui.tableWidget_peaksCalUB.get_selected_rows(True)
@@ -378,14 +378,14 @@ class MainWindow(QtGui.QMainWindow):
                 peak_info = self._myControl.get_peak_info(exp_number, scan_num, pt_num)
                 if zero_hkl:
                     # set HKL to zero
-                    peak_info.set_user_hkl(0, 0, 0)
+                    peak_info.set_hkl(0, 0, 0)
                 else:
                     # set from table
                     miller_index = self.ui.tableWidget_peaksCalUB.get_hkl(i_row)
-                    peak_info.set_user_hkl(miller_index)
+                    peak_info.set_hkl_np_array(numpy.array(miller_index))
             except AssertionError as ass_err:
                 raise RuntimeError('Unable to retrieve PeakInfo due to %s.' % str(ass_err))
-            assert isinstance(peak_info, r4c.PeakProcessHelper)
+            assert isinstance(peak_info, r4c.PeakProcessRecord)
             peak_info_list.append(peak_info)
         # END-FOR
 
@@ -596,8 +596,8 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(str(ass_err))
             return
 
-        assert isinstance(peak_info_obj, r4c.PeakProcessHelper)
-        peak_info_obj.set_user_hkl(h, k, l)
+        assert isinstance(peak_info_obj, r4c.PeakProcessRecord)
+        peak_info_obj.set_hkl(h, k, l)
         self.set_ub_peak_table(peak_info_obj)
 
         # Clear
@@ -768,7 +768,7 @@ class MainWindow(QtGui.QMainWindow):
                 if pt_num < 0:
                     pt_num = None
                 peak_info = self._myControl.get_peak_info(exp_number, scan_num, pt_num)
-                assert isinstance(peak_info, r4c.PeakProcessHelper)
+                assert isinstance(peak_info, r4c.PeakProcessRecord)
                 peak_info_list.append(peak_info)
         # END-FOR
 
@@ -960,10 +960,11 @@ class MainWindow(QtGui.QMainWindow):
         if self.ui.checkBox_loadHKLfromFile.isChecked() is True:
             # This is the first time that in the workflow to get HKL from MD workspace
             peak_info = self._myControl.get_peak_info(exp_no, scan_no)
-            try:
-                peak_info.retrieve_hkl_from_spice_table()
-            except RuntimeError as run_err:
-                self.pop_one_button_dialog('Unable to locate peak info due to %s.' % str(run_err))
+            assert peak_info is not None, 'Unable to locate PeakProcessRecord (peak info).'
+            # try:
+            #     peak_info.retrieve_hkl_from_spice_table()
+            # except RuntimeError as run_err:
+            #     self.pop_one_button_dialog('Unable to locate peak info due to %s.' % str(run_err))
         # END-IF
 
         # Set up correct values to table tableWidget_peaksCalUB
@@ -1762,14 +1763,17 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_refine_ub(self):
+    def do_refine_ub_indexed_peaks(self):
         """
-        Refine UB matrix
+        Refine UB matrix by indexed peaks
         :return:
         """
         # refine UB matrix by indexed peak
         peak_info_list = self._build_peak_info_list(zero_hkl=False)
         # set_hkl_int = self.ui.checkBox_roundHKLInt.isChecked()
+
+        # check where the indexing comes from
+        blabla
 
         # Refine UB matrix
         try:
@@ -2138,15 +2142,13 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_set_peaks_hkl(self):
-        """ Set all peaks' HKL value in the merged-peak tab
+    def do_index_merged_scans_peaks(self):
+        """ Index all peaks' HKL value in the merged-peak tab by UB matrix that is just calculated
         :return:
         """
         # get the parameters
         exp_number = int(self.ui.lineEdit_exp.text())
         hkl_src = str(self.ui.comboBox_indexFrom.currentText())
-
-        round_hkl = self.ui.checkBox_roundHKL.isChecked()
 
         # loop through all rows
         num_rows = self.ui.tableWidget_mergeScans.rowCount()
@@ -2156,8 +2158,8 @@ class MainWindow(QtGui.QMainWindow):
 
             # get or calculate HKL
             if hkl_src == 'From SPICE':
-                # get HKL from SPICE
-                hkl_i = self._myControl.get_peak_info(exp_number, scan_number=scan_i).get_spice_hkl()
+                # get HKL from SPICE (non-user-hkl)
+                hkl_i = self._myControl.get_peak_info(exp_number, scan_number=scan_i).get_hkl(user_hkl=False)
             else:
                 # calculate HKL from SPICE
                 try:
@@ -2177,13 +2179,13 @@ class MainWindow(QtGui.QMainWindow):
                 # END-IF-ELSE(index)
             # END-IF-ELSE (hkl_from_spice)
 
-            # round
-            if round_hkl:
-                hkl_i = hb3a.round_hkl(hkl_i)
+            # # round
+            # if round_hkl:
+            #     hkl_i = hb3a.round_hkl(hkl_i)
 
             # set & show
-            self._myControl.get_peak_info(exp_number, scan_i).set_hkl(hkl_i)
-            self.ui.tableWidget_mergeScans.set_hkl(row_index, hkl_i)
+            self._myControl.get_peak_info(exp_number, scan_i).set_hkl_np_array(hkl_i)
+            self.ui.tableWidget_mergeScans.set_hkl_np_array(row_index, hkl_i)
         # END-FOR
 
         return
@@ -2758,11 +2760,11 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # Check requirements
-        assert isinstance(peak_info, r4c.PeakProcessHelper)
+        assert isinstance(peak_info, r4c.PeakProcessRecord)
 
         # Get data
         exp_number, scan_number = peak_info.get_experiment_info()
-        h, k, l = peak_info.get_spice_hkl()
+        h, k, l = peak_info.get_hkl(user_hkl=False)
         q_x, q_y, q_z = peak_info.get_peak_centre()
         m1 = self._myControl.get_sample_log_value(exp_number, scan_number, 1, '_m1')
         wave_length = hb3a.convert_to_wave_length(m1_position=m1)
@@ -3059,10 +3061,10 @@ class MainWindow(QtGui.QMainWindow):
 
         # get PeakInfo
         peak_info = self._myControl.get_peak_info(exp_number, scan_number)
-        assert isinstance(peak_info, r4c.PeakProcessHelper)
+        assert isinstance(peak_info, r4c.PeakProcessRecord)
 
         # retrieve and set HKL from spice table
-        peak_info.retrieve_hkl_from_spice_table()
+        # peak_info.retrieve_hkl_from_spice_table()
 
         # add to table
         self.set_ub_peak_table(peak_info)

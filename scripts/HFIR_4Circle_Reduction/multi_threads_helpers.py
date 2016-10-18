@@ -77,7 +77,7 @@ class AddPeaksThread(QThread):
 
             # get PeakInfo
             peak_info = self._mainWindow.controller.get_peak_info(self._expNumber, scan_number)
-            assert isinstance(peak_info, r4c.PeakProcessHelper)
+            assert isinstance(peak_info, r4c.PeakProcessRecord)
 
             # send signal to main window for peak being added
             self.peakAddedSignal.emit(self._expNumber, scan_number)
