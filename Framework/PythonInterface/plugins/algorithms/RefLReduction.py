@@ -2,6 +2,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.simpleapi import *
+from mantid.kernel import *
 
 # import sfCalculator
 import sys
@@ -9,8 +10,6 @@ import os
 sys.path.insert(0,os.path.dirname(__file__))
 import sfCalculator # noqa
 sys.path.pop(0)
-
-from mantid.kernel import * # noqa
 
 
 class RefLReduction(PythonAlgorithm):
