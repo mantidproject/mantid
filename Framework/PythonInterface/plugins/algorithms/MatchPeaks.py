@@ -5,6 +5,7 @@ from mantid.simpleapi import *
 from mantid.kernel import Direction
 import numpy as np
 
+
 def mask_ws(ws_to_mask, xstart, xend):
     """
     Calls MaskBins twice, for masking the first and last bins of a workspace
