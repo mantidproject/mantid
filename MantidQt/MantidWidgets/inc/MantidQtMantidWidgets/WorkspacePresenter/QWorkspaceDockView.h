@@ -270,11 +270,11 @@ private:
       *m_convertToMatrixWorkspace, *m_convertMDHistoToMatrixWorkspace,
       *m_clearUB, *m_plotSurface, *m_plotContour;
 
+  QAtomicInt m_updateCount;
   bool m_treeUpdating;
   bool m_promptDelete;
   QMainWindow *m_appParent;
   SaveFileType m_saveFileType;
-  QAtomicInt m_updateCount;
   SortCriteria m_sortCriteria;
   SortDirection m_sortDirection;
   /// Temporarily keeps names of selected workspaces during tree update
