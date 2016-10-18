@@ -1,9 +1,10 @@
-#pylint: disable=no-init,too-many-instance-attributes,too-many-branches
+# pylint: disable=no-init,too-many-instance-attributes,too-many-branches
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
+
 
 def _normalize_to_lowest_temp(elt_ws_name):
     """
@@ -23,7 +24,6 @@ def _normalize_to_lowest_temp(elt_ws_name):
 
 
 class ElasticWindowMultiple(DataProcessorAlgorithm):
-
     _sample_log_name = None
     _sample_log_value = None
     _input_workspaces = None
@@ -85,10 +85,12 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         background_range_end = self.getProperty('BackgroundRangeEnd').value
 
         if background_range_start != Property.EMPTY_DBL and background_range_end == Property.EMPTY_DBL:
-            issues['BackgroundRangeEnd'] = 'If background range start was given and background range end must also be provided.'
+            issues[
+                'BackgroundRangeEnd'] = 'If background range start was given and background range end must also be provided.'
 
         if background_range_start == Property.EMPTY_DBL and background_range_end != Property.EMPTY_DBL:
-            issues['BackgroundRangeStart'] = 'If background range end was given and background range start must also be provided.'
+            issues[
+                'BackgroundRangeStart'] = 'If background range end was given and background range start must also be provided.'
 
         return issues
 
@@ -98,7 +100,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         # Do setup
         self._setup()
 
-        logger.debug('in_ws:'+str(type(self._input_workspaces)))
+        logger.debug('in_ws:' + str(type(self._input_workspaces)))
 
         # Get input workspaces
         input_workspace_names = self._input_workspaces.getNames()
@@ -289,9 +291,9 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         if self._sample_log_name in run:
             # Look for temperature in logs in workspace
             tmp = run[self._sample_log_name].value
-            value_action = {'last_value': lambda x: x[len(x)-1],
+            value_action = {'last_value': lambda x: x[len(x) - 1],
                             'average': lambda x: x.mean()
-                           }
+                            }
             temp = value_action[self._sample_log_value](tmp)
             logger.debug('Temperature %d K found for run: %s' % (temp, run_name))
             return temp

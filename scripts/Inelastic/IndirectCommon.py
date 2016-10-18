@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,redefined-builtin
+# pylint: disable=invalid-name,redefined-builtin
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
 
@@ -7,7 +7,6 @@ from mantid import config, logger
 
 from IndirectImport import import_mantidplot
 
-import os.path
 import math
 import datetime
 import re
@@ -24,6 +23,7 @@ def EndTime(prog):
     message = 'Program ' + prog + ' ended @ ' + str(datetime.datetime.now())
     logger.notice(message)
     logger.notice('----------')
+
 
 def getInstrRun(ws_name):
     """
@@ -53,6 +53,7 @@ def getInstrRun(ws_name):
                 continue
 
     return instrument, run_number
+
 
 def getWSprefix(wsname):
     """
@@ -107,17 +108,16 @@ def getEfixed(workspace):
     raise ValueError('No Efixed parameter found')
 
 
-
 def GetWSangles(inWS):
-    num_hist = s_api.mtd[inWS].getNumberHistograms()                        # get no. of histograms/groups
+    num_hist = s_api.mtd[inWS].getNumberHistograms()  # get no. of histograms/groups
     source_pos = s_api.mtd[inWS].getInstrument().getSource().getPos()
     sample_pos = s_api.mtd[inWS].getInstrument().getSample().getPos()
     beam_pos = sample_pos - source_pos
-    angles = []                                     # will be list of angles
+    angles = []  # will be list of angles
     for index in range(0, num_hist):
-        detector = s_api.mtd[inWS].getDetector(index)                   # get index
-        two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi        # calc angle
-        angles.append(two_theta)                        # add angle
+        detector = s_api.mtd[inWS].getDetector(index)  # get index
+        two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi  # calc angle
+        angles.append(two_theta)  # add angle
     return angles
 
 
@@ -155,6 +155,7 @@ def GetThetaQ(ws):
         raise RuntimeError('Cannot get theta and Q for workspace %s' % ws)
 
     return theta, q
+
 
 def PadArray(inarray, nfixed):
     """
