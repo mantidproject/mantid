@@ -55,6 +55,7 @@ private slots:
 
 private:
   Ui::ILLEnergyTransfer m_uiForm;
+  double m_backScaling = 1.;
 };
 } // namespace CustomInterfaces
 } // namespace Mantid

@@ -286,6 +286,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                                  '7 like 6, but use Vanadium run for peak positions')
 
         self.declareProperty(name='BackgroundScalingFactor',defaultValue=1.,
+                             validator=FloatBoundedValidator(lower=0),
                              doc='Scaling factor for background subtraction')
 
         # Output workspace properties
