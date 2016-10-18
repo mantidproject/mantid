@@ -110,9 +110,9 @@ void ComptonProfile::buildCaches() {
   this->cacheYSpaceValues(m_workspace->points(m_wsIndex), detpar);
 }
 
-void ComptonProfile::cacheYSpaceValues(
-    const HistogramData::Points &tseconds,
-    const Algorithms::DetectorParams &detpar, const ResolutionParams &respar) {
+void ComptonProfile::cacheYSpaceValues(const HistogramData::Points &tseconds,
+                                       const Algorithms::DetectorParams &detpar,
+                                       const ResolutionParams &respar) {
   m_resolutionFunction->setAttributeValue("Mass", m_mass);
   m_resolutionFunction->cacheResolutionComponents(detpar, respar);
   this->cacheYSpaceValues(tseconds, detpar);
