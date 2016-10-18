@@ -545,7 +545,6 @@ void LoadILLTOF::loadDataIntoTheWorkSpace(
   size_t spec = 0;
 
   auto const &instrument = m_localWorkspace->getInstrument();
-  std::vector<detid_t> monitorIDs = instrument->getMonitors();
 
   for (const auto &monitor : monitors) {
     m_localWorkspace->setHistogram(spec++, m_localWorkspace->binEdges(0),
