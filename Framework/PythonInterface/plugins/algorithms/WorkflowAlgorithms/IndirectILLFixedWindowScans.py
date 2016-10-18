@@ -1,96 +1,13 @@
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
-
-from mantid.simpleapi import *
-from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty, \
-                       WorkspaceGroupProperty, FileProperty, MultipleFileProperty, FileAction, \
-                       WorkspaceGroup, Progress
-from mantid.kernel import Direction, config, logger, StringListValidator
-import os.path
-import numpy as np
 import re
+import numpy as np
+from mantid.simpleapi import *
+from mantid.api import *
+from mantid.kernel import *
+
 from IndirectILLReduction import IndirectILLReduction
-
-
-# possibility to replace by the use of SelectNexusFilesByMetadata
-def select_inelastic(workspace):
-    """
-    Select fixed-window scan
-    @param workspace :: input ws name
-    @return   ::
-    """
-    run_object = mtd[workspace].getRun()
-    run_number = mtd[workspace].getRunNumber()
-
-    velocity_profile = -1
-    energy = -1
-    frequency = -1
-
-    inelastic = False
-
-    if run_object.hasProperty('Doppler.velocity_profile'):
-        velocity_profile = run_object.getLogData('Doppler.velocity_profile').value
-    else:
-        logger.debug('Run {0} has no Doppler.velocity_profile'.format(run_number))
-
-    if run_object.hasProperty('Doppler.frequency'):
-        frequency = run_object.getLogData('Doppler.frequency').value
-    else:
-        logger.debug('Run {0} has no Doppler.frequency'.format(run_number))
-
-    if run_object.hasProperty('Doppler.maximum_delta_energy'):
-        energy = run_object.getLogData('Doppler.maximum_delta_energy').value
-    elif run_object.hasProperty('Doppler.delta_energy'):
-        energy = run_object.getLogData('Doppler.delta_energy').value
-    else:
-        logger.error('Run {0} has neither Doppler.maximum_delta_energy nor Doppler.delta_energy'.
-                     format(run_number))
-
-    if velocity_profile == 1 and (energy > 0.0 or frequency > 0.0):
-        inelastic = True
-        logger.information('Run {0} inelastic FWS data'.format(run_number))
-    else:
-        logger.information('Run {0} not inelastic FWS data'.format(run_number))
-
-    return inelastic
-
-
-def select_elastic(workspace):
-    """
-    Select fixed-window scan
-    @param workspace :: input ws name
-    @return   ::
-    """
-    run_object = mtd[workspace].getRun()
-    run_number = mtd[workspace].getRunNumber()
-
-    energy = -1
-    frequency = -1
-
-    elastic = False
-
-    if run_object.hasProperty('Doppler.frequency'):
-        frequency = run_object.getLogData('Doppler.frequency').value
-    else:
-        logger.debug('Run {0} has no Doppler.frequency'.format(run_number))
-
-    if run_object.hasProperty('Doppler.maximum_delta_energy'):
-        energy = run_object.getLogData('Doppler.maximum_delta_energy').value
-    elif run_object.hasProperty('Doppler.delta_energy'):
-        energy = run_object.getLogData('Doppler.delta_energy').value
-    else:
-        logger.error('Run {0} has neither Doppler.maximum_delta_energy nor Doppler.delta_energy'.
-                     format(run_number))
-
-    if energy == 0.0 or frequency == 0.0:
-        elastic = True
-        logger.information('Run {0} elastic FWS data'.format(run_number))
-    else:
-        logger.information('Run {0} not elastic FWS data'.format(run_number))
-
-    return elastic
-
 
 # This function already exists in IndirectILLReduction
 def monitor_range(workspace):
@@ -194,7 +111,6 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
                              Reflection=self._reflection, ReductionType='FWS', DebugMode=self._debug_mode,
                              UnmirrorOption=1, OutputWorkspace=self._out_ws)
 
-        not_selected_runs = []
         self.selected_runs = []
 
         # Figure out number of progress reports, i.e. one for each input workspace/file
@@ -207,15 +123,9 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
 
             progress.report("Reducing run #" + input_ws)
 
-            if select_elastic(input_ws) or select_inelastic(input_ws):
-                self._reduce_run(input_ws)
-                self.selected_runs.append(input_ws)
-            else:
-                not_selected_runs.append(input_ws)
+            self._reduce_run(input_ws)
 
-        # Remove any loaded non-QENS type data if was given:
-        for not_selected_ws in not_selected_runs:
-            DeleteWorkspace(not_selected_ws)
+            self.selected_runs.append(input_ws)
 
         self._set_workspace_properties()
 
@@ -227,14 +137,18 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
         self.log().information('Reducing run #' + input_ws)
         x_values = mtd[input_ws].readX(0)
 
-        if select_elastic(input_ws):
+        energy = mtd[input_ws].getRun().getLogData('Doppler.maximum_delta_energy').value
+
+        if energy == 0.:
+            # Elastic
             # Attention: after the reduction, all x-values are zero!
             x_min = - 0.5
             x_max = + 0.5
             logger.information('EFWS scan from {0} to {1}'.format(x_min, x_max))
             Integration(InputWorkspace=input_ws, OutputWorkspace=input_ws,
                         RangeLower=x_min, RangeUpper=x_max)
-        elif select_inelastic(input_ws):
+        else:
+            # Inelastic
             # Get the two maximum peak positions of the inelastic fixed-window scan
             x_min, x_max = monitor_range(input_ws)
             # Enlarge integration interval on left and right side, take into account the overall blocksize (in general
@@ -250,8 +164,6 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
             Integration(InputWorkspace=input_ws, OutputWorkspace='__right',
                         RangeLower=x_max, RangeUpper=x_values[len(x_values) - 1])
             Plus(LHSWorkspace='__left', RHSWorkspace='__right', OutputWorkspace=input_ws)
-        else:
-            self.log().error('Neither elastic not inelastic fixed-window scan.')
 
     def _set_workspace_properties(self):
 
@@ -271,8 +183,6 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
             the_workspace = mtd[self._out_ws].getItem(i).getRun()
             if the_workspace.hasProperty('Doppler.maximum_delta_energy'):
                 energy = the_workspace.getLogData('Doppler.maximum_delta_energy').value
-            elif the_workspace.hasProperty('Doppler.delta_energy'):
-                energy = the_workspace.getLogData('Doppler.delta_energy').value
             else:
                 energy = float('nan')
             energies.append(energy)
@@ -304,7 +214,7 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
                 if i == indices[j]:
                     # Pick workspace with same energy value
                     self.log().debug('Workspace {0} for GroupWorkspace of energy {1}'.format
-                                        (_selected_runs[j][0] + '_' + self._out_ws, j))
+                                     (_selected_runs[j][0] + '_' + self._out_ws, j))
                     group.append(_selected_runs[j][0] + '_' + self._out_ws)
 
             # Create the GroupWorkspace and set workspace property
