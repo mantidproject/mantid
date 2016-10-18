@@ -98,6 +98,10 @@ void ILLEnergyTransfer::run() {
   QString backgroundFilename = m_uiForm.rfBackgroundRun->getUserInput().toString();
   reductionAlg->setProperty("BackgroundRun", backgroundFilename.toStdString());
 
+  // Handle background scaling factor
+  QString scalingF = m_uiForm.leBackgroundFactor->text();
+  reductionAlg->setProperty("BackgroundScalingFactor", scalingF.toDouble());
+
   // Handle mapping file
   bool useMapFile = m_uiForm.rdGroupChoose->isChecked();
   if (useMapFile) {
