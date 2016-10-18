@@ -29,7 +29,6 @@ class IndirectILLReductionTest(unittest.TestCase):
 
         self._run_name = '146191'
         self._multi_runs = '146191,146192'
-        self._old_run = 'ILLIN16B_034745.nxs'
 
         # Reference workspace after loading (comparisons using blocksize(), getNumberHistograms(), ( SampleLogs, ...))
         ws_loaded = Load(self._run_name)
@@ -68,16 +67,6 @@ class IndirectILLReductionTest(unittest.TestCase):
 
         IndirectILLReduction(**self._args)
 
-        self.assertEqual(mtd['red'].size(), 1, "WorkspaceGroup red should contain one workspace")
-        self._workspace_properties(mtd['red'])
-
-    def test_old_run(self):
-        self._args['Run'] = self._old_run
-        self._args['UnmirrorOption'] = 0
-
-        alg_test = run_algorithm('IndirectILLReduction', **self._args)
-
-        self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
         self.assertEqual(mtd['red'].size(), 1, "WorkspaceGroup red should contain one workspace")
         self._workspace_properties(mtd['red'])
 
