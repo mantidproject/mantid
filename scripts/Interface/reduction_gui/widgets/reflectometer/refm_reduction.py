@@ -1,26 +1,24 @@
 #pylint: disable=invalid-name, too-many-arguments
-from PyQt4 import QtGui, uic, QtCore
+from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
 import math
 import os
-import time
-import sys
 from functools import partial
 from reduction_gui.reduction.reflectometer.refm_data_script import DataSets as REFMDataSets
 from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
-from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.reflectometer.ui_refm_reduction
 
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
+    import mantidplot # noqa
     from mantid.api import *
     #TODO: this will need to change once we get rid of the old python API
     from reduction.instruments.reflectometer import data_manipulation
     IS_IN_MANTIDPLOT = True
 except:
     pass
+
 
 class DataReflWidget(BaseWidget):
     """
@@ -363,8 +361,8 @@ class DataReflWidget(BaseWidget):
                     f = open(file_path,'w')
                     f.write(content)
                     f.close()
-                    QtGui.QMessageBox.information(self, "Automated reduction script saved",\
-                                           "The automated reduction script has been updated")
+                    QtGui.QMessageBox.information(self, "Automated reduction script saved",
+                                                  "The automated reduction script has been updated")
                 except:
                     _report_error()
             else:
@@ -852,8 +850,8 @@ class DataReflWidget(BaseWidget):
         m.DataPeakPixels = [int(self._summary.data_peak_from_pixel.text()),
                             int(self._summary.data_peak_to_pixel.text())]
 
-        m.data_x_range = [int(self._summary.x_min_edit.text()),\
-                     int(self._summary.x_max_edit.text())]
+        m.data_x_range = [int(self._summary.x_min_edit.text()),
+                          int(self._summary.x_max_edit.text())]
         m.data_x_range_flag = self._summary.data_low_res_range_switch.isChecked()
 
         m.norm_x_range = [int(self._summary.norm_x_min_edit.text()),
@@ -996,11 +994,3 @@ class DataReflWidget(BaseWidget):
         self._summary.data_background_to_pixel1.setText("%-d" % int(backmax))
         self._summary.data_from_tof.setText("%-d" % int(tofmin))
         self._summary.data_to_tof.setText("%-d" % int(tofmax))
-
-
-
-
-
-
-
-

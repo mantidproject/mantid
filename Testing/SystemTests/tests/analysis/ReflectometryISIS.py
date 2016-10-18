@@ -8,6 +8,7 @@ from mantid.simpleapi import *
 
 from abc import ABCMeta, abstractmethod
 
+
 class ReflectometryISIS(stresstesting.MantidStressTest):
 
     __metaclass__ = ABCMeta # Mark as an abstract class
@@ -100,6 +101,8 @@ class ReflectometryISIS(stresstesting.MantidStressTest):
         return True
 
 # Specialisation for testing POLREF
+
+
 class POLREF_ReflectometryISIS(ReflectometryISIS):
     def get_workspace_name(self):
         return "POLREF4699"

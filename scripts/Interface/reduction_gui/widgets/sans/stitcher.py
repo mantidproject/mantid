@@ -123,6 +123,7 @@ class StitcherWidget(BaseWidget):
         self.populate_combobox(self._content.high_q_combo)
         self._content.high_q_combo.setEditable(True)
         # pylint: disable = no-self-argument
+
         class ShowEventFilter(QtCore.QObject):
             def eventFilter(obj_self, filteredObj, event):
                 if event.type() == QtCore.QEvent.HoverEnter:

@@ -7,6 +7,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/Run.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;

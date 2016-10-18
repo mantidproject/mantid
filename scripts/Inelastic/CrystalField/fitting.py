@@ -110,7 +110,7 @@ class CrystalField(object):
         self._ion = Ion
         self._symmetry = Symmetry
         self._toleranceEnergy = 1e-10
-        self._toleranceIntensity = 1e-3
+        self._toleranceIntensity = 1e-1
         self._fieldParameters = {}
         self._fieldTies = {}
         self._fieldConstraints = []
@@ -856,4 +856,3 @@ class CrystalFieldFit(object):
     def _set_fit_properties(self, alg):
         for prop in self._fit_properties.items():
             alg.setProperty(*prop)
-

@@ -15,6 +15,7 @@ class NTableWidget(QtGui.QTableWidget):
     NdavTableWidget inherits from QTableWidget by extending the features
     for easy application.
     """
+
     def __init__(self, parent):
         """
 

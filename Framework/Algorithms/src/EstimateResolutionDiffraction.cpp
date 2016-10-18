@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/IDetector.h"
@@ -55,7 +53,6 @@ const std::string EstimateResolutionDiffraction::category() const {
   return "Diffraction\\Utility";
 }
 
-//----------------------------------------------------------------------------------------------
 void EstimateResolutionDiffraction::init() {
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -82,7 +79,6 @@ void EstimateResolutionDiffraction::init() {
                   "the dataset.");
 }
 
-//----------------------------------------------------------------------------------------------
 /**
   */
 void EstimateResolutionDiffraction::exec() {
@@ -97,7 +93,6 @@ void EstimateResolutionDiffraction::exec() {
   setProperty("OutputWorkspace", m_outputWS);
 }
 
-//----------------------------------------------------------------------------------------------
 /**
   */
 void EstimateResolutionDiffraction::processAlgProperties() {
@@ -133,7 +128,6 @@ double EstimateResolutionDiffraction::getWavelength() {
   return cwltimeseries->timeAverageValue();
 }
 
-//----------------------------------------------------------------------------------------------
 /**
   */
 void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
@@ -155,7 +149,6 @@ void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
   g_log.notice() << "L1 = " << m_L1 << "\n";
 }
 
-//----------------------------------------------------------------------------------------------
 /**
   */
 void EstimateResolutionDiffraction::createOutputWorkspace() {
@@ -167,7 +160,6 @@ void EstimateResolutionDiffraction::createOutputWorkspace() {
   API::WorkspaceFactory::Instance().initializeFromParent(m_inputWS, m_outputWS,
                                                          false);
 }
-//----------------------------------------------------------------------------------------------
 /**
   */
 void EstimateResolutionDiffraction::estimateDetectorResolution() {

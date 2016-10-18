@@ -34,7 +34,7 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
             filenames = [name for name in filenames
                          if runNumber in name]
             if len(filenames) <= 0:
-                raise RuntimeError("Failed to find live file '%s'" \
+                raise RuntimeError("Failed to find live file '%s'"
                                    % runNumber)
 
         return os.path.join(livepath, filenames[-1])

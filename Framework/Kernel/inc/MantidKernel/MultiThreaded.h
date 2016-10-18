@@ -1,11 +1,75 @@
 #ifndef MANTID_KERNEL_MULTITHREADED_H_
 #define MANTID_KERNEL_MULTITHREADED_H_
 
+#include "MantidKernel/DataItem.h"
+
 #include <mutex>
 
 namespace Mantid {
-namespace Kernel {} // namespace
-} // namespace
+namespace Kernel {
+
+/** Thread-safety check
+ * Checks the workspace to ensure it is suitable for multithreaded access.
+ * NULL workspaces are assumed suitable
+ * @param workspace pointer to workspace to verify.
+ * @return Whether workspace is threadsafe.
+ */
+template <typename Arg>
+inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type
+threadSafe(Arg workspace) {
+  static_assert(
+      std::is_base_of<DataItem, typename std::remove_pointer<Arg>::type>::value,
+      "Parameter must be derived from Mantid::Kernel::DataItem!");
+  return !workspace || workspace->threadSafe();
+}
+
+/** Thread-safety check
+  * Checks the workspace to ensure it is suitable for multithreaded access.
+  * NULL workspaces are assumed suitable
+  * @param workspace pointer to workspace to verify.
+  * @param others pointers to all other workspaces which need to be checked.
+  * @return whether workspace is threadsafe.
+  */
+template <typename Arg, typename... Args>
+inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type
+threadSafe(Arg workspace, Args &&... others) {
+  static_assert(
+      std::is_base_of<DataItem, typename std::remove_pointer<Arg>::type>::value,
+      "Parameter must be derived from Mantid::Kernel::DataItem!");
+  return (!workspace || workspace->threadSafe()) &&
+         threadSafe(std::forward<Args>(others)...);
+}
+
+/** Thread-safety check
+ * Checks the workspace to ensure it is suitable for multithreaded access.
+ * @param workspace reference to workspace to verify.
+ * @return Whether workspace is threadsafe.
+ */
+template <typename Arg>
+inline typename std::enable_if<!std::is_pointer<Arg>::value, bool>::type
+threadSafe(const Arg &workspace) {
+  static_assert(std::is_base_of<DataItem, Arg>::value,
+                "Parameter must be derived from Mantid::Kernel::DataItem!");
+  return workspace.threadSafe();
+}
+
+/** Thread-safety check
+ * Checks the workspace to ensure it is suitable for multithreaded access.
+ * @param workspace reference to workspace to verify.
+ * @param others references or pointers to all other workspaces which need to be
+ * checked.
+ * @return whether workspace is threadsafe.
+ */
+template <typename Arg, typename... Args>
+inline typename std::enable_if<!std::is_pointer<Arg>::value, bool>::type
+threadSafe(const Arg &workspace, Args &&... others) {
+  static_assert(std::is_base_of<DataItem, Arg>::value,
+                "Parameter must be derived from Mantid::Kernel::DataItem!");
+  return workspace.threadSafe() && threadSafe(std::forward<Args>(others)...);
+}
+
+} // namespace Kernel
+} // namespace Mantid
 
 // The syntax used to define a pragma within a macro is different on windows and
 // GCC
@@ -98,16 +162,6 @@ namespace Kernel {} // namespace
     PRAGMA(omp parallel for if ( ( !workspace1 || workspace1->threadSafe() ) && \
     ( !workspace2 || workspace2->threadSafe() ) ))
 
-/** Includes code to add OpenMP commands to run the next for loop in parallel.
-*	 All three workspaces are checked to ensure they are suitable for
-*multithreaded access
-*  but NULL workspaces are assumed to be safe
-*/
-#define PARALLEL_FOR3(workspace1, workspace2, workspace3)                      \
-    PRAGMA(omp parallel for if ( (!workspace1 || workspace1->threadSafe()) && \
-    ( !workspace2 || workspace2->threadSafe() ) && \
-    ( !workspace3 || workspace3->threadSafe() ) ))
-
 /** Ensures that the next execution line or block is only executed if
 * there are multple threads execting in this region
 */
@@ -164,7 +218,6 @@ namespace Kernel {} // namespace
 #define PARALLEL_FOR_NO_WSP_CHECK_FIRSTPRIVATE2(variable1, variable2)
 #define PARALLEL_FOR1(workspace1)
 #define PARALLEL_FOR2(workspace1, workspace2)
-#define PARALLEL_FOR3(workspace1, workspace2, workspace3)
 #define IF_PARALLEL if (false)
 #define IF_NOT_PARALLEL
 #define PARALLEL_CRITICAL(name)

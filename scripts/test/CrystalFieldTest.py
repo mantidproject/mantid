@@ -9,6 +9,7 @@ from CrystalField.energies import energies
 from mantid.simpleapi import CalculateChiSquared
 from mantid.kernel import ConfigService
 
+c_mbsr = 79.5774715459  # Conversion from barn to mb/sr
 
 class BackgroundTest(unittest.TestCase):
 
@@ -138,11 +139,11 @@ class CrystalFieldTests(unittest.TestCase):
         pl = cf.getPeakList()
         self.assertEquals(pl.shape, (2, 7))
         self.assertAlmostEqual(pl[0, 0], 0.0, 10)
-        self.assertAlmostEqual(pl[1, 0], 1.99118947, 8)
+        self.assertAlmostEqual(pl[1, 0], 1.99118947*c_mbsr, 6)
         self.assertAlmostEqual(pl[0, 1], 3.85696607, 8)
-        self.assertAlmostEqual(pl[1, 1], 0.86130642, 8)
+        self.assertAlmostEqual(pl[1, 1], 0.86130642*c_mbsr, 6)
         self.assertAlmostEqual(pl[0, 2], 2.41303393, 8)
-        self.assertAlmostEqual(pl[1, 2], 0.37963778, 8)
+        self.assertAlmostEqual(pl[1, 2], 0.37963778*c_mbsr, 6)
 
     def test_api_CrystalField_peaks_list_2(self):
         from CrystalField import CrystalField
@@ -151,20 +152,20 @@ class CrystalFieldTests(unittest.TestCase):
         pl1 = cf.getPeakList()
         self.assertEquals(pl1.shape, (2, 7))
         self.assertAlmostEqual(pl1[0, 0], 0.0, 10)
-        self.assertAlmostEqual(pl1[1, 0], 1.99118947, 8)
+        self.assertAlmostEqual(pl1[1, 0], 1.99118947*c_mbsr, 6)
         self.assertAlmostEqual(pl1[0, 1], 3.85696607, 8)
-        self.assertAlmostEqual(pl1[1, 1], 0.86130642, 8)
+        self.assertAlmostEqual(pl1[1, 1], 0.86130642*c_mbsr, 6)
         self.assertAlmostEqual(pl1[0, 2], 2.41303393, 8)
-        self.assertAlmostEqual(pl1[1, 2], 0.37963778, 8)
+        self.assertAlmostEqual(pl1[1, 2], 0.37963778*c_mbsr, 6)
 
         pl2 = cf.getPeakList(1)
         self.assertEquals(pl2.shape, (2, 7))
         self.assertAlmostEqual(pl2[0, 0], 0.0, 10)
-        self.assertAlmostEqual(pl2[1, 0], 1.97812511, 8)
+        self.assertAlmostEqual(pl2[1, 0], 1.97812511*c_mbsr, 6)
         self.assertAlmostEqual(pl2[0, 1], 3.85696607, 8)
-        self.assertAlmostEqual(pl2[1, 1], 0.82930948, 8)
+        self.assertAlmostEqual(pl2[1, 1], 0.82930948*c_mbsr, 6)
         self.assertAlmostEqual(pl2[0, 2], 2.41303393, 8)
-        self.assertAlmostEqual(pl2[1, 2], 0.38262684, 8)
+        self.assertAlmostEqual(pl2[1, 2], 0.38262684*c_mbsr, 6)
 
     def test_PeaksFunction(self):
         from CrystalField import PeaksFunction
@@ -179,14 +180,16 @@ class CrystalFieldTests(unittest.TestCase):
     def test_api_CrystalField_spectrum(self):
         from CrystalField import CrystalField
         cf = CrystalField('Ce', 'C2v', B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068,
-                          Temperature=[4.0, 50.0], FWHM=[0.1, 0.2])
+                          Temperature=[4.0, 50.0], FWHM=[0.1, 0.2], ToleranceIntensity=0.001*c_mbsr)
         x, y = cf.getSpectrum(0)
+        y = y / c_mbsr
         self.assertAlmostEqual(y[60], 5.52333486, 8)
         self.assertAlmostEqual(y[61], 10.11673418, 8)
         self.assertAlmostEqual(y[62], 12.1770908, 8)
         self.assertAlmostEqual(y[63], 7.63981716, 8)
         self.assertAlmostEqual(y[64], 4.08015236, 8)
         x, y = cf.getSpectrum(1)
+        y = y / c_mbsr
         self.assertAlmostEqual(y[45], 0.29822612216224065, 8)
         self.assertAlmostEqual(y[46], 0.46181038787922241, 8)
         self.assertAlmostEqual(y[47], 0.66075719314988057, 8)
@@ -200,19 +203,21 @@ class CrystalFieldTests(unittest.TestCase):
 
         r = [0.0, 1.45, 2.4, 3.0, 3.85]
         x, y = cf.getSpectrum(0, r)
+        y = y / c_mbsr
         self.assertEqual(x[0], 0.0)
         self.assertEqual(x[1], 1.45)
         self.assertEqual(x[2], 2.4)
         self.assertEqual(x[3], 3.0)
         self.assertEqual(x[4], 3.85)
 
-        self.assertAlmostEqual(y[0], 12.474954833565066, 8)
-        self.assertAlmostEqual(y[1], 1.1901690051585272, 8)
-        self.assertAlmostEqual(y[2], 0.12278091428521705, 8)
-        self.assertAlmostEqual(y[3], 0.042940202606241519, 8)
-        self.assertAlmostEqual(y[4], 10.837438382097396, 8)
+        self.assertAlmostEqual(y[0], 12.474954833565066, 6)
+        self.assertAlmostEqual(y[1], 1.1901690051585272, 6)
+        self.assertAlmostEqual(y[2], 0.12278091428521705, 6)
+        self.assertAlmostEqual(y[3], 0.042940202606241519, 6)
+        self.assertAlmostEqual(y[4], 10.837438382097396, 6)
 
         x, y = cf.getSpectrum(1, r)
+        y = y / c_mbsr
         self.assertEqual(x[0], 0.0)
         self.assertEqual(x[1], 1.45)
         self.assertEqual(x[2], 2.4)
@@ -228,8 +233,9 @@ class CrystalFieldTests(unittest.TestCase):
     def test_api_CrystalField_spectrum_0(self):
         from CrystalField import CrystalField
         cf = CrystalField('Ce', 'C2v', B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068,
-                          Temperature=4.0, FWHM=0.1)
+                          Temperature=4.0, FWHM=0.1, ToleranceIntensity=0.001*c_mbsr)
         x, y = cf.getSpectrum()
+        y = y / c_mbsr
         self.assertAlmostEqual(y[60], 5.52333486, 8)
         self.assertAlmostEqual(y[61], 10.11673418, 8)
         self.assertAlmostEqual(y[62], 12.1770908, 8)
@@ -248,26 +254,30 @@ class CrystalFieldTests(unittest.TestCase):
         workspace = CreateWorkspace(x, y, e)
 
         x, y = cf.getSpectrum(0, workspace)
-        self.assertAlmostEqual(y[0], 12.474954833565066, 8)
-        self.assertAlmostEqual(y[1], 4.3004160689570403, 8)
-        self.assertAlmostEqual(y[2], 1.4523089577890338, 8)
-        self.assertAlmostEqual(y[3], 0.6922657279528992, 8)
-        self.assertAlmostEqual(y[4], 0.40107924259746491, 8)
-        self.assertAlmostEqual(y[15], 0.050129858433581413, 8)
-        self.assertAlmostEqual(y[16], 0.054427788297191478, 8)
+        y = y / c_mbsr
+        self.assertAlmostEqual(y[0], 12.474954833565066, 6)
+        self.assertAlmostEqual(y[1], 4.3004160689570403, 6)
+        self.assertAlmostEqual(y[2], 1.4523089577890338, 6)
+        self.assertAlmostEqual(y[3], 0.6922657279528992, 6)
+        self.assertAlmostEqual(y[4], 0.40107924259746491, 6)
+        self.assertAlmostEqual(y[15], 0.050129858433581413, 6)
+        self.assertAlmostEqual(y[16], 0.054427788297191478, 6)
         x, y = cf.getSpectrum(1, workspace)
-        self.assertAlmostEqual(y[0], 6.3046701386938624, 8)
-        self.assertAlmostEqual(y[1], 4.2753076741531455, 8)
-        self.assertAlmostEqual(y[2], 2.1778230746690772, 8)
-        self.assertAlmostEqual(y[3], 1.2011188019120242, 8)
-        self.assertAlmostEqual(y[4], 0.74036819427919942, 8)
+        y = y / c_mbsr
+        self.assertAlmostEqual(y[0], 6.3046701386938624, 6)
+        self.assertAlmostEqual(y[1], 4.2753076741531455, 6)
+        self.assertAlmostEqual(y[2], 2.1778230746690772, 6)
+        self.assertAlmostEqual(y[3], 1.2011188019120242, 6)
+        self.assertAlmostEqual(y[4], 0.74036819427919942, 6)
         x, y = cf.getSpectrum(workspace)
-        self.assertAlmostEqual(y[0], 12.474954833565066, 8)
-        self.assertAlmostEqual(y[1], 4.3004160689570403, 8)
+        y = y / c_mbsr
+        self.assertAlmostEqual(y[0], 12.474954833565066, 6)
+        self.assertAlmostEqual(y[1], 4.3004160689570403, 6)
         workspace = CreateWorkspace(x, y, e, 2)
         x, y = cf.getSpectrum(workspace, 1)
-        self.assertAlmostEqual(y[0], 0.050129858433581413, 8)
-        self.assertAlmostEqual(y[1], 0.054427788297191478, 8)
+        y = y / c_mbsr
+        self.assertAlmostEqual(y[0], 0.050129858433581413, 6)
+        self.assertAlmostEqual(y[1], 0.054427788297191478, 6)
 
     def test_api_CrystalField_spectrum_peaks(self):
         from CrystalField import CrystalField, PeaksFunction
@@ -279,6 +289,7 @@ class CrystalFieldTests(unittest.TestCase):
         cf.peaks.param[3]['Sigma'] = 0.2
         cf.peaks.param[4]['Sigma'] = 0.3
         x, y = cf.getSpectrum()
+        y = y / c_mbsr
         self.assertAlmostEqual(y[123], 0.067679792127989441, 8)
         self.assertAlmostEqual(y[124], 0.099056455104978708, 8)
 
@@ -292,6 +303,8 @@ class CrystalFieldTests(unittest.TestCase):
         cf.peaks[0].param[3]['Sigma'] = 0.3
         x0, y0 = cf.getSpectrum()
         x1, y1 = cf.getSpectrum(1)
+        y0 = y0 / c_mbsr
+        y1 = y1 / c_mbsr
         self.assertAlmostEqual(y0[139], 0.094692329804360792, 8)
         self.assertAlmostEqual(y0[142], 0.07623409141946233, 8)
         self.assertAlmostEqual(y1[139], 0.16332256923203797, 8)
@@ -305,9 +318,10 @@ class CrystalFieldTests(unittest.TestCase):
         cf.peaks.param[1]['Sigma'] = 0.1
         cf.peaks.param[2]['Sigma'] = 0.2
         cf.peaks.param[3]['Sigma'] = 0.3
-        cf.background = Background(peak=Function('PseudoVoigt', Height=10, FWHM=1, Mixing=0.5),
-                                   background=Function('LinearBackground', A0=1.0, A1=0.1))
+        cf.background = Background(peak=Function('PseudoVoigt', Height=10*c_mbsr, FWHM=1, Mixing=0.5),
+                                   background=Function('LinearBackground', A0=1.0*c_mbsr, A1=0.1*c_mbsr))
         x, y = cf.getSpectrum()
+        y = y / c_mbsr
         self.assertAlmostEqual(y[80], 2.5853135104737239, 8)
         self.assertAlmostEqual(y[90], 6.6726231052015859, 8)
 
@@ -319,14 +333,18 @@ class CrystalFieldTests(unittest.TestCase):
         cf.peaks[0].param[1]['Sigma'] = 0.1
         cf.peaks[0].param[2]['Sigma'] = 0.2
         cf.peaks[0].param[3]['Sigma'] = 0.3
-        cf.background = Background(peak=Function('Gaussian', Height=10, Sigma=1),
-                                   background=Function('FlatBackground', A0=1.0)) * 2
+        cf.background = Background(peak=Function('Gaussian', Height=10*c_mbsr, Sigma=1),
+                                   background=Function('FlatBackground', A0=1.0*c_mbsr)) * 2
         cf.background[0].peak.param['Sigma'] = 0.3
         cf.background[1].peak.param['Sigma'] = 0.4
-        cf.background[1].background.param['A0'] = 2
+        cf.background[1].background.param['A0'] = 2*c_mbsr
 
         x0, y0 = cf.getSpectrum()
         x1, y1 = cf.getSpectrum(1)
+        # Original test was for FOCUS convention - intensity in barn. 
+        # Now use ISIS convention with intensity in milibarn/steradian
+        y0 = y0 / c_mbsr
+        y1 = y1 / c_mbsr
         self.assertAlmostEqual(y0[100], 12.882103856689408, 8)
         self.assertAlmostEqual(y0[120], 1.2731198929218952, 8)
         self.assertAlmostEqual(y0[139], 1.0946924013479913, 8)
@@ -344,23 +362,24 @@ class CrystalFieldFitTest(unittest.TestCase):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
         origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
                   Temperature=44.0, FWHM=1.1)
-        origin.background = Background(peak=Function('Gaussian', Height=10, Sigma=1),
+        origin.background = Background(peak=Function('Gaussian', Height=10*c_mbsr, Sigma=1),
                             background=Function('LinearBackground', A0=1.0, A1=0.01))
         x, y = origin.getSpectrum()
         ws = makeWorkspace(x, y)
 
         cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
                       Temperature=44.0, FWHM=1.0)
-        cf.background = Background(peak=Function('Gaussian', Height=10, Sigma=1),
+        cf.background = Background(peak=Function('Gaussian', Height=10*c_mbsr, Sigma=1),
                         background=Function('LinearBackground', A0=1.0, A1=0.01))
         cf.ties(B20=0.37737, B60=0, B62=0, B64=0, B66=0, IntensityScaling=1)
+        cf.ToleranceIntensity = 0.001
         fit = CrystalFieldFit(cf, InputWorkspace=ws)
         fit.fit()
         self.assertAlmostEqual(cf.background.peak.param['PeakCentre'], 7.62501442212e-10, 8)
         self.assertAlmostEqual(cf.background.peak.param['Sigma'], 1.00000000277, 8)
-        self.assertAlmostEqual(cf.background.peak.param['Height'], 9.99999983559, 8)
-        self.assertAlmostEqual(cf.background.background.param['A1'], 0.0100000014282, 8)
-        self.assertAlmostEqual(cf.background.background.param['A0'], 0.999999976941, 8)
+        self.assertAlmostEqual(cf.background.peak.param['Height'], 9.99999983559*c_mbsr, 4)
+        self.assertAlmostEqual(cf.background.background.param['A1'], 0.0100000014282, 4)
+        self.assertAlmostEqual(cf.background.background.param['A0'], 0.999999976941, 4)
         self.assertEqual(cf.param['IB63'], 0.0)
         self.assertEqual(cf.param['IB62'], 0.0)
         self.assertEqual(cf.param['IB61'], 0.0)
@@ -389,26 +408,20 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertEqual(cf.param['B41'], 0.0)
         self.assertEqual(cf.param['B43'], 0.0)
         self.assertEqual(cf.param['B64'], 0.0)
-        self.assertAlmostEqual(cf.param['B20'], 0.37737, 8)
-        self.assertAlmostEqual(cf.param['B22'], 3.97700087765, 8)
-        self.assertAlmostEqual(cf.param['B40'], -0.0317867635188, 8)
-        self.assertAlmostEqual(cf.param['B42'], -0.116110640723, 8)
-        self.assertAlmostEqual(cf.param['B44'], -0.125439939584, 8)
+        self.assertAlmostEqual(cf.param['B20'], 0.37737, 4)
+        self.assertAlmostEqual(cf.param['B22'], 3.97700087765, 4)
+        self.assertAlmostEqual(cf.param['B40'], -0.0317867635188, 4)
+        self.assertAlmostEqual(cf.param['B42'], -0.116110640723, 4)
+        self.assertAlmostEqual(cf.param['B44'], -0.125439939584, 4)
         self.assertAlmostEqual(cf.peaks.param[0]['PeakCentre'], 0.0, 8)
-        self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.10000009456, 8)
-        self.assertAlmostEqual(cf.peaks.param[0]['Amplitude'], 2.74936658109, 8)
-        self.assertAlmostEqual(cf.peaks.param[1]['PeakCentre'], 29.3261118837, 8)
-        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.10000293773, 8)
-        self.assertAlmostEqual(cf.peaks.param[1]['Amplitude'], 0.720400223007, 8)
-        self.assertAlmostEqual(cf.peaks.param[2]['PeakCentre'], 44.341248146, 8)
-        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.10000812804, 8)
-        self.assertAlmostEqual(cf.peaks.param[2]['Amplitude'], 0.429808829601, 8)
-        self.assertAlmostEqual(cf.peaks.param[3]['PeakCentre'], 0.0, 8)
-        self.assertAlmostEqual(cf.peaks.param[3]['FWHM'], 1.0, 8)
-        self.assertAlmostEqual(cf.peaks.param[3]['Amplitude'], 0.0, 8)
-        self.assertAlmostEqual(cf.peaks.param[4]['PeakCentre'], 0.0, 8)
-        self.assertAlmostEqual(cf.peaks.param[4]['FWHM'], 1.0, 8)
-        self.assertAlmostEqual(cf.peaks.param[4]['Amplitude'], 0.0, 8)
+        self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.10000009456, 4)
+        self.assertAlmostEqual(cf.peaks.param[0]['Amplitude'], 2.74936658109*c_mbsr, 2)
+        self.assertAlmostEqual(cf.peaks.param[1]['PeakCentre'], 29.3261118837, 4)
+        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.10000293773, 4)
+        self.assertAlmostEqual(cf.peaks.param[1]['Amplitude'], 0.720400223007*c_mbsr, 2)
+        self.assertAlmostEqual(cf.peaks.param[2]['PeakCentre'], 44.341248146, 4)
+        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.10000812804, 4)
+        self.assertAlmostEqual(cf.peaks.param[2]['Amplitude'], 0.429808829601*c_mbsr, 2)
 
 
     def test_CrystalFieldFit_multi_spectrum(self):
@@ -448,6 +461,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.setBackground(peak=Function('Gaussian', Height=10, Sigma=0.3),
                          background=Function('FlatBackground', A0=1.0))
         cf.ties(IntensityScaling0 = 1.0, IntensityScaling1 = 1.0)
+        cf.ToleranceIntensity = 0.001
 
         ws0 = makeWorkspace(*origin.getSpectrum(0))
         ws1 = makeWorkspace(*origin.getSpectrum(1))
@@ -482,7 +496,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         self.assertNotEqual(cf.peaks[0].param[3]['PeakCentre'], 0.0)
         self.assertNotEqual(cf.peaks[0].param[3]['FWHM'], 0.0)
-        self.assertEqual(cf.peaks[0].param[3]['Amplitude'], 0.0)
+        self.assertNotEqual(cf.peaks[0].param[3]['Amplitude'], 0.0)
 
         self.assertNotEqual(cf.peaks[1].param[1]['PeakCentre'], 0.0)
         self.assertNotEqual(cf.peaks[1].param[1]['FWHM'], 0.0)

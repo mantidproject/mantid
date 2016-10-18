@@ -3,13 +3,14 @@ import stresstesting
 import mantid.simpleapi as ms
 
 #====================================================================================================
+
+
 class MolDynCdlTest(stresstesting.MantidStressTest):
 
     def runTest(self):
         ms.MolDyn(Data='DISF_NaF.cdl',
                   Functions=['Fqt-total', 'Sqw-total'],
                   OutputWorkspace='ISISIndirectSimulationTest_MolDynCdl')
-
 
     def validate(self):
         self.tolerance = 1e-2
@@ -25,7 +26,6 @@ class MolDynCdlTest(stresstesting.MantidStressTest):
         ws2Match = self.checkWorkspacesMatch('DISF_NaF_Sqw-total', 'ISISIndirectSimulation_MolDynCDL_SQW')
 
         return  ws1Match and ws2Match
-
 
     def checkWorkspacesMatch(self, ws1, ws2):
         """
@@ -57,10 +57,8 @@ class MolDynDatTest(stresstesting.MantidStressTest):
         ms.MolDyn(Data='WSH_test.dat',
                   OutputWorkspace='WSH_test_iqt')
 
-
     def validate(self):
         self.tolerance = 1e-2
         self.disableChecking.append("Instrument")
 
         return 'WSH_test_iqt', 'ISISIndirectSimulation_MolDynDAT.nxs'
-
