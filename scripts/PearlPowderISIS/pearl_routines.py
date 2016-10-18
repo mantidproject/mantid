@@ -18,7 +18,7 @@ def PEARL_startup(usern="matt", thiscycle='11_1'):
     global currentdatadir
     global tofbinning
     global tt_mode
-    global pearl_file_dir
+    global calibration_directory
     global userdataprocessed
 
     # ------ User modifiable ----- #
@@ -45,7 +45,7 @@ def PEARL_startup(usern="matt", thiscycle='11_1'):
 
     # ---- Script setup ---- #
     # Setup globals
-    pearl_file_dir = calibration_directory
+    calibration_directory = calibration_directory
     currentdatadir = raw_data_directory
     livedatadir = live_data_directory
     userdataprocessed = output_directory + "Cycle_" + thiscycle + "\\" + usern + "\\"
@@ -124,49 +124,6 @@ def PEARL_getcalibfiles(in_cycle, in_tt_mode, in_pearl_file_dir):
     calfile, groupfile, vabsorbfile, vanfile, instver = \
         pearl_calib_factory.get_calibration_dir(in_cycle, in_tt_mode, in_pearl_file_dir)
     return
-
-
-# sets the intial directory for all calibration files
-def pearl_initial_dir(directory='P:\Mantid\\'):
-    global pearl_file_dir
-    pearl_file_dir = directory
-    print("Set pearl_file_dir directory to ", directory)
-    return
-
-
-# sets the current raw data files directory
-def pearl_set_currentdatadir(directory="I:\\"):
-    global currentdatadir
-    currentdatadir = directory
-    print("Set currentdatadir directory to ", directory)
-    return
-
-
-# sets the user data output directory
-def pearl_set_userdataoutput_dir(directory="P:\\users\\MantidOutput\\"):
-    global userdataprocessed
-    userdataprocessed = directory
-    print("Set userdataprocessed directory to ", directory)
-    return
-
-
-def PEARL_setdatadir(directory="C:\PEARL\RAW\\"):
-    global pearl_datadir
-    pearl_datadir = directory
-    print("Set pearl_datadir directory to ", directory)
-    return
-
-
-# sets the atten file's directory
-def PEARL_setattenfile(new_atten="P:\Mantid\\Attentuation\\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"):
-    global attenfile
-    attenfile = new_atten
-    print("Set attenuation file to ", attenfile)
-    return
-
-
-def PEARL_datadir():
-    return pearl_datadir
 
 
 def PEARL_getfilename(run_number, ext):
@@ -313,7 +270,6 @@ def PEARL_align(work, focus):
 
 
 def PEARL_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False):
-    global instver
     global g_debug
     g_debug = debug
     PEARL_getcycle(number)
@@ -340,7 +296,7 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
     focus = "focus"
 
     PEARL_getcycle(number)
-    PEARL_getcalibfiles(in_cycle=cycle, in_tt_mode=ttmode, in_pearl_file_dir=pearl_file_dir)
+    PEARL_getcalibfiles(in_cycle=cycle, in_tt_mode=ttmode, in_pearl_file_dir=calibration_directory)
 
     print("Focussing mode is:", fmode)
     print("Two theta mode is:", tt_mode)
@@ -578,7 +534,7 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
 def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
                     nvanfile="P:\Mantid\\Calibration\\van_spline_all_cycle_11_1.nxs", nspline=60, absorb=True,
                     debug=False):
-    global mode
+    global mode  # TODO used in PEARL_getmonitorspectrum
     global tt_mode
     global g_debug
     g_debug = debug
@@ -589,7 +545,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     # is called it will return the correct tt_mode files.
 
     PEARL_getcycle(van)
-    PEARL_getcalibfiles(in_cycle=cycle, in_tt_mode=ttmode, in_pearl_file_dir=pearl_file_dir)
+    PEARL_getcalibfiles(in_cycle=cycle, in_tt_mode=ttmode, in_pearl_file_dir=calibration_directory)
     wvan = "wvan"
     wempty = "wempty"
     print("Creating ", nvanfile)
@@ -945,3 +901,62 @@ def _remove_inter_ws(ws_to_remove):
     if not g_debug:
         mantid.mtd.remove(ws_to_remove)
 
+
+# ------- Legacy interface -------- #
+
+# These are here to preserve compatibility with any existing scripts and should
+# be gradually deprecated and removed
+
+# sets the intial directory for all calibration files
+def pearl_initial_dir(directory='P:\Mantid\\'):
+    """
+    Sets the directory for the calibration files
+        @param directory: The directory where calibration files are located
+    """
+    global calibration_directory
+    calibration_directory = directory
+    print("Set pearl_file_dir directory to ", directory)
+    return
+
+
+# sets the current raw data files directory
+def pearl_set_currentdatadir(directory="I:\\"):
+    """
+    Sets the location of the raw data
+        @param directory: The directory where the raw data to process is located
+    """
+    global currentdatadir
+    currentdatadir = directory
+    print("Set currentdatadir directory to ", directory)
+    return
+
+
+# sets the user data output directory
+def pearl_set_userdataoutput_dir(directory="P:\\users\\MantidOutput\\"):
+    """
+    Sets the output directory for the script
+        directory: The location to output data to. A folder with the current cycle will be created in this folder
+    """
+    global userdataprocessed
+    userdataprocessed = directory
+    print("Set userdataprocessed directory to ", directory)
+    return
+
+
+def PEARL_setdatadir(directory="C:\PEARL\RAW\\"):
+    global raw_data_directory
+    raw_data_directory = directory
+    print("Set pearl_datadir directory to ", directory)
+    return
+
+
+# sets the atten file's directory
+def PEARL_setattenfile(new_atten="P:\Mantid\\Attentuation\\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"):
+    global attenfile
+    attenfile = new_atten
+    print("Set attenuation file to ", attenfile)
+    return
+
+
+def PEARL_datadir():
+    return raw_data_directory
