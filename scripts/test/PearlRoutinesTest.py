@@ -46,8 +46,18 @@ class PearlRoutinesTest(unittest.TestCase):
         self.assertEquals(new_alg_range, 12, "'new' instrument algorithm range got " + str(new_alg_range))
         self.assertEquals(new_save_range, 3, "'new' instrument save range got " + str(new_save_range))
 
+        new2_alg_range, new2_save_range = pearl_routines._setup_focus_for_inst("new2")
+        self.assertEquals(new2_alg_range, 14, "'new2' instrument algorithm range got " + str(new2_alg_range))
+        self.assertEquals(new2_save_range, 5, "'new2' instrument save range got " + str(new2_save_range))
 
-        pearl_routines._setup_focus_for_inst("new2")
+
+    def test_numeric_file_names_gen_correct(self):
+        # This test checks the generated names for files are correct
+        # when the run number is purely numeric
+        pearl_routines._generate_out_file_names(int(12345))
+        # TODO when userdata processed is moved out of global
+
+
 if __name__ == '__main__':
     DIRS = config['datasearch.directories'].split(';')
     CalibDir = os.path.join(DIRS[0] + '/PEARL/Calibration_Test/Calibration/')
