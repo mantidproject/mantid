@@ -1867,7 +1867,7 @@ class CWSCDReductionControl(object):
 
         # Build a new PeaksWorkspace
         peak_ws_name = 'TempUBFFTPeaks'
-        self._build_peaks_workspace(peak_info_list, peak_ws_name, True, False)
+        self._build_peaks_workspace(peak_info_list, peak_ws_name, False, False)
 
         # Refine
         api.FindUBUsingFFT(PeaksWorkspace=peak_ws_name,
@@ -1904,7 +1904,7 @@ class CWSCDReductionControl(object):
         return result_tuple
 
     @staticmethod
-    def _build_peaks_workspace(peak_info_list, peak_ws_name, index_from_spice, hkl_to_int):
+    def _build_peaks_workspace(peak_info_list, peak_ws_name, hkl_to_int):
         """
         From a list of PeakInfo, using the averaged peak centre of each of them
         to build a new PeaksWorkspace
@@ -1912,7 +1912,6 @@ class CWSCDReductionControl(object):
         Guarantees: a PeaksWorkspace is created in AnalysisDataService.
         :param peak_info_list: peak information list.  only peak center in Q-sample is required
         :param peak_ws_name:
-        :param index_from_spice: boolean
         :param hkl_to_int:
         :return:
         """
@@ -1920,8 +1919,6 @@ class CWSCDReductionControl(object):
         assert isinstance(peak_info_list, list), 'Peak Info List must be a list.'
         assert len(peak_info_list) > 0, 'Peak Info List cannot be empty.'
         assert isinstance(peak_ws_name, str), 'Peak workspace name must be a string.'
-        assert isinstance(index_from_spice, bool), 'Indexing (hkl) source must be a boolean but not of ' \
-                                                   '%s' % type(index_from_spice)
 
         # create an empty
         api.CreatePeaksWorkspace(NumberOfPeaks=0, OutputWorkspace=peak_ws_name)
@@ -1942,21 +1939,13 @@ class CWSCDReductionControl(object):
             peak_i = peak_ws.getPeak(i_peak_info)
 
             # set the peak indexing to each pear
-            if index_from_spice:
-                # get HKL from spice
-                h, k, l = peak_info_i.get_spice_hkl()
-            else:
-                # get HKL from user setup
-                h, k, l = peak_info_i.get_user_index()
-            # END-IF
-
-            if hkl_to_int:
-                # convert hkl to integer
-                h = float(math.copysign(1, h) * int(abs(h) + 0.5))
-                k = float(math.copysign(1, k) * int(abs(k) + 0.5))
-                l = float(math.copysign(1, l) * int(abs(l) + 0.5))
-            # END-IF
-
+            h, k, l = peak_info_i.get_user_index()
+            # if hkl_to_int:
+            #     # convert hkl to integer
+            #     h = float(math.copysign(1, h) * int(abs(h) + 0.5))
+            #     k = float(math.copysign(1, k) * int(abs(k) + 0.5))
+            #     l = float(math.copysign(1, l) * int(abs(l) + 0.5))
+            # # END-IF
             peak_i.setHKL(h, k, l)
             # q-sample
             q_x, q_y, q_z = peak_info_i.get_peak_centre()

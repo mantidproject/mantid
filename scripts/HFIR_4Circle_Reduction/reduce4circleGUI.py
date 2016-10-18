@@ -34,10 +34,13 @@ import fourcircle_utility as hb3a
 import plot3dwindow
 from multi_threads_helpers import *
 import optimizelatticewindow as ol_window
-# import absorption
 
 # import line for the UI python class
 from ui_MainWindow import Ui_MainWindow
+
+# define constants
+IndexFromSpice = 'From Spice (pre-defined)'
+IndexFromUB = 'From Calculation By UB'
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -149,8 +152,6 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_refine_ub_fft)
         self.connect(self.ui.pushButton_findUBLattice, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub_lattice)
-        self.connect(self.ui.pushButton_findUBLattice_copy, QtCore.SIGNAL('clicked()'),
-                     self.do_refine_ub_lattice_after_fft)
 
         # Tab 'Setup'
         self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
@@ -353,7 +354,7 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def _build_peak_info_list(self):
+    def _build_peak_info_list(self, zero_hkl):
         """ Build a list of PeakInfo to build peak workspace
         :return: list of peak information, which is a PeakProcessHelper instance
         """
@@ -375,6 +376,13 @@ class MainWindow(QtGui.QMainWindow):
                 if pt_num < 0:
                     pt_num = None
                 peak_info = self._myControl.get_peak_info(exp_number, scan_num, pt_num)
+                if zero_hkl:
+                    # set HKL to zero
+                    peak_info.set_user_hkl(0, 0, 0)
+                else:
+                    # set from table
+                    miller_index = self.ui.tableWidget_peaksCalUB.get_hkl(i_row)
+                    peak_info.set_user_hkl(miller_index)
             except AssertionError as ass_err:
                 raise RuntimeError('Unable to retrieve PeakInfo due to %s.' % str(ass_err))
             assert isinstance(peak_info, r4c.PeakProcessHelper)
@@ -509,6 +517,9 @@ class MainWindow(QtGui.QMainWindow):
         self._addUBPeaksThread = AddPeaksThread(self, exp_number, scan_number_list)
         self._addUBPeaksThread.start()
 
+        # set the flag/notification where the indexing (HKL) from
+        self.ui.lineEdit_peaksIndexedBy.setText(IndexFromSpice)
+
         return
 
     def do_add_roi(self):
@@ -573,10 +584,6 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         assert isinstance(peak_info_obj, r4c.PeakProcessHelper)
-        if self.ui.checkBox_roundHKLInt.isChecked():
-            h = math.copysign(1, h)*int(abs(h)+0.5)
-            k = math.copysign(1, k)*int(abs(k)+0.5)
-            l = math.copysign(1, l)*int(abs(l)+0.5)
         peak_info_obj.set_user_hkl(h, k, l)
         self.set_ub_peak_table(peak_info_obj)
 
@@ -590,6 +597,9 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_H.setText('')
         self.ui.lineEdit_K.setText('')
         self.ui.lineEdit_L.setText('')
+
+        # set the flag/notification where the indexing (HKL) from
+        self.ui.lineEdit_peaksIndexedBy.setText(IndexFromSpice)
 
         return
 
@@ -1744,12 +1754,13 @@ class MainWindow(QtGui.QMainWindow):
         Refine UB matrix
         :return:
         """
-        peak_info_list = self._build_peak_info_list()
-        set_hkl_int = self.ui.checkBox_roundHKLInt.isChecked()
+        # refine UB matrix by indexed peak
+        peak_info_list = self._build_peak_info_list(zero_hkl=False)
+        # set_hkl_int = self.ui.checkBox_roundHKLInt.isChecked()
 
         # Refine UB matrix
         try:
-            self._myControl.refine_ub_matrix_indexed_peaks(peak_info_list, set_hkl_int)
+            self._myControl.refine_ub_matrix_indexed_peaks(peak_info_list)
         except AssertionError as error:
             self.pop_one_button_dialog(str(error))
             return
@@ -1769,20 +1780,6 @@ class MainWindow(QtGui.QMainWindow):
             self._refineConfigWindow = ol_window.OptimizeLatticeWindow(self)
 
         self._refineConfigWindow.set_prev_ub_refine_method(False)
-        self._refineConfigWindow.show()
-
-        return
-
-    def do_refine_ub_lattice_after_fft(self):
-        """
-        Refine UB matrix by constaining lattice parameters after FFT-refine-UB is called
-        :return:
-        """
-        if self._refineConfigWindow is None:
-            self._refineConfigWindow = ol_window.OptimizeLatticeWindow(self)
-
-        self._refineConfigWindow.set_prev_ub_refine_method(True)
-
         self._refineConfigWindow.show()
 
         return
@@ -1842,23 +1839,21 @@ class MainWindow(QtGui.QMainWindow):
         Refine UB matrix by calling FFT method
         :return:
         """
+        # launch the dialog to get min D and max D
+        status, min_d, max_d = self.get_refine_ub_fft_parameters()
+        if status is False:
+            self.pop_one_button_dialog('Must specify Min D and max D to refine UB using FFT.')
+            return
+        if (0 < min_d < max_d) is False:
+            self.pop_one_button_dialog('Range of d is not correct!')
+            return
+
         # get PeakInfo list and check
         peak_info_list = self._build_peak_info_list()
         assert isinstance(peak_info_list, list), \
             'PeakInfo list must be a list but not %s.' % str(type(peak_info_list))
         assert len(peak_info_list) >= 3, \
             'PeakInfo must be larger or equal to 3 (.now given %d) to refine UB matrix' % len(peak_info_list)
-
-        # get lattice range information
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_minD,
-                                                        self.ui.lineEdit_maxD])
-        if status is False:
-            self.pop_one_button_dialog('Must specify Min D and max D to refine UB using FFT.')
-            return
-        min_d, max_d = ret_obj
-        if (0 < min_d < max_d) is False:
-            self.pop_one_button_dialog('Range of d is not correct!')
-            return
 
         # friendly suggestion
         if len(peak_info_list) <= 9:
@@ -1917,6 +1912,9 @@ class MainWindow(QtGui.QMainWindow):
             h, k, l = peak_info.get_spice_hkl()
             self.ui.tableWidget_peaksCalUB.update_hkl(i_row, h, k, l)
         # END-FOR
+
+        # set the flag right
+        self.ui.lineEdit_peaksIndexedBy.setText(IndexFromSpice)
 
         return
 
@@ -3057,3 +3055,20 @@ class MainWindow(QtGui.QMainWindow):
         self.set_ub_peak_table(peak_info)
 
         return
+
+    # END-OF-DEFINITION (MainWindow)
+
+
+def round_hkl(index_h, index_k, index_l):
+    """
+
+    :param index_h:
+    :param index_k:
+    :param index_l:
+    :return:
+    """
+    index_h = math.copysign(1, index_h) * int(abs(index_h) + 0.5)
+    index_k = math.copysign(1, index_k) * int(abs(index_k) + 0.5)
+    index_l = math.copysign(1, index_l) * int(abs(index_l) + 0.5)
+
+    return index_h, index_k, index_l
