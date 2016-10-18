@@ -30,6 +30,7 @@ CSS_TINY = """QLabel {
 
 CSS_DEFAULT = """QLineEdit{}"""
 
+
 def _check_and_get_float_line_edit(line_edit, min=None):
     """
         Reads the value of a QLineEdit as a double
@@ -48,6 +49,7 @@ def _check_and_get_float_line_edit(line_edit, min=None):
         line_edit.setStyleSheet(CSS_INVALID)
     return value
 
+
 def _check_and_get_int_line_edit(line_edit):
     """
         Reads the value of a QLineEdit as an integer
@@ -63,11 +65,13 @@ def _check_and_get_int_line_edit(line_edit):
         line_edit.setStyleSheet(CSS_INVALID)
     return value
 
+
 def set_valid(line_edit, is_valid):
     if is_valid:
         line_edit.setStyleSheet(CSS_DEFAULT)
     else:
         line_edit.setStyleSheet(CSS_INVALID)
+
 
 def set_edited(control, is_edited):
     class_name = control.__class__.__name__
@@ -80,6 +84,7 @@ def set_edited(control, is_edited):
         new_style = CSS_DEFAULT.replace("QLineEdit", class_name)
     control.setStyleSheet(new_style)
 
+
 def set_tiny(control, is_tiny=True):
     class_name = control.__class__.__name__
     if is_tiny:
@@ -87,6 +92,3 @@ def set_tiny(control, is_tiny=True):
     else:
         new_style = CSS_DEFAULT.replace("QLineEdit", class_name)
     control.setStyleSheet(new_style)
-
-
-

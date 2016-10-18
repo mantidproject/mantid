@@ -36,10 +36,8 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
     def category(self):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
-
     def summary(self):
         return "Calculates indirect absorption corrections for an annulus sample shape."
-
 
     def PyInit(self):
         # Sample options
@@ -280,7 +278,6 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         else:
             self._ass_ws = self._abs_ws + '_ass'
             self._acc_ws = self._abs_ws + '_acc'
-
 
     def validateInputs(self):
         """

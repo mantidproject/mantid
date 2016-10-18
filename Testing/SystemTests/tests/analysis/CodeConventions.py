@@ -50,6 +50,7 @@ FUNC_BAD_PARAMS = {
     "CubicSpline":("y0", "y1", "y2"),
     "DiffRotDiscreteCircle":("f0.Height", "f0.Radius", "f0.Centre"),
     "DiffSphere":("f0.Height", "f0.Radius", "f0.Centre"),
+    "IsoRotDiff":("f0.Height", "f0.Radius", "f0.Centre"),
     "LatticeErrors":("p0", "p1", "p2", "p3", "p4", "p5"),
     "Muon_ExpDecayOscTest":("lambda", "frequency", "phi"),
     "SCDPanelErrors":("f0_detWidthScale", "f0_detHeightScale",
@@ -66,6 +67,7 @@ FUNC_BAD_PARAMS = {
     "CrystalFieldMultiSpectrum":("f0.f0.A0","f0.f1.Amplitude","f0.f1.PeakCentre","f0.f1.FWHM",
                                  "f0.f2.Amplitude","f0.f2.PeakCentre","f0.f2.FWHM")
     }
+
 
 class Algorithms(stresstesting.MantidStressTest):
 
@@ -108,7 +110,7 @@ class Algorithms(stresstesting.MantidStressTest):
 
     def verifyProperty(self, alg_descr, name):
         upper = name.upper()
-        if (upper in SPECIAL_UPPER) and (not name in SPECIAL):
+        if (upper in SPECIAL_UPPER) and (name not in SPECIAL):
             index = SPECIAL_UPPER.index(upper)
             print alg_descr + " property (" + name + ") has special name "\
                 + "with wrong case: " + name + " should be " + SPECIAL[index]
@@ -144,7 +146,6 @@ class Algorithms(stresstesting.MantidStressTest):
                     if not self.verifyProperty(alg_descr, prop.name):
                         self.__ranOk += 1
 
-
     def validate(self):
         if self.__ranOk > 0:
             print "Found %d errors. Coding conventions found at" % self.__ranOk,\
@@ -152,6 +153,7 @@ class Algorithms(stresstesting.MantidStressTest):
             return False
 
         return True
+
 
 class FitFunctions(stresstesting.MantidStressTest):
     def __init__(self):

@@ -13,7 +13,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/make_unique.h"
 
-#include "boost/math/special_functions/fpclassify.hpp"
 #include "boost/lexical_cast.hpp"
 
 namespace Mantid {

@@ -637,6 +637,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
                                mean = mean,
                                mon_number = mon_number)
 
+
 class DarkRunSubtractionTestStressTest(stresstesting.MantidStressTest):
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)

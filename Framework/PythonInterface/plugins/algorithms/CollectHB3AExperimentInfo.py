@@ -8,10 +8,12 @@ from mantid.kernel import *
 from six.moves import range #pylint: disable=redefined-builtin
 import os
 
+
 class CollectHB3AExperimentInfo(PythonAlgorithm):
     """ Python algorithm to export sample logs to spread sheet file
     for VULCAN
     """
+
     def __init__(self):
         """ Init
         """
@@ -195,7 +197,6 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         # ENDFOR
 
         return
-
 
     def _getProperties(self):
         """ Get properties from user input

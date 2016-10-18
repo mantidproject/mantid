@@ -87,7 +87,7 @@ def load_sac_eff(EXPR_FILE, NoSAC=False, Eff=True):
                 Divide(LHSWorkspace="Vanadium", RHSWorkspace="Corr", OutputWorkspace="Eff")
                 print ' => Pre-calculate Efficiency correction from Vana '
                 ConvertUnits(InputWorkspace="Eff", OutputWorkspace="Eff", Target="Wavelength")
-                Integration(InputWorkspace="Eff", OutputWorkspace="Eff", \
+                Integration(InputWorkspace="Eff", OutputWorkspace="Eff",
                             RangeLower=EXPR_FILE.LowerLambda, RangeUpper=EXPR_FILE.UpperLambda)
                 Multiply(LHSWorkspace="Corr", RHSWorkspace="Eff", OutputWorkspace="Corr")
                 #				if EXPR_FILE.instr=="polaris":
@@ -124,16 +124,16 @@ def focus_one(EXPR_FILE, sampleAdd, scale, Norm, isfirst=False, NoAbs=False):
     Divide(LHSWorkspace="sample", RHSWorkspace="Corr", OutputWorkspace="sample")
     cry_load.scale_wspc("sample", scale)
     if EXPR_FILE.CorrectSampleAbs == "yes":
-        if EXPR_FILE.SampleAbsCorrected == False:
-            cry_utils.correct_abs(InputWkspc="sample", outputWkspc="SampleTrans", \
-                                  TheCylinderSampleHeight=EXPR_FILE.SampleHeight, \
-                                  TheCylinderSampleRadius=EXPR_FILE.SampleRadius, \
-                                  TheAttenuationXSection=EXPR_FILE.SampleAttenuationXSection, \
-                                  TheScatteringXSection=EXPR_FILE.SampleScatteringXSection, \
-                                  TheSampleNumberDensity=EXPR_FILE.SampleNumberDensity, \
-                                  TheNumberOfSlices=EXPR_FILE.SampleNumberOfSlices, \
-                                  TheNumberOfAnnuli=EXPR_FILE.SampleNumberOfAnnuli, \
-                                  TheNumberOfWavelengthPoints=EXPR_FILE.SampleNumberOfWavelengthPoints, \
+        if not EXPR_FILE.SampleAbsCorrected:
+            cry_utils.correct_abs(InputWkspc="sample", outputWkspc="SampleTrans",
+                                  TheCylinderSampleHeight=EXPR_FILE.SampleHeight,
+                                  TheCylinderSampleRadius=EXPR_FILE.SampleRadius,
+                                  TheAttenuationXSection=EXPR_FILE.SampleAttenuationXSection,
+                                  TheScatteringXSection=EXPR_FILE.SampleScatteringXSection,
+                                  TheSampleNumberDensity=EXPR_FILE.SampleNumberDensity,
+                                  TheNumberOfSlices=EXPR_FILE.SampleNumberOfSlices,
+                                  TheNumberOfAnnuli=EXPR_FILE.SampleNumberOfAnnuli,
+                                  TheNumberOfWavelengthPoints=EXPR_FILE.SampleNumberOfWavelengthPoints,
                                   TheExpMethod=EXPR_FILE.SampleExpMethod)
             EXPR_FILE.SampleAbsCorrected = True
         else:

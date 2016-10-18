@@ -1,5 +1,8 @@
 #pylint: disable=invalid-name,relative-import
-import InstrumentSetupWidget,ClassicUBInputWidget,MatrixUBInputWidget,DimensionSelectorWidget
+import InstrumentSetupWidget
+import ClassicUBInputWidget
+import MatrixUBInputWidget
+import DimensionSelectorWidget
 from PyQt4 import QtCore, QtGui
 import sys
 import mantid
@@ -12,6 +15,7 @@ import numpy
 import copy
 import os
 
+
 def float2Input(x):
     if numpy.isfinite(x):
         return x
@@ -19,6 +23,8 @@ def float2Input(x):
         return None
 
 # pylint: disable=too-many-instance-attributes
+
+
 class DGSPlannerGUI(QtGui.QWidget):
     def __init__(self,ol=None,parent=None):
         # pylint: disable=unused-argument,super-on-old-class
@@ -105,7 +111,6 @@ class DGSPlannerGUI(QtGui.QWidget):
         #register startup
         mantid.UsageService.registerFeatureUsage("Interface","DGSPlanner",False)
 
-
     @QtCore.pyqtSlot(mantid.geometry.OrientedLattice)
     def updateUB(self,ol):
         self.ol=ol
@@ -116,9 +121,9 @@ class DGSPlannerGUI(QtGui.QWidget):
     def updateParams(self,d):
         if self.sender() is self.instrumentWidget:
             self.updatedInstrument=True
-        if d.has_key('dimBasis') and self.masterDict.has_key('dimBasis') and d['dimBasis']!=self.masterDict['dimBasis']:
+        if 'dimBasis' in d and 'dimBasis' in self.masterDict and d['dimBasis']!=self.masterDict['dimBasis']:
             self.needToClear=True
-        if d.has_key('dimIndex') and self.masterDict.has_key('dimIndex')and d['dimIndex']!=self.masterDict['dimIndex']:
+        if 'dimIndex' in d and 'dimIndex' in self.masterDict and d['dimIndex']!=self.masterDict['dimIndex']:
             self.needToClear=True
         self.masterDict.update(copy.deepcopy(d))
 
@@ -163,7 +168,7 @@ class DGSPlannerGUI(QtGui.QWidget):
                                                   QtGui.QMessageBox.No)
                 if reply==QtGui.QMessageBox.No:
                     return
-            if self.wg!=None:
+            if self.wg is not None:
                 mantid.simpleapi.DeleteWorkspace(self.wg)
             mantid.simpleapi.LoadEmptyInstrument(mantid.api.ExperimentInfo.getInstrumentFilename(self.masterDict['instrument']),
                                                  OutputWorkspace="__temp_instrument")
@@ -173,7 +178,7 @@ class DGSPlannerGUI(QtGui.QWidget):
                                               LogText=str(self.masterDict['S2']),LogType='Number Series')
                 mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument", RewriteSpectraMap=True, InstrumentName="HYSPEC")
             #masking
-            if self.masterDict.has_key('maskFilename') and len(self.masterDict['maskFilename'].strip())>0:
+            if 'maskFilename' in self.masterDict and len(self.masterDict['maskFilename'].strip())>0:
                 try:
                     __maskWS=mantid.simpleapi.Load(self.masterDict['maskFilename'])
                     mantid.simpleapi.MaskDetectors(Workspace="__temp_instrument",MaskedWorkspace=__maskWS)
@@ -293,7 +298,6 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.canvas.draw()
         mantid.simpleapi.DeleteWorkspace(__mdws)
 
-
     def save(self):
         fileName = str(QtGui.QFileDialog.getSaveFileName(self, 'Save Plot', self.saveDir,'*.png'))
         data = "Instrument "+self.masterDict['instrument']+'\n'
@@ -338,6 +342,7 @@ class DGSPlannerGUI(QtGui.QWidget):
             h2,k2,l2=(float(temp) for temp in self.masterDict['dimBasis'][self.masterDict['dimIndex'][1]].split(','))
             angle=numpy.radians(self.ol.recAngle(h1,k1,l1,h2,k2,l2))
             return 1.*x+numpy.cos(angle)*y,  numpy.sin(angle)*y
+
     def inv_tr(self,x,y):
         x, y = numpy.asarray(x), numpy.asarray(y)
         #one of the axes is energy

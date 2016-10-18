@@ -2,8 +2,6 @@
 #define MANTID_API_EXPERIMENTINFO_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/Sample.h"
 
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/IDetector.h"
@@ -18,6 +16,9 @@ namespace Mantid {
 //---------------------------------------------------------------------------
 // Forward declaration
 //---------------------------------------------------------------------------
+namespace Kernel {
+class Property;
+}
 namespace Geometry {
 class ParameterMap;
 class XMLInstrumentParameter;
@@ -29,6 +30,8 @@ namespace API {
 //---------------------------------------------------------------------------
 class ChopperModel;
 class ModeratorModel;
+class Run;
+class Sample;
 
 /** This class is shared by a few Workspace types
  * and holds information related to a particular experiment/run:

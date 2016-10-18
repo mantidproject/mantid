@@ -45,7 +45,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     def category(self):
         return "Workflow\\MIDAS;CorrectionFunctions\\AbsorptionCorrections"
 
-
     def summary(self):
         return "Calculates absorption corrections for a flat plate sample using Paalman & Pings format."
 

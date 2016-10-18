@@ -5,6 +5,11 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+Supported Operating Systems
+---------------------------
+
+- We now support Ubuntu Xenial Xerus (16.04) and this will be the final release to support Trusty Tahr (14.04).
+- We now support OS X Yosemite (10.10) and support for OS X Mavericks (10.9) has been dropped.
 
 HistogramData
 -------------
@@ -22,6 +27,8 @@ Concepts
 - ``MatrixWorkspace`` : When masking bins or detectors with non-zero weights,
   undefined and infinite values and errors will be zeroed.
 - ``Lattice`` : Allow setting a UB matrix with negative determinant (improper rotation)
+
+- ``MultipleFileProperty`` : will now support also ``OptionalLoad`` ``FileAction`` (similar to ``FileProperty``).
 
 Algorithms
 ----------
@@ -148,11 +155,13 @@ Performance
 CurveFitting
 ------------
 
-- Added two new minimizers belonging to the trust region family of algorithms: DTRS and More-Sorensen.
+- Added a new minimizer belonging to the trust region family of algorithms developped for Mantid by the SCD
+  Numerical Analysis Group at RAL. It has better performance characteristics compared to the existing
+  minimizers especially when applied to the most difficult fitting problems.
 - Added new property `EvaluationType` to Fit algorithm. If set to "Histogram" and the input dataset 
   is a histogram with large bins it can improve accuracy of the fit.
-- The concept page for :ref:`Comparing fit minimizers <FittingMinimizers>` has been updated to include new
-  minimizers and a comparison against neutron data examples.
+- The concept page for :ref:`Comparing fit minimizers <FittingMinimizers>` has been updated to include the new
+  minimizer and a comparison against neutron data examples.
 
 Others
 ------

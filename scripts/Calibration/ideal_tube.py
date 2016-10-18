@@ -1,10 +1,10 @@
-from mantid.simpleapi import *
-from mantid.kernel import *
 import numpy
 
 # This class is the ideal tube, which specifies where the peaks formed by slits or edges should occur
 
 # Author: Karl Palmen ISIS
+
+
 class IdealTube(object):
     """
    The IdealTube specifies where the peaks formed by slits or edges should occur.
@@ -58,7 +58,6 @@ class IdealTube(object):
         self.positions = numpy.array(pos )
         self.functionalForms = form
 
-
     def constructTubeFor3PointsMethod( self, idealAP, idealBP, idealCP, activeTubeLen ):
         """
        Construct and ideal tube for Merlin 3-point calibration
@@ -73,10 +72,9 @@ class IdealTube(object):
         pixelLen = activeTubeLen/1024  # Pixel length
 
        # we then convert idealAP, idealCP and idealBP to Y coordinates and put into ideal tube array
-        self.positions = numpy.array([ idealAP*pixelLen - activeTubeLen/2,\
-            idealCP*pixelLen - activeTubeLen/2, idealBP*pixelLen - activeTubeLen/2])
+        self.positions = numpy.array([ idealAP*pixelLen - activeTubeLen/2,
+                                       idealCP*pixelLen - activeTubeLen/2, idealBP*pixelLen - activeTubeLen/2])
         self.functionalForms = [ 2, 1, 2 ]
-
 
     def getArray( self ):
         """
@@ -89,4 +87,3 @@ class IdealTube(object):
        Reurn the array of of points where the peaks should be in Metres
        """
         return self.functionalForms
-

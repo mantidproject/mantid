@@ -546,6 +546,9 @@ private:
 
   /// Enable/disable "load current run" - if allowed
   void setLoadCurrentRunEnabled(bool enabled);
+
+  /// Check if next/previous run should be appended
+  void checkAppendingRun(const int direction);
 };
 }
 }

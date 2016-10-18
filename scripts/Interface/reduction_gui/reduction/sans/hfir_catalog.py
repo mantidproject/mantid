@@ -22,8 +22,10 @@ try:
 except:
     IN_MANTIDPLOT = False
 
+
 class HFIRDataType(DataType):
     TABLE_NAME="hfir_datatype"
+
 
 class HFIRDataSet(DataSet):
     TABLE_NAME="hfir_dataset"
@@ -65,6 +67,7 @@ class HFIRDataSet(DataSet):
                 return str(ws_object.getRun().getProperty(prop).value)
             except:
                 return ""
+
         def read_series(prop):
             try:
                 ws_object = AnalysisDataService.retrieve(ws)

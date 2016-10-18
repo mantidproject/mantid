@@ -13,6 +13,7 @@ class MplPlot3dCanvas(FigureCanvas):
     """
     Matplotlib 3D canvas class
     """
+
     def __init__(self, parent=None):
         """
         Initialization

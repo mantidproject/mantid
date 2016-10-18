@@ -2,7 +2,7 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 namespace Mantid {
 namespace Algorithms {
@@ -347,7 +347,7 @@ int MedianDetectorTest::doDetectorTests(
       const double signal = countsWS->y(hists.at(i))[0];
 
       // Mask out NaN and infinite
-      if (boost::math::isinf(signal) || boost::math::isnan(signal)) {
+      if (!std::isfinite(signal)) {
         maskWS->mutableY(hists.at(i))[0] = deadValue;
         PARALLEL_ATOMIC
         ++numFailed;

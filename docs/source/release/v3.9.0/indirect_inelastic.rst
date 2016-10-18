@@ -11,10 +11,16 @@ New features
 Algorithms
 ##########
 
+Data Reduction
+##############
+
+- Q-values in :ref:`BASISReduction <algm-BASISReduction>` output are now point data so that their values display correctly when plotted
+
 Data Analysis
 #############
 
 - :ref:`TeixeiraWaterSQE <func-TeixeiraWaterSQE>` models translation of water-like molecules (jump diffusion).
+
 
 Corrections
 ###########
@@ -36,6 +42,10 @@ Transmission
 ~~~~~~~~~~~~
 
 - Option to calculate number density from mass density
+
+- :ref:`IsoRotDiff <func-IsoRotDiff>` models isotropic rotational diffusion of a particle
+  tethered to the origin at a constant distance.
+
 
 Improvements
 ------------
