@@ -3,11 +3,10 @@ from __future__ import (absolute_import, division, print_function)
 
 
 from mantid.simpleapi import *
-from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty, \
-                       WorkspaceGroupProperty, FileProperty, MultipleFileProperty, FileAction, \
-                       WorkspaceGroup, Progress
-from mantid.kernel import Direction, config, logger, StringListValidator
-import os.path
+from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, \
+    PropertyMode, MatrixWorkspaceProperty, WorkspaceGroupProperty, \
+    FileProperty, MultipleFileProperty, FileAction, Progress
+from mantid.kernel import Direction, logger, StringListValidator
 import numpy as np
 import re
 from IndirectILLReduction import IndirectILLReduction
@@ -134,8 +133,11 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
         return "IndirectILLFixedWindowScans"
 
     def PyInit(self):
-        self.declareProperty(MultipleFileProperty(name='Run',extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty(name='Run', extensions=['nxs']),
                              doc='List of input file (s)')
+
+        self.declareProperty(FileProperty('EvaluationEntity', ''),
+                             doc='Post-processing entity (Nexus-file entry).')
 
         self.declareProperty(FileProperty('MapFile', '',
                                           action=FileAction.OptionalLoad,
@@ -150,7 +152,7 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
 
         self.declareProperty(name='Reflection',
                              defaultValue='111',
-                             validator=StringListValidator(['111','311']),
+                             validator=StringListValidator(['111', '311']),
                              doc='Analyser reflection.')
 
         self.declareProperty(name='DebugMode',
@@ -304,7 +306,7 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
                 if i == indices[j]:
                     # Pick workspace with same energy value
                     self.log().debug('Workspace {0} for GroupWorkspace of energy {1}'.format
-                                        (_selected_runs[j][0] + '_' + self._out_ws, j))
+                                     (_selected_runs[j][0] + '_' + self._out_ws, j))
                     group.append(_selected_runs[j][0] + '_' + self._out_ws)
 
             # Create the GroupWorkspace and set workspace property
