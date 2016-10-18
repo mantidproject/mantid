@@ -3,12 +3,12 @@
     from the the interface class so that the HFIRReduction class could
     be used independently of the interface implementation
 """
+from __future__ import (absolute_import, division, print_function)
 import xml.dom.minidom
-import os
-import time
 from reduction_gui.reduction.scripter import BaseScriptElement
-from refl_data_script import DataSets as REFLDataSets
-from refm_data_script import DataSets as REFMDataSets
+from reduction_gui.reduction.reflectometer.refl_data_script import DataSets as REFLDataSets
+from reduction_gui.reduction.reflectometer.refm_data_script import DataSets as REFMDataSets
+
 
 class DataSeries(BaseScriptElement):
 

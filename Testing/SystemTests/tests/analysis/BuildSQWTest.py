@@ -14,6 +14,7 @@ from mantid.simpleapi import *
 # allow for multiple locations
 FILE_LOCATIONS = ["/isis/mantid/localtestdata/"]#,"d:/Data/MantidSystemTests/BigData/Dropbox/LoadSQW"]
 
+
 class BuildSQWTest(stresstesting.MantidStressTest):
 
     _startrun = 15058
@@ -103,6 +104,7 @@ class BuildSQWTest(stresstesting.MantidStressTest):
             except OSError:
                 mantid.logger.warning("Unable to remove created file '%s'" % filename)
 
+
 class LoadSQW_FileBasedTest(BuildSQWTest):
     """ The test checks loading MD workspace from SQW file when target file is file based"""
 
@@ -119,7 +121,6 @@ class LoadSQW_FileBasedTest(BuildSQWTest):
 
         self._created_files=MDws_file
 
-
     def validate(self):
         """Compare file-based MD files """
         ref_file = os.path.join(self._input_location, self._input_data[1])
@@ -129,6 +130,7 @@ class LoadSQW_FileBasedTest(BuildSQWTest):
         DeleteWorkspace("dummy_wsMD")
 
         return rez[0]
+
 
 class LoadSQW_MemBasedTest(BuildSQWTest):
     """ The test checks loading MD workspace from SQW file when target file is file based"""
@@ -144,7 +146,6 @@ class LoadSQW_MemBasedTest(BuildSQWTest):
         dummy_wsMD=LoadSQW(Filename=sqw_file)
 
         self._created_files=[]
-
 
     def validate(self):
         """Compare memory-based vs file based MD workspaces """

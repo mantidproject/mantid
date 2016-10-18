@@ -39,8 +39,8 @@ def CalibrateWish( RunNumber, PanelNumber):
     # Get the calibration and put it into the calibration table
 
     #calibrate the lower tubes
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, lower_tube, funcForm,\
-                                                  rangeList = range(0,76), outputPeak=True)
+    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, lower_tube, funcForm,
+                                                 rangeList = range(0,76), outputPeak=True)
 
     #calibrate the upper tubes
     calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, upper_tube, funcForm,

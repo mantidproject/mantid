@@ -4,6 +4,7 @@ import mantid.api
 from mantid.kernel import logger
 import re
 
+
 class ConvertToWavelength(object):
 
     # List of workspaces to process.
@@ -164,8 +165,3 @@ class ConvertToWavelength(object):
 
         msi.DeleteWorkspace(Workspace=sum_wavelength.getName())
         return (_monitor_ws, _detector_ws)
-
-
-
-
-

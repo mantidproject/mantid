@@ -7,6 +7,7 @@ import os
 from mantid.simpleapi import *
 import stresstesting
 
+
 class ReflectometryInstrumentSignedThetaTest(stresstesting.MantidStressTest):
     def signed_theta_test(self, idf_name, detector_vertical_position, detector_name = 'point-detector'):
         idf_dir=config['instrumentDefinition.directory']

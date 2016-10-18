@@ -2,6 +2,7 @@
 
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
@@ -31,7 +32,6 @@ bool compareMomentum(const Mantid::Kernel::VMD &v1,
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MDNormSCD)
 
-//----------------------------------------------------------------------------------------------
 /**
  * Constructor
  */
@@ -59,7 +59,6 @@ const std::string MDNormSCD::summary() const {
 /// Algorithm's name for use in the GUI and help. @see Algorithm::name
 const std::string MDNormSCD::name() const { return "MDNormSCD"; }
 
-//----------------------------------------------------------------------------------------------
 /**
   * Initialize the algorithm's properties.
   */
@@ -107,7 +106,6 @@ void MDNormSCD::init() {
                   "A name for the output normalization MDHistoWorkspace.");
 }
 
-//----------------------------------------------------------------------------------------------
 /**
  * Execute the algorithm.
  */

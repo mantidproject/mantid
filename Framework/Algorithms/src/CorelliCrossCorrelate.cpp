@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/CorelliCrossCorrelate.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
