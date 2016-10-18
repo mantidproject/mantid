@@ -107,11 +107,11 @@ void ComptonProfile::buildCaches() {
 
   Algorithms::DetectorParams detpar =
       ConvertToYSpace::getDetectorParameters(m_workspace, m_wsIndex);
-  this->cacheYSpaceValues(m_workspace->x(m_wsIndex), detpar);
+  this->cacheYSpaceValues(m_workspace->points(m_wsIndex), detpar);
 }
 
 void ComptonProfile::cacheYSpaceValues(
-    const HistogramData::HistogramX &tseconds,
+    const HistogramData::Points &tseconds,
     const Algorithms::DetectorParams &detpar, const ResolutionParams &respar) {
   m_resolutionFunction->setAttributeValue("Mass", m_mass);
   m_resolutionFunction->cacheResolutionComponents(detpar, respar);
@@ -123,7 +123,7 @@ void ComptonProfile::cacheYSpaceValues(
  * @param detpar Structure containing detector parameters
  */
 void ComptonProfile::cacheYSpaceValues(
-    const HistogramData::HistogramX &tseconds,
+    const HistogramData::Points &tseconds,
     const Algorithms::DetectorParams &detpar) {
 
   // ------ Fixed coefficients related to resolution & Y-space transforms
