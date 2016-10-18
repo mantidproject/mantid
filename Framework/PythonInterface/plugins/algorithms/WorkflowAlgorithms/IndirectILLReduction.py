@@ -210,6 +210,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     _instrument = None
     _analyser = None
     _reflection = None
+    _back_scaling = 1.
 
     # Nexus criteria for given reduction type
     _criteria = None
@@ -283,6 +284,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                                  '5 like 4, but use Vanadium run for peak positions\n'
                                  '6 center both left and right at zero and sum\n'
                                  '7 like 6, but use Vanadium run for peak positions')
+
+        self.declareProperty(name='BackgroundScalingFactor',defaultValue=1.,
+                             doc='Scaling factor for background subtraction')
 
         # Output workspace properties
         self.declareProperty(WorkspaceGroupProperty("OutputWorkspace", "red",
@@ -367,6 +371,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._reduction_type = self.getProperty('ReductionType').value
         self._sum_runs = self.getProperty('SumRuns').value
         self._unmirror_option = self.getProperty('UnmirrorOption').value
+        self._back_scaling = self.getProperty('BackgroundScalingFactor').value
 
         self._red_ws = self.getPropertyValue('OutputWorkspace')
         self._raw_ws = self._red_ws + '_' + self.getPropertyValue('RawWorkspace')
@@ -759,6 +764,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     def _background_subtraction(self, red, bsub):
         # subtract the background if specified
         if self._background_file:
+            Scale(InputWorkspace = 'background', OutputWorkspace = 'background', Factor = self._back_scaling)
             Minus(LHSWorkspace=red, RHSWorkspace='background', OutputWorkspace=red)
             # check the integral after subtraction
             __temp = ReplaceSpecialValues(InputWorkspace=red, NaNValue='0')
