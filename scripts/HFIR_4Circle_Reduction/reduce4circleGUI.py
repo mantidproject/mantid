@@ -453,6 +453,19 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def action_load_last_project(self):
+        """
+        Load last project
+        :return:
+        """
+        project_file_name = str(self.ui.label_last1Path.text())
+        if os.path.exists(project_file_name) is False:
+            self.pop_one_button_dialog('Last saved project %s cannot be located.' % project_file_name)
+        else:
+            self._myControl.load_project(project_file_name)
+
+        return
+
     def closeEvent(self, QCloseEvent):
         """
         Close event
