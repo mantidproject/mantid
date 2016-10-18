@@ -17,6 +17,7 @@ def checkout(repo_path):
 
 
 def update_meta_yaml(repo_path, recipe_path=None):
+    "return: True if updated"
     recipe_path = recipe_path or 'framework'
     if not os.path.isabs(recipe_path):
         recipe_path = os.path.join(repo_path, recipe_path)
@@ -31,9 +32,9 @@ def update_meta_yaml(repo_path, recipe_path=None):
     # if nothing changed just exit
     if header == old_header:
         print "Nothing changed. Skipping."
-        return
+        return False
     open(path, 'wt').write('\n'.join(header+body))
-    return
+    return True
 
 
 def commit(repo_path):
@@ -53,9 +54,9 @@ def push(repo_path):
 def main():
     repo_path = 'conda-recipes'
     checkout(repo_path)
-    update_meta_yaml(repo_path)
-    commit(repo_path)
-    push(repo_path)
+    if update_meta_yaml(repo_path):
+        commit(repo_path)
+        push(repo_path)
     return
 
 
