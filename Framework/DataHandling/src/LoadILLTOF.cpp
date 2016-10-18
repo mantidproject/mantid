@@ -548,10 +548,8 @@ void LoadILLTOF::loadDataIntoTheWorkSpace(
   std::vector<detid_t> monitorIDs = instrument->getMonitors();
 
   for (const auto &monitor : monitors) {
-    m_localWorkspace->setHistogram(
-      spec++, 
-      m_localWorkspace->binEdges(0),
-      Counts(monitor.begin(), monitor.end()));
+    m_localWorkspace->setHistogram(spec++, m_localWorkspace->binEdges(0),
+                                   Counts(monitor.begin(), monitor.end()));
   }
 
   std::vector<detid_t> detectorIDs = instrument->getDetectorIDs(true);
@@ -606,9 +604,8 @@ void LoadILLTOF::loadSpectra(size_t &spec, size_t firstSpec,
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
       m_localWorkspace->setHistogram(
-        spec++,
-        m_localWorkspace->binEdges(0),
-        Counts(HistogramY(data_p, data_p + m_numberOfChannels)));
+          spec++, m_localWorkspace->binEdges(0),
+          Counts(HistogramY(data_p, data_p + m_numberOfChannels)));
       progress.report();
     }
   }

@@ -177,9 +177,8 @@ void LoadLLB::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
       float *data_p = &data(static_cast<int>(i), static_cast<int>(j));
       m_localWorkspace->setHistogram(
-        spec++,
-        m_localWorkspace->binEdges(0),
-        Counts(HistogramY(data_p, data_p + m_numberOfChannels)));
+          spec++, m_localWorkspace->binEdges(0),
+          Counts(HistogramY(data_p, data_p + m_numberOfChannels)));
       progress.report();
     }
   }
@@ -227,8 +226,8 @@ int LoadLLB::getDetectorElasticPeakPosition(const NeXus::NXFloat &data) {
   return calculatedDetectorElasticPeakPosition;
 }
 
-void LoadLLB::setTimeBinning(HistogramX &histX,
-                             int elasticPeakPosition, double channelWidth) {
+void LoadLLB::setTimeBinning(HistogramX &histX, int elasticPeakPosition,
+                             double channelWidth) {
 
   double l1 = m_loader.getL1(m_localWorkspace);
   double l2 = m_loader.getL2(m_localWorkspace);

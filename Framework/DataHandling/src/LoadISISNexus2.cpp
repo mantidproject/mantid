@@ -291,8 +291,8 @@ void LoadISISNexus2::exec() {
     // Get the X data
     NXFloat timeBins = entry.openNXFloat("detector_1/time_of_flight");
     timeBins.load();
-    m_tof_data = boost::make_shared<HistogramX>(
-        timeBins(), timeBins() + x_length);
+    m_tof_data =
+        boost::make_shared<HistogramX>(timeBins(), timeBins() + x_length);
   }
   int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
   loadPeriodData(firstentry, entry, local_workspace, m_load_selected_spectra);
@@ -790,9 +790,10 @@ void LoadISISNexus2::loadPeriodData(
       NXFloat timeBins = monitor.openNXFloat("time_of_flight");
       timeBins.load();
       local_workspace->setHistogram(
-        hist_index, 
-        BinEdges(HistogramX(timeBins(), timeBins() + timeBins.dim0())), 
-        Counts(HistogramY(mondata(), mondata() + m_monBlockInfo.getNumberOfChannels())));
+          hist_index,
+          BinEdges(HistogramX(timeBins(), timeBins() + timeBins.dim0())),
+          Counts(HistogramY(mondata(),
+                            mondata() + m_monBlockInfo.getNumberOfChannels())));
 
       if (update_spectra2det_mapping) {
         // local_workspace->getAxis(1)->setValue(hist_index,
@@ -881,7 +882,8 @@ void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize,
   int64_t final(hist + blocksize);
   while (hist < final) {
     m_progress->report("Loading data");
-    local_workspace->setHistogram(hist, BinEdges(m_tof_data), Counts(data_start, data_end));
+    local_workspace->setHistogram(hist, BinEdges(m_tof_data),
+                                  Counts(data_start, data_end));
     data_start += m_detBlockInfo.getNumberOfChannels();
     data_end += m_detBlockInfo.getNumberOfChannels();
     if (m_load_selected_spectra) {
