@@ -81,6 +81,66 @@ class Lattice(object):
         """
         return self._gamma
 
+    def set_a(self, lattice_a):
+        """
+        set lattice parameter a
+        :param lattice_a:
+        :return:
+        """
+        self._a = lattice_a
+
+        return
+
+    def set_b(self, lattice_b):
+        """
+        set lattice parameter b
+        :param lattice_b:
+        :return:
+        """
+        self._b = lattice_b
+
+        return
+
+    def set_c(self, lattice_c):
+        """
+        set lattice parameter c
+        :param lattice_c:
+        :return:
+        """
+        self._c = lattice_c
+
+        return
+
+    def set_alpha(self, alpha):
+        """
+        set alpha
+        :param alpha:
+        :return:
+        """
+        self._alpha = alpha
+
+        return
+
+    def set_beta(self, beta):
+        """
+        set beta
+        :param beta:
+        :return:
+        """
+        self._beta = beta
+
+        return
+
+    def set_gamma(self, gamma):
+        """
+        set gamma
+        :param gamma:
+        :return:
+        """
+        self._gamma = gamma
+
+        return
+
 
 def m_sin(degree):
     """
@@ -174,16 +234,16 @@ def calculate_reciprocal_lattice(lattice):
     #  v_start = (2 * numpy.pi) ** 3. / volume
 
     # calculate a*, b*, c*
-    lattice_star._a = 2 * numpy.pi * lattice.get_b() * lattice.get_c() * m_sin(lattice.get_alpha()) / volume
-    lattice_star._b = 2 * numpy.pi * lattice.get_a() * lattice.get_c() * m_sin(lattice.get_beta()) / volume
-    lattice_star._c = 2 * numpy.pi * lattice.get_b() * lattice.get_a() * m_sin(lattice.get_gamma()) / volume
+    lattice_star.set_a(2 * numpy.pi * lattice.get_b() * lattice.get_c() * m_sin(lattice.get_alpha()) / volume)
+    lattice_star.set_b(2 * numpy.pi * lattice.get_a() * lattice.get_c() * m_sin(lattice.get_beta()) / volume)
+    lattice_star.set_c(2 * numpy.pi * lattice.get_b() * lattice.get_a() * m_sin(lattice.get_gamma()) / volume)
 
-    lattice_star._alpha = math.acos((m_cos(lattice.get_beta()) * m_cos(lattice.get_gamma()) - m_cos(lattice.get_alpha())) /
-                                    (m_sin(lattice.get_beta()) * m_sin(lattice.get_gamma()))) * 180. / numpy.pi
-    lattice_star._beta = math.acos((m_cos(lattice.get_alpha()) * m_cos(lattice.get_gamma()) - m_cos(lattice.get_beta())) /
-                                   (m_sin(lattice.get_alpha()) * m_sin(lattice.get_gamma()))) * 180. / numpy.pi
-    lattice_star._gamma = math.acos((m_cos(lattice.get_alpha()) * m_cos(lattice.get_beta()) - m_cos(lattice.get_gamma())) /
-                                    (m_sin(lattice.get_alpha()) * m_sin(lattice.get_beta()))) * 180. / numpy.pi
+    lattice_star.set_alpha(math.acos((m_cos(lattice.get_beta()) * m_cos(lattice.get_gamma()) - m_cos(lattice.get_alpha())) /
+                                     (m_sin(lattice.get_beta()) * m_sin(lattice.get_gamma()))) * 180. / numpy.pi)
+    lattice_star.set_beta(math.acos((m_cos(lattice.get_alpha()) * m_cos(lattice.get_gamma()) - m_cos(lattice.get_beta())) /
+                                    (m_sin(lattice.get_alpha()) * m_sin(lattice.get_gamma()))) * 180. / numpy.pi)
+    lattice_star.set_gamma(math.acos((m_cos(lattice.get_alpha()) * m_cos(lattice.get_beta()) - m_cos(lattice.get_gamma())) /
+                                     (m_sin(lattice.get_alpha()) * m_sin(lattice.get_beta()))) * 180. / numpy.pi)
 
     return lattice_star
 

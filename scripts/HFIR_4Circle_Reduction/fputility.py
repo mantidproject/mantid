@@ -95,15 +95,15 @@ def load_scd_fullprof_intensity_file(file_name):
                 continue
 
             try:
-                h = int(terms[0])
-                k = int(terms[1])
-                l = int(terms[2])
+                lattice_h = int(terms[0])
+                lattice_k = int(terms[1])
+                lattice_l = int(terms[2])
                 intensity = float(terms[3])
                 variation = float(terms[4])
             except ValueError:
                 error_buffer += 'unable to parse line %-3d: %s\n' % (line_index, line)
             else:
-                reflection_dict[(h, k, l)] = (intensity, variation)
+                reflection_dict[(lattice_h, lattice_k, lattice_l)] = (intensity, variation)
 
         # END-IF-ELSE
     # END-FOR
@@ -150,33 +150,40 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
     :param with_absorption:
     :return:
     """
-    # check
+    # check input validity
     assert isinstance(user_header, str), 'User header must be a string.'
     assert isinstance(wave_length, float), 'Neutron wave length must be a float.'
     assert isinstance(k_vector_dict, dict), 'K-vector list must be a dictionary.'
     assert isinstance(peak_dict_list, list), 'Peak-dictionary list must be a list.'
 
-    # check k-vector dictionary
-    print '[DB...FIXME] Input k-vector keys:', k_vector_dict.keys()
+    # determine whether the output is for magnetic peaks or nuclear peaks
+    # assuming that either all peaks are magnetic or all peaks are nuclear
+    num_k_vectors = len(k_vector_dict)
+    peak_0_dict = peak_dict_list[0]
+    assert isinstance(peak_0_dict, dict) and 'kindex' in peak_0_dict
+    peak0_is_magnetic = peak_0_dict['kindex'] > 0 and num_k_vectors > 0
 
-    # set up all lines
+    # set up fullprof .ini file buffer
     fp_buffer = ''
 
     # user defined header
     header = 'COMM %s' % user_header.strip()
-    # fixed file format line
-    # FIXME/TODO/NOW - Only  magnetic case use 4i4,2f8,...
-    if with_absorption:
-        file_format = '(3i4,2f8.2,i4,6f8.5)'
+    # fixed file format line: Only  magnetic case use 4i4,2f8,...
+    if peak0_is_magnetic:
+        first_3_terms_foramt = '4i4'
     else:
-        file_format = '(3i4,2f8.2,i4)'
+        first_3_terms_foramt = '3i4'
+
+    if with_absorption:
+        file_format = '(%s,2f8.2,i4,6f8.5)' % first_3_terms_foramt
+    else:
+        file_format = '(%s,2f8.2,i4)' % first_3_terms_foramt
     # wave length
     lambda_line = '%.4f  0  0' % wave_length
 
     fp_buffer += header + '\n' + file_format + '\n' + lambda_line + '\n'
 
     # tricky one.  number of K vectors
-    num_k_vectors = len(k_vector_dict)
     if num_k_vectors > 0:
         # number of k vectors
         kline = '%d' % num_k_vectors
@@ -280,6 +287,12 @@ def main(argv):
 
     intensity_dict1, wave_length1, error_message1 = load_scd_fullprof_intensity_file(int_file_1)
     intensity_dict2, wave_length2, error_message2 = load_scd_fullprof_intensity_file(int_file_2)
+
+    if len(error_message1) == 0:
+        print '[Error] %s: %s' % (int_file_1, error_message1)
+    if len(error_message2) == 0:
+        print '[Error] %s: %s' % (int_file_2, error_message2)
+
     diff_dict = calculate_intensity_difference(intensity_dict1, intensity_dict2)
     diff_peak_list = convert_to_peak_dict_list(diff_dict)
     write_scd_fullprof_kvector('difference', wave_length=wave_length1, k_vector_dict=dict(), peak_dict_list=diff_peak_list,
