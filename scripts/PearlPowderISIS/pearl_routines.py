@@ -113,7 +113,7 @@ def PEARL_getcycle(number):
 
 
 # pylint: disable=unused-variable, too-many-locals, too-many-statements, undefined-loop-variable, redefined-outer-name
-def PEARL_getcalibfiles():
+def PEARL_getcalibfiles(in_cycle, in_tt_mode, in_pearl_file_dir):
     global calfile
     global groupfile
     global vabsorbfile
@@ -122,7 +122,7 @@ def PEARL_getcalibfiles():
     print("Setting calibration for cycle", cycle)
 
     calfile, groupfile, vabsorbfile, vanfile, instver = \
-        pearl_calib_factory.get_calibration_dir(cycle, tt_mode, pearl_file_dir)
+        pearl_calib_factory.get_calibration_dir(in_cycle, in_tt_mode, in_pearl_file_dir)
     return
 
 
@@ -340,7 +340,7 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
     focus = "focus"
 
     PEARL_getcycle(number)
-    PEARL_getcalibfiles()
+    PEARL_getcalibfiles(in_cycle=cycle, in_tt_mode=ttmode, in_pearl_file_dir=pearl_file_dir)
 
     print("Focussing mode is:", fmode)
     print("Two theta mode is:", tt_mode)
@@ -575,11 +575,13 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
     mantid.LoadNexus(Filename=outfile, OutputWorkspace=outwork)
     return outwork
 
-
 def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
-                    nvanfile="P:\Mantid\\Calibration\\van_spline_all_cycle_11_1.nxs", nspline=60, absorb=True):
+                    nvanfile="P:\Mantid\\Calibration\\van_spline_all_cycle_11_1.nxs", nspline=60, absorb=True,
+                    debug=False):
     global mode
     global tt_mode
+    global g_debug
+    g_debug = debug
     mode = fmode
     tt_mode = ttmode
 
@@ -587,7 +589,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     # is called it will return the correct tt_mode files.
 
     PEARL_getcycle(van)
-    PEARL_getcalibfiles()
+    PEARL_getcalibfiles(in_cycle=cycle, in_tt_mode=ttmode, in_pearl_file_dir=pearl_file_dir)
     wvan = "wvan"
     wempty = "wempty"
     print("Creating ", nvanfile)

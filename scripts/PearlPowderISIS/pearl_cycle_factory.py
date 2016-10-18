@@ -143,12 +143,12 @@ def get_cycle_dir(number, current_data_dir):
         print("cycle is set to", cycle)
         instver = "new2"
         datadir = current_data_dir + cycle + "\\"
-        pearl_routines.PEARL_setdatadir(currentdatadir)
+        pearl_routines.PEARL_setdatadir(current_data_dir)
     else:
         cycle = "15_4"
         print("cycle is set to", cycle)
         instver = "new2"
         datadir = current_data_dir + cycle + "\\"
-        pearl_routines.PEARL_setdatadir(currentdatadir)
+        pearl_routines.PEARL_setdatadir(current_data_dir)
 
     return cycle, instver, datadir
