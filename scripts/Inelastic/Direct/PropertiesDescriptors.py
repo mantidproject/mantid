@@ -499,7 +499,7 @@ class SaveFileName(PropDescriptor):
             sr = 0
         try:
             ei = owner.incident_energy.get_current()
-            name +='{0:0<5}Ei{1:<_4.2f}meV'.format(sr,ei)
+            name +='{0:0<5}Ei{1:_<4.2f}meV'.format(sr,ei)
             if instance.sum_runs:
                 name +='sum'
             if owner.monovan_run.run_number():
