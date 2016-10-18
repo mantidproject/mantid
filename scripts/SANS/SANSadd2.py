@@ -8,20 +8,25 @@ from shutil import copyfile
 
 _NO_INDIVIDUAL_PERIODS = -1
 
+
 def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False, binning='Monitors', saveAsEvent=False, isOverlay = False, time_shifts = []):
     if inst.upper() == "SANS2DTUBES":
         inst = "SANS2D"
   #check if there is at least one file in the list
-    if len(runs) < 1 : return
+    if len(runs) < 1 :
+        return
 
-    if not defType.startswith('.') : defType = '.'+defType
+    if not defType.startswith('.') :
+        defType = '.'+defType
 
     # Create the correct format of adding files
     adder = AddOperation(isOverlay, time_shifts)
 
   #these input arguments need to be arrays of strings, enforce this
-    if type(runs) == str : runs = (runs, )
-    if type(rawTypes) == str : rawTypes = (rawTypes, )
+    if isinstance(runs, str) :
+        runs = (runs, )
+    if isinstance(rawTypes, str) :
+        rawTypes = (rawTypes, )
 
     if lowMem:
         lowMem = _can_load_periods(runs, defType, rawTypes)
@@ -39,8 +44,8 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
         isFirstDataSetEvent = False
     #we need to catch all exceptions to ensure that a dialog box is raised with the error
         try :
-            lastPath, lastFile, logFile, num_periods, isFirstDataSetEvent = _loadWS(\
-        userEntry, defType, inst, 'AddFilesSumTempory', rawTypes, period)
+            lastPath, lastFile, logFile, num_periods, isFirstDataSetEvent = _loadWS(
+                userEntry, defType, inst, 'AddFilesSumTempory', rawTypes, period)
 
       # if event data prevent loop over periods makes no sense
             if isFirstDataSetEvent:
@@ -58,8 +63,8 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
 
             for i in range(len(runs)-1):
                 userEntry = runs[i+1]
-                lastPath, lastFile, logFile, dummy, isDataSetEvent = _loadWS(\
-          userEntry, defType, inst,'AddFilesNewTempory', rawTypes, period)
+                lastPath, lastFile, logFile, dummy, isDataSetEvent = _loadWS(
+                    userEntry, defType, inst,'AddFilesNewTempory', rawTypes, period)
 
                 if isDataSetEvent != isFirstDataSetEvent:
                     error = 'Datasets added must be either ALL histogram data or ALL event data'
@@ -97,7 +102,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
             return ""
 
     # in case of event file force it into a histogram workspace
-        if isFirstDataSetEvent and saveAsEvent == False:
+        if isFirstDataSetEvent and not saveAsEvent:
             wsInMonitor = mtd['AddFilesSumTempory_monitors']
             if binning == 'Monitors':
                 monX = wsInMonitor.dataX(0)
@@ -141,7 +146,6 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
 
             if 'AddFilesSumTempory_Rebin' in mtd :
                 DeleteWorkspace('AddFilesSumTempory_Rebin')
-
 
         lastFile = os.path.splitext(lastFile)[0]
     # now save the added file
@@ -194,6 +198,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
 
     return 'The following file has been created:\n'+outFile
 
+
 def _can_load_periods(runs, defType, rawTypes):
     """
     Searches through the supplied list of run file names and
@@ -201,7 +206,8 @@ def _can_load_periods(runs, defType, rawTypes):
   """
     for i in runs:
         dummy, ext = os.path.splitext(i)
-        if ext == '': ext = defType
+        if ext == '':
+            ext = defType
         if _isType(ext, rawTypes):
             return False
   #no raw files were found, assume we can specify the period number for each
@@ -220,6 +226,7 @@ def _makeFilename(entry, ext, inst) :
         dummy, ext = os.path.splitext(filename)
 
     return filename, ext
+
 
 def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
 
@@ -252,8 +259,8 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
       # cal time dif in seconds
             timeDif = (timeArray[i+1].total_nanoseconds()-timeArray[i].total_nanoseconds())*1e-9
             if timeDif > 172800:
-                sanslog.warning('Time increments in the proton charge log of ' + filename + ' are suspicious large.' +\
-                          ' For example a time difference of ' + str(timeDif) + " seconds has been observed.")
+                sanslog.warning('Time increments in the proton charge log of ' + filename + ' are suspicious large.' +
+                                ' For example a time difference of ' + str(timeDif) + " seconds has been observed.")
                 break
 
     path = props.getPropertyValue('FileName')
@@ -279,6 +286,7 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
 
     return path, fName, logFile, numPeriods, isDataSetEvent
 
+
 def _padZero(runNum, inst):
     numDigits = config.getInstrument(inst).zeroPadding(0)
     run = str(runNum).zfill(numDigits)
@@ -288,6 +296,8 @@ def _padZero(runNum, inst):
 # returns true if ext is in the tuple allTypes, ext
 # is intended to be a file extension and allTypes a
 # list of allowed extensions. '*' at the end is supported
+
+
 def _isType(ext, allTypes):
     for oneType in allTypes:
         oneType = str(oneType)
@@ -299,6 +309,7 @@ def _isType(ext, allTypes):
             if ext == oneType :
                 return True
     return False
+
 
 def _copyLog(lastPath, logFile, pathout):
     try :

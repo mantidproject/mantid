@@ -16,6 +16,7 @@ from mantid.simpleapi import *
 #
 # Isotropic thermal parameters are rounded or arbitrary (the tests are meant for checking the calculations only).
 
+
 class ReflectionCheckingTest(stresstesting.MantidStressTest):
     def runTest(self):
         pass
@@ -82,7 +83,6 @@ class POLDICreatePeaksFromCellTestAl2O3(ReflectionCheckingTest):
         ([5, -2, -5], 0.88880, 23.6113, 12)
     ]
 
-
     def runTest(self):
         peaks_Al2O3 = PoldiCreatePeaksFromCell(
             SpaceGroup="R -3 c",
@@ -92,6 +92,7 @@ class POLDICreatePeaksFromCellTestAl2O3(ReflectionCheckingTest):
         self.assertEquals(peaks_Al2O3.rowCount(), 44)
 
         self.checkReflections(peaks_Al2O3, self.data)
+
 
 class POLDICreatePeaksFromCellTestFeTiO3(ReflectionCheckingTest):
     """Structure factor check for:
@@ -106,7 +107,6 @@ class POLDICreatePeaksFromCellTestFeTiO3(ReflectionCheckingTest):
         ([5, -4, 6], 0.88986, 100.244, 6)
     ]
 
-
     def runTest(self):
         peaks_FeTiO3 = PoldiCreatePeaksFromCell(
             SpaceGroup="R -3",
@@ -116,6 +116,7 @@ class POLDICreatePeaksFromCellTestFeTiO3(ReflectionCheckingTest):
         self.assertEquals(peaks_FeTiO3.rowCount(), 108)
 
         self.checkReflections(peaks_FeTiO3, self.data, 6e-5)
+
 
 class POLDICreatePeaksFromCellTestCO(ReflectionCheckingTest):
     """Structure factor check for:
@@ -130,7 +131,6 @@ class POLDICreatePeaksFromCellTestCO(ReflectionCheckingTest):
         ([6, 2, 0], 0.89018, 9.45489, 12)
     ]
 
-
     def runTest(self):
         peaks_CO = PoldiCreatePeaksFromCell(
             SpaceGroup="P 21 3",
@@ -140,6 +140,7 @@ class POLDICreatePeaksFromCellTestCO(ReflectionCheckingTest):
         self.assertEquals(peaks_CO.rowCount(), 91)
 
         self.checkReflections(peaks_CO, self.data, 1e-5)
+
 
 class POLDICreatePeaksFromCellTestBetaQuartz(ReflectionCheckingTest):
     """Structure factor check for:
@@ -153,7 +154,6 @@ class POLDICreatePeaksFromCellTestBetaQuartz(ReflectionCheckingTest):
         ([1, 0, 2], 2.30725, 2.96401, 12),
         ([1, 0, 6], 0.88968, 3.15179, 12)
     ]
-
 
     def runTest(self):
         peaks_betaSiO2 = PoldiCreatePeaksFromCell(

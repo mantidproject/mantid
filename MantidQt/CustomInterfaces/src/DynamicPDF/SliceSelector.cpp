@@ -4,6 +4,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Unit.h"
 // includes for interface
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h"

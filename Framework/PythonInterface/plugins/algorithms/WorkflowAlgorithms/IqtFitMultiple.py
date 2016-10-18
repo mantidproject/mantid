@@ -23,7 +23,6 @@ class IqtFitMultiple(PythonAlgorithm):
     _parameter_name = None
     _fit_group_name = None
 
-
     def category(self):
         return "Workflow\\MIDAS"
 
@@ -76,7 +75,6 @@ class IqtFitMultiple(PythonAlgorithm):
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceGroup', '', direction=Direction.Output),
                              doc='The OutputWorkspace group Data, Calc and Diff, values for the fit of each spectra')
 
-
     def validateInputs(self):
         self._get_properties()
         issues = dict()
@@ -86,8 +84,8 @@ class IqtFitMultiple(PythonAlgorithm):
         # Validate SpecMin/Max
 
         if self._spec_max > maximum_possible_spectra:
-            issues['SpecMax'] = ('SpecMax must be smaller or equal to the '\
-             'number of spectra in the input workspace, %d' % maximum_possible_spectra)
+            issues['SpecMax'] = ('SpecMax must be smaller or equal to the '
+                                 'number of spectra in the input workspace, %d' % maximum_possible_spectra)
         if self._spec_min < 0:
             issues['SpecMin'] = 'SpecMin can not be less than 0'
         if self._spec_max < self._spec_min:
@@ -210,7 +208,6 @@ class IqtFitMultiple(PythonAlgorithm):
         self.setProperty('OutputParameterWorkspace', self._parameter_name)
         self.setProperty('OutputWorkspaceGroup', self._fit_group_name)
         conclusion_prog.report('Algorithm complete')
-
 
     def _create_mutli_domain_func(self, function, input_ws):
         multi= 'composite=MultiDomainFunction,NumDeriv=true;'

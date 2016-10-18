@@ -1,10 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ConfigService.h"
@@ -26,8 +24,6 @@
 #include <QMessageBox>
 
 #include <algorithm>
-
-//-----------------------------------------------------------------------------
 
 namespace MantidQt {
 namespace CustomInterfaces {

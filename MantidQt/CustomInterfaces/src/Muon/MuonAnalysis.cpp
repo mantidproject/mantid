@@ -2081,6 +2081,9 @@ void MuonAnalysis::loadFittings() {
           SLOT(dataToFitChanged()));
   connect(m_dataSelector, SIGNAL(workspaceChanged()), this,
           SLOT(dataToFitChanged()));
+  connect(m_uiForm.plotCreation, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(updateDataPresenterOverwrite(int)));
+  m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
   // Set compatibility mode on/off as appropriate
   const bool isCompMode = m_optionTab->getCompatibilityMode();
   m_fitFunctionPresenter->setCompatibilityMode(isCompMode);
@@ -2100,36 +2103,32 @@ void MuonAnalysis::allowLoading(bool enabled) {
 *   Check to see if the appending option is true when the previous button has
 * been pressed and acts accordingly
 */
-void MuonAnalysis::checkAppendingPreviousRun() {
-  if (m_uiForm.mwRunFiles->getText().isEmpty()) {
-    return;
-  }
-
-  allowLoading(false);
-
-  if (m_uiForm.mwRunFiles->getText().contains("-")) {
-    setAppendingRun(-1);
-  } else {
-    // Subtact one from the current run and load
-    changeRun(-1);
-  }
-}
+void MuonAnalysis::checkAppendingPreviousRun() { checkAppendingRun(-1); }
 
 /**
 *   Check to see if the appending option is true when the next button has been
 * pressed and acts accordingly
 */
-void MuonAnalysis::checkAppendingNextRun() {
-  if (m_uiForm.mwRunFiles->getText().isEmpty())
+void MuonAnalysis::checkAppendingNextRun() { checkAppendingRun(1); }
+
+/**
+ * Check to see if the appending option is true when the next/previous button
+ * has been pressed, and load accordingly
+ * @param direction :: +1 for "next", -1 for "previous"
+ */
+void MuonAnalysis::checkAppendingRun(const int direction) {
+  const auto &runPath = m_uiForm.mwRunFiles->getText();
+  if (runPath.isEmpty()) {
     return;
+  }
 
+  const int sign = direction < 0 ? -1 : 1;
   allowLoading(false);
-
-  if (m_uiForm.mwRunFiles->getText().contains("-")) {
-    setAppendingRun(1);
+  const auto runString = runPath.split(Poco::Path::separator()).last();
+  if (runString.contains("-")) {
+    setAppendingRun(sign); // append next/previous run
   } else {
-    // Add one to current run and laod
-    changeRun(1);
+    changeRun(sign); // replace with next/previous run
   }
 }
 
@@ -2966,6 +2965,17 @@ void MuonAnalysis::setLoadCurrentRunEnabled(bool enabled) {
 void MuonAnalysis::compatibilityModeChanged(int state) {
   m_fitFunctionPresenter->setCompatibilityMode(state ==
                                                Qt::CheckState::Checked);
+}
+
+/**
+ * Update the fit data presenter with current overwrite setting
+ * @param state :: [input] (not used) Setting of combo box
+ */
+void MuonAnalysis::updateDataPresenterOverwrite(int state) {
+  Q_UNUSED(state);
+  if (m_fitDataPresenter) {
+    m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
+  }
 }
 
 } // namespace MantidQt

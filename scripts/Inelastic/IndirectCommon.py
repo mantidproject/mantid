@@ -107,6 +107,7 @@ def getEfixed(workspace):
     raise ValueError('No Efixed parameter found')
 
 
+
 def GetWSangles(inWS):
     num_hist = s_api.mtd[inWS].getNumberHistograms()                        # get no. of histograms/groups
     source_pos = s_api.mtd[inWS].getInstrument().getSource().getPos()
@@ -231,4 +232,3 @@ def plotSpectra(ws, y_axis_title, indicies=None):
     except RuntimeError:
         # User clicked cancel on plot so don't do anything
         return
-

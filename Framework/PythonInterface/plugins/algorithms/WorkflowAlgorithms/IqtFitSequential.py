@@ -6,6 +6,7 @@ from mantid.api import *
 from mantid.kernel import *
 import mantid.simpleapi as ms
 
+
 class IqtFitSequential(PythonAlgorithm):
 
     _input_ws = None
@@ -22,7 +23,6 @@ class IqtFitSequential(PythonAlgorithm):
     _result_ws = None
     _parameter_name = None
     _fit_group_name = None
-
 
     def category(self):
         return "Workflow\\MIDAS"
@@ -76,14 +76,12 @@ class IqtFitSequential(PythonAlgorithm):
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceGroup', '', direction=Direction.Output),
                              doc='The OutputWorkspace group Data, Calc and Diff, values for the fit of each spectra')
 
-
     def validateInputs(self):
         self._get_properties()
         issues = dict()
         if self._start_x >= self._end_x:
             issues['StartX'] = 'StartX must be more than EndX'
         return issues
-
 
     def _get_properties(self):
         self._input_ws = self.getProperty('InputWorkspace').value
@@ -99,7 +97,6 @@ class IqtFitSequential(PythonAlgorithm):
         self._result_name = self.getPropertyValue('OutputResultWorkspace')
         self._parameter_name = self.getPropertyValue('OutputParameterWorkspace')
         self._fit_group_name = self.getPropertyValue('OutputWorkspaceGroup')
-
 
     def PyExec(self):
         from IndirectCommon import getWSprefix
@@ -205,7 +202,6 @@ class IqtFitSequential(PythonAlgorithm):
         self.setProperty('OutputWorkspaceGroup', self._fit_group_name)
         self.setProperty('OutputResultWorkspace', self._result_ws)
         conclusion_prog.report('Algorithm complete')
-
 
     def _transfer_sample_logs(self):
         """

@@ -21,6 +21,7 @@ class GonioTableModel(QtCore.QAbstractTableModel):
     Dealing with the goniometer input
     """
     changed=QtCore.pyqtSignal(dict) #each value is a list
+
     def __init__(self, axes, parent = None):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.labels = axes['gonioLabels']
@@ -136,9 +137,11 @@ class GonioTableModel(QtCore.QAbstractTableModel):
                 return False
         return True
 
+
 class InstrumentSetupWidget(QtGui.QWidget):
     #signal when things change and valid
     changed=QtCore.pyqtSignal(dict)
+
     def __init__(self,parent=None):
         # pylint: disable=unused-argument,super-on-old-class
         super(InstrumentSetupWidget,self).__init__()

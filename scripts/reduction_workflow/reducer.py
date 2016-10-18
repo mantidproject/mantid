@@ -10,6 +10,7 @@ import string
 from mantid.api import AlgorithmManager, AnalysisDataService
 from mantid.kernel import ConfigService, Logger
 
+
 class Reducer(object):
     """
         Base reducer class. Instrument-specific reduction processes should be
@@ -64,7 +65,7 @@ class Reducer(object):
             self._data_path = path
             ConfigService.Instance().appendDataSearchDir(path)
         else:
-            raise RuntimeError, "Reducer.set_data_path: provided path is not a directory (%s)" % path
+            raise RuntimeError("Reducer.set_data_path: provided path is not a directory (%s)" % path)
 
     def set_output_path(self, path):
         """
@@ -75,7 +76,7 @@ class Reducer(object):
         if os.path.isdir(path):
             self._output_path = path
         else:
-            raise RuntimeError, "Reducer.set_output_path: provided path is not a directory (%s)" % path
+            raise RuntimeError("Reducer.set_output_path: provided path is not a directory (%s)" % path)
 
     def clear_data_files(self):
         """
@@ -97,8 +98,8 @@ class Reducer(object):
                 self._data_files[workspace] = None
                 return
             else:
-                raise RuntimeError, "Trying to append a data set without a file name or an existing workspace."
-        if type(data_file)==list:
+                raise RuntimeError("Trying to append a data set without a file name or an existing workspace.")
+        if isinstance(data_file, list):
             if workspace is None:
                 # Use the first file to determine the workspace name
                 workspace = extract_workspace_name(data_file[0])
@@ -171,7 +172,7 @@ class Reducer(object):
             # Check whether the data is already available or needs to be loaded
             if self._data_files[ws] is not None:
                 datafile = self._data_files[ws]
-                if type(datafile)==list:
+                if isinstance(datafile, list):
                     datafile=','.join(datafile)
                 if "Filename" in props:
                     alg.setPropertyValue("Filename", datafile)
@@ -221,6 +222,7 @@ class Reducer(object):
         f.close()
         return self.log_text
 
+
 def extract_workspace_name(filepath, suffix=''):
     """
         Returns a default workspace name for a given data file path.
@@ -229,17 +231,16 @@ def extract_workspace_name(filepath, suffix=''):
         @param suffix: string to append to name
     """
     filepath_tmp = filepath
-    if type(filepath)==list:
+    if isinstance(filepath, list):
         filepath_tmp = filepath[0]
 
     (head, tail) = os.path.split(filepath_tmp)
     basename, extension = os.path.splitext(tail)
 
-    if type(filepath)==list:
+    if isinstance(filepath, list):
         basename += "_combined"
 
     #TODO: check whether the workspace name is already in use
     #      and modify it if it is.
 
     return basename+suffix
-

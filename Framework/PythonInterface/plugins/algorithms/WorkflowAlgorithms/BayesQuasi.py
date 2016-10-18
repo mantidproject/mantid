@@ -1,4 +1,8 @@
-#pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
+#pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,redefined-builtin
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+from six import next
+
 import os
 import numpy as np
 
@@ -15,6 +19,7 @@ if is_supported_f2py_platform():
     QLr     = import_f2py("QLres")
     QLd     = import_f2py("QLdata")
     Qse     = import_f2py("QLse")
+
 
 class BayesQuasi(PythonAlgorithm):
 
@@ -100,7 +105,6 @@ class BayesQuasi(PythonAlgorithm):
                                                      direction=Direction.Output),
                              doc='The name of the probability output workspaces')
 
-
     def validateInputs(self):
         self._get_properties()
         issues = dict()
@@ -110,7 +114,6 @@ class BayesQuasi(PythonAlgorithm):
             issues['MaxRange'] = 'Must be less than EnergyMin'
 
         return issues
-
 
     def _get_properties(self):
         self._program = self.getPropertyValue('Program')
@@ -202,7 +205,7 @@ class BayesQuasi(PythonAlgorithm):
         totalNoSam = nsam
 
         #check if we're performing a sequential fit
-        if self._loop != True:
+        if not self._loop:
             nsam = 1
 
         nres = self.CheckHistZero(self._resWS)[0]
@@ -286,9 +289,9 @@ class BayesQuasi(PythonAlgorithm):
                 logger.information(message)
             if prog == 'QSe':
                 workflow_prog.report('Processing Sample number %i as Stretched Exp' % spectrum)
-                nd,xout,yout,eout,yfit,yprob=Qse.qlstexp(numb,Xv,Yv,Ev,reals,fitOp,\
-                                                        Xdat,Xb,Yb,Wy,We,dtn,xsc,\
-                                                        wrks,wrkr,lwrk)
+                nd,xout,yout,eout,yfit,yprob=Qse.qlstexp(numb,Xv,Yv,Ev,reals,fitOp,
+                                                         Xdat,Xb,Yb,Wy,We,dtn,xsc,
+                                                         wrks,wrkr,lwrk)
             dataX = xout[:nd]
             dataX = np.append(dataX,2*xout[nd-1]-xout[nd-2])
             yfit_list = np.split(yfit[:4*nd],4)
@@ -409,7 +412,6 @@ class BayesQuasi(PythonAlgorithm):
         log_alg.setProperty('LogValues', [log[1] for log in sample_logs])
         log_alg.execute()
 
-
     def C2Se(self, sname):
         outWS = sname+'_Result'
         asc = self._read_ascii_file(sname+'.qse')
@@ -452,8 +454,8 @@ class BayesQuasi(PythonAlgorithm):
         Vaxis.append('f1.Beta')
 
         logger.information('Vaxis=' + str(Vaxis))
-        s_api.CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,\
-            UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
+        s_api.CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
+                              UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
 
         return outWS
 
@@ -637,8 +639,8 @@ class BayesQuasi(PythonAlgorithm):
         y = np.asarray(y).flatten()
         e = np.asarray(e).flatten()
 
-        s_api.CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,\
-            UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=axis_names)
+        s_api.CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,
+                              UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=axis_names)
 
         return output_workspace
 
@@ -647,7 +649,6 @@ class BayesQuasi(PythonAlgorithm):
         #encapsulates the iteration over a block of lines
         for line in block:
             yield self.ExtractFloat(line)
-
 
     def _read_ql_file(self, file_name, nl):
         #offset to ignore header
@@ -664,7 +665,7 @@ class BayesQuasi(PythonAlgorithm):
 
         #iterate over each block of fit parameters in the file
         #each block corresponds to a single column in the final workspace
-        for block_num in xrange(num_blocks):
+        for block_num in range(num_blocks):
             lower_index = header_offset+(block_size*block_num)
             upper_index = lower_index+block_size
 
@@ -672,12 +673,12 @@ class BayesQuasi(PythonAlgorithm):
             line_pointer = self._yield_floats(asc[lower_index:upper_index])
 
             #Q,AMAX,HWHM,BSCL,GSCL
-            line = line_pointer.next()
+            line = next(line_pointer)
             Q, AMAX, HWHM, _, _ = line
             q_data.append(Q)
 
             #A0,A1,A2,A4
-            line = line_pointer.next()
+            line = next(line_pointer)
             block_height = AMAX*line[0]
 
             #parse peak data from block
@@ -685,7 +686,7 @@ class BayesQuasi(PythonAlgorithm):
             block_amplitude = []
             for _ in range(nl):
                 #Amplitude,FWHM for each peak
-                line = line_pointer.next()
+                line = next(line_pointer)
                 amp = AMAX*line[0]
                 FWHM = 2.*HWHM*line[1]
                 block_amplitude.append(amp)
@@ -693,7 +694,7 @@ class BayesQuasi(PythonAlgorithm):
 
             #next parse error data from block
             #SIG0
-            line = line_pointer.next()
+            line = next(line_pointer)
             block_height_e = line[0]
 
             block_FWHM_e = []
@@ -701,12 +702,12 @@ class BayesQuasi(PythonAlgorithm):
             for _ in range(nl):
                 #Amplitude error,FWHM error for each peak
                 #SIGIK
-                line = line_pointer.next()
+                line = next(line_pointer)
                 amp = AMAX*math.sqrt(math.fabs(line[0])+1.0e-20)
                 block_amplitude_e.append(amp)
 
                 #SIGFK
-                line = line_pointer.next()
+                line = next(line_pointer)
                 FWHM = 2.0*HWHM*math.sqrt(math.fabs(line[0])+1.0e-20)
                 block_FWHM_e.append(FWHM)
 

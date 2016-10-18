@@ -7,8 +7,13 @@ Force for ILL backscattering raw
 from IndirectImport import *
 from mantid.simpleapi import *
 from mantid import config, logger, mtd, FileFinder
-import sys, math, os.path, numpy as np
+
+import sys
+import math
+import os.path
+import numpy as np
 from IndirectCommon import StartTime, EndTime, getEfixed
+
 
 MTD_PLOT = import_mantidplot()
 
@@ -220,7 +225,7 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
         eOut.append(em[mm] / 10.0)
     xMon.append(2 * xMon[new - 1] - xMon[new - 2])
     monWS = '__Mon'
-    CreateWorkspace(OutputWorkspace=monWS, DataX=xMon, DataY=yOut, DataE=eOut, \
+    CreateWorkspace(OutputWorkspace=monWS, DataX=xMon, DataY=yOut, DataE=eOut,
                     Nspec=1, UnitX='DeltaE')
     #
     _Qaxis = ''
@@ -231,7 +236,7 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
     for n in range(0, nsp):
         next, _xd, yd, ed = ReadIbackGroup(asc, next)
         tot.append(sum(yd))
-        logger.information('Spectrum ' + str(n + 1) + ' at angle ' + str(theta[n]) + \
+        logger.information('Spectrum ' + str(n + 1) + ' at angle ' + str(theta[n]) +
                            ' ; Total counts = ' + str(sum(yd)))
         for m in range(0, new + 1):
             mm = m + imin
@@ -244,9 +249,9 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
         _Qaxis += str(theta[n])
     ascWS = fname + '_' + ana + refl + '_asc'
     outWS = fname + '_' + ana + refl + '_red'
-    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat, \
+    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
                     Nspec=nsp, UnitX='DeltaE')
-    Divide(LHSWorkspace=ascWS, RHSWorkspace=monWS, OutputWorkspace=ascWS, \
+    Divide(LHSWorkspace=ascWS, RHSWorkspace=monWS, OutputWorkspace=ascWS,
            AllowDifferentNumberSpectra=True)
     DeleteWorkspace(monWS)  # delete monitor WS
     InstrParas(ascWS, instr, ana, refl)
@@ -257,7 +262,7 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
         UseMap(ascWS, map)
     if rejectZ:
         RejectZero(ascWS, tot)
-    if useM == False and rejectZ == False:
+    if not useM and not rejectZ:
         CloneWorkspace(InputWorkspace=ascWS, OutputWorkspace=outWS)
     if Save:
         opath = os.path.join(workdir, outWS + '.nxs')
@@ -334,7 +339,7 @@ def InxStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):
         ns += 1
     ascWS = fname + '_' + ana + refl + '_inx'
     outWS = fname + '_' + ana + refl + '_red'
-    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat, \
+    CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
                     Nspec=ns, UnitX='DeltaE')
     InstrParas(ascWS, instr, ana, refl)
     efixed = RunParas(ascWS, instr, 0, title)
@@ -351,7 +356,7 @@ def InxStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):
         UseMap(ascWS, map)
     if rejectZ:
         RejectZero(ascWS, tot)
-    if useM == False and rejectZ == False:
+    if not useM and not rejectZ:
         CloneWorkspace(InputWorkspace=ascWS, OutputWorkspace=outWS)
     if Save:
         opath = os.path.join(workdir, outWS + '.nxs')
@@ -370,7 +375,7 @@ def RejectZero(inWS, tot):
     outWS = inWS[:-3] + 'red'
     for n in range(0, nin):
         if tot[n] > 0:
-            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp', \
+            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',
                                   WorkspaceIndex=n)
             if nout == 0:
                 RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
@@ -408,7 +413,7 @@ def UseMap(inWS, map):
     outWS = inWS[:-3] + 'red'
     for n in range(0, nin):
         if map[n] == 1:
-            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp', \
+            ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',
                                   WorkspaceIndex=n)
             if nout == 0:
                 RenameWorkspace(InputWorkspace='__tmp', OutputWorkspace=outWS)
@@ -446,7 +451,7 @@ def ChangeAngles(inWS, instr, theta):
         handle.write(str(n + 1) + '   ' + str(theta[n]) + "\n")
         logger.information('Spectrum ' + str(n + 1) + ' = ' + str(theta[n]))
     handle.close()
-    UpdateInstrumentFromFile(Workspace=inWS, Filename=path, MoveMonitors=False, IgnorePhi=False, \
+    UpdateInstrumentFromFile(Workspace=inWS, Filename=path, MoveMonitors=False, IgnorePhi=False,
                              AsciiHeader=head)
 
 
@@ -505,6 +510,7 @@ def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
     _time = text[14:33]  # user line
     next, Ival = Iblock(asc, 5)
     nsubsp = Ival[0]
+
     nspec = Ival[153] - 2
     # text block
     text = asc[25]
@@ -521,9 +527,9 @@ def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
 
     logger.information('No. sub-spectra : ' + str(nsubsp))
     logger.information('No. spectra : ' + str(nspec))
-    logger.information('Scan type : ' + str(int(Fval[8])) + \
+    logger.information('Scan type : ' + str(int(Fval[8])) +
                        ' ; Average energy : ' + str(Fval[9]))
-    logger.information('CaF2 lattice : ' + str(Fval[81]) + \
+    logger.information('CaF2 lattice : ' + str(Fval[81]) +
                        ' ; Graphite lattice : ' + str(Fval[82]))
     logger.information('Wavelength : ' + str(wave))
     logger.information('No. temperatures : ' + str(ntemp))
@@ -605,10 +611,10 @@ def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
             xDq = np.append(xDq, sorted_Q)
             yDq = np.append(yDq, y1Dq)
             eDq = np.append(eDq, e1Dq)
-    CreateWorkspace(OutputWorkspace=ascWS, DataX=xData, DataY=yData, DataE=eData, \
+    CreateWorkspace(OutputWorkspace=ascWS, DataX=xData, DataY=yData, DataE=eData,
                     Nspec=3, UnitX='MomentumTransfer')
     IN13Paras(ascWS, run, title, wave)
-    CreateWorkspace(OutputWorkspace=outWS, DataX=xDq, DataY=yDq, DataE=eDq, \
+    CreateWorkspace(OutputWorkspace=outWS, DataX=xDq, DataY=yDq, DataE=eDq,
                     Nspec=3, UnitX='MomentumTransfer')
     IN13Paras(outWS, run, title, wave)
     if Save:
