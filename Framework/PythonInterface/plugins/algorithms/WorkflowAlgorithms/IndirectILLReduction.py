@@ -697,7 +697,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     xmin = np.maximum(mon_start_bin, start_bin)
                     xmax = np.minimum(mon_end_bin, end_bin)
         elif self._mirror_sense == 16:
-            self.log().information(
+            self.log().notice(
                 'Input run for #{0} has one wing, no unmirroring will be performed'.format(red))
 
             convert_to_energy(red)
