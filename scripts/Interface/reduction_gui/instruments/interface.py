@@ -6,7 +6,6 @@ from PyQt4 import QtGui
 import sys
 import os
 import traceback
-from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.reduction.scripter import BaseReductionScripter
 
 

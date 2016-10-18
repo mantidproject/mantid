@@ -228,7 +228,7 @@ class DirectEnergyConversion(object):
                 DeleteWorkspace(Workspace='white_ws_clone')
                 DeleteWorkspace(Workspace='hard_mask_ws')
                 diag_mask = white.get_masking(1)
-            if not out_ws_name is None:
+            if out_ws_name is not None:
                 dm = CloneWorkspace(diag_mask,OutputWorkspace=out_ws_name)
                 return dm
             else:
@@ -246,7 +246,7 @@ class DirectEnergyConversion(object):
             self.second_white = other_whiteintegrals
 
         # Get the background/total counts from the sample run if present
-        if not diag_sample is None:
+        if diag_sample is not None:
             diag_sample = self.get_run_descriptor(diag_sample)
             sample_mask = diag_sample.get_masking(1)
             if sample_mask is None:
@@ -303,7 +303,7 @@ class DirectEnergyConversion(object):
         # Check how we should run diag
         diag_spectra_blocks = self.diag_spectra
 
-        if not white_mask is None:
+        if white_mask is not None:
             diag_params['white_mask'] = white
         # keep white mask workspace for further usage
         if diag_spectra_blocks is None:
@@ -322,7 +322,7 @@ class DirectEnergyConversion(object):
                     DeleteWorkspace(white_masked_ws)
 
         if out_ws_name:
-            if not diag_sample is None:
+            if diag_sample is not None:
                 diag_sample.add_masked_ws(whiteintegrals)
                 mask = diag_sample.get_masking(1)
                 diag_mask = CloneWorkspace(mask,OutputWorkspace=out_ws_name)
@@ -461,7 +461,7 @@ class DirectEnergyConversion(object):
 #--------------------------------------------------------------------------------------------------
         # ISIS or GUI motor stuff
         psi = PropertyManager.psi.read_psi_from_workspace(sample_ws)
-        if not prop_man.motor_offset is None and np.isnan(psi):
+        if prop_man.motor_offset is not None and np.isnan(psi):
             #logs have a problem
             prop_man.log("*** Can not retrieve rotation value from sample environment logs: {0}.\n"
                          "     Rotation angle remains undefined".format(prop_man.motor_log_names))
@@ -516,7 +516,7 @@ class DirectEnergyConversion(object):
                              format(cut_ind,num_ei_cuts,ei_guess),'notice')
                 # do bleed corrections for chunk if necessary
                 bleed_mask = self._do_bleed_corrections(PropertyManager.sample_run,cut_ind)
-                if not bleed_mask is None:
+                if bleed_mask is not None:
                     mask_ws_name =  PropertyManager.sample_run.get_workspace().name()+'_bleed_mask'
                     RenameWorkspace(bleed_mask,OutputWorkspace=mask_ws_name)
                     self._old_runs_list.append(mask_ws_name)
@@ -886,9 +886,9 @@ class DirectEnergyConversion(object):
         Mask and group detectors based on input parameters
         """
         ws_name = result_ws.getName()
-        if not spec_masks is None:
+        if spec_masks is not None:
             MaskDetectors(Workspace=ws_name, MaskedWorkspace=spec_masks)
-        if not map_file is None:
+        if map_file is not None:
             GroupDetectors(InputWorkspace=ws_name,OutputWorkspace=ws_name,
                            MapFile= map_file, KeepUngroupedSpectra=0, Behaviour='Average')
 
@@ -1287,7 +1287,7 @@ class DirectEnergyConversion(object):
 
         # check if spectra masks is defined
         if hasattr(self,'_spectra_masks'):
-            if not self._spectra_masks is None and self._spectra_masks in mtd:
+            if self._spectra_masks is not None and self._spectra_masks in mtd:
                 return mtd[self._spectra_masks]
             else:
                 self._spectra_masks = None
@@ -1299,7 +1299,7 @@ class DirectEnergyConversion(object):
     def spectra_masks(self,value):
         """ set up spectra masks """
         if value is None:
-            if hasattr(self,'_spectra_masks') and not self._spectra_masks is None:
+            if hasattr(self,'_spectra_masks') and self._spectra_masks is not None:
                 if self._spectra_masks in mtd:
                     DeleteWorkspace(self._spectra_masks)
             self._spectra_masks=None

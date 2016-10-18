@@ -248,7 +248,7 @@ class DetectorBank(object):
         self._side_corr = None
 
     def get_y_corr(self):
-        if not self._y_corr is None:
+        if self._y_corr is not None:
             return self._y_corr
         else:
             raise NotImplementedError('y correction is not used for this detector')
@@ -258,11 +258,11 @@ class DetectorBank(object):
             Only set the value if it isn't disabled
             @param value: set y_corr to this value, unless it's disabled
         """
-        if not self._y_corr is None:
+        if self._y_corr is not None:
             self._y_corr = value
 
     def get_rot_corr(self):
-        if not self._rot_corr is None:
+        if self._rot_corr is not None:
             return self._rot_corr
         else:
             raise NotImplementedError('rot correction is not used for this detector')
@@ -272,12 +272,12 @@ class DetectorBank(object):
             Only set the value if it isn't disabled
             @param value: set rot_corr to this value, unless it's disabled
         """
-        if not self._rot_corr is None:
+        if self._rot_corr is not None:
             self._rot_corr = value
 
     # 22/3/12 RKH added two new variables radius_corr, side_corr
     def get_radius_corr(self):
-        if not self._radius_corr is None:
+        if self._radius_corr is not None:
             return self._radius_corr
         else:
             raise NotImplementedError('radius correction is not used for this detector')
@@ -287,11 +287,11 @@ class DetectorBank(object):
             Only set the value if it isn't disabled
             @param value: set radius_corr to this value, unless it's disabled
         """
-        if not self._rot_corr is None:
+        if self._rot_corr is not None:
             self._radius_corr = value
 
     def get_side_corr(self):
-        if not self._side_corr is None:
+        if self._side_corr is not None:
             return self._side_corr
         else:
             raise NotImplementedError('side correction is not used for this detector')
@@ -301,7 +301,7 @@ class DetectorBank(object):
             Only set the value if it isn't disabled
             @param value: set side_corr to this value, unless it's disabled
         """
-        if not self._side_corr is None:
+        if self._side_corr is not None:
             self._side_corr = value
 
     y_corr = property(get_y_corr, set_y_corr, None, None)

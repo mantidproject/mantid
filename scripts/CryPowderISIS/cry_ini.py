@@ -1,6 +1,5 @@
 #pylint: disable=attribute-defined-outside-init,undefined-loop-variable,too-many-arguments,too-many-branches,too-many-instance-attributes,old-style-class,global-variable-not-assigned
 
-from mantid.simpleapi import *
 import cry_utils
 import re
 import os.path

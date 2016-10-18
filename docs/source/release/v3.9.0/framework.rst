@@ -15,6 +15,7 @@ New
 Improved
 ########
 
+- :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` has now a new mode 'Moving Average' which takes the minimum of a moving window average as the flat background.
 
 Deprecated
 ##########

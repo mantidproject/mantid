@@ -14,7 +14,6 @@ from mantid.simpleapi import *
 from mantid import config, logger, mtd
 from IndirectCommon import *
 import sys
-import platform
 import math
 import os.path
 import numpy as np

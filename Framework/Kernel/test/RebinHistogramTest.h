@@ -1,9 +1,11 @@
 #ifndef REBINHISTOGRAM_TEST_H_
 #define REBINHISTOGRAM_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <vector>
 #include "MantidKernel/VectorHelper.h"
+#include <algorithm>
+#include <cxxtest/TestSuite.h>
+#include <numeric>
+#include <vector>
 
 /// @author Laurent C Chapon, ISIS Facility, Rutherford Appleton Laboratory
 /// 13/03/2009
@@ -49,6 +51,74 @@ public:
       TS_ASSERT_DELTA(returnY[i], yin[i], 1e-7);
       TS_ASSERT_DELTA(returnE[i], ein[i], 1e-7);
     }
+  }
+};
+
+class RebinHistogramTestPerformance : public CxxTest::TestSuite {
+public:
+  RebinHistogramTestPerformance *createSuite() {
+    return new RebinHistogramTestPerformance();
+  }
+
+  void destroySuite(RebinHistogramTestPerformance *suite) { delete suite; }
+
+  RebinHistogramTestPerformance() {
+    setupHistogram();
+    setupOutput();
+  }
+
+  void testRebinSmaller() {
+    auto size = smallerBinEdges.size() - 1;
+    for (size_t i = 0; i < nIters; i++) {
+      std::vector<double> yout(size);
+      std::vector<double> eout(size);
+      Mantid::Kernel::VectorHelper::rebinHistogram(
+          binEdges, counts, errors, smallerBinEdges, yout, eout, false);
+    }
+  }
+
+  void testRebinLarger() {
+    auto size = largerBinEdges.size() - 1;
+    for (size_t i = 0; i < nIters; i++) {
+      std::vector<double> yout(size);
+      std::vector<double> eout(size);
+      Mantid::Kernel::VectorHelper::rebinHistogram(
+          binEdges, counts, errors, largerBinEdges, yout, eout, false);
+    }
+  }
+
+private:
+  const size_t binSize = 10000;
+  const size_t nIters = 10000;
+  std::vector<double> binEdges;
+  std::vector<double> counts;
+  std::vector<double> errors;
+  std::vector<double> smallerBinEdges;
+  std::vector<double> largerBinEdges;
+
+  void setupHistogram() {
+    binEdges.resize(binSize);
+    counts.resize(binSize - 1);
+    errors.resize(binSize - 1);
+
+    std::iota(binEdges.begin(), binEdges.end(), 0);
+  }
+
+  void setupOutput() {
+    smallerBinEdges.resize(binSize * 2);
+    largerBinEdges.resize(binSize / 2);
+
+    auto binWidth = binEdges[1] - binEdges[0];
+
+    for (size_t i = 0; i < binSize - 1; i++) {
+      smallerBinEdges[2 * i] = binEdges[i];
+      smallerBinEdges[(2 * i) + 1] = (binEdges[i] + binEdges[i + 1]) / 2;
+    }
+    smallerBinEdges[2 * (binSize - 1)] = binEdges.back();
+    smallerBinEdges.back() = binEdges.back() + (binWidth / 2);
+
+    for (size_t i = 0; i < largerBinEdges.size(); i++)
+      largerBinEdges[i] = binEdges[(2 * i)];
   }
 };
 

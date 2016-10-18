@@ -27,7 +27,7 @@ class SavePlot1DAsJson(PythonAlgorithm):
 
     def require(self):
         try:
-            import json
+            import json # noqa
         except:
             raise ImportError("Missing json package")
 

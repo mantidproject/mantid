@@ -1,6 +1,6 @@
 #pylint: disable=invalid-name
 import refl_gui
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtGui
 
 if __name__ == "__main__":
     import sys

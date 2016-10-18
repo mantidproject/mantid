@@ -4,6 +4,7 @@
 VERSION = "1.0"
 
 import optparse
+import sys
 try:
     import periodictable
     if not periodictable.__version__.startswith("1.3."):
@@ -12,7 +13,6 @@ try:
 except ImportError, e:
     print "*****To use this you must 'easy_install periodictable'"
     sys.exit(-1)
-import sys
 
 # elements not to put in the output file
 BANNED = ['n', 'Bk', 'Cf', 'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg',

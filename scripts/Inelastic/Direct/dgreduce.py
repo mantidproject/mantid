@@ -171,7 +171,7 @@ def runs_are_equal(ws1,ws2):
                 raise AttributeError
         except Exception as err:
             pass
-        if not err is None:
+        if err is not None:
             raise AttributeError("Input parameter is neither workspace nor ws name")
         return run_num
     #-----------------------------------------------

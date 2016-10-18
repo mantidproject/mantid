@@ -18,7 +18,7 @@ User Interface
 --------------
 
 - ParaView's python scripting interface is available from within MantidPlot and mantidpython. Type `from paraview.simple import *` to get started.
- `Additional documentation <http://www.paraview.org/ParaView3/Doc/Nightly/www/py-doc/>`_
+  `Additional documentation <http://www.paraview.org/ParaView3/Doc/Nightly/www/py-doc/>`_
 
 Instrument View
 ###############
@@ -30,7 +30,7 @@ Plotting Improvements
 Algorithm Toolbox
 #################
 
- - Add compressorType option to SaveMDWorkspaceToVTK.
+- Add compressorType option to SaveMDWorkspaceToVTK.
 
 Scripting Window
 ################

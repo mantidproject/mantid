@@ -1,7 +1,6 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
+from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
-import math
 import os
 from reduction_gui.reduction.sans.eqsans_options_script import ReductionOptions
 from reduction_gui.settings.application_settings import GeneralSettings
