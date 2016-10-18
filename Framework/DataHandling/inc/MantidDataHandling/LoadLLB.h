@@ -5,7 +5,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
-#include "MantidHistogramData\Histogram.h"
+#include "MantidHistogramData/Histogram.h"
 
 namespace Mantid {
 namespace DataHandling {
