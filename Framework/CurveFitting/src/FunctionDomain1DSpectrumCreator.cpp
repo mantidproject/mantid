@@ -58,11 +58,11 @@ void FunctionDomain1DSpectrumCreator::createDomain(
   throwIfWorkspaceInvalid();
 
   if (m_matrixWorkspace->isHistogramData()) {
-    auto &vector = getVectorHistogram();
+    auto vector = getVectorHistogram();
     domain.reset(new FunctionDomain1DSpectrum(m_workspaceIndex,
                                               vector.mutableRawData()));
   } else {
-    auto &vector = getVectorNonHistogram();
+    auto vector = getVectorNonHistogram();
 
     domain.reset(new FunctionDomain1DSpectrum(m_workspaceIndex,
                                               vector.mutableRawData()));
