@@ -2,13 +2,14 @@
 # pylint: disable=invalid-name, too-many-arguments, superfluous-parens, too-many-branches, redefined-builtin
 
 from __future__ import (absolute_import, division, print_function)
+import collections
 import os.path
+import numpy as numpy
 import sys
 
 import mantid.simpleapi as mantid
-import numpy as n
 
-# directories generator
+
 import pearl_calib_factory
 import pearl_cycle_factory
 
@@ -100,16 +101,14 @@ def PEARL_getmonitorspectrum(runno):
     return mspectra
 
 
-def PEARL_getcycle(number):
-    global cycle
-    global instver
-    global datadir
-
+def _calculate_current_cycle(number):
     cycle, instver, datadir = pearl_cycle_factory.get_cycle_dir(number, currentdatadir)
 
-    print("ISIS cycle is set to", cycle)
+    cycle_information = {'cycle': cycle,
+                         'instrument_version':  instver,
+                         'data_directory': datadir}  # TODO change data_dir when we know what it is
 
-    return
+    return cycle_information
 
 
 # pylint: disable=unused-variable, too-many-locals, too-many-statements, undefined-loop-variable, redefined-outer-name
@@ -118,8 +117,6 @@ def PEARL_getcalibfiles(in_cycle, in_tt_mode, in_pearl_file_dir):
     global groupfile
     global vabsorbfile
     global vanfile
-
-    print("Setting calibration for cycle", cycle)
 
     calfile, groupfile, vabsorbfile, vanfile, instver = \
         pearl_calib_factory.get_calibration_dir(in_cycle, in_tt_mode, in_pearl_file_dir)
@@ -154,13 +151,9 @@ def PEARL_getfilename(run_number, ext):
     filename += str(run_number) + "." + ext
 
     full_filename = data_dir + filename
-    #
-    # Check if file exists in default data folder & if not use alternate folder stored in "datadir"...
-    #
-    if not os.path.exists(full_filename):
-        print("No such file as ", full_filename, "; trying X-drive folder...")
 
-        full_filename = datadir + filename
+    if not os.path.exists(full_filename):
+        raise IOError("File: " + full_filename + " not found.")
 
     return full_filename
 
@@ -232,7 +225,7 @@ def PEARL_getmonitor(number, ext, spline_terms=20):
     mantid.ConvertUnits(InputWorkspace=works, OutputWorkspace=works, Target="Wavelength")
     lmin, lmax = PEARL_getlambdarange()
     mantid.CropWorkspace(InputWorkspace=works, OutputWorkspace=works, XMin=lmin, XMax=lmax)
-    ex_regions = n.zeros((2, 4))
+    ex_regions = numpy.zeros((2, 4))
     ex_regions[:, 0] = [3.45, 3.7]
     ex_regions[:, 1] = [2.96, 3.2]
     ex_regions[:, 2] = [2.1, 2.26]
@@ -272,31 +265,23 @@ def PEARL_align(work, focus):
 def PEARL_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False):
     global g_debug
     g_debug = debug
-    PEARL_getcycle(number)
 
-
-    print("Instrument version is:", instver)
-    if (instver == "new2"):
-        outwork = pearl_run_focus(number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm, version=2)
-    else:
-        outwork = pearl_run_focus(number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm, version=1)
+    outwork = pearl_run_focus(number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm)
 
     return outwork
 
 
-def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, version=1):
-    if version == 1:
-        alg_range = 12
-        save_range = 3
-    elif version == 2:
-        alg_range = 14
-        save_range = 5
+def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True):
+
+    cycle_information = _calculate_current_cycle(number)
+
+    alg_range, save_range = _setup_focus_for_inst(cycle_information["instrument_version"])
 
     work = "work"
     focus = "focus"
 
-    PEARL_getcycle(number)
-    PEARL_getcalibfiles(in_cycle=cycle, in_tt_mode=ttmode, in_pearl_file_dir=calibration_directory)
+    _calculate_current_cycle(number)
+    PEARL_getcalibfiles(in_cycle=cycle_information["cycle"], in_tt_mode=ttmode, in_pearl_file_dir=calibration_directory)
 
     print("Focussing mode is:", fmode)
     print("Two theta mode is:", tt_mode)
@@ -429,9 +414,9 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
             if i is 0:
                 append = False
 
-            if version == 1:
+            if cycle_information["instrument_version"] == "new":
                 mantid.SaveGSS(InputWorkspace=name[i], Filename=gssfile, Append=append, Bank=i + 1)
-            elif version == 2:
+            elif cycle_information["instrument_version"] == "new2":
                 mantid.SaveGSS(InputWorkspace=name[i], Filename=gssfile, Append=False, Bank=i + 1)
 
             mantid.ConvertUnits(InputWorkspace=name[i], OutputWorkspace=name[i], Target="dSpacing")
@@ -544,8 +529,8 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     # tt_mode set here will not be used within the function but instead when the PEARL_calibfiles()
     # is called it will return the correct tt_mode files.
 
-    PEARL_getcycle(van)
-    PEARL_getcalibfiles(in_cycle=cycle, in_tt_mode=ttmode, in_pearl_file_dir=calibration_directory)
+    cycle_information = _calculate_current_cycle(van)
+    PEARL_getcalibfiles(in_cycle=cycle_information["cycle"], in_tt_mode=ttmode, in_pearl_file_dir=calibration_directory)
     wvan = "wvan"
     wempty = "wempty"
     print("Creating ", nvanfile)
@@ -582,7 +567,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     # print "Cropping TOF range to ",tmin,tmax
     # CropWorkspace(wvan,wvan,XMin=tmin,XMax=tmax)
 
-    vanfoc = "vanfoc_" + cycle
+    vanfoc = "vanfoc_" + cycle_information["cycle"]
     mantid.AlignDetectors(InputWorkspace=wvan, OutputWorkspace=wvan, CalibrationFile=calfile)
     mantid.DiffractionFocussing(InputWorkspace=wvan, OutputWorkspace=vanfoc, GroupingFileName=groupfile)
     mantid.ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace=vanfoc, Target="TOF")
@@ -593,7 +578,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
 
     _remove_inter_ws(ws_to_remove=wvan)
 
-    if (instver == "new2"):
+    if cycle_information["instrument_version"] == "new2":
         mantid.ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace="vanmask", Target="dSpacing")
         _remove_inter_ws(ws_to_remove=vanfoc)
 
@@ -650,7 +635,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         for i in range(1, 15):
             _remove_inter_ws(ws_to_remove=("spline" + str(i)))
 
-    elif (instver == "new"):
+    elif cycle_information["instrument_version"] == "new":
         mantid.ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace="vanmask", Target="dSpacing")
         _remove_inter_ws(ws_to_remove=vanfoc)
 
@@ -690,7 +675,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         for i in range(1, 13):
             _remove_inter_ws(ws_to_remove=("spline" + str(i)))
 
-    elif (instver == "old"):
+    elif cycle_information["instrument_version"] == "old":
         mantid.ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace="vanmask", Target="dSpacing")
         _remove_inter_ws(ws_to_remove=vanfoc)
 
@@ -743,23 +728,22 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
 
 def PEARL_createcal(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal",
                     groupfile="P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"):
-    PEARL_getcycle(calruns)
+    cycle_information = _calculate_current_cycle(calruns)
 
-    print("Instrument version is ", instver)
 
     wcal = "cal_raw"
     PEARL_read(calruns, "raw", wcal)
 
-    if instver == "new" or instver == "new2":
+    if cycle_information["instrument_version"] == "new" or cycle_information["instrument_version"] == "new2":
         mantid.Rebin(InputWorkspace=wcal, OutputWorkspace=wcal, Params="100,-0.0006,19950")
 
     mantid.ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
     mantid.Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="1.8,0.002,2.1")
 
-    if instver == "new2":
+    if cycle_information["instrument_version"] == "new2":
         mantid.CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=20,
                        WorkspaceIndexMin=9, WorkspaceIndexMax=1063, XMin=1.8, XMax=2.1)
-    elif instver == "new":
+    elif cycle_information["instrument_version"] == "new":
         mantid.CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=20,
                        WorkspaceIndexMin=9, WorkspaceIndexMax=943, XMin=1.8, XMax=2.1)
     else:
@@ -776,21 +760,21 @@ def PEARL_createcal(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal",
 
 
 def PEARL_createcal_Si(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal"):
-    PEARL_getcycle(calruns)
+    cycle_information = _calculate_current_cycle(calruns)
 
     wcal = "cal_raw"
     PEARL_read(calruns, "raw", wcal)
 
-    if instver == "new" or instver == "new2":
+    if cycle_information["instrument_version"] == "new" or cycle_information["instrument_version"] == "new2":
         mantid.Rebin(InputWorkspace=wcal, OutputWorkspace=wcal, Params="100,-0.0006,19950")
 
     mantid.ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
 
-    if instver == "new2":
+    if cycle_information["instrument_version"] == "new2":
         mantid.Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="1.71,0.002,2.1")
         mantid.CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=20,
                        WorkspaceIndexMin=9, WorkspaceIndexMax=1063, XMin=1.71, XMax=2.1)
-    elif instver == "new":
+    elif cycle_information["instrument_version"] == "new":
         mantid.Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="1.85,0.002,2.05")
         mantid.CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=20,
                        WorkspaceIndexMin=9, WorkspaceIndexMax=943, XMin=1.85, XMax=2.05)
@@ -808,7 +792,7 @@ def PEARL_createcal_Si(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal"):
 
 
 def PEARL_creategroup(calruns, ngroupfile="C:\PEARL\\test_cal_group_11_1.cal", ngroup="bank1,bank2,bank3,bank4"):
-    PEARL_getcycle(calruns)
+    _calculate_current_cycle(calruns)
 
     wcal = "cal_raw"
     PEARL_read(calruns, "raw", wcal)
@@ -818,10 +802,10 @@ def PEARL_creategroup(calruns, ngroupfile="C:\PEARL\\test_cal_group_11_1.cal", n
 
 
 def PEARL_sumspec(number, ext, mintof=500, maxtof=1000, minspec=0, maxspec=943):
-    PEARL_getcycle(number)
-    if (instver == "old"):
+    cycle_information = _calculate_current_cycle(number)
+    if cycle_information["instrument_version"] == "old":
         maxspec = 2720
-    elif (instver == "new"):
+    elif cycle_information["instrument_version"] == "new":
         maxspec = 943
     else:
         maxspec = 1063
@@ -836,10 +820,10 @@ def PEARL_sumspec(number, ext, mintof=500, maxtof=1000, minspec=0, maxspec=943):
 
 
 def PEARL_sumspec_lam(number, ext, minlam=0.1, maxlam=4, minspec=8, maxspec=943):
-    PEARL_getcycle(number)
-    if (instver == "old"):
+    cycle_information = _calculate_current_cycle(number)
+    if cycle_information["instrument_version"] == "old":
         maxspec = 2720
-    elif (instver == "new"):
+    elif cycle_information["instrument_version"] == "new":
         maxspec = 943
     else:
         maxspec = 1063
@@ -892,6 +876,23 @@ def PEARL_add(a_name, a_spectra, a_outname, atten=True):
 
     return
 
+
+def _setup_focus_for_inst(inst_vers):
+
+    alg_range = None
+    save_range = None
+
+    if inst_vers == "new" or inst_vers == "old":  # New and old have identical ranges
+        alg_range = 12
+        save_range = 3
+    elif inst_vers == "new2":
+        alg_range = 14
+        save_range = 5
+
+    if alg_range is None or save_range is None:
+        raise ValueError("Instrument version unknown")
+
+    return alg_range, save_range
 
 def _remove_inter_ws(ws_to_remove):
     """

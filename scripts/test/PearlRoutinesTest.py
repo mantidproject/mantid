@@ -38,6 +38,16 @@ class PearlRoutinesTest(unittest.TestCase):
         pearl_routines.PEARL_createcal("91560_91561", noffsetfile=offsetfile, groupfile=ngrpfile)
         pearl_routines.PEARL_createvan("91530_91531", "91550_91551", ttmode="TT35",
                                        nvanfile=vanFile35, nspline=40, absorb=True, debug=True)
+
+    def test_instrument_ranges_calcs_correctly(self):
+        # This test checks that the instrument ranges calculate correctly for given instruments
+        # First the "new" instrument value
+        new_alg_range, new_save_range = pearl_routines._setup_focus_for_inst("new")
+        self.assertEquals(new_alg_range, 12, "'new' instrument algorithm range got " + str(new_alg_range))
+        self.assertEquals(new_save_range, 3, "'new' instrument save range got " + str(new_save_range))
+
+
+        pearl_routines._setup_focus_for_inst("new2")
 if __name__ == '__main__':
     DIRS = config['datasearch.directories'].split(';')
     CalibDir = os.path.join(DIRS[0] + '/PEARL/Calibration_Test/Calibration/')
