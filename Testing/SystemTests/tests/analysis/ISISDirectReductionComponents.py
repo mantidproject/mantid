@@ -54,8 +54,7 @@ class ISIS_ReductionWebLike(stresstesting.MantidStressTest):
         if 'outWS' in mtd:
             return 'outWS'
         saveFileName = self.rd.reducer.save_file_name
-#pylint: disable=unused-variable
-        outWS = Load(Filename=saveFileName+'.nxs') # noqa
+        Load(Filename=saveFileName+'.nxs', OutputWorkspace="outWS")
         #outWS *= 0.997979227566217
         fullRezPath =FileFinder.getFullPath(saveFileName+'.nxs')
         os.remove(fullRezPath)
