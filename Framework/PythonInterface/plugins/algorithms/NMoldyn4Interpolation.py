@@ -42,7 +42,7 @@ class NMoldyn4Interpolation(PythonAlgorithm):
                              doc='Output Workspace of remapped simulation data')
 
     def PyExec(self):
-        self.validate_enviroment()
+        self.validate_environment()
 
         e_fixed = float(self.getPropertyValue('EFixed'))
         # Loads simulated workspace
