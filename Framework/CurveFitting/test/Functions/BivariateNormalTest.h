@@ -176,7 +176,7 @@ public:
          0.0186753}};
 
     for (int i = 0; i < nCells; i += 6) { // points
-      for (int j = 0; j < 7; j++) { // params      
+      for (int j = 0; j < 7; j++) {       // params
 
         const double u = Res[i / 6][j];
         const double v = Jac->get(i, j);
