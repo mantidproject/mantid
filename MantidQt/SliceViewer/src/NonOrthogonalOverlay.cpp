@@ -121,9 +121,7 @@ namespace MantidQt {
                 }
 
                 void NonOrthogonalOverlay::setAxesPoints() {
-                  m_pointA = skewMatrixApply(
-                      -(m_dim0Max),
-                      -(m_dim0Max)); // this should always be correct??
+                  m_pointA = skewMatrixApply(-(m_dim0Max), -(m_dim0Max));
                   m_pointB = skewMatrixApply(m_dim0Max, -(m_dim0Max));
                   m_pointC = skewMatrixApply(-(m_dim0Max), m_dim0Max);
                 }
@@ -134,13 +132,16 @@ namespace MantidQt {
                   m_ws = ws;
                   m_dimX = dimX;
                   m_dimY = dimY;
-                  m_missingHKL =
-                      API::getMissingHKLDimensionIndex(*m_ws, m_dimX, m_dimY);
-                  std::cout << "dimX: " << m_dimX << " dimY: " << m_dimY
-                            << " missing: " << m_missingHKL << std::endl;
+                  // m_missingHKL = //currently finding missing dim via process
+                  // of elimination
+                  //    API::getMissingHKLDimensionIndex(*m_ws, m_dimX, m_dimY);
                   setDefaultAxesPoints();
-                  setSkewMatrix();
-                  setAxesPoints();
+                  bool test = API::isHKLDimensions(*m_ws, m_dimX, m_dimY);
+
+                  if (API::isHKLDimensions(*m_ws, m_dimX, m_dimY)) {
+                    setSkewMatrix();
+                    setAxesPoints();
+                  }
                 }
 		//----------------------------------------------------------------------------------------------
 		/// Paint the overlay
