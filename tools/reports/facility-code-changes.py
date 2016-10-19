@@ -1,14 +1,14 @@
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-__author__ = 'Stuart Campbell'
-
 import datetime
 import subprocess
 import csv
 import argparse
 import os
 import time
+
+__author__ = 'Stuart Campbell'
 
 
 def generate_file_changes_data(year_start, year_end):

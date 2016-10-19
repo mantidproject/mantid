@@ -9,7 +9,7 @@ import os
 import math
 import sys
 import numpy as np
-sys.path.append("/opt/mantidnightly/bin")
+sys.path.append("/opt/mantidnightly/bin") # noqa
 from mantid.simpleapi import *
 
 # Make a ./plots subdirectory for the plot files.

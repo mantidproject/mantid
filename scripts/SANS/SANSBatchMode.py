@@ -35,12 +35,12 @@ import SANSUtility as su
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
 from mantid.kernel import Logger
-sanslog = Logger("SANS")
 import copy
 import sys
 import re
 from reduction_settings import REDUCTION_SETTINGS_OBJ_NAME
 from isis_reduction_steps import UserFile
+sanslog = Logger("SANS")
 ################################################################################
 # Avoid a bug with deepcopy in python 2.6, details and workaround here:
 # http://bugs.python.org/issue1515

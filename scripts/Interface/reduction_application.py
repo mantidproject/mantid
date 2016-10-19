@@ -19,7 +19,7 @@ except:
     sip.setapi('QString',2)
     sip.setapi('QVariant',2)
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui, QtCore # noqa
 
 REDUCTION_WARNING = False
 WARNING_MESSAGE = ""
@@ -40,11 +40,11 @@ if IS_IN_MANTIDPLOT:
         WARNING_MESSAGE = "Please contact the Mantid team with the following message:\n\n\n"
         WARNING_MESSAGE += unicode(traceback.format_exc())
 
-from reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT
-from reduction_gui.settings.application_settings import GeneralSettings
-import ui.ui_reduction_main
-import ui.ui_instrument_dialog
-import ui.ui_cluster_details_dialog
+from reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT # noqa
+from reduction_gui.settings.application_settings import GeneralSettings # noqa
+import ui.ui_reduction_main # noqa
+import ui.ui_instrument_dialog # noqa
+import ui.ui_cluster_details_dialog # noqa
 
 
 class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):

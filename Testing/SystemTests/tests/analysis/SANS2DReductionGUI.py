@@ -13,12 +13,6 @@ The first 2 Tests ensures that the result provided by the GUI are the same for t
 Test was first created to apply to Mantid Release 3.0.
 """
 
-import sys
-
-if __name__ == "__main__":
-  # it is just to allow running this test in Mantid, allowing the following import
-    sys.path.append('/apps/mantid/systemtests/StressTestFramework/')
-
 import stresstesting
 from mantid.simpleapi import *
 import isis_reducer

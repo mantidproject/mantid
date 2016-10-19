@@ -3,9 +3,9 @@ import os
 from mantid.simpleapi import *
 from mantid.kernel import Logger
 from SANSUtility import (bundle_added_event_data_as_group, AddOperation, transfer_special_sample_logs)
-sanslog = Logger("SANS")
 from shutil import copyfile
 
+sanslog = Logger("SANS")
 _NO_INDIVIDUAL_PERIODS = -1
 
 

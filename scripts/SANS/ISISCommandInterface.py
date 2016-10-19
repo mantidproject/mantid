@@ -6,9 +6,6 @@
 import isis_instrument
 from reducer_singleton import ReductionSingleton
 from mantid.kernel import Logger
-
-sanslog = Logger("SANS")
-
 import isis_reduction_steps
 import isis_reducer
 from centre_finder import *
@@ -20,6 +17,8 @@ from SANSadd2 import *
 import SANSUtility as su
 from SANSUtility import deprecated
 import SANSUserFileParser as UserFileParser
+
+sanslog = Logger("SANS")
 
 # disable plotting if running outside Mantidplot
 try:
