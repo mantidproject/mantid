@@ -1,10 +1,12 @@
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/ISplittersWorkspace.h"
+
+// WorkspaceProperty implementation
+#include "MantidAPI/WorkspaceProperty.tcc"
 
 namespace Mantid {
 namespace API {

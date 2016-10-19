@@ -44,6 +44,7 @@ set ( SRC_FILES
 	src/TableWorkspace.cpp
 	src/VectorColumn.cpp
 	src/Workspace2D.cpp
+	src/WorkspaceProperty.cpp
 	src/WorkspaceSingleValue.cpp
 )
 
