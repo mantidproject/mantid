@@ -99,7 +99,7 @@ public:
   void testCreateDomain() {
     TestableFunctionDomain1DSpectrumCreator creator;
     creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::Create2DWorkspace123(1, 5, true));
+        WorkspaceCreationHelper::Create2DWorkspace123(1, 5));
     creator.setWorkspaceIndex(0);
 
     FunctionDomain_sptr domain;
