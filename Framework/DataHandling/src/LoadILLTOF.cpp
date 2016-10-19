@@ -552,12 +552,11 @@ void LoadILLTOF::loadDataIntoTheWorkSpace(
   }
 
   std::vector<detid_t> detectorIDs = instrument->getDetectorIDs(true);
-  size_t firstSpec = spec;
   size_t numberOfMonitors = monitors.size();
 
   Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
 
-  loadSpectra(spec, firstSpec, numberOfMonitors, m_numberOfTubes, detectorIDs,
+  loadSpectra(spec, numberOfMonitors, m_numberOfTubes, detectorIDs,
               data, progress);
 
   g_log.debug() << "Loading data into the workspace: DONE!\n";
@@ -578,7 +577,7 @@ void LoadILLTOF::loadDataIntoTheWorkSpace(
     Progress progressRosace(this, 0, 1,
                             numberOfTubes * m_numberOfPixelsPerTube);
 
-    loadSpectra(spec, firstSpec, numberOfMonitors, numberOfTubes, detectorIDs,
+    loadSpectra(spec, numberOfMonitors, numberOfTubes, detectorIDs,
                 dataRosace, progressRosace);
   }
 }
@@ -588,23 +587,25 @@ void LoadILLTOF::loadDataIntoTheWorkSpace(
  * of detector types in the workspace.
  *
  * @param spec The current spectrum id
- * @param firstSpec The id of the first spectrum that is not a monitor
  * @param numberOfMonitors The number of monitors in the workspace
  * @param numberOfTubes The number of detector tubes in the workspace
  * @param detectorIDs A list of all of the detector IDs
  * @param data The NeXus data to load into the workspace
  * @param progress The progress monitor (different
  */
-void LoadILLTOF::loadSpectra(size_t &spec, size_t firstSpec,
-                             size_t numberOfMonitors, size_t numberOfTubes,
+void LoadILLTOF::loadSpectra(size_t &spec, size_t numberOfMonitors,
+                             size_t numberOfTubes,
                              std::vector<detid_t> &detectorIDs, NXInt data,
                              Progress progress) {
   for (size_t i = 0; i < numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
       m_localWorkspace->setHistogram(
-          spec++, m_localWorkspace->binEdges(0),
-          Counts(HistogramY(data_p, data_p + m_numberOfChannels)));
+          spec, m_localWorkspace->binEdges(0),
+          Counts(data_p, data_p + m_numberOfChannels));
+      m_localWorkspace->getSpectrum(spec)
+        .setDetectorID(detectorIDs[spec - numberOfMonitors]);
+      spec++;
       progress.report();
     }
   }

@@ -791,9 +791,8 @@ void LoadISISNexus2::loadPeriodData(
       timeBins.load();
       local_workspace->setHistogram(
           hist_index,
-          BinEdges(HistogramX(timeBins(), timeBins() + timeBins.dim0())),
-          Counts(HistogramY(mondata(),
-                            mondata() + m_monBlockInfo.getNumberOfChannels())));
+          BinEdges(timeBins(), timeBins() + timeBins.dim0()),
+          Counts(mondata(), mondata() + m_monBlockInfo.getNumberOfChannels()));
 
       if (update_spectra2det_mapping) {
         // local_workspace->getAxis(1)->setValue(hist_index,

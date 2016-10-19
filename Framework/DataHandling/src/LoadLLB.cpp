@@ -178,7 +178,7 @@ void LoadLLB::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
       float *data_p = &data(static_cast<int>(i), static_cast<int>(j));
       m_localWorkspace->setHistogram(
           spec++, m_localWorkspace->binEdges(0),
-          Counts(HistogramY(data_p, data_p + m_numberOfChannels)));
+          Counts(data_p, data_p + m_numberOfChannels));
       progress.report();
     }
   }
