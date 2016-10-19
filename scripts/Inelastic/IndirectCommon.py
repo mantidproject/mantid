@@ -1,11 +1,10 @@
-#pylint: disable=invalid-name,redefined-builtin
+# pylint: disable=invalid-name,redefined-builtin
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
 
 import mantid.simpleapi as s_api
 from mantid import config, logger
 
-from IndirectImport import import_mantidplot
 
 import os.path
 import math
@@ -178,15 +177,15 @@ def createQaxis(inputWS):
 
 
 def GetWSangles(inWS):
-    num_hist = s_api.mtd[inWS].getNumberHistograms()    					# get no. of histograms/groups
+    num_hist = s_api.mtd[inWS].getNumberHistograms()  # get no. of histograms/groups
     source_pos = s_api.mtd[inWS].getInstrument().getSource().getPos()
     sample_pos = s_api.mtd[inWS].getInstrument().getSample().getPos()
     beam_pos = sample_pos - source_pos
-    angles = []    									# will be list of angles
+    angles = []  # will be list of angles
     for index in range(0, num_hist):
-        detector = s_api.mtd[inWS].getDetector(index)    				# get index
-        two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi    	# calc angle
-        angles.append(two_theta)    					# add angle
+        detector = s_api.mtd[inWS].getDetector(index)  # get index
+        two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi  # calc angle
+        angles.append(two_theta)  # add angle
     return angles
 
 
@@ -194,7 +193,7 @@ def GetThetaQ(ws):
     """
     Returns the theta and elastic Q for each spectrum in a given workspace.
 
-    @param ws Wotkspace to get theta and Q for
+    @param ws Workspace to get theta and Q for
     @returns A tuple containing a list of theta values and a list of Q values
     """
 
@@ -409,23 +408,6 @@ def getInstrumentParameter(ws, param_name):
 
     return param
 
-def plotParameters(ws, *param_names):
-    """
-    Plot a number of spectra given a list of parameter names
-    This searchs for relevent spectra using the text axis label.
-
-    @param ws - the workspace to plot from
-    @param param_names - list of names to search for
-    """
-    axis = s_api.mtd[ws].getAxis(1)
-    if axis.isText() and len(param_names) > 0:
-        num_spectra = s_api.mtd[ws].getNumberHistograms()
-
-        for name in param_names:
-            indicies = [i for i in range(num_spectra) if name in axis.label(i)]
-            if len(indicies) > 0:
-                plotSpectra(ws, name, indicies)
-
 
 def convertToElasticQ(input_ws, output_ws=None):
     """
@@ -514,7 +496,7 @@ def IndentifyDataBoundaries(sample_ws):
 
     sample_ws = s_api.mtd[sample_ws]
     nhists = sample_ws.getNumberHistograms()
-    start_data_idx, end_data_idx = 0,0
+    start_data_idx, end_data_idx = 0, 0
     # For all spectra in the workspace
     for spectra in range(0, nhists):
         # Obtain first and last non zero values
