@@ -34,7 +34,7 @@ class CalculateSampleTransmission(PythonAlgorithm):
 
         self.declareProperty(name='DensityType', defaultValue = 'Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc = 'Use of Mass density or Number denisty')
+                             doc = 'Use of Mass density or Number density')
 
         self.declareProperty(name='Density', defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3). Default=0.1')

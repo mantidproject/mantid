@@ -46,7 +46,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                              doc='Sample chemical formula')
         self.declareProperty(name='SampleDensityType', defaultValue = 'Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc = 'Use of Mass density or Number denisty')
+                             doc = 'Use of Mass density or Number density')
         self.declareProperty(name='SampleDensity', defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
         self.declareProperty(name='SampleRadius', defaultValue=0.1,
@@ -63,7 +63,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                              doc='Can chemical formula')
         self.declareProperty(name='CanDensityType', defaultValue = 'Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc = 'Use of Mass density or Number denisty')
+                             doc = 'Use of Mass density or Number density')
         self.declareProperty(name='CanDensity', defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
         self.declareProperty(name='CanRadius', defaultValue=0.2,
@@ -255,7 +255,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
             issues['CanChemicalFormula'] = 'Must be set to use can corrections'
 
         if self._use_can_corrections and self._can_ws_name is None:
-            issues['UseCanCorrections'] = 'Must specify a can workspace to use can corections'
+            issues['UseCanCorrections'] = 'Must specify a can workspace to use can corrections'
 
         return issues
 

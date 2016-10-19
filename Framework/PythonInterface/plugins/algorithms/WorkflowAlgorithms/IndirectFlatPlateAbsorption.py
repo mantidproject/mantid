@@ -48,7 +48,7 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                              doc='Chemical formula for the sample')
         self.declareProperty(name='SampleDensityType', defaultValue = 'Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc = 'Use of Mass density or Number denisty')
+                             doc = 'Use of Mass density or Number density')
         self.declareProperty(name='SampleDensity', defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
         self.declareProperty(name='SampleHeight', defaultValue=1.0,
@@ -71,7 +71,7 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                              doc='Chemical formula for the Container')
         self.declareProperty(name='CanDensityType', defaultValue = 'Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc = 'Use of Mass density or Number denisty')
+                             doc = 'Use of Mass density or Number density')
         self.declareProperty(name='CanDensity', defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
         self.declareProperty(name='CanFrontThickness', defaultValue=0.1,
@@ -179,7 +179,7 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                      Target='DeltaE', EMode='Indirect', EFixed=efixed, EnableLogging = False)
         DeleteWorkspace(sample_wave_ws, EnableLogging = False)
 
-        prog.report('Recording samle logs')
+        prog.report('Recording sample logs')
         sample_log_workspaces = [self._output_ws, self._ass_ws]
         sample_logs = [('sample_shape', 'flatplate'),
                        ('sample_filename', self._sample_ws),
@@ -260,7 +260,7 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
             issues['CanChemicalFormula'] = 'Must be set to use can corrections'
 
         if self._use_can_corrections and self._can_ws_name is None:
-            issues['UseCanCorrections'] = 'Must specify a can workspace to use can corections'
+            issues['UseCanCorrections'] = 'Must specify a can workspace to use can corrections'
 
         return issues
 

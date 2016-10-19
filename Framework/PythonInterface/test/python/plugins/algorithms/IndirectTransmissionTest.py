@@ -2,12 +2,10 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 import numpy as np
-import mantid.simpleapi
 from mantid.simpleapi import IndirectTransmission
 
 
 class IndirectTransmissionTest(unittest.TestCase):
-
     def test_indirect_transmission_iris_graphite_002(self):
         """
         Test a transmission calculation using IRIS, graphite, 002.
@@ -52,7 +50,6 @@ class IndirectTransmissionTest(unittest.TestCase):
         values = ws.column(1)
         np.testing.assert_array_almost_equal(values, ref_result, decimal=4)
 
-
     def test_indirect_transmission_basis_silicon_111(self):
         """
         Test a transmission calculation using BASIS, silicon 111.
@@ -75,7 +72,6 @@ class IndirectTransmissionTest(unittest.TestCase):
         values = ws.column(1)
         np.testing.assert_array_almost_equal(values, ref_result, decimal=4)
 
-
     def test_indirect_transmission_analyser_validation(self):
         """
         Verifies analyser validation based on instrument is working.
@@ -91,7 +87,6 @@ class IndirectTransmissionTest(unittest.TestCase):
         self.assertRaises(RuntimeError, IndirectTransmission,
                           Instrument=instrument, Analyser=analyser, Reflection=reflection, ChemicalFormula=formula,
                           OutputWorkspace='__IndirectTransmissionTest_AnalyserValidation')
-
 
     def test_indirect_transmission_reflection_validation(self):
         """
@@ -122,18 +117,19 @@ class IndirectTransmissionTest(unittest.TestCase):
         thickness = 0.1
 
         ws = IndirectTransmission(Instrument=instrument, Analyser=analyser, Reflection=reflection,
-                                          ChemicalFormula=formula, DensityType='Mass Density', Density=density, Thickness=thickness)
-                                          
+                                  ChemicalFormula=formula, DensityType='Mass Density', Density=density, Thickness=thickness)
+
         ref_result = [6.65800, 0.82122, 2.58186, 53.50693, 56.08880, 0.03342, 0.1, 0.82676, 0.17096]
         mass_values = ws.column(1)
         np.testing.assert_array_almost_equal(mass_values, ref_result, decimal=4)
-        
+
         # mass density 1.0 = number density 0.033424 for water
         density = 0.033424
         ws = IndirectTransmission(Instrument=instrument, Analyser=analyser, Reflection=reflection,
-                                          ChemicalFormula=formula, DensityType='Number Density', Density=density, Thickness=thickness)
+                                  ChemicalFormula=formula, DensityType='Number Density', Density=density, Thickness=thickness)
         num_values = ws.column(1)
         np.testing.assert_array_almost_equal(mass_values, num_values, decimal=4)
-        
-if __name__=="__main__":
+
+
+if __name__ == "__main__":
     unittest.main()

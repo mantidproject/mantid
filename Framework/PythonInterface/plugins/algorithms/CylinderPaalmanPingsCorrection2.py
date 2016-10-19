@@ -71,7 +71,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
         self.declareProperty(name='SampleDensityType', defaultValue = 'Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc = 'Use of Mass density or Number denisty')
+                             doc = 'Use of Mass density or Number density')
 
         self.declareProperty(name='SampleDensity', defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
@@ -95,7 +95,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
         self.declareProperty(name='CanDensityType', defaultValue = 'Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc = 'Use of Mass density or Number denisty')
+                             doc = 'Use of Mass density or Number density')
 
         self.declareProperty(name='CanDensity', defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
@@ -143,7 +143,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         if self._use_can:
             can_chemical_formula = self.getPropertyValue('CanChemicalFormula')
             if can_chemical_formula == '':
-                issues['CanChemicalFormula'] = 'Must provide a chemical foruma when providing a can workspace'
+                issues['CanChemicalFormula'] = 'Must provide a chemical formula when providing a can workspace'
 
         # Ensure there are enough steps
         number_steps = int((self._sample_outer_radius - self._sample_inner_radius) / self._step_size)
@@ -169,8 +169,8 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         data_prog = Progress(self, start=0.1, end=0.85, nreports=len(self._angles))
         for angle in self._angles:
             (A1, A2, A3, A4) = self._cyl_abs(angle)
-            logger.information('Angle : %f * successful' % (angle))
-            data_prog.report('Appending data for angle %f' % (angle))
+            logger.information('Angle : %f * successful' % angle)
+            data_prog.report('Appending data for angle %f' % angle)
             dataA1 = np.append(dataA1, A1)
             dataA2 = np.append(dataA2, A2)
             dataA3 = np.append(dataA3, A3)
@@ -249,7 +249,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             workflow_prog.report('Adding sample logs to %s' % ws_name)
             AddSampleLogMultiple(Workspace=ws_name, LogNames=log_names, LogValues=log_values, EnableLogging=False)
 
-        workflow_prog.report('Create GroupWorkpsace Output')
+        workflow_prog.report('Create GroupWorkspace Output')
         GroupWorkspaces(InputWorkspaces=','.join(workspaces), OutputWorkspace=self._output_ws_name, EnableLogging=False)
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
         workflow_prog.report('Algorithm complete')
@@ -284,11 +284,11 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             logger.information('Sample : inner radius = %f ; outer radius = %f' % (self._radii[0], self._radii[1]))
             self._ms = int((self._radii[1] - self._radii[0] + 0.0001)/self._step_size)
             if self._ms < 20:
-                raise ValueError('Number of steps ( %i ) should be >= 20' % (self._ms))
+                raise ValueError('Number of steps ( %i ) should be >= 20' % self._ms)
             else:
                 if self._ms < 1:
                     self._ms = 1
-                logger.information('Sample : ms = %i ' % (self._ms))
+                logger.information('Sample : ms = %i ' % self._ms)
         if self._use_can:
             self._radii[2] = self._can_outer_radius
             if (self._radii[2] - self._radii[1]) < 1e-4:
@@ -355,7 +355,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             self._sig_a[1] = can_material.absorbXSection()
             self._density[1] = self._can_density
 
-    def _set_material(self, ws_name, chemical_formula, denisty_type, density):
+    def _set_material(self, ws_name, chemical_formula, density_type, density):
         """
         Sets the sample material for a given workspace
         @param ws_name              :: name of the workspace to set sample material for
@@ -367,7 +367,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                 number density of the sample material
         """
         set_material_alg = self.createChildAlgorithm('SetSampleMaterial')
-        if denisty_type == 'Mass Density':
+        if density_type == 'Mass Density':
             set_material_alg.setProperty('SampleMassDensity', density)
             builder = MaterialBuilder()
             mat = builder.setFormula(chemical_formula).setMassDensity(density).build()
@@ -421,7 +421,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         else:
             self._elastic = math.sqrt(81.787/self._efixed) # elastic wavelength
 
-        logger.information('Elastic lambda : %f' % (self._elastic))
+        logger.information('Elastic lambda : %f' % self._elastic)
         logger.information('Lambda : %i values from %f to %f' % (len(self._waves), self._waves[0], self._waves[-1]))
 
 #------------------------------------------------------------------------------
@@ -429,11 +429,11 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
     def _transmission(self):
         distance = self._radii[1] - self._radii[0]
         trans = math.exp(-distance*self._density[0]*(self._sig_s[0] + self._sig_a[0]))
-        logger.information('Sample transmission : %f' % (trans))
+        logger.information('Sample transmission : %f' % trans)
         if self._use_can:
             distance = self._radii[2] - self._radii[1]
             trans = math.exp(-distance*self._density[1]*(self._sig_s[1] + self._sig_a[1]))
-            logger.information('Can transmission : %f' % (trans))
+            logger.information('Can transmission : %f' % trans)
 
 #------------------------------------------------------------------------------
 
@@ -518,7 +518,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                                                theta, amu_scat, amu_tot_i, amu_tot_s)
             Area_s += Area_A + Area_B
             Ass += AAAA + AAAB
-            Ass = Ass/Area_s
+            Ass /= Area_s
         else:
             for i in range(0, self._number_can -1):
                 radius_1 = self._radii[i]
@@ -602,7 +602,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                         LSSN = self._distance(r, self._radii[j+1], O)
                         LSS.append(LSSN - LSST)
 #
-# CALCULATE ABSORBTION FOR PATH THROUGH ALL ANNULI,AND THROUGH INNER ANNULI
+# CALCULATE ABSORPTION FOR PATH THROUGH ALL ANNULI,AND THROUGH INNER ANNULI
                     path = np.zeros(3)
 #	split into input (I) and scattered (S) paths
                     path[0] += amu_tot_i[0]*LIS[0] + amu_tot_s[0]*LSS[0]
