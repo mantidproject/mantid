@@ -2356,7 +2356,9 @@ class CWSCDReductionControl(object):
         assert isinstance(project_file_name, str), 'Project file name must be a string but not of type ' \
                                                    '%s.' % type(project_file_name)
 
-        # instantiate a project mananger instance and load the project
+        print '[INFO] Load project from %s.' % project_file_name
+
+        # instantiate a project manager instance and load the project
         saved_project = project_manager.ProjectManager(mode='import', project_file_path=project_file_name)
         saved_project.load()
 

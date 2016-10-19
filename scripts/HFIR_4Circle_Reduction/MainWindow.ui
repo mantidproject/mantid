@@ -223,7 +223,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>3</number>
+           <number>8</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -4286,7 +4286,7 @@ p, li { white-space: pre-wrap; }
           </widget>
           <widget class="QWidget" name="tab_recordManagemet">
            <attribute name="title">
-            <string>Record Management</string>
+            <string>Advanced Setup</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_27">
             <item row="0" column="0">

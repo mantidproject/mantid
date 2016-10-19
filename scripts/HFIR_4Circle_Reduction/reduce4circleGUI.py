@@ -145,6 +145,10 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_view_data_3d)
         self.connect(self.ui.pushButton_plotSelectedData, QtCore.SIGNAL('clicked()'),
                      self.do_view_data_set_3d)
+        self.connect(self.ui.pushButton_setHKL2Int, QtCore.SIGNAL('clicked()'),
+                     self.do_set_ub_tab_hkl_to_integers)
+        self.connect(self.ui.pushButton_undoSetToInteger, QtCore.SIGNAL('clicked()'),
+                     self.do_undo_ub_tab_hkl_to_integers)
 
         self.connect(self.ui.pushButton_refineUB, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub_indexed_peaks)
@@ -255,6 +259,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.action_save_project)
         self.connect(self.ui.actionOpen_Project, QtCore.SIGNAL('triggered()'),
                      self.action_load_project)
+        self.connect(self.ui.actionOpen_Last_Project, QtCore.SIGNAL('triggered()'),
+                     self.action_load_last_project)
 
         # Validator ... (NEXT)
 
@@ -1773,6 +1779,7 @@ class MainWindow(QtGui.QMainWindow):
         # set_hkl_int = self.ui.checkBox_roundHKLInt.isChecked()
 
         # check where the indexing comes from
+        # TODO/NOW/ISSUE/FIXME - start from here!
         blabla
 
         # Refine UB matrix
@@ -1856,8 +1863,17 @@ class MainWindow(QtGui.QMainWindow):
         Refine UB matrix by calling FFT method
         :return:
         """
+        import refineubfftsetup
+
+        dlg = refineubfftsetup.RefineUBFFTSetupDialog(self)
+        if dlg.exec_():
+            status, min_d, max_d = dlg.get_values()
+            print values
+            # Do stuff with values
+
+        # TODO/FIXME/NOW/ISSUE: edit from here to make it work!
+
         # launch the dialog to get min D and max D
-        status, min_d, max_d = self.get_refine_ub_fft_parameters()
         if status is False:
             self.pop_one_button_dialog('Must specify Min D and max D to refine UB using FFT.')
             return
@@ -2140,6 +2156,14 @@ class MainWindow(QtGui.QMainWindow):
 
         self.ui.tabWidget.setCurrentIndex(0)
 
+        return
+
+    def do_set_ub_tab_hkl_to_integers(self):
+        # TODO/NOW/ISSUE: make this one work!
+        return
+
+    def do_undo_ub_tab_hkl_to_integers(self):
+        # TODO/NOW/ISSUE: make this one work
         return
 
     def do_index_merged_scans_peaks(self):
