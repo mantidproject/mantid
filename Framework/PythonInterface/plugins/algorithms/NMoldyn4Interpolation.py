@@ -10,8 +10,8 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
 
-class NMoldyn4Interpolation(PythonAlgorithm):
 
+class NMoldyn4Interpolation(PythonAlgorithm):
     def category(self):
         return 'Simulation; Inelastic\\DataHandling'
 
@@ -74,12 +74,12 @@ class NMoldyn4Interpolation(PythonAlgorithm):
                         VerticalAxisValues=ref_Q, WorkspaceTitle=output_ws)
         self.setProperty('OutputWorkspace', output_ws)
 
-    def validate_enviroment(self):
+    def validate_environment(self):
         # RHEL 6 produces spurious results because it runs on Python 2.6.X
         # test and warn for this. When RHEL6 is no longer supported this check
         # can be removed
         python_version = version_info
-        if python_version < (2,7,0):
+        if python_version < (2, 7, 0):
             logger.warning("NMoldyn4Interpolation may not run correctly on Python 2.6 and below")
 
     def validate_bounds(self, sim_X, ref_X, sim_Q, ref_Q):
@@ -107,9 +107,9 @@ class NMoldyn4Interpolation(PythonAlgorithm):
         det = ws.getDetector(workspace_index)
         two_theta = ws.detectorTwoTheta(det) / 2
         sin_theta = math.sin(two_theta)
-        numer = 1/sc.constants.angstrom*sc.constants.Planck
-        denom = math.sqrt(2*sc.constants.neutron_mass*sc.constants.eV*1e-3)
-        factor = numer/denom
+        numer = 1 / sc.constants.angstrom * sc.constants.Planck
+        denom = math.sqrt(2 * sc.constants.neutron_mass * sc.constants.eV * 1e-3)
+        factor = numer / denom
         power = -0.5
         wavelength = factor * math.pow(e_fixed, power)
         Q = (4.0 * math.pi * sin_theta) / wavelength
@@ -126,8 +126,8 @@ class NMoldyn4Interpolation(PythonAlgorithm):
         for i in range(osiris.getNumberHistograms()):
             Q_values.append(self.get_Q_for_workspace_index(osiris.getName(), i, e_fixed))
         X_values = osiris.readX(0)
-        X_diff = np.diff(X_values)/2
-        X_bins = [X_values[i]+X_diff[i] for i in range(len(X_diff))]
+        X_diff = np.diff(X_values) / 2
+        X_bins = [X_values[i] + X_diff[i] for i in range(len(X_diff))]
         return X_values, Q_values, X_bins
 
     def load_simulated_dataset(self, ws_name):
@@ -140,5 +140,6 @@ class NMoldyn4Interpolation(PythonAlgorithm):
         E_values = ws_handle.readX(0)
         Y_values = [ws_handle.readY(i) for i in range(ws_handle.getNumberHistograms())]
         return E_values, Q_values, Y_values
+
 
 AlgorithmFactory.subscribe(NMoldyn4Interpolation)
