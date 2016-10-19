@@ -8,6 +8,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidQtAPI/NonOrthogonal.h"
 #include <numeric>
 using namespace Mantid::Kernel;
 
@@ -94,18 +95,35 @@ namespace MantidQt {
                 void NonOrthogonalOverlay::setDefaultAxesPoints() {
                   auto ws = m_ws->get(); // assumes it is a rectangle
                   m_dim0Max = ws->getDimension(0)->getMaximum();
+                  m_dim1 = ws->getDimension(1)->getMaximum();
+                  m_dim2 = ws->getDimension(2)->getMaximum();
                 }
-                QPointF NonOrthogonalOverlay::skewMatrixApply(int x, int y) {
+                QPointF NonOrthogonalOverlay::skewMatrixApply(double x,
+                                                              double y) {
+                  // keyed array,
+                  std::vector<double> dimensions(3, 0);
+                  dimensions.at(m_dimX) = x;
+                  dimensions.at(m_dimY) = y;
+                  // Make sure stops trying to calculate this m_dimX or Y is 3+
+                  // put some of this into setAxisPoints()
+                  double angle_H = dimensions[0];
+                  double angle_K = dimensions[1];
+                  double angle_L = dimensions[2];
 
-                  auto dimX = x * m_skewMatrix[0 + 3 * m_dimX] +
-                              y * m_skewMatrix[1 + 3 * m_dimX];
-                  auto dimY = x * m_skewMatrix[0 + 3 * m_dimY] +
-                              y * m_skewMatrix[1 + 3 * m_dimY];
+                  auto dimX = angle_H * m_skewMatrix[0 + 3 * m_dimX] +
+                              angle_K * m_skewMatrix[1 + 3 * m_dimX] +
+                              angle_L * m_skewMatrix[2 + 3 * m_dimX];
+                  auto dimY = angle_H * m_skewMatrix[0 + 3 * m_dimY] +
+                              angle_K * m_skewMatrix[1 + 3 * m_dimY] +
+                              angle_L * m_skewMatrix[2 + 3 * m_dimY];
+
                   return QPointF(dimX, dimY);
                 }
 
                 void NonOrthogonalOverlay::setAxesPoints() {
-                  m_pointA = skewMatrixApply(-(m_dim0Max), -(m_dim0Max));
+                  m_pointA = skewMatrixApply(
+                      -(m_dim0Max),
+                      -(m_dim0Max)); // this should always be correct??
                   m_pointB = skewMatrixApply(m_dim0Max, -(m_dim0Max));
                   m_pointC = skewMatrixApply(-(m_dim0Max), m_dim0Max);
                 }
@@ -116,6 +134,10 @@ namespace MantidQt {
                   m_ws = ws;
                   m_dimX = dimX;
                   m_dimY = dimY;
+                  m_missingHKL =
+                      API::getMissingHKLDimensionIndex(*m_ws, m_dimX, m_dimY);
+                  std::cout << "dimX: " << m_dimX << " dimY: " << m_dimY
+                            << " missing: " << m_missingHKL << std::endl;
                   setDefaultAxesPoints();
                   setSkewMatrix();
                   setAxesPoints();

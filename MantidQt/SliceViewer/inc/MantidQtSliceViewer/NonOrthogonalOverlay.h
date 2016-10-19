@@ -61,8 +61,11 @@ public:
         void setAxesPoints();
         void setSkewMatrix();
         void setDefaultAxesPoints();
-        QPointF skewMatrixApply(int x, int y);
+        QPointF skewMatrixApply(double x, double y);
         double m_dim0Max;
+        double m_dim1;
+        double m_dim2;
+        size_t m_missingHKL;
         Mantid::API::IMDWorkspace_sptr *m_ws;
 
         Mantid::coord_t m_CompskewMatrix[9];
