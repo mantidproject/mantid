@@ -235,7 +235,7 @@ def identify_bad_detectors(workspace_name):
     except IndexError:
         masking_type = 'None'
 
-    logger.information('Masking type: %s' % (masking_type))
+    logger.information('Masking type: %s' % masking_type)
 
     masked_spec = list()
 
@@ -251,7 +251,7 @@ def identify_bad_detectors(workspace_name):
         # Remove the temporary masking workspace
         DeleteWorkspace(ws_mask)
 
-    logger.debug('Masked specta for workspace %s: %s' % (workspace_name, str(masked_spec)))
+    logger.debug('Masked spectra for workspace %s: %s' % (workspace_name, str(masked_spec)))
 
     return masked_spec
 
@@ -340,7 +340,7 @@ def process_monitor_efficiency(workspace_name):
         raise ValueError('Cannot get monitor details form parameter file')
 
     if area == -1 or thickness == -1 or attenuation == -1:
-        logger.information('For workspace %s, skipping monitor efficiency' % (workspace_name))
+        logger.information('For workspace %s, skipping monitor efficiency' % workspace_name)
         return
 
     OneMinusExponentialCor(InputWorkspace=monitor_workspace_name,
@@ -407,7 +407,7 @@ def scale_detectors(workspace_name, e_mode='Indirect'):
 def group_spectra(workspace_name, masked_detectors, method, group_file=None, group_ws=None):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod and
-    Workflow.GroupingFile parameters and GrpupingPolicy property.
+    Workflow.GroupingFile parameters and GroupingPolicy property.
 
     @param workspace_name Name of workspace to group spectra of
     @param masked_detectors List of spectra numbers to mask
@@ -464,7 +464,7 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
 
         # If it is still not found just give up
         if not os.path.isfile(grouping_file):
-            raise RuntimeError('Cannot find grouping file: %s' % (grouping_file))
+            raise RuntimeError('Cannot find grouping file: %s' % grouping_file)
 
         # Mask detectors if required
         if len(masked_detectors) > 0:
@@ -520,7 +520,7 @@ def fold_chopped(workspace_name):
     for i in range(0, mtd[merged_ws].blocksize()):
         y_val = 0.0
         for rng in ranges:
-            if data_x[i] >= rng[0] and data_x[i] <= rng[1]:
+            if rng[0] <= data_x[i] <= rng[1]:
                 y_val += 1.0
 
         data_y.append(y_val)
@@ -623,7 +623,7 @@ def plot_reduction(workspace_name, plot_type):
     Plot a given workspace based on the Plot property.
 
     @param workspace_name Name of workspace to plot
-    @param plot_types Type of plot to create
+    @param plot_type Type of plot to create
     """
 
     if plot_type == 'Spectra' or plot_type == 'Both':
@@ -650,7 +650,7 @@ def save_reduction(workspace_names, formats, x_units='DeltaE'):
 
     @param workspace_names List of workspace names to save
     @param formats List of formats to save in
-    @param Output X units
+    @param x_units X units
     """
     from mantid.simpleapi import (SaveSPE, SaveNexusProcessed, SaveNXSPE,
                                   SaveAscii, Rebin, DeleteWorkspace,
