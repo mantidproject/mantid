@@ -38,7 +38,8 @@ double QwtRasterDataMDNonOrthogonal::value(double x, double y) const {
     return 0;
 
   // Generate the vector of coordinates, filling in X and Y
-  for (size_t d = 0; d < m_nd; d++) {
+  for (size_t d = 0; d < m_nd;
+       d++) { // m_nd is number dimensions in the workplace
     if (d == m_dimX)
       m_lookPoint[d] = static_cast<coord_t>(x);
     else if (d == m_dimY)

@@ -50,7 +50,31 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER NonOrthogonalOverlay : public QWidget {
 public:
 	NonOrthogonalOverlay(QwtPlot *plot, QWidget *parent);
 	~NonOrthogonalOverlay() override;
-	/// First point of the line (in coordinates of the plot)
+
+        bool m_showLine;
+
+        void calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws, size_t dimX,
+                               size_t dimY);
+
+      private:
+        Mantid::coord_t m_skewMatrix[9];
+        void setAxesPoints();
+        void setSkewMatrix();
+        void setDefaultAxesPoints();
+        QPointF skewMatrixApply(int x, int y);
+        double m_dim0Max;
+        Mantid::API::IMDWorkspace_sptr *m_ws;
+
+        Mantid::coord_t m_CompskewMatrix[9];
+        size_t m_dimY;
+        size_t m_dimX;
+
+        QSize sizeHint() const override;
+        QSize size() const;
+        int height() const;
+        int width() const;
+
+        /// First point of the line (in coordinates of the plot)
 	QPointF m_pointA;
 	/// Second point of the line (in coordinates of the plot)
 	QPointF m_pointB;
@@ -64,18 +88,6 @@ public:
 	QPointF invTransform(QPoint pixels) const;
 	/// QwtPlot containing this
 	QwtPlot *m_plot;
-	bool m_showLine;
-	QSize sizeHint() const override;
-	QSize size() const;
-	int height() const;
-	int width() const;
-	void calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws);
-	Mantid::API::IMDWorkspace_sptr *m_ws;
-	void setAxesPoints();
-	Mantid::Kernel::DblMatrix m_skewMatrix;
-	double getDotProductForGivenDim(int dim);
-	Mantid::coord_t m_CompskewMatrix[9];
-	int m_startPoint;
 };
 
 } // namespace SliceViewer
