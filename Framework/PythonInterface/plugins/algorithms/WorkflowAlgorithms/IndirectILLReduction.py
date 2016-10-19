@@ -396,7 +396,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         """
         Filters all the relevant input files according to the given reduction type
         """
-        message = 'do not match the Reduction Type: ' + self._reduction_type
+        message = 'Runs do not match the Reduction Type: ' + self._reduction_type
         doppler = '$/entry0/instrument/Doppler/'
 
         if self._reduction_type == 'QENS':
@@ -411,22 +411,26 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # Filter the main runs
         self._run_file = SelectNexusFilesByMetadata(self._run_file, self._criteria)
         if not self._run_file:
-            self.log().error('Input Runs ' + message)
-            raise RuntimeError('Input Runs ' + message)
+            self.log().error('Input ' + message)
+            raise RuntimeError('Input ' + message)
+
+        self.log().information('Filtered input runs are: {0}'.format(self._run_file))
 
         # Filter background files if specified
         if self._background_file:
             self._background_file = SelectNexusFilesByMetadata(self._background_file, self._criteria)
             if not self._background_file:
-                self.log().error('Background Runs ' + message)
-                raise RuntimeError('Background Runs ' + message)
+                self.log().error('Background ' + message)
+                raise RuntimeError('Background ' + message)
+            self.log().information('Filtered background runs are: {0}'.format(self._background_file))
 
         # Filter vanadium files if specified
         if self._vanadium_file:
             self._vanadium_file = SelectNexusFilesByMetadata(self._vanadium_file, self._criteria)
             if not self._vanadium_file:
-                self.log().error('Vanadium Runs ' + message)
-                raise RuntimeError('Vanadium Runs ' + message)
+                self.log().error('Vanadium ' + message)
+                raise RuntimeError('Vanadium ' + message)
+            self.log().information('Filtered vanadium runs are: {0}'.format(self._vanadium_file))
 
     def PyExec(self):
 
@@ -628,9 +632,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # cleanup by-products if not needed
         if not self._debug_mode:
             DeleteWorkspace(monitor)
-            if self._mirror_sense == 14:
-                DeleteWorkspace(left)
-                DeleteWorkspace(right)
+
 
     def _energy_and_theta_transfer(self, red, monitor, left, right):
         """
@@ -697,6 +699,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 if self._reduction_type == 'QENS':
                     xmin = np.maximum(mon_start_bin, start_bin)
                     xmax = np.minimum(mon_end_bin, end_bin)
+                if not self._debug_mode:
+                    DeleteWorkspace(left)
+                    DeleteWorkspace(right)
         elif self._mirror_sense == 16:
             self.log().notice(
                 'Input run for #{0} has one wing, no unmirroring will be performed'.format(red))
