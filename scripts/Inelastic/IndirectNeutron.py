@@ -80,6 +80,7 @@ def ReadIbackGroup(a, first):  # read Ascii block of spectrum values
     next = first
     line1 = a[next]
     next += 1
+    _val = ExtractInt(a[next])  # noqa: F841
     if line1.startswith('S'):
         error = ''
     else:
@@ -146,6 +147,7 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
     logger.information('Reading file : ' + path)
 
     asc = loadFile(path)
+    _lasc = len(asc)  # noqa: F841
 
     # raw head
     text = asc[1]
@@ -153,9 +155,11 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
     first = 5
     next, _Ival = Iblock(asc, first)
     next += 2
-
+    title = asc[next]  # title line
     next += 1
     text = asc[next]  # user line
+    _user = text[20:32]  # noqa: F841
+    _time = text[40:50]  # noqa: F841
     next += 6  # 5 lines of text
     # back head1
     next, Fval = Fblock(asc, next)
@@ -165,11 +169,15 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
         freq = Fval[2]
         amp = Fval[3]
         wave = Fval[69]
+        _Ef = 81.787 / (4.0 * wave * wave)  # noqa: F841
         npt = int(Fval[6])
         nsp = int(Fval[7])
     # back head2
     next, Fval = Fblock(asc, next)
+    _k0 = 4.0 * math.pi / wave  # noqa: F841
+    _d2r = math.pi / 180.0  # noqa: F841
     theta = []
+    _Q = []  # noqa: F841
     for m in range(0, nsp):
         theta.append(Fval[m])
     # raw spectra
@@ -218,7 +226,7 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
     monWS = '__Mon'
     CreateWorkspace(OutputWorkspace=monWS, DataX=xMon, DataY=yOut, DataE=eOut,
                     Nspec=1, UnitX='DeltaE')
-
+    #
     _Qaxis = ''
     xDat = []
     yDat = []
@@ -246,6 +254,7 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
            AllowDifferentNumberSpectra=True)
     DeleteWorkspace(monWS)  # delete monitor WS
     InstrParas(ascWS, instr, ana, refl)
+    _efixed = RunParas(ascWS, instr, run, title)  # noqa: F841
     ChangeAngles(ascWS, instr, theta)
     if useM:
         map = ReadMap(mapPath)
@@ -296,6 +305,7 @@ def InxStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):
     val = ExtractInt(asc[0])
     lgrp = int(val[0])
     ngrp = int(val[2])
+    _npt = int(val[7])  # noqa: F841
     title = asc[1]
     ltot = ngrp * lgrp
     logger.information('Number of spectra : ' + str(ngrp))
@@ -377,6 +387,8 @@ def RejectZero(inWS, tot):
 
 
 def ReadMap(path):
+    _workdir = config['defaultsave.directory']  # noqa: F841
+
     asc = loadFile(path)
 
     lasc = len(asc)
@@ -475,6 +487,7 @@ def RunParas(ascWS, _instr, run, title):
 
 def IN13Start(instr, run, ana, refl, _rejectZ, _useM, _mapPath, Plot, Save):  # Ascii start routine
     StartTime('IN13')
+    _samWS = IN13Read(instr, run, ana, refl, Plot, Save)  # noqa: F841
     EndTime('IN13')
 
 
@@ -486,12 +499,14 @@ def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
     logger.information('Reading file : ' + path)
 
     asc = loadFile(path)
+    _lasc = len(asc)  # noqa: F841
 
     # header block
     text = asc[1]
     run = text[:8]
     text = asc[4]  # run line
     instr = text[:4]
+    _time = text[14:33]  # noqa: F841
     next, Ival = Iblock(asc, 5)
     nsubsp = Ival[0]
 
@@ -527,6 +542,7 @@ def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
     # monitors
     psd = next + (nspec + 2048) * lspec
     l1m1 = psd + 1
+    _txt = asc[l1m1]  # noqa: F841
     l2m1 = l1m1 + 3
     mon1 = ExtractFloat(asc[l2m1])
     logger.information('Mon1 : Line ' + str(l2m1) + ' : ' + asc[l2m1])
