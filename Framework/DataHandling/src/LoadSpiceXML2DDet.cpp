@@ -207,7 +207,8 @@ void LoadSpiceXML2DDet::init() {
       "It is used to apply instrument calibration.");
 
   declareProperty("UserSpecifiedWaveLength", EMPTY_DBL(),
-                  "User can specify the wave length of the instrument if it is drifted from the designed value."
+                  "User can specify the wave length of the instrument if it is "
+                  "drifted from the designed value."
                   "It haappens often.");
 }
 
@@ -239,7 +240,6 @@ void LoadSpiceXML2DDet::processInputs() {
   m_ptNumber4Log = getProperty("PtNumber");
 
   m_userSpecifiedWaveLength = getProperty("UserSpecifiedWaveLength");
-
 }
 
 /** Set up sample logs especially 2theta and diffr for loading instrument
@@ -308,7 +308,8 @@ void LoadSpiceXML2DDet::exec() {
     loadInstrument(outws, m_idfFileName);
     // set wave length to user specified wave length
     double wavelength = m_userSpecifiedWaveLength;
-    // if user does not specify wave length then try to get wave length from log sample _m1 (or m1 as well in future)
+    // if user does not specify wave length then try to get wave length from log
+    // sample _m1 (or m1 as well in future)
     bool has_wavelength = wavelength == EMPTY_DBL();
     if (!has_wavelength)
       has_wavelength = getHB3AWavelength(outws, wavelength);
