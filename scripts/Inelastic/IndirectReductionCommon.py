@@ -617,7 +617,7 @@ def plot_reduction(workspace_name, plot_type):
         from mantidplot import plotSpectrum
         num_spectra = mtd[workspace_name].getNumberHistograms()
         try:
-            plotSpectrum(workspace_name, range(0, num_spectra))
+            plotSpectrum(workspace_name, range(0, num_spectra), error_bars=True)
         except RuntimeError:
             logger.notice('Spectrum plotting canceled by user')
 

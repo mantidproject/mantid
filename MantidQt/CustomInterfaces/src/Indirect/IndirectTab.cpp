@@ -150,10 +150,7 @@ bool IndirectTab::loadFile(const QString &filename, const QString &outputName,
 
 /**
  * Configures the SaveNexusProcessed algorithm to save a workspace in the
- *default
- * save directory and adds the algorithm to the batch queue.
- *
- * This uses the plotSpectrum function from the Python API.
+ * default save directory and adds the algorithm to the batch queue.
  *
  * @param wsName Name of workspace to save
  * @param filename Name of file to save as (including extension)
