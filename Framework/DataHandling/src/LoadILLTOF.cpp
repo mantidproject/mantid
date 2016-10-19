@@ -556,8 +556,8 @@ void LoadILLTOF::loadDataIntoTheWorkSpace(
 
   Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
 
-  loadSpectra(spec, numberOfMonitors, m_numberOfTubes, detectorIDs,
-              data, progress);
+  loadSpectra(spec, numberOfMonitors, m_numberOfTubes, detectorIDs, data,
+              progress);
 
   g_log.debug() << "Loading data into the workspace: DONE!\n";
 
@@ -577,8 +577,8 @@ void LoadILLTOF::loadDataIntoTheWorkSpace(
     Progress progressRosace(this, 0, 1,
                             numberOfTubes * m_numberOfPixelsPerTube);
 
-    loadSpectra(spec, numberOfMonitors, numberOfTubes, detectorIDs,
-                dataRosace, progressRosace);
+    loadSpectra(spec, numberOfMonitors, numberOfTubes, detectorIDs, dataRosace,
+                progressRosace);
   }
 }
 
@@ -604,7 +604,7 @@ void LoadILLTOF::loadSpectra(size_t &spec, size_t numberOfMonitors,
           spec, m_localWorkspace->binEdges(0),
           Counts(data_p, data_p + m_numberOfChannels));
       m_localWorkspace->getSpectrum(spec)
-        .setDetectorID(detectorIDs[spec - numberOfMonitors]);
+          .setDetectorID(detectorIDs[spec - numberOfMonitors]);
       spec++;
       progress.report();
     }

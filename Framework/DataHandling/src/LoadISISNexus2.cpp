@@ -790,8 +790,7 @@ void LoadISISNexus2::loadPeriodData(
       NXFloat timeBins = monitor.openNXFloat("time_of_flight");
       timeBins.load();
       local_workspace->setHistogram(
-          hist_index,
-          BinEdges(timeBins(), timeBins() + timeBins.dim0()),
+          hist_index, BinEdges(timeBins(), timeBins() + timeBins.dim0()),
           Counts(mondata(), mondata() + m_monBlockInfo.getNumberOfChannels()));
 
       if (update_spectra2det_mapping) {
