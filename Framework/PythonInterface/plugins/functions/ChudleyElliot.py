@@ -28,6 +28,7 @@ import math
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
 
+
 class ChudleyElliot(IFunction1D):
 
     def category(self):

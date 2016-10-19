@@ -44,12 +44,11 @@ class ConvertToMDworkflow(stresstesting.MantidStressTest):
             SetGoniometer(Workspace=SourceWS,Axis0='Psi,0,1,0,1')
             # ws emulation, end ---------------------------------------------------------------------------------------
 
-            ConvertToMD(InputWorkspace=SourceWS,OutputWorkspace=RezWS,QDimensions='Q3D',QConversionScales='HKL',\
-            OverwriteExisting=0,dEAnalysisMode='Direct',MinValues='-3,-3,-3,-1',MaxValues='3,3,3,3',\
-            SplitInto="20,20,1,1")
+            ConvertToMD(InputWorkspace=SourceWS,OutputWorkspace=RezWS,QDimensions='Q3D',QConversionScales='HKL',
+                        OverwriteExisting=0,dEAnalysisMode='Direct',MinValues='-3,-3,-3,-1',MaxValues='3,3,3,3',
+                        SplitInto="20,20,1,1")
             # delete source workspace from memory;
             DeleteWorkspace(SourceWS)
-
 
     def validate(self):
         """Returns the name of the workspace & file to compare"""
@@ -78,7 +77,4 @@ class ConvertToMDworkflow(stresstesting.MantidStressTest):
             SaveMD(InputWorkspace=valNames[0],Filename=self.__class__.__name__+'-mismatch.nxs')
             return False
 
-
         return True
-
-

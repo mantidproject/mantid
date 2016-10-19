@@ -135,6 +135,7 @@ def checkUnitIs(ws, unit_id, axis_index=0):
     unit = axis.getUnit()
     return unit.unitID() == unit_id
 
+
 def getDefaultWorkingDirectory():
     """
     Get the default save directory and check it's valid.
@@ -530,6 +531,7 @@ def IndentifyDataBoundaries(sample_ws):
     first_data_point = x_data[start_data_idx]
     last_data_point = x_data[len(x_data) - end_data_idx - 2]
     return first_data_point, last_data_point
+
 
 def firstNonZero(data):
     """

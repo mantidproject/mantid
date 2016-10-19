@@ -6,6 +6,8 @@ from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspace
 from mantid.kernel import StringMandatoryValidator, Direction, logger, IntBoundedValidator, FloatBoundedValidator
 
 #pylint: disable=too-many-instance-attributes
+
+
 class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
     _can_inner_radius = 0.0
     _can_outer_radius = 0.0
@@ -28,10 +30,8 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
     def category(self):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
-
     def summary(self):
         return "Calculates indirect absorption corrections for an annulus sample shape."
-
 
     def PyInit(self):
         # Sample options
@@ -255,7 +255,6 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         else:
             self._ass_ws = self._abs_ws + '_ass'
             self._acc_ws = self._abs_ws + '_acc'
-
 
     def validateInputs(self):
         """

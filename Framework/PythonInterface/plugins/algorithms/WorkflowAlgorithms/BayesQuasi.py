@@ -20,6 +20,7 @@ if is_supported_f2py_platform():
     QLd     = import_f2py("QLdata")
     Qse     = import_f2py("QLse")
 
+
 class BayesQuasi(PythonAlgorithm):
 
     _program = None
@@ -104,7 +105,6 @@ class BayesQuasi(PythonAlgorithm):
                                                      direction=Direction.Output),
                              doc='The name of the probability output workspaces')
 
-
     def validateInputs(self):
         self._get_properties()
         issues = dict()
@@ -114,7 +114,6 @@ class BayesQuasi(PythonAlgorithm):
             issues['MaxRange'] = 'Must be less than EnergyMin'
 
         return issues
-
 
     def _get_properties(self):
         self._program = self.getPropertyValue('Program')
@@ -206,7 +205,7 @@ class BayesQuasi(PythonAlgorithm):
         totalNoSam = nsam
 
         #check if we're performing a sequential fit
-        if self._loop != True:
+        if not self._loop:
             nsam = 1
 
         nres = CheckHistZero(self._resWS)[0]
@@ -290,9 +289,9 @@ class BayesQuasi(PythonAlgorithm):
                 logger.information(message)
             if prog == 'QSe':
                 workflow_prog.report('Processing Sample number %i as Stretched Exp' % spectrum)
-                nd,xout,yout,eout,yfit,yprob=Qse.qlstexp(numb,Xv,Yv,Ev,reals,fitOp,\
-                                                        Xdat,Xb,Yb,Wy,We,dtn,xsc,\
-                                                        wrks,wrkr,lwrk)
+                nd,xout,yout,eout,yfit,yprob=Qse.qlstexp(numb,Xv,Yv,Ev,reals,fitOp,
+                                                         Xdat,Xb,Yb,Wy,We,dtn,xsc,
+                                                         wrks,wrkr,lwrk)
             dataX = xout[:nd]
             dataX = np.append(dataX,2*xout[nd-1]-xout[nd-2])
             yfit_list = np.split(yfit[:4*nd],4)
@@ -413,7 +412,6 @@ class BayesQuasi(PythonAlgorithm):
         log_alg.setProperty('LogValues', [log[1] for log in sample_logs])
         log_alg.execute()
 
-
     def C2Se(self, sname):
         outWS = sname+'_Result'
         asc = self._read_ascii_file(sname+'.qse')
@@ -455,8 +453,8 @@ class BayesQuasi(PythonAlgorithm):
         Vaxis.append('f1.Beta')
 
         logger.information('Vaxis=' + str(Vaxis))
-        s_api.CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,\
-            UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
+        s_api.CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
+                              UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
 
         return outWS
 
@@ -640,8 +638,8 @@ class BayesQuasi(PythonAlgorithm):
         y = np.asarray(y).flatten()
         e = np.asarray(e).flatten()
 
-        s_api.CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,\
-            UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=axis_names)
+        s_api.CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,
+                              UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=axis_names)
 
         return output_workspace
 
@@ -650,7 +648,6 @@ class BayesQuasi(PythonAlgorithm):
         #encapsulates the iteration over a block of lines
         for line in block:
             yield ExtractFloat(line)
-
 
     def _read_ql_file(self, file_name, nl):
         #offet to ignore header

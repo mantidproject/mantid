@@ -38,7 +38,7 @@ class LRReflectivityOutput(PythonAlgorithm):
     def PyExec(self):
         # Check that all the input workspaces are scaled
         workspace_list = self.getProperty("ReducedWorkspaces").value
-        if self.check_scaling(workspace_list) == False:
+        if not self.check_scaling(workspace_list):
             logger.error("Absolute normalization not available!")
 
         # Put the workspaces together

@@ -11,6 +11,11 @@ New features
 Algorithms
 ##########
 
+Data Reduction
+##############
+
+- Q-vaues in :ref:`BASISReduction <algm-BASISReduction>` output are now point data so that their values display correctly when plotted
+
 Data Analysis
 #############
 
@@ -21,6 +26,15 @@ Improvements
 ------------
 
 - When plotting from interfaces the plots now display error bars as standard
+
+- :ref:`IsoRotDiff <func-IsoRotDiff>` models isotropic rotational diffusion of a particle
+  tethered to the origin at a constant distance.
+
+
+Improvements
+------------
+ - Data saved in an ASCII format using the *EnergyTransfer* interface can be re-loaded into Mantid
+
 
 Bugfixes
 --------
