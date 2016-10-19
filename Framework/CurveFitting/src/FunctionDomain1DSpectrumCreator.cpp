@@ -112,6 +112,5 @@ void FunctionDomain1DSpectrumCreator::throwIfWorkspaceInvalid() const {
   }
 }
 
-
 } // namespace CurveFitting
 } // namespace Mantid
