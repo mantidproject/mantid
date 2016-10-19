@@ -93,7 +93,7 @@ public:
   std::string usingTool() const { return m_currentToolName; }
 
   void setCurrentToolMethod(std::string toolMethod);
-  std::string getCurrentToolMethod() { return m_currentToolMethod; }
+  std::string getCurrentToolMethod() const { return m_currentToolMethod; }
 
   void setCurrentToolSettings(std::shared_ptr<TomoRecToolConfig> settings) {
     m_currentToolSettings = settings;
@@ -107,12 +107,12 @@ public:
   // Access to the system settings information
   //--------------------------------------------
   // get the remote scripts base dir from the system settings
-  std::string getCurrentRemoteScriptsBaseDir() {
-    return m_systemSettings.m_remote.m_basePathTomoData;
+  std::string getCurrentRemoteScriptsBasePath() {
+    return m_systemSettings.m_remote.m_basePathReconScripts;
   }
 
   /// get the local paths from the system settings
-  std::string getCurrentLocalScriptsBaseDir() {
+  std::string getCurrentLocalScriptsBasePath() {
     return m_systemSettings.m_local.m_reconScriptsPath;
   }
 
@@ -125,7 +125,10 @@ public:
     return m_systemSettings.m_experimentReference;
   }
 
-  /// returns the tomo script location paths so that we have consistency
+  /// returns the scripts folder, used for remote path
+  std::string getTomoScriptFolderPath() { return m_tomoScriptFolderPath; }
+
+  /// returns the tomo script location path inside the scripts folder
   std::string getTomoScriptLocationPath() { return m_tomoScriptLocationPath; }
 
   /// ping the (remote) compute resource
@@ -143,6 +146,7 @@ public:
                         std::vector<std::string> &cmds);
   /// Submit a new job to the (remote or local) compute resource
   void doSubmitReconstructionJob(const std::string &compRes);
+
   /// Cancel a previously submitted job
   void doCancelJobs(const std::string &compRes,
                     const std::vector<std::string> &id);
@@ -150,8 +154,6 @@ public:
   void doRefreshJobsInfo(const std::string &compRes);
 
   void refreshLocalJobsInfo();
-
-  void doRunReconstructionJobLocal();
 
   void updateExperimentReference(const std::string ref) {
     m_experimentRef = ref;
@@ -166,12 +168,6 @@ public:
   void updateReconToolsSettings(const TomoReconToolsUserSettings &ts) {
     m_toolsSettings = ts;
   }
-
-  void updateTomopyMethod(const std::string &method) {
-    m_tomopyMethod = method;
-  }
-
-  void updateAstraMethod(const std::string &method) { m_astraMethod = method; }
 
   void updatePrePostProcSettings(const TomoReconFiltersSettings &filters) {
     m_prePostProcSettings = filters;
@@ -194,11 +190,25 @@ public:
 
   void updateTomoPathsConfig(const TomoPathsConfig &tc) { m_pathsConfig = tc; }
 
-  // tools not yet available/supported - TODO
+  // Names of reconstruction tools
+  static const std::string g_TomoPyTool;
+  static const std::string g_AstraTool;
+  static const std::string g_customCmdTool;
+
+  // not supported
   static const std::string g_CCPiTool;
   static const std::string g_SavuTool;
 
 private:
+  void doRunReconstructionJobLocal(const std::string &compRes,
+                                   const std::string &run,
+                                   const std::string &allOpts,
+                                   const std::vector<std::string> &args);
+
+  void doRunReconstructionJobRemote(const std::string &compRes,
+                                    const std::string &run,
+                                    const std::string &allOpts);
+
   /// retrieve info from compute resource into status table
   void getJobStatusInfo(const std::string &compRes);
 
@@ -293,12 +303,9 @@ private:
   // current tool's method, updated from the presenter on change
   std::string m_currentToolMethod;
 
+  const std::string m_tomoScriptFolderPath = "/scripts";
   const std::string m_tomoScriptLocationPath =
-      "/scripts/Imaging/IMAT/tomo_reconstruct.py";
-
-  // DEPRECATED
-  std::string m_tomopyMethod;
-  std::string m_astraMethod;
+      "/Imaging/IMAT/tomo_reconstruct.py";
 
   // Settings for the pre-/post-processing filters
   TomoReconFiltersSettings m_prePostProcSettings;
@@ -309,11 +316,6 @@ private:
   // The main tomo_reconstruct.py or similar script (as it is distributed with
   // Mantid). This is the entry point for reconstruction jobs.
   static const std::string g_mainReconstructionScript;
-
-  // Names of reconstruction tools
-  static const std::string g_TomoPyTool;
-  static const std::string g_AstraTool;
-  static const std::string g_customCmdTool;
 
   // mutex for the job status info update operations
   // TODO: replace with std::mutex+std::lock_guard

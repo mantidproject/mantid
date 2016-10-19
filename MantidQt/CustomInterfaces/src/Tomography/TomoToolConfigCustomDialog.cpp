@@ -14,6 +14,9 @@ std::string TomoToolConfigCustomDialog::m_backupCommandLine = "";
 
 void TomoToolConfigCustomDialog::setupToolConfig() {
 
+	// sets the current runnable path, overriding the default one
+	m_customUi.lineEdit_runnable->setText(QString::fromStdString(m_runPath));
+
   // None of the other paths matter, because the user could've changed
   // them, so ignore them and load the current ones on the dialogue
   QString run = m_customUi.lineEdit_runnable->text();        // current path
@@ -26,9 +29,6 @@ void TomoToolConfigCustomDialog::setupToolConfig() {
 
 void TomoToolConfigCustomDialog::setupDialogUi() {
   m_customUi.setupUi(this);
-
-  // sets the correct runnable path, overriding the default one
-  m_customUi.lineEdit_runnable->setText(QString::fromStdString(m_runPath));
 
   if (m_backupCommandLine != "") {
     m_customUi.textEdit_cl_opts->setText(

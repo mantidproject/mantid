@@ -21,7 +21,7 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 
 #ifdef _DEBUG
-#define PRESENTER_DEBUG
+// #define PRESENTER_DEBUG
 #endif
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -36,7 +36,7 @@ const std::string TomographyIfacePresenter::g_defOutPathLocal =
     "~/imat/";
 #endif
 
-// TODO: could use ConfigService::isNetworkDrive(const std::string &)
+// TODOPRES: could use ConfigService::isNetworkDrive(const std::string &)
 const std::string TomographyIfacePresenter::g_defOutPathRemote =
 #ifdef _WIN32
     "I:/imat/imat-data/";
@@ -155,10 +155,8 @@ void TomographyIfacePresenter::notify(
 void TomographyIfacePresenter::processSystemSettingsUpdated() {
   m_model->updateSystemSettings(m_view->systemSettings());
 
-  // this will also update the paths
-  auto *dialogPtrForCheck = m_configDialog.get();
-  if (dialogPtrForCheck)
-    setupConfigDialogSettingsAndUpdateModel(dialogPtrForCheck);
+  // update the tool information with the new system settings
+  setupConfigDialogSettingsAndUpdateModel(m_configDialog.get());
 }
 
 void TomographyIfacePresenter::processSetupResourcesAndTools() {
@@ -209,6 +207,9 @@ void TomographyIfacePresenter::processCompResourceChanged() {
     const bool status = !m_model->loggedIn().empty();
     m_view->enableLoggedActions(status);
   }
+
+  // this will udpate the tool after a resource change
+  setupConfigDialogSettingsAndUpdateModel(m_configDialog.get());
 }
 
 void TomographyIfacePresenter::processToolChanged() {
@@ -242,8 +243,11 @@ void TomographyIfacePresenter::processToolChanged() {
 
 void TomographyIfacePresenter::setupConfigDialogSettingsAndUpdateModel(
     TomoToolConfigDialogBase *dialog) {
-  setupConfigDialogSettings(dialog);
-  updateModelAfterToolChanged(dialog);
+
+  if (dialog) {
+    setupConfigDialogSettings(dialog);
+    updateModelAfterToolChanged(dialog);
+  }
 }
 
 void TomographyIfacePresenter::createConfigDialogUsingToolName(
@@ -273,15 +277,17 @@ void TomographyIfacePresenter::setupConfigDialogSettings(
 void TomographyIfacePresenter::setupConfigDialogSettingsForLocal(
     TomoToolConfigDialogBase *dialog) {
   // set up all the information we need for the dialog
+  /* TODOPRES this appends /scripts/ twice, once from C:/MantidInstall/scripts
+   and once from /scripts/Imaging/IMAT/tomo_reconstruct.py */
   std::string run = m_model->getExeternalInterpreterPath() + " " +
-                    m_model->getCurrentLocalScriptsBaseDir() +
+                    m_model->getCurrentLocalScriptsBasePath() +
                     m_model->getTomoScriptLocationPath();
 
 #ifdef PRESENTER_DEBUG
   std::cout << "DEBUG: LOCAL config dialog settings " << run << "\n";
 #endif // PRESENTER_DEBUG
 
-  // TODO get the proper paths for the local reconstruct
+  // TODOPRES get the proper paths for the local reconstruct
   TomoPathsConfig paths = m_view->currentPathsConfig();
 
   std::string pathOut = Poco::Path::expand(
@@ -296,7 +302,7 @@ void TomographyIfacePresenter::setupConfigDialogSettingsForLocal(
 void TomographyIfacePresenter::setupConfigDialogSettingsForRemote(
     TomoToolConfigDialogBase *dialog) {
   // set up all the information we need for the dialog
-  std::string run = m_model->getCurrentRemoteScriptsBaseDir() +
+  std::string run = m_model->getCurrentRemoteScriptsBasePath() + m_model->getTomoScriptFolderPath() +
                     m_model->getTomoScriptLocationPath();
 #ifdef PRESENTER_DEBUG
   std::cout << "DEBUG: REMOTE config dialog settings" << run << "\n";
@@ -505,7 +511,7 @@ void TomographyIfacePresenter::processSetupReconTool() {
   // if not the same, create new Dialog
   if (TomographyIfaceModel::g_CCPiTool != currentReconTool) {
 
-    // TODO save previous state?
+    // TODOPRES save previous state?
     // wrap in unique_ptr
 
     // give pointer to showToolConfig, so it can run the dialogue
@@ -513,7 +519,7 @@ void TomographyIfacePresenter::processSetupReconTool() {
 
     updateModelAfterToolChanged(m_configDialog.get());
 
-    // TODO: this would make sense if the reconstruct action/button
+    // TODOPRES: this would make sense if the reconstruct action/button
     // was only enabled after setting up at least one tool
     // m_view->enableToolsSetupsActions(true);
   }
@@ -521,7 +527,7 @@ void TomographyIfacePresenter::processSetupReconTool() {
 
 void TomographyIfacePresenter::processRunRecon() {
   // m_model->checkDataPathsSet();
-  // TODO: validate data path with additional rules/constraints?
+  // TODOPRES: validate data path with additional rules/constraints?
   TomoPathsConfig paths = m_view->currentPathsConfig();
   if (paths.pathSamples().empty()) {
     m_view->userWarning("Sample images path not set!",
@@ -536,42 +542,16 @@ void TomographyIfacePresenter::processRunRecon() {
   // center of rotation and regions
   m_model->updateImageStackPreParams(m_view->currentROIEtcParams());
 
-#ifdef PRESENTER_DEBUG
-  std::cout << "\n\n DEBUG: Current tool:" << m_model->usingTool()
-            << " and Current method: " << m_model->getCurrentToolMethod();
-
-#endif // PRESENTER_DEBUG
-
-  if (isLocalResourceSelected()) {
-    subprocessRunReconLocal();
-  } else {
-    subprocessRunReconRemote();
+  try {
+    m_model->doSubmitReconstructionJob(m_view->currentComputeResource());
+  } catch (std::exception &e) {
+    m_view->userWarning("Issue when trying to start a job", e.what());
   }
-
   processRefreshJobs();
 }
 
 bool TomographyIfacePresenter::isLocalResourceSelected() {
   return m_model->localComputeResource() == m_view->currentComputeResource();
-}
-
-void TomographyIfacePresenter::subprocessRunReconRemote() {
-  if (m_model->loggedIn().empty()) {
-    m_view->updateJobsInfoDisplay(m_model->jobsStatus(),
-                                  m_model->jobsStatusLocal());
-    return;
-  }
-
-  try {
-
-    m_model->doSubmitReconstructionJob(m_view->currentComputeResource());
-  } catch (std::exception &e) {
-    m_view->userWarning("Issue when trying to start a job", e.what());
-  }
-}
-
-void TomographyIfacePresenter::subprocessRunReconLocal() {
-  m_model->doRunReconstructionJobLocal();
 }
 
 void TomographyIfacePresenter::processRefreshJobs() {
@@ -583,6 +563,7 @@ void TomographyIfacePresenter::processRefreshJobs() {
     return;
   }
 
+  // TODOPRES doesn't support multiple compute resources
   std::string comp = m_view->currentComputeResource();
   if ("Local" == comp) {
     comp = "SCARF@STFC";
@@ -615,7 +596,7 @@ void TomographyIfacePresenter::processVisualizeJobs() {
 void TomographyIfacePresenter::doVisualize(
     const std::vector<std::string> &ids) {
   m_model->logMsg(" Visualizing results from job: " + ids.front());
-  // TODO: open dialog, send to Paraview, etc.
+  // TODOPRES: open dialog, send to Paraview, etc.
 }
 
 void TomographyIfacePresenter::processLogMsg() {

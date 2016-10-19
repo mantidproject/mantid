@@ -121,7 +121,6 @@ set ( SRC_FILES
 	src/Tomography/ImggFormats.cpp
 	src/Tomography/ImggFormatsConvertPresenter.cpp
 	src/Tomography/ImggFormatsConvertViewQtWidget.cpp
-	src/Tomography/SavuConfigDialog.cpp
 	src/Tomography/StackOfImagesDirs.cpp
 	src/Tomography/TomoPathsConfig.cpp
 	src/Tomography/TomoReconPostprocSettings.cpp

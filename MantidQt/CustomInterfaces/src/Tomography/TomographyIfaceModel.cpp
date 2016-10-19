@@ -4,6 +4,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 
+#include <numeric>
+
 #include <Poco/Path.h>
 #include <Poco/Process.h>
 
@@ -16,7 +18,7 @@
 #endif
 
 #ifdef _DEBUG
-#define MODEL_DEBUG
+// #define MODEL_DEBUG
 #endif
 
 using namespace Mantid::API;
@@ -52,7 +54,6 @@ TomographyIfaceModel::TomographyIfaceModel()
       m_loggedInUser(""), m_loggedInComp(""), m_computeRes(),
       m_computeResStatus(), m_reconTools(), m_reconToolsStatus(),
       m_jobsStatus(), m_SCARFtools(), m_toolsSettings(),
-      m_tomopyMethod("gridrec"), m_astraMethod("FBP3D_CUDA"),
       m_prePostProcSettings(), m_imageStackPreParams(), m_statusMutex(NULL) {
 
   m_computeRes.push_back(g_SCARFName);
@@ -344,6 +345,8 @@ void TomographyIfaceModel::doQueryJobStatus(const std::string &compRes,
 
 /**
  * Handle the job submission request relies on a submit algorithm.
+ * @param compRes The resource to which the request will be made, if the
+ * resource is set to "Local" that will be handled too
  */
 void TomographyIfaceModel::doSubmitReconstructionJob(
     const std::string &compRes) {
@@ -364,15 +367,24 @@ void TomographyIfaceModel::doSubmitReconstructionJob(
         "(empty string). You need to setup the reconstruction tool.");
   }
 
-#ifdef MODEL_DEBUG
-  std::string allOpts;
-  for (const auto &option : args) {
-    allOpts += option + " ";
+  std::string allOpts = "";
+  for (const auto &arg : args) {
+    allOpts += arg + " ";
   }
-  std::cout << "\n\n DEBUG: full argument string: " << allOpts << "\n\n";
-  return; // end here to prevent any outgoing connections
-#endif    // MODEL_DEBUG
 
+  logMsg("Running " + usingTool() + ", with binary: " + run +
+         ", with parameters: " + allOpts);
+
+  if ("Local" == compRes) {
+    doRunReconstructionJobLocal(compRes, run, allOpts, args);
+  } else {
+    doRunReconstructionJobRemote(compRes, run, allOpts);
+  }
+}
+
+void TomographyIfaceModel::doRunReconstructionJobRemote(
+    const std::string &compRes, const std::string &run,
+    const std::string &allOpts) {
   // with SCARF we use one (pseudo)-transaction for every submission
   auto transAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "StartRemoteTransaction");
@@ -388,6 +400,13 @@ void TomographyIfaceModel::doSubmitReconstructionJob(
                              std::string(e.what()));
   }
 
+#ifdef MODEL_DEBUG
+  std::cout << "\n\n DEBUG: compRes in remote: " << compRes;
+  std::cout << "\n\n DEBUG: run in remote: " << run;
+  std::cout << "\n\n DEBUG: full argument string: " << allOpts << "\n";
+  return; // end here to prevent any outgoing connections
+#endif    // MODEL_DEBUG
+
   auto submitAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "SubmitRemoteJob");
   submitAlg->initialize();
@@ -395,13 +414,6 @@ void TomographyIfaceModel::doSubmitReconstructionJob(
   submitAlg->setProperty("TaskName", "Mantid tomographic reconstruction job");
   submitAlg->setProperty("TransactionID", tid);
   submitAlg->setProperty("ScriptName", run);
-
-#ifndef MODEL_DEBUG
-  std::string allOpts;
-  for (const auto &option : args) {
-    allOpts += option + " ";
-  }
-#endif // MODEL_DEBUG
   submitAlg->setProperty("ScriptParams", allOpts);
   try {
     submitAlg->execute();
@@ -410,6 +422,51 @@ void TomographyIfaceModel::doSubmitReconstructionJob(
         "Error when trying to submit a reconstruction job: " +
         std::string(e.what()));
   }
+}
+
+void TomographyIfaceModel::doRunReconstructionJobLocal(
+    const std::string &compRes, const std::string &run,
+    const std::string &allOpts, const std::vector<std::string> &args) {
+
+#ifdef MODEL_DEBUG
+  std::cout << "\n\n DEBUG: compRes in local: " << compRes;
+  std::cout << "\n\n DEBUG: run in local: " << run;
+  std::cout << "\n\n DEBUG: full argument string: " << allOpts << "\n";
+  return; // end here to prevent any outgoing connections
+#endif    // MODEL_DEBUG
+
+  // Mantid::Kernel::ConfigService::Instance().launchProcess(run, runArgs);
+  try {
+    Poco::ProcessHandle handle = Poco::Process::launch(run, args);
+    Poco::Process::PID pid = handle.id();
+    Mantid::API::IRemoteJobManager::RemoteJobInfo info;
+    info.id = boost::lexical_cast<std::string>(pid);
+    info.name = "Mantid_Local";
+    if (pid > 0) {
+      info.status = "Starting";
+    } else {
+      info.status = "Exit";
+    }
+    info.cmdLine = run + " " + allOpts;
+    m_jobsStatusLocal.emplace_back(info);
+  } catch (Poco::SystemException &sexc) {
+    g_log.error() << "Execution failed. Could not run the tool. Error details: "
+                  << std::string(sexc.what());
+    Mantid::API::IRemoteJobManager::RemoteJobInfo info;
+    info.id = "none";
+    info.name = "Mantid_Local";
+    info.status = "Exit";
+    info.cmdLine = run + " " + allOpts;
+    m_jobsStatusLocal.emplace_back(info);
+  } catch (std::runtime_error &rexc) {
+    logMsg("The execution of " + usingTool() + "failed. details: " +
+           std::string(rexc.what()));
+    g_log.error()
+        << "Execution failed. Coult not execute the tool. Error details: "
+        << std::string(rexc.what());
+  }
+
+  doRefreshJobsInfo("Local");
 }
 
 void TomographyIfaceModel::doCancelJobs(const std::string &compRes,
@@ -558,57 +615,6 @@ bool TomographyIfaceModel::processIsRunning(int pid) {
 #endif
 }
 
-void TomographyIfaceModel::doRunReconstructionJobLocal() {
-  const std::string toolName = usingTool();
-  try {
-    std::string run;
-    std::vector<std::string> args;
-    makeRunnableWithOptions("local", run, args);
-
-    std::string allOpts;
-    for (const auto &option : args) {
-      allOpts += option + " ";
-    }
-
-    logMsg("Running " + toolName + ", with binary: " + run +
-           ", with parameters: " + allOpts);
-
-    // Mantid::Kernel::ConfigService::Instance().launchProcess(run, runArgs);
-    try {
-      Poco::ProcessHandle handle = Poco::Process::launch(run, args);
-      Poco::Process::PID pid = handle.id();
-      Mantid::API::IRemoteJobManager::RemoteJobInfo info;
-      info.id = boost::lexical_cast<std::string>(pid);
-      info.name = "Mantid_Local";
-      if (pid > 0) {
-        info.status = "Starting";
-      } else {
-        info.status = "Exit";
-      }
-      info.cmdLine = run + " " + allOpts;
-      m_jobsStatusLocal.emplace_back(info);
-    } catch (Poco::SystemException &sexc) {
-      g_log.error()
-          << "Execution failed. Could not run the tool. Error details: "
-          << std::string(sexc.what());
-      Mantid::API::IRemoteJobManager::RemoteJobInfo info;
-      info.id = "none";
-      info.name = "Mantid_Local";
-      info.status = "Exit";
-      info.cmdLine = run + " " + allOpts;
-      m_jobsStatusLocal.emplace_back(info);
-    }
-  } catch (std::runtime_error &rexc) {
-    logMsg("The execution of " + toolName + "failed. details: " +
-           std::string(rexc.what()));
-    g_log.error()
-        << "Execution failed. Coult not execute the tool. Error details: "
-        << std::string(rexc.what());
-  }
-
-  doRefreshJobsInfo("Local");
-}
-
 /**
  * Build the components of the command line to run on the remote or local
  * compute resource. Produces a (normally full) path to a runnable, and
@@ -622,82 +628,21 @@ void TomographyIfaceModel::makeRunnableWithOptions(
     const std::string &comp, std::string &run,
     std::vector<std::string> &opt) const {
   const std::string tool = usingTool();
+  const std::string cmd = m_currentToolSettings->toCommand();
+
   // Special case. Just pass on user inputs.
   if (tool == g_customCmdTool) {
-
-    // TODO leave that case for now
-    // fails for local
-    const std::string cmd = m_currentToolSettings->toCommand();
-#ifdef MODEL_DEBUG
-    std::cout << "DEBUG: CUSTOM to command -> " << cmd << "\n\n";
-#endif // MODEL_DEBUG
 
     opt.resize(1);
     splitCmdLine(cmd, run, opt[0]);
     return;
   }
-
-  std::string cmd;
-  bool local = false;
-  // TODO need to support local paths somewhere else
-  if ("local" == comp) {
-
-    // if local get the local reconstruction path
-    local = true;
-    cmd = m_currentToolSettings->toCommand();
-
-#ifdef MODEL_DEBUG
-    std::cout << "\n\n DEBUG: Expected RUN value: "
-              << m_systemSettings.m_local.m_reconScriptsPath +
-                     g_mainReconstructionScript
-              << "\n BUT GOT: " << cmd << "\n\n";
-#endif // MODEL_DEBUG
-
-#ifdef MODEL_DEBUG
-    std::cout << "\n\n DEBUG: LOCAL? to command -> " << cmd << "\n\n";
-#endif // MODEL_DEBUG
-
-  } else {
-    cmd = m_currentToolSettings->toCommand();
-
-#ifdef MODEL_DEBUG
-    std::cout << "\n\n DEBUG: TOOL:" << m_currentToolName << " to command -> "
-              << cmd << "\n\n";
-#endif // MODEL_DEBUG
-  }
-  // DEAD CODE left for future reference
-  // if tool == TOMOPY branch
-  // this will make something like:
-  // run = "/work/imat/z-tests-fedemp/scripts/tomopy/imat_recon_FBP.py";
-  // opt = "--input_dir " + base + currentPathFITS() + " " + "--dark " +
-  // base +
-  //      currentPathDark() + " " + "--white " + base + currentPathFlat();
-  // } else if (tool == g_AstraTool) {
-  //   cmd = m_currentToolSettings->toCommand();
-  //   std::cout << "\n DEBUG: ASTRA to command -> " << cmd << "\n\n";
-  // this will produce something like this:
-  // run = "/work/imat/scripts/astra/astra-3d-SIRT3D.py";
-  // opt = base + currentPathFITS();
+  bool local = ("Local" == comp) ? true : false;
 
   std::string longOpt;
   splitCmdLine(cmd, run, longOpt);
   checkIfToolIsSetupProperly(tool, cmd);
 
-  // TODO need to support local paths somewhere else
-  if (local) {
-#ifdef MODEL_DEBUG
-    std::cout << "\n\n DEBUG: Expected RUN value: "
-              << m_systemSettings.m_local.m_externalInterpreterPath
-              << "\n BUT GOT: " << run << "\n\n";
-#endif // MODEL_DEBUG
-  }
-  // else {
-  //   // intentionally not using local style paths, as this goes to a server
-  //   with
-  //   // unix file system
-  //   run = m_systemSettings.m_remote.m_basePathReconScripts +
-  //         g_mainReconstructionScript;
-  // }
   opt = makeTomoRecScriptOptions(local);
 }
 
@@ -715,12 +660,6 @@ TomographyIfaceModel::makeTomoRecScriptOptions(bool local) const {
 
   // options with all the info from filters and regions
   std::vector<std::string> opts;
-
-  if (local) {
-    Poco::Path base(m_systemSettings.m_local.m_reconScriptsPath);
-    base.append(g_mainReconstructionScript);
-    opts.emplace_back(base.toString());
-  }
 
   const std::string currentTool = usingTool();
   const std::string toolNameArg = prepareToolNameForArgs(currentTool);
@@ -786,12 +725,13 @@ void TomographyIfaceModel::splitCmdLine(const std::string &cmd,
   if (cmd.empty())
     return;
 
-  const auto pos = cmd.find(' ');
+  const auto pos = cmd.find("--");
   if (std::string::npos == pos)
     return;
 
-  run = cmd.substr(0, pos);
-  opts = cmd.substr(pos + 1);
+  // -1 will be right on the whitespace so it will be cut off
+  run = cmd.substr(0, pos - 1);
+  opts = cmd.substr(pos);
 }
 
 /**
@@ -901,12 +841,7 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
   opts.emplace_back("--input-path=" + adaptInputPathForExecution(
                                           m_pathsConfig.pathSamples(), local));
 
-  // TODO i think this is where we check which tool is used
-  std::string alg = "alg";
-  if (g_TomoPyTool == usingTool())
-    alg = m_tomopyMethod;
-  else if (g_AstraTool == usingTool())
-    alg = m_astraMethod;
+  std::string alg = getCurrentToolMethod();
 
   // check the general enable option and the dataset specific enable
   if (filters.prep.normalizeByFlats && m_pathsConfig.m_pathOpenBeamEnabled) {
@@ -925,6 +860,8 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
 
   std::string openList;
   std::string closeList;
+  // TODOMODL how to handle this? we still need to know what the resource is,
+  // because local is windows and remote is linux
   if (local) {
     openList = "[";
     closeList = "]";
