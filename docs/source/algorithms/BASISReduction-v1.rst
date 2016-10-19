@@ -93,9 +93,15 @@ point on, the reduction process continues using :math:`S'_s` in place of :math:`
 Usage
 -----
 
-.. warning::
+**Perform a reduction:**
 
-    This algorithm is not meant to be run from the command line.
+.. code-block:: python
+
+    BASISReduction(RunNumbers="59671",
+                   EnergyBins=[-120,0.4,120],
+                   MomentumTransferBins=[0.3, 0.2, 1.9],
+                   DivideByVanadium=1,
+                   NormRunNumbers="58183")
 
 .. categories::
 

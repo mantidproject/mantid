@@ -2,6 +2,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -21,7 +22,6 @@ namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadCalFile)
 
-//----------------------------------------------------------------------------------------------
 /** For use by getInstrument3Ways, initializes the properties
  * @param alg :: algorithm to which to add the properties.
  * */
@@ -63,7 +63,6 @@ bool LoadCalFile::instrumentIsSpecified(API::Algorithm *alg) {
   return !InstrumentFilename.empty();
 }
 
-//----------------------------------------------------------------------------------------------
 /** Get a pointer to an instrument in one of 3 ways: InputWorkspace,
  * InstrumentName, InstrumentFilename
  * @param alg :: algorithm from which to get the property values.

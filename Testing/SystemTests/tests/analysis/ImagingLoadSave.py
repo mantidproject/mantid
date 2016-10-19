@@ -5,6 +5,7 @@ import stresstesting
 import mantid.simpleapi as msapi
 from mantid import config
 
+
 def required_larmor_test_files():
     data_root = config['datasearch.directories'].split(';')[0]
     fits_files_dir = os.path.join(data_root, 'wavelength_dependent_images')
@@ -25,12 +26,14 @@ def required_larmor_test_files():
         ('angle5', 'LARMOR00005333_Metals_000_00690.fits')
         ]
 
-    file_paths = [os.path.join(fits_files_dir, comps[0], comps[1])\
+    file_paths = [os.path.join(fits_files_dir, comps[0], comps[1])
                   for comps in fits_files_comps]
 
     return file_paths
 
 #pylint: disable=too-many-public-methods
+
+
 class ImagingLoadSaveTests(unittest.TestCase):
     """
     Tests load/save images. This is just around FITS format at the
@@ -41,7 +44,6 @@ class ImagingLoadSaveTests(unittest.TestCase):
     def setUp(self):
         # Sharing some files with the ImggAggregateWavelengths system test
         self._fits_paths = required_larmor_test_files()
-
 
     def test_load_all_indiv(self):
         """
@@ -116,6 +118,8 @@ class ImagingLoadSaveTests(unittest.TestCase):
         msapi.DeleteWorkspace(group_name)
 
 # Runs the unittest tests defined above in the mantid stress testing framework
+
+
 class ImagingAggregateWavelengths(stresstesting.MantidStressTest):
 
     _success = False

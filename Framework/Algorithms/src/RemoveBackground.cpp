@@ -1,8 +1,9 @@
 #include "MantidAlgorithms/RemoveBackground.h"
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -24,10 +25,6 @@ DECLARE_ALGORITHM(RemoveBackground)
 
 using namespace Kernel;
 using namespace API;
-
-//---------------------------------------------------------------------------------------------
-// Public methods
-//---------------------------------------------------------------------------------------------
 
 /** Initialization method. Declares properties to be used in algorithm.
 *
@@ -146,9 +143,9 @@ void RemoveBackground::exec() {
 //-------------------------------------------------------------------------------------------------------------------------------
 /// Constructor
 BackgroundHelper::BackgroundHelper()
-    : m_WSUnit(), m_bgWs(), m_wkWS(), m_pgLog(nullptr), m_inPlace(true),
-      m_singleValueBackground(false), m_NBg(0), m_dtBg(1), m_ErrSq(0),
-      m_Emode(0), m_Efix(0), m_nullifyNegative(false),
+    : m_WSUnit(), m_bgWs(), m_wkWS(), m_spectrumInfo(nullptr), m_pgLog(nullptr),
+      m_inPlace(true), m_singleValueBackground(false), m_NBg(0), m_dtBg(1),
+      m_ErrSq(0), m_Emode(0), m_Efix(0), m_nullifyNegative(false),
       m_previouslyRemovedBkgMode(false) {}
 /// Destructor
 BackgroundHelper::~BackgroundHelper() { this->deleteUnitsConverters(); }

@@ -56,8 +56,8 @@ class SpaceGroupBuilder(object):
             # pylint: disable=unused-variable,invalid-name
             except RuntimeError as e:
                 raise RuntimeError(
-                    'Can not create space group from supplied CIF-file. You could try to modify the HM-symbol ' \
-                    'to contain spaces between the components.\n' \
+                    'Can not create space group from supplied CIF-file. You could try to modify the HM-symbol '
+                    'to contain spaces between the components.\n'
                     'Keys to look for: _space_group_name_H-M_alt, _symmetry_space_group_name_H-M')
 
     def _getSpaceGroupFromString(self, cifData):
@@ -117,7 +117,7 @@ class UnitCellBuilder(object):
                                  unitCellComponents])
 
         if unitCellValueMap['_cell_length_a'] is None:
-            raise RuntimeError('The a-parameter of the unit cell is not specified in the supplied CIF.\n' \
+            raise RuntimeError('The a-parameter of the unit cell is not specified in the supplied CIF.\n'
                                'Key to look for: _cell_length_a')
 
         replacementMap = {
@@ -182,7 +182,7 @@ class AtomListBuilder(object):
         for field in coordinateFields:
             if field not in cifData.keys():
                 raise RuntimeError(
-                    'Mandatory field {0} not found in CIF-file.' \
+                    'Mandatory field {0} not found in CIF-file.'
                     'Please check the atomic position definitions.'.format(field))
 
         # Return a dict like { 'label1': 'x y z', 'label2': 'x y z' }
@@ -379,7 +379,7 @@ class LoadCIF(PythonAlgorithm):
         try:
             self._loadFromCif()
         except ImportError:
-            raise RuntimeError('This algorithm requires an additional Python package: PyCifRW' \
+            raise RuntimeError('This algorithm requires an additional Python package: PyCifRW'
                                ' (https://pypi.python.org/pypi/PyCifRW/4.1)')
 
     def _loadFromCif(self):

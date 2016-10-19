@@ -4,16 +4,11 @@
 
 #include "LabelToolLogValuesDialog.h"
 
-// STD
-#include <sstream>
-
 // Mantid
 #include <LegendWidget.h>
 #include <Mantid/MantidUI.h>
-#include <MantidAPI/MultipleExperimentInfos.h>
 
 // Qt
-#include <QHeaderView>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QRadioButton>
@@ -44,20 +39,9 @@ LabelToolLogValuesDialog::LabelToolLogValuesDialog(const QString &wsname,
                                                    size_t experimentInfoIndex)
     : SampleLogDialogBase(wsname, parentContainer, flags, experimentInfoIndex) {
 
-  std::stringstream ss;
-  ss << "MantidPlot - " << wsname.toStdString().c_str() << " sample logs";
-  setWindowTitle(QString::fromStdString(ss.str()));
+  setDialogWindowTitle(wsname);
 
-  QStringList titles;
-  titles << "Name"
-         << "Type"
-         << "Value"
-         << "Units";
-  m_tree->setHeaderLabels(titles);
-  m_tree->setSelectionMode(QAbstractItemView::SingleSelection);
-  QHeaderView *hHeader = (QHeaderView *)m_tree->header();
-  hHeader->setResizeMode(2, QHeaderView::Stretch);
-  hHeader->setStretchLastSection(false);
+  setTreeWidgetColumnNames();
 
   QHBoxLayout *uiLayout = new QHBoxLayout;
   uiLayout->addWidget(m_tree);
@@ -72,51 +56,17 @@ LabelToolLogValuesDialog::LabelToolLogValuesDialog(const QString &wsname,
     statRadioChoice[i] = new QRadioButton(stats[i].c_str());
     statValues[i] = new QLineEdit("");
     statValues[i]->setReadOnly(true);
-
     statsBoxLayout->addRow(statRadioChoice[i], statValues[i]);
   }
   // Set default checked radio button
   statRadioChoice[0]->setChecked(true);
   statsBox->setLayout(statsBoxLayout);
 
-  // -------------- The Import/Close buttons ------------------------
-  QHBoxLayout *topButtons = new QHBoxLayout;
-  buttonPlot = new QPushButton(tr("&Import selected log"));
-  buttonPlot->setAutoDefault(true);
-  buttonPlot->setToolTip(
-      "Import log file as a table and construct a 1D graph if appropriate");
-  topButtons->addWidget(buttonPlot);
-
-  buttonClose = new QPushButton(tr("Close"));
-  buttonClose->setToolTip("Close dialog");
-  topButtons->addWidget(buttonClose);
-
   QVBoxLayout *hbox = new QVBoxLayout;
-
-  // -------------- The ExperimentInfo selector------------------------
-  boost::shared_ptr<Mantid::API::MultipleExperimentInfos> mei =
-      AnalysisDataService::Instance().retrieveWS<MultipleExperimentInfos>(
-          m_wsname);
-
-  if (mei) {
-    if (mei->getNumExperimentInfo() > 0) {
-      QHBoxLayout *numSelectorLayout = new QHBoxLayout;
-      QLabel *lbl = new QLabel("Experiment Info #");
-      m_spinNumber = new QSpinBox;
-      m_spinNumber->setMinimum(0);
-      m_spinNumber->setMaximum(int(mei->getNumExperimentInfo()) - 1);
-      m_spinNumber->setValue(int(m_experimentInfoIndex));
-      numSelectorLayout->addWidget(lbl);
-      numSelectorLayout->addWidget(m_spinNumber);
-      // Double-click imports a log file
-      connect(m_spinNumber, SIGNAL(valueChanged(int)), this,
-              SLOT(selectExpInfoNumber(int)));
-      hbox->addLayout(numSelectorLayout);
-    }
-  }
+  addImportAndCloseButtonsTo(hbox);
+  addExperimentInfoSelectorTo(hbox);
 
   // Finish laying out the right side
-  hbox->addLayout(topButtons);
   hbox->addWidget(statsBox);
   hbox->addStretch(1);
 
@@ -132,25 +82,7 @@ LabelToolLogValuesDialog::LabelToolLogValuesDialog(const QString &wsname,
 
   resize(750, 400);
 
-  connect(buttonPlot, SIGNAL(clicked()), this, SLOT(importSelectedLogs()));
-  connect(buttonClose, SIGNAL(clicked()), this, SLOT(close()));
-  // want a custom context menu
-  m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint &)), this,
-          SLOT(popupMenu(const QPoint &)));
-
-  // Double-click imports a log file
-  connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this,
-          SLOT(importItem(QTreeWidgetItem *)));
-
-  // Selecting shows the stats of it
-  connect(m_tree, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this,
-          SLOT(showLogStatistics()));
-
-  // Selecting shows the stats of it
-  connect(m_tree,
-          SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)),
-          this, SLOT(showLogStatistics()));
+  setUpTreeWidgetConnections();
 }
 
 //------------------------------------------------------------------------------------------------
@@ -169,7 +101,7 @@ LabelToolLogValuesDialog::~LabelToolLogValuesDialog() {}
 *
 *	@param item :: The currently selected item from the log list
 *	@throws std::bad_cast :: The exception is throws if the dynamic_cast
-*fails
+*							fails
 *
 */
 void LabelToolLogValuesDialog::importItem(QTreeWidgetItem *item) {
@@ -177,8 +109,8 @@ void LabelToolLogValuesDialog::importItem(QTreeWidgetItem *item) {
   // Dynamic cast up to LegendWidget, which is the class of the
   // one containing the label, in order to use setText
   auto parentWidget = dynamic_cast<LegendWidget *>(m_parentContainer);
-  if (parentWidget == NULL) { // if dynamic cast fails, don't fail silently
-    throw new std::bad_cast;
+  if (NULL == parentWidget) { // if dynamic cast fails, don't fail silently
+    throw std::bad_cast();
   }
 
   // find which radio box is checked

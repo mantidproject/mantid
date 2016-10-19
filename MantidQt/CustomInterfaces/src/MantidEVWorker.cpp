@@ -8,6 +8,8 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/EmptyValues.h"
@@ -161,7 +163,7 @@ bool MantidEVWorker::loadAndConvertToMD(
       alg->setProperty("Filename", file_name);
       alg->setProperty("OutputWorkspace", ev_ws_name);
       if (topaz) {
-        alg->setProperty("FilterByTofMin", 1000.0);
+        alg->setProperty("FilterByTofMin", 500.0);
         alg->setProperty("FilterByTofMax", 16666.0);
       }
       alg->setProperty("LoadMonitors", true);

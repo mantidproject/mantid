@@ -5,6 +5,7 @@ from mantid.simpleapi import *
 from mantid.kernel import Logger
 import SANSUtility
 
+
 class FindDirectionEnum(object): #pylint: disable=R0903
     ALL = 0
     UP_DOWN = 1
@@ -31,7 +32,6 @@ def is_workspace_which_requires_angle(reducer):
     return False
 
 
-
 def get_bench_rotation(reducer):
     '''
     Extract the bench rotation from the instrument
@@ -48,6 +48,7 @@ def get_bench_rotation(reducer):
         bench_rotation = 0.0
     return bench_rotation
 
+
 class CentreFinder(object):
     """
         Aids estimating the effective centre of the particle beam by calculating Q in four
@@ -55,6 +56,7 @@ class CentreFinder(object):
         better estimate for the beam centre position can hence be calculated iteratively
     """
     QUADS = ['Left', 'Right', 'Up', 'Down']
+
     def __init__(self, guess_centre, sign_policy, find_direction = FindDirectionEnum.ALL):
         """
             Takes a loaded reducer (sample information etc.) and the initial guess of the centre
@@ -264,11 +266,11 @@ class CentreFinder(object):
         return cylinder_direction.X(), cylinder_direction.Y(), cylinder_direction.Z()
 
 
-
 class CentrePositioner(object):
     '''
     Handles the positions and increments for beam finding.
     '''
+
     def __init__(self, reducer, position_type, coord1_start, coord2_start,coord1_step,coord2_step, tolerance): #pylint: disable=too-many-arguments
         '''
         Set the CentrePositioner. It requires:
@@ -298,7 +300,6 @@ class CentrePositioner(object):
 
         self.current_coord1 = self.coord1_start
         self.current_coord2 = self.coord2_start
-
 
     def increment_position(self, coord1_old, coord2_old):
         '''
@@ -365,10 +366,13 @@ class CentrePositioner(object):
 
 # Thes classes make sure that only the relevant directions are updated
 # They are not instrument dependent, they should only dependt on the user's choice.
+
+
 class BeamCentrePositionUpdaterFactory(object): #pylint: disable=R0903
     '''
     Creates the required beam centre position updater.
     '''
+
     def __init__(self):
         super(BeamCentrePositionUpdaterFactory, self).__init__()
 
@@ -387,10 +391,12 @@ class BeamCentrePositionUpdaterFactory(object): #pylint: disable=R0903
             RuntimeError("Error in BeamCentrePositionUpdaterFactory: You need to provide a position update"
                          "policy, ie up/down, left/right or all")
 
+
 class BeamCentrePositionUpdater(object): #pylint: disable=R0903
     '''
     Handles the position updates, ie if we are only intereseted in left/right or up/down or all
     '''
+
     def __init__(self):
         super(BeamCentrePositionUpdater, self).__init__()
 
@@ -406,6 +412,7 @@ class BeamCentrePositionUpdaterAll(BeamCentrePositionUpdater):
     '''
     Handles the position updates when all directions are being selected
     '''
+
     def __init__(self):
         super(BeamCentrePositionUpdaterAll, self).__init__()
 
@@ -424,6 +431,7 @@ class BeamCentrePositionUpdaterUpDown(BeamCentrePositionUpdater):
     '''
     Handles the position updates when only up/down is selected
     '''
+
     def __init__(self):
         super(BeamCentrePositionUpdaterUpDown, self).__init__()
 
@@ -444,6 +452,7 @@ class BeamCentrePositionUpdaterLeftRight(BeamCentrePositionUpdater):
     '''
     Handles the position updates when only right/left is selected
     '''
+
     def __init__(self):
         super(BeamCentrePositionUpdaterLeftRight, self).__init__()
 
@@ -473,7 +482,6 @@ class BeamCentrePositionUpdaterLeftRight(BeamCentrePositionUpdater):
         return x_new, y_initial
 
 
-
 # Provides the positions and increments with the correct scaling
 # These set of classes are instrument dependent.
 class PositionProviderFactory(object):
@@ -482,6 +490,7 @@ class PositionProviderFactory(object):
     depend on the instrument, eg Larmor's first coordinate is an angle for certain
     run numbers.
     '''
+
     def __init__(self, increment_coord1, increment_coord2, tolerance, position_type):
         '''
         Initialize the PositionProviderFactory
@@ -553,7 +562,6 @@ class PositionProviderFactory(object):
 
         return tolerance/distance
 
-
     def get_tolerance_for_angle(self, tolerance_linear, increment_linear, increment_angle):
         '''
         The tolerance associated with a linear disaplacement is translated into
@@ -563,6 +571,7 @@ class PositionProviderFactory(object):
         @param increment_angle: the increment of the rotation
         '''
         return (increment_angle/increment_linear)*tolerance_linear
+
 
 class PositionProvider(object):
     def __init__(self, increment_coord1, increment_coord2, tolerance):
@@ -611,10 +620,12 @@ class PositionProvider(object):
     def provide_sign_policy(self):
         RuntimeError("The PositionProvider interface is not implemented")
 
+
 class PositionProviderXY(PositionProvider):
     '''
     Handles the increments for the case when both coordinates are cartesian
     '''
+
     def __init__(self, increment_coord1, increment_coord2, tolerance):
         super(PositionProviderXY,self).__init__(increment_coord1, increment_coord2, tolerance)
         self.increment_x = increment_coord1
@@ -684,11 +695,13 @@ class PositionProviderXY(PositionProvider):
         '''
         return self.sign_policy_x, self.sign_policy_y
 
+
 class PositionProviderAngleY(PositionProvider):
     '''
     Handles the increments for the case when the first coordinate is an angle
     and the second is a cartesian coordinate
     '''
+
     def __init__(self, increment_coord1, increment_coord2, tolerance, tolerance_angle, coord1_offset, coord1_scale_factor):  #pylint: disable=too-many-arguments
         super(PositionProviderAngleY,self).__init__(increment_coord1, increment_coord2, tolerance)
         self.increment_angle = increment_coord1
@@ -700,7 +713,6 @@ class PositionProviderAngleY(PositionProvider):
         # The sign policy
         self.sign_policy_angle = 1.
         self.sign_policy_y = -1.
-
 
     def get_coord1_for_input_with_correct_scaling(self, coord1):
         '''
@@ -774,6 +786,7 @@ class BeamCenterLogger(object):
     depend partially on the type of the first coordinate, ie [m, m] or [degree, m].
     It will also perform a correction for potential offsets like bench rotations.
     '''
+
     def __init__(self, reducer, coord1_scale_factor, coord2_scale_factor):
         super(BeamCenterLogger, self).__init__()
         self.logger = Logger("CentreFinder")

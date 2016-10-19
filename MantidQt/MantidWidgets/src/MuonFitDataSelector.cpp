@@ -111,10 +111,21 @@ void MuonFitDataSelector::userChangedRuns() {
 
 /**
  * Sets group names and updates checkboxes on UI
- * By default sets all checked
+ * By default sets all unchecked
  * @param groups :: [input] List of group names
  */
 void MuonFitDataSelector::setAvailableGroups(const QStringList &groups) {
+  // If it's the same list, do nothing
+  if (groups.size() == m_groupBoxes.size()) {
+    auto existingGroups = m_groupBoxes.keys();
+    auto newGroups = groups;
+    qSort(existingGroups);
+    qSort(newGroups);
+    if (existingGroups == newGroups) {
+      return;
+    }
+  }
+
   clearGroupCheckboxes();
   for (const auto group : groups) {
     addGroupCheckbox(group);
@@ -251,8 +262,8 @@ void MuonFitDataSelector::setDefaultValues() {
   this->setStartTime(0.0);
   this->setEndTime(0.0);
   setPeriodCombination(false);
-  m_ui.txtSimFitLabel->setText("Label");
-  emit simulLabelChanged(); // make sure default "Label" is set
+  m_ui.txtSimFitLabel->setText("0");
+  emit simulLabelChanged(); // make sure default "0" is set
 }
 
 /**
@@ -266,13 +277,13 @@ void MuonFitDataSelector::setPeriodVisibility(bool visible) {
 
 /**
  * Add a new checkbox to the list of groups with given name
- * The new checkbox is checked by default
+ * The new checkbox is unchecked by default
  * @param name :: [input] Name of group to add
  */
 void MuonFitDataSelector::addGroupCheckbox(const QString &name) {
   auto checkBox = new QCheckBox(name);
   m_groupBoxes.insert(name, checkBox);
-  checkBox->setChecked(true);
+  checkBox->setChecked(false);
   m_ui.verticalLayoutGroups->addWidget(checkBox);
   connect(checkBox, SIGNAL(clicked(bool)), this,
           SIGNAL(selectedGroupsChanged()));
@@ -392,7 +403,9 @@ QStringList MuonFitDataSelector::getChosenGroups() const {
 void MuonFitDataSelector::setChosenGroup(const QString &group) {
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
        ++iter) {
-    iter.value()->setChecked(iter.key() == group);
+    if (iter.key() == group) {
+      iter.value()->setChecked(true);
+    }
   }
 }
 

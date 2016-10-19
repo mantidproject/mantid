@@ -5,6 +5,7 @@
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleShapeValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -20,6 +21,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/make_shared.hpp>

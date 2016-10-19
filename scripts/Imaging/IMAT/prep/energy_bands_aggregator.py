@@ -59,7 +59,7 @@ except RuntimeError:
             _USING_PLUGIN_TIFFFILE = True
         except ImportError:
             try:
-                import tifffile
+                import tifffile # noqa
                 _USING_PLUGIN_TIFFFILE = True
             except ImportError:
                 raise ImportError("Cannot find the package 'tifffile' in the system or together with this "
@@ -86,6 +86,8 @@ except ImportError:
 _USING_PLUGIN_TIFFFILE = False
 
 #pylint: disable=too-many-instance-attributes
+
+
 class EnergyBandsAggregator(object):
     """
     Combines energy bands, producing stacks of images with one image per projection angle from
@@ -284,12 +286,12 @@ class EnergyBandsAggregator(object):
         if not in_path:
             raise ValueError("The input path cannot be empty")
 
-        if None == output_path:
+        if output_path is None:
             output_path = self.default_out_path
 
         if out_format:
             self._out_format = out_format
-        if not isinstance(self._out_format, str) or not self._out_format in self.supported_out_formats:
+        if not isinstance(self._out_format, str) or self._out_format not in self.supported_out_formats:
             raise ValueError("Only the following output formats are supported: {0}. Format requested: {1}".
                              format(self.supported_out_formats, self._out_format))
 

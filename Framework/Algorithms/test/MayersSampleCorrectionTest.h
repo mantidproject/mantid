@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/Material.h"
+#include "MantidAPI/Sample.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

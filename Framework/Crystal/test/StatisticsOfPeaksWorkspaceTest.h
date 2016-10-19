@@ -7,6 +7,7 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidAPI/Sample.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <cxxtest/TestSuite.h>

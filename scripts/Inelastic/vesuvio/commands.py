@@ -3,6 +3,8 @@
 Defines functions and classes to start the processing of Vesuvio data.
 The main entry point that most users should care about is fit_tof().
 """
+from __future__ import (absolute_import, division, print_function)
+from six import iteritems
 
 import copy
 import re
@@ -13,7 +15,6 @@ from mantid.api import (AnalysisDataService, WorkspaceFactory, TextAxis)
 from vesuvio.instrument import VESUVIO
 
 import mantid.simpleapi as ms
-
 
 
 # --------------------------------------------------------------------------------
@@ -63,7 +64,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
             iteration_flags['masses'] = _update_masses_from_params(copy.deepcopy(flags['masses']),
                                                                    last_results[2])
 
-        print "=== Iteration {0} out of a possible {1}".format(iteration, iterations)
+        print("=== Iteration {0} out of a possible {1}".format(iteration, iterations))
         results = fit_tof_iteration(sample_data, container_data, runs, iteration_flags)
         exit_iteration += 1
 
@@ -72,10 +73,10 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
             chi2 = np.array(results[3])
             chi2_delta = last_chi2 - chi2
             max_chi2_delta = np.abs(np.max(chi2_delta))
-            print "Cost function change: {0}".format(max_chi2_delta)
+            print("Cost function change: {0}".format(max_chi2_delta))
 
             if max_chi2_delta <= convergence_threshold:
-                print "Stopped at iteration {0} due to minimal change in cost function".format(exit_iteration)
+                print("Stopped at iteration {0} due to minimal change in cost function".format(exit_iteration))
                 last_results = results
                 break
 
@@ -146,7 +147,6 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
                          Minimizer=flags['fit_minimizer'])
         ms.DeleteWorkspace(corrections_fit_name)
         corrections_args['FitParameters'] = pre_correction_pars_name
-
 
         # Add the mutiple scattering arguments
         corrections_args.update(flags['ms_flags'])
@@ -296,6 +296,7 @@ def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
 # Private Functions
 # --------------------------------------------------------------------------------
 
+
 def _update_masses_from_params(old_masses, param_ws):
     """
     Update the massses flag based on the results of a fit.
@@ -339,6 +340,7 @@ def _update_masses_from_params(old_masses, param_ws):
 
     return masses
 
+
 def _create_param_workspace(num_spec, param_table):
     num_params = param_table.rowCount()
     param_workspace = WorkspaceFactory.Instance().create("Workspace2D",
@@ -355,6 +357,7 @@ def _create_param_workspace(num_spec, param_table):
 
     return param_workspace
 
+
 def _update_fit_params(params_ws, spec_idx, params_table, name):
     params_ws.getAxis(0).setLabel(spec_idx, name)
     for idx in range(params_table.rowCount()):
@@ -362,8 +365,10 @@ def _update_fit_params(params_ws, spec_idx, params_table, name):
         params_ws.dataY(idx)[spec_idx] = params_table.column('Value')[idx]
         params_ws.dataE(idx)[spec_idx] = params_table.column('Error')[idx]
 
+
 def _create_tof_workspace_suffix(runs, spectra):
     return runs + "_" + spectra + "_tof"
+
 
 def _create_fit_workspace_suffix(index, tof_data, fit_mode, spectra, iteration=None):
     if fit_mode == "bank":
@@ -377,6 +382,7 @@ def _create_fit_workspace_suffix(index, tof_data, fit_mode, spectra, iteration=N
 
     return suffix
 
+
 def _create_profile_strs_and_mass_list(profile_flags):
     """
     Create a string suitable for the algorithms out of the mass profile flags
@@ -388,7 +394,7 @@ def _create_profile_strs_and_mass_list(profile_flags):
     for mass_prop in profile_flags:
         function_props = ["function={0}".format(mass_prop["function"])]
         del mass_prop["function"]
-        for key, value in mass_prop.iteritems():
+        for key, value in iteritems(mass_prop):
             if key == 'value':
                 mass_values.append(value)
             else:
@@ -397,6 +403,7 @@ def _create_profile_strs_and_mass_list(profile_flags):
     profiles = ";".join(profiles)
 
     return mass_values, profiles
+
 
 def _create_background_str(background_flags):
     """
@@ -407,13 +414,14 @@ def _create_background_str(background_flags):
     if background_flags:
         background_props = ["function={0}".format(background_flags["function"])]
         del background_flags["function"]
-        for key, value in background_flags.iteritems():
+        for key, value in iteritems(background_flags):
             background_props.append("{0}={1}".format(key, value))
         background_str = ",".join(background_props)
     else:
         background_str = ""
 
     return background_str
+
 
 def _create_intensity_constraint_str(intensity_constraints):
     """
@@ -432,6 +440,7 @@ def _create_intensity_constraint_str(intensity_constraints):
 
     return intensity_constraints_str
 
+
 def _create_user_defined_ties_str(masses):
     """
     Creates the internal ties for each mass profile as defined by the user to be used when fitting the data
@@ -441,13 +450,13 @@ def _create_user_defined_ties_str(masses):
     user_defined_ties = []
     for index, mass in enumerate(masses):
         if 'ties' in mass:
-           ties = mass['ties'].split(',')
-           function_dependant_ties= []
-           function_indentifier = 'f' + str(index) + '.'
-           for t in ties:
-               tie_str = function_indentifier + t
-               equal_pos = tie_str.index('=') + 1
-               tie_str = tie_str[:equal_pos] + function_indentifier + tie_str[equal_pos:]
-               user_defined_ties.append(tie_str)
+            ties = mass['ties'].split(',')
+            function_dependant_ties= []
+            function_indentifier = 'f' + str(index) + '.'
+            for t in ties:
+                tie_str = function_indentifier + t
+                equal_pos = tie_str.index('=') + 1
+                tie_str = tie_str[:equal_pos] + function_indentifier + tie_str[equal_pos:]
+                user_defined_ties.append(tie_str)
     user_defined_ties = ','.join(user_defined_ties)
     return user_defined_ties

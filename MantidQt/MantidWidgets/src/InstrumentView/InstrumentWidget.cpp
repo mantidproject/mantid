@@ -11,6 +11,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/Unit.h"
 #include "MantidQtMantidWidgets/InstrumentView/PanelsSurface.h"
 #include "MantidQtMantidWidgets/InstrumentView/Projection3D.h"
 #include "MantidQtMantidWidgets/InstrumentView/SimpleWidget.h"

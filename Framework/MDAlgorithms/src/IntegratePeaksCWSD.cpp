@@ -1,12 +1,13 @@
 #include "MantidMDAlgorithms/IntegratePeaksCWSD.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidGeometry/IDetector.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Peak.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -21,13 +22,14 @@ using namespace Mantid::Geometry;
 
 const signal_t THRESHOLD_SIGNAL = 0;
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 IntegratePeaksCWSD::IntegratePeaksCWSD()
-    : m_useSinglePeakCenterFmUser(false), m_doMergePeak(false) {}
+    : m_haveMultipleRun(false), m_useSinglePeakCenterFmUser(false),
+      m_peakRadius(), m_doMergePeak(false), m_normalizeByMonitor(false),
+      m_normalizeByTime(false), m_scaleFactor(0), m_maskDets(false),
+      m_haveInputPeakWS(false) {}
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksCWSD::init() {
