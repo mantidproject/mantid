@@ -63,9 +63,6 @@ public:
 protected:
   void throwIfWorkspaceInvalid() const;
 
-  HistogramData::Points getVectorHistogram() const;
-  HistogramData::BinEdges getVectorNonHistogram() const;
-
   API::MatrixWorkspace_sptr m_matrixWorkspace;
   size_t m_workspaceIndex;
   bool m_workspaceIndexIsSet;
