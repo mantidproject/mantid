@@ -14,73 +14,93 @@ import pearl_cycle_factory
 # ---- New Public API ---- #
 
 
-def focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False):
-    global g_debug
-    g_debug = debug
+def focus(number, startup_object, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True):
 
-    outwork = _pearl_run_focus(number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm)
+    outwork = _pearl_run_focus(number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm,
+                               user_params=startup_object)
 
     return outwork
 
 
-def PEARL_startup(usern="matt", thiscycle='11_1'):
-    global attenfile
-    global currentdatadir
-    global tofbinning
-    global tt_mode
-    global calibration_directory
-    global userdataprocessed
-
-    # ------ User modifiable ----- #
-    # TODO - Do we change this to be set from the outside i.e. params
-
-    # Directories
-    calibration_directory = "D:\\PEARL\\"  # TODO remove my hardcoded path and generic it
-    raw_data_directory = "D:\\PEARL\\"
-    live_data_directory = None  # Is this even used?
-
-    output_directory = "D:\\PEARL\\output\\"
-
-    # File names
-    atten_file_name = "PRL112_DC25_10MM_FF.OUT"
-    cal_file_name = "pearl_offset_11_2.cal"
-    group_file_name = "pearl_group_11_2_TT88.cal"
-    van_absorb_file_name = "van_spline_all_cycle_11_1.nxs"
-    van_file_name = "van_spline_all_cycle_11_1.nxs"
-
-    # Script settings
-    mode = "all"
-    tt_mode = "TT88"
-    tofbinning = "1500,-0.0006,19900"
-
-    # ---- Script setup ---- #
-    # Setup globals
-    calibration_directory = calibration_directory
-    currentdatadir = raw_data_directory
-    livedatadir = live_data_directory
-    userdataprocessed = output_directory + "Cycle_" + thiscycle + "\\" + usern + "\\"
+def create_group(calruns, startup_objects, ngroupfile, ngroup="bank1,bank2,bank3,bank4"):
+    _create_group(calruns=calruns, user_input=startup_objects, ngroup=ngroup, ngroupfile=ngroupfile)
 
 
-    # Gen full paths to files
-    attenfile = calibration_directory + atten_file_name  # Is this in calibration folder or raw data folder?
-    calfile = calibration_directory + cal_file_name
-    groupfile = calibration_directory + group_file_name
-    vabsorbfile = calibration_directory + van_absorb_file_name
-    vanfile = calibration_directory + van_file_name
+def create_calibration(startup_object, calibration_runs, offset_file_path, grouping_file_path):
+    _create_calibration(calruns=calibration_runs, noffsetfile=offset_file_path, groupfile=grouping_file_path,
+                        user_params=startup_object)
 
-    # TODO now would be a good time to check they all exist
 
-    PEARL_setdatadir(raw_data_directory)
+def create_vanadium(startup_object, vanadium_runs, empty_runs, output_file_name, tt_mode="TT88",
+                    num_of_spline_coefficients=60, do_absorp_corrections=True):
+    # TODO do we support different extensions?
+    _create_van(user_input=startup_object, van=vanadium_runs, empty=empty_runs, nvanfile=output_file_name,
+                nspline=num_of_spline_coefficients, absorb=do_absorp_corrections, ttmode=tt_mode)
 
-    print("Output cycle is set to", thiscycle)
-    print("Processed Data in : ", userdataprocessed)
-    print("Offset file set to :", calfile)
-    print("Grouping file set to :", groupfile)
-    print("Vanadium file is :", vanfile)
-    print("The default focusing mode is :", mode)
-    print("Time of flight binning set to :", tofbinning)
-    print()
-    return
+
+class PearlStart:
+
+    def __init__(self, user_name=None, calibration_dir=None, raw_data_dir=None, output_dir=None, debug=False) :
+        if user_name is None:
+            raise ValueError("A username must be provided in the startup script")
+
+        self.user_name          = user_name
+        self.calibration_dir    = calibration_dir
+        self.raw_data_dir       = raw_data_dir
+        self.output_dir         = output_dir
+
+        # This advanced option disables appending the current cycle to the
+        # path given for raw files.
+        self.disable_appending_cycle_to_raw_dir = False
+
+        # TODO - Tidy this away/document and check it
+        self.tof_binning = "1500,-0.0006,19900"
+
+        global g_debug
+        g_debug = debug
+
+        # ------ User modifiable ----- #
+        # TODO - Do we change this to be set from the outside i.e. params
+
+        # Directories
+        # calibration_directory = "D:\\PEARL\\"  # TODO remove my hardcoded path and generic it for everyone else
+        # raw_data_directory = "D:\\PEARL\\"
+        # live_data_directory = None  # TODO deal with this
+
+        # output_directory = "D:\\PEARL\\output\\"
+
+        # File names
+        atten_file_name = "PRL112_DC25_10MM_FF.OUT"
+        cal_file_name = "pearl_offset_11_2.cal"
+        group_file_name = "pearl_group_11_2_TT88.cal"
+        van_absorb_file_name = "van_spline_all_cycle_11_1.nxs"
+        van_file_name = "van_spline_all_cycle_11_1.nxs"
+
+        # Script settings
+        mode = "all"
+        tt_mode = "TT88"
+        tofbinning = "1500,-0.0006,19900"
+
+        # ---- Script setup ---- #
+        # Setup globals
+        # self.calibration_dir = calibration_directory
+        # self.raw_data_dir = raw_data_directory
+        # livedatadir = live_data_directory
+        # self.output_dir = output_directory + "Cycle_" + "temp" + "\\" + self.user_name + "\\" # TODO change this
+
+        # Gen full paths to files
+        # TODO Is this in calibration folder or raw data folder?
+        # TODO all of these files are overrides and should be dealt as such
+        self.atten_file_path = self.calibration_dir + atten_file_name
+        calfile = self.calibration_dir + cal_file_name
+        groupfile = self.calibration_dir + group_file_name
+        vabsorbfile = self.calibration_dir + van_absorb_file_name
+        vanfile = self.calibration_dir + van_file_name
+
+        # TODO now would be a good time to check they all exist
+
+        #PEARL_setdatadir(raw_data_directory)
+
 
 
 def PEARL_gettofrange():
@@ -106,56 +126,53 @@ def PEARL_getmonitorspectrum(runno):
     return mspectra
 
 
-def PEARL_getfilename(run_number, ext):
-    global livedatadir
+def _get_file_name(run_number, ext):
 
-    if (ext[0] != 's'):
-        data_dir = PEARL_datadir()
-    else:
-        data_dir = livedatadir
     digit = len(str(run_number))
 
     if (run_number < 71009):
-        numdigits = 5
+        number_of_digits = 5
         #
         # filename=data_dir+"PRL"
         #
         filename = "PRL"
     else:
-        numdigits = 8
+        number_of_digits = 8
         #
         # filename=data_dir+"PEARL"
         #
         filename = "PEARL"
 
-    for i in range(0, numdigits - digit):
-        filename = filename + "0"
+    for i in range(0, number_of_digits - digit):
+        filename += "0"
 
     filename += str(run_number) + "." + ext
 
-    full_filename = data_dir + filename
-
-    if not os.path.exists(full_filename):
-        raise IOError("File: " + full_filename + " not found.")
-
-    return full_filename
+    return filename
 
 
-def PearlLoad(files, ext, outname):
+def _load_raw_files(files, ext, outname, input_dir):
+    # TODO low priority tidy this
     if isinstance(files, int):
-        infile = PEARL_getfilename(files, ext)
+        file_name = _get_file_name(files, ext)
+        directory = input_dir
+        if ext[0] == 's':
+            # TODO deal with liveData in higher class
+            raise NotImplementedError()
+
+        infile = directory + file_name
+
         print("loading ", infile, "into ", outname)
-        print("--g_debugGING: ", mantid.LoadRaw.__code__.co_filename)
         mantid.LoadRaw(Filename=infile, OutputWorkspace=outname, LoadLogFiles="0")
     else:
         loop = 0
         num = files.split("_")
         frange = list(range(int(num[0]), int(num[1]) + 1))
         for i in frange:
-            infile = PEARL_getfilename(i, ext)
-            print("loading ", infile)
+            file_name = _get_file_name(i, ext)
+            file_path = input_dir + file_name
             outwork = "run" + str(i)
-            mantid.LoadRaw(Filename=infile, OutputWorkspace=outwork, LoadLogFiles="0")
+            mantid.LoadRaw(Filename=file_path, OutputWorkspace=outwork, LoadLogFiles="0")
             loop = loop + 1
             if loop == 2:
                 firstwk = "run" + str(i - 1)
@@ -170,9 +187,10 @@ def PearlLoad(files, ext, outname):
     return
 
 
-def PearlLoadMon(files, ext, outname):
+def PearlLoadMon(files, ext, outname, input_dir):
     if isinstance(files, int):
-        infile = PEARL_getfilename(files, ext)
+        file_name = _get_file_name(files, ext)
+        infile = input_dir + file_name
         mspectra = PEARL_getmonitorspectrum(files)
         print("loading ", infile, "into ", outname)
         mantid.LoadRaw(Filename=infile, OutputWorkspace=outname, SpectrumMin=mspectra, SpectrumMax=mspectra,
@@ -183,8 +201,8 @@ def PearlLoadMon(files, ext, outname):
         frange = list(range(int(num[0]), int(num[1]) + 1))
         mspectra = PEARL_getmonitorspectrum(int(num[0]))
         for i in frange:
-            infile = PEARL_getfilename(i, ext)
-            print("loading ", infile)
+            file_name = _get_file_name(i, ext)
+            infile = input_dir + file_name
             outwork = "mon" + str(i)
             mantid.LoadRaw(Filename=infile, OutputWorkspace=outwork, SpectrumMin=mspectra, SpectrumMax=mspectra,
                     LoadLogFiles="0")
@@ -202,9 +220,9 @@ def PearlLoadMon(files, ext, outname):
     return
 
 
-def PEARL_getmonitor(number, ext, spline_terms=20):
+def PEARL_getmonitor(number, ext, input_dir, spline_terms=20):
     works = "monitor" + str(number)
-    PearlLoadMon(number, ext, works)
+    PearlLoadMon(number, ext, works, input_dir=input_dir)
     mantid.ConvertUnits(InputWorkspace=works, OutputWorkspace=works, Target="Wavelength")
     lmin, lmax = _get_lambda_range("PEARL")
     mantid.CropWorkspace(InputWorkspace=works, OutputWorkspace=works, XMin=lmin, XMax=lmax)
@@ -223,45 +241,54 @@ def PEARL_getmonitor(number, ext, spline_terms=20):
     return works
 
 
-def PEARL_read(number, ext, outname):
-    PearlLoad(number, ext, outname)
+def _read_pearl_ws(number, ext, outname, raw_data_dir, run_cycle):
+    input_dir = _generate_cycle_dir(raw_data_dir, run_cycle)
+    _load_raw_files(number, ext, outname, input_dir)
     mantid.ConvertUnits(InputWorkspace=outname, OutputWorkspace=outname, Target="Wavelength")
     # lmin,lmax=WISH_getlambdarange()
     # CropWorkspace(output,output,XMin=lmin,XMax=lmax)
-    monitor = PEARL_getmonitor(number, ext, spline_terms=20)
+    monitor = PEARL_getmonitor(number, ext, spline_terms=20, input_dir=input_dir)
     # NormaliseToMonitor(InputWorkspace=outname,OutputWorkspace=outname,MonitorWorkspace=monitor)
     mantid.NormaliseToMonitor(InputWorkspace=outname, OutputWorkspace=outname, MonitorWorkspace=monitor,
-                       IntegrationRangeMin=0.6, IntegrationRangeMax=5.0)
+                              IntegrationRangeMin=0.6, IntegrationRangeMax=5.0)
     mantid.ConvertUnits(InputWorkspace=outname, OutputWorkspace=outname, Target="TOF")
     mantid.mtd.remove(monitor)
     # ReplaceSpecialValues(output,output,NaNValue=0.0,NaNError=0.0,InfinityValue=0.0,InfinityError=0.0)
     return
 
 
-def PEARL_align(work, focus):
-    _get_input_file_paths()
-    mantid.AlignDetectors(InputWorkspace=work, OutputWorkspace=work, CalibrationFile=calfile)
-    # mtd.remove(work)
-    return focus
+def _generate_cycle_dir(raw_data_dir, run_cycle):
+    # Append current cycle to raw data directory
+    input_dir = raw_data_dir
+    if not input_dir.endswith('\\') or not input_dir.endswith('/'):
+        input_dir += ''  # TODO does this work on Windows and Unix
+    input_dir += run_cycle + '\\'
+    return input_dir
 
 
-def _pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True):
+def _pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, user_params=None):
+    """
+     @type user_params: PearlStart
+    """
+    if user_params is None:
+        raise ValueError("Instrument start object not passed.")
 
     cycle_information = _calculate_current_cycle(number)
 
     alg_range, save_range = _setup_focus_for_inst(cycle_information["instrument_version"])
 
-    input_file_paths = _get_input_file_paths(in_cycle=cycle_information["cycle"], in_tt_mode=ttmode,
-                                             in_pearl_file_dir=calibration_directory)
+    input_file_paths = _get_calib_files_full_paths(in_cycle=cycle_information["cycle"], in_tt_mode=ttmode,
+                                                   in_pearl_file_dir=user_params.calibration_dir)
 
-    output_file_names = _generate_out_file_names(number)
+    output_file_names = _generate_out_file_names(number, user_params.output_dir)
 
     work = "work"
     focus = "focus"
 
-    PEARL_read(number, ext, work)
+    _read_pearl_ws(number=number, ext=ext, outname=work, raw_data_dir=user_params.raw_data_dir,
+                   run_cycle=cycle_information["cycle"])
 
-    mantid.Rebin(InputWorkspace=work, OutputWorkspace=work, Params=tofbinning)
+    mantid.Rebin(InputWorkspace=work, OutputWorkspace=work, Params=user_params.tof_binning)
 
     mantid.AlignDetectors(InputWorkspace=work, OutputWorkspace=work,
                           CalibrationFile=input_file_paths["calibration"])
@@ -280,16 +307,16 @@ def _pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True
         if (van_norm):
             mantid.LoadNexus(Filename=input_file_paths["vanadium"], OutputWorkspace=van, EntryNumber=i + 1)
             mantid.ExtractSingleSpectrum(InputWorkspace=focus, OutputWorkspace=rdata, WorkspaceIndex=i)
-            mantid.Rebin(InputWorkspace=van, OutputWorkspace=van, Params=tofbinning)
+            mantid.Rebin(InputWorkspace=van, OutputWorkspace=van, Params=user_params.tof_binning)
             mantid.ConvertUnits(InputWorkspace=rdata, OutputWorkspace=rdata, Target="TOF")
-            mantid.Rebin(InputWorkspace=rdata, OutputWorkspace=rdata, Params=tofbinning)
+            mantid.Rebin(InputWorkspace=rdata, OutputWorkspace=rdata, Params=user_params.tof_binning)
             mantid.Divide(LHSWorkspace=rdata, RHSWorkspace=van, OutputWorkspace=output)
             mantid.CropWorkspace(InputWorkspace=output, OutputWorkspace=output, XMin=0.1)
             mantid.Scale(InputWorkspace=output, OutputWorkspace=output, Factor=10)
         else:
             mantid.ExtractSingleSpectrum(InputWorkspace=focus, OutputWorkspace=rdata, WorkspaceIndex=i)
             mantid.ConvertUnits(InputWorkspace=rdata, OutputWorkspace=rdata, Target="TOF")
-            mantid.Rebin(InputWorkspace=rdata, OutputWorkspace=output, Params=tofbinning)
+            mantid.Rebin(InputWorkspace=rdata, OutputWorkspace=output, Params=user_params.tof_binning)
             mantid.CropWorkspace(InputWorkspace=output, OutputWorkspace=output, XMin=0.1)
 
     _remove_inter_ws(focus)
@@ -414,7 +441,7 @@ def _pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True
             mantid.ConvertUnits(InputWorkspace=name, OutputWorkspace=name, Target="dSpacing")
             mantid.CloneWorkspace(InputWorkspace=name, OutputWorkspace=no_att)
 
-            PEARL_atten(name, name)
+            PEARL_atten(name, name, user_params.atten_file_path)
 
             mantid.ConvertUnits(InputWorkspace=name, OutputWorkspace=name, Target="TOF")
 
@@ -472,13 +499,9 @@ def _pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True
     return output_file_names["output_name"]
 
 
-def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
-                    nvanfile="P:\Mantid\\Calibration\\van_spline_all_cycle_11_1.nxs", nspline=60, absorb=True,
-                    debug=False):
+def _create_van(user_input, van, empty, nvanfile, ext="raw", fmode="all", ttmode="TT88", nspline=60, absorb=True):
     global mode  # TODO used in PEARL_getmonitorspectrum
     global tt_mode
-    global g_debug
-    g_debug = debug
     mode = fmode
     tt_mode = ttmode
 
@@ -489,13 +512,15 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
 
     cycle_information = _calculate_current_cycle(van)
 
-    full_file_paths = _get_input_file_paths(in_cycle=cycle_information["cycle"], in_tt_mode=ttmode,
-                                            in_pearl_file_dir=calibration_directory)
+    full_file_paths = _get_calib_files_full_paths(in_cycle=cycle_information["cycle"], in_tt_mode=ttmode,
+                                                  in_pearl_file_dir=user_input.calibration_dir)
     wvan = "wvan"
     wempty = "wempty"
     print("Creating ", nvanfile)
-    PEARL_read(van, ext, wvan)
-    PEARL_read(empty, ext, wempty)
+    _read_pearl_ws(number=van, ext=ext, outname=wvan, raw_data_dir=user_input.raw_data_dir,
+                   run_cycle=cycle_information["cycle"])
+    _read_pearl_ws(number=empty, ext=ext, outname=wempty, raw_data_dir=user_input.raw_data_dir,
+                   run_cycle=cycle_information["cycle"])
     mantid.Minus(LHSWorkspace=wvan, RHSWorkspace=wempty, OutputWorkspace=wvan)
     print("read van and empty")
 
@@ -689,13 +714,13 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     return
 
 
-def PEARL_createcal(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal",
-                    groupfile="P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"):
+def _create_calibration(calruns, noffsetfile, groupfile, user_params):
     cycle_information = _calculate_current_cycle(calruns)
 
 
     wcal = "cal_raw"
-    PEARL_read(calruns, "raw", wcal)
+    _read_pearl_ws(number=calruns, ext="raw", outname=wcal, raw_data_dir=user_params.raw_data_dir,
+                   run_cycle=cycle_information["cycle"])
 
     if cycle_information["instrument_version"] == "new" or cycle_information["instrument_version"] == "new2":
         mantid.Rebin(InputWorkspace=wcal, OutputWorkspace=wcal, Params="100,-0.0006,19950")
@@ -749,16 +774,23 @@ def PEARL_createcal_Si(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal"):
     mantid.GetDetectorOffsets(InputWorkspace="crosscor", OutputWorkspace="OutputOffsets", Step=0.002,
                        DReference=1.920127251, XMin=-200, XMax=200, GroupingFileName=noffsetfile)
     mantid.AlignDetectors(InputWorkspace=wcal, OutputWorkspace="cal_aligned", CalibrationFile=noffsetfile)
-    mantid.DiffractionFocussing(InputWorkspace="cal_aligned", OutputWorkspace="cal_grouped", GroupingFileName=groupfile)
+    # TODO fix this
+    #mantid.DiffractionFocussing(InputWorkspace="cal_aligned", OutputWorkspace="cal_grouped",
+    # GroupingFileName=groupfile)
 
     return
 
 
-def PEARL_creategroup(calruns, ngroupfile="C:\PEARL\\test_cal_group_11_1.cal", ngroup="bank1,bank2,bank3,bank4"):
-    _calculate_current_cycle(calruns)
+def _create_group(calruns, user_input=None, ngroupfile="C:\PEARL\\test_cal_group_11_1.cal",
+                  ngroup="bank1,bank2,bank3,bank4"):
+
+    if user_input is None:
+        raise ValueError("Instrument start object not passed.")
+
+    cycle_information = _calculate_current_cycle(calruns)
 
     wcal = "cal_raw"
-    PEARL_read(calruns, "raw", wcal)
+    _read_pearl_ws(calruns, "raw", wcal, user_input.raw_data_dir, cycle_information["cycle"])
     mantid.ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
     mantid.CreateCalFileByNames(InstrumentWorkspace=wcal, GroupingFileName=ngroupfile, GroupNames=ngroup)
     return
@@ -773,7 +805,7 @@ def PEARL_sumspec(number, ext, mintof=500, maxtof=1000, minspec=0, maxspec=943):
     else:
         maxspec = 1063
 
-    PearlLoad(number, ext, "work")
+    _load_raw_files(number, ext, "work")
     mantid.NormaliseByCurrent(InputWorkspace="work", OutputWorkspace="work")
     mantid.Integration(InputWorkspace="work", OutputWorkspace="integral", RangeLower=mintof, RangeUpper=maxtof,
                 StartWorkspaceIndex=minspec, EndWorkspaceIndex=maxspec)
@@ -791,9 +823,10 @@ def PEARL_sumspec_lam(number, ext, minlam=0.1, maxlam=4, minspec=8, maxspec=943)
     else:
         maxspec = 1063
 
-    PearlLoad(number, ext, "work")
+    _load_raw_files(number, ext, "work")
     mantid.NormaliseByCurrent(InputWorkspace="work", OutputWorkspace="work")
-    mantid.AlignDetectors(InputWorkspace="work", OutputWorkspace="work", CalibrationFile=calfile)
+    # TODO fix this
+    #mantid.AlignDetectors(InputWorkspace="work", OutputWorkspace="work", CalibrationFile=calfile)
     mantid.ConvertUnits(InputWorkspace="worl", OutputWorkspace="work", Target="Wavelength")
     mantid.Integration(InputWorkspace="work", OutputWorkspace="integral", RangeLower=minlam, RangeUpper=maxlam,
                 StartWorkspaceIndex=minspec, EndWorkspaceIndex=maxspec)
@@ -802,10 +835,9 @@ def PEARL_sumspec_lam(number, ext, minlam=0.1, maxlam=4, minspec=8, maxspec=943)
     return
 
 
-def PEARL_atten(work, outwork):
+def PEARL_atten(work, outwork, attenuation_file_path):
     # attenfile="P:\Mantid\\Attentuation\\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"
-    print("Correct for attenuation using", attenfile)
-    wc_atten = mantid.PearlMCAbsorption(attenfile)
+    wc_atten = mantid.PearlMCAbsorption(attenuation_file_path)
     mantid.ConvertToHistogram(InputWorkspace="wc_atten", OutputWorkspace="wc_atten")
     mantid.RebinToWorkspace(WorkspaceToRebin="wc_atten", WorkspaceToMatch=work, OutputWorkspace="wc_atten")
     mantid.Divide(LHSWorkspace=work, RHSWorkspace="wc_atten", OutputWorkspace=outwork)
@@ -815,8 +847,8 @@ def PEARL_atten(work, outwork):
 
 def PEARL_add(a_name, a_spectra, a_outname, atten=True):
     w_add_out = a_outname
-    gssfile = userdataprocessed + a_outname + ".gss"
-    nxsfile = userdataprocessed + a_outname + ".nxs"
+    gssfile = output_directory + a_outname + ".gss"
+    nxsfile = output_directory + a_outname + ".nxs"
 
     loop = 0
     for i in a_spectra[:]:
@@ -848,16 +880,16 @@ def _get_lambda_range(instrument_name):
 
 
 def _calculate_current_cycle(number):
-    cycle, instrument_version, datadir = pearl_cycle_factory.get_cycle_dir(number, currentdatadir)
+    cycle, instrument_version, _unused_data_dir = pearl_cycle_factory.get_cycle_dir(number, "")  # TODO remove the
+    # blank param and wrap
 
     cycle_information = {'cycle': cycle,
-                         'instrument_version':  instrument_version,
-                         'data_directory': datadir}  # TODO change data_dir when we know what it is
+                         'instrument_version':  instrument_version}
 
     return cycle_information
 
 
-def _get_input_file_paths(in_cycle, in_tt_mode, in_pearl_file_dir):
+def _get_calib_files_full_paths(in_cycle, in_tt_mode, in_pearl_file_dir):
 
     calibration_file, grouping_file, van_absorb, van_file, instrument_ver = \
         pearl_calib_factory.get_calibration_dir(in_cycle, in_tt_mode, in_pearl_file_dir)
@@ -871,19 +903,19 @@ def _get_input_file_paths(in_cycle, in_tt_mode, in_pearl_file_dir):
     return calibration_details
 
 
-def _generate_out_file_names(number):
+def _generate_out_file_names(number, output_directory):
 
     if isinstance(number, int):
-        outfile = userdataprocessed + "PRL" + str(number) + ".nxs"
-        gssfile = userdataprocessed + "PRL" + str(number) + ".gss"
-        tof_xye_file = userdataprocessed + "PRL" + str(number) + "_tof_xye.dat"
-        d_xye_file = userdataprocessed + "PRL" + str(number) + "_d_xye.dat"
+        outfile = output_directory + "PRL" + str(number) + ".nxs"
+        gssfile = output_directory + "PRL" + str(number) + ".gss"
+        tof_xye_file = output_directory + "PRL" + str(number) + "_tof_xye.dat"
+        d_xye_file = output_directory + "PRL" + str(number) + "_d_xye.dat"
         outwork = "PRL" + str(number)
     else:
-        outfile = userdataprocessed + "PRL" + number + ".nxs"
-        gssfile = userdataprocessed + "PRL" + number + ".gss"
-        tof_xye_file = userdataprocessed + "PRL" + number + "_tof_xye.dat"
-        d_xye_file = userdataprocessed + "PRL" + number + "_d_xye.dat"
+        outfile = output_directory + "PRL" + number + ".nxs"
+        gssfile = output_directory + "PRL" + number + ".gss"
+        tof_xye_file = output_directory + "PRL" + number + "_tof_xye.dat"
+        d_xye_file = output_directory + "PRL" + number + "_d_xye.dat"
         outwork = "PRL" + number
 
     out_file_names = {"nxs_filename": outfile,
@@ -911,6 +943,13 @@ def _setup_focus_for_inst(inst_vers):
         raise ValueError("Instrument version unknown")
 
     return alg_range, save_range
+
+
+def _align_workspace(work, focus):
+    # TODO  - Do we need this or can we just push people to calling align detectors bare
+    _get_calib_files_full_paths()
+    #mantid.AlignDetectors(InputWorkspace=work, OutputWorkspace=work, CalibrationFile=calfile)
+    return focus
 
 
 def _remove_inter_ws(ws_to_remove):
@@ -959,29 +998,29 @@ def pearl_set_userdataoutput_dir(directory="P:\\users\\MantidOutput\\"):
     Sets the output directory for the script
         directory: The location to output data to. A folder with the current cycle will be created in this folder
     """
-    global userdataprocessed
-    userdataprocessed = directory
+    global g_output_directory
+    g_output_directory = directory
     print("Set userdataprocessed directory to ", directory)
     return
 
 
 def PEARL_setdatadir(directory="C:\PEARL\RAW\\"):
-    global raw_data_directory
-    raw_data_directory = directory
+    global g_raw_data_directory
+    g_raw_data_directory = directory
     print("Set pearl_datadir directory to ", directory)
     return
 
 
 # sets the atten file's directory
 def PEARL_setattenfile(new_atten="P:\Mantid\\Attentuation\\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"):
-    global attenfile
-    attenfile = new_atten
-    print("Set attenuation file to ", attenfile)
+    global g_attenfile
+    g_attenfile = new_atten
+    print("Set attenuation file to ", g_attenfile)
     return
 
 
 def PEARL_datadir():
-    return raw_data_directory
+    raise NotImplementedError()
 
 # ----   Old APIs   ----#
 
@@ -989,3 +1028,34 @@ def PEARL_datadir():
 def PEARL_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False):
     return focus(number=number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm, debug=debug)
 
+
+def PEARL_align(work, focus):
+    # TODO focus doesn't seem to do anything (just returns) is this API used?
+    _align_workspace(work, focus)
+
+
+def PEARL_read(number, ext, outname):
+    raise NotImplementedError()
+    #  _read_pearl_ws(number=number, ext=ext, outname=outname)
+
+
+def PEARL_creategroup(calruns, ngroupfile="C:\PEARL\\test_cal_group_11_1.cal", ngroup="bank1,bank2,bank3,bank4"):
+    raise NotImplementedError()
+    #_create_group(calruns=calruns)
+
+
+def PEARL_getfilename(run_number, ext):
+    raise NotImplementedError()
+
+def PEARL_createcal(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal",
+                    groupfile="P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"):
+    raise NotImplementedError()
+
+def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
+                    nvanfile="P:\Mantid\\Calibration\\van_spline_all_cycle_11_1.nxs", nspline=60, absorb=True,
+                    debug=False):
+    raise NotImplementedError()
+
+def PEARL_startup(usern, thiscycle):
+    # TODO turn this into a compatible wrapper for the old API
+    raise NotImplementedError()

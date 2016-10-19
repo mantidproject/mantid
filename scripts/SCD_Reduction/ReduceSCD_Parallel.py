@@ -85,7 +85,7 @@ config_files = sys.argv[1:]
 params_dictionary = ReduceDictionary.LoadDictionary( *config_files )
 
 exp_name              = params_dictionary[ "exp_name" ]
-output_directory      = params_dictionary[ "output_directory" ]
+g_output_directory      = params_dictionary["output_directory"]
 output_nexus          = params_dictionary.get( "output_nexus", False)
 reduce_one_run_script = params_dictionary[ "reduce_one_run_script" ]
 slurm_queue_name      = params_dictionary[ "slurm_queue_name" ]
@@ -123,7 +123,7 @@ for r_num in run_nums:
     procList.append( ProcessThread() )
     cmd = '%s %s %s %s' % (python, reduce_one_run_script, " ".join(config_files), str(r_num))
     if slurm_queue_name is not None:
-        console_file = output_directory + "/" + str(r_num) + "_output.txt"
+        console_file = g_output_directory + "/" + str(r_num) + "_output.txt"
         cmd =  'srun -p ' + slurm_queue_name + \
             ' --cpus-per-task=3 -J ReduceSCD_Parallel.py -o ' + console_file + ' ' + cmd
     procList[index].setCommand( cmd )
@@ -156,7 +156,7 @@ print   "***********************************************************************
 # First combine all of the integrated files, by reading the separate files and
 # appending them to a combined output file.
 #
-niggli_name = output_directory + "/" + exp_name + "_Niggli"
+niggli_name = g_output_directory + "/" + exp_name + "_Niggli"
 if output_nexus:
     niggli_integrate_file = niggli_name + ".nxs"
 else:
@@ -190,10 +190,10 @@ if output_nexus:
 if not use_cylindrical_integration:
     for r_num in run_nums:
         if output_nexus:
-            one_run_file = output_directory + '/' + str(r_num) + '_Niggli.nxs'
+            one_run_file = g_output_directory + '/' + str(r_num) + '_Niggli.nxs'
             peaks_ws = Load( Filename=one_run_file )
         else:
-            one_run_file = output_directory + '/' + str(r_num) + '_Niggli.integrate'
+            one_run_file = g_output_directory + '/' + str(r_num) + '_Niggli.integrate'
             peaks_ws = LoadIsawPeaks( Filename=one_run_file )
         if first_time:
             if UseFirstLattice and not read_UB:
@@ -265,7 +265,7 @@ if not use_cylindrical_integration:
 #
 if not use_cylindrical_integration:
     if (cell_type is not None) and (centering is not None) :
-        conv_name = output_directory + "/" + exp_name + "_" + cell_type + "_" + centering
+        conv_name = g_output_directory + "/" + exp_name + "_" + cell_type + "_" + centering
         if output_nexus:
             conventional_integrate_file = conv_name + ".nxs"
         else:
@@ -284,12 +284,12 @@ if use_cylindrical_integration:
     if (cell_type is not None) or (centering is not None):
         print "WARNING: Cylindrical profiles are NOT transformed!!!"
   # Combine *.profiles files
-    filename = output_directory + '/' + exp_name + '.profiles'
+    filename = g_output_directory + '/' + exp_name + '.profiles'
     outputFile = open( filename, 'w' )
 
   # Read and write the first run profile file with header.
     r_num = run_nums[0]
-    filename = output_directory + '/' + instrument_name + '_' + r_num + '.profiles'
+    filename = g_output_directory + '/' + instrument_name + '_' + r_num + '.profiles'
     inputFile = open( filename, 'r' )
     file_all_lines = inputFile.read()
     outputFile.write(file_all_lines)
@@ -298,7 +298,7 @@ if use_cylindrical_integration:
 
   # Read and write the rest of the runs without the header.
     for r_num in run_nums[1:]:
-        filename = output_directory + '/' + instrument_name + '_' + r_num + '.profiles'
+        filename = g_output_directory + '/' + instrument_name + '_' + r_num + '.profiles'
         inputFile = open(filename, 'r')
         for line in inputFile:
             if line[0] == '0':
@@ -310,7 +310,7 @@ if use_cylindrical_integration:
         os.remove(filename)
 
   # Remove *.integrate file(s) ONLY USED FOR CYLINDRICAL INTEGRATION!
-    for integrateFile in os.listdir(output_directory):
+    for integrateFile in os.listdir(g_output_directory):
         if integrateFile.endswith('.integrate'):
             os.remove(integrateFile)
 

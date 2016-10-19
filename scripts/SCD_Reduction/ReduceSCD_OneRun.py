@@ -70,7 +70,7 @@ instrument_name           = params_dictionary[ "instrument_name" ]
 calibration_file_1        = params_dictionary.get('calibration_file_1', None)
 calibration_file_2        = params_dictionary.get('calibration_file_2', None)
 data_directory            = params_dictionary[ "data_directory" ]
-output_directory          = params_dictionary[ "output_directory" ]
+g_output_directory          = params_dictionary["output_directory"]
 output_nexus              = params_dictionary.get( "output_nexus", False)
 min_tof                   = params_dictionary[ "min_tof" ]
 max_tof                   = params_dictionary[ "max_tof" ]
@@ -144,11 +144,11 @@ print "\nProcessing File: " + full_name + " ......\n"
 #
 # Name the files to write for this run
 #
-run_niggli_matrix_file = output_directory + "/" + run + "_Niggli.mat"
+run_niggli_matrix_file = g_output_directory + "/" + run + "_Niggli.mat"
 if output_nexus:
-    run_niggli_integrate_file = output_directory + "/" + run + "_Niggli.nxs"
+    run_niggli_integrate_file = g_output_directory + "/" + run + "_Niggli.nxs"
 else:
-    run_niggli_integrate_file = output_directory + "/" + run + "_Niggli.integrate"
+    run_niggli_integrate_file = g_output_directory + "/" + run + "_Niggli.integrate"
 
 #
 # Load the run data and find the total monitor counts
@@ -315,7 +315,7 @@ elif use_ellipse_integration:
                                    BackgroundInnerSize = bkg_inner_radius )
 
 elif use_cylindrical_integration:
-    profiles_filename = output_directory + "/" + instrument_name + '_' + run + '.profiles'
+    profiles_filename = g_output_directory + "/" + instrument_name + '_' + run + '.profiles'
     MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",
                         dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
                         LorentzCorrection='0', MinValues=minVals, MaxValues=maxVals,
@@ -350,14 +350,14 @@ if use_cylindrical_integration:
 #
 else:
     if (cell_type is not None) and (centering is not None) :
-        run_conventional_matrix_file = output_directory + "/" + run + "_" +        \
-                                   cell_type + "_" + centering + ".mat"
+        run_conventional_matrix_file = g_output_directory + "/" + run + "_" + \
+                                       cell_type + "_" + centering + ".mat"
         if output_nexus:
-            run_conventional_integrate_file = output_directory + "/" + run + "_" + \
-                                      cell_type + "_" + centering + ".nxs"
+            run_conventional_integrate_file = g_output_directory + "/" + run + "_" + \
+                                              cell_type + "_" + centering + ".nxs"
         else:
-            run_conventional_integrate_file = output_directory + "/" + run + "_" + \
-                                      cell_type + "_" + centering + ".integrate"
+            run_conventional_integrate_file = g_output_directory + "/" + run + "_" + \
+                                              cell_type + "_" + centering + ".integrate"
         SelectCellOfType( PeaksWorkspace=peaks_ws,
                           CellType=cell_type, Centering=centering,
                           AllowPermutations=allow_perm,
