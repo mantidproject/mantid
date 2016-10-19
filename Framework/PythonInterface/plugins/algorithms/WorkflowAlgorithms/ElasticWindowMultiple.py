@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
-
+from IndirectCommon import getInstrRun
 
 def _normalize_to_lowest_temp(elt_ws_name):
     """
@@ -95,7 +95,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         return issues
 
     def PyExec(self):
-        from IndirectCommon import getInstrRun
+
 
         # Do setup
         self._setup()
