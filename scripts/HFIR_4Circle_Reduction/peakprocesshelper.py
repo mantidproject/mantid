@@ -1,10 +1,6 @@
 #pylint: disable=W0403,R0902
-from fourcircle_utility import *
-
-import sys
 import numpy
-
-sys.path.append('/Users/wzz/MantidBuild/debug/bin/')
+from fourcircle_utility import *
 from mantid.api import AnalysisDataService
 from mantid.kernel import V3D
 
