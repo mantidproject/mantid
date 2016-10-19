@@ -131,6 +131,8 @@ private:
   int m_ptNumber4Log;
   /// IDF file name to override Mantid's
   std::string m_idfFileName;
+  /// User specified wave length
+  double m_userSpecifiedWaveLength;
 };
 
 } // namespace DataHandling
