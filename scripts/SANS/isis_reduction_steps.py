@@ -1753,15 +1753,18 @@ class DarkRunSubtraction(object):
             run_number.append(setting.run_number)
 
         # Get the indices with settings which correspond to the individual settings
-        get_indices = lambda time_flag, mon_flag : [i for i, val in enumerate(use_time)
-                                                    if use_time[i] == time_flag and use_mon[i] == mon_flag]
+        def get_indices(time_flag, mon_flag):
+            return [i for i, val in enumerate(use_time) if use_time[i] == time_flag and use_mon[i] == mon_flag]
+
         indices_time_detector = get_indices(True, False)
         indices_time_monitor = get_indices(True, True)
         indices_uamp_detector = get_indices(False, False)
         indices_uamp_monitor = get_indices(False, True)
 
         # Check that for each of these settings we only have one run number specified, else raise an error
-        has_max_one_run_number = lambda indices : len(set([run_number[index] for index in indices])) < 2
+        def has_max_one_run_number(indices):
+            return len(set([run_number[index] for index in indices])) < 2
+
         if not has_max_one_run_number(indices_time_detector) or \
            not has_max_one_run_number(indices_time_monitor) or \
            not has_max_one_run_number(indices_uamp_detector) or \
@@ -1843,7 +1846,9 @@ class DarkRunSubtraction(object):
                     monitor_mon_numbers.append(mon_numbers[index])
 
         # Check if the mean value is identical for all entries
-        are_all_same = lambda a_list : all([a_list[0] == a_list[i] for i in range(0, len(a_list))])
+        def are_all_same(a_list):
+            return all([a_list[0] == a_list[i] for i in range(0, len(a_list))])
+
         if len(monitor_mean) > 0:
             if not are_all_same(monitor_mean):
                 raise RuntimeError("DarkRunSubtraction: If several monitors are specified for a certain type "
