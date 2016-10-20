@@ -558,21 +558,33 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         """
         self.log().notice('Loading vanadium run #{0}'.format(self._vanadium_file))
 
+        if self._mirror_sense == 14:
+            # call IndirectILLReduction for vanadium run with unmirror 2 and 3 to get left and right
 
-        # call IndirectILLReduction for vanadium run with unmirror 2 and 3 to get left and right
+            left_vanadium = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
+                                                 Reflection=self._reflection, SumRuns=True, UnmirrorOption=2)
 
-        left_vanadium = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
-                                             Reflection=self._reflection, SumRuns=True, UnmirrorOption=2)
+            right_vanadium = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
+                                                  Reflection=self._reflection, SumRuns=True, UnmirrorOption=3)
 
-        right_vanadium = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
-                                              Reflection=self._reflection, SumRuns=True, UnmirrorOption=3)
+            if not left_vanadium or not right_vanadium:
+                self.log().error('Failed to load vanadium run #{0}. Aborting.'.format(self._vanadium_file))
+            else:
+                # note, that run number will be prepended, so need to rename
+                RenameWorkspace(left_vanadium.getItem(0).getName(),'left_van')
+                RenameWorkspace(right_vanadium.getItem(0).getName(), 'right_van')
 
-        if not left_vanadium or not right_vanadium:
-            self.log().error('Failed to load vanadium run #{0}. Aborting.'.format(self._vanadium_file))
-        else:
-            # note, that run number will be prepended, so need to rename
-            RenameWorkspace(left_vanadium.getItem(0).getName(),'left_van')
-            RenameWorkspace(right_vanadium.getItem(0).getName(), 'right_van')
+        elif self._mirror_sense == 16:
+            # call IndirectILLReduction for vanadium run with unmirror 0
+
+            one_vanadium = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
+                                                Reflection=self._reflection, SumRuns=True, UnmirrorOption=0)
+
+            if not one_vanadium:
+                self.log().error('Failed to load vanadium run #{0}. Aborting.'.format(self._vanadium_file))
+            else:
+                RenameWorkspace(one_vanadium.getItem(0).getName(), 'center_van')
+
 
     def _load_background_run(self):
         """
@@ -634,14 +646,14 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # transfer the x and y axes dependent on mirror sense and unmirror option
         xmin, xmax, xmax_left, xmin_right = self._energy_and_theta_transfer(red, monitor, left, right)
 
-        # Mask dead middle bins out of final energy or monitor range
-        # for two-wing data with unmirror 0
+        # Mask dead middle bins for two-wing data with unmirror 0
         if self._mirror_sense == 14 and self._unmirror_option == 0:
             # Reload X-values (now in meV)
             x = mtd[red].readX(0)
             if xmin_right < x[-1] and xmax_left < x[-1]:
                 # Mask mid bins
-                self.log().debug('Mask red ws bins between {0}, {1}'.format(xmax_left, int(x[-1] / 2) + xmin_right - 1))
+                self.log().debug('Mask red ws bins between {0}, {1}'.
+                                 format(xmax_left, int(x[-1] / 2) + xmin_right - 1))
                 MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[xmax_left],
                          XMax=x[int(x[-1] / 2) + xmin_right])
 
@@ -667,11 +679,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # Initialisation
         xmin = 0
         xmax = size
-        xmax_left = 0
-        xmin_right = size
+        xmax_left = size
+        xmin_right = 0
 
         if self._mirror_sense == 14:
-
+            # two-wing data
             # Get the left and right wings
             extract_workspace(red, left, 0, int(size / 2))
             extract_workspace(red, right, int(size / 2), size)
@@ -698,11 +710,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
             ConvertSpectrumAxis(InputWorkspace=left, OutputWorkspace=left, Target='Theta', EMode='Indirect')
             ConvertSpectrumAxis(InputWorkspace=right, OutputWorkspace=right, Target='Theta', EMode='Indirect')
+            ConvertSpectrumAxis(InputWorkspace=red, OutputWorkspace=red, Target='Theta', EMode='Indirect')
 
-        ConvertSpectrumAxis(InputWorkspace=red, OutputWorkspace=red, Target='Theta', EMode='Indirect')
-
-        # Energy transfer according to mirror_sense and unmirror_option
-        if self._mirror_sense == 14:
             if self._unmirror_option == 0:
                 self.log().warning('Input run for #{0} has two wings,'
                                    ' no energy transfer can be performed'.format(red))
@@ -715,22 +724,44 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 # FWS: Reduced workspace will not be in energy transfer since Vanadium will not be used -- good
                 CloneWorkspace(InputWorkspace=left, OutputWorkspace='__left_clone')
                 CloneWorkspace(InputWorkspace=right, OutputWorkspace='__right_clone')
+
+                # perform unmirror
                 start_bin, end_bin = perform_unmirror(red, '__left_clone', '__right_clone', self._unmirror_option)
+
                 if self._reduction_type == 'QENS':
                     xmin = np.maximum(mon_start_bin, start_bin)
                     xmax = np.minimum(mon_end_bin, end_bin)
                 if not self._debug_mode:
                     DeleteWorkspace(left)
                     DeleteWorkspace(right)
-        elif self._mirror_sense == 16:
-            self.log().notice(
-                'Input run for #{0} has one wing, no unmirroring will be performed'.format(red))
 
+        elif self._mirror_sense == 16:
+            # one-wing data
             convert_to_energy(red)
+            ConvertSpectrumAxis(InputWorkspace=red, OutputWorkspace=red, Target='Theta', EMode='Indirect')
+
             if self._reduction_type == 'QENS':
                 xmin, xmax = monitor_range(monitor)
-                xmax_left = xmin
-                xmin_right = xmax
+
+                if self._unmirror_option == 6:
+                    MatchPeaks(InputWorkspace=red, OutputWorkspace=red, BinRangeTable='__bin_range')
+                    bin_table = mtd['__bin_range'].row(0)
+                    start_bin = bin_table['MinBin']
+                    end_bin = bin_table['MaxBin']
+
+                elif self._unmirror_option == 7:
+                    MatchPeaks(InputWorkspace=red, OutputWorkspace=red, InputWorkspace2='center_van',
+                               MatchInput2ToCentre=True, BinRangeTable='__bin_range')
+                    bin_table = mtd['__bin_range'].row(0)
+                    start_bin = bin_table['MinBin']
+                    end_bin = bin_table['MaxBin']
+
+                elif self._unmirror_option != 0:
+                    self.log().error('Invalid unmirror option for one-wing data. Choose 0,6 or 7.')
+                    raise RuntimeError('Invalid unmirror option for one-wing data. Choose 0,6 or 7.')
+
+                xmin = np.maximum(xmin, start_bin)
+                xmax = np.minimum(xmax, end_bin)
 
         return [xmin, xmax, xmax_left, xmin_right]
 
@@ -832,10 +863,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         @param  out_ws_names: input 2D list of workspace names
         """
 
-        # remove cached left and right of vanadium run
+        # remove cached left and right (or center) of vanadium run
         if self._unmirror_option == 5 or self._unmirror_option == 7:
-            DeleteWorkspace('left_van')
-            DeleteWorkspace('right_van')
+            if self._mirror_sense == 14:
+                DeleteWorkspace('left_van')
+                DeleteWorkspace('right_van')
+            elif self._mirror_sense == 16:
+                DeleteWorkspace('center_van')
 
         # remove background run
         if self._background_file:
