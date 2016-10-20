@@ -171,27 +171,11 @@ void ISISCalibration::run() {
   // Get properties
   QStringList filenameList = m_uiForm.leRunNo->getFilenames();
   QString filenames = filenameList.join(",");
-  QString userInFiles = m_uiForm.leRunNo->getText();
-  QString firstFileNumber("");
-  auto cutIndexDash = userInFiles.indexOf("-");
-  auto cutIndexComma = userInFiles.indexOf(",");
-
-  if (cutIndexDash == -1 && cutIndexComma == -1) {
-    firstFileNumber = userInFiles;
-  } else {
-    if (cutIndexDash != -1) {
-      firstFileNumber = userInFiles.left(cutIndexDash);
-    } else {
-      firstFileNumber = userInFiles.left(cutIndexComma);
-    }
-    if (cutIndexDash != -1 && cutIndexComma != -1) {
-      if (cutIndexDash < cutIndexComma) {
-        firstFileNumber = userInFiles.left(cutIndexDash);
-      } else {
-        firstFileNumber = userInFiles.left(cutIndexComma);
-      }
-    }
-  }
+  QString rawFile = m_uiForm.leRunNo->getFirstFilename();
+  auto pos = rawFile.lastIndexOf(".");
+  auto extension = rawFile.right(rawFile.length() - pos);
+  QFileInfo rawFileInfo(rawFile);
+  QString name = rawFileInfo.baseName();
 
   auto instDetails = getInstrumentDetails();
   QString instDetectorRange =
@@ -203,8 +187,7 @@ void ISISCalibration::run() {
                             m_properties["CalBackMax"]->valueText();
 
   QString outputWorkspaceNameStem =
-      getInstrumentConfiguration()->getInstrumentName() + firstFileNumber +
-      QString::fromStdString("_") +
+      name + QString::fromStdString("_") +
       getInstrumentConfiguration()->getAnalyserName() +
       getInstrumentConfiguration()->getReflectionName();
 
@@ -237,7 +220,6 @@ void ISISCalibration::run() {
 
   // Initially take the calibration workspace as the result
   m_pythonExportWsName = m_outputCalibrationName.toStdString();
-
   // Configure the resolution algorithm
   if (m_uiForm.ckCreateResolution->isChecked()) {
     m_outputResolutionName = outputWorkspaceNameStem;
