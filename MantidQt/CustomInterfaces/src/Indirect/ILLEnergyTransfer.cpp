@@ -56,6 +56,12 @@ bool ILLEnergyTransfer::validate() {
       !m_uiForm.rfVanadiumRun->isValid())
     uiv.addErrorMessage("Vanadium run is invalid.");
 
+  bool ok = true;
+  m_backScaling = m_uiForm.leBackgroundFactor->text().toDouble(&ok);
+  if (!ok || m_backScaling <= 0) {
+    uiv.addErrorMessage("BackgroundScaleFactor is invalid.");
+  }
+
   // Validate if the output workspace name is not empty
   if (m_uiForm.leOutWS->text().toStdString().empty())
     uiv.addErrorMessage("OutputWorkspace name is invalid.");
@@ -97,6 +103,9 @@ void ILLEnergyTransfer::run() {
   // Handle background file
   QString backgroundFilename = m_uiForm.rfBackgroundRun->getUserInput().toString();
   reductionAlg->setProperty("BackgroundRun", backgroundFilename.toStdString());
+
+  // Handle background scaling factor
+  reductionAlg->setProperty("BackgroundScalingFactor",m_backScaling);
 
   // Handle mapping file
   bool useMapFile = m_uiForm.rdGroupChoose->isChecked();

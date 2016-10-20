@@ -262,21 +262,47 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_7">
       <item>
+       <widget class="QLabel" name="label_3">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Scaling Factor</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="leBackgroundFactor">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>1.0</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfBackgroundRun" native="true">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>270</width>
           <height>20</height>
          </size>
         </property>
         <property name="toolTip">
-         <string>Background file</string>
+         <string>Background files</string>
         </property>
         <property name="algorithmAndProperty" stdset="0">
          <string>IndirectILLReduction|BackgroundRun</string>
@@ -522,7 +548,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>0</width>
-       <height>10</height>
+       <height>5</height>
       </size>
      </property>
     </spacer>
