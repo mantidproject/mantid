@@ -101,6 +101,7 @@ def energy_formula(ws):
         logger.information('Doppler max delta energy in micro eV : {0}'.format(delta_energy))
     else:
         logger.error('Maximum Delta Energy is not specified. Check your input files.')
+        raise RuntimeError('Maximum Delta Energy is not specified. Check your input files.')
 
     if delta_energy != 0:
         formula = '(x/{0} - 1)*{1}'.format(mid, (delta_energy / scale) * (size - 1)/(size - 2))
@@ -415,6 +416,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._run_file = SelectNexusFilesByMetadata(self._run_file, self._criteria)
         if not self._run_file:
             self.log().error('Input ' + message)
+            raise RuntimeError('Input ' + message)
 
         self.log().information('Filtered input runs are: {0}'.format(self._run_file))
 
@@ -423,6 +425,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self._background_file = SelectNexusFilesByMetadata(self._background_file, self._criteria)
             if not self._background_file:
                 self.log().error('Background ' + message)
+                raise RuntimeError('Background ' + message)
             self.log().information('Filtered background runs are: {0}'.format(self._background_file))
 
         # Filter vanadium files if specified
@@ -430,6 +433,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self._vanadium_file = SelectNexusFilesByMetadata(self._vanadium_file, self._criteria)
             if not self._vanadium_file:
                 self.log().error('Vanadium ' + message)
+                raise RuntimeError('Vanadium ' + message)
             self.log().information('Filtered vanadium runs are: {0}'.format(self._vanadium_file))
 
     def PyExec(self):
@@ -509,6 +513,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self._mirror_sense = run.getLogData('Doppler.mirror_sense').value
         else:
             self.log().error('Mirror sense is not defined. Check your data.')
+            raise RuntimeError('Mirror sense is not defined. Check your data.')
 
     def _check_mirror_sense(self,ws):
         """
@@ -549,6 +554,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 self._map_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
             else:
                 self.log().error("Failed to find default detector grouping file. Please specify manually.")
+                raise RuntimeError("Failed to find default detector grouping file. Please specify manually.")
 
         self.log().information('Set detector map file : {0}'.format(self._map_file))
 
@@ -581,6 +587,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
             if not left_vanadium or not right_vanadium:
                 self.log().error('Failed to load vanadium run #{0}. Aborting.'.format(self._vanadium_file))
+                raise RuntimeError('Failed to load vanadium run #{0}. Aborting.'.format(self._vanadium_file))
             else:
                 # note, that run number will be prepended, so need to rename
                 RenameWorkspace(left_vanadium.getItem(0).getName(),'left_van')
@@ -588,6 +595,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
             if not self._check_mirror_sense('left_van'):
                 self.log().error('Inconsistent mirror sense in vanadium run. Aborting.')
+                raise RuntimeError('Inconsistent mirror sense in vanadium run. Aborting.')
 
         elif self._mirror_sense == 16:
             # call IndirectILLReduction for vanadium run with unmirror 0
@@ -597,11 +605,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
             if not one_vanadium:
                 self.log().error('Failed to load vanadium run #{0}. Aborting.'.format(self._vanadium_file))
+                raise RuntimeError('Failed to load vanadium run #{0}. Aborting.'.format(self._vanadium_file))
             else:
                 RenameWorkspace(one_vanadium.getItem(0).getName(), 'center_van')
 
             if not self._check_mirror_sense('center_van'):
                 self.log().error('Inconsistent mirror sense in vanadium run. Aborting.')
+                raise RuntimeError('Inconsistent mirror sense in vanadium run. Aborting.')
 
 
     def _load_background_run(self):
@@ -615,6 +625,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         if not self._check_mirror_sense('background'):
             self.log().error('Inconsistent mirror sense in background run. Aborting.')
+            raise RuntimeError('Inconsistent mirror sense in background run. Aborting.')
 
     def _reduce_run(self, run, ws_names):
         """
@@ -768,6 +779,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             if self._reduction_type == 'QENS':
                 xmin, xmax = monitor_range(monitor)
 
+                mask_reduced_ws(red,xmin,xmax)
+
+                start_bin = xmin
+                end_bin = xmax
+
                 if self._unmirror_option == 6:
                     MatchPeaks(InputWorkspace=red, OutputWorkspace=red, BinRangeTable='__bin_range')
                     bin_table = mtd['__bin_range'].row(0)
@@ -776,13 +792,14 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
                 elif self._unmirror_option == 7:
                     MatchPeaks(InputWorkspace=red, OutputWorkspace=red, InputWorkspace2='center_van',
-                               MatchInput2ToCentre=True, BinRangeTable='__bin_range')
+                               MatchInput2ToCenter=True, BinRangeTable='__bin_range')
                     bin_table = mtd['__bin_range'].row(0)
                     start_bin = bin_table['MinBin']
                     end_bin = bin_table['MaxBin']
 
                 elif self._unmirror_option != 0:
                     self.log().error('Invalid unmirror option for one-wing data. Choose 0,6 or 7.')
+                    raise RuntimeError('Invalid unmirror option for one-wing data. Choose 0,6 or 7.')
 
                 xmin = np.maximum(xmin, start_bin)
                 xmax = np.minimum(xmax, end_bin)
@@ -867,6 +884,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 self._debug(red, vnorm)
             else:
                 self.log().error("Calibration workspace has wrong dimensions.")
+                raise RuntimeError("Calibration workspace has wrong dimensions.")
 
     def _debug(self, ws, name):
         """
