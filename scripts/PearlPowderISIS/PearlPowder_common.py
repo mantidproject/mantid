@@ -1,13 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 
-import numpy as numpy
-
-import PearlPowder_PEARL as Pearl
-
-import pearl_cycle_factory # TODO move this into instrument class specific overrides
-import pearl_calib_factory
-
 # --- Public API --- #
 
 
@@ -66,6 +59,14 @@ def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument,
     return
 
 
+def _get_cycle_info(run_number, instrument):
+    cycle, instrument_version = instrument.get_cycle_information(run_number)
+
+    cycle_information = {'cycle': cycle,
+                         'instrument_version':  instrument_version}
+    return cycle_information
+
+
 def _generate_cycle_dir(raw_data_dir, run_cycle):
     str_run_cycle = str(run_cycle)
     # Append current cycle to raw data directory
@@ -100,21 +101,13 @@ def _get_calib_files_full_paths(cycle, in_tt_mode, instrument):
     return calibration_details
 
 
-def _get_cycle_info(cycle, instrument):
-    cycle, instrument_version = instrument.get_cycle_directory(cycle)
-
-    cycle_information = {'cycle': cycle,
-                         'instrument_version':  instrument_version}
-    return cycle_information
-
-
-def _load_monitor(number, ext, input_dir, instrument):
+def _load_monitor(number, input_dir, instrument):
     _load_monitor_out_ws = None
     if isinstance(number, int):
-        file_name = instrument.generate_out_file_name(number, ext)
-        infile = input_dir + file_name
+        full_file_path = instrument.generate_input_full_path(run_number=number, input_dir=input_dir)
         mspectra = instrument.get_monitor_spectra(number)
-        _load_monitor_out_ws = mantid.LoadRaw(Filename=infile, SpectrumMin=mspectra, SpectrumMax=mspectra, LoadLogFiles="0")
+        _load_monitor_out_ws = mantid.LoadRaw(Filename=full_file_path, SpectrumMin=mspectra, SpectrumMax=mspectra,
+                                              LoadLogFiles="0")
     else:
         _load_monitor_out_ws = _load_monitor_sum_range(files=number, input_dir=input_dir, instrument=instrument, ext=ext)
 
@@ -128,7 +121,7 @@ def _load_monitor_sum_range(files, input_dir, instrument, ext):
     mspectra = instrument.get_monitor_spectra(int(num[0]))
     out_ws = None
     for i in frange:
-        file_name = instrument.generate_out_file_name(i, ext)
+        file_name = instrument.generate_inst_file_name(i, ext)
         infile = input_dir + file_name
         outwork = "mon" + str(i)
         mantid.LoadRaw(Filename=infile, OutputWorkspace=outwork, SpectrumMin=mspectra, SpectrumMax=mspectra,
@@ -151,14 +144,11 @@ def _load_monitor_sum_range(files, input_dir, instrument, ext):
 def _load_raw_files(run_number, ext, instrument, input_dir):
     out_ws = None
     if isinstance(run_number, int):
-        file_name = instrument.generate_out_file_name(run_number, ext)
-        directory = input_dir
         if ext[0] == 's':
             # TODO deal with liveData in higher class
             raise NotImplementedError()
 
-        infile = directory + file_name
-
+        infile = instrument.generate_input_full_path(run_number=run_number, input_dir=input_dir)
         out_ws = mantid.LoadRaw(Filename=infile, LoadLogFiles="0")
     else:
         out_ws = load_raw_file_range(ext, run_number, input_dir)
@@ -171,7 +161,7 @@ def load_raw_file_range(ext, files, input_dir, instrument):
     frange = list(range(int(num[0]), int(num[1]) + 1))
     out_ws = None
     for i in frange:
-        file_name = instrument.generate_out_file_name(i, ext)
+        file_name = instrument.generate_inst_file_name(i, ext)
         file_path = input_dir + file_name
         outwork = "run" + str(i)
         mantid.LoadRaw(Filename=file_path, OutputWorkspace=outwork, LoadLogFiles="0")
@@ -195,8 +185,7 @@ def _read_pearl_ws(number, ext, run_cycle, instrument):
     input_ws = _load_raw_files(run_number=number, ext=ext, instrument=instrument, input_dir=input_dir)
 
     _read_pearl_workspace = mantid.ConvertUnits(InputWorkspace=input_ws, Target="Wavelength")
-    _read_pearl_monitor = instrument.get_monitor(run_number=number, file_extension=ext,
-                                                 input_dir=input_dir, spline_terms=20)
+    _read_pearl_monitor = instrument.get_monitor(run_number=number, input_dir=input_dir, spline_terms=20)
     _read_pearl_workspace = mantid.NormaliseToMonitor(InputWorkspace=_read_pearl_workspace,
                                                       MonitorWorkspace=_read_pearl_monitor,
                                                       IntegrationRangeMin=0.6, IntegrationRangeMax=5.0)
@@ -209,7 +198,7 @@ def _read_pearl_ws(number, ext, run_cycle, instrument):
 
 def _run_pearl_focus(instrument, run_number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True):
 
-    cycle_information = _get_cycle_info(cycle=run_number, instrument=instrument)
+    cycle_information = _get_cycle_info(run_number=run_number, instrument=instrument)
 
     alg_range, save_range = instrument.get_instrument_alg_save_ranges(cycle_information["instrument_version"])
 
@@ -218,7 +207,7 @@ def _run_pearl_focus(instrument, run_number, ext="raw", fmode="trans", ttmode="T
 
     output_file_names = instrument.generate_out_file_paths(run_number, instrument.output_dir)
     input_workspace = _read_pearl_ws(number=run_number, ext=ext, instrument=instrument, run_cycle=cycle_information["cycle"])
-    input_workspace = mantid.Rebin(InputWorkspace=input_workspace, Params=instrument.tof_binning)
+    input_workspace = mantid.Rebin(InputWorkspace=input_workspace, Params=instrument.get_tof_binning())
     input_workspace = mantid.AlignDetectors(InputWorkspace=input_workspace, CalibrationFile=input_file_paths["calibration"])
     input_workspace = mantid.DiffractionFocussing(InputWorkspace=input_workspace, GroupingFileName=input_file_paths["grouping"])
 
@@ -424,11 +413,11 @@ def calc_calibration_without_vanadium(focused_ws, index, instrument):
 
 def calc_calibration_with_vanadium(focused_ws, index, vanadium_ws, instrument):
     # Load in workspace containing vanadium run
-    van_rebinned = mantid.Rebin(InputWorkspace=vanadium_ws, Params=instrument.tof_binning)
+    van_rebinned = mantid.Rebin(InputWorkspace=vanadium_ws, Params=instrument.get_tof_binning())
 
     van_spectrum = mantid.ExtractSingleSpectrum(InputWorkspace=focused_ws, WorkspaceIndex=index)
     van_spectrum = mantid.ConvertUnits(InputWorkspace=van_spectrum, Target="TOF")
-    van_spectrum = mantid.Rebin(InputWorkspace=van_spectrum, Params=instrument.tof_binning)
+    van_spectrum = mantid.Rebin(InputWorkspace=van_spectrum, Params=instrument.get_tof_binning())
 
     van_processed = "van_processed" + str(index)  # Workaround for Mantid overwriting the WS in a loop
     mantid.Divide(LHSWorkspace=van_spectrum, RHSWorkspace=van_rebinned, OutputWorkspace=van_processed)

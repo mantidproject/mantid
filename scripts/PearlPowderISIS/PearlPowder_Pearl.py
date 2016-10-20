@@ -3,22 +3,27 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 import numpy as numpy
 
+from PearlPowder_AbstractInst import AbstractInst
 import PearlPowder_common as Common
 import pearl_calib_factory
 import pearl_cycle_factory
 # TODO create static wrapper called start
 
 
-class Pearl:
+class Pearl(AbstractInst):
+
+    # # Instrument default settings
+    _default_input_ext = '.raw'
+    _lambda_lower = 0.03
+    _lambda_upper = 6.00
+    _tof_binning = "1500,-0.0006,19900"
 
     def __init__(self, user_name=None, calibration_dir=None, raw_data_dir=None, output_dir=None):
         if user_name is None:
             raise ValueError("A username must be provided in the startup script")
 
+        super(Pearl, self).__init__(calibration_dir=calibration_dir, raw_data_dir=raw_data_dir, output_dir=output_dir)
         self.user_name = user_name
-        self.calibration_dir = calibration_dir
-        self.raw_data_dir = raw_data_dir
-        self.output_dir = output_dir
 
         # This advanced option disables appending the current cycle to the
         # path given for raw files.
@@ -35,50 +40,47 @@ class Pearl:
 
         self.attenuation_full_path = calibration_dir + pearl_MC_absorption_file_name
 
-        # Instrument defaults settings
-        self.lambda_lower = 0.03
-        self.lambda_upper = 6.00
-        self.tof_binning = "1500,-0.0006,19900"
+        self.mode = None  # For later callers to set
 
-        # Instrument specific params
-        self.mode = None # For later callers to set
+    # --- Abstract Implementation ---- #
 
-    # ---- PEARL API ---- #
-
-    def attenuate_workspace(self, input_workspace):
-        return self._attenuate_workspace(input_workspace=input_workspace)
+    def get_input_extension(self):
+        return self._default_input_ext  # TODO allow user override
 
     def get_lambda_range(self):
-        return self.lambda_lower, self.lambda_upper
+        return self._lambda_lower, self._lambda_upper
 
-    def get_monitor(self, run_number, file_extension, input_dir, spline_terms=20):
-        return self._get_monitor(run_number=run_number, ext=file_extension,
-                                 input_dir=input_dir, spline_terms=spline_terms)
-
-    def get_monitor_spectra(self, run_number):
-        return self._get_monitor_spectrum(run_number=run_number)
-
-    @staticmethod
-    def generate_out_file_paths(run_number, output_directory):
-        return _generate_out_file_names(number=run_number, output_directory=output_directory)
-
-    @staticmethod
-    def generate_out_file_name(run_number, ext):
-        return _gen_file_name(run_number=run_number, ext=ext)
-
-    @staticmethod
-    def get_instrument_alg_save_ranges(instrument_version):
-        return _get_instrument_ranges(instrument_version=instrument_version)
+    def get_tof_binning(self):
+        return self._tof_binning
 
     @staticmethod
     def get_calibration_file_names(cycle, tt_mode):
         return pearl_calib_factory.get_calibration_filename(cycle=cycle, tt_mode=tt_mode)
 
     @staticmethod
-    def get_cycle_directory(cycle):
-        return pearl_cycle_factory.get_cycle_dir(cycle)
+    def get_cycle_information(run_number):
+        return pearl_cycle_factory.get_cycle_dir(run_number)
 
-    # PEARL implementation of instrument specific steps
+    @staticmethod
+    def get_instrument_alg_save_ranges(instrument_version):
+        return _get_instrument_ranges(instrument_version=instrument_version)
+
+    @staticmethod
+    def generate_inst_file_name(run_number):
+        return _gen_file_name(run_number=run_number)
+
+    # Hook overrides
+
+    def attenuate_workspace(self, input_workspace):
+        return self._attenuate_workspace(input_workspace=input_workspace)
+
+    def get_monitor(self, run_number, input_dir, spline_terms=20):
+        return self._get_monitor(run_number=run_number, input_dir=input_dir, spline_terms=spline_terms)
+
+    def get_monitor_spectra(self, run_number):
+        return self._get_monitor_spectrum(run_number=run_number)
+
+    # Implementation of instrument specific steps
 
     def _attenuate_workspace(self, input_workspace):
         wc_attenuated = mantid.PearlMCAbsorption(self.attenuation_full_path)
@@ -89,8 +91,8 @@ class Pearl:
         Common.remove_intermediate_workspace(workspace_name="wc_attenuated")
         return output_workspace
 
-    def _get_monitor(self, run_number, ext, input_dir, spline_terms):
-        get_monitor_ws = Common._load_monitor(run_number, ext, input_dir=input_dir, instrument=self)
+    def _get_monitor(self, run_number, input_dir, spline_terms):
+        get_monitor_ws = Common._load_monitor(run_number, input_dir=input_dir, instrument=self)
         get_monitor_ws = mantid.ConvertUnits(InputWorkspace=get_monitor_ws, Target="Wavelength")
         lmin, lmax = self.get_lambda_range()
         get_monitor_ws = mantid.CropWorkspace(InputWorkspace=get_monitor_ws, XMin=lmin, XMax=lmax)
@@ -124,25 +126,9 @@ class Pearl:
         return mspectra
 
 
-# Functions which only output instrument specific data
+# Implementation of static methods
 
-def _generate_out_file_names(number, output_directory):
-    outfile = output_directory + "PRL" + str(number) + ".nxs"
-    gssfile = output_directory + "PRL" + str(number) + ".gss"
-    tof_xye_file = output_directory + "PRL" + str(number) + "_tof_xye.dat"
-    d_xye_file = output_directory + "PRL" + str(number) + "_d_xye.dat"
-    outwork = "PRL" + str(number)
-
-    out_file_names = {"nxs_filename": outfile,
-                      "gss_filename": gssfile,
-                      "tof_xye_filename": tof_xye_file,
-                      "dspacing_xye_filename": d_xye_file,
-                      "output_name": outwork}
-
-    return out_file_names
-
-
-def _gen_file_name(run_number, ext):
+def _gen_file_name(run_number):
 
     digit = len(str(run_number))
 
@@ -156,7 +142,7 @@ def _gen_file_name(run_number, ext):
     for i in range(0, number_of_digits - digit):
         filename += "0"
 
-    filename += str(run_number) + "." + ext
+    filename += str(run_number)
 
     return filename
 
