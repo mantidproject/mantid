@@ -32,13 +32,16 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 double calculateWidth(double x, const std::vector<double> &xVec,
                       const std::vector<double> &yVec);
-void setWidthConstraint(API::IPeakFunction& peak, double width, double fwhmVariation);
+void setWidthConstraint(API::IPeakFunction &peak, double width,
+                        double fwhmVariation);
 void buildSpectrumFunction(API::CompositeFunction &spectrum,
-                           const std::string &peakShape, size_t maxNPeaks,
-                           size_t nPeaks, const API::FunctionValues &centresAndIntensities,
+                           const std::string &peakShape,
+                           const API::FunctionValues &centresAndIntensities,
                            const std::vector<double> &xVec,
                            const std::vector<double> &yVec,
                            double fwhmVariation, double defaultFWHM);
+size_t calculateNPeaks(const API::FunctionValues &centresAndIntensities);
+size_t calculateMaxNPeaks(size_t nPeaks);
 
 } // namespace CrystalFieldUtils
 } // namespace Functions

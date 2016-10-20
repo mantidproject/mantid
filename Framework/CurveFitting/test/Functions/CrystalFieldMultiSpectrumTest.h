@@ -14,6 +14,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h"
 
 using namespace Mantid;
@@ -228,6 +229,93 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_calculate_widths() {
+    CrystalFieldMultiSpectrum fun;
+    fun.setParameter("B20", 0.37737);
+    fun.setParameter("B22", 3.9770);
+    fun.setParameter("B40", -0.031787);
+    fun.setParameter("B42", -0.11611);
+    fun.setParameter("B44", -0.12544);
+    fun.setAttributeValue("Ion", "Ce");
+    fun.setAttributeValue("Temperatures", std::vector<double>{44.0, 50.0});
+
+    std::vector<double> x[2] = {{0.0, 50.0}, {0.0, 50.0}};
+    std::vector<double> y[2] = {{1.0, 2.0}, {3.0, 4.0}};
+    auto checkW = [&x, &y](size_t i, double c) {
+      return y[i].front() +
+             (y[i].back() - y[i].front()) / (x[i].back() - x[i].front()) * (c - x[i].front());
+    };
+    fun.setAttributeValue("WidthX0", x[0]);
+    fun.setAttributeValue("WidthY0", y[0]);
+    fun.setAttributeValue("WidthX1", x[1]);
+    fun.setAttributeValue("WidthY1", y[1]);
+    fun.buildTargetFunction();
+    {
+      std::string prefix("f0.f1.");
+      auto c = fun.getParameter(prefix + "PeakCentre");
+      auto w = fun.getParameter(prefix + "FWHM");
+      TS_ASSERT_EQUALS(w, checkW(0, c));
+      auto ct = getBounds(fun, prefix + "FWHM");
+      TS_ASSERT_DELTA(ct.first, 0.9, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 1.1, 1e-4);
+    }
+    {
+      std::string prefix("f0.f2.");
+      auto c = fun.getParameter(prefix + "PeakCentre");
+      auto w = fun.getParameter(prefix + "FWHM");
+      TS_ASSERT_EQUALS(w, checkW(0, c));
+      auto ct = getBounds(fun, prefix + "FWHM");
+      TS_ASSERT_DELTA(ct.first, 1.4865, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 1.6865, 1e-4);
+    }
+    {
+      std::string prefix("f0.f3.");
+      auto c = fun.getParameter(prefix + "PeakCentre");
+      auto w = fun.getParameter(prefix + "FWHM");
+      TS_ASSERT_EQUALS(w, checkW(0, c));
+      auto ct = getBounds(fun, prefix + "FWHM");
+      TS_ASSERT_DELTA(ct.first, 1.7868, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 1.9868, 1e-4);
+    }
+    {
+      std::string prefix("f0.f4.");
+      auto w = fun.getParameter(prefix + "FWHM");
+      TS_ASSERT_EQUALS(w, 0.0);
+    }
+    {
+      std::string prefix("f1.f1.");
+      auto c = fun.getParameter(prefix + "PeakCentre");
+      auto w = fun.getParameter(prefix + "FWHM");
+      TS_ASSERT_EQUALS(w, checkW(1, c));
+      auto ct = getBounds(fun, prefix + "FWHM");
+      TS_ASSERT_DELTA(ct.first, 2.9, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 3.1, 1e-4);
+    }
+    {
+      std::string prefix("f1.f2.");
+      auto c = fun.getParameter(prefix + "PeakCentre");
+      auto w = fun.getParameter(prefix + "FWHM");
+      TS_ASSERT_EQUALS(w, checkW(1, c));
+      auto ct = getBounds(fun, prefix + "FWHM");
+      TS_ASSERT_DELTA(ct.first, 3.4865, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 3.6865, 1e-4);
+    }
+    {
+      std::string prefix("f1.f3.");
+      auto c = fun.getParameter(prefix + "PeakCentre");
+      auto w = fun.getParameter(prefix + "FWHM");
+      TS_ASSERT_EQUALS(w, checkW(1, c));
+      auto ct = getBounds(fun, prefix + "FWHM");
+      TS_ASSERT_DELTA(ct.first, 3.7868, 1e-4);
+      TS_ASSERT_DELTA(ct.second, 3.9868, 1e-4);
+    }
+    {
+      std::string prefix("f1.f4.");
+      auto w = fun.getParameter(prefix + "FWHM");
+      TS_ASSERT_EQUALS(w, 0.0);
+    }
+  }
+
 private:
   Workspace_sptr createWorkspace() {
     auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 100, 100);
@@ -236,6 +324,18 @@ private:
       ws->dataX(0)[i] = dx * static_cast<double>(i);
     }
     return ws;
+  }
+
+  std::pair<double, double> getBounds(API::IFunction& fun, const std::string& parName) {
+    auto ct = fun.getConstraint(fun.parameterIndex(parName));
+    if (ct == nullptr) {
+      throw std::runtime_error("Parameter " + parName + " doesn't have constraint");
+    }
+    auto bc = dynamic_cast<Constraints::BoundaryConstraint*>(ct);
+    if (ct == nullptr) {
+      throw std::runtime_error("Parameter " + parName + " doesn't have boundary constraint");
+    }
+    return std::make_pair(bc->lower(), bc->upper());
   }
 };
 

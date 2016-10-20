@@ -93,8 +93,8 @@ void setWidthConstraint(API::IPeakFunction& peak, double width, double fwhmVaria
 /// @param defaultFWHM :: A default value for the FWHM to use if xVec and yVec
 ///        are empty.
 void buildSpectrumFunction(API::CompositeFunction &spectrum,
-                           const std::string &peakShape, size_t maxNPeaks,
-                           size_t nPeaks, const API::FunctionValues &centresAndIntensities,
+                           const std::string &peakShape,
+                           const API::FunctionValues &centresAndIntensities,
                            const std::vector<double> &xVec,
                            const std::vector<double> &yVec,
                            double fwhmVariation, double defaultFWHM) {
@@ -102,6 +102,8 @@ void buildSpectrumFunction(API::CompositeFunction &spectrum,
     throw std::runtime_error("WidthX and WidthY must have the same size.");
   }
   bool useDefaultFWHM = xVec.empty();
+  auto nPeaks = calculateNPeaks(centresAndIntensities);
+  auto maxNPeaks = calculateMaxNPeaks(nPeaks);
   for (size_t i = 0; i < maxNPeaks; ++i) {
     auto fun = API::FunctionFactory::Instance().createFunction(peakShape);
     auto peak = boost::dynamic_pointer_cast<API::IPeakFunction>(fun);
@@ -128,6 +130,16 @@ void buildSpectrumFunction(API::CompositeFunction &spectrum,
     }
     spectrum.addFunction(peak);
   }
+}
+
+/// Calculate the number of visible peaks.
+size_t calculateNPeaks(const API::FunctionValues &centresAndIntensities) {
+  return centresAndIntensities.size() / 2;
+}
+
+/// Calculate the maximum number of peaks a spectrum can have.
+size_t calculateMaxNPeaks(size_t nPeaks) {
+  return nPeaks + nPeaks / 2 + 1;
 }
 
 } // namespace CrystalFieldUtils
