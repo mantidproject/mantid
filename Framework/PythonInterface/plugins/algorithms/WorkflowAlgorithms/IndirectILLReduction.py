@@ -415,7 +415,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._run_file = SelectNexusFilesByMetadata(self._run_file, self._criteria)
         if not self._run_file:
             self.log().error('Input ' + message)
-            raise RuntimeError('Input ' + message)
 
         self.log().information('Filtered input runs are: {0}'.format(self._run_file))
 
@@ -424,7 +423,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self._background_file = SelectNexusFilesByMetadata(self._background_file, self._criteria)
             if not self._background_file:
                 self.log().error('Background ' + message)
-                raise RuntimeError('Background ' + message)
             self.log().information('Filtered background runs are: {0}'.format(self._background_file))
 
         # Filter vanadium files if specified
@@ -432,7 +430,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self._vanadium_file = SelectNexusFilesByMetadata(self._vanadium_file, self._criteria)
             if not self._vanadium_file:
                 self.log().error('Vanadium ' + message)
-                raise RuntimeError('Vanadium ' + message)
             self.log().information('Filtered vanadium runs are: {0}'.format(self._vanadium_file))
 
     def PyExec(self):
@@ -512,7 +509,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self._mirror_sense = run.getLogData('Doppler.mirror_sense').value
         else:
             self.log().error('Mirror sense is not defined. Check your data.')
-            raise RuntimeError('Mirror sense is not defined. Check your data.')
 
     def _check_mirror_sense(self,ws):
         """
@@ -552,7 +548,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile')[0]
                 self._map_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
             else:
-                raise ValueError("Failed to find default detector grouping file. Please specify manually.")
+                self.log().error("Failed to find default detector grouping file. Please specify manually.")
 
         self.log().information('Set detector map file : {0}'.format(self._map_file))
 
@@ -590,9 +586,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 RenameWorkspace(left_vanadium.getItem(0).getName(),'left_van')
                 RenameWorkspace(right_vanadium.getItem(0).getName(), 'right_van')
 
-            if mtd['left_van'].getRun().getLogData('Doppler.mirror_sense').value != self._mirror_sense:
+            if not self._check_mirror_sense('left_van'):
                 self.log().error('Inconsistent mirror sense in vanadium run. Aborting.')
-                raise RuntimeError('Inconsistent mirror sense in vanadium run. Aborting.')
 
         elif self._mirror_sense == 16:
             # call IndirectILLReduction for vanadium run with unmirror 0
@@ -605,9 +600,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             else:
                 RenameWorkspace(one_vanadium.getItem(0).getName(), 'center_van')
 
-            if mtd['center_van'].getRun().getLogData('Doppler.mirror_sense').value != self._mirror_sense:
+            if not self._check_mirror_sense('center_van'):
                 self.log().error('Inconsistent mirror sense in vanadium run. Aborting.')
-                raise RuntimeError('Inconsistent mirror sense in vanadium run. Aborting.')
 
 
     def _load_background_run(self):
@@ -619,9 +613,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         NormaliseToMonitor(InputWorkspace=background, OutputWorkspace=background, MonitorSpectrum=1)
         GroupDetectors(InputWorkspace=background, OutputWorkspace=background, MapFile=self._map_file, Behaviour='Sum')
 
-        if mtd['background'].getRun().getLogData('Doppler.mirror_sense').value != self._mirror_sense:
+        if not self._check_mirror_sense('background'):
             self.log().error('Inconsistent mirror sense in background run. Aborting.')
-            raise RuntimeError('Inconsistent mirror sense in background run. Aborting.')
 
     def _reduce_run(self, run, ws_names):
         """
@@ -790,7 +783,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
                 elif self._unmirror_option != 0:
                     self.log().error('Invalid unmirror option for one-wing data. Choose 0,6 or 7.')
-                    raise RuntimeError('Invalid unmirror option for one-wing data. Choose 0,6 or 7.')
 
                 xmin = np.maximum(xmin, start_bin)
                 xmax = np.minimum(xmax, end_bin)
@@ -806,8 +798,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # Get Doppler energy
         if mtd[red].getRun().hasProperty('Doppler.maximum_delta_energy'):
             energy = mtd[red].getRun().getLogData('Doppler.maximum_delta_energy').value
-        elif mtd[red].getRun().hasProperty('Doppler.delta_energy'):
-            energy = mtd[red].getRun().getLogData('Doppler.delta_energy').value
         else:
             energy = -1
 
