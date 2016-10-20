@@ -515,6 +515,23 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self.log().error('Mirror sense is not defined. Check your data.')
             raise RuntimeError('Mirror sense is not defined. Check your data.')
 
+    def _check_mirror_sense(self,ws):
+        """
+        Checks if the given workspace has the same as self._mirror_sense
+        @param  ws :: input workspace
+        @return    :: true if they are the same, false otherwise
+        """
+        if mtd[ws].getRun().hasProperty('Doppler.mirror_sense'):
+            # mirror_sense 14 : two wings
+            # mirror_sense 16 : one wing
+            _ms = mtd[ws].getRun().getLogData('Doppler.mirror_sense').value
+        else:
+            self.log().warning('Mirror sense is not defined in run #{0}. Skipping.'.format(mtd[ws].getRunNumber()))
+            return False
+
+        return bool(_ms == self._mirror_sense)
+
+
     def _load_auxiliary_files(self):
         """
         Loads parameter and detector grouping map file
@@ -611,9 +628,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         for item in self._out_suffixes:
             temp_run_ws_list.append(run + '_' + item)
 
-        # subscribe the list to the general list
-        ws_names.append(temp_run_ws_list)
-
         # just shortcuts
         red = temp_run_ws_list[0]
         raw = temp_run_ws_list[1]
@@ -624,6 +638,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         right = temp_run_ws_list[6]
         bsub = temp_run_ws_list[7]
         vnorm = temp_run_ws_list[8]
+
+        if not self._check_mirror_sense(red):
+            self.log().warning('Inconsistent mirror sense in run #{0}, skipping.'.format(run))
+            return
 
         self._debug(red, raw)
 
@@ -664,6 +682,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # cleanup by-products if not needed
         if not self._debug_mode:
             DeleteWorkspace(monitor)
+
+        # subscribe the list to the general list
+        ws_names.append(temp_run_ws_list)
 
 
     def _energy_and_theta_transfer(self, red, monitor, left, right):
