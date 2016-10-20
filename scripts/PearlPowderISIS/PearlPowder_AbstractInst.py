@@ -12,11 +12,14 @@ from six import add_metaclass
 
 @add_metaclass(ABCMeta)
 class AbstractInst(object):
-    def __init__(self, calibration_dir=None, raw_data_dir=None, output_dir=None):
+    def __init__(self, calibration_dir=None, raw_data_dir=None, output_dir=None,
+                 default_input_ext=".raw", tt_mode=""):
         # ----- Properties common to ALL instruments -------- #
         self._calibration_dir = calibration_dir
         self._raw_data_dir = raw_data_dir
         self._output_dir = output_dir
+        self._default_input_ext = default_input_ext
+        self._tt_mode = tt_mode
 
     @property
     def calibration_dir(self):
@@ -29,6 +32,14 @@ class AbstractInst(object):
     @property
     def output_dir(self):
         return self._output_dir
+
+    @property
+    def default_input_ext(self):
+        return self._default_input_ext
+
+    @property
+    def tt_mode(self):
+        return self._tt_mode
 
     # Instrument specific properties #
 
@@ -51,13 +62,42 @@ class AbstractInst(object):
         pass
 
     @abstractmethod
-    def get_tof_binning(self):
+    def get_focus_tof_binning(self):
         """
         Returns the TOF binning values
         @param self: The instrument to get TOF binning values for
         @return: TOF binning Values
         """
         pass
+
+    @abstractmethod
+    def get_create_van_tof_binning(self):
+        """
+        Holds the TOF rebin params for create vanadium calibration
+        @return: The TOF rebin params as a string
+        """
+        pass
+
+    # Instrument specific methods
+
+    @abstractmethod
+    def get_calibration_full_paths(self, cycle):
+        """
+        Gets the current calibration file names for this cycle
+        @param cycle: The cycle string to lookup for this run
+        @return: A dictionary the containing the full paths as values for the following keys:
+        "calibration", "grouping", "vanadium_absorption", "vanadium"
+        """
+        pass
+
+    @abstractmethod
+    def spline_background(self, focused_vanadium_ws, spline_number, instrument_version=''):
+        """
+        Splines the background in a way specific to the instrument
+        @param focused_vanadium_ws: The workspace to perform spline backgrounds on
+        @param instrument_version: (Optional) Used for instruments with multiple versions
+        @return: List of workspaces with splined backgrounds
+        """
 
     @staticmethod
     @abstractmethod
@@ -80,17 +120,6 @@ class AbstractInst(object):
         @return: The algorithm and save range in that order
         """
 
-    @abstractmethod
-    def get_calibration_full_paths(self, cycle, tt_mode=''):
-        """
-        Gets the current calibration file names for this cycle
-        @param cycle: The cycle string to lookup for this run
-        @param tt_mode: If multiple modes allow for different calibration files this is used as an additional selector
-        @return: A dictionary the containing the full paths as values for the following keys:
-        "calibration", "grouping", "vanadium_absorption", "vanadium"
-        """
-        pass
-
     @staticmethod
     @abstractmethod
     def get_cycle_information(run_number):
@@ -101,10 +130,8 @@ class AbstractInst(object):
         """
         pass
 
-
-
     # --- Methods applicable to all instruments --- #
-    # These can be overridden if instrument specific behaviour is needed#
+    # These can be overridden if instrument specific behaviour is needed #
     @staticmethod
     def generate_out_file_paths(file_name, output_directory):
         nxs_file = output_directory + str(file_name) + ".nxs"
@@ -138,12 +165,13 @@ class AbstractInst(object):
         return _empty_hook_return_empty_string()
 
 
-
 def _empty_hook():
     pass
 
+
 def _empty_hook_return_empty_string():
     return str('')
+
 
 def _empty_hook_return_input(param):
     # We should return the input workspace untouched

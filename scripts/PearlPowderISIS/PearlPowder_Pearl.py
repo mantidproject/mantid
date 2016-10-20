@@ -16,13 +16,16 @@ class Pearl(AbstractInst):
     _default_input_ext = '.raw'
     _lambda_lower = 0.03
     _lambda_upper = 6.00
-    _tof_binning = "1500,-0.0006,19900"
+    _focus_tof_binning = "1500,-0.0006,19900"
+    _create_van_tof_binning = "100,-0.0006,19990"
 
-    def __init__(self, user_name=None, calibration_dir=None, raw_data_dir=None, output_dir=None):
+    def __init__(self, user_name=None, calibration_dir=None, raw_data_dir=None, output_dir=None,
+                 input_file_ext=".raw", tt_mode="TT88"):
         if user_name is None:
             raise ValueError("A username must be provided in the startup script")
 
-        super(Pearl, self).__init__(calibration_dir=calibration_dir, raw_data_dir=raw_data_dir, output_dir=output_dir)
+        super(Pearl, self).__init__(calibration_dir=calibration_dir, raw_data_dir=raw_data_dir, output_dir=output_dir,
+                                    default_input_ext=input_file_ext, tt_mode=tt_mode)
         self.user_name = user_name
 
         # This advanced option disables appending the current cycle to the
@@ -31,31 +34,33 @@ class Pearl(AbstractInst):
 
         # live_data_directory = None  # TODO deal with this
 
-        # File names # TODO remove this
-        pearl_MC_absorption_file_name = "PRL112_DC25_10MM_FF.OUT"
-        cal_file_name = "pearl_offset_11_2.cal"
-        group_file_name = "pearl_group_11_2_TT88.cal"
-        van_absorb_file_name = "van_spline_all_cycle_11_1.nxs"
-        van_file_name = "van_spline_all_cycle_11_1.nxs"
+        # File names
+        pearl_mc_absorption_file_name = "PRL112_DC25_10MM_FF.OUT"
 
-        self.attenuation_full_path = calibration_dir + pearl_MC_absorption_file_name
-
-        self.mode = None  # For later callers to set
+        self.attenuation_full_path = calibration_dir + pearl_mc_absorption_file_name
+        self.mode = None  # For later callers to set TODO
 
     # --- Abstract Implementation ---- #
 
+    # Params #
     def get_input_extension(self):
         return self._default_input_ext  # TODO allow user override
 
     def get_lambda_range(self):
         return self._lambda_lower, self._lambda_upper
 
-    def get_tof_binning(self):
-        return self._tof_binning
+    def get_focus_tof_binning(self):
+        return self._focus_tof_binning
 
-    def get_calibration_full_paths(self, cycle, tt_mode=''):
+    def get_create_van_tof_binning(self):
+        return self._create_van_tof_binning
+
+    # Methods #
+
+    def get_calibration_full_paths(self, cycle):
+
         calibration_file, grouping_file, van_absorb, van_file =\
-            pearl_calib_factory.get_calibration_filename(cycle=cycle, tt_mode=tt_mode)
+            pearl_calib_factory.get_calibration_filename(cycle=cycle, tt_mode=self.tt_mode)
 
         calibration_dir = self.calibration_dir
 
@@ -71,6 +76,18 @@ class Pearl(AbstractInst):
 
         return calibration_details
 
+    def spline_background(self, focused_vanadium_ws, spline_number, instrument_version=''):
+        if instrument_version == "new2":
+            out_list = _spline_new2_background(in_workspace=focused_vanadium_ws, num_splines=spline_number,
+                                               instrument_version=instrument_version)
+        elif instrument_version == "new":
+            out_list = _spline_new_background(in_workspace=focused_vanadium_ws, num_splines=spline_number,
+                                              instrument_version=instrument_version)
+        elif instrument_version == "old":
+            out_list = _spline_old_background(in_workspace=focused_vanadium_ws, num_splines=spline_number)
+        else:
+            raise ValueError("Spline Background - PEARL: Instrument version unknown")
+        return out_list
 
     @staticmethod
     def get_cycle_information(run_number):
@@ -147,6 +164,7 @@ class Pearl(AbstractInst):
 
 # Implementation of static methods
 
+
 def _gen_file_name(run_number):
 
     digit = len(str(run_number))
@@ -177,3 +195,80 @@ def _get_instrument_ranges(instrument_version):
         raise ValueError("Instrument version unknown")
 
     return alg_range, save_range
+
+
+def _spline_new2_background(in_workspace, num_splines, instrument_version):
+    # remove bragg peaks before spline
+
+    for i in range(0, 12):  # TODO remove this hardcoded value if possible - this is 14 with the 2 below
+        van_stripped_ws = mantid.StripPeaks(InputWorkspace=in_workspace, FWHM=15, Tolerance=8,
+                                            WorkspaceIndex=i)
+
+    # run twice on low angle as peaks are very broad
+    for i in range(0, 2):
+        van_stripped_ws = mantid.StripPeaks(InputWorkspace=van_stripped_ws, FWHM=100, Tolerance=10,
+                                            WorkspaceIndex=12)
+        van_stripped_ws = mantid.StripPeaks(InputWorkspace=van_stripped_ws, FWHM=60, Tolerance=10,
+                                            WorkspaceIndex=13)
+
+    van_stripped_ws = mantid.ConvertUnits(InputWorkspace=van_stripped_ws, Target="TOF")
+
+    splined_ws_list = _perform_spline_range(instrument_version, num_splines, van_stripped_ws)
+    Common.remove_intermediate_workspace(van_stripped_ws)
+    return splined_ws_list
+
+
+def _spline_new_background(in_workspace, num_splines, instrument_version):
+
+    # remove bragg peaks before spline
+    for i in range(0, 12):
+        van_stripped = mantid.StripPeaks(InputWorkspace=in_workspace, FWHM=15, Tolerance=8, WorkspaceIndex=i)
+
+    van_stripped = mantid.ConvertUnits(InputWorkspace=van_stripped, Target="TOF")
+
+    splined_ws_list = _perform_spline_range(instrument_version, num_splines, van_stripped)
+    Common.remove_intermediate_workspace(van_stripped)
+    return splined_ws_list
+
+
+def _perform_spline_range(instrument_version, num_splines, stripped_ws):
+    ws_range, unused = _get_instrument_ranges(instrument_version)
+    splined_ws_list = []
+    for i in range(0, ws_range):
+        out_ws_name = "_create_van_cal_spline-" + str(i)
+        splined_ws_list.append(mantid.SplineBackground(InputWorkspace=stripped_ws, OutputWorkspace=out_ws_name,
+                                                       WorkspaceIndex=i, NCoeff=num_splines))
+    return splined_ws_list
+
+
+def _spline_old_background(in_workspace, num_splines):
+    van_stripped = mantid.ConvertUnits(InputWorkspace=in_workspace, Target="dSpacing")
+
+    # remove bragg peaks before spline
+    van_stripped = mantid.StripPeaks(InputWorkspace=van_stripped, FWHM=15, Tolerance=6, WorkspaceIndex=0)
+    van_stripped = mantid.StripPeaks(InputWorkspace=van_stripped, FWHM=15, Tolerance=6, WorkspaceIndex=2)
+    van_stripped = mantid.StripPeaks(InputWorkspace=van_stripped, FWHM=15, Tolerance=6, WorkspaceIndex=3)
+    van_stripped = mantid.StripPeaks(InputWorkspace=van_stripped, FWHM=40, Tolerance=12, WorkspaceIndex=1)
+    van_stripped = mantid.StripPeaks(InputWorkspace=van_stripped, FWHM=60, Tolerance=12, WorkspaceIndex=1)
+
+    # Mask low d region that is zero before spline
+    for reg in range(0, 4):
+        if reg == 1:
+            van_stripped = mantid.MaskBins(InputWorkspace=van_stripped, XMin=0, XMax=0.14, SpectraList=reg)
+        else:
+            van_stripped = mantid.MaskBins(InputWorkspace=van_stripped, XMin=0, XMax=0.06, SpectraList=reg)
+
+    van_stripped = mantid.ConvertUnits(InputWorkspace=van_stripped, Target="TOF")
+
+    splined_ws_list = []
+    for i in range(0, 4):
+        out_ws_name = "_create_van_calc_spline-" + str(i)
+        if i == 1:
+            coeff = 80
+        else:
+            coeff = 100
+        splined_ws_list.append(mantid.SplineBackground(InputWorkspace=van_stripped, OutputWorkspace=out_ws_name,
+                                                       WorkspaceIndex=i, NCoeff=coeff))
+    Common.remove_intermediate_workspace(van_stripped)
+    return splined_ws_list
+

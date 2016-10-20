@@ -13,22 +13,22 @@ class PearlRoutinesTest(unittest.TestCase):
     def test_inst_new2_exec_fmode_all(self):
         pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir="D:\\PEARL\\",
                                             raw_data_dir="D:\\PEARL\\", output_dir="D:\\PEARL\\output\\")
-        PearlPowder_common.focus(74795, fmode='all', ttmode='TT70', startup_object=pearl_obj)
+        PearlPowder_common.focus(74795, fmode='all', startup_object=pearl_obj)
 
     def test_inst_new2_exec_fmode_groups(self):
         pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir="D:\\PEARL\\",
                                             raw_data_dir="D:\\PEARL\\", output_dir="D:\\PEARL\\output\\")
-        PearlPowder_common.focus(74795, fmode='groups', ttmode='TT70', startup_object=pearl_obj)
+        PearlPowder_common.focus(74795, fmode='groups', startup_object=pearl_obj)
 
     def test_inst_new2_exec_fmode_trans(self):
         pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir="D:\\PEARL\\",
                                             raw_data_dir="D:\\PEARL\\", output_dir="D:\\PEARL\\output\\")
-        PearlPowder_common.focus(74795, fmode='trans', ttmode='TT70', startup_object=pearl_obj)
+        PearlPowder_common.focus(74795, fmode='trans', startup_object=pearl_obj)
 
     def test_inst_new2_exec_fmode_mods(self):
         pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir="D:\\PEARL\\",
                                             raw_data_dir="D:\\PEARL\\", output_dir="D:\\PEARL\\output\\")
-        PearlPowder_common.focus(74795, fmode='mods', ttmode='TT70', startup_object=pearl_obj)
+        PearlPowder_common.focus(74795, fmode='mods', startup_object=pearl_obj)
 
     def test_instrument_ranges_calcs_correctly(self):
         # This test checks that the instrument ranges calculate correctly for given instruments
@@ -59,9 +59,9 @@ class PearlRoutinesTest(unittest.TestCase):
         PearlPowder_common.create_calibration(startup_object=pearl_obj, calibration_runs="91560_91561",
                                               offset_file_path=offsetfile, grouping_file_path=ngrpfile)
 
-        #PearlPowder_common.create_vanadium(startup_object=pearl_obj, vanadium_runs="91530_91531",
-        #                                   empty_runs="91550_91551", tt_mode="TT35", output_file_name=vanFile35,
-        #                                   num_of_spline_coefficients=40, do_absorp_corrections=True)
+        PearlPowder_common.create_vanadium(startup_object=pearl_obj, vanadium_runs="91530_91531",
+                                           empty_runs="91550_91551", output_file_name=vanFile35,
+                                           num_of_spline_coefficients=40, do_absorp_corrections=True)
 
 
 if __name__ == '__main__':
