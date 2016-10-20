@@ -291,18 +291,28 @@ void WorkspaceGroup::workspaceBeforeReplaceHandle(
   const auto oldObject = notice->oldObject();
   const auto newObject = notice->newObject();
 
+  bool foundOld(false);
+  bool foundDuplicate(false);
+
   auto it = m_workspaces.begin();
   auto duplicateIter = m_workspaces.end();
-  bool foundOld(false);
+
   for (; it != m_workspaces.end(); ++it) {
     auto &workspace = *it;
     if (workspace == oldObject) {
       workspace = newObject;
       foundOld = true;
+
     } else if (workspace == newObject) {
       duplicateIter = it;
+      foundDuplicate = true;
+    }
+
+    if (foundOld && foundDuplicate) {
+      break;
     }
   }
+
   if (foundOld && duplicateIter != m_workspaces.end()) {
     m_workspaces.erase(duplicateIter);
   }
