@@ -357,11 +357,14 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
     def __init__(self, parent):
         """
-
+        Initialization
         :param parent:
         :return:
         """
         tableBase.NTableWidget.__init__(self, parent)
+
+        # define class variables
+        self._storedHKL = dict()
 
         return
 
@@ -435,12 +438,12 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         """
         Set HKL to table
         :param i_row:
-        :param hkl:
+        :param hkl: HKL is a list of tuple
         :param error: error of HKL
         """
         # Check
         assert isinstance(i_row, int)
-        assert isinstance(hkl, list)
+        assert isinstance(hkl, list) or isinstance(hkl, tuple) and len(hkl) == 3
 
         i_col_h = UB_Peak_Table_Setup.index(('H', 'float'))
         i_col_k = UB_Peak_Table_Setup.index(('K', 'float'))
@@ -453,6 +456,43 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         if error is not None:
             i_col_error = UB_Peak_Table_Setup.index(('Error', 'float'))
             self.update_cell_value(i_row, i_col_error, error)
+
+        return
+
+    def restore_cached_indexing(self):
+        """
+        Restore the previously saved value to HKL
+        :return:
+        """
+        # check first such that all the stored value are to be
+        stored_line_index = sorted(self._storedHKL.keys())
+        assert len(stored_line_index) == self.rowCount(), 'The current rows and cached row counts do not match.'
+
+        # restore
+        for row_index in stored_line_index:
+            hkl = self._storedHKL[row_index]
+            self.set_hkl(row_index, hkl)
+        # END-FOR
+
+        # clear
+        self._storedHKL.clear()
+
+        return
+
+    def store_current_indexing(self):
+        """
+        Store the current indexing for reverting
+        :return:
+        """
+        # clear the previous value
+        self._storedHKL.clear()
+
+        # store
+        num_rows = self.rowCount()
+        for row_index in range(num_rows):
+            peak_indexing = self.get_hkl(row_index)
+            self._storedHKL[row_index] = peak_indexing
+        # END-FOR
 
         return
 

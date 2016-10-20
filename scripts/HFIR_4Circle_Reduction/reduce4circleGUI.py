@@ -41,6 +41,7 @@ from ui_MainWindow import Ui_MainWindow
 # define constants
 IndexFromSpice = 'From Spice (pre-defined)'
 IndexFromUB = 'From Calculation By UB'
+MAGNETIC_TOL = 0.2
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -2159,11 +2160,39 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_set_ub_tab_hkl_to_integers(self):
-        # TODO/NOW/ISSUE: make this one work!
+        """
+        Set all peaks' indexing (HKL) to integer in the table in "UB matrix calculation" tab.
+        Change to these HKL values is only related to GUI, i.e., the table
+        :return:
+        """
+        # store the current value
+        self.ui.tableWidget_peaksCalUB .store_current_indexing()
+
+        # set the index to integer
+        num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
+        for row_index in range(num_rows):
+            m_h, m_l, m_k = self.ui.tableWidget_peaksCalUB.get_hkl(row_index)
+            peak_indexing, round_error = convert_hkl_to_integer(m_h, m_l, m_k, MAGNETIC_TOL)
+            self.ui.tableWidget_peaksCalUB.set_hkl(row_index, peak_indexing, round_error)
+
+        # disable the set to integer button and enable the revert/undo button
+        self.ui.pushButton_setHKL2Int.setEnabled(False)
+        self.ui.pushButton_undoSetToInteger.setEnabled(True)
+
         return
 
     def do_undo_ub_tab_hkl_to_integers(self):
-        # TODO/NOW/ISSUE: make this one work
+        """
+        After the peaks' indexing are set to integer, undo the action (i.e., revert to the original value)
+        :return:
+        """
+        # restore the value
+        self.ui.tableWidget_peaksCalUB.restore_cached_indexing()
+
+        # enable and disable the buttons
+        self.ui.pushButton_setHKL2Int.setEnabled(True)
+        self.ui.pushButton_undoSetToInteger.setEnabled(False)
+
         return
 
     def do_index_merged_scans_peaks(self):
@@ -3111,3 +3140,35 @@ def round_hkl(index_h, index_k, index_l):
     index_l = math.copysign(1, index_l) * int(abs(index_l) + 0.5)
 
     return index_h, index_k, index_l
+
+
+def convert_hkl_to_integer(index_h, index_k, index_l, magnetic_tolerance=0.2):
+    """
+    Convert index (HKL) to integer by considering magnetic peaks
+    if any index is not close to an integer (default to 0.2), then it is treated as a magnetic peak's HKL
+    :param index_h:
+    :param index_k:
+    :param index_l:
+    :param magnetic_tolerance: tolerance to magnetic peak's indexing
+    :return:
+    """
+    def round_index(value, tol):
+        round_int = math.copysign(1, value) * int(abs(value) + 0.5)
+        if abs(round_int - value) >= tol:
+            # it is likely a magnetic peak
+            round_int = int(value * 100) * 0.01
+        return round_int
+
+    # check inputs' validity
+    assert isinstance(magnetic_tolerance, float) and 0. < magnetic_tolerance <= 0.5
+
+    #
+    index_h_r = round_index(index_h, magnetic_tolerance)
+    index_k_r = round_index(index_k, magnetic_tolerance)
+    index_l_r = round_index(index_l, magnetic_tolerance)
+
+    round_error = math.sqrt((index_h - index_h_r) ** 2 +
+                            (index_k - index_k_r) ** 2 +
+                            (index_l - index_l_r) ** 2)
+
+    return (index_h_r, index_k_r, index_l_r), round_error
