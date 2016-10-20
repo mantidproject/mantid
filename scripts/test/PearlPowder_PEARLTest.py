@@ -10,10 +10,15 @@ import PearlPowder_PEARL
 
 class PearlRoutinesTest(unittest.TestCase):
 
-    def test_inst_new2_exec(self):
+    def xtest_inst_new2_exec_fmode_all(self):
         pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir="D:\\PEARL\\",
                                             raw_data_dir="D:\\PEARL\\", output_dir="D:\\PEARL\\output\\")
         PearlPowder_common.focus(74795, fmode='all', ttmode='TT70', startup_object=pearl_obj)
+
+    def test_inst_new2_exec_fmode_groups(self):
+        pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir="D:\\PEARL\\",
+                                            raw_data_dir="D:\\PEARL\\", output_dir="D:\\PEARL\\output\\")
+        PearlPowder_common.focus(74795, fmode='groups', ttmode='TT70', startup_object=pearl_obj)
 
     def test_instrument_ranges_calcs_correctly(self):
         # This test checks that the instrument ranges calculate correctly for given instruments

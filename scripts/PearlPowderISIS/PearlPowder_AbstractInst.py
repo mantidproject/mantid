@@ -32,6 +32,33 @@ class AbstractInst(object):
 
     # Instrument specific properties #
 
+    @abstractmethod
+    def get_input_extension(self):
+        """
+        Gets the extension of input files for this instrument
+        @param self: The instrument to query the value for
+        @return: The string of the default extension for this file
+        """
+        pass
+
+    @abstractmethod
+    def get_lambda_range(self):
+        """
+        Returns the lower and upper lambda range for this instrument
+        @param self: The instrument to query the values of lambda for
+        @return: The lower and uppers lambda range (in that order)
+        """
+        pass
+
+    @abstractmethod
+    def get_tof_binning(self):
+        """
+        Returns the TOF binning values
+        @param self: The instrument to get TOF binning values for
+        @return: TOF binning Values
+        """
+        pass
+
     @staticmethod
     @abstractmethod
     def generate_inst_file_name(run_number):
@@ -75,32 +102,7 @@ class AbstractInst(object):
         """
         pass
 
-    @abstractmethod
-    def get_input_extension(self):
-        """
-        Gets the extension of input files for this instrument
-        @param self: The instrument to query the value for
-        @return: The string of the default extension for this file
-        """
-        pass
 
-    @abstractmethod
-    def get_lambda_range(self):
-        """
-        Returns the lower and upper lambda range for this instrument
-        @param self: The instrument to query the values of lambda for
-        @return: The lower and uppers lambda range (in that order)
-        """
-        pass
-
-    @abstractmethod
-    def get_tof_binning(self):
-        """
-        Returns the TOF binning values
-        @param self: The instrument to get TOF binning values for
-        @return: TOF binning Values
-        """
-        pass
 
     # --- Methods applicable to all instruments --- #
     # These can be overridden if instrument specific behaviour is needed#

@@ -5,9 +5,6 @@ import mantid as mantid
 import PearlPowder_common as Common
 
 
-
-# This file should ONLY test common logic and not the flow of the program
-
 class PearlRoutinesTest(unittest.TestCase):
 
     def test_generate_cycle(self):
