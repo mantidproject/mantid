@@ -92,14 +92,16 @@ public:
   void usingTool(const std::string &tool) { m_currentToolName = tool; }
   std::string usingTool() const { return m_currentToolName; }
 
-  void setCurrentToolMethod(std::string toolMethod);
+  void setCurrentToolMethod(std::string toolMethod) {
+    m_currentToolMethod = toolMethod;
+  }
   std::string getCurrentToolMethod() const { return m_currentToolMethod; }
 
   void setCurrentToolSettings(std::shared_ptr<TomoRecToolConfig> settings) {
     m_currentToolSettings = settings;
   }
 
-  TomoRecToolConfig *getCurrentToolSettings() {
+  TomoRecToolConfig *getCurrentToolSettings() const {
     return m_currentToolSettings.get();
   }
 
@@ -107,29 +109,31 @@ public:
   // Access to the system settings information
   //--------------------------------------------
   // get the remote scripts base dir from the system settings
-  std::string getCurrentRemoteScriptsBasePath() {
+  std::string getCurrentRemoteScriptsBasePath() const {
     return m_systemSettings.m_remote.m_basePathReconScripts;
   }
 
   /// get the local paths from the system settings
-  std::string getCurrentLocalScriptsBasePath() {
+  std::string getCurrentLocalScriptsBasePath() const {
     return m_systemSettings.m_local.m_reconScriptsPath;
   }
 
-  std::string getExeternalInterpreterPath() {
+  std::string getExeternalInterpreterPath() const {
     return m_systemSettings.m_local.m_externalInterpreterPath;
   }
 
   /// get the experiment reference currently selected
-  std::string getCurrentExperimentReference() {
+  std::string getCurrentExperimentReference() const {
     return m_systemSettings.m_experimentReference;
   }
 
   /// returns the scripts folder, used for remote path
-  std::string getTomoScriptFolderPath() { return m_tomoScriptFolderPath; }
+  std::string getTomoScriptFolderPath() const { return g_tomoScriptFolderPath; }
 
   /// returns the tomo script location path inside the scripts folder
-  std::string getTomoScriptLocationPath() { return m_tomoScriptLocationPath; }
+  std::string getTomoScriptLocationPath() const {
+    return g_mainReconstructionScript;
+  }
 
   /// ping the (remote) compute resource
   bool doPing(const std::string &compRes);
@@ -155,25 +159,18 @@ public:
 
   void refreshLocalJobsInfo();
 
-  void updateExperimentReference(const std::string ref) {
-    m_experimentRef = ref;
-  }
+  void setExperimentReference(const std::string ref) { m_experimentRef = ref; }
 
   /// Update to the current setings given by the user
-  void updateSystemSettings(const TomoSystemSettings &settings) {
+  void setSystemSettings(const TomoSystemSettings &settings) {
     m_systemSettings = settings;
   }
 
-  /// Update to the current setings given by the user
-  void updateReconToolsSettings(const TomoReconToolsUserSettings &ts) {
-    m_toolsSettings = ts;
-  }
-
-  void updatePrePostProcSettings(const TomoReconFiltersSettings &filters) {
+  void setPrePostProcSettings(const TomoReconFiltersSettings &filters) {
     m_prePostProcSettings = filters;
   }
 
-  void updateImageStackPreParams(const ImageStackPreParams &roiEtc) {
+  void setImageStackPreParams(const ImageStackPreParams &roiEtc) {
     m_imageStackPreParams = roiEtc;
   }
 
@@ -186,20 +183,31 @@ public:
   /// for clean destruction
   void cleanup();
 
-  std::string localComputeResource() const { return m_localCompName; }
+  std::string localComputeResource() const { return g_LocalResourceName; }
 
-  void updateTomoPathsConfig(const TomoPathsConfig &tc) { m_pathsConfig = tc; }
+  void setTomoPathsConfig(const TomoPathsConfig &tc) { m_pathsConfig = tc; }
 
   // Names of reconstruction tools
   static const std::string g_TomoPyTool;
   static const std::string g_AstraTool;
   static const std::string g_customCmdTool;
-
-  // not supported
+  // not supported yet
   static const std::string g_CCPiTool;
   static const std::string g_SavuTool;
 
-private:
+  // Name of the remote compute resource
+  static const std::string g_SCARFName;
+  static const std::string g_LocalResourceName;
+
+  // The main tomo_reconstruct.py or similar script (as it is distributed with
+  // Mantid). This is the entry point for reconstruction jobs.
+  static const std::string g_mainReconstructionScript;
+  static const std::string g_tomoScriptFolderPath;
+
+protected: // protected to expose everything to testing
+  std::string
+  constructSingleStringFromVector(const std::vector<std::string> args) const;
+
   void doRunReconstructionJobLocal(const std::string &compRes,
                                    const std::string &run,
                                    const std::string &allOpts,
@@ -250,10 +258,9 @@ private:
   std::string
   buildOutReconstructionDirFromSamplesDir(const std::string &samplesDir) const;
 
+private:
   /// facility for the remote compute resource
   const std::string m_facility;
-  /// display name of the "local" compute resource
-  const std::string m_localCompName;
 
   /// Experiment reference (RBNumber for example)
   std::string m_experimentRef;
@@ -279,9 +286,6 @@ private:
   /// reconstruction tools available on SCARF
   std::vector<std::string> m_SCARFtools;
 
-  // Name of the remote compute resource
-  static const std::string g_SCARFName;
-
   TomoPathsConfig m_pathsConfig;
 
   // System settting including several paths and parameters (local and remote)
@@ -303,19 +307,11 @@ private:
   // current tool's method, updated from the presenter on change
   std::string m_currentToolMethod;
 
-  const std::string m_tomoScriptFolderPath = "/scripts";
-  const std::string m_tomoScriptLocationPath =
-      "/Imaging/IMAT/tomo_reconstruct.py";
-
   // Settings for the pre-/post-processing filters
   TomoReconFiltersSettings m_prePostProcSettings;
 
   // Parameters set for the ROI, normalization region, etc.
   ImageStackPreParams m_imageStackPreParams;
-
-  // The main tomo_reconstruct.py or similar script (as it is distributed with
-  // Mantid). This is the entry point for reconstruction jobs.
-  static const std::string g_mainReconstructionScript;
 
   // mutex for the job status info update operations
   // TODO: replace with std::mutex+std::lock_guard

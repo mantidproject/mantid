@@ -3,18 +3,12 @@
 
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
 
-//------------------------------
-// Forward Declarations
-//------------------------------
-namespace MantidQt {
-namespace CustomInterfaces {
-struct TomoReconToolsUserSettings;
-}
-}
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
 /**
 Third party tool configuration dialog(s) for the tomographic reconstruction
 GUI.
@@ -40,7 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class TomoToolConfigDialogBase {
+class MANTIDQT_CUSTOMINTERFACES_DLL TomoToolConfigDialogBase {
 public:
   TomoToolConfigDialogBase(const std::string toolName = "",
                            const std::string toolMethod = "")
@@ -69,14 +63,10 @@ public:
 
   virtual bool isInitialised() const { return m_isInitialised; }
 
-  virtual TomoReconToolsUserSettings getReconToolSettings() const {
-    return m_toolSettings;
-  }
-
   std::string getSelectedToolMethod() const { return m_toolMethod; }
 
   /// return pointer and transfer ownership
-  std::shared_ptr<TomoRecToolConfig> getSelectedToolConfig() const {
+  std::shared_ptr<TomoRecToolConfig> getSelectedToolSettings() const {
     return m_tempSettings;
   }
 
@@ -115,8 +105,6 @@ protected:
   /// provided virtual function to add Qt execute behaviour as necessary
   virtual int executeQt() = 0; // this class doesn't inherit from Qt and doesnt
                                // have this->exec()
-
-  TomoReconToolsUserSettings m_toolSettings;
 
   std::shared_ptr<TomoRecToolConfig> m_tempSettings;
 

@@ -6,7 +6,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class TomoToolConfigAstraDialog : public QDialog,
+class MANTIDQT_CUSTOMINTERFACES_DLL TomoToolConfigAstraDialog : public QDialog,
                                   public TomoToolConfigDialogBase {
   Q_OBJECT
 public:
