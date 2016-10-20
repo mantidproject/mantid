@@ -2,23 +2,37 @@ import unittest
 
 import mantid as mantid
 
-import PearlPowder_common
+import PearlPowder_common as Common
 
 
 
 # This file should ONLY test common logic and not the flow of the program
 
 class PearlRoutinesTest(unittest.TestCase):
-    def test_instrument_ranges_calcs_correctly(self):
-        # This test checks that the instrument ranges calculate correctly for given instruments
-        # First the "new" instrument value
-        new_alg_range, new_save_range = PearlPowder_common._get_instrument_ranges("new")
-        self.assertEquals(new_alg_range, 12, "'new' instrument algorithm range got " + str(new_alg_range))
-        self.assertEquals(new_save_range, 3, "'new' instrument save range got " + str(new_save_range))
 
-        new2_alg_range, new2_save_range = PearlPowder_common._get_instrument_ranges("new2")
-        self.assertEquals(new2_alg_range, 14, "'new2' instrument algorithm range got " + str(new2_alg_range))
-        self.assertEquals(new2_save_range, 5, "'new2' instrument save range got " + str(new2_save_range))
+    def test_generate_cycle(self):
+        cycle_number = 123
+        str_cycle_numer = str(cycle_number)
+        Windows_style_path = "C:\\test\\"
+        Linux_style_path = "~/test/"
+
+        Win_result = Common._generate_cycle_dir(raw_data_dir=Windows_style_path, run_cycle=cycle_number)
+        Linux_result = Common._generate_cycle_dir(raw_data_dir=Linux_style_path, run_cycle=cycle_number)
+
+        self.assertEquals(Win_result, Windows_style_path + str_cycle_numer + '\\')
+        self.assertEquals(Linux_result, Linux_style_path + str_cycle_numer + '/')
+
+        # Next check it throws if the end of a path is unclosed
+        bad_Windows_path = "C:\\test"
+        bad_Linux_path = "~/test"
+
+        self.assertRaises(ValueError, lambda: Common._generate_cycle_dir(raw_data_dir=bad_Windows_path,
+                                                                         run_cycle=cycle_number))
+        self.assertRaises(ValueError, lambda: Common._generate_cycle_dir(raw_data_dir=bad_Linux_path,
+                                                                         run_cycle=cycle_number))
+
+
+
 
 if __name__ == '__main__':
     unittest.main()

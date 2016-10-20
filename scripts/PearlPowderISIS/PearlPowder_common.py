@@ -3,6 +3,8 @@ import mantid.simpleapi as mantid
 
 import numpy as numpy
 
+import PearlPowder_PEARL as Pearl
+
 import pearl_cycle_factory # TODO move this into instrument class specific overrides
 import pearl_calib_factory
 
@@ -11,14 +13,13 @@ import pearl_calib_factory
 
 def focus(number, startup_object, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True):
 
-    outwork = _run_pearl_focus(number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm,
-                               user_params=startup_object)
-
-    return outwork
+    return _run_pearl_focus(run_number=number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm,
+                            instrument=startup_object)
 
 
-def create_group(calruns, startup_objects, ngroupfile, ngroup="bank1,bank2,bank3,bank4"):
-    _create_group(calruns=calruns, user_input=startup_objects, ngroup=ngroup, ngroupfile=ngroupfile)
+def create_calibration_by_names(calruns, startup_objects, ngroupfile, ngroup="bank1,bank2,bank3,bank4"):
+    _create_blank_cal_file(calibration_runs=calruns, user_input=startup_objects, group_names=ngroup,
+                           instrument=startup_objects, out_grouping_file_name=ngroupfile)
 
 
 def create_calibration(startup_object, calibration_runs, offset_file_path, grouping_file_path):
@@ -33,10 +34,13 @@ def create_vanadium(startup_object, vanadium_runs, empty_runs, output_file_name,
                 nspline=num_of_spline_coefficients, absorb=do_absorp_corrections, ttmode=tt_mode)
 
 
-def setDebug(debug_on=False):
+def set_debug(debug_on=False):
     global g_debug
     g_debug = debug_on
 
+
+def remove_intermediate_workspace(workspace_name):
+    _remove_ws(ws_to_remove=workspace_name)
 
 # --- Private Implementation --- #
 
@@ -46,214 +50,108 @@ def setDebug(debug_on=False):
 # If this doesn't quite provide what you need please let a developer know so we can create
 # another API which will not change without notice
 
-def _attenuate_workspace(work, outwork, attenuation_file_path):
-    wc_atten = mantid.PearlMCAbsorption(attenuation_file_path)
-    mantid.ConvertToHistogram(InputWorkspace="wc_atten", OutputWorkspace="wc_atten")
-    mantid.RebinToWorkspace(WorkspaceToRebin="wc_atten", WorkspaceToMatch=work, OutputWorkspace="wc_atten")
-    mantid.Divide(LHSWorkspace=work, RHSWorkspace="wc_atten", OutputWorkspace=outwork)
-    _remove_inter_ws(ws_to_remove="wc_atten")
-    return
 
+def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument, user_input=None,
+                           group_names="bank1,bank2,bank3,bank4"):
 
-def _create_group(calruns, ngroupfile, user_input=None, ngroup="bank1,bank2,bank3,bank4"):
+    cycle_information = _get_cycle_info(calibration_runs, instrument=instrument)
 
-    if user_input is None:
-        raise ValueError("Instrument start object not passed.")
-
-    cycle_information = _get_cycle_info(calruns)
-
-    wcal = "cal_raw"
-    _read_pearl_ws(calruns, "raw", wcal, user_input.raw_data_dir, cycle_information["cycle"])
-    mantid.ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
-    mantid.CreateCalFileByNames(InstrumentWorkspace=wcal, GroupingFileName=ngroupfile, GroupNames=ngroup)
+    input_ws = "cal_raw"
+    _read_pearl_ws(calibration_runs, "raw", input_ws, user_input.raw_data_dir, cycle_information["cycle"])
+    calibration_dspacing_ws = mantid.ConvertUnits(InputWorkspace=input_ws, Target="dSpacing")
+    mantid.CreateCalFileByNames(InstrumentWorkspace=calibration_dspacing_ws,
+                                GroupingFileName=out_grouping_file_name, GroupNames=group_names)
+    remove_intermediate_workspace(calibration_dspacing_ws)
+    remove_intermediate_workspace(input_ws)
     return
 
 
 def _generate_cycle_dir(raw_data_dir, run_cycle):
+    str_run_cycle = str(run_cycle)
     # Append current cycle to raw data directory
-    input_dir = raw_data_dir
-    if not input_dir.endswith('\\') or not input_dir.endswith('/'):
-        input_dir += ''  # TODO does this work on Windows and Unix
-    input_dir += run_cycle + '\\'
-    return input_dir
-
-
-def _generate_out_file_names(number, output_directory):
-
-    if isinstance(number, int):
-        outfile = output_directory + "PRL" + str(number) + ".nxs"
-        gssfile = output_directory + "PRL" + str(number) + ".gss"
-        tof_xye_file = output_directory + "PRL" + str(number) + "_tof_xye.dat"
-        d_xye_file = output_directory + "PRL" + str(number) + "_d_xye.dat"
-        outwork = "PRL" + str(number)
+    generated_dir = raw_data_dir + str_run_cycle
+    if raw_data_dir.endswith('\\'):
+        generated_dir += '\\'
+    elif raw_data_dir.endswith('/'):
+        generated_dir += '/'
     else:
-        outfile = output_directory + "PRL" + number + ".nxs"
-        gssfile = output_directory + "PRL" + number + ".gss"
-        tof_xye_file = output_directory + "PRL" + number + "_tof_xye.dat"
-        d_xye_file = output_directory + "PRL" + number + "_d_xye.dat"
-        outwork = "PRL" + number
-
-    out_file_names = {"nxs_filename": outfile,
-                      "gss_filename": gssfile,
-                      "tof_xye_filename": tof_xye_file,
-                      "dspacing_xye_filename": d_xye_file,
-                      "output_name": outwork}
-
-    return out_file_names
+        raise ValueError("Path :" + raw_data_dir + "\n Does not end with a \\ or / character")
+    return generated_dir
 
 
-def _get_calib_files_full_paths(in_cycle, in_tt_mode, in_pearl_file_dir):
+def _get_calib_files_full_paths(cycle, in_tt_mode, instrument):
 
-    calibration_file, grouping_file, van_absorb, van_file, instrument_ver = \
-        pearl_calib_factory.get_calibration_dir(in_cycle, in_tt_mode, in_pearl_file_dir)
+    calibration_dir = instrument.calibration_dir
 
-    calibration_details = {"calibration": calibration_file,
-                           "grouping": grouping_file,
-                           "vanadium_absorption": van_absorb,
-                           "vanadium": van_file,
+    calibration_file, grouping_file, van_absorb, van_file, instrument_ver =\
+        instrument.get_calibration_file_names(cycle=cycle, tt_mode=in_tt_mode)
+
+    calibration_full_path = calibration_dir + calibration_file
+    grouping_full_path = calibration_dir + grouping_file
+    van_absorb_full_path = calibration_dir + van_absorb
+    van_file_full_path = calibration_dir + van_file
+
+    calibration_details = {"calibration": calibration_full_path,
+                           "grouping": grouping_full_path,
+                           "vanadium_absorption": van_absorb_full_path,
+                           "vanadium": van_file_full_path,
                            "instrument_version": instrument_ver}
 
     return calibration_details
 
 
-def _get_cycle_info(number):
-    cycle, instrument_version, _unused_data_dir = pearl_cycle_factory.get_cycle_dir(number, "")
-    # TODO remove the blank param and wrap then move this into the PEARL specific startup
+def _get_cycle_info(cycle, instrument):
+    cycle, instrument_version = instrument.get_cycle_directory(cycle)
 
     cycle_information = {'cycle': cycle,
                          'instrument_version':  instrument_version}
-
     return cycle_information
 
 
-def _get_file_name(run_number, ext):
-
-    digit = len(str(run_number))
-
-    if (run_number < 71009):
-        number_of_digits = 5
-        #
-        # filename=data_dir+"PRL"
-        #
-        filename = "PRL"
-    else:
-        number_of_digits = 8
-        #
-        # filename=data_dir+"PEARL"
-        #
-        filename = "PEARL"
-
-    for i in range(0, number_of_digits - digit):
-        filename += "0"
-
-    filename += str(run_number) + "." + ext
-
-    return filename
-
-
-def _get_instrument_ranges(inst_vers):
-
-    # TODO move this to instrument specific class
-    alg_range = None
-    save_range = None
-
-    if inst_vers == "new" or inst_vers == "old":  # New and old have identical ranges
-        alg_range = 12
-        save_range = 3
-    elif inst_vers == "new2":
-        alg_range = 14
-        save_range = 5
-
-    if alg_range is None or save_range is None:
-        raise ValueError("Instrument version unknown")
-
-    return alg_range, save_range
-
-
-def _get_lambda_range(instrument_name):
-    if instrument_name != "PEARL":
-        raise NotImplementedError("Other instruments lambda not available")
-
-    return 0.03, 6.00
-
-
-def _get_monitor(run_number, ext, input_dir, spline_terms=20):
-    works = "monitor" + str(run_number)
-    _load_monitor(run_number, ext, works, input_dir=input_dir)
-    mantid.ConvertUnits(InputWorkspace=works, OutputWorkspace=works, Target="Wavelength")
-    lmin, lmax = _get_lambda_range("PEARL") # TODO move this to instrument override
-    mantid.CropWorkspace(InputWorkspace=works, OutputWorkspace=works, XMin=lmin, XMax=lmax)
-    ex_regions = numpy.zeros((2, 4))
-    ex_regions[:, 0] = [3.45, 3.7]
-    ex_regions[:, 1] = [2.96, 3.2]
-    ex_regions[:, 2] = [2.1, 2.26]
-    ex_regions[:, 3] = [1.73, 1.98]
-    # ConvertToDistribution(works)
-
-    for reg in range(0, 4):
-        mantid.MaskBins(InputWorkspace=works, OutputWorkspace=works, XMin=ex_regions[0, reg], XMax=ex_regions[1, reg])
-
-    mantid.SplineBackground(InputWorkspace=works, OutputWorkspace=works, WorkspaceIndex=0, NCoeff=spline_terms)
-
-    return works
-
-
-def _get_monitor_sepctrum(run_number):
-    mode = ""
-    if run_number < 71009:
-        raise NotImplementedError()  # TODO figure out how to implement this
-    #    if mode == "trans":
-    #       mspectra = 1081
-    #    elif mode == "all":
-    #       mspectra = 2721
-    #    elif mode == "novan":
-    #       mspectra = 2721
-    #    else:
-    #        raise ValueError("Not supported")
-    else:
-        mspectra = 1
-    return mspectra
-
-
-def _load_monitor(files, ext, outname, input_dir):
-    if isinstance(files, int):
-        file_name = _get_file_name(files, ext)
+def _load_monitor(number, ext, input_dir, instrument):
+    _load_monitor_out_ws = None
+    if isinstance(number, int):
+        file_name = instrument.generate_out_file_name(number, ext)
         infile = input_dir + file_name
-        mspectra = _get_monitor_sepctrum(files)
-        print("loading ", infile, "into ", outname)
-        mantid.LoadRaw(Filename=infile, OutputWorkspace=outname, SpectrumMin=mspectra, SpectrumMax=mspectra,
-                  LoadLogFiles="0")
+        mspectra = instrument.get_monitor_spectra(number)
+        _load_monitor_out_ws = mantid.LoadRaw(Filename=infile, SpectrumMin=mspectra, SpectrumMax=mspectra, LoadLogFiles="0")
     else:
-        loop = 0
-        num = files.split("_")
-        frange = list(range(int(num[0]), int(num[1]) + 1))
-        mspectra = _get_monitor_sepctrum(int(num[0]))
-        for i in frange:
-            file_name = _get_file_name(i, ext)
-            infile = input_dir + file_name
-            outwork = "mon" + str(i)
-            mantid.LoadRaw(Filename=infile, OutputWorkspace=outwork, SpectrumMin=mspectra, SpectrumMax=mspectra,
-                    LoadLogFiles="0")
-            loop = loop + 1
-            if loop == 2:
-                firstwk = "mon" + str(i - 1)
-                secondwk = "mon" + str(i)
-                mantid.Plus(LHSWorkspace=firstwk, RHSWorkspace=secondwk, OutputWorkspace=outname)
-                mantid.mtd.remove(firstwk)
-                mantid.mtd.remove(secondwk)
-            elif loop > 2:
-                secondwk = "mon" + str(i)
-                mantid.Plus(LHSWorkspace=outname, RHSWorkspace=secondwk, OutputWorkspace=outname)
-                mantid.mtd.remove(secondwk)
-    return
+        _load_monitor_out_ws = _load_monitor_sum_range(files=number, input_dir=input_dir, instrument=instrument, ext=ext)
+
+    return _load_monitor_out_ws
 
 
+def _load_monitor_sum_range(files, input_dir, instrument, ext):
+    loop = 0
+    num = files.split("_")
+    frange = list(range(int(num[0]), int(num[1]) + 1))
+    mspectra = instrument.get_monitor_spectra(int(num[0]))
+    out_ws = None
+    for i in frange:
+        file_name = instrument.generate_out_file_name(i, ext)
+        infile = input_dir + file_name
+        outwork = "mon" + str(i)
+        mantid.LoadRaw(Filename=infile, OutputWorkspace=outwork, SpectrumMin=mspectra, SpectrumMax=mspectra,
+                       LoadLogFiles="0")
+        loop += 1
+        if loop == 2:
+            firstwk = "mon" + str(i - 1)
+            secondwk = "mon" + str(i)
+            out_ws = mantid.Plus(LHSWorkspace=firstwk, RHSWorkspace=secondwk)
+            mantid.mtd.remove(firstwk)
+            mantid.mtd.remove(secondwk)
+        elif loop > 2:
+            secondwk = "mon" + str(i)
+            out_ws = mantid.Plus(LHSWorkspace=out_ws, RHSWorkspace=secondwk)
+            mantid.mtd.remove(secondwk)
+
+    return out_ws
 
 
-def _load_raw_files(files, ext, outname, input_dir):
-    # TODO low priority tidy this
-    if isinstance(files, int):
-        file_name = _get_file_name(files, ext)
+def _load_raw_files(run_number, ext, instrument, input_dir):
+    out_ws = None
+    if isinstance(run_number, int):
+        file_name = instrument.generate_out_file_name(run_number, ext)
         directory = input_dir
         if ext[0] == 's':
             # TODO deal with liveData in higher class
@@ -261,136 +159,76 @@ def _load_raw_files(files, ext, outname, input_dir):
 
         infile = directory + file_name
 
-        print("loading ", infile, "into ", outname)
-        mantid.LoadRaw(Filename=infile, OutputWorkspace=outname, LoadLogFiles="0")
+        out_ws = mantid.LoadRaw(Filename=infile, LoadLogFiles="0")
     else:
-        loop = 0
-        num = files.split("_")
-        frange = list(range(int(num[0]), int(num[1]) + 1))
-        for i in frange:
-            file_name = _get_file_name(i, ext)
-            file_path = input_dir + file_name
-            outwork = "run" + str(i)
-            mantid.LoadRaw(Filename=file_path, OutputWorkspace=outwork, LoadLogFiles="0")
-            loop = loop + 1
-            if loop == 2:
-                firstwk = "run" + str(i - 1)
-                secondwk = "run" + str(i)
-                mantid.Plus(LHSWorkspace=firstwk, RHSWorkspace=secondwk, OutputWorkspace=outname)
-                mantid.mtd.remove(firstwk)
-                mantid.mtd.remove(secondwk)
-            elif loop > 2:
-                secondwk = "run" + str(i)
-                mantid.Plus(LHSWorkspace=outname, RHSWorkspace=secondwk, OutputWorkspace=outname)
-                mantid.mtd.remove(secondwk)
-    return
+        out_ws = load_raw_file_range(ext, run_number, input_dir)
+    return out_ws
 
 
-def _read_pearl_ws(number, ext, outname, raw_data_dir, run_cycle):
+def load_raw_file_range(ext, files, input_dir, instrument):
+    loop = 0
+    num = files.split("_")
+    frange = list(range(int(num[0]), int(num[1]) + 1))
+    out_ws = None
+    for i in frange:
+        file_name = instrument.generate_out_file_name(i, ext)
+        file_path = input_dir + file_name
+        outwork = "run" + str(i)
+        mantid.LoadRaw(Filename=file_path, OutputWorkspace=outwork, LoadLogFiles="0")
+        loop += 1
+        if loop == 2:
+            firstwk = "run" + str(i - 1)
+            secondwk = "run" + str(i)
+            out_ws = mantid.Plus(LHSWorkspace=firstwk, RHSWorkspace=secondwk)
+            mantid.mtd.remove(firstwk)
+            mantid.mtd.remove(secondwk)
+        elif loop > 2:
+            secondwk = "run" + str(i)
+            out_ws = mantid.Plus(LHSWorkspace=out_ws, RHSWorkspace=secondwk)
+            mantid.mtd.remove(secondwk)
+    return out_ws
+
+
+def _read_pearl_ws(number, ext, run_cycle, instrument):
+    raw_data_dir = instrument.raw_data_dir
     input_dir = _generate_cycle_dir(raw_data_dir, run_cycle)
-    _load_raw_files(number, ext, outname, input_dir)
-    mantid.ConvertUnits(InputWorkspace=outname, OutputWorkspace=outname, Target="Wavelength")
-    # lmin,lmax=WISH_getlambdarange()
-    # CropWorkspace(output,output,XMin=lmin,XMax=lmax)
-    monitor = _get_monitor(number, ext, spline_terms=20, input_dir=input_dir)
-    # NormaliseToMonitor(InputWorkspace=outname,OutputWorkspace=outname,MonitorWorkspace=monitor)
-    mantid.NormaliseToMonitor(InputWorkspace=outname, OutputWorkspace=outname, MonitorWorkspace=monitor,
-                              IntegrationRangeMin=0.6, IntegrationRangeMax=5.0)
-    mantid.ConvertUnits(InputWorkspace=outname, OutputWorkspace=outname, Target="TOF")
-    mantid.mtd.remove(monitor)
-    # ReplaceSpecialValues(output,output,NaNValue=0.0,NaNError=0.0,InfinityValue=0.0,InfinityError=0.0)
-    return
+    input_ws = _load_raw_files(run_number=number, ext=ext, instrument=instrument, input_dir=input_dir)
+
+    _read_pearl_workspace = mantid.ConvertUnits(InputWorkspace=input_ws, Target="Wavelength")
+    _read_pearl_monitor = instrument.get_monitor(run_number=number, file_extension=ext,
+                                                 input_dir=input_dir, spline_terms=20)
+    _read_pearl_workspace = mantid.NormaliseToMonitor(InputWorkspace=_read_pearl_workspace,
+                                                      MonitorWorkspace=_read_pearl_monitor,
+                                                      IntegrationRangeMin=0.6, IntegrationRangeMax=5.0)
+    output_ws = mantid.ConvertUnits(InputWorkspace=_read_pearl_workspace, Target="TOF")
+
+    remove_intermediate_workspace(_read_pearl_monitor)
+    remove_intermediate_workspace(_read_pearl_workspace)
+    return output_ws
 
 
-def _run_pearl_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, user_params=None):
-    """
-     @type user_params: PearlStart
-    """
-    if user_params is None:
-        raise ValueError("Instrument start object not passed.")
+def _run_pearl_focus(instrument, run_number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True):
 
-    cycle_information = _get_cycle_info(number)
+    cycle_information = _get_cycle_info(cycle=run_number, instrument=instrument)
 
-    alg_range, save_range = _get_instrument_ranges(cycle_information["instrument_version"])
+    alg_range, save_range = instrument.get_instrument_alg_save_ranges(cycle_information["instrument_version"])
 
-    input_file_paths = _get_calib_files_full_paths(in_cycle=cycle_information["cycle"], in_tt_mode=ttmode,
-                                                   in_pearl_file_dir=user_params.calibration_dir)
+    input_file_paths = _get_calib_files_full_paths(cycle=cycle_information["cycle"], in_tt_mode=ttmode,
+                                                   instrument=instrument)
 
-    output_file_names = _generate_out_file_names(number, user_params.output_dir)
+    output_file_names = instrument.generate_out_file_paths(run_number, instrument.output_dir)
+    input_workspace = _read_pearl_ws(number=run_number, ext=ext, instrument=instrument, run_cycle=cycle_information["cycle"])
+    input_workspace = mantid.Rebin(InputWorkspace=input_workspace, Params=instrument.tof_binning)
+    input_workspace = mantid.AlignDetectors(InputWorkspace=input_workspace, CalibrationFile=input_file_paths["calibration"])
+    input_workspace = mantid.DiffractionFocussing(InputWorkspace=input_workspace, GroupingFileName=input_file_paths["grouping"])
 
-    work = "work"
-    focus = "focus"
+    calibrated_spectra = _focus_calibrate(alg_range, input_workspace, input_file_paths, instrument, van_norm)
 
-    _read_pearl_ws(number=number, ext=ext, outname=work, raw_data_dir=user_params.raw_data_dir,
-                   run_cycle=cycle_information["cycle"])
+    remove_intermediate_workspace(input_workspace)
 
-    mantid.Rebin(InputWorkspace=work, OutputWorkspace=work, Params=user_params.tof_binning)
+    if fmode == "all":
 
-    mantid.AlignDetectors(InputWorkspace=work, OutputWorkspace=work,
-                          CalibrationFile=input_file_paths["calibration"])
-
-    mantid.DiffractionFocussing(InputWorkspace=work, OutputWorkspace=focus,
-                                GroupingFileName=input_file_paths["grouping"])
-
-    _remove_inter_ws(ws_to_remove=work)
-
-    for i in range(0, alg_range):
-
-        output = output_file_names["output_name"] + "_mod" + str(i + 1)
-        van = "van" + str(i + 1)
-        rdata = "rdata" + str(i + 1)
-
-        if (van_norm):
-            mantid.LoadNexus(Filename=input_file_paths["vanadium"], OutputWorkspace=van, EntryNumber=i + 1)
-            mantid.ExtractSingleSpectrum(InputWorkspace=focus, OutputWorkspace=rdata, WorkspaceIndex=i)
-            mantid.Rebin(InputWorkspace=van, OutputWorkspace=van, Params=user_params.tof_binning)
-            mantid.ConvertUnits(InputWorkspace=rdata, OutputWorkspace=rdata, Target="TOF")
-            mantid.Rebin(InputWorkspace=rdata, OutputWorkspace=rdata, Params=user_params.tof_binning)
-            mantid.Divide(LHSWorkspace=rdata, RHSWorkspace=van, OutputWorkspace=output)
-            mantid.CropWorkspace(InputWorkspace=output, OutputWorkspace=output, XMin=0.1)
-            mantid.Scale(InputWorkspace=output, OutputWorkspace=output, Factor=10)
-        else:
-            mantid.ExtractSingleSpectrum(InputWorkspace=focus, OutputWorkspace=rdata, WorkspaceIndex=i)
-            mantid.ConvertUnits(InputWorkspace=rdata, OutputWorkspace=rdata, Target="TOF")
-            mantid.Rebin(InputWorkspace=rdata, OutputWorkspace=output, Params=user_params.tof_binning)
-            mantid.CropWorkspace(InputWorkspace=output, OutputWorkspace=output, XMin=0.1)
-
-    _remove_inter_ws(focus)
-
-    if (fmode == "all"):
-
-        name = output_file_names["output_name"] + "_mods1-9"
-
-        input = output_file_names["output_name"] + "_mod1"
-
-        mantid.CloneWorkspace(InputWorkspace=input, OutputWorkspace=name)
-
-        for i in range(1, 9):
-            toadd = output_file_names["output_name"] + "_mod" + str(i + 1)
-            mantid.Plus(LHSWorkspace=name, RHSWorkspace=toadd, OutputWorkspace=name)
-
-        mantid.Scale(InputWorkspace=name, OutputWorkspace=name, Factor=0.111111111111111)
-
-        mantid.SaveGSS(InputWorkspace=name, Filename=output_file_names["gss_filename"], Append=False, Bank=1)
-
-        mantid.ConvertUnits(InputWorkspace=name, OutputWorkspace=name, Target="dSpacing")
-
-        mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=name, Append=False)
-
-        for i in range(0, 3):
-            tosave = output_file_names["output_name"] + "_mod" + str(i + 10)
-
-            mantid.SaveGSS(InputWorkspace=tosave, Filename=output_file_names["gss_filename"], Append=True, Bank=i + 2)
-
-            mantid.ConvertUnits(InputWorkspace=tosave, OutputWorkspace=tosave, Target="dSpacing")
-
-            mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=tosave, Append=True)
-
-        for i in range(0, alg_range):
-            _remove_inter_ws(ws_to_remove=(output_file_names["output_name"] + "_mod" + str(i + 1)))
-            _remove_inter_ws(ws_to_remove=("van" + str(i + 1)))
-            _remove_inter_ws(ws_to_remove="rdata" + str(i + 1))
-            _remove_inter_ws(ws_to_remove=name)
+        focus_mode_all(alg_range, output_file_names, calibrated_spectra)
 
     elif (fmode == "groups"):
 
@@ -450,12 +288,12 @@ def _run_pearl_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True
             mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=tosave, Append=True)
 
         for i in range(0, alg_range):
-            _remove_inter_ws(ws_to_remove=(output_file_names["output_name"] + "_mod" + str(i + 1)))
-            _remove_inter_ws(ws_to_remove=("van" + str(i + 1)))
-            _remove_inter_ws(ws_to_remove=("rdata" + str(i + 1)))
-            _remove_inter_ws(ws_to_remove=output)
+            _remove_ws(ws_to_remove=(output_file_names["output_name"] + "_mod" + str(i + 1)))
+            _remove_ws(ws_to_remove=("van" + str(i + 1)))
+            _remove_ws(ws_to_remove=("rdata" + str(i + 1)))
+            _remove_ws(ws_to_remove=output)
         for i in range(1, 4):
-            _remove_inter_ws(ws_to_remove=name[i])
+            _remove_ws(ws_to_remove=name[i])
 
     elif (fmode == "trans"):
 
@@ -477,9 +315,10 @@ def _run_pearl_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True
             mantid.ConvertUnits(InputWorkspace=name, OutputWorkspace=name, Target="dSpacing")
             mantid.CloneWorkspace(InputWorkspace=name, OutputWorkspace=no_att)
 
-            _attenuate_workspace(name, name, user_params.attenuation_full_path)
+            attenuated_workspace = instrument.attenuate_workspace(name)
 
-            mantid.ConvertUnits(InputWorkspace=name, OutputWorkspace=name, Target="TOF")
+            name = mantid.ConvertUnits(InputWorkspace=attenuated_workspace, Target="TOF")
+            remove_intermediate_workspace(attenuated_workspace)
 
         mantid.SaveGSS(InputWorkspace=name, Filename=output_file_names["gss_filename"], Append=False, Bank=1)
         mantid.SaveFocusedXYE(InputWorkspace=name, Filename=output_file_names["tof_xye_filename"], Append=False, IncludeHeader=False)
@@ -496,11 +335,11 @@ def _run_pearl_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True
             mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=tosave, Append=True)
 
         for i in range(0, alg_range):
-            _remove_inter_ws(ws_to_remove=(output_file_names["output_name"] + "_mod" + str(i + 1)))
-            _remove_inter_ws(ws_to_remove=("van" + str(i + 1)))
-            _remove_inter_ws(ws_to_remove=("rdata" + str(i + 1)))
-            _remove_inter_ws(ws_to_remove=output)
-        _remove_inter_ws(ws_to_remove=name)
+            _remove_ws(ws_to_remove=(output_file_names["output_name"] + "_mod" + str(i + 1)))
+            _remove_ws(ws_to_remove=("van" + str(i + 1)))
+            _remove_ws(ws_to_remove=("rdata" + str(i + 1)))
+            _remove_ws(ws_to_remove=output)
+        _remove_ws(ws_to_remove=name)
 
     elif (fmode == "mods"):
 
@@ -523,9 +362,9 @@ def _run_pearl_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True
 
             mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=output, Append=status)
 
-            _remove_inter_ws(ws_to_remove=rdata)
-            _remove_inter_ws(ws_to_remove=van)
-            _remove_inter_ws(ws_to_remove=output)
+            _remove_ws(ws_to_remove=rdata)
+            _remove_ws(ws_to_remove=van)
+            _remove_ws(ws_to_remove=output)
 
     else:
         print("Sorry I don't know that mode", fmode)
@@ -535,14 +374,85 @@ def _run_pearl_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True
     return output_file_names["output_name"]
 
 
-def _remove_inter_ws(ws_to_remove):
+def focus_mode_all(alg_range, output_file_names, calibrated_spectra):
+    # Take first calibrated spectra
+    first_spectrum = calibrated_spectra[0]
+    summed_spectra = mantid.CloneWorkspace(InputWorkspace=first_spectrum)
+    for i in range(1, 9):  # TODO why is this 1-8
+        summed_spectra = mantid.Plus(LHSWorkspace=summed_spectra, RHSWorkspace=calibrated_spectra[i])
+    summed_spectra = mantid.Scale(InputWorkspace=summed_spectra, Factor=0.111111111111111)
+    mantid.SaveGSS(InputWorkspace=summed_spectra, Filename=output_file_names["gss_filename"], Append=False, Bank=1)
+    summed_spectra = mantid.ConvertUnits(InputWorkspace=summed_spectra, Target="dSpacing")
+    mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=summed_spectra, Append=False)
+    for i in range(0, 3):
+        tosave = calibrated_spectra[(i + 10)]
+
+        mantid.SaveGSS(InputWorkspace=tosave, Filename=output_file_names["gss_filename"], Append=True, Bank=i + 2)
+
+        mantid.ConvertUnits(InputWorkspace=tosave, OutputWorkspace=tosave, Target="dSpacing")
+
+        mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=tosave, Append=True)
+    for i in range(0, alg_range):
+        remove_intermediate_workspace(calibrated_spectra[i])
+
+
+def _focus_calibrate(alg_range, focused_ws, input_file_paths, instrument, van_norm):
+    processed_spectra = []
+    if van_norm:
+        vanadium_ws_list = mantid.LoadNexus(Filename=input_file_paths["vanadium"])
+
+    for index in range(0, alg_range):
+        if van_norm:
+            processed_spectra.append(calc_calibration_with_vanadium(focused_ws, index,
+                                                                    vanadium_ws_list[index + 1], instrument))
+        else:
+            processed_spectra.append(calc_calibration_without_vanadium(focused_ws, index, instrument))
+
+    if van_norm:
+        remove_intermediate_workspace(vanadium_ws_list[0]) # Delete the WS group
+
+    return processed_spectra
+
+
+def calc_calibration_without_vanadium(focused_ws, index, instrument):
+    focus_spectrum = mantid.ExtractSingleSpectrum(InputWorkspace=focused_ws, WorkspaceIndex=index)
+    focus_spectrum = mantid.ConvertUnits(InputWorkspace=focus_spectrum, Target="TOF")
+    focus_spectrum = mantid.Rebin(InputWorkspace=focus_spectrum, Params=instrument.tof_binning)
+    focus_calibrated = mantid.CropWorkspace(InputWorkspace=focus_spectrum, XMin=0.1)
+    return focus_calibrated
+
+
+def calc_calibration_with_vanadium(focused_ws, index, vanadium_ws, instrument):
+    # Load in workspace containing vanadium run
+    van_rebinned = mantid.Rebin(InputWorkspace=vanadium_ws, Params=instrument.tof_binning)
+
+    van_spectrum = mantid.ExtractSingleSpectrum(InputWorkspace=focused_ws, WorkspaceIndex=index)
+    van_spectrum = mantid.ConvertUnits(InputWorkspace=van_spectrum, Target="TOF")
+    van_spectrum = mantid.Rebin(InputWorkspace=van_spectrum, Params=instrument.tof_binning)
+
+    van_processed = "van_processed" + str(index)  # Workaround for Mantid overwriting the WS in a loop
+    mantid.Divide(LHSWorkspace=van_spectrum, RHSWorkspace=van_rebinned, OutputWorkspace=van_processed)
+    mantid.CropWorkspace(InputWorkspace=van_processed, XMin=0.1, OutputWorkspace=van_processed)
+    mantid.Scale(InputWorkspace=van_processed, Factor=10, OutputWorkspace=van_processed)
+
+    #remove_intermediate_workspace(van_spectrum)
+
+    return van_processed
+
+
+def _remove_ws(ws_to_remove):
     """
     Removes any intermediate workspaces if debug is set to false
         @param ws_to_remove: The workspace to remove from the ADS
     """
     try:
         if not g_debug:
-            mantid.mtd.remove(ws_to_remove)
-    except NameError:  # TODO fix this we shouldn't be using exceptions for flow
-        mantid.mtd.remove(ws_to_remove)
+            _remove_ws_wrapper(ws=ws_to_remove)
+    except NameError:  # If g_debug has not been set
+        _remove_ws_wrapper(ws=ws_to_remove)
 
+
+def _remove_ws_wrapper(ws):
+    #mantid.DeleteWorkspace(ws)
+    #del ws  # Mark it as deleted so that Python can throw before Mantid preserving more information
+    print("skipping")
