@@ -210,185 +210,182 @@ def _run_pearl_focus(instrument, run_number, ext="raw", fmode="trans", ttmode="T
     input_workspace = mantid.AlignDetectors(InputWorkspace=input_workspace, CalibrationFile=input_file_paths["calibration"])
     input_workspace = mantid.DiffractionFocussing(InputWorkspace=input_workspace, GroupingFileName=input_file_paths["grouping"])
 
-    calibrated_spectra = _focus_calibrate(alg_range, input_workspace, input_file_paths, instrument, van_norm)
+    calibrated_spectra = _focus_load(alg_range, input_workspace, input_file_paths, instrument, van_norm)
 
     remove_intermediate_workspace(input_workspace)
 
     if fmode == "all":
-
-        _focus_mode_all(alg_range, output_file_names, calibrated_spectra)
+        processed_nexus_files = _focus_mode_all(output_file_names, calibrated_spectra)
 
     elif fmode == "groups":
+        processed_nexus_files = _focus_mode_groups(alg_range, cycle_information, output_file_names, save_range,
+                                                   calibrated_spectra)
 
-        _focus_mode_groups(alg_range, cycle_information, output_file_names, save_range, calibrated_spectra)
+    elif fmode == "trans":
 
-    elif (fmode == "trans"):
+        processed_nexus_files = _focus_mode_trans(output_file_names, atten, instrument, calibrated_spectra)
 
-        name = output_file_names["output_name"] + "_mods1-9"
+    elif fmode == "mods":
 
-        input = output_file_names["output_name"] + "_mod1"
-
-        mantid.CloneWorkspace(InputWorkspace=input, OutputWorkspace=name)
-
-        for i in range(1, 9):
-            toadd = output_file_names["output_name"] + "_mod" + str(i + 1)
-            mantid.Plus(LHSWorkspace=name, RHSWorkspace=toadd, OutputWorkspace=name)
-
-        mantid.Scale(InputWorkspace=name, OutputWorkspace=name, Factor=0.111111111111111)
-
-        if (atten):
-            no_att = output_file_names["output_name"] + "_noatten"
-
-            mantid.ConvertUnits(InputWorkspace=name, OutputWorkspace=name, Target="dSpacing")
-            mantid.CloneWorkspace(InputWorkspace=name, OutputWorkspace=no_att)
-
-            attenuated_workspace = instrument.attenuate_workspace(name)
-
-            name = mantid.ConvertUnits(InputWorkspace=attenuated_workspace, Target="TOF")
-            remove_intermediate_workspace(attenuated_workspace)
-
-        mantid.SaveGSS(InputWorkspace=name, Filename=output_file_names["gss_filename"], Append=False, Bank=1)
-        mantid.SaveFocusedXYE(InputWorkspace=name, Filename=output_file_names["tof_xye_filename"], Append=False, IncludeHeader=False)
-
-        mantid.ConvertUnits(InputWorkspace=name, OutputWorkspace=name, Target="dSpacing")
-
-        mantid.SaveFocusedXYE(InputWorkspace=name, Filename=output_file_names["dspacing_xye_filename"], Append=False, IncludeHeader=False)
-        mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=name, Append=False)
-
-        for i in range(0, 9):
-            tosave = output_file_names["output_name"] + "_mod" + str(i + 1)
-            # SaveGSS(tosave,Filename=gssfile,Append=True,Bank=i+2)
-            mantid.ConvertUnits(InputWorkspace=tosave, OutputWorkspace=tosave, Target="dSpacing")
-            mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=tosave, Append=True)
-
-        for i in range(0, alg_range):
-            _remove_ws(ws_to_remove=(output_file_names["output_name"] + "_mod" + str(i + 1)))
-            _remove_ws(ws_to_remove=("van" + str(i + 1)))
-            _remove_ws(ws_to_remove=("rdata" + str(i + 1)))
-            _remove_ws(ws_to_remove=output)
-        _remove_ws(ws_to_remove=name)
-
-    elif (fmode == "mods"):
-
-        for i in range(0, alg_range):
-
-            output = output_file_names["output_name"] + "_mod" + str(i + 1)
-
-            van = "van" + str(i + 1)
-
-            rdata = "rdata" + str(i + 1)
-
-            status = True
-
-            if (i == 0):
-                status = False
-
-            mantid.SaveGSS(InputWorkspace=output, Filename=output_file_names["gss_filename"], Append=status, Bank=i + 1)
-
-            mantid.ConvertUnits(InputWorkspace=output, OutputWorkspace=output, Target="dSpacing")
-
-            mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=output, Append=status)
-
-            _remove_ws(ws_to_remove=rdata)
-            _remove_ws(ws_to_remove=van)
-            _remove_ws(ws_to_remove=output)
+        processed_nexus_files = _focus_mode_mods(output_file_names, calibrated_spectra)
 
     else:
-        print("Sorry I don't know that mode", fmode)
-        return
+        raise ValueError("Focus mode unknown")
 
-    mantid.LoadNexus(Filename=output_file_names["nxs_filename"], OutputWorkspace=output_file_names["output_name"])
-    return output_file_names["output_name"]
+    return processed_nexus_files
+
+
+def _focus_mode_mods(output_file_names, calibrated_spectra):
+    index = 1
+    append = False
+    output_list = []
+    for ws in calibrated_spectra:
+
+        if ws == calibrated_spectra[0]:
+            # Skip WS group
+            continue
+
+        mantid.SaveGSS(InputWorkspace=ws, Filename=output_file_names["gss_filename"], Append=append, Bank=index)
+        output_name = "_focus_mode_mods-" + str(index)
+        dspacing_ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=output_name, Target="dSpacing")
+        output_list.append(dspacing_ws)
+        mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=dspacing_ws, Append=append)
+
+        append = True
+    return output_list
+
+
+def _focus_mode_trans(output_file_names, atten, instrument, calibrated_spectra):
+    summed_ws = mantid.CloneWorkspace(InputWorkspace=calibrated_spectra[1])
+    for i in range(2, 10):  # Add workspaces 2-9
+        summed_ws = mantid.Plus(LHSWorkspace=summed_ws, RHSWorkspace=calibrated_spectra[i])
+
+    summed_ws = mantid.Scale(InputWorkspace=summed_ws, Factor=0.111111111111111)
+
+    attenuated_workspace = summed_ws
+    if atten:
+        no_att = output_file_names["output_name"] + "_noatten"
+
+        no_att_ws = mantid.CloneWorkspace(InputWorkspace=summed_ws, OutputWorkspace=no_att)
+        attenuated_workspace = mantid.ConvertUnits(InputWorkspace=attenuated_workspace, Target="dSpacing")
+        attenuated_workspace = instrument.attenuate_workspace(attenuated_workspace)
+        attenuated_workspace = mantid.ConvertUnits(InputWorkspace=attenuated_workspace, Target="TOF")
+
+    mantid.SaveGSS(InputWorkspace=attenuated_workspace, Filename=output_file_names["gss_filename"], Append=False, Bank=1)
+    mantid.SaveFocusedXYE(InputWorkspace=attenuated_workspace, Filename=output_file_names["tof_xye_filename"],
+                          Append=False, IncludeHeader=False)
+
+    attenuated_workspace = mantid.ConvertUnits(InputWorkspace=attenuated_workspace, Target="dSpacing")
+    mantid.SaveFocusedXYE(InputWorkspace=attenuated_workspace, Filename=output_file_names["dspacing_xye_filename"],
+                          Append=False, IncludeHeader=False)
+    mantid.SaveNexus(InputWorkspace=attenuated_workspace, Filename=output_file_names["nxs_filename"], Append=False)
+
+    output_list = [attenuated_workspace]
+
+    for i in range(1, 10):
+        workspace_name = "_focus_mode_trans-dspacing" + str(i)
+        to_save = mantid.ConvertUnits(InputWorkspace=calibrated_spectra[i], Target="dSpacing",
+                                      OutputWorkspace=workspace_name)
+        output_list.append(to_save)
+        mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=to_save, Append=True)
+
+    remove_intermediate_workspace(summed_ws)
+    return output_list
 
 
 def _focus_mode_groups(alg_range, cycle_information, output_file_names, save_range, calibrated_spectra):
-    workspace_list = []
     output_list = []
+    to_save = _sum_groups_of_three_ws(calibrated_spectra)
 
+    workspaces_4_to_9 = mantid.Plus(LHSWorkspace=to_save[1], RHSWorkspace=to_save[2])
+    workspaces_4_to_9 = mantid.Scale(InputWorkspace=workspaces_4_to_9, Factor=0.5)
+    to_save.append(workspaces_4_to_9)
+    append = False
+    index = 1
+    for ws in to_save:
+        if cycle_information["instrument_version"] == "new":
+            mantid.SaveGSS(InputWorkspace=ws, Filename=output_file_names["gss_filename"], Append=append,
+                           Bank=index)
+        elif cycle_information["instrument_version"] == "new2":
+            mantid.SaveGSS(InputWorkspace=ws, Filename=output_file_names["gss_filename"], Append=False,
+                           Bank=index)
+
+        workspace_names = "_focus_mode_groups_save-" + str(index)
+        dspacing_ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=workspace_names, Target="dSpacing")
+        output_list.append(dspacing_ws)
+        mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=dspacing_ws, Append=append)
+        append = True
+        index += 1
+
+    for i in range(0, save_range):
+        workspace_names = "_focus_mode_groups_save-" + str(i + 9)
+
+        tosave = calibrated_spectra[i + 9]
+
+        mantid.SaveGSS(InputWorkspace=tosave, Filename=output_file_names["gss_filename"], Append=True, Bank=i + 5)
+
+        output_list.append(mantid.ConvertUnits(InputWorkspace=tosave,
+                                               OutputWorkspace=workspace_names, Target="dSpacing"))
+
+        mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=tosave, Append=True)
+    return output_list
+
+
+def _sum_groups_of_three_ws(calibrated_spectra, ):
+    workspace_list = []
+    to_scale_list = []
+    output_list = []
     for outer_loop_count in range(0, 3):
         # First clone workspaces 1/4/7
         pass_multiplier = (outer_loop_count * 3)
         first_ws_index = pass_multiplier + 1
         workspace_names = "focus_mode_groups-" + str(first_ws_index)
         workspace_list.append(mantid.CloneWorkspace(InputWorkspace=calibrated_spectra[first_ws_index],
-                              OutputWorkspace=workspace_names))
+                                                    OutputWorkspace=workspace_names))
         # Then add workspaces 1+2+3 / 4+5+6 / 7+8+9
         for i in range(2, 4):
             input_ws_index = i + pass_multiplier  # Workspaces 2/3
             inner_workspace_names = "focus_mode_groups-" + str(input_ws_index)
 
-            output_list.append(mantid.Plus(LHSWorkspace=workspace_list[outer_loop_count],
-                                           RHSWorkspace=calibrated_spectra[input_ws_index],
-                                           OutputWorkspace=inner_workspace_names))
+            to_scale_list.append(mantid.Plus(LHSWorkspace=workspace_list[outer_loop_count],
+                                             RHSWorkspace=calibrated_spectra[input_ws_index],
+                                             OutputWorkspace=inner_workspace_names))
 
         # Finally scale the output workspaces
         workspace_names = "focus_mode_groups_scaled-" + str(outer_loop_count)
-        output_list.append(mantid.Scale(InputWorkspace=output_list[outer_loop_count],
+        output_list.append(mantid.Scale(InputWorkspace=to_scale_list[outer_loop_count],
                                         OutputWorkspace=workspace_names, Factor=0.333333333333))
-
-    for ws in workspace_list:
+    for ws in to_scale_list:
         remove_intermediate_workspace(ws)
+    return output_list
+
+
+def _focus_mode_all(output_file_names, calibrated_spectra):
+    first_spectrum = calibrated_spectra[0]
+    summed_spectra = mantid.CloneWorkspace(InputWorkspace=first_spectrum)
+
+    for i in range(1, 9):  # TODO why is this 1-8
+        summed_spectra = mantid.Plus(LHSWorkspace=summed_spectra, RHSWorkspace=calibrated_spectra[i])
+
+    summed_spectra = mantid.Scale(InputWorkspace=summed_spectra, Factor=0.111111111111111)
+    mantid.SaveGSS(InputWorkspace=summed_spectra, Filename=output_file_names["gss_filename"], Append=False, Bank=1)
+
+    summed_spectra = mantid.ConvertUnits(InputWorkspace=summed_spectra, Target="dSpacing")
+    mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=summed_spectra, Append=False)
+
+    output_list = []
+    for i in range(0, 3):
+        ws_to_save = calibrated_spectra[(i + 10)]  # Save out workspaces 10/11/12
+
+        mantid.SaveGSS(InputWorkspace=ws_to_save, Filename=output_file_names["gss_filename"], Append=True, Bank=i + 2)
+        to_save = mantid.ConvertUnits(InputWorkspace=ws_to_save, OutputWorkspace=ws_to_save, Target="dSpacing")
+        output_list.append(to_save)
+        mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=to_save, Append=True)
 
     return output_list
 
-    #
-    #       Sum left and right 90degree bank modules, i.e. modules 4-9...
-    #
-    mantid.Plus(LHSWorkspace=name[1], RHSWorkspace=name[2], OutputWorkspace=name[3])
-    mantid.Scale(InputWorkspace=name[3], OutputWorkspace=name[3], Factor=0.5)
-    for i in range(0, 4):
-        append = True
-        if i is 0:
-            append = False
 
-        if cycle_information["instrument_version"] == "new":
-            mantid.SaveGSS(InputWorkspace=name[i], Filename=output_file_names["gss_filename"], Append=append,
-                           Bank=i + 1)
-        elif cycle_information["instrument_version"] == "new2":
-            mantid.SaveGSS(InputWorkspace=name[i], Filename=output_file_names["gss_filename"], Append=False, Bank=i + 1)
-
-        mantid.ConvertUnits(InputWorkspace=name[i], OutputWorkspace=name[i], Target="dSpacing")
-        mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=name[i], Append=append)
-    for i in range(0, save_range):
-        tosave = output_file_names["output_name"] + "_mod" + str(i + 10)
-
-        mantid.SaveGSS(InputWorkspace=tosave, Filename=output_file_names["gss_filename"], Append=True, Bank=i + 5)
-
-        mantid.ConvertUnits(InputWorkspace=tosave, OutputWorkspace=tosave, Target="dSpacing")
-
-        mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=tosave, Append=True)
-    for i in range(0, alg_range):
-        _remove_ws(ws_to_remove=(output_file_names["output_name"] + "_mod" + str(i + 1)))
-        _remove_ws(ws_to_remove=("van" + str(i + 1)))
-        _remove_ws(ws_to_remove=("rdata" + str(i + 1)))
-        _remove_ws(ws_to_remove=output)
-    for i in range(1, 4):
-        _remove_ws(ws_to_remove=name[i])
-
-
-def _focus_mode_all(alg_range, output_file_names, calibrated_spectra):
-    # Take first calibrated spectra
-    first_spectrum = calibrated_spectra[0]
-    summed_spectra = mantid.CloneWorkspace(InputWorkspace=first_spectrum)
-    for i in range(1, 9):  # TODO why is this 1-8
-        summed_spectra = mantid.Plus(LHSWorkspace=summed_spectra, RHSWorkspace=calibrated_spectra[i])
-    summed_spectra = mantid.Scale(InputWorkspace=summed_spectra, Factor=0.111111111111111)
-    mantid.SaveGSS(InputWorkspace=summed_spectra, Filename=output_file_names["gss_filename"], Append=False, Bank=1)
-    summed_spectra = mantid.ConvertUnits(InputWorkspace=summed_spectra, Target="dSpacing")
-    mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=summed_spectra, Append=False)
-    for i in range(0, 3):
-        tosave = calibrated_spectra[(i + 10)]
-
-        mantid.SaveGSS(InputWorkspace=tosave, Filename=output_file_names["gss_filename"], Append=True, Bank=i + 2)
-
-        mantid.ConvertUnits(InputWorkspace=tosave, OutputWorkspace=tosave, Target="dSpacing")
-
-        mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=tosave, Append=True)
-    for i in range(0, alg_range):
-        remove_intermediate_workspace(calibrated_spectra[i])
-
-
-def _focus_calibrate(alg_range, focused_ws, input_file_paths, instrument, van_norm):
+def _focus_load(alg_range, focused_ws, input_file_paths, instrument, van_norm):
     processed_spectra = []
     if van_norm:
         vanadium_ws_list = mantid.LoadNexus(Filename=input_file_paths["vanadium"])
