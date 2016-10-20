@@ -1,5 +1,4 @@
-#pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module,unused-variable
-
+# pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -7,16 +6,14 @@ from mantid import config
 
 import os
 
-
 _str_or_none = lambda s: s if s != '' else None
 _ws_or_none = lambda s: mtd[s] if s != '' else None
 _elems_or_none = lambda l: l if len(l) != 0 else None
 
 
-class IndirectEnergyWindowScan(DataProcessorAlgorithm):
-
+class IndirectElasticWindowScan(DataProcessorAlgorithm):
+    _chopped_data = None
     _data_files = None
-    _sum_files = None
     _load_logs = None
     _calibration_ws = None
     _instrument_name = None
@@ -25,43 +22,28 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
     _efixed = None
     _spectra_range = None
     _background_range = None
-    _elastic_range = None
-    _inelastic_range = None
     _rebin_string = None
     _detailed_balance = None
     _grouping_method = None
     _grouping_ws = None
     _grouping_map_file = None
     _output_ws = None
-    _output_x_units = None
-    _plot_type = None
-    _save_formats = None
     _ipf_filename = None
-    _sample_log_name = None
-    _sample_log_value = None
     _workspace_names = None
-    _scan_ws = None
 
     def category(self):
         return 'Workflow\\Inelastic;Inelastic\\Indirect;Workflow\\MIDAS'
 
-
     def summary(self):
         return 'Runs an energy transfer reduction for an inelastic indirect geometry instrument.'
 
-
     def PyInit(self):
         # Input properties
-        self.declareProperty(StringArrayProperty(name='InputFiles'),
+        self.declareProperty(StringArrayProperty(name='RunNumbers'),
                              doc='Comma separated list of input files')
 
         self.declareProperty(name='LoadLogFiles', defaultValue=True,
                              doc='Load log files when loading runs')
-
-        self.declareProperty(WorkspaceProperty('CalibrationWorkspace', '',
-                                               direction=Direction.Input,
-                                               optional=PropertyMode.Optional),
-                             doc='Workspace contining calibration data')
 
         # Instrument configuration properties
         self.declareProperty(name='Instrument', defaultValue='',
@@ -78,24 +60,16 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
                                               validator=IntArrayMandatoryValidator()),
                              doc='Comma separated range of spectra number to use.')
         self.declareProperty(FloatArrayProperty(name='ElasticRange'),
-                             doc='Energy range for the elastic component')
+                             doc='Range of background to subtract from raw data in time of flight.')
         self.declareProperty(FloatArrayProperty(name='InelasticRange'),
-                             doc='Energy range for the inelastic component.')
+                             doc='Range of background to subtract from raw data in time of flight.')
         self.declareProperty(name='DetailedBalance', defaultValue=Property.EMPTY_DBL,
-                             doc='Apply the detailed balance correction')
+                             doc='')
 
         # Spectra grouping options
         self.declareProperty(name='GroupingMethod', defaultValue='Individual',
-                             validator=StringListValidator(['Individual', 'All', 'File', 'Workspace', 'IPF']),
+                             validator=StringListValidator(['Individual', 'All', 'File']),
                              doc='Method used to group spectra.')
-        self.declareProperty(WorkspaceProperty('GroupingWorkspace', '',
-                                               direction=Direction.Input,
-                                               optional=PropertyMode.Optional),
-                             doc='Workspace containing spectra grouping.')
-        self.declareProperty(FileProperty('MapFile', '',
-                                          action=FileAction.OptionalLoad,
-                                          extensions=['.map']),
-                             doc='File containing spectra grouping.')
 
         self.declareProperty(name='SampleEnvironmentLogName', defaultValue='sample',
                              doc='Name of the sample environment log entry')
@@ -105,95 +79,52 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
                              StringListValidator(sampEnvLogVal_type),
                              doc='Value selection of the sample environment log entry')
 
-        self.declareProperty(name='MSDFit', defaultValue=False,
-                             doc='Perform an MSDFit')
+        self.declareProperty(name='msdFit', defaultValue=False,
+                             doc='Perform an msdFit')
 
+        self.declareProperty(name='Plot', defaultValue=False,
+                             doc='Switch Plot Off/On')
+        self.declareProperty(name='Save', defaultValue=False,
+                             doc='Switch Save result to nxs file Off/On')
 
-        # Output properties
-        self.declareProperty(name='OutputWorkspace', defaultValue='output',
-                             doc='Workspace group for the resulting workspaces.')
-        self.declareProperty(name='ScanWorkspace', defaultValue='scan',
-                             doc='Workspace for the scan results.')
-
-
-    #pylint: disable=too-many-locals
+    # pylint: disable=too-many-locals
     def PyExec(self):
-
+        setup_progress = Progress(self, 0.0, 0.05, 3)
+        setup_progress.report('Getting Parameters')
         self._setup()
 
-        process_prog = Progress(self, start=0.1, end=0.9, nreports=len(self._workspace_names))
-        scan_alg = self.createChildAlgorithm("ISISIndirectEnergyTransfer", 0.05, 0.95)
-        scan_alg.setProperty('InputFiles',self._data_files)
-        scan_alg.setProperty('SumFiles',self._sum_files)
-        scan_alg.setProperty('LoadLogFiles',self._load_logs)
-        scan_alg.setProperty('CalibrationWorkspace',self._calibration_ws)
-        scan_alg.setProperty('Instrument',self._instrument_name)
-        scan_alg.setProperty('Analyser',self._analyser)
-        scan_alg.setProperty('Reflection',self._reflection)
-        scan_alg.setProperty('Efixed',self._efixed)
-        scan_alg.setProperty('SpectraRange',self._spectra_range)
-        scan_alg.setProperty('BackgroundRange',self._background_range)
-        scan_alg.setProperty('RebinString',self._rebin_string)
-        scan_alg.setProperty('DetailedBalance',self._detailed_balance)
-        scan_alg.setProperty('ScaleFactor',self._scale_factor)
-        scan_alg.setProperty('FoldMultipleFrames',self._fold_multiple_frames)
-        scan_alg.setProperty('GroupingMethod',self._grouping_method)
-        scan_alg.setProperty('GroupingWorkspace',self._grouping_ws)
-        scan_alg.setProperty('MapFile',self._grouping_map_file)
-        scan_alg.setProperty('UnitX',self._output_x_units)
-        scan_alg.setProperty('SaveFormats',self._save_formats)
-        scan_alg.setProperty('Plot',self._plot_type)
-        scan_alg.setProperty('OutputWorkspace',self._output_ws)
+        scan_alg = self.createChildAlgorithm("EnergyWindowScan", 0.05, 0.95)
+        scan_alg.setProperty('InputFiles', self._data_files)
+        scan_alg.setProperty('LoadLogFiles', self._load_logs)
+        scan_alg.setProperty('CalibrationWorkspace', self._calibration_ws)
+        scan_alg.setProperty('Instrument', self._instrument_name)
+        scan_alg.setProperty('Analyser', self._analyser)
+        scan_alg.setProperty('Reflection', self._reflection)
+        scan_alg.setProperty('SpectraRange', self._spectra_range)
+        scan_alg.setProperty('ElasticRange', self._elastic_range)
+        scan_alg.setProperty('InelasticRange', self._inelastic_range)
+        scan_alg.setProperty('DetailedBalance', self._detailed_balance)
+        scan_alg.setProperty('GroupingMethod', self._grouping_method)
+        scan_alg.setProperty('SampleEnvironmentLogName', self._sample_log_name)
+        scan_alg.setProperty('SampleEnvironmentLogValue', self._sample_log_value)
+        scan_alg.setProperty('msdFit', self._msdfit)
+        scan_alg.setProperty('ReducedWorkspace', self._output_ws)
+        scan_alg.setProperty('ScanWorkspace', self._scan_ws)
         scan_alg.execute()
 
         logger.information('OutputWorkspace : %s' % self._output_ws)
         logger.information('ScanWorkspace : %s' % self._scan_ws)
 
-        elwin_prog = Progress(self, start=0.9, end=1.0, nreports=4)
-        elwin_prog.report('Elastic Window')
-        ElasticWindowMultiple(InputWorkspaces=self._output_ws,
-                              IntegrationRangeStart=self._elastic_range[0],
-                              IntegrationRangeEnd=self._elastic_range[1],
-                              SampleEnvironmentLogName=self._sample_log_name,
-                              SampleEnvironmentLogValue=self._sample_log_value,
-                              OutputInQ=self._scan_ws + '_el_eq1',
-                              OutputInQSquared=self._scan_ws + '_el_eq2',
-                              OutputELF=self._scan_ws + '_el_elf',
-                              OutputELT=self._scan_ws + '_el_elt')
+        post_progress = Progress(self, 0.95, 1.0, 3)
+        if self._plot:
+            post_progress.report('Plotting')
+            self._plot_result()
 
-        elwin_prog.report('Inelastic Window')
-        ElasticWindowMultiple(InputWorkspaces=self._output_ws,
-                              IntegrationRangeStart=self._inelastic_range[0],
-                              IntegrationRangeEnd=self._inelastic_range[1],
-                              SampleEnvironmentLogName=self._sample_log_name,
-                              SampleEnvironmentLogValue=self._sample_log_value,
-                              OutputInQ=self._scan_ws + '_inel_eq1',
-                              OutputInQSquared=self._scan_ws + '_inel_eq2',
-                              OutputELF=self._scan_ws + '_inel_elf',
-                              OutputELT=self._scan_ws + '_inel_elt')
+        if self._save:
+            post_progress.report('Saving')
+            self._save_output()
 
-        Divide(LHSWorkspace=self._scan_ws + '_el_eq1',
-               RHSWorkspace=self._scan_ws + '_inel_eq1',
-               OutputWorkspace=self._scan_ws + '_eisf')
-
-        delete_alg = self.createChildAlgorithm("DeleteWorkspace", enableLogging=False)
-        delete_alg.setProperty("Workspace", self._scan_ws + '_el_elf')
-        delete_alg.execute()
-        delete_alg.setProperty("Workspace", self._scan_ws + '_inel_elf')
-        delete_alg.execute()
-
-        if self._msdfit:
-            msdfit_prog = Progress(self, start=0.9, end=1.0, nreports=4)
-            msdfit_prog.report('MSDFit')
-            x_values=mtd[self._scan_ws + '_el_eq2'].readX(0)
-            num_hist = mtd[self._scan_ws + '_el_eq2'].getNumberHistograms()
-            MSDFit(InputWorkspace=self._scan_ws + '_el_eq2',
-                   Xstart=x_values[0],
-                   XEnd=x_values[len(x_values) - 1],
-                   SpecMin=0,
-                   SpecMax=num_hist - 1,
-                   OutputWorkspace=self._scan_ws + '_msd',
-                   FitWorkspaces=self._scan_ws + '_msd_fit')
+        post_progress.report('Algorithm Complete')
 
     def validateInputs(self):
         """
@@ -220,7 +151,7 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
         if len(spectra_range) != 2:
             issues['SpectraRange'] = 'Range must contain exactly two items'
         elif spectra_range[0] > spectra_range[1]:
-            issues['SpectraRange'] = 'Range must be in format: lower, upper'
+            issues['SpectraRange'] = 'Range must be in format: lower,upper'
 
         # Validate ranges
         elastic_range = self.getProperty('ElasticRange').value
@@ -228,23 +159,15 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
             if len(elastic_range) != 2:
                 issues['ElasticRange'] = 'Range must contain exactly two items'
             elif elastic_range[0] > elastic_range[1]:
-                issues['ElasticRange'] = 'Range must be in format: lower, upper'
+                issues['ElasticRange'] = 'Range must be in format: lower,upper'
         inelastic_range = self.getProperty('InelasticRange').value
         if inelastic_range is not None:
             if len(inelastic_range) != 2:
                 issues['InelasticRange'] = 'Range must contain exactly two items'
             elif inelastic_range[0] > inelastic_range[1]:
-                issues['InelasticRange'] = 'Range must be in format: lower, upper'
-
-        # Validate grouping method
-        grouping_method = self.getPropertyValue('GroupingMethod')
-        grouping_ws = _ws_or_none(self.getPropertyValue('GroupingWorkspace'))
-
-        if grouping_method == 'Workspace' and grouping_ws is None:
-            issues['GroupingWorkspace'] = 'Must select a grouping workspace for current GroupingWorkspace'
+                issues['InelasticRange'] = 'Range must be in format: lower,upper'
 
         return issues
-
 
     def _setup(self):
         """
@@ -252,46 +175,39 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
         """
 
         # Get properties
-        self._data_files = self.getProperty('InputFiles').value
+        self._instrument_name = self.getPropertyValue('Instrument')
+
+        runs = self.getProperty('RunNumbers').value
+        self._data_files = []
+        for idx in range(len(runs)):
+            self._data_files.append(self._instrument_name.lower() + runs[idx])
+        first_file = self._data_files[0]
         self._sum_files = False
         self._load_logs = self.getProperty('LoadLogFiles').value
         self._calibration_ws = ''
 
-        self._instrument_name = self.getPropertyValue('Instrument')
         self._analyser = self.getPropertyValue('Analyser')
         self._reflection = self.getPropertyValue('Reflection')
-        self._efixed = Property.EMPTY_DBL
 
         self._spectra_range = self.getProperty('SpectraRange').value
-        self._background_range = ''
-        self._rebin_string = ''
-        self._detailed_balance = self.getProperty('DetailedBalance').value
-        self._scale_factor = 1.0
-        self._fold_multiple_frames = False
         self._elastic_range = self.getProperty('ElasticRange').value
         self._inelastic_range = self.getProperty('InelasticRange').value
+        self._detailed_balance = self.getProperty('DetailedBalance').value
 
         self._grouping_method = self.getPropertyValue('GroupingMethod')
         self._grouping_ws = ''
         self._grouping_map_file = ''
 
-        self._output_x_units = 'DeltaE'
-        self._plot_type = 'None'
-        self._save_formats = ''
-
-        self._msdfit = self.getProperty('msdFit').value
-
-        self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._sample_log_name = self.getPropertyValue('SampleEnvironmentLogName')
         self._sample_log_value = self.getPropertyValue('SampleEnvironmentLogValue')
 
-        self._scan_ws = self.getPropertyValue('ScanWorkspace')
+        self._msdfit = self.getProperty('msdFit').value
 
-        # Disable sum files if there is only one file
-        if len(self._data_files) == 1:
-            if self._sum_files:
-                logger.warning('SumFiles disabled when only one input file is provided.')
-            self._sum_files = False
+        self._output_ws = first_file + '_ew_scan_red'
+        self._scan_ws = first_file + '_ew_scan'
+
+        self._plot = self.getProperty('Plot').value
+        self._save = self.getProperty('Save').value
 
         # Get the IPF filename
         self._ipf_filename = os.path.join(config['instrumentDefinition.directory'],
@@ -305,35 +221,52 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
         if self._grouping_method != 'File' and self._grouping_map_file is not None:
             logger.warning('MapFile will be ignored by selected GroupingMethod')
 
-        # The list of workspaces being processed
-        self._workspace_names = []
+    def _save_output(self):
+        workdir = config['defaultsave.directory']
+        el_eq1_path = os.path.join(workdir, self._scan_ws + '_el_eq1.nxs')
+        logger.information('Creating file : %s' % el_eq1_path)
+        SaveNexusProcessed(InputWorkspace=self._scan_ws + '_el_eq1',
+                           Filename=el_eq1_path)
+        el_eq2_path = os.path.join(workdir, self._scan_ws + '_el_eq2.nxs')
+        logger.information('Creating file : %s' % el_eq2_path)
+        SaveNexusProcessed(InputWorkspace=self._scan_ws + '_el_eq2',
+                           Filename=el_eq2_path)
 
-    def _rename_reduction(self, workspace_name):
-        """
-        Renames a workspace according to the naming policy in the Workflow.NamingConvention parameter.
+        inel_eq1_path = os.path.join(workdir, self._scan_ws + '_inel_eq1.nxs')
+        logger.information('Creating file : %s' % inel_eq1_path)
+        SaveNexusProcessed(InputWorkspace=self._scan_ws + '_inel_eq1',
+                           Filename=inel_eq1_path)
+        inel_eq2_path = os.path.join(workdir, self._scan_ws + '_inel_eq2.nxs')
+        logger.information('Creating file : %s' % inel_eq2_path)
+        SaveNexusProcessed(InputWorkspace=self._scan_ws + '_inel_eq2',
+                           Filename=inel_eq2_path)
 
-        @param workspace_name Name of workspace
-        @return New name of workspace
-        """
-        from mantid.simpleapi import RenameWorkspace
-        import string
+        eisf_path = os.path.join(workdir, self._scan_ws + '_eisf.nxs')
+        logger.information('Creating file : %s' % eisf_path)
+        SaveNexusProcessed(InputWorkspace=self._scan_ws + '_eisf',
+                           Filename=eisf_path)
 
-        # Get the instrument
-        instrument = mtd[workspace_name].getInstrument()
+        if self._msdfit:
+            msd_path = os.path.join(workdir, self._scan_ws + '_msd.nxs')
+            logger.information('Creating file : %s' % msd_path)
+            SaveNexusProcessed(InputWorkspace=self._scan_ws + '_msd',
+                               Filename=msd_path)
+            msd_fit_path = os.path.join(workdir, self._scan_ws + '_msd_fit.nxs')
+            logger.information('Creating file : %s' % msd_fit_path)
+            SaveNexusProcessed(InputWorkspace=self._scan_ws + '_msd_fit',
+                               Filename=msd_fit_path)
 
-        # Get run number
-        run_number = mtd[workspace_name].getRun()['run_number'].value
+    def _plot_result(self):
+        import mantidplot as mp
+        nhist = mtd[self._scan_ws + '_el_eq1'].getNumberHistograms()
+        el_eq1_plot = mp.plotSpectrum(self._scan_ws + '_el_eq1', 0, error_bars=True)
+        inel_eq1_plot = mp.plotSpectrum(self._scan_ws + '_inel_eq1', 0, error_bars=True)
+        el_eq2_plot = mp.plotSpectrum(self._scan_ws + '_el_eq2', 0, error_bars=True)
+        inel_eq2_plot = mp.plotSpectrum(self._scan_ws + '_inel_eq2', 0, error_bars=True)
+        eisf_plot = mp.plotSpectrum(self._scan_ws + '_eisf', 0, error_bars=True)
+        if self._msdfit:
+            msd_plot = mp.plotSpectrum(self._scan_ws + '_msd', 1, error_bars=True)
 
-        inst_name = instrument.getName()
-        inst_name = inst_name.lower()
-
-        analyser = instrument.getStringParameter('analyser')[0]
-        reflection = instrument.getStringParameter('reflection')[0]
-        new_name = '%s%s_%s%s_red' % (inst_name.lower(), run_number, analyser, reflection)
-        RenameWorkspace(InputWorkspace=workspace_name,
-                        OutputWorkspace=new_name)
-
-        return new_name
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(IndirectEnergyWindowScan)
+AlgorithmFactory.subscribe(IndirectElasticWindowScan)
