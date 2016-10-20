@@ -18,6 +18,7 @@
 #include <QString>
 #include <QThread>
 #include <QTimer>
+
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 
 #ifdef _DEBUG
@@ -153,7 +154,7 @@ void TomographyIfacePresenter::notify(
 }
 
 void TomographyIfacePresenter::processSystemSettingsUpdated() {
-  m_model->updateSystemSettings(m_view->systemSettings());
+  m_model->setSystemSettings(m_view->systemSettings());
 
   // update the tool information with the new system settings
   setupConfigDialogSettingsAndUpdateModel(m_configDialog.get());
@@ -349,14 +350,14 @@ void TomographyIfacePresenter::updateModelCurrentToolMethod(
 */
 void TomographyIfacePresenter::updateModelCurrentToolSettings(
     TomoToolConfigDialogBase *dialog) {
-  m_model->setCurrentToolSettings(dialog->getSelectedToolConfig());
+  m_model->setCurrentToolSettings(dialog->getSelectedToolSettings());
 }
 
 /**
  * Simply take the paths that the user has provided.
  */
 void TomographyIfacePresenter::processTomoPathsChanged() {
-  m_model->updateTomoPathsConfig(m_view->currentPathsConfig());
+  m_model->setTomoPathsConfig(m_view->currentPathsConfig());
 }
 
 /**
@@ -382,7 +383,7 @@ void TomographyIfacePresenter::processTomoPathsEditedByUser() {
     m_model->logMsg(msg);
   }
 
-  m_model->updateTomoPathsConfig(cfg);
+  m_model->setTomoPathsConfig(cfg);
   m_view->updatePathsConfig(cfg);
 }
 
@@ -538,9 +539,9 @@ void TomographyIfacePresenter::processRunRecon() {
   }
 
   // pre-/post processing steps and filters
-  m_model->updatePrePostProcSettings(m_view->prePostProcSettings());
+  m_model->setPrePostProcSettings(m_view->prePostProcSettings());
   // center of rotation and regions
-  m_model->updateImageStackPreParams(m_view->currentROIEtcParams());
+  m_model->setImageStackPreParams(m_view->currentROIEtcParams());
 
   try {
     m_model->doSubmitReconstructionJob(m_view->currentComputeResource());

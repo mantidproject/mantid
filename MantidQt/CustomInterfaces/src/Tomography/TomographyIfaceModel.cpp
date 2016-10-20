@@ -33,9 +33,12 @@ Mantid::Kernel::Logger g_log("TomographyGUI");
 
 // names by which we know compute resourcess
 const std::string TomographyIfaceModel::g_SCARFName = "SCARF@STFC";
+const std::string TomographyIfaceModel::g_LocalResourceName = "Local";
 
 const std::string TomographyIfaceModel::g_mainReconstructionScript =
     "/Imaging/IMAT/tomo_reconstruct.py";
+
+const std::string TomographyIfaceModel::g_tomoScriptFolderPath = "/scripts";
 
 // names by which we know image/tomography reconstruction tools (3rd party)
 const std::string TomographyIfaceModel::g_TomoPyTool = "TomoPy";
@@ -50,14 +53,13 @@ const std::string TomographyIfaceModel::g_customCmdTool = "Custom command";
  * compute resource.
  */
 TomographyIfaceModel::TomographyIfaceModel()
-    : m_facility("ISIS"), m_localCompName("Local"), m_experimentRef("RB000000"),
-      m_loggedInUser(""), m_loggedInComp(""), m_computeRes(),
-      m_computeResStatus(), m_reconTools(), m_reconToolsStatus(),
-      m_jobsStatus(), m_SCARFtools(), m_toolsSettings(),
+    : m_facility("ISIS"), m_experimentRef("RB000000"), m_loggedInUser(""),
+      m_loggedInComp(""), m_computeRes(), m_computeResStatus(), m_reconTools(),
+      m_reconToolsStatus(), m_jobsStatus(), m_SCARFtools(), m_toolsSettings(),
       m_prePostProcSettings(), m_imageStackPreParams(), m_statusMutex(NULL) {
 
   m_computeRes.push_back(g_SCARFName);
-  m_computeRes.push_back(m_localCompName);
+  m_computeRes.push_back(g_LocalResourceName);
 
   m_SCARFtools.push_back(g_TomoPyTool);
   m_SCARFtools.push_back(g_AstraTool);
@@ -83,10 +85,6 @@ void TomographyIfaceModel::cleanup() {
   }
 }
 
-void TomographyIfaceModel::setCurrentToolMethod(std::string toolMethod) {
-  m_currentToolMethod = toolMethod;
-}
-
 /**
  * Check that the selected compute resource is listed as supported and
  * usable for the remote manager (if it is not local). Local jobs are
@@ -106,13 +104,8 @@ void TomographyIfaceModel::setCurrentToolMethod(std::string toolMethod) {
  */
 std::string
 TomographyIfaceModel::validateCompResource(const std::string &res) const {
-  if (res == m_localCompName) {
-    // Nothing yet
-    // throw std::runtime_error("There is no support for the local compute "
-    //                         "resource. You should not have got here.");
-    // all good at the moment - could do basic validation and checks for
-    // availability of absolutely necessary tools
-    return "local";
+  if (res == g_LocalResourceName) {
+    return g_LocalResourceName;
   }
 
   if (m_computeRes.size() <= 0) {
@@ -209,9 +202,7 @@ void TomographyIfaceModel::setupRunTool(const std::string &compRes) {
   // catch all the useable/relevant tools for the compute
   // resources. For the time being this is rather simple (just
   // SCARF) and will probably stay like this for a while.
-  std::string low = compRes;
-  std::transform(low.begin(), low.end(), low.begin(), tolower);
-  if ("local" == low ||
+  if (g_LocalResourceName == compRes ||
       ("ISIS" == m_facility && (compRes.empty() || g_SCARFName == compRes))) {
     m_reconTools = m_SCARFtools;
   } else {
@@ -344,6 +335,98 @@ void TomographyIfaceModel::doQueryJobStatus(const std::string &compRes,
 }
 
 /**
+ * Build the components of the command line to run on the remote or local
+ * compute resource. Produces a (normally full) path to a runnable, and
+ * the options (quite like $0 and $* in scripts).
+ *
+ * @param comp Compute resource for which the command line is being prepared
+ * @param run Path to a runnable application (script, python module, etc.)
+ * @param opt Command line options to the application
+ */
+void TomographyIfaceModel::makeRunnableWithOptions(
+    const std::string &comp, std::string &run,
+    std::vector<std::string> &opt) const {
+
+  if (!m_currentToolSettings.get()) {
+    throw std::invalid_argument("Settings for tool not set up");
+  }
+
+  const std::string tool = usingTool();
+
+  const std::string cmd = m_currentToolSettings->toCommand();
+
+  // Special case. Just pass on user inputs.
+  if (tool == g_customCmdTool) {
+
+    opt.resize(1);
+    splitCmdLine(cmd, run, opt[0]);
+    return;
+  }
+  bool local = ("Local" == comp) ? true : false;
+
+  std::string longOpt;
+  splitCmdLine(cmd, run, longOpt);
+  checkIfToolIsSetupProperly(tool, cmd);
+
+  opt = makeTomoRecScriptOptions(local);
+}
+
+/**
+ * Build the command line options string in the way the tomorec
+ * scripts (remote and local) expect it.
+ *
+ * @param local whether to adapt the options for a local run (as
+ * opposed to a remote compute resource)
+ *
+ * @return command options ready for the tomorec script
+ */
+std::vector<std::string>
+TomographyIfaceModel::makeTomoRecScriptOptions(bool local) const {
+
+  // options with all the info from filters and regions
+  std::vector<std::string> opts;
+
+  const std::string currentTool = usingTool();
+  const std::string toolNameArg = prepareToolNameForArgs(currentTool);
+
+  const std::string toolArgument = "--tool=" + toolNameArg;
+
+  opts.emplace_back(toolArgument);
+
+  opts.emplace_back("--algorithm=" + m_currentToolMethod);
+
+  // TODO fix proper iterations reading from the interface
+  opts.emplace_back("--num-iter=5");
+
+  filtersCfgToCmdOpts(m_prePostProcSettings, m_imageStackPreParams, local,
+                      opts);
+
+  return opts;
+}
+
+/** Processes the tool name so that it is appropriate for the command line when
+ * executed
+ */
+std::string TomographyIfaceModel::prepareToolNameForArgs(
+    const std::string &toolName) const {
+
+  // the only processing we have for now is converting it to lower case
+  std::string outputString = toolName; // copy over the string
+  std::transform(toolName.cbegin(), toolName.cend(), outputString.begin(),
+                 ::tolower);
+  return outputString;
+}
+
+std::string TomographyIfaceModel::constructSingleStringFromVector(
+    const std::vector<std::string> args) const{
+  std::string allOpts = "";
+  for (const auto &arg : args) {
+    allOpts += arg + " ";
+  }
+  return allOpts;
+}
+
+/**
  * Handle the job submission request relies on a submit algorithm.
  * @param compRes The resource to which the request will be made, if the
  * resource is set to "Local" that will be handled too
@@ -367,10 +450,7 @@ void TomographyIfaceModel::doSubmitReconstructionJob(
         "(empty string). You need to setup the reconstruction tool.");
   }
 
-  std::string allOpts = "";
-  for (const auto &arg : args) {
-    allOpts += arg + " ";
-  }
+  std::string allOpts = constructSingleStringFromVector(args);
 
   logMsg("Running " + usingTool() + ", with binary: " + run +
          ", with parameters: " + allOpts);
@@ -613,83 +693,6 @@ bool TomographyIfaceModel::processIsRunning(int pid) {
   }
   return (0 == kill(pid, 0));
 #endif
-}
-
-/**
- * Build the components of the command line to run on the remote or local
- * compute resource. Produces a (normally full) path to a runnable, and
- * the options (quite like $0 and $* in scripts).
- *
- * @param comp Compute resource for which the command line is being prepared
- * @param run Path to a runnable application (script, python module, etc.)
- * @param opt Command line options to the application
- */
-void TomographyIfaceModel::makeRunnableWithOptions(
-    const std::string &comp, std::string &run,
-    std::vector<std::string> &opt) const {
-  const std::string tool = usingTool();
-  const std::string cmd = m_currentToolSettings->toCommand();
-
-  // Special case. Just pass on user inputs.
-  if (tool == g_customCmdTool) {
-
-    opt.resize(1);
-    splitCmdLine(cmd, run, opt[0]);
-    return;
-  }
-  bool local = ("Local" == comp) ? true : false;
-
-  std::string longOpt;
-  splitCmdLine(cmd, run, longOpt);
-  checkIfToolIsSetupProperly(tool, cmd);
-
-  opt = makeTomoRecScriptOptions(local);
-}
-
-/**
- * Build the command line options string in the way the tomorec
- * scripts (remote and local) expect it.
- *
- * @param local whether to adapt the options for a local run (as
- * opposed to a remote compute resource)
- *
- * @return command options ready for the tomorec script
- */
-std::vector<std::string>
-TomographyIfaceModel::makeTomoRecScriptOptions(bool local) const {
-
-  // options with all the info from filters and regions
-  std::vector<std::string> opts;
-
-  const std::string currentTool = usingTool();
-  const std::string toolNameArg = prepareToolNameForArgs(currentTool);
-
-  const std::string toolArgument = "--tool=" + toolNameArg;
-
-  opts.emplace_back(toolArgument);
-
-  opts.emplace_back("--algorithm=" + m_currentToolMethod);
-
-  // TODO fix proper iterations reading from the interface
-  opts.emplace_back("--num-iter=5");
-
-  filtersCfgToCmdOpts(m_prePostProcSettings, m_imageStackPreParams, local,
-                      opts);
-
-  return opts;
-}
-
-/** Processes the tool name so that it is appropriate for the command line when
- * executed
- */
-std::string TomographyIfaceModel::prepareToolNameForArgs(
-    const std::string &toolName) const {
-
-  // the only processing we have for now is converting it to lower case
-  std::string outputString = toolName; // copy over the string
-  std::transform(toolName.cbegin(), toolName.cend(), outputString.begin(),
-                 ::tolower);
-  return outputString;
 }
 
 /**

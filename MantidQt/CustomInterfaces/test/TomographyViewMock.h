@@ -97,7 +97,7 @@ public:
                      MantidQt::CustomInterfaces::ImageStackPreParams());
 
   // void showToolConfig(const std::string &name) {}
-  MOCK_METHOD1(showToolConfig, void(const std::string &name));
+  MOCK_METHOD1(showToolConfig, void(MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog));
 
   // virtual void updateJobsInfoDisplay( const
   //    std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
