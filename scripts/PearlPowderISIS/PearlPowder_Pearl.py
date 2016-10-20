@@ -53,9 +53,24 @@ class Pearl(AbstractInst):
     def get_tof_binning(self):
         return self._tof_binning
 
-    @staticmethod
-    def get_calibration_file_names(cycle, tt_mode):
-        return pearl_calib_factory.get_calibration_filename(cycle=cycle, tt_mode=tt_mode)
+    def get_calibration_full_paths(self, cycle, tt_mode=''):
+        calibration_file, grouping_file, van_absorb, van_file =\
+            pearl_calib_factory.get_calibration_filename(cycle=cycle, tt_mode=tt_mode)
+
+        calibration_dir = self.calibration_dir
+
+        calibration_full_path = calibration_dir + calibration_file
+        grouping_full_path = calibration_dir + grouping_file
+        van_absorb_full_path = calibration_dir + van_absorb
+        van_file_full_path = calibration_dir + van_file
+
+        calibration_details = {"calibration": calibration_full_path,
+                               "grouping": grouping_full_path,
+                               "vanadium_absorption": van_absorb_full_path,
+                               "vanadium": van_file_full_path}
+
+        return calibration_details
+
 
     @staticmethod
     def get_cycle_information(run_number):
@@ -64,8 +79,6 @@ class Pearl(AbstractInst):
         cycle_information = {'cycle': cycle,
                              'instrument_version': instrument_version}
         return cycle_information
-
-
 
     @staticmethod
     def get_instrument_alg_save_ranges(instrument_version):

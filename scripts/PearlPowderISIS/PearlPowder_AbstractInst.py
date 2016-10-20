@@ -80,15 +80,14 @@ class AbstractInst(object):
         @return: The algorithm and save range in that order
         """
 
-    @staticmethod
     @abstractmethod
-    def get_calibration_file_names(cycle, tt_mode=''):
+    def get_calibration_full_paths(self, cycle, tt_mode=''):
         """
         Gets the current calibration file names for this cycle
         @param cycle: The cycle string to lookup for this run
         @param tt_mode: If multiple modes allow for different calibration files this is used as an additional selector
-        @return: calibration_file, grouping_file, vanadium_absorptions_file, vanadium_file, instrument version
-        in that order
+        @return: A dictionary the containing the full paths as values for the following keys:
+        "calibration", "grouping", "vanadium_absorption", "vanadium"
         """
         pass
 

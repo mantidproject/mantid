@@ -5,7 +5,7 @@ import mantid.simpleapi as mantid
 
 
 def focus(number, startup_object, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True):
-
+    # TODO support other extensions 
     return _run_pearl_focus(run_number=number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm,
                             instrument=startup_object)
 
@@ -21,10 +21,10 @@ def create_calibration(startup_object, calibration_runs, offset_file_path, group
 
 
 def create_vanadium(startup_object, vanadium_runs, empty_runs, output_file_name, tt_mode="TT88",
-                    num_of_spline_coefficients=60, do_absorp_corrections=True):
-    # TODO do we support different extensions?
-    _create_van(user_input=startup_object, van=vanadium_runs, empty=empty_runs, nvanfile=output_file_name,
-                nspline=num_of_spline_coefficients, absorb=do_absorp_corrections, ttmode=tt_mode)
+                    num_of_spline_coefficients=60, do_absorp_corrections=True, generate_abosrp_corrections=False):
+    _create_van(instrument=startup_object, van=vanadium_runs, empty=empty_runs, nvanfile=output_file_name,
+                nspline=num_of_spline_coefficients, ttmode=tt_mode,
+                absorb=do_absorp_corrections, gen_absorb=generate_abosrp_corrections)
 
 
 def set_debug(debug_on=False):
@@ -91,6 +91,161 @@ def _create_calibration(calibration_runs, offset_file_path, grouping_file_path, 
     remove_intermediate_workspace(cal_grouped_ws)
 
 
+def _create_van(instrument, van, empty, nvanfile, ext="raw", ttmode="TT88", nspline=60, absorb=True, gen_absorb=False):
+
+
+    # tt_mode set here will not be used within the function but instead when the PEARL_calibfiles()
+    # is called it will return the correct tt_mode files.
+
+    cycle_information = instrument.get_cycle_information(van)
+
+    wvan = "wvan"
+
+    input_van_ws = _read_pearl_ws(number=van, ext=ext, instrument=instrument)
+    input_empty_ws = _read_pearl_ws(number=empty, ext=ext, instrument=instrument)
+
+    corrected_van_ws = mantid.Minus(LHSWorkspace=input_van_ws, RHSWorkspace=input_empty_ws)
+
+    remove_intermediate_workspace(input_empty_ws)
+    remove_intermediate_workspace(input_van_ws)
+
+    calibration_full_paths = instrument.get_calibration_full_paths(cycle=cycle_information["cycle"], in_tt_mode=ttmode)
+
+    if absorb and not gen_absorb:
+        corrected_van_ws = mantid.ConvertUnits(InputWorkspace=corrected_van_ws, Target="Wavelength")
+
+        # TODO Change out name from T to something meaningful
+        absorption_ws = mantid.LoadNexus(Filename=calibration_full_paths["vanadium_absorption"])
+        corrected_van_ws = mantid.RebinToWorkspace(WorkspaceToRebin=corrected_van_ws, WorkspaceToMatch=absorption_ws)
+        corrected_van_ws = mantid.Divide(LHSWorkspace=corrected_van_ws, RHSWorkspace=absorption_ws)
+        remove_intermediate_workspace(ws_to_remove=absorption_ws)
+
+    elif gen_absorb:
+        mantid.CreateSampleShape(wvan, '<sphere id="sphere_1"> <centre x="0" y="0" z= "0" />\
+                          <radius val="0.005" /> </sphere>')
+        corrected_van_ws = \
+            mantid.AbsorptionCorrection(InputWorkspace=corrected_van_ws, AttenuationXSection="5.08",
+                                        ScatteringXSection="5.1", SampleNumberDensity="0.072",
+                                        NumberOfWavelengthPoints="25", ElementSize="0.05")
+
+        mantid.SaveNexus(Filename=calibration_full_paths["vanadium_absorption"],
+                         InputWorkspace=corrected_van_ws, Append=False)
+
+    corrected_van_ws = mantid.ConvertUnits(InputWorkspace=corrected_van_ws, Target="TOF")
+    trange = "100,-0.0006,19990"  # TODO move this into instrument
+    corrected_van_ws = mantid.Rebin(InputWorkspace=corrected_van_ws, Params=trange)
+
+    corrected_van_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
+                                             CalibrationFile=calibration_full_paths["calibration"])
+
+    focused_van_file = mantid.DiffractionFocussing(InputWorkspace=corrected_van_ws,
+                                                   GroupingFileName=calibration_full_paths["grouping"])
+
+    focused_van_file = mantid.ConvertUnits(InputWorkspace=focused_van_file, Target="TOF")
+    trange = "150,-0.0006,19900"  # TODO move this into instrument
+    focused_van_file = mantid.Rebin(InputWorkspace=focused_van_file, Params=trange)
+    focused_van_file = mantid.ConvertUnits(InputWorkspace=focused_van_file, Target="dSpacing")
+
+    remove_intermediate_workspace(ws_to_remove=corrected_van_ws)
+
+    if cycle_information["instrument_version"] == "new2":
+        splined_ws_list = _spline_new2_inst(focused_van_file, nspline)
+
+        append = False
+        for ws in splined_ws_list:
+            mantid.SaveNexus(Filename=nvanfile, InputWorkspace=ws, Append=append)
+            remove_intermediate_workspace(ws)
+            append = True
+
+    elif cycle_information["instrument_version"] == "new":
+        van_stripped = mantid.ConvertUnits(InputWorkspace=focused_van_file, Target="dSpacing")
+
+        # remove bragg peaks before spline
+
+        #  TODO refactor this common code
+
+        for i in range(0, 12):
+            van_stripped = mantid.StripPeaks(InputWorkspace=van_stripped, FWHM=15, Tolerance=8, WorkspaceIndex=i)
+
+        vam_stripped = mantid.ConvertUnits(InputWorkspace=van_stripped, Target="TOF")
+
+        splined_ws_list = []
+        for i in range(0, 12):
+            out_ws_name = "_create_van_cal_spline-" + str(i)
+            splined_ws_list.append(mantid.SplineBackground(InputWorkspace=vam_stripped, OutputWorkspace=out_ws_name,
+                                                           WorkspaceIndex=i, NCoeff=nspline))
+
+        append = False
+        for ws in splined_ws_list:
+            mantid.SaveNexus(Filename=nvanfile, InputWorkspace=ws, Append=append)
+            remove_intermediate_workspace(ws)
+            append = True
+
+        remove_intermediate_workspace(van_stripped)
+
+    elif cycle_information["instrument_version"] == "old":
+        van_stripped = mantid.ConvertUnits(InputWorkspace=focused_van_file, Target="dSpacing")
+
+        # remove bragg peaks before spline
+        van_stripped = mantid.StripPeaks(InputWorkspace=van_stripped, FWHM=15, Tolerance=6, WorkspaceIndex=0)
+        van_stripped = mantid.StripPeaks(InputWorkspace=van_stripped, FWHM=15, Tolerance=6, WorkspaceIndex=2)
+        van_stripped = mantid.StripPeaks(InputWorkspace=van_stripped, FWHM=15, Tolerance=6, WorkspaceIndex=3)
+        van_stripped = mantid.StripPeaks(InputWorkspace=van_stripped, FWHM=40, Tolerance=12, WorkspaceIndex=1)
+        van_stripped = mantid.StripPeaks(InputWorkspace=van_stripped, FWHM=60, Tolerance=12, WorkspaceIndex=1)
+
+        # Mask low d region that is zero before spline
+        for reg in range(0, 4):
+            if reg == 1:
+                van_stripped = mantid.MaskBins(InputWorkspace=van_stripped, XMin=0, XMax=0.14, SpectraList=reg)
+            else:
+                van_stripped = mantid.MaskBins(InputWorkspace=van_stripped, XMin=0, XMax=0.06, SpectraList=reg)
+
+        van_stripped = mantid.ConvertUnits(InputWorkspace=van_stripped,Target="TOF")
+
+        splined_ws_list = []
+        for i in range(0, 4):
+            out_ws_name = "_create_van_calc_spline-" + str(i)
+            if i == 1:
+                coeff = 80
+            else:
+                coeff = 100
+            splined_ws_list.append(mantid.SplineBackground(InputWorkspace=van_stripped, OutputWorkspace=out_ws_name,
+                                                           WorkspaceIndex=i, NCoeff=coeff))
+
+        append = False
+        for ws in splined_ws_list:
+            mantid.SaveNexus(Filename=nvanfile, InputWorkspace=van_stripped, Append=append)
+            append = True
+            remove_intermediate_workspace(ws)
+    else:
+        raise ValueError("Mode not known or supported")
+
+    mantid.LoadNexus(Filename=nvanfile, OutputWorkspace="Van_data")
+
+
+def _spline_new2_inst(focused_van_file, nspline):
+    # remove bragg peaks before spline
+    van_stripped_ws = mantid.StripPeaks(InputWorkspace=focused_van_file, FWHM=15, Tolerance=8, WorkspaceIndex=0)
+    for i in range(1, 12):  # TODO remove this hardcoded value if possible - this is 14 with the 2 below
+        van_stripped_ws = mantid.StripPeaks(InputWorkspace=van_stripped_ws, FWHM=15, Tolerance=8,
+                                            WorkspaceIndex=i)
+
+    # run twice on low angle as peaks are very broad
+    for i in range(0, 2):
+        van_stripped_ws = mantid.StripPeaks(InputWorkspace=van_stripped_ws, FWHM=100, Tolerance=10,
+                                            WorkspaceIndex=12)
+        van_stripped_ws = mantid.StripPeaks(InputWorkspace=van_stripped_ws, FWHM=60, Tolerance=10,
+                                            WorkspaceIndex=13)
+    van_stripped_ws = mantid.ConvertUnits(InputWorkspace=van_stripped_ws, Target="TOF")
+    splined_ws_list = []
+    for i in range(0, 14):
+        out_ws_name = "_create_van_splined_ws-" + str(i + 1)
+        splined_ws_list.append(mantid.SplineBackground(InputWorkspace=van_stripped_ws, OutputWorkspace=out_ws_name,
+                                                       WorkspaceIndex=i, NCoeff=nspline))
+    remove_intermediate_workspace(van_stripped_ws)
+    return splined_ws_list
+
+
 def _generate_cycle_dir(raw_data_dir, run_cycle):
     str_run_cycle = str(run_cycle)
     # Append current cycle to raw data directory
@@ -102,27 +257,6 @@ def _generate_cycle_dir(raw_data_dir, run_cycle):
     else:
         raise ValueError("Path :" + raw_data_dir + "\n Does not end with a \\ or / character")
     return generated_dir
-
-
-def _get_calib_files_full_paths(cycle, in_tt_mode, instrument):
-
-    calibration_dir = instrument.calibration_dir
-
-    calibration_file, grouping_file, van_absorb, van_file, instrument_ver =\
-        instrument.get_calibration_file_names(cycle=cycle, tt_mode=in_tt_mode)
-
-    calibration_full_path = calibration_dir + calibration_file
-    grouping_full_path = calibration_dir + grouping_file
-    van_absorb_full_path = calibration_dir + van_absorb
-    van_file_full_path = calibration_dir + van_file
-
-    calibration_details = {"calibration": calibration_full_path,
-                           "grouping": grouping_full_path,
-                           "vanadium_absorption": van_absorb_full_path,
-                           "vanadium": van_file_full_path,
-                           "instrument_version": instrument_ver}
-
-    return calibration_details
 
 
 def _load_monitor(number, input_dir, instrument):
@@ -174,11 +308,11 @@ def _load_raw_files(run_number, ext, instrument, input_dir):
         infile = instrument.generate_input_full_path(run_number=run_number, input_dir=input_dir)
         out_ws = mantid.LoadRaw(Filename=infile, LoadLogFiles="0")
     else:
-        out_ws = load_raw_file_range(run_number, input_dir, instrument)
+        out_ws = _load_raw_file_range(run_number, input_dir, instrument)
     return out_ws
 
 
-def load_raw_file_range(files, input_dir, instrument):
+def _load_raw_file_range(files, input_dir, instrument):
     loop = 0
     num = files.split("_")
     frange = list(range(int(num[0]), int(num[1]) + 1))
@@ -225,8 +359,7 @@ def _run_pearl_focus(instrument, run_number, ext="raw", fmode="trans", ttmode="T
 
     alg_range, save_range = instrument.get_instrument_alg_save_ranges(cycle_information["instrument_version"])
 
-    input_file_paths = _get_calib_files_full_paths(cycle=cycle_information["cycle"], in_tt_mode=ttmode,
-                                                   instrument=instrument)
+    input_file_paths = instrument.get_calibration_full_paths(cycle=cycle_information["cycle"], tt_mode=ttmode)
 
     output_file_names = instrument.generate_out_file_paths(run_number, instrument.output_dir)
     input_workspace = _read_pearl_ws(number=run_number, ext=ext, instrument=instrument)
