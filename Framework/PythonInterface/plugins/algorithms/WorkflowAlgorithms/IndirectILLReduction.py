@@ -374,7 +374,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._unmirror_option = self.getProperty('UnmirrorOption').value
         self._back_scaling = self.getProperty('BackgroundScalingFactor').value
 
+        # output workspace
         self._red_ws = self.getPropertyValue('OutputWorkspace')
+
+        # optional output in debug mode
         self._raw_ws = self._red_ws + '_' + self.getPropertyValue('RawWorkspace')
         self._monitor_ws = self._red_ws + '_' + self.getPropertyValue('MonitorWorkspace')
         self._det_ws = self._red_ws + '_' + self.getPropertyValue('DetWorkspace')
@@ -449,9 +452,15 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # check if it is a workspace or workspace group and perform reduction correspondingly
         if isinstance(mtd[self._red_ws], WorkspaceGroup):
 
-            # get instrument from the first ws in a group and load config files
-            self._instrument = mtd[self._red_ws].getItem(0).getInstrument()
+            # get the first workspace in the group
+            __first_ws = mtd[self._red_ws].getItem(0)
 
+            # get the instrument from the first ws in a group and load config files
+            self._instrument = __first_ws.getInstrument()
+
+            self._set_mirror_sense(__first_ws.getRun())
+
+            # load all the aux files
             self._load_auxiliary_files()
 
             # figure out number of progress reports, i.e. one for each input workspace/file
@@ -478,6 +487,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             # get instrument name and load config files
             self._instrument = mtd[self._red_ws].getInstrument()
 
+            self._set_mirror_sense(mtd[self._red_ws].getRun())
+
             self._load_auxiliary_files()
 
             run = '{0:06d}'.format(mtd[self._red_ws].getRunNumber())
@@ -490,6 +501,19 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         # wrap up the output
         self._finalize(out_ws_names)
+
+    def _set_mirror_sense(self, run):
+        """
+        Sets the self._mirror_sense from the given workspace' run
+        @param    run :: input workspace's run object
+        """
+        if run.hasProperty('Doppler.mirror_sense'):
+            # mirror_sense 14 : two wings
+            # mirror_sense 16 : one wing
+            self._mirror_sense = run.getLogData('Doppler.mirror_sense').value
+        else:
+            self.log().error('Mirror sense is not defined. Check your data.')
+            raise RuntimeError('Mirror sense is not defined. Check your data.')
 
     def _load_auxiliary_files(self):
         """
@@ -533,6 +557,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         Note the recursion!
         """
         self.log().notice('Loading vanadium run #{0}'.format(self._vanadium_file))
+
+
         # call IndirectILLReduction for vanadium run with unmirror 2 and 3 to get left and right
 
         left_vanadium = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
@@ -605,18 +631,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         self._vanadium_calibration(red, vnorm)
 
-        # Get mirror_sense
-        if mtd[red].getRun().hasProperty('Doppler.mirror_sense'):
-            # Get mirror_sense from run
-            # mirror_sense 14 : two wings
-            # mirror_sense 16 : one wing
-            self._mirror_sense = mtd[red].getRun().getLogData('Doppler.mirror_sense').value
-        else:
-            self.log().error('Mirror sense is not defined. Check your data.')
-
+        # transfer the x and y axes dependent on mirror sense and unmirror option
         xmin, xmax, xmax_left, xmin_right = self._energy_and_theta_transfer(red, monitor, left, right)
 
-        # Mask bins out of final energy or monitor range
+        # Mask dead middle bins out of final energy or monitor range
+        # for two-wing data with unmirror 0
         if self._mirror_sense == 14 and self._unmirror_option == 0:
             # Reload X-values (now in meV)
             x = mtd[red].readX(0)
@@ -626,6 +645,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[xmax_left],
                          XMax=x[int(x[-1] / 2) + xmin_right])
 
+        # mask dead channels for QENS type
         if self._reduction_type == 'QENS':
             mask_reduced_ws(red, xmin, xmax)
 
