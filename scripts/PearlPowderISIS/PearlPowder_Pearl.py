@@ -59,7 +59,13 @@ class Pearl(AbstractInst):
 
     @staticmethod
     def get_cycle_information(run_number):
-        return pearl_cycle_factory.get_cycle_dir(run_number)
+        cycle, instrument_version = pearl_cycle_factory.get_cycle_dir(run_number)
+
+        cycle_information = {'cycle': cycle,
+                             'instrument_version': instrument_version}
+        return cycle_information
+
+
 
     @staticmethod
     def get_instrument_alg_save_ranges(instrument_version):

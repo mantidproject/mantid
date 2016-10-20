@@ -96,9 +96,9 @@ class AbstractInst(object):
     @abstractmethod
     def get_cycle_information(run_number):
         """
-        Gets the cycle number and the instrument type if defined for this run
+        Gets all the information about this run for this cycle and returns it in a dictionary
         @param run_number: The run to match the cycle to
-        @return: The current cycle and the instrument version if applicable
+        @return: Dictionary with the following keys: "cycle", "instrument_version"
         """
         pass
 

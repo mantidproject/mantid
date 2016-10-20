@@ -289,38 +289,6 @@ def _create_van(user_input, van, empty, nvanfile, ext="raw", fmode="all", ttmode
     return
 
 
-def _create_calibration(calruns, noffsetfile, groupfile, user_params):
-    cycle_information = _calculate_current_cycle(calruns)
-
-
-    wcal = "cal_raw"
-    _read_pearl_ws(number=calruns, ext="raw", outname=wcal, raw_data_dir=user_params.raw_data_dir,
-                   run_cycle=cycle_information["cycle"])
-
-    if cycle_information["instrument_version"] == "new" or cycle_information["instrument_version"] == "new2":
-        mantid.Rebin(InputWorkspace=wcal, OutputWorkspace=wcal, Params="100,-0.0006,19950")
-
-    mantid.ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
-    mantid.Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="1.8,0.002,2.1")
-
-    if cycle_information["instrument_version"] == "new2":
-        mantid.CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=20,
-                       WorkspaceIndexMin=9, WorkspaceIndexMax=1063, XMin=1.8, XMax=2.1)
-    elif cycle_information["instrument_version"] == "new":
-        mantid.CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=20,
-                       WorkspaceIndexMin=9, WorkspaceIndexMax=943, XMin=1.8, XMax=2.1)
-    else:
-        mantid.CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=500,
-                       WorkspaceIndexMin=1, WorkspaceIndexMax=1440, XMin=1.8, XMax=2.1)
-
-    # Ceo Cell refeined to 5.4102(3) so 220 is 1.912795
-    mantid.GetDetectorOffsets(InputWorkspace="crosscor", OutputWorkspace="OutputOffsets", Step=0.002, DReference=1.912795,
-                       XMin=-200, XMax=200, GroupingFileName=noffsetfile)
-    mantid.AlignDetectors(InputWorkspace=wcal, OutputWorkspace="cal_aligned", CalibrationFile=noffsetfile)
-    mantid.DiffractionFocussing(InputWorkspace="cal_aligned", OutputWorkspace="cal_grouped", GroupingFileName=groupfile)
-
-    return
-
 
 def PEARL_createcal_Si(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal"):
     cycle_information = _calculate_current_cycle(calruns)

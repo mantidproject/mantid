@@ -41,7 +41,7 @@ class PearlRoutinesTest(unittest.TestCase):
         self.assertEquals(new2_alg_range, 14, "'new2' instrument algorithm range got " + str(new2_alg_range))
         self.assertEquals(new2_save_range, 5, "'new2' instrument save range got " + str(new2_save_range))
 
-    def xtest_create_van(self):
+    def test_create_van(self):
         # Checks testvan executes correctly
         DataDir = os.path.join(DIRS[0], 'PEARL/Calibration_Test/RawFiles/')
         CalibDir = os.path.join(DIRS[0] + '/PEARL/Calibration_Test/Calibration/')
@@ -59,9 +59,9 @@ class PearlRoutinesTest(unittest.TestCase):
         PearlPowder_common.create_calibration(startup_object=pearl_obj, calibration_runs="91560_91561",
                                               offset_file_path=offsetfile, grouping_file_path=ngrpfile)
 
-        PearlPowder_common.create_vanadium(startup_object=pearl_obj, vanadium_runs="91530_91531",
-                                           empty_runs="91550_91551", tt_mode="TT35", output_file_name=vanFile35,
-                                           num_of_spline_coefficients=40, do_absorp_corrections=True)
+        #PearlPowder_common.create_vanadium(startup_object=pearl_obj, vanadium_runs="91530_91531",
+        #                                   empty_runs="91550_91551", tt_mode="TT35", output_file_name=vanFile35,
+        #                                   num_of_spline_coefficients=40, do_absorp_corrections=True)
 
 
 if __name__ == '__main__':
