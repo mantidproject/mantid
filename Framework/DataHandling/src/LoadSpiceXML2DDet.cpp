@@ -310,7 +310,7 @@ void LoadSpiceXML2DDet::exec() {
     double wavelength = m_userSpecifiedWaveLength;
     // if user does not specify wave length then try to get wave length from log
     // sample _m1 (or m1 as well in future)
-    bool has_wavelength = wavelength == EMPTY_DBL();
+    bool has_wavelength = !(wavelength == EMPTY_DBL());
     if (!has_wavelength)
       has_wavelength = getHB3AWavelength(outws, wavelength);
 
