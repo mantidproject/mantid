@@ -420,7 +420,7 @@ class ExportExperimentLog(PythonAlgorithm):
                 wbuf = wbuf[0:-1]
 
             # Remove unsupported character which may cause importing error of GNUMERIC
-            wbuf = wbuf.translate(None, chr(0))
+            wbuf = wbuf.replace(chr(0),"")
 
             # Re-write file
             ofile = open(self._logfilename, "w")
