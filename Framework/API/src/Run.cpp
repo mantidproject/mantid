@@ -42,6 +42,16 @@ Kernel::Logger g_log("Run");
 // Public member functions
 //----------------------------------------------------------------------
 
+boost::shared_ptr<Run> Run::clone() {
+  auto clone = boost::make_shared<Run>();
+  for (auto property : this->m_manager.getProperties()) {
+    clone->addProperty(property->clone());
+  }
+  clone->m_goniometer = this->m_goniometer;
+  clone->m_histoBins = this->m_histoBins;
+  return clone;
+}
+
 //-----------------------------------------------------------------------------------------------
 /**
  * Filter out a run by time. Takes out any TimeSeriesProperty log entries
@@ -433,7 +443,7 @@ void Run::calculateGoniometerMatrix() {
         getLogAsSingleValue(axisName, Kernel::Math::Maximum);
     const double angle = getLogAsSingleValue(axisName, Kernel::Math::Mean);
     if (minAngle != maxAngle &&
-        !(boost::math::isnan(minAngle) && boost::math::isnan(maxAngle))) {
+        !(std::isnan(minAngle) && std::isnan(maxAngle))) {
       const double lastAngle =
           getLogAsSingleValue(axisName, Kernel::Math::LastValue);
       g_log.warning("Goniometer angle changed in " + axisName + " log from " +

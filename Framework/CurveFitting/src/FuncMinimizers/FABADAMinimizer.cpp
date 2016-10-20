@@ -26,7 +26,7 @@
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/version.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -338,7 +338,7 @@ bool FABADAMinimizer::iterate(size_t) {
     // the user should be aware of that.
 
     // Set the new value in order to calculate the new Chi square value
-    if (boost::math::isnan(new_value)) {
+    if (std::isnan(new_value)) {
       throw std::runtime_error("Parameter value is NaN.");
     }
     new_parameters.set(i, new_value);
@@ -773,7 +773,7 @@ void FABADAMinimizer::TieApplication(const size_t &ParameterIndex,
       API::ParameterTie *tie = m_FitFunction->getTie(j);
       if (tie) {
         new_value = tie->eval();
-        if (boost::math::isnan(new_value)) { // maybe not needed
+        if (std::isnan(new_value)) { // maybe not needed
           throw std::runtime_error("Parameter value is NaN.");
         }
         new_parameters.set(j, new_value);
@@ -783,9 +783,9 @@ void FABADAMinimizer::TieApplication(const size_t &ParameterIndex,
   }
   // After all the other variables, the current one is updated to the ties
   API::ParameterTie *tie = m_FitFunction->getTie(i);
-  if (tie != 0) {
+  if (tie) {
     new_value = tie->eval();
-    if (boost::math::isnan(new_value)) { // maybe not needed
+    if (std::isnan(new_value)) { // maybe not needed
       throw std::runtime_error("Parameter value is NaN.");
     }
     new_parameters.set(i, new_value);
@@ -1020,13 +1020,9 @@ bool FABADAMinimizer::IterationContinuation() {
                    "(MaxIterations property).");
     }
   } else {
-    // If convergence has been reached, continue until complete the chain
-    // length.
-    if (m_counter < m_ChainIterations) {
-      return true;
-    }
-    // nothing else to do, stop interations
-    return false;
+    // If convergence has been reached, continue until we complete the chain
+    // length. Otherwise, stop interations.
+    return m_counter < m_ChainIterations;
   }
   // can we even get here? -> Nope (we should not, so we do not want it to
   // continue)

@@ -4,6 +4,7 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -1547,13 +1548,15 @@ public:
     numberOfHistograms = sansInstrument->getNumberDetectors();
     m_workspaceSans.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
     m_workspaceSans.setInstrument(sansInstrument);
+    m_workspaceSans.getAxis(0)->setUnit("TOF");
+    m_workspaceSans.rebuildSpectraMapping();
+
     m_zRotation =
         Mantid::Kernel::Quat(180, V3D(0, 0, 1)); // rotate 180 degrees around z
 
     m_pos = Mantid::Kernel::V3D(1, 1, 1);
   }
-
-  /// This test is equivalent to SpectrumInfoTestPerformance, see there.
+  /// This test is equivalent to GeometryInfoFactoryTestPerformance, see there.
   void test_typical() {
     auto instrument = m_workspace.getInstrument();
     auto source = instrument->getSource();
@@ -1568,6 +1571,45 @@ public:
     }
     // We are computing and using the result to fool the optimizer.
     TS_ASSERT_DELTA(result, 5214709.740869, 1e-6);
+  }
+
+  void test_calculateL2() {
+
+    /*
+     * Simulate the L2 calculation performed via the Workspace/Instrument
+     * interface.
+     */
+    auto instrument = m_workspaceSans.getInstrument();
+    auto sample = instrument->getSample();
+    double l2 = 0;
+    for (size_t i = 0; i < m_workspaceSans.getNumberHistograms(); ++i) {
+      auto detector = m_workspaceSans.getDetector(i);
+      l2 += detector->getDistance(*sample);
+    }
+    // Prevent optimization
+    TS_ASSERT(l2 > 0);
+  }
+
+  void test_calculateL2_x10() {
+
+    /*
+     * Simulate the L2 calculation performed via the Workspace/Instrument
+     * interface. Repeat several times to benchmark any caching/optmisation that
+     * might be taken place in parameter maps.
+     */
+    auto instrument = m_workspaceSans.getInstrument();
+    auto sample = instrument->getSample();
+    double l2 = 0;
+    int count = 0;
+    while (count < 10) {
+      for (size_t i = 0; i < m_workspaceSans.getNumberHistograms(); ++i) {
+        auto detector = m_workspaceSans.getDetector(i);
+        l2 += detector->getDistance(*sample);
+      }
+      ++count;
+    }
+    // Prevent optimization
+    TS_ASSERT(l2 > 0);
   }
 
   /*

@@ -1,6 +1,3 @@
-//----------------------
-// Includes
-//----------------------
 #include "MantidQtCustomInterfaces/SANSRunWindow.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -16,6 +13,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -3153,19 +3151,6 @@ void SANSRunWindow::handleInstrumentChange() {
   m_uiForm.sliceEvent->setHidden(hide_events_gui);
   m_uiForm.l_events_label->setHidden(hide_events_gui);
   m_uiForm.l_events_binning->setHidden(hide_events_gui);
-
-  // Provide LOQ Specific settings
-  const auto isNowLOQ = m_uiForm.inst_opt->currentText() == "LOQ";
-  applyLOQSettings(isNowLOQ);
-}
-
-/**
- * Apply or unapply LOQ-specific settings
- * @param isNowLOQ: if true then apply LOQ settings else unapply
- */
-void SANSRunWindow::applyLOQSettings(bool isNowLOQ) {
-  // M4 Transmission monitor
-  m_uiForm.trans_M4_check_box->setDisabled(isNowLOQ);
 }
 
 /** Record if the user has changed the default filename, because then we don't
@@ -4051,9 +4036,9 @@ bool SANSRunWindow::isValidWsForRemovingZeroErrors(QString &wsName) {
   bool isValid = true;
   if (result != m_constants.getPythonSuccessKeyword()) {
     result.replace(m_constants.getPythonSuccessKeyword(), "");
-    g_log.warning("Not a valid workspace for zero error replacement. Will save "
-                  "original workspace. More info: " +
-                  result.toStdString());
+    g_log.notice("Not a valid workspace for zero error replacement. Will save "
+                 "original workspace. More info: " +
+                 result.toStdString());
     isValid = false;
   }
   return isValid;

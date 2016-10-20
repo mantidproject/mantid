@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/CompareWorkspaces.h"
 
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -8,6 +5,8 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -25,19 +24,16 @@ using namespace Mantid::Geometry;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CompareWorkspaces)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 CompareWorkspaces::CompareWorkspaces()
     : API::Algorithm(), m_Result(false), m_Prog(nullptr),
       m_ParallelComparison(true) {}
 
-//----------------------------------------------------------------------------------------------
 /** Destructor
  */
 CompareWorkspaces::~CompareWorkspaces() { delete m_Prog; }
 
-//----------------------------------------------------------------------------------------------
 /// Algorithms name for identification. @see Algorithm::name
 const std::string CompareWorkspaces::name() const {
   return "CompareWorkspaces";
@@ -58,7 +54,6 @@ const std::string CompareWorkspaces::summary() const {
          "testing process.";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CompareWorkspaces::init() {
@@ -118,7 +113,6 @@ void CompareWorkspaces::init() {
   m_Messages->addColumn("str", "Workspace 2");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void CompareWorkspaces::exec() {
@@ -184,14 +178,6 @@ bool CompareWorkspaces::processGroups() {
 
   setProperty("Result", m_Result);
   setProperty("Messages", m_Messages);
-
-  // Store output workspace in AnalysisDataService
-  if (!isChild())
-    this->store();
-
-  setExecuted(true);
-  notificationCenter().postNotification(
-      new FinishedNotification(this, this->isExecuted()));
 
   return true;
 }

@@ -1,4 +1,8 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+from six import iteritems
+from six import integer_types
+
 import math
 import numpy as np
 from mantid.simpleapi import *
@@ -8,6 +12,8 @@ from mantid.kernel import StringListValidator, StringMandatoryValidator, IntBoun
                           FloatBoundedValidator, Direction, logger, CompositeValidator
 
 #pylint: disable=too-many-instance-attributes
+
+
 class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
     _sample_ws_name = None
@@ -34,7 +40,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
     def category(self):
         return "Workflow\\MIDAS;CorrectionFunctions\\AbsorptionCorrections"
-
 
     def summary(self):
         return "Calculates absorption corrections for a flat plate sample using Paalman & Pings format."
@@ -315,10 +320,10 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         @param sample_logs Dictionary of logs to append to the workspace.
         """
 
-        for key, value in sample_logs.iteritems():
+        for key, value in iteritems(sample_logs):
             if isinstance(value, bool):
                 log_type = 'String'
-            elif isinstance(value, (int, long, float)):
+            elif isinstance(value, (integer_types, float)):
                 log_type = 'Number'
             else:
                 log_type = 'String'

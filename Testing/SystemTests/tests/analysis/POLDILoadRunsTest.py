@@ -175,8 +175,6 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
 
         self.clearAnalysisDataService()
 
-
-
     def compareWorkspaces(self, left, right):
         for i in range(left.getNumberHistograms()):
             self.assertTrue(np.array_equal(left.dataY(i), right.dataY(i)))

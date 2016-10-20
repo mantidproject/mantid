@@ -155,8 +155,9 @@ void ExtractSpectra::execHistogram() {
       if (hasDx) {
         auto &oldDx = m_inputWorkspace->dx(i);
         outputWorkspace->setSharedDx(
-            j, make_cow<HistogramData::HistogramDx>(oldDx.begin() + m_minX,
-                                                    oldDx.begin() + m_maxX));
+            j,
+            make_cow<HistogramData::HistogramDx>(
+                oldDx.begin() + m_minX, oldDx.begin() + m_maxX - m_histogram));
       }
     } else {
       // Safe to just copy whole vector 'cos can't be cropping in X if not
@@ -298,7 +299,7 @@ void ExtractSpectra::execEvent() {
     auto i = m_workspaceIndexList[j];
     const EventList &el = eventW->getSpectrum(i);
     // The output event list
-    EventList &outEL = outputWorkspace->getOrAddEventList(j);
+    EventList &outEL = outputWorkspace->getSpectrum(j);
     //    // left side of the crop - will erase 0 -> endLeft
     //    std::size_t endLeft;
     //    // right side of the crop - will erase endRight->numEvents+1
@@ -345,8 +346,8 @@ void ExtractSpectra::execEvent() {
       outEL.setX(XValues_new.cowData());
       if (hasDx) {
         auto &oldDx = m_inputWorkspace->dx(i);
-        outEL.setBinEdgeStandardDeviations(oldDx.begin() + m_minX,
-                                           oldDx.begin() + m_maxX);
+        outEL.setPointStandardDeviations(oldDx.begin() + m_minX,
+                                         oldDx.begin() + m_maxX - m_histogram);
       }
     }
 

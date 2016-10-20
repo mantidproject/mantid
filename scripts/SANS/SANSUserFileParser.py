@@ -6,6 +6,8 @@ import re
 DarkRunSettings = namedtuple("DarkRunSettings", "run_number time mean mon mon_number")
 
 #pylint: disable=too-many-instance-attributes
+
+
 class BackCommandParser(object):
     def __init__(self):
         super(BackCommandParser, self).__init__()
@@ -204,7 +206,6 @@ class BackCommandParser(object):
         self._reset_parse_results()
 
         return setting
-
 
     def _parse(self, arguments):
         '''

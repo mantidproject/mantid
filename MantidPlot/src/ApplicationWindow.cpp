@@ -316,6 +316,19 @@ void ApplicationWindow::handleConfigDir() {
   }
 #endif
 }
+/**
+ * Cache the working directory in the QSettings.
+ *
+ * store the working directory in the settings so it may be accessed
+ * elsewhere in the Qt layer.
+ *
+ */
+void ApplicationWindow::cacheWorkingDirectory() const {
+  QSettings settings;
+  settings.beginGroup("/Project");
+  settings.setValue("/WorkingDirectory", workingDir);
+  settings.endGroup();
+}
 
 /**
  * Calls QCoreApplication::exit(m_exitCode)
@@ -4573,13 +4586,7 @@ void ApplicationWindow::openRecentProject(QAction *action) {
     // Have to change the working directory here because that is used when
     // finding the nexus files to load
     workingDir = QFileInfo(f).absolutePath();
-
-    // store the working directory in the settings so it may be accessed
-    // elsewhere in the Qt layer.
-    QSettings settings;
-    settings.beginGroup("/Project");
-    settings.setValue("/WorkingDirectory", workingDir);
-    settings.endGroup();
+    cacheWorkingDirectory();
 
     ApplicationWindow *a = open(fn, false, false);
     if (a && (fn.endsWith(".qti", Qt::CaseInsensitive) ||
@@ -4615,13 +4622,7 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
   newProject();
   m_mantidmatrixWindows.clear();
 
-  // store the working directory in the settings so it may be accessed
-  // elsewhere in the Qt layer.
-  QSettings settings;
-  settings.beginGroup("/Project");
-  settings.setValue("/WorkingDirectory", workingDir);
-  settings.endGroup();
-
+  cacheWorkingDirectory();
   projectname = filename;
   setWindowTitle("MantidPlot - " + filename);
 
@@ -6040,8 +6041,8 @@ void ApplicationWindow::savetoNexusFile() {
   if (!fileName.isEmpty()) {
     std::string wsName;
     MdiSubWindow *w = activeWindow();
-    const std::string windowClassName = w->metaObject()->className();
     if (w) {
+      const std::string windowClassName = w->metaObject()->className();
       if (windowClassName == "MantidMatrix") {
         wsName = dynamic_cast<MantidMatrix *>(w)->getWorkspaceName();
 
@@ -6117,6 +6118,7 @@ void ApplicationWindow::saveProjectAs(const QString &fileName, bool compress) {
       }
 
       workingDir = directory.absolutePath();
+      cacheWorkingDirectory();
       QString projectFileName = directory.dirName();
       projectFileName.append(".mantid");
       projectname = directory.absoluteFilePath(projectFileName);
@@ -9068,6 +9070,35 @@ void ApplicationWindow::closeWindow(MdiSubWindow *window) {
     }
   }
   emit modified();
+}
+
+/** Add a serialisable window to the application
+ * @param window :: the window to add
+ */
+void ApplicationWindow::addSerialisableWindow(QObject *window) {
+  // Here we must store the window as a QObject to avoid multiple inheritence
+  // issues with Qt and the IProjectSerialisable class as well as being able
+  // to respond to the destroyed signal
+  // We can still check here that the window conforms to the interface and
+  // discard it if it does not.
+  if (!dynamic_cast<IProjectSerialisable *>(window))
+    return;
+
+  m_serialisableWindows.push_back(window);
+  // Note that destoryed is emitted directly before the QObject itself
+  // is destoryed. This means the destructor of the specific window type
+  // will have already been called.
+  connect(window, SIGNAL(destroyed(QObject *)), this,
+          SLOT(removeSerialisableWindow(QObject *)));
+}
+
+/** Remove a serialisable window from the application
+ * @param window :: the window to remove
+ */
+void ApplicationWindow::removeSerialisableWindow(QObject *window) {
+  if (m_serialisableWindows.contains(window)) {
+    m_serialisableWindows.removeAt(m_serialisableWindows.indexOf(window));
+  }
 }
 
 void ApplicationWindow::about() {

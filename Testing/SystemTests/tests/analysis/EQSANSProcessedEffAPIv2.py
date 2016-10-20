@@ -6,6 +6,7 @@ from mantid.api import FileFinder
 
 import os
 
+
 class EQSANSProcessedEff(stresstesting.MantidStressTest):
 
     def cleanup(self):

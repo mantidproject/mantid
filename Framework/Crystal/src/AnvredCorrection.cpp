@@ -1,6 +1,8 @@
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -338,11 +340,10 @@ void AnvredCorrection::execEvent() {
           static_cast<float>(itev->m_errorSquared * value * value);
       itev->m_weight *= static_cast<float>(value);
     }
-    correctionFactors->getOrAddEventList(i) += events;
+    correctionFactors->getSpectrum(i) += events;
 
     auto &dets = eventW->getSpectrum(i).getDetectorIDs();
-    for (auto const &det : dets)
-      correctionFactors->getOrAddEventList(i).addDetectorID(det);
+    correctionFactors->getSpectrum(i).addDetectorIDs(dets);
     // When focussing in place, you can clear out old memory from the input one!
     if (inPlace) {
       eventW->getSpectrum(i).clear();

@@ -1,10 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/GetEiMonDet2.h"
 
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -85,8 +83,7 @@ void GetEiMonDet2::init() {
   tofWorkspace->add<InstrumentValidator>();
   auto mandatoryStringProperty =
       boost::make_shared<MandatoryValidator<std::string>>();
-  auto mandatoryDetectorIdProperty =
-      boost::make_shared<MandatoryValidator<detid_t>>();
+  auto mandatoryIntProperty = boost::make_shared<MandatoryValidator<int>>();
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
 
@@ -123,8 +120,7 @@ void GetEiMonDet2::init() {
       PropertyNames::MONITOR_EPP_TABLE,
       make_unique<EnabledWhenProperty>(PropertyNames::MONITOR_WORKSPACE.c_str(),
                                        IS_NOT_DEFAULT));
-  declareProperty(PropertyNames::MONITOR, EMPTY_INT(),
-                  mandatoryDetectorIdProperty,
+  declareProperty(PropertyNames::MONITOR, EMPTY_INT(), mandatoryIntProperty,
                   "Monitor's detector id/spectrum number/workspace index.");
   declareProperty(PropertyNames::PULSE_INTERVAL, EMPTY_DBL(),
                   "Interval between neutron pulses, in microseconds.");
@@ -202,9 +198,10 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
   double distanceSum = 0;
   double eppSum = 0;
   size_t n = 0;
+  // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for if ( m_detectorEPPTable->threadSafe())
              reduction(+: n, distanceSum, eppSum))
-  for (int i = 0; static_cast<size_t>(i) < detectorIndices.size(); ++i) {
+  for (int i = 0; i < static_cast<int>(detectorIndices.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
     const size_t index = detectorIndices[i];
     interruption_point();
@@ -358,6 +355,7 @@ void GetEiMonDet2::monitorDistanceAndTOF(const size_t monitorIndex,
   g_log.information() << "Monitor EPP: " << monitorEPP << ".\n";
 }
 
+namespace {
 /** Transforms detector and monitor indices according to given maps.
  *  @param detectors A vector of detector indices to be transformed
  *  @param monitor A monitor index to be transformed
@@ -368,13 +366,13 @@ void GetEiMonDet2::monitorDistanceAndTOF(const size_t monitorIndex,
  *  @param monitorIndex Output parameter for the monitor
  *         workspace indices
  */
-template <typename T, typename Map>
-void mapIndices(const std::vector<unsigned int> &detectors, const T monitor,
+template <typename Map>
+void mapIndices(const std::vector<unsigned int> &detectors, const int monitor,
                 const Map &detectorIndexMap, const Map &monitorIndexMap,
                 std::vector<size_t> &detectorIndices, size_t &monitorIndex) {
   auto back = std::back_inserter(detectorIndices);
   std::transform(
-      detectors.cbegin(), detectors.cend(), back, [&detectorIndexMap](T i) {
+      detectors.cbegin(), detectors.cend(), back, [&detectorIndexMap](int i) {
         try {
           return detectorIndexMap.at(i);
         } catch (std::out_of_range &) {
@@ -387,6 +385,7 @@ void mapIndices(const std::vector<unsigned int> &detectors, const T monitor,
     throw std::runtime_error(PropertyNames::MONITOR + " out of range.");
   }
 }
+} // namespace anonymous
 
 /** Parser detector and monitor indices from user's input and
  *  transfrorms them to workspace indices.
@@ -398,34 +397,32 @@ void GetEiMonDet2::parseIndices(std::vector<size_t> &detectorIndices,
                                 size_t &monitorIndex) const {
   detectorIndices.clear();
   UserStringParser spectraListParser;
+  const auto detectors = VectorHelper::flattenVector(
+      spectraListParser.parse(getProperty(PropertyNames::DETECTORS)));
+  const int monitor = getProperty(PropertyNames::MONITOR);
   const std::string indexType = getProperty(PropertyNames::INDEX_TYPE);
   if (indexType == IndexTypes::DETECTOR_ID) {
-    const auto detectors = VectorHelper::flattenVector(
-        spectraListParser.parse(getProperty(PropertyNames::DETECTORS)));
-    const detid_t monitor = getProperty(PropertyNames::MONITOR);
     const auto detectorIndexMap =
         m_detectorWs->getDetectorIDToWorkspaceIndexMap();
     const auto monitorIndexMap =
         m_monitorWs->getDetectorIDToWorkspaceIndexMap();
-    mapIndices<detid_t>(detectors, monitor, detectorIndexMap, monitorIndexMap,
-                        detectorIndices, monitorIndex);
+    mapIndices(detectors, monitor, detectorIndexMap, monitorIndexMap,
+               detectorIndices, monitorIndex);
   } else if (indexType == IndexTypes::SPECTRUM_NUMBER) {
-    const auto detectors(VectorHelper::flattenVector(
-        spectraListParser.parse(getProperty(PropertyNames::DETECTORS))));
-    const specnum_t monitor = getProperty(PropertyNames::MONITOR);
     const auto detectorIndexMap =
         m_detectorWs->getSpectrumToWorkspaceIndexMap();
     const auto monitorIndexMap = m_monitorWs->getSpectrumToWorkspaceIndexMap();
-    mapIndices<specnum_t>(detectors, monitor, detectorIndexMap, monitorIndexMap,
-                          detectorIndices, monitorIndex);
+    mapIndices(detectors, monitor, detectorIndexMap, monitorIndexMap,
+               detectorIndices, monitorIndex);
   } else {
     // There is a type mismatch between what UserStringParser returns
     // (unsigned int) and workspace index (size_t), thus the copying.
-    auto detectors = VectorHelper::flattenVector(
-        spectraListParser.parse(getProperty(PropertyNames::DETECTORS)));
     auto back = std::back_inserter(detectorIndices);
     std::copy(detectors.begin(), detectors.end(), back);
-    monitorIndex = getProperty(PropertyNames::MONITOR);
+    if (monitor < 0) {
+      throw std::runtime_error("Monitor cannot be negative.");
+    }
+    monitorIndex = static_cast<size_t>(monitor);
   }
 }
 

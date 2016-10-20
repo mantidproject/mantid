@@ -205,7 +205,14 @@ void EnggDiffractionPresenter::processLoadExistingCalib() {
  */
 
 void EnggDiffractionPresenter::updateNewCalib(const std::string &fname) {
-  if (fname.empty()) {
+
+  Poco::Path pocoPath;
+  const bool pathValid = pocoPath.tryParse(fname);
+
+  if (!pathValid || fname.empty() || pocoPath.isDirectory()) {
+    // Log that we couldn't open the file - its probably and invalid
+    // path which will be regenerated
+    g_log.warning("Could not open GSAS calibration file: " + fname);
     return;
   }
 
@@ -1183,45 +1190,57 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
 
   // Creates appropriate output directory
   const std::string calibrationComp = "Calibration";
-  auto saveDir = outFilesUserDir(calibrationComp);
-  Poco::Path outFullPath(saveDir);
-  outFullPath.append(outFilename);
+  const Poco::Path userCalSaveDir = outFilesUserDir(calibrationComp);
+  const Poco::Path generalCalSaveDir = outFilesGeneralDir(calibrationComp);
+
+  // Use poco to append filename so it is OS independent
+  std::string userCalFullPath =
+      appendToPath(userCalSaveDir.toString(), outFilename);
+  std::string generalCalFullPath =
+      appendToPath(generalCalSaveDir.toString(), outFilename);
 
   // Double horror: 1st use a python script
   // 2nd: because runPythonCode does this by emitting a signal that goes to
   // MantidPlot, it has to be done in the view (which is a UserSubWindow).
   // First write the all banks parameters file
-  m_calibFullPath = outFullPath.toString();
-  writeOutCalibFile(m_calibFullPath, difc, tzero, bankNames, ceriaNo, vanNo);
-  copyToGeneral(outFullPath, calibrationComp);
+  m_calibFullPath = generalCalSaveDir.toString();
+  writeOutCalibFile(userCalFullPath, difc, tzero, bankNames, ceriaNo, vanNo);
+  writeOutCalibFile(generalCalFullPath, difc, tzero, bankNames, ceriaNo, vanNo);
+
   m_currentCalibParms.clear();
 
   // Then write one individual file per bank, using different templates and the
   // specific bank name as suffix
   for (size_t bankIdx = 0; bankIdx < difc.size(); ++bankIdx) {
-    Poco::Path bankOutputFullPath(saveDir);
     // Need to use van number not file name here else it will be
     // "ENGINX_ENGINX12345_ENGINX12345...." as out name
     const std::string bankFilename = buildCalibrateSuggestedFilename(
         vanNo, ceriaNo, "bank_" + bankNames[bankIdx]);
-    bankOutputFullPath.append(bankFilename);
+
+    // Regenerate both full paths for each bank now
+    userCalFullPath = appendToPath(userCalSaveDir.toString(), bankFilename);
+    generalCalFullPath =
+        appendToPath(generalCalSaveDir.toString(), bankFilename);
+
     std::string templateFile = "template_ENGINX_241391_236516_North_bank.prm";
     if (1 == bankIdx) {
       templateFile = "template_ENGINX_241391_236516_South_bank.prm";
     }
 
-    const std::string outPathName = bankOutputFullPath.toString();
-    writeOutCalibFile(outPathName, {difc[bankIdx]}, {tzero[bankIdx]},
+    writeOutCalibFile(userCalFullPath, {difc[bankIdx]}, {tzero[bankIdx]},
                       {bankNames[bankIdx]}, ceriaNo, vanNo, templateFile);
-    copyToGeneral(bankOutputFullPath, calibrationComp);
+    writeOutCalibFile(generalCalFullPath, {difc[bankIdx]}, {tzero[bankIdx]},
+                      {bankNames[bankIdx]}, ceriaNo, vanNo, templateFile);
+
     m_currentCalibParms.emplace_back(
         GSASCalibrationParms(bankIdx, difc[bankIdx], 0.0, tzero[bankIdx]));
     if (1 == difc.size()) {
       // it is a  single bank or cropped calibration, so take its specific name
-      m_calibFullPath = outPathName;
+      m_calibFullPath = generalCalFullPath;
     }
   }
-  g_log.notice() << "Calibration file written as " << m_calibFullPath << '\n';
+  g_log.notice() << "Calibration file written as " << generalCalFullPath << '\n'
+                 << "And: " << userCalFullPath;
 
   // plots the calibrated workspaces.
   g_plottingCounter++;
@@ -2882,6 +2901,11 @@ EnggDiffractionPresenter::outFilesGeneralDir(const std::string &addComponent) {
   try {
 
     dir.append(addComponent);
+
+    Poco::File dirFile(dir);
+    if (!dirFile.exists()) {
+      dirFile.createDirectories();
+    }
   } catch (Poco::FileAccessDeniedException &e) {
     g_log.error() << "Error caused by file access/permission, path to "
                      "general directory: " << dir.toString()
@@ -2930,6 +2954,26 @@ Poco::Path EnggDiffractionPresenter::outFilesRootDir() {
   }
 
   return dir;
+}
+
+/*
+ * Provides a small wrapper function that appends the given string
+ * to the given path in an OS independent manner and returns the
+ * resulting path as a string.
+ *
+ * @param currentPath The path to be appended to
+ * @param toAppend The string to append to the path (note '/' or '\\'
+ * characters should not be included
+ *
+ * @return String with the two parts of the path appended
+ */
+std::string
+EnggDiffractionPresenter::appendToPath(const std::string &currentPath,
+                                       const std::string &toAppend) const {
+  // Uses poco to handle to operation to ensure OS independence
+  Poco::Path newPath(currentPath);
+  newPath.append(toAppend);
+  return newPath.toString();
 }
 
 /**

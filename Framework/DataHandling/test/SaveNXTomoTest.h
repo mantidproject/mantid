@@ -92,8 +92,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("IncludeError", false));
 
     TS_ASSERT_THROWS_NOTHING(m_saver->execute());
-    // TODO:: uncomment - currently fails due to 10519
-    // TS_ASSERT( m_saver->isExecuted() );
+    TS_ASSERT(m_saver->isExecuted());
 
     // Check file exists
     Poco::File file(m_outputFile);
@@ -127,9 +126,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("IncludeError", false));
 
     TS_ASSERT_THROWS_NOTHING(m_saver->execute());
-    // TODO:: uncomment - currently fails due to
-    // https://github.com/mantidproject/mantid/issues/11361
-    // TS_ASSERT( m_saver->isExecuted() );
+    TS_ASSERT(m_saver->isExecuted());
 
     // Check file exists
     Poco::File file(m_outputFile);
@@ -172,8 +169,7 @@ public:
       TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("IncludeError", false));
 
       TS_ASSERT_THROWS_NOTHING(m_saver->execute());
-      // TODO:: uncomment - currently fails due to 10519
-      // TS_ASSERT( m_saver->isExecuted() );
+      TS_ASSERT(m_saver->isExecuted());
 
       // Check file exists
       Poco::File file(m_outputFile);

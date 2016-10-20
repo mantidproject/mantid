@@ -62,7 +62,10 @@ Spectrogram::Spectrogram(const QString &wsName,
                          const Mantid::API::IMDWorkspace_const_sptr &workspace)
     : QObject(), QwtPlotSpectrogram(), d_matrix(NULL), d_funct(NULL),
       d_wsData(NULL), d_wsName(), color_axis(QwtPlot::yRight),
-      color_map_policy(Default), mColorMap(), d_color_map_autoscale(true) {
+      color_map_policy(Default), d_show_labels(true), d_white_out_labels(true),
+      d_labels_x_offset(0), d_labels_y_offset(0),
+      d_labels_align(Qt::AlignHCenter), mColorMap(),
+      d_color_map_autoscale(true) {
   d_wsData = dataFromWorkspace(workspace);
   setData(*d_wsData);
   d_wsName = wsName.toStdString();
@@ -73,7 +76,6 @@ Spectrogram::Spectrogram(const QString &wsName,
   for (double level = data().range().minValue() + step;
        level < data().range().maxValue(); level += step)
     contourLevels += level;
-
   setContourLevels(contourLevels);
 
   observePostDelete();
@@ -967,8 +969,7 @@ QImage Spectrogram::renderImage(const QwtScaleMap &xMap,
       double xmin, xmax;
       mantidFun->getRowXRange(row, xmin, xmax);
       int jmin = -1;
-      if (xmin != std::numeric_limits<double>::infinity() && xmin == xmin &&
-          xmax != std::numeric_limits<double>::infinity() && xmax == xmax) {
+      if (std::isfinite(xmin) && std::isfinite(xmax)) {
         jmin = xMap.transform(xmin) - rect.left();
       } else {
         continue;

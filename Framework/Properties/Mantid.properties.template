@@ -20,7 +20,7 @@ default.instrument =
 Q.convention = Inelastic
 
 # Set of PyQt interfaces to add to the Interfaces menu, separated by a space.  Interfaces are seperated from their respective categories by a "/".
-mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py SANS/ORNL_SANS.py Reflectometry/REFL_Reduction.py Reflectometry/REFL_SF_Calculator.py Reflectometry/REFM_Reduction.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_Powder_Diffraction_Reduction.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py
+mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py Direct/PyChop.py SANS/ORNL_SANS.py Reflectometry/REFL_Reduction.py Reflectometry/REFL_SF_Calculator.py Reflectometry/REFM_Reduction.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_Powder_Diffraction_Reduction.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py
 
 mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
 
@@ -88,6 +88,10 @@ datasearch.directories = @DATADIRS@
 # Warning: Mantid is compiled against a specific version of ParaView. Ensure that this path
 # points to the ParaView obtained from the Mantid download page
 paraview.path = @PARAVIEW_APP_BIN_DIR@
+
+# A semi-colon(;) separated list of directories to use to search for data
+# Use forward slash / for all paths
+paraview.pythonpaths = @PARAVIEW_PYTHON_PATHS@
 
 # Whether to look for ParaView (0 = try to use, 1 = don't use).
 paraview.ignore = @IGNORE_PARAVIEW@
@@ -186,6 +190,8 @@ logging.channels.fileFilterChannel.level= information
 logging.channels.fileChannel.class = FileChannel
 # Blank entry uses default path of HOME/.mantid/mantid.log on Linux/OSX and %APPDATA%\\mantidproject\\mantid
 logging.channels.fileChannel.path =
+# Do not flush file buffers for each newline
+logging.channels.fileChannel.flush = false
 logging.channels.fileChannel.rotation = 1 M
 logging.channels.fileChannel.purgeCount = 9
 logging.channels.fileChannel.formatter.class = PatternFormatter
