@@ -125,13 +125,13 @@ class ABINSCalculateQToscaTest(unittest.TestCase):
         q_vectors = q_calculator.calculateData()
 
         # noinspection PyTypeChecker
-        self.assertEqual(True, np.allclose(correct_q_data, q_vectors.extract()["order_1"]))
+        self.assertEqual(True, np.allclose(correct_q_data, q_vectors.extract()["order_%s" %AbinsConstants.fundamentals]))
 
         # check loading data
         loaded_q = q_calculator.loadData()
 
         # noinspection PyTypeChecker
-        self.assertEqual(True, np.allclose(correct_q_data, loaded_q.extract()["order_1"]))
+        self.assertEqual(True, np.allclose(correct_q_data, loaded_q.extract()["order_%s" %AbinsConstants.fundamentals]))
 
 
 if __name__ == '__main__':
