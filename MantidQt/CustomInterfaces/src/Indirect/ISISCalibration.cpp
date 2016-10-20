@@ -706,7 +706,6 @@ void ISISCalibration::saveClicked() {
   addSaveWorkspaceToQueue(m_outputCalibrationName);
 
   if (m_uiForm.ckCreateResolution->isChecked()) {
-    auto output = m_outputResolutionName.toStdString();
     checkADSForPlotSaveWorkspace(m_outputResolutionName.toStdString(), false);
     addSaveWorkspaceToQueue(m_outputResolutionName);
   }
