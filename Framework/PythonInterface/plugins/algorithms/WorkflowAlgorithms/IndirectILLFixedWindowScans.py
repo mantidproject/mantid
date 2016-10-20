@@ -1,23 +1,18 @@
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
-<<<<<<< HEAD
 
-from mantid.simpleapi import *
+from mantid.simpleapi import *  # noqa
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, \
     PropertyMode, MatrixWorkspaceProperty, WorkspaceGroupProperty, \
     FileProperty, MultipleFileProperty, FileAction, Progress
 from mantid.kernel import Direction, logger, StringListValidator
 import numpy as np
-=======
->>>>>>> bfb96d2fc647cadcabbf8b7a89e91e9f35a80ec0
 import re
-import numpy as np
-from mantid.simpleapi import *
-from mantid.api import *
-from mantid.kernel import *
+
 
 from IndirectILLReduction import IndirectILLReduction
+
 
 # This function already exists in IndirectILLReduction
 def monitor_range(workspace):
@@ -50,6 +45,8 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
     _analyser = None
     _reflection = None
     selected_runs = None
+    _post_processing_entity_name = None
+    _post_processing_entities = None
 
     def category(self):
         return 'Workflow\\MIDAS;Inelastic\\Reduction'
@@ -61,16 +58,24 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
         return "IndirectILLFixedWindowScans"
 
     def PyInit(self):
-        self.declareProperty(MultipleFileProperty(name='Run', extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty(name='Run',
+                                                  extensions=['nxs']),
                              doc='List of input file (s)')
 
-        self.declareProperty(FileProperty('EvaluationEntity', ''),
+        self.declareProperty(name='EvaluationEntity',
+                             defaultValue='temperature',
+                             validator=None,
                              doc='Post-processing entity (Nexus-file entry).')
+
+        self.declareProperty(name='PerformCurveFitting',
+                             defaultValue='False',
+                             doc='Fit post-processed curve; '
+                                 'only for elastic scan data.')
 
         self.declareProperty(FileProperty('MapFile', '',
                                           action=FileAction.OptionalLoad,
                                           extensions=['xml']),
-                             doc='Filename of the detector grouping map file to use. \n'
+                             doc='Filename of the detector grouping map file. \n'
                                  'If left blank the default will be used.')
 
         self.declareProperty(name='Analyser',
@@ -105,6 +110,8 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
 
         issues = dict()
 
+        # Check if post_processing_entity is valid, e.g. is a Nexus-file entry
+
         return issues
 
     def setUp(self):
@@ -115,6 +122,7 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
         self._reflection = self.getPropertyValue('Reflection')
         self._debug_mode = self.getProperty('DebugMode').value
         self._out_ws = self.getPropertyValue('OutputWorkspace')
+        self._post_processing_entity_name = 'sample.' + self.getPropertyValue('EvaluationEntity')
 
     def PyExec(self):
         self.setUp()
@@ -153,13 +161,10 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
         energy = mtd[input_ws].getRun().getLogData('Doppler.maximum_delta_energy').value
 
         if energy == 0.:
-            # Elastic
-            # Attention: after the reduction, all x-values are zero!
-            x_min = - 0.5
-            x_max = + 0.5
-            logger.information('EFWS scan from {0} to {1}'.format(x_min, x_max))
+            # Elastic, take full 'energy range'
+            logger.information('EFWS scan from {0} to {1}'.format(x_values[0], x_values[-1]))
             Integration(InputWorkspace=input_ws, OutputWorkspace=input_ws,
-                        RangeLower=x_min, RangeUpper=x_max)
+                        RangeLower=x_values[0], RangeUpper=x_values[-1])
         else:
             # Inelastic
             # Get the two maximum peak positions of the inelastic fixed-window scan
@@ -178,7 +183,72 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
                         RangeLower=x_max, RangeUpper=x_values[len(x_values) - 1])
             Plus(LHSWorkspace='__left', RHSWorkspace='__right', OutputWorkspace=input_ws)
 
+    def _get_post_processing_entities(self, input_ws):
+        """
+        Set list self._post_processing_entities
+        Args:
+            input_ws: GroupWorkspace, all reduced workspaces of one energy
+        """
+        self._post_processing_entities = []
+        for index in range(mtd[input_ws].getNumberOfEntries()):
+            entity = float(mtd[input_ws].getItem(index).getRun().getLogData(self._post_processing_entity_name).value)
+            self.log().debug('{0}: {1}'.format(self._post_processing_entity_name, entity))
+            self._post_processing_entities.append(entity)
+
+    def _append_bins(self, group, output_ws):
+        """
+        Args:
+            input_ws: GroupWorkspace, will be transformed to one MatrixWorkspace, Workspace2D, not a histogram
+
+        """
+        self._get_post_processing_entities(group)
+
+        number_hists = mtd[group].getItem(0).getNumberHistograms()
+        number_workspaces = mtd[group].getNumberOfEntries()
+        channels = number_workspaces * number_hists
+
+        self.log().notice('Final post-processing workspace has {0} channel(s) and {1} spectra'.format(number_workspaces,
+                                                                                                      number_hists))
+
+        # Initialisation of the new workspace with values of the first workspace
+        y_values = []
+        e_values = []
+        x_values = []
+        y_transposed = []
+        e_transposed = []
+
+        # Create an array of all y-values and e-values
+        for index in range(number_workspaces):
+            workspace = mtd[group].getItem(index)
+            self.log().debug('Process workspace {0} '.format(workspace.getName()))
+            for hists in range(number_hists):  # vstack, hstack
+                y_values = np.append(y_values, np.array(workspace.readY(hists)))
+                e_values = np.append(e_values, np.array(workspace.readE(hists)))
+
+        # Transpose matrix by resorting the values
+        for index2 in range(number_hists):
+            y_transposed = np.append(y_transposed, y_values[index2: channels: number_hists])
+            e_transposed = np.append(e_transposed, e_values[index2: channels: number_hists])
+            x_values = np.append(x_values, np.array(self._post_processing_entities))
+
+        CreateWorkspace(DataX=x_values, DataY=y_transposed, DataE=e_transposed, NSpec=number_hists,
+                        UnitX='Label', ParentWorkspace=mtd[group].getItem(0), OutputWorkspace=output_ws)
+
+        # Label x-values
+        if self._post_processing_entity_name == 'sample.temperature':
+            axis = mtd[output_ws].getAxis(0).getUnit()
+            axis.setLabel('Temperature', 'K')
+
+        SortXAxis(InputWorkspace=output_ws, OutputWorkspace=output_ws)
+
+        GroupWorkspaces(InputWorkspaces=[output_ws, group], OutputWorkspace=group)
+
     def _set_workspace_properties(self):
+        """
+        Sets the properties of each GroupWorkspace for each elastic and inelastic energy
+        Returns: energy values
+
+        """
 
         number_of_workspaces = mtd[self._out_ws].getNumberOfEntries()
 
@@ -226,12 +296,17 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
             for j in range(number_of_workspaces):
                 if i == indices[j]:
                     # Pick workspace with same energy value
-                    self.log().debug('Workspace {0} for GroupWorkspace of energy {1}'.format
-                                     (_selected_runs[j][0] + '_' + self._out_ws, j))
+                    self.log().debug('Workspace {0} for GroupWorkspace of energy {1}'
+                                     .format(_selected_runs[j][0] + '_' + self._out_ws, j))
                     group.append(_selected_runs[j][0] + '_' + self._out_ws)
 
             # Create the GroupWorkspace and set workspace property
             GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=group_name)
+
+            # Create an additional workspace containing all workspaces of the group (transversed)
+            new_group_entry = self._out_ws + '_' + str(energy_values[i]) + '_matrix'
+            self._append_bins(group_name, new_group_entry)
+
             # Set output workspace properties accordingly
             self.setProperty('OutputWorkspace', group_name)
 

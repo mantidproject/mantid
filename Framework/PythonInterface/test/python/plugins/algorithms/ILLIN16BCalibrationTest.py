@@ -49,7 +49,7 @@ class ILLIN16BCalibrationTest(unittest.TestCase):
         self.assertEqual(calib_ws.getNumberHistograms(), 18)
         self.assertEqual(calib_ws.blocksize(), 1)
 
-        self.assertNotEqual(calib_ws.readX(0).all(), 0.0)
+        self.assertNotEqual(calib_ws.extractY().all(), 0.)
 
     def test_map_file(self):
         temp_map = TemporaryFileHelper(SAMPLE_GROUPING_XML, extension='.xml')
