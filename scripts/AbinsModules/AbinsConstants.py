@@ -10,11 +10,12 @@ from scipy import constants
 # S(Q, n * omega) \simeq (Q^2 * U^2)^n / n! exp(-Q^2 * U^2)
 # n = 1, 2, 3.....
 
-first_overtone = 2 # value of first overtone (n = 2)
-fundamentals = 1 # value of fundamental parameter  (n = 1)
+
+fundamentals = 0 # value of fundamental parameter  (n = 1)
+first_overtone = 1 + fundamentals  # value of first overtone (n = 2)
 fundamentals_dim = 1
 
-python_index_shift = 1  # in Python first element starts at 0-th index. This is a shift to index which has to be included
+python_index_shift = 0  # in Python first element starts at 0-th index. This is a shift to index which has to be included
 # in array index calculation to write data in the proper position of array
 
 # symbols of all elements
@@ -63,7 +64,7 @@ complex_type = np.dtype(np.complex)
 
 total_workspace_size = int(round(AbinsParameters.max_wavenumber / float(AbinsParameters.bin_width), 0)) # maximum number of entries in the workspace
 higher_order_quantum_effects_dim = AbinsParameters.higher_order_quantum_effects
-max_quantum_order_array_size = 100000  # maximum size for storing frequencies for each quantum order
-s_last_index = 1 # constant to be used when iterating with range() over all considered quantum effects (range() is exclusive with respect to the last element)
-q_last_index = 1 # constant to be used when iterating with range() over all considered quantum effects  (range() is exclusive with respect to the last element)
+max_array_size = 1000000  # maximum size for storing frequencies for each quantum order
+s_last_index = 0 # constant to be used when iterating with range() over all considered quantum effects (range() is exclusive with respect to the last element)
+q_last_index = 0 # constant to be used when iterating with range() over all considered quantum effects  (range() is exclusive with respect to the last element)
 ####################################### Constants end #################################
