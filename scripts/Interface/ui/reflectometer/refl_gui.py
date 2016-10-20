@@ -447,7 +447,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         """
         copy the contents of the selected cells to the row below as long as the row below contains a run number in the first cell
         """
-        _col = 0
         # make sure all selected cells are in the same row
         sum = 0
         howMany = len(self.tableMain.selectedItems())
@@ -693,11 +692,9 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             if willProcess:
                 for row in rowIndexes:  # range(self.tableMain.rowCount()):
                     runno = []
-                    _loadedRuns = []
                     wksp = []
                     overlapLow = []
                     overlapHigh = []
-                    _theta = [0, 0, 0]
                     if self.tableMain.item(row, 0).text() != '':
                         self.statusMain.showMessage("Processing row: " + str(row + 1))
                         logger.debug("Processing row: " + str(row + 1))
@@ -799,7 +796,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                         outputwksp = runno[0] + '_' + runno[1][3:]
                                     else:
                                         outputwksp = runno[0] + '_' + runno[-1][3:]
-                                    _begoverlap = w2.readX(0)[0]
                                     # get Qmax
                                     if self.tableMain.item(row, i * 5 + 4).text() == '':
                                         overlapHigh = 0.3 * max(w1.readX(0))
@@ -864,7 +860,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             self.__reset_plot_button(plotbutton)
             return
         for i in range(len(runno)):
-            _ws = getWorkspace(wksp[i])
             if len(overlapLow):
                 Qmin = overlapLow[0]
             else:
@@ -974,7 +969,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         # Only make a transmission workspace if we need one.
         if transrun and not transmission_ws:
             converter = ConvertToWavelength(transrun)
-            _trans_run_names = converter.get_name_list()
             size = converter.get_ws_list_size()
             out_ws_name = transrun_named
             if size == 1:

@@ -180,7 +180,7 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
                 cur_index = datafiles.index(fname)
             except ValueError:
                 continue
-            dummy_value = datafiles.pop(cur_index)
+            datafiles.pop(cur_index)
             datafiles.insert(insertion_index, fname)
 
         return datafiles

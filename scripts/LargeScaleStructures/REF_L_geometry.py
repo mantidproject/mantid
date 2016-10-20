@@ -59,7 +59,6 @@ def create_grouping(workspace=None):
 
 def create_geometry(file_name=None, pixel_width=None, pixel_height=None):
     inst_name = "REF_L"
-    short_name = "REF_L"
 
     if pixel_width is None:
         pixel_width = PIXEL_WIDTH

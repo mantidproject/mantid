@@ -154,7 +154,6 @@ class MantidGeom(object):
         basecomponent.setAttribute("mark-as", "monitor")
 
         for i in range(len(distance)):
-            dummy_zi = float(distance[i])
             self._append_child("location", basecomponent, z=distance[i], name=names[i])
 
     def addComponent(self, type_name, idlist=None, root=None, blank_location=True):
@@ -249,17 +248,17 @@ class MantidGeom(object):
 
     def addLocationPolar(self, root, r, theta, phi, name=None):
         if name is not None:
-            _pos_loc = self._append_child("location", root, r=r, t=theta, p=phi, name=name)
+           self._append_child("location", root, r=r, t=theta, p=phi, name=name)
         else:
-            _pos_loc = self._append_child("location", root, r=r, t=theta, p=phi)
+           self._append_child("location", root, r=r, t=theta, p=phi)
 
     def addLocationRTP(self, root, r, t, p, rot_x, rot_y, rot_z, name=None):
         """
         Add a location element to a specific parent node given by root, using r, theta, phi coordinates.
         """
-        dummy_rf = float(r)
-        dummy_tf = float(f)
-        dummy_pf = float(p)
+        float(r)
+        float(f)
+        float(p)
         if name is not None:
             pos_loc = self._append_child("location", root, r=r, t=t, p=p, name=name)
         else:
@@ -269,15 +268,15 @@ class MantidGeom(object):
         # the combined rotation is equals that obtained by applying rotx, then roty and finally rotz.
         if rot_x is not None:
             log = self._append_child("parameter", pos_loc, name="rotx")
-            _rotxf = float(rot_x)
+            float(rot_x)
             self._append_child("value", log, val=rot_x)
         if rot_y is not None:
             log = self._append_child("parameter", pos_loc, name="roty")
-            _rotyf = float(rot_y)
+            float(rot_y)
             self._append_child("value", log, val=rot_y)
         if rot_z is not None:
             log = self._append_child("parameter", pos_loc, name="rotz")
-            _rotzf = float(rot_z)
+            float(rot_z)
             self._append_child("value", log, val=rot_z)
 
     def addNPack(self, name, num_tubes, tube_width, air_gap, type_name="tube"):

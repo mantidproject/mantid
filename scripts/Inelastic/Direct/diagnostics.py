@@ -334,13 +334,6 @@ def do_background_test(background_int, median_lo, median_hi, sigma, mask_zero,
     """
     logger.notice('Running background count test')
 
-    # What shall we call the output
-    lhs_names = lhs_info('names')
-    if len(lhs_names) > 0:
-        ws_name = lhs_names[0]
-    else:
-        ws_name = '__do_background_test'
-
     mask_bkgd, num_failures = MedianDetectorTest(InputWorkspace=background_int,
                                                  StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,
                                                  SignificanceTest=sigma,

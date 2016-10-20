@@ -318,7 +318,7 @@ def _copyLog(lastPath, logFile, pathout):
             copyfile(logFile, os.path.join(pathout, os.path.basename(logFile)))
         else:
             logger.notice("Could not find log file %s" % logFile)
-    except Exception, reason:
+    except Exception:
         error = 'Error copying log file ' + logFile + ' to directory ' + pathout+'\n'
         print error
         logger.notice(error)

@@ -846,7 +846,6 @@ def calculate(string_runs=None,
 
     #Make sure all the lambdaRequested are identical within a given range
     lambdaRequestPrecision = 0.01 #1%
-    _lr = lambdaRequest[0]
     for i in lambdaRequest:
         _localValue = float(lambdaRequest[i][0])
         _localValueRate = lambdaRequestPrecision * _localValue
@@ -865,7 +864,6 @@ def calculate(string_runs=None,
         error_a = []
         error_b = []
         name = []
-        _previous_cal = None
 
         finalS1H = []
         finalS2H = []

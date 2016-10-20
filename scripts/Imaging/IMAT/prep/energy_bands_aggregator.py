@@ -207,7 +207,6 @@ class EnergyBandsAggregator(object):
             acc = np.add(acc, img_data)
         elif 'average' == agg_method:
             acc = np.add((index-1)*acc/index, img_data/index)
-            __img_idx += 1
 
         return acc
 
@@ -247,10 +246,6 @@ class EnergyBandsAggregator(object):
         if '>i2' == data_dtype:
             data_dtype = np.uint16
         accum = np.zeros((imgs[0].shape[0], imgs[0].shape[1]), dtype=data_dtype)
-
-        # methods that require incremental calculations should remember to do this
-        if 'average' == agg_method:
-            __img_idx = 1
 
         # filter, keep only the files between min and max indices given
         if band_indices:

@@ -43,7 +43,7 @@ class SANS2DMinimalBatchReduction(stresstesting.MantidStressTest):
         import SANSBatchMode as batch
         i.SANS2D()
         i.MaskFile(MASKFILE)
-        fit_settings = batch.BatchReduce(BATCHFILE,'.nxs', combineDet='rear')
+        batch.BatchReduce(BATCHFILE,'.nxs', combineDet='rear')
 
     def validate(self):
         self.disableChecking.append('Instrument')
@@ -189,8 +189,6 @@ class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
 
         self.applyGUISettings()
 
-        _user_settings_copy = copy.deepcopy(i.ReductionSingleton().user_settings)
-
         fit_settings={'scale':1.0,'shift':0.0}
         fit_settings = batch.BatchReduce(BATCHFILE,'.nxs', saveAlgs={}, reducer=i.ReductionSingleton().reference(),combineDet='rear')
 
@@ -219,15 +217,9 @@ class SANS2DGUIReduction(SANS2DGUIBatchReduction):
         i.SetCentre('155.45','-169.6','front')
         SCATTER_SAMPLE, logvalues = i.AssignSample(r'SANS2D00022048.nxs', reload = True, period = 1)
 
-        dummy_1 = SCATTER_SAMPLE
-        dummy_2 = logvalues
-
         i.SetCentre('155.45','-169.6','rear')
         i.SetCentre('155.45','-169.6','front')
         SCATTER_SAMPLE, logvalues = i.AssignCan(r'SANS2D00022023.nxs', reload = True, period = 1)
-
-        dummy_3 = SCATTER_SAMPLE
-        dummy_4 = logvalues
 
         t1, t2 = i.TransmissionSample(r'SANS2D00022041.nxs', r'SANS2D00022024.nxs', period_t=1, period_d=1)
 

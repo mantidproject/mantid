@@ -230,8 +230,9 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
             fitt_x_values.append(copy.copy(ws.dataX(1)))
 
     if showPlot:
-        FittedData = CreateWorkspace(numpy.hstack(fitt_x_values),
-                                     numpy.hstack(fitt_y_values))
+        CreateWorkspace(OutputWorkspace='FittedData',
+                        DataX=numpy.hstack(fitt_x_values),
+                        DataY=numpy.hstack(fitt_y_values))
     return results
 
 
@@ -414,7 +415,6 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
     # Move the pixel detectors (might not work for sloping tubes)
     for i in range(nDets):
         deti = ws.getDetector( whichTube[i])
-        det_pos = deti.getPos()
         pNew = pixels[i]
         # again, the opeartion float * v3d is not defined, but v3d * float is,
         # so, I wrote the new pos as center + unit_vector * (float)

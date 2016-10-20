@@ -248,7 +248,7 @@ def improvingCalibrationOfListOfTubes(filename):
     """
     from tube_calib_fit_params import TubeCalibFitParams
 
-    not_good = [19,37, 71, 75, 181, 186, 234, 235, 245, 273, 345]
+    # not_good = [19,37, 71, 75, 181, 186, 234, 235, 245, 273, 345]
 
     CalibInstWS = loadingStep(filename)
     # == Set parameters for calibration ==
@@ -386,7 +386,7 @@ def findThoseTubesThatNeedSpecialCareForCalibration(filename):
 
     print 'Creating the Peaks Workspace that shows the distance from the expected value for all peaks for each tube'
     # Let's see these peaks:
-    Peaks = CreateWorkspace(range(n),distance_from_expected,NSpec=5)
+    CreateWorkspace(range(n),distance_from_expected,NSpec=5,OutputWorkspace='Peaks')
 
     # plot all the 5 peaks for Peaks Workspace. You will see that most of the tubes differ
     # at most 12 pixels from the expected values.
@@ -404,8 +404,8 @@ def findThoseTubesThatNeedSpecialCareForCalibration(filename):
     print 'Calibrating again only these tubes'
     #let's confir that our suspect works
     CalibInstWS = loadingStep(filename)
-    calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-                                      fitPar=fitPar, rangeList= problematic_tubes, plotTube=problematic_tubes)
+    tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
+                   fitPar=fitPar, rangeList= problematic_tubes, plotTube=problematic_tubes)
     # plot the FittedTube agains TubePlot for each detector and you will see that there were problems on those tubes.
 
 
