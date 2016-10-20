@@ -460,7 +460,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
             self._set_mirror_sense(__first_ws.getRun())
 
-            # load all the aux files
             self._load_auxiliary_files()
 
             # figure out number of progress reports, i.e. one for each input workspace/file
@@ -591,6 +590,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 RenameWorkspace(left_vanadium.getItem(0).getName(),'left_van')
                 RenameWorkspace(right_vanadium.getItem(0).getName(), 'right_van')
 
+            if mtd['left_van'].getRun().getLogData('Doppler.mirror_sense').value != self._mirror_sense:
+                self.log().error('Inconsistent mirror sense in vanadium run. Aborting.')
+                raise RuntimeError('Inconsistent mirror sense in vanadium run. Aborting.')
+
         elif self._mirror_sense == 16:
             # call IndirectILLReduction for vanadium run with unmirror 0
 
@@ -602,6 +605,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             else:
                 RenameWorkspace(one_vanadium.getItem(0).getName(), 'center_van')
 
+            if mtd['center_van'].getRun().getLogData('Doppler.mirror_sense').value != self._mirror_sense:
+                self.log().error('Inconsistent mirror sense in vanadium run. Aborting.')
+                raise RuntimeError('Inconsistent mirror sense in vanadium run. Aborting.')
+
 
     def _load_background_run(self):
         """
@@ -612,6 +619,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         NormaliseToMonitor(InputWorkspace=background, OutputWorkspace=background, MonitorSpectrum=1)
         GroupDetectors(InputWorkspace=background, OutputWorkspace=background, MapFile=self._map_file, Behaviour='Sum')
 
+        if mtd['background'].getRun().getLogData('Doppler.mirror_sense').value != self._mirror_sense:
+            self.log().error('Inconsistent mirror sense in background run. Aborting.')
+            raise RuntimeError('Inconsistent mirror sense in background run. Aborting.')
 
     def _reduce_run(self, run, ws_names):
         """
@@ -641,6 +651,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         if not self._check_mirror_sense(red):
             self.log().warning('Inconsistent mirror sense in run #{0}, skipping.'.format(run))
+            DeleteWorkspace(red)
             return
 
         self._debug(red, raw)
