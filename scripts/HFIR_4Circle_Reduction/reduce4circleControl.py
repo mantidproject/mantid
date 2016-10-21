@@ -884,9 +884,13 @@ class CWSCDReductionControl(object):
         :return: PeakInfo instance
         """
         # Check for type
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
-        assert isinstance(pt_number, int) or pt_number is None
+        assert isinstance(exp_number, int), 'Experiment %s must be an integer but not of type %s.' \
+                                            '' % (str(exp_number), type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number %s must be an integer but not of type %s.' \
+                                             '' % (str(scan_number), type(scan_number))
+        assert isinstance(pt_number, int) or pt_number is None, 'Pt number %s must be an integer or None, but ' \
+                                                                'it is of type %s now.' % (str(pt_number),
+                                                                                           type(pt_number))
 
         # construct key
         if pt_number is None:
@@ -1816,8 +1820,7 @@ class CWSCDReductionControl(object):
 
         return
 
-    def refine_ub_matrix_by_lattice(self, peak_info_list, set_hkl_int,  ub_matrix_str, unit_cell_type,
-                                    use_spice_hkl):
+    def refine_ub_matrix_by_lattice(self, peak_info_list, ub_matrix_str, unit_cell_type):
         """
         Refine UB matrix by fixing unit cell type
         :param peak_info_list:
@@ -1827,6 +1830,8 @@ class CWSCDReductionControl(object):
         :param use_spice_hkl:
         :return:
         """
+        # TODO/NOW/ISSUE - make this one work!
+
         # check inputs and return if not good
         assert isinstance(peak_info_list, list), 'peak_info_list must be a list but not %s.' % type(peak_info_list)
         if len(peak_info_list) < 6:
@@ -1856,24 +1861,25 @@ class CWSCDReductionControl(object):
 
         return True, ''
 
-    def refine_ub_matrix_least_info(self, peak_info_list, d_min, d_max):
+    def refine_ub_matrix_least_info(self, peak_info_list, d_min, d_max, tolerance):
         """
         Refine UB matrix with least information from user, i.e., using FindUBFFT
         Requirements: at least 6 PeakInfo objects are given
         Guarantees: Refine UB matrix by FFT
         :return:
         """
+        # TODO/NOW/ISSUE - Fix the documentations
         # Check
         assert isinstance(peak_info_list, list) and len(peak_info_list) >= 6
         assert 0 < d_min < d_max
 
         # Build a new PeaksWorkspace
         peak_ws_name = 'TempUBFFTPeaks'
-        self._build_peaks_workspace(peak_info_list, peak_ws_name, False, False)
+        self._build_peaks_workspace(peak_info_list, peak_ws_name)
 
         # Refine
         api.FindUBUsingFFT(PeaksWorkspace=peak_ws_name,
-                           Tolerance=0.15,
+                           Tolerance=tolerance,
                            MinD=d_min,
                            MaxD=d_max)
 
@@ -1941,7 +1947,9 @@ class CWSCDReductionControl(object):
             peak_i = peak_ws.getPeak(i_peak_info)
 
             # set the peak indexing to each pear
-            h, k, l = peak_info_i.get_user_index()
+            # TODO/NOW/ISSUE - do not use h, k, l!!!
+            h, k, l = peak_info_i.get_hkl(user_hkl=True)
+            print '[DB...BAT] user hkl from peak_info are: ', h, k, l
             # if hkl_to_int:
             #     # convert hkl to integer
             #     h = float(math.copysign(1, h) * int(abs(h) + 0.5))

@@ -150,6 +150,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_set_ub_tab_hkl_to_integers)
         self.connect(self.ui.pushButton_undoSetToInteger, QtCore.SIGNAL('clicked()'),
                      self.do_undo_ub_tab_hkl_to_integers)
+        # TODO/NOW/ISSUE - Make the check box send an event. what is event type from check box???
+        # self.connect(self.ui.checkBox_ubNuclearPeaks, QtCore.SIGNAL(''))
 
         self.connect(self.ui.pushButton_refineUB, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub_indexed_peaks)
@@ -249,7 +251,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_addKShift, QtCore.SIGNAL('clicked()'),
                      self.do_add_k_shift_vector)
 
-        # Menu
+        # Menu and advanced tab
         self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
                      self.menu_quit)
 
@@ -264,6 +266,10 @@ class MainWindow(QtGui.QMainWindow):
                      self.action_load_project)
         self.connect(self.ui.actionOpen_Last_Project, QtCore.SIGNAL('triggered()'),
                      self.action_load_last_project)
+
+        # TODO/NOW/ISSUE - Implement this feature
+        # self.connect(self.ui.pushButton_loadLastNthProject, QtCore.SIGNAL('clicked()'),
+        #              self.do_load_nth_project)
 
         # Validator ... (NEXT)
 
@@ -365,6 +371,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def _build_peak_info_list(self, zero_hkl):
         """ Build a list of PeakInfo to build peak workspace
+        peak HKL can be set to zero or from table
         :return: list of peak information, which is a PeakProcessRecord instance
         """
         # Collecting all peaks that will be used to refine UB matrix
@@ -381,20 +388,20 @@ class MainWindow(QtGui.QMainWindow):
         assert status
         for i_row in row_index_list:
             scan_num, pt_num = self.ui.tableWidget_peaksCalUB.get_exp_info(i_row)
-            try:
-                if pt_num < 0:
-                    pt_num = None
-                peak_info = self._myControl.get_peak_info(exp_number, scan_num, pt_num)
-                if zero_hkl:
-                    # set HKL to zero
-                    peak_info.set_hkl(0, 0, 0)
-                else:
-                    # set from table
-                    miller_index = self.ui.tableWidget_peaksCalUB.get_hkl(i_row)
-                    peak_info.set_hkl_np_array(numpy.array(miller_index))
-            except AssertionError as ass_err:
-                raise RuntimeError('Unable to retrieve PeakInfo due to %s.' % str(ass_err))
+            if pt_num < 0:
+                pt_num = None
+            peak_info = self._myControl.get_peak_info(exp_number, scan_num, pt_num)
             assert isinstance(peak_info, r4c.PeakProcessRecord)
+
+            if zero_hkl:
+                # set HKL to zero
+                peak_info.set_hkl(0., 0., 0.)
+            else:
+                # set from table
+                miller_index = self.ui.tableWidget_peaksCalUB.get_hkl(i_row)
+                peak_info.set_hkl_np_array(numpy.array(miller_index))
+            # END-IF-ELSE
+
             peak_info_list.append(peak_info)
         # END-FOR
 
@@ -459,6 +466,10 @@ class MainWindow(QtGui.QMainWindow):
         project_file_name = str(QtGui.QFileDialog.getOpenFileName(self, 'Choose Project File', os.getcwd()))
 
         self._myControl.load_project(project_file_name)
+
+        # TODO/NOW/ISSUE - should make it as a queue for last n opened/saved project
+        # dirty and quick solution
+        self.ui.label_last1Path.setText(project_file_name)
 
         return
 
@@ -1811,7 +1822,7 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     # add slot for UB refinement configuration window's signal to connect to
-    @QtCore.pyqtSlot(dict)
+    @QtCore.pyqtSlot(int)
     def refine_ub_lattice(self, val):
         """
         Refine UB matrix by constraining on lattice type.
@@ -1821,21 +1832,17 @@ class MainWindow(QtGui.QMainWindow):
         :param val:
         :return:
         """
-        # check signal
+        # check signal for hand shaking
         if val == 1000:
             use_spice_hkl = True
-        elif val == 1001:
-            use_spice_hkl = False
         else:
             raise RuntimeError('It is not an authorized signal value %s.' % str(val))
-        print '[DB...BAT] Use SPICE HKL: ', use_spice_hkl
 
         # it is supposed to get the information back from the window
         unit_cell_type = self._refineConfigWindow.get_unit_cell_type()
 
         # get peak information list
-        peak_info_list = self._build_peak_info_list()
-        set_hkl_int = self.ui.checkBox_roundHKLInt.isChecked()
+        peak_info_list = self._build_peak_info_list(zero_hkl=False)
 
         # get the UB matrix value
         ub_src_tab = self._refineConfigWindow.get_ub_source()
@@ -1850,8 +1857,7 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         # refine UB matrix by constraint on lattice parameters
-        status, error_message = self._myControl.refine_ub_matrix_by_lattice(peak_info_list, set_hkl_int,
-                                                                            ub_matrix, unit_cell_type, use_spice_hkl)
+        status, error_message = self._myControl.refine_ub_matrix_by_lattice(peak_info_list, ub_matrix, unit_cell_type)
         if status:
             # successfully refine the lattice and UB matrix
             self._show_refined_ub_result()
@@ -1869,22 +1875,23 @@ class MainWindow(QtGui.QMainWindow):
 
         dlg = refineubfftsetup.RefineUBFFTSetupDialog(self)
         if dlg.exec_():
-            status, min_d, max_d = dlg.get_values()
-            print values
+            min_d, max_d, tolerance = dlg.get_values()
+            print '[DB...BAT]', min_d, max_d, tolerance
             # Do stuff with values
+        else:
+            # case for cancel
+            return
+
+        # launch the dialog to get min D and max D
+        if (0 < min_d < max_d) is False:
+            self.pop_one_button_dialog('Range of d is not correct! FYI, min D = %.5f, max D = %.5f.'
+                                       '' % (min_d, max_d))
+            return
 
         # TODO/FIXME/NOW/ISSUE: edit from here to make it work!
 
-        # launch the dialog to get min D and max D
-        if status is False:
-            self.pop_one_button_dialog('Must specify Min D and max D to refine UB using FFT.')
-            return
-        if (0 < min_d < max_d) is False:
-            self.pop_one_button_dialog('Range of d is not correct!')
-            return
-
         # get PeakInfo list and check
-        peak_info_list = self._build_peak_info_list()
+        peak_info_list = self._build_peak_info_list(zero_hkl=True)
         assert isinstance(peak_info_list, list), \
             'PeakInfo list must be a list but not %s.' % str(type(peak_info_list))
         assert len(peak_info_list) >= 3, \
@@ -1896,7 +1903,7 @@ class MainWindow(QtGui.QMainWindow):
                                        'to refine UB matrix without prior knowledge.')
 
         # refine
-        self._myControl.refine_ub_matrix_least_info(peak_info_list, min_d, max_d)
+        self._myControl.refine_ub_matrix_least_info(peak_info_list, min_d, max_d, tolerance)
 
         # set value
         self._show_refined_ub_result()
@@ -2103,13 +2110,19 @@ class MainWindow(QtGui.QMainWindow):
         Purpose: select all peaks in table tableWidget_peaksCalUB
         :return:
         """
-        # TODO/NOW/FIXME/ISSUE - implement this!
-        if self.ui.checkBox_ubNuclearPeaks.isCheckable():
-            do_it()
-
-        else:
+        if not self._ubPeakTableFlag:
+            # turn to deselect all
             self.ui.tableWidget_peaksCalUB.select_all_rows(self._ubPeakTableFlag)
-            self._ubPeakTableFlag = not self._ubPeakTableFlag
+        elif self.ui.checkBox_ubNuclearPeaks.isChecked() is False:
+            # all peaks are subjected to select
+            self.ui.tableWidget_peaksCalUB.select_all_rows(self._ubPeakTableFlag)
+        else:
+            # only nuclear peaks to get selected
+            self.ui.tableWidget_peaksCalUB.select_all_nuclear_peaks()
+        # END-IF-ELSE
+
+        # revert the flag
+        self._ubPeakTableFlag = not self._ubPeakTableFlag
 
         return
 

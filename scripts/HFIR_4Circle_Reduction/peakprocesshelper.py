@@ -241,9 +241,13 @@ class PeakProcessRecord(object):
         :param mi_l:
         :return:
         """
-        assert isinstance(mi_h, float)
+        assert isinstance(mi_h, float) or isinstance(mi_h, int), 'h must be a float or integer but not %s.' % type(mi_h)
         assert isinstance(mi_k, float)
         assert isinstance(mi_l, float)
+
+        if isinstance(mi_h, int):
+            mi_h = float(mi_h)
+            # TODO/NOW/FIXME ... Fill the rest for k and l
 
         if self._userHKL is None:
             # init HKL

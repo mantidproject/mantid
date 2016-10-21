@@ -721,6 +721,21 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return self.get_cell_value(row_number, col_index)
 
+    def select_all_nuclear_peaks(self):
+        """
+        select all nuclear peaks, i.e., set the flag on on 'select' for all rows if their HKL indicates that
+        they are nuclear peaks
+        :return:
+        """
+        # TODO/NOW/ISSUE - make this method work!
+        num_rows = self.rowCount()
+        for row_index in range(num_rows):
+            # blabla
+            #
+            pass
+
+        return
+
     def setup(self):
         """
         Init setup
