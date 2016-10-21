@@ -1,5 +1,7 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include <boost/python/class.hpp>

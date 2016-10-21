@@ -18,6 +18,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
@@ -192,10 +194,10 @@ public:
     // Spectrum 0: 0 + 2 * 1 -> All y-values should be 2
     // Spectrum 1: 1 + 2 * 1 -> All y-values should be 3...etc.
     for (size_t i = 0; i < outputWsMatrix->getNumberHistograms(); ++i) {
-      const std::vector<double> &x = outputWsMatrix->readX(i);
-      const std::vector<double> &y = outputWsMatrix->readY(i);
+      const auto &x = outputWsMatrix->x(i);
+      const auto &y = outputWsMatrix->y(i);
 
-      TS_ASSERT_EQUALS(x, matrixWs->readX(i));
+      TS_ASSERT_EQUALS(x, matrixWs->x(i));
       for (size_t j = 0; j < x.size(); ++j) {
         TS_ASSERT_EQUALS(y[j], static_cast<double>(i) + slope * x[j]);
       }
@@ -237,10 +239,10 @@ public:
     // Spectrum 0: 0 + 2 * 1 -> All y-values should be 2
     // Spectrum 1: 1 + 2 * 1 -> All y-values should be 3...etc.
     for (size_t i = 0; i < outputWsMatrix->getNumberHistograms(); ++i) {
-      const std::vector<double> &x = outputWsMatrix->readX(i);
-      const std::vector<double> &y = outputWsMatrix->readY(i);
+      const auto &x = outputWsMatrix->x(i);
+      const auto &y = outputWsMatrix->y(i);
 
-      TS_ASSERT_EQUALS(x, matrixWs->readX(i));
+      TS_ASSERT_EQUALS(x, matrixWs->x(i));
       for (size_t j = 0; j < x.size(); ++j) {
         // If detector is not masked, there should be values, otherwise 0.
         if (!outputWsMatrix->getDetector(i)->isMasked()) {
@@ -286,9 +288,9 @@ public:
     MatrixWorkspace_sptr matrixWs =
         WorkspaceCreationHelper::Create2DWorkspace123(400, 500);
     for (size_t i = 0; i < matrixWs->getNumberHistograms(); ++i) {
-      std::vector<double> &x = matrixWs->dataX(i);
-      std::vector<double> &y = matrixWs->dataY(i);
-      std::vector<double> &e = matrixWs->dataE(i);
+      auto &x = matrixWs->mutableX(i);
+      auto &y = matrixWs->mutableY(i);
+      auto &e = matrixWs->mutableE(i);
 
       for (size_t j = 0; j < x.size(); ++j) {
         x[j] = static_cast<double>(j);
@@ -329,9 +331,9 @@ public:
     MatrixWorkspace_sptr matrixWs =
         WorkspaceCreationHelper::Create2DWorkspace123(400, 50);
     for (size_t i = 0; i < matrixWs->getNumberHistograms(); ++i) {
-      std::vector<double> &x = matrixWs->dataX(i);
-      std::vector<double> &y = matrixWs->dataY(i);
-      std::vector<double> &e = matrixWs->dataE(i);
+      auto &x = matrixWs->mutableX(i);
+      auto &y = matrixWs->mutableY(i);
+      auto &e = matrixWs->mutableE(i);
 
       for (size_t j = 0; j < x.size(); ++j) {
         x[j] = static_cast<double>(j);

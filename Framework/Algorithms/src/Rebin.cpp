@@ -179,7 +179,7 @@ void Rebin::exec() {
       Progress prog(this, 0.0, 1.0, histnumber);
 
       // Go through all the histograms and set the data
-      PARALLEL_FOR3(inputWS, eventInputWS, outputWS)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
       for (int i = 0; i < histnumber; ++i) {
         PARALLEL_START_INTERUPT_REGION
 

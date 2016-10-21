@@ -8,6 +8,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/RefAxis.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidDataObjects/Workspace2D.h"

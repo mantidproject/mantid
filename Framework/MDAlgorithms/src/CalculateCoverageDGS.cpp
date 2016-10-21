@@ -1,5 +1,7 @@
 #include "MantidMDAlgorithms/CalculateCoverageDGS.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
@@ -29,7 +31,6 @@ bool compareMomentum(const Mantid::Kernel::VMD &v1,
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateCoverageDGS)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 CalculateCoverageDGS::CalculateCoverageDGS()
@@ -39,8 +40,6 @@ CalculateCoverageDGS::CalculateCoverageDGS()
       m_lIntegrated(false), m_dEIntegrated(false), m_hX(), m_kX(), m_lX(),
       m_eX(), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1), m_rubw(3, 3),
       m_normWS() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string CalculateCoverageDGS::name() const {
@@ -92,7 +91,6 @@ void CalculateCoverageDGS::cacheDimensionXValues() {
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CalculateCoverageDGS::init() {
@@ -152,7 +150,6 @@ void CalculateCoverageDGS::init() {
                   "A name for the output data MDHistoWorkspace.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void CalculateCoverageDGS::exec() {

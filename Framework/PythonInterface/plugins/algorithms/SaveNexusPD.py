@@ -11,6 +11,7 @@ try:
 except ImportError:
     pass
 
+
 class SaveNexusPD(mantid.api.PythonAlgorithm):
     NX_CLASS = 'NX_class'
     AXES_DICT = {'tof': 'time-of-flight',
@@ -82,7 +83,6 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         self.setPropertyGroup('ProtonChargeUnits', group)
         self.setPropertyGroup('Append', group)
 
-
     def validateInputs(self):
         issues = dict()
 
@@ -92,7 +92,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
         # check for units
         wksp = self.getProperty(wkspParamName).value
         units = wksp.getAxis(0).getUnit().unitID()
-        if not units in allowedUnits:
+        if units not in allowedUnits:
             allowedUnits = ["'%s'" % unit for unit in allowedUnits]
             allowedUnits = ', '.join(allowedUnits)
             issues[wkspParamName] = "Only support units %s" % allowedUnits
@@ -152,7 +152,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
             temp.attrs['units'] = units
 
     def _writeProtonCharge(self, nxentry, wksp):
-        if not 'gd_prtn_chrg' in wksp.run():
+        if 'gd_prtn_chrg' not in wksp.run():
             return  # nothing to do
 
         pcharge = wksp.run()['gd_prtn_chrg']
@@ -271,8 +271,8 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
 
             # check for the entry alread existing in append mode
             if append and wkspname in handle.keys():
-                raise IOError("NXentry named '%s' already exists in '%s'" % \
-                      (wkspname, filename))
+                raise IOError("NXentry named '%s' already exists in '%s'" %
+                              (wkspname, filename))
 
             # create the entry
             nxentry = handle.create_group(wkspname)

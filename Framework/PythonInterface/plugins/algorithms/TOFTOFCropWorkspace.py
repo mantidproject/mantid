@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty    # , WorkspaceUnitValidator
 from mantid.kernel import Direction
 import mantid.simpleapi as api
@@ -6,6 +8,7 @@ import mantid.simpleapi as api
 class TOFTOFCropWorkspace(PythonAlgorithm):
     """ Crop empty time channels
     """
+
     def __init__(self):
         PythonAlgorithm.__init__(self)
 

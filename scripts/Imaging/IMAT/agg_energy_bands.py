@@ -34,6 +34,7 @@ ipython -- agg_energy_bands.py --input-path=~/test/LARMOR/test_few_angles/ --out
 import IMAT.prep.energy_bands_aggregator as eba
 import argparse
 
+
 def _indices_to_tuple(indices):
     """
     See if we have energy band indices. Turn something like '100,200' to a tuple (100,200)
@@ -52,6 +53,7 @@ def _indices_to_tuple(indices):
                              "I expect two integers separated by a comma".format(
                                  indices))
     return tidx
+
 
 def agg_cli():
     """

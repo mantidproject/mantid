@@ -1,9 +1,8 @@
 #pylint: disable=invalid-name
 #!/usr/bin/env python
 
-VERSION = "1.0"
-
 import optparse
+import sys
 try:
     import periodictable
     if not periodictable.__version__.startswith("1.3."):
@@ -12,7 +11,8 @@ try:
 except ImportError, e:
     print "*****To use this you must 'easy_install periodictable'"
     sys.exit(-1)
-import sys
+
+VERSION = "1.0"
 
 # elements not to put in the output file
 BANNED = ['n', 'Bk', 'Cf', 'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg',
@@ -21,8 +21,10 @@ BANNED = ['n', 'Bk', 'Cf', 'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg',
 DELIMITOR_START = "// ---------- START DO NOT EDIT AREA----------"
 DELIMITOR_STOP = "// ---------- END DO NOT EDIT AREA----------"
 
+
 def writeBegin(handle, label, symbol, z, a=0):
     handle.write("static const Atom %s(\"%s\", %d, %d, " % (label, symbol, z, a))
+
 
 def writeMiddle(handle, abundance, atom):
     mass = atom.mass
@@ -36,8 +38,10 @@ def writeMiddle(handle, abundance, atom):
         density = "NAN"
     handle.write("%f, %f, %s" % (abundance, mass, density))
 
+
 def writeEnd(handle):
     handle.write(");\n")
+
 
 def writeIsotope(handle, element, atomicnumber):
     isotope = element._isotopes[atomicnumber]
@@ -46,6 +50,7 @@ def writeIsotope(handle, element, atomicnumber):
     writeMiddle(handle, isotope.abundance, isotope)
     writeEnd(handle)
     return label
+
 
 def writeElement(handle, element):
     label = element.symbol
@@ -58,6 +63,7 @@ def writeElement(handle, element):
     for key in element._isotopes.keys():
         labels.append(writeIsotope(handle, element, key))
     return labels
+
 
 def readExisting(filename):
     # open the file and scoop up everyting
