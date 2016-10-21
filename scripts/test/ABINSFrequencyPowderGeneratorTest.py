@@ -133,12 +133,18 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
         self.assertEqual(True, np.allclose(array, generated_array))
         self.assertEqual(True, np.allclose(correct_counts, generated_counts))
 
-        # use case: higher quantum effects and array with number of combinations larger than bins (array with combinations should be rebined in that case)
+        # use case: higher quantum effects and array with number of combinations larger than bins
+        # (array with combinations should be rebined in that case) and all counts for previous array are ones
+
         array = np.arange(1.0 * AbinsParameters.bin_width, 10.0 * AbinsParameters.bin_width, AbinsParameters.bin_width)
+
         temp_size = array.size
         counts = np.ones(temp_size)
 
         correct_array = np.tile(array, temp_size)
+
+        # array = [ 1.  2.  3.  4.  5.  6.  7.  8.  9.]
+        # counts =[ 1., 1., 1., 1., 1., 1., 1., 1.,  1.]
         generated_array, generated_counts = self.simple_freq_generator.construct_freq_combinations(fundamentals_array=array,
                                                                                                         previous_array=array,
                                                                                                         previous_counts=counts,
@@ -148,14 +154,57 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
             for j in range(temp_size):
                 correct_array[i * temp_size + j] += array[i]
 
+
+        correct_array, correct_counts_1 = np.unique(np.sort(correct_array), return_counts=True)
+
         # Expected values:
         # correct_array= [  2.,   3.,   4.,   5.,   6.,   7.,   8.,   9.,  10.,  11.,  12.,  13.,  14.,  15.,  16., 17.,  18.]
-        # correct_counts= [1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1]
-        correct_array, correct_counts = np.unique(np.sort(correct_array), return_counts=True)
+        # correct_counts_1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+        self.assertEqual(True, np.allclose(correct_array, generated_array))
+        self.assertEqual(True, np.allclose(correct_counts_1, generated_counts))
+
+        # use case: higher quantum effects and array with number of combinations larger than bins
+        # (array with combinations should be rebined in that case) and all but first count are ones; first count is three
+        counts = np.ones(temp_size)
+        counts[0] = 3 # first count is three
+
+
+
+        # array = [ 1.  2.  3.  4.  5.  6.  7.  8.  9.]
+        # counts =[ 3., 1., 1., 1., 1., 1., 1., 1.,  1.]
+        generated_array, generated_counts = self.simple_freq_generator.construct_freq_combinations(fundamentals_array=array,
+                                                                                                   previous_array=array,
+                                                                                                   previous_counts=counts,
+                                                                                                   quantum_order=AbinsConstants.first_overtone + 1) #3rd
+
+        # Expected values:
+        # correct_array = [  2.,   3.,   4.,   5.,   6.,   7.,   8.,   9.,  10.,  11.,  12.,  13.,  14.,  15.,  16., 17.,  18.]
+        # correct_counts_2 =[3.,   4.,   5.,   6.,   7.,   8.,   9.,  10.,  11.,   8.,   7.,   6.,   5.,   4.,   3., 2.,   1.]
+
+        correct_counts_2 = np.copy(correct_counts_1) # here we want a copy not original correct_counts_1
+        correct_counts_2[:9] =correct_counts_2[:9] + 2
 
         self.assertEqual(True, np.allclose(correct_array, generated_array))
-        self.assertEqual(True, np.allclose(correct_counts, generated_counts))
+        self.assertEqual(True, np.allclose(correct_counts_2, generated_counts))
 
+        # use case: higher quantum effects and array with number of combinations larger than bins
+        # (array with combinations should be rebined in that case) and all counts are 3; first count is three
+        counts = np.ones(temp_size) * 3 # all counts are 3
+
+        correct_counts_3 = correct_counts_1 * 3
+
+        # array = [ 1.  2.  3.  4.  5.  6.  7.  8.  9.]
+        # counts =[ 3., 3., 3., 3., 3., 3., 3., 3., 3.]
+        generated_array, generated_counts = self.simple_freq_generator.construct_freq_combinations(fundamentals_array=array,
+                                                                                                   previous_array=array,
+                                                                                                   previous_counts=counts,
+                                                                                                   quantum_order=AbinsConstants.first_overtone + 1) #3rd
+
+        # Expected values:
+        # correct_array = [  2.,   3.,   4.,   5.,   6.,   7.,   8.,   9.,  10.,  11.,  12.,  13.,  14.,  15.,  16., 17.,  18.]
+        # correct_counts_3 = [ 3.,   6.,   9.,  12.,  15.,  18.,  21.,  24.,  27.,  24.,  21.,  18.,  15.,  12.,   9.,  6.,   3.]
+        self.assertEqual(True, np.allclose(correct_array, generated_array))
+        self.assertEqual(True, np.allclose(correct_counts_3, generated_counts))
 
 if __name__ == '__main__':
     unittest.main()

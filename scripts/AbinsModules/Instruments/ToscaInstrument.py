@@ -37,12 +37,19 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         q_data = {}
 
         local_freq = fundamental_frequencies
-        local_counts = None
+        local_counts = np.ones(shape=fundamental_frequencies.size, dtype=AbinsConstants.float_type)
         for quantum_order in range(AbinsConstants.fundamentals, q_dim + AbinsConstants.q_last_index):
             if combinations:
-                local_freq, local_counts = self.construct_freq_combinations(previous_array=local_freq, fundamentals_array=fundamental_frequencies, quantum_order=quantum_order)
+
+                local_freq, local_counts = self.construct_freq_combinations(previous_array=local_freq,
+                                                                            previous_counts=local_counts,
+                                                                            fundamentals_array=fundamental_frequencies,
+                                                                            quantum_order=quantum_order)
+
             else: # only fundamentals (and optionally overtones)
-                local_freq, local_counts = self.construct_freq_overtones(fundamentals_array=fundamental_frequencies, quantum_order=quantum_order)
+
+                local_freq, local_counts = self.construct_freq_overtones(fundamentals_array=fundamental_frequencies,
+                                                                         quantum_order=quantum_order)
 
             k2_i = (local_freq + AbinsParameters.TOSCA_final_neutron_energy) * AbinsParameters.TOSCA_constant
             k2_f = AbinsParameters.TOSCA_final_neutron_energy * AbinsParameters.TOSCA_constant
