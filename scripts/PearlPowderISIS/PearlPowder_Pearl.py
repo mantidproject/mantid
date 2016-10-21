@@ -136,13 +136,14 @@ class Pearl(AbstractInst):
         wc_attenuated = mantid.ConvertToHistogram(InputWorkspace=wc_attenuated, OutputWorkspace=wc_attenuated)
         wc_attenuated = mantid.RebinToWorkspace(WorkspaceToRebin=wc_attenuated, WorkspaceToMatch=input_workspace,
                                                 OutputWorkspace=wc_attenuated)
-        output_workspace = mantid.Divide(LHSWorkspace=input_workspace, RHSWorkspace=wc_attenuated)
-        Common.remove_intermediate_workspace(workspace_name="wc_attenuated")
-        return output_workspace
+        pearl_attenuated_ws = mantid.Divide(LHSWorkspace=input_workspace, RHSWorkspace=wc_attenuated)
+        Common.remove_intermediate_workspace(workspace_name=wc_attenuated)
+        return pearl_attenuated_ws
 
     def _get_monitor(self, run_number, input_dir, spline_terms):
-        get_monitor_ws = Common._load_monitor(run_number, input_dir=input_dir, instrument=self)
-        get_monitor_ws = mantid.ConvertUnits(InputWorkspace=get_monitor_ws, Target="Wavelength")
+        load_monitor_ws = Common._load_monitor(run_number, input_dir=input_dir, instrument=self)
+        get_monitor_ws = mantid.ConvertUnits(InputWorkspace=load_monitor_ws, Target="Wavelength")
+        Common.remove_intermediate_workspace(load_monitor_ws)
         lmin, lmax = self.get_lambda_range()
         get_monitor_ws = mantid.CropWorkspace(InputWorkspace=get_monitor_ws, XMin=lmin, XMax=lmax)
         ex_regions = numpy.zeros((2, 4))
@@ -156,9 +157,9 @@ class Pearl(AbstractInst):
             get_monitor_ws = mantid.MaskBins(InputWorkspace=get_monitor_ws, XMin=ex_regions[0, reg],
                                              XMax=ex_regions[1, reg])
 
-        get_monitor_ws = mantid.SplineBackground(InputWorkspace=get_monitor_ws, WorkspaceIndex=0, NCoeff=spline_terms)
-
-        return get_monitor_ws
+        monitor_ws = mantid.SplineBackground(InputWorkspace=get_monitor_ws, WorkspaceIndex=0, NCoeff=spline_terms)
+        Common.remove_intermediate_workspace(get_monitor_ws)
+        return monitor_ws
 
     def _get_monitor_spectrum(self, run_number):
         if run_number < 71009:

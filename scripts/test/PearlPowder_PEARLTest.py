@@ -10,22 +10,22 @@ import PearlPowder_PEARL
 
 class PearlRoutinesTest(unittest.TestCase):
 
-    def xtest_inst_new2_exec_fmode_all(self):
+    def test_inst_new2_exec_fmode_all(self):
         pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir="D:\\PEARL\\",
                                             raw_data_dir="D:\\PEARL\\", output_dir="D:\\PEARL\\output\\")
         pearl_obj.focus(run_number=74795, focus_mode="all")
 
-    def ztest_inst_new2_exec_fmode_groups(self):
+    def test_inst_new2_exec_fmode_groups(self):
         pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir="D:\\PEARL\\",
                                             raw_data_dir="D:\\PEARL\\", output_dir="D:\\PEARL\\output\\")
         pearl_obj.focus(74795, focus_mode='groups')
 
-    def xtest_inst_new2_exec_fmode_trans(self):
+    def test_inst_new2_exec_fmode_trans(self):
         pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir="D:\\PEARL\\",
                                             raw_data_dir="D:\\PEARL\\", output_dir="D:\\PEARL\\output\\")
         pearl_obj.focus(74795, focus_mode="trans")
 
-    def xtest_inst_new2_exec_fmode_mods(self):
+    def test_inst_new2_exec_fmode_mods(self):
         pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir="D:\\PEARL\\",
                                             raw_data_dir="D:\\PEARL\\", output_dir="D:\\PEARL\\output\\")
         pearl_obj.focus(74795,focus_mode="mods")
@@ -92,7 +92,7 @@ class PearlRoutinesTest(unittest.TestCase):
         offsetfile = 'pearl_offset_15_3.cal'
         ngrpfile = 'test_cal_group_15_3.cal'
         PearlPowder_common.create_calibration(startup_object=pearl_obj, calibration_runs="91560_91561",
-                                              offset_file_path=offsetfile, grouping_file_path=ngrpfile)
+                                              offset_file_path=offsetfile, grouping_file_name=ngrpfile)
 
 if __name__ == '__main__':
     DIRS = mantid.config['datasearch.directories'].split(';')

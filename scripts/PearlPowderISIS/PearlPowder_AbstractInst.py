@@ -64,7 +64,7 @@ class AbstractInst(object):
 
     def create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
         PearlPowder_common.create_calibration(startup_object=self, calibration_runs=calibration_runs,
-                                              offset_file_path=offset_file_name, grouping_file_path=grouping_file_name)
+                                              offset_file_path=offset_file_name, grouping_file_name=grouping_file_name)
 
     def create_calibration_Si(self, calibration_runs, out_file_name):
         PearlPowder_common.create_calibration_si(startup_object=self, calibration_runs=calibration_runs,

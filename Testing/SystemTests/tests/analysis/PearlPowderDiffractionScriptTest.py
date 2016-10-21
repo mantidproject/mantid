@@ -435,6 +435,8 @@ class LoadCalibTests(unittest.TestCase):
         self.assertAlmostEquals(177.218826007, van_tt88_data[13].readX(0)[278], places=DIFF_PLACES)
 
     def matrix_workspaces_test(self, vanadium_tt_file, tt_mode='tt35'):
+        import pydevd
+        pydevd.settrace('localhost', port=23000, stdoutToServer=True, stderrToServer=True)
         for i in range(1, 15):
             self.assertTrue(isinstance(vanadium_tt_file[i], MatrixWorkspace))
             self.assertTrue('spline' + str(i) in vanadium_tt_file[i].getName())
