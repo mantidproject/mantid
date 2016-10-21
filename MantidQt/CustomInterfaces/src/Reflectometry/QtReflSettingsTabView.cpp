@@ -165,5 +165,13 @@ std::string QtReflSettingsTabView::getCPp() const {
   return m_ui.expSettingsCPpEdit->text().toStdString();
 }
 
+/** Return binning parameters
+* @return :: binning parameters
+*/
+std::string QtReflSettingsTabView::getBinningParameters() const {
+
+  return m_ui.expSettingsBinParsEdit->text().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid

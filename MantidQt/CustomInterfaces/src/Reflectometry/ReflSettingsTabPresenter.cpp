@@ -72,6 +72,11 @@ std::string ReflSettingsTabPresenter::getTransmissionOptions() const {
   if (!transLamMax.empty())
     options.push_back("WavelengthMax=" + transLamMax);
 
+  // Add binning parameters
+  auto binPars = m_view->getBinningParameters();
+  if (!binPars.empty())
+    options.push_back("Params=" + binPars);
+
   return boost::algorithm::join(options, ",");
 }
 
@@ -111,6 +116,11 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   auto cpp = m_view->getCPp();
   if (!cpp.empty())
 	  options.push_back("CPp=" + cpp);
+
+  // Add binning parameters
+  auto binPars = m_view->getBinningParameters();
+  if (!binPars.empty())
+    options.push_back("Params=" + binPars);
 
   return boost::algorithm::join(options, ",");
 }

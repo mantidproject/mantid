@@ -66,6 +66,8 @@ public:
   std::string getCAp() const override;
   /// Return Cpp
   std::string getCPp() const override;
+  /// Return binning parameters
+  std::string getBinningParameters() const override;
 
   /// Creates hints for 'Plus'
   void
