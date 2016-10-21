@@ -1803,8 +1803,7 @@ class CWSCDReductionControl(object):
 
         # Construct a new peak workspace by combining all single peak
         ub_peak_ws_name = 'TempUBIndexedPeaks'
-        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name, index_from_spice=True,
-                                    hkl_to_int=set_hkl_int)
+        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name)
 
         # Calculate UB matrix
         try:

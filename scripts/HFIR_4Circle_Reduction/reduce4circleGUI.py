@@ -201,6 +201,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_apply_k_shift)
         self.connect(self.ui.pushButton_clearMergeScanTable, QtCore.SIGNAL('clicked()'),
                      self.do_clear_merge_table)
+        self.connect(self.ui.pushButton_multipleScans, QtCore.SIGNAL('clicked()'),
+                     self.do_merge_multi_scans)
 
         # Tab 'Integrate Peaks'
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
@@ -1710,6 +1712,10 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_merge_multi_scans(self):
+        # TODO/NOW/ISSUE - Implement this!
+        return
+
     def do_merge_scans(self):
         """ Process data for slicing view
         :return:
@@ -1777,11 +1783,6 @@ class MainWindow(QtGui.QMainWindow):
         """
         # refine UB matrix by indexed peak
         peak_info_list = self._build_peak_info_list(zero_hkl=False)
-        # set_hkl_int = self.ui.checkBox_roundHKLInt.isChecked()
-
-        # check where the indexing comes from
-        # TODO/NOW/ISSUE/FIXME - start from here!
-        blabla
 
         # Refine UB matrix
         try:
@@ -2102,8 +2103,13 @@ class MainWindow(QtGui.QMainWindow):
         Purpose: select all peaks in table tableWidget_peaksCalUB
         :return:
         """
-        self.ui.tableWidget_peaksCalUB.select_all_rows(self._ubPeakTableFlag)
-        self._ubPeakTableFlag = not self._ubPeakTableFlag
+        # TODO/NOW/FIXME/ISSUE - implement this!
+        if self.ui.checkBox_ubNuclearPeaks.isCheckable():
+            do_it()
+
+        else:
+            self.ui.tableWidget_peaksCalUB.select_all_rows(self._ubPeakTableFlag)
+            self._ubPeakTableFlag = not self._ubPeakTableFlag
 
         return
 

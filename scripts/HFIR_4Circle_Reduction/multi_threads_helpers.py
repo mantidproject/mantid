@@ -87,6 +87,8 @@ class AddPeaksThread(QThread):
         self.peakStatusSignal.emit(self._expNumber, -1, len(self._scanNumberList))
 
         # pop error if there is any scan that is not reduced right
+        # FIXME/TODO/NOW/ISSUE - it should send out a message to main GUI about the error!
+        # TEST: Exp 423 Scan 82
         if len(failed_list) > 0:
             failed_scans_str = 'Unable to merge scans: '
             sum_error_str = ''
