@@ -6,16 +6,22 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_CUSTOMINTERFACES_DLL TomoToolConfigAstraDialog : public QDialog,
-                                  public TomoToolConfigDialogBase {
-  Q_OBJECT
+class MANTIDQT_CUSTOMINTERFACES_DLL TomoToolConfigAstraDialog
+    : public TomoToolConfigDialogBase {
 public:
-  TomoToolConfigAstraDialog(QWidget *parent = 0)
-      : QDialog(parent),
-        TomoToolConfigDialogBase(DEFAULT_TOOL_NAME, DEFAULT_TOOL_METHOD) {}
+  TomoToolConfigAstraDialog()
+      : TomoToolConfigDialogBase(DEFAULT_TOOL_NAME, DEFAULT_TOOL_METHOD) {}
+
+  ~TomoToolConfigAstraDialog() override {
+    if (m_dialog) {
+      delete m_dialog;
+    }
+  }
 
 private:
-  void setupToolConfig() override;
+  void initialiseDialog() override;
+  void setupMethodSelected() override;
+  void setupToolSettingsFromPaths() override;  
   void setupDialogUi() override;
   int executeQt() override;
 
@@ -23,6 +29,7 @@ private:
   static const std::string DEFAULT_TOOL_NAME;
   static const std::string DEFAULT_TOOL_METHOD;
 
+  QDialog *m_dialog = nullptr;
   Ui::TomoToolConfigAstra m_astraUi;
 };
 

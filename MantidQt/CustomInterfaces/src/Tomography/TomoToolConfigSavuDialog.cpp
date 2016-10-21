@@ -31,10 +31,19 @@ int TomoToolConfigSavuDialog::executeQt() {
   return el.exec();
 }
 
-void TomoToolConfigSavuDialog::setupToolConfig() {
+void TomoToolConfigSavuDialog::initialiseDialog() {
   throw Mantid::Kernel::Exception::NotImplementedError(
-      "setupToolConfig not implemented");
+      "SAVU interface not implemented");
 }
+void TomoToolConfigSavuDialog::setupMethodSelected() {
+  throw Mantid::Kernel::Exception::NotImplementedError(
+      "SAVU interface not implemented");
+}
+void TomoToolConfigSavuDialog::setupToolSettingsFromPaths() {
+  throw Mantid::Kernel::Exception::NotImplementedError(
+      "SAVU interface not implemented");
+}
+
 
 void TomoToolConfigSavuDialog::setupDialogUi() {
   m_savuUi.setupUi(this);

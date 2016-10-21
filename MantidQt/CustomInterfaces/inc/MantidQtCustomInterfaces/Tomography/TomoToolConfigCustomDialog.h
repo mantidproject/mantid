@@ -6,25 +6,32 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_CUSTOMINTERFACES_DLL TomoToolConfigCustomDialog : public QDialog,
-                                   public TomoToolConfigDialogBase {
-  Q_OBJECT
+class MANTIDQT_CUSTOMINTERFACES_DLL TomoToolConfigCustomDialog
+    : public TomoToolConfigDialogBase {
 public:
-  TomoToolConfigCustomDialog(QWidget *parent = 0)
-      : QDialog(parent),
-        TomoToolConfigDialogBase(DEFAULT_TOOL_NAME, DEFAULT_TOOL_METHOD) {}
+  TomoToolConfigCustomDialog()
+      : TomoToolConfigDialogBase(DEFAULT_TOOL_NAME, DEFAULT_TOOL_METHOD) {}
+  ~TomoToolConfigCustomDialog() override {
+    if (m_dialog) {
+      delete m_dialog;
+    }
+  }
 
 private:
-  void setupToolConfig() override;
+  void initialiseDialog() override;
+  void setupMethodSelected() override;
+  void setupToolSettingsFromPaths() override;  
   void setupDialogUi() override;
   void handleDialogResult(int result) override;
   int executeQt() override;
+
 
   // initialised in .cpp file
   static const std::string DEFAULT_TOOL_NAME;
   static const std::string DEFAULT_TOOL_METHOD;
   static std::string m_backupCommandLine;
 
+  QDialog *m_dialog = nullptr;
   Ui::TomoToolConfigCustom m_customUi;
 };
 } // CustomInterfaces

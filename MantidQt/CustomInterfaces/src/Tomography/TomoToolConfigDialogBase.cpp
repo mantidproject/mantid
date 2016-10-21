@@ -27,17 +27,11 @@ TomoToolConfigDialogBase::getCorrectDialogForToolFromString(
   return nullptr;
 }
 
-int TomoToolConfigDialogBase::execute() {
-  int res = this->executeQt();
-  this->handleDialogResult(res);
-  return res;
-}
-
-/** If user clicked OK, it will run setupToolConfig()
-*/
 void TomoToolConfigDialogBase::handleDialogResult(int result) {
   if (QDialog::Accepted == result) {
-    setupToolConfig();
+    // setup the new settings if the user has Accepted
+	  setupMethodSelected();
+	  setupToolSettingsFromPaths();
   }
 }
 } // namespace CustomInterfaces

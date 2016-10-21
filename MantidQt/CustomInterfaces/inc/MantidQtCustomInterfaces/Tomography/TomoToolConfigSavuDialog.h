@@ -20,8 +20,10 @@ public:
   TomoToolConfigSavuDialog(QWidget *parent = 0);
 
 private:
-  void setupToolConfig() override;
+  void setupMethodSelected() override;
+  void setupToolSettingsFromPaths() override;
   void setupDialogUi() override;
+  void initialiseDialog() override;
   int executeQt() override;
 
   void initSavuWindow();

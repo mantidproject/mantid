@@ -1048,7 +1048,7 @@ void TomographyIfaceViewQtGUI::updateSystemSettingsTabFields(
 void TomographyIfaceViewQtGUI::showToolConfig(
     TomoToolConfigDialogBase *dialog) {
 
-  // do we do anything with the parameter?
+  // execute also intiialises all the parts of the GUI
   int res = dialog->execute();
 }
 

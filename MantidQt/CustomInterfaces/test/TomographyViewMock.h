@@ -57,12 +57,6 @@ public:
   // std::string currentReconTool() const {}
   MOCK_CONST_METHOD0(currentReconTool, std::string());
 
-  // std::string astraMethod() const {}
-  MOCK_CONST_METHOD0(astraMethod, std::string());
-
-  // std::string tomopyMethod() const {}
-  MOCK_CONST_METHOD0(tomopyMethod, std::string());
-
   // void updateLoginControls(bool loggedIn) {}
   MOCK_METHOD1(updateLoginControls, void(bool loggedIn));
 
@@ -114,11 +108,6 @@ public:
   // TomoSystemSettings systemSettings() const
   MOCK_CONST_METHOD0(systemSettings,
                      MantidQt::CustomInterfaces::TomoSystemSettings());
-
-  // MantidQt::CustomInterfaces::TomoReconToolsUserSettings
-  // reconToolsSettings() const
-  MOCK_CONST_METHOD0(reconToolsSettings,
-                     MantidQt::CustomInterfaces::TomoReconToolsUserSettings());
 
   // MantidQt::CustomInterfaces::TomoReconToolsUserSettings
   // prePostProcSettings() const

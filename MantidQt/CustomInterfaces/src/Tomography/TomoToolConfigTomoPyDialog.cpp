@@ -8,7 +8,7 @@ const std::string TomoToolConfigTomoPyDialog::DEFAULT_TOOL_NAME = "TomoPy";
 const std::string TomoToolConfigTomoPyDialog::DEFAULT_TOOL_METHOD = "gridrec";
 
 void TomoToolConfigTomoPyDialog::setupDialogUi() {
-  m_tomoPyUi.setupUi(this);
+  m_tomoPyUi.setupUi(m_dialog);
   m_tomoPyUi.comboBox_method->clear();
 
   const auto methods = ToolConfigTomoPy::methods();
@@ -18,24 +18,27 @@ void TomoToolConfigTomoPyDialog::setupDialogUi() {
   }
 }
 
-/** Calls the execute of the QDialog
-*/
-int TomoToolConfigTomoPyDialog::executeQt() { return this->exec(); }
+void TomoToolConfigTomoPyDialog::initialiseDialog() { m_dialog = new QDialog; }
 
-void TomoToolConfigTomoPyDialog::setupToolConfig() {
+void TomoToolConfigTomoPyDialog::setupToolSettingsFromPaths() {
+    // TODO: for the output path, probably better to take the sample path,
+    // then up one level
+    m_toolSettings = std::shared_ptr<ToolConfigTomoPy>(new ToolConfigTomoPy(
+      m_runPath, m_pathOut + m_localOutNameAppendix, m_paths.pathDarks(),
+      m_paths.pathOpenBeam(), m_paths.pathSamples()));
+}
+void TomoToolConfigTomoPyDialog::setupMethodSelected() {
   // move to member/global variable and use more space OR keep here
   const auto methods = ToolConfigTomoPy::methods();
 
   int mi = m_tomoPyUi.comboBox_method->currentIndex();
-  // TODO: for the output path, probably better to take the sample path,
-  // then up one level
-  m_tempSettings = std::shared_ptr<ToolConfigTomoPy>(new ToolConfigTomoPy(
-      m_runPath, m_pathOut + m_localOutNameAppendix, m_paths.pathDarks(),
-      m_paths.pathOpenBeam(), m_paths.pathSamples()));
-
-  // maybe comboBox_method->currentText
+  // TODO maybe comboBox_method->currentText?
   m_toolMethod = methods[mi].first;
 }
+
+/** Calls the execute of the QDialog
+*/
+int TomoToolConfigTomoPyDialog::executeQt() { return m_dialog->exec(); }
 
 } // Custominterfaces
 } // MantidQt

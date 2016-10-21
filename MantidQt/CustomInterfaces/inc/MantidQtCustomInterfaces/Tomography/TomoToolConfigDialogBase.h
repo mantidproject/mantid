@@ -5,7 +5,6 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -50,16 +49,25 @@ public:
                    const std::string &localOutNameAppendix) {
 
     setupPaths(runPath, paths, pathOut, localOutNameAppendix);
-    if (!m_isInitialised) {
-      // set up the tool's method on the first run
-      setupDialogUi();
-      m_isInitialised = true;
-    }
-    setupToolConfig();
+    setupToolSettingsFromPaths();
   }
 
   /// Runs the dialogue and handles the returns
-  virtual int execute();
+  virtual int execute() {
+    if (!isInitialised()) {
+      // set up the tool's method on the first run
+      initialiseDialog();
+      setupDialogUi();
+      setupMethodSelected();
+      // setupToolSettingsFromPaths();
+
+      m_isInitialised = true;
+    }
+
+    int res = this->executeQt();
+    this->handleDialogResult(res);
+    return res;
+  }
 
   virtual bool isInitialised() const { return m_isInitialised; }
 
@@ -67,12 +75,15 @@ public:
 
   /// return pointer and transfer ownership
   std::shared_ptr<TomoRecToolConfig> getSelectedToolSettings() const {
-    return m_tempSettings;
+    return m_toolSettings;
   }
 
   std::string getSelectedToolName() const { return m_toolName; }
 
 protected:
+  // TODO this has empty body just for the sake running the test right now
+  virtual void initialiseDialog() = 0;
+
   virtual void handleDialogResult(int result);
 
   virtual void setScriptRunPath(const std::string run) { m_runPath = run; }
@@ -99,14 +110,17 @@ protected:
 
   virtual void setupDialogUi() = 0;
 
-  /// setup the tool config with the correct paths
-  virtual void setupToolConfig() = 0;
+  /// setup the selected method member variable
+  virtual void setupMethodSelected() = 0;
+
+  /// setup the tool config with the correct paths, must be called after the paths have been set!
+  virtual void setupToolSettingsFromPaths() = 0;
 
   /// provided virtual function to add Qt execute behaviour as necessary
   virtual int executeQt() = 0; // this class doesn't inherit from Qt and doesnt
                                // have this->exec()
 
-  std::shared_ptr<TomoRecToolConfig> m_tempSettings;
+  std::shared_ptr<TomoRecToolConfig> m_toolSettings;
 
   const std::string m_toolName;
 

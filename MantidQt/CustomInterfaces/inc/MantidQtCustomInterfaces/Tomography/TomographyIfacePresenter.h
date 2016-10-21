@@ -110,39 +110,39 @@ protected:
   /// Stops/kills the periodic query (for example if the user logs out)
   void killKeepAliveMechanism();
 
-  bool isLocalResourceSelected();
+  bool isLocalResourceSelected() const;
 
 private:
+  /// creates the correct dialog pointer and sets it to the member variable
+  void createConfigDialogUsingToolName(const std::string &tool);
+
   /// sets up the dialog and uses the settings to update the model
   void
   setupConfigDialogSettingsAndUpdateModel(TomoToolConfigDialogBase *dialog);
 
-  /// creates the correct dialog pointer and sets it to the member variable
-  void createConfigDialogUsingToolName(const std::string &tool);
-
   /// configures up the dialog using the view
   void setupConfigDialogSettings(
-      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog);
+      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog) const;
 
   /// does the actual path configuration for local resource
   void setupConfigDialogSettingsForLocal(
-      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog);
+      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog) const;
 
   /// does the actual path configuration for remote resource
   void setupConfigDialogSettingsForRemote(
-      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog);
+      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog) const;
 
   /// update all the model information after the tool's been changed
-  void updateModelAfterToolChanged(TomoToolConfigDialogBase *dialog);
+  void updateModelAfterToolChanged(const TomoToolConfigDialogBase *dialog);
 
   /// update the model's current tool name using the dialog
-  void updateModelCurrentToolName(TomoToolConfigDialogBase *dialog);
+  void updateModelCurrentToolName(const TomoToolConfigDialogBase *dialog);
 
   /// update the model's current tool method using the dialog
-  void updateModelCurrentToolMethod(TomoToolConfigDialogBase *dialog);
+  void updateModelCurrentToolMethod(const TomoToolConfigDialogBase *dialog);
 
   /// update the model's current tool settings using the dialog
-  void updateModelCurrentToolSettings(TomoToolConfigDialogBase *dialog);
+  void updateModelCurrentToolSettings(const TomoToolConfigDialogBase *dialog);
 
   /// Associated view for this presenter (MVP pattern)
   ITomographyIfaceView *const m_view;
