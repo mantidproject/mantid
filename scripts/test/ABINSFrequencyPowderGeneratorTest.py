@@ -98,6 +98,7 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
         array = np.arange(AbinsParameters.bin_width, 10.0 * AbinsParameters.bin_width, AbinsParameters.bin_width)
         correct_counts = np.ones(array.size)
         generated_array, generated_counts = self.simple_freq_generator.construct_freq_overtones(fundamentals_array=array, quantum_order=AbinsConstants.fundamentals)
+
         self.assertEqual(True, np.allclose(array, generated_array))
         self.assertEqual(True, np.allclose(correct_counts, generated_counts ))
 
@@ -112,6 +113,7 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
 
 
     def test_construct_freq_combinations(self):
+
         # wrong previous array
         with self.assertRaises(ValueError):
             self.simple_freq_generator.construct_freq_combinations(fundamentals_array=np.asarray([1,2]), previous_array=[1,2] , quantum_order=AbinsConstants.first_overtone)
@@ -141,8 +143,6 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
         temp_size = array.size
         counts = np.ones(temp_size)
 
-        correct_array = np.tile(array, temp_size)
-
         # array = [ 1.  2.  3.  4.  5.  6.  7.  8.  9.]
         # counts =[ 1., 1., 1., 1., 1., 1., 1., 1.,  1.]
         generated_array, generated_counts = self.simple_freq_generator.construct_freq_combinations(fundamentals_array=array,
@@ -150,10 +150,11 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
                                                                                                         previous_counts=counts,
                                                                                                         quantum_order=AbinsConstants.first_overtone + 1) #3rd
 
+        correct_array = np.tile(array, temp_size)
+
         for i in range(array.size):
             for j in range(temp_size):
                 correct_array[i * temp_size + j] += array[i]
-
 
         correct_array, correct_counts_1 = np.unique(np.sort(correct_array), return_counts=True)
 
@@ -188,7 +189,7 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
         self.assertEqual(True, np.allclose(correct_counts_2, generated_counts))
 
         # use case: higher quantum effects and array with number of combinations larger than bins
-        # (array with combinations should be rebined in that case) and all counts are 3; first count is three
+        # (array with combinations should be rebined in that case) and all counts are 3
         counts = np.ones(temp_size) * 3 # all counts are 3
 
         correct_counts_3 = correct_counts_1 * 3
@@ -205,6 +206,7 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
         # correct_counts_3 = [ 3.,   6.,   9.,  12.,  15.,  18.,  21.,  24.,  27.,  24.,  21.,  18.,  15.,  12.,   9.,  6.,   3.]
         self.assertEqual(True, np.allclose(correct_array, generated_array))
         self.assertEqual(True, np.allclose(correct_counts_3, generated_counts))
+
 
 if __name__ == '__main__':
     unittest.main()
