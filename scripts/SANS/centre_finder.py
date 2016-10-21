@@ -270,7 +270,7 @@ class CentrePositioner(object):
     Handles the positions and increments for beam finding.
     '''
 
-    def __init__(self, reducer, position_type, coord1_start, coord2_start,coord1_step,coord2_step, tolerance): #pylint: disable=too-many-arguments
+    def __init__(self, reducer, position_type, coord1_start, coord2_start,coord1_step,coord2_step, tolerance):
         '''
         Set the CentrePositioner. It requires:
         @param reducer:: The reducer
@@ -686,7 +686,7 @@ class PositionProviderAngleY(PositionProvider):
     and the second is a cartesian coordinate
     '''
 
-    def __init__(self, increment_coord1, increment_coord2, tolerance, tolerance_angle, coord1_offset, coord1_scale_factor):  #pylint: disable=too-many-arguments
+    def __init__(self, increment_coord1, increment_coord2, tolerance, tolerance_angle, coord1_offset, coord1_scale_factor):
         super(PositionProviderAngleY,self).__init__(increment_coord1, increment_coord2, tolerance)
         self.increment_angle = increment_coord1
         self.increment_y = increment_coord2

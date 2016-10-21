@@ -9,7 +9,8 @@ sanslog = Logger("SANS")
 _NO_INDIVIDUAL_PERIODS = -1
 
 
-def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False, binning='Monitors', saveAsEvent=False, isOverlay = False, time_shifts = []):
+def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False,
+             binning='Monitors', saveAsEvent=False, isOverlay = False, time_shifts = []):
     if inst.upper() == "SANS2DTUBES":
         inst = "SANS2D"
   #check if there is at least one file in the list
@@ -219,9 +220,9 @@ def _makeFilename(entry, ext, inst) :
     If entry not already a valid filename make it into one
   """
     try :
-        runNum = int(entry)                                                  #the user entered something that translates to a run number, convert it to a file
+        runNum = int(entry)  #the user entered something that translates to a run number, convert it to a file
         filename=inst+_padZero(runNum, inst)+ext
-    except ValueError :                                                        #we don't have a run number, assume it's a valid filename
+    except ValueError:  #we don't have a run number, assume it's a valid filename
         filename = entry
         dummy, ext = os.path.splitext(filename)
 

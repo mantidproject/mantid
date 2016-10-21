@@ -316,7 +316,8 @@ class Ui_SaveWindow(object):
         prefix = str(self.lineEdit2.text())
         if not (self.lineEdit.text() and os.path.exists(self.lineEdit.text())):
             logger.notice("Directory specified doesn't exist or was invalid for your operating system")
-            QtGui.QMessageBox.critical(self.lineEdit, 'Could not save',"Directory specified doesn't exist or was invalid for your operating system")
+            QtGui.QMessageBox.critical(self.lineEdit, 'Could not save',
+                                       "Directory specified doesn't exist or was invalid for your operating system")
             return
         for idx in self.listWidget.selectedItems():
             fname=os.path.join(self.lineEdit.text(),prefix + idx.text())

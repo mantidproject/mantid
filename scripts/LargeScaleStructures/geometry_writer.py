@@ -248,16 +248,16 @@ class MantidGeom(object):
 
     def addLocationPolar(self, root, r, theta, phi, name=None):
         if name is not None:
-           self._append_child("location", root, r=r, t=theta, p=phi, name=name)
+            self._append_child("location", root, r=r, t=theta, p=phi, name=name)
         else:
-           self._append_child("location", root, r=r, t=theta, p=phi)
+            self._append_child("location", root, r=r, t=theta, p=phi)
 
     def addLocationRTP(self, root, r, t, p, rot_x, rot_y, rot_z, name=None):
         """
         Add a location element to a specific parent node given by root, using r, theta, phi coordinates.
         """
         float(r)
-        float(f)
+        float(t)
         float(p)
         if name is not None:
             pos_loc = self._append_child("location", root, r=r, t=t, p=p, name=name)
