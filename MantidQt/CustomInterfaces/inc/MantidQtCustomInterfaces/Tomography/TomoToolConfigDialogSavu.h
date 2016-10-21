@@ -13,11 +13,11 @@ class TableRow;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_CUSTOMINTERFACES_DLL TomoToolConfigSavuDialog : public QMainWindow,
+class MANTIDQT_CUSTOMINTERFACES_DLL TomoToolConfigDialogSavu : public QMainWindow,
                                  public TomoToolConfigDialogBase {
   Q_OBJECT
 public:
-  TomoToolConfigSavuDialog(QWidget *parent = 0);
+  TomoToolConfigDialogSavu(QWidget *parent = 0);
 
 private:
   void setupMethodSelected() override;

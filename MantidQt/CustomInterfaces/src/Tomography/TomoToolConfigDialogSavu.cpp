@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigSavuDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogSavu.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 
 #include <MantidAPI/TableRow.h>
@@ -15,7 +15,7 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-TomoToolConfigSavuDialog::TomoToolConfigSavuDialog(QWidget *parent)
+TomoToolConfigDialogSavu::TomoToolConfigDialogSavu(QWidget *parent)
     : QMainWindow(parent) {
   // TODO init the 545231453t54 variables
   m_availPlugins = Mantid::API::WorkspaceFactory::Instance().createTable();
@@ -24,34 +24,34 @@ TomoToolConfigSavuDialog::TomoToolConfigSavuDialog(QWidget *parent)
   m_currPlugins->addColumns("str", "name", 4);
 }
 
-int TomoToolConfigSavuDialog::executeQt() {
+int TomoToolConfigDialogSavu::executeQt() {
   this->show();
   QEventLoop el;
   connect(this, SIGNAL(destroyed()), &el, SLOT(quit()));
   return el.exec();
 }
 
-void TomoToolConfigSavuDialog::initialiseDialog() {
+void TomoToolConfigDialogSavu::initialiseDialog() {
   throw Mantid::Kernel::Exception::NotImplementedError(
       "SAVU interface not implemented");
 }
-void TomoToolConfigSavuDialog::setupMethodSelected() {
+void TomoToolConfigDialogSavu::setupMethodSelected() {
   throw Mantid::Kernel::Exception::NotImplementedError(
       "SAVU interface not implemented");
 }
-void TomoToolConfigSavuDialog::setupToolSettingsFromPaths() {
+void TomoToolConfigDialogSavu::setupToolSettingsFromPaths() {
   throw Mantid::Kernel::Exception::NotImplementedError(
       "SAVU interface not implemented");
 }
 
 
-void TomoToolConfigSavuDialog::setupDialogUi() {
+void TomoToolConfigDialogSavu::setupDialogUi() {
   m_savuUi.setupUi(this);
   initSavuWindow();
   this->setWindowModality(Qt::ApplicationModal);
 }
 
-void TomoToolConfigSavuDialog::initSavuWindow() {
+void TomoToolConfigDialogSavu::initSavuWindow() {
   // geometry, etc. niceties
   // on the left (just plugin names) 1/2, right: 2/3
   QList<int> sizes;
@@ -85,7 +85,7 @@ void TomoToolConfigSavuDialog::initSavuWindow() {
 // TODO: what's in this file should become a class of its own,
 // 'SavuConfigDialog' or similar
 
-void TomoToolConfigSavuDialog::loadAvailablePlugins() {
+void TomoToolConfigDialogSavu::loadAvailablePlugins() {
   // TODO:: load actual plugins when we know them
   // creating a few relatively realistic choices for now (should crossh check
   //  with the savu api when finalized).
@@ -129,7 +129,7 @@ void TomoToolConfigSavuDialog::loadAvailablePlugins() {
 
 // Reloads the GUI list of available plugins from the data object ::
 // Populating only through this ensures correct indexing.
-void TomoToolConfigSavuDialog::refreshAvailablePluginListUI() {
+void TomoToolConfigDialogSavu::refreshAvailablePluginListUI() {
   // Table WS structure, id/params/name/cite
   m_savuUi.listAvailablePlugins->clear();
   for (size_t i = 0; i < m_availPlugins->rowCount(); ++i) {
@@ -141,14 +141,14 @@ void TomoToolConfigSavuDialog::refreshAvailablePluginListUI() {
 
 // Reloads the GUI list of current plugins from the data object ::
 // Populating only through this ensures correct indexing.
-void TomoToolConfigSavuDialog::refreshCurrentPluginListUI() {
+void TomoToolConfigDialogSavu::refreshCurrentPluginListUI() {
   // Table WS structure, id/params/name/cite
   m_savuUi.treeCurrentPlugins->clear();
   createPluginTreeEntries(m_currPlugins);
 }
 
 // Updates the selected plugin info from Available plugins list.
-void TomoToolConfigSavuDialog::availablePluginSelected() {
+void TomoToolConfigDialogSavu::availablePluginSelected() {
   if (m_savuUi.listAvailablePlugins->selectedItems().count() != 0) {
     size_t idx = static_cast<size_t>(
         m_savuUi.listAvailablePlugins->currentIndex().row());
@@ -160,7 +160,7 @@ void TomoToolConfigSavuDialog::availablePluginSelected() {
 }
 
 // Updates the selected plugin info from Current plugins list.
-void TomoToolConfigSavuDialog::currentPluginSelected() {
+void TomoToolConfigDialogSavu::currentPluginSelected() {
   if (m_savuUi.treeCurrentPlugins->selectedItems().count() != 0) {
     auto currItem = m_savuUi.treeCurrentPlugins->selectedItems()[0];
 
@@ -202,7 +202,7 @@ private:
 };
 
 // On user editing a parameter tree item, update the data object to match.
-void TomoToolConfigSavuDialog::paramValModified(QTreeWidgetItem *item,
+void TomoToolConfigDialogSavu::paramValModified(QTreeWidgetItem *item,
                                                 int /*column*/) {
   OwnTreeWidgetItem *ownItem = dynamic_cast<OwnTreeWidgetItem *>(item);
   if (!ownItem)
@@ -237,7 +237,7 @@ void TomoToolConfigSavuDialog::paramValModified(QTreeWidgetItem *item,
 
 // When a top level item is expanded, also expand its child items - if tree
 // items
-void TomoToolConfigSavuDialog::expandedItem(QTreeWidgetItem *item) {
+void TomoToolConfigDialogSavu::expandedItem(QTreeWidgetItem *item) {
   if (item->parent() == NULL) {
     for (int i = 0; i < item->childCount(); ++i) {
       item->child(i)->setExpanded(true);
@@ -247,7 +247,7 @@ void TomoToolConfigSavuDialog::expandedItem(QTreeWidgetItem *item) {
 
 // Adds one plugin from the available plugins list into the list of
 // current plugins
-void TomoToolConfigSavuDialog::transferClicked() {
+void TomoToolConfigDialogSavu::transferClicked() {
   if (0 == m_savuUi.listAvailablePlugins->selectedItems().count())
     return;
 
@@ -259,7 +259,7 @@ void TomoToolConfigSavuDialog::transferClicked() {
   createPluginTreeEntry(row);
 }
 
-void TomoToolConfigSavuDialog::moveUpClicked() {
+void TomoToolConfigDialogSavu::moveUpClicked() {
   if (0 == m_savuUi.treeCurrentPlugins->selectedItems().count())
     return;
 
@@ -277,7 +277,7 @@ void TomoToolConfigSavuDialog::moveUpClicked() {
   }
 }
 
-void TomoToolConfigSavuDialog::moveDownClicked() {
+void TomoToolConfigDialogSavu::moveDownClicked() {
   // TODO: this can be done with the same function as above...
   if (0 == m_savuUi.treeCurrentPlugins->selectedItems().count())
     return;
@@ -296,7 +296,7 @@ void TomoToolConfigSavuDialog::moveDownClicked() {
   }
 }
 
-void TomoToolConfigSavuDialog::removeClicked() {
+void TomoToolConfigDialogSavu::removeClicked() {
   // Also clear ADS entries
   if (0 == m_savuUi.treeCurrentPlugins->selectedItems().count())
     return;
@@ -307,7 +307,7 @@ void TomoToolConfigSavuDialog::removeClicked() {
   refreshCurrentPluginListUI();
 }
 
-void TomoToolConfigSavuDialog::menuOpenClicked() {
+void TomoToolConfigDialogSavu::menuOpenClicked() {
   QString s =
       QFileDialog::getOpenFileName(0, "Open file", QDir::currentPath(),
                                    "NeXus files (*.nxs);;All files (*.*)",
@@ -341,7 +341,7 @@ void TomoToolConfigSavuDialog::menuOpenClicked() {
 * Load a savu tomo config file into the current plugin list, overwriting it.
 * Uses the algorithm LoadSavuTomoConfig
 */
-void TomoToolConfigSavuDialog::loadSavuTomoConfig(
+void TomoToolConfigDialogSavu::loadSavuTomoConfig(
     std::string &filePath, Mantid::API::ITableWorkspace_sptr &currentPlugins) {
   // try to load tomo reconstruction parametereization file
   auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
@@ -367,7 +367,7 @@ void TomoToolConfigSavuDialog::loadSavuTomoConfig(
                                                 std::string(e.what()));
   }
 }
-void TomoToolConfigSavuDialog::menuSaveClicked() {
+void TomoToolConfigDialogSavu::menuSaveClicked() {
   if (m_currentParamPath.empty()) {
     menuSaveAsClicked();
     return;
@@ -395,10 +395,10 @@ void TomoToolConfigSavuDialog::menuSaveClicked() {
     }
   }
 }
-size_t TomoToolConfigSavuDialog::g_nameSeqNo = 0;
+size_t TomoToolConfigDialogSavu::g_nameSeqNo = 0;
 
 // Build a unique (and hidden) name for the table ws
-std::string TomoToolConfigSavuDialog::createUniqueNameHidden() {
+std::string TomoToolConfigDialogSavu::createUniqueNameHidden() {
   std::string name;
   do {
     // with __ prefix => hidden
@@ -409,7 +409,7 @@ std::string TomoToolConfigSavuDialog::createUniqueNameHidden() {
   return name;
 }
 
-void TomoToolConfigSavuDialog::menuSaveAsClicked() {
+void TomoToolConfigDialogSavu::menuSaveAsClicked() {
   QString s =
       QFileDialog::getSaveFileName(0, "Save file", QDir::currentPath(),
                                    "NeXus files (*.nxs);;All files (*.*)",
@@ -422,7 +422,7 @@ void TomoToolConfigSavuDialog::menuSaveAsClicked() {
   menuSaveClicked();
 }
 
-QString TomoToolConfigSavuDialog::tableWSRowToString(ITableWorkspace_sptr table,
+QString TomoToolConfigDialogSavu::tableWSRowToString(ITableWorkspace_sptr table,
                                                      size_t i) {
   std::stringstream msg;
   msg << "ID: " << table->cell<std::string>(i, 0)
@@ -437,7 +437,7 @@ QString TomoToolConfigSavuDialog::tableWSRowToString(ITableWorkspace_sptr table,
 *
 * @param row Row from a table workspace with each row specfying a savu plugin
 */
-void TomoToolConfigSavuDialog::createPluginTreeEntry(TableRow &row) {
+void TomoToolConfigDialogSavu::createPluginTreeEntry(TableRow &row) {
   QStringList idStr, nameStr, citeStr, paramsStr;
   idStr.push_back(QString::fromStdString("ID: " + row.cell<std::string>(0)));
   nameStr.push_back(
@@ -522,7 +522,7 @@ void TomoToolConfigSavuDialog::createPluginTreeEntry(TableRow &row) {
 * separated by commas
 */
 std::string
-TomoToolConfigSavuDialog::paramValStringFromArray(const Json::Value &jsonVal,
+TomoToolConfigDialogSavu::paramValStringFromArray(const Json::Value &jsonVal,
                                                   const std::string &name) {
   std::string s;
   s = "[";
@@ -564,7 +564,7 @@ TomoToolConfigSavuDialog::paramValStringFromArray(const Json::Value &jsonVal,
 * @return String with a parameter value
 */
 std::string
-TomoToolConfigSavuDialog::pluginParamValString(const Json::Value &jsonVal,
+TomoToolConfigDialogSavu::pluginParamValString(const Json::Value &jsonVal,
                                                const std::string &name) {
   std::string s;
   // string and numeric values can (normally) be converted to string but arrays
@@ -587,7 +587,7 @@ TomoToolConfigSavuDialog::pluginParamValString(const Json::Value &jsonVal,
   return s;
 }
 
-void TomoToolConfigSavuDialog::createPluginTreeEntries(
+void TomoToolConfigDialogSavu::createPluginTreeEntries(
     Mantid::API::ITableWorkspace_sptr table) {
   for (size_t i = 0; i < table->rowCount(); ++i) {
     Mantid::API::TableRow r = table->getRow(i);
@@ -602,7 +602,7 @@ void TomoToolConfigSavuDialog::createPluginTreeEntries(
 * @param description More detailed explanation, hints, additional
 * information, etc.
 */
-void TomoToolConfigSavuDialog::userError(const std::string &err,
+void TomoToolConfigDialogSavu::userError(const std::string &err,
                                          const std::string &description) {
   QMessageBox::critical(this, QString::fromStdString(err),
                         QString::fromStdString(description), QMessageBox::Ok,
@@ -616,7 +616,7 @@ void TomoToolConfigSavuDialog::userError(const std::string &err,
 * @param description More detailed explanation, hints, additional
 * information, etc.
 */
-void TomoToolConfigSavuDialog::userWarning(const std::string &err,
+void TomoToolConfigDialogSavu::userWarning(const std::string &err,
                                            const std::string &description) {
   QMessageBox::warning(this, QString::fromStdString(err),
                        QString::fromStdString(description), QMessageBox::Ok,

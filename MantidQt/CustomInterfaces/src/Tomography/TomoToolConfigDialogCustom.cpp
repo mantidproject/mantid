@@ -1,18 +1,18 @@
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigCustomDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogCustom.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigCustom.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-const std::string TomoToolConfigCustomDialog::DEFAULT_TOOL_NAME =
+const std::string TomoToolConfigDialogCustom::DEFAULT_TOOL_NAME =
     "Custom command";
 
 // custom tool doesn't have a default method
-const std::string TomoToolConfigCustomDialog::DEFAULT_TOOL_METHOD = "";
+const std::string TomoToolConfigDialogCustom::DEFAULT_TOOL_METHOD = "";
 
-std::string TomoToolConfigCustomDialog::m_backupCommandLine = "";
+std::string TomoToolConfigDialogCustom::m_backupCommandLine = "";
 
-void TomoToolConfigCustomDialog::setupToolSettingsFromPaths() {
+void TomoToolConfigDialogCustom::setupToolSettingsFromPaths() {
     // None of the other paths matter, because the user could've changed
   // them, so ignore them and load the current ones on the dialogue
   QString run = m_customUi.lineEdit_runnable->text();        // current path
@@ -23,14 +23,14 @@ void TomoToolConfigCustomDialog::setupToolSettingsFromPaths() {
       new ToolConfigCustom(run.toStdString(), opts.toStdString()));
       }
 
-void TomoToolConfigCustomDialog::setupMethodSelected() {
+void TomoToolConfigDialogCustom::setupMethodSelected() {
 
   // sets the current runnable path, overriding the default one
   m_customUi.lineEdit_runnable->setText(QString::fromStdString(m_runPath));
 
 }
 
-void TomoToolConfigCustomDialog::setupDialogUi() {
+void TomoToolConfigDialogCustom::setupDialogUi() {
   m_customUi.setupUi(m_dialog);
 
   if (m_backupCommandLine != "") {
@@ -46,9 +46,9 @@ void TomoToolConfigCustomDialog::setupDialogUi() {
       new ToolConfigCustom(m_runPath, opts.toStdString()));
 }
 
-void TomoToolConfigCustomDialog::initialiseDialog() { m_dialog = new QDialog; }
+void TomoToolConfigDialogCustom::initialiseDialog() { m_dialog = new QDialog; }
 
-void TomoToolConfigCustomDialog::handleDialogResult(int result) {
+void TomoToolConfigDialogCustom::handleDialogResult(int result) {
   if (QDialog::Accepted == result) {
     // if accepted we want to save the information
     m_backupCommandLine =
@@ -56,6 +56,6 @@ void TomoToolConfigCustomDialog::handleDialogResult(int result) {
 	setupToolSettingsFromPaths();
   }
 }
-int TomoToolConfigCustomDialog::executeQt() { return m_dialog->exec(); }
+int TomoToolConfigDialogCustom::executeQt() { return m_dialog->exec(); }
 } // CustomInterfaces
 } // MantidQt

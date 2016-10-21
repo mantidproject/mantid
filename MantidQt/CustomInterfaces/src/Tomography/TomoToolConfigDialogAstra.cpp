@@ -1,14 +1,14 @@
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigAstraDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogAstra.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-const std::string TomoToolConfigAstraDialog::DEFAULT_TOOL_NAME = "Astra";
-const std::string TomoToolConfigAstraDialog::DEFAULT_TOOL_METHOD = "FBP3D_CUDA";
+const std::string TomoToolConfigDialogAstra::DEFAULT_TOOL_NAME = "Astra";
+const std::string TomoToolConfigDialogAstra::DEFAULT_TOOL_METHOD = "FBP3D_CUDA";
 
-void TomoToolConfigAstraDialog::setupDialogUi() {
+void TomoToolConfigDialogAstra::setupDialogUi() {
   m_astraUi.setupUi(m_dialog);
   m_astraUi.comboBox_method->clear();
   const auto methods = ToolConfigAstraToolbox::methods();
@@ -18,9 +18,9 @@ void TomoToolConfigAstraDialog::setupDialogUi() {
   }
 }
 
-void TomoToolConfigAstraDialog::initialiseDialog() { m_dialog = new QDialog; }
+void TomoToolConfigDialogAstra::initialiseDialog() { m_dialog = new QDialog; }
 
-void TomoToolConfigAstraDialog::setupToolSettingsFromPaths() {
+void TomoToolConfigDialogAstra::setupToolSettingsFromPaths() {
   m_toolSettings =
       std::shared_ptr<ToolConfigAstraToolbox>(new ToolConfigAstraToolbox(
           m_runPath, m_pathOut + m_localOutNameAppendix, m_paths.pathDarks(),
@@ -28,7 +28,7 @@ void TomoToolConfigAstraDialog::setupToolSettingsFromPaths() {
 
 }
 
-void TomoToolConfigAstraDialog::setupMethodSelected() {
+void TomoToolConfigDialogAstra::setupMethodSelected() {
   const auto methods = ToolConfigTomoPy::methods();
 
   int mi = m_astraUi.comboBox_method->currentIndex();
@@ -39,6 +39,6 @@ void TomoToolConfigAstraDialog::setupMethodSelected() {
 
 /** Calls the execute of the QDialog
 */
-int TomoToolConfigAstraDialog::executeQt() { return m_dialog->exec(); }
+int TomoToolConfigDialogAstra::executeQt() { return m_dialog->exec(); }
 } // CustomInterfaces
 } // MantidQt

@@ -6,14 +6,14 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_CUSTOMINTERFACES_DLL TomoToolConfigTomoPyDialog
+class MANTIDQT_CUSTOMINTERFACES_DLL TomoToolConfigDialogTomoPy
     : public TomoToolConfigDialogBase {
 
 public:
-  TomoToolConfigTomoPyDialog()
+  TomoToolConfigDialogTomoPy()
       : TomoToolConfigDialogBase(DEFAULT_TOOL_NAME, DEFAULT_TOOL_METHOD) {}
 
-  ~TomoToolConfigTomoPyDialog() override {
+  ~TomoToolConfigDialogTomoPy() override {
     if (m_dialog) {
       delete m_dialog;
     }

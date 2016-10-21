@@ -1,13 +1,13 @@
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPyDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogTomoPy.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-const std::string TomoToolConfigTomoPyDialog::DEFAULT_TOOL_NAME = "TomoPy";
-const std::string TomoToolConfigTomoPyDialog::DEFAULT_TOOL_METHOD = "gridrec";
+const std::string TomoToolConfigDialogTomoPy::DEFAULT_TOOL_NAME = "TomoPy";
+const std::string TomoToolConfigDialogTomoPy::DEFAULT_TOOL_METHOD = "gridrec";
 
-void TomoToolConfigTomoPyDialog::setupDialogUi() {
+void TomoToolConfigDialogTomoPy::setupDialogUi() {
   m_tomoPyUi.setupUi(m_dialog);
   m_tomoPyUi.comboBox_method->clear();
 
@@ -18,16 +18,16 @@ void TomoToolConfigTomoPyDialog::setupDialogUi() {
   }
 }
 
-void TomoToolConfigTomoPyDialog::initialiseDialog() { m_dialog = new QDialog; }
+void TomoToolConfigDialogTomoPy::initialiseDialog() { m_dialog = new QDialog; }
 
-void TomoToolConfigTomoPyDialog::setupToolSettingsFromPaths() {
+void TomoToolConfigDialogTomoPy::setupToolSettingsFromPaths() {
     // TODO: for the output path, probably better to take the sample path,
     // then up one level
     m_toolSettings = std::shared_ptr<ToolConfigTomoPy>(new ToolConfigTomoPy(
       m_runPath, m_pathOut + m_localOutNameAppendix, m_paths.pathDarks(),
       m_paths.pathOpenBeam(), m_paths.pathSamples()));
 }
-void TomoToolConfigTomoPyDialog::setupMethodSelected() {
+void TomoToolConfigDialogTomoPy::setupMethodSelected() {
   // move to member/global variable and use more space OR keep here
   const auto methods = ToolConfigTomoPy::methods();
 
@@ -38,7 +38,7 @@ void TomoToolConfigTomoPyDialog::setupMethodSelected() {
 
 /** Calls the execute of the QDialog
 */
-int TomoToolConfigTomoPyDialog::executeQt() { return m_dialog->exec(); }
+int TomoToolConfigDialogTomoPy::executeQt() { return m_dialog->exec(); }
 
 } // Custominterfaces
 } // MantidQt

@@ -1,8 +1,8 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPyDialog.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigAstraDialog.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigSavuDialog.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigCustomDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogTomoPy.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogAstra.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogSavu.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogCustom.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -12,16 +12,16 @@ TomoToolConfigDialogBase::getCorrectDialogForToolFromString(
     const std::string &toolName) {
 
   if (toolName == "TomoPy") {
-    return new TomoToolConfigTomoPyDialog;
+    return new TomoToolConfigDialogTomoPy;
   }
   if (toolName == "Astra") {
-    return new TomoToolConfigAstraDialog;
+    return new TomoToolConfigDialogAstra;
   }
   if (toolName == "Savu") {
-    return new TomoToolConfigSavuDialog;
+    return new TomoToolConfigDialogSavu;
   }
   if (toolName == "Custom command") {
-    return new TomoToolConfigCustomDialog;
+    return new TomoToolConfigDialogCustom;
   }
 
   return nullptr;

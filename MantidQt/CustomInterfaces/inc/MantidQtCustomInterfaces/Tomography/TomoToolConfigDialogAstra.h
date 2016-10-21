@@ -6,13 +6,13 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_CUSTOMINTERFACES_DLL TomoToolConfigAstraDialog
+class MANTIDQT_CUSTOMINTERFACES_DLL TomoToolConfigDialogAstra
     : public TomoToolConfigDialogBase {
 public:
-  TomoToolConfigAstraDialog()
+  TomoToolConfigDialogAstra()
       : TomoToolConfigDialogBase(DEFAULT_TOOL_NAME, DEFAULT_TOOL_METHOD) {}
 
-  ~TomoToolConfigAstraDialog() override {
+  ~TomoToolConfigDialogAstra() override {
     if (m_dialog) {
       delete m_dialog;
     }
