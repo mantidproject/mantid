@@ -1,0 +1,51 @@
+from PearlPowder_AbstractInst import AbstractInst
+
+
+class PearlPowder_Mock(AbstractInst):
+
+    def __init__(self, calibration_dir, raw_data_dir, output_dir, default_ext="", tt_mode=None):
+        super(PearlPowder_Mock, self).__init__(calibration_dir=calibration_dir, raw_data_dir=raw_data_dir,
+                                               output_dir=output_dir, default_input_ext=default_ext,
+                                               tt_mode=tt_mode)
+        self.generate_cycle_dir_flag = False
+
+    def get_lambda_range(self):
+        return None
+
+    def get_focus_tof_binning(self):
+        return None
+
+    def get_create_van_tof_binning(self):
+        return None
+
+    def get_default_group_names(self):
+        return None
+
+    def get_calibration_full_paths(self, cycle):
+        # This is here to help remind people of the dict that is expected
+        calibration_details = {"calibration": "cal",
+                               "grouping": "group",
+                               "vanadium_absorption": "van_absorb",
+                               "vanadium": "van"}
+        return calibration_details
+
+    @staticmethod
+    def generate_inst_file_name(run_number):
+        return "generate_inst_file_name" + str(run_number)
+
+    def get_instrument_alg_save_ranges(instrument=''):
+        return None
+
+    @staticmethod
+    def get_cycle_information(run_number):
+        # This is here to help remind people of the dict format
+        cycle_information = {"cycle" : "123",
+                             "instrument_version": "test_v1"}
+        return cycle_information
+
+    def _skip_appending_cycle_to_raw_dir(self):
+        return self.generate_cycle_dir_flag
+
+    def test_set_raw_data_dir(self, new_dir):
+        # Used for testing to set a new raw_data_dir
+        self._raw_data_dir = new_dir

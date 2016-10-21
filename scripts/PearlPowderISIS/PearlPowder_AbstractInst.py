@@ -20,7 +20,7 @@ class AbstractInst(object):
         self._calibration_dir = calibration_dir
         self._raw_data_dir = raw_data_dir
         self._output_dir = output_dir
-        self._default_input_ext = default_input_ext
+        self._default_input_ext = _append_dot_to_ext(default_input_ext)
         self._tt_mode = tt_mode
 
     @property
@@ -101,30 +101,22 @@ class AbstractInst(object):
 
         return out_file_names
 
-    def generate_cycle_dir(self, raw_data_dir, run_cycle):
+    def generate_raw_data_cycle_dir(self, run_cycle):
         if self._skip_appending_cycle_to_raw_dir():
-            return raw_data_dir
+            return self.raw_data_dir
         str_run_cycle = str(run_cycle)
 
         # Append current cycle to raw data directory
-        generated_dir = raw_data_dir + str_run_cycle
-        generated_dir = _append_path_dividers_to_end(generated_dir, raw_data_dir)
+        generated_dir = self.raw_data_dir + str_run_cycle
+        generated_dir = _append_path_dividers_to_end(generated_dir, self.raw_data_dir)
 
         return generated_dir
 
     def generate_input_full_path(self, run_number, input_dir):
         # Uses runtime polymorphism to generate the full run name
         file_name = self.generate_inst_file_name(run_number)
-        extension = self.get_input_extension()
+        extension = self.default_input_ext
         return input_dir + file_name + extension
-
-    def get_input_extension(self):
-        """
-        Gets the extension of input files for this instrument
-        @param self: The instrument to query the value for
-        @return: The string of the default extension for this file
-        """
-        return _append_dot_to_ext(self._default_input_ext)
 
     # Instrument specific properties to be implemented by base classes #
 
@@ -175,15 +167,6 @@ class AbstractInst(object):
         """
         pass
 
-    @abstractmethod
-    def spline_background(self, focused_vanadium_ws, spline_number, instrument_version=''):
-        """
-        Splines the background in a way specific to the instrument
-        @param focused_vanadium_ws: The workspace to perform spline backgrounds on
-        @param instrument_version: (Optional) Used for instruments with multiple versions
-        @return: List of workspaces with splined backgrounds
-        """
-
     @staticmethod
     @abstractmethod
     def generate_inst_file_name(run_number):
@@ -220,10 +203,19 @@ class AbstractInst(object):
         return _empty_hook_return_input(input_workspace)
 
     def get_monitor(self, run_number, input_dir, spline_terms):
-        return _empty_hook()
+        return _empty_hook_return_none()
 
     def get_monitor_spectra(self, run_number):
         return _empty_hook_return_empty_string()
+
+    def spline_background(self, focused_vanadium_ws, spline_number, instrument_version=''):
+        """
+        Splines the background in a way specific to the instrument
+        @param focused_vanadium_ws: The workspace to perform spline backgrounds on
+        @param instrument_version: (Optional) Used for instruments with multiple versions
+        @return: List of workspaces with splined backgrounds
+        """
+        return _empty_hook_return_none()
 
     def _skip_appending_cycle_to_raw_dir(self):
         return False
@@ -246,12 +238,15 @@ def _append_path_dividers_to_end(generated_dir, raw_data_dir):
     return generated_dir
 
 
-def _empty_hook():
-    pass
+# These empty hooks can be used to diagnose when an override hasn't fired
 
 
 def _empty_hook_return_empty_string():
     return str('')
+
+
+def _empty_hook_return_none():
+    return None
 
 
 def _empty_hook_return_input(param):

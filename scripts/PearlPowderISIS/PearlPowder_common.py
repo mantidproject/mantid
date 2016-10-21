@@ -289,9 +289,8 @@ def _load_raw_file_range(files, input_dir, instrument):
 
 
 def _read_ws(number, instrument):
-    raw_data_dir = instrument.raw_data_dir
     cycle_information = instrument.get_cycle_information(run_number=number)
-    input_dir = instrument.generate_cycle_dir(raw_data_dir, cycle_information["cycle"])
+    input_dir = instrument.generate_raw_data_cycle_dir(cycle_information["cycle"])
     read_in_ws = _load_raw_files(run_number=number, instrument=instrument, input_dir=input_dir)
     # TODO move this into instrument specific
     read_ws = mantid.ConvertUnits(InputWorkspace=read_in_ws, Target="Wavelength")

@@ -35,6 +35,7 @@ set ( TEST_PY_FILES
       test/ISISDirecInelasticConfigTest.py
       test/IndirectCommonTests.py
       test/PearlRoutinesTest.py
+      test/PearlPowder_AbstractInstTest.py
       test/PearlPowder_commonTest.py
       test/PearlPowder_PEARLTest.py
       test/PyChopTest.py

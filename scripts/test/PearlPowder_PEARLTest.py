@@ -8,7 +8,7 @@ import PearlPowder_common
 import PearlPowder_PEARL
 
 
-class PearlRoutinesTest(unittest.TestCase):
+class PearlPowder_PEARLTest(unittest.TestCase):
 
     def test_inst_new2_exec_fmode_all(self):
         pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir="D:\\PEARL\\",
