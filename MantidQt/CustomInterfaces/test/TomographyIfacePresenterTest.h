@@ -135,33 +135,6 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  // todo disabled because it seems unnecessary
-  // does not really fail, but it cannot do any of the expected updates
-  //   void test_setupReconToolUnsupportedTool() {
-  //     testing::NiceMock<MockTomographyIfaceView> mockView;
-  //     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
-
-  //     EXPECT_CALL(mockView, systemSettings()).Times(0);
-  //     EXPECT_CALL(mockView, currentReconTool())
-  //         .Times(1)
-  //         .WillRepeatedly(Return(g_ccpi));
-  //     EXPECT_CALL(mockView, reconToolsSettings()).Times(0);
-
-  //     // wrong tool => doesn't have a config dialog
-  //     EXPECT_CALL(mockView, showToolConfig(testing::_)).Times(0);
-
-  //     // No errors/warnings
-  //     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-  //     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
-
-  //     pres.notify(ITomographyIfacePresenter::ToolChanged);
-  //     pres.notify(ITomographyIfacePresenter::SetupReconTool);
-  //     TSM_ASSERT(
-  //         "Mock not used as expected. Some EXPECT_CALL conditions were not "
-  //         "satisfied.",
-  //         testing::Mock::VerifyAndClearExpectations(&mockView))
-  //   }
-
   //   setup reconstruction tool now in preseter, have a unit test
   void test_setupReconToolGood() {
     testing::NiceMock<MockTomographyIfaceView> mockView;
