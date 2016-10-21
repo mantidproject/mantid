@@ -5,6 +5,7 @@ from types import *
 import re
 import os
 
+
 def get_sample_list(basefile, listText, direct=""):
     raw = True
     thedir = ""
@@ -13,7 +14,7 @@ def get_sample_list(basefile, listText, direct=""):
     samfillist = []
     p_list = re.compile("s([0-9]+)[ ]+(.+)")
     m_list = p_list.match(listText)
-    if m_list != None:
+    if m_list is not None:
         raw = False
         runno = m_list.group(1)
         listText = m_list.group(2).rstrip()
@@ -119,8 +120,8 @@ def list_of_list2_list(lol):
 # Correct for absorption an InputWkspc(in D).
 # Put its transmission in outputWkspc
 
-def correct_abs(InputWkspc, outputWkspc, TheCylinderSampleHeight, TheCylinderSampleRadius, \
-                TheAttenuationXSection, TheScatteringXSection, TheSampleNumberDensity, \
+def correct_abs(InputWkspc, outputWkspc, TheCylinderSampleHeight, TheCylinderSampleRadius,
+                TheAttenuationXSection, TheScatteringXSection, TheSampleNumberDensity,
                 TheNumberOfSlices, TheNumberOfAnnuli, TheNumberOfWavelengthPoints, TheExpMethod):
     # The input workspace needs to be in units of wavelength for the CylinderAbsorption algorithm
     ConvertUnits(InputWorkspace=InputWkspc, OutputWorkspace=InputWkspc, Target="Wavelength")

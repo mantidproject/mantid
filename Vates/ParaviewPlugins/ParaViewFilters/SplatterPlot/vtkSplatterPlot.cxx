@@ -81,10 +81,16 @@ double vtkSplatterPlot::getTime() const
   return m_time;
 }
 
-int vtkSplatterPlot::RequestData(vtkInformation *,
+int vtkSplatterPlot::RequestData(vtkInformation * info,
                                  vtkInformationVector **inputVector,
                                  vtkInformationVector *outputVector)
 {
+  if (nullptr == m_presenter) {
+    /// If the presenter is not already setup attempt to set it up now
+    /// this might fail, which is handled by the next selection statement
+    this->RequestInformation(info, inputVector, outputVector);
+  }
+
   if (nullptr != m_presenter) {
     // Get the info objects
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
@@ -132,21 +138,29 @@ int vtkSplatterPlot::RequestInformation(vtkInformation *,
                                         vtkInformationVector *)
 {
   if (nullptr == m_presenter) {
-    std::string scalarName = "signal";
-    m_presenter = Mantid::Kernel::make_unique<vtkSplatterPlotFactory>(
-        boost::make_shared<NoThresholdRange>(), scalarName, m_numberPoints,
-        m_topPercentile);
 
-    // Get the info objects
-    vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
-    vtkDataSet *input = vtkDataSet::SafeDownCast(
-      inInfo->Get(vtkDataObject::DATA_OBJECT()));
+    try {
+      std::string scalarName = "signal";
+      m_presenter = Mantid::Kernel::make_unique<vtkSplatterPlotFactory>(
+            boost::make_shared<NoThresholdRange>(), scalarName, m_numberPoints,
+            m_topPercentile);
 
-    m_wsName = Mantid::VATES::vtkDataSetToWsName::exec(input);
-    // Get the workspace from the ADS
-    ADSWorkspaceProvider<IMDWorkspace> workspaceProvider;
-    Workspace_sptr result = workspaceProvider.fetchWorkspace(m_wsName);
-    m_presenter->initialize(result);
+      // Get the info objects
+      vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
+      vtkDataSet *input = vtkDataSet::SafeDownCast(
+            inInfo->Get(vtkDataObject::DATA_OBJECT()));
+      m_wsName = Mantid::VATES::vtkDataSetToWsName::exec(input);
+      // Get the workspace from the ADS
+      ADSWorkspaceProvider<IMDWorkspace> workspaceProvider;
+      Workspace_sptr result = workspaceProvider.fetchWorkspace(m_wsName);
+      m_presenter->initialize(result);
+    } catch (const std::runtime_error) {
+      // Catch incase something goes wrong. It might be that the splatter
+      // plot source is not yet setup correctly and we'll need to run this
+      // call again later.
+      m_presenter = nullptr;
+    }
+
   }
   return 1;
 }

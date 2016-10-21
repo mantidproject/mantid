@@ -27,10 +27,8 @@ logger = Logger("ISISReducer")
 if sys.version_info[0] == 2 and sys.version_info[1] == 6:
     import types
 
-
     def _deepcopy_method(x, memo):
         return type(x)(x.im_func, copy.deepcopy(x.im_self, memo), x.im_class)
-
 
     copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
 ################################################################################
@@ -210,10 +208,10 @@ class ISISReducer(Reducer):
         # so currently do not understand why it is in isis_reduction_steps
         # Also the main purpose of this class is to use it as an input argument
         # to ConvertToQ below
-        self.prep_normalize = isis_reduction_steps.CalculateNormISIS( \
+        self.prep_normalize = isis_reduction_steps.CalculateNormISIS(
             [self.norm_mon, self.transmission_calculator])
 
-        self.to_Q = isis_reduction_steps.ConvertToQISIS( \
+        self.to_Q = isis_reduction_steps.ConvertToQISIS(
             self.prep_normalize)
         self._background_subtracter = isis_reduction_steps.CanSubtraction()
         self.geometry_correcter = isis_reduction_steps.SampleGeomCor()
@@ -465,7 +463,7 @@ class ISISReducer(Reducer):
             the list of reduction steps.
         """
         if self.instrument is None:
-            raise RuntimeError, "ISISReducer: trying to run a reduction with no instrument specified"
+            raise RuntimeError("ISISReducer: trying to run a reduction with no instrument specified")
 
         if self._beam_finder is not None:
             result = self._beam_finder.execute(self)
@@ -524,7 +522,7 @@ class ISISReducer(Reducer):
         if os.path.isdir(path):
             self._user_file_path = path
         else:
-            raise RuntimeError, "ISISReducer.set_user_path: provided path is not a directory (%s)" % path
+            raise RuntimeError("ISISReducer.set_user_path: provided path is not a directory (%s)" % path)
 
     def get_user_path(self):
         return self._user_file_path
@@ -605,7 +603,6 @@ class ISISReducer(Reducer):
     CENT_FIND_RMIN = None
     CENT_FIND_RMAX = None
 
-
     # override some functions from the Base Reduction
 
     # set_beam_finder: override to accept the front detector
@@ -622,7 +619,7 @@ class ISISReducer(Reducer):
             else:
                 self._beam_finder = finder
         else:
-            raise RuntimeError, "Reducer.set_beam_finder expects an object of class ReductionStep"
+            raise RuntimeError("Reducer.set_beam_finder expects an object of class ReductionStep")
 
     def get_beam_center(self, bank=None):
         """

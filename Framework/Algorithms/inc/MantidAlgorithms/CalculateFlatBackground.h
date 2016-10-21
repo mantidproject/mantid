@@ -8,28 +8,29 @@
 
 namespace Mantid {
 namespace Algorithms {
-/** Finds a constant value fit to an appropriate range of each desired spectrum
-    and subtracts that value from the entire spectrum.
+/** Finds a constant background value of each desired spectrum
+    and optionally subtracts that value from the entire spectrum.
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace     - The name of the input workspace. </LI>
-    <LI> OutputWorkspace    - The name to give the output workspace. </LI>
-    <LI> SpectrumIndexList  - The workspace indices of the spectra to fit
+    <LI> InputWorkspace       - The name of the input workspace. </LI>
+    <LI> OutputWorkspace      - The name to give the output workspace. </LI>
+    <LI> SpectrumIndexList    - The workspace indices of the spectra to fit
    background to. </LI>
-    <LI> StartX             - The start of the flat region to fit to. </LI>
-    <LI> EndX               - The end of the flat region to fit to. </LI>
-    <LI> Mode               - How to estimate the background number of counts: a
-   linear fit or the mean. </LI>
-    <LI> OutputMode         - What to return in the Outputworkspace: the
+    <LI> StartX               - The start of the flat region to fit to. </LI>
+    <LI> EndX                 - The end of the flat region to fit to. </LI>
+    <LI> AveragingWindowWidth - The width (in bins) of the moving window. </LI>
+    <LI> Mode                 - How to estimate the background number of
+   counts: a linear fit, the mean, or moving window average. </LI>
+    <LI> OutputMode           - What to return in the Outputworkspace: the
    corrected signal or just the background. </LI>
     </UL>
 
     @author Russell Taylor, Tessella plc
     @date 5/02/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
+    Copyright &copy; 2009-2016 ISIS Rutherford Appleton Laboratory, NScD Oak
+    Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -60,8 +61,8 @@ public:
   const std::string name() const override { return "CalculateFlatBackground"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Finds a constant value fit to an appropriate range of each desired "
-           "spectrum and subtracts that value from the entire spectrum.";
+    return "Finds a constant background value of each desired spectrum and "
+           "optionally subtracts that value from the entire spectrum.";
   }
 
   /// Algorithm's version
@@ -81,10 +82,12 @@ private:
   void restoreDistributionState(API::MatrixWorkspace_sptr workspace);
   void checkRange(double &startX, double &endX);
   void getWsInds(std::vector<int> &output, const int workspaceTotal);
-  double Mean(const API::MatrixWorkspace_const_sptr WS, const int wsInd,
-              const double startX, const double endX, double &variance) const;
+  double Mean(const API::MatrixWorkspace_sptr WS, const int wsInd,
+              const double startX, const double endX) const;
   double LinearFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX,
                    double endX);
+  double movingAverage(API::MatrixWorkspace_const_sptr WS, int wsIndex,
+                       size_t windowWidth) const;
 
   /// variable bin width raw count data must be converted to distributions first
   /// and then converted back, keep track of this

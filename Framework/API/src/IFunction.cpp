@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Jacobian.h"
@@ -23,6 +20,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ProgressBase.h"
+#include "MantidKernel/IPropertyManager.h"
 
 #include <boost/lexical_cast.hpp>
 

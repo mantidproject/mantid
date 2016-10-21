@@ -1,9 +1,12 @@
 #pylint: disable=no-init,invalid-name,too-many-branches
+from __future__ import (absolute_import, division, print_function)
+
 import os
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
 from reduction_workflow.find_data import find_data
+
 
 class HFIRSANSReduction(PythonAlgorithm):
 
@@ -50,9 +53,9 @@ class HFIRSANSReduction(PythonAlgorithm):
             instrument = property_manager.getProperty("InstrumentName").value
 
         output_str = ''
-        if type(data_file)==str:
+        if isinstance(data_file, str):
             data_file = find_data(data_file, instrument=instrument, allow_multiple=True)
-        if type(data_file)==list:
+        if isinstance(data_file, list):
             monitor = 0.0
             timer = 0.0
             for i in range(len(data_file)):
@@ -64,9 +67,9 @@ class HFIRSANSReduction(PythonAlgorithm):
                         self.default_output_dir = head
                 else:
                     output_str += _load_data(data_file[i], '__tmp_wksp')
-                    api.Plus(LHSWorkspace=workspace,\
-                         RHSWorkspace='__tmp_wksp',\
-                         OutputWorkspace=workspace)
+                    api.Plus(LHSWorkspace=workspace,
+                             RHSWorkspace='__tmp_wksp',
+                             OutputWorkspace=workspace)
                     # Get the monitor and timer values
                     ws = AnalysisDataService.retrieve('__tmp_wksp')
                     monitor += ws.getRun().getProperty("monitor").value
@@ -145,9 +148,9 @@ class HFIRSANSReduction(PythonAlgorithm):
             alg.setProperty("OutputWorkspace", output_ws)
 
             if alg.existsProperty("BeamCenterX") \
-                and alg.existsProperty("BeamCenterY") \
-                and beam_center_x is not None \
-                and beam_center_y is not None:
+                    and alg.existsProperty("BeamCenterY") \
+                    and beam_center_x is not None \
+                    and beam_center_y is not None:
                 alg.setProperty("BeamCenterX", beam_center_x)
                 alg.setProperty("BeamCenterY", beam_center_y)
 
@@ -175,8 +178,8 @@ class HFIRSANSReduction(PythonAlgorithm):
         if "BackgroundFiles" in property_list:
             background = property_manager.getProperty("BackgroundFiles").value
             background_ws = "__background_%s" % output_ws
-            msg = self._multiple_load(background, background_ws,\
-                                property_manager, property_manager_name)
+            msg = self._multiple_load(background, background_ws,
+                                      property_manager, property_manager_name)
             bck_msg = "Loaded background %s\n" % background
             bck_msg += msg
 
@@ -204,9 +207,9 @@ class HFIRSANSReduction(PythonAlgorithm):
                 alg.setProperty("OutputWorkspace", '__'+background_ws+"_reduced")
 
                 if alg.existsProperty("BeamCenterX") \
-                    and alg.existsProperty("BeamCenterY") \
-                    and trans_beam_center_x is not None \
-                    and trans_beam_center_y is not None:
+                        and alg.existsProperty("BeamCenterY") \
+                        and trans_beam_center_x is not None \
+                        and trans_beam_center_y is not None:
                     alg.setProperty("BeamCenterX", trans_beam_center_x)
                     alg.setProperty("BeamCenterY", trans_beam_center_y)
 
@@ -236,9 +239,9 @@ class HFIRSANSReduction(PythonAlgorithm):
                                  WorkspaceToMatch=output_ws,
                                  OutputWorkspace=background_ws+'_rebin',
                                  PreserveEvents=False)
-            api.Minus(LHSWorkspace=output_ws,\
-                         RHSWorkspace=background_ws,\
-                         OutputWorkspace=output_ws)
+            api.Minus(LHSWorkspace=output_ws,
+                      RHSWorkspace=background_ws,
+                      OutputWorkspace=output_ws)
 
             bck_msg = bck_msg.replace('\n','\n   |')
             output_msg += "Background subtracted [%s]%s\n" % (background_ws, bck_msg)
@@ -337,9 +340,9 @@ class HFIRSANSReduction(PythonAlgorithm):
             alg.setProperty("OutputWorkspace", workspace)
 
             if alg.existsProperty("BeamCenterX") \
-                and alg.existsProperty("BeamCenterY") \
-                and beam_center_x is not None \
-                and beam_center_y is not None:
+                    and alg.existsProperty("BeamCenterY") \
+                    and beam_center_x is not None \
+                    and beam_center_y is not None:
                 alg.setProperty("BeamCenterX", beam_center_x)
                 alg.setProperty("BeamCenterY", beam_center_y)
 
@@ -449,7 +452,7 @@ class HFIRSANSReduction(PythonAlgorithm):
         ws_list = AnalysisDataService.getObjectNames()
         for item in ws_list:
             if iq_output is not None and item.startswith(iq_output) and \
-                (iqxy_output is None or not item.startswith(iqxy_output)):
+                    (iqxy_output is None or not item.startswith(iqxy_output)):
                 filename = _save_ws(item)
                 if filename is not None:
                     output_msg += "I(Q) saved in %s\n" % (filename)

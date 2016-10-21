@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -23,6 +24,7 @@ public:
     m_func =
         Mantid::API::FunctionFactory::Instance().createFunction("Gaussian");
   }
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(getFunctionString, QString());
   Mantid::API::IFunction_sptr getGlobalFunction() override { return m_func; }
   MOCK_METHOD0(functionStructureChanged, void());
@@ -43,6 +45,7 @@ public:
   MOCK_METHOD3(setLocalParameterFixed, void(const QString &, int, bool));
   MOCK_METHOD3(setLocalParameterTie, void(const QString &, int, QString));
   MOCK_METHOD1(setCurrentDataset, void(int));
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 private:
   Mantid::API::IFunction_sptr m_func;
@@ -51,6 +54,7 @@ private:
 // Mock muon fit property browser
 class MockFitFunctionControl : public IMuonFitFunctionControl {
 public:
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD1(setFunction, void(const Mantid::API::IFunction_sptr));
   MOCK_METHOD0(runFit, void());
   MOCK_METHOD0(runSequentialFit, void());
@@ -60,6 +64,8 @@ public:
   MOCK_CONST_METHOD0(getWorkspaceNamesToFit, std::vector<std::string>());
   MOCK_METHOD1(userChangedDatasetIndex, void(int));
   MOCK_METHOD1(setCompatibilityMode, void(bool));
+  MOCK_METHOD1(fitRawDataClicked, void(bool));
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 class MuonAnalysisFitFunctionPresenterTest : public CxxTest::TestSuite {

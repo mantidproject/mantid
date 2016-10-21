@@ -1,6 +1,8 @@
 #include "MantidCrystal/PredictPeaks.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
 #include "MantidGeometry/Crystal/HKLGenerator.h"
@@ -34,7 +36,6 @@ double get_factor_for_q_convention(const std::string &convention) {
 }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 PredictPeaks::PredictPeaks()
@@ -44,7 +45,6 @@ PredictPeaks::PredictPeaks()
   m_refConds = getAllReflectionConditions();
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void PredictPeaks::init() {
@@ -121,7 +121,6 @@ void PredictPeaks::init() {
                   "An output PeaksWorkspace.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void PredictPeaks::exec() {

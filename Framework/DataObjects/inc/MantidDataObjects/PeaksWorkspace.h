@@ -1,9 +1,6 @@
 #ifndef MANTID_DATAOBJECTS_PEAKSPACE_H_
 #define MANTID_DATAOBJECTS_PEAKSPACE_H_ 1
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Column.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -78,13 +75,7 @@ public:
     * Use mutableRun interface to change log values rather then this method.
    **/
   API::LogManager_sptr logs() override;
-  /**Get constant access to shared pointer containing workspace porperties;
-     Copies logs into new LogManager variable
-     Meaningfull only for some multithereaded methods when a thread wants to
-     have its own copy of logs   */
-  API::LogManager_const_sptr getLogs() const override {
-    return API::LogManager_const_sptr(new API::LogManager(this->run()));
-  }
+  API::LogManager_const_sptr getLogs() const override;
 
   /// Returns a clone of the workspace
   std::unique_ptr<PeaksWorkspace> clone() const {

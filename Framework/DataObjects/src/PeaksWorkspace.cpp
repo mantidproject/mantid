@@ -3,6 +3,8 @@
 #include "MantidAPI/Column.h"
 #include "MantidAPI/ColumnFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Peak.h"
@@ -853,6 +855,13 @@ API::LogManager_sptr PeaksWorkspace::logs() {
 
   m_logCash = API::LogManager_sptr(&(this->mutableRun()), NullDeleter());
   return m_logCash;
+}
+
+/** Get constant access to shared pointer containing workspace porperties;
+ * Copies logs into new LogManager variable Meaningfull only for some
+ * multithereaded methods when a thread wants to have its own copy of logs */
+API::LogManager_const_sptr PeaksWorkspace::getLogs() const {
+  return API::LogManager_const_sptr(new API::LogManager(this->run()));
 }
 
 ITableWorkspace *

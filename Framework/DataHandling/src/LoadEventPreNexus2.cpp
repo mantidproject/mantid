@@ -2,6 +2,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"

@@ -1,10 +1,12 @@
 ﻿#pylint: disable=invalid-name
 from mantid.simpleapi import *
 
+
 class DarkRunCorrection(object):
     '''
     This class performs the dark run correction for ISIS SANS instruments
     '''
+
     def __init__(self):
         super(DarkRunCorrection, self).__init__()
         self._normalization_extractor = DarkRunNormalizationExtractor()
@@ -83,6 +85,8 @@ class DarkRunCorrection(object):
         return alg_dark.getProperty("OutputWorkspace").value
 
 # pylint: disable=too-few-public-methods
+
+
 class DarkRunNormalizationExtractor(object):
     '''
     Extrats the normalization ratio from the scatter workspace
@@ -90,6 +94,7 @@ class DarkRunNormalizationExtractor(object):
     can be either calculated as a ratio of good proton charges or
     a ratio of measurement times
     '''
+
     def __init__(self):
         super(DarkRunNormalizationExtractor, self).__init__()
 

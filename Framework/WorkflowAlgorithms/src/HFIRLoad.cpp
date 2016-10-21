@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include <string>
 
 #include "MantidWorkflowAlgorithms/HFIRLoad.h"
@@ -10,6 +7,7 @@
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {

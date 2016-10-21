@@ -487,7 +487,7 @@ void BinaryOperation::doSingleValue() {
 
   if (m_eout) {
     // ---- The output is an EventWorkspace ------
-    PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
       m_out->setX(i, m_lhs->refX(i));
@@ -498,7 +498,7 @@ void BinaryOperation::doSingleValue() {
     PARALLEL_CHECK_INTERUPT_REGION
   } else {
     // ---- Histogram Output -----
-    PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
       m_out->setX(i, m_lhs->refX(i));
@@ -532,7 +532,7 @@ void BinaryOperation::doSingleColumn() {
   const int64_t numHists = m_lhs->getNumberHistograms();
   if (m_eout) {
     // ---- The output is an EventWorkspace ------
-    PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
       const double rhsY = m_rhs->readY(i)[0];
@@ -548,7 +548,7 @@ void BinaryOperation::doSingleColumn() {
     PARALLEL_CHECK_INTERUPT_REGION
   } else {
     // ---- Histogram Output -----
-    PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
       const double rhsY = m_rhs->readY(i)[0];
@@ -594,7 +594,7 @@ void BinaryOperation::doSingleSpectrum() {
       // Now loop over the spectra of the left hand side calling the virtual
       // function
       const int64_t numHists = m_lhs->getNumberHistograms();
-      PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
       for (int64_t i = 0; i < numHists; ++i) {
         PARALLEL_START_INTERUPT_REGION
         // m_out->setX(i,m_lhs->refX(i)); //unnecessary - that was copied
@@ -617,7 +617,7 @@ void BinaryOperation::doSingleSpectrum() {
       // function
       const int64_t numHists = m_lhs->getNumberHistograms();
 
-      PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
       for (int64_t i = 0; i < numHists; ++i) {
         PARALLEL_START_INTERUPT_REGION
         // m_out->setX(i,m_lhs->refX(i)); //unnecessary - that was copied
@@ -643,7 +643,7 @@ void BinaryOperation::doSingleSpectrum() {
     // function
     const int64_t numHists = m_lhs->getNumberHistograms();
 
-    PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
       m_out->setX(i, m_lhs->refX(i));
@@ -688,7 +688,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
       // ------------ The rhs is ALSO an EventWorkspace ---------------
       // Now loop over the spectra of each one calling the virtual function
       const int64_t numHists = m_lhs->getNumberHistograms();
-      PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
       for (int64_t i = 0; i < numHists; ++i) {
         PARALLEL_START_INTERUPT_REGION
         m_progress->report(this->name());
@@ -721,7 +721,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
       // Now loop over the spectra of each one calling the virtual function
       const int64_t numHists = m_lhs->getNumberHistograms();
 
-      PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
       for (int64_t i = 0; i < numHists; ++i) {
         PARALLEL_START_INTERUPT_REGION
         m_progress->report(this->name());
@@ -758,7 +758,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
     // Now loop over the spectra of each one calling the virtual function
     const int64_t numHists = m_lhs->getNumberHistograms();
 
-    PARALLEL_FOR3(m_lhs, m_rhs, m_out)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
       m_progress->report(this->name());

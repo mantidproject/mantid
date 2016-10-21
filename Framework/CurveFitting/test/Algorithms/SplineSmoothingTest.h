@@ -87,10 +87,10 @@ public:
       MatrixWorkspace_const_sptr derivsWs =
           boost::dynamic_pointer_cast<const MatrixWorkspace>(
               derivs->getItem(i));
-      const auto &xs = ows->readX(i);
-      const auto &ys = ows->readY(i);
-      const auto &d1 = derivsWs->readY(0);
-      const auto &d2 = derivsWs->readY(1);
+      const auto &xs = ows->x(i);
+      const auto &ys = ows->y(i);
+      const auto &d1 = derivsWs->y(0);
+      const auto &d2 = derivsWs->y(1);
 
       // check output for consistency
       for (size_t j = 0; j < ys.size(); ++j) {

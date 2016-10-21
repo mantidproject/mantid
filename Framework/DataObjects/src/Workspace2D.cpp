@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/IPropertyManager.h"
 
 using Mantid::API::ISpectrum;
 using Mantid::API::MantidImage;

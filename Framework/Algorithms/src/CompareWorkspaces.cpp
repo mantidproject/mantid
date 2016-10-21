@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/CompareWorkspaces.h"
 
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -8,6 +5,8 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -25,14 +24,12 @@ using namespace Mantid::Geometry;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CompareWorkspaces)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 CompareWorkspaces::CompareWorkspaces()
     : API::Algorithm(), m_result(false), m_progress(nullptr),
       m_parallelComparison(true) {}
 
-//----------------------------------------------------------------------------------------------
 /// Algorithms name for identification. @see Algorithm::name
 const std::string CompareWorkspaces::name() const {
   return "CompareWorkspaces";
@@ -53,7 +50,6 @@ const std::string CompareWorkspaces::summary() const {
          "testing process.";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CompareWorkspaces::init() {
@@ -113,7 +109,6 @@ void CompareWorkspaces::init() {
   m_messages->addColumn("str", "Workspace 2");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void CompareWorkspaces::exec() {

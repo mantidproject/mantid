@@ -1,9 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-
 #include "MantidAlgorithms/GenerateEventsFilter.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -22,7 +19,6 @@ namespace Mantid {
 namespace Algorithms {
 DECLARE_ALGORITHM(GenerateEventsFilter)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 GenerateEventsFilter::GenerateEventsFilter()
@@ -33,7 +29,6 @@ GenerateEventsFilter::GenerateEventsFilter()
       m_splitters(), m_vecSplitterTime(), m_vecSplitterGroup(),
       m_useParallel(false), m_vecSplitterTimeSet(), m_vecGroupIndexSet() {}
 
-//----------------------------------------------------------------------------------------------
 /** Declare input
  */
 void GenerateEventsFilter::init() {
@@ -175,7 +170,6 @@ void GenerateEventsFilter::init() {
                   "Number of threads forced to use in the parallel mode. ");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Main execute body
  */
 void GenerateEventsFilter::exec() {

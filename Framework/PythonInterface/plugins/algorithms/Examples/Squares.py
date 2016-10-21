@@ -9,6 +9,8 @@ from mantid.kernel import *
 #  - The class name should match the file name;
 #  - Each file should contain exactly one algorithm.
 #
+
+
 class Squares(PythonAlgorithm):
 
     def category(self):

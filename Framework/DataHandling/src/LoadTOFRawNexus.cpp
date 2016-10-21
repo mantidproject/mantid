@@ -4,6 +4,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/cow_ptr.h"
@@ -26,7 +27,6 @@ LoadTOFRawNexus::LoadTOFRawNexus()
       m_spec_max(0), m_dataField(""), m_axisField(""), m_xUnits(""),
       m_fileMutex(), m_assumeOldFile(false) {}
 
-//-------------------------------------------------------------------------------------------------
 /// Initialisation method.
 void LoadTOFRawNexus::init() {
   declareProperty(
@@ -55,7 +55,6 @@ void LoadTOFRawNexus::init() {
       "set.");
 }
 
-//-------------------------------------------------------------------------------------------------
 /**
  * Return the confidence with with this algorithm can load the file
  * @param descriptor A descriptor for the file
@@ -81,7 +80,6 @@ int LoadTOFRawNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
   return confidence;
 }
 
-//-------------------------------------------------------------------------------------------------
 /** Goes thoguh a histogram NXS file and counts the number of pixels.
  * It also determines the name of the data field and axis to load
  *
@@ -450,7 +448,6 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
   // Done!
 }
 
-//-------------------------------------------------------------------------------------------------
 /** @return the name of the entry that we will load */
 std::string LoadTOFRawNexus::getEntryName(const std::string &filename) {
   std::string entry_name = "entry";
@@ -477,7 +474,6 @@ std::string LoadTOFRawNexus::getEntryName(const std::string &filename) {
   return entry_name;
 }
 
-//-------------------------------------------------------------------------------------------------
 /** Executes the algorithm. Reading in the file and creating and populating
  *  the output workspace
  *

@@ -7,6 +7,8 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidAPI/Progress.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -68,6 +70,7 @@ private:
   void initInstrumentSpecific();
   void addAllNexusFieldsAsProperties(std::string filename);
   void addEnergyToRun();
+  void addPulseInterval();
 
   int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
   void loadTimeDetails(NeXus::NXEntry &entry);
@@ -75,6 +78,10 @@ private:
   loadDataIntoTheWorkSpace(NeXus::NXEntry &entry,
                            const std::vector<std::vector<int>> &,
                            int vanaCalculatedDetectorElasticPeakPosition = -1);
+  void loadSpectra(size_t &spec, size_t firstSpec, size_t numberOfMonitors,
+                   size_t numberOfTubes,
+                   std::vector<Mantid::detid_t> &detectorIDs, NeXus::NXInt data,
+                   Mantid::API::Progress progress);
 
   void runLoadInstrument();
 

@@ -35,8 +35,6 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
             filenames.append('PEARL/Focus_Test/RawFiles/PEARL0009247' + str(i))
         # reference files
 
-
-
         return filenames
 
     def _clean_up_files(self, filenames, directories):
