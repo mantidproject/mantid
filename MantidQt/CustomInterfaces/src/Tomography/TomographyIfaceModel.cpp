@@ -17,10 +17,6 @@
 #include <sys/wait.h>
 #endif
 
-#ifdef _DEBUG
-// #define MODEL_DEBUG
-#endif
-
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
@@ -480,13 +476,6 @@ void TomographyIfaceModel::doRunReconstructionJobRemote(
                              std::string(e.what()));
   }
 
-#ifdef MODEL_DEBUG
-  std::cout << "\n\n DEBUG: compRes in remote: " << compRes;
-  std::cout << "\n\n DEBUG: run in remote: " << run;
-  std::cout << "\n\n DEBUG: full argument string: " << allOpts << "\n";
-  return; // end here to prevent any outgoing connections
-#endif    // MODEL_DEBUG
-
   auto submitAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "SubmitRemoteJob");
   submitAlg->initialize();
@@ -507,13 +496,6 @@ void TomographyIfaceModel::doRunReconstructionJobRemote(
 void TomographyIfaceModel::doRunReconstructionJobLocal(
     const std::string &compRes, const std::string &run,
     const std::string &allOpts, const std::vector<std::string> &args) {
-
-#ifdef MODEL_DEBUG
-  std::cout << "\n\n DEBUG: compRes in local: " << compRes;
-  std::cout << "\n\n DEBUG: run in local: " << run;
-  std::cout << "\n\n DEBUG: full argument string: " << allOpts << "\n";
-  return; // end here to prevent any outgoing connections
-#endif    // MODEL_DEBUG
 
   // Mantid::Kernel::ConfigService::Instance().launchProcess(run, runArgs);
   try {

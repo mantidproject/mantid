@@ -13,6 +13,8 @@ const std::string TomoToolConfigDialogCustom::DEFAULT_TOOL_METHOD = "";
 std::string TomoToolConfigDialogCustom::m_backupCommandLine = "";
 
 void TomoToolConfigDialogCustom::setupToolSettingsFromPaths() {
+
+	if(m_isInitialised){
     // None of the other paths matter, because the user could've changed
   // them, so ignore them and load the current ones on the dialogue
   QString run = m_customUi.lineEdit_runnable->text();        // current path
@@ -21,7 +23,13 @@ void TomoToolConfigDialogCustom::setupToolSettingsFromPaths() {
   // update the settings with the newest information
   m_toolSettings = std::shared_ptr<ToolConfigCustom>(
       new ToolConfigCustom(run.toStdString(), opts.toStdString()));
-      }
+	}
+	else {
+		// create settings with the default values
+		m_toolSettings = std::shared_ptr<ToolConfigCustom>(
+			new ToolConfigCustom(m_runPath, "--help")); 
+	}
+}
 
 void TomoToolConfigDialogCustom::setupMethodSelected() {
 

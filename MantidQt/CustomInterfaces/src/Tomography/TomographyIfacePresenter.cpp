@@ -21,9 +21,6 @@
 
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 
-#ifdef _DEBUG
-// #define PRESENTER_DEBUG
-#endif
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
@@ -37,7 +34,6 @@ const std::string TomographyIfacePresenter::g_defOutPathLocal =
     "~/imat/";
 #endif
 
-// TODOPRES: could use ConfigService::isNetworkDrive(const std::string &)
 const std::string TomographyIfacePresenter::g_defOutPathRemote =
 #ifdef _WIN32
     "I:/imat/imat-data/";
@@ -200,7 +196,7 @@ void TomographyIfacePresenter::processSetupResourcesAndTools() {
 void TomographyIfacePresenter::processCompResourceChanged() {
   const std::string comp = m_view->currentComputeResource();
 
-  // TODOPRES TODOMODL find a better way to
+  // TODOPRES find a better way to set up the run tool in model
   m_model->setupRunTool(comp);
 
   if (isLocalResourceSelected()) {
@@ -286,7 +282,6 @@ void TomographyIfacePresenter::setupConfigDialogSettingsForLocal(
                     m_model->getCurrentLocalScriptsBasePath() +
                     m_model->getTomoScriptLocationPath();
 
-  // TODOPRES get the proper paths for the local reconstruct
   TomoPathsConfig paths = m_view->currentPathsConfig();
 
   std::string pathOut = Poco::Path::expand(
@@ -522,8 +517,6 @@ void TomographyIfacePresenter::processSetupReconTool() {
 }
 
 void TomographyIfacePresenter::processRunRecon() {
-  // m_model->checkDataPathsSet();
-  // TODOPRES: validate data path with additional rules/constraints?
   TomoPathsConfig paths = m_view->currentPathsConfig();
   if (paths.pathSamples().empty()) {
     m_view->userWarning("Sample images path not set!",
@@ -559,7 +552,6 @@ void TomographyIfacePresenter::processRefreshJobs() {
     return;
   }
 
-  // TODOPRES doesn't support multiple compute resources
   std::string comp = m_view->currentComputeResource();
   if (isLocalResourceSelected()) {
     comp = "SCARF@STFC";
@@ -592,6 +584,8 @@ void TomographyIfacePresenter::processVisualizeJobs() {
 void TomographyIfacePresenter::doVisualize(
     const std::vector<std::string> &ids) {
   m_model->logMsg(" Visualizing results from job: " + ids.front());
+  m_view->userWarning("Visualizing not implemented", 
+  "Visualizing of the data has not been implemented yet and is unsupported");
   // TODOPRES: open dialog, send to Paraview, etc.
 }
 
