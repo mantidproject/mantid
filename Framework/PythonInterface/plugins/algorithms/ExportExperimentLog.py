@@ -379,7 +379,9 @@ class ExportExperimentLog(PythonAlgorithm):
         # ENDFOR
 
         # Check needs to re-order
-        if list(linedict.keys()) != sorted(linedict.keys()):
+        # This test does not work with python 3, you can not assume the order of a dictionary
+        # if list(linedict.keys()) != sorted(linedict.keys()):
+        if True: # temporary hack to get it working with python 3, always write a new file!
             # Re-write file
             wbuf = ""
 
