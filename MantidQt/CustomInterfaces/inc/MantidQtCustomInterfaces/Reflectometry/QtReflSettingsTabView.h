@@ -68,6 +68,8 @@ public:
   std::string getCPp() const override;
   /// Return binning parameters
   std::string getBinningParameters() const override;
+  /// Return direct beam range
+  std::string getDbnr() const override;
 
   /// Creates hints for 'Plus'
   void

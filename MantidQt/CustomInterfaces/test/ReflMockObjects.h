@@ -76,6 +76,7 @@ public:
   MOCK_CONST_METHOD0(getCAp, std::string());
   MOCK_CONST_METHOD0(getCPp, std::string());
   MOCK_CONST_METHOD0(getBinningParameters, std::string());
+  MOCK_CONST_METHOD0(getDbnr, std::string());
 
   // Calls we don't care about
   void

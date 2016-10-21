@@ -122,6 +122,11 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   if (!binPars.empty())
     options.push_back("Params=" + binPars);
 
+  // Add direct beam range
+  auto dbnr = m_view->getDbnr();
+  if (!dbnr.empty())
+    options.push_back("RegionOfDirectBeam=" + dbnr);
+
   return boost::algorithm::join(options, ",");
 }
 

@@ -173,5 +173,13 @@ std::string QtReflSettingsTabView::getBinningParameters() const {
   return m_ui.expSettingsBinParsEdit->text().toStdString();
 }
 
+/** Return Dbnr
+* @return :: direct beam range Dbnr
+*/
+std::string QtReflSettingsTabView::getDbnr() const {
+
+  return m_ui.expSettingsDBNREdit->text().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid
