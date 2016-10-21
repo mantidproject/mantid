@@ -117,6 +117,14 @@ std::string QtReflSettingsTabView::getAnalysisMode() const {
   return m_ui.analysisModeComboBox->currentText().toStdString();
 }
 
+/** Return transmission lambda min
+* @return :: transmission lambda min
+*/
+std::string QtReflSettingsTabView::getTransmissionLambdaMin() const {
+  
+  return m_ui.expSettingsTransLamMinEdit->text().toStdString();
+}
+
 /** Return CRho
 * @return :: polarization correction CRho
 */

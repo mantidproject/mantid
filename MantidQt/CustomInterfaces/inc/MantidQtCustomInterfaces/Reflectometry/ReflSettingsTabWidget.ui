@@ -208,10 +208,10 @@
                   <number>10</number>
                 </property>
                 <property name="topMargin">
-                  <number>40</number>
+                  <number>50</number>
                 </property>
                 <property name="bottomMargin">
-                  <number>40</number>
+                  <number>50</number>
                 </property>
                 <item row="0" column="0">
                   <widget class="QLabel" name="polCorrLabel">

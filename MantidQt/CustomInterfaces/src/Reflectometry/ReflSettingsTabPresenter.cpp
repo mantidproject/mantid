@@ -50,7 +50,19 @@ std::string ReflSettingsTabPresenter::getPlusOptions() const {
 */
 std::string ReflSettingsTabPresenter::getTransmissionOptions() const {
 
-  return m_view->getTransmissionOptions();
+  std::vector<std::string> options;
+
+  // Global options
+  auto globalOptions = m_view->getTransmissionOptions();
+  if (!globalOptions.empty())
+    options.push_back(globalOptions);
+
+  // Add transmission lambda min
+  auto transLamMin = m_view->getTransmissionLambdaMin();
+  if (!transLamMin.empty())
+    options.push_back("WavelengthMin=" + transLamMin);
+
+  return boost::algorithm::join(options, ",");
 }
 
 /** Returns global options for 'ReflectometryReductionOneAuto'
