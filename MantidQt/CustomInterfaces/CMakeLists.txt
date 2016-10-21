@@ -129,10 +129,10 @@ set ( SRC_FILES
 	src/Tomography/TomoSystemSettingsLocal.cpp
 	src/Tomography/TomoSystemSettingsRemote.cpp
 	src/Tomography/TomoToolConfigDialogBase.cpp
-    src/Tomography/TomoToolConfigTomoPyDialog.cpp
-    src/Tomography/TomoToolConfigCustomDialog.cpp
-    src/Tomography/TomoToolConfigSavuDialog.cpp
-    src/Tomography/TomoToolConfigAstraDialog.cpp
+    src/Tomography/TomoToolConfigDialogTomoPy.cpp
+    src/Tomography/TomoToolConfigDialogCustom.cpp
+    src/Tomography/TomoToolConfigDialogSavu.cpp
+    src/Tomography/TomoToolConfigDialogAstra.cpp
 	src/Tomography/TomographyIfaceModel.cpp
 	src/Tomography/TomographyIfacePresenter.cpp
 	src/Tomography/TomographyIfaceViewQtGUI.cpp
@@ -302,10 +302,10 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Tomography/TomoSystemSettingsLocal.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoSystemSettingsRemote.h
     inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h
-    inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPyDialog.h
-    inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigCustomDialog.h
-    inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigSavuDialog.h
-    inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigAstraDialog.h
+    inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogTomoPy.h
+    inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogCustom.h
+    inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogSavu.h
+    inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogAstra.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
@@ -421,10 +421,10 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
                 inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h
-                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPyDialog.h
-                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigCustomDialog.h
-                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigSavuDialog.h
-                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigAstraDialog.h
+                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogTomoPy.h
+                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogCustom.h
+                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogSavu.h
+                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogAstra.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
