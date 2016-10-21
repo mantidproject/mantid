@@ -70,6 +70,7 @@ public:
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   MOCK_CONST_METHOD0(getAnalysisMode, std::string());
   MOCK_CONST_METHOD0(getTransmissionLambdaMin, std::string());
+  MOCK_CONST_METHOD0(getTransmissionLambdaMax, std::string());
   MOCK_CONST_METHOD0(getCRho, std::string());
   MOCK_CONST_METHOD0(getCAlpha, std::string());
   MOCK_CONST_METHOD0(getCAp, std::string());

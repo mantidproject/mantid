@@ -67,6 +67,11 @@ std::string ReflSettingsTabPresenter::getTransmissionOptions() const {
   if (!transLamMin.empty())
     options.push_back("WavelengthMin=" + transLamMin);
 
+  // Add transmission lambda max
+  auto transLamMax = m_view->getTransmissionLambdaMax();
+  if (!transLamMax.empty())
+    options.push_back("WavelengthMax=" + transLamMax);
+
   return boost::algorithm::join(options, ",");
 }
 

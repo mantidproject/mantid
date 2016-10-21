@@ -56,6 +56,8 @@ public:
   std::string getAnalysisMode() const override;
   /// Return transmission lambda min
   std::string getTransmissionLambdaMin() const override;
+  /// Return transmission lambda max
+  std::string getTransmissionLambdaMax() const override;
   /// Return CRho
   std::string getCRho() const override;
   /// Return CAlpha

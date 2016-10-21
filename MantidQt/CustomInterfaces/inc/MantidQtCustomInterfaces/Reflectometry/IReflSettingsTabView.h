@@ -65,6 +65,7 @@ public:
 
   virtual std::string getAnalysisMode() const = 0;
   virtual std::string getTransmissionLambdaMin() const = 0;
+  virtual std::string getTransmissionLambdaMax() const = 0;
   virtual std::string getCRho() const = 0;
   virtual std::string getCAlpha() const = 0;
   virtual std::string getCAp() const = 0;

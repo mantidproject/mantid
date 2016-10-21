@@ -52,12 +52,16 @@ public:
     EXPECT_CALL(mockView, getTransmissionLambdaMin())
         .Times(Exactly(1))
         .WillOnce(Return("1.0"));
+    EXPECT_CALL(mockView, getTransmissionLambdaMax())
+      .Times(Exactly(1))
+      .WillOnce(Return("15.0"));
     auto options = presenter.getTransmissionOptions();
 
     std::vector<std::string> optionsVec;
     boost::split(optionsVec, options, boost::is_any_of(","));
     TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
     TS_ASSERT_EQUALS(optionsVec[1], "WavelengthMin=1.0");
+    TS_ASSERT_EQUALS(optionsVec[2], "WavelengthMax=15.0");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }

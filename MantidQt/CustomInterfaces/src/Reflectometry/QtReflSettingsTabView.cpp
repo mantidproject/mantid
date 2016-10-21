@@ -125,6 +125,14 @@ std::string QtReflSettingsTabView::getTransmissionLambdaMin() const {
   return m_ui.expSettingsTransLamMinEdit->text().toStdString();
 }
 
+/** Return transmission lambda max
+* @return :: transmission lambda max
+*/
+std::string QtReflSettingsTabView::getTransmissionLambdaMax() const {
+
+  return m_ui.expSettingsTransLamMaxEdit->text().toStdString();
+}
+
 /** Return CRho
 * @return :: polarization correction CRho
 */
