@@ -92,10 +92,10 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
 
     def cleanup(self):
         filenames = []
-        filenames.extend(("PEARL/Focus_Test/DataOut/PRL92476_92479.nxs",
-                          "PEARL/Focus_Test/DataOut/PRL92476_92479_d_xye-0.dat",
-                          "PEARL/Focus_Test/DataOut/PRL92476_92479_tof_xye-0.dat",
-                          "PEARL/Focus_Test/DataOut/PRL92476_92479-0.gss"))
+        filenames.extend(("PEARL/Focus_Test/DataOut/PEARL92476_92479.nxs",
+                          "PEARL/Focus_Test/DataOut/PEARL92476_92479_d_xye-0.dat",
+                          "PEARL/Focus_Test/DataOut/PEARL92476_92479_tof_xye-0.dat",
+                          "PEARL/Focus_Test/DataOut/PEARL92476_92479-0.gss"))
         self._clean_up_files(filenames, DIRS)
 
 
@@ -156,17 +156,17 @@ class LoadTests(unittest.TestCase):
         self.assertTrue(expected_title in focus_file.getTitle())
 
     def test_mod_files(self):
-        mod_group_table = mtd["PRL92476_92479"]
-        self.assertTrue("PRL92476_92479_mods1-9_1" in mod_group_table[0].getName())
+        mod_group_table = mtd["PEARL92476_92479"]
+        self.assertTrue("PEARL92476_92479_mods1-9_1" in mod_group_table[0].getName())
 
         for i in range(1, 10):
-            self.assertTrue("PRL92476_92479_mod" + str(i) in mod_group_table[i].getName())
+            self.assertTrue("PEARL92476_92479_mod" + str(i) in mod_group_table[i].getName())
             self.assertEquals(4310, mod_group_table[i].blocksize())
-            ind_mod_file = mtd["PRL92476_92479_mod" + str(i)]
+            ind_mod_file = mtd["PEARL92476_92479_mod" + str(i)]
             self.assertAlmostEqual(mod_group_table[i].readY(0)[50],
                                    ind_mod_file.readY(0)[50], places=DIFF_PLACES)
 
-        no_atten = mtd["PRL92476_92479_noatten"]
+        no_atten = mtd["PEARL92476_92479_noatten"]
         self.assertAlmostEqual(1.06842521, no_atten.readY(0)[17], places=DIFF_PLACES)
         self.assertAlmostEqual(1.52553392, no_atten.readX(0)[2663], places=DIFF_PLACES)
         self.assertAlmostEqual(0.01567764, no_atten.readE(0)[577], places=DIFF_PLACES)
@@ -177,15 +177,15 @@ class LoadTests(unittest.TestCase):
         files_data = []
 
         wsname = "GSSFile"
-        gss_file = os.path.join(DIRS[0], "PEARL/Focus_Test/DataOut/PRL92476_92479-0.gss")
+        gss_file = os.path.join(DIRS[0], "PEARL/Focus_Test/DataOut/PEARL92476_92479-0.gss")
         files_data.append(LoadGSS(Filename=gss_file, OutputWorkspace=wsname))
 
         xye_dSpacing_ws = "xye_dSpacing"
-        dSpacing_file = os.path.join(DIRS[0], "PEARL/Focus_Test/DataOut/PRL92476_92479_d_xye-0.dat")
+        dSpacing_file = os.path.join(DIRS[0], "PEARL/Focus_Test/DataOut/PEARL92476_92479_d_xye-0.dat")
         files_data.append(Load(Filename=dSpacing_file, OutputWorkspace=xye_dSpacing_ws))
 
         xye_ToF_ws = "xye_ToF"
-        ToF_file = os.path.join(DIRS[0], "PEARL/Focus_Test/DataOut/PRL92476_92479_tof_xye-0.dat")
+        ToF_file = os.path.join(DIRS[0], "PEARL/Focus_Test/DataOut/PEARL92476_92479_tof_xye-0.dat")
         files_data.append(Load(Filename=ToF_file, OutputWorkspace=xye_ToF_ws))
 
         for data in files_data:
@@ -205,12 +205,12 @@ class LoadTests(unittest.TestCase):
         nxs_file = os.path.join(DIRS[0], "PEARL/Focus_Test/RefFiles/Ref_PRL92476_92479.nxs")
         Load(Filename=nxs_file, OutputWorkspace=nexus_ws)
 
-        mod_group_table = mtd["PRL92476_92479"]
+        mod_group_table = mtd["PEARL92476_92479"]
         return nexus_ws, mod_group_table
 
     def test_gss_referenece_files(self):
         gss_wsname = "GSSFile"
-        gss_file = os.path.join(DIRS[0], "PEARL/Focus_Test/DataOut/PRL92476_92479-0.gss")
+        gss_file = os.path.join(DIRS[0], "PEARL/Focus_Test/DataOut/PEARL92476_92479-0.gss")
         LoadGSS(Filename=gss_file, OutputWorkspace=gss_wsname)
 
         ref_gss_wsname = "Ref_GSSFile"
@@ -220,7 +220,7 @@ class LoadTests(unittest.TestCase):
         return gss_wsname, ref_gss_wsname
 
     def test_xye_d_reference_files(self):
-        xye_dspacing_wsname = mtd["PRL92476_92479_mods1-9"]
+        xye_dspacing_wsname = mtd["PEARL92476_92479_mods1-9"]
 
         ref_xye_dspacing_wsname = "Ref_PRL92476_92479_mods1-9_D"
         xye_dSpacing_file = os.path.join(DIRS[0], "PEARL/Focus_Test/RefFiles/Ref_PRL92476_92479_d_xye-0.dat")
@@ -229,7 +229,7 @@ class LoadTests(unittest.TestCase):
         return xye_dspacing_wsname, ref_xye_dspacing_wsname
 
     def test_xye_tof_reference_files(self):
-        xye_tof_wsname = mtd["PRL92476_92479_mods1-9"]
+        xye_tof_wsname = mtd["PEARL92476_92479_mods1-9"]
 
         ref_xye_tof_wsname = "Ref_PRL92476_92479_mods1-9_TOF"
         xye_tof_file = os.path.join(DIRS[0], "PEARL/Focus_Test/RefFiles/Ref_PRL92476_92479_tof_xye-0.dat")

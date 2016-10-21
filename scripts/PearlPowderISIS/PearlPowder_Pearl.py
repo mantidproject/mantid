@@ -3,6 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 import numpy as numpy
 
+import os
+
 from PearlPowder_AbstractInst import AbstractInst
 import PearlPowder_common as Common
 import pearl_calib_factory
@@ -14,6 +16,7 @@ class Pearl(AbstractInst):
 
     # # Instrument default settings
     _default_input_ext = '.raw'
+    _default_group_names = "bank1,bank2,bank3,bank4"
     _lambda_lower = 0.03
     _lambda_upper = 6.00
     _focus_tof_binning = "1500,-0.0006,19900"
@@ -26,25 +29,27 @@ class Pearl(AbstractInst):
 
         super(Pearl, self).__init__(calibration_dir=calibration_dir, raw_data_dir=raw_data_dir, output_dir=output_dir,
                                     default_input_ext=input_file_ext, tt_mode=tt_mode)
-        self.user_name = user_name
+        self._user_name = user_name
 
         # This advanced option disables appending the current cycle to the
         # path given for raw files.
-        self.disable_appending_cycle_to_raw_dir = False
+        self._disable_appending_cycle_to_raw_dir = False
 
         # live_data_directory = None  # TODO deal with this
 
-        # File names
-        pearl_mc_absorption_file_name = "PRL112_DC25_10MM_FF.OUT"
+        # Old API support
+        self._old_atten_file = None
 
-        self.attenuation_full_path = calibration_dir + pearl_mc_absorption_file_name
+        # File names
+        pearl_mc_absorption_file_name = "PRL112_DC25_10MM_FF.OUT" # TODO
+        self._attenuation_full_path = calibration_dir + pearl_mc_absorption_file_name # TODO
         self.mode = None  # For later callers to set TODO
 
     # --- Abstract Implementation ---- #
 
     # Params #
-    def get_input_extension(self):
-        return self._default_input_ext  # TODO allow user override
+    def get_default_group_names(self):
+        return self._default_group_names
 
     def get_lambda_range(self):
         return self._lambda_lower, self._lambda_upper
@@ -76,19 +81,6 @@ class Pearl(AbstractInst):
 
         return calibration_details
 
-    def spline_background(self, focused_vanadium_ws, spline_number, instrument_version=''):
-        if instrument_version == "new2":
-            out_list = _spline_new2_background(in_workspace=focused_vanadium_ws, num_splines=spline_number,
-                                               instrument_version=instrument_version)
-        elif instrument_version == "new":
-            out_list = _spline_new_background(in_workspace=focused_vanadium_ws, num_splines=spline_number,
-                                              instrument_version=instrument_version)
-        elif instrument_version == "old":
-            out_list = _spline_old_background(in_workspace=focused_vanadium_ws, num_splines=spline_number)
-        else:
-            raise ValueError("Spline Background - PEARL: Instrument version unknown")
-        return out_list
-
     @staticmethod
     def get_cycle_information(run_number):
         cycle, instrument_version = pearl_cycle_factory.get_cycle_dir(run_number)
@@ -116,10 +108,31 @@ class Pearl(AbstractInst):
     def get_monitor_spectra(self, run_number):
         return self._get_monitor_spectrum(run_number=run_number)
 
+    def _skip_appending_cycle_to_raw_dir(self):
+        return self._disable_appending_cycle_to_raw_dir
+
+    def spline_background(self, focused_vanadium_ws, spline_number, instrument_version=''):
+        if instrument_version == "new2":
+            out_list = _spline_new2_background(in_workspace=focused_vanadium_ws, num_splines=spline_number,
+                                               instrument_version=instrument_version)
+        elif instrument_version == "new":
+            out_list = _spline_new_background(in_workspace=focused_vanadium_ws, num_splines=spline_number,
+                                              instrument_version=instrument_version)
+        elif instrument_version == "old":
+            out_list = _spline_old_background(in_workspace=focused_vanadium_ws, num_splines=spline_number)
+        else:
+            raise ValueError("Spline Background - PEARL: Instrument version unknown")
+        return out_list
+
     # Implementation of instrument specific steps
 
     def _attenuate_workspace(self, input_workspace):
-        wc_attenuated = mantid.PearlMCAbsorption(self.attenuation_full_path)
+        if self._old_atten_file is None:  # For old API support
+            attenuation_path = self._attenuation_full_path
+        else:
+            attenuation_path = self._old_atten_file
+
+        wc_attenuated = mantid.PearlMCAbsorption(attenuation_path)
         wc_attenuated = mantid.ConvertToHistogram(InputWorkspace=wc_attenuated, OutputWorkspace=wc_attenuated)
         wc_attenuated = mantid.RebinToWorkspace(WorkspaceToRebin=wc_attenuated, WorkspaceToMatch=input_workspace,
                                                 OutputWorkspace=wc_attenuated)
@@ -161,6 +174,45 @@ class Pearl(AbstractInst):
             mspectra = 1
         return mspectra
 
+    # Support for old API
+    def _old_api_constructor_set(self, user_name=None, calibration_dir=None, raw_data_dir=None, output_dir=None,
+                                 input_file_ext=None, tt_mode=None):
+        # Any param can be set so check each individually
+        if user_name is not None:
+            self._user_name = user_name
+        if calibration_dir is not None:
+            self._calibration_dir = calibration_dir
+        if raw_data_dir is not None:
+            self._raw_data_dir = raw_data_dir
+        if output_dir is not None:
+            self._output_dir = output_dir
+        if input_file_ext is not None:
+            self._default_input_ext = input_file_ext
+        if tt_mode is not None:
+            self._tt_mode = tt_mode
+
+    def _old_api_set_tt_mode(self, tt_mode):
+        self._tt_mode = tt_mode
+
+    def _old_api_set_calib_dir(self, calib_dir):
+        self._calibration_dir = calib_dir
+
+    def _old_api_set_raw_data_dir(self, raw_data_dir):
+        self._disable_appending_cycle_to_raw_dir = True
+        self._raw_data_dir = raw_data_dir
+
+    def _old_api_set_output_dir(self, output_dir):
+        self._output_dir = output_dir
+
+    def _old_api_set_ext(self, ext):
+        self._default_input_ext = ext
+
+    def _old_api_set_atten(self, atten_file):
+        self._old_atten_file = _old_api_strip_file_path(atten_file)
+
+
+def _old_api_strip_file_path(in_path):
+    return os.path.basename(in_path)
 
 # Implementation of static methods
 
