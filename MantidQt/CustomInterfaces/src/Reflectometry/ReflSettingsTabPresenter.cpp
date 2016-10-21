@@ -57,6 +57,11 @@ std::string ReflSettingsTabPresenter::getTransmissionOptions() const {
   if (!globalOptions.empty())
     options.push_back(globalOptions);
 
+  // Add analysis mode
+  auto analysisMode = m_view->getAnalysisMode();
+  if (!analysisMode.empty())
+    options.push_back("AnalysisMode=" + analysisMode);
+
   // Add transmission lambda min
   auto transLamMin = m_view->getTransmissionLambdaMin();
   if (!transLamMin.empty())

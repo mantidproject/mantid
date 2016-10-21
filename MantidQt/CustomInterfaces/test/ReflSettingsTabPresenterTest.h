@@ -46,6 +46,9 @@ public:
     EXPECT_CALL(mockView, getTransmissionOptions())
         .Times(Exactly(1))
         .WillOnce(Return(""));
+    EXPECT_CALL(mockView, getAnalysisMode())
+        .Times(Exactly(1))
+        .WillOnce(Return("MultiDetectorAnalysis"));
     EXPECT_CALL(mockView, getTransmissionLambdaMin())
         .Times(Exactly(1))
         .WillOnce(Return("1.0"));
@@ -53,7 +56,8 @@ public:
 
     std::vector<std::string> optionsVec;
     boost::split(optionsVec, options, boost::is_any_of(","));
-    TS_ASSERT_EQUALS(optionsVec[0], "WavelengthMin=1.0");
+    TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
+    TS_ASSERT_EQUALS(optionsVec[1], "WavelengthMin=1.0");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
