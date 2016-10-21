@@ -21,7 +21,7 @@ public:
 private:
   void initialiseDialog() override;
   void setupMethodSelected() override;
-  void setupToolSettingsFromPaths() override;  
+  void setupToolSettingsFromPaths() override;
   void setupDialogUi() override;
   int executeQt() override;
 

@@ -20,11 +20,10 @@ public:
 private:
   void initialiseDialog() override;
   void setupMethodSelected() override;
-  void setupToolSettingsFromPaths() override;  
+  void setupToolSettingsFromPaths() override;
   void setupDialogUi() override;
   void handleDialogResult(int result) override;
   int executeQt() override;
-
 
   // initialised in .cpp file
   static const std::string DEFAULT_TOOL_NAME;

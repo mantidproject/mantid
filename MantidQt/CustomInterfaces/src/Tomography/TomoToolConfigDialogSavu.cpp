@@ -44,7 +44,6 @@ void TomoToolConfigDialogSavu::setupToolSettingsFromPaths() {
       "SAVU interface not implemented");
 }
 
-
 void TomoToolConfigDialogSavu::setupDialogUi() {
   m_savuUi.setupUi(this);
   initSavuWindow();

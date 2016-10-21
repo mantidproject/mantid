@@ -584,8 +584,9 @@ void TomographyIfacePresenter::processVisualizeJobs() {
 void TomographyIfacePresenter::doVisualize(
     const std::vector<std::string> &ids) {
   m_model->logMsg(" Visualizing results from job: " + ids.front());
-  m_view->userWarning("Visualizing not implemented", 
-  "Visualizing of the data has not been implemented yet and is unsupported");
+  m_view->userWarning("Visualizing not implemented", "Visualizing of the data "
+                                                     "has not been implemented "
+                                                     "yet and is unsupported");
   // TODOPRES: open dialog, send to Paraview, etc.
 }
 

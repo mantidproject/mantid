@@ -30,8 +30,8 @@ TomoToolConfigDialogBase::getCorrectDialogForToolFromString(
 void TomoToolConfigDialogBase::handleDialogResult(int result) {
   if (QDialog::Accepted == result) {
     // setup the new settings if the user has Accepted
-	  setupMethodSelected();
-	  setupToolSettingsFromPaths();
+    setupMethodSelected();
+    setupToolSettingsFromPaths();
   }
 }
 } // namespace CustomInterfaces

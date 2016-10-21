@@ -113,7 +113,8 @@ protected:
   /// setup the selected method member variable
   virtual void setupMethodSelected() = 0;
 
-  /// setup the tool config with the correct paths, must be called after the paths have been set!
+  /// setup the tool config with the correct paths, must be called after the
+  /// paths have been set!
   virtual void setupToolSettingsFromPaths() = 0;
 
   /// provided virtual function to add Qt execute behaviour as necessary

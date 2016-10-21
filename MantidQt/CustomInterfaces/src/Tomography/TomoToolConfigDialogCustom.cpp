@@ -14,28 +14,27 @@ std::string TomoToolConfigDialogCustom::m_backupCommandLine = "";
 
 void TomoToolConfigDialogCustom::setupToolSettingsFromPaths() {
 
-	if(m_isInitialised){
+  if (m_isInitialised) {
     // None of the other paths matter, because the user could've changed
-  // them, so ignore them and load the current ones on the dialogue
-  QString run = m_customUi.lineEdit_runnable->text();        // current path
-  QString opts = m_customUi.textEdit_cl_opts->toPlainText(); // current commands
+    // them, so ignore them and load the current ones on the dialogue
+    QString run = m_customUi.lineEdit_runnable->text(); // current path
+    QString opts =
+        m_customUi.textEdit_cl_opts->toPlainText(); // current commands
 
-  // update the settings with the newest information
-  m_toolSettings = std::shared_ptr<ToolConfigCustom>(
-      new ToolConfigCustom(run.toStdString(), opts.toStdString()));
-	}
-	else {
-		// create settings with the default values
-		m_toolSettings = std::shared_ptr<ToolConfigCustom>(
-			new ToolConfigCustom(m_runPath, "--help")); 
-	}
+    // update the settings with the newest information
+    m_toolSettings = std::shared_ptr<ToolConfigCustom>(
+        new ToolConfigCustom(run.toStdString(), opts.toStdString()));
+  } else {
+    // create settings with the default values
+    m_toolSettings = std::shared_ptr<ToolConfigCustom>(
+        new ToolConfigCustom(m_runPath, "--help"));
+  }
 }
 
 void TomoToolConfigDialogCustom::setupMethodSelected() {
 
   // sets the current runnable path, overriding the default one
   m_customUi.lineEdit_runnable->setText(QString::fromStdString(m_runPath));
-
 }
 
 void TomoToolConfigDialogCustom::setupDialogUi() {
@@ -61,7 +60,7 @@ void TomoToolConfigDialogCustom::handleDialogResult(int result) {
     // if accepted we want to save the information
     m_backupCommandLine =
         m_customUi.textEdit_cl_opts->toPlainText().toStdString();
-	setupToolSettingsFromPaths();
+    setupToolSettingsFromPaths();
   }
 }
 int TomoToolConfigDialogCustom::executeQt() { return m_dialog->exec(); }

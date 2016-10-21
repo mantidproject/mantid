@@ -25,14 +25,12 @@ void TomoToolConfigDialogAstra::setupToolSettingsFromPaths() {
       std::shared_ptr<ToolConfigAstraToolbox>(new ToolConfigAstraToolbox(
           m_runPath, m_pathOut + m_localOutNameAppendix, m_paths.pathDarks(),
           m_paths.pathOpenBeam(), m_paths.pathSamples()));
-
 }
 
 void TomoToolConfigDialogAstra::setupMethodSelected() {
   const auto methods = ToolConfigTomoPy::methods();
 
   int mi = m_astraUi.comboBox_method->currentIndex();
-
 
   m_toolMethod = methods[mi].first;
 }

@@ -194,8 +194,7 @@ public:
     EXPECT_CALL(
         mockView,
         showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
-            testing::_)))
-        .Times(1);
+            testing::_))).Times(1);
     EXPECT_CALL(mockView,
                 showImage(testing::Matcher<const std::string &>(testing::_)))
         .Times(0);
@@ -343,8 +342,7 @@ public:
       EXPECT_CALL(
           mockView,
           showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
-              testing::_)))
-          .Times(0);
+              testing::_))).Times(0);
       EXPECT_CALL(mockView,
                   showImage(testing::Matcher<const std::string &>(testing::_)))
           .Times(0);
@@ -404,8 +402,7 @@ public:
     EXPECT_CALL(
         mockView,
         showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
-            testing::_)))
-        .Times(0);
+            testing::_))).Times(0);
     EXPECT_CALL(mockView,
                 showImage(testing::Matcher<const std::string &>(testing::_)))
         .Times(0);
@@ -755,7 +752,7 @@ public:
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
 
-	// we get one warning from trying to submit a job to remote
+    // we get one warning from trying to submit a job to remote
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     // finally, user tries to run a reconstruction job
@@ -767,63 +764,63 @@ public:
   }
 
   void test_sillySessionLocalRemote() {
-	  // the user does a few silly things...
-	  testing::NiceMock<MockTomographyIfaceView> mockView;
-	  MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
+    // the user does a few silly things...
+    testing::NiceMock<MockTomographyIfaceView> mockView;
+    MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
-	  EXPECT_CALL(mockView, systemSettings()).Times(0);
+    EXPECT_CALL(mockView, systemSettings()).Times(0);
 
-	  EXPECT_CALL(mockView, currentPathsConfig())
-		  .Times(1)
-		  .WillOnce(Return(TomoPathsConfig()));
+    EXPECT_CALL(mockView, currentPathsConfig())
+        .Times(1)
+        .WillOnce(Return(TomoPathsConfig()));
 
-	  // user changes some paths
-	  pres.notify(ITomographyIfacePresenter::TomoPathsChanged);
-	  EXPECT_CALL(mockView, currentComputeResource())
-		  .WillRepeatedly(Return("Local"));
+    // user changes some paths
+    pres.notify(ITomographyIfacePresenter::TomoPathsChanged);
+    EXPECT_CALL(mockView, currentComputeResource())
+        .WillRepeatedly(Return("Local"));
 
-	  // user changes the compute resource
-	  pres.notify(ITomographyIfacePresenter::CompResourceChanged);
+    // user changes the compute resource
+    pres.notify(ITomographyIfacePresenter::CompResourceChanged);
 
-	  EXPECT_CALL(mockView, currentReconTool())
-		  .Times(2)
-		  .WillRepeatedly(Return("TomoPy"));
+    EXPECT_CALL(mockView, currentReconTool())
+        .Times(2)
+        .WillRepeatedly(Return("TomoPy"));
 
-	  // and basic tools settings
-	  EXPECT_CALL(mockView, currentPathsConfig())
-		  .Times(1)
-		  .WillOnce(Return(TomoPathsConfig()));
+    // and basic tools settings
+    EXPECT_CALL(mockView, currentPathsConfig())
+        .Times(1)
+        .WillOnce(Return(TomoPathsConfig()));
 
-	  // the tool changed event sets up the tool's paths
-	  pres.notify(ITomographyIfacePresenter::ToolChanged);
-	  // user opens dialog and sets up a reconstruction tool
-	  pres.notify(ITomographyIfacePresenter::SetupReconTool);
+    // the tool changed event sets up the tool's paths
+    pres.notify(ITomographyIfacePresenter::ToolChanged);
+    // user opens dialog and sets up a reconstruction tool
+    pres.notify(ITomographyIfacePresenter::SetupReconTool);
 
-	  TomoPathsConfig pathsCfg;
-	  EXPECT_CALL(mockView, currentPathsConfig())
-		  .Times(1)
-		  .WillOnce(Return(pathsCfg));
+    TomoPathsConfig pathsCfg;
+    EXPECT_CALL(mockView, currentPathsConfig())
+        .Times(1)
+        .WillOnce(Return(pathsCfg));
 
-	  ImageStackPreParams roiEtc;
-	  EXPECT_CALL(mockView, currentROIEtcParams())
-		  .Times(1)
-		  .WillOnce(Return(roiEtc));
+    ImageStackPreParams roiEtc;
+    EXPECT_CALL(mockView, currentROIEtcParams())
+        .Times(1)
+        .WillOnce(Return(roiEtc));
 
-	  TomoReconFiltersSettings filters;
-	  EXPECT_CALL(mockView, prePostProcSettings())
-		  .Times(1)
-		  .WillOnce(Return(filters));
+    TomoReconFiltersSettings filters;
+    EXPECT_CALL(mockView, prePostProcSettings())
+        .Times(1)
+        .WillOnce(Return(filters));
 
-	  // No errors, no warnings
-	  EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-	  EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+    // No errors, no warnings
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-	  // finally, user tries to run a reconstruction job
-	  pres.notify(ITomographyIfacePresenter::RunReconstruct);
-	  TSM_ASSERT(
-		  "Mock not used as expected. Some EXPECT_CALL conditions were not "
-		  "satisfied.",
-		  testing::Mock::VerifyAndClearExpectations(&mockView))
+    // finally, user tries to run a reconstruction job
+    pres.notify(ITomographyIfacePresenter::RunReconstruct);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_shutDown() {
