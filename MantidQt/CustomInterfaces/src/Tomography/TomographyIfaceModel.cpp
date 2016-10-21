@@ -4,8 +4,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 
-#include <numeric>
-
 #include <Poco/Path.h>
 #include <Poco/Process.h>
 
