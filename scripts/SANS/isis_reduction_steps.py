@@ -1754,7 +1754,7 @@ class DarkRunSubtraction(object):
 
         # Get the indices with settings which correspond to the individual settings
         def get_indices(time_flag, mon_flag):
-            return [i for i, val in enumerate(use_time) if use_time[i] == time_flag and use_mon[i] == mon_flag]
+            return [i for i, use_time_i in enumerate(use_time) if use_time_i == time_flag and use_mon[i] == mon_flag]
 
         indices_time_detector = get_indices(True, False)
         indices_time_monitor = get_indices(True, True)
@@ -1846,11 +1846,8 @@ class DarkRunSubtraction(object):
                     monitor_mon_numbers.append(mon_numbers[index])
 
         # Check if the mean value is identical for all entries
-        def are_all_same(a_list):
-            return all([a_list[0] == a_list[i] for i in range(0, len(a_list))])
-
         if len(monitor_mean) > 0:
-            if not are_all_same(monitor_mean):
+            if len(set(monitor_mean)) != 1:
                 raise RuntimeError("DarkRunSubtraction: If several monitors are specified for a certain type "
                                    "of subtraction, it is required to use either all MEAN or all TOF.")
 
