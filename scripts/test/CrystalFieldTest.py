@@ -357,6 +357,24 @@ class CrystalFieldTests(unittest.TestCase):
 
 class CrystalFieldFitTest(unittest.TestCase):
 
+    def _makeMultiWorkspaces(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+
+        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                              Temperature=[44.0, 50], FWHM=[1.1, 0.9])
+        origin.setPeaks('Lorentzian')
+        origin.peaks[0].param[0]['FWHM'] = 1.11
+        origin.peaks[1].param[1]['FWHM'] = 1.12
+        origin.setBackground(peak=Function('Gaussian', Height=10, Sigma=0.3),
+                             background=Function('FlatBackground', A0=1.0))
+        origin.background[1].peak.param['Sigma'] = 0.8
+        origin.background[1].background.param['A0'] = 1.1
+
+        ws0 = makeWorkspace(*origin.getSpectrum(0))
+        ws1 = makeWorkspace(*origin.getSpectrum(1))
+        return ws0, ws1
+
     def test_CrystalFieldFit(self):
         from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -1027,7 +1045,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         ws = makeWorkspace(x, y)
 
         cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
-                          Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 50], [1, 2], 0.3))
+                          Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 50], [1, 2]), WidthVariation=0.3)
 
         fit = CrystalFieldFit(Model=cf, InputWorkspace=ws)
         fit.fit()
@@ -1035,6 +1053,107 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.01, 4)
         self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.4, 4)
         self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.8, 4)
+
+    def test_ResolutionModel_func_single(self):
+        from CrystalField import ResolutionModel
+
+        def func(x):
+            return np.sin(x)
+        rm = ResolutionModel(func, 0, np.pi)
+        self.assertEquals(len(rm.model[0]), 129)
+        self.assertEquals(len(rm.model[1]), 129)
+        self.assertTrue(np.all(func(rm.model[0]) == rm.model[1]))
+
+    def test_ResolutionModel_func_multi(self):
+        from CrystalField import ResolutionModel
+        def func0(x):
+            return np.sin(x)
+        def func1(x):
+            return np.cos(x / 2)
+        rm = ResolutionModel([func0, func1], -np.pi/2, np.pi/2, accuracy = 0.01)
+
+        self.assertEquals(len(rm.model), 2)
+        self.assertEquals(len(rm.model[0][0]), 17)
+        self.assertEquals(len(rm.model[0][1]), 17)
+        self.assertEquals(len(rm.model[1][0]), 9)
+        self.assertEquals(len(rm.model[1][1]), 9)
+        self.assertTrue(np.all(func0(rm.model[0][0]) == rm.model[0][1]))
+        self.assertTrue(np.all(func1(rm.model[1][0]) == rm.model[1][1]))
+
+    def test_ResolutionModel_array_single(self):
+        from CrystalField import ResolutionModel
+
+        x = [1, 2, 3]
+        y = [3, 2, 1]
+        rm = ResolutionModel((x, y))
+        self.assertEquals(rm.model[0], x)
+        self.assertEquals(rm.model[1], y)
+
+    def test_ResolutionModel_array_multi(self):
+        from CrystalField import ResolutionModel
+
+        x0 = [1, 2, 3]
+        y0 = [3, 2, 1]
+        x1 = [4, 5, 6]
+        y1 = [6, 5, 4]
+        rm = ResolutionModel([(x0, y0), (x1, y1)])
+
+        self.assertEquals(len(rm.model), 2)
+        self.assertEquals(rm.model[0][0], x0)
+        self.assertEquals(rm.model[0][1], y0)
+        self.assertEquals(rm.model[1][0], x1)
+        self.assertEquals(rm.model[1][1], y1)
+
+    def test_ResolutionModel_set_single(self):
+        from CrystalField import ResolutionModel, CrystalField
+
+        x = [0, 50]
+        y = [1, 2]
+        rm = ResolutionModel((x, y))
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                      Temperature=44.0, FWHM=1.0, ResolutionModel=rm)
+        sp = cf.getSpectrum()
+        self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.0, 8)
+        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.58101468, 8)
+        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.884945866, 8)
+
+    def test_ResolutionModel_set_single_variation(self):
+        from CrystalField import ResolutionModel, CrystalField
+
+        x = [0, 50]
+        y = [1, 2]
+        rm = ResolutionModel((x, y))
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                      Temperature=44.0, FWHM=1.0, ResolutionModel=rm, WidthVariation=0.3)
+        sp = cf.getSpectrum()
+        self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.0, 8)
+        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.58101468, 8)
+        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.884945866, 8)
+
+    def test_ResolutionModel_set_multi(self):
+        from CrystalField import ResolutionModel, CrystalField, CrystalFieldFit
+        from CrystalField.fitting import makeWorkspace
+
+        x0 = [0, 50]
+        y0 = [1, 2]
+        x1 = [0, 50]
+        y1 = [3, 4]
+        rm = ResolutionModel([(x0, y0), (x1, y1)])
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                      Temperature=[44.0, 50], ResolutionModel=rm)
+
+        ws0, ws1 = self._makeMultiWorkspaces()
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws0, ws1], MaxIterations=0)
+        fit.fit()
+
+        # self.assertAlmostEqual(cf.peaks[0].param[1]['FWHM'], 1.0, 8)
+        self.assertAlmostEqual(cf.peaks[0].param[2]['FWHM'], 1.58101468, 8)
+        self.assertAlmostEqual(cf.peaks[0].param[3]['FWHM'], 1.884945866, 8)
+
+
 
 if __name__ == "__main__":
     unittest.main()

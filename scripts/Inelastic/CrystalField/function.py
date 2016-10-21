@@ -488,3 +488,105 @@ class Background(object):
             self.background.update(func1)
         else:
             self.peak.update(func1)
+
+
+class ResolutionModel:
+    """
+    Encapsulates a resolution model.
+    """
+    default_accuracy = 1e-4
+    max_model_size = 100
+
+    def __init__(self, model, xstart=None, xend=None, accuracy=None):
+        """
+        Initialize the model.
+
+        :param model: Either a prepared model or a single python function or a list
+                    of functions. If it's functions they must have signatures:
+                        func(x: ndarray) -> ndarray
+                    A prepared model is a tuple of exactly two arrays of floats of
+                    equal sizes or a list of such tuples. The first array in the tuple
+                    is the x-values and the second array is the y-values of the resolution
+                    model.
+        :param xstart:
+        :param xend:
+        :param accuracy: (Optional) If given and model argument contains functions it's used
+                    to tabulate the functions such that linear interpolation between the
+                    tabulated points has this accuracy. If not given a default value is used.
+        """
+        from inspect import isfunction
+        self.multi = False
+        if isfunction(model):
+            self.model = self._makeModel(model, xstart, xend, accuracy)
+            return
+        elif hasattr(model, '__len__'):
+            if len(model) == 0:
+                raise RuntimeError('Resolution model cannot be initialised with an empty iterable %s' %
+                                   str(model))
+            if isfunction(model[0]):
+                self.model = [self._makeModel(m, xstart, xend, accuracy) for m in model]
+                self.multi = True
+                return
+            elif isinstance(model[0], tuple):
+                for m in model:
+                    self._checkModel(m)
+                self.model = model
+                self.multi = True
+                return
+        self._checkModel(model)
+        self.model = model
+
+    def _checkModel(self, model):
+        if not isinstance(model, tuple):
+            raise RuntimeError('Resolution model must be a tuple of two arrays of floats.\n'
+                               'Found instead:\n\n%s' % str(model))
+        if len(model) != 2:
+            raise RuntimeError('Resolution model tuple must have exactly two elements.\n'
+                               'Found instead %d' % len(model))
+        self._checkArray(model[0])
+        self._checkArray(model[1])
+        if len(model[0]) != len(model[1]):
+            raise RuntimeError('Resolution model expects two arrays of equal sizes.\n'
+                               'Found sizes %d and %d' % (len(model[0]), len(model[1])))
+
+    def _checkArray(self, array):
+        if not hasattr(array, '__len__'):
+            raise RuntimeError('Expected an array of floats, found %s' % str(array))
+        if len(array) == 0:
+            raise RuntimeError('Expected a non-empty array of floats.')
+        if not isinstance(array[0], float) and not isinstance(array[0], int):
+            raise RuntimeError('Expected an array of floats, found %s' % str(array[0]))
+
+    def _mergeArrays(self, a, b):
+        import numpy as np
+        c = np.empty(2 * len(a) - 1)
+        c[::2] = a
+        c[1::2] = b
+        return c
+
+    def _makeModel(self, model, xstart, xend, accuracy):
+        if xstart is None or xend is None:
+            raise RuntimeError('The x-range must be provided to ResolutionModel via '
+                               'xstart and xend parameters.')
+        import numpy as np
+        if accuracy is None:
+            accuracy = self.default_accuracy
+
+        n = 5
+        acc = accuracy * 2
+        x = []
+        y = []
+        while n < self.max_model_size:
+            x = np.linspace(xstart, xend, n)
+            y = model(x)
+            dx = (x[1] - x[0]) / 2
+            xx = np.linspace(xstart + dx, xend - dx, n - 1)
+            yi = np.interp(xx, x, y)
+            yy = model(xx)
+            acc = np.max(np.abs(yy - yi))
+            if acc <= accuracy:
+                break
+            x = self._mergeArrays(x, xx)
+            y = self._mergeArrays(y, yy)
+            n = len(x)
+        return x, y
