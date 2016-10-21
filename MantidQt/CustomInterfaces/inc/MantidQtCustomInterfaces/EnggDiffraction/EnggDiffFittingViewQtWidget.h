@@ -119,10 +119,9 @@ public:
 
   void setPeakList(const std::string &peakList) const override;
 
-  std::vector<std::string>
-  splitFittingDirectory(std::string &selectedfPath) override;
-
   void setBankEmit() override;
+
+  void resetCanvas() override;
 
   void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                      bool focused, bool plotSinglePeaks) override;
@@ -180,6 +179,7 @@ private slots:
   void setBankIdComboBox(int idx) override;
   void setPeakPick();
   void clearPeakList();
+  void loadClicked();
   void fitClicked();
   void fitAllClicked();
   void FittingRunNo();
@@ -187,6 +187,7 @@ private slots:
   void browseClicked();
   void saveClicked();
   void plotSeparateWindow();
+  void showToolTipHelp();
   void setBankDir(int idx);
   void listViewFittingRun();
 

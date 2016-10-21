@@ -1,3 +1,4 @@
+#pylint: disable=unused-import
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -6,6 +7,7 @@ from mantid.simpleapi import *
 class SelectNexusFilesByMetadataTest(unittest.TestCase):
 
     _fileslist = 'INTER00013460,13463,13464.nxs'
+    _sumfileslist = 'INTER00013460+13463+13464.nxs'
 
     def test_happy_case(self):
 
@@ -15,6 +17,14 @@ class SelectNexusFilesByMetadataTest(unittest.TestCase):
         self.assertEqual(len(outfiles), 2, "Only 1st and 3rd files satisfy.")
         self.assertTrue(outfiles[0].endswith('INTER00013460.nxs'),'Should be first file name')
         self.assertTrue(outfiles[1].endswith('INTER00013464.nxs'),'Should be second file name')
+
+    def test_sum(self):
+        criteria = '$raw_data_1/duration$ > 1000 or $raw_data_1/good_frames$ > 10000'
+        res = SelectNexusFilesByMetadata(FileList=self._sumfileslist, NexusCriteria=criteria)
+        outfiles = res.split('+')
+        self.assertEqual(len(outfiles), 2, "Only 1st and 3rd files satisfy.")
+        self.assertTrue(outfiles[0].endswith('INTER00013460.nxs'), 'Should be first file name')
+        self.assertTrue(outfiles[1].endswith('INTER00013464.nxs'), 'Should be second file name')
 
     def test_invalid_syntax(self):
 
@@ -56,4 +66,10 @@ class SelectNexusFilesByMetadataTest(unittest.TestCase):
         self.assertTrue(outfiles[0].endswith('ILLD33_001030.nxs'),'Should be the file name')
 
 if __name__=="__main__":
-    unittest.main()
+    # run the test if only if the required package is present
+    try:
+        import h5py
+        unittest.main()
+    except ImportError:
+        pass
+

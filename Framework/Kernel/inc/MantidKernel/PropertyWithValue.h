@@ -1,9 +1,6 @@
 #ifndef MANTID_KERNEL_PROPERTYWITHVALUE_H_
 #define MANTID_KERNEL_PROPERTYWITHVALUE_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
@@ -12,7 +9,7 @@
 
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #endif
 

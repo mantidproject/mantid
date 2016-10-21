@@ -3,6 +3,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/SaveCanSAS1D.h"
 #include "MantidDataHandling/LoadCanSAS1D.h"
@@ -181,6 +182,12 @@ public:
     savealg.setPropertyValue("InputWorkspace", "SaveCanSAS1DTest_group");
     savealg.setPropertyValue("Filename", m_filename);
     savealg.setPropertyValue("DetectorNames", "HAB");
+
+    savealg.setProperty("Geometry", "Cylinder");
+    savealg.setProperty("SampleHeight", 1.0);
+    savealg.setProperty("SampleWidth", 2.0);
+    savealg.setProperty("SampleThickness", 3.0);
+
     TS_ASSERT_THROWS_NOTHING(savealg.execute());
     TS_ASSERT(savealg.isExecuted());
 
@@ -234,6 +241,13 @@ public:
     TS_ASSERT_DELTA(ws2d->dataE(0).front(), 0, tolerance);
     TS_ASSERT_DELTA(ws2d->dataE(0)[1000], 1.0, tolerance);
     TS_ASSERT_DELTA(ws2d->dataE(0).back(), 0, tolerance);
+
+    // Check that sample information is correct
+    auto &sample = ws2d->sample();
+    TS_ASSERT(sample.getGeometryFlag() == 1);
+    TS_ASSERT(sample.getHeight() == 1.0);
+    TS_ASSERT(sample.getWidth() == 2.0);
+    TS_ASSERT(sample.getThickness() == 3.0);
   }
 
 private:

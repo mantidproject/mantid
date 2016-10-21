@@ -9,10 +9,11 @@ import ui.sans.ui_hfir_instrument
 
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
+    import mantidplot # noqa
     IS_IN_MANTIDPLOT = True
 except ImportError:
     pass
+
 
 class SANSInstrumentWidget(BaseWidget):
     """
@@ -126,7 +127,6 @@ class SANSInstrumentWidget(BaseWidget):
         self.connect(self._summary.sample_si_dist_chk, QtCore.SIGNAL("clicked(bool)"), self._sample_si_dist_clicked)
         self.connect(self._summary.total_detector_distance_chk, QtCore.SIGNAL("clicked(bool)"), self._total_dist_clicked)
         self.connect(self._summary.wavelength_chk, QtCore.SIGNAL("clicked(bool)"), self._wavelength_clicked)
-
 
         self._summary.sample_dist_edit.textChanged.connect(self._update_total_distance)
         self._summary.sample_si_dist_edit.textChanged.connect(self._update_total_distance)
@@ -267,7 +267,6 @@ class SANSInstrumentWidget(BaseWidget):
 #             self._sample_detector_distance = current_value
 #             self._sample_detector_distance_supplied = is_checked
 
-
     def _sample_si_dist_clicked(self, is_checked):
         self._summary.sample_si_dist_edit.setEnabled(is_checked)
 #         if is_checked:
@@ -307,7 +306,6 @@ class SANSInstrumentWidget(BaseWidget):
             self._wavelength_spread = current_value
 
             self._wavelength_supplied = is_checked
-
 
     def _dark_clicked(self, is_checked):
         self._summary.dark_file_edit.setEnabled(is_checked)
@@ -469,7 +467,6 @@ class SANSInstrumentWidget(BaseWidget):
         # The detector_distanc will be used as sample_total_distance
         m.sample_detector_distance = util._check_and_get_float_line_edit(self._summary.total_detector_distance_edit)
         m.detector_offset = 0
-
 
         # Wavelength value
         wavelength = util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0.0)

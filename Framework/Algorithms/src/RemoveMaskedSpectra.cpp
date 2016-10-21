@@ -2,6 +2,7 @@
 
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 
@@ -13,8 +14,6 @@ using namespace API;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RemoveMaskedSpectra)
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string RemoveMaskedSpectra::name() const {
@@ -35,7 +34,6 @@ const std::string RemoveMaskedSpectra::summary() const {
          "workspace.";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void RemoveMaskedSpectra::init() {
@@ -53,7 +51,6 @@ void RemoveMaskedSpectra::init() {
                   "An output workspace.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void RemoveMaskedSpectra::exec() {
@@ -86,7 +83,6 @@ void RemoveMaskedSpectra::exec() {
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
-//----------------------------------------------------------------------------------------------
 /// Fill in a vector with spectra indices to be extracted.
 /// @param indices :: A reference to a vector to fill with the indices.
 /// @param maskedWorkspace :: A workspace with masking information.
@@ -95,21 +91,17 @@ void RemoveMaskedSpectra::makeIndexList(
   auto mask = dynamic_cast<const DataObjects::MaskWorkspace *>(maskedWorkspace);
   if (mask) {
     for (size_t i = 0; i < mask->getNumberHistograms(); ++i) {
-      if (mask->readY(i)[0] == 0.0) {
+      if (mask->y(i)[0] == 0.0) {
         indices.push_back(static_cast<size_t>(i));
       }
     }
   } else {
+    const auto &spectrumInfo = maskedWorkspace->spectrumInfo();
     for (size_t i = 0; i < maskedWorkspace->getNumberHistograms(); ++i) {
-      Geometry::IDetector_const_sptr det;
-      try {
-        det = maskedWorkspace->getDetector(i);
-      } catch (Exception::NotFoundError &) {
+      if (!spectrumInfo.hasDetectors(i))
         continue;
-      }
-      if (!det->isMasked()) {
+      if (!spectrumInfo.isMasked(i))
         indices.push_back(static_cast<size_t>(i));
-      }
     }
   }
 }

@@ -23,12 +23,15 @@
  * @param flags :: Window flags that are passed the the QWidget constructor
  * @param wsNames :: the names of the workspaces to be plotted
  * @param showWaterfallOption :: If true the waterfall checkbox is created
+ * @param showTiledOption :: If true the "Tiled" checkbox is created
  */
 MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
                                          QList<QString> wsNames,
-                                         const bool showWaterfallOption)
+                                         const bool showWaterfallOption,
+                                         const bool showTiledOption)
     : QWidget(parent, flags), m_spectra(false),
-      m_waterfall(showWaterfallOption), m_wsNames(wsNames),
+      m_waterfall(showWaterfallOption), m_tiled(showTiledOption),
+      m_waterfallOpt(nullptr), m_tiledOpt(nullptr), m_wsNames(wsNames),
       m_wsIndexIntervals(), m_spectraNumIntervals(), m_wsIndexChoice(),
       m_spectraIdChoice() {
   checkForSpectraAxes();
@@ -47,7 +50,8 @@ MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
 MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() const {
   UserInput options;
   options.plots = getPlots();
-  options.waterfall = waterfallPlotRequested();
+  options.waterfall = isWaterfallPlotSelected();
+  options.tiled = isTiledPlotSelected();
   return options;
 }
 
@@ -103,8 +107,16 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
  * Whether the user checked the "waterfall" box
  * @returns True if waterfall plot selected
  */
-bool MantidWSIndexWidget::waterfallPlotRequested() const {
-  return m_waterfallOpt->isChecked();
+bool MantidWSIndexWidget::isWaterfallPlotSelected() const {
+  return m_waterfallOpt ? m_waterfallOpt->isChecked() : false;
+}
+
+/**
+ * Whether the user checked the "tiled" box
+ * @returns True if tiled plot selected
+ */
+bool MantidWSIndexWidget::isTiledPlotSelected() const {
+  return m_tiledOpt ? m_tiledOpt->isChecked() : false;
 }
 
 /**
@@ -231,11 +243,15 @@ void MantidWSIndexWidget::initSpectraBox() {
  */
 void MantidWSIndexWidget::initOptionsBoxes() {
   m_optionsBox = new QHBoxLayout;
-  m_waterfallOpt = new QCheckBox("Waterfall Plot");
-  if (m_waterfall)
+  if (m_waterfall) {
+    m_waterfallOpt = new QCheckBox("Waterfall Plot");
     m_optionsBox->addWidget(m_waterfallOpt);
-  else
-    m_waterfallOpt->setChecked(true);
+  }
+
+  if (m_tiled) {
+    m_tiledOpt = new QCheckBox("Tiled Plot");
+    m_optionsBox->addWidget(m_tiledOpt);
+  }
 
   m_outer->addItem(m_optionsBox);
 }
@@ -349,14 +365,16 @@ bool MantidWSIndexWidget::usingSpectraNumbers() const {
  * @param wsNames :: the names of the workspaces to be plotted
  * @param showWaterfallOption :: If true the waterfall checkbox is created
  * @param showPlotAll :: If true the "Plot all" button is created
+ * @param showTiledOption :: If true the "Tiled" checkbox is created
  */
 MantidWSIndexDialog::MantidWSIndexDialog(MantidUI *mui, Qt::WFlags flags,
                                          QList<QString> wsNames,
                                          const bool showWaterfallOption,
-                                         const bool showPlotAll)
+                                         const bool showPlotAll,
+                                         const bool showTiledOption)
     : QDialog(mui->appWindow(), flags),
-      m_widget(this, flags, wsNames, showWaterfallOption), m_mantidUI(mui),
-      m_plotAll(showPlotAll) {
+      m_widget(this, flags, wsNames, showWaterfallOption, showTiledOption),
+      m_mantidUI(mui), m_plotAll(showPlotAll) {
   // Set up UI.
   init();
 }
@@ -382,8 +400,16 @@ QMultiMap<QString, std::set<int>> MantidWSIndexDialog::getPlots() const {
  * Whether the user checked the "waterfall" box
  * @returns True if waterfall plot selected
  */
-bool MantidWSIndexDialog::waterfallPlotRequested() const {
-  return m_widget.waterfallPlotRequested();
+bool MantidWSIndexDialog::isWaterfallPlotSelected() const {
+  return m_widget.isWaterfallPlotSelected();
+}
+
+/**
+ * Whether the user checked the "tiled" box
+ * @returns True if tiled plot selected
+ */
+bool MantidWSIndexDialog::isTiledPlotSelected() const {
+  return m_widget.isTiledPlotSelected();
 }
 
 //----------------------------------

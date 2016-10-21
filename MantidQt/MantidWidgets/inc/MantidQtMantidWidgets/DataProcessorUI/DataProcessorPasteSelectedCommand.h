@@ -41,6 +41,13 @@ public:
   };
   std::string name() override { return std::string("Paste Selected"); }
   std::string icon() override { return std::string("://paste.png"); }
+  std::string tooltip() override { return std::string("Paste selected"); }
+  std::string whatsthis() override {
+    return std::string("Pastes the contents of the clipboard into the selected "
+                       "rows. If no rows are selected, new ones are added at "
+                       "the end");
+  }
+  std::string shortcut() override { return std::string("Ctrl+V"); }
 };
 }
 }

@@ -1,9 +1,6 @@
 #ifndef MANTID_API_MATRIXWORKSPACE_H_
 #define MANTID_API_MATRIXWORKSPACE_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #ifndef Q_MOC_RUN
 #include <boost/scoped_ptr.hpp>
 #endif
@@ -12,7 +9,6 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
-#include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
@@ -28,6 +24,7 @@ class INearestNeighboursFactory;
 namespace API {
 class Axis;
 class SpectrumDetectorMapping;
+class SpectrumInfo;
 
 /// typedef for the image type
 typedef std::vector<std::vector<double>> MantidImage;
@@ -35,6 +32,9 @@ typedef std::vector<std::vector<double>> MantidImage;
 typedef boost::shared_ptr<MantidImage> MantidImage_sptr;
 /// shared pointer to const MantidImage
 typedef boost::shared_ptr<const MantidImage> MantidImage_const_sptr;
+
+/// Helper for MatrixWorkspace::spectrumInfo()
+enum class ThreadedContextCheck { Check, Skip };
 
 //----------------------------------------------------------------------
 /** Base MatrixWorkspace Abstract Class.
@@ -88,6 +88,9 @@ public:
   using IMDWorkspace::toString;
   /// String description of state
   const std::string toString() const override;
+
+  const SpectrumInfo &spectrumInfo(
+      ThreadedContextCheck contextCheck = ThreadedContextCheck::Check) const;
 
   /**@name Instrument queries */
   //@{
@@ -196,10 +199,6 @@ public:
   HistogramData::BinEdges binEdges(const size_t index) const {
     return getSpectrum(index).binEdges();
   }
-  HistogramData::BinEdgeStandardDeviations
-  binEdgeStandardDeviations(const size_t index) const {
-    return getSpectrum(index).binEdgeStandardDeviations();
-  }
   HistogramData::Points points(const size_t index) const {
     return getSpectrum(index).points();
   }
@@ -210,14 +209,6 @@ public:
   template <typename... T>
   void setBinEdges(const size_t index, T &&... data) & {
     getSpectrum(index).setBinEdges(std::forward<T>(data)...);
-  }
-  template <typename... T>
-  void setBinEdgeVariances(const size_t index, T &&... data) & {
-    getSpectrum(index).setBinEdgeVariances(std::forward<T>(data)...);
-  }
-  template <typename... T>
-  void setBinEdgeStandardDeviations(const size_t index, T &&... data) & {
-    getSpectrum(index).setBinEdgeStandardDeviations(std::forward<T>(data)...);
   }
   template <typename... T> void setPoints(const size_t index, T &&... data) & {
     getSpectrum(index).setPoints(std::forward<T>(data)...);
@@ -619,10 +610,9 @@ private:
   /// containing workspace (null if none).
   boost::shared_ptr<MatrixWorkspace> m_monitorWorkspace;
 
-protected:
-  /// Assists conversions to and from 2D histogram indexing to 1D indexing.
-  MatrixWSIndexCalculator m_indexCalculator;
+  mutable std::unique_ptr<SpectrumInfo> m_spectrumInfo;
 
+protected:
   /// Scoped pointer to NearestNeighbours factory
   boost::scoped_ptr<Mantid::Geometry::INearestNeighboursFactory>
       m_nearestNeighboursFactory;

@@ -2,6 +2,7 @@
 import stresstesting
 from mantid.simpleapi import *
 
+
 class PEARLPowderDiffraction(stresstesting.MantidStressTest):
 
     sample = "PEARL00073987.raw"

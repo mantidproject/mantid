@@ -7,6 +7,7 @@
 #include "MantidKernel/MultiFileValidator.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
@@ -36,17 +37,27 @@ bool doesNotContainWildCard(const std::string &ext) {
 namespace Mantid {
 namespace API {
 /**
- * Constructor
+ * Alternative constructor with action
  *
- * @param name :: The name of the property
- * @param exts ::  The allowed/suggested extensions
+ * @param name   :: The name of the property
+ * @param action :: File action
+ * @param exts   ::  The allowed/suggested extensions
  */
 MultipleFileProperty::MultipleFileProperty(const std::string &name,
+                                           unsigned int action,
                                            const std::vector<std::string> &exts)
     : PropertyWithValue<std::vector<std::vector<std::string>>>(
           name, std::vector<std::vector<std::string>>(),
-          boost::make_shared<MultiFileValidator>(exts), Direction::Input),
-      m_multiFileLoadingEnabled(), m_exts(), m_parser(), m_defaultExt("") {
+          boost::make_shared<MultiFileValidator>(
+              exts, (action == FileProperty::Load)),
+          Direction::Input) {
+  if (action != FileProperty::Load && action != FileProperty::OptionalLoad) {
+    /// raise error for unsupported actions
+    throw std::runtime_error(
+        "Specified action is not supported for MultipleFileProperty");
+  } else {
+    m_action = action;
+  }
   std::string allowMultiFileLoading =
       Kernel::ConfigService::Instance().getString("loading.multifile");
 
@@ -58,6 +69,35 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
   for (const auto &ext : exts)
     if (doesNotContainWildCard(ext))
       m_exts.push_back(ext);
+}
+
+/**
+ * Default constructor with default action
+ *
+ * @param name :: The name of the property
+ * @param exts ::  The allowed/suggested extensions
+ */
+MultipleFileProperty::MultipleFileProperty(const std::string &name,
+                                           const std::vector<std::string> &exts)
+    : MultipleFileProperty(name, FileProperty::Load, exts) {}
+
+/**
+* Check if this property is optional
+* @returns True if the property is optinal, false otherwise
+*/
+bool MultipleFileProperty::isOptional() const {
+  return (m_action == FileProperty::OptionalLoad);
+}
+
+/**
+ * @returns Empty string if empty value is valid, error message otherwise
+ */
+std::string MultipleFileProperty::isEmptyValueValid() const {
+  if (isOptional()) {
+    return "";
+  } else {
+    return "No file specified.";
+  }
 }
 
 /**
@@ -73,8 +113,11 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
  *An empty string indicates success.
  */
 std::string MultipleFileProperty::setValue(const std::string &propValue) {
-  // No empty value is allowed.
-  if (propValue.empty())
+  // No empty value is allowed, unless optional.
+  // This is yet aditional check that is beyond the underlying
+  // MultiFileValidator,
+  // so isOptional needs to be inspected here as well
+  if (propValue.empty() && !isOptional())
     return "No file(s) specified.";
 
   // If multiple file loading is disabled, then set value assuming it is a
@@ -123,36 +166,6 @@ std::string MultipleFileProperty::getDefault() const {
     return toString(m_initialValue, "", "");
 
   return toString(m_initialValue);
-}
-
-/**
- * A convenience function for the cases where we dont use the MultiFileProperty
- *to
- * *add* workspaces - only to list them.  It "flattens" the given vector of
- *vectors
- * into a single vector which is much easier to traverse.  For example:
- *
- * ((1), (2), (30), (31), (32), (100), (102)) becomes (1, 2, 30, 31, 32, 100,
- *102)
- *
- * Used on a vector of vectors that *has* added filenames, the following
- *behaviour is observed:
- *
- * ((1), (2), (30, 31, 32), (100), (102)) becomes (1, 2, 30, 31, 32, 100, 102)
- *
- * @param fileNames :: a vector of vectors, containing all the file names.
- * @return a single vector containing all the file names.
- */
-std::vector<std::string> MultipleFileProperty::flattenFileNames(
-    const std::vector<std::vector<std::string>> &fileNames) {
-  std::vector<std::string> flattenedFileNames;
-
-  for (const auto &fileName : fileNames) {
-    flattenedFileNames.insert(flattenedFileNames.end(), fileName.begin(),
-                              fileName.end());
-  }
-
-  return flattenedFileNames;
 }
 
 /**
@@ -262,7 +275,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       // load a single (and possibly existing) file within a token, but which
       // has unexpected zero
       // padding, or some other anomaly.
-      if (flattenFileNames(f).empty())
+      if (VectorHelper::flattenVector(f).empty())
         f.push_back(std::vector<std::string>(1, *plusTokenString));
 
       if (plusTokenStrings.size() > 1) {
@@ -296,7 +309,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
   // First, find the default extension.  Flatten all the unresolved filenames
   // first, to make this easier.
   std::vector<std::string> flattenedAllUnresolvedFileNames =
-      flattenFileNames(allUnresolvedFileNames);
+      VectorHelper::flattenVector(allUnresolvedFileNames);
   std::string defaultExt;
   auto unresolvedFileName = flattenedAllUnresolvedFileNames.begin();
   for (; unresolvedFileName != flattenedAllUnresolvedFileNames.end();

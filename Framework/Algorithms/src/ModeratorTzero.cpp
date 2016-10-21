@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/ModeratorTzero.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventList.h"
@@ -133,8 +131,7 @@ void ModeratorTzero::exec() {
   // iterate over the spectra
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    MantidVec &inbins = inputWS->dataX(i);
-    MantidVec &outbins = outputWS->dataX(i);
+    outputWS->setHistogram(i, inputWS->histogram(i));
 
     // One parser for each parallel processor needed (except Edirect mode)
     double E1;
@@ -158,8 +155,8 @@ void ModeratorTzero::exec() {
     catch (Exception::NotFoundError &) {
       g_log.error() << "Unable to calculate distances to/from detector" << i
                     << '\n';
-      outbins = inbins;
     }
+
     if (L2 >= 0) {
       // fast neutrons are shifted by min_t0_next, irrespective of tof
       double v1_max = L1 / m_t1min;
@@ -187,39 +184,29 @@ void ModeratorTzero::exec() {
         // shift the time of flights by the emission time from the moderator
         if (t2 >= 0) // t2 < 0 when no detector info is available
         {
-          // iterate over the time-of-flight values
-          for (unsigned int ibin = 0; ibin < inbins.size(); ibin++) {
-            double tof = inbins[ibin]; // recorded time-of-flight
+          auto &outbins = outputWS->mutableX(i);
+          for (auto &tof : outbins) {
             if (tof < m_t1min + t2)
               tof -= min_t0_next;
             else
               tof -= CalculateT0indirect(tof, L1, t2, E1, parser);
-            outbins[ibin] = tof;
           }
-        } else {
-          outbins = inbins;
         }
       } // end of if(emode=="Indirect")
       else if (emode == "Elastic") {
-        for (unsigned int ibin = 0; ibin < inbins.size(); ibin++) {
-          double tof = inbins[ibin]; // recorded time-of-flight;
+        auto &outbins = outputWS->mutableX(i);
+        for (auto &tof : outbins) {
           if (tof < m_t1min * (L1 + L2) / L1)
             tof -= min_t0_next;
           else
             tof -= CalculateT0elastic(tof, L1 + L2, E1, parser);
-          outbins[ibin] = tof;
         }
       } // end of else if(emode=="Elastic")
       else if (emode == "Direct") {
-        for (unsigned int ibin = 0; ibin < inbins.size(); ibin++) {
-          outbins[ibin] = inbins[ibin] - t0_direct;
-        }
+        outputWS->mutableX(i) += -t0_direct;
       } // end of else if(emode="Direct")
     }   // end of if(L2 >= 0)
 
-    // Copy y and e data
-    outputWS->dataY(i) = inputWS->dataY(i);
-    outputWS->dataE(i) = inputWS->dataE(i);
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   } // end of for (int i = 0; i < static_cast<int>(numHists); ++i)
@@ -331,7 +318,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
           if (t2 >= 0) // t2 < 0 when no detector info is available
           {
             // fix the histogram bins
-            MantidVec &x = evlist.dataX();
+            auto &x = evlist.mutableX();
             for (double &tof : x) {
               if (tof < m_t1min + t2)
                 tof -= min_t0_next;
@@ -352,7 +339,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
         }   // end of if(emode=="Indirect")
         else if (emode == "Elastic") {
           // Apply t0 correction to histogram bins
-          MantidVec &x = evlist.dataX();
+          auto &x = evlist.mutableX();
           for (double &tof : x) {
             if (tof < m_t1min * (L1 + L2) / L1)
               tof -= min_t0_next;
@@ -371,16 +358,10 @@ void ModeratorTzero::execEvent(const std::string &emode) {
           }
           evlist.setTofs(tofs);
           evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);
-
-          MantidVec tofs_b = evlist.getTofs();
-          MantidVec xarray = evlist.readX();
         } // end of else if(emode=="Elastic")
         else if (emode == "Direct") {
           // fix the histogram bins
-          MantidVec &x = evlist.dataX();
-          for (double &tof : x) {
-            tof -= t0_direct;
-          }
+          evlist.mutableX() -= t0_direct;
 
           MantidVec tofs = evlist.getTofs();
           for (double &tof : tofs) {

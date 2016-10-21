@@ -33,6 +33,7 @@ except ImportError:
     CAN_IMPORT_NXS = False
 # WORKAROUND FOR IMPORT ISSUE IN UBUNTU --- STOP
 
+
 def deprecated(obj):
     """
     Decorator to apply to functions or classes that we think are not being (or
@@ -43,11 +44,12 @@ def deprecated(obj):
             obj_desc = "\"%s\" function" % obj.__name__
         else:
             obj_desc = "\"%s\" class" % obj.im_class.__name__
+
         def print_warning_wrapper(*args, **kwargs):
-            sanslog.warning("The %s has been marked as deprecated and may be "\
-                            "removed in a future version of Mantid.  If you "\
-                            "believe this to have been marked in error, please "\
-                            "contact the member of the Mantid team responsible "\
+            sanslog.warning("The %s has been marked as deprecated and may be "
+                            "removed in a future version of Mantid.  If you "
+                            "believe this to have been marked in error, please "
+                            "contact the member of the Mantid team responsible "
                             "for ISIS SANS." % obj_desc)
             return obj(*args, **kwargs)
         return print_warning_wrapper
@@ -63,6 +65,7 @@ def deprecated(obj):
     assert False, "Programming error.  You have incorrectly applied the "\
                   "@deprecated decorator.  This is only for use with functions "\
                   "or classes."
+
 
 def GetInstrumentDetails(instrum):
     """
@@ -84,20 +87,24 @@ def GetInstrumentDetails(instrum):
 
     return det.n_columns, first_spectrum, last_spectrum
 
+
 def InfinitePlaneXML(id_name, plane_pt, normal_pt):
     return '<infinite-plane id="' + str(id_name) + '">' + \
         '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + '" />' + \
         '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
         '</infinite-plane>'
 
+
 def InfiniteCylinderXML(id_name, centre, radius, axis):
     return  '<infinite-cylinder id="' + str(id_name) + '">' + \
-    '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
-    '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
-    '<radius val="' + str(radius) + '" />' + \
-    '</infinite-cylinder>\n'
+        '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
+        '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
+        '<radius val="' + str(radius) + '" />' + \
+        '</infinite-cylinder>\n'
 
 # Mask a cylinder, specifying the algebra to use
+
+
 def MaskWithCylinder(workspace, radius, xcentre, ycentre, algebra):
     '''Mask a cylinder on the input workspace.'''
     xmldef = InfiniteCylinderXML('shape', [xcentre, ycentre, 0.0], radius, [0,0,1])
@@ -106,6 +113,8 @@ def MaskWithCylinder(workspace, radius, xcentre, ycentre, algebra):
     MaskDetectorsInShape(Workspace=workspace,ShapeXML=xmldef)
 
 # Mask such that the remainder is that specified by the phi range
+
+
 def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
     # convert all angles to be between 0 and 360
     while phimax > 360 :
@@ -123,9 +132,9 @@ def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
     phimin = math.pi*phimin/180.0
     phimax = math.pi*phimax/180.0
     xmldef =  InfinitePlaneXML('pla',centre, [math.cos(-phimin + math.pi/2.0),math.sin(-phimin + math.pi/2.0),0]) + \
-    InfinitePlaneXML('pla2',centre, [-math.cos(-phimax + math.pi/2.0),-math.sin(-phimax + math.pi/2.0),0]) + \
-    InfinitePlaneXML('pla3',centre, [math.cos(-phimax + math.pi/2.0),math.sin(-phimax + math.pi/2.0),0]) + \
-    InfinitePlaneXML('pla4',centre, [-math.cos(-phimin + math.pi/2.0),-math.sin(-phimin + math.pi/2.0),0])
+        InfinitePlaneXML('pla2',centre, [-math.cos(-phimax + math.pi/2.0),-math.sin(-phimax + math.pi/2.0),0]) + \
+        InfinitePlaneXML('pla3',centre, [math.cos(-phimax + math.pi/2.0),math.sin(-phimax + math.pi/2.0),0]) + \
+        InfinitePlaneXML('pla4',centre, [-math.cos(-phimin + math.pi/2.0),-math.sin(-phimin + math.pi/2.0),0])
 
     if use_mirror :
         xmldef += '<algebra val="#((pla pla2):(pla3 pla4))" />'
@@ -141,6 +150,8 @@ def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
     MaskDetectorsInShape(Workspace=workspace,ShapeXML= xmldef)
 
 # Work out the spectra IDs for block of detectors
+
+
 def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
     '''Compile a list of spectrum Nos for rectangular block of size xdim by ydim'''
     output = ''
@@ -167,6 +178,8 @@ def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
     return output.rstrip(",")
 
 # Mask by bin range
+
+
 def MaskByBinRange(workspace, timemask):
     # timemask should be a ';' separated list of start/end values
     ranges = timemask.split(';')
@@ -174,6 +187,7 @@ def MaskByBinRange(workspace, timemask):
         limits = r.split()
         if len(limits) == 2:
             MaskBins(InputWorkspace=workspace,OutputWorkspace= workspace, XMin= limits[0] ,XMax=limits[1])
+
 
 def QuadrantXML(centre,rmin,rmax,quadrant):
     cin_id = 'cyl-in'
@@ -200,7 +214,7 @@ def QuadrantXML(centre,rmin,rmax,quadrant):
     xmlstring += InfinitePlaneXML(p1id, centre, plane1Axis)
     p2id = 'pl-b'
     xmlstring += InfinitePlaneXML(p2id, centre, plane2Axis)
-    
+
     # The composition of the shape is "(cyl-out (#cyl-in) (pl-a:pl-b))". The breakdown is:
     # 1. Create an infinite hollow cylinder by performing "cyl-out (#cyl-in)". This is the intersection of the
     #    outer radius cylinder with the inverse inner radius cylinder. We have a shell-like selection
@@ -211,6 +225,7 @@ def QuadrantXML(centre,rmin,rmax,quadrant):
     xmlstring += '<algebra val="((' + cout_id + ' (#' + cin_id  + ')) (' + p1id + ':' + p2id + '))"/>\n'
     return xmlstring
 
+
 def getWorkspaceReference(ws_pointer):
     if isinstance(ws_pointer, str):
         ws_pointer = mtd[ws_pointer]
@@ -218,8 +233,10 @@ def getWorkspaceReference(ws_pointer):
         raise RuntimeError("Invalid workspace name input: " + str(ws_pointer))
     return ws_pointer
 
+
 def isEventWorkspace(ws_reference):
     return isinstance(getWorkspaceReference(ws_reference),IEventWorkspace)
+
 
 def getBinsBoundariesFromWorkspace(ws_reference):
     ws_reference = getWorkspaceReference(ws_reference)
@@ -234,6 +251,7 @@ def getBinsBoundariesFromWorkspace(ws_reference):
             binning = binning + ',' + str(Xvalues[j-1]) + ',' + str(binGap)
     binning = binning + "," + str(Xvalues[-1])
     return binning
+
 
 def getFilePathFromWorkspace(ws):
     ws_pointer = getWorkspaceReference(ws)
@@ -258,6 +276,7 @@ def getFilePathFromWorkspace(ws):
         raise RuntimeError("Can not find the file name for workspace " + str(ws))
     return file_path
 
+
 def fromEvent2Histogram(ws_event, ws_monitor, binning = ""):
     """Transform an event mode workspace into a histogram workspace.
     It does conjoin the monitor and the workspace as it is expected from the current
@@ -271,7 +290,7 @@ def fromEvent2Histogram(ws_event, ws_monitor, binning = ""):
 
     It will finally, replace the input workspace with the histogram equivalent workspace.
     """
-    assert ws_monitor != None
+    assert ws_monitor is not None
 
     name = '__monitor_tmp'
 
@@ -289,6 +308,7 @@ def fromEvent2Histogram(ws_event, ws_monitor, binning = ""):
 
     return ws_hist
 
+
 def getChargeAndTime(ws_event):
     r = ws_event.getRun()
     charges = r.getLogData('proton_charge')
@@ -296,6 +316,7 @@ def getChargeAndTime(ws_event):
     time_passed = (charges.times[-1] - charges.times[0]).total_microseconds()
     time_passed /= 1e6
     return total_charge, time_passed
+
 
 def sliceByTimeWs(ws_event, time_start=None, time_stop=None):
     def formatTime(time_val):
@@ -312,6 +333,7 @@ def sliceByTimeWs(ws_event, time_start=None, time_stop=None):
     params['OutputWorkspace'] = outname
     sliced_ws = FilterByTime(ws_event, **params)
     return sliced_ws
+
 
 def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
     """Return the histogram of the sliced event and a tuple with the following:
@@ -344,7 +366,6 @@ def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
 
     part_c, part_t = getChargeAndTime(sliced_ws)
     scaled_monitor = monitor * (part_c/tot_c)
-
 
     hist = fromEvent2Histogram(sliced_ws, scaled_monitor, binning)
     return hist, (tot_t, tot_c, part_t, part_c)
@@ -422,8 +443,6 @@ def sliceParser(str_to_parser):
 
             curr_value = next_value
 
-
-
     def _extract_simple_input(inpstr):
         for fun in _parse_slice, _parse_lower, _parse_upper:
             val = fun(inpstr)
@@ -454,6 +473,7 @@ def sliceParser(str_to_parser):
 
     return result
 
+
 def getFileAndName(incomplete_path):
     this_path = FileFinder.getFullPath(incomplete_path)
     if not this_path:
@@ -469,6 +489,7 @@ def getFileAndName(incomplete_path):
     basename = os.path.splitext(basename)[0]
 
     return this_path, basename
+
 
 def _merge_to_ranges(ints):
     """
@@ -502,9 +523,10 @@ def _merge_to_ranges(ints):
         else:
             ranges.append(current_range)
             current_range = [i, i]
-    if not current_range in ranges:
+    if current_range not in ranges:
         ranges.append(current_range)
     return ranges
+
 
 def _yield_masked_det_ids(masking_ws):
     """
@@ -514,6 +536,7 @@ def _yield_masked_det_ids(masking_ws):
     for ws_index in range(masking_ws.getNumberHistograms()):
         if masking_ws.readY(ws_index)[0] == 1:
             yield masking_ws.getDetector(ws_index).getID()
+
 
 def get_masked_det_ids_from_mask_file(mask_file_path, idf_path):
     """
@@ -536,6 +559,7 @@ def get_masked_det_ids_from_mask_file(mask_file_path, idf_path):
     DeleteWorkspace(Workspace=mask_ws_name)
 
     return det_ids
+
 
 def mask_detectors_with_masking_ws(ws_name, masking_ws_name):
     """
@@ -590,6 +614,7 @@ def check_child_ws_for_name_and_type_for_added_eventdata(wsGroup):
 
     return hasData and hasMonitors
 
+
 def extract_child_ws_for_added_eventdata(ws_group, appendix):
     '''
     Extract the the child workspaces from a workspace group which was
@@ -624,6 +649,7 @@ def extract_child_ws_for_added_eventdata(ws_group, appendix):
         else:
             new_name = ws_group_name
             RenameWorkspace(InputWorkspace = ws_handle.getName(), OutputWorkspace = new_name)
+
 
 def bundle_added_event_data_as_group(out_file_name, out_file_monitors_name):
     """
@@ -669,6 +695,7 @@ def bundle_added_event_data_as_group(out_file_name, out_file_monitors_name):
 
     return out_group_file_name
 
+
 def get_full_path_for_added_event_data(file_name):
     path,base = os.path.split(file_name)
     if path == '' or base not in os.listdir(path):
@@ -681,6 +708,7 @@ def get_full_path_for_added_event_data(file_name):
 
     return full_path_name
 
+
 def extract_spectra(ws, det_ids, output_ws_name):
     """
     A more generic version of ExtactSingleSpectrum.  Accepts an arbitrary list
@@ -692,6 +720,7 @@ def extract_spectra(ws, det_ids, output_ws_name):
     """
     ExtractSpectra(InputWorkspace=ws,OutputWorkspace=output_ws_name, DetectorList=det_ids)
     return mtd[output_ws_name]
+
 
 def get_masked_det_ids(ws):
     """
@@ -712,6 +741,7 @@ def get_masked_det_ids(ws):
         if det.isMasked():
             yield det.getID()
 
+
 def create_zero_error_free_workspace(input_workspace_name, output_workspace_name):
     '''
     Creates a cloned workspace where all zero-error values have been replaced with a large value
@@ -722,7 +752,7 @@ def create_zero_error_free_workspace(input_workspace_name, output_workspace_name
     # Load the input workspace
     message = ""
     complete = False
-    if not input_workspace_name in mtd:
+    if input_workspace_name not in mtd:
         message = 'Failed to create a zero error free cloned workspace: The input workspace does not seem to exist.'
         return message, complete
 
@@ -731,7 +761,7 @@ def create_zero_error_free_workspace(input_workspace_name, output_workspace_name
 
     # Remove all zero errors from the cloned workspace
     CloneWorkspace(InputWorkspace=ws_in, OutputWorkspace=output_workspace_name)
-    if not output_workspace_name in mtd:
+    if output_workspace_name not in mtd:
         message = 'Failed to create a zero error free cloned workspace: A clone could not be created.'
         return message, complete
 
@@ -744,6 +774,7 @@ def create_zero_error_free_workspace(input_workspace_name, output_workspace_name
         message = 'Failed to create a zero error free cloned workspace: Could not remove the zero errors.'
 
     return message, complete
+
 
 def remove_zero_errors_from_workspace(ws):
     '''
@@ -760,6 +791,7 @@ def remove_zero_errors_from_workspace(ws):
         spectrum = errors(index)
         spectrum[spectrum <= 0.0] = ZERO_ERROR_DEFAULT
 
+
 def delete_zero_error_free_workspace(input_workspace_name):
     '''
     Deletes the zero-error free workspace
@@ -773,6 +805,7 @@ def delete_zero_error_free_workspace(input_workspace_name):
     else:
         message = 'Failed to delete a zero-error free workspace'
     return message, complete
+
 
 def is_valid_ws_for_removing_zero_errors(input_workspace_name):
     '''
@@ -798,10 +831,12 @@ def is_valid_ws_for_removing_zero_errors(input_workspace_name):
 
     return message, isValid
 
+
 class AddOperation(object):
     """
     The AddOperation allows to add two workspaces at a time.
     """
+
     def __init__(self,isOverlay, time_shifts):
         """
         The AddOperation requires to know if the workspaces are to
@@ -831,12 +866,15 @@ class AddOperation(object):
                        output_workspace= output_workspace,
                        time_shift = current_time_shift)
 
+
 class CombineWorkspacesFactory(object):
     """
     Factory to determine how to add workspaces
     """
+
     def __init__(self):
         super(CombineWorkspacesFactory, self).__init__()
+
     def create_add_algorithm(self, isOverlay):
         """
         @param isOverlay :: if true we provide the OverlayWorkspaces functionality
@@ -846,10 +884,12 @@ class CombineWorkspacesFactory(object):
         else:
             return PlusWorkspaces()
 
+
 class PlusWorkspaces(object):
     """
     Wrapper for the Plus algorithm
     """
+
     def __init__(self):
         super(PlusWorkspaces, self).__init__()
 
@@ -860,7 +900,6 @@ class PlusWorkspaces(object):
         @param output_workspace :: the output workspace
         @param time_shift :: unused parameter
         """
-        dummy_shift = time_shift
         lhs_ws = self._get_workspace(LHS_workspace)
         rhs_ws = self._get_workspace(RHS_workspace)
 
@@ -885,6 +924,7 @@ class OverlayWorkspaces(object):
     workspaces overlayed such that the first time entry of their proton_charge entry matches.
     This overlap can be shifted by the specified time_shift in seconds
     """
+
     def __init__(self):
         super(OverlayWorkspaces, self).__init__()
 
@@ -943,14 +983,18 @@ class OverlayWorkspaces(object):
             return mtd[workspace]
 
 #pylint: disable=too-few-public-methods
+
+
 class TimeShifter(object):
     """
     The time shifter stores all time shifts for all runs which are to be added. If there is
     a mismatch the time shifts are set to 0.0 seconds.
     """
+
     def __init__(self, time_shifts):
         super(TimeShifter, self).__init__()
         self._time_shifts = time_shifts
+
     def get_Nth_time_shift(self, n):
         """
         Retrieves the specified additional time shift for the nth addition in seconds.
@@ -960,6 +1004,7 @@ class TimeShifter(object):
             return self._cast_to_float(self._time_shifts[n])
         else:
             return 0.0
+
     def _cast_to_float(self, element):
         float_element = 0.0
         try:
@@ -967,6 +1012,7 @@ class TimeShifter(object):
         except ValueError:
             pass# Log here
         return float_element
+
 
 def transfer_special_sample_logs(from_ws, to_ws):
     '''
@@ -1007,11 +1053,14 @@ def transfer_special_sample_logs(from_ws, to_ws):
             alg_log.execute()
 
 #pylint: disable=too-many-instance-attributes
+
+
 class CummulativeTimeSeriesPropertyAdder(object):
     '''
     Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
     cummulative time series correctly at this point.
     '''
+
     def __init__(self, total_time_shift_seconds = 0):
         super(CummulativeTimeSeriesPropertyAdder, self).__init__()
         self._time_series = ['good_uah_log', 'good_frames']
@@ -1087,7 +1136,6 @@ class CummulativeTimeSeriesPropertyAdder(object):
                 self._populate_property(prop, times, values, self._type_map[element])
 
         self._update_single_valued_entries(workspace)
-
 
     def _update_single_valued_entries(self, workspace):
         '''
@@ -1234,6 +1282,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
             prop.addValue(times[index],
                           type_converter(values[index]))
 
+
 def load_monitors_for_multiperiod_event_data(workspace, data_file, monitor_appendix):
     '''
     Takes a multi-period event workspace and loads the monitors
@@ -1248,6 +1297,7 @@ def load_monitors_for_multiperiod_event_data(workspace, data_file, monitor_appen
     mon_ws = mtd["temp_ws_group"]
     # Rename all monitor workspces
     rename_monitors_for_multiperiod_event_data(monitor_workspace = mon_ws, workspace=workspace, appendix=monitor_appendix)
+
 
 def rename_monitors_for_multiperiod_event_data(monitor_workspace, workspace, appendix):
     '''
@@ -1266,16 +1316,18 @@ def rename_monitors_for_multiperiod_event_data(monitor_workspace, workspace, app
     monitor_group_ws_name = workspace.name() + appendix
     RenameWorkspace(InputWorkspace=monitor_workspace, OutputWorkspace=monitor_group_ws_name)
 
+
 def is_convertible_to_int(input_value):
     '''
     Check if the input can be converted to int
     @param input_value :: a general input
     '''
     try:
-        dummy_converted = int(input_value)
+        int(input_value)
     except ValueError:
         return False
     return True
+
 
 def is_convertible_to_float(input_value):
     '''
@@ -1288,7 +1340,7 @@ def is_convertible_to_float(input_value):
         is_convertible = False
     else:
         try:
-            dummy_converted = float(input_value)
+            float(input_value)
             is_convertible = True
         except ValueError:
             is_convertible = False
@@ -1308,12 +1360,14 @@ def is_valid_xml_file_list(input_value):
             return False
     return True
 
+
 def convert_from_string_list(to_convert):
     '''
     Convert a Python string list to a comma-separted string
     @param to_convert :: a string list input
     '''
     return ','.join(element.replace(" ", "") for element in to_convert)
+
 
 def convert_to_string_list(to_convert):
     '''
@@ -1325,6 +1379,7 @@ def convert_to_string_list(to_convert):
     output_string = "[" + ','.join("'"+element+"'" for element in string_list) + "]"
     return output_string
 
+
 def convert_to_list_of_strings(to_convert):
     '''
     Converts a string of comma-separted values to a list of strings
@@ -1333,6 +1388,7 @@ def convert_to_list_of_strings(to_convert):
     '''
     values = to_convert.split(",")
     return [element.strip() for element in values]
+
 
 def can_load_as_event_workspace(filename):
     '''
@@ -1351,7 +1407,7 @@ def can_load_as_event_workspace(filename):
 
     # Ubuntu does not provide NEXUS for python currently, need to hedge for that
     if CAN_IMPORT_NXS:
-        if is_event_workspace == False:
+        if not is_event_workspace:
             # pylint: disable=bare-except
             try:
                 # We only check the first entry in the root
@@ -1367,6 +1423,7 @@ def can_load_as_event_workspace(filename):
                 nxs_file.close()
 
     return is_event_workspace
+
 
 def get_start_q_and_end_q_values(rear_data_name, front_data_name, rescale_shift):
     '''
@@ -1416,6 +1473,7 @@ def get_start_q_and_end_q_values(rear_data_name, front_data_name, rescale_shift)
 
     return min_q, max_q
 
+
 def get_error_corrected_front_and_rear_data_sets(front_data, rear_data, q_min, q_max):
     '''
     Transfers the error data from the front data to the rear data
@@ -1443,6 +1501,7 @@ def get_error_corrected_front_and_rear_data_sets(front_data, rear_data, q_min, q
 
     return front_data_cropped, rear_data_cropped
 
+
 def is_1D_workspace(workspace):
     '''
     Check if the workspace is 1D, ie if it has only a single spectrum
@@ -1454,6 +1513,7 @@ def is_1D_workspace(workspace):
     else:
         return False
 
+
 def meter_2_millimeter(num):
     '''
     Converts from m to mm
@@ -1462,6 +1522,7 @@ def meter_2_millimeter(num):
     '''
     return num*1000.
 
+
 def millimeter_2_meter(num):
     '''
     Converts from mm to m
@@ -1469,6 +1530,7 @@ def millimeter_2_meter(num):
     @returns float in m
     '''
     return num/1000.
+
 
 def correct_q_resolution_for_can(original_workspace, can_workspace, subtracted_workspace):
     '''
@@ -1480,9 +1542,9 @@ def correct_q_resolution_for_can(original_workspace, can_workspace, subtracted_w
     @param can_workspace: the can workspace
     @param subtracted_workspace: the subtracted workspace
     '''
-    dummy1 = can_workspace
     if original_workspace.getNumberHistograms() == 1 and original_workspace.hasDx(0):
         subtracted_workspace.setDx(0, original_workspace.dataDx(0))
+
 
 def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
                                     output_ws, scale):
@@ -1503,21 +1565,13 @@ def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
     @param output_ws: the output workspace
     '''
     def divide_q_resolution_by_counts(q_res, counts):
-        # We are dividing DX by Y. Note that len(DX) = len(Y) + 1
-        # Unfortunately, we need some knowlege about the Q1D algorithm here.
-        # The two last entries of DX are duplicate in Q1D and this is how we
-        # treat it here.
-        q_res_buffer = np.divide(q_res[0:-1],counts)
-        q_res_buffer = np.append(q_res_buffer, q_res_buffer[-1])
+        # We are dividing DX by Y.
+        q_res_buffer = np.divide(q_res,counts)
         return q_res_buffer
 
     def multiply_q_resolution_by_counts(q_res, counts):
-         # We are dividing DX by Y. Note that len(DX) = len(Y) + 1
-        # Unfortunately, we need some knowlege about the Q1D algorithm here.
-        # The two last entries of DX are duplicate in Q1D and this is how we
-        # treat it here.
-        q_res_buffer = np.multiply(q_res[0:-1],counts)
-        q_res_buffer = np.append(q_res_buffer, q_res_buffer[-1])
+         # We are dividing DX by Y.
+        q_res_buffer = np.multiply(q_res,counts)
         return q_res_buffer
 
     if count_ws_rear.getNumberHistograms() != 1:
@@ -1558,6 +1612,7 @@ class MeasurementTimeFromNexusFileExtractor(object):
     '''
     Extracts the measurement from a nexus file
     '''
+
     def __init__(self):
         super(MeasurementTimeFromNexusFileExtractor, self).__init__()
 
@@ -1599,7 +1654,7 @@ class MeasurementTimeFromNexusFileExtractor(object):
                     sanslog.warning("Failed to retrieve the measurement time for " + str(filename_full))
                 finally:
                     nxs_file.close()
-            except ValueError, NeXusError:
+            except ValueError:
                 sanslog.warning("Failed to open the file: " + str(filename_full))
         return measurement_time
 
@@ -1669,6 +1724,7 @@ def get_measurement_time_from_file(filename):
         measurement_time = nxs_extractor.get_measurement_time(filename_full)
     return str(measurement_time).strip()
 
+
 def are_two_files_identical(file_path_1, file_path_2):
     '''
     We want to make sure that two files are binary identical.
@@ -1678,6 +1734,7 @@ def are_two_files_identical(file_path_1, file_path_2):
     '''
     import filecmp
     return filecmp.cmp(file_path_1, file_path_2)
+
 
 def is_valid_user_file_extension(user_file):
     '''
@@ -1693,11 +1750,11 @@ def is_valid_user_file_extension(user_file):
 
     filename, file_extension = os.path.splitext(user_file)
     file_extension = file_extension.upper()
-    dummy_file = filename
     is_allowed = False
     if file_extension in allowed_values or re.match(pattern, file_extension):
         is_allowed = True
     return is_allowed
+
 
 def createUnmanagedAlgorithm(name, **kwargs):
     '''
@@ -1711,6 +1768,7 @@ def createUnmanagedAlgorithm(name, **kwargs):
     for key, value in kwargs.iteritems():
         alg.setProperty(key, value)
     return alg
+
 
 def extract_fit_parameters(rAnds):
     '''
@@ -1765,6 +1823,15 @@ def quaternion_to_angle_and_axis(quaternion):
     return math.degrees(angle), axis
 
 
+def get_unfitted_transmission_workspace_name(workspace_name):
+    suffix = "_unfitted"
+    if workspace_name.endswith(suffix):
+        unfitted_workspace_name = workspace_name
+    else:
+        unfitted_workspace_name = workspace_name + suffix
+    return unfitted_workspace_name
+
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################
@@ -1772,9 +1839,9 @@ def quaternion_to_angle_and_axis(quaternion):
 # Parse a log file containing run information and return the detector positions
 @deprecated
 def parseLogFile(logfile):
-    logkeywords = {'Rear_Det_X':0.0, 'Rear_Det_Z':0.0, 'Front_Det_X':0.0, 'Front_Det_Z':0.0, \
-        'Front_Det_Rot':0.0}
-    if logfile == None:
+    logkeywords = {'Rear_Det_X':0.0, 'Rear_Det_Z':0.0, 'Front_Det_X':0.0, 'Front_Det_Z':0.0,
+                   'Front_Det_Rot':0.0}
+    if logfile is None:
         return tuple(logkeywords.values())
     file_log = open(logfile, 'rU')
     for line in file_log:
@@ -1783,6 +1850,7 @@ def parseLogFile(logfile):
             logkeywords[entry] = float(line.split()[2])
 
     return tuple(logkeywords.values())
+
 
 @deprecated
 def normalizePhi(phi):
@@ -1795,12 +1863,16 @@ def normalizePhi(phi):
     return phi
 
 # Mask the inside of a cylinder
+
+
 @deprecated
 def MaskInsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
     '''Mask out the inside of a cylinder or specified radius'''
     MaskWithCylinder(workspace, radius, xcentre, ycentre, '')
 
 # Mask the outside of a cylinder
+
+
 @deprecated
 def MaskOutsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
     '''Mask out the outside of a cylinder or specified radius'''
@@ -1808,6 +1880,8 @@ def MaskOutsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
 
 # Convert a mask string to a spectra list
 # 6/8/9 RKH attempt to add a box mask e.g.  h12+v34 (= one pixel at intersection), h10>h12+v101>v123 (=block 3 wide, 23 tall)
+
+
 @deprecated
 def ConvertToSpecList(maskstring, firstspec, dimension, orientation):
     '''Compile spectra ID list'''
@@ -1866,6 +1940,8 @@ def ConvertToSpecList(maskstring, firstspec, dimension, orientation):
     return speclist
 
 # Mask by detector number
+
+
 @deprecated
 def MaskBySpecNumber(workspace, speclist):
     speclist = speclist.rstrip(',')
@@ -1873,14 +1949,15 @@ def MaskBySpecNumber(workspace, speclist):
         return ''
     MaskDetectors(Workspace=workspace, SpectraList = speclist)
 
+
 @deprecated
 def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, wavbining, interpolate, loqremovebins):
     tmpWS = inputWS + '_tmp'
     CropWorkspace(InputWorkspace=inputWS,OutputWorkspace=tmpWS, StartWorkspaceIndex=0, EndWorkspaceIndex=2)
 
-    if loqremovebins == True:
+    if loqremovebins:
         RemoveBins(InputWorkspace=tmpWS,OutputWorkspace=tmpWS,XMin= 19900,XMax= 20500, Interpolation='Linear')
-    if backmon_start != None and backmon_end != None:
+    if backmon_start is not None and backmon_end is not None:
         CalculateFlatBackground(InputWorkspace=tmpWS,OutputWorkspace= tmpWS, StartX = backmon_start, EndX = backmon_end, WorkspaceIndexList = spec_list, Mode='Mean')
 
     # Convert and rebin
@@ -1895,6 +1972,8 @@ def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, w
 
 # Setup the transmission workspace
 # Correct of for the volume of the sample/can. Dimensions should be in order: width, height, thickness
+
+
 @deprecated
 def ScaleByVolume(inputWS, scalefactor, geomid, width, height, thickness):
     # Divide by the area
@@ -1910,6 +1989,7 @@ def ScaleByVolume(inputWS, scalefactor, geomid, width, height, thickness):
     # Multiply by the calculated correction factor
     ws = mtd[inputWS]
     ws *= scalefactor
+
 
 @deprecated
 def StripEndZeroes(workspace, flag_value = 0.0):
@@ -1936,6 +2016,7 @@ def StripEndZeroes(workspace, flag_value = 0.0):
     endX = 1.001*x_vals[stop + 1]
     CropWorkspace(InputWorkspace=workspace,OutputWorkspace=workspace,XMin=startX,XMax=endX)
 
+
 @deprecated
 class Orientation(object):
 
@@ -1944,6 +2025,8 @@ class Orientation(object):
     Rotated = 3
 
 # A small class holds the run number with the workspace name, because the run number is not contained in the workspace at the moment
+
+
 @deprecated
 class WorkspaceDetails(object):
 
@@ -1963,6 +2046,8 @@ class WorkspaceDetails(object):
         self._run_number = -1
 
 # A small class to collect together run information, used to save passing tuples around
+
+
 @deprecated
 class RunDetails(object):
 

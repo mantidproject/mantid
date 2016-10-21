@@ -215,6 +215,11 @@ void ReflRunsTabPresenter::transfer() {
   SearchResultMap runs;
   auto selectedRows = m_view->getSelectedSearchRows();
 
+  // Do not begin transfer if nothing is selected
+  if (selectedRows.size() == 0) {
+    return;
+  }
+
   for (auto rowIt = selectedRows.begin(); rowIt != selectedRows.end();
        ++rowIt) {
     const int row = *rowIt;

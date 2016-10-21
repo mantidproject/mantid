@@ -6,6 +6,7 @@ from reduction_workflow.instruments.sans.hfir_command_interface import *
 
 import os
 
+
 def do_cleanup():
     Files = ["BioSANS_test_data_reduction.log",
              "BioSANS_test_data_Iq.xml",
@@ -17,6 +18,7 @@ def do_cleanup():
             os.remove(absfile)
     return True
 
+
 class HFIRTrans1(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -27,6 +29,7 @@ class HFIRTrans1(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         DirectBeamTransmission(sample_file="BioSANS_sample_trans.xml",
@@ -43,6 +46,7 @@ class HFIRTrans1(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRTrans.nxs'
 
+
 class HFIRTrans2(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -53,6 +57,7 @@ class HFIRTrans2(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         SetTransmission(0.522296, 0.009134)
@@ -68,6 +73,7 @@ class HFIRTrans2(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRTrans.nxs'
 
+
 class HFIRTransmissionDarkCurrent(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -78,6 +84,7 @@ class HFIRTransmissionDarkCurrent(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         DirectBeamTransmission(sample_file="BioSANS_sample_trans.xml",
@@ -95,6 +102,7 @@ class HFIRTransmissionDarkCurrent(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRTransmissionDarkCurrent.nxs'
 
+
 class HFIRTransmissionDirectBeamCenter(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -105,6 +113,7 @@ class HFIRTransmissionDirectBeamCenter(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         DirectBeamTransmission(sample_file="BioSANS_sample_trans.xml",
@@ -122,6 +131,7 @@ class HFIRTransmissionDirectBeamCenter(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRTransmissionDirectBeamCenter.nxs'
 
+
 class HFIRTransmissionBeamCenter(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -132,6 +142,7 @@ class HFIRTransmissionBeamCenter(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         DirectBeamTransmission(sample_file="BioSANS_sample_trans.xml",
@@ -150,6 +161,7 @@ class HFIRTransmissionBeamCenter(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRTransmissionDirectBeamCenter.nxs'
 
+
 class HFIRTransmissionBeamSpreader(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -160,6 +172,7 @@ class HFIRTransmissionBeamSpreader(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml",
@@ -180,6 +193,7 @@ class HFIRTransmissionBeamSpreader(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRTransmissionBeamSpreader.nxs'
 
+
 class HFIRTransmissionBeamSpreaderDC(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -190,6 +204,7 @@ class HFIRTransmissionBeamSpreaderDC(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml",
@@ -211,6 +226,7 @@ class HFIRTransmissionBeamSpreaderDC(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRTransmissionBeamSpreaderDC.nxs'
 
+
 class HFIRTransmissionBeamSpreaderDBC(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -221,6 +237,7 @@ class HFIRTransmissionBeamSpreaderDBC(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml",
@@ -242,6 +259,7 @@ class HFIRTransmissionBeamSpreaderDBC(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRTransmissionBeamSpreaderDBC.nxs'
 
+
 class HFIRTransmissionBeamSpreaderBC(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -252,6 +270,7 @@ class HFIRTransmissionBeamSpreaderBC(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml",
@@ -273,5 +292,3 @@ class HFIRTransmissionBeamSpreaderBC(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRTransmissionBeamSpreaderDBC.nxs'
-
-

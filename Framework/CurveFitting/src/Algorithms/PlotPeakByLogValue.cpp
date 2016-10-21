@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include <cmath>
 #include <vector>
 #include <fstream>
@@ -26,6 +23,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -130,6 +128,14 @@ void PlotPeakByLogValue::init() {
       "If true and OutputCompositeMembers is true members of any "
       "Convolution are output convolved\n"
       "with corresponding resolution");
+
+  std::vector<std::string> evaluationTypes{"CentrePoint", "Histogram"};
+  declareProperty(
+      "EvaluationType", "CentrePoint",
+      Kernel::IValidator_sptr(
+          new Kernel::ListValidator<std::string>(evaluationTypes)),
+      "The way the function is evaluated: CentrePoint or Histogram.",
+      Kernel::Direction::Input);
 }
 
 /**
@@ -268,10 +274,14 @@ void PlotPeakByLogValue::exec() {
         if (createFitOutput)
           wsBaseName = wsNames[i].name + "_" + spectrum_index;
 
+        bool histogramFit = getPropertyValue("EvaluationType") == "Histogram";
+
         // Fit the function
         API::IAlgorithm_sptr fit =
             AlgorithmManager::Instance().createUnmanaged("Fit");
         fit->initialize();
+        fit->setPropertyValue("EvaluationType",
+                              getPropertyValue("EvaluationType"));
         fit->setProperty("Function", ifun);
         fit->setProperty("InputWorkspace", data.ws);
         fit->setProperty("WorkspaceIndex", j);
@@ -284,8 +294,10 @@ void PlotPeakByLogValue::exec() {
                               getPropertyValue("MaxIterations"));
         fit->setProperty("CalcErrors", true);
         fit->setProperty("CreateOutput", createFitOutput);
-        fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
-        fit->setProperty("ConvolveMembers", outputConvolvedMembers);
+        if (!histogramFit) {
+          fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
+          fit->setProperty("ConvolveMembers", outputConvolvedMembers);
+        }
         fit->setProperty("Output", wsBaseName);
         fit->execute();
 
@@ -576,7 +588,14 @@ PlotPeakByLogValue::makeNames() const {
         wi = default_wi;
       }
     }
-    int period = (params.count() > 2) ? boost::lexical_cast<int>(params[2]) : 1;
+    int period = 1;
+    try {
+      if (params.count() > 2 && !params[2].empty()) {
+        period = boost::lexical_cast<int>(params[2]);
+      }
+    } catch (boost::bad_lexical_cast &) {
+      throw std::runtime_error("Incorrect value for a period: " + params[2]);
+    }
     if (API::AnalysisDataService::Instance().doesExist(name)) {
       API::Workspace_sptr ws =
           API::AnalysisDataService::Instance().retrieve(name);

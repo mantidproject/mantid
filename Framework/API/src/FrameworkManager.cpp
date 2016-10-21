@@ -20,6 +20,11 @@
 #include <winsock2.h>
 #endif
 
+#ifdef __linux__
+#include <csignal>
+#include <execinfo.h>
+#endif
+
 #ifdef MPI_BUILD
 #include <boost/mpi.hpp>
 #endif
@@ -45,12 +50,55 @@ void NexusErrorFunction(void *data, char *text) {
   // Do nothing.
 }
 
+#ifdef __linux__
+/**
+ * Print current backtrace to the given stream
+ * @param os A reference to an output stream
+ */
+void backtraceToStream(std::ostream &os) {
+  void *trace_elems[32];
+  int trace_elem_count(backtrace(trace_elems, 32));
+  char **stack_syms(backtrace_symbols(trace_elems, trace_elem_count));
+  for (int i = 0; i < trace_elem_count; ++i) {
+    os << ' ' << stack_syms[i] << '\n';
+  }
+  free(stack_syms);
+}
+
+/**
+ * Designed as a handler function for std::set_terminate. It prints
+ * a header message and then a backtrace to std::cerr. It calls exit
+ * with code 1
+ */
+void terminateHandler() {
+  std::cerr << "\n********* UNHANDLED EXCEPTION *********\n";
+  backtraceToStream(std::cerr);
+  exit(1);
+}
+
+/**
+ * Designed as a SIGSEGV handler for detecting segfaults
+ * and printing a backtrace to std::cerr. It exits with
+ * code -1
+ */
+void sigsegvHandler(int) {
+  std::cerr << "\n********* SEGMENTATION FAULT *********\n";
+  backtraceToStream(std::cerr);
+  exit(-1);
+}
+
+#endif
+
 /// Default constructor
 FrameworkManagerImpl::FrameworkManagerImpl()
 #ifdef MPI_BUILD
     : m_mpi_environment(argc, argv)
 #endif
 {
+#ifdef __linux__
+  std::set_terminate(terminateHandler);
+  std::signal(SIGSEGV, sigsegvHandler);
+#endif
   setGlobalNumericLocaleToC();
   Kernel::MemoryOptions::initAllocatorOptions();
 
@@ -114,7 +162,7 @@ void FrameworkManagerImpl::UpdateInstrumentDefinitions() {
     IAlgorithm *algDownloadInstrument =
         this->createAlgorithm("DownloadInstrument");
     algDownloadInstrument->setAlgStartupLogging(false);
-    Poco::ActiveResult<bool> result = algDownloadInstrument->executeAsync();
+    algDownloadInstrument->executeAsync();
   } catch (Kernel::Exception::NotFoundError &) {
     g_log.debug() << "DowndloadInstrument algorithm is not available - cannot "
                      "update instrument definitions.\n";
@@ -126,7 +174,7 @@ void FrameworkManagerImpl::CheckIfNewerVersionIsAvailable() {
   try {
     IAlgorithm *algCheckVersion = this->createAlgorithm("CheckMantidVersion");
     algCheckVersion->setAlgStartupLogging(false);
-    Poco::ActiveResult<bool> result = algCheckVersion->executeAsync();
+    algCheckVersion->executeAsync();
   } catch (Kernel::Exception::NotFoundError &) {
     g_log.debug() << "CheckMantidVersion algorithm is not available - cannot "
                      "check if a newer version is available.\n";

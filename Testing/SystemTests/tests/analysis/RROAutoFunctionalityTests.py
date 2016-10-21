@@ -4,11 +4,11 @@ from algorithm_decorator import make_decorator
 from mantid.simpleapi import *
 import mantid.api
 
+
 class RROAutoFunctionalityTest(stresstesting.MantidStressTest):
     """
     This test is to check the functionality of ReflectometryReductionOneAuto. Data testing is done separately
     """
-
 
     def __init__(self):
         super(RROAutoFunctionalityTest, self).__init__()
@@ -26,7 +26,6 @@ class RROAutoFunctionalityTest(stresstesting.MantidStressTest):
         DeleteWorkspace(self.__trans_ws_1)
         DeleteWorkspace(self.__trans_ws_2)
         DeleteWorkspace(self.__self.__line_detector_ws)
-
 
     def construct_standard_algorithm(self):
         alg = make_decorator(ReflectometryReductionOneAuto)
@@ -70,7 +69,6 @@ class RROAutoFunctionalityTest(stresstesting.MantidStressTest):
 
         out_ws_q, out_ws_lam, theta = alg.execute()
 
-
     def test_spectrum_map_mismatch_throws_when_strict(self):
         alg = self.construct_standard_algorithm()
         '''
@@ -86,7 +84,6 @@ class RROAutoFunctionalityTest(stresstesting.MantidStressTest):
         alg.set_StrictSpectrumChecking(True)
 
         self.assertRaises(Exception, alg.execute) # Should throw due to spectrum missmatch.
-
 
     def test_spectrum_map_mismatch_doesnt_throw_when_not_strict(self):
         alg = self.construct_standard_algorithm()
@@ -104,7 +101,6 @@ class RROAutoFunctionalityTest(stresstesting.MantidStressTest):
         alg.set_StrictSpectrumChecking(False) # Will not crash-out on spectrum checking.
 
         alg.execute()# Should not throw
-
 
     def test_multidetector_run(self):
         alg = self.construct_standard_algorithm()
@@ -149,7 +145,6 @@ class RROAutoFunctionalityTest(stresstesting.MantidStressTest):
 
         self.assertDelta(-0.05714, detector_pos.Z(), 0.0001)
 
-
     def runTest(self):
 
         self.test_point_detector_run_with_single_transmission_workspace()
@@ -163,8 +158,6 @@ class RROAutoFunctionalityTest(stresstesting.MantidStressTest):
         self.test_multidetector_run()
 
         self.test_multidetector_run_correct_positions()
-
-
 
     def validate(self):
         return True

@@ -100,7 +100,7 @@ void SofQWNormalisedPolygon::exec() {
     this->initAngularCachesPSD(inputWS);
   }
 
-  const MantidVec &X = inputWS->readX(0);
+  const auto &X = inputWS->x(0);
   int emode = m_EmodeProperties.m_emode;
 
   PARALLEL_FOR2(inputWS, outputWS)
@@ -187,6 +187,19 @@ void SofQWNormalisedPolygon::exec() {
   // Set the output spectrum-detector mapping
   SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
   outputWS->updateSpectraUsing(outputDetectorMap);
+
+  // Replace any NaNs in outputWorkspace with zeroes
+  if (this->getProperty("ReplaceNaNs")) {
+    auto replaceNans = this->createChildAlgorithm("ReplaceSpecialValues");
+    replaceNans->setChild(true);
+    replaceNans->initialize();
+    replaceNans->setProperty("InputWorkspace", outputWS);
+    replaceNans->setProperty("OutputWorkspace", outputWS);
+    replaceNans->setProperty("NaNValue", 0.0);
+    replaceNans->setProperty("InfinityValue", 0.0);
+    replaceNans->setProperty("BigNumberThreshold", DBL_MAX);
+    replaceNans->execute();
+  }
 }
 
 /**
@@ -379,7 +392,7 @@ RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
     API::MatrixWorkspace_const_sptr inputWorkspace,
     const std::vector<double> &binParams, std::vector<double> &newAxis) {
   // Create vector to hold the new X axis values
-  HistogramData::BinEdges xAxis(inputWorkspace->refX(0));
+  HistogramData::BinEdges xAxis(inputWorkspace->sharedX(0));
   const int xLength = static_cast<int>(xAxis.size());
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that

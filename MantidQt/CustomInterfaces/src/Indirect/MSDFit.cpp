@@ -62,6 +62,8 @@ void MSDFit::setup() {
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(plotFit()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 }
 
 void MSDFit::run() {
@@ -78,8 +80,6 @@ void MSDFit::run() {
   double xEnd = m_dblManager->value(m_properties["End"]);
   long specMin = m_uiForm.spSpectraMin->value();
   long specMax = m_uiForm.spSpectraMax->value();
-  bool plot = m_uiForm.ckPlot->isChecked();
-  bool save = m_uiForm.ckSave->isChecked();
 
   IAlgorithm_sptr msdAlg = AlgorithmManager::Instance().create("MSDFit");
   msdAlg->initialize();
@@ -88,25 +88,13 @@ void MSDFit::run() {
   msdAlg->setProperty("XEnd", xEnd);
   msdAlg->setProperty("SpecMin", specMin);
   msdAlg->setProperty("SpecMax", specMax);
-  msdAlg->setProperty("Plot", plot);
   msdAlg->setProperty("OutputWorkspace", m_pythonExportWsName);
 
   m_batchAlgoRunner->addAlgorithm(msdAlg);
-
-  // Handle saving results
-  if (save) {
-    API::BatchAlgorithmRunner::AlgorithmRuntimeProps saveInputProps;
-    saveInputProps["InputWorkspace"] = m_pythonExportWsName;
-
-    IAlgorithm_sptr saveAlg =
-        AlgorithmManager::Instance().create("SaveNexusProcessed");
-    saveAlg->initialize();
-    saveAlg->setProperty("Filename", m_pythonExportWsName + ".nxs");
-
-    m_batchAlgoRunner->addAlgorithm(saveAlg, saveInputProps);
-  }
-
   m_batchAlgoRunner->executeBatchAsync();
+
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(algorithmComplete(bool)));
 }
 
 void MSDFit::singleFit() {
@@ -159,6 +147,23 @@ bool MSDFit::validate() {
 
 void MSDFit::loadSettings(const QSettings &settings) {
   m_uiForm.dsSampleInput->readSettings(settings.group());
+}
+
+/**
+ * Handles the completion of the MSDFit algorithm
+ *
+ * @param error If the algorithm chain failed
+ */
+void MSDFit::algorithmComplete(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(algorithmComplete(bool)));
+
+  if (error)
+    return;
+
+  // Enable plot and save
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 }
 
 /**
@@ -295,6 +300,25 @@ void MSDFit::updateRS(QtProperty *prop, double val) {
     fitRangeSelector->setMinimum(val);
   else if (prop == m_properties["End"])
     fitRangeSelector->setMaximum(val);
+}
+
+/**
+ * Handles saving of workspace
+ */
+void MSDFit::saveClicked() {
+
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Handles mantid plotting
+ */
+void MSDFit::plotClicked() {
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName + "_Workspaces", true))
+    plotSpectrum((QString::fromStdString(m_pythonExportWsName) + "_Workspaces"),
+                 0, 2);
 }
 
 } // namespace IDA

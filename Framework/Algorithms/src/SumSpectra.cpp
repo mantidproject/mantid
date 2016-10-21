@@ -1,8 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/SumSpectra.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidGeometry/IDetector.h"
@@ -240,6 +239,8 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
   numMasked = 0;
   numZeros = 0;
 
+  const auto &spectrumInfo =
+      localworkspace->spectrumInfo(ThreadedContextCheck::Skip);
   // Loop over spectra
   for (const auto i : this->m_indices) {
     // Don't go outside the range.
@@ -249,19 +250,15 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
       break;
     }
 
-    try {
-      // Get the detector object for this spectrum
-      Geometry::IDetector_const_sptr det = localworkspace->getDetector(i);
+    if (spectrumInfo.hasDetectors(i)) {
       // Skip monitors, if the property is set to do so
-      if (!m_keepMonitors && det->isMonitor())
+      if (!m_keepMonitors && spectrumInfo.isMonitor(i))
         continue;
       // Skip masked detectors
-      if (det->isMasked()) {
+      if (spectrumInfo.isMasked(i)) {
         numMasked++;
         continue;
       }
-    } catch (...) {
-      // if the detector not found just carry on
     }
     numSpectra++;
 
@@ -352,6 +349,12 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   numMasked = 0;
   numZeros = 0;
 
+  // Careful: SumSpectra is called in an OpenMP by other algorithms (on distinct
+  // workspaces) so we manually disable the thread context check here. This will
+  // go wrong if clients call SumSpectra on the same workspace in different
+  // threads at the same time.
+  const auto &spectrumInfo =
+      localworkspace->spectrumInfo(ThreadedContextCheck::Skip);
   // Loop over spectra
   for (const auto i : m_indices) {
     // Don't go outside the range.
@@ -361,19 +364,15 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
       break;
     }
 
-    try {
-      // Get the detector object for this spectrum
-      Geometry::IDetector_const_sptr det = localworkspace->getDetector(i);
+    if (spectrumInfo.hasDetectors(i)) {
       // Skip monitors, if the property is set to do so
-      if (!m_keepMonitors && det->isMonitor())
+      if (!m_keepMonitors && spectrumInfo.isMonitor(i))
         continue;
       // Skip masked detectors
-      if (det->isMasked()) {
+      if (spectrumInfo.isMasked(i)) {
         numMasked++;
         continue;
       }
-    } catch (...) {
-      // if the detector not found just carry on
     }
     numSpectra++;
 
@@ -444,6 +443,8 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   outEL.setSpectrumNo(m_outSpecNum);
   outEL.clearDetectorIDs();
 
+  const auto &spectrumInfo =
+      localworkspace->spectrumInfo(ThreadedContextCheck::Skip);
   // Loop over spectra
   size_t numSpectra(0);
   size_t numMasked(0);
@@ -456,19 +457,15 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
       break;
     }
 
-    try {
-      // Get the detector object for this spectrum
-      Geometry::IDetector_const_sptr det = localworkspace->getDetector(i);
+    if (spectrumInfo.hasDetectors(i)) {
       // Skip monitors, if the property is set to do so
-      if (!m_keepMonitors && det->isMonitor())
+      if (!m_keepMonitors && spectrumInfo.isMonitor(i))
         continue;
       // Skip masked detectors
-      if (det->isMasked()) {
+      if (spectrumInfo.isMasked(i)) {
         numMasked++;
         continue;
       }
-    } catch (...) {
-      // if the detector not found just carry on
     }
     numSpectra++;
 

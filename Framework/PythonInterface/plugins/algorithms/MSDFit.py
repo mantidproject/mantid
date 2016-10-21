@@ -12,16 +12,13 @@ class MSDFit(DataProcessorAlgorithm):
     _x_range = None
     _input_ws = None
     _output_param_ws = None
-    _plot = None
     _output_msd_ws = None
 
     def category(self):
         return 'Workflow\\MIDAS'
 
-
     def summary(self):
         return 'Fits log(intensity) vs Q-squared to obtain the mean squared displacement.'
-
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',direction=Direction.Input),
@@ -37,9 +34,6 @@ class MSDFit(DataProcessorAlgorithm):
         self.declareProperty(name='SpecMax', defaultValue=0,
                              doc='End of spectra range to be fit')
 
-        self.declareProperty(name='Plot', defaultValue=False,
-                             doc='Plots results after fit')
-
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',direction=Direction.Output),
                              doc='Output mean squared displacement')
 
@@ -52,7 +46,6 @@ class MSDFit(DataProcessorAlgorithm):
                                                     direction=Direction.Output,
                                                     optional=PropertyMode.Optional),
                              doc='Output fitted workspaces')
-
 
     def validateInputs(self):
         issues = dict()
@@ -92,14 +85,13 @@ class MSDFit(DataProcessorAlgorithm):
 
         return issues
 
-
     def PyExec(self):
         self._setup()
 
         # Fit line to each of the spectra
         function = 'name=LinearBackground, A0=0, A1=0'
         input_params = [self._input_ws + ',i%d' % i for i in range(self._spec_range[0],
-                                                                    self._spec_range[1] + 1)]
+                                                                   self._spec_range[1] + 1)]
         input_params = ';'.join(input_params)
         PlotPeakByLogValue(Input=input_params,
                            OutputWorkspace=self._output_msd_ws,
@@ -159,10 +151,6 @@ class MSDFit(DataProcessorAlgorithm):
         self.setProperty('ParameterWorkspace', self._output_param_ws)
         self.setProperty('FitWorkspaces', self._output_fit_ws)
 
-        if self._plot:
-            self._plot_result()
-
-
     def _setup(self):
         """
         Gets algorithm properties.
@@ -183,29 +171,5 @@ class MSDFit(DataProcessorAlgorithm):
 
         self._spec_range = [self.getProperty('SpecMin').value,
                             self.getProperty('SpecMax').value]
-
-        self._plot = self.getProperty('Plot').value
-
-
-    def _plot_result(self):
-        """
-        Handles plotting result workspaces.
-        """
-
-        from IndirectImport import import_mantidplot
-        mtd_plot = import_mantidplot()
-
-        x_label = ''
-        ws_run = mtd[self._input_ws].getRun()
-        if 'vert_axis' in ws_run:
-            x_label = ws_run.getLogData('vert_axis').value
-
-        result_ws = mtd[self._output_msd_ws + '_A1']
-        if len(result_ws.readX(0)) > 1:
-            msd_plot = mtd_plot.plotSpectrum(result_ws, 0, True)
-            msd_layer = msd_plot.activeLayer()
-            msd_layer.setAxisTitle(mtd_plot.Layer.Bottom, x_label)
-            msd_layer.setAxisTitle(mtd_plot.Layer.Left, '<u2>')
-
 
 AlgorithmFactory.subscribe(MSDFit)

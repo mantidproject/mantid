@@ -520,7 +520,11 @@ void PeakPickerTool::functionRemoved() { d_graph->plotWidget()->replot(); }
 void PeakPickerTool::algorithmFinished(const QString &out) {
   // Remove old curves first, unless this is muon data
   // (muon scientists want to keep old fits until cleared manually)
-  if (!isMuonData()) {
+  if (isMuonData()) {
+    if (out.endsWith("_Workspaces")) {
+      return; // Simultaneous fit, don't plot results
+    }
+  } else {
     removeFitCurves();
   }
 
@@ -557,6 +561,13 @@ void PeakPickerTool::algorithmFinished(const QString &out) {
   }
 
   graph()->replot();
+
+  // New curve(s) inserted: Y scale may have changed.
+  // If we need to keep left/right Y in sync, do so now.
+  if (graph()->hasSynchronizedScaleDivisions()) {
+    graph()->updateSecondaryAxis(QwtPlot::Axis::yRight);
+    graph()->replot();
+  }
 }
 
 /**

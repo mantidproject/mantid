@@ -5,6 +5,7 @@
 
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/ModeratorModel.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 

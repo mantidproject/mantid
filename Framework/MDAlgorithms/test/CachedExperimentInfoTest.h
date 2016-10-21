@@ -5,6 +5,8 @@
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>

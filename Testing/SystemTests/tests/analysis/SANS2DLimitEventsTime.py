@@ -3,13 +3,14 @@ import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
 
+
 class SANS2DLimitEventsTime(stresstesting.MantidStressTest):
 
     def runTest(self):
         SANS2D()
         MaskFile('MaskSANS2DReductionGUI_LimitEventsTime.txt')
         AssignSample('22048')
-        reduced = WavRangeReduction()
+        WavRangeReduction()
 
     def validate(self):
         self.disableChecking.append('SpectraMap')

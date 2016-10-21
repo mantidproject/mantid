@@ -1,9 +1,11 @@
 #include "MantidAlgorithms/ConvertAxesToRealSpace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <limits>
@@ -17,8 +19,6 @@ using namespace Mantid::DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertAxesToRealSpace)
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's name
 const std::string ConvertAxesToRealSpace::name() const {
@@ -39,7 +39,6 @@ const std::string ConvertAxesToRealSpace::summary() const {
          "the data in the process";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ConvertAxesToRealSpace::init() {
@@ -75,7 +74,6 @@ void ConvertAxesToRealSpace::init() {
       "The number of bins along the horizontal axis.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ConvertAxesToRealSpace::exec() {
@@ -114,12 +112,12 @@ void ConvertAxesToRealSpace::exec() {
 
   int failedCount = 0;
 
+  const auto &spectrumInfo = summedWs->spectrumInfo();
   // for each spectra
   PARALLEL_FOR2(summedWs, outputWs)
   for (int i = 0; i < nHist; ++i) {
     try {
-      Mantid::Geometry::IDetector_const_sptr det = summedWs->getDetector(i);
-      V3D pos = det->getPos();
+      V3D pos = spectrumInfo.position(i);
       double r, theta, phi;
       pos.getSpherical(r, theta, phi);
 
@@ -142,9 +140,9 @@ void ConvertAxesToRealSpace::exec() {
         } else if (axisSelection == "phi") {
           axisValue = phi;
         } else if (axisSelection == "2theta") {
-          axisValue = inputWs->detectorTwoTheta(*det);
+          axisValue = spectrumInfo.twoTheta(i);
         } else if (axisSelection == "signed2theta") {
-          axisValue = inputWs->detectorSignedTwoTheta(*det);
+          axisValue = spectrumInfo.signedTwoTheta(i);
         }
 
         if (axisIndex == 0) {

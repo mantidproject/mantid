@@ -1,6 +1,7 @@
 #ifndef MANTID_API_MULTIPLEFILEPROPERTYTEST_H_
 #define MANTID_API_MULTIPLEFILEPROPERTYTEST_H_
 
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -17,6 +18,7 @@
 
 using namespace Mantid;
 using namespace Mantid::API;
+using Mantid::API::FileProperty;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Helper functions.
@@ -614,6 +616,18 @@ public:
 
     TS_ASSERT_EQUALS(fileNames.size(), 1);
     TS_ASSERT_EQUALS(fileNames[0].size(), 1);
+  }
+
+  void test_multiFileOptionalLoad() {
+    MultipleFileProperty p("Filename", FileProperty::OptionalLoad);
+    p.setValue("myJunkFile.nxs");
+    TS_ASSERT(p.isValid().empty());
+  }
+
+  void test_multiFileOptionalLoadEmpty() {
+    MultipleFileProperty p("Filename", FileProperty::OptionalLoad);
+    p.setValue("");
+    TS_ASSERT(p.isValid().empty());
   }
 
 private:

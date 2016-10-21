@@ -48,10 +48,6 @@ public:
   // virtual bool focusedOutWorkspace() const;
   MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
 
-  // virtual Splits the fitting directory if the ENGINX found
-  MOCK_METHOD1(splitFittingDirectory,
-               std::vector<std::string>(std::string &selectedfPath));
-
   // adds the number of banks to the combo-box widget on the interface
   MOCK_METHOD1(addBankItem, void(std::string bankID));
 
@@ -144,6 +140,9 @@ public:
   MOCK_METHOD3(setDataVector,
                void(std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
                     bool plotSinglePeaks));
+
+  // virtual void resetCanvas
+  MOCK_METHOD0(resetCanvas, void());
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

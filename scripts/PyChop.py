@@ -1,23 +1,21 @@
-#pylint: skip-file
-from mantid import config
-from PyChop import fluxGUI
-from PyChop import PyChopGUI
-from PyQt4 import QtGui
+# pylint: disable=line-too-long, invalid-name, unused-import
+
+"""
+Module to import and run the PyChop GUI for use either on the commandline or as a MantidPlot interface
+"""
+
 import sys
+from PyQt4 import QtGui
+from PyChop import PyChopGui
 
-
-def qapp():
+if __name__ == '__main__':
     if QtGui.QApplication.instance():
-        _app = QtGui.QApplication.instance()
+        app = QtGui.QApplication.instance()
     else:
-        _app = QtGui.QApplication(sys.argv)
-    return _app
-
-app = qapp()
-instr_name = config['default.instrument']
-if instr_name[0:3] == 'LET':
-    Resolution = fluxGUI.MainWindow()#the main ui class for LET resolution
-else:
-    Resolution = PyChopGUI.MainWindow()
-Resolution.show()
-app.exec_()
+        app = QtGui.QApplication(sys.argv)
+    window = PyChopGui.PyChopGui()
+    window.show()
+    try: # check if started from within mantidplot
+        import mantidplot # noqa
+    except ImportError:
+        sys.exit(app.exec_())

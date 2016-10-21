@@ -91,7 +91,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/PluginFit.cpp
                    src/PolynomFitDialog.cpp
                    src/PolynomialFit.cpp
-		    src/ProjectSerialiser.cpp
+                   src/ProjectSerialiser.cpp
                    src/PythonScript.cpp
                    src/PythonScripting.cpp
                    src/QwtBarCurve.cpp
@@ -168,6 +168,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/IFunctionWrapper.cpp
                    src/Mantid/ImportWorkspaceDlg.cpp
                    src/Mantid/InputHistory.cpp
+				   src/Mantid/LabelToolLogValuesDialog.cpp
                    src/Mantid/LoadDAEDlg.cpp
                    src/Mantid/ManageCustomMenus.cpp
                    src/Mantid/ManageInterfaceCategories.cpp
@@ -194,6 +195,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
+				   src/Mantid/SampleLogDialogBase.cpp
                    src/Mantid/UserFitFunctionDialog.cpp
                    src/Mantid/WorkspaceIcons.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindow.cpp
@@ -362,6 +364,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/ImportWorkspaceDlg.h
 		   src/Mantid/IMantidMatrixExtensionHandler.h
                    src/Mantid/InputHistory.h
+				   src/Mantid/LabelToolLogValuesDialog.h
                    src/Mantid/LoadDAEDlg.h
                    src/Mantid/ManageCustomMenus.h
                    src/Mantid/ManageInterfaceCategories.h
@@ -390,9 +393,9 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
                    src/Mantid/RemoveErrorsDialog.h
+				   src/Mantid/SampleLogDialogBase.h
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/WorkspaceIcons.h
-                   src/Mantid/IProjectSerialisable.h
                    src/Mantid/InstrumentWidget/InstrumentWindow.h
 )
 
@@ -596,6 +599,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/FirstTimeSetup.h
                        src/Mantid/IFunctionWrapper.h
                        src/Mantid/ImportWorkspaceDlg.h
+					   src/Mantid/LabelToolLogValuesDialog.h
                        src/Mantid/LoadDAEDlg.h
                        src/Mantid/ManageCustomMenus.h
                        src/Mantid/ManageInterfaceCategories.h
@@ -618,6 +622,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidTable.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h
+					   src/Mantid/SampleLogDialogBase.h
                        src/Mantid/UserFitFunctionDialog.h
                        src/Mantid/InstrumentWidget/InstrumentWindow.h
 )
@@ -668,6 +673,10 @@ qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Vates/VatesSimpleGui/ViewWid
 ###########################################################################
 # Add the dependencies
 ###########################################################################
+
+if(MAKE_VATES)
+  include( ${PARAVIEW_USE_FILE} )
+endif()
 
 include_directories ( SYSTEM ${MUPARSER_INCLUDE_DIR} )
 include_directories ( ${ZLIB_INCLUDE_DIRS} )
@@ -885,6 +894,10 @@ set ( MANTIDPLOT_TEST_PY_FILES
     MantidPlotInputArgsCheck.py
     MantidPlotPyplotGeneralTest.py
 )
+
+if ( MAKE_VATES )
+ list  ( APPEND MANTIDPLOT_TEST_PY_FILES MantidPlotPVPythonTest.py )
+endif ()
 
 if ( 0 )
 	message (STATUS "Your CMAKE_SYSTEM string is '${CMAKE_SYSTEM}'")

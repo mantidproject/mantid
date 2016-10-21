@@ -6,20 +6,18 @@ import stresstesting
 
 EXPECTED_EXT = '.expected'
 
+
 class ValidateFacilitiesFile(stresstesting.MantidStressTest):
 
     def skipTests(self):
         try:
-            import genxmlif
-            import minixsv
+            import minixsv # noqa
         except ImportError:
             return True
         return False
 
-
     def runTest(self):
         """Main entry point for the test suite"""
-        from genxmlif import GenXmlIfError
         from minixsv import pyxsval
         direc = config['instrumentDefinition.directory']
         filename = os.path.join(direc,'Facilities.xml')
