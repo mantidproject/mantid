@@ -7,6 +7,8 @@ from mantid.api import WorkspaceGroup, MatrixWorkspace, mtd
 import mantid.simpleapi as sapi
 
 #pylint: disable=too-many-public-methods
+
+
 class ImagingIMATTomoTests(unittest.TestCase):
     """
     General IMAT/tomography tests, covering pre-/post-processing
@@ -143,7 +145,6 @@ class ImagingIMATTomoTests(unittest.TestCase):
         coords = [0, 0, 10, 10]
         with self.assertRaises(ValueError):
             iprep.filters.crop_vol(self.data_vol[1, :, :], coords)
-
 
     def test_crop_empty(self):
         import IMAT.prep as iprep

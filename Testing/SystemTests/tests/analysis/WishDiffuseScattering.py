@@ -8,6 +8,7 @@ If this breaks for whatever reason, there is a good chance that unregistered scr
 import stresstesting
 from mantid.simpleapi import *
 
+
 class WishDiffuseScattering(stresstesting.MantidStressTest):
 
     def requiredMemoryMB(self):
@@ -66,4 +67,3 @@ class WishDiffuseScattering(stresstesting.MantidStressTest):
 
     def doValidate(self):
         return True
-

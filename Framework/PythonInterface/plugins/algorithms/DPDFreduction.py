@@ -13,6 +13,8 @@ from tempfile import mkstemp
 ENERGY_TO_WAVEVECTOR = 2.072
 
 #pylint: disable=too-many-instance-attributes
+
+
 class DPDFreduction(PythonAlgorithm):
     channelgroup = None
 

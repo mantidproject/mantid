@@ -6,20 +6,18 @@ from mantid.simpleapi import *
 
 import numpy as np
 
+
 class NormaliseSpectra(DataProcessorAlgorithm):
 
     _input_ws_name = None
     _input_ws = None
     _output_ws_name = None
 
-
     def category(self):
         return 'Workflow\\MIDAS;Inelastic'
 
-
     def summary(self):
         return 'Normalise all spectra to have a max value of 1'
-
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
@@ -29,7 +27,6 @@ class NormaliseSpectra(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
                                                      direction=Direction.Output),
                              doc='Output workspace')
-
 
     def PyExec(self):
         self._setup()
@@ -47,8 +44,8 @@ class NormaliseSpectra(DataProcessorAlgorithm):
             if ymax <= 0:
                 spectrum_no = single_spectrum.getSpectrum(0).getSpectrumNo()
                 DeleteWorkspace('single_spectrum')
-                raise RuntimeError("Spectrum number %d:" % (spectrum_no)\
-                                   + "has a maximum y value of 0 or less. "\
+                raise RuntimeError("Spectrum number %d:" % (spectrum_no)
+                                   + "has a maximum y value of 0 or less. "
                                    + "All spectra must have a maximum y value more than 0")
             Scale(InputWorkspace=single_spectrum, Operation="Multiply",
                   Factor=(1/ymax), OutputWorkspace=single_spectrum)

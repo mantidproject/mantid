@@ -1,10 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/GetEiMonDet2.h"
 
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -200,6 +198,7 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
   double distanceSum = 0;
   double eppSum = 0;
   size_t n = 0;
+  // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for if ( m_detectorEPPTable->threadSafe())
              reduction(+: n, distanceSum, eppSum))
   for (int i = 0; i < static_cast<int>(detectorIndices.size()); ++i) {

@@ -10,8 +10,8 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class ReflChoose(QtGui.QDialog, ui_refl_columns.Ui_chooseColumnsDialog):
 
+class ReflChoose(QtGui.QDialog, ui_refl_columns.Ui_chooseColumnsDialog):
 
     visiblestates = {}
 
@@ -32,9 +32,11 @@ class ReflChoose(QtGui.QDialog, ui_refl_columns.Ui_chooseColumnsDialog):
             else:
                 item.setCheckState(0)
             self.listColumns.insertItem(key, item)
+
     def on_listColumns_itemChanged(self, item):
         colno=self.listColumns.row(item)
         self.visiblestates[colno] = (item.checkState() > 0)
+
     def on_buttonsColumns_Clicked(self, button):
         if self.buttonsColumns.button(QtGui.QDialogButtonBox.RestoreDefaults) == button:
             for i in range(self.listColumns.count()):

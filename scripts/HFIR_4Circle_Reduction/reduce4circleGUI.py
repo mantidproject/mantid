@@ -16,7 +16,6 @@ from scipy.optimize import curve_fit
 
 
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import QThread
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -35,7 +34,6 @@ import guiutility as gutil
 import fourcircle_utility as hb3a
 import plot3dwindow
 from multi_threads_helpers import *
-
 
 
 # import line for the UI python class

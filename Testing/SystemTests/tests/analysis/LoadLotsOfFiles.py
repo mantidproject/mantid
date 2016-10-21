@@ -112,6 +112,7 @@ PRIORITY_FILES = ['HYS_13658_event.nxs',
                   'ILLIN5_Sample_096003.nxs',
                   'ILLIN5_Vana_095893.nxs']
 
+
 def useDir(direc):
     """Only allow directories that aren't test output or
     reference results."""
@@ -120,6 +121,7 @@ def useDir(direc):
     if config["defaultsave.directory"] == direc:
         return False
     return "Data" in direc
+
 
 def useFile(direc, filename):
     """Returns (useFile, abspath)"""
@@ -144,6 +146,7 @@ def useFile(direc, filename):
     if os.path.isdir(filename):
         return (False, filename)
     return (True, filename)
+
 
 class LoadLotsOfFiles(stresstesting.MantidStressTest):
     def __getDataFileList__(self):
@@ -177,7 +180,7 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
                 cur_index = datafiles.index(fname)
             except ValueError:
                 continue
-            dummy_value = datafiles.pop(cur_index)
+            datafiles.pop(cur_index)
             datafiles.insert(insertion_index, fname)
 
         return datafiles
@@ -193,7 +196,7 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
 
         # Eval statement will use current scope. Allow access to
         # mantid module
-        import mantid
+        import mantid # noqa
 
         print "Found an expected file '%s' file" % expected
         expectedfile = open(expected)
@@ -202,7 +205,7 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
         for test in tests:
             test = test.strip()
             result = eval(test)
-            if not result == True:
+            if not result:
                 failed.append((test, result))
         if len(failed) > 0:
             for item in failed:
@@ -210,17 +213,15 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
             return False
         return True
 
-
     def __loadAndTest__(self, filename):
         """Do all of the real work of loading and testing the file"""
         print "----------------------------------------"
         print "Loading '%s'" % filename
         from mantid.api import Workspace
-        from mantid.api import IMDEventWorkspace
         # Output can be a tuple if the Load algorithm has extra output properties
         # but the output workspace should always be the first argument
         outputs = Load(filename)
-        if type(outputs) == tuple:
+        if isinstance(outputs, tuple):
             wksp = outputs[0]
         else:
             wksp = outputs
@@ -295,7 +296,7 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
             print "SUMMARY OF FAILED FILES"
             for filename in failed:
                 print filename
-            raise RuntimeError("Failed to load %d of %d files" \
-                                   % (len(failed), len(files)))
+            raise RuntimeError("Failed to load %d of %d files"
+                               % (len(failed), len(files)))
         else:
             print "Successfully loaded %d files" % len(files)

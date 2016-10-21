@@ -25,6 +25,7 @@ else:
 EVENT_WORKSPACE_ID = "EventWorkspace"
 EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
 
+
 def noRunSpecified(runs):
     """ Check whether any run is specified
     Purpose:
@@ -49,6 +50,7 @@ def noRunSpecified(runs):
 
     return False
 
+
 def get_workspace(workspace_name):
     """
     Purpose: Get the reference of a workspace
@@ -64,11 +66,13 @@ def get_workspace(workspace_name):
 
     return AnalysisDataService.retrieve(workspace_name)
 
+
 def is_event_workspace(workspace):
     if isinstance(workspace, str):
         return get_workspace(workspace).id() == EVENT_WORKSPACE_ID
     else:
         return workspace.id() == EVENT_WORKSPACE_ID
+
 
 def allEventWorkspaces(*args):
     """
@@ -89,6 +93,7 @@ def allEventWorkspaces(*args):
 
     return result
 
+
 def getBasename(filename):
     name = os.path.split(filename)[-1]
     for extension in EXTENSIONS_NXS:
@@ -96,6 +101,8 @@ def getBasename(filename):
     return name
 
 #pylint: disable=too-many-instance-attributes
+
+
 class SNSPowderReduction(DataProcessorAlgorithm):
     COMPRESS_TOL_TOF = .01
     _resampleX = None
@@ -158,12 +165,12 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         arrvalidatorVanBack.setLower(-1)
         self.declareProperty(IntArrayProperty("VanadiumBackgroundNumber", values=[0], validator=arrvalidatorVanBack),
                              doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.")
-        self.declareProperty(FileProperty(name="CalibrationFile",defaultValue="",action=FileAction.Load,\
-                                      extensions = [".h5", ".hd5", ".hdf", ".cal"]))
-        self.declareProperty(FileProperty(name="GroupingFile",defaultValue="",action=FileAction.OptionalLoad,\
+        self.declareProperty(FileProperty(name="CalibrationFile",defaultValue="",action=FileAction.Load,
+                                          extensions = [".h5", ".hd5", ".hdf", ".cal"]))
+        self.declareProperty(FileProperty(name="GroupingFile",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions = [".xml"]), "Overrides grouping from CalibrationFile")
-        self.declareProperty(FileProperty(name="CharacterizationRunsFile",defaultValue="",action=FileAction.OptionalLoad,\
-                                      extensions = ["txt"]),"File with characterization runs denoted")
+        self.declareProperty(FileProperty(name="CharacterizationRunsFile",defaultValue="",action=FileAction.OptionalLoad,
+                                          extensions = ["txt"]),"File with characterization runs denoted")
         self.declareProperty(FileProperty(name="ExpIniFilename", defaultValue="", action=FileAction.OptionalLoad,
                                           extensions=[".ini"]))
         self.declareProperty("UnwrapRef", 0.,
@@ -179,10 +186,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty("MaxChunkSize", 0.0, "Specify maximum Gbytes of file to read in one chunk.  Default is whole file.")
         self.declareProperty("FilterCharacterizations", False,
                              "Filter the characterization runs using above parameters. This only works for event files.")
-        self.declareProperty(FloatArrayProperty("Binning", values=[0.,0.,0.],\
-                             direction=Direction.Input), "Positive is linear bins, negative is logorithmic")
+        self.declareProperty(FloatArrayProperty("Binning", values=[0.,0.,0.],
+                                                direction=Direction.Input), "Positive is linear bins, negative is logorithmic")
         self.declareProperty("ResampleX", 0,
-                             "Number of bins in x-axis. Non-zero value overrides \"Params\" property. "+\
+                             "Number of bins in x-axis. Non-zero value overrides \"Params\" property. "+
                              "Negative value means logorithmic binning.")
         self.declareProperty("BinInDspace", True,
                              "If all three bin parameters a specified, whether they are in dspace (true) or time-of-flight (false)")
@@ -190,7 +197,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                              "Subtract fitted vanadium peaks from the known positions.")
         self.declareProperty("VanadiumFWHM", 7, "Default=7")
         self.declareProperty("VanadiumPeakTol", 0.05,
-                             "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. "\
+                             "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. "
                              "Default=0.05, negative turns off")
         self.declareProperty("VanadiumSmoothParams", "20,2", "Default=20,2")
         self.declareProperty("VanadiumRadius", .3175, "Radius for MultipleScatteringCylinderAbsorption")
@@ -211,20 +218,20 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty(infotableprop, "Name of table workspace containing information for splitters.")
 
         self.declareProperty("LowResolutionSpectraOffset", -1,
-                             "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. "+\
+                             "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. "+
                              "Otherwise, ignored.")
 
         self.declareProperty("NormalizeByCurrent", True, "Normalize by current")
 
         self.declareProperty("CompressTOFTolerance", 0.01, "Tolerance to compress events in TOF.")
 
-        self.declareProperty(StringArrayProperty("FrequencyLogNames", ["SpeedRequest1", "Speed1", "frequency"],\
-            direction=Direction.Input),\
-            "Possible log names for frequency.")
+        self.declareProperty(StringArrayProperty("FrequencyLogNames", ["SpeedRequest1", "Speed1", "frequency"],
+                                                 direction=Direction.Input),
+                             "Possible log names for frequency.")
 
-        self.declareProperty(StringArrayProperty("WaveLengthLogNames", ["LambdaRequest", "lambda"],\
-            direction=Direction.Input),\
-            "Candidate log names for wave length.")
+        self.declareProperty(StringArrayProperty("WaveLengthLogNames", ["LambdaRequest", "lambda"],
+                                                 direction=Direction.Input),
+                             "Candidate log names for wave length.")
 
         return
 
@@ -610,8 +617,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return strategy
 
     def __logChunkInfo(self, chunk):
-        keys = list(chunk.keys())
-        keys.sort()
+        keys = sorted(chunk.keys())
 
         keys = [str(key) + "=" + str(chunk[key]) for key in keys]
         self.log().information("Working on chunk [" + ", ".join(keys) + "]")
@@ -619,11 +625,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     def checkInfoMatch(self, left, right):
         if (left["frequency"].value is not None) and (right["frequency"].value is not None) \
            and (abs(left["frequency"].value - right["frequency"].value)/left["frequency"].value > .05):
-            raise RuntimeError("Cannot add incompatible frequencies (%f!=%f)" \
+            raise RuntimeError("Cannot add incompatible frequencies (%f!=%f)"
                                % (left["frequency"].value, right["frequency"].value))
         if (left["wavelength"].value is not None) and (right["wavelength"].value is not None) \
-                   and abs(left["wavelength"].value - right["wavelength"].value)/left["wavelength"].value > .05:
-            raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
+                and abs(left["wavelength"].value - right["wavelength"].value)/left["wavelength"].value > .05:
+            raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)"
                                % (left["wavelength"].value, right["wavelength"].value))
 
     def _loadAndSum(self, filename_list, outName, **filterWall):
@@ -1004,8 +1010,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 api.DeleteWorkspace(pdfwksp)
             return # don't do the other bits of saving
         if "gsas" in self._outTypes:
-            api.SaveGSS(InputWorkspace=wksp, Filename=filename+".gsa", SplitFiles=False, Append=False,\
-                    MultiplyByBinWidth=normalized, Bank=info["bank"].value, Format="SLOG", ExtendedHeader=True)
+            api.SaveGSS(InputWorkspace=wksp, Filename=filename+".gsa", SplitFiles=False, Append=False,
+                        MultiplyByBinWidth=normalized, Bank=info["bank"].value, Format="SLOG", ExtendedHeader=True)
         if "fullprof" in self._outTypes:
             api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info["bank"].value, Filename=filename+".dat")
         if "topas" in self._outTypes:
@@ -1098,7 +1104,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         assert isinstance(workspace_name, str)
 
         return AnalysisDataService.doesExist(workspace_name)
-
 
     def _determine_workspace_splitting(self, split_wksp, filter_wall):
         """

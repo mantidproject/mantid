@@ -4,6 +4,7 @@ from mantid import *
 
 from mantid.simpleapi import *
 
+
 class REFMReduction(stresstesting.MantidStressTest):
     def runTest(self):
         RefReduction(DataRun=str(9709),
@@ -33,4 +34,3 @@ class REFMReduction(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "reflectivity-Off_Off", 'REFMReduction_off_off.nxs'
-

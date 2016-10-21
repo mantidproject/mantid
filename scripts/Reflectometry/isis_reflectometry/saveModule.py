@@ -8,6 +8,7 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
+
 def saveCustom(idx,fname,sep = ' ',logs = [],title = False,error = False):
     fname+='.dat'
     print "FILENAME: ", fname
@@ -39,11 +40,11 @@ def saveCustom(idx,fname,sep = ' ',logs = [],title = False,error = False):
         f.write(s)
     f.close()
 
+
 def saveANSTO(idx,fname):
     fname+='.txt'
     print "FILENAME: ", fname
     a1=mtd[str(idx.text())]
-    titl='#'+a1.getTitle()+'\n'
     x1=a1.readX(0)
     X1=n.zeros((len(x1)-1))
     for i in range(0,len(x1)-1):
@@ -60,11 +61,11 @@ def saveANSTO(idx,fname):
         f.write(s)
     f.close()
 
+
 def saveMFT(idx,fname,logs):
     fname+='.mft'
     print "FILENAME: ", fname
     a1=mtd[str(idx.text())]
-    titl=a1.getTitle()+'\n'
     x1=a1.readX(0)
     X1=n.zeros((len(x1)-1))
     for i in range(0,len(x1)-1):

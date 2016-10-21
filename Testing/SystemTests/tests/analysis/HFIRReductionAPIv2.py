@@ -6,6 +6,7 @@ from reduction_workflow.instruments.sans.hfir_command_interface import *
 
 import os
 
+
 def do_cleanup():
     Files = ["BioSANS_test_data_reduction.log",
              "BioSANS_test_data_Iq.xml",
@@ -16,6 +17,7 @@ def do_cleanup():
         if os.path.exists(absfile):
             os.remove(absfile)
     return True
+
 
 class HFIRReductionAPIv2(stresstesting.MantidStressTest):
     """
@@ -45,6 +47,7 @@ class HFIRReductionAPIv2(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", "HFIRReduction.nxs"
+
 
 class HFIRAbsoluteScalingReference(stresstesting.MantidStressTest):
     """
@@ -76,6 +79,7 @@ class HFIRAbsoluteScalingReference(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", "HFIRAbsoluteScalingReference.nxs"
 
+
 class HFIRAbsoluteScalingValue(stresstesting.MantidStressTest):
     """
         Test absolute scaling using a reference data set
@@ -105,4 +109,3 @@ class HFIRAbsoluteScalingValue(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", "HFIRAbsoluteScalingReference.nxs"
-

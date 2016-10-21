@@ -3,6 +3,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -24,10 +25,6 @@ DECLARE_ALGORITHM(RemoveBackground)
 
 using namespace Kernel;
 using namespace API;
-
-//---------------------------------------------------------------------------------------------
-// Public methods
-//---------------------------------------------------------------------------------------------
 
 /** Initialization method. Declares properties to be used in algorithm.
 *
