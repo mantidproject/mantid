@@ -185,13 +185,13 @@ class CrystalField(object):
             out += ',FWHM=%s' % self._getFWHM(i)
         out += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
         if self._resolutionModel is not None:
-            model = self._resolutionModel.model
             if self._resolutionModel.multi:
-                pass
+                model = self._resolutionModel.model[i]
             else:
-                out += ',WidthX=%s,WidthY=%s' % tuple(map(tuple, model))
-                if self._widthVariation is not None:
-                    out += ',WidthVariation=%s' % self._widthVariation
+                model = self._resolutionModel.model
+            out += ',WidthX=%s,WidthY=%s' % tuple(map(tuple, model))
+            if self._widthVariation is not None:
+                out += ',WidthVariation=%s' % self._widthVariation
 
         peaks = self.getPeak(i)
         params = peaks.paramString('', 0)
@@ -246,6 +246,13 @@ class CrystalField(object):
                 if len(constraintsOut) > 0:
                     constraintsList.append(constraintsOut)
                 i += 1
+        if self._resolutionModel is not None:
+            i = 0
+            for model in self._resolutionModel.model:
+                out += ',WidthX{0}={1},WidthY{0}={2}'.format(i, tuple(model[0]), tuple(model[1]))
+                i += 1
+            if self._widthVariation is not None:
+                out += ',WidthVariation=%s' % self._widthVariation
         i = 0
         for peaks in self.peaks:
             parOut = peaks.paramString('f%s.' % i, 1)

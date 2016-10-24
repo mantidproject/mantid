@@ -1134,7 +1134,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
     def test_ResolutionModel_set_multi(self):
         from CrystalField import ResolutionModel, CrystalField, CrystalFieldFit
-        from CrystalField.fitting import makeWorkspace
+        from mantid.simpleapi import FunctionFactory
 
         x0 = [0, 50]
         y0 = [1, 2]
@@ -1145,15 +1145,42 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
                       Temperature=[44.0, 50], ResolutionModel=rm)
 
-        ws0, ws1 = self._makeMultiWorkspaces()
-        fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws0, ws1], MaxIterations=0)
-        fit.fit()
+        sp = cf.makeSpectrumFunction(0)
+        fun = FunctionFactory.createInitialized(sp)
+        self.assertTrue('WidthX=(0, 50),WidthY=(1, 2)' in sp)
 
-        # self.assertAlmostEqual(cf.peaks[0].param[1]['FWHM'], 1.0, 8)
-        self.assertAlmostEqual(cf.peaks[0].param[2]['FWHM'], 1.58101468, 8)
-        self.assertAlmostEqual(cf.peaks[0].param[3]['FWHM'], 1.884945866, 8)
+        sp = cf.makeSpectrumFunction(1)
+        fun = FunctionFactory.createInitialized(sp)
+        self.assertTrue('WidthX=(0, 50),WidthY=(3, 4)' in sp)
 
+    def test_ResolutionModel_set_multi_variation(self):
+        from CrystalField import ResolutionModel, CrystalField, CrystalFieldFit
+        from mantid.simpleapi import FunctionFactory
 
+        x0 = [0, 50]
+        y0 = [1, 2]
+        x1 = [0, 50]
+        y1 = [3, 4]
+        rm = ResolutionModel([(x0, y0), (x1, y1)])
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                      Temperature=[44.0, 50], ResolutionModel=rm,WidthVariation=0.1)
+
+        sp = cf.makeSpectrumFunction(0)
+        fun = FunctionFactory.createInitialized(sp)
+        self.assertTrue('WidthX=(0, 50),WidthY=(1, 2)' in sp)
+        self.assertTrue('WidthVariation=0.1' in sp)
+
+        sp = cf.makeSpectrumFunction(1)
+        fun = FunctionFactory.createInitialized(sp)
+        self.assertTrue('WidthX=(0, 50),WidthY=(3, 4)' in sp)
+        self.assertTrue('WidthVariation=0.1' in sp)
+
+        sp = cf.makeMultiSpectrumFunction()
+        fun = FunctionFactory.createInitialized(sp)
+        self.assertTrue('WidthX0=(0, 50),WidthY0=(1, 2)' in sp)
+        self.assertTrue('WidthX1=(0, 50),WidthY1=(3, 4)' in sp)
+        self.assertTrue('WidthVariation=0.1' in sp)
 
 if __name__ == "__main__":
     unittest.main()
