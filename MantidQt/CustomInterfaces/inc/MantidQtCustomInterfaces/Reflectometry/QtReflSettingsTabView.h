@@ -72,6 +72,8 @@ public:
   std::string getMonitorIntegralMax() const override;
   /// Return monitor background min
   std::string getMonitorBackgroundMin() const override;
+  /// Return monitor background max
+  std::string getMonitorBackgroundMax() const override;
 
   /// Creates hints for 'Plus'
   void

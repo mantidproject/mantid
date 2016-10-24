@@ -189,5 +189,13 @@ std::string QtReflSettingsTabView::getMonitorBackgroundMin() const {
   return m_ui.instSettingsMonBgMinEdit->text().toStdString();
 }
 
+/** Return monitor background max
+* @return :: monitor background max
+*/
+std::string QtReflSettingsTabView::getMonitorBackgroundMax() const {
+
+  return m_ui.instSettingsMonBgMaxEdit->text().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid
