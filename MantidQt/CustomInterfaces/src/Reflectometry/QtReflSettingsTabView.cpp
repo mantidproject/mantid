@@ -205,5 +205,13 @@ std::string QtReflSettingsTabView::getLambdaMin() const {
   return m_ui.instSettingsLamMinEdit->text().toStdString();
 }
 
+/** Return wavelength max
+* @return :: lambda max
+*/
+std::string QtReflSettingsTabView::getLambdaMax() const {
+
+  return m_ui.instSettingsLamMaxEdit->text().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid

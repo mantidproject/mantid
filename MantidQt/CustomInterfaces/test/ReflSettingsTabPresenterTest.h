@@ -77,6 +77,9 @@ public:
     EXPECT_CALL(mockView, getLambdaMin())
         .Times(Exactly(1))
         .WillOnce(Return("1"));
+    EXPECT_CALL(mockView, getLambdaMax())
+        .Times(Exactly(1))
+        .WillOnce(Return("15"));
     auto options = presenter.getTransmissionOptions();
 
     std::vector<std::string> optionsVec;
@@ -87,6 +90,7 @@ public:
     TS_ASSERT_EQUALS(optionsVec[3], "MonitorBackgroundWavelengthMin=12");
     TS_ASSERT_EQUALS(optionsVec[4], "MonitorBackgroundWavelengthMax=17");
     TS_ASSERT_EQUALS(optionsVec[5], "WavelengthMin=1");
+    TS_ASSERT_EQUALS(optionsVec[6], "WavelengthMax=15");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -128,6 +132,9 @@ public:
     EXPECT_CALL(mockView, getLambdaMin())
         .Times(Exactly(1))
         .WillOnce(Return("1"));
+    EXPECT_CALL(mockView, getLambdaMax())
+        .Times(Exactly(1))
+        .WillOnce(Return("15"));
     auto options = presenter.getReductionOptions();
 
     std::vector<std::string> optionsVec;
@@ -144,6 +151,7 @@ public:
     TS_ASSERT_EQUALS(optionsVec[9], "MonitorBackgroundWavelengthMin=12");
     TS_ASSERT_EQUALS(optionsVec[10], "MonitorBackgroundWavelengthMax=17");
     TS_ASSERT_EQUALS(optionsVec[11], "WavelengthMin=1");
+    TS_ASSERT_EQUALS(optionsVec[12], "WavelengthMax=15");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }

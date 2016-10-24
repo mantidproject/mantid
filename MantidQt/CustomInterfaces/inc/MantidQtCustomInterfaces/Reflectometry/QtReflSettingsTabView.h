@@ -76,6 +76,8 @@ public:
   std::string getMonitorBackgroundMax() const override;
   /// Return wavelength min
   std::string getLambdaMin() const override;
+  /// Return wavelength max
+  std::string getLambdaMax() const override;
 
   /// Creates hints for 'Plus'
   void

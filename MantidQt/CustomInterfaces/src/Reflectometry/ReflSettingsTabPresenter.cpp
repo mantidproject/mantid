@@ -87,6 +87,11 @@ std::string ReflSettingsTabPresenter::getTransmissionOptions() const {
   if (!lamMin.empty())
     options.push_back("WavelengthMin=" + lamMin);
 
+  // Add lambda max
+  auto lamMax = m_view->getLambdaMax();
+  if (!lamMax.empty())
+    options.push_back("WavelengthMax=" + lamMax);
+
   return boost::algorithm::join(options, ",");
 }
 
@@ -161,6 +166,11 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   auto lamMin = m_view->getLambdaMin();
   if (!lamMin.empty())
     options.push_back("WavelengthMin=" + lamMin);
+
+  // Add lambda max
+  auto lamMax = m_view->getLambdaMax();
+  if (!lamMax.empty())
+    options.push_back("WavelengthMax=" + lamMax);
 
   return boost::algorithm::join(options, ",");
 }
