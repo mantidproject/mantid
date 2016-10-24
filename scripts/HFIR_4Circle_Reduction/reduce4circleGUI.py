@@ -30,7 +30,7 @@ else:
     NO_SCROLL = False
 
 import guiutility as gutil
-import fourcircle_utility as hb3a
+import fourcircle_utility as hb3a_util
 import plot3dwindow
 from multi_threads_helpers import *
 import optimizelatticewindow as ol_window
@@ -913,7 +913,7 @@ class MainWindow(QtGui.QMainWindow):
         scan_list_str = str(self.ui.lineEdit_downloadScans.text())
         if len(scan_list_str) > 0:
             # user specifies scans to download
-            valid, scan_list = hb3a.parse_int_array(scan_list_str)
+            valid, scan_list = hb3a_util.parse_int_array(scan_list_str)
             if valid is False:
                 error_message = scan_list
                 self.pop_one_button_dialog(error_message)
@@ -926,7 +926,7 @@ class MainWindow(QtGui.QMainWindow):
             exp_no = ret_obj
             assert isinstance(exp_no, int)
             server_url = str(self.ui.lineEdit_url.text())
-            scan_list = hb3a.get_scans_list(server_url, exp_no, return_list=True)
+            scan_list = hb3a_util.get_scans_list(server_url, exp_no, return_list=True)
         self.pop_one_button_dialog('Going to download scans %s.' % str(scan_list))
 
         # Check location
@@ -1412,10 +1412,10 @@ class MainWindow(QtGui.QMainWindow):
         access_mode = str(self.ui.comboBox_mode.currentText())
         if access_mode == 'Local':
             spice_dir = str(self.ui.lineEdit_localSpiceDir.text())
-            message = hb3a.get_scans_list_local_disk(spice_dir, exp_no)
+            message = hb3a_util.get_scans_list_local_disk(spice_dir, exp_no)
         else:
             url = str(self.ui.lineEdit_url.text())
-            message = hb3a.get_scans_list(url, exp_no)
+            message = hb3a_util.get_scans_list(url, exp_no)
 
         self.pop_one_button_dialog(message)
 
@@ -1903,7 +1903,11 @@ class MainWindow(QtGui.QMainWindow):
                                        'to refine UB matrix without prior knowledge.')
 
         # refine
-        self._myControl.refine_ub_matrix_least_info(peak_info_list, min_d, max_d, tolerance)
+        try:
+            self._myControl.refine_ub_matrix_least_info(peak_info_list, min_d, max_d, tolerance)
+        except RuntimeError as runtime_error:
+            self.pop_one_button_dialog(str(runtime_error))
+            return
 
         # set value
         self._show_refined_ub_result()
@@ -1929,7 +1933,7 @@ class MainWindow(QtGui.QMainWindow):
 
             exp_number = scan_info_tup[0]
             pt_number_list = scan_info_tup[2]
-            ws_name = hb3a.get_merged_md_name('HB3A', exp_number, scan_number, pt_number_list)
+            ws_name = hb3a_util.get_merged_md_name('HB3A', exp_number, scan_number, pt_number_list)
             self.ui.tableWidget_mergeScans.add_new_merged_data(exp_number, scan_number, ws_name)
 
         return
@@ -2191,7 +2195,7 @@ class MainWindow(QtGui.QMainWindow):
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
         for row_index in range(num_rows):
             m_h, m_l, m_k = self.ui.tableWidget_peaksCalUB.get_hkl(row_index)
-            peak_indexing, round_error = convert_hkl_to_integer(m_h, m_l, m_k, MAGNETIC_TOL)
+            peak_indexing, round_error = hb3a_util.convert_hkl_to_integer(m_h, m_l, m_k, MAGNETIC_TOL)
             self.ui.tableWidget_peaksCalUB.set_hkl(row_index, peak_indexing, round_error)
 
         # disable the set to integer button and enable the revert/undo button
@@ -2415,7 +2419,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         url = str(self.ui.lineEdit_url.text())
 
-        url_is_good, err_msg = hb3a.check_url(url)
+        url_is_good, err_msg = hb3a_util.check_url(url)
         if url_is_good is True:
             self.pop_one_button_dialog("URL %s is valid." % url)
             self.ui.lineEdit_url.setStyleSheet("color: green;")
@@ -2839,7 +2843,7 @@ class MainWindow(QtGui.QMainWindow):
         h, k, l = peak_info.get_hkl(user_hkl=False)
         q_x, q_y, q_z = peak_info.get_peak_centre()
         m1 = self._myControl.get_sample_log_value(exp_number, scan_number, 1, '_m1')
-        wave_length = hb3a.convert_to_wave_length(m1_position=m1)
+        wave_length = hb3a_util.convert_to_wave_length(m1_position=m1)
 
         # Set to table
         status, err_msg = self.ui.tableWidget_peaksCalUB.append_row(
@@ -3144,50 +3148,3 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     # END-OF-DEFINITION (MainWindow)
-
-
-def round_hkl(index_h, index_k, index_l):
-    """
-
-    :param index_h:
-    :param index_k:
-    :param index_l:
-    :return:
-    """
-    index_h = math.copysign(1, index_h) * int(abs(index_h) + 0.5)
-    index_k = math.copysign(1, index_k) * int(abs(index_k) + 0.5)
-    index_l = math.copysign(1, index_l) * int(abs(index_l) + 0.5)
-
-    return index_h, index_k, index_l
-
-
-def convert_hkl_to_integer(index_h, index_k, index_l, magnetic_tolerance=0.2):
-    """
-    Convert index (HKL) to integer by considering magnetic peaks
-    if any index is not close to an integer (default to 0.2), then it is treated as a magnetic peak's HKL
-    :param index_h:
-    :param index_k:
-    :param index_l:
-    :param magnetic_tolerance: tolerance to magnetic peak's indexing
-    :return:
-    """
-    def round_index(value, tol):
-        round_int = math.copysign(1, value) * int(abs(value) + 0.5)
-        if abs(round_int - value) >= tol:
-            # it is likely a magnetic peak
-            round_int = int(value * 100) * 0.01
-        return round_int
-
-    # check inputs' validity
-    assert isinstance(magnetic_tolerance, float) and 0. < magnetic_tolerance <= 0.5
-
-    #
-    index_h_r = round_index(index_h, magnetic_tolerance)
-    index_k_r = round_index(index_k, magnetic_tolerance)
-    index_l_r = round_index(index_l, magnetic_tolerance)
-
-    round_error = math.sqrt((index_h - index_h_r) ** 2 +
-                            (index_k - index_k_r) ** 2 +
-                            (index_l - index_l_r) ** 2)
-
-    return (index_h_r, index_k_r, index_l_r), round_error

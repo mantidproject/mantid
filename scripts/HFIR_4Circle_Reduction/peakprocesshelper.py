@@ -132,15 +132,17 @@ class PeakProcessRecord(object):
         return peak_ws
 
     def get_hkl(self, user_hkl):
-        """ Get user's last setup HKL
-        :param user_hkl:
+        """ Get HKL from the peak process record
+        :param user_hkl: if selected, then return the HKL set from client (GUI). Otherwise, HKL is retrieved
+                        from original SPICE file.
         :return:
         """
-        # TODO/FIXME/NOW: document... and blabla
         if user_hkl:
+            # return user-specified HKL
             assert self._userHKL is not None, 'User HKL is None (not set up yet)'
             ret_hkl = self._userHKL
         else:
+            # get HKL from SPICE file
             if self._spiceHKL is None:
                 self.retrieve_hkl_from_spice_table()
             ret_hkl = self._spiceHKL
@@ -247,7 +249,9 @@ class PeakProcessRecord(object):
 
         if isinstance(mi_h, int):
             mi_h = float(mi_h)
-            # TODO/NOW/FIXME ... Fill the rest for k and l
+            mi_k = float(mi_k)
+            mi_l = float(mi_l)
+        # END-IF
 
         if self._userHKL is None:
             # init HKL

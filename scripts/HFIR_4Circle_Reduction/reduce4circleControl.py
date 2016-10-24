@@ -1868,10 +1868,17 @@ class CWSCDReductionControl(object):
         Guarantees: Refine UB matrix by FFT
         :return:
         """
-        # TODO/NOW/ISSUE - Fix the documentations
         # Check
-        assert isinstance(peak_info_list, list) and len(peak_info_list) >= 6
-        assert 0 < d_min < d_max
+        assert isinstance(peak_info_list, list), 'peak_info_list must be a list but not of type %s.' \
+                                                 '' % type(peak_info_list)
+        assert isinstance(d_min, float) and isinstance(d_max, float), 'd_min and d_max must be float but not ' \
+                                                                      '%s and %s.' % (type(d_min), type(d_max))
+
+        if len(peak_info_list) < 6:
+            raise RuntimeError('There must be at least 6 peaks to refine UB matrix by FFT. Only %d peaks '
+                               'are given.' % len(peak_info_list))
+        if not (0 < d_min < d_max):
+            raise RuntimeError('It is required to have 0 < d_min (%f) < d_max (%f).' % (d_min, d_max))
 
         # Build a new PeaksWorkspace
         peak_ws_name = 'TempUBFFTPeaks'
@@ -1947,16 +1954,8 @@ class CWSCDReductionControl(object):
             peak_i = peak_ws.getPeak(i_peak_info)
 
             # set the peak indexing to each pear
-            # TODO/NOW/ISSUE - do not use h, k, l!!!
-            h, k, l = peak_info_i.get_hkl(user_hkl=True)
-            print '[DB...BAT] user hkl from peak_info are: ', h, k, l
-            # if hkl_to_int:
-            #     # convert hkl to integer
-            #     h = float(math.copysign(1, h) * int(abs(h) + 0.5))
-            #     k = float(math.copysign(1, k) * int(abs(k) + 0.5))
-            #     l = float(math.copysign(1, l) * int(abs(l) + 0.5))
-            # # END-IF
-            peak_i.setHKL(h, k, l)
+            index_h, index_k, index_l = peak_info_i.get_hkl(user_hkl=True)
+            peak_i.setHKL(index_h, index_k, index_l)
             # q-sample
             q_x, q_y, q_z = peak_info_i.get_peak_centre()
             q_sample = V3D(q_x, q_y, q_z)

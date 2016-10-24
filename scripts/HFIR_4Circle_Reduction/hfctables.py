@@ -1,6 +1,7 @@
 #pylint: disable=W0403,C0103,R0901,R0904,R0913,C0302
 import numpy
 import sys
+import fourcircle_utility
 
 import NTableWidget as tableBase
 
@@ -434,6 +435,27 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
         return
 
+    def select_all_nuclear_peaks(self):
+        """
+        select all nuclear peaks, i.e., set the flag on on 'select' for all rows if their HKL indicates that
+        they are nuclear peaks
+        :return: string as error message
+        """
+        num_rows = self.rowCount()
+        error_message = ''
+
+        for row_index in range(num_rows):
+            # get the reading of HKL
+            try:
+                hkl_tuple = self.get_hkl(row_index)
+                if fourcircle_utility.is_peak_nuclear(hkl_tuple[0], hkl_tuple[1], hkl_tuple[2]):
+                    self.select_row(row_index, status=True)
+            except RuntimeError as error:
+                error_message += 'Unable to parse HKL of line %d due to %s.' % (row_index, str(error))
+        # END-FOR
+
+        return error_message
+
     def set_hkl(self, i_row, hkl, error=None):
         """
         Set HKL to table
@@ -647,6 +669,30 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return return_list
 
+    def get_hkl(self, row_index):
+        """
+        Get peak index, HKL or a row
+        :param row_index: row index (aka number)
+        :return: 3-float-tuple
+        """
+        # check input's validity
+        assert isinstance(row_index, int) and row_index >= 0, 'Row index %s of type %s is not acceptable.' \
+                                                              '' % (str(row_index), type(row_index))
+
+        # retrieve value of HKL as string and then split them into floats
+        hkl_str = self.get_cell_value(row_index, self._colIndexHKL)
+        hkl_str_list = hkl_str.split(',')
+        try:
+            peak_index_h = float(hkl_str_list[0])
+            peak_index_k = float(hkl_str_list[1])
+            peak_index_l = float(hkl_str_list[2])
+        except IndexError:
+            raise RuntimeError('Row %d\' HKL value %s is not value.' % (row_index, hkl_str))
+        except ValueError:
+            raise RuntimeError('Row %d\' HKL value %s is not value.' % (row_index, hkl_str))
+
+        return peak_index_h, peak_index_k, peak_index_l
+
     def get_merged_status(self, row_number):
         """ Get the status whether it is merged
         :param row_number:
@@ -725,16 +771,22 @@ class ProcessTableWidget(tableBase.NTableWidget):
         """
         select all nuclear peaks, i.e., set the flag on on 'select' for all rows if their HKL indicates that
         they are nuclear peaks
-        :return:
+        :return: string as error message
         """
-        # TODO/NOW/ISSUE - make this method work!
         num_rows = self.rowCount()
-        for row_index in range(num_rows):
-            # blabla
-            #
-            pass
+        error_message = ''
 
-        return
+        for row_index in range(num_rows):
+            # get the reading of HKL
+            try:
+                hkl_tuple = self.get_hkl(row_index)
+                if fourcircle_utility.is_peak_nuclear(hkl_tuple[0], hkl_tuple[1], hkl_tuple[2]):
+                    self.select_row(row_index)
+            except RuntimeError as error:
+                error_message += 'Unable to parse HKL of line %d due to %s.' % (row_index, str(error))
+        # END-FOR
+
+        return error_message
 
     def setup(self):
         """

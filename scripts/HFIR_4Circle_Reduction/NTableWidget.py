@@ -292,6 +292,30 @@ class NTableWidget(QtGui.QTableWidget):
 
         return
 
+    def select_row(self, row_index, status=True):
+        """
+        Select a row
+        :param row_index:
+        :param status:
+        :return:
+        """
+        # get column  index
+        try:
+            status_col_index = self._myColumnNameList.index(self._statusColName)
+        except ValueError as e:
+            # status column name is not properly set up
+            return False, str(e)
+
+        # Loop over all rows. If any row's status is not same as target status, then set it
+        num_rows = self.rowCount()
+        assert isinstance(row_index, int) and 0 <= row_index < num_rows, 'Row number %s of type %s is not right.' \
+                                                                         '' % (str(row_index), type(row_index))
+
+        if self.get_cell_value(row_index, status_col_index) != status:
+            self.update_cell_value(row_index, status_col_index, status)
+
+        return
+
     def set_check_box(self, row, col, state):
         """ function to add a new select checkbox to a cell in a table row
         won't add a new checkbox if one already exists
