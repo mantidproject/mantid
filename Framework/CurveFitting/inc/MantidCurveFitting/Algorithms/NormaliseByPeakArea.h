@@ -71,11 +71,10 @@ private:
   /// Normalise given TOF spectrum
   void normaliseTOFData(const double area, const size_t index);
   /// Stores/accumulates the results
-  void saveToOutput(
-      const API::MatrixWorkspace_sptr &accumWS,
-      const Kernel::cow_ptr<HistogramData::HistogramY> &yValues,
-      const Kernel::cow_ptr<HistogramData::HistogramE> &eValues,
-      const size_t index);
+  void saveToOutput(const API::MatrixWorkspace_sptr &accumWS,
+                    const Kernel::cow_ptr<HistogramData::HistogramY> &yValues,
+                    const Kernel::cow_ptr<HistogramData::HistogramE> &eValues,
+                    const size_t index);
   /// Symmetrises the data in yspace about the origin
   void symmetriseYSpace();
 
