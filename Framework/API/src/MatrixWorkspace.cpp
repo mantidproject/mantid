@@ -180,33 +180,27 @@ const std::string MatrixWorkspace::getTitle() const {
     return Workspace::getTitle();
 }
 
-/** Return a reference to the SpectrumInfo object. NOT THREAD-SAFE!
+/** Return a reference to the SpectrumInfo object.
  *
- * By default ThreadedContextCheck::Check enables a check of the OpenMP thread
- * number to actively fail when called from a threaded context. In cases where
- * the code is calling this in a threaded context but with different workspaces
- * this check can be disabled by setting contextCheck =
- * ThreadedContextCheck::Skip. This is not recommended and should be used with
- * extreme care. This flag is a temporary workaround and will be removed once
- * Instrument-2.0 is introduced.
- *
- * Currently this method is not thread-safe, and any modifications of the
- * instrument or instrument parameters such as mask flags will not be visible in
- * existing SpectrumInfo references. After modification, obtain a new reference
- * by calling this method again.
+ * Any modifications of the instrument or instrument parameters such as mask
+ * flags will not be visible in existing SpectrumInfo references. After
+ * modification, obtain a new reference by calling this method again.
  */
 const SpectrumInfo &
-MatrixWorkspace::spectrumInfo(ThreadedContextCheck contextCheck) const {
-  if (contextCheck == ThreadedContextCheck::Check &&
-      PARALLEL_THREAD_NUMBER != 0)
-    throw std::runtime_error("MatrixWorkspace::spectrumInfo(): Thread ID is "
-                             "not 0. This indicates that the method is called "
-                             "in a threaded context. This is not allowed.");
-
-  // For now we *always* create a new SpectrumInfo since the instrument or
-  // parameters may have changed.
-  m_spectrumInfo = Kernel::make_unique<SpectrumInfo>(*this);
+MatrixWorkspace::spectrumInfo() const {
+  if (!m_spectrumInfo) {
+    std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};
+    if (!m_spectrumInfo)
+      m_spectrumInfo = Kernel::make_unique<SpectrumInfo>(*this);
+  }
   return *m_spectrumInfo;
+}
+
+/// Resets the SpectrumInfo object on modification of the Instrument.
+void MatrixWorkspace::invalidateInstrumentReferences() const {
+  // None of the methods in ExperimentInfo that calls this is thread safe, so we
+  // do not need to bother with locking?
+  m_spectrumInfo = nullptr;
 }
 
 void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {

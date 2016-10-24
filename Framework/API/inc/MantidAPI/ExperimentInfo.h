@@ -58,7 +58,7 @@ public:
   virtual const std::string toString() const;
 
   /// Instrument accessors
-  virtual void setInstrument(const Geometry::Instrument_const_sptr &instr);
+  void setInstrument(const Geometry::Instrument_const_sptr &instr);
   /// Returns the parameterized instrument
   virtual Geometry::Instrument_const_sptr getInstrument() const;
 
@@ -165,6 +165,9 @@ public:
                                            const std::string &date = "");
 
 protected:
+  /// Called when instrument or parameter map is reset to notify child classes.
+  virtual void invalidateInstrumentReferences() const {}
+
   /// Description of the source object
   boost::shared_ptr<ModeratorModel> m_moderatorModel;
   /// Description of the choppers for this experiment.

@@ -140,6 +140,7 @@ const std::string ExperimentInfo::toString() const {
 * @param instr :: Shared pointer to an instrument.
 */
 void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
+  invalidateInstrumentReferences();
   if (instr->isParametrized()) {
     sptr_instrument = instr->baseInstrument();
     m_parmap = instr->getParameterMap();
@@ -175,6 +176,7 @@ Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
     // Check again because another thread may have taken copy
     // and dropped reference count since previous check
     if (!m_parmap.unique()) {
+      invalidateInstrumentReferences();
       ParameterMap_sptr oldData = m_parmap;
       m_parmap = boost::make_shared<ParameterMap>(*oldData);
     }
@@ -320,6 +322,7 @@ void ExperimentInfo::populateInstrumentParameters() {
  */
 void ExperimentInfo::replaceInstrumentParameters(
     const Geometry::ParameterMap &pmap) {
+  invalidateInstrumentReferences();
   this->m_parmap.reset(new ParameterMap(pmap));
 }
 //---------------------------------------------------------------------------------------
@@ -329,6 +332,7 @@ void ExperimentInfo::replaceInstrumentParameters(
  * current map
  */
 void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
+  invalidateInstrumentReferences();
   this->m_parmap->swap(pmap);
 }
 
