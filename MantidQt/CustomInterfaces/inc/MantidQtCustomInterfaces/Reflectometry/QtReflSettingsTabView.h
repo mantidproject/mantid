@@ -70,6 +70,8 @@ public:
   std::string getMonitorIntegralMin() const override;
   /// Return monitor integral max
   std::string getMonitorIntegralMax() const override;
+  /// Return monitor background min
+  std::string getMonitorBackgroundMin() const override;
 
   /// Creates hints for 'Plus'
   void

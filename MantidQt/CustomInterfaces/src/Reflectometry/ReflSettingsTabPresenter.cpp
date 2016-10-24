@@ -72,6 +72,11 @@ std::string ReflSettingsTabPresenter::getTransmissionOptions() const {
   if (!monIntMax.empty())
     options.push_back("MonitorIntegrationWavelengthMax=" + monIntMax);
 
+  // Add monitor background min
+  auto monBgMin = m_view->getMonitorBackgroundMin();
+  if (!monBgMin.empty())
+    options.push_back("MonitorBackgroundWavelengthMin=" + monBgMin);
+
   return boost::algorithm::join(options, ",");
 }
 
@@ -131,6 +136,11 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   auto monIntMax = m_view->getMonitorIntegralMax();
   if (!monIntMax.empty())
     options.push_back("MonitorIntegrationWavelengthMax=" + monIntMax);
+
+  // Add monitor background min
+  auto monBgMin = m_view->getMonitorBackgroundMin();
+  if (!monBgMin.empty())
+    options.push_back("MonitorBackgroundWavelengthMin=" + monBgMin);
 
   return boost::algorithm::join(options, ",");
 }

@@ -74,6 +74,7 @@ public:
   /// Instrument settings
   virtual std::string getMonitorIntegralMin() const = 0;
   virtual std::string getMonitorIntegralMax() const = 0;
+  virtual std::string getMonitorBackgroundMin() const = 0;
 };
 }
 }
