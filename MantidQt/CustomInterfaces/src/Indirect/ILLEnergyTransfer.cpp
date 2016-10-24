@@ -76,13 +76,39 @@ bool ILLEnergyTransfer::validate() {
 void ILLEnergyTransfer::run() {
   QMap<QString, QString> instDetails = getInstrumentDetails();
 
-  IAlgorithm_sptr reductionAlg =
-      AlgorithmManager::Instance().create("IndirectILLReduction");
-  reductionAlg->initialize();
+  IAlgorithm_sptr reductionAlg = nullptr;
 
+  if (m_uiForm.rdQENS->isChecked()) // QENS
+  {
+    reductionAlg = AlgorithmManager::Instance().create("IndirectILLReduction");
+    reductionAlg->initialize();
+
+    // Set options
+    long int uo = m_uiForm.sbUnmirrorOption->value();
+    reductionAlg->setProperty("UnmirrorOption", uo);
+    reductionAlg->setProperty("SumRuns", m_uiForm.ckSum->isChecked());
+
+    // Vanadium run
+    if (uo == 5 || uo == 7) {
+      QString vanFilename = m_uiForm.rfVanadiumRun->getUserInput().toString();
+      reductionAlg->setProperty("VanadiumRun", vanFilename.toStdString());
+    }
+  } else { // FWS
+
+    reductionAlg =
+        AlgorithmManager::Instance().create("IndirectILLFixedWindowScans");
+    reductionAlg->initialize();
+
+    reductionAlg->setProperty("Observable",
+                              m_uiForm.cbObservable->currentText());
+  }
+
+  // options common for QENS and FWS
   reductionAlg->setProperty("Analyser", instDetails["analyser"].toStdString());
   reductionAlg->setProperty("Reflection",
                             instDetails["reflection"].toStdString());
+
+  reductionAlg->setProperty("DebugMode", m_uiForm.ckDebugMode->isChecked());
 
   // Handle input files
   QString runFilename = m_uiForm.rfInput->getUserInput().toString();
@@ -112,18 +138,6 @@ void ILLEnergyTransfer::run() {
   if (useMapFile) {
     QString mapFilename = m_uiForm.rfMapFile->getFirstFilename();
     reductionAlg->setProperty("MapFile", mapFilename.toStdString());
-  }
-
-  // Set options
-  long int uo = m_uiForm.sbUnmirrorOption->value();
-  reductionAlg->setProperty("UnmirrorOption", uo);
-  reductionAlg->setProperty("SumRuns", m_uiForm.ckSum->isChecked());
-  reductionAlg->setProperty("DebugMode", m_uiForm.ckDebugMode->isChecked());
-
-  // Vanadium run
-  if (uo == 5 || uo == 7) {
-    QString vanFilename = m_uiForm.rfVanadiumRun->getUserInput().toString();
-    reductionAlg->setProperty("VanadiumRun", vanFilename.toStdString());
   }
 
   m_batchAlgoRunner->addAlgorithm(reductionAlg);

@@ -23,7 +23,7 @@ Unmirror Options
 **IN16B** can record data with mirror sense, where the spectra for the acceleration and
 deceleration phase of the Doppler drive are recorded separately, or without.
 Technically this is defined in the `Doppler.mirror_sense` entry in the sample logs.
-For the data without mirror sense (technically, mirror_sense == 16) only three unmirror options are valid:
+For the data without mirror sense (i.e. mirror_sense = 16) only three unmirror options are valid:
 
 0: No x-axis shift.
 
@@ -31,7 +31,7 @@ For the data without mirror sense (technically, mirror_sense == 16) only three u
 
 7: Centering the peaks using the corresponding vanadium run.
 
-For the data with mirror sense (i.e. mirror_sense == 14) there are 8 options available:
+For the data with mirror sense (i.e. mirror_sense = 14) there are 8 options available:
 
 0: No x-axis shift, no energy conversion can be performed.
 
@@ -49,7 +49,7 @@ For the data with mirror sense (i.e. mirror_sense == 14) there are 8 options ava
 
 7: Left and right wings will be shifted according to offsets of peak positions of left and right wings in corresponding vanadium run.
 
-Options 5,7 require the ``VanadiumRun``.
+Options 5 and 7 require the ``VanadiumRun``.
 The options ``4-7`` rely on :ref:`FindEPP <algm-FindEPP>` algorithm to find the peak positions.
 All spectra of the reduced workspaces are converted to scattering angle as y-axis.
 Note, that it is forbidden to reduce several runs with different mirror senses.

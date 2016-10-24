@@ -29,6 +29,7 @@ digraph IndirectILLReduction {
   	MapFile
   	CalibrationWorkspace
   	BackgroundRun
+  	BackgroundScalingFactor
   	Analyser
   	Reflection
   	UnmirrorOption
@@ -52,6 +53,7 @@ digraph IndirectILLReduction {
     Plus
     Scale
     Minus
+    SelectNexusFilesByMetadata
   }
 
   subgraph processes {
@@ -60,7 +62,8 @@ digraph IndirectILLReduction {
     ShiftSpectra
   }
 
-  Run -> Load
+  Run -> SelectNexusFilesByMetadata
+  SelectNexusFilesByMetadata -> Load
   Analyser -> LoadParameterFile
   Load -> LoadParameterFile
   Reflection -> LoadParameterFile
@@ -77,6 +80,7 @@ digraph IndirectILLReduction {
   HaveBackgroundRun -> Minus [label="Yes"]
   HaveBackgroundRun -> HaveCalibrationWorkspace [label="No"]
   BackgroundRun -> HaveBackgroundRun
+  BackgroundScalingFactor -> HaveBackgroundRun
   Minus -> HaveCalibrationWorkspace
   HaveCalibrationWorkspace -> ExtractWorkspace [label="No"]
   HaveCalibrationWorkspace -> Divide [label="Yes"]
