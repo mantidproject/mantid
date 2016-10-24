@@ -6,8 +6,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class TomoToolConfigDialogAstra
-    : public TomoToolConfigDialogBase {
+class TomoToolConfigDialogAstra : public TomoToolConfigDialogBase {
 public:
   TomoToolConfigDialogAstra()
       : TomoToolConfigDialogBase(DEFAULT_TOOL_NAME, DEFAULT_TOOL_METHOD) {}
