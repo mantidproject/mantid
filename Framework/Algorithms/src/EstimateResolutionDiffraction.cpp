@@ -175,12 +175,12 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
   for (size_t i = 0; i < numspec; ++i) {
     const auto &det = spectrumInfo.detector(i);
     double detdim;
-    try {
-      const auto &realdet = dynamic_cast<const Detector &>(det);
-      double dy = realdet.getHeight();
-      double dx = realdet.getWidth();
+    const auto realdet = dynamic_cast<const Detector *>(&det);
+    if (realdet) {
+      double dy = realdet->getHeight();
+      double dx = realdet->getWidth();
       detdim = sqrt(dx * dx + dy * dy) * 0.5;
-    } catch (std::bad_cast) {
+    } else {
       // Use detector dimension as 0 as no-information
       detdim = 0;
       ++count_nodetsize;
@@ -205,6 +205,8 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     double t3 = deltatheta * (cos(theta) / sin(theta));
 
     double resolution = sqrt(t1 * t1 + t2 * t2 + t3 * t3);
+    if (spectrumInfo.isMonitor(i))
+      resolution = 0.0;
 
     m_outputWS->mutableX(i)[0] = static_cast<double>(i);
     m_outputWS->mutableY(i)[0] = resolution;
