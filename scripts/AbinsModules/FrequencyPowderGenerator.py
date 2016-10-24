@@ -71,7 +71,7 @@ class FrequencyPowderGenerator(object):
             raise ValueError("Fundamentals in the form of one dimentional array are expected.")
 
         if not (isinstance(quantum_order, int) and
-                AbinsConstants.fundamentals <= quantum_order < AbinsConstants.higher_order_quantum_effects_dim  + AbinsConstants.fundamentals_dim):
+                AbinsConstants.fundamentals <= quantum_order < AbinsConstants.higher_order_quantum_effects  + AbinsConstants.fundamentals):
             raise ValueError("Improper value of quantum order effect.")
 
         # frequencies for fundamentals
@@ -88,7 +88,7 @@ class FrequencyPowderGenerator(object):
                 previous_coefficients.dtype.num == AbinsConstants.int_id):
             raise ValueError("One dimentional array is expected.")
 
-        # higher order effects quantum events
+        # higher order quantum events
         else:
 
             fundamentals_size = fundamentals_array.size
@@ -129,7 +129,7 @@ class FrequencyPowderGenerator(object):
                         current_position += 1
 
             # remove unnecessary zeros from the end of array
-            inds = new_array > AbinsParameters.min_wavenumber
+            inds = new_array > AbinsParameters.acoustic_phonon_threshold
 
             return new_array[inds], new_coefficients[inds]
 
