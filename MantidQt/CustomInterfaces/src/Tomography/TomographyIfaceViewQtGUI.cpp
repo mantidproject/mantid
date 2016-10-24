@@ -1050,7 +1050,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(
     TomoToolConfigDialogBase *dialog) {
 
   // execute also intiialises all the parts of the GUI
-  int res = dialog->execute();
+  dialog->execute();
 }
 
 /**
