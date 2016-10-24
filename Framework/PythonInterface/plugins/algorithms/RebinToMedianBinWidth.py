@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm
 from mantid.kernel import Direction, StringListValidator
 import numpy
+import rebinwrapperhelpers
 
 class RebinToMedianBinWidth(PythonAlgorithm):
     '''
@@ -10,10 +11,6 @@ class RebinToMedianBinWidth(PythonAlgorithm):
     '''
     _PROP_INPUT_WS  = 'InputWorkspace'
     _PROP_OUTPUT_WS = 'OutputWorkspace'
-    _PROP_ROUNDING  = 'Rounding'
-
-    _ROUNDING_NONE = 'None'
-    _ROUNDING_TEN_TO_INT = '10^n'
 
     def category(self):
         '''
@@ -39,10 +36,7 @@ class RebinToMedianBinWidth(PythonAlgorithm):
         '''
         self.declareProperty(MatrixWorkspaceProperty(name=self._PROP_INPUT_WS, defaultValue='', direction=Direction.Input), doc='The workspace containing the input data')
         self.declareProperty(MatrixWorkspaceProperty(name=self._PROP_OUTPUT_WS, defaultValue='', direction=Direction.Output), doc='The output workspace')
-        rounding = StringListValidator()
-        rounding.addAllowedValue(self._ROUNDING_NONE)
-        rounding.addAllowedValue(self._ROUNDING_TEN_TO_INT)
-        self.declareProperty(name=self._PROP_ROUNDING, defaultValue=self._ROUNDING_NONE, validator=rounding, direction=Direction.Input, doc='Bin width rounding')
+        rebinwrapperhelpers.declare_rounding_property(self)
 
     def PyExec(self):
         '''
@@ -62,8 +56,7 @@ class RebinToMedianBinWidth(PythonAlgorithm):
             dxs = xs[1:] - xs[:-1]
             medians[wsIndex] = numpy.median(dxs)
         binWidth = numpy.mean(medians)
-        if roundingMode == self._ROUNDING_TEN_TO_INT:
-            binWidth = 10.0**numpy.floor(numpy.log10(binWidth))
+        binWidth = rebinwrapperhelpers.round(binWidth, roundingMode)
         self.log().notice('Binning to bin width {0}'.format(binWidth))
         outputWs = Rebin(InputWorkspace=inputWs, OutputWorkspace=outputWs, Params=binWidth)
         if inputIsDistribution:
