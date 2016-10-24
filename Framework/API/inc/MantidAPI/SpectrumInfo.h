@@ -6,14 +6,12 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <mutex>
 #include <unordered_map>
 #include <vector>
 
 namespace Mantid {
 using detid_t = int32_t;
 namespace Geometry {
-class IComponent;
 class IDetector;
 class Instrument;
 }
@@ -82,30 +80,11 @@ private:
   const Geometry::IDetector &getDetector(const size_t index) const;
   std::vector<boost::shared_ptr<const Geometry::IDetector>>
   getDetectorVector(const size_t index) const;
-  const Geometry::IComponent &getSource() const;
-  const Geometry::IComponent &getSample() const;
-
-  // These cache init functions are not thread-safe! Use only in combination
-  // with std::call_once!
-  void cacheSource() const;
-  void cacheSample() const;
-  void cacheL1() const;
 
   const MatrixWorkspace &m_workspace;
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
   std::unique_ptr<DetectorInfo> m_detectorInfo;
   std::unordered_map<detid_t, size_t> m_detIDToIndex;
-  // The following variables are mutable, since they are initialized (cached)
-  // only on demand, by const getters.
-  mutable boost::shared_ptr<const Geometry::IComponent> m_source;
-  mutable boost::shared_ptr<const Geometry::IComponent> m_sample;
-  mutable Kernel::V3D m_sourcePos;
-  mutable Kernel::V3D m_samplePos;
-  mutable double m_L1;
-  mutable std::once_flag m_sourceCached;
-  mutable std::once_flag m_sampleCached;
-  mutable std::once_flag m_L1Cached;
-
   mutable std::vector<boost::shared_ptr<const Geometry::IDetector>> m_detectors;
   mutable std::vector<size_t> m_lastIndex;
 };

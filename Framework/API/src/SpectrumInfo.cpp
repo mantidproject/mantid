@@ -12,7 +12,7 @@ namespace Mantid {
 namespace API {
 
 SpectrumInfo::SpectrumInfo(const MatrixWorkspace &workspace)
-    : m_workspace(workspace), m_instrument(workspace.getInstrument()), m_L1(0),
+    : m_workspace(workspace), m_instrument(workspace.getInstrument()),
       m_detectors(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
   // Note: This does not seem possible currently (the instrument objects is
@@ -46,10 +46,14 @@ bool SpectrumInfo::isMasked(const size_t index) const {
  * i.e., for a monitor in the beamline between source and sample L2 is negative.
  */
 double SpectrumInfo::l2(const size_t index) const {
-  if (!isMonitor(index))
-    return getDetector(index).getDistance(getSample());
-  else
-    return getDetector(index).getDistance(getSource()) - l1();
+  double l2{0.0};
+  const auto &dets = getDetectorVector(index);
+  for (const auto &det : dets) {
+    const auto &detIndex = m_detIDToIndex.at(det->getID());
+    m_detectorInfo->setCachedDetector(detIndex, det);
+    l2 += m_detectorInfo->l2(detIndex);
+  }
+  return l2 /= static_cast<double>(dets.size());
 }
 
 /// Returns 2 theta (scattering angle w.r.t. to beam direction).
@@ -145,20 +149,17 @@ bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
 
 /// Returns the source position.
 Kernel::V3D SpectrumInfo::sourcePosition() const {
-  std::call_once(m_sourceCached, &SpectrumInfo::cacheSource, this);
-  return m_sourcePos;
+  return m_detectorInfo->sourcePosition();
 }
 
 /// Returns the sample position.
 Kernel::V3D SpectrumInfo::samplePosition() const {
-  std::call_once(m_sampleCached, &SpectrumInfo::cacheSample, this);
-  return m_samplePos;
+  return m_detectorInfo->samplePosition();
 }
 
 /// Returns L1 (distance from source to sample).
 double SpectrumInfo::l1() const {
-  std::call_once(m_L1Cached, &SpectrumInfo::cacheL1, this);
-  return m_L1;
+  return m_detectorInfo->l1();
 }
 
 const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
@@ -203,44 +204,6 @@ SpectrumInfo::getDetectorVector(const size_t index) const {
     size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
     return {m_detectors[thread]};
   }
-}
-
-/// Returns a reference to the source component. The value is cached, so calling
-/// it repeatedly is cheap.
-const Geometry::IComponent &SpectrumInfo::getSource() const {
-  std::call_once(m_sourceCached, &SpectrumInfo::cacheSource, this);
-  return *m_source;
-}
-
-/// Returns a reference to the sample component. The value is cached, so calling
-/// it repeatedly is cheap.
-const Geometry::IComponent &SpectrumInfo::getSample() const {
-  std::call_once(m_sampleCached, &SpectrumInfo::cacheSample, this);
-  return *m_sample;
-}
-
-void SpectrumInfo::cacheSource() const {
-  m_source = m_instrument->getSource();
-  if (!m_source)
-    throw std::runtime_error("Instrument in workspace " +
-                             m_workspace.getName() +
-                             " does not contain source!");
-  m_sourcePos = m_source->getPos();
-}
-
-void SpectrumInfo::cacheSample() const {
-  m_sample = m_instrument->getSample();
-  if (!m_sample)
-    throw std::runtime_error("Instrument in workspace " +
-                             m_workspace.getName() +
-                             "  does not contain sample!");
-  m_samplePos = m_sample->getPos();
-}
-
-void SpectrumInfo::cacheL1() const {
-  std::call_once(m_sourceCached, &SpectrumInfo::cacheSource, this);
-  std::call_once(m_sampleCached, &SpectrumInfo::cacheSample, this);
-  m_L1 = m_source->getDistance(*m_sample);
 }
 
 } // namespace API
