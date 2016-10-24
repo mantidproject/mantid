@@ -66,24 +66,24 @@
                   </spacer>
                 </item>
                 <item row="1" column="0">
-                  <widget class="QLabel" name="expSettingsTransLamMinLabel">
+                  <widget class="QLabel" name="expSettingsCRhoLabel">
                     <property name="text">
-                      <string>TransmissionLambdaMin</string>
+                      <string>CRho</string>
                     </property>
                   </widget>
                 </item>
                 <item row="1" column="1">
-                  <widget class="QLineEdit" name="expSettingsTransLamMinEdit"/>
+                  <widget class="QLineEdit" name="expSettingsCRhoEdit"/>
                 </item>
                 <item row="1" column="2">
-                  <widget class="QLabel" name="expSettingsTransLamMaxLabel">
+                  <widget class="QLabel" name="expSettingsCAlphaLabel">
                     <property name="text">
-                      <string>TransmissionLambdaMax</string>
+                      <string>CAlpha</string>
                     </property>
                   </widget>
                 </item>
                 <item row="1" column="3">
-                  <widget class="QLineEdit" name="expSettingsTransLamMaxEdit"/>
+                  <widget class="QLineEdit" name="expSettingsCAlphaEdit"/>
                 </item>
                 <item row="1" column="4">
                   <spacer name="expSettings0Spacer1">
@@ -99,24 +99,24 @@
                   </spacer>
                 </item>
                 <item row="2" column="0">
-                  <widget class="QLabel" name="expSettingsCRhoLabel">
+                  <widget class="QLabel" name="expSettingsCApLabel">
                     <property name="text">
-                      <string>CRho</string>
+                      <string>CAp</string>
                     </property>
                   </widget>
                 </item>
                 <item row="2" column="1">
-                  <widget class="QLineEdit" name="expSettingsCRhoEdit"/>
+                  <widget class="QLineEdit" name="expSettingsCApEdit"/>
                 </item>
                 <item row="2" column="2">
-                  <widget class="QLabel" name="expSettingsCAlphaLabel">
+                  <widget class="QLabel" name="expSettingsCPpLabel">
                     <property name="text">
-                      <string>CAlpha</string>
+                      <string>CPp</string>
                     </property>
                   </widget>
                 </item>
                 <item row="2" column="3">
-                  <widget class="QLineEdit" name="expSettingsCAlphaEdit"/>
+                  <widget class="QLineEdit" name="expSettingsCPpEdit"/>
                 </item>
                 <item row="2" column="4">
                   <spacer name="expSettings0Spacer2">
@@ -132,60 +132,17 @@
                   </spacer>
                 </item>
                 <item row="3" column="0">
-                  <widget class="QLabel" name="expSettingsCApLabel">
+                  <widget class="QLabel" name="expSettingsDirectBeamLabel">
                     <property name="text">
-                      <string>CAp</string>
+                      <string>DirectBeam</string>
                     </property>
                   </widget>
                 </item>
                 <item row="3" column="1">
-                  <widget class="QLineEdit" name="expSettingsCApEdit"/>
+                  <widget class="QLineEdit" name="expSettingsDirectBeamEdit"/>
                 </item>
                 <item row="3" column="2">
-                  <widget class="QLabel" name="expSettingsCPpLabel">
-                    <property name="text">
-                      <string>CPp</string>
-                    </property>
-                  </widget>
-                </item>
-                <item row="3" column="3">
-                  <widget class="QLineEdit" name="expSettingsCPpEdit"/>
-                </item>
-                <item row="3" column="4">
                   <spacer name="expSettings0Spacer3">
-                    <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                      <size>
-                        <width>40</width>
-                        <height>20</height>
-                      </size>
-                    </property>
-                  </spacer>
-                </item>
-                <item row="4" column="0">
-                  <widget class="QLabel" name="expSettingsBinParsLabel">
-                    <property name="text">
-                      <string>BinningParameters</string>
-                    </property>
-                  </widget>
-                </item>
-                <item row="4" column="1">
-                  <widget class="QLineEdit" name="expSettingsBinParsEdit"/>
-                </item>
-                <item row="4" column="2">
-                  <widget class="QLabel" name="expSettingsDBNRLabel">
-                    <property name="text">
-                      <string>DBNR</string>
-                    </property>
-                  </widget>
-                </item>
-                <item row="4" column="3">
-                  <widget class="QLineEdit" name="expSettingsDBNREdit"/>
-                </item>
-                <item row="4" column="4">
-                  <spacer name="expSettings0Spacer4">
                     <property name="orientation">
                       <enum>Qt::Horizontal</enum>
                     </property>
@@ -208,10 +165,10 @@
                   <number>10</number>
                 </property>
                 <property name="topMargin">
-                  <number>50</number>
+                  <number>40</number>
                 </property>
                 <property name="bottomMargin">
-                  <number>50</number>
+                  <number>40</number>
                 </property>
                 <item row="0" column="0">
                   <widget class="QLabel" name="polCorrLabel">
@@ -339,24 +296,24 @@
               </spacer>
             </item>
             <item row="2" column="0">
-              <widget class="QLabel" name="instSettingsPDStartLabel">
+              <widget class="QLabel" name="instSettingsLamMinLabel">
                 <property name="text">
-                  <string>PointDetectorStart</string>
+                  <string>LambdaMin</string>
                 </property>
               </widget>
             </item>
             <item row="2" column="1">
-              <widget class="QLineEdit" name="instSettingsPDStartEdit"/>
+              <widget class="QLineEdit" name="instSettingsLamMinEdit"/>
             </item>
             <item row="2" column="2">
-              <widget class="QLabel" name="instSettingsPDStopLabel">
+              <widget class="QLabel" name="instSettingsLamMaxLabel">
                 <property name="text">
-                  <string>PointDetectorStop</string>
+                  <string>LambdaMax</string>
                 </property>
               </widget>
             </item>
             <item row="2" column="3">
-              <widget class="QLineEdit" name="instSettingsPDStopEdit"/>
+              <widget class="QLineEdit" name="instSettingsLamMaxEdit"/>
             </item>
             <item row="2" column="4">
               <spacer name="instSettingsSpacer2">
@@ -372,24 +329,24 @@
               </spacer>
             </item>
             <item row="3" column="0">
-              <widget class="QLabel" name="instSettingsMDStartLabel">
-                <property name="text">
-                  <string>MultiDetectorStart</string>
-                </property>
-              </widget>
-            </item>
-            <item row="3" column="1">
-              <widget class="QLineEdit" name="instSettingsMDStartEdit"/>
-            </item>
-            <item row="3" column="2">
               <widget class="QLabel" name="instSettingsI0MonIndexLabel">
                 <property name="text">
                   <string>I0MonitorIndex</string>
                 </property>
               </widget>
             </item>
-            <item row="3" column="3">
+            <item row="3" column="1">
               <widget class="QLineEdit" name="instSettingsI0MonIndexEdit"/>
+            </item>
+            <item row="3" column="2">
+              <widget class="QLabel" name="instSettingsScaleFactorLabel">
+                <property name="text">
+                  <string>ScaleFactor</string>
+                </property>
+              </widget>
+            </item>
+            <item row="3" column="3">
+              <widget class="QLineEdit" name="instSettingsScaleFactorEdit"/>
             </item>
             <item row="3" column="4">
               <spacer name="instSettingsSpacer3">
@@ -405,104 +362,27 @@
               </spacer>
             </item>
             <item row="4" column="0">
-              <widget class="QLabel" name="instSettingsLamMinLabel">
+              <widget class="QLabel" name="instSettingsMomentumTransferLimitsLabel">
                 <property name="text">
-                  <string>LambdaMin</string>
+                  <string>MomentumTransferLimits</string>
                 </property>
               </widget>
             </item>
             <item row="4" column="1">
-              <widget class="QLineEdit" name="instSettingsLamMinEdit"/>
+              <widget class="QLineEdit" name="instSettingsMomentumTransferLimitsEdit"/>
             </item>
             <item row="4" column="2">
-              <widget class="QLabel" name="instSettingsLamMaxLabel">
-                <property name="text">
-                  <string>LambdaMax</string>
-                </property>
-              </widget>
-            </item>
-            <item row="4" column="3">
-              <widget class="QLineEdit" name="instSettingsLamMaxEdit"/>
-            </item>
-            <item row="4" column="4">
-              <spacer name="instSettingsSpacer4">
-                <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                  <size>
-                    <width>40</width>
-                    <height>20</height>
-                  </size>
-                </property>
-              </spacer>
-            </item>
-            <item row="5" column="0">
-              <widget class="QLabel" name="instSettingsScaleFactorLabel">
-                <property name="text">
-                  <string>NRScaleFactor</string>
-                </property>
-              </widget>
-            </item>
-            <item row="5" column="1">
-              <widget class="QLineEdit" name="instSettingsScaleFactorEdit"/>
-            </item>
-            <item row="5" column="2">
-              <widget class="QLabel" name="instSettingsBackgroundLabel">
-                <property name="text">
-                  <string>NRBackground</string>
-                </property>
-              </widget>
-            </item>
-            <item row="5" column="3">
-              <widget class="QComboBox" name="BackgroundComboBox">
-                <item>
-                  <property name="text">
-                    <string>False</string>
-                  </property>
-                </item>
-                <item>
-                  <property name="text">
-                    <string>True</string>
-                  </property>
-                </item>
-              </widget>
-            </item>
-            <item row="5" column="4">
-              <spacer name="instSettingsSpacer5">
-                <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                  <size>
-                    <width>40</width>
-                    <height>20</height>
-                  </size>
-                </property>
-              </spacer>
-            </item>
-            <item row="6" column="0">
-              <widget class="QLabel" name="instSettingsQLimitsLabel">
-                <property name="text">
-                  <string>NRQLimits</string>
-                </property>
-              </widget>
-            </item>
-            <item row="6" column="1">
-              <widget class="QLineEdit" name="instSettingsNRQLimitsEdit"/>
-            </item>
-            <item row="6" column="2">
               <widget class="QLabel" name="instSettingsDetLimitsLabel">
                 <property name="text">
                   <string>DetectorLimits</string>
                 </property>
               </widget>
             </item>
-            <item row="6" column="3">
+            <item row="4" column="3">
               <widget class="QLineEdit" name="instSettingsDetLimitsEdit"/>
             </item>
-            <item row="6" column="4">
-              <spacer name="instSettingsSpacer6">
+            <item row="4" column="4">
+              <spacer name="instSettingsSpacer4">
                 <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                 </property>
