@@ -1,14 +1,14 @@
 # pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
-from mantid.kernel import *
+
 from mantid.api import *
-from mantid.simpleapi import *
+from mantid.kernel import *
 from mantid import config
 
 import os
 
-_str_or_none = lambda s: s if s != '' else None
-_ws_or_none = lambda s: mtd[s] if s != '' else None
-_elems_or_none = lambda l: l if len(l) != 0 else None
+_str_or_none = lambda s: s if s != '' else None  # noqa
+_ws_or_none = lambda s: mtd[s] if s != '' else None  # noqa
+_elems_or_none = lambda l: l if len(l) != 0 else None  # noqa
 
 
 class EnergyWindowScan(DataProcessorAlgorithm):
@@ -316,8 +316,6 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         @param workspace_name Name of workspace
         @return New name of workspace
         """
-        from mantid.simpleapi import RenameWorkspace
-        import string
 
         # Get the instrument
         instrument = mtd[workspace_name].getInstrument()

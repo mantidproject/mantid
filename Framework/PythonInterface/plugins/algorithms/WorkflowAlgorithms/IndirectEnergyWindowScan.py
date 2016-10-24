@@ -1,14 +1,14 @@
 # pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
-from mantid.kernel import *
+
 from mantid.api import *
-from mantid.simpleapi import *
+from mantid.kernel import *
 from mantid import config
 
 import os
 
-_str_or_none = lambda s: s if s != '' else None
-_ws_or_none = lambda s: mtd[s] if s != '' else None
-_elems_or_none = lambda l: l if len(l) != 0 else None
+_str_or_none = lambda s: s if s != '' else None  # noqa
+_ws_or_none = lambda s: mtd[s] if s != '' else None  # noqa
+_elems_or_none = lambda l: l if len(l) != 0 else None  # noqa
 
 
 class IndirectElasticWindowScan(DataProcessorAlgorithm):
@@ -222,6 +222,7 @@ class IndirectElasticWindowScan(DataProcessorAlgorithm):
             logger.warning('MapFile will be ignored by selected GroupingMethod')
 
     def _save_output(self):
+        from mantid.simpleapi import SaveNexusProcessed
         workdir = config['defaultsave.directory']
         el_eq1_path = os.path.join(workdir, self._scan_ws + '_el_eq1.nxs')
         logger.information('Creating file : %s' % el_eq1_path)
@@ -258,14 +259,14 @@ class IndirectElasticWindowScan(DataProcessorAlgorithm):
 
     def _plot_result(self):
         import mantidplot as mp
-        nhist = mtd[self._scan_ws + '_el_eq1'].getNumberHistograms()
-        el_eq1_plot = mp.plotSpectrum(self._scan_ws + '_el_eq1', 0, error_bars=True)
-        inel_eq1_plot = mp.plotSpectrum(self._scan_ws + '_inel_eq1', 0, error_bars=True)
-        el_eq2_plot = mp.plotSpectrum(self._scan_ws + '_el_eq2', 0, error_bars=True)
-        inel_eq2_plot = mp.plotSpectrum(self._scan_ws + '_inel_eq2', 0, error_bars=True)
-        eisf_plot = mp.plotSpectrum(self._scan_ws + '_eisf', 0, error_bars=True)
+        nhist = mtd[self._scan_ws + '_el_eq1'].getNumberHistograms() # noqa
+        el_eq1_plot = mp.plotSpectrum(self._scan_ws + '_el_eq1', 0, error_bars=True) # noqa
+        inel_eq1_plot = mp.plotSpectrum(self._scan_ws + '_inel_eq1', 0, error_bars=True) # noqa
+        el_eq2_plot = mp.plotSpectrum(self._scan_ws + '_el_eq2', 0, error_bars=True) # noqa
+        inel_eq2_plot = mp.plotSpectrum(self._scan_ws + '_inel_eq2', 0, error_bars=True) # noqa
+        eisf_plot = mp.plotSpectrum(self._scan_ws + '_eisf', 0, error_bars=True) # noqa
         if self._msdfit:
-            msd_plot = mp.plotSpectrum(self._scan_ws + '_msd', 1, error_bars=True)
+            msd_plot = mp.plotSpectrum(self._scan_ws + '_msd', 1, error_bars=True) # noqa
 
 
 # Register algorithm with Mantid
