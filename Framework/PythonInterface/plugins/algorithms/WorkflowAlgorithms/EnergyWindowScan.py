@@ -6,9 +6,9 @@ from mantid import config
 
 import os
 
-_str_or_none = lambda s: s if s != '' else None  # noqa
-_ws_or_none = lambda s: mtd[s] if s != '' else None  # noqa
-_elems_or_none = lambda l: l if len(l) != 0 else None  # noqa
+_str_or_none = lambda s: s if s != '' else None # noqa
+_ws_or_none = lambda s: mtd[s] if s != '' else None # noqa
+_elems_or_none = lambda l: l if len(l) != 0 else None # noqa
 
 
 class EnergyWindowScan(DataProcessorAlgorithm):
