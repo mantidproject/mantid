@@ -185,8 +185,7 @@ const std::string MatrixWorkspace::getTitle() const {
  * Any modifications of the instrument or instrument parameters will invalidate
  * this reference.
  */
-const SpectrumInfo &
-MatrixWorkspace::spectrumInfo() const {
+const SpectrumInfo &MatrixWorkspace::spectrumInfo() const {
   if (!m_spectrumInfo) {
     std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};
     if (!m_spectrumInfo)
@@ -197,8 +196,7 @@ MatrixWorkspace::spectrumInfo() const {
 
 /** Return a non-const reference to the SpectrumInfo object. Not thread safe.
  */
-SpectrumInfo &
-MatrixWorkspace::mutableSpectrumInfo() {
+SpectrumInfo &MatrixWorkspace::mutableSpectrumInfo() {
   // SpectrumInfo holds a parameterized instrument so the reference count to the
   // ParameterMap in ExperimentInfo is never 1, i.e., calling
   // ExperimentInfo::instrumentParameters (as needed for many modifications)

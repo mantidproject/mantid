@@ -75,7 +75,8 @@ Kernel::V3D DetectorInfo::position(const size_t index) const {
   return getDetector(index).getPos();
 }
 
-void DetectorInfo::setPosition(const size_t index, const Kernel::V3D &position) {
+void DetectorInfo::setPosition(const size_t index,
+                               const Kernel::V3D &position) {
   const auto &det = getDetector(index);
   using namespace Geometry::ComponentHelper;
   TransformType positionType = Absolute;

@@ -158,9 +158,7 @@ Kernel::V3D SpectrumInfo::samplePosition() const {
 }
 
 /// Returns L1 (distance from source to sample).
-double SpectrumInfo::l1() const {
-  return m_detectorInfo->l1();
-}
+double SpectrumInfo::l1() const { return m_detectorInfo->l1(); }
 
 const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
