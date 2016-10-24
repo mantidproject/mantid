@@ -120,6 +120,16 @@ public:
     TS_ASSERT_DELTA(spectrumInfo.twoTheta(2), 0.0199973, 1e-6);
   }
 
+  void test_twoTheta_grouped() {
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    m_workspace.getSpectrum(0).setDetectorIDs({1, 3});
+    // det 1 at V3D(0.0, -0.1, 5.0)
+    // det 3 at V3D(0.0,  0.1, 5.0)
+    // Average *scattering* angle is *not* 0.0!
+    TS_ASSERT_DELTA(spectrumInfo.twoTheta(0), 0.0199973, 1e-6);
+    m_workspace.getSpectrum(0).setDetectorIDs({1});
+  }
+
   // Legacy test via the workspace method detectorTwoTheta(), which might be
   // removed at some point.
   void test_twoThetaLegacy() {
