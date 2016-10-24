@@ -13,45 +13,47 @@ A workflow algorithm to perform a data reduction for indirect **ILL** instrument
 This algorithm performs QENS (Quasi-Elastic Neutron Scattering) type of reduction.
 
 SumRuns
-~~~~~~~~~~~~~~~~
+~~~~~~~
 
-All runs will be summed before the reduction. The run number of the first run will be used for naming the single output workspace.
+All runs will be summed while loading, before the reduction. The run number of the first run will be used for naming the single output workspace.
 
 Unmirror Options
 ~~~~~~~~~~~~~~~~
 
-When **IN16B** records data in mirror sense the spectra for the acceleration and
-deceleration phase of the Doppler drive are recorded separately, the result is
-each spectra containing two regions for the same energy range.
+**IN16B** can record data with mirror sense, where the spectra for the acceleration and
+deceleration phase of the Doppler drive are recorded separately, or without.
+Technically this is defined in the `Doppler.mirror_sense` entry in the sample logs.
+For the data without mirror sense (technically, mirror_sense == 16) only three unmirror options are valid:
 
-For quasi-elastic neutron scattering scans (QENS), this algorithm will split the data for each spectrum, these form the **left** and **right** workspaces that are
-reduced independently and then summed according to ``UnmirrorOption`` as follows (after normalisation to monitor and optional calibration with input calibration workspace):
+0: No x-axis shift.
 
-0: No transformation, i.e. normalised, (calibrated) workspace will be returned as reduced workspace.
-If ``Doppler.mirror_sense=14`` in input ``.nxs`` files, the reduced workspace has two wings, so the x-axis will not be converted to energy.
-If ``Doppler.mirror_sense=16`` the reduced workspace will be returned with x-axis in energy transfer.
-If the nexus entry is not present no energy transfer will take place and corresponding warning will be thrown.
+6: Centering the peaks at the zero energy transfer.
 
-1: Left wing will be returned as reduced workspace.
+7: Centering the peaks using the corresponding vanadium run.
 
-2: Right wing will be returned as reduced workspace.
+For the data with mirror sense (i.e. mirror_sense == 14) there are 8 options available:
 
-3: Left and right wings will be simply summed and returned as reduced workspace.
+0: No x-axis shift, no energy conversion can be performed.
+
+1: Left and right wings will summed.
+
+2: Left wing will be returned.
+
+3: Right wing will be returned.
 
 4: Peaks in the right wing will be positioned at peak positions in the left wing, and then they will be summed.
 
-5: Right wing will be shifted with the offset of the peak positions of the right wing of the corresponding vanadium run.
-It will then be summed with left wing. ``VanadiumRun`` needs to be specified.
+5: Right wing will be shifted according with the offsets of the peak positions in left and right wings in vanadium run.
 
 6: Peaks in both, left and right wings will be centered at zero energy transfer and then they will be summed.
 
-7: Left and right wings will be shifted according to offsets of peak positions in corresponding vanadium run.
-They will then be summed and returned. ``VanadiumRun`` needs to be specified.
+7: Left and right wings will be shifted according to offsets of peak positions of left and right wings in corresponding vanadium run.
 
+Options 5,7 require the ``VanadiumRun``.
 The options ``4-7`` rely on :ref:`FindEPP <algm-FindEPP>` algorithm to find the peak positions.
-These options are inherited identically from (and validated against) previous **LAMP** software, to enable smooth transition for the users.
-Energy transferred will be left, right and reduced workspaces (exception for ``UnmirrorOption=0``) and corrupted bins due to normalisation and shift are masked.
-All spectra of the reduced workspaces are converted to scattering angle.
+All spectra of the reduced workspaces are converted to scattering angle as y-axis.
+Note, that it is forbidden to reduce several runs with different mirror senses.
+Technically, the mirror sense will be deduced from the first run, and all the rest will be forced to comply with it, otherwise will be skipped.
 
 Multiple File Reduction
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -68,21 +70,14 @@ computed with :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>` algorithm.
 It then can be seeded back to :ref:`IndirectILLReduction <algm-IndirectILLReduction>` to use for calibration.
 Note, that :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>` itself just calls :ref:`IndirectILLReduction <algm-IndirectILLReduction>`
 for the given (vanadium) run and performs Integration around the specified peak range.
+There is hence no restriction for ``VanadiumRun`` for the alignment be the same as the calibration run.
 
 DebugMode
 ~~~~~~~~~
 This provides a flexibility to monitor the snapshots of workspaces at different intermediate steps.
 If enabled, along with the reduced, left and right workspaces, many other workspaces will be created.
 They also will be grouped and a tuple of many :ref:`WorkspaceGroup <WorkspaceGroup>` s will be returned, where the
-first item would be the group for the final reduced result.
-Enabling the ``DebugMode`` will produce the following additional GroupWorkspaces (Example OutputWorkspace=out):
-- out_detgrouped
-- out_left
-- out_mnorm
-- out_monitor
-- out_raw
-- out_right
-- out_vnorm (if a calibration workspace was given as input)
+first item would be the group for the final reduced result, and the rest of items will be additional intermediate results.
 
 Output Naming Conventions
 ~~~~~~~~~~~~~~~~~~~~~~~~~
