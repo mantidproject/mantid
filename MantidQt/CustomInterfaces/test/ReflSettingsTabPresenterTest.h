@@ -62,23 +62,11 @@ public:
     EXPECT_CALL(mockView, getAnalysisMode())
         .Times(Exactly(1))
         .WillOnce(Return("MultiDetectorAnalysis"));
-    EXPECT_CALL(mockView, getTransmissionLambdaMin())
-        .Times(Exactly(1))
-        .WillOnce(Return("1.0"));
-    EXPECT_CALL(mockView, getTransmissionLambdaMax())
-        .Times(Exactly(1))
-        .WillOnce(Return("15.0"));
-    EXPECT_CALL(mockView, getBinningParameters())
-        .Times(Exactly(1))
-        .WillOnce(Return("\"1.5,0.02,17\""));
     auto options = presenter.getTransmissionOptions();
 
     std::vector<std::string> optionsVec;
     boost::split(optionsVec, options, split_q());
     TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
-    TS_ASSERT_EQUALS(optionsVec[1], "WavelengthMin=1.0");
-    TS_ASSERT_EQUALS(optionsVec[2], "WavelengthMax=15.0");
-    TS_ASSERT_EQUALS(optionsVec[3], "Params=\"1.5,0.02,17\"");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -99,10 +87,7 @@ public:
         .WillOnce(Return("0.6"));
     EXPECT_CALL(mockView, getCAp()).Times(Exactly(1)).WillOnce(Return("100.0"));
     EXPECT_CALL(mockView, getCPp()).Times(Exactly(1)).WillOnce(Return("0.54"));
-    EXPECT_CALL(mockView, getBinningParameters())
-        .Times(Exactly(1))
-        .WillOnce(Return("\"1.5,0.02,17\""));
-    EXPECT_CALL(mockView, getDbnr())
+    EXPECT_CALL(mockView, getDirectBeam())
         .Times(Exactly(1))
         .WillOnce(Return("\"0,3\""));
     auto options = presenter.getReductionOptions();
@@ -114,8 +99,7 @@ public:
     TS_ASSERT_EQUALS(optionsVec[2], "CAlpha=0.6");
     TS_ASSERT_EQUALS(optionsVec[3], "CAp=100.0");
     TS_ASSERT_EQUALS(optionsVec[4], "CPp=0.54");
-    TS_ASSERT_EQUALS(optionsVec[5], "Params=\"1.5,0.02,17\"");
-    TS_ASSERT_EQUALS(optionsVec[6], "RegionOfDirectBeam=\"0,3\"");
+    TS_ASSERT_EQUALS(optionsVec[5], "RegionOfDirectBeam=\"0,3\"");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }

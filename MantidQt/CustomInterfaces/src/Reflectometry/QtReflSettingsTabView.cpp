@@ -117,22 +117,6 @@ std::string QtReflSettingsTabView::getAnalysisMode() const {
   return m_ui.analysisModeComboBox->currentText().toStdString();
 }
 
-/** Return transmission lambda min
-* @return :: transmission lambda min
-*/
-std::string QtReflSettingsTabView::getTransmissionLambdaMin() const {
-  
-  return m_ui.expSettingsTransLamMinEdit->text().toStdString();
-}
-
-/** Return transmission lambda max
-* @return :: transmission lambda max
-*/
-std::string QtReflSettingsTabView::getTransmissionLambdaMax() const {
-
-  return m_ui.expSettingsTransLamMaxEdit->text().toStdString();
-}
-
 /** Return CRho
 * @return :: polarization correction CRho
 */
@@ -165,20 +149,12 @@ std::string QtReflSettingsTabView::getCPp() const {
   return m_ui.expSettingsCPpEdit->text().toStdString();
 }
 
-/** Return binning parameters
-* @return :: binning parameters
-*/
-std::string QtReflSettingsTabView::getBinningParameters() const {
-
-  return m_ui.expSettingsBinParsEdit->text().toStdString();
-}
-
 /** Return Dbnr
 * @return :: direct beam range Dbnr
 */
-std::string QtReflSettingsTabView::getDbnr() const {
+std::string QtReflSettingsTabView::getDirectBeam() const {
 
-  return m_ui.expSettingsDBNREdit->text().toStdString();
+  return m_ui.expSettingsDirectBeamEdit->text().toStdString();
 }
 
 } // namespace CustomInterfaces

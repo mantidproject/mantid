@@ -62,21 +62,6 @@ std::string ReflSettingsTabPresenter::getTransmissionOptions() const {
   if (!analysisMode.empty())
     options.push_back("AnalysisMode=" + analysisMode);
 
-  // Add transmission lambda min
-  auto transLamMin = m_view->getTransmissionLambdaMin();
-  if (!transLamMin.empty())
-    options.push_back("WavelengthMin=" + transLamMin);
-
-  // Add transmission lambda max
-  auto transLamMax = m_view->getTransmissionLambdaMax();
-  if (!transLamMax.empty())
-    options.push_back("WavelengthMax=" + transLamMax);
-
-  // Add binning parameters
-  auto binPars = m_view->getBinningParameters();
-  if (!binPars.empty())
-    options.push_back("Params=" + binPars);
-
   return boost::algorithm::join(options, ",");
 }
 
@@ -117,13 +102,8 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   if (!cpp.empty())
 	  options.push_back("CPp=" + cpp);
 
-  // Add binning parameters
-  auto binPars = m_view->getBinningParameters();
-  if (!binPars.empty())
-    options.push_back("Params=" + binPars);
-
-  // Add direct beam range
-  auto dbnr = m_view->getDbnr();
+  // Add direct beam
+  auto dbnr = m_view->getDirectBeam();
   if (!dbnr.empty())
     options.push_back("RegionOfDirectBeam=" + dbnr);
 

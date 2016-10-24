@@ -64,14 +64,11 @@ public:
   createStitchHints(const std::map<std::string, std::string> &hints) = 0;
 
   virtual std::string getAnalysisMode() const = 0;
-  virtual std::string getTransmissionLambdaMin() const = 0;
-  virtual std::string getTransmissionLambdaMax() const = 0;
   virtual std::string getCRho() const = 0;
   virtual std::string getCAlpha() const = 0;
   virtual std::string getCAp() const = 0;
   virtual std::string getCPp() const = 0;
-  virtual std::string getBinningParameters() const = 0;
-  virtual std::string getDbnr() const = 0;
+  virtual std::string getDirectBeam() const = 0;
 };
 }
 }

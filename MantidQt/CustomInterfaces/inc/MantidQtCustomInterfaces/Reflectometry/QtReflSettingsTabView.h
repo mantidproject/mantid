@@ -54,10 +54,6 @@ public:
   std::string getStitchOptions() const override;
   /// Return selected analysis mode
   std::string getAnalysisMode() const override;
-  /// Return transmission lambda min
-  std::string getTransmissionLambdaMin() const override;
-  /// Return transmission lambda max
-  std::string getTransmissionLambdaMax() const override;
   /// Return CRho
   std::string getCRho() const override;
   /// Return CAlpha
@@ -66,10 +62,8 @@ public:
   std::string getCAp() const override;
   /// Return Cpp
   std::string getCPp() const override;
-  /// Return binning parameters
-  std::string getBinningParameters() const override;
-  /// Return direct beam range
-  std::string getDbnr() const override;
+  /// Return direct beam
+  std::string getDirectBeam() const override;
 
   /// Creates hints for 'Plus'
   void
