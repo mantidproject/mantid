@@ -5,6 +5,7 @@
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidHistogramData/HistogramX.h"
+#include "MantidHistogramData/HistogramY.h"
 
 #include <sstream>
 
@@ -12,6 +13,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using Mantid::HistogramData::HistogramY;
 
 using namespace std;
 
@@ -98,7 +100,7 @@ API::IFunction_sptr LeBailFunction::getFunction() {
 * otherwise, assume zero background
 * @return :: output vector
 */
-std::vector<double>
+HistogramY
 LeBailFunction::function(const Mantid::HistogramData::HistogramX &xvalues,
                          bool calpeaks, bool calbkgd) const {
 
@@ -106,13 +108,11 @@ LeBailFunction::function(const Mantid::HistogramData::HistogramX &xvalues,
   std::vector<double> out(xvalues.size(), 0);
   auto xvals = xvalues.rawData();
 
-  vector<double> temp(xvalues.size());
-
   // Peaks
   if (calpeaks) {
     for (size_t ipk = 0; ipk < m_numPeaks; ++ipk) {
       // Reset temporary vector for output
-      ::fill(temp.begin(), temp.end(), 0.);
+      vector<double> temp(xvalues.size(), 0);
       IPowderDiffPeakFunction_sptr peak = m_vecPeaks[ipk];
       peak->function(temp, xvals);
       transform(out.begin(), out.end(), temp.begin(), out.begin(),
@@ -136,14 +136,14 @@ LeBailFunction::function(const Mantid::HistogramData::HistogramX &xvalues,
       out[i] += values[i];
   }
 
-  return out;
+  return HistogramY(out);
 }
 
 /**  Calculate a single peak's value
 */
-std::vector<double> LeBailFunction::calPeak(size_t ipk,
-                                            const std::vector<double> &xvalues,
-                                            size_t ySize) const {
+HistogramY LeBailFunction::calPeak(size_t ipk,
+                                   const std::vector<double> &xvalues,
+                                   size_t ySize) const {
 
   if (ipk >= m_numPeaks) {
     stringstream errss;
@@ -156,7 +156,7 @@ std::vector<double> LeBailFunction::calPeak(size_t ipk,
   std::vector<double> out(ySize, 0);
   IPowderDiffPeakFunction_sptr peak = m_vecPeaks[ipk];
   peak->function(out, xvalues);
-  return out;
+  return HistogramY(out);
 }
 
 //----------------------------------------------------------------------------------------------

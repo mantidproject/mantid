@@ -3,12 +3,14 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidCurveFitting/Functions/BackgroundFunction.h"
+#include "MantidHistogramData/HistogramX.h"
+#include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidCurveFitting/Functions/BackgroundFunction.h"
-#include "MantidAPI/TextAxis.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -34,6 +36,8 @@ using namespace Mantid::CurveFitting;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::HistogramY;
 
 using namespace std;
 
@@ -1465,13 +1469,9 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles,
   Rfactor startR(-DBL_MAX, -DBL_MAX);
 
   // Process background to make a pure peak spectrum in output workspace
-  std::vector<double> vecBkgd =
-      m_lebailFunction->function(vecX.rawData(), false, true);
+  HistogramY vecBkgd = m_lebailFunction->function(vecX.rawData(), false, true);
   m_outputWS->mutableY(INPUTBKGDINDEX) = vecBkgd;
-  std::vector<double> dataPurePeak(m_outputWS->y(INPUTPUREPEAKINDEX).size(), 0);
-  transform(vecInY.begin(), vecInY.end(), vecBkgd.begin(), dataPurePeak.begin(),
-            ::minus<double>());
-  m_outputWS->mutableY(INPUTPUREPEAKINDEX) = dataPurePeak;
+  m_outputWS->mutableY(INPUTPUREPEAKINDEX) = vecInY - vecBkgd;
 
   // Calcualte starting Rwp and etc
   const auto &vecPurePeak = m_outputWS->y(INPUTPUREPEAKINDEX);
@@ -1487,8 +1487,8 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles,
                         " unphyiscal parameters values.");
   }
 
-  doMarkovChain(parammap, vecX, vecPurePeak, vecBkgd, maxcycles, startR,
-                randomseed);
+  doMarkovChain(parammap, vecX, vecPurePeak, vecBkgd.rawData(), maxcycles,
+                startR, randomseed);
 
   // 5. Sum up: retrieve the best result from class variable: m_bestParameters
   Rfactor finalR(-DBL_MAX, -DBL_MAX);
@@ -1969,12 +1969,13 @@ void LeBailFit::addParameterToMCMinimize(vector<string> &parnamesforMC,
 *
 * @return :: boolean value.  whether all the peaks' parameters are physical.
 */
-bool LeBailFit::calculateDiffractionPattern(
-    const Mantid::HistogramData::HistogramX &vecX,
-    const Mantid::HistogramData::HistogramY &vecY, bool inputraw,
-    bool outputwithbkgd, const std::vector<double> &vecBkgd,
-    std::vector<double> &values, Rfactor &rfactor) {
-  vector<double> veccalbkgd;
+bool LeBailFit::calculateDiffractionPattern(const HistogramX &vecX,
+                                            const HistogramY &vecY,
+                                            bool inputraw, bool outputwithbkgd,
+                                            const HistogramY &vecBkgd,
+                                            std::vector<double> &values,
+                                            Rfactor &rfactor) {
+  HistogramY veccalbkgd;
 
   // Examine whether all peaks are valid
   double maxfwhm = vecX.back() - vecX.front();

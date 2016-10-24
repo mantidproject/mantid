@@ -12,12 +12,15 @@
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidHistogramData/HistogramX.h"
-#include "MantidHistogramData/HistogramY.h"
 
 #include <gsl/gsl_sf_erf.h>
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramX;
+class HistogramY;
+}
+
 namespace CurveFitting {
 namespace Algorithms {
 
@@ -174,7 +177,7 @@ private:
   bool calculateDiffractionPattern(
       const Mantid::HistogramData::HistogramX &vecX,
       const Mantid::HistogramData::HistogramY &vecY, bool inputraw,
-      bool outputwithbkgd, const std::vector<double> &vecBkgd,
+      bool outputwithbkgd, const Mantid::HistogramData::HistogramY &vecBkgd,
       std::vector<double> &values, Kernel::Rfactor &rfactor);
 
   /// Determine whether the proposed value should be accepted or denied

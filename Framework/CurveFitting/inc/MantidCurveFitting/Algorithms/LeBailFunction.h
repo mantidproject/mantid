@@ -10,6 +10,7 @@
 namespace Mantid {
 namespace HistogramData {
 class HistogramX;
+class HistogramY;
 }
 namespace CurveFitting {
 namespace Algorithms {
@@ -87,12 +88,13 @@ public:
   size_t getNumberOfPeaks() const { return m_numPeaks; }
 
   /// Calculate
-  std::vector<double> function(const Mantid::HistogramData::HistogramX &xvalues,
-                               bool calpeaks, bool calbkgd) const;
+  Mantid::HistogramData::HistogramY
+  function(const Mantid::HistogramData::HistogramX &xvalues, bool calpeaks,
+           bool calbkgd) const;
 
   ///  Calculate a single peak's value
-  std::vector<double> calPeak(size_t ipk, const std::vector<double> &xvalues,
-                              size_t ySize) const;
+  Mantid::HistogramData::HistogramY
+  calPeak(size_t ipk, const std::vector<double> &xvalues, size_t ySize) const;
 
   /// Return the composite function
   API::IFunction_sptr getFunction();
