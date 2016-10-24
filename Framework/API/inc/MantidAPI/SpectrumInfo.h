@@ -7,6 +7,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <mutex>
+#include <unordered_map>
 #include <vector>
 
 namespace Mantid {
@@ -79,6 +80,8 @@ public:
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
+  std::vector<boost::shared_ptr<const Geometry::IDetector>>
+  getDetectorVector(const size_t index) const;
   const Geometry::IComponent &getSource() const;
   const Geometry::IComponent &getSample() const;
 
@@ -91,6 +94,7 @@ private:
   const MatrixWorkspace &m_workspace;
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
   std::unique_ptr<DetectorInfo> m_detectorInfo;
+  std::unordered_map<detid_t, size_t> m_detIDToIndex;
   // The following variables are mutable, since they are initialized (cached)
   // only on demand, by const getters.
   mutable boost::shared_ptr<const Geometry::IComponent> m_source;

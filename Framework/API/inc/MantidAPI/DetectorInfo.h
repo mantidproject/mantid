@@ -2,15 +2,20 @@
 #define MANTID_API_DETECTORINFO_H_
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/V3D.h"
+
+#include <boost/shared_ptr.hpp>
 
 #include <vector>
 
 namespace Mantid {
 using detid_t = int32_t;
 namespace Geometry {
+class IDetector;
 class Instrument;
 }
 namespace API {
+class SpectrumInfo;
 
 /** DetectorInfo : TODO: DESCRIPTION
 
@@ -39,10 +44,22 @@ class MANTID_API_DLL DetectorInfo {
 public:
   DetectorInfo(const Geometry::Instrument &instrument);
 
+  Kernel::V3D position(const size_t index) const;
+
   const std::vector<detid_t> detectorIDs() const;
 
+  friend class SpectrumInfo;
+
 private:
+  const Geometry::IDetector &getDetector(const size_t index) const;
+  void setCachedDetector(
+      size_t index,
+      boost::shared_ptr<const Geometry::IDetector> detector) const;
+
+  const Geometry::Instrument &m_instrument;
   std::vector<detid_t> m_detectorIDs;
+  mutable std::vector<boost::shared_ptr<const Geometry::IDetector>> m_detectors;
+  mutable std::vector<size_t> m_lastIndex;
 };
 
 } // namespace API

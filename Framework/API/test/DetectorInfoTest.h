@@ -38,7 +38,7 @@ public:
   }
 
   void test_detectorIDs() {
-    // Check that workspace does not have sorted IDs
+    // Check that *workspace* does not have sorted IDs.
     TS_ASSERT_EQUALS(m_workspace.getDetector(0)->getID(), 5);
     TS_ASSERT_EQUALS(m_workspace.getDetector(1)->getID(), 4);
     TS_ASSERT_EQUALS(m_workspace.getDetector(2)->getID(), 3);
@@ -48,6 +48,7 @@ public:
     const auto &ids = info.detectorIDs();
     auto sorted_ids(ids);
     std::sort(sorted_ids.begin(), sorted_ids.end());
+    // The ids we get from DetectorInfo should be sorted.
     TS_ASSERT_EQUALS(ids, sorted_ids);
   }
 

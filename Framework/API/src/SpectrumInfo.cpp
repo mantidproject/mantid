@@ -22,6 +22,9 @@ SpectrumInfo::SpectrumInfo(const MatrixWorkspace &workspace)
                              " does not contain an instrument!");
 
   m_detectorInfo = Kernel::make_unique<DetectorInfo>(*m_instrument);
+  const auto &detIDs = m_detectorInfo->detectorIDs();
+  for (size_t i = 0; i < detIDs.size(); ++i)
+    m_detIDToIndex[detIDs[i]] = i;
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -86,7 +89,27 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
 
 /// Returns the position of the spectrum with given index.
 Kernel::V3D SpectrumInfo::position(const size_t index) const {
-  return getDetector(index).getPos();
+  // The body of this function is almost a 1:1 duplicate of
+  // DetectorGroup::getPos. The former should be cleaned up once subsequent
+  // changes allow for this, and the latter should be removed.
+  Kernel::V3D newPos;
+  const auto &dets = getDetectorVector(index);
+  for (const auto &det : dets) {
+    const auto &detIndex = m_detIDToIndex.at(det->getID());
+    m_detectorInfo->setCachedDetector(detIndex, det);
+    newPos += m_detectorInfo->position(detIndex);
+  }
+
+  // We can have very small values (< Tolerance) of each component that should
+  // be zero
+  if (std::abs(newPos[0]) < Mantid::Kernel::Tolerance)
+    newPos[0] = 0.0;
+  if (std::abs(newPos[1]) < Mantid::Kernel::Tolerance)
+    newPos[1] = 0.0;
+  if (std::abs(newPos[2]) < Mantid::Kernel::Tolerance)
+    newPos[2] = 0.0;
+
+  return newPos /= static_cast<double>(dets.size());
 }
 
 /// Returns true if the spectrum is associated with detectors in the instrument.
@@ -166,6 +189,20 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   }
 
   return *m_detectors[thread];
+}
+
+std::vector<Geometry::IDetector_const_sptr>
+SpectrumInfo::getDetectorVector(const size_t index) const {
+  using namespace Geometry;
+  const auto &det = getDetector(index);
+  const auto &ndet = det.nDets();
+  if (ndet > 1) {
+    const auto group = dynamic_cast<const DetectorGroup *>(&det);
+    return group->getDetectors();
+  } else {
+    size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
+    return {m_detectors[thread]};
+  }
 }
 
 /// Returns a reference to the source component. The value is cached, so calling
