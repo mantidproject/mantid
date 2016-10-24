@@ -142,6 +142,9 @@ public:
     EXPECT_CALL(mockView, getI0MonitorIndex())
         .Times(Exactly(1))
         .WillOnce(Return("2"));
+    EXPECT_CALL(mockView, getScaleFactor())
+        .Times(Exactly(1))
+        .WillOnce(Return("2"));
     auto options = presenter.getReductionOptions();
 
     std::vector<std::string> optionsVec;
@@ -160,6 +163,7 @@ public:
     TS_ASSERT_EQUALS(optionsVec[11], "WavelengthMin=1");
     TS_ASSERT_EQUALS(optionsVec[12], "WavelengthMax=15");
     TS_ASSERT_EQUALS(optionsVec[13], "I0MonitorIndex=2");
+    TS_ASSERT_EQUALS(optionsVec[14], "ScaleFactor=2");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }

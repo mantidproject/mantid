@@ -221,5 +221,13 @@ std::string QtReflSettingsTabView::getI0MonitorIndex() const {
   return m_ui.instSettingsI0MonIndexEdit->text().toStdString();
 }
 
+/** Return scale factor
+* @return :: scale factor
+*/
+std::string QtReflSettingsTabView::getScaleFactor() const {
+
+  return m_ui.instSettingsScaleFactorEdit->text().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid

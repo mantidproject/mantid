@@ -80,6 +80,8 @@ public:
   std::string getLambdaMax() const override;
   /// Return I0MonitorIndex
   std::string getI0MonitorIndex() const override;
+  /// Return ScaleFactor
+  std::string getScaleFactor() const override;
 
   /// Creates hints for 'Plus'
   void

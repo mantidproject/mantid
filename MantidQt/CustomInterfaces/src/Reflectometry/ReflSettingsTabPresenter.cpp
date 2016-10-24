@@ -182,6 +182,11 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   if (!I0MonitorIndex.empty())
     options.push_back("I0MonitorIndex=" + I0MonitorIndex);
 
+  // Add scale factor
+  auto scaleFactor = m_view->getScaleFactor();
+  if (!scaleFactor.empty())
+    options.push_back("ScaleFactor=" + scaleFactor);
+
   return boost::algorithm::join(options, ",");
 }
 

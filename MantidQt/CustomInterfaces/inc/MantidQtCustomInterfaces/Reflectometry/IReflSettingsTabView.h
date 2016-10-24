@@ -79,6 +79,7 @@ public:
   virtual std::string getLambdaMin() const = 0;
   virtual std::string getLambdaMax() const = 0;
   virtual std::string getI0MonitorIndex() const = 0;
+  virtual std::string getScaleFactor() const = 0;
 };
 }
 }
