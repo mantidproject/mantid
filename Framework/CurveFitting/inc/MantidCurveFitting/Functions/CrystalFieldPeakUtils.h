@@ -34,12 +34,15 @@ double calculateWidth(double x, const std::vector<double> &xVec,
                       const std::vector<double> &yVec);
 void setWidthConstraint(API::IPeakFunction &peak, double width,
                         double fwhmVariation);
-void buildSpectrumFunction(API::CompositeFunction &spectrum,
+size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
                            const std::string &peakShape,
                            const API::FunctionValues &centresAndIntensities,
                            const std::vector<double> &xVec,
                            const std::vector<double> &yVec,
                            double fwhmVariation, double defaultFWHM);
+size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
+                            const API::FunctionValues &values, size_t nOriginalPeaks,
+                            size_t iFirst = 0);
 size_t calculateNPeaks(const API::FunctionValues &centresAndIntensities);
 size_t calculateMaxNPeaks(size_t nPeaks);
 

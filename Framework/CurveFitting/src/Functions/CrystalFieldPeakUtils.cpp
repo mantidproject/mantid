@@ -82,9 +82,6 @@ void setWidthConstraint(API::IPeakFunction& peak, double width, double fwhmVaria
 /// Populates a spectrum with peaks of type given by peakShape argument.
 /// @param spectrum :: A composite function that is a collection of peaks.
 /// @param peakShape :: A shape of each peak as a name of an IPeakFunction.
-/// @param maxNPeaks :: A total number of peaks to add to spectrum. Not all
-///        of them will be fitted.
-/// @param nPeaks :: A number of peaks that will be actually fitted.
 /// @param centresAndIntensities :: A FunctionValues object containing centres
 ///        and intensities for the peaks. First nPeaks calculated values are the
 ///        centres and the following nPeaks values are the intensities.
@@ -92,7 +89,8 @@ void setWidthConstraint(API::IPeakFunction& peak, double width, double fwhmVaria
 /// @param yVec :: y-values of a tabulated width function.
 /// @param defaultFWHM :: A default value for the FWHM to use if xVec and yVec
 ///        are empty.
-void buildSpectrumFunction(API::CompositeFunction &spectrum,
+/// @return :: The number of peaks that will be actually fitted.
+size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
                            const std::string &peakShape,
                            const API::FunctionValues &centresAndIntensities,
                            const std::vector<double> &xVec,
@@ -130,6 +128,7 @@ void buildSpectrumFunction(API::CompositeFunction &spectrum,
     }
     spectrum.addFunction(peak);
   }
+  return nPeaks;
 }
 
 /// Calculate the number of visible peaks.
@@ -140,6 +139,39 @@ size_t calculateNPeaks(const API::FunctionValues &centresAndIntensities) {
 /// Calculate the maximum number of peaks a spectrum can have.
 size_t calculateMaxNPeaks(size_t nPeaks) {
   return nPeaks + nPeaks / 2 + 1;
+}
+
+/// Update the peaks parameters after recalculationof the crystal field.
+/// @param spectrum :: A composite function containings the peaks to update.
+///                    May contain other functions (background) fix indices < iFirst.
+/// @param centresAndIntensities :: A FunctionValues object containing centres
+///        and intensities for the peaks. First nPeaks calculated values are the
+///        centres and the following nPeaks values are the intensities.
+/// @param nOriginalPeaks :: Number of actual peaks the spectrum had before the update.
+///                 This update can change the number of actual peaks.
+/// @param iFirst :: The first index in the composite function (spectrum) at which the
+///         peaks begin.
+/// @return :: The new number of fitted peaks.
+size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
+                            const FunctionValues &centresAndIntensities, size_t nOriginalPeaks,
+                            size_t iFirst) {
+  size_t nGoodPeaks = calculateNPeaks(centresAndIntensities);
+  size_t maxNPeaks = spectrum.nFunctions() - iFirst;
+
+  for (size_t i = 0; i < maxNPeaks; ++i) {
+    auto fun = spectrum.getFunction(i + iFirst);
+    auto &peak = dynamic_cast<API::IPeakFunction &>(*fun);
+    if (i < nGoodPeaks) {
+      peak.setCentre(centresAndIntensities.getCalculated(i));
+      peak.setIntensity(centresAndIntensities.getCalculated(i + nGoodPeaks));
+    } else {
+      peak.setHeight(0.0);
+      if (i > nOriginalPeaks) {
+        peak.fixAll();
+      }
+    }
+  }
+  return nGoodPeaks;
 }
 
 } // namespace CrystalFieldUtils

@@ -26,7 +26,7 @@ DECLARE_FUNCTION(CrystalFieldSpectrum)
 
 /// Constructor
 CrystalFieldSpectrum::CrystalFieldSpectrum()
-    : FunctionGenerator(IFunction_sptr(new CrystalFieldPeaks)) {
+    : FunctionGenerator(IFunction_sptr(new CrystalFieldPeaks)), m_nPeaks(0) {
   declareAttribute("PeakShape", Attribute("Lorentzian"));
   declareAttribute("FWHM", Attribute(0.0));
   std::vector<double> vec;
@@ -61,7 +61,7 @@ void CrystalFieldSpectrum::buildTargetFunction() const {
 
   auto peakShape = IFunction::getAttribute("PeakShape").asString();
   auto defaultFWHM = IFunction::getAttribute("FWHM").asDouble();
-  CrystalFieldUtils::buildSpectrumFunction(*spectrum, peakShape, values, xVec,
+  m_nPeaks = CrystalFieldUtils::buildSpectrumFunction(*spectrum, peakShape, values, xVec,
                                            yVec, fwhmVariation, defaultFWHM);
 }
 
@@ -75,36 +75,8 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
   FunctionDomainGeneral domain;
   FunctionValues values;
   m_source->function(domain, values);
-  auto nPeaks = CrystalFieldUtils::calculateNPeaks(values);
-  size_t maxNPeaks = CrystalFieldUtils::calculateMaxNPeaks(nPeaks);
-  auto spectrum = dynamic_cast<CompositeFunction *>(m_target.get());
-  if (!spectrum) {
-    buildTargetFunction();
-    return;
-  }
-  if (spectrum->nFunctions() != maxNPeaks) {
-    maxNPeaks = spectrum->nFunctions();
-    if (nPeaks > maxNPeaks) {
-      nPeaks = maxNPeaks;
-    }
-  }
-
-  for (size_t i = 0; i < maxNPeaks; ++i) {
-    auto fun = spectrum->getFunction(i);
-    auto peak = boost::dynamic_pointer_cast<API::IPeakFunction>(fun);
-    if (!peak) {
-      throw std::runtime_error("A peak function is expected.");
-    }
-    if (i < nPeaks) {
-      auto centre = values.getCalculated(i);
-      auto intensity = values.getCalculated(i + nPeaks);
-      peak->setCentre(centre);
-      peak->setIntensity(intensity);
-    } else {
-      peak->setHeight(0.0);
-      peak->fixAll();
-    }
-  }
+  auto &spectrum = dynamic_cast<CompositeFunction&>(*m_target);
+  m_nPeaks = CrystalFieldUtils::updateSpectrumFunction(spectrum, values, m_nPeaks);
 }
 
 } // namespace Functions

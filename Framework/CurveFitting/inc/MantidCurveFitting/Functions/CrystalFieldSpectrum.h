@@ -39,6 +39,9 @@ public:
 
 protected:
   void updateTargetFunction() const override;
+private:
+  /// Number of fitted peaks in the spectrum.
+  mutable size_t m_nPeaks;
 };
 
 } // namespace Functions

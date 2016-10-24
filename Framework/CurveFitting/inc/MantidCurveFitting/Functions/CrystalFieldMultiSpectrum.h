@@ -62,8 +62,6 @@ private:
                        API::FunctionValues &values, size_t iSpec) const;
   /// Cache number of fitted peaks
   mutable std::vector<size_t> m_nPeaks;
-  /// Cache number of all peaks
-  mutable std::vector<size_t> m_maxNPeaks;
   /// Caches of the width functions
   mutable std::vector<std::vector<double>> m_widthX;
   mutable std::vector<std::vector<double>> m_widthY;

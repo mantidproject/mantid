@@ -138,7 +138,6 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
   // Create the single-spectrum functions.
   auto nSpec = temperatures.size();
   m_nPeaks.resize(nSpec);
-  m_maxNPeaks.resize(nSpec);
   for (size_t i = 0; i < nSpec; ++i) {
     if (m_widthX[i].empty()) {
       auto suffix = std::to_string(i);
@@ -185,7 +184,6 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(
   FunctionValues values;
   calcExcitations(nre, en, wf, temperature, values, iSpec);
   m_nPeaks[iSpec] = CrystalFieldUtils::calculateNPeaks(values);
-  m_maxNPeaks[iSpec] = CrystalFieldUtils::calculateMaxNPeaks(m_nPeaks[iSpec]);
 
   auto fwhmVariation = getAttribute("WidthVariation").asDouble();
   auto peakShape = IFunction::getAttribute("PeakShape").asString();
@@ -201,7 +199,7 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(
       API::FunctionFactory::Instance().createInitialized(bkgdShape);
   spectrum->addFunction(background);
 
-  CrystalFieldUtils::buildSpectrumFunction(*spectrum, peakShape, values, m_widthX[iSpec],
+  m_nPeaks[iSpec] = CrystalFieldUtils::buildSpectrumFunction(*spectrum, peakShape, values, m_widthX[iSpec],
                         m_widthY[iSpec], fwhmVariation, fwhm);
 
   return IFunction_sptr(spectrum);
@@ -234,29 +232,8 @@ void CrystalFieldMultiSpectrum::updateSpectrum(
     const ComplexFortranMatrix &wf, double temperature, size_t iSpec) const {
   FunctionValues values;
   calcExcitations(nre, en, wf, temperature, values, iSpec);
-  size_t nGoodPeaks = CrystalFieldUtils::calculateNPeaks(values);
-  size_t nOriginalPeaks = m_nPeaks[iSpec];
-  size_t maxNPeaks = m_maxNPeaks[iSpec];
-
-  auto &composite = dynamic_cast<CompositeFunction &>(spectrum);
-  if (maxNPeaks + 1 != composite.nFunctions()) {
-    throw std::logic_error(
-        "CrystalFieldMultiSpectrum target function size mismatch.");
-  }
-
-  for (size_t i = 0; i < maxNPeaks; ++i) {
-    auto fun = composite.getFunction(i + 1);
-    auto &peak = dynamic_cast<API::IPeakFunction &>(*fun);
-    if (i < nGoodPeaks) {
-      peak.setCentre(values.getCalculated(i));
-      peak.setIntensity(values.getCalculated(i + nGoodPeaks));
-    } else {
-      peak.setHeight(0.0);
-      if (i > nOriginalPeaks) {
-        peak.fixAll();
-      }
-    }
-  }
+  auto &composite = dynamic_cast<API::CompositeFunction&>(spectrum);
+  m_nPeaks[iSpec] = CrystalFieldUtils::updateSpectrumFunction(composite, values, m_nPeaks[iSpec], 1);
 }
 
 } // namespace Functions
