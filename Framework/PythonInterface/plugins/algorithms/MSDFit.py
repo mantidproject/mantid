@@ -1,9 +1,9 @@
-#pylint: disable=no-init
+# pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
-from six.moves import range #pylint: disable=redefined-builtin
+from six.moves import range  # pylint: disable=redefined-builtin
 
 
 class MSDFit(DataProcessorAlgorithm):
@@ -21,7 +21,7 @@ class MSDFit(DataProcessorAlgorithm):
         return 'Fits log(intensity) vs Q-squared to obtain the mean squared displacement.'
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
                              doc='Sample input workspace')
 
         self.declareProperty(name='XStart', defaultValue=0.0,
@@ -34,7 +34,7 @@ class MSDFit(DataProcessorAlgorithm):
         self.declareProperty(name='SpecMax', defaultValue=0,
                              doc='End of spectra range to be fit')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output mean squared displacement')
 
         self.declareProperty(ITableWorkspaceProperty('ParameterWorkspace', '',
@@ -68,7 +68,7 @@ class MSDFit(DataProcessorAlgorithm):
         if x_max > x_data[-1]:
             issues['XEnd'] = 'Must be less than maximum X value in workspace'
 
-        # Validate specta fitting range
+        # Validate spectra fitting range
         spec_min = self.getProperty('SpecMin').value
         spec_max = self.getProperty('SpecMax').value
 
@@ -101,10 +101,15 @@ class MSDFit(DataProcessorAlgorithm):
                            FitType='Sequential',
                            CreateOutput=True)
 
-        DeleteWorkspace(self._output_msd_ws + '_NormalisedCovarianceMatrices')
-        DeleteWorkspace(self._output_msd_ws + '_Parameters')
-        RenameWorkspace(self._output_msd_ws,
-                        OutputWorkspace=self._output_param_ws)
+        delete_alg = self.createChildAlgorithm("DeleteWorkspace", enableLogging=False)
+        delete_alg.setProperty("Workspace", self._output_msd_ws + '_NormalisedCovarianceMatrices')
+        delete_alg.execute()
+        delete_alg.setProperty("Workspace", self._output_msd_ws + '_Parameters')
+        delete_alg.execute()
+        rename_alg = self.createChildAlgorithm("RenameWorkspace", enableLogging=False)
+        rename_alg.setProperty("InputWorkspace", self._output_msd_ws)
+        rename_alg.setProperty("OutputWorkspace", self._output_param_ws)
+        rename_alg.execute()
 
         params_table = mtd[self._output_param_ws]
 
@@ -119,33 +124,63 @@ class MSDFit(DataProcessorAlgorithm):
         # A0 workspace
         ws_name = self._output_msd_ws + '_A0'
         parameter_ws_group.append(ws_name)
-        ConvertTableToMatrixWorkspace(self._output_param_ws, OutputWorkspace=ws_name,
-                                      ColumnX='axis-1', ColumnY='A0', ColumnE='A0_Err')
+        ConvertTableToMatrixWorkspace(self._output_param_ws,
+                                      OutputWorkspace=ws_name,
+                                      ColumnX='axis-1',
+                                      ColumnY='A0',
+                                      ColumnE='A0_Err',
+                                      EnableLogging=False)
         xunit = mtd[ws_name].getAxis(0).setUnit('Label')
         xunit.setLabel('Temperature', 'K')
+        SortXAxis(InputWorkspace=ws_name,
+                  OutputWorkspace=ws_name,
+                  EnableLogging=False)
 
         # A1 workspace
         ws_name = self._output_msd_ws + '_A1'
         parameter_ws_group.append(ws_name)
-        ConvertTableToMatrixWorkspace(self._output_param_ws, OutputWorkspace=ws_name,
-                                      ColumnX='axis-1', ColumnY='A1', ColumnE='A1_Err')
+        ConvertTableToMatrixWorkspace(self._output_param_ws,
+                                      OutputWorkspace=ws_name,
+                                      ColumnX='axis-1',
+                                      ColumnY='A1',
+                                      ColumnE='A1_Err',
+                                      EnableLogging=False)
         xunit = mtd[ws_name].getAxis(0).setUnit('Label')
         xunit.setLabel('Temperature', 'K')
-        SortXAxis(ws_name, OutputWorkspace=ws_name)
+        SortXAxis(InputWorkspace=ws_name,
+                  OutputWorkspace=ws_name,
+                  EnableLogging=False)
 
-        # Group parameter workspaces
-        GroupWorkspaces(InputWorkspaces=','.join(parameter_ws_group),
-                        OutputWorkspace=self._output_msd_ws)
+        AppendSpectra(InputWorkspace1=self._output_msd_ws + '_A0',
+                      InputWorkspace2=self._output_msd_ws + '_A1',
+                      ValidateInputs=False,
+                      OutputWorkspace=self._output_msd_ws,
+                      EnableLogging=False)
+        delete_alg.setProperty("Workspace", self._output_msd_ws + '_A0')
+        delete_alg.execute()
+        delete_alg.setProperty("Workspace", self._output_msd_ws + '_A1')
+        delete_alg.execute()
+        # Create a new vertical axis for the Q and Q**2 workspaces
+        y_axis = NumericAxis.create(2)
+        for idx in range(1):
+            y_axis.setValue(idx, idx)
+        mtd[self._output_msd_ws].replaceAxis(1, y_axis)
 
         # Rename fit workspace group
         original_fit_ws_name = self._output_msd_ws + '_Workspaces'
         if original_fit_ws_name != self._output_fit_ws:
-            RenameWorkspace(InputWorkspace=self._output_msd_ws + '_Workspaces',
-                            OutputWorkspace=self._output_fit_ws)
+            rename_alg.setProperty("InputWorkspace", self._output_msd_ws + '_Workspaces')
+            rename_alg.setProperty("OutputWorkspace", self._output_fit_ws)
+            rename_alg.execute()
 
         # Add sample logs to output workspace
-        CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=self._output_msd_ws)
-        CopyLogs(InputWorkspace=self._output_msd_ws + '_A0', OutputWorkspace=self._output_fit_ws)
+        copy_alg = self.createChildAlgorithm("CopyLogs", enableLogging=False)
+        copy_alg.setProperty("InputWorkspace", self._input_ws)
+        copy_alg.setProperty("OutputWorkspace", self._output_msd_ws)
+        copy_alg.execute()
+        copy_alg.setProperty("InputWorkspace", self._input_ws)
+        copy_alg.setProperty("OutputWorkspace", self._output_fit_ws)
+        copy_alg.execute()
 
         self.setProperty('OutputWorkspace', self._output_msd_ws)
         self.setProperty('ParameterWorkspace', self._output_param_ws)
@@ -171,5 +206,6 @@ class MSDFit(DataProcessorAlgorithm):
 
         self._spec_range = [self.getProperty('SpecMin').value,
                             self.getProperty('SpecMax').value]
+
 
 AlgorithmFactory.subscribe(MSDFit)
