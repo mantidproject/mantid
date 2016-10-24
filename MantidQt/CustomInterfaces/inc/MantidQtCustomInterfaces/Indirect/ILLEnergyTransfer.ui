@@ -149,19 +149,27 @@
          <bool>false</bool>
         </property>
         <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="editable">
+         <bool>true</bool>
+        </property>
         <item>
          <property name="text">
-          <string>Temperature [K]</string>
+          <string>Time</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Pressure [bar]</string>
+          <string>Temperature</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Pressure</string>
          </property>
         </item>
        </widget>
