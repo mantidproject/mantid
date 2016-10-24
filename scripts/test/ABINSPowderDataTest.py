@@ -26,38 +26,23 @@ class ABINSPowderDataTest(unittest.TestCase):
 
     def test_input(self):
 
-        # wrong temperature
-        with self.assertRaises(ValueError):
-            poor_tester = PowderData(temperature=-10, num_atoms=2)
-
         # wrong number of atoms
         with self.assertRaises(ValueError):
-            poor_tester = PowderData(temperature=10, num_atoms=-2)
-
-
-    def test_append(self):
-
-        poor_tester = PowderData(temperature=10, num_atoms=2)
-
-        # wrong number value of mean square displacement
-        with self.assertRaises(ValueError):
-            poor_tester._append(num_atom=0, powder_atom="wrong_displacement")
-        # wrong number of atom
-        with self.assertRaises(ValueError):
-            poor_tester._append(num_atom=3, powder_atom={"msd": 0.0001, "dw": 0.0001})
+            poor_tester = PowderData(num_atoms=-2)
 
 
     def test_set(self):
 
-        poor_tester = PowderData(temperature=10, num_atoms=2)
+        poor_tester = PowderData(num_atoms=2)
 
         # wrong items: list instead of numpy array
-        bad_items = {"msd": [0.002, 0.001], "dw": [0.002, 0.001]}
+        bad_items = {"a_tensors": [0.002, 0.001], "b_tensors": [0.002, 0.001]}
         with self.assertRaises(ValueError):
             poor_tester.set(items=bad_items)
 
-        # wrong size of items
-        bad_items = {"msd": np.asarray([0.01, 0.02, 0.03]), "dw": np.asarray([0.01, 0.02, 0.03])}
+        # wrong size of items: data only for one atom ; should be for two atoms
+        bad_items = {"a_tensors": np.asarray([[[0.01, 0.02, 0.03], [0.01, 0.02, 0.03], [0.01, 0.02, 0.03]]]),
+                     "b_tensors": np.asarray([[[0.01, 0.02, 0.03], [0.01, 0.02, 0.03], [0.01, 0.02, 0.03]]])}
         with self.assertRaises(ValueError):
             poor_tester.set(items=bad_items)
 
@@ -67,19 +52,28 @@ class ABINSPowderDataTest(unittest.TestCase):
 
     def test_good_case(self):
 
-        good_msd = {"msd": np.asarray([0.01, 0.001]), "dw": np.asarray([0.01, 0.001])}
-        good_tester = PowderData(temperature=2, num_atoms=2)
-        good_tester.set(items=good_msd)
+        # hypothetical data for two atoms
+        good_powder = {"a_tensors": np.asarray([[[0.01, 0.02, 0.03],
+                                                [0.01, 0.02, 0.03],
+                                               [0.01, 0.02, 0.03]],
+
+                                              [[0.01, 0.02, 0.03],
+                                               [0.01, 0.02, 0.03],
+                                              [0.01, 0.02, 0.03]]]),
+
+                       "b_tensors": np.asarray([[[0.01, 0.02, 0.03],
+                                                 [0.01, 0.02, 0.03],
+                                                 [0.01, 0.02, 0.03]],
+
+                                                [[0.01, 0.02, 0.03],
+                                                 [0.01, 0.02, 0.03],
+                                                 [0.01, 0.02, 0.03]]])}
+        good_tester = PowderData(num_atoms=2)
+        good_tester.set(items=good_powder)
 
         extracted_data = good_tester.extract()
-        for key in good_msd:
-            self.assertEqual(True, np.allclose(good_msd[key], extracted_data[key]))
-
-        good_tester._append(num_atom=0, powder_atom={"dw": 0.01,  "msd": 0.01})
-        good_tester._append(num_atom=1, powder_atom={"dw": 0.001, "msd": 0.001})
-        extracted_data = good_tester.extract()
-        for key in good_msd:
-            self.assertEqual(True, np.allclose(good_msd[key], extracted_data[key]))
+        for key in good_powder:
+            self.assertEqual(True, np.allclose(good_powder[key], extracted_data[key]))
 
 if __name__ == '__main__':
     unittest.main()
