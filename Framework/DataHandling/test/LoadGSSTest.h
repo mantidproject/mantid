@@ -27,7 +27,8 @@ public:
   void test_load_gss_txt() {
     API::IAlgorithm_sptr loader = createAlgorithm();
     loader->setPropertyValue("Filename", "gss.txt");
-    TS_ASSERT(loader->execute())
+    loader->setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(loader->execute());
     API::MatrixWorkspace_const_sptr ws = loader->getProperty("OutputWorkspace");
     // Check a few things in the workspace
     checkWorkspace(ws, 8, 816);

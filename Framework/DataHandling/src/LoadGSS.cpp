@@ -255,16 +255,12 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
       // Line start with Bank including file format, X0 information and etc.
       isOutOfHead = true;
 
-      // If there is, Save the previous to array and initialze new MantiVec for
+      // If there is, Save the previous to array and initialize new MantiVec for
       // (X, Y, E)
       if (!vecX.empty()) {
-        std::vector<double> storeX = vecX;
-        std::vector<double> storeY = vecY;
-        std::vector<double> storeE = vecE;
-
-        gsasDataX.emplace_back(storeX);
-        gsasDataY.emplace_back(storeY);
-        gsasDataE.emplace_back(storeE);
+        gsasDataX.emplace_back(std::move(vecX));
+        gsasDataY.emplace_back(std::move(vecY));
+        gsasDataE.emplace_back(std::move(vecE));
         vecX.clear();
         vecY.clear();
         vecE.clear();
@@ -391,20 +387,26 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
       }
 
       // store read in data (x, y, e) to vector
-      vecX.push_back(xValue);
-      vecY.push_back(yValue);
-      vecE.push_back(eValue);
+      vecX.push_back(std::move(xValue));
+      vecY.push_back(std::move(yValue));
+      vecE.push_back(std::move(eValue));
     } // Date Line
     else {
       g_log.warning() << "Line not defined: " << currentLine << '\n';
     }
-  } // ENDWHILE of readling all lines
+  } // ENDWHILE of reading all lines
+
+  // Get the sizes before using std::move
+  int nHist(static_cast<int>(gsasDataX.size()));
+  int xWidth(static_cast<int>(vecX.size()));
+  int yWidth(static_cast<int>(vecY.size()));
 
   // Push the vectors (X, Y, E) of the last bank to gsasData
   if (!vecX.empty()) { // Put final spectra into data
-    gsasDataX.emplace_back(vecX);
-    gsasDataY.emplace_back(vecY);
-    gsasDataE.emplace_back(vecE);
+    gsasDataX.emplace_back(std::move(vecX));
+    gsasDataY.emplace_back(std::move(vecY));
+    gsasDataE.emplace_back(std::move(vecE));
+    ++nHist;
   }
   input.close();
 
@@ -413,9 +415,6 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   //********************************************************************************************
 
   // Create workspace & GSS Files data is always in TOF
-  int nHist(static_cast<int>(gsasDataX.size()));
-  int xWidth(static_cast<int>(vecX.size()));
-  int yWidth(static_cast<int>(vecY.size()));
 
   MatrixWorkspace_sptr outputWorkspace =
       boost::dynamic_pointer_cast<MatrixWorkspace>(
@@ -429,7 +428,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   else
     outputWorkspace->setTitle(slogTitle);
 
-  // put data from MatidVec's into outputWorkspace
+  // put data from constructed histograms into outputWorkspace
   if (detectorIDs.size() != static_cast<size_t>(nHist)) {
     // File error is found
     std::ostringstream mess("");

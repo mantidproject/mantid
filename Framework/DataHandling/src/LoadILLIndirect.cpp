@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 
@@ -150,7 +151,7 @@ void LoadILLIndirect::loadDataDetails(NeXus::NXEntry &entry) {
 
   m_numberOfTubes = static_cast<size_t>(data.dim0());
   m_numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
-  m_numberOfChannels = static_cast<size_t>(data.dim2()) + 1; // +1 For bin edges
+  m_numberOfChannels = static_cast<size_t>(data.dim2());
 
   NXData dataSDGroup = entry.openNXData("dataSD");
   NXInt dataSD = dataSDGroup.openIntData();
@@ -210,7 +211,7 @@ void LoadILLIndirect::initWorkSpace(
   m_localWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D",
       m_numberOfHistograms + monitorsData.size() + m_numberOfSimpleDetectors,
-      m_numberOfChannels, m_numberOfChannels);
+      m_numberOfChannels + 1, m_numberOfChannels);
 
   m_localWorkspace->getAxis(0)->unit() =
       UnitFactory::Instance().create("Empty");
@@ -240,8 +241,6 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   // load the counts from the file into memory
   dataSD.load();
 
-  // Assign calculated bins to first X axis
-
   size_t spec = 0;
   size_t nb_monitors = monitorsData.size();
   size_t nb_SD_detectors = dataSD.dim0();
@@ -249,16 +248,14 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube +
                                     nb_monitors + nb_SD_detectors);
 
-  std::vector<double> increasingVals(m_numberOfChannels);
-  std::iota(increasingVals.begin(), increasingVals.end(), 1);
-  m_localWorkspace->mutableX(0) = increasingVals;
+  // Assign fake values to first X axis
+  m_localWorkspace->setBinEdges(0, m_numberOfChannels + 1,
+                                HistogramData::LinearGenerator(1.0, 1.0));
 
   // First, Monitor
   for (size_t im = 0; im < nb_monitors; im++) {
 
-    if (im > 0) {
-      m_localWorkspace->setSharedX(im, m_localWorkspace->sharedX(0));
-    }
+    m_localWorkspace->setSharedX(im, m_localWorkspace->sharedX(0));
 
     // Assign Y
     int *monitor_p = monitorsData[im].data();

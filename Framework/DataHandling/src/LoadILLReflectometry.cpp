@@ -285,7 +285,6 @@ void LoadILLReflectometry::loadDataIntoTheWorkSpace(
   // load the counts from the file into memory
   data.load();
 
-  // Assign calculated bins to first X axis
   size_t spec = 0;
   size_t nb_monitors = monitorsData.size();
 
@@ -365,26 +364,27 @@ void LoadILLReflectometry::loadDataIntoTheWorkSpace(
   }
   g_log.debug() << "t_TOF2: " << t_TOF2 << '\n';
 
-  auto &xVals = m_localWorkspace->mutableX(0);
+  std::vector<double> tofVals;
+  tofVals.reserve(m_localWorkspace->x(0).size());
+
   // 2) Compute tof values
   for (size_t timechannelnumber = 0; timechannelnumber <= m_numberOfChannels;
        ++timechannelnumber) {
     double t_TOF1 =
         (static_cast<int>(timechannelnumber) + 0.5) * m_channelWidth +
         tof_delay;
-    xVals[timechannelnumber] = t_TOF1 + t_TOF2;
+    tofVals.push_back(t_TOF1 + t_TOF2);
   }
+
+  HistogramData::BinEdges binEdges(tofVals);
 
   // Load monitors
   for (size_t im = 0; im < nb_monitors; im++) {
-    if (im > 0) {
-      m_localWorkspace->setSharedX(im, m_localWorkspace->sharedX(0));
-    }
-
-    // Assign Y
     int *monitor_p = monitorsData[im].data();
-    m_localWorkspace->mutableY(im)
-        .assign(monitor_p, monitor_p + m_numberOfChannels);
+    HistogramData::Counts histoCounts(monitor_p,
+                                      monitor_p + m_numberOfChannels);
+    HistogramData::Histogram histo(binEdges, std::move(histoCounts));
+    m_localWorkspace->setHistogram(im, std::move(histo));
 
     progress.report();
   }
@@ -393,24 +393,17 @@ void LoadILLReflectometry::loadDataIntoTheWorkSpace(
   for (size_t i = 0; i < m_numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
 
-      // just copy the time binning axis to every spectra
-      m_localWorkspace->setSharedX(spec + nb_monitors,
-                                   m_localWorkspace->sharedX(0));
-
       //// Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      m_localWorkspace->mutableY(spec + nb_monitors)
-          .assign(data_p, data_p + m_numberOfChannels);
 
-      // Assign Error
-      auto &E = m_localWorkspace->mutableE(spec + nb_monitors);
-      std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-                     LoadHelper::calculateStandardError);
+      HistogramData::Counts histoCounts(data_p, data_p + m_numberOfChannels);
+      HistogramData::Histogram histo(binEdges, std::move(histoCounts));
+      m_localWorkspace->setHistogram((spec + nb_monitors), std::move(histo));
 
       ++spec;
       progress.report();
     }
-  } // for m_numberOfTubes
+  }
 
 } // LoadILLIndirect::loadDataIntoTheWorkSpace
 

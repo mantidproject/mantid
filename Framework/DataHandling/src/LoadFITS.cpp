@@ -863,7 +863,7 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
     auto &xVals = ws->mutableX(i);
     auto &yVals = ws->mutableY(i);
     auto &eVals = ws->mutableE(i);
-    std::fill(xVals.begin(), xVals.end(), static_cast<double>(i) * cmpp);
+    xVals = static_cast<double>(i) * cmpp;
 
     for (size_t j = 0; j < ncols; ++j) {
       // Map from 2D->1D index

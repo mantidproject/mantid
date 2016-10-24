@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/UnitFactory.h"
@@ -252,19 +253,13 @@ LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
       std::vector<double> positionsBinning;
       positionsBinning.reserve(vectorSize);
 
-      for (size_t i = 0; i < vectorSize; i++)
-        positionsBinning.push_back(static_cast<double>(i));
+      HistogramData::BinEdges histoBinEdges(
+          vectorSize, HistogramData::LinearGenerator(0.0, 1.0));
+      HistogramData::Counts histoCounts(data(), data() + data.dim2());
+      HistogramData::Histogram histo(std::move(histoBinEdges),
+                                     std::move(histoCounts));
 
-      // Assign X
-      m_localWorkspace->mutableX(firstIndex)
-          .assign(positionsBinning.begin(), positionsBinning.end());
-      // Assign Y
-      m_localWorkspace->mutableY(firstIndex)
-          .assign(data(), data() + data.dim2());
-      // Assign Error
-      auto &E = m_localWorkspace->mutableE(firstIndex);
-      std::transform(data(), data() + data.dim2(), E.begin(),
-                     LoadHelper::calculateStandardError);
+      m_localWorkspace->setHistogram(firstIndex, std::move(histo));
 
       // Add average monitor counts to a property:
       double averageMonitorCounts =
@@ -299,34 +294,25 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromHorizontalTubes(
                 << "First bin = " << timeBinning[0] << '\n';
 
   // Workaround to get the number of tubes / pixels
-  size_t numberOfTubes = data.dim1();
-  size_t numberOfPixelsPerTube = data.dim0();
+  const size_t numberOfTubes = data.dim1();
+  const size_t numberOfPixelsPerTube = data.dim0();
+
+  const size_t numOfEdges = data.dim2() + 1;
 
   Progress progress(this, 0, 1, data.dim0() * data.dim1());
 
-  m_localWorkspace->mutableX(firstIndex)
-      .assign(timeBinning.begin(), timeBinning.end());
-
-  auto sharedXFirstIndex = m_localWorkspace->sharedX(firstIndex);
-
   size_t spec = firstIndex;
-  for (size_t i = 0; i < numberOfTubes; ++i) { // iterate tubes
-    for (size_t j = 0; j < numberOfPixelsPerTube;
-         ++j) { // iterate pixels in the tube 256
-      if (spec > firstIndex) {
-        // just copy the time binning axis to every spectra
-        m_localWorkspace->setSharedX(spec, sharedXFirstIndex);
-      }
-      // Assign Y
-      int *data_p = &data(static_cast<int>(j), static_cast<int>(i), 0);
-      m_localWorkspace->mutableY(spec).assign(data_p, data_p + data.dim2());
 
-      // Assign Error
-      auto &E = m_localWorkspace->mutableE(spec);
-      std::transform(data_p, data_p + data.dim2(), E.begin(),
-                     LoadHelper::calculateStandardError);
+  HistogramData::BinEdges binEdges(timeBinning);
+  HistogramData::Counts histoCounts(data(), data() + data.dim2());
 
-      ++spec;
+  HistogramData::Histogram histo(std::move(binEdges), std::move(histoCounts));
+
+  // iterate tubes
+  for (size_t i = 0; i < numberOfTubes; ++i) {
+    // iterate pixels in the tube - 256
+    for (size_t j = 0; j < numberOfPixelsPerTube; ++j) {
+      m_localWorkspace->setHistogram(spec, histo);
       progress.report();
     }
   }
