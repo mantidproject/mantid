@@ -84,6 +84,8 @@ public:
   std::string getScaleFactor() const override;
   /// Return momentum transfer limits
   std::string getMomentumTransferLimits() const override;
+  /// Return detector limits
+  std::string getDetectorLimits() const override;
 
   /// Creates hints for 'Plus'
   void

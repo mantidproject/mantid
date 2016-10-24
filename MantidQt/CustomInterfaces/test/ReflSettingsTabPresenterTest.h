@@ -83,6 +83,9 @@ public:
     EXPECT_CALL(mockView, getI0MonitorIndex())
         .Times(Exactly(1))
         .WillOnce(Return("2"));
+    EXPECT_CALL(mockView, getDetectorLimits())
+        .Times(Exactly(1))
+        .WillOnce(Return("\"low=395,specular=404,high=414\""));
     auto options = presenter.getTransmissionOptions();
 
     std::vector<std::string> optionsVec;
@@ -95,6 +98,7 @@ public:
     TS_ASSERT_EQUALS(optionsVec[5], "WavelengthMin=1");
     TS_ASSERT_EQUALS(optionsVec[6], "WavelengthMax=15");
     TS_ASSERT_EQUALS(optionsVec[7], "I0MonitorIndex=2");
+    TS_ASSERT_EQUALS(optionsVec[8], "ProcessingInstructions=\"low=395,specular=404,high=414\"");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -148,6 +152,9 @@ public:
     EXPECT_CALL(mockView, getMomentumTransferLimits())
         .Times(Exactly(1))
         .WillOnce(Return("\"0.008,-0.02,0.2\""));
+    EXPECT_CALL(mockView, getDetectorLimits())
+        .Times(Exactly(1))
+        .WillOnce(Return("\"low=395,specular=404,high=414\""));
     auto options = presenter.getReductionOptions();
 
     std::vector<std::string> optionsVec;
@@ -168,6 +175,7 @@ public:
     TS_ASSERT_EQUALS(optionsVec[13], "I0MonitorIndex=2");
     TS_ASSERT_EQUALS(optionsVec[14], "ScaleFactor=2");
     TS_ASSERT_EQUALS(optionsVec[15], "MomentumTransferLimits=\"0.008,-0.02,0.2\"");
+    TS_ASSERT_EQUALS(optionsVec[16], "ProcessingInstructions=\"low=395,specular=404,high=414\"");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }

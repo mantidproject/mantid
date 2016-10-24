@@ -81,6 +81,7 @@ public:
   virtual std::string getI0MonitorIndex() const = 0;
   virtual std::string getScaleFactor() const = 0;
   virtual std::string getMomentumTransferLimits() const = 0;
+  virtual std::string getDetectorLimits() const = 0;
 };
 }
 }

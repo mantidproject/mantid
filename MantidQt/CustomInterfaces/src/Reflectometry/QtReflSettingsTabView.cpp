@@ -237,5 +237,13 @@ std::string QtReflSettingsTabView::getMomentumTransferLimits() const {
   return m_ui.instSettingsMomentumTransferLimitsEdit->text().toStdString();
 }
 
+/** Return detector limits
+* @return :: detector limits
+*/
+std::string QtReflSettingsTabView::getDetectorLimits() const {
+
+  return m_ui.instSettingsDetLimitsEdit->text().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid
