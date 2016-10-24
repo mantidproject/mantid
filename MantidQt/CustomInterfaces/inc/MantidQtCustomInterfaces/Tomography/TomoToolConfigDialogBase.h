@@ -3,7 +3,6 @@
 
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
-#include "MantidQtCustomInterfaces/DllConfig.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -33,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL TomoToolConfigDialogBase {
+class TomoToolConfigDialogBase {
 public:
   TomoToolConfigDialogBase(const std::string toolName = "",
                            const std::string toolMethod = "")

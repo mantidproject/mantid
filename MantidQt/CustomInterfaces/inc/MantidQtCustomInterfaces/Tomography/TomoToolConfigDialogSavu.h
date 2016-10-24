@@ -13,7 +13,7 @@ class TableRow;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_CUSTOMINTERFACES_DLL TomoToolConfigDialogSavu
+class TomoToolConfigDialogSavu
     : public QMainWindow,
       public TomoToolConfigDialogBase {
   Q_OBJECT

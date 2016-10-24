@@ -6,7 +6,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_CUSTOMINTERFACES_DLL TomoToolConfigDialogCustom
+class TomoToolConfigDialogCustom
     : public TomoToolConfigDialogBase {
 public:
   TomoToolConfigDialogCustom()
