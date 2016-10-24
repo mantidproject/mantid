@@ -628,23 +628,24 @@ class CrystalFieldFitTest(unittest.TestCase):
         from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit
         from mantid.simpleapi import FunctionFactory
-        params = {'B20':0.37737, 'B22':3.9770, 'B40':-0.031787, 'B42':-0.11611, 'B44':-0.12544,
-                              'Temperature':44.0, 'FWHM':1.1}
+        params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
+                  'Temperature': 44.0, 'FWHM': 1.1}
         cf1 = CrystalField('Ce', 'C2v', **params)
         cf2 = CrystalField('Pr', 'C2v', **params)
         cf = cf1 + cf2
         x, y = cf.getSpectrum()
         ws = makeWorkspace(x, y)
 
-        params = {'B20': 0.377, 'B22': 3.9, 'B40': -0.03, 'B42': -0.116, 'B44': -0.125,
-                  'Temperature': 44.0, 'FWHM': 1.1}
-        cf1 = CrystalField('Ce', 'C2v', **params)
-        cf2 = CrystalField('Pr', 'C2v', **params)
+        cf1 = CrystalField('Ce', 'C2v', B40=-0.03, B42=-0.116, B44=-0.125, Temperature=44.0, FWHM=1.1)
+        cf1.ties(B20=0.37737, B22=3.977)
+        cf2 = CrystalField('Pr', 'C2v', B40=-0.03, B42=-0.116, B44=-0.125, Temperature=44.0, FWHM=1.1,
+                           ToleranceIntensity=6.0, ToleranceEnergy=1.0)
+        cf2.ties(B20=0.37737, B22=3.977)
         cf = cf1 + cf2
 
         chi2 = CalculateChiSquared(cf.makeSpectrumFunction(), InputWorkspace=ws)[1]
 
-        fit = CrystalFieldFit(Model=cf, InputWorkspace=ws)
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=ws, MaxIterations=10)
         fit.fit()
 
         self.assertTrue(cf.chi2 < chi2)
@@ -669,24 +670,23 @@ class CrystalFieldFitTest(unittest.TestCase):
         from CrystalField import CrystalField, CrystalFieldFit
         from mantid.simpleapi import FunctionFactory
         params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
-                  'Temperature': [44.0, 50], 'FWHM': [1.1, 0.9]}
+                  'Temperature': [44.0, 50.0], 'FWHM': [1.1, 0.9]}
         cf1 = CrystalField('Ce', 'C2v', **params)
         cf2 = CrystalField('Pr', 'C2v', **params)
         cf = cf1 + cf2
         ws1 = makeWorkspace(*cf.getSpectrum(0))
         ws2 = makeWorkspace(*cf.getSpectrum(1))
 
-        params = {'B20': 0.377, 'B22': 3.9, 'B40': -0.03, 'B42': -0.116, 'B44': -0.125,
-                  'Temperature': [44.0, 50], 'FWHM': [1.1, 0.9]}
-        cf1 = CrystalField('Ce', 'C2v', **params)
-        cf1.ties(IntensityScaling0=1.0, IntensityScaling1=1.0)
-        cf2 = CrystalField('Pr', 'C2v', **params)
-        cf2.ties(IntensityScaling0=1.0, IntensityScaling1=1.0)
+        cf1 = CrystalField('Ce', 'C2v', B40=-0.02, B42=-0.11, B44=-0.12, Temperature=[44.0, 50.0], FWHM=[1.0, 1.0])
+        cf1.ties(B20=0.37737, B22=3.977, IntensityScaling0=1.0, IntensityScaling1=1.0)
+        cf2 = CrystalField('Pr', 'C2v', B40=-0.03, B42=-0.116, B44=-0.125, Temperature=[44.0, 50.0], FWHM=[1.0, 1.0],
+                           ToleranceIntensity=6.0, ToleranceEnergy=1.0)
+        cf2.ties(B20=0.37737, B22=3.977, IntensityScaling0=1.0, IntensityScaling1=1.0)
         cf = cf1 + cf2
 
-        chi2 = CalculateChiSquared(cf.makeMultiSpectrumFunction(), InputWorkspace=ws1,  InputWorkspace_1=ws2)[1]
+        chi2 = CalculateChiSquared(cf.makeMultiSpectrumFunction(), InputWorkspace=ws1, InputWorkspace_1=ws2)[1]
 
-        fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws1, ws2])
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws1, ws2], MaxIterations=10)
         fit.fit()
 
         self.assertTrue(cf.chi2 < chi2)
