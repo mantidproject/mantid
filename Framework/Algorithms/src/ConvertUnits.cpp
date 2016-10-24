@@ -409,12 +409,12 @@ bool ConvertUnits::getDetectorValues(const API::SpectrumInfo &spectrumInfo,
                                      const bool signedTheta, int64_t wsIndex,
                                      double &efixed, double &l2,
                                      double &twoTheta) {
-  if(!spectrumInfo.hasDetectors(wsIndex))
+  if (!spectrumInfo.hasDetectors(wsIndex))
     return false;
 
   l2 = spectrumInfo.l2(wsIndex);
   // The scattering angle for this detector (in radians).
-  if(signedTheta)
+  if (signedTheta)
     twoTheta = spectrumInfo.signedTwoTheta(wsIndex);
   else
     twoTheta = spectrumInfo.twoTheta(wsIndex);

@@ -127,7 +127,6 @@ void AbsorptionCorrection::exec() {
   g_log.information(message.str());
   message.str("");
 
-
   // Calculate the cached values of L1 and element volumes.
   initialiseCachedDistances();
   // If sample not at origin, shift cached positions.
@@ -309,8 +308,8 @@ void AbsorptionCorrection::constructSample(API::Sample &sample) {
 /// @param detector :: The detector we are working on
 /// @param L2s :: A vector of the sample-detector distance for  each segment of
 /// the sample
-void AbsorptionCorrection::calculateDistances(
-    const IDetector &detector, std::vector<double> &L2s) const {
+void AbsorptionCorrection::calculateDistances(const IDetector &detector,
+                                              std::vector<double> &L2s) const {
   V3D detectorPos(detector.getPos());
   if (detector.nDets() > 1) {
     // We need to make sure this is right for grouped detectors - should use
