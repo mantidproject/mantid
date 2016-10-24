@@ -195,8 +195,7 @@ Input File
 Reduction Type
   There are two reduction types of IN16B data: Quasi-Elastic Neutron Scattering (QENS) or Fixed Window Scans (FWS),
   which can be either Elastic (EFWS) or Inelastic (IFWS). In case of the FWS, an observable can be specified that will be
-  the x-axis on the final reduced workspace. If one or another reduction type is checked, the input files will be
-  automatically filtered according to velocity profile (0 for QENS, 1 for FWS) and the corresponding algorithm will be run.
+  the x-axis on the final reduced workspace. If one or another reduction type is checked, the corresponding algorithm will be run.
 
 Detector Grouping
   Used to switch between grouping as per the IDF (*Default*) or grouping using a
@@ -204,7 +203,7 @@ Detector Grouping
 
 Background Subtraction
   Used to specify a background (i.e. empty can) subtraction. If multiple files are given, they will be automatically
-  summed.
+  summed. A scale factor can be applied to background subtraction.
 
 Detector Calibration
   Gives the option of applying workspace of calibration constants produced
@@ -327,7 +326,7 @@ Peak Range
   Sets the integration range over the peak in :math:`meV`
 
 Scale Factor
-  Override the calculated scale factor
+  Factor to scale the intensities with
 
 ISIS Diagnostics
 ----------------

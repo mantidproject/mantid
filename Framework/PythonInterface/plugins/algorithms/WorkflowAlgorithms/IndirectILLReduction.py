@@ -9,7 +9,8 @@ from mantid.api import *
 from mantid import config, mtd, logger
 
 
-_ws_or_none = lambda s: mtd[s] if s != '' else None
+def _ws_or_none(s):
+    return mtd[s] if s != '' else None
 
 
 def extract_workspace(ws, ws_out, x_start, x_end):
