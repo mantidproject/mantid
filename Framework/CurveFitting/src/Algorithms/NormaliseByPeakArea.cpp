@@ -297,7 +297,7 @@ void NormaliseByPeakArea::saveToOutput(
     const Kernel::cow_ptr<HistogramData::HistogramY> &yValues,
     const Kernel::cow_ptr<HistogramData::HistogramE> &eValues,
     const size_t index) {
-  assert(yValues.size() == eValues.size());
+  assert(yValues->rawData().size() == eValues->rawData().size());
 
   if (m_sumResults) {
     const size_t npts(accumWS->blocksize());

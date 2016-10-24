@@ -1975,7 +1975,7 @@ bool LeBailFit::calculateDiffractionPattern(const HistogramX &vecX,
                                             const HistogramY &vecBkgd,
                                             std::vector<double> &values,
                                             Rfactor &rfactor) {
-  HistogramY veccalbkgd;
+  HistogramY veccalbkgd(vecX.size());
 
   // Examine whether all peaks are valid
   double maxfwhm = vecX.back() - vecX.front();
