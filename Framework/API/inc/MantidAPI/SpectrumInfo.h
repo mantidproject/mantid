@@ -18,6 +18,7 @@ class Instrument;
 }
 namespace API {
 
+class DetectorInfo;
 class MatrixWorkspace;
 
 /** API::SpectrumInfo is an intermediate step towards a SpectrumInfo that is
@@ -89,7 +90,7 @@ private:
 
   const MatrixWorkspace &m_workspace;
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
-  std::vector<detid_t> m_validDetectorIDs;
+  std::unique_ptr<DetectorInfo> m_detectorInfo;
   // The following variables are mutable, since they are initialized (cached)
   // only on demand, by const getters.
   mutable boost::shared_ptr<const Geometry::IComponent> m_source;

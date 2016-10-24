@@ -1,5 +1,6 @@
-#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -19,9 +20,8 @@ SpectrumInfo::SpectrumInfo(const MatrixWorkspace &workspace)
   if (!m_instrument)
     throw std::runtime_error("Workspace " + workspace.getName() +
                              " does not contain an instrument!");
-  const bool skipMonitors = false;
-  m_validDetectorIDs = m_instrument->getDetectorIDs(skipMonitors);
-  std::sort(m_validDetectorIDs.begin(), m_validDetectorIDs.end());
+
+  m_detectorInfo = Kernel::make_unique<DetectorInfo>(*m_instrument);
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -93,10 +93,11 @@ Kernel::V3D SpectrumInfo::position(const size_t index) const {
 bool SpectrumInfo::hasDetectors(const size_t index) const {
   // Workspaces can contain invalid detector IDs. Those IDs will be silently
   // ignored here until this is fixed.
+  const auto &validDetectorIDs = m_detectorInfo->detectorIDs();
   for (const auto &id : m_workspace.getSpectrum(index).getDetectorIDs()) {
-    const auto &it = std::lower_bound(m_validDetectorIDs.cbegin(),
-                                      m_validDetectorIDs.cend(), id);
-    if (it != m_validDetectorIDs.cend() && *it == id) {
+    const auto &it = std::lower_bound(validDetectorIDs.cbegin(),
+                                      validDetectorIDs.cend(), id);
+    if (it != validDetectorIDs.cend() && *it == id) {
       return true;
     }
   }
@@ -108,10 +109,11 @@ bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
   size_t count = 0;
   // Workspaces can contain invalid detector IDs. Those IDs will be silently
   // ignored here until this is fixed.
+  const auto &validDetectorIDs = m_detectorInfo->detectorIDs();
   for (const auto &id : m_workspace.getSpectrum(index).getDetectorIDs()) {
-    const auto &it = std::lower_bound(m_validDetectorIDs.cbegin(),
-                                      m_validDetectorIDs.cend(), id);
-    if (it != m_validDetectorIDs.cend() && *it == id) {
+    const auto &it = std::lower_bound(validDetectorIDs.cbegin(),
+                                      validDetectorIDs.cend(), id);
+    if (it != validDetectorIDs.cend() && *it == id) {
       ++count;
     }
   }
