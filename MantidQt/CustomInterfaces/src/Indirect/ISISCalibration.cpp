@@ -172,8 +172,6 @@ void ISISCalibration::run() {
   QStringList filenameList = m_uiForm.leRunNo->getFilenames();
   QString filenames = filenameList.join(",");
   QString rawFile = m_uiForm.leRunNo->getFirstFilename();
-  auto pos = rawFile.lastIndexOf(".");
-  auto extension = rawFile.right(rawFile.length() - pos);
   QFileInfo rawFileInfo(rawFile);
   QString name = rawFileInfo.baseName();
 
