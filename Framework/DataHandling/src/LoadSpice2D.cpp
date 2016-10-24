@@ -517,6 +517,7 @@ void LoadSpice2D::setMetadataAsRunProperties(
 
   addRunProperty<double>("wavelength", m_wavelength, "Angstrom");
   addRunProperty<double>("wavelength-spread", m_dwavelength, "Angstrom");
+  addRunProperty<double>("wavelength-spread-ratio", m_dwavelength/m_wavelength, "Angstrom");
 
   addRunProperty<double>(metadata, "Counters/monitor", "monitor", "");
   addRunProperty<double>(metadata, "Counters/time", "timer", "sec");

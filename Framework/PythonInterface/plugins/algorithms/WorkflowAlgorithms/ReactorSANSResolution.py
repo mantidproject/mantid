@@ -42,7 +42,9 @@ class ReactorSANSResolution(PythonAlgorithm):
             wvl = input_ws.getRun().getProperty("wavelength").value
 
         d_wvl = None
-        if input_ws.getRun().hasProperty("wavelength-spread"):
+        if input_ws.getRun().hasProperty("wavelength-spread-ratio"):
+            d_wvl = input_ws.getRun().getProperty("wavelength-spread-ratio").value
+        elif input_ws.getRun().hasProperty("wavelength-spread"):
             d_wvl = input_ws.getRun().getProperty("wavelength-spread").value
 
         source_apert_radius = None
