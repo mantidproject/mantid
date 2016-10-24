@@ -27,11 +27,6 @@ def create_vanadium(startup_object, vanadium_runs, empty_runs, output_file_name,
                 absorb=do_absorp_corrections, gen_absorb=generate_abosrp_corrections)
 
 
-def create_calibration_si(startup_object, calibration_runs, out_file_name):
-    _create_calibration_si(calibration_runs=calibration_runs, output_file_name=out_file_name,
-                           instrument=startup_object)
-
-
 def set_debug(debug_on=False):
     global g_debug
     g_debug = debug_on
@@ -103,33 +98,6 @@ def _create_calibration(calibration_runs, offset_file_name, grouping_file_name, 
     remove_intermediate_workspace(aligned_ws)
     remove_intermediate_workspace(cal_grouped_ws)
 
-
-def _create_calibration_si(calibration_runs, output_file_name, instrument):
-    wcal = "cal_raw"
-    PEARL_read(calruns, "raw", wcal)
-
-    if instver == "new" or instver == "new2":
-        mantid.Rebin(InputWorkspace=wcal, OutputWorkspace=wcal, Params="100,-0.0006,19950")
-
-    ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
-
-    if instver == "new2":
-        mantid.Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="1.71,0.002,2.1")
-        mantid.CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=20,
-                       WorkspaceIndexMin=9, WorkspaceIndexMax=1063, XMin=1.71, XMax=2.1)
-    elif instver == "new":
-        mantid.Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="1.85,0.002,2.05")
-        mantid.CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=20,
-                       WorkspaceIndexMin=9, WorkspaceIndexMax=943, XMin=1.85, XMax=2.05)
-    else:
-        mantid.Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="3,0.002,3.2")
-        mantid.CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=500,
-                       WorkspaceIndexMin=1, WorkspaceIndexMax=1440, XMin=3, XMax=3.2)
-
-    mantid.GetDetectorOffsets(InputWorkspace="crosscor", OutputWorkspace="OutputOffsets", Step=0.002,
-                       DReference=1.920127251, XMin=-200, XMax=200, GroupingFileName=noffsetfile)
-    mantid.AlignDetectors(InputWorkspace=wcal, OutputWorkspace="cal_aligned", CalibrationFile=noffsetfile)
-    mantid.DiffractionFocussing(InputWorkspace="cal_aligned", OutputWorkspace="cal_grouped", GroupingFileName=groupfile)
 
 
 def _create_van(instrument, van, empty, nvanfile, nspline=60, absorb=True, gen_absorb=False):

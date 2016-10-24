@@ -102,6 +102,9 @@ class Pearl(AbstractInst):
     def attenuate_workspace(self, input_workspace):
         return self._attenuate_workspace(input_workspace=input_workspace)
 
+    def create_calibration_si(self, calibration_runs, cal_file_name, grouping_file_name):
+        self._create_silicon_cal(calibration_runs, cal_file_name, grouping_file_name)
+
     def get_monitor(self, run_number, input_dir, spline_terms=20):
         return self._get_monitor(run_number=run_number, input_dir=input_dir, spline_terms=spline_terms)
 
@@ -139,6 +142,47 @@ class Pearl(AbstractInst):
         pearl_attenuated_ws = mantid.Divide(LHSWorkspace=input_workspace, RHSWorkspace=wc_attenuated)
         Common.remove_intermediate_workspace(workspace_name=wc_attenuated)
         return pearl_attenuated_ws
+
+    def _create_silicon_cal(self, runs_to_process, cal_file_name, grouping_file_name):
+        create_si_ws = Common._read_ws(number=runs_to_process, instrument=self)
+        cycle_details = self.get_cycle_information(runs_to_process)
+        instrument_version = cycle_details["instrument_version"]
+
+        if instrument_version == "new" or instrument_version == "new2":
+            create_si_ws = mantid.Rebin(InputWorkspace=create_si_ws, Params="100,-0.0006,19950")
+
+        create_si_d_spacing_ws = mantid.ConvertUnits(InputWorkspace=create_si_ws, Target="dSpacing")
+
+        if instrument_version == "new2":
+            create_si_d_spacing_rebin_ws = mantid.Rebin(InputWorkspace=create_si_d_spacing_ws, Params="1.71,0.002,2.1")
+            create_si_cross_corr_ws = mantid.CrossCorrelate(InputWorkspace=create_si_d_spacing_rebin_ws,
+                                                            ReferenceSpectra=20, WorkspaceIndexMin=9,
+                                                            WorkspaceIndexMax=1063, XMin=1.71, XMax=2.1)
+        elif instrument_version == "new":
+            create_si_d_spacing_rebin_ws = mantid.Rebin(InputWorkspace=create_si_d_spacing_ws, Params="1.85,0.002,2.05")
+            create_si_cross_corr_ws = mantid.CrossCorrelate(InputWorkspace=create_si_d_spacing_rebin_ws,
+                                                            ReferenceSpectra=20, WorkspaceIndexMin=9,
+                                                            WorkspaceIndexMax=943, XMin=1.85, XMax=2.05)
+        elif instrument_version == "old":
+            create_si_d_spacing_rebin_ws = mantid.Rebin(InputWorkspace=create_si_d_spacing_ws, Params="3,0.002,3.2")
+            create_si_cross_corr_ws = mantid.CrossCorrelate(InputWorkspace=create_si_d_spacing_rebin_ws,
+                                                            ReferenceSpectra=500, WorkspaceIndexMin=1,
+                                                            WorkspaceIndexMax=1440, XMin=3, XMax=3.2)
+        else:
+            raise NotImplementedError("The instrument version is not supported for creating a silicon calibration")
+
+        Common.remove_intermediate_workspace(create_si_d_spacing_ws)
+        Common.remove_intermediate_workspace(create_si_d_spacing_rebin_ws)
+
+        calibration_output_path = self.calibration_dir + cal_file_name
+        create_si_offsets_ws = mantid.GetDetectorOffsets(InputWorkspace=create_si_cross_corr_ws,
+                                                         Step=0.002, DReference=1.920127251, XMin=-200, XMax=200,
+                                                         GroupingFileName=calibration_output_path)
+        create_si_aligned_ws = mantid.AlignDetectors(InputWorkspace=create_si_ws,
+                                                     CalibrationFile=calibration_output_path)
+        grouping_output_path = self.calibration_dir + grouping_file_name
+        create_si_grouped_ws = mantid.DiffractionFocussing(InputWorkspace=create_si_aligned_ws,
+                                                           GroupingFileName=grouping_output_path)
 
     def _get_monitor(self, run_number, input_dir, spline_terms):
         load_monitor_ws = Common._load_monitor(run_number, input_dir=input_dir, instrument=self)
@@ -216,7 +260,6 @@ def _old_api_strip_file_path(in_path):
     return os.path.basename(in_path)
 
 # Implementation of static methods
-
 
 def _gen_file_name(run_number):
 

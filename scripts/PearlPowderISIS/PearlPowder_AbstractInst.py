@@ -66,9 +66,9 @@ class AbstractInst(object):
         PearlPowder_common.create_calibration(startup_object=self, calibration_runs=calibration_runs,
                                               offset_file_path=offset_file_name, grouping_file_name=grouping_file_name)
 
-    def create_calibration_Si(self, calibration_runs, out_file_name):
-        PearlPowder_common.create_calibration_si(startup_object=self, calibration_runs=calibration_runs,
-                                                 out_file_name=out_file_name)
+    def create_calibration_Si(self, calibration_runs, cal_file_name, grouping_file_name):
+        self.create_calibration_si(calibration_runs=calibration_runs, cal_file_name=cal_file_name,
+                                   grouping_file_name=grouping_file_name)
 
     # TODO rename this to something clearer
     def create_vanadium(self, vanadium_runs, empty_runs, output_file_name, num_of_splines,
@@ -201,6 +201,16 @@ class AbstractInst(object):
     # --- Instrument optional hooks ----#
     def attenuate_workspace(self, input_workspace):
         return _empty_hook_return_input(input_workspace)
+
+    def create_calibration_si(self, calibration_runs, cal_file_name, grouping_file_name):
+        """
+        Creates a calibration file from a silicon run
+        @param calibration_runs: The silicon calibration runs to process
+        @param cal_file_name: The calibration filename to be created
+        @param grouping_file_name: The grouping filename to be created
+        """
+        raise NotImplementedError("Create calibration from a silicon run is not yet implemented for this instrument")
+
 
     def get_monitor(self, run_number, input_dir, spline_terms):
         return _empty_hook_return_none()

@@ -88,6 +88,10 @@ class PearlPowder_AbstractInstTest(unittest.TestCase):
         output_ws = inst.attenuate_workspace(input_ws)
         self.assertEquals(input_ws, output_ws)
 
+    def test_create_calibration_si(self):
+        inst = self.get_abstract_inst_defaults()
+        self.assertRaises(NotImplementedError, lambda: inst.create_calibration_si("", ""))
+
     def test_get_monitor_hook(self):
         inst = self.get_abstract_inst_defaults()
         # Use type this isn't None to make sure its not returning to us
@@ -111,6 +115,8 @@ class PearlPowder_AbstractInstTest(unittest.TestCase):
         output = inst.spline_background(unused_param, unused_param, unused_param)
 
         self.assertEquals(isinstance(output, type(None)), True)
+
+    # Helper methods to create fresh instrument objects
 
     def get_abstract_inst_defaults(self):
         return PearlPowder_Mock(calibration_dir=self.calibration_dir, raw_data_dir=self.raw_data_dir, 
