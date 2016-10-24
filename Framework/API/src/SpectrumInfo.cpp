@@ -58,37 +58,26 @@ double SpectrumInfo::l2(const size_t index) const {
 
 /// Returns 2 theta (scattering angle w.r.t. to beam direction).
 double SpectrumInfo::twoTheta(const size_t index) const {
-  // Note: This function has big overlap with the method
-  // MatrixWorkspace::detectorTwoTheta(). The plan is to eventually remove the
-  // latter, once SpectrumInfo is in widespread use.
-  const Kernel::V3D samplePos = samplePosition();
-  const Kernel::V3D beamLine = samplePos - sourcePosition();
-
-  if (beamLine.nullVector()) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Source and sample are at same position!");
+  double twoTheta{0.0};
+  const auto &dets = getDetectorVector(index);
+  for (const auto &det : dets) {
+    const auto &detIndex = m_detIDToIndex.at(det->getID());
+    m_detectorInfo->setCachedDetector(detIndex, det);
+    twoTheta += m_detectorInfo->twoTheta(detIndex);
   }
-
-  return getDetector(index).getTwoTheta(samplePos, beamLine);
+  return twoTheta /= static_cast<double>(dets.size());
 }
 
 /// Returns signed 2 theta (signed scattering angle w.r.t. to beam direction).
 double SpectrumInfo::signedTwoTheta(const size_t index) const {
-  // Note: This function has big overlap with the method
-  // MatrixWorkspace::detectorSignedTwoTheta(). The plan is to eventually remove
-  // the latter, once SpectrumInfo is in widespread use.
-  const Kernel::V3D samplePos = samplePosition();
-  const Kernel::V3D beamLine = samplePos - sourcePosition();
-
-  if (beamLine.nullVector()) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Source and sample are at same position!");
+  double signedTwoTheta{0.0};
+  const auto &dets = getDetectorVector(index);
+  for (const auto &det : dets) {
+    const auto &detIndex = m_detIDToIndex.at(det->getID());
+    m_detectorInfo->setCachedDetector(detIndex, det);
+    signedTwoTheta += m_detectorInfo->signedTwoTheta(detIndex);
   }
-  // Get the instrument up axis.
-  const Kernel::V3D &instrumentUpAxis =
-      m_instrument->getReferenceFrame()->vecPointingUp();
-  return getDetector(index)
-      .getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
+  return signedTwoTheta /= static_cast<double>(dets.size());
 }
 
 /// Returns the position of the spectrum with given index.
