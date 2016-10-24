@@ -91,7 +91,7 @@ void CorrectFlightPaths::exec() {
   PARALLEL_FOR2(m_inputWS, m_outputWS)
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    m_outputWS->setHistogram(i, m_outputWS->histogram(i));
+    m_outputWS->setHistogram(i, m_inputWS->histogram(i));
     // Copy the energy transfer axis
     // TOF
 
