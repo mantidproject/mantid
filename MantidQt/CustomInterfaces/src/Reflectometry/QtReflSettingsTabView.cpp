@@ -173,5 +173,13 @@ std::string QtReflSettingsTabView::getMonitorIntegralMin() const {
   return m_ui.instSettingsMonIntMinEdit->text().toStdString();
 }
 
+/** Return monitor integral max
+* @return :: monitor integral max
+*/
+std::string QtReflSettingsTabView::getMonitorIntegralMax() const {
+
+  return m_ui.instSettingsMonIntMaxEdit->text().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid

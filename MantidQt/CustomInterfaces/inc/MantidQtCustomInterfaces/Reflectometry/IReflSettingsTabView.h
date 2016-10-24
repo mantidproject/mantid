@@ -73,6 +73,7 @@ public:
   virtual std::string getPolarisationCorrections() const = 0;
   /// Instrument settings
   virtual std::string getMonitorIntegralMin() const = 0;
+  virtual std::string getMonitorIntegralMax() const = 0;
 };
 }
 }

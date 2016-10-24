@@ -68,6 +68,8 @@ public:
   std::string getPolarisationCorrections() const override;
   /// Return monitor integral min
   std::string getMonitorIntegralMin() const override;
+  /// Return monitor integral max
+  std::string getMonitorIntegralMax() const override;
 
   /// Creates hints for 'Plus'
   void
