@@ -1044,13 +1044,13 @@ void TomographyIfaceViewQtGUI::updateSystemSettingsTabFields(
 /**
  * Displays and gets the results of a tool specific configuration dialog.
  *
- * @param name Name of the (tomographic reconstruction) tool
+ * @param dialog The pointer to the current dialog
  */
 void TomographyIfaceViewQtGUI::showToolConfig(
     TomoToolConfigDialogBase *dialog) {
 
   // execute also intiialises all the parts of the GUI
-  dialog->execute();
+  dialog->initialiseGUIandExecute();
 }
 
 /**
@@ -1155,8 +1155,8 @@ void TomographyIfaceViewQtGUI::browseImageClicked() {
  */
 void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
     const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-        localStatus) {
+    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+        &localStatus) {
 
   QTableWidget *t = m_uiTabRun.tableWidget_run_jobs;
   bool sort = t->isSortingEnabled();

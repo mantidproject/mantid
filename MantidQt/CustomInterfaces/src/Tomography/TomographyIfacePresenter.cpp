@@ -210,14 +210,19 @@ void TomographyIfacePresenter::processCompResourceChanged() {
   setupConfigDialogSettingsAndUpdateModel(m_configDialog.get());
 }
 
+/** Called when the event ToolChanged fires. It gets the name for the current
+ * tabToolTip and first tries to create it (if valid tool name), and if that
+ * succeeds then updates the tool's settings to hold the current path and
+ * afterwards updates the model's information about the tool's current settings
+ */
 void TomographyIfacePresenter::processToolChanged() {
-  const std::string tool = m_view->currentReconTool();
+  const std::string toolName = m_view->currentReconTool();
 
   // disallow reconstruct on tools that don't run yet: Savu and CCPi
-  if (TomographyIfaceModel::g_CCPiTool == tool) {
+  if (TomographyIfaceModel::g_CCPiTool == toolName) {
     m_view->enableRunReconstruct(false);
     m_view->enableConfigTool(false);
-  } else if (TomographyIfaceModel::g_SavuTool == tool) {
+  } else if (TomographyIfaceModel::g_SavuTool == toolName) {
     // for now, show setup dialog, but cannot run
     m_view->enableRunReconstruct(false);
     m_view->enableConfigTool(true);
@@ -230,11 +235,11 @@ void TomographyIfacePresenter::processToolChanged() {
   }
 
   // return if empty string
-  if ("" == tool) {
+  if ("" == toolName) {
     return;
   }
 
-  createConfigDialogUsingToolName(tool);
+  createConfigDialogUsingToolName(toolName);
   // this will set the default settings for the dialog
   auto dialog = m_configDialog.get();
 
@@ -252,16 +257,20 @@ void TomographyIfacePresenter::setupConfigDialogSettingsAndUpdateModel(
   }
 }
 
+/** Uses the static method in TomoToolConfigDialogBase to create the proper tool
+ * from the provided name
+ * @param toolName The string holding the tool's name
+ */
 void TomographyIfacePresenter::createConfigDialogUsingToolName(
-    const std::string &tool) {
+    const std::string &toolName) {
   // free the previous dialogue pointer if any
   m_configDialog.reset();
   m_configDialog = std::unique_ptr<TomoToolConfigDialogBase>(
-      TomoToolConfigDialogBase::getCorrectDialogForToolFromString(tool));
+      TomoToolConfigDialogBase::getCorrectDialogForToolFromString(toolName));
 }
 
-/**
-* Setup the tool's run path, the paths out, the reconstruction index and
+/** Depending on whether local or remote resource is selected, do setup
+* the tool's run path, the paths out, the reconstruction index and
 * the localOutNameAppendix
 *
 * @param dialog The dialog pointer that will be set up
@@ -276,6 +285,11 @@ void TomographyIfacePresenter::setupConfigDialogSettings(
   }
 }
 
+/** Configures the dialog settings for local reconstruction, this means settings
+ * the run command, the pathOut and the name of the output folder
+ *
+ * @param dialog The raw dialog pointer that will be configured.
+ */
 void TomographyIfacePresenter::setupConfigDialogSettingsForLocal(
     TomoToolConfigDialogBase *dialog) const {
   std::string run = m_model->getExeternalInterpreterPath() + " " +
@@ -293,6 +307,16 @@ void TomographyIfacePresenter::setupConfigDialogSettingsForLocal(
   dialog->setupDialog(run, paths, pathOut, localOutNameAppendix);
 }
 
+/** Configures the dialog settings for remote reconstruction, this means
+ * settings
+ * the run command, the pathOut and the name of the output folder
+ *
+ * Currently it does NOT take into account the remote, this is
+ * something that might be needed in the future if more remote reconstruction
+ * locations are added, as currently the only one is SCARF@STFC
+ *
+ * @param dialog The raw dialog pointer that will be configured.
+ */
 void TomographyIfacePresenter::setupConfigDialogSettingsForRemote(
     TomoToolConfigDialogBase *dialog) const {
   // set up all the information we need for the dialog
@@ -310,8 +334,14 @@ void TomographyIfacePresenter::setupConfigDialogSettingsForRemote(
   dialog->setupDialog(run, paths, pathOut, localOutNameAppendix);
 }
 
-/** Updated all of the model's information about the current tool
-*/
+/** Updated  the model's information about the current tool
+ * The settings that are updated are:
+ *  - the current tool name
+ *  - the current tool method
+ *  - the current tool settings
+ *
+ * @param dialog The raw dialog pointer that will be configured.
+ */
 void TomographyIfacePresenter::updateModelAfterToolChanged(
     const TomoToolConfigDialogBase *dialog) {
 
@@ -509,7 +539,6 @@ void TomographyIfacePresenter::processSetupReconTool() {
   }
 
   if (TomographyIfaceModel::g_CCPiTool != currentReconTool) {
-
     // give pointer to showToolConfig, so it can run the dialogue
     m_view->showToolConfig(dialog);
     updateModelAfterToolChanged(dialog);
@@ -552,6 +581,9 @@ void TomographyIfacePresenter::processRefreshJobs() {
     return;
   }
 
+  // TODOPRES is this necessary? if we're logged in, we will never refresh the
+  // jobs for 'Local', also will need to be removed if more remote resources are
+  // added
   std::string comp = m_view->currentComputeResource();
   if (isLocalResourceSelected()) {
     comp = "SCARF@STFC";

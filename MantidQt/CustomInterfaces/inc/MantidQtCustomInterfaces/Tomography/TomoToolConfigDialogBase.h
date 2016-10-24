@@ -54,7 +54,7 @@ public:
   }
 
   /// Runs the dialogue and handles the returns
-  virtual int execute() {
+  virtual int initialiseGUIandExecute() {
     if (!isInitialised()) {
       // set up the tool's method on the first run
       initialiseDialog();

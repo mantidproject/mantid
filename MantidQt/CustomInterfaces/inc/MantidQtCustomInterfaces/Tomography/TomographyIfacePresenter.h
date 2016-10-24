@@ -77,9 +77,6 @@ protected:
   void processSetupReconTool();
   void processRunRecon();
 
-  void subprocessRunReconRemote();
-  void subprocessRunReconLocal();
-
 protected slots:
   /// It may be run on user request, or periodically from a timer/thread
   void processRefreshJobs();
@@ -114,7 +111,7 @@ protected:
 
 private:
   /// creates the correct dialog pointer and sets it to the member variable
-  void createConfigDialogUsingToolName(const std::string &tool);
+  void createConfigDialogUsingToolName(const std::string &toolName);
 
   /// sets up the dialog and uses the settings to update the model
   void

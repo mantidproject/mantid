@@ -269,7 +269,7 @@ public:
   /**
    * Show a tool specific configuration dialog for the user to set it up
    *
-   * @param name human readable name of the tool, as a string
+   * @param dialog The pointer to the current dialog
    */
   virtual void showToolConfig(TomoToolConfigDialogBase *dialog) = 0;
 
@@ -284,8 +284,8 @@ public:
    */
   virtual void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-          localStatus) = 0;
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+          &localStatus) = 0;
 
   /**
    * Save settings (normally when closing the interface). This refers
