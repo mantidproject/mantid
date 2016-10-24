@@ -287,7 +287,7 @@ public:
     TS_ASSERT_EQUALS(actualRun, expectedRun);
     TS_ASSERT_EQUALS(expectedArgsVector.size(), actualArgsVector.size());
 
-    for (int i = 0; i < expectedArgsVector.size(); ++i) {
+    for (size_t i = 0; i < expectedArgsVector.size(); ++i) {
       // append the whitespace because it is added in the argument separation
       TS_ASSERT_EQUALS(expectedArgsVector[i] + " ", actualArgsVector[i]);
     }

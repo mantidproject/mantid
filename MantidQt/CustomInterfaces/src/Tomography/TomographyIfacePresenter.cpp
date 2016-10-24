@@ -313,7 +313,7 @@ void TomographyIfacePresenter::setupConfigDialogSettingsForLocal(
  *
  * Currently it does NOT take into account the remote, this is
  * something that might be needed in the future if more remote reconstruction
- * locations are added, as currently the only one is SCARF@STFC
+ * locations are added, as currently the only one is SCARF
  *
  * @param dialog The raw dialog pointer that will be configured.
  */
