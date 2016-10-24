@@ -66,6 +66,8 @@ public:
   std::string getDirectBeam() const override;
   /// Return selected polarisation corrections
   std::string getPolarisationCorrections() const override;
+  /// Return monitor integral min
+  std::string getMonitorIntegralMin() const override;
 
   /// Creates hints for 'Plus'
   void

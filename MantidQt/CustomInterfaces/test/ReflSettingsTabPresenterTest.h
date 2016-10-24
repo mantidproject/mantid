@@ -62,11 +62,15 @@ public:
     EXPECT_CALL(mockView, getAnalysisMode())
         .Times(Exactly(1))
         .WillOnce(Return("MultiDetectorAnalysis"));
+    EXPECT_CALL(mockView, getMonitorIntegralMin())
+        .Times(Exactly(1))
+        .WillOnce(Return("4"));
     auto options = presenter.getTransmissionOptions();
 
     std::vector<std::string> optionsVec;
     boost::split(optionsVec, options, split_q());
     TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
+    TS_ASSERT_EQUALS(optionsVec[1], "MonitorIntegrationWavelengthMin=4");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -93,6 +97,9 @@ public:
     EXPECT_CALL(mockView, getPolarisationCorrections())
         .Times(Exactly(1))
         .WillOnce(Return("PNR"));
+    EXPECT_CALL(mockView, getMonitorIntegralMin())
+        .Times(Exactly(1))
+        .WillOnce(Return("4"));
     auto options = presenter.getReductionOptions();
 
     std::vector<std::string> optionsVec;
@@ -104,6 +111,7 @@ public:
     TS_ASSERT_EQUALS(optionsVec[4], "CPp=0.54");
     TS_ASSERT_EQUALS(optionsVec[5], "RegionOfDirectBeam=\"0,3\"");
     TS_ASSERT_EQUALS(optionsVec[6], "PolarizationAnalysis=PNR");
+    TS_ASSERT_EQUALS(optionsVec[7], "MonitorIntegrationWavelengthMin=4");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }

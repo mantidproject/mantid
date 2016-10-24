@@ -149,8 +149,8 @@ std::string QtReflSettingsTabView::getCPp() const {
   return m_ui.expSettingsCPpEdit->text().toStdString();
 }
 
-/** Return Dbnr
-* @return :: direct beam range Dbnr
+/** Return direct beam
+* @return :: direct beam range
 */
 std::string QtReflSettingsTabView::getDirectBeam() const {
 
@@ -163,6 +163,14 @@ std::string QtReflSettingsTabView::getDirectBeam() const {
 std::string QtReflSettingsTabView::getPolarisationCorrections() const {
 
   return m_ui.polCorrComboBox->currentText().toStdString();
+}
+
+/** Return monitor integral min
+* @return :: monitor integral min
+*/
+std::string QtReflSettingsTabView::getMonitorIntegralMin() const {
+
+  return m_ui.instSettingsMonIntMinEdit->text().toStdString();
 }
 
 } // namespace CustomInterfaces

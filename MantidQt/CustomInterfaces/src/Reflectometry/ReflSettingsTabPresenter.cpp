@@ -62,6 +62,11 @@ std::string ReflSettingsTabPresenter::getTransmissionOptions() const {
   if (!analysisMode.empty())
     options.push_back("AnalysisMode=" + analysisMode);
 
+  // Add monitor integral min
+  auto monIntMin = m_view->getMonitorIntegralMin();
+  if (!monIntMin.empty())
+    options.push_back("MonitorIntegrationWavelengthMin=" + monIntMin);
+
   return boost::algorithm::join(options, ",");
 }
 
@@ -111,6 +116,11 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   auto polCorr = m_view->getPolarisationCorrections();
   if (!polCorr.empty())
     options.push_back("PolarizationAnalysis=" + polCorr);
+
+  // Add monitor integral min
+  auto monIntMin = m_view->getMonitorIntegralMin();
+  if (!monIntMin.empty())
+    options.push_back("MonitorIntegrationWavelengthMin=" + monIntMin);
 
   return boost::algorithm::join(options, ",");
 }

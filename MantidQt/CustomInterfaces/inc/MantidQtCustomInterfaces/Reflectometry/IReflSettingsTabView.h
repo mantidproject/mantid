@@ -63,6 +63,7 @@ public:
   virtual void
   createStitchHints(const std::map<std::string, std::string> &hints) = 0;
 
+  /// Experiment settings
   virtual std::string getAnalysisMode() const = 0;
   virtual std::string getCRho() const = 0;
   virtual std::string getCAlpha() const = 0;
@@ -70,6 +71,8 @@ public:
   virtual std::string getCPp() const = 0;
   virtual std::string getDirectBeam() const = 0;
   virtual std::string getPolarisationCorrections() const = 0;
+  /// Instrument settings
+  virtual std::string getMonitorIntegralMin() const = 0;
 };
 }
 }
