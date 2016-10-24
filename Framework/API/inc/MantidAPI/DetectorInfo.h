@@ -7,6 +7,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <mutex>
+#include <unordered_map>
 #include <vector>
 
 namespace Mantid {
@@ -15,6 +16,7 @@ namespace Geometry {
 class IComponent;
 class IDetector;
 class Instrument;
+class ParameterMap;
 }
 namespace API {
 class SpectrumInfo;
@@ -44,7 +46,8 @@ class SpectrumInfo;
 */
 class MANTID_API_DLL DetectorInfo {
 public:
-  DetectorInfo(const Geometry::Instrument &instrument);
+  DetectorInfo(const Geometry::Instrument &instrument,
+               Geometry::ParameterMap *pmap = nullptr);
 
   bool isMonitor(const size_t index) const;
   bool isMasked(const size_t index) const;
@@ -53,6 +56,8 @@ public:
   double signedTwoTheta(const size_t index) const;
   Kernel::V3D position(const size_t index) const;
 
+  void setPosition(const size_t index, const Kernel::V3D &position);
+
   // This does not really belong into DetectorInfo, but it seems to be useful
   // while Instrument-2.0 does not exist.
   Kernel::V3D sourcePosition() const;
@@ -60,6 +65,7 @@ public:
   double l1() const;
 
   const std::vector<detid_t> detectorIDs() const;
+  size_t indexOf(const detid_t id) const { return m_detIDToIndex.at(id); }
 
   friend class SpectrumInfo;
 
@@ -77,8 +83,10 @@ private:
   void cacheSample() const;
   void cacheL1() const;
 
+  Geometry::ParameterMap *m_pmap;
   const Geometry::Instrument &m_instrument;
   std::vector<detid_t> m_detectorIDs;
+  std::unordered_map<detid_t, size_t> m_detIDToIndex;
   // The following variables are mutable, since they are initialized (cached)
   // only on demand, by const getters.
   mutable boost::shared_ptr<const Geometry::IComponent> m_source;

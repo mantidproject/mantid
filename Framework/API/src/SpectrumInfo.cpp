@@ -22,9 +22,20 @@ SpectrumInfo::SpectrumInfo(const MatrixWorkspace &workspace)
                              " does not contain an instrument!");
 
   m_detectorInfo = Kernel::make_unique<DetectorInfo>(*m_instrument);
-  const auto &detIDs = m_detectorInfo->detectorIDs();
-  for (size_t i = 0; i < detIDs.size(); ++i)
-    m_detIDToIndex[detIDs[i]] = i;
+}
+
+SpectrumInfo::SpectrumInfo(MatrixWorkspace &workspace)
+    : m_workspace(workspace), m_pmap(&workspace.instrumentParameters()),
+      m_instrument(workspace.getInstrument()),
+      m_detectors(PARALLEL_GET_MAX_THREADS),
+      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
+  // Note: This does not seem possible currently (the instrument objects is
+  // always allocated, even if it is empty), so this will not fail.
+  if (!m_instrument)
+    throw std::runtime_error("Workspace " + workspace.getName() +
+                             " does not contain an instrument!");
+
+  m_detectorInfo = Kernel::make_unique<DetectorInfo>(*m_instrument, m_pmap);
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -49,7 +60,7 @@ double SpectrumInfo::l2(const size_t index) const {
   double l2{0.0};
   const auto &dets = getDetectorVector(index);
   for (const auto &det : dets) {
-    const auto &detIndex = m_detIDToIndex.at(det->getID());
+    const auto &detIndex = m_detectorInfo->indexOf(det->getID());
     m_detectorInfo->setCachedDetector(detIndex, det);
     l2 += m_detectorInfo->l2(detIndex);
   }
@@ -61,7 +72,7 @@ double SpectrumInfo::twoTheta(const size_t index) const {
   double twoTheta{0.0};
   const auto &dets = getDetectorVector(index);
   for (const auto &det : dets) {
-    const auto &detIndex = m_detIDToIndex.at(det->getID());
+    const auto &detIndex = m_detectorInfo->indexOf(det->getID());
     m_detectorInfo->setCachedDetector(detIndex, det);
     twoTheta += m_detectorInfo->twoTheta(detIndex);
   }
@@ -73,7 +84,7 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
   double signedTwoTheta{0.0};
   const auto &dets = getDetectorVector(index);
   for (const auto &det : dets) {
-    const auto &detIndex = m_detIDToIndex.at(det->getID());
+    const auto &detIndex = m_detectorInfo->indexOf(det->getID());
     m_detectorInfo->setCachedDetector(detIndex, det);
     signedTwoTheta += m_detectorInfo->signedTwoTheta(detIndex);
   }
@@ -88,7 +99,7 @@ Kernel::V3D SpectrumInfo::position(const size_t index) const {
   Kernel::V3D newPos;
   const auto &dets = getDetectorVector(index);
   for (const auto &det : dets) {
-    const auto &detIndex = m_detIDToIndex.at(det->getID());
+    const auto &detIndex = m_detectorInfo->indexOf(det->getID());
     m_detectorInfo->setCachedDetector(detIndex, det);
     newPos += m_detectorInfo->position(detIndex);
   }

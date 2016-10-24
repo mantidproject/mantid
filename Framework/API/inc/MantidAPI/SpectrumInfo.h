@@ -14,6 +14,7 @@ using detid_t = int32_t;
 namespace Geometry {
 class IDetector;
 class Instrument;
+class ParameterMap;
 }
 namespace API {
 
@@ -59,6 +60,7 @@ class MatrixWorkspace;
 class MANTID_API_DLL SpectrumInfo {
 public:
   SpectrumInfo(const MatrixWorkspace &workspace);
+  SpectrumInfo(MatrixWorkspace &workspace);
   ~SpectrumInfo();
 
   bool isMonitor(const size_t index) const;
@@ -76,15 +78,20 @@ public:
   Kernel::V3D samplePosition() const;
   double l1() const;
 
+  const DetectorInfo &detectorInfo() const { return *m_detectorInfo; }
+  DetectorInfo &mutableDetectorInfo() { return *m_detectorInfo; }
+
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
   std::vector<boost::shared_ptr<const Geometry::IDetector>>
   getDetectorVector(const size_t index) const;
 
   const MatrixWorkspace &m_workspace;
+  // Note that this is declared and initialized before the instrument, to avoid
+  // a copy.
+  Geometry::ParameterMap *m_pmap{nullptr};
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
   std::unique_ptr<DetectorInfo> m_detectorInfo;
-  std::unordered_map<detid_t, size_t> m_detIDToIndex;
   mutable std::vector<boost::shared_ptr<const Geometry::IDetector>> m_detectors;
   mutable std::vector<size_t> m_lastIndex;
 };

@@ -1,5 +1,6 @@
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -7,11 +8,16 @@
 namespace Mantid {
 namespace API {
 
-DetectorInfo::DetectorInfo(const Geometry::Instrument &instrument)
-    : m_instrument(instrument), m_detectorIDs(instrument.getDetectorIDs(
-                                    false /* do not skip monitors */)),
+DetectorInfo::DetectorInfo(const Geometry::Instrument &instrument,
+                           Geometry::ParameterMap *pmap)
+    : m_pmap(pmap), m_instrument(instrument),
+      m_detectorIDs(
+          instrument.getDetectorIDs(false /* do not skip monitors */)),
       m_detectors(PARALLEL_GET_MAX_THREADS),
-      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
+      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
+  for (size_t i = 0; i < m_detectorIDs.size(); ++i)
+    m_detIDToIndex[m_detectorIDs[i]] = i;
+}
 
 /// Returns true if the detector associated with the detector is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
@@ -67,6 +73,13 @@ double DetectorInfo::signedTwoTheta(const size_t index) const {
 /// Returns the position of the detector with given index.
 Kernel::V3D DetectorInfo::position(const size_t index) const {
   return getDetector(index).getPos();
+}
+
+void DetectorInfo::setPosition(const size_t index, const Kernel::V3D &position) {
+  const auto &det = getDetector(index);
+  using namespace Geometry::ComponentHelper;
+  TransformType positionType = Absolute;
+  moveComponent(det, *m_pmap, position, positionType);
 }
 
 /// Returns the source position.
