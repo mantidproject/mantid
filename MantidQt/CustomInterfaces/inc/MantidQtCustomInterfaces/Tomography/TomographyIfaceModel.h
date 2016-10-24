@@ -208,8 +208,7 @@ protected: // protected to expose everything to testing
   std::string
   constructSingleStringFromVector(const std::vector<std::string> args) const;
 
-  void doRunReconstructionJobLocal(const std::string &compRes,
-                                   const std::string &run,
+  void doRunReconstructionJobLocal(const std::string &run,
                                    const std::string &allOpts,
                                    const std::vector<std::string> &args);
 

@@ -3,6 +3,8 @@
 
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
+// for shared_ptr
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {

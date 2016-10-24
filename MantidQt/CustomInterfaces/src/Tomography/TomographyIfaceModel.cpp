@@ -245,7 +245,8 @@ bool TomographyIfaceModel::doPing(const std::string &compRes) {
     tid = alg->getPropertyValue("TransactionID");
     g_log.information() << "Pinged '" << compRes
                         << "'succesfully. Checked that a transaction could "
-                           "be created, with ID: " << tid << '\n';
+                           "be created, with ID: "
+                        << tid << '\n';
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Error. Failed to ping and start a transaction on "
                              "the remote resource." +
@@ -449,7 +450,7 @@ void TomographyIfaceModel::doSubmitReconstructionJob(
          ", with parameters: " + allOpts);
 
   if ("Local" == compRes) {
-    doRunReconstructionJobLocal(compRes, run, allOpts, args);
+    doRunReconstructionJobLocal(run, allOpts, args);
   } else {
     doRunReconstructionJobRemote(compRes, run, allOpts);
   }
@@ -491,8 +492,8 @@ void TomographyIfaceModel::doRunReconstructionJobRemote(
 }
 
 void TomographyIfaceModel::doRunReconstructionJobLocal(
-    const std::string &compRes, const std::string &run,
-    const std::string &allOpts, const std::vector<std::string> &args) {
+    const std::string &run, const std::string &allOpts,
+    const std::vector<std::string> &args) {
 
   // Mantid::Kernel::ConfigService::Instance().launchProcess(run, runArgs);
   try {
