@@ -119,8 +119,8 @@ public:
 
   void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
-          &localStatus) override;
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+          localStatus) override;
 
   std::vector<std::string> processingJobsIDs() const override {
     return m_processingJobsIDs;
