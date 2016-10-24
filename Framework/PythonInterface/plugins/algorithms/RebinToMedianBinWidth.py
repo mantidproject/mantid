@@ -4,6 +4,10 @@ from mantid.kernel import Direction, StringListValidator
 import numpy
 
 class RebinToMedianBinWidth(PythonAlgorithm):
+    '''
+    Averages the median bin widths over the histograms of the input
+    workspace. The average is then fed to the Rebin algorithm.
+    '''
     _PROP_INPUT_WS  = 'InputWorkspace'
     _PROP_OUTPUT_WS = 'OutputWorkspace'
     _PROP_ROUNDING  = 'Rounding'
@@ -12,15 +16,27 @@ class RebinToMedianBinWidth(PythonAlgorithm):
     _ROUNDING_TEN_TO_INT = '10^n'
 
     def category(self):
+        '''
+        Return algorithm's category.
+        '''
         return 'Transforms\\Rebin'
 
     def name(self):
+        '''
+        Return algorithm's name.
+        '''
         return 'RebinToMedianBinWidth'
 
     def summary(self):
+        '''
+        Return algorithm's summary.
+        '''
         return 'Rebins a workspace to the median bin width.'
 
     def PyInit(self):
+        '''
+        Declares algorithm's properties.
+        '''
         self.declareProperty(MatrixWorkspaceProperty(name=self._PROP_INPUT_WS, defaultValue='', direction=Direction.Input), doc='The workspace containing the input data')
         self.declareProperty(MatrixWorkspaceProperty(name=self._PROP_OUTPUT_WS, defaultValue='', direction=Direction.Output), doc='The output workspace')
         rounding = StringListValidator()
@@ -29,6 +45,10 @@ class RebinToMedianBinWidth(PythonAlgorithm):
         self.declareProperty(name=self._PROP_ROUNDING, defaultValue=self._ROUNDING_NONE, validator=rounding, direction=Direction.Input, doc='Bin width rounding')
 
     def PyExec(self):
+        '''
+        Averages the median bin widths of the input workspace and
+        executes the Rebin algorithm.
+        '''
         inputWs = self.getProperty(self._PROP_INPUT_WS).value
         outputWs = self.getProperty(self._PROP_OUTPUT_WS).value
         roundingMode = self.getProperty(self._PROP_ROUNDING).value
