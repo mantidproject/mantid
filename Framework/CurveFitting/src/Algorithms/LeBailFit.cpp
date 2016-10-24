@@ -1976,6 +1976,7 @@ bool LeBailFit::calculateDiffractionPattern(const HistogramX &vecX,
                                             std::vector<double> &values,
                                             Rfactor &rfactor) {
   HistogramY veccalbkgd(vecX.size());
+  bool veccalbkgdIsEmpty = true;
 
   // Examine whether all peaks are valid
   double maxfwhm = vecX.back() - vecX.front();
@@ -2009,6 +2010,7 @@ bool LeBailFit::calculateDiffractionPattern(const HistogramX &vecX,
       veccalbkgd = m_lebailFunction->function(vecX.rawData(), false, true);
       ::transform(vecY.begin(), vecY.end(), veccalbkgd.begin(),
                   vecPureY.begin(), ::minus<double>());
+      veccalbkgdIsEmpty = false;
     }
 
     // Calculate peak intensity
@@ -2038,7 +2040,7 @@ bool LeBailFit::calculateDiffractionPattern(const HistogramX &vecX,
       ::transform(values.begin(), values.end(), vecBkgd.begin(), values.begin(),
                   ::plus<double>());
     } else {
-      if (veccalbkgd.empty())
+      if (veccalbkgdIsEmpty)
         throw runtime_error("Programming logic error.");
       ::transform(values.begin(), values.end(), veccalbkgd.begin(),
                   values.begin(), ::plus<double>());
@@ -2057,7 +2059,7 @@ bool LeBailFit::calculateDiffractionPattern(const HistogramX &vecX,
                      caldata.begin(), std::plus<double>());
     } else {
       // Re-calculate background
-      if (veccalbkgd.empty())
+      if (veccalbkgdIsEmpty)
         throw runtime_error("Programming logic error (2). ");
       std::transform(values.begin(), values.end(), veccalbkgd.begin(),
                      caldata.begin(), std::plus<double>());
