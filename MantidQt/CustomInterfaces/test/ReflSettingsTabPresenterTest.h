@@ -151,7 +151,7 @@ public:
         .WillOnce(Return("2"));
     EXPECT_CALL(mockView, getMomentumTransferLimits())
         .Times(Exactly(1))
-        .WillOnce(Return("\"0.008,-0.02,0.2\""));
+        .WillOnce(Return("0.008,-0.02,0.2"));
     EXPECT_CALL(mockView, getDetectorLimits())
         .Times(Exactly(1))
         .WillOnce(Return("\"low=395,specular=404,high=414\""));
@@ -174,8 +174,10 @@ public:
     TS_ASSERT_EQUALS(optionsVec[12], "WavelengthMax=15");
     TS_ASSERT_EQUALS(optionsVec[13], "I0MonitorIndex=2");
     TS_ASSERT_EQUALS(optionsVec[14], "ScaleFactor=2");
-    TS_ASSERT_EQUALS(optionsVec[15], "MomentumTransferLimits=\"0.008,-0.02,0.2\"");
-    TS_ASSERT_EQUALS(optionsVec[16], "ProcessingInstructions=\"low=395,specular=404,high=414\"");
+    TS_ASSERT_EQUALS(optionsVec[15], "MomentumTransferMinimum=0.008");
+    TS_ASSERT_EQUALS(optionsVec[16], "MomentumTransferStep=-0.02");
+    TS_ASSERT_EQUALS(optionsVec[17], "MomentumTransferMaximum=0.2");
+    TS_ASSERT_EQUALS(optionsVec[18], "ProcessingInstructions=\"low=395,specular=404,high=414\"");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }

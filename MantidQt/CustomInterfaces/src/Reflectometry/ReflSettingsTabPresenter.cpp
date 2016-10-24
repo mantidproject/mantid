@@ -194,8 +194,13 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
 
   // Add momentum transfer limits
   auto qTransLimits = m_view->getMomentumTransferLimits();
-  if (!qTransLimits.empty())
-    options.push_back("MomentumTransferLimits=" + qTransLimits);
+  if (!qTransLimits.empty()) {
+    std::vector<std::string> qTransVec;
+    boost::split(qTransVec, qTransLimits, boost::is_any_of(","));
+    options.push_back("MomentumTransferMinimum=" + qTransVec[0]);
+    options.push_back("MomentumTransferStep=" + qTransVec[1]);
+    options.push_back("MomentumTransferMaximum=" + qTransVec[2]);
+  }
 
   // Add detector limits
   auto detLimits = m_view->getDetectorLimits();
