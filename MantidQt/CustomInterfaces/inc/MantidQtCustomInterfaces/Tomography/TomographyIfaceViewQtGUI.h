@@ -26,19 +26,16 @@
 #include <json/json.h>
 
 // widgets used in this interface
-class ImageROIViewQtWidget;
 class QMutex;
 
 namespace MantidQt {
 namespace API {
 class BatchAlgorithmRunner;
 }
-namespace CustomInterfaces {
-class TomoToolConfigDialogBase;
 }
 // Qt classes forward declarations
-}
 
+namespace MantidQt {
 namespace CustomInterfaces {
 
 /**
@@ -122,8 +119,8 @@ public:
 
   void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-          localStatus) override;
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+          &localStatus) override;
 
   std::vector<std::string> processingJobsIDs() const override {
     return m_processingJobsIDs;
