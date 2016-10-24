@@ -66,14 +66,16 @@ public:
   std::string getDirectBeam() const override;
   /// Return selected polarisation corrections
   std::string getPolarisationCorrections() const override;
-  /// Return monitor integral min
+  /// Return monitor integral wavelength min
   std::string getMonitorIntegralMin() const override;
-  /// Return monitor integral max
+  /// Return monitor integral wavelength max
   std::string getMonitorIntegralMax() const override;
-  /// Return monitor background min
+  /// Return monitor background wavelength min
   std::string getMonitorBackgroundMin() const override;
-  /// Return monitor background max
+  /// Return monitor background wavelength max
   std::string getMonitorBackgroundMax() const override;
+  /// Return wavelength min
+  std::string getLambdaMin() const override;
 
   /// Creates hints for 'Plus'
   void

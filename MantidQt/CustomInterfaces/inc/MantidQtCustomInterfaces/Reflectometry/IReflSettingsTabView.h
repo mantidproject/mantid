@@ -76,6 +76,7 @@ public:
   virtual std::string getMonitorIntegralMax() const = 0;
   virtual std::string getMonitorBackgroundMin() const = 0;
   virtual std::string getMonitorBackgroundMax() const = 0;
+  virtual std::string getLambdaMin() const = 0;
 };
 }
 }

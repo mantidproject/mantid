@@ -165,7 +165,7 @@ std::string QtReflSettingsTabView::getPolarisationCorrections() const {
   return m_ui.polCorrComboBox->currentText().toStdString();
 }
 
-/** Return monitor integral min
+/** Return monitor integral wavelength min
 * @return :: monitor integral min
 */
 std::string QtReflSettingsTabView::getMonitorIntegralMin() const {
@@ -173,7 +173,7 @@ std::string QtReflSettingsTabView::getMonitorIntegralMin() const {
   return m_ui.instSettingsMonIntMinEdit->text().toStdString();
 }
 
-/** Return monitor integral max
+/** Return monitor integral wavelength max
 * @return :: monitor integral max
 */
 std::string QtReflSettingsTabView::getMonitorIntegralMax() const {
@@ -181,7 +181,7 @@ std::string QtReflSettingsTabView::getMonitorIntegralMax() const {
   return m_ui.instSettingsMonIntMaxEdit->text().toStdString();
 }
 
-/** Return monitor background min
+/** Return monitor background wavelength min
 * @return :: monitor background min
 */
 std::string QtReflSettingsTabView::getMonitorBackgroundMin() const {
@@ -189,12 +189,20 @@ std::string QtReflSettingsTabView::getMonitorBackgroundMin() const {
   return m_ui.instSettingsMonBgMinEdit->text().toStdString();
 }
 
-/** Return monitor background max
+/** Return monitor background wavelength max
 * @return :: monitor background max
 */
 std::string QtReflSettingsTabView::getMonitorBackgroundMax() const {
 
   return m_ui.instSettingsMonBgMaxEdit->text().toStdString();
+}
+
+/** Return wavelength min
+* @return :: lambda min
+*/
+std::string QtReflSettingsTabView::getLambdaMin() const {
+
+  return m_ui.instSettingsLamMinEdit->text().toStdString();
 }
 
 } // namespace CustomInterfaces
