@@ -11,11 +11,11 @@ from scipy import constants
 # n = 1, 2, 3.....
 
 
-fundamentals = 0 # value of fundamental parameter  (n = 1)
+fundamentals = 1 # value of fundamental parameter  (n = 1)
 first_overtone = 1 + fundamentals  # value of first overtone (n = 2)
 fundamentals_dim = 1
 
-python_index_shift = 0  # in Python first element starts at 0-th index. This is a shift to index which has to be included
+python_index_shift = 1  # in Python first element starts at 0-th index. This is a shift to index which has to be included
 # in array index calculation to write data in the proper position of array
 
 # symbols of all elements
@@ -50,7 +50,9 @@ all_keywords_k_data = ["weights", "k_vectors", "frequencies", "atomic_displaceme
 all_keywords_atoms_data = ["symbol", "fract_coord", "atom", "sort", "mass"]
 
 # keywords which define data structure for PowderData
-all_keywords_powder_data = ["msd", "dw"]
+#all_keywords_powder_data = ["msd", "dw"]
+
+all_keywords_powder_data = ["mu"]
 
 # keywords which define data structure for SData
 all_keywords_s_data = ["atoms_data", "frequencies"]
@@ -62,9 +64,14 @@ float_type = np.dtype(np.float64)
 complex_id = np.dtype(np.complex).num
 complex_type = np.dtype(np.complex)
 
+int_id = np.dtype(np.uint8).num
+int_type = np.dtype(np.uint8)
+
+
 total_workspace_size = int(round(AbinsParameters.max_wavenumber / float(AbinsParameters.bin_width), 0)) # maximum number of entries in the workspace
-higher_order_quantum_effects_dim = AbinsParameters.higher_order_quantum_effects
+higher_order_quantum_effects = 3  # number of quantum order effects taken into account
+higher_order_quantum_effects_dim = higher_order_quantum_effects
 max_array_size = 1000000  # maximum size for storing frequencies for each quantum order
-s_last_index = 0 # constant to be used when iterating with range() over all considered quantum effects (range() is exclusive with respect to the last element)
-q_last_index = 0 # constant to be used when iterating with range() over all considered quantum effects  (range() is exclusive with respect to the last element)
+s_last_index = 1 # constant to be used when iterating with range() over all considered quantum effects (range() is exclusive with respect to the last element)
+q_last_index = 1 # constant to be used when iterating with range() over all considered quantum effects  (range() is exclusive with respect to the last element)
 ####################################### Constants end #################################
