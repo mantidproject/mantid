@@ -123,7 +123,7 @@ void NormaliseByPeakArea::exec() {
 
     double peakArea = fitToMassPeak(yspaceIn, static_cast<size_t>(i));
     normaliseTOFData(peakArea, i);
-    saveToOutput(m_yspaceWS, yspaceIn->y(i), yspaceIn->e(i), i);
+    saveToOutput(m_yspaceWS, yspaceIn->sharedY(i), yspaceIn->sharedE(i), i);
 
     m_progress->report();
   }
@@ -263,7 +263,8 @@ double NormaliseByPeakArea::fitToMassPeak(const MatrixWorkspace_sptr &yspace,
   alg->execute();
 
   MatrixWorkspace_sptr fitOutputWS = alg->getProperty("OutputWorkspace");
-  saveToOutput(m_fittedWS, fitOutputWS->y(1), yspace->e(index), index);
+  saveToOutput(m_fittedWS, fitOutputWS->sharedY(1), yspace->sharedE(index),
+               index);
 
   double area = func->getParameter("Intensity");
   if (g_log.is(Logger::Priority::PRIO_INFORMATION)) {
@@ -291,10 +292,11 @@ void NormaliseByPeakArea::normaliseTOFData(const double area,
 * @param eValues Input errors values for y-space
 * @param index Index of the workspace. Only used when not summing.
 */
-void NormaliseByPeakArea::saveToOutput(const API::MatrixWorkspace_sptr &accumWS,
-                                       const HistogramData::HistogramY &yValues,
-                                       const HistogramData::HistogramE &eValues,
-                                       const size_t index) {
+void NormaliseByPeakArea::saveToOutput(
+    const API::MatrixWorkspace_sptr &accumWS,
+    const Kernel::cow_ptr<HistogramData::HistogramY> &yValues,
+    const Kernel::cow_ptr<HistogramData::HistogramE> &eValues,
+    const size_t index) {
   assert(yValues.size() == eValues.size());
 
   if (m_sumResults) {
@@ -305,8 +307,8 @@ void NormaliseByPeakArea::saveToOutput(const API::MatrixWorkspace_sptr &accumWS,
     for (size_t j = 0; j < npts; ++j) {
       double accumYj = accumWS->y(0)[j];
       double accumEj = accumWS->e(0)[j];
-      double rhsYj = yValues[j];
-      double rhsEj = eValues[j];
+      double rhsYj = yValues->rawData()[j];
+      double rhsEj = eValues->rawData()[j];
       if (accumEj < 1e-12 || rhsEj < 1e-12)
         continue;
       double err = 1.0 / (accumEj * accumEj) + 1.0 / (rhsEj * rhsEj);
@@ -315,8 +317,8 @@ void NormaliseByPeakArea::saveToOutput(const API::MatrixWorkspace_sptr &accumWS,
       accumE[j] = 1.0 / sqrt(err);
     }
   } else {
-    accumWS->mutableY(index) = yValues;
-    accumWS->mutableE(index) = eValues;
+    accumWS->setSharedY(index, yValues);
+    accumWS->setSharedE(index, eValues);
   }
 }
 
