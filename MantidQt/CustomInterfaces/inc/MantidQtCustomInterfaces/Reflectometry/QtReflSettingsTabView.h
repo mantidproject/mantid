@@ -80,8 +80,10 @@ public:
   std::string getLambdaMax() const override;
   /// Return I0MonitorIndex
   std::string getI0MonitorIndex() const override;
-  /// Return ScaleFactor
+  /// Return scale factor
   std::string getScaleFactor() const override;
+  /// Return momentum transfer limits
+  std::string getMomentumTransferLimits() const override;
 
   /// Creates hints for 'Plus'
   void

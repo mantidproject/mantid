@@ -83,6 +83,7 @@ public:
   MOCK_CONST_METHOD0(getLambdaMax, std::string());
   MOCK_CONST_METHOD0(getI0MonitorIndex, std::string());
   MOCK_CONST_METHOD0(getScaleFactor, std::string());
+  MOCK_CONST_METHOD0(getMomentumTransferLimits, std::string());
 
   // Calls we don't care about
   void

@@ -187,6 +187,11 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   if (!scaleFactor.empty())
     options.push_back("ScaleFactor=" + scaleFactor);
 
+  // Add momentum transfer limits
+  auto qTransLimits = m_view->getMomentumTransferLimits();
+  if (!qTransLimits.empty())
+    options.push_back("MomentumTransferLimits=" + qTransLimits);
+
   return boost::algorithm::join(options, ",");
 }
 

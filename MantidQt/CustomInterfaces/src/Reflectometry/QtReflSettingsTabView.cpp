@@ -229,5 +229,13 @@ std::string QtReflSettingsTabView::getScaleFactor() const {
   return m_ui.instSettingsScaleFactorEdit->text().toStdString();
 }
 
+/** Return momentum transfer limits
+* @return :: momentum transfer limits
+*/
+std::string QtReflSettingsTabView::getMomentumTransferLimits() const {
+
+  return m_ui.instSettingsMomentumTransferLimitsEdit->text().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid
