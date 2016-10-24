@@ -182,9 +182,8 @@ const std::string MatrixWorkspace::getTitle() const {
 
 /** Return a reference to the SpectrumInfo object.
  *
- * Any modifications of the instrument or instrument parameters such as mask
- * flags will not be visible in existing SpectrumInfo references. After
- * modification, obtain a new reference by calling this method again.
+ * Any modifications of the instrument or instrument parameters will invalidate
+ * this reference.
  */
 const SpectrumInfo &
 MatrixWorkspace::spectrumInfo() const {
@@ -196,10 +195,16 @@ MatrixWorkspace::spectrumInfo() const {
   return *m_spectrumInfo;
 }
 
-/// Resets the SpectrumInfo object on modification of the Instrument.
+/** Resets the SpectrumInfo object on modification of the Instrument.
+ *
+ * This needs to be called by any code that causes a reallocation of the
+ * instrument or the parameter map since currently SpectrumInfo buffers the
+ * result of MatrixWorkspace::getInstrument(). This method should be removed
+ * once SpectrumInfo is an independent object.
+ */
 void MatrixWorkspace::invalidateInstrumentReferences() const {
   // None of the methods in ExperimentInfo that calls this is thread safe, so we
-  // do not need to bother with locking?
+  // do not need to bother with locking here.
   m_spectrumInfo = nullptr;
 }
 
