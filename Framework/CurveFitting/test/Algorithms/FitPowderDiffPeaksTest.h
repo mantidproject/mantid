@@ -482,7 +482,7 @@ public:
     delete suite;
   }
 
-  void setUp() {
+  void setUp() override {
     // Test workspace
     dataws = createInputDataWorkspace(2);
     // Bragg peaks
@@ -528,7 +528,7 @@ public:
     alg.execute();
   }
 
-  void tearDown() {
+  void tearDown() override {
     AnalysisDataService::Instance().remove("DataWorkspace");
     AnalysisDataService::Instance().remove("PeakParameters");
     AnalysisDataService::Instance().remove("InstrumentParameters");
