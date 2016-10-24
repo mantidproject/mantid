@@ -6,9 +6,26 @@ from mantid import config
 
 import os
 
-_str_or_none = lambda s: s if s != '' else None # noqa
-_ws_or_none = lambda s: mtd[s] if s != '' else None # noqa
-_elems_or_none = lambda l: l if len(l) != 0 else None # noqa
+
+def _str_or_none(s):
+    if s != '':
+        return s
+    else:
+        return None
+
+
+def _ws_or_none(s):
+    if s != '':
+        return mtd[s]
+    else:
+        return None
+
+
+def _elems_or_none(l):
+    if len(l) != 0:
+        return l
+    else:
+        return None
 
 
 class IndirectElasticWindowScan(DataProcessorAlgorithm):
@@ -259,14 +276,14 @@ class IndirectElasticWindowScan(DataProcessorAlgorithm):
 
     def _plot_result(self):
         import mantidplot as mp
-        nhist = mtd[self._scan_ws + '_el_eq1'].getNumberHistograms() # noqa
-        el_eq1_plot = mp.plotSpectrum(self._scan_ws + '_el_eq1', 0, error_bars=True) # noqa
-        inel_eq1_plot = mp.plotSpectrum(self._scan_ws + '_inel_eq1', 0, error_bars=True) # noqa
-        el_eq2_plot = mp.plotSpectrum(self._scan_ws + '_el_eq2', 0, error_bars=True) # noqa
-        inel_eq2_plot = mp.plotSpectrum(self._scan_ws + '_inel_eq2', 0, error_bars=True) # noqa
-        eisf_plot = mp.plotSpectrum(self._scan_ws + '_eisf', 0, error_bars=True) # noqa
+        nhist = mtd[self._scan_ws + '_el_eq1'].getNumberHistograms()  # noqa
+        el_eq1_plot = mp.plotSpectrum(self._scan_ws + '_el_eq1', 0, error_bars=True)  # noqa
+        inel_eq1_plot = mp.plotSpectrum(self._scan_ws + '_inel_eq1', 0, error_bars=True)  # noqa
+        el_eq2_plot = mp.plotSpectrum(self._scan_ws + '_el_eq2', 0, error_bars=True)  # noqa
+        inel_eq2_plot = mp.plotSpectrum(self._scan_ws + '_inel_eq2', 0, error_bars=True)  # noqa
+        eisf_plot = mp.plotSpectrum(self._scan_ws + '_eisf', 0, error_bars=True)  # noqa
         if self._msdfit:
-            msd_plot = mp.plotSpectrum(self._scan_ws + '_msd', 1, error_bars=True) # noqa
+            msd_plot = mp.plotSpectrum(self._scan_ws + '_msd', 1, error_bars=True)  # noqa
 
 
 # Register algorithm with Mantid
