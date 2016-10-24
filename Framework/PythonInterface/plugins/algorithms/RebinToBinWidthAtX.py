@@ -1,7 +1,7 @@
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm
 from mantid.kernel import Direction, StringListValidator
 import numpy
-import sys
 
 class RebinToBinWidthAtX(PythonAlgorithm):
     _PROP_INPUT_WS  = 'InputWorkspace'
