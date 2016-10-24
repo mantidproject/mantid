@@ -213,5 +213,13 @@ std::string QtReflSettingsTabView::getLambdaMax() const {
   return m_ui.instSettingsLamMaxEdit->text().toStdString();
 }
 
+/** Return I0MonitorIndex
+* @return :: I0MonitorIndex
+*/
+std::string QtReflSettingsTabView::getI0MonitorIndex() const {
+
+  return m_ui.instSettingsI0MonIndexEdit->text().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid

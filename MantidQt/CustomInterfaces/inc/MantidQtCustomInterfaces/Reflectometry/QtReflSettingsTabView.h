@@ -78,6 +78,8 @@ public:
   std::string getLambdaMin() const override;
   /// Return wavelength max
   std::string getLambdaMax() const override;
+  /// Return I0MonitorIndex
+  std::string getI0MonitorIndex() const override;
 
   /// Creates hints for 'Plus'
   void

@@ -81,6 +81,7 @@ public:
   MOCK_CONST_METHOD0(getMonitorBackgroundMax, std::string());
   MOCK_CONST_METHOD0(getLambdaMin, std::string());
   MOCK_CONST_METHOD0(getLambdaMax, std::string());
+  MOCK_CONST_METHOD0(getI0MonitorIndex, std::string());
 
   // Calls we don't care about
   void

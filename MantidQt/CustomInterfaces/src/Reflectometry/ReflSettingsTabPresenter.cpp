@@ -92,6 +92,11 @@ std::string ReflSettingsTabPresenter::getTransmissionOptions() const {
   if (!lamMax.empty())
     options.push_back("WavelengthMax=" + lamMax);
 
+  // Add I0MonitorIndex
+  auto I0MonitorIndex = m_view->getI0MonitorIndex();
+  if (!I0MonitorIndex.empty())
+    options.push_back("I0MonitorIndex=" + I0MonitorIndex);
+
   return boost::algorithm::join(options, ",");
 }
 
@@ -171,6 +176,11 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   auto lamMax = m_view->getLambdaMax();
   if (!lamMax.empty())
     options.push_back("WavelengthMax=" + lamMax);
+
+  // Add I0MonitorIndex
+  auto I0MonitorIndex = m_view->getI0MonitorIndex();
+  if (!I0MonitorIndex.empty())
+    options.push_back("I0MonitorIndex=" + I0MonitorIndex);
 
   return boost::algorithm::join(options, ",");
 }
