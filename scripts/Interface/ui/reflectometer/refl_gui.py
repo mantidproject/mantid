@@ -1128,7 +1128,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             else:
                 saveDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Save Table")
                 saveDialog.setFileMode(QtGui.QFileDialog.AnyFile)
-                saveDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
+                saveDialog.setNameFilter("Table Files (*.tbl);;All files (*)")
                 saveDialog.setDefaultSuffix("tbl")
                 saveDialog.setAcceptMode(QtGui.QFileDialog.AcceptSave)
                 if saveDialog.exec_():
@@ -1143,7 +1143,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         """
         saveDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Save Table")
         saveDialog.setFileMode(QtGui.QFileDialog.AnyFile)
-        saveDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
+        saveDialog.setNameFilter("Table Files (*.tbl);;All files (*)")
         saveDialog.setDefaultSuffix("tbl")
         saveDialog.setAcceptMode(QtGui.QFileDialog.AcceptSave)
         if saveDialog.exec_():
@@ -1157,7 +1157,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         self.loading = True
         loadDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Open Table")
         loadDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
-        loadDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
+        loadDialog.setNameFilter("Table Files (*.tbl);;All files (*)")
         if loadDialog.exec_():
             try:
                 #before loading make sure you give them a chance to save
