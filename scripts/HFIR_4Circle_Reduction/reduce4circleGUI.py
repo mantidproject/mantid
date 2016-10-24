@@ -150,8 +150,6 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_set_ub_tab_hkl_to_integers)
         self.connect(self.ui.pushButton_undoSetToInteger, QtCore.SIGNAL('clicked()'),
                      self.do_undo_ub_tab_hkl_to_integers)
-        # TODO/NOW/ISSUE - Make the check box send an event. what is event type from check box???
-        # self.connect(self.ui.checkBox_ubNuclearPeaks, QtCore.SIGNAL(''))
 
         self.connect(self.ui.pushButton_refineUB, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub_indexed_peaks)
@@ -450,6 +448,20 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog('Project file %s does exist. Choose another name.' % project_file_name)
             return
 
+        # gather some useful information
+        ui_dict = {}
+        # TODO/NOW/ISSUE - Make this work!
+        # lineEdit_exp and do_???
+        # lineEdit_localSpiceDir
+        # lineEdit_workDir and then
+        # method
+        # linked
+        # to
+        # pushButton_applySetup
+        #
+        # lineEdit_surveyStartPt
+        # lineEdit_surveyEndPt
+
         # export/save project
         self._myControl.export_project(project_file_name)
 
@@ -465,7 +477,9 @@ class MainWindow(QtGui.QMainWindow):
         """
         project_file_name = str(QtGui.QFileDialog.getOpenFileName(self, 'Choose Project File', os.getcwd()))
 
-        self._myControl.load_project(project_file_name)
+        ui_dict = self._myControl.load_project(project_file_name)
+
+        # TODO/NOW/ISSUE - implement ui_dict to GUI
 
         # TODO/NOW/ISSUE - should make it as a queue for last n opened/saved project
         # dirty and quick solution
@@ -2135,6 +2149,9 @@ class MainWindow(QtGui.QMainWindow):
         Select or de-select all rows in survey items
         :return:
         """
+        # TODO/NOW/ISSUE - make this checkbox works
+        # self.ui.checkBox_surveySelectNuclearPeaks
+
         self.ui.tableWidget_surveyTable.select_all_rows(self._surveyTableFlag)
         self._surveyTableFlag = not self._surveyTableFlag
 

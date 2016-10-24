@@ -223,14 +223,15 @@ class CWSCDReductionControl(object):
                         PeakDistanceThreshold=5.,
                         DensityThresholdFactor=0.1,
                         OutputWorkspace=peak_ws_name)
-        assert AnalysisDataService.doesExist(peak_ws_name)
+        assert AnalysisDataService.doesExist(peak_ws_name), 'Output PeaksWorkspace %s cannot be found.' \
+                                                            '' % peak_ws_name
 
         # calculate the peaks with weight
-        helper = PeakProcessRecord(exp_number, scan_number, peak_ws_name)
-        helper.calculate_peak_center()
-        peak_center = helper.get_peak_centre()
+        process_record = PeakProcessRecord(exp_number, scan_number, peak_ws_name)
+        process_record.calculate_peak_center()
+        peak_center = process_record.get_peak_centre()
         # set the merged peak information to data structure
-        self._myPeakInfoDict[(exp_number, scan_number)] = helper
+        self._myPeakInfoDict[(exp_number, scan_number)] = process_record
 
         return True, peak_center
 
@@ -1823,6 +1824,9 @@ class CWSCDReductionControl(object):
     def refine_ub_matrix_by_lattice(self, peak_info_list, ub_matrix_str, unit_cell_type):
         """
         Refine UB matrix by fixing unit cell type
+        Requirements:
+          1. PeakProcessRecord in peak_info_list must have right HKL set as user specified
+
         :param peak_info_list:
         :param set_hkl_int:
         :param ub_matrix_str:
@@ -1830,7 +1834,7 @@ class CWSCDReductionControl(object):
         :param use_spice_hkl:
         :return:
         """
-        # TODO/NOW/ISSUE - make this one work!
+        # TODO/NOW/ISSUE - clean this method!!!
 
         # check inputs and return if not good
         assert isinstance(peak_info_list, list), 'peak_info_list must be a list but not %s.' % type(peak_info_list)
@@ -1844,8 +1848,8 @@ class CWSCDReductionControl(object):
 
         # construct a new workspace by combining all single peaks
         ub_peak_ws_name = 'TempRefineUBLatticePeaks'
-        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name, index_from_spice=use_spice_hkl,
-                                    hkl_to_int=set_hkl_int)
+        self._build_peaks_workspace(peak_info_list, ub_peak_ws_name)
+
         # set UB matrix from input string. It is UB(0, 0), UB(0, 1), UB(0, 2), UB(1, 0), ..., UB(3, 3)
         api.SetUB(Workspace=ub_peak_ws_name,
                   UB=ub_matrix_str)
@@ -1923,11 +1927,10 @@ class CWSCDReductionControl(object):
         """
         From a list of PeakInfo, using the averaged peak centre of each of them
         to build a new PeaksWorkspace
-        Requirements: a list of PeakInfo
+        Requirements: a list of PeakInfo with HKL specified by user
         Guarantees: a PeaksWorkspace is created in AnalysisDataService.
         :param peak_info_list: peak information list.  only peak center in Q-sample is required
         :param peak_ws_name:
-        :param hkl_to_int:
         :return:
         """
         # check
@@ -2372,7 +2375,20 @@ class CWSCDReductionControl(object):
         self._dataDir = saved_project.get('data dir')
         # NEXT ISSUE loading more project parameters
 
-        return
+        # TODO/NOW/ISSUE - Load following parameters
+        # lineEdit_exp and do_???
+        # lineEdit_localSpiceDir
+        # lineEdit_workDir and then
+        # method
+        # linked
+        # to
+        # pushButton_applySetup
+        #
+        # lineEdit_surveyStartPt
+        # lineEdit_surveyEndPt
+        ui_dict = {}
+
+        return ui_dict
 
 
 def convert_spice_ub_to_mantid(spice_ub):

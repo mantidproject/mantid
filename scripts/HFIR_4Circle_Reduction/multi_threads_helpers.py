@@ -203,7 +203,7 @@ class IntegratePeaksThread(QThread):
                 center_i = ret_obj
             else:
                 error_msg = 'Unable to find peak for exp %d scan %d: %s.' % (self._expNumber, scan_number, str(ret_obj))
-                self._mainWindow.controller.set_peak_intensity(self._expNumber, scan_number, 0.)
+                # no need... self._mainWindow.controller.set_peak_intensity(self._expNumber, scan_number, 0.)
                 self._mainWindow.ui.tableWidget_mergeScans.set_peak_intensity(None, scan_number, 0., False)
                 self._mainWindow.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
                 continue
@@ -217,14 +217,20 @@ class IntegratePeaksThread(QThread):
             print '[DB...BAD] Normalization: %s; Use Mask = %s, Mask Workspace = %s.' % (
                 self._normalizeType, str(self._maskDetector), self._selectedMaskName
             )
-            status, ret_obj = self._mainWindow.controller.integrate_scan_peaks(exp=self._expNumber,
-                                                                               scan=scan_number,
-                                                                               peak_radius=1.0,
-                                                                               peak_centre=center_i,
-                                                                               merge_peaks=False,
-                                                                               use_mask=self._maskDetector,
-                                                                               normalization=self._normalizeType,
-                                                                               mask_ws_name=self._selectedMaskName)
+            try:
+                status, ret_obj = self._mainWindow.controller.integrate_scan_peaks(exp=self._expNumber,
+                                                                                   scan=scan_number,
+                                                                                   peak_radius=1.0,
+                                                                                   peak_centre=center_i,
+                                                                                   merge_peaks=False,
+                                                                                   use_mask=self._maskDetector,
+                                                                                   normalization=self._normalizeType,
+                                                                                   mask_ws_name=self._selectedMaskName)
+            except ValueError as val_err:
+                print '[DB] Unable to integrate scan %d due to %s.' % (scan_number, str(val_err))
+                status = False
+                ret_obj = '%s.' % str(val_err)
+
             # handle integration error
             if status:
                 # get PT dict
