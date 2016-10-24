@@ -74,6 +74,7 @@ public:
   MOCK_CONST_METHOD0(getCAp, std::string());
   MOCK_CONST_METHOD0(getCPp, std::string());
   MOCK_CONST_METHOD0(getDirectBeam, std::string());
+  MOCK_CONST_METHOD0(getPolarisationCorrections, std::string());
 
   // Calls we don't care about
   void

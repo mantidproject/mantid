@@ -69,6 +69,7 @@ public:
   virtual std::string getCAp() const = 0;
   virtual std::string getCPp() const = 0;
   virtual std::string getDirectBeam() const = 0;
+  virtual std::string getPolarisationCorrections() const = 0;
 };
 }
 }

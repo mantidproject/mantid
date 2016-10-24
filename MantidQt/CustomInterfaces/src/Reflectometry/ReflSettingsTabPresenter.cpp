@@ -107,6 +107,11 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   if (!dbnr.empty())
     options.push_back("RegionOfDirectBeam=" + dbnr);
 
+  // Add polarisation corrections
+  auto polCorr = m_view->getPolarisationCorrections();
+  if (!polCorr.empty())
+    options.push_back("PolarizationAnalysis=" + polCorr);
+
   return boost::algorithm::join(options, ",");
 }
 

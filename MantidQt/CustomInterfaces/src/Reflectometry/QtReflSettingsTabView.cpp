@@ -157,5 +157,13 @@ std::string QtReflSettingsTabView::getDirectBeam() const {
   return m_ui.expSettingsDirectBeamEdit->text().toStdString();
 }
 
+/** Return selected polarisation corrections
+* @return :: selected polarisation corrections
+*/
+std::string QtReflSettingsTabView::getPolarisationCorrections() const {
+
+  return m_ui.polCorrComboBox->currentText().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid

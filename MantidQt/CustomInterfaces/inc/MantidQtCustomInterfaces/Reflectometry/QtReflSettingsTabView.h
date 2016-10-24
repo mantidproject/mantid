@@ -64,6 +64,8 @@ public:
   std::string getCPp() const override;
   /// Return direct beam
   std::string getDirectBeam() const override;
+  /// Return selected polarisation corrections
+  std::string getPolarisationCorrections() const override;
 
   /// Creates hints for 'Plus'
   void

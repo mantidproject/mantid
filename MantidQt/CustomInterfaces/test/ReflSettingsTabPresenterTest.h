@@ -90,6 +90,9 @@ public:
     EXPECT_CALL(mockView, getDirectBeam())
         .Times(Exactly(1))
         .WillOnce(Return("\"0,3\""));
+    EXPECT_CALL(mockView, getPolarisationCorrections())
+        .Times(Exactly(1))
+        .WillOnce(Return("PNR"));
     auto options = presenter.getReductionOptions();
 
     std::vector<std::string> optionsVec;
@@ -100,6 +103,7 @@ public:
     TS_ASSERT_EQUALS(optionsVec[3], "CAp=100.0");
     TS_ASSERT_EQUALS(optionsVec[4], "CPp=0.54");
     TS_ASSERT_EQUALS(optionsVec[5], "RegionOfDirectBeam=\"0,3\"");
+    TS_ASSERT_EQUALS(optionsVec[6], "PolarizationAnalysis=PNR");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
