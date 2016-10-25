@@ -7,7 +7,6 @@
 #include "MantidAlgorithms/ConvertToConstantL2.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
-#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -45,10 +44,10 @@ namespace Algorithms {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport CorrectFlightPaths : public ConvertToConstantL2, public API::DeprecatedAlgorithm {
+class DLLExport CorrectFlightPaths : public ConvertToConstantL2,
+                                     public API::DeprecatedAlgorithm {
 
   const std::string name() const override { return "CorrectFlightPaths"; }
-
 };
 
 } // namespace Algorithm

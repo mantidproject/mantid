@@ -31,9 +31,6 @@ ConvertToConstantL2::ConvertToConstantL2()
  *
  */
 void ConvertToConstantL2::init() {
-
-  // todo: add validator for TOF
-
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<HistogramValidator>();

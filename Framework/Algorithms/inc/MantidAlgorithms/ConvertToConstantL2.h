@@ -51,7 +51,8 @@ public:
   const std::string name() const override { return "ConvertToConstantL2"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Used to convert flight paths to have a constant l2 in 2D shaped detectors.";
+    return "Used to convert flight paths to have a constant l2 in 2D shaped "
+           "detectors.";
   }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
