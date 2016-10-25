@@ -53,13 +53,23 @@
                   </widget>
                 </item>
                 <item row="0" column="2">
+                  <widget class="QLabel" name="expSettingsDirectBeamLabel">
+                    <property name="text">
+                      <string>DirectBeam</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="0" column="3">
+                  <widget class="QLineEdit" name="expSettingsDirectBeamEdit"/>
+                </item>
+                <item row="0" column="4">
                   <spacer name="expSettings0Spacer0">
                     <property name="orientation">
                       <enum>Qt::Horizontal</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                       <size>
-                        <width>40</width>
+                        <width>20</width>
                         <height>20</height>
                       </size>
                     </property>
@@ -92,7 +102,7 @@
                     </property>
                     <property name="sizeHint" stdset="0">
                       <size>
-                        <width>40</width>
+                        <width>20</width>
                         <height>20</height>
                       </size>
                     </property>
@@ -125,36 +135,13 @@
                     </property>
                     <property name="sizeHint" stdset="0">
                       <size>
-                        <width>40</width>
+                        <width>20</width>
                         <height>20</height>
                       </size>
                     </property>
                   </spacer>
                 </item>
-                <item row="3" column="0">
-                  <widget class="QLabel" name="expSettingsDirectBeamLabel">
-                    <property name="text">
-                      <string>DirectBeam</string>
-                    </property>
-                  </widget>
-                </item>
-                <item row="3" column="1">
-                  <widget class="QLineEdit" name="expSettingsDirectBeamEdit"/>
-                </item>
-                <item row="3" column="2">
-                  <spacer name="expSettings0Spacer3">
-                    <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                      <size>
-                        <width>40</width>
-                        <height>20</height>
-                      </size>
-                    </property>
-                  </spacer>
-                </item>
-            </layout>
+              </layout>
             </item>
             <item>
               <layout class="QGridLayout" name="expSettingsLayout1">
@@ -184,7 +171,7 @@
                     </property>
                     <property name="sizeHint" stdset="0">
                       <size>
-                        <width>40</width>
+                        <width>20</width>
                         <height>20</height>
                       </size>
                     </property>
@@ -216,11 +203,43 @@
                     </property>
                     <property name="sizeHint" stdset="0">
                       <size>
-                        <width>40</width>
+                        <width>20</width>
                         <height>20</height>
                       </size>
                     </property>
                   </spacer>
+                </item>
+              </layout>
+            </item>
+            <item>
+              <layout class="QGridLayout" name="expSettingsLayout2">
+                <property name="margin">
+                  <number>10</number>
+                </property>
+                <item row="0" column="0">
+                  <widget class="QPushButton" name="getExpDefaultsButton">
+                    <property name="fixedWidth">
+                      <number>60</number>
+                    </property>
+                    <property name="fixedHeight">
+                      <number>100</number>
+                    </property>
+                    <layout class="QHBoxLayout" name="getExpDefaultsButtonLayout">
+                      <item>
+                        <widget class="QLabel" name="getExpDefaultsButtonLabel">
+                          <property name="wordWrap">
+                            <bool>true</bool>
+                          </property>
+                          <property name="alignment">
+                            <set>Qt::AlignCenter</set>
+                          </property>
+                          <property name="text">
+                            <string>Get Defaults</string>
+                          </property>
+                        </widget>
+                      </item>
+                    </layout>
+                  </widget>
                 </item>
               </layout>
             </item>
@@ -235,174 +254,210 @@
           <property name="checkable">
             <bool>true</bool>
           </property>
-          <layout class="QGridLayout" name="instSettingsLayout">
-            <property name="margin">
-              <number>10</number>
-            </property>
-            <item row="0" column="0">
-              <widget class="QLabel" name="instSettingsMonIntMinLabel">
-                <property name="text">
-                  <string>MonitorIntegralMin</string>
+          <layout class="QHBoxLayout" name="instSettingsLayoutContainer">
+            <item>
+              <layout class="QGridLayout" name="instSettingsLayout0">
+              <property name="margin">
+                <number>10</number>
+              </property>
+              <item row="0" column="0">
+                <widget class="QLabel" name="instSettingsMonIntMinLabel">
+                  <property name="text">
+                    <string>MonitorIntegralMin</string>
+                  </property>
+                </widget>
+              </item>
+              <item row="0" column="1">
+                <widget class="QLineEdit" name="instSettingsMonIntMinEdit"/>
+              </item>
+              <item row="0" column="2">
+                <widget class="QLabel" name="instSettingsMonIntMaxLabel">
+                  <property name="text">
+                    <string>MonitorIntegralMax</string>
+                  </property>
+                </widget>
+              </item>
+              <item row="0" column="3">
+                <widget class="QLineEdit" name="instSettingsMonIntMaxEdit"/>
+              </item>
+              <item row="0" column="4">
+                <spacer name="instSettings0Spacer0">
+                  <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                    <size>
+                      <width>40</width>
+                      <height>20</height>
+                    </size>
+                  </property>
+                </spacer>
+              </item>
+              <item row="1" column="0">
+                <widget class="QLabel" name="instSettingsMonBgMinLabel">
+                  <property name="text">
+                    <string>MonitorBackgroundMin</string>
+                  </property>
+                </widget>
+              </item>
+              <item row="1" column="1">
+                <widget class="QLineEdit" name="instSettingsMonBgMinEdit"/>
+              </item>
+              <item row="1" column="2">
+                <widget class="QLabel" name="instSettingsMonBgMaxLabel">
+                  <property name="text">
+                    <string>MonitorBackgroundMax</string>
+                  </property>
+                </widget>
+              </item>
+              <item row="1" column="3">
+                <widget class="QLineEdit" name="instSettingsMonBgMaxEdit"/>
+              </item>
+              <item row="0" column="4">
+                <spacer name="instSettings0Spacer1">
+                  <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                    <size>
+                      <width>40</width>
+                      <height>20</height>
+                    </size>
+                  </property>
+                </spacer>
+              </item>
+              <item row="2" column="0">
+                <widget class="QLabel" name="instSettingsLamMinLabel">
+                  <property name="text">
+                    <string>LambdaMin</string>
+                  </property>
+                </widget>
+              </item>
+              <item row="2" column="1">
+                <widget class="QLineEdit" name="instSettingsLamMinEdit"/>
+              </item>
+              <item row="2" column="2">
+                <widget class="QLabel" name="instSettingsLamMaxLabel">
+                  <property name="text">
+                    <string>LambdaMax</string>
+                  </property>
+                </widget>
+              </item>
+              <item row="2" column="3">
+                <widget class="QLineEdit" name="instSettingsLamMaxEdit"/>
+              </item>
+              <item row="0" column="4">
+                <spacer name="instSettings0Spacer2">
+                  <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                    <size>
+                      <width>40</width>
+                      <height>20</height>
+                    </size>
+                  </property>
+                </spacer>
+              </item>
+              <item row="3" column="0">
+                <widget class="QLabel" name="instSettingsI0MonIndexLabel">
+                  <property name="text">
+                    <string>I0MonitorIndex</string>
+                  </property>
+                </widget>
+              </item>
+              <item row="3" column="1">
+                <widget class="QLineEdit" name="instSettingsI0MonIndexEdit"/>
+              </item>
+              <item row="3" column="2">
+                <widget class="QLabel" name="instSettingsScaleFactorLabel">
+                  <property name="text">
+                    <string>ScaleFactor</string>
+                  </property>
+                </widget>
+              </item>
+              <item row="3" column="3">
+                <widget class="QLineEdit" name="instSettingsScaleFactorEdit"/>
+              </item>
+              <item row="0" column="4">
+                <spacer name="instSettings0Spacer3">
+                  <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                    <size>
+                      <width>40</width>
+                      <height>20</height>
+                    </size>
+                  </property>
+                </spacer>
+              </item>
+              <item row="4" column="0">
+                <widget class="QLabel" name="instSettingsMomentumTransferLimitsLabel">
+                  <property name="text">
+                    <string>MomentumTransferLimits</string>
+                  </property>
+                </widget>
+              </item>
+              <item row="4" column="1">
+                <widget class="QLineEdit" name="instSettingsMomentumTransferLimitsEdit"/>
+              </item>
+              <item row="4" column="2">
+                <widget class="QLabel" name="instSettingsDetLimitsLabel">
+                  <property name="text">
+                    <string>DetectorLimits</string>
+                  </property>
+                </widget>
+              </item>
+              <item row="4" column="3">
+                <widget class="QLineEdit" name="instSettingsDetLimitsEdit"/>
+              </item>
+              <item row="0" column="4">
+                <spacer name="instSettings0Spacer4">
+                  <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                    <size>
+                      <width>40</width>
+                      <height>20</height>
+                    </size>
+                  </property>
+                </spacer>
+              </item>
+            </layout>
+            </item>
+            <item>
+              <layout class="QGridLayout" name="instSettingsLayout1">
+                <property name="margin">
+                  <number>10</number>
                 </property>
-              </widget>
-            </item>
-            <item row="0" column="1">
-              <widget class="QLineEdit" name="instSettingsMonIntMinEdit"/>
-            </item>
-            <item row="0" column="2">
-              <widget class="QLabel" name="instSettingsMonIntMaxLabel">
-                <property name="text">
-                  <string>MonitorIntegralMax</string>
-                </property>
-              </widget>
-            </item>
-            <item row="0" column="3">
-              <widget class="QLineEdit" name="instSettingsMonIntMaxEdit"/>
-            </item>
-            <item row="0" column="4">
-              <spacer name="instSettingsSpacer0">
-                <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                  <size>
-                    <width>40</width>
-                    <height>20</height>
-                  </size>
-                </property>
-              </spacer>
-            </item>
-            <item row="1" column="0">
-              <widget class="QLabel" name="instSettingsMonBgMinLabel">
-                <property name="text">
-                  <string>MonitorBackgroundMin</string>
-                </property>
-              </widget>
-            </item>
-            <item row="1" column="1">
-              <widget class="QLineEdit" name="instSettingsMonBgMinEdit"/>
-            </item>
-            <item row="1" column="2">
-              <widget class="QLabel" name="instSettingsMonBgMaxLabel">
-                <property name="text">
-                  <string>MonitorBackgroundMax</string>
-                </property>
-              </widget>
-            </item>
-            <item row="1" column="3">
-              <widget class="QLineEdit" name="instSettingsMonBgMaxEdit"/>
-            </item>
-            <item row="1" column="4">
-              <spacer name="instSettingsSpacer1">
-                <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                  <size>
-                    <width>40</width>
-                    <height>20</height>
-                  </size>
-                </property>
-              </spacer>
-            </item>
-            <item row="2" column="0">
-              <widget class="QLabel" name="instSettingsLamMinLabel">
-                <property name="text">
-                  <string>LambdaMin</string>
-                </property>
-              </widget>
-            </item>
-            <item row="2" column="1">
-              <widget class="QLineEdit" name="instSettingsLamMinEdit"/>
-            </item>
-            <item row="2" column="2">
-              <widget class="QLabel" name="instSettingsLamMaxLabel">
-                <property name="text">
-                  <string>LambdaMax</string>
-                </property>
-              </widget>
-            </item>
-            <item row="2" column="3">
-              <widget class="QLineEdit" name="instSettingsLamMaxEdit"/>
-            </item>
-            <item row="2" column="4">
-              <spacer name="instSettingsSpacer2">
-                <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                  <size>
-                    <width>40</width>
-                    <height>20</height>
-                  </size>
-                </property>
-              </spacer>
-            </item>
-            <item row="3" column="0">
-              <widget class="QLabel" name="instSettingsI0MonIndexLabel">
-                <property name="text">
-                  <string>I0MonitorIndex</string>
-                </property>
-              </widget>
-            </item>
-            <item row="3" column="1">
-              <widget class="QLineEdit" name="instSettingsI0MonIndexEdit"/>
-            </item>
-            <item row="3" column="2">
-              <widget class="QLabel" name="instSettingsScaleFactorLabel">
-                <property name="text">
-                  <string>ScaleFactor</string>
-                </property>
-              </widget>
-            </item>
-            <item row="3" column="3">
-              <widget class="QLineEdit" name="instSettingsScaleFactorEdit"/>
-            </item>
-            <item row="3" column="4">
-              <spacer name="instSettingsSpacer3">
-                <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                  <size>
-                    <width>40</width>
-                    <height>20</height>
-                  </size>
-                </property>
-              </spacer>
-            </item>
-            <item row="4" column="0">
-              <widget class="QLabel" name="instSettingsMomentumTransferLimitsLabel">
-                <property name="text">
-                  <string>MomentumTransferLimits</string>
-                </property>
-              </widget>
-            </item>
-            <item row="4" column="1">
-              <widget class="QLineEdit" name="instSettingsMomentumTransferLimitsEdit"/>
-            </item>
-            <item row="4" column="2">
-              <widget class="QLabel" name="instSettingsDetLimitsLabel">
-                <property name="text">
-                  <string>DetectorLimits</string>
-                </property>
-              </widget>
-            </item>
-            <item row="4" column="3">
-              <widget class="QLineEdit" name="instSettingsDetLimitsEdit"/>
-            </item>
-            <item row="4" column="4">
-              <spacer name="instSettingsSpacer4">
-                <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                  <size>
-                    <width>40</width>
-                    <height>20</height>
-                  </size>
-                </property>
-              </spacer>
+                <item row="0" column="0">
+                  <widget class="QPushButton" name="getInstDefaultsButton">
+                    <property name="fixedWidth">
+                      <number>60</number>
+                    </property>
+                    <property name="fixedHeight">
+                      <number>100</number>
+                    </property>
+                    <layout class="QHBoxLayout" name="getInstDefaultsButtonLayout">
+                      <item>
+                        <widget class="QLabel" name="getInstDefaultsButtonLabel">
+                          <property name="wordWrap">
+                            <bool>true</bool>
+                          </property>
+                          <property name="alignment">
+                            <set>Qt::AlignCenter</set>
+                          </property>
+                          <property name="text">
+                            <string>Get Defaults</string>
+                          </property>
+                        </widget>
+                      </item>
+                    </layout>
+                  </widget>
+                </item>
+              </layout>
             </item>
           </layout>
         </widget>
