@@ -1,0 +1,45 @@
+digraph ReflectometryReductionOne {
+label = "ReflectometryReductionOne Transmission Correction Flowchart"
+ $global_style
+
+subgraph params {
+ $param_style
+  inputWorkspace    [label="OutputWorkspaceWavelength", group=g1]
+  outputWorkspace   [label="OutputWorkspace"]
+  qmin              [label="MomentumTransferMin"]
+  qmax              [label="MomentumTransferMax"]
+  qstep             [label="MomentumTransferStep"]
+  scaleFactor       [label="ScaleFactor"]
+}
+
+subgraph decisions {
+ $decision_style
+}
+
+subgraph algorithms {
+ $algorithm_style
+  convertUnits  [label="ConvertUnits\n(AlignBins=True)", group=g1]
+  rebin         [label="Rebin", group=g1]
+  scale         [label="Scale", group=g1]
+}
+
+subgraph processes {
+ $process_style
+}
+
+subgraph values {
+ $value_style
+}
+
+inputWorkspace    -> convertUnits
+convertUnits      -> rebin
+qmin              -> rebin
+qstep             -> rebin
+qmax              -> rebin
+qmin              -> qstep [style=invis]
+rebin             -> scale
+scaleFactor       -> scale
+scale             -> outputWorkspace
+
+{rank=same; qmin; qmax}
+}

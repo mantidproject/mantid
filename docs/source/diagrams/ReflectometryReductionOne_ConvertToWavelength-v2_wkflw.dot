@@ -6,7 +6,7 @@ rankdir = TB;
 subgraph params {
  $param_style
   inputWS             [label="InputWorkspace"]
-  outputWS            [label="OutputWorkspace"]
+  outputWS            [label="OutputWorkspaceWavelength"]
   procCommands        [label="ProcessingCommands"]
   wavMin              [label="WavelengthMin", group=gwav]
   wavMax              [label="WavelengthMax", group=gwav]

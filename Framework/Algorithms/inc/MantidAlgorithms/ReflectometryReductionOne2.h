@@ -43,7 +43,8 @@ public:
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Reduces a single TOF/Lambda reflectometry run into a mod Q vs I/I0 "
-           "workspace. Performs transmission corrections.";
+           "workspace. Performs monitor normalization and transmission "
+           "corrections.";
   }
   /// Algorithm's version for identification.
   int version() const override { return 2; };
