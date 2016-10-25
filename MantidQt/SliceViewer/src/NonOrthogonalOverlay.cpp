@@ -149,18 +149,46 @@ namespace MantidQt {
 					  //make sure all calcs are outside of paintEvent... so probably move ApplyskewMatrix out of it
                     setSkewMatrix();
                     setAxesPoints();
-					calculateGridlines(5); //tie zoom level to how large dataset is, or just zoom level?
-					
+                    calculateTickMarks(20); // tie zoom level to how large
+                                            // dataset is, or just zoom level?
                   }
                 }
-		
-				void NonOrthogonalOverlay::calculateGridlines(int gridLineNum) { //assumes X axis
-					double axisPoint;
-					double percentageOfLine((m_XEndPoint - m_originPoint) / gridLineNum);
-					for (int i = 0; i < gridLineNum; i++) {
-						axisPoint = (percentageOfLine * i) + m_originPoint;
+
+                void NonOrthogonalOverlay::clearAllAxisPointVectors() {
+                  m_axisPointVec.clear();
+                  m_xAxisTickStartVec.clear();
+                  m_yAxisTickStartVec.clear();
+                  m_xAxisTickEndVec.clear();
+                  m_yAxisTickEndVec.clear();
+                }
+
+                void NonOrthogonalOverlay::calculateTickMarks(
+                    int tickNum) { // assumes X axis
+                  clearAllAxisPointVectors();
+                                        double axisPoint;
+                                        double percentageOfLine(
+                                            (m_XEndPoint - m_originPoint) /
+                                            tickNum);
+                                        for (int i = 0; i <= tickNum; i++) {
+                                                axisPoint = (percentageOfLine * i) + m_originPoint;
 						m_axisPointVec.push_back(axisPoint);
-					}
+                                                m_xAxisTickStartVec.push_back(
+                                                    skewMatrixApply(
+                                                        axisPoint,
+                                                        m_originPoint));
+                                                m_xAxisTickEndVec.push_back(
+                                                    skewMatrixApply(
+                                                        axisPoint,
+                                                        m_originPoint * 1.05));
+                                                m_yAxisTickStartVec.push_back(
+                                                    skewMatrixApply(
+                                                        m_originPoint,
+                                                        axisPoint));
+                                                m_yAxisTickEndVec.push_back(
+                                                    skewMatrixApply(
+                                                        m_originPoint * 1.05,
+                                                        axisPoint));
+                                        }
 
 				}
 
@@ -175,8 +203,8 @@ namespace MantidQt {
 			
             // --- Draw the central line ---
 			if (m_showLine) {
-				centerPen.setWidth(3);
-				centerPen.setCapStyle(Qt::SquareCap);
+                          centerPen.setWidth(2);
+                                centerPen.setCapStyle(Qt::SquareCap);
 				painter.setPen(centerPen);
 				painter.drawLine(transform(m_pointA), transform(m_pointB));
 				painter.drawLine(transform(m_pointA), transform(m_pointC));
@@ -185,10 +213,13 @@ namespace MantidQt {
 				painter.setPen(gridPen);
 				
 				for (int i = 0; i < m_axisPointVec.size(); i++) {
-					painter.drawLine(transform(skewMatrixApply(m_axisPointVec[i], m_originPoint)), transform(skewMatrixApply(m_axisPointVec[i], (m_originPoint*1.05))));
-					painter.drawLine(transform(skewMatrixApply(m_originPoint, m_axisPointVec[i])), transform(skewMatrixApply((m_originPoint*1.05), m_axisPointVec[i])));
-				
-				}
+                                  painter.drawLine(
+                                      transform(m_xAxisTickStartVec[i]),
+                                      transform(m_xAxisTickEndVec[i]));
+                                  painter.drawLine(
+                                      transform(m_yAxisTickStartVec[i]),
+                                      transform(m_yAxisTickEndVec[i]));
+                                }
 
 
 

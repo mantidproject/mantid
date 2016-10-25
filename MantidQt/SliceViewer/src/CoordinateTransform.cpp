@@ -31,6 +31,7 @@ NonOrthogonalTransform::NonOrthogonalTransform(
       ++index;
     }
   }
+
   checkDimensionsForHKL(ws, dimX, dimY);
 }
 void NonOrthogonalTransform::checkDimensionsForHKL(

@@ -81,6 +81,10 @@ public:
 		double m_XEndPoint;
 		double m_YEndPoint;
 		std::vector <double> m_axisPointVec;
+                std::vector<QPointF> m_xAxisTickStartVec;
+                std::vector<QPointF> m_xAxisTickEndVec;
+                std::vector<QPointF> m_yAxisTickStartVec;
+                std::vector<QPointF> m_yAxisTickEndVec;
         /// First point of the line (in coordinates of the plot)
 	QPointF m_pointA;
 	/// Second point of the line (in coordinates of the plot)
@@ -95,7 +99,8 @@ public:
 	QPointF invTransform(QPoint pixels) const;
 	/// QwtPlot containing this
 	QwtPlot *m_plot;
-	void calculateGridlines(int gridLineNum);
+        void calculateTickMarks(int tickNum);
+        void clearAllAxisPointVectors();
 };
 
 } // namespace SliceViewer

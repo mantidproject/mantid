@@ -2389,7 +2389,8 @@ void SliceViewer::disableOrthogonalAnalysisTools(bool checked) {
 	if (ui.btnRebinMode->isChecked()) {
 		ui.btnRebinMode->toggle();
 	}
-	ui.btnDoLine->setDisabled(checked);
+        m_nonOrthogonalOverlay->m_showLine = checked; // not perm soln
+        ui.btnDoLine->setDisabled(checked);
 	ui.btnSnapToGrid->setDisabled(checked);
 	ui.btnClearLine->setDisabled(checked);
 	ui.btnRebinMode->setDisabled(checked);
