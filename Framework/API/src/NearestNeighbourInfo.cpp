@@ -25,7 +25,6 @@ NearestNeighbourInfo::NearestNeighbourInfo(const MatrixWorkspace &workspace,
 *
 * @param comp :: pointer to the querying detector
 * @param radius :: distance from detector on which to filter results
-*be ignored. True to ignore detectors.
 * @return map of DetectorID to distance for the nearest neighbours
 */
 std::map<specnum_t, Kernel::V3D>
@@ -47,7 +46,6 @@ NearestNeighbourInfo::getNeighbours(const Geometry::IDetector *comp,
 *
 * @param spec :: spectrum number of the detector you are looking at
 * @param radius :: distance from detector on which to filter results
-*be ignored. True to ignore detectors.
 * @return map of DetectorID to distance for the nearest neighbours
 */
 std::map<specnum_t, Kernel::V3D>
@@ -58,7 +56,6 @@ NearestNeighbourInfo::getNeighbours(specnum_t spec, const double radius) const {
 /** Queries the NearestNeighbours object for the selected spectrum number.
 *
 * @param spec :: spectrum number of the detector you are looking at
-*be ignored. True to ignore detectors.
 * @return map of DetectorID to distance for the nearest neighbours
 */
 std::map<specnum_t, Kernel::V3D>
