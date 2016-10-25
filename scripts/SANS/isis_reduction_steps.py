@@ -1899,7 +1899,7 @@ class CropDetBank(ReductionStep):
             scatter_ws = getWorkspaceReference(workspace)
             scatter_name = scatter_ws.name()
 
-            monitor_ws = reducer.get_sample().get_monitor()
+            monitor_ws = reducer.get_sample()._get_monitor()
             monitor_name = monitor_ws.name()
 
             # Run the subtraction
@@ -1938,7 +1938,7 @@ class NormalizeToMonitor(ReductionStep):
         sanslog.notice('Normalizing to monitor ' + str(normalization_spectrum))
 
         self.output_wksp = str(workspace) + INCIDENT_MONITOR_TAG
-        mon = reducer.get_sample().get_monitor(normalization_spectrum - 1)
+        mon = reducer.get_sample()._get_monitor(normalization_spectrum - 1)
         if reducer.event2hist.scale != 1:
             mon *= reducer.event2hist.scale
 
@@ -3126,7 +3126,7 @@ class SliceEvent(ReductionStep):
             start = -1
             stop = -1
 
-        _monitor = reducer.get_sample().get_monitor()
+        _monitor = reducer.get_sample()._get_monitor()
 
         if "events.binning" in reducer.settings:
             binning = reducer.settings["events.binning"]

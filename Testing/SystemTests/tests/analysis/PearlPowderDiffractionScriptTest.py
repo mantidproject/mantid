@@ -400,8 +400,7 @@ class LoadCalibTests(unittest.TestCase):
         vanadium_base_dir = (DIRS[0] + 'PEARL/Calibration_Test/Calibration/')
         tt_35_file = 'van_spline_TT35_cycle_15_3.nxs'
         vanadium_tt_35_dir = os.path.join(vanadium_base_dir, tt_35_file)
-        van_tt35_data = LoadNexusProcessed(Filename=vanadium_tt_35_dir,
-                                           OutputWorkspace=tt_35_file)
+        van_tt35_data = LoadNexusProcessed(Filename=vanadium_tt_35_dir)
         self.matrix_workspaces_test(van_tt35_data, 'tt35')
 
         self.assertAlmostEquals(-5.2637392907314393e-06, van_tt35_data[1].readY(0)[2], places=DIFF_PLACES)
@@ -435,11 +434,8 @@ class LoadCalibTests(unittest.TestCase):
         self.assertAlmostEquals(177.218826007, van_tt88_data[13].readX(0)[278], places=DIFF_PLACES)
 
     def matrix_workspaces_test(self, vanadium_tt_file, tt_mode='tt35'):
-        import pydevd
-        pydevd.settrace('localhost', port=23000, stdoutToServer=True, stderrToServer=True)
         for i in range(1, 15):
             self.assertTrue(isinstance(vanadium_tt_file[i], MatrixWorkspace))
-            self.assertTrue('spline' + str(i) in vanadium_tt_file[i].getName())
             self.assertTrue(isinstance(vanadium_tt_file[i], MatrixWorkspace))
             self.assertEquals(1, vanadium_tt_file[i].getNumberHistograms())
             self.assertEquals(8149, vanadium_tt_file[i].blocksize())

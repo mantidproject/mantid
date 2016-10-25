@@ -39,17 +39,20 @@ class AbstractInst(object):
     def default_input_ext(self):
         return self._default_input_ext
 
+    @default_input_ext.setter
+    def default_input_ext(self, new_ext):
+        self._default_input_ext = _append_dot_to_ext(new_ext)
+
     @property
     def tt_mode(self):
         return self._tt_mode
 
-    # --- Methods applicable to all instruments --- #
-    # These can be overridden if instrument specific behaviour is needed #
+    # --- Public API ---- #
 
     # Script entry points
     def focus(self, run_number, focus_mode, input_ext=None, do_attenuation=True, do_van_normalisation=True):
         if input_ext is not None:
-            self._default_input_ext = input_ext
+            self.default_input_ext = input_ext
 
         PearlPowder_common.focus(instrument=self, number=run_number, fmode=focus_mode,
                                  atten=do_attenuation, van_norm=do_van_normalisation)
@@ -57,36 +60,39 @@ class AbstractInst(object):
     def create_empty_calibration_by_names(self, calibration_numbers, output_file_name, group_names=None):
 
         if group_names is None:
-            group_names = self.get_default_group_names()
+            group_names = self._get_default_group_names()
 
         PearlPowder_common.create_calibration_by_names(calruns=calibration_numbers, ngroupfile=output_file_name,
                                                        ngroup=group_names, startup_objects=self)
 
     def create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
-        PearlPowder_common.create_calibration(startup_object=self, calibration_runs=calibration_runs,
-                                              offset_file_path=offset_file_name, grouping_file_name=grouping_file_name)
+        self._create_calibration(calibration_runs=calibration_runs,
+                                 offset_file_name=offset_file_name, grouping_file_name=grouping_file_name)
 
-    def create_calibration_Si(self, calibration_runs, cal_file_name, grouping_file_name):
-        self.create_calibration_si(calibration_runs=calibration_runs, cal_file_name=cal_file_name,
-                                   grouping_file_name=grouping_file_name)
+    def create_calibration_si(self, calibration_runs, cal_file_name, grouping_file_name):
+        self._create_calibration_silicon(calibration_runs=calibration_runs, cal_file_name=cal_file_name,
+                                         grouping_file_name=grouping_file_name)
 
-    # TODO rename this to something clearer
-    def create_vanadium(self, vanadium_runs, empty_runs, output_file_name, num_of_splines,
-                        do_absorb_corrections=True, gen_absorb_correction=False):
+    def create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name, num_of_splines,
+                                    do_absorb_corrections=True, gen_absorb_correction=False):
 
         PearlPowder_common.create_vanadium(startup_object=self, vanadium_runs=vanadium_runs,
                                            empty_runs=empty_runs, output_file_name=output_file_name,
                                            num_of_spline_coefficients=num_of_splines,
-                                           do_absorp_corrections=do_absorb_corrections,
-                                           generate_abosrp_corrections=gen_absorb_correction)
+                                           do_absorb_corrections=do_absorb_corrections,
+                                           generate_absorb_corrections=gen_absorb_correction)
 
     @staticmethod
     def set_debug_mode(val):
         assert isinstance(val, bool)
         PearlPowder_common.set_debug(val)
 
-    def generate_out_file_paths(self, run_number, output_directory):
-        file_name = self.generate_inst_file_name(run_number=run_number)
+    # ---- Private API ---- #
+    # These are to be called from either concrete instruments or PearlPowder_common not by users
+    # Common steps to all instruments
+
+    def _generate_out_file_paths(self, run_number, output_directory):
+        file_name = self._generate_inst_file_name(run_number=run_number)
         nxs_file = output_directory + str(file_name) + ".nxs"
         gss_file = output_directory + str(file_name) + ".gss"
         tof_xye_file = output_directory + str(file_name) + "_tof_xye.dat"
@@ -101,7 +107,7 @@ class AbstractInst(object):
 
         return out_file_names
 
-    def generate_raw_data_cycle_dir(self, run_cycle):
+    def _generate_raw_data_cycle_dir(self, run_cycle):
         if self._skip_appending_cycle_to_raw_dir():
             return self.raw_data_dir
         str_run_cycle = str(run_cycle)
@@ -112,16 +118,16 @@ class AbstractInst(object):
 
         return generated_dir
 
-    def generate_input_full_path(self, run_number, input_dir):
+    def _generate_input_full_path(self, run_number, input_dir):
         # Uses runtime polymorphism to generate the full run name
-        file_name = self.generate_inst_file_name(run_number)
+        file_name = self._generate_inst_file_name(run_number)
         extension = self.default_input_ext
         return input_dir + file_name + extension
 
     # Instrument specific properties to be implemented by base classes #
 
     @abstractmethod
-    def get_lambda_range(self):
+    def _get_lambda_range(self):
         """
         Returns the lower and upper lambda range for this instrument
         @param self: The instrument to query the values of lambda for
@@ -130,7 +136,7 @@ class AbstractInst(object):
         pass
 
     @abstractmethod
-    def get_focus_tof_binning(self):
+    def _get_focus_tof_binning(self):
         """
         Returns the TOF binning values
         @param self: The instrument to get TOF binning values for
@@ -139,17 +145,17 @@ class AbstractInst(object):
         pass
 
     @abstractmethod
-    def get_create_van_tof_binning(self):
+    def _get_create_van_tof_binning(self):
         """
         Holds the TOF rebin params for create vanadium calibration
-        @return: The TOF rebin params as a string
+        @return: The TOF rebin params as a dictionary of strings numbered 1,2,3...n
         """
         pass
 
     # Instrument default parameters
 
     @abstractmethod
-    def get_default_group_names(self):
+    def _get_default_group_names(self):
         """
         Returns the default names for creating a blank calibration by names
         @return: The default grouping names as a string
@@ -158,7 +164,7 @@ class AbstractInst(object):
     # Instrument specific methods
 
     @abstractmethod
-    def get_calibration_full_paths(self, cycle):
+    def _get_calibration_full_paths(self, cycle):
         """
         Gets the current calibration file names for this cycle
         @param cycle: The cycle string to lookup for this run
@@ -169,7 +175,7 @@ class AbstractInst(object):
 
     @staticmethod
     @abstractmethod
-    def generate_inst_file_name(run_number):
+    def _generate_inst_file_name(run_number):
         """
         Generates the conforming file names for an instrument
         @param run_number: The run number to turn into a filename
@@ -179,7 +185,7 @@ class AbstractInst(object):
 
     @staticmethod
     @abstractmethod
-    def get_instrument_alg_save_ranges(instrument=''):
+    def _get_instrument_alg_save_ranges(instrument=''):
         #  TODO fix this documentation when we know what alg_range and save_range is used for
         """
         Gets the instruments ranges for running the algorithm and saving
@@ -190,7 +196,7 @@ class AbstractInst(object):
 
     @staticmethod
     @abstractmethod
-    def get_cycle_information(run_number):
+    def _get_cycle_information(run_number):
         """
         Gets all the information about this run for this cycle and returns it in a dictionary
         @param run_number: The run to match the cycle to
@@ -199,10 +205,20 @@ class AbstractInst(object):
         pass
 
     # --- Instrument optional hooks ----#
-    def attenuate_workspace(self, input_workspace):
+    def _attenuate_workspace(self, input_workspace):
         return _empty_hook_return_input(input_workspace)
 
-    def create_calibration_si(self, calibration_runs, cal_file_name, grouping_file_name):
+    def _create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
+        # TODO what from
+        """
+        Creates a calibration run from
+        @param calibration_runs: The runs to use to create the calibration
+        @param offset_file_name: The calibration filename to be created
+        @param grouping_file_name: The grouping filename to be created
+        """
+        raise NotImplementedError("Create calibration is not yet implemented for this instrument")
+
+    def _create_calibration_silicon(self, calibration_runs, cal_file_name, grouping_file_name):
         """
         Creates a calibration file from a silicon run
         @param calibration_runs: The silicon calibration runs to process
@@ -211,14 +227,20 @@ class AbstractInst(object):
         """
         raise NotImplementedError("Create calibration from a silicon run is not yet implemented for this instrument")
 
-
-    def get_monitor(self, run_number, input_dir, spline_terms):
+    def _get_monitor(self, run_number, input_dir, spline_terms):
         return _empty_hook_return_none()
 
-    def get_monitor_spectra(self, run_number):
+    def _get_monitor_spectra(self, run_number):
         return _empty_hook_return_empty_string()
 
-    def spline_background(self, focused_vanadium_ws, spline_number, instrument_version=''):
+    def _PEARL_use_full_path(self):
+        """
+        Only used by PEARL to maintain compatibility with old routines code
+        @return: Whether the "filename" is actually a full path
+        """
+        return False
+
+    def _spline_background(self, focused_vanadium_ws, spline_number, instrument_version=''):
         """
         Splines the background in a way specific to the instrument
         @param focused_vanadium_ws: The workspace to perform spline backgrounds on
@@ -230,6 +252,9 @@ class AbstractInst(object):
     def _skip_appending_cycle_to_raw_dir(self):
         return False
 
+
+# ----- Private Implementation ----- #
+# These should only be called by the abstract instrument class
 
 def _append_dot_to_ext(ext):
     if not ext.startswith('.'):
@@ -248,8 +273,8 @@ def _append_path_dividers_to_end(generated_dir, raw_data_dir):
     return generated_dir
 
 
-# These empty hooks can be used to diagnose when an override hasn't fired
-
+# These empty hooks can be used to diagnose when an override hasn't
+# fired or if steps are correctly being skipped
 
 def _empty_hook_return_empty_string():
     return str('')

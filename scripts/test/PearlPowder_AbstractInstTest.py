@@ -23,10 +23,10 @@ class PearlPowder_AbstractInstTest(unittest.TestCase):
         inst = self.get_abstract_inst_defaults()
 
         test_out_dir = "testDir\\"
-        reference_name = inst.generate_inst_file_name(run_number="123")
+        reference_name = inst._generate_inst_file_name(run_number="123")
         file_name_without_ext = test_out_dir + reference_name
 
-        output = inst.generate_out_file_paths(123, test_out_dir)
+        output = inst._generate_out_file_paths(123, test_out_dir)
 
         self.assertEquals(output["nxs_filename"], file_name_without_ext+".nxs")
         self.assertEquals(output["gss_filename"], file_name_without_ext+".gss")
@@ -43,7 +43,7 @@ class PearlPowder_AbstractInstTest(unittest.TestCase):
         inst_cycle = "test_1"
         reference_output = input_dir + inst_cycle + '\\'
 
-        output = inst.generate_raw_data_cycle_dir(inst_cycle)
+        output = inst._generate_raw_data_cycle_dir(inst_cycle)
         self.assertEquals(output, reference_output)
 
         # Next test for UNIX paths
@@ -51,7 +51,7 @@ class PearlPowder_AbstractInstTest(unittest.TestCase):
         inst.test_set_raw_data_dir(unix_input_dir)
         reference_output = unix_input_dir + inst_cycle + '/'
 
-        output = inst.generate_raw_data_cycle_dir(inst_cycle)
+        output = inst._generate_raw_data_cycle_dir(inst_cycle)
         self.assertEquals(output, reference_output)
 
     def test_generate_cycle_dir_throws(self):
@@ -59,7 +59,7 @@ class PearlPowder_AbstractInstTest(unittest.TestCase):
         inst = self.get_abstract_inst_defaults()
         inst_cycle = "test"
 
-        self.assertRaises(ValueError, lambda: inst.generate_raw_data_cycle_dir(inst_cycle))
+        self.assertRaises(ValueError, lambda: inst._generate_raw_data_cycle_dir(inst_cycle))
 
     def test_generate_cycle_dir_respects_skip_flag(self):
         # This test is for a function which supports the old API - it should
@@ -67,17 +67,17 @@ class PearlPowder_AbstractInstTest(unittest.TestCase):
         inst = self.get_abstract_inst_defaults()
         inst.generate_cycle_dir_flag = True
 
-        output = inst.generate_raw_data_cycle_dir("test_not_appended")
+        output = inst._generate_raw_data_cycle_dir("test_not_appended")
         self.assertEquals(output, self.raw_data_dir)
 
     def test_generate_full_input_path(self):
         inst = self.get_abstract_inst_all_specified()
         run_number = 12345
-        inst_file_name = inst.generate_inst_file_name(run_number)
+        inst_file_name = inst._generate_inst_file_name(run_number)
         input_path = "test\\"
         reference_output = input_path + inst_file_name + self.default_ext
 
-        output = inst.generate_input_full_path(run_number, input_path)
+        output = inst._generate_input_full_path(run_number, input_path)
         self.assertEquals(output, reference_output)
 
     # Test empty hooks work correctly
@@ -85,25 +85,29 @@ class PearlPowder_AbstractInstTest(unittest.TestCase):
         inst = self.get_abstract_inst_defaults()
         input_ws = "ws_in"
 
-        output_ws = inst.attenuate_workspace(input_ws)
+        output_ws = inst._attenuate_workspace(input_ws)
         self.assertEquals(input_ws, output_ws)
 
     def test_create_calibration_si(self):
         inst = self.get_abstract_inst_defaults()
-        self.assertRaises(NotImplementedError, lambda: inst.create_calibration_si("", ""))
+        self.assertRaises(NotImplementedError, lambda: inst._create_calibration_silicon("", ""))
+
+    def test_create_calibration(self):
+        inst = self.get_abstract_inst_defaults()
+        self.assertRaises(NotImplementedError, lambda: inst.create_calibration("", "", ""))
 
     def test_get_monitor_hook(self):
         inst = self.get_abstract_inst_defaults()
         # Use type this isn't None to make sure its not returning to us
         unused_param = "unused"
-        output = inst.get_monitor(unused_param, unused_param, unused_param)
+        output = inst._get_monitor(unused_param, unused_param, unused_param)
 
         self.assertEquals(isinstance(output, type(None)), True)
 
     def test_get_monitor_spectra_hook(self):
         inst = self.get_abstract_inst_defaults()
         unused_param = None
-        output = inst.get_monitor_spectra(unused_param)
+        output = inst._get_monitor_spectra(unused_param)
 
         # Should return empty string
         self.assertEquals(output, str(""))
@@ -112,7 +116,7 @@ class PearlPowder_AbstractInstTest(unittest.TestCase):
         inst = self.get_abstract_inst_defaults()
         # Use type this isn't None to make sure its not returning to us
         unused_param = "unused"
-        output = inst.spline_background(unused_param, unused_param, unused_param)
+        output = inst._spline_background(unused_param, unused_param, unused_param)
 
         self.assertEquals(isinstance(output, type(None)), True)
 

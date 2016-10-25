@@ -20,7 +20,9 @@ class Pearl(AbstractInst):
     _lambda_lower = 0.03
     _lambda_upper = 6.00
     _focus_tof_binning = "1500,-0.0006,19900"
-    _create_van_tof_binning = "100,-0.0006,19990"
+
+    _create_van_first_tof_binning = "100,-0.0006,19990"
+    _create_van_second_tof_binning = "150,-0.0006,19900"
 
     def __init__(self, user_name=None, calibration_dir=None, raw_data_dir=None, output_dir=None,
                  input_file_ext=".raw", tt_mode="TT88"):
@@ -39,6 +41,7 @@ class Pearl(AbstractInst):
 
         # Old API support
         self._old_atten_file = None
+        self._old_api_uses_full_paths = False
 
         # File names
         pearl_mc_absorption_file_name = "PRL112_DC25_10MM_FF.OUT" # TODO
@@ -48,21 +51,23 @@ class Pearl(AbstractInst):
     # --- Abstract Implementation ---- #
 
     # Params #
-    def get_default_group_names(self):
+    def _get_default_group_names(self):
         return self._default_group_names
 
-    def get_lambda_range(self):
+    def _get_lambda_range(self):
         return self._lambda_lower, self._lambda_upper
 
-    def get_focus_tof_binning(self):
+    def _get_focus_tof_binning(self):
         return self._focus_tof_binning
 
-    def get_create_van_tof_binning(self):
-        return self._create_van_tof_binning
+    def _get_create_van_tof_binning(self):
+        return_dict = {"1": self._create_van_first_tof_binning,
+                       "2": self._create_van_second_tof_binning}
+        return return_dict
 
     # Methods #
 
-    def get_calibration_full_paths(self, cycle):
+    def _get_calibration_full_paths(self, cycle):
 
         calibration_file, grouping_file, van_absorb, van_file =\
             pearl_calib_factory.get_calibration_filename(cycle=cycle, tt_mode=self.tt_mode)
@@ -82,7 +87,7 @@ class Pearl(AbstractInst):
         return calibration_details
 
     @staticmethod
-    def get_cycle_information(run_number):
+    def _get_cycle_information(run_number):
         cycle, instrument_version = pearl_cycle_factory.get_cycle_dir(run_number)
 
         cycle_information = {'cycle': cycle,
@@ -90,31 +95,70 @@ class Pearl(AbstractInst):
         return cycle_information
 
     @staticmethod
-    def get_instrument_alg_save_ranges(instrument_version):
+    def _get_instrument_alg_save_ranges(instrument_version):
         return _get_instrument_ranges(instrument_version=instrument_version)
 
     @staticmethod
-    def generate_inst_file_name(run_number):
+    def _generate_inst_file_name(run_number):
         return _gen_file_name(run_number=run_number)
 
     # Hook overrides
 
-    def attenuate_workspace(self, input_workspace):
+    def _attenuate_workspace(self, input_workspace):
         return self._attenuate_workspace(input_workspace=input_workspace)
 
-    def create_calibration_si(self, calibration_runs, cal_file_name, grouping_file_name):
-        self._create_silicon_cal(calibration_runs, cal_file_name, grouping_file_name)
+    def _create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
+        input_ws = Common._read_ws(number=calibration_runs, instrument=self)
+        cycle_information = self._get_cycle_information(calibration_runs)
 
-    def get_monitor(self, run_number, input_dir, spline_terms=20):
+        # TODO move these hard coded params to instrument specific
+        if cycle_information["instrument_version"] == "new" or cycle_information["instrument_version"] == "new2":
+            input_ws = mantid.Rebin(InputWorkspace=input_ws, Params="100,-0.0006,19950")
+
+        d_spacing_cal = mantid.ConvertUnits(InputWorkspace=input_ws, Target="dSpacing")
+        d_spacing_cal = mantid.Rebin(InputWorkspace=d_spacing_cal, Params="1.8,0.002,2.1")
+
+        if cycle_information["instrument_version"] == "new2":
+            cross_cor_ws = mantid.CrossCorrelate(InputWorkspace=d_spacing_cal, ReferenceSpectra=20,
+                                                 WorkspaceIndexMin=9, WorkspaceIndexMax=1063, XMin=1.8, XMax=2.1)
+
+        elif cycle_information["instrument_version"] == "new":
+            cross_cor_ws = mantid.CrossCorrelate(InputWorkspace=d_spacing_cal, ReferenceSpectra=20,
+                                                 WorkspaceIndexMin=9, WorkspaceIndexMax=943, XMin=1.8, XMax=2.1)
+        else:
+            cross_cor_ws = mantid.CrossCorrelate(InputWorkspace=d_spacing_cal, ReferenceSpectra=500,
+                                                 WorkspaceIndexMin=1, WorkspaceIndexMax=1440, XMin=1.8, XMax=2.1)
+        if self._old_api_uses_full_paths:  # Workaround for old API setting full paths
+            grouping_file_path = grouping_file_name
+            offset_file_path = offset_file_name
+        else:
+            offset_file_path = self.calibration_dir + offset_file_name
+            grouping_file_path = self.calibration_dir + grouping_file_name
+
+        # Ceo Cell refined to 5.4102(3) so 220 is 1.912795
+        offset_output_path = mantid.GetDetectorOffsets(InputWorkspace=cross_cor_ws, Step=0.002, DReference=1.912795,
+                                                       XMin=-200, XMax=200, GroupingFileName=offset_file_path)
+        aligned_ws = mantid.AlignDetectors(InputWorkspace=input_ws, CalibrationFile=offset_file_path)
+        cal_grouped_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws, GroupingFileName=grouping_file_path)
+
+        Common.remove_intermediate_workspace(d_spacing_cal)
+        Common.remove_intermediate_workspace(cross_cor_ws)
+        Common.remove_intermediate_workspace(aligned_ws)
+        Common.remove_intermediate_workspace(cal_grouped_ws)
+
+    def _create_calibration_silicon(self, calibration_runs, cal_file_name, grouping_file_name):
+        self._do_silicon_calibration(calibration_runs, cal_file_name, grouping_file_name)
+
+    def _get_monitor(self, run_number, input_dir, spline_terms=20):
         return self._get_monitor(run_number=run_number, input_dir=input_dir, spline_terms=spline_terms)
 
-    def get_monitor_spectra(self, run_number):
+    def _get_monitor_spectra(self, run_number):
         return self._get_monitor_spectrum(run_number=run_number)
 
     def _skip_appending_cycle_to_raw_dir(self):
         return self._disable_appending_cycle_to_raw_dir
 
-    def spline_background(self, focused_vanadium_ws, spline_number, instrument_version=''):
+    def _spline_background(self, focused_vanadium_ws, spline_number, instrument_version=''):
         if instrument_version == "new2":
             out_list = _spline_new2_background(in_workspace=focused_vanadium_ws, num_splines=spline_number,
                                                instrument_version=instrument_version)
@@ -143,9 +187,9 @@ class Pearl(AbstractInst):
         Common.remove_intermediate_workspace(workspace_name=wc_attenuated)
         return pearl_attenuated_ws
 
-    def _create_silicon_cal(self, runs_to_process, cal_file_name, grouping_file_name):
+    def _do_silicon_calibration(self, runs_to_process, cal_file_name, grouping_file_name):
         create_si_ws = Common._read_ws(number=runs_to_process, instrument=self)
-        cycle_details = self.get_cycle_information(runs_to_process)
+        cycle_details = self._get_cycle_information(runs_to_process)
         instrument_version = cycle_details["instrument_version"]
 
         if instrument_version == "new" or instrument_version == "new2":
@@ -188,7 +232,7 @@ class Pearl(AbstractInst):
         load_monitor_ws = Common._load_monitor(run_number, input_dir=input_dir, instrument=self)
         get_monitor_ws = mantid.ConvertUnits(InputWorkspace=load_monitor_ws, Target="Wavelength")
         Common.remove_intermediate_workspace(load_monitor_ws)
-        lmin, lmax = self.get_lambda_range()
+        lmin, lmax = self._get_lambda_range()
         get_monitor_ws = mantid.CropWorkspace(InputWorkspace=get_monitor_ws, XMin=lmin, XMax=lmax)
         ex_regions = numpy.zeros((2, 4))
         ex_regions[:, 0] = [3.45, 3.7]
@@ -232,7 +276,7 @@ class Pearl(AbstractInst):
         if output_dir is not None:
             self._output_dir = output_dir
         if input_file_ext is not None:
-            self._default_input_ext = input_file_ext
+            self.default_input_ext = input_file_ext
         if tt_mode is not None:
             self._tt_mode = tt_mode
 
@@ -250,16 +294,24 @@ class Pearl(AbstractInst):
         self._output_dir = output_dir
 
     def _old_api_set_ext(self, ext):
-        self._default_input_ext = ext
+        self.default_input_ext = ext
 
     def _old_api_set_atten(self, atten_file):
-        self._old_atten_file = _old_api_strip_file_path(atten_file)
+        self._old_atten_file = _old_api_get_file_name(atten_file)
+
+    def _old_api_set_full_paths(self, val):
+        self._old_api_uses_full_paths = val
+
+    def _PEARL_use_full_path(self):
+        return self._old_api_uses_full_paths
 
 
-def _old_api_strip_file_path(in_path):
+def _old_api_get_file_name(in_path):
+    # Gets the filename from a full path
     return os.path.basename(in_path)
 
 # Implementation of static methods
+
 
 def _gen_file_name(run_number):
 
@@ -295,10 +347,8 @@ def _get_instrument_ranges(instrument_version):
 
 def _spline_new2_background(in_workspace, num_splines, instrument_version):
     # remove bragg peaks before spline
-
-    for i in range(0, 12):  # TODO remove this hardcoded value if possible - this is 14 with the 2 below
-        van_stripped_ws = mantid.StripPeaks(InputWorkspace=in_workspace, FWHM=15, Tolerance=8,
-                                            WorkspaceIndex=i)
+    alg_range, unused = _get_instrument_ranges("new2")
+    van_stripped_ws = _strip_peaks_new_inst(in_workspace, alg_range)
 
     # run twice on low angle as peaks are very broad
     for i in range(0, 2):
@@ -315,10 +365,9 @@ def _spline_new2_background(in_workspace, num_splines, instrument_version):
 
 
 def _spline_new_background(in_workspace, num_splines, instrument_version):
-
-    # remove bragg peaks before spline
-    for i in range(0, 12):
-        van_stripped = mantid.StripPeaks(InputWorkspace=in_workspace, FWHM=15, Tolerance=8, WorkspaceIndex=i)
+    # Remove bragg peaks before spline
+    alg_range, unused = _get_instrument_ranges("new")
+    van_stripped = _strip_peaks_new_inst(in_workspace, alg_range)
 
     van_stripped = mantid.ConvertUnits(InputWorkspace=van_stripped, Target="TOF")
 
@@ -327,11 +376,20 @@ def _spline_new_background(in_workspace, num_splines, instrument_version):
     return splined_ws_list
 
 
+def _strip_peaks_new_inst(input_ws, alg_range):
+    van_stripped_ws = mantid.StripPeaks(InputWorkspace=input_ws, FWHM=15, Tolerance=8, WorkspaceIndex=0)
+    for i in range(1, alg_range):
+        van_stripped_ws = mantid.StripPeaks(InputWorkspace=van_stripped_ws, FWHM=15, Tolerance=8,
+                                            WorkspaceIndex=i)
+
+    return van_stripped_ws
+
+
 def _perform_spline_range(instrument_version, num_splines, stripped_ws):
     ws_range, unused = _get_instrument_ranges(instrument_version)
     splined_ws_list = []
     for i in range(0, ws_range):
-        out_ws_name = "_create_van_cal_spline-" + str(i)
+        out_ws_name = "spline" + str(i + 1)
         splined_ws_list.append(mantid.SplineBackground(InputWorkspace=stripped_ws, OutputWorkspace=out_ws_name,
                                                        WorkspaceIndex=i, NCoeff=num_splines))
     return splined_ws_list
@@ -358,7 +416,7 @@ def _spline_old_background(in_workspace, num_splines):
 
     splined_ws_list = []
     for i in range(0, 4):
-        out_ws_name = "_create_van_calc_spline-" + str(i)
+        out_ws_name = "spline" + str(i+1)
         if i == 1:
             coeff = 80
         else:

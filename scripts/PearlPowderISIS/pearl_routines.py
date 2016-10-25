@@ -80,23 +80,23 @@ def PEARL_startup(usern="matt", thiscycle='11_1'):
 
 
 def PEARL_getlambdarange():
-    return _pearl_obj_singleton().get_lambda_range()
+    return _pearl_obj_singleton()._get_lambda_range()
 
 
 def PEARL_gettofrange():
-    return _pearl_obj_singleton().get_focus_tof_binning()
+    return _pearl_obj_singleton()._get_focus_tof_binning()
 
 
 def PEARL_getmonitorspectrum(runno):
     pearl_obj = _pearl_obj_singleton()
     # Ensure mode is set to latest value
     pearl_obj._old_api_constructor_set(tt_mode=g_oldParams["mode"])
-    return pearl_obj.get_monitor_spectra(runno)
+    return pearl_obj._get_monitor_spectra(runno)
 
 
 def PEARL_getcycle(number):
     pearl_obj = _pearl_obj_singleton()
-    cycle_information = pearl_obj.get_cycle_information(number)
+    cycle_information = pearl_obj._get_cycle_information(number)
     datadir = pearl_obj.output_dir
     updated_vals = {"cycle"   : cycle_information["cycle"],
                     "instver" : cycle_information["instrument_version"],
@@ -120,7 +120,7 @@ def PEARL_getcalibfiles():
     pearl_obj._old_api_set_tt_mode(g_oldParams["tt_mode"])
     pearl_obj._old_api_set_calib_dir(g_oldParams["pearl_file_dir"])
 
-    cal_dict = pearl_obj.get_calibration_full_paths(cycle=cycle)
+    cal_dict = pearl_obj._get_calibration_full_paths(cycle=cycle)
     print ("Setting calibration for cycle", cycle)
 
     updated_vals = {"calfile"     : cal_dict["calibration"],
@@ -183,7 +183,7 @@ def PEARL_datadir():
 def PEARL_getfilename(run_number, ext):
     pearl_obj = _pearl_obj_singleton()
     pearl_obj._old_api_set_ext(ext)
-    return pearl_obj.generate_inst_file_name(run_number)
+    return pearl_obj._generate_inst_file_name(run_number)
 
 
 def PearlLoad(files, ext, outname):
@@ -208,15 +208,13 @@ def PEARL_align(work, focus):
 
 def PEARL_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False):
 
-
     PEARL_getcycle(number)
 
     pearl_obj = _pearl_obj_singleton()
     pearl_obj._old_api_set_tt_mode(ttmode)
     pearl_obj.set_debug_mode(debug)
     return pearl_obj.focus(run_number=number, focus_mode=fmode, input_ext=ext, do_attenuation=atten,
-                    do_van_normalisation=van_norm)
-
+                           do_van_normalisation=van_norm)
 
 
 def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False,
@@ -227,7 +225,7 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
     pearl_obj._old_api_set_tt_mode(ttmode)
     pearl_obj.set_debug_mode(debug)
     return pearl_obj.focus(run_number=number, focus_mode=fmode, input_ext=ext, do_attenuation=atten,
-                    do_van_normalisation=van_norm)
+                           do_van_normalisation=van_norm)
 
 
 def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
@@ -242,26 +240,30 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     pearl_obj._old_api_set_tt_mode(ttmode)
     pearl_obj._old_api_set_ext(ext)
     pearl_obj.set_debug_mode(debug)
-
-    return pearl_obj.create_vanadium(vanadium_runs=van, empty_runs=empty,
-                                     output_file_name=nvanfile, num_of_splines=nspline,
-                                     do_absorb_corrections=absorb)
-
+    pearl_obj._old_api_uses_full_paths = True
+    return pearl_obj.create_calibration_vanadium(vanadium_runs=van, empty_runs=empty,
+                                                 output_file_name=nvanfile, num_of_splines=nspline,
+                                                 do_absorb_corrections=absorb)
+    pearl_obj._old_api_uses_full_paths = False
 
 def PEARL_createcal(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal",
                     groupfile="P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"):
     PEARL_getcycle(calruns)
 
+    # Split the full path used in the old API call
     pearl_obj = _pearl_obj_singleton()
+    pearl_obj._old_api_uses_full_paths = True
     pearl_obj.create_calibration(calibration_runs=calruns, offset_file_name=noffsetfile,
                                  grouping_file_name=groupfile)
+    pearl_obj._old_api_uses_full_paths = False
     return
 
 
 def PEARL_createcal_Si(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal"):
     PEARL_getcycle(calruns)
-
-    _pearl_obj_singleton().create_calibration_Si(calibration_runs=calruns, out_file_name=noffsetfile)
+    grouping_file_name = g_oldParams["groupfile"]
+    _pearl_obj_singleton().create_calibration_si(calibration_runs=calruns,
+                                                 cal_file_name=noffsetfile, grouping_file_name=grouping_file_name)
     return
 
 

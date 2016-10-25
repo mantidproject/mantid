@@ -9,19 +9,19 @@ class PearlPowder_Mock(AbstractInst):
                                                tt_mode=tt_mode)
         self.generate_cycle_dir_flag = False
 
-    def get_lambda_range(self):
+    def _get_lambda_range(self):
         return None
 
-    def get_focus_tof_binning(self):
+    def _get_focus_tof_binning(self):
         return None
 
-    def get_create_van_tof_binning(self):
+    def _get_create_van_tof_binning(self):
         return None
 
-    def get_default_group_names(self):
+    def _get_default_group_names(self):
         return None
 
-    def get_calibration_full_paths(self, cycle):
+    def _get_calibration_full_paths(self, cycle):
         # This is here to help remind people of the dict that is expected
         calibration_details = {"calibration": "cal",
                                "grouping": "group",
@@ -30,14 +30,14 @@ class PearlPowder_Mock(AbstractInst):
         return calibration_details
 
     @staticmethod
-    def generate_inst_file_name(run_number):
+    def _generate_inst_file_name(run_number):
         return "generate_inst_file_name" + str(run_number)
 
-    def get_instrument_alg_save_ranges(instrument=''):
+    def _get_instrument_alg_save_ranges(instrument=''):
         return None
 
     @staticmethod
-    def get_cycle_information(run_number):
+    def _get_cycle_information(run_number):
         # This is here to help remind people of the dict format
         cycle_information = {"cycle" : "123",
                              "instrument_version": "test_v1"}

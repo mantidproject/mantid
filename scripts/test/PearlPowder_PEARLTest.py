@@ -47,9 +47,9 @@ class PearlPowder_PEARLTest(unittest.TestCase):
         pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir=CalibDir,
                                             raw_data_dir=DataDir, output_dir="D:\\PEARL\\output\\")
         vanFile35 = 'van_spline_TT35_cycle_15_3.nxs'
-        pearl_obj.create_vanadium(vanadium_runs="91530_91531",
-                                  empty_runs="91550_91551", output_file_name=vanFile35,
-                                  num_of_splines=40, do_absorb_corrections=True, gen_absorb_correction=False)
+        pearl_obj.create_calibration_vanadium(vanadium_runs="91530_91531",
+                                              empty_runs="91550_91551", output_file_name=vanFile35,
+                                              num_of_splines=40, do_absorb_corrections=True, gen_absorb_correction=False)
 
     def xtest_create_van_absorb_corr_gen(self):
         DataDir = os.path.join(DIRS[0], 'PEARL/Calibration_Test/RawFiles/')
@@ -57,9 +57,9 @@ class PearlPowder_PEARLTest(unittest.TestCase):
         pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir=CalibDir,
                                             raw_data_dir=DataDir, output_dir="D:\\PEARL\\output\\")
         vanFile35 = 'van_spline_TT35_cycle_15_3.nxs'
-        pearl_obj.create_vanadium(vanadium_runs="91530_91531",
-                                  empty_runs="91550_91551", output_file_name=vanFile35,
-                                  num_of_splines=40, do_absorb_corrections=True, gen_absorb_correction=True)
+        pearl_obj.create_calibration_vanadium(vanadium_runs="91530_91531",
+                                              empty_runs="91550_91551", output_file_name=vanFile35,
+                                              num_of_splines=40, do_absorb_corrections=True, gen_absorb_correction=True)
 
     def test_create_van_no_absorb_corr(self):
         DataDir = os.path.join(DIRS[0], 'PEARL/Calibration_Test/RawFiles/')
@@ -67,9 +67,9 @@ class PearlPowder_PEARLTest(unittest.TestCase):
         pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir=CalibDir,
                                             raw_data_dir=DataDir, output_dir="D:\\PEARL\\output\\")
         vanFile35 = 'van_spline_TT35_cycle_15_3.nxs'
-        pearl_obj.create_vanadium(vanadium_runs="91530_91531",
-                                  empty_runs="91550_91551", output_file_name=vanFile35,
-                                  num_of_splines=40, do_absorb_corrections=False)
+        pearl_obj.create_calibration_vanadium(vanadium_runs="91530_91531",
+                                              empty_runs="91550_91551", output_file_name=vanFile35,
+                                              num_of_splines=40, do_absorb_corrections=False)
 
     def test_create_cal_by_name(self):
         # Checks testvan executes correctly

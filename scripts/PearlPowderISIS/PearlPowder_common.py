@@ -15,16 +15,11 @@ def create_calibration_by_names(calruns, startup_objects, ngroupfile, ngroup):
                            instrument=startup_objects)
 
 
-def create_calibration(startup_object, calibration_runs, offset_file_path, grouping_file_name):
-    _create_calibration(calibration_runs=calibration_runs, offset_file_name=offset_file_path,
-                        grouping_file_name=grouping_file_name, instrument=startup_object)
-
-
 def create_vanadium(startup_object, vanadium_runs, empty_runs, output_file_name,
-                    num_of_spline_coefficients=60, do_absorp_corrections=True, generate_abosrp_corrections=False):
+                    num_of_spline_coefficients=60, do_absorb_corrections=True, generate_absorb_corrections=False):
     _create_van(instrument=startup_object, van=vanadium_runs, empty=empty_runs,
-                nvanfile=output_file_name, nspline=num_of_spline_coefficients,
-                absorb=do_absorp_corrections, gen_absorb=generate_abosrp_corrections)
+                output_van_file_name=output_file_name, nspline=num_of_spline_coefficients,
+                absorb=do_absorb_corrections, gen_absorb=generate_absorb_corrections)
 
 
 def set_debug(debug_on=False):
@@ -53,7 +48,7 @@ g_ads_workaround = {"read_pearl_ws" : _read_pearl_ws_count}
 
 def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument, group_names):
 
-    cycle_information = instrument.get_cycle_information(calibration_runs)
+    cycle_information = instrument._get_cycle_information(calibration_runs)
 
     input_ws = _read_ws(calibration_runs, instrument)
     calibration_d_spacing_ws = mantid.ConvertUnits(InputWorkspace=input_ws, Target="dSpacing")
@@ -63,46 +58,8 @@ def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument,
     remove_intermediate_workspace(input_ws)
 
 
-def _create_calibration(calibration_runs, offset_file_name, grouping_file_name, instrument):
-    input_ws = _read_ws(number=calibration_runs, instrument=instrument)
-    cycle_information = instrument.get_cycle_information(calibration_runs)
-
-    # TODO move these hard coded params to instrument specific
-    if cycle_information["instrument_version"] == "new" or cycle_information["instrument_version"] == "new2":
-        input_ws = mantid.Rebin(InputWorkspace=input_ws, Params="100,-0.0006,19950")
-
-    d_spacing_cal = mantid.ConvertUnits(InputWorkspace=input_ws, Target="dSpacing")
-    d_spacing_cal = mantid.Rebin(InputWorkspace=d_spacing_cal, Params="1.8,0.002,2.1")
-
-    if cycle_information["instrument_version"] == "new2":
-        cross_cor_ws = mantid.CrossCorrelate(InputWorkspace=d_spacing_cal, ReferenceSpectra=20,
-                                             WorkspaceIndexMin=9, WorkspaceIndexMax=1063, XMin=1.8, XMax=2.1)
-
-    elif cycle_information["instrument_version"] == "new":
-        cross_cor_ws = mantid.CrossCorrelate(InputWorkspace=d_spacing_cal, ReferenceSpectra=20,
-                                             WorkspaceIndexMin=9, WorkspaceIndexMax=943, XMin=1.8, XMax=2.1)
-    else:
-        cross_cor_ws = mantid.CrossCorrelate(InputWorkspace=d_spacing_cal, ReferenceSpectra=500,
-                                             WorkspaceIndexMin=1, WorkspaceIndexMax=1440, XMin=1.8, XMax=2.1)
-    calib_dir = instrument.calibration_dir
-    offset_file_path = calib_dir + offset_file_name
-    grouping_file_path = calib_dir + grouping_file_name
-    # Ceo Cell refined to 5.4102(3) so 220 is 1.912795
-    offset_output_path = mantid.GetDetectorOffsets(InputWorkspace=cross_cor_ws, Step=0.002, DReference=1.912795,
-                                                   XMin=-200, XMax=200, GroupingFileName=offset_file_path)
-    aligned_ws = mantid.AlignDetectors(InputWorkspace=input_ws, CalibrationFile=offset_file_path)
-    cal_grouped_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws, GroupingFileName=grouping_file_path)
-
-    remove_intermediate_workspace(d_spacing_cal)
-    remove_intermediate_workspace(cross_cor_ws)
-    remove_intermediate_workspace(aligned_ws)
-    remove_intermediate_workspace(cal_grouped_ws)
-
-
-
-def _create_van(instrument, van, empty, nvanfile, nspline=60, absorb=True, gen_absorb=False):
-
-    cycle_information = instrument.get_cycle_information(van)
+def _create_van(instrument, van, empty, output_van_file_name, nspline=60, absorb=True, gen_absorb=False):
+    cycle_information = instrument._get_cycle_information(van)
 
     input_van_ws = _read_ws(number=van, instrument=instrument)
     input_empty_ws = _read_ws(number=empty, instrument=instrument)
@@ -112,13 +69,14 @@ def _create_van(instrument, van, empty, nvanfile, nspline=60, absorb=True, gen_a
     remove_intermediate_workspace(input_empty_ws)
     remove_intermediate_workspace(input_van_ws)
 
-    calibration_full_paths = instrument.get_calibration_full_paths(cycle=cycle_information["cycle"])
+    calibration_full_paths = instrument._get_calibration_full_paths(cycle=cycle_information["cycle"])
+    tof_binning = instrument._get_create_van_tof_binning()
 
     if absorb:
         corrected_van_ws = _apply_absorb_corrections(calibration_full_paths, corrected_van_ws, gen_absorb)
 
     corrected_van_ws = mantid.ConvertUnits(InputWorkspace=corrected_van_ws, Target="TOF")
-    corrected_van_ws = mantid.Rebin(InputWorkspace=corrected_van_ws, Params=instrument.get_create_van_tof_binning())
+    corrected_van_ws = mantid.Rebin(InputWorkspace=corrected_van_ws, Params=tof_binning["1"])
 
     corrected_van_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
                                              CalibrationFile=calibration_full_paths["calibration"])
@@ -128,20 +86,25 @@ def _create_van(instrument, van, empty, nvanfile, nspline=60, absorb=True, gen_a
 
     focused_van_file = mantid.ConvertUnits(InputWorkspace=focused_van_file, Target="TOF")
 
-    focused_van_file = mantid.Rebin(InputWorkspace=focused_van_file, Params=instrument.get_create_van_tof_binning())
+    focused_van_file = mantid.Rebin(InputWorkspace=focused_van_file, Params=tof_binning["2"])
     focused_van_file = mantid.ConvertUnits(InputWorkspace=focused_van_file, Target="dSpacing")
 
     remove_intermediate_workspace(corrected_van_ws)
 
-    splined_ws_list = instrument.spline_background(focused_van_file, nspline, cycle_information["instrument_version"])
+    splined_ws_list = instrument._spline_background(focused_van_file, nspline, cycle_information["instrument_version"])
+
+    if instrument._PEARL_use_full_path():
+        out_van_file_path = output_van_file_name
+    else:
+        out_van_file_path = instrument.calibration_dir + output_van_file_name
 
     append = False
     for ws in splined_ws_list:
-        mantid.SaveNexus(Filename=nvanfile, InputWorkspace=ws, Append=append)
+        mantid.SaveNexus(Filename=out_van_file_path, InputWorkspace=ws, Append=append)
         remove_intermediate_workspace(ws)
         append = True
 
-    mantid.LoadNexus(Filename=nvanfile, OutputWorkspace="Van_data")
+    mantid.LoadNexus(Filename=out_van_file_path, OutputWorkspace="Van_data")
 
 
 def _apply_absorb_corrections(calibration_full_paths, corrected_van_ws, gen_absorb):
@@ -160,8 +123,6 @@ def _apply_absorb_corrections(calibration_full_paths, corrected_van_ws, gen_abso
 
 def _generate_vanadium_absorb_corrections(calibration_full_paths, ws_to_match):
     # TODO are these values applicable to all instruments
-    import pydevd
-    pydevd.settrace('localhost', port=23000, stdoutToServer=True, stderrToServer=True)
     shape_ws = mantid.CloneWorkspace(InputWorkspace=ws_to_match)
     mantid.CreateSampleShape(InputWorkspace=shape_ws, ShapeXML='<sphere id="sphere_1"> <centre x="0" y="0" z= "0" />\
                                                       <radius val="0.005" /> </sphere>')
@@ -184,8 +145,8 @@ def _load_van_absorb_corr(calibration_full_paths):
 def _load_monitor(number, input_dir, instrument):
     load_monitor_ws = None
     if isinstance(number, int):
-        full_file_path = instrument.generate_input_full_path(run_number=number, input_dir=input_dir)
-        mspectra = instrument.get_monitor_spectra(number)
+        full_file_path = instrument._generate_input_full_path(run_number=number, input_dir=input_dir)
+        mspectra = instrument._get_monitor_spectra(number)
         load_monitor_ws = mantid.LoadRaw(Filename=full_file_path, SpectrumMin=mspectra, SpectrumMax=mspectra,
                                          LoadLogFiles="0")
     else:
@@ -198,9 +159,9 @@ def _load_monitor_sum_range(files, input_dir, instrument):
     loop = 0
     num = files.split("_")
     frange = list(range(int(num[0]), int(num[1]) + 1))
-    mspectra = instrument.get_monitor_spectra(int(num[0]))
+    mspectra = instrument._get_monitor_spectra(int(num[0]))
     for i in frange:
-        file_path = instrument.generate_input_full_path(i, input_dir)
+        file_path = instrument._generate_input_full_path(i, input_dir)
         outwork = "mon" + str(i)
         mantid.LoadRaw(Filename=file_path, OutputWorkspace=outwork, SpectrumMin=mspectra, SpectrumMax=mspectra,
                        LoadLogFiles="0")
@@ -226,7 +187,7 @@ def _load_raw_files(run_number, instrument, input_dir):
             # TODO deal with liveData in higher class
             raise NotImplementedError()
 
-        infile = instrument.generate_input_full_path(run_number=run_number, input_dir=input_dir)
+        infile = instrument._generate_input_full_path(run_number=run_number, input_dir=input_dir)
         load_raw_ws = mantid.LoadRaw(Filename=infile, LoadLogFiles="0")
     else:
         load_raw_ws = _load_raw_file_range(run_number, input_dir, instrument)
@@ -239,7 +200,7 @@ def _load_raw_file_range(files, input_dir, instrument):
     frange = list(range(int(num[0]), int(num[1]) + 1))
     out_ws = None
     for i in frange:
-        file_path = instrument.generate_input_full_path(i, input_dir)
+        file_path = instrument._generate_input_full_path(i, input_dir)
         outwork = "run" + str(i)
         mantid.LoadRaw(Filename=file_path, OutputWorkspace=outwork, LoadLogFiles="0")
         loop += 1
@@ -257,17 +218,18 @@ def _load_raw_file_range(files, input_dir, instrument):
 
 
 def _read_ws(number, instrument):
-    cycle_information = instrument.get_cycle_information(run_number=number)
-    input_dir = instrument.generate_raw_data_cycle_dir(cycle_information["cycle"])
+    cycle_information = instrument._get_cycle_information(run_number=number)
+    input_dir = instrument._generate_raw_data_cycle_dir(cycle_information["cycle"])
     read_in_ws = _load_raw_files(run_number=number, instrument=instrument, input_dir=input_dir)
     # TODO move this into instrument specific
     read_ws = mantid.ConvertUnits(InputWorkspace=read_in_ws, Target="Wavelength")
     remove_intermediate_workspace(read_in_ws)
-    _read_pearl_monitor = instrument.get_monitor(run_number=number, input_dir=input_dir, spline_terms=20)
-    read_ws = mantid.NormaliseToMonitor(InputWorkspace=read_ws,
-                                                      MonitorWorkspace=_read_pearl_monitor,
-                                                      IntegrationRangeMin=0.6, IntegrationRangeMax=5.0)
-    output_name = "read_ws-" + str(g_ads_workaround["read_pearl_ws"])
+
+    _read_pearl_monitor = instrument._get_monitor(run_number=number, input_dir=input_dir, spline_terms=20)
+
+    read_ws = mantid.NormaliseToMonitor(InputWorkspace=read_ws, MonitorWorkspace=_read_pearl_monitor,
+                                        IntegrationRangeMin=0.6, IntegrationRangeMax=5.0)
+    output_name = "read_ws_output-" + str(g_ads_workaround["read_pearl_ws"])
     g_ads_workaround["read_pearl_ws"] += 1
     output_ws = mantid.ConvertUnits(InputWorkspace=read_ws,
                                     OutputWorkspace=output_name, Target="TOF")
@@ -279,15 +241,15 @@ def _read_ws(number, instrument):
 
 def _run_pearl_focus(instrument, run_number, fmode="trans", atten=True, van_norm=True):
 
-    cycle_information = instrument.get_cycle_information(run_number=run_number)
+    cycle_information = instrument._get_cycle_information(run_number=run_number)
 
-    alg_range, save_range = instrument.get_instrument_alg_save_ranges(cycle_information["instrument_version"])
+    alg_range, save_range = instrument._get_instrument_alg_save_ranges(cycle_information["instrument_version"])
 
-    input_file_paths = instrument.get_calibration_full_paths(cycle=cycle_information["cycle"])
+    input_file_paths = instrument._get_calibration_full_paths(cycle=cycle_information["cycle"])
 
-    output_file_names = instrument.generate_out_file_paths(run_number, instrument.output_dir)
+    output_file_names = instrument._generate_out_file_paths(run_number, instrument.output_dir)
     read_ws = _read_ws(number=run_number, instrument=instrument)
-    input_workspace = mantid.Rebin(InputWorkspace=read_ws, Params=instrument.get_focus_tof_binning())
+    input_workspace = mantid.Rebin(InputWorkspace=read_ws, Params=instrument._get_focus_tof_binning())
     input_workspace = mantid.AlignDetectors(InputWorkspace=input_workspace, CalibrationFile=input_file_paths["calibration"])
     input_workspace = mantid.DiffractionFocussing(InputWorkspace=input_workspace, GroupingFileName=input_file_paths["grouping"])
 
@@ -354,7 +316,7 @@ def _focus_mode_trans(output_file_names, atten, instrument, calibrated_spectra):
 
         mantid.CloneWorkspace(InputWorkspace=summed_ws, OutputWorkspace=no_att)
         in_atten_ws = mantid.ConvertUnits(InputWorkspace=in_atten_ws, Target="dSpacing")
-        atten_ws = instrument.attenuate_workspace(in_atten_ws)
+        atten_ws = instrument._attenuate_workspace(in_atten_ws)
         attenuated_workspace = mantid.ConvertUnits(InputWorkspace=atten_ws, Target="TOF")
         remove_intermediate_workspace(atten_ws)
         remove_intermediate_workspace(in_atten_ws)
@@ -507,11 +469,11 @@ def calc_calibration_without_vanadium(focused_ws, index, instrument):
 
 def calc_calibration_with_vanadium(focused_ws, index, vanadium_ws, instrument):
     # Load in workspace containing vanadium run
-    van_rebinned = mantid.Rebin(InputWorkspace=vanadium_ws, Params=instrument.get_focus_tof_binning())
+    van_rebinned = mantid.Rebin(InputWorkspace=vanadium_ws, Params=instrument._get_focus_tof_binning())
 
     van_spectrum = mantid.ExtractSingleSpectrum(InputWorkspace=focused_ws, WorkspaceIndex=index)
     van_spectrum = mantid.ConvertUnits(InputWorkspace=van_spectrum, Target="TOF")
-    van_spectrum = mantid.Rebin(InputWorkspace=van_spectrum, Params=instrument.get_focus_tof_binning())
+    van_spectrum = mantid.Rebin(InputWorkspace=van_spectrum, Params=instrument._get_focus_tof_binning())
 
     van_processed = "van_processed" + str(index)  # Workaround for Mantid overwriting the WS in a loop
     mantid.Divide(LHSWorkspace=van_spectrum, RHSWorkspace=van_rebinned, OutputWorkspace=van_processed)
