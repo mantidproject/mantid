@@ -22,6 +22,7 @@ class RebinToBinWidthAtXTest(unittest.TestCase):
             'InputWorkspace': ws,
             'OutputWorkspace': self._OUT_WS_NAME,
             'X': x,
+            'rethrow': True, # Let exceptions through for testing.
             'Rounding': rounding
         }
 
@@ -29,7 +30,8 @@ class RebinToBinWidthAtXTest(unittest.TestCase):
         return numpy.cumsum(numpy.append(numpy.array([xBegin]), binWidths))
 
     def _run_algorithm(self, params):
-        algorithm = testhelpers.run_algorithm('RebinToBinWidthAtX', **params)
+        algorithm = testhelpers.create_algorithm('RebinToBinWidthAtX', **params)
+        testhelpers.assertRaisesNothing(self, algorithm.execute)
         self.assertTrue(algorithm.isExecuted())
 
     def test_success_single_histogram(self):
@@ -77,7 +79,18 @@ class RebinToBinWidthAtXTest(unittest.TestCase):
         self._check_bin_widths(expectedWidth)
 
     def test_failure_X_out_of_bounds(self):
-        pass
+        binWidths = numpy.array([0.13, 0.23, 0.05, 0.27, 0.42])
+        xBegin = -0.11
+        xs = self._make_boundaries(xBegin, binWidths)
+        ys = numpy.zeros(len(xs - 1))
+        ws = CreateWorkspace(DataX=xs, DataY=ys)
+        i = len(xs) / 2 - 1
+        X = xBegin - 1
+        params = self._make_algorithm_params(ws, X)
+        algorithm = testhelpers.create_algorithm('RebinToBinWidthAtX', **params)
+        self.assertRaises(RuntimeError, algorithm.execute)
+        self.assertFalse(algorithm.isExecuted())
+
 
 if __name__ == "__main__":
     unittest.main()
