@@ -75,6 +75,7 @@ set ( TEST_PY_FILES
   NormaliseSpectraTest.py
   OSIRISDiffractionReductionTest.py
   RebinToBinWidthAtXTest.py
+  RebinToMedianBinWidthTest.py
   ResNorm2Test.py
   RetrieveRunInfoTest.py
   SANSFitShiftScaleTest.py

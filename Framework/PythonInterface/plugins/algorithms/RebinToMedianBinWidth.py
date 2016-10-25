@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm
 from mantid.kernel import Direction, StringListValidator
+from mantid.simpleapi import Rebin
 import numpy
 import rebinwrapperhelpers
 
@@ -51,7 +52,7 @@ class RebinToMedianBinWidth(PythonAlgorithm):
         '''
         inputWs = self.getProperty(self._PROP_INPUT_WS).value
         outputWs = self.getProperty(self._PROP_OUTPUT_WS).value
-        roundingMode = self.getProperty(self._PROP_ROUNDING).value
+        roundingMode = self.getProperty(rebinwrapperhelpers.PROP_NAME_ROUNDING_MODE).value
         inputIsDistribution = inputWs.isDistribution()
         if inputIsDistribution:
             inputWs = ConvertToHistogram(inputWs)
