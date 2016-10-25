@@ -72,10 +72,11 @@ private:
   void init() override;
   void exec() override;
 
-  void rebin(const HistogramData::HistogramX &,
-             const HistogramData::HistogramY &,
-             const HistogramData::HistogramE &, std::vector<int> &,
-             HistogramData::HistogramY &, HistogramData::HistogramE &, bool);
+  void rebin(const HistogramData::HistogramX &xold,
+             const HistogramData::HistogramY &yold,
+             const HistogramData::HistogramE &eold, std::vector<int> &xoldIndex,
+             HistogramData::HistogramY &ynew, HistogramData::HistogramE &enew,
+             bool distribution);
 };
 
 } // namespace Algorithm

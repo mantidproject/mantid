@@ -3,17 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAlgorithms/Rebin.h"
-#include "MantidAlgorithms/MaskBins.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/RefAxis.h"
-#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/ScopedWorkspace.h"
+#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAlgorithms/MaskBins.h"
+#include "MantidAlgorithms/Rebin.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -131,8 +131,6 @@ public:
     MatrixWorkspace_sptr rebindata =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
     auto &outX = rebindata->x(0);
-    auto &outY = rebindata->y(0);
-    auto &outE = rebindata->e(0);
 
     TS_ASSERT_EQUALS(outX.size(), 11);
     TS_ASSERT_DELTA(outX[0], 1.0, 1e-5);

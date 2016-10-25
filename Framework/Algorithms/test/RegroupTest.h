@@ -58,7 +58,6 @@ public:
 private:
   Workspace2D_sptr Create1DWorkspace(int size) {
     auto retVal = createWorkspace<Workspace2D>(1, size, size - 1);
-    double j = 1.0;
     BinEdges x(size, LinearGenerator(0.5, 0.75));
     Counts y(size - 1, 3.0);
 

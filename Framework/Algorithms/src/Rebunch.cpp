@@ -274,10 +274,10 @@ void Rebunch::rebunch_point(const HistogramX &xold, const HistogramY &yold,
                             HistogramY &ynew, HistogramE &enew,
                             const size_t n_bunch) {
 
-  int size_y = static_cast<int>(yold.size());
+  size_t size_y = yold.size();
   double xsum, ysum, esum;
-  int wbins = size_y / static_cast<int>(n_bunch);
-  int rem = size_y % static_cast<int>(n_bunch);
+  size_t wbins = size_y / n_bunch;
+  size_t rem = size_y % n_bunch;
 
   size_t i, j;
   int i_in = 0;

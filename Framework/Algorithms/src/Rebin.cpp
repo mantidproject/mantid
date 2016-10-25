@@ -2,11 +2,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Rebin.h"
+#include "MantidHistogramData/Rebin.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -250,26 +251,14 @@ void Rebin::exec() {
     PARALLEL_FOR2(inputWS, outputWS)
     for (int hist = 0; hist < histnumber; ++hist) {
       PARALLEL_START_INTERUPT_REGION
-      // get const references to input Workspace arrays (no copying)
-      auto &XValues = inputWS->x(hist).rawData();
-      auto &YValues = inputWS->y(hist).rawData();
-      auto &YErrors = inputWS->e(hist).rawData();
-
-      // get references to output workspace data (no copying)
-      MantidVec &YValues_new = outputWS->dataY(hist);
-      MantidVec &YErrors_new = outputWS->dataE(hist);
-
-      // output data arrays are implicitly filled by function
       try {
-        VectorHelper::rebin(XValues, YValues, YErrors, XValues_new.rawData(),
-                            YValues_new, YErrors_new, dist);
+        outputWS->setHistogram(
+            hist, std::move(HistogramData::rebin(inputWS->histogram(hist),
+                                                 XValues_new)));
       } catch (std::exception &ex) {
         g_log.error() << "Error in rebin function: " << ex.what() << '\n';
         throw;
       }
-
-      // Populate the output workspace X values
-      outputWS->setBinEdges(hist, XValues_new);
 
       prog.report(name());
       PARALLEL_END_INTERUPT_REGION
@@ -328,7 +317,7 @@ void Rebin::propagateMasks(API::MatrixWorkspace_const_sptr inputWS,
   const MatrixWorkspace::MaskList &mask = inputWS->maskedBins(hist);
   // Now iterate over the list, building up a vector of the masked bins
   auto it = mask.cbegin();
-  const MantidVec &XValues = inputWS->readX(hist);
+  auto &XValues = inputWS->x(hist);
   masked_bins.push_back(XValues[(*it).first]);
   weights.push_back((*it).second);
   masked_bins.push_back(XValues[(*it).first + 1]);
@@ -347,12 +336,12 @@ void Rebin::propagateMasks(API::MatrixWorkspace_const_sptr inputWS,
   // Create a zero vector for the errors because we don't care about them here
   const MantidVec zeroes(weights.size(), 0.0);
   // Create a vector to hold the redistributed weights
-  const MantidVec &XValues_new = outputWS->readX(hist);
+  auto &XValues_new = outputWS->x(hist);
   MantidVec newWeights(XValues_new.size() - 1), zeroes2(XValues_new.size() - 1);
   // Use rebin function to redistribute the weights. Note that distribution flag
   // is set
-  VectorHelper::rebin(masked_bins, weights, zeroes, XValues_new, newWeights,
-                      zeroes2, true);
+  VectorHelper::rebin(masked_bins, weights, zeroes, XValues_new.rawData(),
+                      newWeights, zeroes2, true);
 
   // Now process the output vector and fill the new masking list
   for (size_t index = 0; index < newWeights.size(); ++index) {

@@ -263,7 +263,7 @@ public:
     wksp->initialize(numHists, 10000, 9999);
     BinEdges edges(10000, LinearGenerator(0, 10));
 
-    for (int i = 0; i < numHists; i++)
+    for (size_t i = 0; i < numHists; i++)
       wksp->setBinEdges(i, edges);
 
     wksp->getAxis(0)->unit() =
