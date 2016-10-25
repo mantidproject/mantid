@@ -9,6 +9,14 @@ import unittest
 class RebinToMedianBinWidthTest(unittest.TestCase):
     _OUT_WS_NAME = '__RebinToMedianBinWidthTest_outWs'
 
+    def _check_bin_widths(self, expectedWidth):
+        outWs = mtd[self._OUT_WS_NAME]
+        for i in range(outWs.getNumberHistograms()):
+            binnedXs = outWs.readX(i)
+            newBins = binnedXs[1:] - binnedXs[:-1]
+            for binWidth in newBins:
+                self.assertAlmostEqual(binWidth, expectedWidth)
+
     def _make_algorithm_params(self, ws, rounding='None'):
         return {
             'InputWorkspace': ws,
@@ -33,12 +41,7 @@ class RebinToMedianBinWidthTest(unittest.TestCase):
         params = self._make_algorithm_params(ws)
         self._run_algorithm(params)
         expectedBinWidth = numpy.median(binWidths)
-        outWs = mtd[self._OUT_WS_NAME]
-        for i in range(outWs.getNumberHistograms()):
-            binnedXs = outWs.readX(i)
-            newBins = binnedXs[1:] - binnedXs[:-1]
-            for binWidth in newBins:
-                self.assertAlmostEqual(binWidth, expectedBinWidth)
+        self._check_bin_widths(expectedBinWidth)
 
     def test_average_over_multiple_histograms(self):
         binWidths = numpy.array([0.5, 0.5, 2.3, 2.3, 2.3, 6.5,
@@ -51,12 +54,7 @@ class RebinToMedianBinWidthTest(unittest.TestCase):
         params = self._make_algorithm_params(ws)
         self._run_algorithm(params)
         expectedBinWidth = 0.5 * (2.3 + 1.3)
-        outWs = mtd[self._OUT_WS_NAME]
-        for i in range(outWs.getNumberHistograms()):
-            binnedXs = outWs.readX(i)
-            newBins = binnedXs[1:] - binnedXs[:-1]
-            for binWidth in newBins:
-                self.assertAlmostEqual(binWidth, expectedBinWidth)
+        self._check_bin_widths(expectedBinWidth)
 
     def test_rounding(self):
         binWidths = numpy.array([0.5, 6.1, 2.3, 0.5, 2.3, 2.3])
@@ -66,12 +64,7 @@ class RebinToMedianBinWidthTest(unittest.TestCase):
         params = self._make_algorithm_params(ws, rounding='10^n')
         self._run_algorithm(params)
         expectedBinWidth = 1.0
-        outWs = mtd[self._OUT_WS_NAME]
-        for i in range(outWs.getNumberHistograms()):
-            binnedXs = outWs.readX(i)
-            newBins = binnedXs[1:] - binnedXs[:-1]
-            for binWidth in newBins:
-                self.assertAlmostEqual(binWidth, expectedBinWidth)
+        self._check_bin_widths(expectedBinWidth)
 
 if __name__ == "__main__":
     unittest.main()
