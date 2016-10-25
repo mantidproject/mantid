@@ -32,6 +32,12 @@ class RebinToBinWidthAtX(PythonAlgorithm):
         '''
         return 'Rebins a workspace to the bin width at given X.'
 
+    def version(self):
+        '''
+        Return algorithm's version.
+        '''
+        return 1
+
     def PyInit(self):
         '''
         Declares algorithm's properties.

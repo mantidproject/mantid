@@ -30,6 +30,12 @@ class RebinToMedianBinWidth(PythonAlgorithm):
         '''
         return 'Rebins a workspace to the median bin width.'
 
+    def version(self):
+        '''
+        Return algorithm's version.
+        '''
+        return 1
+
     def PyInit(self):
         '''
         Declares algorithm's properties.
