@@ -40,9 +40,6 @@ public:
   ILLEnergyTransfer(IndirectDataReduction *idrUI, QWidget *parent = 0);
   ~ILLEnergyTransfer() override;
 
-  void save();
-  void plot();
-
   void setup() override;
   void run() override;
 
@@ -56,6 +53,9 @@ private slots:
 private:
   Ui::ILLEnergyTransfer m_uiForm;
   double m_backScaling = 1.;
+  void save();
+  void plot();
+  void generateCalibrationWorkspace();
 };
 } // namespace CustomInterfaces
 } // namespace Mantid
