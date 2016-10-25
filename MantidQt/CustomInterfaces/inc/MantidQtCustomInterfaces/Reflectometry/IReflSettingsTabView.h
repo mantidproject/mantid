@@ -82,6 +82,10 @@ public:
   virtual std::string getScaleFactor() const = 0;
   virtual std::string getMomentumTransferLimits() const = 0;
   virtual std::string getDetectorLimits() const = 0;
+
+  /// Get default values
+  virtual void getExpDefaults() const = 0;
+  virtual void getInstDefaults() const = 0;
 };
 }
 }

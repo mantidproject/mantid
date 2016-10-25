@@ -46,6 +46,7 @@ public:
   ~ReflSettingsTabPresenter() override;
   /// Accept a main presenter
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
+  void notify(IReflSettingsTabPresenter::Flag flag) override;
 
   /// Returns global options for 'Plus' algorithm
   std::string getPlusOptions() const override;
@@ -61,6 +62,8 @@ private:
   void createTransmissionHints();
   void createReductionHints();
   void createStitchHints();
+  void getExpDefaults();
+  void getInstDefaults();
 
   /// The view we are managing
   IReflSettingsTabView *m_view;

@@ -100,6 +100,10 @@ public:
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override;
 
+public slots:
+  void getExpDefaults() const override;
+  void getInstDefaults() const override;
+
 private:
   /// Initialise the interface
   void initLayout();

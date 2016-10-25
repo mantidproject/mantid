@@ -27,7 +27,14 @@ QtReflSettingsTabView::~QtReflSettingsTabView() {}
 /**
 Initialise the Interface
 */
-void QtReflSettingsTabView::initLayout() { m_ui.setupUi(this); }
+void QtReflSettingsTabView::initLayout() { 
+  m_ui.setupUi(this); 
+
+  connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this, 
+          SLOT(getExpDefaults()));
+  connect(m_ui.getInstDefaultsButton, SIGNAL(clicked()), this,
+          SLOT(getInstDefaults()));
+}
 
 /** Returns the presenter managing this view
 * @return :: A pointer to the presenter
@@ -107,6 +114,20 @@ void QtReflSettingsTabView::createStitchHints(
     const std::map<std::string, std::string> &hints) {
 
   m_ui.optionsLayout->addWidget(new HintingLineEdit(this, hints), 4, 2);
+}
+
+/** This slot notifies the presenter to fill experiment settings with default
+* values.
+*/
+void QtReflSettingsTabView::getExpDefaults() const {
+  m_presenter->notify(IReflSettingsTabPresenter::ExpDefaultsFlag);
+}
+
+/** This slot notifies the presenter to fill instrument settings with default
+* values.
+*/
+void QtReflSettingsTabView::getInstDefaults() const {
+  m_presenter->notify(IReflSettingsTabPresenter::InstDefaultsFlag);
 }
 
 /** Return selected analysis mode

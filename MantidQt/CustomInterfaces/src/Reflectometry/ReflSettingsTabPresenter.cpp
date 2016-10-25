@@ -37,6 +37,21 @@ void ReflSettingsTabPresenter::acceptMainPresenter(
   m_mainPresenter = mainPresenter;
 }
 
+/** Used by the view to tell the presenter something has changed
+*/
+void ReflSettingsTabPresenter::notify(IReflSettingsTabPresenter::Flag flag) {
+  switch (flag) {
+  case IReflSettingsTabPresenter::ExpDefaultsFlag:
+    getExpDefaults();
+    break;
+  case IReflSettingsTabPresenter::InstDefaultsFlag:
+    getInstDefaults();
+    break;
+  }
+  // Not having a 'default' case is deliberate. gcc issues a warning if there's
+  // a flag we aren't handling.
+}
+
 /** Returns global options for 'Plus' algorithm
 * @return :: Global options for 'Plus' algorithm
 */
@@ -278,5 +293,13 @@ void ReflSettingsTabPresenter::createStitchHints() {
 
   m_view->createStitchHints(strategy.createHints());
 }
+
+/** Fills experiment settings with default values
+*/
+void ReflSettingsTabPresenter::getExpDefaults() { }
+
+/** Fills instrument settings with default values
+*/
+void ReflSettingsTabPresenter::getInstDefaults() { }
 }
 }

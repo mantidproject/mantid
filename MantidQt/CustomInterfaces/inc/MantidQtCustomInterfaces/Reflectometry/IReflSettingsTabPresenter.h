@@ -46,6 +46,11 @@ public:
   virtual std::string getReductionOptions() const = 0;
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
+
+  enum Flag { ExpDefaultsFlag, InstDefaultsFlag };
+
+  // Tell the presenter something happened
+  virtual void notify(IReflSettingsTabPresenter::Flag flag) = 0;
 };
 }
 }
