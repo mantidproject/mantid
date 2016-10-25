@@ -8,6 +8,13 @@
 namespace Mantid {
 namespace API {
 
+/** Construct DetectorInfo based on an Instrument.
+ *
+ * The Instrument reference `instrument` must be the parameterized instrument
+ * obtained from a workspace. The pointer to the ParameterMap `pmap` can be
+ * null. If it is not null, it must refer to the same map as wrapped in
+ * `instrument`. Non-const methods of DetectorInfo may only be called if `pmap`
+ * is not null. */
 DetectorInfo::DetectorInfo(const Geometry::Instrument &instrument,
                            Geometry::ParameterMap *pmap)
     : m_pmap(pmap), m_instrument(instrument),
@@ -75,6 +82,7 @@ Kernel::V3D DetectorInfo::position(const size_t index) const {
   return getDetector(index).getPos();
 }
 
+/// Set the absolute position of the detector with given index.
 void DetectorInfo::setPosition(const size_t index,
                                const Kernel::V3D &position) {
   const auto &det = getDetector(index);
@@ -101,6 +109,7 @@ double DetectorInfo::l1() const {
   return m_L1;
 }
 
+/// Returns a sorted vector of all detector IDs.
 const std::vector<detid_t> DetectorInfo::detectorIDs() const {
   return m_detectorIDs;
 }
@@ -115,6 +124,7 @@ const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
   return *m_detectors[thread];
 }
 
+/// Sets the cached detector. This is an optimiyation used by SpectrumInfo.
 void DetectorInfo::setCachedDetector(
     size_t index, boost::shared_ptr<const Geometry::IDetector> detector) const {
   size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);

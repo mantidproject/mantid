@@ -21,7 +21,20 @@ class ParameterMap;
 namespace API {
 class SpectrumInfo;
 
-/** DetectorInfo : TODO: DESCRIPTION
+/** API::DetectorInfo is an intermediate step towards a DetectorInfo that is
+  part of Instrument-2.0. The aim is to provide a nearly identical interface
+  such that we can start refactoring existing code before the full-blown
+  implementation of Instrument-2.0 is available.
+
+  DetectorInfo provides easy access to commonly used parameters of individual
+  detectors, such as mask and monitor flags, L1, L2, and 2-theta.
+
+  This class is thread safe with OpenMP BUT NOT WITH ANY OTHER THREADING LIBRARY
+  such as Poco threads or Intel TBB.
+
+
+  @author Simon Heybrock
+  @date 2016
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -65,6 +78,7 @@ public:
   double l1() const;
 
   const std::vector<detid_t> detectorIDs() const;
+  /// Returns the index of the detector with the given detector ID.
   size_t indexOf(const detid_t id) const { return m_detIDToIndex.at(id); }
 
   friend class SpectrumInfo;
