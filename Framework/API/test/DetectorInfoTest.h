@@ -145,6 +145,39 @@ public:
     TS_ASSERT_EQUALS(detectorInfo.position(4), V3D(0.0, 0.0, -2.0));
   }
 
+  void test_setPosition() {
+    auto &detectorInfo = m_workspace.mutableDetectorInfo();
+    const auto oldPos = detectorInfo.position(0);
+    TS_ASSERT_EQUALS(oldPos, V3D(0.0, -0.1, 5.0));
+    V3D newPos(1.0, 2.0, 3.0);
+    detectorInfo.setPosition(0, newPos);
+    TS_ASSERT_EQUALS(detectorInfo.position(0), newPos);
+    // Restore old state
+    detectorInfo.setPosition(0, oldPos);
+  }
+
+  void test_rotation() {
+    const auto &detectorInfo = m_workspace.detectorInfo();
+    TS_ASSERT_EQUALS(detectorInfo.rotation(0), Quat(1.0, 0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(detectorInfo.rotation(1), Quat(1.0, 0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(detectorInfo.rotation(2), Quat(1.0, 0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(detectorInfo.rotation(3), Quat(1.0, 0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(detectorInfo.rotation(4), Quat(1.0, 0.0, 0.0, 0.0));
+  }
+
+  void test_setRotation() {
+    V3D e3{0, 0, 1};
+    Quat r3(90.0, e3);
+    auto &detectorInfo = m_workspace.mutableDetectorInfo();
+    const auto oldPos = detectorInfo.position(0);
+    TS_ASSERT_EQUALS(detectorInfo.rotation(0), Quat(1.0, 0.0, 0.0, 0.0));
+    detectorInfo.setRotation(0, r3);
+    // Rotation does *not* rotate the detector in the global coordinate system
+    // but simply changes the orientation of the detector, keeping its position.
+    TS_ASSERT_EQUALS(detectorInfo.position(0), oldPos);
+    TS_ASSERT_EQUALS(detectorInfo.rotation(0), r3);
+  }
+
   void test_detectorIDs() {
     WorkspaceTester workspace;
     int32_t numberOfHistograms = 5;

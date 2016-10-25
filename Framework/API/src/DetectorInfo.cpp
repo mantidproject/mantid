@@ -82,6 +82,11 @@ Kernel::V3D DetectorInfo::position(const size_t index) const {
   return getDetector(index).getPos();
 }
 
+/// Returns the rotation of the detector with given index.
+Kernel::Quat DetectorInfo::rotation(const size_t index) const {
+  return getDetector(index).getRotation();
+}
+
 /// Set the absolute position of the detector with given index.
 void DetectorInfo::setPosition(const size_t index,
                                const Kernel::V3D &position) {
@@ -89,6 +94,15 @@ void DetectorInfo::setPosition(const size_t index,
   using namespace Geometry::ComponentHelper;
   TransformType positionType = Absolute;
   moveComponent(det, *m_pmap, position, positionType);
+}
+
+/// Set the absolute rotation of the detector with given index.
+void DetectorInfo::setRotation(const size_t index,
+                               const Kernel::Quat &rotation) {
+  const auto &det = getDetector(index);
+  using namespace Geometry::ComponentHelper;
+  TransformType rotationType = Absolute;
+  rotateComponent(det, *m_pmap, rotation, rotationType);
 }
 
 /// Returns the source position.

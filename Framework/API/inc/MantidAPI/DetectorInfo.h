@@ -2,6 +2,7 @@
 #define MANTID_API_DETECTORINFO_H_
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 
 #include <boost/shared_ptr.hpp>
@@ -68,8 +69,10 @@ public:
   double twoTheta(const size_t index) const;
   double signedTwoTheta(const size_t index) const;
   Kernel::V3D position(const size_t index) const;
+  Kernel::Quat rotation(const size_t index) const;
 
   void setPosition(const size_t index, const Kernel::V3D &position);
+  void setRotation(const size_t index, const Kernel::Quat &rotation);
 
   // This does not really belong into DetectorInfo, but it seems to be useful
   // while Instrument-2.0 does not exist.
