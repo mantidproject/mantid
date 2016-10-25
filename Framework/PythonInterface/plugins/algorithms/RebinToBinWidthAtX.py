@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm
 from mantid.kernel import Direction, StringListValidator
+from mantid.simpleapi import Rebin
 import numpy
 import rebinwrapperhelpers
 
@@ -47,7 +48,7 @@ class RebinToBinWidthAtX(PythonAlgorithm):
         inputWs = self.getProperty(self._PROP_INPUT_WS).value
         outputWs = self.getProperty(self._PROP_OUTPUT_WS).value
         x = self.getProperty(self._PROP_X_VALUE).value
-        roundingMode = self.getProperty(self._PROP_ROUNDING).value
+        roundingMode = self.getProperty(rebinwrapperhelpers.PROP_NAME_ROUNDING_MODE).value
         inputIsDistribution = inputWs.isDistribution()
         if inputIsDistribution:
             inputWs = ConvertToHistogram(inputWs)
@@ -56,7 +57,7 @@ class RebinToBinWidthAtX(PythonAlgorithm):
         for wsIndex in range(n):
             xs = inputWs.readX(wsIndex)
             if x <= xs[0] or x > xs[-1]:
-                raise RuntimeError(self._PROP_X_VALUE + ' out of range for workspace index {0}'.format(wsIndex))
+                raise RuntimeError(self._PROP_X_VALUE + ' = {0} out of range for workspace index {1}'.format(x, wsIndex))
             binIndex = inputWs.binIndexOf(x, wsIndex)
             dx = xs[binIndex + 1] - xs[binIndex]
             widths[wsIndex] = dx

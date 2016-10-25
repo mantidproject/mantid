@@ -74,6 +74,7 @@ set ( TEST_PY_FILES
   MuscatSofQWTest.py
   NormaliseSpectraTest.py
   OSIRISDiffractionReductionTest.py
+  RebinToBinWidthAtXTest.py
   ResNorm2Test.py
   RetrieveRunInfoTest.py
   SANSFitShiftScaleTest.py
