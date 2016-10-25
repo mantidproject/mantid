@@ -28,7 +28,7 @@ def _elems_or_none(l):
         return None
 
 
-class IndirectElasticWindowScan(DataProcessorAlgorithm):
+class IndirectEnergyWindowScan(DataProcessorAlgorithm):
     _chopped_data = None
     _data_files = None
     _load_logs = None
@@ -287,4 +287,4 @@ class IndirectElasticWindowScan(DataProcessorAlgorithm):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(IndirectElasticWindowScan)
+AlgorithmFactory.subscribe(IndirectEnergyWindowScan)
