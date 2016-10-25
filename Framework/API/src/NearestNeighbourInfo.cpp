@@ -9,8 +9,8 @@ namespace API {
 *
 * @param workspace :: Reference to workspace providing instrument and
 * spectrum-detector mapping
-* @param nNeighbours :: unsigned int, number of neighbours to include.
-* @param ignoreMaskedDetectors :: flag indicating that masked detectors should
+* @param ignoreMaskedDetectors :: if true, masked detectors are ignored
+* @param nNeighbours :: number of neighbours to include
 */
 NearestNeighbourInfo::NearestNeighbourInfo(const MatrixWorkspace &workspace,
                                            const bool ignoreMaskedDetectors,
