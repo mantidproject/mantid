@@ -1,6 +1,7 @@
 #include "MantidWorkflowAlgorithms/DgsConvertToEnergyTransfer.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
@@ -30,7 +31,6 @@ namespace WorkflowAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsConvertToEnergyTransfer)
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DgsConvertToEnergyTransfer::name() const {
   return "DgsConvertToEnergyTransfer";
@@ -44,9 +44,6 @@ const std::string DgsConvertToEnergyTransfer::category() const {
   return "Workflow\\Inelastic\\UsesPropertyManager";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void DgsConvertToEnergyTransfer::init() {
@@ -87,7 +84,6 @@ void DgsConvertToEnergyTransfer::init() {
                         Direction::Input);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void DgsConvertToEnergyTransfer::exec() {
@@ -267,7 +263,6 @@ void DgsConvertToEnergyTransfer::exec() {
     moveInstComp->setProperty("Z", monPos.Z());
     moveInstComp->setProperty("RelativePosition", false);
     moveInstComp->executeAsChildAlg();
-    outputWS = moveInstComp->getProperty("Workspace");
   }
 
   const double binOffset = -monPeak;

@@ -1,6 +1,4 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+#include "MantidAlgorithms/GravitySANSHelper.h"
 #include "MantidAlgorithms/Q1D2.h"
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidAPI/Axis.h"
@@ -8,6 +6,7 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Histogram1D.h"
@@ -141,33 +140,24 @@ void Q1D2::exec() {
   MantidVec normError2(YOut.size(), 0.0);
 
   // the averaged Q resolution.
-  HistogramData::HistogramDx qResolutionOut(QOut.size(), 0.0);
+  HistogramData::HistogramDx qResolutionOut(QOut.size() - 1, 0.0);
 
   const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
   Progress progress(this, 0.05, 1.0, numSpec + 1);
 
-  PARALLEL_FOR3(m_dataWS, outputWS, pixelAdj)
+  const auto &spectrumInfo = m_dataWS->spectrumInfo();
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_dataWS, *outputWS, pixelAdj.get()))
   for (int i = 0; i < numSpec; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    // Get the pixel relating to this spectrum
-    IDetector_const_sptr det;
-    try {
-      det = m_dataWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
+    if (!spectrumInfo.hasDetectors(i)) {
       g_log.warning() << "Workspace index " << i << " (SpectrumIndex = "
                       << m_dataWS->getSpectrum(i).getSpectrumNo()
                       << ") has no detector assigned to it - discarding\n";
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
-    }
-    // If no detector found or if detector is masked shouldn't be included skip
-    // onto the next spectrum
-    if (!det || det->isMonitor() || det->isMasked()) {
       continue;
     }
+    // Skip if we have a monitor or if the detector is masked.
+    if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
+      continue;
 
     // get the bins that are included inside the RadiusCut/WaveCutcut off, those
     // to calculate for
@@ -197,7 +187,8 @@ void Q1D2::exec() {
                            binNormEs, norms, normETo2s);
 
     // now read the data from the input workspace, calculate Q for each bin
-    convertWavetoQ(i, doGravity, wavStart, QIn, getProperty("ExtraLength"));
+    convertWavetoQ(spectrumInfo, i, doGravity, wavStart, QIn,
+                   getProperty("ExtraLength"));
 
     // Pointers to the counts data and it's error
     auto YIn = m_dataWS->readY(i).cbegin() + wavStart;
@@ -276,12 +267,7 @@ void Q1D2::exec() {
         *qResolutionIterator = (*qResolutionIterator) / (*countsIterator);
       }
     }
-    // Now duplicate write the second to last element into the last element of
-    // the deltaQ vector
-    if (qResolutionOut.size() > 1) {
-      qResolutionOut.rbegin()[0] = qResolutionOut.rbegin()[1];
-    }
-    outputWS->setBinEdgeStandardDeviations(0, std::move(qResolutionOut));
+    outputWS->setPointStandardDeviations(0, std::move(qResolutionOut));
   }
 
   bool doOutputParts = getProperty("OutputParts");
@@ -549,6 +535,7 @@ void Q1D2::normToMask(const size_t offSet, const size_t wsIndex,
 /** Fills a vector with the Q values calculated from the wavelength bin centers
 * from the input workspace and
 *  the workspace geometry as Q = 4*pi*sin(theta)/lambda
+*  @param[in] spectrumInfo SpectrumInfo for workspace
 *  @param[in] wsInd the spectrum to calculate
 *  @param[in] doGravity if to include gravity in the calculation of Q
 *  @param[in] offset index number of the first input bin to use
@@ -558,19 +545,18 @@ void Q1D2::normToMask(const size_t offSet, const size_t wsIndex,
 *  @throw NotFoundError if the detector associated with the spectrum is not
 * found in the instrument definition
 */
-void Q1D2::convertWavetoQ(const size_t wsInd, const bool doGravity,
-                          const size_t offset, MantidVec::iterator Qs,
+void Q1D2::convertWavetoQ(const SpectrumInfo &spectrumInfo, const size_t wsInd,
+                          const bool doGravity, const size_t offset,
+                          MantidVec::iterator Qs,
                           const double extraLength) const {
   static const double FOUR_PI = 4.0 * M_PI;
-
-  IDetector_const_sptr det = m_dataWS->getDetector(wsInd);
 
   // wavelengths (lamda) to be converted to Q
   auto waves = m_dataWS->readX(wsInd).cbegin() + offset;
   // going from bin boundaries to bin centered x-values the size goes down one
   const MantidVec::const_iterator end = m_dataWS->readX(wsInd).end() - 1;
   if (doGravity) {
-    GravitySANSHelper grav(m_dataWS, det, extraLength);
+    GravitySANSHelper grav(spectrumInfo, wsInd, extraLength);
     for (; waves != end; ++Qs, ++waves) {
       // the HistogramValidator at the start should ensure that we have one more
       // bin on the input wavelengths
@@ -585,7 +571,7 @@ void Q1D2::convertWavetoQ(const size_t wsInd, const bool doGravity,
     // Calculate the Q values for the current spectrum, using Q =
     // 4*pi*sin(theta)/lambda
     const double factor =
-        2.0 * FOUR_PI * sin(m_dataWS->detectorTwoTheta(*det) * 0.5);
+        2.0 * FOUR_PI * sin(spectrumInfo.twoTheta(wsInd) * 0.5);
     for (; waves != end; ++Qs, ++waves) {
       // the HistogramValidator at the start should ensure that we have one more
       // bin on the input wavelengths

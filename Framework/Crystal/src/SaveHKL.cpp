@@ -1,4 +1,6 @@
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidCrystal/SaveHKL.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Utils.h"
@@ -11,7 +13,7 @@
 #include <fstream>
 
 #include <Poco/File.h>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -19,19 +21,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Kernel::Strings;
 using namespace Mantid::API;
 using namespace Mantid::PhysicalConstants;
-std::map<int, double> detScale = {{17, 1.115862021},
-                                  {18, 0.87451341},
-                                  {22, 1.079102931},
-                                  {26, 1.087379072},
-                                  {27, 1.064563992},
-                                  {28, 0.878683269},
-                                  {36, 1.15493377},
-                                  {37, 1.010047685},
-                                  {38, 1.046416037},
-                                  {39, 0.83264528},
-                                  {47, 1.06806776},
-                                  {48, 0.872542083},
-                                  {58, 0.915242691}};
 
 namespace Mantid {
 namespace Crystal {
@@ -39,7 +28,6 @@ namespace Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveHKL)
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SaveHKL::init() {
@@ -105,7 +93,6 @@ void SaveHKL::init() {
                   "DirectionCosines.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SaveHKL::exec() {
@@ -304,7 +291,8 @@ void SaveHKL::exec() {
 
         } else {
           std::string temp;
-          ss >> temp >> a;
+          size_t a0 = 1;
+          ss >> temp >> a0 >> temp >> a;
         }
       }
       infile.close();
@@ -333,8 +321,8 @@ void SaveHKL::exec() {
       for (auto wi : ids) {
 
         Peak &p = peaks[wi];
-        if (p.getIntensity() == 0.0 || boost::math::isnan(p.getIntensity()) ||
-            boost::math::isnan(p.getSigmaIntensity())) {
+        if (p.getIntensity() == 0.0 || !(std::isfinite(p.getIntensity())) ||
+            !(std::isfinite(p.getSigmaIntensity()))) {
           banned.insert(wi);
           continue;
         }
@@ -461,9 +449,9 @@ void SaveHKL::exec() {
           correc = scaleFactor * sinsqt * cmonx * sp_ratio /
                    (wl4 * spect * transmission);
 
-          if (inst->getName() == "TOPAZ" &&
-              detScale.find(bank) != detScale.end())
-            correc *= detScale[bank];
+          if (inst->hasParameter("detScale" + bankName))
+            correc *= static_cast<double>(
+                inst->getNumberParameter("detScale" + bankName)[0]);
 
           // instrument background constant for sigma
           instBkg = 0. * 12.28 / cmonx * scaleFactor;

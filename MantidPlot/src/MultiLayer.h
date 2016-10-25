@@ -32,12 +32,12 @@
 #ifndef MULTILAYER_H
 #define MULTILAYER_H
 
-#include "MdiSubWindow.h"
 #include "Graph.h"
-#include "Mantid/IProjectSerialisable.h"
-#include <QPushButton>
+#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MdiSubWindow.h"
 #include <QLayout>
 #include <QPointer>
+#include <QPushButton>
 
 class QLabel;
 class LayerButton;
@@ -104,10 +104,12 @@ public:
 
   void setWaterfallLayout(bool on = true);
 
-  static IProjectSerialisable *loadFromProject(const std::string &lines,
-                                               ApplicationWindow *app,
-                                               const int fileVersion);
+  static MantidQt::API::IProjectSerialisable *
+  loadFromProject(const std::string &lines, ApplicationWindow *app,
+                  const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
+
+  void setCommonAxisScales();
 
 public slots:
   Graph *addLayer(int x = 0, int y = 0, int width = 0, int height = 0);
@@ -262,6 +264,9 @@ private:
 
   bool d_is_waterfall_plot;
   QColor d_waterfall_fill_color;
+
+  const int default_waterfall_width_offset = 10;
+  const int default_waterfall_height_offset = 20;
 };
 
 //! Button with layer number

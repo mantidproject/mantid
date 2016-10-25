@@ -1,9 +1,13 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress, WorkspaceGroupProperty
 from mantid.kernel import StringMandatoryValidator, Direction, logger, IntBoundedValidator, FloatBoundedValidator
 
 #pylint: disable=too-many-instance-attributes
+
+
 class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
     _can_inner_radius = 0.0
     _can_outer_radius = 0.0
@@ -20,17 +24,14 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
     _can_scale = 0.
     _sample_chemical_formula = ''
     _acc_ws = None
-    _plot = False
     _sample_number_density = 0.
     _sample_inner_radius = 0.
 
     def category(self):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
-
     def summary(self):
         return "Calculates indirect absorption corrections for an annulus sample shape."
-
 
     def PyInit(self):
         # Sample options
@@ -75,8 +76,6 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='Events', defaultValue=5000,
                              validator=IntBoundedValidator(0),
                              doc='Number of neutron events')
-        self.declareProperty(name='Plot', defaultValue=False,
-                             doc='Plot options')
 
         # Output options
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
@@ -119,8 +118,6 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                               NumberOfWavelengthPoints=10,
                               EventsPerPoint=self._events)
 
-        plot_data = [self._output_ws, self._sample_ws_name]
-        plot_corr = [self._ass_ws]
         group = self._ass_ws
 
         if self._can_ws_name is not None:
@@ -171,7 +168,6 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
 
                 Divide(LHSWorkspace=can1_wave_ws, RHSWorkspace=self._acc_ws, OutputWorkspace=can1_wave_ws)
                 Minus(LHSWorkspace=sample_wave_ws, RHSWorkspace=can1_wave_ws, OutputWorkspace=sample_wave_ws)
-                plot_corr.append(self._acc_ws)
                 group += ',' + self._acc_ws
 
             else:
@@ -181,7 +177,6 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
 
             DeleteWorkspace(can1_wave_ws)
             DeleteWorkspace(can2_wave_ws)
-            plot_data.append(self._can_ws_name)
 
         else:
             Divide(LHSWorkspace=sample_wave_ws,
@@ -229,14 +224,6 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
             GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=self._abs_ws)
             self.setProperty('CorrectionsWorkspace', self._abs_ws)
 
-        if self._plot:
-            from IndirectImport import import_mantidplot
-            mantid_plot = import_mantidplot()
-            mantid_plot.plotSpectrum(plot_data, 0)
-            if self._abs_ws != '':
-                mantid_plot.plotSpectrum(plot_corr, 0)
-
-
     def _setup(self):
         """
         Get algorithm properties.
@@ -259,7 +246,6 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         self._can_scale = self.getProperty('CanScaleFactor').value
 
         self._events = self.getProperty('Events').value
-        self._plot = self.getProperty('Plot').value
         self._output_ws = self.getPropertyValue('OutputWorkspace')
 
         self._abs_ws = self.getPropertyValue('CorrectionsWorkspace')
@@ -269,7 +255,6 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         else:
             self._ass_ws = self._abs_ws + '_ass'
             self._acc_ws = self._abs_ws + '_acc'
-
 
     def validateInputs(self):
         """

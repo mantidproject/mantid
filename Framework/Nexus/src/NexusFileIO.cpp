@@ -405,7 +405,7 @@ int NexusFileIO::writeNexusProcessedData2D(
     // Potentially x error
     if (localworkspace->hasDx(0)) {
       dims_array[0] = static_cast<int>(nSpect);
-      dims_array[1] = static_cast<int>(localworkspace->readX(0).size());
+      dims_array[1] = static_cast<int>(localworkspace->dx(0).size());
       std::string dxErrorName = "xerrors";
       NXcompmakedata(fileID, dxErrorName.c_str(), NX_FLOAT64, 2, dims_array,
                      m_nexuscompression, asize);
@@ -982,8 +982,9 @@ int NexusFileIO::getWorkspaceSize(int &numberOfSpectra, int &numberOfChannels,
   int len = NX_MAXNAMELEN;
   type = NX_CHAR;
 
-  if (checkAttributeName("units")) {
-    status = NXgetattr(fileID, "units", sbuf, &len, &type);
+  char unitsAttrName[] = "units";
+  if (checkAttributeName(unitsAttrName)) {
+    status = NXgetattr(fileID, unitsAttrName, sbuf, &len, &type);
     if (status != NX_ERROR)
       yUnits = sbuf;
     NXclosedata(fileID);
@@ -995,7 +996,7 @@ int NexusFileIO::getWorkspaceSize(int &numberOfSpectra, int &numberOfChannels,
     return (4);
   len = NX_MAXNAMELEN;
   type = NX_CHAR;
-  NXgetattr(fileID, "units", sbuf, &len, &type);
+  NXgetattr(fileID, unitsAttrName, sbuf, &len, &type);
   axesUnits = std::string(sbuf, len);
   NXgetinfo(fileID, &rank, dim, &type);
   // non-uniform X has 2D axis1 data
@@ -1010,7 +1011,7 @@ int NexusFileIO::getWorkspaceSize(int &numberOfSpectra, int &numberOfChannels,
   NXopendata(fileID, "axis2");
   len = NX_MAXNAMELEN;
   type = NX_CHAR;
-  NXgetattr(fileID, "units", sbuf, &len, &type);
+  NXgetattr(fileID, unitsAttrName, sbuf, &len, &type);
   axesUnits += std::string(":") + std::string(sbuf, len);
   NXclosedata(fileID);
   NXclosegroup(fileID);
@@ -1194,7 +1195,7 @@ bool NexusFileIO::writeNexusBinMasking(
 
   // save masked bin indices
   dimensions[0] = static_cast<int>(bins.size());
-  status = NXmakedata(fileID, "masked_bins", NX_INT32, 1, dimensions);
+  status = NXmakedata(fileID, "masked_bins", NX_UINT64, 1, dimensions);
   if (status == NX_ERROR)
     return false;
   NXopendata(fileID, "masked_bins");

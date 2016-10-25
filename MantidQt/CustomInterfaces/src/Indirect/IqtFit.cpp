@@ -145,6 +145,8 @@ void IqtFit::setup() {
 
   connect(m_blnManager, SIGNAL(valueChanged(QtProperty *, bool)), this,
           SLOT(checkBoxUpdate(QtProperty *, bool)));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspace()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
 }
 
 void IqtFit::run() {
@@ -259,15 +261,13 @@ void IqtFit::plotWorkspace() {
  * Save the result of the algorithm
  */
 void IqtFit::saveResult() {
-  if (m_uiForm.ckSave->isChecked()) {
-    const auto workingdirectory =
-        Mantid::Kernel::ConfigService::Instance().getString(
-            "defaultsave.directory");
-    const auto filepath = workingdirectory + m_baseName + "_Result.nxs";
-    addSaveWorkspaceToQueue(QString::fromStdString(m_baseName + "_Result"),
-                            QString::fromStdString(filepath));
-    m_batchAlgoRunner->executeBatchAsync();
-  }
+  const auto workingdirectory =
+      Mantid::Kernel::ConfigService::Instance().getString(
+          "defaultsave.directory");
+  const auto filepath = workingdirectory + m_baseName + "_Result.nxs";
+  addSaveWorkspaceToQueue(QString::fromStdString(m_baseName + "_Result"),
+                          QString::fromStdString(filepath));
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
 /**
@@ -280,8 +280,9 @@ void IqtFit::algorithmComplete(bool error) {
   if (error)
     return;
   updatePlot();
-  plotWorkspace();
-  saveResult();
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+  m_uiForm.cbPlotType->setEnabled(true);
 }
 
 /**

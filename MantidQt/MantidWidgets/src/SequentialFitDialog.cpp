@@ -1,7 +1,3 @@
-//---------------------------------------
-// Includes
-//---------------------------------------
-
 #include "MantidQtMantidWidgets/SequentialFitDialog.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
@@ -10,6 +6,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ConfigService.h"
 
@@ -20,10 +17,6 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QUrl>
-
-//---------------------------------------
-// Public member functions
-//---------------------------------------
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -335,6 +328,9 @@ void SequentialFitDialog::accept() {
   alg->setProperty("MaxIterations", m_fitBrowser->maxIterations());
   if (ui.rbIndividual->isChecked()) {
     alg->setPropertyValue("FitType", "Individual");
+  }
+  if (m_fitBrowser->isHistogramFit()) {
+    alg->setProperty("EvaluationType", "Histogram");
   }
 
   bool passWSIndexToFunction = ui.ckbPassWS->isChecked();

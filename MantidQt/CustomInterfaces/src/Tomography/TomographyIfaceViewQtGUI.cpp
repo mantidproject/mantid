@@ -1,6 +1,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
@@ -260,12 +261,6 @@ void TomographyIfaceViewQtGUI::doSetupGeneralWidgets() {
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
-  // 'local' - not disabled any longer
-  // m_uiTabSetup.tabWidget_comp_resource->setTabEnabled(false, 1);
-  // m_uiTabSetup.tab_local->setEnabled(false);
-
-  resetRemoteSetup();
-
   // populate setup values from defaults
   const TomoPathsConfig cfg = currentPathsConfig();
   m_uiTabSetup.lineEdit_path_samples->setText(
@@ -1770,7 +1765,7 @@ void TomographyIfaceViewQtGUI::setPrePostProcSettings(
   m_uiTabFilters.checkBox_normalize_by_flats->setChecked(
       opts.prep.normalizeByFlats);
 
-  m_uiTabFilters.checkBox_normalize_by_flats->setChecked(
+  m_uiTabFilters.checkBox_normalize_by_darks->setChecked(
       opts.prep.normalizeByDarks);
 
   m_uiTabFilters.spinBox_prep_median_filter_width->setValue(
@@ -1806,9 +1801,9 @@ TomographyIfaceViewQtGUI::grabSystemSettingsFromUser() const {
   // paths and related
   setts.m_pathComponents[0] =
       m_uiTabSystemSettings.lineEdit_path_comp_1st->text().toStdString();
-  // Not modifyable at the moment:
+  // Not modifiable at the moment:
   // m_uiTabSystemSettings.lineEdit_path_comp_2nd;
-  // Not modifyable at the moment:
+  // Not modifiable at the moment:
   // m_uiTabSystemSettings.lineEdit_path_comp_3rd;
   setts.m_samplesDirPrefix =
       m_uiTabSystemSettings.lineEdit_path_comp_input_samples->text()

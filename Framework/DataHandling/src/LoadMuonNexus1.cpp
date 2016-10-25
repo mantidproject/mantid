@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMuonNexus1.h"
 
 #include "MantidAPI/Axis.h"
@@ -20,6 +17,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/MuonNexusReader.h"
@@ -676,7 +674,8 @@ void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo,
 
   localWorkspace->setX(hist, timeChannelsVec);
   localWorkspace->getSpectrum(hist).setSpectrumNo(specNo);
-
+  // Muon v1 files: always a one-to-one mapping between spectra and detectors
+  localWorkspace->getSpectrum(hist).setDetectorID(static_cast<detid_t>(specNo));
   // Clean up
   delete[] timeChannels;
 }

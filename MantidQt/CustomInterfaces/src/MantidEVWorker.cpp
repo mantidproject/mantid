@@ -8,6 +8,8 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/EmptyValues.h"
@@ -153,23 +155,31 @@ bool MantidEVWorker::loadAndConvertToMD(
   try {
     IAlgorithm_sptr alg;
     if (load_data) {
+      bool topaz = false;
+      // Limits and filtering only done for topaz
+      if (file_name.find("TOPAZ") != std::string::npos)
+        topaz = true;
       IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
       alg->setProperty("Filename", file_name);
       alg->setProperty("OutputWorkspace", ev_ws_name);
-      alg->setProperty("FilterByTofMin", 1000.0);
-      alg->setProperty("FilterByTofMax", 16666.0);
+      if (topaz) {
+        alg->setProperty("FilterByTofMin", 500.0);
+        alg->setProperty("FilterByTofMax", 16666.0);
+      }
       alg->setProperty("LoadMonitors", true);
 
       if (!alg->execute())
         return false;
 
-      alg = AlgorithmManager::Instance().create("FilterBadPulses");
-      alg->setProperty("InputWorkspace", ev_ws_name);
-      alg->setProperty("OutputWorkspace", ev_ws_name);
-      alg->setProperty("LowerCutoff", 25.0);
+      if (topaz) {
+        alg = AlgorithmManager::Instance().create("FilterBadPulses");
+        alg->setProperty("InputWorkspace", ev_ws_name);
+        alg->setProperty("OutputWorkspace", ev_ws_name);
+        alg->setProperty("LowerCutoff", 25.0);
 
-      if (!alg->execute())
-        return false;
+        if (!alg->execute())
+          return false;
+      }
 
       if (load_det_cal) {
         alg = AlgorithmManager::Instance().create("LoadIsawDetCal");

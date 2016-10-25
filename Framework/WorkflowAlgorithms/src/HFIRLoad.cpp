@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include <string>
 
 #include "MantidWorkflowAlgorithms/HFIRLoad.h"
@@ -10,6 +7,7 @@
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {
@@ -193,7 +191,7 @@ void HFIRLoad::exec() {
                   << " from the Algorithm input property.\n";
     sdd = sample_det_dist;
   } else {
-    const std::string sddName = "sample-detector-distance";
+    const std::string sddName = "total-sample-detector-distance";
     Mantid::Kernel::Property *prop = dataWS->run().getProperty(sddName);
     Mantid::Kernel::PropertyWithValue<double> *dp =
         dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);

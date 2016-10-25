@@ -43,7 +43,6 @@ set ( SRC_FILES
 	src/Interpolation.cpp
 	src/LibraryManager.cpp
 	src/LibraryWrapper.cpp
-	src/ListValidator.cpp
 	src/LogFilter.cpp
 	src/LogParser.cpp
 	src/Logger.cpp
@@ -72,6 +71,7 @@ set ( SRC_FILES
 	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusDescriptor.cpp
+	src/NullValidator.cpp
 	src/OptionalBool.cpp
 	src/ParaViewVersion.cpp
 	src/ProgressBase.cpp
@@ -471,7 +471,7 @@ set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 if ( GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5" )
  target_link_libraries ( Kernel LINK_PRIVATE stdc++ )
 endif()
-target_link_libraries ( Kernel LINK_PUBLIC ${NEXUS_LIBRARIES} LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} )
+target_link_libraries ( Kernel LINK_PUBLIC ${NEXUS_LIBRARIES} LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES})
 
 if (WITH_ASAN)
   target_link_libraries ( Kernel LINK_PRIVATE -lasan )
@@ -541,8 +541,14 @@ endif ()
 set ( PLUGINS "." )
 if ( MAKE_VATES )
   set ( PV_PLUGINS "./${PVPLUGINS_DIR}" )
+  if ( MSVC )
+    set (PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
+  else()
+    set ( PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/lib;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
+  endif()
 else ()
   set ( PV_PLUGINS "" )
+  set ( PARAVIEW_PYTHON_PATHS "")
 endif ()
 set ( IGNORE_PARAVIEW "0" )
 set ( QTPLUGINS "." )
@@ -586,29 +592,43 @@ foreach ( SUBDIR ${SCRIPT_SUBDIRS} )
   endif()
 endforeach()
 
-# For an mpi-enabled build, don't log to file and format console output (which winds up in a file) differently
+# For an mpi-enabled build, do not log to file, format console output (which winds up in a file) differently
 # These settings carry down to the installation configuration below
 if ( MPI_BUILD )
-  set ( FILECHANNEL NullChannel )
   set ( CONSOLEPATTERN "%H:%M:%S,%i [%N:%P] %p %s - %t")
   set ( PV_PLUGINS "" )
   set ( IGNORE_PARAVIEW "1" )
 else ()
-  set ( FILECHANNEL FileChannel )
+  option ( ENABLE_FILE_LOGGING "Enable logging to file for development builds. It is always enabled for packages" ON )
+  if ( ENABLE_FILE_LOGGING )
+    set ( FILELOGGER_CHANNEL fileFilterChannel )
+  else ()
+    set ( FILELOGGER_CHANNEL "" )
+  endif ()
   set ( CONSOLEPATTERN "%s-[%p] %t" )
 endif ()
 
 set ( CONSOLECHANNELCLASS "ConsoleChannel" )
 configure_file ( ../Properties/Mantid.properties.template
-                 ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
+                 ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
 )
 
-# Then, at build time, copy into appropriate place
-add_custom_command ( TARGET Kernel POST_BUILD
-                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-                       ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
-                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
-)
+ # Then, copy into appropriate place
+if(MSVC)
+  file(GENERATE
+     OUTPUT
+     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>/Mantid.properties
+     INPUT
+     ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
+  )
+else()
+  file(GENERATE
+     OUTPUT
+     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Mantid.properties
+     INPUT
+     ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
+  )
+endif()
 
 ###########################################################################
 # Installation settings
@@ -624,10 +644,26 @@ else ()
   set ( MANTID_ROOT .. )
 endif ()
 
-set (ENABLE_WEB_UPDATES 1)
-
+# Log to file for installed packages but not mpi
+if ( NOT MPI_BUILD )
+  set ( FILELOGGER_CHANNEL fileFilterChannel )
+endif ()
+set ( ENABLE_WEB_UPDATES 1 )
 set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
+if(MAKE_VATES)
+  if (APPLE)
+    set ( PARAVIEW_PYTHON_PATHS "../Libraries;../Python;../Python/vtk")
+  elseif (WIN32)
+    set ( PV_LIBS "../lib/paraview-${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}" )
+    set ( PARAVIEW_PYTHON_PATHS "${PV_LIBS}/site-packages;${PV_LIBS}/site-packages/vtk" )
+  else () #Linux
+    set ( PV_LIBS "${CMAKE_INSTALL_PREFIX}/lib/paraview-${PARAVIEW_VERSION}")
+    set ( PARAVIEW_PYTHON_PATHS "${PV_LIBS};${PV_LIBS}/site-packages;${PV_LIBS}/site-packages/vtk")
+  endif ()
+else ()
+    set ( PARAVIEW_PYTHON_PATHS "")
+endif()
 set ( UPDATE_INSTRUMENT_DEFINTITIONS "${ENABLE_WEB_UPDATES}" )
 set ( CHECK_FOR_NEW_MANTID_VERSION "${ENABLE_WEB_UPDATES}" )
 set ( ENABLE_USAGE_REPORTS "1" )

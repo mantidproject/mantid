@@ -1,18 +1,17 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataHandling/LoadMuonNexus1.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -130,6 +129,9 @@ void LoadMuonNexus2::doExec() {
   Mantid::NeXus::NXInt spectrum_index = dataGroup.openNXInt("spectrum_index");
   spectrum_index.load();
   m_numberOfSpectra = spectrum_index.dim0();
+
+  // Load detector mapping
+  const auto &detMapping = loadDetectorMapping(spectrum_index);
 
   // Call private method to validate the optional parameters, if set
   checkOptionalProperties();
@@ -250,6 +252,7 @@ void LoadMuonNexus2::doExec() {
       int i = index_spectrum[spec]; // if spec not found i is 0
       loadData(counts, timeBins, counter, period, i, localWorkspace);
       localWorkspace->getSpectrum(counter).setSpectrumNo(spectrum_index[i]);
+      localWorkspace->getSpectrum(counter).setDetectorIDs(detMapping.at(i));
       counter++;
       progress.report();
     }
@@ -260,6 +263,7 @@ void LoadMuonNexus2::doExec() {
         int k = index_spectrum[spec]; // if spec not found k is 0
         loadData(counts, timeBins, counter, period, k, localWorkspace);
         localWorkspace->getSpectrum(counter).setSpectrumNo(spectrum_index[k]);
+        localWorkspace->getSpectrum(counter).setDetectorIDs(detMapping.at(k));
         counter++;
         progress.report();
       }
@@ -445,6 +449,76 @@ int LoadMuonNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
   } catch (...) {
   }
   return 0;
+}
+
+/**
+ * Loads the mapping between index -> set of detector IDs
+ *
+ * If "detector_index", "detector_count" and "detector_list" are all present,
+ * use these to get the mapping, otherwise spectrum number = detector ID
+ * (one-to-one)
+ *
+ * The spectrum spectrum_index[i] maps to detector_count[i] detectors, whose
+ * detector IDs are in detector_list starting at the index detector_index[i]
+ *
+ * @returns :: map of index -> detector IDs
+ * @throws std::runtime_error if fails to read data from file
+ */
+std::map<int, std::set<int>>
+LoadMuonNexus2::loadDetectorMapping(const Mantid::NeXus::NXInt &spectrumIndex) {
+  std::map<int, std::set<int>> mapping;
+  const int nSpectra = spectrumIndex.dim0();
+
+  // Find and open the data group
+  NXRoot root(getPropertyValue("Filename"));
+  NXEntry entry = root.openEntry(m_entry_name);
+  const std::string detectorName = [&entry]() {
+    // Only the first NXdata found
+    for (auto &group : entry.groups()) {
+      std::string className = group.nxclass;
+      if (className == "NXdata") {
+        return group.nxname;
+      }
+    }
+    throw std::runtime_error("No NXdata found in file");
+  }();
+  NXData dataGroup = entry.openNXData(detectorName);
+
+  // Usually for muon data, detector id = spectrum number
+  // If not, the optional groups "detector_index", "detector_list" and
+  // "detector_count" will be present to map one to the other
+  const bool hasDetectorMapping = dataGroup.containsDataSet("detector_index") &&
+                                  dataGroup.containsDataSet("detector_list") &&
+                                  dataGroup.containsDataSet("detector_count");
+  if (hasDetectorMapping) {
+    // Read detector IDs
+    try {
+      const auto detIndex = dataGroup.openNXInt("detector_index");
+      const auto detCount = dataGroup.openNXInt("detector_count");
+      const auto detList = dataGroup.openNXInt("detector_list");
+      const int nSpectra = detIndex.dim0();
+      for (int i = 0; i < nSpectra; ++i) {
+        const int start = detIndex[i];
+        const int nDetectors = detCount[i];
+        std::set<int> detIDs;
+        for (int jDet = 0; jDet < nDetectors; ++jDet) {
+          detIDs.insert(detList[start + jDet]);
+        }
+        mapping[i] = detIDs;
+      }
+    } catch (const ::NeXus::Exception &err) {
+      // Throw a more user-friendly message
+      std::ostringstream message;
+      message << "Failed to read detector mapping: " << err.what();
+      throw std::runtime_error(message.str());
+    }
+  } else {
+    for (int i = 0; i < nSpectra; ++i) {
+      mapping[i] = std::set<int>{spectrumIndex[i]};
+    }
+  }
+
+  return mapping;
 }
 
 } // namespace DataHandling

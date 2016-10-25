@@ -22,14 +22,13 @@ class NonIDF_Properties(object):
           "information" : (4,lambda (msg):   logger.information(msg)),
           "debug" :       (5,lambda (msg):   logger.debug(msg))}
 
-
     def __init__(self,Instrument,run_workspace=None):
         """ initialize main properties, defined by the class
             @parameter Instrument  -- name or pointer to the instrument,
                        deployed in reduction
         """
         #
-        if not run_workspace is None:
+        if run_workspace is not None:
             object.__setattr__(self,'sample_run',run_workspace)
 
         # Helper properties, defining logging options
@@ -55,6 +54,7 @@ class NonIDF_Properties(object):
         super(NonIDF_Properties,self).__setattr__('second_white',None)
         super(NonIDF_Properties,self).__setattr__('_tmp_run',None)
         super(NonIDF_Properties,self).__setattr__('_cashe_sum_ws',False)
+        super(NonIDF_Properties,self).__setattr__('_mapmask_ref_ws',None)
 
     #end
     def log(self, msg,level="notice"):
@@ -107,9 +107,11 @@ class NonIDF_Properties(object):
     #
     _tmp_run     = RunDescriptor("_TMP","Property used for storing intermediate run data during reduction.")
     #-----------------------------------------------------------------------------------
+
     def getDefaultParameterValue(self,par_name):
         """method to get default parameter value, specified in IDF"""
         return prop_helpers.get_default_parameter(self.instrument,par_name)
+
     @property
     def instrument(self):
         if self._pInstrument is None:
@@ -119,15 +121,18 @@ class NonIDF_Properties(object):
     #
     #-----------------------------------------------------------------------------------
     #TODO: do something about it
+
     @property
     def print_diag_results(self):
         """ property-sink used in diagnostics """
         return True
+
     @print_diag_results.setter
     def print_diag_results(self,value):
         pass
     #-----------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
+
     @property
     def cashe_sum_ws(self):
         """Used together with sum_runs property. If True, a workspace
@@ -135,11 +140,13 @@ class NonIDF_Properties(object):
            and used later to add more runs to it
       """
         return self._cashe_sum_ws
+
     @cashe_sum_ws.setter
     def cashe_sum_ws(self,val):
 #pylint: disable=attribute-defined-outside-init
         self._cashe_sum_ws = bool(val)
     # -----------------------------------------------------------------------------
+
     @property
     def log_to_mantid(self):
         """Property specify if high level log should be printed to stdout or added to common Mantid log"""
@@ -148,11 +155,24 @@ class NonIDF_Properties(object):
     @log_to_mantid.setter
     def log_to_mantid(self,val):
         object.__setattr__(self,'_log_to_mantid',bool(val))
+    # -----------------------------------------------------------------------------
+
+    @property
+    def mapmask_ref_ws(self):
+        """Property provides reference workspace for LoadMask and GroupWorkspace algorithms
+
+            on 26/07/2016 refernce workspace (a workspace which provides appropriate
+            spectra-detector mapping was implemented for LoadMask algorithm only.
+        """
+        return self._mapmask_ref_ws
+
+    @mapmask_ref_ws.setter
+    def mapmask_ref_ws(self,val):
+        object.__setattr__(self,'_mapmask_ref_ws',val)
 
     # -----------------------------------------------------------------------------
     # Service properties (used by class itself)
     #
-
     def _set_instrument_and_facility(self,Instrument,run_workspace=None):
         """Obtain default instrument and facility and store it in properties"""
 
@@ -173,7 +193,6 @@ class NonIDF_Properties(object):
                     facility_ = config.getFacility('TEST_LIVE')
                 #end
 
-
             elif isinstance(Instrument,str): # instrument name defined
                 new_name,full_name,facility_ = prop_helpers.check_instrument_name(None,Instrument)
                 #idf_dir = config.getString('instrumentDefinitgeton.directory')
@@ -193,5 +212,3 @@ class NonIDF_Properties(object):
 
 if __name__ == "__main__":
     pass
-
-

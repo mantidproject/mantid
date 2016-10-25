@@ -1,14 +1,17 @@
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidQtMantidWidgets/InstrumentView/DetXMLFile.h"
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
+
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/Unit.h"
 #include "MantidQtMantidWidgets/InstrumentView/PanelsSurface.h"
 #include "MantidQtMantidWidgets/InstrumentView/Projection3D.h"
 #include "MantidQtMantidWidgets/InstrumentView/SimpleWidget.h"
@@ -1278,5 +1281,101 @@ void InstrumentWidget::clearADSHandle() {
   emit clearingHandle();
   close();
 }
+
+int InstrumentWidget::getCurrentTab() const {
+  return mControlsTab->currentIndex();
+}
+
+/**
+ * Save the state of the instrument widget to a project file.
+ * @return string representing the current state of the instrumet widget.
+ */
+std::string InstrumentWidget::saveToProject() const {
+  TSVSerialiser tsv;
+
+  // serialise widget properties
+  tsv.writeLine("WorkspaceName") << getWorkspaceNameStdString();
+  tsv.writeLine("SurfaceType") << getSurfaceType();
+  tsv.writeSection("surface", getSurface()->saveToProject());
+  tsv.writeLine("CurrentTab") << getCurrentTab();
+  tsv.writeLine("EnergyTransfer") << m_xIntegration->getMinimum()
+                                  << m_xIntegration->getMaximum();
+
+  // serialise widget subsections
+  tsv.writeSection("actor", m_instrumentActor->saveToProject());
+  tsv.writeSection("tabs", saveTabs());
+
+  return tsv.outputLines();
+}
+
+/**
+ * Save each tab on the widget to a string.
+ * @return a string representing the state of each tab on the widget
+ */
+std::string InstrumentWidget::saveTabs() const {
+  std::string tabContents;
+  for (auto tab : m_tabs) {
+    tabContents += tab->saveToProject();
+  }
+  return tabContents;
+}
+
+/**
+ * Load the state of each tab from a string.
+ * @param lines :: string containing the tabs states from the project file.
+ */
+void InstrumentWidget::loadTabs(const std::string &lines) const {
+  for (auto tab : m_tabs) {
+    tab->loadFromProject(lines);
+  }
+}
+
+/**
+ * Load the state of the widget from a project file.
+ * @param lines :: string containing the state of the widget from the project
+ * file.
+ */
+void InstrumentWidget::loadFromProject(const std::string &lines) {
+  TSVSerialiser tsv(lines);
+
+  if (tsv.selectLine("SurfaceType")) {
+    int surfaceType;
+    tsv >> surfaceType;
+    setSurfaceType(surfaceType);
+  }
+
+  if (tsv.selectSection("actor")) {
+    std::string actorLines;
+    tsv >> actorLines;
+    m_instrumentActor->loadFromProject(actorLines);
+  }
+
+  if (tsv.selectLine("CurrentTab")) {
+    int tab;
+    tsv >> tab;
+    selectTab(tab);
+  }
+
+  if (tsv.selectLine("EnergyTransfer")) {
+    double min, max;
+    tsv >> min >> max;
+    setBinRange(min, max);
+  }
+
+  if (tsv.selectSection("Surface")) {
+    std::string surfaceLines;
+    tsv >> surfaceLines;
+    getSurface()->loadFromProject(surfaceLines);
+  }
+
+  if (tsv.selectSection("tabs")) {
+    std::string tabLines;
+    tsv >> tabLines;
+    loadTabs(tabLines);
+  }
+
+  updateInstrumentView();
+}
+
 } // MantidWidgets
 } // MantidQt

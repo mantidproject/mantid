@@ -1,9 +1,13 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, PropertyMode, Progress
 from mantid.kernel import StringMandatoryValidator, Direction, logger, FloatBoundedValidator, IntBoundedValidator
 
 #pylint: disable=too-many-instance-attributes
+
+
 class IndirectCylinderAbsorption(DataProcessorAlgorithm):
 
     _sample_ws_name = None
@@ -17,20 +21,16 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
     _can_radius = None
     _can_scale = None
     _events = None
-    _plot = None
     _output_ws = None
     _abs_ws = None
     _ass_ws = None
     _acc_ws = None
 
-
     def category(self):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
-
     def summary(self):
         return "Calculates indirect absorption corrections for a cylinder sample shape."
-
 
     def PyInit(self):
         # Sample options
@@ -67,8 +67,6 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='Events', defaultValue=5000,
                              validator=IntBoundedValidator(0),
                              doc='Number of neutron events')
-        self.declareProperty(name='Plot', defaultValue=False,
-                             doc='Plot options')
 
         # Output options
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
@@ -108,8 +106,6 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                            NumberOfSlices=1,
                            NumberOfAnnuli=10)
 
-        plot_data = [self._output_ws, self._sample_ws_name]
-        plot_corr = [self._ass_ws]
         group = self._ass_ws
 
         if self._can_ws_name is not None:
@@ -142,7 +138,6 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
 
                 Divide(LHSWorkspace=can_wave_ws, RHSWorkspace=self._acc_ws, OutputWorkspace=can_wave_ws)
                 Minus(LHSWorkspace=sample_wave_ws, RHSWorkspace=can_wave_ws, OutputWorkspace=sample_wave_ws)
-                plot_corr.append(self._acc_ws)
                 group += ',' + self._acc_ws
 
             else:
@@ -152,7 +147,6 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                 Divide(LHSWorkspace=sample_wave_ws, RHSWorkspace=self._ass_ws, OutputWorkspace=sample_wave_ws)
 
             DeleteWorkspace(can_wave_ws)
-            plot_data.append(self._can_ws_name)
 
         else:
             Divide(LHSWorkspace=sample_wave_ws, RHSWorkspace=self._ass_ws, OutputWorkspace=sample_wave_ws)
@@ -193,14 +187,6 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
             GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=self._abs_ws)
             self.setProperty('CorrectionsWorkspace', self._abs_ws)
 
-        if self._plot:
-            from IndirectImport import import_mantidplot
-            mantid_plot = import_mantidplot()
-            mantid_plot.plotSpectrum(plot_data, 0)
-            if self._abs_ws != '':
-                mantid_plot.plotSpectrum(plot_corr, 0)
-
-
     def _setup(self):
         """
         Get algorithm properties.
@@ -222,7 +208,6 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
         self._can_scale = self.getProperty('CanScaleFactor').value
 
         self._events = self.getPropertyValue('Events')
-        self._plot = self.getProperty('Plot').value
 
         self._output_ws = self.getPropertyValue('OutputWorkspace')
 
@@ -233,7 +218,6 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
         else:
             self._ass_ws = self._abs_ws + '_ass'
             self._acc_ws = self._abs_ws + '_acc'
-
 
     def validateInputs(self):
         """

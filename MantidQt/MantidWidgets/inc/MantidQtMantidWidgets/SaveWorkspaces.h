@@ -54,12 +54,16 @@ public:
   static QString getSaveAlgExt(const QString &algName);
 public slots:
   void onSaveAsZeroErrorFreeChanged(int state);
+  void onUpdateGeomtryInformation(QString &geometryID, QString &sampleHeight,
+                                  QString &sampleWidth,
+                                  QString &sampleThickness);
 
 signals:
   void closing();
   void createZeroErrorFreeWorkspace(QString &originalWorkspace,
                                     QString &zeroFreeWorkspace);
   void deleteZeroErrorFreeWorkspace(QString &zeroFreeWorkspace);
+  void updateGeometryInformation();
 
 private:
   QLineEdit *m_fNameEdit;
@@ -67,6 +71,10 @@ private:
   QCheckBox *m_append;
   QString m_lastName;
   bool m_saveAsZeroErrorFree;
+  QString m_geometryID;
+  QString m_sampleHeight;
+  QString m_sampleWidth;
+  QString m_sampleThickness;
 
   QHash<QCheckBox *const, QString> m_savFormats;
   typedef QHash<QCheckBox *const, QString>::const_iterator SavFormatsConstIt;

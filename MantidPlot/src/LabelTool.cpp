@@ -4,8 +4,10 @@
 #include "LegendWidget.h"
 #include "Mantid/MantidMatrixCurve.h"
 #include "TextDialog.h"
+#include "Mantid/LabelToolLogValuesDialog.h"
 // Mantid
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/Run.h"
 // Qwt
 #include <qwt_picker.h>
 #include <qwt_plot_canvas.h>
@@ -304,12 +306,13 @@ void LabelTool::blankRegionClicked() {
   }
 
   // For viewing log values.
+  // For viewing log values.
   QMenu *logVals = info->addMenu(tr("Log values"));
 
-  foreach (QString logProperty, logValues()) {
-    QAction *qa = new QAction(logProperty, this);
+  foreach (QString wsName, workspaceNames()) {
+    QAction *qa = new QAction(wsName, this);
     logVals->addAction(qa);
-    connect(qa, SIGNAL(triggered()), this, SLOT(insertLegend()));
+    connect(qa, SIGNAL(triggered()), this, SLOT(showLogValuesDialog()));
   }
 
   clickMenu->exec(QCursor::pos());
@@ -355,15 +358,28 @@ void LabelTool::dataPointClicked() {
   // For viewing log values.
   QMenu *logVals = info->addMenu(tr("Log values"));
 
-  foreach (QString logProperty, logValues()) {
-    QAction *qa = new QAction(logProperty, this);
+  foreach (QString wsName, workspaceNames()) {
+    QAction *qa = new QAction(wsName, this);
     logVals->addAction(qa);
-    connect(qa, SIGNAL(triggered()), this, SLOT(insertLegend()));
+    connect(qa, SIGNAL(triggered()), this, SLOT(showLogValuesDialog()));
   }
 
   clickMenu->exec(QCursor::pos());
 }
 
+void LabelTool::showLogValuesDialog() {
+  QAction *action = qobject_cast<QAction *>(sender());
+  QString wsname = action->text();
+
+  LegendWidget *label = new LegendWidget(d_graph->plotWidget());
+  label->setOriginCoord(m_xPos, m_yPos);
+  label->setFont(d_graph->axisFont(0));
+
+  LabelToolLogValuesDialog *logValues =
+      new LabelToolLogValuesDialog(wsname, label);
+  // window set visibe
+  logValues->setVisible(true);
+}
 /// Creates a label with size equal to the axisFont size
 void LabelTool::insertLegend() {
   QAction *action = qobject_cast<QAction *>(sender());

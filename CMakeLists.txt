@@ -35,6 +35,23 @@ set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #e
 set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 
 ###########################################################################
+# Set ParaView information since later items depend on it
+###########################################################################
+# VATES flag. Requires ParaView
+set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
+if ( ENABLE_MANTIDPLOT AND MAKE_VATES )
+  find_package( ParaView )
+  if( ParaView_FOUND )
+    add_definitions ( -DMAKE_VATES )
+    # Poco::File throws an exception when a backslash is used.
+    string ( REPLACE "\\" "/" ParaView_DIR ${ParaView_DIR} )
+  endif ()
+endif ()
+if ( ENABLE_MANTIDPLOT )
+  include ( ParaViewSetup )
+endif ()
+
+###########################################################################
 # Bootstrap any dependencies
 ###########################################################################
 include ( Bootstrap )
@@ -67,12 +84,7 @@ if ( NOT OPENGL_FOUND )
   message ( FATAL_ERROR "OpenGL was not found." )
 endif ()
 
-###########################################################################
-# Set ParaView information since later items depend on it
-###########################################################################
-if (ENABLE_MANTIDPLOT)
-  include ( ParaViewSetup )
-endif ()
+find_package(TBB REQUIRED)
 
 # We probably don't want this to run on every build.
 option(COVERALLS "Generate coveralls data" OFF)
@@ -126,16 +138,6 @@ set( DOCS_BUILDDIR ${CMAKE_BINARY_DIR}/docs )
 # Framework Build options
 set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each package run together")
 set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to the list of tests run by ctest?")
-
-
-# VATES flag. Requires ParaView
-set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
-if (ENABLE_MANTIDPLOT AND MAKE_VATES )
-  find_package(ParaView)
-  if(ParaView_FOUND)
-    add_definitions ( -DMAKE_VATES )
-  endif()
-endif()
 
 add_subdirectory ( Framework )
 
@@ -224,7 +226,7 @@ endif ()
 install ( DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
 
 # Install the files (.desktop and icon) to create a menu item, but only if installing to /opt/Mantid
-if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_INSTALL_PREFIX STREQUAL "/opt/Mantid" )
+if ( ENABLE_MANTIDPLOT AND ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_INSTALL_PREFIX STREQUAL "/opt/Mantid" )
   install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/installers/LinuxInstaller/mantidplot.desktop
             DESTINATION /usr/share/applications )
   install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/MantidPlot_Icon_32offset.png
@@ -235,6 +237,13 @@ endif()
 # THIS MUST BE THE LAST SUB_DIRECTORY ADDED. See Framework/PostInstall/CMakeLists
 # for an explanation
 add_subdirectory( Framework/PostInstall )
+
+
+# Conda
+set ( ENABLE_CONDA CACHE BOOL "Switch to enable conda package generation")
+if ( ENABLE_CONDA )
+  include ( conda )
+endif ( ENABLE_CONDA )
 
 ###########################################################################
 # CPack settings
@@ -309,12 +318,12 @@ if ( ENABLE_CPACK )
                            "ipython-notebook,"
                            "python-matplotlib,"
                            "python-scipy,"
-                           "tbb,"
-                           "libpocofoundation11,libpocoutil11,libpoconet11,libpoconetssl11,libpococrypto11,libpocoxml11,"
+                           "libtbb2,"
+                           "libpocofoundation${POCO_SOLIB_VERSION},libpocoutil${POCO_SOLIB_VERSION},libpoconet${POCO_SOLIB_VERSION},libpoconetssl${POCO_SOLIB_VERSION},libpococrypto${POCO_SOLIB_VERSION},libpocoxml${POCO_SOLIB_VERSION},"
                            "python-pycifrw (>= 4.2.1)" )
         set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
         if( "${UNIX_CODENAME}" STREQUAL "xenial")
-            list ( APPEND DEPENDS_LIST ", libnexus0v5 (>= 4.3),libjsoncpp1,libqscintilla2-12v5, libmuparser2v5,libqwtplot3d-qt4-0v5,libgsl2,liboce-foundation10,liboce-modeling10")
+            list ( APPEND DEPENDS_LIST ", libhdf5-cpp-11,libnexus0v5 (>= 4.3),libjsoncpp1,libqscintilla2-12v5, libmuparser2v5,libqwtplot3d-qt4-0v5,libgsl2,liboce-foundation10,liboce-modeling10")
             list (REMOVE_ITEM DEPENDS_LIST "libjsoncpp0 (>=0.7.0)," "libqscintilla2-11," "libmuparser2," "libnexus0 (>= 4.3)," "libqwtplot3d-qt4-0," "libgsl0ldbl," "liboce-foundation8,liboce-modeling8,")
         endif()
         # parse list to string required for deb package

@@ -237,17 +237,6 @@ bool ImggTomographicReconstruction::processGroups() {
                  << " input projections, " << ysize << " rows by " << xsize
                  << " columns.\n";
 
-  // This is an ugly workaround for the issue that processGroups()
-  // does not fully finish the algorithm:
-  // https://github.com/mantidproject/mantid/issues/11361
-  // A similar workaround is used in CompareWorkspaces and others
-  // Store output workspace in AnalysisDataService and finish execution
-  if (!isChild())
-    this->store();
-  setExecuted(true);
-  notificationCenter().postNotification(
-      new FinishedNotification(this, this->isExecuted()));
-
   return true;
 }
 

@@ -39,7 +39,9 @@ using namespace Mantid::API;
 SaveWorkspaces::SaveWorkspaces(QWidget *parent, const QString &suggFname,
                                QHash<const QCheckBox *const, QString> &defSavs,
                                bool saveAsZeroErrorFree)
-    : API::MantidDialog(parent), m_saveAsZeroErrorFree(saveAsZeroErrorFree) {
+    : API::MantidDialog(parent), m_saveAsZeroErrorFree(saveAsZeroErrorFree),
+      m_geometryID(""), m_sampleHeight(""), m_sampleWidth(""),
+      m_sampleThickness("") {
   setAttribute(Qt::WA_DeleteOnClose);
   setWindowTitle("Save Workspaces");
 
@@ -263,15 +265,22 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem *> &wspaces,
       MatrixWorkspace_sptr matrix_workspace =
           boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
       if (matrix_workspace) {
-        if (matrix_workspace->getInstrument()->getName() == "SANS2D")
+        if (matrix_workspace->getInstrument()->getName() == "SANS2D") {
           saveCommands += "'front-detector, rear-detector'";
-        if (matrix_workspace->getInstrument()->getName() == "LOQ")
+        }
+        if (matrix_workspace->getInstrument()->getName() == "LOQ") {
           saveCommands += "'HAB, main-detector-bank'";
-      } else {
-        // g_log.wa
+        }
+
+        // Add the geometry information
+        emit updateGeometryInformation();
+        // Remove the first three characters, since they are unwanted
+        saveCommands += ", Geometry='" + m_geometryID + "', SampleHeight=" +
+                        m_sampleHeight + ", SampleWidth=" + m_sampleWidth +
+                        ", SampleThickness=" + m_sampleThickness;
       }
     }
-    // finally finish the algorithm call
+
     saveCommands += ")\n";
   }
   return saveCommands;
@@ -430,4 +439,17 @@ void SaveWorkspaces::onSaveAsZeroErrorFreeChanged(int state) {
   } else {
     m_saveAsZeroErrorFree = true;
   }
+}
+
+/**
+ * Recieves an update for the geometry information
+ */
+void SaveWorkspaces::onUpdateGeomtryInformation(QString &geometryID,
+                                                QString &sampleHeight,
+                                                QString &sampleWidth,
+                                                QString &sampleThickness) {
+  m_geometryID = geometryID;
+  m_sampleHeight = sampleHeight;
+  m_sampleWidth = sampleWidth;
+  m_sampleThickness = sampleThickness;
 }

@@ -1,4 +1,8 @@
-#pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
+#pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,redefined-builtin
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+from six import next
+
 import os
 import numpy as np
 
@@ -9,11 +13,13 @@ from mantid.kernel import StringListValidator, Direction
 import mantid.simpleapi as s_api
 from mantid import config, logger
 from IndirectCommon import *
+MTD_PLOT = import_mantidplot()
 
 if is_supported_f2py_platform():
     QLr     = import_f2py("QLres")
     QLd     = import_f2py("QLdata")
     Qse     = import_f2py("QLse")
+
 
 class BayesQuasi(PythonAlgorithm):
 
@@ -31,8 +37,6 @@ class BayesQuasi(PythonAlgorithm):
     _res_norm = None
     _wfile = None
     _loop = None
-    _save = None
-    _plot = None
 
     def category(self):
         return "Workflow\\MIDAS"
@@ -90,10 +94,6 @@ class BayesQuasi(PythonAlgorithm):
 
         self.declareProperty(name='Loop', defaultValue=True, doc='Switch Sequential fit On/Off')
 
-        self.declareProperty(name='Plot', defaultValue='', doc='Plot options')
-
-        self.declareProperty(name='Save', defaultValue=False, doc='Switch Save result to nxs file Off/On')
-
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceFit', '', direction=Direction.Output),
                              doc='The name of the fit output workspaces')
 
@@ -105,7 +105,6 @@ class BayesQuasi(PythonAlgorithm):
                                                      direction=Direction.Output),
                              doc='The name of the probability output workspaces')
 
-
     def validateInputs(self):
         self._get_properties()
         issues = dict()
@@ -115,7 +114,6 @@ class BayesQuasi(PythonAlgorithm):
             issues['MaxRange'] = 'Must be less than EnergyMin'
 
         return issues
-
 
     def _get_properties(self):
         self._program = self.getPropertyValue('Program')
@@ -132,8 +130,6 @@ class BayesQuasi(PythonAlgorithm):
         self._res_norm = self.getProperty('UseResNorm').value
         self._wfile = self.getPropertyValue('WidthFile')
         self._loop = self.getProperty('Loop').value
-        self._save = self.getProperty('Save').value
-        self._plot = self.getPropertyValue('Plot')
 
     #pylint: disable=too-many-locals,too-many-statements
     def PyExec(self):
@@ -209,7 +205,7 @@ class BayesQuasi(PythonAlgorithm):
         totalNoSam = nsam
 
         #check if we're performing a sequential fit
-        if self._loop != True:
+        if not self._loop:
             nsam = 1
 
         nres = CheckHistZero(self._resWS)[0]
@@ -260,42 +256,42 @@ class BayesQuasi(PythonAlgorithm):
 
         group = ''
         workflow_prog = Progress(self, start=0.3, end=0.7, nreports=nsam*3)
-        for m in range(0,nsam):
-            logger.information('Group ' +str(m)+ ' at angle '+ str(theta[m]))
-            nsp = m+1
+        for spectrum in range(0,nsam):
+            logger.information('Group ' +str(spectrum)+ ' at angle '+ str(theta[spectrum]))
+            nsp = spectrum+1
 
-            nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(self._samWS,m,erange,nbin)
+            nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(self._samWS,spectrum,erange,nbin)
             Ndat = nout[0]
             Imin = nout[1]
             Imax = nout[2]
             if prog == 'QLd':
-                mm = m
+                mm = spectrum
             else:
                 mm = 0
             Nb,Xb,Yb,Eb = GetXYE(self._resWS,mm,array_len)     # get resolution data
             numb = [nsam, nsp, ntc, Ndat, nbin, Imin, Imax, Nb, nrbin]
             rscl = 1.0
-            reals = [efix, theta[m], rscl, bnorm]
+            reals = [efix, theta[spectrum], rscl, bnorm]
 
             if prog == 'QLr':
-                workflow_prog.report('Processing Sample number %i as Lorentzian' % nsam)
+                workflow_prog.report('Processing Sample number %i as Lorentzian' % spectrum)
                 nd,xout,yout,eout,yfit,yprob=QLr.qlres(numb,Xv,Yv,Ev,reals,fitOp,
                                                        Xdat,Xb,Yb,Wy,We,dtn,xsc,
                                                        wrks,wrkr,lwrk)
                 message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])+' '+str(yprob[2])+' '+str(yprob[3])
                 logger.information(message)
             if prog == 'QLd':
-                workflow_prog.report('Processing Sample number %i' % nsam)
+                workflow_prog.report('Processing Sample number %i' % spectrum)
                 nd,xout,yout,eout,yfit,yprob=QLd.qldata(numb,Xv,Yv,Ev,reals,fitOp,
                                                         Xdat,Xb,Yb,Eb,Wy,We,
                                                         wrks,wrkr,lwrk)
                 message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])+' '+str(yprob[2])+' '+str(yprob[3])
                 logger.information(message)
             if prog == 'QSe':
-                workflow_prog.report('Processing Sample number %i as Stretched Exp' % nsam)
-                nd,xout,yout,eout,yfit,yprob=Qse.qlstexp(numb,Xv,Yv,Ev,reals,fitOp,\
-                                                        Xdat,Xb,Yb,Wy,We,dtn,xsc,\
-                                                        wrks,wrkr,lwrk)
+                workflow_prog.report('Processing Sample number %i as Stretched Exp' % spectrum)
+                nd,xout,yout,eout,yfit,yprob=Qse.qlstexp(numb,Xv,Yv,Ev,reals,fitOp,
+                                                         Xdat,Xb,Yb,Wy,We,dtn,xsc,
+                                                         wrks,wrkr,lwrk)
             dataX = xout[:nd]
             dataX = np.append(dataX,2*xout[nd-1]-xout[nd-2])
             yfit_list = np.split(yfit[:4*nd],4)
@@ -335,7 +331,7 @@ class BayesQuasi(PythonAlgorithm):
 
             # create result workspace
             fitWS = fname+'_Workspaces'
-            fout = fname+'_Workspace_'+ str(m)
+            fout = fname+'_Workspace_'+ str(spectrum)
 
             workflow_prog.report('Creating OutputWorkspace')
             s_api.CreateWorkspace(OutputWorkspace=fout, DataX=datX, DataY=datY, DataE=datE,
@@ -363,13 +359,9 @@ class BayesQuasi(PythonAlgorithm):
             s_api.CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,
                                   Nspec=3, UnitX='MomentumTransfer')
             outWS = self.C2Fw(fname)
-            if self._plot != 'None':
-                self.QuasiPlot(fname,self._plot,res_plot,self._loop)
         if self._program == 'QSe':
             comp_prog.report('Runnning C2Se')
             outWS = self.C2Se(fname)
-            if self._plot != 'None':
-                self.QuasiPlot(fname,self._plot,res_plot,self._loop)
 
         log_prog = Progress(self, start=0.8, end =1.0, nreports=8)
         #Add some sample logs to the output workspaces
@@ -382,15 +374,6 @@ class BayesQuasi(PythonAlgorithm):
         log_prog.report('Adding sample logs to Fit workspace')
         self._add_sample_logs(fitWS, prog, erange, nbins)
         log_prog.report('Finialising log copying')
-
-        if self._save:
-            log_prog.report('Saving workspaces')
-            fit_path = os.path.join(workdir,fitWS+'.nxs')
-            s_api.SaveNexusProcessed(InputWorkspace=fitWS, Filename=fit_path)
-            out_path = os.path.join(workdir, outWS+'.nxs')                    # path name for nxs file
-            s_api.SaveNexusProcessed(InputWorkspace=outWS, Filename=out_path)
-            logger.information('Output fit file created : ' + fit_path)
-            logger.information('Output paramter file created : ' + out_path)
 
         self.setProperty('OutputWorkspaceFit', fitWS)
         self.setProperty('OutputWorkspaceResult', outWS)
@@ -428,7 +411,6 @@ class BayesQuasi(PythonAlgorithm):
         log_alg.setProperty('LogNames', [log[0] for log in sample_logs])
         log_alg.setProperty('LogValues', [log[1] for log in sample_logs])
         log_alg.execute()
-
 
     def C2Se(self, sname):
         outWS = sname+'_Result'
@@ -471,8 +453,8 @@ class BayesQuasi(PythonAlgorithm):
         Vaxis.append('f1.Beta')
 
         logger.information('Vaxis=' + str(Vaxis))
-        s_api.CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,\
-            UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
+        s_api.CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
+                              UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
 
         return outWS
 
@@ -596,41 +578,6 @@ class BayesQuasi(PythonAlgorithm):
 
         return widthY, widthE
 
-    def QuasiPlot(self, ws_stem,plot_type,res_plot,sequential):
-        if plot_type:
-            if sequential:
-                ws_name = ws_stem + '_Result'
-            if plot_type == 'Prob' or plot_type == 'All':
-                prob_ws = ws_stem+'_Prob'
-                if prob_ws in s_api.mtd.getObjectNames():
-                    MTD_PLOT.plotSpectrum(prob_ws,[1,2],False)
-
-            self._quasi_plot_parameters(ws_name, plot_type)
-
-        if plot_type == 'Fit' or plot_type == 'All':
-            fWS = ws_stem+'_Workspace_0'
-            MTD_PLOT.plotSpectrum(fWS,res_plot,False)
-
-
-    def _quasi_plot_parameters(self, ws_name, plot_type):
-        """
-        Plot a parameter if the user requested it and it exists
-        in the workspace
-
-        @param ws_name :: name of the workspace to plot from. This function expects it has a TextAxis
-        @param plot_type :: the name of the parameter to plot (or All if all parameters should
-                            be plotted)
-        """
-        num_spectra = s_api.mtd[ws_name].getNumberHistograms()
-        param_names = ['Amplitude', 'FWHM', 'Beta']
-
-        for param_name in param_names:
-            if plot_type == param_name or plot_type == 'All':
-                spectra_indicies = [i for i in range(num_spectra) if param_name in s_api.mtd[ws_name].getAxis(1).label(i)]
-
-                if len(spectra_indicies) > 0:
-                    plotSpectra(ws_name, param_name, indicies=spectra_indicies[:3])
-
     def C2Fw(self, sname):
         output_workspace = sname+'_Result'
         num_spectra = 0
@@ -691,8 +638,8 @@ class BayesQuasi(PythonAlgorithm):
         y = np.asarray(y).flatten()
         e = np.asarray(e).flatten()
 
-        s_api.CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,\
-            UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=axis_names)
+        s_api.CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,
+                              UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=axis_names)
 
         return output_workspace
 
@@ -701,7 +648,6 @@ class BayesQuasi(PythonAlgorithm):
         #encapsulates the iteration over a block of lines
         for line in block:
             yield ExtractFloat(line)
-
 
     def _read_ql_file(self, file_name, nl):
         #offet to ignore header
@@ -718,7 +664,7 @@ class BayesQuasi(PythonAlgorithm):
 
         #iterate over each block of fit parameters in the file
         #each block corresponds to a single column in the final workspace
-        for block_num in xrange(num_blocks):
+        for block_num in range(num_blocks):
             lower_index = header_offset+(block_size*block_num)
             upper_index = lower_index+block_size
 
@@ -726,12 +672,12 @@ class BayesQuasi(PythonAlgorithm):
             line_pointer = self._yield_floats(asc[lower_index:upper_index])
 
             #Q,AMAX,HWHM,BSCL,GSCL
-            line = line_pointer.next()
+            line = next(line_pointer)
             Q, AMAX, HWHM, _, _ = line
             q_data.append(Q)
 
             #A0,A1,A2,A4
-            line = line_pointer.next()
+            line = next(line_pointer)
             block_height = AMAX*line[0]
 
             #parse peak data from block
@@ -739,7 +685,7 @@ class BayesQuasi(PythonAlgorithm):
             block_amplitude = []
             for _ in range(nl):
                 #Amplitude,FWHM for each peak
-                line = line_pointer.next()
+                line = next(line_pointer)
                 amp = AMAX*line[0]
                 FWHM = 2.*HWHM*line[1]
                 block_amplitude.append(amp)
@@ -747,7 +693,7 @@ class BayesQuasi(PythonAlgorithm):
 
             #next parse error data from block
             #SIG0
-            line = line_pointer.next()
+            line = next(line_pointer)
             block_height_e = line[0]
 
             block_FWHM_e = []
@@ -755,12 +701,12 @@ class BayesQuasi(PythonAlgorithm):
             for _ in range(nl):
                 #Amplitude error,FWHM error for each peak
                 #SIGIK
-                line = line_pointer.next()
+                line = next(line_pointer)
                 amp = AMAX*math.sqrt(math.fabs(line[0])+1.0e-20)
                 block_amplitude_e.append(amp)
 
                 #SIGFK
-                line = line_pointer.next()
+                line = next(line_pointer)
                 FWHM = 2.0*HWHM*math.sqrt(math.fabs(line[0])+1.0e-20)
                 block_FWHM_e.append(FWHM)
 

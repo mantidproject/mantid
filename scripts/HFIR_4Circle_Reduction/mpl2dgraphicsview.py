@@ -5,7 +5,7 @@ import numpy as np
 from PyQt4 import QtGui
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar2
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar2
 from matplotlib.figure import Figure
 import matplotlib.image
 from matplotlib import pyplot as plt
@@ -15,6 +15,7 @@ class Mpl2dGraphicsView(QtGui.QWidget):
     """ A combined graphics view including matplotlib canvas and
     a navigation tool bar for 2D image specifically
     """
+
     def __init__(self, parent):
         """ Initialization
         """
@@ -123,6 +124,7 @@ class Qt4Mpl2dCanvas(FigureCanvas):
     """  A customized Qt widget for matplotlib 2D image.
     It can be used to replace GraphicsView of QtGui
     """
+
     def __init__(self, parent):
         """  Initialization
         """
@@ -411,4 +413,3 @@ class MyNavigationToolbar(NavigationToolbar2):
         self._myParent.evt_view_updated()
 
         return
-

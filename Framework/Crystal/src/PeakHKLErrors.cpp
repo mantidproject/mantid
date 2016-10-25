@@ -7,16 +7,18 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidCrystal/PeakHKLErrors.h"
-#include "MantidCrystal/SCDPanelErrors.h"
-
+#include "MantidAPI/AnalysisDataService.h"
 #include <boost/math/special_functions/round.hpp>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::Kernel::Units;
 using Mantid::Geometry::CompAssembly;
 using Mantid::Geometry::IObjComponent_const_sptr;
 using Mantid::Geometry::IComponent_const_sptr;
@@ -377,8 +379,7 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
 
     int runNum = peak_old.getRunNumber();
     std::string runNumStr = std::to_string(runNum);
-    Peak peak =
-        SCDPanelErrors::createNewPeak(peak_old, instNew, 0, peak_old.getL1());
+    Peak peak = createNewPeak(peak_old, instNew, 0, peak_old.getL1());
 
     size_t N = OptRuns.find("/" + runNumStr + "/");
     if (N < OptRuns.size()) {
@@ -470,8 +471,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   for (size_t i = 0; i < nData; i += 3) {
     int peakNum = boost::math::iround(xValues[i]);
     IPeak &peak_old = Peaks->getPeak(peakNum);
-    Peak peak =
-        SCDPanelErrors::createNewPeak(peak_old, instNew, 0, peak_old.getL1());
+    Peak peak = createNewPeak(peak_old, instNew, 0, peak_old.getL1());
 
     int runNum = peak_old.getRunNumber();
     std::string runNumStr = std::to_string(runNum);
@@ -622,6 +622,39 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
       out->set(i + 2, paramNums[x], dhkl[2]);
     }
   }
+}
+
+Peak PeakHKLErrors::createNewPeak(const Geometry::IPeak &peak_old,
+                                  Geometry::Instrument_sptr instrNew, double T0,
+                                  double L0) {
+  Geometry::Instrument_const_sptr inst = peak_old.getInstrument();
+  if (inst->getComponentID() != instrNew->getComponentID()) {
+    g_log.error("All peaks must have the same instrument");
+    throw std::invalid_argument("All peaks must have the same instrument");
+  }
+
+  double T = peak_old.getTOF() + T0;
+
+  int ID = peak_old.getDetectorID();
+
+  Kernel::V3D hkl = peak_old.getHKL();
+  // peak_old.setDetectorID(ID); //set det positions
+  Peak peak(instrNew, ID, peak_old.getWavelength(), hkl,
+            peak_old.getGoniometerMatrix());
+
+  Wavelength wl;
+
+  wl.initialize(L0, peak.getL2(), peak.getScattering(), 0,
+                peak_old.getInitialEnergy(), 0.0);
+
+  peak.setWavelength(wl.singleFromTOF(T));
+  peak.setIntensity(peak_old.getIntensity());
+  peak.setSigmaIntensity(peak_old.getSigmaIntensity());
+  peak.setRunNumber(peak_old.getRunNumber());
+  peak.setBinCount(peak_old.getBinCount());
+
+  //!!!peak.setDetectorID(ID);
+  return peak;
 }
 }
 }

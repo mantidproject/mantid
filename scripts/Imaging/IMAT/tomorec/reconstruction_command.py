@@ -36,6 +36,7 @@ except ImportError:
 from . import io as tomoio
 from . import configs as tomocfg
 
+
 class ReconstructionCommand(object):
     """
     Run a tomographic reconstruction command, which can be a local process or a job on a
@@ -347,7 +348,6 @@ class ReconstructionCommand(object):
 
         return preproc_data
 
-
     def normalize_air_region(self, data, pre_cfg):
         """
         Normalize by beam intensity. This is not directly about proton
@@ -620,7 +620,6 @@ class ReconstructionCommand(object):
                 print(" * WARNING: could not import tomopy so could not use the tomopy method to find the center "
                       "of rotation. Details: {0}".format(exc))
 
-
         print "Using center of rotation: {0}".format(preproc_cfg.cor)
         start = time.time()
         if 'tomopy' == alg_cfg.tool and 'gridrec' != alg_cfg.algorithm and 'fbp' != alg_cfg.algorithm:
@@ -656,7 +655,6 @@ class ReconstructionCommand(object):
         """
         # Some of these have issues depending on the GPU setup
         algs_avail = "[FP3D_CUDA], [BP3D_CUDA]], [FDK_CUDA], [SIRT3D_CUDA], [CGLS3D_CUDA]"
-
 
         if alg_cfg.algorithm.upper() not in algs_avail:
             raise ValueError("Invalid algorithm requested for the Astra package: {0}. "
@@ -828,7 +826,6 @@ class ReconstructionCommand(object):
         else:
             print " * Note: not applied N-dimensional median filter on reconstructed volume"
 
-
     def read_in_stack(self, sample_path, img_format, flat_field_path=None, dark_field_path=None):
         """
         Loads a stack, including sample, white and dark images.
@@ -874,8 +871,9 @@ class ReconstructionCommand(object):
         # slices along the vertical (z) axis
         # output_dir = 'output_recon_tomopy'
         output_dir = cfg.postproc_cfg.output_dir
-        print "* Saving slices of the reconstructed volume in: {0}".format(output_dir)
-        tomoio.save_recon_as_vertical_slices(recon_data, output_dir,
+        out_recon_dir = os.path.join(output_dir, 'reconstructed')
+        print "* Saving slices of the reconstructed volume in: {0}".format(out_recon_dir)
+        tomoio.save_recon_as_vertical_slices(recon_data, out_recon_dir,
                                              name_prefix=self._OUT_SLICES_FILENAME_PREFIX,
                                              img_format=cfg.preproc_cfg.out_img_format)
 

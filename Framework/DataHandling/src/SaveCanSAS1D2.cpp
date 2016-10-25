@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
@@ -10,8 +7,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/Unit.h"
 
-//-----------------------------------------------------------------------------
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -101,37 +98,17 @@ void SaveCanSAS1D2::exec() {
   createSASSampleElement(sasSample);
   m_outFile << sasSample;
 
-  std::string sasInstr = "\n\t\t<SASinstrument>";
-  m_outFile << sasInstr;
-  std::string sasInstrName = "\n\t\t\t<name>";
-  std::string instrname = m_workspace->getInstrument()->getName();
-  // look for xml special characters and replace with entity refrence
-  searchandreplaceSpecialChars(instrname);
-  sasInstrName += instrname;
-  sasInstrName += "</name>";
-  m_outFile << sasInstrName;
-
-  std::string sasSource;
-  createSASSourceElement(sasSource);
-  m_outFile << sasSource;
-
-  std::string sasCollimation = "\n\t\t\t<SAScollimation/>";
-  m_outFile << sasCollimation;
-
+  // Recording the SAS instrument can throw, if there
+  // are no detecors present
+  std::string sasInstrument;
   try {
-    std::string sasDet;
-    createSASDetectorElement(sasDet);
-    m_outFile << sasDet;
+    createSASInstrument(sasInstrument);
   } catch (Kernel::Exception::NotFoundError &) {
-    m_outFile.close();
     throw;
   } catch (std::runtime_error &) {
-    m_outFile.close();
     throw;
   }
-
-  sasInstr = "\n\t\t</SASinstrument>";
-  m_outFile << sasInstr;
+  m_outFile << sasInstrument;
 
   std::string sasProcess;
   createSASProcessElement(sasProcess);

@@ -91,7 +91,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   boost::shared_ptr<EnggDiffractionViewQtGUI> sharedView(
       this, [](EnggDiffractionViewQtGUI *) {});
   m_fittingWidget = new EnggDiffFittingViewQtWidget(
-      m_ui.tabMain, sharedView, sharedView, fullPres, sharedView);
+      m_ui.tabMain, sharedView, sharedView, fullPres, fullPres, sharedView);
   m_ui.tabMain->addTab(m_fittingWidget, QString("Fitting"));
 
   QWidget *wSettings = new QWidget(m_ui.tabMain);
@@ -369,23 +369,28 @@ void EnggDiffractionViewQtGUI::readSettings() {
   // EnggDiffCalibSettings
   m_calibSettings.m_inputDirCalib =
       qs.value("input-dir-calib-files", lastPath).toString().toStdString();
+
   m_calibSettings.m_inputDirRaw =
       qs.value("input-dir-raw-files", lastPath).toString().toStdString();
+
   const std::string fullCalib = guessDefaultFullCalibrationPath();
   m_calibSettings.m_pixelCalibFilename =
       qs.value("pixel-calib-filename", QString::fromStdString(fullCalib))
           .toString()
           .toStdString();
+
   // 'advanced' block
   m_calibSettings.m_forceRecalcOverwrite =
       qs.value("force-recalc-overwrite", false).toBool();
+
   const std::string templ = guessGSASTemplatePath();
   m_calibSettings.m_templateGSAS_PRM =
       qs.value("template-gsas-prm", QString::fromStdString(templ))
           .toString()
           .toStdString();
-  m_calibSettings.m_forceRecalcOverwrite =
-      qs.value("rebin-calib", g_defaultRebinWidth).toBool();
+
+  m_calibSettings.m_rebinCalibrate =
+      qs.value("rebin-calib", g_defaultRebinWidth).toFloat();
 
   // 'focusing' block
   m_focusDir = qs.value("focus-dir").toString().toStdString();
@@ -655,6 +660,14 @@ void EnggDiffractionViewQtGUI::enableCalibrateFocusFitUserActions(bool enable) {
 void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
   for (int ti = 0; ti < m_ui.tabMain->count(); ++ti) {
     m_ui.tabMain->setTabEnabled(ti, enable);
+  }
+}
+
+void EnggDiffractionViewQtGUI::highlightRbNumber(bool isValid) {
+  if (!isValid) {
+    m_ui.label_RBNumber->setStyleSheet("background-color: red; color : white;");
+  } else {
+    m_ui.label_RBNumber->setStyleSheet("background-color: white");
   }
 }
 
@@ -1091,6 +1104,7 @@ void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {
   if (answer == QMessageBox::AcceptRole && m_ui.pushButton_close->isEnabled()) {
     m_presenter->notify(IEnggDiffractionPresenter::ShutDown);
     delete m_splashMsg;
+    m_splashMsg = nullptr;
     event->accept();
   } else {
     event->ignore();

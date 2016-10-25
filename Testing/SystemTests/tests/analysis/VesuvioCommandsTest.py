@@ -26,13 +26,16 @@ def _is_old_boost_version():
 
     return False
 
-def _create_test_flags(background):
+
+def _create_test_flags(background, multivariate=False):
     flags = dict()
     flags['fit_mode'] = 'spectrum'
     flags['spectra'] = '135'
-
-    mass1 = {'value': 1.0079, 'function': 'GramCharlier', 'width': [2, 5, 7],
-             'hermite_coeffs': [1, 0, 0], 'k_free': 0, 'sears_flag': 1}
+    if multivariate:
+        mass1 = {'value': 1.0079, 'function': 'MultivariateGaussian', 'SigmaX':5, 'SigmaY':5, 'SigmaZ':5}
+    else:
+        mass1 = {'value': 1.0079, 'function': 'GramCharlier', 'width': [2, 5, 7],
+                 'hermite_coeffs': [1, 0, 0], 'k_free': 0, 'sears_flag': 1}
     mass2 = {'value': 16.0, 'function': 'Gaussian', 'width': 10}
     mass3 = {'value': 27.0, 'function': 'Gaussian', 'width': 13}
     mass4 = {'value': 133.0, 'function': 'Gaussian', 'width': 30}
@@ -54,6 +57,7 @@ def _create_test_flags(background):
 
     return flags
 
+
 def _equal_within_tolerance(self, expected, actual, tolerance=0.05):
     """
     Checks the expected value is equal to the actual value with in a percentage of tolerance
@@ -61,6 +65,7 @@ def _equal_within_tolerance(self, expected, actual, tolerance=0.05):
     tolerance_value = expected * tolerance
     abs_difference = abs(expected - actual)
     self.assertTrue(abs_difference <= abs(tolerance_value))
+
 
 def _get_peak_height_and_index(workspace, ws_index):
     """
@@ -74,6 +79,7 @@ def _get_peak_height_and_index(workspace, ws_index):
     return peak_height, peak_bin
 
 #====================================================================================
+
 
 class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
 
@@ -123,6 +129,30 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
         self.assertTrue(isinstance(exit_iteration, int))
 
 #====================================================================================
+
+
+class FitSingleSpectrumBivariateGaussianTiesTest(stresstesting.MantidStressTest):
+    """
+    Test ensures that internal ties for mass profiles work correctly
+    This test ties SigmaX to SigmaY making the multivariate gaussian
+    a Bivariate Gaussian
+    """
+
+    def runTest(self):
+        flags = _create_test_flags(background=False, multivariate=True)
+        flags['masses'][0]['ties'] = 'SigmaX=SigmaY'
+        runs = "15039-15045"
+        self._fit_results = fit_tof(runs, flags)
+
+    def validate(self):
+        #Get fit workspace
+        fit_params = mtd['15039-15045_params_iteration_1']
+        f0_sigma_x = fit_params.readY(2)[0]
+        f0_sigma_y = fit_params.readY(3)[0]
+        self.assertAlmostEqual(f0_sigma_x, f0_sigma_y)
+
+#====================================================================================
+
 
 class SingleSpectrumBackground(stresstesting.MantidStressTest):
 
@@ -175,6 +205,7 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
 
 #====================================================================================
 
+
 class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
 
     _fit_results = None
@@ -226,6 +257,7 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         self.assertTrue(isinstance(exit_iteration, int))
 
 #====================================================================================
+
 
 class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest):
 

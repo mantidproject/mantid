@@ -11,6 +11,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Logger.h"
 #include <boost/scoped_ptr.hpp>
@@ -466,8 +467,7 @@ void ConcretePeaksPresenter::setPeakSizeIntoProjection(const double fraction) {
 
 double ConcretePeaksPresenter::getPeakSizeOnProjection() const {
   double result = 0;
-  if (m_viewPeaks != NULL && (m_peaksWS->getNumberPeaks() > 0) &&
-      m_viewPeaks->positionOnly()) {
+  if (m_viewPeaks != NULL && m_peaksWS->getNumberPeaks() > 0) {
     result = m_viewPeaks->getOccupancyInView();
   }
   return result;
@@ -475,8 +475,7 @@ double ConcretePeaksPresenter::getPeakSizeOnProjection() const {
 
 double ConcretePeaksPresenter::getPeakSizeIntoProjection() const {
   double result = 0;
-  if (m_viewPeaks != NULL && (m_peaksWS->getNumberPeaks() > 0) &&
-      m_viewPeaks->positionOnly()) {
+  if (m_viewPeaks != NULL && m_peaksWS->getNumberPeaks() > 0) {
     result = m_viewPeaks->getOccupancyIntoView();
   }
   return result;

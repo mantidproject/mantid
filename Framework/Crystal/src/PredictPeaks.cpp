@@ -1,6 +1,8 @@
 #include "MantidCrystal/PredictPeaks.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
 #include "MantidGeometry/Crystal/HKLGenerator.h"
@@ -34,7 +36,6 @@ double get_factor_for_q_convention(const std::string &convention) {
 }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 PredictPeaks::PredictPeaks()
@@ -44,7 +45,6 @@ PredictPeaks::PredictPeaks()
   m_refConds = getAllReflectionConditions();
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void PredictPeaks::init() {
@@ -121,7 +121,6 @@ void PredictPeaks::init() {
                   "An output PeaksWorkspace.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void PredictPeaks::exec() {
@@ -423,7 +422,7 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
   V3D q = orientedUB * hkl * (2.0 * M_PI * m_qConventionFactor);
 
   // Create the peak using the Q in the lab framewith all its info:
-  Peak p(m_inst, q, boost::optional<double>());
+  Peak p(m_inst, q);
 
   /* The constructor calls setQLabFrame, which already calls findDetector, which
      is expensive. It's not necessary to call it again, instead it's enough to

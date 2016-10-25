@@ -3,6 +3,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include <fstream>
 
@@ -15,7 +16,6 @@ DECLARE_ALGORITHM(SaveDaveGrp)
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SaveDaveGrp::init() {
@@ -30,7 +30,6 @@ void SaveDaveGrp::init() {
                         "Transform all energy units from milli eV to micro eV");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SaveDaveGrp::exec() {

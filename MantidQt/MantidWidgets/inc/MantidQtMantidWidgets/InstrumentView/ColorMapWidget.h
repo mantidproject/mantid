@@ -26,13 +26,17 @@ public:
   void setupColorBarScaling(const MantidColorMap &);
   void setMinValue(double);
   void setMaxValue(double);
-  QString getMinValue();
-  QString getMaxValue();
-  QString getNth_power();
+  QString getMinValue() const;
+  QString getMaxValue() const;
+  QString getNth_power() const;
   void setMinPositiveValue(double);
   int getScaleType() const;
   void setScaleType(int);
   void setNthPower(double);
+  /// Load the state of the actor from a Mantid project file.
+  void loadFromProject(const std::string &lines);
+  /// Save the state of the actor to a Mantid project file.
+  std::string saveToProject() const;
 signals:
   void scaleTypeChanged(int);
   void minValueChanged(double);
