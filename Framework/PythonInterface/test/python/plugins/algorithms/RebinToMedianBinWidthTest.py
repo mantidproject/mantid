@@ -40,5 +40,38 @@ class RebinToMedianBinWidthTest(unittest.TestCase):
             for binWidth in newBins:
                 self.assertAlmostEqual(binWidth, expectedBinWidth)
 
+    def test_average_over_multiple_histograms(self):
+        binWidths = numpy.array([0.5, 0.5, 2.3, 2.3, 2.3, 6.5,
+                                 0.4, 1.3, 0.4, 1.3, 2.5, 1.3])
+        xs1 = self._make_boundaries(-6.6, binWidths[:6])
+        xs2 = self._make_boundaries(99.6, binWidths[6:])
+        xs = numpy.concatenate((xs1, xs2))
+        ys = numpy.zeros(len(xs - 2))
+        ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2)
+        params = self._make_algorithm_params(ws)
+        self._run_algorithm(params)
+        expectedBinWidth = 0.5 * (2.3 + 1.3)
+        outWs = mtd[self._OUT_WS_NAME]
+        for i in range(outWs.getNumberHistograms()):
+            binnedXs = outWs.readX(i)
+            newBins = binnedXs[1:] - binnedXs[:-1]
+            for binWidth in newBins:
+                self.assertAlmostEqual(binWidth, expectedBinWidth)
+
+    def test_rounding(self):
+        binWidths = numpy.array([0.5, 6.1, 2.3, 0.5, 2.3, 2.3])
+        xs = self._make_boundaries(-3.33, binWidths)
+        ys = numpy.zeros(len(xs) - 1)
+        ws = CreateWorkspace(DataX=xs, DataY=ys)
+        params = self._make_algorithm_params(ws, rounding='10^n')
+        self._run_algorithm(params)
+        expectedBinWidth = 1.0
+        outWs = mtd[self._OUT_WS_NAME]
+        for i in range(outWs.getNumberHistograms()):
+            binnedXs = outWs.readX(i)
+            newBins = binnedXs[1:] - binnedXs[:-1]
+            for binWidth in newBins:
+                self.assertAlmostEqual(binWidth, expectedBinWidth)
+
 if __name__ == "__main__":
     unittest.main()
