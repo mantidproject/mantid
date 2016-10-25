@@ -237,7 +237,7 @@ public:
     const auto &spectrumInfo = m_grouped.spectrumInfo();
     const auto oldPos = spectrumInfo.position(0);
     // Change Y pos from 0.0 to -0.1
-    detectorInfo.setPosition(1, V3D(0.0, -1.0, 5.0));
+    detectorInfo.setPosition(1, V3D(0.0, -0.1, 5.0));
     TS_ASSERT_EQUALS(spectrumInfo.position(0), V3D(0.0, 0.0, 5.0));
     TS_ASSERT_DELTA(spectrumInfo.twoTheta(0), 0.0199973, 1e-6);
     // Restore old position
