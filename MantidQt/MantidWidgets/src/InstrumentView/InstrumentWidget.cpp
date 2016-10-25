@@ -1,5 +1,6 @@
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtMantidWidgets/InstrumentView/DetXMLFile.h"
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
@@ -723,7 +724,7 @@ void InstrumentWidget::saveSettings() {
 }
 
 void InstrumentWidget::helpClicked() {
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl("http://www.mantidproject.org/MantidPlot:_Instrument_View"));
 }
 

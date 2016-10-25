@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/StepScan.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/InstrumentDataService.h"
@@ -14,6 +15,8 @@
 #include <Poco/Thread.h>
 
 namespace MantidQt {
+using API::MantidDesktopServices;
+
 namespace CustomInterfaces {
 
 // Register the class with the factory
@@ -710,7 +713,7 @@ void StepScan::checkForVaryingLogs(const std::string &wsName) {
 }
 
 void StepScan::helpClicked() {
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl("http://www.mantidproject.org/Step_Scan_Interface"));
 }
 
