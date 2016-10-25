@@ -17,12 +17,12 @@ class RebinToBinWidthAtXTest(unittest.TestCase):
             for binWidth in newBins:
                 self.assertAlmostEqual(binWidth, expectedBinWidth)
 
-    def _make_algorithm_params(self, ws, x):
+    def _make_algorithm_params(self, ws, x, rounding='None'):
         return {
             'InputWorkspace': ws,
             'OutputWorkspace': self._OUT_WS_NAME,
             'X': x,
-            'Rounding': 'None'
+            'Rounding': rounding
         }
 
     def _make_boundaries(self, xBegin, binWidths):
@@ -64,7 +64,17 @@ class RebinToBinWidthAtXTest(unittest.TestCase):
         self._check_bin_widths(expectedWidth)
 
     def test_rounding(self):
-        pass
+        binWidths = numpy.array([0.13, 0.23, 0.05, 0.27, 0.42])
+        xBegin = -0.11
+        xs = self._make_boundaries(xBegin, binWidths, )
+        ys = numpy.zeros(len(xs - 1))
+        ws = CreateWorkspace(DataX=xs, DataY=ys)
+        i = len(xs) / 2 - 1
+        X = xs[i] + 0.5 * binWidths[i]
+        params = self._make_algorithm_params(ws, X, '10^n')
+        self._run_algorithm(params)
+        expectedWidth = 0.01
+        self._check_bin_widths(expectedWidth)
 
     def test_failure_X_out_of_bounds(self):
         pass

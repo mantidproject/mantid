@@ -28,5 +28,5 @@ def round(x, mode):
     Rounds x depending on the rounding mode selected.
     '''
     if mode == ROUNDING_TEN_TO_INT:
-        return 10.0**numpy.floor(numpy.log10(binWidth))
+        return 10.0**numpy.floor(numpy.log10(x))
     return x
