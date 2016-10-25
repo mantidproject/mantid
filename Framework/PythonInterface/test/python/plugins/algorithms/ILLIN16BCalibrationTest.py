@@ -1,12 +1,12 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.simpleapi import *
+from mantid.simpleapi import *  # noqa
 from testhelpers.tempfile_wrapper import TemporaryFileHelper
 
-
+'''
 SAMPLE_GROUPING_XML = \
-'''<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <detector-grouping instrument="IN16B">
   <group name="psd1"> <ids val="2-129"/> </group>
   <group name="psd2"> <ids val="130-257"/> </group>
@@ -62,5 +62,5 @@ class ILLIN16BCalibrationTest(unittest.TestCase):
         self.assertEqual(calib_ws.blocksize(), 1)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()
