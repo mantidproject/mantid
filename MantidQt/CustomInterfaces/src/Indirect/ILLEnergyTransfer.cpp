@@ -77,6 +77,9 @@ bool ILLEnergyTransfer::validate() {
       uiv.addErrorMessage("Please choose calibration File (not a workspace) "
                           "for FWS type of reduction.");
     }
+    if (m_uiForm.cbObservable->currentText().toStdString().empty()) {
+        uiv.addErrorMessage("Observable is invalid");
+    }
   }
 
   // Show error message for errors
@@ -122,6 +125,10 @@ void ILLEnergyTransfer::run() {
       QString vanFilename = m_uiForm.rfVanadiumRun->getUserInput().toString();
       reductionAlg->setProperty("VanadiumRun", vanFilename.toStdString());
     }
+
+    // Handle background scaling factor
+    reductionAlg->setProperty("BackgroundScalingFactor",m_backScaling);
+
   } else { // FWS
 
     reductionAlg =
@@ -138,8 +145,8 @@ void ILLEnergyTransfer::run() {
       }
     }
 
-    reductionAlg->setProperty("Observable",
-                              m_uiForm.cbObservable->currentText());
+    reductionAlg->setProperty(
+        "Observable", m_uiForm.cbObservable->currentText().toStdString());
   }
 
   // options common for QENS and FWS
@@ -160,9 +167,6 @@ void ILLEnergyTransfer::run() {
   // Handle background file
   QString backgroundFilename = m_uiForm.rfBackgroundRun->getUserInput().toString();
   reductionAlg->setProperty("BackgroundRun", backgroundFilename.toStdString());
-
-  // Handle background scaling factor
-  reductionAlg->setProperty("BackgroundScalingFactor",m_backScaling);
 
   // Handle mapping file
   bool useMapFile = m_uiForm.rdGroupChoose->isChecked();

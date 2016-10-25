@@ -78,7 +78,7 @@
          <string>Sum the input files</string>
         </property>
         <property name="text">
-         <string>Sum Runs</string>
+         <string>Sum All Runs</string>
         </property>
         <property name="checked">
          <bool>false</bool>
@@ -143,7 +143,7 @@
         </property>
        </widget>
       </item>
-      <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+      <item>
        <widget class="QComboBox" name="cbObservable">
         <property name="enabled">
          <bool>false</bool>
@@ -159,17 +159,22 @@
         </property>
         <item>
          <property name="text">
-          <string>Time</string>
+          <string>sample.temperature</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Temperature</string>
+          <string>sample.pressure</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Pressure</string>
+          <string>sample.start_time</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string/>
          </property>
         </item>
        </widget>
