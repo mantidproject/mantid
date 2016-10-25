@@ -4,16 +4,16 @@ import unittest
 from mantid.simpleapi import *  # noqa
 from testhelpers.tempfile_wrapper import TemporaryFileHelper
 
-'''
+
 SAMPLE_GROUPING_XML = \
-<?xml version="1.0" encoding="utf-8"?>
-<detector-grouping instrument="IN16B">
-  <group name="psd1"> <ids val="2-129"/> </group>
-  <group name="psd2"> <ids val="130-257"/> </group>
-  <group name="psd3"> <ids val="258-385"/> </group>
-  <group name="psd4"> <ids val="386-513"/> </group>
-</detector-grouping>
-'''
+    '''<?xml version="1.0" encoding="utf-8"?>
+    <detector-grouping instrument="IN16B">
+      <group name="psd1"> <ids val="2-129"/> </group>
+      <group name="psd2"> <ids val="130-257"/> </group>
+      <group name="psd3"> <ids val="258-385"/> </group>
+      <group name="psd4"> <ids val="386-513"/> </group>
+    </detector-grouping>
+    '''
 
 
 class ILLIN16BCalibrationTest(unittest.TestCase):
