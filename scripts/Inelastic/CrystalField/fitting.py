@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import re
 from mantid.kernel import ConfigService
@@ -167,7 +168,7 @@ class CrystalField(object):
         temperature = self._getTemperature(i)
         out = 'name=CrystalFieldPeaks,Ion=%s,Symmetry=%s,Temperature=%s' % (self._ion, self._symmetry, temperature)
         out += ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
-        out += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
+        out += ',%s' % ','.join(['%s=%s' % item for item in list(self._fieldParameters.items())])
         return out
 
     def makeSpectrumFunction(self, i=0):
@@ -181,7 +182,7 @@ class CrystalField(object):
         out += ',PeakShape=%s' % self.getPeak(i).name
         if self._FWHM is not None:
             out += ',FWHM=%s' % self._getFWHM(i)
-        out += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
+        out += ',%s' % ','.join(['%s=%s' % item for item in list(self._fieldParameters.items())])
         peaks = self.getPeak(i)
         params = peaks.paramString('', 0)
         if len(params) > 0:
@@ -217,7 +218,7 @@ class CrystalField(object):
         out += ',Temperatures=(%s)' % ','.join(map(str, self._temperature))
         if self._FWHM is not None:
             out += ',FWHMs=(%s)' % ','.join(map(str, self._FWHM))
-        out += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
+        out += ',%s' % ','.join(['%s=%s' % item for item in list(self._fieldParameters.items())])
 
         tieList = []
         constraintsList = []
@@ -281,7 +282,7 @@ class CrystalField(object):
         """
         if value not in self.ion_nre_map.keys():
             msg = 'Value %s is not allowed for attribute Ion.\nList of allowed values: %s' %\
-                  (value, ', '.join(self.ion_nre_map.keys()))
+                  (value, ', '.join(list(self.ion_nre_map.keys())))
             raise RuntimeError(msg)
         self._ion = value
         self._dirty_eigensystem = True
@@ -529,7 +530,7 @@ class CrystalField(object):
                 self._fieldTies[name] = '0'
 
     def getFieldTies(self):
-        ties = ['%s=%s' % item for item in self._fieldTies.items()]
+        ties = ['%s=%s' % item for item in list(self._fieldTies.items())]
         return ','.join(ties)
 
     def getFieldConstraints(self):
@@ -740,7 +741,7 @@ class CrystalFieldMulti(object):
             self._ties[tie] = kwargs[tie]
 
     def getTies(self):
-        ties = ['%s=%s' % item for item in self._ties.items()]
+        ties = ['%s=%s' % item for item in list(self._ties.items())]
         return ','.join(ties)
 
     def getSpectrum(self, i=0, workspace=None, ws_index=0):

@@ -1,5 +1,6 @@
 """Test suite for the crystal field calculations in the Inelastic/CrystalField package
 """
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import numpy as np
 
@@ -23,22 +24,22 @@ class BackgroundTest(unittest.TestCase):
         from CrystalField import Background, Function
         b = Background(peak=Function('PseudoVoigt', Height=10, FWHM=1, Mixing=0.5),
                        background=Function('LinearBackground', A0=1.0, A1=0.1)) * 3
-        self.assertEquals(len(b), 3)
+        self.assertEqual(len(b), 3)
         self.assertTrue(isinstance(b[0], Background))
         self.assertTrue(isinstance(b[1], Background))
         self.assertTrue(isinstance(b[2], Background))
         b[0].peak.param['Height'] = 31
         b[1].peak.param['Height'] = 41
         b[2].peak.param['Height'] = 51
-        self.assertEquals(b[0].peak.param['Height'], 31)
-        self.assertEquals(b[1].peak.param['Height'], 41)
-        self.assertEquals(b[2].peak.param['Height'], 51)
+        self.assertEqual(b[0].peak.param['Height'], 31)
+        self.assertEqual(b[1].peak.param['Height'], 41)
+        self.assertEqual(b[2].peak.param['Height'], 51)
         b[0].background.param['A1'] = 3
         b[1].background.param['A1'] = 4
         b[2].background.param['A1'] = 5
-        self.assertEquals(b[0].background.param['A1'], 3)
-        self.assertEquals(b[1].background.param['A1'], 4)
-        self.assertEquals(b[2].background.param['A1'], 5)
+        self.assertEqual(b[0].background.param['A1'], 3)
+        self.assertEqual(b[1].background.param['A1'], 4)
+        self.assertEqual(b[2].background.param['A1'], 5)
 
 
 class CrystalFieldTests(unittest.TestCase):
@@ -137,7 +138,7 @@ class CrystalFieldTests(unittest.TestCase):
         cf = CrystalField('Ce', 'C2v', B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068,
                           Temperature=44.0)
         pl = cf.getPeakList()
-        self.assertEquals(pl.shape, (2, 7))
+        self.assertEqual(pl.shape, (2, 7))
         self.assertAlmostEqual(pl[0, 0], 0.0, 10)
         self.assertAlmostEqual(pl[1, 0], 1.99118947*c_mbsr, 6)
         self.assertAlmostEqual(pl[0, 1], 3.85696607, 8)
@@ -150,7 +151,7 @@ class CrystalFieldTests(unittest.TestCase):
         cf = CrystalField('Ce', 'C2v', B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068,
                           Temperature=[44.0, 50.0])
         pl1 = cf.getPeakList()
-        self.assertEquals(pl1.shape, (2, 7))
+        self.assertEqual(pl1.shape, (2, 7))
         self.assertAlmostEqual(pl1[0, 0], 0.0, 10)
         self.assertAlmostEqual(pl1[1, 0], 1.99118947*c_mbsr, 6)
         self.assertAlmostEqual(pl1[0, 1], 3.85696607, 8)
@@ -159,7 +160,7 @@ class CrystalFieldTests(unittest.TestCase):
         self.assertAlmostEqual(pl1[1, 2], 0.37963778*c_mbsr, 6)
 
         pl2 = cf.getPeakList(1)
-        self.assertEquals(pl2.shape, (2, 7))
+        self.assertEqual(pl2.shape, (2, 7))
         self.assertAlmostEqual(pl2[0, 0], 0.0, 10)
         self.assertAlmostEqual(pl2[1, 0], 1.97812511*c_mbsr, 6)
         self.assertAlmostEqual(pl2[0, 1], 3.85696607, 8)
@@ -174,8 +175,8 @@ class CrystalFieldTests(unittest.TestCase):
         pf.attr[0]['SomeAttr'] = 'Hello'
         pf.param[1]['Sigma'] = 2.1
         pf.param[1]['Height'] = 100
-        self.assertEquals(pf.paramString(), 'f0.SomeAttr=Hello,f0.Sigma=1.1,f1.Sigma=2.1,f1.Height=100')
-        self.assertEquals(pf.toString(), 'name=Gaussian,SomeAttr=Hello,Sigma=1.1;name=Gaussian,Sigma=2.1,Height=100')
+        self.assertEqual(pf.paramString(), 'f0.SomeAttr=Hello,f0.Sigma=1.1,f1.Height=100,f1.Sigma=2.1')
+        self.assertEqual(pf.toString(), 'name=Gaussian,SomeAttr=Hello,Sigma=1.1;name=Gaussian,Height=100,Sigma=2.1')
 
     def test_api_CrystalField_spectrum(self):
         from CrystalField import CrystalField
@@ -440,18 +441,18 @@ class CrystalFieldFitTest(unittest.TestCase):
         s = origin.makeMultiSpectrumFunction()
         fun = FunctionFactory.createInitialized(s)
 
-        self.assertEquals(fun.getParameterValue('f0.f0.f0.Sigma'), 0.3)
-        self.assertEquals(fun.getParameterValue('f0.f0.f1.A0'), 1.0)
-        self.assertEquals(fun.getParameterValue('f1.f0.f0.Sigma'), 0.8)
-        self.assertEquals(fun.getParameterValue('f1.f0.f1.A0'), 1.1)
+        self.assertEqual(fun.getParameterValue('f0.f0.f0.Sigma'), 0.3)
+        self.assertEqual(fun.getParameterValue('f0.f0.f1.A0'), 1.0)
+        self.assertEqual(fun.getParameterValue('f1.f0.f0.Sigma'), 0.8)
+        self.assertEqual(fun.getParameterValue('f1.f0.f1.A0'), 1.1)
 
-        self.assertEquals(fun.getParameterValue('f0.f1.FWHM'), 1.11)
-        self.assertEquals(fun.getParameterValue('f0.f2.FWHM'), 1.1)
-        self.assertEquals(fun.getParameterValue('f0.f3.FWHM'), 1.1)
+        self.assertEqual(fun.getParameterValue('f0.f1.FWHM'), 1.11)
+        self.assertEqual(fun.getParameterValue('f0.f2.FWHM'), 1.1)
+        self.assertEqual(fun.getParameterValue('f0.f3.FWHM'), 1.1)
 
-        self.assertEquals(fun.getParameterValue('f1.f1.FWHM'), 0.9)
-        self.assertEquals(fun.getParameterValue('f1.f2.FWHM'), 1.12)
-        self.assertEquals(fun.getParameterValue('f1.f3.FWHM'), 0.9)
+        self.assertEqual(fun.getParameterValue('f1.f1.FWHM'), 0.9)
+        self.assertEqual(fun.getParameterValue('f1.f2.FWHM'), 1.12)
+        self.assertEqual(fun.getParameterValue('f1.f3.FWHM'), 0.9)
 
         cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
                           Temperature=[44.0, 50], FWHM=[1.1, 0.9])
@@ -525,15 +526,15 @@ class CrystalFieldFitTest(unittest.TestCase):
         s = origin.makeMultiSpectrumFunction()
         fun = FunctionFactory.createInitialized(s)
 
-        self.assertEquals(fun.getParameterValue('f1.f0.A0'), 1.2)
+        self.assertEqual(fun.getParameterValue('f1.f0.A0'), 1.2)
 
-        self.assertEquals(fun.getParameterValue('f0.f1.FWHM'), 1.11)
-        self.assertEquals(fun.getParameterValue('f0.f2.FWHM'), 1.1)
-        self.assertEquals(fun.getParameterValue('f0.f3.FWHM'), 1.1)
+        self.assertEqual(fun.getParameterValue('f0.f1.FWHM'), 1.11)
+        self.assertEqual(fun.getParameterValue('f0.f2.FWHM'), 1.1)
+        self.assertEqual(fun.getParameterValue('f0.f3.FWHM'), 1.1)
 
-        self.assertEquals(fun.getParameterValue('f1.f1.FWHM'), 0.9)
-        self.assertEquals(fun.getParameterValue('f1.f2.FWHM'), 1.12)
-        self.assertEquals(fun.getParameterValue('f1.f3.FWHM'), 0.9)
+        self.assertEqual(fun.getParameterValue('f1.f1.FWHM'), 0.9)
+        self.assertEqual(fun.getParameterValue('f1.f2.FWHM'), 1.12)
+        self.assertEqual(fun.getParameterValue('f1.f3.FWHM'), 0.9)
 
         cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
                           Temperature=[44.0, 50], FWHM=[1.1, 0.9])
@@ -566,16 +567,16 @@ class CrystalFieldFitTest(unittest.TestCase):
         s = origin.makeMultiSpectrumFunction()
         fun = FunctionFactory.createInitialized(s)
 
-        self.assertEquals(fun.getParameterValue('f0.f0.Sigma'), 0.3)
-        self.assertEquals(fun.getParameterValue('f1.f0.Sigma'), 0.8)
+        self.assertEqual(fun.getParameterValue('f0.f0.Sigma'), 0.3)
+        self.assertEqual(fun.getParameterValue('f1.f0.Sigma'), 0.8)
 
-        self.assertEquals(fun.getParameterValue('f0.f1.FWHM'), 1.11)
-        self.assertEquals(fun.getParameterValue('f0.f2.FWHM'), 1.1)
-        self.assertEquals(fun.getParameterValue('f0.f3.FWHM'), 1.1)
+        self.assertEqual(fun.getParameterValue('f0.f1.FWHM'), 1.11)
+        self.assertEqual(fun.getParameterValue('f0.f2.FWHM'), 1.1)
+        self.assertEqual(fun.getParameterValue('f0.f3.FWHM'), 1.1)
 
-        self.assertEquals(fun.getParameterValue('f1.f1.FWHM'), 0.9)
-        self.assertEquals(fun.getParameterValue('f1.f2.FWHM'), 1.12)
-        self.assertEquals(fun.getParameterValue('f1.f3.FWHM'), 0.9)
+        self.assertEqual(fun.getParameterValue('f1.f1.FWHM'), 0.9)
+        self.assertEqual(fun.getParameterValue('f1.f2.FWHM'), 1.12)
+        self.assertEqual(fun.getParameterValue('f1.f3.FWHM'), 0.9)
 
         cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
                           Temperature=[44.0, 50], FWHM=[1.1, 0.9])

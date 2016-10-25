@@ -62,6 +62,7 @@ between reduction steps.  The benefits to this new method are as follows:
    passing settings to each other via PropertyManager objects.
 """
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -140,7 +141,7 @@ def get_settings_object(settings_prop_man_name=REDUCTION_SETTINGS_OBJ_NAME):
 
             new_prop_man = PropertyManagerPicklableWrapper(new_name)
             new_prop_man.clear()
-            for key, value in self.items():
+            for key, value in list(self.items()):
                 new_prop_man[key] = value
             return new_prop_man
 

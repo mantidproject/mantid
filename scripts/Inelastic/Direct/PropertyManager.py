@@ -1,7 +1,9 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from Direct.NonIDF_Properties import *
 
 from collections import OrderedDict,Iterable
+from six import iteritems
 
 
 class PropertyManager(NonIDF_Properties):
@@ -95,7 +97,7 @@ class PropertyManager(NonIDF_Properties):
         self.__dict__.update(param_dict)
 
         # use existing descriptors setter to define IDF-defined descriptor's state
-        for key,val in descr_dict.iteritems():
+        for key,val in iteritems(descr_dict):
             object.__setattr__(self,key,val)
 
         # file properties -- the properties described files which should exist for reduction to work.
@@ -132,7 +134,7 @@ class PropertyManager(NonIDF_Properties):
 
         class_decor = '_'+type(self).__name__+'__'
 
-        for key,val in prop_dict.iteritems():
+        for key,val in iteritems(prop_dict):
             new_key = class_decor+key
             object.__setattr__(self,new_key,val)
 
@@ -281,7 +283,7 @@ class PropertyManager(NonIDF_Properties):
             with some parameters missing.
         """
 
-        for par_name,value in kwargs.items() :
+        for par_name,value in list(kwargs.items()) :
             if value is not None:
                 setattr(self,par_name,value)
     #
@@ -290,7 +292,7 @@ class PropertyManager(NonIDF_Properties):
         """ Set input properties from a dictionary of parameters
 
         """
-        for par_name,value in kwargs.items() :
+        for par_name,value in list(kwargs.items()) :
             setattr(self,par_name,value)
 
         return self.getChangedProperties()
@@ -339,7 +341,7 @@ class PropertyManager(NonIDF_Properties):
                           'instr_name':'','print_diag_results':True,'mapmask_ref_ws':None}
         result = {}
 
-        for key,val in diag_param_list.iteritems():
+        for key,val in iteritems(diag_param_list):
             try:
                 result[key] = getattr(self,key)
             except KeyError:
@@ -379,7 +381,7 @@ class PropertyManager(NonIDF_Properties):
 
         param_list = prop_helpers.get_default_idf_param_list(pInstrument,self.__subst_dict)
         # remove old changes which are not related to IDF (not to reapply it again)
-        for prop_name in old_changes:
+        for prop_name in old_changes.copy():
             if prop_name not in param_list:
                 try:
                     dependencies = getattr(PropertyManager,prop_name).dependencies()
@@ -402,12 +404,12 @@ class PropertyManager(NonIDF_Properties):
         self.setChangedProperties(set())
 
         #sort parameters to have complex properties (with underscore _) first
-        sorted_param =  OrderedDict(sorted(param_list.items(),key=lambda x : ord((x[0][0]).lower())))
+        sorted_param =  OrderedDict(sorted(list(param_list.items()),key=lambda x : ord((x[0][0]).lower())))
 
         # Walk through descriptors list and set their values
         # Assignment to descriptors should accept the form, descriptor is written in IDF
         changed_descriptors = set()
-        for key,val in descr_dict.iteritems():
+        for key,val in iteritems(descr_dict):
             if key not in old_changes_list:
                 try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains
                    # properties, not present in recent IDF.
@@ -458,7 +460,7 @@ class PropertyManager(NonIDF_Properties):
         self.setChangedProperties(changed_descriptors)
 
         # Walk through the complex properties first and then through simple properties
-        for key,val in sorted_param.iteritems():
+        for key,val in iteritems(sorted_param.copy()):
             # complex properties may change through their dependencies so we are setting them first
             if isinstance(val,prop_helpers.ComplexProperty):
                 public_name = key[1:]
@@ -501,7 +503,7 @@ class PropertyManager(NonIDF_Properties):
         self.setChangedProperties(set())
         # set back all changes stored earlier and may be overwritten by new IDF
         # (this is just to be sure -- should not change anything as we do not set properties changed)
-        for key,val in old_changes.iteritems():
+        for key,val in iteritems(old_changes):
             setattr(self,key,val)
 
         # Clear changed properties list (is this wise?, may be we want to know that some defaults changed?)
@@ -740,7 +742,12 @@ class PropertyManager(NonIDF_Properties):
             if key in already_changed:
                 continue
             val = getattr(self,key)
-            self.log("  Value of : {0:<25} is set to : {1:<20} ".format(key,val),log_level)
+            try:
+                self.log("  Value of : {0:<25} is set to : {1:<20} ".format(key,val),log_level)
+            except TypeError:
+                # Python 3 fails here sometimes, I don't know why
+                # TypeError: non-empty format string passed to object.__format__
+                pass
 
         if not display_header:
             return

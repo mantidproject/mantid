@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore
 from mantid.simpleapi import *
 import numpy as n
@@ -11,7 +12,7 @@ except AttributeError:
 
 def saveCustom(idx,fname,sep = ' ',logs = [],title = False,error = False):
     fname+='.dat'
-    print "FILENAME: ", fname
+    print("FILENAME: ", fname)
     a1=mtd[str(idx.text())]
     titl='#'+a1.getTitle()+'\n'
     x1=a1.readX(0)
@@ -27,10 +28,10 @@ def saveCustom(idx,fname,sep = ' ',logs = [],title = False,error = False):
     for log in logs:
         prop = samp.getLogData(str(log.text()))
         headerLine='#'+log.text() + ': ' + str(prop.value) + '\n'
-        print headerLine
+        print(headerLine)
         f.write(headerLine)
     qres=(X1[1]-X1[0])/X1[1]
-    print "Constant dq/q from file: ",qres
+    print("Constant dq/q from file: ",qres)
     for i in range(len(X1)):
         if error:
             dq=X1[i]*qres
@@ -43,7 +44,7 @@ def saveCustom(idx,fname,sep = ' ',logs = [],title = False,error = False):
 
 def saveANSTO(idx,fname):
     fname+='.txt'
-    print "FILENAME: ", fname
+    print("FILENAME: ", fname)
     a1=mtd[str(idx.text())]
     x1=a1.readX(0)
     X1=n.zeros((len(x1)-1))
@@ -54,7 +55,7 @@ def saveANSTO(idx,fname):
     sep='\t'
     f=open(fname,'w')
     qres=(X1[1]-X1[0])/X1[1]
-    print "Constant dq/q from file: ",qres
+    print("Constant dq/q from file: ",qres)
     for i in range(len(X1)):
         dq=X1[i]*qres
         s="%e" % X1[i] +sep+"%e" % y1[i] +sep + "%e" % e1[i] + sep + "%e" % dq +"\n"
@@ -64,7 +65,7 @@ def saveANSTO(idx,fname):
 
 def saveMFT(idx,fname,logs):
     fname+='.mft'
-    print "FILENAME: ", fname
+    print("FILENAME: ", fname)
     a1=mtd[str(idx.text())]
     x1=a1.readX(0)
     X1=n.zeros((len(x1)-1))
@@ -88,7 +89,7 @@ def saveMFT(idx,fname,logs):
     for log in logs:
         prop = samp.getLogData(str(log.text()))
         headerLine=log.text() + ': ' + str(prop.value) + '\n'
-        print headerLine
+        print(headerLine)
         f.write(headerLine)
     f.write('Number of file format: 2\n')
     s = 'Number of data points:\t' + str(len(X1))+'\n'
@@ -96,7 +97,7 @@ def saveMFT(idx,fname,logs):
     f.write('\n')
     f.write('\tq\trefl\trefl_err\tq_res\n')
     qres=(X1[1]-X1[0])/X1[1]
-    print "Constant dq/q from file: ",qres
+    print("Constant dq/q from file: ",qres)
     for i in range(len(X1)):
         dq=X1[i]*qres
         s="\t%e" % X1[i] +sep+"%e" % y1[i] +sep + "%e" % e1[i] + sep + "%e" % dq +"\n"
