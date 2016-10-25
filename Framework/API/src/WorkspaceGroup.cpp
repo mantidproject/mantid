@@ -294,10 +294,9 @@ void WorkspaceGroup::workspaceBeforeReplaceHandle(
   bool foundOld(false);
   bool foundDuplicate(false);
 
-  auto it = m_workspaces.begin();
   auto duplicateIter = m_workspaces.end();
 
-  for (; it != m_workspaces.end(); ++it) {
+  for (auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it) {
     auto &workspace = *it;
     if (workspace == oldObject) {
       workspace = newObject;
