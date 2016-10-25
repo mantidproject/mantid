@@ -303,8 +303,8 @@ void NormaliseByPeakArea::saveToOutput(
     const size_t npts(accumWS->blocksize());
     auto &accumY = accumWS->mutableY(0);
     auto &accumE = accumWS->mutableE(0);
-    auto yValuesRaw = yValues->rawData();
-    auto eValuesRaw = eValues->rawData();
+    const auto &yValuesRaw = yValues->rawData();
+    const auto &eValuesRaw = eValues->rawData();
 
     for (size_t j = 0; j < npts; ++j) {
       double accumYj = accumWS->y(0)[j];
