@@ -2053,7 +2053,7 @@ class TransmissionCalc(ReductionStep):
             order_str = fit_method[10:]
             fit_method = 'POLYNOMIAL'
             self.fit_settings[select + ORDER] = int(order_str)
-        if fit_method not in list(self.TRANS_FIT_OPTIONS.keys()):
+        if fit_method not in self.TRANS_FIT_OPTIONS.keys():
             _issueWarning(
                 'ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default method (%s)' % self.DEFAULT_FIT)
             fit_method = self.DEFAULT_FIT
@@ -2341,7 +2341,7 @@ class TransmissionCalc(ReductionStep):
         calc_trans_alg.setProperty("IncidentBeamMonitor", pre_sample)
         calc_trans_alg.setProperty("RebinParams", reducer.to_wavelen.get_rebin())
         calc_trans_alg.setProperty("OutputUnfittedData", True)
-        for name, value in list(options.items()):
+        for name, value in options.items():
             calc_trans_alg.setProperty(name, value)
 
         if self.trans_mon:
@@ -3254,7 +3254,7 @@ class UserFile(ReductionStep):
         upper_line = line.upper()
 
         # check for a recognised command
-        for keyword in list(self.key_functions.keys()):
+        for keyword in self.key_functions.keys():
             if upper_line.startswith(keyword):
                 # remove the keyword as it has already been parsed
                 params = line[len(keyword):]

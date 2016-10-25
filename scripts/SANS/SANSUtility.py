@@ -1846,7 +1846,7 @@ def parseLogFile(logfile):
     file_log = open(logfile, 'rU')
     for line in file_log:
         entry = line.split()[1]
-        if entry in list(logkeywords.keys()):
+        if entry in logkeywords.keys():
             logkeywords[entry] = float(line.split()[2])
 
     return tuple(logkeywords.values())

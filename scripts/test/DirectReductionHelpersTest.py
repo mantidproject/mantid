@@ -136,7 +136,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
         self.assertEqual(len(desct),3)
         self.assertEqual(desct['descr3'],10)
         self.assertEqual(desct['descr1'],'ddd')
-        self.assertTrue('des222' in list(desct.keys()))
+        self.assertTrue('des222' in desct.keys())
 
 
         self.assertEqual(len(prop_dict),6)

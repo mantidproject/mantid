@@ -283,7 +283,7 @@ class PropertyManager(NonIDF_Properties):
             with some parameters missing.
         """
 
-        for par_name,value in list(kwargs.items()) :
+        for par_name,value in kwargs.items() :
             if value is not None:
                 setattr(self,par_name,value)
     #

@@ -790,7 +790,7 @@ class MantidConfigDirectInelastic(object):
         # define and append user scripts search path
         user_path_part = copy.deepcopy(self._python_user_scripts)
         # pylint: disable=W0212
-        for instr in list(self._user._instrument.values()):
+        for instr in self._user._instrument.values():
             user_path_part.add(os.path.join('direct_inelastic', instr.upper()))
         for part in user_path_part:
             path += ';' + os.path.join(self._script_repo, part) + '/'
@@ -962,5 +962,5 @@ if __name__ == "__main__":
     # Configure user
     mcf.init_user(user.userID, user)
     mcf.generate_config()
-    print("Successfully Configured user: {0} for instrument {1} and RBNum: {2}" \
-        .format(user.userID, user.instrument, user.rb_folder))
+    print("Successfully Configured user: {0} for instrument {1} and RBNum: {2}"
+          .format(user.userID, user.instrument, user.rb_folder))

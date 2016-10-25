@@ -149,7 +149,7 @@ def build_properties_dict(param_map,synonims,descr_list=[]) :
     properties_dict = dict()
     descr_dict = dict()
 
-    for name,val in list(param_map.items()) :
+    for name,val in param_map.items() :
         if name in synonims:
             final_name = str(synonims[name])
         else:

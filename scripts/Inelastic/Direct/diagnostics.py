@@ -17,7 +17,7 @@ from mantid.kernel.funcinspect import lhs_info
 import os
 import Direct.RunDescriptor as RunDescriptor
 from Direct.PropertyManager import PropertyManager
-from six import itertools
+from six import iteritems
 # Reference to reducer used if necessary for working with run descriptors (in diagnostics)
 __Reducer__ = None
 

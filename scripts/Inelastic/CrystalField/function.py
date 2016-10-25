@@ -76,13 +76,13 @@ class Function(object):
 
     def toString(self):
         """Create function initialisation string"""
-        attrib = ['%s=%s' % item for item in list(self._attrib.items())] + \
-                 ['%s=%s' % item for item in list(self._params.items())]
+        attrib = ['%s=%s' % item for item in self._attrib.items()] + \
+                 ['%s=%s' % item for item in self._params.items()]
         if len(attrib) > 0:
             out = 'name=%s,%s' % (self._name, ','.join(attrib))
         else:
             out = 'name=%s' % self._name
-        ties = ','.join(['%s=%s' % item for item in list(self._ties.items())])
+        ties = ','.join(['%s=%s' % item for item in self._ties.items()])
         if len(ties) > 0:
             out += ',ties=(%s)' % ties
         constraints = ','.join(self._constraints)
@@ -94,15 +94,15 @@ class Function(object):
         """Create a string with only parameters and attributes settings.
             The prefix is prepended to all attribute names.
         """
-        attrib = ['%s%s=%s' % ((prefix,) + item) for item in list(self._attrib.items())] + \
-                 ['%s%s=%s' % ((prefix,) + item) for item in list(self._params.items())]
+        attrib = ['%s%s=%s' % ((prefix,) + item) for item in self._attrib.items()] + \
+                 ['%s%s=%s' % ((prefix,) + item) for item in self._params.items()]
         return ','.join(attrib)
 
     def tiesString(self, prefix):
         """Create a string with only ties settings.
             The prefix is prepended to all parameter names.
         """
-        ties = ['%s%s=%s' % ((prefix,) + item) for item in list(self._ties.items())]
+        ties = ['%s%s=%s' % ((prefix,) + item) for item in self._ties.items()]
         return ','.join(ties)
 
     def constraintsString(self, prefix):

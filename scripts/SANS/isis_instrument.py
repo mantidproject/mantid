@@ -337,7 +337,7 @@ class DetectorBank(object):
             @param guess: this name will be searched for in the list
             @return : True if the name was found, otherwise false
         """
-        for name in list(self._names.values()):
+        for name in self._names.values():
             if guess.lower() == name.lower():
                 return True
         return False
