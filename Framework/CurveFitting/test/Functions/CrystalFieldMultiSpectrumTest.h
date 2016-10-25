@@ -316,6 +316,17 @@ public:
     }
   }
 
+  void test_underdefinded() {
+    CrystalFieldMultiSpectrum fun;
+    fun.setParameter("B20", 0.37737);
+    fun.setParameter("B22", 3.9770);
+    fun.setParameter("B40", -0.031787);
+    fun.setParameter("B42", -0.11611);
+    fun.setParameter("B44", -0.12544);
+    fun.setAttributeValue("Ion", "Ce");
+    TS_ASSERT_THROWS_NOTHING(fun.buildTargetFunction());
+  }
+
 private:
   Workspace_sptr createWorkspace() {
     auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 100, 100);

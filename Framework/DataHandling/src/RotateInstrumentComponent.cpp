@@ -117,10 +117,13 @@ void RotateInstrumentComponent::exec() {
   TransformType rotType = Absolute;
   if (relativeRotation)
     rotType = Relative;
+  std::cerr << "Before" << std::endl;
+  std::cerr << comp->getRelativeRot() << comp->getRotation() << comp->getPos() << std::endl;
   if (inputW) {
     Geometry::ParameterMap &pmap = inputW->instrumentParameters();
     Geometry::ComponentHelper::rotateComponent(
         *comp, pmap, Quat(angle, V3D(X, Y, Z)), rotType);
+    std::cerr << comp->getRelativeRot() << comp->getRotation() << comp->getPos() << std::endl;
   } else if (inputP) {
     Geometry::ParameterMap &pmap = inputP->instrumentParameters();
     Geometry::ComponentHelper::rotateComponent(

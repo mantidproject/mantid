@@ -60,6 +60,8 @@ CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum()
   declareAttribute("Background", Attribute("FlatBackground", true));
   declareAttribute("PeakShape", Attribute("Lorentzian"));
   declareAttribute("FWHMs", Attribute(std::vector<double>(1, 0.0)));
+  declareAttribute("WidthX0", Attribute(std::vector<double>()));
+  declareAttribute("WidthY0", Attribute(std::vector<double>()));
   declareAttribute("WidthVariation", Attribute(0.1));
 }
 
@@ -138,6 +140,10 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
   // Create the single-spectrum functions.
   auto nSpec = temperatures.size();
   m_nPeaks.resize(nSpec);
+  if (m_widthX.empty()) {
+    m_widthX.resize(nSpec);
+    m_widthY.resize(nSpec);
+  }
   for (size_t i = 0; i < nSpec; ++i) {
     if (m_widthX[i].empty()) {
       auto suffix = std::to_string(i);
