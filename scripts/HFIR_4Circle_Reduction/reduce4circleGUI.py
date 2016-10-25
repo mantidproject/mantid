@@ -1738,7 +1738,30 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_merge_multi_scans(self):
-        # TODO/NOW/ISSUE - Implement this!
+        """
+        Merge several scans to a single MDWorkspace and give suggestion for re-binning
+        :return:
+        """
+        # TODO/NOW/ISSUE - Test this!
+
+        # find the selected scans
+        selected_rows = self.ui.tableWidget_mergeScans.get_selected_rows(True)
+        if len(selected_rows) < 2:
+            self.pop_one_button_dialog('Merging multiple scans requires more than 1 scan to be selected.')
+            return
+
+        # get the scan numbers
+        scan_number_list = self.ui.tableWidget_mergeScans.get_scan_list(selected_rows)
+
+        # ask name for the merged workspace
+        merged_ws_name = gutil.get_workspace_name(self)
+
+        # call the controller to merge the scans
+        message = self._myControl.merge_scans(scan_number_list, merged_ws_name)
+
+        # information
+        self.pop_one_button_dialog(message)
+
         return
 
     def do_merge_scans(self):
@@ -1901,8 +1924,6 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog('Range of d is not correct! FYI, min D = %.5f, max D = %.5f.'
                                        '' % (min_d, max_d))
             return
-
-        # TODO/FIXME/NOW/ISSUE: edit from here to make it work!
 
         # get PeakInfo list and check
         peak_info_list = self._build_peak_info_list(zero_hkl=True)

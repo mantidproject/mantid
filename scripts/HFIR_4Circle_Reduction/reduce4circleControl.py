@@ -19,7 +19,7 @@ import fputility
 import project_manager
 
 import mantid
-import mantid.simpleapi as api
+import mantid.simpleapi as mantidsimple
 from mantid.api import AnalysisDataService
 from mantid.kernel import V3D
 
@@ -173,7 +173,7 @@ class CWSCDReductionControl(object):
             ))
 
         # mask detectors
-        api.MaskDetectors(Workspace=raw_pt_ws_name, MaskedWorkspace=mask_ws_name)
+        mantidsimple.MaskDetectors(Workspace=raw_pt_ws_name, MaskedWorkspace=mask_ws_name)
 
         return
 
@@ -218,11 +218,11 @@ class CWSCDReductionControl(object):
         # Find peak in Q-space
         merged_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
         peak_ws_name = get_peak_ws_name(exp_number, scan_number, pt_number_list)
-        api.FindPeaksMD(InputWorkspace=merged_ws_name,
-                        MaxPeaks=10,
-                        PeakDistanceThreshold=5.,
-                        DensityThresholdFactor=0.1,
-                        OutputWorkspace=peak_ws_name)
+        mantidsimple.FindPeaksMD(InputWorkspace=merged_ws_name,
+                                 MaxPeaks=10,
+                                 PeakDistanceThreshold=5.,
+                                 DensityThresholdFactor=0.1,
+                                 OutputWorkspace=peak_ws_name)
         assert AnalysisDataService.doesExist(peak_ws_name), 'Output PeaksWorkspace %s cannot be found.' \
                                                             '' % peak_ws_name
 
@@ -266,8 +266,8 @@ class CWSCDReductionControl(object):
 
         # Calculate UB matrix
         try:
-            api.CalculateUMatrix(PeaksWorkspace=ub_peak_ws_name,
-                                 a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma)
+            mantidsimple.CalculateUMatrix(PeaksWorkspace=ub_peak_ws_name,
+                                          a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma)
         except ValueError as val_err:
             return False, str(val_err)
 
@@ -320,7 +320,7 @@ class CWSCDReductionControl(object):
 
         # Download
         try:
-            api.DownloadFile(Address=file_url, Filename=file_name)
+            mantidsimple.DownloadFile(Address=file_url, Filename=file_name)
         except RuntimeError as run_err:
             return False, str(run_err)
 
@@ -353,8 +353,8 @@ class CWSCDReductionControl(object):
 
         # Download
         try:
-            api.DownloadFile(Address=det_file_url,
-                             Filename=local_xml_file_name)
+            mantidsimple.DownloadFile(Address=det_file_url,
+                                      Filename=local_xml_file_name)
         except RuntimeError as run_err:
             return False, 'Unable to download Detector XML file %s from %s ' \
                           'due to %s.' % (local_xml_file_name, det_file_url, str(run_err))
@@ -668,11 +668,11 @@ class CWSCDReductionControl(object):
         md_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_list)
         temp_out_ws = base_file_name
 
-        api.ConvertCWSDMDtoHKL(InputWorkspace=md_ws_name,
-                               UBMatrix='1., 0., 0., 0., 1., 0., 0., 0., 1',
-                               OutputWorkspace=temp_out_ws,
-                               QSampleFileName=out_file_name)
-        api.DeleteWorkspace(Workspace=temp_out_ws)
+        mantidsimple.ConvertCWSDMDtoHKL(InputWorkspace=md_ws_name,
+                                        UBMatrix='1., 0., 0., 0., 1., 0., 0., 0., 1',
+                                        OutputWorkspace=temp_out_ws,
+                                        QSampleFileName=out_file_name)
+        mantidsimple.DeleteWorkspace(Workspace=temp_out_ws)
 
         return out_file_name
 
@@ -702,11 +702,11 @@ class CWSCDReductionControl(object):
         # Find peak in Q-space
         merged_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
         peak_ws_name = get_peak_ws_name(exp_number, scan_number, pt_number_list)
-        api.FindPeaksMD(InputWorkspace=merged_ws_name,
-                        MaxPeaks=10,
-                        PeakDistanceThreshold=5.,
-                        DensityThresholdFactor=0.1,
-                        OutputWorkspace=peak_ws_name)
+        mantidsimple.FindPeaksMD(InputWorkspace=merged_ws_name,
+                                 MaxPeaks=10,
+                                 PeakDistanceThreshold=5.,
+                                 DensityThresholdFactor=0.1,
+                                 OutputWorkspace=peak_ws_name)
         assert AnalysisDataService.doesExist(peak_ws_name)
 
         # add peak to UB matrix workspace to manager
@@ -972,11 +972,11 @@ class CWSCDReductionControl(object):
             # use given name
             mask_ws_name = str(mask_tag)
 
-        api.LoadMask(Instrument='HB3A',
-                     InputFile=mask_file_name,
-                     OutputWorkspace=mask_ws_name)
-        api.InvertMask(InputWorkspace=mask_ws_name,
-                       OutputWorkspace=mask_ws_name)
+        mantidsimple.LoadMask(Instrument='HB3A',
+                              InputFile=mask_file_name,
+                              OutputWorkspace=mask_ws_name)
+        mantidsimple.InvertMask(InputWorkspace=mask_ws_name,
+                                OutputWorkspace=mask_ws_name)
 
         return True, mask_ws_name
 
@@ -1005,8 +1005,8 @@ class CWSCDReductionControl(object):
         ws_names_str = ws_names_str[:-1]
 
         # Group
-        api.GroupWorkspaces(InputWorkspaces=ws_names_str,
-                            OutputWorkspace=group_name)
+        mantidsimple.GroupWorkspaces(InputWorkspaces=ws_names_str,
+                                     OutputWorkspace=group_name)
 
         return
 
@@ -1108,7 +1108,7 @@ class CWSCDReductionControl(object):
 
         # Create a temporary peak workspace for indexing
         temp_index_ws_name = 'TempIndexExp%dScan%dPeak' % (exp_number, scan_number)
-        api.CreatePeaksWorkspace(NumberOfPeaks=0, OutputWorkspace=temp_index_ws_name)
+        mantidsimple.CreatePeaksWorkspace(NumberOfPeaks=0, OutputWorkspace=temp_index_ws_name)
         temp_index_ws = AnalysisDataService.retrieve(temp_index_ws_name)
 
         temp_index_ws.addPeak(peak_ws.getPeak(0))
@@ -1120,7 +1120,7 @@ class CWSCDReductionControl(object):
         ub_1d = ub_matrix.reshape(9,)
 
         # Set UB
-        api.SetUB(Workspace=temp_index_ws_name, UB=ub_1d)
+        mantidsimple.SetUB(Workspace=temp_index_ws_name, UB=ub_1d)
 
         # Note: IndexPeaks and CalculatePeaksHKL do the same job
         #       while IndexPeaks has more control on the output
@@ -1129,9 +1129,9 @@ class CWSCDReductionControl(object):
         else:
             tol = 0.3
 
-        num_peak_index, error = api.IndexPeaks(PeaksWorkspace=temp_index_ws_name,
-                                               Tolerance=tol,
-                                               RoundHKLs=False)
+        num_peak_index, error = mantidsimple.IndexPeaks(PeaksWorkspace=temp_index_ws_name,
+                                                        Tolerance=tol,
+                                                        RoundHKLs=False)
         temp_index_ws = AnalysisDataService.retrieve(temp_index_ws_name)
 
         if num_peak_index == 0:
@@ -1147,7 +1147,7 @@ class CWSCDReductionControl(object):
         peak_info.set_hkl(hkl)
 
         # delete temporary workspace
-        api.DeleteWorkspace(Workspace=temp_index_ws_name)
+        mantidsimple.DeleteWorkspace(Workspace=temp_index_ws_name)
 
         return True, (hkl, error)
 
@@ -1217,15 +1217,15 @@ class CWSCDReductionControl(object):
             norm_by_mon = True
 
         # integrate peak of a scan
-        api.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
-                               OutputWorkspace=integrated_peak_ws_name,
-                               PeakRadius=peak_radius,
-                               PeakCentre=peak_centre_str,
-                               MergePeaks=merge_peaks,
-                               NormalizeByMonitor=norm_by_mon,
-                               NormalizeByTime=norm_by_time,
-                               MaskWorkspace=mask_ws_name,
-                               ScaleFactor=scale_factor)
+        mantidsimple.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
+                                        OutputWorkspace=integrated_peak_ws_name,
+                                        PeakRadius=peak_radius,
+                                        PeakCentre=peak_centre_str,
+                                        MergePeaks=merge_peaks,
+                                        NormalizeByMonitor=norm_by_mon,
+                                        NormalizeByTime=norm_by_time,
+                                        MaskWorkspace=mask_ws_name,
+                                        ScaleFactor=scale_factor)
 
         # process the output workspace
         pt_dict = dict()
@@ -1306,9 +1306,9 @@ class CWSCDReductionControl(object):
             md_ws_name = get_single_pt_md_name(exp_no, scan_no, pt_no)
             peak_ws_name = get_peak_ws_name(exp_no, scan_no, pt_no)
             out_ws_name = peak_ws_name + '_integrated'
-            api.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
-                                   PeaksWorkspace=peak_ws_name,
-                                   OutputWorkspace=out_ws_name)
+            mantidsimple.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
+                                            PeaksWorkspace=peak_ws_name,
+                                            OutputWorkspace=out_ws_name)
             out_peak_ws = AnalysisDataService.retrieve(out_ws_name)
             peak = out_peak_ws.getPeak(0)
             intensity = peak.getIntensity()
@@ -1348,17 +1348,17 @@ class CWSCDReductionControl(object):
         # create an empty peak workspace
         if AnalysisDataService.doesExist('spicematrixws') is False:
             raise RuntimeError('Workspace spicematrixws does not exist.')
-        api.LoadInstrument(Workspace='', InstrumentName='HB3A')
+        mantidsimple.LoadInstrument(Workspace='', InstrumentName='HB3A')
         target_peak_ws_name = 'MyPeakWS'
-        api.CreatePeaksWorkspace(InstrumentWorkspace='spicematrixws', OutputWorkspace=target_peak_ws_name)
+        mantidsimple.CreatePeaksWorkspace(InstrumentWorkspace='spicematrixws', OutputWorkspace=target_peak_ws_name)
         target_peak_ws = AnalysisDataService.retrieve(target_peak_ws_name)
         # copy a peak
         temp_peak_ws_name = 'peak1'
-        api.FindPeaksMD(InputWorkspace='MergedSan0017_QSample',
-                        PeakDistanceThreshold=0.5,
-                        MaxPeaks=10,
-                        DensityThresholdFactor=100,
-                        OutputWorkspace=temp_peak_ws_name)
+        mantidsimple.FindPeaksMD(InputWorkspace='MergedSan0017_QSample',
+                                 PeakDistanceThreshold=0.5,
+                                 MaxPeaks=10,
+                                 DensityThresholdFactor=100,
+                                 OutputWorkspace=temp_peak_ws_name)
 
         src_peak_ws = AnalysisDataService.retrieve(temp_peak_ws_name)
         centre_peak = src_peak_ws.getPeak(0)
@@ -1366,15 +1366,15 @@ class CWSCDReductionControl(object):
         target_peak_ws.removePeak(0)
 
         # Integrate peak
-        api.IntegratePeaksMD(InputWorkspace='MergedSan0017_QSample',
-                             PeakRadius=1.5,
-                             BackgroundInnerRadius=1.5,
-                             BackgroundOuterRadius=3,
-                             PeaksWorkspace=target_peak_ws_name,
-                             OutputWorkspace='SinglePeak1',
-                             IntegrateIfOnEdge=False,
-                             AdaptiveQBackground=True,
-                             Cylinder=False)
+        mantidsimple.IntegratePeaksMD(InputWorkspace='MergedSan0017_QSample',
+                                      PeakRadius=1.5,
+                                      BackgroundInnerRadius=1.5,
+                                      BackgroundOuterRadius=3,
+                                      PeaksWorkspace=target_peak_ws_name,
+                                      OutputWorkspace='SinglePeak1',
+                                      IntegrateIfOnEdge=False,
+                                      AdaptiveQBackground=True,
+                                      Cylinder=False)
 
         raise RuntimeError('Implement ASAP!')
 
@@ -1447,10 +1447,10 @@ class CWSCDReductionControl(object):
                 self.download_spice_file(exp_no, scan_no, over_write=True)
 
             try:
-                spice_table_ws, info_matrix_ws = api.LoadSpiceAscii(Filename=spice_file_name,
-                                                                    OutputWorkspace=out_ws_name,
-                                                                    RunInfoWorkspace='TempInfo')
-                api.DeleteWorkspace(Workspace=info_matrix_ws)
+                spice_table_ws, info_matrix_ws = mantidsimple.LoadSpiceAscii(Filename=spice_file_name,
+                                                                             OutputWorkspace=out_ws_name,
+                                                                             RunInfoWorkspace='TempInfo')
+                mantidsimple.DeleteWorkspace(Workspace=info_matrix_ws)
             except RuntimeError as run_err:
                 return False, 'Unable to load SPICE data %s due to %s' % (spice_file_name, str(run_err))
         else:
@@ -1495,11 +1495,11 @@ class CWSCDReductionControl(object):
         # load SPICE Pt.  detector file
         pt_ws_name = get_raw_data_workspace_name(exp_no, scan_no, pt_no)
         try:
-            api.LoadSpiceXML2DDet(Filename=xml_file_name,
-                                  OutputWorkspace=pt_ws_name,
-                                  DetectorGeometry='256,256',
-                                  SpiceTableWorkspace=spice_table_name,
-                                  PtNumber=pt_no)
+            mantidsimple.LoadSpiceXML2DDet(Filename=xml_file_name,
+                                           OutputWorkspace=pt_ws_name,
+                                           DetectorGeometry='256,256',
+                                           SpiceTableWorkspace=spice_table_name,
+                                           PtNumber=pt_no)
         except RuntimeError as run_err:
             return False, str(run_err)
 
@@ -1509,6 +1509,89 @@ class CWSCDReductionControl(object):
         self._add_raw_workspace(exp_no, scan_no, pt_no, raw_matrix_ws)
 
         return True, pt_ws_name
+
+    def merge_scans(self, scan_md_ws_list, scan_peak_centre_list, merged_ws_name):
+        """
+        Merge scans
+        :param exp_number:
+        :param scan_number_list:
+        :param merged_ws_name:
+        :return:
+        """
+        # check validity
+        assert isinstance(scan_md_ws_list, list), 'Scan MDWorkspace name list cannot be of type %s.' \
+                                                  '' % type(scan_md_ws_list)
+        assert isinstance(scan_peak_centre_list, list), 'Scan peak center list cannot be of type %s.' \
+                                                        '' % type(scan_peak_centre_list)
+        assert len(scan_md_ws_list) >= 2 and len(scan_md_ws_list) == len(scan_peak_centre_list),\
+            'Number of MDWorkspace %d and peak centers %d are not correct.' % (len(scan_md_ws_list),
+                                                                               len(scan_peak_centre_list))
+
+        # get the workspace
+        ws_name_list = ''
+        for i_ws, ws_name in enumerate(scan_md_ws_list):
+            if i_ws != 0:
+                ws_name_list += ', '
+            ws_name_list += ws_name
+        # END-FOR
+
+        # merge
+        mantidsimple.MergeMD(InputWorkspaces=ws_name_list,
+                             OutputWorkspace=merged_ws_name)
+
+        # get the unit of MD workspace
+        md_ws = AnalysisDataService.retrieve(scan_md_ws_list[0])
+        unit = md_ws.getExperimentInfo.getUnit()
+
+        # binning boundary
+        axis0_range = list()
+        axis1_range = list()
+        axis2_range = list()
+        for i_peak, peak in enumerate(scan_peak_centre_list):
+            if i_peak == 0:
+                axis0_range = [peak[0], peak[0], 0.]
+                axis1_range = [peak[1], peak[1], 0.]
+                axis2_range = [peak[2], peak[2], 0.]
+            else:
+                # axis 0
+                if peak[0] < axis0_range[0]:
+                    axis0_range[0] = peak[0]
+                elif peak[0] > axis0_range[1]:
+                    axis0_range[1] = peak[0]
+
+                # axis 1
+                if peak[1] < axis1_range[0]:
+                    axis1_range[0] = peak[1]
+                elif peak[1] > axis1_range[1]:
+                    axis1_range[1] = peak[1]
+
+                # axis 2
+                if peak[2] < axis2_range[0]:
+                    axis2_range[0] = peak[2]
+                elif peak[2] > axis2_range[1]:
+                    axis2_range[1] = peak[2]
+        # END-FOR
+
+        axis0_range[2] = axis0_range[1] - axis0_range[0]
+        axis1_range[2] = axis1_range[1] - axis1_range[0]
+        axis2_range[2] = axis2_range[1] - axis2_range[0]
+
+        # bin MD
+        if unit == 'HKL':
+            # HKL space
+            binning_script = 'BinMD(InputWorkspace=%s, OutputWorkspace=%s,...)' \
+                             '' % (merged_ws_name, merged_ws_name+'_Bin')
+        else:
+            # Q-space
+            binning_script = 'BinMD(InputWorkspace=%s, OutputWorkspace=%s,...)' \
+                             '' % (merged_ws_name, merged_ws_name+'_Bin')
+
+        binning_script += '\n\nRange: \n'
+        binning_script += 'Axis 0: %.5f, %5f (%.5f)\n' % (axis0_range[0], axis0_range[1], axis0_range[2])
+        binning_script += 'Axis 1: %.5f, %5f (%.5f)\n' % (axis1_range[0], axis1_range[1], axis1_range[2])
+        binning_script += 'Axis 2: %.5f, %5f (%.5f)\n' % (axis2_range[0], axis2_range[1], axis2_range[2])
+
+        return binning_script
 
     def merge_pts_in_scan(self, exp_no, scan_no, pt_num_list, target_frame):
         """
@@ -1565,13 +1648,13 @@ class CWSCDReductionControl(object):
             # - construct a configuration with 1 scan and multiple Pts.
             scan_info_table_name = get_merge_pt_info_ws_name(exp_no, scan_no)
             try:
-                api.CollectHB3AExperimentInfo(ExperimentNumber=exp_no,
-                                              ScanList='%d' % scan_no,
-                                              PtLists=pt_list_str,
-                                              DataDirectory=self._dataDir,
-                                              GenerateVirtualInstrument=False,
-                                              OutputWorkspace=scan_info_table_name,
-                                              DetectorTableWorkspace='MockDetTable')
+                mantidsimple.CollectHB3AExperimentInfo(ExperimentNumber=exp_no,
+                                                       ScanList='%d' % scan_no,
+                                                       PtLists=pt_list_str,
+                                                       DataDirectory=self._dataDir,
+                                                       GenerateVirtualInstrument=False,
+                                                       OutputWorkspace=scan_info_table_name,
+                                                       DetectorTableWorkspace='MockDetTable')
             except RuntimeError as rt_error:
                 return False, 'Unable to merge scan %d dur to %s.' % (scan_no, str(rt_error))
             else:
@@ -1582,10 +1665,10 @@ class CWSCDReductionControl(object):
 
             # create MD workspace in Q-sample
             try:
-                api.ConvertCWSDExpToMomentum(InputWorkspace=scan_info_table_name,
-                                             CreateVirtualInstrument=False,
-                                             OutputWorkspace=out_q_name,
-                                             Directory=self._dataDir)
+                mantidsimple.ConvertCWSDExpToMomentum(InputWorkspace=scan_info_table_name,
+                                                      CreateVirtualInstrument=False,
+                                                      OutputWorkspace=out_q_name,
+                                                      Directory=self._dataDir)
                 self._myMDWsList.append(out_q_name)
             except RuntimeError as e:
                 err_msg += 'Unable to convert scan %d data to Q-sample MDEvents due to %s' % (scan_no, str(e))
@@ -1610,9 +1693,9 @@ class CWSCDReductionControl(object):
             # convert to HKL
             out_hkl_name = get_merged_hkl_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
             try:
-                api.ConvertCWSDMDtoHKL(InputWorkspace=out_q_name,
-                                       UBMatrix=ub_matrix_1d,
-                                       OutputWorkspace=out_hkl_name)
+                mantidsimple.ConvertCWSDMDtoHKL(InputWorkspace=out_q_name,
+                                                UBMatrix=ub_matrix_1d,
+                                                OutputWorkspace=out_hkl_name)
 
             except RuntimeError as e:
                 err_msg += 'Failed to reduce scan %d due to %s' % (scan_no, str(e))
@@ -1812,7 +1895,7 @@ class CWSCDReductionControl(object):
 
         # Calculate UB matrix
         try:
-            api.FindUBUsingIndexedPeaks(PeaksWorkspace=ub_peak_ws_name, Tolerance=0.5)
+            mantidsimple.FindUBUsingIndexedPeaks(PeaksWorkspace=ub_peak_ws_name, Tolerance=0.5)
         except RuntimeError as e:
             return False, 'Unable to refine UB matrix due to %s.' % str(e)
 
@@ -1851,14 +1934,14 @@ class CWSCDReductionControl(object):
         self._build_peaks_workspace(peak_info_list, ub_peak_ws_name)
 
         # set UB matrix from input string. It is UB(0, 0), UB(0, 1), UB(0, 2), UB(1, 0), ..., UB(3, 3)
-        api.SetUB(Workspace=ub_peak_ws_name,
-                  UB=ub_matrix_str)
+        mantidsimple.SetUB(Workspace=ub_peak_ws_name,
+                           UB=ub_matrix_str)
 
         # optimize UB matrix by constraining lattice parameter to unit cell type
-        api.OptimizeLatticeForCellType(PeaksWorkspace=ub_peak_ws_name,
-                                       CellType=unit_cell_type,
-                                       Apply=True,
-                                       OutputDirectory=self._workDir)
+        mantidsimple.OptimizeLatticeForCellType(PeaksWorkspace=ub_peak_ws_name,
+                                                CellType=unit_cell_type,
+                                                Apply=True,
+                                                OutputDirectory=self._workDir)
 
         # get refined ub matrix
         self._refinedUBTup = self._get_refined_ub_data(ub_peak_ws_name)
@@ -1889,10 +1972,10 @@ class CWSCDReductionControl(object):
         self._build_peaks_workspace(peak_info_list, peak_ws_name)
 
         # Refine
-        api.FindUBUsingFFT(PeaksWorkspace=peak_ws_name,
-                           Tolerance=tolerance,
-                           MinD=d_min,
-                           MaxD=d_max)
+        mantidsimple.FindUBUsingFFT(PeaksWorkspace=peak_ws_name,
+                                    Tolerance=tolerance,
+                                    MinD=d_min,
+                                    MaxD=d_max)
 
         # Get result
         self._refinedUBTup = self._get_refined_ub_data(peak_ws_name)
@@ -1939,7 +2022,7 @@ class CWSCDReductionControl(object):
         assert isinstance(peak_ws_name, str), 'Peak workspace name must be a string.'
 
         # create an empty
-        api.CreatePeaksWorkspace(NumberOfPeaks=0, OutputWorkspace=peak_ws_name)
+        mantidsimple.CreatePeaksWorkspace(NumberOfPeaks=0, OutputWorkspace=peak_ws_name)
         assert AnalysisDataService.doesExist(peak_ws_name)
         peak_ws = AnalysisDataService.retrieve(peak_ws_name)
 
@@ -2251,7 +2334,7 @@ class CWSCDReductionControl(object):
 
                 # download file and load
                 try:
-                    api.DownloadFile(Address=spice_file_url, Filename=spice_file_name)
+                    mantidsimple.DownloadFile(Address=spice_file_url, Filename=spice_file_name)
                 except RuntimeError as download_error:
                     print 'Unable to download scan %d from %s due to %s.' % (scan_number,
                                                                              spice_file_url,
@@ -2264,9 +2347,9 @@ class CWSCDReductionControl(object):
             # Load SPICE file and retrieve information
             try:
                 spice_table_ws_name = 'TempTable'
-                api.LoadSpiceAscii(Filename=spice_file_name,
-                                   OutputWorkspace=spice_table_ws_name,
-                                   RunInfoWorkspace='TempInfo')
+                mantidsimple.LoadSpiceAscii(Filename=spice_file_name,
+                                            OutputWorkspace=spice_table_ws_name,
+                                            RunInfoWorkspace='TempInfo')
                 spice_table_ws = AnalysisDataService.retrieve(spice_table_ws_name)
                 num_rows = spice_table_ws.rowCount()
 
