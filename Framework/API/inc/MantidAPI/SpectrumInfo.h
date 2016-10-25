@@ -81,14 +81,12 @@ public:
   DetectorInfo &mutableDetectorInfo() { return *m_detectorInfo; }
 
 private:
+  SpectrumInfo(const MatrixWorkspace &workspace, Geometry::ParameterMap *pmap);
   const Geometry::IDetector &getDetector(const size_t index) const;
   std::vector<boost::shared_ptr<const Geometry::IDetector>>
   getDetectorVector(const size_t index) const;
 
   const MatrixWorkspace &m_workspace;
-  // Note that this is declared and initialized before the instrument, to avoid
-  // a copy.
-  Geometry::ParameterMap *m_pmap{nullptr};
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
   std::unique_ptr<DetectorInfo> m_detectorInfo;
   mutable std::vector<boost::shared_ptr<const Geometry::IDetector>> m_detectors;

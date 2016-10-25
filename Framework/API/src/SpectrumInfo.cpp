@@ -12,6 +12,14 @@ namespace Mantid {
 namespace API {
 
 SpectrumInfo::SpectrumInfo(const MatrixWorkspace &workspace)
+    : SpectrumInfo(workspace, nullptr) {}
+
+// Note the ParameterMap is accessed before the instrument, to avoid a copy.
+SpectrumInfo::SpectrumInfo(MatrixWorkspace &workspace)
+    : SpectrumInfo(workspace, &workspace.instrumentParameters()) {}
+
+SpectrumInfo::SpectrumInfo(const MatrixWorkspace &workspace,
+                           Geometry::ParameterMap *pmap)
     : m_workspace(workspace), m_instrument(workspace.getInstrument()),
       m_detectors(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
@@ -21,21 +29,7 @@ SpectrumInfo::SpectrumInfo(const MatrixWorkspace &workspace)
     throw std::runtime_error("Workspace " + workspace.getName() +
                              " does not contain an instrument!");
 
-  m_detectorInfo = Kernel::make_unique<DetectorInfo>(*m_instrument);
-}
-
-SpectrumInfo::SpectrumInfo(MatrixWorkspace &workspace)
-    : m_workspace(workspace), m_pmap(&workspace.instrumentParameters()),
-      m_instrument(workspace.getInstrument()),
-      m_detectors(PARALLEL_GET_MAX_THREADS),
-      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
-  // Note: This does not seem possible currently (the instrument objects is
-  // always allocated, even if it is empty), so this will not fail.
-  if (!m_instrument)
-    throw std::runtime_error("Workspace " + workspace.getName() +
-                             " does not contain an instrument!");
-
-  m_detectorInfo = Kernel::make_unique<DetectorInfo>(*m_instrument, m_pmap);
+  m_detectorInfo = Kernel::make_unique<DetectorInfo>(*m_instrument, pmap);
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -192,11 +186,10 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
 
 std::vector<Geometry::IDetector_const_sptr>
 SpectrumInfo::getDetectorVector(const size_t index) const {
-  using namespace Geometry;
   const auto &det = getDetector(index);
   const auto &ndet = det.nDets();
   if (ndet > 1) {
-    const auto group = dynamic_cast<const DetectorGroup *>(&det);
+    const auto group = dynamic_cast<const Geometry::DetectorGroup *>(&det);
     return group->getDetectors();
   } else {
     size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
