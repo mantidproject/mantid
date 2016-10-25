@@ -4,7 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAlgorithms/ConvertToConstantL2.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
@@ -43,42 +45,10 @@ namespace Algorithms {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport CorrectFlightPaths : public API::Algorithm {
-public:
-  /// Default constructor
-  CorrectFlightPaths();
-  /// Algorithm's name for identification overriding a virtual method
+class DLLExport CorrectFlightPaths : public ConvertToConstantL2, public API::DeprecatedAlgorithm {
+
   const std::string name() const override { return "CorrectFlightPaths"; }
-  /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Used to correct flight paths in 2D shaped detectors.";
-  }
-  /// Algorithm's version for identification overriding a virtual method
-  int version() const override { return 1; }
-  /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override {
-    return "Inelastic\\Corrections;CorrectionFunctions\\InstrumentCorrections";
-  }
 
-private:
-  // Overridden Algorithm methods
-  void init() override;
-  void exec() override;
-  void initWorkspaces();
-  double getRunProperty(std::string);
-  double getInstrumentProperty(std::string);
-  double calculateTOF(double);
-
-  /// The user selected (input) workspace
-  API::MatrixWorkspace_const_sptr m_inputWS;
-  /// The output workspace, maybe the same as the input one
-  API::MatrixWorkspace_sptr m_outputWS;
-
-  Geometry::Instrument_const_sptr m_instrument;
-  Geometry::IComponent_const_sptr m_sample;
-
-  double m_l2;
-  double m_wavelength;
 };
 
 } // namespace Algorithm
