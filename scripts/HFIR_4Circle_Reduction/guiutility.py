@@ -3,7 +3,7 @@
 #
 import math
 import numpy
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 
 def convert_str_to_matrix(matrix_str, matrix_shape):
@@ -310,3 +310,68 @@ def parse_integers_editors(line_edits, allow_blank=False):
         return True, integer_list[0]
 
     return True, integer_list
+
+
+class GetValueDialog(QtGui.QDialog):
+    """
+    A dialog that gets a single value
+    """
+    def __init__(self, parent=None):
+        """
+
+        :param parent:
+        """
+        super(GetValueDialog, self).__init__(parent)
+
+        layout = QtGui.QVBoxLayout(self)
+
+        # nice widget for editing the date
+        self.value_edit = QtGui.QLineEdit(self)
+        layout.addWidget(self.value_edit)
+
+        self.setWindowTitle('Workspace Name')
+
+        # self.datetime = QDateTimeEdit(self)
+        # self.datetime.setCalendarPopup(True)
+        # self.datetime.setDateTime(QDateTime.currentDateTime())
+        # layout.addWidget(self.datetime)
+
+        # OK and Cancel buttons
+        buttons = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel,
+                                         QtCore.Qt.Horizontal, self)
+
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+        return
+
+    # def accept(self):
+    #     """
+    #
+    #     :return:
+    #     """
+    #     self.close()
+    #
+    # def reject(self):
+    #     """
+    #
+    #     :return:
+    #     """
+    #     self.close()
+
+    # get current date and time from the dialog
+    def get_value(self):
+        """
+
+        :return:
+        """
+        return str(self.value_edit.text())
+
+
+# static method to create the dialog and return (date, time, accepted)
+def get_value(parent=None):
+        dialog = GetValueDialog(parent)
+        result = dialog.exec_()
+        value = dialog.get_value()
+        return value, result == QtGui.QDialog.Accepted

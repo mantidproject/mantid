@@ -9,9 +9,7 @@
 #
 ################################################################################
 import csv
-import math
 import random
-import numpy
 
 from fourcircle_utility import *
 from peakprocesshelper import PeakProcessRecord
@@ -544,6 +542,11 @@ class CWSCDReductionControl(object):
         # get SPICE table
         spice_table_name = get_spice_table_name(exp_number, scan_number)
         spice_table = AnalysisDataService.retrieve(spice_table_name)
+
+        if spice_table.rowCount() == 0:
+            raise RuntimeError('Spice table %s is empty.')
+        elif spice_table.rowCount() == 0:
+            raise RuntimeError('Only 1 row in Spice table %s. All motors are stationary.' % spice_table)
 
         # get the motors values
         omega_vec = get_log_data(spice_table, 'omega')
@@ -1144,7 +1147,7 @@ class CWSCDReductionControl(object):
             hkl = numpy.array([hkl_v3d.X(), hkl_v3d.Y(), hkl_v3d.Z()])
 
         # set HKL to peak
-        peak_info.set_hkl(hkl)
+        peak_info.set_hkl(hkl[0], hkl[1], hkl[2])
 
         # delete temporary workspace
         mantidsimple.DeleteWorkspace(Workspace=temp_index_ws_name)
@@ -1541,7 +1544,7 @@ class CWSCDReductionControl(object):
 
         # get the unit of MD workspace
         md_ws = AnalysisDataService.retrieve(scan_md_ws_list[0])
-        unit = md_ws.getExperimentInfo.getUnit()
+        frame = md_ws.getDimension(0).getMDFrame().name()
 
         # binning boundary
         axis0_range = list()
@@ -1577,12 +1580,34 @@ class CWSCDReductionControl(object):
         axis2_range[2] = axis2_range[1] - axis2_range[0]
 
         # bin MD
-        if unit == 'HKL':
+        # TODO/NOW/FIXME - Make this work!
+        if frame == 'HKL':
             # HKL space
+            # BinMD(InputWorkspace='XXX', AxisAligned=False,
+            #       BasisVector0='H,r.l.u,1,0,0',
+            #       BasisVector1='K,r.l.u,0,1,0',
+            #       BasisVector2='L,r.l.u,0,0,1',
+            #       OutputExtents='-0.657,-0.457,-0.857125,0.0715848,-1.23353,1.39895',
+            #       OutputBins='1,100,100',
+            #       Parallel=True,
+            #       OutputWorkspace='XXX_rebinned')
+
+            # option 2:
+            # BinMD(InputWorkspace='XXX',
+            #       AlignedDim0='H,-5,5,100',
+            #       AlignedDim1='K,-5,5,100',
+            #       AlignedDim2='L,-5,5,100',
+            #       OutputWorkspace='XXX_bin')
+
             binning_script = 'BinMD(InputWorkspace=%s, OutputWorkspace=%s,...)' \
                              '' % (merged_ws_name, merged_ws_name+'_Bin')
-        else:
+        elif frame == 'QSample':
             # Q-space
+            # BinMD(InputWorkspace='HB3A_Exp423_Scan81_Pt1_18_MD',
+            #       AlignedDim0='Q_sample_x,-5,5,100',
+            #       AlignedDim1='Q_sample_y,-5,5,100',
+            #       AlignedDim2='Q_sample_z,-5,5,100',
+            #       OutputWorkspace='zzz_bin')
             binning_script = 'BinMD(InputWorkspace=%s, OutputWorkspace=%s,...)' \
                              '' % (merged_ws_name, merged_ws_name+'_Bin')
 

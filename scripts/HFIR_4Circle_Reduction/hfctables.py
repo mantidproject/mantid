@@ -464,8 +464,10 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         :param error: error of HKL
         """
         # Check
-        assert isinstance(i_row, int)
-        assert isinstance(hkl, list) or isinstance(hkl, tuple) and len(hkl) == 3
+        assert isinstance(i_row, int), 'Row number (index) must be integer but not %s.' % type(i_row)
+        assert isinstance(hkl, list) or isinstance(hkl, tuple) and len(hkl) == 3,\
+            'HKL must be either list or tuple with 3 items.  But now it is %s of type %s.' \
+            '' % (str(hkl), type(hkl))
 
         i_col_h = UB_Peak_Table_Setup.index(('H', 'float'))
         i_col_k = UB_Peak_Table_Setup.index(('K', 'float'))

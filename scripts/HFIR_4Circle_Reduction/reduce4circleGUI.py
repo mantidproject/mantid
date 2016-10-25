@@ -1754,8 +1754,10 @@ class MainWindow(QtGui.QMainWindow):
         scan_number_list = self.ui.tableWidget_mergeScans.get_scan_list(selected_rows)
 
         # ask name for the merged workspace
-        merged_ws_name = gutil.get_workspace_name(self)
+        merged_ws_name, status = gutil.get_value(self)
+        print '[DB...BAT]', merged_ws_name, status
 
+        # TODO/NOW/FIXME/ISSUE - From here!!!
         # call the controller to merge the scans
         message = self._myControl.merge_scans(scan_number_list, merged_ws_name)
 
@@ -2758,7 +2760,12 @@ class MainWindow(QtGui.QMainWindow):
             wavelength = self._myControl.get_wave_length(exp_number, [scan_number])
             self.ui.tableWidget_mergeScans.set_wave_length(row_number, wavelength)
             # get motor step (choose from omega, phi and chi)
-            motor_move_tup = self._myControl.get_motor_step(exp_number, scan_number)
+            try:
+                motor_move_tup = self._myControl.get_motor_step(exp_number, scan_number)
+            except RuntimeError as run_err:
+                self.ui.tableWidget_mergeScans.set_status(scan_number, str(run_err))
+                continue
+            # set motor information (the moving motor)
             self.ui.tableWidget_mergeScans.set_motor_info(row_number, motor_move_tup)
             motor_step = motor_move_tup[1]
             # apply the Lorentz correction to the intensity

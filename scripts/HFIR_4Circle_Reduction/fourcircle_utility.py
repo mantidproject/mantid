@@ -502,6 +502,7 @@ def get_step_motor_parameters(log_value_vector):
     std_dev = numpy.std(log_value_vector)
 
     step_vector = log_value_vector[1:] - log_value_vector[:-1]
+    assert step_vector > 0, 'Log value vector size = %d. Step vector size = 0 is not allowed.' % len(log_value_vector)
     step_dev = numpy.std(step_vector)
     step = sum(step_vector)/len(step_vector)
 
