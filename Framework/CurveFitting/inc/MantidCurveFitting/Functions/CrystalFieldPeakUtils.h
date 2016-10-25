@@ -41,8 +41,11 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
                            const std::vector<double> &yVec,
                            double fwhmVariation, double defaultFWHM);
 size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
-                            const API::FunctionValues &values, size_t nOriginalPeaks,
-                            size_t iFirst = 0);
+                            const API::FunctionValues &centresAndIntensities, size_t nOriginalPeaks,
+                            size_t iFirst,
+                            const std::vector<double> &xVec,
+                            const std::vector<double> &yVec,
+                            double fwhmVariation);
 size_t calculateNPeaks(const API::FunctionValues &centresAndIntensities);
 size_t calculateMaxNPeaks(size_t nPeaks);
 

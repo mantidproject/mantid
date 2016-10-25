@@ -61,6 +61,7 @@ void setWidthConstraint(API::IPeakFunction& peak, double width, double fwhmVaria
       peak.fixParameter("FWHM");
       return;
     }
+    peak.removeConstraint("FWHM");
     auto constraint = new Constraints::BoundaryConstraint(&peak, "FWHM", lowerBound, upperBound);
     peak.addConstraint(constraint);
   } else if (peak.name() == "Gaussian") {
@@ -71,6 +72,7 @@ void setWidthConstraint(API::IPeakFunction& peak, double width, double fwhmVaria
     const double WIDTH_TO_SIGMA = 2.0 * sqrt(2.0 * M_LN2);
     lowerBound /= WIDTH_TO_SIGMA;
     upperBound /= WIDTH_TO_SIGMA;
+    peak.removeConstraint("Sigma");
     auto constraint = new Constraints::BoundaryConstraint(&peak, "Sigma", lowerBound, upperBound);
     peak.addConstraint(constraint);
   } else {
@@ -154,16 +156,29 @@ size_t calculateMaxNPeaks(size_t nPeaks) {
 /// @return :: The new number of fitted peaks.
 size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
                             const FunctionValues &centresAndIntensities, size_t nOriginalPeaks,
-                            size_t iFirst) {
+                            size_t iFirst,
+                            const std::vector<double> &xVec,
+                            const std::vector<double> &yVec,
+                            double fwhmVariation) {
   size_t nGoodPeaks = calculateNPeaks(centresAndIntensities);
   size_t maxNPeaks = spectrum.nFunctions() - iFirst;
+  bool mustUpdateWidth = ! xVec.empty();
 
   for (size_t i = 0; i < maxNPeaks; ++i) {
     auto fun = spectrum.getFunction(i + iFirst);
     auto &peak = dynamic_cast<API::IPeakFunction &>(*fun);
     if (i < nGoodPeaks) {
-      peak.setCentre(centresAndIntensities.getCalculated(i));
+      auto centre = centresAndIntensities.getCalculated(i);
+      peak.setCentre(centre);
       peak.setIntensity(centresAndIntensities.getCalculated(i + nGoodPeaks));
+      if (mustUpdateWidth) {
+        auto fwhm = peak.fwhm();
+        auto expectedFwhm = calculateWidth(centre, xVec, yVec);
+        if (fabs(fwhm - expectedFwhm) > fwhmVariation) {
+          peak.setFwhm(expectedFwhm);
+          setWidthConstraint(peak, expectedFwhm, fwhmVariation);
+        }
+      }
     } else {
       peak.setHeight(0.0);
       if (i > nOriginalPeaks) {

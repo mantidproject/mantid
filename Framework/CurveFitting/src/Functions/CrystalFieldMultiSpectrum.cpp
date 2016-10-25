@@ -230,10 +230,13 @@ void CrystalFieldMultiSpectrum::updateTargetFunction() const {
 void CrystalFieldMultiSpectrum::updateSpectrum(
     API::IFunction &spectrum, int nre, const DoubleFortranVector &en,
     const ComplexFortranMatrix &wf, double temperature, size_t iSpec) const {
+  auto fwhmVariation = getAttribute("WidthVariation").asDouble();
   FunctionValues values;
   calcExcitations(nre, en, wf, temperature, values, iSpec);
   auto &composite = dynamic_cast<API::CompositeFunction&>(spectrum);
-  m_nPeaks[iSpec] = CrystalFieldUtils::updateSpectrumFunction(composite, values, m_nPeaks[iSpec], 1);
+  m_nPeaks[iSpec] = CrystalFieldUtils::updateSpectrumFunction(
+      composite, values, m_nPeaks[iSpec], 1, m_widthX[iSpec], m_widthY[iSpec],
+      fwhmVariation);
 }
 
 } // namespace Functions

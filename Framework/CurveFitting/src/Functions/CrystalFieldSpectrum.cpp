@@ -72,11 +72,14 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
     return;
   }
   m_dirty = false;
+  auto xVec = IFunction::getAttribute("WidthX").asVector();
+  auto yVec = IFunction::getAttribute("WidthY").asVector();
+  auto fwhmVariation = getAttribute("WidthVariation").asDouble();
   FunctionDomainGeneral domain;
   FunctionValues values;
   m_source->function(domain, values);
   auto &spectrum = dynamic_cast<CompositeFunction&>(*m_target);
-  m_nPeaks = CrystalFieldUtils::updateSpectrumFunction(spectrum, values, m_nPeaks);
+  m_nPeaks = CrystalFieldUtils::updateSpectrumFunction(spectrum, values, m_nPeaks, 0, xVec, yVec, fwhmVariation);
 }
 
 } // namespace Functions

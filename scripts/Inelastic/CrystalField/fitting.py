@@ -386,9 +386,12 @@ class CrystalField(object):
         self._FWHM = value
         self._dirty_spectra = True
 
-    @property
-    def param(self):
-        return self._fieldParameters
+    def __getitem__(self, item):
+        return self._fieldParameters[item]
+
+    def __setitem__(self, key, value):
+        self._dirty_spectra = True
+        self._fieldParameters[key] = value
 
     @property
     def ResolutionModel(self):
@@ -516,7 +519,7 @@ class CrystalField(object):
         self._spectra[i] = self._calcSpectrum(i, wksp, 0)
         return self._spectra[i]
 
-    def plot(self, i=0, workspace=None, ws_index=0):
+    def plot(self, i=0, workspace=None, ws_index=0, name=None):
         """Plot a spectrum. Parameters are the same as in getSpectrum(...)"""
         from mantidplot import plotSpectrum
         from mantid.api import AlgorithmManager
@@ -524,7 +527,7 @@ class CrystalField(object):
         createWS.initialize()
 
         xArray, yArray = self.getSpectrum(i, workspace, ws_index)
-        ws_name = 'CrystalField_%s' % self._ion
+        ws_name = name if name is not None else 'CrystalField_%s' % self._ion
 
         if isinstance(i, int):
             if workspace is None:
