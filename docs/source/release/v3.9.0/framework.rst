@@ -11,6 +11,7 @@ Algorithms
 New
 ###
 
+- :ref:`ConvertToConstantL2 <algm-ConvertToConstantL2>` is the new name for CorrectFlightPaths.
 
 Improved
 ########
@@ -19,6 +20,8 @@ Improved
 
 Deprecated
 ##########
+
+- :ref:`CorrectFlightPaths <algm-CorrectFlightPaths>` has been renamed to ConvertToConstantL2.
 
 MD Algorithms (VATES CLI)
 #########################
