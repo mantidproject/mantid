@@ -4,6 +4,9 @@
 #include <qpainter.h>
 #include <QRect>
 #include <QShowEvent>
+#include <qwt_scale_widget.h>
+#include <qwt_plot_scaleitem.h>
+
 #include "MantidKernel/Utils.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -33,7 +36,7 @@ namespace MantidQt {
 			m_pointA = QPointF(0, 0);
 			m_pointB = QPointF(1, 0);
 			m_pointC = QPointF(0, 1);
-
+			m_showLine = false;
                         m_width = 0.1;
 
 		}
@@ -79,7 +82,7 @@ namespace MantidQt {
                 void NonOrthogonalOverlay::setSkewMatrix() {
                   Mantid::Kernel::DblMatrix skewMatrix(3, 3, true);
                         API::provideSkewMatrix(skewMatrix, *m_ws);
-			skewMatrix.Invert();
+			skewMatrix.Invert(); 
                         // transform from double to coord_t
                         std::size_t index = 0;
                         for (std::size_t i = 0; i < skewMatrix.numRows(); ++i) {
@@ -95,6 +98,7 @@ namespace MantidQt {
                 void NonOrthogonalOverlay::setDefaultAxesPoints() {
                   auto ws = m_ws->get(); // assumes it is a rectangle
                   m_dim0Max = ws->getDimension(0)->getMaximum();
+				  m_dim0Max = m_dim0Max*1.1; //to set axis slightly back from slice
                   m_dim1 = ws->getDimension(1)->getMaximum();
                   m_dim2 = ws->getDimension(2)->getMaximum();
                 }
@@ -116,14 +120,18 @@ namespace MantidQt {
                   auto dimY = angle_H * m_skewMatrix[0 + 3 * m_dimY] +
                               angle_K * m_skewMatrix[1 + 3 * m_dimY] +
                               angle_L * m_skewMatrix[2 + 3 * m_dimY];
-
-                  return QPointF(dimX, dimY);
+        
+				  return QPointF(dimX, dimY);
+				  
                 }
 
                 void NonOrthogonalOverlay::setAxesPoints() {
-                  m_pointA = skewMatrixApply(-(m_dim0Max), -(m_dim0Max));
-                  m_pointB = skewMatrixApply(m_dim0Max, -(m_dim0Max));
-                  m_pointC = skewMatrixApply(-(m_dim0Max), m_dim0Max);
+	              m_originPoint = -(m_dim0Max);
+				  m_XEndPoint = m_dim0Max;
+				  m_YEndPoint = m_dim0Max;
+				  m_pointA = skewMatrixApply(m_originPoint, m_originPoint);
+				  m_pointB = skewMatrixApply(m_XEndPoint, m_originPoint);
+				  m_pointC = skewMatrixApply(m_originPoint, m_YEndPoint);
                 }
 
                 void NonOrthogonalOverlay::calculateAxesSkew(
@@ -136,28 +144,61 @@ namespace MantidQt {
                   // of elimination
                   //    API::getMissingHKLDimensionIndex(*m_ws, m_dimX, m_dimY);
                   setDefaultAxesPoints();
-                  bool test = API::isHKLDimensions(*m_ws, m_dimX, m_dimY);
 
                   if (API::isHKLDimensions(*m_ws, m_dimX, m_dimY)) {
+					  //make sure all calcs are outside of paintEvent... so probably move ApplyskewMatrix out of it
                     setSkewMatrix();
                     setAxesPoints();
+					calculateGridlines(5); //tie zoom level to how large dataset is, or just zoom level?
+					
                   }
                 }
-		//----------------------------------------------------------------------------------------------
+		
+				void NonOrthogonalOverlay::calculateGridlines(int gridLineNum) { //assumes X axis
+					double axisPoint;
+					double percentageOfLine((m_XEndPoint - m_originPoint) / gridLineNum);
+					for (int i = 0; i < gridLineNum; i++) {
+						axisPoint = (percentageOfLine * i) + m_originPoint;
+						m_axisPointVec.push_back(axisPoint);
+					}
+
+				}
+
+				//----------------------------------------------------------------------------------------------
 		/// Paint the overlay
 		void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
 
 			QPainter painter(this);
 
-                        QPen centerPen(QColor(255, 165, 0, 200));
-
-                        // --- Draw the central line ---
+            QPen centerPen(QColor(0, 0, 0, 200)); //black
+			QPen gridPen(QColor(0, 0, 0, 200)); //grey?
+			
+            // --- Draw the central line ---
 			if (m_showLine) {
-				centerPen.setWidth(4);
-				centerPen.setCapStyle(Qt::FlatCap);
+				centerPen.setWidth(3);
+				centerPen.setCapStyle(Qt::SquareCap);
 				painter.setPen(centerPen);
 				painter.drawLine(transform(m_pointA), transform(m_pointB));
 				painter.drawLine(transform(m_pointA), transform(m_pointC));
+				gridPen.setWidth(2);
+				gridPen.setCapStyle(Qt::FlatCap);
+				painter.setPen(gridPen);
+				
+				for (int i = 0; i < m_axisPointVec.size(); i++) {
+					painter.drawLine(transform(skewMatrixApply(m_axisPointVec[i], m_originPoint)), transform(skewMatrixApply(m_axisPointVec[i], (m_originPoint*1.05))));
+					painter.drawLine(transform(skewMatrixApply(m_originPoint, m_axisPointVec[i])), transform(skewMatrixApply((m_originPoint*1.05), m_axisPointVec[i])));
+				
+				}
+
+
+
+				
+
+				
+				//to remove axis (also need to renable them after...)
+				//m_plot->enableAxis(QwtPlot::yLeft, false);
+				//m_plot->enableAxis(QwtPlot::xBottom, false);
+				
 			}
 
 		}
