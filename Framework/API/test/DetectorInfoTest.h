@@ -152,6 +152,10 @@ public:
     V3D newPos(1.0, 2.0, 3.0);
     detectorInfo.setPosition(0, newPos);
     TS_ASSERT_EQUALS(detectorInfo.position(0), newPos);
+    TS_ASSERT_EQUALS(detectorInfo.position(1), V3D(0.0, 0.0, 5.0));
+    TS_ASSERT_EQUALS(detectorInfo.position(2), V3D(0.0, 0.1, 5.0));
+    TS_ASSERT_EQUALS(detectorInfo.position(3), V3D(0.0, 0.0, -9.0));
+    TS_ASSERT_EQUALS(detectorInfo.position(4), V3D(0.0, 0.0, -2.0));
     // Restore old state
     detectorInfo.setPosition(0, oldPos);
   }
@@ -176,6 +180,10 @@ public:
     // but simply changes the orientation of the detector, keeping its position.
     TS_ASSERT_EQUALS(detectorInfo.position(0), oldPos);
     TS_ASSERT_EQUALS(detectorInfo.rotation(0), r3);
+    TS_ASSERT_EQUALS(detectorInfo.rotation(1), Quat(1.0, 0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(detectorInfo.rotation(2), Quat(1.0, 0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(detectorInfo.rotation(3), Quat(1.0, 0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(detectorInfo.rotation(4), Quat(1.0, 0.0, 0.0, 0.0));
   }
 
   void test_detectorIDs() {

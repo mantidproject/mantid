@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/make_unique.h"
@@ -229,6 +230,18 @@ public:
     TS_ASSERT_EQUALS(spectrumInfo.position(0), V3D(0.0, 0.1 / 2.0, 5.0));
     TS_ASSERT_EQUALS(spectrumInfo.position(1), V3D(0.0, -0.1 / 2.0, 5.0));
     // Other positions are not sensible since the detectors include monitors
+  }
+
+  void test_grouped_position_tracks_changes() {
+    auto &detectorInfo = m_grouped.mutableDetectorInfo();
+    const auto &spectrumInfo = m_grouped.spectrumInfo();
+    const auto oldPos = spectrumInfo.position(0);
+    // Change Y pos from 0.0 to -0.1
+    detectorInfo.setPosition(1, V3D(0.0, -1.0, 5.0));
+    TS_ASSERT_EQUALS(spectrumInfo.position(0), V3D(0.0, 0.0, 5.0));
+    TS_ASSERT_DELTA(spectrumInfo.twoTheta(0), 0.0199973, 1e-6);
+    // Restore old position
+    detectorInfo.setPosition(1, oldPos);
   }
 
   void test_hasDetectors() {
