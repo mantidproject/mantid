@@ -213,6 +213,7 @@ SpectrumInfo &MatrixWorkspace::mutableSpectrumInfo() {
   // algorithms use to avoid an extra copy (call
   // MatrixWorkspace::instrumentParameters() then
   // MatrixWorkspace::getInstrument()).
+  m_spectrumInfo = nullptr;
 
   // No locking here since this non-const method is not thread safe.
   // Note that creating SpectrumInfo will call
@@ -224,10 +225,14 @@ SpectrumInfo &MatrixWorkspace::mutableSpectrumInfo() {
   return *m_spectrumInfo;
 }
 
+/** Return a const reference to the DetectorInfo object.
+ */
 const DetectorInfo &MatrixWorkspace::detectorInfo() const {
   return spectrumInfo().detectorInfo();
 }
 
+/** Return a non-const reference to the SpectrumInfo object. Not thread safe.
+ */
 DetectorInfo &MatrixWorkspace::mutableDetectorInfo() {
   return mutableSpectrumInfo().mutableDetectorInfo();
 }
