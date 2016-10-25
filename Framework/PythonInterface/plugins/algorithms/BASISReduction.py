@@ -38,19 +38,23 @@ class BASISReduction(PythonAlgorithm):
     _long_inst = None
     _extension = None
     _doIndiv = None
-    _noMonNorm = None
+
     _groupDetOpt = None
     _overrideMask = None
     _dMask = None
     _run_list = None  # a list of runs, or a list of sets of runs
     _samWs = None
-    _samMonWs = None
+
     _samWsRun = None
     _samSqwWs = None
+    _debugMode = False  # delete intermediate workspaces?
 
     def __init__(self):
         PythonAlgorithm.__init__(self)
         self._normalizeToFirst = False
+
+        # properties related to monitor
+        self._noMonNorm = None
 
         # properties related to the chosen reflection
         self._reflection = None  # entry in the reflections dictionary
@@ -143,6 +147,7 @@ class BASISReduction(PythonAlgorithm):
         self.setPropertySettings("NormWavelengthRange", ifDivideByVanadium)
         self.setPropertyGroup("NormWavelengthRange", titleDivideByVanadium)
 
+    #pylint: disable=too-many-branches
     def PyExec(self):
         config['default.facility'] = "SNS"
         config['default.instrument'] = self._long_inst
@@ -191,20 +196,22 @@ class BASISReduction(PythonAlgorithm):
             # norm_runs encompasses a single set, thus _getRuns returns
             # a list of only one item
             norm_set = self._getRuns(norm_runs, doIndiv=False)[0]
-            self._normWs = self._sum_and_calibrate(norm_set, extra_extension="_norm")
+            normWs = self._sum_and_calibrate(norm_set, extra_extension="_norm")
 
             # This rebin integrates counts onto a histogram of a single bin
             if self._normalizationType == "by detectorID":
                 normRange = self.getProperty("NormWavelengthRange").value
                 self._normRange = [normRange[0], normRange[1]-normRange[0], normRange[1]]
-                sapi.Rebin(InputWorkspace=self._normWs, OutputWorkspace=self._normWs, Params=self._normRange)
+                sapi.Rebin(InputWorkspace=normWs, OutputWorkspace=normWs, Params=self._normRange)
 
             # FindDetectorsOutsideLimits to be substituted by MedianDetectorTest
-            sapi.FindDetectorsOutsideLimits(InputWorkspace=self._normWs, OutputWorkspace="BASIS_NORM_MASK")
+            sapi.FindDetectorsOutsideLimits(InputWorkspace=normWs, OutputWorkspace="BASIS_NORM_MASK")
 
             # additional reduction steps when normalizing by Q slice
             if self._normalizationType == "by Q slice":
-                self._normWs = self._group_and_SofQW(self._normWs, DEFAULT_VANADIUM_BINS, isSample=False)
+                self._normWs = self._group_and_SofQW(normWs, DEFAULT_VANADIUM_BINS, isSample=False)
+            if not self._debugMode:
+                sapi.DeleteWorkspace(normWs)  # Delete vanadium events file
 
         ##########################
         ##  Process the sample  ##
@@ -221,6 +228,8 @@ class BASISReduction(PythonAlgorithm):
                 sapi.Divide(LHSWorkspace=self._samWs, RHSWorkspace=self._normWs, OutputWorkspace=self._samWs)
             # additional reduction steps
             self._samSqwWs = self._group_and_SofQW(self._samWs, self._etBins, isSample=True)
+            if not self._debugMode:
+                sapi.DeleteWorkspace(self._samWs)  # delete events file
             # Divide by Vanadium
             if self._normalizationType == "by Q slice":
                 sapi.Divide(LHSWorkspace=self._samSqwWs, RHSWorkspace=self._normWs, OutputWorkspace=self._samSqwWs)
@@ -244,6 +253,12 @@ class BASISReduction(PythonAlgorithm):
             extension = "_divided_sqw.nxs" if self._doNorm else "_sqw.nxs"
             processed_filename = self._makeRunName(self._samWsRun, False) + extension
             sapi.SaveNexus(Filename=processed_filename, InputWorkspace=self._samSqwWs)
+
+        if not self._debugMode:
+            sapi.DeleteWorkspace("BASIS_MASK")  # delete the mask
+            if self._doNorm and bool(norm_runs):
+                sapi.DeleteWorkspace("BASIS_NORM_MASK")  # delete vanadium mask
+                sapi.DeleteWorkspace(self._normWs)  # Delete vanadium S(Q)
 
     def _getRuns(self, rlist, doIndiv=True):
         """
@@ -276,9 +291,9 @@ class BASISReduction(PythonAlgorithm):
 
     def _makeRunFile(self, run):
         """
-        Make name like BSS24234
+        Make name like BSS_24234_event.nxs
         """
-        return self._short_inst + str(run)
+        return "{0}_{1}_event.nxs".format(self._short_inst,str(run))
 
     def _sumRuns(self, run_set, sam_ws, mon_ws, extra_ext=None):
         """
@@ -339,9 +354,11 @@ class BASISReduction(PythonAlgorithm):
         """
         wsName = self._makeRunName(run_set[0])
         wsName += extra_extension
-        wsMonName = wsName + "_monitors"
-        self._sumRuns(run_set, wsName, wsMonName, extra_extension)
-        self._calibData(wsName, wsMonName)
+        wsName_mon = wsName + "_monitors"
+        self._sumRuns(run_set, wsName, wsName_mon, extra_extension)
+        self._calibData(wsName, wsName_mon)
+        if not self._debugMode:
+            sapi.DeleteWorkspace(wsName_mon)  # delete monitors
         return wsName
 
     def _group_and_SofQW(self, wsName, etRebins, isSample=True):

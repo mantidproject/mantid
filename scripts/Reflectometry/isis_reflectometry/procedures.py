@@ -677,8 +677,6 @@ def nrNRFn(runList, nameList, incidentAngles, DBList, specChan, minSpec, maxSpec
             # Rebin using internal parameters to avoid problems with summing in Q
             # internalreb=gparams[0]+",0.01,"+gparams[2]
             # Rebin(InputWorkspace=i,OutputWorkspace=i,Params=internalreb)
-            _minSp = int(minSpec)
-            _maxSp = int(maxSpec)
             CropWorkspace(InputWorkspace=i, OutputWorkspace=i + "det", StartWorkspaceIndex=4, EndWorkspaceIndex=243)
             floodnorm(i + "det", floodfile)
             # move the first spectrum in the list onto the beam centre so that when the bench is rotated it's in the right place
@@ -737,7 +735,6 @@ def nrNRFn(runList, nameList, incidentAngles, DBList, specChan, minSpec, maxSpec
 def findbin(wksp, val):
     a1 = mtd[wksp]
     x1 = a1.readX(0)
-    _bnum = -1
 
     i = None
     for i in range(len(x1) - 1):
@@ -760,8 +757,6 @@ def nrDBFn(runListShort, nameListShort, runListLong, nameListLong, nameListComb,
         addRuns(rlistL[i], nlistL[i])
 
     mon_spec = int(gparams[3]) - 1
-    _minSp = int(minSpec) - 1
-    _maxSp = int(maxSpec) - 1
     reb = gparams[0] + "," + gparams[1] + "," + gparams[2]
 
     for i in nlistS:
@@ -952,7 +947,6 @@ def NRCombineDatafn(RunsNameList, CombNameList, applySFs, SFList, SFError, scale
 
     # if applying a global scale factor do it here
     if applyGlobalSF == "2":
-        _scaledData = mtd['currentSum'] / float(globalSF)
         RenameWorkspace('scaledData', CombNameList)
         mtd.deleteWorkspace('currentSum')
     else:
@@ -998,8 +992,6 @@ def nrPNRCorrection(UpWksp, DownWksp):
     Ia = mtd[DownWksp]
     CloneWorkspace(Ip, "PCalpha")
     CropWorkspace(InputWorkspace="PCalpha", OutputWorkspace="PCalpha", StartWorkspaceIndex="0", EndWorkspaceIndex="0")
-    _PCalpha = (mtd['PCalpha'] * 0.0) + 1.0
-    _alpha = mtd['PCalpha']
     # a1=alpha.readY(0)
     # for i in range(0,len(a1)):
     # alpha.dataY(0)[i]=0.0
@@ -1008,7 +1000,6 @@ def nrPNRCorrection(UpWksp, DownWksp):
     CloneWorkspace("PCalpha", "PCAp")
     CloneWorkspace("PCalpha", "PCPp")
     rho = mtd['PCrho']
-    _Ap = mtd['PCAp']
     Pp = mtd['PCPp']
     # for i in range(0,len(a1)):
     # x=(alpha.dataX(0)[i]+alpha.dataX(0)[i])/2.0
@@ -1057,7 +1048,6 @@ def nrPACorrection(UpUpWksp, UpDownWksp, DownUpWksp, DownDownWksp):
     Iaa = mtd[DownDownWksp]
     CloneWorkspace(Ipp, "PCalpha")
     CropWorkspace(InputWorkspace="PCalpha", OutputWorkspace="PCalpha", StartWorkspaceIndex="0", EndWorkspaceIndex="0")
-    _PCalpha = (mtd['PCalpha'] * 0.0) + 1.0
     alpha = mtd['PCalpha']
     # a1=alpha.readY(0)
     # for i in range(0,len(a1)):
@@ -1153,8 +1143,6 @@ def nrPNRFn(runList, nameList, incidentAngles, DBList, specChan, minSpec, maxSpe
         addRuns(rlist[i], nlist[i])
 
     mon_spec = int(gparams[3]) - 1
-    _minSp = int(minSpec)
-    _maxSp = int(maxSpec)
     reb = gparams[0] + "," + gparams[1] + "," + gparams[2]
 
     k = 0

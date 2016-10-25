@@ -8,7 +8,7 @@ from isis_reflectometry.quick import *
 from isis_reflectometry.procedures import *
 from isis_reflectometry.combineMulti import *
 from isis_reflectometry.saveModule import *
-from isis_reflectometry.settings import MissingSettings, Settings
+from isis_reflectometry.settings import Settings
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -282,7 +282,6 @@ class Ui_SaveWindow(object):
 
             self.listWidget.setCurrentItem(self.listWidget.item(0))
             # try to get correct user directory
-            currentInstrument=config['default.instrument']
             if self.SavePath!='':
                 self.lineEdit.setText(self.SavePath)
             else:
@@ -314,15 +313,13 @@ class Ui_SaveWindow(object):
 
 #--------- If "Save" button pressed, selcted workspaces are saved -------------
     def buttonClickHandler1(self):
-        names = mtd.getObjectNames()
-        dataToSave=[]
         prefix = str(self.lineEdit2.text())
         if not (self.lineEdit.text() and os.path.exists(self.lineEdit.text())):
             logger.notice("Directory specified doesn't exist or was invalid for your operating system")
-            QtGui.QMessageBox.critical(self.lineEdit, 'Could not save',"Directory specified doesn't exist or was invalid for your operating system")
+            QtGui.QMessageBox.critical(self.lineEdit, 'Could not save',
+                                       "Directory specified doesn't exist or was invalid for your operating system")
             return
         for idx in self.listWidget.selectedItems():
-            runlist=parseRunList(str(self.spectraEdit.text()))
             fname=os.path.join(self.lineEdit.text(),prefix + idx.text())
             if self.comboBox.currentIndex() == 0:
                 print "Custom Ascii format"

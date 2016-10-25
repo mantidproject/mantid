@@ -1,7 +1,6 @@
 # pylint: disable=invalid-name
 from l2q import *
 from mantid.simpleapi import *
-import math
 from mantid.api import WorkspaceGroup
 
 

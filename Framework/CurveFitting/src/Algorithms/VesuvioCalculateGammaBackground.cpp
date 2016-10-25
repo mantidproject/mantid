@@ -115,7 +115,8 @@ void VesuvioCalculateGammaBackground::exec() {
       10 + nhist * (m_npeaks + 2 * m_foils0.size() * NTHETA * NUP * m_npeaks);
   m_progress = new Progress(this, 0.0, 1.0, nreports);
 
-  PARALLEL_FOR3(m_inputWS, m_correctedWS, m_backgroundWS)
+  PARALLEL_FOR_IF(
+      Kernel::threadSafe(*m_inputWS, *m_correctedWS, *m_backgroundWS))
   for (int64_t i = 0; i < nhist; ++i) {
     PARALLEL_START_INTERUPT_REGION
     const size_t outputIndex = i;

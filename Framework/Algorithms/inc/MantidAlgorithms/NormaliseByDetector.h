@@ -1,10 +1,10 @@
 #ifndef MANTID_ALGORITHMS_NORMALISEBYDETECTOR_H_
 #define MANTID_ALGORITHMS_NORMALISEBYDETECTOR_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
@@ -71,8 +71,8 @@ private:
   /// Process indivdual histogram.
   void processHistogram(
       size_t wsIndex,
-      boost::shared_ptr<Mantid::API::MatrixWorkspace> denominatorWS,
       boost::shared_ptr<const Mantid::API::MatrixWorkspace> inWS,
+      boost::shared_ptr<Mantid::API::MatrixWorkspace> denominatorWS,
       Mantid::API::Progress &prog);
 
   void init() override;

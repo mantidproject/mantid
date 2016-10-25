@@ -488,7 +488,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="spSampleNumberDensity">
+       <widget class="QDoubleSpinBox" name="spSampleDensity">
         <property name="maximum">
          <double>9999.989999999999782</double>
         </property>
@@ -498,10 +498,17 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="lbSampleNumberDensity">
-        <property name="text">
-         <string>Number Density:</string>
-        </property>
+       <widget class="QComboBox" name="cbSampleDensity">
+        <item>
+         <property name="text">
+          <string>Mass Density</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Number Density</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="0" column="2">
@@ -556,10 +563,17 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="0">
-       <widget class="QLabel" name="lbCanNumberDensity">
-        <property name="text">
-         <string>Number Density:</string>
-        </property>
+       <widget class="QComboBox" name="cbCanDensity">
+        <item>
+         <property name="text">
+          <string>Mass Density</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Number Density</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="0" column="3">
@@ -573,7 +587,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="spCanNumberDensity">
+       <widget class="QDoubleSpinBox" name="spCanDensity">
         <property name="maximum">
          <double>9999.989999999999782</double>
         </property>
@@ -709,9 +723,7 @@
   <tabstop>spAnnBeamHeight</tabstop>
   <tabstop>spAnnBeamWidth</tabstop>
   <tabstop>spAnnStepSize</tabstop>
-  <tabstop>spSampleNumberDensity</tabstop>
   <tabstop>leSampleChemicalFormula</tabstop>
-  <tabstop>spCanNumberDensity</tabstop>
   <tabstop>leCanChemicalFormula</tabstop>
   <tabstop>cbPlotOutput</tabstop>
   <tabstop>pbSave</tabstop>
