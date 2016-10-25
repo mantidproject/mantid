@@ -303,12 +303,14 @@ void NormaliseByPeakArea::saveToOutput(
     const size_t npts(accumWS->blocksize());
     auto &accumY = accumWS->mutableY(0);
     auto &accumE = accumWS->mutableE(0);
+    auto yValuesRaw = yValues->rawData();
+    auto eValuesRaw = eValues->rawData();
 
     for (size_t j = 0; j < npts; ++j) {
       double accumYj = accumWS->y(0)[j];
       double accumEj = accumWS->e(0)[j];
-      double rhsYj = yValues->rawData()[j];
-      double rhsEj = eValues->rawData()[j];
+      double rhsYj = yValuesRaw[j];
+      double rhsEj = eValuesRaw[j];
       if (accumEj < 1e-12 || rhsEj < 1e-12)
         continue;
       double err = 1.0 / (accumEj * accumEj) + 1.0 / (rhsEj * rhsEj);
