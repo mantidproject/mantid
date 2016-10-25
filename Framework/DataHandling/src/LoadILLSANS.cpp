@@ -297,8 +297,6 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromHorizontalTubes(
   const size_t numberOfTubes = data.dim1();
   const size_t numberOfPixelsPerTube = data.dim0();
 
-  const size_t numOfEdges = data.dim2() + 1;
-
   Progress progress(this, 0, 1, data.dim0() * data.dim1());
 
   size_t spec = firstIndex;
