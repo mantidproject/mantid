@@ -10,8 +10,9 @@ New features
 
 Algorithms
 ##########
+
 - :ref:`EnergyWindowScan <algm-EnergyWindowScan>` and :ref:`IndirectEnergyWindowScan <algm-IndirectEnergyWindowScan>` have been added
-   to perform a quick run of *EnergyTransfer*, *Elwin* and optional *MSDFit*
+  to perform a quick run of *EnergyTransfer*, *Elwin* and optional *MSDFit*
 
 Data Reduction
 ##############
@@ -29,7 +30,7 @@ Data Analysis
 
 Improvements
 ------------
- - Data saved in an ASCII format using the *EnergyTransfer* interface can be re-loaded into Mantid
+- Data saved in an ASCII format using the *EnergyTransfer* interface can be re-loaded into Mantid
 
 Bugfixes
 --------
