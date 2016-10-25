@@ -58,7 +58,7 @@ double SpectrumInfo::l2(const size_t index) const {
     m_detectorInfo->setCachedDetector(detIndex, det);
     l2 += m_detectorInfo->l2(detIndex);
   }
-  return l2 /= static_cast<double>(dets.size());
+  return l2 / static_cast<double>(dets.size());
 }
 
 /// Returns 2 theta (scattering angle w.r.t. to beam direction).
@@ -70,7 +70,7 @@ double SpectrumInfo::twoTheta(const size_t index) const {
     m_detectorInfo->setCachedDetector(detIndex, det);
     twoTheta += m_detectorInfo->twoTheta(detIndex);
   }
-  return twoTheta /= static_cast<double>(dets.size());
+  return twoTheta / static_cast<double>(dets.size());
 }
 
 /// Returns signed 2 theta (signed scattering angle w.r.t. to beam direction).
@@ -82,7 +82,7 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
     m_detectorInfo->setCachedDetector(detIndex, det);
     signedTwoTheta += m_detectorInfo->signedTwoTheta(detIndex);
   }
-  return signedTwoTheta /= static_cast<double>(dets.size());
+  return signedTwoTheta / static_cast<double>(dets.size());
 }
 
 /// Returns the position of the spectrum with given index.
@@ -107,7 +107,7 @@ Kernel::V3D SpectrumInfo::position(const size_t index) const {
   if (std::abs(newPos[2]) < Mantid::Kernel::Tolerance)
     newPos[2] = 0.0;
 
-  return newPos /= static_cast<double>(dets.size());
+  return newPos / static_cast<double>(dets.size());
 }
 
 /// Returns true if the spectrum is associated with detectors in the instrument.
