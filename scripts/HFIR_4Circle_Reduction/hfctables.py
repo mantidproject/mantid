@@ -465,10 +465,18 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         """
         # Check
         assert isinstance(i_row, int), 'Row number (index) must be integer but not %s.' % type(i_row)
-        assert isinstance(hkl, list) or isinstance(hkl, tuple) and len(hkl) == 3,\
-            'HKL must be either list or tuple with 3 items.  But now it is %s of type %s.' \
-            '' % (str(hkl), type(hkl))
 
+        if isinstance(hkl, list) or isinstance(hkl, tuple):
+            assert len(hkl) == 3, 'In case HKL is list of tuple, its size must be equal to 3 but not %d.' \
+                                  '' % len(hkl)
+        elif isinstance(hkl, numpy.ndarray):
+            assert hkl.shape == (3,), 'In case HKL is numpy array, its shape must be (3,) but not %s.' \
+                                      '' % str(hkl.shape)
+        else:
+            raise AssertionError('HKL of type %s is not supported. Supported types include list, tuple '
+                                 'and numpy array.' % type(hkl))
+
+        # get columns
         i_col_h = UB_Peak_Table_Setup.index(('H', 'float'))
         i_col_k = UB_Peak_Table_Setup.index(('K', 'float'))
         i_col_l = UB_Peak_Table_Setup.index(('L', 'float'))

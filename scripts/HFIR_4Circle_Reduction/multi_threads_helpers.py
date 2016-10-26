@@ -200,7 +200,7 @@ class IntegratePeaksThread(QThread):
                 ret_obj = 'AssertionError: %s.' % str(ass_err)
 
             if status:
-                center_i = ret_obj
+                center_i = ret_obj   # 3-tupe
             else:
                 error_msg = 'Unable to find peak for exp %d scan %d: %s.' % (self._expNumber, scan_number, str(ret_obj))
                 # no need... self._mainWindow.controller.set_peak_intensity(self._expNumber, scan_number, 0.)
@@ -250,6 +250,8 @@ class IntegratePeaksThread(QThread):
 
             # emit signal to main app for peak intensity value
             mode = 1
+            # TODO/NOW/ISSUE/ make it also send out the message for peak center
+            # center_i
             self.peakMergeSignal.emit(self._expNumber, scan_number, float(intensity_i), mode)
         # END-FOR
 

@@ -151,6 +151,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_set_ub_tab_hkl_to_integers)
         self.connect(self.ui.pushButton_undoSetToInteger, QtCore.SIGNAL('clicked()'),
                      self.do_undo_ub_tab_hkl_to_integers)
+        # TODO/NOW/ISSUE/ - Implement this method and also clear index after Refine FFT
+        # self.connect(self.ui.pushButton_clearIndexing, Qt....)
 
         self.connect(self.ui.pushButton_refineUB, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub_indexed_peaks)
@@ -245,6 +247,9 @@ class MainWindow(QtGui.QMainWindow):
                      self.evt_show_survey)
         self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('textEdited(const QString&)'),
                      self.evt_show_survey)
+
+        self.connect(self.ui.pushButton_viewRawSpice, QtCore.SIGNAL('clicked()'),
+                     self.do_show_spice_file)
 
         # Tab k-shift vector
         self.connect(self.ui.pushButton_addKShift, QtCore.SIGNAL('clicked()'),
@@ -1358,7 +1363,7 @@ class MainWindow(QtGui.QMainWindow):
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
             status, pt_number_list = self._myControl.get_pt_numbers(exp_number, scan_number)
 
-            # set intensity to zero and error message
+            # set intensity to zero and error message if fails to get Pt.
             if status is False:
                 error_msg = 'Unable to get Pt. of experiment %d scan %d due to %s.' % (exp_number, scan_number,
                                                                                        str(pt_number_list))
@@ -1421,8 +1426,12 @@ class MainWindow(QtGui.QMainWindow):
                 err_msg += ret_obj + '\n'
         # END-FOR
 
+        # error message
         if len(err_msg) > 0:
             self.pop_one_button_dialog(err_msg)
+
+        # update the message
+        self.ui.lineEdit_peaksIndexedBy.setText(IndexFromUB)
 
         return
 
@@ -1771,7 +1780,7 @@ class MainWindow(QtGui.QMainWindow):
             md_ws_name = self.ui.tableWidget_mergeScans.get_merged_ws_name(i_row)
             md_ws_list.append(md_ws_name)
             # get peak center in 3-tuple
-            peak_center = self._myControl.get_peak_info(exp_number, scan_number).get_peak_center()
+            peak_center = self._myControl.get_peak_info(exp_number, scan_number).get_peak_centre()
             peak_center_list.append(peak_center)
         # END-FOR
 
@@ -2012,7 +2021,7 @@ class MainWindow(QtGui.QMainWindow):
             if pt < 0:
                 pt = None
             peak_info = self._myControl.get_peak_info(exp_number, scan, pt)
-            h, k, l = peak_info.get_spice_hkl()
+            h, k, l = peak_info.get_hkl(user_hkl=False)
             self.ui.tableWidget_peaksCalUB.update_hkl(i_row, h, k, l)
         # END-FOR
 
@@ -2205,8 +2214,9 @@ class MainWindow(QtGui.QMainWindow):
         else:
             # select all peaks
             self.ui.tableWidget_surveyTable.select_all_rows(self._surveyTableFlag)
-            self._surveyTableFlag = not self._surveyTableFlag
         # END-IF-ELSE
+
+        self._surveyTableFlag = not self._surveyTableFlag
 
         return
 
@@ -2387,6 +2397,15 @@ class MainWindow(QtGui.QMainWindow):
         ub_matrix = gutil.convert_str_to_matrix(ub_str, (3, 3))
 
         return ub_matrix
+
+    def do_show_spice_file(self):
+        """
+
+        :return:
+        """
+
+        # TODO/NOW/ISSUE - Implement this
+
 
     def do_show_ub_in_box(self):
         """ Get UB matrix in table tableWidget_ubMergeScan and write to plain text edit plainTextEdit_ubInput
@@ -2794,6 +2813,9 @@ class MainWindow(QtGui.QMainWindow):
                 motor_move_tup = self._myControl.get_motor_step(exp_number, scan_number)
             except RuntimeError as run_err:
                 self.ui.tableWidget_mergeScans.set_status(scan_number, str(run_err))
+                continue
+            except AssertionError as ass_err:
+                self.ui.tableWidget_mergeScans.set_status(scan_number, str(ass_err))
                 continue
             # set motor information (the moving motor)
             self.ui.tableWidget_mergeScans.set_motor_info(row_number, motor_move_tup)
