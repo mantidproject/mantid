@@ -41,9 +41,6 @@ public:
   MOCK_METHOD2(recordWorkspaceRename,
                void(const std::string &oldName, const std::string &newName));
   MOCK_METHOD1(showRenameDialog, void(const StringList &wsNames));
-  MOCK_CONST_METHOD2(groupWorkspaces, void(const StringList &wsNames,
-                                           const std::string &groupName));
-  MOCK_CONST_METHOD1(ungroupWorkspaces, void(const StringList &wsNames));
   MOCK_CONST_METHOD0(getSortDirection, SortDirection());
   MOCK_CONST_METHOD0(getSortCriteria, SortCriteria());
   MOCK_METHOD2(sortWorkspaces,

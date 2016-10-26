@@ -5,10 +5,11 @@
 #include "MantidQtMantidWidgets/WorkspacePresenter/WorkspaceDockMockObjects.h"
 #include "MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h"
 
-#include <MantidAPI/AlgorithmManager.h>
+#include <MantidAPI/FrameworkManager.h>
 #include <MantidAPI/AnalysisDataService.h>
 #include <MantidTestHelpers/WorkspaceCreationHelper.h>
 
+#include <algorithm>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -22,6 +23,8 @@ public:
     return new WorkspacePresenterTest();
   }
   static void destroySuite(WorkspacePresenterTest *suite) { delete suite; }
+
+  WorkspacePresenterTest() { FrameworkManager::Instance(); }
 
   void setUp() override {
     mockView.reset();
@@ -186,17 +189,33 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
 
-    AnalysisDataService::Instance().remove("wksp");
+    AnalysisDataService::Instance().remove("myWorkspace");
   }
 
   void testWorkspacesGrouped() {
+    auto ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws2 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().add("ws1", ws1);
+    AnalysisDataService::Instance().add("ws2", ws2);
     ::testing::DefaultValue<StringList>::Set(StringList{"ws1", "ws2"});
 
     EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), groupWorkspaces(StringList{"ws1", "ws2"},
-                                                 "NewGroup")).Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
+
+    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(
+        AnalysisDataService::Instance().retrieve("NewGroup"));
+
+    TS_ASSERT(group != nullptr);
+
+    if (group) {
+      auto names = group->getNames();
+      TS_ASSERT_EQUALS(names.size(), 2);
+      TS_ASSERT_EQUALS(names[0], "ws1");
+      TS_ASSERT_EQUALS(names[1], "ws2");
+    }
+
+    AnalysisDataService::Instance().deepRemoveGroup("NewGroup");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -215,20 +234,50 @@ public:
 
   void testGroupAlreadyExistsUserConfirm() {
     createGroup("NewGroup");
+    auto ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws2 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().add("ws1", ws1);
+    AnalysisDataService::Instance().add("ws2", ws2);
 
     ::testing::DefaultValue<StringList>::Set(StringList{"ws1", "ws2"});
     ON_CALL(*mockView.get(), askUserYesNo(_, _)).WillByDefault(Return(true));
 
     EXPECT_CALL(*mockView.get(), askUserYesNo(_, _)).Times(1);
     EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), groupWorkspaces(StringList{"ws1", "ws2"},
-                                                 "NewGroup")).Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
 
+    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(
+        AnalysisDataService::Instance().retrieve("NewGroup"));
+    auto names = AnalysisDataService::Instance().getObjectNames();
+
+    // The old "NewGroup" would have been ungrouped in order to create
+    // the another "NewGroup" so check to make sure previously grouped
+    // workspaces still exist
+    TS_ASSERT(
+        std::any_of(names.cbegin(), names.cend(), [](const std::string name) {
+          return name.compare("wksp1") == 0;
+        }));
+    TS_ASSERT(
+        std::any_of(names.cbegin(), names.cend(), [](const std::string name) {
+          return name.compare("wksp2") == 0;
+        }));
+
+    TS_ASSERT(group != nullptr);
+
+    if (group) {
+      auto names = group->getNames();
+      TS_ASSERT_EQUALS(names.size(), 2);
+      TS_ASSERT_EQUALS(names[0], "ws1");
+      TS_ASSERT_EQUALS(names[1], "ws2");
+    }
+
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
 
+    // Remove group and left over workspaces
     removeGroup("NewGroup");
+    AnalysisDataService::Instance().remove("wksp1");
+    AnalysisDataService::Instance().remove("wksp2");
   }
 
   void testGroupAlreadyExistsUserDenies() {
@@ -239,7 +288,6 @@ public:
 
     EXPECT_CALL(*mockView.get(), askUserYesNo(_, _)).Times(1);
     EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), groupWorkspaces(_, _)).Times(Exactly(0));
 
     presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
 
@@ -249,15 +297,28 @@ public:
   }
 
   void testWorkspacesUngrouped() {
+    createGroup("group");
     ::testing::DefaultValue<StringList>::Set(StringList(StringList{"group"}));
 
     EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), ungroupWorkspaces(StringList{"group"}))
-        .Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::UngroupWorkspaces);
 
+    auto names = AnalysisDataService::Instance().getObjectNames();
+
+    TS_ASSERT(std::none_of(names.cbegin(), names.cend(), [](std::string name) {
+      return name.compare("group") == 0;
+    }));
+    TS_ASSERT(std::any_of(names.cbegin(), names.cend(), [](std::string name) {
+      return name.compare("wksp1") == 0;
+    }));
+    TS_ASSERT(std::any_of(names.cbegin(), names.cend(), [](std::string name) {
+      return name.compare("wksp2") == 0;
+    }));
+
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    AnalysisDataService::Instance().clear();
   }
 
   void testInvalidGroupForUngrouping() {
@@ -266,7 +327,6 @@ public:
     EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
     EXPECT_CALL(*mockView.get(), showCriticalUserMessage(_, _))
         .Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), ungroupWorkspaces(_)).Times(Exactly(0));
 
     presenter->notifyFromView(ViewNotifiable::Flag::UngroupWorkspaces);
 

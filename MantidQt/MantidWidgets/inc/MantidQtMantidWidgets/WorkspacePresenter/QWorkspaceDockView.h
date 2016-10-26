@@ -108,10 +108,6 @@ public:
   void showLiveDataDialog() override;
   void
   showRenameDialog(const MantidQt::MantidWidgets::StringList &wsNames) override;
-  void groupWorkspaces(const MantidQt::MantidWidgets::StringList &wsNames,
-                       const std::string &groupName) const override;
-  void ungroupWorkspaces(
-      const MantidQt::MantidWidgets::StringList &wsNames) const override;
   void enableDeletePrompt(bool enable) override;
   bool isPromptDelete() const override;
   bool deleteConfirmation() const override;

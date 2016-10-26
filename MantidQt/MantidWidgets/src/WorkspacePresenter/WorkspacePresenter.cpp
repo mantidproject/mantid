@@ -2,6 +2,7 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidQtMantidWidgets/WorkspacePresenter/ADSAdapter.h"
 #include "MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h"
+#include <MantidAPI/AlgorithmManager.h>
 
 using namespace Mantid;
 
@@ -189,7 +190,23 @@ void WorkspacePresenter::groupWorkspaces() {
       return;
   }
 
-  view->groupWorkspaces(selected, groupName);
+  try {
+    std::string algName("GroupWorkspaces");
+    Mantid::API::IAlgorithm_sptr alg =
+        Mantid::API::AlgorithmManager::Instance().create(algName, 1);
+    alg->initialize();
+    alg->setProperty("InputWorkspaces", selected);
+    alg->setPropertyValue("OutputWorkspace", groupName);
+    // execute the algorithm
+    bool bStatus = alg->execute();
+    if (!bStatus) {
+      view->showCriticalUserMessage("MantidPlot - Algorithm error",
+                                    " Error in GroupWorkspaces algorithm");
+    }
+  } catch (...) {
+    view->showCriticalUserMessage("MantidPlot - Algorithm error",
+                                  " Error in GroupWorkspaces algorithm");
+  }
 }
 
 void WorkspacePresenter::ungroupWorkspaces() {
@@ -202,7 +219,26 @@ void WorkspacePresenter::ungroupWorkspaces() {
     return;
   }
 
-  view->ungroupWorkspaces(selected);
+  try {
+    // workspace name
+    auto wsname = selected[0];
+
+    std::string algName("UnGroupWorkspace");
+    Mantid::API::IAlgorithm_sptr alg =
+        Mantid::API::AlgorithmManager::Instance().create(algName, 1);
+    alg->initialize();
+    alg->setProperty("InputWorkspace", wsname);
+
+    // execute the algorithm
+    bool bStatus = alg->execute();
+    if (!bStatus) {
+      view->showCriticalUserMessage("MantidPlot - Algorithm error",
+                                    " Error in UnGroupWorkspace algorithm");
+    }
+  } catch (...) {
+    view->showCriticalUserMessage("MantidPlot - Algorithm error",
+                                  " Error in UnGroupWorkspace algorithm");
+  }
 }
 
 void WorkspacePresenter::sortWorkspaces() {

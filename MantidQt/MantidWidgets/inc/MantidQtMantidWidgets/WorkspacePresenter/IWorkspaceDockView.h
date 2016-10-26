@@ -62,9 +62,6 @@ public:
   virtual void showRenameDialog(const StringList &wsNames) = 0;
   virtual void recordWorkspaceRename(const std::string &oldName,
                                      const std::string &newName) = 0;
-  virtual void groupWorkspaces(const StringList &wsNames,
-                               const std::string &groupName) const = 0;
-  virtual void ungroupWorkspaces(const StringList &wsNames) const = 0;
   virtual void enableDeletePrompt(bool enable) = 0;
   virtual bool isPromptDelete() const = 0;
   virtual bool deleteConfirmation() const = 0;

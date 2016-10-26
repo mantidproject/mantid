@@ -322,68 +322,6 @@ void QWorkspaceDockView::refreshWorkspaces() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::RefreshWorkspaces);
 }
 
-void QWorkspaceDockView::groupWorkspaces(const StringList &wsNames,
-                                         const std::string &groupName) const {
-  try {
-    std::string algName("GroupWorkspaces");
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create(algName, 1);
-    alg->initialize();
-    alg->setProperty("InputWorkspaces", wsNames);
-    alg->setPropertyValue("OutputWorkspace", groupName);
-    // execute the algorithm
-    bool bStatus = alg->execute();
-    if (!bStatus) {
-      showCriticalUserMessage("MantidPlot - Algorithm error",
-                              " Error in GroupWorkspaces algorithm");
-    }
-  } catch (std::invalid_argument &) {
-    showCriticalUserMessage("MantidPlot - Algorithm error",
-                            " Error in GroupWorkspaces algorithm");
-  } catch (Mantid::Kernel::Exception::NotFoundError &) // if not a valid object
-                                                       // in analysis data
-                                                       // service
-  {
-    showCriticalUserMessage("MantidPlot - Algorithm error",
-                            " Error in GroupWorkspaces algorithm");
-  } catch (std::runtime_error &) {
-    showCriticalUserMessage("MantidPlot - Algorithm error",
-                            " Error in GroupWorkspaces algorithm");
-  } catch (std::exception &) {
-    showCriticalUserMessage("MantidPlot - Algorithm error",
-                            " Error in GroupWorkspaces algorithm");
-  }
-}
-
-void QWorkspaceDockView::ungroupWorkspaces(const StringList &wsNames) const {
-  try {
-    // workspace name
-    std::string wsname = wsNames[0];
-
-    std::string algName("UnGroupWorkspace");
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create(algName, 1);
-    alg->initialize();
-    alg->setProperty("InputWorkspace", wsname);
-
-    // execute the algorithm
-    bool bStatus = alg->execute();
-    if (!bStatus) {
-      showCriticalUserMessage("MantidPlot - Algorithm error",
-                              " Error in UnGroupWorkspace algorithm");
-    }
-  } catch (std::invalid_argument &) {
-    showCriticalUserMessage("MantidPlot - Algorithm error",
-                            " Error in UnGroupWorkspace algorithm");
-  } catch (std::runtime_error &) {
-    showCriticalUserMessage("MantidPlot - Algorithm error",
-                            " Error in UnGroupWorkspace algorithm");
-  } catch (std::exception &) {
-    showCriticalUserMessage("MantidPlot - Algorithm error",
-                            " Error in UnGroupWorkspace algorithm");
-  }
-}
-
 void QWorkspaceDockView::enableDeletePrompt(bool enable) {
   m_promptDelete = enable;
 }
@@ -1503,9 +1441,7 @@ void QWorkspaceDockView::saveToProgram() {
         }
 
         // Execute the save
-        // TODO: you may need to take a look at this algorithm execution methods
-        // m_mantidUI->executeAlgorithmAsync(alg, true);
-        alg->execute();
+        m_mantidUI->executeAlgorithmAsync(alg, true);
 
         // Get the save location of the file (should be default Mantid folder)
         QString savedFile =
@@ -1579,7 +1515,6 @@ void QWorkspaceDockView::plotSpectrum(bool showErrors) {
 
   bool spectrumPlot(true), clearWindow(false);
   MultiLayer *window(NULL);
-  // TODO: Replace with signal?
   m_mantidUI->plot1D(userInput.plots, spectrumPlot,
                      MantidQt::DistributionDefault, showErrors, window,
                      clearWindow, userInput.waterfall);
