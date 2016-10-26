@@ -84,7 +84,7 @@ def _parse_castep_file_header(f_handle):
     @param f_handle - handle to the file.
     @return tuple of the number of ions and branches in the file
     """
-    num_species, num_ions = 0, 0
+    num_species = 0
     file_data = {}
     while True:
         line = f_handle.readline()

@@ -240,7 +240,7 @@ class DirectEnergyConversion(object):
         if self.second_white:
             #TODO: fix THIS DOES NOT WORK!
 #pylint: disable=unused-variable
-            second_white = self.second_white
+            # second_white = self.second_white
             other_whiteintegrals = self.do_white(PropertyManager.second_white, None, None) # No grouping yet
 #pylint: disable=attribute-defined-outside-init
             self.second_white = other_whiteintegrals

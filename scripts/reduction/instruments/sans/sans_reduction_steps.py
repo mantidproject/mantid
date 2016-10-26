@@ -223,10 +223,6 @@ class Mask(ReductionStep):
             @param complement: mask in the direction of the normal or away
             @return the xml string
         """
-        if complement:
-            addition = '#'
-        else:
-            addition = ''
         return '<infinite-plane id="' + str(id) + '">' + \
                '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + \
                '" />' + '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + \

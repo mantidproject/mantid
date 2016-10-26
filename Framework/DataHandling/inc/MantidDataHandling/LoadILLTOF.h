@@ -78,8 +78,7 @@ private:
   loadDataIntoTheWorkSpace(NeXus::NXEntry &entry,
                            const std::vector<std::vector<int>> &,
                            int vanaCalculatedDetectorElasticPeakPosition = -1);
-  void loadSpectra(size_t &spec, size_t firstSpec, size_t numberOfMonitors,
-                   size_t numberOfTubes,
+  void loadSpectra(size_t &spec, size_t numberOfMonitors, size_t numberOfTubes,
                    std::vector<Mantid::detid_t> &detectorIDs, NeXus::NXInt data,
                    Mantid::API::Progress progress);
 

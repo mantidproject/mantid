@@ -63,4 +63,5 @@ class TubeCalibFitParams(object):
         return self.automatic
 
     def __str__(self):
-        return 'peaks'+str(self.peaks)+'height'+str(self.height)+'width'+str(self.width)+'margin'+str(self.margin)+'outedge'+str(self.outEdge)+'inedge'+str(self.inEdge)+'edgegrad'+str(self.edgeGrad       )
+        return ('peaks'+str(self.peaks)+'height'+str(self.height)+'width'+str(self.width)+'margin'+
+                str(self.margin)+'outedge'+str(self.outEdge)+'inedge'+str(self.inEdge)+'edgegrad'+str(self.edgeGrad))

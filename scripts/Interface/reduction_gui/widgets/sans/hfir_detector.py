@@ -145,7 +145,6 @@ class DetectorWidget(BaseWidget):
 
             try:
                 reduction_table_ws = self.options_callback()
-                patch_output = AnalysisDataService.doesExist(patch_ws)
                 filename = self._content.sensitivity_file_edit.text()
                 script  = "ComputeSensitivity(Filename='%s',\n" % filename
                 script += "                   ReductionProperties='%s',\n" % reduction_table_ws
