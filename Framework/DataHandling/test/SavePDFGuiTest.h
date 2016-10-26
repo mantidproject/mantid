@@ -6,6 +6,7 @@
 #include <fstream>
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/SavePDFGui.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 

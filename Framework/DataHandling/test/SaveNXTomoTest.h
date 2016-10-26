@@ -5,6 +5,7 @@
 
 #include "MantidDataHandling/SaveNXTomo.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 

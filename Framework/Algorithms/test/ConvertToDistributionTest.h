@@ -6,6 +6,7 @@
 
 #include "MantidAlgorithms/ConvertToDistribution.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::API;
 using Mantid::Algorithms::ConvertToDistribution;

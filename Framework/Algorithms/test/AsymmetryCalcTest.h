@@ -7,6 +7,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/AsymmetryCalc.h"
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidDataHandling/LoadInstrument.h"

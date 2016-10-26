@@ -4,6 +4,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/SaveCanSAS1D.h"
 #include "MantidDataHandling/LoadCanSAS1D.h"

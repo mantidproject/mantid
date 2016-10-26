@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/DownloadInstrument.h"
+#include "MantidKernel/ConfigService.h"
 
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Glob.h>

@@ -5,6 +5,7 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidCurveFitting/Algorithms/SplineSmoothing.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using Mantid::CurveFitting::Algorithms::SplineSmoothing;
 

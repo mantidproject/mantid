@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/ImggTomographicReconstruction.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Exception.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
