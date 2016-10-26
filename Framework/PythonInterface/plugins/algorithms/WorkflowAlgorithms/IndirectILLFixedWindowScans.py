@@ -144,8 +144,7 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
         self.setUp()
 
         # Check whether observable exists in Nexus file
-        doppler = '$/entry0/'
-        _criteria = doppler + self._post_processing_entity_name.replace('.', '/') + '$'
+        _criteria = '$/entry0/' + self._post_processing_entity_name.replace('.', '/') + '$'
         self.log().debug('Filtering with nexus criteria: {0}'.format(_criteria))
         self._run_file = SelectNexusFilesByMetadata(self._run_file, _criteria)
 

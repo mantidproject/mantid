@@ -3,9 +3,9 @@ from __future__ import (absolute_import, division, print_function)
 
 import os.path
 import numpy as np
-from mantid.simpleapi import *
-from mantid.kernel import *
-from mantid.api import *
+from mantid.simpleapi import *  # noqa
+from mantid.kernel import *  # noqa
+from mantid.api import *  # noqa
 from mantid import config, mtd, logger
 
 
@@ -218,7 +218,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     _criteria = None
 
     # Output Workspace names
-    _out_suffixes = [] # 1D list of output ws suffixes w/o run numbers
+    _out_suffixes = []  # 1D list of output ws suffixes w/o run numbers
 
     def category(self):
         return "Workflow\\MIDAS;Inelastic\\Reduction"
@@ -228,7 +228,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
     def PyInit(self):
         # File properties
-        self.declareProperty(MultipleFileProperty('Run',extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('Run', extensions=['nxs']),
                              doc='File path of run (s).')
 
         self.declareProperty(MultipleFileProperty('VanadiumRun',
@@ -259,7 +259,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         self.declareProperty(name='Reflection',
                              defaultValue='111',
-                             validator=StringListValidator(['111','311']),
+                             validator=StringListValidator(['111', '311']),
                              doc='Analyser reflection.')
 
         self.declareProperty(name='ReductionType',
@@ -275,7 +275,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                              defaultValue=False,
                              doc='Whether to output the workspaces in intermediate steps.')
 
-        self.declareProperty(name='UnmirrorOption',defaultValue=6,
+        self.declareProperty(name='UnmirrorOption', defaultValue=6,
                              validator=IntBoundedValidator(lower=0, upper=7),
                              doc='Unmirroring options: \n'
                                  '0 no unmirroring\n'
@@ -287,16 +287,14 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                                  '6 center both left and right at zero and sum\n'
                                  '7 like 6, but use Vanadium run for peak positions')
 
-        self.declareProperty(name='BackgroundScalingFactor',defaultValue=1.,
+        self.declareProperty(name='BackgroundScalingFactor', defaultValue=1.,
                              validator=FloatBoundedValidator(lower=0),
                              doc='Scaling factor for background subtraction')
-
         # Output workspace properties
         self.declareProperty(WorkspaceGroupProperty("OutputWorkspace", "red",
                                                     optional=PropertyMode.Optional,
                                                     direction=Direction.Output),
                              doc="Group name for the reduced workspace(s).")
-
         # Debug mode
         self.declareProperty(WorkspaceGroupProperty("RawWorkspace", "raw",
                                                     optional=PropertyMode.Optional,
@@ -352,7 +350,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             if __calib is None:
                 issues['CalibrationWorkspace'] = 'Calibration workspace does not exist.'
             else:
-                if isinstance(__calib,WorkspaceGroup):
+                if isinstance(__calib, WorkspaceGroup):
                     issues['CalibrationWorkspace'] = 'Calibration workspace should not be a workspace group.'
                 else:
                     if __calib.blocksize() != 1:
@@ -364,8 +362,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     def setUp(self):
 
         self._run_file = self.getPropertyValue('Run')
-        self._vanadium_file = self.getPropertyValue('VanadiumRun').replace(',','+')
-        self._background_file = self.getPropertyValue('BackgroundRun').replace(',','+')
+        self._vanadium_file = self.getPropertyValue('VanadiumRun').replace(',', '+')
+        self._background_file = self.getPropertyValue('BackgroundRun').replace(',', '+')
         self._analyser = self.getPropertyValue('Analyser')
         self._map_file = self.getPropertyValue('MapFile')
         self._calib_ws = _ws_or_none(self.getPropertyValue('CalibrationWorkspace'))
@@ -396,7 +394,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._out_suffixes = [self._red_ws, self._raw_ws, self._det_ws, self._monitor_ws, self._mnorm_ws,
                               self._left_ws, self._right_ws, self._bsub_ws, self._vnorm_ws]
 
-
     def _filter_files(self):
         """
         Filters all the relevant input files according to the given reduction type
@@ -405,11 +402,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         doppler = '$/entry0/instrument/Doppler/'
 
         if self._reduction_type == 'QENS':
-            self._criteria = doppler + 'maximum_delta_energy$ != 0. and ' + doppler + \
-                             'velocity_profile$ == 0'
+            self._criteria = doppler + 'maximum_delta_energy$ != 0. and ' + doppler + 'velocity_profile$ == 0'
         elif self._reduction_type == 'FWS':
-            self._criteria = doppler + 'maximum_delta_energy$ == 0. or ' + doppler + \
-                             'velocity_profile$ == 1'
+            self._criteria = doppler + 'maximum_delta_energy$ == 0. or ' + doppler + 'velocity_profile$ == 1'
 
         self.log().debug('Filtering with nexus criteria: {0}'.format(self._criteria))
 
@@ -516,7 +511,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self.log().error('Mirror sense is not defined. Check your data.')
             raise RuntimeError('Mirror sense is not defined. Check your data.')
 
-    def _check_mirror_sense(self,ws):
+    def _check_mirror_sense(self, ws):
         """
         Checks if the given workspace has the same as self._mirror_sense
         @param  ws :: input workspace
@@ -531,7 +526,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             return False
 
         return bool(_ms == self._mirror_sense)
-
 
     def _load_auxiliary_files(self):
         """
@@ -580,18 +574,20 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         if self._mirror_sense == 14:
             # call IndirectILLReduction for vanadium run with unmirror 2 and 3 to get left and right
 
-            left_vanadium = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
-                                                 Reflection=self._reflection, SumRuns=True, UnmirrorOption=2)
+            left_vanadium = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file,
+                                                 Analyser=self._analyser, Reflection=self._reflection, SumRuns=True,
+                                                 UnmirrorOption=2)
 
-            right_vanadium = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
-                                                  Reflection=self._reflection, SumRuns=True, UnmirrorOption=3)
+            right_vanadium = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file,
+                                                  Analyser=self._analyser, Reflection=self._reflection, SumRuns=True,
+                                                  UnmirrorOption=3)
 
             if not left_vanadium or not right_vanadium:
                 self.log().error('Failed to load vanadium run #{0}. Aborting.'.format(self._vanadium_file))
                 raise RuntimeError('Failed to load vanadium run #{0}. Aborting.'.format(self._vanadium_file))
             else:
                 # note, that run number will be prepended, so need to rename
-                RenameWorkspace(left_vanadium.getItem(0).getName(),'left_van')
+                RenameWorkspace(left_vanadium.getItem(0).getName(), 'left_van')
                 RenameWorkspace(right_vanadium.getItem(0).getName(), 'right_van')
 
             if not self._check_mirror_sense('left_van'):
@@ -613,7 +609,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             if not self._check_mirror_sense('center_van'):
                 self.log().error('Inconsistent mirror sense in vanadium run. Aborting.')
                 raise RuntimeError('Inconsistent mirror sense in vanadium run. Aborting.')
-
 
     def _load_background_run(self):
         """
@@ -702,7 +697,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # subscribe the list to the general list
         ws_names.append(temp_run_ws_list)
 
-
     def _energy_and_theta_transfer(self, red, monitor, left, right):
         """
         Performs the axes transformation
@@ -780,7 +774,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             if self._reduction_type == 'QENS':
                 xmin, xmax = monitor_range(monitor)
 
-                mask_reduced_ws(red,xmin,xmax)
+                mask_reduced_ws(red, xmin, xmax)
 
                 start_bin = xmin
                 end_bin = xmax
@@ -857,11 +851,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
             ReplaceSpecialValues(InputWorkspace=red, OutputWorkspace=red, NaNValue=0, NaNError=0)
 
-
     def _background_subtraction(self, red, bsub):
         # subtract the background if specified
         if self._background_file:
-            Scale(InputWorkspace = 'background', OutputWorkspace = 'background', Factor = self._back_scaling)
+            Scale(InputWorkspace='background', OutputWorkspace='background', Factor=self._back_scaling)
             Minus(LHSWorkspace=red, RHSWorkspace='background', OutputWorkspace=red)
             # check the integral after subtraction
             __temp = ReplaceSpecialValues(InputWorkspace=red, NaNValue='0')
