@@ -34,7 +34,7 @@ Usage
 
 Output:
 
-.. testoutput:: ExGeneratedDataFit
+.. testoutput:: ExDataFit
 
     MSD Result:
     A0: [-2.45452609]
