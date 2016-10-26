@@ -15,14 +15,14 @@ class EnergyWindowScanTest(unittest.TestCase):
         self.assertEqual(round(scan_ws.readY(1)[0], 7), 1.0528091)
 
     def test_OSIRIS(self):
-        EnergyWindowScan(InputFiles="osi89757.raw, OSI100326.RAW", Instrument='OSIRIS', Analyser='graphite',
-                         Reflection='002', SpectraRange='963, 1004', ElasticRange='-1.0, 0.',
+        EnergyWindowScan(InputFiles="osi89757.raw", Instrument='OSIRIS', Analyser='graphite',
+                         Reflection='002', SpectraRange='963, 1004', ElasticRange='-1.0, 0',
                          InelasticRange='0, 1.5', GroupingMethod='All')
 
-        self.assertEqual(round(mtd['Scan_el_eq1'].readY(1)[0], 7), 0.0458173)
+        self.assertEqual(round(mtd['Scan_el_eq1'].readY(0)[0], 7), 0)
         self.assertEqual(round(mtd['Scan_inel_eq2'].readY(0)[0], 7), -6.8454638)
 
-    def test_MSDfit(self):
+    def test_MSDFit(self):
         EnergyWindowScan(InputFiles="IRS26176.RAW", Instrument='IRIS', Analyser='graphite',
                          Reflection='002', SpectraRange='3, 50', ElasticRange='-0.5, 0',
                          InelasticRange='0, 0.5', GroupingMethod='Individual', MSDFit=True)
