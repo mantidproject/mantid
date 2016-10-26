@@ -43,6 +43,9 @@
         <property name="algorithmAndProperty" stdset="0">
          <string>IndirectILLReduction|Run</string>
         </property>
+        <property name="multipleFiles" stdset="0">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
      </layout>

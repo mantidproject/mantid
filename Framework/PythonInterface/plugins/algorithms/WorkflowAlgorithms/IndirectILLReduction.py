@@ -477,8 +477,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 RenameWorkspace(InputWorkspace=name, OutputWorkspace=ws)
 
                 progress.report("Reducing run #" + run)
-                #call reduction for each run
-                self._reduce_run(run, out_ws_names)
+
+                if not self._check_mirror_sense(ws):
+                    self.log().warning('Inconsistent mirror sense in run #{0}, skipping.'.format(run))
+                    DeleteWorkspace(ws)
+                else:
+                    #call reduction for each run
+                    self._reduce_run(run, out_ws_names)
         else:
             # get instrument name and load config files
             self._instrument = mtd[self._red_ws].getInstrument()
@@ -648,11 +653,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         right = temp_run_ws_list[6]
         bsub = temp_run_ws_list[7]
         vnorm = temp_run_ws_list[8]
-
-        if not self._check_mirror_sense(red):
-            self.log().warning('Inconsistent mirror sense in run #{0}, skipping.'.format(run))
-            DeleteWorkspace(red)
-            return
 
         self._debug(red, raw)
 
