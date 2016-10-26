@@ -271,7 +271,6 @@ public:
       TS_ASSERT_DELTA(ct.second, 1.9868, 1e-4);
     }
     {
-      auto c = fun.getParameter("f3.PeakCentre");
       auto w = fun.getParameter("f3.FWHM");
       TS_ASSERT_EQUALS(w, 0.0);
     }
@@ -377,7 +376,6 @@ public:
       TS_ASSERT_DELTA(w, wFun(c), 1e-3);
     }
     {
-      auto c = fun.getParameter("f3.PeakCentre");
       auto w = fun.getParameter("f3.FWHM");
       TS_ASSERT_EQUALS(w, 0.0);
     }
@@ -434,7 +432,6 @@ public:
       TS_ASSERT_DELTA(ct.second, 0.8437, 1e-4);
     }
     {
-      auto c = fun.getParameter("f3.PeakCentre");
       auto w = fun.getParameter("f3.Sigma");
       TS_ASSERT_EQUALS(w, 0.0);
     }
@@ -485,7 +482,6 @@ public:
       TS_ASSERT_DELTA(ct.second, 2.9868, 1e-4);
     }
     {
-      auto c = fun.getParameter("f3.PeakCentre");
       auto w = fun.getParameter("f3.FWHM");
       TS_ASSERT_EQUALS(w, 0.0);
     }

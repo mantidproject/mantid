@@ -6,6 +6,7 @@
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
 #include <algorithm>
+#include <math.h>
 
 namespace Mantid {
 namespace CurveFitting {
