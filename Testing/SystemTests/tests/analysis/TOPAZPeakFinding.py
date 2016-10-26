@@ -8,6 +8,7 @@ import stresstesting
 import numpy
 from mantid.simpleapi import *
 
+
 class TOPAZPeakFinding(stresstesting.MantidStressTest):
 
     def requiredMemoryMB(self):

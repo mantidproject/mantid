@@ -856,4 +856,3 @@ class CrystalFieldFit(object):
     def _set_fit_properties(self, alg):
         for prop in self._fit_properties.items():
             alg.setProperty(*prop)
-

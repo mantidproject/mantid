@@ -4,6 +4,7 @@ from PyQt4 import QtCore, QtGui
 import math
 import TofConverter.convertUnits
 
+
 class MainWindow(QtGui.QMainWindow):
     needsThetaInputList = ['Momentum transfer (Q Angstroms^-1)', 'd-spacing (Angstroms)']
     needsThetaOutputList = ['Momentum transfer (Q Angstroms^-1)', 'd-spacing (Angstroms)']
@@ -12,12 +13,12 @@ class MainWindow(QtGui.QMainWindow):
 
     def thetaEnable (self, enabled):
         self.ui.scatteringAngleInput.setEnabled(enabled)
-        if  enabled == False:
+        if  not enabled:
             self.ui.scatteringAngleInput.clear()
 
     def flightPathEnable (self, enabled):
         self.ui.totalFlightPathInput.setEnabled(enabled)
-        if  enabled == False:
+        if  not enabled:
             self.ui.totalFlightPathInput.clear()
 
     def setInstrumentInputs (self):

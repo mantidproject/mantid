@@ -1,4 +1,6 @@
 #pylint: disable=no-init,too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
+
 import mantid.simpleapi as s_api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, \
                        PropertyMode, MatrixWorkspace, Progress
@@ -23,14 +25,11 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
     _scaled_container_wavelength = None
     _sample_ws_wavelength = None
 
-
     def category(self):
         return "Workflow\\MIDAS"
 
-
     def summary(self):
         return "Applies a calculated absorption correction in the Paalman and Pings factor style."
-
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
@@ -52,7 +51,6 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output corrections workspace.')
-
 
     #pylint: disable=too-many-branches
     def PyExec(self):

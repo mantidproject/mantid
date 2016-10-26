@@ -113,4 +113,3 @@ class OptimizeLatticeWindow(QtGui.QMainWindow):
             tab_index = 4
 
         return tab_index
-

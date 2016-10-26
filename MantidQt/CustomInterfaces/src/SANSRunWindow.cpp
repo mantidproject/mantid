@@ -1,6 +1,3 @@
-//----------------------
-// Includes
-//----------------------
 #include "MantidQtCustomInterfaces/SANSRunWindow.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -16,6 +13,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -1942,7 +1940,7 @@ void SANSRunWindow::saveFileBrowse() {
                                   ConfigService::Instance().getString(
                                       "defaultsave.directory"))).toString();
 
-  const QString filter = ";;AllFiles (*.*)";
+  const QString filter = ";;AllFiles (*)";
 
   QString oFile = FileDialogHandler::getSaveFileName(
       this, title, prevPath + "/" + m_uiForm.outfile_edit->text());
@@ -1973,7 +1971,7 @@ bool SANSRunWindow::browseForFile(const QString &box_title,
   if (box_text.isEmpty()) {
     start_path = m_last_dir;
   }
-  file_filter += ";;AllFiles (*.*)";
+  file_filter += ";;AllFiles (*)";
   QString file_path =
       QFileDialog::getOpenFileName(this, box_title, start_path, file_filter);
   if (file_path.isEmpty() || QFileInfo(file_path).isDir())

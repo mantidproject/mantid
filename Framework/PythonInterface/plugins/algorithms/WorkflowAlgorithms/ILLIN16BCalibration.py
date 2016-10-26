@@ -15,15 +15,11 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
     _peak_range = None
     _intensity_scale = 1.0
 
-
-
     def category(self):
         return 'Workflow\\Inelastic;Inelastic\\Calibration'
 
-
     def summary(self):
         return 'Creates a calibration workspace in energy transfer for IN16B.'
-
 
     def PyInit(self):
         self.declareProperty(MultipleFileProperty(name='Run',extensions=['nxs']),
@@ -45,7 +41,6 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
                                                direction=Direction.Output),
                              doc='Output workspace for calibration data')
 
-
     def PyExec(self):
         self._setup()
 
@@ -65,11 +60,7 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
               Factor=self._intensity_scale,
               Operation='Multiply')
 
-        DeleteWorkspace(__temp)
-        DeleteWorkspace(__ws_name)
-
         self.setProperty('OutputWorkspace', self._out_ws)
-
 
     def _setup(self):
         """
@@ -93,7 +84,6 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
 
         return issues
 
-
     def _validate_range(self, property_name):
         """
         Validates a range property.
@@ -109,9 +99,7 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         else:
             return 'Incorrect number of values (should be 2)'
 
-
         return None
-
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(ILLIN16BCalibration)

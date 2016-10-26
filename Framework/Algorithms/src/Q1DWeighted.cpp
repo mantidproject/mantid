@@ -2,6 +2,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -107,8 +108,8 @@ void Q1DWeighted::exec() {
 
   // Set the X vector for the output workspace
   outputWS->setBinEdges(0, XOut);
-  MantidVec &YOut = outputWS->dataY(0);
-  MantidVec &EOut = outputWS->dataE(0);
+  auto &YOut = outputWS->mutableY(0);
+  auto &EOut = outputWS->mutableE(0);
 
   const int numSpec = static_cast<int>(inputWS->getNumberHistograms());
 
@@ -189,9 +190,9 @@ void Q1DWeighted::exec() {
         continue;
 
       // Get the current spectrum for both input workspaces
-      const MantidVec &XIn = inputWS->readX(i);
-      const MantidVec &YIn = inputWS->readY(i);
-      const MantidVec &EIn = inputWS->readE(i);
+      auto &XIn = inputWS->x(i);
+      auto &YIn = inputWS->y(i);
+      auto &EIn = inputWS->e(i);
 
       // Each pixel is sub-divided in the number of pixels given as input
       // parameter (NPixelDivision)
@@ -295,8 +296,8 @@ void Q1DWeighted::exec() {
         // Normalize wedges
         for (int iWedge = 0; iWedge < nWedges; iWedge++) {
           if (wedge_XNorm[iWedge][k] > 0) {
-            MantidVec &wedgeYOut = wedgeWorkspaces[iWedge]->dataY(0);
-            MantidVec &wedgeEOut = wedgeWorkspaces[iWedge]->dataE(0);
+            auto &wedgeYOut = wedgeWorkspaces[iWedge]->mutableY(0);
+            auto &wedgeEOut = wedgeWorkspaces[iWedge]->mutableE(0);
             wedgeYOut[k] += wedge_lambda_iq[iWedge][k] / wedge_XNorm[iWedge][k];
             wedgeEOut[k] += wedge_lambda_iq_err[iWedge][k] /
                             wedge_XNorm[iWedge][k] / wedge_XNorm[iWedge][k];
@@ -316,8 +317,8 @@ void Q1DWeighted::exec() {
   }
   for (int iWedge = 0; iWedge < nWedges; iWedge++) {
     for (int i = 0; i < sizeOut - 1; i++) {
-      MantidVec &wedgeYOut = wedgeWorkspaces[iWedge]->dataY(0);
-      MantidVec &wedgeEOut = wedgeWorkspaces[iWedge]->dataE(0);
+      auto &wedgeYOut = wedgeWorkspaces[iWedge]->mutableY(0);
+      auto &wedgeEOut = wedgeWorkspaces[iWedge]->mutableE(0);
       wedgeYOut[i] /= wedge_XNormLambda[iWedge][i];
       wedgeEOut[i] = sqrt(wedgeEOut[i]) / wedge_XNormLambda[iWedge][i];
     }

@@ -9,6 +9,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/BoxInfo.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
 #if defined(__INTEL_COMPILER)
 #pragma warning disable 1170
 #endif

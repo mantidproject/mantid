@@ -1,7 +1,10 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import *
 from mantid.kernel import *
 import math
+
 
 class ReactorSANSResolution(PythonAlgorithm):
     """
@@ -61,8 +64,8 @@ class ReactorSANSResolution(PythonAlgorithm):
         pixel_size_x = input_ws.getInstrument().getNumberParameter("x-pixel-size")[0]
 
         if wvl is not None and d_wvl is not None \
-            and source_apert_radius is not None and sample_apert_radius is not None \
-            and source_sample_distance is not None and sample_detector_distance is not None:
+                and source_apert_radius is not None and sample_apert_radius is not None \
+                and source_sample_distance is not None and sample_detector_distance is not None:
             k = 2.0*math.pi/wvl
             res_factor = math.pow(k*source_apert_radius/source_sample_distance, 2)
             res_factor += (math.pow(k*sample_apert_radius*(source_sample_distance+sample_detector_distance)/

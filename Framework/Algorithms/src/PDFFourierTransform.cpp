@@ -1,12 +1,16 @@
 #include "MantidAlgorithms/PDFFourierTransform.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidHistogramData/LinearGenerator.h"
 
 #include <cmath>
 #include <sstream>
@@ -15,6 +19,7 @@ namespace Mantid {
 namespace Algorithms {
 
 using std::string;
+using namespace HistogramData;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PDFFourierTransform)
@@ -50,9 +55,6 @@ const std::string PDFFourierTransform::category() const {
   return "Diffraction\\Utility";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
 */
 void PDFFourierTransform::init() {
@@ -229,12 +231,12 @@ double PDFFourierTransform::determineRho0() {
 void PDFFourierTransform::exec() {
   // get input data
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  MantidVec inputQ = inputWS->dataX(0);                   //  x for input
+  auto inputQ = inputWS->x(0).rawData();                  //  x for input
   HistogramData::HistogramDx inputDQ(inputQ.size(), 0.0); // dx for input
   if (inputWS->sharedDx(0))
     inputDQ = inputWS->dx(0);
-  MantidVec inputFOfQ = inputWS->dataY(0);  //  y for input
-  MantidVec inputDfOfQ = inputWS->dataE(0); // dy for input
+  auto inputFOfQ = inputWS->y(0).rawData();  //  y for input
+  auto inputDfOfQ = inputWS->e(0).rawData(); // dy for input
 
   // transform input data into Q/MomentumTransfer
   const std::string inputXunit = inputWS->getAxis(0)->unit()->unitID();
@@ -335,16 +337,16 @@ void PDFFourierTransform::exec() {
   outputWS->mutableRun().addProperty("Qmax", inputQ[qmax_index], "Angstroms^-1",
                                      true);
 
-  MantidVec &outputR = outputWS->dataX(0);
-  for (size_t i = 0; i < sizer; i++) {
-    outputR[i] = rdelta * static_cast<double>(1 + i);
-  }
+  BinEdges edges(sizer + 1, LinearGenerator(rdelta, rdelta));
+  outputWS->setBinEdges(0, edges);
+
+  auto &outputR = outputWS->mutableX(0);
   g_log.information() << "Using rmin = " << outputR.front()
                       << "Angstroms and rmax = " << outputR.back()
                       << "Angstroms\n";
   // always calculate G(r) then convert
-  MantidVec &outputY = outputWS->dataY(0);
-  MantidVec &outputE = outputWS->dataE(0);
+  auto &outputY = outputWS->mutableY(0);
+  auto &outputE = outputWS->mutableE(0);
 
   // do the math
   for (size_t r_index = 0; r_index < sizer; r_index++) {

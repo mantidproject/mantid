@@ -7,7 +7,8 @@ from PyQt4 import QtGui, QtCore
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
 
 
 class NTableWidget(QtGui.QTableWidget):
@@ -15,6 +16,7 @@ class NTableWidget(QtGui.QTableWidget):
     NdavTableWidget inherits from QTableWidget by extending the features
     for easy application.
     """
+
     def __init__(self, parent):
         """
 
