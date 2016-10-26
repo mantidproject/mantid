@@ -53,7 +53,7 @@ Improvements
 
 Bugfixes
 --------
-
+- Clicking 'Save' without creating a res file in *ISISCalibration* no longer causes an error
 
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_
