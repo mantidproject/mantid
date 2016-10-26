@@ -836,6 +836,7 @@ set ( TEST_FILES
 	RectangularBeamProfileTest.h
 	ReflectometryReductionOneAutoTest.h
 	ReflectometryReductionOneTest.h
+	ReflectometryReductionOne2Test.h
 	RegroupTest.h
 	RemoveBackgroundTest.h
 	RemoveBinsTest.h

@@ -427,7 +427,7 @@ ReflectometryReductionOne2::convertToWavelength(MatrixWorkspace_sptr inputWS) {
 MatrixWorkspace_sptr ReflectometryReductionOne2::makeDetectorWS(
     MatrixWorkspace_sptr inputWS) {
 
-  std::string processingCommands = getProperty("ProcessingInstructions");
+  std::string processingCommands = getPropertyValue("ProcessingInstructions");
   auto groupAlg = this->createChildAlgorithm("GroupDetectors");
   groupAlg->initialize();
   groupAlg->setProperty("GroupingPattern", processingCommands);
@@ -445,7 +445,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeDetectorWS(
   processingCommands = std::to_string(directBeamRegion[0]) + "-" +
                        std::to_string(directBeamRegion[1]);
 
-  processingCommands = getProperty("ProcessingInstructions");
   auto groupDirectBeamAlg = this->createChildAlgorithm("GroupDetectors");
   groupDirectBeamAlg->initialize();
   groupDirectBeamAlg->setProperty("GroupingPattern", processingCommands);
