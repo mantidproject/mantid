@@ -105,7 +105,7 @@ class CrystalField(object):
         # This is to make sure that Lorentzians get evaluated properly
         ConfigService.setString('curvefitting.peakRadius', str(100))
 
-        from .function import PeaksFunction, ResolutionModel
+        from .function import PeaksFunction
         self._ion = Ion
         self._symmetry = Symmetry
         self._toleranceEnergy = 1e-10
