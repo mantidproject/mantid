@@ -1724,7 +1724,7 @@ void LoadNexusProcessed::loadNonSpectraAxis(
     std::string axisLabels;
     try{
       axisData.load();
-	  axisLabels = std::move(std::string(axisData(), axisData.dim0()));
+	    axisLabels = std::string(axisData(), axisData.dim0());
     }catch(std::exception &){
       axisLabels = "";
     }
