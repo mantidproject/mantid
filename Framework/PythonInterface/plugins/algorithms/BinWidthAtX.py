@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty,\
     PythonAlgorithm
 from mantid.kernel import Direction
+from mantid.simpleapi import ConvertToHistogram, ConvertToPointData
 import numpy
 import roundinghelper
 
@@ -62,8 +63,8 @@ class BinWidthAtX(PythonAlgorithm):
         x = self.getProperty(self._PROP_X_VALUE).value
         roundingMode = self.getProperty(
             roundinghelper.PROP_NAME_ROUNDING_MODE).value
-        inputIsDistribution = inputWs.isDistribution()
-        if inputIsDistribution:
+        inputIsPointData = inputWs.isDistribution()
+        if inputIsPointData:
             inputWs = ConvertToHistogram(inputWs)
         n = inputWs.getNumberHistograms()
         widths = numpy.empty(n)
@@ -79,8 +80,8 @@ class BinWidthAtX(PythonAlgorithm):
             widths[wsIndex] = dx
         binWidth = numpy.mean(widths)
         binWidth = roundinghelper.round(binWidth, roundingMode)
-        if inputIsDistribution:
-            inputWs = ConvertToDistribution(inputWs)
+        if inputIsPointData:
+            inputWs = ConvertToPointData(inputWs)
         self.setProperty(self._PROP_BIN_WIDTH, binWidth)
 
 AlgorithmFactory.subscribe(BinWidthAtX)

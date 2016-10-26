@@ -80,6 +80,17 @@ class BinWidthAtXTest(unittest.TestCase):
         self.assertFalse(algorithm.isExecuted())
         DeleteWorkspace(ws)
 
+    def test_success_on_point_data(self):
+        xs = numpy.array([-2.2, -1.2, 0.1, 0.9])
+        ys = numpy.zeros(len(xs))
+        ws = CreateWorkspace(DataX=xs, DataY=ys, Distribution=True)
+        X = -0.3
+        params = self._make_algorithm_params(ws, X)
+        binWidth = self._run_algorithm(params)
+        # We don't know how bin boundaries are calculated for point data.
+        # So we cannot be too exact here.
+        self.assertLessEqual(binWidth, 1.3)
+        DeleteWorkspace(ws)
 
 if __name__ == "__main__":
     unittest.main()
