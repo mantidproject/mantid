@@ -846,7 +846,6 @@ def calculate(string_runs=None,
 
     #Make sure all the lambdaRequested are identical within a given range
     lambdaRequestPrecision = 0.01 #1%
-    _lr = lambdaRequest[0]
     for i in lambdaRequest:
         _localValue = float(lambdaRequest[i][0])
         _localValueRate = lambdaRequestPrecision * _localValue
@@ -865,7 +864,6 @@ def calculate(string_runs=None,
         error_a = []
         error_b = []
         name = []
-        _previous_cal = None
 
         finalS1H = []
         finalS2H = []
@@ -916,8 +914,7 @@ def calculate(string_runs=None,
 
                 recordSettings(a, b, error_a, error_b, name, cal)
 
-                if (i < (len(list_runs) - 1) and
-                    list_attenuator[i + 1] == (_attenuator+1)):
+                if (i < (len(list_runs) - 1) and list_attenuator[i + 1] == (_attenuator+1)):
                     list_objects.append(cal)
 
             #record S1H and S2H

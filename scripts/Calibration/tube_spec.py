@@ -261,7 +261,6 @@ class TubeSpec:
         comp = self.tubes[tubeIx]
 
         if comp != 0:
-            firstDet = comp[0].getID()
             numDet = comp.nelements()
             return comp[0].getDistance( comp[numDet-1] )
         else:

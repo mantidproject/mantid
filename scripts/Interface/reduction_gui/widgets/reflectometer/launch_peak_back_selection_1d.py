@@ -450,7 +450,6 @@ class DesignerMainWindow(QtGui.QMainWindow):
 
             def on_release(self, event):
                 """on release we reset the press data"""
-                _event = event
                 self.xpress = None
                 self.rect.figure.canvas.draw()
 

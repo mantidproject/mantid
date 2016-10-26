@@ -1,3 +1,5 @@
+import os
+
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot # noqa
@@ -7,8 +9,6 @@ try:
     IS_IN_MANTIDPLOT = True
 except:
     pass
-
-import os
 
 
 class InstrumentParameters(object):

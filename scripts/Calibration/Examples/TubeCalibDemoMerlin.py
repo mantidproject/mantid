@@ -23,7 +23,8 @@ This example shows:
 
  * How to calibrate regions of the instrument separetelly.
  * How to use **calibTable** parameter to append information in order to create a calibration table for the whole instrument.
- * How to use the **outputPeak** to check how the calibration is working as well as the usage of analisePeakTable method to look into the details of the operation to improve the calibration.
+ * How to use the **outputPeak** to check how the calibration is working as well as the usage of analisePeakTable method to
+       look into the details of the operation to improve the calibration.
  * It deals with defining different known positions for the different tube lengths.
 
 
@@ -65,7 +66,7 @@ def analisePeakTable(pTable, peaksName='Peaks'):
     #calculate how far from the expected position each peak position is
     distance_from_expected =  numpy.abs(data - expected_peak_pos)
 
-    Peaks = CreateWorkspace(range(n),distance_from_expected,NSpec=peaks, OutputWorkspace=peaksName)
+    CreateWorkspace(range(n),distance_from_expected,NSpec=peaks, OutputWorkspace=peaksName)
     check = numpy.where(distance_from_expected > 10)[0]
     problematic_tubes = list(set(check))
     print 'Tubes whose distance is far from the expected value: ', problematic_tubes
@@ -104,7 +105,7 @@ def calibrateMerlin(filename):
                                                  outputPeak=True,
                                                  margin=30,
                                                  rangeList=range(20) # because 20, 21, 22, 23 are defective detectors
-                                                )
+                                                 )
     print "Got calibration (new positions of detectors) and put slit peaks into file TubeDemoMerlin01.txt"
     analisePeakTable(peakTable, 'door9_tube1_peaks')
 

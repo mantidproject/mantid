@@ -119,7 +119,6 @@ class DgsReductionScripter(BaseReductionScripter):
         """
         """
         data_files = []
-        data_options = None
         for item in self._observers:
             state = item.state()
             if state is not None:
