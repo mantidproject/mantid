@@ -5,8 +5,9 @@
 #include "MantidQtMantidWidgets/WorkspacePresenter/WorkspaceDockMockObjects.h"
 #include "MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h"
 
-#include <MantidAPI/FrameworkManager.h>
+#include <MantidAPI/AlgorithmManager.h>
 #include <MantidAPI/AnalysisDataService.h>
+#include <MantidAPI/FrameworkManager.h>
 #include <MantidTestHelpers/WorkspaceCreationHelper.h>
 
 #include <algorithm>
@@ -627,9 +628,23 @@ public:
   }
 
   void testClearUBMatrix() {
-    EXPECT_CALL(*mockView.get(), clearUBMatrix()).Times(Exactly(1));
+    ::testing::DefaultValue<StringList>::Set(StringList{"ws1"});
+    auto ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().add("ws1", ws1);
+
+    // Setup a UB matrix before attempting to remove it
+    auto setUB = Mantid::API::AlgorithmManager::Instance().create("SetUB");
+    setUB->initialize();
+    setUB->setProperty("Workspace", "ws1");
+    setUB->execute();
+
+    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), executeAlgorithmAsync(_, _)).Times(Exactly(1));
+
     presenter->notifyFromView(ViewNotifiable::Flag::ClearUBMatrix);
+
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    AnalysisDataService::Instance().remove("ws1");
   }
 
   void testShowSurfacePlot() {

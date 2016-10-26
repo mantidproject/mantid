@@ -144,9 +144,11 @@ public:
   void showTransposed() override;
   void convertToMatrixWorkspace() override;
   void convertMDHistoToMatrixWorkspace() override;
-  void clearUBMatrix() override;
   void showSurfacePlot() override;
   void showContourPlot() override;
+
+  bool executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
+                             const bool wait = true) override;
 
 private:
   bool hasUBMatrix(const std::string &wsName);
@@ -184,6 +186,7 @@ private:
   void setupWidgetLayout();
   void setupLoadButtonMenu();
   void setupConnections();
+
 public slots:
   void clickedWorkspace(QTreeWidgetItem *, int);
   void saveWorkspaceCollection();

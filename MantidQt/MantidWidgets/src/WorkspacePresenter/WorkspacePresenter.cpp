@@ -193,7 +193,7 @@ void WorkspacePresenter::groupWorkspaces() {
   try {
     std::string algName("GroupWorkspaces");
     Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create(algName, 1);
+        Mantid::API::AlgorithmManager::Instance().create(algName, -1);
     alg->initialize();
     alg->setProperty("InputWorkspaces", selected);
     alg->setPropertyValue("OutputWorkspace", groupName);
@@ -225,7 +225,7 @@ void WorkspacePresenter::ungroupWorkspaces() {
 
     std::string algName("UnGroupWorkspace");
     Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create(algName, 1);
+        Mantid::API::AlgorithmManager::Instance().create(algName, -1);
     alg->initialize();
     alg->setProperty("InputWorkspace", wsname);
 
@@ -387,7 +387,17 @@ void WorkspacePresenter::convertMDHistoToMatrixWorkspace() {
 
 void WorkspacePresenter::clearUBMatrix() {
   auto view = lockView();
-  view->clearUBMatrix();
+  auto wsNames = view->getSelectedWorkspaceNames();
+
+  for (auto &ws : wsNames) {
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("ClearUB", -1);
+    if (alg) {
+      alg->initialize();
+      alg->setPropertyValue("Workspace", ws);
+      view->executeAlgorithmAsync(alg);
+    } else
+      break;
+  }
 }
 
 void WorkspacePresenter::showSurfacePlot() {

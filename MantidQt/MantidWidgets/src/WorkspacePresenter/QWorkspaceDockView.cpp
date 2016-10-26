@@ -1092,8 +1092,7 @@ bool QWorkspaceDockView::hasUBMatrix(const std::string &wsName) {
   if (alg) {
     alg->setLogging(false);
     alg->setPropertyValue("Workspace", wsName);
-    // TODO: may need an executeAsync with a wait as before check MantidUI.cpp
-    alg->execute();
+    executeAlgorithmAsync(alg, true);
     hasUB = alg->getProperty("HasUB");
   }
   return hasUB;
@@ -1441,7 +1440,7 @@ void QWorkspaceDockView::saveToProgram() {
         }
 
         // Execute the save
-        m_mantidUI->executeAlgorithmAsync(alg, true);
+        executeAlgorithmAsync(alg, true);
 
         // Get the save location of the file (should be default Mantid folder)
         QString savedFile =
@@ -1671,23 +1670,6 @@ void QWorkspaceDockView::onClickClearUB() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::ClearUBMatrix);
 }
 
-/**
-* Handler for the clear UB matrix event.
-*/
-void QWorkspaceDockView::clearUBMatrix() {
-  auto wsNames = getSelectedWorkspaceNames();
-
-  for (auto &ws : wsNames) {
-    auto alg = m_mantidUI->createAlgorithm("ClearUB");
-    if (alg) {
-      alg->initialize();
-      alg->setPropertyValue("Workspace", ws);
-      m_mantidUI->executeAlgorithmAsync(alg);
-    } else
-      break;
-  }
-}
-
 void QWorkspaceDockView::onClickPlotSurface() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::ShowSurfacePlot);
 }
@@ -1705,5 +1687,11 @@ void QWorkspaceDockView::onClickPlotContour() {
 * Create a contour plot from the selected workspace group
 */
 void QWorkspaceDockView::showContourPlot() { m_mantidUI->showContourPlot(); }
+
+bool QWorkspaceDockView::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
+                                               const bool wait) {
+  return m_mantidUI->executeAlgorithmAsync(alg, wait);
 }
-}
+
+} // namespace MantidWidgets
+} // namespace MantidQt

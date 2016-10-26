@@ -14,6 +14,8 @@ using namespace MantidQt::MantidWidgets;
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
+class MockMantidDisplayBase;
+
 class MockWorkspaceDockView
     : public IWorkspaceDockView,
       public boost::enable_shared_from_this<MockWorkspaceDockView> {
@@ -79,9 +81,11 @@ public:
   MOCK_METHOD0(showTransposed, void());
   MOCK_METHOD0(convertToMatrixWorkspace, void());
   MOCK_METHOD0(convertMDHistoToMatrixWorkspace, void());
-  MOCK_METHOD0(clearUBMatrix, void());
   MOCK_METHOD0(showSurfacePlot, void());
   MOCK_METHOD0(showContourPlot, void());
+
+  MOCK_METHOD2(executeAlgorithmAsync,
+               bool(Mantid::API::IAlgorithm_sptr alg, const bool wait));
 
   // Methods which are not to be mocked
   void enableDeletePrompt(bool) override {}

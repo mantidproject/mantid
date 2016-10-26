@@ -1,6 +1,7 @@
 #ifndef MANTIDQT_MANTIDWIDGETS_IWORKSPACEDOCKVIEW_H_
 #define MANTIDQT_MANTIDWIDGETS_IWORKSPACEDOCKVIEW_H_
 
+#include <MantidAPI/IAlgorithm_fwd.h>
 #include <MantidAPI/Workspace_fwd.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
@@ -102,9 +103,11 @@ public:
   virtual void showTransposed() = 0;
   virtual void convertToMatrixWorkspace() = 0;
   virtual void convertMDHistoToMatrixWorkspace() = 0;
-  virtual void clearUBMatrix() = 0;
   virtual void showSurfacePlot() = 0;
   virtual void showContourPlot() = 0;
+
+  virtual bool executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
+                                     const bool wait = true) = 0;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
