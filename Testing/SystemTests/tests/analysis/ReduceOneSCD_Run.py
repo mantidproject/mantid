@@ -195,7 +195,7 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
 # If requested, also switch to the specified conventional cell and save the
 # corresponding matrix and integrate file
 #
-        if (not cell_type is None) and (not centering is None) :
+        if (cell_type is not None) and (centering is not None) :
             self.run_conventional_matrix_file = self.output_directory + "/" + run + "_" +    \
                                  cell_type + "_" + centering + ".mat"
         #    run_conventional_integrate_file = self.output_directory + "/" + run + "_" + \

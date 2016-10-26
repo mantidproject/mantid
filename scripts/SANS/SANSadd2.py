@@ -3,13 +3,14 @@ import os
 from mantid.simpleapi import *
 from mantid.kernel import Logger
 from SANSUtility import (bundle_added_event_data_as_group, AddOperation, transfer_special_sample_logs)
-sanslog = Logger("SANS")
 from shutil import copyfile
 
+sanslog = Logger("SANS")
 _NO_INDIVIDUAL_PERIODS = -1
 
 
-def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False, binning='Monitors', saveAsEvent=False, isOverlay = False, time_shifts = []):
+def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False,
+             binning='Monitors', saveAsEvent=False, isOverlay = False, time_shifts = []):
     if inst.upper() == "SANS2DTUBES":
         inst = "SANS2D"
   #check if there is at least one file in the list
@@ -102,7 +103,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
             return ""
 
     # in case of event file force it into a histogram workspace
-        if isFirstDataSetEvent and saveAsEvent == False:
+        if isFirstDataSetEvent and not saveAsEvent:
             wsInMonitor = mtd['AddFilesSumTempory_monitors']
             if binning == 'Monitors':
                 monX = wsInMonitor.dataX(0)
@@ -219,9 +220,9 @@ def _makeFilename(entry, ext, inst) :
     If entry not already a valid filename make it into one
   """
     try :
-        runNum = int(entry)                                                  #the user entered something that translates to a run number, convert it to a file
+        runNum = int(entry)  #the user entered something that translates to a run number, convert it to a file
         filename=inst+_padZero(runNum, inst)+ext
-    except ValueError :                                                        #we don't have a run number, assume it's a valid filename
+    except ValueError:  #we don't have a run number, assume it's a valid filename
         filename = entry
         dummy, ext = os.path.splitext(filename)
 
@@ -318,7 +319,7 @@ def _copyLog(lastPath, logFile, pathout):
             copyfile(logFile, os.path.join(pathout, os.path.basename(logFile)))
         else:
             logger.notice("Could not find log file %s" % logFile)
-    except Exception, reason:
+    except Exception:
         error = 'Error copying log file ' + logFile + ' to directory ' + pathout+'\n'
         print error
         logger.notice(error)

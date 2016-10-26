@@ -326,7 +326,7 @@ void AlignDetectors::exec() {
 
 void AlignDetectors::align(const ConversionFactors &converter,
                            Progress &progress, MatrixWorkspace &outputWS) {
-  PARALLEL_FOR1((&outputWS))
+  PARALLEL_FOR_IF(Kernel::threadSafe(outputWS))
   for (int64_t i = 0; i < m_numberOfSpectra; ++i) {
     PARALLEL_START_INTERUPT_REGION
     try {

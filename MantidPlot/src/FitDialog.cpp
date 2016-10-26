@@ -659,7 +659,7 @@ void FitDialog::saveUserFunction() {
           "Parent of FitDialog is not ApplicationWindow as expected.");
     }
     QString filter = tr("MantidPlot fit model") + " (*.fit);;";
-    filter += tr("All files") + " (*.*)";
+    filter += tr("All files") + " (*)";
     QString fn = MantidQt::API::FileDialogHandler::getSaveFileName(
         app, tr("MantidPlot") + " - " + tr("Save Fit Model As"),
         app->fitModelsPath + "/" + name, filter);
@@ -1420,7 +1420,7 @@ void FitDialog::saveInitialGuesses() {
           "Parent of FitDialog is not ApplicationWindow as expected.");
     }
     QString filter = tr("MantidPlot fit model") + " (*.fit);;";
-    filter += tr("All files") + " (*.*)";
+    filter += tr("All files") + " (*)";
     QString fn = MantidQt::API::FileDialogHandler::getSaveFileName(
         app, tr("MantidPlot") + " - " + tr("Save Fit Model As"),
         app->fitModelsPath + "/" + d_current_fit->objectName(), filter);

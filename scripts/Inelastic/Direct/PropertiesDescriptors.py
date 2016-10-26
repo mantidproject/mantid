@@ -114,6 +114,13 @@ class AvrgAccuracy(PropDescriptor):
             vallist = [value]
         rez = []
         lim = 10**(self._accuracy-1)
+
+        def out(a,b,mult):
+            if mult>1:
+                return a<b
+            else:
+                return false
+
         for val in vallist:
             if abs(val) > lim:
                 rez.append(round(val,0))
@@ -123,14 +130,9 @@ class AvrgAccuracy(PropDescriptor):
             else:
                 mult = 1
 
-            def out(a,b):
-                if mult>1:
-                    return a<b
-                else:
-                    return false
             tv = abs(val)
             fin_mult  = 1
-            while out(tv,lim):
+            while out(tv,lim,mult):
                 fin_mult*=mult
                 tv      *= mult
             fin_rez = math.copysign(round(tv,0)/fin_mult,val)
@@ -315,7 +317,7 @@ class IncidentEnergy(PropDescriptor):
                 ei_ref,_,_,_=GetEi(InputWorkspace=monitor_ws,
                                    Monitor1Spec=ei_mon_spec[0], Monitor2Spec=ei_mon_spec[1], EnergyEstimate=ei)
                 fin_ei.append(ei_ref)
-#pylint: disable=broad-except
+#pylint: disable=bare-except
             except:
                 instance.log("Can not refine guess energy {0:f}. Ignoring it.".format(ei),'warning')
         if len(fin_ei) == 0:
@@ -472,40 +474,48 @@ class SaveFileName(PropDescriptor):
         self._custom_print = None
 
     def __get__(self,instance,owner=None):
-
+        # getter functional interface.
         if instance is None:
             return self
-        if not self._custom_print is None:
-            return self._custom_print()
 
+        # if custom file name provided, use it
         if self._file_name:
             return self._file_name
-        else:
-            if instance.instr_name:
-                name = instance.short_inst_name
-            else:
-                name = '_EMPTY'
 
-            sr = owner.sample_run.run_number()
-            if not sr:
-                sr = 0
-            try:
-                ei = owner.incident_energy.get_current()
-                name +='{0:0<5}Ei{1:<4.2f}meV'.format(sr,ei)
-                if instance.sum_runs:
-                    name +='sum'
-                if owner.monovan_run.run_number():
-                    name +='_Abs'
-                name = name.replace('.','d')
+        # if custom function to generate file name is proivede, use this function
+        if self._custom_print is not None:
+            return self._custom_print()
+
+        # user provided nothing.
+        # calculate default target file name from
+        # instrument, energy and run number.
+        if instance.instr_name:
+            name = instance.short_inst_name
+        else:
+            name = '_EMPTY'
+
+        sr = owner.sample_run.run_number()
+        if not sr:
+            sr = 0
+        try:
+            ei = owner.incident_energy.get_current()
+            name +='{0:0<5}Ei{1:_<4.2f}meV'.format(sr,ei)
+            if instance.sum_runs:
+                name +='sum'
+            if owner.monovan_run.run_number():
+                name +='_Abs'
+            name = name.replace('.','d')
 #pylint: disable=bare-except
-            except:
-                name = None
+        except:
+            name = None
         return name
 
     def __set__(self,instance,value):
 
         if value is None:
             self._file_name = None
+        elif callable(value):
+            self._custom_print = value
         else:
             self._file_name = str(value)
 
@@ -767,6 +777,7 @@ class DetCalFile(PropDescriptor):
             file_hint = inst_short_name+str(dcf_val).zfill(zero_padding)
             try:
                 file_name = FileFinder.findRuns(file_hint)[0]
+#pylint: disable=bare-except
             except:
                 return (False,"Can not find run file corresponding to run N: {0}".format(file_hint))
             self._det_cal_file = file_name
@@ -796,7 +807,7 @@ class MapMaskFile(PropDescriptor):
         self._file_ext = file_ext
         self._prop_name = prop_name
 
-        if not doc_string is None:
+        if doc_string is not None:
             self.__doc__ = doc_string
 
     def __get__(self,instance,class_type=None):
@@ -806,7 +817,7 @@ class MapMaskFile(PropDescriptor):
         return self._file_name
 
     def __set__(self,instance,value):
-        if not value is None:
+        if value is not None:
 #pylint: disable=unused-variable
             fileName, fileExtension = os.path.splitext(value)
             if not fileExtension:

@@ -282,7 +282,7 @@ class PropertyManager(NonIDF_Properties):
         """
 
         for par_name,value in kwargs.items() :
-            if not value is None:
+            if value is not None:
                 setattr(self,par_name,value)
     #
 
@@ -531,7 +531,7 @@ class PropertyManager(NonIDF_Properties):
         run_files_prop=['wb_run','monovan_run','mask_run','wb_for_monovan_run','second_white']
         map_mask_prop =['det_cal_file','map_file','hard_mask_file']
 
-        abs_units = not self.monovan_run is None
+        abs_units = self.monovan_run is not None
         files_to_check =[]
         # run files to check
         for prop_name in run_files_prop:
@@ -540,7 +540,7 @@ class PropertyManager(NonIDF_Properties):
                 if theProp.is_existing_ws(): # it is loaded workspace
                     continue   # we do not care if it has file or not
                 val = theProp.__get__(self,PropertyManager)
-                if not val is None :
+                if val is not None :
                     files_to_check.append(prop_name)
 
         # other files to check:
@@ -551,7 +551,7 @@ class PropertyManager(NonIDF_Properties):
         # Absolute units files (only one?)
         if abs_units:
             val = self.monovan_mapfile
-            if not val is None :
+            if val is not None :
                 files_to_check.append('monovan_mapfile')
         #
         return files_to_check
@@ -747,7 +747,7 @@ class PropertyManager(NonIDF_Properties):
 
         save_dir = config.getString('defaultsave.directory')
         self.log("****************************************************************",log_level)
-        if self.monovan_run is not None and not 'van_mass' in changed_Keys:  # This output is Adroja request from may 2014
+        if self.monovan_run is not None and 'van_mass' not in changed_Keys:  # This output is Adroja request from may 2014
             self.log("*** Monochromatic vanadium mass used : {0} ".format(self.van_mass),log_level)
       #
         self.log("*** By default results are saved into: {0}".format(save_dir),log_level)
