@@ -6,6 +6,9 @@
 #include <boost/make_shared.hpp>
 #endif
 
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/StringTokenizer.h"
+
 namespace Mantid {
 namespace Kernel {
 

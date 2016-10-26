@@ -11,6 +11,8 @@
 #include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>
 
+#include <boost/lexical_cast.hpp>
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 

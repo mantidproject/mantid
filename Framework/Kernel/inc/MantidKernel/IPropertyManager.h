@@ -1,12 +1,14 @@
 #ifndef MANTID_KERNEL_IPROPERTYMANAGER_H_
 #define MANTID_KERNEL_IPROPERTYMANAGER_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/make_unique.h"
+
+#include <boost/make_shared.hpp>
+#include <boost/type_traits.hpp>
+
 #include <vector>
 #include <unordered_set>
 

@@ -1,6 +1,3 @@
-//-----------------------------------------------------------------
-// Includes
-//-----------------------------------------------------------------
 #include "MantidAPI/FileProperty.h"
 
 #include "MantidAPI/FileFinder.h"
@@ -12,6 +9,8 @@
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
+
+#include <boost/make_shared.hpp>
 
 #include <algorithm>
 #include <cctype>

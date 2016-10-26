@@ -5,18 +5,9 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
-#include "MantidKernel/OptionalBool.h"
-
-#ifndef Q_MOC_RUN
-#include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#endif
 
 #include <nexus/NeXusFile.hpp>
 
-#include "MantidKernel/IPropertySettings.h"
-#include <MantidKernel/StringTokenizer.h>
 #include <type_traits>
 #include <vector>
 
