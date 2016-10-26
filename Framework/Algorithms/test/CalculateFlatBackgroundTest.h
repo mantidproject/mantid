@@ -1,12 +1,13 @@
 #ifndef FLATBACKGROUNDTEST_H_
 #define FLATBACKGROUNDTEST_H_
 
+#include "MantidAlgorithms/CalculateFlatBackground.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAlgorithms/CalculateFlatBackground.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <boost/lexical_cast.hpp>
@@ -140,16 +141,19 @@ void setupTestWorkspace() {
   const double lower(-1.0), upper(1.0);
   MersenneTwister randGen(seed, lower, upper);
 
+  HistogramData::BinEdges generatedBins(NUMBINS + 1, HistogramData::LinearGenerator(0, 1));
   { // explicit scope to re-use variables
-    auto &x = WS->mutableX(0);
+    WS->setBinEdges(0, generatedBins);
     auto &y = WS->mutableY(0);
+
     auto &e = WS->mutableE(0);
+    auto &refY = WS->y(0);
     for (int i = 0; i < NUMBINS; ++i) {
-      x[i] = i;
+      //x[i] = i;
       y[i] = bg + randGen.nextValue();
-      e[i] = 0.05 * WS->y(0)[i];
+      e[i] = 0.05 * refY[i];
     }
-    x[NUMBINS] = NUMBINS;
+    //x[NUMBINS] = NUMBINS;
   } // end of explicit scope
 
   AnalysisDataService::Instance().add("calcFlatBG", WS);
@@ -160,16 +164,14 @@ void setupTestWorkspace() {
   WS2D->initialize(NUMSPECS, NUMBINS + 1, NUMBINS);
 
   for (int j = 0; j < NUMSPECS; ++j) {
-    auto &x = WS2D->mutableX(j);
-    auto &y = WS2D->mutableY(j);
+	  WS2D->setBinEdges(j, generatedBins);
+    auto &y = WS2D->mutableY(j); 
     auto &e = WS2D->mutableE(j);
     for (int i = 0; i < NUMBINS; ++i) {
-      x[i] = i;
       // any function that means the calculation is non-trivial
       y[i] = j + 4 * (i + 1) - (i * i) / 10;
       e[i] = 2 * i;
     }
-    x[NUMBINS] = NUMBINS;
   }
   // used only in the last test
   addInstrument(WS2D);
@@ -247,10 +249,10 @@ public:
     TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
 
     for (int j = 0; j < NUMSPECS; ++j) {
-      auto &YIn = inputWS->y(j);
-      auto &EIn = inputWS->e(j);
-      auto &YOut = outputWS->y(j);
-      auto &EOut = outputWS->e(j);
+      const auto &YIn = inputWS->y(j);
+      const auto &EIn = inputWS->e(j);
+      const auto &YOut = outputWS->y(j);
+      const auto &EOut = outputWS->e(j);
       // do our own calculation of the background and its error to check with
       // later
       double background = 0, backError = 0;
@@ -289,10 +291,10 @@ public:
     TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
 
     for (int j = 0; j < NUMSPECS; ++j) {
-      auto &YIn = inputWS->y(j);
-      auto &EIn = inputWS->e(j);
-      auto &YOut = outputWS->y(j);
-      auto &EOut = outputWS->e(j);
+      const auto &YIn = inputWS->y(j);
+      const auto &EIn = inputWS->e(j);
+      const auto &YOut = outputWS->y(j);
+      const auto &EOut = outputWS->e(j);
       // do our own calculation of the background and its error to check with
       // later
       double background = 0, backError = 0;
@@ -325,10 +327,10 @@ public:
     TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
 
     for (int j = 0; j < NUMSPECS; ++j) {
-      auto &YIn = inputWS->y(j);
-      auto &EIn = inputWS->e(j);
-      auto &YOut = outputWS->y(j);
-      auto &EOut = outputWS->e(j);
+      const auto &YIn = inputWS->y(j);
+      const auto &EIn = inputWS->e(j);
+      const auto &YOut = outputWS->y(j);
+      const auto &EOut = outputWS->e(j);
       // do our own calculation of the background and its error to check with
       // later
       double background = 0, backError = 0, numSummed = 0;
@@ -396,15 +398,12 @@ public:
     Mantid::DataObjects::Workspace2D_sptr WS(
         new Mantid::DataObjects::Workspace2D);
     WS->initialize(1, NUMBINS + 1, NUMBINS);
-    auto &x = WS->mutableX(0);
-    auto &y = WS->mutableY(0);
-    auto &e = WS->mutableE(0);
-    for (int i = 0; i < NUMBINS; ++i) {
-      x[i] = 2 * i;
-      y[i] = YVALUE;
-      e[i] = YVALUE / 3.0;
-    }
+    
+    WS->setBinEdges(0, NUMBINS + 1, HistogramData::LinearGenerator(0, 2));
+	  auto &x = WS->mutableX(0);
     x[NUMBINS] = 2 * (NUMBINS - 1) + 4.0;
+    WS->mutableY(0) = YVALUE;
+    WS->mutableE(0) = YVALUE / 3.0;
 
     Mantid::Algorithms::CalculateFlatBackground back;
     back.initialize();
@@ -429,8 +428,8 @@ public:
     // The X vectors should be the same
     TS_ASSERT_DELTA(WS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
 
-    auto &YOut = outputWS->y(0);
-    auto &EOut = outputWS->e(0);
+    const auto &YOut = outputWS->y(0);
+    const auto &EOut = outputWS->e(0);
 
     TS_ASSERT_DELTA(YOut[5], 50.0, 1e-6)
     TS_ASSERT_DELTA(YOut[25], 50.0, 1e-6)
@@ -468,10 +467,10 @@ public:
     TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
 
     for (int j = 0; j < NUMSPECS; ++j) {
-      auto &YIn = inputWS->y(j);
-      auto &EIn = inputWS->e(j);
-      auto &YOut = outputWS->y(j);
-      auto &EOut = outputWS->e(j);
+      const auto &YIn = inputWS->y(j);
+      const auto &EIn = inputWS->e(j);
+      const auto &YOut = outputWS->y(j);
+      const auto &EOut = outputWS->e(j);
 
       for (int i = 0; i < NUMBINS; ++i) {
         TS_ASSERT_DELTA(YIn[i], YOut[i], 1e-12)
@@ -558,21 +557,26 @@ private:
         new Mantid::DataObjects::Workspace2D);
     WS->initialize(spectraCount, binCount + 1, binCount);
     for (size_t i = 0; i < spectraCount; ++i) {
+      auto &X = WS->mutableX(i);
+      auto &Y = WS->mutableY(i);
+      auto &E = WS->mutableE(i);
+
+      const auto &constY = WS->y(i);
       for (size_t j = 0; j < binCount; ++j) {
         // Make non-trivial but still linear x axis.
-        WS->mutableX(i)[j] = 0.78 * (static_cast<double>(j) -
+        X[j] = 0.78 * (static_cast<double>(j) -
                                      static_cast<double>(binCount) / 3.0) -
                              0.31 * static_cast<double>(i);
         // Compute some non-trivial y values.
-        WS->mutableY(i)[j] = movingAverageStandardY(i);
-        WS->mutableE(i)[j] = std::sqrt(WS->y(i)[j]);
+        Y[j] = movingAverageStandardY(i);
+        E[j] = std::sqrt(constY[j]);
       }
       // Add extra x value because histogram.
-      WS->mutableX(i)[binCount] =
+      X[binCount] =
           0.78 * 2.0 / 3.0 * static_cast<double>(binCount) -
           0.31 * static_cast<double>(i);
       // The special background value is set here.
-      WS->mutableY(i)[specialIndex] = movingAverageSpecialY(i);
+      Y[specialIndex] = movingAverageSpecialY(i);
     }
     return WS;
   }
@@ -641,7 +645,7 @@ private:
   }
 };
 
-class CalculateFlatBackgroundTestPerformance : public CxxTest::TestSuite {~
+class CalculateFlatBackgroundTestPerformance : public CxxTest::TestSuite {
   /// Tests each method in CalculateFlatBackground using different parameter
   /// sets to make sure the returns are as expected
 public:
