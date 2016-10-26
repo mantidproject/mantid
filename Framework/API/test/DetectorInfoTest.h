@@ -174,6 +174,7 @@ public:
     Quat r3(90.0, e3);
     auto &detectorInfo = m_workspace.mutableDetectorInfo();
     const auto oldPos = detectorInfo.position(0);
+    const auto oldRot = detectorInfo.rotation(0);
     TS_ASSERT_EQUALS(detectorInfo.rotation(0), Quat(1.0, 0.0, 0.0, 0.0));
     detectorInfo.setRotation(0, r3);
     // Rotation does *not* rotate the detector in the global coordinate system
@@ -184,6 +185,78 @@ public:
     TS_ASSERT_EQUALS(detectorInfo.rotation(2), Quat(1.0, 0.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(detectorInfo.rotation(3), Quat(1.0, 0.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(detectorInfo.rotation(4), Quat(1.0, 0.0, 0.0, 0.0));
+    detectorInfo.setRotation(0, oldRot);
+  }
+
+  void test_setPosition_component_works_without_cached_positions() {
+    auto &detectorInfo = m_workspace.mutableDetectorInfo();
+    const auto &instrument = m_workspace.getInstrument();
+    const auto &root = instrument->getComponentByName("SimpleFakeInstrument");
+    const auto oldPos = root->getPos();
+    const V3D offset(1.0, 0.0, 0.0);
+    // No detector, source, or sample data has been accessed, make sure that
+    // uninitialized caches done break the position update.
+    TS_ASSERT_THROWS_NOTHING(detectorInfo.setPosition(*root, oldPos + offset));
+    TS_ASSERT_THROWS_NOTHING(detectorInfo.setPosition(*root, oldPos));
+  }
+
+  void test_setPosition_component() {
+    auto &detInfo = m_workspace.mutableDetectorInfo();
+    const auto &instrument = m_workspace.getInstrument();
+    const auto &root = instrument->getComponentByName("SimpleFakeInstrument");
+    const auto oldPos = root->getPos();
+    const V3D offset(1.0, 0.0, 0.0);
+
+    TS_ASSERT_EQUALS(detInfo.sourcePosition(), V3D(0.0, 0.0, -20.0));
+    TS_ASSERT_EQUALS(detInfo.samplePosition(), V3D(0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(detInfo.position(0), V3D(0.0, -0.1, 5.0));
+
+    detInfo.setPosition(*root, oldPos + offset);
+
+    TS_ASSERT_EQUALS(detInfo.sourcePosition(), V3D(1.0, 0.0, -20.0));
+    TS_ASSERT_EQUALS(detInfo.samplePosition(), V3D(1.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(detInfo.position(0), V3D(1.0, -0.1, 5.0));
+
+    // For additional verification we do *not* use detInfo, but make sure that
+    // the changes actually affected the workspace.
+    const auto &clone = m_workspace.clone();
+    const auto &info = clone->detectorInfo();
+    TS_ASSERT_EQUALS(info.sourcePosition(), V3D(1.0, 0.0, -20.0));
+    TS_ASSERT_EQUALS(info.samplePosition(), V3D(1.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(info.position(0), V3D(1.0, -0.1, 5.0));
+
+    detInfo.setPosition(*root, oldPos);
+  }
+
+  void test_setRotation_component() {
+    auto &detInfo = m_workspace.mutableDetectorInfo();
+    const auto &instrument = m_workspace.getInstrument();
+    const auto &root = instrument->getComponentByName("SimpleFakeInstrument");
+    const auto oldRot = root->getRotation();
+    V3D e2{0, 1, 0};
+    Quat rot(180.0, e2);
+
+    detInfo.setRotation(*root, rot);
+
+    // Rotations *and* positions have changed since *parent* was rotated
+    TS_ASSERT_EQUALS(detInfo.rotation(0), rot);
+    TS_ASSERT_EQUALS(detInfo.rotation(1), rot);
+    TS_ASSERT_EQUALS(detInfo.rotation(2), rot);
+    TS_ASSERT_EQUALS(detInfo.rotation(3), rot);
+    TS_ASSERT_EQUALS(detInfo.rotation(4), rot);
+    TS_ASSERT_EQUALS(detInfo.sourcePosition(), V3D(0.0, 0.0, 20.0));
+    TS_ASSERT_EQUALS(detInfo.samplePosition(), V3D(0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(detInfo.position(0), V3D(0.0, -0.1, -5.0));
+
+    // For additional verification we do *not* use detInfo, but make sure that
+    // the changes actually affected the workspace.
+    const auto &clone = m_workspace.clone();
+    const auto &info = clone->detectorInfo();
+    TS_ASSERT_EQUALS(info.sourcePosition(), V3D(0.0, 0.0, 20.0));
+    TS_ASSERT_EQUALS(info.samplePosition(), V3D(0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(info.position(0), V3D(0.0, -0.1, -5.0));
+
+    detInfo.setRotation(*root, oldRot);
   }
 
   void test_detectorIDs() {

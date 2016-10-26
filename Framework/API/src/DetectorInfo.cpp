@@ -1,6 +1,7 @@
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -103,6 +104,54 @@ void DetectorInfo::setRotation(const size_t index,
   using namespace Geometry::ComponentHelper;
   TransformType rotationType = Absolute;
   rotateComponent(det, *m_pmap, rotation, rotationType);
+}
+
+/** Set the absolute position of the component `comp`.
+ *
+ * This may or may not be a detector. Even if it is not a detector it will
+ * typically still influence detector positions. */
+void DetectorInfo::setPosition(const Geometry::IComponent &comp,
+                               const Kernel::V3D &pos) {
+  using namespace Geometry::ComponentHelper;
+  TransformType positionType = Absolute;
+  moveComponent(comp, *m_pmap, pos, positionType);
+
+  if (!dynamic_cast<const Geometry::Detector *>(&comp)) {
+    // If comp is a detector cached positions stay valid. In all other cases
+    // (higher level in instrument tree, or other leaf component such as sample
+    // or source) we flush all cached positions.
+    if (m_source)
+      m_sourcePos = m_source->getPos();
+    if (m_sample)
+      m_samplePos = m_sample->getPos();
+    // Detector positions are currently not cached, the cached pointers to
+    // detectors stay valid. Once we store positions in DetectorInfo we need to
+    // update detector positions here.
+  }
+}
+
+/** Set the absolute rotation of the component `comp`.
+ *
+ * This may or may not be a detector. Even if it is not a detector it will
+ * typically still influence detector positions rotations. */
+void DetectorInfo::setRotation(const Geometry::IComponent &comp,
+                               const Kernel::Quat &rot) {
+  using namespace Geometry::ComponentHelper;
+  TransformType rotationType = Absolute;
+  rotateComponent(comp, *m_pmap, rot, rotationType);
+
+  if (!dynamic_cast<const Geometry::Detector *>(&comp)) {
+    // If comp is a detector cached positions and rotations stay valid. In all
+    // other cases/ (higher level in instrument tree, or other leaf component
+    // such as sample or source) we flush all cached positions and rotations.
+    if (m_source)
+      m_sourcePos = m_source->getPos();
+    if (m_sample)
+      m_samplePos = m_sample->getPos();
+    // Detector positions and rotations are currently not cached, the cached
+    // pointers to detectors stay valid. Once we store positions and rotations
+    // in DetectorInfo we need to update detector positions and rotations here.
+  }
 }
 
 /// Returns the source position.
