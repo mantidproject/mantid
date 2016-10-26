@@ -1,17 +1,17 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import mtd
 from mantid.simpleapi import CreateWorkspace, DeleteWorkspace
 import numpy
 import testhelpers
 import unittest
+
 
 class MedianBinWidthTest(unittest.TestCase):
 
     def _make_algorithm_params(self, ws, rounding='None'):
         return {
             'InputWorkspace': ws,
-            'rethrow': True, # Let exceptions through for testing.
+            'rethrow': True,  # Let exceptions through for testing.
             'Rounding': rounding
         }
 

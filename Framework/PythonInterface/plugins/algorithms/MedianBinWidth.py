@@ -1,15 +1,17 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm
-from mantid.kernel import Direction, StringListValidator
+from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty,\
+    PythonAlgorithm
+from mantid.kernel import Direction
 from mantid.simpleapi import ConvertToHistogram, ConvertToPointData
 import numpy
 import roundinghelper
 
+
 class MedianBinWidth(PythonAlgorithm):
 
     _PROP_BIN_WIDTH = 'BinWidth'
-    _PROP_INPUT_WS  = 'InputWorkspace'
+    _PROP_INPUT_WS = 'InputWorkspace'
 
     def category(self):
         '''
@@ -27,7 +29,8 @@ class MedianBinWidth(PythonAlgorithm):
         '''
         Return algorithm's summary.
         '''
-        return "Calculates the average of workspace's histograms' median bin widths."
+        return ("Calculates the average of workspace's histograms'"
+                " median bin widths.")
 
     def version(self):
         '''
@@ -39,16 +42,24 @@ class MedianBinWidth(PythonAlgorithm):
         '''
         Declares algorithm's properties.
         '''
-        self.declareProperty(MatrixWorkspaceProperty(name=self._PROP_INPUT_WS, defaultValue='', direction=Direction.Input), doc='The workspace containing the input data')
+        self.declareProperty(
+            MatrixWorkspaceProperty(name=self._PROP_INPUT_WS,
+                                    defaultValue='',
+                                    direction=Direction.Input),
+            doc='The workspace containing the input data')
         roundinghelper.declare_rounding_property(self)
-        self.declareProperty(self._PROP_BIN_WIDTH, defaultValue=0.0, direction=Direction.Output, doc='The averaged median bin width')
+        self.declareProperty(self._PROP_BIN_WIDTH,
+                             defaultValue=0.0,
+                             direction=Direction.Output,
+                             doc='The averaged median bin width')
 
     def PyExec(self):
         '''
         Averages the median bin widths of the input workspace.
         '''
         inputWs = self.getProperty(self._PROP_INPUT_WS).value
-        roundingMode = self.getProperty(roundinghelper.PROP_NAME_ROUNDING_MODE).value
+        roundingMode = self.getProperty(
+            roundinghelper.PROP_NAME_ROUNDING_MODE).value
         inputIsPointData = inputWs.isDistribution()
         if inputIsPointData:
             inputWs = ConvertToHistogram(inputWs)

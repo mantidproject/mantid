@@ -1,11 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import mtd
 from mantid.simpleapi import CreateWorkspace, DeleteWorkspace
 import numpy
 import sys
 import testhelpers
 import unittest
+
 
 class BinWidthAtXTest(unittest.TestCase):
 
@@ -13,7 +13,7 @@ class BinWidthAtXTest(unittest.TestCase):
         return {
             'InputWorkspace': ws,
             'X': x,
-            'rethrow': True, # Let exceptions through for testing.
+            'rethrow': True,  # Let exceptions through for testing.
             'Rounding': rounding
         }
 
@@ -59,7 +59,7 @@ class BinWidthAtXTest(unittest.TestCase):
         X = -0.1
         params = self._make_algorithm_params(ws, X)
         binWidth = self._run_algorithm(params)
-        expectedWidth = 0.5 * (binWidths[1] + binWidths[-2]) # Average!
+        expectedWidth = 0.5 * (binWidths[1] + binWidths[-2])  # Average!
         self.assertAlmostEqual(binWidth, expectedWidth)
         DeleteWorkspace(ws)
 
