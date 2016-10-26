@@ -145,6 +145,7 @@ void CrossCorrelate::exec() {
                                      VectorHelper::SumSquares<double>());
   refMean /= static_cast<double>(nY);
   refMeanE2 /= static_cast<double>(nY * nY);
+
   auto itY = refY.begin();
   auto itE = refE.begin();
 
@@ -168,7 +169,7 @@ void CrossCorrelate::exec() {
     XX[i] = static_cast<double>(i - nY + 2);
   // Initialise the progress reporting object
   out->mutableX(0) = XX;
-  m_progress = new Progress(this, 0.0, 1.0, nspecs);
+  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, nspecs);
   PARALLEL_FOR2(inputWS, out)
   for (int i = 0; i < nspecs; ++i) // Now loop on all spectra
   {
@@ -196,17 +197,17 @@ void CrossCorrelate::exec() {
                                         VectorHelper::SumSquares<double>());
     tempMeanE2 /= static_cast<double>(nY * nY);
     //
-    std::vector<double>::iterator itY;
-    std::vector<double>::iterator itE;
-    itY = tempY.begin();
-    itE = tempE.begin();
+    std::vector<double>::iterator itY1;
+    std::vector<double>::iterator itE1;
+    itY1 = tempY.begin();
+    itE1 = tempE.begin();
     double tempVar = 0.0, tempVarE = 0.0;
-    for (; itY != tempY.end(); ++itY, ++itE) {
-      (*itY) -= tempMean;                    // Now the vector is (y[i]-refMean)
-      (*itE) = (*itE) * (*itE) + tempMeanE2; // New error squared
-      double t = (*itY) * (*itY);
+    for (; itY1 != tempY.end(); ++itY1, ++itE1) {
+      (*itY1) -= tempMean;                    // Now the vector is (y[i]-refMean)
+      (*itE1) = (*itE1) * (*itE1) + tempMeanE2; // New error squared
+      double t = (*itY1) * (*itY1);
       tempVar += t;
-      tempVarE += 4.0 * t * (*itE);
+      tempVarE += 4.0 * t * (*itE1);
     }
 
     // Calculate the normalisation constant

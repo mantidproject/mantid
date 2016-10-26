@@ -72,7 +72,6 @@ namespace Algorithms {
 class DLLExport CompareWorkspaces : public API::Algorithm {
 public:
   CompareWorkspaces();
-  ~CompareWorkspaces() override;
 
   /// Algorithm's name
   const std::string name() const override;
@@ -134,24 +133,25 @@ private:
   /// Records a mismatch in the Messages workspace and sets Result to false
   void recordMismatch(std::string msg, std::string ws1 = "",
                       std::string ws2 = "");
-
-  bool relErr(double x1, double x2, double errorVal) const;
+  /// Calculates relative error between two values and analyses if within the
+  /// limits
+  bool relativeError(double x1, double x2, double errorVal) const;
 
   /// Result of comparison (true if equal, false otherwise)
-  bool m_Result;
+  bool m_result;
 
   /// Mismatch messages that resulted from comparison
-  API::ITableWorkspace_sptr m_Messages;
+  API::ITableWorkspace_sptr m_messages;
 
   /// Report progress of comparison
-  API::Progress *m_Prog;
+  std::unique_ptr<API::Progress> m_progress;
 
   /// Variable states if one wants to compare workspaces in parallell. This
   /// usully true but if one wants to look at the comparison logs, parallell
   /// comparison make things complicated as
   /// logs from different threads are mixed together.  In this case, it is
   /// better not to do parallell comparison.
-  bool m_ParallelComparison;
+  bool m_parallelComparison;
 };
 
 } // namespace Algorithms

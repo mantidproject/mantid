@@ -205,12 +205,11 @@ void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       }
       PARALLEL_END_INTERUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+	PARALLEL_CHECK_INTERUPT_REGION
 
-    // Progress * prog2 = new Progress(this, 0.4, 0.9, 100);
-    Progress *prog2 = nullptr;
+	std::unique_ptr<Progress> prog2;
     ThreadScheduler *ts = new ThreadSchedulerFIFO();
-    ThreadPool tp(ts, 0, prog2);
+    ThreadPool tp(ts, 0, prog2.get());
     ws1->splitAllIfNeeded(ts);
     // prog2->resetNumSteps( ts->size(), 0.4, 0.6);
     tp.joinAll();

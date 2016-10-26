@@ -2,14 +2,9 @@
 #define MANTID_MDALGORITHMS_BINMD_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/CoordTransform.h"
-#include "MantidAPI/IMDEventWorkspace_fwd.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/VMD.h"
 #include "MantidDataObjects/MDBox.h"
-#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
@@ -69,17 +64,20 @@ private:
                 const size_t *const chunkMax);
 
   /// The output MDHistoWorkspace
-  Mantid::DataObjects::MDHistoWorkspace_sptr outWS;
+  Mantid::DataObjects::MDHistoWorkspace_sptr m_outWS;
+
   /// Progress reporting
-  Mantid::API::Progress *prog;
+  std::unique_ptr<Mantid::API::Progress> m_progress;
+
   /// ImplicitFunction used
-  Mantid::Geometry::MDImplicitFunction *implicitFunction;
+  Mantid::Geometry::MDImplicitFunction *m_implicitFunction;
 
   /// Cached values for speed up
-  size_t *indexMultiplier;
-  signal_t *signals;
-  signal_t *errors;
-  signal_t *numEvents;
+  size_t *m_indexMultiplier;
+  signal_t *m_signals;
+  signal_t *m_errors;
+  signal_t *m_numEvents;
+
 };
 
 } // namespace Mantid

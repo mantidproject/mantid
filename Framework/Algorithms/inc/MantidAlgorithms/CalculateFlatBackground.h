@@ -56,12 +56,7 @@ public:
   CalculateFlatBackground()
       : API::Algorithm(), m_convertedFromRawCounts(false),
         m_skipMonitors(false), m_nullifyNegative(true), m_progress(nullptr) {}
-  /// Virtual destructor
-  ~CalculateFlatBackground() override {
-    if (m_progress)
-      delete m_progress;
-    m_progress = nullptr;
-  }
+
   /// Algorithm's name
   const std::string name() const override { return "CalculateFlatBackground"; }
   /// Summary of algorithms purpose
@@ -103,7 +98,7 @@ private:
   // if true, negative signals appearing after background removals are set to 0
   bool m_nullifyNegative;
   /// Progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace Algorithms

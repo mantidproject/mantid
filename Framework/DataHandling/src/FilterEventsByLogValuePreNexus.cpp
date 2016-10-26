@@ -199,7 +199,7 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
 /** Constructor
 */
 FilterEventsByLogValuePreNexus::FilterEventsByLogValuePreNexus()
-    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), m_prog(nullptr),
+    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), m_progress(nullptr),
       m_protonChargeTot(0), m_detid_max(0), m_eventFile(nullptr),
       m_numEvents(0), m_numPulses(0), m_numPixel(0), m_numGoodEvents(0),
       m_numErrorEvents(0), m_numBadEvents(0), m_numWrongdetidEvents(0),
@@ -352,14 +352,14 @@ void FilterEventsByLogValuePreNexus::init() {
  */
 void FilterEventsByLogValuePreNexus::exec() {
   // Process inputs
-  m_prog = new Progress(this, 0.0, 1.0, 100);
+  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, 100);
   processProperties();
 
   // Read input files
-  m_prog->report("Loading Pulse ID file");
+  m_progress->report("Loading Pulse ID file");
   readPulseidFile(m_pulseIDFileName, m_throwError);
 
-  m_prog->report("Loading Event File");
+  m_progress->report("Loading Event File");
   openEventFile(m_eventFileName);
 
   // Correct wrong event index in loaded eventindexes
@@ -420,8 +420,6 @@ void FilterEventsByLogValuePreNexus::exec() {
   // Add fast frequency sample environment (events) data to workspace's log
   processEventLogs();
 
-  // -1. Cleanup
-  delete m_prog;
 } // exec()
 
 //----------------------------------------------------------------------------------------------
@@ -534,7 +532,7 @@ void FilterEventsByLogValuePreNexus::processProperties() {
 DataObjects::EventWorkspace_sptr
 FilterEventsByLogValuePreNexus::setupOutputEventWorkspace() {
   // Create and initialize output EventWorkspace
-  m_prog->report("Creating output workspace");
+  m_progress->report("Creating output workspace");
 
   EventWorkspace_sptr tempworkspace;
 
@@ -566,11 +564,11 @@ FilterEventsByLogValuePreNexus::setupOutputEventWorkspace() {
                                           getRunnumber(m_eventFileName));
 
   // Add the instrument!
-  m_prog->report("Loading Instrument");
+  m_progress->report("Loading Instrument");
   this->runLoadInstrument(m_eventFileName, tempworkspace);
 
   // Load the mapping file
-  m_prog->report("Loading Mapping File");
+  m_progress->report("Loading Mapping File");
   string mapping_filename = this->getPropertyValue(MAP_PARAM);
   if (mapping_filename.empty()) {
     // No mapping file given: genrate mapping file name by routine
@@ -828,7 +826,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
       m_detid_max = it->first;
 
   // Pad all the pixels
-  m_prog->report("Padding Pixels");
+  m_progress->report("Padding Pixels");
   this->m_pixelToWkspindex.reserve(
       m_detid_max + 1); // starting at zero up to and including m_detid_max
   // Set to zero
@@ -931,7 +929,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
       EventWorkspace_sptr partWS;
 
       if (m_parallelProcessing) {
-        m_prog->report("Creating Partial Workspace");
+        m_progress->report("Creating Partial Workspace");
         // Create a partial workspace, copy all the spectra numbers and stuff
         // (no actual events to copy though).
         partWS = workspace->clone();
@@ -958,7 +956,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
                         << " workspaces for parallel loading."
                         << "\n";
 
-    m_prog->resetNumSteps(numBlocks, 0.1, 0.8);
+    m_progress->resetNumSteps(numBlocks, 0.1, 0.8);
 
     // -------------------------------------------------------------------
     // LOAD THE DATA
@@ -1001,7 +999,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
                        current_event_buffer_size, fileOffset);
 
       // Report progress
-      m_prog->report("Load Event PreNeXus");
+      m_progress->report("Load Event PreNeXus");
 
       PARALLEL_END_INTERUPT_REGION
     }
@@ -1014,7 +1012,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
     //--------------------------------------------------------------------
     if (m_parallelProcessing) {
       PARALLEL_START_INTERUPT_REGION
-      m_prog->resetNumSteps(workspace->getNumberHistograms(), 0.8, 0.95);
+      m_progress->resetNumSteps(workspace->getNumberHistograms(), 0.8, 0.95);
 
       // Merge all workspaces, index by index.
       PARALLEL_FOR_NO_WSP_CHECK()
@@ -1039,7 +1037,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
           // Free up memory as you go along.
           partEl.clear(false);
         }
-        m_prog->report("Merging Workspaces");
+        m_progress->report("Merging Workspaces");
       }
 
       g_log.debug() << tim << " to merge workspaces together.\n";
@@ -1054,10 +1052,10 @@ void FilterEventsByLogValuePreNexus::procEvents(
     }
     delete[] eventVectors;
 
-    m_prog->resetNumSteps(3, 0.94, 1.00);
+    m_progress->resetNumSteps(3, 0.94, 1.00);
 
     // finalize loading
-    m_prog->report("Setting proton charge");
+    m_progress->report("Setting proton charge");
     this->setProtonCharge(workspace);
     g_log.debug() << tim << " to set the proton charge log.\n";
 
@@ -1535,7 +1533,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       EventWorkspace_sptr partWS;
 
       if (m_parallelProcessing) {
-        m_prog->report("Creating Partial Workspace");
+        m_progress->report("Creating Partial Workspace");
         // Create a partial workspace, copy all the spectra numbers and stuff
         // (no actual events to copy though).
         partWS = m_localWorkspace->clone();
@@ -1565,7 +1563,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
                         << " workspaces for parallel loading."
                         << "\n";
 
-    m_prog->resetNumSteps(numBlocks, 0.1, 0.8);
+    m_progress->resetNumSteps(numBlocks, 0.1, 0.8);
 
     // -------------------------------------------------------------------
     // LOAD THE DATA
@@ -1608,7 +1606,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
                          current_event_buffer_size, fileOffset);
 
       // Report progress
-      m_prog->report("Load Event PreNeXus");
+      m_progress->report("Load Event PreNeXus");
 
       PARALLEL_END_INTERUPT_REGION
     }
@@ -1621,7 +1619,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
     //--------------------------------------------------------------------
     if (m_parallelProcessing) {
       PARALLEL_START_INTERUPT_REGION
-      m_prog->resetNumSteps(m_localWorkspace->getNumberHistograms(), 0.8, 0.95);
+      m_progress->resetNumSteps(m_localWorkspace->getNumberHistograms(), 0.8, 0.95);
 
       // Merge all workspaces, index by index.
       PARALLEL_FOR_NO_WSP_CHECK()
@@ -1647,7 +1645,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
           // Free up memory as you go along.
           partEl.clear(false);
         }
-        m_prog->report("Merging Workspaces");
+        m_progress->report("Merging Workspaces");
       }
 
       g_log.debug() << tim << " to merge workspaces together.\n";
@@ -1662,10 +1660,10 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
     }
     delete[] eventVectors;
 
-    m_prog->resetNumSteps(3, 0.94, 1.00);
+    m_progress->resetNumSteps(3, 0.94, 1.00);
 
     // finalize loading
-    m_prog->report("Setting proton charge");
+    m_progress->report("Setting proton charge");
     this->setProtonCharge(m_localWorkspace);
     g_log.debug() << tim << " to set the proton charge log.\n";
 
@@ -2121,7 +2119,7 @@ size_t FilterEventsByLogValuePreNexus::padOutEmptyPixels(
       m_detid_max = it->first;
 
   // Pad all the pixels
-  m_prog->report("Padding Pixels of workspace");
+  m_progress->report("Padding Pixels of workspace");
   this->m_pixelToWkspindex.reserve(
       m_detid_max + 1); // starting at zero up to and including m_detid_max
   // Set to zero

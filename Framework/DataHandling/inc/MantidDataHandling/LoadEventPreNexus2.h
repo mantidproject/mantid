@@ -118,7 +118,7 @@ private:
   /// Execution code
   void exec() override;
 
-  Mantid::API::Progress *prog;
+  std::unique_ptr<Mantid::API::Progress> m_progress;
 
   DataObjects::EventWorkspace_sptr localWorkspace; //< Output EventWorkspace
   std::vector<int64_t> spectra_list;               ///<the list of Spectra

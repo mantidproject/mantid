@@ -12,7 +12,6 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Memory.h"
-#include "MantidKernel/MDUnitFactory.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
@@ -57,16 +56,14 @@ LoadMD::LoadMD()
 * be used
 */
 int LoadMD::confidence(Kernel::NexusDescriptor &descriptor) const {
-  int confidence(0);
   const auto &rootPathNameType = descriptor.firstEntryNameType();
   if (rootPathNameType.second != "NXentry")
     return 0;
   if (descriptor.pathExists("/MDEventWorkspace") ||
       descriptor.pathExists("/MDHistoWorkspace")) {
     return 95;
-  } else
-    return 0;
-  return confidence;
+  } 
+  return 0;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -494,9 +491,9 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                                 ": this is not possible.");
 
   CPUTimer tim;
-  auto prog = new Progress(this, 0.0, 1.0, 100);
+  auto progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, 100);
 
-  prog->report("Opening file.");
+  progress->report("Opening file.");
   std::string title;
   try {
     m_file->getAttr("title", title);
@@ -523,7 +520,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   // ----------------------------------------- Box Structure
   // ------------------------------
-  prog->report("Reading box structure from HDD.");
+  progress->report("Reading box structure from HDD.");
   MDBoxFlatTree FlatBoxTree;
   int nDims = static_cast<int>(nd); // should be safe
   FlatBoxTree.loadBoxStructure(m_filename, nDims, MDE::getTypeName());
@@ -531,7 +528,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   BoxController_sptr bc = ws->getBoxController();
   bc->fromXMLString(FlatBoxTree.getBCXMLdescr());
 
-  prog->report("Restoring box structure and connectivity");
+  progress->report("Restoring box structure and connectivity");
   std::vector<API::IMDNode *> boxTree;
   FlatBoxTree.restoreBoxTree(boxTree, bc, fileBackEnd,
                              m_BoxStructureAndMethadata);
@@ -578,10 +575,10 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     loader->openFile(m_filename, "r");
 
     const std::vector<uint64_t> &BoxEventIndex = FlatBoxTree.getEventIndex();
-    prog->setNumSteps(numBoxes);
+    progress->setNumSteps(numBoxes);
 
     for (size_t i = 0; i < numBoxes; i++) {
-      prog->report();
+      progress->report();
       MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxTree[i]);
       if (!box)
         continue;
@@ -615,7 +612,6 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                 << " points after refresh.\n";
 
   g_log.debug() << tim << " to finish up.\n";
-  delete prog;
 }
 
 /**

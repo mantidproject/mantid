@@ -11,8 +11,6 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <cfloat>
-#include <iterator>
 #include <numeric>
 
 using namespace Mantid::Kernel;
@@ -167,8 +165,7 @@ void DiffractionFocussing2::exec() {
   // is irrelevant
   MantidVec weights_default(1, 1.0), emptyVec(1, 0.0), EOutDummy(nPoints);
 
-  Progress *prog;
-  prog = new API::Progress(this, 0.2, 1.00,
+  std::unique_ptr<Progress> progressReport = Kernel::make_unique<Progress>(this, 0.2, 1.00,
                            static_cast<int>(totalHistProcess) + nGroups);
 #ifndef __APPLE__
   PARALLEL_FOR2(m_matrixInputW, out)
@@ -285,7 +282,7 @@ void DiffractionFocussing2::exec() {
         VectorHelper::rebin(limits, weights_default, emptyVec, Xout.rawData(),
                             groupWgt, EOutDummy, true, true);
       }
-      prog->report();
+      progressReport->report();
     } // end of loop for input spectra
 
     // Calculate the bin widths
@@ -315,12 +312,10 @@ void DiffractionFocussing2::exec() {
     std::transform(Eout.begin(), Eout.end(), Eout.begin(),
                    std::bind2nd(std::multiplies<double>(), groupSize));
 
-    prog->report();
+    progressReport->report();
     PARALLEL_END_INTERUPT_REGION
   } // end of loop for groups
   PARALLEL_CHECK_INTERUPT_REGION
-
-  delete prog;
 
   setProperty("OutputWorkspace", out);
 
@@ -353,8 +348,7 @@ void DiffractionFocussing2::execEvent() {
 
   EventType eventWtype = m_eventW->getEventType();
 
-  Progress *prog;
-  prog = new Progress(this, 0.2, 0.25, nGroups);
+  std::unique_ptr<Progress> progressReport = Kernel::make_unique<Progress>(this, 0.2, 0.25, nGroups);
 
   // determine precount size
   vector<size_t> size_required(this->m_validGroups.size(), 0);
@@ -367,12 +361,11 @@ void DiffractionFocussing2::execEvent() {
     for (auto index : indices) {
       size_required[iGroup] += m_eventW->getSpectrum(index).getNumberEvents();
     }
-    prog->report(1, "Pre-counting");
+    progressReport->report(1, "Pre-counting");
   }
 
   // ------------- Pre-allocate Event Lists ----------------------------
-  delete prog;
-  prog = new Progress(this, 0.25, 0.3, totalHistProcess);
+  progressReport = Kernel::make_unique<Progress>(this, 0.25, 0.3, totalHistProcess);
 
   // This creates and reserves the space required
   for (size_t iGroup = 0; iGroup < this->m_validGroups.size(); iGroup++) {
@@ -382,12 +375,11 @@ void DiffractionFocussing2::execEvent() {
     groupEL.reserve(size_required[iGroup]);
     groupEL.clearDetectorIDs();
     groupEL.setSpectrumNo(group);
-    prog->reportIncrement(1, "Allocating");
+    progressReport->reportIncrement(1, "Allocating");
   }
 
   // ----------- Focus ---------------
-  delete prog;
-  prog = new Progress(this, 0.3, 0.9, totalHistProcess);
+  progressReport = Kernel::make_unique<Progress>(this, 0.3, 0.9, totalHistProcess);
 
   if (this->m_validGroups.size() == 1) {
     g_log.information() << "Performing focussing on a single group\n";
@@ -442,7 +434,7 @@ void DiffractionFocussing2::execEvent() {
         // In workspace index iGroup, put what was in the OLD workspace index wi
         out->getSpectrum(iGroup) += m_eventW->getSpectrum(wi);
 
-        prog->reportIncrement(1, "Appending Lists");
+        progressReport->reportIncrement(1, "Appending Lists");
 
         // When focussing in place, you can clear out old memory from the input
         // one!
@@ -459,13 +451,12 @@ void DiffractionFocussing2::execEvent() {
 
   // Now that the data is cleaned up, go through it and set the X vectors to the
   // input workspace we first talked about.
-  delete prog;
-  prog = new Progress(this, 0.9, 1.0, nGroups);
+  progressReport = Kernel::make_unique<Progress>(this, 0.9, 1.0, nGroups);
   for (size_t workspaceIndex = 0; workspaceIndex < this->m_validGroups.size();
        workspaceIndex++) {
     const int group = this->m_validGroups[workspaceIndex];
     // Now this is the workspace index of that group; simply 1 offset
-    prog->reportIncrement(1, "Setting X");
+    progressReport->reportIncrement(1, "Setting X");
 
     if (workspaceIndex >= out->getNumberHistograms()) {
       g_log.warning() << "Warning! Invalid workspace index found for group # "
@@ -491,7 +482,6 @@ void DiffractionFocussing2::execEvent() {
   out->clearMRU();
   setProperty("OutputWorkspace",
               boost::dynamic_pointer_cast<MatrixWorkspace>(out));
-  delete prog;
 }
 
 //=============================================================================

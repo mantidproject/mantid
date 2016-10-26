@@ -97,19 +97,19 @@ protected:
   Mantid::API::IMDEventWorkspace_sptr m_OutIWS;
 
   /// # of events from ALL input files
-  uint64_t totalEvents;
+  uint64_t m_totalEvents;
 
   /// # of events loaded from all tasks
-  uint64_t totalLoaded;
+  uint64_t m_totalLoaded;
 
   /// Mutex for file access
-  std::mutex fileMutex;
+  std::mutex m_fileMutex;
 
   /// Mutex for modifying stats
-  std::mutex statsMutex;
+  std::mutex m_statsMutex;
 
   /// Progress reporter
-  Mantid::API::Progress *prog;
+  std::unique_ptr<API::Progress> m_progress;
 
   /// Set to true if the output is cloned of the first one
   // bool clonedFirst;

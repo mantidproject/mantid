@@ -3,8 +3,6 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
@@ -56,8 +54,6 @@ class DLLExport BinaryOperation : public API::Algorithm {
 public:
   /// Default constructor
   BinaryOperation();
-  /// Destructor
-  ~BinaryOperation() override;
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Arithmetic"; }
@@ -283,7 +279,7 @@ private:
   void propagateBinMasks(const API::MatrixWorkspace_const_sptr rhs,
                          API::MatrixWorkspace_sptr out);
   /// Progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace Algorithms

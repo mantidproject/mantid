@@ -28,11 +28,6 @@ BinaryOperation::BinaryOperation()
       m_useHistogramForRhsEventWorkspace(false),
       m_do2D_even_for_SingleColumn_on_rhs(false), m_progress(nullptr) {}
 
-BinaryOperation::~BinaryOperation() {
-  if (m_progress)
-    delete m_progress;
-}
-
 /** Initialisation method.
  *  Defines input and output workspaces
  *
@@ -255,7 +250,7 @@ void BinaryOperation::exec() {
   operateOnRun(m_lhs->run(), m_rhs->run(), m_out->mutableRun());
 
   // Initialise the progress reporting object
-  m_progress = new Progress(this, 0.0, 1.0, m_lhs->getNumberHistograms());
+  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, m_lhs->getNumberHistograms());
 
   // There are now 4 possible scenarios, shown schematically here:
   // xxx x   xxx xxx   xxx xxx   xxx x

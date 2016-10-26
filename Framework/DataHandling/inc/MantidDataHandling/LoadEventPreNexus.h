@@ -122,14 +122,17 @@ private:
   /// Execution code
   void exec() override;
 
-  Mantid::API::Progress *prog;
-
-  std::vector<int64_t> spectra_list; ///<the list of Spectra
+  std::unique_ptr<Mantid::API::Progress> m_progress;
+  
+  /// The list of Spectra
+  std::vector<int64_t> spectra_list; 
 
   /// The times for each pulse.
   std::vector<Kernel::DateAndTime> pulsetimes;
+
   /// The index of the first event in each pulse.
   std::vector<uint64_t> event_indices;
+
   /// The proton charge on a pulse by pulse basis.
   std::vector<double> proton_charge;
   /// The total proton charge for the run.
@@ -145,17 +148,29 @@ private:
 
   /// Handles loading from the event file
   Mantid::Kernel::BinaryFile<DasEvent> *eventfile;
-  std::size_t num_events; ///< The number of events in the file
-  std::size_t num_pulses; ///<the number of pulses
-  uint32_t numpixel;      ///<the number of pixels
+  /// The number of events in the file
+  std::size_t num_events; 
+  
+  /// The number of pulses
+  std::size_t num_pulses; 
+  /// The number of pixels
+  uint32_t numpixel;      
 
-  std::size_t num_good_events;  ///< The number of good events loaded
-  std::size_t num_error_events; ///< The number of error events encountered
-  /// the number of events that were ignored (not loaded) because, e.g. of only
+  /// The number of good events loaded
+  std::size_t num_good_events;  
+  
+  /// The number of error events encountered
+  std::size_t num_error_events; 
+  
+  /// The number of events that were ignored (not loaded) because, e.g. of only
   /// loading some spectra.
   std::size_t num_ignored_events;
-  std::size_t first_event; ///< The first event to load (count from zero)
-  std::size_t max_events;  ///< Number of events to load
+  
+  /// The first event to load (count from zero)
+  std::size_t first_event; 
+  
+  /// Number of events to load
+  std::size_t max_events;  
 
   /// Set to true if a valid Mapping file was provided.
   bool using_mapping_file;

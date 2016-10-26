@@ -69,12 +69,7 @@ class DLLExport FindPeaks : public API::Algorithm {
 public:
   /// Constructor
   FindPeaks();
-  /// Virtual destructor
-  ~FindPeaks() override {
-    if (m_progress)
-      delete m_progress;
-    m_progress = nullptr;
-  }
+
   /// Algorithm's name
   const std::string name() const override { return "FindPeaks"; }
   /// Summary of algorithms purpose
@@ -205,13 +200,13 @@ private:
   /// Storage of the peak data
   API::ITableWorkspace_sptr m_outPeakTableWS;
   /// Progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress;
 
   // Properties saved in the algo.
   API::MatrixWorkspace_sptr m_dataWS; ///<workspace to check for peaks
   int m_inputPeakFWHM;                ///<holder for the requested peak FWHM
   int m_wsIndex;                      ///<list of workspace indicies to check
-  bool singleSpectrum;   ///<flag for if only a single spectrum is present
+  bool m_singleSpectrum;   ///<flag for if only a single spectrum is present
   bool m_highBackground; ///<flag for find relatively weak peak in high
   /// background
   bool m_rawPeaksTable; ///<flag for whether the output is the raw peak

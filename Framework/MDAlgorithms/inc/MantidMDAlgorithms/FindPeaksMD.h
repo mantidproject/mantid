@@ -81,7 +81,7 @@ private:
   signal_t m_densityScaleFactor;
 
   /// Progress reporter.
-  Mantid::API::Progress *prog;
+  std::unique_ptr<Mantid::API::Progress> prog;
 
   /** Enum describing which type of dimensions in the MDEventWorkspace */
   enum eDimensionType { HKL, QLAB, QSAMPLE };

@@ -33,13 +33,6 @@ UnwrapSNS::UnwrapSNS()
       m_Tmin(0.), m_Tmax(0.), m_frameWidth(0.), m_numberOfSpectra(0),
       m_XSize(0), m_progress(nullptr) {}
 
-/// Destructor
-UnwrapSNS::~UnwrapSNS() {
-  if (m_progress)
-    delete m_progress;
-  m_progress = nullptr;
-}
-
 /// Algorithm's name for identification overriding a virtual method
 const std::string UnwrapSNS::name() const { return "UnwrapSNS"; }
 
@@ -123,7 +116,7 @@ void UnwrapSNS::exec() {
   this->getTofRangeData(false);
 
   // set up the progress bar
-  m_progress = new Progress(this, 0.0, 1.0, m_numberOfSpectra);
+  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra);
 
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != m_inputWS) {
@@ -193,10 +186,11 @@ void UnwrapSNS::execEvent() {
   auto outW = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutW);
 
   // set up the progress bar
-  m_progress = new Progress(this, 0.0, 1.0, m_numberOfSpectra * 2);
+  m_progress =
+      Kernel::make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra * 2);
 
   // algorithm assumes the data is sorted so it can jump out early
-  outW->sortAll(Mantid::DataObjects::TOF_SORT, m_progress);
+  outW->sortAll(Mantid::DataObjects::TOF_SORT, m_progress.get());
 
   this->getTofRangeData(true);
 

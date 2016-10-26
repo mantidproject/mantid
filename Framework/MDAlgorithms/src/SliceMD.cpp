@@ -185,7 +185,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (fileBackedWS)
     API::IMDNode::sortObjByID(boxes);
 
-  auto prog = new Progress(this, 0.0, 1.0, boxes.size());
+  auto prog = Kernel::make_unique<Progress>(this, 0.0, 1.0, boxes.size());
 
   // The root of the output workspace
   MDBoxBase<OMDE, ond> *outRootBox = outWS->getBox();
@@ -277,7 +277,6 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // return the size of the input workspace write buffer to its initial value
   // bc->setCacheParameters(sizeof(MDE),writeBufSize);
   this->setProperty("OutputWorkspace", outEvent);
-  delete prog;
 }
 
 //----------------------------------------------------------------------------------------------

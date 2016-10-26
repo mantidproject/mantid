@@ -3,7 +3,6 @@
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include <boost/scoped_ptr.hpp>
@@ -119,10 +118,13 @@ private:
 
   /// Each dimension object loaded.
   std::vector<Mantid::Geometry::IMDDimension_sptr> m_dims;
+
   /// Coordinate system
   Kernel::SpecialCoordinateSystem m_coordSystem;
+
   /// QConvention
   std::string m_QConvention;
+
   /// load only the box structure with empty boxes but do not tload boxes events
   bool m_BoxStructureAndMethadata;
 

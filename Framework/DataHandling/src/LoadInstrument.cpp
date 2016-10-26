@@ -20,9 +20,6 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <Poco/Exception.h>
-#include <sstream>
-#include <fstream>
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
 using Poco::XML::DOMParser;
@@ -179,9 +176,8 @@ void LoadInstrument::exec() {
           InstrumentDataService::Instance().retrieve(instrumentNameMangled);
     } else {
       // Really create the instrument
-      auto prog = new Progress(this, 0, 1, 100);
-      instrument = parser.parseXML(prog);
-      delete prog;
+      auto prog = Kernel::make_unique<Progress>(this, 0, 1, 100);
+      instrument = parser.parseXML(prog.get());
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }

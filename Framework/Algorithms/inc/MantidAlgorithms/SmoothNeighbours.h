@@ -122,31 +122,41 @@ private:
 
   /// Non rectangular detector group name
   static const std::string NON_UNIFORM_GROUP;
+  
   /// Rectangular detector group name
   static const std::string RECTANGULAR_GROUP;
+  
   /// Input workspace name
   static const std::string INPUT_WORKSPACE;
+  
   /// Number to sum
-  int AdjX;
+  int m_adjX;
+  
   /// Number to sum
-  int AdjY;
+  int m_adjY;
+  
   /// Edge pixels to ignore
-  int Edge;
+  int m_edge;
+  
   /// Radius to search nearest neighbours
-  double Radius;
+  double m_radius;
+  
   /// Number of neighbours
-  int nNeighbours;
+  int m_nNeighbours;
+  
   /// Weight the neighbours during summing
-  boost::scoped_ptr<WeightingStrategy> WeightedSum;
-  /// PreserveEvents
-  bool PreserveEvents;
+  boost::scoped_ptr<WeightingStrategy> m_weightedSum;
+  
+  bool m_preserveEvents;
+  
   ///  expand by pixel IDs
   bool expandSumAllPixels;
+  
   /// number of output workspace pixels
-  size_t outWI;
+  size_t m_outWI;
 
   /// Input workspace
-  Mantid::API::MatrixWorkspace_sptr inWS;
+  Mantid::API::MatrixWorkspace_sptr m_inWS;
 
   /// Each neighbours is specified as a pair with workspace index, weight.
   typedef std::pair<size_t, double> weightedNeighbour;
@@ -155,7 +165,7 @@ private:
   std::vector<std::vector<weightedNeighbour>> m_neighbours;
 
   /// Progress reporter
-  Mantid::API::Progress *m_prog;
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace Algorithm
