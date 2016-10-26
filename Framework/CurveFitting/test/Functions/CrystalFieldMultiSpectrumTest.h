@@ -243,7 +243,8 @@ public:
     std::vector<double> y[2] = {{1.0, 2.0}, {3.0, 4.0}};
     auto checkW = [&x, &y](size_t i, double c) {
       return y[i].front() +
-             (y[i].back() - y[i].front()) / (x[i].back() - x[i].front()) * (c - x[i].front());
+             (y[i].back() - y[i].front()) / (x[i].back() - x[i].front()) *
+                 (c - x[i].front());
     };
     fun.setAttributeValue("WidthX0", x[0]);
     fun.setAttributeValue("WidthY0", y[0]);
@@ -337,14 +338,17 @@ private:
     return ws;
   }
 
-  std::pair<double, double> getBounds(API::IFunction& fun, const std::string& parName) {
+  std::pair<double, double> getBounds(API::IFunction &fun,
+                                      const std::string &parName) {
     auto ct = fun.getConstraint(fun.parameterIndex(parName));
     if (ct == nullptr) {
-      throw std::runtime_error("Parameter " + parName + " doesn't have constraint");
+      throw std::runtime_error("Parameter " + parName +
+                               " doesn't have constraint");
     }
-    auto bc = dynamic_cast<Constraints::BoundaryConstraint*>(ct);
+    auto bc = dynamic_cast<Constraints::BoundaryConstraint *>(ct);
     if (ct == nullptr) {
-      throw std::runtime_error("Parameter " + parName + " doesn't have boundary constraint");
+      throw std::runtime_error("Parameter " + parName +
+                               " doesn't have boundary constraint");
     }
     return std::make_pair(bc->lower(), bc->upper());
   }

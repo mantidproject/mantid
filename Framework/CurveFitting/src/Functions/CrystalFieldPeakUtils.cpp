@@ -16,7 +16,7 @@ using namespace CurveFitting;
 using namespace Kernel;
 using namespace API;
 
-/// Calculate the width of a peak cenrted at x using 
+/// Calculate the width of a peak cenrted at x using
 /// an interpolated value of a function tabulated at xVec points
 /// @param x :: Peak centre.
 /// @param xVec :: x-values of a tabulated width function.
@@ -44,7 +44,8 @@ double calculateWidth(double x, const std::vector<double> &xVec,
 /// @param peak :: A peak function.
 /// @param width :: A width of the peak.
 /// @param widthVariation :: A value by which the with can vary on both sides.
-void setWidthConstraint(API::IPeakFunction& peak, double width, double fwhmVariation) {
+void setWidthConstraint(API::IPeakFunction &peak, double width,
+                        double fwhmVariation) {
   double upperBound = width + fwhmVariation;
   double lowerBound = width - fwhmVariation;
   bool fix = lowerBound == upperBound;
@@ -62,7 +63,8 @@ void setWidthConstraint(API::IPeakFunction& peak, double width, double fwhmVaria
       return;
     }
     peak.removeConstraint("FWHM");
-    auto constraint = new Constraints::BoundaryConstraint(&peak, "FWHM", lowerBound, upperBound);
+    auto constraint = new Constraints::BoundaryConstraint(
+        &peak, "FWHM", lowerBound, upperBound);
     peak.addConstraint(constraint);
   } else if (peak.name() == "Gaussian") {
     if (fix) {
@@ -73,13 +75,14 @@ void setWidthConstraint(API::IPeakFunction& peak, double width, double fwhmVaria
     lowerBound /= WIDTH_TO_SIGMA;
     upperBound /= WIDTH_TO_SIGMA;
     peak.removeConstraint("Sigma");
-    auto constraint = new Constraints::BoundaryConstraint(&peak, "Sigma", lowerBound, upperBound);
+    auto constraint = new Constraints::BoundaryConstraint(
+        &peak, "Sigma", lowerBound, upperBound);
     peak.addConstraint(constraint);
   } else {
-    throw std::runtime_error("Cannot set constraint on width of " + peak.name());
+    throw std::runtime_error("Cannot set constraint on width of " +
+                             peak.name());
   }
 }
-
 
 /// Populates a spectrum with peaks of type given by peakShape argument.
 /// @param spectrum :: A composite function that is a collection of peaks.
@@ -93,11 +96,11 @@ void setWidthConstraint(API::IPeakFunction& peak, double width, double fwhmVaria
 ///        are empty.
 /// @return :: The number of peaks that will be actually fitted.
 size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
-                           const std::string &peakShape,
-                           const API::FunctionValues &centresAndIntensities,
-                           const std::vector<double> &xVec,
-                           const std::vector<double> &yVec,
-                           double fwhmVariation, double defaultFWHM) {
+                             const std::string &peakShape,
+                             const API::FunctionValues &centresAndIntensities,
+                             const std::vector<double> &xVec,
+                             const std::vector<double> &yVec,
+                             double fwhmVariation, double defaultFWHM) {
   if (xVec.size() != yVec.size()) {
     throw std::runtime_error("WidthX and WidthY must have the same size.");
   }
@@ -139,30 +142,31 @@ size_t calculateNPeaks(const API::FunctionValues &centresAndIntensities) {
 }
 
 /// Calculate the maximum number of peaks a spectrum can have.
-size_t calculateMaxNPeaks(size_t nPeaks) {
-  return nPeaks + nPeaks / 2 + 1;
-}
+size_t calculateMaxNPeaks(size_t nPeaks) { return nPeaks + nPeaks / 2 + 1; }
 
 /// Update the peaks parameters after recalculationof the crystal field.
 /// @param spectrum :: A composite function containings the peaks to update.
-///                    May contain other functions (background) fix indices < iFirst.
+///                    May contain other functions (background) fix indices <
+///                    iFirst.
 /// @param centresAndIntensities :: A FunctionValues object containing centres
 ///        and intensities for the peaks. First nPeaks calculated values are the
 ///        centres and the following nPeaks values are the intensities.
-/// @param nOriginalPeaks :: Number of actual peaks the spectrum had before the update.
+/// @param nOriginalPeaks :: Number of actual peaks the spectrum had before the
+/// update.
 ///                 This update can change the number of actual peaks.
-/// @param iFirst :: The first index in the composite function (spectrum) at which the
+/// @param iFirst :: The first index in the composite function (spectrum) at
+/// which the
 ///         peaks begin.
 /// @return :: The new number of fitted peaks.
 size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
-                            const FunctionValues &centresAndIntensities, size_t nOriginalPeaks,
-                            size_t iFirst,
-                            const std::vector<double> &xVec,
-                            const std::vector<double> &yVec,
-                            double fwhmVariation) {
+                              const FunctionValues &centresAndIntensities,
+                              size_t nOriginalPeaks, size_t iFirst,
+                              const std::vector<double> &xVec,
+                              const std::vector<double> &yVec,
+                              double fwhmVariation) {
   size_t nGoodPeaks = calculateNPeaks(centresAndIntensities);
   size_t maxNPeaks = spectrum.nFunctions() - iFirst;
-  bool mustUpdateWidth = ! xVec.empty();
+  bool mustUpdateWidth = !xVec.empty();
 
   for (size_t i = 0; i < maxNPeaks; ++i) {
     auto fun = spectrum.getFunction(i + iFirst);

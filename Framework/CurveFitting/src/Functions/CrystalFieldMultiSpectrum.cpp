@@ -95,7 +95,7 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
     m_nOwnParams = m_source->nParams();
     m_widthX.resize(nSpec);
     m_widthY.resize(nSpec);
-    for(size_t iSpec=0; iSpec < nSpec; ++iSpec) {
+    for (size_t iSpec = 0; iSpec < nSpec; ++iSpec) {
       auto suffix = std::to_string(iSpec);
       declareAttribute("WidthX" + suffix, Attribute(m_widthX[iSpec]));
       declareAttribute("WidthY" + suffix, Attribute(m_widthY[iSpec]));
@@ -158,8 +158,7 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
 /// Calculate excitations at given temperature
 void CrystalFieldMultiSpectrum::calcExcitations(
     int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
-    double temperature, FunctionValues &values, size_t iSpec
-    ) const {
+    double temperature, FunctionValues &values, size_t iSpec) const {
   IntFortranVector degeneration;
   DoubleFortranVector eEnergies;
   DoubleFortranMatrix iEnergies;
@@ -177,7 +176,7 @@ void CrystalFieldMultiSpectrum::calcExcitations(
   double intensityScaling = getParameter(m_nOwnParams - nSpec + iSpec);
   auto nPeaks = eExcitations.size();
   values.expand(2 * nPeaks);
-  for(size_t i = 0; i < nPeaks; ++i) {
+  for (size_t i = 0; i < nPeaks; ++i) {
     values.setCalculated(i, eExcitations.get(i));
     values.setCalculated(i + nPeaks, iExcitations.get(i) * intensityScaling);
   }
@@ -205,8 +204,9 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(
       API::FunctionFactory::Instance().createInitialized(bkgdShape);
   spectrum->addFunction(background);
 
-  m_nPeaks[iSpec] = CrystalFieldUtils::buildSpectrumFunction(*spectrum, peakShape, values, m_widthX[iSpec],
-                        m_widthY[iSpec], fwhmVariation, fwhm);
+  m_nPeaks[iSpec] = CrystalFieldUtils::buildSpectrumFunction(
+      *spectrum, peakShape, values, m_widthX[iSpec], m_widthY[iSpec],
+      fwhmVariation, fwhm);
 
   return IFunction_sptr(spectrum);
 }
@@ -239,7 +239,7 @@ void CrystalFieldMultiSpectrum::updateSpectrum(
   auto fwhmVariation = getAttribute("WidthVariation").asDouble();
   FunctionValues values;
   calcExcitations(nre, en, wf, temperature, values, iSpec);
-  auto &composite = dynamic_cast<API::CompositeFunction&>(spectrum);
+  auto &composite = dynamic_cast<API::CompositeFunction &>(spectrum);
   m_nPeaks[iSpec] = CrystalFieldUtils::updateSpectrumFunction(
       composite, values, m_nPeaks[iSpec], 1, m_widthX[iSpec], m_widthY[iSpec],
       fwhmVariation);

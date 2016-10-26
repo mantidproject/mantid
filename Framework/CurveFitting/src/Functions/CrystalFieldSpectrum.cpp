@@ -61,8 +61,8 @@ void CrystalFieldSpectrum::buildTargetFunction() const {
 
   auto peakShape = IFunction::getAttribute("PeakShape").asString();
   auto defaultFWHM = IFunction::getAttribute("FWHM").asDouble();
-  m_nPeaks = CrystalFieldUtils::buildSpectrumFunction(*spectrum, peakShape, values, xVec,
-                                           yVec, fwhmVariation, defaultFWHM);
+  m_nPeaks = CrystalFieldUtils::buildSpectrumFunction(
+      *spectrum, peakShape, values, xVec, yVec, fwhmVariation, defaultFWHM);
 }
 
 /// Update m_spectrum function.
@@ -78,8 +78,9 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
   FunctionDomainGeneral domain;
   FunctionValues values;
   m_source->function(domain, values);
-  auto &spectrum = dynamic_cast<CompositeFunction&>(*m_target);
-  m_nPeaks = CrystalFieldUtils::updateSpectrumFunction(spectrum, values, m_nPeaks, 0, xVec, yVec, fwhmVariation);
+  auto &spectrum = dynamic_cast<CompositeFunction &>(*m_target);
+  m_nPeaks = CrystalFieldUtils::updateSpectrumFunction(
+      spectrum, values, m_nPeaks, 0, xVec, yVec, fwhmVariation);
 }
 
 } // namespace Functions

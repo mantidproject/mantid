@@ -237,8 +237,8 @@ public:
     fun.setAttributeValue("Ion", "Ce");
     fun.setAttributeValue("Temperature", 44.0);
 
-    std::vector<double> x {0.0, 50.0};
-    std::vector<double> y {1.0, 2.0};
+    std::vector<double> x{0.0, 50.0};
+    std::vector<double> y{1.0, 2.0};
     fun.setAttributeValue("WidthX", x);
     fun.setAttributeValue("WidthY", y);
     auto checkW = [&x, &y](double c) {
@@ -288,15 +288,15 @@ public:
     fun.setAttributeValue("Temperature", 44.0);
 
     {
-      std::vector<double> x {0.0, 10.0};
-      std::vector<double> y {1.0, 2.0};
+      std::vector<double> x{0.0, 10.0};
+      std::vector<double> y{1.0, 2.0};
       fun.setAttributeValue("WidthX", x);
       fun.setAttributeValue("WidthY", y);
       TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
     }
     {
-      std::vector<double> x {1.0, 50.0};
-      std::vector<double> y {1.0, 2.0};
+      std::vector<double> x{1.0, 50.0};
+      std::vector<double> y{1.0, 2.0};
       fun.setAttributeValue("WidthX", x);
       fun.setAttributeValue("WidthY", y);
       TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
@@ -314,28 +314,28 @@ public:
     fun.setAttributeValue("Temperature", 44.0);
 
     {
-      std::vector<double> x {0.0, 10.0, 50.0};
-      std::vector<double> y {1.0, 2.0};
+      std::vector<double> x{0.0, 10.0, 50.0};
+      std::vector<double> y{1.0, 2.0};
       fun.setAttributeValue("WidthX", x);
       fun.setAttributeValue("WidthY", y);
       TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
     }
     {
-      std::vector<double> x {0.0, 50.0};
-      std::vector<double> y {1.0, 2.0, 3.0};
+      std::vector<double> x{0.0, 50.0};
+      std::vector<double> y{1.0, 2.0, 3.0};
       fun.setAttributeValue("WidthX", x);
       fun.setAttributeValue("WidthY", y);
       TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
     }
     {
       std::vector<double> x;
-      std::vector<double> y {1.0, 2.0};
+      std::vector<double> y{1.0, 2.0};
       fun.setAttributeValue("WidthX", x);
       fun.setAttributeValue("WidthY", y);
       TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
     }
     {
-      std::vector<double> x {0.0, 10.0, 50.0};
+      std::vector<double> x{0.0, 10.0, 50.0};
       std::vector<double> y;
       fun.setAttributeValue("WidthX", x);
       fun.setAttributeValue("WidthY", y);
@@ -353,7 +353,7 @@ public:
     fun.setAttributeValue("Ion", "Ce");
     fun.setAttributeValue("Temperature", 44.0);
 
-    auto wFun = [](double x){return 2.0 + sin(M_PI*x/50.0);};
+    auto wFun = [](double x) { return 2.0 + sin(M_PI * x / 50.0); };
     SimpleChebfun cFun(wFun, 0.0, 50.0);
     std::vector<double> x = cFun.linspace(30);
     std::vector<double> y = cFun(x);
@@ -381,7 +381,6 @@ public:
       auto w = fun.getParameter("f3.FWHM");
       TS_ASSERT_EQUALS(w, 0.0);
     }
-
   }
 
   void test_calculated_widths_gaussian() {
@@ -395,8 +394,8 @@ public:
     fun.setAttributeValue("Temperature", 44.0);
     fun.setAttributeValue("PeakShape", "Gaussian");
 
-    std::vector<double> x {0.0, 50.0};
-    std::vector<double> y {1.0, 2.0};
+    std::vector<double> x{0.0, 50.0};
+    std::vector<double> y{1.0, 2.0};
     fun.setAttributeValue("WidthX", x);
     fun.setAttributeValue("WidthY", y);
     auto checkW = [&x, &y](double c) {
@@ -452,8 +451,8 @@ public:
     fun.setAttributeValue("Temperature", 44.0);
     fun.setAttributeValue("WidthVariation", 1.1);
 
-    std::vector<double> x {0.0, 50.0};
-    std::vector<double> y {1.0, 2.0};
+    std::vector<double> x{0.0, 50.0};
+    std::vector<double> y{1.0, 2.0};
     fun.setAttributeValue("WidthX", x);
     fun.setAttributeValue("WidthY", y);
     auto checkW = [&x, &y](double c) {
@@ -502,8 +501,8 @@ public:
     fun.setAttributeValue("Ion", "Ce");
     fun.setAttributeValue("Temperature", 44.0);
 
-    std::vector<double> x {0.0, 50.0};
-    std::vector<double> y {1.0, 2.0};
+    std::vector<double> x{0.0, 50.0};
+    std::vector<double> y{1.0, 2.0};
     fun.setAttributeValue("WidthX", x);
     fun.setAttributeValue("WidthY", y);
     fun.setAttributeValue("WidthVariation", 0.01);
@@ -543,8 +542,8 @@ public:
     fun.setAttributeValue("Temperature", 44.0);
     fun.setAttributeValue("PeakShape", "Gaussian");
 
-    std::vector<double> x {0.0, 50.0};
-    std::vector<double> y {1.0, 2.0};
+    std::vector<double> x{0.0, 50.0};
+    std::vector<double> y{1.0, 2.0};
     fun.setAttributeValue("WidthX", x);
     fun.setAttributeValue("WidthY", y);
     fun.setAttributeValue("WidthVariation", 0.01);
@@ -578,19 +577,20 @@ public:
   }
 
 private:
-
-  std::pair<double, double> getBounds(API::IFunction& fun, const std::string& parName) {
+  std::pair<double, double> getBounds(API::IFunction &fun,
+                                      const std::string &parName) {
     auto ct = fun.getConstraint(fun.parameterIndex(parName));
     if (ct == nullptr) {
-      throw std::runtime_error("Parameter " + parName + " doesn't have constraint");
+      throw std::runtime_error("Parameter " + parName +
+                               " doesn't have constraint");
     }
-    auto bc = dynamic_cast<Constraints::BoundaryConstraint*>(ct);
+    auto bc = dynamic_cast<Constraints::BoundaryConstraint *>(ct);
     if (ct == nullptr) {
-      throw std::runtime_error("Parameter " + parName + " doesn't have boundary constraint");
+      throw std::runtime_error("Parameter " + parName +
+                               " doesn't have boundary constraint");
     }
     return std::make_pair(bc->lower(), bc->upper());
   }
-
 };
 
 #endif /*CRYSTALFIELDSPECTRUMTEST_H_*/
