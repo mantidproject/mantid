@@ -427,7 +427,6 @@ def chbmts(a, b, c, m, x):
     d = 0.0
     ddd = 0.0
     y = (2.0*x-a-b)/(b-a)
-    y2 = 2.0*y
     for j in range(m-1, 0, -1):
         sv = d
         d = 2.*y*d - ddd + c[j]

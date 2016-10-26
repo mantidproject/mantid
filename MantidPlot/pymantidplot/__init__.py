@@ -1246,3 +1246,59 @@ def createDetectorTable(source):
         return new_proxy(proxies.MDIWindow, _qti.app.mantidUI.createDetectorTable, workspace_names[0])
 
 # -----------------------------------------------------------------------------
+def plotSubplots(source, indices, distribution = mantidqtpython.MantidQt.DistributionDefault, error_bars=False, window=None):
+    """Open a tiled plot.
+
+    This plots one or more spectra, with X as the bin boundaries,
+    and Y as the counts in each bin.
+    
+    If one workspace, each spectrum gets its own tile.
+    Otherwise, each workspace gets its own tile.
+
+    Args:
+        source: list of workspace names
+        indices: workspace index, or tuple or list of workspace indices to plot
+        distribution: whether or not to plot as a distribution
+        error_bars: bool, set to True to add error bars.
+        window: window used for plotting. If None a new one will be created
+    Returns:
+        A handle to window if one was specified, otherwise a handle to the created one. None in case of error.
+    """
+
+    workspace_names = getWorkspaceNames(source)
+   
+    # Deal with workspace groups that may contain various types:
+    # Only want to plot MatrixWorkspaces
+    to_plot = []
+    for name in workspace_names:
+        if isinstance(mantid.api.mtd[name], mantid.api.MatrixWorkspace):
+            to_plot.append(name)
+            
+    __checkPlotWorkspaces(to_plot)
+    # check spectrum indices
+    index_list = __getWorkspaceIndices(indices)
+    if len(index_list) == 0:
+        raise ValueError("No spectrum indices given")
+    for idx in index_list:
+        if idx < 0:
+            raise ValueError("Wrong spectrum index (<0): %d" % idx)
+    for name in to_plot:
+        max_spec = workspace(name).getNumberHistograms() - 1
+        for idx in index_list:
+            if idx > max_spec:
+                raise ValueError("Wrong spectrum index for workspace '%s': %d, which is bigger than the"
+                                 " number of spectra in this workspace - 1 (%d)" % (name, idx, max_spec))
+    
+    # Unwrap the window object, if any specified
+    if window != None:
+        window = window._getHeldObject()
+    
+    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotSubplots,
+                                          to_plot, index_list, distribution, error_bars, window))
+    if graph._getHeldObject() == None:
+        raise RuntimeError("Cannot create graph, see log for details.")
+    else:
+        return graph
+
+
+# ----------------------------------------------------------------------------------------------------
