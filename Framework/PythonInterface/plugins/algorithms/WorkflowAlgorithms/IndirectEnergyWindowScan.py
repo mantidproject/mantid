@@ -57,7 +57,7 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
     def PyInit(self):
         # Input properties
         self.declareProperty(StringArrayProperty(name='RunNumbers'),
-                             doc='Comma separated list of input files')
+                             doc='List of input runs')
 
         self.declareProperty(name='LoadLogFiles', defaultValue=True,
                              doc='Load log files when loading runs')
@@ -196,8 +196,7 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
 
         runs = self.getProperty('RunNumbers').value
         self._data_files = []
-        for idx in range(len(runs)):
-            self._data_files.append(self._instrument_name.lower() + runs[idx])
+        self._format_runs(runs)
         first_file = self._data_files[0]
         self._sum_files = False
         self._load_logs = self.getProperty('LoadLogFiles').value
@@ -284,6 +283,17 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
         eisf_plot = mp.plotSpectrum(self._scan_ws + '_eisf', 0, error_bars=True)  # noqa
         if self._msdfit:
             msd_plot = mp.plotSpectrum(self._scan_ws + '_msd', 1, error_bars=True)  # noqa
+
+    def _format_runs(self, runs):
+        run_list = []
+        for run in runs:
+            if '-' in run:
+                a, b = run.split('-')
+                run_list.extend(range(int(a), int(b)+1))
+            else:
+                run_list.append(int(run))
+        for idx in run_list:
+            self._data_files.append(self._instrument_name.lower() + str(idx))
 
 
 # Register algorithm with Mantid
