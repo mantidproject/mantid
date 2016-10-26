@@ -713,7 +713,7 @@ public:
 
   bool insertCurve(Table*, const QString&, int style = 1, int startRow = 0, int endRow = -1);
   bool insertCurve(Table*, const QString&, const QString&, int style = 1, int startRow = 0, int endRow = -1);
-  bool insertCurve(QString, int, bool=false, Graph::CurveType style = Graph::Unspecified);
+  bool insertCurve(QString, int, bool=false, Graph::CurveType style = Graph::Unspecified, bool=false);
   void insertCurve(Graph*, int);
   bool addCurves(Table*, SIP_PYTUPLE, int=0, double=1, int=3, int=0, int=-1);
 %MethodCode
@@ -915,6 +915,7 @@ public:
   Graph* layer(int num);
   Graph* addLayer(int = 0, int = 0, int = 0, int = 0);
   void insertCurve(MultiLayer* ml, int i);
+  void setCommonAxisScales();
   void setCols(int);
   void setRows(int);
   void setName(const QString&);
@@ -1486,6 +1487,10 @@ public:
   MultiLayer* plotMDList(const QList<QString>& wsNames, const int plotAxis,
     const Mantid::API::MDNormalization normalization, const bool showErrors, MultiLayer* window = NULL,
     bool clearWindow = false);
+    
+  MultiLayer *plotSubplots(const QList<QString>& wsNames, const QList<int> &indexList, 
+                           MantidQt::DistributionFlag distr = MantidQt::DistributionDefault, 
+                           bool errs = false, MultiLayer *plotWindow = NULL);
 
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   void convertToWaterfall(MultiLayer*);
