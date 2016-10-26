@@ -1,8 +1,16 @@
 #ifndef MANTID_CURVEFITTING_CRYSTALFIELDPEAKUTILS_H_
 #define MANTID_CURVEFITTING_CRYSTALFIELDPEAKUTILS_H_
-#include "MantidAPI/IPeakFunction.h"
+#include <string>
+#include <vector>
 
 namespace Mantid {
+
+namespace API{
+  class CompositeFunction;
+  class FunctionValues;
+  class IPeakFunction;
+}
+
 namespace CurveFitting {
 namespace Functions {
 namespace CrystalFieldUtils {
