@@ -98,3 +98,4 @@ class LARMORMultiPeriodEventModeLoading(stresstesting.MantidStressTest):
 
     def validate(self):
         return self.success
+
