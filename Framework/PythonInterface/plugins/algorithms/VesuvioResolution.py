@@ -3,8 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import *
 from mantid.kernel import *
-import mantid
 from vesuvio.base import VesuvioBase
+
 
 class VesuvioResolution(VesuvioBase):
 
