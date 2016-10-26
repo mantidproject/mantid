@@ -6,7 +6,8 @@ import numpy as n
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
 
 
 def saveCustom(idx,fname,sep = ' ',logs = [],title = False,error = False):

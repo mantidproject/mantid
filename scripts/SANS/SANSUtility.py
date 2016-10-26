@@ -1115,7 +1115,8 @@ class CummulativeTimeSeriesPropertyAdder(object):
         log_name_start_time = "start_time"
         if (run_lhs.hasProperty(log_name_start_time) and
                 run_rhs.hasProperty(log_name_start_time)):
-            convert_to_date = lambda val: DateAndTime(val) if isinstance(val, str) else val
+            def convert_to_date(val):
+                return DateAndTime(val) if isinstance(val, str) else val
             self._start_time_lhs = convert_to_date(run_lhs.getProperty(log_name_start_time).value)
             self._start_time_rhs = convert_to_date(run_rhs.getProperty(log_name_start_time).value)
 
