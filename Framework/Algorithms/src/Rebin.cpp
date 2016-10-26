@@ -255,8 +255,8 @@ void Rebin::exec() {
     PARALLEL_FOR2(inputWS, outputWS)
     for (int hist = 0; hist < histnumber; ++hist) {
       PARALLEL_START_INTERUPT_REGION
-      outputWS->setHistogram(hist, std::move(HistogramData::rebin(
-                                       inputWS->histogram(hist), XValues_new)));
+      outputWS->setHistogram(
+          hist, HistogramData::rebin(inputWS->histogram(hist), XValues_new));
 
       prog.report(name());
       PARALLEL_END_INTERUPT_REGION
