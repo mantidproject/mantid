@@ -1,15 +1,17 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm
-from mantid.kernel import Direction, StringListValidator
+from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty,\
+    PythonAlgorithm
+from mantid.kernel import Direction
 import numpy
 import roundinghelper
+
 
 class BinWidthAtX(PythonAlgorithm):
 
     _PROP_BIN_WIDTH = 'BinWidth'
-    _PROP_INPUT_WS  = 'InputWorkspace'
-    _PROP_X_VALUE   = 'X'
+    _PROP_INPUT_WS = 'InputWorkspace'
+    _PROP_X_VALUE = 'X'
 
     def category(self):
         '''
@@ -39,10 +41,18 @@ class BinWidthAtX(PythonAlgorithm):
         '''
         Declares algorithm's properties.
         '''
-        self.declareProperty(MatrixWorkspaceProperty(name=self._PROP_INPUT_WS, defaultValue='', direction=Direction.Input), doc='The workspace containing the input data')
-        self.declareProperty(name=self._PROP_X_VALUE, defaultValue=0.0, direction=Direction.Input, doc='')
+        self.declareProperty(
+            MatrixWorkspaceProperty(name=self._PROP_INPUT_WS,
+                                    defaultValue='',
+                                    direction=Direction.Input),
+            doc='The workspace containing the input data')
+        self.declareProperty(
+            name=self._PROP_X_VALUE, defaultValue=0.0,
+            direction=Direction.Input, doc='')
         roundinghelper.declare_rounding_property(self)
-        self.declareProperty(name=self._PROP_BIN_WIDTH, defaultValue=0.0, direction=Direction.Output, doc='The averaged bin width')
+        self.declareProperty(
+            name=self._PROP_BIN_WIDTH, defaultValue=0.0,
+            direction=Direction.Output, doc='The averaged bin width')
 
     def PyExec(self):
         '''
@@ -50,7 +60,8 @@ class BinWidthAtX(PythonAlgorithm):
         '''
         inputWs = self.getProperty(self._PROP_INPUT_WS).value
         x = self.getProperty(self._PROP_X_VALUE).value
-        roundingMode = self.getProperty(roundinghelper.PROP_NAME_ROUNDING_MODE).value
+        roundingMode = self.getProperty(
+            roundinghelper.PROP_NAME_ROUNDING_MODE).value
         inputIsDistribution = inputWs.isDistribution()
         if inputIsDistribution:
             inputWs = ConvertToHistogram(inputWs)
@@ -59,7 +70,10 @@ class BinWidthAtX(PythonAlgorithm):
         for wsIndex in range(n):
             xs = inputWs.readX(wsIndex)
             if x <= xs[0] or x > xs[-1]:
-                raise RuntimeError(self._PROP_X_VALUE + ' = {0} out of range for workspace index {1}'.format(x, wsIndex))
+                raise RuntimeError(
+                    self._PROP_X_VALUE +
+                    ' = {0} out of range for workspace index {1}'
+                    .format(x, wsIndex))
             binIndex = inputWs.binIndexOf(x, wsIndex)
             dx = xs[binIndex + 1] - xs[binIndex]
             widths[wsIndex] = dx
