@@ -320,14 +320,15 @@ void MSDFit::plotClicked() {
   if (checkADSForPlotSaveWorkspace(wsName.toStdString(), true)) {
     // Get the workspace
     auto groupWs =
-      AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
-        wsName.toStdString());
+        AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
+            wsName.toStdString());
     auto groupWsNames = groupWs->getNames();
     if (groupWsNames.size() != 1) {
       plotSpectrum(QString::fromStdString(m_pythonExportWsName), 1);
     }
 
-    else plotSpectrum(wsName, 0, 2);
+    else
+      plotSpectrum(wsName, 0, 2);
   }
 }
 
