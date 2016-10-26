@@ -11,6 +11,8 @@ Algorithms
 New
 ###
 
+- :ref:`BinWidthAtX <algm-BinWidthAtX>` and :ref:`MedianBinWidth <algm-MedianBinWidth>` provide information about the bin widths of histograms.
+
 
 Improved
 ########
