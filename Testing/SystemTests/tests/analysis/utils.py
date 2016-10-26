@@ -1,9 +1,9 @@
 #pylint: disable=invalid-name
-''' SVN Info:  	The variables below will only get subsituted at svn checkout if
-		the repository is configured for variable subsitution.
+''' SVN Info:   The variables below will only get subsituted at svn checkout if
+                the repository is configured for variable subsitution.
 
-	$Id$
-	$HeadURL$
+        $Id$
+        $HeadURL$
 |=============================================================================|=======|
 1                                                                            80   <tab>
 '''

@@ -45,7 +45,6 @@ def saveANSTO(idx,fname):
     fname+='.txt'
     print "FILENAME: ", fname
     a1=mtd[str(idx.text())]
-    titl='#'+a1.getTitle()+'\n'
     x1=a1.readX(0)
     X1=n.zeros((len(x1)-1))
     for i in range(0,len(x1)-1):
@@ -67,7 +66,6 @@ def saveMFT(idx,fname,logs):
     fname+='.mft'
     print "FILENAME: ", fname
     a1=mtd[str(idx.text())]
-    titl=a1.getTitle()+'\n'
     x1=a1.readX(0)
     X1=n.zeros((len(x1)-1))
     for i in range(0,len(x1)-1):

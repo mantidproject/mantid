@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 import os
 
-from distutils.core import setup
-
 # Compile resource file for HFIR SANS and EQSANS
 try:
 

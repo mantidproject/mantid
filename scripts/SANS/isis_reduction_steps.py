@@ -155,8 +155,6 @@ class LoadRun(object):
         """
         if extra_options is None:
             extra_options = dict()
-        _inst = inst
-        _is_can = is_can
         if self._period != self.UNSET_PERIOD:
             workspace = self._get_workspace_name(self._period)
             if not can_load_as_event_workspace(self._data_file):
@@ -256,7 +254,6 @@ class LoadRun(object):
         If reload is True, it will try to get all the information necessary to reload this
         workspace from the data file.
         """
-        _reducer = reducer
         assert isinstance(self._data_file, Workspace)
         ws_pointer = self._data_file
 
@@ -395,7 +392,7 @@ class LoadRun(object):
         return numPeriods
 
     def _getHistory(self, wk_name):
-        _ws = getWorkspaceReference(wk_name)
+        getWorkspaceReference(wk_name)
 
         if isinstance(wk_name, Workspace):
             ws_h = wk_name.getHistory()
@@ -463,7 +460,6 @@ class LoadTransmissions(object):
         self._period_d = period
 
     def execute(self, reducer, workspace):
-        _workspace = workspace
         if self._trans_name not in [None, '']:
             self.trans = LoadRun(self._trans_name, trans=True, reload=self._reload, entry=self._period_t)
             self.trans._assignHelper(reducer)
@@ -519,7 +515,7 @@ class CanSubtraction(ReductionStep):
 
         # clean up the workspaces ready users to see them if required
         if reducer.to_Q.output_type == '1D':
-            _rem_nans = StripEndNans()
+            StripEndNans()
 
         self._keep_partial_results(tmp_smp, tmp_can)
 
@@ -565,7 +561,6 @@ class Mask_ISIS(ReductionStep):
 
     def __init__(self, timemask='', timemask_r='', timemask_f='',
                  specmask='', specmask_r='', specmask_f=''):
-        _specmask = specmask
         self._xml = []
 
         # these spectra will be masked by the algorithm MaskDetectors
@@ -630,10 +625,6 @@ class Mask_ISIS(ReductionStep):
             @param complement: mask in the direction of the normal or away
             @return the xml string
         """
-        if complement:
-            _addition = '#'
-        else:
-            _addition = ''
         return '<infinite-plane id="' + str(id) + '">' + \
                '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + \
                str(plane_pt[2]) + '" />' + \
@@ -1996,7 +1987,6 @@ class TransmissionCalc(ReductionStep):
     YUNITLABEL_TRANSMISSION_RATIO = "Transmission"
 
     def __init__(self, loader=None):
-        _loader = loader
         super(TransmissionCalc, self).__init__()
         # set these variables to None, which means they haven't been set and defaults will be set further down
         self.fit_props = ['lambda_min', 'lambda_max', 'fit_method', 'order']
@@ -2227,7 +2217,6 @@ class TransmissionCalc(ReductionStep):
             or estimates the proportion of neutrons that are transmitted
             through the sample
         """
-        _workspace = workspace
         self.output_wksp = None
 
         # look for run files that contain transmission data
@@ -2876,7 +2865,6 @@ class ConvertToQISIS(ReductionStep):
         '''
         # Here we need to check if the binning has changed, ie if the
         # existing
-        _dummy_ws = det_bank_workspace
         raise RuntimeError("The QResolution optimization has not been implemented yet")
 
     def set_q_resolution_moderator(self, file_name):
@@ -3035,7 +3023,6 @@ class UnitsConvert(ReductionStep):
             @param workspace: the name of the workspace to convert
             @param workspace: the name of the workspace to convert
         """
-        _reducer = reducer
         ConvertUnits(InputWorkspace=workspace, OutputWorkspace=workspace, Target=self._units)
 
         low_wav = self.wav_low
@@ -3167,8 +3154,6 @@ class BaseBeamFinder(ReductionStep):
         return [self._beam_center_x, self._beam_center_y]
 
     def execute(self, reducer, workspace=None):
-        _reducer = reducer
-        _workspace = workspace
         return "Beam Center set at: %s %s" % (str(self._beam_center_x), str(self._beam_center_y))
 
     def update_beam_center(self, beam_center_x, beam_center_y):
@@ -3221,7 +3206,6 @@ class UserFile(ReductionStep):
         return fresh
 
     def execute(self, reducer, workspace=None):
-        _workspace = workspace
         if self.filename is None:
             raise AttributeError('The user file must be set, use the function MaskFile')
         user_file = self.filename
@@ -4009,7 +3993,6 @@ class GetOutputName(ReductionStep):
             @param reducer the reducer object that called this step
             @param workspace un-used
         """
-        _workspace = workspace
         reducer.output_wksp = reducer.get_out_ws_name()
 
 
@@ -4019,7 +4002,6 @@ class ReplaceErrors(ReductionStep):
         self.name = None
 
     def execute(self, reducer, workspace):
-        _reducer = reducer
         ReplaceSpecialValues(InputWorkspace=workspace, OutputWorkspace=workspace, NaNValue="0", InfinityValue="0")
 
 
@@ -4069,7 +4051,6 @@ class StripEndNans(ReductionStep):
             @param reducer: unused
             @param workspace: the workspace to convert
         """
-        _reducer = reducer
         result_ws = mtd[workspace]
         if result_ws.getNumberHistograms() != 1:
             # Strip zeros is only possible on 1D workspaces
@@ -4231,7 +4212,6 @@ class GetSampleGeom(ReductionStep):
             Reads the geometry information stored in the workspace
             but doesn't replace values that have been previously set
         """
-        _reducer = reducer
         wksp = mtd[workspace]
         if isinstance(wksp, WorkspaceGroup):
             wksp = wksp[0]

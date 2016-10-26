@@ -105,7 +105,7 @@ QString getFileDialogFilter(const std::vector<std::string> &exts,
     }
     filter = filter.trimmed();
   }
-  filter.append("All Files (*.*)");
+  filter.append("All Files (*)");
   return filter;
 }
 

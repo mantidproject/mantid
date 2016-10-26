@@ -1,14 +1,8 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
-import reduction_gui.widgets.util as util
+from PyQt4 import QtGui, QtCore
 import math
-import os
-import time
-import sys
-from functools import partial
 from reduction_gui.reduction.reflectometer.refl_data_script import DataSets as REFLDataSets
 from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
-from reduction_gui.settings.application_settings import GeneralSettings
 from base_ref_reduction import BaseRefWidget
 import ui.reflectometer.ui_data_refl_simple
 

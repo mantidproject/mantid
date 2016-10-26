@@ -248,7 +248,7 @@ class DetectorBank(object):
         self._side_corr = None
 
     def get_y_corr(self):
-        if not self._y_corr is None:
+        if self._y_corr is not None:
             return self._y_corr
         else:
             raise NotImplementedError('y correction is not used for this detector')
@@ -258,11 +258,11 @@ class DetectorBank(object):
             Only set the value if it isn't disabled
             @param value: set y_corr to this value, unless it's disabled
         """
-        if not self._y_corr is None:
+        if self._y_corr is not None:
             self._y_corr = value
 
     def get_rot_corr(self):
-        if not self._rot_corr is None:
+        if self._rot_corr is not None:
             return self._rot_corr
         else:
             raise NotImplementedError('rot correction is not used for this detector')
@@ -272,12 +272,12 @@ class DetectorBank(object):
             Only set the value if it isn't disabled
             @param value: set rot_corr to this value, unless it's disabled
         """
-        if not self._rot_corr is None:
+        if self._rot_corr is not None:
             self._rot_corr = value
 
     # 22/3/12 RKH added two new variables radius_corr, side_corr
     def get_radius_corr(self):
-        if not self._radius_corr is None:
+        if self._radius_corr is not None:
             return self._radius_corr
         else:
             raise NotImplementedError('radius correction is not used for this detector')
@@ -287,11 +287,11 @@ class DetectorBank(object):
             Only set the value if it isn't disabled
             @param value: set radius_corr to this value, unless it's disabled
         """
-        if not self._rot_corr is None:
+        if self._rot_corr is not None:
             self._radius_corr = value
 
     def get_side_corr(self):
-        if not self._side_corr is None:
+        if self._side_corr is not None:
             return self._side_corr
         else:
             raise NotImplementedError('side correction is not used for this detector')
@@ -301,7 +301,7 @@ class DetectorBank(object):
             Only set the value if it isn't disabled
             @param value: set side_corr to this value, unless it's disabled
         """
-        if not self._side_corr is None:
+        if self._side_corr is not None:
             self._side_corr = value
 
     y_corr = property(get_y_corr, set_y_corr, None, None)
@@ -390,7 +390,7 @@ class DetectorBank(object):
             is given by an orientation string and this function throws if the string is not recognised
             @param orien: the orienation string must be a string contained in the dictionary _ORIENTED
         """
-        dummy = self._ORIENTED[orien]
+        self._ORIENTED[orien]
         self._orientation = orien
 
     def crop_to_detector(self, input_name, output_name=None):
@@ -753,13 +753,6 @@ class ISISInstrument(BaseInstrument):
         @param coord2_scale_factor: scale factor for the second coordinate
         @param relative_displacement: If the the displacement is to be relative (it normally should be)
         """
-        dummy_1 = workspace
-        dummy_2 = component_name
-        dummy_3 = coord1
-        dummy_3 = coord2
-        dummy_4 = relative_displacement
-        dummy_5 = coord1_scale_factor
-        dummy_6 = coord2_scale_factor
         raise RuntimeError("Not Implemented")
 
     def cur_detector_position(self, ws_name):
@@ -768,7 +761,6 @@ class ISISInstrument(BaseInstrument):
         @param ws_name: the input workspace name
         @raise RuntimeError: Not implemented
         '''
-        dummy_1 = ws_name
         raise RuntimeError("Not Implemented")
 
     def on_load_sample(self, ws_name, beamcentre, isSample):
@@ -1629,9 +1621,9 @@ class LARMOR(ISISInstrument):
         MoveInstrumentComponent(ws, ComponentName=detBench.name(), X=xshift, Y=yshift, Z=zshift)
 
         # Deal with the angle value
-        _total_x_shift = self._rotate_around_y_axis(workspace=ws, component_name=detBench.name(),
-                                                    x_beam=xbeam, x_scale_factor=XSF,
-                                                    bench_rotation=BENCH_ROT)
+        self._rotate_around_y_axis(workspace=ws, component_name=detBench.name(),
+                                   x_beam=xbeam, x_scale_factor=XSF,
+                                   bench_rotation=BENCH_ROT)
 
         # Set the beam centre position afte the move
         self.beam_centre_pos1_after_move = xbeam  # Need to provide the angle in 1000th of a degree
@@ -1654,7 +1646,6 @@ class LARMOR(ISISInstrument):
         @param coord2_scale_factor: scale factor for the second coordinate
         @param relative_displacement: If the the displacement is to be relative (it normally should be)
         """
-        dummy_coord2_scale_factor = coord2_scale_factor
         # Shift the component in the y direction
         MoveInstrumentComponent(Workspace=workspace,
                                 ComponentName=component_name,

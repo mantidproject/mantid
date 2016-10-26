@@ -1,20 +1,17 @@
 #pylint: disable=invalid-name, too-many-arguments
-from PyQt4 import QtGui, uic, QtCore
+from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
 import math
 import os
-import time
-import sys
 from functools import partial
 from reduction_gui.reduction.reflectometer.refm_data_script import DataSets as REFMDataSets
 from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
-from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.reflectometer.ui_refm_reduction
 
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
+    import mantidplot # noqa
     from mantid.api import *
     #TODO: this will need to change once we get rid of the old python API
     from reduction.instruments.reflectometer import data_manipulation
@@ -219,7 +216,6 @@ class DataReflWidget(BaseWidget):
         self._edit_event(ctrl=self._summary.data_run_number_edit)
 
     def _edit_event(self, text=None, ctrl=None):
-        _text = text
         self._summary.edited_warning_label.show()
         util.set_edited(ctrl,True)
 
@@ -483,7 +479,6 @@ class DataReflWidget(BaseWidget):
 
     def _plot_count_vs_y(self, is_peak=True):
         # removes un-used argument warning for pylint
-        _is_peak = is_peak
         """
             Plot counts as a function of high-resolution pixels
             and select peak range
@@ -614,13 +609,11 @@ class DataReflWidget(BaseWidget):
 
     def _add_data(self):
         state = self.get_editing_state()
-        _in_list = False
         # Check whether it's already in the list
         run_numbers = self._summary.data_run_number_edit.text()
         list_items = self._summary.angle_list.findItems(run_numbers, QtCore.Qt.MatchFixedString)
         if len(list_items) > 0:
             list_items[0].setData(QtCore.Qt.UserRole, state)
-            _in_list = True
         else:
             item_widget = QtGui.QListWidgetItem(run_numbers, self._summary.angle_list)
             item_widget.setData(QtCore.Qt.UserRole, state)

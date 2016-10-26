@@ -1,14 +1,14 @@
+import os
+
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
+    import mantidplot # noqa
     from mantid.kernel import config
     from mantid.api import AnalysisDataService
     from mantid.simpleapi import LoadEmptyInstrument
     IS_IN_MANTIDPLOT = True
 except:
     pass
-
-import os
 
 
 class InstrumentParameters(object):

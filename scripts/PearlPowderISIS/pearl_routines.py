@@ -200,7 +200,7 @@ def PEARL_getfilename(run_number, ext):
     #
     # Check if file exists in default data folder & if not use alternate folder stored in "datadir"...
     #
-    if (os.path.exists(full_filename) == False):
+    if not os.path.exists(full_filename):
         print "No such file as ", full_filename, "; trying X-drive folder..."
 
         full_filename = datadir + filename
@@ -380,7 +380,7 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
     AlignDetectors(InputWorkspace=work, OutputWorkspace=work, CalibrationFile=calfile)
     DiffractionFocussing(InputWorkspace=work, OutputWorkspace=focus, GroupingFileName=groupfile)
 
-    if (debug != True):
+    if not debug:
         mtd.remove(work)
 
     for i in range(0, alg_range):
@@ -410,7 +410,7 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
             Rebin(InputWorkspace=rdata, OutputWorkspace=output, Params=tofbinning)
             # Divide(rdata,van,output)
             CropWorkspace(InputWorkspace=output, OutputWorkspace=output, XMin=0.1)
-    if (debug != True):
+    if not debug:
         mtd.remove(focus)
 
     if (mode == "all"):
@@ -442,7 +442,7 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
 
             SaveNexus(Filename=outfile, InputWorkspace=tosave, Append=True)
 
-        if (debug != True):
+        if not debug:
 
             for i in range(0, alg_range):
                 output = outwork + "_mod" + str(i + 1)
@@ -511,7 +511,7 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
 
             SaveNexus(Filename=outfile, InputWorkspace=tosave, Append=True)
 
-        if (debug != True):
+        if not debug:
 
             for i in range(0, alg_range):
                 output = outwork + "_mod" + str(i + 1)
@@ -562,7 +562,7 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
             ConvertUnits(InputWorkspace=tosave, OutputWorkspace=tosave, Target="dSpacing")
             SaveNexus(Filename=outfile, InputWorkspace=tosave, Append=True)
 
-        if (debug != True):
+        if not debug:
             for i in range(0, alg_range):
                 output = outwork + "_mod" + str(i + 1)
                 van = "van" + str(i + 1)
@@ -593,7 +593,7 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
 
             SaveNexus(Filename=outfile, InputWorkspace=output, Append=status)
 
-            if (debug != True):
+            if not debug:
                 mtd.remove(rdata)
                 mtd.remove(van)
                 mtd.remove(output)
@@ -638,7 +638,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     PEARL_read(empty, ext, wempty)
     Minus(LHSWorkspace=wvan, RHSWorkspace=wempty, OutputWorkspace=wvan)
     print "read van and empty"
-    if (debug != True):
+    if not debug:
         mtd.remove(wempty)
 
     if (absorb):
@@ -654,7 +654,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         LoadNexus(Filename=vabsorbfile, OutputWorkspace="T")
         RebinToWorkspace(WorkspaceToRebin=wvan, WorkspaceToMatch="T", OutputWorkspace=wvan)
         Divide(LHSWorkspace=wvan, RHSWorkspace="T", OutputWorkspace=wvan)
-        if (debug != True):
+        if not debug:
             mtd.remove("T")
 
     ConvertUnits(InputWorkspace=wvan, OutputWorkspace=wvan, Target="TOF")
@@ -675,12 +675,12 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     Rebin(InputWorkspace=vanfoc, OutputWorkspace=vanfoc, Params=trange)
     ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace=vanfoc, Target="dSpacing")
 
-    if (debug != True):
+    if not debug:
         mtd.remove(wvan)
 
     if (instver == "new2"):
         ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace="vanmask", Target="dSpacing")
-        if (debug != True):
+        if not debug:
             mtd.remove(vanfoc)
 
         # remove bragg peaks before spline
@@ -702,10 +702,10 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
 
         print "Finished striping-out peaks..."
 
-        if (debug != True):
+        if not debug:
             mtd.remove("vanmask")
 
-        if (debug != True):
+        if not debug:
             print "Not in debug mode so will delete all temporary workspaces"
 
         ConvertUnits(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", Target="TOF")
@@ -734,14 +734,14 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         for i in range(2, 15):
             SaveNexus(Filename=nvanfile, InputWorkspace="spline" + str(i), Append=True)
 
-        if (debug != True):
+        if not debug:
             mtd.remove("vanstrip")
             for i in range(1, 15):
                 mtd.remove("spline" + str(i))
 
     elif (instver == "new"):
         ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace="vanmask", Target="dSpacing")
-        if (debug != True):
+        if not debug:
             mtd.remove(vanfoc)
 
         # remove bragg peaks before spline
@@ -750,10 +750,10 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         for i in range(1, 12):
             StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=i)
 
-        if (debug != True):
+        if not debug:
             mtd.remove("vanmask")
 
-        if (debug != True):
+        if not debug:
             print "Not in debug mode so will delete all temporary workspaces"
         ConvertUnits(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", Target="TOF")
 
@@ -779,7 +779,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         for i in range(2, 13):
             SaveNexus(Filename=nvanfile, InputWorkspace="spline" + str(i), Append=True)
 
-        if (debug != True):
+        if not debug:
             mtd.remove("vanstrip")
 
             for i in range(1, 13):
@@ -787,7 +787,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
 
     elif (instver == "old"):
         ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace="vanmask", Target="dSpacing")
-        if (debug != True):
+        if not debug:
             mtd.remove(vanfoc)
 
         # remove bragg peaks before spline
@@ -797,7 +797,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=40, Tolerance=12, WorkspaceIndex=1)
         StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=60, Tolerance=12, WorkspaceIndex=1)
 
-        if (debug != True):
+        if not debug:
             mtd.remove("vanmask")
 
         # Mask low d region that is zero before spline
@@ -807,7 +807,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
             else:
                 MaskBins(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", XMin=0, XMax=0.06, SpectraList=reg)
 
-        if (debug != True):
+        if not debug:
             print "Not in debug mode so will delete all temporary workspaces"
 
         ConvertUnits(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", Target="TOF")
@@ -828,7 +828,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         for i in range(1, 4):
             SaveNexus(Filename=nvanfile, InputWorkspace="spline" + str(i), Append=True)
 
-        if (debug != True):
+        if not debug:
             mtd.remove("vanstrip")
             for i in range(1, 5):
                 mtd.remove("spline" + str(i))
@@ -963,7 +963,7 @@ def PEARL_atten(work, outwork, debug=False):
     ConvertToHistogram(InputWorkspace="wc_atten", OutputWorkspace="wc_atten")
     RebinToWorkspace(WorkspaceToRebin="wc_atten", WorkspaceToMatch=work, OutputWorkspace="wc_atten")
     Divide(LHSWorkspace=work, RHSWorkspace="wc_atten", OutputWorkspace=outwork)
-    if (debug != True):
+    if not debug:
         mtd.remove("wc_atten")
     return
 

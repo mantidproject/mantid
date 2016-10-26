@@ -54,15 +54,15 @@ public:
         output = boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("H")));
     // Check a couple of values
-    TS_ASSERT_EQUALS(output->readX(0).size(), 10)
-    TS_ASSERT_EQUALS(output->readY(0).size(), 10)
-    TS_ASSERT_EQUALS(output->readX(0)[1], 1)
-    TS_ASSERT_EQUALS(output->readX(0)[9], 9)
-    TS_ASSERT_EQUALS(output->readY(0)[1], 200)
-    TS_ASSERT_EQUALS(output->readY(0)[9], 200)
+    TS_ASSERT_EQUALS(output->x(0).size(), 10)
+    TS_ASSERT_EQUALS(output->y(0).size(), 10)
+    TS_ASSERT_EQUALS(output->x(0)[1], 1)
+    TS_ASSERT_EQUALS(output->x(0)[9], 9)
+    TS_ASSERT_EQUALS(output->y(0)[1], 200)
+    TS_ASSERT_EQUALS(output->y(0)[9], 200)
     // This algorithm doesn't compute errors
-    TS_ASSERT_EQUALS(output->readE(0)[1], 0)
-    TS_ASSERT_EQUALS(output->readE(0)[9], 0)
+    TS_ASSERT_EQUALS(output->e(0)[1], 0)
+    TS_ASSERT_EQUALS(output->e(0)[9], 0)
 
     TSM_ASSERT("Should have an empty unit",
                boost::dynamic_pointer_cast<Mantid::Kernel::Units::Empty>(
@@ -89,15 +89,15 @@ public:
         output = boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("V")));
     // Check a couple of values
-    TS_ASSERT_EQUALS(output->readX(0).size(), 10)
-    TS_ASSERT_EQUALS(output->readY(0).size(), 10)
-    TS_ASSERT_EQUALS(output->readX(0)[1], 1)
-    TS_ASSERT_EQUALS(output->readX(0)[9], 9)
-    TS_ASSERT_EQUALS(output->readY(0)[1], 60)
-    TS_ASSERT_EQUALS(output->readY(0)[9], 60)
+    TS_ASSERT_EQUALS(output->x(0).size(), 10)
+    TS_ASSERT_EQUALS(output->y(0).size(), 10)
+    TS_ASSERT_EQUALS(output->x(0)[1], 1)
+    TS_ASSERT_EQUALS(output->x(0)[9], 9)
+    TS_ASSERT_EQUALS(output->y(0)[1], 60)
+    TS_ASSERT_EQUALS(output->y(0)[9], 60)
     // This algorithm doesn't compute errors
-    TS_ASSERT_EQUALS(output->readE(0)[1], 0)
-    TS_ASSERT_EQUALS(output->readE(0)[9], 0)
+    TS_ASSERT_EQUALS(output->e(0)[1], 0)
+    TS_ASSERT_EQUALS(output->e(0)[9], 0)
   }
 
 private:
