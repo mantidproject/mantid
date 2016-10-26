@@ -30,6 +30,7 @@ else:
     NO_SCROLL = False
 
 import guiutility as gutil
+import peakprocesshelper as peak_util
 import fourcircle_utility as hb3a_util
 import plot3dwindow
 from multi_threads_helpers import *
@@ -449,18 +450,20 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         # gather some useful information
-        ui_dict = {}
+        ui_dict = dict()
+        ui_dict['exp number'] = str(self.ui.lineEdit_exp.text())
+        ui_dict['local spice dir'] = str(self.ui.lineEdit_localSpiceDir.text())
+        ui_dict['work dir'] = str(self.ui.lineEdit_workDir.text())
+        ui_dict['survey start'] = str(self.ui.lineEdit_surveyStartPt.text())
+        ui_dict['survey stop'] = str(self.ui.lineEdit_surveyEndPt.text())
+
         # TODO/NOW/ISSUE - Make this work!
         # lineEdit_exp and do_???
-        # lineEdit_localSpiceDir
-        # lineEdit_workDir and then
+        #
         # method
         # linked
         # to
         # pushButton_applySetup
-        #
-        # lineEdit_surveyStartPt
-        # lineEdit_surveyEndPt
 
         # export/save project
         self._myControl.export_project(project_file_name)
@@ -484,6 +487,13 @@ class MainWindow(QtGui.QMainWindow):
         # TODO/NOW/ISSUE - should make it as a queue for last n opened/saved project
         # dirty and quick solution
         self.ui.label_last1Path.setText(project_file_name)
+
+        # lineEdit_exp and do_???
+
+        # self.ui.lineEdit_localSpiceDir.setText(ui_dict['local spice dir'])
+        # self.ui.lineEdit_workDir.setText(ui_dict['work dir'])
+        # self.ui.lineEdit_surveyStartPt.setText(ui_dict['survey start'])
+        # self.ui.lineEdit_surveyEndPt.setText(ui_dict['survey stop'])
 
         return
 
@@ -1750,16 +1760,26 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog('Merging multiple scans requires more than 1 scan to be selected.')
             return
 
-        # get the scan numbers
-        scan_number_list = self.ui.tableWidget_mergeScans.get_scan_list(selected_rows)
+        # get the information from table workspace
+        exp_number = int(str(self.ui.lineEdit_exp.text()))
+        md_ws_list = list()
+        peak_center_list = list()
+        for i_row in selected_rows:
+            # get scan number and md workspace number
+            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(i_row)
+
+            md_ws_name = self.ui.tableWidget_mergeScans.get_merged_ws_name(i_row)
+            md_ws_list.append(md_ws_name)
+            # get peak center in 3-tuple
+            peak_center = self._myControl.get_peak_info(exp_number, scan_number).get_peak_center()
+            peak_center_list.append(peak_center)
+        # END-FOR
 
         # ask name for the merged workspace
         merged_ws_name, status = gutil.get_value(self)
-        print '[DB...BAT]', merged_ws_name, status
 
-        # TODO/NOW/FIXME/ISSUE - From here!!!
         # call the controller to merge the scans
-        message = self._myControl.merge_scans(scan_number_list, merged_ws_name)
+        message = self._myControl.merge_scans(md_ws_list, peak_center_list, merged_ws_name)
 
         # information
         self.pop_one_button_dialog(message)
@@ -2172,11 +2192,21 @@ class MainWindow(QtGui.QMainWindow):
         Select or de-select all rows in survey items
         :return:
         """
-        # TODO/NOW/ISSUE - make this checkbox works
-        # self.ui.checkBox_surveySelectNuclearPeaks
+        if self.ui.checkBox_surveySelectNuclearPeaks.isChecked():
+            # only select nuclear peaks
+            num_rows = self.ui.tableWidget_surveyTable.rowCount()
+            for i_row in range(num_rows):
+                peak_hkl = self.ui.tableWidget_surveyTable.get_hkl(i_row)
+                if peak_util.is_peak_nuclear(peak_hkl[0], peak_hkl[1], peak_hkl[2]):
+                    self.ui.tableWidget_surveyTable.select_row(i_row, True)
+                else:
+                    self.ui.tableWidget_surveyTable.select_row(i_row, False)
 
-        self.ui.tableWidget_surveyTable.select_all_rows(self._surveyTableFlag)
-        self._surveyTableFlag = not self._surveyTableFlag
+        else:
+            # select all peaks
+            self.ui.tableWidget_surveyTable.select_all_rows(self._surveyTableFlag)
+            self._surveyTableFlag = not self._surveyTableFlag
+        # END-IF-ELSE
 
         return
 

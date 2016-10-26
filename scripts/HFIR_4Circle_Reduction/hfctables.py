@@ -1066,6 +1066,10 @@ class ScanSurveyTable(tableBase.NTableWidget):
         self._currMinCounts = 0.
         self._currMaxCounts = sys.float_info.max
 
+        self._colIndexH = None
+        self._colIndexK = None
+        self._colIndexL = None
+
         return
 
     def filter_and_sort(self, start_scan, end_scan, min_counts, max_counts,
@@ -1153,6 +1157,18 @@ class ScanSurveyTable(tableBase.NTableWidget):
 
         return
 
+    def get_hkl(self, row_index):
+        """
+        Get peak index (HKL) from survey table (i.e., SPICE file)
+        :param row_index:
+        :return:
+        """
+        index_h = self.get_cell_value(row_index, self._colIndexH)
+        index_k = self.get_cell_value(row_index, self._colIndexK)
+        index_l = self.get_cell_value(row_index, self._colIndexL)
+
+        return index_h, index_k, index_l
+
     def get_scan_numbers(self, row_index_list):
         """
         Get scan numbers with specified rows
@@ -1235,6 +1251,10 @@ class ScanSurveyTable(tableBase.NTableWidget):
         """
         self.init_setup(ScanSurveyTable.Table_Setup)
         self.set_status_column_name('Selected')
+
+        self._colIndexH = ScanSurveyTable.Table_Setup.index(('H', 'float'))
+        self._colIndexK = ScanSurveyTable.Table_Setup.index(('K', 'float'))
+        self._colIndexL = ScanSurveyTable.Table_Setup.index(('L', 'float'))
 
         return
 

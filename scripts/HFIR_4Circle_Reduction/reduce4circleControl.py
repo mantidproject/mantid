@@ -1579,37 +1579,34 @@ class CWSCDReductionControl(object):
         axis1_range[2] = axis1_range[1] - axis1_range[0]
         axis2_range[2] = axis2_range[1] - axis2_range[0]
 
-        # bin MD
-        # TODO/NOW/FIXME - Make this work!
+        # edit the message to BinMD for the merged scans
+        binning_script = 'Peak centers are :\n'
+        for peak_center in scan_peak_centre_list:
+            binning_script += '\t%.5f, %.5f, %.5f\n' % (peak_center[0], peak_center[1], peak_center[2])
+
         if frame == 'HKL':
             # HKL space
-            # BinMD(InputWorkspace='XXX', AxisAligned=False,
-            #       BasisVector0='H,r.l.u,1,0,0',
-            #       BasisVector1='K,r.l.u,0,1,0',
-            #       BasisVector2='L,r.l.u,0,0,1',
-            #       OutputExtents='-0.657,-0.457,-0.857125,0.0715848,-1.23353,1.39895',
-            #       OutputBins='1,100,100',
-            #       Parallel=True,
-            #       OutputWorkspace='XXX_rebinned')
-
-            # option 2:
-            # BinMD(InputWorkspace='XXX',
-            #       AlignedDim0='H,-5,5,100',
-            #       AlignedDim1='K,-5,5,100',
-            #       AlignedDim2='L,-5,5,100',
-            #       OutputWorkspace='XXX_bin')
-
-            binning_script = 'BinMD(InputWorkspace=%s, OutputWorkspace=%s,...)' \
-                             '' % (merged_ws_name, merged_ws_name+'_Bin')
+            binning_script += 'BinMD(InputWorkspace=%s, ' \
+                              'AlignedDim0=\'H,%.5f,%.5f,100\', ' \
+                              'AlignedDim1=\'K,%.5f,%.5f,100\', ' \
+                              'AlignedDim2=\'L,%.5f,%.5f,100\', ' \
+                              'OutputWorkspace=%s)' % (merged_ws_name, axis0_range[0]-1, axis0_range[1] + 1,
+                                                       axis1_range[0] - 1, axis1_range[1] + 1,
+                                                       axis2_range[0] - 1, axis2_range[1] + 1,
+                                                       merged_ws_name + '_Histogram')
         elif frame == 'QSample':
             # Q-space
-            # BinMD(InputWorkspace='HB3A_Exp423_Scan81_Pt1_18_MD',
-            #       AlignedDim0='Q_sample_x,-5,5,100',
-            #       AlignedDim1='Q_sample_y,-5,5,100',
-            #       AlignedDim2='Q_sample_z,-5,5,100',
-            #       OutputWorkspace='zzz_bin')
-            binning_script = 'BinMD(InputWorkspace=%s, OutputWorkspace=%s,...)' \
-                             '' % (merged_ws_name, merged_ws_name+'_Bin')
+            binning_script += 'BinMD(InputWorkspace=%s, ' \
+                              'AlignedDim0=\'Q_sample_x,%.5f,%.5f,100\', ' \
+                              'AlignedDim1=\'Q_sample_y,%.5f,%.5f,100\', ' \
+                              'AlignedDim2=\'Q_sample_z,%.5f,%.5f,100\', ' \
+                              'OutputWorkspace=%s)' % (merged_ws_name, axis0_range[0]-1, axis0_range[1] + 1,
+                                                       axis1_range[0] - 1, axis1_range[1] + 1,
+                                                       axis2_range[0] - 1, axis2_range[1] + 1,
+                                                       merged_ws_name + '_Histogram')
+        # END-IF
+
+        binning_script += '\nNote: Here the resolution is 100.  You may modify it and view by SliceViewer.'
 
         binning_script += '\n\nRange: \n'
         binning_script += 'Axis 0: %.5f, %5f (%.5f)\n' % (axis0_range[0], axis0_range[1], axis0_range[2])
@@ -1934,25 +1931,25 @@ class CWSCDReductionControl(object):
         Refine UB matrix by fixing unit cell type
         Requirements:
           1. PeakProcessRecord in peak_info_list must have right HKL set as user specified
+          2. the index of the peaks that are used for refinement are given in PeakProcessRecord's user specified HKL
 
         :param peak_info_list:
-        :param set_hkl_int:
         :param ub_matrix_str:
         :param unit_cell_type:
-        :param use_spice_hkl:
         :return:
         """
-        # TODO/NOW/ISSUE - clean this method!!!
-
         # check inputs and return if not good
         assert isinstance(peak_info_list, list), 'peak_info_list must be a list but not %s.' % type(peak_info_list)
         if len(peak_info_list) < 6:
             return False, 'There must be at least 6 peaks for refining UB. Now only %d is given.' % len(peak_info_list)
-        assert isinstance(ub_matrix_str, str)
+
+        assert isinstance(ub_matrix_str, str), 'UB matrix must be input in form of string but not %s.' \
+                                               '' % type(ub_matrix_str)
         if len(ub_matrix_str.split(',')) != 9:
             return False, 'UB matrix string must have 9 values. Now given %d as %s.' % (len(ub_matrix_str.split(',')),
                                                                                         ub_matrix_str)
-        assert isinstance(unit_cell_type, str) and len(unit_cell_type) >= 5
+        assert isinstance(unit_cell_type, str) and len(unit_cell_type) >= 5,\
+            'Unit cell type must be given as a string but not %s.' % type(unit_cell_type)
 
         # construct a new workspace by combining all single peaks
         ub_peak_ws_name = 'TempRefineUBLatticePeaks'
