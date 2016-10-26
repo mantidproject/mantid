@@ -1,5 +1,6 @@
 #include "MantidDataHandling/LoadNXSPE.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/DeltaEMode.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -215,6 +216,17 @@ void LoadNXSPE::exec() {
   }
 
   file.closeGroup(); // data group
+
+  file.openGroup("instrument", "NXinstrument");
+  entries = file.getEntries();
+  std::string instrument_name;
+  if (entries.count("name")) {
+    file.openData("name");
+    instrument_name = file.getStrData();
+    file.closeData();
+  }
+  file.closeGroup(); // instrument group
+
   file.closeGroup(); // Main entry
   file.close();
 
@@ -246,12 +258,43 @@ void LoadNXSPE::exec() {
   gm.pushAxis("psi", 0, 1, 0, psi);
   outputWS->mutableRun().setGoniometer(gm, true);
 
+  double l12 = 10.0;
+  // If an instrument name is defined, load instrument
+  if (!instrument_name.empty()) {
+    IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+    // Now execute the Child Algorithm. Catch and log any error, but don't stop.
+    try {
+      MatrixWorkspace_sptr instrumentWS = outputWS->clone();
+      loadInst->setPropertyValue("InstrumentName", instrument_name);
+      loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", instrumentWS);
+      loadInst->setProperty("RewriteSpectraMap",
+                            Mantid::Kernel::OptionalBool(false));
+      loadInst->execute();
+      // We just want to get whether the instrument is direct or indirect
+      // and the source position (because we can!).
+      // Nothing else is really needed, and also the physical detectors may not
+      // correspond to the data in the nxspe files because they may have been grouped
+      // to get each nxspe spectrum - and this group mapping is not stored.
+      Geometry::Instrument_const_sptr inst = instrumentWS->getInstrument();
+      l12 = fabs(inst->getSource()->getDistance(*(inst->getSample())));
+      outputWS->mutableRun().addLogData(new PropertyWithValue<std::string>(
+          "deltaE-mode", Kernel::DeltaEMode::asString(instrumentWS->getEMode())));
+    } catch (...) {
+      g_log.information("Cannot load the instrument definition.");
+      instrument_name.clear();
+    }
+  }
+
+  if (instrument_name.empty()) {
+    instrument_name.assign("NXSPE");
+  }
+
   // generate instrument
-  Geometry::Instrument_sptr instrument(new Geometry::Instrument("NXSPE"));
+  Geometry::Instrument_sptr instrument(new Geometry::Instrument(instrument_name));
   outputWS->setInstrument(instrument);
 
   Geometry::ObjComponent *source = new Geometry::ObjComponent("source");
-  source->setPos(0.0, 0.0, -10.0);
+  source->setPos(0.0, 0.0, -l12);
   instrument->add(source);
   instrument->markAsSource(source);
   Geometry::ObjComponent *sample = new Geometry::ObjComponent("sample");
