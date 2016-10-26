@@ -9,7 +9,6 @@ from PearlPowder_AbstractInst import AbstractInst
 import PearlPowder_common as Common
 import pearl_calib_factory
 import pearl_cycle_factory
-# TODO create static wrapper called start
 
 
 class Pearl(AbstractInst):
