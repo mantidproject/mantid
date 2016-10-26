@@ -711,7 +711,7 @@ void IFunction::setMatrixWorkspace(
 
     // check if parameter are specified in instrument definition file
 
-    const Geometry::ParameterMap &paramMap = workspace->instrumentParameters();
+    const auto &paramMap = workspace->constInstrumentParameters();
 
     Geometry::IDetector_const_sptr det;
     size_t numDetectors = workspace->getSpectrum(wi).getDetectorIDs().size();

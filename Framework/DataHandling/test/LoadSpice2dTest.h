@@ -121,8 +121,7 @@ public:
     TS_ASSERT_EQUALS(sample_aperture->getNumberParameter("Size")[0], 14.0);
 
     // Check parameter map access
-    const Mantid::Geometry::ParameterMap *m_paraMap =
-        &(ws2d->instrumentParameters());
+    const auto *m_paraMap = &(ws2d->constInstrumentParameters());
 
     // Check that we can get a parameter
     boost::shared_ptr<Mantid::Geometry::Parameter> sample_aperture_size =

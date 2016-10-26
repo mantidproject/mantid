@@ -107,7 +107,8 @@ const std::string ExperimentInfo::toString() const {
   out << "\n";
 
   // parameter files loaded
-  auto paramFileVector = this->instrumentParameters().getParameterFilenames();
+  auto paramFileVector =
+      this->constInstrumentParameters().getParameterFilenames();
   for (auto &itFilename : paramFileVector) {
     out << "Parameters from: " << itFilename;
     out << "\n";
@@ -530,7 +531,7 @@ Kernel::Property *ExperimentInfo::getLog(const std::string &log) const {
   // If the instrument has a parameter with that name then take the value as a
   // log name
   const std::string logName =
-      instrumentParameters().getString(sptr_instrument.get(), log);
+      constInstrumentParameters().getString(sptr_instrument.get(), log);
   if (logName.empty()) {
     throw std::invalid_argument(
         "ExperimentInfo::getLog - No instrument parameter named \"" + log +
@@ -556,7 +557,7 @@ double ExperimentInfo::getLogAsSingleValue(const std::string &log) const {
   // If the instrument has a parameter with that name then take the value as a
   // log name
   const std::string logName =
-      instrumentParameters().getString(sptr_instrument.get(), log);
+      constInstrumentParameters().getString(sptr_instrument.get(), log);
   if (logName.empty()) {
     throw std::invalid_argument(
         "ExperimentInfo::getLog - No instrument parameter named \"" + log +
@@ -604,9 +605,10 @@ Kernel::DeltaEMode::Type ExperimentInfo::getEMode() const {
   if (run().hasProperty(emodeTag)) {
     emodeStr = run().getPropertyValueAsType<std::string>(emodeTag);
   } else if (sptr_instrument &&
-             instrumentParameters().contains(sptr_instrument.get(), emodeTag)) {
+             constInstrumentParameters().contains(sptr_instrument.get(),
+                                                  emodeTag)) {
     Geometry::Parameter_sptr param =
-        instrumentParameters().get(sptr_instrument.get(), emodeTag);
+        constInstrumentParameters().get(sptr_instrument.get(), emodeTag);
     emodeStr = param->asString();
   } else {
     return Kernel::DeltaEMode::Elastic;
