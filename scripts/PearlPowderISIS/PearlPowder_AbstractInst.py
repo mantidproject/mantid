@@ -54,8 +54,8 @@ class AbstractInst(object):
         if input_ext is not None:
             self.default_input_ext = input_ext
 
-        PearlPowder_common.focus(instrument=self, number=run_number, fmode=focus_mode,
-                                 atten=do_attenuation, van_norm=do_van_normalisation)
+        return PearlPowder_common.focus(instrument=self, number=run_number, fmode=focus_mode,
+                                        atten=do_attenuation, van_norm=do_van_normalisation)
 
     def create_empty_calibration_by_names(self, calibration_numbers, output_file_name, group_names=None):
 

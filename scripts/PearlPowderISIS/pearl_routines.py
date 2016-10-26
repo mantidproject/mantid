@@ -8,7 +8,7 @@ import mantid.simpleapi as mantid
 import numpy as n
 
 # directories generator
-import PearlPowder_PEARL
+import PearlPowder_Pearl
 
 # The old params can be set anywhere so store them in a single global dictionary
 global g_oldParams
@@ -21,7 +21,7 @@ g_pearl_obj = None
 def _pearl_obj_singleton():
     global g_pearl_obj
     if g_pearl_obj is None:
-        g_pearl_obj = PearlPowder_PEARL.Pearl(user_name="NotSet", calibration_dir="NotSet",
+        g_pearl_obj = PearlPowder_Pearl.Pearl(user_name="NotSet", calibration_dir="NotSet",
                                               raw_data_dir="NotSet", output_dir="NotSet",
                                               input_file_ext=".raw", tt_mode="NotSet")
     return g_pearl_obj

@@ -111,6 +111,9 @@ def _apply_absorb_corrections(calibration_full_paths, corrected_van_ws, gen_abso
     corrected_van_ws = mantid.ConvertUnits(InputWorkspace=corrected_van_ws, Target="Wavelength")
 
     if gen_absorb:
+        raise NotImplementedError("Generating absorption corrections is not currently working correctly")
+        # TODO look into this and see what is missing from the original script based on the current
+        # TODO generated NXS file history
         absorb_ws = _generate_vanadium_absorb_corrections(calibration_full_paths, corrected_van_ws)
     else:
         absorb_ws = _load_van_absorb_corr(calibration_full_paths)
