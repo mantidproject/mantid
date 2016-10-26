@@ -2899,7 +2899,7 @@ std::string MuonAnalysis::getSubtractedPeriods() const {
  * Pass this information to the fit helper
  */
 void MuonAnalysis::dataToFitChanged() {
-  if (m_fitDataPresenter) {
+  if (m_fitDataPresenter && m_loaded) { // Only act if some data is loaded
     m_fitDataPresenter->setGrouping(m_groupingHelper.parseGroupingTable());
     m_fitDataPresenter->setPlotType(parsePlotType(m_uiForm.frontPlotFuncs));
     // Set busy cursor while workspaces are being created
