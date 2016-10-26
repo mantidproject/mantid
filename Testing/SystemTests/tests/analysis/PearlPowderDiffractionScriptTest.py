@@ -72,7 +72,7 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
         pearl_routines.pearl_set_userdataoutput_dir(data_out_path)
 
         # run the script by calling PEARL_focus function
-        pearl_routines.PEARL_focus('92476_92479', 'raw', fmode='all', ttmode='TT70',
+        pearl_routines.PEARL_focus('92476_92479', 'raw', fmode='mods', ttmode='TT70',
                                    atten=True, van_norm=True, debug=True)
 
         # Custom code to create and run this single test suite
