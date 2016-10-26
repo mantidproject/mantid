@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/Material.h"
+#include "MantidAPI/Sample.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -33,9 +34,9 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr corrected = alg->getProperty("OutputWorkspace");
-    const auto &tof = corrected->readX(0);
-    const auto &signal = corrected->readY(0);
-    const auto &error = corrected->readE(0);
+    const auto &tof = corrected->x(0);
+    const auto &signal = corrected->y(0);
+    const auto &error = corrected->e(0);
     const double delta(1e-06);
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
@@ -56,9 +57,9 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr corrected = alg->getProperty("OutputWorkspace");
-    const auto &tof = corrected->readX(0);
-    const auto &signal = corrected->readY(0);
-    const auto &error = corrected->readE(0);
+    const auto &tof = corrected->x(0);
+    const auto &signal = corrected->y(0);
+    const auto &error = corrected->e(0);
     const double delta(1e-06);
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);

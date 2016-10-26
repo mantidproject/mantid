@@ -1,9 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -51,9 +49,6 @@ int LoadAscii::confidence(Kernel::FileDescriptor &descriptor) const {
   return confidence;
 }
 
-//--------------------------------------------------------------------------
-// Protected methods
-//--------------------------------------------------------------------------
 /**
 * Process the header information. This implementation just skips it entirely.
 * @param file :: A reference to the file stream
@@ -204,11 +199,14 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
     }
 
     for (size_t i = 0; i < numSpectra; ++i) {
-      spectra[i].dataX().push_back(values[0]);
-      spectra[i].dataY().push_back(values[i * 2 + 1]);
+      auto hist = spectra[i].histogram();
+      hist.resize(hist.size() + 1);
+      hist.mutableX().back() = values[0];
+      hist.mutableY().back() = values[i * 2 + 1];
       if (haveErrors) {
-        spectra[i].dataE().push_back(values[i * 2 + 2]);
+        hist.mutableE().back() = values[i * 2 + 2];
       }
+      spectra[i].setHistogram(hist);
     }
     if (haveXErrors) {
       // Note: we only have X errors with 4-column files.
@@ -236,16 +234,8 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
   }
 
   for (size_t i = 0; i < numSpectra; ++i) {
-    localWorkspace->dataX(i) = spectra[i].dataX();
-    localWorkspace->dataY(i) = spectra[i].dataY();
-    /* If Y or E errors are not there, DON'T copy across as the 'spectra'
-       vectors
-       have not been filled above. The workspace will by default have vectors of
-       the right length filled with zeroes. */
-    if (haveErrors)
-      localWorkspace->dataE(i) = spectra[i].dataE();
-    if (haveXErrors)
-      localWorkspace->setSharedDx(i, spectra[i].sharedDx());
+    localWorkspace->setHistogram(i, spectra[i].histogram());
+
     // Just have spectrum number start at 1 and count up
     localWorkspace->getSpectrum(i).setSpectrumNo(static_cast<specnum_t>(i) + 1);
   }

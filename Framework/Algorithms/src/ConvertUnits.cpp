@@ -674,7 +674,7 @@ const std::vector<double> ConvertUnits::calculateRebinParams(
         auto &XData = workspace->x(i);
         double xfront = XData.front();
         double xback = XData.back();
-        if (boost::math::isfinite(xfront) && boost::math::isfinite(xback)) {
+        if (std::isfinite(xfront) && std::isfinite(xback)) {
           if (xfront < XMin)
             XMin = xfront;
           if (xback > XMax)
@@ -813,18 +813,18 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
       auto edges = workspace->binEdges(j);
       auto k = lastBins[j];
 
-      result->mutableX(j).assign(edges.cbegin(), edges.cbegin() + k);
+      auto &X = result->mutableX(j);
+      std::copy(edges.cbegin(), edges.cbegin() + k, X.begin());
 
       // If the entire X range is not covered, generate fake values.
       if (k < maxBins) {
-        std::iota(result->mutableX(j).begin() + k, result->mutableX(j).end(),
-                  workspace->x(j)[k] + 1);
+        std::iota(X.begin() + k, X.end(), workspace->x(j)[k] + 1);
       }
 
-      result->mutableY(j)
-          .assign(workspace->y(j).cbegin(), workspace->y(j).cbegin() + (k - 1));
-      result->mutableE(j)
-          .assign(workspace->e(j).cbegin(), workspace->e(j).cbegin() + (k - 1));
+      std::copy(workspace->y(j).cbegin(), workspace->y(j).cbegin() + (k - 1),
+                result->mutableY(j).begin());
+      std::copy(workspace->e(j).cbegin(), workspace->e(j).cbegin() + (k - 1),
+                result->mutableE(j).begin());
     }
   }
 

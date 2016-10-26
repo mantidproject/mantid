@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/Run.h"
 
 #include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
@@ -99,6 +100,57 @@ public:
     AnalysisDataService::Instance().remove(outWSName + "_group");
     AnalysisDataService::Instance().remove(outWSName + "_offsets");
     AnalysisDataService::Instance().remove(outWSName + "_mask");
+  }
+};
+
+class LoadCalFileTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    // Since we have no control over the cal file size
+    // instead we setup lots of load algorithms and run it
+    // multiple times to create a stable time for this test
+    loadAlgPtrArray.resize(numberOfIterations);
+    for (auto &vectorItem : loadAlgPtrArray) {
+      vectorItem = setupAlg();
+    }
+  }
+
+  void testLoadCalFilePerformance() {
+    for (int i = 0; i < numberOfIterations; i++) {
+      TS_ASSERT_THROWS_NOTHING(loadAlgPtrArray[i]->execute());
+    }
+  }
+
+  void tearDown() override {
+    for (size_t i = 0; i < loadAlgPtrArray.size(); i++) {
+      delete loadAlgPtrArray[i];
+    }
+    loadAlgPtrArray.clear();
+
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
+private:
+  const int numberOfIterations = 5; // Controls performance test speed
+  std::vector<LoadCalFile *> loadAlgPtrArray;
+
+  const std::string outWSName = "LoadCalFileTest";
+
+  LoadCalFile *setupAlg() {
+
+    LoadCalFile *loadAlg = new LoadCalFile;
+
+    loadAlg->initialize();
+    loadAlg->setPropertyValue("InstrumentName", "GEM");
+    loadAlg->setProperty("MakeGroupingWorkspace", true);
+    loadAlg->setProperty("MakeOffsetsWorkspace", true);
+    loadAlg->setProperty("MakeMaskWorkspace", true);
+    loadAlg->setPropertyValue("CalFilename", "offsets_2006_cycle064.cal");
+    loadAlg->setPropertyValue("WorkspaceName", outWSName);
+
+    loadAlg->setRethrows(true);
+
+    return loadAlg;
   }
 };
 

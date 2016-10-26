@@ -24,6 +24,7 @@ from mantid.api import MatrixWorkspace
 
 import unittest
 
+
 def run_fit(wks, function, minimizer='Levenberg-Marquardt', cost_function='Least squares'):
     """
     Fits the data in a workspace with a function, using the algorithm Fit.
@@ -46,6 +47,7 @@ def run_fit(wks, function, minimizer='Levenberg-Marquardt', cost_function='Least
     errors = param_table.column(2)[:-1]
 
     return params, errors
+
 
 def compare_relative_errors(values_fitted, reference_values, tolerance=1e-6):
     """
@@ -86,6 +88,7 @@ def compare_relative_errors(values_fitted, reference_values, tolerance=1e-6):
             raise RuntimeError("Some results were not as accurate as expected. Please check the log "
                                "messages for details")
 
+
 def load_fitting_test_file_ascii(filename):
     """
     Loads an ascii file in with X,Y,E columns
@@ -100,6 +103,8 @@ def load_fitting_test_file_ascii(filename):
     return wks
 
 # pylint: disable=too-many-public-methods
+
+
 class TwoGaussPeaksEVSData(unittest.TestCase):
     """
     Load a processed ISIS Vesuvio data.
@@ -179,6 +184,7 @@ class SineLikeMuonExperimentAsymmetry(unittest.TestCase):
         fitted_params, _ = run_fit(self.workspace, function_definition)
         compare_relative_errors(fitted_params, expected_params)
 
+
 class VanadiumPatternFromENGINXSmoothing(unittest.TestCase):
     """
     Tests the fitting of data from a Vanadium run on the instrument ENGIN-X. This uses data
@@ -213,8 +219,7 @@ class VanadiumPatternFromENGINXSmoothing(unittest.TestCase):
                            103.07539466368209, 88.69333062995749, 73.2453746596794, 57.94761712646885,
                            46.150107399338026, 33.49607446438909, 27.023391825663943, 19.660388795715143,
                            14.846016985914035, 9.65919973049868, 5.724008517073549, 1.9527932349469075,
-                           -0.9197805852038337, 10.656047152998436, 0.0
-                          ]
+                           -0.9197805852038337, 10.656047152998436, 0.0]
 
         # Note: ignoring parameter errors. Note the higher tolerance so that it works on all platforms
         fitted_params, _ = run_fit(self.workspace, function_definition)
@@ -228,12 +233,12 @@ class VanadiumPatternFromENGINXSmoothing(unittest.TestCase):
         expected_params = [575.5043460508207, -362.0695583401004, 722.7394915082397, 2621.9749776340186,
                            1572.450059153195, 836.417481475315, 361.6875979793134, 240.00983642384153,
                            132.46098325093416, 63.95362315830608, 17.41805806345004, 0.8684078907341928,
-                           -5.204195324981802
-                          ]
+                           -5.204195324981802]
 
         # Note: ignoring parameter errors. Note the higher tolerance so that it works on all platforms
         fitted_params, _ = run_fit(self.workspace, function_definition)
         compare_relative_errors(fitted_params, expected_params, tolerance=1e-4)
+
 
 class WeightedLeastSquaresTest(stresstesting.MantidStressTest):
 

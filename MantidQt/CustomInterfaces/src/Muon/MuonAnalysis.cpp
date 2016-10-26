@@ -564,7 +564,7 @@ void MuonAnalysis::runSaveGroupButton() {
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
-  filter += ";;AllFiles (*.*)";
+  filter += ";;AllFiles (*)";
   QString groupingFile = MantidQt::API::FileDialogHandler::getSaveFileName(
       this, "Save Grouping file as", prevPath, filter);
 
@@ -603,7 +603,7 @@ void MuonAnalysis::runLoadGroupButton() {
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
-  filter += ";;AllFiles (*.*)";
+  filter += ";;AllFiles (*)";
   QString groupingFile = QFileDialog::getOpenFileName(
       this, "Load Grouping file", prevPath, filter);
   if (groupingFile.isEmpty() || QFileInfo(groupingFile).isDir())
@@ -2103,36 +2103,32 @@ void MuonAnalysis::allowLoading(bool enabled) {
 *   Check to see if the appending option is true when the previous button has
 * been pressed and acts accordingly
 */
-void MuonAnalysis::checkAppendingPreviousRun() {
-  if (m_uiForm.mwRunFiles->getText().isEmpty()) {
-    return;
-  }
-
-  allowLoading(false);
-
-  if (m_uiForm.mwRunFiles->getText().contains("-")) {
-    setAppendingRun(-1);
-  } else {
-    // Subtact one from the current run and load
-    changeRun(-1);
-  }
-}
+void MuonAnalysis::checkAppendingPreviousRun() { checkAppendingRun(-1); }
 
 /**
 *   Check to see if the appending option is true when the next button has been
 * pressed and acts accordingly
 */
-void MuonAnalysis::checkAppendingNextRun() {
-  if (m_uiForm.mwRunFiles->getText().isEmpty())
+void MuonAnalysis::checkAppendingNextRun() { checkAppendingRun(1); }
+
+/**
+ * Check to see if the appending option is true when the next/previous button
+ * has been pressed, and load accordingly
+ * @param direction :: +1 for "next", -1 for "previous"
+ */
+void MuonAnalysis::checkAppendingRun(const int direction) {
+  const auto &runPath = m_uiForm.mwRunFiles->getText();
+  if (runPath.isEmpty()) {
     return;
+  }
 
+  const int sign = direction < 0 ? -1 : 1;
   allowLoading(false);
-
-  if (m_uiForm.mwRunFiles->getText().contains("-")) {
-    setAppendingRun(1);
+  const auto runString = runPath.split(Poco::Path::separator()).last();
+  if (runString.contains("-")) {
+    setAppendingRun(sign); // append next/previous run
   } else {
-    // Add one to current run and laod
-    changeRun(1);
+    changeRun(sign); // replace with next/previous run
   }
 }
 
@@ -2903,7 +2899,7 @@ std::string MuonAnalysis::getSubtractedPeriods() const {
  * Pass this information to the fit helper
  */
 void MuonAnalysis::dataToFitChanged() {
-  if (m_fitDataPresenter) {
+  if (m_fitDataPresenter && m_loaded) { // Only act if some data is loaded
     m_fitDataPresenter->setGrouping(m_groupingHelper.parseGroupingTable());
     m_fitDataPresenter->setPlotType(parsePlotType(m_uiForm.frontPlotFuncs));
     // Set busy cursor while workspaces are being created

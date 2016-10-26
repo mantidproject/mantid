@@ -4,8 +4,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
-
 namespace Mantid {
 using namespace API;
 using namespace DataObjects;
@@ -63,21 +61,20 @@ void WeightedMeanOfWorkspace::exec() {
     if (spectrumInfo.hasDetectors(i))
       if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
         continue;
-    MantidVec y = inputWS->dataY(i);
-    MantidVec e = inputWS->dataE(i);
+    auto &y = inputWS->y(i);
+    auto &e = inputWS->e(i);
     double weight = 0.0;
     for (std::size_t j = 0; j < y.size(); ++j) {
-      if (!boost::math::isnan(y[j]) && !boost::math::isinf(y[j]) &&
-          !boost::math::isnan(e[j]) && !boost::math::isinf(e[j])) {
+      if (std::isfinite(y[j]) && std::isfinite(e[j])) {
         weight = 1.0 / (e[j] * e[j]);
         averageValue += (y[j] * weight);
         weightSum += weight;
       }
     }
   }
-  singleValued->dataX(0)[0] = 0.0;
-  singleValued->dataY(0)[0] = averageValue / weightSum;
-  singleValued->dataE(0)[0] = std::sqrt(weightSum);
+  singleValued->mutableX(0)[0] = 0.0;
+  singleValued->mutableY(0)[0] = averageValue / weightSum;
+  singleValued->mutableE(0)[0] = std::sqrt(weightSum);
   this->setProperty("OutputWorkspace", singleValued);
 }
 

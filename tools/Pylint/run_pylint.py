@@ -29,6 +29,7 @@ OUTPUT_PREFIX = "PYLINT-"
 
 #------------------------------------------------------------------------------
 
+
 class Results(object):
     """
     Keep track of the check pass/failure status
@@ -102,6 +103,7 @@ class Results(object):
 
 #------------------------------------------------------------------------------
 
+
 def main(argv):
     """
     Main entry point
@@ -124,6 +126,7 @@ def main(argv):
 
 #------------------------------------------------------------------------------
 
+
 def parse_arguments(argv):
     """
     Parse arguments for script input
@@ -140,7 +143,7 @@ def parse_arguments(argv):
                       help="If provided, use this as the executable path."
                            "Default is to simply call 'pylint'")
     parser.add_option("-f", "--format", dest="format", metavar = "FORMAT",
-                      help="If provided, use the given format type "\
+                      help="If provided, use the given format type "
                            "[default=%s]." % DEFAULT_PYLINT_FORMAT)
     parser.add_option("-m", "--mantidpath", dest="mantidpath", metavar="MANTIDPATH",
                       help="If provided, use this as the MANTIDPATH, overriding"
@@ -180,6 +183,7 @@ def parse_arguments(argv):
 
 #------------------------------------------------------------------------------
 
+
 def setup_environment(mantidpath):
     """
     Setup and check environment can import mantid.
@@ -194,6 +198,7 @@ def setup_environment(mantidpath):
     if errors != "":
         raise ValueError(errors)
 
+
 def setup_mantidpath(mantidpath):
     """
     Setup the environment ready for the subprocess call.
@@ -206,8 +211,8 @@ def setup_mantidpath(mantidpath):
     """
     # Check for mantid module
     if not os.path.isfile(os.path.join(mantidpath, "mantid","__init__.py")):
-        raise ValueError("Unable to find mantid python module in '%s'"\
-                           % mantidpath)
+        raise ValueError("Unable to find mantid python module in '%s'"
+                         % mantidpath)
 
     os.environ["MANTIDPATH"] = mantidpath
     cur_pypath = os.environ.get("PYTHONPATH", "")
@@ -216,6 +221,7 @@ def setup_mantidpath(mantidpath):
     sys.path.insert(0, mantidpath) # for current process
 
 #------------------------------------------------------------------------------
+
 
 def create_dir_if_required(path):
     """
@@ -229,6 +235,7 @@ def create_dir_if_required(path):
 
 #------------------------------------------------------------------------------
 
+
 def check_module_imports():
     """
     Returns an empty string if the environment variables
@@ -241,7 +248,7 @@ def check_module_imports():
     msg = ""
     #pylint: disable=unused-variable
     try:
-        import mantid
+        import mantid # noqa
     except ImportError, exc:
         msg = "Unable to import mantid module: '%s'\n"\
               "Try passing the -m option along with the path to the module"\
@@ -249,6 +256,7 @@ def check_module_imports():
     return msg
 
 #------------------------------------------------------------------------------
+
 
 def get_serializer(filename):
     """
@@ -265,6 +273,7 @@ def get_serializer(filename):
 
 #------------------------------------------------------------------------------
 
+
 def cleanup_serializer(serializer):
     """
     Close a file handle if the serializer points to one.
@@ -276,6 +285,7 @@ def cleanup_serializer(serializer):
         serializer.close()
 
 #------------------------------------------------------------------------------
+
 
 def run_checks(relpaths, options):
     """
@@ -330,6 +340,7 @@ def run_checks(relpaths, options):
 
 #------------------------------------------------------------------------------
 
+
 def get_proc_results(processes, wait=False):
     """
     Return a list of processed results if any are available and pops
@@ -342,7 +353,6 @@ def get_proc_results(processes, wait=False):
       (Updated processes, results)
     """
     results = Results()
-    nprocs = len(processes)
     running = []
     for index, proc_info in enumerate(processes):
         if wait:
@@ -363,6 +373,7 @@ def get_proc_results(processes, wait=False):
         return running, results
 
 #------------------------------------------------------------------------------
+
 
 def gather_targets(basedir, relpaths, excludes=[]):
     """
@@ -388,6 +399,7 @@ def gather_targets(basedir, relpaths, excludes=[]):
         else:
             targets.extend(find_importable_targets(targetpath))
     #endfor
+
     def include_target(path):
         for exclude_path in excludes:
             if path.startswith(exclude_path):
@@ -396,6 +408,7 @@ def gather_targets(basedir, relpaths, excludes=[]):
     return filter(include_target, targets)
 
 #------------------------------------------------------------------------------
+
 
 def find_importable_targets(dirpath):
     """
@@ -415,7 +428,7 @@ def find_importable_targets(dirpath):
             abspath = os.path.join(path, item)
             pkg_init = os.path.join(abspath, "__init__.py")
             if (os.path.isfile(abspath) and item.endswith(".py")) or \
-                os.path.isfile(pkg_init):
+                    os.path.isfile(pkg_init):
                 importables.append(abspath)
             elif os.path.isdir(abspath):
                 importables.extend(package_walk(abspath))
@@ -424,6 +437,7 @@ def find_importable_targets(dirpath):
     return package_walk(dirpath)
 
 #------------------------------------------------------------------------------
+
 
 def get_results_path(dirname, target):
     """
@@ -438,6 +452,7 @@ def get_results_path(dirname, target):
     return os.path.join(dirname, OUTPUT_PREFIX + target.replace("/", "-") + ".log")
 
 #------------------------------------------------------------------------------
+
 
 def start_pylint(srcpath, serializer, options):
     """
@@ -458,6 +473,7 @@ def start_pylint(srcpath, serializer, options):
     return proc, srcpath, serializer
 
 #------------------------------------------------------------------------------
+
 
 def build_pylint_cmd(srcpath, options):
     """

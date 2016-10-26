@@ -1,14 +1,15 @@
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-__author__ = 'Stuart Campbell'
-
 import datetime
 import subprocess
 import csv
 import argparse
 import os
 import time
+
+__author__ = 'Stuart Campbell'
+
 
 def generate_file_changes_data(year_start, year_end):
 
@@ -30,10 +31,11 @@ def generate_file_changes_data(year_start, year_end):
 
             f = open('facility-file-changes-{0}.stdout'.format(date_key),'w',buffering=0)
             arg_changes = ['git', 'log', '--pretty=format:"%aE"', '--shortstat', since, until]
-            sub = subprocess.Popen(arg_changes, stdout=f, stderr=subprocess.PIPE, cwd=repolocation)
+            subprocess.Popen(arg_changes, stdout=f, stderr=subprocess.PIPE, cwd=repolocation)
             f.flush()
             os.fsync(f.fileno())
             f.close()
+
 
 def generate_commit_data(year_start, year_end):
 
@@ -56,11 +58,10 @@ def generate_commit_data(year_start, year_end):
 
             f = open('facility-commits-{0}.stdout'.format(date_key),'w',buffering=0)
             args_commits = ['git', 'log', '--pretty=format:"%aE"', since, until]
-            sub = subprocess.Popen(args_commits, stdout=f, stderr=subprocess.PIPE, cwd=repolocation)
+            subprocess.Popen(args_commits, stdout=f, stderr=subprocess.PIPE, cwd=repolocation)
             f.flush()
             os.fsync(f.fileno())
             f.close()
-
 
 
 if __name__ == '__main__':
@@ -130,8 +131,7 @@ if __name__ == '__main__':
                'granrothge@users.noreply.github.com': 'ORNL',
                'tom.g.r.brooks@gmail.com': 'STFC',
                'ross.whitfield@gmail.com': 'ORNL',
-               'MikeHart85@users.noreply.github.com': 'STFC'
-              }
+               'MikeHart85@users.noreply.github.com': 'STFC'}
 
     days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 

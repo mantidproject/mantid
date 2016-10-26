@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
@@ -10,8 +7,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/Unit.h"
 
-//-----------------------------------------------------------------------------
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
