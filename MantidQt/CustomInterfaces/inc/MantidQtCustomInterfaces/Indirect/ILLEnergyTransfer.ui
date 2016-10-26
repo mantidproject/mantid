@@ -154,6 +154,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Select or type the desired observable.</string>
+        </property>
         <property name="editable">
          <bool>true</bool>
         </property>
@@ -275,7 +278,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_7">
       <item>
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="lbScale">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -394,7 +397,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_6">
       <item>
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="lbUnmirror">
         <property name="text">
          <string>Unmirror Option</string>
         </property>

@@ -109,7 +109,7 @@ def energy_formula(ws):
     else:
         # Center the data for elastic fixed window scan, for integration over the elastic peak
         formula = 'x-{0}'.format(mid)
-        logger.warning('The only energy value is 0 meV. Ignore the x-axis unit.')
+        logger.information('The only energy value is 0 meV. Ignore the x-axis unit.')
 
     logger.information('Energy transform formula: ' + formula)
 
