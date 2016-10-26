@@ -4,6 +4,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/ISplittersWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 // WorkspaceProperty implementation
 #include "MantidAPI/WorkspaceProperty.tcc"
@@ -23,6 +24,8 @@ template class MANTID_API_DLL
     Mantid::API::WorkspaceProperty<Mantid::API::MatrixWorkspace>;
 template class MANTID_API_DLL
     Mantid::API::WorkspaceProperty<Mantid::API::ITableWorkspace>;
+template class MANTID_API_DLL
+    Mantid::API::WorkspaceProperty<Mantid::API::WorkspaceGroup>;
 ///@endcond TEMPLATE
 } // namespace API
 } // namespace Mantid
