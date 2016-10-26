@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include <sstream>
+#include <boost/algorithm/string.hpp>
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/LibraryManager.h"

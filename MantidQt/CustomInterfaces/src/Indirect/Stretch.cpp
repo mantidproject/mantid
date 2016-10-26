@@ -2,6 +2,7 @@
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::API;
 

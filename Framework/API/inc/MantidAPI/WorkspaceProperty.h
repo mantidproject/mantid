@@ -3,10 +3,7 @@
 
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/IWorkspaceProperty.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/WorkspaceGroup.h"
 
 #include <string>
 
@@ -16,6 +13,7 @@ namespace API {
 // Forward decaration
 // -------------------------------------------------------------------------
 class MatrixWorkspace;
+class WorkspaceGroup;
 
 /// Enumeration for a mandatory/optional property
 struct PropertyMode {

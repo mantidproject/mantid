@@ -1,4 +1,5 @@
 #include "MantidRemoteAlgorithms/Authenticate.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Exception.h"

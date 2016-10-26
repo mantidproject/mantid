@@ -2,6 +2,7 @@
 
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/ITableWorkspace.h"
 
 using namespace Mantid::API;

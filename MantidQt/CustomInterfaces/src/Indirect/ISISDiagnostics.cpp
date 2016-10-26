@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/Indirect/ISISDiagnostics.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 

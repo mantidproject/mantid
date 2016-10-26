@@ -1,3 +1,4 @@
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Sample.h"
 

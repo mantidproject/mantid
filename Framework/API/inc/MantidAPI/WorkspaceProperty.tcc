@@ -1,5 +1,8 @@
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid {
 namespace API {

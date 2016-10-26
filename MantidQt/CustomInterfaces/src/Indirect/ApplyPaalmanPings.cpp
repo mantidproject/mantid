@@ -3,6 +3,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <QStringList>
 

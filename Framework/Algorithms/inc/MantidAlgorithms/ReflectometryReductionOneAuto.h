@@ -3,7 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidKernel/System.h"
 
 #include <boost/optional.hpp>

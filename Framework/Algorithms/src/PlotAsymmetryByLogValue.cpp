@@ -18,6 +18,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "Poco/File.h"
 #include <MantidAPI/FileFinder.h>
+#include "MantidAPI/WorkspaceGroup.h"
 
 namespace // anonymous
     {

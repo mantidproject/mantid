@@ -6,6 +6,8 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/TableRow.h"
 
+#include <boost/algorithm/string/split.hpp>
+
 #include <cstdio>
 
 using namespace Mantid;

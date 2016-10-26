@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 

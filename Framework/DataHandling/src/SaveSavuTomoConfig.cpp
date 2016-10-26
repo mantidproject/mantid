@@ -1,3 +1,4 @@
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataHandling/SaveSavuTomoConfig.h"

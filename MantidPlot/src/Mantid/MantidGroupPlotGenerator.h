@@ -5,6 +5,7 @@
 #include "MantidMatrix.h"
 #include "Graph3D.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 /**
 * This utility class generates a surface or contour plot from a group of

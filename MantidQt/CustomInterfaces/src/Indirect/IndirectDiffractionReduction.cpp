@@ -1,10 +1,8 @@
-//----------------------
-// Includes
-//----------------------
 #include "MantidQtCustomInterfaces/Indirect/IndirectDiffractionReduction.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileNameParser.h"

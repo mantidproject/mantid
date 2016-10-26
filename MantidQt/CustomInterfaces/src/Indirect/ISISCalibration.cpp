@@ -2,6 +2,7 @@
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <QFileInfo>
 

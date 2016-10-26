@@ -1,10 +1,8 @@
 #ifndef MANTID_DATAHANDLING_LOAD_H_
 #define MANTID_DATAHANDLING_LOAD_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include <mutex>
 
 namespace Mantid {
