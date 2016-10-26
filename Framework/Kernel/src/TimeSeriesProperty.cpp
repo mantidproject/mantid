@@ -1687,8 +1687,8 @@ template <typename TYPE> std::string TimeSeriesProperty<TYPE>::isValid() const {
 }
 
 /*
- * Not implemented in this class
- * @throw Exception::NotImplementedError Not yet implemented
+ * A TimeSeriesProperty never has a default, so return empty string
+ * @returns Empty string as no defaults can be provided
  */
 template <typename TYPE>
 std::string TimeSeriesProperty<TYPE>::getDefault() const {
