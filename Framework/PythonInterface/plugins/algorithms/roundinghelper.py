@@ -9,11 +9,12 @@ such as BinWidthAtX and MedianBinWidth.
 '''
 
 # Name of the rounding mode property
-PROP_NAME_ROUNDING_MODE  = 'Rounding'
+PROP_NAME_ROUNDING_MODE = 'Rounding'
 
 # Available rounding modes.
 ROUNDING_NONE = 'None'
 ROUNDING_TEN_TO_INT = '10^n'
+
 
 def declare_rounding_property(o):
     '''
@@ -22,7 +23,10 @@ def declare_rounding_property(o):
     rounding = StringListValidator()
     rounding.addAllowedValue(ROUNDING_NONE)
     rounding.addAllowedValue(ROUNDING_TEN_TO_INT)
-    o.declareProperty(name=PROP_NAME_ROUNDING_MODE, defaultValue=ROUNDING_NONE, validator=rounding, direction=Direction.Input, doc='Bin width rounding')
+    o.declareProperty(name=PROP_NAME_ROUNDING_MODE,
+                      defaultValue=ROUNDING_NONE, validator=rounding,
+                      direction=Direction.Input, doc='Bin width rounding')
+
 
 def round(x, mode):
     '''
