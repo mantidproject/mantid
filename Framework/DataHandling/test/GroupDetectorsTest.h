@@ -10,6 +10,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -21,12 +22,9 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using Mantid::detid_t;
 using Mantid::specnum_t;
-using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
-using Mantid::HistogramData::CountStandardDeviations;
-using Mantid::HistogramData::LinearGenerator;
 
 class GroupDetectorsTest : public CxxTest::TestSuite {
 public:
@@ -113,31 +111,33 @@ public:
     MatrixWorkspace_sptr outputWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "GroupTestWS");
-    std::vector<double> tens{10, 11, 12, 13, 14, 15};
-    std::vector<double> ones(5, 1.0);
-    std::vector<double> threes(5, 3.0);
-    std::vector<double> zeroes(5, 0.0);
-    TS_ASSERT_EQUALS(outputWS->dataX(0), tens);
-    TS_ASSERT_EQUALS(outputWS->dataY(0), threes);
+    const HistogramX tens{10, 11, 12, 13, 14, 15};
+    const HistogramY yOnes(5, 1.0);
+    const HistogramE eOnes(5, 1.0);
+    const HistogramY threes(5, 3.0);
+    const HistogramY yZeroes(5, 0.0);
+    const HistogramE eZeroes(5, 0.0);
+    TS_ASSERT_EQUALS(outputWS->x(0), tens);
+    TS_ASSERT_EQUALS(outputWS->y(0), threes);
     for (int i = 0; i < 5; ++i) {
-      TS_ASSERT_DELTA(outputWS->dataE(0)[i], 1.7321, 0.0001);
+      TS_ASSERT_DELTA(outputWS->e(0)[i], 1.7321, 0.0001);
     }
     TS_ASSERT_EQUALS(outputWS->getSpectrum(0).getSpectrumNo(), 0);
-    TS_ASSERT_EQUALS(outputWS->dataX(1), tens);
-    TS_ASSERT_EQUALS(outputWS->dataY(1), ones);
-    TS_ASSERT_EQUALS(outputWS->dataE(1), ones);
+    TS_ASSERT_EQUALS(outputWS->x(1), tens);
+    TS_ASSERT_EQUALS(outputWS->y(1), yOnes);
+    TS_ASSERT_EQUALS(outputWS->e(1), eOnes);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(1).getSpectrumNo(), 1);
-    TS_ASSERT_EQUALS(outputWS->dataX(2), tens);
-    TS_ASSERT_EQUALS(outputWS->dataY(2), zeroes);
-    TS_ASSERT_EQUALS(outputWS->dataE(2), zeroes);
+    TS_ASSERT_EQUALS(outputWS->x(2), tens);
+    TS_ASSERT_EQUALS(outputWS->y(2), yZeroes);
+    TS_ASSERT_EQUALS(outputWS->e(2), eZeroes);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(2).getSpectrumNo(), -1);
-    TS_ASSERT_EQUALS(outputWS->dataX(3), tens);
-    TS_ASSERT_EQUALS(outputWS->dataY(3), zeroes);
-    TS_ASSERT_EQUALS(outputWS->dataE(3), zeroes);
+    TS_ASSERT_EQUALS(outputWS->x(3), tens);
+    TS_ASSERT_EQUALS(outputWS->y(3), yZeroes);
+    TS_ASSERT_EQUALS(outputWS->e(3), eZeroes);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(3).getSpectrumNo(), -1);
-    TS_ASSERT_EQUALS(outputWS->dataX(4), tens);
-    TS_ASSERT_EQUALS(outputWS->dataY(4), ones);
-    TS_ASSERT_EQUALS(outputWS->dataE(4), ones);
+    TS_ASSERT_EQUALS(outputWS->x(4), tens);
+    TS_ASSERT_EQUALS(outputWS->y(4), yOnes);
+    TS_ASSERT_EQUALS(outputWS->e(4), eOnes);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(4).getSpectrumNo(), 4);
 
     boost::shared_ptr<const IDetector> det;

@@ -103,8 +103,6 @@ class SavePlot1DAsJson(PythonAlgorithm):
             serialized['data'][spectrum_no] = arr
             continue
         # axes
-        # .. helper
-        label = lambda axis: axis.getUnit().caption()
 
         def unit(axis):
             s = axis.getUnit().symbol()
@@ -113,8 +111,8 @@ class SavePlot1DAsJson(PythonAlgorithm):
             except:
                 return '%s' % s
         axes = dict(
-            xlabel=label(workspace.getAxis(0)),
-            ylabel=label(workspace.getAxis(1)),
+            xlabel=workspace.getAxis(0).getUnit().caption(),
+            ylabel=workspace.getAxis(1).getUnit().caption(),
             xunit = unit(workspace.getAxis(0)),
             # yunit = unit(workspace.getAxis(1)),
             yunit = workspace.YUnitLabel(),
