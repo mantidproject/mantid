@@ -313,6 +313,10 @@ private:
   size_t findNthIndexFromQuickRef(int n) const;
   /// Set a value from another property
   std::string setValueFromProperty(const Property &right) override;
+  /// Get filtered values
+  std::vector<TYPE> getFilteredValues() const;
+  /// Find if time lies in a filtered region
+  bool isTimeFiltered(const Kernel::DateAndTime &time) const;
 
   /// Holds the time series data
   mutable std::vector<TimeValueUnit<TYPE>> m_values;

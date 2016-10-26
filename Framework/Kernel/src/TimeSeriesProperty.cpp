@@ -1705,12 +1705,14 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::isDefault() const {
 /**
  * Return a TimeSeriesPropertyStatistics struct containing the
  * statistics of this TimeSeriesProperty object.
+ *
+ * N.B. This method DOES take filtering into account
  */
 template <typename TYPE>
 TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics() const {
   TimeSeriesPropertyStatistics out;
   Mantid::Kernel::Statistics raw_stats =
-      Mantid::Kernel::getStatistics(this->valuesAsVector());
+      Mantid::Kernel::getStatistics(this->getFilteredValues());
   out.mean = raw_stats.mean;
   out.standard_deviation = raw_stats.standard_deviation;
   out.median = raw_stats.median;
@@ -2184,6 +2186,66 @@ void TimeSeriesProperty<std::string>::histogramData(
   UNUSED_ARG(counts);
   throw std::runtime_error("histogramData is not implememnted for time series "
                            "properties containing strings");
+}
+
+/**
+ * Get a vector of values taking the filter into account.
+ * Values will be excluded if their times lie in a region where the filter is
+ * false.
+ * @returns :: Vector of included values only
+ */
+template <typename TYPE>
+std::vector<TYPE> TimeSeriesProperty<TYPE>::getFilteredValues() const {
+  if (m_filter.empty()) {
+    return this->valuesAsVector(); // no filtering to do
+  }
+
+  std::vector<TYPE> filteredValues;
+
+  if (!m_filterApplied) {
+    applyFilter();
+  }
+
+  sort();
+
+  const auto &valueMap = valueAsCorrectMap();
+  for (const auto &entry : valueMap) {
+    if (isTimeFiltered(entry.first)) {
+      filteredValues.push_back(entry.second);
+    }
+  }
+
+  return filteredValues;
+}
+
+/**
+ * Find out if the given time is included in the filtered data
+ * i.e. it does not lie in an excluded region
+ * @param time :: [input] Time to check
+ * @returns :: True if time is in an included region, false if the filter
+ * excludes it.
+ */
+template <typename TYPE>
+bool TimeSeriesProperty<TYPE>::isTimeFiltered(
+    const Kernel::DateAndTime &time) const {
+  if (m_filter.empty()) {
+    return false; // no filter
+  }
+
+  if (!m_filterApplied) {
+    applyFilter();
+  }
+
+  // Find which range it lives in
+  auto filterEntry = std::lower_bound(
+      m_filter.begin(), m_filter.end(), time,
+      [](const std::pair<Kernel::DateAndTime, bool> &filterEntry,
+         const Kernel::DateAndTime &t) { return filterEntry.first < t; });
+
+  if (filterEntry != m_filter.begin()) {
+    --filterEntry; // get the latest time BEFORE the given time
+  }
+  return filterEntry->second;
 }
 
 /// @cond
