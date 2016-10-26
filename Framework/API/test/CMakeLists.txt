@@ -9,6 +9,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/BoxControllerDummyIO.cpp
                         ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/NexusTestHelper.cpp
+                        ../../TestHelpers/src/FakeObjects.cpp
       )
   cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries( APITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
