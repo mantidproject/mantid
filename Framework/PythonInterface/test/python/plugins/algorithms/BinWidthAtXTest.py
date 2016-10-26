@@ -7,21 +7,11 @@ import sys
 import testhelpers
 import unittest
 
-class RebinToBinWidthAtXTest(unittest.TestCase):
-    _OUT_WS_NAME = '__rebinToBinWidthAtXTest_outWs'
-
-    def _check_bin_widths(self, expectedBinWidth):
-        outWs = mtd[self._OUT_WS_NAME]
-        for i in range(outWs.getNumberHistograms()):
-            binnedXs = outWs.readX(i)
-            newBins = binnedXs[1:] - binnedXs[:-1]
-            for binWidth in newBins:
-                self.assertAlmostEqual(binWidth, expectedBinWidth)
+class BinWidthAtXTest(unittest.TestCase):
 
     def _make_algorithm_params(self, ws, x, rounding='None'):
         return {
             'InputWorkspace': ws,
-            'OutputWorkspace': self._OUT_WS_NAME,
             'X': x,
             'rethrow': True, # Let exceptions through for testing.
             'Rounding': rounding
@@ -44,17 +34,17 @@ class RebinToBinWidthAtXTest(unittest.TestCase):
         return ws, middleBinX, middleBinWidth
 
     def _run_algorithm(self, params):
-        algorithm = testhelpers.create_algorithm('RebinToBinWidthAtX', **params)
+        algorithm = testhelpers.create_algorithm('BinWidthAtX', **params)
         testhelpers.assertRaisesNothing(self, algorithm.execute)
         self.assertTrue(algorithm.isExecuted())
+        return algorithm.getProperty('BinWidth').value
 
     def test_success_single_histogram(self):
         ws, X, expectedWidth = self._make_single_histogram_ws()
         params = self._make_algorithm_params(ws, X)
-        self._run_algorithm(params)
-        self._check_bin_widths(expectedWidth)
+        binWidth = self._run_algorithm(params)
+        self.assertAlmostEqual(binWidth, expectedWidth)
         DeleteWorkspace(ws)
-        DeleteWorkspace(self._OUT_WS_NAME)
 
     def test_average_over_multiple_histograms(self):
         # Two histograms, center bin boundaries are aligned at -0.12.
@@ -68,26 +58,24 @@ class RebinToBinWidthAtXTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2)
         X = -0.1
         params = self._make_algorithm_params(ws, X)
-        self._run_algorithm(params)
+        binWidth = self._run_algorithm(params)
         expectedWidth = 0.5 * (binWidths[1] + binWidths[-2]) # Average!
-        self._check_bin_widths(expectedWidth)
+        self.assertAlmostEqual(binWidth, expectedWidth)
         DeleteWorkspace(ws)
-        DeleteWorkspace(self._OUT_WS_NAME)
 
     def test_rounding(self):
         ws, X, unused = self._make_single_histogram_ws()
         params = self._make_algorithm_params(ws, X, '10^n')
-        self._run_algorithm(params)
+        binWidth = self._run_algorithm(params)
         expectedWidth = 0.01
-        self._check_bin_widths(expectedWidth)
+        self.assertAlmostEqual(binWidth, expectedWidth)
         DeleteWorkspace(ws)
-        DeleteWorkspace(self._OUT_WS_NAME)
 
     def test_failure_X_out_of_bounds(self):
         ws, unused, unused = self._make_single_histogram_ws()
         X = sys.float_info.max
         params = self._make_algorithm_params(ws, X)
-        algorithm = testhelpers.create_algorithm('RebinToBinWidthAtX', **params)
+        algorithm = testhelpers.create_algorithm('BinWidthAtX', **params)
         self.assertRaises(RuntimeError, algorithm.execute)
         self.assertFalse(algorithm.isExecuted())
         DeleteWorkspace(ws)

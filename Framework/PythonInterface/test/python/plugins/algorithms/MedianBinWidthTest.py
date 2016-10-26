@@ -6,21 +6,11 @@ import numpy
 import testhelpers
 import unittest
 
-class RebinToMedianBinWidthTest(unittest.TestCase):
-    _OUT_WS_NAME = '__RebinToMedianBinWidthTest_outWs'
-
-    def _check_bin_widths(self, expectedWidth):
-        outWs = mtd[self._OUT_WS_NAME]
-        for i in range(outWs.getNumberHistograms()):
-            binnedXs = outWs.readX(i)
-            newBins = binnedXs[1:] - binnedXs[:-1]
-            for binWidth in newBins:
-                self.assertAlmostEqual(binWidth, expectedWidth)
+class MedianBinWidthTest(unittest.TestCase):
 
     def _make_algorithm_params(self, ws, rounding='None'):
         return {
             'InputWorkspace': ws,
-            'OutputWorkspace': self._OUT_WS_NAME,
             'rethrow': True, # Let exceptions through for testing.
             'Rounding': rounding
         }
@@ -29,9 +19,10 @@ class RebinToMedianBinWidthTest(unittest.TestCase):
         return numpy.cumsum(numpy.append(numpy.array([xBegin]), binWidths))
 
     def _run_algorithm(self, params):
-        algorithm = testhelpers.create_algorithm('RebinToMedianBinWidth', **params)
+        algorithm = testhelpers.create_algorithm('MedianBinWidth', **params)
         testhelpers.assertRaisesNothing(self, algorithm.execute)
         self.assertTrue(algorithm.isExecuted())
+        return algorithm.getProperty('BinWidth').value
 
     def test_success_single_histogram(self):
         binWidths = numpy.array([0.5, 0.5, 2.3, 2.3, 2.3, 5.9])
@@ -39,9 +30,10 @@ class RebinToMedianBinWidthTest(unittest.TestCase):
         ys = numpy.zeros(len(xs) - 1)
         ws = CreateWorkspace(DataX=xs, DataY=ys)
         params = self._make_algorithm_params(ws)
-        self._run_algorithm(params)
+        binWidth = self._run_algorithm(params)
         expectedBinWidth = numpy.median(binWidths)
-        self._check_bin_widths(expectedBinWidth)
+        self.assertAlmostEqual(binWidth, expectedBinWidth)
+        DeleteWorkspace(ws)
 
     def test_average_over_multiple_histograms(self):
         binWidths = numpy.array([0.5, 0.5, 2.3, 2.3, 2.3, 6.5,
@@ -52,9 +44,10 @@ class RebinToMedianBinWidthTest(unittest.TestCase):
         ys = numpy.zeros(len(xs - 2))
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2)
         params = self._make_algorithm_params(ws)
-        self._run_algorithm(params)
+        binWidth = self._run_algorithm(params)
         expectedBinWidth = 0.5 * (2.3 + 1.3)
-        self._check_bin_widths(expectedBinWidth)
+        self.assertAlmostEqual(binWidth, expectedBinWidth)
+        DeleteWorkspace(ws)
 
     def test_rounding(self):
         binWidths = numpy.array([0.5, 6.1, 2.3, 0.5, 2.3, 2.3])
@@ -62,9 +55,10 @@ class RebinToMedianBinWidthTest(unittest.TestCase):
         ys = numpy.zeros(len(xs) - 1)
         ws = CreateWorkspace(DataX=xs, DataY=ys)
         params = self._make_algorithm_params(ws, rounding='10^n')
-        self._run_algorithm(params)
+        binWidth = self._run_algorithm(params)
         expectedBinWidth = 1.0
-        self._check_bin_widths(expectedBinWidth)
+        self.assertAlmostEqual(binWidth, expectedBinWidth)
+        DeleteWorkspace(ws)
 
 if __name__ == "__main__":
     unittest.main()

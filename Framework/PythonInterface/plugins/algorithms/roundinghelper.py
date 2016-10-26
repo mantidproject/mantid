@@ -3,8 +3,9 @@ from mantid.kernel import Direction, StringListValidator
 import numpy
 
 '''
-This file contains some common helper declarations/functions for the
-RebinToBinWidthAtX and RebinToMedianBinWidth algorithms.
+This file contains functions which deal with rounding in algorithms
+such as BinWidthAtX and MedianBinWidth.
+
 '''
 
 # Name of the rounding mode property
