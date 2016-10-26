@@ -8,7 +8,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
-// WorkspaceProperty implementation
+// Property implementations
+#include "MantidKernel/PropertyWithValue.tcc"
 #include "MantidAPI/WorkspaceProperty.tcc"
 
 using Mantid::MantidVec;

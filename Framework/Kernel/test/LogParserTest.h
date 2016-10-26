@@ -8,6 +8,7 @@
 #include "MantidKernel/LogParser.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include <boost/lexical_cast.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #include <Poco/File.h>
@@ -683,7 +684,7 @@ private:
 
     int value;
     TS_ASSERT(prop_with_value != NULL);
-    Mantid::Kernel::toValue<int>(prop_with_value->value(), value);
+    boost::lexical_cast<int>(prop_with_value->value());
     TS_ASSERT_EQUALS(expected_period, value);
     delete prop;
     delete log;

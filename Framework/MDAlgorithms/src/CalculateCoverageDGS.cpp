@@ -13,6 +13,8 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <boost/lexical_cast.hpp>
+
 namespace Mantid {
 namespace MDAlgorithms {
 using namespace Mantid::Kernel;
@@ -131,7 +133,7 @@ void CalculateCoverageDGS::init() {
 
   for (int i = 1; i <= 4; i++) {
     std::string dim("Dimension");
-    dim += Kernel::toString(i);
+    dim += boost::lexical_cast<std::string>(i);
     declareProperty(dim, options[i - 1],
                     boost::make_shared<StringListValidator>(options),
                     "Dimension to bin or integrate");
@@ -196,7 +198,7 @@ void CalculateCoverageDGS::exec() {
   size_t q1NumBins = 1, q2NumBins = 1, q3NumBins = 1, dENumBins = 1;
   for (int i = 1; i <= 4; i++) {
     std::string dim("Dimension");
-    dim += Kernel::toString(i);
+    dim += boost::lexical_cast<std::string>(i);
     std::string dimensioni = getProperty(dim);
     if (dimensioni == "Q1") {
       affineMat[i - 1][0] = 1.;
