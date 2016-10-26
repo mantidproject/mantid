@@ -72,7 +72,7 @@ class PearlPowderDiffractionScriptTest(stresstesting.MantidStressTest):
         pearl_routines.pearl_set_userdataoutput_dir(data_out_path)
 
         # run the script by calling PEARL_focus function
-        pearl_routines.PEARL_focus('92476_92479', 'raw', fmode='trans', ttmode='TT70',
+        pearl_routines.PEARL_focus('92476_92479', 'raw', fmode='all', ttmode='TT70',
                                    atten=True, van_norm=True, debug=True)
 
         # Custom code to create and run this single test suite
@@ -119,6 +119,8 @@ class LoadTests(unittest.TestCase):
         # ============================ Success =============================
 
     def test_vanadium_workspace(self):
+        import pydevd
+        pydevd.settrace('localhost', port=23000, stdoutToServer=True, stderrToServer=True)
         for i in range(1, 15):
             van_file = mtd["van" + str(i)]
             self.assertTrue(isinstance(van_file, MatrixWorkspace))

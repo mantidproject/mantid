@@ -417,21 +417,25 @@ def _focus_mode_all(output_file_names, calibrated_spectra):
     first_spectrum = calibrated_spectra[0]
     summed_spectra = mantid.CloneWorkspace(InputWorkspace=first_spectrum)
 
+
     for i in range(1, 9):  # TODO why is this 1-8
         summed_spectra = mantid.Plus(LHSWorkspace=summed_spectra, RHSWorkspace=calibrated_spectra[i])
 
-    summed_spectra = mantid.Scale(InputWorkspace=summed_spectra, Factor=0.111111111111111)
+    summed_spectra_name = output_file_names["output_name"] + "_mods1-9"
+
+    summed_spectra = mantid.Scale(InputWorkspace=summed_spectra, Factor=0.111111111111111,
+                                  OutputWorkspace=summed_spectra_name)
     mantid.SaveGSS(InputWorkspace=summed_spectra, Filename=output_file_names["gss_filename"], Append=False, Bank=1)
 
-    focus_mode_all_summed_ws = mantid.ConvertUnits(InputWorkspace=summed_spectra, Target="dSpacing")
-    mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=focus_mode_all_summed_ws, Append=False)
+    summed_spectra = mantid.ConvertUnits(InputWorkspace=summed_spectra, Target="dSpacing",
+                                         OutputWorkspace=summed_spectra_name)
+    mantid.SaveNexus(Filename=output_file_names["nxs_filename"], InputWorkspace=summed_spectra, Append=False)
 
-    remove_intermediate_workspace(summed_spectra)
-    output_list = [focus_mode_all_summed_ws]
+    output_list = [summed_spectra]
     for i in range(0, 3):
-        spectra_index = (i + 10)
+        spectra_index = (i + 9)  # We want workspaces 10/11/12 so compensate for 0 based index
         ws_to_save = calibrated_spectra[spectra_index]  # Save out workspaces 10/11/12
-        output_name = "focus_mode_all_workspace" + str(spectra_index)
+        output_name = output_file_names["output_name"] + "_mod" + str(spectra_index + 1)
         mantid.SaveGSS(InputWorkspace=ws_to_save, Filename=output_file_names["gss_filename"], Append=True, Bank=i + 2)
         ws_to_save = mantid.ConvertUnits(InputWorkspace=ws_to_save, OutputWorkspace=output_name, Target="dSpacing")
         output_list.append(ws_to_save)
