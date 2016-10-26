@@ -11,6 +11,8 @@ Description
   
 This algorithm takes the bin width at *X* of each histogram in *InputWorkspace* and calculates the average. This value is then placed in the *BinWidth* output property.
 
+Workspaces with Point data are treated as in :ref:`algm-Rebin`: they are converted to histograms with :ref:`algm-ConvertToHistogram` before the bin widths are checked and afterwards back using :ref:`algm-ConvertToPointData`.
+
 Rounding
 ########
 
