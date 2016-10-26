@@ -20,6 +20,10 @@ DECLARE_ALGORITHM(Rebin)
 
 using namespace Kernel;
 using namespace API;
+using HistogramData::Histogram;
+using HistogramData::BinEdges;
+using HistogramData::Frequencies;
+using HistogramData::FrequencyStandardDeviations;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
@@ -251,14 +255,8 @@ void Rebin::exec() {
     PARALLEL_FOR2(inputWS, outputWS)
     for (int hist = 0; hist < histnumber; ++hist) {
       PARALLEL_START_INTERUPT_REGION
-      try {
-        outputWS->setHistogram(
-            hist, std::move(HistogramData::rebin(inputWS->histogram(hist),
-                                                 XValues_new)));
-      } catch (std::exception &ex) {
-        g_log.error() << "Error in rebin function: " << ex.what() << '\n';
-        throw;
-      }
+      outputWS->setHistogram(hist, std::move(HistogramData::rebin(
+                                       inputWS->histogram(hist), XValues_new)));
 
       prog.report(name());
       PARALLEL_END_INTERUPT_REGION
@@ -333,15 +331,15 @@ void Rebin::propagateMasks(API::MatrixWorkspace_const_sptr inputWS,
     masked_bins.push_back(XValues[(*it).first + 1]);
   }
 
-  // Create a zero vector for the errors because we don't care about them here
-  const MantidVec zeroes(weights.size(), 0.0);
-  // Create a vector to hold the redistributed weights
-  auto &XValues_new = outputWS->x(hist);
-  MantidVec newWeights(XValues_new.size() - 1), zeroes2(XValues_new.size() - 1);
+  //// Create a zero vector for the errors because we don't care about them here
+  auto errSize = weights.size();
+  Histogram oldHist(BinEdges(std::move(masked_bins)),
+                    Frequencies(std::move(weights)),
+                    FrequencyStandardDeviations(errSize, 0));
   // Use rebin function to redistribute the weights. Note that distribution flag
   // is set
-  VectorHelper::rebin(masked_bins, weights, zeroes, XValues_new.rawData(),
-                      newWeights, zeroes2, true);
+  auto newHist = HistogramData::rebin(oldHist, outputWS->binEdges(hist));
+  auto newWeights = newHist.y();
 
   // Now process the output vector and fill the new masking list
   for (size_t index = 0; index < newWeights.size(); ++index) {

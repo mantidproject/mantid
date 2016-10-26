@@ -109,12 +109,16 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
       if (xn_high > xo_high) {
         iold++;
       } else {
-        auto factor = 1 / nwidth;
-        ynew[inew] *= factor;
-        enew[inew] = sqrt(enew[inew]) * factor;
         inew++;
       }
     }
+  }
+
+  for (size_t i = 0; i < size_ynew; ++i) {
+    auto width = xnew[i + 1] - xnew[i];
+    auto factor = 1 / width;
+    ynew[i] *= factor;
+    enew[i] = sqrt(enew[i]) * factor;
   }
 
   return Histogram(binEdges, newFrequencies, newFrequencyStdDev);
