@@ -141,7 +141,8 @@ void setupTestWorkspace() {
   const double lower(-1.0), upper(1.0);
   MersenneTwister randGen(seed, lower, upper);
 
-  HistogramData::BinEdges generatedBins(NUMBINS + 1, HistogramData::LinearGenerator(0, 1));
+  HistogramData::BinEdges generatedBins(NUMBINS + 1,
+                                        HistogramData::LinearGenerator(0, 1));
   { // explicit scope to re-use variables
     WS->setBinEdges(0, generatedBins);
     auto &y = WS->mutableY(0);
@@ -149,11 +150,11 @@ void setupTestWorkspace() {
     auto &e = WS->mutableE(0);
     auto &refY = WS->y(0);
     for (int i = 0; i < NUMBINS; ++i) {
-      //x[i] = i;
+      // x[i] = i;
       y[i] = bg + randGen.nextValue();
       e[i] = 0.05 * refY[i];
     }
-    //x[NUMBINS] = NUMBINS;
+    // x[NUMBINS] = NUMBINS;
   } // end of explicit scope
 
   AnalysisDataService::Instance().add("calcFlatBG", WS);
@@ -164,8 +165,8 @@ void setupTestWorkspace() {
   WS2D->initialize(NUMSPECS, NUMBINS + 1, NUMBINS);
 
   for (int j = 0; j < NUMSPECS; ++j) {
-	  WS2D->setBinEdges(j, generatedBins);
-    auto &y = WS2D->mutableY(j); 
+    WS2D->setBinEdges(j, generatedBins);
+    auto &y = WS2D->mutableY(j);
     auto &e = WS2D->mutableE(j);
     for (int i = 0; i < NUMBINS; ++i) {
       // any function that means the calculation is non-trivial
@@ -398,9 +399,9 @@ public:
     Mantid::DataObjects::Workspace2D_sptr WS(
         new Mantid::DataObjects::Workspace2D);
     WS->initialize(1, NUMBINS + 1, NUMBINS);
-    
+
     WS->setBinEdges(0, NUMBINS + 1, HistogramData::LinearGenerator(0, 2));
-	  auto &x = WS->mutableX(0);
+    auto &x = WS->mutableX(0);
     x[NUMBINS] = 2 * (NUMBINS - 1) + 4.0;
     WS->mutableY(0) = YVALUE;
     WS->mutableE(0) = YVALUE / 3.0;
@@ -565,16 +566,15 @@ private:
       for (size_t j = 0; j < binCount; ++j) {
         // Make non-trivial but still linear x axis.
         X[j] = 0.78 * (static_cast<double>(j) -
-                                     static_cast<double>(binCount) / 3.0) -
-                             0.31 * static_cast<double>(i);
+                       static_cast<double>(binCount) / 3.0) -
+               0.31 * static_cast<double>(i);
         // Compute some non-trivial y values.
         Y[j] = movingAverageStandardY(i);
         E[j] = std::sqrt(constY[j]);
       }
       // Add extra x value because histogram.
-      X[binCount] =
-          0.78 * 2.0 / 3.0 * static_cast<double>(binCount) -
-          0.31 * static_cast<double>(i);
+      X[binCount] = 0.78 * 2.0 / 3.0 * static_cast<double>(binCount) -
+                    0.31 * static_cast<double>(i);
       // The special background value is set here.
       Y[specialIndex] = movingAverageSpecialY(i);
     }
