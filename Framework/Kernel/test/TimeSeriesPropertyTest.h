@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSplitter.h"
 
@@ -702,6 +703,7 @@ public:
     TS_ASSERT_DELTA(stats.mean, 6.0, 1e-3);
     TS_ASSERT_DELTA(stats.duration, 100.0, 1e-3);
     TS_ASSERT_DELTA(stats.standard_deviation, 3.1622, 1e-3);
+    TS_ASSERT_DELTA(log->timeAverageValue(), 5.5, 1e-3);
 
     delete log;
   }
@@ -1921,6 +1923,40 @@ public:
                       log->realSize());
 
     delete log;
+  }
+
+  /// Test that getStatistics and timeAverageValue respect the filter
+  void test_getStatistics_filtered() {
+    // Build the log
+    auto log =
+        Mantid::Kernel::make_unique<TimeSeriesProperty<double>>("DoubleLog");
+    Mantid::Kernel::DateAndTime logTime("2007-11-30T16:17:00");
+    const double incrementSecs(10.0);
+    for (int i = 1; i < 12; ++i) {
+      const double val = static_cast<double>(i);
+      log->addValue(logTime.toISO8601String(), val);
+      logTime += incrementSecs;
+    }
+    TS_ASSERT_EQUALS(log->realSize(), 11);
+
+    // Add the filter
+    auto filter =
+        Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("Filter");
+    filter->addValue("2007-11-30T16:17:00", true);
+    filter->addValue("2007-11-30T16:17:15", false);
+    filter->addValue("2007-11-30T16:17:25", true);
+    filter->addValue("2007-11-30T16:18:35", false);
+    log->filterWith(filter.get());
+
+    // Get the stats and compare to expected values
+    const auto &stats = log->getStatistics();
+    TS_ASSERT_DELTA(stats.minimum, 1.0, 1e-6);
+    TS_ASSERT_DELTA(stats.maximum, 10.0, 1e-6);
+    TS_ASSERT_DELTA(stats.median, 6.0, 1e-6);
+    TS_ASSERT_DELTA(stats.mean, 5.77778, 1e-3);
+    TS_ASSERT_DELTA(stats.duration, 100.0, 1e-6);
+    TS_ASSERT_DELTA(stats.standard_deviation, 2.8974, 1e-4);
+    TS_ASSERT_DELTA(log->timeAverageValue(), 5.588, 1e-3);
   }
 
 private:
