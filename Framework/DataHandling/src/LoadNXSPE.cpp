@@ -273,24 +273,22 @@ void LoadNXSPE::exec() {
       // We just want to get whether the instrument is direct or indirect
       // and the source position (because we can!).
       // Nothing else is really needed, and also the physical detectors may not
-      // correspond to the data in the nxspe files because they may have been grouped
-      // to get each nxspe spectrum - and this group mapping is not stored.
+      // correspond to the data in the nxspe files because they may have been
+      // grouped to get each nxspe spectrum - and this mapping is not stored.
       Geometry::Instrument_const_sptr inst = instrumentWS->getInstrument();
       l12 = fabs(inst->getSource()->getDistance(*(inst->getSample())));
       outputWS->mutableRun().addLogData(new PropertyWithValue<std::string>(
-          "deltaE-mode", Kernel::DeltaEMode::asString(instrumentWS->getEMode())));
+          "deltaE-mode",
+          Kernel::DeltaEMode::asString(instrumentWS->getEMode())));
     } catch (...) {
       g_log.information("Cannot load the instrument definition.");
       instrument_name.clear();
     }
   }
 
-  if (instrument_name.empty()) {
-    instrument_name.assign("NXSPE");
-  }
-
   // generate instrument
-  Geometry::Instrument_sptr instrument(new Geometry::Instrument(instrument_name));
+  Geometry::Instrument_sptr instrument(new Geometry::Instrument(
+      instrument_name.empty() ? "NXSPE" : instrument_name));
   outputWS->setInstrument(instrument);
 
   Geometry::ObjComponent *source = new Geometry::ObjComponent("source");
