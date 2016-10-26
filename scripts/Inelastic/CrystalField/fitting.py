@@ -56,7 +56,7 @@ class CrystalField(object):
                         ToleranceEnergy:     energy tolerance,
                         ToleranceIntensity:  intensity tolerance,
                         ResolutionModel:     A resolution model.
-                        WidthVariation:      Absolute value of allowed variation of a peak width during a fit.
+                        FWHMVariation:      Absolute value of allowed variation of a peak width during a fit.
 
                         Field parameters:
 
@@ -117,7 +117,7 @@ class CrystalField(object):
         self._FWHM = None
         self._intensityScaling = 1.0
         self._resolutionModel = None
-        self._widthVariation = None
+        self._fwhmVariation = None
 
         for key in kwargs:
             if key == 'ToleranceEnergy':
@@ -132,8 +132,8 @@ class CrystalField(object):
                 self.ResolutionModel = kwargs[key]
             elif key == 'Temperature':
                 self._temperature = kwargs[key]
-            elif key == 'WidthVariation':
-                self._widthVariation = kwargs[key]
+            elif key == 'FWHMVariation':
+                self._fwhmVariation = kwargs[key]
             else:
                 # Crystal field parameters
                 self._fieldParameters[key] = kwargs[key]
@@ -189,9 +189,9 @@ class CrystalField(object):
                 model = self._resolutionModel.model[i]
             else:
                 model = self._resolutionModel.model
-            out += ',WidthX=%s,WidthY=%s' % tuple(map(tuple, model))
-            if self._widthVariation is not None:
-                out += ',WidthVariation=%s' % self._widthVariation
+            out += ',FWHMX=%s,FWHMY=%s' % tuple(map(tuple, model))
+            if self._fwhmVariation is not None:
+                out += ',FWHMVariation=%s' % self._fwhmVariation
 
         peaks = self.getPeak(i)
         params = peaks.paramString('', 0)
@@ -249,10 +249,10 @@ class CrystalField(object):
         if self._resolutionModel is not None:
             i = 0
             for model in self._resolutionModel.model:
-                out += ',WidthX{0}={1},WidthY{0}={2}'.format(i, tuple(model[0]), tuple(model[1]))
+                out += ',FWHMX{0}={1},FWHMY{0}={2}'.format(i, tuple(model[0]), tuple(model[1]))
                 i += 1
-            if self._widthVariation is not None:
-                out += ',WidthVariation=%s' % self._widthVariation
+            if self._fwhmVariation is not None:
+                out += ',FWHMVariation=%s' % self._fwhmVariation
         i = 0
         for peaks in self.peaks:
             parOut = peaks.paramString('f%s.' % i, 1)

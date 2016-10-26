@@ -40,7 +40,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 double calculateWidth(double x, const std::vector<double> &xVec,
                       const std::vector<double> &yVec);
-void setWidthConstraint(API::IPeakFunction &peak, double width,
+void setWidthConstraint(API::IPeakFunction &peak, double fwhm,
                         double fwhmVariation);
 size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
                              const std::string &peakShape,

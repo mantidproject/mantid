@@ -30,9 +30,9 @@ CrystalFieldSpectrum::CrystalFieldSpectrum()
   declareAttribute("PeakShape", Attribute("Lorentzian"));
   declareAttribute("FWHM", Attribute(0.0));
   std::vector<double> vec;
-  declareAttribute("WidthX", Attribute(vec));
-  declareAttribute("WidthY", Attribute(vec));
-  declareAttribute("WidthVariation", Attribute(0.1));
+  declareAttribute("FWHMX", Attribute(vec));
+  declareAttribute("FWHMY", Attribute(vec));
+  declareAttribute("FWHMVariation", Attribute(0.1));
 }
 
 /// Uses m_crystalField to calculate peak centres and intensities
@@ -55,9 +55,9 @@ void CrystalFieldSpectrum::buildTargetFunction() const {
         "CrystalFieldPeaks returned odd number of values.");
   }
 
-  auto xVec = IFunction::getAttribute("WidthX").asVector();
-  auto yVec = IFunction::getAttribute("WidthY").asVector();
-  auto fwhmVariation = getAttribute("WidthVariation").asDouble();
+  auto xVec = IFunction::getAttribute("FWHMX").asVector();
+  auto yVec = IFunction::getAttribute("FWHMY").asVector();
+  auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
 
   auto peakShape = IFunction::getAttribute("PeakShape").asString();
   auto defaultFWHM = IFunction::getAttribute("FWHM").asDouble();
@@ -72,9 +72,9 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
     return;
   }
   m_dirty = false;
-  auto xVec = IFunction::getAttribute("WidthX").asVector();
-  auto yVec = IFunction::getAttribute("WidthY").asVector();
-  auto fwhmVariation = getAttribute("WidthVariation").asDouble();
+  auto xVec = IFunction::getAttribute("FWHMX").asVector();
+  auto yVec = IFunction::getAttribute("FWHMY").asVector();
+  auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
   FunctionDomainGeneral domain;
   FunctionValues values;
   m_source->function(domain, values);

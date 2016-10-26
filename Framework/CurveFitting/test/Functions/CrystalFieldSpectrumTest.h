@@ -239,8 +239,8 @@ public:
 
     std::vector<double> x{0.0, 50.0};
     std::vector<double> y{1.0, 2.0};
-    fun.setAttributeValue("WidthX", x);
-    fun.setAttributeValue("WidthY", y);
+    fun.setAttributeValue("FWHMX", x);
+    fun.setAttributeValue("FWHMY", y);
     auto checkW = [&x, &y](double c) {
       return y.front() +
              (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
@@ -290,15 +290,15 @@ public:
     {
       std::vector<double> x{0.0, 10.0};
       std::vector<double> y{1.0, 2.0};
-      fun.setAttributeValue("WidthX", x);
-      fun.setAttributeValue("WidthY", y);
+      fun.setAttributeValue("FWHMX", x);
+      fun.setAttributeValue("FWHMY", y);
       TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
     }
     {
       std::vector<double> x{1.0, 50.0};
       std::vector<double> y{1.0, 2.0};
-      fun.setAttributeValue("WidthX", x);
-      fun.setAttributeValue("WidthY", y);
+      fun.setAttributeValue("FWHMX", x);
+      fun.setAttributeValue("FWHMY", y);
       TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
     }
   }
@@ -316,29 +316,29 @@ public:
     {
       std::vector<double> x{0.0, 10.0, 50.0};
       std::vector<double> y{1.0, 2.0};
-      fun.setAttributeValue("WidthX", x);
-      fun.setAttributeValue("WidthY", y);
+      fun.setAttributeValue("FWHMX", x);
+      fun.setAttributeValue("FWHMY", y);
       TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
     }
     {
       std::vector<double> x{0.0, 50.0};
       std::vector<double> y{1.0, 2.0, 3.0};
-      fun.setAttributeValue("WidthX", x);
-      fun.setAttributeValue("WidthY", y);
+      fun.setAttributeValue("FWHMX", x);
+      fun.setAttributeValue("FWHMY", y);
       TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
     }
     {
       std::vector<double> x;
       std::vector<double> y{1.0, 2.0};
-      fun.setAttributeValue("WidthX", x);
-      fun.setAttributeValue("WidthY", y);
+      fun.setAttributeValue("FWHMX", x);
+      fun.setAttributeValue("FWHMY", y);
       TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
     }
     {
       std::vector<double> x{0.0, 10.0, 50.0};
       std::vector<double> y;
-      fun.setAttributeValue("WidthX", x);
-      fun.setAttributeValue("WidthY", y);
+      fun.setAttributeValue("FWHMX", x);
+      fun.setAttributeValue("FWHMY", y);
       TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
     }
   }
@@ -357,8 +357,8 @@ public:
     SimpleChebfun cFun(wFun, 0.0, 50.0);
     std::vector<double> x = cFun.linspace(30);
     std::vector<double> y = cFun(x);
-    fun.setAttributeValue("WidthX", x);
-    fun.setAttributeValue("WidthY", y);
+    fun.setAttributeValue("FWHMX", x);
+    fun.setAttributeValue("FWHMY", y);
     fun.buildTargetFunction();
 
     {
@@ -396,8 +396,8 @@ public:
 
     std::vector<double> x{0.0, 50.0};
     std::vector<double> y{1.0, 2.0};
-    fun.setAttributeValue("WidthX", x);
-    fun.setAttributeValue("WidthY", y);
+    fun.setAttributeValue("FWHMX", x);
+    fun.setAttributeValue("FWHMY", y);
     auto checkW = [&x, &y](double c) {
       return y.front() +
              (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
@@ -449,12 +449,12 @@ public:
     fun.setParameter("B44", -0.12544);
     fun.setAttributeValue("Ion", "Ce");
     fun.setAttributeValue("Temperature", 44.0);
-    fun.setAttributeValue("WidthVariation", 1.1);
+    fun.setAttributeValue("FWHMVariation", 1.1);
 
     std::vector<double> x{0.0, 50.0};
     std::vector<double> y{1.0, 2.0};
-    fun.setAttributeValue("WidthX", x);
-    fun.setAttributeValue("WidthY", y);
+    fun.setAttributeValue("FWHMX", x);
+    fun.setAttributeValue("FWHMY", y);
     auto checkW = [&x, &y](double c) {
       return y.front() +
              (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
@@ -503,9 +503,9 @@ public:
 
     std::vector<double> x{0.0, 50.0};
     std::vector<double> y{1.0, 2.0};
-    fun.setAttributeValue("WidthX", x);
-    fun.setAttributeValue("WidthY", y);
-    fun.setAttributeValue("WidthVariation", 0.01);
+    fun.setAttributeValue("FWHMX", x);
+    fun.setAttributeValue("FWHMY", y);
+    fun.setAttributeValue("FWHMVariation", 0.01);
     auto checkW = [&x, &y](double c) {
       return y.front() +
              (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());
@@ -544,9 +544,9 @@ public:
 
     std::vector<double> x{0.0, 50.0};
     std::vector<double> y{1.0, 2.0};
-    fun.setAttributeValue("WidthX", x);
-    fun.setAttributeValue("WidthY", y);
-    fun.setAttributeValue("WidthVariation", 0.01);
+    fun.setAttributeValue("FWHMX", x);
+    fun.setAttributeValue("FWHMY", y);
+    fun.setAttributeValue("FWHMVariation", 0.01);
     auto checkW = [&x, &y](double c) {
       return y.front() +
              (y.back() - y.front()) / (x.back() - x.front()) * (c - x.front());

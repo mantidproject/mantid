@@ -60,9 +60,9 @@ CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum()
   declareAttribute("Background", Attribute("FlatBackground", true));
   declareAttribute("PeakShape", Attribute("Lorentzian"));
   declareAttribute("FWHMs", Attribute(std::vector<double>(1, 0.0)));
-  declareAttribute("WidthX0", Attribute(std::vector<double>()));
-  declareAttribute("WidthY0", Attribute(std::vector<double>()));
-  declareAttribute("WidthVariation", Attribute(0.1));
+  declareAttribute("FWHMX0", Attribute(std::vector<double>()));
+  declareAttribute("FWHMY0", Attribute(std::vector<double>()));
+  declareAttribute("FWHMVariation", Attribute(0.1));
 }
 
 size_t CrystalFieldMultiSpectrum::getNumberDomains() const {
@@ -93,12 +93,12 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
     auto nSpec = attr.asVector().size();
     dynamic_cast<Peaks &>(*m_source).declareIntensityScaling(nSpec);
     m_nOwnParams = m_source->nParams();
-    m_widthX.resize(nSpec);
-    m_widthY.resize(nSpec);
+    m_fwhmX.resize(nSpec);
+    m_fwhmY.resize(nSpec);
     for (size_t iSpec = 0; iSpec < nSpec; ++iSpec) {
       auto suffix = std::to_string(iSpec);
-      declareAttribute("WidthX" + suffix, Attribute(m_widthX[iSpec]));
-      declareAttribute("WidthY" + suffix, Attribute(m_widthY[iSpec]));
+      declareAttribute("FWHMX" + suffix, Attribute(m_fwhmX[iSpec]));
+      declareAttribute("FWHMY" + suffix, Attribute(m_fwhmY[iSpec]));
     }
   }
   FunctionGenerator::setAttribute(name, attr);
@@ -140,15 +140,15 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
   // Create the single-spectrum functions.
   auto nSpec = temperatures.size();
   m_nPeaks.resize(nSpec);
-  if (m_widthX.empty()) {
-    m_widthX.resize(nSpec);
-    m_widthY.resize(nSpec);
+  if (m_fwhmX.empty()) {
+    m_fwhmX.resize(nSpec);
+    m_fwhmY.resize(nSpec);
   }
   for (size_t i = 0; i < nSpec; ++i) {
-    if (m_widthX[i].empty()) {
+    if (m_fwhmX[i].empty()) {
       auto suffix = std::to_string(i);
-      m_widthX[i] = IFunction::getAttribute("WidthX" + suffix).asVector();
-      m_widthY[i] = IFunction::getAttribute("WidthY" + suffix).asVector();
+      m_fwhmX[i] = IFunction::getAttribute("FWHMX" + suffix).asVector();
+      m_fwhmY[i] = IFunction::getAttribute("FWHMY" + suffix).asVector();
     }
     fun->addFunction(buildSpectrum(nre, en, wf, temperatures[i], fwhms[i], i));
     fun->setDomainIndex(i, i);
@@ -190,7 +190,7 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(
   calcExcitations(nre, en, wf, temperature, values, iSpec);
   m_nPeaks[iSpec] = CrystalFieldUtils::calculateNPeaks(values);
 
-  auto fwhmVariation = getAttribute("WidthVariation").asDouble();
+  auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
   auto peakShape = IFunction::getAttribute("PeakShape").asString();
   auto bkgdShape = IFunction::getAttribute("Background").asUnquotedString();
 
@@ -205,7 +205,7 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(
   spectrum->addFunction(background);
 
   m_nPeaks[iSpec] = CrystalFieldUtils::buildSpectrumFunction(
-      *spectrum, peakShape, values, m_widthX[iSpec], m_widthY[iSpec],
+      *spectrum, peakShape, values, m_fwhmX[iSpec], m_fwhmY[iSpec],
       fwhmVariation, fwhm);
 
   return IFunction_sptr(spectrum);
@@ -236,12 +236,12 @@ void CrystalFieldMultiSpectrum::updateTargetFunction() const {
 void CrystalFieldMultiSpectrum::updateSpectrum(
     API::IFunction &spectrum, int nre, const DoubleFortranVector &en,
     const ComplexFortranMatrix &wf, double temperature, size_t iSpec) const {
-  auto fwhmVariation = getAttribute("WidthVariation").asDouble();
+  auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
   FunctionValues values;
   calcExcitations(nre, en, wf, temperature, values, iSpec);
   auto &composite = dynamic_cast<API::CompositeFunction &>(spectrum);
   m_nPeaks[iSpec] = CrystalFieldUtils::updateSpectrumFunction(
-      composite, values, m_nPeaks[iSpec], 1, m_widthX[iSpec], m_widthY[iSpec],
+      composite, values, m_nPeaks[iSpec], 1, m_fwhmX[iSpec], m_fwhmY[iSpec],
       fwhmVariation);
 }
 

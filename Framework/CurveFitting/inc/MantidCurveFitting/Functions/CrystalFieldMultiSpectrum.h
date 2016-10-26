@@ -63,8 +63,8 @@ private:
   /// Cache number of fitted peaks
   mutable std::vector<size_t> m_nPeaks;
   /// Caches of the width functions
-  mutable std::vector<std::vector<double>> m_widthX;
-  mutable std::vector<std::vector<double>> m_widthY;
+  mutable std::vector<std::vector<double>> m_fwhmX;
+  mutable std::vector<std::vector<double>> m_fwhmY;
 };
 
 } // namespace Functions

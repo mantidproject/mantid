@@ -1045,7 +1045,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         ws = makeWorkspace(x, y)
 
         cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
-                          Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 50], [1, 2]), WidthVariation=0.3)
+                          Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 50], [1, 2]), FWHMVariation=0.3)
 
         fit = CrystalFieldFit(Model=cf, InputWorkspace=ws)
         fit.fit()
@@ -1126,7 +1126,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         rm = ResolutionModel((x, y))
 
         cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
-                      Temperature=44.0, FWHM=1.0, ResolutionModel=rm, WidthVariation=0.3)
+                      Temperature=44.0, FWHM=1.0, ResolutionModel=rm, FWHMVariation=0.3)
         sp = cf.getSpectrum()
         self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.0, 8)
         self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.58101468, 8)
@@ -1147,11 +1147,11 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         sp = cf.makeSpectrumFunction(0)
         fun = FunctionFactory.createInitialized(sp)
-        self.assertTrue('WidthX=(0, 50),WidthY=(1, 2)' in sp)
+        self.assertTrue('FWHMX=(0, 50),FWHMY=(1, 2)' in sp)
 
         sp = cf.makeSpectrumFunction(1)
         fun = FunctionFactory.createInitialized(sp)
-        self.assertTrue('WidthX=(0, 50),WidthY=(3, 4)' in sp)
+        self.assertTrue('FWHMX=(0, 50),FWHMY=(3, 4)' in sp)
 
     def test_ResolutionModel_set_multi_variation(self):
         from CrystalField import ResolutionModel, CrystalField, CrystalFieldFit
@@ -1164,23 +1164,23 @@ class CrystalFieldFitTest(unittest.TestCase):
         rm = ResolutionModel([(x0, y0), (x1, y1)])
 
         cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
-                      Temperature=[44.0, 50], ResolutionModel=rm,WidthVariation=0.1)
+                      Temperature=[44.0, 50], ResolutionModel=rm,FWHMVariation=0.1)
 
         sp = cf.makeSpectrumFunction(0)
         fun = FunctionFactory.createInitialized(sp)
-        self.assertTrue('WidthX=(0, 50),WidthY=(1, 2)' in sp)
-        self.assertTrue('WidthVariation=0.1' in sp)
+        self.assertTrue('FWHMX=(0, 50),FWHMY=(1, 2)' in sp)
+        self.assertTrue('FWHMVariation=0.1' in sp)
 
         sp = cf.makeSpectrumFunction(1)
         fun = FunctionFactory.createInitialized(sp)
-        self.assertTrue('WidthX=(0, 50),WidthY=(3, 4)' in sp)
-        self.assertTrue('WidthVariation=0.1' in sp)
+        self.assertTrue('FWHMX=(0, 50),FWHMY=(3, 4)' in sp)
+        self.assertTrue('FWHMVariation=0.1' in sp)
 
         sp = cf.makeMultiSpectrumFunction()
         fun = FunctionFactory.createInitialized(sp)
-        self.assertTrue('WidthX0=(0, 50),WidthY0=(1, 2)' in sp)
-        self.assertTrue('WidthX1=(0, 50),WidthY1=(3, 4)' in sp)
-        self.assertTrue('WidthVariation=0.1' in sp)
+        self.assertTrue('FWHMX0=(0, 50),FWHMY0=(1, 2)' in sp)
+        self.assertTrue('FWHMX1=(0, 50),FWHMY1=(3, 4)' in sp)
+        self.assertTrue('FWHMVariation=0.1' in sp)
 
     def test_peak_width_update(self):
         from CrystalField import ResolutionModel, CrystalField
@@ -1190,11 +1190,11 @@ class CrystalFieldFitTest(unittest.TestCase):
         rm = ResolutionModel((x, y))
 
         cf1 = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
-                           Temperature=44.0, FWHM=1.0, ResolutionModel=rm, WidthVariation=0.01)
+                           Temperature=44.0, FWHM=1.0, ResolutionModel=rm, FWHMVariation=0.01)
         sp1 = cf1.getSpectrum()
 
         cf2 = CrystalField('Ce', 'C2v', B20=0.57, B22=2.97, B40=-0.0317, B42=-0.116, B44=-0.12,
-                           Temperature=44.0, FWHM=1.0, ResolutionModel=rm, WidthVariation=0.01)
+                           Temperature=44.0, FWHM=1.0, ResolutionModel=rm, FWHMVariation=0.01)
         sp2 = cf2.getSpectrum()
 
         cf1['B20'] = 0.57

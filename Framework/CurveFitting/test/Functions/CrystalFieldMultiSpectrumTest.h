@@ -246,10 +246,10 @@ public:
              (y[i].back() - y[i].front()) / (x[i].back() - x[i].front()) *
                  (c - x[i].front());
     };
-    fun.setAttributeValue("WidthX0", x[0]);
-    fun.setAttributeValue("WidthY0", y[0]);
-    fun.setAttributeValue("WidthX1", x[1]);
-    fun.setAttributeValue("WidthY1", y[1]);
+    fun.setAttributeValue("FWHMX0", x[0]);
+    fun.setAttributeValue("FWHMY0", y[0]);
+    fun.setAttributeValue("FWHMX1", x[1]);
+    fun.setAttributeValue("FWHMY1", y[1]);
     fun.buildTargetFunction();
     {
       std::string prefix("f0.f1.");

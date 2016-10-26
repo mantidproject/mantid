@@ -42,12 +42,12 @@ double calculateWidth(double x, const std::vector<double> &xVec,
 
 /// Set a boundary constraint on the appropriate parameter of the peak.
 /// @param peak :: A peak function.
-/// @param width :: A width of the peak.
-/// @param widthVariation :: A value by which the with can vary on both sides.
-void setWidthConstraint(API::IPeakFunction &peak, double width,
+/// @param fwhm :: A width of the peak.
+/// @param fwhmVariation :: A value by which the with can vary on both sides.
+void setWidthConstraint(API::IPeakFunction &peak, double fwhm,
                         double fwhmVariation) {
-  double upperBound = width + fwhmVariation;
-  double lowerBound = width - fwhmVariation;
+  double upperBound = fwhm + fwhmVariation;
+  double lowerBound = fwhm - fwhmVariation;
   bool fix = lowerBound == upperBound;
   if (!fix) {
     if (lowerBound < 0.0) {
@@ -92,6 +92,7 @@ void setWidthConstraint(API::IPeakFunction &peak, double width,
 ///        centres and the following nPeaks values are the intensities.
 /// @param xVec :: x-values of a tabulated width function.
 /// @param yVec :: y-values of a tabulated width function.
+/// @param fwhmVariation :: A variation in the peak width allowed in a fit.
 /// @param defaultFWHM :: A default value for the FWHM to use if xVec and yVec
 ///        are empty.
 /// @return :: The number of peaks that will be actually fitted.
@@ -146,17 +147,18 @@ size_t calculateMaxNPeaks(size_t nPeaks) { return nPeaks + nPeaks / 2 + 1; }
 
 /// Update the peaks parameters after recalculationof the crystal field.
 /// @param spectrum :: A composite function containings the peaks to update.
-///                    May contain other functions (background) fix indices <
-///                    iFirst.
+///                    May contain other functions (background) fix indices
+///                    < iFirst.
 /// @param centresAndIntensities :: A FunctionValues object containing centres
 ///        and intensities for the peaks. First nPeaks calculated values are the
 ///        centres and the following nPeaks values are the intensities.
 /// @param nOriginalPeaks :: Number of actual peaks the spectrum had before the
-/// update.
-///                 This update can change the number of actual peaks.
+///        update.This update can change the number of actual peaks.
 /// @param iFirst :: The first index in the composite function (spectrum) at
-/// which the
-///         peaks begin.
+///        which the peaks begin.
+/// @param xVec :: x-values of a tabulated width function.
+/// @param yVec :: y-values of a tabulated width function.
+/// @param fwhmVariation :: A variation in the peak width allowed in a fit.
 /// @return :: The new number of fitted peaks.
 size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
                               const FunctionValues &centresAndIntensities,
