@@ -140,7 +140,18 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
             self.log().information('Loaded calibration run: {0}'.format(self._calibration_file))
 
     def PyExec(self):
+
         self.setUp()
+
+        # Check whether observable exists in Nexus file
+        doppler = '$/entry0/'
+        _criteria = doppler + self._post_processing_entity_name.replace('.', '/') + '$'
+        self.log().debug('Filtering with nexus criteria: {0}'.format(_criteria))
+        self._run_file = SelectNexusFilesByMetadata(self._run_file, _criteria)
+
+        if self._run_file == '':
+            self.log().error('Observable not found in Nexus files.')
+            raise RuntimeError('Observable not found in Nexus files.')
 
         self.log().information('Call IndirectILLReduction for .nxs file(s) : {0}'.format(self._run_file))
         IndirectILLReduction(Run=self._run_file, MapFile=self._map_file, Analyser=self._analyser,
