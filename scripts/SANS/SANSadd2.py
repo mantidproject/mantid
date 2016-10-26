@@ -2,15 +2,76 @@
 import os
 from mantid.simpleapi import *
 from mantid.kernel import Logger
+from mantid.api import WorkspaceGroup, IEventWorkspace
+
 from SANSUtility import (bundle_added_event_data_as_group, AddOperation, transfer_special_sample_logs)
 from shutil import copyfile
 
 sanslog = Logger("SANS")
 _NO_INDIVIDUAL_PERIODS = -1
+ADD_FILES_SUM_TEMPORARY = "AddFilesSumTemporary"
+ADD_FILES_SUM_TEMPORARY_MONITORS = "AddFilesSumTemporary_monitors"
+ADD_FILES_NEW_TEMPORARY = "AddFilesNewTempory"
+ADD_FILES_NEW_TEMPORARY_MONITORS = "AddFilesNewTempory_monitors"
+
+
+class WorkspaceWrapper(object):
+    def __init__(self, workspace):
+        if workspace is None:
+            raise ValueError("WorkspaceWrapper: No valid workspace was provided.")
+        self._workspace = workspace
+        self._is_group_workspace = self._check_if_group_workspace(self._workspace)
+        self._reference_workspace = self._workspace if self._is_group_workspace else self._workspace[0]
+        self._is_event_data = self._check_if_is_event_data()
+
+    @staticmethod
+    def _check_if_group_workspace(workspace):
+        return True if isinstance(workspace, WorkspaceGroup) else False
+
+    def _check_if_is_event_data(self):
+        return isinstance(self._reference_workspace, IEventWorkspace)
+
+    def get_workspace(self, period=1):
+        if self._is_group_workspace:
+            ws = self._workspace[period-1]
+        else:
+            ws = self._workspace
+        return ws
+
+    def getRun(self):
+        return self._reference_workspace.getRun()
+
+    def getHistory(self):
+        return self._reference_workspace.getHistory()
+
+    @property
+    def is_event_workspace(self):
+        return self._is_event_data
+
+
+def add_multi_period_workspace(multi_period_workspace, adder, run_to_add):
+    group_workspace_name = multi_period_workspace.name()
+    workspace_sum = multi_period_workspace[0]
+    for index in range(1, len(multi_period_workspace)):
+        adder.add(LHS_workspace=workspace_sum, RHS_workspace=multi_period_workspace[index],
+                  output_workspace=workspace_sum, run_to_add=run_to_add)
+    # Now delete all workspaces exepct for the first one, starting from the back
+    for index in reversed(range(1, len(multi_period_workspace))):
+        DeleteWorkspace(multi_period_workspace[index])
+    UnGroupWorkspace(multi_period_workspace)
+    RenameWorkspace(workspace_sum, group_workspace_name)
+
+
+def handle_loaded_multi_period_file(workspace_name, monitor_name, adder, run_to_add, is_event):
+    workspace_group = mtd[workspace_name]
+    add_multi_period_workspace(multi_period_workspace=workspace_group, adder=adder, run_to_add=run_to_add)
+    if is_event:
+        workspace_group_monitors = mtd[monitor_name]
+        add_multi_period_workspace(multi_period_workspace=workspace_group_monitors, adder=adder, run_to_add=run_to_add)
 
 
 def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False,
-             binning='Monitors', saveAsEvent=False, isOverlay = False, time_shifts = []):
+             binning='Monitors', saveAsEvent=False, isOverlay = False, time_shifts=None):
     if inst.upper() == "SANS2DTUBES":
         inst = "SANS2D"
   #check if there is at least one file in the list
@@ -21,6 +82,8 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
         defType = '.'+defType
 
     # Create the correct format of adding files
+    if time_shifts is None:
+        time_shifts = []
     adder = AddOperation(isOverlay, time_shifts)
 
   #these input arguments need to be arrays of strings, enforce this
@@ -46,7 +109,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
     #we need to catch all exceptions to ensure that a dialog box is raised with the error
         try :
             lastPath, lastFile, logFile, num_periods, isFirstDataSetEvent = _loadWS(
-                userEntry, defType, inst, 'AddFilesSumTempory', rawTypes, period)
+                userEntry, defType, inst, ADD_FILES_SUM_TEMPORARY, rawTypes, period)
 
       # if event data prevent loop over periods makes no sense
             if isFirstDataSetEvent:
@@ -57,54 +120,71 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
                 error = 'Adding event data not supported for ' + inst + ' for now'
                 print error
                 logger.notice(error)
-                for workspaceName in ('AddFilesSumTempory','AddFilesSumTempory_monitors'):
+                for workspaceName in (ADD_FILES_SUM_TEMPORARY,ADD_FILES_SUM_TEMPORARY_MONITORS):
                     if workspaceName in mtd:
                         DeleteWorkspace(workspaceName)
                 return ""
 
+            # If the loaded workspace is a multi-period workspace then we need to add those files together first
+            # In this way we get rid of the group workspace
+            if isinstance(mtd[ADD_FILES_SUM_TEMPORARY], WorkspaceGroup):
+                handle_loaded_multi_period_file(workspace_name= ADD_FILES_SUM_TEMPORARY,
+                                                monitor_name=ADD_FILES_SUM_TEMPORARY_MONITORS,
+                                                adder=adder, run_to_add=1e10, is_event=isFirstDataSetEvent)
+
             for i in range(len(runs)-1):
                 userEntry = runs[i+1]
                 lastPath, lastFile, logFile, dummy, isDataSetEvent = _loadWS(
-                    userEntry, defType, inst,'AddFilesNewTempory', rawTypes, period)
+                    userEntry, defType, inst, ADD_FILES_NEW_TEMPORARY, rawTypes, period)
 
                 if isDataSetEvent != isFirstDataSetEvent:
                     error = 'Datasets added must be either ALL histogram data or ALL event data'
                     print error
                     logger.notice(error)
-                    for workspaceName in ('AddFilesSumTempory','AddFilesNewTempory'):
+                    for workspaceName in (ADD_FILES_SUM_TEMPORARY, ADD_FILES_SUM_TEMPORARY_MONITORS,
+                                          ADD_FILES_NEW_TEMPORARY, ADD_FILES_NEW_TEMPORARY_MONITORS):
                         if workspaceName in mtd:
                             DeleteWorkspace(workspaceName)
                     return ""
 
-                adder.add(LHS_workspace='AddFilesSumTempory',RHS_workspace= 'AddFilesNewTempory',
-                          output_workspace= 'AddFilesSumTempory', run_to_add = counter_run)
+                # If the loaded workspace is a multi-period workspace then we need to add those files together first
+                # In this way we get rid of the group worksapce
+                if isinstance(mtd[ADD_FILES_NEW_TEMPORARY], WorkspaceGroup):
+                    handle_loaded_multi_period_file(workspace_name=ADD_FILES_NEW_TEMPORARY,
+                                                    monitor_name=ADD_FILES_NEW_TEMPORARY_MONITORS,
+                                                    adder=adder, run_to_add=counter_run, is_event=isDataSetEvent)
+
+                adder.add(LHS_workspace=ADD_FILES_SUM_TEMPORARY,RHS_workspace=ADD_FILES_NEW_TEMPORARY,
+                          output_workspace=ADD_FILES_SUM_TEMPORARY, run_to_add=counter_run)
+
                 if isFirstDataSetEvent:
-                    adder.add(LHS_workspace='AddFilesSumTempory_monitors',RHS_workspace= 'AddFilesNewTempory_monitors',
-                              output_workspace= 'AddFilesSumTempory_monitors', run_to_add = counter_run)
-                DeleteWorkspace("AddFilesNewTempory")
+                    adder.add(LHS_workspace=ADD_FILES_SUM_TEMPORARY_MONITORS,
+                              RHS_workspace= ADD_FILES_NEW_TEMPORARY_MONITORS,
+                              output_workspace=ADD_FILES_SUM_TEMPORARY_MONITORS,
+                              run_to_add = counter_run)
+                DeleteWorkspace(ADD_FILES_NEW_TEMPORARY)
                 if isFirstDataSetEvent:
-                    DeleteWorkspace("AddFilesNewTempory_monitors")
+                    DeleteWorkspace(ADD_FILES_NEW_TEMPORARY_MONITORS)
                 # Increment the run number
                 counter_run +=1
         except ValueError as e:
             error = 'Error opening file ' + userEntry+': ' + str(e)
             print error
             logger.notice(error)
-            if 'AddFilesSumTempory' in mtd :
-                DeleteWorkspace('AddFilesSumTempory')
+            if ADD_FILES_SUM_TEMPORARY in mtd :
+                DeleteWorkspace(ADD_FILES_SUM_TEMPORARY)
             return ""
         except Exception as e:
             error = 'Error finding files: ' + str(e)
             print error
             logger.notice(error)
-            for workspaceName in ('AddFilesSumTempory','AddFilesNewTempory'):
+            for workspaceName in (ADD_FILES_SUM_TEMPORARY, ADD_FILES_NEW_TEMPORARY):
                 if workspaceName in mtd:
                     DeleteWorkspace(workspaceName)
             return ""
-
     # in case of event file force it into a histogram workspace
         if isFirstDataSetEvent and not saveAsEvent:
-            wsInMonitor = mtd['AddFilesSumTempory_monitors']
+            wsInMonitor = mtd[ADD_FILES_SUM_TEMPORARY_MONITORS]
             if binning == 'Monitors':
                 monX = wsInMonitor.dataX(0)
                 binning = str(monX[0])
@@ -118,20 +198,21 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
                 binning = binning + "," + str(monX[len(monX)-1])
 
             logger.notice(binning)
-            Rebin(InputWorkspace='AddFilesSumTempory',OutputWorkspace='AddFilesSumTempory_Rebin',Params= binning, PreserveEvents=False)
+            Rebin(InputWorkspace=ADD_FILES_SUM_TEMPORARY,OutputWorkspace='AddFilesSumTempory_Rebin',Params=binning,
+                  PreserveEvents=False)
 
         # loading the nexus file using LoadNexus is necessary because it has some metadata
         # that is not in LoadEventNexus. This must be fixed.
             filename, ext = _makeFilename(runs[0], defType, inst)
-            LoadNexus(Filename=filename, OutputWorkspace='AddFilesSumTempory', SpectrumMax=wsInMonitor.getNumberHistograms())
+            LoadNexus(Filename=filename, OutputWorkspace=ADD_FILES_SUM_TEMPORARY, SpectrumMax=wsInMonitor.getNumberHistograms())
         # User may have selected a binning which is different from the default
-            Rebin(InputWorkspace='AddFilesSumTempory',OutputWorkspace='AddFilesSumTempory',Params= binning)
+            Rebin(InputWorkspace=ADD_FILES_SUM_TEMPORARY,OutputWorkspace=ADD_FILES_SUM_TEMPORARY,Params= binning)
         # For now the monitor binning must be the same as the detector binning
         # since otherwise both cannot exist in the same output histogram file
-            Rebin(InputWorkspace='AddFilesSumTempory_monitors',OutputWorkspace='AddFilesSumTempory_monitors',Params= binning)
+            Rebin(InputWorkspace=ADD_FILES_SUM_TEMPORARY_MONITORS,OutputWorkspace=ADD_FILES_SUM_TEMPORARY_MONITORS,Params= binning)
 
-            wsInMonitor = mtd['AddFilesSumTempory_monitors']
-            wsOut = mtd['AddFilesSumTempory']
+            wsInMonitor = mtd[ADD_FILES_SUM_TEMPORARY_MONITORS]
+            wsOut = mtd[ADD_FILES_SUM_TEMPORARY]
             wsInDetector = mtd['AddFilesSumTempory_Rebin']
 
             # We loose added sample log information since we reload a single run workspace
@@ -141,8 +222,8 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
 
             mon_n = wsInMonitor.getNumberHistograms()
             for i in range(mon_n):
-                wsOut.setY(i,wsInMonitor.dataY(i))
-                wsOut.setE(i,wsInMonitor.dataE(i))
+                wsOut.setY(i, wsInMonitor.dataY(i))
+                wsOut.setE(i, wsInMonitor.dataE(i))
             ConjoinWorkspaces(wsOut, wsInDetector, CheckOverlapping=True)
 
             if 'AddFilesSumTempory_Rebin' in mtd :
@@ -154,24 +235,25 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
         outFile_monitors = lastFile+'-add_monitors.'+'nxs'
         logger.notice('writing file:   '+outFile)
 
+
         if period == 1 or period == _NO_INDIVIDUAL_PERIODS:
         #replace the file the first time around
-            SaveNexusProcessed(InputWorkspace="AddFilesSumTempory",
+            SaveNexusProcessed(InputWorkspace=ADD_FILES_SUM_TEMPORARY,
                                Filename=outFile, Append=False)
             # If we are saving event data, then we need to save also the monitor file
             if isFirstDataSetEvent and saveAsEvent:
-                SaveNexusProcessed(InputWorkspace="AddFilesSumTempory_monitors",
-                                   Filename=outFile_monitors , Append=False)
+                SaveNexusProcessed(InputWorkspace=ADD_FILES_SUM_TEMPORARY_MONITORS,
+                                   Filename=outFile_monitors, Append=False)
 
         else:
       #then append
-            SaveNexusProcessed("AddFilesSumTempory", outFile, Append=True)
+            SaveNexusProcessed(ADD_FILES_SUM_TEMPORARY, outFile, Append=True)
             if isFirstDataSetEvent and saveAsEvent:
-                SaveNexusProcessed("AddFilesSumTempory_monitors", outFile_monitors , Append=True)
+                SaveNexusProcessed(ADD_FILES_SUM_TEMPORARY_MONITORS, outFile_monitors , Append=True)
 
-        DeleteWorkspace("AddFilesSumTempory")
+        DeleteWorkspace(ADD_FILES_SUM_TEMPORARY)
         if isFirstDataSetEvent:
-            DeleteWorkspace("AddFilesSumTempory_monitors")
+            DeleteWorkspace(ADD_FILES_SUM_TEMPORARY_MONITORS)
 
         if period == num_periods:
             break
@@ -241,16 +323,12 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
     else:
         outWs = Load(Filename=filename,OutputWorkspace=wsName)
 
-    props = outWs.getHistory().lastAlgorithm()
-
-    isDataSetEvent = False
-    wsDataSet = mtd[wsName]
-    if hasattr(wsDataSet, 'getNumberEvents'):
-        isDataSetEvent = True
-
+    workspace_wrapper = WorkspaceWrapper(outWs)
+    isDataSetEvent = workspace_wrapper.is_event_workspace
     if isDataSetEvent:
-        LoadEventNexus(Filename=filename,OutputWorkspace=wsName, LoadMonitors=True)
-        runDetails = mtd[wsName].getRun()
+        LoadEventNexus(Filename=filename, OutputWorkspace=wsName, LoadMonitors=True)
+        workspace_wrapper = WorkspaceWrapper(mtd[wsName])
+        runDetails = workspace_wrapper.getRun()
         timeArray = runDetails.getLogData("proton_charge").times
     # There should never be a time increment in the proton charge larger than say "two weeks"
     # SANS2D currently is run at 10 frames per second. This may be increated to 5Hz
@@ -264,6 +342,7 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
                                 ' For example a time difference of ' + str(timeDif) + " seconds has been observed.")
                 break
 
+    props = workspace_wrapper.getHistory().lastAlgorithm()
     path = props.getPropertyValue('FileName')
     path, fName = os.path.split(path)
     if path.find('/') == -1:
@@ -279,8 +358,8 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
         logFile = os.path.splitext(fName)[0]+'.log'
 
     try:
-        samp = mtd[wsName].getRun()
-        numPeriods = samp.getLogData('nperiods').value
+        run = workspace_wrapper.getRun()
+        numPeriods = run.getLogData('nperiods').value
     except:
     #assume the run file didn't support multi-period data and so there is only one period
         numPeriods = 1
