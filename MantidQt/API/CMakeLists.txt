@@ -13,6 +13,7 @@
 	src/ListPropertyWidget.cpp
 	src/ManageUserDirectories.cpp
 	src/MantidColorMap.cpp
+	src/MantidDesktopServices.cpp
 	src/MantidDialog.cpp
 	src/MantidHelpInterface.cpp
 	src/MantidQwtIMDWorkspaceData.cpp
@@ -93,6 +94,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/InterfaceManager.h
   inc/MantidQtAPI/IProjectSerialisable.h
 	inc/MantidQtAPI/MantidColorMap.h
+	inc/MantidQtAPI/MantidDesktopServices.h
 	inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
 	inc/MantidQtAPI/MantidQwtWorkspaceData.h
 	inc/MantidQtAPI/MantidAlgorithmMetatype.h

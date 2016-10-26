@@ -11,9 +11,6 @@
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 
-#include <QDesktopServices>
-#include <QUrl>
-
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 

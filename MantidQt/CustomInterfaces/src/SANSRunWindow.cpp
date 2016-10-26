@@ -18,13 +18,13 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
 #include "MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h"
 #include "MantidQtCustomInterfaces/SANSEventSlicing.h"
 
 #include <QClipboard>
-#include <QDesktopServices>
 #include <QTemporaryFile>
 #include <QTextStream>
 #include <QUrl>
@@ -3886,7 +3886,7 @@ void SANSRunWindow::handleSlicePushButton() {
 void SANSRunWindow::openHelpPage() {
   const auto helpPageUrl =
       m_helpPageUrls[static_cast<Tab>(m_uiForm.tabWidget->currentIndex())];
-  QDesktopServices::openUrl(QUrl(helpPageUrl));
+  MantidDesktopServices::openUrl(QUrl(helpPageUrl));
 }
 
 // Set the validators for inputs
