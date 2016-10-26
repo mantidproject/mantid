@@ -781,7 +781,8 @@ def _set_logging_option(algm_obj, kwargs):
 
 def set_properties(alg_object, *args, **kwargs):
     """
-        Set all of the properties of the algorithm
+        Set all of the properties of the algorithm. There is no guarantee of
+        the order the properties will be set
         :param alg_object: An initialised algorithm object
         :param *args: Positional arguments
         :param **kwargs: Keyword arguments
@@ -800,10 +801,17 @@ def set_properties(alg_object, *args, **kwargs):
     # end
     if len(args) > 0:
         mandatory_props = alg_object.mandatoryProperties()
-        for (key, value) in zip(mandatory_props[:len(args)], args):
-            do_set_property(key, value)
+    else:
+        mandatory_props = []
     if len(kwargs) > 0:
         for (key, value) in iteritems(kwargs):
+            do_set_property(key, value)
+            try:
+                mandatory_props.remove(key)
+            except ValueError:
+                pass
+    if len(args) > 0:
+        for (key, value) in zip(mandatory_props[:len(args)], args):
             do_set_property(key, value)
 
 

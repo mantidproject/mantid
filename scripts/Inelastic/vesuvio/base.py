@@ -24,18 +24,22 @@ class VesuvioBase(Algorithm):
                 alg.setProperty(key, kwargs[key])
                 del kwargs[key]
 
+        ret_props = None
         if 'return_values' in kwargs:
             ret_props = kwargs['return_values']
             if type(ret_props) is str:
                 ret_props = [ret_props]
             del kwargs['return_values']
-        else:
-            ret_props = alg.outputProperties()
+
         for name, value in iteritems(kwargs):
             alg.setProperty(name, value)
         alg.execute()
 
         # Assemble return values
+        if ret_props is None:
+            # This must be AFTER execute just in case that attached more
+            # output properties
+            ret_props = alg.outputProperties()
         outputs = []
         for name in ret_props:
             outputs.append(alg.getProperty(name).value)
