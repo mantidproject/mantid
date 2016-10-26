@@ -4,7 +4,6 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtAPI/MantidDesktopServices.h"
 
-#include <QDesktopServices>
 #include <QMessageBox>
 #include <QPainter>
 #include <QSettings>

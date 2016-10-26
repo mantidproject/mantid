@@ -26,7 +26,6 @@
 #include <QCheckBox>
 #include <QColorDialog>
 #include <QComboBox>
-#include <QDesktopServices>
 #include <QDoubleValidator>
 #include <QDragEnterEvent>
 #include <QDropEvent>

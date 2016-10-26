@@ -8,7 +8,6 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <QFileInfo>
-#include <QDesktopServices>
 #include <QUrl>
 
 #include <Poco/ActiveResult.h>

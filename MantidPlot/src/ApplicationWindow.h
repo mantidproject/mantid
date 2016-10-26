@@ -33,7 +33,6 @@ Description          : QtiPlot's main window
 #define APPLICATION_H
 
 #include <QBuffer>
-#include <QDesktopServices>
 #include <QFile>
 #include <QLocale>
 #include <QMainWindow>

@@ -25,7 +25,6 @@
 #include "MantidQtCustomInterfaces/SANSEventSlicing.h"
 
 #include <QClipboard>
-#include <QDesktopServices>
 #include <QTemporaryFile>
 #include <QTextStream>
 #include <QUrl>
