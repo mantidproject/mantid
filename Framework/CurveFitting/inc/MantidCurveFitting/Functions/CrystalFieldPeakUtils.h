@@ -5,10 +5,10 @@
 
 namespace Mantid {
 
-namespace API{
-  class CompositeFunction;
-  class FunctionValues;
-  class IPeakFunction;
+namespace API {
+class CompositeFunction;
+class FunctionValues;
+class IPeakFunction;
 }
 
 namespace CurveFitting {
