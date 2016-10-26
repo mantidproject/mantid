@@ -564,7 +564,7 @@ void MuonAnalysis::runSaveGroupButton() {
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
-  filter += ";;AllFiles (*.*)";
+  filter += ";;AllFiles (*)";
   QString groupingFile = MantidQt::API::FileDialogHandler::getSaveFileName(
       this, "Save Grouping file as", prevPath, filter);
 
@@ -603,7 +603,7 @@ void MuonAnalysis::runLoadGroupButton() {
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
-  filter += ";;AllFiles (*.*)";
+  filter += ";;AllFiles (*)";
   QString groupingFile = QFileDialog::getOpenFileName(
       this, "Load Grouping file", prevPath, filter);
   if (groupingFile.isEmpty() || QFileInfo(groupingFile).isDir())
@@ -2899,7 +2899,7 @@ std::string MuonAnalysis::getSubtractedPeriods() const {
  * Pass this information to the fit helper
  */
 void MuonAnalysis::dataToFitChanged() {
-  if (m_fitDataPresenter) {
+  if (m_fitDataPresenter && m_loaded) { // Only act if some data is loaded
     m_fitDataPresenter->setGrouping(m_groupingHelper.parseGroupingTable());
     m_fitDataPresenter->setPlotType(parsePlotType(m_uiForm.frontPlotFuncs));
     // Set busy cursor while workspaces are being created

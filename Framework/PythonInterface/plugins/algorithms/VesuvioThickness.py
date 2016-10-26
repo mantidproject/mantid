@@ -63,9 +63,9 @@ class VesuvioThickness(PythonAlgorithm):
         num_masses = len(self._masses)
         num_amplitudes = len(self._amplitudes)
         if num_masses == 0:
-            isuues['Masses'] = ('Must have 1 or more Masses defined')
+            issues['Masses'] = ('Must have 1 or more Masses defined')
         if num_amplitudes == 0:
-            isuues['Amplitudes'] = ('Must have 1 or more Amplitudes defined')
+            issues['Amplitudes'] = ('Must have 1 or more Amplitudes defined')
 
         if num_masses != num_amplitudes:
             issues['Masses'] = ('The number of masses: %d, ' % num_masses

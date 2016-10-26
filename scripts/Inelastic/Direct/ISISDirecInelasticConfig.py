@@ -315,6 +315,7 @@ class UserProperties(object):
     def get_all_cycles(self):
         """Return list of all cycles the user participates in"""
         return self._instrument.keys()
+
     def get_all_rb(self):
         """Return list of all rb folders the user participates in"""
         return self._rb_dirs.values()

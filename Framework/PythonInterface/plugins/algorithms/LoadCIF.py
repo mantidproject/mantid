@@ -50,11 +50,11 @@ class SpaceGroupBuilder(object):
         try:
             return self._getSpaceGroupFromString(cifData)
         # pylint: disable=unused-variable
-        except (RuntimeError, ValueError) as error:
+        except (RuntimeError, ValueError):
             try:
                 return self._getSpaceGroupFromNumber(cifData)
             # pylint: disable=unused-variable,invalid-name
-            except RuntimeError as e:
+            except RuntimeError:
                 raise RuntimeError(
                     'Can not create space group from supplied CIF-file. You could try to modify the HM-symbol '
                     'to contain spaces between the components.\n'

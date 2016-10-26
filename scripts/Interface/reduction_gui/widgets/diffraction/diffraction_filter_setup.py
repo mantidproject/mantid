@@ -193,7 +193,8 @@ class FilterSetupWidget(BaseWidget):
                 self._content.valuechange_combo.setCurrentIndex(index)
             else:
                 self._content.valuechange_combo.setCurrentIndex(0)
-                print "Input value of filter log value by changing direction '%s' is not allowed." % (state.filterlogvaluebychangingdirection)
+                print "Input value of filter log value by changing direction '%s' is not allowed." % \
+                    (state.filterlogvaluebychangingdirection)
         else:
             # Default
             self._content.valuechange_combo.setCurrentIndex(0)
@@ -332,7 +333,7 @@ class FilterSetupWidget(BaseWidget):
         # Get property
         run = self._metaws.getRun()
         try:
-            logproperty = run.getProperty(str(logname))
+            run.getProperty(str(logname))
         except RuntimeError:
             # Unable to plot
             msg3 = str("Error! Workspace %s does not contain log %s. " % (str(self._metaws),
