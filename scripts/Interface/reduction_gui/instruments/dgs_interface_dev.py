@@ -6,13 +6,14 @@ from reduction_gui.widgets.inelastic.dgs_absolute_units import AbsoluteUnitsWidg
 from reduction_gui.widgets.inelastic.dgs_pd_sc_conversion import PdAndScConversionWidget
 from reduction_gui.widgets.cluster_status import RemoteJobsWidget
 from reduction_gui.reduction.inelastic.dgs_reduction_script import DgsReductionScripter
+
+
 class DgsInterface(InstrumentInterface):
     """
         Defines the widgets for direct geometry spectrometer reduction
     """
     # Allowed extensions for loading data files
     data_type = "Data files *.* (*.*)"
-
 
     def __init__(self, name, settings):
         super(DgsInterface, self).__init__(name, settings)

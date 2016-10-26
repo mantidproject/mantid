@@ -8,6 +8,7 @@ import urllib
 URL = "http://builds.mantidproject.org/job/master_systemtests"
 PLATFORMS=['rhel7','rhel6', 'osx', 'win7', 'ubuntu']
 
+
 class TestCase:
 
     def __init__(self, kwargs):

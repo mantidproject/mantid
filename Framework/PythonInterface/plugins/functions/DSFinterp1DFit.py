@@ -119,7 +119,6 @@ class DSFinterp1DFit(IFunction1D):
             return None
         return {'Intensity':intensity, 'TargetParameter':f}
 
-
     def function1D(self, xvals):
         ''' Fit using the interpolated structure factor '''
         p=self.validateParams()
@@ -191,5 +190,5 @@ try:
     import dsfinterp
     FunctionFactory.subscribe(DSFinterp1DFit)
 except ImportError:
-    logger.debug('Failed to subscribe fit function DSFinterp1DFit. '+\
+    logger.debug('Failed to subscribe fit function DSFinterp1DFit. '+
                  'Python package dsfinterp may be missing (https://pypi.python.org/pypi/dsfinterp)')

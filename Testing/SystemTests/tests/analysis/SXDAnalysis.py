@@ -2,6 +2,7 @@
 import stresstesting
 from mantid.simpleapi import *
 
+
 class SXDAnalysis(stresstesting.MantidStressTest):
     """
     Start of a system test for SXD data analyiss
@@ -52,6 +53,7 @@ class SXDAnalysis(stresstesting.MantidStressTest):
     def doValidation(self):
         # If we reach here, no validation failed
         return True
+
     def requiredMemoryMB(self):
         """Far too slow for managed workspaces. They're tested in other places. Requires 2Gb"""
         return 1000

@@ -9,6 +9,7 @@ import unittest
 
 DIFF_PLACES = 12
 
+
 class VesuvioTests(unittest.TestCase):
 
     ws_name = "evs_raw"
@@ -19,7 +20,6 @@ class VesuvioTests(unittest.TestCase):
         monitor_name = self.ws_name + '_monitors'
         if monitor_name in mtd:
             mtd.remove(monitor_name)
-
 
     #==================== Test spectrum list validation ============================
 
@@ -44,9 +44,7 @@ class VesuvioTests(unittest.TestCase):
         # check workspace created
         self.assertTrue(mtd.doesExist(self.ws_name))
 
-
     #================== Success cases ================================
-
 
     def test_load_with_back_scattering_spectra_produces_correct_workspace_using_double_difference(self):
         diff_mode = "DoubleDifference"
@@ -253,7 +251,6 @@ class VesuvioTests(unittest.TestCase):
 
         self._verify_spectra_numbering(evs_raw.getSpectrum(0), 3,
                                        range(2101,2114))
-
 
     def test_sumspectra_with_multiple_groups_gives_number_output_spectra_as_input_groups_with_foil_in(self):
         self._run_load("14188", "3-15;30-50", "FoilIn", "IP0005.dat", sum_runs=True)

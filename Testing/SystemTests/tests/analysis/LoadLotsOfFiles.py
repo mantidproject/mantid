@@ -7,6 +7,8 @@ import re
 import stresstesting
 
 BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
+                '80_tubes_Top_and_Bottom_May_2016.xml',
+                '80tubeCalibration_18-04-2016_r9330-9335.nxs',
                 '80tube_DIRECT_3146_M1_30April15_r3146.dat',
                 '992 Descriptions.txt',
                 'directBeamDatabaseFall2014_IPTS_11601_2.cfg',
@@ -21,6 +23,7 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'DISF_NaF.cdl',
                 'det_corrected7.dat',
                 'det_LET_cycle12-3.dat',
+                'DIRECT_M1_21Nov15_6x8mm_0.9_20.0_r6279_extrapolated.dat',
                 'eqsans_configuration.1463',
                 'FLAT_CELL.061',
                 'HYSA_mask.xml',
@@ -43,6 +46,8 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'MASK_SANS2D_REAR_Bottom_3_tubes_16May2014.xml',
                 'MASK_SANS2D_REAR_Edges_16Mar2015.xml',
                 'MASK_SANS2D_BOTH_Extras_24Mar2015.xml',
+                'MASK_Tube6.xml',
+                'MASK_squareBeamstop_6x8Beam_11-October-2016.xml',
                 'MAP17269.raw', # Don't need to check multiple MAPS files
                 'MAP17589.raw',
                 'MER06399.raw', # Don't need to check multiple MERLIN files
@@ -83,6 +88,7 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'poldi2015n000977.hdf',
                 'USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt',
                 'USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt',
+                'USER_Larmor_163F_HePATest_r13038.txt',
                 'Vesuvio_IP_file_test.par',
                 'IP0004_10.par'
                ]
@@ -112,6 +118,7 @@ PRIORITY_FILES = ['HYS_13658_event.nxs',
                   'ILLIN5_Sample_096003.nxs',
                   'ILLIN5_Vana_095893.nxs']
 
+
 def useDir(direc):
     """Only allow directories that aren't test output or
     reference results."""
@@ -120,6 +127,7 @@ def useDir(direc):
     if config["defaultsave.directory"] == direc:
         return False
     return "Data" in direc
+
 
 def useFile(direc, filename):
     """Returns (useFile, abspath)"""
@@ -144,6 +152,7 @@ def useFile(direc, filename):
     if os.path.isdir(filename):
         return (False, filename)
     return (True, filename)
+
 
 class LoadLotsOfFiles(stresstesting.MantidStressTest):
     def __getDataFileList__(self):
@@ -202,14 +211,13 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
         for test in tests:
             test = test.strip()
             result = eval(test)
-            if not result == True:
+            if not result:
                 failed.append((test, result))
         if len(failed) > 0:
             for item in failed:
                 print "  Failed test '%s' returned '%s' instead of 'True'" % (item[0], item[1])
             return False
         return True
-
 
     def __loadAndTest__(self, filename):
         """Do all of the real work of loading and testing the file"""
@@ -220,7 +228,7 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
         # Output can be a tuple if the Load algorithm has extra output properties
         # but the output workspace should always be the first argument
         outputs = Load(filename)
-        if type(outputs) == tuple:
+        if isinstance(outputs, tuple):
             wksp = outputs[0]
         else:
             wksp = outputs
@@ -295,7 +303,7 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
             print "SUMMARY OF FAILED FILES"
             for filename in failed:
                 print filename
-            raise RuntimeError("Failed to load %d of %d files" \
-                                   % (len(failed), len(files)))
+            raise RuntimeError("Failed to load %d of %d files"
+                               % (len(failed), len(files)))
         else:
             print "Successfully loaded %d files" % len(files)

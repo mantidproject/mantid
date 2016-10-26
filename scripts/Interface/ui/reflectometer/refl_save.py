@@ -15,6 +15,7 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
+
 class Ui_SaveWindow(object):
     def __init__(self):
 
@@ -81,11 +82,8 @@ class Ui_SaveWindow(object):
         self.regExCheckBox = QtGui.QCheckBox("RegEx", self.centralWidget)
         self.gridLayout.addWidget(self.regExCheckBox, 1, 4, 1, 1)
 
-
-
         self.LogsLabel = QtGui.QLabel("List of logged parameters: ",self.centralWidget)
         self.gridLayout.addWidget(self.LogsLabel,1,6,1,3)
-
 
         self.ListLabel = QtGui.QLabel("List of workspaces: ",self.centralWidget)
 
@@ -246,7 +244,7 @@ class Ui_SaveWindow(object):
         # Exclude WorkspaceGroups from our list. We cannot save them to ASCII.
         names = [i for i in names if not isinstance(AnalysisDataService.retrieve(i), WorkspaceGroup)]
         return names
-    
+
     def filterWksp(self):
         self.listWidget.clear()
         names = self._get_saveable_workspace_names()
@@ -353,9 +351,10 @@ class Ui_SaveWindow(object):
 
         self.SavePath=self.lineEdit.text()
 
+
 def calcRes(run):
     runno = '_' + str(run) + 'temp'
-    if type(run) == type(int()):
+    if isinstance(run, type(int())):
         Load(Filename=run, OutputWorkspace=runno)
     else:
         Load(Filename=run.replace("raw", "nxs", 1), OutputWorkspace=runno)
@@ -369,7 +368,7 @@ def calcRes(run):
     s2vg = inst.getComponentByName('slit2')
     s2vg = s2vg.getNumberParameter('vertical gap')[0]
 
-    if type(theta) != float:
+    if not isinstance(theta, float):
         th = theta[len(theta) - 1]
     else:
         th = theta
@@ -380,6 +379,7 @@ def calcRes(run):
     print "dq/q=", resolution
     DeleteWorkspace(runno)
     return resolution
+
 
 def groupGet(wksp, whattoget, field=''):
     '''
@@ -395,7 +395,7 @@ def groupGet(wksp, whattoget, field=''):
         if isinstance(mtd[wksp], WorkspaceGroup):
             try:
                 log = mtd[wksp + '_1'].getRun().getLogData(field).value
-                if type(log) is int or type(log) is str:
+                if isinstance(log, int) or isinstance(log, str):
                     res = log
                 else:
                     res = log[len(log) - 1]
@@ -405,7 +405,7 @@ def groupGet(wksp, whattoget, field=''):
         else:
             try:
                 log = mtd[wksp].getRun().getLogData(field).value
-                if type(log) is int or type(log) is str:
+                if isinstance(log, int) or isinstance(log, str):
                     res = log
                 else:
                     res = log[len(log) - 1]
@@ -418,6 +418,7 @@ def groupGet(wksp, whattoget, field=''):
             return mtd[wksp + '_1'].getNumberHistograms()
         else:
             return mtd[wksp].getNumberHistograms()
+
 
 def getWorkspace(wksp):
 

@@ -1,4 +1,5 @@
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Sample.h"
 
 #include "MantidCrystal/SortHKL.h"
 

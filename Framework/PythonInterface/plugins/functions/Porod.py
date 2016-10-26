@@ -28,12 +28,14 @@ import math
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
 
+
 class Porod(IFunction1D):
     """
         Provide a Porod model for SANS
 
         I(q) = C/q^4 + background
     """
+
     def category(self):
         return "SANS"
 

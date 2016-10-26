@@ -10,6 +10,7 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 from refl_data_script import DataSets as REFLDataSets
 from refm_data_script import DataSets as REFMDataSets
 
+
 class DataSeries(BaseScriptElement):
 
     data_sets = []

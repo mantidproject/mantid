@@ -32,6 +32,7 @@ MAX_SCAN_NUMBER = 100000
 class CWSCDReductionControl(object):
     """ Controlling class for reactor-based single crystal diffraction reduction
     """
+
     def __init__(self, instrument_name=None):
         """ init
         """

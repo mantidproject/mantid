@@ -2,6 +2,7 @@
 import stresstesting
 from mantid.simpleapi import *
 
+
 class FilteredLoadvsLoadThenFilter(stresstesting.MantidStressTest):
     '''Tests that filtering with LoadEventNexus gives the same answer as loading the whole file and then filtering'''
 
