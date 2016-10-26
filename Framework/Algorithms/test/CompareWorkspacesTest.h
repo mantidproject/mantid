@@ -8,6 +8,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"

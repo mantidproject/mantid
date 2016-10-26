@@ -4,7 +4,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <gsl/gsl_statistics.h>
 #include <unordered_map>
 
@@ -91,9 +90,7 @@ void IntegrateByComponent::exec() {
         const double yValue = integratedWS->readY(hists[i])[0];
         const double eValue = integratedWS->readE(hists[i])[0];
 
-        if (boost::math::isnan(yValue) || boost::math::isinf(yValue) ||
-            boost::math::isnan(eValue) ||
-            boost::math::isinf(eValue)) // NaNs/Infs
+        if (!std::isfinite(yValue) || !std::isfinite(eValue)) // NaNs/Infs
           continue;
 
         // Now we have a good value
@@ -128,9 +125,7 @@ void IntegrateByComponent::exec() {
 
         const double yValue = integratedWS->readY(hists[i])[0];
         const double eValue = integratedWS->readE(hists[i])[0];
-        if (boost::math::isnan(yValue) || boost::math::isinf(yValue) ||
-            boost::math::isnan(eValue) ||
-            boost::math::isinf(eValue)) // NaNs/Infs
+        if (!std::isfinite(yValue) || !std::isfinite(eValue)) // NaNs/Infs
           continue;
 
         // Now we have a good value

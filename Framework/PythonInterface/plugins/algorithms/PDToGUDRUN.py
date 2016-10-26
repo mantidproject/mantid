@@ -180,7 +180,6 @@ class PDToGUDRUN(DataProcessorAlgorithm):
                     OutputFilename=self.getProperty("GUDRUNFile").value,
                     startProgress=0.9, endProgress=1.0)
 
-
         self.setProperty("OutputWorkspace", wksp)
 
 # Register algorithm with Mantid.

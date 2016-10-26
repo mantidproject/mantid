@@ -483,9 +483,165 @@ public:
 
     AnalysisDataService::Instance().remove("Removed1");
   }
+
+  void test_movingAverageThrowsOnlyWithInvalidWindowWidth() {
+    size_t binCount = 5;
+    movingAverageWindowWidthTest(0, binCount, true);
+    movingAverageWindowWidthTest(1, binCount, false);
+    movingAverageWindowWidthTest(binCount - 1, binCount, false);
+    movingAverageWindowWidthTest(binCount, binCount, false);
+    movingAverageWindowWidthTest(binCount + 1, binCount, true);
+  }
+
+  void test_movingAverageModeWhenWindowWidthIsOne() {
+    const size_t spectraCount = 3;
+    const size_t binCount = 4;
+    movingAverageTest(1, spectraCount, binCount);
+  }
+
+  void test_movingAverageModeWhenWindowWidthIsTwo() {
+    const size_t spectraCount = 2;
+    const size_t binCount = 7;
+    movingAverageTest(2, spectraCount, binCount);
+  }
+
+  void test_movingAverageModeWithMaximalWindowWidth() {
+    const size_t spectraCount = 4;
+    const size_t binCount = 9;
+    movingAverageTest(binCount, spectraCount, binCount);
+  }
+
+private:
+  double bg;
+
+  double round(double value) { return floor(value * 100000 + 0.5) / 100000; }
+
+  void addInstrument(DataObjects::Workspace2D_sptr &WS) {
+    int ndets = static_cast<int>(WS->getNumberHistograms());
+
+    WS->setTitle("Test histogram"); // actually adds a property call run_title
+                                    // to the logs
+    WS->getAxis(0)->setUnit("TOF");
+    WS->setYUnit("Counts");
+
+    boost::shared_ptr<Geometry::Instrument> testInst(
+        new Geometry::Instrument("testInst"));
+    // testInst->setReferenceFrame(boost::shared_ptr<Geometry::ReferenceFrame>(new
+    // Geometry::ReferenceFrame(Geometry::PointingAlong::Y,Geometry::X,Geometry::Left,"")));
+    WS->setInstrument(testInst);
+
+    const double pixelRadius(0.05);
+    Geometry::Object_sptr pixelShape =
+        ComponentCreationHelper::createCappedCylinder(
+            pixelRadius, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
+
+    const double detXPos(5.0);
+    for (int i = 0; i < ndets; ++i) {
+      std::ostringstream lexer;
+      lexer << "pixel-" << i << ")";
+      Geometry::Detector *physicalPixel =
+          new Geometry::Detector(lexer.str(), WS->getAxis(1)->spectraNo(i),
+                                 pixelShape, testInst.get());
+      const double ypos = i * 2.0 * pixelRadius;
+      physicalPixel->setPos(detXPos, ypos, 0.0);
+      testInst->add(physicalPixel);
+      testInst->markAsMonitor(physicalPixel);
+      WS->getSpectrum(i).addDetectorID(physicalPixel->getID());
+    }
+  }
+
+  /// Creates a  workspace with a single special value in each spectrum.
+  Mantid::DataObjects::Workspace2D_sptr
+  movingAverageCreateWorkspace(const size_t spectraCount, const size_t binCount,
+                               const size_t specialIndex) {
+    Mantid::DataObjects::Workspace2D_sptr WS(
+        new Mantid::DataObjects::Workspace2D);
+    WS->initialize(spectraCount, binCount + 1, binCount);
+    for (size_t i = 0; i < spectraCount; ++i) {
+      for (size_t j = 0; j < binCount; ++j) {
+        // Make non-trivial but still linear x axis.
+        WS->mutableX(i)[j] = 0.78 * (static_cast<double>(j) -
+                                     static_cast<double>(binCount) / 3.0) -
+                             0.31 * static_cast<double>(i);
+        // Compute some non-trivial y values.
+        WS->mutableY(i)[j] = movingAverageStandardY(i);
+        WS->mutableE(i)[j] = std::sqrt(WS->y(i)[j]);
+      }
+      // Add extra x value because histogram.
+      WS->mutableX(i)[binCount] =
+          0.78 * 2.0 / 3.0 * static_cast<double>(binCount) -
+          0.31 * static_cast<double>(i);
+      // The special background value is set here.
+      WS->mutableY(i)[specialIndex] = movingAverageSpecialY(i);
+    }
+    return WS;
+  }
+
+  double movingAverageSpecialY(const size_t wsIndex) {
+    // This value has to be smaller than what is returned by
+    // movingAverageStandardY().
+    return 0.23 * movingAverageStandardY(wsIndex);
+  }
+
+  double movingAverageStandardY(const size_t wsIndex) {
+    return 9.34 + 3.2 * static_cast<double>(wsIndex);
+  }
+
+  void movingAverageTest(const size_t windowWidth, const size_t spectraCount,
+                         const size_t binCount) {
+    Mantid::DataObjects::Workspace2D_sptr WS;
+    for (size_t i = 0; i < binCount; ++i) {
+      WS = movingAverageCreateWorkspace(spectraCount, binCount, i);
+      Mantid::Algorithms::CalculateFlatBackground flatBG;
+      flatBG.setRethrows(true);
+      TS_ASSERT_THROWS_NOTHING(flatBG.initialize())
+      TS_ASSERT(flatBG.isInitialized())
+      flatBG.setProperty("InputWorkspace", WS);
+      flatBG.setPropertyValue("OutputWorkspace", "Removed1");
+      flatBG.setPropertyValue("Mode", "Moving Average");
+      flatBG.setProperty("AveragingWindowWidth", static_cast<int>(windowWidth));
+      flatBG.setPropertyValue("OutputMode", "Return Background");
+      TS_ASSERT_THROWS_NOTHING(flatBG.execute())
+      TS_ASSERT(flatBG.isExecuted())
+      MatrixWorkspace_sptr outputWS =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              "Removed1");
+      for (size_t j = 0; j < spectraCount; ++j) {
+        const double expected = (movingAverageSpecialY(j) +
+                                 (static_cast<double>(windowWidth) - 1) *
+                                     movingAverageStandardY(j)) /
+                                static_cast<double>(windowWidth);
+        TS_ASSERT_DELTA(outputWS->y(j)[0], expected, 1e-12)
+      }
+      AnalysisDataService::Instance().remove("Removed1");
+    }
+  }
+
+  void movingAverageWindowWidthTest(size_t windowWidth, size_t binCount,
+                                    bool shouldThrow) {
+    Mantid::DataObjects::Workspace2D_sptr WS;
+    WS = movingAverageCreateWorkspace(1, binCount, 0);
+    Mantid::Algorithms::CalculateFlatBackground flatBG;
+    flatBG.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(flatBG.initialize())
+    TS_ASSERT(flatBG.isInitialized())
+    flatBG.setProperty("InputWorkspace", WS);
+    flatBG.setPropertyValue("OutputWorkspace", "Removed1");
+    flatBG.setPropertyValue("Mode", "Moving Average");
+    flatBG.setProperty("AveragingWindowWidth", static_cast<int>(windowWidth));
+    flatBG.setPropertyValue("OutputMode", "Return Background");
+    if (shouldThrow) {
+      TS_ASSERT_THROWS_ANYTHING(flatBG.execute())
+      TS_ASSERT(!flatBG.isExecuted())
+    } else {
+      TS_ASSERT_THROWS_NOTHING(flatBG.execute())
+      TS_ASSERT(flatBG.isExecuted())
+    }
+    AnalysisDataService::Instance().remove("Removed1");
+  }
 };
 
-class CalculateFlatBackgroundTestPerformance : public CxxTest::TestSuite {
+class CalculateFlatBackgroundTestPerformance : public CxxTest::TestSuite {~
   /// Tests each method in CalculateFlatBackground using different parameter
   /// sets to make sure the returns are as expected
 public:

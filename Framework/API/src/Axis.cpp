@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Axis.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 namespace Mantid {

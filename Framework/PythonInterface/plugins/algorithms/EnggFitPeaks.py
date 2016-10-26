@@ -5,6 +5,7 @@ import math
 from mantid.kernel import *
 from mantid.api import *
 
+
 class EnggFitPeaks(PythonAlgorithm):
     EXPECTED_DIM_TYPE = 'Time-of-flight'
     PEAK_TYPE = 'BackToBackExponential'
@@ -404,7 +405,7 @@ class EnggFitPeaks(PythonAlgorithm):
         Creates a table where to put peak fitting results to
 
         @param tbl_name :: name of the table workspace (can be empty)
-    	"""
+        """
         table = None
         if not tbl_name:
             alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')

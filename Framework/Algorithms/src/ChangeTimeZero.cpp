@@ -3,6 +3,7 @@
 #include "MantidAlgorithms/ChangePulsetime.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -39,7 +40,6 @@ bool isTimeSeries(Mantid::Kernel::Property *prop) {
 }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ChangeTimeZero::init() {
@@ -58,7 +58,6 @@ void ChangeTimeZero::init() {
                   "An output workspace.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ChangeTimeZero::exec() {

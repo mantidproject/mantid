@@ -3,6 +3,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
@@ -17,7 +18,6 @@
 #include "MantidGeometry/Surfaces/Sphere.h"
 
 #include <boost/regex.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <map>
 #include <sstream>
@@ -31,8 +31,6 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXSPE)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-
-//----------------------------------------------------------------------------------------------
 
 /**
  * Calculate the confidence in the string value. This is used for file
@@ -79,7 +77,6 @@ int LoadNXSPE::confidence(Kernel::NexusDescriptor &descriptor) const {
   return confidence;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadNXSPE::init() {
@@ -92,7 +89,6 @@ void LoadNXSPE::init() {
                   "The name of the workspace that will be created.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void LoadNXSPE::exec() {
@@ -290,7 +286,7 @@ void LoadNXSPE::exec() {
     itdataend = itdata + numBins;
     iterrorend = iterror + numBins;
     outputWS->dataX(i) = energies;
-    if ((!boost::math::isfinite(*itdata)) || (*itdata <= -1e10)) // masked bin
+    if ((!std::isfinite(*itdata)) || (*itdata <= -1e10)) // masked bin
     {
       outputWS->dataY(i) = std::vector<double>(numBins, 0);
       outputWS->dataE(i) = std::vector<double>(numBins, 0);

@@ -178,7 +178,7 @@ double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
   const double peakLoc = inputW->x(s)[it - yValues.begin()];
   // Return if peak of Cross Correlation is nan (Happens when spectra is zero)
   // Pixel with large offset will be masked
-  if (boost::math::isnan(peakHeight))
+  if (std::isnan(peakHeight))
     return (1000.);
 
   IAlgorithm_sptr fit_alg;

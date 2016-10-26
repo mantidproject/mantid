@@ -102,6 +102,8 @@ public:
                                const std::string &groupName = "") const;
   /// Set selected workspace
   void setSelectedWorkspace(const QString &wsName);
+  /// Updates "overwrite" setting
+  void setOverwrite(bool enabled) { m_overwrite = enabled; }
 
 public slots:
   /// Transforms fit results when a simultaneous fit finishes
@@ -117,7 +119,9 @@ public slots:
   /// Open sequential fit dialog
   void openSequentialFitDialog();
   /// Updates label to avoid overwriting existing results
-  void checkAndUpdateFitLabel(bool seq);
+  void checkAndUpdateFitLabel(bool sequentialFit);
+  /// Handles "fit raw data" selection/deselection
+  void handleFitRawData(bool enabled, bool updateWorkspaces = true);
 
 private:
   /// Generate names of workspaces to be created
@@ -145,6 +149,8 @@ private:
   void setUpDataSelector(const QString &wsName);
   /// Check if multiple runs are selected
   bool isMultipleRuns() const;
+  /// Update fit label to match run number(s)
+  void updateFitLabelFromRuns();
   /// Fit browser to update (non-owning pointer)
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
   /// Data selector to get input from (non-owning pointer)
@@ -161,6 +167,10 @@ private:
   Mantid::API::Grouping m_grouping;
   /// Stored plot type
   Muon::PlotType m_plotType;
+  /// Whether "fit raw data" is selected
+  bool m_fitRawData;
+  /// Whether "overwrite" option is set or not
+  bool m_overwrite;
 };
 } // namespace CustomInterfaces
 } // namespace Mantid

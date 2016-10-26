@@ -7,6 +7,7 @@
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidQtMantidWidgets/InstrumentView/GLActor.h"
 #include <queue>
 #include <QMessageBox>

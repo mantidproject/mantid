@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/MonitorEfficiencyCorUser.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidGeometry/Instrument.h"
@@ -21,7 +22,6 @@ using namespace Geometry;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MonitorEfficiencyCorUser)
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 
