@@ -74,5 +74,5 @@ class SANS2DMultiPeriodAddFilesWithoutLowMem(stresstesting.MantidStressTest):
 
         return '5512p7rear_1D_2.0_4.0Phi-45.0_45.0','SANS2DMultiPeriodAddFiles.nxs'
 
-class LARMORMultiPeriodAddEventFiles(stresstesting.MantidStressTest):
-    pass
+#class LARMORMultiPeriodAddEventFiles(stresstesting.MantidStressTest):
+#    pass

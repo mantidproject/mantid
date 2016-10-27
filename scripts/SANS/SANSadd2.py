@@ -21,7 +21,7 @@ class WorkspaceWrapper(object):
             raise ValueError("WorkspaceWrapper: No valid workspace was provided.")
         self._workspace = workspace
         self._is_group_workspace = self._check_if_group_workspace(self._workspace)
-        self._reference_workspace = self._workspace if self._is_group_workspace else self._workspace[0]
+        self._reference_workspace = self._workspace[0] if self._is_group_workspace else self._workspace
         self._is_event_data = self._check_if_is_event_data()
 
     @staticmethod
@@ -106,6 +106,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
     while True:
 
         isFirstDataSetEvent = False
+        is_first_data_set_group_workspace = False
     #we need to catch all exceptions to ensure that a dialog box is raised with the error
         try :
             lastPath, lastFile, logFile, num_periods, isFirstDataSetEvent = _loadWS(
@@ -127,7 +128,8 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
 
             # If the loaded workspace is a multi-period workspace then we need to add those files together first
             # In this way we get rid of the group workspace
-            if isinstance(mtd[ADD_FILES_SUM_TEMPORARY], WorkspaceGroup):
+            is_first_data_set_group_workspace = isinstance(mtd[ADD_FILES_SUM_TEMPORARY], WorkspaceGroup)
+            if is_first_data_set_group_workspace:
                 handle_loaded_multi_period_file(workspace_name= ADD_FILES_SUM_TEMPORARY,
                                                 monitor_name=ADD_FILES_SUM_TEMPORARY_MONITORS,
                                                 adder=adder, run_to_add=1e10, is_event=isFirstDataSetEvent)
@@ -182,52 +184,10 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
                 if workspaceName in mtd:
                     DeleteWorkspace(workspaceName)
             return ""
-    # in case of event file force it into a histogram workspace
+    # in case of event file force it into a histogram workspace if this is requested
         if isFirstDataSetEvent and not saveAsEvent:
-            wsInMonitor = mtd[ADD_FILES_SUM_TEMPORARY_MONITORS]
-            if binning == 'Monitors':
-                monX = wsInMonitor.dataX(0)
-                binning = str(monX[0])
-                binGap = monX[1] - monX[0]
-                binning = binning + "," + str(binGap)
-                for j in range(2,len(monX)):
-                    nextBinGap = monX[j] - monX[j-1]
-                    if nextBinGap != binGap:
-                        binGap = nextBinGap
-                        binning = binning + "," + str(monX[j-1]) + "," + str(binGap)
-                binning = binning + "," + str(monX[len(monX)-1])
-
-            logger.notice(binning)
-            Rebin(InputWorkspace=ADD_FILES_SUM_TEMPORARY,OutputWorkspace='AddFilesSumTempory_Rebin',Params=binning,
-                  PreserveEvents=False)
-
-        # loading the nexus file using LoadNexus is necessary because it has some metadata
-        # that is not in LoadEventNexus. This must be fixed.
-            filename, ext = _makeFilename(runs[0], defType, inst)
-            LoadNexus(Filename=filename, OutputWorkspace=ADD_FILES_SUM_TEMPORARY, SpectrumMax=wsInMonitor.getNumberHistograms())
-        # User may have selected a binning which is different from the default
-            Rebin(InputWorkspace=ADD_FILES_SUM_TEMPORARY,OutputWorkspace=ADD_FILES_SUM_TEMPORARY,Params= binning)
-        # For now the monitor binning must be the same as the detector binning
-        # since otherwise both cannot exist in the same output histogram file
-            Rebin(InputWorkspace=ADD_FILES_SUM_TEMPORARY_MONITORS,OutputWorkspace=ADD_FILES_SUM_TEMPORARY_MONITORS,Params= binning)
-
-            wsInMonitor = mtd[ADD_FILES_SUM_TEMPORARY_MONITORS]
-            wsOut = mtd[ADD_FILES_SUM_TEMPORARY]
-            wsInDetector = mtd['AddFilesSumTempory_Rebin']
-
-            # We loose added sample log information since we reload a single run workspace
-            # and conjoin with the added workspace. In order to preserve some added sample
-            # logs we need to transfer them at this point
-            transfer_special_sample_logs(from_ws = wsInDetector, to_ws = wsOut)
-
-            mon_n = wsInMonitor.getNumberHistograms()
-            for i in range(mon_n):
-                wsOut.setY(i, wsInMonitor.dataY(i))
-                wsOut.setE(i, wsInMonitor.dataE(i))
-            ConjoinWorkspaces(wsOut, wsInDetector, CheckOverlapping=True)
-
-            if 'AddFilesSumTempory_Rebin' in mtd :
-                DeleteWorkspace('AddFilesSumTempory_Rebin')
+            handle_saving_event_workspace_when_saving_as_histogram(binning, is_first_data_set_group_workspace,
+                                                                   runs, defType, inst)
 
         lastFile = os.path.splitext(lastFile)[0]
     # now save the added file
@@ -281,6 +241,58 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
 
     return 'The following file has been created:\n'+outFile
 
+
+def handle_saving_event_workspace_when_saving_as_histogram(binning, is_first_data_set_group_workspace, runs, defType, inst):
+    wsInMonitor = mtd[ADD_FILES_SUM_TEMPORARY_MONITORS]
+    if binning == 'Monitors':
+        monX = wsInMonitor.dataX(0)
+        binning = str(monX[0])
+        binGap = monX[1] - monX[0]
+        binning = binning + "," + str(binGap)
+        for j in range(2,len(monX)):
+            nextBinGap = monX[j] - monX[j-1]
+            if nextBinGap != binGap:
+                binGap = nextBinGap
+                binning = binning + "," + str(monX[j-1]) + "," + str(binGap)
+        binning = binning + "," + str(monX[len(monX)-1])
+
+    logger.notice(binning)
+    Rebin(InputWorkspace=ADD_FILES_SUM_TEMPORARY,OutputWorkspace='AddFilesSumTempory_Rebin',Params=binning,
+            PreserveEvents=False)
+
+    # loading the nexus file using LoadNexus is necessary because it has some metadata
+    # that is not in LoadEventNexus. This must be fixed.
+    filename, ext = _makeFilename(runs[0], defType, inst)
+    if is_first_data_set_group_workspace:
+        # If we are dealing with multi-period event workspaces then there is no way of getting any other
+        # sample log inforamtion hence we use make a copy of the monitor workspace and use that instead
+        # of the reloading the first file again
+        CloneWorkspace(InputWorkspace=ADD_FILES_SUM_TEMPORARY_MONITORS, OutputWorkspace=ADD_FILES_SUM_TEMPORARY)
+    else:
+        LoadNexus(Filename=filename, OutputWorkspace=ADD_FILES_SUM_TEMPORARY, SpectrumMax=wsInMonitor.getNumberHistograms())
+    # User may have selected a binning which is different from the default
+    Rebin(InputWorkspace=ADD_FILES_SUM_TEMPORARY,OutputWorkspace=ADD_FILES_SUM_TEMPORARY,Params= binning)
+    # For now the monitor binning must be the same as the detector binning
+    # since otherwise both cannot exist in the same output histogram file
+    Rebin(InputWorkspace=ADD_FILES_SUM_TEMPORARY_MONITORS,OutputWorkspace=ADD_FILES_SUM_TEMPORARY_MONITORS,Params= binning)
+
+    wsInMonitor = mtd[ADD_FILES_SUM_TEMPORARY_MONITORS]
+    wsOut = mtd[ADD_FILES_SUM_TEMPORARY]
+    wsInDetector = mtd['AddFilesSumTempory_Rebin']
+
+    # We loose added sample log information since we reload a single run workspace
+    # and conjoin with the added workspace. In order to preserve some added sample
+    # logs we need to transfer them at this point
+    transfer_special_sample_logs(from_ws = wsInDetector, to_ws = wsOut)
+
+    mon_n = wsInMonitor.getNumberHistograms()
+    for i in range(mon_n):
+        wsOut.setY(i, wsInMonitor.dataY(i))
+        wsOut.setE(i, wsInMonitor.dataE(i))
+    ConjoinWorkspaces(wsOut, wsInDetector, CheckOverlapping=True)
+
+    if 'AddFilesSumTempory_Rebin' in mtd :
+        DeleteWorkspace('AddFilesSumTempory_Rebin')
 
 def _can_load_periods(runs, defType, rawTypes):
     """
