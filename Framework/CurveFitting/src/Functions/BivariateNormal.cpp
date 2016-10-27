@@ -101,9 +101,8 @@ void BivariateNormal::function1D(double *out, const double *xValues,
 
   getConstraint(IBACK)->setPenaltyFactor(K * 3000);
 
-  double badParams =
-      initCoeff(D, X, Y, coefNorm, expCoeffx2,
-                expCoeffy2, expCoeffxy, NCells, Varxx, Varxy, Varyy);
+  double badParams = initCoeff(D, X, Y, coefNorm, expCoeffx2, expCoeffy2,
+                               expCoeffxy, NCells, Varxx, Varxy, Varyy);
 
   std::ostringstream inf;
   inf << "F Parameters=";
@@ -562,9 +561,8 @@ double BivariateNormal::initCommon() {
     double Varxx, Varxy, Varyy;
 
     Varxx = Varxy = Varyy = -1;
-    penalty =
-        initCoeff(D, X, Y, coefNorm, expCoeffx2,
-                  expCoeffy2, expCoeffxy, NCells1, Varxx, Varxy, Varyy);
+    penalty = initCoeff(D, X, Y, coefNorm, expCoeffx2, expCoeffy2, expCoeffxy,
+                        NCells1, Varxx, Varxy, Varyy);
 
     if (Varx0 < 0 && penalty <= 0) {
       Varx0 = Varxx;
@@ -589,12 +587,11 @@ double BivariateNormal::initCommon() {
   return penalty;
 }
 
-double BivariateNormal::initCoeff(const HistogramY &D,
-                                  const HistogramY &X,
-                                  const HistogramY &Y,
-                                  double &coefNorm, double &expCoeffx2,
-                                  double &expCoeffy2, double &expCoeffxy,
-                                  int &NCells, double &Varxx, double &Varxy,
+double BivariateNormal::initCoeff(const HistogramY &D, const HistogramY &X,
+                                  const HistogramY &Y, double &coefNorm,
+                                  double &expCoeffx2, double &expCoeffy2,
+                                  double &expCoeffxy, int &NCells,
+                                  double &Varxx, double &Varxy,
                                   double &Varyy) const {
 
   double Background = getParameter("Background");

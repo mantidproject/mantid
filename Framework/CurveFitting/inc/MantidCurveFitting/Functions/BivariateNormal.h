@@ -9,8 +9,8 @@
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
-namespace HistogramData{
-  class HistogramY;
+namespace HistogramData {
+class HistogramY;
 }
 namespace CurveFitting {
 namespace Functions {
@@ -156,7 +156,8 @@ protected:
   /// common values
 
   // Returns penalty.
-  double initCoeff(const HistogramData::HistogramY &D, const HistogramData::HistogramY &X,
+  double initCoeff(const HistogramData::HistogramY &D,
+                   const HistogramData::HistogramY &X,
                    const HistogramData::HistogramY &Y, double &coefNorm,
                    double &expCoeffx2, double &expCoeffy2, double &expCoeffxy,
                    int &NCells, double &Varxx, double &Varxy,
