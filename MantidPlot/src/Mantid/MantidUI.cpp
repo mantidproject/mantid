@@ -3576,13 +3576,16 @@ void MantidUI::plotLayerOfMultilayer(MultiLayer *multi, const bool plotErrors,
     }
   };
 
+  const bool isFitResult = workspaceIsFitResult(wsName);
+
   const int layerIndex = row * nCols + col + 1; // layers numbered from 1
   auto *layer = multi->layer(layerIndex);
   QString legendText = wsName + '\n';
   int curveIndex(0);
   for (const int spec : spectra) {
-    layer->insertCurve(wsName, spec, plotErrors, GraphOptions::Unspecified,
-                       plotDist);
+    const auto plotType = isFitResult ? getCurveTypeForFitResult(spec)
+                                      : GraphOptions::Unspecified;
+    layer->insertCurve(wsName, spec, plotErrors, plotType, plotDist);
     legendText += "\\l(" + QString::number(++curveIndex) + ")" +
                   getLegendKey(wsName, spec) + "\n";
   }
