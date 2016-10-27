@@ -181,7 +181,7 @@ def perform_unmirror(red, left, right, option):
     if option > 3 or option == 1:
         # Perform unmirror option by summing left and right workspaces
         Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=red)
-        #Scale(InputWorkspace=red, OutputWorkspace=red, Factor=0.5, Operation='Multiply')
+        Scale(InputWorkspace=red, OutputWorkspace=red, Factor=0.5, Operation='Multiply')
 
     return start_bin, end_bin
 
