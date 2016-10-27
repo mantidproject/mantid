@@ -1,12 +1,11 @@
 #ifndef MANTID_DATAHANDLING_LoadAscii2_H_
 #define MANTID_DATAHANDLING_LoadAscii2_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+
+#include <list>
 
 namespace Mantid {
 namespace DataHandling {

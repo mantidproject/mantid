@@ -6,10 +6,13 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
 
-#include <nexus/NeXusFile.hpp>
+#include <boost/type_traits.hpp>
 
-#include <type_traits>
 #include <vector>
+
+namespace NeXus {
+class File;
+}
 
 namespace Mantid {
 

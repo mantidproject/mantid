@@ -5,8 +5,8 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 #include <boost/scoped_array.hpp>
-#include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 namespace Mantid {
 namespace DataHandling {

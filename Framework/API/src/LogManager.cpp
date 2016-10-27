@@ -1,10 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/LogManager.h"
 #include "MantidKernel/PropertyNexus.h"
 
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace API {
