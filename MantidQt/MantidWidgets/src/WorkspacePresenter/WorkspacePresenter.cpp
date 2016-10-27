@@ -178,7 +178,6 @@ void WorkspacePresenter::groupWorkspaces() {
   auto selected = view->getSelectedWorkspaceNames();
 
   std::string groupName("NewGroup");
-  std::vector<std::string> inputWSVec;
   // get selected workspaces
   if (selected.size() < 2) {
     view->showCriticalUserMessage("Cannot Group Workspaces",

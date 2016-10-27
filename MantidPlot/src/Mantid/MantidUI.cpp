@@ -283,7 +283,6 @@ MantidUI::MantidUI(ApplicationWindow *aw)
 
 // Should it be moved to the constructor?
 void MantidUI::init() {
-  AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
   Mantid::Kernel::ConfigService::Instance().addObserver(
       m_configServiceObserver);
 
