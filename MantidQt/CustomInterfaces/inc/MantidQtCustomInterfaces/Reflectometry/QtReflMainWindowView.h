@@ -17,7 +17,7 @@ class IReflSettingsTabPresenter;
 ReflMainWindowView is the concrete main window view implementing the
 functionality defined by the interface IReflMainWindowView
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -70,6 +70,8 @@ private:
   IReflRunsTabPresenter *createRunsTab();
   /// Creates the 'Settings' tab
   IReflSettingsTabPresenter *createSettingsTab();
+  /// Creates the 'Save ASCII' tab
+  void createSaveTab();
 
   /// Interface definition with widgets for the main interface window
   Ui::RelMainWindowWidget m_ui;

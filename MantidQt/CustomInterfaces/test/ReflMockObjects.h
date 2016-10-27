@@ -8,6 +8,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
@@ -59,6 +60,10 @@ public:
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
   IReflRunsTabPresenter *getPresenter() const override { return nullptr; }
+};
+
+class MockSaveTabView : public IReflSaveTabView {
+public:
 };
 
 class MockSettingsTabView : public IReflSettingsTabView {

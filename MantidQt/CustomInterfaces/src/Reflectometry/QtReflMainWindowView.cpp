@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflMainWindowView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflRunsTabView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/QtReflSaveTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflSettingsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainWindowPresenter.h"
 
@@ -31,6 +32,7 @@ void QtReflMainWindowView::initLayout() {
   // Create the tabs
   auto runsPresenter = createRunsTab();
   auto settingsPresenter = createSettingsTab();
+  createSaveTab();
 
   // Create the presenter
   m_presenter.reset(
@@ -57,6 +59,14 @@ IReflSettingsTabPresenter *QtReflMainWindowView::createSettingsTab() {
   m_ui.mainTab->addTab(settingsTab, QString("Settings"));
 
   return settingsTab->getPresenter();
+}
+
+/** Creates the 'Save ASCII' tab
+*/
+void QtReflMainWindowView::createSaveTab() {
+
+	QtReflSaveTabView *saveTab = new QtReflSaveTabView(this);
+	m_ui.mainTab->addTab(saveTab, QString("Save ASCII"));
 }
 
 /**

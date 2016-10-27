@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ReflSaveTabWidget</class>
+  <widget class="QWidget" name="ReflSaveTabWidget">
+    <property name="geometry">
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>959</width>
+        <height>346</height>
+      </rect>
+    </property>
+    <property name="windowTitle">
+      <string>Save ASCII</string>
+    </property>
+    <layout class="QGridLayout" name="optionsLayout">
+      <property name="margin">
+        <number>20</number>
+      </property>
+    </layout>
+  </widget>
+ <tabstops/>
+ <customwidgets/>
+ <resources/>
+ <connections/>
+</ui>

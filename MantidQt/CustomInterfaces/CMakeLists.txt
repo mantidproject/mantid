@@ -92,6 +92,7 @@ set ( SRC_FILES
 	src/Reflectometry/MeasurementItem.cpp
 	src/Reflectometry/QtReflMainWindowView.cpp
 	src/Reflectometry/QtReflRunsTabView.cpp
+	src/Reflectometry/QtReflSaveTabView.cpp
 	src/Reflectometry/QtReflSettingsTabView.cpp
 	src/Reflectometry/ReflCatalogSearcher.cpp
 	src/Reflectometry/ReflGenericDataProcessorPresenterFactory.cpp
@@ -101,6 +102,7 @@ set ( SRC_FILES
 	src/Reflectometry/ReflNexusMeasurementItemSource.cpp
 	src/Reflectometry/ReflRunsTabPresenter.cpp
 	src/Reflectometry/ReflSearchModel.cpp
+	src/Reflectometry/ReflSaveTabPresenter.cpp
 	src/Reflectometry/ReflSettingsTabPresenter.cpp
 	src/Reflectometry/ReflTableSchema.cpp
 	src/Reflectometry/TransferResults.cpp
@@ -250,6 +252,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflSaveTabView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/MeasurementItem.h
@@ -399,6 +403,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h
                 inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflRunsTabView.h
+                inc/MantidQtCustomInterfaces/Reflectometry/QtReflSaveTabView.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflSettingsTabView.h
                 inc/MantidQtCustomInterfaces/SampleTransmission.h
                 inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionWidget.h
@@ -475,6 +480,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
 			   inc/MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflMainWindowWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflRunsTabWidget.ui
+               inc/MantidQtCustomInterfaces/Reflectometry/ReflSaveTabWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflSettingsTabWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflWindow.ui
                inc/MantidQtCustomInterfaces/SampleTransmission.ui
@@ -522,6 +528,7 @@ set ( TEST_FILES
 	ReflMeasureTransferStrategyTest.h
 	ReflNexusMeasurementItemSourceTest.h
 	ReflRunsTabPresenterTest.h
+	ReflSaveTabPresenterTest.h
 	ReflSettingsTabPresenterTest.h
 	StackOfImagesDirsTest.h
 	TomographyIfaceModelTest.h
