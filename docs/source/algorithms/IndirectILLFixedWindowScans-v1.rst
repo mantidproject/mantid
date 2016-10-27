@@ -27,6 +27,11 @@ See Also
 
 -  :ref:`algm-IndirectILLReduction` for performing the actual energy transfer reduction for IN16B instrument.
 
+Workflow
+--------
+
+.. diagram:: IndirectILLFixedWindowScans-v1_wkflw.dot
+
 Usage
 -----
 
@@ -34,10 +39,16 @@ Usage
 
 .. testcode:: ExFixedWindowScans
 
+    out = IndirectILLFixedWindowScans(Run='143718')
+    print "out now refers to a group workspace, which is called %s" % out.getName()
+    print "it contains %d item, one for each energy transfer" % out.size()
+
 Output:
 
 .. testoutput:: ExFixedWindowScans
 
+    out now refers to a group workspace, which is called out
+    it contains 1 item, one for each energy transfer
 
 .. categories::
 

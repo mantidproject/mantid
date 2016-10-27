@@ -1,0 +1,44 @@
+digraph IndirectILLFixedWindowScans {
+  label="IndirectILLFixedWindowScans Flowchart"
+  $global_style
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph descision {
+    $decision_style
+  }
+
+  subgraph params {
+  	$param_style
+  	Run
+  	Observable
+  	CalibrationRun
+  	BackgroundRun
+  }
+
+  subgraph algorithms {
+  	$algorithm_style
+  	IndirectILLReduction
+    SelectNexusFilesByMetadata
+    Integration
+  }
+
+  subgraph processes {
+  	$process_style
+  	PostProcessing
+  	Interpolation
+  }
+
+  Run -> SelectNexusFilesByMetadata
+  SelectNexusFilesByMetadata -> IndirectILLReduction
+  IndirectILLReduction -> Integration
+  Integration -> PostProcessing
+  Observable -> PostProcessing
+  CalibrationRun -> Interpolation
+  BackgroundRun -> Interpolation
+  Interpolation -> PostProcessing
+  PostProcessing -> OutputWorkspace
+}

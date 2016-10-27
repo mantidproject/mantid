@@ -15,8 +15,7 @@ digraph IndirectILLReduction {
   }
 
   subgraph descision {
-    $decision_style   
-    Save          
+    $decision_style
     HaveCalibrationWorkspace
     HaveBackgroundRun
     UnmirrorOption
@@ -41,7 +40,6 @@ digraph IndirectILLReduction {
   	MaskBins
     M_MaskBins [label="MaskBins"]
   	IndirectILLReduction
-  	SaveNexusProcessed
     LoadParameterFile
     GroupDetectors
     ExtractSngleSpectrum
@@ -104,7 +102,4 @@ digraph IndirectILLReduction {
   Scale -> MaskBins
   MaskBins -> GroupWorkspaces
   GroupWorkspaces -> OutputWorkspace
-  OutputWorkspace -> Save
-  Save -> SaveNexusProcessed [label="Yes"]
-
 }
