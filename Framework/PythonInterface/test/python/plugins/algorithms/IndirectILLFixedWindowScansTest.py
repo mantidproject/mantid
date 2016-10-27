@@ -10,23 +10,22 @@ from mantid import config
 class IndirectILLFixedWindowScansTest(unittest.TestCase):
 
     _args = {}
-    _run_one_wing_elastic = None
-    _run_two_wings_inelastic = None
+
     # cache the def instrument and data search dirs
     _def_fac = config['default.facility']
     _def_inst = config['default.instrument']
     _data_dirs = config['datasearch.directories']
+
+    # EFWS, one wing, newer data
+    _run_one_wing_elastic = '143718'
+    # IFWS, two wings, older data, Doppler.frequency defined
+    _run_two_wings_inelastic = '083073'
 
     def setUp(self):
         # set instrument and append datasearch directory
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'IN16B'
         config.appendDataSearchSubDir('ILL/IN16B/')
-
-        # Elastic scan data with one wing - newer data, Doppler.Frequency not defined
-        self._run_one_wing_elastic = '143718'
-        # Inelastic scan data with two wings - older data, Doppler.frequency defined
-        self._run_two_wings_inelastic = '083073'
 
     def tearDown(self):
         # set cached facility and datasearch directory
