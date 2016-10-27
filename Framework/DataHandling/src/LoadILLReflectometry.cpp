@@ -388,11 +388,16 @@ void LoadILLReflectometry::loadDataIntoTheWorkSpace(
     progress.report();
   }
 
-  const HistogramData::Counts histoCounts(data(), data() + m_numberOfChannels);
-
   for (size_t i = 0; i < m_numberOfTubes; ++i) {
-    m_localWorkspace->setHistogram((spec + nb_monitors), binEdges, histoCounts);
-    spec += m_numberOfPixelsPerTube;
+    for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
+      int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+      const HistogramData::Counts histoCounts(data_p,
+                                              data_p + m_numberOfChannels);
+      m_localWorkspace->setHistogram((spec + nb_monitors), binEdges,
+                                     std::move(histoCounts));
+      ++spec;
+      progress.report();
+    }
   }
 
 } // LoadILLIndirect::loadDataIntoTheWorkSpace

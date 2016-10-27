@@ -301,12 +301,16 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromHorizontalTubes(
   size_t spec = firstIndex;
 
   const HistogramData::BinEdges binEdges(timeBinning);
-  const HistogramData::Counts histoCounts(data(), data() + data.dim2());
 
   for (size_t i = 0; i < numberOfTubes; ++i) {
-    m_localWorkspace->setHistogram(spec, binEdges, histoCounts);
-    progress.report();
-    spec += numberOfPixelsPerTube;
+    for (size_t j = 0; j < numberOfPixelsPerTube; ++j) {
+      int *data_p = &data(static_cast<int>(j), static_cast<int>(i), 0);
+      const HistogramData::Counts histoCounts(data_p, data_p + data.dim2());
+      m_localWorkspace->setHistogram(spec, binEdges, std::move(histoCounts));
+
+      ++spec;
+      progress.report();
+    }
   }
 
   g_log.debug() << "Data loading into WS done....\n";
@@ -337,14 +341,18 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
   Progress progress(this, 0, 1, data.dim0() * data.dim1());
 
   const HistogramData::BinEdges binEdges(timeBinning);
-  const HistogramData::Counts histoCounts(data(), data() + data.dim2());
+  size_t spec = firstIndex;
 
-  m_localWorkspace->setHistogram(firstIndex, std::move(binEdges),
-                                 std::move(histoCounts));
+  for (size_t i = 0; i < numberOfTubes; ++i) {
+    for (size_t j = 0; j < numberOfPixelsPerTube; ++j) {
+      int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+      const HistogramData::Counts histoCounts(data_p, data_p + data.dim2());
 
-  progress.report();
-
-  const size_t spec = numberOfTubes * numberOfPixelsPerTube;
+      m_localWorkspace->setHistogram(spec, binEdges, std::move(histoCounts));
+      ++spec;
+      progress.report();
+    }
+  }
 
   g_log.debug() << "Data loading inti WS done....\n";
 
