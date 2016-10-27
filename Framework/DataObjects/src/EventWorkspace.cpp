@@ -2,7 +2,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
@@ -706,10 +705,6 @@ void EventWorkspace::getIntegratedSpectra(std::vector<double> &out,
 
 } // namespace DataObjects
 } // namespace Mantid
-
-///\cond TEMPLATE
-template class DLLExport
-    Mantid::API::WorkspaceProperty<Mantid::DataObjects::EventWorkspace>;
 
 namespace Mantid {
 namespace Kernel {
