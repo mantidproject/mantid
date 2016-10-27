@@ -42,12 +42,12 @@
                   <widget class="QComboBox" name="analysisModeComboBox">
                     <item>
                       <property name="text">
-                        <string>MultiDetectorAnalysis</string>
+                        <string>PointDetectorAnalysis</string>
                       </property>
                     </item>
                     <item>
                       <property name="text">
-                        <string>PointDetectorAnalysis</string>
+                        <string>MultiDetectorAnalysis</string>
                       </property>
                     </item>
                   </widget>
@@ -141,43 +141,57 @@
                     </property>
                   </spacer>
                 </item>
-              </layout>
-            </item>
-            <item>
-              <layout class="QGridLayout" name="expSettingsLayout1">
-                <property name="leftMargin">
-                  <number>10</number>
-                </property>
-                <property name="rightMargin">
-                  <number>10</number>
-                </property>
-                <property name="topMargin">
-                  <number>40</number>
-                </property>
-                <property name="bottomMargin">
-                  <number>40</number>
-                </property>
-                <item row="0" column="0">
-                  <widget class="QLabel" name="polCorrLabel">
+                <item row="3" column="0">
+                  <widget class="QLabel" name="expSettingsMomentumTransferLimitsLabel">
                     <property name="text">
-                      <string>Polarisation corrections:</string>
+                      <string>MomentumTransferLimits</string>
                     </property>
                   </widget>
                 </item>
-                <item row="0" column="1">
-                  <spacer name="expSettings1Spacer0">
+                <item row="3" column="1">
+                  <widget class="QLineEdit" name="expSettingsMomentumTransferLimitsEdit"/>
+                </item>
+                <item row="3" column="2">
+                  <widget class="QLabel" name="expSettingsDetLimitsLabel">
+                    <property name="text">
+                      <string>DetectorLimits</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="3" column="3">
+                  <widget class="QLineEdit" name="expSettingsDetLimitsEdit"/>
+                </item>
+                <item row="3" column="4">
+                  <spacer name="expSettings0Spacer3">
                     <property name="orientation">
                       <enum>Qt::Horizontal</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                       <size>
-                        <width>20</width>
+                        <width>40</width>
                         <height>20</height>
                       </size>
                     </property>
                   </spacer>
                 </item>
-                <item row="1" column="0">
+                <item row="4" column="0">
+                  <widget class="QLabel" name="expSettingsScaleFactorLabel">
+                    <property name="text">
+                      <string>ScaleFactor</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="4" column="1">
+                  <widget class="QLineEdit" name="expSettingsScaleFactorEdit"/>
+                </item>
+                <item row="4" column="2">
+                  <widget class="QLabel" name="polCorrLabel">
+                    <property name="text">
+                      <string>PolarisationCorrections</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="4" column="3">
                   <widget class="QComboBox" name="polCorrComboBox">
                     <item>
                       <property name="text">
@@ -196,14 +210,14 @@
                     </item>
                   </widget>
                 </item>
-                <item row="1" column="1">
-                  <spacer name="expSettings1Spacer1">
+                <item row="4" column="4">
+                  <spacer name="expSettings0Spacer4">
                     <property name="orientation">
                       <enum>Qt::Horizontal</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                       <size>
-                        <width>20</width>
+                        <width>40</width>
                         <height>20</height>
                       </size>
                     </property>
@@ -212,7 +226,7 @@
               </layout>
             </item>
             <item>
-              <layout class="QGridLayout" name="expSettingsLayout2">
+              <layout class="QGridLayout" name="expSettingsLayout1">
                 <property name="margin">
                   <number>10</number>
                 </property>
@@ -313,7 +327,7 @@
               <item row="1" column="3">
                 <widget class="QLineEdit" name="instSettingsMonBgMaxEdit"/>
               </item>
-              <item row="0" column="4">
+              <item row="1" column="4">
                 <spacer name="instSettings0Spacer1">
                   <property name="orientation">
                     <enum>Qt::Horizontal</enum>
@@ -346,7 +360,7 @@
               <item row="2" column="3">
                 <widget class="QLineEdit" name="instSettingsLamMaxEdit"/>
               </item>
-              <item row="0" column="4">
+              <item row="2" column="4">
                 <spacer name="instSettings0Spacer2">
                   <property name="orientation">
                     <enum>Qt::Horizontal</enum>
@@ -370,50 +384,7 @@
                 <widget class="QLineEdit" name="instSettingsI0MonIndexEdit"/>
               </item>
               <item row="3" column="2">
-                <widget class="QLabel" name="instSettingsScaleFactorLabel">
-                  <property name="text">
-                    <string>ScaleFactor</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="3" column="3">
-                <widget class="QLineEdit" name="instSettingsScaleFactorEdit"/>
-              </item>
-              <item row="0" column="4">
                 <spacer name="instSettings0Spacer3">
-                  <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                    <size>
-                      <width>40</width>
-                      <height>20</height>
-                    </size>
-                  </property>
-                </spacer>
-              </item>
-              <item row="4" column="0">
-                <widget class="QLabel" name="instSettingsMomentumTransferLimitsLabel">
-                  <property name="text">
-                    <string>MomentumTransferLimits</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="4" column="1">
-                <widget class="QLineEdit" name="instSettingsMomentumTransferLimitsEdit"/>
-              </item>
-              <item row="4" column="2">
-                <widget class="QLabel" name="instSettingsDetLimitsLabel">
-                  <property name="text">
-                    <string>DetectorLimits</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="4" column="3">
-                <widget class="QLineEdit" name="instSettingsDetLimitsEdit"/>
-              </item>
-              <item row="0" column="4">
-                <spacer name="instSettings0Spacer4">
                   <property name="orientation">
                     <enum>Qt::Horizontal</enum>
                   </property>

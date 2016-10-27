@@ -158,7 +158,7 @@ void QtReflSettingsTabView::setInstDefaults(
   m_ui.instSettingsLamMinEdit->setText(defaults[4]);
   m_ui.instSettingsLamMaxEdit->setText(defaults[5]);
   m_ui.instSettingsI0MonIndexEdit->setText(defaults[6]);
-  m_ui.instSettingsScaleFactorEdit->setText(defaults[7]);
+  m_ui.expSettingsScaleFactorEdit->setText(defaults[7]);
 }
 
 /** Return selected analysis mode
@@ -278,7 +278,7 @@ std::string QtReflSettingsTabView::getI0MonitorIndex() const {
 */
 std::string QtReflSettingsTabView::getScaleFactor() const {
 
-  return m_ui.instSettingsScaleFactorEdit->text().toStdString();
+  return m_ui.expSettingsScaleFactorEdit->text().toStdString();
 }
 
 /** Return momentum transfer limits
@@ -286,7 +286,7 @@ std::string QtReflSettingsTabView::getScaleFactor() const {
 */
 std::string QtReflSettingsTabView::getMomentumTransferLimits() const {
 
-  return m_ui.instSettingsMomentumTransferLimitsEdit->text().toStdString();
+  return m_ui.expSettingsMomentumTransferLimitsEdit->text().toStdString();
 }
 
 /** Return detector limits
@@ -294,7 +294,7 @@ std::string QtReflSettingsTabView::getMomentumTransferLimits() const {
 */
 std::string QtReflSettingsTabView::getDetectorLimits() const {
 
-  return m_ui.instSettingsDetLimitsEdit->text().toStdString();
+  return m_ui.expSettingsDetLimitsEdit->text().toStdString();
 }
 
 } // namespace CustomInterfaces
