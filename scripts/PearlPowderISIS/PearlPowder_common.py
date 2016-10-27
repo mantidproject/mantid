@@ -47,9 +47,6 @@ g_ads_workaround = {"read_pearl_ws" : _read_pearl_ws_count}
 
 
 def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument, group_names):
-
-    cycle_information = instrument._get_cycle_information(calibration_runs)
-
     input_ws = _read_ws(calibration_runs, instrument)
     calibration_d_spacing_ws = mantid.ConvertUnits(InputWorkspace=input_ws, Target="dSpacing")
     mantid.CreateCalFileByNames(InstrumentWorkspace=calibration_d_spacing_ws,
@@ -422,7 +419,6 @@ def _focus_mode_all(output_file_paths, calibrated_spectra):
     summed_spectra = mantid.Scale(InputWorkspace=summed_spectra, Factor=0.111111111111111,
                                   OutputWorkspace=summed_spectra_name)
     mantid.SaveGSS(InputWorkspace=summed_spectra, Filename=output_file_paths["gss_filename"], Append=False, Bank=1)
-
 
     summed_spectra = mantid.ConvertUnits(InputWorkspace=summed_spectra, Target="dSpacing",
                                          OutputWorkspace=summed_spectra_name)

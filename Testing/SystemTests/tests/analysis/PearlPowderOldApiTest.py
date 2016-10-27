@@ -14,6 +14,7 @@ DIRS = config['datasearch.directories'].split(';')
 
 class PearlPowderOldApiFmodeAll(stresstesting.MantidStressTest):
     fmode = "all"
+
     def requiredFiles(self):
         return _gen_required_files()
 

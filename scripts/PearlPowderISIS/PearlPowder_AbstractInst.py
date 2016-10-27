@@ -1,7 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 
-import mantid.simpleapi as mantid
-
 from abc import ABCMeta, abstractmethod
 from six import add_metaclass
 

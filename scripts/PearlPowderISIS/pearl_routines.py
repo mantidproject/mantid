@@ -13,6 +13,7 @@ g_oldParams = {}
 global g_pearl_obj
 g_pearl_obj = None
 
+
 def _pearl_obj_singleton():
     global g_pearl_obj
     if g_pearl_obj is None:
@@ -21,15 +22,18 @@ def _pearl_obj_singleton():
                                               input_file_ext=".raw", tt_mode="NotSet")
     return g_pearl_obj
 
+
 def _get_global_dict():
     global g_oldParams
     return g_oldParams
+
 
 def _merge_dict_into_global(d):
     copy = d.copy()
     global g_oldParams
     g_oldParams.update(copy)
     return g_oldParams
+
 
 def PEARL_startup(usern="matt", thiscycle='11_1'):
     # ---- !!! This is deprecated and should not be used - it is only here for compatibility with old scripts !!!--- #
@@ -240,6 +244,7 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
                                                  output_file_name=nvanfile, num_of_splines=nspline,
                                                  do_absorb_corrections=absorb)
     pearl_obj._old_api_uses_full_paths = False
+
 
 def PEARL_createcal(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal",
                     groupfile="P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"):

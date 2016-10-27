@@ -102,7 +102,7 @@ class Pearl(AbstractInst):
     # Hook overrides
 
     def _attenuate_workspace(self, input_workspace):
-        return self._attenuate_workspace(input_workspace=input_workspace)
+        return self._run_attenuate_workspace(input_workspace=input_workspace)
 
     def _create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
         input_ws = Common._read_ws(number=calibration_runs, instrument=self)
@@ -135,6 +135,7 @@ class Pearl(AbstractInst):
         # Ceo Cell refined to 5.4102(3) so 220 is 1.912795
         offset_output_path = mantid.GetDetectorOffsets(InputWorkspace=cross_cor_ws, Step=0.002, DReference=1.912795,
                                                        XMin=-200, XMax=200, GroupingFileName=offset_file_path)
+        del offset_output_path  # This isn't used so delete it to keep linters happy
         aligned_ws = mantid.AlignDetectors(InputWorkspace=input_ws, CalibrationFile=offset_file_path)
         cal_grouped_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws, GroupingFileName=grouping_file_path)
 
@@ -147,7 +148,7 @@ class Pearl(AbstractInst):
         self._do_silicon_calibration(calibration_runs, cal_file_name, grouping_file_name)
 
     def _get_monitor(self, run_number, input_dir, spline_terms=20):
-        return self._get_monitor(run_number=run_number, input_dir=input_dir, spline_terms=spline_terms)
+        return self._run_get_monitor(run_number=run_number, input_dir=input_dir, spline_terms=spline_terms)
 
     def _get_monitor_spectra(self, run_number):
         return self._get_monitor_spectrum(run_number=run_number)
@@ -170,7 +171,7 @@ class Pearl(AbstractInst):
 
     # Implementation of instrument specific steps
 
-    def _attenuate_workspace(self, input_workspace):
+    def _run_attenuate_workspace(self, input_workspace):
         if self._old_atten_file is None:  # For old API support
             attenuation_path = self._attenuation_full_path
         else:
@@ -224,8 +225,9 @@ class Pearl(AbstractInst):
         grouping_output_path = self.calibration_dir + grouping_file_name
         create_si_grouped_ws = mantid.DiffractionFocussing(InputWorkspace=create_si_aligned_ws,
                                                            GroupingFileName=grouping_output_path)
+        del create_si_offsets_ws, create_si_grouped_ws
 
-    def _get_monitor(self, run_number, input_dir, spline_terms):
+    def _run_get_monitor(self, run_number, input_dir, spline_terms):
         load_monitor_ws = Common._load_monitor(run_number, input_dir=input_dir, instrument=self)
         get_monitor_ws = mantid.ConvertUnits(InputWorkspace=load_monitor_ws, Target="Wavelength")
         Common.remove_intermediate_workspace(load_monitor_ws)
@@ -251,9 +253,9 @@ class Pearl(AbstractInst):
             if self._focus_mode == "trans":
                 mspectra = 1081
             elif self._focus_mode == "all":
-               mspectra = 2721
+                mspectra = 2721
             elif self._focus_mode == "novan":
-               mspectra = 2721
+                mspectra = 2721
             else:
                 raise ValueError("Mode not set or supported")
         else:
@@ -422,4 +424,3 @@ def _spline_old_background(in_workspace):
                                                        WorkspaceIndex=i, NCoeff=coeff))
     Common.remove_intermediate_workspace(van_stripped)
     return splined_ws_list
-

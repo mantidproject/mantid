@@ -165,8 +165,7 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
         mtd.remove(monitor)
         return
 
-    #pylint: disable=too-many-arguments,too-many-branches
-    def PEARL_focus(self, number,ext="raw",fmode="trans",ttmode="TT70",atten=True,van_norm=True):
+    def PEARL_focus(self, number,ext="raw",fmode="trans",ttmode="TT70",atten=True,van_norm=True):  # NOQA
 
         self.tt_mode=ttmode
         self.mode=fmode
