@@ -36,6 +36,7 @@ set ( SRC_FILES
 	src/PeakShapeSpherical.cpp
 	src/PeakShapeSphericalFactory.cpp
 	src/PeaksWorkspace.cpp
+	src/PropertyWithValue.cpp
 	src/RebinnedOutput.cpp
 	src/ReflectometryTransform.cpp
 	src/SpecialWorkspace2D.cpp
