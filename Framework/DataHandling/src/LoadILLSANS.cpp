@@ -298,14 +298,16 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromHorizontalTubes(
 
   Progress progress(this, 0, 1, data.dim0() * data.dim1());
 
-  const size_t spec = numberOfPixelsPerTube * numberOfTubes;
+  size_t spec = firstIndex;
 
   const HistogramData::BinEdges binEdges(timeBinning);
   const HistogramData::Counts histoCounts(data(), data() + data.dim2());
 
-  m_localWorkspace->setHistogram(firstIndex, std::move(binEdges),
-                                 std::move(histoCounts));
-  progress.report();
+  for (size_t i = 0; i < numberOfTubes; ++i) {
+    m_localWorkspace->setHistogram(spec, binEdges, histoCounts);
+    progress.report();
+    spec += numberOfPixelsPerTube;
+  }
 
   g_log.debug() << "Data loading into WS done....\n";
 
