@@ -1340,7 +1340,7 @@ class RunDescriptor(PropDescriptor):
 # Hell knows how to redefine these warnings or if they are valid or not
 #pylint: disable=W0141
 #pylint: disable=W0110
-            self._ws_cname = part_ind + ''.join(re.findall('\d+', name))
+            self._ws_cname = part_ind + ''.join(re.findall('\D+', name))
         else:
 #pylint: disable=attribute-defined-outside-init
             self._ws_cname = part_ind + name

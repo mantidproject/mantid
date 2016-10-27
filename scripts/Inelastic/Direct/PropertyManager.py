@@ -741,13 +741,8 @@ class PropertyManager(NonIDF_Properties):
         for key in changed_Keys:
             if key in already_changed:
                 continue
-            val = getattr(self,key)
-            try:
-                self.log("  Value of : {0:<25} is set to : {1:<20} ".format(key,val),log_level)
-            except TypeError:
-                # Python 3 fails here sometimes, I don't know why
-                # TypeError: non-empty format string passed to object.__format__
-                pass
+            val = str(getattr(self,key))
+            self.log("  Value of : {0:<25} is set to : {1:<20} ".format(key,val),log_level)
 
         if not display_header:
             return
