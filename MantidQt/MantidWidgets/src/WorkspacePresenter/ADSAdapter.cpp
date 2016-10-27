@@ -77,7 +77,7 @@ void ADSAdapter::handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr) {
 }
 
 void ADSAdapter::handleReplaceWorkspace(
-    Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf) {
+    Mantid::API::WorkspaceAfterReplaceNotification_ptr) {
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::GenericUpdateNotification);
