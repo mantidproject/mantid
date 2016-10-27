@@ -299,21 +299,15 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromHorizontalTubes(
 
   Progress progress(this, 0, 1, data.dim0() * data.dim1());
 
-  size_t spec = firstIndex;
+  const size_t spec = numberOfPixelsPerTube * numberOfTubes;
 
   HistogramData::BinEdges binEdges(timeBinning);
   HistogramData::Counts histoCounts(data(), data() + data.dim2());
 
   HistogramData::Histogram histo(std::move(binEdges), std::move(histoCounts));
 
-  // iterate tubes
-  for (size_t i = 0; i < numberOfTubes; ++i) {
-    // iterate pixels in the tube - 256
-    for (size_t j = 0; j < numberOfPixelsPerTube; ++j) {
-      m_localWorkspace->setHistogram(spec, histo);
-      progress.report();
-    }
-  }
+  m_localWorkspace->setHistogram(firstIndex, histo);
+  progress.report();
 
   g_log.debug() << "Data loading into WS done....\n";
 
@@ -337,37 +331,20 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
                 << "First bin = " << timeBinning[0] << '\n';
 
   // Workaround to get the number of tubes / pixels
-  size_t numberOfTubes = data.dim0();
-  size_t numberOfPixelsPerTube = data.dim1();
+  const size_t numberOfTubes = data.dim0();
+  const size_t numberOfPixelsPerTube = data.dim1();
 
   Progress progress(this, 0, 1, data.dim0() * data.dim1());
 
-  m_localWorkspace->mutableX(firstIndex)
-      .assign(timeBinning.begin(), timeBinning.end());
+  const HistogramData::BinEdges binEdges(timeBinning);
+  const HistogramData::Counts histoCounts(data(), data() + data.dim2());
+  const HistogramData::Histogram histo(std::move(binEdges),
+                                       std::move(histoCounts));
+  m_localWorkspace->setHistogram(firstIndex, std::move(histo));
 
-  auto sharedXFirstIndex = m_localWorkspace->sharedX(firstIndex);
+  progress.report();
 
-  size_t spec = firstIndex;
-  for (size_t i = 0; i < numberOfTubes; ++i) { // iterate tubes
-    for (size_t j = 0; j < numberOfPixelsPerTube;
-         ++j) { // iterate pixels in the tube 256
-      if (spec > firstIndex) {
-        // just copy the time binning axis to every spectra
-        m_localWorkspace->setSharedX(spec, sharedXFirstIndex);
-      }
-      // Assign Y
-      int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      m_localWorkspace->mutableY(spec).assign(data_p, data_p + data.dim2());
-
-      // Assign Error
-      auto &E = m_localWorkspace->mutableE(spec);
-      std::transform(data_p, data_p + data.dim2(), E.begin(),
-                     LoadHelper::calculateStandardError);
-
-      ++spec;
-      progress.report();
-    }
-  }
+  const size_t spec = numberOfTubes * numberOfPixelsPerTube;
 
   g_log.debug() << "Data loading inti WS done....\n";
 

@@ -365,7 +365,7 @@ UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &workspace,
                      const double &min, const double &max,
                      const size_t &numBins) {
   // Calculate the width of a bin
-  const double step = (max - min) / numBins;
+  const double step = (max - min) / static_cast<double>(numBins);
 
   // Create a Rebin child algorithm
   IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
