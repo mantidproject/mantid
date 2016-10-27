@@ -35,6 +35,7 @@ import fourcircle_utility as hb3a_util
 import plot3dwindow
 from multi_threads_helpers import *
 import optimizelatticewindow as ol_window
+import viewspicedialog
 
 # import line for the UI python class
 from ui_MainWindow import Ui_MainWindow
@@ -462,19 +463,16 @@ class MainWindow(QtGui.QMainWindow):
         ui_dict['survey start'] = str(self.ui.lineEdit_surveyStartPt.text())
         ui_dict['survey stop'] = str(self.ui.lineEdit_surveyEndPt.text())
 
-        # TODO/NOW/ISSUE - Make this work!
-        # lineEdit_exp and do_???
-        #
-        # method
-        # linked
-        # to
-        # pushButton_applySetup
-
         # export/save project
-        self._myControl.export_project(project_file_name)
+        self._myControl.export_project(project_file_name, ui_dict)
 
-        # register
-        self.ui.label_last1Path.setText(project_file_name)
+        # register and make it as a queue for last n opened/saved project
+        last_1_path = str(self.ui.label_last1Path.text())
+        if last_1_path != project_file_name:
+            self.ui.label_last3Path.setText(self.ui.label_last2Path.text())
+            self.ui.label_last2Path.setText(self.ui.label_last1Path.text())
+            self.ui.label_last1Path.setText(last_1_path)
+        # END-IF
 
         return
 
@@ -487,18 +485,23 @@ class MainWindow(QtGui.QMainWindow):
 
         ui_dict = self._myControl.load_project(project_file_name)
 
-        # TODO/NOW/ISSUE - implement ui_dict to GUI
+        # make it as a queue for last n opened/saved project
+        last_1_path = str(self.ui.label_last1Path.text())
+        if last_1_path != project_file_name:
+            self.ui.label_last3Path.setText(self.ui.label_last2Path.text())
+            self.ui.label_last2Path.setText(self.ui.label_last1Path.text())
+            self.ui.label_last1Path.setText(last_1_path)
+        # END-IF
 
-        # TODO/NOW/ISSUE - should make it as a queue for last n opened/saved project
-        # dirty and quick solution
-        self.ui.label_last1Path.setText(project_file_name)
+        # set the UI parameters to GUI
+        self.ui.lineEdit_localSpiceDir.setText(ui_dict['local spice dir'])
+        self.ui.lineEdit_workDir.setText(ui_dict['work dir'])
+        self.ui.lineEdit_surveyStartPt.setText(ui_dict['survey start'])
+        self.ui.lineEdit_surveyEndPt.setText(ui_dict['survey stop'])
 
-        # lineEdit_exp and do_???
-
-        # self.ui.lineEdit_localSpiceDir.setText(ui_dict['local spice dir'])
-        # self.ui.lineEdit_workDir.setText(ui_dict['work dir'])
-        # self.ui.lineEdit_surveyStartPt.setText(ui_dict['survey start'])
-        # self.ui.lineEdit_surveyEndPt.setText(ui_dict['survey stop'])
+        # now try to call some actions
+        self.do_apply_setup()
+        self.do_set_experiment()
 
         return
 
@@ -2400,12 +2403,30 @@ class MainWindow(QtGui.QMainWindow):
 
     def do_show_spice_file(self):
         """
-
+        Show SPICE file in a window
         :return:
         """
+        # get the files from the GUI
+        exp_number = int(str(self.ui.lineEdit_exp.text()))
 
-        # TODO/NOW/ISSUE - Implement this
+        row_id_list = self.ui.tableWidget_surveyTable.get_selected_rows(True)
+        scan_number_list = self.ui.tableWidget_surveyTable.get_scan_numbers(row_id_list)
+        if len(scan_number_list) == 0:
+            return
 
+        # read the spice file into list of lines
+        self._myControl.read_spice_file(exp_number, scan_number_list[0])
+
+        self._spiceViwer = viewspicedialog.ViewSpiceDialog(self)
+
+        # Write each line
+        for line in spice_line_list:
+            self._spiceViwer.write_text(line)
+
+        # show the new window
+        self._spiceViwer.show()
+
+        return
 
     def do_show_ub_in_box(self):
         """ Get UB matrix in table tableWidget_ubMergeScan and write to plain text edit plainTextEdit_ubInput

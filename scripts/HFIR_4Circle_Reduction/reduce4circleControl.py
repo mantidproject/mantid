@@ -2442,9 +2442,11 @@ class CWSCDReductionControl(object):
 
         return True, scan_sum_list, error_message
 
-    def export_project(self, project_file_name):
-        """
-
+    def export_project(self, project_file_name, ui_dict):
+        """ Export project
+        - the data structure and information will be written to a ProjectManager file
+        :param project_file_name:
+        :param ui_dict:
         :return:
         """
         # check inputs' validity
@@ -2455,8 +2457,9 @@ class CWSCDReductionControl(object):
 
         project.add_workspaces(self._myMDWsList)
         project.set('data dir', self._dataDir)
+        project.set('gui parameters', ui_dict)
 
-        project.export()
+        project.export(overwrite=False)
 
         return
 
@@ -2478,20 +2481,8 @@ class CWSCDReductionControl(object):
 
         # set current value
         self._dataDir = saved_project.get('data dir')
-        # NEXT ISSUE loading more project parameters
 
-        # TODO/NOW/ISSUE - Load following parameters
-        # lineEdit_exp and do_???
-        # lineEdit_localSpiceDir
-        # lineEdit_workDir and then
-        # method
-        # linked
-        # to
-        # pushButton_applySetup
-        #
-        # lineEdit_surveyStartPt
-        # lineEdit_surveyEndPt
-        ui_dict = {}
+        ui_dict = saved_project.get('gui parameters')
 
         return ui_dict
 

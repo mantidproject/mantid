@@ -58,7 +58,7 @@ class ProjectManager(object):
 
     def set(self, key, value):
         """
-
+        Set parameter (can be any data structure) to project manager and then export data
         :param key:
         :param value:
         :return:
@@ -67,9 +67,10 @@ class ProjectManager(object):
 
         return
 
-    def export(self):
+    def export(self, overwrite=False):
         """
-
+        Export the (ideally) whole project to disk
+        :param overwrite: if specified, then any existing files with same name will be rewritten
         :return:
         """
         self.create_workspace_directory()
@@ -77,7 +78,8 @@ class ProjectManager(object):
         # save MDs
         for ws_name in self._wsList:
             md_file_name = os.path.join(self._wsDir, ws_name + '.nxs')
-            mantidsimple.SaveMD(InputWorkspace=ws_name, Filename=md_file_name)
+            if overwrite or os.path.exists(md_file_name):
+                mantidsimple.SaveMD(InputWorkspace=ws_name, Filename=md_file_name)
 
         with open(self._projectPath, 'w') as pickle_file:
             pickle.dump(self._variableDict, pickle_file, pickle.HIGHEST_PROTOCOL)

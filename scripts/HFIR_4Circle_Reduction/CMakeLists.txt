@@ -6,6 +6,7 @@ set( UI_FILES
   View3DWidget.ui
   OptimizeLattice.ui
   RefineUbFftDialog.ui
+  SpiceViewerDialog.ui
 )
 
 UiToPy( UI_FILES CompileUIHFIR_4Circle_Reduction)
