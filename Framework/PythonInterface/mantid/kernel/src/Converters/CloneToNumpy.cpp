@@ -12,12 +12,10 @@ namespace PythonInterface {
 namespace Converters {
 
 extern template int NDArrayTypeIndex<bool>::typenum;
-extern template int NDArrayTypeIndex<int>::typenum;
-extern template int NDArrayTypeIndex<long>::typenum;
-extern template int NDArrayTypeIndex<long long>::typenum;
-extern template int NDArrayTypeIndex<unsigned int>::typenum;
-extern template int NDArrayTypeIndex<unsigned long>::typenum;
-extern template int NDArrayTypeIndex<unsigned long long>::typenum;
+extern template int NDArrayTypeIndex<int32_t>::typenum;
+extern template int NDArrayTypeIndex<uint32_t>::typenum;
+extern template int NDArrayTypeIndex<int64_t>::typenum;
+extern template int NDArrayTypeIndex<uint64_t>::typenum;
 extern template int NDArrayTypeIndex<float>::typenum;
 extern template int NDArrayTypeIndex<double>::typenum;
 
@@ -123,12 +121,10 @@ PyObject *cloneND(const std::string *carray, const int ndims,
   INSTANTIATE_CLONEND(ElementType)
 
 ///@cond Doxygen doesn't seem to like this...
-INSTANTIATE_CLONE(int)
-INSTANTIATE_CLONE(long)
-INSTANTIATE_CLONE(long long)
-INSTANTIATE_CLONE(unsigned int)
-INSTANTIATE_CLONE(unsigned long)
-INSTANTIATE_CLONE(unsigned long long)
+INSTANTIATE_CLONE(int32_t)
+INSTANTIATE_CLONE(uint32_t)
+INSTANTIATE_CLONE(int64_t)
+INSTANTIATE_CLONE(uint64_t)
 INSTANTIATE_CLONE(double)
 INSTANTIATE_CLONE(float)
 // Need further 1D specialisation for string

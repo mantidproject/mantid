@@ -41,14 +41,12 @@ void TypeRegistry::registerBuiltins() {
   subscribe<TypedPropertyValueHandler<Type>>();                                \
   subscribe<SequenceTypeHandler<std::vector<Type>>>();
 
-  // unsigned ints
-  SUBSCRIBE_HANDLER(int);
-  SUBSCRIBE_HANDLER(long);
-  SUBSCRIBE_HANDLER(long long);
   // signed ints
-  SUBSCRIBE_HANDLER(unsigned int);
-  SUBSCRIBE_HANDLER(unsigned long);
-  SUBSCRIBE_HANDLER(unsigned long long);
+  SUBSCRIBE_HANDLER(int32_t);
+  SUBSCRIBE_HANDLER(int64_t);
+  // unsigned ints
+  SUBSCRIBE_HANDLER(uint32_t);
+  SUBSCRIBE_HANDLER(uint64_t);
   // boolean
   SUBSCRIBE_HANDLER(bool);
   // double

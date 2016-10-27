@@ -11,12 +11,10 @@ namespace PythonInterface {
 namespace Converters {
 
 extern template int NDArrayTypeIndex<bool>::typenum;
-extern template int NDArrayTypeIndex<int>::typenum;
-extern template int NDArrayTypeIndex<long>::typenum;
-extern template int NDArrayTypeIndex<long long>::typenum;
-extern template int NDArrayTypeIndex<unsigned int>::typenum;
-extern template int NDArrayTypeIndex<unsigned long>::typenum;
-extern template int NDArrayTypeIndex<unsigned long long>::typenum;
+extern template int NDArrayTypeIndex<int32_t>::typenum;
+extern template int NDArrayTypeIndex<uint32_t>::typenum;
+extern template int NDArrayTypeIndex<int64_t>::typenum;
+extern template int NDArrayTypeIndex<uint64_t>::typenum;
 extern template int NDArrayTypeIndex<float>::typenum;
 extern template int NDArrayTypeIndex<double>::typenum;
 }
@@ -155,12 +153,10 @@ void NDArrayToVector<DestElementType>::typeCheck() {
   template struct DLLExport NDArrayToVector<ElementType>;
 
 ///@cond Doxygen doesn't seem to like this...
-INSTANTIATE_TOVECTOR(int)
-INSTANTIATE_TOVECTOR(long)
-INSTANTIATE_TOVECTOR(long long)
-INSTANTIATE_TOVECTOR(unsigned int)
-INSTANTIATE_TOVECTOR(unsigned long)
-INSTANTIATE_TOVECTOR(unsigned long long)
+INSTANTIATE_TOVECTOR(int32_t)
+INSTANTIATE_TOVECTOR(uint32_t)
+INSTANTIATE_TOVECTOR(int64_t)
+INSTANTIATE_TOVECTOR(uint64_t)
 INSTANTIATE_TOVECTOR(double)
 INSTANTIATE_TOVECTOR(bool)
 INSTANTIATE_TOVECTOR(std::string)

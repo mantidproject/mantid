@@ -64,12 +64,10 @@ PyObject *wrapWithNDArray(const ElementType *carray, const int ndims,
       const NumpyWrapMode);
 
 ///@cond Doxygen doesn't seem to like this...
-INSTANTIATE_WRAPNUMPY(int)
-INSTANTIATE_WRAPNUMPY(long)
-INSTANTIATE_WRAPNUMPY(long long)
-INSTANTIATE_WRAPNUMPY(unsigned int)
-INSTANTIATE_WRAPNUMPY(unsigned long)
-INSTANTIATE_WRAPNUMPY(unsigned long long)
+INSTANTIATE_WRAPNUMPY(int32_t)
+INSTANTIATE_WRAPNUMPY(uint32_t)
+INSTANTIATE_WRAPNUMPY(int64_t)
+INSTANTIATE_WRAPNUMPY(uint64_t)
 INSTANTIATE_WRAPNUMPY(double)
 INSTANTIATE_WRAPNUMPY(float)
 ///@endcond

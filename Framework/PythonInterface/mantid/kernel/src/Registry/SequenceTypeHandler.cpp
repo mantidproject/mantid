@@ -119,12 +119,10 @@ std::unique_ptr<Kernel::Property> SequenceTypeHandler<ContainerType>::create(
 #define INSTANTIATE(ElementType)                                               \
   template struct DLLExport SequenceTypeHandler<std::vector<ElementType>>;
 
-INSTANTIATE(int)
-INSTANTIATE(long)
-INSTANTIATE(long long)
-INSTANTIATE(unsigned int)
-INSTANTIATE(unsigned long)
-INSTANTIATE(unsigned long long)
+INSTANTIATE(int32_t)
+INSTANTIATE(uint32_t)
+INSTANTIATE(int64_t)
+INSTANTIATE(uint64_t)
 INSTANTIATE(double)
 INSTANTIATE(std::string)
 INSTANTIATE(bool)
