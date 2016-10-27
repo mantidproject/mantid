@@ -10,6 +10,7 @@ using Mantid::API::MatrixWorkspace_const_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::ExperimentInfo;
+using Mantid::HistogramData::Histogram;
 
 /**
  * Constructor
@@ -106,7 +107,7 @@ MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
         "Input WorkspaceGroup must only contain MatrixWorkspaces");
   }
 
-  const auto index = options.plotIndex; // which spectrum to plot from each WS
+  const auto index = options.plotIndex;  // which spectrum to plot from each WS
   const auto &logName = options.logName; // Log to read for axis of XYZ plot
   // Create workspace to hold the data
   // Each "spectrum" will be the data from one workspace
@@ -122,7 +123,10 @@ MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
 
   // If we are making a surface plot, create a point data workspace.
   // If it's a contour plot, make a histo workspace.
-  const auto xSize = graphType == Type::Contour ? firstWS->blocksize() + 1 : firstWS->blocksize();
+  const auto xMode = graphType == Type::Contour ? Histogram::XMode::BinEdges
+                                                : Histogram::XMode::Points;
+  const auto xSize = graphType == Type::Contour ? firstWS->blocksize() + 1
+                                                : firstWS->blocksize();
   matrixWS = Mantid::API::WorkspaceFactory::Instance().create(
       firstWS, nWorkspaces, xSize, firstWS->blocksize());
   matrixWS->setYUnitLabel(firstWS->YUnitLabel());
@@ -133,7 +137,16 @@ MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
     const auto ws =
         boost::dynamic_pointer_cast<const MatrixWorkspace>(wsGroup->getItem(i));
     if (ws) {
-      matrixWS->setHistogram(i, ws->histogram(index));
+      // Make sure the X data is set as the correct mode
+
+      if (xMode == Histogram::XMode::BinEdges) {
+        matrixWS->setBinEdges(i, ws->binEdges(index));
+      } else {
+        matrixWS->setPoints(i, ws->points(index));
+      }
+      // Y and E can be shared
+      matrixWS->setSharedY(i, ws->sharedY(index));
+      matrixWS->setSharedE(i, ws->sharedE(index));
       if (logName == MantidSurfacePlotDialog::CUSTOM) {
         logValues.push_back(getSingleLogValue(i, options.customLogValues));
       } else {
