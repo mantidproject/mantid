@@ -9,21 +9,24 @@
 Description
 -----------
 
-This algorithm selects fixed window scan data of the IN16B instrument at ILL. An integration will be performed over the elastic peak range or the begin and end ranges of the elastic or inelastic data, respectively.
-The integration range will be determined automatically taking into account the relevant peaks as well as the overall number of bins.
-An error occurs, if there are no elastic or inelastic scan data found.
-All output workspaces are GroupWorkspaces.
+This algorithm performs Fixed Window Scan (FWS) data reduction (both Elastic and Inelastic) for IN16B indirect geometry instrument at ILL.
+It handles multiple files following the syntax given in `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_.
+Scanning observable can be in principle any metadata. For the list of valid options check the Sample Logs.
+
+Output
+------
+The output is a GroupWorkspace that contains the results, one per each of energy value (including 0 for EFWS).
+Each Workspace in the group will have the given observable as the x-axis, and scattering angle for each detector as y-axis.
 
 See Also
 ########
 
--  :ref:`algm-IndirectILLReduction` for reducing quasi-elastic and fixed window scanned data.
-
+-  :ref:`algm-IndirectILLReduction` for performing the actual energy transfer reduction for IN16B instrument.
 
 Usage
 -----
 
-**Example: Appending two workspaces**
+**Example: EFWS+IFWS**
 
 .. testcode:: ExFixedWindowScans
 
