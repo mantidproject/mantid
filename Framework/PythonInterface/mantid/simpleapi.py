@@ -781,52 +781,38 @@ def _set_logging_option(algm_obj, kwargs):
 
 def set_properties(alg_object, *args, **kwargs):
     """
-        Set all of the properties of the algorithm
+        Set all of the properties of the algorithm. There is no guarantee of
+        the order the properties will be set
         :param alg_object: An initialised algorithm object
         :param *args: Positional arguments
         :param **kwargs: Keyword arguments
     """
-    args_dict = {}
-    if len(args) > 0:
-        mandatory_props = alg_object.mandatoryProperties()
-        # Remove any already in kwargs
-        for key in kwargs.keys():
-            try:
-                mandatory_props.remove(key)
-            except ValueError:
-                pass
-        # If have any left
-        if len(mandatory_props) > 0:
-            # Now pair up the properties & arguments
-            for (key, arg) in zip(mandatory_props[:len(args)], args):
-                args_dict[key] = arg
-        else:
-            raise RuntimeError("Positional argument(s) provided but none are required. Check function call.")
-
-    # As dictionaries are no longer ordered in Python 3 we need to
-    # pass the positional arguments before the keyword arguments as some
-    # algorithms require the positional args to be set first
-    _set_alg_properties(arguments=args_dict, algorithm=alg_object)
-    _set_alg_properties(arguments=kwargs, algorithm=alg_object)
-
-def _set_alg_properties(arguments, algorithm):
-    """
-    Loops over all keys in a dictionary passing the values to the algorithm
-    :param arguments: Dictionary containing key-value arguments to set
-    :param algorithm: The algorithm to pass these to
-    """
-    for key in arguments.keys():
-        value = arguments[key]
+    def do_set_property(name, value):
         if value is None:
-            continue
+            return
         # The correct parent/child relationship is not quite set up yet: #5157
         # ChildAlgorithms in Python are marked as children but their output is in the
         # ADS meaning we cannot just set DataItem properties by value. At the moment
         # they are just set with strings
         if isinstance(value, _kernel.DataItem):
-            algorithm.setPropertyValue(key, value.name())
+            alg_object.setPropertyValue(key, value.name())
         else:
-            algorithm.setProperty(key, value)
+            alg_object.setProperty(key, value)
+    # end
+    if len(args) > 0:
+        mandatory_props = alg_object.mandatoryProperties()
+    else:
+        mandatory_props = []
+    if len(kwargs) > 0:
+        for (key, value) in iteritems(kwargs):
+            do_set_property(key, value)
+            try:
+                mandatory_props.remove(key)
+            except ValueError:
+                pass
+    if len(args) > 0:
+        for (key, value) in zip(mandatory_props[:len(args)], args):
+            do_set_property(key, value)
 
 
 def _create_algorithm_function(name, version, algm_object):
