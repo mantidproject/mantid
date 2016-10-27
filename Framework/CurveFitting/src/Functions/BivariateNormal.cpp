@@ -1,10 +1,15 @@
-#include "MantidCurveFitting/Functions/BivariateNormal.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
+
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidCurveFitting/Functions/BivariateNormal.h"
+
+#include "MantidHistogramData/HistogramY.h"
+
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
+
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <cmath>
@@ -21,6 +26,7 @@ namespace Functions {
 
 using namespace CurveFitting;
 using namespace Constraints;
+using namespace HistogramData;
 
 namespace {
 /// static logger
@@ -96,7 +102,7 @@ void BivariateNormal::function1D(double *out, const double *xValues,
   getConstraint(IBACK)->setPenaltyFactor(K * 3000);
 
   double badParams =
-      initCoeff(D.rawData(), X.rawData(), Y.rawData(), coefNorm, expCoeffx2,
+      initCoeff(D, X, Y, coefNorm, expCoeffx2,
                 expCoeffy2, expCoeffxy, NCells, Varxx, Varxy, Varyy);
 
   std::ostringstream inf;
@@ -557,7 +563,7 @@ double BivariateNormal::initCommon() {
 
     Varxx = Varxy = Varyy = -1;
     penalty =
-        initCoeff(D.rawData(), X.rawData(), Y.rawData(), coefNorm, expCoeffx2,
+        initCoeff(D, X, Y, coefNorm, expCoeffx2,
                   expCoeffy2, expCoeffxy, NCells1, Varxx, Varxy, Varyy);
 
     if (Varx0 < 0 && penalty <= 0) {
@@ -583,9 +589,9 @@ double BivariateNormal::initCommon() {
   return penalty;
 }
 
-double BivariateNormal::initCoeff(const std::vector<double> &D,
-                                  const std::vector<double> &X,
-                                  const std::vector<double> &Y,
+double BivariateNormal::initCoeff(const HistogramY &D,
+                                  const HistogramY &X,
+                                  const HistogramY &Y,
                                   double &coefNorm, double &expCoeffx2,
                                   double &expCoeffy2, double &expCoeffxy,
                                   int &NCells, double &Varxx, double &Varxy,
