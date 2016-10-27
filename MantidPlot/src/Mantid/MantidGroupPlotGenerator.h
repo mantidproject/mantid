@@ -58,15 +58,6 @@ private:
   /// Returns a single log value from supplied custom log
   double getSingleLogValue(int wsIndex, const std::set<double> &values) const;
 
-  /// Converts histogram to point data, if not already
-  void convertHistoToPoints(Mantid::API::MatrixWorkspace_sptr ws) const;
-
-  /// Converts point to histogram data, if not already
-  void convertPointsToHisto(Mantid::API::MatrixWorkspace_sptr ws) const;
-
-  /// Converts X data to correct (point/histo) format for the graph type
-  void convertXData(Mantid::API::MatrixWorkspace_sptr ws, Type graphType) const;
-
   /// Get X axis title
   QString getXAxisTitle(
       const boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup) const;

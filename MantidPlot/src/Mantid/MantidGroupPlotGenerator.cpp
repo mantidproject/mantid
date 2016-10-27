@@ -56,9 +56,6 @@ void MantidGroupPlotGenerator::plot(
     // Generate X axis title
     const auto &xLabelQ = getXAxisTitle(wsGroup);
 
-    // Convert to correct X axis format
-    convertXData(matrixWS, graphType);
-
     // Import the data for plotting
     auto matrixToPlot =
         m_mantidUI->importMatrixWorkspace(matrixWS, -1, -1, false);
@@ -86,7 +83,7 @@ void MantidGroupPlotGenerator::plot(
 
 /**
  * Create a workspace for the surface/contour plot from the given workspace
- * group. Outputs title for the X axis.
+ * group.
  *
  * Note that only MatrixWorkspaces can be plotted, so if the group contains
  * Table or Peaks workspaces then it cannot be used.
@@ -100,43 +97,54 @@ const MatrixWorkspace_sptr
 MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
     Type graphType, WorkspaceGroup_const_sptr wsGroup,
     const MantidSurfacePlotDialog::UserInputSurface &options) const {
-  MatrixWorkspace_sptr matrixWS;     // Workspace to return
-  int index = options.plotIndex;     // which spectrum to plot from each WS
-  QString logName = options.logName; // Log to read from for axis of XYZ plot
-  if (wsGroup && groupIsAllMatrixWorkspaces(wsGroup)) {
-    // Create workspace to hold the data
-    // Each "spectrum" will be the data from one workspace
-    int nWorkspaces = wsGroup->getNumberOfEntries();
-    if (nWorkspaces > 0) {
-      const auto firstWS =
-          boost::dynamic_pointer_cast<const MatrixWorkspace>(wsGroup->getItem(
-              0)); // Already checked group contains only MatrixWorkspaces
-      matrixWS = Mantid::API::WorkspaceFactory::Instance().create(
-          firstWS, nWorkspaces, firstWS->blocksize(), firstWS->blocksize());
-      matrixWS->setYUnitLabel(firstWS->YUnitLabel());
+  if (!wsGroup || wsGroup->size() == 0) {
+    throw std::invalid_argument("Must provide a non-empty WorkspaceGroup");
+  }
 
-      // For each workspace in group, add data and log values
-      std::vector<double> logValues;
-      for (int i = 0; i < nWorkspaces; i++) {
-        const auto ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(
-            wsGroup->getItem(i));
-        if (ws) {
-          auto X = ws->readX(index);
-          auto Y = ws->readY(index);
-          matrixWS->dataX(i).swap(X);
-          matrixWS->dataY(i).swap(Y);
-          if (logName == MantidSurfacePlotDialog::CUSTOM) {
-            logValues.push_back(getSingleLogValue(i, options.customLogValues));
-          } else {
-            logValues.push_back(getSingleLogValue(i, ws, logName));
-          }
-        }
+  if (!groupIsAllMatrixWorkspaces(wsGroup)) {
+    throw std::invalid_argument(
+        "Input WorkspaceGroup must only contain MatrixWorkspaces");
+  }
+
+  const auto index = options.plotIndex; // which spectrum to plot from each WS
+  const auto &logName = options.logName; // Log to read for axis of XYZ plot
+  // Create workspace to hold the data
+  // Each "spectrum" will be the data from one workspace
+  const auto nWorkspaces = wsGroup->getNumberOfEntries();
+  if (nWorkspaces < 0) {
+    return MatrixWorkspace_sptr();
+  }
+
+  MatrixWorkspace_sptr matrixWS; // Workspace to return
+  // Cast succeeds: have already checked group contains only MatrixWorkspaces
+  const auto firstWS =
+      boost::dynamic_pointer_cast<const MatrixWorkspace>(wsGroup->getItem(0));
+
+  // If we are making a surface plot, create a point data workspace.
+  // If it's a contour plot, make a histo workspace.
+  const auto xSize = graphType == Type::Contour ? firstWS->blocksize() + 1 : firstWS->blocksize();
+  matrixWS = Mantid::API::WorkspaceFactory::Instance().create(
+      firstWS, nWorkspaces, xSize, firstWS->blocksize());
+  matrixWS->setYUnitLabel(firstWS->YUnitLabel());
+
+  // For each workspace in group, add data and log values
+  std::vector<double> logValues;
+  for (int i = 0; i < nWorkspaces; i++) {
+    const auto ws =
+        boost::dynamic_pointer_cast<const MatrixWorkspace>(wsGroup->getItem(i));
+    if (ws) {
+      matrixWS->setHistogram(i, ws->histogram(index));
+      if (logName == MantidSurfacePlotDialog::CUSTOM) {
+        logValues.push_back(getSingleLogValue(i, options.customLogValues));
+      } else {
+        logValues.push_back(getSingleLogValue(i, ws, logName));
       }
-
-      // Set log axis values by replacing the "spectra" axis
-      matrixWS->replaceAxis(1, new Mantid::API::NumericAxis(logValues));
     }
   }
+
+  // Set log axis values by replacing the "spectra" axis
+  matrixWS->replaceAxis(1, new Mantid::API::NumericAxis(logValues));
+
   return matrixWS;
 }
 
@@ -220,59 +228,6 @@ double MantidGroupPlotGenerator::getSingleLogValue(
     } else {
       throw std::invalid_argument("Bad input workspace type");
     }
-  }
-}
-
-/**
- * Converts X data to correct (point/histo) format for the graph type.
- * Contour: convert points to histo, if not already.
- * Surface: convert histo to points, if not already.
- * Converts data in place.
- * @param ws :: [input, output] Workspace to change
- * @param graphType :: [input] Type of graph to be plotted
- */
-void MantidGroupPlotGenerator::convertXData(MatrixWorkspace_sptr ws,
-                                            Type graphType) const {
-  if (graphType == Type::Contour) {
-    convertPointsToHisto(ws);
-  } else if (graphType == Type::Surface) {
-    convertHistoToPoints(ws);
-  }
-}
-
-/**
- * Utility method to convert a histogram workspace to points data
- * (centred bins) for surface plots.
- * @param ws :: [input, output] Workspace to convert
- */
-void MantidGroupPlotGenerator::convertHistoToPoints(
-    MatrixWorkspace_sptr ws) const {
-  if (ws && ws->isHistogramData()) {
-    auto alg = m_mantidUI->createAlgorithm("ConvertToPointData");
-    alg->initialize();
-    alg->setChild(true);
-    alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", "__NotUsed");
-    alg->execute();
-    ws = alg->getProperty("OutputWorkspace");
-  }
-}
-
-/**
- * Utility method to convert a points workspace to histogram data
- * for contour plots.
- * @param ws :: [input, output] Workspace to convert
- */
-void MantidGroupPlotGenerator::convertPointsToHisto(
-    MatrixWorkspace_sptr ws) const {
-  if (ws && !ws->isHistogramData()) {
-    auto alg = m_mantidUI->createAlgorithm("ConvertToHistogram");
-    alg->initialize();
-    alg->setChild(true);
-    alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", "__NotUsed");
-    alg->execute();
-    ws = alg->getProperty("OutputWorkspace");
   }
 }
 
