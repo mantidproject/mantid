@@ -5,7 +5,7 @@ from testhelpers import run_algorithm
 from mantid.simpleapi import *
 
 
-class DGSReductionILLTest(unittest.TestCase):
+class DirectILLReductionTest(unittest.TestCase):
 
     def setUp(self):
         pass

@@ -110,7 +110,7 @@ def guessIncidentEnergyWorkspaceName(eppWorkspace):
 def stringListToArray(string):
     return eval('[' + string + ']')
 
-class DGSReductionILL(DataProcessorAlgorithm):
+class DirectILLReduction(DataProcessorAlgorithm):
 
     def __init__(self):
         DataProcessorAlgorithm.__init__(self)
@@ -119,7 +119,7 @@ class DGSReductionILL(DataProcessorAlgorithm):
         return 'Workflow\\Inelastic'
 
     def name(self):
-        return 'DGSReductionILL'
+        return 'DirectILLReduction'
 
     def summary(self):
         return 'Data reduction workflow for the direct geometry time-of-flight spectrometers at ILL'
@@ -601,4 +601,4 @@ class DGSReductionILL(DataProcessorAlgorithm):
         minEnd = numpy.min(x[-dx:])
         return min(minimum, minEnd)
 
-AlgorithmFactory.subscribe(DGSReductionILL)
+AlgorithmFactory.subscribe(DirectILLReduction)
