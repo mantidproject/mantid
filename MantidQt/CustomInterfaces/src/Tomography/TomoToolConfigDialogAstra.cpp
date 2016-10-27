@@ -21,10 +21,9 @@ void TomoToolConfigDialogAstra::setupDialogUi() {
 void TomoToolConfigDialogAstra::initialiseDialog() { m_dialog = new QDialog; }
 
 void TomoToolConfigDialogAstra::setupToolSettingsFromPaths() {
-  m_toolSettings =
-      std::shared_ptr<ToolConfigAstraToolbox>(new ToolConfigAstraToolbox(
-          m_runPath, m_pathOut + m_localOutNameAppendix, m_paths.pathDarks(),
-          m_paths.pathOpenBeam(), m_paths.pathSamples()));
+  m_toolSettings = std::make_shared<ToolConfigAstraToolbox>(
+      m_runPath, m_pathOut + m_localOutNameAppendix, m_paths.pathDarks(),
+      m_paths.pathOpenBeam(), m_paths.pathSamples());
 }
 
 void TomoToolConfigDialogAstra::setupMethodSelected() {

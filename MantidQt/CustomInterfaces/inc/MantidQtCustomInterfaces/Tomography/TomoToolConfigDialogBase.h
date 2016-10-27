@@ -3,7 +3,7 @@
 
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
-// for shared_ptr
+
 #include <memory>
 
 namespace MantidQt {
@@ -42,7 +42,7 @@ public:
   }
   virtual ~TomoToolConfigDialogBase() {}
 
-  static TomoToolConfigDialogBase *
+  static std::unique_ptr<TomoToolConfigDialogBase>
   getCorrectDialogForToolFromString(const std::string &toolName);
 
   void setupDialog(const std::string &runPath, const TomoPathsConfig &paths,

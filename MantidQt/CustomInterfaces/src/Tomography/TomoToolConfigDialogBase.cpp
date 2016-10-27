@@ -4,24 +4,26 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogSavu.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogCustom.h"
 
+#include "MantidKernel/make_unique.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
-TomoToolConfigDialogBase *
+std::unique_ptr<TomoToolConfigDialogBase>
 TomoToolConfigDialogBase::getCorrectDialogForToolFromString(
     const std::string &toolName) {
 
   if (toolName == "TomoPy") {
-    return new TomoToolConfigDialogTomoPy;
+    return Mantid::Kernel::make_unique<TomoToolConfigDialogTomoPy>();
   }
   if (toolName == "Astra") {
-    return new TomoToolConfigDialogAstra;
+    return Mantid::Kernel::make_unique<TomoToolConfigDialogAstra>();
   }
   if (toolName == "Savu") {
-    return new TomoToolConfigDialogSavu;
+    return Mantid::Kernel::make_unique<TomoToolConfigDialogSavu>();
   }
   if (toolName == "Custom command") {
-    return new TomoToolConfigDialogCustom;
+    return Mantid::Kernel::make_unique<TomoToolConfigDialogCustom>();
   }
 
   return nullptr;

@@ -265,8 +265,8 @@ void TomographyIfacePresenter::createConfigDialogUsingToolName(
     const std::string &toolName) {
   // free the previous dialogue pointer if any
   m_configDialog.reset();
-  m_configDialog = std::unique_ptr<TomoToolConfigDialogBase>(
-      TomoToolConfigDialogBase::getCorrectDialogForToolFromString(toolName));
+  m_configDialog =
+      TomoToolConfigDialogBase::getCorrectDialogForToolFromString(toolName);
 }
 
 /** Depending on whether local or remote resource is selected, do setup

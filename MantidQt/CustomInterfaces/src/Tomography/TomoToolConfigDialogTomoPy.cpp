@@ -23,9 +23,9 @@ void TomoToolConfigDialogTomoPy::initialiseDialog() { m_dialog = new QDialog; }
 void TomoToolConfigDialogTomoPy::setupToolSettingsFromPaths() {
   // TODO: for the output path, probably better to take the sample path,
   // then up one level
-  m_toolSettings = std::shared_ptr<ToolConfigTomoPy>(new ToolConfigTomoPy(
+  m_toolSettings = std::make_shared<ToolConfigTomoPy>(
       m_runPath, m_pathOut + m_localOutNameAppendix, m_paths.pathDarks(),
-      m_paths.pathOpenBeam(), m_paths.pathSamples()));
+      m_paths.pathOpenBeam(), m_paths.pathSamples());
 }
 void TomoToolConfigDialogTomoPy::setupMethodSelected() {
   // move to member/global variable and use more space OR keep here

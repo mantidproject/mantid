@@ -22,12 +22,11 @@ void TomoToolConfigDialogCustom::setupToolSettingsFromPaths() {
         m_customUi.textEdit_cl_opts->toPlainText(); // current commands
 
     // update the settings with the newest information
-    m_toolSettings = std::shared_ptr<ToolConfigCustom>(
-        new ToolConfigCustom(run.toStdString(), opts.toStdString()));
+    m_toolSettings = std::make_shared<ToolConfigCustom>(run.toStdString(),
+                                                        opts.toStdString());
   } else {
     // create settings with the default values
-    m_toolSettings = std::shared_ptr<ToolConfigCustom>(
-        new ToolConfigCustom(m_runPath, "--help"));
+    m_toolSettings = std::make_shared<ToolConfigCustom>(m_runPath, "--help");
   }
 }
 
