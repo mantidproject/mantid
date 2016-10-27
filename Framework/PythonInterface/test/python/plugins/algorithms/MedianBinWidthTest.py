@@ -41,7 +41,7 @@ class MedianBinWidthTest(unittest.TestCase):
         xs1 = self._make_boundaries(-6.6, binWidths[:6])
         xs2 = self._make_boundaries(99.6, binWidths[6:])
         xs = numpy.concatenate((xs1, xs2))
-        ys = numpy.zeros(len(xs - 2))
+        ys = numpy.zeros(len(xs) - 2)
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2)
         params = self._make_algorithm_params(ws)
         binWidth = self._run_algorithm(params)

@@ -26,7 +26,7 @@ class BinWidthAtXTest(unittest.TestCase):
         binWidths = numpy.array([0.13, 0.23, 0.05, 0.27, 0.42])
         xBegin = -0.11
         xs = self._make_boundaries(xBegin, binWidths)
-        ys = numpy.zeros(len(xs - 1))
+        ys = numpy.zeros(len(xs) - 1)
         ws = CreateWorkspace(DataX=xs, DataY=ys)
         i = len(binWidths) / 2
         middleBinWidth = binWidths[i]
@@ -54,7 +54,7 @@ class BinWidthAtXTest(unittest.TestCase):
         xs1 = self._make_boundaries(-0.42, binWidths[:3])
         xs2 = self._make_boundaries(-1.02, binWidths[3:])
         xs = numpy.concatenate((xs1, xs2))
-        ys = numpy.zeros(len(xs - 2))
+        ys = numpy.zeros(len(xs) - 2)
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2)
         X = -0.1
         params = self._make_algorithm_params(ws, X)
