@@ -307,10 +307,9 @@ void TomoToolConfigDialogSavu::removeClicked() {
 }
 
 void TomoToolConfigDialogSavu::menuOpenClicked() {
-  QString s =
-      QFileDialog::getOpenFileName(0, "Open file", QDir::currentPath(),
-                                   "NeXus files (*.nxs);;All files (*.*)",
-                                   new QString("NeXus files (*.nxs)"));
+  QString s = QFileDialog::getOpenFileName(0, "Open file", QDir::currentPath(),
+                                           "NeXus files (*.nxs);;All files (*)",
+                                           new QString("NeXus files (*.nxs)"));
   std::string name = s.toStdString();
 
   if ("" == name)
@@ -409,10 +408,9 @@ std::string TomoToolConfigDialogSavu::createUniqueNameHidden() {
 }
 
 void TomoToolConfigDialogSavu::menuSaveAsClicked() {
-  QString s =
-      QFileDialog::getSaveFileName(0, "Save file", QDir::currentPath(),
-                                   "NeXus files (*.nxs);;All files (*.*)",
-                                   new QString("NeXus files (*.nxs)"));
+  QString s = QFileDialog::getSaveFileName(0, "Save file", QDir::currentPath(),
+                                           "NeXus files (*.nxs);;All files (*)",
+                                           new QString("NeXus files (*.nxs)"));
   std::string name = s.toStdString();
   if ("" == name)
     return;

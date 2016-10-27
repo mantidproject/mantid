@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
+from __future__ import (absolute_import, division, print_function)
 from IndirectImport import *
 
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,

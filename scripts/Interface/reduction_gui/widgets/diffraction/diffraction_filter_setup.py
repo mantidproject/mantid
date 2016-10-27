@@ -193,7 +193,8 @@ class FilterSetupWidget(BaseWidget):
                 self._content.valuechange_combo.setCurrentIndex(index)
             else:
                 self._content.valuechange_combo.setCurrentIndex(0)
-                print "Input value of filter log value by changing direction '%s' is not allowed." % (state.filterlogvaluebychangingdirection)
+                print "Input value of filter log value by changing direction '%s' is not allowed." % \
+                    (state.filterlogvaluebychangingdirection)
         else:
             # Default
             self._content.valuechange_combo.setCurrentIndex(0)

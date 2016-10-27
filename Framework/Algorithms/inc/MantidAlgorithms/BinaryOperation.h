@@ -1,9 +1,6 @@
 #ifndef MANTID_ALGORITHMS_BINARYOPERATION_H_
 #define MANTID_ALGORITHMS_BINARYOPERATION_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace_fwd.h"
@@ -285,12 +282,6 @@ private:
 
   void propagateBinMasks(const API::MatrixWorkspace_const_sptr rhs,
                          API::MatrixWorkspace_sptr out);
-  /// Apply masking requested by propagateSpectraMasks.
-  void applyMaskingToOutput(API::MatrixWorkspace_sptr out);
-
-  /// A store for accumulated spectra that should be masked in the output
-  /// workspace
-  std::vector<int64_t> m_indicesToMask;
   /// Progress reporting
   API::Progress *m_progress;
 };

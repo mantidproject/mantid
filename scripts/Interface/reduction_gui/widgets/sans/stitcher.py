@@ -342,7 +342,7 @@ class StitcherWidget(BaseWidget):
         fname = QtCore.QFileInfo(QtGui.QFileDialog.getOpenFileName(self, title,
                                                                    self._output_dir,
                                                                    "Reduced XML files (*.xml);; Reduced Nexus files"
-                                                                   " (*.nxs);; All files (*.*)")).filePath()
+                                                                   " (*.nxs);; All files (*)")).filePath()
         if fname:
             # Store the location of the loaded file
             self._output_dir = str(QtCore.QFileInfo(fname).path())

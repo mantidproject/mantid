@@ -83,8 +83,10 @@ void CalculatePaalmanPings::run() {
     absCorProps["SampleWorkspace"] = sampleWsName.toStdString();
   }
 
-  absCorAlgo->setProperty("SampleNumberDensity",
-                          m_uiForm.spSampleNumberDensity->value());
+  absCorAlgo->setProperty(
+      "SampleDensityType",
+      m_uiForm.cbSampleDensity->currentText().toStdString());
+  absCorAlgo->setProperty("SampleDensity", m_uiForm.spSampleDensity->value());
 
   absCorAlgo->setProperty(
       "SampleChemicalFormula",
@@ -109,8 +111,9 @@ void CalculatePaalmanPings::run() {
       absCorProps["CanWorkspace"] = canWsName;
     }
 
-    absCorAlgo->setProperty("CanNumberDensity",
-                            m_uiForm.spCanNumberDensity->value());
+    absCorAlgo->setProperty("CanDensityType",
+                            m_uiForm.cbCanDensity->currentText().toStdString());
+    absCorAlgo->setProperty("CanDensity", m_uiForm.spCanDensity->value());
 
     const auto canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
     absCorAlgo->setProperty("CanChemicalFormula",

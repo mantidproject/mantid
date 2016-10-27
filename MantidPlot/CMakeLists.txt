@@ -169,7 +169,6 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/ImportWorkspaceDlg.cpp
                    src/Mantid/InputHistory.cpp
 				   src/Mantid/LabelToolLogValuesDialog.cpp
-                   src/Mantid/LoadDAEDlg.cpp
                    src/Mantid/ManageCustomMenus.cpp
                    src/Mantid/ManageInterfaceCategories.cpp
                    src/Mantid/MantidAbout.cpp
@@ -365,7 +364,6 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
 		   src/Mantid/IMantidMatrixExtensionHandler.h
                    src/Mantid/InputHistory.h
 				   src/Mantid/LabelToolLogValuesDialog.h
-                   src/Mantid/LoadDAEDlg.h
                    src/Mantid/ManageCustomMenus.h
                    src/Mantid/ManageInterfaceCategories.h
                    src/Mantid/MantidAbout.h
@@ -600,7 +598,6 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/IFunctionWrapper.h
                        src/Mantid/ImportWorkspaceDlg.h
 					   src/Mantid/LabelToolLogValuesDialog.h
-                       src/Mantid/LoadDAEDlg.h
                        src/Mantid/ManageCustomMenus.h
                        src/Mantid/ManageInterfaceCategories.h
                        src/Mantid/MantidAbout.h

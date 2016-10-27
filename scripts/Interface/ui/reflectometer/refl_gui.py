@@ -27,7 +27,8 @@ from mantid import UsageService
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
 
 canMantidPlot = True
 
@@ -82,7 +83,9 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         #Setup instrument with defaults assigned.
         self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF', 'OFFSPEC']
         self.polarisation_instruments = ['CRISP', 'POLREF']
-        self.polarisation_options = {'None': PolarisationCorrection.NONE, '1-PNR': PolarisationCorrection.PNR, '2-PA': PolarisationCorrection.PA}
+        self.polarisation_options = {'None': PolarisationCorrection.NONE,
+                                     '1-PNR': PolarisationCorrection.PNR,
+                                     '2-PA': PolarisationCorrection.PA}
 
         #Set the live data settings, use default if none have been set before
         settings = QtCore.QSettings()
@@ -467,7 +470,10 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                         row = row + 1
                         filled = filled + 1
                 if not filled:
-                    QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill', "No target cells to autofill. Rows to be filled should contain a run number in their first cell, and start from directly below the selected line.")
+                    QtGui.QMessageBox.critical(self.tableMain,
+                                               'Cannot perform Autofill',
+                                               "No target cells to autofill. Rows to be filled should contain a run number in their "
+                                               "first cell, and start from directly below the selected line.")
             else:
                 QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill', "Selected cells must all be in the same row.")
         else:
@@ -683,7 +689,9 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             for idx in rows:
                 rowIndexes.append(idx.row())
             if not len(rowIndexes):
-                reply = QtGui.QMessageBox.question(self.tableMain, 'Process all rows?', "This will process all rows in the table. Continue?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+                reply = QtGui.QMessageBox.question(self.tableMain, 'Process all rows?',
+                                                   "This will process all rows in the table. Continue?",
+                                                   QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
                 if reply == QtGui.QMessageBox.No:
                     logger.notice("Cancelled!")
                     willProcess = False
@@ -713,7 +721,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                         if self.tableMain.item(row, 15).text() == '':
                             loadedRun = None
                             if load_live_runs.is_live_run(runno[0]):
-                                loadedRun = load_live_runs.get_live_data(config['default.instrument'], frequency=self.live_freq, accumulation=self.live_method)
+                                loadedRun = load_live_runs.get_live_data(config['default.instrument'], frequency=self.live_freq,
+                                                                         accumulation=self.live_method)
                             else:
                                 Load(Filename=runno[0], OutputWorkspace="_run")
                                 loadedRun = mtd["_run"]
@@ -743,12 +752,14 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                 logger.notice("Calculated resolution: " + str(dqq))
                             except:
                                 self.statusMain.clearMessage()
-                                logger.error("Failed to calculate dq/q because we could not find theta in the workspace's sample log. Try entering theta or dq/q manually.")
+                                logger.error("Failed to calculate dq/q because we could not find theta in the workspace's sample log. "
+                                             "Try entering theta or dq/q manually.")
                                 return
                         else:
                             dqq = float(self.tableMain.item(row, 15).text())
 
-                        #Check secondary and tertiary two_theta columns, if they're blank and their corresponding run columns are set, fill them.
+                        # Check secondary and tertiary two_theta columns, if they're
+                        # blank and their corresponding run columns are set, fill them.
                         for run_col in [5, 10]:
                             tht_col = run_col + 1
                             run_val = str(self.tableMain.item(row, run_col).text())
@@ -974,11 +985,14 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             if size == 1:
                 trans1 = converter.get_workspace_from_list(0)
 
-                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name, Params=0.02, StartOverlap=10.0, EndOverlap=12.0)
+                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name,
+                                                                  Params=0.02, StartOverlap=10.0, EndOverlap=12.0)
             elif size == 2:
                 trans1 = converter.get_workspace_from_list(0)
                 trans2 = converter.get_workspace_from_list(1)
-                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name, SecondTransmissionRun=trans2, Params=0.02, StartOverlap=10.0, EndOverlap=12.0)
+                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name,
+                                                                  SecondTransmissionRun=trans2, Params=0.02,
+                                                                  StartOverlap=10.0, EndOverlap=12.0)
             else:
                 raise RuntimeError("Up to 2 transmission runs can be specified. No more than that.")
 
@@ -1013,8 +1027,10 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                     #If the transmission workspace is a group, we'll use it pair-wise with the tof workspace group
                     if isinstance(transmission_ws, WorkspaceGroup):
                         group_trans_ws = transmission_ws[i]
-                    wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws[i], FirstTransmissionRun=group_trans_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ_'+str(i+1),
-                                                                 OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),ScaleFactor=factor,MomentumTransferStep=Qstep,
+                    wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws[i], FirstTransmissionRun=group_trans_ws,
+                                                                 thetaIn=angle, OutputWorkspace=runno+'_IvsQ_'+str(i+1),
+                                                                 OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),
+                                                                 ScaleFactor=factor,MomentumTransferStep=Qstep,
                                                                  MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax)
                     wqGroup.append(wq)
                     wlamGroup.append(wlam)
@@ -1024,8 +1040,10 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 wlam = GroupWorkspaces(InputWorkspaces=wlamGroup, OutputWorkspace=runno+'_IvsLam')
                 th = thetaGroup[0]
             else:
-                wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ',
-                                                             OutputWorkspaceWavelength=runno+'_IvsLam', ScaleFactor=factor,MomentumTransferStep=Qstep,
+                wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws,
+                                                             thetaIn=angle, OutputWorkspace=runno+'_IvsQ',
+                                                             OutputWorkspaceWavelength=runno+'_IvsLam',
+                                                             ScaleFactor=factor,MomentumTransferStep=Qstep,
                                                              MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax)
 
             cleanup()
@@ -1085,7 +1103,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             #this is an emergency autosave as the program is failing
             logger.error("The ISIS Reflectonomy GUI has encountered an error, it will now attempt to save a copy of your work.")
             msgBox = QtGui.QMessageBox()
-            msgBox.setText("The ISIS Reflectonomy GUI has encountered an error, it will now attempt to save a copy of your work.\nPlease check the log for details.")
+            msgBox.setText("The ISIS Reflectonomy GUI has encountered an error, it will now attempt to save a copy of your work.\n"
+                           "Please check the log for details.")
             msgBox.setStandardButtons(QtGui.QMessageBox.Ok)
             msgBox.setIcon(QtGui.QMessageBox.Critical)
             msgBox.setDefaultButton(QtGui.QMessageBox.Ok)
@@ -1110,7 +1129,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             else:
                 saveDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Save Table")
                 saveDialog.setFileMode(QtGui.QFileDialog.AnyFile)
-                saveDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
+                saveDialog.setNameFilter("Table Files (*.tbl);;All files (*)")
                 saveDialog.setDefaultSuffix("tbl")
                 saveDialog.setAcceptMode(QtGui.QFileDialog.AcceptSave)
                 if saveDialog.exec_():
@@ -1125,7 +1144,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         """
         saveDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Save Table")
         saveDialog.setFileMode(QtGui.QFileDialog.AnyFile)
-        saveDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
+        saveDialog.setNameFilter("Table Files (*.tbl);;All files (*)")
         saveDialog.setDefaultSuffix("tbl")
         saveDialog.setAcceptMode(QtGui.QFileDialog.AcceptSave)
         if saveDialog.exec_():
@@ -1139,7 +1158,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         self.loading = True
         loadDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Open Table")
         loadDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
-        loadDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
+        loadDialog.setNameFilter("Table Files (*.tbl);;All files (*)")
         if loadDialog.exec_():
             try:
                 #before loading make sure you give them a chance to save

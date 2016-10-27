@@ -3410,11 +3410,12 @@ MultiLayer *MantidUI::plotSelectedColumns(const MantidMatrix *const m,
  * @param toPlot :: Map of form ws -> [spectra_list]
  * @param distr :: if true, workspace plot as distribution (y data/bin width)
  * @param errs :: if true, plot the errors on the graph
+ * @param plotWindow :: Window to plot in - if null, create a new one
  * @return created MultiLayer, or null on failure
  */
 MultiLayer *MantidUI::plotSubplots(const QMultiMap<QString, set<int>> &toPlot,
-                                   MantidQt::DistributionFlag distr,
-                                   bool errs) {
+                                   MantidQt::DistributionFlag distr, bool errs,
+                                   MultiLayer *plotWindow) {
   // Check if nothing to plot
   if (toPlot.size() == 0)
     return nullptr;
@@ -3456,8 +3457,16 @@ MultiLayer *MantidUI::plotSubplots(const QMultiMap<QString, set<int>> &toPlot,
   // Set the wait cursor while we are plotting
   ScopedOverrideCursor waitCursor;
 
-  // Create window with correct number of layers
-  auto *multi = appWindow()->multilayerPlot(plotTitle, nSubplots, 1, nSubplots);
+  // Create window with correct number of layers, or use existing
+  MultiLayer *multi;
+  if (plotWindow) {
+    multi = plotWindow;
+    multi->setLayersNumber(0); // remove any existing plots
+    multi->setLayersNumber(nSubplots);
+  } else {
+    multi = appWindow()->multilayerPlot(plotTitle, nSubplots, 1, nSubplots);
+  }
+  assert(multi);
   multi->setCloseOnEmpty(true);
   multi->arrangeLayers(true, true);
 
@@ -3555,11 +3564,12 @@ void MantidUI::plotLayerOfMultilayer(MultiLayer *multi, const bool plotErrors,
  * @param toPlot :: A list of workspace/spectra to be shown in the graph
  * @param distr :: if true, workspace plot as distribution (y data/bin width)
  * @param errs :: if true, plot the errors on the graph
+ * @param plotWindow :: Window to plot in - if null, create a new one
  * @return created MultiLayer, or null on failure
  */
 MultiLayer *MantidUI::plotSubplots(const QMultiMap<QString, int> &toPlot,
-                                   MantidQt::DistributionFlag distr,
-                                   bool errs) {
+                                   MantidQt::DistributionFlag distr, bool errs,
+                                   MultiLayer *plotWindow) {
 
   // Convert the input map into a map of workspace->spectra
   QMultiMap<QString, std::set<int>> spectraByWorkspace;
@@ -3573,7 +3583,43 @@ MultiLayer *MantidUI::plotSubplots(const QMultiMap<QString, int> &toPlot,
   }
 
   // Pass over to the overloaded method
-  return plotSubplots(spectraByWorkspace, distr, errs);
+  return plotSubplots(spectraByWorkspace, distr, errs, plotWindow);
+}
+
+/**
+ * Plot a "tiled" plot (with subplots).
+ * Ask user for confirmation if lots of plots are chosen.
+ * If just one workspace, put each spectrum in its own subplot
+ * If multiple workspaces, each ws gets its own subplot
+ *
+ * This overload plots the same spectra for each workspace.
+ *
+ * @param wsNames :: A list of workspace names to be shown in the graph
+ * @param indexList :: list of workspace indices
+ * @param distr :: if true, workspace plot as distribution (y data/bin width)
+ * @param errs :: if true, plot the errors on the graph
+ * @param plotWindow :: Window to plot in - if null, create a new one
+ * @return created MultiLayer, or null on failure
+ */
+MultiLayer *MantidUI::plotSubplots(const QStringList &wsNames,
+                                   const QList<int> &indexList,
+                                   MantidQt::DistributionFlag distr, bool errs,
+                                   MultiLayer *plotWindow) {
+  // convert input into map of workspace->spectra
+  QMultiMap<QString, std::set<int>> spectraByWorkspace;
+  const std::set<int> wsIndices = [&indexList]() {
+    std::set<int> indexSet;
+    for (const auto &index : indexList) {
+      indexSet.insert(index);
+    }
+    return indexSet;
+  }();
+  for (const auto &wsName : wsNames) {
+    spectraByWorkspace.insert(wsName, wsIndices);
+  }
+
+  // Pass to the overloaded method
+  return plotSubplots(spectraByWorkspace, distr, errs, plotWindow);
 }
 
 Table *MantidUI::createTableFromBins(
