@@ -1,6 +1,6 @@
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import os.path
-import shutil
 
 from mantid.api import AnalysisDataService, MatrixWorkspace, ITableWorkspace
 from mantid.simpleapi import *
@@ -44,8 +44,8 @@ class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest
             for files in filenames:
                 path = os.path.join(directories[0], files)
                 os.remove(path)
-        except OSError, ose:
-            print 'could not delete the generated file: ', ose.filename
+        except OSError as ose:
+            print ('could not delete the generated file: ', ose.filename)
 
     def runTest(self):
         self._success = False

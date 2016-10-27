@@ -1,10 +1,7 @@
-# pylint: disable= attribute-defined-outside-init, no-init
-
-import unittest
+from __future__ import (absolute_import, division, print_function)
 import os.path
 import shutil
 
-from mantid.api import AnalysisDataService, MatrixWorkspace, ITableWorkspace
 import mantid.simpleapi as mantid
 from mantid import config
 import stresstesting
@@ -75,24 +72,26 @@ class PearlPowderOldApiFmodeTrans(stresstesting.MantidStressTest):
             return _validate_wrapper(self, self.fmode)
 
         def cleanup(self):
-            _clean_up_files(DIRS)
+            _clean_up_files(DIRS, tof_xye_file_saved=True)
 
 
 # Class common implementation
-def _clean_up_files(directories):
-        filenames = []
-        filenames.extend(("PEARL/Focus_Test/DataOut/PEARL92476_92479.nxs",
-                          "PEARL/Focus_Test/DataOut/PEARL92476_92479_d_xye-0.dat",
-                          "PEARL/Focus_Test/DataOut/PEARL92476_92479_tof_xye-0.dat",
-                          "PEARL/Focus_Test/DataOut/PEARL92476_92479-0.gss"))
+def _clean_up_files(directories, tof_xye_file_saved=False):
+        filenames = ["PEARL/Focus_Test/DataOut/PEARL92476_92479.nxs",
+                     "PEARL/Focus_Test/DataOut/PEARL92476_92479-0.gss"]
+
+        if tof_xye_file_saved:
+            filenames.extend(["PEARL/Focus_Test/DataOut/PEARL92476_92479_tof_xye-0.dat",
+                             "PEARL/Focus_Test/DataOut/PEARL92476_92479_d_xye-0.dat"])
+
         try:
             for files in filenames:
                 path = os.path.join(directories[0], files)
                 os.remove(path)
             cali_path = os.path.join(directories[0], "PEARL/Focus_Test/DataOut")
             shutil.rmtree(cali_path)
-        except OSError, ose:
-            print 'could not delete the generated file: ', ose.filename
+        except OSError as ose:
+            print ('could not delete the generated file: ', ose.filename)
 
 
 def _gen_required_files():
@@ -103,11 +102,11 @@ def _gen_required_files():
                       'PEARL/Focus_Test/Calibration/pearl_offset_15_3.cal',
                       'PEARL/Focus_Test/Calibration/van_spline_TT70_cycle_15_4.nxs',
                       'PEARL/Focus_Test/Attentuation/PRL112_DC25_10MM_FF.OUT',
-                      # reference files
-                      'PEARL/Focus_Test/RefFiles/Ref_PRL92476_92479.nxs',
-                      'PEARL/Focus_Test/RefFiles/Ref_PRL92476_92479-0.gss',
-                      'PEARL/Focus_Test/RefFiles/Ref_PRL92476_92479_d_xye-0.dat',
-                      'PEARL/Focus_Test/RefFiles/Ref_PRL92476_92479_tof_xye-0.dat'
+                      # Input files
+                      'PEARL/Focus_Test/RawFiles/PEARL00092476.raw',
+                      'PEARL/Focus_Test/RawFiles/PEARL00092477.raw',
+                      'PEARL/Focus_Test/RawFiles/PEARL00092478.raw',
+                      'PEARL/Focus_Test/RawFiles/PEARL00092479.raw'
                       ))
     # raw files / run numbers 92476-92479
     for i in range(6, 10):
