@@ -682,9 +682,8 @@ private:
     PropertyWithValue<int> *prop_with_value =
         dynamic_cast<PropertyWithValue<int> *>(prop);
 
-    int value;
     TS_ASSERT(prop_with_value != NULL);
-    boost::lexical_cast<int>(prop_with_value->value());
+    int value = boost::lexical_cast<int>(prop_with_value->value());
     TS_ASSERT_EQUALS(expected_period, value);
     delete prop;
     delete log;
