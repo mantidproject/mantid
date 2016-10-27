@@ -77,6 +77,7 @@ set ( SRC_FILES
 	src/CreateSampleWorkspace.cpp
 	src/CreateSingleValuedWorkspace.cpp
 	src/CreateTransmissionWorkspace.cpp
+	src/CreateTransmissionWorkspace2.cpp
 	src/CreateTransmissionWorkspaceAuto.cpp
 	src/CreateUserDefinedBackground.cpp
 	src/CreateWorkspace.cpp
@@ -385,6 +386,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CreateSampleWorkspace.h
 	inc/MantidAlgorithms/CreateSingleValuedWorkspace.h
 	inc/MantidAlgorithms/CreateTransmissionWorkspace.h
+	inc/MantidAlgorithms/CreateTransmissionWorkspace2.h
 	inc/MantidAlgorithms/CreateTransmissionWorkspaceAuto.h
 	inc/MantidAlgorithms/CreateUserDefinedBackground.h
 	inc/MantidAlgorithms/CreateWorkspace.h
@@ -706,6 +708,7 @@ set ( TEST_FILES
 	CreateSingleValuedWorkspaceTest.h
 	CreateTransmissionWorkspaceAutoTest.h
 	CreateTransmissionWorkspaceTest.h
+	CreateTransmissionWorkspace2Test.h
 	CreateUserDefinedBackgroundTest.h
 	CreateWorkspaceTest.h
 	CropToComponentTest.h

@@ -766,7 +766,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
     }
 
     // Make the transmission run.
-    auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
+    auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace", -1, -1,
+                                          true, 1);
     alg->initialize();
     alg->setProperty("FirstTransmissionRun", firstTransmissionRun);
     if (secondTransmissionRun.is_initialized()) {

@@ -10,7 +10,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** ReflectometryReductionOne2 : Reflectometry reduction of a single input TOF
- workspace to an IvsQ workspace.
+ workspace to an IvsQ workspace. Version 2 of the algorithm.
 
  Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
  National Laboratory & European Spallation Source
