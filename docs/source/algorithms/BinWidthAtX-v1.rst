@@ -26,7 +26,7 @@ Usage
   
 **Example: rebin a workspace to equidistant bin boundaries.**
 
-.. testCode:: Example
+.. testcode:: ExBinWidthAtX
 
     import numpy
     
@@ -57,7 +57,7 @@ Usage
 
 Output:
 
-.. testOutput:: Example
+.. testoutput:: ExBinWidthAtX
 
     New bin width: 0.01
     Bin widths before rebinning, first: 0.0025, last: 0.9925
