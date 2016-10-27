@@ -108,6 +108,12 @@ template class DLLExport ArrayProperty<float>;
 template class DLLExport ArrayProperty<double>;
 template class DLLExport ArrayProperty<std::string>;
 
+template class DLLExport ArrayProperty<std::vector<int32_t>>;
+template class DLLExport ArrayProperty<std::vector<uint32_t>>;
+template class DLLExport ArrayProperty<std::vector<int64_t>>;
+template class DLLExport ArrayProperty<std::vector<uint64_t>>;
+template class DLLExport ArrayProperty<std::vector<float>>;
+template class DLLExport ArrayProperty<std::vector<double>>;
 template class DLLExport ArrayProperty<std::vector<std::string>>;
 
 /// @endcond
