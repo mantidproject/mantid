@@ -178,11 +178,13 @@ public:
   ///  Return the time series as a correct C++ map<DateAndTime, TYPE>. All
   ///  values
   std::map<DateAndTime, TYPE> valueAsCorrectMap() const;
-  ///  Return the time series's values as a vector<TYPE>
+  ///  Return the time series's values (unfiltered) as a vector<TYPE>
   std::vector<TYPE> valuesAsVector() const;
   ///  Return the time series as a correct C++ multimap<DateAndTime, TYPE>. All
   ///  values
   std::multimap<DateAndTime, TYPE> valueAsMultiMap() const;
+  /// Get filtered values as a vector
+  std::vector<TYPE> filteredValuesAsVector() const;
 
   /// Return the time series's times as a vector<DateAndTime>
   std::vector<DateAndTime> timesAsVector() const override;
@@ -313,8 +315,6 @@ private:
   size_t findNthIndexFromQuickRef(int n) const;
   /// Set a value from another property
   std::string setValueFromProperty(const Property &right) override;
-  /// Get filtered values
-  std::vector<TYPE> getFilteredValues() const;
   /// Find if time lies in a filtered region
   bool isTimeFiltered(const Kernel::DateAndTime &time) const;
 

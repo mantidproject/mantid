@@ -1925,8 +1925,40 @@ public:
     delete log;
   }
 
-  /// Test that getStatistics and timeAverageValue respect the filter
+  /// Test that getStatistics respects the filter
   void test_getStatistics_filtered() {
+    const auto &log = getFilteredTestLog();
+
+    // Get the stats and compare to expected values
+    const auto &stats = log->getStatistics();
+    TS_ASSERT_DELTA(stats.minimum, 1.0, 1e-6);
+    TS_ASSERT_DELTA(stats.maximum, 10.0, 1e-6);
+    TS_ASSERT_DELTA(stats.median, 6.0, 1e-6);
+    TS_ASSERT_DELTA(stats.mean, 5.77778, 1e-3);
+    TS_ASSERT_DELTA(stats.duration, 100.0, 1e-6);
+    TS_ASSERT_DELTA(stats.standard_deviation, 2.8974, 1e-4);
+  }
+
+  /// Test that timeAverageValue respects the filter
+  void test_timeAverageValue_filtered() {
+    const auto &log = getFilteredTestLog();
+    TS_ASSERT_DELTA(log->timeAverageValue(), 5.588, 1e-3);
+  }
+
+  void test_filteredValuesAsVector() {
+    const auto &log = getFilteredTestLog();
+
+    const auto &unfilteredValues = log->valuesAsVector();
+    const auto &filteredValues = log->filteredValuesAsVector();
+
+    TS_ASSERT_DIFFERS(unfilteredValues.size(), filteredValues.size());
+    TS_ASSERT_EQUALS(unfilteredValues.size(), 11);
+    TS_ASSERT_EQUALS(filteredValues.size(), 9);
+  }
+
+private:
+  /// Generate a test log that has been filtered
+  std::unique_ptr<TimeSeriesProperty<double>> getFilteredTestLog() {
     // Build the log
     auto log =
         Mantid::Kernel::make_unique<TimeSeriesProperty<double>>("DoubleLog");
@@ -1937,8 +1969,6 @@ public:
       log->addValue(logTime.toISO8601String(), val);
       logTime += incrementSecs;
     }
-    TS_ASSERT_EQUALS(log->realSize(), 11);
-
     // Add the filter
     auto filter =
         Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("Filter");
@@ -1947,19 +1977,9 @@ public:
     filter->addValue("2007-11-30T16:17:25", true);
     filter->addValue("2007-11-30T16:18:35", false);
     log->filterWith(filter.get());
-
-    // Get the stats and compare to expected values
-    const auto &stats = log->getStatistics();
-    TS_ASSERT_DELTA(stats.minimum, 1.0, 1e-6);
-    TS_ASSERT_DELTA(stats.maximum, 10.0, 1e-6);
-    TS_ASSERT_DELTA(stats.median, 6.0, 1e-6);
-    TS_ASSERT_DELTA(stats.mean, 5.77778, 1e-3);
-    TS_ASSERT_DELTA(stats.duration, 100.0, 1e-6);
-    TS_ASSERT_DELTA(stats.standard_deviation, 2.8974, 1e-4);
-    TS_ASSERT_DELTA(log->timeAverageValue(), 5.588, 1e-3);
+    return log;
   }
 
-private:
   TimeSeriesProperty<int> *iProp;
   TimeSeriesProperty<double> *dProp;
   TimeSeriesProperty<std::string> *sProp;

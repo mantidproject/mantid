@@ -1712,7 +1712,7 @@ template <typename TYPE>
 TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics() const {
   TimeSeriesPropertyStatistics out;
   Mantid::Kernel::Statistics raw_stats =
-      Mantid::Kernel::getStatistics(this->getFilteredValues());
+      Mantid::Kernel::getStatistics(this->filteredValuesAsVector());
   out.mean = raw_stats.mean;
   out.standard_deviation = raw_stats.standard_deviation;
   out.median = raw_stats.median;
@@ -2197,7 +2197,7 @@ void TimeSeriesProperty<std::string>::histogramData(
  * @returns :: Vector of included values only
  */
 template <typename TYPE>
-std::vector<TYPE> TimeSeriesProperty<TYPE>::getFilteredValues() const {
+std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
   if (m_filter.empty()) {
     return this->valuesAsVector(); // no filtering to do
   }
