@@ -45,9 +45,9 @@ private:
 
   /// Creates a single workspace to plot from
   const Mantid::API::MatrixWorkspace_sptr createWorkspaceForGroupPlot(
+      Type graphType,
       boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup,
-      const MantidSurfacePlotDialog::UserInputSurface &options,
-      QString *xAxisTitle) const;
+      const MantidSurfacePlotDialog::UserInputSurface &options) const;
 
   /// Returns a single log value from the given workspace
   double
@@ -66,6 +66,10 @@ private:
 
   /// Converts X data to correct (point/histo) format for the graph type
   void convertXData(Mantid::API::MatrixWorkspace_sptr ws, Type graphType) const;
+
+  /// Get X axis title
+  QString getXAxisTitle(
+      const boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup) const;
 
   /// Pointer to the Mantid UI
   MantidUI *const m_mantidUI;
