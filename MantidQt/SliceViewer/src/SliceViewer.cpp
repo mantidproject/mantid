@@ -1523,18 +1523,24 @@ void SliceViewer::showInfoAt(double x, double y) {
   VMD coords(m_ws->getNumDims());
   for (size_t d = 0; d < m_ws->getNumDims(); d++)
     coords[d] = VMD_t(m_dimWidgets[d]->getSlicePoint());
+
   coords[m_dimX] = VMD_t(x);
   coords[m_dimY] = VMD_t(y);
 
-  // Perform non-orthogonal correction if required
-  m_coordinateTransform->transform(coords, m_dimX, m_dimY);
+  if (ui.btnNonOrthogonalToggle->isChecked()) {
+	  // Perform non-orthogonal correction if required
+	  m_coordinateTransform->transform(coords, m_dimX, m_dimY);
+  }
 
   signal_t signal =
       m_ws->getSignalWithMaskAtVMD(coords, this->m_data->getNormalization());
+
   ui.lblInfoX->setText(QString::number(coords[m_dimX], 'g', 4));
   ui.lblInfoY->setText(QString::number(coords[m_dimY], 'g', 4));
+  //ui.lblInfoX->setText(QString::number(x, 'g', 4));
+  //ui.lblInfoY->setText(QString::number(y, 'g', 4));
   ui.lblInfoSignal->setText(QString::number(signal, 'g', 4));
-
+  
   // Now show the coords in the original workspace
   if (m_ws->hasOriginalWorkspace()) {
     IMDWorkspace_sptr origWS =
