@@ -1,9 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty,\
-    PythonAlgorithm
+from mantid.api import AlgorithmFactory, HistogramValidator,\
+    MatrixWorkspaceProperty, PythonAlgorithm
 from mantid.kernel import Direction
-from mantid.simpleapi import ConvertToHistogram, ConvertToPointData
 import numpy
 import roundinghelper
 
@@ -45,8 +44,9 @@ class BinWidthAtX(PythonAlgorithm):
         self.declareProperty(
             MatrixWorkspaceProperty(name=self._PROP_INPUT_WS,
                                     defaultValue='',
+                                    validator=HistogramValidator(),
                                     direction=Direction.Input),
-            doc='The workspace containing the input data')
+            doc='A workspace containing the input histograms')
         self.declareProperty(
             name=self._PROP_X_VALUE, defaultValue=0.0,
             direction=Direction.Input, doc='The x value of the bin to use.')
@@ -63,9 +63,6 @@ class BinWidthAtX(PythonAlgorithm):
         x = self.getProperty(self._PROP_X_VALUE).value
         roundingMode = self.getProperty(
             roundinghelper.PROP_NAME_ROUNDING_MODE).value
-        inputIsPointData = inputWs.isDistribution()
-        if inputIsPointData:
-            inputWs = ConvertToHistogram(inputWs)
         n = inputWs.getNumberHistograms()
         widths = numpy.empty(n)
         for wsIndex in range(n):
@@ -80,8 +77,6 @@ class BinWidthAtX(PythonAlgorithm):
             widths[wsIndex] = dx
         binWidth = numpy.mean(widths)
         binWidth = roundinghelper.round(binWidth, roundingMode)
-        if inputIsPointData:
-            inputWs = ConvertToPointData(inputWs)
         self.setProperty(self._PROP_BIN_WIDTH, binWidth)
 
 AlgorithmFactory.subscribe(BinWidthAtX)

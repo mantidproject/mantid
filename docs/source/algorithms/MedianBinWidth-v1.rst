@@ -9,15 +9,17 @@
 Description
 -----------
   
-This algorithm calculates the median bin widht of each histogram in *InputWorkspace*. The (optionally rounded) mean value of the medians is then placed in the *BinWidth* output property.
-
-Workspaces with Point data are treated as in :ref:`algm-Rebin`: they are converted to histograms with :ref:`algm-ConvertToHistogram` before the bin widths are checked and afterwards back using :ref:`algm-ConvertToPointData`.
+This algorithm calculates the median bin width of each histogram in *InputWorkspace*. The (optionally rounded) mean value of the medians is then placed in the *BinWidth* output property.
 
 Rounding
 ########
 
 If the *Rounding* property is set to **10^n**, the bin width will be rounded down to the nearest power of 10. For example, 0.11 and 0.99 will be rounded to 0.1, while 0.011 and 0.099 will be rounded to 0.01.
 
+Restrictions on properties
+################################
+
+The *InputWorkspace* has to contain histogram data. For point data, :ref:`algm-ConvertToHistogram` can be used first, but care should be taken if the points are not equally spaced.
 
 Usage
 -----

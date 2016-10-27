@@ -60,15 +60,13 @@ class MedianBinWidthTest(unittest.TestCase):
         self.assertAlmostEqual(binWidth, expectedBinWidth)
         DeleteWorkspace(ws)
 
-    def test_success_on_point_data(self):
+    def test_throws_on_non_histogram_input(self):
         xs = numpy.array([-0.7, 0.7, 1.1, 1.8, 2.2])
         ys = numpy.zeros(len(xs))
         ws = CreateWorkspace(DataX=xs, DataY=ys, Distribution=True)
         params = self._make_algorithm_params(ws)
-        binWidth = self._run_algorithm(params)
-        # We don't know how point data is exactly converted to histograms.
-        # So we cannot be too exact here.
-        self.assertLessEqual(binWidth, 0.5 * (1.4 + 0.4))
+        self.assertRaises(ValueError, testhelpers.create_algorithm,
+                         'BinWidthAtX', **params)
         DeleteWorkspace(ws)
 
 if __name__ == "__main__":

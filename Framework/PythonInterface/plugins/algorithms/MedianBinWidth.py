@@ -1,9 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty,\
-    PythonAlgorithm
+from mantid.api import AlgorithmFactory, HistogramValidator,\
+    MatrixWorkspaceProperty, PythonAlgorithm
 from mantid.kernel import Direction
-from mantid.simpleapi import ConvertToHistogram, ConvertToPointData
 import numpy
 import roundinghelper
 
@@ -45,6 +44,7 @@ class MedianBinWidth(PythonAlgorithm):
         self.declareProperty(
             MatrixWorkspaceProperty(name=self._PROP_INPUT_WS,
                                     defaultValue='',
+                                    validator=HistogramValidator(),
                                     direction=Direction.Input),
             doc='The workspace containing the input data')
         roundinghelper.declare_rounding_property(self)
@@ -60,9 +60,6 @@ class MedianBinWidth(PythonAlgorithm):
         inputWs = self.getProperty(self._PROP_INPUT_WS).value
         roundingMode = self.getProperty(
             roundinghelper.PROP_NAME_ROUNDING_MODE).value
-        inputIsPointData = inputWs.isDistribution()
-        if inputIsPointData:
-            inputWs = ConvertToHistogram(inputWs)
         n = inputWs.getNumberHistograms()
         medians = numpy.empty(n)
         for wsIndex in range(n):
@@ -71,8 +68,6 @@ class MedianBinWidth(PythonAlgorithm):
             medians[wsIndex] = numpy.median(dxs)
         binWidth = numpy.mean(medians)
         binWidth = roundinghelper.round(binWidth, roundingMode)
-        if inputIsPointData:
-            inputWs = ConvertToPointData(inputWs)
         self.setProperty(self._PROP_BIN_WIDTH, binWidth)
 
 AlgorithmFactory.subscribe(MedianBinWidth)
