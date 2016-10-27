@@ -24,7 +24,7 @@ Usage
 
 .. testcode:: ExDataFit
 
-    EnergyWindowScan(InputFiles="IRS26176.RAW", Instrument='IRIS', Analyser='graphite',
+    EnergyWindowScan(InputFiles="IRS21360.RAW", Instrument='IRIS', Analyser='graphite',
                              Reflection='002', SpectraRange='3, 50', ElasticRange='-0.5, 0',
                              InelasticRange='0, 0.5', GroupingMethod='Individual', MSDFit=True)
 
