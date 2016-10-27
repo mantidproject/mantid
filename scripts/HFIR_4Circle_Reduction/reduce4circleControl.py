@@ -903,9 +903,13 @@ class CWSCDReductionControl(object):
             p_key = (exp_number, scan_number, pt_number)
 
         # Check for existence
-        assert p_key in self._myPeakInfoDict, 'Exp/Scan/Pt %s does not exist in PeakInfo dictionary.' % str(p_key)
+        if p_key in self._myPeakInfoDict:
+            ret_value = self._myPeakInfoDict[p_key]
+        else:
+            ret_value = None
+            print '[DB...INFO] Peak Key is supposed to be %s.' % p_key
 
-        return self._myPeakInfoDict[p_key]
+        return ret_value
 
     def get_peaks_integrated_intensities(self, exp_number, scan_number, pt_list):
         """
@@ -1720,7 +1724,7 @@ class CWSCDReductionControl(object):
                                                 OutputWorkspace=out_hkl_name)
 
             except RuntimeError as e:
-                err_msg += 'Failed to reduce scan %d due to %s' % (scan_no, str(e))
+                err_msg += 'Failed to reduce scan %d from MDWorkspace %s due to %s' % (scan_no, out_q_name, str(e))
                 return False, err_msg
 
             # set up output
@@ -2480,9 +2484,15 @@ class CWSCDReductionControl(object):
         saved_project.load()
 
         # set current value
-        self._dataDir = saved_project.get('data dir')
+        try:
+            self._dataDir = saved_project.get('data dir')
+        except KeyError:
+            self._dataDir = None
 
-        ui_dict = saved_project.get('gui parameters')
+        try:
+            ui_dict = saved_project.get('gui parameters')
+        except KeyError:
+            ui_dict = dict()
 
         return ui_dict
 

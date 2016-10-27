@@ -494,14 +494,17 @@ class MainWindow(QtGui.QMainWindow):
         # END-IF
 
         # set the UI parameters to GUI
-        self.ui.lineEdit_localSpiceDir.setText(ui_dict['local spice dir'])
-        self.ui.lineEdit_workDir.setText(ui_dict['work dir'])
-        self.ui.lineEdit_surveyStartPt.setText(ui_dict['survey start'])
-        self.ui.lineEdit_surveyEndPt.setText(ui_dict['survey stop'])
+        try:
+            self.ui.lineEdit_localSpiceDir.setText(ui_dict['local spice dir'])
+            self.ui.lineEdit_workDir.setText(ui_dict['work dir'])
+            self.ui.lineEdit_surveyStartPt.setText(ui_dict['survey start'])
+            self.ui.lineEdit_surveyEndPt.setText(ui_dict['survey stop'])
 
-        # now try to call some actions
-        self.do_apply_setup()
-        self.do_set_experiment()
+            # now try to call some actions
+            self.do_apply_setup()
+            self.do_set_experiment()
+        except KeyError:
+            print '[Error] Some field cannot be found.'
 
         return
 
@@ -514,7 +517,20 @@ class MainWindow(QtGui.QMainWindow):
         if os.path.exists(project_file_name) is False:
             self.pop_one_button_dialog('Last saved project %s cannot be located.' % project_file_name)
         else:
-            self._myControl.load_project(project_file_name)
+            ui_dict = self._myControl.load_project(project_file_name)
+
+            # set the UI parameters to GUI
+            try:
+                self.ui.lineEdit_localSpiceDir.setText(ui_dict['local spice dir'])
+                self.ui.lineEdit_workDir.setText(ui_dict['work dir'])
+                self.ui.lineEdit_surveyStartPt.setText(ui_dict['survey start'])
+                self.ui.lineEdit_surveyEndPt.setText(ui_dict['survey stop'])
+
+                # now try to call some actions
+                self.do_apply_setup()
+                self.do_set_experiment()
+            except KeyError:
+                print '[Error] Some field cannot be found.'
 
         return
 
@@ -1765,6 +1781,7 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # TODO/NOW/ISSUE - Test this!
+        # TODO/NOW/ISSUE - Merge Peak should create PeakProcessRecord
 
         # find the selected scans
         selected_rows = self.ui.tableWidget_mergeScans.get_selected_rows(True)
@@ -1784,6 +1801,7 @@ class MainWindow(QtGui.QMainWindow):
             md_ws_list.append(md_ws_name)
             # get peak center in 3-tuple
             peak_center = self._myControl.get_peak_info(exp_number, scan_number).get_peak_centre()
+            assert peak_center is not None, 'Exp/Scan/Pt %s does not exist in PeakInfo dictionary.'
             peak_center_list.append(peak_center)
         # END-FOR
 
