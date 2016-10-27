@@ -28,12 +28,9 @@
 #include "MantidQtAPI/MdSettings.h"
 #include "MantidQtAPI/SignalBlocker.h"
 #include "MantidQtAPI/SignalRange.h"
-<<<<<<< HEAD
 #include "MantidQtAPI/TSVSerialiser.h"
-=======
 #include "MantidQtAPI/NonOrthogonal.h"
 #include "MantidQtAPI/QwtRasterDataMDNonOrthogonal.h"
->>>>>>> Checkpointing Re #12110
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/CustomTools.h"
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
@@ -553,6 +550,7 @@ void SliceViewer::initMenus() {
 //------------------------------------------------------------------------------
 /** Intialize the zooming/panning tools */
 void SliceViewer::initZoomer() {
+
   QwtPlotPicker *zoomer = new QwtPlotPicker(m_plot->canvas());
   zoomer->setSelectionFlags(QwtPicker::RectSelection |
                             QwtPicker::DragSelection);
@@ -2336,7 +2334,6 @@ Event handler for changing magnification.
 */
 void SliceViewer::magnifierRescaled(double) {
   autoRebinIfRequired();
-
   this->updatePeaksOverlay();
 }
 
@@ -2361,9 +2358,15 @@ bool SliceViewer::isAutoRebinSet() const {
 Auto rebin the workspace according the the current-view + rebin parameters if
 that option has been set.
 */
-void SliceViewer::autoRebinIfRequired() {
+void SliceViewer::autoRebinIfRequired() { // probably rename this if forcing it
+                                          // to do 2 things
   if (isAutoRebinSet()) {
     rebinParamsChanged();
+  }
+  if (ui.btnNonOrthogonalToggle->isChecked()) {
+    QwtDoubleInterval xint = m_plot->axisScaleDiv(m_spect->xAxis())->interval();
+    QwtDoubleInterval yint = m_plot->axisScaleDiv(m_spect->yAxis())->interval();
+    m_nonOrthogonalOverlay->zoomChanged(xint, yint);
   }
 }
 /** NON ORTHOGONAL STUFF **/
@@ -2373,7 +2376,7 @@ void SliceViewer::setNonOrthogonalbtn()
 	bool isNonOrthogonalWS = API::requiresSkewMatrix(m_ws);
 	bool canShowSkewedWS = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
 	ui.btnNonOrthogonalToggle->setDisabled(!canShowSkewedWS);
-	//Orthogonal Overlay axes calculated and appear
+        // Orthogonal Overlay axes calculated and appear.
         m_nonOrthogonalOverlay->calculateAxesSkew(
             &m_ws, m_dimX, m_dimY); // set this later so only appears if nonOrth
         emit disableOrthogonalAnalysisTools(ui.btnNonOrthogonalToggle->isChecked());

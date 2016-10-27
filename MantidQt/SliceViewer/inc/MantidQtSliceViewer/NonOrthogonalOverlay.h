@@ -56,6 +56,8 @@ public:
         void calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws, size_t dimX,
                                size_t dimY);
 
+        void zoomChanged(QwtDoubleInterval xint, QwtDoubleInterval yint);
+
       private:
         Mantid::coord_t m_skewMatrix[9];
         void setAxesPoints();
@@ -76,8 +78,8 @@ public:
         QSize size() const;
         int height() const;
         int width() const;
-
-		double m_originPoint;
+        double m_totalArea;
+                double m_originPoint;
 		double m_XEndPoint;
 		double m_YEndPoint;
 		std::vector <double> m_axisPointVec;

@@ -4,8 +4,6 @@
 #include <qpainter.h>
 #include <QRect>
 #include <QShowEvent>
-#include <qwt_scale_widget.h>
-#include <qwt_plot_scaleitem.h>
 
 #include "MantidKernel/Utils.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -38,8 +36,7 @@ namespace MantidQt {
 			m_pointC = QPointF(0, 1);
 			m_showLine = false;
                         m_width = 0.1;
-
-		}
+                }
 
 		//----------------------------------------------------------------------------------------------
 		/** Destructor
@@ -81,13 +78,12 @@ namespace MantidQt {
 
                 void NonOrthogonalOverlay::setSkewMatrix() {
                   Mantid::Kernel::DblMatrix skewMatrix(3, 3, true);
-                        API::provideSkewMatrix(skewMatrix, *m_ws);
-			skewMatrix.Invert(); 
-                        // transform from double to coord_t
-                        std::size_t index = 0;
-                        for (std::size_t i = 0; i < skewMatrix.numRows(); ++i) {
-                          for (std::size_t j = 0; j < skewMatrix.numCols();
-                               ++j) {
+                  API::provideSkewMatrix(skewMatrix, *m_ws);
+                  skewMatrix.Invert();
+                  // transform from double to coord_t
+                  std::size_t index = 0;
+                  for (std::size_t i = 0; i < skewMatrix.numRows(); ++i) {
+                    for (std::size_t j = 0; j < skewMatrix.numCols(); ++j) {
                             m_skewMatrix[index] =
                                 static_cast<Mantid::coord_t>(skewMatrix[i][j]);
                             ++index;
@@ -99,6 +95,8 @@ namespace MantidQt {
                   auto ws = m_ws->get(); // assumes it is a rectangle
                   m_dim0Max = ws->getDimension(0)->getMaximum();
 				  m_dim0Max = m_dim0Max*1.1; //to set axis slightly back from slice
+                                  m_totalArea =
+                                      (m_dim0Max * 2) * (m_dim0Max * 2);
                   m_dim1 = ws->getDimension(1)->getMaximum();
                   m_dim2 = ws->getDimension(2)->getMaximum();
                 }
@@ -125,6 +123,30 @@ namespace MantidQt {
 				  
                 }
 
+                void NonOrthogonalOverlay::zoomChanged(QwtDoubleInterval xint,
+                                                       QwtDoubleInterval yint) {
+                  double xMin = xint.minValue();
+                  double xMax = xint.maxValue();
+                  double yMin = yint.minValue();
+                  double yMax = yint.maxValue();
+                  double totalAreaShown = (xMax - xMin) * (yMax - yMin);
+                  // just concn on x axis for now
+                  double xVisible = totalAreaShown / m_totalArea;
+                  xVisible = xVisible * 100;
+                  int displayNum = 0;
+                  if (xVisible > 200) {
+                    displayNum = 10;
+                  } else if (xVisible < 200 && xVisible > 100) {
+                    displayNum = 15;
+                  } else if (xVisible < 100) {
+                    displayNum = 20;
+                  } else {
+                    displayNum = 15;
+                  }
+
+                  calculateTickMarks(displayNum);
+                }
+
                 void NonOrthogonalOverlay::setAxesPoints() {
 	              m_originPoint = -(m_dim0Max);
 				  m_XEndPoint = m_dim0Max;
@@ -149,7 +171,7 @@ namespace MantidQt {
 					  //make sure all calcs are outside of paintEvent... so probably move ApplyskewMatrix out of it
                     setSkewMatrix();
                     setAxesPoints();
-                    calculateTickMarks(20); // tie zoom level to how large
+                    calculateTickMarks(10); // tie zoom level to how large
                                             // dataset is, or just zoom level?
                   }
                 }
@@ -165,6 +187,8 @@ namespace MantidQt {
                 void NonOrthogonalOverlay::calculateTickMarks(
                     int tickNum) { // assumes X axis
                   clearAllAxisPointVectors();
+                  std::cout << "redrawing with ticks as: " << tickNum
+                            << std::endl;
                                         double axisPoint;
                                         double percentageOfLine(
                                             (m_XEndPoint - m_originPoint) /
@@ -179,14 +203,16 @@ namespace MantidQt {
                                                 m_xAxisTickEndVec.push_back(
                                                     skewMatrixApply(
                                                         axisPoint,
-                                                        m_originPoint * 1.05));
+                                                        m_XEndPoint));
+                                                // m_originPoint * 1.05));
                                                 m_yAxisTickStartVec.push_back(
                                                     skewMatrixApply(
                                                         m_originPoint,
                                                         axisPoint));
                                                 m_yAxisTickEndVec.push_back(
                                                     skewMatrixApply(
-                                                        m_originPoint * 1.05,
+                                                        // m_originPoint * 1.05,
+                                                        m_XEndPoint,
                                                         axisPoint));
                                         }
 
@@ -199,8 +225,8 @@ namespace MantidQt {
 			QPainter painter(this);
 
             QPen centerPen(QColor(0, 0, 0, 200)); //black
-			QPen gridPen(QColor(0, 0, 0, 200)); //grey?
-			
+            QPen gridPen(QColor(160, 160, 160, 200)); // grey
+
             // --- Draw the central line ---
 			if (m_showLine) {
                           centerPen.setWidth(2);
@@ -208,8 +234,8 @@ namespace MantidQt {
 				painter.setPen(centerPen);
 				painter.drawLine(transform(m_pointA), transform(m_pointB));
 				painter.drawLine(transform(m_pointA), transform(m_pointC));
-				gridPen.setWidth(2);
-				gridPen.setCapStyle(Qt::FlatCap);
+                                gridPen.setWidth(1);
+                                gridPen.setCapStyle(Qt::FlatCap);
 				painter.setPen(gridPen);
 				
 				for (int i = 0; i < m_axisPointVec.size(); i++) {
@@ -229,8 +255,9 @@ namespace MantidQt {
 				//to remove axis (also need to renable them after...)
 				//m_plot->enableAxis(QwtPlot::yLeft, false);
 				//m_plot->enableAxis(QwtPlot::xBottom, false);
-				
-			}
+                                // m_plot->setAxisScale(QwtPlot::xBottom, 0,
+                                // 100);
+                        }
 
 		}
 
