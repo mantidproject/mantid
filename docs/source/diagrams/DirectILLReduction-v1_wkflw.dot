@@ -1,0 +1,98 @@
+digraph DGSReductionILLWorkflow {
+  label = "DGSReductionILL workflow diagram"
+  $global_style
+  
+  subgraph params {
+    $param_style
+    cadmiumWorkspace [label="CadmiumWorkspace"]
+    emptyCanWorkspace [label="EmptyCanWorkspace"]
+    inputFile [label="InputFile"]
+    outputECWorkspace [label="OutputWorkspace"]
+    outputSampleWorkspace [label="OutputWorkspace"]
+    outputVanadiumWorkspace [label="OutputWorkspace"]
+    vanadiumWorkspace [label="VanadiumWorkspace"]
+  }
+  
+  subgraph decisions {
+    $decision_style
+    checkECReduction [label="Is EC/Cd reduction?"]
+    checkECSubtraction [label="EC subtraction\nrequested?"]
+    checkNormalisationMethod [label="Normalisation method?"]
+    checkVanadiumAbsoluteUnits [label="Absolute normalisation\nrequested?"]
+    checkVanadiumNormalisation[label="Vanadium normalisation\nrequested?"]
+    checkVanadiumReduction [label="Is vanadium reduction?"]
+  }
+  
+  subgraph algorithms {
+    $algorithm_style
+    absoluteUnitsScaling [label="Scale to\nabsolute units"]
+    detectorEfficiencyCorrection [label="DetectorEfficiencyCorUser"]
+    ecSubtraction [label="Empty can subtraction"]
+    extractMonitors [label="ExtractMonitorWorkspace"]
+    flatBackgroundMultiplication [label="Scale"]
+    flatBackgroundSubtraction [label="Minus"]
+    incidentEnergyCalibration [label="GetEiMonDet"]
+    kikfConversion [label="KiKfConversion"]
+    masking [label="MaskDetectors"]
+    mergeRuns [label="MergeRuns"]
+    normaliseToMonitor [label="NormaliseToMonitor"]
+    normaliseToTime [label="Divide by\nacquisition time"]
+    rebinning [label="Rebin"]
+    unitConversion [label="ConvertUnits"]
+    vanadiumIntegration [label="ComputeCalibrationCoefVan"]
+    vanadiumNormalisation [label="Divide"]
+  }
+  
+  subgraph values {
+  $value_style
+    detectorWorkspace [label="detector workspace"]
+    eppSource [label="EPPWorkspace\nOR\nrun FindEPP"]
+    flatBackgroundSource [label="FlatBackgroundWorkspace\nOR\nrun FlatBackgroundCalculation"]
+    monitorWorkspace [label="monitor workspace"]
+  }
+  
+  // Flat background flow
+  flatBackgroundSource -> flatBackgroundMultiplication
+  flatBackgroundMultiplication -> flatBackgroundSubtraction
+
+  inputFile -> mergeRuns
+  mergeRuns -> extractMonitors
+  extractMonitors -> monitorWorkspace
+  extractMonitors -> detectorWorkspace
+  detectorWorkspace -> flatBackgroundSubtraction
+  flatBackgroundSubtraction -> masking
+  eppSource -> masking
+  masking -> incidentEnergyCalibration
+  eppSource -> incidentEnergyCalibration
+  incidentEnergyCalibration -> checkNormalisationMethod
+
+  checkNormalisationMethod -> normaliseToMonitor [label="Monitor"]
+  normaliseToMonitor -> checkECReduction
+  checkNormalisationMethod -> normaliseToTime [label="AcquisitionTime"]
+  normaliseToTime -> checkECReduction
+
+  checkECReduction -> outputECWorkspace [label="Yes"]
+  checkECReduction -> checkECSubtraction [label="No"]
+  checkECSubtraction -> ecSubtraction [label="Yes"]
+  cadmiumWorkspace -> ecSubtraction [label="Optional"]
+  emptyCanWorkspace -> ecSubtraction
+  ecSubtraction -> checkVanadiumReduction
+  checkECSubtraction -> checkVanadiumReduction [label="No"]
+
+  checkVanadiumReduction -> vanadiumIntegration [label="Yes"]
+  vanadiumIntegration -> outputVanadiumWorkspace
+  checkVanadiumReduction -> checkVanadiumNormalisation [label="No"]
+
+  checkVanadiumNormalisation -> vanadiumNormalisation [label="Yes"]
+  vanadiumWorkspace -> vanadiumNormalisation
+  vanadiumNormalisation -> checkVanadiumAbsoluteUnits
+  checkVanadiumAbsoluteUnits -> absoluteUnitsScaling [label="Yes"]
+  absoluteUnitsScaling -> unitConversion
+  checkVanadiumAbsoluteUnits -> unitConversion [label="No"]
+  checkVanadiumNormalisation -> unitConversion [label="No"]
+
+  unitConversion -> kikfConversion
+  kikfConversion -> rebinning
+  rebinning -> detectorEfficiencyCorrection
+  detectorEfficiencyCorrection -> outputSampleWorkspace
+}
