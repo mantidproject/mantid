@@ -61,6 +61,11 @@ private:
   Poco::NObserver<ADSAdapter, Mantid::API::WorkspaceAddNotification>
       m_addObserver;
 
+  void handleReplaceWorkspace(
+      Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
+  Poco::NObserver<ADSAdapter, Mantid::API::WorkspaceAfterReplaceNotification>
+      m_replaceObserver;
+
   void
   handleDeleteWorkspace(Mantid::API::WorkspacePostDeleteNotification_ptr pNf);
   Poco::NObserver<ADSAdapter, Mantid::API::WorkspacePostDeleteNotification>

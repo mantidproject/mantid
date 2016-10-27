@@ -43,7 +43,8 @@ public:
     WorkspacesCleared,
     WorkspacesGrouped,
     WorkspacesUngrouped,
-    WorkspaceGroupUpdated
+    WorkspaceGroupUpdated,
+    GenericUpdateNotification
   };
 
   virtual void notifyFromWorkspaceProvider(Flag flag) = 0;

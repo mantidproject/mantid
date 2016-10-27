@@ -1200,6 +1200,7 @@ void QWorkspaceDockView::onClickLiveData() {
 // Asynchronous signal handlers
 /// Handle asynchronous tree update.
 void QWorkspaceDockView::handleUpdateTree(const TopLevelItems &items) {
+  m_mantidUI->updateProject();
   // do not update until the counter is zero
   if (m_updateCount.deref())
     return;
@@ -1223,7 +1224,10 @@ void QWorkspaceDockView::handleUpdateTree(const TopLevelItems &items) {
   m_tree->sort();
 }
 
-void QWorkspaceDockView::handleClearView() { m_tree->clear(); }
+void QWorkspaceDockView::handleClearView() {
+  m_mantidUI->updateProject();
+  m_tree->clear();
+}
 
 // Context Menu Methods
 
@@ -1688,6 +1692,13 @@ void QWorkspaceDockView::onClickPlotContour() {
 */
 void QWorkspaceDockView::showContourPlot() { m_mantidUI->showContourPlot(); }
 
+/**
+* Allows asynchronous execution of algorithms. This method is made
+* available in the view for access by the presenter in order to
+* obviate the dependency on Qt in the Unit tests.
+* @param alg : algorithm to be executed
+* @param wait : determines whether or not a non-gui blocking wait should occur.
+*/
 bool QWorkspaceDockView::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
                                                const bool wait) {
   return m_mantidUI->executeAlgorithmAsync(alg, wait);

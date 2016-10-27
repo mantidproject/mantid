@@ -10,6 +10,7 @@ namespace MantidWidgets {
 
 ADSAdapter::ADSAdapter()
     : m_addObserver(*this, &ADSAdapter::handleAddWorkspace),
+      m_replaceObserver(*this, &ADSAdapter::handleReplaceWorkspace),
       m_deleteObserver(*this, &ADSAdapter::handleDeleteWorkspace),
       m_clearADSObserver(*this, &ADSAdapter::handleClearADS),
       m_renameObserver(*this, &ADSAdapter::handleRenameWorkspace),
@@ -20,6 +21,7 @@ ADSAdapter::ADSAdapter()
   // Register all observers.
   auto &nc = AnalysisDataService::Instance().notificationCenter;
   nc.addObserver(m_addObserver);
+  nc.addObserver(m_replaceObserver);
   nc.addObserver(m_deleteObserver);
   nc.addObserver(m_clearADSObserver);
   nc.addObserver(m_renameObserver);
@@ -32,6 +34,7 @@ ADSAdapter::~ADSAdapter() {
   // remove all observers
   auto &nc = AnalysisDataService::Instance().notificationCenter;
   nc.removeObserver(m_addObserver);
+  nc.removeObserver(m_replaceObserver);
   nc.removeObserver(m_deleteObserver);
   nc.removeObserver(m_clearADSObserver);
   nc.removeObserver(m_renameObserver);
@@ -71,6 +74,13 @@ void ADSAdapter::handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr) {
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::WorkspaceLoaded);
+}
+
+void ADSAdapter::handleReplaceWorkspace(
+    Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf) {
+  auto presenter = lockPresenter();
+  presenter->notifyFromWorkspaceProvider(
+      WorkspaceProviderNotifiable::Flag::GenericUpdateNotification);
 }
 
 void ADSAdapter::handleDeleteWorkspace(

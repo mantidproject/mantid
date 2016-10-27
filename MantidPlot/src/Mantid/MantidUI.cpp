@@ -181,15 +181,6 @@ GraphOptions::CurveType getCurveTypeForFitResult(const size_t spectrum) {
 MantidUI::MantidUI(ApplicationWindow *aw)
     : m_finishedLoadDAEObserver(*this,
                                 &MantidUI::handleLoadDAEFinishedNotification),
-      m_addObserver(*this, &MantidUI::handleAddWorkspace),
-      m_replaceObserver(*this, &MantidUI::handleReplaceWorkspace),
-      m_deleteObserver(*this, &MantidUI::handleDeleteWorkspace),
-      m_clearADSObserver(*this, &MantidUI::handleClearADS),
-      m_renameObserver(*this, &MantidUI::handleRenameWorkspace),
-      m_groupworkspacesObserver(*this, &MantidUI::handleGroupWorkspaces),
-      m_ungroupworkspaceObserver(*this, &MantidUI::handleUnGroupWorkspace),
-      m_workspaceGroupUpdateObserver(*this,
-                                     &MantidUI::handleWorkspaceGroupUpdate),
       m_configServiceObserver(*this, &MantidUI::handleConfigServiceUpdate),
       m_appWindow(aw), m_lastShownInstrumentWin(NULL),
       m_lastShownSliceViewWin(NULL), m_lastShownSpectrumViewerWin(NULL),
@@ -273,16 +264,10 @@ MantidUI::MantidUI(ApplicationWindow *aw)
           SLOT(updateProgress(void *, double, const QString &, double, int)),
           Qt::QueuedConnection);
 
-  connect(this, SIGNAL(ADS_updated()), appWindow(), SLOT(modifiedProject()));
   m_algMonitor->start();
 
   mantidMenu = new QMenu(m_appWindow);
   mantidMenu->setObjectName("mantidMenu");
-  // for activating the keyboard shortcut for Clear All Memory even if no
-  // clciking on Mantid Menu
-  // Ticket #672
-  // connect(mantidMenu, SIGNAL(aboutToShow()), this,
-  // SLOT(mantidMenuAboutToShow()));
   mantidMenuAboutToShow();
 
   QShortcut *sc =
@@ -299,14 +284,6 @@ MantidUI::MantidUI(ApplicationWindow *aw)
 // Should it be moved to the constructor?
 void MantidUI::init() {
   AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
-  dataStore.notificationCenter.addObserver(m_addObserver);
-  dataStore.notificationCenter.addObserver(m_replaceObserver);
-  dataStore.notificationCenter.addObserver(m_deleteObserver);
-  dataStore.notificationCenter.addObserver(m_clearADSObserver);
-  dataStore.notificationCenter.addObserver(m_renameObserver);
-  dataStore.notificationCenter.addObserver(m_groupworkspacesObserver);
-  dataStore.notificationCenter.addObserver(m_ungroupworkspaceObserver);
-  dataStore.notificationCenter.addObserver(m_workspaceGroupUpdateObserver);
   Mantid::Kernel::ConfigService::Instance().addObserver(
       m_configServiceObserver);
 
@@ -418,20 +395,6 @@ MantidUI::~MantidUI() {
 
   Mantid::Kernel::ConfigService::Instance().removeObserver(
       m_configServiceObserver);
-  Mantid::API::AnalysisDataService::Instance()
-      .notificationCenter.removeObserver(m_groupworkspacesObserver);
-  Mantid::API::AnalysisDataService::Instance()
-      .notificationCenter.removeObserver(m_ungroupworkspaceObserver);
-  Mantid::API::AnalysisDataService::Instance()
-      .notificationCenter.removeObserver(m_workspaceGroupUpdateObserver);
-  Mantid::API::AnalysisDataService::Instance()
-      .notificationCenter.removeObserver(m_addObserver);
-  Mantid::API::AnalysisDataService::Instance()
-      .notificationCenter.removeObserver(m_replaceObserver);
-  Mantid::API::AnalysisDataService::Instance()
-      .notificationCenter.removeObserver(m_deleteObserver);
-  Mantid::API::AnalysisDataService::Instance()
-      .notificationCenter.removeObserver(m_clearADSObserver);
 
   delete m_fitFunction;
 }
@@ -463,6 +426,10 @@ QStringList MantidUI::getAlgorithmNames() {
 */
 int MantidUI::runningAlgCount() const { return m_algMonitor->count(); }
 
+/**
+* Alerts applicationWindow that the ADS has been modified.
+*/
+void MantidUI::updateProject() { m_appWindow->modifiedProject(); }
 /**
 * Ticket #678
 */
@@ -1995,44 +1962,6 @@ void MantidUI::showCritical(const QString &text) {
 }
 
 void MantidUI::showAlgMonitor() { m_algMonitor->showDialog(); }
-
-void MantidUI::handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr) {
-  emit ADS_updated();
-}
-
-void MantidUI::handleReplaceWorkspace(
-    Mantid::API::WorkspaceAfterReplaceNotification_ptr) {
-  emit ADS_updated();
-}
-
-void MantidUI::handleDeleteWorkspace(
-    Mantid::API::WorkspacePostDeleteNotification_ptr) {
-  emit ADS_updated();
-}
-
-void MantidUI::handleClearADS(Mantid::API::ClearADSNotification_ptr) {
-  emit workspaces_cleared();
-}
-
-void MantidUI::handleRenameWorkspace(
-    Mantid::API::WorkspaceRenameNotification_ptr msg) {
-  emit workspace_renamed(QString::fromStdString(msg->objectName()),
-                         QString::fromStdString(msg->newObjectName()));
-  emit ADS_updated();
-}
-void MantidUI::handleGroupWorkspaces(
-    Mantid::API::WorkspacesGroupedNotification_ptr) {
-  emit ADS_updated();
-}
-void MantidUI::handleUnGroupWorkspace(
-    Mantid::API::WorkspaceUnGroupingNotification_ptr) {
-  emit ADS_updated();
-}
-
-void MantidUI::handleWorkspaceGroupUpdate(
-    Mantid::API::GroupUpdatedNotification_ptr) {
-  emit ADS_updated();
-}
 
 void MantidUI::handleConfigServiceUpdate(
     Mantid::Kernel::ConfigValChangeNotification_ptr pNf) {

@@ -44,6 +44,9 @@ void WorkspacePresenter::notifyFromWorkspaceProvider(
   case WorkspaceProviderNotifiable::Flag::WorkspacesCleared:
     workspacesCleared();
     break;
+  case WorkspaceProviderNotifiable::Flag::GenericUpdateNotification:
+    updateView();
+    break;
   }
 }
 

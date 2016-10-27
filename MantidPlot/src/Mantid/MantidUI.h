@@ -142,6 +142,7 @@ public:
   // Returns the number of algorithms currently executing
   int runningAlgCount() const;
 
+  void updateProject() override;
   // Create an algorithm using Mantid FrameworkManager
   // Create a pointer to the named algorithm and version
   Mantid::API::IAlgorithm_sptr createAlgorithm(const QString &algName,
@@ -409,10 +410,6 @@ signals:
   // main one
   // (e.g. handlers of algorithm notifications)
 
-  void workspaces_cleared();
-  void ADS_updated();
-  void workspace_renamed(QString, QString);
-
   void needToCreateLoadDAEMantidMatrix(const QString &);
 
   // Display a critical error dialog box
@@ -577,47 +574,6 @@ private:
   Poco::NObserver<MantidUI, Mantid::API::Algorithm::FinishedNotification>
       m_finishedLoadDAEObserver;
 
-  void handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr pNf);
-  Poco::NObserver<MantidUI, Mantid::API::WorkspaceAddNotification>
-      m_addObserver;
-
-  void handleReplaceWorkspace(
-      Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
-  Poco::NObserver<MantidUI, Mantid::API::WorkspaceAfterReplaceNotification>
-      m_replaceObserver;
-
-  void
-  handleDeleteWorkspace(Mantid::API::WorkspacePostDeleteNotification_ptr pNf);
-  Poco::NObserver<MantidUI, Mantid::API::WorkspacePostDeleteNotification>
-      m_deleteObserver;
-
-  void handleClearADS(Mantid::API::ClearADSNotification_ptr pNf);
-  Poco::NObserver<MantidUI, Mantid::API::ClearADSNotification>
-      m_clearADSObserver;
-
-  // handles rename workspace notification
-  void handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr pNf);
-  Poco::NObserver<MantidUI, Mantid::API::WorkspaceRenameNotification>
-      m_renameObserver;
-
-  // handles notification send by Groupworkspaces algorithm
-  void
-  handleGroupWorkspaces(Mantid::API::WorkspacesGroupedNotification_ptr pNf);
-  Poco::NObserver<MantidUI, Mantid::API::WorkspacesGroupedNotification>
-      m_groupworkspacesObserver;
-
-  // handles notification send by UnGroupworkspaces algorithm
-  void
-  handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupingNotification_ptr pNf);
-  Poco::NObserver<MantidUI, Mantid::API::WorkspaceUnGroupingNotification>
-      m_ungroupworkspaceObserver;
-
-  // handles notification send by a WorkspaceGroup instance
-  void
-  handleWorkspaceGroupUpdate(Mantid::API::GroupUpdatedNotification_ptr pNf);
-  Poco::NObserver<MantidUI, Mantid::API::GroupUpdatedNotification>
-      m_workspaceGroupUpdateObserver;
-
   // handles notification send by ConfigService, change on
   // pythonscripts.directories
   void handleConfigServiceUpdate(
@@ -670,8 +626,8 @@ private:
   boost::shared_ptr<MantidQt::MantidWidgets::QWorkspaceDockView>
       m_exploreMantid; // Dock window for manipulating workspaces
   AlgorithmDockWidget *m_exploreAlgorithms; // Dock window for using algorithms
-  RemoteClusterDockWidget *
-      m_exploreRemoteTasks; // Dock window for using remote tasks
+  RemoteClusterDockWidget
+      *m_exploreRemoteTasks; // Dock window for using remote tasks
   /// Current fit property browser being used
   MantidQt::MantidWidgets::FitPropertyBrowser *m_fitFunction;
   /// Default fit property browser (the one docked on the left)
@@ -712,8 +668,8 @@ private:
   // Stores dependent mdi windows. If the 'key' window closes, all 'value' ones
   // must be closed as well.
   std::unordered_multimap<MdiSubWindow *, MdiSubWindow *> m_mdiDependency;
-  QMdiSubWindow *
-      m_vatesSubWindow; ///< Holder for the Vates interface sub-window
+  QMdiSubWindow
+      *m_vatesSubWindow; ///< Holder for the Vates interface sub-window
 
   // prevents some repeated code realtating to log names
   void formatLogName(QString &label, const QString &wsName);
