@@ -397,6 +397,8 @@ void WorkspacePresenter::clearUBMatrix() {
     if (alg) {
       alg->initialize();
       alg->setPropertyValue("Workspace", ws);
+      // Run in this manner due to Qt dependencies within this method.
+      // otherwise it would have been implemented here.
       view->executeAlgorithmAsync(alg);
     } else
       break;
