@@ -1,28 +1,25 @@
-#include "MantidDataObjects/DllConfig.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidDataObjects/DllConfig.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidDataObjects/MDEvent.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
+#include "MantidDataObjects/SplittersWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 
 // PropertyWithValue implementation
 #include "MantidKernel/PropertyWithValue.tcc"
 
 namespace Mantid {
 namespace DataObjects {
-class EventWorkspace;
-class GroupingWorkspace;
-class MaskWorkspace;
-class MDHistoWorkspace;
-class OffsetsWorkspace;
-class PeaksWorkspace;
-class RebinnedOutput;
-class SpecialWorkspace2D;
-class SplittersWorkspace;
-class TableWorkspace;
-class Workspace2D;
-class WorkspaceSingleValue;
-
-template <size_t nd> class MDEvent;
-template <size_t nd> class MDLeanEvent;
-template <class MDE, size_t nd> class MDEventWorkspace;
-
 template <size_t nd> using MDEventWS = MDEventWorkspace<MDEvent<nd>, nd>;
 template <size_t nd>
 using MDLeanEventWS = MDEventWorkspace<MDLeanEvent<nd>, nd>;

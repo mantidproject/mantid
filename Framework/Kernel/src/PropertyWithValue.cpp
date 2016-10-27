@@ -49,6 +49,8 @@ template class MANTID_KERNEL_DLL
 template class MANTID_KERNEL_DLL
     PropertyWithValue<std::vector<std::vector<std::string>>>;
 template class MANTID_KERNEL_DLL
+    PropertyWithValue<boost::shared_ptr<IValidator>>;
+template class MANTID_KERNEL_DLL
     PropertyWithValue<boost::shared_ptr<PropertyManager>>;
 template class MANTID_KERNEL_DLL
     PropertyWithValue<boost::shared_ptr<WorkspaceTester>>;

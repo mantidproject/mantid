@@ -1,27 +1,24 @@
-#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidAPI/DllConfig.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IMaskWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/ISplittersWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/Workspace.h"
 
 // PropertyWithValue implementation
 #include "MantidKernel/PropertyWithValue.tcc"
 
 namespace Mantid {
-namespace API {
-class ExperimentInfo;
-class IAlgorithm;
-class IEventWorkspace;
-class IFunction;
-class IMaskWorkspace;
-class IMDEventWorkspace;
-class IMDHistoWorkspace;
-class IMDWorkspace;
-class IPeaksWorkspace;
-class ISplittersWorkspace;
-class ITableWorkspace;
-class IValidator;
-class MatrixWorkspace;
-class Workspace;
-class WorkspaceGroup;
-}
 namespace Kernel {
 
 /// @cond
@@ -45,8 +42,6 @@ template class MANTID_API_DLL
     PropertyWithValue<boost::shared_ptr<API::ISplittersWorkspace>>;
 template class MANTID_API_DLL
     PropertyWithValue<boost::shared_ptr<API::ITableWorkspace>>;
-template class MANTID_API_DLL
-    PropertyWithValue<boost::shared_ptr<API::IValidator>>;
 template class MANTID_API_DLL
     PropertyWithValue<boost::shared_ptr<API::MatrixWorkspace>>;
 template class MANTID_API_DLL
