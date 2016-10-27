@@ -59,8 +59,6 @@ PROPERTYWITHVALUE_SAVEPROPERTY(std::vector<double>)
 PROPERTYWITHVALUE_SAVEPROPERTY(std::vector<int32_t>)
 
 /// @cond
-template class MANTID_KERNEL_DLL PropertyWithValue<long long>;
-template class MANTID_KERNEL_DLL PropertyWithValue<unsigned long long>;
 template class MANTID_KERNEL_DLL PropertyWithValue<uint16_t>;
 template class MANTID_KERNEL_DLL PropertyWithValue<bool>;
 template class MANTID_KERNEL_DLL PropertyWithValue<OptionalBool>;
@@ -69,9 +67,6 @@ template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<uint16_t>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<uint32_t>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<int64_t>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<uint64_t>>;
-template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<long long>>;
-template class MANTID_KERNEL_DLL
-    PropertyWithValue<std::vector<unsigned long long>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<bool>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<OptionalBool>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<std::string>>;
