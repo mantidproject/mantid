@@ -125,7 +125,7 @@ def GetThetaQ(ws):
     """
     Returns the theta and elastic Q for each spectrum in a given workspace.
 
-    @param ws Wotkspace to get theta and Q for
+    @param ws Workspace to get theta and Q for
     @returns A tuple containing a list of theta values and a list of Q values
     """
 
@@ -194,7 +194,7 @@ def getInstrumentParameter(ws, param_name):
     inst = s_api.mtd[ws].getInstrument()
 
     # Create a map of type parameters to functions. This is so we avoid writing lots of
-    # if statements becuase there's no way to dynamically get the type.
+    # if statements because there's no way to dynamically get the type.
     func_map = {'double': inst.getNumberParameter, 'string': inst.getStringParameter,
                 'int': inst.getIntParameter, 'bool': inst.getBoolParameter}
 
@@ -210,24 +210,24 @@ def getInstrumentParameter(ws, param_name):
     return param
 
 
-def plotSpectra(ws, y_axis_title, indicies=None):
+def plotSpectra(ws, y_axis_title, indices=None):
     """
-    Plot a selection of spectra given a list of indicies
+    Plot a selection of spectra given a list of indices
 
     @param ws - the workspace to plot
     @param y_axis_title - label for the y axis
-    @param indicies - list of spectrum indicies to plot
+    @param indices - list of spectrum indices to plot
     """
-    if indicies is None:
-        indicies = []
+    if indices is None:
+        indices = []
 
-    if len(indicies) == 0:
+    if len(indices) == 0:
         num_spectra = s_api.mtd[ws].getNumberHistograms()
-        indicies = list(range(num_spectra))
+        indices = list(range(num_spectra))
 
     try:
         mtd_plot = import_mantidplot()
-        plot = mtd_plot.plotSpectrum(ws, indicies, True)
+        plot = mtd_plot.plotSpectrum(ws, indices, True)
         layer = plot.activeLayer()
         layer.setAxisTitle(mtd_plot.Layer.Left, y_axis_title)
     except RuntimeError:

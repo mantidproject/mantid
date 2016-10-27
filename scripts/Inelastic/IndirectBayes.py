@@ -145,15 +145,15 @@ def ResNormRun(vname, rname, erange, nbin, Plot='None', Save=False):
             ConjoinWorkspaces(InputWorkspace1='Fit', InputWorkspace2='__f1tmp',
                               CheckOverlapping=False)
 
-    resnorm_intesity = fname + '_ResNorm_Intensity'
+    resnorm_intensity = fname + '_ResNorm_Intensity'
     resnorm_stretch = fname + '_ResNorm_Stretch'
 
-    CreateWorkspace(OutputWorkspace=resnorm_intesity, DataX=xPar, DataY=yPar1, DataE=xPar,
+    CreateWorkspace(OutputWorkspace=resnorm_intensity, DataX=xPar, DataY=yPar1, DataE=xPar,
                     NSpec=1, UnitX='MomentumTransfer')
     CreateWorkspace(OutputWorkspace=resnorm_stretch, DataX=xPar, DataY=yPar2, DataE=xPar,
                     NSpec=1, UnitX='MomentumTransfer')
 
-    group = resnorm_intesity + ',' + resnorm_stretch
+    group = resnorm_intensity + ',' + resnorm_stretch
 
     resnorm_workspace = fname + '_ResNorm'
     resnorm_fit_workspace = fname + '_ResNorm_Fit'

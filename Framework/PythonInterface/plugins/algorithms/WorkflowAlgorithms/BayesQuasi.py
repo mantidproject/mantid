@@ -181,7 +181,7 @@ class BayesQuasi(PythonAlgorithm):
 
         # Check for trailing and leading zeros in data
         setup_prog.report('Checking for leading and trailing zeros in the data')
-        first_data_point, last_data_point = self.IndentifyDataBoundaries(self._samWS)
+        first_data_point, last_data_point = self.IdentifyDataBoundaries(self._samWS)
         if first_data_point > self._e_min:
             logger.warning("Sample workspace contains leading zeros within the energy range.")
             logger.warning("Updating eMin: eMin = " + str(first_data_point))
@@ -417,8 +417,6 @@ class BayesQuasi(PythonAlgorithm):
         asc = self._read_ascii_file(sname+'.qse')
         var = asc[3].split()                            #split line on spaces
         nspec = var[0]
-        var = (asc[6]).split()
-        var = [int(v) for v in var]
         first = 7
         Xout = []
         Yf, Yi, Yb = [], [], []
@@ -830,9 +828,9 @@ class BayesQuasi(PythonAlgorithm):
         values = [float(v) for v in values]
         return values
 
-    def IndentifyDataBoundaries(self, sample_ws):
+    def IdentifyDataBoundaries(self, sample_ws):
         """
-        Indentifies and returns the first and last no zero data point in a workspace
+        Identifies and returns the first and last no zero data point in a workspace
         For multiple workspace spectra, the data points that are closest to the centre
         out of all the spectra in the workspace are returned
         """

@@ -6,6 +6,7 @@ from mantid.kernel import *
 from mantid.api import *
 from IndirectCommon import getInstrRun
 
+
 def _normalize_to_lowest_temp(elt_ws_name):
     """
     Normalise a workspace to the lowest temperature run.
@@ -95,7 +96,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         return issues
 
     def PyExec(self):
-
 
         # Do setup
         self._setup()
@@ -292,7 +292,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             # Look for temperature in logs in workspace
             tmp = run[self._sample_log_name].value
 
-            value_action = {'last_value': lambda x: x[len(x)-1],
+            value_action = {'last_value': lambda x: x[len(x) - 1],
                             'average': lambda x: x.mean()}
 
             temp = value_action[self._sample_log_value](tmp)
