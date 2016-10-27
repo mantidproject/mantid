@@ -515,16 +515,15 @@ class ResolutionModel:
                     to tabulate the functions such that linear interpolation between the
                     tabulated points has this accuracy. If not given a default value is used.
         """
-        from inspect import isfunction
         self.multi = False
-        if isfunction(model):
+        if hasattr(model, '__call__'):
             self.model = self._makeModel(model, xstart, xend, accuracy)
             return
         elif hasattr(model, '__len__'):
             if len(model) == 0:
                 raise RuntimeError('Resolution model cannot be initialised with an empty iterable %s' %
                                    str(model))
-            if isfunction(model[0]):
+            if hasattr(model[0], '__call__'):
                 self.model = [self._makeModel(m, xstart, xend, accuracy) for m in model]
                 self.multi = True
                 return
