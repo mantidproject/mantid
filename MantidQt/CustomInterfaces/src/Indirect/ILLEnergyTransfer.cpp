@@ -147,6 +147,8 @@ void ILLEnergyTransfer::run() {
 
     reductionAlg->setProperty(
         "Observable", m_uiForm.cbObservable->currentText().toStdString());
+
+    reductionAlg->setProperty("SortXAxis", m_uiForm.cbSortX->isChecked());
   }
 
   // options common for QENS and FWS

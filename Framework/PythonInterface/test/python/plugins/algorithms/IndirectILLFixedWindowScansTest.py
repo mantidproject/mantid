@@ -6,9 +6,6 @@ from testhelpers import run_algorithm
 from mantid.api import WorkspaceGroup, MatrixWorkspace
 from mantid import config
 
-# IN16B data can have one wing or two. The IndirectILLFixedWindowScans algorithm calls IndirectILLReduction with
-# default UnmirrorOption=6, which treats the two wing data.
-
 
 class IndirectILLFixedWindowScansTest(unittest.TestCase):
 
@@ -67,7 +64,7 @@ class IndirectILLFixedWindowScansTest(unittest.TestCase):
         # The first two spectra contain zero-valued errors (single detectors) - no test since y-values and e-values are
         # treated equivalently
         # Check log file entry if original run number was saved
-        self.assertTrue(ws.getItem(0).getRun().getLogData('included_run_number_0').value)
+        self.assertTrue(ws.getItem(0).getRun().getLogData('ReducedRuns').value)
         self.assertEqual(ws.getItem(0).blocksize(), 1)
         self.assertEqual(ws.getItem(0).getNumberHistograms(), 18)
         # Workspaces should have x- unit temperature K as default (check for symbol K  DOES NOT WORK)

@@ -42,11 +42,12 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
     _out_ws = None
     _analyser = None
     _reflection = None
+    _sortX = False
 
     selected_runs = None
 
-    _post_processing_entity_name = None
-    _post_processing_entities = None
+    _observable_name = None
+    _observable = None
 
     def category(self):
         return 'Workflow\\MIDAS;Inelastic\\Reduction'
@@ -64,10 +65,13 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
 
         self.declareProperty(name='Observable',
                              defaultValue='sample.temperature',
-                             doc='Post-processing entity, a SampleLog entry, \n'
-                                 'e.g. sample.temperature, sample.pressure, \n'
-                                 'start_time')
+                             doc='Scanning observable, a Sample Log entry\n')
 
+        self.declareProperty(name='SortXAxis',
+                             defaultValue=False,
+                             doc='Whether or not to sort the x-axis\n')
+
+        # Not yet implemented
         self.declareProperty(name='PerformCurveFitting',
                              defaultValue='False',
                              doc='Fit post-processed curve; \n'
@@ -112,8 +116,6 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
 
         issues = dict()
 
-        # Check if post_processing_entity is valid sample log entry
-
         return issues
 
     def setUp(self):
@@ -126,17 +128,17 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
         self._background_file = self.getPropertyValue('BackgroundRun')
         self._calibration_file = self.getPropertyValue('CalibrationRun')
         self._out_ws = self.getPropertyValue('OutputWorkspace')
-        self._post_processing_entity_name = self.getPropertyValue('Observable')
+        self._observable_name = self.getPropertyValue('Observable')
+        self._sortX = self.getProperty('SortXAxis').value
 
         # load background run if needed
         if self._background_file:
-            # do something here
+            # Call ILLReduction for background file and do something here
             self.log().information('Loaded background run: {0}'.format(self._background_file))
 
         # load vanadium run if needed
         if self._calibration_file:
-            # do something here
-            # call IN16BCalibration
+            # Call ILLReduction for calibration file and do something here
             self.log().information('Loaded calibration run: {0}'.format(self._calibration_file))
 
     def PyExec(self):
@@ -144,13 +146,13 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
         self.setUp()
 
         # Check whether observable exists in Nexus file
-        _criteria = '$/entry0/' + self._post_processing_entity_name.replace('.', '/') + '$'
+        _criteria = '$/entry0/' + self._observable_name.replace('.', '/') + '$ or True'
         self.log().debug('Filtering with nexus criteria: {0}'.format(_criteria))
         self._run_file = SelectNexusFilesByMetadata(self._run_file, _criteria)
 
         if self._run_file == '':
-            self.log().error('Observable not found in Nexus files.')
-            raise RuntimeError('Observable not found in Nexus files.')
+            self.log().error('Observable not found in Sample Logs')
+            raise RuntimeError('Observable not found in Sample Logs')
 
         self.log().information('Call IndirectILLReduction for .nxs file(s) : {0}'.format(self._run_file))
         IndirectILLReduction(Run=self._run_file, MapFile=self._map_file, Analyser=self._analyser,
@@ -205,16 +207,16 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
                         RangeLower=x_max, RangeUpper=x_values[len(x_values) - 1])
             Plus(LHSWorkspace='__left', RHSWorkspace='__right', OutputWorkspace=input_ws)
 
-    def _get_post_processing_entities(self, input_ws):
+    def _get_observable(self, input_ws):
         """
-        Set list self._post_processing_entities
+        Set list self._observable
         Args:
             input_ws: GroupWorkspace, all reduced workspaces of one energy
         """
-        self._post_processing_entities = []
+        self._observable = []
         for index in range(mtd[input_ws].getNumberOfEntries()):
-            entity = mtd[input_ws].getItem(index).getRun().getLogData(self._post_processing_entity_name).value
-            if self._post_processing_entity_name != 'start_time':
+            entity = mtd[input_ws].getItem(index).getRun().getLogData(self._observable_name).value
+            if self._observable_name != 'start_time':
                 entity = float(entity)
             else:
                 # start_time is a string like 2016-09-12T09:09:15 (date using hyphen T time using colon)
@@ -227,8 +229,8 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
                 entity = seconds + 60 * minutes + 3600 * hours
                 # Improvement possible: account for different days!
 
-            self.log().debug('{0}: {1}'.format(self._post_processing_entity_name, entity))
-            self._post_processing_entities.append(entity)
+            self.log().debug('{0}: {1}'.format(self._observable_name, entity))
+            self._observable.append(entity)
 
     def _create_matrix(self, group, output_ws):
         """
@@ -237,7 +239,7 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
             output_ws : name of the output workspace
 
         """
-        self._get_post_processing_entities(group)
+        self._get_observable(group)
 
         number_hists = mtd[group].getItem(0).getNumberHistograms()
         number_workspaces = mtd[group].getNumberOfEntries()
@@ -266,30 +268,32 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
         for index2 in range(number_hists):
             y_transposed = np.append(y_transposed, y_values[index2: length: number_hists])
             e_transposed = np.append(e_transposed, e_values[index2: length: number_hists])
-            x_values = np.append(x_values, np.array(self._post_processing_entities))
+            x_values = np.append(x_values, np.array(self._observable))
 
         CreateWorkspace(DataX=x_values, DataY=y_transposed, DataE=e_transposed, NSpec=number_hists,
                         WorkspaceTitle=output_ws, Distribution=True, ParentWorkspace=mtd[group].getItem(0),
                         OutputWorkspace=output_ws)
 
-        SortXAxis(InputWorkspace=output_ws, OutputWorkspace=output_ws)
+        if self._sortX:
+            SortXAxis(InputWorkspace=output_ws, OutputWorkspace=output_ws)
 
+        run_numbers = []
         for index in range(number_workspaces):
-            # Save run number for files of selected energy
-            AddSampleLog(Workspace=output_ws, LogName='included_run_number_' + str(index),
-                         Logtext=str(mtd[group].getItem(index).getRun().getLogData('run_number').value),
-                         LogType='Number')
+            run_numbers.append(mtd[group].getItem(index).getRun().getLogData('run_number').value)
+
+        # Save run number for files of selected energy
+        AddSampleLog(Workspace=output_ws, LogName='ReducedRuns', LogText=str(run_numbers))
 
         # Label x-values
         axis = mtd[output_ws].getAxis(0)
-        if self._post_processing_entity_name == 'sample.temperature':
+        if self._observable_name == 'sample.temperature':
             axis.setUnit("Label").setLabel('Temperature', 'K')
-        elif self._post_processing_entity_name == 'sample.pressure':
+        elif self._observable_name == 'sample.pressure':
             axis.setUnit("Label").setLabel('Pressure', 'P')
-        elif self._post_processing_entity_name == 'start_time':
+        elif self._observable_name == 'start_time':
             axis.setUnit("Label").setLabel('Time', 'seconds')
         else:
-            axis.setUnit("Label").setLabel(self._post_processing_entity_name, 'Unknown')
+            axis.setUnit("Label").setLabel(self._observable_name, 'Unknown')
 
     def _get_energies(self):
         '''

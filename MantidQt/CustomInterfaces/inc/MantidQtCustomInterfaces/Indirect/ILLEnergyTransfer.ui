@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>592</width>
+    <width>600</width>
     <height>518</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>500</width>
+    <width>600</width>
     <height>0</height>
    </size>
   </property>
@@ -109,9 +109,15 @@
      <property name="title">
       <string>Reduction Type</string>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_14">
+     <layout class="QHBoxLayout" name="horizontalLayout_8">
       <item>
        <widget class="QRadioButton" name="rdQENS">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>QENS</string>
         </property>
@@ -123,10 +129,19 @@
         </attribute>
        </widget>
       </item>
-      <item>
+      <item alignment="Qt::AlignLeft">
        <widget class="QRadioButton" name="rdFWS">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>E/I - FWS</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
         </property>
         <attribute name="buttonGroup">
          <string notr="true">buttonGroup</string>
@@ -139,7 +154,7 @@
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>Observable</string>
+         <string>Scanning Observable</string>
         </property>
        </widget>
       </item>
@@ -155,7 +170,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Select or type the desired observable.</string>
+         <string>Select or type the desired observable. See Sample Logs for the list of valid parameters.</string>
         </property>
         <property name="editable">
          <bool>true</bool>
@@ -180,6 +195,19 @@
           <string/>
          </property>
         </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="cbSortX">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Whether or not to sort the x-axis in final result.</string>
+        </property>
+        <property name="text">
+         <string>SortXAxis</string>
+        </property>
        </widget>
       </item>
      </layout>
@@ -290,13 +318,19 @@
         </property>
        </widget>
       </item>
-      <item>
+      <item alignment="Qt::AlignLeft">
        <widget class="QLineEdit" name="leBackgroundFactor">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
         </property>
         <property name="text">
          <string>1.0</string>
@@ -379,6 +413,7 @@
         <property name="showLoad" stdset="0">
          <bool>false</bool>
         </property>
+        <zorder>gbBackground</zorder>
        </widget>
       </item>
      </layout>
@@ -760,6 +795,38 @@
     <hint type="destinationlabel">
      <x>295</x>
      <y>359</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbSortX</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>113</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>531</x>
+     <y>112</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbSortX</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>136</x>
+     <y>113</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>531</x>
+     <y>112</y>
     </hint>
    </hints>
   </connection>
