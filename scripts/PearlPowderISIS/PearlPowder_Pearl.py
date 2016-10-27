@@ -247,8 +247,6 @@ class Pearl(AbstractInst):
         return monitor_ws
 
     def _get_monitor_spectrum(self, run_number):
-        import pydevd
-        pydevd.settrace('localhost', port=23000, stdoutToServer=True, stderrToServer=True)
         if run_number < 71009:
             if self._focus_mode == "trans":
                 mspectra = 1081

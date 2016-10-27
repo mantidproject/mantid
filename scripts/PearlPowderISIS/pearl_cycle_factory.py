@@ -11,7 +11,6 @@ def get_cycle_dir(number):
         num = number.split("_")
         runno = int(num[0])
 
-    print("The run number is get cycle is", runno)
     if (runno < 71009):
         cycle = "10_2"
         instver = "old"
