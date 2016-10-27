@@ -139,15 +139,13 @@ struct is_range_type<volatile const T> : public is_range_type<T> {};
 template <class T>
 struct is_range_type<volatile T> : public is_range_type<T> {};
 
-template <> struct is_range_type<unsigned short> : public std::true_type {};
-template <> struct is_range_type<unsigned int> : public std::true_type {};
-template <> struct is_range_type<unsigned long> : public std::true_type {};
-template <> struct is_range_type<unsigned long long> : public std::true_type {};
+template <> struct is_range_type<uint16_t> : public std::true_type {};
+template <> struct is_range_type<uint32_t> : public std::true_type {};
+template <> struct is_range_type<uint64_t> : public std::true_type {};
 
-template <> struct is_range_type<short> : public std::true_type {};
-template <> struct is_range_type<int> : public std::true_type {};
-template <> struct is_range_type<long> : public std::true_type {};
-template <> struct is_range_type<long long> : public std::true_type {};
+template <> struct is_range_type<int16_t> : public std::true_type {};
+template <> struct is_range_type<int32_t> : public std::true_type {};
+template <> struct is_range_type<int64_t> : public std::true_type {};
 }
 template <typename T>
 void toValue(const std::string &strvalue, std::vector<T> &value) {
