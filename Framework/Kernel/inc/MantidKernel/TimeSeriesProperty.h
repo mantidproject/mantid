@@ -300,8 +300,8 @@ private:
   //----------------------------------------------------------------------------------------------
   /// Saves the time vector has time + start attribute
   void saveTimeVector(::NeXus::File *file);
-  /// Sort the property into increasing times
-  void sort() const;
+  /// Sort the property into increasing times, if not already sorted
+  void sortIfNecessary() const;
   ///  Find the index of the entry of time t in the mP vector (sorted)
   int findIndex(Kernel::DateAndTime t) const;
   ///  Find the upper_bound of time t in container.

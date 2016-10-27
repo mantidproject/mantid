@@ -71,7 +71,7 @@ TimeSeriesProperty<TYPE>::getDerivative() const {
                              "property with less then two values");
   }
 
-  this->sort();
+  this->sortIfNecessary();
   auto it = this->m_values.begin();
   int64_t t0 = it->time().totalNanoseconds();
   TYPE v0 = it->value();
@@ -162,7 +162,7 @@ operator+=(Property const *right) {
 template <typename TYPE>
 bool TimeSeriesProperty<TYPE>::
 operator==(const TimeSeriesProperty<TYPE> &right) const {
-  sort();
+  sortIfNecessary();
 
   if (this->name() != right.name()) // should this be done?
   {
@@ -261,7 +261,7 @@ template <typename TYPE>
 void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime &start,
                                             const Kernel::DateAndTime &stop) {
   // 0. Sort
-  sort();
+  sortIfNecessary();
 
   // 1. Do nothing for single (constant) value
   if (m_values.size() <= 1)
@@ -319,7 +319,7 @@ template <typename TYPE>
 void TimeSeriesProperty<TYPE>::filterByTimes(
     const std::vector<SplittingInterval> &splittervec) {
   // 1. Sort
-  sort();
+  sortIfNecessary();
 
   // 2. Return for single value
   if (m_values.size() <= 1) {
@@ -406,7 +406,7 @@ void TimeSeriesProperty<TYPE>::splitByTime(
     std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
     bool isPeriodic) const {
   // 0. Sort if necessary
-  sort();
+  sortIfNecessary();
 
   if (outputs.empty())
     return;
@@ -581,7 +581,7 @@ void TimeSeriesProperty<TYPE>::makeFilterByValue(
     return;
 
   // 1. Sort
-  sort();
+  sortIfNecessary();
 
   // 2. Do the rest
   bool lastGood(false);
@@ -726,8 +726,7 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(
     return static_cast<double>(m_values.front().value());
   }
 
-  // Sort, if necessary.
-  sort();
+  sortIfNecessary();
 
   double numerator(0.0), totalTime(0.0);
   // Loop through the filter ranges
@@ -803,7 +802,7 @@ template <typename TYPE>
 std::map<DateAndTime, TYPE>
 TimeSeriesProperty<TYPE>::valueAsCorrectMap() const {
   // 1. Sort if necessary
-  sort();
+  sortIfNecessary();
 
   // 2. Data Strcture
   std::map<DateAndTime, TYPE> asMap;
@@ -822,7 +821,7 @@ TimeSeriesProperty<TYPE>::valueAsCorrectMap() const {
  */
 template <typename TYPE>
 std::vector<TYPE> TimeSeriesProperty<TYPE>::valuesAsVector() const {
-  sort();
+  sortIfNecessary();
 
   std::vector<TYPE> out;
   out.reserve(m_values.size());
@@ -859,7 +858,7 @@ TimeSeriesProperty<TYPE>::valueAsMultiMap() const {
  */
 template <typename TYPE>
 std::vector<DateAndTime> TimeSeriesProperty<TYPE>::timesAsVector() const {
-  sort();
+  sortIfNecessary();
 
   std::vector<DateAndTime> out;
   out.reserve(m_values.size());
@@ -878,7 +877,7 @@ std::vector<DateAndTime> TimeSeriesProperty<TYPE>::timesAsVector() const {
 template <typename TYPE>
 std::vector<double> TimeSeriesProperty<TYPE>::timesAsVectorSeconds() const {
   // 1. Sort if necessary
-  sort();
+  sortIfNecessary();
 
   // 2. Output data structure
   std::vector<double> out;
@@ -996,7 +995,7 @@ DateAndTime TimeSeriesProperty<TYPE>::lastTime() const {
     throw std::runtime_error(error);
   }
 
-  sort();
+  sortIfNecessary();
 
   return m_values.rbegin()->time();
 }
@@ -1012,7 +1011,7 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::firstValue() const {
     throw std::runtime_error(error);
   }
 
-  sort();
+  sortIfNecessary();
 
   return m_values[0].value();
 }
@@ -1029,7 +1028,7 @@ DateAndTime TimeSeriesProperty<TYPE>::firstTime() const {
     throw std::runtime_error(error);
   }
 
-  sort();
+  sortIfNecessary();
 
   return m_values[0].time();
 }
@@ -1046,7 +1045,7 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue() const {
     throw std::runtime_error(error);
   }
 
-  sort();
+  sortIfNecessary();
 
   return m_values.rbegin()->value();
 }
@@ -1080,7 +1079,7 @@ template <typename TYPE> int TimeSeriesProperty<TYPE>::realSize() const {
  * @return time series property as a string
  */
 template <typename TYPE> std::string TimeSeriesProperty<TYPE>::value() const {
-  sort();
+  sortIfNecessary();
 
   std::stringstream ins;
   for (size_t i = 0; i < m_values.size(); i++) {
@@ -1104,7 +1103,7 @@ template <typename TYPE> std::string TimeSeriesProperty<TYPE>::value() const {
  */
 template <typename TYPE>
 std::vector<std::string> TimeSeriesProperty<TYPE>::time_tValue() const {
-  sort();
+  sortIfNecessary();
 
   std::vector<std::string> values;
   values.reserve(m_values.size());
@@ -1128,7 +1127,7 @@ std::vector<std::string> TimeSeriesProperty<TYPE>::time_tValue() const {
 template <typename TYPE>
 std::map<DateAndTime, TYPE> TimeSeriesProperty<TYPE>::valueAsMap() const {
   // 1. Sort if necessary
-  sort();
+  sortIfNecessary();
 
   // 2. Build map
 
@@ -1187,7 +1186,8 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::clear() {
  *  The last value is the last entry in the m_values vector - no sorting is
  *  done or checked for to ensure that the last value is the most recent in
  * time.
- *  It is up to the client to call sort() first if this is a requirement.
+ *  It is up to the client to call sortIfNecessary() first if this is a
+ * requirement.
  */
 template <typename TYPE> void TimeSeriesProperty<TYPE>::clearOutdated() {
   if (realSize() > 1) {
@@ -1271,7 +1271,7 @@ TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t) const {
   }
 
   // 1. Get sorted
-  sort();
+  sortIfNecessary();
 
   // 2.
   TYPE value;
@@ -1320,7 +1320,7 @@ TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t,
   }
 
   // 1. Get sorted
-  sort();
+  sortIfNecessary();
 
   // 2.
   TYPE value;
@@ -1376,7 +1376,7 @@ TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int n) const {
   }
 
   // 1. Sort
-  sort();
+  sortIfNecessary();
 
   // 2. Calculate time interval
 
@@ -1495,7 +1495,7 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
   }
 
   // 2. Sort and apply filter
-  sort();
+  sortIfNecessary();
 
   if (m_filter.empty()) {
     // 3. Situation 1:  No filter
@@ -1541,7 +1541,7 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
  */
 template <typename TYPE>
 Kernel::DateAndTime TimeSeriesProperty<TYPE>::nthTime(int n) const {
-  sort();
+  sortIfNecessary();
 
   if (m_values.empty()) {
     const std::string error("nthTime(): TimeSeriesProperty '" + name() +
@@ -1734,7 +1734,7 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics() const {
  */
 template <typename TYPE> void TimeSeriesProperty<TYPE>::eliminateDuplicates() {
   // 1. Sort if necessary
-  sort();
+  sortIfNecessary();
 
   // 2. Detect and Remove Duplicated
   size_t numremoved = 0;
@@ -1788,9 +1788,11 @@ std::string TimeSeriesProperty<TYPE>::toString() const {
 
 //----------------------------------------------------------------------------------
 /*
- * Sort vector mP and set the flag
+ * Sort vector mP and set the flag. Only sorts if the values are not already
+ * sorted.
  */
-template <typename TYPE> void TimeSeriesProperty<TYPE>::sort() const {
+template <typename TYPE>
+void TimeSeriesProperty<TYPE>::sortIfNecessary() const {
   if (m_propSortedFlag == TimeSeriesSortStatus::TSUNKNOWN) {
     bool sorted = is_sorted(m_values.begin(), m_values.end());
     if (sorted)
@@ -1820,7 +1822,7 @@ int TimeSeriesProperty<TYPE>::findIndex(Kernel::DateAndTime t) const {
     return 0;
 
   // 1. Sort
-  sort();
+  sortIfNecessary();
 
   // 2. Extreme value
   if (t <= m_values[0].time()) {
@@ -1870,7 +1872,7 @@ int TimeSeriesProperty<TYPE>::upperBound(Kernel::DateAndTime t, int istart,
   }
 
   // 2. Sort
-  sort();
+  sortIfNecessary();
 
   // 3. Construct the pair for comparison and do lower_bound()
   TimeValueUnit<TYPE> temppair(t, m_values[0].value());
@@ -2206,7 +2208,7 @@ std::vector<TYPE> TimeSeriesProperty<TYPE>::getFilteredValues() const {
     applyFilter();
   }
 
-  sort();
+  sortIfNecessary();
 
   const auto &valueMap = valueAsCorrectMap();
   for (const auto &entry : valueMap) {
