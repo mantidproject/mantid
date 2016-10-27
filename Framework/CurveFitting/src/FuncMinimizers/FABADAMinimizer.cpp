@@ -549,7 +549,7 @@ void FABADAMinimizer::finalize() {
     // Do one iteration for each parameter plus one for Chi square.
     for (size_t j = 0; j < m_nParams + 1; ++j) {
       wsC->setPoints(j, chain_length, HistogramData::LinearGenerator(0.0, 1.0));
-	  wsC->mutableY(j) = m_chain[j];	  
+      wsC->mutableY(j) = m_chain[j];
     }
 
     // Set and name the workspace for the complete chain
@@ -579,12 +579,12 @@ void FABADAMinimizer::finalize() {
     double bin = (red_conv_chain[m_nParams][conv_length - 1] - start) /
                  double(pdf_length);
     size_t step = 0;
-    auto &X = ws->mutableX(m_nParams);
     auto &Y = ws->mutableY(m_nParams);
-    X[0] = start;
+    ws->setBinEdges(m_nParams, pdf_length + 1,
+                    HistogramData::LinearGenerator(start, bin));
+    const auto &X = ws->x(m_nParams);
     for (size_t i = 1; i < static_cast<size_t>(pdf_length) + 1; i++) {
-      double bin_end = start + double(i) * bin;
-      X[i] = bin_end;
+      const double bin_end = X[i];
       while (step < conv_length && red_conv_chain[m_nParams][step] <= bin_end) {
         pdf_y[i - 1] += 1;
         ++step;
@@ -605,12 +605,12 @@ void FABADAMinimizer::finalize() {
       double bin =
           (red_conv_chain[j][conv_length - 1] - start) / double(pdf_length);
       size_t step = 0;
-      auto &X = ws->mutableX(j);
       auto &Y = ws->mutableY(j);
-      X[0] = start;
+      ws->setBinEdges(j, pdf_length + 1,
+                      HistogramData::LinearGenerator(start, bin));
+      const auto &X = ws->x(j);
       for (size_t i = 1; i < static_cast<size_t>(pdf_length) + 1; i++) {
-        double bin_end = start + double(i) * bin;
-        X[i] = bin_end;
+        double bin_end = X[i];
         while (step < conv_length && red_conv_chain[j][step] <= bin_end) {
           pdf_y[i - 1] += 1;
           ++step;
