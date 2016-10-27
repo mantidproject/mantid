@@ -430,6 +430,6 @@ def get_calibration_filename(cycle, tt_mode):
         vanfile = "test_van_new_cycle_10_2.nxs"
     # ----------------------------------------------------------------------------- #
     else:
-        print("Sorry that cycle has not been defined yet")
+        raise ValueError("Sorry that cycle has not been defined yet")
 
     return calfile, groupfile, vabsorbfile, vanfile

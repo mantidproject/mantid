@@ -4,21 +4,20 @@ import mantid.simpleapi as mantid
 # --- Public API --- #
 
 
-def focus(number, instrument, fmode="trans", atten=True, van_norm=True):
-    # TODO support other extensions
-    return _run_pearl_focus(run_number=number, focus_mode=fmode, perform_attenuation=atten, perform_vanadium_norm=van_norm,
-                            instrument=instrument)
+def focus(number, instrument, attenuate=True, van_norm=True):
+    return _run_pearl_focus(run_number=number, perform_attenuation=attenuate,
+                            perform_vanadium_norm=van_norm, instrument=instrument)
 
 
-def create_calibration_by_names(calruns, startup_objects, ngroupfile, ngroup):
-    _create_blank_cal_file(calibration_runs=calruns, group_names=ngroup, out_grouping_file_name=ngroupfile,
-                           instrument=startup_objects)
+def create_calibration_by_names(calibration_runs, startup_objects, grouping_file_name, group_names):
+    _create_blank_cal_file(calibration_runs=calibration_runs, group_names=group_names,
+                           out_grouping_file_name=grouping_file_name, instrument=startup_objects)
 
 
 def create_vanadium(startup_object, vanadium_runs, empty_runs, output_file_name,
                     num_of_spline_coefficients=60, do_absorb_corrections=True, generate_absorb_corrections=False):
     _create_van(instrument=startup_object, van=vanadium_runs, empty=empty_runs,
-                output_van_file_name=output_file_name, nspline=num_of_spline_coefficients,
+                output_van_file_name=output_file_name, num_of_splines=num_of_spline_coefficients,
                 absorb=do_absorb_corrections, gen_absorb=generate_absorb_corrections)
 
 
@@ -41,6 +40,7 @@ def remove_intermediate_workspace(workspace_name):
 # This section is holds several counters which work around the fact that Mantid
 # takes the alias and uses it as the WS name and on subsequent calls overrides it
 # when the Python API truly implements anonymous pointers this can be removed
+
 _read_pearl_ws_count = 0
 global g_ads_workaround
 g_ads_workaround = {"read_pearl_ws" : _read_pearl_ws_count}
@@ -58,7 +58,7 @@ def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument,
     remove_intermediate_workspace(input_ws)
 
 
-def _create_van(instrument, van, empty, output_van_file_name, nspline=60, absorb=True, gen_absorb=False):
+def _create_van(instrument, van, empty, output_van_file_name, num_of_splines=60, absorb=True, gen_absorb=False):
     cycle_information = instrument._get_cycle_information(van)
 
     input_van_ws = _read_ws(number=van, instrument=instrument)
@@ -91,7 +91,8 @@ def _create_van(instrument, van, empty, output_van_file_name, nspline=60, absorb
 
     remove_intermediate_workspace(corrected_van_ws)
 
-    splined_ws_list = instrument._spline_background(focused_van_file, nspline, cycle_information["instrument_version"])
+    splined_ws_list = instrument._spline_background(focused_van_file, num_of_splines,
+                                                    cycle_information["instrument_version"])
 
     if instrument._PEARL_use_full_path():
         out_van_file_path = output_van_file_name
@@ -146,7 +147,6 @@ def _load_van_absorb_corr(calibration_full_paths):
 
 
 def _load_monitor(number, input_dir, instrument):
-    load_monitor_ws = None
     if isinstance(number, int):
         full_file_path = instrument._generate_input_full_path(run_number=number, input_dir=input_dir)
         mspectra = instrument._get_monitor_spectra(number)
@@ -184,12 +184,7 @@ def _load_monitor_sum_range(files, input_dir, instrument):
 
 
 def _load_raw_files(run_number, instrument, input_dir):
-    ext = instrument.default_input_ext
     if isinstance(run_number, int):
-        if ext[0] == 's':
-            # TODO deal with liveData in higher class
-            raise NotImplementedError()
-
         infile = instrument._generate_input_full_path(run_number=run_number, input_dir=input_dir)
         load_raw_ws = mantid.LoadRaw(Filename=infile, LoadLogFiles="0")
     else:
@@ -242,7 +237,7 @@ def _read_ws(number, instrument):
     return output_ws
 
 
-def _run_pearl_focus(instrument, run_number, focus_mode, perform_attenuation, perform_vanadium_norm):
+def _run_pearl_focus(instrument, run_number, perform_attenuation, perform_vanadium_norm):
 
     cycle_information = instrument._get_cycle_information(run_number=run_number)
 
@@ -261,6 +256,7 @@ def _run_pearl_focus(instrument, run_number, focus_mode, perform_attenuation, pe
     remove_intermediate_workspace(read_ws)
     remove_intermediate_workspace(input_workspace)
 
+    focus_mode = instrument.focus_mode
     if focus_mode == "all":
         processed_nexus_files = _focus_mode_all(output_file_paths, calibrated_spectra)
 

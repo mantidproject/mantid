@@ -16,8 +16,10 @@ class Pearl(AbstractInst):
     # # Instrument default settings
     _default_input_ext = '.raw'
     _default_group_names = "bank1,bank2,bank3,bank4"
+
     _lambda_lower = 0.03
     _lambda_upper = 6.00
+
     _focus_tof_binning = "1500,-0.0006,19900"
 
     _create_van_first_tof_binning = "100,-0.0006,19990"
@@ -25,12 +27,9 @@ class Pearl(AbstractInst):
 
     def __init__(self, user_name=None, calibration_dir=None, raw_data_dir=None, output_dir=None,
                  input_file_ext=".raw", tt_mode="TT88"):
-        if user_name is None:
-            raise ValueError("A username must be provided in the startup script")
 
-        super(Pearl, self).__init__(calibration_dir=calibration_dir, raw_data_dir=raw_data_dir, output_dir=output_dir,
-                                    default_input_ext=input_file_ext, tt_mode=tt_mode)
-        self._user_name = user_name
+        super(Pearl, self).__init__(user_name=user_name, calibration_dir=calibration_dir, raw_data_dir=raw_data_dir,
+                                    output_dir=output_dir, default_input_ext=input_file_ext, tt_mode=tt_mode)
 
         # This advanced option disables appending the current cycle to the
         # path given for raw files.
@@ -43,9 +42,8 @@ class Pearl(AbstractInst):
         self._old_api_uses_full_paths = False
 
         # File names
-        pearl_mc_absorption_file_name = "PRL112_DC25_10MM_FF.OUT" # TODO
-        self._attenuation_full_path = calibration_dir + pearl_mc_absorption_file_name # TODO
-        self.mode = None  # For later callers to set TODO
+        pearl_mc_absorption_file_name = "PRL112_DC25_10MM_FF.OUT"  # TODO
+        self._attenuation_full_path = calibration_dir + pearl_mc_absorption_file_name  # TODO
 
     # --- Abstract Implementation ---- #
 
@@ -94,8 +92,8 @@ class Pearl(AbstractInst):
         return cycle_information
 
     @staticmethod
-    def _get_instrument_alg_save_ranges(instrument_version):
-        return _get_instrument_ranges(instrument_version=instrument_version)
+    def _get_instrument_alg_save_ranges(instrument=''):
+        return _get_instrument_ranges(instrument_version=instrument)
 
     @staticmethod
     def _generate_inst_file_name(run_number):
@@ -165,7 +163,7 @@ class Pearl(AbstractInst):
             out_list = _spline_new_background(in_workspace=focused_vanadium_ws, num_splines=spline_number,
                                               instrument_version=instrument_version)
         elif instrument_version == "old":
-            out_list = _spline_old_background(in_workspace=focused_vanadium_ws, num_splines=spline_number)
+            out_list = _spline_old_background(in_workspace=focused_vanadium_ws)
         else:
             raise ValueError("Spline Background - PEARL: Instrument version unknown")
         return out_list
@@ -249,12 +247,14 @@ class Pearl(AbstractInst):
         return monitor_ws
 
     def _get_monitor_spectrum(self, run_number):
+        import pydevd
+        pydevd.settrace('localhost', port=23000, stdoutToServer=True, stderrToServer=True)
         if run_number < 71009:
-            if self.mode == "trans":
+            if self._focus_mode == "trans":
                 mspectra = 1081
-            elif self.mode == "all":
+            elif self._focus_mode == "all":
                mspectra = 2721
-            elif self.mode == "novan":
+            elif self._focus_mode == "novan":
                mspectra = 2721
             else:
                 raise ValueError("Mode not set or supported")
@@ -309,8 +309,8 @@ def _old_api_get_file_name(in_path):
     # Gets the filename from a full path
     return os.path.basename(in_path)
 
-# Implementation of static methods
 
+# Implementation of static methods
 
 def _gen_file_name(run_number):
 
@@ -346,7 +346,7 @@ def _get_instrument_ranges(instrument_version):
 
 def _spline_new2_background(in_workspace, num_splines, instrument_version):
     # remove bragg peaks before spline
-    alg_range, unused = _get_instrument_ranges("new2")
+    alg_range, unused = _get_instrument_ranges(instrument_version)
     van_stripped_ws = _strip_peaks_new_inst(in_workspace, alg_range)
 
     # run twice on low angle as peaks are very broad
@@ -365,7 +365,7 @@ def _spline_new2_background(in_workspace, num_splines, instrument_version):
 
 def _spline_new_background(in_workspace, num_splines, instrument_version):
     # Remove bragg peaks before spline
-    alg_range, unused = _get_instrument_ranges("new")
+    alg_range, unused = _get_instrument_ranges(instrument_version)
     van_stripped = _strip_peaks_new_inst(in_workspace, alg_range)
 
     van_stripped = mantid.ConvertUnits(InputWorkspace=van_stripped, Target="TOF")
@@ -394,7 +394,7 @@ def _perform_spline_range(instrument_version, num_splines, stripped_ws):
     return splined_ws_list
 
 
-def _spline_old_background(in_workspace, num_splines):
+def _spline_old_background(in_workspace):
     van_stripped = mantid.ConvertUnits(InputWorkspace=in_workspace, Target="dSpacing")
 
     # remove bragg peaks before spline

@@ -14,14 +14,18 @@ import PearlPowder_common
 
 @add_metaclass(ABCMeta)
 class AbstractInst(object):
-    def __init__(self, calibration_dir=None, raw_data_dir=None, output_dir=None,
+    def __init__(self, user_name=None, calibration_dir=None, raw_data_dir=None, output_dir=None,
                  default_input_ext=".raw", tt_mode=""):
         # ----- Properties common to ALL instruments -------- #
+        if user_name is None:
+            raise ValueError("A user name must be specified")
+        self._user_name = user_name
         self._calibration_dir = calibration_dir
         self._raw_data_dir = raw_data_dir
         self._output_dir = output_dir
         self._default_input_ext = _append_dot_to_ext(default_input_ext)
         self._tt_mode = tt_mode
+        self._focus_mode = None
 
     @property
     def calibration_dir(self):
@@ -47,23 +51,32 @@ class AbstractInst(object):
     def tt_mode(self):
         return self._tt_mode
 
+    @property
+    def focus_mode(self):
+        return self._focus_mode
+
+    @property
+    def user_name(self):
+        return self._user_name
+
     # --- Public API ---- #
 
     # Script entry points
     def focus(self, run_number, focus_mode, input_ext=None, do_attenuation=True, do_van_normalisation=True):
+        self._focus_mode = focus_mode
         if input_ext is not None:
             self.default_input_ext = input_ext
 
-        return PearlPowder_common.focus(instrument=self, number=run_number, fmode=focus_mode,
-                                        atten=do_attenuation, van_norm=do_van_normalisation)
+        return PearlPowder_common.focus(instrument=self, number=run_number,
+                                        attenuate=do_attenuation, van_norm=do_van_normalisation)
 
     def create_empty_calibration_by_names(self, calibration_numbers, output_file_name, group_names=None):
 
         if group_names is None:
             group_names = self._get_default_group_names()
 
-        PearlPowder_common.create_calibration_by_names(calruns=calibration_numbers, ngroupfile=output_file_name,
-                                                       ngroup=group_names, startup_objects=self)
+        PearlPowder_common.create_calibration_by_names(calibration_runs=calibration_numbers, grouping_file_name=output_file_name,
+                                                       group_names=group_names, startup_objects=self)
 
     def create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
         self._create_calibration(calibration_runs=calibration_runs,

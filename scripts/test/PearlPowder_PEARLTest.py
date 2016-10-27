@@ -5,94 +5,85 @@ import unittest
 import mantid as mantid
 
 import PearlPowder_common
-import PearlPowder_PEARL
+import PearlPowder_Pearl
 
 
-class PearlPowder_PEARLTest(unittest.TestCase):
+class PearlPowder_PearlTest(unittest.TestCase):
 
-    def test_inst_new2_exec_fmode_all(self):
-        pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir="D:\\PEARL\\",
-                                            raw_data_dir="D:\\PEARL\\", output_dir="D:\\PEARL\\output\\")
-        pearl_obj.focus(run_number=74795, focus_mode="all")
+    # Static method tests
 
-    def test_inst_new2_exec_fmode_groups(self):
-        pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir="D:\\PEARL\\",
-                                            raw_data_dir="D:\\PEARL\\", output_dir="D:\\PEARL\\output\\")
-        pearl_obj.focus(74795, focus_mode='groups')
+    def test_cycle_information_generates_correctly(self):
+        # This checks that the cycle information generates using the correct keys for the dict
+        output = self._get_pearl_inst_defaults()._get_cycle_information(85500)
+        expected_cycle = "14_1"
+        expected_inst_vers = "new2"
+        self.assertEquals(output["cycle"], expected_cycle)
+        self.assertEquals(output["instrument_version"], expected_inst_vers)
 
-    def test_inst_new2_exec_fmode_trans(self):
-        pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir="D:\\PEARL\\",
-                                            raw_data_dir="D:\\PEARL\\", output_dir="D:\\PEARL\\output\\")
-        pearl_obj.focus(74795, focus_mode="trans")
-
-    def test_inst_new2_exec_fmode_mods(self):
-        pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir="D:\\PEARL\\",
-                                            raw_data_dir="D:\\PEARL\\", output_dir="D:\\PEARL\\output\\")
-        pearl_obj.focus(74795,focus_mode="mods")
-
-    def test_instrument_ranges_calcs_correctly(self):
+    def test_get_instrument_ranges(self):
         # This test checks that the instrument ranges calculate correctly for given instruments
         # First the "new" instrument value
-        new_alg_range, new_save_range = PearlPowder_PEARL._get_instrument_ranges("new")
+        new_alg_range, new_save_range = PearlPowder_Pearl._get_instrument_ranges("new")
         self.assertEquals(new_alg_range, 12, "'new' instrument algorithm range got " + str(new_alg_range))
         self.assertEquals(new_save_range, 3, "'new' instrument save range got " + str(new_save_range))
 
-        new2_alg_range, new2_save_range = PearlPowder_PEARL._get_instrument_ranges("new2")
+        new2_alg_range, new2_save_range = PearlPowder_Pearl._get_instrument_ranges("new2")
         self.assertEquals(new2_alg_range, 14, "'new2' instrument algorithm range got " + str(new2_alg_range))
         self.assertEquals(new2_save_range, 5, "'new2' instrument save range got " + str(new2_save_range))
 
-    def test_create_van_absorb_corr_load(self):
-        DataDir = os.path.join(DIRS[0], 'PEARL/Calibration_Test/RawFiles/')
-        CalibDir = os.path.join(DIRS[0] + '/PEARL/Calibration_Test/Calibration/')
-        pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir=CalibDir,
-                                            raw_data_dir=DataDir, output_dir="D:\\PEARL\\output\\")
-        vanFile35 = 'van_spline_TT35_cycle_15_3.nxs'
-        pearl_obj.create_calibration_vanadium(vanadium_runs="91530_91531",
-                                              empty_runs="91550_91551", output_file_name=vanFile35,
-                                              num_of_splines=40, do_absorb_corrections=True, gen_absorb_correction=False)
+    def test_generate_inst_file_name(self):
+        # Tests that the generated names conform to the format expected
+        old_name_input = 71008  # This is the last run to use the old format
+        new_name_input = 71009  # Everything after this run should use new format
 
-    def xtest_create_van_absorb_corr_gen(self):
-        DataDir = os.path.join(DIRS[0], 'PEARL/Calibration_Test/RawFiles/')
-        CalibDir = os.path.join(DIRS[0] + '/PEARL/Calibration_Test/Calibration/')
-        pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir=CalibDir,
-                                            raw_data_dir=DataDir, output_dir="D:\\PEARL\\output\\")
-        vanFile35 = 'van_spline_TT35_cycle_15_3.nxs'
-        pearl_obj.create_calibration_vanadium(vanadium_runs="91530_91531",
-                                              empty_runs="91550_91551", output_file_name=vanFile35,
-                                              num_of_splines=40, do_absorb_corrections=True, gen_absorb_correction=True)
+        expected_old_name = "PRL" + str(old_name_input)
+        expected_new_name = "PEARL" + "000" + str(new_name_input)  # New names should have 8 numerical digits
 
-    def test_create_van_no_absorb_corr(self):
-        DataDir = os.path.join(DIRS[0], 'PEARL/Calibration_Test/RawFiles/')
-        CalibDir = os.path.join(DIRS[0] + '/PEARL/Calibration_Test/Calibration/')
-        pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir=CalibDir,
-                                            raw_data_dir=DataDir, output_dir="D:\\PEARL\\output\\")
-        vanFile35 = 'van_spline_TT35_cycle_15_3.nxs'
-        pearl_obj.create_calibration_vanadium(vanadium_runs="91530_91531",
-                                              empty_runs="91550_91551", output_file_name=vanFile35,
-                                              num_of_splines=40, do_absorb_corrections=False)
+        old_output = PearlPowder_Pearl._gen_file_name(old_name_input)
+        self.assertEquals(expected_old_name, old_output)
 
-    def test_create_cal_by_name(self):
-        # Checks testvan executes correctly
-        DataDir = os.path.join(DIRS[0], 'PEARL/Calibration_Test/RawFiles/')
-        CalibDir = os.path.join(DIRS[0] + '/PEARL/Calibration_Test/Calibration/')
+        new_output = PearlPowder_Pearl._gen_file_name(new_name_input)
+        self.assertEquals(expected_new_name, new_output)
 
-        pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir=CalibDir,
-                                            raw_data_dir=DataDir, output_dir="D:\\PEARL\\output\\")
+    # Non static methods
+    def test_get_calibration_full_paths(self):
+        input_cycle = "15_4"
+        input_tt_mode = self.default_tt_mode
 
-        ngrpfile = 'test_cal_group_15_3.cal'
+        expected_calfile = "pearl_offset_15_3.cal"
+        expected_van_aborb_file = "pearl_absorp_sphere_10mm_newinst2_long.nxs"
+        expected_grouping_file = "pearl_group_12_1_TT88.cal"
+        expected_vanadium_file = "van_spline_TT88_cycle_15_4.nxs"
 
-        pearl_obj.create_empty_calibration_by_names("91560_91561", output_file_name=ngrpfile)
+        expected_calibration_dir = self.calibration_dir
 
-    def test_create_cal(self):
-        DataDir = os.path.join(DIRS[0], 'PEARL/Calibration_Test/RawFiles/')
-        CalibDir = os.path.join(DIRS[0] + '/PEARL/Calibration_Test/Calibration/')
-        pearl_obj = PearlPowder_PEARL.Pearl(user_name="Test", calibration_dir=CalibDir,
-                                            raw_data_dir=DataDir, output_dir="D:\\PEARL\\output\\")
+        pearl_obj = self._get_pearl_inst_defaults()
+        output = pearl_obj._get_calibration_full_paths(input_cycle)
 
-        offsetfile = 'pearl_offset_15_3.cal'
-        ngrpfile = 'test_cal_group_15_3.cal'
-        PearlPowder_common.create_calibration(startup_object=pearl_obj, calibration_runs="91560_91561",
-                                              offset_file_path=offsetfile, grouping_file_name=ngrpfile)
+        self.assertEquals(output["calibration"], expected_calibration_dir + expected_calfile)
+        self.assertEquals(output["grouping"], expected_calibration_dir + expected_grouping_file)
+        self.assertEquals(output["vanadium_absorption"], expected_calibration_dir + expected_van_aborb_file)
+        self.assertEquals(output["vanadium"], expected_calibration_dir + expected_vanadium_file)
+
+    def _get_pearl_inst_defaults(self):
+        return PearlPowder_Pearl.Pearl(user_name="unitTest-PEARL", calibration_dir=self.calibration_dir,
+                                       raw_data_dir=self.raw_data_dir, output_dir=self.output_dir)
+
+    def _get_pearl_inst_all_specified(self):
+        return PearlPowder_Pearl.Pearl(calibration_dir=self.calibration_dir, raw_data_dir=self.raw_data_dir,
+                                       output_dir=self.output_dir, default_ext=self.default_ext, tt_mode=self.tt_mode)
+
+    # Test params
+    calibration_dir = "calDir"
+    raw_data_dir = "rawDir"
+    output_dir = "outDir"
+
+    default_tt_mode = "TT88"
+
+    # Optional Params
+    default_ext = ".ext"
+    tt_mode = "tt_test"
+
 
 if __name__ == '__main__':
     DIRS = mantid.config['datasearch.directories'].split(';')

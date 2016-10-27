@@ -3,10 +3,10 @@ from PearlPowder_AbstractInst import AbstractInst
 
 class PearlPowder_Mock(AbstractInst):
 
-    def __init__(self, calibration_dir, raw_data_dir, output_dir, default_ext="", tt_mode=None):
-        super(PearlPowder_Mock, self).__init__(calibration_dir=calibration_dir, raw_data_dir=raw_data_dir,
-                                               output_dir=output_dir, default_input_ext=default_ext,
-                                               tt_mode=tt_mode)
+    def __init__(self, user_name, calibration_dir, raw_data_dir, output_dir, default_ext="", tt_mode=None):
+        super(PearlPowder_Mock, self).__init__(user_name=user_name, calibration_dir=calibration_dir,
+                                               raw_data_dir=raw_data_dir, output_dir=output_dir,
+                                               default_input_ext=default_ext, tt_mode=tt_mode)
         self.generate_cycle_dir_flag = False
 
     def _get_lambda_range(self):
