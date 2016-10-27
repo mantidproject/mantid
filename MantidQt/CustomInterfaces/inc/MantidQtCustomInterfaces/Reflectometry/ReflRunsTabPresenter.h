@@ -96,6 +96,7 @@ protected:
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
   void transfer();
   void pushCommands();
+  std::string getCurrentInstrument() const;
 
 private:
   static const std::string LegacyTransferMethod;

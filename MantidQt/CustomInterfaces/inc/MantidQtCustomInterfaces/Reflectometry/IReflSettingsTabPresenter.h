@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_IREFLSETTINGSTABPRESENTER_H
 
 #include <string>
+#include "MantidGeometry/Instrument.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

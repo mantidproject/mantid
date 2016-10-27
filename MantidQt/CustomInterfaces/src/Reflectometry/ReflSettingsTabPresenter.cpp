@@ -1,10 +1,13 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsTabPresenter.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/algorithm.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -296,10 +299,59 @@ void ReflSettingsTabPresenter::createStitchHints() {
 
 /** Fills experiment settings with default values
 */
-void ReflSettingsTabPresenter::getExpDefaults() { }
+void ReflSettingsTabPresenter::getExpDefaults() {
+  // The algorithm
+  IAlgorithm_sptr alg =
+    AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+
+  // Collect all default values and set them in view
+  std::vector<std::string> defaults;
+  defaults.push_back(alg->getPropertyValue("AnalysisMode"));
+  defaults.push_back(alg->getPropertyValue("PolarizationAnalysis"));
+
+  // Convert to QString vector and set defaults in view
+  std::vector<QString> defaults_qstr;
+  defaults_qstr.resize(defaults.size());
+  std::transform(defaults.begin(), defaults.end(), defaults_qstr.begin(),
+                 [](std::string i) { return QString::fromStdString(i); });
+  m_view->setExpDefaults(defaults_qstr);
+}
 
 /** Fills instrument settings with default values
 */
-void ReflSettingsTabPresenter::getInstDefaults() { }
+void ReflSettingsTabPresenter::getInstDefaults() {
+
+  // The algorithm
+  IAlgorithm_sptr alg =
+    AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+
+  // The instrument
+  IAlgorithm_sptr loadInst =
+    AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  loadInst->setChild(true);
+  loadInst->setProperty("OutputWorkspace", "outWs");
+  loadInst->setProperty("InstrumentName", m_mainPresenter->getInstrument());
+  loadInst->execute();
+  MatrixWorkspace_const_sptr ws = loadInst->getProperty("OutputWorkspace");
+  auto inst = ws->getInstrument();
+
+  // Collect all default values
+  std::vector<double> defaults;
+  defaults.push_back(inst->getNumberParameter("MonitorIntegralMin")[0]);
+  defaults.push_back(inst->getNumberParameter("MonitorIntegralMax")[0]);
+  defaults.push_back(inst->getNumberParameter("MonitorBackgroundMin")[0]);
+  defaults.push_back(inst->getNumberParameter("MonitorBackgroundMax")[0]);
+  defaults.push_back(inst->getNumberParameter("LambdaMin")[0]);
+  defaults.push_back(inst->getNumberParameter("LambdaMax")[0]);
+  defaults.push_back(inst->getNumberParameter("I0MonitorIndex")[0]);
+  defaults.push_back(boost::lexical_cast<double>(alg->getPropertyValue("ScaleFactor")));
+
+  // Convert to QString vector and set defaults in view
+  std::vector<QString> defaults_qstr;
+  defaults_qstr.resize(defaults.size());
+  std::transform(defaults.begin(), defaults.end(), defaults_qstr.begin(),
+                 [](double i) { return QString::number(i); });
+  m_view->setInstDefaults(defaults_qstr);
+}
 }
 }

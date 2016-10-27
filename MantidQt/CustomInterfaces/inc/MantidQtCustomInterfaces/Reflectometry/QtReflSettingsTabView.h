@@ -86,6 +86,9 @@ public:
   std::string getMomentumTransferLimits() const override;
   /// Return detector limits
   std::string getDetectorLimits() const override;
+  /// Set default values for experiment and instrument settings
+  void setExpDefaults(std::vector<QString> defaults) const override;
+  void setInstDefaults(std::vector<QString> defaults) const override;
 
   /// Creates hints for 'Plus'
   void
@@ -101,8 +104,9 @@ public:
   createStitchHints(const std::map<std::string, std::string> &hints) override;
 
 public slots:
-  void getExpDefaults() const override;
-  void getInstDefaults() const override;
+  /// Request presenter to obtain default values for settings
+  void requestExpDefaults() const override;
+  void requestInstDefaults() const override;
 
 private:
   /// Initialise the interface

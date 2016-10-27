@@ -83,9 +83,12 @@ public:
   virtual std::string getMomentumTransferLimits() const = 0;
   virtual std::string getDetectorLimits() const = 0;
 
-  /// Get default values
-  virtual void getExpDefaults() const = 0;
-  virtual void getInstDefaults() const = 0;
+  /// Request presenter to obtain default values for settings
+  virtual void requestExpDefaults() const = 0;
+  virtual void requestInstDefaults() const = 0;
+  /// Set default values for settings
+  virtual void setExpDefaults(std::vector<QString> defaults) const = 0;
+  virtual void setInstDefaults(std::vector<QString> defaults) const = 0;
 };
 }
 }

@@ -364,6 +364,14 @@ std::string ReflRunsTabPresenter::getPostprocessingOptions() const {
 }
 
 /**
+Gets the currently selected (or default) instrument
+* @return : The current instrument
+*/
+std::string ReflRunsTabPresenter::getCurrentInstrument() const {
+  return m_view->getSearchInstrument();
+}
+
+/**
 Tells the view to show an critical error dialog
 @param prompt : The prompt to appear on the dialog
 @param title : The text for the title bar of the dialog

@@ -1,11 +1,15 @@
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflSettingsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsTabPresenter.h"
 #include "MantidQtMantidWidgets/HintingLineEdit.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidGeometry/Instrument_fwd.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 using namespace MantidQt::MantidWidgets;
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -31,9 +35,9 @@ void QtReflSettingsTabView::initLayout() {
   m_ui.setupUi(this); 
 
   connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this, 
-          SLOT(getExpDefaults()));
+          SLOT(requestExpDefaults()));
   connect(m_ui.getInstDefaultsButton, SIGNAL(clicked()), this,
-          SLOT(getInstDefaults()));
+          SLOT(requestInstDefaults()));
 }
 
 /** Returns the presenter managing this view
@@ -119,15 +123,46 @@ void QtReflSettingsTabView::createStitchHints(
 /** This slot notifies the presenter to fill experiment settings with default
 * values.
 */
-void QtReflSettingsTabView::getExpDefaults() const {
+void QtReflSettingsTabView::requestExpDefaults() const {
   m_presenter->notify(IReflSettingsTabPresenter::ExpDefaultsFlag);
 }
 
 /** This slot notifies the presenter to fill instrument settings with default
 * values.
 */
-void QtReflSettingsTabView::getInstDefaults() const {
+void QtReflSettingsTabView::requestInstDefaults() const {
   m_presenter->notify(IReflSettingsTabPresenter::InstDefaultsFlag);
+}
+
+/* Sets default values for all experiment settings given a list of default 
+* values.
+*/
+void QtReflSettingsTabView::setExpDefaults(
+  std::vector<QString> defaults) const {
+  
+  int amIndex = m_ui.analysisModeComboBox->findText(defaults[0]);
+  if (amIndex != -1)
+    m_ui.analysisModeComboBox->setCurrentIndex(amIndex);
+
+  int pcIndex = m_ui.polCorrComboBox->findText(defaults[1]);
+  if (pcIndex != -1)
+    m_ui.polCorrComboBox->setCurrentIndex(pcIndex);
+}
+
+/* Sets default values for all instrument settings given a list of default
+* values.
+*/
+void QtReflSettingsTabView::setInstDefaults(
+  std::vector<QString> defaults) const {
+  
+  m_ui.instSettingsMonIntMinEdit->setText(defaults[0]);
+  m_ui.instSettingsMonIntMaxEdit->setText(defaults[1]);
+  m_ui.instSettingsMonBgMinEdit->setText(defaults[2]);
+  m_ui.instSettingsMonBgMaxEdit->setText(defaults[3]);
+  m_ui.instSettingsLamMinEdit->setText(defaults[4]);
+  m_ui.instSettingsLamMaxEdit->setText(defaults[5]);
+  m_ui.instSettingsI0MonIndexEdit->setText(defaults[6]);
+  m_ui.instSettingsScaleFactorEdit->setText(defaults[7]);
 }
 
 /** Return selected analysis mode

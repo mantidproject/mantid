@@ -42,6 +42,9 @@ public:
 
   // Tell the presenter something happened
   virtual void notify(IReflRunsTabPresenter::Flag flag) = 0;
+
+  // Return current instrument
+  virtual std::string getCurrentInstrument() const = 0;
 };
 }
 }
