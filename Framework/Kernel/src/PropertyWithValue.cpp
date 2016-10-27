@@ -40,12 +40,9 @@ class TableWorkspace;
 class Workspace2D;
 class WorkspaceSingleValue;
 
-template <size_t nd>
-class MDEvent;
-template <size_t nd>
-class MDLeanEvent;
-template <class MDE, size_t nd>
-class MDEventWorkspace;
+template <size_t nd> class MDEvent;
+template <size_t nd> class MDLeanEvent;
+template <class MDE, size_t nd> class MDEventWorkspace;
 
 template <size_t nd> using MDEventWS = MDEventWorkspace<MDEvent<nd>, nd>;
 template <size_t nd>
