@@ -49,7 +49,7 @@ class BinWidthAtX(PythonAlgorithm):
             doc='The workspace containing the input data')
         self.declareProperty(
             name=self._PROP_X_VALUE, defaultValue=0.0,
-            direction=Direction.Input, doc='')
+            direction=Direction.Input, doc='The x value of the bin to use.')
         roundinghelper.declare_rounding_property(self)
         self.declareProperty(
             name=self._PROP_BIN_WIDTH, defaultValue=0.0,
