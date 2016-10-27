@@ -369,12 +369,12 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
 
   if (isOddSize) {
     auto histogram = out->histogram(0);
-    auto newSize = histogram.y().size() - 1;
-
     histogram.setSharedX(inputWS->sharedX(wsIndex));
     histogram.setSharedE(inputWS->sharedE(wsIndex));
 
+    auto newSize = histogram.y().size() - 1;
     histogram.resize(newSize);
+
     out->setHistogram(0, histogram);
   } else {
     out->setSharedX(0, inputWS->sharedX(wsIndex));

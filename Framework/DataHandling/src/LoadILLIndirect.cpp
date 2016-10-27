@@ -249,18 +249,16 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
                                     nb_monitors + nb_SD_detectors);
 
   // Assign fake values to first X axis
-  m_localWorkspace->setBinEdges(0, m_numberOfChannels + 1,
+  const HistogramData::BinEdges histoBinEdges(m_numberOfChannels + 1,
                                 HistogramData::LinearGenerator(1.0, 1.0));
+
 
   // First, Monitor
   for (size_t im = 0; im < nb_monitors; im++) {
 
-    m_localWorkspace->setSharedX(im, m_localWorkspace->sharedX(0));
-
-    // Assign Y
     int *monitor_p = monitorsData[im].data();
-    m_localWorkspace->mutableY(im)
-        .assign(monitor_p, monitor_p + m_numberOfChannels);
+	const HistogramData::Counts histoCounts(monitor_p, monitor_p + m_numberOfChannels);
+	m_localWorkspace->setHistogram(im, histoBinEdges, std::move(histoCounts));
 
     progress.report();
   }
@@ -269,19 +267,10 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   for (size_t i = 0; i < m_numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
 
-      // just copy the time binning axis to every spectra
-      m_localWorkspace->setSharedX((spec + nb_monitors),
-                                   m_localWorkspace->sharedX(0));
-
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      m_localWorkspace->mutableY(spec + nb_monitors)
-          .assign(data_p, data_p + m_numberOfChannels);
-
-      // Assign Error
-      auto &E = m_localWorkspace->mutableE(spec + nb_monitors);
-      std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-                     LoadILLIndirect::calculateError);
+	  const HistogramData::Counts histoCounts(data_p, data_p + m_numberOfChannels);
+	  m_localWorkspace->setHistogram((spec + nb_monitors), histoBinEdges, std::move(histoCounts));
 
       ++spec;
       progress.report();
@@ -291,14 +280,11 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   // Then add Simple Detector (SD)
   for (int i = 0; i < dataSD.dim0(); ++i) {
 
-    // just copy again the time binning axis to every spectra
-    m_localWorkspace->setSharedX((spec + nb_monitors + i),
-                                 m_localWorkspace->sharedX(0));
-
+	
     // Assign Y
     int *dataSD_p = &dataSD(i, 0, 0);
-    m_localWorkspace->mutableY(spec + nb_monitors + i)
-        .assign(dataSD_p, dataSD_p + m_numberOfChannels);
+	const HistogramData::Counts histoCounts(dataSD_p, dataSD_p + m_numberOfChannels);
+	m_localWorkspace->setHistogram((spec + nb_monitors + i), histoBinEdges, std::move(histoCounts));
 
     progress.report();
   }

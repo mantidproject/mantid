@@ -109,9 +109,9 @@ void UnwrapMonitor::exec() {
       // If the detector flightpath is missing, zero the data
       g_log.debug() << "Detector information for workspace index " << i
                     << " is not available.\n";
-      tempWS->mutableX(i).assign(tempWS->x(i).size(), 0.0);
-      tempWS->mutableY(i).assign(tempWS->y(i).size(), 0.0);
-      tempWS->mutableE(i).assign(tempWS->e(i).size(), 0.0);
+      tempWS->mutableX(i) = 0.0;
+      tempWS->mutableY(i) = 0.0;
+      tempWS->mutableE(i) = 0.0;
       continue;
     }
 
@@ -142,7 +142,7 @@ void UnwrapMonitor::exec() {
     // Get the maximum number of bins (excluding monitors) for the rebinning
     // below
     if (!spectrumInfo.isMonitor(i)) {
-      const size_t XLen = static_cast<int>(tempWS->x(i).size());
+      const size_t XLen = tempWS->x(i).size();
       if (XLen > max_bins)
         max_bins = XLen;
     }
