@@ -52,6 +52,7 @@ Bugs Resolved
 - Fixed a bug where checking or unchecking "show invisible workspaces" in View->Preferences->Mantid->Options would have no effect on workspaces loaded in the dock.
 - The Spectrum Viewer now reports two theta and azimuthal angle correctly.
 - Fixed crash when clicking "Help->Ask for Help" on Linux-based systems with Firefox set as the default browser.  
+- The "Plot Surface from Group" and "Plot Contour from Group" options have been fixed and now work for both histogram and point data. Note that all workspaces in the group must have the same X data.
 
 SliceViewer Improvements
 ------------------------
