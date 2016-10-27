@@ -1,7 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/ArrayProperty.h"
+
+// PropertyWithValue implementation
+#include "MantidKernel/PropertyWithValue.tcc"
 
 namespace Mantid {
 namespace Kernel {
