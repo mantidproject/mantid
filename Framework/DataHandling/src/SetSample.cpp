@@ -33,13 +33,13 @@ namespace {
  * the value.
  * @param args Dictionary-type containing the argument
  */
-long getAxisIndex(const Kernel::PropertyManager &args) {
+int64_t getAxisIndex(const Kernel::PropertyManager &args) {
   using Kernel::Property;
   using Kernel::PropertyWithValue;
-  long axisIdx(1);
+  int64_t axisIdx(1);
   if (args.existsProperty("Axis")) {
     Kernel::Property *axisProp = args.getProperty("Axis");
-    axisIdx = static_cast<PropertyWithValue<long> *>(axisProp)->operator()();
+    axisIdx = static_cast<PropertyWithValue<int64_t> *>(axisProp)->operator()();
     if (axisIdx < 0 || axisIdx > 2)
       throw std::invalid_argument(
           "Geometry.Axis value must be either 0,1,2 (X,Y,Z)");
@@ -55,7 +55,7 @@ long getAxisIndex(const Kernel::PropertyManager &args) {
   * @param axis The index of the height-axis of the cylinder
   */
 V3D cylBaseCentre(const std::vector<double> &cylCentre, double height,
-                  long axisIdx) {
+                  int64_t axisIdx) {
   const V3D halfHeight = [&]() {
     switch (axisIdx) {
     case 0:
@@ -76,7 +76,7 @@ V3D cylBaseCentre(const std::vector<double> &cylCentre, double height,
  * @param axisIdx Index 0,1,2 for the axis of a cylinder
  * @return A string containing the axis tag for this index
  */
-std::string axisXML(long axisIdx) {
+std::string axisXML(int64_t axisIdx) {
   switch (axisIdx) {
   case 0:
     return "<axis x=\"1\" y=\"0\" z=\"0\" />";
@@ -386,7 +386,7 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
   double outerRadius =
       hollow ? args.getProperty("OuterRadius") : args.getProperty("Radius");
   std::vector<double> centre = args.getProperty("Center");
-  long axisIdx = getAxisIndex(args);
+  int64_t axisIdx = getAxisIndex(args);
   // convert to metres
   height *= 0.01;
   innerRadius *= 0.01;
