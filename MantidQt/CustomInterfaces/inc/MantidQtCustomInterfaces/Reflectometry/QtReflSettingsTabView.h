@@ -54,6 +54,8 @@ public:
   std::string getStitchOptions() const override;
   /// Return selected analysis mode
   std::string getAnalysisMode() const override;
+  /// Return direct beam
+  std::string getDirectBeam() const override;
   /// Return CRho
   std::string getCRho() const override;
   /// Return CAlpha
@@ -62,8 +64,12 @@ public:
   std::string getCAp() const override;
   /// Return Cpp
   std::string getCPp() const override;
-  /// Return direct beam
-  std::string getDirectBeam() const override;
+  /// Return momentum transfer limits
+  std::string getMomentumTransferLimits() const override;
+  /// Return detector limits
+  std::string getDetectorLimits() const override;
+  /// Return scale factor
+  std::string getScaleFactor() const override;
   /// Return selected polarisation corrections
   std::string getPolarisationCorrections() const override;
   /// Return monitor integral wavelength min
@@ -80,12 +86,6 @@ public:
   std::string getLambdaMax() const override;
   /// Return I0MonitorIndex
   std::string getI0MonitorIndex() const override;
-  /// Return scale factor
-  std::string getScaleFactor() const override;
-  /// Return momentum transfer limits
-  std::string getMomentumTransferLimits() const override;
-  /// Return detector limits
-  std::string getDetectorLimits() const override;
   /// Set default values for experiment and instrument settings
   void setExpDefaults(std::vector<QString> defaults) const override;
   void setInstDefaults(std::vector<QString> defaults) const override;

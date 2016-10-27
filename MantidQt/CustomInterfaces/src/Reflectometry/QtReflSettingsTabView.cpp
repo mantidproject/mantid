@@ -143,6 +143,8 @@ void QtReflSettingsTabView::setExpDefaults(
   int pcIndex = m_ui.polCorrComboBox->findText(defaults[1]);
   if (pcIndex != -1)
     m_ui.polCorrComboBox->setCurrentIndex(pcIndex);
+
+  m_ui.expSettingsScaleFactorEdit->setText(defaults[2]);
 }
 
 /* Sets default values for all instrument settings given a list of default
@@ -158,7 +160,6 @@ void QtReflSettingsTabView::setInstDefaults(
   m_ui.instSettingsLamMinEdit->setText(defaults[4]);
   m_ui.instSettingsLamMaxEdit->setText(defaults[5]);
   m_ui.instSettingsI0MonIndexEdit->setText(defaults[6]);
-  m_ui.expSettingsScaleFactorEdit->setText(defaults[7]);
 }
 
 /** Return selected analysis mode
@@ -167,6 +168,14 @@ void QtReflSettingsTabView::setInstDefaults(
 std::string QtReflSettingsTabView::getAnalysisMode() const {
 
   return m_ui.analysisModeComboBox->currentText().toStdString();
+}
+
+/** Return direct beam
+* @return :: direct beam range
+*/
+std::string QtReflSettingsTabView::getDirectBeam() const {
+
+  return m_ui.expSettingsDirectBeamEdit->text().toStdString();
 }
 
 /** Return CRho
@@ -201,12 +210,28 @@ std::string QtReflSettingsTabView::getCPp() const {
   return m_ui.expSettingsCPpEdit->text().toStdString();
 }
 
-/** Return direct beam
-* @return :: direct beam range
+/** Return momentum transfer limits
+* @return :: momentum transfer limits
 */
-std::string QtReflSettingsTabView::getDirectBeam() const {
+std::string QtReflSettingsTabView::getMomentumTransferLimits() const {
 
-  return m_ui.expSettingsDirectBeamEdit->text().toStdString();
+  return m_ui.expSettingsMomentumTransferLimitsEdit->text().toStdString();
+}
+
+/** Return detector limits
+* @return :: detector limits
+*/
+std::string QtReflSettingsTabView::getDetectorLimits() const {
+
+  return m_ui.expSettingsDetLimitsEdit->text().toStdString();
+}
+
+/** Return scale factor
+* @return :: scale factor
+*/
+std::string QtReflSettingsTabView::getScaleFactor() const {
+
+  return m_ui.expSettingsScaleFactorEdit->text().toStdString();
 }
 
 /** Return selected polarisation corrections
@@ -271,30 +296,6 @@ std::string QtReflSettingsTabView::getLambdaMax() const {
 std::string QtReflSettingsTabView::getI0MonitorIndex() const {
 
   return m_ui.instSettingsI0MonIndexEdit->text().toStdString();
-}
-
-/** Return scale factor
-* @return :: scale factor
-*/
-std::string QtReflSettingsTabView::getScaleFactor() const {
-
-  return m_ui.expSettingsScaleFactorEdit->text().toStdString();
-}
-
-/** Return momentum transfer limits
-* @return :: momentum transfer limits
-*/
-std::string QtReflSettingsTabView::getMomentumTransferLimits() const {
-
-  return m_ui.expSettingsMomentumTransferLimitsEdit->text().toStdString();
-}
-
-/** Return detector limits
-* @return :: detector limits
-*/
-std::string QtReflSettingsTabView::getDetectorLimits() const {
-
-  return m_ui.expSettingsDetLimitsEdit->text().toStdString();
 }
 
 } // namespace CustomInterfaces

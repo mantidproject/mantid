@@ -307,6 +307,7 @@ void ReflSettingsTabPresenter::getExpDefaults() {
   std::vector<std::string> defaults;
   defaults.push_back(alg->getPropertyValue("AnalysisMode"));
   defaults.push_back(alg->getPropertyValue("PolarizationAnalysis"));
+  defaults.push_back(alg->getPropertyValue("ScaleFactor"));
 
   // Convert to QString vector and set defaults in view
   std::vector<QString> defaults_qstr;
@@ -343,7 +344,6 @@ void ReflSettingsTabPresenter::getInstDefaults() {
   defaults.push_back(inst->getNumberParameter("LambdaMin")[0]);
   defaults.push_back(inst->getNumberParameter("LambdaMax")[0]);
   defaults.push_back(inst->getNumberParameter("I0MonitorIndex")[0]);
-  defaults.push_back(boost::lexical_cast<double>(alg->getPropertyValue("ScaleFactor")));
 
   // Convert to QString vector and set defaults in view
   std::vector<QString> defaults_qstr;

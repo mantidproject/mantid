@@ -34,7 +34,7 @@
                 <item row="0" column="0">
                   <widget class="QLabel" name="analysisModeLabel">
                     <property name="text">
-                      <string>Analysis Mode</string>
+                      <string>AnalysisMode</string>
                     </property>
                   </widget>
                 </item>

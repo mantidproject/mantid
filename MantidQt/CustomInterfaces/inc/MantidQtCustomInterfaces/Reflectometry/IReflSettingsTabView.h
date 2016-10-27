@@ -65,11 +65,14 @@ public:
 
   /// Experiment settings
   virtual std::string getAnalysisMode() const = 0;
+  virtual std::string getDirectBeam() const = 0;
   virtual std::string getCRho() const = 0;
   virtual std::string getCAlpha() const = 0;
   virtual std::string getCAp() const = 0;
   virtual std::string getCPp() const = 0;
-  virtual std::string getDirectBeam() const = 0;
+  virtual std::string getMomentumTransferLimits() const = 0;
+  virtual std::string getDetectorLimits() const = 0;
+  virtual std::string getScaleFactor() const = 0;
   virtual std::string getPolarisationCorrections() const = 0;
   /// Instrument settings
   virtual std::string getMonitorIntegralMin() const = 0;
@@ -79,9 +82,6 @@ public:
   virtual std::string getLambdaMin() const = 0;
   virtual std::string getLambdaMax() const = 0;
   virtual std::string getI0MonitorIndex() const = 0;
-  virtual std::string getScaleFactor() const = 0;
-  virtual std::string getMomentumTransferLimits() const = 0;
-  virtual std::string getDetectorLimits() const = 0;
 
   /// Request presenter to obtain default values for settings
   virtual void requestExpDefaults() const = 0;
