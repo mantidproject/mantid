@@ -34,6 +34,11 @@ public:
   validatePlotOptions(MantidSurfacePlotDialog::UserInputSurface &options,
                       int nWorkspaces);
 
+  /// Tests if WorkspaceGroup contents all have same X for given spectrum
+  static bool
+  groupContentsHaveSameX(const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
+                         const size_t index);
+
 private:
   /// Type of graph to plot
   enum class Type { Surface, Contour };
@@ -61,6 +66,11 @@ private:
   /// Get X axis title
   QString getXAxisTitle(
       const boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup) const;
+
+  /// Validate chosen workspaces/spectra
+  void validateWorkspaceChoices(
+      const boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup,
+      const size_t spectrum) const;
 
   /// Pointer to the Mantid UI
   MantidUI *const m_mantidUI;

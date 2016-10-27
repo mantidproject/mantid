@@ -52,7 +52,13 @@ void MantidGroupPlotGenerator::plot(
     const MantidSurfacePlotDialog::UserInputSurface &options) const {
   if (wsGroup && options.accepted) {
     // Set up one new matrix workspace to hold all the data for plotting
-    auto matrixWS = createWorkspaceForGroupPlot(graphType, wsGroup, options);
+    MatrixWorkspace_sptr matrixWS;
+    try {
+      matrixWS = createWorkspaceForGroupPlot(graphType, wsGroup, options);
+    } catch (const std::logic_error &err) {
+      m_mantidUI->showCritical(err.what());
+      return;
+    }
 
     // Generate X axis title
     const auto &xLabelQ = getXAxisTitle(wsGroup);
@@ -98,17 +104,12 @@ const MatrixWorkspace_sptr
 MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
     Type graphType, WorkspaceGroup_const_sptr wsGroup,
     const MantidSurfacePlotDialog::UserInputSurface &options) const {
-  if (!wsGroup || wsGroup->size() == 0) {
-    throw std::invalid_argument("Must provide a non-empty WorkspaceGroup");
-  }
-
-  if (!groupIsAllMatrixWorkspaces(wsGroup)) {
-    throw std::invalid_argument(
-        "Input WorkspaceGroup must only contain MatrixWorkspaces");
-  }
-
-  const auto index = options.plotIndex;  // which spectrum to plot from each WS
+  const auto index = static_cast<size_t>(
+      options.plotIndex);                // which spectrum to plot from each WS
   const auto &logName = options.logName; // Log to read for axis of XYZ plot
+
+  validateWorkspaceChoices(wsGroup, index);
+
   // Create workspace to hold the data
   // Each "spectrum" will be the data from one workspace
   const auto nWorkspaces = wsGroup->getNumberOfEntries();
@@ -138,7 +139,6 @@ MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
         boost::dynamic_pointer_cast<const MatrixWorkspace>(wsGroup->getItem(i));
     if (ws) {
       // Make sure the X data is set as the correct mode
-
       if (xMode == Histogram::XMode::BinEdges) {
         matrixWS->setBinEdges(i, ws->binEdges(index));
       } else {
@@ -289,4 +289,84 @@ QString MantidGroupPlotGenerator::getXAxisTitle(
     xAxisTitle.append(" (").append(xAxisUnits.c_str()).append(")");
   }
   return xAxisTitle;
+}
+
+/**
+ * Test if all workspaces in the group have the same X data for the given
+ * spectrum.
+ * (At the moment just tests size of X data)
+ * Precondition: wsGroup contains only MatrixWorkspaces
+ *
+ * @param wsGroup :: [input] Group to test
+ * @param index :: [input] Index of spectrum to test
+ * @return :: True if X data same, else false.
+ */
+bool MantidGroupPlotGenerator::groupContentsHaveSameX(
+    const Mantid::API::WorkspaceGroup_const_sptr &wsGroup, const size_t index) {
+  if (!wsGroup) {
+    return false;
+  }
+
+  // Check and retrieve X data for given workspace, spectrum
+  const auto getXData = [&wsGroup](const size_t workspace,
+                                   const size_t spectrum) {
+    const auto &ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem(workspace));
+    if (ws) {
+      if (ws->getNumberHistograms() < spectrum) {
+        throw std::logic_error("Spectrum index too large for some workspaces");
+      } else {
+        return ws->x(spectrum);
+      }
+    } else {
+      throw std::logic_error(
+          "Group contains something other than MatrixWorkspaces");
+    }
+  };
+
+  const auto nWorkspaces = wsGroup->size();
+  switch (nWorkspaces) {
+  case 0:
+    return false;
+  case 1:
+    return true; // all spectra (only 1) have same X
+  default:
+    bool allSameX = true;
+    const auto &firstX = getXData(0, index);
+    for (size_t i = 1; i < nWorkspaces; ++i) {
+      const auto &x = getXData(i, index);
+      if (x.size() != firstX.size()) {
+        allSameX = false;
+        break;
+      }
+    }
+    return allSameX;
+  }
+}
+
+/**
+ * Validate the supplied workspace group and spectrum index.
+ * - Group must not be empty
+ * - Group must only contain MatrixWorkspaces
+ * - Group must have same X data for all workspaces
+ * @param wsGroup :: [input] Workspace group to test
+ * @param spectrum :: [input] Spectrum index to test
+ * @throws std::invalid_argument if validation fails.
+ */
+void MantidGroupPlotGenerator::validateWorkspaceChoices(
+    const boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup,
+    const size_t spectrum) const {
+  if (!wsGroup || wsGroup->size() == 0) {
+    throw std::invalid_argument("Must provide a non-empty WorkspaceGroup");
+  }
+
+  if (!groupIsAllMatrixWorkspaces(wsGroup)) {
+    throw std::invalid_argument(
+        "Input WorkspaceGroup must only contain MatrixWorkspaces");
+  }
+
+  if (!groupContentsHaveSameX(wsGroup, spectrum)) {
+    throw std::invalid_argument(
+        "Input WorkspaceGroup must have same X data for all workspaces");
+  }
 }
