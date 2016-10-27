@@ -68,6 +68,7 @@ private:
 protected:
   void setFunction();
   void addWorkspaces();
+  std::vector<std::string> getCostFunctionNames() const;
 
   /// Keep the domain type
   API::IDomainCreator::DomainType m_domainType{API::IDomainCreator::Simple};

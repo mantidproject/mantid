@@ -1,5 +1,6 @@
 set ( SRC_FILES
 	src/Algorithms/CalculateChiSquared.cpp
+	src/Algorithms/CalculateCostFunction.cpp
 	src/Algorithms/ConvertToYSpace.cpp
 	src/Algorithms/ConvolveWorkspaces.cpp
 	src/Algorithms/CrystalFieldEnergies.cpp
@@ -146,6 +147,7 @@ set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
 
 set ( INC_FILES
 	inc/MantidCurveFitting/Algorithms/CalculateChiSquared.h
+	inc/MantidCurveFitting/Algorithms/CalculateCostFunction.h
 	inc/MantidCurveFitting/Algorithms/ConvertToYSpace.h
 	inc/MantidCurveFitting/Algorithms/ConvolveWorkspaces.h
 	inc/MantidCurveFitting/Algorithms/CrystalFieldEnergies.h
@@ -300,6 +302,7 @@ set ( TEST_FILES
 	# RefinePowderInstrumentParametersTest.h
 	#SCDPanelErrorsTest.h
 	Algorithms/CalculateChiSquaredTest.h
+	Algorithms/CalculateCostFunctionTest.h
 	Algorithms/ConvertToYSpaceTest.h
 	Algorithms/ConvolveWorkspacesTest.h
 	Algorithms/EstimatePeakErrorsTest.h
