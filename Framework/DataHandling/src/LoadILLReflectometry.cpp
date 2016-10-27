@@ -381,18 +381,16 @@ void LoadILLReflectometry::loadDataIntoTheWorkSpace(
   // Load monitors
   for (size_t im = 0; im < nb_monitors; im++) {
     int *monitor_p = monitorsData[im].data();
-    HistogramData::Counts histoCounts(monitor_p,
-                                      monitor_p + m_numberOfChannels);
-    HistogramData::Histogram histo(binEdges, std::move(histoCounts));
-    m_localWorkspace->setHistogram(im, std::move(histo));
+    const HistogramData::Counts histoCounts(monitor_p,
+                                            monitor_p + m_numberOfChannels);
+    m_localWorkspace->setHistogram(im, binEdges, std::move(histoCounts));
 
     progress.report();
   }
 
   const HistogramData::Counts histoCounts(data(), data() + m_numberOfChannels);
-  const HistogramData::Histogram histo(std::move(binEdges),
-                                       std::move(histoCounts));
-  m_localWorkspace->setHistogram((spec + nb_monitors), std::move(histo));
+  m_localWorkspace->setHistogram((spec + nb_monitors), std::move(binEdges),
+                                 std::move(histoCounts));
 
 } // LoadILLIndirect::loadDataIntoTheWorkSpace
 

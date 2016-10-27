@@ -253,13 +253,12 @@ LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
       std::vector<double> positionsBinning;
       positionsBinning.reserve(vectorSize);
 
-      HistogramData::BinEdges histoBinEdges(
+      const HistogramData::BinEdges histoBinEdges(
           vectorSize, HistogramData::LinearGenerator(0.0, 1.0));
-      HistogramData::Counts histoCounts(data(), data() + data.dim2());
-      HistogramData::Histogram histo(std::move(histoBinEdges),
-                                     std::move(histoCounts));
+      const HistogramData::Counts histoCounts(data(), data() + data.dim2());
 
-      m_localWorkspace->setHistogram(firstIndex, std::move(histo));
+      m_localWorkspace->setHistogram(firstIndex, std::move(histoBinEdges),
+                                     std::move(histoCounts));
 
       // Add average monitor counts to a property:
       double averageMonitorCounts =
@@ -301,12 +300,11 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromHorizontalTubes(
 
   const size_t spec = numberOfPixelsPerTube * numberOfTubes;
 
-  HistogramData::BinEdges binEdges(timeBinning);
-  HistogramData::Counts histoCounts(data(), data() + data.dim2());
+  const HistogramData::BinEdges binEdges(timeBinning);
+  const HistogramData::Counts histoCounts(data(), data() + data.dim2());
 
-  HistogramData::Histogram histo(std::move(binEdges), std::move(histoCounts));
-
-  m_localWorkspace->setHistogram(firstIndex, histo);
+  m_localWorkspace->setHistogram(firstIndex, std::move(binEdges),
+                                 std::move(histoCounts));
   progress.report();
 
   g_log.debug() << "Data loading into WS done....\n";
@@ -338,9 +336,9 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
 
   const HistogramData::BinEdges binEdges(timeBinning);
   const HistogramData::Counts histoCounts(data(), data() + data.dim2());
-  const HistogramData::Histogram histo(std::move(binEdges),
-                                       std::move(histoCounts));
-  m_localWorkspace->setHistogram(firstIndex, std::move(histo));
+
+  m_localWorkspace->setHistogram(firstIndex, std::move(binEdges),
+                                 std::move(histoCounts));
 
   progress.report();
 
