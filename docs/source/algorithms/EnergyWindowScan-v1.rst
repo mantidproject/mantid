@@ -28,17 +28,6 @@ Usage
                              Reflection='002', SpectraRange='3, 50', ElasticRange='-0.5, 0',
                              InelasticRange='0, 0.5', GroupingMethod='Individual', MSDFit=True)
 
-    print("MSD Result:")
-    print 'A0: ' + str(mtd['Scan_msd'].readY(0))
-    print 'A1: ' + str(mtd['Scan_msd'].readY(1))
-
-Output:
-
-.. testoutput:: ExDataFit
-
-    MSD Result:
-    A0: [-2.45452609]
-    A1: [ 0.16692898]
 
 .. categories::
 

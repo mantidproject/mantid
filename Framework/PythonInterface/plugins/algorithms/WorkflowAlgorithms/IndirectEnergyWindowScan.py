@@ -96,7 +96,7 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
                              StringListValidator(sampEnvLogVal_type),
                              doc='Value selection of the sample environment log entry')
 
-        self.declareProperty(name='msdFit', defaultValue=False,
+        self.declareProperty(name='MSDFit', defaultValue=False,
                              doc='Perform an msdFit')
 
         self.declareProperty(name='Plot', defaultValue=False,
@@ -124,7 +124,7 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
         scan_alg.setProperty('GroupingMethod', self._grouping_method)
         scan_alg.setProperty('SampleEnvironmentLogName', self._sample_log_name)
         scan_alg.setProperty('SampleEnvironmentLogValue', self._sample_log_value)
-        scan_alg.setProperty('msdFit', self._msdfit)
+        scan_alg.setProperty('MSDFit', self._msdfit)
         scan_alg.setProperty('ReducedWorkspace', self._output_ws)
         scan_alg.setProperty('ScanWorkspace', self._scan_ws)
         scan_alg.execute()

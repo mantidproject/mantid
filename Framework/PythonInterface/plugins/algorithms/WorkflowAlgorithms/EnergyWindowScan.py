@@ -117,8 +117,8 @@ class EnergyWindowScan(DataProcessorAlgorithm):
                              StringListValidator(sampEnvLogVal_type),
                              doc='Value selection of the sample environment log entry')
 
-        self.declareProperty(name='msdFit', defaultValue=False,
-                             doc='Perform an msdFit')
+        self.declareProperty(name='MSDFit', defaultValue=False,
+                             doc='Perform an MSDFit')
 
         # Output properties
         self.declareProperty(name='ReducedWorkspace', defaultValue='Reduced',
@@ -297,7 +297,7 @@ class EnergyWindowScan(DataProcessorAlgorithm):
 
         self._output_x_units = 'DeltaE'
 
-        self._msdfit = self.getProperty('msdFit').value
+        self._msdfit = self.getProperty('MSDFit').value
 
         self._output_ws = self.getPropertyValue('ReducedWorkspace')
         self._sample_log_name = self.getPropertyValue('SampleEnvironmentLogName')
