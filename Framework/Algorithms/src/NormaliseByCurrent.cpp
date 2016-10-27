@@ -52,7 +52,6 @@ double NormaliseByCurrent::extractCharge(
   }
   // Handle multiperiod data.
   // The number of periods is set above by reference
-  // cppcheck-suppress knownConditionTrueFalse
   if (nPeriods > 1) {
     // Fetch the period property
     Property *currentPeriodNumberProperty = run.getLogData("current_period");
