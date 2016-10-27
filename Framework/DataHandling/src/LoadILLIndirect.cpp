@@ -249,16 +249,16 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
                                     nb_monitors + nb_SD_detectors);
 
   // Assign fake values to first X axis
-  const HistogramData::BinEdges histoBinEdges(m_numberOfChannels + 1,
-                                HistogramData::LinearGenerator(1.0, 1.0));
-
+  const HistogramData::BinEdges histoBinEdges(
+      m_numberOfChannels + 1, HistogramData::LinearGenerator(1.0, 1.0));
 
   // First, Monitor
   for (size_t im = 0; im < nb_monitors; im++) {
 
     int *monitor_p = monitorsData[im].data();
-	const HistogramData::Counts histoCounts(monitor_p, monitor_p + m_numberOfChannels);
-	m_localWorkspace->setHistogram(im, histoBinEdges, std::move(histoCounts));
+    const HistogramData::Counts histoCounts(monitor_p,
+                                            monitor_p + m_numberOfChannels);
+    m_localWorkspace->setHistogram(im, histoBinEdges, std::move(histoCounts));
 
     progress.report();
   }
@@ -269,8 +269,10 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
 
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-	  const HistogramData::Counts histoCounts(data_p, data_p + m_numberOfChannels);
-	  m_localWorkspace->setHistogram((spec + nb_monitors), histoBinEdges, std::move(histoCounts));
+      const HistogramData::Counts histoCounts(data_p,
+                                              data_p + m_numberOfChannels);
+      m_localWorkspace->setHistogram((spec + nb_monitors), histoBinEdges,
+                                     std::move(histoCounts));
 
       ++spec;
       progress.report();
@@ -280,11 +282,12 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   // Then add Simple Detector (SD)
   for (int i = 0; i < dataSD.dim0(); ++i) {
 
-	
     // Assign Y
     int *dataSD_p = &dataSD(i, 0, 0);
-	const HistogramData::Counts histoCounts(dataSD_p, dataSD_p + m_numberOfChannels);
-	m_localWorkspace->setHistogram((spec + nb_monitors + i), histoBinEdges, std::move(histoCounts));
+    const HistogramData::Counts histoCounts(dataSD_p,
+                                            dataSD_p + m_numberOfChannels);
+    m_localWorkspace->setHistogram((spec + nb_monitors + i), histoBinEdges,
+                                   std::move(histoCounts));
 
     progress.report();
   }
