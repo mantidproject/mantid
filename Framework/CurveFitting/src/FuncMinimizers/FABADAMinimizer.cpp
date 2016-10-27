@@ -1,32 +1,33 @@
-#include "MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h"
-#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
-#include "MantidCurveFitting//Constraints/BoundaryConstraint.h"
-
-#include <cstdio>
-#include <cstdlib>
-#include <ctime>
-
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/TableRow.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
+
+#include "MantidCurveFitting//Constraints/BoundaryConstraint.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h"
+
+#include "MantidHistogramData/LinearGenerator.h"
+
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 
-#include "MantidKernel/Logger.h"
-
+#include <boost/random/mersenne_twister.hpp>
 #include <boost/random/normal_distribution.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
-#include <boost/random/mersenne_twister.hpp>
 #include <boost/version.hpp>
 #include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -547,12 +548,8 @@ void FABADAMinimizer::finalize() {
 
     // Do one iteration for each parameter plus one for Chi square.
     for (size_t j = 0; j < m_nParams + 1; ++j) {
-      auto &X = wsC->mutableX(j);
-      auto &Y = wsC->mutableY(j);
-      for (size_t k = 0; k < chain_length; ++k) {
-        X[k] = double(k);
-        Y[k] = m_chain[j][k];
-      }
+      wsC->setPoints(j, chain_length, HistogramData::LinearGenerator(0.0, 1.0));
+	  wsC->mutableY(j) = m_chain[j];	  
     }
 
     // Set and name the workspace for the complete chain

@@ -226,7 +226,7 @@ void VesuvioCalculateMS::cacheInputs() {
   if (nInputAtomProps != nExptdAtomProp * nmasses) {
     std::ostringstream os;
     os << "Inconsistent AtomicProperties list defined. Expected "
-       << nExptdAtomProp *nmasses << " values, however, only "
+       << nExptdAtomProp * nmasses << " values, however, only "
        << sampleInfo.size() << " have been given.";
     throw std::invalid_argument(os.str());
   }
@@ -375,9 +375,9 @@ void VesuvioCalculateMS::assignToOutput(
   for (size_t i = 1; i < m_nscatters; ++i) //(i >= 1 for multiple scatters)
   {
     const auto &counts = avgCounts.sim.counts[i];
-    // equivalent to msscatY[j] += counts[j]
-    std::transform(counts.begin(), counts.end(), msscatY.begin(),
-                   msscatY.begin(), std::plus<double>());
+
+    msscatY += counts;
+
     const auto &scerrors = avgCounts.errors[i];
     // sum errors in quadrature
     std::transform(scerrors.begin(), scerrors.end(), msscatE.begin(),
