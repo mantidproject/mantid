@@ -52,8 +52,7 @@ namespace Kernel {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <typename TYPE>
-class MANTID_KERNEL_DLL PropertyWithValue : public Property {
+template <typename TYPE> class PropertyWithValue : public Property {
 public:
   PropertyWithValue(
       const std::string &name, const TYPE &defaultValue,
