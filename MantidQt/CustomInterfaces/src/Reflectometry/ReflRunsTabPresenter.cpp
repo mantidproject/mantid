@@ -202,7 +202,7 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   if (searchAlg->isExecuted()) {
     ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
     m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
-        *getTransferStrategy(), results, m_view->getSearchInstrument()));
+        *getTransferStrategy(), results, getCurrentInstrumentName()));
     m_view->showSearch(m_searchModel);
   }
 }
@@ -367,7 +367,7 @@ std::string ReflRunsTabPresenter::getPostprocessingOptions() const {
 Gets the currently selected (or default) instrument
 * @return : The current instrument
 */
-std::string ReflRunsTabPresenter::getCurrentInstrument() const {
+std::string ReflRunsTabPresenter::getCurrentInstrumentName() const {
   return m_view->getSearchInstrument();
 }
 

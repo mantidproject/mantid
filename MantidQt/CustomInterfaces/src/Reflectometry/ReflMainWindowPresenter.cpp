@@ -139,9 +139,9 @@ ReflMainWindowPresenter::runPythonAlgorithm(const std::string &pythonCode) {
   return m_view->runPythonAlgorithm(pythonCode);
 }
 
-std::string ReflMainWindowPresenter::getInstrument() const {
+std::string ReflMainWindowPresenter::getInstrumentName() const {
 
-  return m_runsPresenter->getCurrentInstrument();
+  return m_runsPresenter->getCurrentInstrumentName();
 }
 
 /** Checks for null pointer

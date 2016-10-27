@@ -54,8 +54,8 @@ public:
   std::string getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions() const override;
-  /// Returns instrument
-  std::string getInstrument() const override;
+  /// Returns instrument name
+  std::string getInstrumentName() const override;
 
   /// Dialog/Prompt methods
   std::string askUserString(const std::string &prompt, const std::string &title,

@@ -1,15 +1,11 @@
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflSettingsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsTabPresenter.h"
 #include "MantidQtMantidWidgets/HintingLineEdit.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidGeometry/Instrument_fwd.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 using namespace MantidQt::MantidWidgets;
-using namespace Mantid::API;
-using namespace Mantid::Geometry;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor

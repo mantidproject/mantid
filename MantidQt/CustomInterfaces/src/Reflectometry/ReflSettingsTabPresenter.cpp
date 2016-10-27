@@ -3,11 +3,10 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/algorithm/algorithm.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -330,7 +329,7 @@ void ReflSettingsTabPresenter::getInstDefaults() {
     AlgorithmManager::Instance().create("LoadEmptyInstrument");
   loadInst->setChild(true);
   loadInst->setProperty("OutputWorkspace", "outWs");
-  loadInst->setProperty("InstrumentName", m_mainPresenter->getInstrument());
+  loadInst->setProperty("InstrumentName", m_mainPresenter->getInstrumentName());
   loadInst->execute();
   MatrixWorkspace_const_sptr ws = loadInst->getProperty("OutputWorkspace");
   auto inst = ws->getInstrument();
