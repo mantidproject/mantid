@@ -67,6 +67,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/PeaksViewerOverlayDialog.h
 	inc/MantidQtSliceViewer/PeaksWorkspaceWidget.h
 	inc/MantidQtSliceViewer/ProxyCompositePeaksPresenter.h
+	inc/MantidQtSliceViewer/QConversionScale.h
 	inc/MantidQtSliceViewer/QPeaksTableModel.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerFunctions.h

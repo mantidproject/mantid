@@ -4,7 +4,7 @@
 #include <qpainter.h>
 #include <QRect>
 #include <QShowEvent>
-
+#include "MantidQtSliceViewer\QConversionScale.h"
 #include "MantidKernel/Utils.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -145,6 +145,7 @@ namespace MantidQt {
                   }
 
                   calculateTickMarks(displayNum);
+				  
                 }
 
                 void NonOrthogonalOverlay::setAxesPoints() {
@@ -187,34 +188,19 @@ namespace MantidQt {
                 void NonOrthogonalOverlay::calculateTickMarks(
                     int tickNum) { // assumes X axis
                   clearAllAxisPointVectors();
-                  std::cout << "redrawing with ticks as: " << tickNum
-                            << std::endl;
-                                        double axisPoint;
-                                        double percentageOfLine(
-                                            (m_XEndPoint - m_originPoint) /
-                                            tickNum);
-                                        for (int i = 0; i <= tickNum; i++) {
-                                                axisPoint = (percentageOfLine * i) + m_originPoint;
-						m_axisPointVec.push_back(axisPoint);
-                                                m_xAxisTickStartVec.push_back(
-                                                    skewMatrixApply(
-                                                        axisPoint,
-                                                        m_originPoint));
-                                                m_xAxisTickEndVec.push_back(
-                                                    skewMatrixApply(
-                                                        axisPoint,
-                                                        m_XEndPoint));
+                  double axisPoint;
+                  double percentageOfLine((m_XEndPoint - m_originPoint) / tickNum);
+                  for (int i = 0; i <= tickNum; i++) {
+					axisPoint = (percentageOfLine * i) + m_originPoint;
+					m_axisPointVec.push_back(axisPoint);
+                    m_xAxisTickStartVec.push_back(skewMatrixApply(axisPoint, m_originPoint));
+                    m_xAxisTickEndVec.push_back(skewMatrixApply(axisPoint, m_XEndPoint));
                                                 // m_originPoint * 1.05));
-                                                m_yAxisTickStartVec.push_back(
-                                                    skewMatrixApply(
-                                                        m_originPoint,
-                                                        axisPoint));
-                                                m_yAxisTickEndVec.push_back(
-                                                    skewMatrixApply(
+                    m_yAxisTickStartVec.push_back(skewMatrixApply(m_originPoint, axisPoint));
+                    m_yAxisTickEndVec.push_back(skewMatrixApply(m_XEndPoint, axisPoint));
                                                         // m_originPoint * 1.05,
-                                                        m_XEndPoint,
-                                                        axisPoint));
-                                        }
+                                                        
+                    }
 
 				}
 
