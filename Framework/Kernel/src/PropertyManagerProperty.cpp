@@ -2,9 +2,6 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 
-// PropertyWithValue implementation
-#include "MantidKernel/PropertyWithValue.tcc"
-
 namespace Mantid {
 namespace Kernel {
 
