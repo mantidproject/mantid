@@ -1,6 +1,9 @@
 #include "MantidKernel/MaskedProperty.h"
 #include "MantidKernel/PropertyHistory.h"
 
+// PropertyWithValue implementation
+#include "MantidKernel/PropertyWithValue.tcc"
+
 namespace Mantid {
 namespace Kernel {
 
