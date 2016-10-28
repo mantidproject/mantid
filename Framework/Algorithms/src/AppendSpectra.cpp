@@ -5,6 +5,9 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/TextAxis.h"
+
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -131,10 +134,45 @@ void AppendSpectra::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
   if (ws2min > ws1max)
     return;
 
+  const int yAxisNum = 1;
+  auto yAxisWS1 = ws1->getAxis(yAxisNum);  
+  auto yAxisWS2 = ws2->getAxis(yAxisNum);
+  auto outputYAxis = output->getAxis(yAxisNum);
+      // if spectra numbers
+
+  bool isSpectraAxis = (yAxisWS1->isSpectra() && yAxisWS2->isSpectra());
+  bool isTextAxis = (yAxisWS1->isText() && yAxisWS2->isText());
+  bool isNumericAxis = (yAxisWS1->isNumeric() && yAxisWS2->isNumeric());
+  
+  if (isSpectraAxis) {
+  
+    for (size_t i = 0; i < output->getNumberHistograms(); i++){
+      output->getSpectrum(i).setSpectrumNo(specnum_t(i));
+    }
+
+  } else if (isTextAxis) {
+    // auto yTextAxis = dynamic_cast<TextAxis *>(yAxisWS1);
+    auto outputTextAxis = dynamic_cast<TextAxis *>(outputYAxis);
+    
+    for (size_t i = 0; i < output->getNumberHistograms(); i++){
+    	outputTextAxis->setLabel(i, yAxisWS1->label(i));
+      output->getSpectrum(i).setSpectrumNo(specnum_t(i));
+    }
+  } else if (isNumericAxis) {
+    
+    // auto yNumericAxis = dynamic_cast<NumericAxis *>(yAxisWS1);
+    auto outputNumericAxis = dynamic_cast<NumericAxis *>(outputYAxis);
+    
+    for (size_t i = 0; i < output->getNumberHistograms(); i++){
+      outputYAxis->setValue(i, yAxisWS1->getValue(i));    
+      output->getSpectrum(i).setSpectrumNo(specnum_t(i));
+    }
+
+  } else {
+    throw 42;
+  }
   // change the axis by adding the maximum existing spectrum number to the
   // current value
-  for (size_t i = 0; i < output->getNumberHistograms(); i++)
-    output->getSpectrum(i).setSpectrumNo(specnum_t(i));
 }
 
 void AppendSpectra::combineLogs(const API::Run &lhs, const API::Run &rhs,
