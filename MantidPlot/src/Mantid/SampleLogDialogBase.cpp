@@ -87,7 +87,7 @@ void SampleLogDialogBase::importSelectedLogs() {
 * @param filter :: Type of filtering (default none)
 */
 void SampleLogDialogBase::showLogStatistics(
-    const SampleLogDialogBase::FilterType filter) {
+    const LogFilterGenerator::FilterType filter) {
   QList<QTreeWidgetItem *> items = m_tree->selectedItems();
   QListIterator<QTreeWidgetItem *> pItr(items);
   if (pItr.hasNext()) {
@@ -108,7 +108,7 @@ void SampleLogDialogBase::showLogStatistics(
 *	@date 05/11/2009
 */
 void SampleLogDialogBase::showLogStatisticsOfItem(
-    QTreeWidgetItem *item, const SampleLogDialogBase::FilterType filter) {
+    QTreeWidgetItem *item, const LogFilterGenerator::FilterType filter) {
   // Assume that you can't show the stats
   for (size_t i = 0; i < NUM_STATS; i++) {
     statValues[i]->setText(QString(""));

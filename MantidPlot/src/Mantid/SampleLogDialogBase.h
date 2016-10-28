@@ -5,7 +5,8 @@
 // Includes
 //----------------------------------
 #include <QDialog>
-#include <MantidAPI/ExperimentInfo.h>
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/LogFilterGenerator.h"
 
 //----------------------------------
 // Forward declarations
@@ -67,18 +68,18 @@ public:
   /// Virtual Destructor for derived classes
   virtual ~SampleLogDialogBase();
 
-  /// Types of filter that can be used
-  enum class FilterType { None, Status, Period, StatusAndPeriod };
-
 protected slots:
   /// Plot logs
   virtual void importSelectedLogs();
 
   /// Show the stats of the selected log
-  virtual void showLogStatistics(const FilterType filter = FilterType::None);
   virtual void
-  showLogStatisticsOfItem(QTreeWidgetItem *item,
-                          const FilterType filter = FilterType::None);
+  showLogStatistics(const Mantid::API::LogFilterGenerator::FilterType filter =
+                        Mantid::API::LogFilterGenerator::FilterType::None);
+  virtual void showLogStatisticsOfItem(
+      QTreeWidgetItem *item,
+      const Mantid::API::LogFilterGenerator::FilterType filter =
+          Mantid::API::LogFilterGenerator::FilterType::None);
 
   /// Context menu popup
   virtual void popupMenu(const QPoint &pos);
