@@ -27,10 +27,10 @@ QtReflSettingsTabView::~QtReflSettingsTabView() {}
 /**
 Initialise the Interface
 */
-void QtReflSettingsTabView::initLayout() { 
-  m_ui.setupUi(this); 
+void QtReflSettingsTabView::initLayout() {
+  m_ui.setupUi(this);
 
-  connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this, 
+  connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
           SLOT(requestExpDefaults()));
   connect(m_ui.getInstDefaultsButton, SIGNAL(clicked()), this,
           SLOT(requestInstDefaults()));
@@ -130,7 +130,7 @@ void QtReflSettingsTabView::requestInstDefaults() const {
   m_presenter->notify(IReflSettingsTabPresenter::InstDefaultsFlag);
 }
 
-/* Sets default values for all experiment settings given a list of default 
+/* Sets default values for all experiment settings given a list of default
 * values.
 */
 void QtReflSettingsTabView::setExpDefaults(
@@ -201,7 +201,7 @@ std::string QtReflSettingsTabView::getCAlpha() const {
 */
 std::string QtReflSettingsTabView::getCAp() const {
 
-	return m_ui.expSettingsCApEdit->text().toStdString();
+  return m_ui.expSettingsCApEdit->text().toStdString();
 }
 
 /** Return CPp
