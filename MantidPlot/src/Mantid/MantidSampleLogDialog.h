@@ -65,6 +65,9 @@ protected slots:
   /// Import a single item
   virtual void importItem(QTreeWidgetItem *item) override;
 
+  /// Slot when radio button changed
+  void onFilterChanged();
+
 protected:
   /// Filter radio buttons
   QRadioButton *filterNone, *filterStatus, *filterPeriod, *filterStatusPeriod;

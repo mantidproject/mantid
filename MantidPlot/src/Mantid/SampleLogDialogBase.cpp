@@ -84,8 +84,10 @@ void SampleLogDialogBase::importSelectedLogs() {
 *
 *	@author Martyn Gigg, Tessella Support Services plc
 *	@date 05/11/2009
+* @param filter :: Type of filtering (default none)
 */
-void SampleLogDialogBase::showLogStatistics() {
+void SampleLogDialogBase::showLogStatistics(
+    const SampleLogDialogBase::FilterType filter) {
   QList<QTreeWidgetItem *> items = m_tree->selectedItems();
   QListIterator<QTreeWidgetItem *> pItr(items);
   if (pItr.hasNext()) {
@@ -99,12 +101,14 @@ void SampleLogDialogBase::showLogStatistics() {
 * Show the stats of the log for the selected item
 *
 *	@param item :: The item to be imported
+* @param filter :: Type of filtering (default none)
 *	@throw invalid_argument if format identifier for the item is wrong
 *
 *	@author Martyn Gigg, Tessella Support Services plc
 *	@date 05/11/2009
 */
-void SampleLogDialogBase::showLogStatisticsOfItem(QTreeWidgetItem *item) {
+void SampleLogDialogBase::showLogStatisticsOfItem(
+    QTreeWidgetItem *item, const SampleLogDialogBase::FilterType filter) {
   // Assume that you can't show the stats
   for (size_t i = 0; i < NUM_STATS; i++) {
     statValues[i]->setText(QString(""));

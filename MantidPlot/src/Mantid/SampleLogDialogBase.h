@@ -67,13 +67,18 @@ public:
   /// Virtual Destructor for derived classes
   virtual ~SampleLogDialogBase();
 
+  /// Types of filter that can be used
+  enum class FilterType { None, Status, Period, StatusAndPeriod };
+
 protected slots:
   /// Plot logs
   virtual void importSelectedLogs();
 
   /// Show the stats of the selected log
-  virtual void showLogStatistics();
-  virtual void showLogStatisticsOfItem(QTreeWidgetItem *item);
+  virtual void showLogStatistics(const FilterType filter = FilterType::None);
+  virtual void
+  showLogStatisticsOfItem(QTreeWidgetItem *item,
+                          const FilterType filter = FilterType::None);
 
   /// Context menu popup
   virtual void popupMenu(const QPoint &pos);

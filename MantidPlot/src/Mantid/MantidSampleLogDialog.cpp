@@ -60,8 +60,7 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
 
   // Changing filter option updates stats
   for (auto *radioButton : filterRadioButtons) {
-    connect(radioButton, SIGNAL(toggled(bool)), this,
-            SLOT(showLogStatistics()));
+    connect(radioButton, SIGNAL(toggled(bool)), this, SLOT(onFilterChanged()));
   }
 
   // -------------- Statistics on logs ------------------------
@@ -150,4 +149,21 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem *item) {
   default:
     throw std::invalid_argument("Error importing log entry, wrong data type");
   }
+}
+
+/**
+ * Slot called when radio button is changed.
+ * Applies filter and displays statistics.
+ */
+void MantidSampleLogDialog::onFilterChanged() {
+  FilterType filter = FilterType::None;
+  if (filterStatus->isChecked()) {
+    filter = FilterType::Status;
+  } else if (filterPeriod->isChecked()) {
+    filter = FilterType::Period;
+  } else if (filterStatusPeriod->isChecked()) {
+    filter = FilterType::StatusAndPeriod;
+  }
+
+  showLogStatistics(filter);
 }
