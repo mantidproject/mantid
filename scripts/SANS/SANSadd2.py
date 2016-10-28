@@ -2,10 +2,13 @@
 import os
 from mantid.simpleapi import *
 from mantid.kernel import Logger
-from mantid.api import WorkspaceGroup, IEventWorkspace
+from mantid.api import WorkspaceGroup, IEventWorkspace, FileFinder
 
-from SANSUtility import (bundle_added_event_data_as_group, AddOperation, transfer_special_sample_logs)
+from SANSUtility import (AddOperation, transfer_special_sample_logs,
+                         bundle_added_event_data_as_group, WorkspaceType,
+                         get_workspace_type)
 from shutil import copyfile
+import h5py as h5
 
 sanslog = Logger("SANS")
 _NO_INDIVIDUAL_PERIODS = -1
@@ -13,61 +16,6 @@ ADD_FILES_SUM_TEMPORARY = "AddFilesSumTemporary"
 ADD_FILES_SUM_TEMPORARY_MONITORS = "AddFilesSumTemporary_monitors"
 ADD_FILES_NEW_TEMPORARY = "AddFilesNewTempory"
 ADD_FILES_NEW_TEMPORARY_MONITORS = "AddFilesNewTempory_monitors"
-
-
-class WorkspaceWrapper(object):
-    def __init__(self, workspace):
-        if workspace is None:
-            raise ValueError("WorkspaceWrapper: No valid workspace was provided.")
-        self._workspace = workspace
-        self._is_group_workspace = self._check_if_group_workspace(self._workspace)
-        self._reference_workspace = self._workspace[0] if self._is_group_workspace else self._workspace
-        self._is_event_data = self._check_if_is_event_data()
-
-    @staticmethod
-    def _check_if_group_workspace(workspace):
-        return True if isinstance(workspace, WorkspaceGroup) else False
-
-    def _check_if_is_event_data(self):
-        return isinstance(self._reference_workspace, IEventWorkspace)
-
-    def get_workspace(self, period=1):
-        if self._is_group_workspace:
-            ws = self._workspace[period-1]
-        else:
-            ws = self._workspace
-        return ws
-
-    def getRun(self):
-        return self._reference_workspace.getRun()
-
-    def getHistory(self):
-        return self._reference_workspace.getHistory()
-
-    @property
-    def is_event_workspace(self):
-        return self._is_event_data
-
-
-def add_multi_period_workspace(multi_period_workspace, adder, run_to_add):
-    group_workspace_name = multi_period_workspace.name()
-    workspace_sum = multi_period_workspace[0]
-    for index in range(1, len(multi_period_workspace)):
-        adder.add(LHS_workspace=workspace_sum, RHS_workspace=multi_period_workspace[index],
-                  output_workspace=workspace_sum, run_to_add=run_to_add)
-    # Now delete all workspaces exepct for the first one, starting from the back
-    for index in reversed(range(1, len(multi_period_workspace))):
-        DeleteWorkspace(multi_period_workspace[index])
-    UnGroupWorkspace(multi_period_workspace)
-    RenameWorkspace(workspace_sum, group_workspace_name)
-
-
-def handle_loaded_multi_period_file(workspace_name, monitor_name, adder, run_to_add, is_event):
-    workspace_group = mtd[workspace_name]
-    add_multi_period_workspace(multi_period_workspace=workspace_group, adder=adder, run_to_add=run_to_add)
-    if is_event:
-        workspace_group_monitors = mtd[monitor_name]
-        add_multi_period_workspace(multi_period_workspace=workspace_group_monitors, adder=adder, run_to_add=run_to_add)
 
 
 def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False,
@@ -112,10 +60,6 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
             lastPath, lastFile, logFile, num_periods, isFirstDataSetEvent = _loadWS(
                 userEntry, defType, inst, ADD_FILES_SUM_TEMPORARY, rawTypes, period)
 
-      # if event data prevent loop over periods makes no sense
-            if isFirstDataSetEvent:
-                period = _NO_INDIVIDUAL_PERIODS
-
             is_not_allowed_instrument = inst.upper() != 'SANS2D' and inst.upper() != 'LARMOR'
             if is_not_allowed_instrument and isFirstDataSetEvent:
                 error = 'Adding event data not supported for ' + inst + ' for now'
@@ -125,14 +69,6 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
                     if workspaceName in mtd:
                         DeleteWorkspace(workspaceName)
                 return ""
-
-            # If the loaded workspace is a multi-period workspace then we need to add those files together first
-            # In this way we get rid of the group workspace
-            is_first_data_set_group_workspace = isinstance(mtd[ADD_FILES_SUM_TEMPORARY], WorkspaceGroup)
-            if is_first_data_set_group_workspace:
-                handle_loaded_multi_period_file(workspace_name= ADD_FILES_SUM_TEMPORARY,
-                                                monitor_name=ADD_FILES_SUM_TEMPORARY_MONITORS,
-                                                adder=adder, run_to_add=1e10, is_event=isFirstDataSetEvent)
 
             for i in range(len(runs)-1):
                 userEntry = runs[i+1]
@@ -148,13 +84,6 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
                         if workspaceName in mtd:
                             DeleteWorkspace(workspaceName)
                     return ""
-
-                # If the loaded workspace is a multi-period workspace then we need to add those files together first
-                # In this way we get rid of the group worksapce
-                if isinstance(mtd[ADD_FILES_NEW_TEMPORARY], WorkspaceGroup):
-                    handle_loaded_multi_period_file(workspace_name=ADD_FILES_NEW_TEMPORARY,
-                                                    monitor_name=ADD_FILES_NEW_TEMPORARY_MONITORS,
-                                                    adder=adder, run_to_add=counter_run, is_event=isDataSetEvent)
 
                 adder.add(LHS_workspace=ADD_FILES_SUM_TEMPORARY,RHS_workspace=ADD_FILES_NEW_TEMPORARY,
                           output_workspace=ADD_FILES_SUM_TEMPORARY, run_to_add=counter_run)
@@ -195,7 +124,6 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
         outFile_monitors = lastFile+'-add_monitors.'+'nxs'
         logger.notice('writing file:   '+outFile)
 
-
         if period == 1 or period == _NO_INDIVIDUAL_PERIODS:
         #replace the file the first time around
             SaveNexusProcessed(InputWorkspace=ADD_FILES_SUM_TEMPORARY,
@@ -224,7 +152,11 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
             period += 1
 
     if isFirstDataSetEvent and saveAsEvent:
-        outFile = bundle_added_event_data_as_group(outFile, outFile_monitors)
+        filename, ext = _makeFilename(runs[0], defType, inst)
+        workspace_type = get_workspace_type(filename)
+        is_multi_period = True if workspace_type is WorkspaceType.MultiperiodEvent else False
+        outFile = bundle_added_event_data_as_group(outFile, outFile_monitors, is_multi_period)
+
 
   #this adds the path to the filename
     path,base = os.path.split(outFile)
@@ -263,7 +195,8 @@ def handle_saving_event_workspace_when_saving_as_histogram(binning, is_first_dat
     # loading the nexus file using LoadNexus is necessary because it has some metadata
     # that is not in LoadEventNexus. This must be fixed.
     filename, ext = _makeFilename(runs[0], defType, inst)
-    if is_first_data_set_group_workspace:
+    workspace_type = get_workspace_type(filename)
+    if workspace_type is WorkspaceType.MultiperiodEvent:
         # If we are dealing with multi-period event workspaces then there is no way of getting any other
         # sample log inforamtion hence we use make a copy of the monitor workspace and use that instead
         # of the reloading the first file again
@@ -323,40 +256,67 @@ def _makeFilename(entry, ext, inst) :
     return filename, ext
 
 
+def remove_unwanted_workspaces(workspace_name, temp_workspace_name, period):
+    # Delete all entries execept for the period which is requested
+    workspaces_to_keep = temp_workspace_name + "_" + str(period)
+    group_workspace = mtd[temp_workspace_name]
+    workspace_names_to_remove = [element.name() for element in group_workspace if element.name() != workspaces_to_keep]
+    for to_remove in workspace_names_to_remove:
+        DeleteWorkspace(to_remove)
+    # We need to ungroup the group workspace which only contains now a single workspace
+    UnGroupWorkspace(group_workspace)
+    RenameWorkspace(InputWorkspace=workspaces_to_keep, OutputWorkspace=workspace_name)
+
+
 def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
-
     filename, ext = _makeFilename(entry, ext, inst)
-
     logger.notice('reading file:     '+filename)
 
+    isDataSetEvent = False
     if period != _NO_INDIVIDUAL_PERIODS:
-      #load just a single period
-        outWs = Load(Filename=filename, OutputWorkspace=wsName, EntryNumber=period)
+        workspace_type = get_workspace_type(filename)
+        if workspace_type is WorkspaceType.MultiperiodHistogram:
+            outWs = Load(Filename=filename, OutputWorkspace=wsName, EntryNumber=period)
+        elif workspace_type is WorkspaceType.Histogram:
+            outWs = Load(Filename=filename, OutputWorkspace=wsName)
+        elif workspace_type is WorkspaceType.Event or workspace_type is WorkspaceType.MultiperiodEvent:
+            isDataSetEvent = True
+            temp_ws_name = wsName + "_event_temp"
+            temp_ws_name_monitors = temp_ws_name + "_monitors"
+            ws_name_monitors = wsName + "_monitors"
+
+            LoadEventNexus(Filename=filename, OutputWorkspace=temp_ws_name, LoadMonitors=True)
+            outWs = mtd[temp_ws_name]
+            # If we are dealing with a multiperid workspace then we must can only use a single period at a
+            # time, hence we reload from disk the whole data set every time which is very bad and must be
+            # cached in the future
+            if isinstance(outWs, WorkspaceGroup):
+                remove_unwanted_workspaces(wsName, temp_ws_name, period)
+                remove_unwanted_workspaces(ws_name_monitors, temp_ws_name_monitors, period)
+            else:
+                RenameWorkspace(InputWorkspace=temp_ws_name, OutputWorkspace=wsName)
+                RenameWorkspace(InputWorkspace=temp_ws_name_monitors, OutputWorkspace=ws_name_monitors)
+
+            runDetails = mtd[wsName].getRun()
+            timeArray = runDetails.getLogData("proton_charge").times
+            # There should never be a time increment in the proton charge larger than say "two weeks"
+            # SANS2D currently is run at 10 frames per second. This may be increated to 5Hz
+            # (step of 0.2 sec). Although time between frames may be larger due to having the SMP veto switched on,
+            # but hopefully not longer than two weeks!
+            for i in range(len(timeArray)-1):
+            # cal time dif in seconds
+                timeDif = (timeArray[i+1].total_nanoseconds()-timeArray[i].total_nanoseconds())*1e-9
+                if timeDif > 172800:
+                    sanslog.warning('Time increments in the proton charge log of ' + filename + ' are suspicious large.' +
+                                    ' For example a time difference of ' + str(timeDif) + " seconds has been observed.")
+                    break
+        else:
+            raise RuntimeError("SANS2add2: Unknown data type: {0}".format(type(workspace_type)))
     else:
+        # This is for raw data
         outWs = Load(Filename=filename,OutputWorkspace=wsName)
 
-    workspace_wrapper = WorkspaceWrapper(outWs)
-    isDataSetEvent = workspace_wrapper.is_event_workspace
-    if isDataSetEvent:
-        LoadEventNexus(Filename=filename, OutputWorkspace=wsName, LoadMonitors=True)
-        workspace_wrapper = WorkspaceWrapper(mtd[wsName])
-        runDetails = workspace_wrapper.getRun()
-        timeArray = runDetails.getLogData("proton_charge").times
-    # There should never be a time increment in the proton charge larger than say "two weeks"
-    # SANS2D currently is run at 10 frames per second. This may be increated to 5Hz
-    # (step of 0.2 sec). Although time between frames may be larger due to having the SMP veto switched on,
-    # but hopefully not longer than two weeks!
-        for i in range(len(timeArray)-1):
-      # cal time dif in seconds
-            timeDif = (timeArray[i+1].total_nanoseconds()-timeArray[i].total_nanoseconds())*1e-9
-            if timeDif > 172800:
-                sanslog.warning('Time increments in the proton charge log of ' + filename + ' are suspicious large.' +
-                                ' For example a time difference of ' + str(timeDif) + " seconds has been observed.")
-                break
-
-    props = workspace_wrapper.getHistory().lastAlgorithm()
-    path = props.getPropertyValue('FileName')
-    path, fName = os.path.split(path)
+    path, fName = os.path.split(filename)
     if path.find('/') == -1:
     #looks like we're on a windows system, convert the directory separators
         path = path.replace('\\', '/')
@@ -370,7 +330,8 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
         logFile = os.path.splitext(fName)[0]+'.log'
 
     try:
-        run = workspace_wrapper.getRun()
+        outWs = mtd[wsName]
+        run = outWs.getRun()
         numPeriods = run.getLogData('nperiods').value
     except:
     #assume the run file didn't support multi-period data and so there is only one period

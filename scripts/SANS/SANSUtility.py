@@ -13,6 +13,7 @@ import os
 import re
 import types
 import numpy as np
+import h5py as h5
 
 sanslog = Logger("SANS")
 ADDED_TAG = '-add'
@@ -650,18 +651,75 @@ def extract_child_ws_for_added_eventdata(ws_group, appendix):
             new_name = ws_group_name
             RenameWorkspace(InputWorkspace = ws_handle.getName(), OutputWorkspace = new_name)
 
+class WorkspaceType(object):
+    class Event(object):
+        pass
+    class Histogram(object):
+        pass
+    class MultiperiodEvent(object):
+        pass
+    class MultiperiodHistogram(object):
+        pass
 
-def bundle_added_event_data_as_group(out_file_name, out_file_monitors_name):
+def get_number_of_periods_from_file(file_name):
+    full_file_path = FileFinder.getFullPath(file_name)
+    try:
+        with h5.File(file_name) as h5_file:
+            keys = h5_file.keys()
+            is_isis_nexus = "raw_data_1" in keys
+
+            first_entry = h5_file["raw_data_1"]
+            period_group = first_entry["periods"]
+            proton_charge_data_set = period_group["proton_charge"]
+            number_of_periods = len(proton_charge_data_set)
+    except IOError:
+        number_of_periods = -1
+    return number_of_periods
+
+
+def check_if_is_event_data(file_name):
+    """
+    Event mode files have a class with a "NXevent_data" type
+    Structure:
+    |--mantid_workspace_1/raw_data_1|
+                                    |--some_group|
+                                                 |--Attribute: NX_class = NXevent_data
+    """
+    with h5.File(file_name) as h5_file:
+        # Open first entry
+        keys = h5_file.keys()
+        first_entry = h5_file[keys[0]]
+        # Open instrument group
+        is_event_mode = False
+        for value in first_entry.values():
+            if "NX_class" in value.attrs and "NXevent_data" == value.attrs["NX_class"]:
+                is_event_mode = True
+                break
+    return is_event_mode
+
+
+def get_workspace_type(file_name):
+    number_of_periods = get_number_of_periods_from_file(file_name)
+    is_event_data = check_if_is_event_data(file_name)
+
+    if number_of_periods > 1:
+        workspace_type = WorkspaceType.MultiperiodEvent if is_event_data else WorkspaceType.MultiperiodHistogram
+    else:
+        workspace_type = WorkspaceType.Event if is_event_data else WorkspaceType.Histogram
+    return workspace_type
+
+
+def bundle_added_event_data_as_group(out_file_name, out_file_monitors_name, is_multi_period):
     """
     We load an added event data file and its associated monitor file. Combine
     the data in a group workspace and delete the original files.
     @param out_file_name :: the file name of the event data file
     @param out_file_monitors_name :: the file name of the monitors file
+    @param is_multi_period: if the data set is multiperid
     @return the name fo the new group workspace file
     """
     # Extract the file name and the extension
     file_name, file_extension = os.path.splitext(out_file_name)
-
     event_data_temp = file_name + ADDED_EVENT_DATA_TAG
     Load(Filename = out_file_name, OutputWorkspace = event_data_temp)
     event_data_ws = mtd[event_data_temp]
@@ -684,14 +742,26 @@ def bundle_added_event_data_as_group(out_file_name, out_file_monitors_name):
         os.remove(full_monitor_path_name)
 
     # Create a grouped workspace with the data and the monitor child workspaces
-    GroupWorkspaces(InputWorkspaces = [event_data_ws, monitor_ws], OutputWorkspace = out_group_ws_name)
+    workspace_names_to_group = []
+    if isinstance(event_data_ws, WorkspaceGroup):
+        for workspace in event_data_ws:
+            workspace_names_to_group.append(workspace.name())
+    else:
+        workspace_names_to_group.append(event_data_ws.name())
+    if isinstance(monitor_ws, WorkspaceGroup):
+        for workspace in monitor_ws:
+            workspace_names_to_group.append(workspace.name())
+    else:
+        workspace_names_to_group.append(monitor_ws.name())
+
+    GroupWorkspaces(InputWorkspaces = workspace_names_to_group, OutputWorkspace = out_group_ws_name)
     group_ws = mtd[out_group_ws_name]
 
     # Save the group
     SaveNexusProcessed(InputWorkspace = group_ws, Filename = out_group_file_name, Append=False)
     # Delete the files and the temporary workspaces
-    DeleteWorkspace(event_data_ws)
-    DeleteWorkspace(monitor_ws)
+    if out_group_ws_name in mtd:
+        DeleteWorkspace(out_group_ws_name)
 
     return out_group_file_name
 
