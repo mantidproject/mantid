@@ -152,8 +152,8 @@ class GeneralDFTProgram(IOmodule):
         k_points = KpointsData(num_atoms=self._num_atoms, num_k=self._num_k)
         k_points.set({"weights": data["weights"],  # 1D [k] (one entry corresponds to weight of one k-point)
                       "k_vectors": data["k_vectors"],  # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
-                      "frequencies": np.multiply(data["frequencies"], AbinsConstants.cm1_2_hartree),  # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
-                      "atomic_displacements": np.multiply(data["atomic_displacements"], AbinsConstants.atomic_length_2_angstrom)}) # 4D array [k][atom_n][freq][3] (one entry corresponds to one coordinate for atom atom_n, frequency  freq and k-point k )
+                      "frequencies": data["frequencies"] * AbinsConstants.cm1_2_hartree,  # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
+                      "atomic_displacements": data["atomic_displacements"] * AbinsConstants.atomic_length_2_angstrom}) # 4D array [k][atom_n][freq][3] (one entry corresponds to one coordinate for atom atom_n, frequency  freq and k-point k )
 
 
         atoms = AtomsDaTa(num_atoms=self._num_atoms)

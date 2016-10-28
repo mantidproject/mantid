@@ -14,9 +14,9 @@ q_mesh = [10, 10, 10] # Q grid
 
 # TOSCA instrument
 #    TOSCA parameters for calculating Q^2
-TOSCA_final_neutron_energy = 36000.0  # Final energy on the crystal analyser cm-1
+TOSCA_final_neutron_energy = 32  # Final energy on the crystal analyser cm-1
 TOSCA_cos_scattering_angle = math.cos(2.356)  # Angle of the crystal analyser radians
-TOSCA_constant = 1 / 16.7103322  #
+
 
 #    TOSCA parameters for resolution function
 # sigma = TOSCA_A * omega * omega + TOSCA_B * omega + TOSCA_C
@@ -40,9 +40,6 @@ powder_data_group = "Powder"  # name of the group where PowderData is stored
 crystal_data_group = "Crystal"  # name of the group where CrystalData is stored
 
 S_data_group = "S"  # name of the group where dynamical factor is stored
-
-higher_order_quantum_effects = 4  # number of quantum order effects taken into account
-
 
 pkt_per_peak = 50  # number of points for each peak broadened by the experimental resolution
 bin_width = 1.0  # defines width of bins used in rebining of S

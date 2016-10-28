@@ -11,7 +11,6 @@ class FrequencyPowderGenerator(object):
     def __init__(self):
         super(FrequencyPowderGenerator, self).__init__()
 
-
     def construct_freq_overtones(self, fundamentals_array=None, quantum_order=None):
 
         """
@@ -46,14 +45,13 @@ class FrequencyPowderGenerator(object):
         new_array = fundamentals_array * quantum_order
 
         # remove frequencies above AbinsParameters.max_wavenumber
-        indx =   new_array < AbinsParameters.max_wavenumber
+        indx = new_array < AbinsParameters.max_wavenumber
         new_array = new_array[indx]
 
         # construct array with coefficients
         coefficients = np.eye(new_array.size, dtype=AbinsConstants.int_type) * quantum_order
 
         return new_array, coefficients
-
 
     def construct_freq_combinations(self, previous_array=None, previous_coefficients=None, fundamentals_array=None, quantum_order=None):
         """

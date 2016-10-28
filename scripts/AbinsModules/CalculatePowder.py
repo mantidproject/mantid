@@ -1,30 +1,22 @@
 import numpy as np
-
-from IOmodule import  IOmodule
+from IOmodule import IOmodule
 from PowderData import PowderData
 from QData import QData
 from AbinsData import AbinsData
 import AbinsParameters
 import AbinsConstants
 
+
 class CalculatePowder(IOmodule):
     """
-    Class for calculating mean square displacements (MSD) for the powder use case.
-    Mean square displacements are in Hartree atomic units.
-    Working equation is taken from http://atztogo.github.io/phonopy/thermal-displacement.html.
-    Additionally Debye-Waller factors are calculated which are  MSD multiplied by coth(omega/2T)^2 for each frequency.
-    They have to be multiplied by Q^2 to be equivalent to DW from "Vibrational spectroscopy with neutrons...." .
-    Obtained MSD and DW  can be directly used for calculation of S(Q, omega) in case sample has a form of powder.
+    Class for calculating powder data.
     """
     def __init__(self, filename=None, abins_data=None, temperature=None):
         """
-
-
         @param filename:  name of input DFT filename
         @param abins_data: object of type AbinsData with data from input DFT file
         @param temperature:  temperature in K
         """
-
 
         if not isinstance(abins_data, AbinsData):
             raise ValueError("Object of AbinsData was expected.")
@@ -34,81 +26,84 @@ class CalculatePowder(IOmodule):
             raise ValueError("Invalid value of temperature.")
         if temperature < 0:
             raise ValueError("Temperature cannot be negative.")
-        self._temperature = float(temperature) # temperature in K
+        self._temperature = float(temperature)  # temperature in K
 
-        super(CalculatePowder, self).__init__(input_filename=filename, group_name=AbinsParameters.powder_data_group+ "/" + "%sK"%self._temperature)
+        super(CalculatePowder, self).__init__(input_filename=filename,
+                                              group_name=AbinsParameters.powder_data_group + "/" +
+                                              "%sK" % self._temperature)
 
-
-    def _calculate_powder(self):
+    def _get_gamma_data(self, k_data=None):
         """
-        MSD are calculated according to http://atztogo.github.io/phonopy/thermal-displacement.html.
-        MSD are expressed in Hartree atomic units. Additionally DW are calculated. DW are MSD multiplied by
-        coth(omega/2T)^2 for every frequency.
+        Extracts k points data only for Gamma point.
+        @param k_data: numpy array with k-points data.
+        @return: dictionary with k_data only for Gamma point
         """
-        _data = self._abins_data.extract()
+        gamma_pkt_index = -1
 
-        weights = _data["k_points_data"]["weights"]
-        mass_hartree_factor  = [1.0 / (2 * atom["mass"]) for atom in _data["atoms_data"]]
+        # look for index of Gamma point
+        num_k = k_data["k_vectors"].shape[0]
+        for k in range(num_k):
+            if np.linalg.norm(k_data["k_vectors"][k]) < AbinsConstants.small_k:
+                gamma_pkt_index = k
+                break
+        if gamma_pkt_index == -1:
+            raise ValueError("Gamma point not found.")
+
+        k_points = {"weights": k_data["weights"][gamma_pkt_index],
+                    "k_vectors": k_data["k_vectors"][gamma_pkt_index],
+                    "frequencies": k_data["frequencies"][gamma_pkt_index],
+                    "atomic_displacements": k_data["atomic_displacements"][gamma_pkt_index]}
+
+        return k_points
+
+    def _calculate_powder(self, temperature=None):
+        """
+        Calculates powder data (a_tensors, b_tensors according to aCLIMAX manual).
+        """
+
+        # get all necessary data
+        data = self._abins_data.extract()
+        k_data = self._get_gamma_data(data["k_points_data"])
+        displacements = k_data["atomic_displacements"]
+        num_freq = displacements.shape[1]
+        num_atoms = displacements.shape[0]
+        atoms_data = data["atoms_data"]
+
+        # create containers for powder data
+        dim = 3
+        b_tensors = np.zeros(shape=(num_atoms, num_freq - AbinsConstants.first_optical_phonon, dim, dim),
+                             dtype=AbinsConstants.float_type)
+        a_tensors = np.zeros(shape=(num_atoms, dim, dim), dtype=AbinsConstants.float_type)
+
+        # calculate coth (go beyond low temperature approximation)
+        freq_hartree = k_data["frequencies"]  # frequencies in Hartree units
         temperature_hartree = self._temperature * AbinsConstants.k_2_hartree
-        freq_hartree = _data["k_points_data"]["frequencies"]
-        displacements = _data["k_points_data"]["atomic_displacements"]
+        coth = 1.0 / np.tanh(1.0 / (2.0 * temperature_hartree) * freq_hartree)
 
-        num_k = displacements.shape[0]
-        num_atoms = displacements.shape[1]
-        num_freq = displacements.shape[2]
+        # convert to required units
+        frequencies = freq_hartree / AbinsConstants.cm1_2_hartree  # convert frequencies to cm^1
 
-        exp_factor = 1.0 / temperature_hartree
-        _coth_factor = 1.0 / (2.0 * temperature_hartree) # coth( _coth_factor * omega)
+        # convert  mass of atoms to amu units
+        masses = [atom["mass"] / AbinsConstants.m_2_hartree for atom in atoms_data]
 
-        _powder = PowderData(temperature=self._temperature, num_atoms=num_atoms)
+        powder = PowderData(num_atoms=num_atoms)
 
-
-        _powder_atom = {"msd": 0.0, "dw": 0.0}
-
-        # noinspection PyTypeChecker
-        _coth = np.divide(1.0, np.tanh(np.multiply(_coth_factor, freq_hartree)))
-        _coth_square = np.multiply(_coth, _coth)
-        # noinspection PyTypeChecker
-        expm1 = np.expm1(np.multiply(exp_factor, freq_hartree))
-
-        # noinspection PyTypeChecker
-        one_over_freq = np.divide(1.0, freq_hartree)
-        two_over_freq_n = np.divide(2.0, np.multiply(freq_hartree, expm1))
-
+        # calculate powder data
         for atom in range(num_atoms):
 
-            temp_msd_k = 0.0
-            temp_dw_k = 0.0
+            mass = masses[atom]
+            for omega_i in range(AbinsConstants.first_optical_phonon, num_freq):
 
-            for k in range(num_k):
+                disp = displacements[atom][omega_i] * coth[omega_i]  # full expression ?
+                # disp = displacements[atom][omega_i] # low temperature approximation?
+                factor = mass * AbinsConstants.aCLIMAX_constant / frequencies[omega_i]
+                b_tensors[atom, omega_i - AbinsConstants.first_optical_phonon] = np.outer(disp, disp).real * factor
+                a_tensors[atom] += b_tensors[atom, omega_i - AbinsConstants.first_optical_phonon]
 
-                temp_msd_freq = 0.0
-                temp_dw_freq = 0.0
+        # fill powder object with powder data
+        powder.set(dict(b_tensors=b_tensors, a_tensors=a_tensors))
 
-                # correction for acoustic modes at Gamma point
-                if np.linalg.norm(_data["k_points_data"]["k_vectors"][k]) < AbinsConstants.small_k: start = 3
-                else: start = 0
-
-                for freq in range(start, num_freq):
-
-                    disp = displacements[k, atom, freq, :]
-                    temp = np.vdot(disp, disp).real * (one_over_freq[k, freq] + two_over_freq_n[k, freq])
-                    temp_msd_freq += temp
-                    temp_dw_freq += temp * _coth_square[k, freq]
-
-                weight_k = weights[k]
-                temp_msd_k += temp_msd_freq *  weight_k
-                temp_dw_k += temp_dw_freq * weight_k
-
-
-            mass_factor = mass_hartree_factor[atom]
-            _powder_atom["msd"] = temp_msd_k * mass_factor
-            _powder_atom["dw"] = temp_dw_k * mass_factor
-
-            _powder._append(num_atom=atom, powder_atom=_powder_atom)
-
-        return _powder
-
+        return powder
 
     def calculateData(self):
         """
@@ -117,28 +112,20 @@ class CalculatePowder(IOmodule):
         """
 
         data = self._calculate_powder()
-
         self.addFileAttributes()
         self.addData("powder_data", data.extract())
-
         self.save()
 
         return data
-
 
     def loadData(self):
         """
         Loads mean square displacements and Debye-Waller factors from an hdf file.
         @return: object of type PowderData with mean square displacements and Debye-Waller factors.
         """
-        _data = self.load(list_of_datasets=["powder_data"])
-        _powder_data = PowderData(temperature=self._temperature,
-                                  num_atoms=_data["datasets"]["powder_data"]["msd"].shape[0])
 
-        _powder_data.set(_data["datasets"]["powder_data"])
+        data = self.load(list_of_datasets=["powder_data"])
+        powder_data = PowderData(num_atoms=data["datasets"]["powder_data"]["b_tensors"].shape[0])
+        powder_data.set(data["datasets"]["powder_data"])
 
-        return _powder_data
-
-
-
-
+        return powder_data

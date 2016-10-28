@@ -7,6 +7,7 @@ from AbinsModules import AbinsConstants
 from AbinsModules.KpointsData import KpointsData
 from AbinsModules.FrequencyPowderGenerator import FrequencyPowderGenerator
 
+
 class ToscaInstrument(Instrument, FrequencyPowderGenerator):
     """
     Class for TOSCA and TOSCA-like instruments.
@@ -15,7 +16,6 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         self._name = name
         self._k_points_data = None
         super(ToscaInstrument, self).__init__()
-
 
     def calculate_q_powder(self, overtones=None, combinations=None):
         """
@@ -37,27 +37,26 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         q_data = {}
 
         local_freq = fundamental_frequencies
-        local_counts = np.ones(shape=fundamental_frequencies.size, dtype=AbinsConstants.float_type)
+        local_coeff = np.ones(shape=fundamental_frequencies.size, dtype=AbinsConstants.float_type)
         for quantum_order in range(AbinsConstants.fundamentals, q_dim + AbinsConstants.q_last_index):
             if combinations:
 
-                local_freq, local_counts = self.construct_freq_combinations(previous_array=local_freq,
-                                                                            previous_counts=local_counts,
-                                                                            fundamentals_array=fundamental_frequencies,
-                                                                            quantum_order=quantum_order)
+                local_freq, local_coeff = self.construct_freq_combinations(previous_array=local_freq,
+                                                                           previous_coefficients=local_coeff,
+                                                                           fundamentals_array=fundamental_frequencies,
+                                                                           quantum_order=quantum_order)
 
-            else: # only fundamentals (and optionally overtones)
+            else:  # only fundamentals (and optionally overtones)
 
-                local_freq, local_counts = self.construct_freq_overtones(fundamentals_array=fundamental_frequencies,
-                                                                         quantum_order=quantum_order)
+                local_freq, local_coeff = self.construct_freq_overtones(fundamentals_array=fundamental_frequencies,
+                                                                        quantum_order=quantum_order)
 
-            k2_i = (local_freq + AbinsParameters.TOSCA_final_neutron_energy) * AbinsParameters.TOSCA_constant
-            k2_f = AbinsParameters.TOSCA_final_neutron_energy * AbinsParameters.TOSCA_constant
-            q_data["order_%s" % quantum_order] = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * AbinsParameters.TOSCA_cos_scattering_angle
-
+            k2_i = (local_freq + AbinsParameters.TOSCA_final_neutron_energy) * AbinsConstants.TOSCA_constant
+            k2_f = AbinsParameters.TOSCA_final_neutron_energy * AbinsConstants.TOSCA_constant
+            temp = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * AbinsParameters.TOSCA_cos_scattering_angle
+            q_data["order_%s" % quantum_order] = temp
 
         return q_data
-
 
     def collect_K_data(self, k_points_data=None):
         """
@@ -67,7 +66,6 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
 
         self._k_points_data = k_points_data
 
-
     def convolve_with_resolution_function(self, frequencies=None, s_dft=None):
         """
         Convolves discrete DFT spectrum with the  resolution function for the TOSCA instrument (and TOSCA-like).
@@ -75,7 +73,7 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         @param s_dft:  discrete S calculated directly from DFT
         """
 
-        # noinspection PyTypeChecker
+        #  noinspection PyTypeChecker
         all_points = AbinsParameters.pkt_per_peak * frequencies.shape[0]
 
         broadened_spectrum = np.zeros(shape=all_points, dtype=AbinsConstants.float_type)
@@ -91,10 +89,12 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
                                         num=AbinsParameters.pkt_per_peak))
 
             points_freq[local_start:local_start + AbinsParameters.pkt_per_peak] = temp
-            broadened_spectrum[local_start:local_start + AbinsParameters.pkt_per_peak] = np.convolve(s_dft[indx[0]], self._gaussian(sigma=sigma, points=temp, center=freq))
+
+            # noinspection PyPep8
+            temp = np.convolve(s_dft[indx[0]], self._gaussian(sigma=sigma, points=temp, center=freq))
+            broadened_spectrum[local_start:local_start + AbinsParameters.pkt_per_peak] = temp
 
         return points_freq, broadened_spectrum
-
 
     def _gaussian(self, sigma=None, points=None, center=None):
 
@@ -105,4 +105,4 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         @return: numpy array with calculated Gaussian values
         """
         sigma_factor = 2.0 * sigma * sigma
-        return 1.0 / math.sqrt(sigma_factor * np.pi) * np.exp(-(points - center) ** 2  / sigma_factor)
+        return 1.0 / math.sqrt(sigma_factor * np.pi) * np.exp(-(points - center) ** 2 / sigma_factor)
