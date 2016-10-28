@@ -83,6 +83,8 @@ public:
 		double m_XEndPoint;
 		double m_YEndPoint;
 		std::vector <double> m_axisPointVec;
+		std::vector<QPointF> m_xNumbers;
+		std::vector<QPointF> m_yNumbers;
                 std::vector<QPointF> m_xAxisTickStartVec;
                 std::vector<QPointF> m_xAxisTickEndVec;
                 std::vector<QPointF> m_yAxisTickStartVec;

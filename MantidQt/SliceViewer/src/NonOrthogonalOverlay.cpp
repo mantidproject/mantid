@@ -177,6 +177,8 @@ namespace MantidQt {
                   m_yAxisTickStartVec.clear();
                   m_xAxisTickEndVec.clear();
                   m_yAxisTickEndVec.clear();
+				  m_xNumbers.clear();
+				  m_yNumbers.clear();
                 }
 
                 void NonOrthogonalOverlay::calculateTickMarks(
@@ -196,16 +198,18 @@ namespace MantidQt {
                     axisPointX = (percentageOfLineX * i) + m_xMinVis;
                     axisPointY = (percentageOfLineY * i) + m_yMinVis;
                     m_axisPointVec.push_back(axisPointX);
+					m_xNumbers.push_back(skewMatrixApply(axisPointX, m_yMinVis));
+					m_yNumbers.push_back(skewMatrixApply(m_xMinVis, axisPointY));
                     m_xAxisTickStartVec.push_back(
                         skewMatrixApply(axisPointX, (m_yMinVis - yBuffer)));
                     m_xAxisTickEndVec.push_back(
                         skewMatrixApply(axisPointX, (m_yMaxVis + yBuffer)));
-                                                // m_originPoint * 1.05));
+                                              
                     m_yAxisTickStartVec.push_back(
                         skewMatrixApply((m_xMinVis - xBuffer), axisPointY));
                     m_yAxisTickEndVec.push_back(
                         skewMatrixApply((m_xMaxVis + xBuffer), axisPointY));
-                                                        // m_originPoint * 1.05,
+                                                        
                                                         
                     }
 
@@ -218,11 +222,11 @@ namespace MantidQt {
 			QPainter painter(this);
 
             QPen centerPen(QColor(0, 0, 0, 200)); //black
-            QPen gridPen(QColor(160, 160, 160, 200)); // grey will want to be
+            QPen gridPen(QColor(160, 160, 160, 100)); // grey will want to be
                                                       // checking colours
                                                       // eventually and changing
                                                       // it as req
-
+			QPen numberPen(QColor(255, 255, 255, 200));
             // --- Draw the central line ---
 			if (m_showLine) {
                           centerPen.setWidth(2);
@@ -232,22 +236,27 @@ namespace MantidQt {
 				painter.drawLine(transform(m_pointA), transform(m_pointC));
                                 gridPen.setWidth(1);
                                 gridPen.setCapStyle(Qt::FlatCap);
-				painter.setPen(gridPen);
+								gridPen.setStyle(Qt::DashLine);
+				
+				
 				
 				for (int i = 0; i < m_axisPointVec.size(); i++) {
+					painter.setPen(gridPen);
                                   painter.drawLine(
                                       transform(m_xAxisTickStartVec[i]),
                                       transform(m_xAxisTickEndVec[i]));
+								  
                                   painter.drawLine( // will have to change
                                                     // drawgrid cos ymax not
                                                     // same as xmax anymore
                                       transform(m_yAxisTickStartVec[i]),
                                       transform(m_yAxisTickEndVec[i]));
+								  painter.setPen(numberPen);
+								  painter.drawText(transform(m_xNumbers[i]), QString::number(m_axisPointVec[i]));
+								  painter.drawText(transform(m_yNumbers[i]), QString("x"));
                                 }
 
-                                //to remove axis (also need to renable them after...)
-				//m_plot->enableAxis(QwtPlot::yLeft, false);
-				//m_plot->enableAxis(QwtPlot::xBottom, false);
+
                         }
 
 		}
