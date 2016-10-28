@@ -19,12 +19,11 @@ Usage
 
 **Example - IRIS Energy Window Scan**
 
-.. testcode:: ExDataFit
+.. code-block:: python
 
     IndirectEnergyWindowScan(RunNumbers="21360", Instrument='IRIS', Analyser='graphite',
                              Reflection='002', SpectraRange='3, 50', ElasticRange='-0.5, 0',
                              InelasticRange='0, 0.5', GroupingMethod='Individual', MSDFit=True)
-
 
 .. categories::
 
