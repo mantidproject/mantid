@@ -131,8 +131,7 @@ private:
         << "1.6"
         << "0.04"
         << "1"
-
-        << "";
+        << "ProcessingInstructions='0', CorrectDetectorPositions=0";
     row = ws->appendRow();
     row << "0"
         << "12346"
@@ -142,7 +141,7 @@ private:
         << "2.9"
         << "0.04"
         << "1"
-        << "";
+        << "ProcessingInstructions='0'";
     row = ws->appendRow();
     row << "1"
         << "24681"
@@ -1284,9 +1283,9 @@ public:
   }
 
   /*
-   * Test processing workspaces with non-standard names, with
-   * and without run_number information in the sample log.
-   */
+  * Test processing workspaces with non-standard names, with
+  * and without run_number information in the sample log.
+  */
   void testProcessCustomNames() {
 
     NiceMock<MockDataProcessorView> mockDataProcessorView;
@@ -1307,8 +1306,8 @@ public:
         << "0.1"
         << "1.6"
         << "0.04"
-
-        << "1";
+        << "1"
+        << "ProcessingInstructions='0', CorrectDetectorPositions=0";
     row = ws->appendRow();
     row << "1"
         << "dataB"
@@ -1317,8 +1316,8 @@ public:
         << "1.4"
         << "2.9"
         << "0.04"
-
-        << "1";
+        << "1"
+        << "ProcessingInstructions='0', CorrectDetectorPositions=0";
 
     createTOFWorkspace("dataA");
     createTOFWorkspace("dataB");
@@ -2188,7 +2187,8 @@ public:
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(1);
 
-    const std::string expected = "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\t";
+    const std::string expected =
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2244,10 +2244,12 @@ public:
     rowlist[1].insert(0);
     rowlist[1].insert(1);
 
-    const std::string expected = "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\t\n"
-                                 "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\t\n"
-                                 "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\n"
-                                 "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\t";
+    const std::string expected =
+        "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0', "
+        "CorrectDetectorPositions=0\n"
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\n"
+        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\n"
+        "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\t";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2279,7 +2281,8 @@ public:
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(1);
 
-    const std::string expected = "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\t";
+    const std::string expected =
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2324,9 +2327,11 @@ public:
     rowlist[0].insert(1);
     rowlist[1].insert(0);
 
-    const std::string expected = "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\t\n"
-                                 "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\t\n"
-                                 "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t";
+    const std::string expected =
+        "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0', "
+        "CorrectDetectorPositions=0\n"
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\n"
+        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
