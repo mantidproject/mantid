@@ -22,12 +22,13 @@ steps taking place in the reduction.
 
 .. diagram:: ReflectometryReductionOne_HighLvl-v2_wkflw.dot
 
+
 Conversion to Wavelength
 ########################
 
-First, the algorithm checks if the X units of
+First, the algorithm checks the X units of
 the input workspace. If the input workspace is already in wavelength, normalization by
-monitors and direct beam is not performed, as it is considered that the input run was
+monitors and direct beam are not performed, as it is considered that the input run was
 already reduced using this algorithm. If the input workspace is in TOF, it will be
 converted to wavelength (note that :literal:`AlignBins` will be set to :literal:`True` for this in 
 :ref:`algm-ConvertUnits`), cropped according to
@@ -37,10 +38,14 @@ of interest, specified via :literal:`ProcessingInstructions`, will be grouped to
 normalization (if :literal:`RegionOfDirectBeam` is specified) dividing the detectors of
 interest by the direct beam, and monitor normalization (if :literal:`I0MonitorIndex` and
 :literal:`MonitorBackgroundWavelengthMin` and :literal:`MonitorBackgroundWavelengthMax` are all specified),
-in which case the detectors of interest will be divided by monitors. A summary of the
-steps taking place in the reduction is shown below.
+in which case the detectors of interest will be divided by monitors. Detectors can be normalized
+by integrated monitors by setting :literal:`NormalizeByIntegratedMonitors` to true, in which case
+:literal:`MonitorIntegrationWavelengthMin` and :literal:`MonitorIntegrationWavelenthMax` will
+be used as the integration range. A summary of the
+steps is shown in the workflow diagram below.
 
 .. diagram:: ReflectometryReductionOne_ConvertToWavelength-v2_wkflw.dot
+
 
 Transmission Correction
 #######################
@@ -51,29 +56,37 @@ transmission runs or specific correction algorithms.
 
 .. diagram:: ReflectometryReductionOne_TransmissionCorrection-v2_wkflw.dot
 
-When transmission runs are given, the spectrum numbers in the
-transmission workspaces must be the same as those in the input run
-workspace. If two transmission runs are provided then the stitching
-parameters associated with the transmission runs will also be required.
-If a single transmission run is provided, then no stitching parameters
-will be needed.
 
-If no transmission runs are provided, then polynomial correction can be
-performed instead. Polynomial correction is enabled by setting the
-:literal:`CorrectionAlgorithm` property. If set to
-:literal:`PolynomialCorrection` it runs the :ref:`algm-PolynomialCorrection`
-algorithm, with this algorithms :literal:`Polynomial` property used as its
-:literal:`Coefficients` property. If the :literal:`CorrectionAlgorithm` property is set to
+When normalizing by transmission runs, i.e. when one or two transmission runs
+are given, the spectrum numbers in the
+transmission workspaces must be the same as those in the input run
+workspace. If spectrum numbers do not match, the algorithm will throw and exception
+and execution of the algorithm will be stopped. This behaviour can be optionally
+swithced off by setting :literal:`StrictSpectrumChecking` to false, in which case
+a warning message will be shown instead.
+
+When both :literal:`FirstTransmissionRun` and :literal:`SecondTransmissionRun`
+are provided the stitching parameters :literal:`Params`, :literal:`StartOverlap` and
+:literal:`EndOverlap` will be used to create the transmission workspace that
+will be used for the normalization.
+
+If no transmission runs are provided, then algorithmic corrections can be
+performed instead by setting :literal:`CorrectionAlgorithm` to either
+:literal:`PolynomialCorrection` or :literal:`ExponentialCorrection`, the two
+possible types of corrections at the moment. If :literal:`PolynomialCorrection`,
+is selected, :ref:`algm-PolynomialCorrection` algorithm will be run, with this
+algorithm's :literal:`Polynomial` property used as its :literal:`Coefficients`
+property. If the :literal:`CorrectionAlgorithm` property is set to
 :literal:`ExponentialCorrection`, then the :Ref:`algm-ExponentialCorrection`
-algorithm is used, with C0 and C1 taken from the :literal:`C0` and :literal:`C1`
+algorithm is used, with *C0* and *C1* taken from the :literal:`C0` and :literal:`C1`
 properties.
 
 Conversion to Momentum Transfer (Q)
 ###################################
 
-Finally, the output workspace in wavelength is converted into momentum transfer (Q).
+Finally, the output workspace in wavelength is converted to momentum transfer (Q).
 Optionally, this workspace can be rebinned according to :literal:`MomentumTransferMin`,
-:literal:`MomentumTransferStep` and :literal:`MomentumTransferMax` and scaled if
+:literal:`MomentumTransferStep` and :literal:`MomentumTransferMax`, and scaled if
 :literal:`ScaleFactor` is given.
 
 .. diagram:: ReflectometryReductionOne_ConvertToMomentum-v2_wkflw.dot
@@ -81,6 +94,37 @@ Optionally, this workspace can be rebinned according to :literal:`MomentumTransf
 
 Usage
 -----
+
+**Example - Reduce a Run**
+
+.. testcode:: ExReflRedOneSimple
+
+   run = Load(Filename='INTER00013460.nxs')
+   # Basic reduction with no transmission run
+   IvsQ, IvsLam = ReflectometryReductionOne(InputWorkspace=run,
+                                            WavelengthMin=1.0,
+                                            WavelengthMax=17.0,
+                                            ProcessingInstructions='3:4',
+                                            I0MonitorIndex=2,
+                                            MonitorBackgroundWavelengthMin=15.0,
+                                            MonitorBackgroundWavelengthMax=17.0,
+                                            MonitorIntegrationWavelengthMin=4.0,
+                                            MonitorIntegrationWavelengthMax=10.0)
+
+   print "%.4f" % (IvsLam.readY(0)[173])
+   print "%.4f" % (IvsLam.readY(0)[174])
+   print "%.4f" % (IvsQ.readY(0)[2])
+   print "%.4f" % (IvsQ.readY(0)[3])
+
+
+Output:
+
+.. testoutput:: ExReflRedOneSimple
+
+   0.0014
+   0.0014
+   0.0117
+   0.0214
 
 .. categories::
 

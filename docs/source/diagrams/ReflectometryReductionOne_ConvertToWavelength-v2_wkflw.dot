@@ -1,5 +1,5 @@
 digraph ReflectometryReductionOne {
-label = "ReflectometryReductionOne ConvertToWavelength Flowchart"
+label = "\n"
 rankdir = TB;
  $global_style
 

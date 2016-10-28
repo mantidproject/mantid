@@ -1,5 +1,5 @@
 digraph ReflectometryReductionOne {
-label = "ReflectometryReductionOne High Level Flowchart"
+label = "\n"
  $global_style
 
 subgraph params {

@@ -1,5 +1,5 @@
 digraph ReflectometryReductionOne {
-label = "ReflectometryReductionOne Transmission Correction Flowchart"
+label = "\n"
  $global_style
 
 subgraph params {
@@ -12,7 +12,6 @@ subgraph params {
   polynomial        [label="Polynomial"]
   c0                [label="C0"]
   c1                [label="C1"]
-  params            [label="Params"]
 }
 
 subgraph decisions {
@@ -54,7 +53,6 @@ polyCorr          -> outputWorkspace
 expCorr           -> outputWorkspace
 firstTransRun     -> createTransWS
 secondTransRun    -> createTransWS
-params            -> createTransWS
 createTransWS     -> rebinByTransWS
 rebinByTransWS    -> divideTrans
 divideTrans       -> outputWorkspace

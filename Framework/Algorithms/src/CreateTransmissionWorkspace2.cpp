@@ -22,7 +22,7 @@ const std::string CreateTransmissionWorkspace2::name() const {
 }
 /// Summary of algorithm's purpose
 const std::string CreateTransmissionWorkspace2::summary() const {
-  return "Creates a transmission run workspace in Wavelength from one or two "
+  return "Creates a transmission run workspace in wavelength from one or two "
          "input workspaces in TOF.";
 }
 /// Algorithm's version for identification. @see Algorithm::version
@@ -80,7 +80,7 @@ void CreateTransmissionWorkspace2::init() {
 
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
-                  "Output Workspace in wavelength.");
+                  "Output workspace in wavelength.");
 }
 
 /** Initialize properties related to monitors

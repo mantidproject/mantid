@@ -1,5 +1,5 @@
 digraph ReflectometryReductionOne {
-label = "ReflectometryReductionOne Transmission Correction Flowchart"
+label = "\n"
  $global_style
 
 subgraph params {
@@ -36,7 +36,6 @@ convertUnits      -> rebin
 qmin              -> rebin
 qstep             -> rebin
 qmax              -> rebin
-qmin              -> qstep [style=invis]
 rebin             -> scale
 scaleFactor       -> scale
 scale             -> outputWorkspace
