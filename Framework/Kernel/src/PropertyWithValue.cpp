@@ -5,9 +5,6 @@
 // PropertyWithValue implementation
 #include "MantidKernel/PropertyWithValue.tcc"
 
-class WorkspaceTester;
-class TableWorkspaceTester;
-
 namespace Mantid {
 namespace Kernel {
 
@@ -52,10 +49,6 @@ template class MANTID_KERNEL_DLL
     PropertyWithValue<boost::shared_ptr<IValidator>>;
 template class MANTID_KERNEL_DLL
     PropertyWithValue<boost::shared_ptr<PropertyManager>>;
-template class MANTID_KERNEL_DLL
-    PropertyWithValue<boost::shared_ptr<WorkspaceTester>>;
-template class MANTID_KERNEL_DLL
-    PropertyWithValue<boost::shared_ptr<TableWorkspaceTester>>;
 /// @endcond
 
 // The explicit template instantiations for some types does not have an export

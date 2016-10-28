@@ -1,16 +1,21 @@
 #include "MantidTestHelpers/FakeObjects.h"
 
-// WorkspaceProperty implementation
+// Property implementations
+#include "MantidKernel/PropertyWithValue.tcc"
 #include "MantidAPI/WorkspaceProperty.tcc"
 
 namespace Mantid {
-// Note that this file is part of DataObjects, but we are injecting explicit
-// instantiations into API. This does not extend or modify API.
+namespace Kernel {
+///@cond TEMPLATE
+template class DLLExport PropertyWithValue<boost::shared_ptr<WorkspaceTester>>;
+template class DLLExport
+    PropertyWithValue<boost::shared_ptr<TableWorkspaceTester>>;
+///@endcond TEMPLATE
+} // namespace Kernel
 namespace API {
 ///@cond TEMPLATE
-template class MANTID_API_DLL Mantid::API::WorkspaceProperty<WorkspaceTester>;
-template class MANTID_API_DLL
-    Mantid::API::WorkspaceProperty<TableWorkspaceTester>;
+template class DLLExport Mantid::API::WorkspaceProperty<WorkspaceTester>;
+template class DLLExport Mantid::API::WorkspaceProperty<TableWorkspaceTester>;
 ///@endcond TEMPLATE
 } // namespace API
 } // namespace Mantid
