@@ -36,7 +36,7 @@ namespace Kernel {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 template <typename T>
-class DLLExport ArrayProperty : public PropertyWithValue<std::vector<T>> {
+class ArrayProperty : public PropertyWithValue<std::vector<T>> {
 public:
   ArrayProperty(const std::string &name, const std::vector<T> &vec,
                 IValidator_sptr validator = IValidator_sptr(new NullValidator),
