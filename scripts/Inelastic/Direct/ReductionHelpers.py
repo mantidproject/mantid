@@ -228,10 +228,12 @@ def build_subst_dictionary(synonims_list=None) :
         if len(keys) < 2 :
             raise AttributeError("The pairs in the synonyms fields have to have form key1=key2=key3 with at least two values present")
         if len(keys[0]) == 0:
-            raise AttributeError("The pairs in the synonyms fields have to have form key1=key2=key3 with at least two values present, but the first key is empty")
+            raise AttributeError("The pairs in the synonyms fields have to have form key1=key2=key3 with at least two values present, "
+                                 "but the first key is empty")
         for i in xrange(1,len(keys)) :
             if len(keys[i]) == 0 :
-                raise AttributeError("The pairs in the synonyms fields have to have form key1=key2=key3 with at least two values present, but the key"+str(i)+" is empty")
+                raise AttributeError("The pairs in the synonyms fields have to have form key1=key2=key3 with at least two values present, "
+                                     "but the key"+str(i)+" is empty")
             kkk = keys[i].strip()
             rez[kkk]=keys[0].strip()
 
@@ -292,7 +294,7 @@ def check_instrument_name(old_name,new_name):
     """ function checks if new instrument name is acceptable instrument name"""
 
     if new_name is None:
-        if not old_name is None:
+        if old_name is not None:
             return (None,None,config.getFacility())
         else:
             raise KeyError("No instrument name is defined")
@@ -339,7 +341,8 @@ def parse_single_name(filename):
         path1,ind1,ext1=parse_single_name(fl)
         path2,ind2,ext2=parse_single_name(fr)
         if ind1>ind2:
-            raise ValueError('Invalid file number defined using colon : left run number {0} has to be large then right {1}'.format(ind1,ind2))
+            raise ValueError('Invalid file number defined using colon : left run number '
+                             '{0} has to be large then right {1}'.format(ind1,ind2))
         number = range(ind1[0],ind2[0]+1)
         if len(filepath)>0:
             filepath=[filepath]*len(number)

@@ -17,8 +17,8 @@ class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
 
     def skipTests(self):
         try:
-            from genxmlif import GenXmlIfError
-            from minixsv import pyxsval
+            from genxmlif import GenXmlIfError # noqa
+            from minixsv import pyxsval # noqa
         except ImportError:
             return True
         return False

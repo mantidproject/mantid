@@ -94,7 +94,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         return issues
 
     def PyExec(self):
-        from IndirectImport import import_mantidplot
         from IndirectCommon import getInstrRun
 
         # Do setup
@@ -293,8 +292,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             # Look for temperature in logs in workspace
             tmp = run[self._sample_log_name].value
             value_action = {'last_value': lambda x: x[len(x)-1],
-                            'average': lambda x: x.mean()
-                           }
+                            'average': lambda x: x.mean()}
             temp = value_action[self._sample_log_value](tmp)
             logger.debug('Temperature %d K found for run: %s' % (temp, run_name))
             return temp

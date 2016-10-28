@@ -1,5 +1,4 @@
 #pylint: disable=invalid-name
-import sys
 
 """
     This algorithm reads the SNS ROI files (used in M. Reuter data reduction).

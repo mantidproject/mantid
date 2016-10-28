@@ -151,6 +151,20 @@ public:
   void showCustomInterfaceHelp(const QString &name);
 };
 
+class MantidDesktopServices
+{
+%TypeHeaderCode
+#include "MantidQtAPI/MantidDesktopServices.h"
+%End
+public:
+  static bool openUrl(const QUrl &url);
+  static void setUrlHandler(const QString &scheme, QObject *receiver,
+                            const char *method);
+  static void unsetUrlHandler(const QString &scheme);
+  static QString storageLocation(QDesktopServices::StandardLocation type);
+  static QString displayName(QDesktopServices::StandardLocation type);
+};
+
 };
 
 namespace MantidWidgets
@@ -1162,7 +1176,7 @@ Mantid::API::MDNormalization SliceViewer::getNormalization()
 void SliceViewer::setColorBarAutoScale(bool autoscale)
 ------------------------------------------------------
     Set autoscaling for the color scale on or off
-	
+
 	Args:
 	    autoscale :: on/off status for autoscaling
 
@@ -1610,7 +1624,7 @@ public:
                      SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z,
                      RENDERMODE_SIZE };
   enum Tab { RENDER, PICK, MASK, TREE };
-  
+
   InstrumentWidget(const QString &wsName, QWidget *parent = nullptr,
 				bool resetGeometry = true, bool autoscaling = true,
 				double scaleMin = 0.0, double scaleMax = 0.0,
@@ -1884,6 +1898,3 @@ private:
 
 };//end namespace MantidWidgets
 };//end namespace MantidQt
-
-
-
