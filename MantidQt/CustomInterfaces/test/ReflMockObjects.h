@@ -85,8 +85,8 @@ public:
   MOCK_CONST_METHOD0(getLambdaMin, std::string());
   MOCK_CONST_METHOD0(getLambdaMax, std::string());
   MOCK_CONST_METHOD0(getI0MonitorIndex, std::string());
-  MOCK_CONST_METHOD1(setExpDefaults, void(std::vector<std::string>));
-  MOCK_CONST_METHOD1(setInstDefaults, void(std::vector<double>));
+  MOCK_CONST_METHOD1(setExpDefaults, void(const std::vector<std::string>));
+  MOCK_CONST_METHOD1(setInstDefaults, void(const std::vector<double>));
 
   // Calls we don't care about
   void
