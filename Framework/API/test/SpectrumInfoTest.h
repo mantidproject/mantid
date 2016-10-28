@@ -119,8 +119,8 @@ public:
     TS_ASSERT_DELTA(spectrumInfo.twoTheta(1), 0.0, 1e-6);
     TS_ASSERT_DELTA(spectrumInfo.twoTheta(2), 0.0199973, 1e-6);
     // Monitors
-    TS_ASSERT_EQUALS(spectrumInfo.twoTheta(3), 0.0);
-    TS_ASSERT_EQUALS(spectrumInfo.twoTheta(4), 0.0);
+    TS_ASSERT_THROWS(spectrumInfo.twoTheta(3), std::logic_error);
+    TS_ASSERT_THROWS(spectrumInfo.twoTheta(4), std::logic_error);
   }
 
   // Legacy test via the workspace method detectorTwoTheta(), which might be
@@ -138,8 +138,8 @@ public:
     TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(1), 0.0, 1e-6);
     TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(2), 0.0199973, 1e-6);
     // Monitors
-    TS_ASSERT_EQUALS(spectrumInfo.signedTwoTheta(3), 0.0);
-    TS_ASSERT_EQUALS(spectrumInfo.signedTwoTheta(4), 0.0);
+    TS_ASSERT_THROWS(spectrumInfo.signedTwoTheta(3), std::logic_error);
+    TS_ASSERT_THROWS(spectrumInfo.signedTwoTheta(4), std::logic_error);
   }
 
   // Legacy test via the workspace method detectorSignedTwoTheta(), which might

@@ -51,11 +51,12 @@ double SpectrumInfo::l2(const size_t index) const {
 
 /** Returns the scattering angle 2 theta (angle w.r.t. to beam direction).
  *
- * For monitors this is defined as 0.
+ * Throws an exception if the spectrum is a monitor.
  */
 double SpectrumInfo::twoTheta(const size_t index) const {
   if (isMonitor(index))
-    return 0.0;
+    throw std::logic_error(
+        "Two theta (scattering angle) is not defined for monitors.");
 
   // Note: This function has big overlap with the method
   // MatrixWorkspace::detectorTwoTheta(). The plan is to eventually remove the
@@ -74,11 +75,12 @@ double SpectrumInfo::twoTheta(const size_t index) const {
 /** Returns the signed scattering angle 2 theta (angle w.r.t. to beam
  * direction).
  *
- * For monitors this is defined as 0.
+ * Throws an exception if the spectrum is a monitor.
  */
 double SpectrumInfo::signedTwoTheta(const size_t index) const {
   if (isMonitor(index))
-    return 0.0;
+    throw std::logic_error(
+        "Two theta (scattering angle) is not defined for monitors.");
 
   // Note: This function has big overlap with the method
   // MatrixWorkspace::detectorSignedTwoTheta(). The plan is to eventually remove

@@ -413,13 +413,13 @@ bool ConvertUnits::getDetectorValues(const API::SpectrumInfo &spectrumInfo,
     return false;
 
   l2 = spectrumInfo.l2(wsIndex);
-  // The scattering angle for this detector (in radians).
-  if (signedTheta)
-    twoTheta = spectrumInfo.signedTwoTheta(wsIndex);
-  else
-    twoTheta = spectrumInfo.twoTheta(wsIndex);
 
   if (!spectrumInfo.isMonitor(wsIndex)) {
+    // The scattering angle for this detector (in radians).
+    if (signedTheta)
+      twoTheta = spectrumInfo.signedTwoTheta(wsIndex);
+    else
+      twoTheta = spectrumInfo.twoTheta(wsIndex);
     // If an indirect instrument, try getting Efixed from the geometry
     if (emode == 2 && efixed == EMPTY_DBL()) // indirect
     {
@@ -435,6 +435,7 @@ bool ConvertUnits::getDetectorValues(const API::SpectrumInfo &spectrumInfo,
       // Non-unique detector (i.e., DetectorGroup): use single provided value
     }
   } else {
+    twoTheta = 0.0;
     efixed = DBL_MIN;
     // Energy transfer is meaningless for a monitor, so set l2 to 0.
     if (outputUnit.unitID().find("DeltaE") != std::string::npos) {

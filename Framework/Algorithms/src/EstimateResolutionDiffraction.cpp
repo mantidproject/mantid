@@ -193,7 +193,8 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     double centraltof = (l1 + l2) / m_centreVelocity;
 
     // Angle
-    double twotheta = spectrumInfo.twoTheta(i);
+    double twotheta =
+        spectrumInfo.isMonitor(i) ? 0.0 : spectrumInfo.twoTheta(i);
     double theta = 0.5 * twotheta;
 
     double solidangle = det.solidAngle(samplepos);
