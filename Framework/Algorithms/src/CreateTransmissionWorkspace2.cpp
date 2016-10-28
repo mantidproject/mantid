@@ -22,8 +22,8 @@ const std::string CreateTransmissionWorkspace2::name() const {
 }
 /// Summary of algorithm's purpose
 const std::string CreateTransmissionWorkspace2::summary() const {
-  return "Creates a transmission run workspace in Wavelength from input TOF "
-         "workspaces.";
+  return "Creates a transmission run workspace in Wavelength from one or two "
+         "input workspaces in TOF.";
 }
 /// Algorithm's version for identification. @see Algorithm::version
 int CreateTransmissionWorkspace2::version() const { return 2; }
@@ -44,14 +44,15 @@ void CreateTransmissionWorkspace2::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "FirstTransmissionRun", "", Direction::Input,
                       PropertyMode::Mandatory, inputValidator->clone()),
-                  "First transmission run, or the low wavelength transmision "
-                  "run if SecondTransmissionRun is also provided.");
+                  "First transmission run. Corresponds to the low wavelength "
+                  "transmision run if a SecondTransmissionRun is also "
+                  "provided.");
 
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "SecondTransmissionRun", "", Direction::Input,
                       PropertyMode::Optional, inputValidator->clone()),
-                  "Second, high wavelength transmission run. Optional. Causes "
-                  "the InputWorkspace to be treated as the low wavelength "
+                  "High wavelength transmission run. Optional. Causes the "
+                  "first transmission run to be treated as the low wavelength "
                   "transmission run.");
 
   declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
@@ -79,7 +80,7 @@ void CreateTransmissionWorkspace2::init() {
 
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
-                  "Output Workspace IvsQ.");
+                  "Output Workspace in wavelength.");
 }
 
 /** Initialize properties related to monitors
@@ -130,12 +131,14 @@ void CreateTransmissionWorkspace2::initStitchProperties() {
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
-                  "Start wavelength for stitching transmission runs together");
+                  "Start wavelength for stitching transmission runs together. "
+                  "Only used if a second transmission run is provided.");
 
-  declareProperty(
-      make_unique<PropertyWithValue<double>>("EndOverlap", Mantid::EMPTY_DBL(),
-                                             Direction::Input),
-      "End wavelength (angstroms) for stitching transmission runs together");
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
+                  "End wavelength (angstroms) for stitching transmission runs "
+                  "together. Only used if a second transmission run is "
+                  "provided.");
 }
 
 /** Validate inputs
