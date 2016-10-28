@@ -105,7 +105,8 @@ public:
   }
 
   IAlgorithm_sptr construct_standard_algorithm() {
-    auto alg = AlgorithmManager::Instance().create("ReflectometryReductionOne");
+    auto alg =
+        AlgorithmManager::Instance().create("ReflectometryReductionOne", 1);
     alg->setRethrows(true);
     alg->setChild(true);
     alg->initialize();
@@ -118,7 +119,7 @@ public:
     alg->setProperty("MonitorIntegrationWavelengthMin", 1.2);
     alg->setProperty("MonitorIntegrationWavelengthMax", 1.5);
     alg->setProperty("MomentumTransferStep", 0.1);
-    alg->setPropertyValue("ProcessingInstructions", "1");
+    alg->setPropertyValue("ProcessingInstructions", "0");
     alg->setPropertyValue("OutputWorkspace", "x");
     alg->setPropertyValue("OutputWorkspaceWavelength", "y");
     alg->setRethrows(true);
