@@ -100,6 +100,7 @@ namespace MantidQt {
                   m_dim1 = ws->getDimension(1)->getMaximum();
                   m_dim2 = ws->getDimension(2)->getMaximum();
                 }
+
                 QPointF NonOrthogonalOverlay::skewMatrixApply(double x,
                                                               double y) {
                   // keyed array,
@@ -125,24 +126,14 @@ namespace MantidQt {
 
                 void NonOrthogonalOverlay::zoomChanged(QwtDoubleInterval xint,
                                                        QwtDoubleInterval yint) {
-                  double xMin = xint.minValue();
-                  double xMax = xint.maxValue();
-                  double yMin = yint.minValue();
-                  double yMax = yint.maxValue();
-                  double totalAreaShown = (xMax - xMin) * (yMax - yMin);
-                  // just concn on x axis for now
-                  double xVisible = totalAreaShown / m_totalArea;
-                  xVisible = xVisible * 100;
-                  int displayNum = 0;
-                  if (xVisible > 200) {
-                    displayNum = 10;
-                  } else if (xVisible < 200 && xVisible > 100) {
-                    displayNum = 15;
-                  } else if (xVisible < 100) {
-                    displayNum = 20;
-                  } else {
-                    displayNum = 15;
-                  }
+                  m_xMinVis = xint.minValue();
+                  m_xMaxVis = xint.maxValue();
+                  m_yMinVis = yint.minValue();
+                  m_yMaxVis = yint.maxValue();
+
+                  int displayNum = 20; // can mess around increasing or
+                                       // decreasing grid later, maybe make an
+                                       // option on sliceviewgui
 
                   calculateTickMarks(displayNum);
 				  
@@ -168,8 +159,11 @@ namespace MantidQt {
                   //    API::getMissingHKLDimensionIndex(*m_ws, m_dimX, m_dimY);
                   setDefaultAxesPoints();
 
-                  if (API::isHKLDimensions(*m_ws, m_dimX, m_dimY)) {
-					  //make sure all calcs are outside of paintEvent... so probably move ApplyskewMatrix out of it
+                  if (API::isHKLDimensions(
+                          *m_ws, m_dimX,
+                          m_dimY)) { // and skew actually _wants_ to be visible
+                    // make sure all calcs are outside of paintEvent... so
+                    // probably move ApplyskewMatrix out of it
                     setSkewMatrix();
                     setAxesPoints();
                     calculateTickMarks(10); // tie zoom level to how large
@@ -188,16 +182,29 @@ namespace MantidQt {
                 void NonOrthogonalOverlay::calculateTickMarks(
                     int tickNum) { // assumes X axis
                   clearAllAxisPointVectors();
-                  double axisPoint;
-                  double percentageOfLine((m_XEndPoint - m_originPoint) / tickNum);
+                  double xBuffer = ((m_xMaxVis - m_xMinVis) / 3);
+                  double yBuffer = ((m_yMaxVis - m_yMinVis) / 3);
+                  double axisPointX;
+                  double axisPointY;
+                  double percentageOfLineX(
+                      ((m_xMaxVis + xBuffer) - (m_xMinVis - xBuffer)) /
+                      tickNum);
+                  double percentageOfLineY(
+                      ((m_yMaxVis + yBuffer) - (m_yMinVis - yBuffer)) /
+                      tickNum);
                   for (int i = 0; i <= tickNum; i++) {
-					axisPoint = (percentageOfLine * i) + m_originPoint;
-					m_axisPointVec.push_back(axisPoint);
-                    m_xAxisTickStartVec.push_back(skewMatrixApply(axisPoint, m_originPoint));
-                    m_xAxisTickEndVec.push_back(skewMatrixApply(axisPoint, m_XEndPoint));
+                    axisPointX = (percentageOfLineX * i) + m_xMinVis;
+                    axisPointY = (percentageOfLineY * i) + m_yMinVis;
+                    m_axisPointVec.push_back(axisPointX);
+                    m_xAxisTickStartVec.push_back(
+                        skewMatrixApply(axisPointX, (m_yMinVis - yBuffer)));
+                    m_xAxisTickEndVec.push_back(
+                        skewMatrixApply(axisPointX, (m_yMaxVis + yBuffer)));
                                                 // m_originPoint * 1.05));
-                    m_yAxisTickStartVec.push_back(skewMatrixApply(m_originPoint, axisPoint));
-                    m_yAxisTickEndVec.push_back(skewMatrixApply(m_XEndPoint, axisPoint));
+                    m_yAxisTickStartVec.push_back(
+                        skewMatrixApply((m_xMinVis - xBuffer), axisPointY));
+                    m_yAxisTickEndVec.push_back(
+                        skewMatrixApply((m_xMaxVis + xBuffer), axisPointY));
                                                         // m_originPoint * 1.05,
                                                         
                     }
@@ -211,7 +218,10 @@ namespace MantidQt {
 			QPainter painter(this);
 
             QPen centerPen(QColor(0, 0, 0, 200)); //black
-            QPen gridPen(QColor(160, 160, 160, 200)); // grey
+            QPen gridPen(QColor(160, 160, 160, 200)); // grey will want to be
+                                                      // checking colours
+                                                      // eventually and changing
+                                                      // it as req
 
             // --- Draw the central line ---
 			if (m_showLine) {
@@ -228,21 +238,16 @@ namespace MantidQt {
                                   painter.drawLine(
                                       transform(m_xAxisTickStartVec[i]),
                                       transform(m_xAxisTickEndVec[i]));
-                                  painter.drawLine(
+                                  painter.drawLine( // will have to change
+                                                    // drawgrid cos ymax not
+                                                    // same as xmax anymore
                                       transform(m_yAxisTickStartVec[i]),
                                       transform(m_yAxisTickEndVec[i]));
                                 }
 
-
-
-				
-
-				
-				//to remove axis (also need to renable them after...)
+                                //to remove axis (also need to renable them after...)
 				//m_plot->enableAxis(QwtPlot::yLeft, false);
 				//m_plot->enableAxis(QwtPlot::xBottom, false);
-                                // m_plot->setAxisScale(QwtPlot::xBottom, 0,
-                                // 100);
                         }
 
 		}

@@ -1537,8 +1537,6 @@ void SliceViewer::showInfoAt(double x, double y) {
 
   ui.lblInfoX->setText(QString::number(coords[m_dimX], 'g', 4));
   ui.lblInfoY->setText(QString::number(coords[m_dimY], 'g', 4));
-  //ui.lblInfoX->setText(QString::number(x, 'g', 4));
-  //ui.lblInfoY->setText(QString::number(y, 'g', 4));
   ui.lblInfoSignal->setText(QString::number(signal, 'g', 4));
   
   // Now show the coords in the original workspace

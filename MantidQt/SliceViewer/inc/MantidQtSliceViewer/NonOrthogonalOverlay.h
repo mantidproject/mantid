@@ -87,6 +87,10 @@ public:
                 std::vector<QPointF> m_xAxisTickEndVec;
                 std::vector<QPointF> m_yAxisTickStartVec;
                 std::vector<QPointF> m_yAxisTickEndVec;
+                double m_xMinVis;
+                double m_xMaxVis;
+                double m_yMinVis;
+                double m_yMaxVis;
         /// First point of the line (in coordinates of the plot)
 	QPointF m_pointA;
 	/// Second point of the line (in coordinates of the plot)
