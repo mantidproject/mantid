@@ -83,12 +83,12 @@ void initArrayLookup(PyArrayIndex &index) {
   typedef SequenceTypeHandler<std::vector<std::string>> StringArrayHandler;
   index.emplace("StringArray", boost::make_shared<StringArrayHandler>());
 
-  typedef SequenceTypeHandler<std::vector<long>> LongIntArrayHandler;
+  typedef SequenceTypeHandler<std::vector<int64_t>> LongIntArrayHandler;
   index.emplace("LongIntArray", boost::make_shared<LongIntArrayHandler>());
 
 #if PY_MAJOR_VERSION < 3
   // Backwards compatible behaviour
-  typedef SequenceTypeHandler<std::vector<int>> IntArrayHandler;
+  typedef SequenceTypeHandler<std::vector<int32_t>> IntArrayHandler;
   index.emplace("IntArray", boost::make_shared<IntArrayHandler>());
 #endif
 }
