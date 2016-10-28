@@ -41,5 +41,5 @@ createListValidator(const boost::python::list &allowedValues) {
 
 void export_ListValidator() {
   EXPORT_LISTVALIDATOR(std::string, String);
-  EXPORT_LISTVALIDATOR(long, Int);
+  EXPORT_LISTVALIDATOR(int64_t, Int);
 }
