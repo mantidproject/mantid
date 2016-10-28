@@ -735,6 +735,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 mask_reduced_ws(left, xmin_left, xmax_left)
                 mask_reduced_ws(right, xmin_right, xmax_right)
 
+            # Delete the left and right monitors
+            DeleteWorkspace('__left_mon')
+            DeleteWorkspace('__right_mon')
+
             # Convert left and right wing axis conversions, vanadium runs are already converted
             convert_to_energy(left)
             convert_to_energy(right)
@@ -758,6 +762,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
                 # perform unmirror
                 start_bin, end_bin = perform_unmirror(red, '__left_clone', '__right_clone', self._unmirror_option)
+
+                # delete temporary ws
+                DeleteWorkspace('__left_clone')
+                DeleteWorkspace('__right_clone')
 
                 if self._reduction_type == 'QENS':
                     xmin = np.maximum(mon_start_bin, start_bin)
@@ -784,6 +792,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     bin_table = mtd['__bin_range'].row(0)
                     start_bin = bin_table['MinBin']
                     end_bin = bin_table['MaxBin']
+                    DeleteWorkspace('__bin_range')
 
                 elif self._unmirror_option == 7:
                     MatchPeaks(InputWorkspace=red, OutputWorkspace=red, InputWorkspace2='center_van',
@@ -791,6 +800,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     bin_table = mtd['__bin_range'].row(0)
                     start_bin = bin_table['MinBin']
                     end_bin = bin_table['MaxBin']
+                    DeleteWorkspace('__bin_range')
 
                 elif self._unmirror_option != 0:
                     self.log().error('Invalid unmirror option for one-wing data. Choose 0,6 or 7.')
@@ -849,10 +859,19 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                                    MonitorWorkspace=monitor)
                 Plus(LHSWorkspace='__mon_left', RHSWorkspace='__mon_right', OutputWorkspace=red)
 
+                # delete temporary workspaces
+                DeleteWorkspace('__red_left')
+                DeleteWorkspace('__red_right')
+                DeleteWorkspace('__mon_left')
+                DeleteWorkspace('__mon_right')
+
             ReplaceSpecialValues(InputWorkspace=red, OutputWorkspace=red, NaNValue=0, NaNError=0)
 
     def _background_subtraction(self, red, bsub):
-        # subtract the background if specified
+        """
+        @param red  :: reduced workspace
+        @param bsub :: background subtracted workspace
+        """
         if self._background_file:
             Scale(InputWorkspace='background', OutputWorkspace='background', Factor=self._back_scaling)
             Minus(LHSWorkspace=red, RHSWorkspace='background', OutputWorkspace=red)
@@ -868,7 +887,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
     def _vanadium_calibration(self, red, vnorm):
         """
-        @param red: reduced workspace that will be calibrated
+        @param red   :: reduced workspace that will be calibrated
+        @param vnorm :: vanadium normalised workspace
         """
         # Calibrate to vanadium calibration workspace if specified
         # note, this is a one-column calibration workspace
