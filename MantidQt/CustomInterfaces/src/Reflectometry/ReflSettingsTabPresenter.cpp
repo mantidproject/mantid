@@ -137,7 +137,7 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   // Add analysis mode
   auto analysisMode = m_view->getAnalysisMode();
   if (!analysisMode.empty())
-	  options.push_back("AnalysisMode=" + analysisMode);
+    options.push_back("AnalysisMode=" + analysisMode);
 
   // Add CRho
   auto crho = m_view->getCRho();
@@ -147,7 +147,7 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   // Add CAlpha
   auto calpha = m_view->getCAlpha();
   if (!calpha.empty())
-	  options.push_back("CAlpha=" + calpha);
+    options.push_back("CAlpha=" + calpha);
 
   // Add CAp
   auto cap = m_view->getCAp();
@@ -157,7 +157,7 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   // Add CPp
   auto cpp = m_view->getCPp();
   if (!cpp.empty())
-	  options.push_back("CPp=" + cpp);
+    options.push_back("CPp=" + cpp);
 
   // Add direct beam
   auto dbnr = m_view->getDirectBeam();
@@ -301,33 +301,23 @@ void ReflSettingsTabPresenter::createStitchHints() {
 void ReflSettingsTabPresenter::getExpDefaults() {
   // The algorithm
   IAlgorithm_sptr alg =
-    AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+      AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
 
   // Collect all default values and set them in view
   std::vector<std::string> defaults;
   defaults.push_back(alg->getPropertyValue("AnalysisMode"));
   defaults.push_back(alg->getPropertyValue("PolarizationAnalysis"));
   defaults.push_back(alg->getPropertyValue("ScaleFactor"));
-
-  // Convert to QString vector and set defaults in view
-  std::vector<QString> defaults_qstr;
-  defaults_qstr.resize(defaults.size());
-  std::transform(defaults.begin(), defaults.end(), defaults_qstr.begin(),
-                 [](std::string i) { return QString::fromStdString(i); });
-  m_view->setExpDefaults(defaults_qstr);
+  m_view->setExpDefaults(defaults);
 }
 
 /** Fills instrument settings with default values
 */
 void ReflSettingsTabPresenter::getInstDefaults() {
 
-  // The algorithm
-  IAlgorithm_sptr alg =
-    AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
-
   // The instrument
   IAlgorithm_sptr loadInst =
-    AlgorithmManager::Instance().create("LoadEmptyInstrument");
+      AlgorithmManager::Instance().create("LoadEmptyInstrument");
   loadInst->setChild(true);
   loadInst->setProperty("OutputWorkspace", "outWs");
   loadInst->setProperty("InstrumentName", m_mainPresenter->getInstrumentName());
@@ -336,21 +326,21 @@ void ReflSettingsTabPresenter::getInstDefaults() {
   auto inst = ws->getInstrument();
 
   // Collect all default values
-  std::vector<double> defaults;
-  defaults.push_back(inst->getNumberParameter("MonitorIntegralMin")[0]);
-  defaults.push_back(inst->getNumberParameter("MonitorIntegralMax")[0]);
-  defaults.push_back(inst->getNumberParameter("MonitorBackgroundMin")[0]);
-  defaults.push_back(inst->getNumberParameter("MonitorBackgroundMax")[0]);
-  defaults.push_back(inst->getNumberParameter("LambdaMin")[0]);
-  defaults.push_back(inst->getNumberParameter("LambdaMax")[0]);
-  defaults.push_back(inst->getNumberParameter("I0MonitorIndex")[0]);
+  std::vector<std::string> defaults;
+  defaults.push_back(
+      std::to_string(inst->getNumberParameter("MonitorIntegralMin")[0]));
+  defaults.push_back(
+      std::to_string(inst->getNumberParameter("MonitorIntegralMax")[0]));
+  defaults.push_back(
+      std::to_string(inst->getNumberParameter("MonitorBackgroundMin")[0]));
+  defaults.push_back(
+      std::to_string(inst->getNumberParameter("MonitorBackgroundMax")[0]));
+  defaults.push_back(std::to_string(inst->getNumberParameter("LambdaMin")[0]));
+  defaults.push_back(std::to_string(inst->getNumberParameter("LambdaMax")[0]));
+  defaults.push_back(
+      std::to_string(inst->getNumberParameter("I0MonitorIndex")[0]));
 
-  // Convert to QString vector and set defaults in view
-  std::vector<QString> defaults_qstr;
-  defaults_qstr.resize(defaults.size());
-  std::transform(defaults.begin(), defaults.end(), defaults_qstr.begin(),
-                 [](double i) { return QString::number(i); });
-  m_view->setInstDefaults(defaults_qstr);
+  m_view->setInstDefaults(defaults);
 }
 }
 }

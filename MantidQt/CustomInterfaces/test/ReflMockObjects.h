@@ -85,6 +85,8 @@ public:
   MOCK_CONST_METHOD0(getScaleFactor, std::string());
   MOCK_CONST_METHOD0(getMomentumTransferLimits, std::string());
   MOCK_CONST_METHOD0(getDetectorLimits, std::string());
+  MOCK_CONST_METHOD1(setExpDefaults, void(std::vector<std::string>));
+  MOCK_CONST_METHOD1(setInstDefaults, void(std::vector<std::string>));
 
   // Calls we don't care about
   void
@@ -103,6 +105,8 @@ public:
   createStitchHints(const std::map<std::string, std::string> &hints) override {
     UNUSED_ARG(hints);
   };
+  void requestExpDefaults() const {};
+  void requestInstDefaults() const {};
   IReflSettingsTabPresenter *getPresenter() const override { return nullptr; }
 };
 
@@ -128,6 +132,7 @@ public:
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
     UNUSED_ARG(presenter);
   };
+  std::string getCurrentInstrumentName() const override { return "INTER"; };
   ~MockRunsTabPresenter() override{};
 };
 
@@ -141,6 +146,9 @@ public:
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
     UNUSED_ARG(presenter);
   };
+  void notify(IReflSettingsTabPresenter::Flag flag) override {
+    UNUSED_ARG(flag);
+  };
   ~MockSettingsTabPresenter() override{};
 };
 
@@ -150,6 +158,7 @@ public:
   MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
+  MOCK_CONST_METHOD0(getInstrumentName, std::string());
   MOCK_METHOD3(askUserString,
                std::string(const std::string &, const std::string &,
                            const std::string &));

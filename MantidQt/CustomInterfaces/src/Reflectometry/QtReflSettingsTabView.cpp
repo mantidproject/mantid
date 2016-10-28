@@ -134,32 +134,34 @@ void QtReflSettingsTabView::requestInstDefaults() const {
 * values.
 */
 void QtReflSettingsTabView::setExpDefaults(
-  std::vector<QString> defaults) const {
-  
-  int amIndex = m_ui.analysisModeComboBox->findText(defaults[0]);
+    std::vector<std::string> defaults) const {
+
+  int amIndex =
+      m_ui.analysisModeComboBox->findText(QString::fromStdString(defaults[0]));
   if (amIndex != -1)
     m_ui.analysisModeComboBox->setCurrentIndex(amIndex);
 
-  int pcIndex = m_ui.polCorrComboBox->findText(defaults[1]);
+  int pcIndex =
+      m_ui.polCorrComboBox->findText(QString::fromStdString(defaults[1]));
   if (pcIndex != -1)
     m_ui.polCorrComboBox->setCurrentIndex(pcIndex);
 
-  m_ui.expSettingsScaleFactorEdit->setText(defaults[2]);
+  m_ui.expSettingsScaleFactorEdit->setText(QString::fromStdString(defaults[2]));
 }
 
 /* Sets default values for all instrument settings given a list of default
 * values.
 */
 void QtReflSettingsTabView::setInstDefaults(
-  std::vector<QString> defaults) const {
-  
-  m_ui.instSettingsMonIntMinEdit->setText(defaults[0]);
-  m_ui.instSettingsMonIntMaxEdit->setText(defaults[1]);
-  m_ui.instSettingsMonBgMinEdit->setText(defaults[2]);
-  m_ui.instSettingsMonBgMaxEdit->setText(defaults[3]);
-  m_ui.instSettingsLamMinEdit->setText(defaults[4]);
-  m_ui.instSettingsLamMaxEdit->setText(defaults[5]);
-  m_ui.instSettingsI0MonIndexEdit->setText(defaults[6]);
+    std::vector<std::string> defaults) const {
+
+  m_ui.instSettingsMonIntMinEdit->setText(QString::fromStdString(defaults[0]));
+  m_ui.instSettingsMonIntMaxEdit->setText(QString::fromStdString(defaults[1]));
+  m_ui.instSettingsMonBgMinEdit->setText(QString::fromStdString(defaults[2]));
+  m_ui.instSettingsMonBgMaxEdit->setText(QString::fromStdString(defaults[3]));
+  m_ui.instSettingsLamMinEdit->setText(QString::fromStdString(defaults[4]));
+  m_ui.instSettingsLamMaxEdit->setText(QString::fromStdString(defaults[5]));
+  m_ui.instSettingsI0MonIndexEdit->setText(QString::fromStdString(defaults[6]));
 }
 
 /** Return selected analysis mode

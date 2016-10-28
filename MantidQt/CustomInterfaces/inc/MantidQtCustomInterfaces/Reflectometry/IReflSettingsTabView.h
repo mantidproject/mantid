@@ -87,8 +87,8 @@ public:
   virtual void requestExpDefaults() const = 0;
   virtual void requestInstDefaults() const = 0;
   /// Set default values for settings
-  virtual void setExpDefaults(std::vector<QString> defaults) const = 0;
-  virtual void setInstDefaults(std::vector<QString> defaults) const = 0;
+  virtual void setExpDefaults(std::vector<std::string> defaults) const = 0;
+  virtual void setInstDefaults(std::vector<std::string> defaults) const = 0;
 };
 }
 }

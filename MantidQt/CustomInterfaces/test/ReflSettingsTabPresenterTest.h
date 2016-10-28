@@ -13,17 +13,18 @@ using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 
 namespace {
-  class split_q {
-  private:
-    mutable bool in_q;
-  public:
-    split_q() : in_q(false) {}
-    bool operator() (char c) const
-    {
-      if (c == '\"') in_q = !in_q;
-      return !in_q && c == ',';
-    }
-  };
+class split_q {
+private:
+  mutable bool in_q;
+
+public:
+  split_q() : in_q(false) {}
+  bool operator()(char c) const {
+    if (c == '\"')
+      in_q = !in_q;
+    return !in_q && c == ',';
+  }
+};
 };
 
 //=====================================================================================
@@ -189,6 +190,24 @@ public:
     EXPECT_CALL(mockView, getStitchOptions()).Times(Exactly(1));
     presenter.getStitchOptions();
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testInstrumentDefaults() {
+    MockSettingsTabView mockView;
+    MockMainWindowPresenter mainPresenter;
+    ReflSettingsTabPresenter presenter(&mockView);
+
+    // This presenter accepts the main presenter
+    presenter.acceptMainPresenter(&mainPresenter);
+
+    std::vector<std::string> defaults = {std::to_string(4.0),
+                                         std::to_string(10.)};
+
+    EXPECT_CALL(mainPresenter, getInstrumentName())
+        .Times(1)
+        .WillOnce(Return("INTER"));
+    EXPECT_CALL(mockView, setInstDefaults(defaults)).Times(1);
+    presenter.notify(IReflSettingsTabPresenter::InstDefaultsFlag);
   }
 };
 
