@@ -114,18 +114,33 @@ private:
   PropertyWithValue() = default;
 };
 
-template <> void PropertyWithValue<float>::saveProperty(::NeXus::File *file);
-template <> void PropertyWithValue<double>::saveProperty(::NeXus::File *file);
-template <> void PropertyWithValue<int32_t>::saveProperty(::NeXus::File *file);
-template <> void PropertyWithValue<uint32_t>::saveProperty(::NeXus::File *file);
-template <> void PropertyWithValue<int64_t>::saveProperty(::NeXus::File *file);
-template <> void PropertyWithValue<uint64_t>::saveProperty(::NeXus::File *file);
 template <>
-void PropertyWithValue<std::string>::saveProperty(::NeXus::File *file);
+MANTID_KERNEL_DLL void
+PropertyWithValue<float>::saveProperty(::NeXus::File *file);
 template <>
-void PropertyWithValue<std::vector<double>>::saveProperty(::NeXus::File *file);
+MANTID_KERNEL_DLL void
+PropertyWithValue<double>::saveProperty(::NeXus::File *file);
 template <>
-void PropertyWithValue<std::vector<int32_t>>::saveProperty(::NeXus::File *file);
+MANTID_KERNEL_DLL void
+PropertyWithValue<int32_t>::saveProperty(::NeXus::File *file);
+template <>
+MANTID_KERNEL_DLL void
+PropertyWithValue<uint32_t>::saveProperty(::NeXus::File *file);
+template <>
+MANTID_KERNEL_DLL void
+PropertyWithValue<int64_t>::saveProperty(::NeXus::File *file);
+template <>
+MANTID_KERNEL_DLL void
+PropertyWithValue<uint64_t>::saveProperty(::NeXus::File *file);
+template <>
+MANTID_KERNEL_DLL void
+PropertyWithValue<std::string>::saveProperty(::NeXus::File *file);
+template <>
+MANTID_KERNEL_DLL void
+PropertyWithValue<std::vector<double>>::saveProperty(::NeXus::File *file);
+template <>
+MANTID_KERNEL_DLL void
+PropertyWithValue<std::vector<int32_t>>::saveProperty(::NeXus::File *file);
 
 template <typename TYPE>
 Logger PropertyWithValue<TYPE>::g_logger("PropertyWithValue");
