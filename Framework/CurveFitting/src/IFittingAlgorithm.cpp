@@ -278,6 +278,37 @@ std::vector<std::string> IFittingAlgorithm::getCostFunctionNames() const {
   return out;
 }
 
+/// Declare a "CostFunction" property.
+void IFittingAlgorithm::declareCostFunctionProperty() {
+  Kernel::IValidator_sptr costFuncValidator =
+      boost::make_shared<Kernel::ListValidator<std::string>>(getCostFunctionNames());
+  declareProperty(
+      "CostFunction", "Least squares", costFuncValidator,
+      "The cost function to be used for the fit, default is Least squares",
+      Kernel::Direction::InOut);
+}
+
+/// Create a cost function from the "CostFunction" property.
+boost::shared_ptr<CostFunctions::CostFuncFitting> IFittingAlgorithm::getCostFunctionProperty() const {
+  // Function may need some preparation.
+  m_function->setUpForFit();
+
+  API::FunctionDomain_sptr domain;
+  API::FunctionValues_sptr values;
+  m_domainCreator->createDomain(domain, values);
+
+  // Do something with the function which may depend on workspace.
+  m_domainCreator->initFunction(m_function);
+
+  // get the cost function which must be a CostFuncFitting
+  auto costFunction = boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
+      API::CostFunctionFactory::Instance().create(
+          getPropertyValue("CostFunction")));
+
+  costFunction->setFittingFunction(m_function, domain, values);
+
+  return costFunction;
+}
 
 //----------------------------------------------------------------------------------------------
 /// Execute the algorithm.

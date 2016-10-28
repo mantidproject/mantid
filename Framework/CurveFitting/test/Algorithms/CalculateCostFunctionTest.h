@@ -72,7 +72,7 @@ public:
     CalculateCostFunction alg;
     alg.initialize();
     auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        [](double x, int i) { return 0.0; }, 1, 0.0, 1.0, 0.1);
+        [](double x, int i) { return 1.0; }, 1, 0.0, 1.0, 0.1);
     double w = 0.0;
     std::generate(ws->dataE(0).begin(), ws->dataE(0).end(), [&w] {
       w += 1.0;
@@ -85,7 +85,7 @@ public:
     TS_ASSERT(alg.isExecuted());
     double value = alg.getProperty("Value");
     auto sum = std::accumulate(ws->x(0).begin(), ws->x(0).end(), 0.0,
-                               [](double s, double a) { return s + a * a; });
+                               [](double s, double a) { return s + (a - 1.0) * (a - 1.0); });
     TS_ASSERT_DELTA(value, sum / 2, 1e-15);
   }
 };

@@ -1,4 +1,4 @@
-#include "MantidCurveFitting/Algorithms/CalculateCostFunction.h"
+#include "MantidCurveFitting/Algorithms/MonteCarloParameters.h"
 
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
@@ -12,43 +12,33 @@ using namespace Kernel;
 using namespace API;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(CalculateCostFunction)
+DECLARE_ALGORITHM(MonteCarloParameters)
 
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string CalculateCostFunction::name() const {
-  return "CalculateCostFunction";
+const std::string MonteCarloParameters::name() const {
+  return "MonteCarloParameters";
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CalculateCostFunction::version() const { return 1; }
+int MonteCarloParameters::version() const { return 1; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string CalculateCostFunction::summary() const {
-  return "Calculate cost function for a function and a data set in a workspace.";
+const std::string MonteCarloParameters::summary() const {
+  return "Estimate parameters of a fitting function using a Monte Carlo algorithm.";
 }
 
 //----------------------------------------------------------------------------------------------
 /// Initialize the algorithm's properties.
-void CalculateCostFunction::initConcrete() {
+void MonteCarloParameters::initConcrete() {
   declareCostFunctionProperty();
-  declareProperty("Value", 0.0, "Output value of the cost function.",
-                  Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------
 /// Execute the algorithm.
-void CalculateCostFunction::execConcrete() {
-
-  if (!m_costFunction) {
-    m_costFunction = getCostFunctionProperty();
-  }
-
-  // Get the result.
-  double value = m_costFunction->val();
-  // Store the result.
-  setProperty("Value", value);
+void MonteCarloParameters::execConcrete() {
+  auto costFunction = getCostFunctionProperty();
 }
 
 } // namespace Algorithms

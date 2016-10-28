@@ -11,6 +11,7 @@ set ( SRC_FILES
 	src/Algorithms/FitPowderDiffPeaks.cpp
 	src/Algorithms/LeBailFit.cpp
 	src/Algorithms/LeBailFunction.cpp
+	src/Algorithms/MonteCarloParameters.cpp
 	src/Algorithms/NormaliseByPeakArea.cpp
 	src/Algorithms/PawleyFit.cpp
 	src/Algorithms/PlotPeakByLogValue.cpp
@@ -158,6 +159,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Algorithms/FitPowderDiffPeaks.h
 	inc/MantidCurveFitting/Algorithms/LeBailFit.h
 	inc/MantidCurveFitting/Algorithms/LeBailFunction.h
+	inc/MantidCurveFitting/Algorithms/MonteCarloParameters.h
 	inc/MantidCurveFitting/Algorithms/NormaliseByPeakArea.h
 	inc/MantidCurveFitting/Algorithms/PawleyFit.h
 	inc/MantidCurveFitting/Algorithms/PlotPeakByLogValue.h
@@ -311,6 +313,7 @@ set ( TEST_FILES
 	Algorithms/FitTest.h
 	Algorithms/LeBailFitTest.h
 	Algorithms/LeBailFunctionTest.h
+	Algorithms/MonteCarloParametersTest.h
 	Algorithms/NormaliseByPeakAreaTest.h
 	Algorithms/PawleyFitTest.h
 	Algorithms/PlotPeakByLogValueTest.h
