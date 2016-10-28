@@ -5,6 +5,7 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspacePropert
 from mantid.kernel import FloatArrayProperty, Direction
 import numpy as np
 
+
 class GetQsInQENSData(PythonAlgorithm):
     """Extract Q-values from a MatrixWorkspace containing QENS data
     """
