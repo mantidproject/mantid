@@ -763,8 +763,7 @@ template <typename TYPE>
 double TimeSeriesProperty<TYPE>::timeAverageValue() const {
   double retVal = 0.0;
   try {
-    TimeSplitterType filter;
-    filter.emplace_back(this->firstTime(), this->lastTime());
+    const auto &filter = getSplittingIntervals();
     retVal = this->averageValueInFilter(filter);
   } catch (std::exception &) {
     // just return nan
@@ -2248,6 +2247,60 @@ bool TimeSeriesProperty<TYPE>::isTimeFiltered(
     --filterEntry; // get the latest time BEFORE the given time
   }
   return filterEntry->second;
+}
+
+/**
+ * Get a list of the splitting intervals, if filtering is enabled.
+ * Otherwise the interval is just first time - last time.
+ * @returns :: Vector of splitting intervals
+ */
+template <typename TYPE>
+std::vector<SplittingInterval>
+TimeSeriesProperty<TYPE>::getSplittingIntervals() const {
+  std::vector<SplittingInterval> intervals;
+  // Case where there is no filter
+  if (m_filter.empty()) {
+    intervals.emplace_back(firstTime(), lastTime());
+    return intervals;
+  }
+
+  if (!m_filterApplied) {
+    applyFilter();
+  }
+
+  // (local reference to use in lambda)
+  const auto &localFilter = m_filter;
+  /// Count along to find the next time in the filter for which value is 'val'
+  const auto findNext = [&localFilter](size_t &index, const bool val) {
+    for (; index < localFilter.size(); ++index) {
+      const auto &entry = localFilter[index];
+      if (entry.second == val) {
+        return entry.first;
+      }
+    }
+    return localFilter.back().first;
+  };
+
+  // Look through filter to find start/stop pairs
+  size_t index = 0;
+  while (index < m_filter.size()) {
+    DateAndTime start, stop;
+    if (index == 0) {
+      if (m_filter[0].second) {
+        start = m_filter[0].first;
+      } else {
+        start = firstTime();
+      }
+    } else {
+      start = findNext(index, true);
+    }
+    stop = findNext(index, false);
+    if (stop != start) { // avoid empty ranges
+      intervals.emplace_back(start, stop);
+    }
+  }
+
+  return intervals;
 }
 
 /// @cond

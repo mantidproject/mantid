@@ -1956,9 +1956,71 @@ public:
     TS_ASSERT_EQUALS(filteredValues.size(), 9);
   }
 
+  void test_getSplittingIntervals_noFilter() {
+    const auto &log = getTestLog(); // no filter
+    const auto &intervals = log->getSplittingIntervals();
+    TS_ASSERT_EQUALS(intervals.size(), 1);
+    const auto &range = intervals.front();
+    TS_ASSERT_EQUALS(range.start(), log->firstTime());
+    TS_ASSERT_EQUALS(range.stop(), log->lastTime());
+  }
+
+  void test_getSplittingIntervals_repeatedEntries() {
+    const auto &log = getTestLog();
+    // Add the filter
+    auto filter =
+        Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("Filter");
+    Mantid::Kernel::DateAndTime firstStart("2007-11-30T16:17:00"),
+        firstEnd("2007-11-30T16:17:15"), secondStart("2007-11-30T16:18:35"),
+        secondEnd("2007-11-30T16:18:40");
+    filter->addValue(firstStart.toISO8601String(), true);
+    filter->addValue(firstEnd.toISO8601String(), false);
+    filter->addValue("2007-11-30T16:17:25", false);
+    filter->addValue(secondStart.toISO8601String(), true);
+    filter->addValue("2007-11-30T16:18:38", true);
+    filter->addValue(secondEnd.toISO8601String(), false);
+    log->filterWith(filter.get());
+    const auto &intervals = log->getSplittingIntervals();
+    TS_ASSERT_EQUALS(intervals.size(), 2);
+    if (intervals.size() == 2) {
+      const auto &firstRange = intervals.front(),
+                 &secondRange = intervals.back();
+      TS_ASSERT_EQUALS(firstRange.start(), firstStart);
+      TS_ASSERT_EQUALS(firstRange.stop(), firstEnd);
+      TS_ASSERT_EQUALS(secondRange.start(), secondStart);
+      TS_ASSERT_EQUALS(secondRange.stop(), secondEnd);
+    }
+  }
+
+  void test_getSplittingIntervals_startEndTimes() {
+    const auto &log = getTestLog();
+    // Add the filter
+    auto filter =
+        Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("Filter");
+    Mantid::Kernel::DateAndTime firstEnd("2007-11-30T16:17:05"),
+        secondStart("2007-11-30T16:17:10"), secondEnd("2007-11-30T16:17:15"),
+        thirdStart("2007-11-30T16:18:35");
+    filter->addValue(log->firstTime(), true);
+    filter->addValue(firstEnd.toISO8601String(), false);
+    filter->addValue(secondStart.toISO8601String(), true);
+    filter->addValue(secondEnd.toISO8601String(), false);
+    filter->addValue(thirdStart.toISO8601String(), true);
+    log->filterWith(filter.get());
+    const auto &intervals = log->getSplittingIntervals();
+    TS_ASSERT_EQUALS(intervals.size(), 3);
+    if (intervals.size() == 3) {
+      TS_ASSERT_EQUALS(intervals[0].start(), log->firstTime());
+      TS_ASSERT_EQUALS(intervals[0].stop(), firstEnd);
+      TS_ASSERT_EQUALS(intervals[1].start(), secondStart);
+      TS_ASSERT_EQUALS(intervals[1].stop(), secondEnd);
+      TS_ASSERT_EQUALS(intervals[2].start(), thirdStart);
+      TS_ASSERT(intervals[2].stop() > thirdStart);
+    }
+  }
+
 private:
-  /// Generate a test log that has been filtered
-  std::unique_ptr<TimeSeriesProperty<double>> getFilteredTestLog() {
+  /// Generate a test log
+  std::unique_ptr<TimeSeriesProperty<double>> getTestLog() {
     // Build the log
     auto log =
         Mantid::Kernel::make_unique<TimeSeriesProperty<double>>("DoubleLog");
@@ -1969,6 +2031,13 @@ private:
       log->addValue(logTime.toISO8601String(), val);
       logTime += incrementSecs;
     }
+    return log;
+  }
+
+  /// Generate a test log that has been filtered
+  std::unique_ptr<TimeSeriesProperty<double>> getFilteredTestLog() {
+    // Build the log
+    auto log = getTestLog();
     // Add the filter
     auto filter =
         Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("Filter");

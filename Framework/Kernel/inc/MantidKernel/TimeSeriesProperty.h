@@ -298,6 +298,9 @@ public:
     * total size you'll need easily available in advance.  */
   void reserve(size_t size) { m_values.reserve(size); };
 
+  /// If filtering by log, get the time intervals for splitting
+  std::vector<Mantid::Kernel::SplittingInterval> getSplittingIntervals() const;
+
 private:
   //----------------------------------------------------------------------------------------------
   /// Saves the time vector has time + start attribute
