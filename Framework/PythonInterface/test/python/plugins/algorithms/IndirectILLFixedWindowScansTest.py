@@ -16,10 +16,16 @@ class IndirectILLFixedWindowScansTest(unittest.TestCase):
     _def_inst = config['default.instrument']
     _data_dirs = config['datasearch.directories']
 
-    # EFWS, one wing, newer data
-    _run_one_wing_elastic = '143718'
-    # IFWS, two wings, older data, Doppler.frequency defined
-    _run_two_wings_inelastic = '083073'
+    # EFWS+IFWS, one wing
+    _run_one_wing_mixed = '170257,170258,171001,171003'
+    _one_wing = ['[170257, 170258]', # EFWS
+                 '[171001, 171003]'] # IFWS @ 2 microEV
+
+    # EFWS+IFWS, two wings
+    _run_two_wings_mixed = '083072:083077'
+    _two_wings = ['[83072, 83075]', # EFWS
+                  '[83073, 83076]', # IFWS @ 1.5 microEV
+                  '[83074, 83077]'] # IFWS @ 3.0 microEV
 
     def setUp(self):
         # set instrument and append datasearch directory
@@ -33,51 +39,49 @@ class IndirectILLFixedWindowScansTest(unittest.TestCase):
         config['default.instrument'] = self._def_inst
         config['datasearch.directories'] = self._data_dirs
 
-    def test_efws(self):
-        self._args['Run'] = self._run_one_wing_elastic
+    def test_one_wing(self):
+        self._args['Run'] = self._run_one_wing_mixed
 
         alg_test = run_algorithm('IndirectILLFixedWindowScans', **self._args)
         self.assertTrue(alg_test.isExecuted(), "IndirectILLFixedWindowScans not executed")
 
-        self._workspace_properties(mtd['output'])
+        self._workspace_group_properties(mtd['result'], 2)
 
-    def test_ifws(self):
-        self._args['Run'] = self._run_two_wings_inelastic
+        for i in range(mtd['result'].getNumberOfEntries()):
+            _item = mtd['result'].getItem(i)
+            self.assertEquals(_item.getRun().getLogData('ReducedRuns').value,self._one_wing[i])
+            self._workspace_properties(_item, 2)
+
+    def test_two_wings(self):
+        self._args['Run'] = self._run_two_wings_mixed
 
         alg_test = run_algorithm('IndirectILLFixedWindowScans', **self._args)
         self.assertTrue(alg_test.isExecuted(), "IndirectILLFixedWindowScans not executed")
 
-        self._workspace_properties(mtd['output'])
+        self._workspace_group_properties(mtd['result'], 3)
 
-    def test_raise_ValueError(self):
-        self._args['Run'] = self._run_two_wings_inelastic
-        try:
-            alg_test = run_algorithm('IndirectILLFixedWindowScans', **self._args)
-        except ValueError:
-            self.assertFalse(alg_test.isExecuted(), "IndirectILLFixedWindowScans executed")
+        for i in range(mtd['result'].getNumberOfEntries()):
+            _item = mtd['result'].getItem(i)
+            self.assertEquals(_item.getRun().getLogData('ReducedRuns').value,self._two_wings[i])
+            self._workspace_properties(_item, 2)
 
-    def _workspace_properties(self, ws):
-        # After integration only one bin, all entries for all spectra > 0
-        self.assertGreater(ws.getItem(0).extractY().all(), 0.)
-        self.assertGreater(ws.getItem(0).extractX().all(), 0.)
-        # The first two spectra contain zero-valued errors (single detectors) - no test since y-values and e-values are
-        # treated equivalently
-        # Check log file entry if original run number was saved
-        self.assertTrue(ws.getItem(0).getRun().getLogData('ReducedRuns').value)
-        self.assertEqual(ws.getItem(0).blocksize(), 1)
-        self.assertEqual(ws.getItem(0).getNumberHistograms(), 18)
-        # Workspaces should have x- unit temperature K as default (check for symbol K  DOES NOT WORK)
-        self.assertEqual(ws.getItem(0).getAxis(0).getUnit().caption(), 'Temperature')
-        #self.assertEqual(ws.getItem(0).getAxis(0).getUnit().symbol(), 'K')
-        self.assertTrue(ws.getItem(0).getAxis(0).isNumeric())
-        # Workspace should have y- unit scattering angle as default (check for symbol degrees DOES NOT WORK)
-        self.assertEqual(ws.getItem(0).getAxis(1).getUnit().caption(), 'Scattering angle')
-        self.assertTrue(ws.getItem(0).getAxis(1).isNumeric())
-        self.assertEqual(ws.size(), 1, "WorkspaceGroup should contain one workspace")
+    def _workspace_group_properties(self, ws, n_uniqueE):
+
         self.assertTrue(isinstance(ws, WorkspaceGroup), "Should be a group workspace")
-        self.assertTrue(isinstance(ws.getItem(0), MatrixWorkspace), "Should be a matrix workspace")
-        self.assertTrue(ws.getItem(0).getSampleDetails(), "Should have SampleLogs")
-        self.assertTrue(ws.getItem(0).getHistory().lastAlgorithm(), "Should have AlgorithmsHistory")
+        self.assertEquals(ws.getNumberOfEntries(), n_uniqueE, "Group should contain "+str(n_uniqueE)+" workspaces")
+
+    def _workspace_properties(self, ws, n_uniqueT):
+
+        self.assertGreater(ws.extractY().all(), 0.)
+        self.assertEqual(ws.getNumberHistograms(), 18)
+        self.assertEqual(ws.blocksize(), n_uniqueT)
+        self.assertEqual(ws.getAxis(0).getUnit().caption(), 'Temperature')
+        self.assertTrue(ws.getAxis(0).isNumeric())
+        self.assertEqual(ws.getAxis(1).getUnit().caption(), 'Scattering angle')
+        self.assertTrue(ws.getAxis(1).isNumeric())
+        self.assertTrue(isinstance(ws, MatrixWorkspace), "Should be a matrix workspace")
+        self.assertTrue(ws.getSampleDetails(), "Should have SampleLogs")
+        self.assertTrue(ws.getHistory().lastAlgorithm(), "Should have AlgorithmsHistory")
 
 if __name__ == "__main__":
     unittest.main()
