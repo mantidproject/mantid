@@ -52,8 +52,6 @@ template class MANTID_DATAOBJECTS_DLL
 template class MANTID_DATAOBJECTS_DLL
     PropertyWithValue<boost::shared_ptr<DataObjects::MDEventWS<9>>>;
 template class MANTID_DATAOBJECTS_DLL
-    PropertyWithValue<boost::shared_ptr<DataObjects::MDEventWS<10>>>;
-template class MANTID_DATAOBJECTS_DLL
     PropertyWithValue<boost::shared_ptr<DataObjects::MDLeanEventWS<1>>>;
 template class MANTID_DATAOBJECTS_DLL
     PropertyWithValue<boost::shared_ptr<DataObjects::MDLeanEventWS<2>>>;
@@ -71,8 +69,6 @@ template class MANTID_DATAOBJECTS_DLL
     PropertyWithValue<boost::shared_ptr<DataObjects::MDLeanEventWS<8>>>;
 template class MANTID_DATAOBJECTS_DLL
     PropertyWithValue<boost::shared_ptr<DataObjects::MDLeanEventWS<9>>>;
-template class MANTID_DATAOBJECTS_DLL
-    PropertyWithValue<boost::shared_ptr<DataObjects::MDLeanEventWS<10>>>;
 template class MANTID_DATAOBJECTS_DLL
     PropertyWithValue<boost::shared_ptr<DataObjects::MDHistoWorkspace>>;
 template class MANTID_DATAOBJECTS_DLL
