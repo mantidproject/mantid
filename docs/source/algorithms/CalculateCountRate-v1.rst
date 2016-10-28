@@ -78,8 +78,8 @@ Usage
     Initially, Property block_count_rate not found
     The Algorithm produced log: block_count_rate
     log block_count_rate contains 200 entries
-    log starts at 2010-01-01T00:00:09.011891145  and records value: 968.0
-    log ends   at 2010-01-01T00:59:50.996493194  and records value: 1006.0
+    log starts at 2010-01-01T00:00:09.014398787  and records value: 968.0
+    log ends   at 2010-01-01T00:59:50.998014178  and records value: 1006.0
  
 .. categories::
 
