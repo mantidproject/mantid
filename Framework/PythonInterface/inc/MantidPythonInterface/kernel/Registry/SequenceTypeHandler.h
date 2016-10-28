@@ -33,7 +33,8 @@ namespace Registry {
  * should contain a type called value_type indicating the element type.
  */
 template <typename ContainerType>
-struct SequenceTypeHandler : TypedPropertyValueHandler<ContainerType> {
+struct DLLExport SequenceTypeHandler
+    : TypedPropertyValueHandler<ContainerType> {
 
   /// Call to set a named property where the value is some container type
   void set(Kernel::IPropertyManager *alg, const std::string &name,
