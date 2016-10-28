@@ -153,15 +153,15 @@ void QtReflSettingsTabView::setExpDefaults(
 * values.
 */
 void QtReflSettingsTabView::setInstDefaults(
-    std::vector<std::string> defaults) const {
+    std::vector<double> defaults) const {
 
-  m_ui.instSettingsMonIntMinEdit->setText(QString::fromStdString(defaults[0]));
-  m_ui.instSettingsMonIntMaxEdit->setText(QString::fromStdString(defaults[1]));
-  m_ui.instSettingsMonBgMinEdit->setText(QString::fromStdString(defaults[2]));
-  m_ui.instSettingsMonBgMaxEdit->setText(QString::fromStdString(defaults[3]));
-  m_ui.instSettingsLamMinEdit->setText(QString::fromStdString(defaults[4]));
-  m_ui.instSettingsLamMaxEdit->setText(QString::fromStdString(defaults[5]));
-  m_ui.instSettingsI0MonIndexEdit->setText(QString::fromStdString(defaults[6]));
+  m_ui.instSettingsMonIntMinEdit->setText(QString::number(defaults[0]));
+  m_ui.instSettingsMonIntMaxEdit->setText(QString::number(defaults[1]));
+  m_ui.instSettingsMonBgMinEdit->setText(QString::number(defaults[2]));
+  m_ui.instSettingsMonBgMaxEdit->setText(QString::number(defaults[3]));
+  m_ui.instSettingsLamMinEdit->setText(QString::number(defaults[4]));
+  m_ui.instSettingsLamMaxEdit->setText(QString::number(defaults[5]));
+  m_ui.instSettingsI0MonIndexEdit->setText(QString::number(defaults[6]));
 }
 
 /** Return selected analysis mode

@@ -69,11 +69,14 @@ public:
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   MOCK_CONST_METHOD0(getAnalysisMode, std::string());
+  MOCK_CONST_METHOD0(getDirectBeam, std::string());
   MOCK_CONST_METHOD0(getCRho, std::string());
   MOCK_CONST_METHOD0(getCAlpha, std::string());
   MOCK_CONST_METHOD0(getCAp, std::string());
   MOCK_CONST_METHOD0(getCPp, std::string());
-  MOCK_CONST_METHOD0(getDirectBeam, std::string());
+  MOCK_CONST_METHOD0(getMomentumTransferLimits, std::string());
+  MOCK_CONST_METHOD0(getDetectorLimits, std::string());
+  MOCK_CONST_METHOD0(getScaleFactor, std::string());
   MOCK_CONST_METHOD0(getPolarisationCorrections, std::string());
   MOCK_CONST_METHOD0(getMonitorIntegralMin, std::string());
   MOCK_CONST_METHOD0(getMonitorIntegralMax, std::string());
@@ -82,11 +85,8 @@ public:
   MOCK_CONST_METHOD0(getLambdaMin, std::string());
   MOCK_CONST_METHOD0(getLambdaMax, std::string());
   MOCK_CONST_METHOD0(getI0MonitorIndex, std::string());
-  MOCK_CONST_METHOD0(getScaleFactor, std::string());
-  MOCK_CONST_METHOD0(getMomentumTransferLimits, std::string());
-  MOCK_CONST_METHOD0(getDetectorLimits, std::string());
   MOCK_CONST_METHOD1(setExpDefaults, void(std::vector<std::string>));
-  MOCK_CONST_METHOD1(setInstDefaults, void(std::vector<std::string>));
+  MOCK_CONST_METHOD1(setInstDefaults, void(std::vector<double>));
 
   // Calls we don't care about
   void

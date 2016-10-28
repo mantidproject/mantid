@@ -192,6 +192,16 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
+  void testExperimentDefaults() {
+    MockSettingsTabView mockView;
+    ReflSettingsTabPresenter presenter(&mockView);
+
+    std::vector<std::string> defaults = {"PointDetectorAnalysis", "None", "1"};
+
+    EXPECT_CALL(mockView, setExpDefaults(defaults)).Times(1);
+    presenter.notify(IReflSettingsTabPresenter::ExpDefaultsFlag);
+  }
+
   void testInstrumentDefaults() {
     MockSettingsTabView mockView;
     MockMainWindowPresenter mainPresenter;
@@ -200,8 +210,7 @@ public:
     // This presenter accepts the main presenter
     presenter.acceptMainPresenter(&mainPresenter);
 
-    std::vector<std::string> defaults = {std::to_string(4.0),
-                                         std::to_string(10.)};
+    std::vector<double> defaults = {4.0, 10., 15., 17., 1.0, 17., 2.0};
 
     EXPECT_CALL(mainPresenter, getInstrumentName())
         .Times(1)

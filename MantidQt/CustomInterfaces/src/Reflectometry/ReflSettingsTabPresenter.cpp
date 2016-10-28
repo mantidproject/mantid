@@ -326,19 +326,14 @@ void ReflSettingsTabPresenter::getInstDefaults() {
   auto inst = ws->getInstrument();
 
   // Collect all default values
-  std::vector<std::string> defaults;
-  defaults.push_back(
-      std::to_string(inst->getNumberParameter("MonitorIntegralMin")[0]));
-  defaults.push_back(
-      std::to_string(inst->getNumberParameter("MonitorIntegralMax")[0]));
-  defaults.push_back(
-      std::to_string(inst->getNumberParameter("MonitorBackgroundMin")[0]));
-  defaults.push_back(
-      std::to_string(inst->getNumberParameter("MonitorBackgroundMax")[0]));
-  defaults.push_back(std::to_string(inst->getNumberParameter("LambdaMin")[0]));
-  defaults.push_back(std::to_string(inst->getNumberParameter("LambdaMax")[0]));
-  defaults.push_back(
-      std::to_string(inst->getNumberParameter("I0MonitorIndex")[0]));
+  std::vector<double> defaults;
+  defaults.push_back(inst->getNumberParameter("MonitorIntegralMin")[0]);
+  defaults.push_back(inst->getNumberParameter("MonitorIntegralMax")[0]);
+  defaults.push_back(inst->getNumberParameter("MonitorBackgroundMin")[0]);
+  defaults.push_back(inst->getNumberParameter("MonitorBackgroundMax")[0]);
+  defaults.push_back(inst->getNumberParameter("LambdaMin")[0]);
+  defaults.push_back(inst->getNumberParameter("LambdaMax")[0]);
+  defaults.push_back(inst->getNumberParameter("I0MonitorIndex")[0]);
 
   m_view->setInstDefaults(defaults);
 }
