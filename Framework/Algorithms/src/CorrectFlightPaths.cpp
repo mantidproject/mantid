@@ -12,7 +12,9 @@ using namespace Geometry;
 DECLARE_ALGORITHM(CorrectFlightPaths)
 
 /// Constructor
-CorrectFlightPaths::CorrectFlightPaths() : ConvertToConstantL2() { this->useAlgorithm("ConvertToConstantL2", 1); }
+CorrectFlightPaths::CorrectFlightPaths() : ConvertToConstantL2() {
+  this->useAlgorithm("ConvertToConstantL2", 1);
+}
 
 } // namespace Algorithm
 } // namespace Mantid
