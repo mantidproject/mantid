@@ -76,144 +76,144 @@ namespace MantidQt {
 			return QPointF(xA, yA);
 		}
 
-                void NonOrthogonalOverlay::setSkewMatrix() {
-                  Mantid::Kernel::DblMatrix skewMatrix(3, 3, true);
-                  API::provideSkewMatrix(skewMatrix, *m_ws);
-                  skewMatrix.Invert();
-                  // transform from double to coord_t
-                  std::size_t index = 0;
-                  for (std::size_t i = 0; i < skewMatrix.numRows(); ++i) {
-                    for (std::size_t j = 0; j < skewMatrix.numCols(); ++j) {
-                            m_skewMatrix[index] =
-                                static_cast<Mantid::coord_t>(skewMatrix[i][j]);
-                            ++index;
-                          }
-                        }
+		void NonOrthogonalOverlay::setSkewMatrix() {
+			Mantid::Kernel::DblMatrix skewMatrix(3, 3, true);
+			API::provideSkewMatrix(skewMatrix, *m_ws);
+			skewMatrix.Invert();
+			// transform from double to coord_t
+			std::size_t index = 0;
+			for (std::size_t i = 0; i < skewMatrix.numRows(); ++i) {
+				for (std::size_t j = 0; j < skewMatrix.numCols(); ++j) {
+					m_skewMatrix[index] =
+						static_cast<Mantid::coord_t>(skewMatrix[i][j]);
+					++index;
+				}
+			}
 		}
 
-                void NonOrthogonalOverlay::setDefaultAxesPoints() {
-                  auto ws = m_ws->get(); // assumes it is a rectangle
-                  m_dim0Max = ws->getDimension(0)->getMaximum();
-				  m_dim0Max = m_dim0Max*1.1; //to set axis slightly back from slice
-                                  m_totalArea =
-                                      (m_dim0Max * 2) * (m_dim0Max * 2);
-                  m_dim1 = ws->getDimension(1)->getMaximum();
-                  m_dim2 = ws->getDimension(2)->getMaximum();
-                }
+        void NonOrthogonalOverlay::setDefaultAxesPoints() {
+            auto ws = m_ws->get(); // assumes it is a rectangle
+            m_dim0Max = ws->getDimension(0)->getMaximum();
+			m_dim0Max = m_dim0Max*1.1; //to set axis slightly back from slice
+                            m_totalArea =
+                                (m_dim0Max * 2) * (m_dim0Max * 2);
+            m_dim1 = ws->getDimension(1)->getMaximum();
+            m_dim2 = ws->getDimension(2)->getMaximum();
+        }
 
-                QPointF NonOrthogonalOverlay::skewMatrixApply(double x,
-                                                              double y) {
-                  // keyed array,
-                  std::vector<double> dimensions(3, 0);
-                  dimensions.at(m_dimX) = x;
-                  dimensions.at(m_dimY) = y;
-                  // Make sure stops trying to calculate this m_dimX or Y is 3+
-                  // put some of this into setAxisPoints()
-                  double angle_H = dimensions[0];
-                  double angle_K = dimensions[1];
-                  double angle_L = dimensions[2];
+        QPointF NonOrthogonalOverlay::skewMatrixApply(double x, double y) {
+            // keyed array,
+            std::vector<double> dimensions(3, 0);
+            dimensions.at(m_dimX) = x;
+            dimensions.at(m_dimY) = y;
+            // Make sure stops trying to calculate this m_dimX or Y is 3+
+            // put some of this into setAxisPoints()
+            double angle_H = dimensions[0];
+            double angle_K = dimensions[1];
+            double angle_L = dimensions[2];
 
-                  auto dimX = angle_H * m_skewMatrix[0 + 3 * m_dimX] +
-                              angle_K * m_skewMatrix[1 + 3 * m_dimX] +
-                              angle_L * m_skewMatrix[2 + 3 * m_dimX];
-                  auto dimY = angle_H * m_skewMatrix[0 + 3 * m_dimY] +
-                              angle_K * m_skewMatrix[1 + 3 * m_dimY] +
-                              angle_L * m_skewMatrix[2 + 3 * m_dimY];
+            auto dimX = angle_H * m_skewMatrix[0 + 3 * m_dimX] +
+                        angle_K * m_skewMatrix[1 + 3 * m_dimX] +
+                        angle_L * m_skewMatrix[2 + 3 * m_dimX];
+            auto dimY = angle_H * m_skewMatrix[0 + 3 * m_dimY] +
+                        angle_K * m_skewMatrix[1 + 3 * m_dimY] +
+                        angle_L * m_skewMatrix[2 + 3 * m_dimY];
         
-				  return QPointF(dimX, dimY);
+			return QPointF(dimX, dimY);
 				  
-                }
+        }
 
-                void NonOrthogonalOverlay::zoomChanged(QwtDoubleInterval xint,
-                                                       QwtDoubleInterval yint) {
-                  m_xMinVis = xint.minValue();
-                  m_xMaxVis = xint.maxValue();
-                  m_yMinVis = yint.minValue();
-                  m_yMaxVis = yint.maxValue();
+        void NonOrthogonalOverlay::zoomChanged(QwtDoubleInterval xint,
+                                                QwtDoubleInterval yint) {
+            m_xMinVis = xint.minValue();
+            m_xMaxVis = xint.maxValue();
+            m_yMinVis = yint.minValue();
+            m_yMaxVis = yint.maxValue();
 
-                  int displayNum = 20; // can mess around increasing or
-                                       // decreasing grid later, maybe make an
-                                       // option on sliceviewgui
+            int displayNum = 20; // can mess around increasing or
+                                // decreasing grid later, maybe make an
+                                // option on sliceviewgui
 
-                  calculateTickMarks(displayNum);
+            calculateTickMarks(displayNum);
 				  
-                }
+        }
 
-                void NonOrthogonalOverlay::setAxesPoints() {
-	              m_originPoint = -(m_dim0Max);
-				  m_XEndPoint = m_dim0Max;
-				  m_YEndPoint = m_dim0Max;
-				  m_pointA = skewMatrixApply(m_originPoint, m_originPoint);
-				  m_pointB = skewMatrixApply(m_XEndPoint, m_originPoint);
-				  m_pointC = skewMatrixApply(m_originPoint, m_YEndPoint);
-                }
+        void NonOrthogonalOverlay::setAxesPoints() {
+	        m_originPoint = -(m_dim0Max);
+			m_XEndPoint = m_dim0Max;
+			m_YEndPoint = m_dim0Max;
+			m_pointA = skewMatrixApply(m_originPoint, m_originPoint);
+			m_pointB = skewMatrixApply(m_XEndPoint, m_originPoint);
+			m_pointC = skewMatrixApply(m_originPoint, m_YEndPoint);
+        }
 
-                void NonOrthogonalOverlay::calculateAxesSkew(
-                    Mantid::API::IMDWorkspace_sptr *ws, size_t dimX,
-                    size_t dimY) {
-                  m_ws = ws;
-                  m_dimX = dimX;
-                  m_dimY = dimY;
-                  // m_missingHKL = //currently finding missing dim via process
-                  // of elimination
-                  //    API::getMissingHKLDimensionIndex(*m_ws, m_dimX, m_dimY);
-                  setDefaultAxesPoints();
+        void NonOrthogonalOverlay::calculateAxesSkew(
+            Mantid::API::IMDWorkspace_sptr *ws, size_t dimX,
+            size_t dimY) {
+            m_ws = ws;
+            m_dimX = dimX;
+            m_dimY = dimY;
+            // m_missingHKL = //currently finding missing dim via process
+            // of elimination
+            //    API::getMissingHKLDimensionIndex(*m_ws, m_dimX, m_dimY);
+            setDefaultAxesPoints();
 
-                  if (API::isHKLDimensions(
-                          *m_ws, m_dimX,
-                          m_dimY)) { // and skew actually _wants_ to be visible
-                    // make sure all calcs are outside of paintEvent... so
-                    // probably move ApplyskewMatrix out of it
-                    setSkewMatrix();
-                    setAxesPoints();
-                    calculateTickMarks(10); // tie zoom level to how large
-                                            // dataset is, or just zoom level?
-                  }
-                }
+            if (API::isHKLDimensions(
+                    *m_ws, m_dimX,
+                    m_dimY)) { // and skew actually _wants_ to be visible
+            // make sure all calcs are outside of paintEvent... so
+            // probably move ApplyskewMatrix out of it
+            setSkewMatrix();
+            setAxesPoints();
+            calculateTickMarks(10); // tie zoom level to how large
+                                    // dataset is, or just zoom level?
+            }
+        }
 
-                void NonOrthogonalOverlay::clearAllAxisPointVectors() {
-                  m_axisPointVec.clear();
-                  m_xAxisTickStartVec.clear();
-                  m_yAxisTickStartVec.clear();
-                  m_xAxisTickEndVec.clear();
-                  m_yAxisTickEndVec.clear();
-				  m_xNumbers.clear();
-				  m_yNumbers.clear();
-                }
+        void NonOrthogonalOverlay::clearAllAxisPointVectors() {
+            m_axisXPointVec.clear();
+			m_axisYPointVec.clear();
+            m_xAxisTickStartVec.clear();
+            m_yAxisTickStartVec.clear();
+            m_xAxisTickEndVec.clear();
+            m_yAxisTickEndVec.clear();
+			m_xNumbers.clear();
+			m_yNumbers.clear();
+        }
 
-                void NonOrthogonalOverlay::calculateTickMarks(
-                    int tickNum) { // assumes X axis
-                  clearAllAxisPointVectors();
-                  double xBuffer = ((m_xMaxVis - m_xMinVis) / 3);
-                  double yBuffer = ((m_yMaxVis - m_yMinVis) / 3);
-                  double axisPointX;
-                  double axisPointY;
-                  double percentageOfLineX(
-                      ((m_xMaxVis + xBuffer) - (m_xMinVis - xBuffer)) /
-                      tickNum);
-                  double percentageOfLineY(
-                      ((m_yMaxVis + yBuffer) - (m_yMinVis - yBuffer)) /
-                      tickNum);
-                  for (int i = 0; i <= tickNum; i++) {
-                    axisPointX = (percentageOfLineX * i) + m_xMinVis;
-                    axisPointY = (percentageOfLineY * i) + m_yMinVis;
-                    m_axisPointVec.push_back(axisPointX);
-					m_xNumbers.push_back(skewMatrixApply(axisPointX, m_yMinVis));
-					m_yNumbers.push_back(skewMatrixApply(m_xMinVis, axisPointY));
-                    m_xAxisTickStartVec.push_back(
-                        skewMatrixApply(axisPointX, (m_yMinVis - yBuffer)));
-                    m_xAxisTickEndVec.push_back(
-                        skewMatrixApply(axisPointX, (m_yMaxVis + yBuffer)));
-                                              
-                    m_yAxisTickStartVec.push_back(
-                        skewMatrixApply((m_xMinVis - xBuffer), axisPointY));
-                    m_yAxisTickEndVec.push_back(
-                        skewMatrixApply((m_xMaxVis + xBuffer), axisPointY));
-                                                        
-                                                        
-                    }
+		void NonOrthogonalOverlay::calculateTickMarks(
+			int tickNum) { // assumes X axis
+			clearAllAxisPointVectors();
+			double xBuffer = ((m_xMaxVis - m_xMinVis) / 3);
+			double yBuffer = ((m_yMaxVis - m_yMinVis) / 3);
+			double axisPointX;
+			double axisPointY;
+			double percentageOfLineX(
+				((m_xMaxVis + xBuffer) - (m_xMinVis - xBuffer)) /
+				tickNum);
+			double percentageOfLineY(
+				((m_yMaxVis + yBuffer) - (m_yMinVis - yBuffer)) /
+				tickNum);
+			for (int i = 0; i <= tickNum; i++) {
+				axisPointX = (percentageOfLineX * i) + m_xMinVis;
+				axisPointY = (percentageOfLineY * i) + m_yMinVis;
+				m_axisXPointVec.push_back(axisPointX);
+				m_xNumbers.push_back(skewMatrixApply(axisPointX, m_yMinVis));
+				m_yNumbers.push_back(skewMatrixApply(m_xMinVis, axisPointY));
+				m_xAxisTickStartVec.push_back(
+					skewMatrixApply(axisPointX, (m_yMinVis - yBuffer)));
+				m_xAxisTickEndVec.push_back(
+					skewMatrixApply(axisPointX, (m_yMaxVis + yBuffer)));
+				m_axisYPointVec.push_back(axisPointY);
+				m_yAxisTickStartVec.push_back(
+					skewMatrixApply((m_xMinVis - xBuffer), axisPointY));
+				m_yAxisTickEndVec.push_back(
+					skewMatrixApply((m_xMaxVis + xBuffer), axisPointY));
 
-				}
+
+			}
+
+		}
 
 				//----------------------------------------------------------------------------------------------
 		/// Paint the overlay
@@ -222,42 +222,34 @@ namespace MantidQt {
 			QPainter painter(this);
 
             QPen centerPen(QColor(0, 0, 0, 200)); //black
-            QPen gridPen(QColor(160, 160, 160, 100)); // grey will want to be
-                                                      // checking colours
-                                                      // eventually and changing
-                                                      // it as req
-			QPen numberPen(QColor(255, 255, 255, 200));
+            QPen gridPen(QColor(160, 160, 160, 100)); //grey
+			QPen numberPen(QColor(160, 160, 160, 255));
             // --- Draw the central line ---
 			if (m_showLine) {
-                          centerPen.setWidth(2);
-                                centerPen.setCapStyle(Qt::SquareCap);
+                centerPen.setWidth(2);
+                centerPen.setCapStyle(Qt::SquareCap);
 				painter.setPen(centerPen);
 				painter.drawLine(transform(m_pointA), transform(m_pointB));
 				painter.drawLine(transform(m_pointA), transform(m_pointC));
-                                gridPen.setWidth(1);
-                                gridPen.setCapStyle(Qt::FlatCap);
-								gridPen.setStyle(Qt::DashLine);
+                gridPen.setWidth(1);
+                gridPen.setCapStyle(Qt::FlatCap);
+				gridPen.setStyle(Qt::DashLine);
 				
 				
 				
-				for (int i = 0; i < m_axisPointVec.size(); i++) {
+				for (int i = 0; i < m_axisXPointVec.size(); i++) {
 					painter.setPen(gridPen);
-                                  painter.drawLine(
-                                      transform(m_xAxisTickStartVec[i]),
-                                      transform(m_xAxisTickEndVec[i]));
-								  
-                                  painter.drawLine( // will have to change
-                                                    // drawgrid cos ymax not
-                                                    // same as xmax anymore
-                                      transform(m_yAxisTickStartVec[i]),
-                                      transform(m_yAxisTickEndVec[i]));
-								  painter.setPen(numberPen);
-								  painter.drawText(transform(m_xNumbers[i]), QString::number(m_axisPointVec[i]));
-								  painter.drawText(transform(m_yNumbers[i]), QString("x"));
-                                }
+					painter.drawLine(
+						transform(m_xAxisTickStartVec[i]),
+						transform(m_xAxisTickEndVec[i]));
+					painter.drawLine(transform(m_yAxisTickStartVec[i]), transform(m_yAxisTickEndVec[i]));
+					painter.setPen(numberPen);
+					painter.drawText(transform(m_xNumbers[i]), QString::number(m_axisXPointVec[i], 'g', 3));
+					painter.drawText(transform(m_yNumbers[i]), QString::number(m_axisYPointVec[i], 'g', 3));
+				  }
 
 
-                        }
+          }
 
 		}
 

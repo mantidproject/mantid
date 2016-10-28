@@ -51,49 +51,50 @@ public:
 	NonOrthogonalOverlay(QwtPlot *plot, QWidget *parent);
 	~NonOrthogonalOverlay() override;
 
-        bool m_showLine;
+    bool m_showLine;
 
-        void calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws, size_t dimX,
-                               size_t dimY);
+    void calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws, size_t dimX,
+                            size_t dimY);
 
-        void zoomChanged(QwtDoubleInterval xint, QwtDoubleInterval yint);
+    void zoomChanged(QwtDoubleInterval xint, QwtDoubleInterval yint);
 
-      private:
-        Mantid::coord_t m_skewMatrix[9];
-        void setAxesPoints();
-        void setSkewMatrix();
-        void setDefaultAxesPoints();
-        QPointF skewMatrixApply(double x, double y);
-        double m_dim0Max;
-        double m_dim1;
-        double m_dim2;
-        size_t m_missingHKL;
-        Mantid::API::IMDWorkspace_sptr *m_ws;
+private:
+    Mantid::coord_t m_skewMatrix[9];
+    void setAxesPoints();
+    void setSkewMatrix();
+    void setDefaultAxesPoints();
+    QPointF skewMatrixApply(double x, double y);
+    double m_dim0Max;
+    double m_dim1;
+    double m_dim2;
+    size_t m_missingHKL;
+    Mantid::API::IMDWorkspace_sptr *m_ws;
 
-        Mantid::coord_t m_CompskewMatrix[9];
-        size_t m_dimY;
-        size_t m_dimX;
+    Mantid::coord_t m_CompskewMatrix[9];
+    size_t m_dimY;
+    size_t m_dimX;
 
-        QSize sizeHint() const override;
-        QSize size() const;
-        int height() const;
-        int width() const;
-        double m_totalArea;
-                double m_originPoint;
-		double m_XEndPoint;
-		double m_YEndPoint;
-		std::vector <double> m_axisPointVec;
-		std::vector<QPointF> m_xNumbers;
-		std::vector<QPointF> m_yNumbers;
-                std::vector<QPointF> m_xAxisTickStartVec;
-                std::vector<QPointF> m_xAxisTickEndVec;
-                std::vector<QPointF> m_yAxisTickStartVec;
-                std::vector<QPointF> m_yAxisTickEndVec;
-                double m_xMinVis;
-                double m_xMaxVis;
-                double m_yMinVis;
-                double m_yMaxVis;
-        /// First point of the line (in coordinates of the plot)
+    QSize sizeHint() const override;
+    QSize size() const;
+    int height() const;
+    int width() const;
+    double m_totalArea;
+    double m_originPoint;
+	double m_XEndPoint;
+	double m_YEndPoint;
+	std::vector <double> m_axisXPointVec;
+	std::vector <double> m_axisYPointVec;
+	std::vector<QPointF> m_xNumbers;
+	std::vector<QPointF> m_yNumbers;
+    std::vector<QPointF> m_xAxisTickStartVec;
+    std::vector<QPointF> m_xAxisTickEndVec;
+    std::vector<QPointF> m_yAxisTickStartVec;
+    std::vector<QPointF> m_yAxisTickEndVec;
+    double m_xMinVis;
+    double m_xMaxVis;
+    double m_yMinVis;
+    double m_yMaxVis;
+    /// First point of the line (in coordinates of the plot)
 	QPointF m_pointA;
 	/// Second point of the line (in coordinates of the plot)
 	QPointF m_pointB;
@@ -107,8 +108,8 @@ public:
 	QPointF invTransform(QPoint pixels) const;
 	/// QwtPlot containing this
 	QwtPlot *m_plot;
-        void calculateTickMarks(int tickNum);
-        void clearAllAxisPointVectors();
+    void calculateTickMarks(int tickNum);
+    void clearAllAxisPointVectors();
 };
 
 } // namespace SliceViewer

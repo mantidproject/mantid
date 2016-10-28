@@ -726,7 +726,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   emit setNonOrthogonalbtn();
   m_data->setWorkspace(ws);
   m_plot->setWorkspace(ws);
-
+  autoRebinIfRequired();
   // Set the normalization appropriate
   this->setNormalization(ws->displayNormalization(), false);
 
