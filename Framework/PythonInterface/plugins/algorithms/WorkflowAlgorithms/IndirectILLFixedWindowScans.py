@@ -108,7 +108,7 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
                                                   extensions=['nxs']),
                              doc='File path of calibration run(s).')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', 'output',
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', 'result',
                                                     direction=Direction.Output),
                              doc='Output workspace group')
 
