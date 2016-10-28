@@ -87,8 +87,8 @@ public:
   /// Return I0MonitorIndex
   std::string getI0MonitorIndex() const override;
   /// Set default values for experiment and instrument settings
-  void setExpDefaults(const std::vector<std::string> defaults) const override;
-  void setInstDefaults(const std::vector<double> defaults) const override;
+  void setExpDefaults(const std::vector<std::string> &) const override;
+  void setInstDefaults(const std::vector<double> &) const override;
 
   /// Creates hints for 'Plus'
   void
@@ -105,8 +105,8 @@ public:
 
 public slots:
   /// Request presenter to obtain default values for settings
-  void requestExpDefaults() const override;
-  void requestInstDefaults() const override;
+  void requestExpDefaults() const;
+  void requestInstDefaults() const;
 
 private:
   /// Initialise the interface

@@ -25,7 +25,7 @@ public:
     return !in_q && c == ',';
   }
 };
-};
+}
 
 //=====================================================================================
 // Functional tests
@@ -217,6 +217,7 @@ public:
         .WillOnce(Return("INTER"));
     EXPECT_CALL(mockView, setInstDefaults(defaults)).Times(1);
     presenter.notify(IReflSettingsTabPresenter::InstDefaultsFlag);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 };
 

@@ -84,13 +84,10 @@ public:
   virtual std::string getLambdaMax() const = 0;
   virtual std::string getI0MonitorIndex() const = 0;
 
-  /// Request presenter to obtain default values for settings
-  virtual void requestExpDefaults() const = 0;
-  virtual void requestInstDefaults() const = 0;
   /// Set default values for settings
   virtual void
-  setExpDefaults(const std::vector<std::string> defaults) const = 0;
-  virtual void setInstDefaults(const std::vector<double> defaults) const = 0;
+  setExpDefaults(const std::vector<std::string> &) const = 0;
+  virtual void setInstDefaults(const std::vector<double> &) const = 0;
 };
 }
 }

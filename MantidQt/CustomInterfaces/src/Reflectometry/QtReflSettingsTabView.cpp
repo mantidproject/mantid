@@ -134,7 +134,7 @@ void QtReflSettingsTabView::requestInstDefaults() const {
 * values.
 */
 void QtReflSettingsTabView::setExpDefaults(
-    const std::vector<std::string> defaults) const {
+    const std::vector<std::string> &defaults) const {
 
   int amIndex =
       m_ui.analysisModeComboBox->findText(QString::fromStdString(defaults[0]));
@@ -153,7 +153,7 @@ void QtReflSettingsTabView::setExpDefaults(
 * values.
 */
 void QtReflSettingsTabView::setInstDefaults(
-    const std::vector<double> defaults) const {
+    const std::vector<double> &defaults) const {
 
   m_ui.instSettingsMonIntMinEdit->setText(QString::number(defaults[0]));
   m_ui.instSettingsMonIntMaxEdit->setText(QString::number(defaults[1]));
