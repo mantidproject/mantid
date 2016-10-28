@@ -249,30 +249,26 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
                                                                                                       number_hists))
 
         # Initialisation of the new workspace with values of the first workspace
-        y_values = []
-        e_values = []
-        x_values = []
-        y_transposed = []
-        e_transposed = []
+        y_values = np.zeros([1, length])
+        e_values = np.zeros([1, length])
+        x_values = np.zeros([1, length])
+        # Variable that will store one row of the final matrix
+        y_row = np.zeros(number_workspaces)
+        e_row = np.zeros(number_workspaces)
 
-        # Create an array of all y-values and e-values
-        for index in range(number_workspaces):
-            workspace = mtd[group].getItem(index)
-            self.log().debug('Process workspace {0} '.format(workspace.getName()))
-
-            for hists in range(number_hists):
-                y_values = np.append(y_values, np.array(workspace.readY(hists)))
-                e_values = np.append(e_values, np.array(workspace.readE(hists)))
-
-        # Transpose matrix by resorting the values
-        for index2 in range(number_hists):
-            y_transposed = np.append(y_transposed, y_values[index2: length: number_hists])
-            e_transposed = np.append(e_transposed, e_values[index2: length: number_hists])
-            x_values = np.append(x_values, np.array(self._observable))
-
-        CreateWorkspace(DataX=x_values, DataY=y_transposed, DataE=e_transposed, NSpec=number_hists,
+        CreateWorkspace(DataX=x_values, DataY=y_values, DataE=e_values, NSpec=number_hists,
                         WorkspaceTitle=output_ws, Distribution=True, ParentWorkspace=mtd[group].getItem(0),
                         OutputWorkspace=output_ws)
+
+        # Get and set workspace entries
+        for hist in range(number_hists):
+            mtd[output_ws].setX(hist, np.array(self._observable))
+            for index in range(number_workspaces):
+                workspace = mtd[group].getItem(index)
+                y_row[index] = workspace.readY(hist)
+                e_row[index] = workspace.readE(hist)
+            mtd[output_ws].setY(hist, y_row)
+            mtd[output_ws].setE(hist, e_row)
 
         if self._sortX:
             SortXAxis(InputWorkspace=output_ws, OutputWorkspace=output_ws)
