@@ -995,8 +995,8 @@ public:
     TS_ASSERT(loader.execute());
     TS_ASSERT(loader.isExecuted());
 
-    Workspace_sptr ws = loader.getProperty("OutputWorkspace");
-    auto outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    Workspace_const_sptr ws = loader.getProperty("OutputWorkspace");
+    const auto outWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
     for (size_t i = 0; i < outWS->blocksize(); ++i) {
       TS_ASSERT_EQUALS(outWS->x(0)[i], i);
@@ -1016,8 +1016,8 @@ public:
     TS_ASSERT(loader.execute());
     TS_ASSERT(loader.isExecuted());
 
-    Workspace_sptr ws = loader.getProperty("OutputWorkspace");
-    auto outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    Workspace_const_sptr ws = loader.getProperty("OutputWorkspace");
+    const auto outWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
     for (size_t i = 0; i < outWS->blocksize(); ++i) {
       TS_ASSERT_EQUALS(outWS->x(0)[i], i);
