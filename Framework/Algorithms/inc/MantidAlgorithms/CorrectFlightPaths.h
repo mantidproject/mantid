@@ -46,7 +46,8 @@ namespace Algorithms {
  */
 class DLLExport CorrectFlightPaths : public ConvertToConstantL2,
                                      public API::DeprecatedAlgorithm {
-
+public:
+  CorrectFlightPaths();
   const std::string name() const override { return "CorrectFlightPaths"; }
 };
 

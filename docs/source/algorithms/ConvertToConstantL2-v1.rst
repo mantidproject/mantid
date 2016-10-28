@@ -9,11 +9,6 @@
 Description
 -----------
 
-.. warning::
-
-   This algorithm will be deprecated in the next version of Mantid. Please, use :ref:`algm-ConverToConstantL2` instead, which
-   is the new name for this algorithm.
-
 Moves the instrument and then corrects the flight paths such that a flat detector appears spherical with a constant l2 value.
 
 Both time-of-flight sample-detector time and sample to detector distance are corrected to constant values.
