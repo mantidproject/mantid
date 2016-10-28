@@ -207,6 +207,9 @@ class IndirectILLFixedWindowScans(DataProcessorAlgorithm):
                         RangeLower=x_max, RangeUpper=x_values[len(x_values) - 1])
             Plus(LHSWorkspace='__left', RHSWorkspace='__right', OutputWorkspace=input_ws)
 
+            DeleteWorkspace('__left')
+            DeleteWorkspace('__right')
+
     def _get_observable(self, input_ws):
         """
         Set list self._observable
