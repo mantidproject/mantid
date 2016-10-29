@@ -454,7 +454,7 @@ private:
                                   const boost::shared_ptr<T> &value) {
     // CAREFUL: is_convertible has undefined behavior for incomplete types. If T
     // is forward-declared in the calling code, e.g., an algorithm that calls
-    // setProperty, compilation in linking do work. However, the BEHAVIOR IS
+    // setProperty, compilation and linking do work. However, the BEHAVIOR IS
     // UNDEFINED and the compiler will not complain, but things crash or go
     // wrong badly. To circumvent this we call `sizeof` here to force a compiler
     // error if T is an incomplete type.
