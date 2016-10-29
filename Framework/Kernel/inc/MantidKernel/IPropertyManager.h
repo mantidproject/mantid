@@ -147,6 +147,31 @@ public:
     return this;
   }
 
+  /** Templated method to set the value of a PropertyWithValue, variant for
+   * shared_ptr types. This variant is required to enforce checks for complete
+   * types, do not remove it.
+   *  @param name :: The name of the property (case insensitive)
+   *  @param value :: The value to assign to the property
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
+  template <typename T, class = typename std::enable_if<
+                            !std::is_same<T, bool>::value>::type>
+  IPropertyManager *setProperty(const std::string &name,
+                                const boost::shared_ptr<T> &value) {
+    // CAREFUL: is_convertible has undefined behavior for incomplete types. If T
+    // is forward-declared in the calling code, e.g., an algorithm that calls
+    // setProperty, compilation in linking do work. However, the BEHAVIOR IS
+    // UNDEFINED and the compiler will not complain, but things crash or go
+    // wrong badly. To circumvent this we call `sizeof` here to force a compiler
+    // error if T is an incomplete type.
+    static_cast<void>(sizeof(T)); // DO NOT REMOVE, enforces complete type
+    setTypedProperty(name, value, boost::is_convertible<T, DataItem>());
+    this->afterPropertySet(name);
+    return this;
+  }
+
   /** Specialised version of setProperty template method to handle const char *
   *  @param name :: The name of the property (case insensitive)
   *  @param value :: The value to assign to the property
