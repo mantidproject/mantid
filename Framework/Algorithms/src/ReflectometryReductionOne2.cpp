@@ -204,16 +204,19 @@ void ReflectometryReductionOne2::initTransmissionProperties() {
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "These parameters are used for stitching together transmission runs. "
       "Values are in wavelength (angstroms). This input is only needed if a "
-      "SecondTransmission run is provided.");
+      "second transmission run is provided.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
-                  "Start wavelength for stitching transmission runs together");
+                  "Start wavelength for stitching transmission runs together. "
+		  "This parameter is only used if a second transmission run "
+		  "is provided.");
 
   declareProperty(
       make_unique<PropertyWithValue<double>>("EndOverlap", Mantid::EMPTY_DBL(),
                                              Direction::Input),
-      "End wavelength (angstroms) for stitching transmission runs together");
+      "End wavelength (angstroms) for stitching transmission runs together. "
+      "This parameter is only used if a second transmission run is provided.");
 
   declareProperty(make_unique<PropertyWithValue<bool>>("StrictSpectrumChecking",
 	  true, Direction::Input),
@@ -270,7 +273,7 @@ void ReflectometryReductionOne2::initMomentumTransferProperties() {
                   "Resolution value in IvsQ Workspace. Used for Rebinning the "
                   "IvsQ Workspace. This value will be made minus to apply "
                   "logarithmic rebinning. If you wish to have linear "
-                  "bin-widths then please provide a negative DQQ",
+                  "bin-widths then please provide a negative value.",
                   Direction::Input);
   declareProperty("MomentumTransferMax", Mantid::EMPTY_DBL(),
                   "Maximum Q value in IvsQ "

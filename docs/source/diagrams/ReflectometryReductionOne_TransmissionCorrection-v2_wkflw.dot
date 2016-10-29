@@ -54,6 +54,7 @@ expCorr           -> outputWorkspace
 firstTransRun     -> createTransWS
 secondTransRun    -> createTransWS
 createTransWS     -> rebinByTransWS
+inputWorkspace	  -> rebinByTransWS
 rebinByTransWS    -> divideTrans
 divideTrans       -> outputWorkspace
 
