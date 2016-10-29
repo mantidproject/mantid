@@ -34,7 +34,7 @@ void initTypeLookup(PyTypeIndex &index) {
 
   // Python 2/3 have an arbitrary-sized long type. The handler
   // will raise an error if the input value overflows a C long
-  typedef TypedPropertyValueHandler<long> IntHandler;
+  typedef TypedPropertyValueHandler<int64_t> IntHandler;
   index.emplace(&PyLong_Type, boost::make_shared<IntHandler>());
 
   // In Python 3 all strings are unicode but in Python 2 unicode strings
