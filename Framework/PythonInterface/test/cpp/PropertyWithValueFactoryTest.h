@@ -45,7 +45,7 @@ public:
   }
 
   void test_builtin_type_creates_int_type_property_without_error() {
-    testCreateSingleValueProperty<long>(FROM_INT(10));
+    testCreateSingleValueProperty<int64_t>(FROM_INT(10));
   }
 
   void test_builtin_type_creates_double_type_property_without_error() {
@@ -66,15 +66,15 @@ public:
   }
 
   void test_builtin_type_create_long_array_from_list_type_property() {
-    testCreateArrayProperty<long>(
+    testCreateArrayProperty<int64_t>(
         Py_BuildValue("[NN]", PyLong_FromLong(-10), PyLong_FromLong(4)));
   }
 
   void test_builtin_type_create_int_array_from_list_type_property() {
 #if PY_MAJOR_VERSION < 3
-    testCreateArrayProperty<int>(Py_BuildValue("[ii]", -10, 4));
+    testCreateArrayProperty<int32_t>(Py_BuildValue("[ii]", -10, 4));
 #else
-    testCreateArrayProperty<long>(Py_BuildValue("[ii]", -10, 4));
+    testCreateArrayProperty<int64_t>(Py_BuildValue("[ii]", -10, 4));
 #endif
   }
 
