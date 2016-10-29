@@ -30,7 +30,7 @@ template <> DLLExport bool checkIsEmpty(const double &value) {
  * @param value :: A int value
  * @return True if the value is considered empty, see EmptyValues.h
  */
-template <> DLLExport bool checkIsEmpty(const int &value) {
+template <> DLLExport bool checkIsEmpty(const int32_t &value) {
   return (value == Mantid::EMPTY_INT());
 }
 /**
@@ -38,7 +38,7 @@ template <> DLLExport bool checkIsEmpty(const int &value) {
  * @param value :: A long value
  * @return True if the value is considered empty, see EmptyValues.h
  */
-template <> DLLExport bool checkIsEmpty(const long &value) {
+template <> DLLExport bool checkIsEmpty(const int64_t &value) {
   return (value == Mantid::EMPTY_LONG());
 }
 /**
