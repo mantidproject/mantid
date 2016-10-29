@@ -32,7 +32,6 @@ class ViewSpiceDialog(QtGui.QDialog):
 
         return
 
-
     def clear_text(self):
         """
         Clear the text of the edit

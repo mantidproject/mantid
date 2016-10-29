@@ -300,7 +300,7 @@ class CWSCDReductionControl(object):
         :param exp_number: experiment number
         :param scan_number:
         :param over_write:
-        :return:
+        :return: 2-tuple: status (successful or failed), string (file name or error message
         """
         # Check
         if exp_number is None:
@@ -1929,6 +1929,29 @@ class CWSCDReductionControl(object):
         self._refinedUBTup = self._get_refined_ub_data(ub_peak_ws_name)
 
         return
+
+    def read_spice_file(self, exp_number, scan_number):
+        """
+        Read SPICE file
+        :param exp_number: experiment number
+        :param scan_number: scan number
+        :return: a list of string for each line
+        """
+        # check inputs' validity
+        assert isinstance(exp_number, int) and exp_number > 0, 'Experiment number must be a positive integer.'
+        assert isinstance(scan_number, int) and scan_number > 0, 'Scan number must be a positive integer.'
+
+        # get the local SPICE file
+        status, ret_string = self.download_spice_file(exp_number, scan_number, over_write=False)
+        assert status, ret_string
+        spice_file_name = ret_string
+
+        # read the SPICE file
+        spice_file = open(spice_file_name, 'r')
+        spice_line_list = spice_file.readlines()
+        spice_file.close()
+
+        return spice_line_list
 
     def refine_ub_matrix_by_lattice(self, peak_info_list, ub_matrix_str, unit_cell_type):
         """

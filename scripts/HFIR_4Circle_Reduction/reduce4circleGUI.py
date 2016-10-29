@@ -6,7 +6,6 @@
 ################################################################################
 import os
 import sys
-import math
 import csv
 import time
 import datetime
@@ -1922,10 +1921,8 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # check signal for hand shaking
-        if val == 1000:
-            use_spice_hkl = True
-        else:
-            raise RuntimeError('It is not an authorized signal value %s.' % str(val))
+        if val != 1000:
+            raise RuntimeError('Signal value %s is not an authorized signal value (1000).' % str(val))
 
         # it is supposed to get the information back from the window
         unit_cell_type = self._refineConfigWindow.get_unit_cell_type()
@@ -2433,12 +2430,13 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         # read the spice file into list of lines
-        self._myControl.read_spice_file(exp_number, scan_number_list[0])
+        spice_line_list = self._myControl.read_spice_file(exp_number, scan_number_list[0])
 
         self._spiceViwer = viewspicedialog.ViewSpiceDialog(self)
 
         # Write each line
         for line in spice_line_list:
+            line = line.strip()
             self._spiceViwer.write_text(line)
 
         # show the new window
