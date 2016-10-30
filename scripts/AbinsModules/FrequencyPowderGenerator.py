@@ -3,6 +3,7 @@ import AbinsConstants
 import math
 import numpy as np
 
+
 class FrequencyPowderGenerator(object):
     """
     Class which generates frequencies for both overtones and combinations.
@@ -38,9 +39,10 @@ class FrequencyPowderGenerator(object):
 
             raise ValueError("Fundamentals in the form of one dimentional array are expected.")
 
-        if not  (isinstance(quantum_order, int) and
-                 AbinsConstants.fundamentals <= quantum_order < AbinsConstants.higher_order_quantum_effects_dim + AbinsConstants.fundamentals_dim):
-            raise ValueError("Improper value of quantum order effect.")
+        if not (isinstance(quantum_order, int) and
+                AbinsConstants.fundamentals <= quantum_order <=
+                AbinsConstants.higher_order_quantum_effects_dim + AbinsConstants.fundamentals_dim):
+            raise ValueError("Improper value of quantum order effect. (quantum_order = %s)" % quantum_order)
 
         new_array = fundamentals_array * quantum_order
 
@@ -53,14 +55,16 @@ class FrequencyPowderGenerator(object):
 
         return new_array, coefficients
 
-    def construct_freq_combinations(self, previous_array=None, previous_coefficients=None, fundamentals_array=None, quantum_order=None):
+    def construct_freq_combinations(self, previous_array=None, previous_coefficients=None,
+                                    fundamentals_array=None, quantum_order=None):
         """
         Generates frequencies for the given order of quantum event.
         @param previous_array: array with frequencies for the previous quantum effect
         @param previous_coefficients: coefficients which correspond to the previous order quantum effect
         @param fundamentals_array: array with frequencies for fundamentals
         @param quantum_order: number of quantum order effect for which new array should be constructed
-        @return: array with frequencies for the required quantum number event, array which stores coefficients for all frequencies
+        @return: array with frequencies for the required quantum number event, array which stores coefficients for all
+                 frequencies
         """
         if not (isinstance(fundamentals_array, np.ndarray) and
                 len(fundamentals_array.shape) == 1 and
@@ -69,8 +73,9 @@ class FrequencyPowderGenerator(object):
             raise ValueError("Fundamentals in the form of one dimentional array are expected.")
 
         if not (isinstance(quantum_order, int) and
-                AbinsConstants.fundamentals <= quantum_order < AbinsConstants.higher_order_quantum_effects  + AbinsConstants.fundamentals):
-            raise ValueError("Improper value of quantum order effect.")
+                AbinsConstants.fundamentals <= quantum_order <=
+                AbinsConstants.higher_order_quantum_effects + AbinsConstants.fundamentals):
+            raise ValueError("Improper value of quantum order effect (quantum_order = %s)" % quantum_order)
 
         # frequencies for fundamentals
         if quantum_order == AbinsConstants.fundamentals:
@@ -91,10 +96,9 @@ class FrequencyPowderGenerator(object):
 
             fundamentals_size = fundamentals_array.size
             previous_size = previous_array.size
-
-            initial_size =  previous_size + fundamentals_size
+            initial_size = previous_size + fundamentals_size
             new_array = np.zeros(shape=initial_size, dtype=AbinsConstants.float_type)
-            new_coefficients =  np.zeros(shape=(initial_size, fundamentals_size), dtype=AbinsConstants.int_type)
+            new_coefficients = np.zeros(shape=(initial_size, fundamentals_size), dtype=AbinsConstants.int_type)
             current_position = 0
 
             for j in range(fundamentals_size):
@@ -102,7 +106,11 @@ class FrequencyPowderGenerator(object):
 
                     # in case array is really big stop constructing array and return what we have
                     if new_array.size > AbinsConstants.max_array_size * quantum_order:
-                        return new_array, new_coefficients
+
+                        # remove unnecessary zeros from the end of array
+                        inds = new_array > AbinsParameters.acoustic_phonon_threshold
+
+                        return new_array[inds], new_coefficients[inds]
 
                     # add frequency to the collection of frequencies
                     temp = previous_array[i] + fundamentals_array[j]
@@ -115,7 +123,8 @@ class FrequencyPowderGenerator(object):
 
                             new_size = current_position + fundamentals_size
                             new_array = np.zeros(shape=new_size, dtype=AbinsConstants.float_type)
-                            new_coefficients = np.zeros(shape=(new_size, fundamentals_size), dtype=AbinsConstants.int_type)
+                            new_coefficients = np.zeros(shape=(new_size, fundamentals_size),
+                                                        dtype=AbinsConstants.int_type)
 
                             new_array[:current_position] = old_array
                             new_coefficients[:current_position] = old_coefficients
