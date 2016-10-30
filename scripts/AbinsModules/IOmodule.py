@@ -8,7 +8,7 @@ from AbinsModules import AbinsParameters
 from mantid.kernel import logger
 
 
-# noinspection PyProtectedMember
+# noinspection PyProtectedMember,PyPep8Naming
 class IOmodule(object):
     """
     Class for ABINS I/O HDF file operations.
@@ -29,28 +29,33 @@ class IOmodule(object):
                 begin = input_filename.find("/") + 1
                 input_filename = input_filename[begin:]
 
-            if input_filename == "": raise ValueError("Name of the file cannot be an empty string!")
+            if input_filename == "":
+                raise ValueError("Name of the file cannot be an empty string!")
 
-        else: raise ValueError("Invalid name of hdf file. String was expected!")
+        else:
+            raise ValueError("Invalid name of hdf file. String was expected!")
 
-        if isinstance(group_name, str): self._group_name = group_name
-        else: raise ValueError("Invalid name of the group. String was expected!")
+        if isinstance(group_name, str):
+            self._group_name = group_name
+        else:
+            raise ValueError("Invalid name of the group. String was expected!")
 
         core_name = input_filename[0:input_filename.find(".")]
-        self._hdf_filename = core_name + ".hdf5" # name of hdf file
+        self._hdf_filename = core_name + ".hdf5"  # name of hdf file
 
         try:
             self._advanced_parameters = self._get_advanced_parameters()
         except (IOError, ValueError) as err:
             logger.error(str(err))
 
-        self._attributes = {} # attributes for group
-        self._data = {} # data  for group; they are expected to be numpy arrays or
-                        # complex data sets which have the form of Python dictionaries or list of Python
-                        # dictionaries
+        self._attributes = {}  # attributes for group
+
+        # data  for group; they are expected to be numpy arrays or
+        # complex data sets which have the form of Python dictionaries or list of Python
+        # dictionaries
+        self._data = {}
 
         # Fields which have a form of empty dictionaries have to be set by an inheriting class.
-
 
     def _valid_hash(self):
         """
@@ -60,7 +65,6 @@ class IOmodule(object):
         _saved_hash = self.load(list_of_attributes=["hash"])
         return self._hash_input_filename == _saved_hash["attributes"]["hash"]
 
-
     def _valid_advanced_parameters(self):
         """
         In case of rerun checks if advanced parameters haven't changed.
@@ -69,7 +73,6 @@ class IOmodule(object):
         """
         previous_advanced_parameters = self.load(list_of_attributes=["advanced_parameters"])
         return self._advanced_parameters == previous_advanced_parameters["attributes"]["advanced_parameters"]
-
 
     def checkPreviousData(self):
         """
@@ -84,20 +87,17 @@ class IOmodule(object):
         if not self._valid_advanced_parameters():
             raise ValueError("Different advanced parameters were used in the previous calculations.")
 
-
     def loadData(self):
         """
         Method which loads data from an hdf file. Method which has to be implemented by an inheriting class.
         """
         return None
 
-
     def calculateData(self):
         """
         Method which evaluates data in case loading failed. Method which has to be implemented by an inheriting class.
         """
         return None
-
 
     def getData(self):
         """
@@ -121,7 +121,6 @@ class IOmodule(object):
 
         return _data
 
-
     def eraseHDFfile(self):
         """
         Erases content of hdf file.
@@ -129,7 +128,6 @@ class IOmodule(object):
 
         with h5py.File(self._hdf_filename, 'w') as hdf_file:
             pass
-
 
     def addAttribute(self, name=None, value=None):
         """
@@ -139,7 +137,6 @@ class IOmodule(object):
         """
         self._attributes[name] = value
 
-
     def addFileAttributes(self):
         """
         Adds file attributes: filename and hash of file to the collection of all attributes.
@@ -148,7 +145,6 @@ class IOmodule(object):
         self.addAttribute("hash", self._hash_input_filename)
         self.addAttribute("filename", self._input_filename)
         self.addAttribute("advanced_parameters", self._advanced_parameters)
-
 
     def addData(self, name=None, value=None):
         """
@@ -160,7 +156,6 @@ class IOmodule(object):
         """
         self._data[name] = value
 
-
     def _save_attributes(self, group=None):
         """
         Saves attributes to an hdf file.
@@ -170,8 +165,8 @@ class IOmodule(object):
             if isinstance(self._attributes[name], (np.int64, int, np.float64, float, str, bytes)):
                 group.attrs[name] = self._attributes[name]
             else:
-                raise ValueError("Invalid value of attribute. String, int or bytes was expected! (invalid type : %s)" %type(self._attributes[name]))
-
+                raise ValueError("Invalid value of attribute. String, "
+                                 "int or bytes was expected! (invalid type : %s)" % type(self._attributes[name]))
 
     def _recursively_save_structured_data_to_group(self, hdf_file=None, path=None, dic=None):
         """
@@ -194,8 +189,7 @@ class IOmodule(object):
             elif isinstance(item, dict):
                 self._recursively_save_structured_data_to_group(hdf_file=hdf_file, path=folder + '/', dic=item)
             else:
-                raise ValueError('Cannot save %s type'%type(item))
-
+                raise ValueError('Cannot save %s type' % type(item))
 
     def _save_data(self, hdf_file=None, group=None):
         """
@@ -209,19 +203,23 @@ class IOmodule(object):
         for item in self._data:
             # case data to save is a simple numpy array
             if isinstance(self._data[item], np.ndarray):
-                if item in group: del group[item]
+                if item in group:
+                    del group[item]
                 group.create_dataset(name=item, data=self._data[item], compression="gzip", compression_opts=9)
             # case data to save has form of list
             elif isinstance(self._data[item], list):
                 num_el = len(self._data[item])
                 for el in range(num_el):
-                    self._recursively_save_structured_data_to_group(hdf_file=hdf_file, path=group.name + "/" + item + "/%s/" % el, dic=self._data[item][el])
+                    self._recursively_save_structured_data_to_group(hdf_file=hdf_file,
+                                                                    path=group.name + "/" + item + "/%s/" % el,
+                                                                    dic=self._data[item][el])
             # case data has a form of dictionary
             elif isinstance(self._data[item], dict):
-                self._recursively_save_structured_data_to_group(hdf_file=hdf_file, path=group.name + "/" + item + "/", dic=self._data[item])
+                self._recursively_save_structured_data_to_group(hdf_file=hdf_file,
+                                                                path=group.name + "/" + item + "/",
+                                                                dic=self._data[item])
             else:
-                raise ValueError('Invalid structured dataset. Cannot save %s type'%type(item))
-
+                raise ValueError('Invalid structured dataset. Cannot save %s type' % type(item))
 
     def save(self):
         """
@@ -229,20 +227,21 @@ class IOmodule(object):
         """
 
         with h5py.File(self._hdf_filename, 'a') as hdf_file:
-            if not self._group_name in hdf_file:
+            if self._group_name not in hdf_file:
                 hdf_file.create_group(self._group_name)
             group = hdf_file[self._group_name]
 
-            if len(self._attributes.keys())>0: self._save_attributes(group=group)
-            if len(self._data.keys())>0: self._save_data(hdf_file=hdf_file, group=group)
+            if len(self._attributes.keys()) > 0:
+                self._save_attributes(group=group)
+            if len(self._data.keys()) > 0:
+                self._save_data(hdf_file=hdf_file, group=group)
 
         # Repack if possible to reclaim disk space
         try:
-            subprocess.check_call(["h5repack","-i%s"%self._hdf_filename, "-otemphgfrt.hdf5"])
+            subprocess.check_call(["h5repack", "-i%s" % self._hdf_filename, "-otemphgfrt.hdf5"])
             shutil.move("temphgfrt.hdf5", self._hdf_filename)
         except OSError:
-            pass # repacking failed: no h5repack installed in the system... but we proceed
-
+            pass  # repacking failed: no h5repack installed in the system... but we proceed
 
     def _list_of_str(self, list_str=None):
         """
@@ -253,11 +252,11 @@ class IOmodule(object):
         if list_str is None:
             return False
 
-        if not  (isinstance(list_str, list) and all([isinstance(list_str[item], str) for item in range(len(list_str))])):
+        if not (isinstance(list_str, list) and
+                all([isinstance(list_str[item], str) for item in range(len(list_str))])):
             raise ValueError("Invalid list of items to load!")
 
         return True
-
 
     def _load_attributes(self, list_of_attributes=None, group=None):
         """
@@ -273,7 +272,6 @@ class IOmodule(object):
 
         return results
 
-
     def _load_attribute(self, name=None, group=None):
         """
         Loads attribute.
@@ -281,11 +279,10 @@ class IOmodule(object):
         @param name: name of attribute
         @return:  value of attribute
         """
-        if not name in group.attrs:
+        if name not in group.attrs:
             raise ValueError("Attribute %s in not present in %s file!" % (name, self._hdf_filename))
         else:
             return group.attrs[name]
-
 
     def _load_datasets(self, hdf_file=None, list_of_datasets=None, group=None):
         """
@@ -296,12 +293,11 @@ class IOmodule(object):
         @return:
         """
 
-        results={}
+        results = {}
         for item in list_of_datasets:
             results[item] = self._load_dataset(hdf_file=hdf_file, name=item, group=group)
 
         return results
-
 
     def _get_subgrp_name(self, path=None):
         """
@@ -313,7 +309,6 @@ class IOmodule(object):
         end = reversed_path.find("/")
         return reversed_path[:end]
 
-
     def _convert_unicode_to_string_core(self, item=None):
         """
         Convert atom element from unicode to str
@@ -322,7 +317,6 @@ class IOmodule(object):
         """
         assert isinstance(item, unicode)
         return str(item).replace("u'", "'")
-
 
     def _convert_unicode_to_str(self, objectToCheck=None):
         """
@@ -353,7 +347,6 @@ class IOmodule(object):
 
         return objectToCheck
 
-
     def _load_dataset(self, hdf_file=None, name=None, group=None):
         """
         Loads one structured dataset.
@@ -362,10 +355,11 @@ class IOmodule(object):
         @param group: name of the main group
         @return:
         """
-        if not isinstance(name, str): raise ValueError("Invalid name of the dataset!")
+        if not isinstance(name, str):
+            raise ValueError("Invalid name of the dataset!")
 
         if name in group:
-           _hdf_group = group[name]
+            _hdf_group = group[name]
         else:
             raise ValueError("Invalid name of the dataset!")
 
@@ -376,11 +370,14 @@ class IOmodule(object):
             # here we make an assumption about keys which have a numeric values; we assume that always : 1, 2, 3... Max
             _num_keys = len(_hdf_group.keys())
             for item in range(_num_keys):
-                _structured_dataset_list.append(self._recursively_load_dict_contents_from_group(hdf_file=hdf_file, path=_hdf_group.name+"/%s"%item))
+                _structured_dataset_list.append(
+                    self._recursively_load_dict_contents_from_group(hdf_file=hdf_file,
+                                                                    path=_hdf_group.name + "/%s" % item))
             return self._convert_unicode_to_str(objectToCheck=_structured_dataset_list)
         else:
-            return self._convert_unicode_to_str(objectToCheck=self._recursively_load_dict_contents_from_group(hdf_file=hdf_file, path=_hdf_group.name+"/"))
-
+            return self._convert_unicode_to_str(
+                objectToCheck=self._recursively_load_dict_contents_from_group(hdf_file=hdf_file,
+                                                                              path=_hdf_group.name+"/"))
 
     def _recursively_load_dict_contents_from_group(self, hdf_file=None, path=None):
         """
@@ -398,7 +395,6 @@ class IOmodule(object):
                 ans[key] = self._recursively_load_dict_contents_from_group(hdf_file, path + key + '/')
         return ans
 
-
     def load(self, list_of_attributes=None, list_of_datasets=None):
         """
         Loads all necessary data.
@@ -413,7 +409,8 @@ class IOmodule(object):
         results = {}
         with h5py.File(self._hdf_filename, 'r') as hdf_file:
 
-            if not self._group_name in hdf_file: raise ValueError("No group %s in hdf file!"% self._group_name)
+            if self._group_name not in hdf_file:
+                raise ValueError("No group %s in hdf file!" % self._group_name)
 
             group = hdf_file[self._group_name]
 
@@ -426,7 +423,6 @@ class IOmodule(object):
                                                           group=group)
 
         return results
-
 
     def _calculate_hash(self, filename=None):
         buf = 65536  # chop content of phonon file into 64kb chunks to minimize memory consumption for hash creation
@@ -441,15 +437,13 @@ class IOmodule(object):
 
         return sha.hexdigest()
 
-
     def _get_advanced_parameters(self):
         """
         Calculates hash of file with advanced parameters.
-        Returns: string representation of hash for  file  with advanced parameters which contains only hexadecimal digits
-
+        Returns: string representation of hash for  file  with advanced parameters
+                 which contains only hexadecimal digits
         """
         return self._calculate_hash(filename=AbinsParameters.__file__.replace(".pyc", ".py"))
-
 
     def calculateDFTFileHash(self):
         """
