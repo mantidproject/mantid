@@ -17,9 +17,6 @@ namespace Kernel {
 template <typename Arg>
 inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type
 threadSafe(Arg workspace) {
-  static_assert(
-      std::is_base_of<DataItem, typename std::remove_pointer<Arg>::type>::value,
-      "Parameter must be derived from Mantid::Kernel::DataItem!");
   return !workspace || workspace->threadSafe();
 }
 
@@ -33,9 +30,6 @@ threadSafe(Arg workspace) {
 template <typename Arg, typename... Args>
 inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type
 threadSafe(Arg workspace, Args &&... others) {
-  static_assert(
-      std::is_base_of<DataItem, typename std::remove_pointer<Arg>::type>::value,
-      "Parameter must be derived from Mantid::Kernel::DataItem!");
   return (!workspace || workspace->threadSafe()) &&
          threadSafe(std::forward<Args>(others)...);
 }
@@ -48,8 +42,6 @@ threadSafe(Arg workspace, Args &&... others) {
 template <typename Arg>
 inline typename std::enable_if<!std::is_pointer<Arg>::value, bool>::type
 threadSafe(const Arg &workspace) {
-  static_assert(std::is_base_of<DataItem, Arg>::value,
-                "Parameter must be derived from Mantid::Kernel::DataItem!");
   return workspace.threadSafe();
 }
 
@@ -63,8 +55,6 @@ threadSafe(const Arg &workspace) {
 template <typename Arg, typename... Args>
 inline typename std::enable_if<!std::is_pointer<Arg>::value, bool>::type
 threadSafe(const Arg &workspace, Args &&... others) {
-  static_assert(std::is_base_of<DataItem, Arg>::value,
-                "Parameter must be derived from Mantid::Kernel::DataItem!");
   return workspace.threadSafe() && threadSafe(std::forward<Args>(others)...);
 }
 
