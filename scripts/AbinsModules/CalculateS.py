@@ -195,8 +195,8 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
 
             if self._evaluate_combinations:
 
-                local_freq, local_coeff = self.construct_freq_combinations(previous_array=lc_freq_c,
-                                                                           previous_coefficients=lc_coeff_c,
+                local_freq, local_coeff = self.construct_freq_combinations(previous_array=local_freq,
+                                                                           previous_coefficients=local_coeff,
                                                                            fundamentals_array=fundamentals_freq,
                                                                            quantum_order=order)
 
