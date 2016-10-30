@@ -1,9 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/SolidAngle.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -82,18 +80,8 @@ void SolidAngle::exec() {
   outputWS->setYUnitLabel("Steradian");
   setProperty("OutputWorkspace", outputWS);
 
-  // Get a pointer to the instrument contained in the workspace
-  Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
-
-  // Get the distance between the source and the sample (assume in metres)
-  Geometry::IComponent_const_sptr sample = instrument->getSample();
-  if (!sample) {
-    g_log.information("There doesn't appear to be any sample location "
-                      "information in the workspace");
-    throw std::logic_error(
-        "Sample location not found, aborting algorithm SoildAngle");
-  }
-  Kernel::V3D samplePos = sample->getPos();
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  const Kernel::V3D samplePos = spectrumInfo.samplePosition();
   g_log.debug() << "Sample position is " << samplePos << '\n';
 
   int loopIterations = m_MaxSpec - m_MinSpec;
@@ -105,20 +93,19 @@ void SolidAngle::exec() {
   for (int j = 0; j <= loopIterations; ++j) {
     PARALLEL_START_INTERUPT_REGION
     int i = j + m_MinSpec;
-    try {
+    if (spectrumInfo.hasDetectors(i)) {
       // Copy over the spectrum number & detector IDs
       outputWS->getSpectrum(j).copyInfoFrom(inputWS->getSpectrum(i));
-      // Now get the detector to which this relates
-      Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
       // Solid angle should be zero if detector is masked ('dead')
-      double solidAngle = det->isMasked() ? 0.0 : det->solidAngle(samplePos);
+      double solidAngle = spectrumInfo.isMasked(i)
+                              ? 0.0
+                              : spectrumInfo.detector(i).solidAngle(samplePos);
 
       outputWS->mutableX(j)[0] = inputWS->x(i).front();
       outputWS->mutableX(j)[1] = inputWS->x(i).back();
       outputWS->mutableY(j)[0] = solidAngle;
       outputWS->mutableE(j)[0] = 0;
-    } catch (Exception::NotFoundError &) {
-      // Get to here if exception thrown when calculating distance to detector
+    } else {
       failCount++;
       outputWS->mutableX(j) = 0;
       outputWS->mutableY(j) = 0;

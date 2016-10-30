@@ -179,7 +179,6 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max, background_min
         else:  # we have a transmission run
             _monInt = Integration(InputWorkspace=_I0P, RangeLower=int_min, RangeUpper=int_max)
             IvsLam = Divide(LHSWorkspace=_detector_ws, RHSWorkspace=_monInt)
-            _names = mtd.getObjectNames()
 
             IvsLam = transCorr(trans, IvsLam, lambda_min, lambda_max, background_min, background_max,
                                int_min, int_max, detector_index_ranges, i0_monitor_index, stitch_start_overlap,
@@ -441,8 +440,6 @@ def nrPNRCorrection(Wksp, crho, calpha, cAp, cPp):
         CloneWorkspace(Ip, OutputWorkspace="PCalpha")
         CropWorkspace(InputWorkspace="PCalpha", OutputWorkspace="PCalpha", StartWorkspaceIndex="0",
                       EndWorkspaceIndex="0")
-        _PCalpha = (mtd['PCalpha'] * 0.0) + 1.0
-        _alpha = mtd['PCalpha']
         # a1=alpha.readY(0)
         # for i in range(0,len(a1)):
         # alpha.dataY(0)[i]=0.0
@@ -451,7 +448,6 @@ def nrPNRCorrection(Wksp, crho, calpha, cAp, cPp):
         CloneWorkspace("PCalpha", OutputWorkspace="PCAp")
         CloneWorkspace("PCalpha", OutputWorkspace="PCPp")
         rho = mtd['PCrho']
-        _Ap = mtd['PCAp']
         Pp = mtd['PCPp']
         # for i in range(0,len(a1)):
         # x=(alpha.dataX(0)[i]+alpha.dataX(0)[i])/2.0
@@ -516,7 +512,6 @@ def nrPACorrection(Wksp, crho, calpha, cAp, cPp):  # UpUpWksp,UpDownWksp,DownUpW
 
         CloneWorkspace(Ipp, OutputWorkspace="PCalpha")
         CropWorkspace(InputWorkspace="PCalpha", OutputWorkspace="PCalpha", StartWorkspaceIndex=0, EndWorkspaceIndex=0)
-        _PCalpha = (mtd['PCalpha'] * 0.0) + 1.0
         alpha = mtd['PCalpha']
         CloneWorkspace("PCalpha", OutputWorkspace="PCrho")
         CloneWorkspace("PCalpha", OutputWorkspace="PCAp")
@@ -643,9 +638,9 @@ def _testQuick():
     [_w1lam, _w1q, _th] = quick(94511, theta=0.25, trans='94504')
     [_w2lam, _w2q, _th] = quick(94512, theta=0.65, trans='94504')
     [_w3lam, _w3q, _th] = quick(94513, theta=1.5, trans='94504')
-    _g1 = plotSpectrum("94511_IvsQ", 0)
-    _g2 = plotSpectrum("94512_IvsQ", 0)
-    _g3 = plotSpectrum("94513_IvsQ", 0)
+    plotSpectrum("94511_IvsQ", 0)
+    plotSpectrum("94512_IvsQ", 0)
+    plotSpectrum("94513_IvsQ", 0)
 
     return True
 

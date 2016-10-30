@@ -367,7 +367,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # ENDIF (Sum data or not)
 
         for (samRunIndex, sam_ws_name) in enumerate(samwksplist):
-            assert isinstance(sam_ws_name, str), 'Assuming that samRun is a string. But it is %s' % str(type(sam_ws_))
+            assert isinstance(sam_ws_name, str), 'Assuming that samRun is a string. But it is %s' % str(type(sam_ws_name))
             if is_event_workspace(sam_ws_name):
                 self.log().information('Sample Run %s:  starting number of events = %d.' % (
                     sam_ws_name, get_workspace(sam_ws_name).getNumberEvents()))
@@ -641,14 +641,14 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         1. run number are integers
         Guarantees:
 
-        :param run_number_list: list of run numbers
+        :param filename_list: list of filenames
         :param outName:
         :param filterWall:
         :return:
         """
         # Check requirements
         assert isinstance(filename_list, list), \
-            'Run number list is not a list but of type %s' % str(type(run_number_list))
+            'Run number list is not a list but of type %s' % str(type(filename_list))
 
         # Form output workspaces' names
         out_ws_name_list = ['%s_loadsum' % getBasename(filename) for filename in filename_list]
@@ -1262,7 +1262,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     van_bkgd_ws_name = self._loadAndSum([van_bkgd_run_number], van_bkgd_ws_name, **vanFilterWall)
 
                 van_bkgd_ws = get_workspace(van_bkgd_ws_name)
-                if van_bkgd_ws.id() == EVENT_WORKSPACE_ID and van_bkgd_ws.getNumberEvents() > 0:
+                if van_bkgd_ws.id() == EVENT_WORKSPACE_ID and van_bkgd_ws.getNumberEvents() <= 0:
                     # skip if background run is empty
                     pass
                 else:

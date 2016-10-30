@@ -28,7 +28,7 @@ class NonIDF_Properties(object):
                        deployed in reduction
         """
         #
-        if not run_workspace is None:
+        if run_workspace is not None:
             object.__setattr__(self,'sample_run',run_workspace)
 
         # Helper properties, defining logging options

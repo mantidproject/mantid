@@ -104,7 +104,7 @@ class UserProperties(object):
             # pylint: disable=W0703
             except Exception:
                 ind = None
-            if not ind is None:
+            if ind is not None:
                 str_parts[ind] = str(getattr(self, prop))
         data_string = "".join(str_parts)
         return data_string
@@ -315,6 +315,7 @@ class UserProperties(object):
     def get_all_cycles(self):
         """Return list of all cycles the user participates in"""
         return self._instrument.keys()
+
     def get_all_rb(self):
         """Return list of all rb folders the user participates in"""
         return self._rb_dirs.values()

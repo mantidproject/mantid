@@ -57,7 +57,8 @@ void UnaryOperation::exec() {
       RebinnedOutput_sptr outtemp =
           boost::dynamic_pointer_cast<RebinnedOutput>(out_work);
       for (size_t i = 0; i < outtemp->getNumberHistograms(); ++i) {
-        MantidVecPtr F;
+        // because setF wants a COW pointer
+        Kernel::cow_ptr<std::vector<double>> F;
         F.access() = intemp->dataF(i);
         outtemp->setF(i, F);
       }
@@ -80,15 +81,15 @@ void UnaryOperation::exec() {
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy the X values over
-    out_work->setX(i, in_work->refX(i));
+    out_work->setSharedX(i, in_work->sharedX(i));
     // Get references to the data
     // Output (non-const) ones first because they may copy the vector
     // if it's shared, which isn't thread-safe.
-    MantidVec &YOut = out_work->dataY(i);
-    MantidVec &EOut = out_work->dataE(i);
+    auto &YOut = out_work->mutableY(i);
+    auto &EOut = out_work->mutableE(i);
     const auto X = in_work->points(i);
-    const MantidVec &Y = in_work->readY(i);
-    const MantidVec &E = in_work->readE(i);
+    const auto &Y = in_work->y(i);
+    const auto &E = in_work->e(i);
 
     for (size_t j = 0; j < specSize; ++j) {
       // Call the abstract function, passing in the current values

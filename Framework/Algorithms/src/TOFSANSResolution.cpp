@@ -100,7 +100,7 @@ void TOFSANSResolution::exec() {
   const std::vector<double> binParams = getProperty("OutputBinning");
 
   // Count histogram for normalization
-  const int xLength = static_cast<int>(iqWS->readX(0).size());
+  const int xLength = static_cast<int>(iqWS->x(0).size());
   std::vector<double> XNorm(xLength - 1, 0.0);
 
   // Create workspaces with each component of the resolution for debugging
@@ -110,16 +110,16 @@ void TOFSANSResolution::exec() {
       make_unique<WorkspaceProperty<>>("ThetaError", "", Direction::Output));
   setPropertyValue("ThetaError", "__" + iqWS->getName() + "_theta_error");
   setProperty("ThetaError", thetaWS);
-  thetaWS->setX(0, iqWS->refX(0));
-  MantidVec &ThetaY = thetaWS->dataY(0);
+  thetaWS->setSharedX(0, iqWS->sharedX(0));
+  auto &ThetaY = thetaWS->mutableY(0);
 
   MatrixWorkspace_sptr tofWS = WorkspaceFactory::Instance().create(iqWS);
   declareProperty(
       make_unique<WorkspaceProperty<>>("TOFError", "", Direction::Output));
   setPropertyValue("TOFError", "__" + iqWS->getName() + "_tof_error");
   setProperty("TOFError", tofWS);
-  tofWS->setX(0, iqWS->refX(0));
-  MantidVec &TOFY = tofWS->dataY(0);
+  tofWS->setSharedX(0, iqWS->sharedX(0));
+  auto &TOFY = tofWS->mutableY(0);
 
   // Initialize Dq
   HistogramData::HistogramDx DxOut(xLength - 1, 0.0);
@@ -150,8 +150,8 @@ void TOFSANSResolution::exec() {
     const double theta = spectrumInfo.twoTheta(i);
     const double factor = 4.0 * M_PI * sin(0.5 * theta);
 
-    const MantidVec &XIn = reducedWS->readX(i);
-    const MantidVec &YIn = reducedWS->readY(i);
+    const auto &XIn = reducedWS->x(i);
+    const auto &YIn = reducedWS->y(i);
     const int wlLength = static_cast<int>(XIn.size());
 
     std::vector<double> _dx(xLength - 1, 0.0);

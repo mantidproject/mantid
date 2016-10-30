@@ -410,7 +410,7 @@ std::vector<double> VesuvioCalculateGammaBackground::calculateTofSpectrum(
     // Fix the Mass parameter
     profile->fix(0);
 
-    profile->cacheYSpaceValues(tseconds.rawData(), false, detpar, respar);
+    profile->cacheYSpaceValues(m_backgroundWS->points(wsIndex), detpar, respar);
 
     profile->massProfile(tmpWork.data(), tmpWork.size());
     // Add to final result

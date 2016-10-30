@@ -171,7 +171,7 @@ def runs_are_equal(ws1,ws2):
                 raise AttributeError
         except Exception as err:
             pass
-        if not err is None:
+        if err is not None:
             raise AttributeError("Input parameter is neither workspace nor ws name")
         return run_num
     #-----------------------------------------------
@@ -186,7 +186,8 @@ def runs_are_equal(ws1,ws2):
     return run_num1==run_num2
 
 
-def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,samp_mass,ei_guess,rebin,map_file='default',monovan_mapfile='default',**kwargs):
+def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,samp_mass,
+              ei_guess,rebin,map_file='default',monovan_mapfile='default',**kwargs):
     """
     dgreduce.abs_units(wb_run          Whitebeam run number or file name or workspace
                   sample_run          Sample run run number or file name or workspace

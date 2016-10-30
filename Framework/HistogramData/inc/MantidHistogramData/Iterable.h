@@ -85,6 +85,10 @@ public:
     return static_cast<const T *>(this)->data().back();
   }
 
+  // expose typedefs for the iterator types in the underlying container
+  typedef std::vector<double>::iterator iterator;
+  typedef std::vector<double>::const_iterator const_iterator;
+
 protected:
   ~Iterable() = default;
 };

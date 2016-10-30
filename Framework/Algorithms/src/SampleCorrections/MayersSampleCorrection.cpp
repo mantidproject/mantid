@@ -105,9 +105,6 @@ void MayersSampleCorrection::exec() {
   for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    // Copy the X values over
-    const auto &inX = inputWS->readX(i);
-    outputWS->dataX(i) = inX;
     IDetector_const_sptr det;
     try {
       det = inputWS->getDetector(i);
@@ -128,9 +125,9 @@ void MayersSampleCorrection::exec() {
     params.sigmaSc = sampleMaterial.totalScatterXSection();
     params.cylRadius = radius;
     params.cylHeight = height;
-    MayersSampleCorrectionStrategy correction(params, inX, inputWS->readY(i),
-                                              inputWS->readE(i));
-    correction.apply(outputWS->dataY(i), outputWS->dataE(i));
+
+    MayersSampleCorrectionStrategy correction(params, inputWS->histogram(i));
+    outputWS->setHistogram(i, correction.getCorrectedHisto());
     prog.report();
 
     PARALLEL_END_INTERUPT_REGION

@@ -401,7 +401,9 @@ void SumEventsByLogValue::createBinnedOutput(
         log->maxValue() *
         1.000001); // Make it a tiny bit larger to cover full range
   }
-  MantidVec XValues;
+
+  // XValues will be resized in createAxisFromRebinParams()
+  std::vector<double> XValues;
   const int XLength =
       VectorHelper::createAxisFromRebinParams(m_binningParams, XValues);
   assert((int)XValues.size() == XLength);
@@ -410,11 +412,11 @@ void SumEventsByLogValue::createBinnedOutput(
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D", 1, XLength, XLength - 1);
   // Copy the bin boundaries into the output workspace
-  outputWorkspace->dataX(0) = XValues;
+  outputWorkspace->mutableX(0) = XValues;
   outputWorkspace->getAxis(0)->title() = m_logName;
   outputWorkspace->setYUnit("Counts");
 
-  MantidVec &Y = outputWorkspace->dataY(0);
+  auto &Y = outputWorkspace->mutableY(0);
   const int numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numSpec);
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
@@ -438,7 +440,7 @@ void SumEventsByLogValue::createBinnedOutput(
 
   // The errors are the sqrt of the counts so long as we don't deal with
   // weighted events.
-  std::transform(Y.begin(), Y.end(), outputWorkspace->dataE(0).begin(),
+  std::transform(Y.cbegin(), Y.cend(), outputWorkspace->mutableE(0).begin(),
                  (double (*)(double))std::sqrt);
 
   setProperty("OutputWorkspace", outputWorkspace);

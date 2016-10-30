@@ -161,8 +161,6 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
     p.SetExpr(formula);
 
     for (size_t i = 0; i < effOut.size(); ++i) {
-      // Cppcheck cannot see that e is accessed in p.Eval().
-      // cppcheck-suppress unreadVariable
       e = m_Ei - xIn[i];
       double eff = p.Eval();
       effOut[i] = eff / eff0;

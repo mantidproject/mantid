@@ -1,3 +1,5 @@
+#include "MantidQtMantidWidgets/CatalogSearch.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -5,11 +7,10 @@
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidQtMantidWidgets/CatalogSearch.h"
+
 #include <Poco/ActiveResult.h>
 #include <Poco/Path.h>
 
-#include <QDesktopServices>
 #include <QFileDialog>
 #include <QSettings>
 #include <QStyle>
@@ -179,7 +180,8 @@ void CatalogSearch::onFacilityLogin() {}
  * Sends the user to relevant search page on the Mantid project site.
  */
 void CatalogSearch::helpClicked() {
-  QDesktopServices::openUrl(
+  using MantidQt::API::MantidDesktopServices;
+  MantidDesktopServices::openUrl(
       QUrl("http://www.mantidproject.org/Catalog_Search"));
 }
 
