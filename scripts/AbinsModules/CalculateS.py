@@ -185,9 +185,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
 
         # calculate frequencies
         local_freq = fundamentals_freq
-        lc_freq_c = fundamentals_freq
         local_coeff = np.eye(local_freq.size, dtype=AbinsConstants.int_type)
-        lc_coeff_c = local_coeff
         generated_frequencies = []
         generated_coefficients = []
 
@@ -380,7 +378,6 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                     break
             q2_w = q2[omega]
             dw = math.exp(-q2_w * a_trace / 3.0)
-            # print "indices=", indices
             i = indices[0]
             j = indices[1]
             k = indices[2]
@@ -415,7 +412,6 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                     coeff -= 1
 
                 # we collected all necessary indices
-
                 if len(indices) == 4:
                     break
 
