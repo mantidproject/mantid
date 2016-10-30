@@ -118,8 +118,8 @@ class ABINSCalculateQToscaTest(unittest.TestCase):
         extracted_raw_data = self._raw_data.extract()
 
         # convert frequencies to cm^-1 in order to compare
-        local_freq = np.copy(extracted_raw_data["frequencies"][0]) / AbinsConstants.cm1_2_hartree
-        k2_i = (local_freq + AbinsParameters.TOSCA_final_neutron_energy) * AbinsConstants.TOSCA_constant
+        freq = extracted_raw_data["frequencies"][0][AbinsConstants.first_optical_phonon:] / AbinsConstants.cm1_2_hartree
+        k2_i = (freq + AbinsParameters.TOSCA_final_neutron_energy) * AbinsConstants.TOSCA_constant
         k2_f = AbinsParameters.TOSCA_final_neutron_energy * AbinsConstants.TOSCA_constant
         # noinspection PyTypeChecker
         correct_q_data = k2_i + k2_f - 2 * np.power(k2_i * k2_f, 0.5) * AbinsParameters.TOSCA_cos_scattering_angle
