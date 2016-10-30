@@ -87,10 +87,12 @@ template <> PyObject *cloneToNDArray(const std::vector<std::string> &cdata) {
       const std::vector<ElementType> &);
 
 ///@cond Doxygen doesn't seem to like this...
-INSTANTIATE_TONDARRAY(int32_t);
-INSTANTIATE_TONDARRAY(uint32_t);
-INSTANTIATE_TONDARRAY(int64_t);
-INSTANTIATE_TONDARRAY(uint64_t);
+INSTANTIATE_TONDARRAY(int);
+INSTANTIATE_TONDARRAY(long);
+INSTANTIATE_TONDARRAY(long long);
+INSTANTIATE_TONDARRAY(unsigned int);
+INSTANTIATE_TONDARRAY(unsigned long);
+INSTANTIATE_TONDARRAY(unsigned long long);
 INSTANTIATE_TONDARRAY(double);
 ///@endcond
 // std::string already has clone instantiated as it is specialized

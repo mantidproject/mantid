@@ -5,21 +5,30 @@
 using Mantid::PythonInterface::PropertyWithValueExporter;
 
 void export_BasicPropertyWithValueTypes() {
-  // ints32 & vectors
-  PropertyWithValueExporter<int32_t>::define("Int32PropertyWithValue");
-  PropertyWithValueExporter<std::vector<int32_t>>::define(
-      "VectorInt32PropertyWithValue");
-  PropertyWithValueExporter<uint32_t>::define("UInt32PropertyWithValue");
-  PropertyWithValueExporter<std::vector<uint32_t>>::define(
-      "VectorUInt32PropertyWithValue");
+  // ints & vectors
+  PropertyWithValueExporter<int>::define("IntPropertyWithValue");
+  PropertyWithValueExporter<std::vector<int>>::define(
+      "VectorIntPropertyWithValue");
+  PropertyWithValueExporter<unsigned int>::define("UIntPropertyWithValue");
+  PropertyWithValueExporter<std::vector<unsigned int>>::define(
+      "VectorUIntPropertyWithValue");
 
-  // ints64 & vectors
-  PropertyWithValueExporter<int64_t>::define("Int64PropertyWithValue");
-  PropertyWithValueExporter<std::vector<int64_t>>::define(
-      "VectorInt64PropertyWithValue");
-  PropertyWithValueExporter<uint64_t>::define("UInt64PropertyWithValue");
-  PropertyWithValueExporter<std::vector<uint64_t>>::define(
-      "VectorUInt64PropertyWithValue");
+  // longs & vectors
+  PropertyWithValueExporter<long>::define("LongPropertyWithValue");
+  PropertyWithValueExporter<std::vector<long>>::define(
+      "VectorLongPropertyWithValue");
+  PropertyWithValueExporter<unsigned long>::define("ULongPropertyWithValue");
+  PropertyWithValueExporter<std::vector<unsigned long>>::define(
+      "VectorULongPropertyWithValue");
+
+  // long long long longs & vectors
+  PropertyWithValueExporter<long long>::define("LongLongPropertyWithValue");
+  PropertyWithValueExporter<std::vector<long long>>::define(
+      "VectorLongLongPropertyWithValue");
+  PropertyWithValueExporter<unsigned long long>::define(
+      "ULongLongPropertyWithValue");
+  PropertyWithValueExporter<std::vector<unsigned long long>>::define(
+      "VectorULongLongPropertyWithValue");
 
   // double
   PropertyWithValueExporter<double>::define("FloatPropertyWithValue");

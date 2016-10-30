@@ -104,5 +104,5 @@ createExclusiveBoundedValidator(object lower = object(),
 
 void export_BoundedValidator() {
   EXPORT_BOUNDEDVALIDATOR(double, Float);
-  EXPORT_BOUNDEDVALIDATOR(int64_t, Int);
+  EXPORT_BOUNDEDVALIDATOR(long, Int);
 }

@@ -34,7 +34,7 @@ void initTypeLookup(PyTypeIndex &index) {
 
   // Python 2/3 have an arbitrary-sized long type. The handler
   // will raise an error if the input value overflows a C long
-  typedef TypedPropertyValueHandler<int64_t> IntHandler;
+  typedef TypedPropertyValueHandler<long> IntHandler;
   index.emplace(&PyLong_Type, boost::make_shared<IntHandler>());
 
   // In Python 3 all strings are unicode but in Python 2 unicode strings
@@ -83,12 +83,12 @@ void initArrayLookup(PyArrayIndex &index) {
   typedef SequenceTypeHandler<std::vector<std::string>> StringArrayHandler;
   index.emplace("StringArray", boost::make_shared<StringArrayHandler>());
 
-  typedef SequenceTypeHandler<std::vector<int64_t>> LongIntArrayHandler;
+  typedef SequenceTypeHandler<std::vector<long>> LongIntArrayHandler;
   index.emplace("LongIntArray", boost::make_shared<LongIntArrayHandler>());
 
 #if PY_MAJOR_VERSION < 3
   // Backwards compatible behaviour
-  typedef SequenceTypeHandler<std::vector<int32_t>> IntArrayHandler;
+  typedef SequenceTypeHandler<std::vector<int>> IntArrayHandler;
   index.emplace("IntArray", boost::make_shared<IntArrayHandler>());
 #endif
 }
