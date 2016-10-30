@@ -24,7 +24,8 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         if not isinstance(overtones, bool):
             raise ValueError("Invalid value of overtones. Expected values are: True, False.")
 
-        fundamental_frequencies = self._k_points_data["frequencies"][0] * 1.0 / AbinsConstants.cm1_2_hartree
+        const = 1.0 / AbinsConstants.cm1_2_hartree
+        fundamental_frequencies = self._k_points_data["frequencies"][0][AbinsConstants.first_optical_phonon:] * const
 
         # fundamentals and higher quantum order effects
         if overtones:
@@ -37,7 +38,7 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         q_data = {}
 
         local_freq = fundamental_frequencies
-        local_coeff = np.ones(shape=fundamental_frequencies.size, dtype=AbinsConstants.float_type)
+        local_coeff = np.eye(fundamental_frequencies.size, dtype=AbinsConstants.float_type)
         for quantum_order in range(AbinsConstants.fundamentals, q_dim + AbinsConstants.q_last_index):
             if combinations:
 
@@ -54,6 +55,7 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
             k2_i = (local_freq + AbinsParameters.TOSCA_final_neutron_energy) * AbinsConstants.TOSCA_constant
             k2_f = AbinsParameters.TOSCA_final_neutron_energy * AbinsConstants.TOSCA_constant
             temp = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * AbinsParameters.TOSCA_cos_scattering_angle
+
             q_data["order_%s" % quantum_order] = temp
 
         return q_data
