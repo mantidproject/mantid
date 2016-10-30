@@ -68,11 +68,11 @@ complex_type = np.dtype(np.complex)
 int_id = np.dtype(np.uint8).num
 int_type = np.dtype(np.uint8)
 
-total_workspace_size = int(round(AbinsParameters.max_wavenumber / float(AbinsParameters.bin_width),
-                                 0))  # maximum number of entries in the workspace
+# maximum number of entries in the workspace
+total_workspace_size = int(round(AbinsParameters.max_wavenumber / float(AbinsParameters.bin_width), 0))
 higher_order_quantum_effects = 3  # number of quantum order effects taken into account
 higher_order_quantum_effects_dim = higher_order_quantum_effects
-max_array_size = 1000000  # maximum size for storing frequencies for each quantum order
+max_array_size = 100000  # maximum size for storing frequencies for each quantum order
 
 
 # constant to be used when iterating with range() over all considered quantum effects
@@ -85,7 +85,7 @@ q_last_index = 1
 
 
 # construction of aCLIMAX constant which is used to evaluate mean square displacement (u)
-h_bar = constants.codata.value("Planck constant over 2 pi")  # h_bar=  1.0545718e-34 [J s] = [kg m^2 / s ]
+h_bar = constants.codata.value("Planck constant over 2 pi")  # h_bar =  1.0545718e-34 [J s] = [kg m^2 / s ]
 h_bar_decomposition = math.frexp(h_bar)
 
 m2_to_angstrom2 = 1.0 / constants.angstrom**2  # m^2 = 10^20 A^2
@@ -98,7 +98,7 @@ kg2amu_decomposition = math.frexp(kg2amu)
 hz2inv_cm = constants.codata.value("hertz-inverse meter relationship") / 100  # Hz [s^1] = 3.33564095198152e-11 [cm^-1]
 hz2inv_cm_decomposition = math.frexp(hz2inv_cm)
 #
-# u = h_bar [J s ]/ ( 2 m [kg] omega [s^-1]) = aClimax_constant / ( m [amu] nu [cm^-1])
+# u = h_bar [J s ]/ ( 2 m [kg] omega [s^-1]) = aCLIMAX_constant / ( m [amu] nu [cm^-1])
 #
 # omega -- angular frequency
 # nu -- wavenumber
@@ -109,13 +109,14 @@ hz2inv_cm_decomposition = math.frexp(hz2inv_cm)
 #
 
 aCLIMAX_constant = h_bar_decomposition[0] * m2_to_angstrom2_decomposition[0] * \
-                   kg2amu_decomposition[0] * hz2inv_cm_decomposition[0]
-aCLIMAX_constant *= 2**h_bar_decomposition[1] * 2**m2_to_angstrom2_decomposition[1] * \
-                     2**kg2amu_decomposition[1] * 2**hz2inv_cm_decomposition[1]
-aCLIMAX_constant /= (2 * 2 * math.pi)
+                   kg2amu_decomposition[0] * hz2inv_cm_decomposition[0] / math.pi
+aCLIMAX_constant *= 2 ** (h_bar_decomposition[1] + m2_to_angstrom2_decomposition[1] + kg2amu_decomposition[1] +
+                          hz2inv_cm_decomposition[1] - 2)
+
 
 aCLIMAX_constant_decomposition = math.frexp(aCLIMAX_constant)
 m_n_decomposition = math.frexp(constants.m_n)
 
-TOSCA_constant = m_n_decomposition[0] * kg2amu_decomposition[0] / aCLIMAX_constant_decomposition[0]  # constant used to evaluate Q^2 for TOSCA.
-TOSCA_constant *= 2**m_n_decomposition[1] * 2**kg2amu_decomposition[1] / 2**aCLIMAX_constant_decomposition[1]
+# constant used to evaluate Q^2 for TOSCA.
+TOSCA_constant = m_n_decomposition[0] * kg2amu_decomposition[0] / aCLIMAX_constant_decomposition[0]
+TOSCA_constant *= 2 ** (m_n_decomposition[1] + kg2amu_decomposition[1] - aCLIMAX_constant_decomposition[1])
