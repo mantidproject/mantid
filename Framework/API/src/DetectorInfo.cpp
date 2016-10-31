@@ -21,7 +21,7 @@ DetectorInfo::DetectorInfo(const Geometry::Instrument &instrument,
     : m_pmap(pmap), m_instrument(instrument),
       m_detectorIDs(
           instrument.getDetectorIDs(false /* do not skip monitors */)),
-      m_detectors(PARALLEL_GET_MAX_THREADS),
+      m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
   for (size_t i = 0; i < m_detectorIDs.size(); ++i)
     m_detIDToIndex[m_detectorIDs[i]] = i;
@@ -181,10 +181,10 @@ const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
   size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   if (m_lastIndex[thread] != index) {
     m_lastIndex[thread] = index;
-    m_detectors[thread] = m_instrument.getDetector(m_detectorIDs[index]);
+    m_lastDetector[thread] = m_instrument.getDetector(m_detectorIDs[index]);
   }
 
-  return *m_detectors[thread];
+  return *m_lastDetector[thread];
 }
 
 /// Sets the cached detector. This is an optimization used by SpectrumInfo.
@@ -192,7 +192,7 @@ void DetectorInfo::setCachedDetector(
     size_t index, boost::shared_ptr<const Geometry::IDetector> detector) const {
   size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   m_lastIndex[thread] = index;
-  m_detectors[thread] = detector;
+  m_lastDetector[thread] = detector;
 }
 
 /// Returns a reference to the source component. The value is cached, so calling

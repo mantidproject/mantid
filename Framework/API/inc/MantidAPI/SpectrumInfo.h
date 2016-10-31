@@ -95,7 +95,8 @@ private:
   const MatrixWorkspace &m_workspace;
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
   std::unique_ptr<DetectorInfo> m_detectorInfo;
-  mutable std::vector<boost::shared_ptr<const Geometry::IDetector>> m_detectors;
+  mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>
+      m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;
 };
 

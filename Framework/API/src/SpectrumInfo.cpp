@@ -21,7 +21,7 @@ SpectrumInfo::SpectrumInfo(MatrixWorkspace &workspace)
 SpectrumInfo::SpectrumInfo(const MatrixWorkspace &workspace,
                            Geometry::ParameterMap *pmap)
     : m_workspace(workspace), m_instrument(workspace.getInstrument()),
-      m_detectors(PARALLEL_GET_MAX_THREADS),
+      m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
   // Note: This does not seem possible currently (the instrument objects is
   // always allocated, even if it is empty), so this will not fail.
@@ -178,7 +178,7 @@ double SpectrumInfo::l1() const { return m_detectorInfo->l1(); }
 const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   if (m_lastIndex[thread] == index)
-    return *m_detectors[thread];
+    return *m_lastDetector[thread];
 
   m_lastIndex[thread] = index;
 
@@ -189,7 +189,7 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   const size_t ndets = dets.size();
   if (ndets == 1) {
     // If only 1 detector for the spectrum number, just return it
-    m_detectors[thread] = m_instrument->getDetector(*dets.begin());
+    m_lastDetector[thread] = m_instrument->getDetector(*dets.begin());
   } else if (ndets == 0) {
     throw Kernel::Exception::NotFoundError("MatrixWorkspace::getDetector(): No "
                                            "detectors for this workspace "
@@ -198,11 +198,11 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   } else {
     // Else need to construct a DetectorGroup and use that
     auto dets_ptr = m_instrument->getDetectors(dets);
-    m_detectors[thread] = Geometry::IDetector_const_sptr(
+    m_lastDetector[thread] = Geometry::IDetector_const_sptr(
         new Geometry::DetectorGroup(dets_ptr, false));
   }
 
-  return *m_detectors[thread];
+  return *m_lastDetector[thread];
 }
 
 std::vector<Geometry::IDetector_const_sptr>
@@ -214,7 +214,7 @@ SpectrumInfo::getDetectorVector(const size_t index) const {
     return group->getDetectors();
   } else {
     size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
-    return {m_detectors[thread]};
+    return {m_lastDetector[thread]};
   }
 }
 

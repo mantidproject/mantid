@@ -118,7 +118,8 @@ private:
   mutable std::once_flag m_sampleCached;
   mutable std::once_flag m_L1Cached;
 
-  mutable std::vector<boost::shared_ptr<const Geometry::IDetector>> m_detectors;
+  mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>
+      m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;
 };
 
