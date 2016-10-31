@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/Exception.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidHistogramData/Rebin.h"
@@ -12,6 +13,7 @@
 #include <random>
 
 using namespace Mantid::HistogramData;
+using namespace Mantid::HistogramData::Exception;
 
 class RebinTest : public CxxTest::TestSuite {
 public:
@@ -47,21 +49,30 @@ public:
     std::vector<double> binEdges{1, 2, 3, 3, 5, 7};
     BinEdges edges(binEdges);
 
-    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges), std::runtime_error);
+    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges), InvalidBinEdgesError);
   }
 
   void testRebinFailsStartBinEdgesInvalid() {
     std::vector<double> binEdges{1, 1, 3, 4, 5, 7};
     BinEdges edges(binEdges);
 
-    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges), std::runtime_error);
+    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges), InvalidBinEdgesError);
   }
 
   void testRebinEndCentralBinEdgesInvalid() {
     std::vector<double> binEdges{1, 2, 3, 4, 5, 5};
     BinEdges edges(binEdges);
 
-    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges), std::runtime_error);
+    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges), InvalidBinEdgesError);
+  }
+
+  void testNegativeBinEdges() {
+    auto hist = Histogram(BinEdges(3, LinearGenerator(-3, 3)), Counts{20, 10},
+                          CountStandardDeviations{4.4721, 3.1622});
+    std::vector<double> binEdges{-3, -2, -1, 0, 1, 2, 3};
+    BinEdges edges(std::move(binEdges));
+
+    TS_ASSERT_THROWS_NOTHING(rebin(getCountsHistogram(), edges));
   }
 
   void testRebinFailsInputBinEdgesInvalid() {
@@ -69,7 +80,7 @@ public:
     Histogram hist(BinEdges(std::move(binEdges)), Counts(5, 10));
     BinEdges edges{1, 2, 3, 4, 5, 6};
 
-    TS_ASSERT_THROWS(rebin(hist, edges), std::runtime_error);
+    TS_ASSERT_THROWS(rebin(hist, edges), InvalidBinEdgesError);
   }
 
   void testRebinFailsInputAndOutputBinEdgesInvalid() {
@@ -77,7 +88,7 @@ public:
     Histogram hist(BinEdges(binEdges), Counts(5, 10));
     BinEdges edges(std::move(binEdges));
 
-    TS_ASSERT_THROWS(rebin(hist, edges), std::runtime_error);
+    TS_ASSERT_THROWS(rebin(hist, edges), InvalidBinEdgesError);
   }
 
   void testRebinIdenticalBins() {
