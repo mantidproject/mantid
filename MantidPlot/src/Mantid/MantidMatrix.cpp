@@ -1,14 +1,14 @@
-#include "MantidKernel/Logger.h"
-#include "MantidMatrixModel.h"
 #include "MantidMatrix.h"
-#include "MantidMatrixFunction.h"
-#include "MantidUI.h"
-#include "../Graph3D.h"
 #include "../ApplicationWindow.h"
+#include "../Graph3D.h"
 #include "../Spectrogram.h"
+#include "MantidKernel/Logger.h"
 #include "MantidMatrixDialog.h"
+#include "MantidMatrixFunction.h"
+#include "MantidMatrixModel.h"
+#include "MantidUI.h"
 #include "Preferences.h"
-#include "../pixmaps.h"
+#include <MantidQtAPI/pixmaps.h>
 
 #include "MantidQtAPI/TSVSerialiser.h"
 
@@ -22,7 +22,6 @@
 
 #include <QScrollBar>
 
-#include <stdlib.h>
 #include <algorithm>
 #include <limits>
 #include <cmath>
@@ -712,7 +711,7 @@ void MantidMatrix::attachMultilayer(MultiLayer *ml) {
 @param type :: The "curve" type.
 @return Pointer to the created graph.
 */
-MultiLayer *MantidMatrix::plotGraph2D(Graph::CurveType type) {
+MultiLayer *MantidMatrix::plotGraph2D(GraphOptions::CurveType type) {
   if (numRows() == 1) {
     QMessageBox::critical(0, "MantidPlot - Error",
                           "Cannot plot a workspace with only one spectrum.");
@@ -735,7 +734,8 @@ MultiLayer *MantidMatrix::plotGraph2D(Graph::CurveType type) {
 }
 
 Spectrogram *MantidMatrix::plotSpectrogram(Graph *plot, ApplicationWindow *app,
-                                           Graph::CurveType type, bool project,
+                                           GraphOptions::CurveType type,
+                                           bool project,
                                            const ProjectData *const prjData) {
   app->setPreferences(plot);
 

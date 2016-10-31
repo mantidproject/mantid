@@ -98,6 +98,7 @@ set ( SRC_FILES
 	src/MultiPeriodGroupWorker.cpp
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
+	src/NearestNeighbourInfo.cpp
 	src/NotebookBuilder.cpp
 	src/NotebookWriter.cpp
 	src/NullCoordTransform.cpp
@@ -281,6 +282,7 @@ set ( INC_FILES
 	inc/MantidAPI/MultiPeriodGroupWorker.h
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
+	inc/MantidAPI/NearestNeighbourInfo.h
 	inc/MantidAPI/NotebookBuilder.h
 	inc/MantidAPI/NotebookWriter.h
 	inc/MantidAPI/NullCoordTransform.h
@@ -393,6 +395,7 @@ set ( TEST_FILES
 	MultiPeriodGroupWorkerTest.h
 	MultipleExperimentInfosTest.h
 	MultipleFilePropertyTest.h
+	NearestNeighbourInfoTest.h
 	NotebookBuilderTest.h
 	NotebookWriterTest.h
 	NumericAxisTest.h

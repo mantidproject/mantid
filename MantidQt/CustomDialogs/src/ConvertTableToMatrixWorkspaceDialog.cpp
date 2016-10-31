@@ -4,7 +4,6 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QUrl>
-#include <QDesktopServices>
 #include <QDesktopWidget>
 #include <QFileInfo>
 

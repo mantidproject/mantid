@@ -1,4 +1,4 @@
-﻿# pylint: disable=invalid-name, property-on-old-class, redefined-builtin, protected-access
+# pylint: disable=invalid-name, property-on-old-class, redefined-builtin, protected-access
 """
     ISIS-specific implementation of the SANS Reducer.
 
@@ -6,6 +6,7 @@
     understand what's happening and how best to fit it in the Reducer design.
 
 """
+from __future__ import (absolute_import, division, print_function)
 from reducer_singleton import Reducer
 import isis_reduction_steps
 import isis_instrument
@@ -28,7 +29,7 @@ if sys.version_info[0] == 2 and sys.version_info[1] == 6:
     import types
 
     def _deepcopy_method(x, memo):
-        return type(x)(x.im_func, copy.deepcopy(x.im_self, memo), x.im_class)
+        return type(x)(x.__func__, copy.deepcopy(x.__self__, memo), x.__self__.__class__)
 
     copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
 ################################################################################
@@ -84,7 +85,7 @@ class Sample(object):
     def get_monitor(self, index=None):
         try:
             _ws = mtd[self.loader.wksp_name + "_monitors"]
-        except (StandardError, Warning):
+        except (Exception, Warning):
             _ws = mtd[self.loader.wksp_name]
 
         if index is not None:
@@ -507,10 +508,10 @@ class ISISReducer(Reducer):
         self.__transmission_sample = ""
         self.__transmission_can = ""
 
-        for role in self._temporys.keys():
+        for role in list(self._temporys.keys()):
             try:
                 DeleteWorkspace(Workspace=self._temporys[role])
-            except (StandardError, Warning):
+            except (Exception, Warning):
                 # if cleaning up isn't possible there is probably nothing we can do
                 pass
 
@@ -690,7 +691,7 @@ class ISISReducer(Reducer):
             try:
                 if wk and wk in mtd:
                     DeleteWorkspace(Workspace=wk)
-            except (StandardError, Warning):
+            except (Exception, Warning):
                 # if the workspace can't be deleted this function does nothing
                 pass
 
@@ -714,7 +715,7 @@ class ISISReducer(Reducer):
             to_check = self._reduction_steps
             for element in to_check:
                 element.run_consistency_check()
-        except RuntimeError, details:
+        except RuntimeError as details:
             if was_empty:
                 self._reduction_steps = None
             raise RuntimeError(str(details))

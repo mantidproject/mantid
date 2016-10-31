@@ -1,7 +1,9 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid import config
 import os
-
+import re
+from six.moves import range
 """
 Set of functions to assist with processing instrument parameters relevant to reduction.
 """
@@ -143,7 +145,7 @@ def build_properties_dict(param_map,synonims,descr_list=[]) :
             final_name = str(name)
         prelim_dict[final_name]=None
 
-    param_keys = prelim_dict.keys()
+    param_keys = list(prelim_dict.keys())
     properties_dict = dict()
     descr_dict = dict()
 
@@ -230,7 +232,7 @@ def build_subst_dictionary(synonims_list=None) :
         if len(keys[0]) == 0:
             raise AttributeError("The pairs in the synonyms fields have to have form key1=key2=key3 with at least two values present, "
                                  "but the first key is empty")
-        for i in xrange(1,len(keys)) :
+        for i in range(1,len(keys)) :
             if len(keys[i]) == 0 :
                 raise AttributeError("The pairs in the synonyms fields have to have form key1=key2=key3 with at least two values present, "
                                      "but the key"+str(i)+" is empty")
@@ -343,7 +345,7 @@ def parse_single_name(filename):
         if ind1>ind2:
             raise ValueError('Invalid file number defined using colon : left run number '
                              '{0} has to be large then right {1}'.format(ind1,ind2))
-        number = range(ind1[0],ind2[0]+1)
+        number = list(range(ind1[0],ind2[0]+1))
         if len(filepath)>0:
             filepath=[filepath]*len(number)
         else:
@@ -356,11 +358,11 @@ def parse_single_name(filename):
         return (filepath,number,fext)
 
     fname,fext  = os.path.splitext(fname)
-    fnumber = filter(lambda x: x.isdigit(), fname)
+    fnumber = re.findall('\d+', fname)
     if len(fnumber) == 0:
         number = 0
     else:
-        number = int(fnumber)
+        number = int(fnumber[0])
     return ([filepath],[number],[fext])
 
 
@@ -380,7 +382,7 @@ def parse_run_file_name(run_string):
         filenum+=ind
         fext+=ext1
 
-    non_empty = filter(lambda x: len(x) >0, fext)
+    non_empty = [x for x in fext if len(x) >0]
     if len(non_empty)>0:
         anExt = non_empty[-1]
         for i,val in enumerate(fext):
@@ -402,7 +404,7 @@ def process_prop_list(workspace,logName="CombinedSpectraIDList"):
     """
     if workspace.run().hasProperty(logName):
         spec_id_str = workspace.run().getProperty(logName).value
-        spec_id_str = spec_id_str.translate(None,'[]').strip()
+        spec_id_str = spec_id_str.replace('[','').replace(']','').strip()
         spec_id_listS = spec_id_str.split(',')
         spec_list = []
         for val in spec_id_listS:
