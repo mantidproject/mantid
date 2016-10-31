@@ -38,7 +38,7 @@ DLLExport int EMPTY_INT();
 DLLExport long EMPTY_LONG();
 
 /// Returns what we consider an "empty" int64_t
-DLLExport long EMPTY_INT64();
+DLLExport int64_t EMPTY_INT64();
 
 /// Return what we consider to be an empty double
 DLLExport double EMPTY_DBL();
