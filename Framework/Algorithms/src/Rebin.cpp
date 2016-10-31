@@ -115,9 +115,11 @@ void Rebin::init() {
       "FullBinsOnly", false,
       "Omit the final bin if it's width is smaller than the step size");
 
-  declareProperty("IgnoreBinErrors", false, "Ignore errors related to "
-                                            "zero/negative bin widths in "
-                                            "input/output workspaces.");
+  declareProperty("IgnoreBinErrors", false,
+                  "Ignore errors related to "
+                  "zero/negative bin widths in "
+                  "input/output workspaces. Wehn ignored, the signal and "
+                  "errors are set to zero");
 }
 
 /** Executes the rebin algorithm
