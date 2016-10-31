@@ -948,11 +948,11 @@ void ComponentInfoController::displayComparePeaksInfo(
 
   text << "-------------------------------\n";
 
-  auto peakPos1 = detector1->getPos();
-  auto peakPos2 = detector2->getPos();
+  auto pos1 = detector1->getPos();
+  auto pos2 = detector2->getPos();
 
-  auto angle = peakPos1.angle(peakPos2) * conversion;
-  auto distance = peakPos1 - peakPos2;
+  auto angle = pos1.angle(pos2) * conversion;
+  auto distance = pos1 - pos2;
   auto dirAngles = distance.directionAngles();
 
   text << "Angle between: " << angle << "\n";
