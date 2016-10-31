@@ -57,6 +57,15 @@ template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<unsigned long>>;
 template class MANTID_KERNEL_DLL
     PropertyWithValue<std::vector<std::vector<long>>>;
 #endif
+#ifdef __linux__
+template class MANTID_KERNEL_DLL PropertyWithValue<long long>;
+template class MANTID_KERNEL_DLL PropertyWithValue<unsigned long long>;
+template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<long long>>;
+template class MANTID_KERNEL_DLL
+    PropertyWithValue<std::vector<unsigned long long>>;
+template class MANTID_KERNEL_DLL
+    PropertyWithValue<std::vector<std::vector<long long>>>;
+#endif
 /// @endcond
 
 // The explicit template instantiations for some types does not have an export
