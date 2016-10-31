@@ -48,6 +48,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/LogFilterGenerator.h"
 #include "MantidAPI/Run.h"
 
 #include <QMessageBox>
@@ -2434,12 +2435,29 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data,
 */
 void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
                                   int filter) {
-  // if you need to add a final filter valure to the end of the filter to match
+  // if you need to add a final filter value to the end of the filter to match
   // the extent of the data, then set this to the index of the row to add the
   // value
   int addFinalFilterValueIndex = 0;
   Mantid::Kernel::DateAndTime lastFilterTime;
 
+  // Convert input int into enum value
+  const Mantid::API::LogFilterGenerator::FilterType filterType = [&filter]() {
+    switch (filter) {
+    case 0:
+      return Mantid::API::LogFilterGenerator::FilterType::None;
+    case 1:
+      return Mantid::API::LogFilterGenerator::FilterType::Status;
+    case 2:
+      return Mantid::API::LogFilterGenerator::FilterType::Period;
+    case 3:
+      return Mantid::API::LogFilterGenerator::FilterType::StatusAndPeriod;
+    default:
+      return Mantid::API::LogFilterGenerator::FilterType::None;
+    }
+  }();
+
+  // Make sure the workspace exists and contains the log
   MatrixWorkspace_const_sptr ws =
       boost::dynamic_pointer_cast<const MatrixWorkspace>(getWorkspace(wsName));
   if (!ws)
@@ -2450,12 +2468,14 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   if (!logData)
     return;
 
-  Mantid::Kernel::LogFilter flt(logData);
+  // Generate the filter
+  Mantid::API::LogFilterGenerator filterGenerator(filterType, ws);
+  const auto &flt = filterGenerator.generateFilter(logName.toStdString());
 
   // Get a map of time/value. This greatly speeds up display.
   // NOTE: valueAsMap() skips repeated values.
   std::map<DateAndTime, double> time_value_map =
-      flt.data()->valueAsCorrectMap();
+      flt->data()->valueAsCorrectMap();
   int rowcount = static_cast<int>(time_value_map.size());
   int colCount = 2;
 
@@ -2517,65 +2537,9 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
 
   int iValueCurve = 0;
 
-  // Applying filters
-  if (filter > 0) {
-    Mantid::Kernel::TimeSeriesProperty<bool> *f = 0;
-    if (filter == 1 || filter == 3) {
-      // one of the filters is the running status
-      try {
-        f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(
-            ws->run().getLogData("running"));
-        if (f)
-          flt.addFilter(*f);
-        else {
-          t->setconfirmcloseFlag(false);
-          t->setAttribute(Qt::WA_DeleteOnClose);
-          t->close();
-          importNumSeriesLog(wsName, logName, 0);
-          return;
-        }
-        // If filter records start later than the data we add a value at the
-        // filter's front
-        if (f->firstTime() > firstTime) {
-          // add a "not running" value to the status filter
-          Mantid::Kernel::TimeSeriesProperty<bool> atStart("tmp");
-          atStart.addValue(firstTime, false);
-          atStart.addValue(f->firstTime(), f->firstValue());
-          flt.addFilter(atStart);
-        }
-      } catch (...) {
-        t->setconfirmcloseFlag(false);
-        t->setAttribute(Qt::WA_DeleteOnClose);
-        t->close();
-        importNumSeriesLog(wsName, logName, 0);
-        return;
-      }
-    }
-
-    if (filter == 2 || filter == 3) {
-      std::vector<Mantid::Kernel::Property *> ps = ws->run().getLogData();
-      for (std::vector<Mantid::Kernel::Property *>::const_iterator it =
-               ps.begin();
-           it != ps.end(); ++it)
-        if ((*it)->name().find("period ") == 0) {
-          try {
-            f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(*it);
-            if (f)
-              flt.addFilter(*f);
-            else {
-              importNumSeriesLog(wsName, logName, 0);
-              return;
-            }
-          } catch (...) {
-            importNumSeriesLog(wsName, logName, 0);
-            return;
-          }
-
-          break;
-        }
-    }
-
-    if (flt.filter()) {
+  // Applying filter column to table
+  if (filterType != Mantid::API::LogFilterGenerator::FilterType::None) {
+    if (flt->filter()) {
       // Valid filter was found
       t->addColumns(2);
       t->setColName(2, "FTime");
@@ -2591,29 +2555,29 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
       t->setColPlotDesignation(2, Table::X);
       t->setColName(3, "Filter");
 
-      if (flt.filter()->size() > rowcount) {
-        t->addRows(flt.filter()->size() - rowcount);
+      if (flt->filter()->size() > rowcount) {
+        t->addRows(flt->filter()->size() - rowcount);
       }
 
-      if (flt.data()->size() > rowcount) {
-        t->addRows(flt.data()->size() - rowcount);
+      if (flt->data()->size() > rowcount) {
+        t->addRows(flt->data()->size() - rowcount);
       }
 
-      for (int i = 0; i < flt.filter()->size(); i++) {
-        if (flt.filter()->nthInterval(i).begin() >
+      for (int i = 0; i < flt->filter()->size(); i++) {
+        if (flt->filter()->nthInterval(i).begin() >
             0) // protect against bizarre values we sometimes get
         {
           std::string time_string = extractLogTime(
-              flt.filter()->nthInterval(i).begin(), useAbsoluteDate, startTime);
+              flt->filter()->nthInterval(i).begin(), useAbsoluteDate, startTime);
 
           t->setText(i, 2, QString::fromStdString(time_string));
-          t->setCell(i, 3, !flt.filter()->nthValue(i));
-          if ((i + 1 == flt.filter()->size()) &&
-              (!flt.filter()->nthValue(
+          t->setCell(i, 3, !flt->filter()->nthValue(i));
+          if ((i + 1 == flt->filter()->size()) &&
+              (!flt->filter()->nthValue(
                   i))) // last filter value and set to be filtering
           {
             addFinalFilterValueIndex = i + 1;
-            lastFilterTime = flt.filter()->nthInterval(i).begin();
+            lastFilterTime = flt->filter()->nthInterval(i).begin();
           }
         }
       }
@@ -2641,13 +2605,13 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
 
   try {
     // Set the filter strings
-    if (filter && flt.filter() && lastTime < flt.filter()->lastTime()) {
+    if (filter && flt->filter() && lastTime < flt->filter()->lastTime()) {
       rowcount = static_cast<int>(time_value_map.size());
       if (rowcount == t->numRows())
         t->addRows(1);
 
       std::string time_string =
-          extractLogTime(flt.filter()->lastTime(), useAbsoluteDate, startTime);
+          extractLogTime(flt->filter()->lastTime(), useAbsoluteDate, startTime);
 
       t->setText(rowcount, 0, QString::fromStdString(time_string));
       t->setCell(rowcount, 1, lastValue);
@@ -2683,7 +2647,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
     return;
 
   QStringList colNames;
-  if (filter && flt.filter()) {
+  if (filter && flt->filter()) {
     colNames << t->colName(3);
   }
   colNames << t->colName(1);
@@ -2696,7 +2660,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   // Set x-axis label format
   if (useAbsoluteDate) {
     Mantid::Kernel::DateAndTime label_as_ptime =
-        flt.data()->nthInterval(0).begin();
+        flt->data()->nthInterval(0).begin();
     QDateTime dt = QDateTime::fromTime_t(uint(label_as_ptime.to_localtime_t()));
     QString format = dt.toString(Qt::ISODate) + ";HH:mm:ss";
     g->setLabelsDateTimeFormat(2, ScaleDraw::Date, format);
@@ -2710,7 +2674,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   QPen pn = QPen(Qt::black);
   g->setCurvePen(iValueCurve, pn);
 
-  if (filter && flt.filter()) {
+  if (filter && flt->filter()) {
     int iFilterCurve = 1;
     QwtPlotCurve *c = g->curve(iFilterCurve);
     if (c) {
