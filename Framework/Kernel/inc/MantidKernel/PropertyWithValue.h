@@ -6,8 +6,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
 
-#include <boost/type_traits.hpp>
-
 #include <vector>
 
 namespace NeXus {
