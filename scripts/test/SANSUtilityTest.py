@@ -343,9 +343,6 @@ class TestLoadingAddedEventWorkspaceExtraction(unittest.TestCase):
         self.do_test_extraction(TEST_STRING_DATA, TEST_STRING_MON)
 
 
-
-
-
 class AddOperationTest(unittest.TestCase):
     def compare_added_workspaces(self,ws1, ws2, out_ws, start_time1, start_time2, extra_time_shift, isOverlay):
         self._compare_added_logs(ws1, ws2, out_ws, start_time1, start_time2, extra_time_shift, isOverlay)

@@ -677,9 +677,9 @@ def extract_child_ws_for_added_eventdata(ws_group, appendix):
 
 def get_new_workspace_name(appendix, old_workspace_name, ws_group_name):
     new_workspace_name = ws_group_name
-    final_number = re.search('_(\d+)$', old_workspace_name).group(0)
+    final_number = re.search('_(\d+)$', old_workspace_name)
     if final_number is not None:
-        new_workspace_name += final_number
+        new_workspace_name += final_number.group(0)
 
     if appendix in old_workspace_name:
         new_workspace_name += appendix
