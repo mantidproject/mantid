@@ -118,7 +118,7 @@ void Rebin::init() {
   declareProperty("IgnoreBinErrors", false,
                   "Ignore errors related to "
                   "zero/negative bin widths in "
-                  "input/output workspaces. Wehn ignored, the signal and "
+                  "input/output workspaces. When ignored, the signal and "
                   "errors are set to zero");
 }
 
