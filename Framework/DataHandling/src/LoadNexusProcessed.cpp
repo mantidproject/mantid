@@ -425,7 +425,7 @@ void LoadNexusProcessed::exec() {
     // First member of group should be the group itself, for some reason!
 
     // load names of each of the workspaces. Note that if we have duplicate
-    // names then we don't select them 
+    // names then we don't select them
     std::vector<std::string> names(nWorkspaceEntries + 1);
     extractWorkspaceNames(root, names);
 
@@ -595,7 +595,6 @@ void LoadNexusProcessed::extractWorkspaceNames(
     names.clear();
     names.resize(size);
   }
-
 }
 
 /**
