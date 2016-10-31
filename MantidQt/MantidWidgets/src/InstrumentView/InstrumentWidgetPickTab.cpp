@@ -58,8 +58,12 @@
 #include <numeric>
 #include <vector>
 
+#include <boost/math/constants/constants.hpp>
+
 namespace MantidQt {
 namespace MantidWidgets {
+
+using namespace boost::math;
 
 /// to be used in std::transform
 struct Sqrt {
@@ -904,68 +908,62 @@ QString ComponentInfoController::displayNonDetectorInfo(
   return text;
 }
 
+QString ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *peak)
+{
+  std::stringstream text;
+  auto instrument = peak->getInstrument();
+  auto sample = instrument->getSample()->getPos();
+  auto source = instrument->getSource()->getPos();
+  auto L1 = (sample - source);
+
+  auto detector = peak->getDetector();
+  auto twoTheta = detector->getTwoTheta(sample, L1) * double_constants::radian;
+  auto d = peak->getDSpacing();
+
+  text << "d: " << d << "\n";
+  text << "2 Theta: " << twoTheta << "\n";
+  text << "Theta: " << (twoTheta / 2.) << "\n";
+  text << "\n";
+
+  return QString::fromStdString(text.str());
+}
+
+QString ComponentInfoController::displayPeakAngles(std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks)
+{
+  std::stringstream text;
+  auto peak1 = peaks.first;
+  auto peak2 = peaks.second;
+
+  auto pos1 = peak1->getDetector()->getPos();
+  auto pos2 = peak2->getDetector()->getPos();
+
+  auto angle = pos1.angle(pos2) * double_constants::radian;
+  auto distance = pos1 - pos2;
+  auto dirAngles = distance.directionAngles();
+
+  text << "Angle between: " << angle << "\n";
+  text << "Direction angles: ";
+  text << " a: " << dirAngles[0];
+  text << " b: " << dirAngles[1];
+  text << " c: " << dirAngles[2];
+  text << "\n";
+
+  return QString::fromStdString(text.str());
+}
+
 void ComponentInfoController::displayComparePeaksInfo(
     std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks) {
   std::stringstream text;
   auto peak1 = peaks.first;
   auto peak2 = peaks.second;
 
-  auto instrument = peak1->getInstrument();
-  auto sample = instrument->getSample()->getPos();
-  auto source = instrument->getSource()->getPos();
-  auto L1 = (sample - source);
-
-  const auto conversion = (180 / M_PI);
-  auto detector1 = peak1->getDetector();
-  auto twoTheta1 = detector1->getTwoTheta(sample, L1) * conversion;
-  auto d1 = peak1->getDSpacing();
-  auto hkl1 = peak1->getHKL();
-
   text << "First Peak \n";
-  text << "d: " << d1 << "\n";
-  text << "2 Theta: " << twoTheta1 << "\n";
-  text << "Theta: " << (twoTheta1 / 2.) << "\n";
-  text << "H: " << hkl1[0];
-  text << " K: " << hkl1[1];
-  text << " L: " << hkl1[2];
-  text << "\n";
-
+  text << displayPeakInfo(peak1).toStdString();
   text << "-------------------------------\n";
-
-  auto detector2 = peak2->getDetector();
-  auto twoTheta2 = detector2->getTwoTheta(sample, L1) * conversion;
-  auto d2 = peak2->getDSpacing();
-  auto hkl2 = peak2->getHKL();
-
   text << "Second Peak \n";
-  text << "d: " << d2 << "\n";
-  text << "2 Theta: " << twoTheta2 << "\n";
-  text << "Theta: " << (twoTheta2 / 2.) << "\n";
-  text << "H: " << hkl2[0];
-  text << " K: " << hkl2[1];
-  text << " L: " << hkl2[2];
-  text << "\n";
-
+  text << displayPeakInfo(peak2).toStdString();
   text << "-------------------------------\n";
-
-  auto pos1 = detector1->getPos();
-  auto pos2 = detector2->getPos();
-
-  auto angle = pos1.angle(pos2) * conversion;
-  auto distance = pos1 - pos2;
-  auto dirAngles = distance.directionAngles();
-
-  text << "Angle between: " << angle << "\n";
-  text << "Distance Parts: ";
-  text << " x: " << distance[0];
-  text << " y: " << distance[1];
-  text << " z: " << distance[2];
-  text << "\n";
-  text << "Direction angles: ";
-  text << " a: " << dirAngles[0];
-  text << " b: " << dirAngles[1];
-  text << " c: " << dirAngles[2];
-  text << "\n";
+  text << displayPeakAngles(peaks).toStdString();
 
   m_selectionInfoDisplay->setText(QString::fromStdString(text.str()));
 }
