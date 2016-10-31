@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Rebin.h"
+#include "MantidHistogramData/Exception.h"
 #include "MantidHistogramData/Rebin.h"
 
 #include "MantidAPI/Axis.h"
@@ -24,6 +25,7 @@ using HistogramData::Histogram;
 using HistogramData::BinEdges;
 using HistogramData::Frequencies;
 using HistogramData::FrequencyStandardDeviations;
+using HistogramData::Exception::InvalidBinEdgesError;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
@@ -112,6 +114,10 @@ void Rebin::init() {
   declareProperty(
       "FullBinsOnly", false,
       "Omit the final bin if it's width is smaller than the step size");
+
+  declareProperty("IgnoreBinErrors", false, "Ignore errors related to "
+                                            "zero/negative bin widths in "
+                                            "input/output workspaces.");
 }
 
 /** Executes the rebin algorithm
@@ -250,13 +256,22 @@ void Rebin::exec() {
     // Copy over the 'vertical' axis
     if (inputWS->axes() > 1)
       outputWS->replaceAxis(1, inputWS->getAxis(1)->clone(outputWS.get()));
+    bool ignoreBinErrors = getProperty("IgnoreBinErrors");
 
     Progress prog(this, 0.0, 1.0, histnumber);
     PARALLEL_FOR2(inputWS, outputWS)
     for (int hist = 0; hist < histnumber; ++hist) {
       PARALLEL_START_INTERUPT_REGION
-      outputWS->setHistogram(
-          hist, HistogramData::rebin(inputWS->histogram(hist), XValues_new));
+
+      try {
+        outputWS->setHistogram(
+            hist, HistogramData::rebin(inputWS->histogram(hist), XValues_new));
+      } catch (InvalidBinEdgesError &) {
+        if (ignoreBinErrors)
+          outputWS->setBinEdges(hist, XValues_new);
+        else
+          throw;
+      }
 
       prog.report(name());
       PARALLEL_END_INTERUPT_REGION
@@ -338,13 +353,20 @@ void Rebin::propagateMasks(API::MatrixWorkspace_const_sptr inputWS,
                     FrequencyStandardDeviations(errSize, 0));
   // Use rebin function to redistribute the weights. Note that distribution flag
   // is set
-  auto newHist = HistogramData::rebin(oldHist, outputWS->binEdges(hist));
-  auto newWeights = newHist.y();
+  bool ignoreErrors = getProperty("IgnoreBinErrors");
 
-  // Now process the output vector and fill the new masking list
-  for (size_t index = 0; index < newWeights.size(); ++index) {
-    if (newWeights[index] > 0.0)
-      outputWS->flagMasked(hist, index, newWeights[index]);
+  try {
+    auto newHist = HistogramData::rebin(oldHist, outputWS->binEdges(hist));
+    auto newWeights = newHist.y();
+
+    // Now process the output vector and fill the new masking list
+    for (size_t index = 0; index < newWeights.size(); ++index) {
+      if (newWeights[index] > 0.0)
+        outputWS->flagMasked(hist, index, newWeights[index]);
+    }
+  } catch (InvalidBinEdgesError &) {
+    if (!ignoreErrors)
+      throw;
   }
 }
 
