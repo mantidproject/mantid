@@ -25,11 +25,6 @@ PROPERTYWITHVALUE_SAVEPROPERTY(uint64_t)
 PROPERTYWITHVALUE_SAVEPROPERTY(std::string)
 PROPERTYWITHVALUE_SAVEPROPERTY(std::vector<double>)
 PROPERTYWITHVALUE_SAVEPROPERTY(std::vector<int32_t>)
-#ifdef _WIN32
-PROPERTYWITHVALUE_SAVEPROPERTY(long)
-PROPERTYWITHVALUE_SAVEPROPERTY(unsigned long)
-PROPERTYWITHVALUE_SAVEPROPERTY(std::vector<long>)
-#endif
 
 /// @cond
 template class MANTID_KERNEL_DLL PropertyWithValue<uint16_t>;
@@ -55,6 +50,9 @@ template class MANTID_KERNEL_DLL
 template class MANTID_KERNEL_DLL
     PropertyWithValue<boost::shared_ptr<PropertyManager>>;
 #ifdef _WIN32
+template class MANTID_KERNEL_DLL PropertyWithValue<long>;
+template class MANTID_KERNEL_DLL PropertyWithValue<unsigned long>;
+template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<long>>;
 template class MANTID_KERNEL_DLL PropertyWithValue<std::vector<unsigned long>>;
 template class MANTID_KERNEL_DLL
     PropertyWithValue<std::vector<std::vector<long>>>;
@@ -75,12 +73,6 @@ template class PropertyWithValue<uint64_t>;
 
 template class PropertyWithValue<std::vector<double>>;
 template class PropertyWithValue<std::vector<int32_t>>;
-
-#ifdef _WIN32
-template class PropertyWithValue<long>;
-template class PropertyWithValue<unsigned long>;
-template class PropertyWithValue<std::vector<long>>;
-#endif
 
 template class PropertyWithValue<std::string>;
 

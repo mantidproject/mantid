@@ -140,16 +140,6 @@ PropertyWithValue<std::vector<double>>::saveProperty(::NeXus::File *file);
 template <>
 MANTID_KERNEL_DLL void
 PropertyWithValue<std::vector<int32_t>>::saveProperty(::NeXus::File *file);
-#ifdef _WIN32
-template <>
-MANTID_KERNEL_DLL void
-PropertyWithValue<long>::saveProperty(::NeXus::File *file);
-template <>
-MANTID_KERNEL_DLL void
-PropertyWithValue<unsigned long>::saveProperty(::NeXus::File *file);
-MANTID_KERNEL_DLL void
-PropertyWithValue<std::vector<long>>::saveProperty(::NeXus::File *file);
-#endif
 
 template <typename TYPE>
 Logger PropertyWithValue<TYPE>::g_logger("PropertyWithValue");
