@@ -94,9 +94,7 @@ namespace MantidQt {
         void NonOrthogonalOverlay::setDefaultAxesPoints() {
             auto ws = m_ws->get(); // assumes it is a rectangle
             m_dim0Max = ws->getDimension(0)->getMaximum();
-			m_dim0Max = m_dim0Max*1.1; //to set axis slightly back from slice
-                            m_totalArea =
-                                (m_dim0Max * 2) * (m_dim0Max * 2);
+			//m_dim0Max = m_dim0Max*1.1; //to set axis slightly back from slice
             m_dim1 = ws->getDimension(1)->getMaximum();
             m_dim2 = ws->getDimension(2)->getMaximum();
         }
@@ -118,7 +116,7 @@ namespace MantidQt {
             auto dimY = angle_H * m_skewMatrix[0 + 3 * m_dimY] +
                         angle_K * m_skewMatrix[1 + 3 * m_dimY] +
                         angle_L * m_skewMatrix[2 + 3 * m_dimY];
-        
+
 			return QPointF(dimX, dimY);
 				  
         }
@@ -184,35 +182,43 @@ namespace MantidQt {
 		void NonOrthogonalOverlay::calculateTickMarks(
 			int tickNum) { // assumes X axis
 			clearAllAxisPointVectors();
-			double xBuffer = ((m_xMaxVis - m_xMinVis) / 3);
-			double yBuffer = ((m_yMaxVis - m_yMinVis) / 3);
+			double xBuffer = (m_xMaxVis - m_xMinVis);
+			double yBuffer = (m_yMaxVis - m_yMinVis);
+			m_xMaxVis = m_xMaxVis + xBuffer;
+			m_xMinVis = m_xMinVis - xBuffer;
+			m_yMaxVis = m_yMaxVis + yBuffer;
+			m_yMinVis = m_yMinVis - yBuffer;
 			double axisPointX;
 			double axisPointY;
-			double percentageOfLineX(
-				((m_xMaxVis + xBuffer) - (m_xMinVis - xBuffer)) /
+			double percentageOfLineX = (
+				((m_xMaxVis ) - (m_xMinVis)) /
 				tickNum);
-			double percentageOfLineY(
-				((m_yMaxVis + yBuffer) - (m_yMinVis - yBuffer)) /
+			double percentageOfLineY = (
+				((m_yMaxVis ) - (m_yMinVis)) /
 				tickNum);
 			for (int i = 0; i <= tickNum; i++) {
 				axisPointX = (percentageOfLineX * i) + m_xMinVis;
 				axisPointY = (percentageOfLineY * i) + m_yMinVis;
+				std::cout << axisPointX << std::endl;
+				std::cout << axisPointY << std::endl;
 				m_axisXPointVec.push_back(axisPointX);
 				m_xNumbers.push_back(skewMatrixApply(axisPointX, m_yMinVis));
+				m_xNumbers[i].setY(m_yMinVis + yBuffer);
 				m_yNumbers.push_back(skewMatrixApply(m_xMinVis, axisPointY));
+				m_yNumbers[i].setX(m_xMinVis + xBuffer);
 				m_xAxisTickStartVec.push_back(
-					skewMatrixApply(axisPointX, (m_yMinVis - yBuffer)));
+					skewMatrixApply(axisPointX, (m_yMinVis)));
 				m_xAxisTickEndVec.push_back(
-					skewMatrixApply(axisPointX, (m_yMaxVis + yBuffer)));
+					skewMatrixApply(axisPointX, (m_yMaxVis)));
 				m_axisYPointVec.push_back(axisPointY);
 				m_yAxisTickStartVec.push_back(
-					skewMatrixApply((m_xMinVis - xBuffer), axisPointY));
+					skewMatrixApply((m_xMinVis), axisPointY));
 				m_yAxisTickEndVec.push_back(
-					skewMatrixApply((m_xMaxVis + xBuffer), axisPointY));
+					skewMatrixApply((m_xMaxVis), axisPointY));
 
 
 			}
-
+			std::cout << "tst" << std::endl;
 		}
 
 				//----------------------------------------------------------------------------------------------
@@ -237,7 +243,7 @@ namespace MantidQt {
 				
 				
 				
-				for (int i = 0; i < m_axisXPointVec.size(); i++) {
+				for (int i = 0; i < m_axisYPointVec.size(); i++) {
 					painter.setPen(gridPen);
 					painter.drawLine(
 						transform(m_xAxisTickStartVec[i]),

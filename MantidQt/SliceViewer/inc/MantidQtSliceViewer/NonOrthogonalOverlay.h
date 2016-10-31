@@ -94,6 +94,8 @@ private:
     double m_xMaxVis;
     double m_yMinVis;
     double m_yMaxVis;
+	double m_dimXSkew;
+	double m_dimySkew;
     /// First point of the line (in coordinates of the plot)
 	QPointF m_pointA;
 	/// Second point of the line (in coordinates of the plot)
