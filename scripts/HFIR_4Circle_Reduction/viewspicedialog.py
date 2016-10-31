@@ -11,7 +11,7 @@ class ViewSpiceDialog(QtGui.QDialog):
         Initialization
         :param parent:
         """
-        super(ViewSpiceDialog, self).__init__(self)
+        super(ViewSpiceDialog, self).__init__()
 
         # define UI
         self.ui = ui_SpiceViewerDialog.Ui_Dialog()

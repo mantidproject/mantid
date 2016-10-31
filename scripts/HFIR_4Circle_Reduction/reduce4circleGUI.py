@@ -906,7 +906,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
         for i_row in range(num_rows):
-            self.ui.tableWidget_mergeScans.set_hkl(i_row, [0., 0., 0.])
+            self.ui.tableWidget_peaksCalUB.set_hkl(i_row, [0., 0., 0.])
 
     def do_clear_merge_table(self):
         """
@@ -2447,9 +2447,10 @@ class MainWindow(QtGui.QMainWindow):
         self._spiceViwer = viewspicedialog.ViewSpiceDialog(self)
 
         # Write each line
+        wbuf = ''
         for line in spice_line_list:
-            line = line.strip()
-            self._spiceViwer.write_text(line)
+            wbuf += line
+        self._spiceViwer.write_text(wbuf)
 
         # show the new window
         self._spiceViwer.show()
