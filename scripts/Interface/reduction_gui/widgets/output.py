@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 from reduction_gui.reduction.output_script import Output
 from base_widget import BaseWidget
 import ui.ui_hfir_output

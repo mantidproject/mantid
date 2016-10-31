@@ -70,7 +70,7 @@ void CentroidPeaks::integrate() {
   int MaxPeaks = -1;
   size_t Numberwi = inWS->getNumberHistograms();
   int NumberPeaks = peakWS->getNumberPeaks();
-  for (int i = 0; i < NumberPeaks; i++) {
+  for (int i = 0; i < NumberPeaks; ++i) {
     Peak &peak = peakWS->getPeaks()[i];
     int pixelID = peak.getDetectorID();
 
@@ -87,22 +87,22 @@ void CentroidPeaks::integrate() {
 
   int Edge = getProperty("EdgePixels");
   Progress prog(this, MinPeaks, 1.0, MaxPeaks);
-  PARALLEL_FOR2(inWS, peakWS)
-  for (int i = MinPeaks; i <= MaxPeaks; i++) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *peakWS))
+  for (int i = MinPeaks; i <= MaxPeaks; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Get a direct ref to that peak.
-    IPeak &peak = peakWS->getPeak(i);
+    auto &peak = peakWS->getPeak(i);
     int col = peak.getCol();
     int row = peak.getRow();
     int pixelID = peak.getDetectorID();
-    detid2index_map::const_iterator it = wi_to_detid_map.find(pixelID);
+    auto it = wi_to_detid_map.find(pixelID);
     if (it == wi_to_detid_map.end()) {
       continue;
     }
     size_t workspaceIndex = it->second;
     double TOFPeakd = peak.getTOF();
-    const MantidVec &X = inWS->readX(workspaceIndex);
-    int chan = Kernel::VectorHelper::getBinIndex(X, TOFPeakd);
+    const auto &X = inWS->x(workspaceIndex);
+    int chan = Kernel::VectorHelper::getBinIndex(X.rawData(), TOFPeakd);
     std::string bankName = peak.getBankName();
 
     double intensity = 0.0;
@@ -121,13 +121,13 @@ void CentroidPeaks::integrate() {
         for (int icol = colstart; icol <= colend; ++icol) {
           if (edgePixel(bankName, icol, irow, Edge))
             continue;
-          detid2index_map::const_iterator it =
+          const auto it =
               wi_to_detid_map.find(findPixelID(bankName, icol, irow));
           if (it == wi_to_detid_map.end())
             continue;
           size_t workspaceIndex = (it->second);
 
-          const MantidVec &histogram = inWS->readY(workspaceIndex);
+          const auto &histogram = inWS->y(workspaceIndex);
 
           intensity += histogram[ichan];
           rowcentroid += irow * histogram[ichan];
@@ -152,7 +152,7 @@ void CentroidPeaks::integrate() {
       workspaceIndex = (it->second);
       Mantid::Kernel::Units::Wavelength wl;
       std::vector<double> timeflight;
-      timeflight.push_back(inWS->readX(workspaceIndex)[chan]);
+      timeflight.push_back(inWS->x(workspaceIndex)[chan]);
       double scattering = peak.getScattering();
       double L1 = peak.getL1();
       double L2 = peak.getL2();
@@ -161,7 +161,7 @@ void CentroidPeaks::integrate() {
       timeflight.clear();
 
       peak.setWavelength(lambda);
-      peak.setBinCount(inWS->readY(workspaceIndex)[chan]);
+      peak.setBinCount(inWS->y(workspaceIndex)[chan]);
     }
     PARALLEL_END_INTERUPT_REGION
   }
@@ -169,7 +169,7 @@ void CentroidPeaks::integrate() {
 
   for (int i = int(peakWS->getNumberPeaks()) - 1; i >= 0; --i) {
     // Get a direct ref to that peak.
-    IPeak &peak = peakWS->getPeak(i);
+    auto &peak = peakWS->getPeak(i);
     int col = peak.getCol();
     int row = peak.getRow();
     std::string bankName = peak.getBankName();
@@ -206,8 +206,9 @@ void CentroidPeaks::integrateEvent() {
   int MaxPeaks = -1;
   size_t Numberwi = inWS->getNumberHistograms();
   int NumberPeaks = peakWS->getNumberPeaks();
-  for (int i = 0; i < NumberPeaks; i++) {
-    Peak &peak = peakWS->getPeaks()[i];
+
+  for (int i = 0; i < NumberPeaks; ++i) {
+    auto &peak = peakWS->getPeak(i);
     int pixelID = peak.getDetectorID();
 
     // Find the workspace index for this detector ID
@@ -223,11 +224,11 @@ void CentroidPeaks::integrateEvent() {
 
   int Edge = getProperty("EdgePixels");
   Progress prog(this, MinPeaks, 1.0, MaxPeaks);
-  PARALLEL_FOR2(inWS, peakWS)
-  for (int i = MinPeaks; i <= MaxPeaks; i++) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *peakWS))
+  for (int i = MinPeaks; i <= MaxPeaks; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Get a direct ref to that peak.
-    IPeak &peak = peakWS->getPeak(i);
+    auto &peak = peakWS->getPeak(i);
     int col = peak.getCol();
     int row = peak.getRow();
     double TOFPeakd = peak.getTOF();
@@ -237,8 +238,6 @@ void CentroidPeaks::integrateEvent() {
     double tofcentroid = 0.0;
     if (edgePixel(bankName, col, row, Edge))
       continue;
-    Mantid::detid2index_map::iterator it;
-    it = wi_to_detid_map.find(findPixelID(bankName, col, row));
 
     double tofstart = TOFPeakd * std::pow(1.004, -PeakRadius);
     double tofend = TOFPeakd * std::pow(1.004, PeakRadius);
@@ -250,23 +249,19 @@ void CentroidPeaks::integrateEvent() {
     int colend = col + PeakRadius;
     for (int irow = rowstart; irow <= rowend; ++irow) {
       for (int icol = colstart; icol <= colend; ++icol) {
-        Mantid::detid2index_map::iterator it;
         if (edgePixel(bankName, icol, irow, Edge))
           continue;
-        it = wi_to_detid_map.find(findPixelID(bankName, icol, irow));
-        size_t workspaceIndex = (it->second);
+        auto it1 = wi_to_detid_map.find(findPixelID(bankName, icol, irow));
+        size_t workspaceIndex = (it1->second);
         EventList el = eventW->getSpectrum(workspaceIndex);
         el.switchTo(WEIGHTED_NOTIME);
         std::vector<WeightedEventNoTime> events = el.getWeightedEventsNoTime();
 
-        std::vector<WeightedEventNoTime>::iterator itev;
-        auto itev_end = events.end();
-
         // Check for events in tof range
-        for (itev = events.begin(); itev != itev_end; ++itev) {
-          double tof = itev->tof();
+        for (const auto &event : events) {
+          double tof = event.tof();
           if (tof > tofstart && tof < tofend) {
-            double weight = itev->weight();
+            double weight = event.weight();
             intensity += weight;
             rowcentroid += irow * weight;
             colcentroid += icol * weight;
@@ -304,7 +299,7 @@ void CentroidPeaks::integrateEvent() {
 
   for (int i = int(peakWS->getNumberPeaks()) - 1; i >= 0; --i) {
     // Get a direct ref to that peak.
-    IPeak &peak = peakWS->getPeak(i);
+    auto &peak = peakWS->getPeak(i);
     int col = peak.getCol();
     int row = peak.getRow();
     std::string bankName = peak.getBankName();
@@ -334,6 +329,7 @@ void CentroidPeaks::exec() {
     this->integrate();
   }
 }
+
 int CentroidPeaks::findPixelID(std::string bankName, int col, int row) {
   Geometry::Instrument_const_sptr Iptr = inWS->getInstrument();
   boost::shared_ptr<const IComponent> parent =

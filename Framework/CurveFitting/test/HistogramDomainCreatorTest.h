@@ -83,7 +83,7 @@ public:
     TS_ASSERT_EQUALS(values->size(), 10);
     TS_ASSERT_EQUALS(ws->blocksize(), 10);
     auto &h = dynamic_cast<FunctionDomain1DHistogram &>(*domain);
-    auto &x = ws->readX(0);
+    auto &x = ws->x(0);
     for (size_t j = 0; j < 10; ++j) {
       TS_ASSERT_EQUALS(h[j], x[j + 1]);
     }
@@ -187,9 +187,9 @@ public:
         "fit_Workspace");
     TS_ASSERT(outWS);
 
-    auto &y = outWS->readY(0);
-    auto &f = outWS->readY(1);
-    auto &d = outWS->readY(2);
+    auto &y = outWS->y(0);
+    auto &f = outWS->y(1);
+    auto &d = outWS->y(2);
     for (size_t i = 0; i < y.size(); ++i) {
       TS_ASSERT_DELTA(y[i], f[i], 1e-5);
       TS_ASSERT_DELTA(d[i], 0.0, 1e-5);
@@ -309,9 +309,9 @@ public:
         "fit_Workspace");
     TS_ASSERT(outWS);
 
-    auto &y = outWS->readY(0);
-    auto &f = outWS->readY(1);
-    auto &d = outWS->readY(2);
+    auto &y = outWS->y(0);
+    auto &f = outWS->y(1);
+    auto &d = outWS->y(2);
     for (size_t i = 0; i < y.size(); ++i) {
       TS_ASSERT_DELTA(y[i], f[i], 1e-5);
       TS_ASSERT_DELTA(d[i], 0.0, 1e-5);
@@ -337,9 +337,9 @@ public:
         "fit_Workspace");
     TS_ASSERT(outWS);
 
-    auto &y = outWS->readY(0);
-    auto &f = outWS->readY(1);
-    auto &d = outWS->readY(2);
+    auto &y = outWS->y(0);
+    auto &f = outWS->y(1);
+    auto &d = outWS->y(2);
     for (size_t i = 0; i < y.size(); ++i) {
       TS_ASSERT_DELTA(y[i], f[i], 1e-5);
       TS_ASSERT_DELTA(d[i], 0.0, 1e-5);
@@ -366,9 +366,9 @@ public:
         "fit_Workspace");
     TS_ASSERT(outWS);
 
-    auto &y = outWS->readY(0);
-    auto &f = outWS->readY(1);
-    auto &d = outWS->readY(2);
+    auto &y = outWS->y(0);
+    auto &f = outWS->y(1);
+    auto &d = outWS->y(2);
     for (size_t i = 0; i < y.size(); ++i) {
       TS_ASSERT_DELTA(y[i], f[i], 1e-5);
       TS_ASSERT_DELTA(d[i], 0.0, 1e-5);
@@ -400,9 +400,9 @@ public:
         "fit_Workspace");
     TS_ASSERT(outWS);
 
-    auto &y = outWS->readY(0);
-    auto &f = outWS->readY(1);
-    auto &d = outWS->readY(2);
+    auto &y = outWS->y(0);
+    auto &f = outWS->y(1);
+    auto &d = outWS->y(2);
 
     for (size_t i = 0; i < y.size(); ++i) {
       TS_ASSERT_DELTA(y[i], f[i], 1e-5);
@@ -444,8 +444,8 @@ private:
     ws2->initialize(2, nx, ny);
 
     for (size_t is = 0; is < ws2->getNumberHistograms(); ++is) {
-      Mantid::MantidVec &x = ws2->dataX(is);
-      Mantid::MantidVec &y = ws2->dataY(is);
+      auto &x = ws2->mutableX(is);
+      auto &y = ws2->mutableY(is);
       for (size_t i = 0; i < ws2->blocksize(); ++i) {
         x[i] = 0.1 * double(i) + 0.01 * double(is);
         y[i] = (10.0 + double(is)) * exp(-(x[i]) / (0.5 * (1 + double(is))));
@@ -464,9 +464,9 @@ private:
     double x1 = 1.0;
     double dx = (x1 - x0) / static_cast<double>(ny);
     ws->initialize(1, nx, ny);
-    Mantid::MantidVec &x = ws->dataX(0);
-    Mantid::MantidVec &y = ws->dataY(0);
-    Mantid::MantidVec &e = ws->dataE(0);
+    auto &x = ws->mutableX(0);
+    auto &y = ws->mutableY(0);
+    auto &e = ws->mutableE(0);
     x.front() = x0;
     for (size_t i = 0; i < ny; ++i) {
       double xl = x0 + dx * double(i);

@@ -10,7 +10,7 @@ class SANS2DLimitEventsTime(stresstesting.MantidStressTest):
         SANS2D()
         MaskFile('MaskSANS2DReductionGUI_LimitEventsTime.txt')
         AssignSample('22048')
-        reduced = WavRangeReduction()
+        WavRangeReduction()
 
     def validate(self):
         self.disableChecking.append('SpectraMap')

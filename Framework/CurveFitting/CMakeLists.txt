@@ -61,6 +61,7 @@ set ( SRC_FILES
 	src/Functions/CrystalFieldPeaks.cpp
 	src/Functions/CrystalFieldPeaksBase.cpp
 	src/Functions/CrystalFieldMultiSpectrum.cpp
+	src/Functions/CrystalFieldPeakUtils.cpp
 	src/Functions/CrystalFieldSpectrum.cpp
 	src/Functions/CubicSpline.cpp
 	src/Functions/DeltaFunction.cpp
@@ -210,9 +211,10 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/ComptonScatteringCountRate.h
 	inc/MantidCurveFitting/Functions/Convolution.h
 	inc/MantidCurveFitting/Functions/CrystalElectricField.h
+	inc/MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h
 	inc/MantidCurveFitting/Functions/CrystalFieldPeaks.h
 	inc/MantidCurveFitting/Functions/CrystalFieldPeaksBase.h
-	inc/MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h
+	inc/MantidCurveFitting/Functions/CrystalFieldPeakUtils.h
 	inc/MantidCurveFitting/Functions/CrystalFieldSpectrum.h
 	inc/MantidCurveFitting/Functions/CubicSpline.h
 	inc/MantidCurveFitting/Functions/DeltaFunction.h

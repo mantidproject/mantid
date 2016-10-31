@@ -72,7 +72,7 @@ void MonitorEfficiencyCorUser::exec() {
 
   // Loop over the histograms (detector spectra)
   double factor = 1 / eff0;
-  PARALLEL_FOR2(m_outputWS, m_inputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS, *m_inputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     PARALLEL_START_INTERUPT_REGION
     m_outputWS->setHistogram(i, m_inputWS->histogram(i) * factor);

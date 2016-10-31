@@ -1,5 +1,5 @@
 Name:           mantid-developer
-Version:        1.18
+Version:        1.19
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -31,7 +31,11 @@ Requires: muParser-devel
 Requires: mxml-devel
 Requires: nexus >= 4.2
 Requires: nexus-devel >= 4.2
+%if 0%{?el6}
+Requires: ninja
+%else
 Requires: ninja-build
+%endif
 Requires: numpy
 Requires: OCE-devel
 Requires: poco-devel >= 1.4.6
@@ -41,7 +45,7 @@ Requires: python-ipython >= 1.1
 %{?el6:Conflicts: python-ipython >= 2.0}
 Requires: python-matplotlib
 %{?fedora:Requires: python2-matplotlib-qt4}
-%{?rhel:Requires: python-matplotlib-qt4}
+%{?el7:Requires: python-matplotlib-qt4}
 Requires: python-pip
 Requires: python-sphinx
 Requires: python-sphinx-theme-bootstrap

@@ -369,7 +369,7 @@ void SaveWorkspaces::saveFileBrowse() {
                                   ConfigService::Instance().getString(
                                       "defaultsave.directory"))).toString();
 
-  QString filter = ";;AllFiles (*.*)";
+  QString filter = ";;AllFiles (*)";
   QFileDialog::Option userCon = m_append->isChecked()
                                     ? QFileDialog::DontConfirmOverwrite
                                     : static_cast<QFileDialog::Option>(0);

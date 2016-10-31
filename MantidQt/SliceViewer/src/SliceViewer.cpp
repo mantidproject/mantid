@@ -22,6 +22,7 @@
 #include "MantidKernel/ReadLock.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/PlotAxis.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtAPI/MdSettings.h"
 #include "MantidQtAPI/SignalBlocker.h"
 #include "MantidQtAPI/SignalRange.h"
@@ -54,6 +55,7 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
+using MantidQt::API::MantidDesktopServices;
 using MantidQt::API::SyncedCheckboxes;
 using MantidQt::API::SignalBlocker;
 using Poco::XML::DOMParser;
@@ -1158,20 +1160,20 @@ void SliceViewer::zoomRectSlot(const QwtDoubleRect &rect) {
 /// Slot for opening help page
 void SliceViewer::helpSliceViewer() {
   QString helpPage = "MantidPlot:_SliceViewer";
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl(QString("http://www.mantidproject.org/") + helpPage));
 }
 
 /// Slot for opening help page
 void SliceViewer::helpLineViewer() {
   QString helpPage = "MantidPlot:_LineViewer";
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl(QString("http://www.mantidproject.org/") + helpPage));
 }
 
 void SliceViewer::helpPeaksViewer() {
   QString helpPage = "PeaksViewer";
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl(QString("http://www.mantidproject.org/") + helpPage));
 }
 

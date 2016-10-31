@@ -5,7 +5,6 @@ from six.moves import range #pylint: disable=redefined-builtin
 
 from mantid.api import *
 import mantid.simpleapi as api
-from mantid.api import *
 from mantid.kernel import *
 
 
