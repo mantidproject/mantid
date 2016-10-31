@@ -176,8 +176,9 @@ Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
     std::lock_guard<std::recursive_mutex> lock(m_mutex);
     // Check again because another thread may have taken copy
     // and dropped reference count since previous check
-    if (!m_parmap.unique()) {
+    if (!m_parmap.unique())
       invalidateInstrumentReferences();
+    if (!m_parmap.unique()) {
       ParameterMap_sptr oldData = m_parmap;
       m_parmap = boost::make_shared<ParameterMap>(*oldData);
     }
