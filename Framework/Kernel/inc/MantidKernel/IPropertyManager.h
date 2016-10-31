@@ -6,8 +6,10 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/make_unique.h"
 
+#ifndef Q_MOC_RUN
 #include <boost/make_shared.hpp>
 #include <boost/type_traits.hpp>
+#endif
 
 #include <vector>
 #include <unordered_set>
