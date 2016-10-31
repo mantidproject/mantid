@@ -39,8 +39,8 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
         self.assertNotEqual(len(inter_X), sim.getAxis(0).length())
         self.assertEqual(inter_Q_length, osiris_Q_length)
         self.assertNotEqual(inter_Q_length, sim.getNumberHistograms())
-        self.assertAlmostEqual(sample_Y_data[0], 0.020095312677012457, 12)
-        self.assertAlmostEqual(sample_Y_data[30], 1.7310334927635238, 12)
+        self.assertAlmostEqual(sample_Y_data[0], 0.020095312, 9)
+        self.assertAlmostEqual(sample_Y_data[30], 1.73103349, 7)
 
     def test_X_min_too_big(self):
         x_data = np.arange(-0.5, 2., 0.05)
