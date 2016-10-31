@@ -231,7 +231,7 @@ const DetectorInfo &MatrixWorkspace::detectorInfo() const {
   return spectrumInfo().detectorInfo();
 }
 
-/** Return a non-const reference to the SpectrumInfo object. Not thread safe.
+/** Return a non-const reference to the DetectorInfo object. Not thread safe.
  */
 DetectorInfo &MatrixWorkspace::mutableDetectorInfo() {
   return mutableSpectrumInfo().mutableDetectorInfo();

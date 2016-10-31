@@ -187,7 +187,7 @@ const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
   return *m_detectors[thread];
 }
 
-/// Sets the cached detector. This is an optimiyation used by SpectrumInfo.
+/// Sets the cached detector. This is an optimization used by SpectrumInfo.
 void DetectorInfo::setCachedDetector(
     size_t index, boost::shared_ptr<const Geometry::IDetector> detector) const {
   size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
