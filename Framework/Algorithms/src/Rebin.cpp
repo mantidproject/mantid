@@ -357,7 +357,7 @@ void Rebin::propagateMasks(API::MatrixWorkspace_const_sptr inputWS,
 
   try {
     auto newHist = HistogramData::rebin(oldHist, outputWS->binEdges(hist));
-    auto newWeights = newHist.y();
+    auto &newWeights = newHist.y();
 
     // Now process the output vector and fill the new masking list
     for (size_t index = 0; index < newWeights.size(); ++index) {
