@@ -111,7 +111,7 @@ void LogFilterGenerator::filterByPeriod(LogFilter *filter) const {
           return;
         }
       } catch (const std::runtime_error &err) {
-        g_log.warning << "Could not filter by period: " << err.what();
+        g_log.warning() << "Could not filter by period: " << err.what();
         return;
       }
       break;
@@ -128,7 +128,7 @@ Property *LogFilterGenerator::getLogData(const std::string &logName) const {
   try {
     const auto logData = m_workspace->run().getLogData(logName);
     return logData;
-  } catch (const std::runtime_error &err) {
+  } catch (const std::runtime_error &) {
     g_log.warning("Could not find log value " + logName + " in workspace");
     return nullptr;
   }

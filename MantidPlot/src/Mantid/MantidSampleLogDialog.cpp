@@ -156,13 +156,14 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem *item) {
  * Applies filter and displays statistics.
  */
 void MantidSampleLogDialog::onFilterChanged() {
-  FilterType filter = FilterType::None;
+  Mantid::API::LogFilterGenerator::FilterType filter =
+      Mantid::API::LogFilterGenerator::FilterType::None;
   if (filterStatus->isChecked()) {
-    filter = FilterType::Status;
+    filter = Mantid::API::LogFilterGenerator::FilterType::Status;
   } else if (filterPeriod->isChecked()) {
-    filter = FilterType::Period;
+    filter = Mantid::API::LogFilterGenerator::FilterType::Period;
   } else if (filterStatusPeriod->isChecked()) {
-    filter = FilterType::StatusAndPeriod;
+    filter = Mantid::API::LogFilterGenerator::FilterType::StatusAndPeriod;
   }
 
   showLogStatistics(filter);
