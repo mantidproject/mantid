@@ -305,9 +305,9 @@ public:
     TS_ASSERT(outLam->x(0)[0] >= 1.5);
     TS_ASSERT(outLam->x(0)[7] <= 15.0);
     TS_ASSERT_DELTA(outLam->x(0)[0], 2.8257, 0.0001);
-	TS_ASSERT_DELTA(outLam->x(0)[1], 2.9257, 0.0001);
-	TS_ASSERT_DELTA(outLam->x(0)[2], 3.0257, 0.0001);
-	TS_ASSERT_DELTA(outLam->x(0)[3], 3.1257, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[1], 2.9257, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[2], 3.0257, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[3], 3.1257, 0.0001);
   }
 };
 

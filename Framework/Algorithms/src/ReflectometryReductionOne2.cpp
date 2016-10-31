@@ -8,8 +8,6 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/Unit.h"
 
-
-
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
@@ -209,8 +207,8 @@ void ReflectometryReductionOne2::initTransmissionProperties() {
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
                   "Start wavelength for stitching transmission runs together. "
-		  "This parameter is only used if a second transmission run "
-		  "is provided.");
+                  "This parameter is only used if a second transmission run "
+                  "is provided.");
 
   declareProperty(
       make_unique<PropertyWithValue<double>>("EndOverlap", Mantid::EMPTY_DBL(),
@@ -219,10 +217,10 @@ void ReflectometryReductionOne2::initTransmissionProperties() {
       "This parameter is only used if a second transmission run is provided.");
 
   declareProperty(make_unique<PropertyWithValue<bool>>("StrictSpectrumChecking",
-	  true, Direction::Input),
-	  "Enforces spectrum number checking prior to normalization by "
-	  "transmission workspace. Applies to input workspace and "
-	  "transmission workspace.");
+                                                       true, Direction::Input),
+                  "Enforces spectrum number checking prior to normalization by "
+                  "transmission workspace. Applies to input workspace and "
+                  "transmission workspace.");
 
   setPropertyGroup("FirstTransmissionRun", "Transmission");
   setPropertyGroup("SecondTransmissionRun", "Transmission");
@@ -427,8 +425,8 @@ ReflectometryReductionOne2::convertToWavelength(MatrixWorkspace_sptr inputWS) {
 * @param inputWS :: the input workspace in wavelength
 * @return :: the detector workspace
 */
-MatrixWorkspace_sptr ReflectometryReductionOne2::makeDetectorWS(
-    MatrixWorkspace_sptr inputWS) {
+MatrixWorkspace_sptr
+ReflectometryReductionOne2::makeDetectorWS(MatrixWorkspace_sptr inputWS) {
 
   std::string processingCommands = getPropertyValue("ProcessingInstructions");
   auto groupAlg = this->createChildAlgorithm("GroupDetectors");
@@ -645,7 +643,7 @@ ReflectometryReductionOne2::convertToQ(MatrixWorkspace_sptr inputWS) {
   Property *qStepProp = getProperty("MomentumTransferStep");
   if (!qStepProp->isDefault()) {
     double qstep = getProperty("MomentumTransferStep");
-	qstep = -qstep;
+    qstep = -qstep;
 
     std::vector<double> qparams;
     Property *qMin = getProperty("MomentumTransferMin");

@@ -1,16 +1,17 @@
-#ifndef MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACE2_H_
-#define MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACE2_H_
+#ifndef MANTID_ALGORITHMS_SPECULARREFLECTIONPOSITIONCORRECT2_H_
+#define MANTID_ALGORITHMS_SPECULARREFLECTIONPOSITIONCORRECT2_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAlgorithms/SpecularReflectionAlgorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-/** CreateTransmissionWorkspace2 : Create a transmission run workspace in
- Wavelength given one or more TOF workspaces. Version 2 of the algorithm.
+/** SpecularReflectionPositionCorrect : Algorithm to perform vertical position
+ corrections based on the specular reflection condition.
 
- Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
  National Laboratory & European Spallation Source
 
  This file is part of Mantid.
@@ -31,35 +32,24 @@ namespace Algorithms {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport CreateTransmissionWorkspace2
-    : public API::DataProcessorAlgorithm {
+class DLLExport SpecularReflectionPositionCorrect2
+  : public API::Algorithm {
 public:
+  /// Name of this algorithm
   const std::string name() const override;
+  /// Summary of algorithms purpose
   const std::string summary() const override;
+  /// Version
   int version() const override;
+  /// Category
   const std::string category() const override;
 
 private:
-  /// Initialize
   void init() override;
-  /// Execute
   void exec() override;
-  /// Validate inputs
-  std::map<std::string, std::string> validateInputs() override;
-  /// Init properties for monitors
-  void initMonitorProperties();
-  /// Init properties for stitching
-  void initStitchProperties();
-
-  /// Convert a TOF workspace to wavelength
-  API::MatrixWorkspace_sptr
-  convertToWavelength(API::MatrixWorkspace_sptr inputWS);
-  /// Normalize by monitors
-  API::MatrixWorkspace_sptr
-  normalizeDetectorsByMonitors(API::MatrixWorkspace_sptr IvsLam);
 };
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACE2_H_ */
+#endif /* MANTID_ALGORITHMS_SPECULARREFLECTIONPOSITIONCORRECT2_H_ */

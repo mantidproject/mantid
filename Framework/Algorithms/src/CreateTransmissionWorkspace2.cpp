@@ -153,7 +153,8 @@ CreateTransmissionWorkspace2::validateInputs() {
   double wavMin = getProperty("WavelengthMin");
   double wavMax = getProperty("WavelengthMax");
   if (wavMin > wavMax)
-	  results["WavelengthMin"] = "WavelengthMax must be greater than WavelengthMin";
+    results["WavelengthMin"] =
+        "WavelengthMax must be greater than WavelengthMin";
 
   // Validate monitor background range
   double monMin = getProperty("MonitorBackgroundWavelengthMin");

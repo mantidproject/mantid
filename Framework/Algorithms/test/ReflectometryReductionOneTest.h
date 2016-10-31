@@ -105,7 +105,8 @@ public:
   }
 
   IAlgorithm_sptr construct_standard_algorithm() {
-    auto alg = AlgorithmManager::Instance().create("ReflectometryReductionOne", 1);
+    auto alg =
+        AlgorithmManager::Instance().create("ReflectometryReductionOne", 1);
     alg->setRethrows(true);
     alg->setChild(true);
     alg->initialize();
@@ -177,7 +178,8 @@ public:
     // set this detector ready for processing instructions
     m_tinyReflWS->getSpectrum(0).setDetectorID(det->getID());
 
-    auto alg = AlgorithmManager::Instance().create("ReflectometryReductionOne", 1);
+    auto alg =
+        AlgorithmManager::Instance().create("ReflectometryReductionOne", 1);
     alg->setRethrows(true);
     alg->setChild(true);
     alg->initialize();
@@ -336,7 +338,8 @@ public:
     // set this detector ready for processing instructions
     m_tinyReflWS->getSpectrum(0).setDetectorID(det->getID());
 
-    auto alg = AlgorithmManager::Instance().create("ReflectometryReductionOne", 1);
+    auto alg =
+        AlgorithmManager::Instance().create("ReflectometryReductionOne", 1);
     alg->setRethrows(true);
     alg->setChild(true);
     alg->initialize();

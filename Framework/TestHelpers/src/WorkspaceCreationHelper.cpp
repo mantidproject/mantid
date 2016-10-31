@@ -491,7 +491,8 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
 }
 
 /**
-* Create a very small 2D workspace for a virtual reflectometry instrument with multiple detectors
+* Create a very small 2D workspace for a virtual reflectometry instrument with
+* multiple detectors
 * @return workspace with instrument attached.
 * @param startX : X Tof start value for the workspace.
 */
@@ -519,7 +520,7 @@ create2DWorkspaceWithReflectometryInstrumentMultiDetector(double startX) {
   Detector *det1 = new Detector(
       "point-detector", 2,
       ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), nullptr);
-  det1->setPos(20,(20 - sample->getPos().X()) , 0);
+  det1->setPos(20, (20 - sample->getPos().X()), 0);
   instrument->add(det1);
   instrument->markAsDetector(det1);
 
@@ -553,7 +554,6 @@ create2DWorkspaceWithReflectometryInstrumentMultiDetector(double startX) {
   workspace->getSpectrum(3).setDetectorID(det3->getID());
   return workspace;
 }
-
 
 void createInstrumentForWorkspaceWithDistances(
     MatrixWorkspace_sptr workspace, const V3D &samplePosition,
