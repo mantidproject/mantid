@@ -146,6 +146,11 @@ template <> struct is_range_type<uint64_t> : public std::true_type {};
 template <> struct is_range_type<int16_t> : public std::true_type {};
 template <> struct is_range_type<int32_t> : public std::true_type {};
 template <> struct is_range_type<int64_t> : public std::true_type {};
+
+#ifdef _WIN32
+template <> struct is_range_type<unsigned long> : public std::true_type {};
+template <> struct is_range_type<long> : public std::true_type {};
+#endif
 }
 template <typename T>
 void toValue(const std::string &strvalue, std::vector<T> &value) {
