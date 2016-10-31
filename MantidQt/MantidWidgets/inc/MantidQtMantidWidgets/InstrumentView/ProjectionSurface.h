@@ -345,6 +345,14 @@ protected:
   /// use with a new PeakOverlay.
 
 private:
+  /// Draw a line between two peak markers
+  void drawPeakComparisonLine(QPainter& painter) const;
+  /// Draw the peak markers on the surface
+  void drawPeakMarkers(QPainter& painter) const;
+  /// Draw the mask shapes on the surface
+  void drawMaskShapes(QPainter& painter) const;
+  /// Draw the selection rectangle to the surface
+  void drawSelectionRect(QPainter& painter) const;
   /// Get the current input controller
   MantidQt::MantidWidgets::InputController *getController() const;
 

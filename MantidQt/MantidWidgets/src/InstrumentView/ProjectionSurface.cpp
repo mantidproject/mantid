@@ -197,58 +197,19 @@ void ProjectionSurface::draw(MantidGLWidget *widget, bool picking) const {
 
     if (!picking) {
       QPainter painter(widget);
-      RectF windowRect = getSurfaceBounds();
-      m_maskShapes.setWindow(windowRect, painter.viewport());
-      m_maskShapes.draw(painter);
-      for (int i = 0; i < m_peakShapes.size(); ++i) {
-        m_peakShapes[i]->setWindow(windowRect, painter.viewport());
-        m_peakShapes[i]->draw(painter);
-      }
-
-      if (!m_selectedMarkers.first.isNull() && !m_selectedMarkers.second.isNull()) {
-        QTransform transform;
-        windowRect.findTransform(transform, painter.viewport());
-        auto o1 = m_selectedMarkers.first;
-        auto o2 = m_selectedMarkers.second;
-        QPointF p1 = transform.map(o1);
-        QPointF p2 = transform.map(o2);
-
-        painter.setPen(Qt::red);
-        painter.drawLine(p1, p2);
-      }
+      drawMaskShapes(painter);
+      drawPeakMarkers(painter);
+      drawPeakComparisonLine(painter);
       painter.end();
     }
   } else if (!picking) {
     QPainter painter(widget);
     painter.drawImage(0, 0, **image);
 
-    RectF windowRect = getSurfaceBounds();
-    m_maskShapes.setWindow(windowRect, painter.viewport());
-    m_maskShapes.draw(painter);
-
-    for (int i = 0; i < m_peakShapes.size(); ++i) {
-      m_peakShapes[i]->setWindow(windowRect, painter.viewport());
-      m_peakShapes[i]->draw(painter);
-    }
-
-    // draw the selection rectangle
-    if (!m_selectRect.isNull()) {
-      painter.setPen(Qt::blue);
-      // painter.setCompositionMode(QPainter::CompositionMode_Xor);
-      painter.drawRect(m_selectRect);
-    }
-
-    if (!m_selectedMarkers.first.isNull() && !m_selectedMarkers.second.isNull()) {
-      QTransform transform;
-      windowRect.findTransform(transform, painter.viewport());
-      auto o1 = m_selectedMarkers.first;
-      auto o2 = m_selectedMarkers.second;
-      QPointF p1 = transform.map(o1);
-      QPointF p2 = transform.map(o2);
-
-      painter.setPen(Qt::red);
-      painter.drawLine(p1, p2);
-    }
+    drawMaskShapes(painter);
+    drawPeakMarkers(painter);
+    drawPeakComparisonLine(painter);
+    drawSelectionRect(painter);
 
     getController()->onPaint(painter);
     painter.end();
@@ -289,33 +250,10 @@ void ProjectionSurface::drawSimple(QWidget *widget) const {
   QPainter painter(widget);
   painter.drawImage(0, 0, *m_viewImage);
 
-  RectF windowRect = getSurfaceBounds();
-  m_maskShapes.setWindow(windowRect, painter.viewport());
-  m_maskShapes.draw(painter);
-
-  for (int i = 0; i < m_peakShapes.size(); ++i) {
-    m_peakShapes[i]->setWindow(windowRect, painter.viewport());
-    m_peakShapes[i]->draw(painter);
-  }
-
-  // draw the selection rectangle
-  if (!m_selectRect.isNull()) {
-    painter.setPen(Qt::blue);
-    // painter.setCompositionMode(QPainter::CompositionMode_Xor);
-    painter.drawRect(m_selectRect);
-  }
-
-  if (!m_selectedMarkers.first.isNull() && !m_selectedMarkers.second.isNull()) {
-    QTransform transform;
-    windowRect.findTransform(transform, painter.viewport());
-    auto o1 = m_selectedMarkers.first;
-    auto o2 = m_selectedMarkers.second;
-    QPointF p1 = transform.map(o1);
-    QPointF p2 = transform.map(o2);
-
-    painter.setPen(Qt::red);
-    painter.drawLine(p1, p2);
-  }
+  drawMaskShapes(painter);
+  drawPeakMarkers(painter);
+  drawPeakComparisonLine(painter);
+  drawSelectionRect(painter);
 
   getController()->onPaint(painter);
   painter.end();
@@ -569,6 +507,62 @@ void ProjectionSurface::setPeakVisibility() const {
     foreach (PeakOverlay *po, m_peakShapes) {
       po->setPeakVisibility(xmin, xmax, unitID);
     }
+  }
+}
+
+/**
+ * Draw a line between peak markers being compared
+ * @param painter :: The QPainter object to draw the line with
+ */
+void ProjectionSurface::drawPeakComparisonLine(QPainter &painter) const
+{
+  if (!m_selectedMarkers.first.isNull() && !m_selectedMarkers.second.isNull()) {
+    QTransform transform;
+    auto windowRect = getSurfaceBounds();
+    windowRect.findTransform(transform, painter.viewport());
+    auto p1 = transform.map(m_selectedMarkers.first);
+    auto p2 = transform.map(m_selectedMarkers.second);
+
+    painter.setPen(Qt::red);
+    painter.drawLine(p1, p2);
+  }
+}
+
+/**
+ * Draw the peak marker objects on the surface
+ * @param painter :: The QPainter object to draw the markers with
+ */
+void ProjectionSurface::drawPeakMarkers(QPainter &painter) const
+{
+    auto windowRect = getSurfaceBounds();
+    for (int i = 0; i < m_peakShapes.size(); ++i) {
+      m_peakShapes[i]->setWindow(windowRect, painter.viewport());
+      m_peakShapes[i]->draw(painter);
+    }
+}
+
+/**
+ * Draw the mask shapes on the surface
+ * @param painter :: The QPainter object to draw the masks with
+ */
+void ProjectionSurface::drawMaskShapes(QPainter &painter) const
+{
+  RectF windowRect = getSurfaceBounds();
+  m_maskShapes.setWindow(windowRect, painter.viewport());
+  m_maskShapes.draw(painter);
+}
+
+/**
+ * Draw the selection rectangle on the surface
+ * @param painter :: The QPainter object to draw the rectangle with
+ */
+void ProjectionSurface::drawSelectionRect(QPainter &painter) const
+{
+  // draw the selection rectangle
+  if (!m_selectRect.isNull()) {
+    painter.setPen(Qt::blue);
+    // painter.setCompositionMode(QPainter::CompositionMode_Xor);
+    painter.drawRect(m_selectRect);
   }
 }
 
