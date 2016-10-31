@@ -263,9 +263,9 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
   // does a search upon the entire HDF5 tree. `openLocal` is *much* quicker, as
   // it only searches the current group. It does, however, require that the
   // parent group is currently open.
-  // Words of Warning: While the openLocal construct is an optimization, 
+  // Words of Warning: While the openLocal construct is an optimization,
   // it is very dangerous. Forgetting to close an entry of an NXEntry in a
-  // completely unrelated part of the code can result in us opening the 
+  // completely unrelated part of the code can result in us opening the
   // wrong NXEntry here!
   NXEntry mtdEntry(root, entryName);
   mtdEntry.openLocal();
@@ -467,8 +467,7 @@ void LoadNexusProcessed::exec() {
       os << p;
 
       // decide what the workspace should be called
-      std::string wsName =
-          buildWorkspaceName(names[p], base_name, p);
+      std::string wsName = buildWorkspaceName(names[p], base_name, p);
 
       Workspace_sptr local_workspace;
 
@@ -528,8 +527,7 @@ std::string LoadNexusProcessed::buildWorkspaceName(const std::string &name,
 
   if (!name.empty()) {
     wsName = name;
-  }
-  else {
+  } else {
     // if the name property wasn't defined just use <OutputWorkspaceName>_n
     wsName = baseName + index;
   }

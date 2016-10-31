@@ -99,7 +99,7 @@ private:
 
   /// Extract the workspace name
   void extractWorkspaceNames(Mantid::NeXus::NXRoot &root,
-                              std::vector<std::string> &names);
+                             std::vector<std::string> &names);
 
   /// Load the workspace name attribute if it exists
   std::string loadWorkspaceName(Mantid::NeXus::NXRoot &root,
