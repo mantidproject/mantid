@@ -5,7 +5,6 @@ from six.moves import range
 import mantid.simpleapi as s_api
 from mantid import config, logger
 
-from IndirectImport import import_mantidplot
 
 import math
 import datetime
@@ -208,28 +207,3 @@ def getInstrumentParameter(ws, param_name):
         raise ValueError('Unable to retrieve %s from Instrument Parameter file.' % param_name)
 
     return param
-
-
-def plotSpectra(ws, y_axis_title, indices=None):
-    """
-    Plot a selection of spectra given a list of indices
-
-    @param ws - the workspace to plot
-    @param y_axis_title - label for the y axis
-    @param indices - list of spectrum indices to plot
-    """
-    if indices is None:
-        indices = []
-
-    if len(indices) == 0:
-        num_spectra = s_api.mtd[ws].getNumberHistograms()
-        indices = list(range(num_spectra))
-
-    try:
-        mtd_plot = import_mantidplot()
-        plot = mtd_plot.plotSpectrum(ws, indices, True)
-        layer = plot.activeLayer()
-        layer.setAxisTitle(mtd_plot.Layer.Left, y_axis_title)
-    except RuntimeError:
-        # User clicked cancel on plot so don't do anything
-        return

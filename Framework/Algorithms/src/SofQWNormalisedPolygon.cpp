@@ -1,9 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/NearestNeighbourInfo.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/FractionalRebinning.h"
@@ -30,8 +28,6 @@ using namespace Mantid::DataObjects;
 /// Default constructor
 SofQWNormalisedPolygon::SofQWNormalisedPolygon()
     : Rebin2D(), m_Qout(), m_thetaWidth(0.0), m_detNeighbourOffset(-1) {}
-
-//----------------------------------------------------------------------------------------------
 
 /**
  * @return the name of the Algorithm
@@ -318,10 +314,12 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
  */
 void SofQWNormalisedPolygon::initAngularCachesPSD(
     const API::MatrixWorkspace_const_sptr &workspace) {
-  // Trigger a build of the nearst neighbors outside the OpenMP loop
-  const int numNeighbours = 4;
   const size_t nHistos = workspace->getNumberHistograms();
   g_log.debug() << "Number of Histograms: " << nHistos << '\n';
+
+  bool ignoreMasked = true;
+  const int numNeighbours = 4;
+  NearestNeighbourInfo neighbourInfo(*workspace, ignoreMasked, numNeighbours);
 
   this->m_theta = std::vector<double>(nHistos);
   this->m_thetaWidths = std::vector<double>(nHistos);
@@ -333,8 +331,7 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
     DetConstPtr detector = workspace->getDetector(i);
     g_log.debug() << "Current histogram: " << i << '\n';
     specnum_t inSpec = workspace->getSpectrum(i).getSpectrumNo();
-    SpectraDistanceMap neighbours =
-        workspace->getNeighboursExact(inSpec, numNeighbours, true);
+    SpectraDistanceMap neighbours = neighbourInfo.getNeighboursExact(inSpec);
 
     g_log.debug() << "Current ID: " << inSpec << '\n';
     // Convert from spectrum numbers to workspace indices

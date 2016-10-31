@@ -74,7 +74,8 @@ void LorentzCorrection::exec() {
     if (!spectrumInfo.hasDetectors(i))
       continue;
 
-    const double twoTheta = spectrumInfo.twoTheta(i);
+    const double twoTheta =
+        spectrumInfo.isMonitor(i) ? 0.0 : spectrumInfo.twoTheta(i);
     const double sinTheta = std::sin(twoTheta / 2);
     double sinThetaSq = sinTheta * sinTheta;
 

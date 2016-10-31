@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import re
 from mantid.kernel import ConfigService
@@ -281,7 +282,7 @@ class CrystalField(object):
         """
         if value not in self.ion_nre_map.keys():
             msg = 'Value %s is not allowed for attribute Ion.\nList of allowed values: %s' %\
-                  (value, ', '.join(self.ion_nre_map.keys()))
+                  (value, ', '.join(list(self.ion_nre_map.keys())))
             raise RuntimeError(msg)
         self._ion = value
         self._dirty_eigensystem = True

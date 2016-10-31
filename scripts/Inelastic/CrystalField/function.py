@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import re
 
 parNamePattern = re.compile(r'([a-zA-Z][\w.]+)')
@@ -153,7 +154,7 @@ class CompositeProperties(object):
 
     def getSize(self):
         """Get number of maps (functions) defined here"""
-        keys = self._properties.keys()
+        keys = list(self._properties.keys())
         if len(keys) > 0:
             return max(keys) + 1
         return 0
@@ -166,7 +167,7 @@ class CompositeProperties(object):
         for i in range(self.getSize()):
             if i in self._properties:
                 props = self._properties[i]
-                prop_list.append(','.join(['%s=%s' % item for item in props.items()]))
+                prop_list.append(','.join(['%s=%s' % item for item in sorted(props.items())]))
             else:
                 prop_list.append('')
         return prop_list
@@ -184,7 +185,7 @@ class CompositeProperties(object):
             props = self._properties[i]
             if len(out) > 0:
                 out += ','
-            out += ','.join(['%s%s=%s' % ((fullPrefix,) + item) for item in props.items()])
+            out += ','.join(['%s%s=%s' % ((fullPrefix,) + item) for item in sorted(props.items())])
         return out[:]
 
 
@@ -406,7 +407,7 @@ class Background(object):
     def __mul__(self, nCopies):
         """Make expressions like Background(...) * 8 return a list of 8 identical backgrounds."""
         copies = [self] * nCopies
-        return map(Background.clone, copies)
+        return list(map(Background.clone, copies))
         # return [self.clone() for i in range(nCopies)]
 
     def __rmul__(self, nCopies):
