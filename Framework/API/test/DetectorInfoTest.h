@@ -43,12 +43,6 @@ public:
                                  numberOfBins - 1);
   }
 
-  void test_constructor() {
-    const auto &instrument = m_workspace.getInstrument();
-    TS_ASSERT_THROWS_NOTHING(DetectorInfo(*instrument));
-    UNUSED_ARG(instrument);
-  }
-
   void test_sourcePosition() {
     TS_ASSERT_EQUALS(m_workspace.detectorInfo().sourcePosition(),
                      V3D(0.0, 0.0, -20.0));
