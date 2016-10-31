@@ -27,10 +27,7 @@ double calculateWidth(double x, const std::vector<double> &xVec,
   assert(xVec.size() == yVec.size());
   auto upperIt = std::lower_bound(xVec.begin(), xVec.end(), x);
   if (upperIt == xVec.end() || x < xVec.front()) {
-    throw std::runtime_error("Cannot calculate peak width: peak at " +
-                             std::to_string(x) + " is outside given range (" +
-                             std::to_string(xVec.front()) + " : " +
-                             std::to_string(xVec.back()) + ")");
+    return -1.0;
   }
   if (upperIt == xVec.begin()) {
     return yVec.front();
@@ -85,6 +82,23 @@ void setWidthConstraint(API::IPeakFunction &peak, double fwhm,
   }
 }
 
+/// Calculate the number of visible peaks.
+size_t calculateNPeaks(const API::FunctionValues &centresAndIntensities) {
+  return centresAndIntensities.size() / 2;
+}
+
+/// Calculate the maximum number of peaks a spectrum can have.
+size_t calculateMaxNPeaks(size_t nPeaks) { return nPeaks + nPeaks / 2 + 1; }
+
+/// Set peak's properties such that it was invisible in the spectrum.
+/// @param peak :: A peak function to set.
+/// @param fwhm :: A width value to pass to the peak.
+inline void ignorePeak(API::IPeakFunction &peak, double fwhm) {
+  peak.setHeight(0.0);
+  peak.fixAll();
+  peak.setFwhm(fwhm);
+}
+
 /// Populates a spectrum with peaks of type given by peakShape argument.
 /// @param spectrum :: A composite function that is a collection of peaks.
 /// @param peakShape :: A shape of each peak as a name of an IPeakFunction.
@@ -106,6 +120,7 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
   if (xVec.size() != yVec.size()) {
     throw std::runtime_error("WidthX and WidthY must have the same size.");
   }
+
   bool useDefaultFWHM = xVec.empty();
   auto nPeaks = calculateNPeaks(centresAndIntensities);
   auto maxNPeaks = calculateMaxNPeaks(nPeaks);
@@ -125,26 +140,20 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
         peak->setFwhm(defaultFWHM);
       } else {
         auto fwhm = calculateWidth(centre, xVec, yVec);
-        peak->setFwhm(fwhm);
-        setWidthConstraint(*peak, fwhm, fwhmVariation);
+        if (fwhm > 0.0) {
+          peak->setFwhm(fwhm);
+          setWidthConstraint(*peak, fwhm, fwhmVariation);
+        } else {
+          ignorePeak(*peak, defaultFWHM);
+        }
       }
     } else {
-      peak->setHeight(0.0);
-      peak->fixAll();
-      peak->setFwhm(defaultFWHM);
+      ignorePeak(*peak, defaultFWHM);
     }
     spectrum.addFunction(peak);
   }
   return nPeaks;
 }
-
-/// Calculate the number of visible peaks.
-size_t calculateNPeaks(const API::FunctionValues &centresAndIntensities) {
-  return centresAndIntensities.size() / 2;
-}
-
-/// Calculate the maximum number of peaks a spectrum can have.
-size_t calculateMaxNPeaks(size_t nPeaks) { return nPeaks + nPeaks / 2 + 1; }
 
 /// Update the peaks parameters after recalculationof the crystal field.
 /// @param spectrum :: A composite function containings the peaks to update.
@@ -181,7 +190,9 @@ size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
       if (mustUpdateWidth) {
         auto fwhm = peak.fwhm();
         auto expectedFwhm = calculateWidth(centre, xVec, yVec);
-        if (fabs(fwhm - expectedFwhm) > fwhmVariation) {
+        if (expectedFwhm <= 0.0) {
+          ignorePeak(peak, fwhm);
+        } else if (fabs(fwhm - expectedFwhm) > fwhmVariation) {
           peak.setFwhm(expectedFwhm);
           setWidthConstraint(peak, expectedFwhm, fwhmVariation);
         }

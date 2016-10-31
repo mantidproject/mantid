@@ -38,10 +38,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-double calculateWidth(double x, const std::vector<double> &xVec,
-                      const std::vector<double> &yVec);
-void setWidthConstraint(API::IPeakFunction &peak, double fwhm,
-                        double fwhmVariation);
 size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
                              const std::string &peakShape,
                              const API::FunctionValues &centresAndIntensities,
@@ -55,7 +51,6 @@ size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
                               const std::vector<double> &yVec,
                               double fwhmVariation);
 size_t calculateNPeaks(const API::FunctionValues &centresAndIntensities);
-size_t calculateMaxNPeaks(size_t nPeaks);
 
 } // namespace CrystalFieldUtils
 } // namespace Functions

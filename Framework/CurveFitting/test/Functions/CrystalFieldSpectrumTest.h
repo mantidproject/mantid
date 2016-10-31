@@ -291,14 +291,20 @@ public:
       std::vector<double> y{1.0, 2.0};
       fun.setAttributeValue("FWHMX", x);
       fun.setAttributeValue("FWHMY", y);
-      TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
+      //TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
+      fun.buildTargetFunction();
+      TS_ASSERT_DIFFERS(fun.getParameter("f0.Amplitude"), 0.0);
+      TS_ASSERT_EQUALS(fun.getParameter("f1.Amplitude"), 0.0);
+      TS_ASSERT_EQUALS(fun.getParameter("f2.Amplitude"), 0.0);
     }
     {
       std::vector<double> x{1.0, 50.0};
       std::vector<double> y{1.0, 2.0};
       fun.setAttributeValue("FWHMX", x);
       fun.setAttributeValue("FWHMY", y);
-      TS_ASSERT_THROWS(fun.buildTargetFunction(), std::runtime_error);
+      TS_ASSERT_EQUALS(fun.getParameter("f0.Amplitude"), 0.0);
+      TS_ASSERT_DIFFERS(fun.getParameter("f1.Amplitude"), 0.0);
+      TS_ASSERT_DIFFERS(fun.getParameter("f2.Amplitude"), 0.0);
     }
   }
 
