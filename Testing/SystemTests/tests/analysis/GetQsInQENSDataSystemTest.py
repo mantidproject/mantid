@@ -6,6 +6,7 @@ from stresstesting import MantidStressTest
 import mantid.simpleapi as sm
 import hashlib
 
+
 class GetQsInQENSDataSystemTest(MantidStressTest):
     """Example:
         if qvalues = [0.3, 0.5, 0.7, 0.9] for a particular file, then
