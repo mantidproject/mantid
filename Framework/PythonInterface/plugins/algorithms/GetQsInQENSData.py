@@ -24,6 +24,8 @@ class GetQsInQENSData(PythonAlgorithm):
         """
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
                              doc="Input QENS data as MatrixWorkspace")
+        self.declareProperty("RaiseMode", False,
+                             doc="Set to True if an Exception, instead of an empty list of Q values, is desired.")
         self.declareProperty(FloatArrayProperty("Qvalues", Direction.Output))
 
     def validateInputs(self):
@@ -49,7 +51,10 @@ class GetQsInQENSData(PythonAlgorithm):
         """
         # Check if the vertical axis has units of Momentum transfer
         number_spectra = workspace.getNumberHistograms()
-        axis = workspace.getAxis(1)
+        try:
+            axis = workspace.getAxis(1)
+        except:
+            raise RuntimeError("Emtpy vertical axis")
         if axis.getUnit().unitID() == "MomentumTransfer":
             try:
                 qvalues = axis.extractValues()
@@ -82,6 +87,8 @@ class GetQsInQENSData(PythonAlgorithm):
             self._qvalues = self._extract_qvalues(qens_data)
         except RuntimeError, error_message:
             self.log().error(str(error_message))
+            if self.getPropertyValue("RaiseMode"):
+                raise RuntimeError(error_message)
             self._qvalues = list() # empty list
         # Write output
         self.setProperty("Qvalues", self._qvalues)
