@@ -61,7 +61,7 @@ void ExtractMask::exec() {
   const int64_t nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, nHist);
 
-  PARALLEL_FOR2(inputWS, maskWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *maskWS))
   for (int64_t i = 0; i < nHist; ++i) {
     PARALLEL_START_INTERUPT_REGION
     bool inputIsMasked(false);

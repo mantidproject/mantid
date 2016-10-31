@@ -148,7 +148,7 @@ void SumEventsByLogValue::createTableOutput(
   std::vector<int> Y(xLength);
   const int numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numSpec + xLength);
-  PARALLEL_FOR1(m_inputWorkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
   for (int spec = 0; spec < numSpec; ++spec) {
     PARALLEL_START_INTERUPT_REGION
     const IEventList &eventList = m_inputWorkspace->getSpectrum(spec);
@@ -418,7 +418,7 @@ void SumEventsByLogValue::createBinnedOutput(
   auto &Y = outputWorkspace->mutableY(0);
   const int numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numSpec);
-  PARALLEL_FOR1(m_inputWorkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
   for (int spec = 0; spec < numSpec; ++spec) {
     PARALLEL_START_INTERUPT_REGION
     const IEventList &eventList = m_inputWorkspace->getSpectrum(spec);
