@@ -952,6 +952,59 @@ public:
     AnalysisDataService::Instance().remove("y_2");
   }
 
+  void test_that_workspace_name_is_not_loaded_when_is_duplicate() {
+    // Arrange
+    SaveNexusProcessed alg;
+    alg.initialize();
+    std::string tempFile = "LoadNexusProcessed_TmpTestWorkspace.nxs";
+    alg.setPropertyValue("Filename", tempFile);
+
+    std::string workspaceName = "test_workspace_name";
+    for (size_t index = 0; index < 2; ++index) {
+      // Create a sample workspace and add it to the ADS, so it gets a name.
+      auto ws = WorkspaceCreationHelper::Create1DWorkspaceConstant(
+          3, static_cast<double>(index), static_cast<double>(index));
+      AnalysisDataService::Instance().addOrReplace(workspaceName, ws);
+      alg.setProperty("InputWorkspace",
+                      boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
+      if (index == 0) {
+        alg.setProperty("Append", false);
+      } else {
+        alg.setProperty("Append", true);
+      }
+      alg.execute();
+    }
+    // Delete the workspace
+    AnalysisDataService::Instance().remove(workspaceName);
+
+    tempFile = alg.getProperty("Filename");
+
+    // Load the data
+    LoadNexusProcessed loader;
+    loader.setChild(false);
+    loader.initialize();
+    loader.setPropertyValue("Filename", tempFile);
+    loader.setPropertyValue("OutputWorkspace", "ws_loaded");
+    // Act
+    loader.execute();
+
+    // Assert
+    TSM_ASSERT("Can access workspace via name which is the name of the file "
+               "with an index",
+               AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+                   "ws_loaded_1"));
+    TSM_ASSERT("Can access workspace via name which is the name of the file "
+               "with an index",
+               AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+                   "ws_loaded_2"));
+    // Clean up
+    AnalysisDataService::Instance().remove("ws_loaded_1");
+    AnalysisDataService::Instance().remove("ws_loaded_2");
+    if (!tempFile.empty() && Poco::File(tempFile).exists()) {
+      Poco::File(tempFile).remove();
+    }
+  }
+
   void do_load_multiperiod_workspace(bool fast) {
     LoadNexusProcessed loader;
     loader.setChild(true);

@@ -424,7 +424,8 @@ void LoadNexusProcessed::exec() {
     std::string base_name = getPropertyValue("OutputWorkspace");
     // First member of group should be the group itself, for some reason!
 
-    // load names of each of the workspaces
+    // load names of each of the workspaces. Note that if we have duplicate
+    // names then we don't select them 
     std::vector<std::string> names(nWorkspaceEntries + 1);
     extractWorkspaceNames(root, names);
 
@@ -528,7 +529,17 @@ std::string LoadNexusProcessed::buildWorkspaceName(const std::string &name,
   if (!name.empty()) {
     wsName = name;
   } else {
-    // if the name property wasn't defined just use <OutputWorkspaceName>_n
+    // we have a common stem so rename accordingly
+    boost::smatch results;
+    const boost::regex exp(".*_(\\d+$)");
+    // if we have a common name stem then name is <OutputWorkspaceName>_n
+    if (boost::regex_search(name, results, exp)) {
+      wsName = baseName + std::string(results[1].first, results[1].second);
+    } else {
+      // if the name property wasn't defined just use <OutputWorkspaceName>_n
+      wsName = baseName + index;
+    }
+
     wsName = baseName + index;
   }
 
@@ -575,6 +586,16 @@ void LoadNexusProcessed::extractWorkspaceNames(
     os << p;
     names[p] = loadWorkspaceName(root, "mantid_workspace_" + os.str());
   }
+
+  // Check that there are no duplicates in the workspace name
+  // This can cause severe problems
+  auto it = std::unique(names.begin(), names.end());
+  if (it != names.end()) {
+    auto size = names.size();
+    names.clear();
+    names.resize(size);
+  }
+
 }
 
 /**
