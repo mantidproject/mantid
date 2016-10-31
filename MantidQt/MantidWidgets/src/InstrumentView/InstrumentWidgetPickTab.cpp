@@ -240,7 +240,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_peakCompare = new QPushButton();
   m_peakCompare->setCheckable(true);
   m_peakCompare->setAutoExclusive(true);
-  m_peakCompare->setIcon(QIcon(":/PickTools/selection-peaks.png"));
+  m_peakCompare->setIcon(QIcon(":/PickTools/selection-peak-compare.png"));
   m_peakCompare->setToolTip("Compare single crystal peak(s)");
 
   QGridLayout *toolBox = new QGridLayout();
