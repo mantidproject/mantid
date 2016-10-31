@@ -204,6 +204,18 @@ void ProjectionSurface::draw(MantidGLWidget *widget, bool picking) const {
         m_peakShapes[i]->setWindow(windowRect, painter.viewport());
         m_peakShapes[i]->draw(painter);
       }
+
+      if (!m_selectedMarkers.first.isNull() && !m_selectedMarkers.second.isNull()) {
+        QTransform transform;
+        windowRect.findTransform(transform, painter.viewport());
+        auto o1 = m_selectedMarkers.first;
+        auto o2 = m_selectedMarkers.second;
+        QPointF p1 = transform.map(o1);
+        QPointF p2 = transform.map(o2);
+
+        painter.setPen(Qt::red);
+        painter.drawLine(p1, p2);
+      }
       painter.end();
     }
   } else if (!picking) {
@@ -225,6 +237,19 @@ void ProjectionSurface::draw(MantidGLWidget *widget, bool picking) const {
       // painter.setCompositionMode(QPainter::CompositionMode_Xor);
       painter.drawRect(m_selectRect);
     }
+
+    if (!m_selectedMarkers.first.isNull() && !m_selectedMarkers.second.isNull()) {
+      QTransform transform;
+      windowRect.findTransform(transform, painter.viewport());
+      auto o1 = m_selectedMarkers.first;
+      auto o2 = m_selectedMarkers.second;
+      QPointF p1 = transform.map(o1);
+      QPointF p2 = transform.map(o2);
+
+      painter.setPen(Qt::red);
+      painter.drawLine(p1, p2);
+    }
+
     getController()->onPaint(painter);
     painter.end();
     // Discard any error generated here
@@ -279,6 +304,19 @@ void ProjectionSurface::drawSimple(QWidget *widget) const {
     // painter.setCompositionMode(QPainter::CompositionMode_Xor);
     painter.drawRect(m_selectRect);
   }
+
+  if (!m_selectedMarkers.first.isNull() && !m_selectedMarkers.second.isNull()) {
+    QTransform transform;
+    windowRect.findTransform(transform, painter.viewport());
+    auto o1 = m_selectedMarkers.first;
+    auto o2 = m_selectedMarkers.second;
+    QPointF p1 = transform.map(o1);
+    QPointF p2 = transform.map(o2);
+
+    painter.setPen(Qt::red);
+    painter.drawLine(p1, p2);
+  }
+
   getController()->onPaint(painter);
   painter.end();
 }
@@ -713,12 +751,16 @@ void ProjectionSurface::comparePeaks(const QRect &rect) {
   // Find the selected peak across all of the peak overlays.
   // If more than one peak was found in the selection area just
   // take the first peak.
+  PeakMarker2D *marker = nullptr;
   Mantid::Geometry::IPeak *peak = nullptr;
+  QPointF origin;
   foreach (PeakOverlay *po, m_peakShapes) {
     po->selectIn(rect);
-    const auto peaks = po->getSelectedPeaks();
-    if (peaks.length() > 0) {
-      peak = peaks.first();
+    const auto markers = po->getSelectedPeakMarkers();
+    if (markers.length() > 0) {
+      marker = markers.first();
+      origin = marker->origin();
+      peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
       break;
     }
   }
@@ -726,14 +768,18 @@ void ProjectionSurface::comparePeaks(const QRect &rect) {
   if (!m_selectedPeaks.first) {
     // No peaks have been selected yet
     m_selectedPeaks.first = peak;
+    m_selectedMarkers.first = origin;
   } else if (!m_selectedPeaks.second) {
     // Two peaks have now been selected
     m_selectedPeaks.second = peak;
+    m_selectedMarkers.second = origin;
   } else if (m_selectedPeaks.first && m_selectedPeaks.second) {
     // Two peaks have already been selected. Clear the pair and store
     // the new peak as the first entry
     m_selectedPeaks.first = peak;
+    m_selectedMarkers.first = origin;
     m_selectedPeaks.second = nullptr;
+    m_selectedMarkers.second = QPointF();
   }
 
   // Only emit the signal to update when we have two peaks

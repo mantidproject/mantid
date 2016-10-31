@@ -337,14 +337,12 @@ Mantid::Geometry::IPeak &PeakOverlay::getPeak(int i) {
   return m_peaksWorkspace->getPeak(i);
 }
 
-QList<Mantid::Geometry::IPeak *> PeakOverlay::getSelectedPeaks() {
-  QList<Mantid::Geometry::IPeak *> peaks;
+QList<PeakMarker2D *> PeakOverlay::getSelectedPeakMarkers() {
+  QList<PeakMarker2D *> peaks;
   for (auto &shape : m_selectedShapes) {
     auto marker = dynamic_cast<PeakMarker2D *>(shape);
-    if (!marker)
-      throw std::logic_error("Wrong shape type found.");
-    auto peak = getPeaksWorkspace()->getPeakPtr(marker->getRow());
-    peaks.append(peak);
+    if (marker)
+      peaks.append(marker);
   }
 
   return peaks;

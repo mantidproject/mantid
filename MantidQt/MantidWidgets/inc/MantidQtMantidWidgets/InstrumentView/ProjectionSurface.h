@@ -331,6 +331,7 @@ protected:
   int m_interactionMode; ///< mode of interaction - index in m_inputControllers
   bool m_isLightingOn;   ///< Lighting on/off flag
 
+
   Shape2DCollection m_maskShapes;            ///< to draw mask shapes
   mutable QList<PeakOverlay *> m_peakShapes; ///< to draw peak labels
   mutable int m_peakLabelPrecision;
@@ -338,6 +339,7 @@ protected:
   mutable bool m_showPeakLabels;    ///< flag to show peak hkl labels
   bool m_showPeakRelativeIntensity; ///< flag to show peak hkl labels
   mutable int m_peakShapesStyle; ///< index of a default PeakMarker2D style to
+  std::pair<QPointF, QPointF> m_selectedMarkers;
   std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *>
       m_selectedPeaks;
   /// use with a new PeakOverlay.
