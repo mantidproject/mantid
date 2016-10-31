@@ -37,4 +37,34 @@ public:
   }
 };
 
+class RayTracerTesterTestPerformance : public CxxTest::TestSuite {
+public:
+  static RayTracerTesterTestPerformance *createSuite() {
+    return new RayTracerTesterTestPerformance();
+  }
+  static void destroySuite(RayTracerTesterTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    alg.setPropertyValue("Filename", "CNCS_Definition.xml");
+    alg.setPropertyValue("OutputWorkspace", "cncs");
+  }
+
+  void test_performance() {
+    int iterations = 3;
+    doTestExec(iterations);
+  }
+
+  void doTestExec(int iterations) {
+    for (int i = 0; i < iterations; i++) {
+      alg.exec();
+    }
+  }
+
+private:
+  RayTracerTester alg;
+};
 #endif /* MANTID_ALGORITHMS_RAYTRACERTESTERTEST_H_ */

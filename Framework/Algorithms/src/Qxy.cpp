@@ -1,18 +1,21 @@
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidAlgorithms/GravitySANSHelper.h"
 #include "MantidAlgorithms/Qxy.h"
-#include "MantidAlgorithms/Qhelper.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/GravitySANSHelper.h"
+#include "MantidAlgorithms/Qhelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+
+#include <algorithm>
+#include <cmath>
 
 namespace Mantid {
 namespace Algorithms {
@@ -109,73 +112,65 @@ void Qxy::exec() {
       WorkspaceFactory::Instance().create(outputWorkspace);
   // Copy the X values from the output workspace to the solidAngles one
   for (size_t i = 0; i < weights->getNumberHistograms(); ++i)
-    weights->setX(i, outputWorkspace->refX(0));
+    weights->setSharedX(i, outputWorkspace->sharedX(0));
 
   const size_t numSpec = inputWorkspace->getNumberHistograms();
   const size_t numBins = inputWorkspace->blocksize();
-
-  // the samplePos is often not (0, 0, 0) because the instruments components are
-  // moved to account for the beam centre
-  const V3D samplePos = inputWorkspace->getInstrument()->getSample()->getPos();
 
   // Set the progress bar (1 update for every one percent increase in progress)
   Progress prog(this, 0.05, 1.0, numSpec);
 
   const auto &spectrumInfo = inputWorkspace->spectrumInfo();
 
+  // the samplePos is often not (0, 0, 0) because the instruments components are
+  // moved to account for the beam centre
+  const V3D samplePos = spectrumInfo.samplePosition();
+
   //  PARALLEL_FOR2(inputWorkspace,outputWorkspace)
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
     //    PARALLEL_START_INTERUPT_REGION
-    // Get the pixel relating to this spectrum
-    IDetector_const_sptr det;
-    try {
-      det = inputWorkspace->getDetector(i);
-    } catch (Exception::NotFoundError &) {
+    if (!spectrumInfo.hasDetectors(i)) {
       g_log.warning() << "Workspace index " << i
                       << " has no detector assigned to it - discarding\n";
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
+      continue;
     }
     // If no detector found or if it's masked or a monitor, skip onto the next
     // spectrum
-    if (!det || det->isMonitor() || det->isMasked())
+    if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
       continue;
 
     // get the bins that are included inside the RadiusCut/WaveCutcut off, those
     // to calculate for
     const size_t wavStart = helper.waveLengthCutOff(
         inputWorkspace, getProperty("RadiusCut"), getProperty("WaveCut"), i);
-    if (wavStart >= inputWorkspace->readY(i).size()) {
+    if (wavStart >= inputWorkspace->y(i).size()) {
       // all the spectra in this detector are out of range
       continue;
     }
 
-    V3D detPos = det->getPos() - samplePos;
+    V3D detPos = spectrumInfo.position(i) - samplePos;
 
     // these will be re-calculated if gravity is on but without gravity there is
     // no need
     double phi = atan2(detPos.Y(), detPos.X());
     double a = cos(phi);
     double b = sin(phi);
-    double sinTheta = sin(inputWorkspace->detectorTwoTheta(*det) * 0.5);
+    double sinTheta = sin(spectrumInfo.twoTheta(i) * 0.5);
 
     // Get references to the data for this spectrum
-    const MantidVec &X = inputWorkspace->readX(i);
-    const MantidVec &Y = inputWorkspace->readY(i);
-    const MantidVec &E = inputWorkspace->readE(i);
+    const auto &X = inputWorkspace->x(i);
+    const auto &Y = inputWorkspace->y(i);
+    const auto &E = inputWorkspace->e(i);
 
-    const MantidVec &axis = outputWorkspace->readX(0);
+    const auto &axis = outputWorkspace->x(0);
 
     // the solid angle of the detector as seen by the sample is used for
     // normalisation later on
-    double angle = det->solidAngle(samplePos);
+    double angle = spectrumInfo.detector(i).solidAngle(samplePos);
 
     // some bins are masked completely or partially, the following vector will
     // contain the fractions
-    MantidVec maskFractions;
+    std::vector<double> maskFractions;
     if (inputWorkspace->hasMaskedBins(i)) {
       // go through the set and convert it to a vector
       const MatrixWorkspace::MaskList &mask = inputWorkspace->maskedBins(i);
@@ -224,7 +219,7 @@ void Qxy::exec() {
         break;
       // Find the indices pointing to the place in the 2D array where this bin's
       // contents should go
-      const MantidVec::difference_type xIndex =
+      const auto xIndex =
           std::upper_bound(axis.begin(), axis.end(), Qx) - axis.begin() - 1;
       const int yIndex = static_cast<int>(
           std::upper_bound(axis.begin(), axis.end(), Qy) - axis.begin() - 1);
@@ -232,8 +227,8 @@ void Qxy::exec() {
       //      */
       {
         // the data will be copied to this bin in the output array
-        double &outputBinY = outputWorkspace->dataY(yIndex)[xIndex];
-        double &outputBinE = outputWorkspace->dataE(yIndex)[xIndex];
+        double &outputBinY = outputWorkspace->mutableY(yIndex)[xIndex];
+        double &outputBinE = outputWorkspace->mutableE(yIndex)[xIndex];
 
         if (std::isnan(outputBinY)) {
           outputBinY = outputBinE = 0;
@@ -261,30 +256,43 @@ void Qxy::exec() {
 
         // then the product of contributions which have errors, i.e. optional
         // pixelAdj and waveAdj contributions
+        auto &outWeightsY = weights->mutableY(yIndex);
+        auto &outWeightsE = weights->mutableE(yIndex);
 
         if (pixelAdj && waveAdj) {
-          weights->dataY(yIndex)[xIndex] +=
-              weight * pixelAdj->readY(i)[0] * waveAdj->readY(0)[j];
-          const double pixelYSq = pixelAdj->readY(i)[0] * pixelAdj->readY(i)[0];
-          const double pixelESq = pixelAdj->readE(i)[0] * pixelAdj->readE(i)[0];
-          const double waveYSq = waveAdj->readY(0)[j] * waveAdj->readY(0)[j];
-          const double waveESq = waveAdj->readE(0)[j] * waveAdj->readE(0)[j];
+          auto pixelY = pixelAdj->y(i)[0];
+          auto pixelE = pixelAdj->e(i)[0];
+
+          auto waveY = waveAdj->y(0)[j];
+          auto waveE = waveAdj->e(0)[j];
+
+          outWeightsY[xIndex] += weight * pixelY * waveY;
+          const double pixelYSq = pixelY * pixelY;
+          const double pixelESq = pixelE * pixelE;
+          const double waveYSq = waveY * waveY;
+          const double waveESq = waveE * waveE;
           // add product of errors from pixelAdj and waveAdj (note no error on
           // weight is assumed)
-          weights->dataE(yIndex)[xIndex] +=
+          outWeightsE[xIndex] +=
               weight * weight * (waveESq * pixelYSq + pixelESq * waveYSq);
         } else if (pixelAdj) {
-          weights->dataY(yIndex)[xIndex] += weight * pixelAdj->readY(i)[0];
-          const double pixelE = weight * pixelAdj->readE(i)[0];
+          auto pixelY = pixelAdj->y(i)[0];
+          auto pixelE = pixelAdj->e(i)[0];
+
+          outWeightsY[xIndex] += weight * pixelY;
+          const double pixelESq = weight * pixelE;
           // add error from pixelAdj
-          weights->dataE(yIndex)[xIndex] += pixelE * pixelE;
+          outWeightsE[xIndex] += pixelESq * pixelESq;
         } else if (waveAdj) {
-          weights->dataY(yIndex)[xIndex] += weight * waveAdj->readY(0)[j];
-          const double waveE = weight * waveAdj->readE(0)[j];
+          auto waveY = waveAdj->y(0)[j];
+          auto waveE = waveAdj->e(0)[j];
+
+          outWeightsY[xIndex] += weight * waveY;
+          const double waveESq = weight * waveE;
           // add error from waveAdj
-          weights->dataE(yIndex)[xIndex] += waveE * waveE;
+          outWeightsE[xIndex] += waveESq * waveESq;
         } else
-          weights->dataY(yIndex)[xIndex] += weight;
+          outWeightsY[xIndex] += weight;
       }
     } // loop over single spectrum
 
@@ -298,9 +306,9 @@ void Qxy::exec() {
   // left to be executed here for computational efficiency
   size_t numHist = weights->getNumberHistograms();
   for (size_t i = 0; i < numHist; i++) {
-    for (double &j : weights->dataE(i)) {
-      j = sqrt(j);
-    }
+    auto &weightsE = weights->mutableE(i);
+    std::transform(weightsE.cbegin(), weightsE.cend(), weightsE.begin(),
+                   [&](double val) { return sqrt(val); });
   }
 
   bool doOutputParts = getProperty("OutputParts");
@@ -309,9 +317,7 @@ void Qxy::exec() {
     MatrixWorkspace_sptr ws_sumOfCounts =
         WorkspaceFactory::Instance().create(outputWorkspace);
     for (size_t i = 0; i < ws_sumOfCounts->getNumberHistograms(); i++) {
-      ws_sumOfCounts->dataX(i) = outputWorkspace->dataX(i);
-      ws_sumOfCounts->dataY(i) = outputWorkspace->dataY(i);
-      ws_sumOfCounts->dataE(i) = outputWorkspace->dataE(i);
+      ws_sumOfCounts->setHistogram(i, outputWorkspace->histogram(i));
     }
 
     helper.outputParts(this, ws_sumOfCounts, weights);
@@ -326,7 +332,7 @@ void Qxy::exec() {
   const size_t nbins = outputWorkspace->blocksize();
   int emptyBins = 0;
   for (size_t i = 0; i < nhist; ++i) {
-    const auto &yOut = outputWorkspace->readY(i);
+    auto &yOut = outputWorkspace->y(i);
     for (size_t j = 0; j < nbins; ++j) {
       if (yOut[j] < 1.0e-12)
         ++emptyBins;
@@ -381,9 +387,12 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   // Fill the X vectors in the output workspace
   for (int i = 0; i < bins - 1; ++i) {
     outputWorkspace->setBinEdges(i, axis);
+    auto &y = outputWorkspace->mutableY(i);
+    auto &e = outputWorkspace->mutableE(i);
+
     for (int j = 0; j < bins - j; ++j) {
-      outputWorkspace->dataY(i)[j] = std::numeric_limits<double>::quiet_NaN();
-      outputWorkspace->dataE(i)[j] = std::numeric_limits<double>::quiet_NaN();
+      y[j] = std::numeric_limits<double>::quiet_NaN();
+      e[j] = std::numeric_limits<double>::quiet_NaN();
     }
   }
 
