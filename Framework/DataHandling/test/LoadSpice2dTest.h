@@ -133,6 +133,8 @@ public:
     Mantid::Geometry::ParameterMap &pmap_nonconst =
         ws2d->instrumentParameters();
     pmap_nonconst.addDouble(sample_aperture.get(), "Size", 15.0);
+    // The parameter map was copied by the non-const access, get new reference.
+    m_paraMap = &(ws2d->constInstrumentParameters());
     sample_aperture_size = m_paraMap->get(sample_aperture.get(), "Size");
     TS_ASSERT_EQUALS(sample_aperture_size->value<double>(), 15.0);
 
