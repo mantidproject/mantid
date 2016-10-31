@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/CountStandardDeviations.cpp
 	src/CountVariances.cpp
 	src/Counts.cpp
+	src/Exception.cpp
 	src/Frequencies.cpp
 	src/FrequencyStandardDeviations.cpp
 	src/FrequencyVariances.cpp
@@ -19,6 +20,7 @@ set ( INC_FILES
 	inc/MantidHistogramData/CountVariances.h
 	inc/MantidHistogramData/Counts.h
 	inc/MantidHistogramData/EValidation.h
+	inc/MantidHistogramData/Exception.h
 	inc/MantidHistogramData/FixedLengthVector.h
 	inc/MantidHistogramData/Frequencies.h
 	inc/MantidHistogramData/FrequencyStandardDeviations.h

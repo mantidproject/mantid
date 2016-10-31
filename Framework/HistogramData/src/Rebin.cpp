@@ -1,5 +1,6 @@
 #include "MantidHistogramData/Rebin.h"
 #include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/Exception.h"
 #include "MantidHistogramData/Histogram.h"
 #include <algorithm>
 #include <numeric>
@@ -12,6 +13,7 @@ using Mantid::HistogramData::CountVariances;
 using Mantid::HistogramData::Frequencies;
 using Mantid::HistogramData::FrequencyStandardDeviations;
 using Mantid::HistogramData::FrequencyVariances;
+using Mantid::HistogramData::Exception::InvalidBinEdgesError;
 
 namespace {
 Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
@@ -39,7 +41,7 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
     auto nwidth = xn_high - xn_low;
 
     if (owidth <= 0.0 || nwidth <= 0.0)
-      throw std::runtime_error("Negative or zero bin widths not allowed.");
+      throw InvalidBinEdgesError("Negative or zero bin widths not allowed.");
 
     if (xn_high <= xo_low)
       inew++; /* old and new bins do not overlap */
@@ -92,7 +94,7 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
     auto nwidth = xn_high - xn_low;
 
     if (owidth <= 0.0 || nwidth <= 0.0)
-      throw std::runtime_error("Negative or zero bin widths not allowed.");
+      throw InvalidBinEdgesError("Negative or zero bin widths not allowed.");
 
     if (xn_high <= xo_low)
       inew++; /* old and new bins do not overlap */
