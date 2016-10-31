@@ -151,8 +151,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_set_ub_tab_hkl_to_integers)
         self.connect(self.ui.pushButton_undoSetToInteger, QtCore.SIGNAL('clicked()'),
                      self.do_undo_ub_tab_hkl_to_integers)
-        # TODO/NOW/ISSUE/ - Implement this method and also clear index after Refine FFT
-        # self.connect(self.ui.pushButton_clearIndexing, Qt....)
+        self.connect(self.ui.pushButton_clearIndexing, QtCore.SIGNAL('clicked()'),
+                     self.do_clear_all_peaks_index_ub)
 
         self.connect(self.ui.pushButton_refineUB, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub_indexed_peaks)
@@ -898,6 +898,15 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(error_message)
 
         return
+
+    def do_clear_all_peaks_index_ub(self):
+        """
+        Set all peaks' indexes in UB matrix calculation tab to zero
+        :return:
+        """
+        num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
+        for i_row in range(num_rows):
+            self.ui.tableWidget_mergeScans.set_hkl(i_row, [0., 0., 0.])
 
     def do_clear_merge_table(self):
         """
@@ -1995,6 +2004,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # set value
         self._show_refined_ub_result()
+
+        # set HKL to zero
+        self.do_clear_all_peaks_index_ub()
 
         return
 

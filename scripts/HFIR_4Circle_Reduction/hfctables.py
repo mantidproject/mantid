@@ -839,12 +839,14 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
     def set_hkl(self, row_number, hkl):
         """ Set Miller index HKL to a row
+        :param row_number: row number
         :param hkl:
         :return:
         """
         # check
-        assert isinstance(row_number, int) and 0 <= row_number < self.rowCount()
-        assert len(hkl) == 3
+        assert isinstance(row_number, int) and 0 <= row_number < self.rowCount(),\
+            'Row number %s is out of range.' % str(row_number)
+        assert len(hkl) == 3, 'HKL must be a sequence with 3 items but not %s.' % len(hkl)
 
         # update the cell
         hkl_str = '%.3f, %.3f, %.3f' % (hkl[0], hkl[1], hkl[2])
