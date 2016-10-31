@@ -62,30 +62,56 @@ public:
   /// Finalize minimization, eg store additional outputs
   void finalize() override;
 
-private:
-  /// Returns the step from a Gaussian given sigma = Jump
-  double GaussianStep(const double &Jump);
+  /// Public methods only for testing purposes
+
   /// If the new point is out of its bounds, it is changed to fit in the bound
   /// limits
-  void BoundApplication(const size_t &ParameterIndex, double &new_value,
+  void boundApplication(const size_t &parameterIndex, double &newValue,
                         double &step);
+
+private:
+  /// Returns the step from a Gaussian given sigma = Jump
+  double gaussianStep(const double &jump);
   /// Applied to the other parameters first and sequentially, finally to the
   /// current one
-  void TieApplication(const size_t &ParameterIndex, GSLVector &new_parameters,
-                      double &new_value);
+  void tieApplication(const size_t &parameterIndex, GSLVector &newParameters,
+                      double &newValue);
   /// Given the new chi2, next position is calculated and updated.
   /// m_changes[ParameterIndex] updated too
-  void AlgorithmDisplacement(const size_t &ParameterIndex,
-                             const double &chi2_new, GSLVector &new_parameters);
+  void algorithmDisplacement(const size_t &parameterIndex,
+                             const double &chi2New, GSLVector &newParameters);
   /// Updates the ParameterIndex-th parameter jump if appropriate
-  void JumpUpdate(const size_t &ParameterIndex);
+  void jumpUpdate(const size_t &parameterIndex);
   /// Check for convergence (including Overexploration convergence), updates
   /// m_converged
-  void ConvergenceCheck();
+  void convergenceCheck();
   /// Refrigerates the system if appropriate
-  void SimAnnealingRefrigeration();
+  void simAnnealingRefrigeration();
   /// Decides wheather iteration must continue or not
-  bool IterationContinuation();
+  bool iterationContinuation();
+  /// Output Markov chains
+  void outputChains();
+  /// Output converged chains
+  void outputConvergedChains(size_t convLength, int nSteps);
+  /// Output cost function
+  void outputCostFunctionTable(size_t convLength, double mostProbableChi2);
+  /// Output PDF
+  double outputPDF(size_t convLength,
+                   std::vector<std::vector<double>> &reducedChain);
+  /// Output parameter table
+  void outputParameterTable(const std::vector<double> &bestParameters,
+                            const std::vector<double> &errorsLeft,
+                            const std::vector<double> &errorsRight);
+  /// Calculated converged chain and parameters
+  void calculateConvChainAndBestParameters(
+      size_t convLength, int nSteps,
+      std::vector<std::vector<double>> &reducedChain,
+      std::vector<double> &bestParameters, std::vector<double> &errorLeft,
+      std::vector<double> &errorRight);
+  /// Initialize member variables related to fitting parameters
+  void initChainsAndParameters();
+  /// Initialize member variables related to simulated annealing
+  void initSimulatedAnnealing();
 
   // Variables declarations
   /// Pointer to the cost function. Must be the least squares.
@@ -93,13 +119,13 @@ private:
   // no sea necesaria la cost function
   boost::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;
   /// Pointer to the Fitting Function (IFunction) inside the cost function.
-  API::IFunction_sptr m_FitFunction;
+  API::IFunction_sptr m_fitFunction;
   /// The number of iterations done (restarted at each phase).
   size_t m_counter;
   /// The number of chain iterations
-  size_t m_ChainIterations;
+  size_t m_chainIterations;
   /// The number of changes done on each parameter.
-  std::vector<double> m_changes;
+  std::vector<int> m_changes;
   /// The jump for each parameter
   std::vector<double> m_jump;
   /// Parameters' values.
@@ -111,45 +137,34 @@ private:
   /// Boolean that indicates global convergence
   bool m_converged;
   /// The point when convergence has been reached
-  size_t m_conv_point;
+  size_t m_convPoint;
   /// Convergence of each parameter
-  std::vector<bool> m_par_converged;
-  /// Lower bound for each parameter
-  std::vector<double> m_lower;
-  /// Upper bound for each parameter
-  std::vector<double> m_upper;
-  /// Bool that indicates if there is any boundary constraint
-  std::vector<bool> m_bound;
+  std::vector<bool> m_parConverged;
   /// Convergence criteria for each parameter
   std::vector<double> m_criteria;
   /// Maximum number of iterations
-  size_t m_max_iter;
+  size_t m_maxIter;
   /// Bool that idicates if a varible has changed at some self iteration
-  std::vector<bool> m_par_changed;
+  std::vector<bool> m_parChanged;
   /// Simulated Annealing temperature
-  double m_Temperature;
+  double m_temperature;
   /// The global number of iterations done
   size_t m_counterGlobal;
   /// Number of iterations between Simulated Annealing refrigeration points
-  size_t m_SimAnnealingItStep;
+  size_t m_simAnnealingItStep;
   /// The number of refrigeration points left
-  size_t m_LeftRefrPoints;
+  size_t m_leftRefrPoints;
   /// Temperature step between different Simulated Annealing phases
-  double m_TempStep;
+  double m_tempStep;
   /// Overexploration applied
-  bool m_Overexploration;
+  bool m_overexploration;
   /// Number of parameters of the FittingFunction (not necessarily the
   /// CostFunction)
   size_t m_nParams;
-  /// Number of consecutive innactive regenerations needed to consider
-  /// convergence
-  size_t m_InnactConvCriterion;
-  /// Number of consecutive regenerations without changes (>=
-  /// m_InnactConvCriterion it is considered to have arrived to convergence at a
-  /// steep minimum)
-  std::vector<size_t> m_NumInactiveRegenerations;
+  /// Number of consecutive regenerations without changes
+  std::vector<size_t> m_numInactiveRegenerations;
   /// To track convergence through immobility
-  std::vector<double> m_changesOld;
+  std::vector<int> m_changesOld;
 };
 
 /// Used to access the setDirty() protected member
