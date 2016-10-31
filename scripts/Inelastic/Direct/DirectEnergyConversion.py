@@ -276,7 +276,7 @@ class DirectEnergyConversion(object):
                 bin_size = 2*(bkgd_range[1]-bkgd_range[0])
                 background_int = Rebin(result_ws,
                                        Params=[bkgd_range[0],bin_size,bkgd_range[1]],
-                                       PreserveEvents=False,FullBinsOnly=False, IgnoreErrors=True)
+                                       PreserveEvents=False,FullBinsOnly=False, IgnoreBinErrors=True)
                 total_counts = Integration(result_ws, IncludePartialBins=True)
                 background_int = ConvertUnits(background_int, Target="Energy",EMode='Elastic', AlignBins=0)
                 self.prop_man.log("Diagnose: finished convertUnits ",'information')
@@ -1695,7 +1695,7 @@ class DirectEnergyConversion(object):
         energy_bins = PropertyManager.energy_bins.get_abs_range(self.prop_man)
         if energy_bins:
             Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= energy_bins,PreserveEvents=False,
-                  IgnoreErrors=True)
+                  IgnoreBinErrors=True)
             if bkgr_ws:
                 #apply data ws normalization to background workspace
                 data_run.export_normalization(bkgr_ws)
@@ -1746,7 +1746,7 @@ class DirectEnergyConversion(object):
                        InstrumentParameter="DelayTime",Combine=True)
         else: # calculate background workspace for future usage
             bkgr_ws = Rebin(result_ws,Params=[bkg_range_min,(bkg_range_max - bkg_range_min) * 1.001,bkg_range_max],PreserveEvents=False,
-                            IgnoreErrors=True)
+                            IgnoreBinErrors=True)
             RenameWorkspace(InputWorkspace=bkgr_ws, OutputWorkspace='bkgr_ws_source')
             bkgr_ws = mtd['bkgr_ws_source']
 
@@ -1784,7 +1784,7 @@ class DirectEnergyConversion(object):
         if prop_man.energy_bins:
             bins = PropertyManager.energy_bins.get_abs_range(prop_man)
             Rebin(InputWorkspace=result_name,OutputWorkspace= result_name,Params=bins,
-                  IgnoreErrors=True)
+                  IgnoreBinErrors=True)
 
         # Masking and grouping
         result_ws = mtd[result_name]
@@ -1861,7 +1861,7 @@ class DirectEnergyConversion(object):
 
         delta = 2.0 * (upp - low)
         white_ws = Rebin(InputWorkspace=old_name,OutputWorkspace=old_name, Params=[low, delta, upp],
-                         IgnoreErrors=True)
+                         IgnoreBinErrors=True)
         # Why aren't we doing this...-> because integration does not work properly for event workspaces
         #Integration(white_ws, white_ws, RangeLower=low, RangeUpper=upp)
         AddSampleLog(white_ws,LogName = done_Log,LogText=done_log_VAL,LogType='String')
