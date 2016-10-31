@@ -257,10 +257,10 @@ Example of setting a resolution model::
     cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm)
 
 When a resolution model is set the peak width will be constrained to have a value close to the model. The degree of deviation is controled by the
-`WidthVariation` parameter. It has the default of 0.1 and is an absolute maximum difference a width can have. If set to 0 the widths will be fixed
+`FWHMVariation` parameter. It has the default of 0.1 and is an absolute maximum difference a width can have. If set to 0 the widths will be fixed
 to their calculated values (depending on the instant values of their peak centres). For example::
 
-    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm, WidthVariation=0.001)
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm, FWHMVariation=0.001)
 
 
 
