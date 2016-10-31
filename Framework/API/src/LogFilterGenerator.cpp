@@ -1,6 +1,5 @@
 #include "MantidAPI/LogFilterGenerator.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Run.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -25,7 +24,17 @@ namespace API {
 LogFilterGenerator::LogFilterGenerator(
     const LogFilterGenerator::FilterType filterType,
     const Mantid::API::MatrixWorkspace_const_sptr &workspace)
-    : m_filterType(filterType), m_workspace(workspace) {}
+    : m_filterType(filterType), m_run(workspace->run()) {}
+
+/**
+ * Constructor
+ * @param filterType :: [input] Filter by status, period, both or neither
+ * @param run :: [input] Run containing log data
+ */
+LogFilterGenerator::LogFilterGenerator(
+    const LogFilterGenerator::FilterType filterType,
+    const Mantid::API::Run &run)
+    : m_filterType(filterType), m_run(run) {}
 
 /**
  * Generate log filter from given workspace and log name
@@ -98,7 +107,7 @@ void LogFilterGenerator::filterByStatus(LogFilter *filter) const {
  * @param filter :: [input, output] LogFilter to which filter will be added
  */
 void LogFilterGenerator::filterByPeriod(LogFilter *filter) const {
-  const auto &logs = m_workspace->run().getLogData();
+  const auto &logs = m_run.getLogData();
   for (const auto &log : logs) {
     if (log->name().find("period ") == 0) {
       try {
@@ -126,7 +135,7 @@ void LogFilterGenerator::filterByPeriod(LogFilter *filter) const {
  */
 Property *LogFilterGenerator::getLogData(const std::string &logName) const {
   try {
-    const auto logData = m_workspace->run().getLogData(logName);
+    const auto logData = m_run.getLogData(logName);
     return logData;
   } catch (const std::runtime_error &) {
     g_log.warning("Could not find log value " + logName + " in workspace");

@@ -3,6 +3,7 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/Property.h"
 #include <memory>
@@ -41,9 +42,12 @@ public:
   /// Types of filter that can be used
   enum class FilterType { None, Status, Period, StatusAndPeriod };
 
-  /// Constructor
+  /// Constructor taking workspace
   LogFilterGenerator(const FilterType filterType,
                      const Mantid::API::MatrixWorkspace_const_sptr &workspace);
+
+  /// Constructor taking run object
+  LogFilterGenerator(const FilterType filterType, const Mantid::API::Run &run);
 
   /// Generate log filter from given workspace and log name
   std::unique_ptr<Mantid::Kernel::LogFilter>
@@ -58,8 +62,8 @@ private:
   Mantid::Kernel::Property *getLogData(const std::string &logName) const;
   /// Type of filter
   const FilterType m_filterType;
-  /// Workspace to analyse
-  const Mantid::API::MatrixWorkspace_const_sptr m_workspace;
+  /// Run object containing logs
+  const Mantid::API::Run m_run;
 };
 
 } // namespace API

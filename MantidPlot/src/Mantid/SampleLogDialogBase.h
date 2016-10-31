@@ -7,7 +7,8 @@
 #include <QDialog>
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/LogFilterGenerator.h"
-
+#include "MantidKernel/TimeSeriesProperty.h"
+#include <memory>
 //----------------------------------
 // Forward declarations
 //----------------------------------
@@ -147,6 +148,23 @@ protected:
     numericArray   ///< for logs that are an array of numeric values (int or
                    /// double)
   };
+};
+
+/// Object that applies a filter to a property for as long as it is in scope.
+/// When scope ends, filter is cleared.
+template <typename T> class ScopedFilter {
+public:
+  ScopedFilter(Mantid::Kernel::TimeSeriesProperty<T> *prop,
+               const std::unique_ptr<Mantid::Kernel::LogFilter> &logFilter)
+      : m_prop(prop) {
+    if (logFilter && logFilter->filter()) {
+      m_prop->filterWith(logFilter->filter());
+    }
+  }
+  ~ScopedFilter() { m_prop->clearFilter(); }
+
+private:
+  Mantid::Kernel::TimeSeriesProperty<T> *m_prop;
 };
 
 #endif // SAMPLELOGDIALOGBASE_H_
