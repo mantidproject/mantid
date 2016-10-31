@@ -147,7 +147,7 @@ template <> struct is_range_type<int16_t> : public std::true_type {};
 template <> struct is_range_type<int32_t> : public std::true_type {};
 template <> struct is_range_type<int64_t> : public std::true_type {};
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__clang__)
 template <> struct is_range_type<unsigned long> : public std::true_type {};
 template <> struct is_range_type<long> : public std::true_type {};
 #endif

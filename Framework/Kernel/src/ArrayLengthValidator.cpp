@@ -188,7 +188,7 @@ template class ArrayLengthValidator<double>;
 template class ArrayLengthValidator<int32_t>;
 template class ArrayLengthValidator<int64_t>;
 template class ArrayLengthValidator<std::string>;
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__clang__)
 template class ArrayLengthValidator<long>;
 #endif
 } // namespace Mantid

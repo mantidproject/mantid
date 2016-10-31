@@ -39,10 +39,10 @@ template <> DLLExport bool checkIsEmpty(const int &value) {
  * @return True if the value is considered empty, see EmptyValues.h
  */
 template <> DLLExport bool checkIsEmpty(const long &value) {
-  // 32 bit on Windows, 64 bit on Linux
+  // 32 bit for Windows and Clang, 64 bit for GCC
   return (value == Mantid::EMPTY_LONG());
 }
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__clang__)
 /**
  * Specialization of checkIsEmpty for 64 bit intiger
  * @param value :: A int64_t value
