@@ -331,7 +331,6 @@ protected:
   int m_interactionMode; ///< mode of interaction - index in m_inputControllers
   bool m_isLightingOn;   ///< Lighting on/off flag
 
-
   Shape2DCollection m_maskShapes;            ///< to draw mask shapes
   mutable QList<PeakOverlay *> m_peakShapes; ///< to draw peak labels
   mutable int m_peakLabelPrecision;
@@ -346,13 +345,13 @@ protected:
 
 private:
   /// Draw a line between two peak markers
-  void drawPeakComparisonLine(QPainter& painter) const;
+  void drawPeakComparisonLine(QPainter &painter) const;
   /// Draw the peak markers on the surface
-  void drawPeakMarkers(QPainter& painter) const;
+  void drawPeakMarkers(QPainter &painter) const;
   /// Draw the mask shapes on the surface
-  void drawMaskShapes(QPainter& painter) const;
+  void drawMaskShapes(QPainter &painter) const;
   /// Draw the selection rectangle to the surface
-  void drawSelectionRect(QPainter& painter) const;
+  void drawSelectionRect(QPainter &painter) const;
   /// Get the current input controller
   MantidQt::MantidWidgets::InputController *getController() const;
 

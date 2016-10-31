@@ -191,8 +191,9 @@ public slots:
 private:
   QString displayDetectorInfo(Mantid::detid_t detid);
   QString displayNonDetectorInfo(Mantid::Geometry::ComponentID compID);
-  QString displayPeakInfo(Mantid::Geometry::IPeak * peak);
-  QString displayPeakAngles(std::pair<Mantid::Geometry::IPeak*, Mantid::Geometry::IPeak*> peaks);
+  QString displayPeakInfo(Mantid::Geometry::IPeak *peak);
+  QString displayPeakAngles(
+      std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks);
   QString getParameterInfo(Mantid::Geometry::IComponent_const_sptr comp);
   QString getPeakOverlayInfo();
 

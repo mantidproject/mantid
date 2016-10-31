@@ -514,8 +514,7 @@ void ProjectionSurface::setPeakVisibility() const {
  * Draw a line between peak markers being compared
  * @param painter :: The QPainter object to draw the line with
  */
-void ProjectionSurface::drawPeakComparisonLine(QPainter &painter) const
-{
+void ProjectionSurface::drawPeakComparisonLine(QPainter &painter) const {
   if (!m_selectedMarkers.first.isNull() && !m_selectedMarkers.second.isNull()) {
     QTransform transform;
     auto windowRect = getSurfaceBounds();
@@ -532,21 +531,19 @@ void ProjectionSurface::drawPeakComparisonLine(QPainter &painter) const
  * Draw the peak marker objects on the surface
  * @param painter :: The QPainter object to draw the markers with
  */
-void ProjectionSurface::drawPeakMarkers(QPainter &painter) const
-{
-    auto windowRect = getSurfaceBounds();
-    for (int i = 0; i < m_peakShapes.size(); ++i) {
-      m_peakShapes[i]->setWindow(windowRect, painter.viewport());
-      m_peakShapes[i]->draw(painter);
-    }
+void ProjectionSurface::drawPeakMarkers(QPainter &painter) const {
+  auto windowRect = getSurfaceBounds();
+  for (int i = 0; i < m_peakShapes.size(); ++i) {
+    m_peakShapes[i]->setWindow(windowRect, painter.viewport());
+    m_peakShapes[i]->draw(painter);
+  }
 }
 
 /**
  * Draw the mask shapes on the surface
  * @param painter :: The QPainter object to draw the masks with
  */
-void ProjectionSurface::drawMaskShapes(QPainter &painter) const
-{
+void ProjectionSurface::drawMaskShapes(QPainter &painter) const {
   RectF windowRect = getSurfaceBounds();
   m_maskShapes.setWindow(windowRect, painter.viewport());
   m_maskShapes.draw(painter);
@@ -556,8 +553,7 @@ void ProjectionSurface::drawMaskShapes(QPainter &painter) const
  * Draw the selection rectangle on the surface
  * @param painter :: The QPainter object to draw the rectangle with
  */
-void ProjectionSurface::drawSelectionRect(QPainter &painter) const
-{
+void ProjectionSurface::drawSelectionRect(QPainter &painter) const {
   // draw the selection rectangle
   if (!m_selectRect.isNull()) {
     painter.setPen(Qt::blue);

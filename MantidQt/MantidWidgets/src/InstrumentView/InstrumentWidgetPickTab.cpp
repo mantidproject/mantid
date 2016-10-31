@@ -908,8 +908,8 @@ QString ComponentInfoController::displayNonDetectorInfo(
   return text;
 }
 
-QString ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *peak)
-{
+QString
+ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *peak) {
   std::stringstream text;
   auto instrument = peak->getInstrument();
   auto sample = instrument->getSample()->getPos();
@@ -928,8 +928,8 @@ QString ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *peak)
   return QString::fromStdString(text.str());
 }
 
-QString ComponentInfoController::displayPeakAngles(std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks)
-{
+QString ComponentInfoController::displayPeakAngles(
+    std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks) {
   std::stringstream text;
   auto peak1 = peaks.first;
   auto peak2 = peaks.second;
