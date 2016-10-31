@@ -46,6 +46,7 @@ public:
   void test_constructor() {
     const auto &instrument = m_workspace.getInstrument();
     TS_ASSERT_THROWS_NOTHING(DetectorInfo(*instrument));
+    UNUSED_ARG(instrument);
   }
 
   void test_sourcePosition() {
