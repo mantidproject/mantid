@@ -2,13 +2,12 @@
 import os
 from mantid.simpleapi import *
 from mantid.kernel import Logger
-from mantid.api import WorkspaceGroup, IEventWorkspace, FileFinder
+from mantid.api import WorkspaceGroup
 
 from SANSUtility import (AddOperation, transfer_special_sample_logs,
                          bundle_added_event_data_as_group, WorkspaceType,
                          get_workspace_type)
 from shutil import copyfile
-import h5py as h5
 
 sanslog = Logger("SANS")
 _NO_INDIVIDUAL_PERIODS = -1
@@ -157,7 +156,6 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
         is_multi_period = True if workspace_type is WorkspaceType.MultiperiodEvent else False
         outFile = bundle_added_event_data_as_group(outFile, outFile_monitors, is_multi_period)
 
-
   #this adds the path to the filename
     path,base = os.path.split(outFile)
     if path == '' or base not in os.listdir(path):
@@ -190,7 +188,7 @@ def handle_saving_event_workspace_when_saving_as_histogram(binning, is_first_dat
 
     logger.notice(binning)
     Rebin(InputWorkspace=ADD_FILES_SUM_TEMPORARY,OutputWorkspace='AddFilesSumTempory_Rebin',Params=binning,
-            PreserveEvents=False)
+          PreserveEvents=False)
 
     # loading the nexus file using LoadNexus is necessary because it has some metadata
     # that is not in LoadEventNexus. This must be fixed.
@@ -226,6 +224,7 @@ def handle_saving_event_workspace_when_saving_as_histogram(binning, is_first_dat
 
     if 'AddFilesSumTempory_Rebin' in mtd :
         DeleteWorkspace('AddFilesSumTempory_Rebin')
+
 
 def _can_load_periods(runs, defType, rawTypes):
     """
