@@ -25,6 +25,11 @@ Data Analysis
 - :ref:`TeixeiraWaterSQE <func-TeixeiraWaterSQE>` models translation of water-like molecules (jump diffusion).
 
 
+Improvements
+------------
+
+- When plotting from interfaces the plots now display error bars as standard
+
 Corrections
 ###########
 
@@ -45,17 +50,19 @@ Transmission
 ~~~~~~~~~~~~
 
 - Option to calculate number density from mass density
-
 - :ref:`IsoRotDiff <func-IsoRotDiff>` models isotropic rotational diffusion of a particle
   tethered to the origin at a constant distance.
 
 
 Improvements
 ------------
+
  - Data saved in an ASCII format using the *EnergyTransfer* interface can be re-loaded into Mantid
+
 
 Bugfixes
 --------
+
 - Clicking 'Save' without creating a res file in *ISISCalibration* no longer causes an error
 
 
