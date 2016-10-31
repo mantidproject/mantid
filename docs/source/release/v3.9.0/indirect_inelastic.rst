@@ -20,6 +20,7 @@ Data Analysis
 #############
 
 - :ref:`TeixeiraWaterSQE <func-TeixeiraWaterSQE>` models translation of water-like molecules (jump diffusion).
+- :ref:`GetQsInQENSData <algm-GetQsInQENSData>` Extracts or computes Q values from a MatrixWorkspace.
 
 
 Corrections
