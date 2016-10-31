@@ -188,5 +188,8 @@ template class ArrayLengthValidator<double>;
 template class ArrayLengthValidator<int32_t>;
 template class ArrayLengthValidator<int64_t>;
 template class ArrayLengthValidator<std::string>;
+#ifdef _WIN32
+template class ArrayLengthValidator<long>;
+#endif
 } // namespace Mantid
 } // namespace Kernel

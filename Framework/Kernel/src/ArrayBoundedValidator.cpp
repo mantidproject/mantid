@@ -139,6 +139,9 @@ template <typename TYPE> void ArrayBoundedValidator<TYPE>::clearUpper() {
 template class ArrayBoundedValidator<double>;
 template class ArrayBoundedValidator<int32_t>;
 template class ArrayBoundedValidator<int64_t>;
+#ifdef _WIN32
+template class ArrayBoundedValidator<long>;
+#endif
 
 } // Kernel
 } // Mantid
