@@ -11,10 +11,13 @@ New features
 Algorithms
 ##########
 
+- A new algorithm :ref:`NMoldyn4Interpolation <algm-NMoldyn4Interpolation>` which interpolates simulated data onto reference OSIRIS data
+
 Data Reduction
 ##############
 
 - Q-values in :ref:`BASISReduction <algm-BASISReduction>` output are now point data so that their values display correctly when plotted
+
 
 Data Analysis
 #############
