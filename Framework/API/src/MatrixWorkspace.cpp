@@ -197,30 +197,26 @@ const SpectrumInfo &MatrixWorkspace::spectrumInfo() const {
 /** Return a non-const reference to the SpectrumInfo object. Not thread safe.
  */
 SpectrumInfo &MatrixWorkspace::mutableSpectrumInfo() {
-  // SpectrumInfo holds a parameterized instrument so the reference count to the
-  // ParameterMap in ExperimentInfo is never 1, i.e., calling
-  // ExperimentInfo::instrumentParameters (as needed for many modifications)
-  // would always trigger a copy and leave the instrument information in
-  // SpectrumInfo in a detached state. Here we work around this as follows:
-  //
-  // By creating a new SpectrumInfo any previous references that we are
-  // responsible for are released. Creating SpectrumInfo with a non-const
-  // reference to a MatrixWorkspace will cache to result of
-  // ExperimentInfo::instrumentParameters() which will later be used by
-  // modifications. This will trigger a copy if required. SpectrumInfo will
-  // obtain the parameterized instrument after obtaining the ParameterMap such
-  // that both refer to the same instance. This is the same method existing
-  // algorithms use to avoid an extra copy (call
-  // MatrixWorkspace::instrumentParameters() then
-  // MatrixWorkspace::getInstrument()).
-  m_spectrumInfo = nullptr;
+  // Creating SpectrumInfo with a non-const reference to a MatrixWorkspace will
+  // cache to result of ExperimentInfo::instrumentParameters() which will later
+  // be used by modifications. This will trigger a copy if required. Note that
+  // if m_spectrumInfo was not equals to nullptr the following happens:
+  // 1. The old SpectrumInfo object is storing a parameterized instrument. Thus
+  // the reference count to the ParameterMap in ExperimentInfo is at least 2 (1
+  // from the ExperimentInfo, 1 from SpectrumInfo).
+  // 2. make_unique creates a new SpectrumInfo, which calls
+  // ExperimentInfo::instrumentParameters(). In the latter method, the reference
+  // count to the ParameterMap is not 1, so invalidateInstrumentReferences() is
+  // called.
+  // 3. invalidateInstrumentReferences() resets m_spectrumInfo, dropping the
+  // reference count to the ParameterMap by 1.
+  // 4. If the ExperimentInfo is the sole remaining owner of the ParameterMap it
+  // returns a reference to it, otherwise it creates a copy and returns a
+  // reference.
+  // 5. Construction of SpectrumInfo continues and the result is assigned to
+  // m_spectrumInfo.
 
   // No locking here since this non-const method is not thread safe.
-  // Note that creating SpectrumInfo will call
-  // ExperimentInfo::instrumentParameters, which will call
-  // invalidateInstrumentReferences() if there is a copy, which in turn will set
-  // m_spectrumInfo to nullptr. However, this happens before the assignment, so
-  // we should be fine.
   m_spectrumInfo = Kernel::make_unique<SpectrumInfo>(*this);
   return *m_spectrumInfo;
 }
