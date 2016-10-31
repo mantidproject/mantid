@@ -1,9 +1,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/NullValidator.h"
 
-// PropertyWithValue implementation
-#include "MantidKernel/PropertyWithValue.tcc"
-
 #include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
