@@ -977,7 +977,7 @@ public:
     // Delete the workspace
     AnalysisDataService::Instance().remove(workspaceName);
 
-    tempFile = alg.getProperty("Filename");
+    tempFile = alg.getPropertyValue("Filename");
 
     // Load the data
     LoadNexusProcessed loader;
