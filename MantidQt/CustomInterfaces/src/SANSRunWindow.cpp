@@ -18,13 +18,13 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
 #include "MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h"
 #include "MantidQtCustomInterfaces/SANSEventSlicing.h"
 
 #include <QClipboard>
-#include <QDesktopServices>
 #include <QTemporaryFile>
 #include <QTextStream>
 #include <QUrl>
@@ -1940,7 +1940,7 @@ void SANSRunWindow::saveFileBrowse() {
                                   ConfigService::Instance().getString(
                                       "defaultsave.directory"))).toString();
 
-  const QString filter = ";;AllFiles (*.*)";
+  const QString filter = ";;AllFiles (*)";
 
   QString oFile = FileDialogHandler::getSaveFileName(
       this, title, prevPath + "/" + m_uiForm.outfile_edit->text());
@@ -1971,7 +1971,7 @@ bool SANSRunWindow::browseForFile(const QString &box_title,
   if (box_text.isEmpty()) {
     start_path = m_last_dir;
   }
-  file_filter += ";;AllFiles (*.*)";
+  file_filter += ";;AllFiles (*)";
   QString file_path =
       QFileDialog::getOpenFileName(this, box_title, start_path, file_filter);
   if (file_path.isEmpty() || QFileInfo(file_path).isDir())
@@ -3886,7 +3886,7 @@ void SANSRunWindow::handleSlicePushButton() {
 void SANSRunWindow::openHelpPage() {
   const auto helpPageUrl =
       m_helpPageUrls[static_cast<Tab>(m_uiForm.tabWidget->currentIndex())];
-  QDesktopServices::openUrl(QUrl(helpPageUrl));
+  MantidDesktopServices::openUrl(QUrl(helpPageUrl));
 }
 
 // Set the validators for inputs

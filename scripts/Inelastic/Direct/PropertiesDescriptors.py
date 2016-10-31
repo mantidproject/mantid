@@ -1,8 +1,9 @@
-﻿#pylint: disable=too-many-lines
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """ File contains collection of Descriptors used to define complex
     properties in NonIDF_Properties and PropertyManager classes
 """
+from __future__ import (absolute_import, division, print_function)
 import os
 import numpy as np
 import math
@@ -17,6 +18,7 @@ from mantid import api,geometry,config
 import Direct.ReductionHelpers as prop_helpers
 #pylint: disable=unused-import
 import Direct.CommonFunctions as common
+import collections
 
 
 #-----------------------------------------------------------------------------------------
@@ -114,6 +116,13 @@ class AvrgAccuracy(PropDescriptor):
             vallist = [value]
         rez = []
         lim = 10**(self._accuracy-1)
+
+        def out(a,b,mult):
+            if mult>1:
+                return a<b
+            else:
+                return false
+
         for val in vallist:
             if abs(val) > lim:
                 rez.append(round(val,0))
@@ -123,14 +132,9 @@ class AvrgAccuracy(PropDescriptor):
             else:
                 mult = 1
 
-            def out(a,b):
-                if mult>1:
-                    return a<b
-                else:
-                    return false
             tv = abs(val)
             fin_mult  = 1
-            while out(tv,lim):
+            while out(tv,lim,mult):
                 fin_mult*=mult
                 tv      *= mult
             fin_rez = math.copysign(round(tv,0)/fin_mult,val)
@@ -192,7 +196,7 @@ class IncidentEnergy(PropDescriptor):
                 else:
                     if value.find('[') > -1:
                         energy_list = True
-                        value = value.translate(None, '[]').strip()
+                        value = value.replace('[','').replace(']','').strip()
                     else:
                         energy_list = False
                     en_list = str.split(value,',')
@@ -315,7 +319,7 @@ class IncidentEnergy(PropDescriptor):
                 ei_ref,_,_,_=GetEi(InputWorkspace=monitor_ws,
                                    Monitor1Spec=ei_mon_spec[0], Monitor2Spec=ei_mon_spec[1], EnergyEstimate=ei)
                 fin_ei.append(ei_ref)
-#pylint: disable=broad-except
+#pylint: disable=bare-except
             except:
                 instance.log("Can not refine guess energy {0:f}. Ignoring it.".format(ei),'warning')
         if len(fin_ei) == 0:
@@ -379,7 +383,7 @@ class EnergyBins(PropDescriptor):
     def __set__(self,instance,values):
         if values is not None:
             if isinstance(values,str):
-                values = values.translate(None, '[]').strip()
+                values = values.replace('[','').replace(']','').strip()
                 lst = values.split(',')
                 self.__set__(instance,lst)
                 return
@@ -472,40 +476,48 @@ class SaveFileName(PropDescriptor):
         self._custom_print = None
 
     def __get__(self,instance,owner=None):
-
+        # getter functional interface.
         if instance is None:
             return self
+
+        # if custom file name provided, use it
+        if self._file_name:
+            return self._file_name
+
+        # if custom function to generate file name is proivede, use this function
         if self._custom_print is not None:
             return self._custom_print()
 
-        if self._file_name:
-            return self._file_name
+        # user provided nothing.
+        # calculate default target file name from
+        # instrument, energy and run number.
+        if instance.instr_name:
+            name = instance.short_inst_name
         else:
-            if instance.instr_name:
-                name = instance.short_inst_name
-            else:
-                name = '_EMPTY'
+            name = '_EMPTY'
 
-            sr = owner.sample_run.run_number()
-            if not sr:
-                sr = 0
-            try:
-                ei = owner.incident_energy.get_current()
-                name +='{0:0<5}Ei{1:<4.2f}meV'.format(sr,ei)
-                if instance.sum_runs:
-                    name +='sum'
-                if owner.monovan_run.run_number():
-                    name +='_Abs'
-                name = name.replace('.','d')
+        sr = owner.sample_run.run_number()
+        if not sr:
+            sr = 0
+        try:
+            ei = owner.incident_energy.get_current()
+            name +='{0:0<5}Ei{1:_<4.2f}meV'.format(sr,ei)
+            if instance.sum_runs:
+                name +='sum'
+            if owner.monovan_run.run_number():
+                name +='_Abs'
+            name = name.replace('.','d')
 #pylint: disable=bare-except
-            except:
-                name = None
+        except:
+            name = None
         return name
 
     def __set__(self,instance,value):
 
         if value is None:
             self._file_name = None
+        elif isinstance(value, collections.Callable):
+            self._custom_print = value
         else:
             self._file_name = str(value)
 
@@ -767,6 +779,7 @@ class DetCalFile(PropDescriptor):
             file_hint = inst_short_name+str(dcf_val).zfill(zero_padding)
             try:
                 file_name = FileFinder.findRuns(file_hint)[0]
+#pylint: disable=bare-except
             except:
                 return (False,"Can not find run file corresponding to run N: {0}".format(file_hint))
             self._det_cal_file = file_name
@@ -1056,7 +1069,7 @@ class EiMonSpectra(prop_helpers.ComplexProperty):
             tDict = instance.__dict__
 
         if isinstance(value,str):
-            val =  value.translate(None,'[]').strip()
+            val =  value.replace('[','').replace(']','').strip()
             if val.find(':')>-1:
                 val = val.split(':')
             else:

@@ -22,3 +22,8 @@ Algorithms
 ##########
 
 - A utility algorithm :ref:`WorkflowAlgorithmRunner <algm-WorkflowAlgorithmRunner>` has been added to manage the running of certain data reduction workflows at ILL.
+
+Crystal Field
+-------------
+
+- The peak widths can be fixed to or varied around values obtained from experimental or calculated instrument resolution function.

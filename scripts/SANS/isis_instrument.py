@@ -1,4 +1,5 @@
-﻿# pylint: disable=too-many-lines, invalid-name, bare-except, too-many-instance-attributes
+# pylint: disable=too-many-lines, invalid-name, bare-except, too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
 import math
 import os
 import re
@@ -10,6 +11,7 @@ from mantid.kernel import Logger
 from mantid.kernel import V3D
 import SANSUtility as su
 from math import copysign
+from six import iteritems
 
 sanslog = Logger("SANS")
 
@@ -390,7 +392,7 @@ class DetectorBank(object):
             is given by an orientation string and this function throws if the string is not recognised
             @param orien: the orienation string must be a string contained in the dictionary _ORIENTED
         """
-        dummy = self._ORIENTED[orien]
+        self._ORIENTED[orien]
         self._orientation = orien
 
     def crop_to_detector(self, input_name, output_name=None):
@@ -590,7 +592,7 @@ class ISISInstrument(BaseInstrument):
             return self.DETECTORS['high-angle']
 
     def getDetector(self, requested):
-        for _n, detect in self.DETECTORS.iteritems():
+        for _n, detect in iteritems(self.DETECTORS):
             if detect.isAlias(requested):
                 return detect
         sanslog.notice("getDetector: Detector " + requested + "not found")
@@ -724,7 +726,7 @@ class ISISInstrument(BaseInstrument):
         MoveInstrumentComponent(Workspace=ws, ComponentName='some-sample-holder', Z=self.SAMPLE_Z_CORR,
                                 RelativePosition=True)
 
-        for i in self.monitor_zs.keys():
+        for i in list(self.monitor_zs.keys()):
             # get the current location
             component = self.monitor_names[i]
             ws = mtd[str(ws)]
@@ -753,13 +755,6 @@ class ISISInstrument(BaseInstrument):
         @param coord2_scale_factor: scale factor for the second coordinate
         @param relative_displacement: If the the displacement is to be relative (it normally should be)
         """
-        dummy_1 = workspace
-        dummy_2 = component_name
-        dummy_3 = coord1
-        dummy_3 = coord2
-        dummy_4 = relative_displacement
-        dummy_5 = coord1_scale_factor
-        dummy_6 = coord2_scale_factor
         raise RuntimeError("Not Implemented")
 
     def cur_detector_position(self, ws_name):
@@ -768,7 +763,6 @@ class ISISInstrument(BaseInstrument):
         @param ws_name: the input workspace name
         @raise RuntimeError: Not implemented
         '''
-        dummy_1 = ws_name
         raise RuntimeError("Not Implemented")
 
     def on_load_sample(self, ws_name, beamcentre, isSample):
@@ -923,7 +917,7 @@ class LOQ(ISISInstrument):
 
         if self.has_m4_monitor:
             self.monitor_names.update({self._m4_det_id: self._m4_monitor_name})
-        elif self._m4_det_id in self.monitor_names.keys():
+        elif self._m4_det_id in list(self.monitor_names.keys()):
             del self.monitor_names[self._m4_det_id]
 
     def move_components(self, ws, xbeam, ybeam):
@@ -1629,9 +1623,9 @@ class LARMOR(ISISInstrument):
         MoveInstrumentComponent(ws, ComponentName=detBench.name(), X=xshift, Y=yshift, Z=zshift)
 
         # Deal with the angle value
-        _total_x_shift = self._rotate_around_y_axis(workspace=ws, component_name=detBench.name(),
-                                                    x_beam=xbeam, x_scale_factor=XSF,
-                                                    bench_rotation=BENCH_ROT)
+        self._rotate_around_y_axis(workspace=ws, component_name=detBench.name(),
+                                   x_beam=xbeam, x_scale_factor=XSF,
+                                   bench_rotation=BENCH_ROT)
 
         # Set the beam centre position afte the move
         self.beam_centre_pos1_after_move = xbeam  # Need to provide the angle in 1000th of a degree
@@ -1654,7 +1648,6 @@ class LARMOR(ISISInstrument):
         @param coord2_scale_factor: scale factor for the second coordinate
         @param relative_displacement: If the the displacement is to be relative (it normally should be)
         """
-        dummy_coord2_scale_factor = coord2_scale_factor
         # Shift the component in the y direction
         MoveInstrumentComponent(Workspace=workspace,
                                 ComponentName=component_name,

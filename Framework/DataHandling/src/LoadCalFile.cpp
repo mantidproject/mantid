@@ -310,10 +310,10 @@ void LoadCalFile::readCalFile(const std::string &calFileName,
         if (select <= 0) {
           // Not selected, then mask this detector
           maskWS->maskWorkspaceIndex(wi);
-          maskWS->dataY(wi)[0] = 1.0;
+          maskWS->mutableY(wi)[0] = 1.0;
         } else {
           // Selected, set the value to be 0
-          maskWS->dataY(wi)[0] = 0.0;
+          maskWS->mutableY(wi)[0] = 0.0;
           if (!hasUnmasked)
             hasUnmasked = true;
         }

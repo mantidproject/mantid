@@ -270,7 +270,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     // peak.
     signal_t thresholdDensity = ws->getBox()->getSignalNormalized() *
                                 DensityThresholdFactor * m_densityScaleFactor;
-    if (std::isfinite(thresholdDensity)) {
+    if (!std::isfinite(thresholdDensity)) {
       g_log.warning()
           << "Infinite or NaN overall density found. Your input data "
              "may be invalid. Using a 0 threshold instead.\n";
