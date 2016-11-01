@@ -8,6 +8,7 @@
 #include "MantidDataHandling/LoadInstrumentFromNexus.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"

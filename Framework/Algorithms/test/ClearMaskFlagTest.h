@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/ClearMaskFlag.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"

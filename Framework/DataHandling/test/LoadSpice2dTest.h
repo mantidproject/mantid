@@ -9,6 +9,7 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include <Poco/Path.h>
 #include <vector>

@@ -3,6 +3,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 

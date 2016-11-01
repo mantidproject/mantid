@@ -2,6 +2,7 @@
 #define MANTID_DATAHANDLING_LOADNXSPETEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"

@@ -1,10 +1,8 @@
 #ifndef LOADRKHTEST_H_
 #define LOADRKHTEST_H_
 
-//-----------------
-// Includes
-//-----------------
 #include "MantidDataHandling/LoadRKH.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"

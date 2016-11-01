@@ -1,11 +1,9 @@
 #ifndef LOADQKKTEST_H_
 #define LOADQKKTEST_H_
 
-//-----------------
-// Includes
-//-----------------
 #include "MantidDataHandling/LoadQKK.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ConfigService.h"
 #include <cxxtest/TestSuite.h>
 #include <Poco/Path.h>

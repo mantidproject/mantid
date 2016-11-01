@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/RemoveWorkspaceHistory.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
 using Mantid::Algorithms::RemoveWorkspaceHistory;

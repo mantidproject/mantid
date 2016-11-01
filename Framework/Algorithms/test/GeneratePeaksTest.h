@@ -7,6 +7,7 @@
 
 #include "MantidAlgorithms/GeneratePeaks.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/MatrixWorkspace.h"

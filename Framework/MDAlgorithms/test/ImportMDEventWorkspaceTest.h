@@ -4,6 +4,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidMDAlgorithms/ImportMDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ConfigService.h"
 
 #include <cxxtest/TestSuite.h>

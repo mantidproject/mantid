@@ -12,6 +12,7 @@
 
 #include "MantidDataHandling/LoadEventPreNexus.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"

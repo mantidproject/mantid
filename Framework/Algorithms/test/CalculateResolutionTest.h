@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/CalculateResolution.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/V3D.h"
