@@ -41,10 +41,15 @@
 #ifndef FLOWLAYOUT_H
 #define FLOWLAYOUT_H
 
+#include "MantidQtAPI/DllOption.h"
 #include <QLayout>
 #include <QRect>
+#include <QStyle>
 #include <QWidgetItem>
-class FlowLayout : public QLayout {
+
+namespace MantidQt {
+namespace API {
+class EXPORT_OPT_MANTIDQT_API FlowLayout : public QLayout {
 public:
   FlowLayout(QWidget *parent, int margin = -1, int hSpacing = -1,
              int vSpacing = -1);
@@ -72,5 +77,7 @@ private:
   int m_hSpace;
   int m_vSpace;
 };
+}
+}
 
 #endif

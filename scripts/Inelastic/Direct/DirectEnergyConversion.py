@@ -1,6 +1,7 @@
-﻿#pylint: disable=too-many-lines
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 #pylind: disable=attribute-defined-outside-init
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.kernel import funcinspect
 from mantid import geometry,api
@@ -11,6 +12,8 @@ import math
 import time
 import numpy as np
 import collections
+from six import iteritems
+from six.moves import range
 
 import Direct.CommonFunctions  as common
 import Direct.diagnostics      as diagnostics
@@ -1087,8 +1090,8 @@ class DirectEnergyConversion(object):
         TOF_range = self.get_TOF_for_energies(workspace,en_list,spectra_id,ei)
 
         def process_block(tof_range):
-            tof_range = filter(lambda x: not(math.isnan(x)), tof_range)
-            dt = map(lambda x,y : abs(x - y),tof_range[1:],tof_range[:-1])
+            tof_range = [x for x in tof_range if not(math.isnan(x))]
+            dt = list(map(lambda x,y : abs(x - y),tof_range[1:],tof_range[:-1]))
             t_step = min(dt)
             tof_min = min(tof_range)
             tof_max = max(tof_range)
@@ -1097,7 +1100,7 @@ class DirectEnergyConversion(object):
         nBlocks = len(spectra_id)
         if nBlocks > 1:
             tof_min,t_step,tof_max = process_block(TOF_range[0])
-            for ind in xrange(1,nBlocks):
+            for ind in range(1,nBlocks):
                 tof_min1,t_step1,tof_max1 = process_block(TOF_range[ind])
                 tof_min = min(tof_min,tof_min1)
                 tof_max = max(tof_max,tof_max1)
@@ -1482,7 +1485,7 @@ class DirectEnergyConversion(object):
 
         scale_factor = van_multiplier * sample_multiplier / xsection
 
-        for norm_type,val in norm_factor.iteritems():
+        for norm_type,val in iteritems(norm_factor):
             norm_factor[norm_type] = val * scale_factor
 
         # check for NaN
