@@ -42,7 +42,6 @@ namespace Kernel {
 */
 template <typename TYPE = double> class DLLExport VMDBase {
 public:
-  //-------------------------------------------------------------------------------------------
   /** Default constructor, build with 1 dimension */
   VMDBase() : nd(1) {
     data = new TYPE[nd];
@@ -50,7 +49,6 @@ public:
       data[d] = TYPE(0.0);
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Constructor
    * @param nd :: number of dimensions  */
   VMDBase(size_t nd) : nd(nd) {
@@ -61,7 +59,6 @@ public:
       data[d] = TYPE(0.0);
   }
 
-  //-------------------------------------------------------------------------------------------
   /** 2D Constructor
    * @param val0 :: value at first dimension
    * @param val1 :: value at second dimension
@@ -72,7 +69,6 @@ public:
     data[1] = TYPE(val1);
   }
 
-  //-------------------------------------------------------------------------------------------
   /** 3D Constructor
    * @param val0 :: value at first dimension
    * @param val1 :: value at second dimension
@@ -85,7 +81,6 @@ public:
     data[2] = TYPE(val2);
   }
 
-  //-------------------------------------------------------------------------------------------
   /** 4D Constructor
    * @param val0 :: value at first dimension
    * @param val1 :: value at second dimension
@@ -100,7 +95,6 @@ public:
     data[3] = TYPE(val3);
   }
 
-  //-------------------------------------------------------------------------------------------
   /** 5D Constructor
    * @param val0 :: value at first dimension
    * @param val1 :: value at second dimension
@@ -118,7 +112,6 @@ public:
     data[4] = TYPE(val4);
   }
 
-  //-------------------------------------------------------------------------------------------
   /** 6D Constructor
    * @param val0 :: value at first dimension
    * @param val1 :: value at second dimension
@@ -139,7 +132,6 @@ public:
     data[5] = TYPE(val5);
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Copy constructor
    * @param other :: other to copy */
   VMDBase(const VMDBase &other) : nd(other.nd) {
@@ -150,7 +142,6 @@ public:
       data[d] = other.data[d];
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Assignment operator
    * @param other :: copy into this
    */
@@ -165,7 +156,6 @@ public:
     return *this;
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Constructor
    * @param nd :: number of dimensions
    * @param bareData :: pointer to a nd-sized bare data array */
@@ -177,7 +167,6 @@ public:
       data[d] = TYPE(bareData[d]);
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Constructor
    * @param nd :: number of dimensions
    * @param bareData :: pointer to a nd-sized bare data array */
@@ -189,7 +178,6 @@ public:
       data[d] = TYPE(bareData[d]);
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Constructor
    * @param vector :: V3D */
   VMDBase(const V3D &vector) : nd(3) {
@@ -198,7 +186,6 @@ public:
       data[d] = TYPE(vector[d]);
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Constructor
    * @param vector :: vector of doubles */
   template <class T> VMDBase(const std::vector<T> &vector) : nd(vector.size()) {
@@ -209,7 +196,6 @@ public:
       data[d] = TYPE(vector[d]);
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Constructor
    * @param vector :: vector of floats */
   VMDBase(const std::vector<float> &vector) : nd(vector.size()) {
@@ -220,7 +206,6 @@ public:
       data[d] = TYPE(vector[d]);
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Constructor from string
    * @param str :: string of comma or space-separated numbers for each component
    */
@@ -246,15 +231,12 @@ public:
     std::copy(vals.cbegin(), vals.cend(), data);
   }
 
-  //-------------------------------------------------------------------------------------------
   /// Destructor
   virtual ~VMDBase() { delete[] data; }
 
-  //-------------------------------------------------------------------------------------------
   /// @return the number of dimensions
   size_t getNumDims() const { return nd; }
 
-  //-------------------------------------------------------------------------------------------
   /// @return the number of dimensions
   size_t size() const { return nd; }
 
@@ -264,11 +246,9 @@ public:
   /** @return the value at the index */
   TYPE &operator[](const size_t index) { return data[index]; }
 
-  //-------------------------------------------------------------------------------------------
   /** @return the bare data array directly. */
   const TYPE *getBareArray() const { return data; }
 
-  //-------------------------------------------------------------------------------------------
   /** Return a simple string representation of the vector
    * @param separator :: string to place between values, one space is the
    * default
@@ -280,7 +260,6 @@ public:
     return mess.str();
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Get the vector as a vector
    * @tparam T :: type to convert to (double/float)
    * @return the vector as a std::vector
@@ -292,7 +271,6 @@ public:
     return out;
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Equals operator with tolerance factor
     @param v :: VMDBase for comparison
     @return true if the items are equal
@@ -306,14 +284,12 @@ public:
     return true;
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Not-equals operator with tolerance factor
     @param v :: VMDBase for comparison
     @return true if the items are equal
    */
   bool operator!=(const VMDBase &v) const { return !operator==(v); }
 
-  //-------------------------------------------------------------------------------------------
   /** Add two vectors together
    * @param v :: other vector, must match number of dimensions  */
   VMDBase operator+(const VMDBase &v) const {
@@ -322,7 +298,6 @@ public:
     return out;
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Add two vectors together
    * @param v :: other vector, must match number of dimensions  */
   VMDBase &operator+=(const VMDBase &v) {
@@ -334,7 +309,6 @@ public:
     return *this;
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Subtract two vectors
    * @param v
    *  :: other vector, must match number of dimensions  */
@@ -344,7 +318,6 @@ public:
     return out;
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Subtract two vectors
    * @param v :: other vector, must match number of dimensions  */
   VMDBase &operator-=(const VMDBase &v) {
@@ -356,7 +329,6 @@ public:
     return *this;
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Inner product of two vectors (element-by-element)
    * @param v :: other vector, must match number of dimensions  */
   VMDBase operator*(const VMDBase &v) const {
@@ -365,7 +337,6 @@ public:
     return out;
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Inner product of two vectors (element-by-element)
    * @param v :: other vector, must match number of dimensions  */
   VMDBase &operator*=(const VMDBase &v) {
@@ -377,7 +348,6 @@ public:
     return *this;
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Inner division of two vectors (element-by-element)
    * @param v :: other vector, must match number of dimensions  */
   VMDBase operator/(const VMDBase &v) const {
@@ -386,7 +356,6 @@ public:
     return out;
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Inner division of two vectors (element-by-element)
    * @param v :: other vector, must match number of dimensions  */
   VMDBase &operator/=(const VMDBase &v) {
@@ -398,7 +367,6 @@ public:
     return *this;
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Multiply by a scalar
    * @param scalar :: double scalar to multiply each element  */
   VMDBase operator*(const double scalar) const {
@@ -407,7 +375,6 @@ public:
     return out;
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Multiply by a scalar
    * @param scalar :: double scalar to multiply each element  */
   VMDBase &operator*=(const double scalar) {
@@ -416,7 +383,6 @@ public:
     return *this;
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Divide by a scalar
    * @param scalar :: double scalar to Divide each element  */
   VMDBase operator/(const double scalar) const {
@@ -425,7 +391,6 @@ public:
     return out;
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Divide by a scalar
    * @param scalar :: double scalar to Divide each element  */
   VMDBase &operator/=(const double scalar) {
@@ -434,7 +399,6 @@ public:
     return *this;
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Scalar product of two vectors
    * @param v :: other vector, must match number of dimensions  */
   TYPE scalar_prod(const VMDBase &v) const {
@@ -447,7 +411,6 @@ public:
     return out;
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Cross product of two vectors. Only works in 3D
    * @param v :: other vector, also 3D  */
   VMDBase cross_prod(const VMDBase &v) const {
@@ -464,7 +427,6 @@ public:
     return out;
   }
 
-  //-------------------------------------------------------------------------------------------
   /** @return the length of this vector */
   TYPE length() const { return TYPE(std::sqrt(this->norm2())); }
 
@@ -474,7 +436,6 @@ public:
   /** @return the length of this vector */
   TYPE norm2() const { return this->scalar_prod(*this); }
 
-  //-------------------------------------------------------------------------------------------
   /** Normalize this vector to unity length
    * @return the length of this vector BEFORE normalizing */
   TYPE normalize() {
@@ -484,7 +445,6 @@ public:
     return length;
   }
 
-  //-------------------------------------------------------------------------------------------
   /** Return the angle between this and another vector
    *  @param v :: The other vector
    *  @return The angle between the vectors in radians (0 < theta < pi)
