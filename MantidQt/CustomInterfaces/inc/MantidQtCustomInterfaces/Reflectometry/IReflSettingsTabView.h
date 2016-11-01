@@ -72,7 +72,6 @@ public:
   virtual std::string getCAp() const = 0;
   virtual std::string getCPp() const = 0;
   virtual std::string getMomentumTransferStep() const = 0;
-  virtual std::string getDetectorLimits() const = 0;
   virtual std::string getScaleFactor() const = 0;
   virtual std::string getPolarisationCorrections() const = 0;
   /// Instrument settings
@@ -83,6 +82,7 @@ public:
   virtual std::string getLambdaMin() const = 0;
   virtual std::string getLambdaMax() const = 0;
   virtual std::string getI0MonitorIndex() const = 0;
+  virtual std::string getProcessingInstructions() const = 0;
 
   /// Set default values for settings
   virtual void setExpDefaults(const std::vector<std::string> &) const = 0;

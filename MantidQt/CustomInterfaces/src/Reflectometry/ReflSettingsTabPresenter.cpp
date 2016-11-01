@@ -115,9 +115,9 @@ std::string ReflSettingsTabPresenter::getTransmissionOptions() const {
     options.push_back("I0MonitorIndex=" + I0MonitorIndex);
 
   // Add detector limits
-  auto detLimits = m_view->getDetectorLimits();
-  if (!detLimits.empty())
-    options.push_back("ProcessingInstructions=" + detLimits);
+  auto procInst = m_view->getProcessingInstructions();
+  if (!procInst.empty())
+    options.push_back("ProcessingInstructions=" + procInst);
 
   return boost::algorithm::join(options, ",");
 }
@@ -216,9 +216,9 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   }
 
   // Add detector limits
-  auto detLimits = m_view->getDetectorLimits();
-  if (!detLimits.empty())
-    options.push_back("ProcessingInstructions=" + detLimits);
+  auto procInst = m_view->getProcessingInstructions();
+  if (!procInst.empty())
+    options.push_back("ProcessingInstructions=" + procInst);
 
   return boost::algorithm::join(options, ",");
 }

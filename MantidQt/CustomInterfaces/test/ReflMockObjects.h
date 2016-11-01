@@ -75,7 +75,6 @@ public:
   MOCK_CONST_METHOD0(getCAp, std::string());
   MOCK_CONST_METHOD0(getCPp, std::string());
   MOCK_CONST_METHOD0(getMomentumTransferStep, std::string());
-  MOCK_CONST_METHOD0(getDetectorLimits, std::string());
   MOCK_CONST_METHOD0(getScaleFactor, std::string());
   MOCK_CONST_METHOD0(getPolarisationCorrections, std::string());
   MOCK_CONST_METHOD0(getMonitorIntegralMin, std::string());
@@ -85,6 +84,7 @@ public:
   MOCK_CONST_METHOD0(getLambdaMin, std::string());
   MOCK_CONST_METHOD0(getLambdaMax, std::string());
   MOCK_CONST_METHOD0(getI0MonitorIndex, std::string());
+  MOCK_CONST_METHOD0(getProcessingInstructions, std::string());
   MOCK_CONST_METHOD1(setExpDefaults, void(const std::vector<std::string> &));
   MOCK_CONST_METHOD1(setInstDefaults, void(const std::vector<double> &));
 

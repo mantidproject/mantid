@@ -66,8 +66,6 @@ public:
   std::string getCPp() const override;
   /// Return momentum transfer limits
   std::string getMomentumTransferStep() const override;
-  /// Return detector limits
-  std::string getDetectorLimits() const override;
   /// Return scale factor
   std::string getScaleFactor() const override;
   /// Return selected polarisation corrections
@@ -86,6 +84,8 @@ public:
   std::string getLambdaMax() const override;
   /// Return I0MonitorIndex
   std::string getI0MonitorIndex() const override;
+  /// Return processing instructions
+  std::string getProcessingInstructions() const override;
   /// Set default values for experiment and instrument settings
   void setExpDefaults(const std::vector<std::string> &) const override;
   void setInstDefaults(const std::vector<double> &) const override;

@@ -84,7 +84,7 @@ public:
     EXPECT_CALL(mockView, getI0MonitorIndex())
         .Times(Exactly(1))
         .WillOnce(Return("2"));
-    EXPECT_CALL(mockView, getDetectorLimits())
+    EXPECT_CALL(mockView, getProcessingInstructions())
         .Times(Exactly(1))
         .WillOnce(Return("\"3,4\""));
     auto options = presenter.getTransmissionOptions();
@@ -153,7 +153,7 @@ public:
     EXPECT_CALL(mockView, getMomentumTransferStep())
         .Times(Exactly(1))
         .WillOnce(Return("-0.02"));
-    EXPECT_CALL(mockView, getDetectorLimits())
+    EXPECT_CALL(mockView, getProcessingInstructions())
         .Times(Exactly(1))
         .WillOnce(Return("\"3,4\""));
     auto options = presenter.getReductionOptions();

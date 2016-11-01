@@ -224,15 +224,6 @@ std::string QtReflSettingsTabView::getMomentumTransferStep() const {
   return m_ui.momentumTransferStepEdit->text().toStdString();
 }
 
-/** Return detector limits
-* @return :: detector limits
-*/
-std::string QtReflSettingsTabView::getDetectorLimits() const {
-
-  //return m_ui.expSettingsDetLimitsEdit->text().toStdString();
-  return 0;
-}
-
 /** Return scale factor
 * @return :: scale factor
 */
@@ -303,6 +294,14 @@ std::string QtReflSettingsTabView::getLambdaMax() const {
 std::string QtReflSettingsTabView::getI0MonitorIndex() const {
 
   return m_ui.I0MonIndexEdit->text().toStdString();
+}
+
+/** Return processing instructions
+* @return :: processing instructions
+*/
+std::string QtReflSettingsTabView::getProcessingInstructions() const {
+
+  return m_ui.procInstEdit->text().toStdString();
 }
 
 } // namespace CustomInterfaces
