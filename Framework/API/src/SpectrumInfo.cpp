@@ -10,18 +10,14 @@ namespace Mantid {
 namespace API {
 
 SpectrumInfo::SpectrumInfo(const MatrixWorkspace &workspace)
-    : SpectrumInfo(workspace, nullptr) {}
-
-// Note the ParameterMap is accessed before the instrument, to avoid a copy.
-SpectrumInfo::SpectrumInfo(MatrixWorkspace &workspace)
-    : SpectrumInfo(workspace, &workspace.instrumentParameters()) {}
-
-SpectrumInfo::SpectrumInfo(const MatrixWorkspace &workspace,
-                           Geometry::ParameterMap *pmap)
-    : m_workspace(workspace), m_detectorInfo(Kernel::make_unique<DetectorInfo>(
-                                  workspace.getInstrument(), pmap)),
+    : m_workspace(workspace), m_detectorInfo(workspace.detectorInfo()),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
+
+SpectrumInfo::SpectrumInfo(MatrixWorkspace &workspace)
+    : SpectrumInfo(const_cast<const MatrixWorkspace &>(workspace)) {
+  m_mutableDetectorInfo = &workspace.mutableDetectorInfo();
+}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 SpectrumInfo::~SpectrumInfo() = default;
@@ -45,9 +41,9 @@ double SpectrumInfo::l2(const size_t index) const {
   double l2{0.0};
   const auto &dets = getDetectorVector(index);
   for (const auto &det : dets) {
-    const auto &detIndex = m_detectorInfo->indexOf(det->getID());
-    m_detectorInfo->setCachedDetector(detIndex, det);
-    l2 += m_detectorInfo->l2(detIndex);
+    const auto &detIndex = m_detectorInfo.indexOf(det->getID());
+    m_detectorInfo.setCachedDetector(detIndex, det);
+    l2 += m_detectorInfo.l2(detIndex);
   }
   return l2 / static_cast<double>(dets.size());
 }
@@ -64,9 +60,9 @@ double SpectrumInfo::twoTheta(const size_t index) const {
   double twoTheta{0.0};
   const auto &dets = getDetectorVector(index);
   for (const auto &det : dets) {
-    const auto &detIndex = m_detectorInfo->indexOf(det->getID());
-    m_detectorInfo->setCachedDetector(detIndex, det);
-    twoTheta += m_detectorInfo->twoTheta(detIndex);
+    const auto &detIndex = m_detectorInfo.indexOf(det->getID());
+    m_detectorInfo.setCachedDetector(detIndex, det);
+    twoTheta += m_detectorInfo.twoTheta(detIndex);
   }
   return twoTheta / static_cast<double>(dets.size());
 }
@@ -84,9 +80,9 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
   double signedTwoTheta{0.0};
   const auto &dets = getDetectorVector(index);
   for (const auto &det : dets) {
-    const auto &detIndex = m_detectorInfo->indexOf(det->getID());
-    m_detectorInfo->setCachedDetector(detIndex, det);
-    signedTwoTheta += m_detectorInfo->signedTwoTheta(detIndex);
+    const auto &detIndex = m_detectorInfo.indexOf(det->getID());
+    m_detectorInfo.setCachedDetector(detIndex, det);
+    signedTwoTheta += m_detectorInfo.signedTwoTheta(detIndex);
   }
   return signedTwoTheta / static_cast<double>(dets.size());
 }
@@ -99,9 +95,9 @@ Kernel::V3D SpectrumInfo::position(const size_t index) const {
   Kernel::V3D newPos;
   const auto &dets = getDetectorVector(index);
   for (const auto &det : dets) {
-    const auto &detIndex = m_detectorInfo->indexOf(det->getID());
-    m_detectorInfo->setCachedDetector(detIndex, det);
-    newPos += m_detectorInfo->position(detIndex);
+    const auto &detIndex = m_detectorInfo.indexOf(det->getID());
+    m_detectorInfo.setCachedDetector(detIndex, det);
+    newPos += m_detectorInfo.position(detIndex);
   }
 
   // We can have very small values (< Tolerance) of each component that should
@@ -120,7 +116,7 @@ Kernel::V3D SpectrumInfo::position(const size_t index) const {
 bool SpectrumInfo::hasDetectors(const size_t index) const {
   // Workspaces can contain invalid detector IDs. Those IDs will be silently
   // ignored here until this is fixed.
-  const auto &validDetectorIDs = m_detectorInfo->detectorIDs();
+  const auto &validDetectorIDs = m_detectorInfo.detectorIDs();
   for (const auto &id : m_workspace.getSpectrum(index).getDetectorIDs()) {
     const auto &it = std::lower_bound(validDetectorIDs.cbegin(),
                                       validDetectorIDs.cend(), id);
@@ -136,7 +132,7 @@ bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
   size_t count = 0;
   // Workspaces can contain invalid detector IDs. Those IDs will be silently
   // ignored here until this is fixed.
-  const auto &validDetectorIDs = m_detectorInfo->detectorIDs();
+  const auto &validDetectorIDs = m_detectorInfo.detectorIDs();
   for (const auto &id : m_workspace.getSpectrum(index).getDetectorIDs()) {
     const auto &it = std::lower_bound(validDetectorIDs.cbegin(),
                                       validDetectorIDs.cend(), id);
@@ -155,16 +151,16 @@ const Geometry::IDetector &SpectrumInfo::detector(const size_t index) const {
 
 /// Returns the source position.
 Kernel::V3D SpectrumInfo::sourcePosition() const {
-  return m_detectorInfo->sourcePosition();
+  return m_detectorInfo.sourcePosition();
 }
 
 /// Returns the sample position.
 Kernel::V3D SpectrumInfo::samplePosition() const {
-  return m_detectorInfo->samplePosition();
+  return m_detectorInfo.samplePosition();
 }
 
 /// Returns L1 (distance from source to sample).
-double SpectrumInfo::l1() const { return m_detectorInfo->l1(); }
+double SpectrumInfo::l1() const { return m_detectorInfo.l1(); }
 
 const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
@@ -180,8 +176,8 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   const size_t ndets = dets.size();
   if (ndets == 1) {
     // If only 1 detector for the spectrum number, just return it
-    const auto detIndex = m_detectorInfo->indexOf(*dets.begin());
-    m_lastDetector[thread] = m_detectorInfo->getDetectorPtr(detIndex);
+    const auto detIndex = m_detectorInfo.indexOf(*dets.begin());
+    m_lastDetector[thread] = m_detectorInfo.getDetectorPtr(detIndex);
   } else if (ndets == 0) {
     throw Kernel::Exception::NotFoundError("MatrixWorkspace::getDetector(): No "
                                            "detectors for this workspace "
@@ -191,8 +187,8 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
     // Else need to construct a DetectorGroup and use that
     std::vector<boost::shared_ptr<const Geometry::IDetector>> det_ptrs;
     for (const auto &id : dets) {
-      const auto detIndex = m_detectorInfo->indexOf(id);
-      det_ptrs.push_back(m_detectorInfo->getDetectorPtr(detIndex));
+      const auto detIndex = m_detectorInfo.indexOf(id);
+      det_ptrs.push_back(m_detectorInfo.getDetectorPtr(detIndex));
     }
     m_lastDetector[thread] =
         boost::make_shared<Geometry::DetectorGroup>(det_ptrs, false);

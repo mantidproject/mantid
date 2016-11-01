@@ -19,7 +19,6 @@ class ParameterMap;
 
 namespace API {
 class Axis;
-class DetectorInfo;
 class SpectrumDetectorMapping;
 class SpectrumInfo;
 
@@ -85,8 +84,6 @@ public:
 
   const SpectrumInfo &spectrumInfo() const;
   SpectrumInfo &mutableSpectrumInfo();
-  const DetectorInfo &detectorInfo() const;
-  DetectorInfo &mutableDetectorInfo();
 
   /**@name Instrument queries */
   //@{

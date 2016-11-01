@@ -182,39 +182,22 @@ const SpectrumInfo &MatrixWorkspace::spectrumInfo() const {
  */
 SpectrumInfo &MatrixWorkspace::mutableSpectrumInfo() {
   // Creating SpectrumInfo with a non-const reference to a MatrixWorkspace will
-  // cache to result of ExperimentInfo::instrumentParameters() which will later
-  // be used by modifications. This will trigger a copy if required. Note that
-  // if m_spectrumInfo was not equals to nullptr the following happens:
-  // 1. The old SpectrumInfo object is storing a parameterized instrument. Thus
-  // the reference count to the ParameterMap in ExperimentInfo is at least 2 (1
-  // from the ExperimentInfo, 1 from SpectrumInfo).
-  // 2. make_unique creates a new SpectrumInfo, which calls
-  // ExperimentInfo::instrumentParameters(). In the latter method, the reference
-  // count to the ParameterMap is not 1, so invalidateInstrumentReferences() is
-  // called.
-  // 3. invalidateInstrumentReferences() resets m_spectrumInfo, dropping the
-  // reference count to the ParameterMap by 1.
-  // 4. If the ExperimentInfo is the sole remaining owner of the ParameterMap it
-  // returns a reference to it, otherwise it creates a copy and returns a
-  // reference.
-  // 5. Construction of SpectrumInfo continues and the result is assigned to
+  // call ExperimentInfo::mutableDetectorInfo() which will later be used by
+  // modifications. This will trigger a copy if required. Note that the
+  // following happens internally:
+  // 1. make_unique creates a new SpectrumInfo, which calls
+  // ExperimentInfo::mutableDetectorInfo(). In the latter method, the reference
+  // count to the ParameterMap is typically not 1, so
+  // invalidateInstrumentReferences() is called.
+  // 2. invalidateInstrumentReferences() resets m_spectrumInfo, releasing any
+  // parameterized detectors and thus dropping any unneeded references to the
+  // ParameterMap.
+  // 3. Construction of SpectrumInfo continues and the result is assigned to
   // m_spectrumInfo.
 
   // No locking here since this non-const method is not thread safe.
   m_spectrumInfo = Kernel::make_unique<SpectrumInfo>(*this);
   return *m_spectrumInfo;
-}
-
-/** Return a const reference to the DetectorInfo object.
- */
-const DetectorInfo &MatrixWorkspace::detectorInfo() const {
-  return spectrumInfo().detectorInfo();
-}
-
-/** Return a non-const reference to the DetectorInfo object. Not thread safe.
- */
-DetectorInfo &MatrixWorkspace::mutableDetectorInfo() {
-  return mutableSpectrumInfo().mutableDetectorInfo();
 }
 
 /** Resets the SpectrumInfo object on modification of the Instrument.

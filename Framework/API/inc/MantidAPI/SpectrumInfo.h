@@ -83,17 +83,14 @@ public:
   Kernel::V3D samplePosition() const;
   double l1() const;
 
-  const DetectorInfo &detectorInfo() const { return *m_detectorInfo; }
-  DetectorInfo &mutableDetectorInfo() { return *m_detectorInfo; }
-
 private:
-  SpectrumInfo(const MatrixWorkspace &workspace, Geometry::ParameterMap *pmap);
   const Geometry::IDetector &getDetector(const size_t index) const;
   std::vector<boost::shared_ptr<const Geometry::IDetector>>
   getDetectorVector(const size_t index) const;
 
   const MatrixWorkspace &m_workspace;
-  std::unique_ptr<DetectorInfo> m_detectorInfo;
+  const DetectorInfo &m_detectorInfo;
+  DetectorInfo *m_mutableDetectorInfo{nullptr};
   mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>
       m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;
