@@ -907,7 +907,7 @@ class CWSCDReductionControl(object):
             ret_value = self._myPeakInfoDict[p_key]
         else:
             ret_value = None
-            print '[DB...INFO] Peak Key is supposed to be %s.' % p_key
+            print '[DB...INFO] Peak Key is supposed to be %s of type %s..' % (str(p_key), type(p_key))
 
         return ret_value
 
@@ -1517,9 +1517,10 @@ class CWSCDReductionControl(object):
 
         return True, pt_ws_name
 
+    # TODO/NOW/ISSUE - clean up this method!
     def merge_scans(self, scan_md_ws_list, scan_peak_centre_list, merged_ws_name):
         """
-        Merge scans
+        Merge multiple scans
         :param exp_number:
         :param scan_number_list:
         :param merged_ws_name:

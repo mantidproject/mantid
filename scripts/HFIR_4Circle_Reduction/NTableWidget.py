@@ -432,7 +432,7 @@ class NTableWidget(QtGui.QTableWidget):
         :param row:
         :param col:
         :param value:
-        :return:
+        :return: None
         """
         # Check
         assert isinstance(row, int) and 0 <= row < self.rowCount()

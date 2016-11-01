@@ -1460,6 +1460,10 @@ class MainWindow(QtGui.QMainWindow):
         # update the message
         self.ui.lineEdit_peaksIndexedBy.setText(IndexFromUB)
 
+        # enable/disable push buttons
+        self.ui.pushButton_setHKL2Int.setEnabled(True)
+        self.ui.pushButton_undoSetToInteger.setEnable(False)
+
         return
 
     def do_list_scans(self):
@@ -2231,21 +2235,26 @@ class MainWindow(QtGui.QMainWindow):
         Select or de-select all rows in survey items
         :return:
         """
-        if self.ui.checkBox_surveySelectNuclearPeaks.isChecked():
-            # only select nuclear peaks
-            num_rows = self.ui.tableWidget_surveyTable.rowCount()
-            for i_row in range(num_rows):
-                peak_hkl = self.ui.tableWidget_surveyTable.get_hkl(i_row)
-                if peak_util.is_peak_nuclear(peak_hkl[0], peak_hkl[1], peak_hkl[2]):
-                    self.ui.tableWidget_surveyTable.select_row(i_row, True)
-                else:
-                    self.ui.tableWidget_surveyTable.select_row(i_row, False)
-
+        if self._surveyTableFlag:
+            # flag is turned on: select all peaks or all nuclear peaks
+            if self.ui.checkBox_surveySelectNuclearPeaks.isChecked():
+                # only select nuclear peaks
+                num_rows = self.ui.tableWidget_surveyTable.rowCount()
+                for i_row in range(num_rows):
+                    peak_hkl = self.ui.tableWidget_surveyTable.get_hkl(i_row)
+                    if peak_util.is_peak_nuclear(peak_hkl[0], peak_hkl[1], peak_hkl[2]):
+                        self.ui.tableWidget_surveyTable.select_row(i_row, True)
+                    else:
+                        self.ui.tableWidget_surveyTable.select_row(i_row, False)
+            else:
+                # all peaks
+                self.ui.tableWidget_surveyTable.select_all_rows(True)
         else:
-            # select all peaks
-            self.ui.tableWidget_surveyTable.select_all_rows(self._surveyTableFlag)
+            # de-select all peaks
+            self.ui.tableWidget_surveyTable.select_all_rows(False)
         # END-IF-ELSE
 
+        # flip the flag for next select
         self._surveyTableFlag = not self._surveyTableFlag
 
         return
@@ -2371,7 +2380,7 @@ class MainWindow(QtGui.QMainWindow):
 
             # set & show
             self._myControl.get_peak_info(exp_number, scan_i).set_hkl_np_array(hkl_i)
-            self.ui.tableWidget_mergeScans.set_hkl_np_array(row_index, hkl_i)
+            self.ui.tableWidget_mergeScans.set_hkl(row_index, hkl_i)
         # END-FOR
 
         return
@@ -2883,7 +2892,8 @@ class MainWindow(QtGui.QMainWindow):
         :param message:
         :return:
         """
-        assert isinstance(message, str)
+        assert isinstance(message, str), 'Input message %s must a string but not %s.' \
+                                         '' % (str(message), type(message))
         QtGui.QMessageBox.information(self, '4-circle Data Reduction', message)
 
         return
@@ -3190,9 +3200,9 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def update_merge_status(self, exp_number, scan_number, sig_value, peak_centre, mode):
+    def update_merge_value(self, exp_number, scan_number, sig_value, peak_centre, mode):
         """
-        update the status of merging/integrating peaks
+        update the values of result from merging/integrating peaks
         :param exp_number:
         :param scan_number:
         :param sig_value:
@@ -3214,6 +3224,8 @@ class MainWindow(QtGui.QMainWindow):
             # end of processing one peak
             intensity = sig_value
 
+            print '[DB...BAT] Get peak center %s of type %s.' % (str(peak_centre), type(peak_centre))
+
             # check intensity value
             is_error = False
             if intensity < 0:
@@ -3231,10 +3243,16 @@ class MainWindow(QtGui.QMainWindow):
             status, error_msg = self._myControl.set_peak_intensity(exp_number, scan_number, intensity)
             if status:
                 # set the value to table
-                self.ui.tableWidget_mergeScans.set_peak_intensity(None, scan_number, intensity)
-                self.ui.tableWidget_mergeScans.set_peak_centre(exp_number, scan_number, peak_centre)
+                self.ui.tableWidget_mergeScans.set_peak_intensity(row_number=None,
+                                                                  scan_number=scan_number,
+                                                                  peak_intensity=intensity)
+                self.ui.tableWidget_mergeScans.set_peak_centre(row_number=None,
+                                                               scan_number=scan_number,
+                                                               peak_centre=peak_centre)
                 if not is_error:
                     self.ui.tableWidget_mergeScans.set_status(scan_number, 'Done')
+                else:
+                    self.ui.tableWidget_mergeScans.set_status(scan_number, 'Intensity Error')
             else:
                 self._errorMessageEnsemble += error_msg + '\n'
                 self.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
@@ -3263,28 +3281,47 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def update_merge_error(self, exp_number, scan_number, error_msg):
+    def update_merge_message(self, exp_number, scan_number, mode, message):
         """
-        Update the merge-scan table for error message
+        Update the merge-scan table for message such as error or etc.
+        Note: the string passed from PyQt message is of type unicode but not string!
         :param exp_number:
         :param scan_number:
-        :param error_msg:
+        :param mode:
+        :param message:
         :return:
         """
         # check
-        assert isinstance(exp_number, int)
+        assert isinstance(exp_number, int), 'Experiment number must be integer.'
         assert isinstance(scan_number, int)
-        assert isinstance(error_msg, str)
+        assert isinstance(mode, int), 'Mode %s must be integer but not %s.' \
+                                      '' % (str(mode), type(mode))
+        assert isinstance(message, str) or isinstance(message, unicode),\
+            'Message %s must be a string/unicode but not %s.' % (str(message), type(message))
+
+        # passed value from PyQt signal might be a unicode code
+        message = str(message)
 
         # set intensity, state to table
-        self.ui.tableWidget_mergeScans.set_peak_intensity(row_number=None, scan_number=scan_number,
-                                                          peak_intensity=0., lorentz_corrected=False)
-        self.ui.tableWidget_mergeScans.set_status(scan_no=scan_number, status=error_msg)
+        if mode == 0:
+            # error message
+            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number=None, scan_number=scan_number,
+                                                              peak_intensity=0., lorentz_corrected=False)
+            self.ui.tableWidget_mergeScans.set_status(scan_no=scan_number, status=message)
 
-        # set peak value
-        status, error_msg = self._myControl.set_peak_intensity(exp_number, scan_number, 0.)
-        if not status:
-            self.pop_one_button_dialog(error_msg)
+            # set peak value
+            status, ret_message = self._myControl.set_peak_intensity(exp_number, scan_number, 0.)
+            if not status:
+                self.pop_one_button_dialog(ret_message)
+
+        elif mode == 1:
+            # merged workspace name
+            merged_ws_name = message
+            self.ui.tableWidget_mergeScans.set_ws_names(scan_num=scan_number, merged_md_name=merged_ws_name,
+                                                        ws_group_name='')
+
+        else:
+            raise RuntimeError('Peak-merging mode %d is not supported.' % mode)
 
         return
 

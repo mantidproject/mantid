@@ -548,6 +548,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
     """
     Extended table for peaks used to calculate UB matrix
     """
+    # TODO/NOW/ISSUE - Rename HKL to Unit (HKL/Q-Sample) and then make it meaningful
     TableSetup = [('Scan', 'int'),
                   ('Intensity', 'float'),
                   ('Corrected', 'float'),
@@ -887,18 +888,39 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return
 
-    def set_peak_centre(self, row_number, peak_centre):
+    def set_peak_centre(self, row_number, scan_number, peak_centre):
         """
         set peak centre value
         :param row_number:
+        :param scan_number:
         :param peak_centre:
         :return:
         """
         # check input's validity
-        assert isinstance(row_number, int), 'Row number %s must be an integer but not %s.' \
-                                            '' % (str(row_number), type(row_number))
+        if row_number is not None and scan_number is not None:
+            raise AssertionError('Row number %s and scan number %s cannot be given simultaneously.' % (
+                str(row_number), str(scan_number)))
+        elif row_number is None and scan_number is None:
+            raise AssertionError('Row number and scan number cannot be left empty simultaneously.')
+
         assert isinstance(peak_centre, str) or len(peak_centre) == 3,\
             'Peak centre %s must be a string or a container with size 3.' % str(peak_centre)
+
+        # if scan number is given, then find out row number
+        if row_number is None:
+            # row number is not defined.  go through table for scan number
+            row_number = -1
+            num_rows = self.rowCount()
+            scan_col_index = ProcessTableWidget.TableSetup.index(('Scan', 'int'))
+            for row_index in xrange(num_rows):
+                scan_i = self.get_cell_value(row_index, scan_col_index)
+                if scan_i == scan_number:
+                    row_number = row_index
+                    break
+            # check
+            if row_number < 0:
+                raise RuntimeError('Scan %d cannot be found in the table.' % scan_number)
+        # END-IF
 
         # set value
         if isinstance(peak_centre, str):
@@ -1032,10 +1054,15 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :param ws_group_name:
         :return:
         """
+        # DEBUG
+        print '[DB...BAT] Set workspace name (table): scan = ', scan_num, ' ws = ', merged_md_name, ws_group_name
+
         # Check
         assert isinstance(scan_num, int)
         assert isinstance(merged_md_name, str) or merged_md_name is None
         assert isinstance(ws_group_name, str) or ws_group_name is None
+
+        j_ws_name = self.get_column_index('Merged Workspace')
 
         num_rows = self.rowCount()
         set_done = False
@@ -1043,9 +1070,9 @@ class ProcessTableWidget(tableBase.NTableWidget):
             tmp_scan_no = self.get_cell_value(i_row, 0)
             if scan_num == tmp_scan_no:
                 if merged_md_name is not None:
-                    self.update_cell_value(i_row, 3, merged_md_name)
-                if ws_group_name is not None:
-                    self.update_cell_value(i_row, 4, ws_group_name)
+                    self.update_cell_value(i_row, j_ws_name, merged_md_name)
+                # if ws_group_name is not None:
+                #     self.update_cell_value(i_row, 4, ws_group_name)
                 set_done = True
                 break
         # END-FOR

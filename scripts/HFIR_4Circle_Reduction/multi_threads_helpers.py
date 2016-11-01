@@ -110,8 +110,9 @@ class IntegratePeaksThread(QThread):
     A thread to integrate peaks
     """
     # signal to emit before a merge/integration status: exp number, scan number, progress, mode
-    peakMergeSignal = QtCore.pyqtSignal(int, int, float, int)
-    errorSignal = QtCore.pyqtSignal(int, int, str)
+    peakMergeSignal = QtCore.pyqtSignal(int, int, float, list, int)
+    # signal to report state: (1) experiment, (2) scan, (3) mode, (4) message
+    mergeMsgSignal = QtCore.pyqtSignal(int, int, int, str)
 
     def __init__(self, main_window, exp_number, scan_tuple_list, mask_det, mask_name, norm_type, num_pt_bg_left,
                  num_pt_bg_right):
@@ -153,8 +154,8 @@ class IntegratePeaksThread(QThread):
         self._numBgPtRight = num_pt_bg_right
 
         # link signals
-        self.peakMergeSignal.connect(self._mainWindow.update_merge_status)
-        self.errorSignal.connect(self._mainWindow.update_merge_error)
+        self.peakMergeSignal.connect(self._mainWindow.update_merge_value)
+        self.mergeMsgSignal.connect(self._mainWindow.update_merge_message)
 
         return
 
@@ -179,14 +180,38 @@ class IntegratePeaksThread(QThread):
 
             # emit signal for run start (mode 0)
             mode = int(0)
-            self.peakMergeSignal.emit(self._expNumber, scan_number, float(index), mode)
+            self.peakMergeSignal.emit(self._expNumber, scan_number, float(index), [0., 0., 0.], mode)
 
             # merge if not merged
             if merged is False:
-                self._mainWindow.controller.merge_pts_in_scan(exp_no=self._expNumber, scan_no=scan_number,
-                                                              pt_num_list=pt_number_list,
-                                                              target_frame='q-sample')
-                self._mainWindow.ui.tableWidget_mergeScans.set_status(scan_number, 'Merged')
+                merged_ws_name = 'X'
+                try:
+                    status, ret_tup = self._mainWindow.controller.merge_pts_in_scan(exp_no=self._expNumber,
+                                                                                    scan_no=scan_number,
+                                                                                    pt_num_list=pt_number_list,
+                                                                                    target_frame='q-sample')
+                    if status:
+                        merged_ws_name = str(ret_tup[0])
+                        error_message = ''
+                    else:
+                        error_message = str(ret_tup)
+                except RuntimeError as run_err:
+                    status = False
+                    error_message = str(run_err)
+
+                # continue to
+                if status:
+                    # successfully merge peak
+                    assert isinstance(merged_ws_name, str), 'Merged workspace %s must be a string but not %s.' \
+                                                            '' % (str(merged_ws_name), type(merged_ws_name))
+                    self.mergeMsgSignal.emit(self._expNumber, scan_number, 1, merged_ws_name)
+                else:
+                    self.mergeMsgSignal.emit(self._expNumber, scan_number, 0, error_message)
+                    continue
+                # self._mainWindow.ui.tableWidget_mergeScans.set_status(scan_number, 'Merged')
+            else:
+                # merged
+                print '[DB...BAT] Scan %s is merged (in thread)!' % scan_number
             # END-IF
 
             # calculate peak center
@@ -201,7 +226,7 @@ class IntegratePeaksThread(QThread):
                 ret_obj = 'AssertionError: %s.' % str(ass_err)
 
             if status:
-                center_i = ret_obj   # 3-tupe
+                center_i = ret_obj   # 3-tuple
             else:
                 error_msg = 'Unable to find peak for exp %d scan %d: %s.' % (self._expNumber, scan_number, str(ret_obj))
                 # no need... self._mainWindow.controller.set_peak_intensity(self._expNumber, scan_number, 0.)
@@ -239,7 +264,7 @@ class IntegratePeaksThread(QThread):
             else:
                 # integration failed
                 error_msg = str(ret_obj)
-                self.errorSignal.emit(self._expNumber, scan_number, error_msg)
+                self.mergeMsgSignal.emit(self._expNumber, scan_number, 0, error_msg)
                 continue
 
             # calculate background value
@@ -248,17 +273,17 @@ class IntegratePeaksThread(QThread):
 
             # correct intensity by background value
             intensity_i = self._mainWindow.controller.simple_integrate_peak(pt_dict, avg_bg_value)
-            peak_centre = self._mainWindow.controller.get_peak_info(self._expNumber, scan_number).get_centre()
+            peak_centre = self._mainWindow.controller.get_peak_info(self._expNumber, scan_number).get_peak_centre()
 
             # emit signal to main app for peak intensity value
             mode = 1
             # center_i
-            self.peakMergeSignal.emit(self._expNumber, scan_number, float(intensity_i), peak_centre, mode)
+            self.peakMergeSignal.emit(self._expNumber, scan_number, float(intensity_i), list(peak_centre), mode)
         # END-FOR
 
         # terminate the process
         mode = int(2)
-        self.peakMergeSignal.emit(self._expNumber, -1, len(self._scanTupleList), mode)
+        self.peakMergeSignal.emit(self._expNumber, -1, len(self._scanTupleList), [0, 0, 0], mode)
         # self._mainWindow.ui.tableWidget_mergeScans.select_all_rows(False)
 
         return
