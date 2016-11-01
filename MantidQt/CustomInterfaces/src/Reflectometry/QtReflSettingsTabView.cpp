@@ -219,10 +219,9 @@ std::string QtReflSettingsTabView::getCPp() const {
 /** Return momentum transfer limits
 * @return :: momentum transfer limits
 */
-std::string QtReflSettingsTabView::getMomentumTransferLimits() const {
+std::string QtReflSettingsTabView::getMomentumTransferStep() const {
 
-  //return m_ui.expSettingsMomentumTransferLimitsEdit->text().toStdString();
-  return 0;
+  return m_ui.momentumTransferStepEdit->text().toStdString();
 }
 
 /** Return detector limits

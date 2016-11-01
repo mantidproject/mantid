@@ -65,7 +65,7 @@ public:
   /// Return Cpp
   std::string getCPp() const override;
   /// Return momentum transfer limits
-  std::string getMomentumTransferLimits() const override;
+  std::string getMomentumTransferStep() const override;
   /// Return detector limits
   std::string getDetectorLimits() const override;
   /// Return scale factor

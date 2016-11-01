@@ -71,7 +71,7 @@ public:
   virtual std::string getCAlpha() const = 0;
   virtual std::string getCAp() const = 0;
   virtual std::string getCPp() const = 0;
-  virtual std::string getMomentumTransferLimits() const = 0;
+  virtual std::string getMomentumTransferStep() const = 0;
   virtual std::string getDetectorLimits() const = 0;
   virtual std::string getScaleFactor() const = 0;
   virtual std::string getPolarisationCorrections() const = 0;

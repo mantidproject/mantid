@@ -74,7 +74,7 @@ public:
   MOCK_CONST_METHOD0(getCAlpha, std::string());
   MOCK_CONST_METHOD0(getCAp, std::string());
   MOCK_CONST_METHOD0(getCPp, std::string());
-  MOCK_CONST_METHOD0(getMomentumTransferLimits, std::string());
+  MOCK_CONST_METHOD0(getMomentumTransferStep, std::string());
   MOCK_CONST_METHOD0(getDetectorLimits, std::string());
   MOCK_CONST_METHOD0(getScaleFactor, std::string());
   MOCK_CONST_METHOD0(getPolarisationCorrections, std::string());
