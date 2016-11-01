@@ -19,9 +19,9 @@ import SANSUtility as su
 import os
 import copy
 import sys
-from collections import namedtuple
 
 logger = Logger("ISISReducer")
+
 
 class ReductionStateTransferer(object):
     def __init__(self):
@@ -56,7 +56,7 @@ class ReductionStateTransferer(object):
                 reducer.settings["events.binning"] = copy.deepcopy(self.rc.settings["events.binning"])
 
         # Get wavelength limits
-        reducer.to_Q.w_cut  = self.rc.to_Q.w_cut 
+        reducer.to_Q.w_cut  = self.rc.to_Q.w_cut
 
         # Get Q limits
         reducer.to_Q.binning = self.rc.to_Q.binning
@@ -93,7 +93,7 @@ class ReductionStateTransferer(object):
         reducer.instrument.set_incident_mon(self.rc.instrument.get_incident_mon())
 
         # Set transmission spectrum
-        reducer.instrument.incid_mon_4_trans_calc = self.rc.instrument.incid_mon_4_trans_calc 
+        reducer.instrument.incid_mon_4_trans_calc = self.rc.instrument.incid_mon_4_trans_calc
         reducer.transmission_calculator.interpolate = self.rc.transmission_calculator.interpolate
 
         # Set transmission settings
