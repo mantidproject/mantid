@@ -38,7 +38,7 @@ from .api._aliases import *
 
 #------------------------ Specialized function calls --------------------------
 # List of specialized algorithms
-__SPECIALIZED_FUNCTIONS__ = ["Load", "CutMD", "RenameWorkspace"]
+__SPECIALIZED_FUNCTIONS__ = ["Load", "StartLiveData", "CutMD", "RenameWorkspace"]
 # List of specialized algorithms
 __MDCOORD_FUNCTIONS__ = ["PeakIntensityVsRadius", "CentroidPeaksMD","IntegratePeaksMD"]
 # The "magic" keyword to enable/disable logging
@@ -214,6 +214,60 @@ def LoadDialog(*args, **kwargs):
     set_properties_dialog(algm,**arguments)
     algm.execute()
     return algm
+
+#------------------------------------------------------------------------------
+
+def StartLiveData(*args, **kwargs):
+    """
+    StartLiveData dynamically adds the properties of the specific LiveListener
+    that is used to itself, to allow usage such as the following:
+
+        StartLiveData(Instrument='ISIS_Histogram', ...
+                      PeriodList=[1,3], SpectraList=[2,4,6])
+
+    Where PeriodList and SpectraList are properties of the ISISHistoDataListener
+    rather than of StartLiveData. For StartLiveData to know those are valid
+    properties, however, it first needs to know what the Instrument is.
+
+    This is a similar situation as in the Load algorithm, where the Filename
+    must be provided before other properties become available, and so it is
+    solved here in the same way.
+    """
+    instrument, = _get_mandatory_args('StartLiveData', ["Instrument"], *args, **kwargs)
+
+    # Create and execute
+    (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
+    algm = _create_algorithm_object('StartLiveData',
+                                    startProgress=_startProgress,
+                                    endProgress=_endProgress)
+    _set_logging_option(algm, kwargs)
+    try:
+        algm.setProperty('Instrument', instrument) # Must be set first
+    except ValueError as ve:
+        raise ValueError('Problem when setting Instrument. This is the detailed error '
+                         'description: ' + str(ve))
+
+    # Remove from keywords so it is not set twice
+    try:
+        del kwargs['Instrument']
+    except KeyError:
+        pass
+
+    # Handle unpacking / workspace names from lhs
+    lhs = _kernel.funcinspect.lhs_info()
+    lhs_args = _get_args_from_lhs(lhs, algm)
+    final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
+
+    # Check for any properties that aren't known and warn they will not be used
+    for key in list(final_keywords.keys()):
+        if key not in algm:
+            logger.warning("You've passed a property (%s) to StartLiveData() that doesn't apply to this Instrument." % key)
+            del final_keywords[key]
+
+    set_properties(algm, **final_keywords)
+    algm.execute()
+
+    return _gather_returns("StartLiveData", lhs, algm)
 
 #---------------------------- Fit ---------------------------------------------
 
