@@ -4,6 +4,7 @@
 #include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Utils.h"

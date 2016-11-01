@@ -3,6 +3,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/BoundedValidator.h"

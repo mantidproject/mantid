@@ -1,4 +1,3 @@
-// Includes
 #include "MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h"
 #include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 
@@ -6,6 +5,7 @@
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/ModeratorModel.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

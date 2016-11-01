@@ -9,6 +9,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"

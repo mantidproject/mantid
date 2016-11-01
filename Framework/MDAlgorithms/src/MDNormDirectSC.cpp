@@ -13,6 +13,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

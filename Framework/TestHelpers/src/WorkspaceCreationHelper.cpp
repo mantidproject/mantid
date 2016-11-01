@@ -22,6 +22,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/Component.h"

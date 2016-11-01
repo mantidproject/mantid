@@ -1,11 +1,10 @@
 #ifndef MANTID_DATAHANDLING_LOADASCII_H_
 #define MANTID_DATAHANDLING_LOADASCII_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
+
+#include <list>
 
 namespace Mantid {
 namespace DataHandling {

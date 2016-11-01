@@ -5,6 +5,7 @@
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"

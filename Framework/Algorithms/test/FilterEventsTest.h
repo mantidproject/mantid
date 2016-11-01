@@ -13,6 +13,7 @@
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

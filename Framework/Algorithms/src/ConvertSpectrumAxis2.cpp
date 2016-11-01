@@ -16,6 +16,8 @@
 
 #include <cfloat>
 
+constexpr double rad2deg = 180.0 / M_PI;
+
 namespace Mantid {
 namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory

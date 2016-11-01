@@ -4,6 +4,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/CPUTimer.h"

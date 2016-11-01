@@ -11,6 +11,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/Sample.h"
 

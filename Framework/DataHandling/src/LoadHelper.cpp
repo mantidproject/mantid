@@ -6,6 +6,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include <nexus/napi.h>
 

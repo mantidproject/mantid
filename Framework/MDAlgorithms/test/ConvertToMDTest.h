@@ -2,6 +2,7 @@
 #define MANTID_MD_CONVERT2_Q_NDANY_TEST_H_
 
 #include "MantidAPI/BoxController.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
