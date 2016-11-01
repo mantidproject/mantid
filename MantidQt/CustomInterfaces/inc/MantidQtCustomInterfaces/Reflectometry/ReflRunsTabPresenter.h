@@ -77,6 +77,8 @@ public:
   std::map<std::string, std::string> getPreprocessingOptions() const override;
   std::string getProcessingOptions() const override;
   std::string getPostprocessingOptions() const override;
+  /// Get current instrument name
+  std::string getCurrentInstrumentName() const override;
 
 protected:
   /// The search model
@@ -96,7 +98,6 @@ protected:
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
   void transfer();
   void pushCommands();
-  std::string getCurrentInstrumentName() const;
 
 private:
   static const std::string LegacyTransferMethod;

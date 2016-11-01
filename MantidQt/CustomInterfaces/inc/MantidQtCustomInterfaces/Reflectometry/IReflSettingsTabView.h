@@ -85,8 +85,7 @@ public:
   virtual std::string getI0MonitorIndex() const = 0;
 
   /// Set default values for settings
-  virtual void
-  setExpDefaults(const std::vector<std::string> &) const = 0;
+  virtual void setExpDefaults(const std::vector<std::string> &) const = 0;
   virtual void setInstDefaults(const std::vector<double> &) const = 0;
 };
 }
