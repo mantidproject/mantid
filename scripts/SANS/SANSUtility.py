@@ -687,6 +687,7 @@ class WorkspaceType(object):
 
     class Event(object):
         pass
+
     class Histogram(object):
         pass
 
@@ -701,7 +702,6 @@ def get_number_of_periods_from_file(file_name):
     full_file_path = FileFinder.getFullPath(file_name)
     try:
         with h5.File(full_file_path) as h5_file:
-            keys = h5_file.keys()
             first_entry = h5_file["raw_data_1"]
             period_group = first_entry["periods"]
             proton_charge_data_set = period_group["proton_charge"]
