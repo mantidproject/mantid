@@ -77,7 +77,7 @@ void MuonRemoveExpDecay::exec() {
   if (inputWS != outputWS) {
 
     // Copy all the Y and E data
-    PARALLEL_FOR2(inputWS, outputWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
     for (int64_t i = 0; i < int64_t(numSpectra); ++i) {
       PARALLEL_START_INTERUPT_REGION
       const auto index = static_cast<size_t>(i);
@@ -91,7 +91,7 @@ void MuonRemoveExpDecay::exec() {
 
   // Do the specified spectra only
   int specLength = static_cast<int>(spectra.size());
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < specLength; ++i) {
     PARALLEL_START_INTERUPT_REGION
     const auto specNum = static_cast<size_t>(spectra[i]);

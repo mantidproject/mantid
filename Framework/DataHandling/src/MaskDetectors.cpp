@@ -235,13 +235,6 @@ void MaskDetectors::exec() {
     MatrixWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
     setProperty("Workspace", ws);
   }
-
-  /*
-  This rebuild request call, gives the workspace the opportunity to rebuild the
-  nearest neighbours map
-  and therefore pick up any detectors newly masked with this algorithm.
-  */
-  WS->rebuildNearestNeighbours();
 }
 /* Verifies input ranges are defined and returns these ranges if they are.
 *

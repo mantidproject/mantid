@@ -111,7 +111,7 @@ public:
     SpectrumInfo info(*ws);
     // This attempts to test threading, but probably it is not really exercising
     // much.
-    PARALLEL_FOR1(ws)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
     for (int i = 0; i < count; ++i)
       TS_ASSERT_EQUALS(info.isMasked(static_cast<size_t>(i)), i % 2 == 0);
   }
@@ -393,7 +393,7 @@ public:
   }
   static void destroySuite(SpectrumInfoTestPerformance *suite) { delete suite; }
 
-  SpectrumInfoTestPerformance() : m_workspace(nullptr) {
+  SpectrumInfoTestPerformance() : m_workspace() {
     size_t numberOfHistograms = 10000;
     size_t numberOfBins = 1;
     m_workspace.init(numberOfHistograms, numberOfBins, numberOfBins - 1);

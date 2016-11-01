@@ -42,9 +42,9 @@ QwtBarCurve::QwtBarCurve(BarStyle style, Table *t, const QString &xColName,
   setStyle(QwtPlotCurve::UserCurve);
 
   if (bar_style == Vertical)
-    setType(Graph::VerticalBars);
+    setType(GraphOptions::VerticalBars);
   else
-    setType(Graph::HorizontalBars);
+    setType(GraphOptions::HorizontalBars);
 }
 
 void QwtBarCurve::copy(const QwtBarCurve *b) {

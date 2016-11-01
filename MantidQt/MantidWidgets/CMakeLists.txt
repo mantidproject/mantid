@@ -84,10 +84,14 @@ set ( SRC_FILES
 	src/InstrumentView/XIntegrationControl.cpp
 	src/LineEditWithClear.cpp
 	src/LogValueSelector.cpp
+	src/MantidTreeWidget.cpp
+	src/MantidTreeWidgetItem.cpp
 	src/MWDiag.cpp
 	src/MWRunFiles.cpp
 	src/MWView.cpp
 	src/MantidHelpWindow.cpp
+	src/MantidSurfacePlotDialog.cpp
+	src/MantidWSIndexDialog.cpp
 	src/MessageDisplay.cpp
 	src/MultifitSetupDialog.cpp
 	src/MuonFitDataSelector.cpp
@@ -115,6 +119,9 @@ set ( SRC_FILES
 	src/WorkspaceSelector.cpp
 	src/pqHelpWindow.cxx
 	src/pythonCalc.cpp
+    src/WorkspacePresenter/WorkspacePresenter.cpp
+    src/WorkspacePresenter/ADSAdapter.cpp
+	src/WorkspacePresenter/QWorkspaceDockView.cpp
 )
 
 # Header files with Q_OBJECT that qmake will "moc"
@@ -145,6 +152,9 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/InstrumentSelector.h
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.h
     inc/MantidQtMantidWidgets/InputController.h
+	inc/MantidQtMantidWidgets/MantidSurfacePlotDialog.h
+	inc/MantidQtMantidWidgets/MantidWSIndexDialog.h
+	inc/MantidQtMantidWidgets/MantidTreeWidget.h
     inc/MantidQtMantidWidgets/MantidHelpWindow.h
     inc/MantidQtMantidWidgets/MessageDisplay.h
     inc/MantidQtMantidWidgets/MultifitSetupDialog.h
@@ -197,8 +207,9 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/InstrumentView/Shape2DCollection.h
     inc/MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h
     inc/MantidQtMantidWidgets/InstrumentView/UCorrectionDialog.h
-	inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
+    inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
 	inc/MantidQtMantidWidgets/LogValueSelector.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/QWorkspaceDockView.h
 )
 
 # Add the include files are NOT already in MOC_FILES
@@ -299,11 +310,19 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/InstrumentView/Viewport.h
 	inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
 	inc/MantidQtMantidWidgets/LogValueSelector.h
+	inc/MantidQtMantidWidgets/MantidDisplayBase.h
+	inc/MantidQtMantidWidgets/MantidTreeWidgetItem.h
 	inc/MantidQtMantidWidgets/MuonFitDataSelector.h
 	inc/MantidQtMantidWidgets/MuonFunctionBrowser.h
 	inc/MantidQtMantidWidgets/ProgressPresenter.h
-	inc/MantidQtMantidWidgets/ProgressableView.h
-	inc/MantidQtMantidWidgets/WidgetDllOption.h
+    inc/MantidQtMantidWidgets/ProgressableView.h
+    inc/MantidQtMantidWidgets/ProgressPresenter.h
+    inc/MantidQtMantidWidgets/WorkspacePresenter/ViewNotifiable.h
+    inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProviderNotifiable.h
+    inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h
+    inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProvider.h
+    inc/MantidQtMantidWidgets/WorkspacePresenter/ADSAdapter.h
+    inc/MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h
 )
 
 # QtDesigner UI files to process
@@ -341,7 +360,7 @@ set ( TEST_PY_FILES
 )
 
 set ( TEST_FILES
-	AlgorithmHintStrategyTest.h
+  AlgorithmHintStrategyTest.h
   DataProcessorUI/DataProcessorPostprocessingAlgorithmTest.h
   DataProcessorUI/DataProcessorPreprocessingAlgorithmTest.h
   DataProcessorUI/DataProcessorProcessingAlgorithmBaseTest.h
@@ -355,6 +374,8 @@ set ( TEST_FILES
   DataProcessorUI/ParseKeyValueStringTest.h
   DataProcessorUI/QDataProcessorOneLevelTreeModelTest.h
   DataProcessorUI/QDataProcessorTwoLevelTreeModelTest.h
+  WorkspacePresenter/WorkspacePresenterTest.h
+  WorkspacePresenter/ADSAdapterTest.h
 )
 
 find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)
