@@ -522,7 +522,7 @@ ReflectometryReductionOne2::makeMonitorWS(MatrixWorkspace_sptr inputWS) {
 
 /** Perform transmission correction by running 'CreateTransmissionWorkspace' on
 * the input workspace
-* @detectorWS :: the input workspace
+* @param detectorWS :: the input workspace
 * @return :: the input workspace normalized by transmission
 */
 MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(

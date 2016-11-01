@@ -102,6 +102,10 @@ Optionally, this workspace can be rebinned according to :literal:`MomentumTransf
 
 .. diagram:: ReflectometryReductionOne_ConvertToMomentum-v2_wkflw.dot
 
+Previous Versions
+-----------------
+
+This is version 2 of the algorithm. For version 1, please see `here. <ReflectometryReductionOne-v1.html>`_
 
 Usage
 -----

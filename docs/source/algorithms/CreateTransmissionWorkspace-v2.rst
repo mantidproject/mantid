@@ -40,6 +40,11 @@ provided.
 
 .. diagram:: CreateTransmissionWorkspace_ConvertToWavelength-v2_wkflw.dot
 
+Previous Versions
+-----------------
+
+This is version 2 of the algorithm. For version 1, please see `here. <CreateTransmissionWorkspace-v1.html>`_
+
 Usage
 -----
 
