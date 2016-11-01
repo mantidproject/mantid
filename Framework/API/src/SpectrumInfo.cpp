@@ -189,7 +189,8 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   const size_t ndets = dets.size();
   if (ndets == 1) {
     // If only 1 detector for the spectrum number, just return it
-    m_lastDetector[thread] = m_instrument->getDetector(*dets.begin());
+    const auto detIndex = m_detectorInfo->indexOf(*dets.begin());
+    m_lastDetector[thread] = m_detectorInfo->getDetectorPtr(detIndex);
   } else if (ndets == 0) {
     throw Kernel::Exception::NotFoundError("MatrixWorkspace::getDetector(): No "
                                            "detectors for this workspace "
@@ -197,9 +198,13 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
                                            "");
   } else {
     // Else need to construct a DetectorGroup and use that
-    auto dets_ptr = m_instrument->getDetectors(dets);
-    m_lastDetector[thread] = Geometry::IDetector_const_sptr(
-        new Geometry::DetectorGroup(dets_ptr, false));
+    std::vector<boost::shared_ptr<const Geometry::IDetector>> det_ptrs;
+    for (const auto &id : dets) {
+      const auto detIndex = m_detectorInfo->indexOf(id);
+      det_ptrs.push_back(m_detectorInfo->getDetectorPtr(detIndex));
+    }
+    m_lastDetector[thread] =
+        boost::make_shared<Geometry::DetectorGroup>(det_ptrs, false);
   }
 
   return *m_lastDetector[thread];

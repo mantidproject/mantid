@@ -338,7 +338,7 @@ public:
 
   void test_no_detector() {
     const auto &spectrumInfo = m_workspaceNoInstrument.spectrumInfo();
-    TS_ASSERT_THROWS(spectrumInfo.detector(0), std::runtime_error);
+    TS_ASSERT_THROWS(spectrumInfo.detector(0), std::out_of_range);
   }
 
 private:
