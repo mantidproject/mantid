@@ -1718,8 +1718,12 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics() const {
   out.minimum = raw_stats.minimum;
   out.maximum = raw_stats.maximum;
   if (this->size() > 0) {
-    out.duration =
-        DateAndTime::secondsFromDuration(this->lastTime() - this->firstTime());
+    const auto &intervals = this->getSplittingIntervals();
+    double duration_sec = 0.0;
+    for (const auto &interval : intervals) {
+      duration_sec += interval.duration();
+    }
+    out.duration = duration_sec;
   } else {
     out.duration = std::numeric_limits<double>::quiet_NaN();
   }

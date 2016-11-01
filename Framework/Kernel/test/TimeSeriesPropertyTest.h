@@ -1935,7 +1935,7 @@ public:
     TS_ASSERT_DELTA(stats.maximum, 10.0, 1e-6);
     TS_ASSERT_DELTA(stats.median, 6.0, 1e-6);
     TS_ASSERT_DELTA(stats.mean, 5.77778, 1e-3);
-    TS_ASSERT_DELTA(stats.duration, 100.0, 1e-6);
+    TS_ASSERT_DELTA(stats.duration, 85.0, 1e-6);
     TS_ASSERT_DELTA(stats.standard_deviation, 2.8974, 1e-4);
   }
 
