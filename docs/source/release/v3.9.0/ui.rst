@@ -51,7 +51,8 @@ Bugs Resolved
 
 - Fixed a bug where checking or unchecking "show invisible workspaces" in View->Preferences->Mantid->Options would have no effect on workspaces loaded in the dock.
 - The Spectrum Viewer now reports two theta and azimuthal angle correctly.
-- Fixed crash when clicking "Help->Ask for Help" on Linux-based systems with Firefox set as the default browser.  
+- Fixed crash when clicking "Help->Ask for Help" on Linux-based systems with Firefox set as the default browser.
+- The "Filter log values by" option in the Sample Logs dialog now works out the log statistics with the correct filter applied.
 
 SliceViewer Improvements
 ------------------------

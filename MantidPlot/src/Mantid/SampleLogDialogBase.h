@@ -77,8 +77,8 @@ protected slots:
   virtual void showLogStatistics();
   virtual void showLogStatisticsOfItem(
       QTreeWidgetItem *item,
-      const Mantid::API::LogFilterGenerator::FilterType filter =
-          Mantid::API::LogFilterGenerator::FilterType::None);
+      const Mantid::API::LogFilterGenerator::FilterType
+          filter = Mantid::API::LogFilterGenerator::FilterType::None);
 
   /// Context menu popup
   virtual void popupMenu(const QPoint &pos);

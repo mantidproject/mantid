@@ -2531,8 +2531,9 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
         if (flt->filter()->nthInterval(i).begin() >
             0) // protect against bizarre values we sometimes get
         {
-          std::string time_string = extractLogTime(
-              flt->filter()->nthInterval(i).begin(), useAbsoluteDate, startTime);
+          std::string time_string =
+              extractLogTime(flt->filter()->nthInterval(i).begin(),
+                             useAbsoluteDate, startTime);
 
           t->setText(i, 2, QString::fromStdString(time_string));
           t->setCell(i, 3, !flt->filter()->nthValue(i));
