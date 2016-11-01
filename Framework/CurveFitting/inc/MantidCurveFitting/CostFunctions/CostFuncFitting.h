@@ -74,6 +74,8 @@ public:
   API::FunctionDomain_sptr getDomain() const { return m_domain; }
   /// Get FunctionValues where function values are stored.
   API::FunctionValues_sptr getValues() const { return m_values; }
+  /// Apply ties in the fitting function
+  void applyTies();
 
 protected:
   /**

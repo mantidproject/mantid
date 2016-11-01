@@ -199,6 +199,14 @@ void CostFuncFitting::calTransformationMatrixNumerically(GSLMatrix &tm) {
   }
 }
 
+/// Apply ties in the fitting function
+void CostFuncFitting::applyTies() {
+  if (m_function) {
+    m_function->applyTies();
+  }
+}
+
+
 } // namespace CostFunctions
 } // namespace CurveFitting
 } // namespace Mantid

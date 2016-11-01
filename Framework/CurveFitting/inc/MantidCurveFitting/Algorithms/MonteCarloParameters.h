@@ -6,11 +6,6 @@
 
 namespace Mantid {
 namespace CurveFitting {
-
-namespace CostFunctions {
-class CostFuncFitting;
-}
-
 namespace Algorithms {
 
 /**
@@ -47,9 +42,6 @@ public:
 private:
   void initConcrete() override;
   void execConcrete() override;
-
-  /// Cache for the cost function
-  boost::shared_ptr<CostFunctions::CostFuncFitting> m_costFunction;
 };
 
 } // namespace Algorithms
