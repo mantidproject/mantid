@@ -57,7 +57,8 @@ private:
   const Mantid::API::MatrixWorkspace_sptr createWorkspaceForGroupPlot(
       Type graphType,
       boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup,
-      const MantidSurfacePlotDialog::UserInputSurface &options) const;
+      const MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface &
+          options) const;
 
   /// Returns a single log value from the given workspace
   double
