@@ -13,6 +13,7 @@
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/V3D.h"
 
 #include <Poco/File.h>

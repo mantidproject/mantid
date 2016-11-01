@@ -1,4 +1,13 @@
 #include "MantidKernel/VMD.h"
+#include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Tolerance.h"
+#include "MantidKernel/V3D.h"
+#include <algorithm>
+#include <cstddef>
+#include <sstream>
+#include <stdexcept>
 
 using namespace Mantid::Kernel;
 

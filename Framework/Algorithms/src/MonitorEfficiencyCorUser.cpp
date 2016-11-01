@@ -7,6 +7,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Strings.h"
 
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;

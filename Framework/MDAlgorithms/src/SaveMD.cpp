@@ -3,6 +3,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEventFactory.h"

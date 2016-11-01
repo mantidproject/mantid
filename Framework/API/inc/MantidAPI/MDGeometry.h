@@ -2,6 +2,7 @@
 #define MANTID_API_MDGEOMETRY_H_
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/VMD.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <boost/shared_ptr.hpp>

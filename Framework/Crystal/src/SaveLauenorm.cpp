@@ -7,6 +7,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Strings.h"
 #include <fstream>
 #include <Poco/File.h>
 #include <Poco/Path.h>

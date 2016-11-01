@@ -1,18 +1,13 @@
 #ifndef MANTID_KERNEL_VMD_H_
 #define MANTID_KERNEL_VMD_H_
 
-#include "MantidKernel/StringTokenizer.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Tolerance.h"
-#include "MantidKernel/V3D.h"
-#include <algorithm>
-#include <cstddef>
-#include <sstream>
-#include <stdexcept>
+#include "MantidKernel/DllConfig.h"
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
+class V3D;
 
 /** Simple vector class for multiple dimensions (i.e. > 3).
 

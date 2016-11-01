@@ -7,6 +7,7 @@
 #include <cmath>
 
 #include "MantidKernel/VMD.h"
+#include "MantidKernel/V3D.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

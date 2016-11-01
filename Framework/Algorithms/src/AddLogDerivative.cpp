@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/AddLogDerivative.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"

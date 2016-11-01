@@ -8,6 +8,7 @@
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Strings.h"
 
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::Points;
