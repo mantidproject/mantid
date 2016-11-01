@@ -12,6 +12,7 @@ namespace Mantid {
 namespace API {
 class CoordTransform;
 class IMDWorkspace;
+class MDGeometryNotificationHelper;
 
 /** Describes the geometry (i.e. dimensions) of an IMDWorkspace.
  * This defines the dimensions contained in the workspace.
@@ -129,10 +130,11 @@ public:
   /// Clear original workspaces
   void clearOriginalWorkspaces();
 
+  friend class MDGeometryNotificationHelper;
+
 protected:
   /// Function called when observer objects recieves a notification
-  void deleteNotificationReceived(
-      Mantid::API::WorkspacePreDeleteNotification_ptr notice);
+  void deleteNotificationReceived(const Workspace_sptr &deleted);
 
   /// Vector of the dimensions used, in the order X Y Z t, etc.
   std::vector<Mantid::Geometry::IMDDimension_sptr> m_dimensions;
@@ -155,12 +157,8 @@ protected:
   std::vector<boost::shared_ptr<const Mantid::API::CoordTransform>>
       m_transforms_ToOriginal;
 
-  /// Poco delete notification observer object
-  Poco::NObserver<MDGeometry, Mantid::API::WorkspacePreDeleteNotification>
-      m_delete_observer;
-
-  /// Set to True when the m_delete_observer is observing workspace deletions.
-  bool m_observingDelete;
+  /// Helper that deals with notifications and observing the ADS
+  std::unique_ptr<MDGeometryNotificationHelper> m_notificationHelper;
 
   /** the matrix which transforms momentums from orthogonal Q-system to
      Orthogonal HKL or non-orthogonal HKL system alighned WRT to arbitrary
