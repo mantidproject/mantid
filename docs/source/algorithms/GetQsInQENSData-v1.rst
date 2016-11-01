@@ -23,7 +23,8 @@ Usage
     workspace = LoadDaveGrp("BASIS_59689_divided.dat")
     qvalues = GetQsInQENSData(workspace)
     # print the first three values
-    print' '.join(['{0:6.3f}'.format(Q) for Q in qvalues[0:3]])
+    vals = ' '.join(['{0:6.3f}'.format(Q) for Q in qvalues[0:3]])
+    print "'{0}'".format(vals)
 
 .. testcleanup:: ExtractQvalues
 
@@ -31,14 +32,15 @@ Usage
 
 .. testoutput:: ExtractQvalues
 
-     0.300  0.500  0.700
+    ' 0.300  0.500  0.700'
 
 .. testcode:: ComputeQvalues
 
     workspace = LoadNexus("osiris97944_graphite002_red")
     qvalues = GetQsInQENSData(workspace)
     # print the first three values
-    print' '.join(['{0:6.3f}'.format(Q) for Q in qvalues[0:3]])
+    vals = ' '.join(['{0:6.3f}'.format(Q) for Q in qvalues[0:3]])
+    print "'{0}'".format(vals)
 
 .. testcleanup:: ComputeQvalues
 
@@ -46,7 +48,7 @@ Usage
 
 .. testoutput:: ComputeQvalues
 
-     0.189  0.244  0.298
+    ' 0.189  0.244  0.298'
 
 .. categories::
 
