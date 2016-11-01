@@ -83,64 +83,6 @@ void CreateTransmissionWorkspace2::init() {
                   "Output workspace in wavelength.");
 }
 
-/** Initialize properties related to monitors
-*/
-void CreateTransmissionWorkspace2::initMonitorProperties() {
-
-  // Monitor workspace index
-  declareProperty(make_unique<PropertyWithValue<int>>(
-                      "I0MonitorIndex", Mantid::EMPTY_INT(), Direction::Input),
-                  "I0 monitor workspace index");
-
-  // Minimum wavelength for background subtraction
-  declareProperty(
-      make_unique<PropertyWithValue<double>>("MonitorBackgroundWavelengthMin",
-                                             Mantid::EMPTY_DBL(),
-                                             Direction::Input),
-      "Wavelength minimum for monitor background subtraction in angstroms.");
-  // Maximum wavelength for background subtraction
-  declareProperty(
-      make_unique<PropertyWithValue<double>>("MonitorBackgroundWavelengthMax",
-                                             Mantid::EMPTY_DBL(),
-                                             Direction::Input),
-      "Wavelength maximum for monitor background subtraction in angstroms.");
-
-  // Minimum wavelength for monitor integration
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
-                      Direction::Input),
-                  "Wavelength minimum for integration in angstroms.");
-  // Maximum wavelength for monitor integration
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
-                      Direction::Input),
-                  "Wavelength maximum for integration in angstroms.");
-}
-
-/** Initialize properties used for stitching transmission runs
-*/
-void CreateTransmissionWorkspace2::initStitchProperties() {
-
-  declareProperty(
-      make_unique<ArrayProperty<double>>(
-          "Params", boost::make_shared<RebinParamsValidator>(true)),
-      "A comma separated list of first bin boundary, width, last bin boundary. "
-      "These parameters are used for stitching together transmission runs. "
-      "Values are in wavelength (angstroms). This input is only needed if a "
-      "SecondTransmission run is provided.");
-
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
-                  "Start wavelength for stitching transmission runs together. "
-                  "Only used if a second transmission run is provided.");
-
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
-                  "End wavelength (angstroms) for stitching transmission runs "
-                  "together. Only used if a second transmission run is "
-                  "provided.");
-}
-
 /** Validate inputs
 * @return :: error message to show
 */
@@ -205,38 +147,6 @@ void CreateTransmissionWorkspace2::exec() {
   }
 }
 
-/** Converts an input workspace in TOF to wavelength and crops to specified
-* limits.
-* @param inputWS :: the workspace to convert
-* @return :: the workspace in wavelength
-*/
-MatrixWorkspace_sptr CreateTransmissionWorkspace2::convertToWavelength(
-    MatrixWorkspace_sptr inputWS) {
-
-  auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
-  convertUnitsAlg->initialize();
-  convertUnitsAlg->setProperty("InputWorkspace", inputWS);
-  convertUnitsAlg->setProperty("Target", "Wavelength");
-  convertUnitsAlg->setProperty("AlignBins", true);
-  convertUnitsAlg->execute();
-  MatrixWorkspace_sptr outputWS =
-      convertUnitsAlg->getProperty("OutputWorkspace");
-
-  // Crop out the lambda x-ranges now that the workspace is in wavelength.
-  double wavelengthMin = getProperty("WavelengthMin");
-  double wavelengthMax = getProperty("WavelengthMax");
-
-  auto cropWorkspaceAlg = this->createChildAlgorithm("CropWorkspace");
-  cropWorkspaceAlg->initialize();
-  cropWorkspaceAlg->setProperty("InputWorkspace", outputWS);
-  cropWorkspaceAlg->setProperty("XMin", wavelengthMin);
-  cropWorkspaceAlg->setProperty("XMax", wavelengthMax);
-  cropWorkspaceAlg->execute();
-  outputWS = cropWorkspaceAlg->getProperty("OutputWorkspace");
-
-  return outputWS;
-}
-
 /** Normalize detectors by monitors
 * @param IvsLam :: a workspace in wavelength that contains spectra for both
 * monitors and detectors
@@ -246,14 +156,7 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
     MatrixWorkspace_sptr IvsLam) {
 
   // Detector workspace
-
-  std::string processingCommands = getPropertyValue("ProcessingInstructions");
-  auto groupAlg = createChildAlgorithm("GroupDetectors");
-  groupAlg->initialize();
-  groupAlg->setProperty("GroupingPattern", processingCommands);
-  groupAlg->setProperty("InputWorkspace", IvsLam);
-  groupAlg->execute();
-  MatrixWorkspace_sptr detectorWS = groupAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr detectorWS = makeDetectorWS(IvsLam);
 
   // Monitor workspace
   // Only if I0MonitorIndex, MonitorBackgroundWavelengthMin
@@ -269,46 +172,16 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
     return detectorWS;
   }
 
-  // Extract the monitor workspace
-  int monitorIndex = getProperty("I0MonitorIndex");
-  auto cropWorkspaceAlg = createChildAlgorithm("CropWorkspace");
-  cropWorkspaceAlg->initialize();
-  cropWorkspaceAlg->setProperty("InputWorkspace", IvsLam);
-  cropWorkspaceAlg->setProperty("StartWorkspaceIndex", monitorIndex);
-  cropWorkspaceAlg->setProperty("EndWorkspaceIndex", monitorIndex);
-  cropWorkspaceAlg->execute();
-  MatrixWorkspace_sptr monitorWS =
-      cropWorkspaceAlg->getProperty("OutputWorkspace");
-
-  // Flat background correction
-  double backgroundMin = getProperty("MonitorBackgroundWavelengthMin");
-  double backgroundMax = getProperty("MonitorBackgroundWavelengthMax");
-  auto correctMonitorsAlg =
-      this->createChildAlgorithm("CalculateFlatBackground");
-  correctMonitorsAlg->initialize();
-  correctMonitorsAlg->setProperty("InputWorkspace", monitorWS);
-  correctMonitorsAlg->setProperty("StartX", backgroundMin);
-  correctMonitorsAlg->setProperty("EndX", backgroundMax);
-  correctMonitorsAlg->setProperty("SkipMonitors", false);
-  correctMonitorsAlg->execute();
-  monitorWS = correctMonitorsAlg->getProperty("OutputWorkspace");
-
   // Normalization by integrated monitors
-  // Only if MonitorIntegrationWavelengthMin and MonitorIntegrationWavelengthMax
-  // have been given
+  // Only if both MonitorIntegrationWavelengthMin and
+  // MonitorIntegrationWavelengthMax are have been given
 
   Property *intMinProperty = getProperty("MonitorIntegrationWavelengthMin");
   Property *intMaxProperty = getProperty("MonitorIntegrationWavelengthMax");
-  if (intMinProperty->isDefault() || intMaxProperty->isDefault())
-    return divide(detectorWS, monitorWS);
-
-  auto integrationAlg = createChildAlgorithm("Integration");
-  integrationAlg->initialize();
-  integrationAlg->setProperty("InputWorkspace", monitorWS);
-  integrationAlg->setPropertyValue("RangeLower", intMinProperty->value());
-  integrationAlg->setPropertyValue("RangeUpper", intMaxProperty->value());
-  integrationAlg->execute();
-  monitorWS = integrationAlg->getProperty("OutputWorkspace");
+  bool integratedMonitors =
+      (intMinProperty->isDefault() || intMaxProperty->isDefault()) ? false
+                                                                   : true;
+  auto monitorWS = makeMonitorWS(IvsLam, integratedMonitors);
 
   return divide(detectorWS, monitorWS);
 }

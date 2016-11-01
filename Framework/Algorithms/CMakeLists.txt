@@ -222,6 +222,7 @@ set ( SRC_FILES
 	src/ReflectometryReductionOne2.cpp
 	src/ReflectometryReductionOneAuto.cpp
 	src/ReflectometryWorkflowBase.cpp
+	src/ReflectometryWorkflowBase2.cpp
 	src/Regroup.cpp
 	src/RemoveBackground.cpp
 	src/RemoveBins.cpp
@@ -535,6 +536,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ReflectometryReductionOne2.h
 	inc/MantidAlgorithms/ReflectometryReductionOneAuto.h
 	inc/MantidAlgorithms/ReflectometryWorkflowBase.h
+	inc/MantidAlgorithms/ReflectometryWorkflowBase2.h
 	inc/MantidAlgorithms/Regroup.h
 	inc/MantidAlgorithms/RemoveBackground.h
 	inc/MantidAlgorithms/RemoveBins.h

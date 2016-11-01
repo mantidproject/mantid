@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACE2_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -32,7 +32,7 @@ namespace Algorithms {
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport CreateTransmissionWorkspace2
-    : public API::DataProcessorAlgorithm {
+    : public ReflectometryWorkflowBase2 {
 public:
   const std::string name() const override;
   const std::string summary() const override;
@@ -46,14 +46,7 @@ private:
   void exec() override;
   /// Validate inputs
   std::map<std::string, std::string> validateInputs() override;
-  /// Init properties for monitors
-  void initMonitorProperties();
-  /// Init properties for stitching
-  void initStitchProperties();
 
-  /// Convert a TOF workspace to wavelength
-  API::MatrixWorkspace_sptr
-  convertToWavelength(API::MatrixWorkspace_sptr inputWS);
   /// Normalize by monitors
   API::MatrixWorkspace_sptr
   normalizeDetectorsByMonitors(API::MatrixWorkspace_sptr IvsLam);

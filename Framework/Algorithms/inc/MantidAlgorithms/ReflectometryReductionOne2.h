@@ -3,8 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidAPI/DataProcessorAlgorithm.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -33,8 +32,7 @@ namespace Algorithms {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport ReflectometryReductionOne2
-    : public API::DataProcessorAlgorithm {
+class DLLExport ReflectometryReductionOne2 : public ReflectometryWorkflowBase2 {
 public:
   /// Algorithm's name for identification
   const std::string name() const override {
@@ -60,25 +58,9 @@ private:
   void exec() override;
   // Validate inputs
   std::map<std::string, std::string> validateInputs() override;
-  // Initialize monitor properties
-  void initMonitorProperties();
-  // Initialize direct beam properties
-  void initDirectBeamProperties();
-  // Initialize transmission properties
-  void initTransmissionProperties();
-  // Initialize algorithmic correction properties
-  void initAlgorithmicProperties();
-  // Initialize momentum transfer properties
-  void initMomentumTransferProperties();
-  // Convert a workspace to wavelength
+  // Create a direct beam workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
-  convertToWavelength(Mantid::API::MatrixWorkspace_sptr inputWS);
-  // Create a detector workspace from input workspace in wavelength
-  Mantid::API::MatrixWorkspace_sptr
-  makeDetectorWS(Mantid::API::MatrixWorkspace_sptr inputWS);
-  // Create a monitor workspace from input workspace in wavelength
-  Mantid::API::MatrixWorkspace_sptr
-  makeMonitorWS(Mantid::API::MatrixWorkspace_sptr inputWS);
+  makeDirectBeamWS(Mantid::API::MatrixWorkspace_sptr inputWS);
   // Performs transmission corrections
   Mantid::API::MatrixWorkspace_sptr
   transmissionCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS);
