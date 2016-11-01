@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/SQWLoadingPresenter.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/MDLoadingView.h"

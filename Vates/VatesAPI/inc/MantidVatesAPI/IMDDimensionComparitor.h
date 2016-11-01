@@ -1,6 +1,7 @@
 #ifndef IMD_DIMENSION_COMPARITOR_H
 #define IMD_DIMENSION_COMPARITOR_H
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDWorkspace.h"
 
 namespace Mantid {

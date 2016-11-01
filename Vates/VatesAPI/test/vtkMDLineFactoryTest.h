@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/make_unique.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidVatesAPI/vtkMDLineFactory.h"
 #include "MantidVatesAPI/NoThresholdRange.h"

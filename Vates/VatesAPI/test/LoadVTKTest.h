@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/LoadVTK.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/UnknownFrame.h"

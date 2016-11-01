@@ -1,6 +1,7 @@
 #ifndef VTK_MD_HEX_FACTORY_TEST
 #define VTK_MD_HEX_FACTORY_TEST
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidDataObjects/MDEventFactory.h"
