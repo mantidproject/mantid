@@ -161,7 +161,7 @@ void Q1DWeighted::exec() {
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
 
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   // Loop over all xLength-1 detector channels
   // Note: xLength -1, because X is a histogram and has a number of boundaries
   // equal to the number of detector channels + 1.

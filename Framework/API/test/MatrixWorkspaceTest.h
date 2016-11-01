@@ -326,7 +326,7 @@ public:
     auto workspace = makeWorkspaceWithDetectors(numHist, 1);
     std::atomic<bool> parallelException{false};
     std::atomic<int> threadCount{1};
-    PARALLEL_FOR1(workspace)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*workspace))
     for (int i = 0; i < numHist; ++i) {
       // Note: Cannot use INTERUPT_REGION macros since not inside an Algorithm.
       threadCount = PARALLEL_NUMBER_OF_THREADS;

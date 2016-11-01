@@ -130,7 +130,7 @@ void ChopData::exec() {
                                                          nbins + 1, nbins);
 
     // Copy over X, Y and E data
-    PARALLEL_FOR2(inputWS, workspace)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *workspace))
     for (int j = 0; j < nHist; j++) {
 
       auto edges = inputWS->binEdges(j);

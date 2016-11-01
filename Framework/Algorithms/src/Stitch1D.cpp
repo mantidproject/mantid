@@ -60,7 +60,7 @@ MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2,
                                           MatrixWorkspace_sptr &source) {
   MatrixWorkspace_sptr product = WorkspaceFactory::Instance().create(source);
   const int histogramCount = static_cast<int>(source->getNumberHistograms());
-  PARALLEL_FOR2(source, product)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*source, *product))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy over the bin boundaries
@@ -97,7 +97,7 @@ MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2,
  */
 void Stitch1D::maskInPlace(int a1, int a2, MatrixWorkspace_sptr source) {
   const int histogramCount = static_cast<int>(source->getNumberHistograms());
-  PARALLEL_FOR1(source)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*source))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy over the data
@@ -300,7 +300,7 @@ MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input,
 
   // Record special values and then mask them out as zeros. Special values are
   // remembered and then replaced post processing.
-  PARALLEL_FOR1(outWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outWS))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     std::vector<size_t> &nanYIndexes = m_nanYIndexes[i];
@@ -461,7 +461,7 @@ Stitch1D::findStartEndIndexes(double startOverlap, double endOverlap,
 bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr ws) {
   int64_t ws_size = static_cast<int64_t>(ws->getNumberHistograms());
   bool hasNonZeroErrors = false;
-  PARALLEL_FOR1(ws)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
   for (int i = 0; i < ws_size; ++i) {
     PARALLEL_START_INTERUPT_REGION
     if (!hasNonZeroErrors) // Keep checking
@@ -625,7 +625,7 @@ void Stitch1D::exec() {
  */
 void Stitch1D::reinsertSpecialValues(MatrixWorkspace_sptr ws) {
   int histogramCount = static_cast<int>(ws->getNumberHistograms());
-  PARALLEL_FOR1(ws)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy over the data

@@ -282,7 +282,7 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
   if (!m_inputEvents && m_distribution) {
     // Loop over the histograms (detector spectra)
     Progress prog(this, 0.0, 0.2, m_numberOfSpectra);
-    PARALLEL_FOR1(outputWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
     for (int64_t i = 0; i < static_cast<int64_t>(m_numberOfSpectra); ++i) {
       PARALLEL_START_INTERUPT_REGION
       // Take the bin width dependency out of the Y & E data
@@ -348,7 +348,7 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
 
       auto xVals = outputWS->sharedX(0);
 
-      PARALLEL_FOR1(outputWS)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
       for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
         PARALLEL_START_INTERUPT_REGION
         outputWS->setX(j, xVals);
@@ -368,7 +368,7 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
   // If we get to here then the bins weren't aligned and each spectrum is
   // unique
   // Loop over the histograms (detector spectra)
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t k = 0; k < numberOfSpectra_i; ++k) {
     PARALLEL_START_INTERUPT_REGION
     if (!commonBoundaries) {
@@ -670,7 +670,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
   } else {
     // either events or ragged boundaries
     int numberOfSpectra_i = static_cast<int>(numberOfSpectra);
-    PARALLEL_FOR1(WS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*WS))
     for (int j = 0; j < numberOfSpectra_i; ++j) {
       PARALLEL_START_INTERUPT_REGION
       if (isInputEvents) {

@@ -42,7 +42,7 @@ Workspace2D::~Workspace2D() {
 // http://social.msdn.microsoft.com/Forums/en-US/2fe4cfc7-ca5c-4665-8026-42e0ba634214/visual-studio-$
 
 #ifdef _MSC_VER
-  PARALLEL_FOR1(this)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*this))
   for (int64_t i = 0; i < static_cast<int64_t>(m_noVectors); i++) {
 #else
   for (size_t i = 0; i < m_noVectors; ++i) {

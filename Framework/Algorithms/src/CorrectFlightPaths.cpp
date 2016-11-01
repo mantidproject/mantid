@@ -89,7 +89,7 @@ void CorrectFlightPaths::exec() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
 
   // Loop over the histograms (detector spectra)
-  PARALLEL_FOR2(m_inputWS, m_outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     PARALLEL_START_INTERUPT_REGION
     m_outputWS->setHistogram(i, m_outputWS->histogram(i));
