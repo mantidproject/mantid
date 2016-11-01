@@ -62,7 +62,7 @@ void SmoothData::exec() {
       WorkspaceFactory::Instance().create(inputWorkspace);
 
   Progress progress(this, 0.0, 1.0, inputWorkspace->getNumberHistograms());
-  PARALLEL_FOR2(inputWorkspace, outputWorkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
   // Loop over all the spectra in the workspace
   for (int i = 0; i < static_cast<int>(inputWorkspace->getNumberHistograms());
        ++i) {

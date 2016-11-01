@@ -1,10 +1,10 @@
 #ifndef MANTIDGROUPPLOTGENERATOR_H_
 #define MANTIDGROUPPLOTGENERATOR_H_
 
-#include "MantidSurfacePlotDialog.h"
-#include "MantidMatrix.h"
 #include "Graph3D.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidMatrix.h"
+#include <MantidQtMantidWidgets/MantidSurfacePlotDialog.h>
 
 /**
 * This utility class generates a surface or contour plot from a group of
@@ -13,26 +13,30 @@
 class MantidGroupPlotGenerator {
 public:
   /// Constructor
-  explicit MantidGroupPlotGenerator(MantidUI *mantidUI);
+  explicit MantidGroupPlotGenerator(
+      MantidQt::MantidWidgets::MantidDisplayBase *mantidUI);
 
   /// Plots a surface from the given workspace group
-  void
-  plotSurface(const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
-              const MantidSurfacePlotDialog::UserInputSurface &options) const;
+  void plotSurface(
+      const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
+      const MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface &
+          options) const;
 
   /// Plots a contour plot from the given workspace group
-  void
-  plotContour(const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
-              const MantidSurfacePlotDialog::UserInputSurface &options) const;
+  void plotContour(
+      const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
+      const MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface &
+          options) const;
 
   /// Tests if WorkspaceGroup contains only MatrixWorkspaces
   static bool groupIsAllMatrixWorkspaces(
       const Mantid::API::WorkspaceGroup_const_sptr &wsGroup);
 
   /// Validates the given options and returns an error string
-  static std::string
-  validatePlotOptions(MantidSurfacePlotDialog::UserInputSurface &options,
-                      int nWorkspaces);
+  static std::string validatePlotOptions(
+      MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface &
+          options,
+      int nWorkspaces);
 
   /// Tests if WorkspaceGroup contents all have same X for given spectrum
   static bool
@@ -44,9 +48,10 @@ private:
   enum class Type { Surface, Contour };
 
   /// Plots a graph from the given workspace group
-  void plot(Type graphType,
-            const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
-            const MantidSurfacePlotDialog::UserInputSurface &options) const;
+  void plot(
+      Type graphType, const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
+      const MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface &
+          options) const;
 
   /// Creates a single workspace to plot from
   const Mantid::API::MatrixWorkspace_sptr createWorkspaceForGroupPlot(
@@ -73,7 +78,7 @@ private:
       const size_t spectrum) const;
 
   /// Pointer to the Mantid UI
-  MantidUI *const m_mantidUI;
+  MantidQt::MantidWidgets::MantidDisplayBase *const m_mantidUI;
 };
 
 #endif

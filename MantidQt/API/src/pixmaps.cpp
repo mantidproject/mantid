@@ -6,11 +6,13 @@
  *      Author: janik
  */
 
-#include "pixmaps.h"
+#include "MantidQtAPI/pixmaps.h"
 #include <sstream>
 #include <stdexcept>
 
 
+namespace MantidQt{
+namespace API{
 
 //==================================================================================
 // xpms from other spots in the files
@@ -13000,3 +13002,5 @@ QPixmap getQPixmap(const std::string &name)
 
 }
 
+}
+}

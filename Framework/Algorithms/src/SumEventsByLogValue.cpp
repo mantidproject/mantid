@@ -148,7 +148,7 @@ void SumEventsByLogValue::createTableOutput(
   std::vector<int> Y(xLength);
   const int numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numSpec + xLength);
-  PARALLEL_FOR1(m_inputWorkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
   for (int spec = 0; spec < numSpec; ++spec) {
     PARALLEL_START_INTERUPT_REGION
     const IEventList &eventList = m_inputWorkspace->getSpectrum(spec);
@@ -378,8 +378,7 @@ double SumEventsByLogValue::sumProtonCharge(
     const Kernel::TimeSeriesProperty<double> *protonChargeLog,
     const Kernel::TimeSplitterType &filter) {
   // Clone the proton charge log and filter the clone on this log value
-  boost::scoped_ptr<TimeSeriesProperty<double>> protonChargeLogClone(
-      protonChargeLog->clone());
+  auto protonChargeLogClone(protonChargeLog->clone());
   protonChargeLogClone->filterByTimes(filter);
   // Seems like the only way to sum this is to yank out the values
   const std::vector<double> pcValues = protonChargeLogClone->valuesAsVector();
@@ -419,7 +418,7 @@ void SumEventsByLogValue::createBinnedOutput(
   auto &Y = outputWorkspace->mutableY(0);
   const int numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numSpec);
-  PARALLEL_FOR1(m_inputWorkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
   for (int spec = 0; spec < numSpec; ++spec) {
     PARALLEL_START_INTERUPT_REGION
     const IEventList &eventList = m_inputWorkspace->getSpectrum(spec);

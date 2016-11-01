@@ -1,8 +1,13 @@
-#ifndef MANTIDSURFACEPLOTDIALOG_H_
-#define MANTIDSURFACEPLOTDIALOG_H_
+#ifndef MANTIDQT_MANTIDWIDGETS_MANTIDSURFACEPLOTDIALOG_H_
+#define MANTIDQT_MANTIDWIDGETS_MANTIDSURFACEPLOTDIALOG_H_
 
-#include <QComboBox>
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "MantidWSIndexDialog.h"
+#include <QComboBox>
+
+namespace MantidQt {
+namespace MantidWidgets {
+class MantidDisplayBase;
 
 /**
  * The MantidSurfacePlotDialog offers the same functionality of choosing a
@@ -14,7 +19,8 @@
  * - The user is offered the choice of only those logs that have single values
  * per workspace.
  */
-class MantidSurfacePlotDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidSurfacePlotDialog
+    : public QDialog {
   Q_OBJECT
 
 public:
@@ -29,7 +35,7 @@ public:
 
   /// Constructor - same parameters as one of the parent constructors, along
   /// with a list of the names of workspaces to be plotted.
-  MantidSurfacePlotDialog(MantidUI *parent, Qt::WFlags flags,
+  MantidSurfacePlotDialog(MantidDisplayBase *parent, Qt::WFlags flags,
                           QList<QString> wsNames, const QString &plotType);
   /// Returns a structure holding all of the selected options
   UserInputSurface getSelections() const;
@@ -65,7 +71,7 @@ private:
   /// Returns the input custom log values
   const std::set<double> getCustomLogValues() const;
   /// A pointer to the parent MantidUI object
-  MantidUI *m_mantidUI;
+  MantidDisplayBase *m_mantidUI;
   /// A list of names of workspaces which are to be plotted.
   QList<QString> m_wsNames;
   /// Set to true when user accepts input
@@ -80,5 +86,6 @@ private:
   /// Minimum width for dialog to fit title in
   static const int MINIMUM_WIDTH;
 };
-
-#endif
+}
+}
+#endif // MANTIDQT_MANTIDWIDGETS_MANTIDSURFACEPLOTDIALOG_H_
