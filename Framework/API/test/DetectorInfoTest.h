@@ -20,7 +20,7 @@ public:
   static DetectorInfoTest *createSuite() { return new DetectorInfoTest(); }
   static void destroySuite(DetectorInfoTest *suite) { delete suite; }
 
-  DetectorInfoTest() : m_workspace(nullptr) {
+  DetectorInfoTest() {
     size_t numberOfHistograms = 5;
     size_t numberOfBins = 1;
     m_workspace.init(numberOfHistograms, numberOfBins + 1, numberOfBins);
@@ -92,7 +92,7 @@ public:
     const auto &info = ws->detectorInfo();
     // This attempts to test threading, but probably it is not really exercising
     // much.
-    PARALLEL_FOR1(ws)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
     for (int i = 0; i < count; ++i)
       TS_ASSERT_EQUALS(info.isMasked(static_cast<size_t>(i)), i % 2 == 0);
   }
