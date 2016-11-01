@@ -149,6 +149,50 @@ void IFunction::removeTie(const std::string &parName) {
   this->removeTie(i);
 }
 
+/// Write the list of ties to a stream
+void IFunction::writeTies(std::ostringstream& ostr) const {
+  // collect the non-default ties
+  std::string ties;
+  for (size_t i = 0; i < nParams(); i++) {
+    const ParameterTie *tie = getTie(i);
+    if (tie && !tie->isDefault()) {
+      std::string tmp = tie->asString(this);
+      if (!tmp.empty()) {
+        if (!ties.empty()) {
+          ties += ",";
+        }
+        ties += tmp;
+      }
+    }
+  }
+  // print the ties
+  if (!ties.empty()) {
+    ostr << ",ties=(" << ties << ")";
+  }
+}
+
+/// Write the list of constraints to a stream
+void IFunction::writeConstraints(std::ostringstream& ostr) const {
+  // collect non-default constraints
+  std::string constraints;
+  for (size_t i = 0; i < nParams(); i++) {
+    const IConstraint *c = getConstraint(i);
+    if (c && !c->isDefault()) {
+      std::string tmp = c->asString();
+      if (!tmp.empty()) {
+        if (!constraints.empty()) {
+          constraints += ",";
+        }
+        constraints += tmp;
+      }
+    }
+  }
+  // print constraints
+  if (!constraints.empty()) {
+    ostr << ",constraints=(" << constraints << ")";
+  }
+}
+
 /**
  * Writes a string that can be used in Fit.IFunction to create a copy of this
  * IFunction
@@ -172,42 +216,8 @@ std::string IFunction::asString() const {
       ostr << ',' << parameterName(i) << '=' << getParameter(i);
     }
   }
-  // collect non-default constraints
-  std::string constraints;
-  for (size_t i = 0; i < nParams(); i++) {
-    const IConstraint *c = getConstraint(i);
-    if (c && !c->isDefault()) {
-      std::string tmp = c->asString();
-      if (!tmp.empty()) {
-        if (!constraints.empty()) {
-          constraints += ",";
-        }
-        constraints += tmp;
-      }
-    }
-  }
-  // print constraints
-  if (!constraints.empty()) {
-    ostr << ",constraints=(" << constraints << ")";
-  }
-  // collect the non-default ties
-  std::string ties;
-  for (size_t i = 0; i < nParams(); i++) {
-    const ParameterTie *tie = getTie(i);
-    if (tie && !tie->isDefault()) {
-      std::string tmp = tie->asString(this);
-      if (!tmp.empty()) {
-        if (!ties.empty()) {
-          ties += ",";
-        }
-        ties += tmp;
-      }
-    }
-  }
-  // print the ties
-  if (!ties.empty()) {
-    ostr << ",ties=(" << ties << ")";
-  }
+  writeConstraints(ostr);
+  writeTies(ostr);
   return ostr.str();
 }
 

@@ -17,9 +17,7 @@ namespace CurveFitting {
 namespace Functions {
 
 using namespace CurveFitting;
-
 using namespace Kernel;
-
 using namespace API;
 
 DECLARE_FUNCTION(CrystalFieldSpectrum)
@@ -41,6 +39,7 @@ void CrystalFieldSpectrum::buildTargetFunction() const {
   m_dirty = false;
   auto spectrum = new CompositeFunction;
   m_target.reset(spectrum);
+  m_target->setAttribute("NumDeriv", this->getAttribute("NumDeriv"));
 
   FunctionDomainGeneral domain;
   FunctionValues values;
@@ -78,9 +77,57 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
   FunctionDomainGeneral domain;
   FunctionValues values;
   m_source->function(domain, values);
+  m_target->setAttribute("NumDeriv", this->getAttribute("NumDeriv"));
   auto &spectrum = dynamic_cast<CompositeFunction &>(*m_target);
   m_nPeaks = CrystalFieldUtils::updateSpectrumFunction(
       spectrum, values, m_nPeaks, 0, xVec, yVec, fwhmVariation);
+}
+
+/// Custom string conversion method
+std::string CrystalFieldSpectrum::asString() const {
+  std::ostringstream ostr;
+  ostr << "name=" << this->name();
+  // Print the attributes
+  std::vector<std::string> attr = this->getAttributeNames();
+  for (const auto &attName : attr) {
+    std::string attValue = this->getAttribute(attName).value();
+    if (!attValue.empty() && attValue != "\"\"") {
+      ostr << ',' << attName << '=' << attValue;
+    }
+  }
+  // Print own parameters
+  for (size_t i = 0; i < m_nOwnParams; i++) {
+    const ParameterTie *tie = getTie(i);
+    if (!tie || !tie->isDefault()) {
+      ostr << ',' << parameterName(i) << '=' << getParameter(i);
+    }
+  }
+
+  // Print parameters of the important peaks only
+  const CompositeFunction &spectrum =
+      dynamic_cast<const CompositeFunction &>(*m_target);
+  for (size_t ip = 0; ip < m_nPeaks; ++ip) {
+    const auto &peak = *spectrum.getFunction(ip);
+    // Print peak's atributes
+    auto attr = peak.getAttributeNames();
+    for (const auto &attName : attr) {
+      std::string attValue = peak.getAttribute(attName).value();
+      if (!attValue.empty() && attValue != "\"\"") {
+        ostr << ",f" << ip << "." << attName << '=' << attValue;
+      }
+    }
+    // Print peak's parameters
+    for (size_t i = 0; i < peak.nParams(); i++) {
+      const ParameterTie *tie = peak.getTie(i);
+      if (!tie || !tie->isDefault()) {
+        ostr << ",f" << ip << "." << peak.parameterName(i) << '=' << peak.getParameter(i);
+      }
+    }
+  }
+
+  writeConstraints(ostr);
+  writeTies(ostr);
+  return ostr.str();
 }
 
 } // namespace Functions

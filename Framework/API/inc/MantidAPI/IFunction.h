@@ -561,6 +561,11 @@ protected:
   void storeAttributeValue(const std::string &name,
                            const API::IFunction::Attribute &value);
 
+  /// Write the list of ties to a stream
+  void writeTies(std::ostringstream& ostr) const;
+  /// Write the list of constraints to a stream
+  void writeConstraints(std::ostringstream& ostr) const;
+
   friend class ParameterTie;
   friend class CompositeFunction;
   friend class FunctionParameterDecorator;
