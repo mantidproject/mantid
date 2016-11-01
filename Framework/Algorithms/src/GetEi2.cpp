@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/GetEi2.h"
 
-#include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -13,9 +13,9 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <cmath>
-#include <algorithm>
 #include <sstream>
 
 using namespace Mantid::Kernel;
@@ -646,6 +646,7 @@ API::MatrixWorkspace_sptr GetEi2::rebin(API::MatrixWorkspace_sptr monitor_ws,
   std::ostringstream binParams;
   binParams << first << "," << width << "," << end;
   childAlg->setPropertyValue("Params", binParams.str());
+  childAlg->setProperty("IgnoreBinErrors", true);
   childAlg->executeAsChildAlg();
   return childAlg->getProperty("OutputWorkspace");
 }
