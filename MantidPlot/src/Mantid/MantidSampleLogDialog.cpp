@@ -60,7 +60,8 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
 
   // Changing filter option updates stats
   for (auto *radioButton : filterRadioButtons) {
-    connect(radioButton, SIGNAL(toggled(bool)), this, SLOT(onFilterChanged()));
+    connect(radioButton, SIGNAL(toggled(bool)), this,
+            SLOT(showLogStatistics()));
   }
 
   // -------------- Statistics on logs ------------------------
@@ -152,19 +153,18 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem *item) {
 }
 
 /**
- * Slot called when radio button is changed.
- * Applies filter and displays statistics.
+ * Return filter type based on which radio button is selected
+ * @returns :: Filter type selected in UI
  */
-void MantidSampleLogDialog::onFilterChanged() {
-  Mantid::API::LogFilterGenerator::FilterType filter =
-      Mantid::API::LogFilterGenerator::FilterType::None;
+Mantid::API::LogFilterGenerator::FilterType
+MantidSampleLogDialog::getFilterType() const {
   if (filterStatus->isChecked()) {
-    filter = Mantid::API::LogFilterGenerator::FilterType::Status;
+    return Mantid::API::LogFilterGenerator::FilterType::Status;
   } else if (filterPeriod->isChecked()) {
-    filter = Mantid::API::LogFilterGenerator::FilterType::Period;
+    return Mantid::API::LogFilterGenerator::FilterType::Period;
   } else if (filterStatusPeriod->isChecked()) {
-    filter = Mantid::API::LogFilterGenerator::FilterType::StatusAndPeriod;
+    return Mantid::API::LogFilterGenerator::FilterType::StatusAndPeriod;
+  } else {
+    return Mantid::API::LogFilterGenerator::FilterType::None;
   }
-
-  showLogStatistics(filter);
 }

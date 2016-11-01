@@ -74,9 +74,7 @@ protected slots:
   virtual void importSelectedLogs();
 
   /// Show the stats of the selected log
-  virtual void
-  showLogStatistics(const Mantid::API::LogFilterGenerator::FilterType filter =
-                        Mantid::API::LogFilterGenerator::FilterType::None);
+  virtual void showLogStatistics();
   virtual void showLogStatisticsOfItem(
       QTreeWidgetItem *item,
       const Mantid::API::LogFilterGenerator::FilterType filter =
@@ -110,6 +108,11 @@ protected:
 
   /// Sets up the QTreeWidget's connections for functionality
   void setUpTreeWidgetConnections();
+
+  /// Which type of filtering is selected - in base class case, none
+  virtual Mantid::API::LogFilterGenerator::FilterType getFilterType() const {
+    return Mantid::API::LogFilterGenerator::FilterType::None;
+  }
 
   /// A tree widget
   QTreeWidget *m_tree;

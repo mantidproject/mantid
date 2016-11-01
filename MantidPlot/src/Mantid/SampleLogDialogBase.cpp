@@ -85,8 +85,10 @@ void SampleLogDialogBase::importSelectedLogs() {
 *	@date 05/11/2009
 * @param filter :: Type of filtering (default none)
 */
-void SampleLogDialogBase::showLogStatistics(
-    const LogFilterGenerator::FilterType filter) {
+void SampleLogDialogBase::showLogStatistics() {
+
+  const auto &filter = this->getFilterType();
+
   QList<QTreeWidgetItem *> items = m_tree->selectedItems();
   QListIterator<QTreeWidgetItem *> pItr(items);
   if (pItr.hasNext()) {
