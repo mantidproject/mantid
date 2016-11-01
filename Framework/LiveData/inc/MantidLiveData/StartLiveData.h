@@ -56,6 +56,7 @@ public:
 private:
   void init() override;
   void exec() override;
+  void afterPropertySet(const std::string &) override;
 };
 
 } // namespace LiveData

@@ -59,21 +59,6 @@ void StartLiveData::init() {
       "If you specify 0, MonitorLiveData will not launch and you will get only "
       "one chunk.");
 
-  // Properties used with ISISHistoDataListener
-  declareProperty(make_unique<ArrayProperty<specnum_t>>("SpectraList"),
-                  "An optional list of spectra to load. If blank, all "
-                  "available spectra will be loaded. Applied to ISIS histogram"
-                  " data only.");
-  getPointerToProperty("SpectraList")->setGroup(listenerPropertyGroup);
-
-  auto validator = boost::make_shared<ArrayBoundedValidator<int>>();
-  validator->setLower(1);
-  declareProperty(make_unique<ArrayProperty<int>>("PeriodList", validator),
-                  "An optional list of periods to load. If blank, all "
-                  "available periods will be loaded. Applied to ISIS histogram"
-                  " data only.");
-  getPointerToProperty("PeriodList")->setGroup(listenerPropertyGroup);
-
   // Initialize the properties common to LiveDataAlgorithm.
   initProps();
 
@@ -83,6 +68,37 @@ void StartLiveData::init() {
                   "A handle to the MonitorLiveData algorithm instance that "
                   "continues to read live data after this algorithm "
                   "completes.");
+}
+
+/**
+ * After Instrument property is set copy any properties that the instrument's
+ * listener may have to this algorithm.
+ */
+void StartLiveData::afterPropertySet(const std::string &propName) {
+  if (propName == "Instrument") {
+    // Remove old listener's properties
+    const std::vector<Property *> existingProps = getProperties();
+    for (auto existingProp : existingProps) {
+      if (existingProp->getGroup() == listenerPropertyGroup) {
+        removeProperty(existingProp->name());
+      }
+    }
+
+    // Add new listener's properties
+    auto listener = LiveListenerFactory::Instance().create(
+        getPropertyValue(propName), false);
+    auto propertyManagerListener =
+        boost::dynamic_pointer_cast<IPropertyManager>(listener);
+
+    if (propertyManagerListener) {
+      const std::vector<Property *> listenerProps = propertyManagerListener->getProperties();
+      for (auto listenerProp : listenerProps) {
+        auto prop = std::unique_ptr<Property>(listenerProp->clone());
+        prop->setGroup(listenerPropertyGroup);
+        declareProperty(std::move(prop));
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------------
