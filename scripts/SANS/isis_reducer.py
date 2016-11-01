@@ -49,7 +49,11 @@ class ReductionStateTransferer(object):
         reducer.CENT_FIND_RMAX = self.rc.CENT_FIND_RMAX
 
         # Get events binning
-        reducer.settings["events.binning"] = self.rc.settings["events.binning"]
+        if hasattr(reducer, "settings") and hasattr(self.rc, "settings"):
+            settings1 = reducer.settings
+            settings2 = self.rc.settings
+            if "events.binning" in settings1 and "events.binning" in settings2:
+                reducer.settings["events.binning"] = copy.deepcopy(self.rc.settings["events.binning"])
 
         # Get wavelength limits
         reducer.to_Q.w_cut  = self.rc.to_Q.w_cut 
