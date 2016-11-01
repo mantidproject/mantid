@@ -261,7 +261,7 @@ void Rebin::exec() {
     bool ignoreBinErrors = getProperty("IgnoreBinErrors");
 
     Progress prog(this, 0.0, 1.0, histnumber);
-    PARALLEL_FOR2(inputWS, outputWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
     for (int hist = 0; hist < histnumber; ++hist) {
       PARALLEL_START_INTERUPT_REGION
 

@@ -63,7 +63,7 @@ void RebinByTimeAtSample::doHistogramming(IEventWorkspace_sptr inWS,
   auto x = Kernel::make_cow<HistogramData::HistogramX>(OutXValues_scaled);
 
   // Go through all the histograms and set the data
-  PARALLEL_FOR2(inWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *outputWS))
   for (int i = 0; i < histnumber; ++i) {
     PARALLEL_START_INTERUPT_REGION
 

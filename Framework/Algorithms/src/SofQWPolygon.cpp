@@ -75,7 +75,7 @@ void SofQWPolygon::exec() {
     qCalculator = &SofQWPolygon::calculateIndirectQ;
   }
 
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nTheta);
        ++i) // signed for openmp
   {

@@ -1,5 +1,6 @@
 #include "MantidQtMantidWidgets/UserFunctionDialog.h"
 #include "MantidQtMantidWidgets/RenameParDialog.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidAPI/Expression.h"
 #include "MantidKernel/ConfigService.h"
 
@@ -10,11 +11,11 @@
 #include <QKeyEvent>
 #include <QFile>
 #include <QTextStream>
-#include <QDesktopServices>
 #include <QUrl>
 
 #include <algorithm>
 
+using MantidQt::API::MantidDesktopServices;
 using namespace MantidQt::MantidWidgets;
 
 UserFunctionDialog::UserFunctionDialog(QWidget *parent, const QString &formula)
@@ -496,7 +497,7 @@ bool UserFunctionDialog::isBuiltin(const QString &cat) const {
  * Open the help wiki page in the web browser.
  */
 void UserFunctionDialog::helpClicked() {
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl("http://www.mantidproject.org/MantidPlot:_User_Function_Dialog"));
 }
 

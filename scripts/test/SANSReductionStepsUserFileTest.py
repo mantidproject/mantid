@@ -1,4 +1,5 @@
-﻿import unittest
+from __future__ import (absolute_import, division, print_function)
+import unittest
 import mantid
 import isis_instrument as instruments
 import ISISCommandInterface as command_iface
