@@ -10,15 +10,14 @@
  *********************************************************************************/
 #ifndef WORKSPACECREATIONHELPER_H_
 #define WORKSPACECREATIONHELPER_H_
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
+
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceFactory.h"

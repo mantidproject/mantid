@@ -1,4 +1,5 @@
 #include "MantidCrystal/SCDCalibratePanels.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"

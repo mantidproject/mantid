@@ -16,6 +16,7 @@
 #include "MantidKernel/V3D.h"
 
 #include <Poco/File.h>
+#include <boost/algorithm/string/trim.hpp>
 #include <sstream>
 #include <iostream>
 #include <fstream>

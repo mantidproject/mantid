@@ -4,6 +4,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <MantidQtMantidWidgets/MantidDisplayBase.h>
 
 using namespace MantidQt::MantidWidgets;

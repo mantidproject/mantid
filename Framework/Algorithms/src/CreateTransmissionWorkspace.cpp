@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/CreateTransmissionWorkspace.h"
 #include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 

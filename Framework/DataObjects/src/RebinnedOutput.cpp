@@ -1,6 +1,7 @@
 #include "MantidDataObjects/RebinnedOutput.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Logger.h"
 
 #include <algorithm>
 

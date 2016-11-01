@@ -1,6 +1,7 @@
 #include "MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction2.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/Run.h"

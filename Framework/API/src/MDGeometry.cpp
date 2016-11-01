@@ -1,10 +1,12 @@
 #include "MantidAPI/MDGeometry.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/make_unique.h"
+#include <Poco/NObserver.h>
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
@@ -428,7 +430,8 @@ void MDGeometry::transformDimensions(std::vector<double> &scaling,
  *
  * @param notice :: notification of workspace deletion
  */
-void MDGeometry::deleteNotificationReceived(const Workspace_sptr &deleted) {
+void MDGeometry::deleteNotificationReceived(
+    const boost::shared_ptr<const Workspace> &deleted) {
   for (auto &original : m_originalWorkspaces) {
     if (original) {
       // Compare the pointer being deleted to the one stored as the original.

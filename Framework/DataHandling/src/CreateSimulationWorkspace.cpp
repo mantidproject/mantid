@@ -21,6 +21,8 @@
 
 #include <Poco/File.h>
 
+#include <boost/algorithm/string/predicate.hpp>
+
 namespace {
 
 struct StartAndEndTime {

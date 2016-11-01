@@ -6,6 +6,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidGeometry/Instrument.h"

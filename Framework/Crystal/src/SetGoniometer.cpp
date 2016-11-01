@@ -4,6 +4,9 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+
 using Mantid::Geometry::Goniometer;
 using namespace Mantid::Geometry;
 

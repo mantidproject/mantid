@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/FilterEvents.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/SpectrumInfo.h"

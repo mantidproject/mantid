@@ -1,5 +1,6 @@
 #include "MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FileProperty.h"

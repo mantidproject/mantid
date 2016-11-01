@@ -1,4 +1,5 @@
 #include "MantidLiveData/FileEventDataListener.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileFinder.h"

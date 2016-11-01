@@ -6,6 +6,7 @@
 
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
 

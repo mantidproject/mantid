@@ -1,6 +1,3 @@
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
 #include "MantidDataHandling/LoadILLTOF.h"
 
 #include "MantidAPI/Axis.h"
@@ -11,6 +8,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -20,10 +19,6 @@ using namespace NeXus;
 using namespace HistogramData;
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF)
-
-//---------------------------------------------------
-// Private member functions
-//---------------------------------------------------
 
 /**
  * Return the confidence with with this algorithm can load the file

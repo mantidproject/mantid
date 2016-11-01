@@ -1,4 +1,5 @@
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/System.h"

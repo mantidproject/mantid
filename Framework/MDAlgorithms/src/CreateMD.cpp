@@ -1,5 +1,6 @@
 #include "MantidMDAlgorithms/CreateMD.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"

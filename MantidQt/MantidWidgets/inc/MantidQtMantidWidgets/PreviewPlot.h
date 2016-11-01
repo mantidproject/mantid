@@ -8,7 +8,10 @@
 #include "MantidQtMantidWidgets/RangeSelector.h"
 #include "MantidQtAPI/MantidWidget.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+
+#include <Poco/NObserver.h>
 
 #include <QActionGroup>
 #include <QHBoxLayout>

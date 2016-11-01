@@ -1,7 +1,5 @@
-//----------------------------------
-// Includes
-//----------------------------------
 #include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorTypes.h"

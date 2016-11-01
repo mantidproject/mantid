@@ -13,6 +13,7 @@
 
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 
 #include <cmath>
 

@@ -3,16 +3,20 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include <Poco/NObserver.h>
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <boost/shared_ptr.hpp>
 
+#include <memory>
+
 namespace Mantid {
+namespace Geometry {
+class IMDDimension;
+}
 namespace API {
 class CoordTransform;
 class IMDWorkspace;
 class MDGeometryNotificationHelper;
+class Workspace;
 
 /** Describes the geometry (i.e. dimensions) of an IMDWorkspace.
  * This defines the dimensions contained in the workspace.
@@ -49,8 +53,8 @@ public:
   MDGeometry();
   MDGeometry(const MDGeometry &other);
   virtual ~MDGeometry();
-  void
-  initGeometry(std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions);
+  void initGeometry(
+      std::vector<boost::shared_ptr<Geometry::IMDDimension>> &dimensions);
 
   // --------------------------------------------------------------------------------------------
   // These are the main methods for dimensions, that CAN be overridden (e.g. by
@@ -62,7 +66,7 @@ public:
   getDimensionWithId(std::string id) const;
   size_t getDimensionIndexByName(const std::string &name) const;
   size_t getDimensionIndexById(const std::string &id) const;
-  Mantid::Geometry::VecIMDDimension_const_sptr
+  std::vector<boost::shared_ptr<const Geometry::IMDDimension>>
   getNonIntegratedDimensions() const;
   virtual std::vector<coord_t> estimateResolution() const;
 
@@ -134,10 +138,11 @@ public:
 
 protected:
   /// Function called when observer objects recieves a notification
-  void deleteNotificationReceived(const Workspace_sptr &deleted);
+  void
+  deleteNotificationReceived(const boost::shared_ptr<const Workspace> &deleted);
 
   /// Vector of the dimensions used, in the order X Y Z t, etc.
-  std::vector<Mantid::Geometry::IMDDimension_sptr> m_dimensions;
+  std::vector<boost::shared_ptr<Geometry::IMDDimension>> m_dimensions;
 
   /// Pointer to the original workspace(s), if this workspace is a coordinate
   /// transformation from an original workspace.

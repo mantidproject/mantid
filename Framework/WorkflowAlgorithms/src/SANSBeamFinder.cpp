@@ -1,9 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SANSBeamFinder.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 #include "MantidWorkflowAlgorithms/HFIRInstrument.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidKernel/PropertyManagerDataService.h"
