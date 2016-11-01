@@ -89,8 +89,8 @@ private:
   getDetectorVector(const size_t index) const;
 
   const MatrixWorkspace &m_workspace;
-  const DetectorInfo &m_detectorInfo;
   DetectorInfo *m_mutableDetectorInfo{nullptr};
+  const DetectorInfo &m_detectorInfo;
   mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>
       m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;

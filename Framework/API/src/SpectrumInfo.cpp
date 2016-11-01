@@ -15,9 +15,11 @@ SpectrumInfo::SpectrumInfo(const MatrixWorkspace &workspace)
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
 
 SpectrumInfo::SpectrumInfo(MatrixWorkspace &workspace)
-    : SpectrumInfo(const_cast<const MatrixWorkspace &>(workspace)) {
-  m_mutableDetectorInfo = &workspace.mutableDetectorInfo();
-}
+    : m_workspace(workspace),
+      m_mutableDetectorInfo(&workspace.mutableDetectorInfo()),
+      m_detectorInfo(*m_mutableDetectorInfo),
+      m_lastDetector(PARALLEL_GET_MAX_THREADS),
+      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 SpectrumInfo::~SpectrumInfo() = default;
