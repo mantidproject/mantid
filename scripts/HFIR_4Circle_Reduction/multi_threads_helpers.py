@@ -14,6 +14,8 @@ class AddPeaksThread(QThread):
     peakAddedSignal = QtCore.pyqtSignal(int, int)
     # signal for status: int_0 = experiment number, int_1 = scan number, int_2 = progress (0...)
     peakStatusSignal = QtCore.pyqtSignal(int, int, int)
+    # signal for final error report: int_0 = experiment number, str_1 = error message
+    peakAddedErrorSignal = QtCore.pyqtSignal(int, str)
 
     def __init__(self, main_window, exp_number, scan_number_list):
         """
@@ -38,6 +40,7 @@ class AddPeaksThread(QThread):
         # connect to the updateTextEdit slot defined in app1.py
         self.peakAddedSignal.connect(self._mainWindow.update_peak_added_info)
         self.peakStatusSignal.connect(self._mainWindow.update_adding_peaks_status)
+        self.peakAddedErrorSignal.connect(self._mainWindow.report_peak_addition)
 
         return
 
@@ -86,8 +89,7 @@ class AddPeaksThread(QThread):
         # send signal with unphysical scan number to flag the end of operation.
         self.peakStatusSignal.emit(self._expNumber, -1, len(self._scanNumberList))
 
-        # pop error if there is any scan that is not reduced right
-        # FIXME/TODO/NOW/ISSUE - it should send out a message to main GUI about the error!
+        # construct a final error message for main GUI
         # TEST: Exp 423 Scan 82
         if len(failed_list) > 0:
             failed_scans_str = 'Unable to merge scans: '
@@ -97,8 +99,7 @@ class AddPeaksThread(QThread):
                 sum_error_str += '%s\n' % fail_tup[1]
             # END-FOR
 
-            self._mainWindow.pop_one_button_dialog(failed_scans_str)
-            self._mainWindow.pop_one_button_dialog(sum_error_str)
+            self.peakAddedErrorSignal.emit(self._expNumber, failed_scans_str + '\n' + sum_error_str)
         # END-IF
 
         return
@@ -247,12 +248,12 @@ class IntegratePeaksThread(QThread):
 
             # correct intensity by background value
             intensity_i = self._mainWindow.controller.simple_integrate_peak(pt_dict, avg_bg_value)
+            peak_centre = self._mainWindow.controller.get_peak_info(self._expNumber, scan_number).get_centre()
 
             # emit signal to main app for peak intensity value
             mode = 1
-            # TODO/NOW/ISSUE/ make it also send out the message for peak center
             # center_i
-            self.peakMergeSignal.emit(self._expNumber, scan_number, float(intensity_i), mode)
+            self.peakMergeSignal.emit(self._expNumber, scan_number, float(intensity_i), peak_centre, mode)
         # END-FOR
 
         # terminate the process

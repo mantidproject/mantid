@@ -573,6 +573,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         self._colIndexKIndex = None
         self._colIndexHKL = None
         self._colIndexStatus = None
+        self._colIndexPeakCentre = None
 
         return
 
@@ -810,6 +811,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         self._colIndexKIndex = self.TableSetup.index(('K-Index', 'int'))
         self._colIndexHKL = self.TableSetup.index(('HKL', 'str'))
         self._colIndexStatus = self.TableSetup.index(('Status', 'str'))
+        self._colIndexPeakCentre = self.TableSetup.index(('Peak Centre', 'str'))
 
         return
 
@@ -882,6 +884,31 @@ class ProcessTableWidget(tableBase.NTableWidget):
         # set motor step information string to the table cell.
         motor_col_index = self.TableSetup.index(('Motor', 'str'))
         self.update_cell_value(row_number, motor_col_index, motor_info)
+
+        return
+
+    def set_peak_centre(self, row_number, peak_centre):
+        """
+        set peak centre value
+        :param row_number:
+        :param peak_centre:
+        :return:
+        """
+        # check input's validity
+        assert isinstance(row_number, int), 'Row number %s must be an integer but not %s.' \
+                                            '' % (str(row_number), type(row_number))
+        assert isinstance(peak_centre, str) or len(peak_centre) == 3,\
+            'Peak centre %s must be a string or a container with size 3.' % str(peak_centre)
+
+        # set value
+        if isinstance(peak_centre, str):
+            # string no need to change
+            value_to_set = peak_centre
+        else:
+            # construct the value
+            value_to_set = '%.4f, %.4f, %.4f' % (peak_centre[0], peak_centre[1], peak_centre[2])
+
+        self.update_cell_value(row_number, self._colIndexPeakCentre, value_to_set)
 
         return
 

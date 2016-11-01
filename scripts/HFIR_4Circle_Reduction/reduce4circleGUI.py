@@ -2888,6 +2888,18 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def report_peak_addition(self, exp_number, error_message):
+        """
+
+        :param self:
+        :param exp_number:
+        :param error_message:
+        :return:
+        """
+        self.pop_one_button_dialog('Exp: %d\n%s' % (exp_number, error_message))
+
+        return
+
     def save_current_session(self, filename=None):
         """ Save current session/value setup to
         :return:
@@ -3178,12 +3190,13 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def update_merge_status(self, exp_number, scan_number, sig_value, mode):
+    def update_merge_status(self, exp_number, scan_number, sig_value, peak_centre, mode):
         """
         update the status of merging/integrating peaks
         :param exp_number:
         :param scan_number:
         :param sig_value:
+        :param peak_centre:
         :param mode:
         :return:
         """
@@ -3211,11 +3224,15 @@ class MainWindow(QtGui.QMainWindow):
                 intensity = 0.
                 is_error = True
 
+            if len(peak_centre) != 3:
+                print '[DB] Peak centre %s is not correct.' % str(peak_centre)
+
             # set the calculated peak intensity to _peakInfoDict
             status, error_msg = self._myControl.set_peak_intensity(exp_number, scan_number, intensity)
             if status:
                 # set the value to table
                 self.ui.tableWidget_mergeScans.set_peak_intensity(None, scan_number, intensity)
+                self.ui.tableWidget_mergeScans.set_peak_centre(exp_number, scan_number, peak_centre)
                 if not is_error:
                     self.ui.tableWidget_mergeScans.set_status(scan_number, 'Done')
             else:
