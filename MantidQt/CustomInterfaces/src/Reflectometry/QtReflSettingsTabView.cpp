@@ -49,8 +49,9 @@ IReflSettingsTabPresenter *QtReflSettingsTabView::getPresenter() const {
 */
 std::string QtReflSettingsTabView::getPlusOptions() const {
 
-  auto widget = m_ui.optionsLayout->itemAtPosition(1, 2)->widget();
-  return static_cast<HintingLineEdit *>(widget)->text().toStdString();
+  //auto widget = m_ui.optionsLayout->itemAtPosition(1, 2)->widget();
+  //return static_cast<HintingLineEdit *>(widget)->text().toStdString();
+  return 0;
 }
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
@@ -58,8 +59,9 @@ std::string QtReflSettingsTabView::getPlusOptions() const {
 */
 std::string QtReflSettingsTabView::getTransmissionOptions() const {
 
-  auto widget = m_ui.optionsLayout->itemAtPosition(2, 2)->widget();
-  return static_cast<HintingLineEdit *>(widget)->text().toStdString();
+  //auto widget = m_ui.optionsLayout->itemAtPosition(2, 2)->widget();
+  //return static_cast<HintingLineEdit *>(widget)->text().toStdString();
+  return 0;
 }
 
 /** Returns global options for 'ReflectometryReductionOneAuto'
@@ -67,8 +69,9 @@ std::string QtReflSettingsTabView::getTransmissionOptions() const {
 */
 std::string QtReflSettingsTabView::getReductionOptions() const {
 
-  auto widget = m_ui.optionsLayout->itemAtPosition(3, 2)->widget();
-  return static_cast<HintingLineEdit *>(widget)->text().toStdString();
+  //auto widget = m_ui.optionsLayout->itemAtPosition(3, 2)->widget();
+  //return static_cast<HintingLineEdit *>(widget)->text().toStdString();
+  return 0;
 }
 
 /** Returns global options for 'Stitch1DMany'
@@ -76,8 +79,9 @@ std::string QtReflSettingsTabView::getReductionOptions() const {
 */
 std::string QtReflSettingsTabView::getStitchOptions() const {
 
-  auto widget = m_ui.optionsLayout->itemAtPosition(4, 2)->widget();
-  return static_cast<HintingLineEdit *>(widget)->text().toStdString();
+  //auto widget = m_ui.optionsLayout->itemAtPosition(4, 2)->widget();
+  //return static_cast<HintingLineEdit *>(widget)->text().toStdString();
+  return 0;
 }
 
 /** Creates hints for 'Plus'
@@ -86,7 +90,7 @@ std::string QtReflSettingsTabView::getStitchOptions() const {
 void QtReflSettingsTabView::createPlusHints(
     const std::map<std::string, std::string> &hints) {
 
-  m_ui.optionsLayout->addWidget(new HintingLineEdit(this, hints), 1, 2);
+  //m_ui.optionsLayout->addWidget(new HintingLineEdit(this, hints), 1, 2);
 }
 
 /** Creates hints for 'CreateTransmissionWorkspaceAuto'
@@ -95,7 +99,7 @@ void QtReflSettingsTabView::createPlusHints(
 void QtReflSettingsTabView::createTransmissionHints(
     const std::map<std::string, std::string> &hints) {
 
-  m_ui.optionsLayout->addWidget(new HintingLineEdit(this, hints), 2, 2);
+  //m_ui.optionsLayout->addWidget(new HintingLineEdit(this, hints), 2, 2);
 }
 
 /** Creates hints for 'ReflectometryReductionOneAuto'
@@ -104,7 +108,7 @@ void QtReflSettingsTabView::createTransmissionHints(
 void QtReflSettingsTabView::createReductionHints(
     const std::map<std::string, std::string> &hints) {
 
-  m_ui.optionsLayout->addWidget(new HintingLineEdit(this, hints), 3, 2);
+  //m_ui.optionsLayout->addWidget(new HintingLineEdit(this, hints), 3, 2);
 }
 
 /** Creates hints for 'Stitch1DMany'
@@ -113,7 +117,7 @@ void QtReflSettingsTabView::createReductionHints(
 void QtReflSettingsTabView::createStitchHints(
     const std::map<std::string, std::string> &hints) {
 
-  m_ui.optionsLayout->addWidget(new HintingLineEdit(this, hints), 4, 2);
+  m_ui.expSettingsLayout0->addWidget(new HintingLineEdit(this, hints), 7, 1, 1, 3);
 }
 
 /** This slot notifies the presenter to fill experiment settings with default
@@ -146,7 +150,7 @@ void QtReflSettingsTabView::setExpDefaults(
   if (pcIndex != -1)
     m_ui.polCorrComboBox->setCurrentIndex(pcIndex);
 
-  m_ui.expSettingsScaleFactorEdit->setText(QString::fromStdString(defaults[2]));
+  m_ui.scaleEdit->setText(QString::fromStdString(defaults[2]));
 }
 
 /* Sets default values for all instrument settings given a list of default
@@ -155,13 +159,13 @@ void QtReflSettingsTabView::setExpDefaults(
 void QtReflSettingsTabView::setInstDefaults(
     const std::vector<double> &defaults) const {
 
-  m_ui.instSettingsMonIntMinEdit->setText(QString::number(defaults[0]));
-  m_ui.instSettingsMonIntMaxEdit->setText(QString::number(defaults[1]));
-  m_ui.instSettingsMonBgMinEdit->setText(QString::number(defaults[2]));
-  m_ui.instSettingsMonBgMaxEdit->setText(QString::number(defaults[3]));
-  m_ui.instSettingsLamMinEdit->setText(QString::number(defaults[4]));
-  m_ui.instSettingsLamMaxEdit->setText(QString::number(defaults[5]));
-  m_ui.instSettingsI0MonIndexEdit->setText(QString::number(defaults[6]));
+  m_ui.monIntMinEdit->setText(QString::number(defaults[0]));
+  m_ui.monIntMaxEdit->setText(QString::number(defaults[1]));
+  m_ui.monBgMinEdit->setText(QString::number(defaults[2]));
+  m_ui.monBgMaxEdit->setText(QString::number(defaults[3]));
+  m_ui.lamMinEdit->setText(QString::number(defaults[4]));
+  m_ui.lamMaxEdit->setText(QString::number(defaults[5]));
+  m_ui.I0MonIndexEdit->setText(QString::number(defaults[6]));
 }
 
 /** Return selected analysis mode
@@ -177,7 +181,7 @@ std::string QtReflSettingsTabView::getAnalysisMode() const {
 */
 std::string QtReflSettingsTabView::getDirectBeam() const {
 
-  return m_ui.expSettingsDirectBeamEdit->text().toStdString();
+  return m_ui.directBeamEdit->text().toStdString();
 }
 
 /** Return CRho
@@ -185,7 +189,7 @@ std::string QtReflSettingsTabView::getDirectBeam() const {
 */
 std::string QtReflSettingsTabView::getCRho() const {
 
-  return m_ui.expSettingsCRhoEdit->text().toStdString();
+  return m_ui.CRhoEdit->text().toStdString();
 }
 
 /** Return CAlpha
@@ -193,7 +197,7 @@ std::string QtReflSettingsTabView::getCRho() const {
 */
 std::string QtReflSettingsTabView::getCAlpha() const {
 
-  return m_ui.expSettingsCAlphaEdit->text().toStdString();
+  return m_ui.CAlphaEdit->text().toStdString();
 }
 
 /** Return CAp
@@ -201,7 +205,7 @@ std::string QtReflSettingsTabView::getCAlpha() const {
 */
 std::string QtReflSettingsTabView::getCAp() const {
 
-  return m_ui.expSettingsCApEdit->text().toStdString();
+  return m_ui.CApEdit->text().toStdString();
 }
 
 /** Return CPp
@@ -209,7 +213,7 @@ std::string QtReflSettingsTabView::getCAp() const {
 */
 std::string QtReflSettingsTabView::getCPp() const {
 
-  return m_ui.expSettingsCPpEdit->text().toStdString();
+  return m_ui.CPpEdit->text().toStdString();
 }
 
 /** Return momentum transfer limits
@@ -217,7 +221,8 @@ std::string QtReflSettingsTabView::getCPp() const {
 */
 std::string QtReflSettingsTabView::getMomentumTransferLimits() const {
 
-  return m_ui.expSettingsMomentumTransferLimitsEdit->text().toStdString();
+  //return m_ui.expSettingsMomentumTransferLimitsEdit->text().toStdString();
+  return 0;
 }
 
 /** Return detector limits
@@ -225,7 +230,8 @@ std::string QtReflSettingsTabView::getMomentumTransferLimits() const {
 */
 std::string QtReflSettingsTabView::getDetectorLimits() const {
 
-  return m_ui.expSettingsDetLimitsEdit->text().toStdString();
+  //return m_ui.expSettingsDetLimitsEdit->text().toStdString();
+  return 0;
 }
 
 /** Return scale factor
@@ -233,7 +239,7 @@ std::string QtReflSettingsTabView::getDetectorLimits() const {
 */
 std::string QtReflSettingsTabView::getScaleFactor() const {
 
-  return m_ui.expSettingsScaleFactorEdit->text().toStdString();
+  return m_ui.scaleEdit->text().toStdString();
 }
 
 /** Return selected polarisation corrections
@@ -249,7 +255,7 @@ std::string QtReflSettingsTabView::getPolarisationCorrections() const {
 */
 std::string QtReflSettingsTabView::getMonitorIntegralMin() const {
 
-  return m_ui.instSettingsMonIntMinEdit->text().toStdString();
+  return m_ui.monIntMinEdit->text().toStdString();
 }
 
 /** Return monitor integral wavelength max
@@ -257,7 +263,7 @@ std::string QtReflSettingsTabView::getMonitorIntegralMin() const {
 */
 std::string QtReflSettingsTabView::getMonitorIntegralMax() const {
 
-  return m_ui.instSettingsMonIntMaxEdit->text().toStdString();
+  return m_ui.monIntMaxEdit->text().toStdString();
 }
 
 /** Return monitor background wavelength min
@@ -265,7 +271,7 @@ std::string QtReflSettingsTabView::getMonitorIntegralMax() const {
 */
 std::string QtReflSettingsTabView::getMonitorBackgroundMin() const {
 
-  return m_ui.instSettingsMonBgMinEdit->text().toStdString();
+  return m_ui.monBgMinEdit->text().toStdString();
 }
 
 /** Return monitor background wavelength max
@@ -273,7 +279,7 @@ std::string QtReflSettingsTabView::getMonitorBackgroundMin() const {
 */
 std::string QtReflSettingsTabView::getMonitorBackgroundMax() const {
 
-  return m_ui.instSettingsMonBgMaxEdit->text().toStdString();
+  return m_ui.monBgMaxEdit->text().toStdString();
 }
 
 /** Return wavelength min
@@ -281,7 +287,7 @@ std::string QtReflSettingsTabView::getMonitorBackgroundMax() const {
 */
 std::string QtReflSettingsTabView::getLambdaMin() const {
 
-  return m_ui.instSettingsLamMinEdit->text().toStdString();
+  return m_ui.lamMinEdit->text().toStdString();
 }
 
 /** Return wavelength max
@@ -289,7 +295,7 @@ std::string QtReflSettingsTabView::getLambdaMin() const {
 */
 std::string QtReflSettingsTabView::getLambdaMax() const {
 
-  return m_ui.instSettingsLamMaxEdit->text().toStdString();
+  return m_ui.lamMaxEdit->text().toStdString();
 }
 
 /** Return I0MonitorIndex
@@ -297,7 +303,7 @@ std::string QtReflSettingsTabView::getLambdaMax() const {
 */
 std::string QtReflSettingsTabView::getI0MonitorIndex() const {
 
-  return m_ui.instSettingsI0MonIndexEdit->text().toStdString();
+  return m_ui.I0MonIndexEdit->text().toStdString();
 }
 
 } // namespace CustomInterfaces

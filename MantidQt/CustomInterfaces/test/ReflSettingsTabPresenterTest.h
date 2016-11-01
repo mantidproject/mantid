@@ -200,6 +200,7 @@ public:
 
     EXPECT_CALL(mockView, setExpDefaults(defaults)).Times(1);
     presenter.notify(IReflSettingsTabPresenter::ExpDefaultsFlag);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
   void testInstrumentDefaults() {
