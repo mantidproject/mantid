@@ -1,9 +1,7 @@
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/MultiThreaded.h"
 
 #include <algorithm>
@@ -20,17 +18,10 @@ SpectrumInfo::SpectrumInfo(MatrixWorkspace &workspace)
 
 SpectrumInfo::SpectrumInfo(const MatrixWorkspace &workspace,
                            Geometry::ParameterMap *pmap)
-    : m_workspace(workspace), m_instrument(workspace.getInstrument()),
+    : m_workspace(workspace), m_detectorInfo(Kernel::make_unique<DetectorInfo>(
+                                  workspace.getInstrument(), pmap)),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
-      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
-  // Note: This does not seem possible currently (the instrument objects is
-  // always allocated, even if it is empty), so this will not fail.
-  if (!m_instrument)
-    throw std::runtime_error("Workspace " + workspace.getName() +
-                             " does not contain an instrument!");
-
-  m_detectorInfo = Kernel::make_unique<DetectorInfo>(*m_instrument, pmap);
-}
+      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 SpectrumInfo::~SpectrumInfo() = default;

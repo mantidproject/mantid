@@ -16,13 +16,18 @@ namespace API {
  * null. If it is not null, it must refer to the same map as wrapped in
  * `instrument`. Non-const methods of DetectorInfo may only be called if `pmap`
  * is not null. */
-DetectorInfo::DetectorInfo(const Geometry::Instrument &instrument,
-                           Geometry::ParameterMap *pmap)
+DetectorInfo::DetectorInfo(
+    boost::shared_ptr<const Geometry::Instrument> instrument,
+    Geometry::ParameterMap *pmap)
     : m_pmap(pmap), m_instrument(instrument),
-      m_detectorIDs(
-          instrument.getDetectorIDs(false /* do not skip monitors */)),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
+  // Note: This does not seem possible currently (the instrument objects is
+  // always allocated, even if it is empty), so this will not fail.
+  if (!m_instrument)
+    throw std::runtime_error("Workspace does not contain an instrument!");
+
+  m_detectorIDs = instrument->getDetectorIDs(false /* do not skip monitors */);
   for (size_t i = 0; i < m_detectorIDs.size(); ++i)
     m_detIDToIndex[m_detectorIDs[i]] = i;
 }
@@ -73,7 +78,7 @@ double DetectorInfo::signedTwoTheta(const size_t index) const {
   }
   // Get the instrument up axis.
   const Kernel::V3D &instrumentUpAxis =
-      m_instrument.getReferenceFrame()->vecPointingUp();
+      m_instrument->getReferenceFrame()->vecPointingUp();
   return getDetector(index)
       .getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
 }
@@ -181,7 +186,7 @@ const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
   size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   if (m_lastIndex[thread] != index) {
     m_lastIndex[thread] = index;
-    m_lastDetector[thread] = m_instrument.getDetector(m_detectorIDs[index]);
+    m_lastDetector[thread] = m_instrument->getDetector(m_detectorIDs[index]);
   }
 
   return *m_lastDetector[thread];
@@ -218,14 +223,14 @@ const Geometry::IComponent &DetectorInfo::getSample() const {
 }
 
 void DetectorInfo::cacheSource() const {
-  m_source = m_instrument.getSource();
+  m_source = m_instrument->getSource();
   if (!m_source)
     throw std::runtime_error("Instrument does not contain source!");
   m_sourcePos = m_source->getPos();
 }
 
 void DetectorInfo::cacheSample() const {
-  m_sample = m_instrument.getSample();
+  m_sample = m_instrument->getSample();
   if (!m_sample)
     throw std::runtime_error("Instrument does not contain sample!");
   m_samplePos = m_sample->getPos();

@@ -60,7 +60,7 @@ class SpectrumInfo;
 */
 class MANTID_API_DLL DetectorInfo {
 public:
-  DetectorInfo(const Geometry::Instrument &instrument,
+  DetectorInfo(boost::shared_ptr<const Geometry::Instrument> instrument,
                Geometry::ParameterMap *pmap = nullptr);
 
   bool isMonitor(const size_t index) const;
@@ -106,7 +106,7 @@ private:
   void cacheL1() const;
 
   Geometry::ParameterMap *m_pmap;
-  const Geometry::Instrument &m_instrument;
+  boost::shared_ptr<const Geometry::Instrument> m_instrument;
   std::vector<detid_t> m_detectorIDs;
   std::unordered_map<detid_t, size_t> m_detIDToIndex;
   // The following variables are mutable, since they are initialized (cached)
