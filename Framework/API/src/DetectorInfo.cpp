@@ -27,12 +27,12 @@ DetectorInfo::DetectorInfo(const Geometry::Instrument &instrument,
     m_detIDToIndex[m_detectorIDs[i]] = i;
 }
 
-/// Returns true if the detector associated with the detector is a monitor.
+/// Returns true if the detector is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
   return getDetector(index).isMonitor();
 }
 
-/// Returns true if the detector associated with the detector is a masked.
+/// Returns true if the detector is a masked.
 bool DetectorInfo::isMasked(const size_t index) const {
   return getDetector(index).isMasked();
 }
