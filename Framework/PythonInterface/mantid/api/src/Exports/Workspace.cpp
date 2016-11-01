@@ -1,4 +1,5 @@
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceHistory.h"
 
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"

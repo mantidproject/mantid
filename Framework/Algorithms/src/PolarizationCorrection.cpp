@@ -2,6 +2,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"

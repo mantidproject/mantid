@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/Comment.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;

@@ -2,6 +2,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceHistory.h"
 
 namespace Mantid {
 namespace Algorithms {

@@ -1,8 +1,10 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidCrystal/SaveIsawUB.h"
-#include <fstream>
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Sample.h"
+
+#include <fstream>
+#include <iomanip>
 
 using Mantid::Kernel::DblMatrix;
 using Mantid::Geometry::UnitCell;

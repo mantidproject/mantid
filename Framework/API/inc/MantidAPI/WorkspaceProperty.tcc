@@ -3,6 +3,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/PropertyHistory.h"
 
 namespace Mantid {
 namespace API {

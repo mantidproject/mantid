@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/RemoveWorkspaceHistory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
 using Mantid::Algorithms::RemoveWorkspaceHistory;

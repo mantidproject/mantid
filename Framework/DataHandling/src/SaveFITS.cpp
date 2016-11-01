@@ -7,6 +7,7 @@
 #include "MantidKernel/make_unique.h"
 
 #include <fstream>
+#include <iomanip>
 
 #include <boost/pointer_cast.hpp>
 

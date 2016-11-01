@@ -16,6 +16,8 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/WorkspaceHistory.h"
+#include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 

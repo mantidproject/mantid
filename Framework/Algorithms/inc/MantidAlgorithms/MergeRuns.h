@@ -1,14 +1,12 @@
 #ifndef MANTID_ALGORITHMS_MERGERUNS_H_
 #define MANTID_ALGORITHMS_MERGERUNS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include <list>
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <MantidAPI/MatrixWorkspace.h>
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>

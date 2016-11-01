@@ -1,6 +1,7 @@
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/MDBoxIterator.h"

@@ -1,11 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/DynamicKuboToyabe.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
+
+#include <iomanip>
 #include <vector>
 
 namespace Mantid {

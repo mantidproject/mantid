@@ -1,5 +1,6 @@
 #include "AlgorithmDockWidget.h"
 #include "MantidUI.h"
+#include <iomanip>
 
 //-------------------- AlgorithmDockWidget ----------------------//
 /** Create a QDockWidget containing:

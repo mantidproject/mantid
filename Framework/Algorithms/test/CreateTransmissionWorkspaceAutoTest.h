@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/CreateTransmissionWorkspaceAuto.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceHistory.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>

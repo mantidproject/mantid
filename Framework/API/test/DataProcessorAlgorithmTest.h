@@ -6,6 +6,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid;

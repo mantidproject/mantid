@@ -1,5 +1,8 @@
 #include "MantidMDAlgorithms/CompactMD.h"
 #include "MantidAPI/IMDIterator.h"
+
+#include <boost/lexical_cast.hpp>
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;

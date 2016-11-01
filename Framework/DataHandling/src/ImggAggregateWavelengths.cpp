@@ -10,6 +10,7 @@
 #include "MantidKernel/StringTokenizer.h"
 
 #include <fstream>
+#include <iomanip>
 
 #include <Poco/File.h>
 #include <Poco/DirectoryIterator.h>

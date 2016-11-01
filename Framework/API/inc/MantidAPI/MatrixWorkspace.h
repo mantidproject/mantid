@@ -6,11 +6,14 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/EmptyValues.h"
 
 namespace Mantid {
-//----------------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------------
+
+namespace Kernel {
+class DateAndTime;
+}
+
 namespace Geometry {
 class ParameterMap;
 }

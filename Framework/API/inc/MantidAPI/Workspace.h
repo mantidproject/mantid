@@ -2,7 +2,6 @@
 #define MANTID_API_WORKSPACE_H_
 
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DataItem.h"
 #include "MantidKernel/Exception.h"
@@ -15,6 +14,7 @@ class Logger;
 
 namespace API {
 class AnalysisDataServiceImpl;
+class WorkspaceHistory;
 
 /** Base Workspace Abstract Class.
 

@@ -4,6 +4,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataObjects/EventWorkspace.h"
