@@ -121,4 +121,4 @@ IPropertyManager::getValue<Mantid::API::Workspace_const_sptr>(
 
 } // namespace Kernel
 } // namespace Mantid
-  ///\endcond TEMPLATE
+///\endcond TEMPLATE
