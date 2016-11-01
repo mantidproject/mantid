@@ -49,8 +49,15 @@ double SpectrumInfo::l2(const size_t index) const {
     return getDetector(index).getDistance(getSource()) - l1();
 }
 
-/// Returns 2 theta (angle w.r.t. to beam direction).
+/** Returns the scattering angle 2 theta (angle w.r.t. to beam direction).
+ *
+ * Throws an exception if the spectrum is a monitor.
+ */
 double SpectrumInfo::twoTheta(const size_t index) const {
+  if (isMonitor(index))
+    throw std::logic_error(
+        "Two theta (scattering angle) is not defined for monitors.");
+
   // Note: This function has big overlap with the method
   // MatrixWorkspace::detectorTwoTheta(). The plan is to eventually remove the
   // latter, once SpectrumInfo is in widespread use.
@@ -65,8 +72,16 @@ double SpectrumInfo::twoTheta(const size_t index) const {
   return getDetector(index).getTwoTheta(samplePos, beamLine);
 }
 
-/// Returns signed 2 theta (signed angle w.r.t. to beam direction).
+/** Returns the signed scattering angle 2 theta (angle w.r.t. to beam
+ * direction).
+ *
+ * Throws an exception if the spectrum is a monitor.
+ */
 double SpectrumInfo::signedTwoTheta(const size_t index) const {
+  if (isMonitor(index))
+    throw std::logic_error(
+        "Two theta (scattering angle) is not defined for monitors.");
+
   // Note: This function has big overlap with the method
   // MatrixWorkspace::detectorSignedTwoTheta(). The plan is to eventually remove
   // the latter, once SpectrumInfo is in widespread use.
@@ -116,6 +131,12 @@ bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
     }
   }
   return count == 1;
+}
+
+/// Return a const reference to the detector or detector group of the spectrum
+/// with given index.
+const Geometry::IDetector &SpectrumInfo::detector(const size_t index) const {
+  return getDetector(index);
 }
 
 /// Returns the source position.
