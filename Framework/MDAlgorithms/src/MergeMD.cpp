@@ -4,6 +4,7 @@
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Strings.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::Kernel;

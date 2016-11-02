@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -11,6 +8,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Strings.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>

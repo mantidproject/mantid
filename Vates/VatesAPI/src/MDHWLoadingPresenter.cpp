@@ -19,6 +19,8 @@
 #include "MantidVatesAPI/Common.h"
 
 #include <boost/scoped_ptr.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <vtkPVChangeOfBasisHelper.h>
 #include <vtkFieldData.h>
