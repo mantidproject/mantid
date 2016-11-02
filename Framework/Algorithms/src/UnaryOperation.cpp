@@ -77,7 +77,7 @@ void UnaryOperation::exec() {
 
   // Loop over every cell in the workspace, calling the abstract correction
   // function
-  PARALLEL_FOR2(in_work, out_work)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*in_work, *out_work))
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy the X values over
@@ -121,7 +121,7 @@ void UnaryOperation::execEvent() {
 
   int64_t numHistograms = static_cast<int64_t>(outputWS->getNumberHistograms());
   API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numHistograms; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // switch to weighted events if needed, and use the appropriate helper

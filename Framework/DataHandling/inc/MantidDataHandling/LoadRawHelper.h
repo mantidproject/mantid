@@ -1,13 +1,11 @@
 #ifndef MANTID_DATAHANDLING_LOADRAWHELPER_H_
 #define MANTID_DATAHANDLING_LOADRAWHELPER_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidAPI/Run.h"
+#include <boost/scoped_ptr.hpp>
 #include <climits>
 
 //----------------------------------------------------------------------

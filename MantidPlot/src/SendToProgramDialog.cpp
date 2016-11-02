@@ -1,24 +1,26 @@
 #include "SendToProgramDialog.h"
 #include "ConfigDialog.h"
-#include "pixmaps.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/ConfigService.h"
+#include <MantidQtAPI/pixmaps.h>
 
-#include <QPushButton>
+#include <QComboBox>
+#include <QFileDialog>
 #include <QGridLayout>
 #include <QGroupBox>
-#include <QWidget>
-#include <QComboBox>
 #include <QHBoxLayout>
-#include <QVBoxLayout>
 #include <QMessageBox>
+#include <QPixmap>
+#include <QPushButton>
 #include <QStringList>
 #include <QTextEdit>
-#include <QFileDialog>
-#include <QPixmap>
+#include <QVBoxLayout>
 #include <QVector>
+#include <QWidget>
 
 #include <map>
+
+using namespace MantidQt::API;
 
 /**
 * Constructor when adding a new program to the send to list

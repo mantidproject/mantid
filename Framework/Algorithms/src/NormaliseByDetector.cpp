@@ -174,7 +174,7 @@ NormaliseByDetector::processHistograms(MatrixWorkspace_sptr inWS) {
   // Choose between parallel execution and sequential execution then, process
   // histograms accordingly.
   if (m_parallelExecution) {
-    PARALLEL_FOR2(inWS, denominatorWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *denominatorWS))
     for (int wsIndex = 0; wsIndex < static_cast<int>(nHistograms); ++wsIndex) {
       PARALLEL_START_INTERUPT_REGION
       this->processHistogram(wsIndex, inWS, denominatorWS, prog);

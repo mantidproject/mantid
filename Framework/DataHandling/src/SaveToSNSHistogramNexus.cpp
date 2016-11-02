@@ -287,7 +287,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
     Timer tim1;
     int ypixels = static_cast<int>(det->ypixels());
 
-    PARALLEL_FOR1(inputWorkspace)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace))
     for (int y = 0; y < ypixels; y++) {
       PARALLEL_START_INTERUPT_REGION
       // Get the workspace index for the detector ID at this spot

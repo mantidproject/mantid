@@ -27,13 +27,13 @@
  *                                                                         *
  ***************************************************************************/
 #include "Convolution.h"
+#include "ColorBox.h"
 #include "MultiLayer.h"
 #include "Plot.h"
 #include "PlotCurve.h"
-#include "ColorBox.h"
 
-#include <QMessageBox>
 #include <QLocale>
+#include <QMessageBox>
 #include <gsl/gsl_fft_halfcomplex.h>
 
 Convolution::Convolution(ApplicationWindow *parent, Table *t,
@@ -169,7 +169,7 @@ void Convolution::addResultCurve() {
         new DataCurve(d_table, d_table->colName(cols), d_table->colName(cols2));
     c->setData(x_temp.data(), d_x, d_n); // c->setData(x_temp, d_x, d_n);
     c->setPen(QPen(ColorBox::color(d_curveColorIndex), 1));
-    d_output_graph->insertPlotItem(c, Graph::Line);
+    d_output_graph->insertPlotItem(c, GraphOptions::Line);
     d_output_graph->updatePlot();
   }
 }

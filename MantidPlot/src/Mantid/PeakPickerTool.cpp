@@ -1,26 +1,26 @@
 #include "PeakPickerTool.h"
+#include "../FunctionCurve.h"
 #include "MantidMatrixCurve.h"
-#include "MantidUI.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
-#include "../FunctionCurve.h"
 #include "MantidQtMantidWidgets/PropertyHandler.h"
+#include "MantidUI.h"
 
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 
 #include "qwt_painter.h"
-#include <QPainter>
-#include <QList>
-#include <QToolBar>
 #include <QAction>
-#include <QMenu>
-#include <QMouseEvent>
 #include <QInputDialog>
+#include <QList>
+#include <QMenu>
 #include <QMessageBox>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QToolBar>
 
 namespace {
 /// static logger
@@ -532,7 +532,7 @@ void PeakPickerTool::algorithmFinished(const QString &out) {
   // and change to line.
   auto *curve =
       new MantidMatrixCurve("", out, graph(), 1, MantidMatrixCurve::Spectrum,
-                            false, m_shouldBeNormalised, Graph::Line);
+                            false, m_shouldBeNormalised, GraphOptions::Line);
   m_curveNames.append(curve->title().text());
   if (m_fitPropertyBrowser->plotDiff()) {
     curve =
