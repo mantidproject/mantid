@@ -5,6 +5,12 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
+Features
+---------
+
+- Make added multi-period event files available for the ISIS SANS reduction.
+
+
 Bug Fixes
 ---------
 
