@@ -62,6 +62,7 @@
 #include "Mantid/ErrorBarSettings.h"
 #include "Mantid/MantidMDCurve.h"
 #include "Mantid/MantidMatrixCurve.h"
+#include "MantidKernel/Strings.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/QwtRasterDataMD.h"

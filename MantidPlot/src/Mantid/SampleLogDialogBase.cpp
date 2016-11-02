@@ -7,6 +7,7 @@
 
 #include <MantidKernel/TimeSeriesProperty.h>
 #include <MantidKernel/ArrayProperty.h>
+#include "MantidKernel/Strings.h"
 
 #include <QMenu>
 #include <QFileInfo>

@@ -39,6 +39,7 @@
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidMatrixFunction.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/QwtRasterDataMD.h"
