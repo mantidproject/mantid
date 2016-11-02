@@ -334,7 +334,8 @@ void InputControllerDraw::signalRightClick() {}
 
 //--------------------------------------------------------------------------------
 
-InputControllerSelection::InputControllerSelection(QObject *parent, QPixmap *icon)
+InputControllerSelection::InputControllerSelection(QObject *parent,
+                                                   QPixmap *icon)
     : InputControllerDraw(parent), m_rect(0, 0, cursorSize(), cursorSize()) {
   m_image = icon;
 }

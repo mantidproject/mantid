@@ -50,7 +50,8 @@ void PeakOverlayInteractive::peakDeletionMode() {
   QApplication::restoreOverrideCursor();
   auto *temp = m_tool;
   auto eraseIcon = new QPixmap(":/PickTools/eraser.png");
-  auto *eraseTool = new MantidQt::MantidWidgets::InputControllerSelection(this, eraseIcon);
+  auto *eraseTool =
+      new MantidQt::MantidWidgets::InputControllerSelection(this, eraseIcon);
   connect(eraseTool, SIGNAL(selection(QRect)), this, SLOT(erasePeaks(QRect)),
           Qt::QueuedConnection);
   m_tool = eraseTool;
