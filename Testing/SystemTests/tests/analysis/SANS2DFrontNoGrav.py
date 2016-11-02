@@ -3,6 +3,7 @@ import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
 
+
 class SANS2DFrontNoGrav(stresstesting.MantidStressTest):
 
     def runTest(self):
@@ -24,6 +25,7 @@ class SANS2DFrontNoGrav(stresstesting.MantidStressTest):
         self.disableChecking.append('Instrument')
         return '2500front_1D_4.6_12.85','SANS2DFrontNoGrav.nxs'
 
+
 class SANS2DWithExtraLengthGravity(stresstesting.MantidStressTest):
     def runTest(self):
         SANS2D()
@@ -36,7 +38,6 @@ class SANS2DWithExtraLengthGravity(stresstesting.MantidStressTest):
         Set1D()
         AssignSample('2500.nxs')
         WavRangeReduction(4.6, 12.85, False)
-
 
     def validate(self):
         self.disableChecking.append('SpectraMap')

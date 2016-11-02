@@ -2,6 +2,7 @@
 import stresstesting
 from mantid.simpleapi import *
 
+
 def rel_err_less_delta(val, ref, epsilon):
     """
     Checks that a value 'val' does not differ from a reference value 'ref' by 'epsilon'
@@ -22,6 +23,7 @@ def rel_err_less_delta(val, ref, epsilon):
                .format(val, ref, epsilon))
 
     return check
+
 
 class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
 

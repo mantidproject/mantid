@@ -1,4 +1,6 @@
 #pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -7,9 +9,16 @@ from mantid import config
 import os
 
 
-_str_or_none = lambda s: s if s != '' else None
-_ws_or_none = lambda s: mtd[s] if s != '' else None
-_elems_or_none = lambda l: l if len(l) != 0 else None
+def _str_or_none(s):
+    return s if s != '' else None
+
+
+def _ws_or_none(s):
+    return mtd[s] if s != '' else None
+
+
+def _elems_or_none(l):
+    return l if len(l) != 0 else None
 
 
 class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
@@ -37,14 +46,11 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
     _ipf_filename = None
     _workspace_names = None
 
-
     def category(self):
         return 'Workflow\\Inelastic;Inelastic\\Indirect'
 
-
     def summary(self):
         return 'Runs an energy transfer reduction for an inelastic indirect geometry instrument.'
-
 
     def PyInit(self):
         # Input properties
@@ -112,7 +118,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output),
                              doc='Workspace group for the resulting workspaces.')
-
 
     #pylint: disable=too-many-locals
     def PyExec(self):
@@ -270,7 +275,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         summary_prog.report('Algorithm complete')
 
-
     def validateInputs(self):
         """
         Validates algorithm properties.
@@ -318,7 +322,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             issues['Efixed'] = 'Can only override Efixed on IRIS and OSIRIS'
 
         return issues
-
 
     def _setup(self):
         """

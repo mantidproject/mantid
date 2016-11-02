@@ -1,7 +1,10 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
+
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
+
 
 class NormaliseByThickness(PythonAlgorithm):
     """

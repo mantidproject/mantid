@@ -73,7 +73,7 @@ public:
     TS_ASSERT_EQUALS(outputItem1->getNumberHistograms(), 8192);
     double sum = 0.0;
     for (size_t i = 0; i < outputItem1->getNumberHistograms(); i++)
-      sum += outputItem1->readY(i)[0];
+      sum += outputItem1->y(i)[0];
     sum *= 1.0e22;
     TS_ASSERT_DELTA(sum, 107163.7851, 0.0001);
     //
@@ -109,6 +109,32 @@ private:
   LoadMcStas algToBeTested;
   std::string inputFile;
   std::string outputSpace;
+};
+
+class LoadMcStasTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoadMcStasTestPerformance *createSuite() {
+    return new LoadMcStasTestPerformance();
+  }
+
+  static void destroySuite(LoadMcStasTestPerformance *suite) { delete suite; }
+
+  void setUp() override {
+    loadFile.initialize();
+    loadFile.setProperty("Filename", "mcstas_event_hist.h5");
+    loadFile.setProperty("OutputWorkspace", "outputWS");
+  }
+
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("outputWS");
+  }
+
+  void testDefaultLoad() { loadFile.execute(); }
+
+private:
+  LoadMcStas loadFile;
 };
 
 #endif /*LoadMcStasTEST_H_*/

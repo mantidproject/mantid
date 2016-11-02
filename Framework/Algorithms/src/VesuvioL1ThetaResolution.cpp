@@ -201,24 +201,24 @@ void VesuvioL1ThetaResolution::exec() {
 
     // Set values in output workspace
     const int specNo = m_instWorkspace->getSpectrum(i).getSpectrumNo();
-    m_outputWorkspace->dataX(0)[i] = specNo;
-    m_outputWorkspace->dataX(1)[i] = specNo;
-    m_outputWorkspace->dataX(2)[i] = specNo;
-    m_outputWorkspace->dataX(3)[i] = specNo;
-    m_outputWorkspace->dataY(0)[i] = l1Stats.mean;
-    m_outputWorkspace->dataY(1)[i] = l1Stats.standard_deviation;
-    m_outputWorkspace->dataY(2)[i] = thetaStats.mean;
-    m_outputWorkspace->dataY(3)[i] = thetaStats.standard_deviation;
+    m_outputWorkspace->mutableX(0)[i] = specNo;
+    m_outputWorkspace->mutableX(1)[i] = specNo;
+    m_outputWorkspace->mutableX(2)[i] = specNo;
+    m_outputWorkspace->mutableX(3)[i] = specNo;
+    m_outputWorkspace->mutableY(0)[i] = l1Stats.mean;
+    m_outputWorkspace->mutableY(1)[i] = l1Stats.standard_deviation;
+    m_outputWorkspace->mutableY(2)[i] = thetaStats.mean;
+    m_outputWorkspace->mutableY(3)[i] = thetaStats.standard_deviation;
 
     // Process data for L1 distribution
     if (m_l1DistributionWs) {
-      std::vector<double> &x = m_l1DistributionWs->dataX(i);
+      auto &x = m_l1DistributionWs->mutableX(i);
       std::vector<double> y(numEvents, 1.0);
 
       std::sort(l1.begin(), l1.end());
       std::copy(l1.begin(), l1.end(), x.begin());
 
-      m_l1DistributionWs->dataY(i) = y;
+      m_l1DistributionWs->mutableY(i) = y;
 
       auto &spec = m_l1DistributionWs->getSpectrum(i);
       spec.setSpectrumNo(specNo);
@@ -227,13 +227,13 @@ void VesuvioL1ThetaResolution::exec() {
 
     // Process data for theta distribution
     if (m_thetaDistributionWs) {
-      std::vector<double> &x = m_thetaDistributionWs->dataX(i);
+      auto &x = m_thetaDistributionWs->mutableX(i);
       std::vector<double> y(numEvents, 1.0);
 
       std::sort(theta.begin(), theta.end());
       std::copy(theta.begin(), theta.end(), x.begin());
 
-      m_thetaDistributionWs->dataY(i) = y;
+      m_thetaDistributionWs->mutableY(i) = y;
 
       auto &spec = m_thetaDistributionWs->getSpectrum(i);
       spec.setSpectrumNo(specNo);
@@ -429,7 +429,7 @@ VesuvioL1ThetaResolution::processDistribution(MatrixWorkspace_sptr ws,
   double xMin(DBL_MAX);
   double xMax(DBL_MIN);
   for (size_t i = 0; i < numHist; i++) {
-    const std::vector<double> &x = ws->readX(i);
+    auto &x = ws->x(i);
     xMin = std::min(xMin, x.front());
     xMax = std::max(xMax, x.back());
   }
@@ -448,8 +448,8 @@ VesuvioL1ThetaResolution::processDistribution(MatrixWorkspace_sptr ws,
   ws = rebin->getProperty("OutputWorkspace");
 
   for (size_t i = 0; i < numHist; i++) {
-    const std::vector<double> &y = ws->readY(i);
-    std::vector<double> &e = ws->dataE(i);
+    auto &y = ws->y(i);
+    auto &e = ws->mutableE(i);
 
     std::transform(y.begin(), y.end(), e.begin(), SquareRoot());
   }

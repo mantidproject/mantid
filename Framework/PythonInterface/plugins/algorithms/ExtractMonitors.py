@@ -3,6 +3,7 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import (MatrixWorkspaceProperty, DataProcessorAlgorithm, PropertyMode)
 
+
 class ExtractMonitors(DataProcessorAlgorithm):
     def category(self):
         return 'Utility\\Workspaces'

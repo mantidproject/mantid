@@ -32,28 +32,28 @@
 
 #include <cmath>
 
-#include <QRegExp>
-#include <QMessageBox>
-#include <QDockWidget>
-#include <QLocale>
-#include <QDate>
-#include <QDir>
-#include <QTemporaryFile>
+#include "ArrowMarker.h"
+#include "ColorBox.h"
+#include "Folder.h"
+#include "FunctionCurve.h"
+#include "Grid.h"
+#include "ImageMarker.h"
+#include "LegendWidget.h"
 #include "Matrix.h"
 #include "MatrixModel.h"
-#include "ColorBox.h"
 #include "MultiLayer.h"
 #include "Note.h"
-#include "Folder.h"
+#include "QwtErrorPlotCurve.h"
 #include "QwtHistogram.h"
 #include "QwtPieCurve.h"
 #include "VectorCurve.h"
-#include "FunctionCurve.h"
-#include "QwtErrorPlotCurve.h"
-#include "LegendWidget.h"
-#include "Grid.h"
-#include "ArrowMarker.h"
-#include "ImageMarker.h"
+#include <QDate>
+#include <QDir>
+#include <QDockWidget>
+#include <QLocale>
+#include <QMessageBox>
+#include <QRegExp>
+#include <QTemporaryFile>
 
 #include "qwt_plot_canvas.h"
 #include "qwt_plot_layout.h"
@@ -534,7 +534,7 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
 
     ml->setCaptionPolicy((MdiSubWindow::CaptionPolicy)opj.graphTitle(g));
     ml->setBirthDate(JulianDateTime2String(opj.graphCreationDate(g)));
-    ml->hide(); //!hack used in order to avoid resize and repaint events
+    ml->hide(); //! hack used in order to avoid resize and repaint events
     ml->setWindowLabel(opj.graphLabel(g));
 
     rect graphRect = opj.graphRect(g);
@@ -578,42 +578,42 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
           int color = 0;
           switch (opj.curveType(g, l, c)) {
           case OPJFile::Line:
-            style = Graph::Line;
+            style = GraphOptions::Line;
             break;
           case OPJFile::Scatter:
-            style = Graph::Scatter;
+            style = GraphOptions::Scatter;
             break;
           case OPJFile::LineSymbol:
-            style = Graph::LineSymbols;
+            style = GraphOptions::LineSymbols;
             break;
           case OPJFile::ErrorBar:
           case OPJFile::XErrorBar:
-            style = Graph::ErrorBars;
+            style = GraphOptions::ErrorBars;
             break;
           case OPJFile::Column:
-            style = Graph::VerticalBars;
+            style = GraphOptions::VerticalBars;
             break;
           case OPJFile::Bar:
-            style = Graph::HorizontalBars;
+            style = GraphOptions::HorizontalBars;
             break;
           case OPJFile::Histogram:
-            style = Graph::Histogram;
+            style = GraphOptions::Histogram;
             break;
           case OPJFile::Pie:
-            style = Graph::Pie;
+            style = GraphOptions::Pie;
             break;
           case OPJFile::Box:
-            style = Graph::Box;
+            style = GraphOptions::Box;
             break;
           case OPJFile::FlowVector:
-            style = Graph::VectXYXY;
+            style = GraphOptions::VectXYXY;
             break;
           case OPJFile::Vector:
-            style = Graph::VectXYAM;
+            style = GraphOptions::VectXYAM;
             break;
           case OPJFile::Area:
           case OPJFile::AreaStack:
-            style = Graph::Area;
+            style = GraphOptions::Area;
             break;
           case OPJFile::TextPlot:
             style = OPJFile::TextPlot;
@@ -629,7 +629,7 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
           switch (data[0].toAscii()) {
           case 'T':
             tableName = data.right(data.length() - 2);
-            if (style == Graph::ErrorBars) {
+            if (style == GraphOptions::ErrorBars) {
               int flags = opj.curveSymbolType(g, l, c);
               curve = graph->addErrorBars(
                   tableName + "_" + opj.curveXColName(g, l, c),
@@ -639,15 +639,15 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
                   int(ceil(opj.curveLineWidth(g, l, c))),
                   int(ceil(opj.curveSymbolSize(g, l, c))), QColor(Qt::black),
                   (flags & 0x40) == 0x40, (flags & 2) == 2, (flags & 1) == 1);
-            } else if (style == Graph::Histogram)
+            } else if (style == GraphOptions::Histogram)
               curve = graph->insertCurve(
                   mw->table(tableName),
                   tableName + "_" + opj.curveYColName(g, l, c), style);
-            else if (style == Graph::Pie || style == Graph::Box) {
+            else if (style == GraphOptions::Pie || style == GraphOptions::Box) {
               QStringList names;
               names << (tableName + "_" + opj.curveYColName(g, l, c));
               graph->addCurves(mw->table(tableName), names, style);
-            } else if (style == Graph::VectXYXY) {
+            } else if (style == GraphOptions::VectXYXY) {
               QStringList names;
               vectorProperties vector = opj.curveVectorProperties(g, l, c);
               names << (tableName + "_" + opj.curveXColName(g, l, c))
@@ -656,7 +656,7 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
                     << (tableName + "_" + QString(vector.endYColName.c_str()));
 
               graph->addCurves(mw->table(tableName), names, style);
-            } else if (style == Graph::VectXYAM) {
+            } else if (style == GraphOptions::VectXYAM) {
               QStringList names;
               vectorProperties vector = opj.curveVectorProperties(g, l, c);
               names << (tableName + "_" + opj.curveXColName(g, l, c))
@@ -725,8 +725,9 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
           cl.sSize = int(ceil(opj.curveSymbolSize(g, l, c)));
           cl.penWidth = float(opj.curveSymbolThickness(g, l, c));
           color = opj.curveSymbolColor(g, l, c);
-          if ((style == Graph::Scatter || style == Graph::LineSymbols ||
-               style == Graph::Area) &&
+          if ((style == GraphOptions::Scatter ||
+               style == GraphOptions::LineSymbols ||
+               style == GraphOptions::Area) &&
               color == 0xF7) // 0xF7 -Automatic color
             color = auto_color++;
           cl.symCol = color;
@@ -793,8 +794,9 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
           case 10:
           case 11:
             color = opj.curveSymbolFillColor(g, l, c);
-            if ((style == Graph::Scatter || style == Graph::LineSymbols ||
-                 style == Graph::Area) &&
+            if ((style == GraphOptions::Scatter ||
+                 style == GraphOptions::LineSymbols ||
+                 style == GraphOptions::Area) &&
                 color == 0xF7) // 0xF7 -Automatic color
               color = 17;      // depend on Origin settings - not stored in file
             cl.fillCol = color;
@@ -808,9 +810,10 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
           cl.lCol = (color == 0xF7 ? 0 : color); // 0xF7 -Automatic color
           int linestyle = opj.curveLineStyle(g, l, c);
           cl.filledArea =
-              (opj.curveIsFilledArea(g, l, c) || style == Graph::VerticalBars ||
-               style == Graph::HorizontalBars || style == Graph::Histogram ||
-               style == Graph::Pie)
+              (opj.curveIsFilledArea(g, l, c) ||
+               style == GraphOptions::VerticalBars ||
+               style == GraphOptions::HorizontalBars ||
+               style == GraphOptions::Histogram || style == GraphOptions::Pie)
                   ? 1
                   : 0;
           if (cl.filledArea) {
@@ -852,9 +855,10 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
             color = (cl.aStyle == 0 ? opj.curveFillAreaColor(g, l, c)
                                     : opj.curveFillPatternColor(g, l, c));
             cl.aCol = (color == 0xF7 ? 0 : color); // 0xF7 -Automatic color
-            if (style == Graph::VerticalBars ||
-                style == Graph::HorizontalBars || style == Graph::Histogram ||
-                style == Graph::Pie) {
+            if (style == GraphOptions::VerticalBars ||
+                style == GraphOptions::HorizontalBars ||
+                style == GraphOptions::Histogram ||
+                style == GraphOptions::Pie) {
               color = opj.curveFillPatternBorderColor(g, l, c);
               cl.lCol = (color == 0xF7 ? 0 : color); // 0xF7 -Automatic color
               color = (cl.aStyle == 0 ? opj.curveFillAreaColor(g, l, c)
@@ -887,11 +891,12 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
           }
 
           graph->updateCurveLayout(curve, &cl);
-          if (style == Graph::VerticalBars || style == Graph::HorizontalBars) {
+          if (style == GraphOptions::VerticalBars ||
+              style == GraphOptions::HorizontalBars) {
             QwtBarCurve *b = static_cast<QwtBarCurve *>(graph->curve(c));
             if (b)
               b->setGap(qRound(100 - opj.curveSymbolSize(g, l, c) * 10));
-          } else if (style == Graph::Histogram) {
+          } else if (style == GraphOptions::Histogram) {
             QwtHistogram *h = static_cast<QwtHistogram *>(graph->curve(c));
             if (h) {
               vector<double> bin = opj.layerHistogram(g, l);
@@ -899,7 +904,7 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
                 h->setBinning(false, bin[0], bin[1], bin[2]);
               h->loadData();
             }
-          } else if (style == Graph::Pie) {
+          } else if (style == GraphOptions::Pie) {
             QwtPieCurve *p = static_cast<QwtPieCurve *>(graph->curve(c));
             switch (linestyle) {
             case OPJFile::Solid:
@@ -945,7 +950,8 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
                 opj.curvePieProperties(g, l, c).format_categories);
             p->setFixedLabelsPosition(
                 opj.curvePieProperties(g, l, c).position_associate);
-          } else if (style == Graph::VectXYXY || style == Graph::VectXYAM) {
+          } else if (style == GraphOptions::VectXYXY ||
+                     style == GraphOptions::VectXYAM) {
             vectorProperties vector = opj.curveVectorProperties(g, l, c);
             graph->updateVectorsLayout(
                 c, ColorBox::color(cl.symCol), ceil(vector.width),
@@ -981,12 +987,12 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
       vector<int> ticksX = opj.layerXTicks(g, l);
       graphLayerRange rangeY = opj.layerYRange(g, l);
       vector<int> ticksY = opj.layerYTicks(g, l);
-      if (style == Graph::HorizontalBars) {
+      if (style == GraphOptions::HorizontalBars) {
         graph->setScale(0, rangeX.min, rangeX.max, rangeX.step, ticksX[0],
                         ticksX[1], opj.layerXScale(g, l));
         graph->setScale(2, rangeY.min, rangeY.max, rangeY.step, ticksY[0],
                         ticksY[1], opj.layerYScale(g, l));
-      } else if (style != Graph::Box) {
+      } else if (style != GraphOptions::Box) {
 
         graphAxisBreak breakX = opj.layerXBreak(g, l);
         graphAxisBreak breakY = opj.layerYBreak(g, l);
@@ -1167,7 +1173,7 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
 
       // add texts
       vector<text> texts = opj.layerTexts(g, l);
-      if (style != Graph::Pie) {
+      if (style != GraphOptions::Pie) {
         for (size_t i = 0; i < texts.size(); ++i) {
           addText(texts[i], graph, 0, layerRect, fFontScaleFactor, fXScale,
                   fYScale);

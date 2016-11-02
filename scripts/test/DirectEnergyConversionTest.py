@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import os, sys
 from mantid.simpleapi import *
 from mantid import api

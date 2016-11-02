@@ -1,4 +1,4 @@
-﻿# pylint: disable=invalid-name, property-on-old-class, redefined-builtin, protected-access
+# pylint: disable=invalid-name, property-on-old-class, redefined-builtin, protected-access
 """
     ISIS-specific implementation of the SANS Reducer.
 
@@ -6,6 +6,7 @@
     understand what's happening and how best to fit it in the Reducer design.
 
 """
+from __future__ import (absolute_import, division, print_function)
 from reducer_singleton import Reducer
 import isis_reduction_steps
 import isis_instrument
@@ -18,8 +19,11 @@ import SANSUtility as su
 import os
 import copy
 import sys
+from collections import namedtuple
 
 logger = Logger("ISISReducer")
+
+temp_reduction_framework_settings = namedtuple('temp_reduction_framework_settings', 'incident_monitor')
 
 ################################################################################
 # Avoid a bug with deepcopy in python 2.6, details and workaround here:
@@ -27,10 +31,8 @@ logger = Logger("ISISReducer")
 if sys.version_info[0] == 2 and sys.version_info[1] == 6:
     import types
 
-
     def _deepcopy_method(x, memo):
-        return type(x)(x.im_func, copy.deepcopy(x.im_self, memo), x.im_class)
-
+        return type(x)(x.__func__, copy.deepcopy(x.__self__, memo), x.__self__.__class__)
 
     copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
 ################################################################################
@@ -86,7 +88,7 @@ class Sample(object):
     def get_monitor(self, index=None):
         try:
             _ws = mtd[self.loader.wksp_name + "_monitors"]
-        except (StandardError, Warning):
+        except (Exception, Warning):
             _ws = mtd[self.loader.wksp_name]
 
         if index is not None:
@@ -210,10 +212,10 @@ class ISISReducer(Reducer):
         # so currently do not understand why it is in isis_reduction_steps
         # Also the main purpose of this class is to use it as an input argument
         # to ConvertToQ below
-        self.prep_normalize = isis_reduction_steps.CalculateNormISIS( \
+        self.prep_normalize = isis_reduction_steps.CalculateNormISIS(
             [self.norm_mon, self.transmission_calculator])
 
-        self.to_Q = isis_reduction_steps.ConvertToQISIS( \
+        self.to_Q = isis_reduction_steps.ConvertToQISIS(
             self.prep_normalize)
         self._background_subtracter = isis_reduction_steps.CanSubtraction()
         self.geometry_correcter = isis_reduction_steps.SampleGeomCor()
@@ -468,7 +470,7 @@ class ISISReducer(Reducer):
             the list of reduction steps.
         """
         if self.instrument is None:
-            raise RuntimeError, "ISISReducer: trying to run a reduction with no instrument specified"
+            raise RuntimeError("ISISReducer: trying to run a reduction with no instrument specified")
 
         if self._beam_finder is not None:
             result = self._beam_finder.execute(self)
@@ -512,10 +514,10 @@ class ISISReducer(Reducer):
         self.__transmission_sample = ""
         self.__transmission_can = ""
 
-        for role in self._temporys.keys():
+        for role in list(self._temporys.keys()):
             try:
                 DeleteWorkspace(Workspace=self._temporys[role])
-            except (StandardError, Warning):
+            except (Exception, Warning):
                 # if cleaning up isn't possible there is probably nothing we can do
                 pass
 
@@ -527,7 +529,7 @@ class ISISReducer(Reducer):
         if os.path.isdir(path):
             self._user_file_path = path
         else:
-            raise RuntimeError, "ISISReducer.set_user_path: provided path is not a directory (%s)" % path
+            raise RuntimeError("ISISReducer.set_user_path: provided path is not a directory (%s)" % path)
 
     def get_user_path(self):
         return self._user_file_path
@@ -608,7 +610,6 @@ class ISISReducer(Reducer):
     CENT_FIND_RMIN = None
     CENT_FIND_RMAX = None
 
-
     # override some functions from the Base Reduction
 
     # set_beam_finder: override to accept the front detector
@@ -625,7 +626,7 @@ class ISISReducer(Reducer):
             else:
                 self._beam_finder = finder
         else:
-            raise RuntimeError, "Reducer.set_beam_finder expects an object of class ReductionStep"
+            raise RuntimeError("Reducer.set_beam_finder expects an object of class ReductionStep")
 
     def get_beam_center(self, bank=None):
         """
@@ -696,7 +697,7 @@ class ISISReducer(Reducer):
             try:
                 if wk and wk in mtd:
                     DeleteWorkspace(Workspace=wk)
-            except (StandardError, Warning):
+            except (Exception, Warning):
                 # if the workspace can't be deleted this function does nothing
                 pass
 
@@ -720,7 +721,7 @@ class ISISReducer(Reducer):
             to_check = self._reduction_steps
             for element in to_check:
                 element.run_consistency_check()
-        except RuntimeError, details:
+        except RuntimeError as details:
             if was_empty:
                 self._reduction_steps = None
             raise RuntimeError(str(details))
@@ -771,9 +772,9 @@ class ISISReducer(Reducer):
         idf_path_reducer = self.get_idf_file_path()
         idf_path_reducer = os.path.normpath(idf_path_reducer)
 
-        # Now check if both idf paths and underlying files. If they are, then don't do anything
+        # Now check both underlying files. If they are equal, then don't do anything
         # else switch the underlying instrument
-        if idf_path_reducer == idf_path_workspace and su.are_two_files_identical(idf_path_reducer, idf_path_reducer):
+        if su.are_two_files_identical(idf_path_workspace, idf_path_reducer):
             return
         else:
             logger.notice("Updating the IDF of the Reducer. Switching from " +
@@ -786,6 +787,10 @@ class ISISReducer(Reducer):
             old_detector_selection = old_instrument.get_detector_selection()
 
             if instrument is not None:
+                # Read the values of some variables which are set on the reduction
+                # framework.
+                temp_settings = self.get_values_from_reduction_framework()
+
                 self.set_instrument(instrument)
 
                 # We need to update the instrument, by reloading the user file.
@@ -793,8 +798,27 @@ class ISISReducer(Reducer):
                 # seems to be the only reasonable way to do this.
                 self.user_settings.execute(self)
 
+                # Apply the settings to reloaded reduction framework
+                self.apply_values_from_reduction_framework(temp_settings)
+
                 # Now we set the correct detector, this is also being done in the GUI
                 self.get_instrument().setDetector(old_detector_selection)
+
+    def get_values_from_reduction_framework(self):
+        """
+        This method extracts some settings of the current reduction framework which
+        we want to apply later on.
+        """
+        # Get the incident monitor
+        incident_monitor = self.instrument.get_incident_mon()
+        temp_settings = temp_reduction_framework_settings(incident_monitor=incident_monitor)
+
+        return temp_settings
+
+    def apply_values_from_reduction_framework(self, temp_settings):
+        # Set the incident monitor
+        incident_monitor = temp_settings.incident_monitor
+        self.instrument.set_incident_mon(incident_monitor)
 
     def _get_correct_instrument(self, instrument_name, idf_path = None):
         '''
@@ -851,21 +875,13 @@ class ISISReducer(Reducer):
         '''
         was_event = False
         if self.is_can():
-            sample = self.get_can()
-            try:
-                dummy_ws = mtd[can.loader.wksp_name + "_monitors"]
+            can = self.get_can()
+            if can.loader.wksp_name + "_monitors" in mtd.getObjectNames():
                 was_event = True
-            # pylint: disable=bare-except
-            except:
-                was_event = False
         else:
             sample = self.get_sample()
-            try:
-                dummy_ws = mtd[sample.loader.wksp_name + "_monitors"]
+            if sample.loader.wksp_name + "_monitors" in mtd.getObjectNames():
                 was_event = True
-            # pylint: disable=bare-except
-            except:
-                was_event = False
         return was_event
 
     def get_unwrap_monitors(self):

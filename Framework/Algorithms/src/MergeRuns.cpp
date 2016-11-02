@@ -4,6 +4,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
@@ -107,8 +108,7 @@ void MergeRuns::exec() {
   }
 
   if (inputs.size() == 1) {
-    g_log.error("Only one input workspace specified");
-    throw std::invalid_argument("Only one input workspace specified");
+    g_log.warning("Only one input workspace specified");
   }
 
   // First, try as event workspaces

@@ -184,14 +184,11 @@ void CreateSimulationWorkspace::createOutputWorkspace() {
 
   m_progress = boost::make_shared<Progress>(this, 0.5, 0.75, nhistograms);
 
-  PARALLEL_FOR1(m_outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nhistograms); ++i) {
     m_outputWS->setBinEdges(i, binBoundaries);
-    MantidVec &yOut = m_outputWS->dataY(i);
-    for (size_t j = 0; j < ylength; ++j) {
-      yOut[j] = 1.0; // Set everything to a value so that you can visualize the
-                     // output sensibly
-    }
+    m_outputWS->mutableY(i) = 1.0;
+
     m_progress->report("Setting X values");
   }
   applyDetectorMapping();

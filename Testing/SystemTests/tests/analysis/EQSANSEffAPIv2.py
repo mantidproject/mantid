@@ -6,6 +6,7 @@ from mantid.api import FileFinder
 
 import os
 
+
 class EQSANSEff(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -44,4 +45,3 @@ class EQSANSEff(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "EQSANS_1466_event_Iq", 'EQSANSEff.nxs'
-

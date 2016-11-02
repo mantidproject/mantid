@@ -18,7 +18,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_array.hpp>
 #include <Poco/File.h>
-//#include <hdf5.h> //This is troublesome on multiple platforms.
 
 #include <cstdlib>
 #include <cstring>
@@ -288,7 +287,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
     Timer tim1;
     int ypixels = static_cast<int>(det->ypixels());
 
-    PARALLEL_FOR1(inputWorkspace)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace))
     for (int y = 0; y < ypixels; y++) {
       PARALLEL_START_INTERUPT_REGION
       // Get the workspace index for the detector ID at this spot
@@ -649,15 +648,28 @@ int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
   (void)is_definition;
 
   int status, i, attrLen, attrType;
+#ifndef NEXUS43
+  int rank;
+  int dims[4];
+#endif
   NXname attrName;
   void *attrBuffer;
 
   i = 0;
   do {
+#ifdef NEXUS43
     status = NXgetnextattr(inId, attrName, &attrLen, &attrType);
+#else
+    status = NXgetnextattra(inId, attrName, &rank, dims, &attrType);
+#endif
     if (status == NX_ERROR)
       return NX_ERROR;
     if (status == NX_OK) {
+#ifndef NEXUS43
+      if (rank != 1)
+        return NX_ERROR;
+      attrLen = dims[0];
+#endif
       if (strcmp(attrName, "NeXus_version") &&
           strcmp(attrName, "XML_version") && strcmp(attrName, "HDF_version") &&
           strcmp(attrName, "HDF5_Version") && strcmp(attrName, "file_name") &&
