@@ -19,6 +19,7 @@
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

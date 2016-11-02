@@ -4,6 +4,7 @@
 #include "SaveMDTest.h"
 #include "SaveMD2Test.h"
 
+#include "MantidKernel/Strings.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/WorkspaceHistory.h"

@@ -7,6 +7,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
+#include <array>
+
 using namespace Mantid::API;
 using Mantid::CurveFitting::Functions::Chebyshev;
 
