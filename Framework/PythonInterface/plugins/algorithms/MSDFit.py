@@ -17,10 +17,8 @@ class MSDFit(DataProcessorAlgorithm):
     def category(self):
         return 'Workflow\\MIDAS'
 
-
     def summary(self):
         return 'Fits log(intensity) vs Q-squared to obtain the mean squared displacement.'
-
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',direction=Direction.Input),
@@ -48,7 +46,6 @@ class MSDFit(DataProcessorAlgorithm):
                                                     direction=Direction.Output,
                                                     optional=PropertyMode.Optional),
                              doc='Output fitted workspaces')
-
 
     def validateInputs(self):
         issues = dict()
@@ -88,14 +85,13 @@ class MSDFit(DataProcessorAlgorithm):
 
         return issues
 
-
     def PyExec(self):
         self._setup()
 
         # Fit line to each of the spectra
         function = 'name=LinearBackground, A0=0, A1=0'
         input_params = [self._input_ws + ',i%d' % i for i in range(self._spec_range[0],
-                                                                    self._spec_range[1] + 1)]
+                                                                   self._spec_range[1] + 1)]
         input_params = ';'.join(input_params)
         PlotPeakByLogValue(Input=input_params,
                            OutputWorkspace=self._output_msd_ws,

@@ -6,6 +6,8 @@ from ISISCommandInterface import *
 from SANSBatchMode import *
 
 # test batch mode with sans2d and selecting a period in batch mode
+
+
 class SANS2DMultiPeriodSingle(stresstesting.MantidStressTest):
 
     reduced=''
@@ -31,6 +33,7 @@ class SANS2DMultiPeriodSingle(stresstesting.MantidStressTest):
 
         return mtd[self.reduced][6].name(),'SANS2DBatch.nxs'
 
+
 class SANS2DMultiPeriodBatch(SANS2DMultiPeriodSingle):
 
     def runTest(self):
@@ -45,4 +48,3 @@ class SANS2DMultiPeriodBatch(SANS2DMultiPeriodSingle):
 
         BatchReduce(csv_file, 'nxs', saveAlgs={})
         self.reduced = '5512_SANS2DBatch'
-

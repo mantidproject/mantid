@@ -2,7 +2,7 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 namespace Mantid {
 namespace Algorithms {
@@ -251,7 +251,7 @@ int MedianDetectorTest::maskOutliers(
     std::vector<size_t> &hists = indexmap[i];
     double median = medianvec[i];
 
-    PARALLEL_FOR1(countsWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*countsWS))
     for (int j = 0; j < static_cast<int>(hists.size()); ++j) { // NOLINT
       const double value = countsWS->y(hists[j])[0];
       if ((value == 0.) && checkForMask) {
@@ -314,7 +314,7 @@ int MedianDetectorTest::doDetectorTests(
                     (instrument->getSample() != nullptr));
   }
 
-  PARALLEL_FOR2(countsWS, maskWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*countsWS, *maskWS))
   for (int j = 0; j < static_cast<int>(indexmap.size()); ++j) {
     std::vector<size_t> hists = indexmap.at(j);
     double median = medianvec.at(j);
@@ -347,7 +347,7 @@ int MedianDetectorTest::doDetectorTests(
       const double signal = countsWS->y(hists.at(i))[0];
 
       // Mask out NaN and infinite
-      if (boost::math::isinf(signal) || boost::math::isnan(signal)) {
+      if (!std::isfinite(signal)) {
         maskWS->mutableY(hists.at(i))[0] = deadValue;
         PARALLEL_ATOMIC
         ++numFailed;

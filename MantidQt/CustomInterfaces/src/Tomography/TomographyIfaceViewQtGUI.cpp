@@ -1,6 +1,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
@@ -1318,7 +1319,7 @@ void TomographyIfaceViewQtGUI::browseImageClicked() {
                             "(*.tif *.tiff);;"
                             "PNG, Portable Network Graphics "
                             "(*.png);;"
-                            "Other extensions/all files (*.*)");
+                            "Other extensions/all files (*)");
   // Note that this could be done using UserSubWindow::openFileDialog(),
   // but that method doesn't give much control over the text used for the
   // allowed extensions.

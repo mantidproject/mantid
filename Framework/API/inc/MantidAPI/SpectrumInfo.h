@@ -70,6 +70,11 @@ public:
   bool hasDetectors(const size_t index) const;
   bool hasUniqueDetector(const size_t index) const;
 
+  // This is likely to be deprecated/removed with the introduction of
+  // Instrument-2.0: The concept of detector groups will probably be dropped so
+  // returning a single detector for a spectrum will not be possible anymore.
+  const Geometry::IDetector &detector(const size_t index) const;
+
   // This does not really belong into SpectrumInfo, but it seems to be useful
   // while Instrument-2.0 does not exist.
   Kernel::V3D sourcePosition() const;

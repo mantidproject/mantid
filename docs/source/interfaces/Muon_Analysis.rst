@@ -148,7 +148,7 @@ Run Information etc.
 
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **1** | **Run Information**      | Information about the loaded run.                                                       |
-|       |                          | See `Run <http://docs.mantidproject.org/nightly/concepts/Run.html#ISIS_Muon_data>`_     |
+|       |                          | See `Run <http://docs.mantidproject.org/nightly/concepts/Run.html#isis-muon-data>`_     |
 |       |                          | for the list of parameters which are looked up in the data files.                       |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **2** | **Connected plot**       | The name of the workspace produced for the last plot, i.e. "connected" to the interface.|

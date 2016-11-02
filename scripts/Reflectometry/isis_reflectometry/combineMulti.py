@@ -1,7 +1,7 @@
 # pylint: disable=invalid-name
-from l2q import *
+from __future__ import (absolute_import, division, print_function)
+from .l2q import *
 from mantid.simpleapi import *
-import math
 from mantid.api import WorkspaceGroup
 
 
@@ -23,17 +23,17 @@ def combineDataMulti(wksp_list, output_wksp, beg_overlap, end_overlap, Qmin, Qma
 
     # check if overlaps have correct number of entries
     defaultoverlaps = False
-    if type(beg_overlap) != list:
+    if not isinstance(beg_overlap, list):
         beg_overlap = [beg_overlap]
-    if type(end_overlap) != list:
+    if not isinstance(end_overlap, list):
         end_overlap = [end_overlap]
     if len(wksp_list) != len(beg_overlap):
-        print "Using default values!"
+        print("Using default values!")
         defaultoverlaps = True
 
     # copy first workspace into temporary wksp 'currentSum'
     currentSum = CloneWorkspace(InputWorkspace=wksp_list[0])
-    print "Length: ", len(wksp_list), wksp_list
+    print("Length: ", len(wksp_list), wksp_list)
 
     for i in range(0, len(wksp_list) - 1):
         w1 = currentSum
@@ -46,7 +46,7 @@ def combineDataMulti(wksp_list, output_wksp, beg_overlap, end_overlap, Qmin, Qma
         else:
             overlapLow = beg_overlap[i + 1]
             overlapHigh = end_overlap[i]
-        print "Iteration", i
+        print("Iteration", i)
         currentSum, scale_factor = stitch2(currentSum, mtd[wksp_list[i + 1]], currentSum.name(), overlapLow,
                                            overlapHigh, Qmin, Qmax, binning, scale_high, scale_right=scale_right)
     RenameWorkspace(InputWorkspace=currentSum.name(), OutputWorkspace=output_wksp)
@@ -85,9 +85,9 @@ def stitch2(ws1, ws2, output_ws_name, begoverlap, endoverlap, Qmin, Qmax, binnin
         manual_scalefactor = False
         scalefactor = 1.0
     # Interally use the Stitch1D algorithm.
-    outputs = Stitch1D(LHSWorkspace=ws1, RHSWorkspace=ws2, \
-                       OutputWorkspace=output_ws_name, StartOverlap=begoverlap, EndOverlap=endoverlap, \
-                       UseManualScaleFactor=manual_scalefactor, \
+    outputs = Stitch1D(LHSWorkspace=ws1, RHSWorkspace=ws2,
+                       OutputWorkspace=output_ws_name, StartOverlap=begoverlap, EndOverlap=endoverlap,
+                       UseManualScaleFactor=manual_scalefactor,
                        ManualScaleFactor=scalefactor, Params="%f,%f,%f" % (Qmin, binning, Qmax),
                        ScaleRHSWorkspace=scale_right)
 
@@ -117,10 +117,10 @@ def combine2(wksp1, wksp2, outputwksp, begoverlap, endoverlap, Qmin, Qmax, binni
         manual_scalefactor = False
         scalefactor = 1.0
     # Interally use the Stitch1D algorithm.
-    outputs = Stitch1D(LHSWorkspace=mtd[wksp1], RHSWorkspace=mtd[wksp2], \
-                       OutputWorkspace=outputwksp, StartOverlap=begoverlap, EndOverlap=endoverlap, \
-                       UseManualScaleFactor=manual_scalefactor, \
-                       ManualScaleFactor=scalefactor, Params="%f,%f,%f" % (Qmin, binning, Qmax), \
+    outputs = Stitch1D(LHSWorkspace=mtd[wksp1], RHSWorkspace=mtd[wksp2],
+                       OutputWorkspace=outputwksp, StartOverlap=begoverlap, EndOverlap=endoverlap,
+                       UseManualScaleFactor=manual_scalefactor,
+                       ManualScaleFactor=scalefactor, Params="%f,%f,%f" % (Qmin, binning, Qmax),
                        ScaleRHSWorkspace=scale_right)
 
     outscalefactor = outputs[1]

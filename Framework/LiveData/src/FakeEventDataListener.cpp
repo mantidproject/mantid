@@ -1,6 +1,7 @@
 #include "MantidLiveData/FakeEventDataListener.h"
 #include "MantidLiveData/Exception.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/ConfigService.h"

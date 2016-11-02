@@ -10,6 +10,7 @@ import numpy as np
 from . import MulpyRep
 from .ISISFermi import ISISFermi
 
+
 class ISISDisk:
     """
     Calculates the resolution and flux for the ISIS disk chopper spectrometer LET
@@ -387,4 +388,3 @@ class ISISDisk:
             plt.set_xlim(0, xmax)
             plt.set_xlabel(r'TOF ($\mu$sec)')
             plt.set_ylabel(r'Distance (m)')
-

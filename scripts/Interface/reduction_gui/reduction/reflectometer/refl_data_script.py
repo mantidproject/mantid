@@ -7,6 +7,7 @@
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
 
+
 class DataSets(BaseScriptElement):
 
     DataPeakSelectionType = 'narrow'
@@ -232,7 +233,6 @@ class DataSets(BaseScriptElement):
         self.DataPeakPixels = [BaseScriptElement.getIntElement(instrument_dom, "from_peak_pixels"),
                                BaseScriptElement.getIntElement(instrument_dom, "to_peak_pixels")]
 
-
         #data metadata
         _tthd_value = BaseScriptElement.getStringElement(instrument_dom, "tthd_value")
         if _tthd_value == '':
@@ -336,7 +336,6 @@ class DataSets(BaseScriptElement):
         # Primary fraction
         self.clocking_from = BaseScriptElement.getIntElement(instrument_dom, "clocking_from", default=None)
         self.clocking_to = BaseScriptElement.getIntElement(instrument_dom, "clocking_to", default=None)
-
 
     def reset(self):
         """

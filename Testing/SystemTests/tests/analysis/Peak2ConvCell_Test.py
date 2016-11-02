@@ -164,7 +164,7 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
 
         Res = matrix([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
         ConvUB = self.CalcConventionalUB(a, b, c, alpha, beta, gamma, celltype)
-        if ConvUB == None:
+        if ConvUB is None:
             return None
 
         ResP = numpy.matrix.copy(ConvUB)
@@ -247,13 +247,11 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
 
             Res = Res.I
 
-
-
         elif Center == 'R':
 
             if celltype != 'H' or alpha > 120:  # alpha =120 planar, >120 no go or c under a-b plane.
 
-                self.conventionalUB = NiggliUB = None
+                self.conventionalUB = None
                 return None
 
                 # Did not work with 0 error. FindUBUsingFFT failed
@@ -369,7 +367,6 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
 
     def FixUpPlusMinus(self, UB):  # TODO make increasing lengthed sides too
         M = matrix([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
-        M1 = matrix([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
         G = UB.T * UB
         #G.I
 
@@ -463,7 +460,6 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
                         odd = i
                         break
 
-
                 elif nneg == 1 and L[i] < 0:
                     odd = i
                 elif nneg == 2 and L[i] > 0:
@@ -500,9 +496,6 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
         Error = error * MinAbsQ
         npeaks = 0
 
-        a1 = hkl[0, 0]
-        a2 = hkl[1, 0]
-        a3 = hkl[2, 0]
         done = False
         while not done:
 
@@ -790,20 +783,20 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
                                 Lat1 = self.XchangeSides(Lat1, 0, 1)
 
                             if math.fabs(Lat0[3] - Lat1[3]) < angTolerance and\
-                                            math.fabs(Lat0[4] - Lat1[4]) < angTolerance and\
-                                math.fabs(Lat0[5] - Lat1[5]) < angTolerance:
+                                math.fabs(Lat0[4] - Lat1[4]) < angTolerance and\
+                                    math.fabs(Lat0[5] - Lat1[5]) < angTolerance:
                                 break
                             if Lat1[1] > Lat1[2] - tolerance:
                                 Lat1 = self.XchangeSides(Lat1, 1, 2)
 
                             if math.fabs(Lat0[3] - Lat1[3]) < angTolerance and\
-                                            math.fabs(Lat0[4] - Lat1[4]) < angTolerance and\
-                                            math.fabs(Lat0[5] - Lat1[5]) < angTolerance:
+                                    math.fabs(Lat0[4] - Lat1[4]) < angTolerance and\
+                                    math.fabs(Lat0[5] - Lat1[5]) < angTolerance:
                                 break
 
                         if math.fabs(Lat0[3] - Lat1[3]) < angTolerance and\
-                                        math.fabs(Lat0[4] - Lat1[4]) < angTolerance and\
-                                        math.fabs(Lat0[5] - Lat1[5]) < angTolerance:
+                                math.fabs(Lat0[4] - Lat1[4]) < angTolerance and\
+                                math.fabs(Lat0[5] - Lat1[5]) < angTolerance:
                             return Lat1
                     i1 = i1 + 1
                     i2 = i2 + 1
@@ -848,9 +841,9 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
 
                                             UBconv = self.conventionalUB
                                             V = self.getMatrixAxis(i1, Xtal)
-                                            if UBconv == None:
+                                            if UBconv is None:
                                                 continue
-                                            if UBnig == None:
+                                            if UBnig is None:
                                                 continue
                                             UBnig = V * UBnig
                                             UBconv = V * UBconv
@@ -867,23 +860,23 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
                                             # -------Failed tests because of FindUBUsingFFT -------------------
 
                                             if side1 == 1 and side2 == 2 and Error == 0.0 and Xtal == 'M' and \
-                                                            Center == 'C' and i1 == 0 and i2a == 1 and ang == 140:
+                                                    Center == 'C' and i1 == 0 and i2a == 1 and ang == 140:
                                                 continue
 
                                             if side1 == 2 and side2 == 2 and Error == 0.0 and Xtal == 'M' and\
-                                                            Center == 'P' and i1 == 1 and i2a == 1 and ang == 110:
+                                                    Center == 'P' and i1 == 1 and i2a == 1 and ang == 110:
                                                 continue  # one side doubled
 
                                             if side1 == 3 and side2 == 3 and Error == 0.0 and Xtal == 'M' and\
-                                                            Center == 'I' and i1 == 1 and i2a == 2:
+                                                    Center == 'I' and i1 == 1 and i2a == 2:
                                                 continue
 
                                             if side1 == 3 and side2 == 3 and Error == 0.0 and Xtal == 'M' and\
-                                                            Center == 'I' and i1 == 2 and i2a == 1:
+                                                    Center == 'I' and i1 == 2 and i2a == 1:
                                                 continue
 
                                             if side1 == 3 and side2 == 3 and Error == 0.0 and Xtal == 'H' and\
-                                                            Center == 'I' and i1 == 2 and i2a == 1 and ang == 20:
+                                                    Center == 'I' and i1 == 2 and i2a == 1 and ang == 20:
                                                 continue
                                                 # ------------------------------ end Failed FindUB test------------
                                             FindUBUsingFFT(Peaks, Lat0[0] * .5, Lat0[2] * 2.0, .15)
@@ -903,7 +896,6 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
                                             print Lat0
                                             print Lat1
                                             self.MatchXtlparams(Lat1, Lat0, MatchXtalTol, "Niggli values do not match")
-
 
                                             # Now see if the conventional cell is in list
                                             XtalCenter1 = self.Xlate(Xtal, Center, Sides,

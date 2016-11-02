@@ -21,6 +21,7 @@ try:
 except ImportError, e:
     logger.error(e.message())
 
+
 class BaseRefWidget(BaseWidget):
     """
         Base widget for reflectivity interfaces
@@ -445,7 +446,6 @@ class BaseRefWidget(BaseWidget):
             if ws.endswith("_scaled"):
                 scaled_ws_list.append(ws)
 
-
         # get binning parameters
         _from_q = str(self._summary.q_min_edit.text())
         _bin_size = str(self._summary.q_step_edit.text())
@@ -506,13 +506,11 @@ class BaseRefWidget(BaseWidget):
         for ws in scaled_ws_list:
             # print 'file_number: ' , file_number
             data_y = mtd[ws].dataY(0)
-            _data_e = mtd[ws].dataE(0)
 
             # cleanup data 0-> NAN
             for y_val in data_y:
                 # print '-> data_y[j]: ' , data_y[j] , ' data_e[j]: ' , data_y[j]
                 if y_val < 1e-12:
-                    _y_val = np.nan
                     _y_val = np.nan
 
             _file_number += 1
@@ -579,7 +577,6 @@ class BaseRefWidget(BaseWidget):
                 elif (data_y[j] == 0) and (data_y_i[j]>0):
                     data_y[j] = data_y_i[j]
                     data_e[j] = data_e_i[j]
-
 
         return scaled_ws_list[0]+'_histo'
 
@@ -661,7 +658,6 @@ class BaseRefWidget(BaseWidget):
         for _line in text:
             f.write(_line + '\n')
 
-
     def browse_config_file_name(self):
         '''
         Define configuration file name
@@ -714,7 +710,6 @@ class BaseRefWidget(BaseWidget):
     def _edit_event(self, text=None, ctrl=None):
         if text is None:
             text = ""
-            _text = text
         self._summary.edited_warning_label.show()
         util.set_edited(ctrl, True)
 
@@ -849,8 +844,8 @@ class BaseRefWidget(BaseWidget):
                     f = open(file_path,'w')
                     f.write(content)
                     f.close()
-                    QtGui.QMessageBox.information(self, "Automated reduction script saved",\
-                                           "The automated reduction script has been updated")
+                    QtGui.QMessageBox.information(self, "Automated reduction script saved",
+                                                  "The automated reduction script has been updated")
                 except:
                     _report_error()
             else:
@@ -1006,7 +1001,6 @@ class BaseRefWidget(BaseWidget):
             For REFM, this is X
             For REFL, this is Y
         """
-        _is_peak = is_peak
 #        run_number = self._summary.data_run_number_edit.text()
 #        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]
 #
@@ -1079,7 +1073,6 @@ class BaseRefWidget(BaseWidget):
             Will launch the 2d plot for the data of counts vs x
         """
         return
-
 
     def _plot_data_count_vs_tof_2d(self):
         """
@@ -1171,7 +1164,6 @@ class BaseRefWidget(BaseWidget):
                                QtCore.SIGNAL("peak_back_tof_range_update(double,double, double,double,double,double)"),
                                self.call_back)
 
-
     def call_back(self, peakmin, peakmax, backmin, backmax, tofmin, tofmax):
         self._summary.data_peak_from_pixel.setText("%-d" % int(peakmin))
         self._summary.data_peak_to_pixel.setText("%-d" % int(peakmax))
@@ -1241,14 +1233,11 @@ class BaseRefWidget(BaseWidget):
         """
         return
 
-
     def _plot_norm_count_vs_tof_2d(self):
         """
             Will launch the 2d plot for the norm of counts vs TOF
         """
         return
-
-
 
     def _integrated_plot(self, is_high_res, file_ctrl, min_ctrl, max_ctrl, isPeak=True):
         """
@@ -1357,8 +1346,8 @@ class BaseRefWidget(BaseWidget):
                 state.geometry_correction_switch = self._summary.geometry_correction_switch.isChecked()
 
                 #incident medium
-                _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j))\
-                                          for j in range(self._summary.incident_medium_combobox.count())]
+                _incident_medium_list = [str(self._summary.incident_medium_combobox.itemText(j))
+                                         for j in range(self._summary.incident_medium_combobox.count())]
                 _incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
 
                 _incident_medium_string = (',').join(_incident_medium_list)

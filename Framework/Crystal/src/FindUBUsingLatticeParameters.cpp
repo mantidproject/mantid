@@ -3,6 +3,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -14,7 +15,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingLatticeParameters::init() {
@@ -48,7 +48,6 @@ void FindUBUsingLatticeParameters::init() {
                         "Indexing Tolerance (0.15)");
 }
 
-//--------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void FindUBUsingLatticeParameters::exec() {

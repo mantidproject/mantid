@@ -62,7 +62,7 @@ void SmoothData::exec() {
       WorkspaceFactory::Instance().create(inputWorkspace);
 
   Progress progress(this, 0.0, 1.0, inputWorkspace->getNumberHistograms());
-  PARALLEL_FOR2(inputWorkspace, outputWorkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
   // Loop over all the spectra in the workspace
   for (int i = 0; i < static_cast<int>(inputWorkspace->getNumberHistograms());
        ++i) {
@@ -92,19 +92,19 @@ void SmoothData::exec() {
 
     // Copy the X data over. Preserves data sharing if present in input
     // workspace.
-    outputWorkspace->setX(i, inputWorkspace->refX(i));
+    outputWorkspace->setSharedX(i, inputWorkspace->sharedX(i));
 
     // Now get references to the Y & E vectors in the input and output
     // workspaces
-    const MantidVec &Y = inputWorkspace->readY(i);
-    const MantidVec &E = inputWorkspace->readE(i);
-    MantidVec &newY = outputWorkspace->dataY(i);
-    MantidVec &newE = outputWorkspace->dataE(i);
     if (npts == 0) {
-      newY = Y;
-      newE = E;
+      outputWorkspace->setSharedY(i, inputWorkspace->sharedY(i));
+      outputWorkspace->setSharedE(i, inputWorkspace->sharedE(i));
       continue;
     }
+    const auto &Y = inputWorkspace->y(i);
+    const auto &E = inputWorkspace->e(i);
+    auto &newY = outputWorkspace->mutableY(i);
+    auto &newE = outputWorkspace->mutableE(i);
     // Use total to help hold our moving average
     double total = 0.0, totalE = 0.0;
     // First push the values ahead of the current point onto total

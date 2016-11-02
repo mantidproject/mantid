@@ -920,6 +920,10 @@ public:
     doTestLoadAndSaveHistogramWS(true);
   }
 
+  void test_SaveAndLoadOnHistogramWSwithLegacyXErrors() {
+    doTestLoadAndSaveHistogramWS(true, false, true);
+  }
+
   void test_SaveAndLoadOnPointLikeWS() { doTestLoadAndSavePointWS(false); }
 
   void test_SaveAndLoadOnPointLikeWSWithXErrors() {
@@ -1152,16 +1156,17 @@ private:
   }
 
   void doTestLoadAndSaveHistogramWS(bool useXErrors = false,
-                                    bool numericAxis = false) {
+                                    bool numericAxis = false,
+                                    bool legacyXErrors = false) {
     // Test SaveNexusProcessed/LoadNexusProcessed on a histogram workspace with
     // x errors
 
     // Create histogram workspace with two spectra and 4 points
     std::vector<double> x1{1, 2, 3};
-    std::vector<double> dx1{3, 2, 1};
+    std::vector<double> dx1{3, 2};
     std::vector<double> y1{1, 2};
     std::vector<double> x2{1, 2, 3};
-    std::vector<double> dx2{3, 2, 1};
+    std::vector<double> dx2{3, 2};
     std::vector<double> y2{1, 2};
     MatrixWorkspace_sptr inputWs = WorkspaceFactory::Instance().create(
         "Workspace2D", 2, x1.size(), y1.size());
@@ -1170,8 +1175,12 @@ private:
     inputWs->mutableY(0) = y1;
     inputWs->mutableY(1) = y2;
     if (useXErrors) {
-      inputWs->setBinEdgeStandardDeviations(0, dx1);
-      inputWs->setBinEdgeStandardDeviations(1, dx2);
+      inputWs->setPointStandardDeviations(0, dx1);
+      inputWs->setPointStandardDeviations(1, dx2);
+      if (legacyXErrors) {
+        inputWs->dataDx(0).push_back(1);
+        inputWs->dataDx(1).push_back(1);
+      }
     }
     if (numericAxis) {
       auto numericAxis = new NumericAxis(2);
@@ -1214,8 +1223,8 @@ private:
     TS_ASSERT_EQUALS(inputWs->e(1), outputWs->e(1));
     if (useXErrors) {
       TSM_ASSERT("Should have an x error", outputWs->hasDx(0));
-      TS_ASSERT_EQUALS(inputWs->dx(0).rawData(), outputWs->dx(0).rawData());
-      TS_ASSERT_EQUALS(inputWs->dx(1).rawData(), outputWs->dx(1).rawData());
+      TS_ASSERT_EQUALS(dx1, outputWs->dx(0).rawData());
+      TS_ASSERT_EQUALS(dx2, outputWs->dx(1).rawData());
     }
 
     // Axes

@@ -7,7 +7,6 @@
 
 #
 import tube
-from mantid.api import WorkspaceFactory  # For table worskspace of calibrations
 from tube_spec import TubeSpec
 #from tube_calib_fit_params import  # To handle fit parameters
 
@@ -45,8 +44,8 @@ print "Created objects needed for calibration."
 
 # == Get the calibration and put results into calibration table ==
 
-calibrationTable, peakTable = tube.calibrate(CalibInstWS, thisTubeSet, knownPos, funcForm,\
-    outputPeak=True)
+calibrationTable, peakTable = tube.calibrate(CalibInstWS, thisTubeSet, knownPos, funcForm,
+                                             outputPeak=True)
 print "Got calibration (new positions of detectors) "
 
 # == Apply the Calibation ==
@@ -57,4 +56,3 @@ print "Applied calibration"
 # == Save workspace ==
 #SaveNexusProcessed( CalibInstWS, path+'TubeCalibDemoMapsResult.nxs',"Result of Running TCDemoMaps.py")
 print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMapsResult.nxs"
-

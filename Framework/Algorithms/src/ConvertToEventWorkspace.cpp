@@ -62,7 +62,7 @@ void ConvertToEventWorkspace::exec() {
   API::WorkspaceFactory::Instance().initializeFromParent(inWS, outWS, false);
 
   Progress prog(this, 0.0, 1.0, inWS->getNumberHistograms());
-  PARALLEL_FOR1(inWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inWS))
   for (int iwi = 0; iwi < int(inWS->getNumberHistograms()); iwi++) {
     PARALLEL_START_INTERUPT_REGION
     size_t wi = size_t(iwi);

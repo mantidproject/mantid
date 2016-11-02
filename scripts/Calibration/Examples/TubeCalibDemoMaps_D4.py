@@ -54,4 +54,3 @@ print "Applied calibration"
 # == Save workspace ==
 SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMapsResult.nxs',"Result of Running TCDemoMaps.py")
 print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMapsResult.nxs"
-
