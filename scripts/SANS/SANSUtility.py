@@ -698,6 +698,7 @@ class WorkspaceType(object):
     class MultiperiodHistogram(object):
         pass
 
+
 def get_number_of_periods_from_file(file_name):
     full_file_path = FileFinder.findRuns(file_name)
     if hasattr(full_file_path, '__iter__'):

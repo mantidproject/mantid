@@ -27,7 +27,7 @@ class SANS2DMultiPeriodAddFiles(stresstesting.MantidStressTest):
 
         WavRangeReduction(2, 4, DefaultTrans)
 
-        paths = [os.path.join(config['defaultsave.directory'],'SANS2D00005512-add.nxs'), 
+        paths = [os.path.join(config['defaultsave.directory'],'SANS2D00005512-add.nxs'),
                  os.path.join(config['defaultsave.directory'],'SANS2D00005512.log')]
         for path in paths:
             if os.path.exists(path):
@@ -61,7 +61,7 @@ class LARMORMultiPeriodAddEventFiles(stresstesting.MantidStressTest):
         WavRangeReduction(2, 4, DefaultTrans)
 
         # Clean up
-        to_clean = ["13065_sans_nxs", 
+        to_clean = ["13065_sans_nxs",
                     "13065p1rear_1D_2.0_4.0_incident_monitor",
                     "13065p2rear_1D_2.0_4.0_incident_monitor",
                     "13065p3rear_1D_2.0_4.0_incident_monitor",
@@ -70,8 +70,8 @@ class LARMORMultiPeriodAddEventFiles(stresstesting.MantidStressTest):
         for workspace in to_clean:
             DeleteWorkspace(workspace)
 
-        paths = [os.path.join(config['defaultsave.directory'],'LARMOR00013065-add.nxs'), 
-                os.path.join(config['defaultsave.directory'],'SANS2D00013065.log')]
+        paths = [os.path.join(config['defaultsave.directory'],'LARMOR00013065-add.nxs'),
+                 os.path.join(config['defaultsave.directory'],'SANS2D00013065.log')]  # noqa
         for path in paths:
             if os.path.exists(path):
                 os.remove(path)
@@ -83,5 +83,5 @@ class LARMORMultiPeriodAddEventFiles(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Axes')
-        
+
         return "13065p1rear_1D_2.0_4.0" , "LARMORMultiPeriodAddEventFiles.nxs"
