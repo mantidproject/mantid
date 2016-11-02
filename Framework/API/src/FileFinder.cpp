@@ -148,8 +148,7 @@ std::string FileFinderImpl::getFullPath(const std::string &filename,
     } else {
       Poco::Path path(searchPath, fName);
       Poco::File file(path);
-      MDAlgorithmsTest_SaveMD2Testif(file.exists() &&
-                                     !(ignoreDirs && file.isDirectory())) {
+      if (file.exists() && !(ignoreDirs && file.isDirectory())) {
         return path.toString();
       }
     }
