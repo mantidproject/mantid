@@ -7,6 +7,7 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <boost/regex.hpp>
 
 namespace Mantid {
