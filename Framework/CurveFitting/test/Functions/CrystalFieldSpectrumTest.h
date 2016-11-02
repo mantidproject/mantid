@@ -9,11 +9,13 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Functions/CrystalFieldSpectrum.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/SimpleChebfun.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -577,6 +579,57 @@ public:
     }
   }
 
+  void test_asString() {
+    CrystalFieldSpectrum fun;
+    fun.setParameter("B20", 0.37737);
+    fun.setParameter("B22", 3.9770);
+    fun.setParameter("B40", -0.031787);
+    fun.setParameter("B42", -0.11611);
+    fun.setParameter("B44", -0.12544);
+    fun.setAttributeValue("Ion", "Ce");
+    fun.setAttributeValue("Temperature", 44.0);
+    fun.setAttributeValue("PeakShape", "Gaussian");
+    std::cerr << fun.asString() << std::endl;
+  }
+
+  void test_monte_carlo() {
+    CrystalFieldSpectrum fun;
+    fun.setParameter("B20", 0.37737);
+    fun.setParameter("B22", 3.9770);
+    fun.setParameter("B40", -0.031787);
+    fun.setParameter("B42", -0.11611);
+    fun.setParameter("B44", -0.12544);
+    fun.setAttributeValue("Ion", "Ce");
+    fun.setAttributeValue("Temperature", 44.0);
+    fun.setAttributeValue("FWHM", 1.0);
+    auto ws = createWorkspace(fun, 0, 50, 100);
+    auto mc = AlgorithmFactory::Instance().create("MonteCarloParameters", -1);
+    mc->initialize();
+    mc->setPropertyValue(
+        "Function",
+        "name=CrystalFieldSpectrum,Ion=Ce,"
+        "Symmetry=C2v,Temperature=44.0,FWHM=1.0,"
+        "constraints=(0<B20<2,1<B22<4,-0.1<B40<0.1,-0.1<B42<0.1,-0.1<B44<0.1)");
+    mc->setProperty("InputWorkspace", ws);
+    mc->setProperty("NIterations", 1000);
+    mc->execute();
+    IFunction_sptr func = mc->getProperty("Function");
+    std::cerr << func->asString() << std::endl;
+    auto b20 = func->getParameter("B20");
+    auto b22 = func->getParameter("B22");
+    auto b40 = func->getParameter("B40");
+    auto b42 = func->getParameter("B42");
+    auto b44 = func->getParameter("B44");
+    std::cerr << b20 << ' ' << b22 << std::endl;
+    auto fit = AlgorithmFactory::Instance().create("Fit", -1);
+    fit->initialize();
+    fit->setProperty("Function", func);
+    fit->setProperty("InputWorkspace", ws);
+    fit->execute();
+    double chi2 = fit->getProperty("OutputChi2overDoF");
+    std::cerr << "ch2=" << chi2 << std::endl;
+  }
+
 private:
   std::pair<double, double> getBounds(API::IFunction &fun,
                                       const std::string &parName) {
@@ -591,6 +644,16 @@ private:
                                " doesn't have boundary constraint");
     }
     return std::make_pair(bc->lower(), bc->upper());
+  }
+
+  MatrixWorkspace_sptr createWorkspace(const IFunction &fun, double x0, double x1, size_t nbins) {
+    auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, nbins, nbins);
+    FunctionDomain1DVector x(x0, x1, nbins);
+    FunctionValues y(x);
+    fun.function(x, y);
+    ws->dataX(0) = x.toVector();
+    ws->dataY(0) = y.toVector();
+    return ws;
   }
 };
 

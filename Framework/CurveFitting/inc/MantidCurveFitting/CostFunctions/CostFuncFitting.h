@@ -76,6 +76,8 @@ public:
   API::FunctionValues_sptr getValues() const { return m_values; }
   /// Apply ties in the fitting function
   void applyTies();
+  /// Reset the fitting function (neccessary if parameters get fixed/unfixed)
+  void reset();
 
 protected:
   /**

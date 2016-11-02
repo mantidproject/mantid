@@ -845,6 +845,7 @@ class CrystalFieldFit(object):
         self._input_workspace = InputWorkspace
         self._output_workspace_base_name = 'fit'
         self._fit_properties = kwargs
+        self._function = None
 
     def fit(self):
         """
@@ -855,12 +856,31 @@ class CrystalFieldFit(object):
         else:
             return self._fit_single()
 
+    def monte_carlo(self, **kwargs):
+        if isinstance(self._input_workspace, list):
+            raise NotImplementedError('Monte Carlo estimation is not implemented for multiple spectra')
+        from mantid.api import AlgorithmManager
+        fun = self.model.makeSpectrumFunction()
+        alg = AlgorithmManager.createUnmanaged('MonteCarloParameters')
+        alg.initialize()
+        alg.setProperty('Function', fun)
+        alg.setProperty('InputWorkspace', self._input_workspace)
+        for param in kwargs:
+            alg.setProperty(param, kwargs[param])
+        alg.execute()
+        function = alg.getProperty('Function').value
+        self.model.update(function)
+        self._function = function
+
     def _fit_single(self):
         """
         Fit when the model has a single spectrum.
         """
         from mantid.api import AlgorithmManager
-        fun = self.model.makeSpectrumFunction()
+        if self._function is None:
+            fun = self.model.makeSpectrumFunction()
+        else:
+            fun = str(self._function)
         alg = AlgorithmManager.createUnmanaged('Fit')
         alg.initialize()
         alg.setProperty('Function', fun)

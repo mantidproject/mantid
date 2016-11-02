@@ -206,6 +206,11 @@ void CostFuncFitting::applyTies() {
   }
 }
 
+/// Reset the fitting function (neccessary if parameters get fixed/unfixed)
+void CostFuncFitting::reset() {
+  setFittingFunction(m_function, m_domain, m_values);
+}
+
 
 } // namespace CostFunctions
 } // namespace CurveFitting

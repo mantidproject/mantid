@@ -132,8 +132,6 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
     }
     if (i < nPeaks) {
       auto centre = centresAndIntensities.getCalculated(i);
-      peak->fixCentre();
-      peak->fixIntensity();
       peak->setCentre(centre);
       peak->setIntensity(centresAndIntensities.getCalculated(i + nPeaks));
       if (useDefaultFWHM) {
@@ -147,6 +145,8 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
           ignorePeak(*peak, defaultFWHM);
         }
       }
+      peak->fixCentre();
+      peak->fixIntensity();
     } else {
       ignorePeak(*peak, defaultFWHM);
     }
@@ -197,6 +197,8 @@ size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
           setWidthConstraint(peak, expectedFwhm, fwhmVariation);
         }
       }
+      peak.unfixIntensity();
+      peak.fixIntensity();
     } else {
       peak.setHeight(0.0);
       if (i > nOriginalPeaks) {

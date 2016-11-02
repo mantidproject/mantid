@@ -79,8 +79,14 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
   m_source->function(domain, values);
   m_target->setAttribute("NumDeriv", this->getAttribute("NumDeriv"));
   auto &spectrum = dynamic_cast<CompositeFunction &>(*m_target);
-  m_nPeaks = CrystalFieldUtils::updateSpectrumFunction(
-      spectrum, values, m_nPeaks, 0, xVec, yVec, fwhmVariation);
+  m_nPeaks = CrystalFieldUtils::calculateNPeaks(values);
+  auto maxNPeaks = CrystalFieldUtils::calculateMaxNPeaks(m_nPeaks);
+  if (maxNPeaks > spectrum.nFunctions()) {
+    buildTargetFunction();
+  } else {
+    CrystalFieldUtils::updateSpectrumFunction(spectrum, values, m_nPeaks, 0,
+                                              xVec, yVec, fwhmVariation);
+  }
 }
 
 /// Custom string conversion method

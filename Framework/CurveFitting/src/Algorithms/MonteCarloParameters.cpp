@@ -83,8 +83,8 @@ void MonteCarloParameters::execConcrete() {
       continue;
     auto constraint = func->getConstraint(i);
     if (constraint == nullptr) {
-      throw std::runtime_error("Parameter " + func->parameterName(i) +
-                               " must have a boundary constraint.");
+      func->fix(i);
+      continue;
     }
     auto boundary = dynamic_cast<Constraints::BoundaryConstraint *>(constraint);
     if (boundary == nullptr) {
@@ -103,6 +103,9 @@ void MonteCarloParameters::execConcrete() {
     // of a generator with uniform distribution.
     ranges.push_back(std::make_pair(boundary->lower(), boundary->upper()));
   }
+  // Number of parameters could have changed
+  costFunction->reset();
+  nParams = costFunction->nParams();
 
   std::vector<double> bestParams = getParameters(*costFunction);
   double bestValue = costFunction->val();

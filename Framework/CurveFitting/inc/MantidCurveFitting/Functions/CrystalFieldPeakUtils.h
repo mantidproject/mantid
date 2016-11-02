@@ -51,6 +51,7 @@ size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
                               const std::vector<double> &yVec,
                               double fwhmVariation);
 size_t calculateNPeaks(const API::FunctionValues &centresAndIntensities);
+size_t calculateMaxNPeaks(size_t nPeaks);
 
 } // namespace CrystalFieldUtils
 } // namespace Functions
