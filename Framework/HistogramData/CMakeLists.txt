@@ -108,7 +108,8 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET HistogramData PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( HistogramData LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} )
+target_link_libraries ( HistogramData LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+                        ${GSL_LIBRARIES} ${MANTIDLIBS} )
 
 # Add the unit tests directory
 add_subdirectory ( test )
