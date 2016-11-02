@@ -94,24 +94,24 @@ void ReflectometryWorkflowBase2::initTransmissionProperties() {
 */
 void ReflectometryWorkflowBase2::initStitchProperties() {
 
-	declareProperty(
-		make_unique<ArrayProperty<double>>(
-			"Params", boost::make_shared<RebinParamsValidator>(true)),
-		"A comma separated list of first bin boundary, width, last bin boundary. "
-		"These parameters are used for stitching together transmission runs. "
-		"Values are in wavelength (angstroms). This input is only needed if a "
-		"SecondTransmission run is provided.");
+  declareProperty(
+      make_unique<ArrayProperty<double>>(
+          "Params", boost::make_shared<RebinParamsValidator>(true)),
+      "A comma separated list of first bin boundary, width, last bin boundary. "
+      "These parameters are used for stitching together transmission runs. "
+      "Values are in wavelength (angstroms). This input is only needed if a "
+      "SecondTransmission run is provided.");
 
-	declareProperty(make_unique<PropertyWithValue<double>>(
-		"StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
-		"Start wavelength for stitching transmission runs together. "
-		"Only used if a second transmission run is provided.");
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
+                  "Start wavelength for stitching transmission runs together. "
+                  "Only used if a second transmission run is provided.");
 
-	declareProperty(make_unique<PropertyWithValue<double>>(
-		"EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
-		"End wavelength (angstroms) for stitching transmission runs "
-		"together. Only used if a second transmission run is "
-		"provided.");
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
+                  "End wavelength (angstroms) for stitching transmission runs "
+                  "together. Only used if a second transmission run is "
+                  "provided.");
 }
 
 /** Initialize algorithmic correction properties

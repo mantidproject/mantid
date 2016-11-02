@@ -173,7 +173,7 @@ void ReflectometryReductionOne2::exec() {
     Property *directBeamProperty = getProperty("RegionOfDirectBeam");
     if (!directBeamProperty->isDefault()) {
       auto directBeam = makeDirectBeamWS(IvsLam);
-	  detectorWS = divide(detectorWS, directBeam);
+      detectorWS = divide(detectorWS, directBeam);
     }
 
     // Monitor workspace (only if I0MonitorIndex, MonitorBackgroundWavelengthMin
