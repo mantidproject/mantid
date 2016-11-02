@@ -90,9 +90,6 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         The sums and fits are done in d-spacing.
         """
 
-        import pydevd
-        pydevd.settrace('localhost', port=49988, stdoutToServer=True, stderrToServer=True)
-
         ws = self.getProperty('Workspace').value
         outWS = self.getPropertyValue('OutputWorkspace')
         vanWS = self.getProperty('VanadiumWorkspace').value
