@@ -120,3 +120,12 @@ m_n_decomposition = math.frexp(constants.m_n)
 # constant used to evaluate Q^2 for TOSCA.
 TOSCA_constant = m_n_decomposition[0] * kg2amu_decomposition[0] / aCLIMAX_constant_decomposition[0]
 TOSCA_constant *= 2 ** (m_n_decomposition[1] + kg2amu_decomposition[1] - aCLIMAX_constant_decomposition[1])
+
+# symbolic representation of empty slot in coefficients array
+empty_slot = 0
+
+# constants which represent quantum order effects
+quantum_order_one = 1
+quantum_order_two = 2
+quantum_order_three = 3
+quantum_order_four = 4

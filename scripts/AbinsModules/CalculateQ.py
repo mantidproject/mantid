@@ -36,18 +36,18 @@ class CalculateQ(IOmodule):
         self._k_points_data = k_points_data
 
         if isinstance(overtones, bool):
-            self._overtones = overtones
+            self._evaluate_overtones = overtones
         else:
             raise ValueError("Invalid value of overtones. Expected values are: True, False.")
 
         if isinstance(combinations, bool):
-            self._combinations = combinations
+            self._evaluate_combinations = combinations
         else:
             raise ValueError("Invalid value of combinations. Expected values are: True, False.")
 
-        if self._overtones:
+        if self._evaluate_overtones:
             overtones_folder = "overtones_true"
-            if self._combinations:
+            if self._evaluate_combinations:
                 combinations_folder = "combinations_true"
             else:
                 combinations_folder = "combinations_false"
@@ -92,9 +92,9 @@ class CalculateQ(IOmodule):
         """
         if self._sample_form == "Powder":
             self._instrument.collect_K_data(k_points_data=self._get_gamma_data(k_data_obj=self._k_points_data))
-            self._Qvectors = QData(overtones=self._overtones)
-            self._Qvectors.set(self._instrument.calculate_q_powder(overtones=self._overtones,
-                                                                   combinations=self._combinations))
+            self._Qvectors = QData(overtones=self._evaluate_overtones)
+            self._Qvectors.set(self._instrument.calculate_q_powder(overtones=self._evaluate_overtones,
+                                                                   combinations=self._evaluate_combinations))
         else:
             raise ValueError("SingleCrystal user case is not implemented.")
 
@@ -120,7 +120,7 @@ class CalculateQ(IOmodule):
         @return: QData object
         """
         data = self.load(list_of_datasets=["data"])
-        results = QData(overtones=self._overtones)
+        results = QData(overtones=self._evaluate_overtones)
         results.set(data["datasets"]["data"])
 
         return results

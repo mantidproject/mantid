@@ -19,6 +19,8 @@ except ImportError:
 
 from AbinsModules import CalculateS, LoadCASTEP
 
+
+# noinspection PyPep8Naming
 class ABINSCalculateSPowderTest(unittest.TestCase):
     """
     Test of  CalculateS for the Powder scenario.
@@ -27,8 +29,8 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
     _temperature = 10  # 10 K,  temperature for the benchmark
     _sample_form = "Powder"
     _instrument_name = "TOSCA"
-    _overtones=False
-    _combinations=False
+    _overtones = False
+    _combinations = False
 
     # data
     core = "../ExternalData/Testing/Data/UnitTest/"
@@ -89,20 +91,19 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
                                 abins_data=_good_data.extract(), instrument_name=self._instrument_name,
                                 overtones=self._overtones, combinations=self._combinations)
 
-
     #  main test
     def test_good_case(self):
         self._good_case(name=self.Si2_path)
         self._good_case(name=self.Squaricn_path)
 
-
     # helper functions
     def _good_case(self, name=None):
         # calculation of powder data
         _good_data = self._get_good_data(filename=name)
-        _good_tester = CalculateS(filename=name + ".phonon", temperature=self._temperature, sample_form=self._sample_form,
-                                  abins_data=_good_data["DFT"], instrument_name=self._instrument_name,
-                                  overtones=self._overtones, combinations=self._combinations)
+        _good_tester = CalculateS(filename=name + ".phonon",  temperature=self._temperature,
+                                  sample_form=self._sample_form, abins_data=_good_data["DFT"],
+                                  instrument_name=self._instrument_name, overtones=self._overtones,
+                                  combinations=self._combinations)
         calculated_data = _good_tester.getData()
 
         self._check_data(good_data=_good_data["S"], data=calculated_data.extract())
@@ -115,7 +116,6 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
 
         self._check_data(good_data=_good_data["S"], data=loaded_data.extract())
 
-
     def _get_good_data(self, filename=None):
 
         _CASTEP_reader = LoadCASTEP(input_DFT_filename=filename + ".phonon")
@@ -123,41 +123,40 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
 
         return {"DFT": _CASTEP_reader.readPhononFile(), "S": _S}
 
-
     def _prepare_data(self, filename=None):
         """Reads a correct values from ASCII file."""
         correct_data = None
         with open(filename) as data_file:
+            # noinspection PyPep8
             correct_data = json.loads(data_file.read().replace("\\n", " ").
                                       replace("array",    "").
                                       replace("(["    ,  "[").
                                       replace("])"    ,  "]").
                                       replace("'"     ,  '"').
-                                      replace("0. "   ,"0.0"))
+                                      replace("0. "   , "0.0"))
 
-        # for key in correct_data.keys():
-        #
-        #     correct_data[key] = np.asarray(correct_data[key])
+        temp = np.asarray(correct_data["frequencies"]["order_%s" % AbinsConstants.fundamentals])
+        correct_data["frequencies"]["order_%s" % AbinsConstants.fundamentals] = temp
 
-        correct_data["frequencies"]["order_%s" % AbinsConstants.fundamentals] = np.asarray(correct_data["frequencies"]["order_%s" % AbinsConstants.fundamentals])
         for el in range(len(correct_data["atoms_data"])):
-            correct_data["atoms_data"]["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals] = np.asarray(correct_data["atoms_data"]["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals])
+            temp = np.asarray(correct_data["atoms_data"]["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals])
+            correct_data["atoms_data"]["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals] = temp
 
         return correct_data
 
-
     def _check_data(self, good_data=None, data=None):
-        print good_data.keys()
-        print "\n\n\n"
-        print 'good_data["frequencies"]=', good_data["frequencies"]
-        print good_data["frequencies"].keys()
-        print data.keys()
-        self.assertEqual(True, np.allclose(good_data["frequencies"]["order_%s" % AbinsConstants.fundamentals], data["frequencies"]["order_%s"% AbinsConstants.fundamentals]))
+
+        self.assertEqual(True, np.allclose(good_data["frequencies"]["order_%s" % AbinsConstants.fundamentals],
+                                           data["frequencies"]["order_%s" % AbinsConstants.fundamentals]))
 
         for el in range(len(good_data["atoms_data"])):
-            self.assertEqual(True, np.allclose(good_data["atoms_data"]["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals], data["atoms_data"]["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals]))
-            self.assertEqual(good_data["atoms_data"]["atom_%s" % el]["sort"], data["atoms_data"]["atom_%s" % el]["sort"])
-            self.assertEqual(good_data["atoms_data"]["atom_%s" % el]["symbol"], data["atoms_data"]["atom_%s" % el]["symbol"])
+            good_temp = good_data["atoms_data"]["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals]
+            data_temp = data["atoms_data"]["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals]
+            self.assertEqual(True, np.allclose(good_temp, data_temp))
+            self.assertEqual(good_data["atoms_data"]["atom_%s" % el]["sort"],
+                             data["atoms_data"]["atom_%s" % el]["sort"])
+            self.assertEqual(good_data["atoms_data"]["atom_%s" % el]["symbol"],
+                             data["atoms_data"]["atom_%s" % el]["symbol"])
 
 
 if __name__ == '__main__':

@@ -84,10 +84,10 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                                       combinations_folder))
         FrequencyPowderGenerator.__init__(self)
 
-        self._calculate_order = {1: self._calculate_order_one,
-                                 2: self._calculate_order_two,
-                                 3: self._calculate_order_three,
-                                 4: self._calculate_order_four}
+        self._calculate_order = {AbinsConstants.quantum_order_one: self._calculate_order_one,
+                                 AbinsConstants.quantum_order_two: self._calculate_order_two,
+                                 AbinsConstants.quantum_order_three: self._calculate_order_three,
+                                 AbinsConstants.quantum_order_four: self._calculate_order_four}
 
     def _calculate_s(self):
 
@@ -294,12 +294,12 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
             # extract indices of a and b tensor which should be used to evaluate S for the given transition
 
             for indx, coeff in np.ndenumerate(coefficients[omega]):
-                while coeff != 0:
+                while coeff != AbinsConstants.empty_slot:
                     indices.append(indx[0])
                     coeff -= 1
 
                 # we collected all necessary indices
-                if len(indices) == 2:
+                if len(indices) == AbinsConstants.quantum_order_two:
                     break
 
             q2_w = q2[omega]
@@ -369,12 +369,12 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
 
             # extract indices of a and b tensor which should be used to evaluate S for the given transition
             for indx, coeff in np.ndenumerate(coefficients[omega]):
-                while coeff != 0:
+                while coeff != AbinsConstants.empty_slot:
                     indices.append(indx[0])
                     coeff -= 1
 
                 # we collected all necessary indices
-                if len(indices) == 3:
+                if len(indices) == AbinsConstants.quantum_order_three:
                     break
             q2_w = q2[omega]
             dw = math.exp(-q2_w * a_trace / 3.0)
@@ -407,12 +407,12 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
 
             # extract indices of a and b tensor which should be used to evaluate S for the given transition
             for indx, coeff in np.ndenumerate(coefficients[omega]):
-                while coeff != 0:
+                while coeff != AbinsConstants.empty_slot:
                     indices.append(indx[0])
                     coeff -= 1
 
                 # we collected all necessary indices
-                if len(indices) == 4:
+                if len(indices) == AbinsConstants.quantum_order_four:
                     break
 
             q2_w = q2[omega]
