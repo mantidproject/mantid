@@ -1725,7 +1725,7 @@ void LoadNexusProcessed::loadNonSpectraAxis(
     try {
       axisData.load();
       axisLabels = std::string(axisData(), axisData.dim0());
-    } catch (std::exception &) {
+    } catch (std::runtime_error &) {
       axisLabels = "";
     }
     // Use boost::tokenizer to split up the input
