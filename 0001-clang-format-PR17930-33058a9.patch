@@ -1,0 +1,30 @@
+From e174944c510291009a298284d82a17477706036d Mon Sep 17 00:00:00 2001
+From: mantid-builder <mantid-buildserver@mantidproject.org>
+Date: Wed, 2 Nov 2016 16:18:09 +0000
+Subject: [PATCH] clang-format PR17930 33058a9
+
+---
+ Framework/Algorithms/src/GetEiMonDet2.cpp | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/Framework/Algorithms/src/GetEiMonDet2.cpp b/Framework/Algorithms/src/GetEiMonDet2.cpp
+index c086e08..7977dd0 100644
+--- a/Framework/Algorithms/src/GetEiMonDet2.cpp
++++ b/Framework/Algorithms/src/GetEiMonDet2.cpp
+@@ -104,10 +104,9 @@ void GetEiMonDet2::init() {
+                   boost::make_shared<StringListValidator>(indexTypes),
+                   "The type of indices " + PropertyNames::DETECTORS + " and " +
+                       PropertyNames::MONITOR + " refer to.");
+-  declareProperty(
+-      make_unique<ArrayProperty<int>>(PropertyNames::DETECTORS.c_str(),
+-                                      mandatoryArrayProperty),
+-      "A list of detector ids/spectrum number/workspace indices.");
++  declareProperty(make_unique<ArrayProperty<int>>(
++                      PropertyNames::DETECTORS.c_str(), mandatoryArrayProperty),
++                  "A list of detector ids/spectrum number/workspace indices.");
+   declareProperty(make_unique<WorkspaceProperty<>>(
+                       PropertyNames::MONITOR_WORKSPACE.c_str(), "",
+                       Direction::Input, PropertyMode::Optional, tofWorkspace),
+-- 
+2.7.4
+
