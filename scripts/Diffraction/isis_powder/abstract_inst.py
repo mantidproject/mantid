@@ -66,7 +66,7 @@ class AbstractInst(object):
             self.default_input_ext = input_ext
 
         return common.focus(instrument=self, number=run_number,
-                                        attenuate=do_attenuation, van_norm=do_van_normalisation)
+                            attenuate=do_attenuation, van_norm=do_van_normalisation)
 
     def create_empty_calibration_by_names(self, calibration_numbers, output_file_name, group_names=None):
 
@@ -74,7 +74,7 @@ class AbstractInst(object):
             group_names = self._get_default_group_names()
 
         common.create_calibration_by_names(calibration_runs=calibration_numbers, grouping_file_name=output_file_name,
-                                                       group_names=group_names, startup_objects=self)
+                                           group_names=group_names, startup_objects=self)
 
     def create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
         self._create_calibration(calibration_runs=calibration_runs,
@@ -88,10 +88,10 @@ class AbstractInst(object):
                                     do_absorb_corrections=True, gen_absorb_correction=False):
 
         common.create_vanadium(startup_object=self, vanadium_runs=vanadium_runs,
-                                           empty_runs=empty_runs, output_file_name=output_file_name,
-                                           num_of_spline_coefficients=num_of_splines,
-                                           do_absorb_corrections=do_absorb_corrections,
-                                           generate_absorb_corrections=gen_absorb_correction)
+                               empty_runs=empty_runs, output_file_name=output_file_name,
+                               num_of_spline_coefficients=num_of_splines,
+                               do_absorb_corrections=do_absorb_corrections,
+                               generate_absorb_corrections=gen_absorb_correction)
 
     @staticmethod
     def set_debug_mode(val):

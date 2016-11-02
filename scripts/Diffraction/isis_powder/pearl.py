@@ -5,7 +5,7 @@ import numpy as numpy
 
 import os
 
-from isis_powder import AbstractInst
+from isis_powder.abstract_inst import AbstractInst
 from isis_powder import pearl_calib_factory
 from isis_powder import pearl_cycle_factory
 import isis_powder.common as common
