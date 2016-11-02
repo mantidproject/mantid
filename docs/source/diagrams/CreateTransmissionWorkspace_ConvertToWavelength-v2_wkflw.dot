@@ -24,12 +24,12 @@ subgraph decisions {
 subgraph algorithms {
  $algorithm_style
   convertWav    [label="ConvertUnits\n(AlignBins = True)", group=g1]
-  cropWav       [label="CropWorkspace", group=g1]
   groupDet      [label="GroupDetectors"]
   cropMonWS     [label="CropWorkspace", group=g11]
   calcFlatBg    [label="CalculateFlatBackground", group=g11]
   intMon        [label="Integration", group=g11]
   divideDetMon  [label="Divide\n(Detectors / Monitors)", group=g1]
+  cropWav       [label="CropWorkspace", group=g1]
 }
 
 subgraph processes {
@@ -43,10 +43,7 @@ subgraph values {
 }
 
 inputWS             -> convertWav
-wavMin              -> cropWav
-convertWav          -> cropWav
-wavMax              -> cropWav
-cropWav             -> valWav
+convertWav          -> valWav
 valWav              -> groupDet       [label="Detectors"]
 procCommands        -> groupDet
 
@@ -59,12 +56,19 @@ calcFlatBg          -> intMon
 monIntWavMin        -> intMon
 monIntWavMax        -> intMon
 
-groupDet        -> divideDetMon
+groupDet            -> divideDetMon
 intMon              -> divideDetMon
-divideDetMon        -> valWavOut
+wavMin              -> cropWav
+divideDetMon        -> cropWav
+wavMax              -> cropWav
+cropWav             -> valWavOut
 
-wavMax -> monBackWavMax [style=invis]
+groupDet -> cropMonWS [style=invis]
+groupDet -> intMon [style=invis]
+monBackWavMin -> monIntWavMin [style=invis]
+monBackWavMax -> monIntWavMax [style=invis]
 
 {rank=same; monIntWavMin; monIntWavMax}
 {rank=same; monBackWavMin; monBackWavMax}
+{rank=same; groupDet; cropMonWS}
 }

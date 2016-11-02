@@ -193,6 +193,9 @@ void ReflectometryReductionOne2::exec() {
     }
   }
 
+  // Crop to wavelength limits
+  IvsLam = cropWavelength(IvsLam);
+
   // Transmission correction
   MatrixWorkspace_sptr transRun = getProperty("FirstTransmissionRun");
   if (transRun) {

@@ -37,8 +37,7 @@ the input workspace. If the input workspace is already in wavelength, normalizat
 monitors and direct beam are not performed, as it is considered that the input run was
 already reduced using this algorithm. If the input workspace is in TOF, it will be
 converted to wavelength (note that :literal:`AlignBins` will be set to :literal:`True` for this in 
-:ref:`algm-ConvertUnits`), cropped according to
-:literal:`WavelengthMin` and :literal:`WavelengthMax`, which are both mandatory properties, and the detectors
+:ref:`algm-ConvertUnits`) and the detectors
 of interest, specified via :literal:`ProcessingInstructions`, will be grouped together using
 :ref:`algm-GroupDetectors`. **Optionally**, the algorithm will perform direct beam
 normalization (if :literal:`RegionOfDirectBeam` is specified) dividing the detectors of
@@ -47,8 +46,9 @@ interest by the direct beam, and monitor normalization (if :literal:`I0MonitorIn
 in which case the detectors of interest will be divided by monitors. Detectors can be normalized
 by integrated monitors by setting :literal:`NormalizeByIntegratedMonitors` to true, in which case
 :literal:`MonitorIntegrationWavelengthMin` and :literal:`MonitorIntegrationWavelenthMax` will
-be used as the integration range. A summary of the
-steps is shown in the workflow diagram below.
+be used as the integration range. Finally, the resulting workspace will be cropped according to
+:literal:`WavelengthMin` and :literal:`WavelengthMax`, which are both mandatory properties.
+A summary of the steps is shown in the workflow diagram below.
 
 .. diagram:: ReflectometryReductionOne_ConvertToWavelength-v2_wkflw.dot
 

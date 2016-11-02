@@ -25,16 +25,16 @@ output workspace is generated with X-units of wavelength in angstroms.
 The diagram above illustrates the main steps in the algorithm. Below is a more
 detailed diagram describing how transmission workspaces are converted to units
 of wavelength and normalized by monitors. First, the input workspace is converted
-to wavelength and cropped according to :literal:`WavelengthMin` and :literal:`WavelengthMax`.
-Next, :literal:`ProcessingInstructions` are used as the grouping pattern to extract
+to wavelength and :literal:`ProcessingInstructions` are used to extract
 the detectors of interest. If :literal:`I0MonitorIndex`, :literal:`MonitorBackgroundWavelengthMin`
 and :literal:`MonitorBackgroundWavelengthMax` are provided, the monitor will be
 extracted from the input workspace and its background will be subtracted according
 to :literal:`MonitorBackgroundWavelengthMin` and :literal:`MonitorBackgroundWavelengthMax`.
 If :literal:`MonitorIntegrationWavelengthMin` and :literal:`MonitorIntegrationWavelengthMax`
 are provided, monitors will be integrated according to that range. Finally, the
-detector workspace will be normalize by the monitor workspace. Note that monitor
-normalization is optional and only happens when all :literal:`I0MonitorIndex`,
+detector workspace will be normalized by the monitor workspace, and the resulting workspace
+will be cropped according to :literal:`WavelengthMin` and :literal:`WavelengthMax`.
+Note that monitor normalization is optional and only happens when all :literal:`I0MonitorIndex`,
 :literal:`MonitorBackgroundWavelengthMin` and :literal:`MonitorBackgroundWavelengthMax` are
 provided.
 

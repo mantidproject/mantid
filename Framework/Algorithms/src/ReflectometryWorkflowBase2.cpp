@@ -227,8 +227,7 @@ ReflectometryWorkflowBase2::validateTransmissionProperties() {
   return results;
 }
 
-/** Converts an input workspace in TOF to wavelength and crops to specified
-* limits.
+/** Converts an input workspace in TOF to wavelength
 * @param inputWS :: the workspace to convert
 * @return :: the workspace in wavelength
 */
@@ -244,17 +243,28 @@ ReflectometryWorkflowBase2::convertToWavelength(MatrixWorkspace_sptr inputWS) {
   MatrixWorkspace_sptr outputWS =
       convertUnitsAlg->getProperty("OutputWorkspace");
 
+  return outputWS;
+}
+
+/** Crops a workspace in wavelength to specified limits
+* @param inputWS :: the workspace to crop
+* @return :: the cropped workspace
+*/
+MatrixWorkspace_sptr
+ReflectometryWorkflowBase2::cropWavelength(MatrixWorkspace_sptr inputWS) {
+
   // Crop out the lambda x-ranges now that the workspace is in wavelength.
   double wavelengthMin = getProperty("WavelengthMin");
   double wavelengthMax = getProperty("WavelengthMax");
 
   auto cropWorkspaceAlg = createChildAlgorithm("CropWorkspace");
   cropWorkspaceAlg->initialize();
-  cropWorkspaceAlg->setProperty("InputWorkspace", outputWS);
+  cropWorkspaceAlg->setProperty("InputWorkspace", inputWS);
   cropWorkspaceAlg->setProperty("XMin", wavelengthMin);
   cropWorkspaceAlg->setProperty("XMax", wavelengthMax);
   cropWorkspaceAlg->execute();
-  outputWS = cropWorkspaceAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWS =
+      cropWorkspaceAlg->getProperty("OutputWorkspace");
 
   return outputWS;
 }

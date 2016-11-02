@@ -56,6 +56,9 @@ protected:
   /// Convert a workspace from TOF to wavelength
   Mantid::API::MatrixWorkspace_sptr
   convertToWavelength(Mantid::API::MatrixWorkspace_sptr inputWS);
+  /// Crop a workspace in wavelength
+  Mantid::API::MatrixWorkspace_sptr
+  cropWavelength(Mantid::API::MatrixWorkspace_sptr inputWS);
   // Create a detector workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
   makeDetectorWS(Mantid::API::MatrixWorkspace_sptr inputWS);

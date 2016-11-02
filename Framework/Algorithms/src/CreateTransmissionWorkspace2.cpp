@@ -125,11 +125,13 @@ void CreateTransmissionWorkspace2::exec() {
   MatrixWorkspace_sptr firstTransWS = getProperty("FirstTransmissionRun");
   firstTransWS = convertToWavelength(firstTransWS);
   firstTransWS = normalizeDetectorsByMonitors(firstTransWS);
+  firstTransWS = cropWavelength(firstTransWS);
 
   MatrixWorkspace_sptr secondTransWS = getProperty("SecondTransmissionRun");
   if (secondTransWS) {
     secondTransWS = convertToWavelength(secondTransWS);
     secondTransWS = normalizeDetectorsByMonitors(secondTransWS);
+    secondTransWS = cropWavelength(secondTransWS);
 
     // Stitch the results.
     auto stitch = createChildAlgorithm("Stitch1D");
