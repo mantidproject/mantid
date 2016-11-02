@@ -44,24 +44,6 @@ IReflSettingsTabPresenter *QtReflSettingsTabView::getPresenter() const {
   return m_presenter.get();
 }
 
-/** Returns global options for 'Stitch1DMany'
-* @return :: Global options for 'Stitch1DMany'
-*/
-std::string QtReflSettingsTabView::getStitchOptions() const {
-
-  auto widget = m_ui.expSettingsLayout0->itemAtPosition(7, 1)->widget();
-  return static_cast<HintingLineEdit *>(widget)->text().toStdString();
-}
-
-/** Creates hints for 'Stitch1DMany'
-* @param hints :: Hints as a map
-*/
-void QtReflSettingsTabView::createStitchHints(
-    const std::map<std::string, std::string> &hints) {
-
-  m_ui.expSettingsLayout0->addWidget(new HintingLineEdit(this, hints), 7, 1, 1, 3);
-}
-
 /** This slot notifies the presenter to fill experiment settings with default
 * values.
 */
@@ -96,7 +78,7 @@ void QtReflSettingsTabView::setExpDefaults(
   m_ui.CAlphaEdit->setText(QString::fromStdString(defaults[3]));
   m_ui.CApEdit->setText(QString::fromStdString(defaults[4]));
   m_ui.CPpEdit->setText(QString::fromStdString(defaults[5]));
-  m_ui.scaleEdit->setText(QString::fromStdString(defaults[6]));
+  m_ui.scaleFactorEdit->setText(QString::fromStdString(defaults[6]));
 }
 
 /* Sets default values for all instrument settings given a list of default
@@ -114,6 +96,24 @@ void QtReflSettingsTabView::setInstDefaults(
   m_ui.I0MonIndexEdit->setText(QString::number(defaults[6]));
 }
 
+/** Returns global options for 'Stitch1DMany'
+* @return :: Global options for 'Stitch1DMany'
+*/
+std::string QtReflSettingsTabView::getStitchOptions() const {
+
+  auto widget = m_ui.expSettingsLayout0->itemAtPosition(7, 1)->widget();
+  return static_cast<HintingLineEdit *>(widget)->text().toStdString();
+}
+
+/** Creates hints for 'Stitch1DMany'
+* @param hints :: Hints as a map
+*/
+void QtReflSettingsTabView::createStitchHints(
+  const std::map<std::string, std::string> &hints) {
+
+  m_ui.expSettingsLayout0->addWidget(new HintingLineEdit(this, hints), 7, 1, 1, 3);
+}
+
 /** Return selected analysis mode
 * @return :: selected analysis mode
 */
@@ -128,6 +128,14 @@ std::string QtReflSettingsTabView::getAnalysisMode() const {
 std::string QtReflSettingsTabView::getDirectBeam() const {
 
   return m_ui.directBeamEdit->text().toStdString();
+}
+
+/** Return selected polarisation corrections
+* @return :: selected polarisation corrections
+*/
+std::string QtReflSettingsTabView::getPolarisationCorrections() const {
+
+  return m_ui.polCorrComboBox->currentText().toStdString();
 }
 
 /** Return CRho
@@ -175,15 +183,7 @@ std::string QtReflSettingsTabView::getMomentumTransferStep() const {
 */
 std::string QtReflSettingsTabView::getScaleFactor() const {
 
-  return m_ui.scaleEdit->text().toStdString();
-}
-
-/** Return selected polarisation corrections
-* @return :: selected polarisation corrections
-*/
-std::string QtReflSettingsTabView::getPolarisationCorrections() const {
-
-  return m_ui.polCorrComboBox->currentText().toStdString();
+  return m_ui.scaleFactorEdit->text().toStdString();
 }
 
 /** Return integrated monitors option

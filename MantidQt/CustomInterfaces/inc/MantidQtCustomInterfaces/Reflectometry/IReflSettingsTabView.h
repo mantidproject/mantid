@@ -56,13 +56,13 @@ public:
   /// Experiment settings
   virtual std::string getAnalysisMode() const = 0;
   virtual std::string getDirectBeam() const = 0;
+  virtual std::string getPolarisationCorrections() const = 0;
   virtual std::string getCRho() const = 0;
   virtual std::string getCAlpha() const = 0;
   virtual std::string getCAp() const = 0;
   virtual std::string getCPp() const = 0;
   virtual std::string getMomentumTransferStep() const = 0;
   virtual std::string getScaleFactor() const = 0;
-  virtual std::string getPolarisationCorrections() const = 0;
   /// Instrument settings
   virtual std::string getIntMonCheck() const = 0;
   virtual std::string getMonitorIntegralMin() const = 0;

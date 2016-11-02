@@ -165,8 +165,7 @@ public:
     TS_ASSERT_EQUALS(optionsVec[14], "I0MonitorIndex=2");
     TS_ASSERT_EQUALS(optionsVec[15], "ScaleFactor=2");
     TS_ASSERT_EQUALS(optionsVec[16], "MomentumTransferStep=-0.02");
-    TS_ASSERT_EQUALS(optionsVec[17], "MomentumTransferMaximum=0.2");
-    TS_ASSERT_EQUALS(optionsVec[18], "ProcessingInstructions=\"3,4\"");
+    TS_ASSERT_EQUALS(optionsVec[17], "ProcessingInstructions=\"3,4\"");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -184,7 +183,8 @@ public:
     MockSettingsTabView mockView;
     ReflSettingsTabPresenter presenter(&mockView);
 
-    std::vector<std::string> defaults = {"PointDetectorAnalysis", "None", "1"};
+    std::vector<std::string> defaults = 
+        {"PointDetectorAnalysis", "2.5",  "0.6", "100.0", "0.54", "None", "1"};
 
     EXPECT_CALL(mockView, setExpDefaults(defaults)).Times(1);
     presenter.notify(IReflSettingsTabPresenter::ExpDefaultsFlag);

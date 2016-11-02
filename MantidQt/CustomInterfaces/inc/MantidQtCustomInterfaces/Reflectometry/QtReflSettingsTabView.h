@@ -50,6 +50,8 @@ public:
   std::string getAnalysisMode() const override;
   /// Return direct beam
   std::string getDirectBeam() const override;
+  /// Return selected polarisation corrections
+  std::string getPolarisationCorrections() const override;
   /// Return CRho
   std::string getCRho() const override;
   /// Return CAlpha
@@ -62,8 +64,6 @@ public:
   std::string getMomentumTransferStep() const override;
   /// Return scale factor
   std::string getScaleFactor() const override;
-  /// Return selected polarisation corrections
-  std::string getPolarisationCorrections() const override;
   /// Return integrated monitors option
   std::string getIntMonCheck() const override;
   /// Return monitor integral wavelength min

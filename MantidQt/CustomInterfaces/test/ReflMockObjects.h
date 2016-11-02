@@ -64,16 +64,18 @@ public:
 class MockSettingsTabView : public IReflSettingsTabView {
 public:
   // Global options
+  MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
+  MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   MOCK_CONST_METHOD0(getAnalysisMode, std::string());
   MOCK_CONST_METHOD0(getDirectBeam, std::string());
+  MOCK_CONST_METHOD0(getPolarisationCorrections, std::string());
   MOCK_CONST_METHOD0(getCRho, std::string());
   MOCK_CONST_METHOD0(getCAlpha, std::string());
   MOCK_CONST_METHOD0(getCAp, std::string());
   MOCK_CONST_METHOD0(getCPp, std::string());
   MOCK_CONST_METHOD0(getMomentumTransferStep, std::string());
   MOCK_CONST_METHOD0(getScaleFactor, std::string());
-  MOCK_CONST_METHOD0(getPolarisationCorrections, std::string());
   MOCK_CONST_METHOD0(getIntMonCheck, std::string());
   MOCK_CONST_METHOD0(getMonitorIntegralMin, std::string());
   MOCK_CONST_METHOD0(getMonitorIntegralMax, std::string());
@@ -122,6 +124,8 @@ public:
 
 class MockSettingsTabPresenter : public IReflSettingsTabPresenter {
 public:
+  MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
+  MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   // Other calls we don't care about
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
@@ -135,6 +139,8 @@ public:
 
 class MockMainWindowPresenter : public IReflMainWindowPresenter {
 public:
+  MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
+  MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   MOCK_CONST_METHOD0(getInstrumentName, std::string());
   MOCK_METHOD3(askUserString,
