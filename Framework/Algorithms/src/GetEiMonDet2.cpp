@@ -83,7 +83,7 @@ void GetEiMonDet2::init() {
   tofWorkspace->add<WorkspaceUnitValidator>("TOF");
   tofWorkspace->add<InstrumentValidator>();
   auto mandatoryArrayProperty =
-      boost::make_shared<MandatoryValidator<ArrayProperty<int>>>();
+      boost::make_shared<MandatoryValidator<std::vector<int>>>();
   auto mandatoryIntProperty = boost::make_shared<MandatoryValidator<int>>();
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
