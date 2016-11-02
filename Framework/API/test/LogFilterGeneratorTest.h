@@ -144,7 +144,7 @@ private:
     times.reserve(logSize);
     values.reserve(logSize);
     constexpr double incrementSecs(10.0);
-    for (int i = 0; i < logSize; ++i) {
+    for (size_t i = 0; i < logSize; ++i) {
       const double val = static_cast<double>(i);
       times.push_back(initialTime + val * incrementSecs);
       values.push_back(val);

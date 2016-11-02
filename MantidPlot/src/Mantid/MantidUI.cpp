@@ -2489,9 +2489,6 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
     t->setColumnType(0, Table::Numeric);
   }
 
-  // The time when the first data was recorded.
-  auto firstTime = time_value_map.begin()->first;
-
   // Make the column header with the units, if any
   QString column1 = label.section("-", 1);
   if (logData->units() != "")

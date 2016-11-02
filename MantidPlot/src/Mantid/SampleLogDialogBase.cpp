@@ -83,7 +83,6 @@ void SampleLogDialogBase::importSelectedLogs() {
 *
 *	@author Martyn Gigg, Tessella Support Services plc
 *	@date 05/11/2009
-* @param filter :: Type of filtering (default none)
 */
 void SampleLogDialogBase::showLogStatistics() {
 
