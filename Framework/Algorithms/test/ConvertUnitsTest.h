@@ -16,6 +16,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Kernel;

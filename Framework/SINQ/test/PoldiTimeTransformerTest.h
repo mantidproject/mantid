@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 

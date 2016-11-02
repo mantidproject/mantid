@@ -73,7 +73,7 @@ createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
                         const std::vector<Kernel::V3D> &vecdetpos,
                         const std::vector<detid_t> &vecdetid);
 
-MANTID_GEOMETRY_DLL Object_sptr
+MANTID_GEOMETRY_DLL boost::shared_ptr<Object>
 createSphere(double radius, const Kernel::V3D &centre, const std::string &id);
 
 MANTID_GEOMETRY_DLL std::string

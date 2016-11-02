@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/TableRow.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidSINQ/PoldiUtilities/PoldiBasicChopper.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 

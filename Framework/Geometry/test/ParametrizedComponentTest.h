@@ -7,6 +7,7 @@
 #include <boost/make_shared.hpp>
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/Exception.h"

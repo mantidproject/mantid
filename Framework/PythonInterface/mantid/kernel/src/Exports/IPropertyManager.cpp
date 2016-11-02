@@ -1,4 +1,5 @@
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/IPropertySettings.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"

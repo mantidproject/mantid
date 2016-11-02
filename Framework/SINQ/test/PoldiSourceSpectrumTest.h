@@ -6,6 +6,7 @@
 #include "MantidKernel/Interpolation.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include <stdexcept>
 
 using namespace Mantid::Poldi;

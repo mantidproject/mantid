@@ -1,9 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"

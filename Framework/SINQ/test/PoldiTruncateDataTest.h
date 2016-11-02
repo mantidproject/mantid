@@ -10,6 +10,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;

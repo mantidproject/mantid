@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 

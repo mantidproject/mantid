@@ -28,6 +28,7 @@
 #include <Poco/Path.h>
 #include <Poco/SAX/AttributesImpl.h>
 #include <Poco/String.h>
+#include <Poco/XML/XMLWriter.h>
 
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>

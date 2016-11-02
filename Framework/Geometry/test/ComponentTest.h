@@ -5,6 +5,7 @@
 #include <cmath>
 #include <string>
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/Exception.h"

@@ -17,6 +17,8 @@
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/Object.h"
 
 namespace Mantid {
 namespace CurveFitting {

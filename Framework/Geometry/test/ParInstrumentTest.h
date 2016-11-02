@@ -5,6 +5,7 @@
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
 
 #include <boost/make_shared.hpp>

@@ -1,12 +1,8 @@
 #ifndef IMANTID_GEOMETRY_OBJCOMPONENT_H_
 #define IMANTID_GEOMETRY_OBJCOMPONENT_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Objects/Track.h"
 
 namespace Mantid {
 
@@ -15,9 +11,7 @@ class Material;
 }
 
 namespace Geometry {
-//----------------------------------------------------------------------
-// Forward Declaration
-//----------------------------------------------------------------------
+class Track;
 class Object;
 class GeometryHandler;
 

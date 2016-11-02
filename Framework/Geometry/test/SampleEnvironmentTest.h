@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 

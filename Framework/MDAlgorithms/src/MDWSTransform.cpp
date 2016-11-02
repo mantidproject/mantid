@@ -6,6 +6,7 @@
 #include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/Tolerance.h"
 
 #include <cfloat>
 

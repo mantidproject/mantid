@@ -8,6 +8,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Unit.h"
 #include <boost/make_shared.hpp>
 

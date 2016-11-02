@@ -5,6 +5,7 @@
 
 #include "MantidSINQ/PoldiPeakSummary.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;

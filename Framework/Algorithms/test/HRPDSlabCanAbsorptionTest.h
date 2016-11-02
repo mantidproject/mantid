@@ -7,6 +7,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Geometry;

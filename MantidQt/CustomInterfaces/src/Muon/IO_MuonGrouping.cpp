@@ -27,6 +27,8 @@
 #pragma warning(disable : 4250)
 #include <Poco/XML/XMLWriter.h>
 #pragma warning(pop)
+#else
+#include <Poco/XML/XMLWriter.h>
 #endif
 
 //-----------------------------------------------------------------------------

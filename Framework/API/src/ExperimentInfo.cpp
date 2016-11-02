@@ -25,6 +25,7 @@
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
+#include <Poco/SAX/Attributes.h>
 #include <Poco/SAX/ContentHandler.h>
 #include <Poco/SAX/SAXParser.h>
 #include <nexus/NeXusException.hpp>
