@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from abc import ABCMeta, abstractmethod
 from six import add_metaclass
 
-import PearlPowder_common
+from isis_powder import common
 
 # This class provides common hooks for instruments to override
 # if they want to define the behaviour of the hook. Otherwise it
@@ -65,7 +65,7 @@ class AbstractInst(object):
         if input_ext is not None:
             self.default_input_ext = input_ext
 
-        return PearlPowder_common.focus(instrument=self, number=run_number,
+        return common.focus(instrument=self, number=run_number,
                                         attenuate=do_attenuation, van_norm=do_van_normalisation)
 
     def create_empty_calibration_by_names(self, calibration_numbers, output_file_name, group_names=None):
@@ -73,7 +73,7 @@ class AbstractInst(object):
         if group_names is None:
             group_names = self._get_default_group_names()
 
-        PearlPowder_common.create_calibration_by_names(calibration_runs=calibration_numbers, grouping_file_name=output_file_name,
+        common.create_calibration_by_names(calibration_runs=calibration_numbers, grouping_file_name=output_file_name,
                                                        group_names=group_names, startup_objects=self)
 
     def create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
@@ -87,7 +87,7 @@ class AbstractInst(object):
     def create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name, num_of_splines,
                                     do_absorb_corrections=True, gen_absorb_correction=False):
 
-        PearlPowder_common.create_vanadium(startup_object=self, vanadium_runs=vanadium_runs,
+        common.create_vanadium(startup_object=self, vanadium_runs=vanadium_runs,
                                            empty_runs=empty_runs, output_file_name=output_file_name,
                                            num_of_spline_coefficients=num_of_splines,
                                            do_absorb_corrections=do_absorb_corrections,
@@ -96,10 +96,10 @@ class AbstractInst(object):
     @staticmethod
     def set_debug_mode(val):
         assert isinstance(val, bool)
-        PearlPowder_common.set_debug(val)
+        common.set_debug(val)
 
     # ---- Private API ---- #
-    # These are to be called from either concrete instruments or PearlPowder_common not by users
+    # These are to be called from either concrete instruments or common not by users
     # Common steps to all instruments
 
     def _generate_out_file_paths(self, run_number, output_directory):

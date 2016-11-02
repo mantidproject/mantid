@@ -3,12 +3,10 @@ import os
 import unittest
 
 import mantid as mantid
-
-import PearlPowder_common
-import PearlPowder_Pearl
+from isis_powder import pearl
 
 
-class PearlPowder_PearlTest(unittest.TestCase):
+class isis_powder_PearlTest(unittest.TestCase):
 
     # Static method tests
 
@@ -23,11 +21,11 @@ class PearlPowder_PearlTest(unittest.TestCase):
     def test_get_instrument_ranges(self):
         # This test checks that the instrument ranges calculate correctly for given instruments
         # First the "new" instrument value
-        new_alg_range, new_save_range = PearlPowder_Pearl._get_instrument_ranges("new")
+        new_alg_range, new_save_range = pearl._get_instrument_ranges("new")
         self.assertEquals(new_alg_range, 12, "'new' instrument algorithm range got " + str(new_alg_range))
         self.assertEquals(new_save_range, 3, "'new' instrument save range got " + str(new_save_range))
 
-        new2_alg_range, new2_save_range = PearlPowder_Pearl._get_instrument_ranges("new2")
+        new2_alg_range, new2_save_range = pearl._get_instrument_ranges("new2")
         self.assertEquals(new2_alg_range, 14, "'new2' instrument algorithm range got " + str(new2_alg_range))
         self.assertEquals(new2_save_range, 5, "'new2' instrument save range got " + str(new2_save_range))
 
@@ -39,10 +37,10 @@ class PearlPowder_PearlTest(unittest.TestCase):
         expected_old_name = "PRL" + str(old_name_input)
         expected_new_name = "PEARL" + "000" + str(new_name_input)  # New names should have 8 numerical digits
 
-        old_output = PearlPowder_Pearl._gen_file_name(old_name_input)
+        old_output = pearl._gen_file_name(old_name_input)
         self.assertEquals(expected_old_name, old_output)
 
-        new_output = PearlPowder_Pearl._gen_file_name(new_name_input)
+        new_output = pearl._gen_file_name(new_name_input)
         self.assertEquals(expected_new_name, new_output)
 
     # Non static methods
@@ -66,12 +64,12 @@ class PearlPowder_PearlTest(unittest.TestCase):
         self.assertEquals(output["vanadium"], expected_calibration_dir + expected_vanadium_file)
 
     def _get_pearl_inst_defaults(self):
-        return PearlPowder_Pearl.Pearl(user_name="unitTest-PEARL", calibration_dir=self.calibration_dir,
+        return pearl.Pearl(user_name="unitTest-PEARL", calibration_dir=self.calibration_dir,
                                        raw_data_dir=self.raw_data_dir, output_dir=self.output_dir)
 
     def _get_pearl_inst_all_specified(self):
-        return PearlPowder_Pearl.Pearl(calibration_dir=self.calibration_dir, raw_data_dir=self.raw_data_dir,
-                                       output_dir=self.output_dir, default_ext=self.default_ext, tt_mode=self.tt_mode)
+        return pearl.Pearl(calibration_dir=self.calibration_dir, raw_data_dir=self.raw_data_dir,
+                           output_dir=self.output_dir, input_file_ext=self.default_ext, tt_mode=self.tt_mode)
 
     # Test params
     calibration_dir = "calDir"

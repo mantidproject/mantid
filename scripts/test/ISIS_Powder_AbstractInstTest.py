@@ -1,10 +1,9 @@
 import unittest
-import mantid
 
-from PearlPowder_Mock import PearlPowder_Mock
+import mantid as mantid  # For next import to work
+from isis_powder.mock_instrument import MockInstrument
 
-
-class PearlPowder_AbstractInstTest(unittest.TestCase):
+class isis_powder_AbstractInstTest(unittest.TestCase):
 
     def test_init_sets_params(self):
         inst = self._get_abstract_inst_all_specified()
@@ -123,13 +122,13 @@ class PearlPowder_AbstractInstTest(unittest.TestCase):
     # Helper methods to create fresh instrument objects
 
     def _get_abstract_inst_defaults(self):
-        return PearlPowder_Mock(user_name=self.user_name, calibration_dir=self.calibration_dir,
-                                raw_data_dir=self.raw_data_dir, output_dir=self.output_dir)
+        return MockInstrument(user_name=self.user_name, calibration_dir=self.calibration_dir,
+                              raw_data_dir=self.raw_data_dir, output_dir=self.output_dir)
     
     def _get_abstract_inst_all_specified(self):
-        return PearlPowder_Mock(user_name=self.user_name, calibration_dir=self.calibration_dir,
-                                raw_data_dir=self.raw_data_dir, output_dir=self.output_dir,
-                                default_ext=self.default_ext, tt_mode=self.tt_mode)
+        return MockInstrument(user_name=self.user_name, calibration_dir=self.calibration_dir,
+                              raw_data_dir=self.raw_data_dir, output_dir=self.output_dir,
+                              default_ext=self.default_ext, tt_mode=self.tt_mode)
 
     # Test params
     user_name = "unit_test_abstract_inst"

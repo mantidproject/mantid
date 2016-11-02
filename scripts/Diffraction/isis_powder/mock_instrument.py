@@ -1,12 +1,12 @@
-from PearlPowder_AbstractInst import AbstractInst
+from abstract_inst import AbstractInst
 
 
-class PearlPowder_Mock(AbstractInst):
+class MockInstrument(AbstractInst):
 
     def __init__(self, user_name, calibration_dir, raw_data_dir, output_dir, default_ext="", tt_mode=None):
-        super(PearlPowder_Mock, self).__init__(user_name=user_name, calibration_dir=calibration_dir,
-                                               raw_data_dir=raw_data_dir, output_dir=output_dir,
-                                               default_input_ext=default_ext, tt_mode=tt_mode)
+        super(MockInstrument, self).__init__(user_name=user_name, calibration_dir=calibration_dir,
+                                             raw_data_dir=raw_data_dir, output_dir=output_dir,
+                                             default_input_ext=default_ext, tt_mode=tt_mode)
         self.generate_cycle_dir_flag = False
 
     def _get_lambda_range(self):
@@ -33,6 +33,7 @@ class PearlPowder_Mock(AbstractInst):
     def _generate_inst_file_name(run_number):
         return "generate_inst_file_name" + str(run_number)
 
+    @staticmethod
     def _get_instrument_alg_save_ranges(instrument=''):
         return None
 

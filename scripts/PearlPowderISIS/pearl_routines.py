@@ -1,9 +1,14 @@
 from __future__ import (absolute_import, division, print_function)
 
-import mantid.simpleapi as mantid
+import warnings
 
 # directories generator
-import PearlPowder_Pearl
+from isis_powder.pearl import Pearl
+
+# --------------------------------------------------------------------------------
+# This script has been refactored into the isis_powder module and is provided for
+# supporting existing scripts. It removed as the new are adopted and less code
+# relies on the behaviour of this API
 
 # The old params can be set anywhere so store them in a single global dictionary
 global g_oldParams
@@ -17,9 +22,9 @@ g_pearl_obj = None
 def _pearl_obj_singleton():
     global g_pearl_obj
     if g_pearl_obj is None:
-        g_pearl_obj = PearlPowder_Pearl.Pearl(user_name="NotSet", calibration_dir="NotSet",
-                                              raw_data_dir="NotSet", output_dir="NotSet",
-                                              input_file_ext=".raw", tt_mode="NotSet")
+        g_pearl_obj = Pearl(user_name="NotSet", calibration_dir="NotSet",
+                            raw_data_dir="NotSet", output_dir="NotSet",
+                            input_file_ext=".raw", tt_mode="NotSet")
     return g_pearl_obj
 
 
@@ -37,7 +42,7 @@ def _merge_dict_into_global(d):
 
 def PEARL_startup(usern="matt", thiscycle='11_1'):
     # ---- !!! This is deprecated and should not be used - it is only here for compatibility with old scripts !!!--- #
-    mantid.logger.warning("Using old deprecated method of performing Pearl Powder Diffraction.")
+    warnings.warn("This method of performing Pearl Powder Diffraction is deprecated.", DeprecationWarning)
     pearl_file_dir = "P:\\Mantid\\Calibration\\"
     currentdatadir = "I:\\"
     tt_mode = "TT88"
@@ -48,8 +53,8 @@ def PEARL_startup(usern="matt", thiscycle='11_1'):
     livedatadir = "I:\\"
     # These should now only be the filename and not the path. The calibration dir (pearl_file_dir)
     # is where the files will be searched for
-    calfile = "pearl_offset_11_2.cal" # TODO implement an override for these
-    groupfile =  "pearl_group_11_2_TT88.cal" # TODO implement an override for these
+    calfile = "pearl_offset_11_2.cal"
+    groupfile =  "pearl_group_11_2_TT88.cal"
     vabsorbfile = "pearl_absorp_sphere_10mm_newinst_long.nxs"
     vanfile = "van_spline_all_cycle_11_1.nxs"
     attenfile = "P:\\Mantid\\Attentuation\\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT"
@@ -240,10 +245,11 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     pearl_obj._old_api_set_ext(ext)
     pearl_obj.set_debug_mode(debug)
     pearl_obj._old_api_uses_full_paths = True
-    return pearl_obj.create_calibration_vanadium(vanadium_runs=van, empty_runs=empty,
-                                                 output_file_name=nvanfile, num_of_splines=nspline,
-                                                 do_absorb_corrections=absorb)
+    return_val = pearl_obj.create_calibration_vanadium(vanadium_runs=van, empty_runs=empty,
+                                                       output_file_name=nvanfile, num_of_splines=nspline,
+                                                       do_absorb_corrections=absorb)
     pearl_obj._old_api_uses_full_paths = False
+    return return_val
 
 
 def PEARL_createcal(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal",

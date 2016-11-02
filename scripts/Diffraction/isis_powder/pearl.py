@@ -5,10 +5,10 @@ import numpy as numpy
 
 import os
 
-from PearlPowder_AbstractInst import AbstractInst
-import PearlPowder_common as Common
-import pearl_calib_factory
-import pearl_cycle_factory
+from isis_powder import AbstractInst
+from isis_powder import pearl_calib_factory
+from isis_powder import pearl_cycle_factory
+import isis_powder.common as common
 
 
 class Pearl(AbstractInst):
@@ -105,7 +105,7 @@ class Pearl(AbstractInst):
         return self._run_attenuate_workspace(input_workspace=input_workspace)
 
     def _create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
-        input_ws = Common._read_ws(number=calibration_runs, instrument=self)
+        input_ws = common._read_ws(number=calibration_runs, instrument=self)
         cycle_information = self._get_cycle_information(calibration_runs)
 
         # TODO move these hard coded params to instrument specific
@@ -139,10 +139,10 @@ class Pearl(AbstractInst):
         aligned_ws = mantid.AlignDetectors(InputWorkspace=input_ws, CalibrationFile=offset_file_path)
         cal_grouped_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws, GroupingFileName=grouping_file_path)
 
-        Common.remove_intermediate_workspace(d_spacing_cal)
-        Common.remove_intermediate_workspace(cross_cor_ws)
-        Common.remove_intermediate_workspace(aligned_ws)
-        Common.remove_intermediate_workspace(cal_grouped_ws)
+        common.remove_intermediate_workspace(d_spacing_cal)
+        common.remove_intermediate_workspace(cross_cor_ws)
+        common.remove_intermediate_workspace(aligned_ws)
+        common.remove_intermediate_workspace(cal_grouped_ws)
 
     def _create_calibration_silicon(self, calibration_runs, cal_file_name, grouping_file_name):
         self._do_silicon_calibration(calibration_runs, cal_file_name, grouping_file_name)
@@ -182,11 +182,11 @@ class Pearl(AbstractInst):
         wc_attenuated = mantid.RebinToWorkspace(WorkspaceToRebin=wc_attenuated, WorkspaceToMatch=input_workspace,
                                                 OutputWorkspace=wc_attenuated)
         pearl_attenuated_ws = mantid.Divide(LHSWorkspace=input_workspace, RHSWorkspace=wc_attenuated)
-        Common.remove_intermediate_workspace(workspace_name=wc_attenuated)
+        common.remove_intermediate_workspace(workspace_name=wc_attenuated)
         return pearl_attenuated_ws
 
     def _do_silicon_calibration(self, runs_to_process, cal_file_name, grouping_file_name):
-        create_si_ws = Common._read_ws(number=runs_to_process, instrument=self)
+        create_si_ws = common._read_ws(number=runs_to_process, instrument=self)
         cycle_details = self._get_cycle_information(runs_to_process)
         instrument_version = cycle_details["instrument_version"]
 
@@ -213,8 +213,8 @@ class Pearl(AbstractInst):
         else:
             raise NotImplementedError("The instrument version is not supported for creating a silicon calibration")
 
-        Common.remove_intermediate_workspace(create_si_d_spacing_ws)
-        Common.remove_intermediate_workspace(create_si_d_spacing_rebin_ws)
+        common.remove_intermediate_workspace(create_si_d_spacing_ws)
+        common.remove_intermediate_workspace(create_si_d_spacing_rebin_ws)
 
         calibration_output_path = self.calibration_dir + cal_file_name
         create_si_offsets_ws = mantid.GetDetectorOffsets(InputWorkspace=create_si_cross_corr_ws,
@@ -228,9 +228,9 @@ class Pearl(AbstractInst):
         del create_si_offsets_ws, create_si_grouped_ws
 
     def _run_get_monitor(self, run_number, input_dir, spline_terms):
-        load_monitor_ws = Common._load_monitor(run_number, input_dir=input_dir, instrument=self)
+        load_monitor_ws = common._load_monitor(run_number, input_dir=input_dir, instrument=self)
         get_monitor_ws = mantid.ConvertUnits(InputWorkspace=load_monitor_ws, Target="Wavelength")
-        Common.remove_intermediate_workspace(load_monitor_ws)
+        common.remove_intermediate_workspace(load_monitor_ws)
         lmin, lmax = self._get_lambda_range()
         get_monitor_ws = mantid.CropWorkspace(InputWorkspace=get_monitor_ws, XMin=lmin, XMax=lmax)
         ex_regions = numpy.zeros((2, 4))
@@ -245,7 +245,7 @@ class Pearl(AbstractInst):
                                              XMax=ex_regions[1, reg])
 
         monitor_ws = mantid.SplineBackground(InputWorkspace=get_monitor_ws, WorkspaceIndex=0, NCoeff=spline_terms)
-        Common.remove_intermediate_workspace(get_monitor_ws)
+        common.remove_intermediate_workspace(get_monitor_ws)
         return monitor_ws
 
     def _get_monitor_spectrum(self, run_number):
@@ -359,7 +359,7 @@ def _spline_new2_background(in_workspace, num_splines, instrument_version):
     van_stripped_ws = mantid.ConvertUnits(InputWorkspace=van_stripped_ws, Target="TOF")
 
     splined_ws_list = _perform_spline_range(instrument_version, num_splines, van_stripped_ws)
-    Common.remove_intermediate_workspace(van_stripped_ws)
+    common.remove_intermediate_workspace(van_stripped_ws)
     return splined_ws_list
 
 
@@ -371,7 +371,7 @@ def _spline_new_background(in_workspace, num_splines, instrument_version):
     van_stripped = mantid.ConvertUnits(InputWorkspace=van_stripped, Target="TOF")
 
     splined_ws_list = _perform_spline_range(instrument_version, num_splines, van_stripped)
-    Common.remove_intermediate_workspace(van_stripped)
+    common.remove_intermediate_workspace(van_stripped)
     return splined_ws_list
 
 
@@ -422,5 +422,5 @@ def _spline_old_background(in_workspace):
             coeff = 100
         splined_ws_list.append(mantid.SplineBackground(InputWorkspace=van_stripped, OutputWorkspace=out_ws_name,
                                                        WorkspaceIndex=i, NCoeff=coeff))
-    Common.remove_intermediate_workspace(van_stripped)
+    common.remove_intermediate_workspace(van_stripped)
     return splined_ws_list
