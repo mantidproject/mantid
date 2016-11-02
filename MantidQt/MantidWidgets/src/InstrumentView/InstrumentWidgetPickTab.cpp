@@ -9,10 +9,7 @@
 #include "MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h"
 
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/Unit.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -22,11 +19,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/V3D.h"
 
 #include "qwt_scale_widget.h"
