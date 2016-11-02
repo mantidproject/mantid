@@ -383,7 +383,10 @@ void LoadILLReflectometry::loadDataIntoTheWorkSpace(
     int *monitor_p = monitorsData[im].data();
     const HistogramData::Counts histoCounts(monitor_p,
                                             monitor_p + m_numberOfChannels);
-    m_localWorkspace->setHistogram(im, binEdges, std::move(histoCounts));
+    const HistogramData::CountStandardDeviations histoBlankError(
+        monitorsData[im].size(), 0.0);
+    m_localWorkspace->setHistogram(im, binEdges, std::move(histoCounts),
+                                   std::move(histoBlankError));
 
     progress.report();
   }

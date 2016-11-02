@@ -286,9 +286,12 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
     int *dataSD_p = &dataSD(i, 0, 0);
     const HistogramData::Counts histoCounts(dataSD_p,
                                             dataSD_p + m_numberOfChannels);
-    m_localWorkspace->setHistogram((spec + nb_monitors + i), histoBinEdges,
-                                   std::move(histoCounts));
+    const HistogramData::CountStandardDeviations histoErrors(m_numberOfChannels,
+                                                             0.0);
 
+    m_localWorkspace->setHistogram((spec + nb_monitors + i), histoBinEdges,
+                                   std::move(histoCounts),
+                                   std::move(histoErrors));
     progress.report();
   }
 
