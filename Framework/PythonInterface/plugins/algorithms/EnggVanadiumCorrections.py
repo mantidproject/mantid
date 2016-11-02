@@ -31,7 +31,8 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                              "will be applied on it.")
 
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output, PropertyMode.Optional),
-                             "Workspace with the diffraction data to correct. The Vanadium corrections "
+                             "Optional output workspace, if an output workspace is provided then the"
+                             "input workspace will not be changed. The Vanadium corrections "
                              "will be applied on it.")
 
         self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input,
