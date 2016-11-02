@@ -32,7 +32,8 @@ ObjComponent::ObjComponent(const std::string &name, IComponent *parent)
 * component
 *  @param parent :: The Parent geometry object of this component
 */
-ObjComponent::ObjComponent(const std::string &name, Object_const_sptr shape,
+ObjComponent::ObjComponent(const std::string &name,
+                           boost::shared_ptr<const Object> shape,
                            IComponent *parent)
     : IObjComponent(), Component(name, parent), m_shape(shape) {}
 
