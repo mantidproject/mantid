@@ -891,4 +891,3 @@ class ISISReducer(Reducer):
         self._unwrap_monitors = value
 
     unwrap_monitors = property(get_unwrap_monitors, set_unwrap_monitors, None, None)
-

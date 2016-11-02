@@ -1959,8 +1959,8 @@ class NormalizeToMonitor(ReductionStep):
         if str(mon) != self.output_wksp:
             RenameWorkspace(mon, OutputWorkspace=self.output_wksp)
 
-        if (is_prompt_peak_instrument(reducer) and reducer.transmission_calculator.removePromptPeakMin is not None 
-            and reducer.transmission_calculator.removePromptPeakMax is not None):
+        if (is_prompt_peak_instrument(reducer) and reducer.transmission_calculator.removePromptPeakMin is not None
+            and reducer.transmission_calculator.removePromptPeakMax is not None):  # noqa
             RemoveBins(InputWorkspace=self.output_wksp, OutputWorkspace=self.output_wksp,
                        XMin=reducer.transmission_calculator.removePromptPeakMin, XMax=
                        reducer.transmission_calculator.removePromptPeakMax, Interpolation="Linear")
@@ -2145,7 +2145,7 @@ class TransmissionCalc(ReductionStep):
         self._correct_dark_run_background(reducer, tmpWS, trans_det_ids)
 
         if is_prompt_peak_instrument(reducer) and self.removePromptPeakMin is not None and \
-                        self.removePromptPeakMax is not None:
+                        self.removePromptPeakMax is not None:  # noqa
             RemoveBins(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, XMin=self.removePromptPeakMin,
                        XMax=self.removePromptPeakMax,
                        Interpolation='Linear')
@@ -4281,7 +4281,7 @@ class GetSampleGeom(ReductionStep):
             Reads the geometry information stored in the workspace
             but doesn't replace values that have been previously set
         """
-        _reducer = reducer
+        _reducer = reducer  # noqa
         wksp = mtd[workspace]
         if isinstance(wksp, WorkspaceGroup):
             wksp = wksp[0]
