@@ -120,6 +120,8 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         self.declareProperty(name='MSDFit', defaultValue=False,
                              doc='Perform an MSDFit')
 
+        self.declareProperty(name='SumFiles', defaultValue=False,
+                             doc='Toggle input file summing or sequential processing')
         # Output properties
         self.declareProperty(name='ReducedWorkspace', defaultValue='Reduced',
                              doc='Workspace group for the resulting workspaces.')
@@ -237,6 +239,7 @@ class EnergyWindowScan(DataProcessorAlgorithm):
             issues['Reflection'] = error_message
 
         # Validate spectra range
+
         spectra_range = self.getProperty('SpectraRange').value
         if len(spectra_range) != 2:
             issues['SpectraRange'] = 'Range must contain exactly two items'
@@ -273,7 +276,7 @@ class EnergyWindowScan(DataProcessorAlgorithm):
 
         # Get properties
         self._data_files = self.getProperty('InputFiles').value
-        self._sum_files = False
+        self._sum_files = self.getProperty('SumFiles').value
         self._load_logs = self.getProperty('LoadLogFiles').value
         self._calibration_ws = ''
 
@@ -306,9 +309,8 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         self._scan_ws = self.getPropertyValue('ScanWorkspace')
 
         # Disable sum files if there is only one file
-        if len(self._data_files) == 1:
-            if self._sum_files:
-                logger.warning('SumFiles disabled when only one input file is provided.')
+        if (len(self._data_files) == 1) & self._sum_files:
+            logger.warning('SumFiles disabled when only one input file is provided.')
             self._sum_files = False
 
         # Get the IPF filename
@@ -325,34 +327,6 @@ class EnergyWindowScan(DataProcessorAlgorithm):
 
         # The list of workspaces being processed
         self._workspace_names = []
-
-    def _rename_reduction(self, workspace_name):
-        """
-        Renames a workspace according to the naming policy in the Workflow.NamingConvention parameter.
-
-        @param workspace_name Name of workspace
-        @return New name of workspace
-        """
-
-        # Get the instrument
-        instrument = mtd[workspace_name].getInstrument()
-
-        # Get run number
-        run_number = mtd[workspace_name].getRun()['run_number'].value
-
-        inst_name = instrument.getName()
-        inst_name = inst_name.lower()
-
-        analyser = instrument.getStringParameter('analyser')[0]
-        reflection = instrument.getStringParameter('reflection')[0]
-        new_name = '%s%s_%s%s_red' % (inst_name.lower(), run_number, analyser, reflection)
-        rename_alg = self.createChildAlgorithm("RenameWorkspace", enableLogging=False)
-        rename_alg.setProperty("InputWorkspace", workspace_name)
-        rename_alg.setProperty("OutputWorkspace", new_name)
-        rename_alg.execute()
-
-        return new_name
-
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(EnergyWindowScan)

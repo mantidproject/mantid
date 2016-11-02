@@ -97,7 +97,10 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
                              doc='Value selection of the sample environment log entry')
 
         self.declareProperty(name='MSDFit', defaultValue=False,
-                             doc='Perform an msdFit')
+                             doc='Perform an MSDFit')
+
+        self.declareProperty(name='SumFiles', defaultValue=False,
+                             doc='Toggle input file summing or sequential processing')
 
         self.declareProperty(name='Plot', defaultValue=False,
                              doc='Switch Plot Off/On')
@@ -198,7 +201,7 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
         self._data_files = []
         self._format_runs(runs)
         first_file = self._data_files[0]
-        self._sum_files = False
+        self._sum_files = self.getProperty('SumFiles').value
         self._load_logs = self.getProperty('LoadLogFiles').value
         self._calibration_ws = ''
 
