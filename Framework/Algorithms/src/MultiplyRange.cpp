@@ -71,7 +71,7 @@ void MultiplyRange::exec() {
   const int histogramCount = static_cast<int>(inputWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, histogramCount);
   // Loop over spectra
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     outputWS->setHistogram(i, inputWS->histogram(i));

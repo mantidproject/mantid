@@ -26,6 +26,14 @@ Instrument View
 Plotting Improvements
 #####################
 - Fixed a bug where left and right Y axes went out of sync when a fit was run.
+- Exposed the ``plotSubplots`` command to Python. This creates a tiled (multilayer) plot with one workspace per tile.
+
+.. figure:: ../../images/multilayer_3.9.png
+   :class: screenshot
+   :width: 550px
+   :align: right
+
+   plotSubplots image
 
 Algorithm Toolbox
 #################
@@ -43,6 +51,7 @@ Bugs Resolved
 
 - Fixed a bug where checking or unchecking "show invisible workspaces" in View->Preferences->Mantid->Options would have no effect on workspaces loaded in the dock.
 - The Spectrum Viewer now reports two theta and azimuthal angle correctly.
+- Fixed crash when clicking "Help->Ask for Help" on Linux-based systems with Firefox set as the default browser.  
 
 SliceViewer Improvements
 ------------------------

@@ -158,7 +158,7 @@ void CreateWorkspace::exec() {
 
   Progress progress(this, 0, 1, nSpec);
 
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < nSpec; i++) {
     PARALLEL_START_INTERUPT_REGION
 

@@ -198,7 +198,8 @@ class SANSInstrumentWidget(BaseWidget):
     def _mask_plot_clicked(self):
         ws_name = os.path.basename(str(self._summary.mask_edit.text()))
         self.mask_ws = "__mask_%s" % ws_name
-        self.show_instrument(self._summary.mask_edit.text, workspace=self.mask_ws, tab=2, reload=self.mask_reload, mask=self._masked_detectors)
+        self.show_instrument(self._summary.mask_edit.text, workspace=self.mask_ws, tab=2,
+                             reload=self.mask_reload, mask=self._masked_detectors)
         self._masked_detectors = []
         self.mask_reload = False
 

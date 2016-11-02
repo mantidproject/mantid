@@ -308,7 +308,7 @@ class RunSetupWidget(BaseWidget):
     def _calfile_browse(self):
         """ Event handing for browsing calibrtion file
         """
-        fname = self.data_browse_dialog(data_type="*.h5;;*.cal;;*.hd5;;*.hdf;;*.*")
+        fname = self.data_browse_dialog(data_type="*.h5;;*.cal;;*.hd5;;*.hdf;;*")
         if fname:
             self._content.calfile_edit.setText(fname)
 
@@ -317,7 +317,7 @@ class RunSetupWidget(BaseWidget):
     def _charfile_browse(self):
         """ Event handing for browsing calibrtion file
         """
-        fname = self.data_browse_dialog("*.txt;;*.*")
+        fname = self.data_browse_dialog("*.txt;;*")
         if fname:
             self._content.charfile_edit.setText(fname)
 
@@ -327,7 +327,7 @@ class RunSetupWidget(BaseWidget):
         """ Event handling for browsing Exp Ini file
         :return:
         """
-        exp_ini_file_name = self.data_browse_dialog(data_type="*.ini;;*.*")
+        exp_ini_file_name = self.data_browse_dialog(data_type="*.ini;;*")
         if exp_ini_file_name:
             self._content.lineEdit_expIniFile.setText(exp_ini_file_name)
 

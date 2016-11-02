@@ -61,7 +61,7 @@ void XDataConverter::exec() {
     outputWS->replaceAxis(1, inputWS->getAxis(1)->clone(outputWS.get()));
 
   Progress prog(this, 0.0, 1.0, numSpectra);
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < int(numSpectra); ++i) {
     PARALLEL_START_INTERUPT_REGION
 

@@ -1,4 +1,4 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
 #
 # SANSBatchMode.py
 #
@@ -30,6 +30,7 @@
 # The save directory must currently be specified in the Mantid.user.properties file
 
 #Make the reduction module available
+from __future__ import (absolute_import, division, print_function)
 from ISISCommandInterface import *
 import SANSUtility as su
 from mantid.simpleapi import *
@@ -48,7 +49,7 @@ if sys.version_info[0] == 2 and sys.version_info[1] == 6:
     import types
 
     def _deepcopy_method(x, memo):
-        return type(x)(x.im_func, copy.deepcopy(x.im_self, memo), x.im_class)
+        return type(x)(x.__func__, copy.deepcopy(x.__self__, memo), x.__self__.__class__)
     copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
 ################################################################################
 
@@ -135,7 +136,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         @param filename: the CSV file with the list of runs to analyse
         @param format: type of file to load, nxs for Nexus, etc.
         @param plotresults: if true and this function is run from Mantidplot a graph will be created for the results of each reduction
-        @param saveAlgs: this named algorithm will be passed the name of the results workspace and filename (default = 'SaveRKH'). Pass a tuple of strings to save to multiple file formats
+        @param saveAlgs: this named algorithm will be passed the name of the results workspace and filename (default = 'SaveRKH').
+            Pass a tuple of strings to save to multiple file formats
         @param verbose: set to true to write more information to the log (default=False)
         @param centreit: do centre finding (default=False)
         @param reducer: if to use the command line (default) or GUI reducer object
@@ -210,18 +212,20 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                 if verbose == 1:
                     FindBeamCentre(50.,170.,12)
 
-            # WavRangeReduction runs the reduction for the specified wavelength range where the final argument can either be DefaultTrans or CalcTrans:
+            # WavRangeReduction runs the reduction for the specified
+            # wavelength range where the final argument can either be
+            # DefaultTrans or CalcTrans:
             reduced = WavRangeReduction(combineDet=combineDet, out_fit_settings=scale_shift)
 
-        except SkipEntry, reason:
+        except SkipEntry as reason:
             #this means that a load step failed, the warning and the fact that the results aren't there is enough for the user
             issueWarning(str(reason)+ ', skipping entry')
             continue
-        except SkipReduction, reason:
+        except SkipReduction as reason:
             #this means that a load step failed, the warning and the fact that the results aren't there is enough for the user
             issueWarning(str(reason)+ ', skipping reduction')
             continue
-        except ValueError, reason:
+        except ValueError as reason:
             issueWarning('Cannot load file :'+str(reason))
             #when we are all up to Python 2.5 replace the duplicated code below with one finally:
             delete_workspaces(raw_workspaces)
@@ -284,7 +288,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
             # else we map it to itself.
             save_names_dict = get_mapped_workspaces(save_names, save_as_zero_error_free)
 
-            for algor in saveAlgs.keys():
+            for algor in list(saveAlgs.keys()):
                 for workspace_name in save_names:
                     #add the file extension, important when saving different types of file so they don't over-write each other
                     ext = saveAlgs[algor]

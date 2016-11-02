@@ -1,8 +1,8 @@
 #include "MantidAPI/Run.h"
-#include "MantidKernel/LogFilter.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAlgorithms/NormaliseByCurrent.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/LogFilter.h"
 
 namespace Mantid {
 namespace Algorithms {

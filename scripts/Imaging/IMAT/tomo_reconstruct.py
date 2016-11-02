@@ -50,7 +50,6 @@ ipython -- scripts/Imaging/IMAT/tomo_reconstruct.py\
 
 # find first the package/subpackages in the path of this file.
 import sys
-from sys import path
 import os
 from os import path
 # So insert in the path the directory that contains this file
@@ -270,8 +269,8 @@ def main_tomo_rec():
     # distributions, as found for example on rhel6
     vers = sys.version_info
     if vers < (2,7,0):
-        raise RuntimeErrorn("Not running this test as it requires Python >= 2.7. Version found: {0}".
-                            format(vers))
+        raise RuntimeError("Not running this test as it requires Python >= 2.7. Version found: {0}".
+                           format(vers))
 
     import inspect
 

@@ -206,13 +206,15 @@ public:
     ExposedNearestNeighbours accountForMaskedNN(m_instrument, spectramap,
                                                 false);
 
-    size_t sizeWithoutMasking = ignoreMaskedNN.getSpectraDetectors().size();
-    size_t sizeWithMasking = accountForMaskedNN.getSpectraDetectors().size();
+    size_t sizeWithoutMasked = ignoreMaskedNN.getSpectraDetectors().size();
+    size_t sizeWithMasked = accountForMaskedNN.getSpectraDetectors().size();
 
-    TSM_ASSERT_EQUALS("Without masking should get 18 spectra back", 18,
-                      sizeWithoutMasking);
+    TSM_ASSERT_EQUALS("With masked should get 18 spectra back", 18,
+                      sizeWithMasked);
+    TSM_ASSERT_EQUALS("Without masked should get 16 spectra back", 16,
+                      sizeWithoutMasked);
     TSM_ASSERT("Must have less detectors available after applying masking",
-               sizeWithoutMasking > sizeWithMasking);
+               sizeWithoutMasked < sizeWithMasked);
   }
 };
 
