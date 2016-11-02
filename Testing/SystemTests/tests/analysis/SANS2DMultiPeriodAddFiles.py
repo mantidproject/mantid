@@ -1,6 +1,8 @@
 ﻿#pylint: disable=no-init
 import stresstesting
 from mantid.simpleapi import *
+
+
 from mantid import config
 from ISISCommandInterface import *
 
@@ -12,13 +14,11 @@ class SANS2DMultiPeriodAddFiles(stresstesting.MantidStressTest):
         return 2500
 
     def runTest(self):
-
         SANS2D()
         Set1D()
         Detector("rear-detector")
         MaskFile('MASKSANS2Doptions.091A')
         Gravity(True)
-
         add_runs( ('5512', '5512') ,'SANS2D', 'nxs', lowMem=True)
 
     #one period of a multi-period Nexus file
@@ -26,8 +26,11 @@ class SANS2DMultiPeriodAddFiles(stresstesting.MantidStressTest):
 
         WavRangeReduction(2, 4, DefaultTrans)
 
-        os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00005512-add.nxs'))
-        os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00005512.log'))
+        paths = [os.path.join(config['defaultsave.directory'],'SANS2D00005512-add.nxs'), 
+                 os.path.join(config['defaultsave.directory'],'SANS2D00005512.log')]
+        for path in paths:
+            if os.path.exists(path):
+                os.remove(path)
 
     def validate(self):
     # Need to disable checking of the Spectra-Detector map because it isn't

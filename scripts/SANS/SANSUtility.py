@@ -6,7 +6,7 @@
 ########################################################
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
-from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup, FileLoaderRegistry
+from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup, FileLoaderRegistry, FileFinder
 from mantid.kernel import time_duration, DateAndTime
 import inspect
 import math
@@ -698,9 +698,10 @@ class WorkspaceType(object):
     class MultiperiodHistogram(object):
         pass
 
-
 def get_number_of_periods_from_file(file_name):
-    full_file_path = FileFinder.getFullPath(file_name)
+    full_file_path = FileFinder.findRuns(file_name)
+    if hasattr(full_file_path, '__iter__'):
+        full_file_path = full_file_path[0]
     try:
         with h5.File(full_file_path) as h5_file:
             first_entry = h5_file["raw_data_1"]
@@ -720,6 +721,9 @@ def check_if_is_event_data(file_name):
                                     |--some_group|
                                                  |--Attribute: NX_class = NXevent_data
     """
+    full_file_path = FileFinder.findRuns(file_name)
+    if hasattr(full_file_path, '__iter__'):
+        file_name = full_file_path[0]
     with h5.File(file_name) as h5_file:
         # Open first entry
         keys = h5_file.keys()
