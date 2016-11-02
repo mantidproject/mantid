@@ -3,9 +3,14 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 // Forward decs
 class IReflMainWindowPresenter;
@@ -59,6 +64,8 @@ private:
   void createStitchHints();
   void getExpDefaults();
   void getInstDefaults();
+  IAlgorithm_sptr createReductionAlg();
+  Instrument_const_sptr createEmptyInstrument(std::string instName);
 
   /// The view we are managing
   IReflSettingsTabView *m_view;

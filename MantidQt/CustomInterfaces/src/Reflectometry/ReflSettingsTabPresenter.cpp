@@ -4,15 +4,13 @@
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument.h"
-
-#include <boost/algorithm/string.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
+using namespace Mantid::Geometry;
 
 /** Constructor
 * @param view :: The view we are handling
@@ -232,57 +230,76 @@ void ReflSettingsTabPresenter::createStitchHints() {
 /** Fills experiment settings with default values
 */
 void ReflSettingsTabPresenter::getExpDefaults() {
-  // The algorithm
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
-
-  // The instrument
-  IAlgorithm_sptr loadInst =
-    AlgorithmManager::Instance().create("LoadEmptyInstrument");
-  loadInst->setChild(true);
-  loadInst->setProperty("OutputWorkspace", "outWs");
-  loadInst->setProperty("InstrumentName", m_mainPresenter->getInstrumentName());
-  loadInst->execute();
-  MatrixWorkspace_const_sptr ws = loadInst->getProperty("OutputWorkspace");
-  auto inst = ws->getInstrument();
+  // Algorithm and instrument
+  auto alg = createReductionAlg();
+  auto inst = createEmptyInstrument(m_mainPresenter->getInstrumentName());
 
   // Collect all default values and set them in view
-  std::vector<std::string> defaults;
-  defaults.push_back(alg->getPropertyValue("AnalysisMode"));
-  defaults.push_back(alg->getPropertyValue("PolarizationAnalysis"));
-  defaults.push_back(inst->getStringParameter("crho")[0]);
-  defaults.push_back(inst->getStringParameter("calpha")[0]);
-  defaults.push_back(inst->getStringParameter("cAp")[0]);
-  defaults.push_back(inst->getStringParameter("cPp")[0]);
-  defaults.push_back(alg->getPropertyValue("ScaleFactor"));
+  std::vector<std::string> defaults(7);
+  defaults[0] = alg->getPropertyValue("AnalysisMode");
+  defaults[1] = alg->getPropertyValue("PolarizationAnalysis");
+
+  auto cRho = inst->getStringParameter("crho");
+  if (!cRho.empty())
+    defaults[2] = cRho[0];
+
+  auto cAlpha = inst->getStringParameter("calpha");
+  if (!cAlpha.empty())
+    defaults[3] = cAlpha[0];
+
+  auto cAp = inst->getStringParameter("cAp");
+  if (!cAp.empty())
+    defaults[4] = cAp[0];
+
+  auto cPp = inst->getStringParameter("cPp");
+  if (!cPp.empty())
+    defaults[5] = cPp[0];
+
+  defaults[6] = alg->getPropertyValue("ScaleFactor");
+
   m_view->setExpDefaults(defaults);
 }
 
 /** Fills instrument settings with default values
 */
 void ReflSettingsTabPresenter::getInstDefaults() {
-
-  // The instrument
-  IAlgorithm_sptr loadInst =
-      AlgorithmManager::Instance().create("LoadEmptyInstrument");
-  loadInst->setChild(true);
-  loadInst->setProperty("OutputWorkspace", "outWs");
-  loadInst->setProperty("InstrumentName", m_mainPresenter->getInstrumentName());
-  loadInst->execute();
-  MatrixWorkspace_const_sptr ws = loadInst->getProperty("OutputWorkspace");
-  auto inst = ws->getInstrument();
+  // Algorithm and instrument
+  auto alg = createReductionAlg();
+  auto inst = createEmptyInstrument(m_mainPresenter->getInstrumentName());
 
   // Collect all default values
-  std::vector<double> defaults;
-  defaults.push_back(inst->getNumberParameter("MonitorIntegralMin")[0]);
-  defaults.push_back(inst->getNumberParameter("MonitorIntegralMax")[0]);
-  defaults.push_back(inst->getNumberParameter("MonitorBackgroundMin")[0]);
-  defaults.push_back(inst->getNumberParameter("MonitorBackgroundMax")[0]);
-  defaults.push_back(inst->getNumberParameter("LambdaMin")[0]);
-  defaults.push_back(inst->getNumberParameter("LambdaMax")[0]);
-  defaults.push_back(inst->getNumberParameter("I0MonitorIndex")[0]);
+  std::vector<double> defaults(8);
+  defaults[0] = boost::lexical_cast<double>(
+      alg->getPropertyValue("NormalizeByIntegratedMonitors"));
+  defaults[1] = inst->getNumberParameter("MonitorIntegralMin")[0];
+  defaults[2] = inst->getNumberParameter("MonitorIntegralMax")[0];
+  defaults[3] = inst->getNumberParameter("MonitorBackgroundMin")[0];
+  defaults[4] = inst->getNumberParameter("MonitorBackgroundMax")[0];
+  defaults[5] = inst->getNumberParameter("LambdaMin")[0];
+  defaults[6] = inst->getNumberParameter("LambdaMax")[0];
+  defaults[7] = inst->getNumberParameter("I0MonitorIndex")[0];
 
   m_view->setInstDefaults(defaults);
+}
+
+/** Generates and returns an instance of the ReflectometryReductionOne algorithm
+*/
+IAlgorithm_sptr ReflSettingsTabPresenter::createReductionAlg() {
+  return AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+}
+
+/** Creates and returns an example empty instrument given an instrument name
+*/
+Instrument_const_sptr 
+    ReflSettingsTabPresenter::createEmptyInstrument(std::string instName) {
+  IAlgorithm_sptr loadInst =
+    AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  loadInst->setChild(true);
+  loadInst->setProperty("OutputWorkspace", "outWs");
+  loadInst->setProperty("InstrumentName", instName);
+  loadInst->execute();
+  MatrixWorkspace_const_sptr ws = loadInst->getProperty("OutputWorkspace");
+  return ws->getInstrument();
 }
 }
 }

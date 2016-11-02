@@ -87,13 +87,16 @@ void QtReflSettingsTabView::setExpDefaults(
 void QtReflSettingsTabView::setInstDefaults(
     const std::vector<double> &defaults) const {
 
-  m_ui.monIntMinEdit->setText(QString::number(defaults[0]));
-  m_ui.monIntMaxEdit->setText(QString::number(defaults[1]));
-  m_ui.monBgMinEdit->setText(QString::number(defaults[2]));
-  m_ui.monBgMaxEdit->setText(QString::number(defaults[3]));
-  m_ui.lamMinEdit->setText(QString::number(defaults[4]));
-  m_ui.lamMaxEdit->setText(QString::number(defaults[5]));
-  m_ui.I0MonIndexEdit->setText(QString::number(defaults[6]));
+  auto intMonCheckState = (defaults[0] != 0) ? Qt::Checked : Qt::Unchecked;
+  m_ui.intMonCheckBox->setCheckState(intMonCheckState);
+
+  m_ui.monIntMinEdit->setText(QString::number(defaults[1]));
+  m_ui.monIntMaxEdit->setText(QString::number(defaults[2]));
+  m_ui.monBgMinEdit->setText(QString::number(defaults[3]));
+  m_ui.monBgMaxEdit->setText(QString::number(defaults[4]));
+  m_ui.lamMinEdit->setText(QString::number(defaults[5]));
+  m_ui.lamMaxEdit->setText(QString::number(defaults[6]));
+  m_ui.I0MonIndexEdit->setText(QString::number(defaults[7]));
 }
 
 /** Returns global options for 'Stitch1DMany'
@@ -191,7 +194,7 @@ std::string QtReflSettingsTabView::getScaleFactor() const {
 */
 std::string QtReflSettingsTabView::getIntMonCheck() const {
 
-  return m_ui.intMonCheckEdit->text().toStdString();
+  return boost::lexical_cast<std::string>(m_ui.intMonCheckBox->checkState());
 }
 
 /** Return monitor integral wavelength min
