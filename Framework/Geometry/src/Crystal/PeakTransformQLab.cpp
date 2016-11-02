@@ -1,4 +1,5 @@
 #include "MantidGeometry/Crystal/PeakTransformQLab.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include <boost/make_shared.hpp>
 
 using boost::regex;

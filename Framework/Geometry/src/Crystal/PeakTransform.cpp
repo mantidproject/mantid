@@ -1,4 +1,5 @@
 #include "MantidGeometry/Crystal/PeakTransform.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 
 namespace Mantid {
 namespace Geometry {

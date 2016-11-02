@@ -1,6 +1,7 @@
 #include "MantidGeometry/Rendering/CacheGeometryRenderer.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Quat.h"
 #include <climits>
 
