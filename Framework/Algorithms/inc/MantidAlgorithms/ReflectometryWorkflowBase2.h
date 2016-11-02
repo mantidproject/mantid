@@ -1,0 +1,73 @@
+#ifndef MANTID_ALGORITHMS_REFLECTOMETRYWORKFLOWBASE2_H_
+#define MANTID_ALGORITHMS_REFLECTOMETRYWORKFLOWBASE2_H_
+
+#include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+
+#include <map>
+#include <string>
+
+namespace Mantid {
+namespace Algorithms {
+
+/** ReflectometryWorkflowBase2 : base class containing common implementation
+ functionality usable by concrete reflectometry workflow algorithms. Version 2.
+
+ Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
+
+ This file is part of Mantid.
+
+ Mantid is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+
+ Mantid is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+ File change history is stored at: <https://github.com/mantidproject/mantid>
+ Code Documentation is available at: <http://doxygen.mantidproject.org>
+ */
+class DLLExport ReflectometryWorkflowBase2
+    : public API::DataProcessorAlgorithm {
+protected:
+  /// Initialize monitor properties
+  void initMonitorProperties();
+  /// Initialize direct beam properties
+  void initDirectBeamProperties();
+  /// Initialize transmission properties
+  void initTransmissionProperties();
+  /// Initialize properties for stitching transmission runs
+  void initStitchProperties();
+  /// Initialize corection algorithm properties
+  void initAlgorithmicProperties();
+  /// Initialize momentum transfer properties
+  void initMomentumTransferProperties();
+  /// Validate direct beam properties
+  std::map<std::string, std::string> validateDirectBeamProperties();
+  /// Validate transmission properties
+  std::map<std::string, std::string> validateTransmissionProperties();
+  /// Convert a workspace from TOF to wavelength
+  Mantid::API::MatrixWorkspace_sptr
+  convertToWavelength(Mantid::API::MatrixWorkspace_sptr inputWS);
+  /// Crop a workspace in wavelength
+  Mantid::API::MatrixWorkspace_sptr
+  cropWavelength(Mantid::API::MatrixWorkspace_sptr inputWS);
+  // Create a detector workspace from input workspace in wavelength
+  Mantid::API::MatrixWorkspace_sptr
+  makeDetectorWS(Mantid::API::MatrixWorkspace_sptr inputWS);
+  // Create a monitor workspace from input workspace in wavelength
+  Mantid::API::MatrixWorkspace_sptr
+  makeMonitorWS(Mantid::API::MatrixWorkspace_sptr inputWS,
+                bool integratedMonitors);
+};
+} // namespace Algorithms
+} // namespace Mantid
+
+#endif /* MANTID_ALGORITHMS_REFLECTOMETRYWORKFLOWBASE2_H_ */
