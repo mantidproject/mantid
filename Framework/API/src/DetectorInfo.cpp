@@ -161,18 +161,20 @@ void DetectorInfo::setRotation(const Geometry::IComponent &comp,
 
 /// Returns the source position.
 Kernel::V3D DetectorInfo::sourcePosition() const {
-  std::call_once(m_sourceCached, &DetectorInfo::cacheSource, this);
+  cacheSource();
   return m_sourcePos;
 }
 
 /// Returns the sample position.
 Kernel::V3D DetectorInfo::samplePosition() const {
-  std::call_once(m_sampleCached, &DetectorInfo::cacheSample, this);
+  cacheSample();
   return m_samplePos;
 }
 
 /// Returns L1 (distance from source to sample).
 double DetectorInfo::l1() const {
+  cacheSource();
+  cacheSample();
   std::call_once(m_L1Cached, &DetectorInfo::cacheL1, this);
   return m_L1;
 }
@@ -211,36 +213,52 @@ void DetectorInfo::setCachedDetector(
 /// Returns a reference to the source component. The value is cached, so calling
 /// it repeatedly is cheap.
 const Geometry::IComponent &DetectorInfo::getSource() const {
-  std::call_once(m_sourceCached, &DetectorInfo::cacheSource, this);
+  cacheSource();
   return *m_source;
 }
 
 /// Returns a reference to the sample component. The value is cached, so calling
 /// it repeatedly is cheap.
 const Geometry::IComponent &DetectorInfo::getSample() const {
-  std::call_once(m_sampleCached, &DetectorInfo::cacheSample, this);
+  cacheSample();
   return *m_sample;
 }
 
 void DetectorInfo::cacheSource() const {
-  m_source = m_instrument->getSource();
-  if (!m_source)
+  std::call_once(m_sourceCached, &DetectorInfo::doCacheSource, this);
+  if (!m_sourceGood)
     throw std::runtime_error("Instrument does not contain source!");
-  m_sourcePos = m_source->getPos();
 }
 
 void DetectorInfo::cacheSample() const {
-  m_sample = m_instrument->getSample();
-  if (!m_sample)
+  std::call_once(m_sampleCached, &DetectorInfo::doCacheSample, this);
+  if (!m_sampleGood)
     throw std::runtime_error("Instrument does not contain sample!");
+}
+
+void DetectorInfo::doCacheSource() const {
+  m_source = m_instrument->getSource();
+  // Workaround: GCC has trouble with exceptions thrown from with std::call_once
+  // (example from cppreference does not work). Instead we set a flag and throw
+  // in a wrapper function.
+  if (!m_source)
+    return;
+  m_sourceGood = true;
+  m_sourcePos = m_source->getPos();
+}
+
+void DetectorInfo::doCacheSample() const {
+  m_sample = m_instrument->getSample();
+  // Workaround: GCC has trouble with exceptions thrown from with std::call_once
+  // (example from cppreference does not work). Instead we set a flag and throw
+  // in a wrapper function.
+  if (!m_sample)
+    return;
+  m_sampleGood = true;
   m_samplePos = m_sample->getPos();
 }
 
-void DetectorInfo::cacheL1() const {
-  std::call_once(m_sourceCached, &DetectorInfo::cacheSource, this);
-  std::call_once(m_sampleCached, &DetectorInfo::cacheSample, this);
-  m_L1 = m_source->getDistance(*m_sample);
-}
+void DetectorInfo::cacheL1() const { m_L1 = m_source->getDistance(*m_sample); }
 
 } // namespace API
 } // namespace Mantid

@@ -99,10 +99,13 @@ private:
   const Geometry::IComponent &getSource() const;
   const Geometry::IComponent &getSample() const;
 
-  // These cache init functions are not thread-safe! Use only in combination
-  // with std::call_once!
   void cacheSource() const;
   void cacheSample() const;
+
+  // These cache init functions are not thread-safe! Use only in combination
+  // with std::call_once!
+  void doCacheSource() const;
+  void doCacheSample() const;
   void cacheL1() const;
 
   Geometry::ParameterMap *m_pmap;
@@ -113,6 +116,8 @@ private:
   // only on demand, by const getters.
   mutable boost::shared_ptr<const Geometry::IComponent> m_source;
   mutable boost::shared_ptr<const Geometry::IComponent> m_sample;
+  mutable bool m_sourceGood{false};
+  mutable bool m_sampleGood{false};
   mutable Kernel::V3D m_sourcePos;
   mutable Kernel::V3D m_samplePos;
   mutable double m_L1;

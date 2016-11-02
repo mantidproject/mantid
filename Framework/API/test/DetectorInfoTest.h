@@ -60,6 +60,18 @@ public:
                      std::runtime_error);
   }
 
+  void test_l1_no_instrument_call_once_regression() {
+    // There is a bug in GCC (5.4): If an exception is thrown from within
+    // std::call_once, a subsequent call to that std::call_once will freeze.
+    // Previously this happened for DetectorInfo so here we see if a failing
+    // call to `l1` can be repeated. If the bug is reintroduced this test will
+    // not fail but FREEZE.
+    TS_ASSERT_THROWS(m_workspaceNoInstrument.detectorInfo().l1(),
+                     std::runtime_error);
+    TS_ASSERT_THROWS(m_workspaceNoInstrument.detectorInfo().l1(),
+                     std::runtime_error);
+  }
+
   void test_isMonitor() {
     const auto &detectorInfo = m_workspace.detectorInfo();
     TS_ASSERT_EQUALS(detectorInfo.isMonitor(0), false);
