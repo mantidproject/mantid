@@ -3,7 +3,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-def get_cycle_dir(number):  # NOQA
+def get_cycle_dir(number):
     if isinstance(number, int):
         runno = number
     else:

@@ -165,7 +165,7 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
         mtd.remove(monitor)
         return
 
-    def PEARL_focus(self, number,ext="raw",fmode="trans",ttmode="TT70",atten=True,van_norm=True):  # NOQA
+    def PEARL_focus(self, number,ext="raw",fmode="trans",ttmode="TT70",atten=True,van_norm=True):
 
         self.tt_mode=ttmode
         self.mode=fmode

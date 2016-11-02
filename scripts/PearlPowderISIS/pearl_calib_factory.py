@@ -3,8 +3,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-def get_calibration_filename(cycle, tt_mode):  # NOQA
-
+def get_calibration_filename(cycle, tt_mode):
     if cycle == "15_4":
 
         calfile = "pearl_offset_15_3.cal"
