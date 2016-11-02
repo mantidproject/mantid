@@ -177,8 +177,7 @@ template <typename TYPE> VMDBase<TYPE>::VMDBase(const V3D &vector) : nd(3) {
 /** Constructor
  * @param vector :: vector of doubles */
 template <typename TYPE>
-template <class T>
-VMDBase<TYPE>::VMDBase(const std::vector<T> &vector)
+VMDBase<TYPE>::VMDBase(const std::vector<double> &vector)
     : nd(vector.size()) {
   if (nd <= 0)
     throw std::invalid_argument("nd must be > 0");
@@ -594,7 +593,6 @@ VMDBase<TYPE>::getNormalVector(const std::vector<VMDBase<TYPE>> &vectors) {
 /// Instantiate VMDBase classes
 template class VMDBase<double>;
 template class VMDBase<float>;
-template VMDBase<float>::VMDBase(const std::vector<double> &);
 
 /**
   Prints a text representation of itself

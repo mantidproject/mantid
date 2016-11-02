@@ -51,7 +51,7 @@ public:
   VMDBase(size_t nd, const double *bareData);
   VMDBase(size_t nd, const float *bareData);
   VMDBase(const V3D &vector);
-  template <class T> VMDBase(const std::vector<T> &vector);
+  VMDBase(const std::vector<double> &vector);
   VMDBase(const std::vector<float> &vector);
   VMDBase(const std::string &str);
   ~VMDBase();
