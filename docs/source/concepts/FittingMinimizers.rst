@@ -1,4 +1,4 @@
-.. _FittingMinimizers:
+﻿.. _FittingMinimizers:
 
 Comparing Minimizers
 ====================
@@ -25,18 +25,18 @@ Several minimizers are included with Mantid and can be selected in the
 or when using the algorithm :ref:`Fit <algm-Fit>` The following
 options are available:
 
-- `Simplex <https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method>`__
-- `SteepestDescent <https://en.wikipedia.org/wiki/Gradient_descent>`__
-- `Conjugate gradient (Fletcher-Reeves imp.) <https://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method>`__
-- `Conjugate gradient (Polak-Ribiere imp.) <https://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method>`__
-- `BFGS (Broyden-Fletcher-Goldfarb-Shanno) <https://en.wikipedia.org/wiki/Broyden–Fletcher–Goldfarb–Shanno_algorithm>`__
-- `Levenberg-Marquardt <https://en.wikipedia.org/wiki/Levenberg-Marquardt_algorithm>`__ (default)
+- `Simplex <../FitMinimizers/Simplex.html>`__
+- `SteepestDescent <../FitMinimizers/GradientDescent.html>`__
+- `Conjugate gradient (Fletcher-Reeves imp.) <../FitMinimizers/FletcherReeves.html>`__
+- `Conjugate gradient (Polak-Ribiere imp.) <../FitMinimizers/PolakRibiere.html>`__
+- `BFGS (Broyden-Fletcher-Goldfarb-Shanno) <../FitMinimizers/BFGS.html>`__
+- `Levenberg-Marquardt <../FitMinimizers/LevenbergMarquardt.html>`__ (default)
 - Levenberg-MarquardtMD
 
   A `Levenberg-Marquardt <https://en.wikipedia.org/wiki/Levenberg-Marquardt_algorithm>`__ implementation generalised to allow different cost functions, and supporting chunking techniques for large datasets.
 - Damping 
 
-  A `Gauss-Newton <https://en.wikipedia.org/wiki/Gauss–Newton_algorithm#Improved_versions>`__ algorithm with damping.
+  A `Gauss-Newton <../FitMinimizers/GaussNewton.html>`__ algorithm with damping.
 - :ref:`FABADA <FABADA>`
 - `Trust region
   <https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls>`__: a `trust
