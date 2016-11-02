@@ -5,6 +5,12 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
+Features
+--------
+
+- Added NXcanSAS as an output format of the ISIS SANS Gui.
+
+
 Bug Fixes
 ---------
 
