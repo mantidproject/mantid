@@ -1211,7 +1211,7 @@ void MantidEV::showInfo(bool lab_coords, Mantid::Kernel::V3D q_point) {
   std::string peaks_ws_name =
       m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
 
-  std::vector<std::pair<std::string, std::string> > info;
+  std::vector<std::pair<std::string, std::string>> info;
 
   if (!worker->isPeaksWorkspace(peaks_ws_name)) // just show the Q vector
   {

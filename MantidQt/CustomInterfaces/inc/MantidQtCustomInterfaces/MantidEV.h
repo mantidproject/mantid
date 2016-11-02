@@ -204,13 +204,11 @@ public:
   // This interface's categories.
   static QString categoryInfo() { return "Diffraction"; }
 
-public
-slots:
+public slots:
   /// Slot for Q-Point selection notification
   void QPointSelection_slot(bool, double, double, double);
 
-private
-slots:
+private slots:
 
   /// Go to help page
   void help_slot();
