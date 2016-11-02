@@ -740,7 +740,8 @@ void SANSRunWindow::readSaveSettings(QSettings &valueStore) {
       valueStore.value("NIST_Qxy", false).toBool());
   m_uiForm.saveRKH_check->setChecked(valueStore.value("RKH", false).toBool());
   m_uiForm.saveCSV_check->setChecked(valueStore.value("CSV", false).toBool());
-  m_uiForm.saveNXcanSAS_check->setChecked(valueStore.value("NXcanSAS", false).toBool());
+  m_uiForm.saveNXcanSAS_check->setChecked(
+      valueStore.value("NXcanSAS", false).toBool());
 }
 
 /**
@@ -784,7 +785,6 @@ void SANSRunWindow::saveSaveSettings(QSettings &valueStore) {
   valueStore.setValue("RKH", m_uiForm.saveRKH_check->isChecked());
   valueStore.setValue("CSV", m_uiForm.saveCSV_check->isChecked());
   valueStore.setValue("NXcanSAS", m_uiForm.saveNXcanSAS_check->isChecked());
-
 }
 /**
  * Run a function from the SANS reduction script, ensuring that the first call
@@ -2955,7 +2955,8 @@ void SANSRunWindow::handleDefSaveClick() {
           boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
       if (matrix_workspace) {
         auto detectorSelection = m_uiForm.detbank_sel->currentText();
-        setTransmissionOnSaveCommand(saveCommand, matrix_workspace, detectorSelection);
+        setTransmissionOnSaveCommand(saveCommand, matrix_workspace,
+                                     detectorSelection);
       }
 
       // Add the sample information to the output
@@ -2971,15 +2972,16 @@ void SANSRunWindow::handleDefSaveClick() {
       saveCommand += ")\n";
     } else if ((*alg) == "SaveNXcanSAS") {
       saveCommand +=
-        (*alg) + "('" + m_outputWS + "','" + fname + "', DetectorNames=";
+          (*alg) + "('" + m_outputWS + "','" + fname + "', DetectorNames=";
       Workspace_sptr workspace_ptr =
-        AnalysisDataService::Instance().retrieve(m_outputWS.toStdString());
+          AnalysisDataService::Instance().retrieve(m_outputWS.toStdString());
       MatrixWorkspace_sptr matrix_workspace =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
- 
+          boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
+
       if (matrix_workspace) {
         auto detectorSelection = m_uiForm.detbank_sel->currentText();
-        setTransmissionOnSaveCommand(saveCommand, matrix_workspace, detectorSelection);
+        setTransmissionOnSaveCommand(saveCommand, matrix_workspace,
+                                     detectorSelection);
       }
       saveCommand += ")\n";
     } else

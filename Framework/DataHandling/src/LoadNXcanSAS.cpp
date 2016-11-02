@@ -84,15 +84,15 @@ Mantid::API::MatrixWorkspace_sptr createWorkspace(H5::DataSet &dataSet) {
       dimInfo.dimBin /*xdata*/, dimInfo.dimBin /*ydata*/);
 }
 
-Mantid::API::MatrixWorkspace_sptr createWorkspaceForHistogram(H5::DataSet &dataSet) {
+Mantid::API::MatrixWorkspace_sptr
+createWorkspaceForHistogram(H5::DataSet &dataSet) {
   auto dimInfo = getDataSpaceInfo(dataSet);
 
   // Create a workspace based on the dataSpace information
   return Mantid::API::WorkspaceFactory::Instance().create(
-    "Workspace2D", dimInfo.dimSpectrumAxis /*NHisto*/,
-    dimInfo.dimBin + 1 /*xdata*/, dimInfo.dimBin /*ydata*/);
+      "Workspace2D", dimInfo.dimSpectrumAxis /*NHisto*/,
+      dimInfo.dimBin + 1 /*xdata*/, dimInfo.dimBin /*ydata*/);
 }
-
 
 // ----- LOGS
 

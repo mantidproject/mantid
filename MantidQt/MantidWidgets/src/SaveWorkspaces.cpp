@@ -23,20 +23,22 @@
 #include <QMessageBox>
 
 namespace {
-  void setDetectorNamesOnCanSasFormat(QString& saveCommands, 
-    const QList<QListWidgetItem *> & wspaces, int j) {
-    saveCommands += ", DetectorNames=";
-    Mantid::API::Workspace_sptr workspace_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(
-      wspaces[j]->text().toStdString());
-    Mantid::API::MatrixWorkspace_sptr matrix_workspace =
+void setDetectorNamesOnCanSasFormat(QString &saveCommands,
+                                    const QList<QListWidgetItem *> &wspaces,
+                                    int j) {
+  saveCommands += ", DetectorNames=";
+  Mantid::API::Workspace_sptr workspace_ptr =
+      Mantid::API::AnalysisDataService::Instance().retrieve(
+          wspaces[j]->text().toStdString());
+  Mantid::API::MatrixWorkspace_sptr matrix_workspace =
       boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace_ptr);
-    if (matrix_workspace) {
-      if (matrix_workspace->getInstrument()->getName() == "SANS2D")
-        saveCommands += "'front-detector, rear-detector'";
-      if (matrix_workspace->getInstrument()->getName() == "LOQ")
-        saveCommands += "'HAB, main-detector-bank'";
-    }
+  if (matrix_workspace) {
+    if (matrix_workspace->getInstrument()->getName() == "SANS2D")
+      saveCommands += "'front-detector, rear-detector'";
+    if (matrix_workspace->getInstrument()->getName() == "LOQ")
+      saveCommands += "'HAB, main-detector-bank'";
   }
+}
 }
 
 using namespace MantidQt::MantidWidgets;
@@ -275,21 +277,20 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem *> &wspaces,
       outFile += exten;
     }
     saveCommands += outFile + "'";
-    if (algorithm != "SaveCSV" && algorithm != "SaveNISTDAT" && algorithm != "SaveNXcanSAS") {
+    if (algorithm != "SaveCSV" && algorithm != "SaveNISTDAT" &&
+        algorithm != "SaveNXcanSAS") {
       saveCommands += ", Append=";
       saveCommands += toAppend ? "True" : "False";
     }
     if (algorithm == "SaveCanSAS1D") {
       setDetectorNamesOnCanSasFormat(saveCommands, wspaces, j);
 
-
-
       // Add the geometry information
       emit updateGeometryInformation();
       // Remove the first three characters, since they are unwanted
       saveCommands += ", Geometry='" + m_geometryID + "', SampleHeight=" +
-        m_sampleHeight + ", SampleWidth=" + m_sampleWidth +
-        ", SampleThickness=" + m_sampleThickness;
+                      m_sampleHeight + ", SampleWidth=" + m_sampleWidth +
+                      ", SampleThickness=" + m_sampleThickness;
     }
     if (algorithm == "SaveNXcanSAS") {
       setDetectorNamesOnCanSasFormat(saveCommands, wspaces, j);
