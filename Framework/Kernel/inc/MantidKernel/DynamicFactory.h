@@ -18,12 +18,9 @@
 // Poco
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
-#include <Poco/AutoPtr.h>
 
 // std
-#include <cstring>
 #include <functional>
-#include <iterator>
 #include <vector>
 
 namespace Mantid {

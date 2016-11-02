@@ -7,7 +7,6 @@
 #include "MantidGeometry/IDTypes.h" //For specnum_t
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Cache.h"
 
 #include "tbb/concurrent_unordered_map.h"
