@@ -7,6 +7,8 @@
 
 #include "MantidKernel/DeltaEMode.h"
 
+#include <boost/scoped_ptr.hpp>
+
 namespace Mantid {
 namespace MDAlgorithms {
 

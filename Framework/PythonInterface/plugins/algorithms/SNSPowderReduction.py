@@ -1262,7 +1262,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     van_bkgd_ws_name = self._loadAndSum([van_bkgd_run_number], van_bkgd_ws_name, **vanFilterWall)
 
                 van_bkgd_ws = get_workspace(van_bkgd_ws_name)
-                if van_bkgd_ws.id() == EVENT_WORKSPACE_ID and van_bkgd_ws.getNumberEvents() > 0:
+                if van_bkgd_ws.id() == EVENT_WORKSPACE_ID and van_bkgd_ws.getNumberEvents() <= 0:
                     # skip if background run is empty
                     pass
                 else:

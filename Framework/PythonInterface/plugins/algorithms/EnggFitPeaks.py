@@ -394,10 +394,8 @@ class EnggFitPeaks(PythonAlgorithm):
         detTwoTheta = ws.detectorTwoTheta(det)
 
         # hard coded equation to convert dSpacing -> TOF for the single detector
-        dSpacingToTof = lambda d: 252.816 * 2 * (50 + detL2) * math.sin(detTwoTheta / 2.0) * d
-
         # Values (in principle, expected peak positions) in TOF for the detector
-        tof_values = [dSpacingToTof(ep) for ep in dsp_values]
+        tof_values = [252.816 * 2 * (50 + detL2) * math.sin(detTwoTheta / 2.0) * ep for ep in dsp_values]
         return tof_values
 
     def _create_fitted_peaks_table(self, tbl_name):

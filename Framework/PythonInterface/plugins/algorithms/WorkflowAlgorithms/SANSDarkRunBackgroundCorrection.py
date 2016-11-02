@@ -377,7 +377,7 @@ class DarkRunMonitorAndDetectorRemover(object):
         '''
         det_id_list = []
         if len(monitor_list) != 0:
-            det_id_list = zip(*monitor_list)[1]
+            det_id_list = list(zip(*monitor_list))[1]
 
         selected_monitors = []
         if len(monitor_selection) > 0:

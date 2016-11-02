@@ -1,4 +1,4 @@
-﻿# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes, too-many-branches,too-many-locals, too-many-nested-blocks
+# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes, too-many-branches,too-many-locals, too-many-nested-blocks
 
 try:
     from mantidplot import *
@@ -27,7 +27,8 @@ from mantid import UsageService
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
 
 canMantidPlot = True
 
@@ -1128,7 +1129,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             else:
                 saveDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Save Table")
                 saveDialog.setFileMode(QtGui.QFileDialog.AnyFile)
-                saveDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
+                saveDialog.setNameFilter("Table Files (*.tbl);;All files (*)")
                 saveDialog.setDefaultSuffix("tbl")
                 saveDialog.setAcceptMode(QtGui.QFileDialog.AcceptSave)
                 if saveDialog.exec_():
@@ -1143,7 +1144,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         """
         saveDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Save Table")
         saveDialog.setFileMode(QtGui.QFileDialog.AnyFile)
-        saveDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
+        saveDialog.setNameFilter("Table Files (*.tbl);;All files (*)")
         saveDialog.setDefaultSuffix("tbl")
         saveDialog.setAcceptMode(QtGui.QFileDialog.AcceptSave)
         if saveDialog.exec_():
@@ -1157,7 +1158,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         self.loading = True
         loadDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Open Table")
         loadDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
-        loadDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
+        loadDialog.setNameFilter("Table Files (*.tbl);;All files (*)")
         if loadDialog.exec_():
             try:
                 #before loading make sure you give them a chance to save

@@ -1,4 +1,4 @@
-﻿# pylint: disable=too-many-lines, too-many-branches, invalid-name, super-on-old-class, protected-access,
+# pylint: disable=too-many-lines, too-many-branches, invalid-name, super-on-old-class, protected-access,
 # pylint: disable=too-few-public-methods,too-few-public-methods, too-many-arguments, too-many-instance-attributes
 """
     This file defines what happens in each step in the data reduction, it's
@@ -8,6 +8,7 @@
     Most of this code is a copy-paste from SANSReduction.py, organized to be used with
     ReductionStep objects. The guts needs refactoring.
 """
+from __future__ import (absolute_import, division, print_function)
 import os
 import re
 import math
@@ -44,7 +45,7 @@ def _issueWarning(msg):
         Prints a message to the log marked as warning
         @param msg: message to be issued
     """
-    print msg
+    print(msg)
     sanslog.warning(msg)
 
 
@@ -53,7 +54,7 @@ def _issueInfo(msg):
         Prints a message to the log
         @param msg: message to be issued
     """
-    print msg
+    print(msg)
     sanslog.notice(msg)
 
 
@@ -184,7 +185,7 @@ class LoadRun(object):
             if isinstance(outWs, IEventWorkspace):
                 try:
                     LoadNexusMonitors(self._data_file, OutputWorkspace=monitor_ws_name)
-                except ValueError, details:
+                except ValueError as details:
                     sanslog.warning('The file does not contain monitors. \n' +
                                     'The normalization might behave differently than you expect.\n'
                                     ' Further details: ' + str(details) + '\n')
@@ -202,7 +203,7 @@ class LoadRun(object):
         try:
             last_algorithm = outWs.getHistory().lastAlgorithm()
             loader_name = last_algorithm.getProperty('LoaderName').value
-        except RuntimeError, details:
+        except RuntimeError as details:
             sanslog.warning(
                 'Tried to get a loader name. But it seems that there is no loader name. Further info: ' + str(details))
 
@@ -325,7 +326,7 @@ class LoadRun(object):
             else:
                 # the spectrum_limits is not the default only for transmission data
                 self._load(reducer.instrument, extra_options=spectrum_limits)
-        except RuntimeError, details:
+        except RuntimeError as details:
             sanslog.warning(str(details))
             self._wksp_name = ''
             return
@@ -858,7 +859,7 @@ class Mask_ISIS(ReductionStep):
                     ydim = abs(upp2 - low2) + 1
                     speclist += detector.spectrum_block(low2, low, ydim, xdim) + ','
                 else:
-                    print "error in mask, ignored:  " + x
+                    print("error in mask, ignored:  " + x)
             elif '>' in x:  # Commands: MASK Ssp1>Ssp2, MASK Hn1>Hn2 and MASK Vn1>Vn2
                 pieces = x.split('>')
                 low = int(pieces[0].lstrip('hvs'))
@@ -1181,7 +1182,7 @@ class LoadSample(LoadRun):
             raise RuntimeError('Unable to load SANS sample run, cannot continue.')
 
         if self.periods_in_file > 1:
-            self.entries = range(0, self.periods_in_file)
+            self.entries = list(range(0, self.periods_in_file))
 
         # applies on_load_sample for all the workspaces (single or groupworkspace)
         num = 0
@@ -1753,15 +1754,18 @@ class DarkRunSubtraction(object):
             run_number.append(setting.run_number)
 
         # Get the indices with settings which correspond to the individual settings
-        get_indices = lambda time_flag, mon_flag : [i for i, val in enumerate(use_time)
-                                                    if use_time[i] == time_flag and use_mon[i] == mon_flag]
+        def get_indices(time_flag, mon_flag):
+            return [i for i, use_time_i in enumerate(use_time) if use_time_i == time_flag and use_mon[i] == mon_flag]
+
         indices_time_detector = get_indices(True, False)
         indices_time_monitor = get_indices(True, True)
         indices_uamp_detector = get_indices(False, False)
         indices_uamp_monitor = get_indices(False, True)
 
         # Check that for each of these settings we only have one run number specified, else raise an error
-        has_max_one_run_number = lambda indices : len(set([run_number[index] for index in indices])) < 2
+        def has_max_one_run_number(indices):
+            return len(set([run_number[index] for index in indices])) < 2
+
         if not has_max_one_run_number(indices_time_detector) or \
            not has_max_one_run_number(indices_time_monitor) or \
            not has_max_one_run_number(indices_uamp_detector) or \
@@ -1843,9 +1847,8 @@ class DarkRunSubtraction(object):
                     monitor_mon_numbers.append(mon_numbers[index])
 
         # Check if the mean value is identical for all entries
-        are_all_same = lambda a_list : all([a_list[0] == a_list[i] for i in range(0, len(a_list))])
         if len(monitor_mean) > 0:
-            if not are_all_same(monitor_mean):
+            if len(set(monitor_mean)) != 1:
                 raise RuntimeError("DarkRunSubtraction: If several monitors are specified for a certain type "
                                    "of subtraction, it is required to use either all MEAN or all TOF.")
 
@@ -2663,7 +2666,7 @@ class ConvertToQISIS(ReductionStep):
         else:
             msg = "User file can't override previous gravity setting, do gravity correction remains " + str(
                 self._use_gravity)
-            print msg
+            print(msg)
             sanslog.warning(msg)
 
     def get_extra_length(self):
@@ -2684,7 +2687,7 @@ class ConvertToQISIS(ReductionStep):
         else:
             msg = ("User file can't override previous extra length setting for" +
                    " gravity correction; extra length remains " + str(self._grav_extra_length))
-            print msg
+            print(msg)
             sanslog.warning(msg)
 
     def execute(self, reducer, workspace):
@@ -2791,7 +2794,7 @@ class ConvertToQISIS(ReductionStep):
         # Run a consistency check
         try:
             self.run_consistency_check()
-        except RuntimeError, details:
+        except RuntimeError as details:
             sanslog.warning("ConverToQISIS: There was something wrong with the Q Resolution"
                             " settings. Running the reduction without the Q Resolution"
                             " Setting. See details %s" % str(details))
@@ -3293,7 +3296,7 @@ class UserFile(ReductionStep):
                 y_pos = float(values[1]) / YSF
             elif hab_str_pos > 0:
                 values = upper_line[hab_str_pos + 4:].split()  # remove the SET CENTRE/HAB
-                print ' convert values ', values
+                print(' convert values ', values)
                 x_pos = float(values[0]) / XSF
                 y_pos = float(values[1]) / YSF
             else:
@@ -3301,7 +3304,7 @@ class UserFile(ReductionStep):
                 x_pos = float(values[2]) / XSF
                 y_pos = float(values[3]) / YSF
             if hab_str_pos > 0:
-                print 'Front values = ', x_pos, y_pos
+                print('Front values = ', x_pos, y_pos)
                 reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos), 'front')
             else:
                 reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos))
@@ -3747,7 +3750,7 @@ class UserFile(ReductionStep):
             # parse the words after 'TIME' as first the start time and then the end
             reducer.inst.set_TOFs(int(times[0]), int(times[1]), monitor)
             return ''
-        except Exception, reason:
+        except Exception as reason:
             # return a description of any problems and then continue to read the next line
             return str(reason) + ' on line: '
 
@@ -3782,7 +3785,7 @@ class UserFile(ReductionStep):
                 reducer.inst.set_TOFs_for_ROI(int(times[0]), int(times[1]))
                 return ''
             raise ValueError('Expected two times for BACK/TRANS')
-        except ValueError, reason:
+        except ValueError as reason:
             # return a description of any problems and then continue to read the next line
             return str(reason) + ' on line: '
 

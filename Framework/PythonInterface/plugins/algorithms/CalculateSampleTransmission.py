@@ -12,6 +12,7 @@ class CalculateSampleTransmission(PythonAlgorithm):
 
     _bin_params = None
     _chemical_formula = None
+    _density_type = None
     _density = None
     _thickness = None
     _output_ws = None
@@ -31,8 +32,12 @@ class CalculateSampleTransmission(PythonAlgorithm):
                              validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
 
-        self.declareProperty(name='NumberDensity', defaultValue=0.1,
-                             doc='Number denisty per atom (atoms/Angstrom^3). Default=0.1')
+        self.declareProperty(name='DensityType', defaultValue = 'Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
+                             doc = 'Use of Mass density or Number density')
+
+        self.declareProperty(name='Density', defaultValue=0.1,
+                             doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3). Default=0.1')
 
         self.declareProperty(name='Thickness', defaultValue=0.1,
                              doc='Sample thickness (cm). Default=0.1')
@@ -43,9 +48,9 @@ class CalculateSampleTransmission(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
-        density = self.getProperty('NumberDensity').value
+        density = self.getProperty('Density').value
         if density < 0.0:
-            issues['NumberDensity'] = 'NumberDensity must be positive'
+            issues['Density'] = 'Density must be positive'
 
         thickness = self.getProperty('Thickness').value
         if thickness < 0.0:
@@ -61,6 +66,11 @@ class CalculateSampleTransmission(PythonAlgorithm):
                         VerticalAxisUnit='Text', VerticalAxisValues='Transmission,Scattering')
         Rebin(InputWorkspace=self._output_ws, OutputWorkspace=self._output_ws,
               Params=self._bin_params)
+
+        if self._density_type == 'Mass Density':
+            builder = MaterialBuilder()
+            mat = builder.setFormula(self._chemical_formula).setMassDensity(self._density).build()
+            self._density = mat.numberDensity
         SetSampleMaterial(InputWorkspace=self._output_ws, ChemicalFormula=self._chemical_formula, SampleNumberDensity=self._density)
         ConvertToPointData(InputWorkspace=self._output_ws, OutputWorkspace=self._output_ws)
 
@@ -87,7 +97,8 @@ class CalculateSampleTransmission(PythonAlgorithm):
 
         self._bin_params = self.getPropertyValue('WavelengthRange')
         self._chemical_formula = self.getPropertyValue('ChemicalFormula')
-        self._density = self.getProperty('NumberDensity').value
+        self._density_type = self.getPropertyValue('DensityType')
+        self._density = self.getProperty('Density').value
         self._thickness = self.getProperty('Thickness').value
         self._output_ws = self.getPropertyValue('OutputWorkspace')
 
@@ -95,7 +106,7 @@ class CalculateSampleTransmission(PythonAlgorithm):
         """
         Calculates transmission and scattering at a given wavelength.
 
-        @param wavelength Wavelength at which to calculate (in Angstrom)
+        @param wavelength Wavelength at which to calculate (in Angstroms)
         @return Tuple of transmission and scattering percentages
         """
 

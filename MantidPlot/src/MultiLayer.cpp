@@ -27,21 +27,21 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include <QVector>
-#include <QWidgetList>
-#include <QPrinter>
-#include <QPrintDialog>
 #include <QApplication>
-#include <QMessageBox>
 #include <QBitmap>
+#include <QCheckBox>
+#include <QClipboard>
+#include <QGroupBox>
 #include <QImageWriter>
+#include <QMessageBox>
 #include <QPainter>
 #include <QPicture>
-#include <QClipboard>
-#include <QCheckBox>
-#include <QGroupBox>
-#include <QSpinBox>
+#include <QPrintDialog>
+#include <QPrinter>
 #include <QSize>
+#include <QSpinBox>
+#include <QVector>
+#include <QWidgetList>
 
 #include <cmath>
 #include <limits>
@@ -57,21 +57,22 @@
 #include <qwt_scale_widget.h>
 #include <qwt_text_label.h>
 
+#include "ApplicationWindow.h"
+#include "LegendWidget.h"
 #include "MultiLayer.h"
 #include "Plot.h"
-#include "LegendWidget.h"
 #include "SelectionMoveResizer.h"
-#include "ApplicationWindow.h"
 #include <ColorButton.h>
 
-#include "Mantid/MantidDock.h"
-#include "Mantid/MantidMatrixCurve.h"
 #include "Mantid/MantidMDCurve.h"
+#include "Mantid/MantidMatrixCurve.h"
+#include <MantidQtMantidWidgets/MantidTreeWidget.h>
 
-#include <gsl/gsl_vector.h>
 #include "Mantid/MantidMDCurveDialog.h"
-#include "Mantid/MantidWSIndexDialog.h"
 #include "MantidQtSliceViewer/LinePlotOptions.h"
+#include <MantidQtMantidWidgets/MantidTreeWidget.h>
+#include <MantidQtMantidWidgets/MantidWSIndexDialog.h>
+#include <gsl/gsl_vector.h>
 
 #include "MantidQtAPI/TSVSerialiser.h"
 
@@ -79,6 +80,7 @@
 DECLARE_WINDOW(MultiLayer)
 
 using namespace Mantid;
+using namespace MantidQt::MantidWidgets;
 
 namespace {
 /// static logger

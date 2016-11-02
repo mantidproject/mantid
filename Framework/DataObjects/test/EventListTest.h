@@ -5,8 +5,10 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Timer.h"
-#include <cmath>
 #include "MantidKernel/CPUTimer.h"
+
+#include <boost/scoped_ptr.hpp>
+#include <cmath>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -18,7 +20,6 @@ using std::runtime_error;
 using std::size_t;
 using std::vector;
 
-//==========================================================================================
 class EventListTest : public CxxTest::TestSuite {
 private:
   EventList el;
