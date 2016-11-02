@@ -253,8 +253,14 @@ def StartLiveData(*args, **kwargs):
     except KeyError:
         pass
 
-    # Handle unpacking / workspace names from lhs
+    # LHS Handling currently unsupported for StartLiveData
     lhs = _kernel.funcinspect.lhs_info()
+    if lhs[0] > 0:  # Number of terms on the lhs
+        raise RuntimeError("Assigning the output of StartLiveData is currently "
+                           "unsupported due to limitations of the simpleapi. "
+                           "Please call StartLiveData without assigning it to "
+                           "to anything.")
+
     lhs_args = _get_args_from_lhs(lhs, algm)
     final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
 
