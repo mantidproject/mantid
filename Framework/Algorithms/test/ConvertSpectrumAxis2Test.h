@@ -16,9 +16,9 @@ using namespace Mantid::HistogramData::detail;
 class ConvertSpectrumAxis2Test : public CxxTest::TestSuite {
 private:
   void do_algorithm_run(std::string target, std::string inputWS,
-                        std::string outputWS, bool startYNegative = true) {
+                        std::string outputWS, bool startYNegative = true, bool isHistogram) {
     auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        3, 1, false, startYNegative);
+        3, 1, false, startYNegative, isHistogram);
     AnalysisDataService::Instance().addOrReplace(inputWS, testWS);
 
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
@@ -118,13 +118,29 @@ public:
     const std::string outputSignedThetaAxisWS("outSignedThetaWS");
     const std::string outputSignedThetaAxisWS2("outSignedThetaWS2");
 
-    do_algorithm_run("signed_theta", inputWS, outputSignedThetaAxisWS);
+    // Histogram
+    do_algorithm_run("signed_theta", inputWS, outputSignedThetaAxisWS, true);
 
     // Check output values for the workspace then clean up.
     check_output_values_for_signed_theta_conversion(outputSignedThetaAxisWS);
     clean_up_workspaces(inputWS, outputSignedThetaAxisWS);
 
-    do_algorithm_run("SignedTheta", inputWS, outputSignedThetaAxisWS2);
+    // No histogram
+    do_algorithm_run("signed_theta", inputWS, outputSignedThetaAxisWS, false);
+
+    // Check output values for the workspace then clean up.
+    check_output_values_for_signed_theta_conversion(outputSignedThetaAxisWS);
+    clean_up_workspaces(inputWS, outputSignedThetaAxisWS);
+
+    // Histogram
+    do_algorithm_run("SignedTheta", inputWS, outputSignedThetaAxisWS2, true);
+
+    // Check output values for the workspace then clean up.
+    check_output_values_for_signed_theta_conversion(outputSignedThetaAxisWS2);
+    clean_up_workspaces(inputWS, outputSignedThetaAxisWS2);
+
+    // No histogram
+    do_algorithm_run("SignedTheta", inputWS, outputSignedThetaAxisWS2, false);
 
     // Check output values for the workspace then clean up.
     check_output_values_for_signed_theta_conversion(outputSignedThetaAxisWS2);
@@ -136,13 +152,13 @@ public:
     const std::string outputWS("outWS");
     const std::string outputWS2("outWS2");
 
-    do_algorithm_run("theta", inputWS, outputWS);
+    do_algorithm_run("theta", inputWS, outputWS, true);
 
     // Check output values for the workspace then clean up.
     check_output_values_for_theta_conversion(inputWS, outputWS);
     clean_up_workspaces(inputWS, outputWS);
 
-    do_algorithm_run("Theta", inputWS, outputWS2);
+    do_algorithm_run("Theta", inputWS, outputWS2, true);
 
     // Check output values for the workspace then clean up.
     check_output_values_for_theta_conversion(inputWS, outputWS2);
@@ -179,7 +195,7 @@ public:
     std::string inputWS("inWS");
     const std::string outputWS("outWS");
 
-    do_algorithm_run("ElasticQ", inputWS, outputWS, false);
+    do_algorithm_run("ElasticQ", inputWS, outputWS, false, true);
 
     MatrixWorkspace_const_sptr input, output;
     TS_ASSERT_THROWS_NOTHING(
@@ -221,7 +237,7 @@ public:
     std::string inputWS("inWS");
     const std::string outputWS("outWS");
 
-    do_algorithm_run("ElasticQSquared", inputWS, outputWS, false);
+    do_algorithm_run("ElasticQSquared", inputWS, outputWS, false, true);
 
     MatrixWorkspace_const_sptr input, output;
     TS_ASSERT_THROWS_NOTHING(

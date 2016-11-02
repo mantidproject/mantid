@@ -32,7 +32,6 @@ constexpr double rad2deg = 180. / M_PI;
 void ConvertSpectrumAxis::init() {
   // Validator for Input Workspace
   auto wsVal = boost::make_shared<CompositeValidator>();
-  wsVal->add<HistogramValidator>();
   wsVal->add<SpectraAxisValidator>();
   wsVal->add<InstrumentValidator>();
 
