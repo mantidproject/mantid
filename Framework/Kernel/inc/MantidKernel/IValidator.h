@@ -1,21 +1,15 @@
 #ifndef MANTID_KERNEL_IVALIDATOR_H_
 #define MANTID_KERNEL_IVALIDATOR_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/DataItem.h"
-#include "MantidKernel/Logger.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/any.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
 #endif
 #include <vector>
 #include <string>
-#include <sstream>
 #include <stdexcept>
 
 namespace Mantid {

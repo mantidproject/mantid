@@ -36,7 +36,7 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
   const size_t totalHists =
       ws1->getNumberHistograms() + ws2->getNumberHistograms();
   MatrixWorkspace_sptr output = WorkspaceFactory::Instance().create(
-      "Workspace2D", totalHists, ws1->readX(0).size(), ws1->readY(0).size());
+      "Workspace2D", totalHists, ws1->x(0).size(), ws1->y(0).size());
   // Copy over stuff from first input workspace. This will include the spectrum
   // masking
   WorkspaceFactory::Instance().initializeFromParent(ws1, output, true);
@@ -50,25 +50,20 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
 
   // Loop over the input workspaces in turn copying the data into the output one
   const int64_t &nhist1 = ws1->getNumberHistograms();
-  PARALLEL_FOR2(ws1, output)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws1, *output))
   for (int64_t i = 0; i < nhist1; ++i) {
     PARALLEL_START_INTERUPT_REGION
     auto &outSpec = output->getSpectrum(i);
     const auto &inSpec = ws1->getSpectrum(i);
 
-    // Copy X,Y,E
-    outSpec.setX(XValues);
-    outSpec.dataY() = inSpec.dataY();
-    outSpec.dataE() = inSpec.dataE();
+    outSpec.setHistogram(inSpec.histogram());
     // Copy the spectrum number/detector IDs
     outSpec.copyInfoFrom(inSpec);
 
     // Propagate binmasking, if needed
     if (ws1->hasMaskedBins(i)) {
-      const MatrixWorkspace::MaskList &inputMasks = ws1->maskedBins(i);
-      MatrixWorkspace::MaskList::const_iterator it;
-      for (it = inputMasks.begin(); it != inputMasks.end(); ++it) {
-        output->flagMasked(i, (*it).first, (*it).second);
+      for (const auto &inputMask : ws1->maskedBins(i)) {
+        output->flagMasked(i, inputMask.first, inputMask.second);
       }
     }
 
@@ -80,7 +75,7 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
   // For second loop we use the offset from the first
   const int64_t &nhist2 = ws2->getNumberHistograms();
   const auto &spectrumInfo = ws2->spectrumInfo();
-  PARALLEL_FOR2(ws2, output)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws2, *output))
   for (int64_t j = 0; j < nhist2; ++j) {
     PARALLEL_START_INTERUPT_REGION
     // The spectrum in the output workspace
@@ -88,19 +83,14 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
     // Spectrum in the second workspace
     const auto &inSpec = ws2->getSpectrum(j);
 
-    // Copy X,Y,E
-    outSpec.setX(XValues);
-    outSpec.dataY() = inSpec.dataY();
-    outSpec.dataE() = inSpec.dataE();
+    outSpec.setHistogram(inSpec.histogram());
     // Copy the spectrum number/detector IDs
     outSpec.copyInfoFrom(inSpec);
 
     // Propagate masking, if needed
     if (ws2->hasMaskedBins(j)) {
-      const MatrixWorkspace::MaskList &inputMasks = ws2->maskedBins(j);
-      MatrixWorkspace::MaskList::const_iterator it;
-      for (it = inputMasks.begin(); it != inputMasks.end(); ++it) {
-        output->flagMasked(nhist1 + j, (*it).first, (*it).second);
+      for (const auto &inputMask : ws2->maskedBins(j)) {
+        output->flagMasked(nhist1 + j, inputMask.first, inputMask.second);
       }
     }
     // Propagate spectrum masking
@@ -129,8 +119,8 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
   // Have the minimum # of histograms in the output.
   EventWorkspace_sptr output = boost::dynamic_pointer_cast<EventWorkspace>(
       WorkspaceFactory::Instance().create("EventWorkspace", totalHists,
-                                          event_ws1->readX(0).size(),
-                                          event_ws1->readY(0).size()));
+                                          event_ws1->x(0).size(),
+                                          event_ws1->y(0).size()));
   // Copy over geometry (but not data) from first input workspace
   WorkspaceFactory::Instance().initializeFromParent(event_ws1, output, true);
 
@@ -160,7 +150,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
   }
 
   // Set the same bins for all output pixels
-  output->setAllX(HistogramData::BinEdges(event_ws1->refX(0)));
+  output->setAllX(event_ws1->binEdges(0));
 
   fixSpectrumNumbers(event_ws1, event_ws2, output);
 

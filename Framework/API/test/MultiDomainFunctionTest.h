@@ -81,6 +81,7 @@ public:
       off_diag += value;
   }
   double get(size_t, size_t) override { return 0.0; }
+  void zero() override {}
 };
 }
 

@@ -1,14 +1,14 @@
-#include "MantidKernel/Logger.h"
-#include "MantidMatrixModel.h"
 #include "MantidMatrix.h"
-#include "MantidMatrixFunction.h"
-#include "MantidUI.h"
-#include "../Graph3D.h"
 #include "../ApplicationWindow.h"
+#include "../Graph3D.h"
 #include "../Spectrogram.h"
+#include "MantidKernel/Logger.h"
 #include "MantidMatrixDialog.h"
+#include "MantidMatrixFunction.h"
+#include "MantidMatrixModel.h"
+#include "MantidUI.h"
 #include "Preferences.h"
-#include "../pixmaps.h"
+#include <MantidQtAPI/pixmaps.h>
 
 #include "MantidQtAPI/TSVSerialiser.h"
 
@@ -22,11 +22,10 @@
 
 #include <QScrollBar>
 
-#include <stdlib.h>
 #include <algorithm>
 #include <limits>
+#include <cmath>
 
-#include <boost/math/special_functions/fpclassify.hpp>
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -206,11 +205,6 @@ void MantidMatrix::viewChanged(int index) {
     activeView()->horizontalScrollBar()->setValue(hValue);
     activeView()->verticalScrollBar()->setValue(vValue);
   }
-}
-
-/// Checks if d is not infinity or a NaN
-bool isANumber(volatile const double &d) {
-  return d != std::numeric_limits<double>::infinity() && !boost::math::isnan(d);
 }
 
 void MantidMatrix::setup(Mantid::API::MatrixWorkspace_const_sptr ws, int start,
@@ -590,7 +584,7 @@ QwtDoubleRect MantidMatrix::boundingRect() {
         x_end = X[m_workspace->blocksize()];
       else
         x_end = X[m_workspace->blocksize() - 1];
-      if (!isANumber(x_start) || !isANumber(x_end)) {
+      if (!std::isfinite(x_start) || !std::isfinite(x_end)) {
         x_start = x_end = 0;
       }
       i0++;
@@ -619,13 +613,13 @@ QwtDoubleRect MantidMatrix::boundingRect() {
           const Mantid::MantidVec &X = m_workspace->readX(i);
           if (X.front() < x_start) {
             double xs = X.front();
-            if (!isANumber(xs))
+            if (!std::isfinite(xs))
               continue;
             x_start = xs;
           }
           if (X.back() > x_end) {
             double xe = X.back();
-            if (!isANumber(xe))
+            if (!std::isfinite(xe))
               continue;
             x_end = xe;
           }
@@ -717,7 +711,7 @@ void MantidMatrix::attachMultilayer(MultiLayer *ml) {
 @param type :: The "curve" type.
 @return Pointer to the created graph.
 */
-MultiLayer *MantidMatrix::plotGraph2D(Graph::CurveType type) {
+MultiLayer *MantidMatrix::plotGraph2D(GraphOptions::CurveType type) {
   if (numRows() == 1) {
     QMessageBox::critical(0, "MantidPlot - Error",
                           "Cannot plot a workspace with only one spectrum.");
@@ -740,7 +734,8 @@ MultiLayer *MantidMatrix::plotGraph2D(Graph::CurveType type) {
 }
 
 Spectrogram *MantidMatrix::plotSpectrogram(Graph *plot, ApplicationWindow *app,
-                                           Graph::CurveType type, bool project,
+                                           GraphOptions::CurveType type,
+                                           bool project,
                                            const ProjectData *const prjData) {
   app->setPreferences(plot);
 
@@ -1141,7 +1136,7 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
 
   if (ws) {
 
-    PARALLEL_FOR1(ws)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
     for (int wi = 0; wi < static_cast<int>(ws->getNumberHistograms()); wi++) {
       double local_min, local_max;
       const Mantid::MantidVec &Y = ws->readY(wi);
@@ -1151,7 +1146,7 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
 
       for (size_t i = 0; i < Y.size(); i++) {
         double aux = Y[i];
-        if (fabs(aux) == std::numeric_limits<double>::infinity() || aux != aux)
+        if (!std::isfinite(aux))
           continue;
         if (aux < local_min)
           local_min = aux;

@@ -186,7 +186,7 @@ std::string QDataProcessorWidget::requestNotebookPath() {
   // causes problems on MacOS.
   QString qfilename = API::FileDialogHandler::getSaveFileName(
       this, "Save notebook file", QDir::currentPath(),
-      "IPython Notebook files (*.ipynb);;All files (*.*)",
+      "IPython Notebook files (*.ipynb);;All files (*)",
       new QString("IPython Notebook files (*.ipynb)"));
 
   // There is a Qt bug (QTBUG-27186) which means the filename returned

@@ -1,6 +1,8 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -26,7 +28,6 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 namespace {
-//------------------------------------------------------------------------------------------------
 /** Helper function allowing to typecast sequence of bytes into proper expected
 *type.
 * The input buffer is interpreted as the template type

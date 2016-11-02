@@ -26,7 +26,7 @@ const double epsmch = std::numeric_limits<double>::epsilon();
 ///  A = J' * J
 /// @param J :: The matrix.
 /// @param A :: The result.
-void matmult_inner(const DoubleFortranMatrix &J, DoubleFortranMatrix &A) {
+void matmultInner(const DoubleFortranMatrix &J, DoubleFortranMatrix &A) {
   auto n = J.len2();
   A.allocate(n, n);
   gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, J.gsl(), J.gsl(), 0.0, A.gsl());
@@ -38,7 +38,7 @@ void matmult_inner(const DoubleFortranMatrix &J, DoubleFortranMatrix &A) {
 /// @param J :: The matrix.
 /// @param s1 :: The largest sv.
 /// @param sn :: The smalles sv.
-void get_svd_J(const DoubleFortranMatrix &J, double &s1, double &sn) {
+void getSvdJ(const DoubleFortranMatrix &J, double &s1, double &sn) {
 
   auto n = J.len2();
   DoubleFortranMatrix U = J;
@@ -63,8 +63,8 @@ double norm2(const DoubleFortranVector &v) {
 /// @param J :: The matrix.
 /// @param x :: The vector.
 /// @param Jx :: The result vector.
-void mult_J(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
-            DoubleFortranVector &Jx) {
+void multJ(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
+           DoubleFortranVector &Jx) {
   // dgemv('N',m,n,alpha,J,m,x,1,beta,Jx,1);
   if (Jx.len() != J.len1()) {
     Jx.allocate(J.len1());
@@ -76,8 +76,8 @@ void mult_J(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
 /// @param J :: The matrix.
 /// @param x :: The vector.
 /// @param Jtx :: The result vector.
-void mult_Jt(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
-             DoubleFortranVector &Jtx) {
+void multJt(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
+            DoubleFortranVector &Jtx) {
   // dgemv('T',m,n,alpha,J,m,x,1,beta,Jtx,1)
   if (Jtx.len() != J.len2()) {
     Jtx.allocate(J.len2());
@@ -86,7 +86,7 @@ void mult_Jt(const DoubleFortranMatrix &J, const DoubleFortranVector &x,
 }
 
 /// Dot product of two vectors.
-double dot_product(const DoubleFortranVector &x, const DoubleFortranVector &y) {
+double dotProduct(const DoubleFortranVector &x, const DoubleFortranVector &y) {
   return x.dot(y);
 }
 
@@ -106,14 +106,13 @@ double dot_product(const DoubleFortranVector &x, const DoubleFortranVector &y) {
 /// @param d :: The point where to evaluate the model.
 /// @param options :: The options.
 /// @param w :: The work struct.
-double evaluate_model(const DoubleFortranVector &f,
-                      const DoubleFortranMatrix &J,
-                      const DoubleFortranMatrix &hf,
-                      const DoubleFortranVector &d, const nlls_options &options,
-                      evaluate_model_work &w) {
+double evaluateModel(const DoubleFortranVector &f, const DoubleFortranMatrix &J,
+                     const DoubleFortranMatrix &hf,
+                     const DoubleFortranVector &d, const nlls_options &options,
+                     evaluate_model_work &w) {
 
   // Jd = J*d
-  mult_J(J, d, w.Jd);
+  multJ(J, d, w.Jd);
 
   // First, get the base
   // 0.5 (f^T f + f^T J d + d^T' J ^T J d )
@@ -128,8 +127,8 @@ double evaluate_model(const DoubleFortranVector &f,
   default:
     // these have a dynamic H -- recalculate
     // H = J^T J + HF, HF is (an approx?) to the Hessian
-    mult_J(hf, d, w.Hd);
-    md = w.md_gn + 0.5 * dot_product(d, w.Hd);
+    multJ(hf, d, w.Hd);
+    md = w.md_gn + 0.5 * dotProduct(d, w.Hd);
   }
   return md;
 }
@@ -144,8 +143,8 @@ double evaluate_model(const DoubleFortranVector &f,
 /// @param normfnew :: The 2-norm of the residuals vector at d != 0.
 /// @param md :: The value of the model at the same d as normfnew.
 /// @param options :: The options.
-double calculate_rho(double normf, double normfnew, double md,
-                     const nlls_options &options) {
+double calculateRho(double normf, double normfnew, double md,
+                    const nlls_options &options) {
   UNUSED_ARG(options);
   auto actual_reduction = (0.5 * pow(normf, 2)) - (0.5 * pow(normfnew, 2));
   auto predicted_reduction = ((0.5 * pow(normf, 2)) - md);
@@ -163,22 +162,22 @@ double calculate_rho(double normf, double normfnew, double md,
 /// Update the Hessian matrix without actually evaluating it (quasi-Newton?)
 /// @param hf :: The matrix to update.
 /// @param w :: The work struct.
-void rank_one_update(DoubleFortranMatrix &hf, NLLS_workspace &w) {
+void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w) {
 
-  auto yts = dot_product(w.d, w.y);
+  auto yts = dotProduct(w.d, w.y);
   if (fabs(yts) < sqrt(10 * epsmch)) {
     //! safeguard: skip this update
     return;
   }
 
-  mult_J(hf, w.d, w.Sks); // hfs = S_k * d
+  multJ(hf, w.d, w.Sks); // hfs = S_k * d
 
   w.ysharpSks = w.y_sharp;
   w.ysharpSks -= w.Sks;
 
   // now, let's scale hd (Nocedal and Wright, Section 10.2)
-  auto dSks = fabs(dot_product(w.d, w.Sks));
-  auto alpha = fabs(dot_product(w.d, w.y_sharp)) / dSks;
+  auto dSks = fabs(dotProduct(w.d, w.Sks));
+  auto alpha = fabs(dotProduct(w.d, w.y_sharp)) / dSks;
   alpha = std::min(one, alpha);
   hf *= alpha;
 
@@ -192,21 +191,21 @@ void rank_one_update(DoubleFortranMatrix &hf, NLLS_workspace &w) {
   // call dGER(n,n,alpha,w.y,1,w.ysharpSks,1,hf,n)
   gsl_blas_dger(alpha, w.y.gsl(), w.ysharpSks.gsl(), hf.gsl());
   // hf = hf - ((y# - Sk d)^T d)/((yts)**2)) * y y^T
-  alpha = -dot_product(w.ysharpSks, w.d) / (pow(yts, 2));
+  alpha = -dotProduct(w.ysharpSks, w.d) / (pow(yts, 2));
   // call dGER(n,n,alpha,w.y,1,w.y,1,hf,n)
   gsl_blas_dger(alpha, w.y.gsl(), w.y.gsl(), hf.gsl());
 }
 
 /// Update the trust region radius which is hidden in NLLS_workspace w
 /// (w.Delta).
-/// @param rho :: The rho calculated by calculate_rho(...). It may also be
+/// @param rho :: The rho calculated by calculateRho(...). It may also be
 /// updated.
 /// @param options :: The options.
 /// @param inform :: The information.
 /// @param w :: The work struct containing the radius that is to be updated
 /// (w.Delta).
-void update_trust_region_radius(double &rho, const nlls_options &options,
-                                nlls_inform &inform, NLLS_workspace &w) {
+void updateTrustRegionRadius(double &rho, const nlls_options &options,
+                             nlls_inform &inform, NLLS_workspace &w) {
 
   switch (options.tr_update_strategy) {
   case 1: // default, step-function
@@ -260,9 +259,8 @@ void update_trust_region_radius(double &rho, const nlls_options &options,
 }
 
 /// Test the convergence.
-void test_convergence(double normF, double normJF, double normF0,
-                      double normJF0, const nlls_options &options,
-                      nlls_inform &inform) {
+void testConvergence(double normF, double normJF, double normF0, double normJF0,
+                     const nlls_options &options, nlls_inform &inform) {
 
   if (normF <=
       std::max(options.stop_g_absolute, options.stop_g_relative * normF0)) {
@@ -290,9 +288,9 @@ void test_convergence(double normF, double normJF, double normF0,
 /// @param w :: Stored scaling data.
 /// @param options :: The options.
 /// @param inform :: The information.
-void apply_scaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
-                   DoubleFortranVector &v, apply_scaling_work &w,
-                   const nlls_options &options, nlls_inform &inform) {
+void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
+                  DoubleFortranVector &v, apply_scaling_work &w,
+                  const nlls_options &options, nlls_inform &inform) {
   auto m = J.len1();
   auto n = J.len2();
   if (w.diag.len() != n) {
@@ -359,8 +357,8 @@ void apply_scaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
 /// @param A :: The input matrix.
 /// @param ew :: The output eigenvalues.
 /// @param ev :: The output eigenvectors.
-void all_eig_symm(const DoubleFortranMatrix &A, DoubleFortranVector &ew,
-                  DoubleFortranMatrix &ev) {
+void allEigSymm(const DoubleFortranMatrix &A, DoubleFortranVector &ew,
+                DoubleFortranMatrix &ev) {
   auto M = A;
   M.eigenSystem(ew, ev);
 }
@@ -369,7 +367,7 @@ void all_eig_symm(const DoubleFortranMatrix &A, DoubleFortranVector &ew,
 // If we start using them the method should be un-commented and used here
 //
 // void apply_second_order_info(int n, int m, const DoubleFortranVector &X,
-//                             NLLS_workspace &w, eval_hf_type eval_HF,
+//                             NLLS_workspace &w, eval_hf_type evalHF,
 //                             params_base_type params,
 //                             const nlls_options &options, nlls_inform &inform,
 //                             const DoubleFortranVector &weights) {
@@ -377,11 +375,11 @@ void all_eig_symm(const DoubleFortranMatrix &A, DoubleFortranVector &ew,
 //  if (options.exact_second_derivatives) {
 //    DoubleFortranVector temp = w.f;
 //    temp *= weights;
-//    eval_HF(inform.external_return, n, m, X, temp, w.hf, params);
+//    evalHF(inform.external_return, n, m, X, temp, w.hf, params);
 //    inform.h_eval = inform.h_eval + 1;
 //  } else {
 //    // use the rank-one approximation...
-//    rank_one_update(w.hf, w, n);
+//    rankOneUpdate(w.hf, w, n);
 //  }
 //}
 

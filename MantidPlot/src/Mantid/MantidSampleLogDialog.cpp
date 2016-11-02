@@ -8,7 +8,6 @@
 #include "MantidUI.h"
 
 // Qt
-#include <QHeaderView>
 #include <QRadioButton>
 #include <QFormLayout>
 #include <QGroupBox>
@@ -34,20 +33,9 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
                                              size_t experimentInfoIndex)
     : SampleLogDialogBase(wsname, mui->appWindow(), flags, experimentInfoIndex),
       m_mantidUI(mui) {
-  std::stringstream ss;
-  ss << "MantidPlot - " << wsname.toStdString().c_str() << " sample logs";
-  setWindowTitle(QString::fromStdString(ss.str()));
+  setDialogWindowTitle(wsname);
 
-  QStringList titles;
-  titles << "Name"
-         << "Type"
-         << "Value"
-         << "Units";
-  m_tree->setHeaderLabels(titles);
-  m_tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
-  QHeaderView *hHeader = (QHeaderView *)m_tree->header();
-  hHeader->setResizeMode(2, QHeaderView::Stretch);
-  hHeader->setStretchLastSection(false);
+  setTreeWidgetColumnNames();
 
   QHBoxLayout *uiLayout = new QHBoxLayout;
   uiLayout->addWidget(m_tree);
@@ -82,43 +70,11 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
   }
   statsBox->setLayout(statsBoxLayout);
 
-  // -------------- The Import/Close buttons ------------------------
-  QHBoxLayout *topButtons = new QHBoxLayout;
-  buttonPlot = new QPushButton(tr("&Import selected log"));
-  buttonPlot->setAutoDefault(true);
-  buttonPlot->setToolTip(
-      "Import log file as a table and construct a 1D graph if appropriate");
-  topButtons->addWidget(buttonPlot);
-
-  buttonClose = new QPushButton(tr("Close"));
-  buttonClose->setToolTip("Close dialog");
-  topButtons->addWidget(buttonClose);
-
   QVBoxLayout *hbox = new QVBoxLayout;
-
-  // -------------- The ExperimentInfo selector------------------------
-  boost::shared_ptr<MultipleExperimentInfos> mei =
-      AnalysisDataService::Instance().retrieveWS<MultipleExperimentInfos>(
-          m_wsname);
-  if (mei) {
-    if (mei->getNumExperimentInfo() > 0) {
-      QHBoxLayout *numSelectorLayout = new QHBoxLayout;
-      QLabel *lbl = new QLabel("Experiment Info #");
-      m_spinNumber = new QSpinBox;
-      m_spinNumber->setMinimum(0);
-      m_spinNumber->setMaximum(int(mei->getNumExperimentInfo()) - 1);
-      m_spinNumber->setValue(int(m_experimentInfoIndex));
-      numSelectorLayout->addWidget(lbl);
-      numSelectorLayout->addWidget(m_spinNumber);
-      // Double-click imports a log file
-      connect(m_spinNumber, SIGNAL(valueChanged(int)), this,
-              SLOT(selectExpInfoNumber(int)));
-      hbox->addLayout(numSelectorLayout);
-    }
-  }
+  addImportAndCloseButtonsTo(hbox);
+  addExperimentInfoSelectorTo(hbox);
 
   // Finish laying out the right side
-  hbox->addLayout(topButtons);
   hbox->addWidget(groupBox);
   hbox->addWidget(statsBox);
   hbox->addStretch(1);
@@ -134,25 +90,7 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
 
   resize(750, 400);
 
-  connect(buttonPlot, SIGNAL(clicked()), this, SLOT(importSelectedLogs()));
-  connect(buttonClose, SIGNAL(clicked()), this, SLOT(close()));
-  // want a custom context menu
-  m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint &)), this,
-          SLOT(popupMenu(const QPoint &)));
-
-  // Double-click imports a log file
-  connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this,
-          SLOT(importItem(QTreeWidgetItem *)));
-
-  // Selecting shows the stats of it
-  connect(m_tree, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this,
-          SLOT(showLogStatistics()));
-
-  // Selecting shows the stats of it
-  connect(m_tree,
-          SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)),
-          this, SLOT(showLogStatistics()));
+  setUpTreeWidgetConnections();
 }
 
 MantidSampleLogDialog::~MantidSampleLogDialog() {}

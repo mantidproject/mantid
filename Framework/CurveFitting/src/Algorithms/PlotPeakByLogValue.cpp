@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include <cmath>
 #include <vector>
 #include <fstream>
@@ -26,6 +23,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"

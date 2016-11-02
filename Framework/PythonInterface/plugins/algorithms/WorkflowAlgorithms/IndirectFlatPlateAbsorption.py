@@ -1,38 +1,43 @@
 #pylint: disable=no-init,too-many-instance-attributes,too-many-branches
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress, WorkspaceGroupProperty
-from mantid.kernel import StringMandatoryValidator, Direction, logger, FloatBoundedValidator
+from mantid.kernel import StringMandatoryValidator, Direction, logger, FloatBoundedValidator, MaterialBuilder, StringListValidator
 
 
 class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
 
+    # Sample variables
     _sample_ws = None
     _sample_chemical_formula = None
-    _sample_number_density = None
+    _sample_density_type = None
+    _sample_density = None
     _sample_height = None
     _sample_width = None
     _sample_thickness = None
+
+    # Container variables
     _can_ws_name = None
     _use_can_corrections = None
     _can_chemical_formula = None
-    _can_number_density = None
+    _can_density_type = None
+    _can_density = None
     _can_front_thickness = None
     _can_back_thickness = None
     _can_scale = None
+
     _element_size = None
     _output_ws = None
     _abs_ws = None
     _ass_ws = None
     _acc_ws = None
 
-
     def category(self):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
-
     def summary(self):
         return "Calculates indirect absorption corrections for a flat sample shape."
-
 
     def PyInit(self):
         # Sample
@@ -41,9 +46,11 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
                              validator=StringMandatoryValidator(),
                              doc='Chemical formula for the sample')
-        self.declareProperty(name='SampleNumberDensity', defaultValue=0.1,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Sample number density')
+        self.declareProperty(name='SampleDensityType', defaultValue = 'Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
+                             doc = 'Use of Mass density or Number density')
+        self.declareProperty(name='SampleDensity', defaultValue=0.1,
+                             doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
         self.declareProperty(name='SampleHeight', defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample height')
@@ -62,9 +69,11 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                              doc='Use can corrections in subtraction')
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
                              doc='Chemical formula for the Container')
-        self.declareProperty(name='CanNumberDensity', defaultValue=0.1,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Container number density')
+        self.declareProperty(name='CanDensityType', defaultValue = 'Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
+                             doc = 'Use of Mass density or Number density')
+        self.declareProperty(name='CanDensity', defaultValue=0.1,
+                             doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
         self.declareProperty(name='CanFrontThickness', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Can front thickness')
@@ -88,7 +97,6 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                                                     optional=PropertyMode.Optional),
                              doc='The workspace group to save correction factors')
 
-
     def PyExec(self):
         from IndirectCommon import getEfixed
 
@@ -104,9 +112,13 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
 
         sample_wave_ws = '__sam_wave'
         ConvertUnits(InputWorkspace=self._sample_ws, OutputWorkspace=sample_wave_ws,
-                     Target='Wavelength', EMode='Indirect', EFixed=efixed)
+                     Target='Wavelength', EMode='Indirect', EFixed=efixed, EnableLogging = False)
 
-        SetSampleMaterial(sample_wave_ws, ChemicalFormula=self._sample_chemical_formula, SampleNumberDensity=self._sample_number_density)
+        if self._sample_density_type == 'Mass Density':
+            builder = MaterialBuilder()
+            mat = builder.setFormula(self._sample_chemical_formula).setMassDensity(self._sample_density).build()
+            self._sample_density = mat.numberDensity
+        SetSampleMaterial(sample_wave_ws, ChemicalFormula=self._sample_chemical_formula, SampleNumberDensity=self._sample_density)
 
         prog.report('Calculating sample corrections')
         FlatPlateAbsorption(InputWorkspace=sample_wave_ws,
@@ -124,7 +136,7 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         if self._can_ws_name is not None:
             can_wave_ws = '__can_wave'
             ConvertUnits(InputWorkspace=self._can_ws_name, OutputWorkspace=can_wave_ws,
-                         Target='Wavelength', EMode='Indirect', EFixed=efixed)
+                         Target='Wavelength', EMode='Indirect', EFixed=efixed, EnableLogging = False)
             if self._can_scale != 1.0:
                 logger.information('Scaling container by: ' + str(self._can_scale))
                 Scale(InputWorkspace=can_wave_ws, OutputWorkspace=can_wave_ws, Factor=self._can_scale, Operation='Multiply')
@@ -133,7 +145,12 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                 prog.report('Calculating container corrections')
                 Divide(LHSWorkspace=sample_wave_ws, RHSWorkspace=self._ass_ws, OutputWorkspace=sample_wave_ws)
 
-                SetSampleMaterial(can_wave_ws, ChemicalFormula=self._can_chemical_formula, SampleNumberDensity=self._can_number_density)
+                if self._sample_density_type == 'Mass Density':
+                    builder = MaterialBuilder()
+                    mat = builder.setFormula(self._can_chemical_formula).setMassDensity(self._can_density).build()
+                    self._can_density = mat.numberDensity
+                SetSampleMaterial(can_wave_ws, ChemicalFormula=self._can_chemical_formula, SampleNumberDensity=self._can_density)
+
                 FlatPlateAbsorption(InputWorkspace=can_wave_ws,
                                     OutputWorkspace=self._acc_ws,
                                     SampleHeight=self._sample_height,
@@ -153,16 +170,16 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                 Minus(LHSWorkspace=sample_wave_ws, RHSWorkspace=can_wave_ws, OutputWorkspace=sample_wave_ws)
                 Divide(LHSWorkspace=sample_wave_ws, RHSWorkspace=self._ass_ws, OutputWorkspace=sample_wave_ws)
 
-            DeleteWorkspace(can_wave_ws)
+            DeleteWorkspace(can_wave_ws, EnableLogging = False)
 
         else:
             Divide(LHSWorkspace=sample_wave_ws, RHSWorkspace=self._ass_ws, OutputWorkspace=sample_wave_ws)
 
         ConvertUnits(InputWorkspace=sample_wave_ws, OutputWorkspace=self._output_ws,
-                     Target='DeltaE', EMode='Indirect', EFixed=efixed)
-        DeleteWorkspace(sample_wave_ws)
+                     Target='DeltaE', EMode='Indirect', EFixed=efixed, EnableLogging = False)
+        DeleteWorkspace(sample_wave_ws, EnableLogging = False)
 
-        prog.report('Recording samle logs')
+        prog.report('Recording sample logs')
         sample_log_workspaces = [self._output_ws, self._ass_ws]
         sample_logs = [('sample_shape', 'flatplate'),
                        ('sample_filename', self._sample_ws),
@@ -183,17 +200,17 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         log_values = [item[1] for item in sample_logs]
 
         for ws_name in sample_log_workspaces:
-            AddSampleLogMultiple(Workspace=ws_name, LogNames=log_names, LogValues=log_values)
+            AddSampleLogMultiple(Workspace=ws_name, LogNames=log_names, LogValues=log_values, EnableLogging = False)
 
         self.setProperty('OutputWorkspace', self._output_ws)
 
         # Output the Ass workspace if it is wanted, delete if not
         if self._abs_ws == '':
-            DeleteWorkspace(self._ass_ws)
+            DeleteWorkspace(self._ass_ws, EnableLogging = False)
             if self._can_ws_name is not None and self._use_can_corrections:
-                DeleteWorkspace(self._acc_ws)
+                DeleteWorkspace(self._acc_ws, EnableLogging = False)
         else:
-            GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=self._abs_ws)
+            GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=self._abs_ws, EnableLogging = False)
             self.setProperty('CorrectionsWorkspace', self._abs_ws)
 
     def _setup(self):
@@ -203,7 +220,8 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
 
         self._sample_ws = self.getPropertyValue('SampleWorkspace')
         self._sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
-        self._sample_number_density = self.getProperty('SampleNumberDensity').value
+        self._sample_density_type = self.getPropertyValue('SampleDensityType')
+        self._sample_density = self.getProperty('SampleDensity').value
         self._sample_height = self.getProperty('SampleHeight').value
         self._sample_width = self.getProperty('SampleWidth').value
         self._sample_thickness = self.getProperty('SampleThickness').value
@@ -213,7 +231,8 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
             self._can_ws_name = None
         self._use_can_corrections = self.getProperty('UseCanCorrections').value
         self._can_chemical_formula = self.getPropertyValue('CanChemicalFormula')
-        self._can_number_density = self.getProperty('CanNumberDensity').value
+        self._can_density_type = self.getPropertyValue('CanDensityType')
+        self._can_density = self.getProperty('CanDensity').value
         self._can_front_thickness = self.getProperty('CanFrontThickness').value
         self._can_back_thickness = self.getProperty('CanBackThickness').value
         self._can_scale = self.getProperty('CanScaleFactor').value
@@ -229,7 +248,6 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
             self._ass_ws = self._abs_ws + '_ass'
             self._acc_ws = self._abs_ws + '_acc'
 
-
     def validateInputs(self):
         """
         Validate algorithm options.
@@ -242,7 +260,7 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
             issues['CanChemicalFormula'] = 'Must be set to use can corrections'
 
         if self._use_can_corrections and self._can_ws_name is None:
-            issues['UseCanCorrections'] = 'Must specify a can workspace to use can corections'
+            issues['UseCanCorrections'] = 'Must specify a can workspace to use can corrections'
 
         return issues
 

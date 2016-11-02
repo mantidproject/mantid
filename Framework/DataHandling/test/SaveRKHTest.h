@@ -11,8 +11,8 @@
 #include <Poco/File.h>
 using namespace Mantid::API;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::BinEdgeVariances;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::HistogramData::PointStandardDeviations;
 
 class SaveRKHTest : public CxxTest::TestSuite {
 public:
@@ -219,9 +219,9 @@ public:
 
     // Test values
     TSM_ASSERT_DELTA("Expecting mean of 0 and 1", x, 0.5, 1e-08);
-    TSM_ASSERT_DELTA("Expecting mean of 1 and 1", y, 1.0, 1e-08);
-    TSM_ASSERT_DELTA("Expecting mean of 1 and 1", err, 1.0, 1e-06);
-    TSM_ASSERT_DELTA("Expecting mean of sqrt(0) and sqrt(1)", dx, 0.5, 1e-06);
+    TS_ASSERT_DELTA(y, 1.0, 1e-08);
+    TS_ASSERT_DELTA(err, 1.0, 1e-06);
+    TS_ASSERT_DELTA(dx, 0.1, 1e-06);
 
     // We are at the first data entry now. We step over
     // Three more entries
@@ -240,10 +240,9 @@ public:
 
     // Test values
     TSM_ASSERT_DELTA("Expecting mean of 3 and 4", x, 3.5, 1e-08);
-    TSM_ASSERT_DELTA("Expecting mean of 1 and 1", y, 1.0, 1e-08);
-    TSM_ASSERT_DELTA("Expecting mean of 1 and 1", err, 1.0, 1e-06);
-    TSM_ASSERT_DELTA("Expecting mean of sqrt(3) and sqrt(4)", dx,
-                     (sqrt(3) + sqrt(4)) / 2, 1e-06);
+    TS_ASSERT_DELTA(y, 1.0, 1e-08);
+    TS_ASSERT_DELTA(err, 1.0, 1e-06);
+    TS_ASSERT_DELTA(dx, 3.1, 1e-06);
 
     file.close();
   }
@@ -263,11 +262,10 @@ private:
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(
         "Workspace2D", nSpec, x_length, y_length);
     BinEdges x(x_length, LinearGenerator(0.0, 1.0));
-    BinEdgeVariances dx(x_length);
-    std::iota(dx.begin(), dx.end(), 0.0);
+    PointStandardDeviations dx(y_length, LinearGenerator(0.1, 1.0));
     for (size_t j = 0; j < nSpec; ++j) {
       ws->setBinEdges(j, x);
-      ws->setBinEdgeStandardDeviations(j, dx);
+      ws->setPointStandardDeviations(j, dx);
       ws->dataY(j).assign(y_length, double(1));
       ws->dataE(j).assign(y_length, double(1));
     }

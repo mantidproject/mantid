@@ -169,7 +169,7 @@ void CrossCorrelate::exec() {
   // Initialise the progress reporting object
   out->mutableX(0) = XX;
   m_progress = new Progress(this, 0.0, 1.0, nspecs);
-  PARALLEL_FOR2(inputWS, out)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *out))
   for (int i = 0; i < nspecs; ++i) // Now loop on all spectra
   {
     PARALLEL_START_INTERUPT_REGION

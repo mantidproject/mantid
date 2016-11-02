@@ -14,6 +14,9 @@ namespace Mantid {
 namespace API {
 class ExperimentInfo;
 }
+namespace Geometry {
+class OrientedLattice;
+}
 
 namespace MDAlgorithms {
 
