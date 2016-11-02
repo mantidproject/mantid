@@ -756,7 +756,7 @@ def _merge_keywords_with_lhs(keywords, lhs_args):
     final_keywords.update(keywords)
     return final_keywords
 
-def _gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
+def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
     """Gather the return values and ensure they are in the
        correct order as defined by the output properties and
        return them as a tuple. If their is a single return
@@ -767,6 +767,8 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
        :param algm_obj: An executed algorithm object.
        :param ignore_regex: A list of strings containing regex expressions to match against property names that will be ignored & not returned.
     """
+    if ignore_regex is None: ignore_regex = []
+
     import re
     def ignore_property(name, ignore_regex):
         for regex in ignore_regex:
