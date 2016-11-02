@@ -1,6 +1,7 @@
 #include "MantidAPI/MultiPeriodGroupWorker.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/Strings.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"

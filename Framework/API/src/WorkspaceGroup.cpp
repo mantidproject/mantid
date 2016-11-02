@@ -4,6 +4,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/Strings.h"
 
 namespace Mantid {
 namespace API {
