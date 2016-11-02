@@ -121,7 +121,7 @@ class SliceEventFactory(object):
         if isinstance(workspace, Workspace2D):
             slicer = NullSlicer()
         elif instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or \
-                        instrument is SANSInstrument.SANS2D:
+             instrument is SANSInstrument.SANS2D: # noqa
             slicer = ISISSlicer()
         else:
             slicer = NullSlicer()

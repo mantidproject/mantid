@@ -1,7 +1,5 @@
-from collections import Sequence
 from SANS2.Common.SANSFileInformation import find_full_file_path
 from SANS2.UserFile.UserFileParser import UserFileParser
-from SANS2.UserFile.UserFileCommon import *
 
 
 class UserFileReader(object):

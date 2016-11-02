@@ -87,9 +87,9 @@ def get_output_workspace_name(state, reduction_mode):
         phi_limits_as_string = ""
 
     # 7. Slice limits
-    slice = state.slice
-    start_time = slice.start_time
-    end_time = slice.end_time
+    slice_state = state.slice
+    start_time = slice_state.start_time
+    end_time = slice_state.end_time
     if start_time and end_time:
         start_time_as_string = '_t%.2f' % start_time[0]
         end_time_as_string = '_T%.2f' % end_time[0]
@@ -98,7 +98,7 @@ def get_output_workspace_name(state, reduction_mode):
         end_time_as_string = ""
 
     # Piece it all together
-    output_workspace_name = short_run_number_as_string + period_as_string + detector_name_short + \
-                            dimensionality_as_string + wavelength_range_string + phi_limits_as_string + \
-                            start_time_as_string + end_time_as_string
+    output_workspace_name = (short_run_number_as_string + period_as_string + detector_name_short +
+                             dimensionality_as_string + wavelength_range_string + phi_limits_as_string +
+                             start_time_as_string + end_time_as_string)
     return output_workspace_name

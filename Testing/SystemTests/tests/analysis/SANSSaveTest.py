@@ -3,7 +3,6 @@ import os
 import mantid
 import unittest
 import stresstesting
-import mantid.simpleapi as sapi
 
 from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
 from SANS2.Common.SANSConstants import SANSConstants
@@ -26,8 +25,8 @@ class SANSSaveTest(unittest.TestCase):
 
         crop_name = "CropWorkspace"
         crop_options = {SANSConstants.input_workspace: workspace,
-                         SANSConstants.output_workspace: SANSConstants.dummy,
-                          "EndWorkspaceIndex": 0}
+                        SANSConstants.output_workspace: SANSConstants.dummy,
+                        "EndWorkspaceIndex": 0}
         crop_alg = create_unmanaged_algorithm(crop_name, **crop_options)
         crop_alg.execute()
         workspace = crop_alg.getProperty(SANSConstants.output_workspace).value

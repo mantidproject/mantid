@@ -15,7 +15,7 @@ from SANS2.Common.SANSFunctions import (create_unmanaged_algorithm, get_single_v
 # -------------------------------------------------
 def move_component(workspace, offsets, component_to_move):
     """
-    Move an individial component on a workspace
+    Move an individual component on a workspace
 
     :param workspace: the workspace which the component which is to be moved.
     :param offsets: a Coordinate vs. Value map of offsets.
@@ -461,7 +461,7 @@ class SANSMoveSANS2D(SANSMove):
         # For LOQ we only have to coordinates
         assert len(coordinates) == 2
 
-        _component = component
+        _component = component # noqa
 
         # Move the high angle bank
         self._move_high_angle_bank(move_info, workspace, coordinates)

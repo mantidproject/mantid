@@ -2,8 +2,7 @@
 
 """ Crops a selected component from a SANS."""
 
-from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator,
-                           FloatArrayProperty)
+from mantid.kernel import (Direction, StringListValidator)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 
 from SANS2.Common.SANSConstants import SANSConstants

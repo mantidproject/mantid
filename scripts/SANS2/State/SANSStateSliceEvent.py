@@ -1,7 +1,7 @@
 """ Defines the state of the event slices which should be reduced."""
 
 import json
-from SANS2.State.SANSStateBase import (SANSStateBase, sans_parameters, FloatListParameter, StringParameter)
+from SANS2.State.SANSStateBase import (SANSStateBase, sans_parameters, FloatListParameter)
 
 
 # ------------------------------------------------
@@ -31,8 +31,9 @@ class SANSStateSliceEventISIS(SANSStateSliceEvent, SANSStateBase):
         if self.start_time and self.end_time:
             # The length of start_time and end_time needs to be identical
             if len(self.start_time) != len(self.end_time):
-                is_invalid.update({"start_time": "The length of start_time is {} and the length of end_time is {}, but they "
-                                                "have to be identical".format(len(self.start_time), len(self.end_time))})
+                is_invalid.update({"start_time": "The length of start_time is {} and the length of end_time "
+                                                 "is {}, but they have to be identical".format(len(self.start_time),
+                                                                                               len(self.end_time))})
 
             # Each entry in start_time and end_time must be a float
             if len(self.start_time) == len(self.end_time) and len(self.start_time) > 0:

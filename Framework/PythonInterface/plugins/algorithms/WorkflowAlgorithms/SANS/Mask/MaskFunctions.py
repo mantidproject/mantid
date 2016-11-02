@@ -177,4 +177,3 @@ class SpectraBlock(object):
                 output.extend((max_spectrum - (start_spectrum + x + (y * detector_dimension) - base_spectrum_number)
                                for x in range(0, x_dim)))
         return output
-

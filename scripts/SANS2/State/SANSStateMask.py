@@ -24,13 +24,13 @@ def range_check(start, stop, invalid_dict, start_name, stop_name, general_name=N
     """
     if start is not None and stop is None or start is None and stop is not None:
         invalid_dict.update({general_name: "You have to either specify " + start_name + " AND " +
-                                               stop_name +" or none"})
+                                           stop_name + " or none"})  # noqa
 
     if start is not None and stop is not None:
         # Start and stop need to have the same length
         if len(start) != len(stop):
             invalid_dict.update({general_name: "The entries for start and stop values of the " + general_name +
-                                                     " have differing lengths, namely {0} and {1}".format(start, stop)})
+                                               " have differing lengths, namely {0} and {1}".format(start, stop)})
         # Start values need to be smaller than the stop values
         for a, b in zip(start, stop):
             if a > b:
@@ -178,7 +178,7 @@ class SANSStateMaskISIS(SANSStateBase, SANSStateMask):
         # --------------------
         # Radius mask rule: If there is a minimum, then we also want a maximum
         if self.radius_max is None and self.radius_min is not None or \
-                                self.radius_max is not None and self.radius_min is None:
+           self.radius_max is not None and self.radius_min is None:
             is_invalid.update({"radius mask": "You have to either specify radius_min AND radius_max or none"})
 
         # Radius mask rule: the min radius must be less or equal to the max radius

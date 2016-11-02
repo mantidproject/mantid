@@ -351,7 +351,7 @@ class SANSMoveTest(unittest.TestCase):
         # Act
         # The component input is not relevant for SANS2D's initial move. All detectors are moved
         component = "front-detector"
-        move_alg = self._run_move(state, workspace=workspace, move_type="InitialMove", component=component)
+        self._run_move(state, workspace=workspace, move_type="InitialMove", component=component)
 
         # Assert for initial move for high angle bank
         # These values are on the workspace and in the sample logs
@@ -383,7 +383,7 @@ class SANSMoveTest(unittest.TestCase):
         # Act
         # The component input is not relevant for SANS2D's initial move. All detectors are moved
         component = None
-        move_alg = self._run_move(state, workspace=workspace, move_type="InitialMove", component=component)
+        self._run_move(state, workspace=workspace, move_type="InitialMove", component=component)
 
         # Assert for initial move for low angle bank
         # These values are on the workspace and in the sample logs,

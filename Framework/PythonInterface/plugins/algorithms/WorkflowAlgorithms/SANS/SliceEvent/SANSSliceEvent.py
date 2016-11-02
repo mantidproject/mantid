@@ -76,7 +76,6 @@ class SANSSliceEvent(DataProcessorAlgorithm):
         self.setProperty("SliceEventFactor", slice_factor)
         progress.report("Finished slicing.")
 
-
     def validateInputs(self):
         errors = dict()
         # Check that the input can be converted into the right state object

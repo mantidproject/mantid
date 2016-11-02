@@ -2,8 +2,7 @@
 
 """ SANSReductionCore algorithm runs the sequence of reduction steps which are necessary to reduce a data set."""
 
-from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayProperty,
-                           EnabledWhenProperty, PropertyCriterion, StringListValidator)
+from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 
 from SANS2.Common.SANSConstants import SANSConstants

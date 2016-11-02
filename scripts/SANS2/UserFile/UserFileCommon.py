@@ -32,7 +32,6 @@ monitor_spectrum = namedtuple('monitor_spectrum', 'spectrum, is_trans, interpola
 monitor_file = namedtuple('monitor_file', 'file_path, detector_type')
 
 
-
 # -----------------------------------------------------------------
 # --- User File keywords ------------------------------------------
 # -----------------------------------------------------------------

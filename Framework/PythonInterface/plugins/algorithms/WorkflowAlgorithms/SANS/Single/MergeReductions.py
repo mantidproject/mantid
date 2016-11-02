@@ -99,7 +99,7 @@ class MergeFactory(object):
         instrument = data_info.instrument
 
         if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or \
-                        instrument is SANSInstrument.SANS2D:
+           instrument is SANSInstrument.SANS2D:
             merger = ISIS1DMerger()
         else:
             merger = NullMerger()

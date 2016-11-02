@@ -1,8 +1,7 @@
 """ Defines the state of the event slices which should be reduced."""
 
 import json
-from SANS2.State.SANSStateBase import (SANSStateBase, StringParameter, FloatParameter,
-                                       ClassTypeParameter, sans_parameters)
+from SANS2.State.SANSStateBase import (SANSStateBase, FloatParameter, ClassTypeParameter, sans_parameters)
 from SANS2.Common.SANSEnumerations import (RebinType, RangeStepType)
 
 
@@ -32,14 +31,14 @@ class SANSStateWavelengthISIS(SANSStateWavelength, SANSStateBase):
         is_invalid = dict()
 
         if self.wavelength_low is not None and self.wavelength_high is None or \
-                                self.wavelength_low is None and self.wavelength_high is not None:
+           self.wavelength_low is None and self.wavelength_high is not None:
             is_invalid.update({"wave_length_low and wave_length_high": "Either both are specified or none."})
 
         if self.wavelength_low is not None and self.wavelength_high is not None and \
-                        self.wavelength_low > self.wavelength_high:
+           self.wavelength_low > self.wavelength_high:
             is_invalid.update({"wave_length_low and wave_length_high": "wave_length_low {0} appears to be larger than "
                                                                        "wavelength_high {1}".format(self.wavelength_low,
-                                                                                                    self.wavelength_high)})
+                                                                                                    self.wavelength_high)})  # noqa
 
         if is_invalid:
             raise ValueError("SANSStateWavelength: The provided inputs are illegal. "

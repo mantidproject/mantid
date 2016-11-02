@@ -334,7 +334,7 @@ class NullMasker(Masker):
         super(NullMasker, self).__init__()
 
     def mask_workspace(self, mask_info, workspace_to_mask, detector_type, progress):
-        _ = mask_info
+        _ = mask_info  # noqa
         return workspace_to_mask
 
 
@@ -394,8 +394,8 @@ class MaskFactory(object):
         """
         data_info = state.data
         instrument = data_info.instrument
-        if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or \
-                        instrument is SANSInstrument.SANS2D:
+        if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or\
+                        instrument is SANSInstrument.SANS2D: #noqa
             run_number = data_info.sample_scatter_run_number
             file_name = data_info.sample_scatter
             _, ipf_path = get_instrument_paths_for_sans_file(file_name)

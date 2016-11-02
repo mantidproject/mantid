@@ -4,7 +4,7 @@ from SANS2.Common.SANSConstants import SANSConstants
 from SANS2.Common.SANSEnumerations import (DetectorType, FitModeForMerge)
 from SANS2.Common.SANSFileInformation import find_full_file_path
 from SANS2.UserFile.UserFileReader import UserFileReader
-from SANS2.UserFile.UserFileCommon import *
+from SANS2.UserFile.UserFileCommon import *  # noqa
 
 from SANS2.State.StateBuilder.SANSStateBuilder import get_state_builder
 from SANS2.State.StateBuilder.SANSStateMaskBuilder import get_mask_builder
@@ -145,7 +145,7 @@ class UserFileStateDirectorISIS(object):
 
         return self._state_builder.build()
 
-    def _set_up_move_state(self, user_file_items):
+    def _set_up_move_state(self, user_file_items):  #noqa
         # The elements which can be set up via the user file are:
         # 1. Correction in X, Y, Z
         # 2. Rotation
@@ -382,7 +382,7 @@ class UserFileStateDirectorISIS(object):
             self._reduction_builder.set_merge_range_min(None)
             self._reduction_builder.set_merge_range_max(None)
 
-    def _set_up_mask_state(self, user_file_items):
+    def _set_up_mask_state(self, user_file_items):  # noqa
         # Check for the various possible masks that can be present in the user file
         # This can be:
         # 1. A line mask

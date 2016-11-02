@@ -12,6 +12,7 @@ from SANS2.Common.SANSConstants import SANSConstants
 from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
 from mantid.api import AnalysisDataService
 
+
 # -----------------------------------------------
 # Tests for the SANSBatchReduction algorithm
 # -----------------------------------------------

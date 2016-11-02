@@ -3,7 +3,7 @@
 import copy
 
 from SANS2.State.SANSStateMask import (SANSStateMaskISIS)
-from SANS2.State.StateBuilder.StateBuilderFunctions import (set_detector_names, set_monitor_names)
+from SANS2.State.StateBuilder.StateBuilderFunctions import (set_detector_names)
 from SANS2.Common.SANSEnumerations import SANSInstrument
 from SANS2.Common.SANSFileInformation import (get_instrument_paths_for_sans_file)
 from SANS2.State.StateBuilder.AutomaticSetters import (automatic_setters)

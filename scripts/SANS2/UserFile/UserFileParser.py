@@ -281,7 +281,6 @@ class DetParser(UserFileComponentParser):
         self._y_tilt = "\\s*YTILT\\s*"
         self._y_tilt_pattern = re.compile(start_string + self._y_tilt + space_string + float_number + end_string)
 
-
         self._radius = "\\s*RADIUS\\s*"
         self._radius_pattern = re.compile(start_string + self._radius + space_string + float_number + end_string)
         self._correction_lab = "\\s*CORR\\s*[/]?\\s*REAR\\s*[/]?\\s*"
@@ -513,7 +512,7 @@ class LimitParser(UserFileComponentParser):
         # Note that we have to account for an undocumented potential step size (which is ignored
         self._radius = "\\s*R\\s*"
         self._radius_string = start_string + self._radius + space_string + float_number + space_string + float_number +\
-                              "\\s*(" + float_number + ")?\\s*" + end_string
+                              "\\s*(" + float_number + ")?\\s*" + end_string  # noqa
         self._radius_pattern = re.compile(self._radius_string)
 
     def parse_line(self, line):
@@ -750,10 +749,10 @@ class MaskParser(UserFileComponentParser):
         self._v_plus_h = "\\s*" + self._v + integer_number + "\\s*\\+\\s*" + self._h + integer_number
         self._h_plus_v = "\\s*" + self._h + integer_number + "\\s*\\+\\s*" + self._v + integer_number
 
-        self._vv_plus_hh = self._v + integer_number + self._additional_v + "\\s*\\+\\s*" \
-                           + self._h + integer_number + self._additional_h
-        self._hh_plus_vv = self._h + integer_number + self._additional_h + "\\s*\\+\\s*" \
-                           + self._v + integer_number + self._additional_v
+        self._vv_plus_hh = self._v + integer_number + self._additional_v + "\\s*\\+\\s*" + self._h + integer_number +\
+                           self._additional_h  # noqa
+        self._hh_plus_vv = self._h + integer_number + self._additional_h + "\\s*\\+\\s*" + self._v + integer_number +\
+                           self._additional_v  # noqa
 
         self._blocks = "\\s*(" + self._v_plus_h + "|" + self._h_plus_v + "|" +\
                        self._vv_plus_hh + "|" + self._hh_plus_vv + ")\\s*"
@@ -914,7 +913,7 @@ class MaskParser(UserFileComponentParser):
         spectrum_range_string = re.sub(self._range, " ", spectrum_range_string)
         spectrum_range = extract_int_range(spectrum_range_string)
         return {user_file_mask_spectrum_range_mask: range_entry(start=spectrum_range[0],
-                                                               stop=spectrum_range[1])}
+                                                                stop=spectrum_range[1])}
 
     def _extract_vertical_single_strip_mask(self, line):
         detector_type = DetectorType.Hab if re.search(self._hab, line) is not None else DetectorType.Lab
@@ -1814,7 +1813,6 @@ class MonParser(UserFileComponentParser):
         return does_pattern_match(self._spectrum_pattern, line)
 
     def _extract_length(self, line):
-        output = dict()
         if re.search(self._interpolate, line) is not None:
             interpolate = True
             line = re.sub(self._interpolate, "", line)

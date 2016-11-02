@@ -2,8 +2,6 @@
 
 """ Defines the state of saving."""
 
-from abc import (ABCMeta, abstractmethod)
-
 from SANS2.State.SANSStateBase import (SANSStateBase, BoolParameter, StringParameter,
                                        ClassTypeListParameter, sans_parameters)
 from SANS2.Common.SANSEnumerations import SaveType

@@ -2,8 +2,7 @@
 
 """ SANSMaskWorkspace algorithm applies the masks of SANSMask state to a workspace."""
 
-from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator,
-                           FloatArrayProperty, Property)
+from mantid.kernel import (Direction, StringListValidator, Property)
 from mantid.dataobjects import EventWorkspace
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 from SANS2.Common.SANSConstants import SANSConstants
