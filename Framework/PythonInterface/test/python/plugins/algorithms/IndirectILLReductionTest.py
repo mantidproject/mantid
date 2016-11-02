@@ -154,7 +154,20 @@ class IndirectILLReductionTest(unittest.TestCase):
         self._assertTrue(result[0],"Unmirror 1 should be the sum of 2 and 3")
 
     def _test_unmirror_4_5(self):
-        pass
+        self._args['Run'] = '146007'
+        self._args['UnmirrorOption'] = 4
+
+        vana4 = IndirectILLReduction(**self._args)
+
+        self._args['VanadiumRun'] = '146007'
+        self._args['UnmirrorOption'] = 5
+
+        vana5 = IndirectILLReduction(**self._args)
+
+        result = CompareWorkspaces(vana4.getItem(0), vana5.getItem(0))
+
+        self._assertTrue(result[0], "Unmirror 4 should be the same as 5 if "
+                                    "the same run is also defined as vanadium run")
 
     def _test_unmirror_6_7(self):
         self._args['Run'] = '146007'

@@ -151,7 +151,8 @@ def perform_unmirror(red, left, right, option):
     elif option == 5:
         logger.information('Unmirror 5: Shift the right according to right of the vanadium and sum to left')
         _bin_range = '__bin_range'
-        MatchPeaks(InputWorkspace=right, InputWorkspace2='right_van', OutputWorkspace=left, BinRangeTable=_bin_range)
+        MatchPeaks(InputWorkspace=right, InputWorkspace2='left_van', InputWorkspace3='right_van',
+                   OutputWorkspace=right, BinRangeTable=_bin_range)
         bin_table = mtd[_bin_range].row(0)
         start_bin = bin_table['MinBin']
         end_bin = bin_table['MaxBin']
