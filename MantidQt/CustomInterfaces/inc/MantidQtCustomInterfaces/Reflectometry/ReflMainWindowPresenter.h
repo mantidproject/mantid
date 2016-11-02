@@ -46,8 +46,6 @@ public:
                           IReflSettingsTabPresenter *settingsPresenter);
   /// Destructor
   ~ReflMainWindowPresenter() override;
-  /// Returns global options for 'Plus' algorithm
-  std::string getPlusOptions() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   std::string getTransmissionOptions() const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'

@@ -44,22 +44,10 @@ public:
 
   ReflSettingsTabPresenterTest() { FrameworkManager::Instance(); }
 
-  void testGetPlusOptions() {
-    MockSettingsTabView mockView;
-    ReflSettingsTabPresenter presenter(&mockView);
-
-    EXPECT_CALL(mockView, getPlusOptions()).Times(Exactly(1));
-    presenter.getPlusOptions();
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-  }
-
   void testGetTransmissionOptions() {
     MockSettingsTabView mockView;
     ReflSettingsTabPresenter presenter(&mockView);
 
-    EXPECT_CALL(mockView, getTransmissionOptions())
-        .Times(Exactly(1))
-        .WillOnce(Return(""));
     EXPECT_CALL(mockView, getAnalysisMode())
         .Times(Exactly(1))
         .WillOnce(Return("MultiDetectorAnalysis"));
@@ -108,9 +96,6 @@ public:
     MockSettingsTabView mockView;
     ReflSettingsTabPresenter presenter(&mockView);
 
-    EXPECT_CALL(mockView, getReductionOptions())
-        .Times(Exactly(1))
-        .WillOnce(Return(""));
     EXPECT_CALL(mockView, getAnalysisMode())
         .Times(Exactly(1))
         .WillOnce(Return("MultiDetectorAnalysis"));

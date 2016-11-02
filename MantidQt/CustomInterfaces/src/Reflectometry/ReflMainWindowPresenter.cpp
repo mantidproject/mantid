@@ -26,16 +26,6 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
 */
 ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
 
-/** Returns global options for 'Plus' algorithm
-* @return :: Global options for 'Plus' algorithm
-*/
-std::string ReflMainWindowPresenter::getPlusOptions() const {
-
-  checkPtrValid(m_settingsPresenter);
-
-  return m_settingsPresenter->getPlusOptions();
-}
-
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
 */

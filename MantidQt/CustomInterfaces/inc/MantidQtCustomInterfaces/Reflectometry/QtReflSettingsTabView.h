@@ -44,12 +44,6 @@ public:
   ~QtReflSettingsTabView() override;
   /// Returns the presenter managing this view
   IReflSettingsTabPresenter *getPresenter() const override;
-  /// Returns global options for 'Plus' algorithm
-  std::string getPlusOptions() const override;
-  /// Returns global options for 'CreateTransmissionWorkspaceAuto'
-  std::string getTransmissionOptions() const override;
-  /// Returns global options for 'ReflectometryReductionOneAuto'
-  std::string getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions() const override;
   /// Return selected analysis mode
@@ -92,15 +86,6 @@ public:
   void setExpDefaults(const std::vector<std::string> &) const override;
   void setInstDefaults(const std::vector<double> &) const override;
 
-  /// Creates hints for 'Plus'
-  void
-  createPlusHints(const std::map<std::string, std::string> &hints) override;
-  /// Creates hints for 'CreateTransmissionWorkspaceAuto'
-  void createTransmissionHints(
-      const std::map<std::string, std::string> &hints) override;
-  /// Creates hints for 'ReflectometryReductionOneAuto'
-  void createReductionHints(
-      const std::map<std::string, std::string> &hints) override;
   /// Creates hints for 'Stitch1DMany'
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override;

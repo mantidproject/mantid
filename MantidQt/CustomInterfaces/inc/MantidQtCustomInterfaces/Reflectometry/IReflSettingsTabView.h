@@ -48,17 +48,6 @@ public:
   /// Returns the presenter managing this view
   virtual IReflSettingsTabPresenter *getPresenter() const = 0;
 
-  /// Pre-processing
-  virtual std::string getPlusOptions() const = 0;
-  virtual std::string getTransmissionOptions() const = 0;
-  virtual void
-  createPlusHints(const std::map<std::string, std::string> &hints) = 0;
-  virtual void
-  createTransmissionHints(const std::map<std::string, std::string> &hints) = 0;
-  /// Processing
-  virtual std::string getReductionOptions() const = 0;
-  virtual void
-  createReductionHints(const std::map<std::string, std::string> &hints) = 0;
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
   virtual void

@@ -40,7 +40,6 @@ public:
   /// Accept a main presenter
   virtual void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) = 0;
   /// Pre-processing
-  virtual std::string getPlusOptions() const = 0;
   virtual std::string getTransmissionOptions() const = 0;
   /// Processing
   virtual std::string getReductionOptions() const = 0;

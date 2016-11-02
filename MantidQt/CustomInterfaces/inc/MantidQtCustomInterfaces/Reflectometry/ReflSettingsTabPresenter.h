@@ -48,8 +48,6 @@ public:
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflSettingsTabPresenter::Flag flag) override;
 
-  /// Returns global options for 'Plus' algorithm
-  std::string getPlusOptions() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   std::string getTransmissionOptions() const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
@@ -58,9 +56,6 @@ public:
   std::string getStitchOptions() const override;
 
 private:
-  void createPlusHints();
-  void createTransmissionHints();
-  void createReductionHints();
   void createStitchHints();
   void getExpDefaults();
   void getInstDefaults();

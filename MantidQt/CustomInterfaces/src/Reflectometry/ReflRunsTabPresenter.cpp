@@ -341,7 +341,7 @@ std::map<std::string, std::string>
 ReflRunsTabPresenter::getPreprocessingOptions() const {
 
   std::map<std::string, std::string> options;
-  options["Run(s)"] = m_mainPresenter->getPlusOptions();
+  //options["Run(s)"] = m_mainPresenter->getPlusOptions();
   options["Transmission Run(s)"] = m_mainPresenter->getTransmissionOptions();
 
   return options;

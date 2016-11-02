@@ -64,9 +64,6 @@ public:
 class MockSettingsTabView : public IReflSettingsTabView {
 public:
   // Global options
-  MOCK_CONST_METHOD0(getPlusOptions, std::string());
-  MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
-  MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   MOCK_CONST_METHOD0(getAnalysisMode, std::string());
   MOCK_CONST_METHOD0(getDirectBeam, std::string());
@@ -90,18 +87,6 @@ public:
   MOCK_CONST_METHOD1(setInstDefaults, void(const std::vector<double> &));
 
   // Calls we don't care about
-  void
-  createPlusHints(const std::map<std::string, std::string> &hints) override {
-    UNUSED_ARG(hints);
-  };
-  void createTransmissionHints(
-      const std::map<std::string, std::string> &hints) override {
-    UNUSED_ARG(hints);
-  };
-  void createReductionHints(
-      const std::map<std::string, std::string> &hints) override {
-    UNUSED_ARG(hints);
-  };
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override {
     UNUSED_ARG(hints);
@@ -137,9 +122,6 @@ public:
 
 class MockSettingsTabPresenter : public IReflSettingsTabPresenter {
 public:
-  MOCK_CONST_METHOD0(getPlusOptions, std::string());
-  MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
-  MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   // Other calls we don't care about
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
@@ -153,9 +135,6 @@ public:
 
 class MockMainWindowPresenter : public IReflMainWindowPresenter {
 public:
-  MOCK_CONST_METHOD0(getPlusOptions, std::string());
-  MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
-  MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   MOCK_CONST_METHOD0(getInstrumentName, std::string());
   MOCK_METHOD3(askUserString,
