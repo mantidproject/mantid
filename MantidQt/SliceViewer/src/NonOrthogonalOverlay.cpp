@@ -163,8 +163,11 @@ namespace MantidQt {
             // probably move ApplyskewMatrix out of it
             setSkewMatrix();
             setAxesPoints();
-            calculateTickMarks(10); // tie zoom level to how large
+			
+            calculateTickMarks(20); // tie zoom level to how large
                                     // dataset is, or just zoom level?
+			update();
+
             }
         }
 
@@ -199,8 +202,6 @@ namespace MantidQt {
 			for (int i = 0; i <= tickNum; i++) {
 				axisPointX = (percentageOfLineX * i) + m_xMinVis;
 				axisPointY = (percentageOfLineY * i) + m_yMinVis;
-				std::cout << axisPointX << std::endl;
-				std::cout << axisPointY << std::endl;
 				m_axisXPointVec.push_back(axisPointX);
 				m_xNumbers.push_back(skewMatrixApply(axisPointX, m_yMinVis));
 				m_xNumbers[i].setY(m_yMinVis + yBuffer);
@@ -215,10 +216,8 @@ namespace MantidQt {
 					skewMatrixApply((m_xMinVis), axisPointY));
 				m_yAxisTickEndVec.push_back(
 					skewMatrixApply((m_xMaxVis), axisPointY));
-
-
 			}
-			std::cout << "tst" << std::endl;
+			update();
 		}
 
 				//----------------------------------------------------------------------------------------------
@@ -242,7 +241,6 @@ namespace MantidQt {
 				gridPen.setStyle(Qt::DashLine);
 				
 				
-				
 				for (int i = 0; i < m_axisYPointVec.size(); i++) {
 					painter.setPen(gridPen);
 					painter.drawLine(
@@ -253,7 +251,6 @@ namespace MantidQt {
 					painter.drawText(transform(m_xNumbers[i]), QString::number(m_axisXPointVec[i], 'g', 3));
 					painter.drawText(transform(m_yNumbers[i]), QString::number(m_axisYPointVec[i], 'g', 3));
 				  }
-
 
           }
 
