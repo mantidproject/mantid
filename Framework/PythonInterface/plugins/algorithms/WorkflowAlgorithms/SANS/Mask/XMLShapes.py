@@ -93,7 +93,7 @@ def create_phi_mask(shape_id, centre, phi_min, phi_max, use_mirror=True):
     shape_id = str(shape_id)
     lim_phi_xml = infinite_plane(shape_id + '_plane1', centre, [cos(-phi_min + pi / 2.0),
                                                                 sin(-phi_min + pi / 2.0), 0]) \
-                  + infinite_plane(shape_id + '_plane2', centre, [-cos(-phi_max + pi / 2.0), #noqa
+                  + infinite_plane(shape_id + '_plane2', centre, [-cos(-phi_max + pi / 2.0),  # noqa
                                                                   -sin(-phi_max + pi / 2.0), 0])
 
     if use_mirror:

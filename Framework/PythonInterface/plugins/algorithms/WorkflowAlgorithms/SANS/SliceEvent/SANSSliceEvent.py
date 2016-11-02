@@ -2,8 +2,7 @@
 
 """ SANSSliceEvent takes out a slice from a event workspace."""
 
-from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator,
-                           FloatArrayProperty)
+from mantid.kernel import (Direction, PropertyManagerProperty)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 
 from SANS.SliceEvent.Slicer import (SliceEventFactory, get_scaled_workspace)

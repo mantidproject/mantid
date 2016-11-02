@@ -145,7 +145,7 @@ class UserFileStateDirectorISIS(object):
 
         return self._state_builder.build()
 
-    def _set_up_move_state(self, user_file_items):  #noqa
+    def _set_up_move_state(self, user_file_items):  # noqa
         # The elements which can be set up via the user file are:
         # 1. Correction in X, Y, Z
         # 2. Rotation
