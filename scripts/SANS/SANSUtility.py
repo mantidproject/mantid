@@ -1,9 +1,10 @@
-﻿#pylint: disable=too-many-lines
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 #########################################################
 # This module contains utility functions common to the
 # SANS data reduction scripts
 ########################################################
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup, FileLoaderRegistry
 from mantid.kernel import time_duration, DateAndTime
@@ -11,7 +12,7 @@ import inspect
 import math
 import os
 import re
-import types
+from six import types, iteritems
 import numpy as np
 
 sanslog = Logger("SANS")
@@ -43,7 +44,7 @@ def deprecated(obj):
         if inspect.isfunction(obj):
             obj_desc = "\"%s\" function" % obj.__name__
         else:
-            obj_desc = "\"%s\" class" % obj.im_class.__name__
+            obj_desc = "\"%s\" class" % obj.__self__.__class__.__name__
 
         def print_warning_wrapper(*args, **kwargs):
             sanslog.warning("The %s has been marked as deprecated and may be "
@@ -58,7 +59,7 @@ def deprecated(obj):
     # (by recursion).
     if inspect.isclass(obj):
         for name, fn in inspect.getmembers(obj):
-            if isinstance(fn, types.UnboundMethodType):
+            if isinstance(fn, types.MethodType):
                 setattr(obj, name, deprecated(fn))
         return obj
 
@@ -913,7 +914,7 @@ class PlusWorkspaces(object):
     def _get_workspace(self, workspace):
         if isinstance(workspace, MatrixWorkspace):
             return workspace
-        elif isinstance(workspace, basestring) and mtd.doesExist(workspace):
+        elif isinstance(workspace, str) and mtd.doesExist(workspace):
             return mtd[workspace]
 
 
@@ -978,7 +979,7 @@ class OverlayWorkspaces(object):
     def _get_workspace(self, workspace):
         if isinstance(workspace, MatrixWorkspace):
             return workspace
-        elif isinstance(workspace, basestring) and mtd.doesExist(workspace):
+        elif isinstance(workspace, str) and mtd.doesExist(workspace):
             return mtd[workspace]
 
 #pylint: disable=too-few-public-methods
@@ -1207,10 +1208,10 @@ class CummulativeTimeSeriesPropertyAdder(object):
         values.extend(values_lhs)
         values.extend(values_rhs)
 
-        zipped = zip(times, values)
+        zipped = list(zip(times, values))
         # We sort via the times
         zipped.sort(key = lambda z : z[0])
-        unzipped = zip(*zipped)
+        unzipped = list(zip(*zipped))
         return unzipped[0], unzipped[1]
 
     def _shift_time_series(self, time_series):
@@ -1413,7 +1414,7 @@ def can_load_as_event_workspace(filename):
                 # We only check the first entry in the root
                 # and check for event_eventworkspace in the next level
                 nxs_file =nxs.open(filename, 'r')
-                rootKeys =  nxs_file.getentries().keys()
+                rootKeys =  list(nxs_file.getentries().keys())
                 nxs_file.opengroup(rootKeys[0])
                 nxs_file.opengroup('event_workspace')
                 is_event_workspace = True
@@ -1643,7 +1644,7 @@ class MeasurementTimeFromNexusFileExtractor(object):
                 nxs_file = nxs.open(filename_full, 'r')
             # pylint: disable=bare-except
                 try:
-                    rootKeys =  nxs_file.getentries().keys()
+                    rootKeys =  list(nxs_file.getentries().keys())
                     nxs_file.opengroup(rootKeys[0])
                     is_processed_file = self._check_if_processed_nexus_file(nxs_file)
                     if is_processed_file:
@@ -1765,7 +1766,7 @@ def createUnmanagedAlgorithm(name, **kwargs):
     alg = AlgorithmManager.createUnmanaged(name)
     alg.initialize()
     alg.setChild(True)
-    for key, value in kwargs.iteritems():
+    for key, value in iteritems(kwargs):
         alg.setProperty(key, value)
     return alg
 
@@ -1916,7 +1917,7 @@ def ConvertToSpecList(maskstring, firstspec, dimension, orientation):
                 ydim=abs(upp2-low2)+1
                 speclist += spectrumBlock(firstspec,low2, low,nstrips, dimension, dimension,orientation)+ ','
             else:
-                print "error in mask, ignored:  " + x
+                print("error in mask, ignored:  " + x)
         elif '>' in x:
             pieces = x.split('>')
             low = int(pieces[0].lstrip('hvs'))

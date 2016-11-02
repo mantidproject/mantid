@@ -38,14 +38,14 @@ QwtErrorPlotCurve::QwtErrorPlotCurve(int orientation, Table *t,
                                      const QString &name)
     : DataCurve(t, QString(), name), ErrorBarSettings(), d_master_curve(NULL) {
   type = orientation;
-  setType(Graph::ErrorBars);
+  setType(GraphOptions::ErrorBars);
   setStyle(QwtPlotCurve::UserCurve);
 }
 
 QwtErrorPlotCurve::QwtErrorPlotCurve(Table *t, const QString &name)
     : DataCurve(t, QString(), name), ErrorBarSettings(), d_master_curve(NULL) {
   type = Vertical;
-  setType(Graph::ErrorBars);
+  setType(GraphOptions::ErrorBars);
   setStyle(QwtPlotCurve::UserCurve);
 }
 
@@ -86,9 +86,9 @@ void QwtErrorPlotCurve::drawErrorBars(QPainter *painter,
 
   double d_xOffset = 0.0;
   double d_yOffset = 0.0;
-  if (d_master_curve->type() == Graph::VerticalBars)
+  if (d_master_curve->type() == GraphOptions::VerticalBars)
     d_xOffset = (static_cast<QwtBarCurve *>(d_master_curve))->dataOffset();
-  else if (d_master_curve->type() == Graph::HorizontalBars)
+  else if (d_master_curve->type() == GraphOptions::HorizontalBars)
     d_yOffset = (static_cast<QwtBarCurve *>(d_master_curve))->dataOffset();
 
   int skipPoints = d_master_curve->skipSymbolsCount();

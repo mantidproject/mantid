@@ -161,7 +161,7 @@ void CalculateFlatBackground::exec() {
   // the output
   if (outputWS != inputWS) {
     outputWS = WorkspaceFactory::Instance().create(inputWS);
-    PARALLEL_FOR2(inputWS, outputWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
     for (int i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
       outputWS->setHistogram(i, inputWS->histogram(i));

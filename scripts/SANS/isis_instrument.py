@@ -1,4 +1,5 @@
-﻿# pylint: disable=too-many-lines, invalid-name, bare-except, too-many-instance-attributes
+# pylint: disable=too-many-lines, invalid-name, bare-except, too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
 import math
 import os
 import re
@@ -10,6 +11,7 @@ from mantid.kernel import Logger
 from mantid.kernel import V3D
 import SANSUtility as su
 from math import copysign
+from six import iteritems
 
 sanslog = Logger("SANS")
 
@@ -590,7 +592,7 @@ class ISISInstrument(BaseInstrument):
             return self.DETECTORS['high-angle']
 
     def getDetector(self, requested):
-        for _n, detect in self.DETECTORS.iteritems():
+        for _n, detect in iteritems(self.DETECTORS):
             if detect.isAlias(requested):
                 return detect
         sanslog.notice("getDetector: Detector " + requested + "not found")
@@ -724,7 +726,7 @@ class ISISInstrument(BaseInstrument):
         MoveInstrumentComponent(Workspace=ws, ComponentName='some-sample-holder', Z=self.SAMPLE_Z_CORR,
                                 RelativePosition=True)
 
-        for i in self.monitor_zs.keys():
+        for i in list(self.monitor_zs.keys()):
             # get the current location
             component = self.monitor_names[i]
             ws = mtd[str(ws)]
@@ -915,7 +917,7 @@ class LOQ(ISISInstrument):
 
         if self.has_m4_monitor:
             self.monitor_names.update({self._m4_det_id: self._m4_monitor_name})
-        elif self._m4_det_id in self.monitor_names.keys():
+        elif self._m4_det_id in list(self.monitor_names.keys()):
             del self.monitor_names[self._m4_det_id]
 
     def move_components(self, ws, xbeam, ybeam):

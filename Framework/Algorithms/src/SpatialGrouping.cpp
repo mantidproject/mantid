@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/SpatialGrouping.h"
 
 #include "MantidGeometry/IDetector.h"
@@ -65,7 +62,8 @@ void SpatialGrouping::init() {
 * exec() method implemented from Algorithm base class
 */
 void SpatialGrouping::exec() {
-  inputWorkspace = getProperty("InputWorkspace");
+  API::MatrixWorkspace_const_sptr inputWorkspace =
+      getProperty("InputWorkspace");
   double searchDist = getProperty("SearchDistance");
   int gridSize = getProperty("GridSize");
   size_t nNeighbours = (gridSize * gridSize) - 1;
@@ -81,6 +79,10 @@ void SpatialGrouping::exec() {
   // spectrum numbers!
 
   Mantid::API::Progress prog(this, 0.0, 1.0, m_detectors.size());
+
+  bool ignoreMaskedDetectors = false;
+  m_neighbourInfo = Kernel::make_unique<API::NearestNeighbourInfo>(
+      *inputWorkspace, ignoreMaskedDetectors);
 
   for (auto &detector : m_detectors) {
     prog.report();
@@ -201,7 +203,7 @@ void SpatialGrouping::exec() {
 */
 bool SpatialGrouping::expandNet(
     std::map<specnum_t, Mantid::Kernel::V3D> &nearest, specnum_t spec,
-    const size_t &noNeighbours, const Mantid::Geometry::BoundingBox &bbox) {
+    const size_t noNeighbours, const Mantid::Geometry::BoundingBox &bbox) {
   const size_t incoming = nearest.size();
 
   Mantid::Geometry::IDetector_const_sptr det = m_detectors[spec];
@@ -210,11 +212,11 @@ bool SpatialGrouping::expandNet(
 
   // Special case for first run for this detector
   if (incoming == 0) {
-    potentials = inputWorkspace->getNeighbours(det.get());
+    potentials = m_neighbourInfo->getNeighbours(det.get());
   } else {
     for (auto &nrsIt : nearest) {
       std::map<specnum_t, Mantid::Kernel::V3D> results;
-      results = inputWorkspace->getNeighbours(m_detectors[nrsIt.first].get());
+      results = m_neighbourInfo->getNeighbours(m_detectors[nrsIt.first].get());
       for (auto &result : results) {
         potentials[result.first] = result.second;
       }
@@ -274,7 +276,7 @@ bool SpatialGrouping::expandNet(
 */
 void SpatialGrouping::sortByDistance(
     std::map<detid_t, Mantid::Kernel::V3D> &nearest,
-    const size_t &noNeighbours) {
+    const size_t noNeighbours) {
   std::vector<std::pair<detid_t, Mantid::Kernel::V3D>> order(nearest.begin(),
                                                              nearest.end());
 
@@ -336,7 +338,7 @@ void SpatialGrouping::createBox(
 * @param max :: max value (changed by this function)
 * @param factor :: factor by which to grow the values
 */
-void SpatialGrouping::growBox(double &min, double &max, const double &factor) {
+void SpatialGrouping::growBox(double &min, double &max, const double factor) {
   double rng = max - min;
   double mid = (max + min) / 2.0;
   double halfwid = rng / 2.0;

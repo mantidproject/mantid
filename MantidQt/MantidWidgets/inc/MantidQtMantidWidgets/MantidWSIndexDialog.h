@@ -4,74 +4,89 @@
 //----------------------------------
 // Includes
 //----------------------------------
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include <QCheckBox>
 #include <QDialog>
-#include <QString>
-#include <QList>
 #include <QLabel>
-#include <QVBoxLayout>
 #include <QLineEdit>
-#include <QValidator>
+#include <QList>
 #include <QMap>
+#include <QString>
+#include <QVBoxLayout>
+#include <QValidator>
 
 #include <set>
 
-#include "MantidUI.h"
-
+namespace MantidQt {
+namespace MantidWidgets {
 //----------------------------------
 // Forward declarations
 //----------------------------------
 class IntervalList;
 
 /**
-    The MantidWSIndexDialog class presents users with a dialog so that they may
-    specify which workspace indices / spectra IDs are to be plotted by Mantid.
+        The MantidWSIndexDialog class presents users with a dialog so that
+   they may
+        specify which workspace indices / spectra IDs are to be plotted by
+   Mantid.
 
-    They are prompted with the available range(s) of indices/IDs they can plot.
-    They must enter a range(s) that is(are) enclosed within those ranges.
+        They are prompted with the available range(s) of indices/IDs they
+   can plot.
+        They must enter a range(s) that is(are) enclosed within those
+   ranges.
 
-    "Ranges" are of a format you've probably seen when inputting page numbers to
-    print into a word processing program or similar, i.e. "2, 4-6" to print out
-    pages 2, 4, 5 and 6.
+        "Ranges" are of a format you've probably seen when inputting page
+   numbers to
+        print into a word processing program or similar, i.e. "2, 4-6" to
+   print out
+        pages 2, 4, 5 and 6.
 
-    Ranges are defined by the "Interval" and "IntervalList" classes.
+        Ranges are defined by the "Interval" and "IntervalList" classes.
 
-    The IntervalListValidator class overrides QValidator, and allows Mantid
-    to assertain whether a user has attempted to input a valid range or not.
-    Altering this class will affect the behaviour of what is allowed to be
+        The IntervalListValidator class overrides QValidator, and allows
+   Mantid
+        to assertain whether a user has attempted to input a valid range or
+   not.
+        Altering this class will affect the behaviour of what is allowed to
+   be
    typed,
-    and what inputs allow the "OK" button to be pressed.
+        and what inputs allow the "OK" button to be pressed.
 
-    TODO - perhaps the interval objects are useful elsewhere, in which case
+        TODO - perhaps the interval objects are useful elsewhere, in which
+   case
    those
-           three classes are best in thier own header and source.
+                   three classes are best in thier own header and source.
 
-    @author Peter G Parker, ISIS, RAL
-    @date 2011/10/06
+        @author Peter G Parker, ISIS, RAL
+        @date 2011/10/06
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+        Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak
+   Ridge
    National Laboratory & European Spallation Source
 
-    This file is part of Mantid.
+        This file is part of Mantid.
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+        Mantid is free software; you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation; either version 3 of the License, or
+        (at your option) any later version.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+        Mantid is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+        You should have received a copy of the GNU General Public License
+        along with this program.  If not, see
+   <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
+        File change history is stored at:
+   <https://github.com/mantidproject/mantid>
+        Code Documentation is available at:
+   <http://doxygen.mantidproject.org>
 */
 
-class Interval {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS Interval {
 public:
   /// Constructor - starting and ending at single.
   explicit Interval(int single);
@@ -97,7 +112,8 @@ public:
   /// Returns a set of ints that represents the interval.
   std::set<int> getIntSet() const;
 
-  /// Returns true if this interval completely contains the interval passed to
+  /// Returns true if this interval completely contains the interval passed
+  /// to
   /// it, else false.
   bool contains(const Interval &) const;
 
@@ -114,7 +130,7 @@ private:
   int m_start, m_end;
 };
 
-class IntervalList {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IntervalList {
 public:
   /// Constructor - with empty list.
   IntervalList(void);
@@ -133,7 +149,8 @@ public:
   /// Returns a string that represents the IntervalList, of the form
   /// "0, 2-5, 8, 10-12".  String is cut short by default to 6 intervals.
   std::string toStdString(int numOfIntervals = 6) const;
-  /// Convenience function that returns the contents of toStdString as a QString
+  /// Convenience function that returns the contents of toStdString as a
+  /// QString
   /// object.
   QString toQString(int numOfIntervals = 6) const;
 
@@ -147,24 +164,28 @@ public:
   void addIntervals(QString);
   /// Adds an IntervalList to this IntervalList.
   void addIntervalList(const IntervalList &);
-  /// Replaces the current list with the list belonging to given IntervalList
+  /// Replaces the current list with the list belonging to given
+  /// IntervalList
   /// object.
   void setIntervalList(const IntervalList &);
 
   /// Returns a set of ints that represents the interval.
   std::set<int> getIntSet() const;
 
-  /// Returns true if this interval list completely contains the interval passed
+  /// Returns true if this interval list completely contains the interval
+  /// passed
   /// to it, else false.
   bool contains(const Interval &) const;
-  /// Returns true if this interval list completely contains the interval list
+  /// Returns true if this interval list completely contains the interval
+  /// list
   /// passed to it, else false.
   bool contains(const IntervalList &) const;
 
   /// Returns true if the QString can be parsed into an IntervalList, else
   /// false.
   static bool isParsable(const QString &);
-  /// Returns true if the QString can be parsed into an IntervalList which can
+  /// Returns true if the QString can be parsed into an IntervalList which
+  /// can
   /// then be contained
   /// in the IntervalList given, else false.
   static bool isParsable(const QString &, const IntervalList &);
@@ -181,7 +202,8 @@ private:
   QList<Interval> m_list;
 };
 
-class IntervalListValidator : public QValidator {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IntervalListValidator
+    : public QValidator {
   Q_OBJECT
 
 public:
@@ -197,15 +219,17 @@ private:
   IntervalList m_intervalList;
 };
 
-class MantidWSIndexWidget : public QWidget {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidWSIndexWidget : public QWidget {
   Q_OBJECT
 
-  /** Auxiliar class to wrap the QLine allowing to have a warn to the user for
+  /** Auxiliar class to wrap the QLine allowing to have a warn to the user
+ * for
  *  invalid inputs.
 */
   class QLineEditWithErrorMark : public QWidget {
   public:
-    /// constructor that will join togheter the QLineEdit and an 'invisible' *
+    /// constructor that will join togheter the QLineEdit and an 'invisible'
+    /// *
     /// label.
     explicit QLineEditWithErrorMark(QWidget *parent = 0);
     /// virtual destructor to allow Qt to deallocate all objects
@@ -223,8 +247,8 @@ class MantidWSIndexWidget : public QWidget {
 
 public:
   /**
-    * POD structure to hold all user-selected input
-    */
+        * POD structure to hold all user-selected input
+        */
   struct UserInput {
     QMultiMap<QString, std::set<int>> plots;
     bool waterfall;
@@ -272,11 +296,13 @@ private:
   /// Check to see if all workspaces have a spectrum axis
   void checkForSpectraAxes();
 
-  /// Generates an IntervalList which defines which workspace indices the user
+  /// Generates an IntervalList which defines which workspace indices the
+  /// user
   /// can
   /// ask to plot.
   void generateWsIndexIntervals();
-  /// Generates an IntervalList which defines which spectra IDs the user can ask
+  /// Generates an IntervalList which defines which spectra IDs the user can
+  /// ask
   /// to plot.
   void generateSpectraNumIntervals();
 
@@ -307,13 +333,12 @@ private:
   IntervalList m_wsIndexChoice, m_spectraIdChoice;
 };
 
-class MantidWSIndexDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidWSIndexDialog : public QDialog {
   Q_OBJECT
 
 public:
   /// Constructor - has a list of the names of workspaces to be plotted.
-  MantidWSIndexDialog(MantidUI *parent, Qt::WFlags flags,
-                      QList<QString> wsNames,
+  MantidWSIndexDialog(QWidget *parent, Qt::WFlags flags, QList<QString> wsNames,
                       const bool showWaterfallOption = false,
                       const bool showPlotAll = true,
                       const bool showTiledOption = false);
@@ -339,8 +364,6 @@ private:
   void init();
   /// Initializes the layout of the buttons
   void initButtons();
-  /// A pointer to the parent MantidUI object
-  MantidUI *m_mantidUI;
   /// Do we allow the display of the "Plot all" button
   bool m_plotAll;
   /// Qt objects
@@ -348,5 +371,6 @@ private:
   QHBoxLayout *m_buttonBox;
   QVBoxLayout *m_outer;
 };
-
+}
+}
 #endif // MANTIDWSINDEXDIALOG_H_

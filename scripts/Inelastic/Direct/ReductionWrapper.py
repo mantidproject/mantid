@@ -1,4 +1,5 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid import config,api
 from mantid.kernel import funcinspect
@@ -9,6 +10,7 @@ from Direct.DirectEnergyConversion import DirectEnergyConversion
 import os
 import re
 import time
+from six import iteritems
 try:
     import h5py
     h5py_installed = True
@@ -119,7 +121,7 @@ class ReductionWrapper(object):
         f = open(FileName,'w')
         f.write("standard_vars = {\n")
         str_wrapper = '         '
-        for key,val in self._wvs.standard_vars.iteritems():
+        for key,val in iteritems(self._wvs.standard_vars):
             if isinstance(val,str):
                 row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
             else:
@@ -129,7 +131,7 @@ class ReductionWrapper(object):
         f.write("\n}\nadvanced_vars={\n")
         #print advances variables
         str_wrapper = '         '
-        for key,val in self._wvs.advanced_vars.iteritems():
+        for key,val in iteritems(self._wvs.advanced_vars):
             if isinstance(val,str):
                 row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
             else:

@@ -11,6 +11,8 @@ New features
 Algorithms
 ##########
 
+- A new algorithm :ref:`NMoldyn4Interpolation <algm-NMoldyn4Interpolation>` which interpolates simulated data onto reference OSIRIS data
+
 Data Reduction
 ##############
 
@@ -19,11 +21,17 @@ Data Reduction
 - :ref:`IndirectILLReduction <algm-IndirectILLReduction>` and :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>` algorithms are refactored to accommodate new requirements. This includes now handling of multiple files, unmirroring logic, debug mode, etc.. Changes are incorporated in Indirect Data Reduction GUI.
 - :ref:`IndirectILLFixedWindowScans <algm-IndirectILLFixedWindowScans>` algorithm treats the elastic and inelastic fixed-window scan data from IN16B instrument at ILL.
 
+
 Data Analysis
 #############
 
 - :ref:`TeixeiraWaterSQE <func-TeixeiraWaterSQE>` models translation of water-like molecules (jump diffusion).
 
+
+Improvements
+------------
+
+- When plotting from interfaces the plots now display error bars as standard
 
 Corrections
 ###########
@@ -45,17 +53,19 @@ Transmission
 ~~~~~~~~~~~~
 
 - Option to calculate number density from mass density
-
 - :ref:`IsoRotDiff <func-IsoRotDiff>` models isotropic rotational diffusion of a particle
   tethered to the origin at a constant distance.
 
 
 Improvements
 ------------
+
  - Data saved in an ASCII format using the *EnergyTransfer* interface can be re-loaded into Mantid
+
 
 Bugfixes
 --------
+
 - Clicking 'Save' without creating a res file in *ISISCalibration* no longer causes an error
 
 

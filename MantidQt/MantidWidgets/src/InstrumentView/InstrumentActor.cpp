@@ -638,7 +638,6 @@ void InstrumentActor::resetColors() {
   Instrument_const_sptr inst = getInstrument();
   IMaskWorkspace_sptr mask = getMaskWorkspaceIfExists();
 
-  // PARALLEL_FOR1(m_workspace)
   for (int iwi = 0; iwi < int(m_specIntegrs.size()); iwi++) {
     size_t wi = size_t(iwi);
     double integratedValue = m_specIntegrs[wi];
