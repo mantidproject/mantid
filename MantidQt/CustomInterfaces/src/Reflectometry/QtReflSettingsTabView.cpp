@@ -92,7 +92,11 @@ void QtReflSettingsTabView::setExpDefaults(
   if (pcIndex != -1)
     m_ui.polCorrComboBox->setCurrentIndex(pcIndex);
 
-  m_ui.scaleEdit->setText(QString::fromStdString(defaults[2]));
+  m_ui.CRhoEdit->setText(QString::fromStdString(defaults[2]));
+  m_ui.CAlphaEdit->setText(QString::fromStdString(defaults[3]));
+  m_ui.CApEdit->setText(QString::fromStdString(defaults[4]));
+  m_ui.CPpEdit->setText(QString::fromStdString(defaults[5]));
+  m_ui.scaleEdit->setText(QString::fromStdString(defaults[6]));
 }
 
 /* Sets default values for all instrument settings given a list of default

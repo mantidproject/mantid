@@ -236,10 +236,24 @@ void ReflSettingsTabPresenter::getExpDefaults() {
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
 
+  // The instrument
+  IAlgorithm_sptr loadInst =
+    AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  loadInst->setChild(true);
+  loadInst->setProperty("OutputWorkspace", "outWs");
+  loadInst->setProperty("InstrumentName", m_mainPresenter->getInstrumentName());
+  loadInst->execute();
+  MatrixWorkspace_const_sptr ws = loadInst->getProperty("OutputWorkspace");
+  auto inst = ws->getInstrument();
+
   // Collect all default values and set them in view
   std::vector<std::string> defaults;
   defaults.push_back(alg->getPropertyValue("AnalysisMode"));
   defaults.push_back(alg->getPropertyValue("PolarizationAnalysis"));
+  defaults.push_back(inst->getStringParameter("crho")[0]);
+  defaults.push_back(inst->getStringParameter("calpha")[0]);
+  defaults.push_back(inst->getStringParameter("cAp")[0]);
+  defaults.push_back(inst->getStringParameter("cPp")[0]);
   defaults.push_back(alg->getPropertyValue("ScaleFactor"));
   m_view->setExpDefaults(defaults);
 }
