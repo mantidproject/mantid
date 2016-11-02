@@ -683,7 +683,7 @@ class DummyException {
 public:
   std::string m_validFrom;
   std::string m_validTo;
-  DummyException(std::string validFrom, std::string validTo)
+  DummyException(const std::string &validFrom, const std::string &validTo)
       : m_validFrom(validFrom), m_validTo(validTo) {}
 };
 

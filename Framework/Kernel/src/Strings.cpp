@@ -411,7 +411,7 @@ void writeMCNPX(const std::string &Line, std::ostream &OX) {
  *  @param Ln :: line component to strip
  *  @return vector of components
  */
-std::vector<std::string> StrParts(std::string Ln) {
+std::vector<std::string> StrParts(const std::string &Ln) {
   std::vector<std::string> Out;
   std::string Part;
   while (section(Ln, Part))
