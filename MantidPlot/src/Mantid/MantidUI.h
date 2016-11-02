@@ -233,8 +233,6 @@ public:
   void updateAlgorithms();
   /// updates the workspaces tree
   void updateWorkspaces();
-  /// Show the algorithm dock widget
-  void showAlgWidget(bool on = true);
 
   /// Plot a 1D graph for an integrated mdworkspace
   MultiLayer *plotMDList(const QStringList &wsNames, const int plotAxis,
