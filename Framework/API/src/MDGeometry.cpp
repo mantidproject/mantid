@@ -428,7 +428,7 @@ void MDGeometry::transformDimensions(std::vector<double> &scaling,
  * This checks if the "original workspace" in this object is being deleted,
  * and removes the reference to it to allow it to be destructed properly.
  *
- * @param notice :: notification of workspace deletion
+ * @param deleted :: The deleted workspace
  */
 void MDGeometry::deleteNotificationReceived(
     const boost::shared_ptr<const Workspace> &deleted) {
