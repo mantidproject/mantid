@@ -16,6 +16,7 @@ except AttributeError:
         return s
 
 import mantid
+import mantidqtpython as mqt
 from HfirPDReductionControl import *
 
 #----- default configuration ---------------
@@ -594,13 +595,13 @@ class MainWindow(QtGui.QMainWindow):
         helpapp = QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.BinariesPath) + QtCore.QDir.separator()
         helpapp += 'assistant'
         args = ['-enableRemoteControl', '-collectionFile',self.collectionFile,'-showUrl',self.qtUrl]
-        if os.path.isfile(helpapp):
+        if os.path.isfile(helpapp) and os.path.isfile(self.collectionFile):
             self.assistantProcess.close()
             self.assistantProcess.waitForFinished()
             self.assistantProcess.start(helpapp, args)
             print "Show help from (app) ", helpapp
         else:
-            QtGui.QDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
+            mqt.MantidQt.API.MantidDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
             print "Show help from (url)", QtCore.QUrl(self.externalUrl)
 
         return

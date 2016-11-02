@@ -117,34 +117,24 @@ void Qxy::exec() {
   const size_t numSpec = inputWorkspace->getNumberHistograms();
   const size_t numBins = inputWorkspace->blocksize();
 
-  // the samplePos is often not (0, 0, 0) because the instruments components are
-  // moved to account for the beam centre
-  const V3D samplePos = inputWorkspace->getInstrument()->getSample()->getPos();
-
   // Set the progress bar (1 update for every one percent increase in progress)
   Progress prog(this, 0.05, 1.0, numSpec);
 
   const auto &spectrumInfo = inputWorkspace->spectrumInfo();
 
-  //  PARALLEL_FOR2(inputWorkspace,outputWorkspace)
+  // the samplePos is often not (0, 0, 0) because the instruments components are
+  // moved to account for the beam centre
+  const V3D samplePos = spectrumInfo.samplePosition();
+
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
-    //    PARALLEL_START_INTERUPT_REGION
-    // Get the pixel relating to this spectrum
-    IDetector_const_sptr det;
-    try {
-      det = inputWorkspace->getDetector(i);
-    } catch (Exception::NotFoundError &) {
+    if (!spectrumInfo.hasDetectors(i)) {
       g_log.warning() << "Workspace index " << i
                       << " has no detector assigned to it - discarding\n";
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
+      continue;
     }
     // If no detector found or if it's masked or a monitor, skip onto the next
     // spectrum
-    if (!det || det->isMonitor() || det->isMasked())
+    if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
       continue;
 
     // get the bins that are included inside the RadiusCut/WaveCutcut off, those
@@ -156,14 +146,14 @@ void Qxy::exec() {
       continue;
     }
 
-    V3D detPos = det->getPos() - samplePos;
+    V3D detPos = spectrumInfo.position(i) - samplePos;
 
     // these will be re-calculated if gravity is on but without gravity there is
     // no need
     double phi = atan2(detPos.Y(), detPos.X());
     double a = cos(phi);
     double b = sin(phi);
-    double sinTheta = sin(inputWorkspace->detectorTwoTheta(*det) * 0.5);
+    double sinTheta = sin(spectrumInfo.twoTheta(i) * 0.5);
 
     // Get references to the data for this spectrum
     const auto &X = inputWorkspace->x(i);
@@ -174,7 +164,7 @@ void Qxy::exec() {
 
     // the solid angle of the detector as seen by the sample is used for
     // normalisation later on
-    double angle = det->solidAngle(samplePos);
+    double angle = spectrumInfo.detector(i).solidAngle(samplePos);
 
     // some bins are masked completely or partially, the following vector will
     // contain the fractions
@@ -306,9 +296,7 @@ void Qxy::exec() {
 
     prog.report("Calculating Q");
 
-    //    PARALLEL_END_INTERUPT_REGION
   } // loop over all spectra
-  //  PARALLEL_CHECK_INTERUPT_REGION
 
   // take sqrt of error weight values
   // left to be executed here for computational efficiency

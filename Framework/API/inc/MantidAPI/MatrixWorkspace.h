@@ -1,10 +1,6 @@
 #ifndef MANTID_API_MATRIXWORKSPACE_H_
 #define MANTID_API_MATRIXWORKSPACE_H_
 
-#ifndef Q_MOC_RUN
-#include <boost/scoped_ptr.hpp>
-#endif
-
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -17,8 +13,6 @@ namespace Mantid {
 //----------------------------------------------------------------------------
 namespace Geometry {
 class ParameterMap;
-class INearestNeighbours;
-class INearestNeighboursFactory;
 }
 
 namespace API {
@@ -98,29 +92,6 @@ public:
   double detectorTwoTheta(const Geometry::IDetector &det) const;
   double detectorSignedTwoTheta(const Geometry::IDetector &det) const;
 
-  //@}
-
-  void populateInstrumentParameters() override;
-
-  /** @name Nearest neighbours */
-  /// Build and populate the NearestNeighbours object
-  void buildNearestNeighbours(const bool ignoreMaskedDetectors = false) const;
-  /// Causes the nearest neighbours map to be rebuilt
-  void rebuildNearestNeighbours();
-  /// Query the NearestNeighbours object for a detector
-  std::map<specnum_t, Mantid::Kernel::V3D>
-  getNeighbours(const Geometry::IDetector *comp, const double radius = 0.0,
-                const bool ignoreMaskedDetectors = false) const;
-  /// Query the NearestNeighbours object for a given spectrum number using a
-  /// search radius
-  std::map<specnum_t, Mantid::Kernel::V3D>
-  getNeighbours(specnum_t spec, const double radius,
-                const bool ignoreMaskedDetectors = false) const;
-  /// Query the NearestNeighbours object for a given spectrum number using the
-  /// direct number of nearest neighbours
-  std::map<specnum_t, Mantid::Kernel::V3D>
-  getNeighboursExact(specnum_t spec, const int nNeighbours,
-                     const bool ignoreMaskedDetectors = false) const;
   //@}
 
   virtual void updateSpectraUsing(const SpectrumDetectorMapping &map);
@@ -562,8 +533,7 @@ protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MatrixWorkspace(const MatrixWorkspace &other);
 
-  MatrixWorkspace(
-      Mantid::Geometry::INearestNeighboursFactory *nnFactory = nullptr);
+  MatrixWorkspace();
 
   /// Initialises the workspace. Sets the size and lengths of the arrays. Must
   /// be overloaded.
@@ -590,7 +560,7 @@ private:
                 const MantidImage &image, size_t start, bool parallelExecution);
 
   /// Has this workspace been initialised?
-  bool m_isInitialized;
+  bool m_isInitialized{false};
 
   /// The unit for the data values (e.g. Counts)
   std::string m_YUnit;
@@ -599,9 +569,9 @@ private:
 
   /// Flag indicating whether the m_isCommonBinsFlag has been set. False by
   /// default
-  mutable bool m_isCommonBinsFlagSet;
+  mutable bool m_isCommonBinsFlagSet{false};
   /// Flag indicating whether the data has common bins. False by default
-  mutable bool m_isCommonBinsFlag;
+  mutable bool m_isCommonBinsFlag{false};
 
   /// The set of masked bins in a map keyed on workspace index
   std::map<int64_t, MaskList> m_masks;
@@ -613,14 +583,6 @@ private:
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfo;
 
 protected:
-  /// Scoped pointer to NearestNeighbours factory
-  boost::scoped_ptr<Mantid::Geometry::INearestNeighboursFactory>
-      m_nearestNeighboursFactory;
-
-  /// Shared pointer to NearestNeighbours object
-  mutable boost::shared_ptr<Mantid::Geometry::INearestNeighbours>
-      m_nearestNeighbours;
-
   /// Getter for the dimension id based on the axis.
   std::string getDimensionIdFromAxis(const int &axisIndex) const;
 };

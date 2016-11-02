@@ -5,9 +5,6 @@
 #include "MantidQtCustomInterfaces/Indirect/ResNorm.h"
 #include "MantidQtCustomInterfaces/Indirect/Stretch.h"
 
-#include <QDesktopServices>
-#include <QUrl>
-
 // Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt {
 namespace CustomInterfaces {

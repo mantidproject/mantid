@@ -89,7 +89,7 @@ void ApplyTransmissionCorrection::exec() {
   const auto &spectrumInfo = inputWS->spectrumInfo();
 
   // Loop through the spectra and apply correction
-  PARALLEL_FOR2(inputWS, corrWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *corrWS))
   for (int i = 0; i < numHists; i++) {
     PARALLEL_START_INTERUPT_REGION
 

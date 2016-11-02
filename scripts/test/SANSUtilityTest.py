@@ -1,4 +1,5 @@
-﻿
+
+from __future__ import (absolute_import, division, print_function)
 import unittest
 # Need to import mantid before we import SANSUtility
 import mantid
@@ -168,15 +169,15 @@ class SANSUtilityTest(unittest.TestCase):
         # workspace in the ADS, and NOTHING else?
         self.assertTrue("result" in mtd)
         self.assertTrue("ws" in mtd)
-        self.assertEquals(2, len(mtd))
+        self.assertEqual(2, len(mtd))
 
-        self.assertEquals(result.getNumberHistograms(), len(det_ids))
-        self.assertEquals(result.getDetector(0).getID(), 100)
-        self.assertEquals(result.getDetector(1).getID(), 102)
-        self.assertEquals(result.getDetector(2).getID(), 104)
+        self.assertEqual(result.getNumberHistograms(), len(det_ids))
+        self.assertEqual(result.getDetector(0).getID(), 100)
+        self.assertEqual(result.getDetector(1).getID(), 102)
+        self.assertEqual(result.getDetector(2).getID(), 104)
 
         ws = CreateSampleWorkspace("Histogram", "Multiple Peaks")
-        det_ids = range(100, 299, 2)
+        det_ids = list(range(100, 299, 2))
         result = su.extract_spectra(ws, det_ids, "result")
 
     def test_get_masked_det_ids(self):
@@ -189,13 +190,13 @@ class SANSUtilityTest(unittest.TestCase):
         self.assertTrue(100 in masked_det_ids)
         self.assertTrue(102 in masked_det_ids)
         self.assertTrue(104 in masked_det_ids)
-        self.assertEquals(len(masked_det_ids), 3)
+        self.assertEqual(len(masked_det_ids), 3)
 
     def test_merge_to_ranges(self):
-        self.assertEquals([[1, 4]],                 su._merge_to_ranges([1, 2, 3, 4]))
-        self.assertEquals([[1, 3], [5, 7]],         su._merge_to_ranges([1, 2, 3, 5, 6, 7]))
-        self.assertEquals([[1, 3], [5, 5], [7, 9]], su._merge_to_ranges([1, 2, 3, 5, 7, 8, 9]))
-        self.assertEquals([[1, 1]],                 su._merge_to_ranges([1]))
+        self.assertEqual([[1, 4]],                 su._merge_to_ranges([1, 2, 3, 4]))
+        self.assertEqual([[1, 3], [5, 7]],         su._merge_to_ranges([1, 2, 3, 5, 6, 7]))
+        self.assertEqual([[1, 3], [5, 5], [7, 9]], su._merge_to_ranges([1, 2, 3, 5, 7, 8, 9]))
+        self.assertEqual([[1, 1]],                 su._merge_to_ranges([1]))
 
 class TestBundleAddedEventDataFilesToGroupWorkspaceFile(unittest.TestCase):
     def _prepare_workspaces(self, names):
@@ -668,7 +669,7 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
         message, complete = su.create_zero_error_free_workspace(input_workspace_name = ws_name, output_workspace_name = ws_clone_name)
         # Assert
         message.strip()
-        print message
+        print(message)
        # self.assertTrue(not message)
         #self.assertTrue(complete)
         self.assertTrue(mtd[ws_name] != mtd[ws_clone_name])
@@ -1231,7 +1232,7 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
             self.assertTrue(larger_or_equal)
 
     def _check_that_values_of_series_are_the_same(self, series1, series2):
-        zipped = zip(series1, series2)
+        zipped = list(zip(series1, series2))
         areEqual = True
         for e1, e2 in zipped:
             isEqual = e1 == e2

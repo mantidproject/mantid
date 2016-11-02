@@ -48,7 +48,7 @@ BoxCurve::BoxCurve(Table *t, const QString &name, int startRow, int endRow)
   w_coeff = 95.0;
   b_width = 80;
 
-  setType(Graph::Box);
+  setType(GraphOptions::Box);
   setStyle(QwtPlotCurve::UserCurve);
 }
 

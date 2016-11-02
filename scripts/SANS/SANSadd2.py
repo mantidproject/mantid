@@ -1,4 +1,5 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 import os
 from mantid.simpleapi import *
 from mantid.kernel import Logger
@@ -62,7 +63,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
             is_not_allowed_instrument = inst.upper() != 'SANS2D' and inst.upper() != 'LARMOR'
             if is_not_allowed_instrument and isFirstDataSetEvent:
                 error = 'Adding event data not supported for ' + inst + ' for now'
-                print error
+                print(error)
                 logger.notice(error)
                 for workspaceName in (ADD_FILES_SUM_TEMPORARY,ADD_FILES_SUM_TEMPORARY_MONITORS):
                     if workspaceName in mtd:
@@ -76,7 +77,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
 
                 if isDataSetEvent != isFirstDataSetEvent:
                     error = 'Datasets added must be either ALL histogram data or ALL event data'
-                    print error
+                    print(error)
                     logger.notice(error)
                     for workspaceName in (ADD_FILES_SUM_TEMPORARY, ADD_FILES_SUM_TEMPORARY_MONITORS,
                                           ADD_FILES_NEW_TEMPORARY, ADD_FILES_NEW_TEMPORARY_MONITORS):
@@ -99,14 +100,14 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
                 counter_run +=1
         except ValueError as e:
             error = 'Error opening file ' + userEntry+': ' + str(e)
-            print error
+            print(error)
             logger.notice(error)
             if ADD_FILES_SUM_TEMPORARY in mtd :
                 DeleteWorkspace(ADD_FILES_SUM_TEMPORARY)
             return ""
         except Exception as e:
             error = 'Error finding files: ' + str(e)
-            print error
+            print(error)
             logger.notice(error)
             for workspaceName in (ADD_FILES_SUM_TEMPORARY, ADD_FILES_NEW_TEMPORARY):
                 if workspaceName in mtd:
@@ -372,7 +373,7 @@ def _copyLog(lastPath, logFile, pathout):
             logger.notice("Could not find log file %s" % logFile)
     except Exception:
         error = 'Error copying log file ' + logFile + ' to directory ' + pathout+'\n'
-        print error
+        print(error)
         logger.notice(error)
 
 if __name__ == '__main__':

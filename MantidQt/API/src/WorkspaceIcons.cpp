@@ -1,9 +1,11 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "WorkspaceIcons.h"
-#include "../pixmaps.h"
+#include "MantidQtAPI/WorkspaceIcons.h"
+#include "MantidQtAPI/pixmaps.h"
 
+namespace MantidQt {
+namespace API {
 //-----------------------------------------------------------------------------
 // Public member functions
 //-----------------------------------------------------------------------------
@@ -52,4 +54,6 @@ void WorkspaceIcons::initInternalLookup() {
   // MD
   m_idToPixmapName["MDHistoWorkspace"] = "mantid_mdws_xpm";
   m_idToPixmapName["MDEventWorkspace"] = "mantid_mdws_xpm";
+}
+}
 }

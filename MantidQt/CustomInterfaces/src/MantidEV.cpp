@@ -2,15 +2,17 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QSettings>
-#include <QDesktopServices>
 #include <QDesktopWidget>
 #include <Poco/Path.h>
 
 #include "MantidQtCustomInterfaces/MantidEV.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
 
 namespace MantidQt {
+using API::MantidDesktopServices;
+
 namespace CustomInterfaces {
 
 // Register the class with the factory
@@ -510,7 +512,7 @@ void MantidEV::setDefaultState_slot() {
  * Go to MantidEV web page when help menu item is chosen
  */
 void MantidEV::help_slot() {
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl("http://www.mantidproject.org/"
            "SCD_Event_Data_Reduction_Interface_(MantidEV)"));
 }
