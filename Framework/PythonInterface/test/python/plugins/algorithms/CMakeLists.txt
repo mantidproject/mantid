@@ -72,6 +72,7 @@ set ( TEST_PY_FILES
   MolDynTest.py
   MSDFitTest.py
   MuscatSofQWTest.py
+  NMoldyn4InterpolationTest.py
   NormaliseSpectraTest.py
   OSIRISDiffractionReductionTest.py
   ResNorm2Test.py

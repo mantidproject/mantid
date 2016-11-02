@@ -71,22 +71,6 @@ def get_masked_pixels(nx_low, nx_high, ny_low, ny_high, workspace):
     return masked_pts
 
 
-def _get_pixel_info(workspace):
-    """
-        Get the pixel size and number of pixels from the workspace
-        @param workspace: workspace to extract the pixel information from
-    """
-    ## Number of detector pixels in X
-    nx_pixels = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
-    ## Number of detector pixels in Y
-    ny_pixels = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
-    ## Pixel size in mm
-    pixel_size_x = workspace.getInstrument().getNumberParameter("x-pixel-size")[0]
-    pixel_size_y = workspace.getInstrument().getNumberParameter("y-pixel-size")[0]
-
-    return nx_pixels, ny_pixels, pixel_size_x, pixel_size_y
-
-
 def get_detector_from_pixel(pixel_list, workspace):
     """
         Returns a list of detector IDs from a list of [x,y] pixels,

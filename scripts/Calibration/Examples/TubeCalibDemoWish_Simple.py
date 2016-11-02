@@ -47,7 +47,7 @@ def CalibrateWish( RunNumber, PanelNumber):
                                                  rangeList = range(76,152),
                                                  calibTable=calibrationTable,#give the calibration table to append data
                                                  outputPeak = peakTable#give peak table to append data
-                                                )
+                                                 )
 
     print "Got calibration (new positions of detectors)"
 

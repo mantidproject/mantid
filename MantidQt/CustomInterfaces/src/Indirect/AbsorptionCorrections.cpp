@@ -47,8 +47,10 @@ void AbsorptionCorrections::run() {
   QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
   absCorAlgo->setProperty("SampleWorkspace", sampleWsName.toStdString());
 
-  double sampleNumberDensity = m_uiForm.spSampleNumberDensity->value();
-  absCorAlgo->setProperty("SampleNumberDensity", sampleNumberDensity);
+  absCorAlgo->setProperty(
+      "SampleDensityType",
+      m_uiForm.cbSampleDensity->currentText().toStdString());
+  absCorAlgo->setProperty("SampleDensity", m_uiForm.spSampleDensity->value());
 
   QString sampleChemicalFormula = m_uiForm.leSampleChemicalFormula->text();
   absCorAlgo->setProperty("SampleChemicalFormula",
@@ -94,8 +96,10 @@ void AbsorptionCorrections::run() {
     absCorAlgo->setProperty("UseCanCorrections", useCanCorrections);
 
     if (useCanCorrections) {
-      double canNumberDensity = m_uiForm.spCanNumberDensity->value();
-      absCorAlgo->setProperty("CanNumberDensity", canNumberDensity);
+
+      absCorAlgo->setProperty(
+          "CanDensityType", m_uiForm.cbCanDensity->currentText().toStdString());
+      absCorAlgo->setProperty("CanDensity", m_uiForm.spCanDensity->value());
 
       QString canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
       absCorAlgo->setProperty("CanChemicalFormula",
@@ -206,7 +210,7 @@ bool AbsorptionCorrections::validate() {
 
   if (uiv.checkFieldIsNotEmpty("Sample Chemical Formula",
                                m_uiForm.leSampleChemicalFormula))
-    uiv.checkFieldIsValid("Sample Chamical Formula",
+    uiv.checkFieldIsValid("Sample Chemical Formula",
                           m_uiForm.leSampleChemicalFormula);
   const auto sampleChem =
       m_uiForm.leSampleChemicalFormula->text().toStdString();
@@ -231,9 +235,9 @@ bool AbsorptionCorrections::validate() {
 
     bool useCanCorrections = m_uiForm.ckUseCanCorrections->isChecked();
     if (useCanCorrections) {
-      if (uiv.checkFieldIsNotEmpty("Container Chamical Formula",
+      if (uiv.checkFieldIsNotEmpty("Container Chemical Formula",
                                    m_uiForm.leCanChemicalFormula))
-        uiv.checkFieldIsValid("Container Chamical Formula",
+        uiv.checkFieldIsValid("Container Chemical Formula",
                               m_uiForm.leCanChemicalFormula);
     }
   }

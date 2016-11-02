@@ -214,7 +214,7 @@ void ConvertAxisByFormula::exec() {
           outputWs->getNumberHistograms()); // cast to make openmp happy
       auto xVals = outputWs->refX(0);
       Progress prog(this, 0.6, 1.0, numberOfSpectra_i);
-      PARALLEL_FOR1(outputWs)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*outputWs))
       for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
         PARALLEL_START_INTERUPT_REGION
         outputWs->setX(j, xVals);

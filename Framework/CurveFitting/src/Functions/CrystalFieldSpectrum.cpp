@@ -1,11 +1,16 @@
 #include "MantidCurveFitting/Functions/CrystalFieldSpectrum.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
+#include "MantidCurveFitting/Functions/CrystalFieldPeakUtils.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+
+#include <algorithm>
+#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -21,9 +26,13 @@ DECLARE_FUNCTION(CrystalFieldSpectrum)
 
 /// Constructor
 CrystalFieldSpectrum::CrystalFieldSpectrum()
-    : FunctionGenerator(IFunction_sptr(new CrystalFieldPeaks)) {
+    : FunctionGenerator(IFunction_sptr(new CrystalFieldPeaks)), m_nPeaks(0) {
   declareAttribute("PeakShape", Attribute("Lorentzian"));
   declareAttribute("FWHM", Attribute(0.0));
+  std::vector<double> vec;
+  declareAttribute("FWHMX", Attribute(vec));
+  declareAttribute("FWHMY", Attribute(vec));
+  declareAttribute("FWHMVariation", Attribute(0.1));
 }
 
 /// Uses m_crystalField to calculate peak centres and intensities
@@ -46,28 +55,14 @@ void CrystalFieldSpectrum::buildTargetFunction() const {
         "CrystalFieldPeaks returned odd number of values.");
   }
 
+  auto xVec = IFunction::getAttribute("FWHMX").asVector();
+  auto yVec = IFunction::getAttribute("FWHMY").asVector();
+  auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
+
   auto peakShape = IFunction::getAttribute("PeakShape").asString();
-  auto fwhm = IFunction::getAttribute("FWHM").asDouble();
-  auto nPeaks = values.size() / 2;
-  size_t maxNPeaks = nPeaks + nPeaks / 2 + 1;
-  for (size_t i = 0; i < maxNPeaks; ++i) {
-    auto fun = API::FunctionFactory::Instance().createFunction(peakShape);
-    auto peak = boost::dynamic_pointer_cast<API::IPeakFunction>(fun);
-    if (!peak) {
-      throw std::runtime_error("A peak function is expected.");
-    }
-    if (i < nPeaks) {
-      peak->fixCentre();
-      peak->fixIntensity();
-      peak->setCentre(values.getCalculated(i));
-      peak->setIntensity(values.getCalculated(i + nPeaks));
-    } else {
-      peak->setHeight(0.0);
-      peak->fixAll();
-    }
-    peak->setFwhm(fwhm);
-    spectrum->addFunction(peak);
-  }
+  auto defaultFWHM = IFunction::getAttribute("FWHM").asDouble();
+  m_nPeaks = CrystalFieldUtils::buildSpectrumFunction(
+      *spectrum, peakShape, values, xVec, yVec, fwhmVariation, defaultFWHM);
 }
 
 /// Update m_spectrum function.
@@ -77,40 +72,15 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
     return;
   }
   m_dirty = false;
+  auto xVec = IFunction::getAttribute("FWHMX").asVector();
+  auto yVec = IFunction::getAttribute("FWHMY").asVector();
+  auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
   FunctionDomainGeneral domain;
   FunctionValues values;
   m_source->function(domain, values);
-  auto nPeaks = values.size() / 2;
-
-  size_t maxNPeaks = nPeaks + nPeaks / 2 + 1;
-  auto spectrum = dynamic_cast<CompositeFunction *>(m_target.get());
-  if (!spectrum) {
-    buildTargetFunction();
-    return;
-  }
-  if (spectrum->nFunctions() != maxNPeaks) {
-    maxNPeaks = spectrum->nFunctions();
-    if (nPeaks > maxNPeaks) {
-      nPeaks = maxNPeaks;
-    }
-  }
-
-  for (size_t i = 0; i < maxNPeaks; ++i) {
-    auto fun = spectrum->getFunction(i);
-    auto peak = boost::dynamic_pointer_cast<API::IPeakFunction>(fun);
-    if (!peak) {
-      throw std::runtime_error("A peak function is expected.");
-    }
-    if (i < nPeaks) {
-      auto centre = values.getCalculated(i);
-      auto intensity = values.getCalculated(i + nPeaks);
-      peak->setCentre(centre);
-      peak->setIntensity(intensity);
-    } else {
-      peak->setHeight(0.0);
-      peak->fixAll();
-    }
-  }
+  auto &spectrum = dynamic_cast<CompositeFunction &>(*m_target);
+  m_nPeaks = CrystalFieldUtils::updateSpectrumFunction(
+      spectrum, values, m_nPeaks, 0, xVec, yVec, fwhmVariation);
 }
 
 } // namespace Functions

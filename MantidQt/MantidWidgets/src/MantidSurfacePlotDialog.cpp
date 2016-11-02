@@ -1,13 +1,17 @@
-#include "MantidSurfacePlotDialog.h"
-#include "MantidAPI/IMDWorkspace.h"
+#include "MantidQtMantidWidgets/MantidSurfacePlotDialog.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidQtMantidWidgets/MantidDisplayBase.h"
 #include "MantidAPI/Run.h"
 #include <QMessageBox>
+#include <QPushButton>
 
 using Mantid::API::IMDWorkspace;
 using Mantid::API::IMDWorkspace_sptr;
 using Mantid::API::ExperimentInfo;
 
+namespace MantidQt {
+namespace MantidWidgets {
 /// The string "Workspace index"
 const QString MantidSurfacePlotDialog::WORKSPACE_INDEX = "Workspace index";
 
@@ -24,11 +28,11 @@ const int MantidSurfacePlotDialog::MINIMUM_WIDTH = 275;
  * @param wsNames :: the names of the workspaces to be plotted
  * @param plotType :: Type of plot (for window title)
  */
-MantidSurfacePlotDialog::MantidSurfacePlotDialog(MantidUI *mui,
+MantidSurfacePlotDialog::MantidSurfacePlotDialog(MantidDisplayBase *mui,
                                                  Qt::WFlags flags,
                                                  QList<QString> wsNames,
                                                  const QString &plotType)
-    : QDialog(mui->appWindow(), flags), m_widget(this, flags, wsNames, false),
+    : QDialog(mui->getParent(), flags), m_widget(this, flags, wsNames, false),
       m_mantidUI(mui), m_wsNames(wsNames), m_accepted(false) {
   // Set up UI.
   init(plotType);
@@ -263,4 +267,6 @@ void MantidSurfacePlotDialog::showPlotOptionsError(const QString &message) {
     errorMessage.setIcon(QMessageBox::Critical);
     errorMessage.exec();
   }
+}
+}
 }

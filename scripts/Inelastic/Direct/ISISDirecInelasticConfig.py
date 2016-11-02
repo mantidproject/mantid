@@ -1,4 +1,5 @@
-﻿#!/usr/bin/python
+#!/usr/bin/python
+from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 import platform
@@ -8,6 +9,7 @@ import copy
 from datetime import date
 import time
 from xml.dom import minidom
+from six import iteritems
 
 # the list of instruments this configuration is applicable to
 INELASTIC_INSTRUMENTS = ['MAPS', 'LET', 'MERLIN', 'MARI', 'HET']
@@ -85,7 +87,7 @@ class UserProperties(object):
         self._rb_dirs[recent_date_id] = rb_folder_or_id
         if self._recent_dateID:
             max_date = self._start_dates[self._recent_dateID]
-            for date_key, a_date in self._start_dates.iteritems():
+            for date_key, a_date in iteritems(self._start_dates):
                 if a_date > max_date:
                     self._recent_dateID = date_key
                     max_date = a_date
@@ -104,7 +106,7 @@ class UserProperties(object):
             # pylint: disable=W0703
             except Exception:
                 ind = None
-            if not ind is None:
+            if ind is not None:
                 str_parts[ind] = str(getattr(self, prop))
         data_string = "".join(str_parts)
         return data_string
@@ -310,14 +312,15 @@ class UserProperties(object):
 
     def get_all_instruments(self):
         """ Return list of all instruments, user is working on during this cycle"""
-        return self._instrument.values()
+        return list(self._instrument.values())
 
     def get_all_cycles(self):
         """Return list of all cycles the user participates in"""
-        return self._instrument.keys()
+        return list(self._instrument.keys())
+
     def get_all_rb(self):
         """Return list of all rb folders the user participates in"""
-        return self._rb_dirs.values()
+        return list(self._rb_dirs.values())
 
 
 #
@@ -543,7 +546,7 @@ class MantidConfigDirectInelastic(object):
         fh_targ = open(output_file, 'w')
         if not fh_targ:
             return
-        var_to_replace = replacemets_list.keys()
+        var_to_replace = list(replacemets_list.keys())
         with open(input_file) as fh_source:
             for line in fh_source:
                 rez = line
@@ -571,7 +574,7 @@ class MantidConfigDirectInelastic(object):
             shutil.copyfile(input_file, output_file)
         else:
             self._copy_and_parse_user_file(input_file, output_file, replacement_list)
-        os.chmod(output_file, 0777)
+        os.chmod(output_file, 0o777)
 
         ownership_str = "chown {0}:{1} {2}".format(self._user.userID,rb_group, output_file)
         if platform.system() != 'Windows':
@@ -731,7 +734,7 @@ class MantidConfigDirectInelastic(object):
         # how to check cycle folders, they may not be available
         self._cycle_data_folder = set()
         # pylint: disable=W0212
-        for date_key, folder_id in theUser._cycle_IDs.items():
+        for date_key, folder_id in list(theUser._cycle_IDs.items()):
             self._cycle_data_folder.add(self.get_data_folder_name(theUser._instrument[date_key], folder_id))
         # Initialize configuration settings
         self._dynamic_configuration = copy.deepcopy(self._dynamic_options_base)
@@ -848,7 +851,7 @@ class MantidConfigDirectInelastic(object):
         users_cycles = self._user.get_all_cycles()
         users_rb     = self._user.get_all_rb()
         # extract rb folder without path, which gives RB group name
-        users_rb     = map(os.path.basename,users_rb)
+        users_rb     = list(map(os.path.basename,users_rb))
         #
         for cycle,rb_name in zip(users_cycles,users_rb):
             if key_users_list:
@@ -913,7 +916,7 @@ class MantidConfigDirectInelastic(object):
 if __name__ == "__main__":
 
     if len(sys.argv) != 6:
-        print "usage: Config.py userID instrument RBNumber cycleID start_date"
+        print("usage: Config.py userID instrument RBNumber cycleID start_date")
         exit()
 
     argi = sys.argv[1:]
@@ -945,19 +948,19 @@ if __name__ == "__main__":
     # initialize Mantid configuration
     # its testing route under main so it rightly imports itself
     #pylint: disable=W0406
-    from ISISDirecInelasticConfig import MantidConfigDirectInelastic, UserProperties
+    from .ISISDirecInelasticConfig import MantidConfigDirectInelastic, UserProperties
 
     mcf = MantidConfigDirectInelastic(MantidDir, rootDir, UserScriptRepoDir, MapMaskDir)
-    print "Successfully initialized ISIS Inelastic Configuration script generator"
+    print("Successfully initialized ISIS Inelastic Configuration script generator")
 
     rb_user_folder = os.path.join(mcf._home_path, user.userID)
     user.rb_dir = rb_user_folder
     if not user.rb_dir_exist:
-        print "RB folder {0} for user {1} should exist and be accessible to configure this user".format(user.rb_dir,
-                                                                                                        user.userID)
+        print("RB folder {0} for user {1} should exist and be accessible to configure this user".format(user.rb_dir,
+                                                                                                        user.userID))
         exit()
     # Configure user
     mcf.init_user(user.userID, user)
     mcf.generate_config()
-    print "Successfully Configured user: {0} for instrument {1} and RBNum: {2}" \
-        .format(user.userID, user.instrument, user.rb_folder)
+    print("Successfully Configured user: {0} for instrument {1} and RBNum: {2}"
+          .format(user.userID, user.instrument, user.rb_folder))

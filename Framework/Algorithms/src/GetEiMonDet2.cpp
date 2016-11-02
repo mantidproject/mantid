@@ -199,6 +199,7 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
   double distanceSum = 0;
   double eppSum = 0;
   size_t n = 0;
+  // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for if ( m_detectorEPPTable->threadSafe())
              reduction(+: n, distanceSum, eppSum))
   for (int i = 0; i < static_cast<int>(detectorIndices.size()); ++i) {

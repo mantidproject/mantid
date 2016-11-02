@@ -28,12 +28,13 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "ApplicationWindow.h"
 #include "Folder.h"
-#include "pixmaps.h"
-
+#include "ApplicationWindow.h"
+#include <MantidQtAPI/pixmaps.h>
 #include <QApplication>
 #include <QDateTime>
+
+using namespace MantidQt::API;
 
 Folder::Folder(Folder *parent, const QString &name)
     : QObject(parent),

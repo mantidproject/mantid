@@ -379,7 +379,9 @@ class ExportExperimentLog(PythonAlgorithm):
         # ENDFOR
 
         # Check needs to re-order
-        if list(linedict.keys()) != sorted(linedict.keys()):
+        # This test does not work with python 3, you can not assume the order of a dictionary
+        # if list(linedict.keys()) != sorted(linedict.keys()):
+        if True: # temporary hack to get it working with python 3, always write a new file!
             # Re-write file
             wbuf = ""
 
@@ -420,7 +422,7 @@ class ExportExperimentLog(PythonAlgorithm):
                 wbuf = wbuf[0:-1]
 
             # Remove unsupported character which may cause importing error of GNUMERIC
-            wbuf = wbuf.translate(None, chr(0))
+            wbuf = wbuf.replace(chr(0),"")
 
             # Re-write file
             ofile = open(self._logfilename, "w")

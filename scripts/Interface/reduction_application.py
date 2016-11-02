@@ -9,7 +9,7 @@ import traceback
 # Check whether Mantid is available
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
+    import mantidplot # noqa
     IS_IN_MANTIDPLOT = True
     from mantid.kernel import ConfigService
     from mantid.api import AlgorithmFactory
@@ -19,7 +19,7 @@ except:
     sip.setapi('QString',2)
     sip.setapi('QVariant',2)
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui, QtCore # noqa
 
 REDUCTION_WARNING = False
 WARNING_MESSAGE = ""
@@ -40,11 +40,11 @@ if IS_IN_MANTIDPLOT:
         WARNING_MESSAGE = "Please contact the Mantid team with the following message:\n\n\n"
         WARNING_MESSAGE += unicode(traceback.format_exc())
 
-from reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT
-from reduction_gui.settings.application_settings import GeneralSettings
-import ui.ui_reduction_main
-import ui.ui_instrument_dialog
-import ui.ui_cluster_details_dialog
+from reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT # noqa
+from reduction_gui.settings.application_settings import GeneralSettings # noqa
+import ui.ui_reduction_main # noqa
+import ui.ui_instrument_dialog # noqa
+import ui.ui_cluster_details_dialog # noqa
 
 
 class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
@@ -272,7 +272,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
 
         recent_files = []
         for fname in self._recent_files:
-            if fname != self._filename and QtCore.QFile.exists(fname) and not fname in recent_files:
+            if fname != self._filename and QtCore.QFile.exists(fname) and fname not in recent_files:
                 recent_files.append(fname)
 
         if len(recent_files)>0:
@@ -393,7 +393,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         """
         if False:
             reply = QtGui.QMessageBox.question(self, 'Message',
-                                               "Are you sure you want to quit this application?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+                                               "Are you sure you want to quit this application?",
+                                               QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
 
             if reply == QtGui.QMessageBox.Yes:
                 event.accept()

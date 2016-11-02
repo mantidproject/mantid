@@ -251,7 +251,7 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
 
             if celltype != 'H' or alpha > 120:  # alpha =120 planar, >120 no go or c under a-b plane.
 
-                self.conventionalUB = NiggliUB = None
+                self.conventionalUB = None
                 return None
 
                 # Did not work with 0 error. FindUBUsingFFT failed
@@ -367,7 +367,6 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
 
     def FixUpPlusMinus(self, UB):  # TODO make increasing lengthed sides too
         M = matrix([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
-        M1 = matrix([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
         G = UB.T * UB
         #G.I
 
@@ -497,9 +496,6 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
         Error = error * MinAbsQ
         npeaks = 0
 
-        a1 = hkl[0, 0]
-        a2 = hkl[1, 0]
-        a3 = hkl[2, 0]
         done = False
         while not done:
 

@@ -2,10 +2,8 @@
 ################################################################################
 # Event Filtering (and advanced) Setup Widget
 ################################################################################
-from PyQt4 import QtGui, uic, QtCore
-from functools import partial
+from PyQt4 import QtGui, QtCore
 from reduction_gui.widgets.base_widget import BaseWidget
-import reduction_gui.widgets.util as util
 
 from reduction_gui.reduction.diffraction.diffraction_filter_setup_script import FilterSetupScript
 import ui.diffraction.ui_diffraction_filter_setup
@@ -195,7 +193,8 @@ class FilterSetupWidget(BaseWidget):
                 self._content.valuechange_combo.setCurrentIndex(index)
             else:
                 self._content.valuechange_combo.setCurrentIndex(0)
-                print "Input value of filter log value by changing direction '%s' is not allowed." % (state.filterlogvaluebychangingdirection)
+                print "Input value of filter log value by changing direction '%s' is not allowed." % \
+                    (state.filterlogvaluebychangingdirection)
         else:
             # Default
             self._content.valuechange_combo.setCurrentIndex(0)
@@ -263,7 +262,6 @@ class FilterSetupWidget(BaseWidget):
         """ Handling event if run number is changed... If it is a valid run number,
         the load the meta data
         """
-        from datetime import datetime
 
         # 1. Form the file
         newrunnumberstr = self._content.run_number_edit.text()
@@ -335,7 +333,7 @@ class FilterSetupWidget(BaseWidget):
         # Get property
         run = self._metaws.getRun()
         try:
-            logproperty = run.getProperty(str(logname))
+            run.getProperty(str(logname))
         except RuntimeError:
             # Unable to plot
             msg3 = str("Error! Workspace %s does not contain log %s. " % (str(self._metaws),

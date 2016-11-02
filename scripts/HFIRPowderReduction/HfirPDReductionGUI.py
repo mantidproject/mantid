@@ -16,6 +16,7 @@ except AttributeError:
         return s
 
 import mantid
+import mantidqtpython as mqt
 from HfirPDReductionControl import *
 
 #----- default configuration ---------------
@@ -453,7 +454,7 @@ class MainWindow(QtGui.QMainWindow):
         Return :: None
         """
         # Get file name
-        filefilter = "Text (*.txt);;Data (*.dat);;All files (*.*)"
+        filefilter = "Text (*.txt);;Data (*.dat);;All files (*)"
         curDir = os.getcwd()
         excldetfnames = QtGui.QFileDialog.getOpenFileNames(self, 'Open File(s)', curDir, filefilter)
         try:
@@ -594,13 +595,13 @@ class MainWindow(QtGui.QMainWindow):
         helpapp = QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.BinariesPath) + QtCore.QDir.separator()
         helpapp += 'assistant'
         args = ['-enableRemoteControl', '-collectionFile',self.collectionFile,'-showUrl',self.qtUrl]
-        if os.path.isfile(helpapp):
+        if os.path.isfile(helpapp) and os.path.isfile(self.collectionFile):
             self.assistantProcess.close()
             self.assistantProcess.waitForFinished()
             self.assistantProcess.start(helpapp, args)
             print "Show help from (app) ", helpapp
         else:
-            QtGui.QDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
+            mqt.MantidQt.API.MantidDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
             print "Show help from (url)", QtCore.QUrl(self.externalUrl)
 
         return
@@ -736,7 +737,7 @@ class MainWindow(QtGui.QMainWindow):
             # Apply detector efficiency correction
             if vancorrfname is None:
                 # browse vanadium correction file
-                filefilter = "Text (*.txt);;Data (*.dat);;All files (*.*)"
+                filefilter = "Text (*.txt);;Data (*.dat);;All files (*)"
                 curDir = os.getcwd()
                 vancorrfnames = QtGui.QFileDialog.getOpenFileNames(self, 'Open File(s)', curDir, filefilter)
                 if len(vancorrfnames) > 0:
@@ -1423,7 +1424,7 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 homedir = os.getcwd()
             # launch a dialog to get data
-            filefilter = "All files (*.*);;Fullprof (*.dat);;GSAS (*.gsa)"
+            filefilter = "All files (*);;Fullprof (*.dat);;GSAS (*.gsa)"
             sfilename = str(QtGui.QFileDialog.getSaveFileName(self, 'Save File', homedir, filefilter))
         except NotImplementedError as e:
             self._logError(str(e))

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from compile_util import compile_ui
-from distutils.core import setup
 
 # Compile resource file
 try:

@@ -9,7 +9,7 @@ import ui.sans.ui_hfir_instrument
 
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
+    import mantidplot # noqa
     IS_IN_MANTIDPLOT = True
 except ImportError:
     pass

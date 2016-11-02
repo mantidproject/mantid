@@ -34,7 +34,7 @@ const std::string EnggDiffFittingViewQtWidget::g_settingsGroup =
 const std::string EnggDiffFittingViewQtWidget::g_peaksListExt =
     "Peaks list File: CSV "
     "(*.csv *.txt);;"
-    "Other extensions/all files (*.*)";
+    "Other extensions/all files (*)";
 
 bool EnggDiffFittingViewQtWidget::m_fittingMutliRunMode = false;
 bool EnggDiffFittingViewQtWidget::m_fittingSingleRunMode = false;
