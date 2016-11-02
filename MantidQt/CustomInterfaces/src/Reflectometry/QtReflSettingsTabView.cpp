@@ -134,6 +134,14 @@ std::string QtReflSettingsTabView::getDirectBeam() const {
   return m_ui.directBeamEdit->text().toStdString();
 }
 
+/** Return selected transmission run(s)
+* @return :: selected transmission run(s)
+*/
+std::string QtReflSettingsTabView::getTransmissionRuns() const {
+
+  return m_ui.transmissionRunsEdit->text().toStdString();
+}
+
 /** Return selected polarisation corrections
 * @return :: selected polarisation corrections
 */
@@ -195,7 +203,7 @@ std::string QtReflSettingsTabView::getScaleFactor() const {
 */
 std::string QtReflSettingsTabView::getIntMonCheck() const {
 
-  return boost::lexical_cast<std::string>(m_ui.intMonCheckBox->checkState());
+  return m_ui.intMonCheckBox->isChecked() ? "1" : "0";
 }
 
 /** Return monitor integral wavelength min

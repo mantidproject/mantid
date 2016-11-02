@@ -50,6 +50,8 @@ public:
   std::string getAnalysisMode() const override;
   /// Return direct beam
   std::string getDirectBeam() const override;
+  /// Return transmission runs
+  std::string getTransmissionRuns() const override;
   /// Return selected polarisation corrections
   std::string getPolarisationCorrections() const override;
   /// Return CRho

@@ -66,6 +66,7 @@ private:
   void getInstDefaults();
   IAlgorithm_sptr createReductionAlg();
   Instrument_const_sptr createEmptyInstrument(std::string instName);
+  std::string getTransmissionRuns() const;
 
   /// The view we are managing
   IReflSettingsTabView *m_view;

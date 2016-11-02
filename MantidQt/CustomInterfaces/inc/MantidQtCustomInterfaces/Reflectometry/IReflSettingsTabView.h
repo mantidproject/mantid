@@ -56,6 +56,7 @@ public:
   /// Experiment settings
   virtual std::string getAnalysisMode() const = 0;
   virtual std::string getDirectBeam() const = 0;
+  virtual std::string getTransmissionRuns() const = 0;
   virtual std::string getPolarisationCorrections() const = 0;
   virtual std::string getCRho() const = 0;
   virtual std::string getCAlpha() const = 0;

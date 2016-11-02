@@ -202,7 +202,48 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   if (!procInst.empty())
     options.push_back("ProcessingInstructions=" + procInst);
 
+  // Add transmission runs
+  auto transRuns = this->getTransmissionRuns();
+  if (!transRuns.empty())
+    options.push_back(transRuns);
+
   return boost::algorithm::join(options, ",");
+}
+
+/** Receives specified transmission runs from the view and loads them into the
+*ADS. Returns a string with transmission runs so that they are considered in the
+*reduction
+*
+* @return :: transmission run(s) as a string that will be used for the reduction
+*/
+std::string ReflSettingsTabPresenter::getTransmissionRuns() const {
+
+  auto runs = m_view->getTransmissionRuns();
+  if (runs.empty())
+    return "";
+
+  std::vector<std::string> transRuns;
+  boost::split(transRuns, runs, boost::is_any_of(","));
+
+  if (transRuns.size() > 2)
+    throw std::invalid_argument("Only one transmission run or two "
+                                "transmission runs separated by ',' "
+                                "are allowed.");
+
+  for (const auto &run : transRuns) {
+    // Load transmission runs and put them in the ADS
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadISISNexus");
+    alg->setProperty("Filename", run);
+    alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
+    alg->execute();
+  }
+
+  // Return them as options for reduction
+  std::string options = "FirstTransmissionRun=TRANS_" + transRuns[0];
+  if (transRuns.size() > 1)
+    options += ",SecondTransmissionRun=TRANS_" + transRuns[1];
+
+  return options;
 }
 
 /** Returns global options for 'Stitch1DMany'
