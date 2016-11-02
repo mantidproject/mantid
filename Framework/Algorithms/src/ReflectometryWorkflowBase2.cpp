@@ -292,6 +292,8 @@ ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS) {
 * IOMonitorIndex has been specified and MonitorBackgroundWavelengthMin and
 * MonitorBackgroundWavelengthMax have been given.
 * @param inputWS :: the input workspace in wavelength
+* @param integratedMonitors :: boolean to indicate if monitors should be
+* integrated
 * @return :: the monitor workspace
 */
 MatrixWorkspace_sptr
