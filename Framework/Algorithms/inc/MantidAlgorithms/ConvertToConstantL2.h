@@ -1,9 +1,6 @@
 #ifndef MANTID_ALGORITHMS_ConvertToConstantL2_H_
 #define MANTID_ALGORITHMS_ConvertToConstantL2_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument.h"
 
@@ -76,7 +73,6 @@ private:
   API::MatrixWorkspace_sptr m_outputWS;
 
   Geometry::Instrument_const_sptr m_instrument;
-  Geometry::IComponent_const_sptr m_sample;
 
   double m_l2;
   double m_wavelength;

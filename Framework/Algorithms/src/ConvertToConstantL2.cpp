@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/ConvertToConstantL2.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -24,8 +25,8 @@ DECLARE_ALGORITHM(ConvertToConstantL2)
 
 // Constructor
 ConvertToConstantL2::ConvertToConstantL2()
-    : API::Algorithm(), m_inputWS(), m_outputWS(), m_instrument(), m_sample(),
-      m_l2(0.), m_wavelength(0.) {}
+    : API::Algorithm(), m_inputWS(), m_outputWS(), m_instrument(), m_l2(0.),
+      m_wavelength(0.) {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
@@ -51,7 +52,6 @@ void ConvertToConstantL2::initWorkspaces() {
   m_inputWS = this->getProperty("InputWorkspace");
   m_outputWS = this->getProperty("OutputWorkspace");
   m_instrument = m_inputWS->getInstrument();
-  m_sample = m_instrument->getSample();
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (m_outputWS != this->m_inputWS) {
@@ -83,6 +83,8 @@ void ConvertToConstantL2::exec() {
   int64_t numberOfSpectra_i =
       static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
 
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+
   // Loop over the histograms (detector spectra)
 
   PARALLEL_FOR2(m_inputWS, m_outputWS)
@@ -93,22 +95,21 @@ void ConvertToConstantL2::exec() {
     // TOF
 
     // subract the diference in l2
-    IDetector_const_sptr det = m_inputWS->getDetector(i);
-    double thisDetL2 = det->getDistance(*m_sample);
+    double thisDetL2 = spectrumInfo.l2(i);
     double deltaL2 = std::abs(thisDetL2 - m_l2);
     double deltaTOF = calculateTOF(deltaL2);
     deltaTOF *= 1e6; // micro sec
 
     // position - set all detector distance to constant l2
     double r, theta, phi;
-    V3D oldPos = det->getPos();
+    V3D oldPos = spectrumInfo.position(i);
     oldPos.getSpherical(r, theta, phi);
     V3D newPos;
     newPos.spherical(m_l2, theta, phi);
-    ComponentHelper::moveComponent(*det, pmap, newPos,
+    ComponentHelper::moveComponent(spectrumInfo.detector(i), pmap, newPos,
                                    ComponentHelper::Absolute);
 
-    m_outputWS->mutableX(i) += -deltaTOF;
+    m_outputWS->mutableX(i) -= deltaTOF;
 
     prog.report("Aligning elastic line...");
     PARALLEL_END_INTERUPT_REGION
