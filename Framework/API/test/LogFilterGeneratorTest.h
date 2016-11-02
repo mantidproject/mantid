@@ -62,10 +62,13 @@ public:
     std::unique_ptr<LogFilter> filter;
     TS_ASSERT_THROWS_NOTHING(filter = generator.generateFilter("TestLog"));
     TS_ASSERT(filter->filter());
-    const auto &values = filter->filter()->valuesAsVector();
-    TS_ASSERT(!values.empty());
-    const std::vector<bool> expected{true, false, true};
-    TS_ASSERT_EQUALS(expected, values);
+    const auto &resultMap = filter->filter()->valueAsCorrectMap();
+    std::map<DateAndTime, bool> expected;
+    expected.emplace(DateAndTime("2007-11-30T16:17:00"), true);
+    expected.emplace(DateAndTime("2007-11-30T16:17:30"), false);
+    expected.emplace(DateAndTime("2007-11-30T16:18:00"), true);
+    TS_ASSERT_EQUALS(resultMap.size(), 3);
+    TS_ASSERT_EQUALS(resultMap, expected);
   }
 
   void test_typeIsPeriod_noPeriodLogPresent_thenNoFilterReturned() {
