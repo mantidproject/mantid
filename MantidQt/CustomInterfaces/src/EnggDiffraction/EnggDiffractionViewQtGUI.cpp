@@ -33,7 +33,7 @@ int EnggDiffractionViewQtGUI::g_currentCropCalibBankName = 0;
 const std::string EnggDiffractionViewQtGUI::g_iparmExtStr =
     "GSAS instrument parameters, IPARM file: PRM, PAR, IPAR, IPARAM "
     "(*.prm *.par *.ipar *.iparam);;"
-    "Other extensions/all files (*.*)";
+    "Other extensions/all files (*)";
 
 const std::string EnggDiffractionViewQtGUI::g_pixelCalibExt =
     "Comma separated values text file with calibration table, CSV"
@@ -42,12 +42,12 @@ const std::string EnggDiffractionViewQtGUI::g_pixelCalibExt =
     "(*.nxs *.nexus);;"
     "Supported formats: CSV, NXS "
     "(*.csv *.nxs *.nexus);;"
-    "Other extensions/all files (*.*)";
+    "Other extensions/all files (*)";
 
 const std::string EnggDiffractionViewQtGUI::g_DetGrpExtStr =
     "Detector Grouping File: CSV "
     "(*.csv *.txt);;"
-    "Other extensions/all files (*.*)";
+    "Other extensions/all files (*)";
 
 const std::string EnggDiffractionViewQtGUI::g_settingsGroup =
     "CustomInterfaces/EnggDiffractionView";
@@ -369,23 +369,28 @@ void EnggDiffractionViewQtGUI::readSettings() {
   // EnggDiffCalibSettings
   m_calibSettings.m_inputDirCalib =
       qs.value("input-dir-calib-files", lastPath).toString().toStdString();
+
   m_calibSettings.m_inputDirRaw =
       qs.value("input-dir-raw-files", lastPath).toString().toStdString();
+
   const std::string fullCalib = guessDefaultFullCalibrationPath();
   m_calibSettings.m_pixelCalibFilename =
       qs.value("pixel-calib-filename", QString::fromStdString(fullCalib))
           .toString()
           .toStdString();
+
   // 'advanced' block
   m_calibSettings.m_forceRecalcOverwrite =
       qs.value("force-recalc-overwrite", false).toBool();
+
   const std::string templ = guessGSASTemplatePath();
   m_calibSettings.m_templateGSAS_PRM =
       qs.value("template-gsas-prm", QString::fromStdString(templ))
           .toString()
           .toStdString();
-  m_calibSettings.m_forceRecalcOverwrite =
-      qs.value("rebin-calib", g_defaultRebinWidth).toBool();
+
+  m_calibSettings.m_rebinCalibrate =
+      qs.value("rebin-calib", g_defaultRebinWidth).toFloat();
 
   // 'focusing' block
   m_focusDir = qs.value("focus-dir").toString().toStdString();

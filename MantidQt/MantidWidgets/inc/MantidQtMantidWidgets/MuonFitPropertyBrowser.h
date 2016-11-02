@@ -94,12 +94,15 @@ signals:
   void workspacesToFitChanged(int n) override;
   /// Emitted when dataset index to fit is changed
   void userChangedDatasetIndex(int index) override;
+  /// Emitted when "fit to raw data" is changed
+  void fitRawDataClicked(bool enabled) override;
 
 protected:
   void showEvent(QShowEvent *e) override;
 
 private slots:
   void doubleChanged(QtProperty *prop) override;
+  void boolChanged(QtProperty *prop) override;
 
 private:
   /// Get the registered function names

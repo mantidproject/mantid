@@ -3,6 +3,8 @@
 
 #include "MantidMDAlgorithms/Quantification/Models/Strontium122.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MDFittingTestHelpers.h"
 
 #include <cxxtest/TestSuite.h>

@@ -35,7 +35,8 @@ funcForm = [2,1,1,1,2]
 # Set initial parameters for peak finding
 ExpectedHeight = -1000.0 # Expected Height of Gaussian Peaks (initial value of fit parameter)
 ExpectedWidth = 8.0 # Expected width of Gaussian peaks in pixels  (initial value of fit parameter)
-ExpectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0] # Expected positions of the edges and Gaussian peaks in pixels (initial values of fit parameters)
+ExpectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0] # Expected positions of the edges and Gaussian peaks
+                                                     # in pixels (initial values of fit parameters)
 fitPar = TubeCalibFitParams( ExpectedPositions, ExpectedHeight, ExpectedWidth)
 fitPar.setAutomatic(True)
 
@@ -53,4 +54,3 @@ print "Applied calibration"
 # == Save workspace ==
 #SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMapsResult.nxs',"Result of Running TCDemoMaps.py")
 #print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMapsResult.nxs"
-

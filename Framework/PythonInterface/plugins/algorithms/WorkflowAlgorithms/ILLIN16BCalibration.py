@@ -1,4 +1,6 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.kernel import *
 from mantid.api import (WorkspaceProperty, FileProperty, FileAction,
                         DataProcessorAlgorithm, AlgorithmFactory, mtd)
@@ -14,14 +16,11 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
     _intensity_scale = None
     _mirror_mode = None
 
-
     def category(self):
         return 'Workflow\\Inelastic;Inelastic\\Calibration'
 
-
     def summary(self):
         return 'Creates a calibration workspace in energy trnasfer for IN16B.'
-
 
     def PyInit(self):
         self.declareProperty(FileProperty(name='Run', defaultValue='',
@@ -46,7 +45,6 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                direction=Direction.Output),
                              doc='Output workspace for calibration data')
-
 
     def PyExec(self):
         self._setup()
@@ -99,9 +97,7 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
               Factor=self._intensity_scale,
               Operation='Multiply')
 
-
         self.setProperty('OutputWorkspace', self._out_ws)
-
 
     def _setup(self):
         """
@@ -119,7 +115,6 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         if self._intensity_scale == 1.0:
             self._intensity_scale = None
 
-
     def validateInputs(self):
         """
         Validates input ranges.
@@ -129,7 +124,6 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         issues['PeakRange'] = self._validate_range('PeakRange')
 
         return issues
-
 
     def _validate_range(self, property_name):
         """

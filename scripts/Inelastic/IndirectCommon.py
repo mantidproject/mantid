@@ -1,8 +1,10 @@
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name,redefined-builtin
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+
 import mantid.simpleapi as s_api
 from mantid import config, logger
 
-from IndirectImport import import_mantidplot
 
 import os.path
 import math
@@ -132,6 +134,7 @@ def checkUnitIs(ws, unit_id, axis_index=0):
     unit = axis.getUnit()
     return unit.unitID() == unit_id
 
+
 def getDefaultWorkingDirectory():
     """
     Get the default save directory and check it's valid.
@@ -174,15 +177,15 @@ def createQaxis(inputWS):
 
 
 def GetWSangles(inWS):
-    num_hist = s_api.mtd[inWS].getNumberHistograms()    					# get no. of histograms/groups
+    num_hist = s_api.mtd[inWS].getNumberHistograms()  # get no. of histograms/groups
     source_pos = s_api.mtd[inWS].getInstrument().getSource().getPos()
     sample_pos = s_api.mtd[inWS].getInstrument().getSample().getPos()
     beam_pos = sample_pos - source_pos
-    angles = []    									# will be list of angles
+    angles = []  # will be list of angles
     for index in range(0, num_hist):
-        detector = s_api.mtd[inWS].getDetector(index)    				# get index
-        two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi    	# calc angle
-        angles.append(two_theta)    					# add angle
+        detector = s_api.mtd[inWS].getDetector(index)  # get index
+        two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi  # calc angle
+        angles.append(two_theta)  # add angle
     return angles
 
 
@@ -190,7 +193,7 @@ def GetThetaQ(ws):
     """
     Returns the theta and elastic Q for each spectrum in a given workspace.
 
-    @param ws Wotkspace to get theta and Q for
+    @param ws Workspace to get theta and Q for
     @returns A tuple containing a list of theta values and a list of Q values
     """
 
@@ -406,49 +409,6 @@ def getInstrumentParameter(ws, param_name):
     return param
 
 
-def plotSpectra(ws, y_axis_title, indicies=None):
-    """
-    Plot a selection of spectra given a list of indicies
-
-    @param ws - the workspace to plot
-    @param y_axis_title - label for the y axis
-    @param indicies - list of spectrum indicies to plot
-    """
-    if indicies is None:
-        indicies = []
-
-    if len(indicies) == 0:
-        num_spectra = s_api.mtd[ws].getNumberHistograms()
-        indicies = range(num_spectra)
-
-    try:
-        mtd_plot = import_mantidplot()
-        plot = mtd_plot.plotSpectrum(ws, indicies, True)
-        layer = plot.activeLayer()
-        layer.setAxisTitle(mtd_plot.Layer.Left, y_axis_title)
-    except RuntimeError:
-        # User clicked cancel on plot so don't do anything
-        return
-
-
-def plotParameters(ws, *param_names):
-    """
-    Plot a number of spectra given a list of parameter names
-    This searchs for relevent spectra using the text axis label.
-
-    @param ws - the workspace to plot from
-    @param param_names - list of names to search for
-    """
-    axis = s_api.mtd[ws].getAxis(1)
-    if axis.isText() and len(param_names) > 0:
-        num_spectra = s_api.mtd[ws].getNumberHistograms()
-
-        for name in param_names:
-            indicies = [i for i in range(num_spectra) if name in axis.label(i)]
-            if len(indicies) > 0:
-                plotSpectra(ws, name, indicies)
-
-
 def convertToElasticQ(input_ws, output_ws=None):
     """
     Helper function to convert the spectrum axis of a sample to ElasticQ.
@@ -506,14 +466,14 @@ def transposeFitParametersTable(params_table, output_table=None):
     # Create columns with parameter names for headers
     column_names = ['.'.join(name.split('.')[1:]) for name in param_names[:num_params]]
     column_error_names = [name + '_Err' for name in column_names]
-    column_names = zip(column_names, column_error_names)
+    column_names = list(zip(column_names, column_error_names))
     table_ws.addColumn('double', 'axis-1')
     for name, error_name in column_names:
         table_ws.addColumn('double', name)
         table_ws.addColumn('double', error_name)
 
     # Output parameter values to table row
-    for i in xrange(0, params_table.rowCount() - 1, num_params):
+    for i in range(0, params_table.rowCount() - 1, num_params):
         row_values = param_values[i:i + num_params]
         row_errors = param_errors[i:i + num_params]
         row = [value for pair in zip(row_values, row_errors) for value in pair]
@@ -536,7 +496,7 @@ def IndentifyDataBoundaries(sample_ws):
 
     sample_ws = s_api.mtd[sample_ws]
     nhists = sample_ws.getNumberHistograms()
-    start_data_idx, end_data_idx = 0,0
+    start_data_idx, end_data_idx = 0, 0
     # For all spectra in the workspace
     for spectra in range(0, nhists):
         # Obtain first and last non zero values
@@ -553,6 +513,7 @@ def IndentifyDataBoundaries(sample_ws):
     first_data_point = x_data[start_data_idx]
     last_data_point = x_data[len(x_data) - end_data_idx - 2]
     return first_data_point, last_data_point
+
 
 def firstNonZero(data):
     """

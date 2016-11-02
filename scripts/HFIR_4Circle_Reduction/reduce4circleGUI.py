@@ -16,7 +16,6 @@ from scipy.optimize import curve_fit
 
 
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import QThread
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -35,7 +34,6 @@ import guiutility as gutil
 import fourcircle_utility as hb3a
 import plot3dwindow
 from multi_threads_helpers import *
-
 
 
 # import line for the UI python class
@@ -1344,7 +1342,7 @@ class MainWindow(QtGui.QMainWindow):
         num_rows = int(self.ui.lineEdit_numSurveyOutput.text())
 
         # get the csv file
-        file_filter = 'CSV Files (*.csv);;All Files (*.*)'
+        file_filter = 'CSV Files (*.csv);;All Files (*)'
         csv_file_name = str(QtGui.QFileDialog.getOpenFileName(self, 'Open Exp-Scan Survey File', self._homeDir,
                                                               file_filter))
         if csv_file_name is None or len(csv_file_name) == 0:
@@ -1933,7 +1931,7 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # Get file name
-        file_filter = 'CSV Files (*.csv);;All Files (*.*)'
+        file_filter = 'CSV Files (*.csv);;All Files (*)'
         out_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Save scan survey result',
                                                               self._homeDir, file_filter))
 
@@ -1947,7 +1945,7 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # get file name
-        file_filter = 'Data Files (*.dat);;All Files (*.*)'
+        file_filter = 'Data Files (*.dat);;All Files (*)'
         ub_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'ASCII File To Save UB Matrix', self._homeDir,
                                                              file_filter))
 
@@ -2099,7 +2097,7 @@ class MainWindow(QtGui.QMainWindow):
         """ Get UB matrix from an Ascii file
         :return:
         """
-        file_filter = 'Data Files (*.dat);;Text Files (*.txt);;All Files (*.*)'
+        file_filter = 'Data Files (*.dat);;Text Files (*.txt);;All Files (*)'
         file_name = QtGui.QFileDialog.getOpenFileName(self, 'Open UB ASCII File', self._homeDir,
                                                       file_filter)
         # quit if cancelled

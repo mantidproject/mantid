@@ -3,6 +3,8 @@
 from mantid.simpleapi import *
 import ISISCommandInterface as i
 import stresstesting
+
+
 class SANSMergedDetectorsTest(stresstesting.MantidStressTest):
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)

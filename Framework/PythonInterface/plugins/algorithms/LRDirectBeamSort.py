@@ -1,9 +1,9 @@
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
-import mantid
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
+
 
 class CompareTwoNXSDataForSFcalculator(object):
     """
@@ -69,6 +69,7 @@ class CompareTwoNXSDataForSFcalculator(object):
 
     def result(self):
         return self.resultComparison
+
 
 def sorter_function(r1, r2):
     """

@@ -11,6 +11,7 @@
 #include <cxxtest/TestSuite.h>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include <string>
 

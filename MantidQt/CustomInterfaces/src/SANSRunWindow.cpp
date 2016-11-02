@@ -1,6 +1,3 @@
-//----------------------
-// Includes
-//----------------------
 #include "MantidQtCustomInterfaces/SANSRunWindow.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -16,17 +13,18 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
 #include "MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h"
 #include "MantidQtCustomInterfaces/SANSEventSlicing.h"
 
 #include <QClipboard>
-#include <QDesktopServices>
 #include <QTemporaryFile>
 #include <QTextStream>
 #include <QUrl>
@@ -1981,7 +1979,7 @@ void SANSRunWindow::saveFileBrowse() {
                                   ConfigService::Instance().getString(
                                       "defaultsave.directory"))).toString();
 
-  const QString filter = ";;AllFiles (*.*)";
+  const QString filter = ";;AllFiles (*)";
 
   QString oFile = FileDialogHandler::getSaveFileName(
       this, title, prevPath + "/" + m_uiForm.outfile_edit->text());
@@ -2012,7 +2010,7 @@ bool SANSRunWindow::browseForFile(const QString &box_title,
   if (box_text.isEmpty()) {
     start_path = m_last_dir;
   }
-  file_filter += ";;AllFiles (*.*)";
+  file_filter += ";;AllFiles (*)";
   QString file_path =
       QFileDialog::getOpenFileName(this, box_title, start_path, file_filter);
   if (file_path.isEmpty() || QFileInfo(file_path).isDir())
@@ -3175,19 +3173,6 @@ void SANSRunWindow::handleInstrumentChange() {
   m_uiForm.sliceEvent->setHidden(hide_events_gui);
   m_uiForm.l_events_label->setHidden(hide_events_gui);
   m_uiForm.l_events_binning->setHidden(hide_events_gui);
-
-  // Provide LOQ Specific settings
-  const auto isNowLOQ = m_uiForm.inst_opt->currentText() == "LOQ";
-  applyLOQSettings(isNowLOQ);
-}
-
-/**
- * Apply or unapply LOQ-specific settings
- * @param isNowLOQ: if true then apply LOQ settings else unapply
- */
-void SANSRunWindow::applyLOQSettings(bool isNowLOQ) {
-  // M4 Transmission monitor
-  m_uiForm.trans_M4_check_box->setDisabled(isNowLOQ);
 }
 
 /** Record if the user has changed the default filename, because then we don't
@@ -3923,7 +3908,7 @@ void SANSRunWindow::handleSlicePushButton() {
 void SANSRunWindow::openHelpPage() {
   const auto helpPageUrl =
       m_helpPageUrls[static_cast<Tab>(m_uiForm.tabWidget->currentIndex())];
-  QDesktopServices::openUrl(QUrl(helpPageUrl));
+  MantidDesktopServices::openUrl(QUrl(helpPageUrl));
 }
 
 // Set the validators for inputs
@@ -4073,9 +4058,9 @@ bool SANSRunWindow::isValidWsForRemovingZeroErrors(QString &wsName) {
   bool isValid = true;
   if (result != m_constants.getPythonSuccessKeyword()) {
     result.replace(m_constants.getPythonSuccessKeyword(), "");
-    g_log.warning("Not a valid workspace for zero error replacement. Will save "
-                  "original workspace. More info: " +
-                  result.toStdString());
+    g_log.notice("Not a valid workspace for zero error replacement. Will save "
+                 "original workspace. More info: " +
+                 result.toStdString());
     isValid = false;
   }
   return isValid;

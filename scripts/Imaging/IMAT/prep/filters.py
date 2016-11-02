@@ -20,6 +20,7 @@
 
 import numpy as np
 
+
 def scale_down(data_vol, block_size, method='average'):
     """
     Downscale to for example shrink 1Kx1K images to 512x512
@@ -61,6 +62,7 @@ def scale_down(data_vol, block_size, method='average'):
 
     return rescaled_vol
 
+
 def crop_vol(data_vol, coords):
     """
     Crops a data volume by a rectangle defined by two corner
@@ -87,6 +89,7 @@ def crop_vol(data_vol, coords):
         cropped_data = data_vol[:, coords[1]:(coords[3]+1), coords[0]:(coords[2]+1)]
 
     return cropped_data
+
 
 def remove_stripes_ring_artifacts(data_vol, method='wavelet-fourier'):
     """
@@ -124,6 +127,7 @@ def remove_stripes_ring_artifacts(data_vol, method='wavelet-fourier'):
 
     return stripped_vol
 
+
 def remove_sino_stripes_rings_wf(data_vol, wv_levels=None):
     if not wv_levels:
         max_len = np.max(data_vol.shape)
@@ -131,6 +135,7 @@ def remove_sino_stripes_rings_wf(data_vol, wv_levels=None):
 
     from . import filters_adv
     return filters_adv.remove_sino_stripes_rings_wf(data_vol, wv_levels)
+
 
 def circular_mask(data_vol, ratio=1.0, mask_out_val=0.0):
     """
@@ -154,6 +159,7 @@ def circular_mask(data_vol, ratio=1.0, mask_out_val=0.0):
         data_vol[idx, ~mask_in] = mask_out_val
 
     return data_vol
+
 
 def _calc_mask(ydim, xdim, ratio):
     """

@@ -1,6 +1,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -76,7 +77,7 @@ MuonAnalysisResultTableCreator::MuonAnalysisResultTableCreator(
     const QStringList &itemsSelected, const QStringList &logsSelected,
     const LogValuesMap *logValues, bool multipleLabels)
     : m_items(itemsSelected), m_logs(logsSelected), m_logValues(logValues),
-      m_multiple(multipleLabels) {
+      m_multiple(multipleLabels), m_firstStart_ns(0) {
   if (!m_logValues) {
     throw std::invalid_argument(
         "Log values passed in to result table creator are null!");

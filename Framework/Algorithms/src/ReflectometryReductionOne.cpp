@@ -8,6 +8,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Unit.h"
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
@@ -130,10 +131,6 @@ void ReflectometryReductionOne::init() {
       boost::make_shared<StringListValidator>(propOptions),
       "The type of analysis to perform. Point detector or multi detector.");
 
-  declareProperty(make_unique<ArrayProperty<int>>("RegionOfInterest"),
-                  "Indices of the spectra a pair (lower, upper) that mark the "
-                  "ranges that correspond to the region of interest (reflected "
-                  "beam) in multi-detector mode.");
   declareProperty(make_unique<ArrayProperty<int>>("RegionOfDirectBeam"),
                   "Indices of the spectra a pair (lower, upper) that mark the "
                   "ranges that correspond to the direct beam in multi-detector "
@@ -482,25 +479,6 @@ ReflectometryReductionOne::getDetectorComponent(
                                 " does not exist. Check input properties.");
   }
   return searchResult;
-}
-
-/**
-* Sum spectra over a specified range.
-* @param inWS
-* @param startIndex
-* @param endIndex
-* @return Workspace with spectra summed over the specified range.
-*/
-MatrixWorkspace_sptr ReflectometryReductionOne::sumSpectraOverRange(
-    MatrixWorkspace_sptr inWS, const int startIndex, const int endIndex) {
-  auto sumSpectra = this->createChildAlgorithm("SumSpectra");
-  sumSpectra->initialize();
-  sumSpectra->setProperty("InputWorkspace", inWS);
-  sumSpectra->setProperty("StartWorkspaceIndex", startIndex);
-  sumSpectra->setProperty("EndWorkspaceIndex", endIndex);
-  sumSpectra->execute();
-  MatrixWorkspace_sptr outWS = sumSpectra->getProperty("OutputWorkspace");
-  return outWS;
 }
 
 //----------------------------------------------------------------------------------------------

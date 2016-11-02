@@ -3,6 +3,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -14,8 +15,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//--------------------------------------------------------------------------
-
 const std::string FindUBUsingFFT::name() const { return "FindUBUsingFFT"; }
 
 int FindUBUsingFFT::version() const { return 1; }
@@ -24,7 +23,6 @@ const std::string FindUBUsingFFT::category() const {
   return "Crystal\\UBMatrix";
 }
 
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingFFT::init() {
@@ -44,7 +42,6 @@ void FindUBUsingFFT::init() {
                         "Indexing Tolerance (0.15)");
 }
 
-//--------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void FindUBUsingFFT::exec() {

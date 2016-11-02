@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ReplaceSpecialValues.h"
 #include "MantidKernel/Exception.h"
-#include "boost/math/special_functions/fpclassify.hpp"
 #include <limits>
 #include <cmath>
 
@@ -84,11 +83,11 @@ void ReplaceSpecialValues::performUnaryOperation(const double XIn,
 }
 
 bool ReplaceSpecialValues::checkIfNan(const double &value) const {
-  return (boost::math::isnan(value));
+  return (std::isnan(value));
 }
 
 bool ReplaceSpecialValues::checkIfInfinite(const double &value) const {
-  return (std::abs(value) == std::numeric_limits<double>::infinity());
+  return (std::isinf(value));
 }
 
 bool ReplaceSpecialValues::checkIfBig(const double &value) const {

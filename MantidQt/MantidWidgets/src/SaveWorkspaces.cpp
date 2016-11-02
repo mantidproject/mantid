@@ -282,6 +282,8 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem *> &wspaces,
     if (algorithm == "SaveCanSAS1D") {
       setDetectorNamesOnCanSasFormat(saveCommands, wspaces, j);
 
+
+
       // Add the geometry information
       emit updateGeometryInformation();
       // Remove the first three characters, since they are unwanted
@@ -380,7 +382,7 @@ void SaveWorkspaces::saveFileBrowse() {
                                   ConfigService::Instance().getString(
                                       "defaultsave.directory"))).toString();
 
-  QString filter = ";;AllFiles (*.*)";
+  QString filter = ";;AllFiles (*)";
   QFileDialog::Option userCon = m_append->isChecked()
                                     ? QFileDialog::DontConfirmOverwrite
                                     : static_cast<QFileDialog::Option>(0);

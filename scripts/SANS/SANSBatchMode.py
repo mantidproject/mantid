@@ -1,4 +1,4 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
 #
 # SANSBatchMode.py
 #
@@ -30,24 +30,26 @@
 # The save directory must currently be specified in the Mantid.user.properties file
 
 #Make the reduction module available
+from __future__ import (absolute_import, division, print_function)
 from ISISCommandInterface import *
 import SANSUtility as su
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
 from mantid.kernel import Logger
-sanslog = Logger("SANS")
 import copy
 import sys
 import re
 from reduction_settings import REDUCTION_SETTINGS_OBJ_NAME
 from isis_reduction_steps import UserFile
+sanslog = Logger("SANS")
 ################################################################################
 # Avoid a bug with deepcopy in python 2.6, details and workaround here:
 # http://bugs.python.org/issue1515
 if sys.version_info[0] == 2 and sys.version_info[1] == 6:
     import types
+
     def _deepcopy_method(x, memo):
-        return type(x)(x.im_func, copy.deepcopy(x.im_self, memo), x.im_class)
+        return type(x)(x.__func__, copy.deepcopy(x.__self__, memo), x.__self__.__class__)
     copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
 ################################################################################
 
@@ -90,8 +92,11 @@ COMMAND['can_sans'] = 'AssignCan('
 COMMAND['sample_trans'] = 'TransmissionSample('
 COMMAND['can_trans'] = 'TransmissionCan('
 
+
 class SkipEntry(RuntimeError):
     pass
+
+
 class SkipReduction(RuntimeError):
     pass
 
@@ -139,7 +144,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         @param filename: the CSV file with the list of runs to analyse
         @param format: type of file to load, nxs for Nexus, etc.
         @param plotresults: if true and this function is run from Mantidplot a graph will be created for the results of each reduction
-        @param saveAlgs: this named algorithm will be passed the name of the results workspace and filename (default = 'SaveRKH'). Pass a tuple of strings to save to multiple file formats
+        @param saveAlgs: this named algorithm will be passed the name of the results workspace and filename (default = 'SaveRKH').
+            Pass a tuple of strings to save to multiple file formats
         @param verbose: set to true to write more information to the log (default=False)
         @param centreit: do centre finding (default=False)
         @param reducer: if to use the command line (default) or GUI reducer object
@@ -214,26 +220,26 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                 if verbose == 1:
                     FindBeamCentre(50.,170.,12)
 
-
-            # WavRangeReduction runs the reduction for the specified wavelength range where the final argument can either be DefaultTrans or CalcTrans:
+            # WavRangeReduction runs the reduction for the specified
+            # wavelength range where the final argument can either be
+            # DefaultTrans or CalcTrans:
             reduced = WavRangeReduction(combineDet=combineDet, out_fit_settings=scale_shift)
 
-        except SkipEntry, reason:
+        except SkipEntry as reason:
             #this means that a load step failed, the warning and the fact that the results aren't there is enough for the user
             issueWarning(str(reason)+ ', skipping entry')
             continue
-        except SkipReduction, reason:
+        except SkipReduction as reason:
             #this means that a load step failed, the warning and the fact that the results aren't there is enough for the user
             issueWarning(str(reason)+ ', skipping reduction')
             continue
-        except ValueError, reason:
+        except ValueError as reason:
             issueWarning('Cannot load file :'+str(reason))
             #when we are all up to Python 2.5 replace the duplicated code below with one finally:
             delete_workspaces(raw_workspaces)
             raise
 
         delete_workspaces(raw_workspaces)
-
 
         if verbose:
             sanslog.notice(createColetteScript(run, format, reduced, centreit, plotresults, filename))
@@ -290,7 +296,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
             # else we map it to itself.
             save_names_dict = get_mapped_workspaces(save_names, save_as_zero_error_free)
 
-            for algor in saveAlgs.keys():
+            for algor in list(saveAlgs.keys()):
                 for workspace_name in save_names:
                     #add the file extension, important when saving different types of file so they don't over-write each other
                     ext = saveAlgs[algor]
@@ -336,6 +342,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
     #end of reduction of all entries of batch file
     return scale_shift
 
+
 def parse_run(run_num, ext):
     """
         Extracts an (optional) period specification from the run_num
@@ -357,6 +364,7 @@ def parse_run(run_num, ext):
         period = -1
 
     return run_spec, period
+
 
 def read_run(runs, run_role, format):
     """
@@ -386,6 +394,7 @@ def read_run(runs, run_role, format):
         return run_ws[0]
     return run_ws
 
+
 def read_trans_runs(runs, sample_or_can, format):
     """
         Loads the transmission runs to either be applied to the sample or the can.
@@ -412,14 +421,15 @@ def read_trans_runs(runs, sample_or_can, format):
         raise SkipReduction('Cannot load ' + role2 + ' run "' + run_file2 + '"')
     return [ws1, ws2]
 
+
 def delete_workspaces(workspaces):
     """
         Delete the list of workspaces if possible but fail siliently if there is
         a problem
         @param workspaces: the list to delete
     """
-    if type(workspaces) != type(list()):
-        if type(workspaces) != type(tuple()):
+    if not isinstance(workspaces, type(list())):
+        if not isinstance(workspaces, type(tuple())):
             workspaces = [workspaces]
 
     for wksp in workspaces:
@@ -429,6 +439,7 @@ def delete_workspaces(workspaces):
             except:
                 #we're only deleting to save memory, if the workspace really won't delete leave it
                 pass
+
 
 def get_mapped_workspaces(save_names, save_as_zero_error_free):
     """
@@ -453,6 +464,7 @@ def get_mapped_workspaces(save_names, save_as_zero_error_free):
             workspace_dictionary[name] = name
     return workspace_dictionary
 
+
 def delete_cloned_workspaces(save_names_dict):
     """
         If there are cloned workspaces in the worksapce map, then they are deleted
@@ -464,6 +476,7 @@ def delete_cloned_workspaces(save_names_dict):
             to_delete.append(save_names_dict[key])
     for element in to_delete:
         su.delete_zero_error_free_workspace(input_workspace_name = element)
+
 
 def setUserFileInBatchMode(new_user_file, current_user_file, original_user_file, original_settings, original_prop_man_settings):
     """
@@ -504,6 +517,7 @@ def setUserFileInBatchMode(new_user_file, current_user_file, original_user_file,
             ReductionSingleton().user_settings.execute(ReductionSingleton())
         current_user_file = user_file_to_set
     return current_user_file
+
 
 def sanitize_name(filename):
     # Users have used invalid characters for the output file in the past. We need to
