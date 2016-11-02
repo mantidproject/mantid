@@ -108,7 +108,7 @@ Output:
 .. testoutput:: ExCreateTransWSTwo
 
     The first four transWS Y values are:
-    0.0573
+    0.0572
     0.0575
     0.0585
     0.0585
