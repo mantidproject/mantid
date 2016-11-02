@@ -2,7 +2,6 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
-from mantid.api import PythonAlgorithm
 import mantid.simpleapi as sapi
 
 
