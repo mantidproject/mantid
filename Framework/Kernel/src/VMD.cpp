@@ -594,8 +594,7 @@ VMDBase<TYPE>::getNormalVector(const std::vector<VMDBase<TYPE>> &vectors) {
 /// Instantiate VMDBase classes
 template class VMDBase<double>;
 template class VMDBase<float>;
-template VMDBase<float>::VMDBase<double>(
-    std::vector<double, std::allocator<double>> const &);
+template VMDBase<float>::VMDBase(const std::vector<double> &);
 
 /**
   Prints a text representation of itself
