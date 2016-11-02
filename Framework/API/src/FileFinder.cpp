@@ -116,7 +116,7 @@ std::string FileFinderImpl::getFullPath(const std::string &filename,
   // First try the path relative to the current directory. Can throw in some
   // circumstances with extensions that have wild cards
   try {
-    Poco::File fullPath(Poco::Path(true).resolve(fName));
+    Poco::File fullPath(Poco::Path().resolve(fName));
     if (fullPath.exists() && (!ignoreDirs || !fullPath.isDirectory()))
       return fullPath.path();
   } catch (std::exception &) {
@@ -148,7 +148,7 @@ std::string FileFinderImpl::getFullPath(const std::string &filename,
     } else {
       Poco::Path path(searchPath, fName);
       Poco::File file(path);
-      if (file.exists() && !(ignoreDirs && file.isDirectory())) {
+      MDAlgorithmsTest_SaveMD2Testif (file.exists() && !(ignoreDirs && file.isDirectory())) {
         return path.toString();
       }
     }
