@@ -654,6 +654,38 @@ public:
     TS_ASSERT_EQUALS(expectedRunning, runningMap);
   }
 
+  /// If a run is aborted and then restarted, the "running" log should be set to
+  /// false at all times during the aborted run.
+  void test_abort_runningLogAlwaysFalseBeforeRestart_oldStyleCommands() {
+    auto log = make_unique<TimeSeriesProperty<std::string>>("MyICPevent");
+
+    // (This is a cut-down version of EMU66122, changed to "old style" commands)
+    const DateAndTime timeZero{"2016-10-01T10:01:44"};
+    const std::vector<DateAndTime> times{
+        timeZero,        timeZero + 3.0,  timeZero + 3.0,  timeZero + 51.0,
+        timeZero + 57.0, timeZero + 60.0, timeZero + 60.0, timeZero + 111.0};
+    const std::vector<std::string> values{
+        "CHANGE_PERIOD 1", "CHANGE_PERIOD 1", "BEGIN", "ABORT",
+        "CHANGE_PERIOD 1", "CHANGE_PERIOD 1", "BEGIN", "END"};
+    log->addValues(times, values);
+
+    const std::multimap<DateAndTime, bool> expectedRunning{
+        {timeZero + 3.0, false},    // begin - run later aborted
+        {timeZero + 51.0, false},   // abort
+        {timeZero + 60.0, true},    // begin
+        {timeZero + 111.0, false}}; // end
+
+    const LogParser logparser(log.get());
+
+    const auto &prop = std::unique_ptr<Property>(logparser.createRunningLog());
+    const auto *runningProp =
+        dynamic_cast<const TimeSeriesProperty<bool> *>(prop.get());
+    TS_ASSERT(runningProp);
+    TS_ASSERT_EQUALS(expectedRunning.size(), runningProp->size());
+    const auto &runningMap = runningProp->valueAsMultiMap();
+    TS_ASSERT_EQUALS(expectedRunning, runningMap);
+  }
+
 private:
   /// Helper method to run common test code for checking period logs.
   void doTestCurrentPeriodLog(const int &expected_period) {
