@@ -2,7 +2,9 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
+from mantid.api import PythonAlgorithm
 import mantid.simpleapi as sapi
+
 
 import numpy as np
 
@@ -26,6 +28,10 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.InOut, PropertyMode.Optional),
+                             "Workspace with the diffraction data to correct. The Vanadium corrections "
+                             "will be applied on it.")
+
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output, PropertyMode.Optional),
                              "Workspace with the diffraction data to correct. The Vanadium corrections "
                              "will be applied on it.")
 
@@ -83,7 +89,12 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
         The sums and fits are done in d-spacing.
         """
+
+        import pydevd
+        pydevd.settrace('localhost', port=49988, stdoutToServer=True, stderrToServer=True)
+
         ws = self.getProperty('Workspace').value
+        outWS = self.getPropertyValue('OutputWorkspace')
         vanWS = self.getProperty('VanadiumWorkspace').value
         integWS = self.getProperty('IntegrationWorkspace').value
         curvesWS = self.getProperty('CurvesWorkspace').value
@@ -108,9 +119,18 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                              'the CurvesWorkspace are required inputs. One or both of them were not given')
 
         prog.report('Applying corrections on the input workspace')
-        if ws:
+        if outWS:
+            sapi.CloneWorkspace(ws, OutputWorkspace=outWS)
+            # this retrieves the cloned workspace from the ADS
+            outWS = mtd[outWS]
+
+            self._applyVanadiumCorrections(outWS, integWS, curvesWS)
+            self.setProperty('OutputWorkspace', outWS)
+            
+        else:
             self._applyVanadiumCorrections(ws, integWS, curvesWS)
             self.setProperty('Workspace', ws)
+                
 
     def _applyVanadiumCorrections(self, ws, integWS, curvesWS):
         """
