@@ -179,7 +179,6 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
-  
   void testExperimentDefaults() {
     MockSettingsTabView mockView;
     MockMainWindowPresenter mainPresenter;
@@ -189,11 +188,11 @@ public:
     presenter.acceptMainPresenter(&mainPresenter);
 
     std::vector<std::string> defaults = {
-      "PointDetectorAnalysis", "None", 
-      "1.006831,-0.011467,0.002244,-0.000095", 
-      "1.017526,-0.017183,0.003136,-0.000140",
-      "0.917940,0.038265,-0.006645,0.000282",
-      "0.972762,0.001828,-0.000261,0.0", "1"};
+        "PointDetectorAnalysis", "None",
+        "1.006831,-0.011467,0.002244,-0.000095",
+        "1.017526,-0.017183,0.003136,-0.000140",
+        "0.917940,0.038265,-0.006645,0.000282",
+        "0.972762,0.001828,-0.000261,0.0", "1"};
 
     EXPECT_CALL(mainPresenter, getInstrumentName())
         .Times(1)

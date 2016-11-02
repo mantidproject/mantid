@@ -112,9 +112,10 @@ std::string QtReflSettingsTabView::getStitchOptions() const {
 * @param hints :: Hints as a map
 */
 void QtReflSettingsTabView::createStitchHints(
-  const std::map<std::string, std::string> &hints) {
+    const std::map<std::string, std::string> &hints) {
 
-  m_ui.expSettingsLayout0->addWidget(new HintingLineEdit(this, hints), 7, 1, 1, 3);
+  m_ui.expSettingsLayout0->addWidget(new HintingLineEdit(this, hints), 7, 1, 1,
+                                     3);
 }
 
 /** Return selected analysis mode

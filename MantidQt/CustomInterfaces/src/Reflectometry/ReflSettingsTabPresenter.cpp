@@ -290,10 +290,10 @@ IAlgorithm_sptr ReflSettingsTabPresenter::createReductionAlg() {
 
 /** Creates and returns an example empty instrument given an instrument name
 */
-Instrument_const_sptr 
-    ReflSettingsTabPresenter::createEmptyInstrument(std::string instName) {
+Instrument_const_sptr
+ReflSettingsTabPresenter::createEmptyInstrument(std::string instName) {
   IAlgorithm_sptr loadInst =
-    AlgorithmManager::Instance().create("LoadEmptyInstrument");
+      AlgorithmManager::Instance().create("LoadEmptyInstrument");
   loadInst->setChild(true);
   loadInst->setProperty("OutputWorkspace", "outWs");
   loadInst->setProperty("InstrumentName", instName);
