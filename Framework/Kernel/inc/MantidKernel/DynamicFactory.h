@@ -21,6 +21,7 @@
 
 // std
 #include <functional>
+#include <iterator>
 #include <vector>
 
 namespace Mantid {
