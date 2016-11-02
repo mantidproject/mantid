@@ -1074,7 +1074,6 @@ class Mask_ISIS(ReductionStep):
 
         _output_ws, detector_list = ExtractMask(InputWorkspace=workspace, OutputWorkspace="__mask")
         _issueInfo("Mask check %s: %g masked pixels" % (workspace, len(detector_list)))
-        SaveNexus(Filename="C:/Users/pica/Desktop/masked_file.nxs", InputWorkspace=workspace)
 
     def view(self, instrum):
         """
