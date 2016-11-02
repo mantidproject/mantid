@@ -91,7 +91,8 @@ void StartLiveData::afterPropertySet(const std::string &propName) {
         boost::dynamic_pointer_cast<IPropertyManager>(listener);
 
     if (propertyManagerListener) {
-      const std::vector<Property *> listenerProps = propertyManagerListener->getProperties();
+      const std::vector<Property *> listenerProps =
+          propertyManagerListener->getProperties();
       for (auto listenerProp : listenerProps) {
         auto prop = std::unique_ptr<Property>(listenerProp->clone());
         prop->setGroup(listenerPropertyGroup);
