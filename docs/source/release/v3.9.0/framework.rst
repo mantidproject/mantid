@@ -16,6 +16,7 @@ Improved
 ########
 
 - :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` has now a new mode 'Moving Average' which takes the minimum of a moving window average as the flat background.
+- :ref:`StartLiveData <algm-StartLiveData>` and its dialog now support dynamic listener properties, based on the specific LiveListener being used.
 
 Deprecated
 ##########
@@ -40,6 +41,7 @@ Python Algorithms
 
 - :ref:`MatchPeaks <algm-MatchPeaks>` performs circular shift operation (numpy roll) along the x-axis to align the peaks in the spectra.
 - :ref:`FindEPP <algm-FindEPP>` is improved to better determine the initial parameters and range for the fitting.
+- :ref:`StartLiveData <algm-StartLiveData>` can now accept LiveListener properties as parameters, based on the Instrument parameter.
 
 Bug Fixes
 ---------
