@@ -250,53 +250,23 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerSelection
   Q_OBJECT
 
 public:
-  InputControllerSelection(QObject *parent);
+  InputControllerSelection(QObject *parent, QPixmap *icon);
   ~InputControllerSelection() override;
   void onPaint(QPainter &) override;
+
+signals:
+  void selection(const QRect &);
 
 private:
   void drawCursor(QPixmap *cursor) override;
   void setPosition(const QPoint &pos) override;
   void resize() override;
+  void signalLeftClick() override;
 
-protected:
   QPixmap *m_image;
   QRect m_rect;
 };
 
-/**
-    Controller for comparing peaks on an unwrapped surface.
-  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerCompare
-    : public InputControllerSelection {
-  Q_OBJECT
-
-public:
-  InputControllerCompare(QObject *parent);
-
-signals:
-  void compare(const QRect &);
-
-private:
-  void signalLeftClick() override;
-};
-
-/**
-    Controller for erasing peaks on an unwrapped surface.
-  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerErase
-    : public InputControllerSelection {
-  Q_OBJECT
-
-public:
-  InputControllerErase(QObject *parent);
-
-signals:
-  void erase(const QRect &);
-
-private:
-  void signalLeftClick() override;
-};
 /**
     Controller for drawing and erasing arbitrary shapes on an unwrapped surface.
   */

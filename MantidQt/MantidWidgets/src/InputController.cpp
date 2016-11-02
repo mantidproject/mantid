@@ -334,9 +334,9 @@ void InputControllerDraw::signalRightClick() {}
 
 //--------------------------------------------------------------------------------
 
-InputControllerSelection::InputControllerSelection(QObject *parent)
+InputControllerSelection::InputControllerSelection(QObject *parent, QPixmap *icon)
     : InputControllerDraw(parent), m_rect(0, 0, cursorSize(), cursorSize()) {
-  m_image = new QPixmap(":/PickTools/selection-pointer.png");
+  m_image = icon;
 }
 
 InputControllerSelection::~InputControllerSelection() { delete m_image; }
@@ -375,23 +375,7 @@ void InputControllerSelection::resize() {
   m_rect.setSize(QSize(size, size));
 }
 
-//--------------------------------------------------------------------------------
-
-InputControllerCompare::InputControllerCompare(QObject *parent)
-    : InputControllerSelection(parent) {
-  m_image = new QPixmap(":/PickTools/selection-pointer.png");
-}
-
-void InputControllerCompare::signalLeftClick() { emit compare(m_rect); }
-
-//--------------------------------------------------------------------------------
-
-InputControllerErase::InputControllerErase(QObject *parent)
-    : InputControllerSelection(parent) {
-  m_image = new QPixmap(":/PickTools/eraser.png");
-}
-
-void InputControllerErase::signalLeftClick() { emit erase(m_rect); }
+void InputControllerSelection::signalLeftClick() { emit selection(m_rect); }
 
 //--------------------------------------------------------------------------------
 

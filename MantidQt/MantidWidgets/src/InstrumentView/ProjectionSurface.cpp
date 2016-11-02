@@ -106,14 +106,16 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
           SLOT(eraseFree(const QPolygonF &)));
 
   // create and connect the peak eraser controller
-  InputControllerErase *eraseController = new InputControllerErase(this);
+  auto eraseIcon = new QPixmap(":/PickTools/eraser.png");
+  InputControllerSelection *eraseController = new InputControllerSelection(this, eraseIcon);
   setInputController(ErasePeakMode, eraseController);
-  connect(eraseController, SIGNAL(erase(QRect)), this, SLOT(erasePeaks(QRect)));
+  connect(eraseController, SIGNAL(selection(QRect)), this, SLOT(erasePeaks(QRect)));
 
   // create and connect the peak compare controller
-  InputControllerCompare *compareController = new InputControllerCompare(this);
+  auto selectIcon = new QPixmap(":/PickTools/selection-pointer.png");
+  InputControllerSelection *compareController = new InputControllerSelection(this, selectIcon);
   setInputController(ComparePeakMode, compareController);
-  connect(compareController, SIGNAL(compare(QRect)), this,
+  connect(compareController, SIGNAL(selection(QRect)), this,
           SLOT(comparePeaks(QRect)));
 }
 
