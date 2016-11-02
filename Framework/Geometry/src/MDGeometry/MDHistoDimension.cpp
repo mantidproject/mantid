@@ -1,4 +1,5 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include <sstream>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>

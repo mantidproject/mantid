@@ -1,5 +1,6 @@
 #include <cfloat>
 #include <cmath>
+#include <complex>
 #include <vector>
 
 #include "MantidKernel/V3D.h"

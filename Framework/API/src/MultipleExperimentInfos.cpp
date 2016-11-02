@@ -3,6 +3,7 @@
 #include "MantidKernel/System.h"
 
 #include <boost/make_shared.hpp>
+#include <sstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
