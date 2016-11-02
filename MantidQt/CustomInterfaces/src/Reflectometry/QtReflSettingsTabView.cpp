@@ -240,6 +240,14 @@ std::string QtReflSettingsTabView::getPolarisationCorrections() const {
   return m_ui.polCorrComboBox->currentText().toStdString();
 }
 
+/** Return integrated monitors option
+* @return :: integrated monitors check
+*/
+std::string QtReflSettingsTabView::getIntMonCheck() const {
+
+  return m_ui.intMonCheckEdit->text().toStdString();
+}
+
 /** Return monitor integral wavelength min
 * @return :: monitor integral min
 */

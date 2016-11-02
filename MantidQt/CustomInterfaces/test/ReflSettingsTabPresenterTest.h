@@ -126,6 +126,9 @@ public:
     EXPECT_CALL(mockView, getPolarisationCorrections())
         .Times(Exactly(1))
         .WillOnce(Return("PNR"));
+    EXPECT_CALL(mockView, getIntMonCheck())
+        .Times(Exactly(1))
+        .WillOnce(Return("True"));
     EXPECT_CALL(mockView, getMonitorIntegralMin())
         .Times(Exactly(1))
         .WillOnce(Return("4"));
@@ -167,17 +170,18 @@ public:
     TS_ASSERT_EQUALS(optionsVec[4], "CPp=0.54");
     TS_ASSERT_EQUALS(optionsVec[5], "RegionOfDirectBeam=\"0,3\"");
     TS_ASSERT_EQUALS(optionsVec[6], "PolarizationAnalysis=PNR");
-    TS_ASSERT_EQUALS(optionsVec[7], "MonitorIntegrationWavelengthMin=4");
-    TS_ASSERT_EQUALS(optionsVec[8], "MonitorIntegrationWavelengthMax=10");
-    TS_ASSERT_EQUALS(optionsVec[9], "MonitorBackgroundWavelengthMin=12");
-    TS_ASSERT_EQUALS(optionsVec[10], "MonitorBackgroundWavelengthMax=17");
-    TS_ASSERT_EQUALS(optionsVec[11], "WavelengthMin=1");
-    TS_ASSERT_EQUALS(optionsVec[12], "WavelengthMax=15");
-    TS_ASSERT_EQUALS(optionsVec[13], "I0MonitorIndex=2");
-    TS_ASSERT_EQUALS(optionsVec[14], "ScaleFactor=2");
-    TS_ASSERT_EQUALS(optionsVec[15], "MomentumTransferStep=-0.02");
-    TS_ASSERT_EQUALS(optionsVec[16], "MomentumTransferMaximum=0.2");
-    TS_ASSERT_EQUALS(optionsVec[17], "ProcessingInstructions=\"3,4\"");
+    TS_ASSERT_EQUALS(optionsVec[7], "NormalizeByIntegratedMonitors=True");
+    TS_ASSERT_EQUALS(optionsVec[8], "MonitorIntegrationWavelengthMin=4");
+    TS_ASSERT_EQUALS(optionsVec[9], "MonitorIntegrationWavelengthMax=10");
+    TS_ASSERT_EQUALS(optionsVec[10], "MonitorBackgroundWavelengthMin=12");
+    TS_ASSERT_EQUALS(optionsVec[11], "MonitorBackgroundWavelengthMax=17");
+    TS_ASSERT_EQUALS(optionsVec[12], "WavelengthMin=1");
+    TS_ASSERT_EQUALS(optionsVec[13], "WavelengthMax=15");
+    TS_ASSERT_EQUALS(optionsVec[14], "I0MonitorIndex=2");
+    TS_ASSERT_EQUALS(optionsVec[15], "ScaleFactor=2");
+    TS_ASSERT_EQUALS(optionsVec[16], "MomentumTransferStep=-0.02");
+    TS_ASSERT_EQUALS(optionsVec[17], "MomentumTransferMaximum=0.2");
+    TS_ASSERT_EQUALS(optionsVec[18], "ProcessingInstructions=\"3,4\"");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }

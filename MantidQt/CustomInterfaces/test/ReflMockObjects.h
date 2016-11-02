@@ -77,6 +77,7 @@ public:
   MOCK_CONST_METHOD0(getMomentumTransferStep, std::string());
   MOCK_CONST_METHOD0(getScaleFactor, std::string());
   MOCK_CONST_METHOD0(getPolarisationCorrections, std::string());
+  MOCK_CONST_METHOD0(getIntMonCheck, std::string());
   MOCK_CONST_METHOD0(getMonitorIntegralMin, std::string());
   MOCK_CONST_METHOD0(getMonitorIntegralMax, std::string());
   MOCK_CONST_METHOD0(getMonitorBackgroundMin, std::string());

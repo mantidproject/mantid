@@ -70,6 +70,8 @@ public:
   std::string getScaleFactor() const override;
   /// Return selected polarisation corrections
   std::string getPolarisationCorrections() const override;
+  /// Return integrated monitors option
+  std::string getIntMonCheck() const override;
   /// Return monitor integral wavelength min
   std::string getMonitorIntegralMin() const override;
   /// Return monitor integral wavelength max

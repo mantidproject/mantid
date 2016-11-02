@@ -337,170 +337,169 @@
           <layout class="QHBoxLayout" name="instSettingsLayoutContainer">
             <item>
               <layout class="QGridLayout" name="instSettingsLayout0">
-              <property name="margin">
-                <number>10</number>
-              </property>
-              <item row="0" column="0">
-                <widget class="QLabel" name="intMonCheckLabel">
-                  <property name="text">
-                    <string>IntegratedMonitors</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="0" column="1">
-                <widget class="QCheckBox" name="intMonCheckEdit">
-                  <property name="checkState">
-                    <set>Qt::Checked</set>
-                  </property>
-                </widget>
-              </item>
-              <item row="0" column="2">
-                <spacer name="instSettings0Spacer0">
-                  <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                    <size>
-                      <width>40</width>
-                      <height>20</height>
-                    </size>
-                  </property>
-                </spacer>
-              </item>   
-                
-              <item row="1" column="0">
-                <widget class="QLabel" name="monIntMinLabel">
-                  <property name="text">
-                    <string>MonitorIntegralMin</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="1" column="1">
-                <widget class="QLineEdit" name="monIntMinEdit"/>
-              </item>
-              <item row="1" column="2">
-                <widget class="QLabel" name="monIntMaxLabel">
-                  <property name="text">
-                    <string>MonitorIntegralMax</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="1" column="3">
-                <widget class="QLineEdit" name="monIntMaxEdit"/>
-              </item>
-              <item row="1" column="4">
-                <spacer name="instSettings0Spacer1">
-                  <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                    <size>
-                      <width>40</width>
-                      <height>20</height>
-                    </size>
-                  </property>
-                </spacer>
-              </item>
-              <item row="2" column="0">
-                <widget class="QLabel" name="monBgMinLabel">
-                  <property name="text">
-                    <string>MonitorBackgroundMin</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="2" column="1">
-                <widget class="QLineEdit" name="monBgMinEdit"/>
-              </item>
-              <item row="2" column="2">
-                <widget class="QLabel" name="monBgMaxLabel">
-                  <property name="text">
-                    <string>MonitorBackgroundMax</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="2" column="3">
-                <widget class="QLineEdit" name="monBgMaxEdit"/>
-              </item>
-              <item row="2" column="4">
-                <spacer name="instSettings0Spacer2">
-                  <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                    <size>
-                      <width>40</width>
-                      <height>20</height>
-                    </size>
-                  </property>
-                </spacer>
-              </item>
-              <item row="3" column="0">
-                <widget class="QLabel" name="lamMinLabel">
-                  <property name="text">
-                    <string>LambdaMin</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="3" column="1">
-                <widget class="QLineEdit" name="lamMinEdit"/>
-              </item>
-              <item row="3" column="2">
-                <widget class="QLabel" name="lamMaxLabel">
-                  <property name="text">
-                    <string>LambdaMax</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="3" column="3">
-                <widget class="QLineEdit" name="lamMaxEdit"/>
-              </item>
-              <item row="3" column="4">
-                <spacer name="instSettings0Spacer3">
-                  <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                    <size>
-                      <width>40</width>
-                      <height>20</height>
-                    </size>
-                  </property>
-                </spacer>
-              </item>
-              <item row="4" column="0">
-                <widget class="QLabel" name="I0MonIndexLabel">
-                  <property name="text">
-                    <string>I0MonitorIndex</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="4" column="1">
-                <widget class="QLineEdit" name="I0MonIndexEdit"/>
-              </item>
-              <item row="4" column="2">
-                <widget class="QLabel" name="procInstLabel">
-                  <property name="text">
-                    <string>ProcessingInstructions</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="4" column="3">
-                <widget class="QLineEdit" name="procInstEdit"/>
-              </item>
-              <item row="4" column="4">
-                <spacer name="instSettings0Spacer4">
-                  <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                    <size>
-                      <width>40</width>
-                      <height>20</height>
-                    </size>
-                  </property>
-                </spacer>
-              </item>
-            </layout>
+                <property name="margin">
+                  <number>10</number>
+                </property>
+                <item row="0" column="0">
+                  <widget class="QLabel" name="intMonCheckLabel">
+                    <property name="text">
+                      <string>IntegratedMonitors</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="0" column="1">
+                  <widget class="QCheckBox" name="intMonCheckEdit">
+                    <property name="checkState">
+                      <set>Qt::Checked</set>
+                    </property>
+                  </widget>
+                </item>
+                <item row="0" column="2">
+                  <spacer name="instSettings0Spacer0">
+                    <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                      <size>
+                        <width>40</width>
+                        <height>20</height>
+                      </size>
+                    </property>
+                  </spacer>
+                </item>
+                <item row="1" column="0">
+                  <widget class="QLabel" name="monIntMinLabel">
+                    <property name="text">
+                      <string>MonitorIntegralMin</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="1" column="1">
+                  <widget class="QLineEdit" name="monIntMinEdit"/>
+                </item>
+                <item row="1" column="2">
+                  <widget class="QLabel" name="monIntMaxLabel">
+                    <property name="text">
+                      <string>MonitorIntegralMax</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="1" column="3">
+                  <widget class="QLineEdit" name="monIntMaxEdit"/>
+                </item>
+                <item row="1" column="4">
+                  <spacer name="instSettings0Spacer1">
+                    <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                      <size>
+                        <width>40</width>
+                        <height>20</height>
+                      </size>
+                    </property>
+                  </spacer>
+                </item>
+                <item row="2" column="0">
+                  <widget class="QLabel" name="monBgMinLabel">
+                    <property name="text">
+                      <string>MonitorBackgroundMin</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="2" column="1">
+                  <widget class="QLineEdit" name="monBgMinEdit"/>
+                </item>
+                <item row="2" column="2">
+                  <widget class="QLabel" name="monBgMaxLabel">
+                    <property name="text">
+                      <string>MonitorBackgroundMax</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="2" column="3">
+                  <widget class="QLineEdit" name="monBgMaxEdit"/>
+                </item>
+                <item row="2" column="4">
+                  <spacer name="instSettings0Spacer2">
+                    <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                      <size>
+                        <width>40</width>
+                        <height>20</height>
+                      </size>
+                    </property>
+                  </spacer>
+                </item>
+                <item row="3" column="0">
+                  <widget class="QLabel" name="lamMinLabel">
+                    <property name="text">
+                      <string>LambdaMin</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="3" column="1">
+                  <widget class="QLineEdit" name="lamMinEdit"/>
+                </item>
+                <item row="3" column="2">
+                  <widget class="QLabel" name="lamMaxLabel">
+                    <property name="text">
+                      <string>LambdaMax</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="3" column="3">
+                  <widget class="QLineEdit" name="lamMaxEdit"/>
+                </item>
+                <item row="3" column="4">
+                  <spacer name="instSettings0Spacer3">
+                    <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                      <size>
+                        <width>40</width>
+                        <height>20</height>
+                      </size>
+                    </property>
+                  </spacer>
+                </item>
+                <item row="4" column="0">
+                  <widget class="QLabel" name="I0MonIndexLabel">
+                    <property name="text">
+                      <string>I0MonitorIndex</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="4" column="1">
+                  <widget class="QLineEdit" name="I0MonIndexEdit"/>
+                </item>
+                <item row="4" column="2">
+                  <widget class="QLabel" name="procInstLabel">
+                    <property name="text">
+                      <string>ProcessingInstructions</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="4" column="3">
+                  <widget class="QLineEdit" name="procInstEdit"/>
+                </item>
+                <item row="4" column="4">
+                  <spacer name="instSettings0Spacer4">
+                    <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                      <size>
+                        <width>40</width>
+                        <height>20</height>
+                      </size>
+                    </property>
+                  </spacer>
+                </item>
+              </layout>
             </item>
             <item>
               <layout class="QGridLayout" name="instSettingsLayout1">

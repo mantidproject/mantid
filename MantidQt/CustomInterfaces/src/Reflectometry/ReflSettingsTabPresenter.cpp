@@ -169,6 +169,11 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
   if (!polCorr.empty())
     options.push_back("PolarizationAnalysis=" + polCorr);
 
+  // Add integrated monitors option
+  auto intMonCheck = m_view->getIntMonCheck();
+  if (!intMonCheck.empty())
+    options.push_back("NormalizeByIntegratedMonitors=" + intMonCheck);
+
   // Add monitor integral min
   auto monIntMin = m_view->getMonitorIntegralMin();
   if (!monIntMin.empty())
