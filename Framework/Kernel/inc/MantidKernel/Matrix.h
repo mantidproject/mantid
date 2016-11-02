@@ -4,7 +4,7 @@
 #include "MantidKernel/DllConfig.h"
 #include <vector>
 #include <cfloat>
-#include <ostream>
+#include <iosfwd>
 
 namespace Mantid {
 
