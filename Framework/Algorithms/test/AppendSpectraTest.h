@@ -388,7 +388,7 @@ private:
     auto appendSpectra =
         Mantid::API::FrameworkManager::Instance().createAlgorithm(
             "AppendSpectra");
-    TS_ASSERT_THROWS_NOTHING(appendSpectra->setRethrows(true););
+    TS_ASSERT_THROWS_NOTHING(appendSpectra->setRethrows(true));
     TS_ASSERT_THROWS_NOTHING(
         appendSpectra->setProperty("InputWorkspace1", inputWorkspace1));
     TS_ASSERT_THROWS_NOTHING(
