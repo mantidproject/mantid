@@ -144,6 +144,9 @@ public:
     EXPECT_CALL(mockView, getProcessingInstructions())
         .Times(Exactly(1))
         .WillOnce(Return("\"3,4\""));
+    EXPECT_CALL(mockView, getTransmissionRuns())
+        .Times(Exactly(1))
+        .WillOnce(Return("INTER00013463.nxs,INTER00013464.nxs"));
     auto options = presenter.getReductionOptions();
 
     std::vector<std::string> optionsVec;
@@ -166,6 +169,8 @@ public:
     TS_ASSERT_EQUALS(optionsVec[15], "ScaleFactor=2");
     TS_ASSERT_EQUALS(optionsVec[16], "MomentumTransferStep=-0.02");
     TS_ASSERT_EQUALS(optionsVec[17], "ProcessingInstructions=\"3,4\"");
+    TS_ASSERT_EQUALS(optionsVec[18], "FirstTransmissionRun=TRANS_INTER00013463.nxs");
+    TS_ASSERT_EQUALS(optionsVec[19], "SecondTransmissionRun=TRANS_INTER00013464.nxs");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
