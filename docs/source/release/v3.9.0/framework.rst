@@ -41,7 +41,7 @@ Python Algorithms
 
 - :ref:`MatchPeaks <algm-MatchPeaks>` performs circular shift operation (numpy roll) along the x-axis to align the peaks in the spectra.
 - :ref:`FindEPP <algm-FindEPP>` is improved to better determine the initial parameters and range for the fitting.
-- :ref:`StartLiveData <algm-StartLiveData>` can now accept LiveListener properties as parameters, based on the Instrument parameter.
+- :ref:`StartLiveData <algm-StartLiveData>` can now accept LiveListener properties as parameters, based on the value of the "Instrument" parameter.
 
 Bug Fixes
 ---------
