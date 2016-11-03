@@ -94,6 +94,10 @@ public:
   createStitchHints(const std::map<std::string, std::string> &hints) override {
     UNUSED_ARG(hints);
   };
+  void setPolarisationCorrectionsAccessibility(
+      const std::string &instName) const override {
+    UNUSED_ARG(instName);
+  }
   IReflSettingsTabPresenter *getPresenter() const override { return nullptr; }
 };
 
@@ -119,7 +123,6 @@ public:
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
     UNUSED_ARG(presenter);
   };
-  std::string getCurrentInstrumentName() const override { return "INTER"; };
   ~MockRunsTabPresenter() override{};
 };
 
@@ -135,6 +138,9 @@ public:
   void notify(IReflSettingsTabPresenter::Flag flag) override {
     UNUSED_ARG(flag);
   };
+  void setInstrumentName(const std::string instName) override {
+    UNUSED_ARG(instName);
+  }
   ~MockSettingsTabPresenter() override{};
 };
 
@@ -153,6 +159,10 @@ public:
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
+  // Other calls we don't care about
+  void setInstrumentName(const std::string &instName) const override {
+    UNUSED_ARG(instName);
+  }
   ~MockMainWindowPresenter() override{};
 };
 
