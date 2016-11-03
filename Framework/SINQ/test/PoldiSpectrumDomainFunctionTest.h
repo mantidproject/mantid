@@ -10,7 +10,6 @@
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidCurveFitting/Jacobian.h"
 
 using ::testing::Return;

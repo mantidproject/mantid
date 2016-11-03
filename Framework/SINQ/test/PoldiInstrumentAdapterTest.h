@@ -9,7 +9,6 @@
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 
 #include "MantidAPI/Run.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 using namespace Mantid::Poldi;

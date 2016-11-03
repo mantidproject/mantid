@@ -1,7 +1,6 @@
 #include "MantidAlgorithms/CopyInstrumentParameters.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 
 #include <iostream>
 

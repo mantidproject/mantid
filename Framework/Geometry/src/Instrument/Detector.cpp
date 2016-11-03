@@ -1,6 +1,5 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 
 namespace Mantid {
 namespace Geometry {

@@ -7,7 +7,6 @@
 
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Poldi;

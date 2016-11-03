@@ -6,7 +6,6 @@
 #include <string>
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
 

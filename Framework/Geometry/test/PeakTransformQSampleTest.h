@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Crystal/PeakTransformQSample.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MockObjects.h"
 #include <boost/make_shared.hpp>
 

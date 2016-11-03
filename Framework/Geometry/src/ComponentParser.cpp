@@ -1,5 +1,4 @@
 #include "MantidGeometry/ComponentParser.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 
 using namespace Mantid::Kernel;
 

@@ -1,5 +1,4 @@
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include <boost/python/class.hpp>
 
 using Mantid::Geometry::Detector;

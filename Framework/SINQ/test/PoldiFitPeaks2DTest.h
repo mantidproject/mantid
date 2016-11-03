@@ -5,7 +5,6 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 
 #include "MantidKernel/Matrix.h"
 

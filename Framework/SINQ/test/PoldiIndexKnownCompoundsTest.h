@@ -9,7 +9,6 @@
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include <boost/algorithm/string/split.hpp>
 
 using namespace Mantid::Poldi;

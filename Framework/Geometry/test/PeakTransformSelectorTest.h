@@ -3,7 +3,6 @@
 
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidGeometry/Crystal/PeakTransformSelector.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>

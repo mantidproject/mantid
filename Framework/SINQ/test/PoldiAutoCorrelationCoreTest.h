@@ -13,7 +13,6 @@
 #include "MantidSINQ/PoldiUtilities/PoldiDGrid.h"
 
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidDataObjects/Workspace2D.h"

@@ -1,7 +1,6 @@
 #include "MantidGeometry/Rendering/GluGeometryRenderer.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Quat.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Cone.h"

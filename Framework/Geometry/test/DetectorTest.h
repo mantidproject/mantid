@@ -5,7 +5,6 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include <cmath>
 
 using namespace Mantid::Geometry;

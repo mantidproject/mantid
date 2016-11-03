@@ -11,6 +11,7 @@
 
 #include "tbb/concurrent_unordered_map.h"
 
+#include <memory>
 #include <vector>
 #include <typeinfo>
 
@@ -73,6 +74,9 @@ public:
       ComponentID, boost::shared_ptr<Parameter>>::const_iterator pmap_cit;
   /// Default constructor
   ParameterMap();
+  /// Const constructor
+  ParameterMap(const ParameterMap &other);
+  ~ParameterMap();
   /// Returns true if the map is empty, false otherwise
   inline bool empty() const { return m_map.empty(); }
   /// Return the size of the map
@@ -359,7 +363,8 @@ private:
   /// internal cache map instance for cached rotation values
   mutable Kernel::Cache<const ComponentID, Kernel::Quat> m_cacheRotMap;
   /// internal cache map for cached bounding boxes
-  mutable Kernel::Cache<const ComponentID, BoundingBox> m_boundingBoxMap;
+  std::unique_ptr<Kernel::Cache<const ComponentID, BoundingBox>>
+      m_boundingBoxMap;
 };
 
 /// ParameterMap shared pointer typedef
