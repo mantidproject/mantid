@@ -1,5 +1,4 @@
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
-#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
