@@ -16,7 +16,7 @@ using namespace Mantid::Geometry;
 * @param view :: The view we are handling
 */
 ReflSettingsTabPresenter::ReflSettingsTabPresenter(IReflSettingsTabView *view)
-    : m_view(view), m_mainPresenter() {
+    : m_view(view), m_mainPresenter(), currentInstrumentName("INTER") {
 
   // Create the 'HintingLineEdits'
   createStitchHints();

@@ -20,9 +20,6 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
   m_settingsPresenter->acceptMainPresenter(this);
-
-  // Trigger the setting of the current instrument name in settings tab
-  m_runsPresenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
 }
 
 /** Destructor

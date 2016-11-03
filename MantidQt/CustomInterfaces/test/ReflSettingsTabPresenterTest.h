@@ -188,11 +188,13 @@ public:
 
   void testExperimentDefaults() {
     MockSettingsTabView mockView;
-    MockMainWindowPresenter mainPresenter;
     ReflSettingsTabPresenter presenter(&mockView);
+    MockMainWindowPresenter mainPresenter;
 
     // This presenter accepts the main presenter
     presenter.acceptMainPresenter(&mainPresenter);
+    // Set instrument to 'POLREF'
+    presenter.setInstrumentName("POLREF");
 
     std::vector<std::string> defaults = {
         "PointDetectorAnalysis", "None",
@@ -201,9 +203,6 @@ public:
         "0.917940,0.038265,-0.006645,0.000282",
         "0.972762,0.001828,-0.000261,0.0", "1"};
 
-    EXPECT_CALL(mainPresenter, getInstrumentName())
-        .Times(1)
-        .WillOnce(Return("POLREF"));
     EXPECT_CALL(mockView, setExpDefaults(defaults)).Times(1);
     presenter.notify(IReflSettingsTabPresenter::ExpDefaultsFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
@@ -219,9 +218,6 @@ public:
 
     std::vector<double> defaults = {1., 4.0, 10., 15., 17., 1.0, 17., 2.0};
 
-    EXPECT_CALL(mainPresenter, getInstrumentName())
-        .Times(1)
-        .WillOnce(Return("INTER"));
     EXPECT_CALL(mockView, setInstDefaults(defaults)).Times(1);
     presenter.notify(IReflSettingsTabPresenter::InstDefaultsFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
