@@ -11,6 +11,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <fstream>
+#include <cctype>
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
