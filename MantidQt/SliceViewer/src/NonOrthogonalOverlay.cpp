@@ -94,7 +94,7 @@ namespace MantidQt {
         void NonOrthogonalOverlay::setDefaultAxesPoints() {
             auto ws = m_ws->get(); // assumes it is a rectangle
             m_dim0Max = ws->getDimension(0)->getMaximum();
-			//m_dim0Max = m_dim0Max*1.1; //to set axis slightly back from slice
+			m_dim0Max = m_dim0Max*1.1; //to set axis slightly back from slice
             m_dim1 = ws->getDimension(1)->getMaximum();
             m_dim2 = ws->getDimension(2)->getMaximum();
         }
@@ -131,9 +131,7 @@ namespace MantidQt {
             int displayNum = 20; // can mess around increasing or
                                 // decreasing grid later, maybe make an
                                 // option on sliceviewgui
-
-            calculateTickMarks(displayNum);
-				  
+			calculateTickMarks(displayNum);		  
         }
 
         void NonOrthogonalOverlay::setAxesPoints() {
@@ -158,14 +156,9 @@ namespace MantidQt {
 
             if (API::isHKLDimensions(
                     *m_ws, m_dimX,
-                    m_dimY)) { // and skew actually _wants_ to be visible
-            // make sure all calcs are outside of paintEvent... so
-            // probably move ApplyskewMatrix out of it
+                    m_dimY)) {
             setSkewMatrix();
             setAxesPoints();
-			                 // dataset is, or just zoom level?
-				
-
             }
         }
 
@@ -183,37 +176,37 @@ namespace MantidQt {
 		void NonOrthogonalOverlay::calculateTickMarks(
 			int tickNum) { // assumes X axis
 			clearAllAxisPointVectors();
-			double xBuffer = (m_xMaxVis - m_xMinVis);
-			double yBuffer = (m_yMaxVis - m_yMinVis);
-			m_xMaxVis = m_xMaxVis + xBuffer;
-			m_xMinVis = m_xMinVis - xBuffer;
-			m_yMaxVis = m_yMaxVis + yBuffer;
-			m_yMinVis = m_yMinVis - yBuffer;
+			double xBuffer  = (m_xMaxVis - m_xMinVis);
+			double yBuffer =  (m_yMaxVis - m_yMinVis);
+			double m_xMaxVisBuffered = m_xMaxVis + xBuffer;
+			double m_xMinVisBuffered = m_xMinVis - xBuffer;
+			double m_yMaxVisBuffered = m_yMaxVis + yBuffer;
+			double m_yMinVisBuffered = m_yMinVis - yBuffer;
 			double axisPointX;
 			double axisPointY;
 			double percentageOfLineX = (
-				((m_xMaxVis ) - (m_xMinVis)) /
+				((m_xMaxVisBuffered) - (m_xMinVisBuffered)) /
 				tickNum);
 			double percentageOfLineY = (
-				((m_yMaxVis ) - (m_yMinVis)) /
+				((m_yMaxVisBuffered) - (m_yMinVisBuffered)) /
 				tickNum);
 			for (int i = 0; i <= tickNum; i++) {
-				axisPointX = (percentageOfLineX * i) + m_xMinVis;
-				axisPointY = (percentageOfLineY * i) + m_yMinVis;
+				axisPointX = (percentageOfLineX * i) + m_xMinVisBuffered;
+				axisPointY = (percentageOfLineY * i) + m_yMinVisBuffered;
 				m_axisXPointVec.push_back(axisPointX);
 				m_xNumbers.push_back(skewMatrixApply(axisPointX, m_yMinVis));
-				m_xNumbers[i].setY(m_yMinVis + yBuffer);
+				m_xNumbers[i].setY(m_yMinVis);
 				m_yNumbers.push_back(skewMatrixApply(m_xMinVis, axisPointY));
-				m_yNumbers[i].setX(m_xMinVis + xBuffer);
+				m_yNumbers[i].setX(m_xMinVis);
 				m_xAxisTickStartVec.push_back(
-					skewMatrixApply(axisPointX, (m_yMinVis)));
+					skewMatrixApply(axisPointX, (m_yMinVisBuffered)));
 				m_xAxisTickEndVec.push_back(
-					skewMatrixApply(axisPointX, (m_yMaxVis)));
+					skewMatrixApply(axisPointX, (m_yMaxVisBuffered)));
 				m_axisYPointVec.push_back(axisPointY);
 				m_yAxisTickStartVec.push_back(
-					skewMatrixApply((m_xMinVis), axisPointY));
+					skewMatrixApply((m_xMinVisBuffered), axisPointY));
 				m_yAxisTickEndVec.push_back(
-					skewMatrixApply((m_xMaxVis), axisPointY));
+					skewMatrixApply((m_xMaxVisBuffered), axisPointY));
 			}
 			update();
 		}

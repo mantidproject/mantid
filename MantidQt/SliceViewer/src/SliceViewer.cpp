@@ -1238,6 +1238,7 @@ void SliceViewer::resetZoom() {
   m_plot->replot();
   autoRebinIfRequired();
   updatePeaksOverlay();
+  updateNonOrthogonalOverlay();
 }
 
 //------------------------------------------------------------------------------
