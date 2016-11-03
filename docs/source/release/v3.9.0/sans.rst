@@ -9,6 +9,7 @@ Bug Fixes
 ---------
 
 |
+
 - IDF bug when using Larmor in batch mode was resolved.
 
 X uncertainties (delta-Q)
