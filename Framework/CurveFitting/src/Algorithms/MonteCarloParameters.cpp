@@ -1,9 +1,13 @@
 #include "MantidCurveFitting/Algorithms/MonteCarloParameters.h"
 
 #include "MantidAPI/CostFunctionFactory.h"
+#include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/Expression.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 #include "MantidKernel/MersenneTwister.h"
+
+#include <numeric>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -41,7 +45,21 @@ void setParameters(CostFunctions::CostFuncFitting &costFunc, const std::vector<d
   }
   costFunc.applyTies();
 }
+
+/// Return a sum of constraints penalty values.
+double
+getConstraints(const std::vector<std::unique_ptr<IConstraint>> &constraints) {
+  try {
+    return std::accumulate(constraints.begin(), constraints.end(), 0.0,
+                           [](double s, const std::unique_ptr<IConstraint> &c) {
+                             return s + c->check();
+                           });
+  } catch (...) {
+    return 0.0;
+  }
 }
+
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 
@@ -64,6 +82,7 @@ const std::string MonteCarloParameters::summary() const {
 void MonteCarloParameters::initConcrete() {
   declareCostFunctionProperty();
   declareProperty("NIterations", 100, "Number of iterations to run.");
+  declareProperty("Constraints","","Additional constraints on tied parameters.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -73,14 +92,29 @@ void MonteCarloParameters::execConcrete() {
   auto nParams = costFunction->nParams();
   auto func = costFunction->getFittingFunction();
 
-  Kernel::MersenneTwister randGenerator;
+  // Use additional constraints on parameters tied in some way
+  // to the varied parameters to exculde unwanted results.
+  std::vector<std::unique_ptr<IConstraint>> constraints;
+  std::string constraintStr = getProperty("Constraints");
+  if (!constraintStr.empty()) {
+    Expression expr;
+    expr.parse(constraintStr);
+    expr.toList();
+    for (auto &term : expr.terms()) {
+      IConstraint *c =
+          ConstraintFactory::Instance().createInitialized(func.get(), term);
+      constraints.push_back(std::unique_ptr<IConstraint>(c));
+    }
+  }
 
+  Kernel::MersenneTwister randGenerator;
   // Ranges to use with random number generators: one for each free parameter.
   std::vector<std::pair<double, double>> ranges;
   ranges.reserve(nParams);
   for (size_t i = 0; i < func->nParams(); ++i) {
-    if (func->isFixed(i))
+    if (func->isFixed(i)) {
       continue;
+    }
     auto constraint = func->getConstraint(i);
     if (constraint == nullptr) {
       func->fix(i);
@@ -108,7 +142,7 @@ void MonteCarloParameters::execConcrete() {
   nParams = costFunction->nParams();
 
   std::vector<double> bestParams = getParameters(*costFunction);
-  double bestValue = costFunction->val();
+  double bestValue = costFunction->val() + getConstraints(constraints);
 
   // Implicit cast from int to size_t
   size_t nIter = static_cast<int>(getProperty("NIterations"));
@@ -118,6 +152,9 @@ void MonteCarloParameters::execConcrete() {
       costFunction->setParameter(i, randGenerator.nextValue(range.first, range.second));
     }
     costFunction->applyTies();
+    if (getConstraints(constraints) > 0.0) {
+      continue;
+    }
     auto value = costFunction->val();
     if (value < bestValue) {
       bestValue = value;
