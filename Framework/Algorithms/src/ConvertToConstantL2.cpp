@@ -90,6 +90,11 @@ void ConvertToConstantL2::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     PARALLEL_START_INTERUPT_REGION
+    // Should not move the monitors
+    if (spectrumInfo.isMonitor(i)) {
+      continue;
+    }
+
     m_outputWS->setHistogram(i, m_inputWS->histogram(i));
     // Copy the energy transfer axis
     // TOF
