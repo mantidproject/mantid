@@ -10,8 +10,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 std::unique_ptr<TomoToolConfigDialogBase>
-TomoToolConfigDialogBase::getToolDialogFor(
-    const std::string &toolName) {
+TomoToolConfigDialogBase::getToolDialogFor(const std::string &toolName) {
 
   if (toolName == "TomoPy") {
     return Mantid::Kernel::make_unique<TomoToolConfigDialogTomoPy>();
