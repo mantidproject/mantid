@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import SetBeam, SetSample, MonteCarloAbsorption, GroupWorkspaces
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
-                        WorkspaceGroupProperty, PropertyMode, Progress)
+                        WorkspaceGroupProperty, PropertyMode, Progress, mtd)
 from mantid.kernel import (StringMandatoryValidator, Direction, logger, FloatBoundedValidator,
                            IntBoundedValidator, MaterialBuilder, StringListValidator)
 
@@ -45,8 +45,8 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                              doc='Sample workspace.')
         self.declareProperty(name='SampleChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
-        self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
-                             validator=StringListValidator(['Mass Density', 'Number Density']),
+        self.declareProperty(name='SampleDensityType', defaultValue='Mass',
+                             validator=StringListValidator(['Mass', 'Number']),
                              doc='Use of Mass density or Number density')
         self.declareProperty(name='SampleDensity', defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
@@ -126,10 +126,10 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                           'Width': self._beam_width,
                           'Height': self._beam_height})
 
-        if self._sample_density_type == 'Mass Density':
+        if self._sample_density_type == 'Mass':
             sample_mat_list = {'ChemicalFormula': self._sample_chemical_formula,
                                'SampleMassDensity': self._sample_density}
-        if self._sample_density_type == 'Number Density':
+        if self._sample_density_type == 'Number':
             sample_mat_list = {'ChemicalFormula': self._sample_chemical_formula,
                                'SampleNumberDensity': self._sample_density}
 
@@ -183,10 +183,10 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                 divide_alg.setProperty("OutputWorkspace", sample_wave_ws)
                 divide_alg.execute()
 
-                if self._sample_density_type == 'Mass Density':
+                if self._sample_density_type == 'Mass':
                     container_mat_list = {'ChemicalFormula': self._can_chemical_formula,
                                           'SampleMassDensity': self._can_density}
-                if self._sample_density_type == 'Number Density':
+                if self._sample_density_type == 'Number':
                     container_mat_list = {'ChemicalFormula': self._can_chemical_formula,
                                           'SampleNumberDensity': self._can_density}
 

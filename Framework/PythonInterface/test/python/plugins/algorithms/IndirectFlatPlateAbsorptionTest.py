@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.simpleapi import *
+from mantid.simpleapi import LoadNexusProcessed, IndirectFlatPlateAbsorption
 from mantid.api import *
 
 
@@ -44,7 +44,8 @@ class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
 
         corrected, fact = IndirectFlatPlateAbsorption(SampleWorkspace=self._red_ws,
                                                       SampleChemicalFormula='H2-O',
-                                                      ElementSize=1)
+                                                      ElementSize=1,
+                                                      Version = 1)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
@@ -58,7 +59,8 @@ class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
                                                       SampleChemicalFormula='H2-O',
                                                       CanWorkspace=self._can_ws,
                                                       ElementSize=1,
-                                                      UseCanCorrections=False)
+                                                      UseCanCorrections=False,
+                                                      Version = 1)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
@@ -74,7 +76,8 @@ class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
                                                       CanWorkspace=self._can_ws,
                                                       CanScaleFactor=0.8,
                                                       ElementSize=1,
-                                                      UseCanCorrections=False)
+                                                      UseCanCorrections=False,
+                                                      Version = 1)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
@@ -89,7 +92,8 @@ class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
                                                       CanWorkspace=self._can_ws,
                                                       CanChemicalFormula='V',
                                                       ElementSize=1,
-                                                      UseCanCorrections=True)
+                                                      UseCanCorrections=True,
+                                                      Version = 1)
 
         self.assertEqual(fact.size(), 2)
         self._test_workspaces(corrected, fact)
@@ -108,7 +112,8 @@ class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
                                                       CanDensityType='Number Density',
                                                       CanDensity=0.5,
                                                       UseCanCorrections=True,
-                                                      ElementSize=1)
+                                                      ElementSize=1,
+                                                      Version = 1)
 
         self.assertEqual(fact.size(), 2)
         self._test_workspaces(corrected, fact)
@@ -127,7 +132,8 @@ class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
                                                       CanDensityType='Mass Density',
                                                       CanDensity=0.5,
                                                       UseCanCorrections=True,
-                                                      ElementSize=1)
+                                                      ElementSize=1,
+                                                      Version = 1)
 
         self.assertEqual(fact.size(), 2)
         self._test_workspaces(corrected, fact)
