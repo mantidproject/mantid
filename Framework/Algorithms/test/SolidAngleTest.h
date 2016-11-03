@@ -6,6 +6,7 @@
 
 #include "MantidAlgorithms/SolidAngle.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"

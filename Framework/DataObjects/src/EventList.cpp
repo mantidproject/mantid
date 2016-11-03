@@ -4,6 +4,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Unit.h"
 #include <cfloat>
 
 #include <cmath>

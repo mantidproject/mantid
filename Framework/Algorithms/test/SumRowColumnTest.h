@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/SumRowColumn.h"
 #include "MantidAPI/Axis.h"
+#include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;

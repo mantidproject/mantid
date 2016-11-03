@@ -6,6 +6,7 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 using Mantid::Algorithms::ConvertToPointData;
 using Mantid::API::IAlgorithm_sptr;

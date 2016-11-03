@@ -20,6 +20,7 @@
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ConfigService.h"

@@ -13,6 +13,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadNexus.h"

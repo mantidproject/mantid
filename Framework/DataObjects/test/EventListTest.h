@@ -6,6 +6,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/Unit.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <cmath>

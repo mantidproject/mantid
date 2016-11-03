@@ -8,6 +8,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::API;

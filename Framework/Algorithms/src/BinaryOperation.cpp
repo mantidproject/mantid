@@ -10,6 +10,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/Unit.h"
 
 #include <boost/make_shared.hpp>
 

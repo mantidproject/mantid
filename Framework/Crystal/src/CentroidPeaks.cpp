@@ -1,6 +1,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidCrystal/CentroidPeaks.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 

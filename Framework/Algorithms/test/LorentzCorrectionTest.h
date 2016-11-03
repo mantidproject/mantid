@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>

@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Algorithms {

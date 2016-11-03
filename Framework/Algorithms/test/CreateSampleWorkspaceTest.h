@@ -13,6 +13,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/Unit.h"
 
 using Mantid::Algorithms::CreateSampleWorkspace;
 using namespace Mantid::Kernel;
