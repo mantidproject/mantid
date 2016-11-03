@@ -91,9 +91,6 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
 
 /// Returns the position of the spectrum with given index.
 Kernel::V3D SpectrumInfo::position(const size_t index) const {
-  // The body of this function is almost a 1:1 duplicate of
-  // DetectorGroup::getPos. The former should be cleaned up once subsequent
-  // changes allow for this, and the latter should be removed.
   Kernel::V3D newPos;
   const auto &dets = getDetectorVector(index);
   for (const auto &det : dets) {
@@ -101,16 +98,6 @@ Kernel::V3D SpectrumInfo::position(const size_t index) const {
     m_detectorInfo.setCachedDetector(detIndex, det);
     newPos += m_detectorInfo.position(detIndex);
   }
-
-  // We can have very small values (< Tolerance) of each component that should
-  // be zero
-  if (std::abs(newPos[0]) < Mantid::Kernel::Tolerance)
-    newPos[0] = 0.0;
-  if (std::abs(newPos[1]) < Mantid::Kernel::Tolerance)
-    newPos[1] = 0.0;
-  if (std::abs(newPos[2]) < Mantid::Kernel::Tolerance)
-    newPos[2] = 0.0;
-
   return newPos / static_cast<double>(dets.size());
 }
 
