@@ -155,7 +155,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         divides by a curve fitted to the sum of the set of spectra of the corresponding bank.
 
         @param ws :: workspace to work on / correct
-        @param curvesWS :: a workspace with the per-bank curves for Vanadium data, 
+        @param curvesWS :: a workspace with the per-bank curves for Vanadium data,
                 this will contain 3 histograms per instrument bank
         """
         curvesDict = self._precalcWStoDict(curvesWS)
