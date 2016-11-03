@@ -18,6 +18,19 @@ public:
   static void destroySuite(InterpolateTest *suite) { delete suite; }
 
   // ---------------------------------------------------------------------------
+  // Success cases - linear in-place no copy
+  // ---------------------------------------------------------------------------
+  void test_interpolateLinearInPlaceDoes_Not_Copy() {
+    Histogram input(Points(5, LinearGenerator(0, 0.5)), {-2, 0, 0, 0, 2});
+    auto xAddrBefore = &input.x();
+    auto yAddrBefore = &input.y();
+    TS_ASSERT_THROWS_NOTHING(interpolateLinearInplace(input, 4));
+
+    TS_ASSERT_EQUALS(xAddrBefore, &input.x());
+    TS_ASSERT_EQUALS(yAddrBefore, &input.y());
+  }
+
+  // ---------------------------------------------------------------------------
   // Success cases - linear, point X data
   // ---------------------------------------------------------------------------
   void test_interpolateLinearPointDataSet_Stepsize_One_Less_Point_Size() {
@@ -67,6 +80,20 @@ public:
 
     checkSizesUnchanged(input, inOut);
     checkData(input, inOut, expectedY);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Success cases - cspline in-place no copy
+  // ---------------------------------------------------------------------------
+  void test_interpolateCSplineInPlaceDoes_Not_Copy() {
+    Histogram input(Points(7, LinearGenerator(0, 0.5)),
+                    {-3, 0, -1, 0, 1, 0, 3});
+    auto xAddrBefore = &input.x();
+    auto yAddrBefore = &input.y();
+    TS_ASSERT_THROWS_NOTHING(interpolateCSplineInplace(input, 2));
+
+    TS_ASSERT_EQUALS(xAddrBefore, &input.x());
+    TS_ASSERT_EQUALS(yAddrBefore, &input.y());
   }
 
   // ---------------------------------------------------------------------------
