@@ -295,7 +295,7 @@ void VesuvioCalculateMS::cacheInputs() {
     throw std::runtime_error("Workspace has no gold foil component defined.");
   }
   auto param =
-      m_inputWS->instrumentParameters().get(foil.get(), "hwhm_lorentz");
+      m_inputWS->constInstrumentParameters().get(foil.get(), "hwhm_lorentz");
   if (!param) {
     throw std::runtime_error(
         "Foil component has no hwhm_lorentz parameter defined.");

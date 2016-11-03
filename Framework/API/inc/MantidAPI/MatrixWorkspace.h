@@ -1,6 +1,8 @@
 #ifndef MANTID_API_MATRIXWORKSPACE_H_
 #define MANTID_API_MATRIXWORKSPACE_H_
 
+#include <mutex>
+
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -26,9 +28,6 @@ typedef std::vector<std::vector<double>> MantidImage;
 typedef boost::shared_ptr<MantidImage> MantidImage_sptr;
 /// shared pointer to const MantidImage
 typedef boost::shared_ptr<const MantidImage> MantidImage_const_sptr;
-
-/// Helper for MatrixWorkspace::spectrumInfo()
-enum class ThreadedContextCheck { Check, Skip };
 
 //----------------------------------------------------------------------
 /** Base MatrixWorkspace Abstract Class.
@@ -83,8 +82,8 @@ public:
   /// String description of state
   const std::string toString() const override;
 
-  const SpectrumInfo &spectrumInfo(
-      ThreadedContextCheck contextCheck = ThreadedContextCheck::Check) const;
+  const SpectrumInfo &spectrumInfo() const;
+  SpectrumInfo &mutableSpectrumInfo();
 
   /**@name Instrument queries */
   //@{
@@ -544,6 +543,8 @@ protected:
   /// could allow the X values to be changed.
   void invalidateCommonBinsFlag() { m_isCommonBinsFlagSet = false; }
 
+  void invalidateInstrumentReferences() const override;
+
   /// A vector of pointers to the axes for this workspace
   std::vector<Axis *> m_axes;
 
@@ -581,6 +582,7 @@ private:
   boost::shared_ptr<MatrixWorkspace> m_monitorWorkspace;
 
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfo;
+  mutable std::mutex m_spectrumInfoMutex;
 
 protected:
   /// Getter for the dimension id based on the axis.
