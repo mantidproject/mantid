@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOG_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOG_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOGBASE_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOGBASE_H_
 
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
@@ -43,7 +43,7 @@ public:
   virtual ~TomoToolConfigDialogBase() {}
 
   static std::unique_ptr<TomoToolConfigDialogBase>
-  getCorrectDialogForToolFromString(const std::string &toolName);
+  getToolDialogFor(const std::string &toolName);
 
   void setupDialog(const std::string &runPath, const TomoPathsConfig &paths,
                    const std::string &pathOut,
@@ -65,7 +65,7 @@ public:
       m_isInitialised = true;
     }
 
-    int res = this->executeQt();
+    const int res = this->executeQt();
     this->handleDialogResult(res);
     return res;
   }
@@ -85,7 +85,7 @@ protected:
   // TODO this has empty body just for the sake running the test right now
   virtual void initialiseDialog() = 0;
 
-  virtual void handleDialogResult(int result);
+  virtual void handleDialogResult(const int result);
 
   virtual void setScriptRunPath(const std::string run) { m_runPath = run; }
 
@@ -141,4 +141,4 @@ protected:
 }
 }
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOG_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOGBASE_H_

@@ -10,7 +10,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 std::unique_ptr<TomoToolConfigDialogBase>
-TomoToolConfigDialogBase::getCorrectDialogForToolFromString(
+TomoToolConfigDialogBase::getToolDialogFor(
     const std::string &toolName) {
 
   if (toolName == "TomoPy") {
@@ -29,7 +29,7 @@ TomoToolConfigDialogBase::getCorrectDialogForToolFromString(
   return nullptr;
 }
 
-void TomoToolConfigDialogBase::handleDialogResult(int result) {
+void TomoToolConfigDialogBase::handleDialogResult(const int result) {
   if (QDialog::Accepted == result) {
     // setup the new settings if the user has Accepted
     setupMethodSelected();

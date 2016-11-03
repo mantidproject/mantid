@@ -20,8 +20,8 @@
 #include "ui_TomographyIfaceQtTabFiltersSettings.h"
 #include "ui_TomographyIfaceQtTabRun.h"
 #include "ui_TomographyIfaceQtTabSetup.h"
-#include "ui_TomographyIfaceQtTabVisualize.h"
 #include "ui_TomographyIfaceQtTabSystemSettings.h"
+#include "ui_TomographyIfaceQtTabVisualize.h"
 #include <boost/scoped_ptr.hpp>
 #include <json/json.h>
 
@@ -119,8 +119,8 @@ public:
 
   void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-          localStatus) override;
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+          &localStatus) override;
 
   std::vector<std::string> processingJobsIDs() const override {
     return m_processingJobsIDs;
@@ -249,7 +249,7 @@ private:
   void updatePathsConfig(const TomoPathsConfig &cfg) override;
 
   void showToolConfig(
-      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog) override;
+      MantidQt::CustomInterfaces::TomoToolConfigDialogBase &dialog) override;
 
   void closeEvent(QCloseEvent *ev) override;
 

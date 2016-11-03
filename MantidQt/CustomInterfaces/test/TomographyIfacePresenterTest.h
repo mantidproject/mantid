@@ -5,8 +5,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
 
-#include <QApplication>
-
 #include <cxxtest/TestSuite.h>
 #include "TomographyViewMock.h"
 
@@ -157,8 +155,6 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    // FAIL AT NULLPTR somewhere after dialogue creation
-    // ..................................
     pres.notify(ITomographyIfacePresenter::ToolChanged);
     pres.notify(ITomographyIfacePresenter::SetupReconTool);
     TSM_ASSERT(
@@ -194,7 +190,8 @@ public:
     EXPECT_CALL(
         mockView,
         showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
-            testing::_))).Times(1);
+            testing::_)))
+        .Times(1);
     EXPECT_CALL(mockView,
                 showImage(testing::Matcher<const std::string &>(testing::_)))
         .Times(0);
@@ -260,7 +257,8 @@ public:
     tools.emplace_back("TomoPy");
 
     TomoPathsConfig toolPaths;
-    for (size_t i = 0; i < tools.size(); i++) {
+    const size_t toolsize = tools.size();
+    for (size_t i = 0; i < toolsize; i++) {
       // expect the current paths config will be read only once
       EXPECT_CALL(mockView, currentPathsConfig())
           .Times(1)
@@ -342,7 +340,8 @@ public:
       EXPECT_CALL(
           mockView,
           showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
-              testing::_))).Times(0);
+              testing::_)))
+          .Times(0);
       EXPECT_CALL(mockView,
                   showImage(testing::Matcher<const std::string &>(testing::_)))
           .Times(0);
@@ -402,7 +401,8 @@ public:
     EXPECT_CALL(
         mockView,
         showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
-            testing::_))).Times(0);
+            testing::_)))
+        .Times(0);
     EXPECT_CALL(mockView,
                 showImage(testing::Matcher<const std::string &>(testing::_)))
         .Times(0);

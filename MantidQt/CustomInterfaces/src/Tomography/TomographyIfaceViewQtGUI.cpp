@@ -1,16 +1,16 @@
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
 #include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigCustom.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 
@@ -1047,10 +1047,10 @@ void TomographyIfaceViewQtGUI::updateSystemSettingsTabFields(
  * @param dialog The pointer to the current dialog
  */
 void TomographyIfaceViewQtGUI::showToolConfig(
-    TomoToolConfigDialogBase *dialog) {
+    TomoToolConfigDialogBase &dialog) {
 
   // execute also intiialises all the parts of the GUI
-  dialog->initialiseGUIandExecute();
+  dialog.initialiseGUIandExecute();
 }
 
 /**
@@ -1155,8 +1155,8 @@ void TomographyIfaceViewQtGUI::browseImageClicked() {
  */
 void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
     const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-        localStatus) {
+    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+        &localStatus) {
 
   QTableWidget *t = m_uiTabRun.tableWidget_run_jobs;
   bool sort = t->isSortingEnabled();

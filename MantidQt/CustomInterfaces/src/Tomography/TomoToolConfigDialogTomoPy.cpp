@@ -12,7 +12,8 @@ void TomoToolConfigDialogTomoPy::setupDialogUi() {
   m_tomoPyUi.comboBox_method->clear();
 
   const auto methods = ToolConfigTomoPy::methods();
-  for (size_t i = 0; i < methods.size(); i++) {
+  const size_t methodsSize = methods.size();
+  for (size_t i = 0; i < methodsSize; i++) {
     m_tomoPyUi.comboBox_method->addItem(
         QString::fromStdString(methods[i].second));
   }
@@ -31,7 +32,7 @@ void TomoToolConfigDialogTomoPy::setupMethodSelected() {
   // move to member/global variable and use more space OR keep here
   const auto methods = ToolConfigTomoPy::methods();
 
-  int mi = m_tomoPyUi.comboBox_method->currentIndex();
+  const int mi = m_tomoPyUi.comboBox_method->currentIndex();
   // TODO maybe comboBox_method->currentText?
   m_toolMethod = methods[mi].first;
 }

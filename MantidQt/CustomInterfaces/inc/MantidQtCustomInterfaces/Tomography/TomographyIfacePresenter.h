@@ -119,15 +119,15 @@ private:
 
   /// configures up the dialog using the view
   void setupConfigDialogSettings(
-      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog) const;
+      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog);
 
   /// does the actual path configuration for local resource
   void setupConfigDialogSettingsForLocal(
-      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog) const;
+      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog);
 
   /// does the actual path configuration for remote resource
   void setupConfigDialogSettingsForRemote(
-      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog) const;
+      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog);
 
   /// update all the model information after the tool's been changed
   void updateModelAfterToolChanged(const TomoToolConfigDialogBase *dialog);

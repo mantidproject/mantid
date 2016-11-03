@@ -11,9 +11,7 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
-// class TomoToolConfigDialogBase; Why does it not work with forward
-// declaration?
-// maybe it has to be in namespaces!
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -271,7 +269,7 @@ public:
    *
    * @param dialog The pointer to the current dialog
    */
-  virtual void showToolConfig(TomoToolConfigDialogBase *dialog) = 0;
+  virtual void showToolConfig(TomoToolConfigDialogBase &dialog) = 0;
 
   /**
    * Refresh the table, tree etc. that displays info on the running/finished

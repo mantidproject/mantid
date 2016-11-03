@@ -48,8 +48,8 @@ void TomoToolConfigDialogCustom::setupDialogUi() {
   QString opts = m_customUi.textEdit_cl_opts->toPlainText();
 
   // create the default settings
-  m_toolSettings = std::shared_ptr<ToolConfigCustom>(
-      new ToolConfigCustom(m_runPath, opts.toStdString()));
+  m_toolSettings =
+      std::make_shared<ToolConfigCustom>(m_runPath, opts.toStdString());
 }
 
 void TomoToolConfigDialogCustom::initialiseDialog() { m_dialog = new QDialog; }

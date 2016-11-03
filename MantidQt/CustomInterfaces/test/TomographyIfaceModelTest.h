@@ -221,8 +221,9 @@ public:
     model.setupRunTool("Local");
     model.usingTool("Custom command");
 
-    std::shared_ptr<ToolConfigCustom> d(
-        new ToolConfigCustom("fail", "some params"));
+    std::shared_ptr<ToolConfigCustom> d =
+        std::make_shared<ToolConfigCustom>("fail", "some params");
+
     model.setCurrentToolSettings(d);
     TSM_ASSERT_THROWS("Exception not thrown as expected - run custom local "
                       "with wrong parameters",

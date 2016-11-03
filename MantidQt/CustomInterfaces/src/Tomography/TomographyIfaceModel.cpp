@@ -1,8 +1,8 @@
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
 
 #include <Poco/Path.h>
 #include <Poco/Process.h>
@@ -48,18 +48,14 @@ const std::string TomographyIfaceModel::g_customCmdTool = "Custom command";
  */
 TomographyIfaceModel::TomographyIfaceModel()
     : m_facility("ISIS"), m_experimentRef("RB000000"), m_loggedInUser(""),
-      m_loggedInComp(""), m_computeRes(), m_computeResStatus(), m_reconTools(),
-      m_reconToolsStatus(), m_jobsStatus(), m_SCARFtools(), m_toolsSettings(),
+      m_loggedInComp(""), m_computeResStatus(), m_reconTools(),
+      m_reconToolsStatus(), m_jobsStatus(), m_toolsSettings(),
       m_prePostProcSettings(), m_imageStackPreParams(), m_statusMutex(NULL) {
 
-  m_computeRes.push_back(g_SCARFName);
-  m_computeRes.push_back(g_LocalResourceName);
+  m_computeRes = {g_SCARFName, g_LocalResourceName};
 
-  m_SCARFtools.push_back(g_TomoPyTool);
-  m_SCARFtools.push_back(g_AstraTool);
-  m_SCARFtools.push_back(g_CCPiTool);
-  m_SCARFtools.push_back(g_SavuTool);
-  m_SCARFtools.push_back(g_customCmdTool);
+  m_SCARFtools = {g_TomoPyTool, g_AstraTool, g_CCPiTool, g_SavuTool,
+                  g_customCmdTool};
 
   m_currentToolName = m_SCARFtools.front();
 
@@ -245,7 +241,8 @@ bool TomographyIfaceModel::doPing(const std::string &compRes) {
     tid = alg->getPropertyValue("TransactionID");
     g_log.information() << "Pinged '" << compRes
                         << "'succesfully. Checked that a transaction could "
-                           "be created, with ID: " << tid << '\n';
+                           "be created, with ID: "
+                        << tid << '\n';
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Error. Failed to ping and start a transaction on "
                              "the remote resource." +
@@ -340,7 +337,7 @@ void TomographyIfaceModel::makeRunnableWithOptions(
     const std::string &comp, std::string &run,
     std::vector<std::string> &opt) const {
 
-  if (!m_currentToolSettings.get()) {
+  if (!m_currentToolSettings) {
     throw std::invalid_argument("Settings for tool not set up");
   }
 
@@ -350,12 +347,11 @@ void TomographyIfaceModel::makeRunnableWithOptions(
 
   // Special case. Just pass on user inputs.
   if (tool == g_customCmdTool) {
-
     opt.resize(1);
     splitCmdLine(cmd, run, opt[0]);
     return;
   }
-  bool local = ("Local" == comp) ? true : false;
+  const bool local = ("Local" == comp) ? true : false;
 
   std::string longOpt;
   splitCmdLine(cmd, run, longOpt);
@@ -374,7 +370,7 @@ void TomographyIfaceModel::makeRunnableWithOptions(
  * @return command options ready for the tomorec script
  */
 std::vector<std::string>
-TomographyIfaceModel::makeTomoRecScriptOptions(bool local) const {
+TomographyIfaceModel::makeTomoRecScriptOptions(const bool local) const {
 
   // options with all the info from filters and regions
   std::vector<std::string> opts;
@@ -680,7 +676,7 @@ bool TomographyIfaceModel::processIsRunning(int pid) {
  * @param tool Name of the tool this warning applies to
  * @param cmd command/script/executable derived from the settings
  */
-void TomographyIfaceModel::checkIfToolIsSetupProperly(
+bool TomographyIfaceModel::checkIfToolIsSetupProperly(
     const std::string &tool, const std::string &cmd) const {
   if (tool.empty() || cmd.empty()) {
     const std::string detail =
@@ -693,6 +689,7 @@ void TomographyIfaceModel::checkIfToolIsSetupProperly(
     throw std::runtime_error("Cannot run the tool " + tool +
                              " without setting it up." + detail);
   }
+  return true;
 }
 
 /**
@@ -705,11 +702,14 @@ void TomographyIfaceModel::splitCmdLine(const std::string &cmd,
   if (cmd.empty())
     return;
 
+  // look for the first -- as this is the first cmd line separator and signifies
+  // where the command line starts
   const auto pos = cmd.find("--");
   if (std::string::npos == pos)
     return;
 
-  // -1 will be right on the whitespace so it will be cut off
+  // pos - 1 to separate on the whitespace between the run info and the cmd line
+  // opts
   run = cmd.substr(0, pos - 1);
   opts = cmd.substr(pos);
 }

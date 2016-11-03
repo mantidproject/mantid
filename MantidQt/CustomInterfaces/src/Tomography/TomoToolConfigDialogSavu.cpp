@@ -53,17 +53,14 @@ void TomoToolConfigDialogSavu::setupDialogUi() {
 void TomoToolConfigDialogSavu::initSavuWindow() {
   // geometry, etc. niceties
   // on the left (just plugin names) 1/2, right: 2/3
-  QList<int> sizes;
-  sizes.push_back(100);
-  sizes.push_back(200);
-  m_savuUi.splitterPlugins->setSizes(sizes);
+  QList<int> sizes{100, 200};
+  m_savuUi.splitterPlugins->setSizes(std::move(sizes));
 
   // Setup Parameter editor tab
   loadAvailablePlugins();
   m_savuUi.treeCurrentPlugins->setHeaderHidden(true);
 
   // Connect slots
-
   // Lists/trees
   connect(m_savuUi.listAvailablePlugins, SIGNAL(itemSelectionChanged()), this,
           SLOT(availablePluginSelected()));
@@ -131,10 +128,11 @@ void TomoToolConfigDialogSavu::loadAvailablePlugins() {
 void TomoToolConfigDialogSavu::refreshAvailablePluginListUI() {
   // Table WS structure, id/params/name/cite
   m_savuUi.listAvailablePlugins->clear();
-  for (size_t i = 0; i < m_availPlugins->rowCount(); ++i) {
-    QString str =
+  const size_t rowcount = m_availPlugins->rowCount();
+  for (size_t i = 0; i < rowcount; ++i) {
+    const QString str =
         QString::fromStdString(m_availPlugins->cell<std::string>(i, 2));
-    m_savuUi.listAvailablePlugins->addItem(str);
+    m_savuUi.listAvailablePlugins->addItem(std::move(str));
   }
 }
 
@@ -149,7 +147,7 @@ void TomoToolConfigDialogSavu::refreshCurrentPluginListUI() {
 // Updates the selected plugin info from Available plugins list.
 void TomoToolConfigDialogSavu::availablePluginSelected() {
   if (m_savuUi.listAvailablePlugins->selectedItems().count() != 0) {
-    size_t idx = static_cast<size_t>(
+    const size_t idx = static_cast<size_t>(
         m_savuUi.listAvailablePlugins->currentIndex().row());
     if (idx < m_availPlugins->rowCount()) {
       m_savuUi.availablePluginDesc->setText(
@@ -250,9 +248,11 @@ void TomoToolConfigDialogSavu::transferClicked() {
   if (0 == m_savuUi.listAvailablePlugins->selectedItems().count())
     return;
 
-  int idx = m_savuUi.listAvailablePlugins->currentIndex().row();
+  const int idx = m_savuUi.listAvailablePlugins->currentIndex().row();
+  const size_t columnCount = m_currPlugins->columnCount();
+
   Mantid::API::TableRow row = m_currPlugins->appendRow();
-  for (size_t j = 0; j < m_currPlugins->columnCount(); ++j) {
+  for (size_t j = 0; j < columnCount; ++j) {
     row << m_availPlugins->cell<std::string>(idx, j);
   }
   createPluginTreeEntry(row);
@@ -262,12 +262,13 @@ void TomoToolConfigDialogSavu::moveUpClicked() {
   if (0 == m_savuUi.treeCurrentPlugins->selectedItems().count())
     return;
 
-  size_t idx =
+  const size_t idx =
       static_cast<size_t>(m_savuUi.treeCurrentPlugins->currentIndex().row());
   if (idx > 0 && idx < m_currPlugins->rowCount()) {
     // swap row, all columns
-    for (size_t j = 0; j < m_currPlugins->columnCount(); ++j) {
-      std::string swap = m_currPlugins->cell<std::string>(idx, j);
+    const size_t columnCount = m_currPlugins->columnCount();
+    for (size_t j = 0; j < columnCount; ++j) {
+      const std::string swap = m_currPlugins->cell<std::string>(idx, j);
       m_currPlugins->cell<std::string>(idx, j) =
           m_currPlugins->cell<std::string>(idx - 1, j);
       m_currPlugins->cell<std::string>(idx - 1, j) = swap;
@@ -281,12 +282,14 @@ void TomoToolConfigDialogSavu::moveDownClicked() {
   if (0 == m_savuUi.treeCurrentPlugins->selectedItems().count())
     return;
 
-  size_t idx =
+  const size_t idx =
       static_cast<size_t>(m_savuUi.treeCurrentPlugins->currentIndex().row());
   if (idx < m_currPlugins->rowCount() - 1) {
     // swap all columns
-    for (size_t j = 0; j < m_currPlugins->columnCount(); ++j) {
-      std::string swap = m_currPlugins->cell<std::string>(idx, j);
+
+    const size_t columnCount = m_currPlugins->columnCount();
+    for (size_t j = 0; j < columnCount; ++j) {
+      const std::string swap = m_currPlugins->cell<std::string>(idx, j);
       m_currPlugins->cell<std::string>(idx, j) =
           m_currPlugins->cell<std::string>(idx + 1, j);
       m_currPlugins->cell<std::string>(idx + 1, j) = swap;
@@ -300,7 +303,7 @@ void TomoToolConfigDialogSavu::removeClicked() {
   if (0 == m_savuUi.treeCurrentPlugins->selectedItems().count())
     return;
 
-  int idx = m_savuUi.treeCurrentPlugins->currentIndex().row();
+  const int idx = m_savuUi.treeCurrentPlugins->currentIndex().row();
   m_currPlugins->removeRow(idx);
 
   refreshCurrentPluginListUI();

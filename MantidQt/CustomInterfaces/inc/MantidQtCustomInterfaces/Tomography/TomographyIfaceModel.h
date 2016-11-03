@@ -101,12 +101,8 @@ public:
     m_currentToolSettings = settings;
   }
 
-  TomoRecToolConfig *getCurrentToolSettings() const {
-    return m_currentToolSettings.get();
-  }
-
   //--------------------------------------------
-  // Access to the system settings information
+  // Access to the system settings informationp
   //--------------------------------------------
   // get the remote scripts base dir from the system settings
   std::string getCurrentRemoteScriptsBasePath() const {
@@ -225,7 +221,7 @@ protected: // protected to expose everything to testing
   void makeRunnableWithOptions(const std::string &comp, std::string &run,
                                std::vector<std::string> &opt) const;
 
-  void checkIfToolIsSetupProperly(const std::string &tool,
+  bool checkIfToolIsSetupProperly(const std::string &tool,
                                   const std::string &cmd) const;
 
   std::vector<std::string> makeTomoRecScriptOptions(bool local) const;
