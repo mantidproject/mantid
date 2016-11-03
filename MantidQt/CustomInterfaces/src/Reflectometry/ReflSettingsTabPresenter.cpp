@@ -231,6 +231,8 @@ std::string ReflSettingsTabPresenter::getTransmissionRuns() const {
                                 "are allowed.");
 
   for (const auto &run : transRuns) {
+    if (AnalysisDataService::Instance().doesExist("TRANS_" + run))
+      continue;
     // Load transmission runs and put them in the ADS
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadISISNexus");
     alg->setProperty("Filename", run);
