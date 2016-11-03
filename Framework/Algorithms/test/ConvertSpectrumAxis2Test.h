@@ -155,13 +155,13 @@ public:
     const std::string outputWS("outWS");
     const std::string outputWS2("outWS2");
 
-    do_algorithm_run("theta", inputWS, outputWS, true, true);
+    do_algorithm_run("theta", inputWS, outputWS);
 
     // Check output values for the workspace then clean up.
     check_output_values_for_theta_conversion(inputWS, outputWS);
     clean_up_workspaces(inputWS, outputWS);
 
-    do_algorithm_run("Theta", inputWS, outputWS2, true, true);
+    do_algorithm_run("Theta", inputWS, outputWS2);
 
     // Check output values for the workspace then clean up.
     check_output_values_for_theta_conversion(inputWS, outputWS2);
@@ -175,7 +175,7 @@ public:
     const std::string target("ElasticQ");
 
     auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        3, 1, false, true);
+        3, 1, false);
     AnalysisDataService::Instance().addOrReplace(inputWS, testWS);
 
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
@@ -198,7 +198,7 @@ public:
     std::string inputWS("inWS");
     const std::string outputWS("outWS");
 
-    do_algorithm_run("ElasticQ", inputWS, outputWS, false, true);
+    do_algorithm_run("ElasticQ", inputWS, outputWS, false);
 
     MatrixWorkspace_const_sptr input, output;
     TS_ASSERT_THROWS_NOTHING(
@@ -240,7 +240,7 @@ public:
     std::string inputWS("inWS");
     const std::string outputWS("outWS");
 
-    do_algorithm_run("ElasticQSquared", inputWS, outputWS, false, true);
+    do_algorithm_run("ElasticQSquared", inputWS, outputWS, false);
 
     MatrixWorkspace_const_sptr input, output;
     TS_ASSERT_THROWS_NOTHING(
