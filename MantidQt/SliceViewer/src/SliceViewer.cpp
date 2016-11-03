@@ -572,7 +572,8 @@ void SliceViewer::initZoomer() {
   // Hook-up listener to rescaled event
   QObject::connect(magnif, SIGNAL(rescaled(double)), this,
                    SLOT(magnifierRescaled(double)));
-
+  QObject::connect(magnif, SIGNAL(rescaled(double)), this,
+	  SLOT(updateNonOrthogonalOverlay()));
   // Pan using the right mouse button + drag
   QwtPlotPanner *panner = new QwtPlotPanner(m_plot->canvas());
   panner->setMouseButton(Qt::RightButton);
@@ -695,7 +696,7 @@ void SliceViewer::switchQWTRaster(
 {
   if (useNonOrthogonal && ui.btnNonOrthogonalToggle->isChecked()) {
 	  m_data = Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
-	  
+	  updateNonOrthogonalOverlay();
 
   } else {
 	  m_data = Kernel::make_unique<API::QwtRasterDataMD>();
@@ -706,6 +707,14 @@ void SliceViewer::switchQWTRaster(
   this->setTransparentZeros(false);
 
   updateDisplay();
+}
+
+void SliceViewer::updateNonOrthogonalOverlay() {
+	if (ui.btnNonOrthogonalToggle->isChecked()) {
+		QwtDoubleInterval xint = m_plot->axisScaleDiv(m_spect->xAxis())->interval();
+		QwtDoubleInterval yint = m_plot->axisScaleDiv(m_spect->yAxis())->interval();
+		m_nonOrthogonalOverlay->zoomChanged(xint, yint);
+	}
 }
 //------------------------------------------------------------------------------
 /** Set the displayed workspace. Updates UI.
@@ -723,6 +732,8 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
 	  SLOT(switchQWTRaster(bool)));
   QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
 	  SLOT(setNonOrthogonalbtn()));
+  QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
+	  SLOT(updateNonOrthogonalOverlay()));
   emit setNonOrthogonalbtn();
   m_data->setWorkspace(ws);
   m_plot->setWorkspace(ws);
@@ -2364,11 +2375,6 @@ void SliceViewer::autoRebinIfRequired() { // probably rename this if forcing it
                                           // to do 2 things
   if (isAutoRebinSet()) {
     rebinParamsChanged();
-  }
-  if (ui.btnNonOrthogonalToggle->isChecked()) {
-    QwtDoubleInterval xint = m_plot->axisScaleDiv(m_spect->xAxis())->interval();
-    QwtDoubleInterval yint = m_plot->axisScaleDiv(m_spect->yAxis())->interval();
-    m_nonOrthogonalOverlay->zoomChanged(xint, yint);
   }
 }
 /** NON ORTHOGONAL STUFF **/

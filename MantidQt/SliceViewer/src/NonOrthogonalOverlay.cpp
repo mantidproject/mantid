@@ -163,10 +163,8 @@ namespace MantidQt {
             // probably move ApplyskewMatrix out of it
             setSkewMatrix();
             setAxesPoints();
-			
-            calculateTickMarks(20); // tie zoom level to how large
-                                    // dataset is, or just zoom level?
-			update();
+			                 // dataset is, or just zoom level?
+				
 
             }
         }
@@ -253,7 +251,7 @@ namespace MantidQt {
 				  }
 
           }
-
+			
 		}
 
 	
