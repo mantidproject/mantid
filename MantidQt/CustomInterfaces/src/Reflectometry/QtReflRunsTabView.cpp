@@ -56,9 +56,9 @@ void QtReflRunsTabView::initLayout() {
 
   // Create the presenter
   m_presenter = std::make_shared<ReflRunsTabPresenter>(
-    this /* main view */,
-    this /* Currently this concrete view is also responsible for prog reporting */,
-    qDataProcessorWidget->getPresenter() /* The data processor presenter */);
+      this /* main view */,
+      this /* Currently this concrete view is also responsible for prog reporting */,
+      qDataProcessorWidget->getPresenter() /* The data processor presenter */);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 
   // Custom context menu for table
@@ -251,7 +251,7 @@ void QtReflRunsTabView::instrumentChanged(int index) {
   m_presenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
 }
 
-/** Notifies 
+/** Notifies
 
 /**
 Get the selected instrument for searching

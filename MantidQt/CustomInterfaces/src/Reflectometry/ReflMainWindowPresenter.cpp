@@ -136,7 +136,8 @@ ReflMainWindowPresenter::runPythonAlgorithm(const std::string &pythonCode) {
 Tells the setting tab presenter what to set its current instrument name to
 * @param instName : The name of the instrument to be set
 */
-void ReflMainWindowPresenter::setInstrumentName(const std::string &instName) const {
+void ReflMainWindowPresenter::setInstrumentName(
+    const std::string &instName) const {
 
   m_settingsPresenter->setInstrumentName(instName);
 }
