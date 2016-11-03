@@ -209,7 +209,7 @@ void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
 
   QPainter painter(this);
 
-  QPen centerPen(QColor(0, 0, 0, 200)); // black
+  QPen centerPen(QColor(0, 0, 0, 200));     // black
   QPen gridPen(QColor(160, 160, 160, 100)); // grey
   QPen numberPen(QColor(160, 160, 160, 255));
   // --- Draw the central line ---
