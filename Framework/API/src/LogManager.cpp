@@ -105,7 +105,7 @@ LogManager::LogManager(const LogManager &other)
 // Defined as default in source for forward declaration with std::unique_ptr.
 LogManager::~LogManager() = default;
 
-LogManager &LogManager ::operator=(const LogManager &other) {
+LogManager &LogManager::operator=(const LogManager &other) {
   m_manager = other.m_manager;
   m_singleValueCache = Kernel::make_unique<Kernel::Cache<
       std::pair<std::string, Kernel::Math::StatisticType>, double>>(
