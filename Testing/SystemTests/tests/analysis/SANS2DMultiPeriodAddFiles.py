@@ -53,7 +53,7 @@ class LARMORMultiPeriodAddEventFiles(stresstesting.MantidStressTest):
         LARMOR()
         Set1D()
         Detector("DetectorBench")
-        MaskFile('USER_Larmor_163F_HePATest_r13038.txt')
+        MaskFile('USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt')
         Gravity(True)
         add_runs( ('13065', '13065') ,'LARMOR', 'nxs', lowMem=True)
 
@@ -66,7 +66,7 @@ class LARMORMultiPeriodAddEventFiles(stresstesting.MantidStressTest):
                     "13065p2rear_1D_2.0_4.0_incident_monitor",
                     "13065p3rear_1D_2.0_4.0_incident_monitor",
                     "13065p4rear_1D_2.0_4.0_incident_monitor",
-                    "80tubeCalibration_18-04-2016_r9330-9335"]
+                    "80tubeCalibration_1-05-2015_r3157-3160"]
         for workspace in to_clean:
             DeleteWorkspace(workspace)
 

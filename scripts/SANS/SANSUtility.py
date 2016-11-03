@@ -698,6 +698,9 @@ class WorkspaceType(object):
     class MultiperiodHistogram(object):
         pass
 
+    class Other(object):
+        pass
+
 
 def get_number_of_periods_from_file(file_name):
     full_file_path = FileFinder.findRuns(file_name)
@@ -738,14 +741,32 @@ def check_if_is_event_data(file_name):
     return is_event_mode
 
 
-def get_workspace_type(file_name):
-    number_of_periods = get_number_of_periods_from_file(file_name)
-    is_event_data = check_if_is_event_data(file_name)
+def is_nexus_file(file_name):
+    full_file_path = FileFinder.findRuns(file_name)
+    if hasattr(full_file_path, '__iter__'):
+        file_name = full_file_path[0]
+    is_nexus = True
+    try:
+        with h5.File(file_name) as h5_file:
+            keys = h5_file.keys()
+            nexus_test = "raw_data_1" in keys or "mantid_workspace_1" in keys
+            is_nexus = True if nexus_test else False
+    except:  # noqa
+        is_nexus = False
+    return is_nexus
 
-    if number_of_periods > 1:
-        workspace_type = WorkspaceType.MultiperiodEvent if is_event_data else WorkspaceType.MultiperiodHistogram
+
+def get_workspace_type(file_name):
+    if is_nexus_file(file_name):
+        number_of_periods = get_number_of_periods_from_file(file_name)
+        is_event_data = check_if_is_event_data(file_name)
+
+        if number_of_periods > 1:
+            workspace_type = WorkspaceType.MultiperiodEvent if is_event_data else WorkspaceType.MultiperiodHistogram
+        else:
+            workspace_type = WorkspaceType.Event if is_event_data else WorkspaceType.Histogram
     else:
-        workspace_type = WorkspaceType.Event if is_event_data else WorkspaceType.Histogram
+        workspace_type = WorkspaceType.Other
     return workspace_type
 
 

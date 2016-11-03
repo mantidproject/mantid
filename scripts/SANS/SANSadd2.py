@@ -273,47 +273,46 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
     logger.notice('reading file:     '+filename)
 
     isDataSetEvent = False
-    if period != _NO_INDIVIDUAL_PERIODS:
-        workspace_type = get_workspace_type(filename)
-        if workspace_type is WorkspaceType.MultiperiodHistogram:
+    workspace_type = get_workspace_type(filename)
+    if workspace_type is WorkspaceType.MultiperiodHistogram:
+        if period != _NO_INDIVIDUAL_PERIODS:
             outWs = Load(Filename=filename, OutputWorkspace=wsName, EntryNumber=period)
-        elif workspace_type is WorkspaceType.Histogram:
-            outWs = Load(Filename=filename, OutputWorkspace=wsName)
-        elif workspace_type is WorkspaceType.Event or workspace_type is WorkspaceType.MultiperiodEvent:
-            isDataSetEvent = True
-            temp_ws_name = wsName + "_event_temp"
-            temp_ws_name_monitors = temp_ws_name + "_monitors"
-            ws_name_monitors = wsName + "_monitors"
-
-            LoadEventNexus(Filename=filename, OutputWorkspace=temp_ws_name, LoadMonitors=True)
-            outWs = mtd[temp_ws_name]
-            # If we are dealing with a multiperid workspace then we must can only use a single period at a
-            # time, hence we reload from disk the whole data set every time which is very bad and must be
-            # cached in the future
-            if isinstance(outWs, WorkspaceGroup):
-                remove_unwanted_workspaces(wsName, temp_ws_name, period)
-                remove_unwanted_workspaces(ws_name_monitors, temp_ws_name_monitors, period)
-            else:
-                RenameWorkspace(InputWorkspace=temp_ws_name, OutputWorkspace=wsName)
-                RenameWorkspace(InputWorkspace=temp_ws_name_monitors, OutputWorkspace=ws_name_monitors)
-
-            runDetails = mtd[wsName].getRun()
-            timeArray = runDetails.getLogData("proton_charge").times
-            # There should never be a time increment in the proton charge larger than say "two weeks"
-            # SANS2D currently is run at 10 frames per second. This may be increated to 5Hz
-            # (step of 0.2 sec). Although time between frames may be larger due to having the SMP veto switched on,
-            # but hopefully not longer than two weeks!
-            for i in range(len(timeArray)-1):
-            # cal time dif in seconds
-                timeDif = (timeArray[i+1].total_nanoseconds()-timeArray[i].total_nanoseconds())*1e-9
-                if timeDif > 172800:
-                    sanslog.warning('Time increments in the proton charge log of ' + filename + ' are suspicious large.' +
-                                    ' For example a time difference of ' + str(timeDif) + " seconds has been observed.")
-                    break
         else:
-            raise RuntimeError("SANS2add2: Unknown data type: {0}".format(type(workspace_type)))
+            outWs = Load(Filename=filename, OutputWorkspace=wsName)
+    elif workspace_type is WorkspaceType.Histogram:
+        outWs = Load(Filename=filename, OutputWorkspace=wsName)
+    elif workspace_type is WorkspaceType.Event or workspace_type is WorkspaceType.MultiperiodEvent:
+        isDataSetEvent = True
+        temp_ws_name = wsName + "_event_temp"
+        temp_ws_name_monitors = temp_ws_name + "_monitors"
+        ws_name_monitors = wsName + "_monitors"
+
+        LoadEventNexus(Filename=filename, OutputWorkspace=temp_ws_name, LoadMonitors=True)
+        outWs = mtd[temp_ws_name]
+        # If we are dealing with a multiperid workspace then we must can only use a single period at a
+        # time, hence we reload from disk the whole data set every time which is very bad and must be
+        # cached in the future
+        if isinstance(outWs, WorkspaceGroup):
+            remove_unwanted_workspaces(wsName, temp_ws_name, period)
+            remove_unwanted_workspaces(ws_name_monitors, temp_ws_name_monitors, period)
+        else:
+            RenameWorkspace(InputWorkspace=temp_ws_name, OutputWorkspace=wsName)
+            RenameWorkspace(InputWorkspace=temp_ws_name_monitors, OutputWorkspace=ws_name_monitors)
+
+        runDetails = mtd[wsName].getRun()
+        timeArray = runDetails.getLogData("proton_charge").times
+        # There should never be a time increment in the proton charge larger than say "two weeks"
+        # SANS2D currently is run at 10 frames per second. This may be increated to 5Hz
+        # (step of 0.2 sec). Although time between frames may be larger due to having the SMP veto switched on,
+        # but hopefully not longer than two weeks!
+        for i in range(len(timeArray)-1):
+        # cal time dif in seconds
+            timeDif = (timeArray[i+1].total_nanoseconds()-timeArray[i].total_nanoseconds())*1e-9
+            if timeDif > 172800:
+                sanslog.warning('Time increments in the proton charge log of ' + filename + ' are suspicious large.' +
+                                ' For example a time difference of ' + str(timeDif) + " seconds has been observed.")
+                break
     else:
-        # This is for raw data
         outWs = Load(Filename=filename,OutputWorkspace=wsName)
 
     path, fName = os.path.split(filename)
