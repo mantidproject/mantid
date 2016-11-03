@@ -1102,7 +1102,7 @@ void ParameterMap::addParameterFilename(const std::string &filename) {
   m_parameterFileNames.push_back(filename);
 }
 
-  /// Wrapper for ParameterFactory::create to avoid include in header
+/// Wrapper for ParameterFactory::create to avoid include in header
 boost::shared_ptr<Parameter>
 ParameterMap::create(const std::string &className,
                      const std::string &name) const {
