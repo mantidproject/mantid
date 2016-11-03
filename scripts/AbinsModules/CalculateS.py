@@ -96,11 +96,8 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         _instrument = _instrument_producer.produceInstrument(name=self._instrument_name)
 
         # Calculate Q
-        _q_calculator = CalculateQ(filename=self._input_filename,
-                                   instrument=_instrument,
-                                   sample_form=self._sample_form,
+        _q_calculator = CalculateQ(filename=self._input_filename, instrument=_instrument, sample_form=self._sample_form,
                                    k_points_data=self._abins_data.getKpointsData(),
-                                   overtones=self._evaluate_overtones,
                                    combinations=self._evaluate_combinations)
 
         _q_vectors = _q_calculator.getData()
@@ -250,23 +247,15 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         Calculates S for the first order quantum event for one atom.
         @param q2: squared values of momentum transfer vectors
         @param frequencies: frequencies for which transitions occur
-        @param coefficients: array which stores information how transitions can be decomposed in terms fundamentals
+        @param coefficients: array which stores information how transitions can be decomposed in terms of fundamentals
         @param a_tensor: total MSD tensor for the given atom
         @param a_trace: total MSD trace for the given atom
         @param b_tensor: frequency dependent MSD tensor for the given atom
         @param b_trace: frequency dependent MSD trace for the given atom
         @return: s for the first quantum order effect for the given atom
         """
-        n_freq = frequencies.size
-        s = np.zeros(shape=n_freq, dtype=AbinsConstants.float_type)
-
-        for omega in range(n_freq):
-
-            trace_ba = np.trace(np.dot(b_tensor[omega], a_tensor))
-            q2_el = q2[omega]
-
-            s[omega] = q2_el * b_trace[omega] / 3.0 * math.exp(
-                -q2_el * (a_trace + 2.0 * trace_ba / b_trace[omega]) / 5.0)
+        trace_ba = np.tensordot(a=b_tensor, b=a_tensor, axes=([1, 2], [0, 1]))
+        s = q2 * b_trace / 3.0 * np.exp(-q2 * (a_trace + 2.0 * trace_ba / b_trace) / 5.0)
 
         return s
 
@@ -278,22 +267,25 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
 
         @param q2: squared values of momentum transfer vectors
         @param frequencies: frequencies for which transitions occur
-        @param coefficients: array which stores information how transitions can be decomposed in terms fundamentals
+        @param coefficients: array which stores information how transitions can be decomposed in terms of fundamentals
         @param a_tensor: total MSD tensor for the given atom
         @param a_trace: total MSD trace for the given atom
         @param b_tensor: frequency dependent MSD tensor for the given atom
         @param b_trace: frequency dependent MSD trace for the given atom
         @return: s for the second quantum order effect for the given atom
         """
+
+        dw = np.exp(-q2 * a_trace / 3.0)
+        q4 = q2 ** 2
         n_freq = frequencies.size
+
         s = np.zeros(shape=n_freq, dtype=AbinsConstants.float_type)
-        for omega in range(n_freq):
+        for i in range(n_freq):
 
             indices = []
 
             # extract indices of a and b tensor which should be used to evaluate S for the given transition
-
-            for indx, coeff in np.ndenumerate(coefficients[omega]):
+            for indx, coeff in np.ndenumerate(coefficients[i]):
                 while coeff != AbinsConstants.empty_slot:
                     indices.append(indx[0])
                     coeff -= 1
@@ -302,51 +294,23 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                 if len(indices) == AbinsConstants.quantum_order_two:
                     break
 
-            q2_w = q2[omega]
-            dw = math.exp(-q2_w * a_trace / 3.0)
-
             if indices[0] == indices[1]:
 
-                i = indices[0]
-                b_tr = b_trace[i]
-                trace_bb = np.trace(np.dot(b_tensor[i], b_tensor[i]))
-                s[omega] = q2_w ** 2 / 30.0 * (b_tr * b_tr + 2 * trace_bb) * dw
+                b_ten = b_tensor[indices[0]]
+                bb_trace = np.einsum('ij,ji->', b_ten, b_ten)
+                s[i] = np.prod(b_trace[indices] + 2 * bb_trace) / 30.0
 
             else:
 
-                i = indices[0]
-                j = indices[1]
-                tr_b0 = b_trace[i]
-                tr_b1 = b_trace[j]
-                tr_b0b1 = np.trace(np.dot(b_tensor[i], b_tensor[j]))
-                tr_b1b0 = np.trace(np.dot(b_tensor[j], b_tensor[i]))
-                s[omega] = q2_w ** 2 / 15.0 * (tr_b0 * tr_b1 + tr_b0b1 + tr_b1b0) * dw
+                ii = indices[0]
+                jj = indices[1]
+                tr_b0b1 = np.einsum('ij,ji->', b_tensor[ii], b_tensor[jj])
+                tr_b1b0 = np.einsum('ij,ji->', b_tensor[jj], b_tensor[ii])
+                s[i] = np.prod(b_trace[indices] + tr_b0b1 + tr_b1b0) / 15.0
+
+        s *= q4 * dw
 
         return s
-
-    # def _enhance_overtones(self, frequencies_combinations=None, frequencies_overtones=None):
-    #     """
-    #     Correction to intensities in case only overtones are selected. Methods counts occurrences of frequencies
-    #     which would be used in case of full overtone + combination calculations in bins defined by overtone
-    #     frequencies.
-    #     @param frequencies_overtones: numpy array with overtone frequencies
-    #     @param frequencies_combinations: numpy array with frequencies which would be used in case of combination
-    #                                      calculations
-    #     @return: numpy array with counts of combination frequencies in bins created by overtone frequencies.
-    #     """
-    #     if not (isinstance(frequencies_combinations, np.ndarray) and len(frequencies_combinations.shape) == 1):
-    #         raise ValueError("Frequencies in the form of one dimentional are expected.")
-    #
-    #     if not (isinstance(frequencies_overtones, np.ndarray) and len(frequencies_overtones.shape) == 1):
-    #         raise ValueError("Frequencies in the form of one dimentional  are expected.")
-    #
-    #     if frequencies_combinations.size <= frequencies_overtones.size:
-    #         raise ValueError("Combinations frequencies should be more then overtones frequencies.")
-    #
-    #     counts = np.ones(shape=frequencies_combinations.size, dtype=AbinsConstants.float_type)
-    #     inds = np.digitize(frequencies_combinations, frequencies_overtones)
-    #
-    #     return np.asarray([counts[inds == i].sum() for i in range(frequencies_overtones.size)])
 
     def _calculate_order_three(self, q2=None, frequencies=None, coefficients=None, a_tensor=None, a_trace=None,
                                b_tensor=None, b_trace=None):
@@ -354,7 +318,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         Calculates S for the third order quantum effect for one atom.
         @param q2: squared values of momentum transfer vectors
         @param frequencies: frequencies for which transitions occur
-        @param coefficients: array which stores information how transitions can be decomposed in terms fundamentals
+        @param coefficients: array which stores information how transitions can be decomposed in terms of fundamentals
         @param a_tensor: total MSD tensor for the given atom
         @param a_trace: total MSD trace for the given atom
         @param b_tensor: frequency dependent MSD tensor for the given atom
@@ -363,12 +327,16 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         """
         n_freq = frequencies.size
         s = np.zeros(shape=n_freq, dtype=AbinsConstants.float_type)
-        for omega in range(n_freq):
+
+        dw = np.exp(-q2 * a_trace / 3.0)
+        q6 = q2 ** 3
+
+        for i in range(n_freq):
 
             indices = []
 
             # extract indices of a and b tensor which should be used to evaluate S for the given transition
-            for indx, coeff in np.ndenumerate(coefficients[omega]):
+            for indx, coeff in np.ndenumerate(coefficients[i]):
                 while coeff != AbinsConstants.empty_slot:
                     indices.append(indx[0])
                     coeff -= 1
@@ -376,13 +344,10 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                 # we collected all necessary indices
                 if len(indices) == AbinsConstants.quantum_order_three:
                     break
-            q2_w = q2[omega]
-            dw = math.exp(-q2_w * a_trace / 3.0)
-            i = indices[0]
-            j = indices[1]
-            k = indices[2]
 
-            s[omega] = 9.0 / 543.0 * q2_w ** 3 * b_trace[i] * b_trace[j] * b_trace[k] * dw
+            s[i] = np.prod(b_trace[indices])
+
+        s *= 9.0 / 543.0 * q6 * dw
 
         return s
 
@@ -392,7 +357,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         Calculates S for the fourth order quantum effect for one atom.
         @param q2: q2: squared values of momentum transfer vectors
         @param frequencies: frequencies for which transitions occur
-        @param coefficients: array which stores information how transitions can be decomposed in terms fundamentals
+        @param coefficients: array which stores information how transitions can be decomposed in terms of fundamentals
         @param a_tensor: total MSD tensor for the given atom
         @param a_trace: total MSD trace for the given atom
         @param b_tensor: frequency dependent MSD tensor for the given atom
@@ -401,12 +366,15 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         """
         n_freq = frequencies.size
         s = np.zeros(shape=n_freq, dtype=AbinsConstants.float_type)
-        for omega in range(n_freq):
+        q8 = q2 ** 4
+        dw = np.exp(-q2 * a_trace / 3.0)
+
+        for i in range(n_freq):
 
             indices = []
 
             # extract indices of a and b tensor which should be used to evaluate S for the given transition
-            for indx, coeff in np.ndenumerate(coefficients[omega]):
+            for indx, coeff in np.ndenumerate(coefficients[i]):
                 while coeff != AbinsConstants.empty_slot:
                     indices.append(indx[0])
                     coeff -= 1
@@ -415,14 +383,9 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                 if len(indices) == AbinsConstants.quantum_order_four:
                     break
 
-            q2_w = q2[omega]
-            dw = math.exp(-q2_w * a_trace / 3.0)
-            i = indices[0]
-            j = indices[1]
-            k = indices[2]
-            l = indices[3]
+            s[i] = np.prod(b_trace[indices])
 
-            s[omega] = 27.0 / 9850.0 * q2_w ** 4 * b_trace[i] * b_trace[j] * b_trace[k] * b_trace[l] * dw
+        s *= 27.0 / 9850.0 * q8 * dw
 
         return s
 
