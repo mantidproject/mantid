@@ -22,13 +22,11 @@ class ABINS(PythonAlgorithm):
     _instrument = None
     _atoms = None
     _sum_contributions = None
-    _evaluate_overtones = None
-    _evaluate_combinations = None
     _scale_by_cross_section = None
     _output_workspace_name = None
     _calc_partial = None
     _out_ws_name = None
-
+    _num_quantum_order_events = None
     # ----------------------------------------------------------------------------------------
 
     def category(self):
@@ -89,17 +87,24 @@ class ABINS(PythonAlgorithm):
         self.declareProperty(name="SumContributions", defaultValue=False,
                              doc="Sum the partial dynamical structure factors into a single workspace.")
 
-        self.declareProperty(name="Overtones", defaultValue=False,
-                             doc="In case it is set to True and sample has a form of  "
-                                 "Powder workspaces for overtones will be calculated.")
-
-        self.declareProperty(name="Combinations", defaultValue=False,
-                             doc="In case it is set to True and sample has a form of  Powder "
-                                 "workspaces for full quantum order effects will be calculated.")
+        # self.declareProperty(name="Overtones", defaultValue=False,
+        #                      doc="In case it is set to True and sample has a form of  "
+        #                          "Powder workspaces for overtones will be calculated.")
+        #
+        # self.declareProperty(name="Combinations", defaultValue=False,
+        #                      doc="In case it is set to True and sample has a form of  Powder "
+        #                          "workspaces for full quantum order effects will be calculated.")
 
         self.declareProperty(name="ScaleByCrossSection", defaultValue='Incoherent',
                              validator=StringListValidator(['Total', 'Incoherent', 'Coherent']),
                              doc="Scale the partial dynamical structure factors by the scattering cross section.")
+
+        self.declareProperty(name="QuantumOrderEventsNumber", defaultValue='1',
+                             validator=StringListValidator(['1', '2', '3', '4']),
+                             doc="Number of quantum order effects included in the calculation "
+                                 "(1 -> fundamentals, 2-> first overtone + fundamentals + "
+                                 "2nd order combinations, 3-> fundamentals + first overtone + second overtone + 2nd "
+                                 "order combinations + 3rd order combinations etc...)")
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", '', Direction.Output),
                              doc="Name to give the output workspace.")
@@ -127,16 +132,6 @@ class ABINS(PythonAlgorithm):
                 issues["PhononFile"] = output["Comment"]
         elif dft_program == "CRYSTAL":
             issues["DFTprogram"] = "Support for CRYSTAL DFT program not implemented yet."
-
-        overtones = self.getProperty("Overtones").value
-        sample_form = self.getProperty("SampleForm").value
-        if overtones and (sample_form != "Powder"):
-            issues["Overtones"] = "Workspaces with overtones can be created only for the Powder case scenario."
-
-        combinations = self.getProperty("Combinations").value
-        if not overtones and combinations:
-            issues["Combinations"] = "Workspaces with higher order effects which contain both overtones " \
-                                     "and combinations can be created only in case overtones are also set to True."
 
         workspace_name = self.getPropertyValue("OutputWorkspace")
         if workspace_name in mtd:
@@ -176,9 +171,8 @@ class ABINS(PythonAlgorithm):
 
         # 3) calculate S
         s_calculator = CalculateS(filename=self._phononFile, temperature=self._temperature,
-                                  instrument_name=self._instrument, abins_data=dft_data,
-                                  sample_form=self._sampleForm, overtones=self._evaluate_overtones,
-                                  combinations=self._evaluate_combinations)
+                                  sample_form=self._sampleForm, abins_data=dft_data, instrument_name=self._instrument,
+                                  quantum_order_events_num=self._num_quantum_order_events)
 
         s_data = s_calculator.getData()
 
@@ -241,16 +235,16 @@ class ABINS(PythonAlgorithm):
         """
         Creates workspaces for all types of atoms. Creates both partial and total workspaces for all types of atoms.
 
-        @param atoms_symbols: list of atom types for which overtones should be created
+        @param atoms_symbols: list of atom types for which S should be created
         @param s_data: dynamical factor data of type SData
         @return: workspaces for list of atoms types, S for the particular type of atom
         """
         s_data_extracted = s_data.extract()
 
-        if self._evaluate_overtones:
-            s_total_dim = AbinsConstants.fundamentals_dim + AbinsConstants.higher_order_quantum_effects_dim
-        else:
-            s_total_dim = AbinsConstants.fundamentals_dim
+        # if self._evaluate_overtones:
+        #     s_total_dim = AbinsConstants.fundamentals_dim + AbinsConstants.higher_order_quantum_effects_dim
+        # else:
+        #     s_total_dim = AbinsConstants.fundamentals_dim
 
         freq_dic = s_data_extracted["frequencies"]
         max_size = freq_dic["order_%s" % AbinsConstants.fundamentals].size
@@ -259,9 +253,10 @@ class ABINS(PythonAlgorithm):
         for item in items:
             if max_size < freq_dic[item].size:
                 max_size = freq_dic[item].size
-        freq = np.zeros((s_total_dim, max_size))
+        freq = np.zeros((self._num_quantum_order_events, max_size))
 
-        for exponential in range(AbinsConstants.fundamentals, s_total_dim + AbinsConstants.s_last_index):
+        for exponential in range(AbinsConstants.fundamentals,
+                                 self._num_quantum_order_events + AbinsConstants.s_last_index):
             exponential_indx = exponential - AbinsConstants.python_index_shift
             temp_freq = freq_dic["order_%s" % exponential]
             freq[exponential_indx][:temp_freq.size] = temp_freq
@@ -278,7 +273,8 @@ class ABINS(PythonAlgorithm):
             for atom in range(num_atoms):
                 if atoms_data["atom_%s" % atom]["symbol"] == atom_symbol:
                     temp_s_atom_data.fill(0)
-                    for order in range(AbinsConstants.fundamentals, s_total_dim + AbinsConstants.s_last_index):
+                    for order in range(AbinsConstants.fundamentals,
+                                       self._num_quantum_order_events + AbinsConstants.s_last_index):
                         order_indx = order - AbinsConstants.python_index_shift
                         temp_order = atoms_data["atom_%s" % atom]["s"]["order_%s" % order]
                         temp_s_atom_data[order_indx, :temp_order.size] = temp_order
@@ -298,12 +294,13 @@ class ABINS(PythonAlgorithm):
 
     def _create_partial_s_per_type_workspaces(self, atoms_symbols=None, s_data=None):
         """
-        Creates workspaces for all types of atoms. Each workspace stores fundamentals and overtones for S for the given 
+        Creates workspaces for all types of atoms. Each workspace stores quantum order events for S for the given
         type of atom. It also stores total workspace for the given type of atom. 
          
-        @param atoms_symbols: list of atom types for which overtones should be created
+        @param atoms_symbols: list of atom types for which quantum order events of S  should be calculated
         @param s_data: dynamical factor data of type SData
-        @return: workspaces for list of atoms types, each workspace contains overtones of S for the particular atom type
+        @return: workspaces for list of atoms types, each workspace contains  quantum order events of
+                 S for the particular atom type
         """
 
         return self._create_workspaces(atoms_symbols=atoms_symbols, s_data=s_data)
@@ -344,19 +341,19 @@ class ABINS(PythonAlgorithm):
             # Set correct units on workspace
             self._set_workspace_units(wrk=workspace)
 
-        # fundamentals and overtones
+        # quantum order events (fundamentals + overtones + combinations for the given order)
         else:
 
             dim = s_points.shape[0]
             partial_wrk_names = []
 
             for n in range(dim):
-                if self._evaluate_overtones and self._evaluate_combinations:
-                    seed = "quantum_order_effect_%s" % (n + 1)
-                elif n == 0:
-                    seed = "fundamentals"
-                else:  # here we count from 1 because n=1 is fundamental, n=2 first overtone etc....
-                    seed = "overtone_%s" % n
+                # if self._evaluate_overtones and self._quantum_order_events_num:
+                seed = "quantum_order_effect_%s" % (n + 1)
+                # elif n == 0:
+                #     seed = "fundamentals"
+                # else:  # here we count from 1 because n=1 is fundamental, n=2 first overtone etc....
+                #     seed = "overtone_%s" % n
 
                 wrk_name = workspace + "_" + seed
                 partial_wrk_names.append(wrk_name)
@@ -601,10 +598,14 @@ class ABINS(PythonAlgorithm):
         self._instrument = self.getProperty("Instrument").value
         self._atoms = self.getProperty("Atoms").value
         self._sum_contributions = self.getProperty("SumContributions").value
-        self._evaluate_overtones = self.getProperty("Overtones").value
-        self._evaluate_combinations = self.getProperty("Combinations").value
+        # self._evaluate_overtones = self.getProperty("Overtones").value
+
+        # conversion from str to int
+        self._num_quantum_order_events = int(self.getProperty("QuantumOrderEventsNumber").value)
+        self._evaluate_combinations = self._num_quantum_order_events > AbinsConstants.quantum_order_one
         self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
+
         self._calc_partial = (len(self._atoms) > 0)
 
 try:

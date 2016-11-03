@@ -31,7 +31,8 @@ TOSCA_C = 2.5
 ###################################### ABINS internal parameters ##########################
 # Parameters which can be changed by user if necessary
 
-DFT_group = "PhononAB"  # name of the group in the hdf file in which extracted data from DFT phonon calculations are stored
+# name of the group in the hdf file in which extracted  data from DFT phonon calculations are stored
+DFT_group = "PhononAB"
 
 Q_data_group = "Q_data"  # name of the group where Q data is stored
 
@@ -44,8 +45,8 @@ S_data_group = "S"  # name of the group where dynamical factor is stored
 pkt_per_peak = 50  # number of points for each peak broadened by the experimental resolution
 bin_width = 1.0  # defines width of bins used in rebining of S
 max_wavenumber = 4100  # maximum wavenumber in cm^1 taken into account while creating workspaces (exclusive)
-min_wavenumber = 0.0 # minimal wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
-acoustic_phonon_threshold = 0.0 # frequencies below this value are treated as acoustic and neglected.
+min_wavenumber = 0.0  # minimal wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
+acoustic_phonon_threshold = 0.0  # frequencies below this value are treated as acoustic and neglected.
 ######################################ABINS internal parameters end ###########################
 
 

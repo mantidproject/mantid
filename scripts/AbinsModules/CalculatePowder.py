@@ -92,13 +92,13 @@ class CalculatePowder(IOmodule):
         for atom in range(num_atoms):
 
             mass = masses[atom]
-            for omega_i in range(AbinsConstants.first_optical_phonon, num_freq):
+            for i in range(AbinsConstants.first_optical_phonon, num_freq):
 
-                disp = displacements[atom][omega_i] * coth[omega_i]  # full expression ?
+                disp = displacements[atom][i] * coth[i]  # full expression ?
                 # disp = displacements[atom][omega_i] # low temperature approximation?
-                factor = mass * AbinsConstants.aCLIMAX_constant / frequencies[omega_i]
-                b_tensors[atom, omega_i - AbinsConstants.first_optical_phonon] = np.outer(disp, disp).real * factor
-                a_tensors[atom] += b_tensors[atom, omega_i - AbinsConstants.first_optical_phonon]
+                factor = mass * AbinsConstants.aCLIMAX_constant / frequencies[i]
+                b_tensors[atom, i - AbinsConstants.first_optical_phonon] = np.outer(disp, disp).real * factor
+                a_tensors[atom] += b_tensors[atom, i - AbinsConstants.first_optical_phonon]
 
         # fill powder object with powder data
         powder.set(dict(b_tensors=b_tensors, a_tensors=a_tensors))

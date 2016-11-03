@@ -60,55 +60,35 @@ class ABINSCalculateQToscaTest(unittest.TestCase):
 
         # wrong file name
         with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename=1,
-                                           instrument=self._tosca_instrument,
-                                           sample_form=self._sample_form,
-                                           k_points_data=self._raw_data,
-                                           overtones=False,
-                                           combinations=False)
+            poor_q_calculator = CalculateQ(filename=1, instrument=self._tosca_instrument, sample_form=self._sample_form,
+                                           k_points_data=self._raw_data, combinations=False)
 
         # wrong instrument
         with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename=self._filename,
-                                           instrument="Different_instrument",
-                                           sample_form=self._sample_form,
-                                           k_points_data=self._raw_data,
-                                           overtones=False,
+            poor_q_calculator = CalculateQ(filename=self._filename, instrument="Different_instrument",
+                                           sample_form=self._sample_form, k_points_data=self._raw_data,
                                            combinations=False)
 
         # wrong sample form
         with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename=self._filename,
-                                           instrument=self._tosca_instrument,
-                                           sample_form="Solid",
-                                           k_points_data=self._raw_data,
-                                           overtones=False,
-                                           combinations=False)
+            poor_q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument,
+                                           sample_form="Solid", k_points_data=self._raw_data, combinations=False)
 
         # no k_points_data
         with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename=self._filename,
-                                           sample_form=self._sample_form,
-                                           instrument=self._tosca_instrument,
-                                           overtones=False,
-                                           combinations=False)
+            poor_q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument,
+                                           sample_form=self._sample_form, combinations=False)
 
         # wrong value of overtones
         with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename=self._filename,
-                                           instrument=self._tosca_instrument,
-                                           sample_form=self._sample_form,
-                                           k_points_data=self._raw_data,
-                                           overtones="bad_overtones",
+            poor_q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument,
+                                           sample_form=self._sample_form, k_points_data=self._raw_data,
                                            combinations=False)
 
         # wrong value of combinations
         with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename=self._filename,
-                                           instrument=self._tosca_instrument,
-                                           sample_form=self._sample_form,
-                                           k_points_data=self._raw_data,
-                                           overtones=False,
+            poor_q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument,
+                                           sample_form=self._sample_form, k_points_data=self._raw_data,
                                            combinations="bad_combinations")
 
     # Use case: TOSCA instrument
@@ -124,12 +104,8 @@ class ABINSCalculateQToscaTest(unittest.TestCase):
         # noinspection PyTypeChecker
         correct_q_data = k2_i + k2_f - 2 * np.power(k2_i * k2_f, 0.5) * AbinsParameters.TOSCA_cos_scattering_angle
 
-        q_calculator = CalculateQ(filename=self._filename,
-                                  instrument=self._tosca_instrument,
-                                  sample_form=self._sample_form,
-                                  k_points_data=self._raw_data,
-                                  overtones=False,
-                                  combinations=False)
+        q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument,
+                                  sample_form=self._sample_form, k_points_data=self._raw_data, combinations=False)
         q_vectors = q_calculator.calculateData()
 
         # noinspection PyTypeChecker

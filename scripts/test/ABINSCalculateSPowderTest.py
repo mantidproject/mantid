@@ -65,31 +65,30 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             poor_S = CalculateS(filename=1, temperature=self._temperature, sample_form=self._sample_form,
                                 abins_data=_good_data, instrument_name=self._instrument_name,
-                                overtones=self._overtones, combinations=self._combinations)
+                                quantum_order_events_num=self._combinations)
 
         # wrong temperature
         with self.assertRaises(ValueError):
-            poor_S = CalculateS(filename=filename, temperature=-1, sample_form=self._sample_form,
-                                abins_data=_good_data, instrument_name=self._instrument_name,
-                                overtones=self._overtones, combinations=self._combinations)
+            poor_S = CalculateS(filename=filename, temperature=-1, sample_form=self._sample_form, abins_data=_good_data,
+                                instrument_name=self._instrument_name, quantum_order_events_num=self._combinations)
 
         # wrong sample
         with self.assertRaises(ValueError):
             poor_S = CalculateS(filename=filename, temperature=self._temperature, sample_form="SOLID",
                                 abins_data=_good_data, instrument_name=self._instrument_name,
-                                overtones=self._overtones, combinations=self._combinations)
+                                quantum_order_events_num=self._combinations)
 
         # wrong abins data: content of abins data instead of object abins_data
         with self.assertRaises(ValueError):
             poor_S = CalculateS(filename=filename, temperature=self._temperature, sample_form=self._sample_form,
                                 abins_data=_good_data.extract(), instrument_name=self._instrument_name,
-                                overtones=self._overtones, combinations=self._combinations)
+                                quantum_order_events_num=self._combinations)
 
         # wrong instrument
         with self.assertRaises(ValueError):
             poor_S = CalculateS(filename=filename, temperature=self._temperature, sample_form=self._sample_form,
                                 abins_data=_good_data.extract(), instrument_name=self._instrument_name,
-                                overtones=self._overtones, combinations=self._combinations)
+                                quantum_order_events_num=self._combinations)
 
     #  main test
     def test_good_case(self):
@@ -100,10 +99,9 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
     def _good_case(self, name=None):
         # calculation of powder data
         _good_data = self._get_good_data(filename=name)
-        _good_tester = CalculateS(filename=name + ".phonon",  temperature=self._temperature,
+        _good_tester = CalculateS(filename=name + ".phonon", temperature=self._temperature,
                                   sample_form=self._sample_form, abins_data=_good_data["DFT"],
-                                  instrument_name=self._instrument_name, overtones=self._overtones,
-                                  combinations=self._combinations)
+                                  instrument_name=self._instrument_name, quantum_order_events_num=self._combinations)
         calculated_data = _good_tester.getData()
 
         self._check_data(good_data=_good_data["S"], data=calculated_data.extract())
@@ -111,7 +109,7 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
         # check if loading powder data is correct
         new_tester = CalculateS(filename=name + ".phonon", temperature=self._temperature, sample_form=self._sample_form,
                                 abins_data=_good_data["DFT"], instrument_name=self._instrument_name,
-                                overtones=self._overtones, combinations=self._combinations)
+                                quantum_order_events_num=self._combinations)
         loaded_data = new_tester.loadData()
 
         self._check_data(good_data=_good_data["S"], data=loaded_data.extract())

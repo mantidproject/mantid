@@ -5,16 +5,15 @@ class QData(GeneralData):
     """
     Class for storing Q data.
     """
-    def __init__(self, overtones=None):
+    def __init__(self, quantum_order_events_num=None):
         """
-        @param overtones: True if overtones should be included in calculations, otherwise False
+        @param quantum_order_events_num: True if overtones should be included in calculations, otherwise False
         """
         super(QData, self).__init__()
-        if isinstance(overtones, bool):
-            self._overtones = overtones
+        if isinstance(quantum_order_events_num, int):
+            self._quantum_order_events_num = quantum_order_events_num
         else:
-            raise ValueError("Invalid value of overtones. Expected values are: True, False ")
-
+            raise ValueError("Invalid value of quantum order events.")
 
     def set(self, items=None):
 
@@ -23,11 +22,9 @@ class QData(GeneralData):
         else:
             raise ValueError("Improper format of Q data. Dictionary is expected.")
 
-
     def extract(self):
 
         return self._data
-
 
     def __str__(self):
         return "Q vectors data"

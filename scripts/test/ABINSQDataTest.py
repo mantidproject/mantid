@@ -13,11 +13,11 @@ class ABINSQvectorsTEST(unittest.TestCase):
 
         # invalid value of overtones
         with self.assertRaises(ValueError):
-            vectors_Q = QData(overtones="bad")
+            vectors_Q = QData(quantum_order_events_num="bad")
 
 
         # Good items to set
-        vectors_Q = QData(overtones=False)
+        vectors_Q = QData(quantum_order_events_num=False)
         vectors_Q.set({"order_0": self._good_array}) # array for one k point
         self.assertEqual(True, np.allclose(self._good_array, vectors_Q.extract()["order_0"]))
 

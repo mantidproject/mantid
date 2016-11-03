@@ -1,10 +1,11 @@
 import numpy as np
+from mantid.kernel import logger
 
 # ABINS modules
 import AbinsParameters
 import AbinsConstants
 from IOmodule import IOmodule
-from QData import  QData
+from QData import QData
 from KpointsData import KpointsData
 from Instruments import Instrument
 
@@ -14,50 +15,43 @@ class CalculateQ(IOmodule):
     Class for calculating Q vectors for instrument of choice.
     """
 
-    def __init__(self, filename=None, instrument=None, sample_form=None, k_points_data=None, overtones=None, combinations=None):
+    def __init__(self, filename=None, instrument=None, sample_form=None, k_points_data=None,
+                 quantum_order_events_num=None):
         """
         @param filename: name of input filename (CASTEP: foo.phonon)
         @param instrument: object of type  Instrument
         @param sample_form: form in which sample is (Powder or SingleCrystal)
         @param k_points_data: object of type KpointsData with data from DFT calculations
-        @param overtones: True if overtones should be included in calculations, otherwise False
-        @param combinations: True if combinations should be calculated, otherwise False
+        @param quantum_order_events_num: number of quantum order events taken into account during the simulation
         """
         if not isinstance(instrument, Instrument):
             raise ValueError("Invalid instrument.")
         self._instrument = instrument
             
-        if not sample_form in AbinsConstants.all_sample_forms:
-            raise ValueError("Invalid value of the sample form. Please specify one of the two options: 'SingleCrystal', 'Powder'.")
+        if sample_form not in AbinsConstants.all_sample_forms:
+            raise ValueError("Invalid value of the sample form. Please specify one of the "
+                             "two options: 'SingleCrystal', 'Powder'.")
         self._sample_form = sample_form
 
         if not isinstance(k_points_data, KpointsData):
             raise ValueError("Invalid value of k-points data.")
         self._k_points_data = k_points_data
 
-        if isinstance(overtones, bool):
-            self._evaluate_overtones = overtones
+        if isinstance(quantum_order_events_num, int):
+            self._quantum_order_events_num = quantum_order_events_num
         else:
-            raise ValueError("Invalid value of overtones. Expected values are: True, False.")
+            raise ValueError("Invalid value of quantum order events.")
 
-        if isinstance(combinations, bool):
-            self._evaluate_combinations = combinations
-        else:
-            raise ValueError("Invalid value of combinations. Expected values are: True, False.")
+        # if self._evaluate_combinations:
+        #     combinations_folder = "combinations_true"
+        # else:
+        #     combinations_folder = "combinations_false"
 
-        if self._evaluate_overtones:
-            overtones_folder = "overtones_true"
-            if self._evaluate_combinations:
-                combinations_folder = "combinations_true"
-            else:
-                combinations_folder = "combinations_false"
-        else:
-            overtones_folder = "overtones_false"
-            combinations_folder = "combinations_false"
+        self._Qvectors = None  # data with Q vectors
 
-        self._Qvectors = None # data with Q vectors
-
-        super(CalculateQ, self).__init__(input_filename=filename, group_name=AbinsParameters.Q_data_group + "/%s"%self._instrument + "/" + self._sample_form + "/" + overtones_folder + "/" + combinations_folder)
+        super(CalculateQ, self).__init__(input_filename=filename,
+                                         group_name=AbinsParameters.Q_data_group +
+                                         "/%s" % self._instrument + "/" + self._sample_form)
 
     def _get_gamma_data(self, k_data_obj=None):
         """
@@ -92,9 +86,9 @@ class CalculateQ(IOmodule):
         """
         if self._sample_form == "Powder":
             self._instrument.collect_K_data(k_points_data=self._get_gamma_data(k_data_obj=self._k_points_data))
-            self._Qvectors = QData(overtones=self._evaluate_overtones)
-            self._Qvectors.set(self._instrument.calculate_q_powder(overtones=self._evaluate_overtones,
-                                                                   combinations=self._evaluate_combinations))
+            self._Qvectors = QData(quantum_order_events_num=self._quantum_order_events_num)
+            self._Qvectors.set(self._instrument.calculate_q_powder(
+                quantum_order_events_num=self._quantum_order_events_num))
         else:
             raise ValueError("SingleCrystal user case is not implemented.")
 
@@ -108,8 +102,9 @@ class CalculateQ(IOmodule):
         else:
             raise ValueError("Invalid instrument.")
 
-        self.addData("data", self._Qvectors.extract()) # Q vectors in the form of numpy array
+        self.addData("data", self._Qvectors.extract())  # Q vectors in the form of numpy array
         self.addFileAttributes()
+        self.addAttribute(name="order_of_quantum_events", value=self._quantum_order_events_num)
         self.save()
 
         return self._Qvectors
@@ -119,8 +114,21 @@ class CalculateQ(IOmodule):
         Loads  Q data from hdf file.
         @return: QData object
         """
-        data = self.load(list_of_datasets=["data"])
-        results = QData(overtones=self._evaluate_overtones)
+        data = self.load(list_of_datasets=["data"], list_of_attributes=["order_of_quantum_events"])
+        if self._quantum_order_events_num > data["attributes"]["order_of_quantum_events"]:
+            raise ValueError("User requested a larger number of quantum events to be included in the simulation "
+                             "then in the previous calculations. Q data cannot be loaded from the hdf file.")
+        if self._quantum_order_events_num < data["attributes"]["order_of_quantum_events"]:
+            logger.notice("User requested a smaller number of quantum events than in the previous calculations. "
+                          "Q data from hdf file which corresponds only to requested quantum order events will be "
+                          "loaded.")
+            temp_data = {}
+            for j in range(AbinsConstants.fundamentals,
+                           self._quantum_order_events_num + AbinsConstants.s_last_index):
+                temp_data["order_%s" % j] = data["datasets"]["data"]["order_%s" % j]
+            data["datasets"]["data"] = temp_data
+
+        results = QData(quantum_order_events_num=self._quantum_order_events_num)
         results.set(data["datasets"]["data"])
 
         return results

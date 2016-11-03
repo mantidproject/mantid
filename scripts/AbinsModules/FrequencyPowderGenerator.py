@@ -12,48 +12,48 @@ class FrequencyPowderGenerator(object):
     def __init__(self):
         super(FrequencyPowderGenerator, self).__init__()
 
-    def construct_freq_overtones(self, fundamentals_array=None, quantum_order=None):
-
-        """
-        Calculates frequencies for fundamentals and overtones. It also calculates coefficients which are used to
-        express those  frequencies as a linear combination of fundamentals. Each row in an array of coefficients
-        corresponds to the  particular  frequency. Elements in the particular row store information about coefficients
-        which are needed to decompose frequencies in terms of fundamentals. The number of elements in each row is equal
-        to the number of fundamentals. An array with coefficients for n-overtone has the following form:
-
-            [  n 0 0 0 0 ....
-               0 n 0 0 0
-               0 0 n .......
-               .............
-               .............  ]
-
-        ,e.g, it is diagonal matrix  with all diagonal elements equal to n.
-
-        @param fundamentals_array: numpy array with fundamentals
-        @param quantum_order: quantum order event (n = 1, 2, 3, 4)
-        @return: numpy array with frequencies, numpy array with coefficients.
-        """
-        if not (isinstance(fundamentals_array, np.ndarray) and
-                len(fundamentals_array.shape) == 1 and
-                fundamentals_array.dtype.num == AbinsConstants.float_id):
-
-            raise ValueError("Fundamentals in the form of one dimentional array are expected.")
-
-        if not (isinstance(quantum_order, int) and
-                AbinsConstants.fundamentals <= quantum_order <=
-                AbinsConstants.higher_order_quantum_effects_dim + AbinsConstants.fundamentals_dim):
-            raise ValueError("Improper value of quantum order effect. (quantum_order = %s)" % quantum_order)
-
-        new_array = fundamentals_array * quantum_order
-
-        # remove frequencies above AbinsParameters.max_wavenumber
-        indx = new_array < AbinsParameters.max_wavenumber
-        new_array = new_array[indx]
-
-        # construct array with coefficients
-        coefficients = np.eye(new_array.size, dtype=AbinsConstants.int_type) * quantum_order
-
-        return new_array, coefficients
+    # def construct_freq_overtones(self, fundamentals_array=None, quantum_order=None):
+    #
+    #     """
+    #     Calculates frequencies for fundamentals and overtones. It also calculates coefficients which are used to
+    #     express those  frequencies as a linear combination of fundamentals. Each row in an array of coefficients
+    #     corresponds to the  particular  frequency. Elements in the particular row store information about coefficients
+    #     which are needed to decompose frequencies in terms of fundamentals. The number of elements in each row is equal
+    #     to the number of fundamentals. An array with coefficients for n-overtone has the following form:
+    #
+    #         [  n 0 0 0 0 ....
+    #            0 n 0 0 0
+    #            0 0 n .......
+    #            .............
+    #            .............  ]
+    #
+    #     ,e.g, it is diagonal matrix  with all diagonal elements equal to n.
+    #
+    #     @param fundamentals_array: numpy array with fundamentals
+    #     @param quantum_order: quantum order event (n = 1, 2, 3, 4)
+    #     @return: numpy array with frequencies, numpy array with coefficients.
+    #     """
+    #     if not (isinstance(fundamentals_array, np.ndarray) and
+    #             len(fundamentals_array.shape) == 1 and
+    #             fundamentals_array.dtype.num == AbinsConstants.float_id):
+    #
+    #         raise ValueError("Fundamentals in the form of one dimentional array are expected.")
+    #
+    #     if not (isinstance(quantum_order, int) and
+    #             AbinsConstants.fundamentals <= quantum_order <=
+    #             AbinsConstants.higher_order_quantum_effects_dim + AbinsConstants.fundamentals_dim):
+    #         raise ValueError("Improper value of quantum order effect. (quantum_order = %s)" % quantum_order)
+    #
+    #     new_array = fundamentals_array * quantum_order
+    #
+    #     # remove frequencies above AbinsParameters.max_wavenumber
+    #     indx = new_array < AbinsParameters.max_wavenumber
+    #     new_array = new_array[indx]
+    #
+    #     # construct array with coefficients
+    #     coefficients = np.eye(new_array.size, dtype=AbinsConstants.int_type) * quantum_order
+    #
+    #     return new_array, coefficients
 
     def construct_freq_combinations(self, previous_array=None, previous_coefficients=None,
                                     fundamentals_array=None, quantum_order=None):

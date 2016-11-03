@@ -4,17 +4,18 @@ from mantid.kernel import logger
 # ABINS modules
 from IOmodule import IOmodule
 from KpointsData import KpointsData
-from AtomsData import  AtomsDaTa
+from AtomsData import AtomsDaTa
 from AbinsData import AbinsData
 import AbinsParameters
 import AbinsConstants
 
+
+# noinspection PyPep8Naming
 class GeneralDFTProgram(IOmodule):
     """
     A general class which groups all methods which should be inherited or implemented by a DFT program used
     in INS analysis.
     """
-
     def __init__(self, input_DFT_filename=None):
 
         super(GeneralDFTProgram, self).__init__(input_filename=input_DFT_filename, group_name=AbinsParameters.DFT_group)
@@ -22,7 +23,6 @@ class GeneralDFTProgram(IOmodule):
         self._num_k = None
         self._num_atoms = None
         self._sample_form = None
-
 
     def readPhononFile(self):
         """
@@ -95,7 +95,8 @@ class GeneralDFTProgram(IOmodule):
 
                         "hash"  - hash of a file with the phonon data. It should be a string representation of hash.
 
-                        "DFT_program" - name of the DFT program which was used to obtain phonon data (for CASTEP -> CASTEP).
+                        "DFT_program" - name of the DFT program which was used to obtain phonon data (for CASTEP ->
+                                        CASTEP).
 
                         "filename" - name of input DFT file
 
@@ -105,7 +106,6 @@ class GeneralDFTProgram(IOmodule):
 
         """
         return None
-
 
     def loadData(self):
         """
@@ -118,16 +118,15 @@ class GeneralDFTProgram(IOmodule):
         self._num_k = _datasets["k_vectors"].shape[0]
         self._num_atoms = len(_datasets["atoms"])
 
-        _loaded_data = {"frequencies":_datasets["frequencies"],
+        _loaded_data = {"frequencies": _datasets["frequencies"],
                         "weights": _datasets["weights"],
-                        "k_vectors":_datasets["k_vectors"],
+                        "k_vectors": _datasets["k_vectors"],
                         "atomic_displacements": _datasets["atomic_displacements"],
                         "unit_cell": _datasets["unit_cell"],
-                        "atoms":_datasets["atoms"]
+                        "atoms": _datasets["atoms"]
                         }
 
         return self._rearrange_data(data=_loaded_data)
-
 
     # Protected methods which should be reused by classes which read DFT phonon data
     def _recoverSymmetryPoints(self, data=None):
@@ -139,7 +138,6 @@ class GeneralDFTProgram(IOmodule):
 
         pass
 
-
     def _rearrange_data(self, data=None):
         """
         This method rearranges data read from phonon DFT file. It converts  masses and frequencies Hartree atomic units.
@@ -150,11 +148,16 @@ class GeneralDFTProgram(IOmodule):
         """
 
         k_points = KpointsData(num_atoms=self._num_atoms, num_k=self._num_k)
-        k_points.set({"weights": data["weights"],  # 1D [k] (one entry corresponds to weight of one k-point)
-                      "k_vectors": data["k_vectors"],  # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
-                      "frequencies": data["frequencies"] * AbinsConstants.cm1_2_hartree,  # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
-                      "atomic_displacements": data["atomic_displacements"] * AbinsConstants.atomic_length_2_angstrom}) # 4D array [k][atom_n][freq][3] (one entry corresponds to one coordinate for atom atom_n, frequency  freq and k-point k )
 
+        # 1D [k] (one entry corresponds to weight of one k-point)
+        k_points.set({"weights": data["weights"],
+                      # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
+                      "k_vectors": data["k_vectors"],
+                      # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
+                      "frequencies": data["frequencies"] * AbinsConstants.cm1_2_hartree,
+                      # 4D array [k][atom_n][freq][3] (one entry corresponds to
+                      # one coordinate for atom atom_n, frequency  freq and k-point k )
+                      "atomic_displacements": data["atomic_displacements"] * AbinsConstants.atomic_length_2_angstrom})
 
         atoms = AtomsDaTa(num_atoms=self._num_atoms)
         for atom in data["atoms"]:
@@ -164,7 +167,6 @@ class GeneralDFTProgram(IOmodule):
         result_data = AbinsData()
         result_data.set(k_points_data=k_points, atoms_data=atoms)
         return result_data
-
 
     def getData(self):
 
@@ -184,5 +186,3 @@ class GeneralDFTProgram(IOmodule):
             logger.notice(str(dft_data) + " from DFT input file has been loaded.")
 
         return dft_data
-
-

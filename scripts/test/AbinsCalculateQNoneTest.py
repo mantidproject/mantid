@@ -61,10 +61,8 @@ class ABINSCalculateQNoneTest(unittest.TestCase):
 
         producer = InstrumentProducer()
         tosca_instrument = producer.produceInstrument("None")
-        q_calculator = CalculateQ(filename=self._filename,
-                                  instrument=self._none_instrument,
-                                  sample_form=self._sample_form,
-                                  k_points_data=self._raw_data)
+        q_calculator = CalculateQ(filename=self._filename, instrument=self._none_instrument,
+                                  sample_form=self._sample_form, k_points_data=self._raw_data)
         q_vectors = q_calculator.calculateData()
 
         # noinspection PyTypeChecker

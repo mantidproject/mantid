@@ -17,40 +17,40 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         self._k_points_data = None
         super(ToscaInstrument, self).__init__()
 
-    def calculate_q_powder(self, overtones=None, combinations=None):
+    def calculate_q_powder(self, quantum_order_events_num=None):
         """
         Calculates squared Q vectors for TOSCA and TOSCA-like instruments.
         """
-        if not isinstance(overtones, bool):
+        if not isinstance(quantum_order_events_num, int):
             raise ValueError("Invalid value of overtones. Expected values are: True, False.")
 
         const = 1.0 / AbinsConstants.cm1_2_hartree
         fundamental_frequencies = self._k_points_data["frequencies"][0][AbinsConstants.first_optical_phonon:] * const
 
         # fundamentals and higher quantum order effects
-        if overtones:
-            q_dim = AbinsConstants.fundamentals_dim + AbinsConstants.higher_order_quantum_effects_dim
-
-        # only fundamentals
-        else:
-            q_dim = AbinsConstants.fundamentals_dim
+        # if overtones:
+        #     q_dim = AbinsConstants.fundamentals_dim + AbinsConstants.higher_order_quantum_effects_dim
+        #
+        # # only fundamentals
+        # else:
+        #     q_dim = AbinsConstants.fundamentals_dim
 
         q_data = {}
 
         local_freq = fundamental_frequencies
         local_coeff = np.eye(fundamental_frequencies.size, dtype=AbinsConstants.float_type)
-        for quantum_order in range(AbinsConstants.fundamentals, q_dim + AbinsConstants.q_last_index):
-            if combinations:
+        for quantum_order in range(AbinsConstants.fundamentals, quantum_order_events_num + AbinsConstants.q_last_index):
+            # if quantum_order_events_num:
 
-                local_freq, local_coeff = self.construct_freq_combinations(previous_array=local_freq,
-                                                                           previous_coefficients=local_coeff,
-                                                                           fundamentals_array=fundamental_frequencies,
-                                                                           quantum_order=quantum_order)
+            local_freq, local_coeff = self.construct_freq_combinations(previous_array=local_freq,
+                                                                       previous_coefficients=local_coeff,
+                                                                       fundamentals_array=fundamental_frequencies,
+                                                                       quantum_order=quantum_order)
 
-            else:  # only fundamentals (and optionally overtones)
-
-                local_freq, local_coeff = self.construct_freq_overtones(fundamentals_array=fundamental_frequencies,
-                                                                        quantum_order=quantum_order)
+            # else:  # only fundamentals (and optionally overtones)
+            #
+            #     local_freq, local_coeff = self.construct_freq_overtones(fundamentals_array=fundamental_frequencies,
+            #                                                             quantum_order=quantum_order)
 
             k2_i = (local_freq + AbinsParameters.TOSCA_final_neutron_energy) * AbinsConstants.TOSCA_constant
             k2_f = AbinsParameters.TOSCA_final_neutron_energy * AbinsConstants.TOSCA_constant
@@ -83,18 +83,18 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
 
         for indx, freq in np.ndenumerate(frequencies):
 
-            sigma = AbinsParameters.TOSCA_A * freq * freq + AbinsParameters.TOSCA_B * freq + AbinsParameters.TOSCA_C
+            sigma = AbinsParameters.TOSCA_A * freq ** 2 + AbinsParameters.TOSCA_B * freq + AbinsParameters.TOSCA_C
             local_start = indx[0] * AbinsParameters.pkt_per_peak
 
-            temp = np.array(np.linspace(freq - AbinsParameters.fwhm * sigma,
-                                        freq + AbinsParameters.fwhm * sigma,
-                                        num=AbinsParameters.pkt_per_peak))
+            broad_freq = np.array(np.linspace(freq - AbinsParameters.fwhm * sigma,
+                                              freq + AbinsParameters.fwhm * sigma,
+                                              num=AbinsParameters.pkt_per_peak))
 
-            points_freq[local_start:local_start + AbinsParameters.pkt_per_peak] = temp
+            points_freq[local_start:local_start + AbinsParameters.pkt_per_peak] = broad_freq
 
             # noinspection PyPep8
-            temp = np.convolve(s_dft[indx[0]], self._gaussian(sigma=sigma, points=temp, center=freq))
-            broadened_spectrum[local_start:local_start + AbinsParameters.pkt_per_peak] = temp
+            temp_spectrum = np.convolve(s_dft[indx[0]], self._gaussian(sigma=sigma, points=broad_freq, center=freq))
+            broadened_spectrum[local_start:local_start + AbinsParameters.pkt_per_peak] = temp_spectrum
 
         return points_freq, broadened_spectrum
 
