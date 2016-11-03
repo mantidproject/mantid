@@ -1,12 +1,12 @@
 #include "MantidAlgorithms/AppendSpectra.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/TextAxis.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -137,41 +137,28 @@ void AppendSpectra::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
   const auto yAxisWS1 = ws1->getAxis(yAxisNum);
   const auto yAxisWS2 = ws2->getAxis(yAxisNum);
   auto outputYAxis = output->getAxis(yAxisNum);
-  auto ws1len = ws1->getNumberHistograms();
-  // if spectra numbers
+  const auto ws1len = ws1->getNumberHistograms();
 
-  const bool isTextAxis = (yAxisWS1->isText() && yAxisWS2->isText());
-  const bool isNumericAxis = (yAxisWS1->isNumeric() && yAxisWS2->isNumeric());
+  const bool isTextAxis = yAxisWS1->isText() && yAxisWS2->isText();
+  const bool isNumericAxis = yAxisWS1->isNumeric() && yAxisWS2->isNumeric();
 
-  if (isTextAxis) {
-    // have to cast up to TextAxis, setLabel is TextAxis specific method
-    auto outputTextAxis = dynamic_cast<TextAxis *>(outputYAxis);
-
-    for (size_t i = 0; i < output->getNumberHistograms(); i++) {
+  auto outputTextAxis = dynamic_cast<TextAxis *>(outputYAxis);
+  for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+    if (isTextAxis) {
       // check if we're outside the spectra of the first workspace
-      std::string inputLabel =
+      const std::string inputLabel =
           i < ws1len ? yAxisWS1->label(i) : yAxisWS2->label(i - ws1len);
-
       outputTextAxis->setLabel(i, (inputLabel.size() > 0) ? inputLabel : "");
-      output->getSpectrum(i).setSpectrumNo(specnum_t(i));
-    }
-  } else if (isNumericAxis) {
 
-    for (size_t i = 0; i < output->getNumberHistograms(); i++) {
+    } else if (isNumericAxis) {
       // check if we're outside the spectra of the first workspace
-      double inputVal =
+      const double inputVal =
           i < ws1len ? yAxisWS1->getValue(i) : yAxisWS2->getValue(i - ws1len);
       outputYAxis->setValue(i, inputVal);
-      output->getSpectrum(i).setSpectrumNo(specnum_t(i));
     }
 
-  } else {
-    // change the axis by adding the maximum existing spectrum number to the
-    // current value
-    // default to old behaviour if none of our special cases are true
-    for (size_t i = 0; i < output->getNumberHistograms(); i++) {
-      output->getSpectrum(i).setSpectrumNo(specnum_t(i));
-    }
+    // append the spectra
+    output->getSpectrum(i).setSpectrumNo(specnum_t(i));
   }
 }
 
