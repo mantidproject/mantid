@@ -208,6 +208,7 @@ namespace MantidQt {
 				m_yAxisTickEndVec.push_back(
 					skewMatrixApply((m_xMaxVisBuffered), axisPointY));
 			}
+
 			update();
 		}
 
@@ -239,8 +240,12 @@ namespace MantidQt {
 						transform(m_xAxisTickEndVec[i]));
 					painter.drawLine(transform(m_yAxisTickStartVec[i]), transform(m_yAxisTickEndVec[i]));
 					painter.setPen(numberPen);
-					painter.drawText(transform(m_xNumbers[i]), QString::number(m_axisXPointVec[i], 'g', 3));
-					painter.drawText(transform(m_yNumbers[i]), QString::number(m_axisYPointVec[i], 'g', 3));
+					if ((m_xNumbers[i].x() > m_xMinVis) && (m_xNumbers[i].x() < (m_xMaxVis*0.95))){
+						painter.drawText(transform(m_xNumbers[i]), QString::number(m_axisXPointVec[i], 'g', 3));
+					}
+					if ((m_yNumbers[i].y() > m_yMinVis) && (m_yNumbers[i].y() < (m_yMaxVis*0.95))) {
+						painter.drawText(transform(m_yNumbers[i]), QString::number(m_axisYPointVec[i], 'g', 3));
+					}
 				  }
 
           }

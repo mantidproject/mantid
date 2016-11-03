@@ -2377,6 +2377,7 @@ void SliceViewer::autoRebinIfRequired() { // probably rename this if forcing it
   if (isAutoRebinSet()) {
     rebinParamsChanged();
   }
+  updateNonOrthogonalOverlay();
 }
 /** NON ORTHOGONAL STUFF **/
 
