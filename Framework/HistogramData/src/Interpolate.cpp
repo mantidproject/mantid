@@ -65,12 +65,7 @@ void sanityCheck(const Histogram &input, const size_t stepSize,
  */
 void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
                                HistogramY &ynew) {
-  auto binCentre = input.xMode() == Histogram::XMode::BinEdges
-                       ? [](const HistogramX &x,
-                            size_t i) { return 0.5 * (x[i] + x[i + 1]); }
-                       : [](const HistogramX &x, size_t i) { return x[i]; };
-
-  auto &xold = input.x();
+  auto xold = input.points();
   auto &yold = input.y();
   auto nypts = yold.size();
   size_t step(stepSize), index2(0);
@@ -79,11 +74,11 @@ void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
   ynew.back() = yold.back();
   for (size_t i = 0; i < nypts - 1; ++i) // Last point has been calculated
   {
-    double xp = binCentre(xold, i);
+    double xp = xold[i];
     if (step == stepSize) {
       x1 = xp;
       index2 = ((i + stepSize) >= nypts ? nypts - 1 : (i + stepSize));
-      x2 = binCentre(xold, index2);
+      x2 = xold[index2];
       overgap = 1.0 / (x2 - x1);
       y1 = yold[i];
       y2 = yold[index2];
@@ -107,22 +102,18 @@ void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
  */
 void interpolateYCSplineInplace(const Histogram &input, const size_t stepSize,
                                 HistogramY &ynew) {
-  auto binCentre = input.xMode() == Histogram::XMode::BinEdges
-                       ? [](const HistogramX &x,
-                            size_t i) { return 0.5 * (x[i] + x[i + 1]); }
-                       : [](const HistogramX &x, size_t i) { return x[i]; };
-  auto &xold = input.x();
+  auto xold = input.points();
   auto &yold = input.y();
   auto nypts = yold.size();
 
   const auto ncalc = numberCalculated(nypts, stepSize);
   std::vector<double> xc(ncalc), yc(ncalc);
   for (size_t step = 0, i = 0; step < nypts; step += stepSize, i += 1) {
-    xc[i] = binCentre(xold, step);
+    xc[i] = xold[step];
     yc[i] = yold[step];
   }
   // Ensure we have the last value
-  xc.back() = binCentre(xold, nypts - 1);
+  xc.back() = xold[nypts - 1];
   yc.back() = yold.back();
 
   gsl_interp_accel *acc = gsl_interp_accel_alloc();
@@ -130,7 +121,7 @@ void interpolateYCSplineInplace(const Histogram &input, const size_t stepSize,
   gsl_spline_init(spline, xc.data(), yc.data(), ncalc);
   // Evaluate each point for the full range
   for (size_t i = 0; i < nypts; ++i) {
-    ynew[i] = gsl_spline_eval(spline, binCentre(xold, i), acc);
+    ynew[i] = gsl_spline_eval(spline, xold[i], acc);
   }
   gsl_spline_free(spline);
   gsl_interp_accel_free(acc);
