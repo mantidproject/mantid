@@ -4,6 +4,7 @@
 #include "MantidKernel/Cache.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include <cstring>
 #include <boost/algorithm/string.hpp>
 
@@ -1099,6 +1100,13 @@ const std::vector<std::string> &ParameterMap::getParameterFilenames() const {
 */
 void ParameterMap::addParameterFilename(const std::string &filename) {
   m_parameterFileNames.push_back(filename);
+}
+
+  /// Wrapper for ParameterFactory::create to avoid include in header
+boost::shared_ptr<Parameter>
+ParameterMap::create(const std::string &className,
+                     const std::string &name) const {
+  return ParameterFactory::create(className, name);
 }
 
 } // Namespace Geometry

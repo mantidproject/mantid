@@ -6,7 +6,6 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IDTypes.h" //For specnum_t
 #include "MantidGeometry/Instrument/Parameter.h"
-#include "MantidGeometry/Instrument/ParameterFactory.h"
 
 #include "tbb/concurrent_unordered_map.h"
 
@@ -142,7 +141,7 @@ public:
   void add(const std::string &type, const IComponent *comp,
            const std::string &name, const T &value,
            const std::string *const pDescription = nullptr) {
-    auto param = ParameterFactory::create(type, name);
+    auto param = create(type, name);
     auto typedParam = boost::dynamic_pointer_cast<ParameterType<T>>(param);
     assert(typedParam); // If not true the factory has created the wrong type
     typedParam->setValue(value);
@@ -341,6 +340,9 @@ public:
   pmap_cit end() const { return m_map.end(); }
 
 private:
+  boost::shared_ptr<Parameter> create(const std::string &className,
+                                      const std::string &name) const;
+
   /// Assignment operator
   ParameterMap &operator=(ParameterMap *rhs);
   /// internal function to get position of the parameter in the parameter map
