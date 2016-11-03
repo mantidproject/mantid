@@ -318,7 +318,7 @@ public:
 
 private:
   const size_t binSize = 10000;
-  const size_t nIters = 1000;
+  const size_t nIters = 5000;
   Histogram hist;
 };
 
