@@ -7,7 +7,7 @@ from mantid.api import WorkspaceGroup
 
 from SANSUtility import (AddOperation, transfer_special_sample_logs,
                          bundle_added_event_data_as_group, WorkspaceType,
-                         get_workspace_type)
+                         get_workspace_type, getFileAndName)
 from shutil import copyfile
 
 sanslog = Logger("SANS")
@@ -315,7 +315,8 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
     else:
         outWs = Load(Filename=filename,OutputWorkspace=wsName)
 
-    path, fName = os.path.split(filename)
+    full_path, __ = getFileAndName(filename)
+    path, fName = os.path.split(full_path)
     if path.find('/') == -1:
     #looks like we're on a windows system, convert the directory separators
         path = path.replace('\\', '/')
