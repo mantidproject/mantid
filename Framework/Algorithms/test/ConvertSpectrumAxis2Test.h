@@ -240,7 +240,7 @@ public:
     std::string inputWS("inWS");
     const std::string outputWS("outWS");
 
-    ("ElasticQSquared", inputWS, outputWS, false, true);
+    do_algorithm_run("ElasticQSquared", inputWS, outputWS, false, true);
 
     MatrixWorkspace_const_sptr input, output;
     TS_ASSERT_THROWS_NOTHING(
