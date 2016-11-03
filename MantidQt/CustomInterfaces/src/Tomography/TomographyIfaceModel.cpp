@@ -241,7 +241,8 @@ bool TomographyIfaceModel::doPing(const std::string &compRes) {
     tid = alg->getPropertyValue("TransactionID");
     g_log.information() << "Pinged '" << compRes
                         << "'succesfully. Checked that a transaction could "
-                           "be created, with ID: " << tid << '\n';
+                           "be created, with ID: "
+                        << tid << '\n';
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Error. Failed to ping and start a transaction on "
                              "the remote resource." +
@@ -373,6 +374,7 @@ TomographyIfaceModel::makeTomoRecScriptOptions(const bool local) const {
 
   // options with all the info from filters and regions
   std::vector<std::string> opts;
+  opts.reserve(9);
 
   const std::string currentTool = usingTool();
   const std::string toolNameArg = prepareToolNameForArgs(currentTool);
@@ -820,7 +822,7 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
   opts.emplace_back("--input-path=" + adaptInputPathForExecution(
                                           m_pathsConfig.pathSamples(), local));
 
-  std::string alg = getCurrentToolMethod();
+  const std::string alg = getCurrentToolMethod();
 
   // check the general enable option and the dataset specific enable
   if (filters.prep.normalizeByFlats && m_pathsConfig.m_pathOpenBeamEnabled) {
