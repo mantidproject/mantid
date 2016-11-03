@@ -45,6 +45,9 @@ set ( TEST_PY_FILES
   IndirectAnnulusAbsorptionTest.py
   IndirectCylinderAbsorptionTest.py
   IndirectFlatPlateAbsorptionTest.py
+  IndirectAnnulusAbsorption2Test.py
+  IndirectCylinderAbsorption2Test.py
+  IndirectFlatPlateAbsorption2Test.py
   IndirectILLReductionTest.py
   IndirectResolutionTest.py
   IndirectTransmissionTest.py
