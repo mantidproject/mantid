@@ -81,22 +81,22 @@ class FrequencyPowderGenerator(object):
         if quantum_order == AbinsConstants.fundamentals:
             return fundamentals_array, np.eye(fundamentals_array.size, dtype=AbinsConstants.int_type)
 
-        if not (isinstance(previous_array, np.ndarray) and
-                len(previous_array.shape) == 1 and
-                previous_array.dtype.num == AbinsConstants.float_id):
-            raise ValueError("One dimentional array is expected.")
-
-        if not (isinstance(previous_coefficients, np.ndarray) and
-                len(previous_coefficients.shape) == 2 and
-                previous_coefficients.dtype.num == AbinsConstants.int_id):
-            raise ValueError("One dimentional array is expected.")
-
         # higher order quantum events
         else:
 
+            if not (isinstance(previous_array, np.ndarray) and
+                            len(previous_array.shape) == 1 and
+                            previous_array.dtype.num == AbinsConstants.float_id):
+                raise ValueError("One dimentional array is expected.")
+
+            if not (isinstance(previous_coefficients, np.ndarray) and
+                        len(previous_coefficients.shape) == 2 and
+                        previous_coefficients.dtype.num == AbinsConstants.int_id):
+                raise ValueError("One dimentional array is expected.")
+
             fundamentals_size = fundamentals_array.size
             previous_size = previous_array.size
-            initial_size = previous_size + fundamentals_size
+            initial_size = previous_size + 10 * fundamentals_size
             new_array = np.zeros(shape=initial_size, dtype=AbinsConstants.float_type)
             new_coefficients = np.zeros(shape=(initial_size, fundamentals_size), dtype=AbinsConstants.int_type)
             current_position = 0
