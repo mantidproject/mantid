@@ -76,28 +76,43 @@ void StartLiveData::init() {
  */
 void StartLiveData::afterPropertySet(const std::string &propName) {
   if (propName == "Instrument") {
-    // Remove old listener's properties
-    const std::vector<Property *> existingProps = getProperties();
-    for (auto existingProp : existingProps) {
-      if (existingProp->getGroup() == listenerPropertyGroup) {
-        removeProperty(existingProp->name());
-      }
-    }
+    // Properties of old listener, if any, need to be removed
+    removeListenerProperties();
 
-    // Add new listener's properties
+    // Get of instance of listener for this instrument
     auto listener = LiveListenerFactory::Instance().create(
         getPropertyValue(propName), false);
-    auto propertyManagerListener =
-        boost::dynamic_pointer_cast<IPropertyManager>(listener);
 
-    if (propertyManagerListener) {
-      const std::vector<Property *> listenerProps =
-          propertyManagerListener->getProperties();
-      for (auto listenerProp : listenerProps) {
-        auto prop = std::unique_ptr<Property>(listenerProp->clone());
-        prop->setGroup(listenerPropertyGroup);
-        declareProperty(std::move(prop));
-      }
+    // Copy over properties of new listener to this algorithm
+    copyListenerProperties(listener);
+  }
+}
+
+/**
+ * Copies properties from an ILiveListener to this algorithm. This makes them
+ * appear in the "listener properties" group on the StartLiveData custom dialog.
+ *
+ * @param listener ILiveListener from which to copy properties
+ */
+void StartLiveData::copyListenerProperties(const boost::shared_ptr<ILiveListener> &listener)
+{
+  // Add clones of listener's properties to this algorithm
+  for (auto listenerProp : listener->getProperties()) {
+    auto prop = std::unique_ptr<Property>(listenerProp->clone());
+    prop->setGroup(listenerPropertyGroup);
+    declareProperty(std::move(prop));
+  }
+}
+
+/**
+ * Removes previously copied ILiveListener properties.
+ */
+void StartLiveData::removeListenerProperties()
+{
+  // Remove all properties tagged with the listener property group
+  for (auto prop : getProperties()) {
+    if (prop->getGroup() == listenerPropertyGroup) {
+      removeProperty(prop->name());
     }
   }
 }
