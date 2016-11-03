@@ -94,8 +94,8 @@ void StartLiveData::afterPropertySet(const std::string &propName) {
  *
  * @param listener ILiveListener from which to copy properties
  */
-void StartLiveData::copyListenerProperties(const boost::shared_ptr<ILiveListener> &listener)
-{
+void StartLiveData::copyListenerProperties(
+    const boost::shared_ptr<ILiveListener> &listener) {
   // Add clones of listener's properties to this algorithm
   for (auto listenerProp : listener->getProperties()) {
     auto prop = std::unique_ptr<Property>(listenerProp->clone());
@@ -107,8 +107,7 @@ void StartLiveData::copyListenerProperties(const boost::shared_ptr<ILiveListener
 /**
  * Removes previously copied ILiveListener properties.
  */
-void StartLiveData::removeListenerProperties()
-{
+void StartLiveData::removeListenerProperties() {
   // Remove all properties tagged with the listener property group
   for (auto prop : getProperties()) {
     if (prop->getGroup() == listenerPropertyGroup) {
