@@ -269,7 +269,7 @@ public:
    *
    * @param dialog The pointer to the current dialog
    */
-  virtual void showToolConfig(TomoToolConfigDialogBase *const dialog) = 0;
+  virtual void showToolConfig(TomoToolConfigDialogBase &dialog) = 0;
 
   /**
    * Refresh the table, tree etc. that displays info on the running/finished
@@ -282,8 +282,8 @@ public:
    */
   virtual void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-          localStatus) = 0;
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+          &localStatus) = 0;
 
   /**
    * Save settings (normally when closing the interface). This refers

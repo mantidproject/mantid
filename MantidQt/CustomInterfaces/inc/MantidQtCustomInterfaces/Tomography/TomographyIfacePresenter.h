@@ -114,34 +114,29 @@ private:
   void createConfigDialogUsingToolName(const std::string &toolName);
 
   /// sets up the dialog and uses the settings to update the model
-  void setupConfigDialogSettingsAndUpdateModel(
-      TomoToolConfigDialogBase *const dialog);
+  void
+  setupConfigDialogSettingsAndUpdateModel(TomoToolConfigDialogBase *dialog);
 
   /// configures up the dialog using the view
-  void setupConfigDialogSettings(TomoToolConfigDialogBase *const dialog);
+  void setupConfigDialogSettings(TomoToolConfigDialogBase &dialog);
 
   /// does the actual path configuration for local resource
-  void
-  setupConfigDialogSettingsForLocal(TomoToolConfigDialogBase *const dialog);
+  void setupConfigDialogSettingsForLocal(TomoToolConfigDialogBase &dialog);
 
   /// does the actual path configuration for remote resource
-  void
-  setupConfigDialogSettingsForRemote(TomoToolConfigDialogBase *const dialog);
+  void setupConfigDialogSettingsForRemote(TomoToolConfigDialogBase &dialog);
 
   /// update all the model information after the tool's been changed
-  void
-  updateModelAfterToolChanged(const TomoToolConfigDialogBase *const dialog);
+  void updateModelAfterToolChanged(const TomoToolConfigDialogBase &dialog);
 
   /// update the model's current tool name using the dialog
-  void updateModelCurrentToolName(const TomoToolConfigDialogBase *const dialog);
+  void updateModelCurrentToolName(const TomoToolConfigDialogBase &dialog);
 
   /// update the model's current tool method using the dialog
-  void
-  updateModelCurrentToolMethod(const TomoToolConfigDialogBase *const dialog);
+  void updateModelCurrentToolMethod(const TomoToolConfigDialogBase &dialog);
 
   /// update the model's current tool settings using the dialog
-  void
-  updateModelCurrentToolSettings(const TomoToolConfigDialogBase *const dialog);
+  void updateModelCurrentToolSettings(const TomoToolConfigDialogBase &dialog);
 
   /// Associated view for this presenter (MVP pattern)
   ITomographyIfaceView *const m_view;

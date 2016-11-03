@@ -258,6 +258,7 @@ public:
 
     TomoPathsConfig toolPaths;
     const size_t toolsize = tools.size();
+
     for (size_t i = 0; i < toolsize; i++) {
       // expect the current paths config will be read only once
       EXPECT_CALL(mockView, currentPathsConfig())
