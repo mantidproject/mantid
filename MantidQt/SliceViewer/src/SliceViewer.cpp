@@ -2408,9 +2408,16 @@ void SliceViewer::disableOrthogonalAnalysisTools(bool checked) {
 	ui.btnClearLine->setDisabled(checked);
 	ui.btnRebinMode->setDisabled(checked);
 	ui.btnPeakOverlay->setDisabled(checked);
-	m_plot->enableAxis(QwtPlot::yLeft, !checked);
-	m_plot->enableAxis(QwtPlot::xBottom, !checked);
+	disableAxisForNonorthogonal(checked, QwtPlot::yLeft);
+	disableAxisForNonorthogonal(checked, QwtPlot::xBottom);
+	m_nonOrthogonalOverlay->update();
+	m_plot->updateLayout();
+}
 
+void SliceViewer::disableAxisForNonorthogonal(bool disable, int axesPosition) {
+	m_plot->axisScaleDraw(axesPosition)->enableComponent(QwtAbstractScaleDraw::ScaleComponent::Labels, !disable);
+	m_plot->axisScaleDraw(axesPosition)->enableComponent(QwtAbstractScaleDraw::ScaleComponent::Ticks, !disable);
+	m_plot->axisScaleDraw(axesPosition)->enableComponent(QwtAbstractScaleDraw::ScaleComponent::Backbone, !disable);
 }
 /**
  * Convenience function for removing all displayed peaks workspaces.

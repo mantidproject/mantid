@@ -202,6 +202,7 @@ public slots:
   //Non Orthogonal
   void setNonOrthogonalbtn();
   void disableOrthogonalAnalysisTools(bool checked);
+  void disableAxisForNonorthogonal(bool disable, int axesPosition);
   // Synced checkboxes
   void LineMode_toggled(bool);
   void SnapToGrid_toggled(bool);
