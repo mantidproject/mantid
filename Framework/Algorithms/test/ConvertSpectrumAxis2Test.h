@@ -16,7 +16,8 @@ using namespace Mantid::HistogramData::detail;
 class ConvertSpectrumAxis2Test : public CxxTest::TestSuite {
 private:
   void do_algorithm_run(std::string target, std::string inputWS,
-                        std::string outputWS, bool startYNegative = true, bool isHistogram = true) {
+                        std::string outputWS, bool startYNegative = true,
+                        bool isHistogram = true) {
     auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         3, 1, false, startYNegative, isHistogram);
     AnalysisDataService::Instance().addOrReplace(inputWS, testWS);
@@ -126,7 +127,8 @@ public:
     clean_up_workspaces(inputWS, outputSignedThetaAxisWS);
 
     // No histogram
-    do_algorithm_run("signed_theta", inputWS, outputSignedThetaAxisWS, true, false);
+    do_algorithm_run("signed_theta", inputWS, outputSignedThetaAxisWS, true,
+                     false);
 
     // Check output values for the workspace then clean up.
     check_output_values_for_signed_theta_conversion(outputSignedThetaAxisWS);
@@ -140,7 +142,8 @@ public:
     clean_up_workspaces(inputWS, outputSignedThetaAxisWS2);
 
     // No histogram
-    do_algorithm_run("SignedTheta", inputWS, outputSignedThetaAxisWS2, true, false);
+    do_algorithm_run("SignedTheta", inputWS, outputSignedThetaAxisWS2, true,
+                     false);
 
     // Check output values for the workspace then clean up.
     check_output_values_for_signed_theta_conversion(outputSignedThetaAxisWS2);
