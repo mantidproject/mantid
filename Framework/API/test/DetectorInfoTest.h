@@ -315,4 +315,106 @@ private:
   }
 };
 
+class DetectorInfoTestPerformance : public CxxTest::TestSuite {
+public:
+  static DetectorInfoTestPerformance *createSuite() {
+    return new DetectorInfoTestPerformance();
+  }
+  static void destroySuite(DetectorInfoTestPerformance *suite) { delete suite; }
+
+  DetectorInfoTestPerformance() : m_workspace() {
+    size_t numberOfHistograms = 10000;
+    size_t numberOfBins = 1;
+    m_workspace.init(numberOfHistograms, numberOfBins + 1, numberOfBins);
+    bool includeMonitors = false;
+    bool startYNegative = true;
+    const std::string instrumentName("SimpleFakeInstrument");
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(
+        m_workspace, includeMonitors, startYNegative, instrumentName);
+  }
+
+  void test_typical() {
+    // Typically:
+    // - workspace with > 10k histograms
+    // - need L1, L2, and 2-theta
+    // Note that the instrument in this case is extremely simple, with few
+    // detectors and no parameters, so the actual performance will be worse.
+    for (int repeat = 0; repeat < 32; ++repeat) {
+      double result = 0.0;
+      const auto &detectorInfo = m_workspace.detectorInfo();
+      for (size_t i = 0; i < 10000; ++i) {
+        result += detectorInfo.l1();
+        result += detectorInfo.l2(i);
+        result += detectorInfo.twoTheta(i);
+      }
+      // We are computing and using the result to fool the optimizer.
+      TS_ASSERT_DELTA(result, 5214709.740869, 1e-6);
+    }
+  }
+
+  void test_isMasked() {
+    for (int repeat = 0; repeat < 32; ++repeat) {
+      bool result = false;
+      const auto &detectorInfo = m_workspace.detectorInfo();
+      for (size_t i = 0; i < 10000; ++i) {
+        result |= detectorInfo.isMasked(i);
+      }
+      // We are computing and using the result to fool the optimizer.
+      TS_ASSERT(!result);
+    }
+  }
+
+  void test_position() {
+    for (int repeat = 0; repeat < 32; ++repeat) {
+      Kernel::V3D result;
+      const auto &detectorInfo = m_workspace.detectorInfo();
+      for (size_t i = 0; i < 10000; ++i) {
+        result += detectorInfo.position(i);
+      }
+      // We are computing and using the result to fool the optimizer.
+      TS_ASSERT_DELTA(result[0], 0.0, 1e-6);
+    }
+  }
+
+  void test_setPosition() {
+    for (int repeat = 0; repeat < 32; ++repeat) {
+      auto &detectorInfo = m_workspace.mutableDetectorInfo();
+      for (size_t i = 0; i < 10000; ++i) {
+        detectorInfo.setPosition(i, Kernel::V3D(1.0, 0.0, 0.0));
+      }
+    }
+  }
+
+  void test_position_after_move() {
+    for (int repeat = 0; repeat < 32; ++repeat) {
+      Kernel::V3D result;
+      const auto &detectorInfo = m_workspace.detectorInfo();
+      for (size_t i = 0; i < 10000; ++i) {
+        result += detectorInfo.position(i);
+      }
+      // We are computing and using the result to fool the optimizer.
+      TS_ASSERT_DELTA(result[0], 10000.0, 1e-6);
+    }
+  }
+
+  void test_position_after_parent_move() {
+    auto &detectorInfo = m_workspace.mutableDetectorInfo();
+    const auto &instrument = m_workspace.getInstrument();
+    const auto &root = instrument->getComponentByName("SimpleFakeInstrument");
+    detectorInfo.setPosition(*root, Kernel::V3D(0.1, 0.0, 0.0));
+    for (int repeat = 0; repeat < 32; ++repeat) {
+      Kernel::V3D result;
+      const auto &detectorInfo = m_workspace.detectorInfo();
+      for (size_t i = 0; i < 10000; ++i) {
+        result += detectorInfo.position(i);
+      }
+      // We are computing and using the result to fool the optimizer.
+      TS_ASSERT_DELTA(result[0], 11000.0, 1e-6);
+    }
+  }
+
+private:
+  WorkspaceTester m_workspace;
+};
+
 #endif /* MANTID_API_DETECTORINFOTEST_H_ */
