@@ -35,14 +35,14 @@ void normalizeColumns(Mantid::Kernel::DblMatrix &skewMatrix) {
   const auto numberOfColumns = skewMatrix.numCols();
   const auto numberOfRows = skewMatrix.numRows();
   std::vector<double> bNorm;
-  bNorm.reserve(skewMatrix.numCols()); 
+  bNorm.reserve(skewMatrix.numCols());
   double sumOverRow(0.0);
   for (size_t column = 0; column < numberOfColumns; ++column) {
     sumOverRow = 0.0;
     for (size_t row = 0; row < numberOfRows; ++row) {
       sumOverRow += std::pow(skewMatrix[row][column], 2);
     }
-	bNorm.push_back(std::sqrt(sumOverRow));
+    bNorm.push_back(std::sqrt(sumOverRow));
   }
 
   // Apply column normalisation to skew matrix --> TODO: Check why 3 is
@@ -87,7 +87,7 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix, T workspace) {
     Mantid::Kernel::Matrix<Mantid::coord_t> temp(nDims, nDims, true);
     affineMatrix = temp;
   }
-  
+
   // Extract W Matrix
   auto wMatrixAsArray =
       run.template getPropertyValueAsType<std::vector<double>>("W_MATRIX");
@@ -98,7 +98,6 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix, T workspace) {
   Mantid::Kernel::DblMatrix bMatrix = orientedLattice.getB();
   bMatrix *= wMatrix;
 
-
   // Get G* Matrix
   Mantid::Kernel::DblMatrix gStarMatrix = bMatrix.Tprime() * bMatrix;
 
@@ -106,16 +105,15 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix, T workspace) {
   Mantid::Geometry::UnitCell unitCell(orientedLattice);
   unitCell.recalculateFromGstar(gStarMatrix);
   skewMatrix = unitCell.getB();
-  
+
   // Provide column normalisation of the skewMatrix
   normalizeColumns(skewMatrix);
-  
+
   // Setup basis normalisation array
   std::vector<double> basisNormalization = {orientedLattice.astar(),
                                             orientedLattice.bstar(),
                                             orientedLattice.cstar()};
 
- 
   // Expand matrix to 4 dimensions if necessary
   if (4 == workspace->getNumDims()) {
     basisNormalization.push_back(1.0);
@@ -144,8 +142,8 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix, T workspace) {
   if (4 == workspace->getNumDims()) {
     stripMatrix(skewMatrix);
   }
-  skewMatrix.Invert(); //Current fix so skewed image displays in correct orientation
-  
+  skewMatrix
+      .Invert(); // Current fix so skewed image displays in correct orientation
 }
 
 template <typename T> bool doRequiresSkewMatrix(T workspace) {
@@ -214,20 +212,17 @@ bool isHKLDimensions(Mantid::API::IMDWorkspace_const_sptr workspace,
   }
   return dimensionHKL;
 }
-size_t getMissingHKLDimensionIndex(Mantid::API::IMDWorkspace_const_sptr workspace, size_t dimX,
-	size_t dimY)
-{
-	for (size_t i = 0; i < workspace->getNumDims(); ++i)
-	{
-		auto dimension = workspace->getDimension(i);
-		const auto &frame = dimension->getMDFrame();
-		if ((frame.name() == Mantid::Geometry::HKL::HKLName) && (i != dimX) && (i != dimY))
-		{
-			return i; 
-		}
-
-	}
+size_t
+getMissingHKLDimensionIndex(Mantid::API::IMDWorkspace_const_sptr workspace,
+                            size_t dimX, size_t dimY) {
+  for (size_t i = 0; i < workspace->getNumDims(); ++i) {
+    auto dimension = workspace->getDimension(i);
+    const auto &frame = dimension->getMDFrame();
+    if ((frame.name() == Mantid::Geometry::HKL::HKLName) && (i != dimX) &&
+        (i != dimY)) {
+      return i;
+    }
+  }
 }
 }
-
 }

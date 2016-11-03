@@ -21,9 +21,9 @@ public:
   double value(double x, double y) const override;
 
   void setSliceParams(size_t dimX, size_t dimY,
-	  Mantid::Geometry::IMDDimension_const_sptr X,
-	  Mantid::Geometry::IMDDimension_const_sptr Y,
-	  std::vector<Mantid::coord_t> &slicePoint) override;
+                      Mantid::Geometry::IMDDimension_const_sptr X,
+                      Mantid::Geometry::IMDDimension_const_sptr Y,
+                      std::vector<Mantid::coord_t> &slicePoint) override;
 
 protected:
   void copyFrom(const QwtRasterDataMDNonOrthogonal &source,
@@ -32,7 +32,7 @@ protected:
   Mantid::coord_t m_skewMatrix[9];
 
 private:
-	size_t m_missingHKLdim;
+  size_t m_missingHKLdim;
 };
 
 } // namespace SliceViewer

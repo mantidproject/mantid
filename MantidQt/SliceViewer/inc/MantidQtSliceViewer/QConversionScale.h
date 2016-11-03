@@ -3,25 +3,16 @@
 #include <qwt_plot.h>
 #include <qwt_scale_draw.h>
 
-
-class QConversionScaleDraw : public QwtScaleDraw
-{
+class QConversionScaleDraw : public QwtScaleDraw {
 public:
+  explicit QConversionScaleDraw() {}
 
-	explicit QConversionScaleDraw()
-	{
+  virtual QwtText label(double value) const override {
+    // value is x
 
-	}
-
-	virtual QwtText label(double value) const override
-	{
-		//value is x
-		
-		return QwtScaleDraw::label(value * 2);
-	}
+    return QwtScaleDraw::label(value * 2);
+  }
 
 private:
-
-	double m_conversionFactor;
-
+  double m_conversionFactor;
 };

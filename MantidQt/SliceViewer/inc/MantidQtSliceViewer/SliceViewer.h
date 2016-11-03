@@ -77,7 +77,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget,
 public:
   SliceViewer(QWidget *parent = 0);
   ~SliceViewer() override;
-  
+
   void setWorkspace(const QString &wsName);
   void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
   Mantid::API::IMDWorkspace_sptr getWorkspace();
@@ -199,7 +199,7 @@ public slots:
   void saveImage(const QString &filename = QString());
   void copyImageToClipboard();
   void onPeaksViewerOverlayOptions();
-  //Non Orthogonal
+  // Non Orthogonal
   void setNonOrthogonalbtn();
   void disableOrthogonalAnalysisTools(bool checked);
   void disableAxisForNonorthogonal(bool disable, int axesPosition);
@@ -293,7 +293,7 @@ private:
 
   // PeakOverlay * m_peakOverlay;
 
-  //NonOrthogonal Overlay for drawing axes
+  // NonOrthogonal Overlay for drawing axes
   NonOrthogonalOverlay *m_nonOrthogonalOverlay;
 
   /// Object for running algorithms in the background
@@ -317,7 +317,7 @@ private:
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> m_dimensions;
 
   /// Data presenter
-  std::unique_ptr <API::QwtRasterDataMD> m_data;
+  std::unique_ptr<API::QwtRasterDataMD> m_data;
 
   /// The X and Y dimensions being plotted
   Mantid::Geometry::IMDDimension_const_sptr m_X;
