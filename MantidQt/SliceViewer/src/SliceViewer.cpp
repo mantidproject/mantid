@@ -2387,8 +2387,13 @@ void SliceViewer::setNonOrthogonalbtn()
 	bool canShowSkewedWS = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
 	ui.btnNonOrthogonalToggle->setDisabled(!canShowSkewedWS);
         // Orthogonal Overlay axes calculated and appear.
-        m_nonOrthogonalOverlay->calculateAxesSkew(
-            &m_ws, m_dimX, m_dimY); // set this later so only appears if nonOrth
+        if (canShowSkewedWS) {
+          m_nonOrthogonalOverlay->calculateAxesSkew(
+              &m_ws, m_dimX,
+              m_dimY); // set this later so only appears if nonOrth
+        } else {
+          m_nonOrthogonalOverlay->m_showLine = false;
+        }
         emit disableOrthogonalAnalysisTools(ui.btnNonOrthogonalToggle->isChecked());
 
 }
