@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include <boost/python/class.hpp>
 
 using Mantid::Geometry::DetectorGroup;

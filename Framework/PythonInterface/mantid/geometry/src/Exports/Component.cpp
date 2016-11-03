@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 

@@ -1,5 +1,6 @@
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>

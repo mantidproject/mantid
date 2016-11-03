@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include <boost/python/class.hpp>
 
 using Mantid::Geometry::ObjComponent;

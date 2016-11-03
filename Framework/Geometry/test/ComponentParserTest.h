@@ -2,6 +2,7 @@
 #define MANTID_GEOMETRY_COMPONENTPARSERTEST_H_
 
 #include "MantidGeometry/ComponentParser.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"

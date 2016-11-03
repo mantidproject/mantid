@@ -6,6 +6,7 @@
 #include "MantidKernel/System.h"
 
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
