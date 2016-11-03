@@ -1047,10 +1047,10 @@ void TomographyIfaceViewQtGUI::updateSystemSettingsTabFields(
  * @param dialog The pointer to the current dialog
  */
 void TomographyIfaceViewQtGUI::showToolConfig(
-    TomoToolConfigDialogBase &dialog) {
+    TomoToolConfigDialogBase *const dialog) {
 
   // execute also intiialises all the parts of the GUI
-  dialog.initialiseGUIandExecute();
+  dialog->initialiseGUIandExecute();
 }
 
 /**

@@ -269,7 +269,7 @@ public:
    *
    * @param dialog The pointer to the current dialog
    */
-  virtual void showToolConfig(TomoToolConfigDialogBase &dialog) = 0;
+  virtual void showToolConfig(TomoToolConfigDialogBase *const dialog) = 0;
 
   /**
    * Refresh the table, tree etc. that displays info on the running/finished

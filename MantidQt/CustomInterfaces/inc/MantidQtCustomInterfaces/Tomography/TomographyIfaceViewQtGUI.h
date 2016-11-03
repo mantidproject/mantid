@@ -248,8 +248,8 @@ private:
 
   void updatePathsConfig(const TomoPathsConfig &cfg) override;
 
-  void showToolConfig(
-      MantidQt::CustomInterfaces::TomoToolConfigDialogBase &dialog) override;
+  void showToolConfig(MantidQt::CustomInterfaces::TomoToolConfigDialogBase
+                          *const dialog) override;
 
   void closeEvent(QCloseEvent *ev) override;
 

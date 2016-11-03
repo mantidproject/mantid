@@ -249,7 +249,7 @@ void TomographyIfacePresenter::processToolChanged() {
 }
 
 void TomographyIfacePresenter::setupConfigDialogSettingsAndUpdateModel(
-    TomoToolConfigDialogBase *dialog) {
+    TomoToolConfigDialogBase *const dialog) {
 
   if (dialog) {
     setupConfigDialogSettings(dialog);
@@ -265,8 +265,7 @@ void TomographyIfacePresenter::createConfigDialogUsingToolName(
     const std::string &toolName) {
   // free the previous dialogue pointer if any
   m_configDialog.reset();
-  m_configDialog =
-      TomoToolConfigDialogBase::getToolDialogFor(toolName);
+  m_configDialog = TomoToolConfigDialogBase::getToolDialogFor(toolName);
 }
 
 /** Depending on whether local or remote resource is selected, do setup
@@ -276,7 +275,7 @@ void TomographyIfacePresenter::createConfigDialogUsingToolName(
 * @param dialog The dialog pointer that will be set up
 */
 void TomographyIfacePresenter::setupConfigDialogSettings(
-    TomoToolConfigDialogBase *dialog) {
+    TomoToolConfigDialogBase *const dialog) {
 
   if (isLocalResourceSelected()) {
     setupConfigDialogSettingsForLocal(dialog);
@@ -291,7 +290,7 @@ void TomographyIfacePresenter::setupConfigDialogSettings(
  * @param dialog The raw dialog pointer that will be configured.
  */
 void TomographyIfacePresenter::setupConfigDialogSettingsForLocal(
-    TomoToolConfigDialogBase *dialog) {
+    TomoToolConfigDialogBase *const dialog) {
   std::string run = m_model->getExeternalInterpreterPath() + " " +
                     m_model->getCurrentLocalScriptsBasePath() +
                     m_model->getTomoScriptLocationPath();
@@ -318,7 +317,7 @@ void TomographyIfacePresenter::setupConfigDialogSettingsForLocal(
  * @param dialog The raw dialog pointer that will be configured.
  */
 void TomographyIfacePresenter::setupConfigDialogSettingsForRemote(
-    TomoToolConfigDialogBase *dialog) {
+    TomoToolConfigDialogBase *const dialog) {
   // set up all the information we need for the dialog
   std::string run = m_model->getCurrentRemoteScriptsBasePath() +
                     m_model->getTomoScriptFolderPath() +
@@ -343,7 +342,7 @@ void TomographyIfacePresenter::setupConfigDialogSettingsForRemote(
  * @param dialog The raw dialog pointer that will be configured.
  */
 void TomographyIfacePresenter::updateModelAfterToolChanged(
-    const TomoToolConfigDialogBase *dialog) {
+    const TomoToolConfigDialogBase *const dialog) {
 
   // if passed an empty string don't remove the name
   updateModelCurrentToolName(dialog);
@@ -355,14 +354,14 @@ void TomographyIfacePresenter::updateModelAfterToolChanged(
 * dialogue itself
 */
 void TomographyIfacePresenter::updateModelCurrentToolName(
-    const TomoToolConfigDialogBase *dialog) {
+    const TomoToolConfigDialogBase *const dialog) {
   m_model->usingTool(dialog->getSelectedToolName());
 }
 /** Sets the model's current tool method by coyping the
 * string over to the model, getting it from the dialogue itself
 */
 void TomographyIfacePresenter::updateModelCurrentToolMethod(
-    const TomoToolConfigDialogBase *dialog) {
+    const TomoToolConfigDialogBase *const dialog) {
   m_model->setCurrentToolMethod(dialog->getSelectedToolMethod());
 }
 
@@ -371,7 +370,7 @@ void TomographyIfacePresenter::updateModelCurrentToolMethod(
 * the tool is changed or the whole interface is closed
 */
 void TomographyIfacePresenter::updateModelCurrentToolSettings(
-    const TomoToolConfigDialogBase *dialog) {
+    const TomoToolConfigDialogBase *const dialog) {
   m_model->setCurrentToolSettings(dialog->getSelectedToolSettings());
 }
 
@@ -540,7 +539,7 @@ void TomographyIfacePresenter::processSetupReconTool() {
 
   if (TomographyIfaceModel::g_CCPiTool != currentReconTool) {
     // give pointer to showToolConfig, so it can run the dialogue
-    m_view->showToolConfig(*dialog);
+    m_view->showToolConfig(dialog);
     updateModelAfterToolChanged(dialog);
   }
 }

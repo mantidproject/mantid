@@ -114,32 +114,34 @@ private:
   void createConfigDialogUsingToolName(const std::string &toolName);
 
   /// sets up the dialog and uses the settings to update the model
-  void
-  setupConfigDialogSettingsAndUpdateModel(TomoToolConfigDialogBase *dialog);
+  void setupConfigDialogSettingsAndUpdateModel(
+      TomoToolConfigDialogBase *const dialog);
 
   /// configures up the dialog using the view
-  void setupConfigDialogSettings(
-      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog);
+  void setupConfigDialogSettings(TomoToolConfigDialogBase *const dialog);
 
   /// does the actual path configuration for local resource
-  void setupConfigDialogSettingsForLocal(
-      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog);
+  void
+  setupConfigDialogSettingsForLocal(TomoToolConfigDialogBase *const dialog);
 
   /// does the actual path configuration for remote resource
-  void setupConfigDialogSettingsForRemote(
-      MantidQt::CustomInterfaces::TomoToolConfigDialogBase *dialog);
+  void
+  setupConfigDialogSettingsForRemote(TomoToolConfigDialogBase *const dialog);
 
   /// update all the model information after the tool's been changed
-  void updateModelAfterToolChanged(const TomoToolConfigDialogBase *dialog);
+  void
+  updateModelAfterToolChanged(const TomoToolConfigDialogBase *const dialog);
 
   /// update the model's current tool name using the dialog
-  void updateModelCurrentToolName(const TomoToolConfigDialogBase *dialog);
+  void updateModelCurrentToolName(const TomoToolConfigDialogBase *const dialog);
 
   /// update the model's current tool method using the dialog
-  void updateModelCurrentToolMethod(const TomoToolConfigDialogBase *dialog);
+  void
+  updateModelCurrentToolMethod(const TomoToolConfigDialogBase *const dialog);
 
   /// update the model's current tool settings using the dialog
-  void updateModelCurrentToolSettings(const TomoToolConfigDialogBase *dialog);
+  void
+  updateModelCurrentToolSettings(const TomoToolConfigDialogBase *const dialog);
 
   /// Associated view for this presenter (MVP pattern)
   ITomographyIfaceView *const m_view;
