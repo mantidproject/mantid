@@ -5,6 +5,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <iomanip>
+#include <sstream>
 #include <vector>
 
 namespace Mantid {

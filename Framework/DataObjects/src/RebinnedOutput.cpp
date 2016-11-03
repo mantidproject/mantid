@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <sstream>
 
 namespace Mantid {
 namespace DataObjects {

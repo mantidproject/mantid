@@ -7,7 +7,6 @@
 #include "MantidGeometry/IDTypes.h" //For specnum_t
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
-#include "MantidKernel/Cache.h"
 
 #include "tbb/concurrent_unordered_map.h"
 
@@ -16,11 +15,10 @@
 #include <typeinfo>
 
 namespace Mantid {
+namespace Kernel {
+template <class KEYTYPE, class VALUETYPE> class Cache;
+}
 namespace Geometry {
-
-//---------------------------------------------------------------------------
-// Forward declarations
-//---------------------------------------------------------------------------
 class BoundingBox;
 
 /** @class ParameterMap ParameterMap.h
@@ -359,9 +357,9 @@ private:
   /// internal parameter map instance
   pmap m_map;
   /// internal cache map instance for cached position values
-  mutable Kernel::Cache<const ComponentID, Kernel::V3D> m_cacheLocMap;
+  std::unique_ptr<Kernel::Cache<const ComponentID, Kernel::V3D>> m_cacheLocMap;
   /// internal cache map instance for cached rotation values
-  mutable Kernel::Cache<const ComponentID, Kernel::Quat> m_cacheRotMap;
+  std::unique_ptr<Kernel::Cache<const ComponentID, Kernel::Quat>> m_cacheRotMap;
   /// internal cache map for cached bounding boxes
   std::unique_ptr<Kernel::Cache<const ComponentID, BoundingBox>>
       m_boundingBoxMap;

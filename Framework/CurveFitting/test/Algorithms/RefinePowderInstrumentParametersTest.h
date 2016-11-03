@@ -10,6 +10,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include <fstream>
+#include <iomanip>
 
 using Mantid::CurveFitting::Algorithms::RefinePowderInstrumentParameters;
 using namespace Mantid;

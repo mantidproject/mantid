@@ -10,6 +10,7 @@
 #include <boost/algorithm/string/split.hpp>
 
 #include <cstdio>
+#include <iomanip>
 
 using namespace Mantid;
 using namespace Mantid::API;

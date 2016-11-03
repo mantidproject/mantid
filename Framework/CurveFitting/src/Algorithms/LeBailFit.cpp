@@ -20,6 +20,7 @@
 #include <boost/algorithm/string/split.hpp>
 
 #include <fstream>
+#include <iomanip>
 
 const int OBSDATAINDEX(0);
 const int CALDATAINDEX(1);

@@ -133,6 +133,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cassert>
+#include <iostream>
 
 #include <qwt_scale_engine.h>
 #include <QColorGroup>

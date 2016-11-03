@@ -2,11 +2,10 @@
 #define MANTID_API_LOGMANAGER_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/Cache.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/Statistics.h"
-#include "MantidKernel/TimeSplitter.h"
+#include <memory>
 #include <vector>
 
 namespace NeXus {
@@ -15,7 +14,10 @@ class File;
 
 namespace Mantid {
 namespace Kernel {
+template <class KEYTYPE, class VALUETYPE> class Cache;
 template <typename TYPE> class TimeSeriesProperty;
+class SplittingInterval;
+typedef std::vector<SplittingInterval> TimeSplitterType;
 }
 
 namespace API {
@@ -50,9 +52,12 @@ namespace API {
 */
 class MANTID_API_DLL LogManager {
 public:
+  LogManager();
+  LogManager(const LogManager &other);
   /// Destructor. Doesn't need to be virtual as long as nothing inherits from
   /// this class.
-  virtual ~LogManager() = default;
+  virtual ~LogManager();
+  LogManager &operator=(const LogManager &other);
 
   //-------------------------------------------------------------
   /// Set the run start and end
@@ -194,11 +199,10 @@ protected:
   static const char *PROTON_CHARGE_LOG_NAME;
 
 private:
-  /// Cache type for single value logs
-  typedef Kernel::Cache<std::pair<std::string, Kernel::Math::StatisticType>,
-                        double> SingleValueCache;
   /// Cache for the retrieved single values
-  mutable SingleValueCache m_singleValueCache;
+  std::unique_ptr<Kernel::Cache<
+      std::pair<std::string, Kernel::Math::StatisticType>, double>>
+      m_singleValueCache;
 };
 /// shared pointer to the logManager base class
 typedef boost::shared_ptr<LogManager> LogManager_sptr;
