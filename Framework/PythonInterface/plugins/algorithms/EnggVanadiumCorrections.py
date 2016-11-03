@@ -123,12 +123,10 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
             self._applyVanadiumCorrections(outWS, integWS, curvesWS)
             self.setProperty('OutputWorkspace', outWS)
-            
         else:
             self._applyVanadiumCorrections(ws, integWS, curvesWS)
             self.setProperty('Workspace', ws)
                 
-
     def _applyVanadiumCorrections(self, ws, integWS, curvesWS):
         """
         Applies the corrections on a workspace. The integration and curves workspaces may have
