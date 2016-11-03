@@ -5,7 +5,7 @@
 using Mantid::DataObjects::EventWorkspace;
 using Mantid::API::WorkspaceProperty;
 
-GET_POINTER_SPECIALIZATION(WorkspaceProperty<IEventWorkspace>)
+GET_POINTER_SPECIALIZATION(WorkspaceProperty<EventWorkspace>)
 
 void export_EventWorkspaceProperty() {
   using Mantid::PythonInterface::WorkspacePropertyExporter;

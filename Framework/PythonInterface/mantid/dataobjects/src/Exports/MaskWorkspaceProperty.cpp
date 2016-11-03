@@ -5,7 +5,7 @@
 using Mantid::DataObjects::MaskWorkspace;
 using Mantid::API::WorkspaceProperty;
 
-GET_POINTER_SPECIALIZATION(WorkspaceProperty<IEventWorkspace>)
+GET_POINTER_SPECIALIZATION(WorkspaceProperty<MaskWorkspace>)
 
 void export_MaskWorkspaceProperty() {
   using Mantid::PythonInterface::WorkspacePropertyExporter;
