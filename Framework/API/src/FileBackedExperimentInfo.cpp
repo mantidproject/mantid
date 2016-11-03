@@ -58,7 +58,7 @@ FileBackedExperimentInfo::getInstrument() const {
 const Geometry::ParameterMap &
 FileBackedExperimentInfo::instrumentParameters() const {
   populateIfNotLoaded();
-  return ExperimentInfo::instrumentParameters();
+  return ExperimentInfo::constInstrumentParameters();
 }
 
 /**
