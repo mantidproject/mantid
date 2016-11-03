@@ -43,7 +43,6 @@ std::tm *gmtime_r_portable(const std::time_t *clock, struct std::tm *result) {
 #ifdef _WIN32
   // Windows implementation
   if (!gmtime_s(result, clock)) { // Returns zero if successful
-    // cppcheck-suppress CastIntegerToAddressAtReturn
     return result;
   } else { // Returned some non-zero error code
     return NULL;

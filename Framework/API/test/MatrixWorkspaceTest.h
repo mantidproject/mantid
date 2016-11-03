@@ -15,7 +15,6 @@
 #include "MantidKernel/make_cow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
-#include "MantidTestHelpers/FakeGmockObjects.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -36,7 +35,6 @@ using std::size_t;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using namespace testing;
 
 // Declare into the factory.
 DECLARE_WORKSPACE(WorkspaceTester)
@@ -323,27 +321,22 @@ public:
     TS_ASSERT(!parallelException);
   }
 
-  void test_spectrumInfo_fails_threaded() {
+  void test_spectrumInfo_works_threaded() {
     const int numHist(3);
     auto workspace = makeWorkspaceWithDetectors(numHist, 1);
+    std::vector<const SpectrumInfo *> spectrumInfos(numHist);
     std::atomic<bool> parallelException{false};
-    std::atomic<int> threadCount{1};
-    PARALLEL_FOR1(workspace)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*workspace))
     for (int i = 0; i < numHist; ++i) {
-      // Note: Cannot use INTERUPT_REGION macros since not inside an Algorithm.
-      threadCount = PARALLEL_NUMBER_OF_THREADS;
       try {
-        static_cast<void>(workspace->spectrumInfo());
+        spectrumInfos[i] = &(workspace->spectrumInfo());
       } catch (...) {
         parallelException = true;
       }
     }
-    // If we actually had more than one thread this should throw.
-    if (threadCount > 1) {
-      TS_ASSERT(parallelException);
-    } else {
-      TS_ASSERT(!parallelException);
-    }
+    TS_ASSERT(!parallelException);
+    for (int i = 0; i < numHist; ++i)
+      TS_ASSERT_EQUALS(spectrumInfos[0], spectrumInfos[i]);
   }
 
   void testFlagMasked() {
@@ -487,120 +480,6 @@ public:
     }
     // Save that to the NXS file
     TS_ASSERT_THROWS_NOTHING(ws->saveSpectraMapNexus(th.file, spec););
-  }
-
-  void test_get_neighbours_exact() {
-    // Create a nearest neighbours product, which can be returned.
-    SpectrumDistanceMap map;
-    MockNearestNeighbours *product = new MockNearestNeighbours;
-    EXPECT_CALL(*product, neighbours(_)).WillRepeatedly(Return(map));
-    EXPECT_CALL(*product, die()).Times(1); // Created once and destroyed once!
-
-    // Create a factory, for generating the nearest neighbour products
-    MockNearestNeighboursFactory *factory = new MockNearestNeighboursFactory;
-    EXPECT_CALL(*factory, create(_, _, _, _))
-        .Times(1)
-        .WillOnce(Return(product));
-
-    WorkspaceTester wkspace(factory);
-    wkspace.initialize(1, 4, 3);
-    wkspace.getNeighboursExact(0, 1); // First call should construct nearest
-                                      // neighbours before calling ::neighbours
-    wkspace.getNeighboursExact(0, 1); // Second call should not construct
-                                      // nearest neighbours before calling
-                                      // ::neighbours
-  }
-
-  void test_get_neighbours_radius() {
-    // Create a nearest neighbours product, which can be returned.
-    SpectrumDistanceMap map;
-    MockNearestNeighbours *product = new MockNearestNeighbours;
-    EXPECT_CALL(*product, neighboursInRadius(_, _)).WillRepeatedly(Return(map));
-    EXPECT_CALL(*product, die()).Times(1); // Created once and destroyed once!
-
-    // Create a factory, for generating the nearest neighbour products
-    MockNearestNeighboursFactory *factory = new MockNearestNeighboursFactory;
-    EXPECT_CALL(*factory, create(_, _, _)).Times(1).WillOnce(Return(product));
-
-    WorkspaceTester wkspace(factory);
-    wkspace.initialize(1, 4, 3);
-    wkspace.getNeighbours(0, 1); // First call should construct nearest
-                                 // neighbours before calling ::neighbours
-    wkspace.getNeighbours(0, 1); // Second call should not construct nearest
-                                 // neighbours before calling ::neighbours
-  }
-
-  void test_reset_neighbours() {
-    // Create a nearest neighbours product, which can be returned.
-    SpectrumDistanceMap map;
-    MockNearestNeighbours *product = new MockNearestNeighbours;
-    EXPECT_CALL(*product, neighboursInRadius(_, _)).WillRepeatedly(Return(map));
-    EXPECT_CALL(*product, die())
-        .Times(1); // Should be explicitly called upon reset.
-
-    // Create a factory, for generating the nearest neighbour products
-    MockNearestNeighboursFactory *factory = new MockNearestNeighboursFactory;
-    EXPECT_CALL(*factory, create(_, _, _)).Times(1).WillOnce(Return(product));
-
-    WorkspaceTester wkspace(factory);
-    wkspace.initialize(1, 4, 3);
-    wkspace.getNeighbours(0, 1); // First call should construct nearest
-                                 // neighbours before calling ::neighbours
-    wkspace.rebuildNearestNeighbours(); // should cause die.
-
-    TSM_ASSERT("Nearest neigbhbours Factory has not been used as expected",
-               Mock::VerifyAndClearExpectations(factory));
-    TSM_ASSERT("Nearest neigbhbours Product has not been used as expected",
-               Mock::VerifyAndClearExpectations(product));
-  }
-
-  void test_rebuild_after_reset_neighbours() {
-    SpectrumDistanceMap mapA, mapB, mapC;
-
-    MockNearestNeighbours *productA = new MockNearestNeighbours;
-    EXPECT_CALL(*productA, neighboursInRadius(_, _))
-        .WillRepeatedly(Return(mapA));
-    EXPECT_CALL(*productA, die()).Times(1);
-
-    MockNearestNeighbours *productB = new MockNearestNeighbours;
-    EXPECT_CALL(*productB, neighboursInRadius(_, _))
-        .WillRepeatedly(Return(mapB));
-    EXPECT_CALL(*productB, die()).Times(1);
-
-    MockNearestNeighbours *productC = new MockNearestNeighbours;
-    EXPECT_CALL(*productC, neighboursInRadius(_, _))
-        .WillRepeatedly(Return(mapC));
-    EXPECT_CALL(*productC, die()).Times(1);
-
-    // Create a factory, for generating the nearest neighbour products
-    MockNearestNeighboursFactory *factory = new MockNearestNeighboursFactory;
-    EXPECT_CALL(*factory, create(_, _, _))
-        .Times(3)
-        .WillOnce(Return(productA))
-        .WillOnce(Return(productB))
-        .WillOnce(Return(productC));
-
-    WorkspaceTester wkspace(factory);
-    wkspace.initialize(1, 4, 3);
-    wkspace.getNeighbours(0, 1); // First call should construct nearest
-                                 // neighbours before calling ::neighbours
-    wkspace.rebuildNearestNeighbours(); // should cause die.
-    wkspace.getNeighbours(0, 1); // should cause creation for radius type call
-    wkspace.rebuildNearestNeighbours(); // should cause die.
-    wkspace.getNeighbours(
-        0, 1); // should cause creation for number of neighbours type call
-    wkspace.rebuildNearestNeighbours(); // should cause die. allows expectations
-                                        // to be checked, otherwise die called
-                                        // on nn destruction!
-
-    TSM_ASSERT("Nearest neigbhbours Factory has not been used as expected",
-               Mock::VerifyAndClearExpectations(factory));
-    TSM_ASSERT("Nearest neigbhbours ProductA has not been used as expected",
-               Mock::VerifyAndClearExpectations(productA));
-    TSM_ASSERT("Nearest neigbhbours ProductB has not been used as expected",
-               Mock::VerifyAndClearExpectations(productB));
-    TSM_ASSERT("Nearest neigbhbours ProductC has not been used as expected",
-               Mock::VerifyAndClearExpectations(productC));
   }
 
   /** Properly, this tests a method on Instrument, not MatrixWorkspace, but they
@@ -1518,7 +1397,7 @@ public:
     delete suite;
   }
 
-  MatrixWorkspaceTestPerformance() : m_workspace(nullptr) {
+  MatrixWorkspaceTestPerformance() : m_workspace() {
     using namespace Mantid::Geometry;
 
     size_t numberOfHistograms = 10000;

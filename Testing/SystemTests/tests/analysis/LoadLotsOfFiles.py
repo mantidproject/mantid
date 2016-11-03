@@ -90,8 +90,7 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt',
                 'USER_Larmor_163F_HePATest_r13038.txt',
                 'Vesuvio_IP_file_test.par',
-                'IP0004_10.par'
-               ]
+                'IP0004_10.par']
 
 EXPECTED_EXT = '.expected'
 
@@ -186,7 +185,7 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
                 cur_index = datafiles.index(fname)
             except ValueError:
                 continue
-            dummy_value = datafiles.pop(cur_index)
+            datafiles.pop(cur_index)
             datafiles.insert(insertion_index, fname)
 
         return datafiles
@@ -202,7 +201,7 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
 
         # Eval statement will use current scope. Allow access to
         # mantid module
-        import mantid
+        import mantid # noqa
 
         print "Found an expected file '%s' file" % expected
         expectedfile = open(expected)
@@ -224,7 +223,6 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
         print "----------------------------------------"
         print "Loading '%s'" % filename
         from mantid.api import Workspace
-        from mantid.api import IMDEventWorkspace
         # Output can be a tuple if the Load algorithm has extra output properties
         # but the output workspace should always be the first argument
         outputs = Load(filename)

@@ -5,7 +5,6 @@
     be used independently of the interface implementation
 """
 import os
-import time
 import xml.dom.minidom
 
 from reduction_gui.reduction.scripter import BaseScriptElement

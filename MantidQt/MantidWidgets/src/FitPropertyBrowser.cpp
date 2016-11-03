@@ -2,6 +2,7 @@
 #include "MantidQtMantidWidgets/PropertyHandler.h"
 #include "MantidQtMantidWidgets/SequentialFitDialog.h"
 #include "MantidQtMantidWidgets/MultifitSetupDialog.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -51,12 +52,13 @@
 #include <QSignalMapper>
 #include <QMetaMethod>
 #include <QTreeWidget>
-#include <QDesktopServices>
 #include <QUrl>
 
 #include <algorithm>
 
 namespace MantidQt {
+using API::MantidDesktopServices;
+
 namespace MantidWidgets {
 
 /**
@@ -3033,7 +3035,7 @@ void FitPropertyBrowser::functionHelp() {
     QString url =
         QString::fromStdString("http://docs.mantidproject.org/fitfunctions/" +
                                handler->ifun()->name());
-    QDesktopServices::openUrl(QUrl(url));
+    MantidDesktopServices::openUrl(QUrl(url));
   }
 }
 
@@ -3041,9 +3043,10 @@ void FitPropertyBrowser::functionHelp() {
  * Show online browser help
  */
 void FitPropertyBrowser::browserHelp() {
-  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/"
-                                 "MantidPlot:_Simple_Peak_Fitting_with_the_Fit_"
-                                 "Wizard#Fit_Properties_Browser"));
+  MantidDesktopServices::openUrl(
+      QUrl("http://www.mantidproject.org/"
+           "MantidPlot:_Simple_Peak_Fitting_with_the_Fit_"
+           "Wizard#Fit_Properties_Browser"));
 }
 
 /**=================================================================================================

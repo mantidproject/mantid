@@ -4,10 +4,12 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include <algorithm>
 #include <cmath>
 
 using Mantid::Algorithms::MayersSampleCorrectionStrategy;
+using namespace Mantid::HistogramData;
 
 class MayersSampleCorrectionStrategyTest : public CxxTest::TestSuite {
 public:
@@ -21,10 +23,8 @@ public:
   }
 
   void test_Attentuaton_Correction_For_Fixed_Mur() {
-    std::vector<double> dummy(2, 0.0);
-    dummy[1] = 1.0;
-    MayersSampleCorrectionStrategy mscat(createTestParameters(), dummy, dummy,
-                                         dummy);
+    Histogram histo(Points{0, 1}, Counts{0, 1});
+    MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
     auto absFactor = mscat.calculateSelfAttenuation(0.01);
 
     const double delta = 1e-8;
@@ -33,10 +33,8 @@ public:
 
   void
   test_Multiple_Scattering_With_Fixed_Mur_And_Absorption_Correction_Factor() {
-    std::vector<double> dummy(2, 0.0);
-    dummy[1] = 1.0;
-    MayersSampleCorrectionStrategy mscat(createTestParameters(), dummy, dummy,
-                                         dummy);
+    Histogram histo(Points{0, 1}, Counts{0, 1});
+    MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
     const size_t irp(1);
     const double muR(0.01), abs(0.0003);
     auto absFactor = mscat.calculateMS(irp, muR, abs);
@@ -47,17 +45,16 @@ public:
   }
 
   void test_Corrects_Both_Absorption_And_Multiple_Scattering_For_Point_Data() {
-    using std::sqrt;
     const size_t nypts(100);
-    std::vector<double> signal(nypts, 2.0), tof(nypts), error(nypts);
-    std::transform(signal.begin(), signal.end(), error.begin(),
-                   (double (*)(double))sqrt);
-    std::generate(tof.begin(), tof.end(), Incrementer(100.0));
-    MayersSampleCorrectionStrategy mscat(createTestParameters(), tof, signal,
-                                         error);
+    Histogram histo(Points(nypts, LinearGenerator(100.0, 1.0)),
+                    Counts(nypts, 2.0));
+    MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
 
-    // Correct it
-    mscat.apply(signal, error);
+    auto outHisto = mscat.getCorrectedHisto();
+
+    const auto &tof = outHisto.x();
+    const auto &signal = outHisto.y();
+    const auto &error = outHisto.e();
 
     // Check some values
     const double delta(1e-06);
@@ -73,18 +70,16 @@ public:
 
   void
   test_Corrects_Both_Absorption_And_Multiple_Scattering_For_Histogram_Data() {
-    using std::sqrt;
     const size_t nypts(100);
-    std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
-    std::transform(signal.begin(), signal.end(), error.begin(),
-                   (double (*)(double))sqrt);
-    // Generate a histogram with the same mid points as the point data example
-    std::generate(tof.begin(), tof.end(), Incrementer(99.5));
-    MayersSampleCorrectionStrategy mscat(createTestParameters(), tof, signal,
-                                         error);
+    Histogram histo(BinEdges(nypts + 1, LinearGenerator(99.5, 1.0)),
+                    Counts(nypts, 2.0));
+    MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
 
-    // Correct it
-    mscat.apply(signal, error);
+    auto outHisto = mscat.getCorrectedHisto();
+
+    const auto &tof = outHisto.x();
+    const auto &signal = outHisto.y();
+    const auto &error = outHisto.e();
 
     // Check some values
     const double delta(1e-06);
@@ -99,19 +94,17 @@ public:
   }
 
   void test_Corrects_For_Absorption_For_Histogram_Data() {
-    using std::sqrt;
     const size_t nypts(100);
-    std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
-    std::transform(signal.begin(), signal.end(), error.begin(),
-                   (double (*)(double))sqrt);
-    // Generate a histogram with the same mid points as the point data example
-    std::generate(tof.begin(), tof.end(), Incrementer(99.5));
     bool mscatOn(false);
-    MayersSampleCorrectionStrategy mscat(createTestParameters(mscatOn), tof,
-                                         signal, error);
+    Histogram histo(BinEdges(nypts + 1, LinearGenerator(99.5, 1.0)),
+                    Counts(nypts, 2.0));
+    MayersSampleCorrectionStrategy mscat(createTestParameters(mscatOn), histo);
 
-    // Correct it
-    mscat.apply(signal, error);
+    auto outHisto = mscat.getCorrectedHisto();
+
+    auto tof = outHisto.x();
+    auto signal = outHisto.y();
+    auto error = outHisto.e();
 
     // Check some values
     const double delta(1e-06);
@@ -127,29 +120,16 @@ public:
 
   // ---------------------- Failure tests -----------------------------
   void test_Tof_Not_Monotonically_Increasing_Throws_Invalid_Argument() {
-    using std::sqrt;
     const size_t nypts(10);
-    std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
-    std::transform(signal.begin(), signal.end(), error.begin(),
-                   (double (*)(double))sqrt);
-    std::generate(tof.begin(), tof.end(), Decrementer(199.5));
-    TS_ASSERT_THROWS(MayersSampleCorrectionStrategy(createTestParameters(), tof,
-                                                    signal, error),
-                     std::invalid_argument);
+    Histogram histo(BinEdges(nypts + 1, LinearGenerator(199.5, -1.0)),
+                    Counts(nypts, 2.0));
+
+    TS_ASSERT_THROWS(
+        MayersSampleCorrectionStrategy(createTestParameters(), histo),
+        std::invalid_argument);
   }
 
 private:
-  struct Incrementer {
-    Incrementer(double start) : current(start) {}
-    double operator()() { return current++; }
-    double current;
-  };
-  struct Decrementer {
-    Decrementer(double start) : current(start) {}
-    double operator()() { return current--; }
-    double current;
-  };
-
   MayersSampleCorrectionStrategy::Parameters
   createTestParameters(bool mscatOn = true) {
     // A bit like a POLARIS spectrum

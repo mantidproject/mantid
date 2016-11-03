@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from isis_reduction_steps import StripEndNans
 from isis_instrument import LARMOR
 from mantid.simpleapi import *
@@ -233,7 +234,6 @@ class CentreFinder(object):
         return residueX, residueY
 
     def _residual_calculation_for_single_direction(self, yvalsA, yvalsB, qvalsA, qvalsB, qrange, nvals, id1, id2):
-        dummy_1 = qrange
         residue = 0
         indexB = 0
         for indexA in range(0, nvals):
@@ -271,7 +271,7 @@ class CentrePositioner(object):
     Handles the positions and increments for beam finding.
     '''
 
-    def __init__(self, reducer, position_type, coord1_start, coord2_start,coord1_step,coord2_step, tolerance): #pylint: disable=too-many-arguments
+    def __init__(self, reducer, position_type, coord1_start, coord2_start,coord1_step,coord2_step, tolerance):
         '''
         Set the CentrePositioner. It requires:
         @param reducer:: The reducer
@@ -401,10 +401,6 @@ class BeamCentrePositionUpdater(object): #pylint: disable=R0903
         super(BeamCentrePositionUpdater, self).__init__()
 
     def increment_position(self, coord1_old, coord2_old, coord1_increment, coord2_increment):
-        dummy_1 = coord1_old
-        dummy_2 = coord2_old
-        dummy_3 = coord1_increment
-        dummy_4 = coord2_increment
         raise RuntimeError("BeamCentrePositionUpdater is not implemented")
 
 
@@ -444,7 +440,6 @@ class BeamCentrePositionUpdaterUpDown(BeamCentrePositionUpdater):
         @param coord2_increment: the increment for the second coordinate
         @returns the incremented position
         '''
-        dummy_1 = coord1_increment
         return coord1_old, coord2_old + coord2_increment
 
 
@@ -465,7 +460,6 @@ class BeamCentrePositionUpdaterLeftRight(BeamCentrePositionUpdater):
         @param coord2_increment: the increment for the second coordinate
         @returns the incremented position
         '''
-        dummy_1 = coord2_increment
         return coord1_old + coord1_increment, coord2_old
 
     def produce_final_position(self, x_new, x_initial, y_new, y_initial):
@@ -477,8 +471,6 @@ class BeamCentrePositionUpdaterLeftRight(BeamCentrePositionUpdater):
         @param coord2_initial: the second initial coordinate
         @returns the final position
         '''
-        dummy_1 = y_new
-        dummy_2 = x_initial
         return x_new, y_initial
 
 
@@ -576,21 +568,14 @@ class PositionProviderFactory(object):
 class PositionProvider(object):
     def __init__(self, increment_coord1, increment_coord2, tolerance):
         super(PositionProvider,self).__init__()
-        dummy_1 = increment_coord1
-        dummy_2 = increment_coord2
-        dummy_3 = tolerance
 
     def get_coord1_for_input_with_correct_scaling(self, coord1):
-        dummy_coord1 = coord1
         RuntimeError("The PositionProvider interface is not implemented")
 
     def get_coord1_for_output_with_correct_scaling_and_offset(self, coord1):
-        dummy_coord1 = coord1
         RuntimeError("The PositionProvider interface is not implemented")
 
     def produce_initial_position(self, coord1, coord2):
-        dummy_coord1 = coord1
-        dummy_coord2 = coord2
         RuntimeError("The PositionProvider interface is not implemented")
 
     def half_and_reverse_increment_coord1(self):
@@ -702,7 +687,7 @@ class PositionProviderAngleY(PositionProvider):
     and the second is a cartesian coordinate
     '''
 
-    def __init__(self, increment_coord1, increment_coord2, tolerance, tolerance_angle, coord1_offset, coord1_scale_factor):  #pylint: disable=too-many-arguments
+    def __init__(self, increment_coord1, increment_coord2, tolerance, tolerance_angle, coord1_offset, coord1_scale_factor):
         super(PositionProviderAngleY,self).__init__(increment_coord1, increment_coord2, tolerance)
         self.increment_angle = increment_coord1
         self.increment_y = increment_coord2

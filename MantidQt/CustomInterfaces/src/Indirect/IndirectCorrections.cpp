@@ -13,9 +13,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 
-#include <QDesktopServices>
-#include <QUrl>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 // Add this class to the list of specialised dialogs in this namespace

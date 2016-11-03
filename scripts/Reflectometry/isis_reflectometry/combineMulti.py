@@ -1,7 +1,7 @@
 # pylint: disable=invalid-name
-from l2q import *
+from __future__ import (absolute_import, division, print_function)
+from .l2q import *
 from mantid.simpleapi import *
-import math
 from mantid.api import WorkspaceGroup
 
 
@@ -28,12 +28,12 @@ def combineDataMulti(wksp_list, output_wksp, beg_overlap, end_overlap, Qmin, Qma
     if not isinstance(end_overlap, list):
         end_overlap = [end_overlap]
     if len(wksp_list) != len(beg_overlap):
-        print "Using default values!"
+        print("Using default values!")
         defaultoverlaps = True
 
     # copy first workspace into temporary wksp 'currentSum'
     currentSum = CloneWorkspace(InputWorkspace=wksp_list[0])
-    print "Length: ", len(wksp_list), wksp_list
+    print("Length: ", len(wksp_list), wksp_list)
 
     for i in range(0, len(wksp_list) - 1):
         w1 = currentSum
@@ -46,7 +46,7 @@ def combineDataMulti(wksp_list, output_wksp, beg_overlap, end_overlap, Qmin, Qma
         else:
             overlapLow = beg_overlap[i + 1]
             overlapHigh = end_overlap[i]
-        print "Iteration", i
+        print("Iteration", i)
         currentSum, scale_factor = stitch2(currentSum, mtd[wksp_list[i + 1]], currentSum.name(), overlapLow,
                                            overlapHigh, Qmin, Qmax, binning, scale_high, scale_right=scale_right)
     RenameWorkspace(InputWorkspace=currentSum.name(), OutputWorkspace=output_wksp)

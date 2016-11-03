@@ -6,7 +6,6 @@ from PyQt4 import QtGui
 import sys
 import os
 import traceback
-from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.reduction.scripter import BaseReductionScripter
 
 
@@ -207,7 +206,7 @@ class InstrumentInterface(object):
                 # Otherwise take the 'normal' path
                 self.scripter.apply()
             self.set_running(False)
-        except RuntimeError, e:
+        except RuntimeError:
             if self._settings.debug:
                 msg = "Reduction could not be executed:\n\n%s" % unicode(traceback.format_exc())
             else:

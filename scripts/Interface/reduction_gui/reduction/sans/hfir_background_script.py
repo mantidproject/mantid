@@ -11,7 +11,7 @@ from reduction_gui.reduction.sans.hfir_sample_script import SampleData
 # Disable unused import warning
 # pylint: disable=W0611
 try:
-    import mantidplot
+    import mantidplot # noqa
     IS_IN_MANTIDPLOT = True
 except(ImportError, ImportWarning):
     IS_IN_MANTIDPLOT = False
