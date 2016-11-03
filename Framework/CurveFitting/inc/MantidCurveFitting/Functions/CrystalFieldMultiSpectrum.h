@@ -1,6 +1,7 @@
 #ifndef MANTID_CURVEFITTING_CRYSTALFIELDMULTISPECTRUM_H_
 #define MANTID_CURVEFITTING_CRYSTALFIELDMULTISPECTRUM_H_
 
+#include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/FortranDefs.h"
 #include "MantidCurveFitting/Functions/FunctionGenerator.h"
 
@@ -58,12 +59,12 @@ private:
   /// Calculate excitations at given temperature
   void calcExcitations(int nre, const DoubleFortranVector &en,
                        const ComplexFortranMatrix &wf, double temperature,
-                       DoubleFortranVector &eExcitations,
-                       DoubleFortranVector &iExcitations) const;
+                       API::FunctionValues &values, size_t iSpec) const;
   /// Cache number of fitted peaks
   mutable std::vector<size_t> m_nPeaks;
-  /// Cache number of all peaks
-  mutable std::vector<size_t> m_maxNPeaks;
+  /// Caches of the width functions
+  mutable std::vector<std::vector<double>> m_fwhmX;
+  mutable std::vector<std::vector<double>> m_fwhmY;
 };
 
 } // namespace Functions

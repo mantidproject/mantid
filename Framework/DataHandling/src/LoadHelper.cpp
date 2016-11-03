@@ -307,8 +307,9 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
             int units_len = NX_MAXNAMELEN;
             int units_type = NX_CHAR;
 
-            units_status = NXgetattr(nxfileID, "units", units_sbuf, &units_len,
-                                     &units_type);
+            char unitsAttrName[] = "units";
+            units_status = NXgetattr(nxfileID, unitsAttrName, units_sbuf,
+                                     &units_len, &units_type);
             if (units_status != NX_ERROR) {
               g_log.debug() << indent_str << "[ " << property_name
                             << " has unit " << units_sbuf << " ]\n";
@@ -418,11 +419,28 @@ void LoadHelper::dumpNexusAttributes(NXhandle nxfileID,
   // Attributes
   NXname pName;
   int iLength, iType;
+#ifndef NEXUS43
+  int rank;
+  int dims[4];
+#endif
   int nbuff = 127;
   boost::shared_array<char> buff(new char[nbuff + 1]);
 
+#ifdef NEXUS43
   while (NXgetnextattr(nxfileID, pName, &iLength, &iType) != NX_EOD) {
+#else
+  while (NXgetnextattra(nxfileID, pName, &rank, dims, &iType) != NX_EOD) {
     g_log.debug() << indentStr << '@' << pName << " = ";
+    if (rank > 1) { // mantid only supports single value attributes
+      throw std::runtime_error(
+          "Encountered attribute with multi-dimensional array value");
+    }
+    iLength = dims[0]; // to clarify things
+    if (iType != NX_CHAR && iLength != 1) {
+      throw std::runtime_error("Encountered attribute with array value");
+    }
+#endif
+
     switch (iType) {
     case NX_CHAR: {
       if (iLength > nbuff + 1) {

@@ -6,6 +6,8 @@ import mantid.simpleapi as msapi
 
 # Too many properties!
 #pylint: disable=too-many-instance-attributes
+
+
 class GSASIIRefineFitPeaks(PythonAlgorithm):
     """
     Mantid algorithm to use the powder diffraction and related data
@@ -87,7 +89,6 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                              'the first spectrum will be processed (that is, the only spectrum '
                              'for focussed data workspaces.', direction = Direction.Input)
 
-
         self.declareProperty(FileProperty(name = self.PROP_INSTR_FILE, defaultValue = '',
                                           action = FileAction.Load,
                                           extensions = [".par", ".prm", ".ipar", ".iparm"]),
@@ -156,7 +157,6 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         self.setPropertyGroup(self.PROP_BACKGROUND_TYPE, GRP_FITTING_OPTS)
         self.setPropertyGroup(self.PROP_MINX, GRP_FITTING_OPTS)
         self.setPropertyGroup(self.PROP_MAXX, GRP_FITTING_OPTS)
-
 
         GRP_PAWLEY_OPTIONS = "Pawley refinement options"
 
@@ -481,7 +481,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                                 data = gs2_rd.powderdata,
                                 prevVaryList = None
                                 # OneCycle = False, controls = None, dlg = None
-                               )
+                                )
         self.log().debug("Result: : {0}".format(result))
         Rwp = Rvals['Rwp']
         gof = Rvals['GOF']
@@ -874,7 +874,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         with open(out_lattice_file, 'w') as lattice_txt:
             print("a, b, c, alpha, beta, gamma", file=lattice_txt)
             print(("{0}, {1}, {2}, {3}, {4}, {5}".
-                                  format(latt_a, latt_b, latt_c, latt_alpha, latt_beta, latt_gamma)), file=lattice_txt)
+                   format(latt_a, latt_b, latt_c, latt_alpha, latt_beta, latt_gamma)), file=lattice_txt)
 
     def _prepare_save_gsas2_project(self, gs2, gs2_rd):
         """

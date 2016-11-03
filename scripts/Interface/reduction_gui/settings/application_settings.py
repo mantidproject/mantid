@@ -12,6 +12,7 @@ From mantidplot:
 
 from PyQt4 import QtCore
 
+
 class GeneralSettings(QtCore.QObject):
     """
         Settings class that will be passed from the main application

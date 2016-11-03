@@ -2,13 +2,13 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
@@ -16,7 +16,7 @@
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/make_unique.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 #include <numeric>
 
@@ -40,14 +40,7 @@ const std::string MatrixWorkspace::xDimensionId = "xDimension";
 const std::string MatrixWorkspace::yDimensionId = "yDimension";
 
 /// Default constructor
-MatrixWorkspace::MatrixWorkspace(
-    Mantid::Geometry::INearestNeighboursFactory *nnFactory)
-    : IMDWorkspace(), ExperimentInfo(), m_axes(), m_isInitialized(false),
-      m_YUnit(), m_YUnitLabel(), m_isCommonBinsFlagSet(false),
-      m_isCommonBinsFlag(false), m_masks(), m_indexCalculator(),
-      m_nearestNeighboursFactory(
-          (nnFactory == nullptr) ? new NearestNeighboursFactory : nnFactory),
-      m_nearestNeighbours() {}
+MatrixWorkspace::MatrixWorkspace() = default;
 
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
     : IMDWorkspace(other), ExperimentInfo(other) {
@@ -61,13 +54,6 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
   m_isCommonBinsFlagSet = other.m_isCommonBinsFlagSet;
   m_isCommonBinsFlag = other.m_isCommonBinsFlag;
   m_masks = other.m_masks;
-  m_indexCalculator = other.m_indexCalculator;
-  // I think it is necessary to create our own copy of the factory, since we do
-  // not know who owns the factory in other and how its lifetime is controlled.
-  m_nearestNeighboursFactory.reset(new NearestNeighboursFactory);
-  // m_nearestNeighbours seem to be built automatically when needed, so we do
-  // not copy here.
-
   // TODO: Do we need to init m_monitorWorkspace?
 
   // This call causes copying of m_parmap (ParameterMap). The constructor of
@@ -147,13 +133,11 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
     throw;
   }
 
-  m_indexCalculator = MatrixWSIndexCalculator(this->blocksize());
   // Indicate that this workspace has been initialized to prevent duplicate
   // attempts.
   m_isInitialized = true;
 }
 
-//---------------------------------------------------------------------------------------
 /** Set the title of the workspace
 *
 *  @param t :: The title
@@ -168,7 +152,6 @@ void MatrixWorkspace::setTitle(const std::string &t) {
   run.addProperty("run_title", t, true);
 }
 
-//---------------------------------------------------------------------------------------
 /** Get the workspace title
 *
 *  @return The title
@@ -181,33 +164,53 @@ const std::string MatrixWorkspace::getTitle() const {
     return Workspace::getTitle();
 }
 
-/** Return a reference to the SpectrumInfo object. NOT THREAD-SAFE!
+/** Return a reference to the SpectrumInfo object.
  *
- * By default ThreadedContextCheck::Check enables a check of the OpenMP thread
- * number to actively fail when called from a threaded context. In cases where
- * the code is calling this in a threaded context but with different workspaces
- * this check can be disabled by setting contextCheck =
- * ThreadedContextCheck::Skip. This is not recommended and should be used with
- * extreme care. This flag is a temporary workaround and will be removed once
- * Instrument-2.0 is introduced.
- *
- * Currently this method is not thread-safe, and any modifications of the
- * instrument or instrument parameters such as mask flags will not be visible in
- * existing SpectrumInfo references. After modification, obtain a new reference
- * by calling this method again.
+ * Any modifications of the instrument or instrument parameters will invalidate
+ * this reference.
  */
-const SpectrumInfo &
-MatrixWorkspace::spectrumInfo(ThreadedContextCheck contextCheck) const {
-  if (contextCheck == ThreadedContextCheck::Check &&
-      PARALLEL_THREAD_NUMBER != 0)
-    throw std::runtime_error("MatrixWorkspace::spectrumInfo(): Thread ID is "
-                             "not 0. This indicates that the method is called "
-                             "in a threaded context. This is not allowed.");
+const SpectrumInfo &MatrixWorkspace::spectrumInfo() const {
+  if (!m_spectrumInfo) {
+    std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};
+    if (!m_spectrumInfo)
+      m_spectrumInfo = Kernel::make_unique<SpectrumInfo>(*this);
+  }
+  return *m_spectrumInfo;
+}
 
-  // For now we *always* create a new SpectrumInfo since the instrument or
-  // parameters may have changed.
+/** Return a non-const reference to the SpectrumInfo object. Not thread safe.
+ */
+SpectrumInfo &MatrixWorkspace::mutableSpectrumInfo() {
+  // Creating SpectrumInfo with a non-const reference to a MatrixWorkspace will
+  // call ExperimentInfo::mutableDetectorInfo() which will later be used by
+  // modifications. This will trigger a copy if required. Note that the
+  // following happens internally:
+  // 1. make_unique creates a new SpectrumInfo, which calls
+  // ExperimentInfo::mutableDetectorInfo(). In the latter method, the reference
+  // count to the ParameterMap is typically not 1, so
+  // invalidateInstrumentReferences() is called.
+  // 2. invalidateInstrumentReferences() resets m_spectrumInfo, releasing any
+  // parameterized detectors and thus dropping any unneeded references to the
+  // ParameterMap.
+  // 3. Construction of SpectrumInfo continues and the result is assigned to
+  // m_spectrumInfo.
+
+  // No locking here since this non-const method is not thread safe.
   m_spectrumInfo = Kernel::make_unique<SpectrumInfo>(*this);
   return *m_spectrumInfo;
+}
+
+/** Resets the SpectrumInfo object on modification of the Instrument.
+ *
+ * This needs to be called by any code that causes a reallocation of the
+ * instrument or the parameter map since currently SpectrumInfo buffers the
+ * result of MatrixWorkspace::getInstrument(). This method should be removed
+ * once SpectrumInfo is an independent object.
+ */
+void MatrixWorkspace::invalidateInstrumentReferences() const {
+  // None of the methods in ExperimentInfo that calls this is thread safe, so we
+  // do not need to bother with locking here.
+  m_spectrumInfo = nullptr;
 }
 
 void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
@@ -229,7 +232,6 @@ void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
   }
 }
 
-//---------------------------------------------------------------------------------------
 /**
 * Rebuild the default spectra mapping for a workspace. If a non-empty
 * instrument is set then the default maps each detector to a spectra with
@@ -264,123 +266,11 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors) {
       index++;
     }
 
-    m_nearestNeighbours.reset();
-
   } catch (std::runtime_error &) {
     throw;
   }
 }
 
-//---------------------------------------------------------------------------------------
-/**
-* Handles the building of the NearestNeighbours object, if it has not already
-* been
-* populated for this parameter map.
-* @param ignoreMaskedDetectors :: flag indicating that masked detectors should
-* be ignored. True to ignore detectors.
-*/
-void MatrixWorkspace::buildNearestNeighbours(
-    const bool ignoreMaskedDetectors) const {
-  if (!m_nearestNeighbours) {
-    boost::shared_ptr<const Instrument> inst = this->getInstrument();
-    if (inst) {
-      SpectrumDetectorMapping spectraMap(this);
-      m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(
-          inst, spectraMap.getMapping(), ignoreMaskedDetectors));
-    } else {
-      throw Mantid::Kernel::Exception::NullPointerException(
-          "ParameterMap: buildNearestNeighbours. Can't obtain instrument.",
-          "instrument");
-    }
-  }
-}
-
-/*
-Allow the NearestNeighbours list to be cleaned and rebuilt. Certain algorithms
-require this in order to exclude/include
-detectors from previously being considered.
-*/
-void MatrixWorkspace::rebuildNearestNeighbours() {
-  /*m_nearestNeighbours should now be NULL. This will trigger rebuilding on
-  subsequent first call to getNeighbours
-  ,which peforms a lazy evaluation on the nearest neighbours map */
-  m_nearestNeighbours.reset();
-}
-
-//---------------------------------------------------------------------------------------
-/** Queries the NearestNeighbours object for the selected detector.
-* NOTE! getNeighbours(spectrumNumber, radius) is MUCH faster.
-*
-* @param comp :: pointer to the querying detector
-* @param radius :: distance from detector on which to filter results
-* @param ignoreMaskedDetectors :: flag indicating that masked detectors should
-*be ignored. True to ignore detectors.
-* @return map of DetectorID to distance for the nearest neighbours
-*/
-std::map<specnum_t, V3D>
-MatrixWorkspace::getNeighbours(const Geometry::IDetector *comp,
-                               const double radius,
-                               const bool ignoreMaskedDetectors) const {
-  if (!m_nearestNeighbours) {
-    buildNearestNeighbours(ignoreMaskedDetectors);
-  }
-  // Find the spectrum number
-  std::vector<specnum_t> spectra =
-      this->getSpectraFromDetectorIDs(std::vector<detid_t>(1, comp->getID()));
-  if (spectra.empty()) {
-    throw Kernel::Exception::NotFoundError("MatrixWorkspace::getNeighbours - "
-                                           "Cannot find spectrum number for "
-                                           "detector",
-                                           comp->getID());
-  }
-  std::map<specnum_t, V3D> neighbours =
-      m_nearestNeighbours->neighboursInRadius(spectra[0], radius);
-  return neighbours;
-}
-
-//---------------------------------------------------------------------------------------
-/** Queries the NearestNeighbours object for the selected spectrum number.
-*
-* @param spec :: spectrum number of the detector you are looking at
-* @param radius :: distance from detector on which to filter results
-* @param ignoreMaskedDetectors :: flag indicating that masked detectors should
-*be ignored. True to ignore detectors.
-* @return map of DetectorID to distance for the nearest neighbours
-*/
-std::map<specnum_t, V3D>
-MatrixWorkspace::getNeighbours(specnum_t spec, const double radius,
-                               bool ignoreMaskedDetectors) const {
-  if (!m_nearestNeighbours) {
-    buildNearestNeighbours(ignoreMaskedDetectors);
-  }
-  std::map<specnum_t, V3D> neighbours =
-      m_nearestNeighbours->neighboursInRadius(spec, radius);
-  return neighbours;
-}
-
-//---------------------------------------------------------------------------------------
-/** Queries the NearestNeighbours object for the selected spectrum number.
-*
-* @param spec :: spectrum number of the detector you are looking at
-* @param nNeighbours :: unsigned int, number of neighbours to include.
-* @param ignoreMaskedDetectors :: flag indicating that masked detectors should
-*be ignored. True to ignore detectors.
-* @return map of DetectorID to distance for the nearest neighbours
-*/
-std::map<specnum_t, V3D>
-MatrixWorkspace::getNeighboursExact(specnum_t spec, const int nNeighbours,
-                                    bool ignoreMaskedDetectors) const {
-  if (!m_nearestNeighbours) {
-    SpectrumDetectorMapping spectraMap(this);
-    m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(
-        nNeighbours, this->getInstrument(), spectraMap.getMapping(),
-        ignoreMaskedDetectors));
-  }
-  std::map<specnum_t, V3D> neighbours = m_nearestNeighbours->neighbours(spec);
-  return neighbours;
-}
-
-//---------------------------------------------------------------------------------------
 /** Return a map where:
 *    KEY is the Spectrum #
 *    VALUE is the Workspace Index
@@ -400,7 +290,6 @@ spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
   }
 }
 
-//---------------------------------------------------------------------------------------
 /** Return a vector where:
 *    The index into the vector = spectrum number + offset
 *    The value at that index = the corresponding Workspace Index
@@ -447,7 +336,6 @@ MatrixWorkspace::getSpectrumToWorkspaceIndexVector(specnum_t &offset) const {
   return out;
 }
 
-//---------------------------------------------------------------------------------------
 /** Does the workspace has any grouped detectors?
 *  @return true if the workspace has any grouped detectors, otherwise false
 */
@@ -466,7 +354,6 @@ bool MatrixWorkspace::hasGroupedDetectors() const {
   return retVal;
 }
 
-//---------------------------------------------------------------------------------------
 /** Return a map where:
 *    KEY is the DetectorID (pixel ID)
 *    VALUE is the Workspace Index
@@ -510,7 +397,6 @@ detid2index_map MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(
   return map;
 }
 
-//---------------------------------------------------------------------------------------
 /** Return a vector where:
 *    The index into the vector = DetectorID (pixel ID) + offset
 *    The value at that index = the corresponding Workspace Index
@@ -564,7 +450,6 @@ std::vector<size_t> MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
   return out;
 }
 
-//---------------------------------------------------------------------------------------
 /** Converts a list of spectrum numbers to the corresponding workspace indices.
 *  Not a very efficient operation, but unfortunately it's sometimes required.
 *
@@ -590,7 +475,6 @@ std::vector<size_t> MatrixWorkspace::getIndicesFromSpectra(
   return indexList;
 }
 
-//---------------------------------------------------------------------------------------
 /** Given a spectrum number, find the corresponding workspace index
 *
 * @param specNo :: spectrum number wanted
@@ -606,7 +490,6 @@ MatrixWorkspace::getIndexFromSpectrumNumber(const specnum_t specNo) const {
   throw std::runtime_error("Could not find spectrum number in any spectrum.");
 }
 
-//---------------------------------------------------------------------------------------
 /** Converts a list of detector IDs to the corresponding workspace indices.
 *
      *  Note that only known detector IDs are converted (so an empty vector will
@@ -641,7 +524,6 @@ std::vector<size_t> MatrixWorkspace::getIndicesFromDetectorIDs(
   return indexList;
 }
 
-//---------------------------------------------------------------------------------------
 /** Converts a list of detector IDs to the corresponding spectrum numbers. Might
 *be slow!
 *
@@ -699,7 +581,7 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
     const MantidVec &dataX = this->readX(workspaceIndex);
     const double xfront = dataX.front();
     const double xback = dataX.back();
-    if (boost::math::isfinite(xfront) && boost::math::isfinite(xback)) {
+    if (std::isfinite(xfront) && std::isfinite(xback)) {
       if (xfront < xmin)
         xmin = xfront;
       if (xback > xmax)
@@ -708,7 +590,6 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
   }
 }
 
-//---------------------------------------------------------------------------------------
 /** Integrate all the spectra in the matrix workspace within the range given.
 * Default implementation, can be overridden by base classes if they know
 *something smarter!
@@ -861,24 +742,9 @@ double MatrixWorkspace::detectorTwoTheta(const Geometry::IDetector &det) const {
   return det.getTwoTheta(samplePos, beamLine);
 }
 
-//---------------------------------------------------------------------------------------
-/** Add parameters to the instrument parameter map that are defined in
-* instrument
-*   definition file and for which logfile data are available. Logs must be
-* loaded
-*   before running this method.
-*/
-void MatrixWorkspace::populateInstrumentParameters() {
-  ExperimentInfo::populateInstrumentParameters();
-  // Clear out the nearestNeighbors so that it gets recalculated
-  this->m_nearestNeighbours.reset();
-}
-
-//----------------------------------------------------------------------------------------------------
 /// @return The number of axes which this workspace has
 int MatrixWorkspace::axes() const { return static_cast<int>(m_axes.size()); }
 
-//----------------------------------------------------------------------------------------------------
 /** Get a pointer to a workspace axis
 *  @param axisIndex :: The index of the axis required
 *  @throw IndexError If the argument given is outside the range of axes held by
@@ -916,7 +782,6 @@ void MatrixWorkspace::replaceAxis(const std::size_t &axisIndex,
   m_axes[axisIndex] = newAxis;
 }
 
-//----------------------------------------------------------------------------------------------------
 /// Returns the units of the data in the workspace
 std::string MatrixWorkspace::YUnit() const { return m_YUnit; }
 
@@ -949,7 +814,6 @@ void MatrixWorkspace::setYUnitLabel(const std::string &newLabel) {
   m_YUnitLabel = newLabel;
 }
 
-//----------------------------------------------------------------------------------------------------
 /** Are the Y-values in this workspace dimensioned?
 * TODO: For example: ????
 * @return whether workspace is a distribution or not
@@ -1019,8 +883,8 @@ bool MatrixWorkspace::isCommonBins() const {
         }
 
         // handle Nan's and inf's
-        if ((boost::math::isinf(first) != boost::math::isinf(last)) ||
-            (boost::math::isnan(first) != boost::math::isnan(last))) {
+        if ((std::isinf(first) != std::isinf(last)) ||
+            (std::isnan(first) != std::isnan(last))) {
           m_isCommonBinsFlag = false;
         }
       }
@@ -1030,7 +894,7 @@ bool MatrixWorkspace::isCommonBins() const {
 
   return m_isCommonBinsFlag;
 }
-//----------------------------------------------------------------------------------------------------
+
 /**
 * Mask a given workspace index, setting the data and error values to zero
 * @param index :: The index within the workspace to mask
@@ -1058,12 +922,8 @@ void MatrixWorkspace::maskWorkspaceIndex(const std::size_t index) {
     } catch (Kernel::Exception::NotFoundError &) {
     }
   }
-  // If masking has occured, the NearestNeighbours map will be out of date must
-  // be rebuilt.
-  this->rebuildNearestNeighbours();
 }
 
-//----------------------------------------------------------------------------------------------------
 /** Called by the algorithm MaskBins to mask a single bin for the first time,
 * algorithms that later propagate the
 *  the mask from an input to the output should call flagMasked() instead. Here
@@ -1188,7 +1048,6 @@ boost::shared_ptr<MatrixWorkspace> MatrixWorkspace::monitorWorkspace() const {
   return m_monitorWorkspace;
 }
 
-//---------------------------------------------------------------------------------------------
 /** Return memory used by the workspace, in bytes.
 * @return bytes used.
 */
@@ -1212,7 +1071,6 @@ size_t MatrixWorkspace::getMemorySizeForXAxes() const {
   return total;
 }
 
-//-----------------------------------------------------------------------------
 /** Return the time of the first pulse received, by accessing the run's
 * sample logs to find the proton_charge.
 *
@@ -1242,7 +1100,6 @@ Kernel::DateAndTime MatrixWorkspace::getFirstPulseTime() const {
   return startDate;
 }
 
-//-----------------------------------------------------------------------------
 /** Return the time of the last pulse received, by accessing the run's
 * sample logs to find the proton_charge
 *
@@ -1257,7 +1114,6 @@ Kernel::DateAndTime MatrixWorkspace::getLastPulseTime() const {
   return log->lastTime();
 }
 
-//----------------------------------------------------------------------------------------------------
 /**
 * Returns the bin index of the given X value
 * @param xValue :: The X value to search for
@@ -1504,7 +1360,6 @@ MatrixWorkspace::getDimensionWithId(std::string id) const {
   return dim;
 }
 
-//--------------------------------------------------------------------------------------------
 /** Create IMDIterators from this 2D workspace
 *
 * @param suggestedNumCores :: split the iterators into this many cores (if
@@ -1537,7 +1392,6 @@ std::vector<IMDIterator *> MatrixWorkspace::createIterators(
   return out;
 }
 
-//------------------------------------------------------------------------------------
 /** Obtain coordinates for a line plot through a MDWorkspace.
 * Cross the workspace from start to end points, recording the signal along the
 *line.
@@ -1558,7 +1412,6 @@ MatrixWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
   return IMDWorkspace::getLinePlot(start, end, normalize);
 }
 
-//------------------------------------------------------------------------------------
 /** Returns the (normalized) signal at a given coordinates
 *
 * @param coords :: bare array, size 2, of coordinates. X, Y
@@ -1634,7 +1487,6 @@ signal_t MatrixWorkspace::getSignalAtCoord(
     return std::numeric_limits<double>::quiet_NaN();
 }
 
-//------------------------------------------------------------------------------------
 /** Returns the (normalized) signal at a given coordinates
  * Implementation differs from getSignalAtCoord for MD workspaces
 *
@@ -1648,7 +1500,6 @@ signal_t MatrixWorkspace::getSignalWithMaskAtCoord(
   return getSignalAtCoord(coords, normalization);
 }
 
-//--------------------------------------------------------------------------------------------
 /** Save the spectra detector map to an open NeXus file.
 * @param file :: open NeXus file
 * @param spec :: list of the Workspace Indices to save.

@@ -969,8 +969,7 @@ QImage Spectrogram::renderImage(const QwtScaleMap &xMap,
       double xmin, xmax;
       mantidFun->getRowXRange(row, xmin, xmax);
       int jmin = -1;
-      if (xmin != std::numeric_limits<double>::infinity() && xmin == xmin &&
-          xmax != std::numeric_limits<double>::infinity() && xmax == xmax) {
+      if (std::isfinite(xmin) && std::isfinite(xmax)) {
         jmin = xMap.transform(xmin) - rect.left();
       } else {
         continue;
@@ -1023,6 +1022,7 @@ void Spectrogram::loadFromProject(const std::string &lines) {
     std::string policyStr = tsv.sections("ColorPolicy").front();
     int policy = 0;
     Strings::convert<int>(policyStr, policy);
+    // cppcheck-suppress knownConditionTrueFalse
     if (policy == GrayScale)
       setGrayScale();
     else if (policy == Default)

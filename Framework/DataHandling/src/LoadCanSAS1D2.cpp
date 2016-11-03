@@ -1,10 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadCanSAS1D2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -17,7 +15,6 @@
 #include <Poco/DOM/NodeList.h>
 
 #include <boost/lexical_cast.hpp>
-//-----------------------------------------------------------------------
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;

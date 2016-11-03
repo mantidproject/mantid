@@ -2,15 +2,17 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QSettings>
-#include <QDesktopServices>
 #include <QDesktopWidget>
 #include <Poco/Path.h>
 
 #include "MantidQtCustomInterfaces/MantidEV.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
 
 namespace MantidQt {
+using API::MantidDesktopServices;
+
 namespace CustomInterfaces {
 
 // Register the class with the factory
@@ -510,7 +512,7 @@ void MantidEV::setDefaultState_slot() {
  * Go to MantidEV web page when help menu item is chosen
  */
 void MantidEV::help_slot() {
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl("http://www.mantidproject.org/"
            "SCD_Event_Data_Reduction_Interface_(MantidEV)"));
 }
@@ -631,7 +633,7 @@ void MantidEV::loadEventFile_slot() {
   QString file_path = getFilePath(last_event_file);
   QString Qfile_name =
       QFileDialog::getOpenFileName(this, tr("Load event file"), file_path,
-                                   tr("Nexus Files (*.nxs);; All files(*.*)"));
+                                   tr("Nexus Files (*.nxs);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     m_uiForm.EventFileName_ledt->setText(Qfile_name);
@@ -647,7 +649,7 @@ void MantidEV::selectDetCalFile_slot() {
   QString file_path = getFilePath(last_cal_file);
   QString Qfile_name = QFileDialog::getOpenFileName(
       this, tr("Load calibration file"), file_path,
-      tr("ISAW .DetCal Files (*.DetCal);; All files(*.*)"));
+      tr("ISAW .DetCal Files (*.DetCal);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     m_uiForm.CalFileName_ledt->setText(Qfile_name);
@@ -663,7 +665,7 @@ void MantidEV::selectDetCalFile2_slot() {
   QString file_path = getFilePath(last_cal_file2);
   QString Qfile_name = QFileDialog::getOpenFileName(
       this, tr("Load calibration file"), file_path,
-      tr("ISAW .DetCal Files (*.DetCal);; All files(*.*)"));
+      tr("ISAW .DetCal Files (*.DetCal);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     m_uiForm.CalFileName2_ledt->setText(Qfile_name);
@@ -762,7 +764,7 @@ void MantidEV::getLoadPeaksFileName_slot() {
   QString file_path = getFilePath(last_peaks_file);
   QString Qfile_name = QFileDialog::getOpenFileName(
       this, tr("Load peaks file"), file_path,
-      tr("Peaks Files (*.peaks *.integrate *.nxs *.h5);; All files(*.*)"));
+      tr("Peaks Files (*.peaks *.integrate *.nxs *.h5);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     last_peaks_file = Qfile_name.toStdString();
@@ -778,7 +780,7 @@ void MantidEV::getSavePeaksFileName() {
   QString file_path = getFilePath(last_peaks_file);
   QString Qfile_name = QFileDialog::getSaveFileName(
       this, tr("Save peaks file"), file_path,
-      tr("Peaks Files (*.peaks *.integrate *.nxs *.h5);; All files(*.*)"), 0,
+      tr("Peaks Files (*.peaks *.integrate *.nxs *.h5);; All files(*)"), 0,
       QFileDialog::DontConfirmOverwrite);
 
   if (Qfile_name.length() > 0) {
@@ -926,7 +928,7 @@ void MantidEV::getLoadUB_FileName_slot() {
   QString file_path = getFilePath(last_UB_file);
   QString Qfile_name =
       QFileDialog::getOpenFileName(this, tr("Load matrix file"), file_path,
-                                   tr("Matrix Files (*.mat);; All files(*.*)"));
+                                   tr("Matrix Files (*.mat);; All files(*)"));
   if (Qfile_name.length() > 0) {
     last_UB_file = Qfile_name.toStdString();
     m_uiForm.SelectUBFile_ledt->setText(Qfile_name);
@@ -940,7 +942,7 @@ void MantidEV::getSaveUB_FileName() {
   QString file_path = getFilePath(last_UB_file);
   QString Qfile_name =
       QFileDialog::getSaveFileName(this, tr("Save matrix file"), file_path,
-                                   tr("Matrix Files (*.mat);; All files(*.*)"));
+                                   tr("Matrix Files (*.mat);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     last_UB_file = Qfile_name.toStdString();
@@ -1271,7 +1273,7 @@ void MantidEV::saveState_slot() {
   QString file_path = getFilePath(last_ini_file);
   QString Qfile_name = QFileDialog::getSaveFileName(
       this, tr("Save Settings File(.ini)"), file_path,
-      tr("Settings Files (*.ini);; All files(*.*) "));
+      tr("Settings Files (*.ini);; All files(*) "));
 
   if (Qfile_name.length() > 0) {
     last_ini_file = Qfile_name.toStdString();
@@ -1286,7 +1288,7 @@ void MantidEV::loadState_slot() {
   QString file_path = getFilePath(last_ini_file);
   QString Qfile_name = QFileDialog::getOpenFileName(
       this, tr("Load Settings File(.ini)"), file_path,
-      tr("Settings Files (*.ini);; All files(*.*)"));
+      tr("Settings Files (*.ini);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     last_ini_file = Qfile_name.toStdString();

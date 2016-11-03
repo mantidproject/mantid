@@ -337,6 +337,18 @@ public:
     TS_ASSERT_EQUALS(e.str(), "2*(a+b)+(1-sin(x-y))");
   }
 
+  void testBrackets2() {
+    Expression e;
+    e.parse("2*(a+b)-(1-s)");
+    TS_ASSERT_EQUALS(e.str(), "2*(a+b)-(1-s)");
+  }
+
+  void testBrackets3() {
+    Expression e;
+    e.parse("2*(a+b)-(1-sin(x-y))");
+    TS_ASSERT_EQUALS(e.str(), "2*(a+b)-(1-sin(x-y))");
+  }
+
   void testGetVariables() {
     Expression e;
     e.parse("a+b*sin(x)*fun1(fun2(a+c))");
@@ -403,6 +415,123 @@ public:
       TS_ASSERT_THROWS_NOTHING(e.parse("z,y,x,"));
       TS_ASSERT_EQUALS(e.size(), 3);
       TS_ASSERT_EQUALS(e[2].str(), "x");
+    }
+  }
+
+  void test_tie_expression_with_brackets() {
+    Expression e;
+    e.parse("ties=(a0=2,a1=4*(2+2))");
+    TS_ASSERT_EQUALS(e.str(), "ties=(a0=2,a1=4*(2+2))");
+    TS_ASSERT_EQUALS(e[1].name(), ",");
+  }
+
+  void test_tie_expression_with_brackets_1() {
+    Expression e;
+    e.parse("ties=(a0 = 2,  Height = Sigma/(0.5 * 0.5))");
+    TS_ASSERT_EQUALS(e.str(), "ties=(a0=2,Height=Sigma/(0.5*0.5))");
+    TS_ASSERT_EQUALS(e[1].name(), ",");
+  }
+
+  void test_bad_brackets() {
+    Expression e;
+    try {
+      e.parse("x+(y");
+      TS_FAIL("Expected an exception.");
+    } catch (Expression::ParsingError &e) {
+      TS_ASSERT_EQUALS(std::string(e.what()),
+                       "Unmatched bracket at\n\n(y\n^\n");
+    }
+  }
+
+  void test_bad_brackets_1() {
+    Expression e;
+    try {
+      e.parse("x+sin(y-3");
+      TS_FAIL("Expected an exception.");
+    } catch (Expression::ParsingError &e) {
+      TS_ASSERT_EQUALS(std::string(e.what()),
+                       "Unmatched bracket at\n\nsin(y-3\n   ^\n");
+    }
+  }
+
+  void test_bad_brackets_2() {
+    Expression e;
+    try {
+      e.parse("x+sinsinsinsinsin(y-3");
+      TS_FAIL("Expected an exception.");
+    } catch (Expression::ParsingError &e) {
+      TS_ASSERT_EQUALS(
+          std::string(e.what()),
+          "Unmatched bracket at\n\n...nsinsinsin(y-3\n             ^\n");
+    }
+  }
+
+  void test_bad_brackets_3() {
+    Expression e;
+    try {
+      e.parse("x+sinsinsinsinsin(y-3*1+2+3+4+5+6+7+0");
+      TS_FAIL("Expected an exception.");
+    } catch (Expression::ParsingError &e) {
+      TS_ASSERT_EQUALS(std::string(e.what()), "Unmatched bracket "
+                                              "at\n\n...nsinsinsin(y-3*1+2+3+4+"
+                                              "5+...\n             ^\n");
+    }
+  }
+
+  void test_bad_brackets_4() {
+    Expression e;
+    try {
+      e.parse("x+y+z)");
+      TS_FAIL("Expected an exception.");
+    } catch (Expression::ParsingError &e) {
+      TS_ASSERT_EQUALS(std::string(e.what()),
+                       "Unmatched bracket at\n\nx+y+z)\n^\n");
+    }
+  }
+
+  void test_syntax_error() {
+    Expression e;
+    try {
+      e.parse("x+y+");
+      TS_FAIL("Expected an exception.");
+    } catch (Expression::ParsingError &e) {
+      TS_ASSERT_EQUALS(
+          std::string(e.what()),
+          "A binary operator isn't followed by a value at\n\nx+y+\n   ^\n");
+    }
+  }
+
+  void test_syntax_error_1() {
+    Expression e;
+    try {
+      e.parse("x+y++++z");
+      TS_FAIL("Expected an exception.");
+    } catch (Expression::ParsingError &e) {
+      TS_ASSERT_EQUALS(std::string(e.what()),
+                       "Unrecognized operator at\n\nx+y++++z\n   ^\n");
+    }
+  }
+
+  void test_syntax_error_2() {
+    Expression e;
+    try {
+      e.parse("x+y+ + + +");
+      TS_FAIL("Expected an exception.");
+    } catch (Expression::ParsingError &e) {
+      TS_ASSERT_EQUALS(std::string(e.what()), "A binary operator isn't "
+                                              "followed by a value at\n\nx+y+ "
+                                              "+ + +\n         ^\n");
+    }
+  }
+
+  void test_syntax_error_3() {
+    Expression e;
+    try {
+      e.parse("x+y+ )");
+      TS_FAIL("Expected an exception.");
+    } catch (Expression::ParsingError &e) {
+      TS_ASSERT_EQUALS(std::string(e.what()),
+                       "Unmatched bracket at\n\nx+y+ )\n^\n");
     }
   }
 };

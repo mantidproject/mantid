@@ -10,6 +10,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -119,10 +120,14 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
       warningGiven = true;
       continue;
     }
-    if (signedTheta)
-      m_indexMap.emplace(spectrumInfo.signedTwoTheta(i) * rad2deg, i);
-    else
-      m_indexMap.emplace(spectrumInfo.twoTheta(i) * rad2deg, i);
+    if (!spectrumInfo.isMonitor(i)) {
+      if (signedTheta)
+        m_indexMap.emplace(spectrumInfo.signedTwoTheta(i) * rad2deg, i);
+      else
+        m_indexMap.emplace(spectrumInfo.twoTheta(i) * rad2deg, i);
+    } else {
+      m_indexMap.emplace(0.0, i);
+    }
 
     progress.report("Converting to theta...");
   }

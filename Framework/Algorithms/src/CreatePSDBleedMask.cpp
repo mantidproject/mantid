@@ -1,7 +1,5 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/CreatePSDBleedMask.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -25,16 +23,8 @@ using API::MatrixWorkspace_sptr;
 using API::MatrixWorkspace_const_sptr;
 using DataObjects::MaskWorkspace_sptr;
 
-//----------------------------------------------------------------------
-// Public methods
-//----------------------------------------------------------------------
-
 /// Default constructor
 CreatePSDBleedMask::CreatePSDBleedMask() {}
-
-//----------------------------------------------------------------------
-// Private methods
-//----------------------------------------------------------------------
 
 /// Initialize the algorithm properties
 void CreatePSDBleedMask::init() {
@@ -159,11 +149,10 @@ void CreatePSDBleedMask::exec() {
 
   progress.resetNumSteps(numTubes, 0, 1);
 
-  PARALLEL_FOR2(inputWorkspace, outputWorkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
   for (int i = 0; i < numTubes; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    auto current = tubeMap.begin();
-    std::advance(current, i);
+    auto current = std::next(tubeMap.begin(), i);
     const TubeIndex::mapped_type tubeIndices = current->second;
     bool mask = performBleedTest(tubeIndices, inputWorkspace, maxRate,
                                  numIgnoredPixels);

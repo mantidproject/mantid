@@ -5,7 +5,9 @@
 #include "MantidDataHandling/LoadDaveGrp.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;

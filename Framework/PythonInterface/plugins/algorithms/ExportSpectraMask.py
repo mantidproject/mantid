@@ -1,8 +1,10 @@
 #pylint: disable=invalid-name, no-init
+from __future__ import (absolute_import, division, print_function)
 import os
 from mantid import config
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, mtd, FileProperty, FileAction
 from mantid.kernel import Direction, logger, IntArrayProperty
+
 
 def export_masks(ws,fileName='',returnMasksOnly=False):
     """Exports masks applied to Mantid workspace
@@ -21,11 +23,10 @@ def export_masks(ws,fileName='',returnMasksOnly=False):
        list of masks instead.
     """
    # get pointer to the workspace
-    if type(ws) == str:
+    if isinstance(ws, str):
         pws = mtd[ws]
     else:
         pws = ws
-
 
     ws_name=pws.getName()
     nhist = pws.getNumberHistograms()
@@ -60,7 +61,6 @@ def export_masks(ws,fileName='',returnMasksOnly=False):
     else:
         filename = fileName
 
-
     nMasks = len(masks)
     if nMasks == 0:
         if returnMasksOnly:
@@ -71,11 +71,9 @@ def export_masks(ws,fileName='',returnMasksOnly=False):
 
     logger.notice("Workspace {0} has {1} masked spectra, including {2} spectra without detectors".format(ws_name,nMasks,no_detectors))
 
-
     if not returnMasksOnly :
         writeISISmasks(filename,masks,8)
     return masks
-
 
 
 def flushOutString(f,OutString,BlockSize,BlockLimit):
@@ -158,10 +156,10 @@ def  writeISISmasks(filename,masks,nSpectraInRow=8):
         (f,OutString,BlockSize)=flushOutString(f,OutString,BlockSize,0)
 
 
-
 class ExportSpectraMask(PythonAlgorithm):
     """ Export workspace's mask
     """
+
     def category(self):
         """ Return category
         """
@@ -181,15 +179,15 @@ class ExportSpectraMask(PythonAlgorithm):
         """
         self.declareProperty(WorkspaceProperty("Workspace", "",Direction.Input), "The workspace to export masks from.")
 
-        self.declareProperty(FileProperty(name="Filename",defaultValue="",action=FileAction.OptionalSave,\
-                                extensions = [".msk"],direction=Direction.Input),\
-                                doc="The name or full path to the file to save mask to."\
-                            " If empty, the name of the input workspace and default save directory are used.")
-        self.declareProperty("ExportMaskOnly",False,"If true, algorithm will not save mask in a file"\
-                             "and only returns the list containing numbers of masked spectra.",\
-                              Direction.Input)
-        self.declareProperty(IntArrayProperty(name="SpectraMasks",direction = Direction.Output),\
-                         doc="List of the masked  spectra numbers.")
+        self.declareProperty(FileProperty(name="Filename",defaultValue="",action=FileAction.OptionalSave,
+                                          extensions = [".msk"],direction=Direction.Input),
+                             doc="The name or full path to the file to save mask to."
+                             " If empty, the name of the input workspace and default save directory are used.")
+        self.declareProperty("ExportMaskOnly",False,"If true, algorithm will not save mask in a file"
+                             "and only returns the list containing numbers of masked spectra.",
+                             Direction.Input)
+        self.declareProperty(IntArrayProperty(name="SpectraMasks",direction = Direction.Output),
+                             doc="List of the masked  spectra numbers.")
         return
 
     def PyExec(self):

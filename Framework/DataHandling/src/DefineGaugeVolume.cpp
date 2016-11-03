@@ -1,9 +1,7 @@
-//--------------------------------
-// Includes
-//--------------------------------
 #include "MantidDataHandling/DefineGaugeVolume.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid {

@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/DetectorEfficiencyCorUser.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
@@ -21,7 +22,6 @@ using namespace Geometry;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DetectorEfficiencyCorUser)
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DetectorEfficiencyCorUser::name() const {
   return "DetectorEfficiencyCorUser";
@@ -35,9 +35,6 @@ const std::string DetectorEfficiencyCorUser::category() const {
   return "CorrectionFunctions\\EfficiencyCorrections;Inelastic\\Corrections";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void DetectorEfficiencyCorUser::init() {
@@ -58,7 +55,6 @@ void DetectorEfficiencyCorUser::init() {
                   "The energy of neutrons leaving the source.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void DetectorEfficiencyCorUser::exec() {
@@ -80,7 +76,7 @@ void DetectorEfficiencyCorUser::exec() {
       static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
 
   // Loop over the histograms (detector spectra)
-  PARALLEL_FOR2(m_outputWS, m_inputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS, *m_inputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -165,8 +161,6 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
     p.SetExpr(formula);
 
     for (size_t i = 0; i < effOut.size(); ++i) {
-      // Cppcheck cannot see that e is accessed in p.Eval().
-      // cppcheck-suppress unreadVariable
       e = m_Ei - xIn[i];
       double eff = p.Eval();
       effOut[i] = eff / eff0;
