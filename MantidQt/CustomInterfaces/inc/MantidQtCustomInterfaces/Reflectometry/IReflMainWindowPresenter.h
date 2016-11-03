@@ -57,7 +57,7 @@ public:
   virtual void giveUserInfo(const std::string &prompt,
                             const std::string &title) = 0;
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
-  virtual std::string getInstrumentName() const = 0;
+  virtual void setInstrumentName(const std::string &instName) const = 0;
 };
 }
 }

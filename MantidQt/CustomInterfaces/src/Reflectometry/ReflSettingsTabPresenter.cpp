@@ -49,6 +49,15 @@ void ReflSettingsTabPresenter::notify(IReflSettingsTabPresenter::Flag flag) {
   // a flag we aren't handling.
 }
 
+/** Sets the current instrument name and changes accessibility status of
+* the polarisation corrections option in the view accordingly
+* @param instName :: [input] The name of the instrument to set to
+*/
+void ReflSettingsTabPresenter::setInstrumentName(const std::string instName) {
+  currentInstrumentName = instName;
+  m_view->setPolarisationCorrectionsAccessibility(currentInstrumentName);
+}
+
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
 */
@@ -275,7 +284,7 @@ void ReflSettingsTabPresenter::createStitchHints() {
 void ReflSettingsTabPresenter::getExpDefaults() {
   // Algorithm and instrument
   auto alg = createReductionAlg();
-  auto inst = createEmptyInstrument(m_mainPresenter->getInstrumentName());
+  auto inst = createEmptyInstrument(currentInstrumentName);
 
   // Collect all default values and set them in view
   std::vector<std::string> defaults(7);
@@ -308,7 +317,7 @@ void ReflSettingsTabPresenter::getExpDefaults() {
 void ReflSettingsTabPresenter::getInstDefaults() {
   // Algorithm and instrument
   auto alg = createReductionAlg();
-  auto inst = createEmptyInstrument(m_mainPresenter->getInstrumentName());
+  auto inst = createEmptyInstrument(currentInstrumentName);
 
   // Collect all default values
   std::vector<double> defaults(8);

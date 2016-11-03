@@ -78,6 +78,10 @@ public:
   /// Set default values for settings
   virtual void setExpDefaults(const std::vector<std::string> &) const = 0;
   virtual void setInstDefaults(const std::vector<double> &) const = 0;
+
+  /// Set accessibility for polarisation corrections
+  virtual void setPolarisationCorrectionsAccessibility(
+      const std::string &) const = 0;
 };
 }
 }

@@ -38,13 +38,10 @@ public:
   /// Accept a main presenter
   virtual void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) = 0;
 
-  enum Flag { SearchFlag, ICATSearchCompleteFlag, TransferFlag };
+  enum Flag { SearchFlag, ICATSearchCompleteFlag, TransferFlag, InstrumentChangedFlag };
 
   // Tell the presenter something happened
   virtual void notify(IReflRunsTabPresenter::Flag flag) = 0;
-
-  // Get current instrument name
-  virtual std::string getCurrentInstrumentName() const = 0;
 };
 }
 }

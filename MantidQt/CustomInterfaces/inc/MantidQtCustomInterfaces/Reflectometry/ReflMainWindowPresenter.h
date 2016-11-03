@@ -52,8 +52,6 @@ public:
   std::string getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions() const override;
-  /// Returns instrument name
-  std::string getInstrumentName() const override;
 
   /// Dialog/Prompt methods
   std::string askUserString(const std::string &prompt, const std::string &title,
@@ -67,6 +65,7 @@ public:
   void giveUserInfo(const std::string &prompt,
                     const std::string &title) override;
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
+  void setInstrumentName(const std::string &instName) const override;
 
 private:
   /// Check for null pointer

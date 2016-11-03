@@ -99,6 +99,22 @@ void QtReflSettingsTabView::setInstDefaults(
   m_ui.I0MonIndexEdit->setText(QString::number(defaults[7]));
 }
 
+/* Sets the accessibility status of the polarisation corrections option based
+* upon the name of the instrument currently being used
+* @param instName :: [input] The name of the instrument being used
+*/
+void QtReflSettingsTabView::setPolarisationCorrectionsAccessibility(
+    const std::string &instName) const {
+  bool isAccessible = (instName != "INTER" && instName != "SURF");
+  m_ui.polCorrComboBox->setEnabled(isAccessible);
+  // Set text to 'None' if inaccessible
+  if (!isAccessible) {
+    int noneIndex = m_ui.polCorrComboBox->findText("None");
+    if (noneIndex != -1)
+      m_ui.polCorrComboBox->setCurrentIndex(noneIndex);
+  }
+}
+
 /** Returns global options for 'Stitch1DMany'
 * @return :: Global options for 'Stitch1DMany'
 */

@@ -20,6 +20,9 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
   m_settingsPresenter->acceptMainPresenter(this);
+
+  // Trigger the setting of the current instrument name in settings tab
+  m_runsPresenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
 }
 
 /** Destructor
@@ -129,9 +132,13 @@ ReflMainWindowPresenter::runPythonAlgorithm(const std::string &pythonCode) {
   return m_view->runPythonAlgorithm(pythonCode);
 }
 
-std::string ReflMainWindowPresenter::getInstrumentName() const {
+/**
+Tells the setting tab presenter what to set its current instrument name to
+* @param instName : The name of the instrument to be set
+*/
+void ReflMainWindowPresenter::setInstrumentName(const std::string &instName) const {
 
-  return m_runsPresenter->getCurrentInstrumentName();
+  m_settingsPresenter->setInstrumentName(instName);
 }
 
 /** Checks for null pointer

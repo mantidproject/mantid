@@ -77,8 +77,6 @@ public:
   std::map<std::string, std::string> getPreprocessingOptions() const override;
   std::string getProcessingOptions() const override;
   std::string getPostprocessingOptions() const override;
-  /// Get current instrument name
-  std::string getCurrentInstrumentName() const override;
 
 protected:
   /// The search model

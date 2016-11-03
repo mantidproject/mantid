@@ -52,6 +52,7 @@ public:
   /// Accept a main presenter
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflSettingsTabPresenter::Flag flag) override;
+  void setInstrumentName(const std::string instName) override;
 
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   std::string getTransmissionOptions() const override;
@@ -72,6 +73,8 @@ private:
   IReflSettingsTabView *m_view;
   /// The main presenter
   IReflMainWindowPresenter *m_mainPresenter;
+  /// Name of the current instrument in use
+  std::string currentInstrumentName;
 };
 }
 }

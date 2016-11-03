@@ -50,14 +50,6 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
   // presenter with the list of commands
   m_tablePresenter->accept(this);
 
-  // TODO. Select strategy.
-  /*
-  std::unique_ptr<CatalogConfigService> catConfigService(
-  makeCatalogConfigServiceAdapter(ConfigService::Instance()));
-  UserCatalogInfo catalogInfo(
-  ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
-  */
-
   // If we don't have a searcher yet, use ReflCatalogSearcher
   if (!m_searcher)
     m_searcher.reset(new ReflCatalogSearcher());
@@ -113,9 +105,13 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     auto algRunner = m_view->getAlgorithmRunner();
     IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
     populateSearch(searchAlg);
-  } break;
+    break;
+  }
   case IReflRunsTabPresenter::TransferFlag:
     transfer();
+    break;
+  case IReflRunsTabPresenter::InstrumentChangedFlag:
+    m_mainPresenter->setInstrumentName(m_view->getSearchInstrument());
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -202,7 +198,7 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   if (searchAlg->isExecuted()) {
     ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
     m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
-        *getTransferStrategy(), results, getCurrentInstrumentName()));
+        *getTransferStrategy(), results, m_view->getSearchInstrument()));
     m_view->showSearch(m_searchModel);
   }
 }
@@ -360,14 +356,6 @@ std::string ReflRunsTabPresenter::getProcessingOptions() const {
 */
 std::string ReflRunsTabPresenter::getPostprocessingOptions() const {
   return m_mainPresenter->getStitchOptions();
-}
-
-/**
-Gets the currently selected (or default) instrument
-* @return : The current instrument
-*/
-std::string ReflRunsTabPresenter::getCurrentInstrumentName() const {
-  return m_view->getSearchInstrument();
 }
 
 /**

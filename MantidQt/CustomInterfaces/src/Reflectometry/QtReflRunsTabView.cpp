@@ -54,6 +54,13 @@ void QtReflRunsTabView::initLayout() {
       std::unique_ptr<DataProcessorPresenter>(presenterFactory.create()), this);
   ui.layoutProcessPane->addWidget(qDataProcessorWidget);
 
+  // Create the presenter
+  m_presenter = std::make_shared<ReflRunsTabPresenter>(
+    this /* main view */,
+    this /* Currently this concrete view is also responsible for prog reporting */,
+    qDataProcessorWidget->getPresenter() /* The data processor presenter */);
+  m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
+
   // Custom context menu for table
   connect(ui.tableSearchResults,
           SIGNAL(customContextMenuRequested(const QPoint &)), this,
@@ -71,13 +78,6 @@ void QtReflRunsTabView::initLayout() {
   connect(qDataProcessorWidget,
           SIGNAL(comboProcessInstrument_currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
-
-  // Create the presenter
-  m_presenter = std::make_shared<ReflRunsTabPresenter>(
-      this /* main view */,
-      this /* Currently this concrete view is also responsible for prog reporting */,
-      qDataProcessorWidget->getPresenter() /* The data processor presenter */);
-  m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 }
 
 /**
@@ -241,14 +241,17 @@ void QtReflRunsTabView::showSearchContextMenu(const QPoint &pos) {
 }
 
 /** This is slot is triggered when any of the instrument combo boxes changes. It
- * is used to update the Slit Calculator
+ * notifies the main presenter and updates the Slit Calculator
  * @param index : The index of the combo box
  */
 void QtReflRunsTabView::instrumentChanged(int index) {
   m_calculator->setCurrentInstrumentName(
       ui.comboSearchInstrument->itemText(index).toStdString());
   m_calculator->processInstrumentHasBeenChanged();
+  m_presenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
 }
+
+/** Notifies 
 
 /**
 Get the selected instrument for searching
