@@ -160,7 +160,13 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 bkgOutWs = backgroundWorkspaceName(identifier)
             bkgWindow = self.getProperty(PROP_FLAT_BACKGROUND_WINDOW).value
             bkgScaling = self.getProperty(PROP_FLAT_BACKGROUND_SCALING).value
-            bkgWorkspace = self._calculateFlatBackground(workspace, bkgOutWs, bkgWindow)
+            bkgWorkspace = CalculateFlatBackground(InputWorkspace=workspace,
+                                                   OutputWorkspace=bkgOutWs,
+                                                   Mode='Moving Average',
+                                                   OutputMode='ReturnBackground',
+                                                   SkipMonitors=False,
+                                                   NullifyNegativeValues=False,
+                                                   AveragingWindowWidth=bkgWindow)
             bkgWorkspace = Scale(InputWorkspace = bkgWorkspace,
                                  OutputWorkspace = bkgWorkspace,
                                  Factor = bkgScaling)
@@ -538,14 +544,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
         return issues
 
-    def _calculateFlatBackground(self, ws, bkgWsName, window):
-        # TODO this functionality should be moved to CalculateFlatBackground
-        # algorithm some day
-        bkgWs = CloneWorkspace(InputWorkspace=ws,OutputWorkspace=bkgWsName)
-        for i in range(ws.getNumberHistograms()):
-            bkgWs.dataY(i).fill(self._runningMeanMinimum(ws.readY(i), window))
-        return bkgWs
-
     def _convertToWorkspaceIndex(self, i, workspace):
         indexType = self.getProperty(PROP_INDEX_TYPE).value
         if indexType == INDEX_TYPE_WORKSPACE_INDEX:
@@ -591,17 +589,5 @@ class DirectILLReduction(DataProcessorAlgorithm):
                     DeleteWorkspace(Workspace = ws)
 
         self.log().debug('Finished')
-
-
-    def _runningMeanMinimum(self, x, window):
-        # TODO this functionality should be moved to CalculateFlatBackground
-        # algorithm some day
-        # Does not handle NaNs.
-        dx = window / 2 + 1
-        minimum = numpy.min(x[:dx])
-        for i in range(len(x) - window):
-            minimum = min(minimum, numpy.mean(x[i:i+window]))
-        minEnd = numpy.min(x[-dx:])
-        return min(minimum, minEnd)
 
 AlgorithmFactory.subscribe(DirectILLReduction)
