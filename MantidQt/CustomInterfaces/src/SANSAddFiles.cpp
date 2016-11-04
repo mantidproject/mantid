@@ -137,7 +137,6 @@ void SANSAddFiles::initLayout() {
           SLOT(onStateChangedForOverlayCheckBox(int)));
 }
 
-
 /** sets tool tip strings for the components on the form
 */
 void SANSAddFiles::setToolTips() {
