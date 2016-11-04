@@ -4,7 +4,6 @@
 #include <qpainter.h>
 #include <QRect>
 #include <QShowEvent>
-#include "MantidQtSliceViewer\QConversionScale.h"
 #include "MantidKernel/Utils.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
