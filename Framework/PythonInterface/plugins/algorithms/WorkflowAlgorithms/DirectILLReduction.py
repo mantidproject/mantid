@@ -330,8 +330,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                        DataValue=transmission)
             tempWsName2 = '__input_minus_Cd_for_' + outWs
             tempWsName3 = '__EC_minus_Cd_for_' + outWs
-            # If no Cd, calculate
-            # out = in / transmission - EC
             # If Cd, calculate
             # out = (in - Cd) / transmission - (EC - Cd)
             if cdWs:
@@ -341,17 +339,25 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 ecWs = Minus(LHSWorkspace=ecWs,
                              RHSWorkspace=cdWs,
                              OutputWorkspace=tempWsNamw3)
-            workspace = Divide(LHSWorkspace=workspace,
-                               RHSWorkspace=transmission,
-                               OutputWorkspace=outWs)
-            Minus(LHSWorkspace=workspace,
-                  RHSWorkspace=inEC,
-                  OutputWorkspace=workspace)
-            if cdWs:
+                workspace = Divide(LHSWorkspace=workspace,
+                                   RHSWorkspace=transmission,
+                                   OutputWorkspace=outWs)
+                workspace = Minus(LHSWorkspace=workspace,
+                                  RHSWorkspace=ecWs,
+                                  OutputWorkspace=workspace)
                 # Cleanup
                 DeleteWorkspace(Workspace=tempWsName1)
                 DeleteWorkspace(Workspace=tempWsName2)
                 DeleteWorkspace(Workspace=tempWsName3)
+            # If no Cd, calculate
+            # out = in - transmission * EC
+            else:
+                ecWs = Multiply(LHSWorkspace=ecWs,
+                                RHSWorkspace=transmission,
+                                OutputWorkspace=ecWs)
+                workspace = Minus(LHSWorkspace=workspace,
+                                  RHSWorkspace=inEC,
+                                  OutputWorkspace=workspace)
 
         # Reduction for vanadium ends here.
         if reductionType == REDUCTION_TYPE_VANADIUM:
