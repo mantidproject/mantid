@@ -16,6 +16,10 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidCrystal/SetUB.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/Run.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/MDUnit.h"
 
 class CoordinateTransformTest : public CxxTest::TestSuite {
 private:
