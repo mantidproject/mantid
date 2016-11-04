@@ -251,8 +251,6 @@ void QtReflRunsTabView::instrumentChanged(int index) {
   m_presenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
 }
 
-/** Notifies
-
 /**
 Get the selected instrument for searching
 @returns the selected instrument to search for
