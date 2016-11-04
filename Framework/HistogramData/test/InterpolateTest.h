@@ -101,11 +101,11 @@ public:
   // ---------------------------------------------------------------------------
   void test_interpolateCSplinePointDataSet_Minimum_Calculated_Points() {
     Histogram input(Points(7, LinearGenerator(0, 0.5)),
-                    {-3, 0, -1, 0, 1, 0, 3});
+                    Counts({-3, 0, -4, 0, 4, 0, 3}));
     auto output = interpolateCSpline(input, 2);
 
     checkSizesUnchanged(input, output);
-    std::vector<double> expectedY = {-3, -2, -1, 0, 1, 2, 3};
+    std::vector<double> expectedY = {-3, -4.625, -4, 0., 4, 4.625, 3};
     checkData(input, output, expectedY);
 
     // Inplace

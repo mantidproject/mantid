@@ -113,7 +113,7 @@ void interpolateYCSplineInplace(const Histogram &input, const size_t stepSize,
     yc[i] = yold[step];
   }
   // Ensure we have the last value
-  xc.back() = xold[nypts - 1];
+  xc.back() = xold.back();
   yc.back() = yold.back();
 
   gsl_interp_accel *acc = gsl_interp_accel_alloc();
