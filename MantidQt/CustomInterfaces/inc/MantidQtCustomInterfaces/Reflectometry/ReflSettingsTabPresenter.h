@@ -74,7 +74,7 @@ private:
   /// The main presenter
   IReflMainWindowPresenter *m_mainPresenter;
   /// Name of the current instrument in use
-  std::string currentInstrumentName;
+  std::string m_currentInstrumentName;
 };
 }
 }

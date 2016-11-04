@@ -91,9 +91,8 @@ public:
   /// Creates hints for 'Stitch1DMany'
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override;
-  /// Sets accessibility status for polarisation corrections option
-  void setPolarisationCorrectionsAccessibility(
-      const std::string &instName) const override;
+  /// Sets enabled status for polarisation corrections and parameters
+  void setPolarisationOptionsEnabled(bool enable) const override;
 
 public slots:
   /// Request presenter to obtain default values for settings

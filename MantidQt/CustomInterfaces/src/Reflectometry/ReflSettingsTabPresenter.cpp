@@ -16,7 +16,7 @@ using namespace Mantid::Geometry;
 * @param view :: The view we are handling
 */
 ReflSettingsTabPresenter::ReflSettingsTabPresenter(IReflSettingsTabView *view)
-    : m_view(view), m_mainPresenter(), currentInstrumentName("INTER") {
+    : m_view(view), m_mainPresenter() {
 
   // Create the 'HintingLineEdits'
   createStitchHints();
@@ -54,8 +54,9 @@ void ReflSettingsTabPresenter::notify(IReflSettingsTabPresenter::Flag flag) {
 * @param instName :: [input] The name of the instrument to set to
 */
 void ReflSettingsTabPresenter::setInstrumentName(const std::string instName) {
-  currentInstrumentName = instName;
-  m_view->setPolarisationCorrectionsAccessibility(currentInstrumentName);
+  m_currentInstrumentName = instName;
+  m_view->setPolarisationOptionsEnabled(
+    instName != "INTER" && instName != "SURF");
 }
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
@@ -284,7 +285,7 @@ void ReflSettingsTabPresenter::createStitchHints() {
 void ReflSettingsTabPresenter::getExpDefaults() {
   // Algorithm and instrument
   auto alg = createReductionAlg();
-  auto inst = createEmptyInstrument(currentInstrumentName);
+  auto inst = createEmptyInstrument(m_currentInstrumentName);
 
   // Collect all default values and set them in view
   std::vector<std::string> defaults(7);
@@ -317,7 +318,7 @@ void ReflSettingsTabPresenter::getExpDefaults() {
 void ReflSettingsTabPresenter::getInstDefaults() {
   // Algorithm and instrument
   auto alg = createReductionAlg();
-  auto inst = createEmptyInstrument(currentInstrumentName);
+  auto inst = createEmptyInstrument(m_currentInstrumentName);
 
   // Collect all default values
   std::vector<double> defaults(8);

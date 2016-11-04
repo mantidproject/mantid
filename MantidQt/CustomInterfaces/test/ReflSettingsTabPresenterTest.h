@@ -146,7 +146,7 @@ public:
         .WillOnce(Return("\"3,4\""));
     EXPECT_CALL(mockView, getTransmissionRuns())
         .Times(Exactly(1))
-        .WillOnce(Return("INTER00013463.nxs,INTER00013464.nxs"));
+        .WillOnce(Return("INTER00013463,INTER00013464"));
     auto options = presenter.getReductionOptions();
 
     std::vector<std::string> optionsVec;
@@ -170,9 +170,13 @@ public:
     TS_ASSERT_EQUALS(optionsVec[16], "MomentumTransferStep=-0.02");
     TS_ASSERT_EQUALS(optionsVec[17], "ProcessingInstructions=\"3,4\"");
     TS_ASSERT_EQUALS(optionsVec[18],
-                     "FirstTransmissionRun=TRANS_INTER00013463.nxs");
+                     "FirstTransmissionRun=TRANS_INTER00013463");
     TS_ASSERT_EQUALS(optionsVec[19],
-                     "SecondTransmissionRun=TRANS_INTER00013464.nxs");
+                     "SecondTransmissionRun=TRANS_INTER00013464");
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013463"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013464"));
+    AnalysisDataService::Instance().clear();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -186,6 +190,16 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
+  void testPolarisationOptionsEnabled() {
+    MockSettingsTabView mockView;
+    ReflSettingsTabPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, setPolarisationOptionsEnabled(false)).Times(Exactly(1));
+    presenter.setInstrumentName("INTER");
+    EXPECT_CALL(mockView, setPolarisationOptionsEnabled(true)).Times(Exactly(1));
+    presenter.setInstrumentName("POLREF");
+  }
+
   void testExperimentDefaults() {
     MockSettingsTabView mockView;
     ReflSettingsTabPresenter presenter(&mockView);
@@ -193,7 +207,9 @@ public:
 
     // This presenter accepts the main presenter
     presenter.acceptMainPresenter(&mainPresenter);
+
     // Set instrument to 'POLREF'
+    EXPECT_CALL(mockView, setPolarisationOptionsEnabled(true)).Times(Exactly(1));
     presenter.setInstrumentName("POLREF");
 
     std::vector<std::string> defaults = {
@@ -202,7 +218,7 @@ public:
         "1.017526,-0.017183,0.003136,-0.000140",
         "0.917940,0.038265,-0.006645,0.000282",
         "0.972762,0.001828,-0.000261,0.0", "1"};
-
+    
     EXPECT_CALL(mockView, setExpDefaults(defaults)).Times(1);
     presenter.notify(IReflSettingsTabPresenter::ExpDefaultsFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
@@ -215,6 +231,10 @@ public:
 
     // This presenter accepts the main presenter
     presenter.acceptMainPresenter(&mainPresenter);
+
+    // Set instrument to 'INTER'
+    EXPECT_CALL(mockView, setPolarisationOptionsEnabled(false)).Times(Exactly(1));
+    presenter.setInstrumentName("INTER");
 
     std::vector<double> defaults = {1., 4.0, 10., 15., 17., 1.0, 17., 2.0};
 

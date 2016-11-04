@@ -99,19 +99,26 @@ void QtReflSettingsTabView::setInstDefaults(
   m_ui.I0MonIndexEdit->setText(QString::number(defaults[7]));
 }
 
-/* Sets the accessibility status of the polarisation corrections option based
-* upon the name of the instrument currently being used
-* @param instName :: [input] The name of the instrument being used
+/* Sets the enabled status of polarisation corrections and parameters
+* @param enable :: [input] bool to enable options or not
 */
-void QtReflSettingsTabView::setPolarisationCorrectionsAccessibility(
-    const std::string &instName) const {
-  bool isAccessible = (instName != "INTER" && instName != "SURF");
-  m_ui.polCorrComboBox->setEnabled(isAccessible);
-  // Set text to 'None' if inaccessible
-  if (!isAccessible) {
+void QtReflSettingsTabView::setPolarisationOptionsEnabled(bool enable) const {
+  m_ui.polCorrComboBox->setEnabled(enable);
+  m_ui.CRhoEdit->setEnabled(enable);
+  m_ui.CAlphaEdit->setEnabled(enable);
+  m_ui.CApEdit->setEnabled(enable);
+  m_ui.CPpEdit->setEnabled(enable);
+
+  if (!enable) {
+    // Set polarisation corrections text to 'None' when disabled
     int noneIndex = m_ui.polCorrComboBox->findText("None");
     if (noneIndex != -1)
       m_ui.polCorrComboBox->setCurrentIndex(noneIndex);
+    // Clear all parameters as well
+    m_ui.CRhoEdit->clear();
+    m_ui.CAlphaEdit->clear();
+    m_ui.CApEdit->clear();
+    m_ui.CPpEdit->clear();
   }
 }
 
