@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from mantid.api import AlgorithmFactory, AnalysisDataServiceImpl, DataProcessorAlgorithm, FileAction, FileProperty, ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, PropertyMode,  WorkspaceProperty
-from mantid.kernel import Direct, Direction, StringListValidator, UnitConversion
+from mantid.kernel import Direct, Direction, IntArrayProperty, StringListValidator, UnitConversion
 from mantid.simpleapi import AddSampleLog, CalculateFlatBackground,\
                              CloneWorkspace, ComputeCalibrationCoefVan,\
                              ConvertUnits, CorrectKiKf, CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace, DetectorEfficiencyCorUser, Divide, ExtractMonitors, ExtractSpectra, \
@@ -107,9 +107,6 @@ def guessIncidentEnergyWorkspaceName(eppWorkspace):
     splits = eppWorkspace.getName().split('_')
     return ''.join(splits[:-1]) + '_ie'
 
-def stringListToArray(string):
-    return eval('[' + string + ']')
-
 class DirectILLReduction(DataProcessorAlgorithm):
 
     def __init__(self):
@@ -211,7 +208,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 self.setProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE, eppOutWs)
 
         # Identify bad detectors & include user mask
-        userMask = stringListToArray(self.getProperty(PROP_USER_MASK).value)
+        userMask = self.getProperty(PROP_USER_MASK).value
         outWs = badDetectorWorkspaceName(identifier)
         badDetWorkspace, nFailures = FindDetectorsOutsideLimits(InputWorkspace=workspace,
                                                                 OutputWorkspace=outWs)
@@ -484,9 +481,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              0,
                              direction=Direction.Input,
                              doc='Index of the main monitor spectrum.')
-        self.declareProperty(PROP_USER_MASK,
-                             '',
-                             direction=Direction.Input,
+        self.declareProperty(IntArrayProperty(PROP_USER_MASK,
+                                              '',
+                                              direction=Direction.Input),
                              doc='List of spectra to mask')
         self.declareProperty(PROP_TRANSMISSION,
                              1.0,
