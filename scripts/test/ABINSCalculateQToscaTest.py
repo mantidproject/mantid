@@ -61,35 +61,32 @@ class ABINSCalculateQToscaTest(unittest.TestCase):
         # wrong file name
         with self.assertRaises(ValueError):
             poor_q_calculator = CalculateQ(filename=1, instrument=self._tosca_instrument, sample_form=self._sample_form,
-                                           k_points_data=self._raw_data, combinations=False)
+                                           k_points_data=self._raw_data,
+                                           quantum_order_events_num=AbinsConstants.fundamentals)
 
         # wrong instrument
         with self.assertRaises(ValueError):
             poor_q_calculator = CalculateQ(filename=self._filename, instrument="Different_instrument",
                                            sample_form=self._sample_form, k_points_data=self._raw_data,
-                                           combinations=False)
+                                           quantum_order_events_num=AbinsConstants.fundamentals)
 
         # wrong sample form
         with self.assertRaises(ValueError):
             poor_q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument,
-                                           sample_form="Solid", k_points_data=self._raw_data, combinations=False)
+                                           sample_form="Solid", k_points_data=self._raw_data,
+                                           quantum_order_events_num=AbinsConstants.fundamentals)
 
         # no k_points_data
         with self.assertRaises(ValueError):
             poor_q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument,
-                                           sample_form=self._sample_form, combinations=False)
+                                           sample_form=self._sample_form,
+                                           quantum_order_events_num=AbinsConstants.fundamentals)
 
-        # wrong value of overtones
+        # wrong value of quantum_order_events_num
         with self.assertRaises(ValueError):
             poor_q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument,
                                            sample_form=self._sample_form, k_points_data=self._raw_data,
-                                           combinations=False)
-
-        # wrong value of combinations
-        with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument,
-                                           sample_form=self._sample_form, k_points_data=self._raw_data,
-                                           combinations="bad_combinations")
+                                           quantum_order_events_num=-1)
 
     # Use case: TOSCA instrument
     def test_TOSCA(self):
@@ -105,7 +102,8 @@ class ABINSCalculateQToscaTest(unittest.TestCase):
         correct_q_data = k2_i + k2_f - 2 * np.power(k2_i * k2_f, 0.5) * AbinsParameters.TOSCA_cos_scattering_angle
 
         q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument,
-                                  sample_form=self._sample_form, k_points_data=self._raw_data, combinations=False)
+                                  sample_form=self._sample_form, k_points_data=self._raw_data,
+                                  quantum_order_events_num=AbinsConstants.fundamentals)
         q_vectors = q_calculator.calculateData()
 
         # noinspection PyTypeChecker

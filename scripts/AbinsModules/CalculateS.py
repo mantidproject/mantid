@@ -51,7 +51,9 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         else:
             raise ValueError("Object of type AbinsData was expected.")
 
-        if isinstance(quantum_order_events_num, int):
+        min_order = AbinsConstants.fundamentals
+        max_order = AbinsConstants.fundamentals + AbinsConstants.higher_order_quantum_effects
+        if isinstance(quantum_order_events_num, int) and min_order <= quantum_order_events_num <= max_order:
             self._quantum_order_events_num = quantum_order_events_num
         else:
             raise ValueError("Invalid number of quantum order events.")

@@ -37,15 +37,12 @@ class CalculateQ(IOmodule):
             raise ValueError("Invalid value of k-points data.")
         self._k_points_data = k_points_data
 
-        if isinstance(quantum_order_events_num, int):
+        min_order = AbinsConstants.fundamentals
+        max_order = AbinsConstants.fundamentals + AbinsConstants.higher_order_quantum_effects
+        if isinstance(quantum_order_events_num, int) and min_order <= quantum_order_events_num <= max_order:
             self._quantum_order_events_num = quantum_order_events_num
         else:
             raise ValueError("Invalid value of quantum order events.")
-
-        # if self._evaluate_combinations:
-        #     combinations_folder = "combinations_true"
-        # else:
-        #     combinations_folder = "combinations_false"
 
         self._Qvectors = None  # data with Q vectors
 
