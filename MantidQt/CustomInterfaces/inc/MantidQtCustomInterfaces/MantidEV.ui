@@ -3162,7 +3162,7 @@
               <item>
                <widget class="QLabel" name="AdaptiveQMult_lbl">
                 <property name="text">
-                 <string>Peak Radius plus this value multiplied by the magnitude of Q.</string>
+                 <string>AdaptiveQMultiplier</string>
                 </property>
                </widget>
               </item>
@@ -3175,7 +3175,7 @@
                  </sizepolicy>
                 </property>
                 <property name="toolTip">
-                 <string>PeakRadius plus this value multiplied by the magnitude of Q.</string>
+                 <string>PeakRadius + AdaptiveQMultiplier * |Q|</string>
                 </property>
                 <property name="text">
                  <string>0.0</string>
@@ -3205,10 +3205,10 @@
               <item>
                <widget class="QCheckBox" name="AdaptiveQBkg_ckbx">
                 <property name="toolTip">
-                 <string>If true, all background values vary on a line so that they are background plus AdaptiveQMultiplier multiplied by magnitude of Q.</string>
+                 <string>If true, BackgroundRadius + AdaptiveQMultiplier *|Q|</string>
                 </property>
                 <property name="text">
-                 <string>Change background when Peak Radius changes with magnitude of Q</string>
+                 <string>Use BackgroundRadius + AdaptiveQMultiplier *|Q|</string>
                 </property>
                </widget>
               </item>

@@ -220,10 +220,12 @@ bool MantidEVWorker::loadAndConvertToMD(
 
     if (!alg->execute())
       return false;
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     g_log.error() << "Error:" << e.what() << '\n';
     return false;
-  } catch (...) {
+  }
+  catch (...) {
     g_log.error() << "Error: Could Not load file and convert to MD\n";
     return false;
   }
@@ -331,10 +333,12 @@ bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
       }
       return true;
     }
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     g_log.error() << "Error:" << e.what() << '\n';
     return false;
-  } catch (...) {
+  }
+  catch (...) {
     g_log.error() << "Error: Could Not findPeaks\n";
     return false;
   }
@@ -370,10 +374,12 @@ bool MantidEVWorker::predictPeaks(const std::string &peaks_ws_name,
 
     if (alg->execute())
       return true;
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     g_log.error() << "Error:" << e.what() << '\n';
     return false;
-  } catch (...) {
+  }
+  catch (...) {
     g_log.error() << "Error: Could Not predictPeaks\n";
     return false;
   }
@@ -770,14 +776,12 @@ bool MantidEVWorker::changeHKL(const std::string &peaks_ws_name,
  *                                    that is background.
  *  @param cylinder_profile_fit       The fitting function for cylinder
  *                                    integration.
- *  @param adaptiveQBkg                Default is false.   If true, all
- *               background values vary on a line so that they are
- *               background plus AdaptiveQMultiplier multiplied
- *                by the magnitude of Q at the peak center so each peak has a
- *                different integration radius.  Q includes the 2*pi factor.
- *  @param adaptiveQMult       Peak integration radius varies on a line so that
- *                it is PeakRadius plus this value multiplied
- *                by the magnitude of Q at the peak center so each peak has a
+ *  @param adaptiveQBkg                Default is false.   If true,
+ *            BackgroundOuterRadius + AdaptiveQMultiplier *|Q|
+ *            BackgroundInnerRadius + AdaptiveQMultiplier *|Q|
+ *  @param adaptiveQMult       Default is 0.
+ *                PeakRadius + AdaptiveQMultiplier * |Q|
+ *                so each peak has a
  *                different integration radius.  Q includes the 2*pi factor.
  *
  *  @return true if the unweighted workspace was successfully created and
@@ -848,10 +852,12 @@ bool MantidEVWorker::sphereIntegrate(
 
     std::cout << "Integrated temporary MD workspace FAILED\n";
     return false;
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     g_log.error() << "Error:" << e.what() << '\n';
     return false;
-  } catch (...) {
+  }
+  catch (...) {
     g_log.error() << "Error: Could Not Integrated temporary MD workspace\n";
     return false;
   }
@@ -921,10 +927,12 @@ bool MantidEVWorker::fitIntegrate(const std::string &peaks_ws_name,
     }
 
     std::cout << "Integrated temporary FIT workspace FAILED\n";
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     g_log.error() << "Error:" << e.what() << '\n';
     return false;
-  } catch (...) {
+  }
+  catch (...) {
     g_log.error() << "Error: Could Not Integrated temporary FIT workspace\n";
     return false;
   }
@@ -982,10 +990,12 @@ bool MantidEVWorker::ellipsoidIntegrate(const std::string &peaks_ws_name,
     }
 
     std::cout << "IntegrateEllipsoids FAILED\n";
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     g_log.error() << "Error:" << e.what() << '\n';
     return false;
-  } catch (...) {
+  }
+  catch (...) {
     g_log.error() << "Error: Could Not IntegratedEllipsoids\n";
     return false;
   }
@@ -1054,7 +1064,8 @@ bool MantidEVWorker::showUB(const std::string &peaks_ws_name) {
             o_lattice.errorgamma());
 
     g_log.notice(std::string(logInfo));
-  } catch (...) {
+  }
+  catch (...) {
     return false;
   }
 
@@ -1098,7 +1109,8 @@ bool MantidEVWorker::getUB(const std::string &peaks_ws_name, bool lab_coords,
       auto goniometer_matrix = peak.getGoniometerMatrix();
       UB = goniometer_matrix * UB;
     }
-  } catch (...) {
+  }
+  catch (...) {
     return false;
   }
 
@@ -1146,7 +1158,8 @@ bool MantidEVWorker::copyLattice(const std::string &peaks_ws_name,
       alg->setProperty("CopyShape", false);
       alg->setProperty("CopyLattice", true);
       alg->execute();
-    } catch (...) {
+    }
+    catch (...) {
       g_log.notice() << "\n";
       g_log.notice() << "CopySample from " << peaks_ws_name << " to "
                      << md_ws_name << " FAILED\n\n";
@@ -1170,7 +1183,8 @@ bool MantidEVWorker::copyLattice(const std::string &peaks_ws_name,
       alg->setProperty("CopyShape", false);
       alg->setProperty("CopyLattice", true);
       alg->execute();
-    } catch (...) {
+    }
+    catch (...) {
       g_log.notice() << "\n";
       g_log.notice() << "CopySample from " << peaks_ws_name << " to "
                      << event_ws_name << " FAILED\n\n";
@@ -1191,7 +1205,7 @@ bool MantidEVWorker::copyLattice(const std::string &peaks_ws_name,
  *                         it is in sample coordinates.
  * @param  Q               The Q-vector.
  */
-std::vector<std::pair<std::string, std::string>>
+std::vector<std::pair<std::string, std::string> >
 MantidEVWorker::PointInfo(const std::string &peaks_ws_name, bool lab_coords,
                           Mantid::Kernel::V3D Q) {
   IPeaksWorkspace_sptr peaks_ws =

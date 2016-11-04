@@ -41,39 +41,39 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksMD2::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace> >(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace.");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("PeakRadius", 1.0,
-                                             Direction::Input),
+      make_unique<PropertyWithValue<double> >("PeakRadius", 1.0,
+                                              Direction::Input),
       "Fixed radius around each peak position in which to integrate (in the "
       "same units as the workspace).");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("BackgroundInnerRadius", 0.0,
-                                             Direction::Input),
+      make_unique<PropertyWithValue<double> >("BackgroundInnerRadius", 0.0,
+                                              Direction::Input),
       "Inner radius to use to evaluate the background of the peak.\n"
       "If smaller than PeakRadius, then we assume BackgroundInnerRadius = "
       "PeakRadius.");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("BackgroundOuterRadius", 0.0,
-                                             Direction::Input),
+      make_unique<PropertyWithValue<double> >("BackgroundOuterRadius", 0.0,
+                                              Direction::Input),
       "Outer radius to use to evaluate the background of the peak.\n"
       "The signal density around the peak (BackgroundInnerRadius < r < "
       "BackgroundOuterRadius) is used to estimate the background under the "
       "peak.\n"
       "If smaller than PeakRadius, no background measurement is done.");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                       "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace> >("OutputWorkspace", "",
+                                                      Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");
 
@@ -88,23 +88,21 @@ void IntegratePeaksMD2::init() {
       "If false, do not integrate if the outer radius is not on a detector.");
 
   declareProperty("AdaptiveQBackground", false,
-                  "Default is false.   If true, all background values"
-                  "vary on a line so that they are"
-                  "background plus AdaptiveQMultiplier multiplied"
-                  "by the magnitude of Q at the peak center so each peak has a "
-                  "different integration radius.  Q includes the 2*pi factor.");
+                  "Default is false.   If true, "
+                  "BackgroundOuterRadius + AdaptiveQMultiplier * |Q|"
+                  "BackgroundInnerRadius + AdaptiveQMultiplier * |Q|");
 
   declareProperty("Cylinder", false,
                   "Default is sphere.  Use next five parameters for cylinder.");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("CylinderLength", 0.0,
-                                             Direction::Input),
+      make_unique<PropertyWithValue<double> >("CylinderLength", 0.0,
+                                              Direction::Input),
       "Length of cylinder in which to integrate (in the same units as the "
       "workspace).");
 
-  declareProperty(make_unique<PropertyWithValue<double>>("PercentBackground",
-                                                         0.0, Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double> >(
+                      "PercentBackground", 0.0, Direction::Input),
                   "Percent of CylinderLength that is background (20 is 20%)");
 
   std::vector<std::string> peakNames =
@@ -132,9 +130,8 @@ void IntegratePeaksMD2::init() {
       "Save (Optionally) as Isaw peaks file with profiles included");
 
   declareProperty("AdaptiveQMultiplier", 0.0,
-                  "Peak integration radius varies on a line so that it is "
-                  "PeakRadius plus this value multiplied "
-                  "by the magnitude of Q at the peak center so each peak has a "
+                  "PeakRadius + AdaptiveQMultiplier * |Q| "
+                  "so each peak has a "
                   "different integration radius.  Q includes the 2*pi factor.");
 
   declareProperty(
@@ -168,7 +165,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   try {
     runMaskDetectors(inPeakWS, "Tube", "edges");
     runMaskDetectors(inPeakWS, "Pixel", "edges");
-  } catch (...) {
+  }
+  catch (...) {
     g_log.error("Can't execute MaskBTP algorithm for this instrument to set "
                 "edge for IntegrateIfOnEdge option");
   }
@@ -338,9 +336,17 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         lenQpeak = std::sqrt(lenQpeak);
       }
       double adaptiveRadius = adaptiveQMultiplier * lenQpeak + PeakRadius;
-      if (adaptiveRadius <= 0.0)
+      if (adaptiveRadius <= 0.0) {
         g_log.error() << "Error: Radius for integration sphere of peak " << i
                       << " is negative =  " << adaptiveRadius << '\n';
+        adaptiveRadius = 0.;
+        p.setIntensity(0.0);
+        p.setSigmaIntensity(0.0);
+        PeakRadiusVector[i] = 0.0;
+        BackgroundInnerRadiusVector[i] = 0.0;
+        BackgroundOuterRadiusVector[i] = 0.0;
+        continue;
+      }
       PeakRadiusVector[i] = adaptiveRadius;
       BackgroundInnerRadiusVector[i] =
           adaptiveQBackgroundMultiplier * lenQpeak + BackgroundInnerRadius;
@@ -526,7 +532,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         findpeaks->setProperty<int>("MaxGuessedPeakWidth", 4);
         try {
           findpeaks->executeAsChildAlg();
-        } catch (...) {
+        }
+        catch (...) {
           g_log.error("Can't execute FindPeaks algorithm");
           continue;
         }
@@ -673,7 +680,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     IAlgorithm_sptr alg;
     try {
       alg = createChildAlgorithm("SaveIsawPeaks", -1, -1, false);
-    } catch (Exception::NotFoundError &) {
+    }
+    catch (Exception::NotFoundError &) {
       g_log.error("Can't locate SaveIsawPeaks algorithm");
       throw;
     }
@@ -809,7 +817,7 @@ void IntegratePeaksMD2::exec() {
 double f_eval2(double x, void *params) {
   boost::shared_ptr<const API::CompositeFunction> fun =
       *reinterpret_cast<boost::shared_ptr<const API::CompositeFunction> *>(
-          params);
+           params);
   FunctionDomain1DVector domain(x);
   FunctionValues yval(domain);
   fun->function(domain, yval);
