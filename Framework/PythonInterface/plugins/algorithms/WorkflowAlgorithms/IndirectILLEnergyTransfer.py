@@ -1,7 +1,5 @@
-#pylint: disable=no-init,too-many-instance-attributes,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
-import os.path
 import numpy as np
 from mantid.simpleapi import *  # noqa
 from mantid.kernel import *  # noqa
@@ -15,7 +13,8 @@ def _ws_or_none(s):
 
 def extract_workspace(ws, ws_out, x_start, x_end):
     """
-    Extracts a part of the workspace
+    Extracts a part of the workspace and
+    shifts the x-axis to start from 0
     @param  ws      :: input workspace name
     @param  ws_out  :: output workspace name
     @param  x_start :: start bin of workspace to be extracted
@@ -86,7 +85,7 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
 
     def setUp(self):
 
-        self._run_file = self.getPropertyValue('Run').replace(',','+')
+        self._run_file = self.getPropertyValue('Run').replace(',','+') # automatic summing
         self._analyser = self.getPropertyValue('Analyser')
         self._map_file = self.getPropertyValue('MapFile')
         self._reflection = self.getPropertyValue('Reflection')
@@ -94,6 +93,11 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
         self._red_ws = self.getPropertyValue('OutputWorkspace')
 
     def _load_map_file(self):
+        """
+        Loads the detector grouping map file
+        @throws RuntimeError :: if neither the user defined
+                                nor the default file is not found
+        """
 
         self._instrument_name = self._instrument.getName()
         self._analyser = self.getPropertyValue('Analyser')
@@ -115,7 +119,7 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
 
     def _mask(self, ws, xstart, xend):
         """
-        Calls MaskBins twice, for masking the first and last bins of a workspace
+        Masks the first and last bins
         @param   ws           :: input workspace name
         @param   xstart       :: MaskBins between x[0] and x[xstart]
         @param   xend         :: MaskBins between x[xend] and x[-1]
@@ -131,6 +135,10 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
             MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=x_values[xend + 1], XMax=x_values[-1])
 
     def _convert_to_energy(self, ws):
+        """
+        Converts the x-axis from raw channel number to energy transfer
+        @param ws :: input workspace name
+        """
 
         x = mtd[ws].readX(0)
         size = mtd[ws].blocksize()
@@ -144,11 +152,16 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
             formula = '(x-{0})*{1}'.format(mid-0.5, 1. / scale)
             self.log().notice('The only energy value is 0 meV. Ignore the x-axis.')
 
-        self.log().information('Energy convertsion formula is: {0}'.format(formula))
+        self.log().information('Energy conversion formula is: {0}'.format(formula))
 
         ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=formula, AxisUnits = 'DeltaE')
 
     def _monitor_max_range(self, ws):
+        """
+        Gives the bin indices of the first and last peaks in the monitor
+        @param ws :: input workspace name
+        return    :: [xmin,xmax]
+        """
 
         y = mtd[ws].readY(0)
         size = len(y)
@@ -158,6 +171,11 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
         return imin, imax
 
     def _monitor_zero_range(self, ws):
+        """
+        Gives the bin indices of the first and last non-zero bins in monitor
+        @param ws :: input workspace name
+        return    :: [start,end]
+        """
 
         y = mtd[ws].readY(0)
         nonzero = np.argwhere(y!=0)
@@ -166,6 +184,10 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
         return start,end
 
     def _setup_run_properties(self):
+        """
+        Sets up the doppler properties, and deduces the reduction type
+        @throws RuntimeError :: If anyone of the 3 required entries is missing
+        """
 
         run = mtd[self._ws].getRun()
 
@@ -203,12 +225,10 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
             if i == 0:
                 LoadILLIndirect(Filename=item,OutputWorkspace=self._red_ws)
             if i > 0:
-                runnumber = os.path.basename(item)
-                LoadILLIndirect(Filename=item, OutputWorkspace=runnumber)
+                runnumber = os.path.basename(item).split('.')[0]
+                LoadILLIndirect(Filename=item, OutputWorkspace='__' + runnumber)
                 MergeRuns(InputWorkspaces=[self._red_ws,runnumber],OutputWorkspace=self._red_ws)
                 DeleteWorkspace(runnumber)
-
-        # Load(Filename=self._run_file, OutputWorkspace=self._red_ws)
 
         self._instrument = mtd[self._red_ws].getInstrument()
 
@@ -227,8 +247,8 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
         if self._mirror_sense == 14:      # two wings, extract left and right
 
             size = mtd[self._ws].blocksize()
-            left = run + '_left'
-            right = run + '_right'
+            left = self._ws + '_left'
+            right = self._ws + '_right'
             extract_workspace(self._ws, left, 0, int(size/2))
             extract_workspace(self._ws, right, int(size/2), size)
             DeleteWorkspace(self._ws)
@@ -244,6 +264,10 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
         self.setProperty('OutputWorkspace',self._red_ws)
 
     def _reduce_one_wing(self, ws):
+        """
+        Reduces given workspace assuming it is one wing already
+        @param ws :: input workspace name
+        """
 
         mon = '__mon_'+ws
 
@@ -268,6 +292,11 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
         ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='Theta', EMode='Indirect')
 
     def _normalise_to_monitor(self, ws, mon):
+        """
+        Normalises the ws to the monitor dependent on the reduction type
+        @param ws :: input workspace name
+        @param ws :: ws's monitor
+        """
 
         if self._reduction_type == 'QENS':
             # Normalise bin-to-bin
@@ -304,7 +333,8 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
             DeleteWorkspace(i2)
             DeleteWorkspace(__integral)
 
-            ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0, NaNError=0)
+        ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
+                             NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0)
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLEnergyTransfer)
