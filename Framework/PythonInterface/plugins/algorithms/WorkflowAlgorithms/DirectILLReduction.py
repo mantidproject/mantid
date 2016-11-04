@@ -49,58 +49,96 @@ REDUCTION_TYPE_VANADIUM = 'Vanadium'
 
 temp_workspaces = []
 
-# Name generators for temporary workspaces.
+def namelogging(method):
+    '''
+    Decorator used within the NameSource class.
+    '''
+    def wrapper(self):
+        name = method(self)
+        self._names.add(name)
+    return wrapper
+
+# Name generator for temporary workspaces.
 # TODO We may want to hide these and delete afterwards.
-def backgroundWorkspaceName(token):
-    return token + '_bkg'
+class NameSource:
 
-def backgroundSubtractedWorkspaceName(token):
-    return token + '_bkgsubtr'
+    def __init__(self, prefix):
+        self._names = set()
+        self._prefix = prefix
 
-def badDetectorWorkspaceName(token):
-    return token + '_mask'
+    @namelogging
+    def background(self):
+        return self._prefix + '_bkg'
 
-def detectorEfficiencyCorrectedWorkspaceName(token):
-    return token + '_deteff'
+    @namelogging
+    def backgroundSubtracted(self):
+        return self._prefix + '_bkgsubtr'
 
-def ecSubtractedWorkspaceName(token):
-    return token + '_ecsubtr'
+    @namelogging
+    def badDetector(self):
+        return self._prefix + '_mask'
 
-def eiCalibratedWorkspaceName(token):
-    return token + '_ecalib'
+    @namelogging
+    def detectorEfficiencyCorrected(self):
+        return self._prefix + '_deteff'
 
-def energyConvertedWorkspaceName(token):
-    return token +'_econv'
+    @namelogging
+    def ecSubtracted(self):
+        return self._prefix + '_ecsubtr'
 
-def eppWorkspaceName(token):
-    return token + '_epp'
+    @namelogging
+    def eiCalibrated(self):
+        return self._prefix + '_ecalib'
 
-def incidentEnergyWorkspaceName(token):
-    return token + '_ie'
+    @namelogging
+    def energyConverted(self):
+        return self._prefix +'_econv'
 
-def kikfConvertedWorkspaceName(token):
-    return token + '_kikf'
+    @namelogging
+    def epp(self):
+        return self._prefix + '_epp'
 
-def maskedWorkspaceName(token):
-    return token + '_masked'
+    def getNames(self):
+        '''
+        Returns a set of all names already generated.
+        '''
+        return self._names
 
-def monitorEppWorkspaceName(token):
-    return token + '_monepp'
+    @namelogging
+    def incident(self):
+        return self._prefix + '_ie'
 
-def monitorWorkspaceName(token):
-    return token + '_monitors'
+    @namelogging
+    def kikf(self):
+        return self._prefix + '_kikf'
 
-def normalisedWorkspaceName(token):
-    return token + '_norm'
+    @namelogging
+    def masked(self):
+        return self._prefix + '_masked'
 
-def rawWorkspaceName(token):
-    return token + '_raw'
+    @namelogging
+    def monitor(self):
+        return self._prefix + '_monepp'
 
-def rebinnedWorkspaceName(token):
-    return token + '_rebinned'
+    @namelogging
+    def monitor(self):
+        return self._prefix + '_monitors'
 
-def vanadiumNormalisedWorkspaceName(token):
-    return token + '_vnorm'
+    @namelogging
+    def normalised(self):
+        return self._prefix + '_norm'
+
+    @namelogging
+    def raw(self):
+        return self._prefix + '_raw'
+
+    @namelogging
+    def rebinned(self):
+        return self._prefix + '_rebinned'
+
+    @namelogging
+    def vanadium(self):
+        return self._prefix + '_vnorm'
 
 def guessIncidentEnergyWorkspaceName(eppWorkspace):
     # This can be considered a bit of a hack.
@@ -126,13 +164,17 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
         reductionType = self.getProperty(PROP_REDUCTION_TYPE).value
-        identifier = self.getProperty(PROP_OUTPUT_PREFIX).value
+        workspaceNamePrefix = self.getProperty(PROP_OUTPUT_PREFIX).value
+        controlMode = self.getProperty(PROP_CONTROL_MODE).value
+        if controlMode:
+            workspaceNamePrefix = '__' + workspaceNamePrefix
+        workspaceNames = NameSource(workspaceNamePrefix)
         indexType = self.getProperty(PROP_INDEX_TYPE).value
 
         if self.getProperty(PROP_INPUT_FILE).value:
             # Load data
             inputFilename = self.getProperty(PROP_INPUT_FILE).value
-            outWs = rawWorkspaceName(identifier)
+            outWs = workspaceNames.raw()
             # The variable 'workspace' shall hold the current 'main' data
             # throughout the algorithm.
             workspace = Load(Filename=inputFilename,
@@ -157,7 +199,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # Fit background regardless of where it actually comes from.
         if bkgOutWs or not bkgInWs:
             if not bkgOutWs:
-                bkgOutWs = backgroundWorkspaceName(identifier)
+                bkgOutWs = workspaceNames.background()
             bkgWindow = self.getProperty(PROP_FLAT_BACKGROUND_WINDOW).value
             bkgScaling = self.getProperty(PROP_FLAT_BACKGROUND_SCALING).value
             bkgWorkspace = CalculateFlatBackground(InputWorkspace=workspace,
@@ -177,7 +219,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             if bkgWorkspace and self.getProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE).value:
                 self.setProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE, bkgOutWs)
         # Subtract time-independent background
-        outWs = backgroundSubtractedWorkspaceName(identifier)
+        outWs = workspaceNames.backgroundSubtracted()
         workspace = Minus(LHSWorkspace=workspace,
                           RHSWorkspace=bkgWorkspace,
                           OutputWorkspace=outWs)
@@ -191,9 +233,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # came from outside. Otherwise make our own.
         if eppOutWs or not eppInWs:
             if not eppOutWs:
-                eppOutWs = eppWorkspaceName(identifier)
+                eppOutWs = workspaceNames.epp()
             if not monitorEppOutWs:
-                monitorEppOutWs = monitorEppWorkspaceName(identifier)
+                monitorEppOutWs = workspaceNames.monitorEpp()
             eppWorkspace = FindEPP(InputWorkspace = workspace,
                                    OutputWorkspace = eppOutWs)
             monitorEppWorkspace = FindEPP(InputWorkspace = monitorWorkspace,
@@ -215,7 +257,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
         # Identify bad detectors & include user mask
         userMask = self.getProperty(PROP_USER_MASK).value
-        outWs = badDetectorWorkspaceName(identifier)
+        outWs = workspaceNames.badDetector()
         badDetWorkspace, nFailures = FindDetectorsOutsideLimits(InputWorkspace=workspace,
                                                                 OutputWorkspace=outWs)
         def mask(maskWs, i):
@@ -226,7 +268,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             if i in userMask:
                 mask(badDetWorkspace, i)
         # Mask detectors
-        outWs = maskedWorkspaceName(identifier)
+        outWs = workspaceNames.masked()
         workspace = CloneWorkspace(InputWorkspace=workspace,
                                    OutputWorkspace=outWs)
         MaskDetectors(Workspace=workspace,
@@ -263,12 +305,12 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                      MonitorEppTable=monitorEppWorkspace,
                                      Monitor=self.getProperty(PROP_MONITOR_INDEX).value,
                                      PulseInterval=pulseInterval)
-                eiWsName = incidentEnergyWorkspaceName(identifier)
+                eiWsName = workspaceNames.incidentEnergy()
                 CreateSingleValuedWorkspace(OutputWorkspace=eiWsName,
                                             DataValue=energy)
             # Update incident energy
             energy = mtd[eiWsName].readY(0)[0]
-            outWs = eiCalibratedWorkspaceName(identifier)
+            outWs = workspaceNames.eiCalibrated()
             workspace = CloneWorkspace(InputWorkspace=workspace,
                                        OutputWorkspace=outWs)
             AddSampleLog(Workspace=workspace,
@@ -291,7 +333,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         normalisationMethod = self.getProperty(PROP_NORMALISATION).value
         if normalisationMethod:
             if normalisationMethod == NORM_METHOD_MONITOR:
-                outWs = normalisedWorkspaceName(identifier)
+                outWs = workspaceNames.normalised()
                 eppRow = monitorEppWorkspace.row(monitorIndex)
                 sigma = eppRow['Sigma']
                 centre = eppRow['PeakCentre']
@@ -304,7 +346,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                            IntegrationRangeMin=begin,
                                                            IntegrationRangeMax=end)
             elif normalisationMethod == NORM_METHOD_TIME:
-                outWs = normalisedWorkspaceName(identifier)
+                outWs = workspaceNames.normalised()
                 tempWsName = '__actual_time_for_' + outWs
                 time = CreateSingleValuedWorkspace(OutputWorkspace=tempWsName,
                                                    DataValue=inWs.getLogData('actual_time').value)
@@ -317,7 +359,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
         # Reduction for empty can and cadmium ends here.
         if reductionType == REDUCTION_TYPE_CD or reductionType == REDUCTION_TYPE_EC:
-            self._finalize(workspace)
+            self._finalize(workspace, workspaceNames)
             return
 
         # Continuing with vanadium and sample reductions.
@@ -325,7 +367,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # Empty can subtraction
         ecWs = self.getProperty(PROP_EC_WORKSPACE).value
         if ecWs:
-            outWs = ecSubtractedWorkspaceName(identifier)
+            outWs = workspaceNames.ecSubtracted()
             cdWs = self.getProperty(PROP_CD_WORKSPACE).value
             transmission = self.getProperty(PROP_TRANSMISSION).value
             tempWsName1 = '__transmission_for_' + outWs
@@ -373,7 +415,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             workspace = ComputeCalibrationCoefVan(VanadiumWorkspace=workspace,
                                                   EPPTable=eppWorkspace,
                                                   OutputWorkspace=outWs)
-            self._finalize(workspace)
+            self._finalize(workspace, workspaceNames)
             return
 
         # Continuing with sample reduction.
@@ -381,20 +423,20 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # Vanadium normalisation
         vanadiumNormFactors = self.getProperty(PROP_VANADIUM_WORKSPACE).value
         if vanadiumNormFactors:
-            outWs = vanadiumNormalisedWorkspaceName(identifier)
+            outWs = workspaceNames.vanadiumNormalised()
             workspace = Divide(LHSWorkspace=workspace,
                                RHSWorkspace=vanadiumNormFactors,
                                OutputWorkspace=outWs)
 
         # Convert units from TOF to energy
-        outWs = energyConvertedWorkspaceName(identifier)
+        outWs = workspaceNames.energyConverted()
         workspace = ConvertUnits(InputWorkspace = workspace,
                                  OutputWorkspace = outWs,
                                  Target = 'DeltaE',
                                  EMode = 'Direct')
 
         # KiKf conversion
-        outWs = kikfConvertedWorkspaceName(identifier)
+        outWs = workspaceNames.kikfConverted()
         workspace = CorrectKiKf(InputWorkspace = workspace,
                                 OutputWorkspace = outWs)
 
@@ -402,19 +444,19 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # TODO automatize binning in w. Do we need rebinning in q as well?
         params = self.getProperty(PROP_BINNING_W).value
         if params:
-            outWs = rebinnedWorkspaceName(identifier)
+            outWs = workspaceNames.rebinned()
             workspace = Rebin(InputWorkspace = workspace,
                               OutputWorkspace = outWs,
                               Params = params)
 
         # Detector efficiency correction
-        outWs = detectorEfficiencyCorrectedWorkspaceName(identifier)
+        outWs = workspaceNames.detectorEfficiencyCorrected()
         workspace = DetectorEfficiencyCorUser(InputWorkspace = workspace,
                                               OutputWorkspace = outWs)
 
         # TODO Self-shielding corrections
 
-        self._finalize(workspace)
+        self._finalize(workspace, workspaceNames)
 
     def PyInit(self):
         # TODO Property validation.
@@ -558,35 +600,12 @@ class DirectILLReduction(DataProcessorAlgorithm):
                     return j
             raise RuntimeError('No workspace index found for detector id ' + i)
 
-    def _finalize(self, outputWorkspace):
+    def _finalize(self, outputWorkspace, workspaceNames):
         self.setProperty(PROP_OUTPUT_WORKSPACE, outputWorkspace)
 
         if not self.getProperty(PROP_CONTROL_MODE).value:
-            token = self.getProperty(PROP_OUTPUT_PREFIX).value
-            # TODO: what can we delete earlier from this list?
-            for ws in [backgroundWorkspaceName(token),
-                       backgroundSubtractedWorkspaceName(token),
-                       badDetectorWorkspaceName(token),
-                       detectorEfficiencyCorrectedWorkspaceName(token),
-                       ecSubtractedWorkspaceName(token),
-                       eiCalibratedWorkspaceName(token),
-                       energyConvertedWorkspaceName(token),
-                       eppWorkspaceName(token),
-                       incidentEnergyWorkspaceName(token),
-                       kikfConvertedWorkspaceName(token),
-                       maskedWorkspaceName(token),
-                       monitorEppWorkspaceName(token),
-                       monitorWorkspaceName(token),
-                       normalisedWorkspaceName(token),
-                       rawWorkspaceName(token),
-                       rebinnedWorkspaceName(token),
-                       vanadiumNormalisedWorkspaceName(token),
-                       'EPPfit_NormalisedCovarianceMatrix',
-                       'EPPfit_Parameters',
-                       'normFactor',
-                       'workspace',
-                       'dectectorWorkspace',
-                       'monitorWorkspace']:
+            # TODO: what can we delete earlier from this set?
+            for ws in workspaceNames.getNames():
                 if mtd.doesExist(ws):
                     DeleteWorkspace(Workspace = ws)
 
