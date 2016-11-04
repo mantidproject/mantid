@@ -4,6 +4,7 @@ from abc import ABCMeta, abstractmethod
 from six import add_metaclass
 
 from isis_powder import common
+from isis_powder import focus
 
 # This class provides common hooks for instruments to override
 # if they want to define the behaviour of the hook. Otherwise it
@@ -65,8 +66,8 @@ class AbstractInst(object):
         if input_ext is not None:
             self.default_input_ext = input_ext
 
-        return common.focus(instrument=self, number=run_number,
-                            attenuate=do_attenuation, van_norm=do_van_normalisation)
+        return focus.focus(instrument=self, number=run_number,
+                           attenuate=do_attenuation, van_norm=do_van_normalisation)
 
     def create_empty_calibration_by_names(self, calibration_numbers, output_file_name, group_names=None):
 
@@ -200,7 +201,6 @@ class AbstractInst(object):
         #  TODO fix this documentation when we know what alg_range and save_range is used for
         """
         Gets the instruments ranges for running the algorithm and saving
-        @param self: The instrument to query for this information
         @param instrument: The version of the instrument if applicable
         @return: The algorithm and save range in that order
         """
@@ -238,13 +238,13 @@ class AbstractInst(object):
         """
         raise NotImplementedError("Create calibration from a silicon run is not yet implemented for this instrument")
 
-    def _get_monitor(self, run_number, input_dir, spline_terms):
+    def _normalise_ws(self, ws_to_correct, monitor_ws=None, spline_terms=20):
         return _empty_hook_return_none()
 
     def _get_monitor_spectra(self, run_number):
         return _empty_hook_return_empty_string()
 
-    def _PEARL_use_full_path(self):
+    def _PEARL_filename_is_full_path(self):
         """
         Only used by PEARL to maintain compatibility with old routines code
         @return: Whether the "filename" is actually a full path
@@ -263,9 +263,29 @@ class AbstractInst(object):
     def _skip_appending_cycle_to_raw_dir(self):
         return False
 
+    def _mask_noisy_detectors(self, vanadium_run):
+        pass
 
+    def _calculate_solid_angle_efficiency_corrections(self, vanadium_ws):
+        return _empty_hook_return_none()
+
+    def _do_tof_rebinning_focus(self, input_workspace):
+        return input_workspace
+
+    def _focus_load(self, run_number, input_workspace, perform_vanadium_norm):
+        return _empty_hook_return_none()
+
+    def _process_output(self, processed_spectra, run_number, attenuate=False):
+        return _empty_hook_return_none()
+
+    def _subtract_sample_empty(self, input_sample):
+        return input_sample
+
+    def _apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_ws_path):
+        return ws_to_correct
 # ----- Private Implementation ----- #
 # These should only be called by the abstract instrument class
+
 
 def _append_dot_to_ext(ext):
     if not ext.startswith('.'):

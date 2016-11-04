@@ -15,13 +15,15 @@ import cry_vana
 
 def focus_all(EXPR_FILE, samplelistTexte, scale=0, NoVabs=False, NoSAC=False, Eff=True, Norm=True,
               Write_ExtV=True):
+    import pydevd
+    pydevd.settrace('localhost', port=23000, stdoutToServer=True, stderrToServer=True)
     if scale == 0:
         scale = float(EXPR_FILE.scale)
     # === Norm boolean flag used to Optionally correct to a Vana ===
     if Norm:
         print 'Existing Vana Status:' + EXPR_FILE.ExistV
         # SAC/EFF corrections loads the Vana
-        load_sac_eff(EXPR_FILE, NoSAC=NoSAC, Eff=Eff)
+        load_sac_eff(EXPR_FILE, NoSAC=NoSAC, Eff=Eff)  # Done - Loads "corr"
         if EXPR_FILE.ExistV == "load":
             for i in EXPR_FILE.bankList:
                 spec = i - 1
