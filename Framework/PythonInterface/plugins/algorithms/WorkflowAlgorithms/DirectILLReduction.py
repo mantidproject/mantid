@@ -538,8 +538,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
         """
         issues = dict()
 
+        fileGiven = not self.getProperty(PROP_INPUT_FILE).isDefault()
+        wsGiven = not self.getProperty(PROP_INPUT_WORKSPACE).isDefault()
         # Validate an input exists
-        if not self.getProperty(PROP_INPUT_FILE).value and not self.getProperty(PROP_INPUT_WORKSPACE).value:
+        if fileGiven == wsGiven:
             issues[PROP_INPUT_FILE] = 'Must give either an input file or an input workspace.'
 
         return issues
