@@ -87,14 +87,6 @@ class ABINS(PythonAlgorithm):
         self.declareProperty(name="SumContributions", defaultValue=False,
                              doc="Sum the partial dynamical structure factors into a single workspace.")
 
-        # self.declareProperty(name="Overtones", defaultValue=False,
-        #                      doc="In case it is set to True and sample has a form of  "
-        #                          "Powder workspaces for overtones will be calculated.")
-        #
-        # self.declareProperty(name="Combinations", defaultValue=False,
-        #                      doc="In case it is set to True and sample has a form of  Powder "
-        #                          "workspaces for full quantum order effects will be calculated.")
-
         self.declareProperty(name="ScaleByCrossSection", defaultValue='Incoherent',
                              validator=StringListValidator(['Total', 'Incoherent', 'Coherent']),
                              doc="Scale the partial dynamical structure factors by the scattering cross section.")
@@ -240,12 +232,6 @@ class ABINS(PythonAlgorithm):
         @return: workspaces for list of atoms types, S for the particular type of atom
         """
         s_data_extracted = s_data.extract()
-
-        # if self._evaluate_overtones:
-        #     s_total_dim = AbinsConstants.fundamentals_dim + AbinsConstants.higher_order_quantum_effects_dim
-        # else:
-        #     s_total_dim = AbinsConstants.fundamentals_dim
-
         freq_dic = s_data_extracted["frequencies"]
         max_size = freq_dic["order_%s" % AbinsConstants.fundamentals].size
         items = freq_dic.keys()
@@ -348,13 +334,7 @@ class ABINS(PythonAlgorithm):
             partial_wrk_names = []
 
             for n in range(dim):
-                # if self._evaluate_overtones and self._quantum_order_events_num:
-                seed = "quantum_order_effect_%s" % (n + 1)
-                # elif n == 0:
-                #     seed = "fundamentals"
-                # else:  # here we count from 1 because n=1 is fundamental, n=2 first overtone etc....
-                #     seed = "overtone_%s" % n
-
+                seed = "quantum_event_%s" % (n + 1)
                 wrk_name = workspace + "_" + seed
                 partial_wrk_names.append(wrk_name)
                 temp_freq, temp_s = self._rearrange_freq(freq=freq[n], s_array=s_points[n])
@@ -598,7 +578,6 @@ class ABINS(PythonAlgorithm):
         self._instrument = self.getProperty("Instrument").value
         self._atoms = self.getProperty("Atoms").value
         self._sum_contributions = self.getProperty("SumContributions").value
-        # self._evaluate_overtones = self.getProperty("Overtones").value
 
         # conversion from str to int
         self._num_quantum_order_events = int(self.getProperty("QuantumOrderEventsNumber").value)
