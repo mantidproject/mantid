@@ -185,10 +185,8 @@ public:
         MantidQt::SliceViewer::createCoordinateTransform(eventWorkspace, m_dimX,
                                                          m_dimY);
     m_coordinateTransform->transform(coords, m_dimX, m_dimY);
-    double target = 2.20767;
-    bool skewCorrect = skewWithinTolerance(coords[0], target);
-
-    // Assert
+    double expectedValue = 0.633975;
+    bool skewCorrect = skewWithinTolerance(coords[0], expectedValue);
     TSM_ASSERT("Coords not skewed within limits", skewCorrect);
   }
 
