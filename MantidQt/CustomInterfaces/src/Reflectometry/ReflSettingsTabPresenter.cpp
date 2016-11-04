@@ -55,8 +55,8 @@ void ReflSettingsTabPresenter::notify(IReflSettingsTabPresenter::Flag flag) {
 */
 void ReflSettingsTabPresenter::setInstrumentName(const std::string instName) {
   m_currentInstrumentName = instName;
-  m_view->setPolarisationOptionsEnabled(
-    instName != "INTER" && instName != "SURF");
+  m_view->setPolarisationOptionsEnabled(instName != "INTER" &&
+                                        instName != "SURF");
 }
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
