@@ -75,7 +75,6 @@ SANSAddFiles::SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets)
 SANSAddFiles::~SANSAddFiles() {
   try {
     ConfigService::Instance().removeObserver(m_newOutDir);
-    saveSettings();
   } catch (...) {
     // we've cleaned up the best we can, move on
   }
@@ -122,8 +121,6 @@ void SANSAddFiles::initLayout() {
   connect(m_SANSForm->remove_Btn, SIGNAL(clicked()), this,
           SLOT(removeSelected()));
 
-  readSettings();
-
   setToolTips();
 
   setOutDir(ConfigService::Instance().getString("defaultsave.directory"));
@@ -139,27 +136,8 @@ void SANSAddFiles::initLayout() {
   connect(m_SANSForm->overlayCheckBox, SIGNAL(stateChanged(int)), this,
           SLOT(onStateChangedForOverlayCheckBox(int)));
 }
-/**
- * Restore previous input
- */
-void SANSAddFiles::readSettings() {
-  QSettings value_store;
-  value_store.beginGroup("CustomInterfaces/AddRuns");
 
-  m_SANSForm->loadSeparateEntries->setChecked(
-      value_store.value("Minimise_memory", false).toBool());
 
-  value_store.endGroup();
-}
-/**
- * Save input for future use
- */
-void SANSAddFiles::saveSettings() {
-  QSettings value_store;
-  value_store.beginGroup("CustomInterfaces/AddRuns");
-  value_store.setValue("Minimise_memory",
-                       m_SANSForm->loadSeparateEntries->isChecked());
-}
 /** sets tool tip strings for the components on the form
 */
 void SANSAddFiles::setToolTips() {
@@ -168,8 +146,6 @@ void SANSAddFiles::setToolTips() {
                                         "directory");
   m_SANSForm->summedPath_Btn->setToolTip(
       "Set the directories used both for loading and\nsaving run data");
-  m_SANSForm->loadSeparateEntries->setToolTip(
-      "Where possible load a minimum amount into\nmemory at any time");
 
   m_SANSForm->add_Btn->setToolTip("Click here to do the sum");
   m_SANSForm->clear_Btn->setToolTip("Clear the run files to sum box");
@@ -313,8 +289,7 @@ void SANSAddFiles::runPythonAddFiles() {
   code_torun.truncate(code_torun.length() - 1);
   code_torun += ")";
 
-  QString lowMem =
-      m_SANSForm->loadSeparateEntries->isChecked() ? "True" : "False";
+  QString lowMem = "True";
   code_torun += ", lowMem=" + lowMem;
 
   QString overlay = m_SANSForm->overlayCheckBox->isChecked() ? "True" : "False";
