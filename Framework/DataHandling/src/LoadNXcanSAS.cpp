@@ -450,7 +450,6 @@ void loadTransmissionData(H5::Group &transmission,
   workspace->getAxis(0)->unit() =
       Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 }
-
 }
 
 namespace Mantid {
@@ -590,12 +589,13 @@ void LoadNXcanSAS::loadTransmission(H5::Group &entry, const std::string &name) {
     propertyName = "TransmissionCanWorkspace";
   const std::string doc = "The transmission workspace";
 
-  declareProperty(Kernel::make_unique<Mantid::API::WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
-                  propertyName, title, Direction::Output),
-                  doc);
+  declareProperty(
+      Kernel::make_unique<
+          Mantid::API::WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
+          propertyName, title, Direction::Output),
+      doc);
   setProperty(propertyName, workspace);
 }
-
 
 } // namespace DataHandling
 } // namespace Mantid
