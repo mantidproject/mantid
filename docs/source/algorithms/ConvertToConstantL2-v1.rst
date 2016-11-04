@@ -19,7 +19,7 @@ So far this has only be tested on the ILL IN5 instrument.
 
 Note
 ###################################
-This algorithm is intended for visualisaion only. It is not recommended as part of any reduction process.
+This algorithm is intended for visualisation only. It is not recommended as part of any reduction process.
 
 **Example - Add multiple sample logs**
 
@@ -53,7 +53,7 @@ Output:
     Detector 4 distance from origin: 4.283
     Detector 5 distance from origin: 4.278
     After conversion:
-    Monitor 0 distance from origin: 4.000
+    Monitor 0 distance from origin: 0.500
     Detector 1 distance from origin: 4.000
     Detector 2 distance from origin: 4.000
     Detector 3 distance from origin: 4.000
