@@ -35,7 +35,7 @@ PROP_NORMALISATION                    = 'Normalisation'
 PROP_OUTPUT_EPP_WORKSPACE             = 'OutputEPPWorkspace'
 PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE = 'OutputFlatBackgroundWorkspace'
 PROP_OUTPUT_MONITOR_EPP_WORKSPACE     = 'OutputMonitorEPPWorkspace'
-PROP_OUTPUT_SUFFIX                    = 'OutputPrefix'
+PROP_OUTPUT_PREFIX                    = 'OutputPrefix'
 PROP_OUTPUT_WORKSPACE                 = 'OutputWorkspace'
 PROP_REDUCTION_TYPE                   = 'ReductionType'
 PROP_TRANSMISSION                     = 'Transmission'
@@ -126,7 +126,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
         reductionType = self.getProperty(PROP_REDUCTION_TYPE).value
-        identifier = self.getProperty(PROP_OUTPUT_SUFFIX).value
+        identifier = self.getProperty(PROP_OUTPUT_PREFIX).value
         indexType = self.getProperty(PROP_INDEX_TYPE).value
 
         if self.getProperty(PROP_INPUT_FILE).value:
@@ -421,10 +421,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                      '',
                                                      optional=PropertyMode.Optional,
                                                      direction=Direction.Input))
-        self.declareProperty(PROP_OUTPUT_SUFFIX,
+        self.declareProperty(PROP_OUTPUT_PREFIX,
                              '',
                              direction=Direction.Input,
-                             doc='String to use as postfix in output workspace names')
+                             doc='String to use as prefix in output workspace names')
         self.declareProperty(PROP_CONTROL_MODE,
                              False,
                              direction=Direction.Input,
@@ -562,7 +562,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         self.setProperty(PROP_OUTPUT_WORKSPACE, outputWorkspace)
 
         if not self.getProperty(PROP_CONTROL_MODE).value:
-            token = self.getProperty(PROP_OUTPUT_SUFFIX).value
+            token = self.getProperty(PROP_OUTPUT_PREFIX).value
             # TODO: what can we delete earlier from this list?
             for ws in [backgroundWorkspaceName(token),
                        backgroundSubtractedWorkspaceName(token),
