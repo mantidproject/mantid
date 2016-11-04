@@ -549,6 +549,9 @@ private:
 
   /// Check if next/previous run should be appended
   void checkAppendingRun(const int direction);
+
+  /// Set the Grouping and Data Analysis tabs enabled/disabled
+  void setAnalysisTabsEnabled(const bool enabled);
 };
 }
 }
