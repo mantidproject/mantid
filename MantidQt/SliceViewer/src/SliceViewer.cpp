@@ -2379,7 +2379,6 @@ void SliceViewer::autoRebinIfRequired() { // probably rename this if forcing it
 /** NON ORTHOGONAL STUFF **/
 
 void SliceViewer::setNonOrthogonalbtn() {
-  bool isNonOrthogonalWS = API::requiresSkewMatrix(m_ws);
   bool canShowSkewedWS = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
   ui.btnNonOrthogonalToggle->setDisabled(!canShowSkewedWS);
   // Orthogonal Overlay axes calculated and appear.

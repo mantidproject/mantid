@@ -175,15 +175,13 @@ void NonOrthogonalOverlay::calculateTickMarks(int tickNum) { // assumes X axis
   double m_xMinVisBuffered = m_xMinVis - xBuffer;
   double m_yMaxVisBuffered = m_yMaxVis + yBuffer;
   double m_yMinVisBuffered = m_yMinVis - yBuffer;
-  double axisPointX;
-  double axisPointY;
   double percentageOfLineX =
       (((m_xMaxVisBuffered) - (m_xMinVisBuffered)) / tickNum);
   double percentageOfLineY =
       (((m_yMaxVisBuffered) - (m_yMinVisBuffered)) / tickNum);
   for (int i = 0; i <= tickNum; i++) {
-    axisPointX = (percentageOfLineX * i) + m_xMinVisBuffered;
-    axisPointY = (percentageOfLineY * i) + m_yMinVisBuffered;
+    double axisPointX = (percentageOfLineX * i) + m_xMinVisBuffered;
+    double axisPointY = (percentageOfLineY * i) + m_yMinVisBuffered;
     m_axisXPointVec.push_back(axisPointX);
     m_xNumbers.push_back(skewMatrixApply(axisPointX, m_yMinVis));
     m_xNumbers[i].setY(m_yMinVis);
