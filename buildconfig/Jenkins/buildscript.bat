@@ -28,7 +28,7 @@ echo %sha1%
 set VS_VERSION=14
 call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" amd64
 set CM_GENERATOR=Visual Studio 14 2015 Win64
-set PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%
+set PARAVIEW_DIR=%PARAVIEW_DIR%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up the location for local object store outside of the build and source
