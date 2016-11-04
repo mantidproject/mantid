@@ -37,7 +37,7 @@ void normalizeColumns(Mantid::Kernel::DblMatrix &skewMatrix) {
   std::vector<double> bNorm;
   bNorm.reserve(skewMatrix.numCols());
   for (size_t column = 0; column < numberOfColumns; ++column) {
-	  double sumOverRow(0.0);
+    double sumOverRow(0.0);
     for (size_t row = 0; row < numberOfRows; ++row) {
       sumOverRow += std::pow(skewMatrix[row][column], 2);
     }
