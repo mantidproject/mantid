@@ -29,7 +29,7 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
 
         # fundamentals and higher quantum order effects
         # if overtones:
-        #     q_dim = AbinsConstants.fundamentals_dim + AbinsConstants.higher_order_quantum_effects_dim
+        #     q_dim = AbinsConstants.fundamentals_dim + AbinsConstants.higher_order_quantum_events_dim
         #
         # # only fundamentals
         # else:

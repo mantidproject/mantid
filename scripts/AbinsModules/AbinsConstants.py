@@ -70,8 +70,8 @@ int_type = np.dtype(np.uint8)
 
 # maximum number of entries in the workspace
 total_workspace_size = int(round(AbinsParameters.max_wavenumber / float(AbinsParameters.bin_width), 0))
-higher_order_quantum_effects = 3  # number of quantum order effects taken into account
-higher_order_quantum_effects_dim = higher_order_quantum_effects
+higher_order_quantum_events = 3  # number of quantum order effects taken into account
+higher_order_quantum_events_dim = higher_order_quantum_events
 max_array_size = 1000000  # maximum size for storing frequencies for each quantum order
 
 

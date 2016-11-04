@@ -41,7 +41,7 @@ class FrequencyPowderGenerator(object):
     #
     #     if not (isinstance(quantum_order, int) and
     #             AbinsConstants.fundamentals <= quantum_order <=
-    #             AbinsConstants.higher_order_quantum_effects_dim + AbinsConstants.fundamentals_dim):
+    #             AbinsConstants.higher_order_quantum_events_dim + AbinsConstants.fundamentals_dim):
     #         raise ValueError("Improper value of quantum order effect. (quantum_order = %s)" % quantum_order)
     #
     #     new_array = fundamentals_array * quantum_order
@@ -74,7 +74,7 @@ class FrequencyPowderGenerator(object):
 
         if not (isinstance(quantum_order, int) and
                 AbinsConstants.fundamentals <= quantum_order <=
-                AbinsConstants.higher_order_quantum_effects + AbinsConstants.fundamentals):
+                AbinsConstants.higher_order_quantum_events + AbinsConstants.fundamentals):
             raise ValueError("Improper value of quantum order effect (quantum_order = %s)" % quantum_order)
 
         # frequencies for fundamentals

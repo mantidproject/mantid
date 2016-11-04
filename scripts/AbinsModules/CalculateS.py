@@ -52,7 +52,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
             raise ValueError("Object of type AbinsData was expected.")
 
         min_order = AbinsConstants.fundamentals
-        max_order = AbinsConstants.fundamentals + AbinsConstants.higher_order_quantum_effects
+        max_order = AbinsConstants.fundamentals + AbinsConstants.higher_order_quantum_events
         if isinstance(quantum_order_events_num, int) and min_order <= quantum_order_events_num <= max_order:
             self._quantum_order_events_num = quantum_order_events_num
         else:
@@ -243,7 +243,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         @param a_trace: total MSD trace for the given atom
         @param b_tensor: frequency dependent MSD tensor for the given atom
         @param b_trace: frequency dependent MSD trace for the given atom
-        @return: s for the first quantum order effect for the given atom
+        @return: s for the first quantum order event for the given atom
         """
         trace_ba = np.tensordot(a=b_tensor, b=a_tensor, axes=([1, 2], [0, 1]))
         s = q2 * b_trace / 3.0 * np.exp(-q2 * (a_trace + 2.0 * trace_ba / b_trace) / 5.0)
@@ -253,7 +253,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
     def _calculate_order_two(self, q2=None, frequencies=None, indices=None, a_tensor=None, a_trace=None,
                              b_tensor=None, b_trace=None):
         """
-        Calculates S for the second order quantum effect for one atom.
+        Calculates S for the second order quantum event for one atom.
 
 
         @param q2: squared values of momentum transfer vectors
@@ -263,7 +263,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         @param a_trace: total MSD trace for the given atom
         @param b_tensor: frequency dependent MSD tensor for the given atom
         @param b_trace: frequency dependent MSD trace for the given atom
-        @return: s for the second quantum order effect for the given atom
+        @return: s for the second quantum order event for the given atom
         """
 
         dw = np.exp(-q2 * a_trace / 3.0)
@@ -295,7 +295,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
     def _calculate_order_three(self, q2=None, frequencies=None, indices=None, a_tensor=None, a_trace=None,
                                b_tensor=None, b_trace=None):
         """
-        Calculates S for the third order quantum effect for one atom.
+        Calculates S for the third order quantum event for one atom.
         @param q2: squared values of momentum transfer vectors
         @param frequencies: frequencies for which transitions occur
         @param indices: array which stores information how transitions can be decomposed in terms of fundamentals
@@ -303,7 +303,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         @param a_trace: total MSD trace for the given atom
         @param b_tensor: frequency dependent MSD tensor for the given atom
         @param b_trace: frequency dependent MSD trace for the given atom
-        @return: s for the third quantum order effect for the given atom
+        @return: s for the third quantum order event for the given atom
         """
         s = 9.0 / 543.0 * q2 ** 3 * np.prod(np.take(b_trace, indices=indices), axis=1) * np.exp(-q2 * a_trace / 3.0)
 
@@ -312,7 +312,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
     def _calculate_order_four(self, q2=None, frequencies=None, indices=None, a_tensor=None, a_trace=None,
                               b_tensor=None, b_trace=None):
         """
-        Calculates S for the fourth order quantum effect for one atom.
+        Calculates S for the fourth order quantum event for one atom.
         @param q2: q2: squared values of momentum transfer vectors
         @param frequencies: frequencies for which transitions occur
         @param indices: array which stores information how transitions can be decomposed in terms of fundamentals
@@ -320,7 +320,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         @param a_trace: total MSD trace for the given atom
         @param b_tensor: frequency dependent MSD tensor for the given atom
         @param b_trace: frequency dependent MSD trace for the given atom
-        @return: s for the forth quantum order effect for the given atom
+        @return: s for the forth quantum order event for the given atom
         """
         s = 27.0 / 9850.0 * q2 ** 4 * np.prod(np.take(b_trace, indices=indices), axis=1) * np.exp(-q2 * a_trace / 3.0)
 
@@ -334,7 +334,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
 
     def _rebin_data(self, array_x=None, array_y=None):
         """
-        Rebins S data so that all quantum effects have the same x-axis.
+        Rebins S data so that all quantum events have the same x-axis.
         @param array_x: numpy array with frequencies
         @param array_y: numpy array with S
         @return: rebined frequencies, rebined S

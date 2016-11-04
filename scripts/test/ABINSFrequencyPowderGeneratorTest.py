@@ -40,7 +40,7 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
 
         # to high quantum order
         with     self.assertRaises(ValueError):
-            self.simple_freq_generator.construct_freq_overtones(fundamentals_array=np.asarray([1,2]), quantum_order=AbinsConstants.higher_order_quantum_effects_dim +
+            self.simple_freq_generator.construct_freq_overtones(fundamentals_array=np.asarray([1,2]), quantum_order=AbinsConstants.higher_order_quantum_events_dim +
                                                                                                                     AbinsConstants.s_last_index +
                                                                                                                     1)
 
@@ -54,7 +54,7 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
         self.assertEqual(True, np.allclose(correct_coefficients, generated_coefficients ))
 
         # use case: overtones
-        q_order = AbinsConstants.higher_order_quantum_effects # the highest supported quantum effect
+        q_order = AbinsConstants.higher_order_quantum_events # the highest supported quantum effect
         correct_array = array * q_order
         correct_array = correct_array[correct_array < AbinsParameters.max_wavenumber]
 

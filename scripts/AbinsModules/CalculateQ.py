@@ -38,7 +38,7 @@ class CalculateQ(IOmodule):
         self._k_points_data = k_points_data
 
         min_order = AbinsConstants.fundamentals
-        max_order = AbinsConstants.fundamentals + AbinsConstants.higher_order_quantum_effects
+        max_order = AbinsConstants.fundamentals + AbinsConstants.higher_order_quantum_events
         if isinstance(quantum_order_events_num, int) and min_order <= quantum_order_events_num <= max_order:
             self._quantum_order_events_num = quantum_order_events_num
         else:
