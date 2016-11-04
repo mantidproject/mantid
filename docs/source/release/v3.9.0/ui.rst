@@ -22,6 +22,7 @@ User Interface
 
 Instrument View
 ###############
+ - New peak comparison tool on the pick tab. The user can select two peaks and information relating to their properties and the angles between them.
 
 Plotting Improvements
 #####################
@@ -53,6 +54,7 @@ Bugs Resolved
 - The Spectrum Viewer now reports two theta and azimuthal angle correctly.
 - Fixed crash when clicking "Help->Ask for Help" on Linux-based systems with Firefox set as the default browser.  
 - Fixed crash when loading data and the algorithm widget is hidden
+- Fixed exception being thrown when saving project with custom interfaces open
 
 SliceViewer Improvements
 ------------------------

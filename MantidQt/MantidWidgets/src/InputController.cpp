@@ -334,22 +334,21 @@ void InputControllerDraw::signalRightClick() {}
 
 //--------------------------------------------------------------------------------
 
-InputControllerErase::InputControllerErase(QObject *parent)
+InputControllerSelection::InputControllerSelection(QObject *parent,
+                                                   QPixmap *icon)
     : InputControllerDraw(parent), m_rect(0, 0, cursorSize(), cursorSize()) {
-  m_image = new QPixmap(":/PickTools/eraser.png");
+  m_image = icon;
 }
 
-InputControllerErase::~InputControllerErase() { delete m_image; }
+InputControllerSelection::~InputControllerSelection() { delete m_image; }
 
-void InputControllerErase::signalLeftClick() { emit erase(m_rect); }
-
-void InputControllerErase::onPaint(QPainter &painter) {
+void InputControllerSelection::onPaint(QPainter &painter) {
   if (isActive() && !isLeftButtonPressed()) {
     painter.drawPixmap(m_rect.bottomRight(), *m_image);
   }
 }
 
-void InputControllerErase::drawCursor(QPixmap *cursor) {
+void InputControllerSelection::drawCursor(QPixmap *cursor) {
   cursor->fill(QColor(255, 255, 255, 0));
   QPainter painter(cursor);
   auto size = cursorSize();
@@ -368,14 +367,16 @@ void InputControllerErase::drawCursor(QPixmap *cursor) {
   painter.drawRect(QRect(0, 0, size, size));
 }
 
-void InputControllerErase::setPosition(const QPoint &pos) {
+void InputControllerSelection::setPosition(const QPoint &pos) {
   m_rect.moveTopLeft(pos);
 }
 
-void InputControllerErase::resize() {
+void InputControllerSelection::resize() {
   auto size = cursorSize();
   m_rect.setSize(QSize(size, size));
 }
+
+void InputControllerSelection::signalLeftClick() { emit selection(m_rect); }
 
 //--------------------------------------------------------------------------------
 
