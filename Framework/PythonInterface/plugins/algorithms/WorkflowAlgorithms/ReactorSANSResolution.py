@@ -69,7 +69,7 @@ class ReactorSANSResolution(PythonAlgorithm):
                 and source_apert_radius is not None and sample_apert_radius is not None \
                 and source_sample_distance is not None and sample_detector_distance is not None:
             k = 2.0*math.pi/wvl
-            res_factor = math.pow(k*source_apert_radius/source_sample_distance, 2)
+            res_factor = math.pow(k*source_apert_radius/source_sample_distance, 2)/4.0
             res_factor += (math.pow(k*sample_apert_radius*(source_sample_distance+sample_detector_distance)/
                                     (source_sample_distance*sample_detector_distance), 2)/4.0)
             res_factor += math.pow(k*pixel_size_x/sample_detector_distance, 2)/12.0
