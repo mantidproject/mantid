@@ -104,7 +104,7 @@ void GetEiMonDet2::init() {
                   boost::make_shared<StringListValidator>(indexTypes),
                   "The type of indices " + PropertyNames::DETECTORS + " and " +
                       PropertyNames::MONITOR + " refer to.");
-  declareProperty(make_unique<ArrayProperty<int>>(
+  declareProperty(Kernel::make_unique<ArrayProperty<int>>(
                       PropertyNames::DETECTORS.c_str(), mandatoryArrayProperty),
                   "A list of detector ids/spectrum number/workspace indices.");
   declareProperty(make_unique<WorkspaceProperty<>>(
