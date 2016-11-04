@@ -18,7 +18,7 @@ namespace API {
 
 class MDGeometryNotificationHelper {
 public:
-  MDGeometryNotificationHelper(MDGeometry &parent)
+  explicit MDGeometryNotificationHelper(MDGeometry &parent)
       : m_parent(parent),
         m_delete_observer(
             *this, &MDGeometryNotificationHelper::deleteNotificationReceived) {}
