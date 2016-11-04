@@ -11,6 +11,7 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
 
 #include <algorithm>
+#include <cctype>
 #include <fstream>
 
 #include <boost/lexical_cast.hpp>
