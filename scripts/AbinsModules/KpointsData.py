@@ -43,14 +43,12 @@ class KpointsData(GeneralData):
             raise ValueError("Invalid number of k-points.")
 
         if isinstance(num_atoms, int) and num_atoms > 0:
-            self._num_freq = dim * num_atoms # number of phonons for one k-point
-            self._num_atoms = num_atoms # number of displacements for one k-point
+            self._num_freq = dim * num_atoms  # number of phonons for one k-point
+            self._num_atoms = num_atoms  # number of displacements for one k-point
         else:
             raise ValueError("Invalid number of atoms.")
 
-
-        self._data={}
-
+        self._data = {}
 
     def set(self, items=None):
 
@@ -65,7 +63,7 @@ class KpointsData(GeneralData):
         #  "weights"
         weights = items["weights"]
 
-        if  (isinstance(weights, np.ndarray) and
+        if (isinstance(weights, np.ndarray) and
             weights.shape == (self._num_k,) and
             weights.dtype.num == AbinsConstants.float_id and
             np.allclose(weights, weights[weights>=0])):
@@ -84,7 +82,6 @@ class KpointsData(GeneralData):
             self._data["k_vectors"] = k_vectors
         else:
             raise ValueError("Invalid value of k_vectors.")
-
 
         #  "frequencies"
         frequencies = items["frequencies"]

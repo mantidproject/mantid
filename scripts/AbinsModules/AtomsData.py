@@ -8,7 +8,7 @@ class AtomsDaTa(GeneralData):
         super(AtomsDaTa, self).__init__()
         if not isinstance(num_atoms, int):
             raise ValueError("Invalid number of atoms.")
-        if num_atoms< 0:
+        if num_atoms < 0:
             raise ValueError("Number of atoms cannot be negative.")
         self._num_atoms = num_atoms
 
@@ -20,7 +20,7 @@ class AtomsDaTa(GeneralData):
         """
 
         if not isinstance(item, dict):
-            raise  ValueError("Every element of AtomsData has  a form of the dictionary.")
+            raise ValueError("Every element of AtomsData has  a form of the dictionary.")
 
         if not sorted(item.keys()) == sorted(AbinsConstants.all_keywords_atoms_data):
             raise ValueError("Invalid structure of the dictionary to be added.")
@@ -33,11 +33,11 @@ class AtomsDaTa(GeneralData):
         fract_coord = item["fract_coord"]
         if not isinstance(fract_coord, np.ndarray):
             raise ValueError("Coordinates of an atom should have a form of a numpy array.")
-        if len(fract_coord.shape)  != 1:
+        if len(fract_coord.shape) != 1:
             raise ValueError("Coordinates should have a form of 1D numpy array.")
         if fract_coord.shape[0] != 3:
             raise ValueError("Coordinates should have a form of numpy array with three elements.")
-        if fract_coord.dtype.num !=  AbinsConstants.float_id:
+        if fract_coord.dtype.num != AbinsConstants.float_id:
             raise ValueError("All coordinates should be real numbers.")
 
         # "atom"
@@ -46,7 +46,7 @@ class AtomsDaTa(GeneralData):
             raise ValueError("Number of atom should be integer.")
         if atom < 0:
             raise ValueError("Number of atom cannot be negative.")
-        if atom  >= self._num_atoms: # here = because we count from 0
+        if atom >= self._num_atoms:  # here = because we count from 0
             raise ValueError("Number of atoms cannot be larger than the total number of atoms.")
 
         # "sort"
@@ -55,7 +55,7 @@ class AtomsDaTa(GeneralData):
             raise ValueError("Parameter sort  should be integer.")
         if sort < 0:
             raise ValueError("Parameter sort cannot be negative.")
-        if sort  >= self._num_atoms: # here = because we count from 0
+        if sort >= self._num_atoms:  # here = because we count from 0
             raise ValueError("Parameter sort cannot be larger than the total number of atoms.")
 
         # "mass"
@@ -72,7 +72,8 @@ class AtomsDaTa(GeneralData):
 
 
         if len(items) != self._num_atoms:
-            raise ValueError("Inconsistent size of new data and number of atoms. (%s != %s)"%(len(items), self._num_atoms))
+            raise ValueError("Inconsistent size of new data and number of atoms. (%s != %s)" %
+                             (len(items), self._num_atoms))
 
         if isinstance(items, list):
             self._data = []
@@ -89,4 +90,3 @@ class AtomsDaTa(GeneralData):
 
     def __str__(self):
         return "Atoms data"
-

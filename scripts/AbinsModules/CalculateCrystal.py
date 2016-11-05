@@ -16,7 +16,7 @@ class CalculateCrystal(IOmodule):
             raise ValueError("Object of AbinsData was expected.")
         self._abins_data = abins_data
 
-        if not (isinstance(temperature, int) or isinstance(temperature, float)):
+        if not isinstance(temperature, (int, float)):
             raise ValueError("Invalid value of temperature.")
         if temperature < 0:
             raise ValueError("Temperature cannot be negative.")

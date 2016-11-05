@@ -17,7 +17,7 @@ class CalculateDWCrystal(object):
         @param abins_data: input Abins data (type: AbinsData)
         """
 
-        if not (isinstance(temperature, float) or isinstance(temperature, int)):
+        if not isinstance(temperature, (float, int)):
             raise ValueError("Invalid value of the temperature. Number was expected.")
         if temperature < 0:
             raise ValueError("Temperature cannot be negative.")

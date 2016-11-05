@@ -35,7 +35,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         @param instrument_name: name of instrument (str)
         @param quantum_order_events_num: number of quantum order events taken into account during the simulation
         """
-        if not (isinstance(temperature, float) or isinstance(temperature, int)):
+        if not isinstance(temperature, (int, float)):
             raise ValueError("Invalid value of the temperature. Number was expected.")
         if temperature < 0:
             raise ValueError("Temperature cannot be negative.")

@@ -9,7 +9,7 @@ class SData(GeneralData):
     def __init__(self, temperature=None, sample_form=None):
         super(SData, self).__init__()
 
-        if not ((isinstance(temperature, float) or isinstance(temperature, int)) and temperature > 0):
+        if not isinstance(temperature, (float, int)) and temperature > 0:
             raise ValueError("Invalid value of temperature.")
         self._temperature = float(temperature)
 

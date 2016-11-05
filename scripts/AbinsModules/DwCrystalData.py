@@ -12,12 +12,11 @@ class DwCrystalData(GeneralData):
     def __init__(self, temperature=None, num_atoms=None):
         """
         @param temperature:  temperature in K
-        @param num_atom: number of atoms in the unit cell
+        @param num_atoms: number of atoms in the unit cell
         """
         super(DwCrystalData, self).__init__()
 
-        if (isinstance(temperature, int) or isinstance(temperature, float)) and \
-            temperature > 0:
+        if isinstance(temperature, (int, float)) and temperature > 0:
             self._temperature = temperature
         else:
             raise ValueError("Improper value of temperature.")
@@ -71,7 +70,7 @@ class DwCrystalData(GeneralData):
         """
         if not isinstance(atom, int):
             raise ValueError("Number of atom should be an integer.")
-        if atom < 0 or atom > self._num_atoms: # here we count from zero
+        if atom < 0 or atom > self._num_atoms:  # here we count from zero
             raise ValueError("Invalid number of atom.")
 
         if not isinstance(data, np.ndarray):
