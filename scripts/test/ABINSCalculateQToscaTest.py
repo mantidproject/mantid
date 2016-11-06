@@ -62,31 +62,31 @@ class ABINSCalculateQToscaTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             poor_q_calculator = CalculateQ(filename=1, instrument=self._tosca_instrument, sample_form=self._sample_form,
                                            k_points_data=self._raw_data,
-                                           quantum_order_events_num=AbinsConstants.fundamentals)
+                                           quantum_order_num=AbinsConstants.fundamentals)
 
         # wrong instrument
         with self.assertRaises(ValueError):
             poor_q_calculator = CalculateQ(filename=self._filename, instrument="Different_instrument",
                                            sample_form=self._sample_form, k_points_data=self._raw_data,
-                                           quantum_order_events_num=AbinsConstants.fundamentals)
+                                           quantum_order_num=AbinsConstants.fundamentals)
 
         # wrong sample form
         with self.assertRaises(ValueError):
             poor_q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument,
                                            sample_form="Solid", k_points_data=self._raw_data,
-                                           quantum_order_events_num=AbinsConstants.fundamentals)
+                                           quantum_order_num=AbinsConstants.fundamentals)
 
         # no k_points_data
         with self.assertRaises(ValueError):
             poor_q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument,
                                            sample_form=self._sample_form,
-                                           quantum_order_events_num=AbinsConstants.fundamentals)
+                                           quantum_order_num=AbinsConstants.fundamentals)
 
         # wrong value of quantum_order_events_num
         with self.assertRaises(ValueError):
             poor_q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument,
                                            sample_form=self._sample_form, k_points_data=self._raw_data,
-                                           quantum_order_events_num=-1)
+                                           quantum_order_num=-1)
 
     # Use case: TOSCA instrument
     def test_TOSCA(self):
@@ -103,7 +103,7 @@ class ABINSCalculateQToscaTest(unittest.TestCase):
 
         q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument,
                                   sample_form=self._sample_form, k_points_data=self._raw_data,
-                                  quantum_order_events_num=AbinsConstants.fundamentals)
+                                  quantum_order_num=AbinsConstants.fundamentals)
         q_vectors = q_calculator.calculateData()
 
         # noinspection PyTypeChecker
