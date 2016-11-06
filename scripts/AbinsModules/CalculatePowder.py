@@ -1,7 +1,6 @@
 import numpy as np
 from IOmodule import IOmodule
 from PowderData import PowderData
-from QData import QData
 from AbinsData import AbinsData
 import AbinsParameters
 import AbinsConstants
@@ -56,7 +55,7 @@ class CalculatePowder(IOmodule):
 
         return k_points
 
-    def _calculate_powder(self, temperature=None):
+    def _calculate_powder(self):
         """
         Calculates powder data (a_tensors, b_tensors according to aCLIMAX manual).
         """
@@ -65,40 +64,35 @@ class CalculatePowder(IOmodule):
         data = self._abins_data.extract()
         k_data = self._get_gamma_data(data["k_points_data"])
         displacements = k_data["atomic_displacements"]
-        num_freq = displacements.shape[1]
         num_atoms = displacements.shape[0]
         atoms_data = data["atoms_data"]
-
-        # create containers for powder data
-        dim = 3
-        b_tensors = np.zeros(shape=(num_atoms, num_freq - AbinsConstants.first_optical_phonon, dim, dim),
-                             dtype=AbinsConstants.float_type)
-        a_tensors = np.zeros(shape=(num_atoms, dim, dim), dtype=AbinsConstants.float_type)
-
-        # calculate coth (go beyond low temperature approximation)
-        freq_hartree = k_data["frequencies"]  # frequencies in Hartree units
-        temperature_hartree = self._temperature * AbinsConstants.k_2_hartree
-        coth = 1.0 / np.tanh(1.0 / (2.0 * temperature_hartree) * freq_hartree)
+        freq_hartree = k_data["frequencies"][AbinsConstants.first_optical_phonon:]  # frequencies in Hartree units
 
         # convert to required units
         frequencies = freq_hartree / AbinsConstants.cm1_2_hartree  # convert frequencies to cm^1
 
-        # convert  mass of atoms to amu units
-        masses = [atom["mass"] / AbinsConstants.m_2_hartree for atom in atoms_data]
-
         powder = PowderData(num_atoms=num_atoms)
 
-        # calculate powder data
-        for atom in range(num_atoms):
+        # Notation for  indices:
+        #     num_freq -- number of optical phonons (total number of phonons - acoustic phonons)
+        #     num_atoms -- number of atoms
+        #     dim -- size of displacement vector for one atom (dim = 3)
 
-            mass = masses[atom]
-            for i in range(AbinsConstants.first_optical_phonon, num_freq):
+        # masses[num_atoms, num_freq]
+        masses = np.asarray([([atom["mass"]] * frequencies.size) for atom in atoms_data])
+        masses = masses / AbinsConstants.m_2_hartree  # convert  mass of atoms to amu units
 
-                disp = displacements[atom][i] * coth[i]  # full expression ?
-                # disp = displacements[atom][omega_i] # low temperature approximation?
-                factor = mass * AbinsConstants.aCLIMAX_constant / frequencies[i]
-                b_tensors[atom, i - AbinsConstants.first_optical_phonon] = np.outer(disp, disp).real * factor
-                a_tensors[atom] += b_tensors[atom, i - AbinsConstants.first_optical_phonon]
+        # disp[num_atoms, num_freq, dim]
+        disp = displacements[:, AbinsConstants.first_optical_phonon:]
+
+        # factor[num_atoms, num_freq]
+        factor = np.einsum('ij,j->ij', masses, AbinsConstants.aCLIMAX_constant / frequencies)
+
+        # b_tensors[num_atoms, num_freq, dim, dim]
+        b_tensors = np.einsum('ijkl,ij->ijkl', np.einsum('lki, lkj->lkij', disp, disp).real, factor)
+
+        # a_tensors[num_atoms, dim, dim]
+        a_tensors = np.sum(a=b_tensors, axis=1)
 
         # fill powder object with powder data
         powder.set(dict(b_tensors=b_tensors, a_tensors=a_tensors))
