@@ -16,13 +16,13 @@ class CalculateQ(IOmodule):
     """
 
     def __init__(self, filename=None, instrument=None, sample_form=None, k_points_data=None,
-                 quantum_order_events_num=None):
+                 quantum_order_num=None):
         """
         @param filename: name of input filename (CASTEP: foo.phonon)
         @param instrument: object of type  Instrument
         @param sample_form: form in which sample is (Powder or SingleCrystal)
         @param k_points_data: object of type KpointsData with data from DFT calculations
-        @param quantum_order_events_num: number of quantum order events taken into account during the simulation
+        @param quantum_order_num: number of quantum order events taken into account during the simulation
         """
         if not isinstance(instrument, Instrument):
             raise ValueError("Invalid instrument.")
@@ -39,8 +39,8 @@ class CalculateQ(IOmodule):
 
         min_order = AbinsConstants.fundamentals
         max_order = AbinsConstants.fundamentals + AbinsConstants.higher_order_quantum_events
-        if isinstance(quantum_order_events_num, int) and min_order <= quantum_order_events_num <= max_order:
-            self._quantum_order_events_num = quantum_order_events_num
+        if isinstance(quantum_order_num, int) and min_order <= quantum_order_num <= max_order:
+            self._quantum_order_events_num = quantum_order_num
         else:
             raise ValueError("Invalid value of quantum order events.")
 

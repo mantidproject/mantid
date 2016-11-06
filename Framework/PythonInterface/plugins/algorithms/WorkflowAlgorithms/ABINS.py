@@ -164,7 +164,7 @@ class ABINS(PythonAlgorithm):
         # 3) calculate S
         s_calculator = CalculateS(filename=self._phononFile, temperature=self._temperature,
                                   sample_form=self._sampleForm, abins_data=dft_data, instrument_name=self._instrument,
-                                  quantum_order_events_num=self._num_quantum_order_events)
+                                  quantum_order_num=self._num_quantum_order_events)
 
         s_data = s_calculator.getData()
 

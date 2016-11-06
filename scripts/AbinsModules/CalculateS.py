@@ -1,5 +1,4 @@
 import numpy as np
-import math
 from copy import copy
 
 from mantid.kernel import logger
@@ -26,14 +25,14 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
     """
 
     def __init__(self, filename=None, temperature=None, sample_form=None, abins_data=None, instrument_name=None,
-                 quantum_order_events_num=None):
+                 quantum_order_num=None):
         """
         @param filename: name of input DFT file (CASTEP: foo.phonon)
         @param temperature: temperature in K for which calculation of S should be done
         @param sample_form: form in which experimental sample is: Powder or SingleCrystal (str)
         @param abins_data: object of type AbinsData with data from phonon file
         @param instrument_name: name of instrument (str)
-        @param quantum_order_events_num: number of quantum order events taken into account during the simulation
+        @param quantum_order_num: number of quantum order events taken into account during the simulation
         """
         if not isinstance(temperature, (int, float)):
             raise ValueError("Invalid value of the temperature. Number was expected.")
@@ -53,8 +52,8 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
 
         min_order = AbinsConstants.fundamentals
         max_order = AbinsConstants.fundamentals + AbinsConstants.higher_order_quantum_events
-        if isinstance(quantum_order_events_num, int) and min_order <= quantum_order_events_num <= max_order:
-            self._quantum_order_events_num = quantum_order_events_num
+        if isinstance(quantum_order_num, int) and min_order <= quantum_order_num <= max_order:
+            self._quantum_order_num = quantum_order_num
         else:
             raise ValueError("Invalid number of quantum order events.")
 
@@ -83,17 +82,16 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         # Calculate Q
         _q_calculator = CalculateQ(filename=self._input_filename, instrument=_instrument, sample_form=self._sample_form,
                                    k_points_data=self._abins_data.getKpointsData(),
-                                   quantum_order_events_num=self._quantum_order_events_num)
+                                   quantum_order_num=self._quantum_order_num)
 
         _q_vectors = _q_calculator.getData()
 
-        # Powder case: calculate MSD and DW
+        # Powder case: calculate A and B tensors
         if self._sample_form == "Powder":
 
-            _powder_calculator = CalculatePowder(filename=self._input_filename, abins_data=self._abins_data,
-                                                 temperature=self._temperature)
+            _powder_calculator = CalculatePowder(filename=self._input_filename, abins_data=self._abins_data)
             _powder_data = _powder_calculator.getData()
-            _s_data = self._calculate_s_powder(q_data=_q_vectors, powder_data=_powder_data, instrument=_instrument)
+            _s_data = self._calculate_s_powder_1D(q_data=_q_vectors, powder_data=_powder_data, instrument=_instrument)
 
         # Crystal case: calculate DW
         else:
@@ -125,7 +123,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         return k_points
 
     # noinspection PyTypeChecker
-    def _calculate_s_powder(self, q_data=None, powder_data=None, instrument=None):
+    def _calculate_s_powder_1D(self, q_data=None, powder_data=None, instrument=None):
         """
         Calculates S for the powder case.
 
@@ -164,10 +162,9 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         local_freq = fundamentals_freq
         local_coeff = np.eye(local_freq.size, dtype=AbinsConstants.int_type)
         generated_frequencies = []
-        # generated_coefficients = []
         generated_reduced_coefficients = []
 
-        for order in range(AbinsConstants.fundamentals, self._quantum_order_events_num + AbinsConstants.s_last_index):
+        for order in range(AbinsConstants.fundamentals, self._quantum_order_num + AbinsConstants.s_last_index):
 
             local_freq, local_coeff = self.construct_freq_combinations(previous_array=local_freq,
                                                                        previous_coefficients=local_coeff,
@@ -196,7 +193,8 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         # calculate s for each atom
         for atom in range(num_atoms):
 
-            for order in range(AbinsConstants.fundamentals, self._quantum_order_events_num + AbinsConstants.s_last_index):
+            for order in range(AbinsConstants.fundamentals,
+                               self._quantum_order_num + AbinsConstants.s_last_index):
 
                 q2 = extracted_q_data["order_%s" % order]
                 order_indx = order - AbinsConstants.python_index_shift
@@ -232,6 +230,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
 
         return s_data
 
+    # noinspection PyUnusedLocal
     def _calculate_order_one(self, q2=None, frequencies=None, indices=None, a_tensor=None, a_trace=None,
                              b_tensor=None, b_trace=None):
         """
@@ -245,11 +244,15 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         @param b_trace: frequency dependent MSD trace for the given atom
         @return: s for the first quantum order event for the given atom
         """
-        trace_ba = np.tensordot(a=b_tensor, b=a_tensor, axes=([1, 2], [0, 1]))
-        s = q2 * b_trace / 3.0 * np.exp(-q2 * (a_trace + 2.0 * trace_ba / b_trace) / 5.0)
+        trace_ba = np.einsum('kli, il->k', b_tensor, a_tensor)
+        coth = 1.0 / np.tanh(frequencies * AbinsConstants.cm1_2_hartree /
+                             (2.0 * self._temperature * AbinsConstants.k_2_hartree))
+
+        s = q2 * b_trace / 3.0 * np.exp(-q2 * (a_trace + 2.0 * trace_ba / b_trace) / 5.0 * coth * coth)
 
         return s
 
+    # noinspection PyUnusedLocal
     def _calculate_order_two(self, q2=None, frequencies=None, indices=None, a_tensor=None, a_trace=None,
                              b_tensor=None, b_trace=None):
         """
@@ -265,33 +268,22 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         @param b_trace: frequency dependent MSD trace for the given atom
         @return: s for the second quantum order event for the given atom
         """
+        coth = 1.0 / np.tanh(frequencies * AbinsConstants.cm1_2_hartree /
+                             (2.0 * self._temperature * AbinsConstants.k_2_hartree))
 
-        dw = np.exp(-q2 * a_trace / 3.0)
+        dw = np.exp(-q2 * a_trace / 3.0 * coth * coth)
         q4 = q2 ** 2
-        n_freq = frequencies.size
 
-        s = np.zeros(shape=n_freq, dtype=AbinsConstants.float_type)
+        # in case indices are the same factor is 2 otherwise it is 1
+        factor = (indices[:, 0] == indices[:, 1]) + 1
 
-        for i in range(n_freq):
-
-            if indices[i, 0] == indices[i, 1]:
-
-                b_ten = b_tensor[indices[i, 0]]
-                bb_trace = np.einsum('ij,ji->', b_ten, b_ten)
-                s[i] = (np.prod(b_trace[indices[i]]) + 2 * bb_trace) / 30.0
-
-            else:
-
-                ii = indices[i, 0]
-                jj = indices[i, 1]
-                tr_b0b1 = np.einsum('ij,ji->', b_tensor[ii], b_tensor[jj])
-                tr_b1b0 = np.einsum('ij,ji->', b_tensor[jj], b_tensor[ii])
-                s[i] = (np.prod(b_trace[indices[i]]) + tr_b0b1 + tr_b1b0) / 15.0
-
-        s *= q4 * dw
+        s = q4 * dw * (np.prod(np.take(b_trace, indices=indices), axis=1) +
+            np.einsum('kli, kil->k', np.take(b_tensor, indices=indices[:, 0], axis=0),
+            np.take(b_tensor, indices=indices[:, 1], axis=0))) / (15.0 * factor)
 
         return s
 
+    # noinspection PyUnusedLocal,PyUnusedLocal
     def _calculate_order_three(self, q2=None, frequencies=None, indices=None, a_tensor=None, a_trace=None,
                                b_tensor=None, b_trace=None):
         """
@@ -305,10 +297,14 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         @param b_trace: frequency dependent MSD trace for the given atom
         @return: s for the third quantum order event for the given atom
         """
-        s = 9.0 / 543.0 * q2 ** 3 * np.prod(np.take(b_trace, indices=indices), axis=1) * np.exp(-q2 * a_trace / 3.0)
+        coth = 1.0 / np.tanh(frequencies * AbinsConstants.cm1_2_hartree /
+                             (2.0 * self._temperature * AbinsConstants.k_2_hartree))
+        s = 9.0 / 543.0 * q2 ** 3 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
+            np.exp(-q2 * a_trace / 3.0 * coth * coth)
 
         return s
 
+    # noinspection PyUnusedLocal
     def _calculate_order_four(self, q2=None, frequencies=None, indices=None, a_tensor=None, a_trace=None,
                               b_tensor=None, b_trace=None):
         """
@@ -322,7 +318,10 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         @param b_trace: frequency dependent MSD trace for the given atom
         @return: s for the forth quantum order event for the given atom
         """
-        s = 27.0 / 9850.0 * q2 ** 4 * np.prod(np.take(b_trace, indices=indices), axis=1) * np.exp(-q2 * a_trace / 3.0)
+        coth = 1.0 / np.tanh(frequencies * AbinsConstants.cm1_2_hartree /
+                             (2.0 * self._temperature * AbinsConstants.k_2_hartree))
+        s = 27.0 / 9850.0 * q2 ** 4 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
+            np.exp(-q2 * a_trace / 3.0 * coth * coth)
 
         return s
 
@@ -356,7 +355,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         """
         data = self._calculate_s()
         self.addFileAttributes()
-        self.addAttribute(name="order_of_quantum_events", value=self._quantum_order_events_num)
+        self.addAttribute(name="order_of_quantum_events", value=self._quantum_order_num)
         self.addData("data", data.extract())
         self.save()
 
@@ -368,17 +367,17 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         @return: object of type SData.
         """
         data = self.load(list_of_datasets=["data"], list_of_attributes=["filename", "order_of_quantum_events"])
-        if self._quantum_order_events_num > data["attributes"]["order_of_quantum_events"]:
+        if self._quantum_order_num > data["attributes"]["order_of_quantum_events"]:
             raise ValueError("User requested a larger number of quantum events to be included in the simulation "
                              "then in the previous calculations. S cannot be loaded from the hdf file.")
-        if self._quantum_order_events_num < data["attributes"]["order_of_quantum_events"]:
+        if self._quantum_order_num < data["attributes"]["order_of_quantum_events"]:
             logger.notice("User requested a smaller number of quantum events than in the previous calculations. "
                           "S Data from hdf file which corresponds only to requested quantum order events will be "
                           "loaded.")
             temp_data = {"frequencies": {}, "atoms_data": {}}
 
             # load necessary frequencies
-            for i in range(AbinsConstants.fundamentals, self._quantum_order_events_num + AbinsConstants.s_last_index):
+            for i in range(AbinsConstants.fundamentals, self._quantum_order_num + AbinsConstants.s_last_index):
                 temp_data["frequencies"]["order_%s" % i] = data["datasets"]["data"]["frequencies"]["order_%s" % i]
 
             # load atoms_data
@@ -388,7 +387,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                 symbol = data["datasets"]["data"]["atoms_data"]["atom_%s" % i]["symbol"]
                 temp_data["atoms_data"]["atom_%s" % i] = {"sort": sort,  "symbol":  symbol, "s": {}}
                 for j in range(AbinsConstants.fundamentals,
-                               self._quantum_order_events_num + AbinsConstants.s_last_index):
+                               self._quantum_order_num + AbinsConstants.s_last_index):
                     temp_val = data["datasets"]["data"]["atoms_data"]["atom_%s" % i]["s"]["order_%s" % j]
                     temp_data["atoms_data"]["atom_%s" % i]["s"] = {"order_%s" % j: temp_val}
 
