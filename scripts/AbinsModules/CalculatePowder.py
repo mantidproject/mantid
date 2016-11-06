@@ -10,26 +10,18 @@ class CalculatePowder(IOmodule):
     """
     Class for calculating powder data.
     """
-    def __init__(self, filename=None, abins_data=None, temperature=None):
+    def __init__(self, filename=None, abins_data=None):
         """
         @param filename:  name of input DFT filename
         @param abins_data: object of type AbinsData with data from input DFT file
-        @param temperature:  temperature in K
         """
 
         if not isinstance(abins_data, AbinsData):
             raise ValueError("Object of AbinsData was expected.")
         self._abins_data = abins_data
 
-        if not isinstance(temperature, (int, float)):
-            raise ValueError("Invalid value of temperature.")
-        if temperature < 0:
-            raise ValueError("Temperature cannot be negative.")
-        self._temperature = float(temperature)  # temperature in K
-
         super(CalculatePowder, self).__init__(input_filename=filename,
-                                              group_name=AbinsParameters.powder_data_group + "/" +
-                                              "%sK" % self._temperature)
+                                              group_name=AbinsParameters.powder_data_group + "/")
 
     def _get_gamma_data(self, k_data=None):
         """
@@ -68,7 +60,6 @@ class CalculatePowder(IOmodule):
         atoms_data = data["atoms_data"]
         freq_hartree = k_data["frequencies"][AbinsConstants.first_optical_phonon:]  # frequencies in Hartree units
 
-        # convert to required units
         frequencies = freq_hartree / AbinsConstants.cm1_2_hartree  # convert frequencies to cm^1
 
         powder = PowderData(num_atoms=num_atoms)
