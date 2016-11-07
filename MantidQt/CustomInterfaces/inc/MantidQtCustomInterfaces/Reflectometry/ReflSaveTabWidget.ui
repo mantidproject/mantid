@@ -59,9 +59,6 @@
           <property name="title">
             <string>Custom save</string>
           </property>
-          <property name="checkable">
-            <bool>true</bool>
-          </property>
           <layout class="QGridLayout" name="customSaveLayout">
             <property name="margin">
               <number>20</number>
@@ -130,7 +127,7 @@
               <widget class="QTextEdit" name="listOfWorkspacesEdit"/>
             </item>
             <item row="2" column="4">
-              <spacer name="customSaveSpacer3">
+              <spacer name="customSaveSpacer2">
                 <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                 </property>
@@ -153,7 +150,7 @@
               </widget>
             </item>
             <item row="3" column="4">
-              <spacer name="customSaveSpacer4">
+              <spacer name="customSaveSpacer3">
                 <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                 </property>
@@ -165,96 +162,34 @@
                 </property>
               </spacer>
             </item>
-            <item row="4" column="0" colspan="6">
-              <widget class="QGroupBox" name="groupBoxGroup">
+            <item row="3" column="5" rowspan="4">
+              <widget class="QGroupBox" name="customFormatOptionsGroup">
                 <property name="title">
-                  <string>GroupBox</string>
+                  <string>Custom Format Options</string>
                 </property>
-                <layout class="QGridLayout" name="groupBoxLayout">
-                  <property name="margin">
-                    <number>20</number>
-                  </property>
-                  <item row ="0" column="0">
-                    <widget class="QLabel" name="spectraListLabel">
-                      <property name="text">
-                        <string>Spectra list</string>
-                      </property>
-                    </widget>
+                <layout class="QGridLayout" name="customFormatOptionsLayout">
+                  <item row="0" column="0">
+                    <widget class="QCheckBox" name="titleCheckBox"/>
                   </item>
                   <item row="0" column="1">
-                    <widget class="QLineEdit" name="spectraListEdit"/>
+                    <widget class="QLabel" name="titleLabel">
+                      <property name="text">
+                        <string>Title</string>
+                      </property>
+                    </widget>
                   </item>
                   <item row="0" column="2">
-                    <spacer name="groupBoxSpacer0">
-                      <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                        <size>
-                          <width>20</width>
-                          <height>20</height>
-                        </size>
-                      </property>
-                    </spacer>
-                  </item>        
-                  <item row ="1" column="0">
-                    <widget class="QLabel" name="fileFormatLabel">
+                    <widget class="QCheckBox" name="qResolutionCheckBox"/>
+                  </item>
+                  <item row="0" column="3">
+                    <widget class="QLabel" name="qResolutionLabel">
                       <property name="text">
-                        <string>File format</string>
+                        <string>Q resolution</string>
                       </property>
                     </widget>
                   </item>
-                  <item row="1" column="1">
-                    <widget class="QComboBox" name="fileFormatComboBox">
-                      <item>
-                        <property name="text">
-                          <string>Custom format (*.dat)</string>
-                        </property>
-                      </item>
-                      <item>
-                        <property name="text">
-                          <string>3 column (*.dat)</string>
-                        </property>
-                      </item>
-                      <item>
-                        <property name="text">
-                          <string>ANSTO, MotoFit, 4 column (*.txt)</string>
-                        </property>
-                      </item>
-                      <item>
-                        <property name="text">
-                          <string>ILL Cosmos (*.mft)</string>
-                        </property>
-                      </item>
-                      <property name="font">
-                        <font>
-                          <bold>true</bold>
-                        </font>
-                      </property>
-                    </widget>
-                  </item>
-                  <item row="1" column="2">
-                    <spacer name="groupBoxSpacer1">
-                      <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                        <size>
-                          <width>20</width>
-                          <height>20</height>
-                        </size>
-                      </property>
-                    </spacer>
-                  </item>  
-                  <item row="2" column="0" colspan="2">
-                    <widget class="QPushButton" name="saveButton">
-                      <property name="text">
-                        <string>Save</string>
-                      </property>
-                    </widget>
-                  </item>
-                  <item row="2" column="2">
-                    <spacer name="groupBoxSpacer2">
+                  <item row="0" column="4">
+                    <spacer name="customFormatOptionsSpacer0">
                       <property name="orientation">
                         <enum>Qt::Horizontal</enum>
                       </property>
@@ -266,34 +201,38 @@
                       </property>
                     </spacer>
                   </item>
-                  <item row="0" column="3" rowspan="3">
-                    <widget class="QGroupBox" name="customFormatOptionsGroup">
+                  <item row="1" column="0" colspan="5">
+                    <widget class="QGroupBox" name="separatorGroup">
                       <property name="title">
-                        <string>Custom Format Options</string>
+                        <string>Separator</string>
                       </property>
-                      <layout class="QGridLayout" name="customFormatOptionsLayout">
+                      <layout class="QGridLayout" name="separatorLayout">
                         <item row="0" column="0">
-                          <widget class="QCheckBox" name="titleCheckBox"/>
+                          <widget class="QRadioButton" name="commaRadioButton">
+                            <property name="text">
+                              <string>Comma</string>
+                            </property>
+                            <property name="checked">
+                              <bool>true</bool>
+                            </property>
+                          </widget>
                         </item>
                         <item row="0" column="1">
-                          <widget class="QLabel" name="titleLabel">
+                          <widget class="QRadioButton" name="spaceRadioButton">
                             <property name="text">
-                              <string>Title</string>
+                              <string>Space</string>
                             </property>
                           </widget>
                         </item>
                         <item row="0" column="2">
-                          <widget class="QCheckBox" name="qResolutionCheckBox"/>
-                        </item>
-                        <item row="0" column="3">
-                          <widget class="QLabel" name="qResolutionLabel">
+                          <widget class="QRadioButton" name="tabRadioButton">
                             <property name="text">
-                              <string>Q resolution</string>
+                              <string>Tab</string>
                             </property>
                           </widget>
                         </item>
-                        <item row="0" column="4">
-                          <spacer name="customFormatOptionsSpacer0">
+                        <item row="0" column="3">
+                          <spacer name="separatorSpacer0">
                             <property name="orientation">
                               <enum>Qt::Horizontal</enum>
                             </property>
@@ -305,58 +244,104 @@
                             </property>
                           </spacer>
                         </item>
-                        <item row="1" column="0" colspan="5">
-                          <widget class="QGroupBox" name="separatorGroup">
-                            <property name="title">
-                              <string>Separator</string>
-                            </property>
-                            <layout class="QGridLayout" name="separatorLayout">
-                              <item row="0" column="0">
-                                <widget class="QRadioButton" name="commaRadioButton">
-                                  <property name="text">
-                                    <string>Comma</string>
-                                  </property>
-                                  <property name="checked">
-                                    <bool>true</bool>
-                                  </property>
-                                </widget>
-                              </item>
-                              <item row="0" column="1">
-                                <widget class="QRadioButton" name="spaceRadioButton">
-                                  <property name="text">
-                                    <string>Space</string>
-                                  </property>
-                                </widget>
-                              </item>
-                              <item row="0" column="2">
-                                <widget class="QRadioButton" name="tabRadioButton">
-                                  <property name="text">
-                                    <string>Tab</string>
-                                  </property>
-                                </widget>
-                              </item>
-                              <item row="0" column="3">
-                                <spacer name="separatorSpacer0">
-                                  <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                  </property>
-                                  <property name="sizeHint" stdset="0">
-                                    <size>
-                                      <width>20</width>
-                                      <height>20</height>
-                                    </size>
-                                  </property>
-                                </spacer>
-                              </item>
-                            </layout>
-                          </widget>
-                        </item>
                       </layout>
                     </widget>
-                  </item>       
+                  </item>
                 </layout>
               </widget>
+            </item>     
+            <item row ="4" column="0">
+              <widget class="QLabel" name="spectraListLabel">
+                <property name="text">
+                  <string>Spectra list</string>
+                </property>
+              </widget>
             </item>
+            <item row="4" column="1" colspan="3">
+              <widget class="QLineEdit" name="spectraListEdit"/>
+            </item>
+            <item row="4" column="4">
+              <spacer name="customSaveSpacer4">
+                <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                  <size>
+                    <width>20</width>
+                    <height>20</height>
+                  </size>
+                </property>
+              </spacer>
+            </item>            
+            <item row ="5" column="0">
+              <widget class="QLabel" name="fileFormatLabel">
+                <property name="text">
+                  <string>File format</string>
+                </property>
+              </widget>
+            </item>
+            <item row="5" column="1" colspan="3">
+              <widget class="QComboBox" name="fileFormatComboBox">
+                <item>
+                  <property name="text">
+                    <string>Custom format (*.dat)</string>
+                  </property>
+                </item>
+                <item>
+                  <property name="text">
+                    <string>3 column (*.dat)</string>
+                  </property>
+                </item>
+                <item>
+                  <property name="text">
+                    <string>ANSTO, MotoFit, 4 column (*.txt)</string>
+                  </property>
+                </item>
+                <item>
+                  <property name="text">
+                    <string>ILL Cosmos (*.mft)</string>
+                  </property>
+                </item>
+                <property name="font">
+                  <font>
+                    <bold>true</bold>
+                  </font>
+                </property>
+              </widget>
+            </item>
+            <item row="5" column="4">
+              <spacer name="customSaveSpacer5">
+                <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                  <size>
+                    <width>20</width>
+                    <height>20</height>
+                  </size>
+                </property>
+              </spacer>
+            </item>
+            <item row="6" column="0" colspan="4">
+              <widget class="QPushButton" name="saveButton">
+                <property name="text">
+                  <string>Save</string>
+                </property>
+              </widget>
+            </item>
+            <item row="6" column="4">
+              <spacer name="customSaveSpacer6">
+                <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                  <size>
+                    <width>20</width>
+                    <height>20</height>
+                  </size>
+                </property>
+              </spacer>
+            </item>    
           </layout>
         </widget>
       </item>
