@@ -6,7 +6,7 @@ from mantid.simpleapi import AddSampleLog, CalculateFlatBackground,\
                              CloneWorkspace, ComputeCalibrationCoefVan,\
                              ConvertUnits, CorrectKiKf, CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace, DetectorEfficiencyCorUser, Divide, ExtractMonitors, ExtractSpectra, \
                              FindDetectorsOutsideLimits, FindEPP, GetEiMonDet, GroupWorkspaces, Integration, Load,\
-                             MaskDetectors, MergeRuns, Minus, NormaliseToMonitor, Regroup, Scale
+                             MaskDetectors, MedianDetectorTest, MergeRuns, Minus, NormaliseToMonitor, Regroup, Scale
 import numpy
 
 INDEX_TYPE_DETECTOR_ID     = 'DetectorID'
@@ -20,7 +20,9 @@ PROP_BINNING_Q                        = 'QBinning'
 PROP_BINNING_W                        = 'WBinning'
 PROP_CD_WORKSPACE                     = 'CadmiumWorkspace'
 PROP_CONTROL_MODE                     = 'ControlMode'
+PROP_DIAGNOSTICS_WORKSPACE            = 'DetectorDiagnosticsWorkspace'
 PROP_DETECTORS_FOR_EI_CALIBRATION     = 'IncidentEnergyCalibrationDetectors'
+PROP_DO_DETECTOR_DIAGNOSTICS          = 'UseDetectorDiagnostics'
 PROP_EC_WORKSPACE                     = 'EmptyCanWorkspace'
 PROP_EPP_WORKSPACE                    = 'EPPWorkspace'
 PROP_FLAT_BACKGROUND_SCALING          = 'FlatBackgroundScaling'
@@ -32,6 +34,7 @@ PROP_INPUT_WORKSPACE                  = 'InputWorkspace'
 PROP_MONITOR_EPP_WORKSPACE            = 'MonitorEPPWorkspace'
 PROP_MONITOR_INDEX                    = 'MonitorIndex'
 PROP_NORMALISATION                    = 'Normalisation'
+PROP_OUTPUT_DIAGNOSTICS_WORKSPACE     = 'OutputDetectorDiagnosticsWorkspace'
 PROP_OUTPUT_EPP_WORKSPACE             = 'OutputEPPWorkspace'
 PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE = 'OutputFlatBackgroundWorkspace'
 PROP_OUTPUT_MONITOR_EPP_WORKSPACE     = 'OutputMonitorEPPWorkspace'
@@ -39,7 +42,7 @@ PROP_OUTPUT_PREFIX                    = 'OutputPrefix'
 PROP_OUTPUT_WORKSPACE                 = 'OutputWorkspace'
 PROP_REDUCTION_TYPE                   = 'ReductionType'
 PROP_TRANSMISSION                     = 'Transmission'
-PROP_USER_MASK                        = 'SpectrumMask'
+PROP_USER_MASK                        = 'MaskedDetectors'
 PROP_VANADIUM_WORKSPACE               = 'VanadiumWorkspace'
 
 REDUCTION_TYPE_CD = 'Empty can/cadmium'
@@ -75,8 +78,20 @@ class NameSource:
         return self._prefix + '_bkgsubtr'
 
     @namelogging
-    def badDetector(self):
-        return self._prefix + '_mask'
+    def badDetectors(self):
+        return self._prefix + '_alldiagn'
+
+    @namelogging
+    def badDetectorSpuriousBkg(self):
+        return self._prefix + '_bkgdiang'
+
+    @namelogging
+    def badDetectorEPPFails(self):
+        return self._prefix + '_eppfaildiagn'
+
+    @namelogging
+    def badDetectorZeroCounts(self):
+        return self._prefix + '_zerocountdiagn'
 
     @namelogging
     def detectorEfficiencyCorrected(self):
@@ -144,6 +159,9 @@ def guessIncidentEnergyWorkspaceName(eppWorkspace):
     # This can be considered a bit of a hack.
     splits = eppWorkspace.getName().split('_')
     return ''.join(splits[:-1]) + '_ie'
+
+def setAsBad(ws, index):
+    ws.dataY(index)[0] += 1
 
 class DirectILLReduction(DataProcessorAlgorithm):
 
@@ -255,24 +273,42 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 self.setProperty(PROP_OUTPUT_EPP_WORKSPACE, eppOutWs)
                 self.setProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE, eppOutWs)
 
-        # Identify bad detectors & include user mask
+        # Detector diagnostics, if requested.
+        if self.getProperty(PROP_DO_DETECTOR_DIAGNOSTICS).value:
+            diagnosticsWs = self.getProperty(PROP_DIAGNOSTICS_WORKSPACE).value
+            # No input diagnostics workspace? Diagnose!
+            if not diagnosticsWs:
+                # 1. Detectors with zero counts.
+                outWsName = workspaceNames.badDetector()
+                diagnosticsWs, nFailures = FindDetectorsOutsideLimits(InputWorkspace=workspace,
+                                                                      OutputWorkspace=outWsName)
+                # 2. Detectors where FindEPP failed.
+                # TODO Should this be stored in a separate temp ws for debuggin?
+                for i in range(diagnosticsWs.getNumberHistograms()):
+                    if eppWorkspace.cell('FitStatus', i) != 'success':
+                        setAsBad(diagnosticsWs, i)
+                # 3. Detectors with high background
+                outWsName = workspaceNames.badDetectorSpuriousBkg()
+                bkgDiagnostics, nFailures = MedianDetectorTest(InputWorkspace=bkgWorkspace,
+                                                               OutputWorkspace=outWsName)
+                for i in range(diagnosticsWs.getNumberHistograms()):
+                    if bkgDiagnostics.readY(i)[0] == 0:
+                        setAsBad(diagnosticsWs, i)
+            # Mask detectors identified as bad.
+            outWsName = workspaceNames.masked()
+            workspace = CloneWorkspace(InputWorkspace=workspace,
+                                       OutputWorkspace=outWsName)
+            MaskDetectors(Workspace=workspace,
+                          MaskedWorkspace=badDetWorkspace)
+            # Save output if desired.
+            diagnosticsOutWs = self.getProperty(PROP_OUTPUT_DIAGNOSTICS_WORKSPACE).value
+            if diagnosticsOutWs:
+                self.setProperty(PROP_OUTPUT_DIAGNOSTICS_WORKSPACE, diagnosticsWs)
+        # Apply user mask.
         userMask = self.getProperty(PROP_USER_MASK).value
-        outWs = workspaceNames.badDetector()
-        badDetWorkspace, nFailures = FindDetectorsOutsideLimits(InputWorkspace=workspace,
-                                                                OutputWorkspace=outWs)
-        def mask(maskWs, i):
-            maskWs.setY(i, numpy.array([maskWs.readY(i)[0] + 1.0]))
-        for i in range(badDetWorkspace.getNumberHistograms()):
-            if eppWorkspace.cell('FitStatus', i) != 'success':
-                mask(badDetWorkspace, i)
-            if i in userMask:
-                mask(badDetWorkspace, i)
-        # Mask detectors
-        outWs = workspaceNames.masked()
-        workspace = CloneWorkspace(InputWorkspace=workspace,
-                                   OutputWorkspace=outWs)
         MaskDetectors(Workspace=workspace,
-                      MaskedWorkspace=badDetWorkspace)
+                      DetectorList=userMask)
+
 
         # Get calibrated incident energy from somewhere
         # It should come from the same place as the epp workspace.
@@ -533,6 +569,15 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                               '',
                                               direction=Direction.Input),
                              doc='List of spectra to mask')
+        self.declareProperty(PROP_DO_DETECTOR_DIAGNOSTICS,
+                             True,
+                             direction=Direction.Input,
+                             doc='If true, run detector diagnostics or apply ' + PROP_DIAGNOSTICS_WORKSPACE)
+        self.declareProperty(MatrixWorkspaceProperty(PROP_DIAGNOSTICS_WORKSPACE,
+                                                     '',
+                                                     Direction.Input,
+                                                     PropertyMode.Optional),
+                             doc='Detector diagnostics workspace obtained from another reduction run.')
         self.declareProperty(PROP_TRANSMISSION,
                              1.0,
                              direction=Direction.Input,
@@ -569,6 +614,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              direction=Direction.Output,
                              optional=PropertyMode.Optional),
                              doc='Output workspace for flat background')
+        self.declareProperty(WorkspaceProperty(PROP_OUTPUT_DIAGNOSTICS_WORKSPACE,
+                                               '',
+                                               direction=Direction.Output,
+                                               optional=PropertyMode.Optional),
+                             doc='Output workspace for detector diagnostics')
         self.declareProperty(WorkspaceProperty(PROP_OUTPUT_WORKSPACE,
                              '',
                              direction=Direction.Output),
