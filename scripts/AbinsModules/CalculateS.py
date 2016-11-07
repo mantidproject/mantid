@@ -122,7 +122,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                     "atomic_displacements": np.asarray([k_data["atomic_displacements"][gamma_pkt_index]])}
         return k_points
 
-    # noinspection PyTypeChecker
+    # noinspection PyTypeChecker,PyPep8Naming
     def _calculate_s_powder_1D(self, q_data=None, powder_data=None, instrument=None):
         """
         Calculates S for the powder case.
@@ -160,9 +160,9 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
 
         # calculate frequencies
         local_freq = fundamentals_freq
-        local_coeff = np.eye(local_freq.size, dtype=AbinsConstants.int_type)
+        local_coeff = np.arange(fundamentals_freq.size, dtype=AbinsConstants.int_type)
         generated_frequencies = []
-        generated_reduced_coefficients = []
+        generated_coefficients = []
 
         for order in range(AbinsConstants.fundamentals, self._quantum_order_num + AbinsConstants.s_last_index):
 
@@ -171,24 +171,8 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                                                                        fundamentals_array=fundamentals_freq,
                                                                        quantum_order=order)
 
-            outer_indx = []
-            for i in range(local_freq.size):
-
-                inner_indices = []
-                for indx, coeff in np.ndenumerate(local_coeff[i]):
-                    while coeff != AbinsConstants.empty_slot:
-                        inner_indices.append(indx[0])
-                        coeff -= 1
-
-                    # we collected all necessary indices
-                    if len(inner_indices) == order:
-                        break
-
-                outer_indx.append(inner_indices)
-
             generated_frequencies.append(local_freq)
-            # generated_coefficients.append(local_coeff)
-            generated_reduced_coefficients.append(np.asarray(outer_indx))
+            generated_coefficients.append(local_coeff)
 
         # calculate s for each atom
         for atom in range(num_atoms):
@@ -201,7 +185,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
 
                 value_dft = self._calculate_order[order](q2=q2,
                                                          frequencies=generated_frequencies[order_indx],
-                                                         indices=generated_reduced_coefficients[order_indx],
+                                                         indices=generated_coefficients[order_indx],
                                                          a_tensor=powder_atoms_data["a_tensors"][atom],
                                                          a_trace=a_traces[atom],
                                                          b_tensor=powder_atoms_data["b_tensors"][atom],
@@ -277,6 +261,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         # in case indices are the same factor is 2 otherwise it is 1
         factor = (indices[:, 0] == indices[:, 1]) + 1
 
+        # noinspection PyPep8
         s = q4 * dw * (np.prod(np.take(b_trace, indices=indices), axis=1) +
             np.einsum('kli, kil->k', np.take(b_tensor, indices=indices[:, 0], axis=0),
             np.take(b_tensor, indices=indices[:, 1], axis=0))) / (15.0 * factor)
