@@ -17,6 +17,13 @@ class IndirectAnnulusAbsorption2Test(unittest.TestCase):
         self._can_ws = can_ws
         self._red_ws = red_ws
 
+    def tearDown(self):
+        """
+        Removes sample workspaces.
+        """
+        DeleteWorkspace(self._can_ws)
+        DeleteWorkspace(self._red_ws)
+
     def _test_workspaces(self, corrected, factor_group):
         """
         Checks the units of the Ass and corrected workspaces.

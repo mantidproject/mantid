@@ -65,8 +65,8 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                              doc='Use can corrections in subtraction')
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
                              doc='Can chemical formula')
-        self.declareProperty(name='CanDensityType', defaultValue='Mass Density',
-                             validator=StringListValidator(['Mass Density', 'Number Density']),
+        self.declareProperty(name='CanDensityType', defaultValue='Mass',
+                             validator=StringListValidator(['Mass', 'Number']),
                              doc='Use of Mass density or Number density')
         self.declareProperty(name='CanDensity', defaultValue=0.1,
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')

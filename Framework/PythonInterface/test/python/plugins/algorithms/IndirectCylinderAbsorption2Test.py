@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.simpleapi import LoadNexusProcessed, IndirectCylinderAbsorption
+from mantid.simpleapi import LoadNexusProcessed, IndirectCylinderAbsorption, DeleteWorkspace
 from mantid.api import *
 
 
@@ -16,6 +16,13 @@ class IndirectCylinderAbsorption2Test(unittest.TestCase):
 
         self._can_ws = can_ws
         self._red_ws = red_ws
+
+    def tearDown(self):
+        """
+        Removes sample workspaces.
+        """
+        DeleteWorkspace(self._can_ws)
+        DeleteWorkspace(self._red_ws)
 
     def _test_workspaces(self, corrected, factor_group):
         """
