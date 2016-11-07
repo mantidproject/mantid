@@ -1136,7 +1136,7 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
 
   if (ws) {
 
-    PARALLEL_FOR1(ws)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
     for (int wi = 0; wi < static_cast<int>(ws->getNumberHistograms()); wi++) {
       double local_min, local_max;
       const Mantid::MantidVec &Y = ws->readY(wi);

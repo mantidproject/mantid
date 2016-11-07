@@ -76,7 +76,7 @@ void DetectorEfficiencyCorUser::exec() {
       static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
 
   // Loop over the histograms (detector spectra)
-  PARALLEL_FOR2(m_outputWS, m_inputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS, *m_inputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
