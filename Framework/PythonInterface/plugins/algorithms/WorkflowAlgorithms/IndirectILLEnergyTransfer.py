@@ -47,6 +47,9 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
     def summary(self):
         return 'Performs energy transfer reduction for ILL indirect geometry data, instrument IN16B.'
 
+    def name(self):
+        return "IndirectILLEnergyTransfer"
+
     def PyInit(self):
 
         self.declareProperty(MultipleFileProperty('Run', extensions=['nxs']),
@@ -168,8 +171,8 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
         y = mtd[ws].readY(0)
         size = len(y)
         mid = int(size / 2)
-        imin = np.nanargmax(y[0:mid]) - 1
-        imax = np.nanargmax(y[mid:size]) + 1 + mid
+        imin = np.nanargmax(y[0:mid])
+        imax = np.nanargmax(y[mid:size]) + mid
         return imin, imax
 
     def _monitor_zero_range(self, ws):
@@ -313,13 +316,11 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
             NormaliseToMonitor(InputWorkspace=ws, OutputWorkspace=ws, MonitorWorkspace=mon,
                                IntegrationRangeMin=x[0], IntegrationRangeMax=x[-1])
 
-            ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0, NaNError=0)
-
         elif self._reduction_type == 'IFWS':
             # Integrate over the two peaks at the beginning and at the end and sum
             size = mtd[ws].blocksize()
             x_values = mtd[ws].readX(0)
-            x_start, x_end = self._monitor_max_range(ws)
+            x_start, x_end = self._monitor_max_range(mon)
 
             i1 = '__integral1_' + ws
             i2 = '__integral2_' + ws
@@ -328,7 +329,7 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
                         RangeLower=x_values[0], RangeUpper=x_values[2*x_start])
 
             Integration(InputWorkspace=mon, OutputWorkspace=i2,
-                        RangeLower=x_values[-2*(size - x_end)+1], RangeUpper=x_values[-1])
+                        RangeLower=x_values[-2*(size - x_end)], RangeUpper=x_values[-1])
 
             __integral = Plus(i1,i2)
 

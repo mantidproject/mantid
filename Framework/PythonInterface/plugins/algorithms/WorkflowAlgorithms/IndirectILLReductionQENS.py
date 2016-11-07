@@ -19,6 +19,7 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
     _back_scaling = None
     _criteria = None
     _progress = None
+    _red_ws = None
     _common_args = {}
     _peak_range = []
     _runs = []
@@ -28,6 +29,9 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
 
     def summary(self):
         return 'Performs complete QENS multiple file reduction for ILL indirect geometry data, instrument IN16B.'
+
+    def name(self):
+        return "IndirectILLReductionQENS"
 
     def PyInit(self):
 
@@ -166,7 +170,7 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
 
     def _filter_files(self, files, label):
         '''
-        Filters the given list of files according to QENS and mirror sense criteria
+        Filters the given list of files according to nexus criteria
         @param  files :: list of input files (i.e. , and + separated string)
         @param  label :: label of error message if nothing left after filtering
         @throws RuntimeError :: when nothing left after filtering
@@ -260,7 +264,7 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         @param run :: run path
         '''
 
-        runnumber = os.path.basename(run).split('.')[0]
+        runnumber = os.path.basename(run.split('+')[0]).split('.')[0]
 
         self._progress.report("Reducing run #" + run)
 
