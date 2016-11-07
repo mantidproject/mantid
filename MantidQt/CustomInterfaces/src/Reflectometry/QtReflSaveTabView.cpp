@@ -73,5 +73,12 @@ std::string QtReflSaveTabView::getSpectraList() const {
   return m_ui.spectraListEdit->text().toStdString();
 }
 
+/** Returns the file format
+* @return :: File format
+*/
+std::string QtReflSaveTabView::getFileFormat() const {
+  return m_ui.fileFormatComboBox->currentText().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid

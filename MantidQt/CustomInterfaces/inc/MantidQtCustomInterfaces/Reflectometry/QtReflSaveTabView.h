@@ -60,6 +60,8 @@ public:
   std::string getListOfParameters() const override;
   /// Returns the spectra list
   std::string getSpectraList() const override;
+  /// Returns the file format
+  std::string getFileFormat() const override;
 
 private:
   /// Initialize the interface
