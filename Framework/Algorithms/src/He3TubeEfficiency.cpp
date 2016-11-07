@@ -102,7 +102,7 @@ void He3TubeEfficiency::exec() {
   }
 
   // Get the detector parameters
-  this->paraMap = &(this->inputWS->constInstrumentParameters());
+  m_paraMap = &(m_inputWS->constInstrumentParameters());
 
   // Store some information about the instrument setup that will not change
   m_samplePos = m_inputWS->getInstrument()->getSample()->getPos();
