@@ -21,42 +21,13 @@ DECLARE_ALGORITHM(MonteCarloParameters)
 
 namespace {
 
-/// Get parameters of a cost function as a vector of doubles.
-std::vector<double> getParameters(const CostFunctions::CostFuncFitting &costFunc) {
-  std::vector<double> out;
-  auto n = costFunc.nParams();
-  if (n > 0) {
-    out.reserve(n);
-    for (size_t i = 0; i < n; ++i) {
-      out.push_back(costFunc.getParameter(i));
-    }
-  }
-  return out;
-}
-
-/// Set parameters of a cost function from a vector.
-void setParameters(CostFunctions::CostFuncFitting &costFunc, const std::vector<double> &params) {
-  if (params.size() != costFunc.nParams()) {
-    throw std::logic_error("Number of parameters of a cost function doesn't "
-                           "match the size of an input vector.");
-  }
-  for (size_t i = 0; i < params.size(); ++i) {
-    costFunc.setParameter(i, params[i]);
-  }
-  costFunc.applyTies();
-}
-
 /// Return a sum of constraints penalty values.
 double
 getConstraints(const std::vector<std::unique_ptr<IConstraint>> &constraints) {
-  try {
-    return std::accumulate(constraints.begin(), constraints.end(), 0.0,
-                           [](double s, const std::unique_ptr<IConstraint> &c) {
-                             return s + c->check();
-                           });
-  } catch (...) {
-    return 0.0;
-  }
+  return std::accumulate(constraints.begin(), constraints.end(), 0.0,
+                          [](double s, const std::unique_ptr<IConstraint> &c) {
+                            return s + c->check();
+                          });
 }
 
 } // namespace
@@ -81,7 +52,7 @@ const std::string MonteCarloParameters::summary() const {
 /// Initialize the algorithm's properties.
 void MonteCarloParameters::initConcrete() {
   declareCostFunctionProperty();
-  declareProperty("NIterations", 100, "Number of iterations to run.");
+  declareProperty("NSamples", 100, "Number of iterations to run.");
   declareProperty("Constraints","","Additional constraints on tied parameters.");
 }
 
@@ -141,11 +112,12 @@ void MonteCarloParameters::execConcrete() {
   costFunction->reset();
   nParams = costFunction->nParams();
 
-  std::vector<double> bestParams = getParameters(*costFunction);
+  GSLVector bestParams;
+  costFunction->getParameters(bestParams);
   double bestValue = costFunction->val() + getConstraints(constraints);
 
   // Implicit cast from int to size_t
-  size_t nIter = static_cast<int>(getProperty("NIterations"));
+  size_t nIter = static_cast<int>(getProperty("NSamples"));
   for(size_t it = 0; it < nIter; ++it) {
     for(size_t i = 0; i < nParams; ++i) {
       const auto &range = ranges[i];
@@ -158,10 +130,10 @@ void MonteCarloParameters::execConcrete() {
     auto value = costFunction->val();
     if (value < bestValue) {
       bestValue = value;
-      bestParams = getParameters(*costFunction);
+      costFunction->getParameters(bestParams);
     }
   }
-  setParameters(*costFunction, bestParams);
+  costFunction->setParameters(bestParams);
 }
 
 } // namespace Algorithms

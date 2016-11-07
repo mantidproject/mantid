@@ -599,7 +599,7 @@ public:
         "Symmetry=C2v,Temperature=44.0,FWHM=1.0,NPeaks=3,"
         "constraints=(0<B20<2,1<B22<4,-0.1<B40<0.1,-0.1<B42<0.1,-0.1<B44<0.1)");
     mc->setProperty("InputWorkspace", ws);
-    mc->setProperty("NIterations", 1000);
+    mc->setProperty("NSamples", 1000);
     mc->setProperty("Constraints", "0<f2.PeakCentre<50");
     mc->execute();
     IFunction_sptr func = mc->getProperty("Function");

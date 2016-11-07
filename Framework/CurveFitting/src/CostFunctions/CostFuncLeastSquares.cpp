@@ -367,34 +367,6 @@ void CostFuncLeastSquares::drop() {
 }
 
 /**
- * Copy the parameter values from a GSLVector.
- * @param params :: A vector to copy the parameters from
- */
-void CostFuncLeastSquares::setParameters(const GSLVector &params) {
-  if (nParams() != params.size()) {
-    throw std::runtime_error(
-        "Parameter vector has wrong size in CostFuncLeastSquares.");
-  }
-  for (size_t i = 0; i < nParams(); ++i) {
-    setParameter(i, params.get(i));
-  }
-  m_function->applyTies();
-}
-
-/**
- * Copy the parameter values to a GSLVector.
- * @param params :: A vector to copy the parameters to
- */
-void CostFuncLeastSquares::getParameters(GSLVector &params) const {
-  if (params.size() != nParams()) {
-    params.resize(nParams());
-  }
-  for (size_t i = 0; i < nParams(); ++i) {
-    params.set(i, getParameter(i));
-  }
-}
-
-/**
   * Calculates covariance matrix for fitting function's active parameters.
   * @param covar :: Output cavariance matrix.
   * @param epsrel :: Tolerance.

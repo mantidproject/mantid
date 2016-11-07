@@ -859,7 +859,11 @@ class CrystalFieldFit(object):
 
     def monte_carlo(self, **kwargs):
         if isinstance(self._input_workspace, list):
-            raise NotImplementedError('Monte Carlo estimation is not implemented for multiple spectra')
+            self._monte_carlo_multi(**kwargs)
+        else:
+            self._monte_carlo_single(**kwargs)
+
+    def _monte_carlo_single(self, **kwargs):
         from mantid.api import AlgorithmManager
         fun = self.model.makeSpectrumFunction()
         alg = AlgorithmManager.createUnmanaged('MonteCarloParameters')
@@ -873,7 +877,7 @@ class CrystalFieldFit(object):
         self.model.update(function)
         self._function = function
 
-    def monte_carlo_multi(self, **kwargs):
+    def _monte_carlo_multi(self, **kwargs):
         from mantid.api import AlgorithmManager
         fun = self.model.makeMultiSpectrumFunction()
         alg = AlgorithmManager.createUnmanaged('MonteCarloParameters')

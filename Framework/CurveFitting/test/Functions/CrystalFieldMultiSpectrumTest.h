@@ -353,7 +353,7 @@ public:
     mc->setProperty("WorkspaceIndex", 0);
     mc->setProperty("InputWorkspace_1", ws);
     mc->setProperty("WorkspaceIndex_1", 1);
-    mc->setProperty("NIterations", 1000);
+    mc->setProperty("NSamples", 1000);
     mc->setProperty("Constraints", "0<f0.f2.PeakCentre<50,0<f0.f3.PeakCentre<"
                                    "50,0<f1.f2.PeakCentre<50,0<f1.f3."
                                    "PeakCentre<50");

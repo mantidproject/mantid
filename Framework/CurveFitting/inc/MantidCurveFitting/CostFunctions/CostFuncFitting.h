@@ -78,6 +78,11 @@ public:
   void applyTies();
   /// Reset the fitting function (neccessary if parameters get fixed/unfixed)
   void reset();
+  /// Set all parameters
+  void setParameters(const GSLVector &params);
+  /// Get values of all parameters
+  void getParameters(GSLVector &params) const;
+
 
 protected:
   /**
