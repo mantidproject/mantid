@@ -62,6 +62,8 @@ public:
   std::string getSpectraList() const override;
   /// Returns the file format
   std::string getFileFormat() const override;
+  /// Returns the title check
+  bool getTitleCheck() const override;
 
 private:
   /// Initialize the interface

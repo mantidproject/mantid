@@ -49,6 +49,7 @@ public:
   virtual std::string getListOfParameters() const = 0;
   virtual std::string getSpectraList() const = 0;
   virtual std::string getFileFormat() const = 0;
+  virtual bool getTitleCheck() const = 0;
 };
 }
 }

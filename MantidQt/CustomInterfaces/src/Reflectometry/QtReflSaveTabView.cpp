@@ -80,5 +80,12 @@ std::string QtReflSaveTabView::getFileFormat() const {
   return m_ui.fileFormatComboBox->currentText().toStdString();
 }
 
+/** Returns the title check value
+* @return :: The title check
+*/
+bool QtReflSaveTabView::getTitleCheck() const {
+  return m_ui.titleCheckBox->isChecked();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid
