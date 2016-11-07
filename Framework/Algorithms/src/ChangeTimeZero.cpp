@@ -237,7 +237,7 @@ ChangeTimeZero::getStartTimeFromWorkspace(API::MatrixWorkspace_sptr ws) const {
   Mantid::Kernel::TimeSeriesProperty<double> *goodFrame = nullptr;
   try {
     goodFrame = run.getTimeSeriesProperty<double>("proton_charge");
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     throw std::invalid_argument("ChangeTimeZero: The log needs a proton_charge "
                                 "time series to determine the zero time.");
   }

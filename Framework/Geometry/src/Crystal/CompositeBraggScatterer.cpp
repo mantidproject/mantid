@@ -142,7 +142,7 @@ void CompositeBraggScatterer::propagatePropertyToScatterer(
     const std::string &propertyValue) {
   try {
     scatterer->setPropertyValue(propertyName, propertyValue);
-  } catch (Kernel::Exception::NotFoundError) {
+  } catch (const Kernel::Exception::NotFoundError &) {
     // do nothing.
   }
 }
