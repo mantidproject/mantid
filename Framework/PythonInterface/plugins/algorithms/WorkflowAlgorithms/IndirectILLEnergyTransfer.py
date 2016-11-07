@@ -95,8 +95,7 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
     def _load_map_file(self):
         """
         Loads the detector grouping map file
-        @throws RuntimeError :: if neither the user defined
-                                nor the default file is not found
+        @throws RuntimeError :: if neither the user defined nor the default file is found
         """
 
         self._instrument_name = self._instrument.getName()
@@ -134,19 +133,22 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
             logger.debug('Mask bins larger than {0}'.format(xend))
             MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=x_values[xend + 1], XMax=x_values[-1])
 
-    def _convert_to_energy(self, ws):
+    def _convert_to_energy(self, ws, n_crop):
         """
         Converts the x-axis from raw channel number to energy transfer
         @param ws :: input workspace name
+        @param ws :: number of cropped bins
         """
 
         x = mtd[ws].readX(0)
         size = mtd[ws].blocksize()
-        mid = (x[-1] - x[0])/ 2. # think more about this, for cropped case it still does not work
+        mid = (x[-1] + x[0])/ 2.
         scale = 1000.  # from micro ev to mili ev
 
+        factor = (size + n_crop)/(size - 1)
+
         if self._doppler_energy != 0:
-            formula = '(x/{0} - 1)*{1}'.format(mid, (self._doppler_energy / scale) * size / (size - 1))
+            formula = '(x/{0} - 1)*{1}'.format(mid, (self._doppler_energy / scale) * factor)
         else:
             # Center the data for elastic fixed window scan, for integration over the elastic peak
             formula = '(x-{0})*{1}'.format(mid-0.5, 1. / scale)
@@ -225,8 +227,8 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
             if i == 0:
                 LoadILLIndirect(Filename=item,OutputWorkspace=self._red_ws)
             if i > 0:
-                runnumber = os.path.basename(item).split('.')[0]
-                LoadILLIndirect(Filename=item, OutputWorkspace='__' + runnumber)
+                runnumber = '__' + os.path.basename(item).split('.')[0]
+                LoadILLIndirect(Filename=item, OutputWorkspace=runnumber)
                 MergeRuns(InputWorkspaces=[self._red_ws,runnumber],OutputWorkspace=self._red_ws)
                 DeleteWorkspace(runnumber)
 
@@ -279,15 +281,18 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
 
         self._normalise_to_monitor(ws, mon)
 
-        DeleteWorkspace(mon)
+        n_cropped_bins = 0
 
         if self._reduction_type == 'QENS':
             if self._dead_channels:
-                CropWorkspace(InputWorkspace=ws,OutputWorkspace=ws,XMin=xmin,XMax=xmax)
+                CropWorkspace(InputWorkspace=ws,OutputWorkspace=ws,XMin=xmin,XMax=xmax+1)
+                n_cropped_bins = mtd[mon].blocksize() - mtd[ws].blocksize() - 1
             else:
                 self._mask(ws, xmin, xmax)
 
-        self._convert_to_energy(ws)
+        DeleteWorkspace(mon)
+
+        self._convert_to_energy(ws, n_cropped_bins)
 
         ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='Theta', EMode='Indirect')
 

@@ -18,6 +18,7 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
     _mirror_sense = None
     _back_scaling = None
     _criteria = None
+    _progress = None
     _common_args = {}
     _peak_range = []
     _runs = []
@@ -164,6 +165,13 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         del self._runs[:]
 
     def _filter_files(self, files, label):
+        '''
+        Filters the given list of files according to QENS and mirror sense criteria
+        @param  files :: list of input files (i.e. , and + separated string)
+        @param  label :: label of error message if nothing left after filtering
+        @throws RuntimeError :: when nothing left after filtering
+        @return :: the list of input files that passsed the criteria
+        '''
 
         files = SelectNexusFilesByMetadata(files, self._criteria)
 
@@ -175,6 +183,9 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         return files
 
     def _filter_all_input_files(self):
+        '''
+        Filters all the lists of input files needed for the reduction.
+        '''
 
         self._sample_file = self._filter_files(self._sample_file,'sample')
 
@@ -187,8 +198,23 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         if self._alignment_file:
             self._alignment_file = self._filter_files(self._alignment_file, 'alignment')
 
-    def _warn_negative_integral(self, ws):
-        pass
+    def _warn_negative_integral(self, ws, message):
+        '''
+        Raises an error if an integral of the given workspace is <= 0
+        @param ws :: input workspace name
+        @param message :: message suffix for the error
+        @throws RuntimeError :: on non-positive integral found
+        '''
+
+        tmp_int = '__tmp_int'+ws
+        Integration(InputWorkspace=ws,OutputWorkspace=tmp_int)
+
+        for item in range(mtd[tmp_int].getNumberOfEntries()):
+            for index in range(mtd[tmp_int].getItem(item).getNumberHistograms()):
+                if mtd[tmp_int].getItem(item).readY(index)[0] <= 0:
+                    raise RuntimeError('Negative or 0 integral in spectrum #{0} {1}'.format(index,message))
+
+        DeleteWorkspace(tmp_int)
 
     def PyExec(self):
 
@@ -204,12 +230,16 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
             IndirectILLEnergyTransfer(Run = self._calibration_file, OutputWorkspace = 'calibration', **self._common_args)
             Integration(InputWorkspace='calibration',RangeLower=self._peak_range[0],RangeUpper=self._peak_range[1],
                         OutputWorkspace='calibration')
-            self._warn_negative_integral('calibration')
+            self._warn_negative_integral('calibration','in calibration workspace.')
 
         if self._unmirror_option == 5 or self._unmirror_option == 7:
             IndirectILLEnergyTransfer(Run = self._alignment_file, OutputWorkspace = 'alignment', **self._common_args)
 
-        for run in self._sample_file.split(','):
+        runs = self._sample_file.split(',')
+
+        self._progress = Progress(self, start=0.0, end=1.0, nreports=len(runs))
+
+        for run in runs:
             self._reduce_run(run)
 
         if self._background_file:
@@ -225,8 +255,14 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         self.setProperty('OutputWorkspace',self._red_ws)
 
     def _reduce_run(self,run):
+        '''
+        Reduces the given (single or summed multiple) run
+        @param run :: run path
+        '''
 
         runnumber = os.path.basename(run).split('.')[0]
+
+        self._progress.report("Reducing run #" + run)
 
         ws = runnumber + '_' + self._red_ws
 
@@ -234,7 +270,7 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
 
         if self._background_file:
             Minus(LHSWorkspace=ws, RHSWorkspace='background', OutputWorkspace=ws)
-            self._warn_negative_integral(ws)
+            self._warn_negative_integral(ws,'after background subtraction.')
 
         if self._calibration_file:
             Divide(LHSWorkspace=ws, RHSWorkspace='calibration', OutputWorkspace=ws)
@@ -245,11 +281,15 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         self._runs.append(ws)
 
     def _perform_unmirror(self, ws):
+        '''
+        Performs unmirroring, i.e. summing of left and right wings for two-wing data or centering the one wing data
+        @param ws :: input workspace
+        '''
 
         outname = mtd[ws].getName()
 
         self.log().information('Unmirroring workspace {0} with option {1} and mirror sense {2}'
-                               .format(outname,self._unmirror_option, str(self._mirror_sense)))
+                               .format(outname,self._unmirror_option, self._mirror_sense))
 
         if not self._mirror_sense:   # one wing
 
