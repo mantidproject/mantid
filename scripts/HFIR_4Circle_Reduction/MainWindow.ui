@@ -223,7 +223,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>5</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1356,30 +1356,6 @@ p, li { white-space: pre-wrap; }
                     </widget>
                    </item>
                    <item>
-                    <widget class="QPushButton" name="pushButton_setScanInfo">
-                     <property name="text">
-                      <string>Set</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QPushButton" name="pushButton_usePt4UB">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use this peak to calcualate UB matrix&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                     <property name="text">
-                      <string>Use</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QPushButton" name="pushButton_showPtList">
-                     <property name="text">
-                      <string>List Pt.</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
                     <layout class="QHBoxLayout" name="horizontalLayout_4">
                      <item>
                       <widget class="QPushButton" name="pushButton_prevScanNumber">
@@ -1452,6 +1428,31 @@ p, li { white-space: pre-wrap; }
                      </item>
                     </layout>
                    </item>
+                   <item>
+                    <widget class="QPushButton" name="pushButton_setScanInfo">
+                     <property name="text">
+                      <string>Set</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_12">
+                     <item>
+                      <widget class="QPushButton" name="pushButton_showPtList">
+                       <property name="text">
+                        <string>List Pt.</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="pushButton_showSPICEinRaw">
+                       <property name="text">
+                        <string>SPICE</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
                   </layout>
                  </widget>
                 </item>
@@ -1483,25 +1484,6 @@ p, li { white-space: pre-wrap; }
                      </property>
                      <property name="alignment">
                       <set>Qt::AlignCenter</set>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QPushButton" name="pushButton_plotRawPt">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>80</width>
-                       <height>0</height>
-                      </size>
-                     </property>
-                     <property name="text">
-                      <string>Plot</string>
                      </property>
                     </widget>
                    </item>
@@ -1577,6 +1559,25 @@ p, li { white-space: pre-wrap; }
                       </widget>
                      </item>
                     </layout>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="pushButton_plotRawPt">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="minimumSize">
+                      <size>
+                       <width>80</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>Plot</string>
+                     </property>
+                    </widget>
                    </item>
                   </layout>
                  </widget>

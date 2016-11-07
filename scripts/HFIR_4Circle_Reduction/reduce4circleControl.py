@@ -1521,8 +1521,8 @@ class CWSCDReductionControl(object):
     def merge_scans(self, scan_md_ws_list, scan_peak_centre_list, merged_ws_name):
         """
         Merge multiple scans
-        :param exp_number:
-        :param scan_number_list:
+        :param scan_md_ws_list:
+        :param scan_peak_centre_list:
         :param merged_ws_name:
         :return:
         """

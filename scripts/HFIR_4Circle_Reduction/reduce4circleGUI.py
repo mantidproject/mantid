@@ -109,8 +109,11 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_plot_next_pt_raw)
         self.connect(self.ui.pushButton_showPtList, QtCore.SIGNAL('clicked()'),
                      self.show_scan_pt_list)
-        self.connect(self.ui.pushButton_usePt4UB, QtCore.SIGNAL('clicked()'),
-                     self.do_add_peak_to_find)
+        # TODO/ISSUE/NOW - remove it and the function too!
+        # self.connect(self.ui.pushButton_usePt4UB, QtCore.SIGNAL('clicked()'),
+        #              self.do_add_peak_to_find)
+        # TODO/ISSUE/NOW
+        # self.connect(self.ui.pushButton_showSPICEinRaw, QtCore....)
         self.connect(self.ui.pushButton_addROI, QtCore.SIGNAL('clicked()'),
                      self.do_add_roi)
         self.connect(self.ui.pushButton_cancelROI, QtCore.SIGNAL('clicked()'),
@@ -1462,7 +1465,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # enable/disable push buttons
         self.ui.pushButton_setHKL2Int.setEnabled(True)
-        self.ui.pushButton_undoSetToInteger.setEnable(False)
+        self.ui.pushButton_undoSetToInteger.setEnabled(False)
 
         return
 
@@ -2341,6 +2344,7 @@ class MainWindow(QtGui.QMainWindow):
         """ Index all peaks' HKL value in the merged-peak tab by UB matrix that is just calculated
         :return:
         """
+        # TODO/NOW/ISSUE/FIXME - This one does not work well.  Add debugging to fix it!
         # get the parameters
         exp_number = int(self.ui.lineEdit_exp.text())
         hkl_src = str(self.ui.comboBox_indexFrom.currentText())
