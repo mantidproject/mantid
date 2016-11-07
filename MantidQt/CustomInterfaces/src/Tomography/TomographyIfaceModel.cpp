@@ -241,7 +241,8 @@ bool TomographyIfaceModel::doPing(const std::string &compRes) {
     tid = alg->getPropertyValue("TransactionID");
     g_log.information() << "Pinged '" << compRes
                         << "'succesfully. Checked that a transaction could "
-                           "be created, with ID: " << tid << '\n';
+                           "be created, with ID: "
+                        << tid << '\n';
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Error. Failed to ping and start a transaction on "
                              "the remote resource." +
@@ -488,36 +489,22 @@ void TomographyIfaceModel::doRunReconstructionJobLocal(
     const std::string &run, const std::string &allOpts,
     const std::vector<std::string> &args) {
 
-  // Mantid::Kernel::ConfigService::Instance().launchProcess(run, runArgs);
+  // initialise to 0, if the launch fails then the id will not be changed
+  Poco::Process::PID pid = 0;
   try {
     Poco::ProcessHandle handle = Poco::Process::launch(run, args);
-    Poco::Process::PID pid = handle.id();
-    Mantid::API::IRemoteJobManager::RemoteJobInfo info;
-    info.id = boost::lexical_cast<std::string>(pid);
-    info.name = "Mantid_Local";
-    if (pid > 0) {
-      info.status = "Starting";
-    } else {
-      info.status = "Exit";
-    }
-    info.cmdLine = run + " " + allOpts;
-    m_jobsStatusLocal.emplace_back(info);
+    pid = handle.id();
   } catch (Poco::SystemException &sexc) {
     g_log.error() << "Execution failed. Could not run the tool. Error details: "
                   << std::string(sexc.what());
-    Mantid::API::IRemoteJobManager::RemoteJobInfo info;
-    info.id = "none";
-    info.name = "Mantid_Local";
-    info.status = "Exit";
-    info.cmdLine = run + " " + allOpts;
-    m_jobsStatusLocal.emplace_back(info);
-  } catch (std::runtime_error &rexc) {
-    logMsg("The execution of " + usingTool() + "failed. details: " +
-           std::string(rexc.what()));
-    g_log.error()
-        << "Execution failed. Coult not execute the tool. Error details: "
-        << std::string(rexc.what());
   }
+
+  Mantid::API::IRemoteJobManager::RemoteJobInfo info;
+  info.id = boost::lexical_cast<std::string>(pid);
+  info.name = "Mantid_Local";
+  info.status = pid > 0 ? "Starting" : "Exit";
+  info.cmdLine = run + " " + allOpts;
+  m_jobsStatusLocal.emplace_back(info);
 
   doRefreshJobsInfo("Local");
 }
