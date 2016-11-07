@@ -77,6 +77,16 @@
               <widget class="QLineEdit" name="filterEdit"/>
             </item>
             <item row="0" column="2">
+              <widget class="QCheckBox" name="regExpCheckBox"/>
+            </item>
+            <item row="0" column="3">
+              <widget class="QLabel" name="regExpLabel">
+                <property name="text">
+                  <string>RegExp</string>
+                </property>
+              </widget>
+            </item>
+            <item row="0" column="4">
               <spacer name="customSaveSpacer0">
                 <property name="orientation">
                   <enum>Qt::Horizontal</enum>
@@ -89,14 +99,14 @@
                 </property>
               </spacer>
             </item>
-            <item row ="1" column="0" colspan="2">
+            <item row ="1" column="0" colspan="4">
               <widget class="QLabel" name="listOfWorkspacesLabel">
                 <property name="text">
                   <string>List Of Workspaces</string>
                 </property>
               </widget>
             </item>
-            <item row="1" column="2">
+            <item row="1" column="4">
               <spacer name="customSaveSpacer1">
                 <property name="orientation">
                   <enum>Qt::Horizontal</enum>
@@ -109,17 +119,17 @@
                 </property>
               </spacer>
             </item>
-            <item row ="1" column="3">
+            <item row ="1" column="5">
               <widget class="QLabel" name="listOfLoggedParametersLabel">
                 <property name="text">
                   <string>List Of Logged Parameters</string>
                 </property>
               </widget>
             </item>
-            <item row ="2" column="0" colspan="2">
+            <item row ="2" column="0" colspan="4">
               <widget class="QTextEdit" name="listOfWorkspacesEdit"/>
             </item>
-            <item row="2" column="2">
+            <item row="2" column="4">
               <spacer name="customSaveSpacer3">
                 <property name="orientation">
                   <enum>Qt::Horizontal</enum>
@@ -132,10 +142,30 @@
                 </property>
               </spacer>
             </item>
-            <item row ="2" column="3">
+            <item row ="2" column="5">
               <widget class="QTextEdit" name="listOfLoggedParametersEdit"/>
             </item>
             <item row="3" column="0" colspan="4">
+              <widget class="QPushButton" name="refreshButton">
+                <property name="text">
+                  <string>Refresh</string>
+                </property>
+              </widget>
+            </item>
+            <item row="3" column="4">
+              <spacer name="customSaveSpacer4">
+                <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint">
+                  <size>
+                    <width>20</width>
+                    <height>20</height>
+                  </size>
+                </property>
+              </spacer>
+            </item>
+            <item row="4" column="0" colspan="6">
               <widget class="QGroupBox" name="groupBoxGroup">
                 <property name="title">
                   <string>GroupBox</string>
@@ -175,7 +205,33 @@
                     </widget>
                   </item>
                   <item row="1" column="1">
-                    <widget class="QComboBox" name="fileFormatComboBox"/>
+                    <widget class="QComboBox" name="fileFormatComboBox">
+                      <item>
+                        <property name="text">
+                          <string>Custom format (*.dat)</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>3 column (*.dat)</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>ANSTO, MotoFit, 4 column (*.txt)</string>
+                        </property>
+                      </item>
+                      <item>
+                        <property name="text">
+                          <string>ILL Cosmos (*.mft)</string>
+                        </property>
+                      </item>
+                      <property name="font">
+                        <font>
+                          <bold>true</bold>
+                        </font>
+                      </property>
+                    </widget>
                   </item>
                   <item row="1" column="2">
                     <spacer name="groupBoxSpacer1">
