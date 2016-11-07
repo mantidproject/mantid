@@ -19,7 +19,7 @@ namespace SliceViewer {
 /** Constructor
  */
 NonOrthogonalOverlay::NonOrthogonalOverlay(QwtPlot *plot, QWidget *parent)
-    : QWidget(parent), m_plot(plot), m_showLine(true), m_numberAxisEdge(0.95) {
+    : QWidget(parent), m_plot(plot), m_numberAxisEdge(0.95) {
   m_skewMatrix[0] = 1.0;
   m_skewMatrix[1] = 0.0;
   m_skewMatrix[2] = 0.0;
@@ -214,7 +214,7 @@ void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
     gridPen.setCapStyle(Qt::FlatCap);
     gridPen.setStyle(Qt::DashLine);
 
-    for (int i = 0; i < m_axisYPointVec.size(); i++) {
+    for (size_t i = 0; i < m_axisYPointVec.size(); i++) {
       painter.setPen(gridPen);
       painter.drawLine(transform(m_xAxisTickStartVec[i]),
                        transform(m_xAxisTickEndVec[i]));
