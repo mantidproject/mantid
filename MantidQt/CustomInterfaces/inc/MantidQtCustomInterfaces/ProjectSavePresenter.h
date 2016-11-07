@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Workspace.h"
 #include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtCustomInterfaces/ProjectSaveModel.h"
 #include "MantidQtCustomInterfaces/IProjectSaveView.h"
 
 #include <vector>
@@ -43,11 +44,10 @@ public:
   ProjectSavePresenter(IProjectSaveView* view);
 
 private:
-  std::vector<Mantid::API::Workspace_sptr> getWorkspaces() const;
-  std::set<std::string> getWorkspaceNames(const std::vector<Mantid::API::Workspace_sptr>& workspaces) const;
 
   /// Handle to the view for this presenter
   IProjectSaveView *m_view;
+  ProjectSaveModel m_model;
 };
 
 } //CustomInterfaces

@@ -10,24 +10,13 @@ using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
 
 ProjectSavePresenter::ProjectSavePresenter(IProjectSaveView *view)
-  : m_view(view)
+  : m_view(view), m_model(m_view->getWindows())
 {
-  auto workspaces = getWorkspaces();
-  auto workspaceNames = getWorkspaceNames(workspaces);
-  auto windows = m_view->getWindows();
+  auto workspaceNames = m_model.getWorkspaceNames();
+  for(auto name : workspaceNames) {
+    if(m_model.hasWindows(name)) {
+      auto windows = m_model.getWindows(name);
+    }
+  }
   m_view->updateWorkspacesList(workspaceNames);
-}
-
-std::vector<Workspace_sptr> ProjectSavePresenter::getWorkspaces() const {
-  auto &ads = AnalysisDataService::Instance();
-  return ads.getObjects();
-}
-
-std::set<std::string> ProjectSavePresenter::getWorkspaceNames(const std::vector<Workspace_sptr> &workspaces) const
-{
-  std::set<std::string> workspaceNames;
-  std::transform(workspaces.begin(), workspaces.end(),
-                 std::inserter(workspaceNames, workspaceNames.end()),
-                 [](const Workspace_sptr ws) { return ws->name(); });
-  return workspaceNames;
 }
