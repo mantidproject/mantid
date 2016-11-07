@@ -55,9 +55,8 @@ void InterpolationOption::set(const std::string &kind) {
 }
 
 /**
- * Add the interpolation property to the given algorithm
- * @param algorithm A reference to the algorithm that wil receive the new
- * property
+ * Create a property suitable to attach to an algorithm to support interpolation
+ * @return A new Property containing the valid list of interpolation methods
  */
 
 std::unique_ptr<Property> InterpolationOption::property() const {
@@ -78,8 +77,8 @@ std::string InterpolationOption::propertyDoc() const {
 
 /**
  * Apply the interpolation method to the given histogram
- * @param input
- * @param stepSize
+ * @param inOut A reference to a histogram to interpolate
+ * @param stepSize The step size of calculated points
  */
 void InterpolationOption::applyInplace(HistogramData::Histogram &inOut,
                                        size_t stepSize) const {
