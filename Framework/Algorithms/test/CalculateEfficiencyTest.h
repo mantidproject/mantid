@@ -236,7 +236,6 @@ void runValidateTest(const std::string &inputWS,
 
 class CalculateEfficiencyTest : public CxxTest::TestSuite {
 public:
-  void tearDown() {}
   void testName() { TS_ASSERT_EQUALS(correction.name(), "CalculateEfficiency") }
 
   void testVersion() { TS_ASSERT_EQUALS(correction.version(), 1) }
