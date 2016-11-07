@@ -46,6 +46,8 @@ public:
   QtReflSaveTabView(QWidget *parent = 0);
   /// Destructor
   ~QtReflSaveTabView() override;
+  /// Returns the save path
+  std::string getSavePath() const override;
 
 private:
   /// Initialize the interface

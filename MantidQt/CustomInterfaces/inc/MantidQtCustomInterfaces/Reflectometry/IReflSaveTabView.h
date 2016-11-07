@@ -40,6 +40,8 @@ public:
   IReflSaveTabView(){};
   /// Destructor
   virtual ~IReflSaveTabView(){};
+
+  virtual std::string getSavePath() const = 0;
 };
 }
 }

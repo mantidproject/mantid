@@ -24,5 +24,12 @@ Initialize the Interface
 */
 void QtReflSaveTabView::initLayout() { m_ui.setupUi(this); }
 
+/** Returns the save path
+* @return :: The save path
+*/
+std::string QtReflSaveTabView::getSavePath() const { 
+  return m_ui.savePathEdit->text().toStdString(); 
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid

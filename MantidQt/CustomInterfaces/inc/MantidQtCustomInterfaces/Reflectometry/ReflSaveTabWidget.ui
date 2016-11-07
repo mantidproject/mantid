@@ -20,14 +20,14 @@
       <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
-            <widget class="QLabel" name="pathLabel">
+            <widget class="QLabel" name="savePathLabel">
               <property name="text">
                 <string>Save path:</string>
               </property>
             </widget>
           </item>
           <item>
-            <widget class="QLineEdit" name="pathEdit"/>
+            <widget class="QLineEdit" name="savePathEdit"/>
           </item>
           <item>
             <widget class="QLabel" name="prefixLabel">
