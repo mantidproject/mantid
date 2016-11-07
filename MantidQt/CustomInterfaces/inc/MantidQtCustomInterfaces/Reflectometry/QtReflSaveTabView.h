@@ -52,6 +52,8 @@ public:
   std::string getPrefix() const override;
   /// Returns the filter
   std::string getFilter() const override;
+  /// Returns the reg exp check
+  bool getRegExpCheck() const override;
 
 private:
   /// Initialize the interface

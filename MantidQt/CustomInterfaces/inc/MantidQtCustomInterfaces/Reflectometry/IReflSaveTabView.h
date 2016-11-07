@@ -44,6 +44,7 @@ public:
   virtual std::string getSavePath() const = 0;
   virtual std::string getPrefix() const = 0;
   virtual std::string getFilter() const = 0;
+  virtual bool getRegExpCheck() const = 0;
 };
 }
 }

@@ -45,6 +45,13 @@ std::string QtReflSaveTabView::getFilter() const {
   return m_ui.filterEdit->text().toStdString();
 }
 
+/** Returns the regular expression check value
+* @return :: The reg exp check
+*/
+bool QtReflSaveTabView::getRegExpCheck() const {
+  return m_ui.regExpCheckBox->isChecked();
+}
+
 
 } // namespace CustomInterfaces
 } // namespace Mantid
