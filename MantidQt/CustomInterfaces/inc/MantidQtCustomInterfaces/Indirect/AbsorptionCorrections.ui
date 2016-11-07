@@ -169,15 +169,18 @@
            </widget>
           </item>
           <item row="5" column="1">
-           <widget class="QDoubleSpinBox" name="spFlatElementSize">
+           <widget class="QDoubleSpinBox" name="spFlatBeamHeight">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>5</number>
             </property>
             <property name="singleStep">
-             <double>0.010000000000000</double>
+             <double>0.100000000000000</double>
             </property>
             <property name="value">
-             <double>0.100000000000000</double>
+             <double>0.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -208,9 +211,9 @@
            </widget>
           </item>
           <item row="5" column="0">
-           <widget class="QLabel" name="lbFlatElementSize">
+           <widget class="QLabel" name="lbFlatBeamHeight">
             <property name="text">
-             <string>Element Size:</string>
+             <string>Beam Height:</string>
             </property>
            </widget>
           </item>
@@ -271,6 +274,60 @@
            <widget class="QLabel" name="lbFlatCanBackThickness">
             <property name="text">
              <string>Container Back Thickness:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="2">
+           <widget class="QLabel" name="lbFlatBeamWidth">
+            <property name="text">
+             <string>Beam Width:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="3">
+           <widget class="QDoubleSpinBox" name="spFlatBeamWidth">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="decimals">
+             <number>5</number>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="lbFlatNumberWavelengths">
+            <property name="text">
+             <string>Number Wavelengths:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QSpinBox" name="spFlatNumberWavelengths">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="value">
+             <number>10</number>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="2">
+           <widget class="QLabel" name="lbFlatNumberEvents">
+            <property name="text">
+             <string>Events:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="3">
+           <widget class="QSpinBox" name="spFlatNumberEvents">
+            <property name="maximum">
+             <number>10000000</number>
+            </property>
+            <property name="value">
+             <number>1000</number>
             </property>
            </widget>
           </item>
@@ -717,7 +774,7 @@
   <tabstop>spFlatSampleThickness</tabstop>
   <tabstop>spFlatCanFrontThickness</tabstop>
   <tabstop>spFlatCanBackThickness</tabstop>
-  <tabstop>spFlatElementSize</tabstop>
+  <tabstop>spFlatBeamHeight</tabstop>
   <tabstop>spAnnSampleInnerRadius</tabstop>
   <tabstop>spAnnSampleOuterRadius</tabstop>
   <tabstop>spAnnCanInnerRadius</tabstop>
