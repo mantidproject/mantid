@@ -10,6 +10,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/V3D.h"
 #include "MantidMDAlgorithms/CalculateCoverageDGS.h"
+#include "MantidAPI/Sample.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>

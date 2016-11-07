@@ -102,7 +102,7 @@ void He3TubeEfficiency::exec() {
   }
 
   // Get the detector parameters
-  m_paraMap = &(m_inputWS->instrumentParameters());
+  this->paraMap = &(this->inputWS->constInstrumentParameters());
 
   // Store some information about the instrument setup that will not change
   m_samplePos = m_inputWS->getInstrument()->getSample()->getPos();
@@ -118,7 +118,7 @@ void He3TubeEfficiency::exec() {
   std::size_t numHists = m_inputWS->getNumberHistograms();
   m_progress = new API::Progress(this, 0.0, 1.0, numHists);
 
-  PARALLEL_FOR2(m_inputWS, m_outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -412,7 +412,7 @@ void He3TubeEfficiency::execEvent() {
 
   std::size_t numHistograms = outputWS->getNumberHistograms();
   m_progress = new API::Progress(this, 0.0, 1.0, numHistograms);
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < static_cast<int>(numHistograms); ++i) {
     PARALLEL_START_INTERUPT_REGION
 

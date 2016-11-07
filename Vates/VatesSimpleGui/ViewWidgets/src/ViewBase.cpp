@@ -9,6 +9,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/BoxInfo.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
 #if defined(__INTEL_COMPILER)
 #pragma warning disable 1170
 #endif
@@ -145,6 +146,19 @@ void ViewBase::setAutoColorScale() {
   // Set the color scale widget
   emit this->dataRange(colorScale.minValue, colorScale.maxValue);
   emit this->setLogScale(colorScale.useLogScale);
+}
+
+/**
+ * Clear the render layout completely
+ */
+void ViewBase::clearRenderLayout(QFrame *frame) {
+  QLayout *layout = frame->layout();
+  if (layout) {
+    QLayoutItem *item;
+    while ((item = layout->takeAt(0)) != nullptr)
+      layout->removeItem(item);
+    delete layout;
+  }
 }
 
 /**

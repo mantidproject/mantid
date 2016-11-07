@@ -86,8 +86,8 @@ void SumRowColumn::exec() {
   outputWS->getAxis(0)->unit().reset(new Mantid::Kernel::Units::Empty);
 
   // Get references to the vectors for the results
-  MantidVec &X = outputWS->dataX(0);
-  MantidVec &Y = outputWS->dataY(0);
+  auto &X = outputWS->mutableX(0);
+  auto &Y = outputWS->mutableY(0);
 
   // Get the orientation
   const std::string orientation = getProperty("Orientation");
@@ -101,7 +101,7 @@ void SumRowColumn::exec() {
     // Now loop over calculating Y's
     for (int j = start; j <= end; ++j) {
       const int index = (horizontal ? (i + j * dim) : (i * dim + j));
-      Y[i] += integratedWS->readY(index)[0];
+      Y[i] += integratedWS->y(index)[0];
     }
   }
 

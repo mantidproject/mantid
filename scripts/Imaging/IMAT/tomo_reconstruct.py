@@ -50,14 +50,14 @@ ipython -- scripts/Imaging/IMAT/tomo_reconstruct.py\
 
 # find first the package/subpackages in the path of this file.
 import sys
-from sys import path
 import os
 from os import path
 # So insert in the path the directory that contains this file
-sys.path.insert(0, os.path.split(path.dirname(__file__))[0])
+sys.path.insert(0, os.path.split(path.dirname(__file__))[0]) # noqa
 
 from IMAT.tomorec import reconstruction_command as tomocmd
 import IMAT.tomorec.configs as tomocfg
+
 
 def setup_cmd_options():
     """
@@ -164,6 +164,7 @@ def setup_cmd_options():
 
     return parser
 
+
 def grab_preproc_options(args):
     """
     Get pre-proc options from the command line (through an argument parser)
@@ -218,6 +219,7 @@ def grab_preproc_options(args):
 
     return pre_config
 
+
 def grab_tool_alg_options(args):
     """
     Get tool and algorithm options from the command line (through an argument parser)
@@ -236,6 +238,7 @@ def grab_tool_alg_options(args):
         config.num_iter = int(args.num_iter)
 
     return config
+
 
 def grab_postproc_options(args):
     """
@@ -266,8 +269,8 @@ def main_tomo_rec():
     # distributions, as found for example on rhel6
     vers = sys.version_info
     if vers < (2,7,0):
-        raise RuntimeErrorn("Not running this test as it requires Python >= 2.7. Version found: {0}".
-                            format(vers))
+        raise RuntimeError("Not running this test as it requires Python >= 2.7. Version found: {0}".
+                           format(vers))
 
     import inspect
 

@@ -28,61 +28,62 @@ Description          : Preferences dialog
 ***************************************************************************/
 #include "ConfigDialog.h"
 #include "ApplicationWindow.h"
-#include "MultiLayer.h"
-#include "Graph.h"
-#include "Matrix.h"
-#include "ColorButton.h"
 #include "ColorBox.h"
-#include "pixmaps.h"
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
-#include "SendToProgramDialog.h"
+#include "ColorButton.h"
+#include "Graph.h"
 #include "Mantid/MantidUI.h"
+#include "MantidQtMantidWidgets/DoubleSpinBox.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "Matrix.h"
+#include "MultiLayer.h"
+#include "SendToProgramDialog.h"
+#include <MantidQtAPI/pixmaps.h>
 
-#include <QLocale>
-#include <QPushButton>
-#include <QLabel>
-#include <QLineEdit>
-#include <QGridLayout>
-#include <QGroupBox>
+#include <QApplication>
+#include <QComboBox>
+#include <QDir>
+#include <QFileDialog>
 #include <QFont>
 #include <QFontDialog>
-#include <QTabWidget>
-#include <QTreeWidget>
-#include <QStackedWidget>
-#include <QWidget>
-#include <QComboBox>
-#include <QSpinBox>
-#include <QRadioButton>
-#include <QStyleFactory>
-#include <QRegExp>
-#include <QMessageBox>
-#include <QTranslator>
-#include <QApplication>
-#include <QDir>
-#include <QPixmap>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QListWidget>
 #include <QFontMetrics>
-#include <QFileDialog>
-#include <QRegExp>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QLocale>
+#include <QMessageBox>
 #include <QMouseEvent>
+#include <QPixmap>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QRegExp>
+#include <QRegExp>
+#include <QSpinBox>
+#include <QStackedWidget>
 #include <QStringList>
+#include <QStyleFactory>
+#include <QTabWidget>
+#include <QTranslator>
+#include <QTreeWidget>
+#include <QVBoxLayout>
+#include <QWidget>
 
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FacilityInfo.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidQtMantidWidgets/InstrumentSelector.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidQtAPI/MdConstants.h"
-#include "MantidQtAPI/MdSettings.h"
 #include "MantidQtAPI/MdPlottingCmapsProvider.h"
+#include "MantidQtAPI/MdSettings.h"
+#include "MantidQtMantidWidgets/InstrumentSelector.h"
 
 #include <limits>
 
+using namespace MantidQt::API;
 using Mantid::Kernel::ConfigService;
 
 ConfigDialog::ConfigDialog(QWidget *parent, Qt::WFlags fl)
@@ -2338,25 +2339,25 @@ void ConfigDialog::languageChange() {
   boxCurveStyle->addItem(getQPixmap("hBars_xpm"), tr(" Horizontal Bars"));
 
   int style = app->defaultCurveStyle;
-  if (style == Graph::Line)
+  if (style == GraphOptions::Line)
     boxCurveStyle->setCurrentIndex(0);
-  else if (style == Graph::Scatter)
+  else if (style == GraphOptions::Scatter)
     boxCurveStyle->setCurrentIndex(1);
-  else if (style == Graph::LineSymbols)
+  else if (style == GraphOptions::LineSymbols)
     boxCurveStyle->setCurrentIndex(2);
-  else if (style == Graph::VerticalDropLines)
+  else if (style == GraphOptions::VerticalDropLines)
     boxCurveStyle->setCurrentIndex(3);
-  else if (style == Graph::Spline)
+  else if (style == GraphOptions::Spline)
     boxCurveStyle->setCurrentIndex(4);
-  else if (style == Graph::VerticalSteps)
+  else if (style == GraphOptions::VerticalSteps)
     boxCurveStyle->setCurrentIndex(5);
-  else if (style == Graph::HorizontalSteps)
+  else if (style == GraphOptions::HorizontalSteps)
     boxCurveStyle->setCurrentIndex(6);
-  else if (style == Graph::Area)
+  else if (style == GraphOptions::Area)
     boxCurveStyle->setCurrentIndex(7);
-  else if (style == Graph::VerticalBars)
+  else if (style == GraphOptions::VerticalBars)
     boxCurveStyle->setCurrentIndex(8);
-  else if (style == Graph::HorizontalBars)
+  else if (style == GraphOptions::HorizontalBars)
     boxCurveStyle->setCurrentIndex(9);
 
   // plots 3D
@@ -2821,8 +2822,19 @@ void ConfigDialog::updateMantidOptionsTab() {
 
   // invisible workspaces options
   QString showinvisible_ws = m_invisibleWorkspaces->isChecked() ? "1" : "0";
-  cfgSvc.setString("MantidOptions.InvisibleWorkspaces",
-                   showinvisible_ws.toStdString());
+
+  // store it if it has changed
+  if (showinvisible_ws.toStdString() !=
+      cfgSvc.getString("MantidOptions.InvisibleWorkspaces")) {
+    cfgSvc.setString("MantidOptions.InvisibleWorkspaces",
+                     showinvisible_ws.toStdString());
+
+    // update the workspace tree
+    if (ApplicationWindow *app =
+            dynamic_cast<ApplicationWindow *>(this->parentWidget())) {
+      app->mantidUI->updateWorkspaces();
+    }
+  }
 
   // OpenGL option
   QString setting = m_useOpenGL->isChecked() ? "On" : "Off";
@@ -2873,34 +2885,34 @@ int ConfigDialog::curveStyle() {
   int style = 0;
   switch (boxCurveStyle->currentIndex()) {
   case 0:
-    style = Graph::Line;
+    style = GraphOptions::Line;
     break;
   case 1:
-    style = Graph::Scatter;
+    style = GraphOptions::Scatter;
     break;
   case 2:
-    style = Graph::LineSymbols;
+    style = GraphOptions::LineSymbols;
     break;
   case 3:
-    style = Graph::VerticalDropLines;
+    style = GraphOptions::VerticalDropLines;
     break;
   case 4:
-    style = Graph::Spline;
+    style = GraphOptions::Spline;
     break;
   case 5:
-    style = Graph::VerticalSteps;
+    style = GraphOptions::VerticalSteps;
     break;
   case 6:
-    style = Graph::HorizontalSteps;
+    style = GraphOptions::HorizontalSteps;
     break;
   case 7:
-    style = Graph::Area;
+    style = GraphOptions::Area;
     break;
   case 8:
-    style = Graph::VerticalBars;
+    style = GraphOptions::VerticalBars;
     break;
   case 9:
-    style = Graph::HorizontalBars;
+    style = GraphOptions::HorizontalBars;
     break;
   }
   return style;

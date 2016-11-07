@@ -1,9 +1,7 @@
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
@@ -23,10 +21,6 @@ using Kernel::V3D;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MayersSampleCorrection)
-
-//------------------------------------------------------------------------------
-// Public members
-//------------------------------------------------------------------------------
 
 /**
  * Constructor
@@ -107,13 +101,10 @@ void MayersSampleCorrection::exec() {
   Progress prog(this, 0., 1., nhist);
   prog.setNotifyStep(0.01);
 
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    // Copy the X values over
-    const auto &inX = inputWS->readX(i);
-    outputWS->dataX(i) = inX;
     IDetector_const_sptr det;
     try {
       det = inputWS->getDetector(i);
@@ -134,9 +125,9 @@ void MayersSampleCorrection::exec() {
     params.sigmaSc = sampleMaterial.totalScatterXSection();
     params.cylRadius = radius;
     params.cylHeight = height;
-    MayersSampleCorrectionStrategy correction(params, inX, inputWS->readY(i),
-                                              inputWS->readE(i));
-    correction.apply(outputWS->dataY(i), outputWS->dataE(i));
+
+    MayersSampleCorrectionStrategy correction(params, inputWS->histogram(i));
+    outputWS->setHistogram(i, correction.getCorrectedHisto());
     prog.report();
 
     PARALLEL_END_INTERUPT_REGION

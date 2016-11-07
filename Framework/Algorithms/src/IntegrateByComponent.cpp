@@ -78,7 +78,7 @@ void IntegrateByComponent::exec() {
       prog.report();
       std::vector<double> averageYInput, averageEInput;
 
-      PARALLEL_FOR1(integratedWS)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*integratedWS))
       for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
         PARALLEL_START_INTERUPT_REGION
 
@@ -90,9 +90,7 @@ void IntegrateByComponent::exec() {
         const double yValue = integratedWS->y(hists[i])[0];
         const double eValue = integratedWS->e(hists[i])[0];
 
-        if (boost::math::isnan(yValue) || boost::math::isinf(yValue) ||
-            boost::math::isnan(eValue) ||
-            boost::math::isinf(eValue)) // NaNs/Infs
+        if (!std::isfinite(yValue) || !std::isfinite(eValue)) // NaNs/Infs
           continue;
 
         // Now we have a good value
@@ -117,7 +115,7 @@ void IntegrateByComponent::exec() {
             gsl_stats_mean(&averageEInput[0], 1, averageYInput.size()));
       }
 
-      PARALLEL_FOR1(integratedWS)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*integratedWS))
       for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
         PARALLEL_START_INTERUPT_REGION
         if (spectrumInfo.isMonitor(hists[i]))
@@ -127,9 +125,7 @@ void IntegrateByComponent::exec() {
 
         const double yValue = integratedWS->y(hists[i])[0];
         const double eValue = integratedWS->e(hists[i])[0];
-        if (boost::math::isnan(yValue) || boost::math::isinf(yValue) ||
-            boost::math::isnan(eValue) ||
-            boost::math::isinf(eValue)) // NaNs/Infs
+        if (!std::isfinite(yValue) || !std::isfinite(eValue)) // NaNs/Infs
           continue;
 
         // Now we have a good value

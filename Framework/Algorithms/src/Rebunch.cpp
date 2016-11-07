@@ -79,7 +79,7 @@ void Rebunch::exec() {
   int progress_step = histnumber / 100;
   if (progress_step == 0)
     progress_step = 1;
-  PARALLEL_FOR2(inputW, outputW)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputW, *outputW))
   for (int hist = 0; hist < histnumber; hist++) {
     PARALLEL_START_INTERUPT_REGION
 
