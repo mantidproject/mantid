@@ -65,8 +65,8 @@ float_type = np.dtype(np.float64)
 complex_id = np.dtype(np.complex).num
 complex_type = np.dtype(np.complex)
 
-int_id = np.dtype(np.uint8).num
-int_type = np.dtype(np.uint8)
+int_id = np.dtype(np.uint16).num
+int_type = np.dtype(np.uint16)
 
 # maximum number of entries in the workspace
 total_workspace_size = int(round(AbinsParameters.max_wavenumber / float(AbinsParameters.bin_width), 0))
