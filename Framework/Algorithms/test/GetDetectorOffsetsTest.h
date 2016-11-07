@@ -1,15 +1,15 @@
 #ifndef GETDETECTOROFFSETSTEST_H_
 #define GETDETECTOROFFSETSTEST_H_
 
-#include "MantidAlgorithms/GetDetectorOffsets.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAlgorithms/GetDetectorOffsets.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-#include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::API;
 using Mantid::Algorithms::GetDetectorOffsets;
@@ -213,7 +213,7 @@ public:
   GetDetectorOffsetsTestPerformance() { FrameworkManager::Instance(); }
 
   void setUp() override {
-    numpixels = 10000;
+    numpixels = 100;
     WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         numpixels, 200, false);
     WS->getAxis(0)->unit() =

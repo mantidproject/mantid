@@ -372,4 +372,61 @@ public:
   }
 };
 
+class ConvertSpectrumAxis2TestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ConvertSpectrumAxis2TestPerformance *createSuite() {
+    return new ConvertSpectrumAxis2TestPerformance();
+  }
+  static void destroySuite(ConvertSpectrumAxis2TestPerformance *suite) {
+    delete suite;
+  }
+
+  ConvertSpectrumAxis2TestPerformance() {
+    bool startYNegative = true;
+
+    inputWS_manyBins =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+            300, 3000, false, startYNegative);
+    inputWS_manyHistograms =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+            2000, 300, false, startYNegative);
+  }
+  ~ConvertSpectrumAxis2TestPerformance() override {
+    AnalysisDataService::Instance().remove(outputWS);
+  }
+
+  /** Bin length doesn't really matter with HistogramData
+  * because only the shared pointer is copied
+  */
+  void testManyBinsPerformace() {
+    Mantid::Algorithms::ConvertSpectrumAxis2 conv;
+
+    conv.initialize();
+    conv.setProperty("InputWorkspace", inputWS_manyBins);
+    conv.setPropertyValue("OutputWorkspace", outputWS);
+    conv.setPropertyValue("Target", "theta");
+    conv.setPropertyValue("EFixed", "10.0");
+    conv.execute();
+    conv.isExecuted();
+  }
+
+  void testManyHistogramsPerformace() {
+    Mantid::Algorithms::ConvertSpectrumAxis2 conv;
+
+    conv.initialize();
+    conv.setProperty("InputWorkspace", inputWS_manyHistograms);
+    conv.setPropertyValue("OutputWorkspace", outputWS);
+    conv.setPropertyValue("Target", "theta");
+    conv.setPropertyValue("EFixed", "10.0");
+    conv.execute();
+    conv.isExecuted();
+  }
+
+private:
+  MatrixWorkspace_sptr inputWS_manyBins;
+  MatrixWorkspace_sptr inputWS_manyHistograms;
+  const std::string outputWS = "outputWS";
+};
 #endif /*CONVERTSPECTRUMAXIS2TEST_H_*/

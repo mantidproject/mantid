@@ -16,6 +16,13 @@ using Mantid::Kernel::UnitFactory;
 
 class ApplyTransmissionCorrectionTest : public CxxTest::TestSuite {
 public:
+  static ApplyTransmissionCorrectionTest *createSuite() {
+    return new ApplyTransmissionCorrectionTest();
+  }
+  static void destroySuite(ApplyTransmissionCorrectionTest *suite) {
+    delete suite;
+  }
+
   void testBasics() {
     Mantid::Algorithms::ApplyTransmissionCorrection correction;
 
@@ -120,4 +127,60 @@ public:
   }
 };
 
+class ApplyTransmissionCorrectionTestPerformance : public CxxTest::TestSuite {
+public:
+  static ApplyTransmissionCorrectionTestPerformance *createSuite() {
+    return new ApplyTransmissionCorrectionTestPerformance();
+  }
+  static void destroySuite(ApplyTransmissionCorrectionTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    inputWS = "input_data_ws";
+    outputWS = "output_data_ws";
+    Mantid::DataHandling::LoadSpice2D loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "BioSANS_test_data.xml");
+    loader.setPropertyValue("OutputWorkspace", inputWS);
+    loader.execute();
+
+    Mantid::DataHandling::MoveInstrumentComponent mover;
+    mover.initialize();
+    mover.setPropertyValue("Workspace", inputWS);
+    mover.setPropertyValue("ComponentName", "detector1");
+    // X = (16-192.0/2.0+0.5)*5.15/1000.0 = -0.409425
+    // Y = (95-192.0/2.0+0.5)*5.15/1000.0 = -0.002575
+    mover.setPropertyValue("X", "0.409425");
+    mover.setPropertyValue("Y", "0.002575");
+    mover.execute();
+  }
+
+  void tearDown() override {
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS);
+    Mantid::API::AnalysisDataService::Instance().remove(inputWS);
+  }
+
+  void test_performance() {
+
+    Mantid::Algorithms::ApplyTransmissionCorrection correction;
+
+    correction.initialize();
+
+    correction.setPropertyValue("InputWorkspace", inputWS);
+
+    // Applytranscor Y and E params
+    // Y 0.6
+    correction.setProperty("TransmissionValue", 0.6);
+    // E 0.02
+    correction.setProperty("TransmissionError", 0.02);
+    correction.setPropertyValue("OutputWorkspace", outputWS);
+    correction.execute();
+    TS_ASSERT(correction.isExecuted())
+  }
+
+private:
+  std::string inputWS;
+  std::string outputWS;
+};
 #endif /*APPLYTRANSMISSIONCORRECTIONTEST_H_*/

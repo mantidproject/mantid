@@ -7,11 +7,8 @@
 #include "MantidAlgorithms/DetectorEfficiencyCorUser.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidKernel/ArrayProperty.h"
 #include <cmath>
 
 using namespace Mantid::API;
@@ -87,11 +84,11 @@ public:
     c.execute();
     TS_ASSERT(c.isExecuted());
 
+    // AFTER
     Mantid::API::MatrixWorkspace_const_sptr output;
     output = Mantid::API::AnalysisDataService::Instance()
                  .retrieveWS<Mantid::API::MatrixWorkspace>(outputWSName);
 
-    // AFTER
     // test the first tube to see if distance was well corrected to l2
     for (int i = 0; i < 5; i++) {
       Mantid::Geometry::IDetector_const_sptr det = output->getDetector(i);
@@ -109,6 +106,60 @@ public:
 
 private:
   int m_l2;
+};
+
+class CorrectFlightPathsTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    // generate large workspace
+    generateWorkspace(3000);
+  }
+
+  void tearDown() override {
+    AnalysisDataService::Instance().remove(outputWSName);
+    AnalysisDataService::Instance().remove(inputWSName);
+  }
+  void testPerformance() {
+
+    CorrectFlightPaths c;
+    if (!c.isInitialized())
+      c.initialize();
+
+    c.setPropertyValue("InputWorkspace", inputWSName);
+    c.setPropertyValue("OutputWorkspace", outputWSName);
+    c.execute();
+    TS_ASSERT(c.isExecuted());
+  }
+
+private:
+  std::string inputWSName = "inputWS";
+  std::string outputWSName = "outputWS";
+
+  void generateWorkspace(int nHist = 50, int nBins = 50) {
+    int m_l2 = 4;
+    std::vector<double> L2(nHist, 5);
+    std::vector<double> polar(nHist, (30. / 180.) * M_PI);
+    polar[0] = 0;
+    std::vector<double> azimutal(nHist, 0);
+    azimutal[1] = (45. / 180.) * M_PI;
+    azimutal[2] = (90. / 180.) * M_PI;
+    azimutal[3] = (135. / 180.) * M_PI;
+    azimutal[4] = (180. / 180.) * M_PI;
+
+    Mantid::API::MatrixWorkspace_sptr dataws =
+        WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimutal,
+                                                            nBins, -1, 3, 3);
+
+    dataws->getAxis(0)->setUnit("TOF");
+    dataws->mutableRun().addProperty("wavelength",
+                                     boost::lexical_cast<std::string>(5));
+
+    dataws->instrumentParameters().addString(
+        dataws->getInstrument()->getComponentID(), "l2",
+        boost::lexical_cast<std::string>(m_l2));
+
+    API::AnalysisDataService::Instance().addOrReplace(inputWSName, dataws);
+  }
 };
 
 #endif /* MANTID_ALGORITHMS_CORRECTFLIGHTPATHSTEST_H_ */

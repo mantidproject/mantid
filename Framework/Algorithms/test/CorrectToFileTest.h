@@ -196,4 +196,63 @@ private:
   std::string inputFile;
 };
 
+class CorrectToFileTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static CorrectToFileTestPerformance *createSuite() {
+    return new CorrectToFileTestPerformance();
+  }
+  static void destroySuite(CorrectToFileTestPerformance *suite) {
+    delete suite;
+  }
+  CorrectToFileTestPerformance() {
+    outputSpace = "outputWS";
+
+    testInputWS2D =
+        WorkspaceCreationHelper::Create2DWorkspaceBinned(100, 204, 1.5);
+    testInputWS2D->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+
+    // Need a workspace to correct
+    testInputWSEvent =
+        WorkspaceCreationHelper::CreateEventWorkspace(100, 204, 204, 1.5);
+    testInputWSEvent->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+  }
+
+  void testExec2DPerformance() {
+    // Need a workspace to correct
+    executeAlgorithm(testInputWS2D, "Wavelength", "Divide");
+  }
+
+  void testExecEventPerformance() {
+    executeAlgorithm(testInputWSEvent, "Wavelength", "Divide");
+  }
+
+private:
+  MatrixWorkspace_sptr testInputWS2D;
+  Mantid::DataObjects::EventWorkspace_sptr testInputWSEvent;
+
+  std::string outputSpace;
+
+  void executeAlgorithm(MatrixWorkspace_sptr inputWS, const std::string &unit,
+                        const std::string &operation) {
+    Mantid::Algorithms::CorrectToFile correctToFile;
+    correctToFile.initialize();
+
+    const std::string inputFile("DIRECT.041");
+
+    // Set the properties
+    correctToFile.setProperty("WorkspaceToCorrect", inputWS);
+    correctToFile.setPropertyValue("Filename", inputFile);
+    correctToFile.setPropertyValue("FirstColumnValue", unit);
+    correctToFile.setPropertyValue("WorkspaceOperation", operation);
+    correctToFile.setPropertyValue("OutputWorkspace", outputSpace);
+    // Should now not throw anything
+    correctToFile.execute();
+    correctToFile.isExecuted();
+  }
+};
+
 #endif // CORRECTTOFILE_H_

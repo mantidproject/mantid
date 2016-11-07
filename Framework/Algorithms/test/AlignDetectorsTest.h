@@ -9,6 +9,7 @@
 #include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include <MantidAPI/FrameworkManager.h>
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
@@ -16,23 +17,33 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
+namespace {
+/** Setup for loading raw data */
+void setUp_Event(std::string &inputWSName) {
+  inputWSName = "eventWS";
+  EventWorkspace_sptr ws =
+      WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10,
+                                                                      false);
+  ws->getAxis(0)->setUnit("TOF");
+  AnalysisDataService::Instance().addOrReplace(inputWSName, ws);
+}
+/** Setup for loading Nexus data */
+void setUp_HRP38692(std::string &inputWSName) {
+
+  LoadNexus loader;
+  loader.initialize();
+  loader.setPropertyValue("Filename", "HRP38692a.nxs");
+  inputWSName = "nexusWS";
+  loader.setPropertyValue("OutputWorkspace", inputWSName);
+  loader.execute();
+}
+}
 class AlignDetectorsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static AlignDetectorsTest *createSuite() { return new AlignDetectorsTest(); }
   static void destroySuite(AlignDetectorsTest *suite) { delete suite; }
-
-  /** Setup for loading Nexus data */
-  void setUp_HRP38692() {
-
-    LoadNexus loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", "HRP38692a.nxs");
-    inputWS = "nexusWS";
-    loader.setPropertyValue("OutputWorkspace", inputWS);
-    loader.execute();
-  }
 
   void testTheBasics() {
     TS_ASSERT_EQUALS(align.name(), "AlignDetectors");
@@ -48,7 +59,7 @@ public:
    * raw data file.
    */
   void testExecWorkspace2D() {
-    setUp_HRP38692();
+    setUp_HRP38692(inputWS);
     if (!align.isInitialized())
       align.initialize();
 
@@ -87,18 +98,8 @@ public:
     AnalysisDataService::Instance().remove(outputWS);
   }
 
-  /** Setup for loading raw data */
-  void setUp_Event() {
-    inputWS = "eventWS";
-    EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10,
-                                                                        false);
-    ws->getAxis(0)->setUnit("TOF");
-    AnalysisDataService::Instance().addOrReplace(inputWS, ws);
-  }
-
   void testExecEventWorkspace_sameOutputWS() {
-    this->setUp_Event();
+    setUp_Event(inputWS);
     std::size_t wkspIndex = 1; // a good workspace index (with events)
 
     // Retrieve Workspace
@@ -131,7 +132,7 @@ public:
   }
 
   void testExecEventWorkspace_differentOutputWS() {
-    this->setUp_Event();
+    setUp_Event(inputWS);
     std::size_t wkspIndex = 1; // a good workspace index (with events)
 
     // Retrieve Workspace
@@ -171,4 +172,60 @@ private:
   EventWorkspace_sptr WS;
 };
 
+class AlignDetectorsTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static AlignDetectorsTestPerformance *createSuite() {
+    return new AlignDetectorsTestPerformance();
+  }
+  static void destroySuite(AlignDetectorsTestPerformance *suite) {
+    delete suite;
+  }
+
+  // In constructor so that they are executed only once
+  AlignDetectorsTestPerformance() {
+    setUp_HRP38692(inputWS);
+    setUp_Event(inputWS_event);
+  }
+
+  ~AlignDetectorsTestPerformance() override {
+    AnalysisDataService::Instance().remove(inputWS);
+    AnalysisDataService::Instance().remove(inputWS_event);
+    AnalysisDataService::Instance().remove(outputWS);
+    AnalysisDataService::Instance().remove(outputWS_event);
+  }
+
+  void testExec_EventWS() {
+    // Start by init'ing the algorithm
+    AlignDetectors align;
+    align.initialize();
+
+    // Set all the properties
+    align.setProperty("InputWorkspace", inputWS_event);
+    align.setProperty("OutputWorkspace", outputWS_event);
+    align.setPropertyValue("CalibrationFile", "refl_fake.cal");
+
+    align.execute();
+  }
+
+  void testExec_HRP() {
+    // Start by init'ing the algorithm
+    AlignDetectors align;
+    align.initialize();
+
+    // Set all the properties
+    align.setProperty("InputWorkspace", inputWS);
+    align.setProperty("OutputWorkspace", outputWS);
+    align.setPropertyValue("CalibrationFile", "refl_fake.cal");
+
+    align.execute();
+  }
+
+private:
+  std::string inputWS = "inputWS";
+  std::string outputWS = "outputWS";
+  std::string inputWS_event = "inputWSEvent";
+  std::string outputWS_event = "outputWSEvent";
+};
 #endif /*ALIGNDETECTORSTEST_H_*/
