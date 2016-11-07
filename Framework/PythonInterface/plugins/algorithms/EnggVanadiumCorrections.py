@@ -1,3 +1,4 @@
+
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
@@ -126,7 +127,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         else:
             self._applyVanadiumCorrections(ws, integWS, curvesWS)
             self.setProperty('Workspace', ws)
-                
+
     def _applyVanadiumCorrections(self, ws, integWS, curvesWS):
         """
         Applies the corrections on a workspace. The integration and curves workspaces may have
