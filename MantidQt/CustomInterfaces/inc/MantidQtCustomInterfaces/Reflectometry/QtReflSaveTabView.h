@@ -56,6 +56,8 @@ public:
   bool getRegExpCheck() const override;
   /// Returns the list of workspaces
   std::string getListOfWorkspaces() const override;
+  /// Returns the list of parameters
+  std::string getListOfParameters() const override;
 
 private:
   /// Initialize the interface

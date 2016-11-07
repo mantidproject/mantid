@@ -59,5 +59,12 @@ std::string QtReflSaveTabView::getListOfWorkspaces() const {
   return m_ui.listOfWorkspacesEdit->toPlainText().toStdString();
 }
 
+/** Returns the list of logged parameters as a single string
+* @return :: List of parameters
+*/
+std::string QtReflSaveTabView::getListOfParameters() const {
+  return m_ui.listOfLoggedParametersEdit->toPlainText().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid

@@ -46,6 +46,7 @@ public:
   virtual std::string getFilter() const = 0;
   virtual bool getRegExpCheck() const = 0;
   virtual std::string getListOfWorkspaces() const = 0;
+  virtual std::string getListOfParameters() const = 0;
 };
 }
 }
