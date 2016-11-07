@@ -20,7 +20,6 @@ public:
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER NullTransform
     : public CoordinateTransform {
 public:
-  ~NullTransform();
   void transform(Mantid::Kernel::VMD &coords, size_t dimX,
                  size_t dimY) override;
   void checkDimensionsForHKL(Mantid::API::IMDWorkspace_sptr ws, size_t dimX,
@@ -49,3 +48,4 @@ createCoordinateTransform(Mantid::API::IMDWorkspace_sptr ws, size_t dimX,
 }
 }
 #endif
+

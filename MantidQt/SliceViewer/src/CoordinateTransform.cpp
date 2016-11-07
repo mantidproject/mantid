@@ -5,7 +5,6 @@
 
 namespace MantidQt {
 namespace SliceViewer {
-NullTransform::~NullTransform() {}
 
 void NullTransform::transform(Mantid::Kernel::VMD &coords, size_t dimX,
                               size_t dimY) {}

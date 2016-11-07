@@ -19,22 +19,24 @@ namespace SliceViewer {
 /** Constructor
  */
 NonOrthogonalOverlay::NonOrthogonalOverlay(QwtPlot *plot, QWidget *parent)
-    : QWidget(parent), m_plot(plot), m_showLine(true) {
-  m_CompskewMatrix[0] = 1.0;
-  m_CompskewMatrix[1] = 0.0;
-  m_CompskewMatrix[2] = 0.0;
-  m_CompskewMatrix[3] = 0.0;
-  m_CompskewMatrix[4] = 1.0;
-  m_CompskewMatrix[5] = 0.0;
-  m_CompskewMatrix[6] = 0.0;
-  m_CompskewMatrix[7] = 0.0;
-  m_CompskewMatrix[8] = 1.0;
+    : QWidget(parent), m_plot(plot), m_showLine(true), m_numberAxisEdge(0.95) {
+  m_skewMatrix[0] = 1.0;
+  m_skewMatrix[1] = 0.0;
+  m_skewMatrix[2] = 0.0;
+  m_skewMatrix[3] = 0.0;
+  m_skewMatrix[4] = 1.0;
+  m_skewMatrix[5] = 0.0;
+  m_skewMatrix[6] = 0.0;
+  m_skewMatrix[7] = 0.0;
+  m_skewMatrix[8] = 1.0;
 
   m_pointA = QPointF(0, 0);
-  m_pointB = QPointF(1, 0);
-  m_pointC = QPointF(0, 1);
+  m_pointB = QPointF(0, 0);
+  m_pointC = QPointF(0, 0);
+  m_dim0Max = 0;
   m_showLine = false;
   m_width = 0.1;
+
 }
 
 //----------------------------------------------------------------------------------------------
@@ -59,8 +61,8 @@ int NonOrthogonalOverlay::width() const { return m_plot->canvas()->width(); }
  * @param coords :: coordinate point in plot coordinates
  * @return pixel coordinates */
 QPoint NonOrthogonalOverlay::transform(QPointF coords) const {
-  int xA = m_plot->transform(QwtPlot::xBottom, coords.x());
-  int yA = m_plot->transform(QwtPlot::yLeft, coords.y());
+  auto xA = m_plot->transform(QwtPlot::xBottom, coords.x());
+  auto yA = m_plot->transform(QwtPlot::yLeft, coords.y());
   return QPoint(xA, yA);
 }
 
@@ -69,8 +71,8 @@ QPoint NonOrthogonalOverlay::transform(QPointF coords) const {
  * @param pixels :: location in pixels
  * @return plot coordinates (float)   */
 QPointF NonOrthogonalOverlay::invTransform(QPoint pixels) const {
-  double xA = m_plot->invTransform(QwtPlot::xBottom, pixels.x());
-  double yA = m_plot->invTransform(QwtPlot::yLeft, pixels.y());
+ auto xA = m_plot->invTransform(QwtPlot::xBottom, pixels.x());
+ auto yA = m_plot->invTransform(QwtPlot::yLeft, pixels.y());
   return QPointF(xA, yA);
 }
 
@@ -88,14 +90,6 @@ void NonOrthogonalOverlay::setSkewMatrix() {
   }
 }
 
-void NonOrthogonalOverlay::setDefaultAxesPoints() {
-  auto ws = m_ws->get(); // assumes it is a rectangle
-  m_dim0Max = ws->getDimension(0)->getMaximum();
-  m_dim0Max = m_dim0Max * 1.1; // to set axis slightly back from slice
-  m_dim1 = ws->getDimension(1)->getMaximum();
-  m_dim2 = ws->getDimension(2)->getMaximum();
-}
-
 QPointF NonOrthogonalOverlay::skewMatrixApply(double x, double y) {
   // keyed array,
   std::vector<double> dimensions(3, 0);
@@ -103,9 +97,9 @@ QPointF NonOrthogonalOverlay::skewMatrixApply(double x, double y) {
   dimensions.at(m_dimY) = y;
   // Make sure stops trying to calculate this m_dimX or Y is 3+
   // put some of this into setAxisPoints()
-  double angle_H = dimensions[0];
-  double angle_K = dimensions[1];
-  double angle_L = dimensions[2];
+  const auto angle_H = dimensions[0];
+  const auto angle_K = dimensions[1];
+  const auto angle_L = dimensions[2];
 
   auto dimX = angle_H * m_skewMatrix[0 + 3 * m_dimX] +
               angle_K * m_skewMatrix[1 + 3 * m_dimX] +
@@ -124,19 +118,28 @@ void NonOrthogonalOverlay::zoomChanged(QwtDoubleInterval xint,
   m_yMinVis = yint.minValue();
   m_yMaxVis = yint.maxValue();
 
-  int displayNum = 20; // can mess around increasing or
+  double xBuffer = (m_xMaxVis - m_xMinVis);
+  double yBuffer = (m_yMaxVis - m_yMinVis);
+  m_xMaxVisBuffered = m_xMaxVis + xBuffer;
+  m_xMinVisBuffered = m_xMinVis - xBuffer;
+  m_yMaxVisBuffered = m_yMaxVis + yBuffer;
+  m_yMinVisBuffered = m_yMinVis - yBuffer;
+
+  size_t displayNum = 20; // can mess around increasing or
                        // decreasing grid later, maybe make an
                        // option on sliceviewgui
   calculateTickMarks(displayNum);
 }
 
 void NonOrthogonalOverlay::setAxesPoints() {
+  auto ws = m_ws->get(); 
+  m_dim0Max = ws->getDimension(0)->getMaximum();
+  m_dim0Max = m_dim0Max * 1.1; // to set axis slightly back from slice
   m_originPoint = -(m_dim0Max);
-  m_XEndPoint = m_dim0Max;
-  m_YEndPoint = m_dim0Max;
+  m_endPoint = m_dim0Max; //works for both max Y and X
   m_pointA = skewMatrixApply(m_originPoint, m_originPoint);
-  m_pointB = skewMatrixApply(m_XEndPoint, m_originPoint);
-  m_pointC = skewMatrixApply(m_originPoint, m_YEndPoint);
+  m_pointB = skewMatrixApply(m_endPoint, m_originPoint);
+  m_pointC = skewMatrixApply(m_originPoint, m_endPoint);
 }
 
 void NonOrthogonalOverlay::calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws,
@@ -144,10 +147,6 @@ void NonOrthogonalOverlay::calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws,
   m_ws = ws;
   m_dimX = dimX;
   m_dimY = dimY;
-  // m_missingHKL = //currently finding missing dim via process
-  // of elimination
-  //    API::getMissingHKLDimensionIndex(*m_ws, m_dimX, m_dimY);
-  setDefaultAxesPoints();
 
   if (API::isHKLDimensions(*m_ws, m_dimX, m_dimY)) {
     setSkewMatrix();
@@ -166,17 +165,12 @@ void NonOrthogonalOverlay::clearAllAxisPointVectors() {
   m_yNumbers.clear();
 }
 
-void NonOrthogonalOverlay::calculateTickMarks(int tickNum) { // assumes X axis
+void NonOrthogonalOverlay::calculateTickMarks(size_t tickNum) { // assumes X axis
   clearAllAxisPointVectors();
-  double xBuffer = (m_xMaxVis - m_xMinVis);
-  double yBuffer = (m_yMaxVis - m_yMinVis);
-  double m_xMaxVisBuffered = m_xMaxVis + xBuffer;
-  double m_xMinVisBuffered = m_xMinVis - xBuffer;
-  double m_yMaxVisBuffered = m_yMaxVis + yBuffer;
-  double m_yMinVisBuffered = m_yMinVis - yBuffer;
-  double percentageOfLineX =
+  
+  auto percentageOfLineX =
       (((m_xMaxVisBuffered) - (m_xMinVisBuffered)) / tickNum);
-  double percentageOfLineY =
+  auto percentageOfLineY =
       (((m_yMaxVisBuffered) - (m_yMinVisBuffered)) / tickNum);
   for (int i = 0; i <= tickNum; i++) {
     double axisPointX = (percentageOfLineX * i) + m_xMinVisBuffered;
@@ -228,12 +222,12 @@ void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
                        transform(m_yAxisTickEndVec[i]));
       painter.setPen(numberPen);
       if ((m_xNumbers[i].x() > m_xMinVis) &&
-          (m_xNumbers[i].x() < (m_xMaxVis * 0.95))) {
+          (m_xNumbers[i].x() < (m_xMaxVis * m_numberAxisEdge))) {
         painter.drawText(transform(m_xNumbers[i]),
                          QString::number(m_axisXPointVec[i], 'g', 3));
       }
       if ((m_yNumbers[i].y() > m_yMinVis) &&
-          (m_yNumbers[i].y() < (m_yMaxVis * 0.95))) {
+          (m_yNumbers[i].y() < (m_yMaxVis * m_numberAxisEdge))) {
         painter.drawText(transform(m_yNumbers[i]),
                          QString::number(m_axisYPointVec[i], 'g', 3));
       }

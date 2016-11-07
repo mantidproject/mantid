@@ -46,10 +46,12 @@ void normalizeColumns(Mantid::Kernel::DblMatrix &skewMatrix) {
 
   // Apply column normalisation to skew matrix --> TODO: Check why 3 is
   // hardcoded
+  const size_t dim = 3;
   Mantid::Kernel::DblMatrix scaleMat(3, 3, true);
-  scaleMat[0][0] /= bNorm[0];
-  scaleMat[1][1] /= bNorm[1];
-  scaleMat[2][2] /= bNorm[2];
+  for (size_t index = 0; index < dim; ++index) {
+	  scaleMat[index][index] /= bNorm[index];
+  }
+
   skewMatrix *= scaleMat;
 }
 
@@ -127,6 +129,8 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix, T workspace) {
 
   // The affine matrix has a underlying type of coord_t(float) but
   // we need a double
+
+
   auto reducedDimension = affineMatrix.Ssize() - 1;
   Mantid::Kernel::DblMatrix affMat(reducedDimension, reducedDimension);
   for (std::size_t i = 0; i < reducedDimension; i++) {
@@ -134,6 +138,7 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix, T workspace) {
       affMat[i][j] = affineMatrix[i][j];
     }
   }
+
 
   // Perform similarity transform to get coordinate orientation correct
   skewMatrix = affMat.Tprime() * (skewMatrix * affMat);
@@ -202,7 +207,7 @@ bool isHKLDimensions(Mantid::API::IMDWorkspace_const_sptr workspace,
                      size_t dimX, size_t dimY) {
   auto dimensionHKL = true;
   size_t dimensionIndices[2] = {dimX, dimY};
-  for (auto &dimensionIndex : dimensionIndices) {
+  for (const auto &dimensionIndex : dimensionIndices) {
     auto dimension = workspace->getDimension(dimensionIndex);
     const auto &frame = dimension->getMDFrame();
     if (frame.name() != Mantid::Geometry::HKL::HKLName) {

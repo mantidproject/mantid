@@ -59,29 +59,49 @@ public:
   void zoomChanged(QwtDoubleInterval xint, QwtDoubleInterval yint);
 
 private:
-  Mantid::coord_t m_skewMatrix[9];
-  void setAxesPoints();
-  void setSkewMatrix();
-  void setDefaultAxesPoints();
-  QPointF skewMatrixApply(double x, double y);
-  double m_dim0Max;
-  double m_dim1;
-  double m_dim2;
-  size_t m_missingHKL;
-  Mantid::API::IMDWorkspace_sptr *m_ws;
-
-  Mantid::coord_t m_CompskewMatrix[9];
-  size_t m_dimY;
-  size_t m_dimX;
-
   QSize sizeHint() const override;
   QSize size() const;
   int height() const;
   int width() const;
-  double m_totalArea;
+  /// QwtPlot containing this
+  QwtPlot *m_plot;
+  Mantid::coord_t m_skewMatrix[9];
+  Mantid::API::IMDWorkspace_sptr *m_ws;
+
+  QPoint transform(QPointF coords) const;
+  QPointF invTransform(QPoint pixels) const;
+
+  void setAxesPoints(); //below are set in function
+  double m_dim0Max;
   double m_originPoint;
-  double m_XEndPoint;
-  double m_YEndPoint;
+  double m_endPoint;
+  /// First point of the line (in coordinates of the plot)
+  QPointF m_pointA;
+  /// Second point of the line (in coordinates of the plot)
+  QPointF m_pointB;
+  /// Third point of the line (in coordinates of the plot)
+  QPointF m_pointC;
+
+  void setSkewMatrix();
+
+  QPointF skewMatrixApply(double x, double y);
+ 
+  //set in ZoomChanged
+  double m_xMinVis;
+  double m_xMaxVis;
+  double m_yMinVis;
+  double m_yMaxVis;
+  double m_xMaxVisBuffered;
+  double m_xMinVisBuffered;
+  double m_yMaxVisBuffered;
+  double m_yMinVisBuffered;
+
+
+  //set in calculateAxesSkew
+  size_t m_dimY;
+  size_t m_dimX;
+
+  void calculateTickMarks(size_t tickNum);
   std::vector<double> m_axisXPointVec;
   std::vector<double> m_axisYPointVec;
   std::vector<QPointF> m_xNumbers;
@@ -90,31 +110,19 @@ private:
   std::vector<QPointF> m_xAxisTickEndVec;
   std::vector<QPointF> m_yAxisTickStartVec;
   std::vector<QPointF> m_yAxisTickEndVec;
-  double m_xMinVis;
-  double m_xMaxVis;
-  double m_yMinVis;
-  double m_yMaxVis;
-  double m_dimXSkew;
-  double m_dimySkew;
-  /// First point of the line (in coordinates of the plot)
-  QPointF m_pointA;
-  /// Second point of the line (in coordinates of the plot)
-  QPointF m_pointB;
-  /// Third point of the line (in coordinates of the plot)
-  QPointF m_pointC;
+
+  void clearAllAxisPointVectors();
+
+
   /// Width of the line (in coordinates of the plot)
   double m_width;
   // QRect drawHandle(QPainter &painter, QPointF coords, QColor brush);
   void paintEvent(QPaintEvent *event) override;
-  QPoint transform(QPointF coords) const;
-  QPointF invTransform(QPoint pixels) const;
-  /// QwtPlot containing this
-  QwtPlot *m_plot;
-  void calculateTickMarks(int tickNum);
-  void clearAllAxisPointVectors();
+  const double m_numberAxisEdge; //prevents numbers from only being half shown on the axis by making boundary smaller
 };
 
 } // namespace SliceViewer
 } // namespace Mantid
 
 #endif /* MANTID_SLICEVIEWER_NONORTHOGONALOVERLAY_H_ */
+
