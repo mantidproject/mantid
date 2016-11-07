@@ -983,6 +983,48 @@ public:
     do_load_multiperiod_workspace(false /*Use old route*/);
   }
 
+  void test_load_workspace_empty_textaxis() {
+    // filename workspaceEmptyTextAxis
+    LoadNexusProcessed loader;
+    loader.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("Filename", "workspaceEmptyTextAxis.nxs"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", "ws"));
+
+    TS_ASSERT(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    Workspace_const_sptr ws = loader.getProperty("OutputWorkspace");
+    const auto outWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+
+    for (size_t i = 0; i < outWS->blocksize(); ++i) {
+      TS_ASSERT_EQUALS(outWS->x(0)[i], i);
+      TS_ASSERT_EQUALS(outWS->y(0)[i], i);
+    }
+  }
+
+  void test_load_workspace_with_textaxis() {
+    // filename workspaceWithTextAxis
+    LoadNexusProcessed loader;
+    loader.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("Filename", "workspaceWithTextAxis.nxs"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", "ws"));
+
+    TS_ASSERT(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    Workspace_const_sptr ws = loader.getProperty("OutputWorkspace");
+    const auto outWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+
+    for (size_t i = 0; i < outWS->blocksize(); ++i) {
+      TS_ASSERT_EQUALS(outWS->x(0)[i], i);
+      TS_ASSERT_EQUALS(outWS->y(0)[i], i);
+    }
+  }
+
 private:
   void doHistoryTest(MatrixWorkspace_sptr matrix_ws) {
     const WorkspaceHistory history = matrix_ws->getHistory();

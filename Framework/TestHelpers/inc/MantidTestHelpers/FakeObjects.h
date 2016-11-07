@@ -103,6 +103,11 @@ public:
   WorkspaceTester() : MatrixWorkspace(), spec(0) {}
   ~WorkspaceTester() override {}
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<WorkspaceTester> clone() const {
+    return std::unique_ptr<WorkspaceTester>(doClone());
+  }
+
   // Empty overrides of virtual methods
   size_t getNumberHistograms() const override { return spec; }
   const std::string id() const override { return "WorkspaceTester"; }
@@ -140,7 +145,7 @@ public:
 
 private:
   WorkspaceTester *doClone() const override {
-    throw std::runtime_error("Cloning of WorkspaceTester is not implemented.");
+    return new WorkspaceTester(*this);
   }
   std::vector<SpectrumTester> vec;
   size_t spec;

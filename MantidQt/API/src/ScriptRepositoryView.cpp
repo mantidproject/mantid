@@ -154,7 +154,7 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent)
     // create the model
     model = new RepoModel(this);
 
-  } catch (EXC_OPTIONS ex) {
+  } catch (EXC_OPTIONS &ex) {
     if (ex == NODIRECTORY)
       // probably the user change mind. He does not want to install any more.
       QMessageBox::warning(this, "Installation Failed",

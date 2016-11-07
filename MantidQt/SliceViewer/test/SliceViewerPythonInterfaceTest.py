@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import sys
 import sys
 import os
@@ -279,17 +280,17 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertEqual(sv.getColorScaleMin(), 10)
         self.assertEqual(sv.getColorScaleMax(), 30)
         self.assertEqual(sv.getColorScaleLog(), False)
-	self.assertEqual(sv.getColorScaleType(), 0)
+        self.assertEqual(sv.getColorScaleType(), 0)
         sv.setColorScale(20, 1000, True)
         self.assertEqual(sv.getColorScaleMin(), 20)
         self.assertEqual(sv.getColorScaleMax(), 1000)
         self.assertEqual(sv.getColorScaleLog(), True)
-	self.assertEqual(sv.getColorScaleType(), 1)
-	sv.setColorScale(30, 75, 2)
-	self.assertEqual(sv.getColorScaleMin(), 30)
+        self.assertEqual(sv.getColorScaleType(), 1)
+        sv.setColorScale(30, 75, 2)
+        self.assertEqual(sv.getColorScaleMin(), 30)
         self.assertEqual(sv.getColorScaleMax(), 75)
         self.assertEqual(sv.getColorScaleLog(), False)
-	self.assertEqual(sv.getColorScaleType(), 2)
+        self.assertEqual(sv.getColorScaleType(), 2)
 
     def test_setColorScale_throwsOnBadInputs(self):
         sv = self.sv
@@ -392,12 +393,12 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         lv = self.svw.getLiner()
         lv.setStartXY(0, 0)
         lv.setEndXY(10,5)
-        self.assertEquals("A", self._getPlotXAxisName(lv, binned_ws))
+        self.assertEqual("A", self._getPlotXAxisName(lv, binned_ws))
 
         #should toggle to 'B' axis as that is now the longest
         lv.setStartXY(0, 0)
         lv.setEndXY(5,10)
-        self.assertEquals("B", self._getPlotXAxisName(lv, binned_ws))
+        self.assertEqual("B", self._getPlotXAxisName(lv, binned_ws))
 
 
     def test_mdhistoAutoAxisAssignmentWhenAnAxisIsIntegrated(self):
@@ -414,12 +415,12 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         lv = self.svw.getLiner()
         lv.setStartXY(0, 0)
         lv.setEndXY(10,5)
-        self.assertEquals("B", self._getPlotXAxisName(lv, binned_ws))
+        self.assertEqual("B", self._getPlotXAxisName(lv, binned_ws))
 
         #should toggle to 'B' axis as that is now the longest and also because 'A' is integrated.
         lv.setStartXY(0, 0)
         lv.setEndXY(5,10)
-        self.assertEquals("B", self._getPlotXAxisName(lv, binned_ws))
+        self.assertEqual("B", self._getPlotXAxisName(lv, binned_ws))
 
     def test_mdAutoAxisAssignment(self):
         CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='A,B,C',Units='A,A,A',OutputWorkspace='original')
@@ -434,12 +435,12 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         lv = self.svw.getLiner()
         lv.setStartXY(0, 0)
         lv.setEndXY(10,5)
-        self.assertEquals("A", self._getPlotXAxisName(lv, original))
+        self.assertEqual("A", self._getPlotXAxisName(lv, original))
 
         #should toggle to 'B' axis as that is now the longest.
         lv.setStartXY(0, 0)
         lv.setEndXY(5,10)
-        self.assertEquals("B", self._getPlotXAxisName(lv, original))
+        self.assertEqual("B", self._getPlotXAxisName(lv, original))
 
     #==========================================================================
     #======================= Dynamic Rebinning ================================

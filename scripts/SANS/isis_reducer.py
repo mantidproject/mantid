@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, property-on-old-class, redefined-builtin, protected-access
+﻿# pylint: disable=invalid-name, property-on-old-class, redefined-builtin, protected-access
 """
     ISIS-specific implementation of the SANS Reducer.
 
@@ -19,11 +19,125 @@ import SANSUtility as su
 import os
 import copy
 import sys
-from collections import namedtuple
 
 logger = Logger("ISISReducer")
 
-temp_reduction_framework_settings = namedtuple('temp_reduction_framework_settings', 'incident_monitor')
+
+class ReductionStateTransferer(object):
+    def __init__(self):
+        super(ReductionStateTransferer, self).__init__()
+        # A copy of the reducer
+        self.rc = None
+
+    def get_copy_of_reducer(self, reducer):
+        self.rc = copy.deepcopy(reducer)
+
+    def apply_gui_changes_from_old_reducer_to_new_reducer(self, reducer):
+        # Apply detector
+        det_name = self.rc.instrument.det_selection
+        reducer.instrument.setDetector(det_name)
+
+        # Apply output type
+        reducer.to_Q.output_type = self.rc.to_Q.output_type
+
+        # Get radius limit
+        reducer.to_Q.r_cut = self.rc.to_Q.r_cut
+        reducer.mask.min_radius = self.rc.mask.min_radius
+        reducer.mask.max_radius = self.rc.mask.max_radius
+        reducer.mask.max_radius = self.rc.mask.max_radius
+        reducer.CENT_FIND_RMIN = self.rc.CENT_FIND_RMIN
+        reducer.CENT_FIND_RMAX = self.rc.CENT_FIND_RMAX
+
+        # Get events binning
+        if hasattr(reducer, "settings") and hasattr(self.rc, "settings"):
+            settings1 = reducer.settings
+            settings2 = self.rc.settings
+            if "events.binning" in settings1 and "events.binning" in settings2:
+                reducer.settings["events.binning"] = copy.deepcopy(self.rc.settings["events.binning"])
+
+        # Get wavelength limits
+        reducer.to_Q.w_cut  = self.rc.to_Q.w_cut
+
+        # Get Q limits
+        reducer.to_Q.binning = self.rc.to_Q.binning
+
+        # Get QXY limits
+        reducer.QXY2 = self.rc.QXY2
+        reducer.DQXY = self.rc.DQXY
+
+        # Get Phi Limits
+        reducer.mask.phi_min = self.rc.mask.phi_min
+        reducer.mask.phi_max = self.rc.mask.phi_max
+        reducer.mask.phi_mirror = self.rc.mask.phi_mirror
+
+        # Get flood files
+        reducer.prep_normalize._high_angle_pixel_file = self.rc.prep_normalize._high_angle_pixel_file
+        reducer.prep_normalize._low_angle_pixel_file = self.rc.prep_normalize._low_angle_pixel_file
+
+        # Transmission fits
+        reducer.transmission_calculator.fit_settings = copy.deepcopy(self.rc.transmission_calculator.fit_settings)
+
+        # Set front detector scale, shift and q range
+        reducer.instrument.getDetector('FRONT').rescaleAndShift = copy.deepcopy(self.rc.instrument.getDetector('FRONT').rescaleAndShift)
+
+        # Set Gravity and extra length
+        reducer.to_Q._use_gravity = self.rc.to_Q._use_gravity
+        reducer.to_Q._grav_extra_length = self.rc.to_Q._grav_extra_length
+        reducer.to_Q._grav_extra_length_set = self.rc.to_Q._grav_extra_length_set
+
+        # Set sample offset
+        reducer.instrument.SAMPLE_Z_CORR = self.rc.instrument.SAMPLE_Z_CORR
+
+        # Set monitor spectrum
+        reducer.instrument._use_interpol_norm = self.rc.instrument._use_interpol_norm
+        reducer.instrument.set_incident_mon(self.rc.instrument.get_incident_mon())
+
+        # Set transmission spectrum
+        reducer.instrument.incid_mon_4_trans_calc = self.rc.instrument.incid_mon_4_trans_calc
+        reducer.transmission_calculator.interpolate = self.rc.transmission_calculator.interpolate
+
+        # Set transmission settings
+        reducer.transmission_calculator.trans_mon = self.rc.transmission_calculator.trans_mon
+        if hasattr(self.rc.instrument, "monitor_4_offset"):
+            reducer.instrument.monitor_4_offset = self.rc.instrument.monitor_4_offset
+        reducer.transmission_calculator.radius = self.rc.transmission_calculator.radius
+        reducer.transmission_calculator.roi_files = self.rc.transmission_calculator.roi_files
+        reducer.transmission_calculator.mask_files = self.rc.transmission_calculator.mask_files
+
+        # Set q resolution settings
+        reducer.to_Q.use_q_resolution = self.rc.to_Q.use_q_resolution
+        reducer.to_Q._q_resolution_moderator_file_name = self.rc.to_Q._q_resolution_moderator_file_name
+        reducer.to_Q._q_resolution_delta_r = self.rc.to_Q._q_resolution_delta_r
+        reducer.to_Q._q_resolution_a1 = self.rc.to_Q._q_resolution_a1
+        reducer.to_Q._q_resolution_a2 = self.rc.to_Q._q_resolution_a2
+        reducer.to_Q._q_resolution_h1 = self.rc.to_Q._q_resolution_h1
+        reducer.to_Q._q_resolution_w1 = self.rc.to_Q._q_resolution_w1
+        reducer.to_Q._q_resolution_h2 = self.rc.to_Q._q_resolution_h2
+        reducer.to_Q._q_resolution_w2 = self.rc.to_Q._q_resolution_w2
+        reducer.to_Q._q_resolution_collimation_length = self.rc.to_Q._q_resolution_collimation_length
+
+        # Set background correction settings
+        reducer.dark_run_subtraction = copy.deepcopy(self.rc.dark_run_subtraction)
+
+        # Set centre
+        reducer._front_beam_finder = copy.deepcopy(self.rc._front_beam_finder)
+        reducer._beam_finder = copy.deepcopy(self.rc._beam_finder)
+
+        # Set mask
+        reducer.mask.spec_mask_f = copy.deepcopy(self.rc.mask.spec_mask_f)
+        reducer.mask.spec_mask_r = copy.deepcopy(self.rc.mask.spec_mask_r)
+        reducer.mask.time_mask = copy.deepcopy(self.rc.mask.time_mask)
+        reducer.mask.time_mask_f = copy.deepcopy(self.rc.mask.time_mask_f)
+        reducer.mask.time_mask_r = copy.deepcopy(self.rc.mask.time_mask_r)
+        reducer.mask.arm_width = copy.deepcopy(self.rc.mask.arm_width)
+        reducer.mask.arm_angle = copy.deepcopy(self.rc.mask.arm_angle)
+        reducer.mask.arm_x = copy.deepcopy(self.rc.mask.arm_x)
+        reducer.mask.arm_y = copy.deepcopy(self.rc.mask.arm_y)
+
+        # Add slices
+        reducer._slices_def = copy.deepcopy(self.rc._slices_def)
+        reducer._slice_index = copy.deepcopy(self.rc._slice_index)
+
 
 ################################################################################
 # Avoid a bug with deepcopy in python 2.6, details and workaround here:
@@ -786,7 +900,8 @@ class ISISReducer(Reducer):
             if instrument is not None:
                 # Read the values of some variables which are set on the reduction
                 # framework.
-                temp_settings = self.get_values_from_reduction_framework()
+                state_transfer = ReductionStateTransferer()
+                state_transfer.get_copy_of_reducer(self)
 
                 self.set_instrument(instrument)
 
@@ -796,26 +911,10 @@ class ISISReducer(Reducer):
                 self.user_settings.execute(self)
 
                 # Apply the settings to reloaded reduction framework
-                self.apply_values_from_reduction_framework(temp_settings)
+                state_transfer.apply_gui_changes_from_old_reducer_to_new_reducer(self)
 
                 # Now we set the correct detector, this is also being done in the GUI
                 self.get_instrument().setDetector(old_detector_selection)
-
-    def get_values_from_reduction_framework(self):
-        """
-        This method extracts some settings of the current reduction framework which
-        we want to apply later on.
-        """
-        # Get the incident monitor
-        incident_monitor = self.instrument.get_incident_mon()
-        temp_settings = temp_reduction_framework_settings(incident_monitor=incident_monitor)
-
-        return temp_settings
-
-    def apply_values_from_reduction_framework(self, temp_settings):
-        # Set the incident monitor
-        incident_monitor = temp_settings.incident_monitor
-        self.instrument.set_incident_mon(incident_monitor)
 
     def _get_correct_instrument(self, instrument_name, idf_path = None):
         '''
