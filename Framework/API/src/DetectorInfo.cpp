@@ -180,7 +180,7 @@ double DetectorInfo::l1() const {
 }
 
 /// Returns a sorted vector of all detector IDs.
-const std::vector<detid_t>& DetectorInfo::detectorIDs() const {
+const std::vector<detid_t> &DetectorInfo::detectorIDs() const {
   return m_detectorIDs;
 }
 
