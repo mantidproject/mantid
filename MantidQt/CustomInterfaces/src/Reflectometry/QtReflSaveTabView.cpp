@@ -87,5 +87,12 @@ bool QtReflSaveTabView::getTitleCheck() const {
   return m_ui.titleCheckBox->isChecked();
 }
 
+/** Returns the Q resolution check value
+* @return :: The Q resolution check
+*/
+bool QtReflSaveTabView::getQResolutionCheck() const {
+  return m_ui.qResolutionCheckBox->isChecked();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid

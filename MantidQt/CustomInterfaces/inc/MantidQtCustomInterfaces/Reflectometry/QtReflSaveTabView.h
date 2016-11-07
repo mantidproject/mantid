@@ -46,6 +46,7 @@ public:
   QtReflSaveTabView(QWidget *parent = 0);
   /// Destructor
   ~QtReflSaveTabView() override;
+
   /// Returns the save path
   std::string getSavePath() const override;
   /// Returns the prefix
@@ -64,6 +65,8 @@ public:
   std::string getFileFormat() const override;
   /// Returns the title check
   bool getTitleCheck() const override;
+  /// Returns the Q resolution check
+  bool getQResolutionCheck() const override;
 
 private:
   /// Initialize the interface
