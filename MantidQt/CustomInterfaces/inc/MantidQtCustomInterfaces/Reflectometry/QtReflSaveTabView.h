@@ -54,6 +54,8 @@ public:
   std::string getFilter() const override;
   /// Returns the reg exp check
   bool getRegExpCheck() const override;
+  /// Returns the list of workspaces
+  std::string getListOfWorkspaces() const override;
 
 private:
   /// Initialize the interface

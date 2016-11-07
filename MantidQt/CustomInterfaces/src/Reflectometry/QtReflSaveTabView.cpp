@@ -52,6 +52,12 @@ bool QtReflSaveTabView::getRegExpCheck() const {
   return m_ui.regExpCheckBox->isChecked();
 }
 
+/** Returns the list of workspaces as a single string
+* @return :: List of workspaces
+*/
+std::string QtReflSaveTabView::getListOfWorkspaces() const {
+  return m_ui.listOfWorkspacesEdit->toPlainText().toStdString();
+}
 
 } // namespace CustomInterfaces
 } // namespace Mantid
