@@ -13,6 +13,10 @@ GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockProjectSaveView : public IProjectSaveView {
 public:
+  MOCK_METHOD0(getWindows, std::vector<MantidQt::API::IProjectSerialisable*>());
+  MOCK_METHOD1(updateWorkspacesList, void(const std::set<std::string> &));
+  MOCK_METHOD1(updateIncludedWindowsList, void(const std::set<std::string> &));
+  MOCK_METHOD1(updateExcludedWindowsList, void(const std::set<std::string> &));
 };
 
 #endif

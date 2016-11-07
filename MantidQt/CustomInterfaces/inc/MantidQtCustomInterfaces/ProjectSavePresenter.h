@@ -1,7 +1,14 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_PROJECTSAVEPRESENTER_H
 #define MANTIDQTCUSTOMINTERFACES_PROJECTSAVEPRESENTER_H
 
+#include "MantidAPI/Workspace.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 #include "MantidQtCustomInterfaces/IProjectSaveView.h"
+
+#include <vector>
+
+
+//------------------------------------------------
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -36,6 +43,9 @@ public:
   ProjectSavePresenter(IProjectSaveView* view);
 
 private:
+  std::vector<Mantid::API::Workspace_sptr> getWorkspaces() const;
+  std::set<std::string> getWorkspaceNames(const std::vector<Mantid::API::Workspace_sptr>& workspaces) const;
+
   /// Handle to the view for this presenter
   IProjectSaveView *m_view;
 };

@@ -1,7 +1,13 @@
 #ifndef MANTID_CUSTOMINTERFACES_IPROJECTSAVEVIEWVIEW_H
 #define MANTID_CUSTOMINTERFACES_IPROJECTSAVEVIEWVIEW_H
 
+#include "MantidQtAPI/IProjectSerialisable.h"
+
+#include <QWidget>
+#include <QMainWindow>
 #include <string>
+#include <vector>
+#include <set>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -34,6 +40,15 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class IProjectSaveView {
 public:
+
+  virtual std::vector<MantidQt::API::IProjectSerialisable*> getWindows() = 0;
+  virtual void updateWorkspacesList(const std::set<std::string>& workspaces) = 0;
+  virtual void updateIncludedWindowsList(const std::set<std::string>& windows) = 0;
+  virtual void updateExcludedWindowsList(const std::set<std::string>& windows) = 0;
+
+private:
+    std::vector<MantidQt::API::IProjectSerialisable*> m_serialisableWindows;
+
 
 };
 }
