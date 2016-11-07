@@ -31,8 +31,6 @@ protected:
   Mantid::coord_t *m_lookPoint;
   Mantid::coord_t m_skewMatrix[9];
 
-private:
-  size_t m_missingHKLdim;
 };
 
 } // namespace SliceViewer
