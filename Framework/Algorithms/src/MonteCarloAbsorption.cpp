@@ -2,6 +2,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
+#include "MantidAlgorithms/InterpolationOption.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
@@ -103,6 +104,9 @@ void MonteCarloAbsorption::init() {
       "The number of \"neutron\" events to generate per simulated point");
   declareProperty("SeedValue", DEFAULT_SEED, positiveInt,
                   "Seed the random number generator with this value");
+
+  InterpolationOption interpolateOpt;
+  declareProperty(interpolateOpt.property(), interpolateOpt.propertyDoc());
 }
 
 /**
@@ -113,9 +117,11 @@ void MonteCarloAbsorption::exec() {
   const int nevents = getProperty("EventsPerPoint");
   const int nlambda = getProperty("NumberOfWavelengthPoints");
   const int seed = getProperty("SeedValue");
+  InterpolationOption interpolateOpt;
+  interpolateOpt.set(getPropertyValue("Interpolation"));
 
-  auto outputWS =
-      doSimulation(*inputWS, static_cast<size_t>(nevents), nlambda, seed);
+  auto outputWS = doSimulation(*inputWS, static_cast<size_t>(nevents), nlambda,
+                               seed, interpolateOpt);
 
   setProperty("OutputWorkspace", outputWS);
 }
@@ -127,11 +133,13 @@ void MonteCarloAbsorption::exec() {
  * @param nlambda Number of wavelength points to simulate. The remainder
  * are computed using interpolation
  * @param seed Seed value for the random number generator
+ * @param interpolateOpt Method of interpolation to compute unsimulated points
  * @return A new workspace containing the correction factors & errors
  */
 MatrixWorkspace_sptr
 MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
-                                   size_t nevents, int nlambda, int seed) {
+                                   size_t nevents, int nlambda, int seed,
+                                   const InterpolationOption &interpolateOpt) {
   auto outputWS = createOutputWorkspace(inputWS);
   // Cache information about the workspace that will be used repeatedly
   auto instrument = inputWS.getInstrument();
@@ -203,7 +211,7 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     // Interpolate through points not simulated
     if (lambdaStepSize > 1) {
       auto histnew = outputWS->histogram(i);
-      interpolateLinearInplace(histnew, lambdaStepSize);
+      interpolateOpt.applyInplace(histnew, lambdaStepSize);
       outputWS->setHistogram(i, histnew);
     }
 
