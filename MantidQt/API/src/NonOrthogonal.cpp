@@ -49,7 +49,7 @@ void normalizeColumns(Mantid::Kernel::DblMatrix &skewMatrix) {
   const size_t dim = 3;
   Mantid::Kernel::DblMatrix scaleMat(3, 3, true);
   for (size_t index = 0; index < dim; ++index) {
-	  scaleMat[index][index] /= bNorm[index];
+    scaleMat[index][index] /= bNorm[index];
   }
 
   skewMatrix *= scaleMat;
@@ -130,7 +130,6 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix, T workspace) {
   // The affine matrix has a underlying type of coord_t(float) but
   // we need a double
 
-
   auto reducedDimension = affineMatrix.Ssize() - 1;
   Mantid::Kernel::DblMatrix affMat(reducedDimension, reducedDimension);
   for (std::size_t i = 0; i < reducedDimension; i++) {
@@ -138,7 +137,6 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix, T workspace) {
       affMat[i][j] = affineMatrix[i][j];
     }
   }
-
 
   // Perform similarity transform to get coordinate orientation correct
   skewMatrix = affMat.Tprime() * (skewMatrix * affMat);

@@ -36,7 +36,6 @@ NonOrthogonalOverlay::NonOrthogonalOverlay(QwtPlot *plot, QWidget *parent)
   m_dim0Max = 0;
   m_showLine = false;
   m_width = 0.1;
-
 }
 
 //----------------------------------------------------------------------------------------------
@@ -71,8 +70,8 @@ QPoint NonOrthogonalOverlay::transform(QPointF coords) const {
  * @param pixels :: location in pixels
  * @return plot coordinates (float)   */
 QPointF NonOrthogonalOverlay::invTransform(QPoint pixels) const {
- auto xA = m_plot->invTransform(QwtPlot::xBottom, pixels.x());
- auto yA = m_plot->invTransform(QwtPlot::yLeft, pixels.y());
+  auto xA = m_plot->invTransform(QwtPlot::xBottom, pixels.x());
+  auto yA = m_plot->invTransform(QwtPlot::yLeft, pixels.y());
   return QPointF(xA, yA);
 }
 
@@ -126,17 +125,17 @@ void NonOrthogonalOverlay::zoomChanged(QwtDoubleInterval xint,
   m_yMinVisBuffered = m_yMinVis - yBuffer;
 
   size_t displayNum = 20; // can mess around increasing or
-                       // decreasing grid later, maybe make an
-                       // option on sliceviewgui
+                          // decreasing grid later, maybe make an
+                          // option on sliceviewgui
   calculateTickMarks(displayNum);
 }
 
 void NonOrthogonalOverlay::setAxesPoints() {
-  auto ws = m_ws->get(); 
+  auto ws = m_ws->get();
   m_dim0Max = ws->getDimension(0)->getMaximum();
   m_dim0Max = m_dim0Max * 1.1; // to set axis slightly back from slice
   m_originPoint = -(m_dim0Max);
-  m_endPoint = m_dim0Max; //works for both max Y and X
+  m_endPoint = m_dim0Max; // works for both max Y and X
   m_pointA = skewMatrixApply(m_originPoint, m_originPoint);
   m_pointB = skewMatrixApply(m_endPoint, m_originPoint);
   m_pointC = skewMatrixApply(m_originPoint, m_endPoint);
@@ -165,9 +164,10 @@ void NonOrthogonalOverlay::clearAllAxisPointVectors() {
   m_yNumbers.clear();
 }
 
-void NonOrthogonalOverlay::calculateTickMarks(size_t tickNum) { // assumes X axis
+void NonOrthogonalOverlay::calculateTickMarks(
+    size_t tickNum) { // assumes X axis
   clearAllAxisPointVectors();
-  
+
   auto percentageOfLineX =
       (((m_xMaxVisBuffered) - (m_xMinVisBuffered)) / tickNum);
   auto percentageOfLineY =

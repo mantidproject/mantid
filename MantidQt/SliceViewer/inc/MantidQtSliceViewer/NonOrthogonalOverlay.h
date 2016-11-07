@@ -71,7 +71,7 @@ private:
   QPoint transform(QPointF coords) const;
   QPointF invTransform(QPoint pixels) const;
 
-  void setAxesPoints(); //below are set in function
+  void setAxesPoints(); // below are set in function
   double m_dim0Max;
   double m_originPoint;
   double m_endPoint;
@@ -85,8 +85,8 @@ private:
   void setSkewMatrix();
 
   QPointF skewMatrixApply(double x, double y);
- 
-  //set in ZoomChanged
+
+  // set in ZoomChanged
   double m_xMinVis;
   double m_xMaxVis;
   double m_yMinVis;
@@ -96,8 +96,7 @@ private:
   double m_yMaxVisBuffered;
   double m_yMinVisBuffered;
 
-
-  //set in calculateAxesSkew
+  // set in calculateAxesSkew
   size_t m_dimY;
   size_t m_dimX;
 
@@ -113,16 +112,15 @@ private:
 
   void clearAllAxisPointVectors();
 
-
   /// Width of the line (in coordinates of the plot)
   double m_width;
   // QRect drawHandle(QPainter &painter, QPointF coords, QColor brush);
   void paintEvent(QPaintEvent *event) override;
-  const double m_numberAxisEdge; //prevents numbers from only being half shown on the axis by making boundary smaller
+  const double m_numberAxisEdge; // prevents numbers from only being half shown
+                                 // on the axis by making boundary smaller
 };
 
 } // namespace SliceViewer
 } // namespace Mantid
 
 #endif /* MANTID_SLICEVIEWER_NONORTHOGONALOVERLAY_H_ */
-

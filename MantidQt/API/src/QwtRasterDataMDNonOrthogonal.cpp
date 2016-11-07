@@ -18,7 +18,6 @@ QwtRasterDataMDNonOrthogonal::QwtRasterDataMDNonOrthogonal()
   m_skewMatrix[6] = 0.0;
   m_skewMatrix[7] = 0.0;
   m_skewMatrix[8] = 1.0;
-
 }
 
 QwtRasterDataMDNonOrthogonal::~QwtRasterDataMDNonOrthogonal() {

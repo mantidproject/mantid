@@ -7,12 +7,16 @@ namespace MantidQt {
 namespace SliceViewer {
 
 void NullTransform::transform(Mantid::Kernel::VMD &coords, size_t dimX,
-	size_t dimY) {
-	(void)coords; (void)dimX; (void)dimY;
+                              size_t dimY) {
+  (void)coords;
+  (void)dimX;
+  (void)dimY;
 }
 void NullTransform::checkDimensionsForHKL(Mantid::API::IMDWorkspace_sptr ws,
-                                          size_t dimX, size_t dimY){
-	(void)ws; (void)dimX; (void)dimY;
+                                          size_t dimX, size_t dimY) {
+  (void)ws;
+  (void)dimX;
+  (void)dimY;
 }
 
 NonOrthogonalTransform::~NonOrthogonalTransform() {}
