@@ -42,6 +42,7 @@ public:
   virtual ~IReflSaveTabView(){};
 
   virtual std::string getSavePath() const = 0;
+  virtual std::string getPrefix() const = 0;
 };
 }
 }

@@ -31,5 +31,12 @@ std::string QtReflSaveTabView::getSavePath() const {
   return m_ui.savePathEdit->text().toStdString(); 
 }
 
+/** Returns the file name prefix
+* @return :: The prefix
+*/
+std::string QtReflSaveTabView::getPrefix() const {
+  return m_ui.prefixEdit->text().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid
