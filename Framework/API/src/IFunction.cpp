@@ -1082,6 +1082,17 @@ void IFunction::storeAttributeValue(const std::string &name,
 }
 
 /**
+*  Store a value to a named attribute if it can be considered "mutable" or
+*  read only, which simply reflects the current state of the function.
+*  @param name :: The name of the attribute
+*  @param value :: The value of the attribute
+*/
+void IFunction::storeReadOnlyAttribute(
+    const std::string &name, const API::IFunction::Attribute &value) const {
+  const_cast<IFunction *>(this)->storeAttributeValue(name, value);
+}
+
+/**
  * Set the covariance matrix. Algorithm Fit sets this matrix to the top-level
  * function
  * after fitting. If the function is composite the matrix isn't set to its

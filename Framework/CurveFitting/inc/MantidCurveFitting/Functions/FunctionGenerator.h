@@ -157,10 +157,6 @@ protected:
   virtual void updateTargetFunction() const = 0;
   /// Update target function if necessary.
   void checkTargetFunction() const;
-  /// Check if an attribute is read-only.
-  bool isReadOnly(const std::string &attrName) const;
-  /// Mark an attribute as read-only.
-  void markAsReadOnly(const std::string &attrName);
   /// Function that calculates parameters of the target function.
   API::IFunction_sptr m_source;
   /// Function that actually calculates the output.
@@ -169,10 +165,6 @@ protected:
   size_t m_nOwnParams;
   /// Flag indicating that updateTargetFunction() is required.
   mutable bool m_dirty;
-  /// A list of names of the read-only attributes.
-  /// If such attributes are set (by implementation functions most likely)
-  /// m_dirty flag isn't set.
-  std::vector<std::string> m_readOnlyAttributes;
 };
 
 } // namespace Functions

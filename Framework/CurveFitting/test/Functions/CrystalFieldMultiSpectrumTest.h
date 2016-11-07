@@ -9,6 +9,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidAPI/JointDomain.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -328,6 +329,48 @@ public:
     TS_ASSERT_THROWS_NOTHING(fun.buildTargetFunction());
   }
 
+  void test_monte_carlo() {
+    CrystalFieldMultiSpectrum fun;
+    fun.setParameter("B20", 0.37737);
+    fun.setParameter("B22", 3.9770);
+    fun.setParameter("B40", -0.031787);
+    fun.setParameter("B42", -0.11611);
+    fun.setParameter("B44", -0.12544);
+    fun.setAttributeValue("Ion", "Ce");
+    fun.setAttributeValue("Temperatures", std::vector<double>{44.0, 50.0});
+    fun.setAttributeValue("FWHMs", std::vector<double>{1.0, 1.5});
+    auto ws = createWorkspace(fun, 0, 50, 100);
+
+    auto mc = AlgorithmFactory::Instance().create("MonteCarloParameters", -1);
+    mc->initialize();
+    mc->setRethrows(true);
+    mc->setPropertyValue(
+        "Function",
+        "name=CrystalFieldMultiSpectrum,Ion=Ce,"
+        "Symmetry=C2v,Temperatures=(44.0, 50.0),FWHMs=(1.0, 1.0),NPeaks=3,"
+        "constraints=(0<B20<2,1<B22<4,-0.1<B40<0.1,-0.1<B42<0.1,-0.1<B44<0.1)");
+    mc->setProperty("InputWorkspace", ws);
+    mc->setProperty("WorkspaceIndex", 0);
+    mc->setProperty("InputWorkspace_1", ws);
+    mc->setProperty("WorkspaceIndex_1", 1);
+    mc->setProperty("NIterations", 1000);
+    mc->setProperty("Constraints", "0<f0.f2.PeakCentre<50,0<f0.f3.PeakCentre<"
+                                   "50,0<f1.f2.PeakCentre<50,0<f1.f3."
+                                   "PeakCentre<50");
+    mc->execute();
+    IFunction_sptr func = mc->getProperty("Function");
+    auto fit = AlgorithmFactory::Instance().create("Fit", -1);
+    fit->initialize();
+    fit->setProperty("Function", func);
+    fit->setProperty("InputWorkspace", ws);
+    fit->setProperty("WorkspaceIndex", 0);
+    fit->setProperty("InputWorkspace_1", ws);
+    fit->setProperty("WorkspaceIndex_1", 1);
+    fit->execute();
+    double chi2 = fit->getProperty("OutputChi2overDoF");
+    TS_ASSERT_LESS_THAN(chi2, 100.0);
+  }
+
 private:
   Workspace_sptr createWorkspace() {
     auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 100, 100);
@@ -351,6 +394,28 @@ private:
                                " doesn't have boundary constraint");
     }
     return std::make_pair(bc->lower(), bc->upper());
+  }
+
+  MatrixWorkspace_sptr createWorkspace(const IFunction &fun, double x0,
+                                       double x1, size_t nbins) {
+    auto nSpec = fun.getNumberDomains();
+    auto ws =
+        WorkspaceFactory::Instance().create("Workspace2D", nSpec, nbins, nbins);
+    JointDomain domain;
+    for (size_t i = 0; i < nSpec; ++i) {
+      auto x = FunctionDomain_sptr(new FunctionDomain1DVector(x0, x1, nbins));
+      domain.addDomain(x);
+    }
+    FunctionValues y(domain);
+    fun.function(domain, y);
+    for (size_t i = 0; i < nSpec; ++i) {
+      auto x = static_cast<const FunctionDomain1DVector &>(domain.getDomain(i));
+      ws->dataX(i) = x.toVector();
+      auto n = x.size();
+      auto from = y.getPointerToCalculated(i * n);
+      ws->dataY(i).assign(from, from + n);
+    }
+    return ws;
   }
 };
 

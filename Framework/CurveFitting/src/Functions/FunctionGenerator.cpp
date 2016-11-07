@@ -305,15 +305,11 @@ void FunctionGenerator::setAttribute(const std::string &attName,
                                      const IFunction::Attribute &att) {
   if (IFunction::hasAttribute(attName)) {
     IFunction::setAttribute(attName, att);
-    if (!isReadOnly(attName)) {
-      m_dirty = true;
-      m_target.reset();
-    }
+    m_dirty = true;
+    m_target.reset();
   } else if (isSourceName(attName)) {
     m_source->setAttribute(attName, att);
-    if (!isReadOnly(attName)) {
-      m_dirty = true;
-    }
+    m_dirty = true;
   } else {
     checkTargetFunction();
     m_target->setAttribute(attName, att);
@@ -363,21 +359,6 @@ void FunctionGenerator::checkTargetFunction() const {
     throw std::logic_error(
         "FunctionGenerator failed to generate target function.");
   }
-}
-
-/// Mark an attribute as read-only.
-/// @param attrName :: A name of an attribute to mark. No check is made
-///   on existence of the attribute.
-void FunctionGenerator::markAsReadOnly(const std::string &attrName) {
-  m_readOnlyAttributes.push_back(attrName);
-}
-
-/// Check if an attribute is read-only.
-/// @param attrName :: A name of an attribute to check. No check is made
-///   on existence of the attribute.
-bool FunctionGenerator::isReadOnly(const std::string &attrName) const {
-  return std::find(m_readOnlyAttributes.cbegin(), m_readOnlyAttributes.cend(),
-                   attrName) != m_readOnlyAttributes.cend();
 }
 
 } // namespace Functions

@@ -32,15 +32,6 @@ CrystalFieldSpectrum::CrystalFieldSpectrum()
   declareAttribute("FWHMY", Attribute(vec));
   declareAttribute("FWHMVariation", Attribute(0.1));
   declareAttribute("NPeaks", Attribute(0));
-  markAsReadOnly("NPeaks");
-}
-
-/// Store new value of the NPeaks attribute.
-void CrystalFieldSpectrum::storeNPeaks() const {
-  // NPeaks is a "mutable" attribute
-  auto ifun = static_cast<const IFunction *>(this);
-  const_cast<IFunction *>(ifun)->setAttributeValue(
-      "NPeaks", static_cast<int>(m_nPeaks));
 }
 
 /// Uses m_crystalField to calculate peak centres and intensities
@@ -74,7 +65,7 @@ void CrystalFieldSpectrum::buildTargetFunction() const {
   m_nPeaks = CrystalFieldUtils::buildSpectrumFunction(
       *spectrum, peakShape, values, xVec, yVec, fwhmVariation, defaultFWHM,
       nRequiredPeaks);
-  storeNPeaks();
+  storeReadOnlyAttribute("NPeaks", Attribute(static_cast<int>(m_nPeaks)));
 }
 
 /// Update m_spectrum function.
@@ -100,7 +91,7 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
     CrystalFieldUtils::updateSpectrumFunction(spectrum, values, m_nPeaks, 0,
                                               xVec, yVec, fwhmVariation);
   }
-  storeNPeaks();
+  storeReadOnlyAttribute("NPeaks", Attribute(static_cast<int>(m_nPeaks)));
 }
 
 /// Custom string conversion method

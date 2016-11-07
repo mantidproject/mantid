@@ -184,7 +184,8 @@ class CrystalField(object):
         out += ',PeakShape=%s' % self.getPeak(i).name
         if self._FWHM is not None:
             out += ',FWHM=%s' % self._getFWHM(i)
-        out += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
+        if len(self._fieldParameters) > 0:
+            out += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
         if self._resolutionModel is not None:
             if self._resolutionModel.multi:
                 model = self._resolutionModel.model[i]
@@ -870,6 +871,24 @@ class CrystalFieldFit(object):
         alg.execute()
         function = alg.getProperty('Function').value
         self.model.update(function)
+        self._function = function
+
+    def monte_carlo_multi(self, **kwargs):
+        from mantid.api import AlgorithmManager
+        fun = self.model.makeMultiSpectrumFunction()
+        alg = AlgorithmManager.createUnmanaged('MonteCarloParameters')
+        alg.initialize()
+        alg.setProperty('Function', fun)
+        alg.setProperty('InputWorkspace', self._input_workspace[0])
+        i = 1
+        for workspace in self._input_workspace[1:]:
+            alg.setProperty('InputWorkspace_%s' % i, workspace)
+            i += 1
+        for param in kwargs:
+            alg.setProperty(param, kwargs[param])
+        alg.execute()
+        function = alg.getProperty('Function').value
+        self.model.update_multi(function)
         self._function = function
 
     def _fit_single(self):

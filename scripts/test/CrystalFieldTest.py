@@ -1214,6 +1214,57 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertEqual(cf1.peaks.param[1]['Amplitude'], cf2.peaks.param[1]['Amplitude'],)
         self.assertEqual(cf1.peaks.param[1]['FWHM'], cf2.peaks.param[1]['FWHM'],)
 
+    def test_monte_carlo_single_spectrum(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+
+        # Create some crystal field data
+        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                              Temperature=44.0, FWHM=1.1)
+        x, y = origin.getSpectrum()
+        ws = makeWorkspace(x, y)
+
+        # Define a CrystalField object with parameters slightly shifted.
+        cf = CrystalField('Ce', 'C2v', B20=0, B22=0, B40=0, B42=0, B44=0,
+                          Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 100], [1, 1]), FWHMVariation=0)
+
+        # Set the ties
+        cf.ties(B20=0.37737)
+        cf.constraints('2<B22<6', '-0.2<B40<0.2', '-0.2<B42<0.2', '-0.2<B44<0.2')
+        # Create a fit object
+        fit = CrystalFieldFit(cf, InputWorkspace=ws)
+        fit.monte_carlo(NIterations=1000, Constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45')
+        # Run fit
+        fit.fit()
+        self.assertTrue(cf.chi2 < 100.0)
+
+    def test_monte_carlo_multi_spectrum(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function, ResolutionModel
+
+        # Create some crystal field data
+        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                              Temperature=[44.0, 50.0], FWHM=[1.0, 1.0])
+        ws1 = makeWorkspace(*origin.getSpectrum(0))
+        ws2 = makeWorkspace(*origin.getSpectrum(1))
+
+        # Define a CrystalField object with parameters slightly shifted.
+        x = [0, 50]
+        y = [1, 2]
+        rm = ResolutionModel([(x, y), (x, y)])
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=0, B42=0, B44=0, NPeaks=9,
+                          Temperature=[44.0, 50.0], FWHM=[1.0, 1.0], ResolutionModel=rm, FWHMVariation=0)
+
+        # Set the ties
+        cf.ties(B20=0.37737)
+        cf.constraints('2<B22<6', '-0.2<B40<0.2', '-0.2<B42<0.2', '-0.2<B44<0.2')
+        # Create a fit object
+        fit = CrystalFieldFit(cf, InputWorkspace=[ws1, ws2])
+        fit.monte_carlo_multi(NIterations=1000, Constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45')
+        # Run fit
+        fit.fit()
+        self.assertTrue(cf.chi2 < 100.0)
+
 
 if __name__ == "__main__":
     unittest.main()

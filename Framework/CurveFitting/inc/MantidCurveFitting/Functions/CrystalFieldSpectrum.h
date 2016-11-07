@@ -42,7 +42,6 @@ protected:
   void updateTargetFunction() const override;
 
 private:
-  void storeNPeaks() const;
   /// Number of fitted peaks in the spectrum.
   mutable size_t m_nPeaks;
 };
