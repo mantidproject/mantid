@@ -5,6 +5,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -56,9 +57,19 @@ std::string MantidEVWorker::workspaceType(const std::string &ws_name) {
   if (!ADS.doesExist(ws_name))
     return std::string("");
 
-  Workspace_const_sptr outWS = ADS.retrieveWS<Workspace>(ws_name);
+  WorkspaceGroup_const_sptr wsgroup = ADS.retrieveWS<WorkspaceGroup>(ws_name);
+  if (wsgroup) {
 
-  return outWS->id();
+    std::vector<std::string> group = wsgroup->getNames();
+    Workspace_const_sptr outWS = ADS.retrieveWS<Workspace>(group[0]);
+
+    return outWS->id();
+  } else {
+
+    Workspace_const_sptr outWS = ADS.retrieveWS<Workspace>(ws_name);
+
+    return outWS->id();
+  }
 }
 
 /**
@@ -220,10 +231,12 @@ bool MantidEVWorker::loadAndConvertToMD(
 
     if (!alg->execute())
       return false;
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     g_log.error() << "Error:" << e.what() << '\n';
     return false;
-  } catch (...) {
+  }
+  catch (...) {
     g_log.error() << "Error: Could Not load file and convert to MD\n";
     return false;
   }
@@ -331,10 +344,12 @@ bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
       }
       return true;
     }
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     g_log.error() << "Error:" << e.what() << '\n';
     return false;
-  } catch (...) {
+  }
+  catch (...) {
     g_log.error() << "Error: Could Not findPeaks\n";
     return false;
   }
@@ -370,10 +385,12 @@ bool MantidEVWorker::predictPeaks(const std::string &peaks_ws_name,
 
     if (alg->execute())
       return true;
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     g_log.error() << "Error:" << e.what() << '\n';
     return false;
-  } catch (...) {
+  }
+  catch (...) {
     g_log.error() << "Error: Could Not predictPeaks\n";
     return false;
   }
@@ -837,10 +854,12 @@ bool MantidEVWorker::sphereIntegrate(
 
     std::cout << "Integrated temporary MD workspace FAILED\n";
     return false;
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     g_log.error() << "Error:" << e.what() << '\n';
     return false;
-  } catch (...) {
+  }
+  catch (...) {
     g_log.error() << "Error: Could Not Integrated temporary MD workspace\n";
     return false;
   }
@@ -910,10 +929,12 @@ bool MantidEVWorker::fitIntegrate(const std::string &peaks_ws_name,
     }
 
     std::cout << "Integrated temporary FIT workspace FAILED\n";
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     g_log.error() << "Error:" << e.what() << '\n';
     return false;
-  } catch (...) {
+  }
+  catch (...) {
     g_log.error() << "Error: Could Not Integrated temporary FIT workspace\n";
     return false;
   }
@@ -971,10 +992,12 @@ bool MantidEVWorker::ellipsoidIntegrate(const std::string &peaks_ws_name,
     }
 
     std::cout << "IntegrateEllipsoids FAILED\n";
-  } catch (std::exception &e) {
+  }
+  catch (std::exception &e) {
     g_log.error() << "Error:" << e.what() << '\n';
     return false;
-  } catch (...) {
+  }
+  catch (...) {
     g_log.error() << "Error: Could Not IntegratedEllipsoids\n";
     return false;
   }
@@ -1043,7 +1066,8 @@ bool MantidEVWorker::showUB(const std::string &peaks_ws_name) {
             o_lattice.errorgamma());
 
     g_log.notice(std::string(logInfo));
-  } catch (...) {
+  }
+  catch (...) {
     return false;
   }
 
@@ -1087,7 +1111,8 @@ bool MantidEVWorker::getUB(const std::string &peaks_ws_name, bool lab_coords,
       auto goniometer_matrix = peak.getGoniometerMatrix();
       UB = goniometer_matrix * UB;
     }
-  } catch (...) {
+  }
+  catch (...) {
     return false;
   }
 
@@ -1108,9 +1133,7 @@ bool MantidEVWorker::getUB(const std::string &peaks_ws_name, bool lab_coords,
  */
 bool MantidEVWorker::copyLattice(const std::string &peaks_ws_name,
                                  const std::string &md_ws_name,
-                                 const std::string &event_ws_name)
-
-{
+                                 const std::string &event_ws_name) {
   // fail if peaks workspace is not there
   if (!isPeaksWorkspace(peaks_ws_name)) {
     return false;
@@ -1137,7 +1160,8 @@ bool MantidEVWorker::copyLattice(const std::string &peaks_ws_name,
       alg->setProperty("CopyShape", false);
       alg->setProperty("CopyLattice", true);
       alg->execute();
-    } catch (...) {
+    }
+    catch (...) {
       g_log.notice() << "\n";
       g_log.notice() << "CopySample from " << peaks_ws_name << " to "
                      << md_ws_name << " FAILED\n\n";
@@ -1161,7 +1185,8 @@ bool MantidEVWorker::copyLattice(const std::string &peaks_ws_name,
       alg->setProperty("CopyShape", false);
       alg->setProperty("CopyLattice", true);
       alg->execute();
-    } catch (...) {
+    }
+    catch (...) {
       g_log.notice() << "\n";
       g_log.notice() << "CopySample from " << peaks_ws_name << " to "
                      << event_ws_name << " FAILED\n\n";
@@ -1182,7 +1207,7 @@ bool MantidEVWorker::copyLattice(const std::string &peaks_ws_name,
  *                         it is in sample coordinates.
  * @param  Q               The Q-vector.
  */
-std::vector<std::pair<std::string, std::string>>
+std::vector<std::pair<std::string, std::string> >
 MantidEVWorker::PointInfo(const std::string &peaks_ws_name, bool lab_coords,
                           Mantid::Kernel::V3D Q) {
   IPeaksWorkspace_sptr peaks_ws =
