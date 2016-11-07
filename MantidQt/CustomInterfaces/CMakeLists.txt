@@ -88,8 +88,9 @@ set ( SRC_FILES
 	src/Muon/MuonAnalysisOptionTab.cpp
 	src/Muon/MuonAnalysisResultTableCreator.cpp
 	src/Muon/MuonAnalysisResultTableTab.cpp
-	src/Muon/MuonSequentialFitDialog.cpp
-	src/Reflectometry/MeasurementItem.cpp
+  src/Muon/MuonSequentialFitDialog.cpp
+  src/ProjectSavePresenter.cpp
+  src/Reflectometry/MeasurementItem.cpp
 	src/Reflectometry/QtReflMainWindowView.cpp
 	src/Reflectometry/QtReflRunsTabView.cpp
 	src/Reflectometry/QtReflSettingsTabView.cpp
@@ -245,7 +246,9 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableCreator.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
 	inc/MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h
-	inc/MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h
+  inc/MantidQtCustomInterfaces/IProjectSaveView.h
+  inc/MantidQtCustomInterfaces/ProjectSavePresenter.h
+  inc/MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h
@@ -397,6 +400,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
                 inc/MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h
+                inc/MantidQtCustomInterfaces/IProjectSaveView.h
                 inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflRunsTabView.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflSettingsTabView.h
@@ -517,6 +521,7 @@ set ( TEST_FILES
 	MuonAnalysisFitFunctionPresenterTest.h
 	MuonAnalysisHelperTest.h
 	MuonAnalysisResultTableCreatorTest.h
+  ProjectSavePresenterTest.h
 	ReflLegacyTransferStrategyTest.h
 	ReflMainWindowPresenterTest.h
 	ReflMeasureTransferStrategyTest.h
