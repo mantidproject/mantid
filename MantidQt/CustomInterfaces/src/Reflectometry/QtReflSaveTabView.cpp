@@ -38,5 +38,13 @@ std::string QtReflSaveTabView::getPrefix() const {
   return m_ui.prefixEdit->text().toStdString();
 }
 
+/** Returns the workspace list filter
+* @return :: The filter
+*/
+std::string QtReflSaveTabView::getFilter() const {
+  return m_ui.filterEdit->text().toStdString();
+}
+
+
 } // namespace CustomInterfaces
 } // namespace Mantid

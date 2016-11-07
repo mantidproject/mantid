@@ -48,8 +48,10 @@ public:
   ~QtReflSaveTabView() override;
   /// Returns the save path
   std::string getSavePath() const override;
-  /// Returns prefix
+  /// Returns the prefix
   std::string getPrefix() const override;
+  /// Returns the filter
+  std::string getFilter() const override;
 
 private:
   /// Initialize the interface
