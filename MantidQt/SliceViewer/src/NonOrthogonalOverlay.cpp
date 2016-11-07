@@ -124,9 +124,9 @@ void NonOrthogonalOverlay::zoomChanged(QwtDoubleInterval xint,
   m_yMaxVisBuffered = m_yMaxVis + yBuffer;
   m_yMinVisBuffered = m_yMinVis - yBuffer;
 
-  size_t displayNum = 20; // can mess around increasing or
-                          // decreasing grid later, maybe make an
-                          // option on sliceviewgui
+  const double displayNum = 20; // can mess around increasing or
+                                // decreasing grid later, maybe make an
+                                // option on sliceviewgui
   calculateTickMarks(displayNum);
 }
 
@@ -165,14 +165,14 @@ void NonOrthogonalOverlay::clearAllAxisPointVectors() {
 }
 
 void NonOrthogonalOverlay::calculateTickMarks(
-    size_t tickNum) { // assumes X axis
+    double tickNum) { // assumes X axis
   clearAllAxisPointVectors();
 
   auto percentageOfLineX =
       (((m_xMaxVisBuffered) - (m_xMinVisBuffered)) / tickNum);
   auto percentageOfLineY =
       (((m_yMaxVisBuffered) - (m_yMinVisBuffered)) / tickNum);
-  for (int i = 0; i <= tickNum; i++) {
+  for (double i = 0; i <= tickNum; i++) {
     double axisPointX = (percentageOfLineX * i) + m_xMinVisBuffered;
     double axisPointY = (percentageOfLineY * i) + m_yMinVisBuffered;
     m_axisXPointVec.push_back(axisPointX);

@@ -2,6 +2,7 @@
 #define MANTIDQT_SLICEVIEWER_COORDINATETRANSFORM_TEST_H
 
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidQtSliceViewer/CoordinateTransform.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/MDUnitFactory.h"
@@ -110,6 +111,8 @@ private:
 
 public:
   static CoordinateTransformTest *createSuite() {
+    Mantid::API::FrameworkManager::Instance();
+    Mantid::API::AlgorithmManager::Instance();
     return new CoordinateTransformTest();
   }
 
