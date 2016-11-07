@@ -89,8 +89,8 @@ void IntegratePeaksMD2::init() {
 
   declareProperty("AdaptiveQBackground", false,
                   "Default is false.   If true, "
-                  "BackgroundOuterRadius + AdaptiveQMultiplier * |Q|"
-                  "BackgroundInnerRadius + AdaptiveQMultiplier * |Q|");
+                  "BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|**"
+                  "BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**");
 
   declareProperty("Cylinder", false,
                   "Default is sphere.  Use next five parameters for cylinder.");
@@ -130,7 +130,7 @@ void IntegratePeaksMD2::init() {
       "Save (Optionally) as Isaw peaks file with profiles included");
 
   declareProperty("AdaptiveQMultiplier", 0.0,
-                  "PeakRadius + AdaptiveQMultiplier * |Q| "
+                  "PeakRadius + AdaptiveQMultiplier * **|Q|** "
                   "so each peak has a "
                   "different integration radius.  Q includes the 2*pi factor.");
 
