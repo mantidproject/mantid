@@ -77,7 +77,7 @@ The algorithm proceeds as follows. For each spectrum:
    * average the accumulated attentuation factors over `NEvents` and assign this as the correction factor for
      this :math:`\lambda_{step}`.
 
-#. finally, perform an interpolation through the unsimulated wavelength points
+#. finally, interpolate through the unsimulated wavelength points using the selected method
 
 Usage
 -----
@@ -95,6 +95,22 @@ Usage
    # Simulating every data point can be slow. Use a smaller set and interpolate
    abscor = MonteCarloAbsorption(data, NumberOfWavelengthPoints=50)
    corrected = data/abscor
+
+**Example: A cylindrical sample with no container, interpolating with a CSpline**
+
+.. testcode:: ExCylinderSampleOnlyAndSpline
+
+   data = CreateSampleWorkspace(WorkspaceType='Histogram', NumBanks=1)
+   data = ConvertUnits(data, Target="Wavelength")
+   # Default up axis is Y
+   SetSample(data, Geometry={'Shape': 'Cylinder', 'Height': 5.0, 'Radius': 1.0,
+                     'Center': [0.0,0.0,0.0]},
+                   Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6', 'SampleNumberDensity': 0.07})
+   # Simulating every data point can be slow. Use a smaller set and interpolate
+   abscor = MonteCarloAbsorption(data, NumberOfWavelengthPoints=50,
+                                 Interpolation='CSpline')
+   corrected = data/abscor
+
 
 **Example: A cylindrical sample setting a beam size**
 
