@@ -66,5 +66,12 @@ std::string QtReflSaveTabView::getListOfParameters() const {
   return m_ui.listOfLoggedParametersEdit->toPlainText().toStdString();
 }
 
+/** Returns the spectra list as a single string
+* @return :: Spectra list
+*/
+std::string QtReflSaveTabView::getSpectraList() const {
+  return m_ui.spectraListEdit->text().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid
