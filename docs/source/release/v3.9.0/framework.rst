@@ -15,7 +15,9 @@ New
 Improved
 ########
 
-- :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` has now a new mode 'Moving Average' which takes the minimum of a moving window average as the flat background.
+- :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` has a new mode 'Moving Average' which takes the minimum of a moving window average as the flat background.
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` gained a new option: `Interpolation`.
+  This controls the method used for interpolation. Availabile options are: `Linear` & `CSpline`.
 
 Deprecated
 ##########
