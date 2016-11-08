@@ -245,7 +245,7 @@ void MuonAnalysisFitFunctionPresenter::handleDatasetIndexChanged(int index) {
  * Turn multiple fitting mode on/off.
  * Turning it off hides the function browser and data selector so that
  * the fitting works as it used to pre-Mantid 3.8.
- * @param enabled :: [input] On/off for multiple fitting mode.
+ * @param state :: [input] On/off for multiple fitting mode.
  */
 void MuonAnalysisFitFunctionPresenter::setMultiFitState(
     Muon::MultiFitState state) {

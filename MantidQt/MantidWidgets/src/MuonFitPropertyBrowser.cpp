@@ -558,6 +558,9 @@ std::string MuonFitPropertyBrowser::outputName() const {
  * @param enabled :: [input] Whether to turn this mode on or off
  */
 void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
+  // First, clear whatever model is currently set
+  this->clear();
+
   // Show or hide "Function" and "Data" sections
   m_browser->setItemVisible(m_functionsGroup, !enabled);
   m_browser->setItemVisible(m_settingsGroup, !enabled);
