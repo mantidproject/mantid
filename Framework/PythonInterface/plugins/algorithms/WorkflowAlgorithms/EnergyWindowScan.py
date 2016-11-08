@@ -46,12 +46,9 @@ class EnergyWindowScan(DataProcessorAlgorithm):
     _grouping_map_file = None
     _output_ws = None
     _output_x_units = None
-    _plot_type = None
-    _save_formats = None
     _ipf_filename = None
     _sample_log_name = None
     _sample_log_value = None
-    _workspace_names = None
     _scan_ws = None
 
     def category(self):
@@ -130,7 +127,7 @@ class EnergyWindowScan(DataProcessorAlgorithm):
 
         self._setup()
 
-        process_prog = Progress(self, start=0.1, end=0.9, nreports=len(self._workspace_names))
+        process_prog = Progress(self, start=0.1, end=0.9, nreports=4)
         process_prog.report("Energy Transfer")
         scan_alg = self.createChildAlgorithm("ISISIndirectEnergyTransfer", 0.05, 0.95)
         scan_alg.setProperty('InputFiles', self._data_files)
@@ -325,9 +322,6 @@ class EnergyWindowScan(DataProcessorAlgorithm):
 
         if self._grouping_method != 'File' and self._grouping_map_file is not None:
             logger.warning('MapFile will be ignored by selected GroupingMethod')
-
-        # The list of workspaces being processed
-        self._workspace_names = []
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(EnergyWindowScan)
