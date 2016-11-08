@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGSAVUDIALOG_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGSAVUDIALOG_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOGSAVU_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOGSAVU_H_
 
 #include "ui_TomoToolConfigSavu.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
@@ -13,15 +13,17 @@ class TableRow;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class TomoToolConfigSavuDialog : public QMainWindow,
+class TomoToolConfigDialogSavu : public QMainWindow,
                                  public TomoToolConfigDialogBase {
   Q_OBJECT
 public:
-  TomoToolConfigSavuDialog(QWidget *parent = 0);
+  TomoToolConfigDialogSavu(QWidget *parent = 0);
 
 private:
-  void setupToolConfig() override;
+  void setupMethodSelected() override;
+  void setupToolSettingsFromPaths() override;
   void setupDialogUi() override;
+  void initialiseDialog() override;
   int executeQt() override;
 
   void initSavuWindow();
@@ -66,4 +68,4 @@ private:
 
 } // CustomInterfaces
 } // MantidQt
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGSAVUDIALOG_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOGSAVU_H_

@@ -1,20 +1,14 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOG_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOG_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOGBASE_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOGBASE_H_
 
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 
-//------------------------------
-// Forward Declarations
-//------------------------------
-namespace MantidQt {
-namespace CustomInterfaces {
-struct TomoReconToolsUserSettings;
-}
-}
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
 /**
 Third party tool configuration dialog(s) for the tomographic reconstruction
 GUI.
@@ -42,48 +36,73 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class TomoToolConfigDialogBase {
 public:
-  TomoToolConfigDialogBase(std::string toolMethod = "")
-      : m_toolMethod(toolMethod), m_isInitialised(false) {}
+  TomoToolConfigDialogBase(const std::string toolName = "",
+                           const std::string toolMethod = "")
+      : m_toolName(toolName), m_toolMethod(toolMethod), m_isInitialised(false) {
+  }
   virtual ~TomoToolConfigDialogBase() {}
 
-  static TomoToolConfigDialogBase *
-  getCorrectDialogForToolFromString(const std::string &toolName);
+  static std::unique_ptr<TomoToolConfigDialogBase>
+  getToolDialogFor(const std::string &toolName);
 
-  void setupDialog(std::string runPath, TomoPathsConfig paths,
-                   std::string pathOut, std::string localOutNameAppendix) {
+  void setupDialog(const std::string &runPath, const TomoPathsConfig &paths,
+                   const std::string &pathOut,
+                   const std::string &localOutNameAppendix) {
 
-    if (!m_isInitialised) {
-      setupPaths(runPath, paths, pathOut, localOutNameAppendix);
-      setupDialogUi();
-      m_isInitialised = true;
-    }
+    setupPaths(runPath, paths, pathOut, localOutNameAppendix);
+    setupToolSettingsFromPaths();
   }
 
   /// Runs the dialogue and handles the returns
-  virtual int execute();
+  virtual int initialiseGUIandExecute() {
+    if (!isInitialised()) {
+      // set up the tool's method on the first run
+      initialiseDialog();
+      setupDialogUi();
+      setupMethodSelected();
+      // setupToolSettingsFromPaths();
 
-  virtual bool isInitialised() { return m_isInitialised; }
+      m_isInitialised = true;
+    }
 
-  virtual TomoReconToolsUserSettings getReconToolSettings() {
-    return m_toolSettings;
+    const int res = this->executeQt();
+    this->handleDialogResult(res);
+    return res;
   }
+
+  virtual bool isInitialised() const { return m_isInitialised; }
 
   std::string getSelectedToolMethod() const { return m_toolMethod; }
 
+  /// return pointer and transfer ownership
+  std::shared_ptr<TomoRecToolConfig> getSelectedToolSettings() const {
+    return m_toolSettings;
+  }
+
+  std::string getSelectedToolName() const { return m_toolName; }
+
 protected:
-  virtual void setScriptRunPath(std::string run) { m_runPath = run; }
+  // TODO this has empty body just for the sake running the test right now
+  virtual void initialiseDialog() = 0;
 
-  virtual void setTomoPathsConfig(TomoPathsConfig paths) { m_paths = paths; }
+  virtual void handleDialogResult(const int result);
 
-  virtual void setPathOut(std::string pathOut) { m_pathOut = pathOut; }
+  virtual void setScriptRunPath(const std::string run) { m_runPath = run; }
 
-  virtual void setLocalOutNameAppendix(std::string localOutNameAppendix) {
+  virtual void setTomoPathsConfig(const TomoPathsConfig paths) {
+    m_paths = paths;
+  }
+
+  virtual void setPathOut(const std::string pathOut) { m_pathOut = pathOut; }
+
+  virtual void setLocalOutNameAppendix(const std::string localOutNameAppendix) {
     m_localOutNameAppendix = localOutNameAppendix;
   }
 
-  virtual void setupPaths(std::string runPath, TomoPathsConfig paths,
-                          std::string pathOut,
-                          std::string localOutNameAppendix) {
+  virtual void setupPaths(const std::string &runPath,
+                          const TomoPathsConfig &paths,
+                          const std::string &pathOut,
+                          const std::string &localOutNameAppendix) {
     this->setScriptRunPath(runPath);
     this->setTomoPathsConfig(paths);
     this->setPathOut(pathOut);
@@ -92,15 +111,20 @@ protected:
 
   virtual void setupDialogUi() = 0;
 
-  // setup the tool config with the correct paths
-  // save the chosen method ?
-  virtual void setupToolConfig() = 0;
+  /// setup the selected method member variable
+  virtual void setupMethodSelected() = 0;
 
-  virtual void handleDialogResult(int result);
+  /// setup the tool config with the correct paths, must be called after the
+  /// paths have been set!
+  virtual void setupToolSettingsFromPaths() = 0;
 
-  virtual int executeQt() = 0;
+  /// provided virtual function to add Qt execute behaviour as necessary
+  virtual int executeQt() = 0; // this class doesn't inherit from Qt and doesnt
+                               // have this->exec()
 
-  TomoReconToolsUserSettings m_toolSettings;
+  std::shared_ptr<TomoRecToolConfig> m_toolSettings;
+
+  const std::string m_toolName;
 
   std::string m_toolMethod;
 
@@ -117,4 +141,4 @@ protected:
 }
 }
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOG_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOGBASE_H_

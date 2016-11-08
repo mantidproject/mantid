@@ -1,23 +1,87 @@
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogSavu.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 
-#include <boost/lexical_cast.hpp>
-
+#include <MantidAPI/TableRow.h>
+#include <MantidAPI/WorkspaceFactory.h>
 #include <Poco/String.h>
-
+#include <json/reader.h>
+#include <MantidAPI/NotebookWriter.h>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <MantidAPI/AlgorithmManager.h>
 
 using namespace Mantid::API;
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
+TomoToolConfigDialogSavu::TomoToolConfigDialogSavu(QWidget *parent)
+    : QMainWindow(parent) {
+  // TODO init the 545231453t54 variables
+  m_availPlugins = Mantid::API::WorkspaceFactory::Instance().createTable();
+  m_availPlugins->addColumns("str", "name", 4);
+  m_currPlugins = Mantid::API::WorkspaceFactory::Instance().createTable();
+  m_currPlugins->addColumns("str", "name", 4);
+}
+
+int TomoToolConfigDialogSavu::executeQt() {
+  this->show();
+  QEventLoop el;
+  connect(this, SIGNAL(destroyed()), &el, SLOT(quit()));
+  return el.exec();
+}
+
+void TomoToolConfigDialogSavu::initialiseDialog() {
+  throw Mantid::Kernel::Exception::NotImplementedError(
+      "SAVU interface not implemented");
+}
+void TomoToolConfigDialogSavu::setupMethodSelected() {
+  throw Mantid::Kernel::Exception::NotImplementedError(
+      "SAVU interface not implemented");
+}
+void TomoToolConfigDialogSavu::setupToolSettingsFromPaths() {
+  throw Mantid::Kernel::Exception::NotImplementedError(
+      "SAVU interface not implemented");
+}
+
+void TomoToolConfigDialogSavu::setupDialogUi() {
+  m_savuUi.setupUi(this);
+  initSavuWindow();
+  this->setWindowModality(Qt::ApplicationModal);
+}
+
+void TomoToolConfigDialogSavu::initSavuWindow() {
+  // geometry, etc. niceties
+  // on the left (just plugin names) 1/2, right: 2/3
+  QList<int> sizes{100, 200};
+  m_savuUi.splitterPlugins->setSizes(std::move(sizes));
+
+  // Setup Parameter editor tab
+  loadAvailablePlugins();
+  m_savuUi.treeCurrentPlugins->setHeaderHidden(true);
+
+  // Connect slots
+  // Lists/trees
+  connect(m_savuUi.listAvailablePlugins, SIGNAL(itemSelectionChanged()), this,
+          SLOT(availablePluginSelected()));
+  connect(m_savuUi.treeCurrentPlugins, SIGNAL(itemSelectionChanged()), this,
+          SLOT(currentPluginSelected()));
+  connect(m_savuUi.treeCurrentPlugins, SIGNAL(itemExpanded(QTreeWidgetItem *)),
+          this, SLOT(expandedItem(QTreeWidgetItem *)));
+
+  // Buttons
+  connect(m_savuUi.btnTransfer, SIGNAL(released()), this,
+          SLOT(transferClicked()));
+  connect(m_savuUi.btnMoveUp, SIGNAL(released()), this, SLOT(moveUpClicked()));
+  connect(m_savuUi.btnMoveDown, SIGNAL(released()), this,
+          SLOT(moveDownClicked()));
+  connect(m_savuUi.btnRemove, SIGNAL(released()), this, SLOT(removeClicked()));
+}
+
 // TODO: what's in this file should become a class of its own,
 // 'SavuConfigDialog' or similar
 
-void TomographyIfaceViewQtGUI::loadAvailablePlugins() {
+void TomoToolConfigDialogSavu::loadAvailablePlugins() {
   // TODO:: load actual plugins when we know them
   // creating a few relatively realistic choices for now (should crossh check
   //  with the savu api when finalized).
@@ -61,48 +125,49 @@ void TomographyIfaceViewQtGUI::loadAvailablePlugins() {
 
 // Reloads the GUI list of available plugins from the data object ::
 // Populating only through this ensures correct indexing.
-void TomographyIfaceViewQtGUI::refreshAvailablePluginListUI() {
+void TomoToolConfigDialogSavu::refreshAvailablePluginListUI() {
   // Table WS structure, id/params/name/cite
-  m_uiSavu.listAvailablePlugins->clear();
-  for (size_t i = 0; i < m_availPlugins->rowCount(); ++i) {
-    QString str =
+  m_savuUi.listAvailablePlugins->clear();
+  const size_t rowcount = m_availPlugins->rowCount();
+  for (size_t i = 0; i < rowcount; ++i) {
+    const QString str =
         QString::fromStdString(m_availPlugins->cell<std::string>(i, 2));
-    m_uiSavu.listAvailablePlugins->addItem(str);
+    m_savuUi.listAvailablePlugins->addItem(std::move(str));
   }
 }
 
 // Reloads the GUI list of current plugins from the data object ::
 // Populating only through this ensures correct indexing.
-void TomographyIfaceViewQtGUI::refreshCurrentPluginListUI() {
+void TomoToolConfigDialogSavu::refreshCurrentPluginListUI() {
   // Table WS structure, id/params/name/cite
-  m_uiSavu.treeCurrentPlugins->clear();
+  m_savuUi.treeCurrentPlugins->clear();
   createPluginTreeEntries(m_currPlugins);
 }
 
 // Updates the selected plugin info from Available plugins list.
-void TomographyIfaceViewQtGUI::availablePluginSelected() {
-  if (m_uiSavu.listAvailablePlugins->selectedItems().count() != 0) {
-    size_t idx = static_cast<size_t>(
-        m_uiSavu.listAvailablePlugins->currentIndex().row());
+void TomoToolConfigDialogSavu::availablePluginSelected() {
+  if (m_savuUi.listAvailablePlugins->selectedItems().count() != 0) {
+    const size_t idx = static_cast<size_t>(
+        m_savuUi.listAvailablePlugins->currentIndex().row());
     if (idx < m_availPlugins->rowCount()) {
-      m_uiSavu.availablePluginDesc->setText(
+      m_savuUi.availablePluginDesc->setText(
           tableWSRowToString(m_availPlugins, idx));
     }
   }
 }
 
 // Updates the selected plugin info from Current plugins list.
-void TomographyIfaceViewQtGUI::currentPluginSelected() {
-  if (m_uiSavu.treeCurrentPlugins->selectedItems().count() != 0) {
-    auto currItem = m_uiSavu.treeCurrentPlugins->selectedItems()[0];
+void TomoToolConfigDialogSavu::currentPluginSelected() {
+  if (m_savuUi.treeCurrentPlugins->selectedItems().count() != 0) {
+    auto currItem = m_savuUi.treeCurrentPlugins->selectedItems()[0];
 
     while (currItem->parent() != NULL)
       currItem = currItem->parent();
 
     int topLevelIndex =
-        m_uiSavu.treeCurrentPlugins->indexOfTopLevelItem(currItem);
+        m_savuUi.treeCurrentPlugins->indexOfTopLevelItem(currItem);
 
-    m_uiSavu.currentPluginDesc->setText(
+    m_savuUi.currentPluginDesc->setText(
         tableWSRowToString(m_currPlugins, topLevelIndex));
   }
 }
@@ -134,7 +199,7 @@ private:
 };
 
 // On user editing a parameter tree item, update the data object to match.
-void TomographyIfaceViewQtGUI::paramValModified(QTreeWidgetItem *item,
+void TomoToolConfigDialogSavu::paramValModified(QTreeWidgetItem *item,
                                                 int /*column*/) {
   OwnTreeWidgetItem *ownItem = dynamic_cast<OwnTreeWidgetItem *>(item);
   if (!ownItem)
@@ -142,7 +207,7 @@ void TomographyIfaceViewQtGUI::paramValModified(QTreeWidgetItem *item,
 
   int topLevelIndex = -1;
   if (ownItem->getRootParent() != NULL) {
-    topLevelIndex = m_uiSavu.treeCurrentPlugins->indexOfTopLevelItem(
+    topLevelIndex = m_savuUi.treeCurrentPlugins->indexOfTopLevelItem(
         ownItem->getRootParent());
   }
   if (-1 == topLevelIndex)
@@ -169,7 +234,7 @@ void TomographyIfaceViewQtGUI::paramValModified(QTreeWidgetItem *item,
 
 // When a top level item is expanded, also expand its child items - if tree
 // items
-void TomographyIfaceViewQtGUI::expandedItem(QTreeWidgetItem *item) {
+void TomoToolConfigDialogSavu::expandedItem(QTreeWidgetItem *item) {
   if (item->parent() == NULL) {
     for (int i = 0; i < item->childCount(); ++i) {
       item->child(i)->setExpanded(true);
@@ -179,28 +244,31 @@ void TomographyIfaceViewQtGUI::expandedItem(QTreeWidgetItem *item) {
 
 // Adds one plugin from the available plugins list into the list of
 // current plugins
-void TomographyIfaceViewQtGUI::transferClicked() {
-  if (0 == m_uiSavu.listAvailablePlugins->selectedItems().count())
+void TomoToolConfigDialogSavu::transferClicked() {
+  if (0 == m_savuUi.listAvailablePlugins->selectedItems().count())
     return;
 
-  int idx = m_uiSavu.listAvailablePlugins->currentIndex().row();
+  const int idx = m_savuUi.listAvailablePlugins->currentIndex().row();
+  const size_t columnCount = m_currPlugins->columnCount();
+
   Mantid::API::TableRow row = m_currPlugins->appendRow();
-  for (size_t j = 0; j < m_currPlugins->columnCount(); ++j) {
+  for (size_t j = 0; j < columnCount; ++j) {
     row << m_availPlugins->cell<std::string>(idx, j);
   }
   createPluginTreeEntry(row);
 }
 
-void TomographyIfaceViewQtGUI::moveUpClicked() {
-  if (0 == m_uiSavu.treeCurrentPlugins->selectedItems().count())
+void TomoToolConfigDialogSavu::moveUpClicked() {
+  if (0 == m_savuUi.treeCurrentPlugins->selectedItems().count())
     return;
 
-  size_t idx =
-      static_cast<size_t>(m_uiSavu.treeCurrentPlugins->currentIndex().row());
+  const size_t idx =
+      static_cast<size_t>(m_savuUi.treeCurrentPlugins->currentIndex().row());
   if (idx > 0 && idx < m_currPlugins->rowCount()) {
     // swap row, all columns
-    for (size_t j = 0; j < m_currPlugins->columnCount(); ++j) {
-      std::string swap = m_currPlugins->cell<std::string>(idx, j);
+    const size_t columnCount = m_currPlugins->columnCount();
+    for (size_t j = 0; j < columnCount; ++j) {
+      const std::string swap = m_currPlugins->cell<std::string>(idx, j);
       m_currPlugins->cell<std::string>(idx, j) =
           m_currPlugins->cell<std::string>(idx - 1, j);
       m_currPlugins->cell<std::string>(idx - 1, j) = swap;
@@ -209,17 +277,19 @@ void TomographyIfaceViewQtGUI::moveUpClicked() {
   }
 }
 
-void TomographyIfaceViewQtGUI::moveDownClicked() {
+void TomoToolConfigDialogSavu::moveDownClicked() {
   // TODO: this can be done with the same function as above...
-  if (0 == m_uiSavu.treeCurrentPlugins->selectedItems().count())
+  if (0 == m_savuUi.treeCurrentPlugins->selectedItems().count())
     return;
 
-  size_t idx =
-      static_cast<size_t>(m_uiSavu.treeCurrentPlugins->currentIndex().row());
+  const size_t idx =
+      static_cast<size_t>(m_savuUi.treeCurrentPlugins->currentIndex().row());
   if (idx < m_currPlugins->rowCount() - 1) {
     // swap all columns
-    for (size_t j = 0; j < m_currPlugins->columnCount(); ++j) {
-      std::string swap = m_currPlugins->cell<std::string>(idx, j);
+
+    const size_t columnCount = m_currPlugins->columnCount();
+    for (size_t j = 0; j < columnCount; ++j) {
+      const std::string swap = m_currPlugins->cell<std::string>(idx, j);
       m_currPlugins->cell<std::string>(idx, j) =
           m_currPlugins->cell<std::string>(idx + 1, j);
       m_currPlugins->cell<std::string>(idx + 1, j) = swap;
@@ -228,18 +298,18 @@ void TomographyIfaceViewQtGUI::moveDownClicked() {
   }
 }
 
-void TomographyIfaceViewQtGUI::removeClicked() {
+void TomoToolConfigDialogSavu::removeClicked() {
   // Also clear ADS entries
-  if (0 == m_uiSavu.treeCurrentPlugins->selectedItems().count())
+  if (0 == m_savuUi.treeCurrentPlugins->selectedItems().count())
     return;
 
-  int idx = m_uiSavu.treeCurrentPlugins->currentIndex().row();
+  const int idx = m_savuUi.treeCurrentPlugins->currentIndex().row();
   m_currPlugins->removeRow(idx);
 
   refreshCurrentPluginListUI();
 }
 
-void TomographyIfaceViewQtGUI::menuOpenClicked() {
+void TomoToolConfigDialogSavu::menuOpenClicked() {
   QString s = QFileDialog::getOpenFileName(0, "Open file", QDir::currentPath(),
                                            "NeXus files (*.nxs);;All files (*)",
                                            new QString("NeXus files (*.nxs)"));
@@ -268,7 +338,37 @@ void TomographyIfaceViewQtGUI::menuOpenClicked() {
   }
 }
 
-void TomographyIfaceViewQtGUI::menuSaveClicked() {
+/**
+* Load a savu tomo config file into the current plugin list, overwriting it.
+* Uses the algorithm LoadSavuTomoConfig
+*/
+void TomoToolConfigDialogSavu::loadSavuTomoConfig(
+    std::string &filePath, Mantid::API::ITableWorkspace_sptr &currentPlugins) {
+  // try to load tomo reconstruction parametereization file
+  auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "LoadSavuTomoConfig");
+  alg->initialize();
+  alg->setPropertyValue("Filename", filePath);
+  alg->setPropertyValue("OutputWorkspace", createUniqueNameHidden());
+  try {
+    alg->execute();
+  } catch (std::runtime_error &e) {
+    throw std::runtime_error(
+        std::string("Error when trying to load tomographic reconstruction "
+                    "parameter file: ") +
+        e.what());
+  }
+
+  // new processing plugins list
+  try {
+    currentPlugins = alg->getProperty("OutputWorkspace");
+  } catch (std::exception &e) {
+    userError("Could not load config file", "Failed to load the file "
+                                            "with the following error: " +
+                                                std::string(e.what()));
+  }
+}
+void TomoToolConfigDialogSavu::menuSaveClicked() {
   if (m_currentParamPath.empty()) {
     menuSaveAsClicked();
     return;
@@ -296,8 +396,21 @@ void TomographyIfaceViewQtGUI::menuSaveClicked() {
     }
   }
 }
+size_t TomoToolConfigDialogSavu::g_nameSeqNo = 0;
 
-void TomographyIfaceViewQtGUI::menuSaveAsClicked() {
+// Build a unique (and hidden) name for the table ws
+std::string TomoToolConfigDialogSavu::createUniqueNameHidden() {
+  std::string name;
+  do {
+    // with __ prefix => hidden
+    name = "__TomoConfigTableWS_Seq_" +
+           boost::lexical_cast<std::string>(g_nameSeqNo++);
+  } while (AnalysisDataService::Instance().doesExist(name));
+
+  return name;
+}
+
+void TomoToolConfigDialogSavu::menuSaveAsClicked() {
   QString s = QFileDialog::getSaveFileName(0, "Save file", QDir::currentPath(),
                                            "NeXus files (*.nxs);;All files (*)",
                                            new QString("NeXus files (*.nxs)"));
@@ -309,7 +422,7 @@ void TomographyIfaceViewQtGUI::menuSaveAsClicked() {
   menuSaveClicked();
 }
 
-QString TomographyIfaceViewQtGUI::tableWSRowToString(ITableWorkspace_sptr table,
+QString TomoToolConfigDialogSavu::tableWSRowToString(ITableWorkspace_sptr table,
                                                      size_t i) {
   std::stringstream msg;
   msg << "ID: " << table->cell<std::string>(i, 0)
@@ -320,11 +433,11 @@ QString TomographyIfaceViewQtGUI::tableWSRowToString(ITableWorkspace_sptr table,
 }
 
 /**
- * Creates a treewidget item for a row of a table workspace.
- *
- * @param row Row from a table workspace with each row specfying a savu plugin
- */
-void TomographyIfaceViewQtGUI::createPluginTreeEntry(TableRow &row) {
+* Creates a treewidget item for a row of a table workspace.
+*
+* @param row Row from a table workspace with each row specfying a savu plugin
+*/
+void TomoToolConfigDialogSavu::createPluginTreeEntry(TableRow &row) {
   QStringList idStr, nameStr, citeStr, paramsStr;
   idStr.push_back(QString::fromStdString("ID: " + row.cell<std::string>(0)));
   nameStr.push_back(
@@ -389,27 +502,27 @@ void TomographyIfaceViewQtGUI::createPluginTreeEntry(TableRow &row) {
       layout->addWidget(paramContainerTree);
 
       pluginParamsItem->addChild(container);
-      m_uiSavu.treeCurrentPlugins->setItemWidget(container, 0, w);
+      m_savuUi.treeCurrentPlugins->setItemWidget(container, 0, w);
     }
   }
 
   pluginBaseItem->addChildren(items);
-  m_uiSavu.treeCurrentPlugins->addTopLevelItem(pluginBaseItem);
+  m_savuUi.treeCurrentPlugins->addTopLevelItem(pluginBaseItem);
 }
 
 /**
- * This is a kind of .asString() method for arrays. It iterates
- * through the array elements and builds the string enclosed by [].
- *
- * @param jsonVal Value of a parameter that seems to be an array
- *(isArray()==true)
- * @param name Name of the parameter (to give informative messages)
- *
- * @return String with a parameter value(s), enclosed by [] and
- * separated by commas
- */
+* This is a kind of .asString() method for arrays. It iterates
+* through the array elements and builds the string enclosed by [].
+*
+* @param jsonVal Value of a parameter that seems to be an array
+*(isArray()==true)
+* @param name Name of the parameter (to give informative messages)
+*
+* @return String with a parameter value(s), enclosed by [] and
+* separated by commas
+*/
 std::string
-TomographyIfaceViewQtGUI::paramValStringFromArray(const Json::Value &jsonVal,
+TomoToolConfigDialogSavu::paramValStringFromArray(const Json::Value &jsonVal,
                                                   const std::string &name) {
   std::string s;
   s = "[";
@@ -442,16 +555,16 @@ TomographyIfaceViewQtGUI::paramValStringFromArray(const Json::Value &jsonVal,
 }
 
 /**
- * Build a string with the value of a parameter in a json
- * string. Works for scalar and list/array values.
- *
- * @param jsonVal Value of a parameter that seems to be an array
- * @param name Name of the parameter (to give informative messages)
- *
- * @return String with a parameter value
- */
+* Build a string with the value of a parameter in a json
+* string. Works for scalar and list/array values.
+*
+* @param jsonVal Value of a parameter that seems to be an array
+* @param name Name of the parameter (to give informative messages)
+*
+* @return String with a parameter value
+*/
 std::string
-TomographyIfaceViewQtGUI::pluginParamValString(const Json::Value &jsonVal,
+TomoToolConfigDialogSavu::pluginParamValString(const Json::Value &jsonVal,
                                                const std::string &name) {
   std::string s;
   // string and numeric values can (normally) be converted to string but arrays
@@ -474,12 +587,40 @@ TomographyIfaceViewQtGUI::pluginParamValString(const Json::Value &jsonVal,
   return s;
 }
 
-void TomographyIfaceViewQtGUI::createPluginTreeEntries(
-    ITableWorkspace_sptr table) {
+void TomoToolConfigDialogSavu::createPluginTreeEntries(
+    Mantid::API::ITableWorkspace_sptr table) {
   for (size_t i = 0; i < table->rowCount(); ++i) {
-    TableRow r = table->getRow(i);
+    Mantid::API::TableRow r = table->getRow(i);
     createPluginTreeEntry(r);
   }
+}
+
+/** TODO move into a class, extract from here and QtView interface
+* Show an error (serious) message to the user (pop up)
+*
+* @param err Basic error title
+* @param description More detailed explanation, hints, additional
+* information, etc.
+*/
+void TomoToolConfigDialogSavu::userError(const std::string &err,
+                                         const std::string &description) {
+  QMessageBox::critical(this, QString::fromStdString(err),
+                        QString::fromStdString(description), QMessageBox::Ok,
+                        QMessageBox::Ok);
+}
+
+/**
+* Show a warning message to the user (pop up)
+*
+* @param err Basic error title
+* @param description More detailed explanation, hints, additional
+* information, etc.
+*/
+void TomoToolConfigDialogSavu::userWarning(const std::string &err,
+                                           const std::string &description) {
+  QMessageBox::warning(this, QString::fromStdString(err),
+                       QString::fromStdString(description), QMessageBox::Ok,
+                       QMessageBox::Ok);
 }
 
 } // namespace CustomInterfaces

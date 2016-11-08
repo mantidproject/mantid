@@ -1,48 +1,38 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPyDialog.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigAstraDialog.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigSavuDialog.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigCustomDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogTomoPy.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogAstra.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogSavu.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogCustom.h"
+
+#include "MantidKernel/make_unique.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-TomoToolConfigDialogBase *
-TomoToolConfigDialogBase::getCorrectDialogForToolFromString(
-    const std::string &toolName) {
-  std::cout << toolName << '\n';
-  // TODO move to global STRINGS from View!
+std::unique_ptr<TomoToolConfigDialogBase>
+TomoToolConfigDialogBase::getToolDialogFor(const std::string &toolName) {
 
   if (toolName == "TomoPy") {
-    return new TomoToolConfigTomoPyDialog;
+    return Mantid::Kernel::make_unique<TomoToolConfigDialogTomoPy>();
   }
   if (toolName == "Astra") {
-    return new TomoToolConfigAstraDialog;
+    return Mantid::Kernel::make_unique<TomoToolConfigDialogAstra>();
   }
   if (toolName == "Savu") {
-    return new TomoToolConfigSavuDialog;
+    return Mantid::Kernel::make_unique<TomoToolConfigDialogSavu>();
   }
   if (toolName == "Custom command") {
-    return new TomoToolConfigCustomDialog;
+    return Mantid::Kernel::make_unique<TomoToolConfigDialogCustom>();
   }
-//	  throw Mantid::Kernel::Exception::NotFoundError(
-//		  "Selected tool dialog not found!", toolName);
 
   return nullptr;
 }
 
-int TomoToolConfigDialogBase::execute() {
-  // TODO enum?
-  int res = this->executeQt();
-  this->handleDialogResult(res);
-  return res;
-}
-
-/** If user clicked OK, it will run setupToolConfig()
-*/
-void TomoToolConfigDialogBase::handleDialogResult(int result) {
+void TomoToolConfigDialogBase::handleDialogResult(const int result) {
   if (QDialog::Accepted == result) {
-    setupToolConfig();
+    // setup the new settings if the user has Accepted
+    setupMethodSelected();
+    setupToolSettingsFromPaths();
   }
 }
 } // namespace CustomInterfaces

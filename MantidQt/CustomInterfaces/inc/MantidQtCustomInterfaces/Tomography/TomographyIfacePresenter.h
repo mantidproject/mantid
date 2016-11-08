@@ -18,6 +18,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 class TomoPathsConfig;
+class TomoToolConfigDialogBase;
 
 /**
 Tomography GUI. Presenter for the GUI (as in the MVP
@@ -76,9 +77,6 @@ protected:
   void processSetupReconTool();
   void processRunRecon();
 
-  void subprocessRunReconRemote();
-  void subprocessRunReconLocal();
-
 protected slots:
   /// It may be run on user request, or periodically from a timer/thread
   void processRefreshJobs();
@@ -105,10 +103,41 @@ protected:
 
   /// Starts a periodic query just to keep sessions alive when logged in
   void startKeepAliveMechanism(int period);
+
   /// Stops/kills the periodic query (for example if the user logs out)
   void killKeepAliveMechanism();
 
+  bool isLocalResourceSelected() const;
+
 private:
+  /// creates the correct dialog pointer and sets it to the member variable
+  void createConfigDialogUsingToolName(const std::string &toolName);
+
+  /// sets up the dialog and uses the settings to update the model
+  void
+  setupConfigDialogSettingsAndUpdateModel(TomoToolConfigDialogBase *dialog);
+
+  /// configures up the dialog using the view
+  void setupConfigDialogSettings(TomoToolConfigDialogBase &dialog);
+
+  /// does the actual path configuration for local resource
+  void setupConfigDialogSettingsForLocal(TomoToolConfigDialogBase &dialog);
+
+  /// does the actual path configuration for remote resource
+  void setupConfigDialogSettingsForRemote(TomoToolConfigDialogBase &dialog);
+
+  /// update all the model information after the tool's been changed
+  void updateModelAfterToolChanged(const TomoToolConfigDialogBase &dialog);
+
+  /// update the model's current tool name using the dialog
+  void updateModelCurrentToolName(const TomoToolConfigDialogBase &dialog);
+
+  /// update the model's current tool method using the dialog
+  void updateModelCurrentToolMethod(const TomoToolConfigDialogBase &dialog);
+
+  /// update the model's current tool settings using the dialog
+  void updateModelCurrentToolSettings(const TomoToolConfigDialogBase &dialog);
+
   /// Associated view for this presenter (MVP pattern)
   ITomographyIfaceView *const m_view;
 
@@ -125,6 +154,8 @@ private:
 
   std::unique_ptr<TomoToolConfigDialogBase> m_configDialog;
 
+  static const std::string g_defOutPathLocal;
+  static const std::string g_defOutPathRemote;
 };
 
 } // namespace CustomInterfaces

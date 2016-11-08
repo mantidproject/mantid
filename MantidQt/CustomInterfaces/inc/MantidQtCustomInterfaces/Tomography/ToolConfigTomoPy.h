@@ -33,7 +33,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL ToolConfigTomoPy : public TomoRecToolConfig {
+class MANTIDQT_CUSTOMINTERFACES_DLL ToolConfigTomoPy
+    : public TomoRecToolConfig {
 public:
   ToolConfigTomoPy();
 
@@ -44,7 +45,7 @@ public:
   ~ToolConfigTomoPy() override {}
 
   // gives the list of methods (reconstruction algorithms) available
-  static const std::vector<std::pair<std::string, std::string> > methods() {
+  static const std::vector<std::pair<std::string, std::string>> methods() {
     return g_tomopyMethods;
   }
 
