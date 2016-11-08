@@ -654,10 +654,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
         elif indexType == INDEX_TYPE_SPECTRUM_NUMBER:
             return workspace.getIndexFromSpectrumNumber(i)
         else: # INDEX_TYPE_DETECTOR_ID
-            for j in len(workspace.getNumberHistograms()):
+            for j in range(workspace.getNumberHistograms()):
                 if workspace.getSpectrum(j).hasDetectorID(i):
                     return j
-            raise RuntimeError('No workspace index found for detector id ' + i)
+            raise RuntimeError('No workspace index found for detector id {0}'.format(i))
 
     def _finalize(self, outputWorkspace, workspaceNames):
         self.setProperty(PROP_OUTPUT_WORKSPACE, outputWorkspace)
