@@ -1,4 +1,3 @@
-# pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
 
 from mantid.api import *
 from mantid.kernel import *
@@ -107,7 +106,6 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
         self.declareProperty(name='Save', defaultValue=False,
                              doc='Switch Save result to nxs file Off/On')
 
-    # pylint: disable=too-many-locals
     def PyExec(self):
         setup_progress = Progress(self, 0.0, 0.05, 3)
         setup_progress.report('Getting Parameters')
@@ -221,6 +219,9 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
         self._sample_log_value = self.getPropertyValue('SampleEnvironmentLogValue')
 
         self._msdfit = self.getProperty('msdFit').value
+        if (self._msdfit) & (self._grouping_method == 'All'):
+            logger.warning("MSDFit will not run if GroupingMethod is 'All'")
+            self._msdfit = False
 
         self._output_ws = first_file + '_ew_scan_red'
         self._scan_ws = first_file + '_ew_scan'

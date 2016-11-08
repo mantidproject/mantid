@@ -1,11 +1,8 @@
-# pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
-
 from mantid.api import *
 from mantid.kernel import *
 from mantid import config
 
 import os
-
 
 def _str_or_none(s):
     if s != '':
@@ -201,11 +198,16 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         delete_alg.setProperty("Workspace", self._scan_ws + '_inel_elf')
         delete_alg.execute()
 
+
+        x_values = mtd[self._scan_ws + '_el_eq2'].readX(0)
+        num_hist = mtd[self._scan_ws + '_el_eq2'].getNumberHistograms()
+        if len(x_values) < 2:
+            logger.error("Unable to perform MSDFit")
+            self._msdfit = False
+
         if self._msdfit:
             msdfit_prog = Progress(self, start=0.9, end=1.0, nreports=4)
             msdfit_prog.report('msdFit')
-            x_values = mtd[self._scan_ws + '_el_eq2'].readX(0)
-            num_hist = mtd[self._scan_ws + '_el_eq2'].getNumberHistograms()
             msd_alg = self.createChildAlgorithm("MSDFit", enableLogging=False)
             msd_alg.setProperty("InputWorkspace", self._scan_ws + '_el_eq2')
             msd_alg.setProperty("Xstart", x_values[0])
