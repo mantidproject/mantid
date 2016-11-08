@@ -35,9 +35,7 @@ class CrystalField(object):
                           'C6h', 'D6', 'C6v', 'D3h', 'D6h', 'T', 'Td', 'Th', 'O', 'Oh']
 
     default_peakShape = 'Gaussian'
-
     default_background = 'FlatBackground'
-
     default_spectrum_size = 200
 
     field_parameter_names = ['BmolX','BmolY','BmolZ','BextX','BextY','BextZ',
@@ -58,7 +56,8 @@ class CrystalField(object):
         @param kwargs: Other field parameters and attributes. Acceptable values include:
                         ToleranceEnergy:     energy tolerance,
                         ToleranceIntensity:  intensity tolerance,
-                        ResolutionModel: A resolution model.
+                        ResolutionModel:     A resolution model.
+                        FWHMVariation:      Absolute value of allowed variation of a peak width during a fit.
 
                         Field parameters:
 
@@ -119,6 +118,7 @@ class CrystalField(object):
         self._FWHM = None
         self._intensityScaling = 1.0
         self._resolutionModel = None
+        self._fwhmVariation = None
 
         for key in kwargs:
             if key == 'ToleranceEnergy':
@@ -130,9 +130,11 @@ class CrystalField(object):
             elif key == 'FWHM':
                 self._FWHM = kwargs[key]
             elif key == 'ResolutionModel':
-                self._resolutionModel = kwargs[key]
+                self.ResolutionModel = kwargs[key]
             elif key == 'Temperature':
                 self._temperature = kwargs[key]
+            elif key == 'FWHMVariation':
+                self._fwhmVariation = kwargs[key]
             else:
                 # Crystal field parameters
                 self._fieldParameters[key] = kwargs[key]
@@ -183,6 +185,15 @@ class CrystalField(object):
         if self._FWHM is not None:
             out += ',FWHM=%s' % self._getFWHM(i)
         out += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
+        if self._resolutionModel is not None:
+            if self._resolutionModel.multi:
+                model = self._resolutionModel.model[i]
+            else:
+                model = self._resolutionModel.model
+            out += ',FWHMX=%s,FWHMY=%s' % tuple(map(tuple, model))
+            if self._fwhmVariation is not None:
+                out += ',FWHMVariation=%s' % self._fwhmVariation
+
         peaks = self.getPeak(i)
         params = peaks.paramString('', 0)
         if len(params) > 0:
@@ -236,6 +247,13 @@ class CrystalField(object):
                 if len(constraintsOut) > 0:
                     constraintsList.append(constraintsOut)
                 i += 1
+        if self._resolutionModel is not None:
+            i = 0
+            for model in self._resolutionModel.model:
+                out += ',FWHMX{0}={1},FWHMY{0}={2}'.format(i, tuple(model[0]), tuple(model[1]))
+                i += 1
+            if self._fwhmVariation is not None:
+                out += ',FWHMVariation=%s' % self._fwhmVariation
         i = 0
         for peaks in self.peaks:
             parOut = peaks.paramString('f%s.' % i, 1)
@@ -369,9 +387,24 @@ class CrystalField(object):
         self._FWHM = value
         self._dirty_spectra = True
 
+    def __getitem__(self, item):
+        return self._fieldParameters[item]
+
+    def __setitem__(self, key, value):
+        self._dirty_spectra = True
+        self._fieldParameters[key] = value
+
     @property
-    def param(self):
-        return self._fieldParameters
+    def ResolutionModel(self):
+        return self._resolutionModel
+
+    @ResolutionModel.setter
+    def ResolutionModel(self, value):
+        from .function import ResolutionModel
+        if isinstance(value, ResolutionModel):
+            self._resolutionModel = value
+        else:
+            self._resolutionModel = ResolutionModel(value)
 
     def ties(self, **kwargs):
         """Set ties on the field parameters.
@@ -487,7 +520,7 @@ class CrystalField(object):
         self._spectra[i] = self._calcSpectrum(i, wksp, 0)
         return self._spectra[i]
 
-    def plot(self, i=0, workspace=None, ws_index=0):
+    def plot(self, i=0, workspace=None, ws_index=0, name=None):
         """Plot a spectrum. Parameters are the same as in getSpectrum(...)"""
         from mantidplot import plotSpectrum
         from mantid.api import AlgorithmManager
@@ -495,7 +528,7 @@ class CrystalField(object):
         createWS.initialize()
 
         xArray, yArray = self.getSpectrum(i, workspace, ws_index)
-        ws_name = 'CrystalField_%s' % self._ion
+        ws_name = name if name is not None else 'CrystalField_%s' % self._ion
 
         if isinstance(i, int):
             if workspace is None:
@@ -612,6 +645,22 @@ class CrystalField(object):
             else:
                 self._fieldParameters[par] = value
 
+    def calc_xmin_xmax(self, i):
+        """Calculate the x-range containing interesting features of a spectrum (for plotting)
+        @param i: If an integer is given then calculate the x-range for the i-th spectrum.
+                  If None given get the range covering all the spectra.
+        @return: Tuple (xmin, xmax)
+        """
+        peaks = self.getPeakList(i)
+        x_min = np.min(peaks[0])
+        x_max = np.max(peaks[0])
+        # dx probably should depend on peak widths
+        deltaX = np.abs(x_max - x_min) * 0.1
+        if x_min < 0:
+            x_min -= deltaX
+        x_max += deltaX
+        return x_min, x_max
+
     def __add__(self, other):
         return CrystalFieldMulti(self, other)
 
@@ -689,26 +738,16 @@ class CrystalField(object):
         alg.setProperty('WorkspaceIndex', ws_index)
         alg.setProperty('OutputWorkspace', 'dummy')
         alg.execute()
+        fun = alg.getProperty('Function').value
+        if not self._isMultiSpectra():
+            self.update(fun)
         out = alg.getProperty('OutputWorkspace').value
         # Create copies of the x and y because `out` goes out of scope when this method returns
         # and x and y get deallocated
         return np.array(out.readX(0)), np.array(out.readY(1))
 
-    def calc_xmin_xmax(self, i):
-        """Calculate the x-range containing interesting features of a spectrum (for plotting)
-        @param i: If an integer is given then calculate the x-range for the i-th spectrum.
-                  If None given get the range covering all the spectra.
-        @return: Tuple (xmin, xmax)
-        """
-        peaks = self.getPeakList(i)
-        x_min = np.min(peaks[0])
-        x_max = np.max(peaks[0])
-        # dx probably should depend on peak widths
-        deltaX = np.abs(x_max - x_min) * 0.1
-        if x_min < 0:
-            x_min -= deltaX
-        x_max += deltaX
-        return x_min, x_max
+    def _isMultiSpectra(self):
+        return hasattr(self._temperature, '__len__')
 
 
 class CrystalFieldMulti(object):

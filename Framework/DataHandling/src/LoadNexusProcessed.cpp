@@ -1721,8 +1721,13 @@ void LoadNexusProcessed::loadNonSpectraAxis(
     }
   } else if (axis->isText()) {
     NXChar axisData = data.openNXChar("axis2");
-    axisData.load();
-    std::string axisLabels(axisData(), axisData.dim0());
+    std::string axisLabels;
+    try {
+      axisData.load();
+      axisLabels = std::string(axisData(), axisData.dim0());
+    } catch (std::runtime_error &) {
+      axisLabels = "";
+    }
     // Use boost::tokenizer to split up the input
     Mantid::Kernel::StringTokenizer tokenizer(
         axisLabels, "\n", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);

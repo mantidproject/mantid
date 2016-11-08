@@ -141,7 +141,7 @@ void AbsorptionCorrection::exec() {
 
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
-  PARALLEL_FOR2(m_inputWS, correctionFactors)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *correctionFactors))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
 

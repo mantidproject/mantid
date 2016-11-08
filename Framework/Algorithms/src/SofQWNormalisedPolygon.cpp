@@ -99,7 +99,7 @@ void SofQWNormalisedPolygon::exec() {
   const auto &X = inputWS->x(0);
   int emode = m_EmodeProperties.m_emode;
 
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nHistos);
        ++i) // signed for openmp
   {

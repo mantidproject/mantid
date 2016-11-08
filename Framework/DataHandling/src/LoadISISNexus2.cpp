@@ -924,7 +924,7 @@ void LoadISISNexus2::runLoadInstrument(
   }
   if (executionSuccessful) {
     // If requested update the instrument to positions in the data file
-    const Geometry::ParameterMap &pmap = localWorkspace->instrumentParameters();
+    const auto &pmap = localWorkspace->constInstrumentParameters();
     if (pmap.contains(localWorkspace->getInstrument()->getComponentID(),
                       "det-pos-source")) {
       boost::shared_ptr<Geometry::Parameter> updateDets = pmap.get(

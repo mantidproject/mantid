@@ -126,9 +126,7 @@ void Qxy::exec() {
   // moved to account for the beam centre
   const V3D samplePos = spectrumInfo.samplePosition();
 
-  //  PARALLEL_FOR2(inputWorkspace,outputWorkspace)
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
-    //    PARALLEL_START_INTERUPT_REGION
     if (!spectrumInfo.hasDetectors(i)) {
       g_log.warning() << "Workspace index " << i
                       << " has no detector assigned to it - discarding\n";
@@ -298,9 +296,7 @@ void Qxy::exec() {
 
     prog.report("Calculating Q");
 
-    //    PARALLEL_END_INTERUPT_REGION
   } // loop over all spectra
-  //  PARALLEL_CHECK_INTERUPT_REGION
 
   // take sqrt of error weight values
   // left to be executed here for computational efficiency
