@@ -177,13 +177,56 @@ class Pearl(AbstractInst):
         input_workspace = mantid.Rebin(InputWorkspace=input_workspace, Params=self._focus_tof_binning)
         return input_workspace
 
-    def _focus_load(self, run_number, input_workspace, perform_vanadium_norm):
+    def _focus_processing(self, run_number, input_workspace, perform_vanadium_norm):
         return self._perform_focus_loading(run_number, input_workspace, perform_vanadium_norm)
 
-    def _process_output(self, processed_spectra, run_number, attenuate=False):
+    def _process_focus_output(self, processed_spectra, run_number, attenuate=False):
         return fmode_output.generate_and_save_focus_output(self, processed_spectra=processed_spectra,
                                                            run_number=run_number, perform_attenuation=attenuate,
                                                            focus_mode=self._focus_mode)
+
+    def _load_monitor(self, number, cycle):
+        input_dir = self._generate_raw_data_cycle_dir(run_cycle=cycle)
+        # TODO refactor all of this
+        if isinstance(number, int):
+            full_file_path = self._generate_input_full_path(run_number=number, input_dir=input_dir)
+            mspectra = self._get_monitor_spectra(number)
+            load_monitor_ws = mantid.LoadRaw(Filename=full_file_path, SpectrumMin=mspectra, SpectrumMax=mspectra,
+                                             LoadLogFiles="0")
+        else:
+            load_monitor_ws = common._load_monitor_sum_range(files=number, input_dir=input_dir, instrument=self)
+
+        return load_monitor_ws
+
+    def _apply_van_calibration_tof_rebinning(self, vanadium_ws, tof_rebin_pass, return_units):
+        tof_rebin_param_dict = self._get_create_van_tof_binning()
+        tof_rebin_param = tof_rebin_param_dict[str(tof_rebin_pass)]
+
+        rebinned_ws = mantid.ConvertUnits(InputWorkspace=vanadium_ws, Target="TOF")
+        rebinned_ws = mantid.Rebin(InputWorkspace=rebinned_ws, Params=tof_rebin_param)
+
+        rebinned_ws = mantid.ConvertUnits(InputWorkspace=rebinned_ws, Target=return_units)
+
+        common.remove_intermediate_workspace(vanadium_ws)
+        vanadium_ws = rebinned_ws
+        return vanadium_ws
+
+    def _generate_vanadium_absorb_corrections(self, calibration_full_paths, ws_to_match):
+        raise NotImplementedError("Generating absorption corrections needs to be implemented correctly")
+
+        # TODO are these values applicable to all instruments
+        shape_ws = mantid.CloneWorkspace(InputWorkspace=ws_to_match)
+        mantid.CreateSampleShape(InputWorkspace=shape_ws, ShapeXML='<sphere id="sphere_1"> <centre x="0" y="0" z= "0" />\
+                                                          <radius val="0.005" /> </sphere>')
+
+        absorb_ws = \
+            mantid.AbsorptionCorrection(InputWorkspace=shape_ws, AttenuationXSection="5.08",
+                                        ScatteringXSection="5.1", SampleNumberDensity="0.072",
+                                        NumberOfWavelengthPoints="25", ElementSize="0.05")
+        mantid.SaveNexus(Filename=calibration_full_paths["vanadium_absorption"],
+                         InputWorkspace=absorb_ws, Append=False)
+        common.remove_intermediate_workspace(shape_ws)
+        return absorb_ws
 
     # Implementation of instrument specific steps
 

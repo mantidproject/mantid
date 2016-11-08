@@ -5,6 +5,7 @@ from six import add_metaclass
 
 from isis_powder import common
 from isis_powder import focus
+from isis_powder import calibrate
 
 # This class provides common hooks for instruments to override
 # if they want to define the behaviour of the hook. Otherwise it
@@ -85,14 +86,11 @@ class AbstractInst(object):
         self._create_calibration_silicon(calibration_runs=calibration_runs, cal_file_name=cal_file_name,
                                          grouping_file_name=grouping_file_name)
 
-    def create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name, num_of_splines,
+    def create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name, num_of_splines=None,
                                     do_absorb_corrections=True, gen_absorb_correction=False):
-
-        common.create_vanadium(startup_object=self, vanadium_runs=vanadium_runs,
-                               empty_runs=empty_runs, output_file_name=output_file_name,
-                               num_of_spline_coefficients=num_of_splines,
-                               do_absorb_corrections=do_absorb_corrections,
-                               generate_absorb_corrections=gen_absorb_correction)
+        calibrate.create_van(instrument=self, van=vanadium_runs, empty=empty_runs,
+                             output_van_file_name=output_file_name, num_of_splines=num_of_splines,
+                             absorb=do_absorb_corrections, gen_absorb=gen_absorb_correction)
 
     @staticmethod
     def set_debug_mode(val):
@@ -198,7 +196,8 @@ class AbstractInst(object):
     @staticmethod
     @abstractmethod
     def _get_instrument_alg_save_ranges(instrument=''):
-        #  TODO fix this documentation when we know what alg_range and save_range is used for
+        #  TODO we need to move save range out into a separate hook and make alg
+        #  range represent the number of banks
         """
         Gets the instruments ranges for running the algorithm and saving
         @param instrument: The version of the instrument if applicable
@@ -216,6 +215,8 @@ class AbstractInst(object):
         pass
 
     # --- Instrument optional hooks ----#
+    # TODO cull some of these hooks once we unify the scripts
+
     def _attenuate_workspace(self, input_workspace):
         return _empty_hook_return_input(input_workspace)
 
@@ -272,20 +273,29 @@ class AbstractInst(object):
     def _do_tof_rebinning_focus(self, input_workspace):
         return input_workspace
 
-    def _focus_load(self, run_number, input_workspace, perform_vanadium_norm):
+    def _focus_processing(self, run_number, input_workspace, perform_vanadium_norm):
         return _empty_hook_return_none()
 
-    def _process_output(self, processed_spectra, run_number, attenuate=False):
+    def _process_focus_output(self, processed_spectra, run_number, attenuate=False):
         return _empty_hook_return_none()
 
     def _subtract_sample_empty(self, input_sample):
         return input_sample
 
-    def _apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_ws_path):
+    def _apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number):
         return ws_to_correct
+
+    def _load_monitor(self, number, cycle):
+        return None
+
+    def _apply_van_calibration_tof_rebinning(self, vanadium_ws, tof_rebin_pass, return_units):
+        return vanadium_ws
+
+    def _generate_vanadium_absorb_corrections(self, calibration_full_paths, ws_to_match):
+        raise NotImplementedError("Not implemented for this instrument yet")
+
 # ----- Private Implementation ----- #
 # These should only be called by the abstract instrument class
-
 
 def _append_dot_to_ext(ext):
     if not ext.startswith('.'):

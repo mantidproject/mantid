@@ -17,9 +17,11 @@ def _run_focus(instrument, run_number, perform_attenuation, perform_vanadium_nor
     # Align / Focus
     cycle_information = instrument._get_cycle_information(run_number=run_number)
     calibration_file_paths = instrument._get_calibration_full_paths(cycle=cycle_information["cycle"])
+
     # Compensate for empty sample if specified
     input_workspace = instrument._subtract_sample_empty(input_workspace)
 
+    # TODO this prints a warnings about detectors being incorrect on POLARIS
     input_workspace = mantid.AlignDetectors(InputWorkspace=input_workspace,
                                             CalibrationFile=calibration_file_paths["calibration"])
 
@@ -30,13 +32,13 @@ def _run_focus(instrument, run_number, perform_attenuation, perform_vanadium_nor
                                                   GroupingFileName=calibration_file_paths["grouping"])
 
     # Process
-    calibrated_spectra = instrument._focus_load(run_number, input_workspace, perform_vanadium_norm)
+    calibrated_spectra = instrument._focus_processing(run_number, input_workspace, perform_vanadium_norm)
 
     common.remove_intermediate_workspace(read_ws)
     common.remove_intermediate_workspace(input_workspace)
 
     # Output
-    processed_nexus_files = instrument._process_output(calibrated_spectra, run_number, attenuate=perform_attenuation)
+    processed_nexus_files = instrument._process_focus_output(calibrated_spectra, run_number, attenuate=perform_attenuation)
 
     for ws in calibrated_spectra:
         common.remove_intermediate_workspace(ws)

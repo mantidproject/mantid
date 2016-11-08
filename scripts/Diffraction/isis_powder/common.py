@@ -9,13 +9,6 @@ def create_calibration_by_names(calibration_runs, startup_objects, grouping_file
                            out_grouping_file_name=grouping_file_name, instrument=startup_objects)
 
 
-def create_vanadium(startup_object, vanadium_runs, empty_runs, output_file_name,
-                    num_of_spline_coefficients=60, do_absorb_corrections=True, generate_absorb_corrections=False):
-    _create_van(instrument=startup_object, van=vanadium_runs, empty=empty_runs,
-                output_van_file_name=output_file_name, num_of_splines=num_of_spline_coefficients,
-                absorb=do_absorb_corrections, gen_absorb=generate_absorb_corrections)
-
-
 def set_debug(debug_on=False):
     global g_debug
     g_debug = debug_on
@@ -37,6 +30,7 @@ _read_ws_count = 0
 global g_ads_workaround
 g_ads_workaround = {"read_ws": _read_ws_count}
 
+
 def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument, group_names):
     input_ws = _load_current_normalised_ws(calibration_runs, instrument)
     calibration_d_spacing_ws = mantid.ConvertUnits(InputWorkspace=input_ws, Target="dSpacing")
@@ -44,94 +38,6 @@ def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument,
                                 GroupingFileName=out_grouping_file_name, GroupNames=group_names)
     remove_intermediate_workspace(calibration_d_spacing_ws)
     remove_intermediate_workspace(input_ws)
-
-
-def _create_van(instrument, van, empty, output_van_file_name, num_of_splines=60, absorb=True, gen_absorb=False):
-    cycle_information = instrument._get_cycle_information(van)
-
-    input_van_ws = _load_current_normalised_ws(number=van, instrument=instrument)
-    input_empty_ws = _load_current_normalised_ws(number=empty, instrument=instrument)
-
-    corrected_van_ws = mantid.Minus(LHSWorkspace=input_van_ws, RHSWorkspace=input_empty_ws)
-
-    remove_intermediate_workspace(input_empty_ws)
-    remove_intermediate_workspace(input_van_ws)
-
-    calibration_full_paths = instrument._get_calibration_full_paths(cycle=cycle_information["cycle"])
-    tof_binning = instrument._get_create_van_tof_binning()
-
-    if absorb:
-        corrected_van_ws = _apply_absorb_corrections(calibration_full_paths, corrected_van_ws, gen_absorb)
-
-    corrected_van_ws = mantid.ConvertUnits(InputWorkspace=corrected_van_ws, Target="TOF")
-    corrected_van_ws = mantid.Rebin(InputWorkspace=corrected_van_ws, Params=tof_binning["1"])
-
-    corrected_van_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
-                                             CalibrationFile=calibration_full_paths["calibration"])
-
-    focused_van_file = mantid.DiffractionFocussing(InputWorkspace=corrected_van_ws,
-                                                   GroupingFileName=calibration_full_paths["grouping"])
-
-    focused_van_file = mantid.ConvertUnits(InputWorkspace=focused_van_file, Target="TOF")
-
-    focused_van_file = mantid.Rebin(InputWorkspace=focused_van_file, Params=tof_binning["2"])
-    focused_van_file = mantid.ConvertUnits(InputWorkspace=focused_van_file, Target="dSpacing")
-
-    remove_intermediate_workspace(corrected_van_ws)
-
-    splined_ws_list = instrument._spline_background(focused_van_file, num_of_splines,
-                                                    cycle_information["instrument_version"])
-
-    if instrument._PEARL_filename_is_full_path():
-        out_van_file_path = output_van_file_name
-    else:
-        out_van_file_path = instrument.calibration_dir + output_van_file_name
-
-    append = False
-    for ws in splined_ws_list:
-        mantid.SaveNexus(Filename=out_van_file_path, InputWorkspace=ws, Append=append)
-        remove_intermediate_workspace(ws)
-        append = True
-
-    mantid.LoadNexus(Filename=out_van_file_path, OutputWorkspace="Van_data")
-
-
-def _apply_absorb_corrections(calibration_full_paths, corrected_van_ws, gen_absorb):
-    corrected_van_ws = mantid.ConvertUnits(InputWorkspace=corrected_van_ws, Target="Wavelength")
-
-    if gen_absorb:
-        raise NotImplementedError("Generating absorption corrections is not currently working correctly")
-        # TODO look into this and see what is missing from the original script based on the current
-        # TODO generated NXS file history
-        absorb_ws = _generate_vanadium_absorb_corrections(calibration_full_paths, corrected_van_ws)
-    else:
-        absorb_ws = _load_van_absorb_corr(calibration_full_paths)
-
-    corrected_van_ws = mantid.RebinToWorkspace(WorkspaceToRebin=corrected_van_ws, WorkspaceToMatch=absorb_ws)
-    corrected_van_ws = mantid.Divide(LHSWorkspace=corrected_van_ws, RHSWorkspace=absorb_ws)
-    remove_intermediate_workspace(absorb_ws)
-    return corrected_van_ws
-
-
-def _generate_vanadium_absorb_corrections(calibration_full_paths, ws_to_match):
-    # TODO are these values applicable to all instruments
-    shape_ws = mantid.CloneWorkspace(InputWorkspace=ws_to_match)
-    mantid.CreateSampleShape(InputWorkspace=shape_ws, ShapeXML='<sphere id="sphere_1"> <centre x="0" y="0" z= "0" />\
-                                                      <radius val="0.005" /> </sphere>')
-
-    absorb_ws = \
-        mantid.AbsorptionCorrection(InputWorkspace=shape_ws, AttenuationXSection="5.08",
-                                    ScatteringXSection="5.1", SampleNumberDensity="0.072",
-                                    NumberOfWavelengthPoints="25", ElementSize="0.05")
-    mantid.SaveNexus(Filename=calibration_full_paths["vanadium_absorption"],
-                     InputWorkspace=absorb_ws, Append=False)
-    remove_intermediate_workspace(shape_ws)
-    return absorb_ws
-
-
-def _load_van_absorb_corr(calibration_full_paths):
-    absorption_ws = mantid.LoadNexus(Filename=calibration_full_paths["vanadium_absorption"])
-    return absorption_ws
 
 
 def _load_monitor(number, input_dir, instrument):
@@ -172,7 +78,10 @@ def _load_monitor_sum_range(files, input_dir, instrument):
     return load_monitor_summed
 
 
-def _load_raw_files(run_number, instrument, input_dir):
+def _load_raw_files(run_number, instrument):
+    cycle_information = instrument._get_cycle_information(run_number=run_number)
+    input_dir = instrument._generate_raw_data_cycle_dir(cycle_information["cycle"])
+
     if isinstance(run_number, int):
         infile = instrument._generate_input_full_path(run_number=run_number, input_dir=input_dir)
         load_raw_ws = mantid.LoadRaw(Filename=infile, LoadLogFiles="0")
@@ -205,11 +114,12 @@ def _load_raw_file_range(files, input_dir, instrument):
 
 
 def _load_current_normalised_ws(number, instrument):
-    cycle_information = instrument._get_cycle_information(run_number=number)
-    input_dir = instrument._generate_raw_data_cycle_dir(cycle_information["cycle"])
+    # TODO monitor loading should be instrument specific and not in common
 
-    read_in_ws = _load_raw_files(run_number=number, instrument=instrument, input_dir=input_dir)
-    load_monitor_ws = _load_monitor(number=number, input_dir=input_dir, instrument=instrument)
+    read_in_ws = _load_raw_files(run_number=number, instrument=instrument)
+
+    cycle_information = instrument._get_cycle_information(run_number=number)
+    load_monitor_ws = instrument._load_monitor(number=number, cycle=cycle_information["cycle"])
 
     read_ws = instrument._normalise_ws(ws_to_correct=read_in_ws, monitor_ws=load_monitor_ws, spline_terms=20)
 

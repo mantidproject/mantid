@@ -13,7 +13,7 @@ DIFF_PLACES = 8
 DIRS = config['datasearch.directories'].split(';')
 
 
-class PearlPowderDiffractionScriptTestCalibration(stresstesting.MantidStressTest):
+class PowderDiffOldApiCalibrateTest(stresstesting.MantidStressTest):
     def requiredFiles(self):
         filenames = []
 
