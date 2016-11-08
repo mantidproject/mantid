@@ -384,6 +384,7 @@ private:
 
   /// NonOrthogonal Fields
   std::unique_ptr<CoordinateTransform> m_coordinateTransform;
+  bool m_firstNonOrthogonalWorkspaceOpen;
 
   // -------------------------- Controllers ------------------------
   boost::shared_ptr<CompositePeaksPresenter> m_peaksPresenter;

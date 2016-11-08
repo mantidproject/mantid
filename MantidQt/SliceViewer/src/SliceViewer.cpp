@@ -88,7 +88,7 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
           boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
-      m_peaksSliderWidget(NULL) {
+      m_peaksSliderWidget(NULL), m_firstNonOrthogonalWorkspaceOpen(true) {
 
   ui.setupUi(this);
 
@@ -701,6 +701,10 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
   m_data->setWorkspace(m_ws);
   this->setTransparentZeros(false);
 
+  if (m_firstNonOrthogonalWorkspaceOpen) {
+    m_firstNonOrthogonalWorkspaceOpen = false;
+    ui.btnNonOrthogonalToggle->toggle();
+  }
   updateDisplay();
 }
 
@@ -733,6 +737,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
                    SLOT(updateNonOrthogonalOverlay()));
   emit setNonOrthogonalbtn();
+  m_firstNonOrthogonalWorkspaceOpen = true;
   m_data->setWorkspace(ws);
   m_plot->setWorkspace(ws);
   autoRebinIfRequired();
