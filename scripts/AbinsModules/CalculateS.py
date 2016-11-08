@@ -371,10 +371,9 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                 sort = data["datasets"]["data"]["atoms_data"]["atom_%s" % i]["sort"]
                 symbol = data["datasets"]["data"]["atoms_data"]["atom_%s" % i]["symbol"]
                 temp_data["atoms_data"]["atom_%s" % i] = {"sort": sort,  "symbol":  symbol, "s": {}}
-                for j in range(AbinsConstants.fundamentals,
-                               self._quantum_order_num + AbinsConstants.s_last_index):
+                for j in range(AbinsConstants.fundamentals, self._quantum_order_num + AbinsConstants.s_last_index):
                     temp_val = data["datasets"]["data"]["atoms_data"]["atom_%s" % i]["s"]["order_%s" % j]
-                    temp_data["atoms_data"]["atom_%s" % i]["s"] = {"order_%s" % j: temp_val}
+                    temp_data["atoms_data"]["atom_%s" % i]["s"]["order_%s" % j] = temp_val
 
             # reduce the data which is loaded to only this data which is required by the user
             data["datasets"]["data"] = temp_data
