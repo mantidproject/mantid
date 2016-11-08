@@ -122,10 +122,9 @@ public:
   virtual MantidSurfacePlotDialog *
   createSurfacePlotDialog(int flags, QStringList wsNames,
                           const QString &plotType) = 0;
-  virtual MantidWSIndexDialog *createWorkspaceIndexDialog(int flags,
-                                                          QStringList wsNames,
-                                                          bool showWaterfall,
-                                                          bool showPlotAll) = 0;
+  virtual MantidWSIndexDialog *
+  createWorkspaceIndexDialog(int flags, QStringList wsNames, bool showWaterfall,
+                             bool showPlotAll, bool showTiledOpt) = 0;
 
   virtual void updateProject() = 0;
 #ifdef MAKE_VATES
