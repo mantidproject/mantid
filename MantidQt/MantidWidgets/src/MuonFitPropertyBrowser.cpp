@@ -549,21 +549,23 @@ std::string MuonFitPropertyBrowser::outputName() const {
 }
 
 /**
- * Set "compatibility mode" (i.e. the behaviour pre-Mantid 3.8) on or off.
- * In this mode, all parts of the fit property browser are shown and all extra
+ * Set multiple fitting mode on or off.
+ * If turned off, all parts of the fit property browser are shown and all extra
  * widgets (like the function browser or data selector) are hidden, so it looks
- * just like it used to before the changes.
+ * just like it used to before the changes in Mantid 3.8.
+ * If turned on, the "Function" and "Data" sections of the fit property browser
+ * are hidden and the extra widgets are shown.
  * @param enabled :: [input] Whether to turn this mode on or off
  */
-void MuonFitPropertyBrowser::setCompatibilityMode(bool enabled) {
+void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
   // Show or hide "Function" and "Data" sections
-  m_browser->setItemVisible(m_functionsGroup, enabled);
-  m_browser->setItemVisible(m_settingsGroup, enabled);
+  m_browser->setItemVisible(m_functionsGroup, !enabled);
+  m_browser->setItemVisible(m_settingsGroup, !enabled);
 
   // Show or hide additional widgets
   for (int i = 0; i < m_additionalLayout->count(); ++i) {
     if (auto *widget = m_additionalLayout->itemAt(i)->widget()) {
-      widget->setVisible(!enabled);
+      widget->setVisible(enabled);
     }
   }
 }
