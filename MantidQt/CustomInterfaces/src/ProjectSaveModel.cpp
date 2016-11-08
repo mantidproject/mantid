@@ -1,6 +1,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtCustomInterfaces/ProjectSaveModel.h"
 
+#include <unordered_set>
+
 using namespace Mantid::API;
 using namespace MantidQt::API;
 using namespace MantidQt::CustomInterfaces;
@@ -28,6 +30,22 @@ std::vector<IProjectSerialisable *> ProjectSaveModel::getWindows(const std::stri
   }
 
   return std::vector<IProjectSerialisable*>();
+}
+
+std::vector<std::string> ProjectSaveModel::getWindowNames(const std::vector<std::string> &wsNames) const
+{
+  std::unordered_set<std::string> windowNames;
+
+  for(auto &name : wsNames) {
+    auto windows = getWindows(name);
+    for (auto window : windows) {
+      windowNames.insert(window->getWindowName());
+    }
+  }
+
+  std::vector<std::string> names(windowNames.cbegin(), windowNames.cend());
+  std::sort(names.begin(), names.end());
+  return names;
 }
 
 std::vector<std::string> ProjectSaveModel::getWorkspaceNames() const

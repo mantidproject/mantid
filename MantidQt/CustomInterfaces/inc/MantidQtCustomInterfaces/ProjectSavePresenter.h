@@ -41,9 +41,17 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class ProjectSavePresenter
 {
 public:
+  enum class Notification {
+    UncheckWorkspace,
+    CheckWorkspace
+  };
+
   ProjectSavePresenter(IProjectSaveView* view);
+  void notify(Notification notification);
 
 private:
+  void includeWindowsForCheckedWorkspace();
+  void excludeWindowsForUncheckedWorkspace();
 
   /// Handle to the view for this presenter
   IProjectSaveView *m_view;

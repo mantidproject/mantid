@@ -100,6 +100,36 @@ public:
     TS_ASSERT_EQUALS(names[1], "ws2");
   }
 
+  void testGetWindowNames() {
+    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+
+    WindowStub win1("window1", {"ws1"});
+    WindowStub win2("window2", {"ws2"});
+    WindowStub win3("window3", {"ws1", "ws2"});
+    WindowStub win4("window4", {});
+    windows.push_back(&win1);
+    windows.push_back(&win2);
+    windows.push_back(&win3);
+    windows.push_back(&win4);
+
+    ProjectSaveModel model(windows);
+    auto names = model.getWindowNames({"ws1", "ws2"});
+    TS_ASSERT_EQUALS(names.size(), 3);
+    TS_ASSERT_EQUALS(names[0], "window1");
+    TS_ASSERT_EQUALS(names[1], "window2");
+    TS_ASSERT_EQUALS(names[2], "window3");
+
+    names = model.getWindowNames({"ws1"});
+    TS_ASSERT_EQUALS(names.size(), 2);
+    TS_ASSERT_EQUALS(names[0], "window1");
+    TS_ASSERT_EQUALS(names[1], "window3");
+
+    names = model.getWindowNames({"ws2"});
+    TS_ASSERT_EQUALS(names.size(), 2);
+    TS_ASSERT_EQUALS(names[0], "window2");
+    TS_ASSERT_EQUALS(names[1], "window3");
+  }
+
 };
 
 #endif // MANTIDQTCUSTOMINTERFACES_PROJECTSAVEMODELTEST_H

@@ -211,6 +211,71 @@ public:
     tearDownWorkspaces(workspaces);
   }
 
+  void testDeselectWorkspaceWithAWindow() {
+    std::vector<std::string> workspaces = {"ws1"};
+    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<std::string> windowNames = {"WindowName1Workspaces"};
+    WindowStub window(windowNames[0], workspaces);
+    windows.push_back(&window);
+
+    setUpWorkspaces(workspaces);
+
+    // View should be passed what workspaces exist and what windows
+    // are currently included.
+    ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
+    ON_CALL(m_view, getUncheckedWorkspaceNames())
+        .WillByDefault(Return(workspaces));
+
+    EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
+    EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateIncludedWindowsList(windowNames))
+        .Times(Exactly(1));
+    EXPECT_CALL(m_view, getUncheckedWorkspaceNames())
+        .WillOnce(Return(workspaces));
+    EXPECT_CALL(m_view, updateExcludedWindowsList(windowNames))
+        .Times(Exactly(1));
+
+    ProjectSavePresenter presenter(&m_view);
+    presenter.notify(ProjectSavePresenter::Notification::UncheckWorkspace);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+    tearDownWorkspaces(workspaces);
+  }
+
+  void testReselectWorkspaceWithAWindow() {
+    std::vector<std::string> workspaces = {"ws1"};
+    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<std::string> windowNames = {"WindowName1Workspaces"};
+    WindowStub window(windowNames[0], workspaces);
+    windows.push_back(&window);
+
+    setUpWorkspaces(workspaces);
+
+    ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
+    ON_CALL(m_view, getUncheckedWorkspaceNames())
+        .WillByDefault(Return(workspaces));
+    ON_CALL(m_view, getCheckedWorkspaceNames())
+        .WillByDefault(Return(workspaces));
+
+    EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
+    EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateIncludedWindowsList(windowNames))
+        .Times(Exactly(2));
+    EXPECT_CALL(m_view, getUncheckedWorkspaceNames())
+        .WillOnce(Return(workspaces));
+    EXPECT_CALL(m_view, updateExcludedWindowsList(windowNames))
+        .Times(Exactly(1));
+    EXPECT_CALL(m_view, getCheckedWorkspaceNames())
+        .WillOnce(Return(workspaces));
+
+    ProjectSavePresenter presenter(&m_view);
+    presenter.notify(ProjectSavePresenter::Notification::UncheckWorkspace);
+    presenter.notify(ProjectSavePresenter::Notification::CheckWorkspace);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+    tearDownWorkspaces(workspaces);
+  }
+
   //============================================================================
   // Test Helper Methods
   //============================================================================

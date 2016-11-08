@@ -12,11 +12,11 @@ using namespace MantidQt::CustomInterfaces;
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
-/**** Views ****/
-
 class MockProjectSaveView : public IProjectSaveView {
 public:
   MOCK_METHOD0(getWindows, std::vector<MantidQt::API::IProjectSerialisable*>());
+  MOCK_METHOD0(getCheckedWorkspaceNames, std::vector<std::string>());
+  MOCK_METHOD0(getUncheckedWorkspaceNames, std::vector<std::string>());
   MOCK_METHOD1(updateWorkspacesList, void(const std::vector<std::string> &));
   MOCK_METHOD1(updateIncludedWindowsList, void(const std::vector<std::string> &));
   MOCK_METHOD1(updateExcludedWindowsList, void(const std::vector<std::string> &));
