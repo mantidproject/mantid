@@ -7,14 +7,13 @@ from mantid.kernel import *  # noqa
 from mantid.api import *  # noqa
 from mantid import mtd
 import numpy as np
-import re
 
 
 class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
-    _sample_file = None
-    _background_file = None
-    _calibration_file = None
+    _sample_files = None
+    _background_files = None
+    _calibration_files = None
     _mirror_sense = None
     _observable = None
     _sortX = None
@@ -25,9 +24,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
     _analyser = None
     _reflection = None
     _common_args = {}
-    _runs = []
-    _back_runs = []
-    _calib_runs = []
+    _all_runs = None
 
     def category(self):
         return 'Workflow\\MIDAS;Inelastic\\Reduction'
@@ -99,9 +96,9 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
     def setUp(self):
 
-        self._sample_file = self.getPropertyValue('Run')
-        self._background_file = self.getPropertyValue('BackgroundRun')
-        self._calibration_file = self.getPropertyValue('CalibrationRun')
+        self._sample_files = self.getPropertyValue('Run')
+        self._background_files = self.getPropertyValue('BackgroundRun')
+        self._calibration_files = self.getPropertyValue('CalibrationRun')
         self._mirror_sense = self.getProperty('MirrorSense').value
         self._observable = self.getPropertyValue('Observable')
         self._sortX = self.getProperty('SortXAxis').value
@@ -125,10 +122,8 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         # make sure observable entry also exists (value is not important)
         self._criteria += 'and ($/entry0/' + self._observable.replace('.', '/') + '$ or True)'
 
-        # empty the runs list
-        del self._runs[:]
-        del self._calib_runs[:]
-        del self._back_runs[:]
+        # empty dictionary
+        self._all_runs = dict()
 
     def _filter_files(self, files, label):
         '''
@@ -148,19 +143,6 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
             self.log().information('Filtered {0} runs are: {0} \\n'.format(label,files.replace(',','\\n')))
 
         return files
-
-    def _filter_all_input_files(self):
-        '''
-        Filters all the lists of input files needed for the reduction.
-        '''
-
-        self._sample_file = self._filter_files(self._sample_file,'sample')
-
-        if self._background_file:
-            self._background_file = self._filter_files(self._background_file, 'background')
-
-        if self._calibration_file:
-            self._calibration_file = self._filter_files(self._calibration_file, 'calibration')
 
     def _ifws_peak_bins(self, ws):
         '''
@@ -205,7 +187,8 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         if self._mirror_sense:
             left = mtd[groupws].getItem(0).getName()
             right = mtd[groupws].getItem(1).getName()
-            Sum(LHSWorkspace=left,RHSWorkspace=right,OutputWorkspace=groupws)
+            UnGroupWorkspace(groupws)
+            Plus(LHSWorkspace=left,RHSWorkspace=right,OutputWorkspace=groupws)
             DeleteWorkspace(left)
             DeleteWorkspace(right)
         else:
@@ -215,48 +198,54 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
         self.setUp()
 
-        self._filter_all_input_files()
+        # total number of (unsummed) runs
+        total = self._sample_files.count(',')+self._background_files.count(',')+self._calibration_files.count(',')
 
-        runs = self._sample_file.split(',')
-        back_runs = self._background_file.split(',')
-        calib_runs = self._calibration_file.split(',')
+        self._progress = Progress(self, start=0.0, end=1.0, nreports=total)
 
-        self._progress = Progress(self, start=0.0, end=1.0, nreports=len(runs))
+        self._reduce_multiple_runs(self._sample_files,'sample')
 
-        for run in runs:
-            self._progress.report("Reducing run #" + run)
-            self._reduce_run(run)
-            self._runs.append(run)
+        if self._background_files:
+            self._reduce_multiple_runs(self._background_files,'background')
+            #SplineInterpolation(WorkspaceToMatch=self._red_ws+'_sample',
+            #                    WorkspaceToInterpolate=self._red_ws+'_background', DerivOrder=0)
 
-        # create matrix here
+        if self._calibration_files:
+            self._reduce_multiple_runs(self._calibration_files,'calibration')
 
-        if self._background_file:
-            for brun in back_runs:
-                self._reduce_run(brun)
+        self.log().information('Run files map is :'+str(self._all_runs))
 
-            # create matrix here
-            # interpolate
-            # subtract
+        RenameWorkspace(InputWorkspace=self._red_ws+'_sample',OutputWorkspace=self._red_ws)
 
-        if self._calibration_file:
-            for crun in calib_runs:
-                self._reduce_run(crun)
+        self.setProperty('OutputWorkspace',self._red_ws)
 
-            # create matrix here
-            # interpolate
-            # divide
+    def _reduce_multiple_runs(self, files, label):
+        '''
+        Filters and reduces multiple files
+        @param runs :: list of run paths
+        @param ws :: output ws name
+        '''
 
-        #self._set_workspace_properties()
+        files = self._filter_files(files, label)
 
-    def _reduce_run(self, run):
+        for run in files.split(','):
+            self._reduce_run(run, label)
+
+        self._create_matrices(label)
+
+    def _reduce_run(self, run, label):
         '''
         Reduces the given (single or summed multiple) run
         @param run :: run path
+        @param runnumber :: run number
+        @param  label :: sample, background or calibration
         '''
 
         runnumber = os.path.basename(run.split('+')[0]).split('.')[0]
 
-        ws = runnumber+'_'+self._red_ws
+        ws = runnumber + '_' + label
+
+        self._progress.report("Reducing run #" + runnumber)
 
         IndirectILLEnergyTransfer(Run=run,OutputWorkspace=ws,**self._common_args)
 
@@ -271,178 +260,96 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
         self._perform_unmirror(ws)
 
-    def _get_observable(self, input_ws):
-        """
-        Set list self._observable
-        Args:
-            input_ws: GroupWorkspace, all reduced workspaces of one energy
-        """
-        self._observable = []
-        for index in range(mtd[input_ws].getNumberOfEntries()):
-            entity = mtd[input_ws].getItem(index).getRun().getLogData(self._observable_name).value
-            if self._observable_name != 'start_time':
-                entity = float(entity)
+        self._subscribe_run(ws, energy, label)
+
+    def _subscribe_run(self, ws, energy, label):
+        '''
+        Subcribes the given ws name to the list for
+        given energy and sample/background or calibration
+        @param ws :: workspace name
+        @param energy :: energy
+        @param label  :: sample,calibration or background
+        '''
+
+        if label in self._all_runs:
+            if energy in self._all_runs[label]:
+                self._all_runs[label][energy].append(ws)
             else:
-                # start_time is a string like 2016-09-12T09:09:15 (date using hyphen T time using colon)
-                entity = str(entity)
-                # Get all numbers
-                entity = re.findall(r'\d+', entity)
-                hours = int(entity[3])
-                minutes = int(entity[4])
-                seconds = int(entity[5])
-                entity = seconds + 60 * minutes + 3600 * hours
-                # Improvement possible: account for different days!
-
-            self.log().debug('{0}: {1}'.format(self._observable_name, entity))
-            self._observable.append(entity)
-
-    def _create_matrix(self, group, output_ws):
-        """
-        Args:
-            group : GroupWorkspace, will be transformed to one MatrixWorkspace, Workspace2D, not a histogram
-            output_ws : name of the output workspace
-
-        """
-        self._get_observable(group)
-
-        number_hists = mtd[group].getItem(0).getNumberHistograms()
-        number_workspaces = mtd[group].getNumberOfEntries()
-        length = number_workspaces * number_hists
-
-        self.log().notice('Final post-processing workspace has {0} channel(s) and {1} spectra'.format(number_workspaces,
-                                                                                                      number_hists))
-
-        # Initialisation of the new workspace with values of the first workspace
-        y_values = np.zeros([1, length])
-        e_values = np.zeros([1, length])
-        x_values = np.zeros([1, length])
-        # Variable that will store one row of the final matrix
-        y_row = np.zeros(number_workspaces)
-        e_row = np.zeros(number_workspaces)
-
-        CreateWorkspace(DataX=x_values, DataY=y_values, DataE=e_values, NSpec=number_hists,
-                        WorkspaceTitle=output_ws, Distribution=True, ParentWorkspace=mtd[group].getItem(0),
-                        OutputWorkspace=output_ws)
-
-        # Get and set workspace entries
-        for hist in range(number_hists):
-            mtd[output_ws].setX(hist, np.array(self._observable))
-            for index in range(number_workspaces):
-                workspace = mtd[group].getItem(index)
-                y_row[index] = workspace.readY(hist)
-                e_row[index] = workspace.readE(hist)
-            mtd[output_ws].setY(hist, y_row)
-            mtd[output_ws].setE(hist, e_row)
-
-        if self._sortX:
-            SortXAxis(InputWorkspace=output_ws, OutputWorkspace=output_ws)
-
-        run_numbers = []
-        for index in range(number_workspaces):
-            run_numbers.append(mtd[group].getItem(index).getRun().getLogData('run_number').value)
-
-        # Save run number for files of selected energy
-        AddSampleLog(Workspace=output_ws, LogName='ReducedRuns', LogText=str(run_numbers))
-
-        # Label x-values
-        axis = mtd[output_ws].getAxis(0)
-        if self._observable_name == 'sample.temperature':
-            axis.setUnit("Label").setLabel('Temperature', 'K')
-        elif self._observable_name == 'sample.pressure':
-            axis.setUnit("Label").setLabel('Pressure', 'P')
-        elif self._observable_name == 'start_time':
-            axis.setUnit("Label").setLabel('Time', 'seconds')
+                self._all_runs[label][energy] = [ws]
         else:
-            axis.setUnit("Label").setLabel(self._observable_name, 'Unknown')
+            self._all_runs[label] = dict()
+            self._all_runs[label][energy] = [ws]
 
-    def _get_energies(self):
+    def _get_observable_values(self, ws_list):
         '''
-        Returns: energies   a list of unique energies
-                 indices    indices of the energy values
-
+        Retrives the needed sample log values for the given list of workspaces
+        @param ws_list :: list of workspaces
+        @returns :: array of observable values
         '''
-        energies = []
-        number_of_workspaces = mtd[self._out_ws].getNumberOfEntries()
 
-        # Count appearances of energy, this will be the number of GroupWorkspaces needed
-        for i in range(number_of_workspaces):
-            the_workspace = mtd[self._out_ws].getItem(i).getRun()
-            if the_workspace.hasProperty('Doppler.maximum_delta_energy'):
-                energy = round(the_workspace.getLogData('Doppler.maximum_delta_energy').value, 2)
+        result = []
+
+        for ws in ws_list:
+            value = mtd[ws].getRun().getLogData(self._observable).value
+            if 'time' not in self._observable:
+                value = float(value)
             else:
-                energy = float('nan')
-            energies.append(energy)
+                # start_time is a string like 2016-09-12T09:09:15
+                pass
 
-        # return_counts would be nice to use here but requires numpy version 1.9.0
-        energy_values, indices = np.unique(energies, return_inverse=True)
-        self.log().information('FWS energies: {0}'.format(energy_values))
-        self.log().debug('Corresponding workspaces (index): {0}'.format(indices))
+            result.append(value)
 
-        return [energy_values, indices]
+        return result
 
-    def _get_list_of_workspace_names(self):
+    def _create_matrices(self, label):
+        '''
+        For each reduction type concatenates the workspaces putting the given sample log value as x-axis
+        Creates a group workspace for the given label, that contains 2D workspaces for each distinct energy value
+        @param label :: sample, background or calibration
         '''
 
-        Returns: a list of all workspaces after calling IndirectILLReduction
+        togroup = []
 
-        '''
-        _selected_runs = []
-        number_of_workspaces = mtd[self._out_ws].getNumberOfEntries()
-        for i in range(number_of_workspaces):
-            _selected_runs.append(re.findall(r'\d+', self.selected_runs[i]))
-        self.log().debug('List of runs: {0}'.format(_selected_runs))
+        for energy, ws_list in self._all_runs[label].iteritems():
 
-        return _selected_runs
+            size = len(self._all_runs[label][energy])
+            wsname = self._red_ws+'_'+str(energy)
+            togroup.append(wsname)
+            nspectra = mtd[ws_list[0]].getNumberHistograms()
+            observable_array = self._get_observable_values(self._all_runs[label][energy])
 
-    def _set_workspace_properties(self):
-        """
-        Sets the properties of each GroupWorkspace for each elastic and inelastic energy
+            y_values = np.zeros(size*nspectra)
+            e_values = np.zeros(size*nspectra)
+            x_values = np.zeros(size*nspectra)
 
-        """
+            CreateWorkspace(DataX=x_values, DataY=y_values, DataE=e_values, NSpec=nspectra,
+                            WorkspaceTitle=wsname, Distribution=True, ParentWorkspace=mtd[ws_list[0]],
+                            OutputWorkspace=wsname)
 
-        number_of_workspaces = mtd[self._out_ws].getNumberOfEntries()
+            # AddSampleLog(Workspace=wsname, LogName='ReducedRuns', LogText=str(run_numbers))
 
-        energy_values, indices = self._get_energies()
+            for spectrum in range(nspectra):
 
-        number_groups = len(energy_values)
-        self.log().debug('Number of GroupWorkspaces {0}'.format(number_groups))
+                mtd[wsname].setX(spectrum, np.array(observable_array))
 
-        _selected_runs = self._get_list_of_workspace_names()
+                y_data = np.zeros(size)
+                e_data = np.zeros(size)
 
-        UnGroupWorkspace(self._out_ws)
+                for bin in range(size):
+                    y_data[bin] = mtd[ws_list[bin]].readY(spectrum)[0]
+                    e_data[bin] = mtd[ws_list[bin]].readE(spectrum)[0]
 
-        # List of final output workspaces
-        matrices = []
+                mtd[wsname].setY(spectrum, y_data)
+                mtd[wsname].setE(spectrum, e_data)
 
-        for mygroup in range(number_groups):
-            self.log().debug('Group of energy {0} micro eV'.format(energy_values[mygroup]))
+            if self._sortX:
+                SortXAxis(InputWorkspace=wsname, OutputWorkspace=wsname)
 
-            # Create a new list for each new group of workspaces
-            group = []
-            # Create GroupWorkspace name of the energy group
-            group_name = 'group' + str(energy_values[mygroup])
+        for energy, ws_list in self._all_runs[label].iteritems():
+            for ws in ws_list:
+                DeleteWorkspace(ws)
 
-            # Add the workspaces to the group, which belong to the same energy
-            for ith_workspace in range(number_of_workspaces):
-                if mygroup == indices[ith_workspace]:
-                    # Pick workspace with same energy value
-                    self.log().debug('Join workspace {0}'.format(_selected_runs[ith_workspace][0] + '_' + self._out_ws))
-                    group.append(_selected_runs[ith_workspace][0] + '_' + self._out_ws)
-
-            # Create a GroupWorkspace
-            self.log().debug('GroupWorkspaces {0} for grouping {1}'.format(group_name, group))
-            GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=group_name)
-
-            # Create an additional workspace containing all workspaces of the group (transversed)
-            matrix = self._out_ws + '_' + str(energy_values[mygroup])
-            self._create_matrix(group_name, matrix)
-            matrices.append(matrix)
-
-            DeleteWorkspace(group_name)
-
-        self.log().notice('Set OutputWorkspace property for grouped workspaces {0}'.format(matrices))
-        GroupWorkspaces(InputWorkspaces=matrices, OutputWorkspace=self._out_ws)
-        self.setProperty('OutputWorkspace', self._out_ws)
+        GroupWorkspaces(InputWorkspaces=togroup,OutputWorkspace=self._red_ws+'_'+label)
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLReductionFWS)

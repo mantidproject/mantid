@@ -8,10 +8,10 @@ from mantid import mtd
 
 class IndirectILLReductionQENS(DataProcessorAlgorithm):
 
-    _sample_file = None
-    _alignment_file = None
-    _background_file = None
-    _calibration_file = None
+    _sample_files = None
+    _alignment_files = None
+    _background_files = None
+    _calibration_files = None
     _sum_all_runs = None
     _mask_bins = None
     _unmirror_option = None
@@ -22,7 +22,7 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
     _red_ws = None
     _common_args = {}
     _peak_range = []
-    _runs = []
+    _runs = None
 
     def category(self):
         return "Workflow\\MIDAS;Inelastic\\Reduction"
@@ -165,8 +165,8 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         # mirror sense criteria
         self._criteria += '14' if self._mirror_sense else '16'
 
-        # empty the runs list
-        del self._runs[:]
+        # empty list
+        self._runs = []
 
     def _filter_files(self, files, label):
         '''
