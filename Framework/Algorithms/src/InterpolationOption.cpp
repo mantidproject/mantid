@@ -62,7 +62,6 @@ void InterpolationOption::set(const std::string &kind) {
 std::unique_ptr<Property> InterpolationOption::property() const {
   using Kernel::StringListValidator;
   using StringProperty = Kernel::PropertyWithValue<std::string>;
-  using StringVector = std::vector<std::string>;
 
   return Kernel::make_unique<StringProperty>(
       PROP_NAME, LINEAR_OPT, boost::make_shared<StringListValidator>(OPTIONS));
