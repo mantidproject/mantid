@@ -238,7 +238,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             bkgWorkspace = CalculateFlatBackground(InputWorkspace=workspace,
                                                    OutputWorkspace=bkgOutWs,
                                                    Mode='Moving Average',
-                                                   OutputMode='ReturnBackground',
+                                                   OutputMode='Return Background',
                                                    SkipMonitors=False,
                                                    NullifyNegativeValues=False,
                                                    AveragingWindowWidth=bkgWindow)
