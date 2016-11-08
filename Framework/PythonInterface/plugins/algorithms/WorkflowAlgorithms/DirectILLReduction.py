@@ -140,11 +140,15 @@ class NameSource:
 
     @namelogging
     def monitor(self):
+        return self._prefix + '_monitors'
+
+    @namelogging
+    def monitorEPP(self):
         return self._prefix + '_monepp'
 
     @namelogging
-    def monitor(self):
-        return self._prefix + '_monitors'
+    def monitorsExtracted(self):
+        return self._prefix + '_detectors'
 
     @namelogging
     def normalised(self):
@@ -212,7 +216,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
             workspace = self.getProperty(PROP_INPUT_WORKSPACE).value
 
         # Extract monitors to a separate workspace
-        workspace, monitorWorkspace = ExtractMonitors(workspace)
+        outWsName = workspaceNames.monitorsExtracted()
+        monitorWorkspace = workspaceNames.monitor()
+        workspace, monitorWorkspace = ExtractMonitors(InputWorkspace=workspace,
+                                                      DetectorWorkspace=outWsName,
+                                                      MonitorWorkspace=monitorWorkspace)
 
         monitorIndex = self.getProperty(PROP_MONITOR_INDEX).value
         monitorIndex = self._convertToWorkspaceIndex(monitorIndex, monitorWorkspace)
