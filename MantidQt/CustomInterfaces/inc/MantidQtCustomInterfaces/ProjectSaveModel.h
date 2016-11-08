@@ -19,6 +19,8 @@ public:
   bool hasWindows(const std::string& ws) const;
   /// Get all window handles for this workspace
   std::vector<MantidQt::API::IProjectSerialisable*> getWindows(const std::string& wsName) const;
+  /// Get all window handles for a collection of workspace names
+  std::vector<MantidQt::API::IProjectSerialisable *> getUniqueWindows(const std::vector<std::string> &wsNames) const;
   /// Get all window names for a collection of workspace names
   std::vector<std::string> getWindowNames(const std::vector<std::string> &wsNames) const;
   /// Get all workspace names

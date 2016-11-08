@@ -22,6 +22,8 @@ public:
   MOCK_METHOD1(updateExcludedWindowsList, void(const std::vector<std::string> &));
 };
 
+//==============================================================================
+
 class WindowStub : public IProjectSerialisable {
 private:
   std::string m_name;

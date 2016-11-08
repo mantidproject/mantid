@@ -43,7 +43,7 @@ class ProjectSavePresenter
 public:
   enum class Notification {
     UncheckWorkspace,
-    CheckWorkspace
+    CheckWorkspace,
   };
 
   ProjectSavePresenter(IProjectSaveView* view);

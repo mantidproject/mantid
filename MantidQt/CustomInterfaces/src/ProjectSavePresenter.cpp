@@ -43,4 +43,3 @@ void ProjectSavePresenter::excludeWindowsForUncheckedWorkspace()
   auto names = m_model.getWindowNames(wsNames);
   m_view->updateExcludedWindowsList(names);
 }
-
