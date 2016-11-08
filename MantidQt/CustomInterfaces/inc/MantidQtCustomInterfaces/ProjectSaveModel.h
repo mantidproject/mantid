@@ -20,7 +20,7 @@ public:
   /// Get all window handles for this workspace
   std::vector<MantidQt::API::IProjectSerialisable*> getWindows(const std::string& wsName) const;
   /// Get all workspace names
-  std::set<std::string> getWorkspaceNames() const;
+  std::vector<std::string> getWorkspaceNames() const;
 
 private:
   std::vector<Mantid::API::Workspace_sptr> getWorkspaces() const;

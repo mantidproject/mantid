@@ -8,11 +8,18 @@
 
 #include <QList>
 
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtCustomInterfaces/ProjectSavePresenter.h"
 #include "ProjectSaveMockObjects.h"
 
+using namespace MantidQt::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
+
+//=====================================================================================
+// Mocked/Stubbed test objects
+//=====================================================================================
+
 
 //=====================================================================================
 // Functional tests
@@ -37,7 +44,7 @@ public:
   // ---------------------------------------------------
 
   void testConstructWithNoWorkspacesAndNoWindows() {
-    std::set<std::string> empty;
+    std::vector<std::string> empty;
     std::vector<MantidQt::API::IProjectSerialisable*> windows;
 
     // View should be passed what workspaces exist and what windows
@@ -47,7 +54,7 @@ public:
     EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
     EXPECT_CALL(m_view, updateWorkspacesList(empty)).Times(Exactly(1));
     EXPECT_CALL(m_view, updateIncludedWindowsList(empty)).Times(Exactly(1));
-    EXPECT_CALL(m_view, updateExcludedWindowsList(empty)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateExcludedWindowsList(empty)).Times(Exactly(0));
 
     ProjectSavePresenter presenter(&m_view);
 
@@ -55,8 +62,10 @@ public:
   }
 
   void testConstructWithSingleWorkspaceAndNoWindows() {
-    std::set<std::string> empty;
-    std::set<std::string> workspaces = {"ws1"};
+    std::vector<std::string> empty;
+    std::vector<std::string> workspaces = {"ws1"};
+
+    setUpWorkspaces(workspaces);
     std::vector<MantidQt::API::IProjectSerialisable*> windows;
 
     // View should be passed what workspaces exist and what windows
@@ -65,49 +74,168 @@ public:
     EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
     EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
     EXPECT_CALL(m_view, updateIncludedWindowsList(empty)).Times(Exactly(1));
-    EXPECT_CALL(m_view, updateExcludedWindowsList(empty)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateExcludedWindowsList(empty)).Times(Exactly(0));
 
     ProjectSavePresenter presenter(&m_view);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+    tearDownWorkspaces(workspaces);
   }
 
-  void testSaveAllEmptyADS() {
+  void testConstructWithTwoWorkspacesAndNoWindows() {
+    std::vector<std::string> empty;
+    std::vector<std::string> workspaces = {"ws1", "ws2"};
+
+    setUpWorkspaces(workspaces);
+    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+
+    // View should be passed what workspaces exist and what windows
+    // are currently included.
+    ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
+    EXPECT_CALL(m_view, getWindows()).WillRepeatedly(Return(windows));
+    EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateIncludedWindowsList(empty)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateExcludedWindowsList(empty)).Times(Exactly(0));
+
     ProjectSavePresenter presenter(&m_view);
-    TS_FAIL("Test is unimplemented");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+    tearDownWorkspaces(workspaces);
   }
 
-  void testSavePartialEmptyADS() {
+  void testConstructWithOneWorkspaceAndOneWindow() {
+    std::vector<std::string> empty;
+    std::vector<std::string> workspaces = {"ws1"};
+
+    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<std::string> windowNames = {"WindowName1Workspace"};
+    WindowStub window(windowNames[0], workspaces);
+    windows.push_back(&window);
+
+    setUpWorkspaces(workspaces);
+
+    // View should be passed what workspaces exist and what windows
+    // are currently included.
+    ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
+    EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
+    EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateIncludedWindowsList(windowNames)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateExcludedWindowsList(empty)).Times(Exactly(0));
+
     ProjectSavePresenter presenter(&m_view);
-    TS_FAIL("Test is unimplemented");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+    tearDownWorkspaces(workspaces);
   }
 
-  void testCancel() {
+  void testConstructWithOneWorkspaceAndTwoWindows() {
+    std::vector<std::string> empty;
+    std::vector<std::string> workspaces = {"ws1"};
+
+    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<std::string> windowNames = {"WindowName1Workspace",
+                                            "WindowName2Workspace"};
+    WindowStub window1(windowNames[0], workspaces);
+    WindowStub window2(windowNames[1], workspaces);
+    windows.push_back(&window1);
+    windows.push_back(&window2);
+
+    setUpWorkspaces(workspaces);
+
+    // View should be passed what workspaces exist and what windows
+    // are currently included.
+    ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
+    EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
+    EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateIncludedWindowsList(windowNames)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateExcludedWindowsList(empty)).Times(Exactly(0));
+
     ProjectSavePresenter presenter(&m_view);
-    TS_FAIL("Test is unimplemented");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+    tearDownWorkspaces(workspaces);
   }
 
-  void testDeselectWorkspace() {
+
+  void testConstructWithTwoWorkspacesAndOneWindow() {
+    std::vector<std::string> empty;
+    std::vector<std::string> workspaces = {"ws1", "ws2"};
+
+    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<std::string> windowNames = {"WindowName2Workspaces"};
+    WindowStub window(windowNames[0], workspaces);
+    windows.push_back(&window);
+
+
+    setUpWorkspaces(workspaces);
+
+    // View should be passed what workspaces exist and what windows
+    // are currently included.
+    ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
+    EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
+    EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateIncludedWindowsList(windowNames)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateExcludedWindowsList(empty)).Times(Exactly(0));
+
     ProjectSavePresenter presenter(&m_view);
-    TS_FAIL("Test is unimplemented");
 
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+    tearDownWorkspaces(workspaces);
   }
 
-  void testReselectWorkspace() {
+  void testConstructWithTwoWorkspacesAndTwoWindows() {
+    std::vector<std::string> empty;
+    std::vector<std::string> workspaces = {"ws1", "ws2"};
+
+    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    std::vector<std::string> windowNames = {"WindowName1Workspace",
+                                            "WindowName2Workspace"};
+    WindowStub window1(windowNames[0], {workspaces[0]});
+    WindowStub window2(windowNames[1], {workspaces[1]});
+    windows.push_back(&window1);
+    windows.push_back(&window2);
+
+    setUpWorkspaces(workspaces);
+
+    // View should be passed what workspaces exist and what windows
+    // are currently included.
+    ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
+    EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
+    EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateIncludedWindowsList(windowNames)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateExcludedWindowsList(empty)).Times(Exactly(0));
+
     ProjectSavePresenter presenter(&m_view);
-    TS_FAIL("Test is unimplemented");
 
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+    tearDownWorkspaces(workspaces);
   }
 
-  void testDeselectAllWorkspaces() {
-    ProjectSavePresenter presenter(&m_view);
-    TS_FAIL("Test is unimplemented");
+  //============================================================================
+  // Test Helper Methods
+  //============================================================================
+
+  /**
+ * Create some workspaces and add them to the ADS
+ * @param workspaces :: List of workspace names
+ */
+  void setUpWorkspaces(const std::vector<std::string> &workspaces) {
+    for (auto & name : workspaces) {
+      auto ws = WorkspaceCreationHelper::Create1DWorkspaceRand(10);
+      WorkspaceCreationHelper::storeWS(name, ws);
+    }
   }
 
-  void testReselectAllWorkspaces() {
-    ProjectSavePresenter presenter(&m_view);
-    TS_FAIL("Test is unimplemented");
+  /**
+ * Remove a list of workspaces from the ADS
+ * @param workspaces :: List of workspace names
+ */
+  void tearDownWorkspaces(const std::vector<std::string> &workspaces) {
+    for (auto &name : workspaces) {
+      WorkspaceCreationHelper::removeWS(name);
+    }
   }
+
 };
 
 #endif

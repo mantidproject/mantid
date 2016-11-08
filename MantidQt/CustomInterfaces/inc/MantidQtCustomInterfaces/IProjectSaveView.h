@@ -42,9 +42,9 @@ class IProjectSaveView {
 public:
 
   virtual std::vector<MantidQt::API::IProjectSerialisable*> getWindows() = 0;
-  virtual void updateWorkspacesList(const std::set<std::string>& workspaces) = 0;
-  virtual void updateIncludedWindowsList(const std::set<std::string>& windows) = 0;
-  virtual void updateExcludedWindowsList(const std::set<std::string>& windows) = 0;
+  virtual void updateWorkspacesList(const std::vector<std::string>& workspaces) = 0;
+  virtual void updateIncludedWindowsList(const std::vector<std::string>& windows) = 0;
+  virtual void updateExcludedWindowsList(const std::vector<std::string>& windows) = 0;
 
 private:
     std::vector<MantidQt::API::IProjectSerialisable*> m_serialisableWindows;

@@ -8,9 +8,16 @@ using namespace MantidQt::CustomInterfaces;
 ProjectSaveModel::ProjectSaveModel(std::vector<IProjectSerialisable*> windows)
 {
   auto workspaces = getWorkspaces();
-  for (auto ws : workspaces) {
+  for (auto & ws : workspaces) {
     std::pair<std::string, std::vector<IProjectSerialisable*>> item(ws->name(), std::vector<IProjectSerialisable*>());
     m_workspaceWindows.insert(item);
+  }
+
+  for (auto window : windows) {
+    auto wsNames = window->getWorkspaceNames();
+    for (auto & name : wsNames) {
+      m_workspaceWindows[name].push_back(window);
+    }
   }
 }
 
@@ -23,12 +30,14 @@ std::vector<IProjectSerialisable *> ProjectSaveModel::getWindows(const std::stri
   return std::vector<IProjectSerialisable*>();
 }
 
-std::set<std::string> ProjectSaveModel::getWorkspaceNames() const
+std::vector<std::string> ProjectSaveModel::getWorkspaceNames() const
 {
-  std::set<std::string> names;
+  std::vector<std::string> names;
   for(auto &item : m_workspaceWindows) {
-    names.insert(item.first);
+    names.push_back(item.first);
   }
+
+  std::sort(names.begin(), names.end());
   return names;
 }
 
