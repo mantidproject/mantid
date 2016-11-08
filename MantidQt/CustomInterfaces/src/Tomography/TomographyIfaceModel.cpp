@@ -350,7 +350,7 @@ void TomographyIfaceModel::makeRunnableWithOptions(
     splitCmdLine(cmd, run, opt[0]);
     return;
   }
-  const bool local = ("Local" == comp) ? true : false;
+  const bool local = (g_LocalResourceName == comp) ? true : false;
 
   std::string longOpt;
   splitCmdLine(cmd, run, longOpt);
@@ -442,7 +442,7 @@ void TomographyIfaceModel::doSubmitReconstructionJob(
   logMsg("Running " + usingTool() + ", with binary: " + run +
          ", with parameters: " + allOpts);
 
-  if ("Local" == compRes) {
+  if (g_LocalResourceName == compRes) {
     doRunReconstructionJobLocal(run, allOpts, args);
   } else {
     doRunReconstructionJobRemote(compRes, run, allOpts);
@@ -505,7 +505,7 @@ void TomographyIfaceModel::doRunReconstructionJobLocal(
   info.cmdLine = run + " " + allOpts;
   m_jobsStatusLocal.emplace_back(info);
 
-  doRefreshJobsInfo("Local");
+  doRefreshJobsInfo(g_LocalResourceName);
 }
 
 void TomographyIfaceModel::doCancelJobs(const std::string &compRes,
@@ -531,7 +531,7 @@ void TomographyIfaceModel::doCancelJobs(const std::string &compRes,
 
 void TomographyIfaceModel::doRefreshJobsInfo(const std::string &compRes) {
 
-  if ("Local" == compRes) {
+  if (g_LocalResourceName == compRes) {
     refreshLocalJobsInfo();
     return;
   }
