@@ -78,10 +78,12 @@ class Pearl(AbstractInst):
         van_absorb_full_path = calibration_dir + van_absorb
         van_file_full_path = calibration_dir + van_file
 
+        # TODO when we move PEARL to save out splined vanadium files support them below
         calibration_details = {"calibration": calibration_full_path,
                                "grouping": grouping_full_path,
                                "vanadium_absorption": van_absorb_full_path,
-                               "vanadium": van_file_full_path}
+                               "vanadium": van_file_full_path,
+                               "calibrated_vanadium": van_file_full_path}
 
         return calibration_details
 

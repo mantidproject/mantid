@@ -248,7 +248,8 @@ class AbstractInst(object):
         return _empty_hook_return_none()
 
     def _skip_appending_cycle_to_raw_dir(self):
-        return False
+        return True
+        # TODO set this to False if they just dump their raw files in one folder
 
     def _mask_noisy_detectors(self, vanadium_run):
         pass

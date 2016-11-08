@@ -1,0 +1,15 @@
+# The format is as follows:
+
+#cycle:
+#  offset_file_name : "name.cal"
+#  grouping_file_name : "grouping.cal"
+#  vanadium_file_name : "raw_vanadium_run.raw"
+#  calibrated_vanadium_file_name : "calibrated_vanadium_name.nxs"
+#  solid_angle_file_name : "solid_angle_corrections.nxs"
+
+test:
+  offset_file_name : "offsets_2011_cycle111b.cal"
+  grouping_file_name : "offsets_2011_cycle111b.cal"
+  vanadium_file_name : "POL78338.raw"
+  calibrated_vanadium_file_name : "calibrated_vanadium_name.nxs"
+  solid_angle_file_name : "solid_angle_corrections.nxs"

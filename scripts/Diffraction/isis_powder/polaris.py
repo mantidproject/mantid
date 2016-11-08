@@ -4,6 +4,7 @@ import mantid.simpleapi as mantid
 
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.polaris_routines import polaris_calib_factory
+from isis_powder.polaris_routines import polaris_calib_parser
 
 import isis_powder.common as common
 
@@ -43,19 +44,25 @@ class Polaris(AbstractInst):
 
     def _get_calibration_full_paths(self, cycle):
         # TODO implement this properly
-        offset_file_name, grouping_file_name, vanadium_file_name = polaris_calib_factory.get_calibration_file(cycle)
+        # offset_file_name, grouping_file_name, vanadium_file_name = polaris_calib_factory.get_calibration_file(cycle)
 
+        configuration = polaris_calib_parser.get_calibration_dict(cycle)
         calibration_dir = self.calibration_dir
 
-        calibration_full_path = calibration_dir + offset_file_name
-        grouping_full_path = calibration_dir + grouping_file_name
-        vanadium_absorb_full_path = None
-        vanadium_full_path = self.raw_data_dir + vanadium_file_name
+        # Assume the raw vanadium is with other raw files
+        vanadium_full_path = self.raw_data_dir + configuration["vanadium_file_name"]
+
+        calibration_full_path = calibration_dir + configuration["offset_file_name"]
+        grouping_full_path = calibration_dir + configuration["grouping_file_name"]
+
+        calibrated_full_path = calibration_dir + configuration["calibrated_vanadium_file_name"]
+        solid_angle_file_path = calibration_dir + configuration["solid_angle_file_name"]
 
         calibration_details = {"calibration": calibration_full_path,
                                "grouping": grouping_full_path,
-                               "vanadium_absorption": vanadium_absorb_full_path,
-                               "vanadium": vanadium_full_path}
+                               "vanadium": vanadium_full_path,
+                               "calibrated_vanadium": calibrated_full_path,
+                               "solid_angle_corr": solid_angle_file_path}
 
         return calibration_details
 
@@ -71,7 +78,7 @@ class Polaris(AbstractInst):
 
     @staticmethod
     def _get_cycle_information(run_number):
-        return {"cycle": "",  # TODO implement properly
+        return {"cycle": "test",  # TODO implement properly
                 "instrument_version": ""}
 
     def _normalise_ws(self, ws_to_correct, monitor_ws=None, spline_terms=20):
@@ -133,10 +140,16 @@ class Polaris(AbstractInst):
         ws_to_correct = corrected_ws
         return ws_to_correct
 
-    def _focus_processing(self, run_number, input_workspace, perform_vanadium_norm):
-        self._get_cycle_information(run_number=run_number)
+    def correct_sample_vanadium(self, focused_ws, index, vanadium_ws=None):
+        spectra_name = "sample_ws-" + str(index + 1)
+        mantid.CropWorkspace(InputWorkspace=focused_ws, OutputWorkspace=spectra_name,
+                             StartWorkspaceIndex=index, EndWorkspaceIndex=index)
+        if vanadium_ws:
+            van_rebinned = mantid.RebinToWorkspace(WorkspaceToRebin=vanadium_ws, WorkspaceToMatch=spectra_name)
+            mantid.Divide(LHSWorkspace=spectra_name, RHSWorkspace=van_rebinned, OutputWorkspace=spectra_name)
+            common.remove_intermediate_workspace(van_rebinned)
 
-
+        return spectra_name
 
     def _spline_background(self, focused_vanadium_ws, spline_number, instrument_version=''):
 
@@ -144,7 +157,7 @@ class Polaris(AbstractInst):
             spline_number = 100
 
         mode = "spline"  # TODO support spline modes for all instruments
-        extracted_spectra = _extract_vanadium_spectra(focused_vanadium_ws, self._number_of_banks)
+        extracted_spectra = _extract_bank_spectra(focused_vanadium_ws, self._number_of_banks)
 
         if mode == "spline":
             output = self._mask_spline_vanadium_ws(vanadium_spectra_list=extracted_spectra,
@@ -221,14 +234,14 @@ class Polaris(AbstractInst):
 # Class private implementation
 
 
-def _extract_vanadium_spectra(vanadium_ws, num_banks):
-    vanadium_spectra_list = []
+def _extract_bank_spectra(ws_to_split, num_banks):
+    spectra_bank_list = []
     for i in range(0, num_banks):
-        output_name = "vanadium-" + str(i + 1)
+        output_name = "bank-" + str(i + 1)
         # Have to use crop workspace as extract single spectrum struggles with the variable bin widths
-        vanadium_spectra_list.append(mantid.CropWorkspace(InputWorkspace=vanadium_ws, OutputWorkspace=output_name,
-                                                          StartWorkspaceIndex=i, EndWorkspaceIndex=i))
-    return vanadium_spectra_list
+        spectra_bank_list.append(mantid.CropWorkspace(InputWorkspace=ws_to_split, OutputWorkspace=output_name,
+                                                      StartWorkspaceIndex=i, EndWorkspaceIndex=i))
+    return spectra_bank_list
 
 
 def _apply_masking(workspaces_to_mask, mask_list):
@@ -253,5 +266,3 @@ def _apply_masking(workspaces_to_mask, mask_list):
 
     return output_workspaces
 
-
-def _divide_sample_vanadium_splines(sample_ws, vanadium_splines_ws)

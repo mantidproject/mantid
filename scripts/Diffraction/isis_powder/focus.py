@@ -58,7 +58,7 @@ def _divide_sample_by_vanadium(instrument, run_number, input_workspace, perform_
 
     for index in range(0, alg_range):
         if perform_vanadium_norm:
-            vanadium_ws = mantid.LoadNexus(Filename=input_file_paths["vanadium"], EntryNumber=index + 1)
+            vanadium_ws = mantid.LoadNexus(Filename=input_file_paths["calibrated_vanadium"], EntryNumber=index + 1)
 
             processed_spectra.append(
                 instrument.correct_sample_vanadium(focused_ws=input_workspace, index=index, vanadium_ws=vanadium_ws))
@@ -66,6 +66,6 @@ def _divide_sample_by_vanadium(instrument, run_number, input_workspace, perform_
             common.remove_intermediate_workspace(vanadium_ws)
         else:
             processed_spectra.append(
-                instrument.calc_calibration_without_vanadium(focused_ws=input_workspace, index=index))
+                instrument.correct_sample_vanadium(focused_ws=input_workspace, index=index))
 
     return processed_spectra
