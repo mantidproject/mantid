@@ -100,7 +100,8 @@ private:
   size_t m_dimY;
   size_t m_dimX;
 
-  void calculateTickMarks(double tickNum);
+  void calculateTickMarks();
+  const double m_tickNumber;
   std::vector<double> m_axisXPointVec;
   std::vector<double> m_axisYPointVec;
   std::vector<QPointF> m_xNumbers;

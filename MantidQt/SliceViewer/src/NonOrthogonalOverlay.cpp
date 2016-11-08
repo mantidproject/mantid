@@ -19,7 +19,7 @@ namespace SliceViewer {
 /** Constructor
  */
 NonOrthogonalOverlay::NonOrthogonalOverlay(QwtPlot *plot, QWidget *parent)
-    : QWidget(parent), m_plot(plot), m_numberAxisEdge(0.95) {
+    : QWidget(parent), m_plot(plot), m_numberAxisEdge(0.95), m_tickNumber(20) {
   m_skewMatrix[0] = 1.0;
   m_skewMatrix[1] = 0.0;
   m_skewMatrix[2] = 0.0;
@@ -124,10 +124,7 @@ void NonOrthogonalOverlay::zoomChanged(QwtDoubleInterval xint,
   m_yMaxVisBuffered = m_yMaxVis + yBuffer;
   m_yMinVisBuffered = m_yMinVis - yBuffer;
 
-  const double displayNum = 20; // can mess around increasing or
-                                // decreasing grid later, maybe make an
-                                // option on sliceviewgui
-  calculateTickMarks(displayNum);
+  calculateTickMarks();
 }
 
 void NonOrthogonalOverlay::setAxesPoints() {
@@ -164,22 +161,21 @@ void NonOrthogonalOverlay::clearAllAxisPointVectors() {
   m_yNumbers.clear();
 }
 
-void NonOrthogonalOverlay::calculateTickMarks(
-    double tickNum) { // assumes X axis
+void NonOrthogonalOverlay::calculateTickMarks() { // assumes X axis
   clearAllAxisPointVectors();
 
   auto percentageOfLineX =
-      (((m_xMaxVisBuffered) - (m_xMinVisBuffered)) / tickNum);
+      (((m_xMaxVisBuffered) - (m_xMinVisBuffered)) / m_tickNumber);
   auto percentageOfLineY =
-      (((m_yMaxVisBuffered) - (m_yMinVisBuffered)) / tickNum);
-  for (double i = 0; i <= tickNum; i++) {
+      (((m_yMaxVisBuffered) - (m_yMinVisBuffered)) / m_tickNumber);
+  for (double i = 0; i <= m_tickNumber; i++) {
     double axisPointX = (percentageOfLineX * i) + m_xMinVisBuffered;
     double axisPointY = (percentageOfLineY * i) + m_yMinVisBuffered;
     m_axisXPointVec.push_back(axisPointX);
     m_xNumbers.push_back(skewMatrixApply(axisPointX, m_yMinVis));
-    m_xNumbers[i].setY(m_yMinVis);
+    m_xNumbers[i].setY(static_cast<qreal>(m_yMinVis));
     m_yNumbers.push_back(skewMatrixApply(m_xMinVis, axisPointY));
-    m_yNumbers[i].setX(m_xMinVis);
+    m_yNumbers[i].setX(static_cast<qreal>(m_xMinVis));
     m_xAxisTickStartVec.push_back(
         skewMatrixApply(axisPointX, (m_yMinVisBuffered)));
     m_xAxisTickEndVec.push_back(
