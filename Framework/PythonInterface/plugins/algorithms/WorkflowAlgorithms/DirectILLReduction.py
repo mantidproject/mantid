@@ -9,6 +9,9 @@ from mantid.simpleapi import AddSampleLog, CalculateFlatBackground,\
                              MaskDetectors, MedianDetectorTest, MergeRuns, Minus, NormaliseToMonitor, Regroup, Scale
 import numpy
 
+CLEANUP_DELETE = 'DeleteIntermediateWorkspaces'
+CLEANUP_KEEP   = 'KeepIntermediateWorkspaces'
+
 INDEX_TYPE_DETECTOR_ID     = 'DetectorID'
 INDEX_TYPE_SPECTRUM_NUMBER = 'SpectrumNumber'
 INDEX_TYPE_WORKSPACE_INDEX = 'WorkspaceIndex'
@@ -19,7 +22,7 @@ NORM_METHOD_TIME    = 'AcquisitionTime'
 PROP_BINNING_Q                        = 'QBinning'
 PROP_BINNING_W                        = 'WBinning'
 PROP_CD_WORKSPACE                     = 'CadmiumWorkspace'
-PROP_CONTROL_MODE                     = 'ControlMode'
+PROP_CLEANUP_MODE                     = 'Cleanup'
 PROP_DIAGNOSTICS_WORKSPACE            = 'DetectorDiagnosticsWorkspace'
 PROP_DETECTORS_FOR_EI_CALIBRATION     = 'IncidentEnergyCalibrationDetectors'
 PROP_DO_DETECTOR_DIAGNOSTICS          = 'UseDetectorDiagnostics'
@@ -183,8 +186,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
     def PyExec(self):
         reductionType = self.getProperty(PROP_REDUCTION_TYPE).value
         workspaceNamePrefix = self.getProperty(PROP_OUTPUT_PREFIX).value
-        controlMode = self.getProperty(PROP_CONTROL_MODE).value
-        if controlMode:
+        cleanupMode = self.getProperty(PROP_CLEANUP_MODE).value
+        if cleanupMode == CLEANUP_DELETE:
             workspaceNamePrefix = '__' + workspaceNamePrefix
         workspaceNames = NameSource(workspaceNamePrefix)
         indexType = self.getProperty(PROP_INDEX_TYPE).value
@@ -509,8 +512,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              '',
                              direction=Direction.Input,
                              doc='String to use as prefix in output workspace names')
-        self.declareProperty(PROP_CONTROL_MODE,
-                             False,
+        
+        self.declareProperty(PROP_CLEANUP_MODE,
+                             CLEANUP_DELETE,
+                             validator=StringListValidator([CLEANUP_DELETE, CLEANUP_KEEP]),
                              direction=Direction.Input,
                              doc='Whether or not to clean up intermediate workspaces')
         self.declareProperty(PROP_REDUCTION_TYPE,
@@ -653,7 +658,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
     def _finalize(self, outputWorkspace, workspaceNames):
         self.setProperty(PROP_OUTPUT_WORKSPACE, outputWorkspace)
 
-        if not self.getProperty(PROP_CONTROL_MODE).value:
+        if self.getProperty(PROP_CLEANUP_MODE).value == CLEANUP_DELETE:
             # TODO: what can we delete earlier from this set?
             for ws in workspaceNames.getNames():
                 if mtd.doesExist(ws):
