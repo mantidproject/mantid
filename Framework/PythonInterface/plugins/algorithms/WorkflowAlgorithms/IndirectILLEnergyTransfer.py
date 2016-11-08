@@ -305,6 +305,7 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
         @param ws :: input workspace name
         @param ws :: ws's monitor
         """
+        x = mtd[ws].readX(0)
 
         if self._reduction_type == 'QENS':
             # Normalise bin-to-bin
@@ -312,32 +313,39 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
 
         elif self._reduction_type == 'EFWS':
             # Integrate over the whole range
-            x = mtd[ws].readX(0)
-            NormaliseToMonitor(InputWorkspace=ws, OutputWorkspace=ws, MonitorWorkspace=mon,
-                               IntegrationRangeMin=x[0], IntegrationRangeMax=x[-1])
+
+            int = '__integral1_' + ws
+            Integration(InputWorkspace=mon, OutputWorkspace=int,
+                        RangeLower=x[0], RangeUpper=x[-1])
+
+            if mtd[int].readY(0)[0] !=0: # this needs to be checked
+                Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=1. / mtd[int].readY(0)[0])
+
+            DeleteWorkspace(int)
 
         elif self._reduction_type == 'IFWS':
             # Integrate over the two peaks at the beginning and at the end and sum
             size = mtd[ws].blocksize()
-            x_values = mtd[ws].readX(0)
             x_start, x_end = self._monitor_max_range(mon)
 
             i1 = '__integral1_' + ws
             i2 = '__integral2_' + ws
+            int = '__integral_' + ws
 
             Integration(InputWorkspace=mon, OutputWorkspace=i1,
-                        RangeLower=x_values[0], RangeUpper=x_values[2*x_start])
+                        RangeLower=x[0], RangeUpper=x[2*x_start])
 
             Integration(InputWorkspace=mon, OutputWorkspace=i2,
-                        RangeLower=x_values[-2*(size - x_end)], RangeUpper=x_values[-1])
+                        RangeLower=x[-2*(size - x_end)], RangeUpper=x[-1])
 
-            __integral = Plus(i1,i2)
+            Plus(LHSWorkspace=i1,RHSWorkspace=i2,OutputWorkspace=int)
 
-            Scale(InputWorkspace = ws, OutputWorkspace = ws, Factor = 1./__integral.readY(0)[0])
+            if mtd[int].readY(0)[0] != 0: # this needs to be checked
+                Scale(InputWorkspace = ws, OutputWorkspace = ws, Factor = 1./mtd[int].readY(0)[0])
 
             DeleteWorkspace(i1)
             DeleteWorkspace(i2)
-            DeleteWorkspace(__integral)
+            DeleteWorkspace(int)
 
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
                              NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0)

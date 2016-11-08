@@ -120,7 +120,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         self._criteria += '14' if self._mirror_sense else '16'
 
         # make sure observable entry also exists (value is not important)
-        self._criteria += 'and ($/entry0/' + self._observable.replace('.', '/') + '$ or True)'
+        self._criteria += ' and ($/entry0/' + self._observable.replace('.', '/') + '$ or True)'
 
         # empty dictionary
         self._all_runs = dict()
@@ -188,9 +188,11 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
             left = mtd[groupws].getItem(0).getName()
             right = mtd[groupws].getItem(1).getName()
             UnGroupWorkspace(groupws)
-            Plus(LHSWorkspace=left,RHSWorkspace=right,OutputWorkspace=groupws)
+            sum = '__sum_'+groupws
+            Plus(LHSWorkspace=left,RHSWorkspace=right,OutputWorkspace=sum)
             DeleteWorkspace(left)
             DeleteWorkspace(right)
+            RenameWorkspace(InputWorkspace=sum,OutputWorkspace=groupws)
         else:
             RenameWorkspace(InputWorkspace=mtd[groupws].getItem(0),OutputWorkspace=groupws)
 
@@ -207,11 +209,11 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
         if self._background_files:
             self._reduce_multiple_runs(self._background_files,'background')
-            #SplineInterpolation(WorkspaceToMatch=self._red_ws+'_sample',
-            #                    WorkspaceToInterpolate=self._red_ws+'_background', DerivOrder=0)
+            # interpolate, minus, delete background
 
         if self._calibration_files:
             self._reduce_multiple_runs(self._calibration_files,'calibration')
+            # interpolate, divide, delete calibration
 
         self.log().information('Run files map is :'+str(self._all_runs))
 
@@ -291,10 +293,12 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
         for ws in ws_list:
             value = mtd[ws].getRun().getLogData(self._observable).value
-            if 'time' not in self._observable:
+
+            if 'start_time' not in self._observable:
                 value = float(value)
             else:
-                # start_time is a string like 2016-09-12T09:09:15
+                # start_time is a string like 2016-09-12T09:09:15,
+                # find an elegant way to convert to absolute time
                 pass
 
             result.append(value)
@@ -345,11 +349,29 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
             if self._sortX:
                 SortXAxis(InputWorkspace=wsname, OutputWorkspace=wsname)
 
+            self._set_x_label(wsname)
+
         for energy, ws_list in self._all_runs[label].iteritems():
             for ws in ws_list:
                 DeleteWorkspace(ws)
 
         GroupWorkspaces(InputWorkspaces=togroup,OutputWorkspace=self._red_ws+'_'+label)
+
+    def _set_x_label(self, ws):
+        '''
+        Sets the x-axis label
+        @param ws :: input workspace
+        '''
+
+        axis = mtd[ws].getAxis(0)
+        if self._observable == 'sample.temperature':
+            axis.setUnit("Label").setLabel('Temperature', 'K')
+        elif self._observable == 'sample.pressure':
+            axis.setUnit("Label").setLabel('Pressure', 'P')
+        elif self._observable == 'start_time':
+            axis.setUnit("Label").setLabel('Time', 'seconds')
+        else:
+            axis.setUnit("Label").setLabel(self._observable, 'Unknown')
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLReductionFWS)
