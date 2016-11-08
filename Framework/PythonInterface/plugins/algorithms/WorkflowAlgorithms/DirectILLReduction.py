@@ -12,6 +12,9 @@ import numpy
 CLEANUP_DELETE = 'DeleteIntermediateWorkspaces'
 CLEANUP_KEEP   = 'KeepIntermediateWorkspaces'
 
+DIAGNOSTICS_YES   = 'UseDetectorDiagnostics'
+DIAGNOSTICS_NO    = 'OmitDetectorDiagnostics'
+
 INDEX_TYPE_DETECTOR_ID     = 'DetectorID'
 INDEX_TYPE_SPECTRUM_NUMBER = 'SpectrumNumber'
 INDEX_TYPE_WORKSPACE_INDEX = 'WorkspaceIndex'
@@ -25,7 +28,7 @@ PROP_CD_WORKSPACE                     = 'CadmiumWorkspace'
 PROP_CLEANUP_MODE                     = 'Cleanup'
 PROP_DIAGNOSTICS_WORKSPACE            = 'DetectorDiagnosticsWorkspace'
 PROP_DETECTORS_FOR_EI_CALIBRATION     = 'IncidentEnergyCalibrationDetectors'
-PROP_DO_DETECTOR_DIAGNOSTICS          = 'UseDetectorDiagnostics'
+PROP_DETECTOR_DIAGNOSTICS             = 'Diagnostics'
 PROP_EC_WORKSPACE                     = 'EmptyCanWorkspace'
 PROP_EPP_WORKSPACE                    = 'EPPWorkspace'
 PROP_FLAT_BACKGROUND_SCALING          = 'FlatBackgroundScaling'
@@ -277,7 +280,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 self.setProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE, eppOutWs)
 
         # Detector diagnostics, if requested.
-        if self.getProperty(PROP_DO_DETECTOR_DIAGNOSTICS).value:
+        if self.getProperty(PROP_DETECTOR_DIAGNOSTICS).value == DIAGNOSTICS_YES:
             diagnosticsWs = self.getProperty(PROP_DIAGNOSTICS_WORKSPACE).value
             # No input diagnostics workspace? Diagnose!
             if not diagnosticsWs:
@@ -574,8 +577,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                               '',
                                               direction=Direction.Input),
                              doc='List of spectra to mask')
-        self.declareProperty(PROP_DO_DETECTOR_DIAGNOSTICS,
-                             True,
+        self.declareProperty(PROP_DETECTOR_DIAGNOSTICS,
+                             DIAGNOSTICS_YES,
+                             validator=StringListValidator([DIAGNOSTICS_YES, DIAGNOSTICS_NO]),
                              direction=Direction.Input,
                              doc='If true, run detector diagnostics or apply ' + PROP_DIAGNOSTICS_WORKSPACE)
         self.declareProperty(MatrixWorkspaceProperty(PROP_DIAGNOSTICS_WORKSPACE,
