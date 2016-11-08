@@ -16,6 +16,7 @@ Bug Fixes
 
 |
 
+- Fix for LARMOR multi-period loading. The initial rotation was not correctly applied to all child workspaces.
 - IDF bug when using Larmor in batch mode was resolved.
 - Issue where Gui changes were not picked up for batch reductions was resolved.
 
