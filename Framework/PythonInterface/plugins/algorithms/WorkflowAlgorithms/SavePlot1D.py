@@ -58,6 +58,9 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                              'Override with custom names for spectra')
         self.declareProperty('Result', '', Direction.Output)
 
+        self.declareProperty('PopCanvas', False, 'If true, a Matplotlib canvas will be popped out '
+                             ', which contains the saved plot.')
+
     def validateInputs(self):
         messages = {}
         outputType = self.getProperty('OutputType').value
@@ -174,6 +177,8 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         return (data, xlabel, ylabel)
 
     def saveImage(self):
+        """ Save image
+        """
         ok2run = ''
         try:
             import matplotlib
@@ -198,8 +203,12 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
             fig, ax = plt.subplots()
             self.doPlotImage(ax, self._wksp)
 
+        # get the flag to pop out canvas or not
+        pop_canvas = self.getProperty('PopCanvas').value
+
         plt.tight_layout(1.08)
-        plt.show()
+        if pop_canvas:
+            plt.show()
         filename = self.getProperty("OutputFilename").value
         fig.savefig(filename, bbox_inches='tight')
 

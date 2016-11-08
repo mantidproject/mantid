@@ -426,8 +426,8 @@ void LoadNexusProcessed::exec() {
 
     // load names of each of the workspaces. Note that if we have duplicate
     // names then we don't select them
-    std::vector<std::string> names(nWorkspaceEntries + 1);
-    extractWorkspaceNames(root, names);
+    auto names =
+        extractWorkspaceNames(root, static_cast<size_t>(nWorkspaceEntries));
 
     // remove existing workspace and replace with the one being loaded
     bool wsExists = AnalysisDataService::Instance().doesExist(base_name);
@@ -575,16 +575,15 @@ void LoadNexusProcessed::correctForWorkspaceNameClash(std::string &wsName) {
 * Extract the workspace names from the file (if any are stored)
 *
 * @param root :: the root for the NeXus document
-* @param names :: vector to store the names to be loaded.
+* @param nWorkspaceEntries :: the number of workspace entries
 */
-void LoadNexusProcessed::extractWorkspaceNames(
-    NXRoot &root, std::vector<std::string> &names) {
-  size_t nWorkspaceEntries = root.groups().size();
-  std::ostringstream os;
+std::vector<std::string>
+LoadNexusProcessed::extractWorkspaceNames(NXRoot &root,
+                                          size_t nWorkspaceEntries) {
+  std::vector<std::string> names(nWorkspaceEntries + 1);
   for (size_t p = 1; p <= nWorkspaceEntries; ++p) {
-    os.str(std::string());
-    os << p;
-    names[p] = loadWorkspaceName(root, "mantid_workspace_" + os.str());
+    auto period = std::to_string(p);
+    names[p] = loadWorkspaceName(root, "mantid_workspace_" + period);
   }
 
   // Check that there are no duplicates in the workspace name
@@ -595,6 +594,7 @@ void LoadNexusProcessed::extractWorkspaceNames(
     names.clear();
     names.resize(size);
   }
+  return names;
 }
 
 /**
@@ -1714,8 +1714,13 @@ void LoadNexusProcessed::loadNonSpectraAxis(
     }
   } else if (axis->isText()) {
     NXChar axisData = data.openNXChar("axis2");
-    axisData.load();
-    std::string axisLabels(axisData(), axisData.dim0());
+    std::string axisLabels;
+    try {
+      axisData.load();
+      axisLabels = std::string(axisData(), axisData.dim0());
+    } catch (std::runtime_error &) {
+      axisLabels = "";
+    }
     // Use boost::tokenizer to split up the input
     Mantid::Kernel::StringTokenizer tokenizer(
         axisLabels, "\n", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);

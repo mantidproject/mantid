@@ -66,6 +66,7 @@ public:
     PickSingleMode,
     PickTubeMode,
     AddPeakMode,
+    ComparePeakMode,
     DrawRegularMode,
     DrawFreeMode,
     ErasePeakMode,
@@ -271,6 +272,8 @@ signals:
   // peaks
   void peaksWorkspaceAdded();
   void peaksWorkspaceDeleted();
+  void comparePeaks(
+      const std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &);
 
   // other
   void redrawRequired(); ///< request redrawing of self
@@ -286,6 +289,7 @@ protected slots:
   void pickComponentAt(int x, int y);
   void touchComponentAt(int x, int y);
   void erasePeaks(const QRect &rect);
+  void comparePeaks(const QRect &rect);
 
   void colorMapChanged();
 
@@ -334,9 +338,20 @@ protected:
   mutable bool m_showPeakLabels;    ///< flag to show peak hkl labels
   bool m_showPeakRelativeIntensity; ///< flag to show peak hkl labels
   mutable int m_peakShapesStyle; ///< index of a default PeakMarker2D style to
+  std::pair<QPointF, QPointF> m_selectedMarkers;
+  std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *>
+      m_selectedPeaks;
   /// use with a new PeakOverlay.
 
 private:
+  /// Draw a line between two peak markers
+  void drawPeakComparisonLine(QPainter &painter) const;
+  /// Draw the peak markers on the surface
+  void drawPeakMarkers(QPainter &painter) const;
+  /// Draw the mask shapes on the surface
+  void drawMaskShapes(QPainter &painter) const;
+  /// Draw the selection rectangle to the surface
+  void drawSelectionRect(QPainter &painter) const;
   /// Get the current input controller
   MantidQt::MantidWidgets::InputController *getController() const;
 

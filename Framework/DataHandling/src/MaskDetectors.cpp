@@ -345,7 +345,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
     DataObjects::MaskWorkspace_sptr maskWS =
         boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
     if (maskWS) {
-      Geometry::ParameterMap &maskPmap = maskWS->instrumentParameters();
+      const auto &maskPmap = maskWS->constInstrumentParameters();
       Instrument_const_sptr maskInstrument = maskWS->getInstrument();
       if (maskInstrument->getDetectorIDs().size() !=
           WS->getInstrument()->getDetectorIDs().size()) {
