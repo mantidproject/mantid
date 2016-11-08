@@ -15,7 +15,7 @@ def create_vana(EXPR_FILE, NoAbs=False, write_existingv=True):
         print " => Substract the Empty to the Vana"
         Minus(LHSWorkspace="Vanadium", RHSWorkspace="Empty", OutputWorkspace="Vanadium_align")
         mtd.remove("Empty")
-    cry_load. align_fnc("Vanadium_align", EXPR_FILE)
+    cry_load.align_fnc("Vanadium_align", EXPR_FILE)
     Divide(LHSWorkspace="Vanadium_align", RHSWorkspace="Corr", OutputWorkspace="Vanadium_corr")
     if not NoAbs:
         print " => Van Absortption correction"
