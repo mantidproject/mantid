@@ -127,7 +127,7 @@ class NameSource:
         return self._names
 
     @namelogging
-    def incident(self):
+    def incidentEnergy(self):
         return self._prefix + '_ie'
 
     @namelogging
