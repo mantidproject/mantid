@@ -241,7 +241,8 @@ bool TomographyIfaceModel::doPing(const std::string &compRes) {
     tid = alg->getPropertyValue("TransactionID");
     g_log.information() << "Pinged '" << compRes
                         << "'succesfully. Checked that a transaction could "
-                           "be created, with ID: " << tid << '\n';
+                           "be created, with ID: "
+                        << tid << '\n';
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Error. Failed to ping and start a transaction on "
                              "the remote resource." +
@@ -500,7 +501,7 @@ void TomographyIfaceModel::doRunReconstructionJobLocal(
 
   Mantid::API::IRemoteJobManager::RemoteJobInfo info;
   info.id = boost::lexical_cast<std::string>(pid);
-  info.name = "Mantid_Local";
+  info.name = pid > 0 ? "Mantid_Local" : "none";
   info.status = pid > 0 ? "Starting" : "Exit";
   info.cmdLine = run + " " + allOpts;
   m_jobsStatusLocal.emplace_back(info);
