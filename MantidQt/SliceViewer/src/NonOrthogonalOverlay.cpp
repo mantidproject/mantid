@@ -19,7 +19,7 @@ namespace SliceViewer {
 /** Constructor
  */
 NonOrthogonalOverlay::NonOrthogonalOverlay(QwtPlot *plot, QWidget *parent)
-    : QWidget(parent), m_plot(plot), m_numberAxisEdge(0.95), m_tickNumber(20) {
+    : QWidget(parent), m_plot(plot), m_tickNumber(20), m_numberAxisEdge(0.95) {
   m_skewMatrix[0] = 1.0;
   m_skewMatrix[1] = 0.0;
   m_skewMatrix[2] = 0.0;
@@ -94,8 +94,6 @@ QPointF NonOrthogonalOverlay::skewMatrixApply(double x, double y) {
   std::vector<double> dimensions(3, 0);
   dimensions.at(m_dimX) = x;
   dimensions.at(m_dimY) = y;
-  // Make sure stops trying to calculate this m_dimX or Y is 3+
-  // put some of this into setAxisPoints()
   const auto angle_H = dimensions[0];
   const auto angle_K = dimensions[1];
   const auto angle_L = dimensions[2];
@@ -168,14 +166,14 @@ void NonOrthogonalOverlay::calculateTickMarks() { // assumes X axis
       (((m_xMaxVisBuffered) - (m_xMinVisBuffered)) / m_tickNumber);
   auto percentageOfLineY =
       (((m_yMaxVisBuffered) - (m_yMinVisBuffered)) / m_tickNumber);
-  for (double i = 0; i <= m_tickNumber; i++) {
+  for (size_t i = 0; i <= static_cast<size_t>(m_tickNumber); i++) {
     double axisPointX = (percentageOfLineX * i) + m_xMinVisBuffered;
     double axisPointY = (percentageOfLineY * i) + m_yMinVisBuffered;
     m_axisXPointVec.push_back(axisPointX);
     m_xNumbers.push_back(skewMatrixApply(axisPointX, m_yMinVis));
-    m_xNumbers[i].setY(static_cast<qreal>(m_yMinVis));
+    m_xNumbers[i].setY(m_yMinVis);
     m_yNumbers.push_back(skewMatrixApply(m_xMinVis, axisPointY));
-    m_yNumbers[i].setX(static_cast<qreal>(m_xMinVis));
+    m_yNumbers[i].setX(m_xMinVis);
     m_xAxisTickStartVec.push_back(
         skewMatrixApply(axisPointX, (m_yMinVisBuffered)));
     m_xAxisTickEndVec.push_back(
