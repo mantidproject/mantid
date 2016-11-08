@@ -15,7 +15,7 @@ from isis_powder import calibrate
 @add_metaclass(ABCMeta)
 class AbstractInst(object):
     def __init__(self, user_name=None, calibration_dir=None, raw_data_dir=None, output_dir=None,
-                 default_input_ext=".raw", tt_mode=""):
+                 default_input_ext=".raw"):
         # ----- Properties common to ALL instruments -------- #
         if user_name is None:
             raise ValueError("A user name must be specified")
@@ -24,7 +24,6 @@ class AbstractInst(object):
         self._raw_data_dir = raw_data_dir
         self._output_dir = output_dir
         self._default_input_ext = _append_dot_to_ext(default_input_ext)
-        self._tt_mode = tt_mode
         self._focus_mode = None
 
     @property
@@ -46,10 +45,6 @@ class AbstractInst(object):
     @default_input_ext.setter
     def default_input_ext(self, new_ext):
         self._default_input_ext = _append_dot_to_ext(new_ext)
-
-    @property
-    def tt_mode(self):
-        return self._tt_mode
 
     @property
     def focus_mode(self):
@@ -142,15 +137,6 @@ class AbstractInst(object):
         Returns the lower and upper lambda range for this instrument
         @param self: The instrument to query the values of lambda for
         @return: The lower and uppers lambda range (in that order)
-        """
-        pass
-
-    @abstractmethod
-    def _get_focus_tof_binning(self):
-        """
-        Returns the TOF binning values
-        @param self: The instrument to get TOF binning values for
-        @return: TOF binning Values
         """
         pass
 
@@ -273,16 +259,13 @@ class AbstractInst(object):
     def _do_tof_rebinning_focus(self, input_workspace):
         return input_workspace
 
-    def _focus_processing(self, run_number, input_workspace, perform_vanadium_norm):
-        return _empty_hook_return_none()
-
     def _process_focus_output(self, processed_spectra, run_number, attenuate=False):
         return _empty_hook_return_none()
 
     def _subtract_sample_empty(self, input_sample):
         return input_sample
 
-    def _apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number):
+    def _apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number=None, vanadium_path=None):
         return ws_to_correct
 
     def _load_monitor(self, number, cycle):
@@ -297,8 +280,13 @@ class AbstractInst(object):
     def _calibration_rebin_to_workspace(self, ws_to_rebin, ws_to_match):
         return ws_to_rebin
 
+    def correct_sample_vanadium(self, focused_ws, index, vanadium_ws=None):
+        raise NotImplementedError("Cannot process the sample with a vanadium run for this instrument")
+
+
 # ----- Private Implementation ----- #
 # These should only be called by the abstract instrument class
+
 
 def _append_dot_to_ext(ext):
     if not ext.startswith('.'):

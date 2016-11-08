@@ -31,7 +31,9 @@ class Pearl(AbstractInst):
                  input_file_ext=".raw", tt_mode="TT88"):
 
         super(Pearl, self).__init__(user_name=user_name, calibration_dir=calibration_dir, raw_data_dir=raw_data_dir,
-                                    output_dir=output_dir, default_input_ext=input_file_ext, tt_mode=tt_mode)
+                                    output_dir=output_dir, default_input_ext=input_file_ext)
+
+        self._tt_mode = tt_mode
 
         # This advanced option disables appending the current cycle to the
         # path given for raw files.
@@ -56,9 +58,6 @@ class Pearl(AbstractInst):
     def _get_lambda_range(self):
         return self._lambda_lower, self._lambda_upper
 
-    def _get_focus_tof_binning(self):
-        return self._focus_tof_binning
-
     def _get_create_van_tof_binning(self):
         return_dict = {"1": self._create_van_first_tof_binning,
                        "2": self._create_van_second_tof_binning}
@@ -69,7 +68,7 @@ class Pearl(AbstractInst):
     def _get_calibration_full_paths(self, cycle):
 
         calibration_file, grouping_file, van_absorb, van_file =\
-            pearl_calib_factory.get_calibration_filename(cycle=cycle, tt_mode=self.tt_mode)
+            pearl_calib_factory.get_calibration_filename(cycle=cycle, tt_mode=self._tt_mode)
 
         calibration_dir = self.calibration_dir
 
@@ -234,6 +233,27 @@ class Pearl(AbstractInst):
         ws_to_rebin = rebinned_ws
         return ws_to_rebin
 
+    def correct_sample_vanadium(self, focused_ws, index, vanadium_ws=None):
+        data_ws = mantid.ExtractSingleSpectrum(InputWorkspace=focused_ws, WorkspaceIndex=index)
+        data_ws = mantid.ConvertUnits(InputWorkspace=data_ws, Target="TOF")
+        data_ws = mantid.Rebin(InputWorkspace=data_ws, Params=self._focus_tof_binning)
+
+        if vanadium_ws:
+            data_processed = "van_processed" + str(index)  # Workaround for Mantid overwriting the WS in a loop
+            vanadium_ws = mantid.Rebin(InputWorkspace=vanadium_ws, Params=self._focus_tof_binning)
+            data_ws = mantid.Divide(LHSWorkspace=data_ws, RHSWorkspace=vanadium_ws, OutputWorkspace=data_processed)
+        else:
+            data_processed = "processed-" + str(index)
+
+        mantid.CropWorkspace(InputWorkspace=data_ws, XMin=0.1, OutputWorkspace=data_processed)
+
+        if vanadium_ws:
+            mantid.Scale(InputWorkspace=data_processed, Factor=10, OutputWorkspace=data_processed)
+
+        common.remove_intermediate_workspace(data_ws)
+
+        return data_processed
+
     # Implementation of instrument specific steps
 
     def _run_attenuate_workspace(self, input_workspace):
@@ -334,29 +354,6 @@ class Pearl(AbstractInst):
             mspectra = 1
         return mspectra
 
-    def _perform_focus_loading(self, run_number, input_workspace, perform_vanadium_norm):
-        processed_spectra = []
-
-        cycle_information = self._get_cycle_information(run_number=run_number)
-        input_file_paths = self._get_calibration_full_paths(cycle=cycle_information["cycle"])
-
-        alg_range, save_range = self._get_instrument_alg_save_ranges(cycle_information["instrument_version"])
-
-        for index in range(0, alg_range):
-            if perform_vanadium_norm:
-                vanadium_ws = mantid.LoadNexus(Filename=input_file_paths["vanadium"], EntryNumber=index + 1)
-                van_rebinned = mantid.Rebin(InputWorkspace=vanadium_ws, Params=self._get_focus_tof_binning())
-
-                processed_spectra.append(calc_calibration_with_vanadium(input_workspace, index, van_rebinned,
-                                                                        tof_binning=self._focus_tof_binning))
-
-                common.remove_intermediate_workspace(vanadium_ws)
-                common.remove_intermediate_workspace(van_rebinned)
-            else:
-                processed_spectra.append(calc_calibration_without_vanadium(input_workspace, index))
-
-        return processed_spectra
-
     # Support for old API - This can be removed when PEARL_routines is removed
     def _old_api_constructor_set(self, user_name=None, calibration_dir=None, raw_data_dir=None, output_dir=None,
                                  input_file_ext=None, tt_mode=None):
@@ -398,6 +395,9 @@ class Pearl(AbstractInst):
 
     def _PEARL_filename_is_full_path(self):
         return self._old_api_uses_full_paths
+
+    def _get_focus_tof_binning(self):
+        return self._focus_tof_binning
 
 
 def _old_api_get_file_name(in_path):
@@ -519,29 +519,3 @@ def _spline_old_instrument_background(in_workspace):
                                                        WorkspaceIndex=i, NCoeff=coeff))
     common.remove_intermediate_workspace(van_stripped)
     return splined_ws_list
-
-
-def calc_calibration_without_vanadium(focused_ws, index, instrument):
-    focus_spectrum = mantid.ExtractSingleSpectrum(InputWorkspace=focused_ws, WorkspaceIndex=index)
-    focus_spectrum = mantid.ConvertUnits(InputWorkspace=focus_spectrum, Target="TOF")
-    focus_spectrum = mantid.Rebin(InputWorkspace=focus_spectrum, Params=instrument.tof_binning)
-    focus_calibrated = mantid.CropWorkspace(InputWorkspace=focus_spectrum, XMin=0.1)
-    return focus_calibrated
-
-
-def calc_calibration_with_vanadium(focused_ws, index, vanadium_ws, tof_binning):
-    data_ws = mantid.ExtractSingleSpectrum(InputWorkspace=focused_ws, WorkspaceIndex=index)
-    data_ws = mantid.ConvertUnits(InputWorkspace=data_ws, Target="TOF")
-    data_ws = mantid.Rebin(InputWorkspace=data_ws, Params=tof_binning)
-
-    data_processed = "van_processed" + str(index)  # Workaround for Mantid overwriting the WS in a loop
-
-    mantid.Divide(LHSWorkspace=data_ws, RHSWorkspace=vanadium_ws, OutputWorkspace=data_processed)
-    mantid.CropWorkspace(InputWorkspace=data_processed, XMin=0.1, OutputWorkspace=data_processed)
-    mantid.Scale(InputWorkspace=data_processed, Factor=10, OutputWorkspace=data_processed)
-
-    common.remove_intermediate_workspace(data_ws)
-
-    return data_processed
-
-

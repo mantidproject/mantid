@@ -68,7 +68,7 @@ def _apply_absorb_corrections(instrument, calibration_full_paths, corrected_van_
     else:
         absorb_ws = mantid.LoadNexus(Filename=calibration_full_paths["vanadium_absorption"])
 
-    # PEARL rebins whilst POLARIS does not
+    # PEARL rebins whilst POLARIS does not as some of the older absorption files have different number of bins
     corrected_van_ws = instrument._calibration_rebin_to_workspace(ws_to_rebin=corrected_van_ws, ws_to_match=absorb_ws)
     corrected_van_ws = mantid.Divide(LHSWorkspace=corrected_van_ws, RHSWorkspace=absorb_ws)
     corrected_van_ws = mantid.ConvertUnits(InputWorkspace=corrected_van_ws, Target="dSpacing")

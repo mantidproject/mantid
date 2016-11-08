@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
-import os
 
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.polaris_routines import polaris_calib_factory
@@ -24,7 +23,7 @@ class Polaris(AbstractInst):
                  input_file_ext=".raw", sample_empty_name=None):  # TODO move TT_mode PEARL specific
 
         super(Polaris, self).__init__(user_name=user_name, calibration_dir=calibration_dir, raw_data_dir=raw_data_dir,
-                                      output_dir=output_dir, default_input_ext=input_file_ext, tt_mode=None)
+                                      output_dir=output_dir, default_input_ext=input_file_ext)
 
         self._masking_file_name = "VanaPeaks.dat"
         self._sample_empty = sample_empty_name
@@ -116,8 +115,14 @@ class Polaris(AbstractInst):
             common.remove_intermediate_workspace(empty_sample)
         return input_sample
 
-    def _apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number):
-        solid_angle_vanadium_ws = common._load_raw_files(run_number=vanadium_number, instrument=self)
+    def _apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number=None, vanadium_path=None):
+        assert(vanadium_number or vanadium_path)
+
+        if vanadium_number:
+            solid_angle_vanadium_ws = common._load_raw_files(run_number=vanadium_number, instrument=self)
+        else:
+            solid_angle_vanadium_ws = mantid.Load(Filename=vanadium_path)
+
         solid_angle_vanadium_ws = self._normalise_ws(solid_angle_vanadium_ws)
         corrections = self._calculate_solid_angle_efficiency_corrections(solid_angle_vanadium_ws)
 
@@ -129,7 +134,9 @@ class Polaris(AbstractInst):
         return ws_to_correct
 
     def _focus_processing(self, run_number, input_workspace, perform_vanadium_norm):
-        raise NotImplementedError("Need to do focus processing")
+        self._get_cycle_information(run_number=run_number)
+
+
 
     def _spline_background(self, focused_vanadium_ws, spline_number, instrument_version=''):
 
@@ -245,3 +252,6 @@ def _apply_masking(workspaces_to_mask, mask_list):
         index += 1
 
     return output_workspaces
+
+
+def _divide_sample_vanadium_splines(sample_ws, vanadium_splines_ws)
