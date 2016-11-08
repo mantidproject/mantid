@@ -34,4 +34,3 @@ if not detector.isMasked():
     sAngle = detector.solidAngle(samplePos)
 
 print "The solid angle of the spectrum located at index " + str(wsIndex) + " is: " + str(sAngle) + " steradians"
-

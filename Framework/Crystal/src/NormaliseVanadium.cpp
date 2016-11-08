@@ -60,8 +60,6 @@ void NormaliseVanadium::exec() {
       static_cast<int64_t>(m_inputWS->getNumberHistograms());
   const int64_t specSize = static_cast<int64_t>(m_inputWS->blocksize());
 
-  const bool isHist = m_inputWS->isHistogramData();
-
   // If sample not at origin, shift cached positions.
   const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
   const V3D pos = m_inputWS->getInstrument()->getSource()->getPos() - samplePos;
@@ -69,20 +67,19 @@ void NormaliseVanadium::exec() {
 
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
-  PARALLEL_FOR2(m_inputWS, correctionFactors)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *correctionFactors))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
     //    PARALLEL_START_INTERUPT_REGION //FIXME: Restore
 
     // Get a reference to the Y's in the output WS for storing the factors
-    MantidVec &Y = correctionFactors->dataY(i);
-    MantidVec &E = correctionFactors->dataE(i);
+    auto &Y = correctionFactors->mutableY(i);
+    auto &E = correctionFactors->mutableE(i);
 
     // Copy over bin boundaries
     const auto &inSpec = m_inputWS->getSpectrum(i);
-    const MantidVec &Xin = inSpec.readX();
-    correctionFactors->dataX(i) = Xin;
-    const MantidVec &Yin = inSpec.readY();
-    const MantidVec &Ein = inSpec.readE();
+    correctionFactors->setSharedX(i, inSpec.sharedX());
+    const auto &Yin = inSpec.y();
+    const auto &Ein = inSpec.e();
 
     // Get detector position
     IDetector_const_sptr det;
@@ -108,7 +105,10 @@ void NormaliseVanadium::exec() {
     double scattering = dir.angle(V3D(0.0, 0.0, 1.0));
 
     Mantid::Kernel::Units::Wavelength wl;
-    std::vector<double> timeflight;
+    auto timeflight = inSpec.points();
+    if (unitStr.compare("TOF") == 0)
+      wl.fromTOF(timeflight.mutableRawData(), timeflight.mutableRawData(), L1,
+                 L2, scattering, 0, 0, 0);
 
     // Loop through the bins in the current spectrum
     double lambp = 0;
@@ -116,10 +116,7 @@ void NormaliseVanadium::exec() {
     double normp = 0;
     double normm = 0;
     for (int64_t j = 0; j < specSize; j++) {
-      timeflight.push_back((isHist ? (0.5 * (Xin[j] + Xin[j + 1])) : Xin[j]));
-      if (unitStr.compare("TOF") == 0)
-        wl.fromTOF(timeflight, timeflight, L1, L2, scattering, 0, 0, 0);
-      const double lambda = timeflight[0];
+      const double lambda = timeflight[j];
       if (lambda > lambdanorm) {
         lambp = lambda;
         normp = Yin[j];
@@ -127,7 +124,6 @@ void NormaliseVanadium::exec() {
       }
       lambm = lambda;
       normm = Yin[j];
-      timeflight.clear();
     }
     double normvalue =
         normm + (lambdanorm - lambm) * (normp - normm) / (lambp - lambm);

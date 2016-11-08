@@ -39,7 +39,6 @@ public:
   /// Destructor
   virtual ~IReflMainWindowPresenter(){};
   /// Pre-processing
-  virtual std::string getPlusOptions() const = 0;
   virtual std::string getTransmissionOptions() const = 0;
   /// Processing
   virtual std::string getReductionOptions() const = 0;
@@ -58,6 +57,7 @@ public:
   virtual void giveUserInfo(const std::string &prompt,
                             const std::string &title) = 0;
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
+  virtual void setInstrumentName(const std::string &instName) const = 0;
 };
 }
 }

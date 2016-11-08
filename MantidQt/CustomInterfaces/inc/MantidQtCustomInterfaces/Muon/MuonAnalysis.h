@@ -244,6 +244,9 @@ private slots:
   /// Called when compatibility mode is turned on/off
   void compatibilityModeChanged(int state);
 
+  /// Called when "overwrite" is changed
+  void updateDataPresenterOverwrite(int state);
+
 private:
   /// Initialize local Python environment
   void initLocalPython() override;
@@ -543,6 +546,12 @@ private:
 
   /// Enable/disable "load current run" - if allowed
   void setLoadCurrentRunEnabled(bool enabled);
+
+  /// Check if next/previous run should be appended
+  void checkAppendingRun(const int direction);
+
+  /// Set the Grouping and Data Analysis tabs enabled/disabled
+  void setAnalysisTabsEnabled(const bool enabled);
 };
 }
 }

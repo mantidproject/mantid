@@ -3,6 +3,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -14,7 +15,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void IndexPeaks::init() {
@@ -42,7 +42,6 @@ void IndexPeaks::init() {
                         "Round H, K and L values to integers");
 }
 
-//--------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void IndexPeaks::exec() {

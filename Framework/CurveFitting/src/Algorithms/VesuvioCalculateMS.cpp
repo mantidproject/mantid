@@ -5,6 +5,7 @@
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleShapeValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -20,6 +21,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/make_shared.hpp>
@@ -293,7 +295,7 @@ void VesuvioCalculateMS::cacheInputs() {
     throw std::runtime_error("Workspace has no gold foil component defined.");
   }
   auto param =
-      m_inputWS->instrumentParameters().get(foil.get(), "hwhm_lorentz");
+      m_inputWS->constInstrumentParameters().get(foil.get(), "hwhm_lorentz");
   if (!param) {
     throw std::runtime_error(
         "Foil component has no hwhm_lorentz parameter defined.");

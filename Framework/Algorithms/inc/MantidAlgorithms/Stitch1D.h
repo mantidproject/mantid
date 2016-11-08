@@ -2,7 +2,6 @@
 #define MANTID_ALGORITHMS_STITCH1D_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/cow_ptr.h"
 
 #include <boost/tuple/tuple.hpp>
 
@@ -63,13 +62,13 @@ private:
                        const double &intesectionMax) const;
 
   /// Get the rebin parameters
-  Mantid::MantidVec getRebinParams(Mantid::API::MatrixWorkspace_sptr &lhsWS,
-                                   Mantid::API::MatrixWorkspace_sptr &rhsWS,
-                                   const bool scaleRHS) const;
+  std::vector<double> getRebinParams(Mantid::API::MatrixWorkspace_sptr &lhsWS,
+                                     Mantid::API::MatrixWorkspace_sptr &rhsWS,
+                                     const bool scaleRHS) const;
   /// Perform rebin
   Mantid::API::MatrixWorkspace_sptr
   rebin(Mantid::API::MatrixWorkspace_sptr &input,
-        const Mantid::MantidVec &params);
+        const std::vector<double> &params);
   /// Perform integration
   Mantid::API::MatrixWorkspace_sptr
   integration(Mantid::API::MatrixWorkspace_sptr &input, const double &start,

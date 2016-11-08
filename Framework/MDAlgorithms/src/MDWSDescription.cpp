@@ -3,6 +3,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Strings.h"
@@ -448,6 +450,10 @@ MDWSDescription::getCoordinateSystem() const {
  */
 bool MDWSDescription::isQ3DMode() const {
   return this->AlgID.compare("Q3D") == 0;
+}
+
+bool MDWSDescription::hasLattice() const {
+  return m_InWS->sample().hasOrientedLattice();
 }
 
 } // end namespace MDAlgorithms

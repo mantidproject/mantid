@@ -17,6 +17,7 @@ namespace DataHandling {
 using namespace Kernel;
 using namespace API;
 using namespace NeXus;
+using namespace HistogramData;
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF)
 
@@ -119,6 +120,7 @@ void LoadILLTOF::exec() {
                            calculatedDetectorElasticPeakPosition);
 
   addEnergyToRun();
+  addPulseInterval();
 
   // load the instrument from the IDF if it exists
   runLoadInstrument();
@@ -353,6 +355,44 @@ void LoadILLTOF::addEnergyToRun() {
 }
 
 /**
+ * Calculate and add the pulse intervals for the run
+ */
+void LoadILLTOF::addPulseInterval() {
+  API::Run &runDetails = m_localWorkspace->mutableRun();
+  double pulseInterval;
+  double n_pulses;
+  double fermiChopperSpeed;
+
+  if (m_instrumentName == "IN4") {
+    fermiChopperSpeed =
+        runDetails.getPropertyAsSingleValue("FC.rotation_speed");
+    double bkgChopper1Speed =
+        runDetails.getPropertyAsSingleValue("BC1.rotation_speed");
+    double bkgChopper2Speed =
+        runDetails.getPropertyAsSingleValue("BC2.rotation_speed");
+
+    if (std::abs(bkgChopper1Speed - bkgChopper2Speed) > 1) {
+      throw std::invalid_argument(
+          "Background choppers 1 and 2 have different speeds");
+    }
+
+    n_pulses = fermiChopperSpeed / bkgChopper1Speed / 4;
+  } else if (m_instrumentName == "IN6") {
+    fermiChopperSpeed =
+        runDetails.getPropertyAsSingleValue("Fermi.rotation_speed");
+    double suppressorSpeed =
+        runDetails.getPropertyAsSingleValue("Suppressor.rotation_speed");
+
+    n_pulses = fermiChopperSpeed / suppressorSpeed;
+  } else {
+    return;
+  }
+
+  pulseInterval = 60.0 / (2 * fermiChopperSpeed) * n_pulses;
+  runDetails.addProperty<double>("pulse_interval", pulseInterval);
+}
+
+/**
  * Gets the experimental Elastic Peak Position in the dectector
  * as the value parsed from the nexus file might be wrong.
  *
@@ -486,71 +526,42 @@ void LoadILLTOF::loadDataIntoTheWorkSpace(
                                  1e6; // microsecs
 
   // Calculate the real tof (t1+t2) put it in tof array
-  std::vector<double> detectorTofBins(m_numberOfChannels + 1);
+  auto &X0 = m_localWorkspace->mutableX(0);
   for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-    detectorTofBins[i] =
-        theoreticalElasticTOF +
-        m_channelWidth *
-            static_cast<double>(static_cast<int>(i) -
-                                calculatedDetectorElasticPeakPosition) -
-        m_channelWidth /
-            2; // to make sure the bin is in the middle of the elastic peak
+    X0[i] = theoreticalElasticTOF +
+            m_channelWidth *
+                static_cast<double>(static_cast<int>(i) -
+                                    calculatedDetectorElasticPeakPosition) -
+            m_channelWidth /
+                2; // to make sure the bin is in the middle of the elastic peak
   }
 
   g_log.information() << "T1+T2 : Theoretical = " << theoreticalElasticTOF;
-  g_log.information()
-      << " ::  Calculated bin = ["
-      << detectorTofBins[calculatedDetectorElasticPeakPosition] << ","
-      << detectorTofBins[calculatedDetectorElasticPeakPosition + 1] << "]\n";
+  g_log.information() << " ::  Calculated bin = ["
+                      << X0[calculatedDetectorElasticPeakPosition] << ","
+                      << X0[calculatedDetectorElasticPeakPosition + 1] << "]\n";
 
   // The binning for monitors is considered the same as for detectors
   size_t spec = 0;
 
   auto const &instrument = m_localWorkspace->getInstrument();
+
   std::vector<detid_t> monitorIDs = instrument->getMonitors();
 
   for (const auto &monitor : monitors) {
-    m_localWorkspace->dataX(spec)
-        .assign(detectorTofBins.begin(), detectorTofBins.end());
-    // Assign Y
-    m_localWorkspace->dataY(spec).assign(monitor.begin(), monitor.end());
-    // Assign Error
-    MantidVec &E = m_localWorkspace->dataE(spec);
-    std::transform(monitor.begin(), monitor.end(), E.begin(),
-                   LoadILLTOF::calculateError);
+    m_localWorkspace->setHistogram(spec, m_localWorkspace->binEdges(0),
+                                   Counts(monitor.begin(), monitor.end()));
     m_localWorkspace->getSpectrum(spec).setDetectorID(monitorIDs[spec]);
-    ++spec;
+    spec++;
   }
 
   std::vector<detid_t> detectorIDs = instrument->getDetectorIDs(true);
-
-  // Assign calculated bins to first X axis
-  size_t firstSpec = spec;
   size_t numberOfMonitors = monitors.size();
-  m_localWorkspace->dataX(firstSpec)
-      .assign(detectorTofBins.begin(), detectorTofBins.end());
 
   Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
-  for (size_t i = 0; i < m_numberOfTubes; ++i) {
-    for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
-      if (spec > firstSpec) {
-        // just copy the time binning axis to every spectra
-        m_localWorkspace->dataX(spec) = m_localWorkspace->readX(firstSpec);
-      }
-      // Assign Y
-      int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      m_localWorkspace->dataY(spec).assign(data_p, data_p + m_numberOfChannels);
 
-      // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec);
-      std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-                     LoadILLTOF::calculateError);
-      m_localWorkspace->getSpectrum(spec)
-          .setDetectorID(detectorIDs[spec - numberOfMonitors]);
-      ++spec;
-      progress.report();
-    }
-  }
+  loadSpectra(spec, numberOfMonitors, m_numberOfTubes, detectorIDs, data,
+              progress);
 
   g_log.debug() << "Loading data into the workspace: DONE!\n";
 
@@ -569,24 +580,37 @@ void LoadILLTOF::loadDataIntoTheWorkSpace(
 
     Progress progressRosace(this, 0, 1,
                             numberOfTubes * m_numberOfPixelsPerTube);
-    for (size_t i = 0; i < numberOfTubes; ++i) {
-      for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
-        // just copy the time binning axis to every spectra
-        m_localWorkspace->dataX(spec) = m_localWorkspace->readX(firstSpec);
 
-        // Assign Y
-        int *data_p = &dataRosace(static_cast<int>(i), static_cast<int>(j), 0);
-        m_localWorkspace->dataY(spec)
-            .assign(data_p, data_p + m_numberOfChannels);
+    loadSpectra(spec, numberOfMonitors, numberOfTubes, detectorIDs, dataRosace,
+                progressRosace);
+  }
+}
 
-        // Assign Error
-        MantidVec &E = m_localWorkspace->dataE(spec);
-        std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-                       LoadILLTOF::calculateError);
-
-        ++spec;
-        progressRosace.report();
-      }
+/**
+ * Loops over all the pixels and loads the correct spectra. Called for each set
+ * of detector types in the workspace.
+ *
+ * @param spec The current spectrum id
+ * @param numberOfMonitors The number of monitors in the workspace
+ * @param numberOfTubes The number of detector tubes in the workspace
+ * @param detectorIDs A list of all of the detector IDs
+ * @param data The NeXus data to load into the workspace
+ * @param progress The progress monitor (different
+ */
+void LoadILLTOF::loadSpectra(size_t &spec, size_t numberOfMonitors,
+                             size_t numberOfTubes,
+                             std::vector<detid_t> &detectorIDs, NXInt data,
+                             Progress progress) {
+  for (size_t i = 0; i < numberOfTubes; ++i) {
+    for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
+      int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+      m_localWorkspace->setHistogram(
+          spec, m_localWorkspace->binEdges(0),
+          Counts(data_p, data_p + m_numberOfChannels));
+      m_localWorkspace->getSpectrum(spec)
+          .setDetectorID(detectorIDs[spec - numberOfMonitors]);
+      spec++;
+      progress.report();
     }
   }
 }

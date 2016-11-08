@@ -8,6 +8,7 @@ from mantid.simpleapi import *
 import os
 from abc import ABCMeta, abstractmethod
 
+
 class ISISReflInstrumentIDFTest(stresstesting.MantidStressTest):
 
     __metaclass__ = ABCMeta # Mark as an abstract class
@@ -38,21 +39,29 @@ class ISISReflInstrumentIDFTest(stresstesting.MantidStressTest):
         return True
 
 # Specialisation for testing POLREF
+
+
 class POLREF_ISISReflInstrumentIDFTest(ISISReflInstrumentIDFTest):
     def get_IDF_name(self):
         return "POLREF_Definition.xml"
 
 # Specialisation for testing INTER
+
+
 class INTER_ISISReflInstrumentIDFTest(ISISReflInstrumentIDFTest):
     def get_IDF_name(self):
         return "INTER_Definition.xml"
 
 # Specialisation for testing SURF
+
+
 class SURF_ISISReflInstrumentIDFTest(ISISReflInstrumentIDFTest):
     def get_IDF_name(self):
         return "SURF_Definition.xml"
 
 # Specialisation for testing CRISP
+
+
 class CRISP_ISISReflInstrumentIDFTest(ISISReflInstrumentIDFTest):
     def get_IDF_name(self):
         return "CRISP_Definition.xml"

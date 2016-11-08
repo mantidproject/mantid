@@ -12,6 +12,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
@@ -163,7 +164,7 @@ public:
             wsName));
 
     // We now check the parameter that is different in the embedded parameters
-    const ParameterMap &paramMap = output->instrumentParameters();
+    const auto &paramMap = output->constInstrumentParameters();
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "low-angle-detector-name"),
                      "LAB");
@@ -206,7 +207,7 @@ public:
             wsName));
 
     // We now check a parameter
-    const ParameterMap &paramMap = output->instrumentParameters();
+    const auto &paramMap = output->constInstrumentParameters();
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "low-angle-detector-name"),
                      "main-detector-bank");
@@ -288,7 +289,7 @@ public:
             wsName));
 
     // We now check a parameter that has been changed by this
-    const ParameterMap &paramMap = output->instrumentParameters();
+    const auto &paramMap = output->constInstrumentParameters();
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "high-angle-detector-name"),
                      "HAB App");
@@ -378,7 +379,7 @@ public:
             wsName));
 
     // We now check a parameter that has been changed by this
-    const ParameterMap &paramMap = output->instrumentParameters();
+    const auto &paramMap = output->constInstrumentParameters();
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "high-angle-detector-name"),
                      "HAB Rep");

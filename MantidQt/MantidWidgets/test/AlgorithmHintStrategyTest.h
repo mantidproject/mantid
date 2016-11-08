@@ -10,6 +10,8 @@
 #include "MantidQtMantidWidgets/HintStrategy.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 
+#include <boost/scoped_ptr.hpp>
+
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 

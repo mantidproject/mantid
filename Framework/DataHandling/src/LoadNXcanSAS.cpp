@@ -3,6 +3,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -81,6 +82,16 @@ Mantid::API::MatrixWorkspace_sptr createWorkspace(H5::DataSet &dataSet) {
   return Mantid::API::WorkspaceFactory::Instance().create(
       "Workspace2D", dimInfo.dimSpectrumAxis /*NHisto*/,
       dimInfo.dimBin /*xdata*/, dimInfo.dimBin /*ydata*/);
+}
+
+Mantid::API::MatrixWorkspace_sptr
+createWorkspaceForHistogram(H5::DataSet &dataSet) {
+  auto dimInfo = getDataSpaceInfo(dataSet);
+
+  // Create a workspace based on the dataSpace information
+  return Mantid::API::WorkspaceFactory::Instance().create(
+      "Workspace2D", dimInfo.dimSpectrumAxis /*NHisto*/,
+      dimInfo.dimBin + 1 /*xdata*/, dimInfo.dimBin /*ydata*/);
 }
 
 // ----- LOGS
@@ -439,35 +450,6 @@ void loadTransmissionData(H5::Group &transmission,
   workspace->getAxis(0)->unit() =
       Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 }
-
-void loadTransmission(H5::Group &entry, const std::string &name) {
-  if (!hasTransmissionEntry(entry, name)) {
-    g_log.information("NXcanSAS file does not contain transmission for " +
-                      name);
-  }
-  auto transmission =
-      entry.openGroup(sasTransmissionSpectrumGroupName + "_" + name);
-
-  // Create a 1D workspace
-  auto tDataSet = transmission.openDataSet(sasTransmissionSpectrumT);
-  auto workspace = createWorkspace(tDataSet);
-
-  // Load logs
-  loadLogs(entry, workspace);
-  auto title = workspace->getTitle();
-  const std::string transExtension = "_trans_" + name;
-  title += transExtension;
-  workspace->setTitle(transExtension);
-
-  // Load instrument
-  loadInstrument(entry, workspace);
-
-  // Load transmission data
-  loadTransmissionData(transmission, workspace);
-
-  // Add the workspace to the ADS
-  Mantid::API::AnalysisDataService::Instance().add(title, workspace);
-}
 }
 
 namespace Mantid {
@@ -565,6 +547,54 @@ void LoadNXcanSAS::exec() {
   }
   file.close();
   setProperty("OutputWorkspace", ws);
+}
+
+void LoadNXcanSAS::loadTransmission(H5::Group &entry, const std::string &name) {
+  if (!hasTransmissionEntry(entry, name)) {
+    g_log.information("NXcanSAS file does not contain transmission for " +
+                      name);
+    return;
+  }
+
+  auto transmission =
+      entry.openGroup(sasTransmissionSpectrumGroupName + "_" + name);
+
+  // Create a 1D workspace
+  auto tDataSet = transmission.openDataSet(sasTransmissionSpectrumT);
+  auto workspace = createWorkspaceForHistogram(tDataSet);
+
+  // Load logs
+  loadLogs(entry, workspace);
+  auto title = workspace->getTitle();
+  const std::string transExtension = "_trans_" + name;
+  title += transExtension;
+  workspace->setTitle(transExtension);
+
+  // Load instrument
+  loadInstrument(entry, workspace);
+
+  // Load transmission data
+  loadTransmissionData(transmission, workspace);
+
+  // Set to distribution
+  workspace->setDistribution(true);
+  workspace->setYUnitLabel("Transmission");
+
+  // Set the workspace on the output
+
+  std::string propertyName;
+  if (name == "sample")
+    propertyName = "TransmissionWorkspace";
+  else
+    propertyName = "TransmissionCanWorkspace";
+  const std::string doc = "The transmission workspace";
+
+  declareProperty(
+      Kernel::make_unique<
+          Mantid::API::WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
+          propertyName, title, Direction::Output),
+      doc);
+  setProperty(propertyName, workspace);
 }
 
 } // namespace DataHandling

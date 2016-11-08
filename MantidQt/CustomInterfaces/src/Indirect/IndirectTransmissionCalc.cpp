@@ -71,7 +71,11 @@ void IndirectTransmissionCalc::run() {
       m_uiForm.iicInstrumentConfiguration->getReflectionName().toStdString());
   transAlg->setProperty("ChemicalFormula",
                         m_uiForm.leChemicalFormula->text().toStdString());
-  transAlg->setProperty("NumberDensity", m_uiForm.spNumberDensity->value());
+  if (m_uiForm.cbDensityType->currentIndex() == 0)
+    transAlg->setProperty("DensityType", "Mass Density");
+  else
+    transAlg->setProperty("DensityType", "Number Density");
+  transAlg->setProperty("Density", m_uiForm.spDensity->value());
   transAlg->setProperty("Thickness", m_uiForm.spThickness->value());
   transAlg->setProperty("OutputWorkspace", outWsName);
 

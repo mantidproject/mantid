@@ -4,6 +4,10 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/IFileLoader.h"
 
+namespace H5 {
+class Group;
+}
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -53,6 +57,8 @@ public:
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
+  /// Loads the transmission runs
+  void loadTransmission(H5::Group &entry, const std::string &name);
   /// Initialisation code
   void init() override;
   /// Execution code
