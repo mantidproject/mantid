@@ -67,6 +67,8 @@ public:
   bool getTitleCheck() const override;
   /// Returns the Q resolution check
   bool getQResolutionCheck() const override;
+  /// Returns the separator type
+  std::string getSeparator() const override;
 
 private:
   /// Initialize the interface
@@ -75,6 +77,7 @@ private:
   std::unique_ptr<IReflSaveTabPresenter> m_presenter;
   /// The widget
   Ui::ReflSaveTabWidget m_ui;
+
 };
 
 } // namespace Mantid

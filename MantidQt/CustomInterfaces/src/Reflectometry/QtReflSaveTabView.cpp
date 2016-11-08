@@ -94,5 +94,12 @@ bool QtReflSaveTabView::getQResolutionCheck() const {
   return m_ui.qResolutionCheckBox->isChecked();
 }
 
+/** Returns the separator type
+* @return :: The separator
+*/
+std::string QtReflSaveTabView::getSeparator() const {
+  return m_ui.separatorButtonGroup->checkedButton()->text().toStdString();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid

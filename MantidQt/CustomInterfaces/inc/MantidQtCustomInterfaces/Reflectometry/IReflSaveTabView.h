@@ -51,6 +51,7 @@ public:
   virtual std::string getFileFormat() const = 0;
   virtual bool getTitleCheck() const = 0;
   virtual bool getQResolutionCheck() const = 0;
+  virtual std::string getSeparator() const = 0;
 };
 }
 }
