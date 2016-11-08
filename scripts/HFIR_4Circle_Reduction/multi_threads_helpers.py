@@ -178,6 +178,8 @@ class IntegratePeaksThread(QThread):
             assert isinstance(scan_tup, tuple) and len(scan_tup) == 3
             scan_number, pt_number_list, merged = scan_tup
 
+            print '[DB...BAT] IntegratePeakThread: Scan %d' % scan_number
+
             # emit signal for run start (mode 0)
             mode = int(0)
             self.peakMergeSignal.emit(self._expNumber, scan_number, float(index), [0., 0., 0.], mode)

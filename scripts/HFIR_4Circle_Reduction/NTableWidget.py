@@ -435,7 +435,8 @@ class NTableWidget(QtGui.QTableWidget):
         :return: None
         """
         # Check
-        assert isinstance(row, int) and 0 <= row < self.rowCount()
+        assert isinstance(row, int) and 0 <= row < self.rowCount(),\
+            'Row %s (%s) must be an integer between 0 and %d.' % (str(row), type(row), self.rowCount())
         assert isinstance(col, int) and 0 <= col < self.columnCount()
 
         cell_item = self.item(row, col)

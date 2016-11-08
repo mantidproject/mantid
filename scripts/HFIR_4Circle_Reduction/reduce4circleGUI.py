@@ -621,18 +621,8 @@ class MainWindow(QtGui.QMainWindow):
         if len(scan_list) == 0:
             self.pop_one_button_dialog('Scan list is empty.')
 
-        # get unit
-        unit_str = str(self.ui.comboBox_mergeScanFrame.currentText())
-        if unit_str.startswith('HKL'):
-            this_unit = 'HKL'
-        elif unit_str.startswith('Q'):
-            this_unit = 'QSample'
-        else:
-            raise RuntimeError('Merged MD Frame unit %s is not supported.' % this_unit)
-
         # Set table
-        self.ui.tableWidget_mergeScans.append_scans(scans=scan_list, allow_duplicate_scans=False,
-                                                    unit=this_unit)
+        self.ui.tableWidget_mergeScans.append_scans(scans=scan_list, allow_duplicate_scans=False)
 
         return
 
@@ -1342,7 +1332,8 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_integrate_peaks(self):
-        """ Integrate selected peaks.  If any scan is not merged, then it will merge the scan first.
+        """ Integrate selected peaks tab-merged scans.
+        If any scan is not merged, then it will merge the scan first.
         Integrate peaks from the table of merged peak.
         It will so the simple cuboid integration with region of interest and background subtraction.
         :return:
@@ -1352,6 +1343,8 @@ class MainWindow(QtGui.QMainWindow):
         if len(row_number_list) == 0:
             self.pop_one_button_dialog('No scan is selected for scan')
             return
+        else:
+            print '[DB...BAT] IntegratePeaks: selected rows: ', row_number_list
 
         # get experiment number
         status, ret_obj = gutil.parse_integers_editors(self.ui.lineEdit_exp, allow_blank=False)
@@ -1405,7 +1398,7 @@ class MainWindow(QtGui.QMainWindow):
 
             # add to list
             scan_number_list.append((scan_number, pt_number_list, merged))
-            self.ui.tableWidget_mergeScans.set_status_by_row(row_number, 'Waiting')
+            self.ui.tableWidget_mergeScans.set_status(row_number, 'Waiting')
         # END-FOR
 
         # set the progress bar
@@ -1833,6 +1826,7 @@ class MainWindow(QtGui.QMainWindow):
         """ Process data for slicing view
         :return:
         """
+        # TODO/FIXME/NOW/ ----- It is BROKEN!!!!
         # Get UB matrix
         ub_matrix = self.ui.tableWidget_ubInUse.get_matrix()
         self._myControl.set_ub_matrix(exp_number=None, ub_matrix=ub_matrix)
@@ -1862,7 +1856,7 @@ class MainWindow(QtGui.QMainWindow):
                 if len(err_msg) > 0:
                     self.pop_one_button_dialog(err_msg)
 
-            self.ui.tableWidget_mergeScans.set_status_by_row(i_row, 'In Processing')
+            self.ui.tableWidget_mergeScans.set_status(i_row, 'In Processing')
 
             status, ret_tup = self._myControl.merge_pts_in_scan(exp_no=None, scan_no=scan_no,
                                                                 pt_num_list=[], target_frame=frame)
@@ -1880,7 +1874,7 @@ class MainWindow(QtGui.QMainWindow):
                 print merge_status
 
             # update table
-            self.ui.tableWidget_mergeScans.set_status_by_row(i_row, merge_status)
+            self.ui.tableWidget_mergeScans.set_status(i_row, merge_status)
             self.ui.tableWidget_mergeScans.set_ws_names_by_row(i_row, merged_name, group_name)
 
             # Sleep for a while
@@ -2910,17 +2904,17 @@ class MainWindow(QtGui.QMainWindow):
             try:
                 motor_move_tup = self._myControl.get_motor_step(exp_number, scan_number)
             except RuntimeError as run_err:
-                self.ui.tableWidget_mergeScans.set_status(scan_number, str(run_err))
+                self.ui.tableWidget_mergeScans.set_status(row_number, str(run_err))
                 continue
             except AssertionError as ass_err:
-                self.ui.tableWidget_mergeScans.set_status(scan_number, str(ass_err))
+                self.ui.tableWidget_mergeScans.set_status(row_number, str(ass_err))
                 continue
             # set motor information (the moving motor)
             self.ui.tableWidget_mergeScans.set_motor_info(row_number, motor_move_tup)
             motor_step = motor_move_tup[1]
             # apply the Lorentz correction to the intensity
             corrected = self._myControl.apply_lorentz_correction(peak_intensity, q, wavelength, motor_step)
-            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, None, corrected, lorentz_corrected=True)
+            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, corrected, lorentz_corrected=True)
             self._myControl.set_peak_intensity(exp_number, scan_number, corrected)
         # END-FOR (row_number)
 
@@ -3249,6 +3243,8 @@ class MainWindow(QtGui.QMainWindow):
         :param mode:
         :return:
         """
+        # TODO/NOW/ISSUE - Add debugging information to see why it is wrong to set value to table (messed row/scan)
+        print '[DB...BAT] UpdatePeakIntegrationValue: Scan = %d' % scan_number
         if mode == 0:
             # start of processing one peak
             progress = int(sig_value - 0.5)
@@ -3261,8 +3257,15 @@ class MainWindow(QtGui.QMainWindow):
 
         elif mode == 1:
             # end of processing one peak
-            intensity = sig_value
+            # get row number
+            try:
+                row_number = self.ui.tableWidget_mergeScans.get_row_by_scan(scan_number)
+            except RuntimeError as run_err:
+                self.pop_one_button_dialog(str(run_err))
+                return
 
+            # gather values for updating
+            intensity = sig_value
             print '[DB...BAT] Get peak center %s of type %s.' % (str(peak_centre), type(peak_centre))
 
             # check intensity value
@@ -3270,31 +3273,33 @@ class MainWindow(QtGui.QMainWindow):
             if intensity < 0:
                 # set to status
                 error_msg = 'Negative intensity: %.3f' % intensity
-                self.ui.tableWidget_mergeScans.set_status(scan_no=scan_number, status=error_msg)
+                self.ui.tableWidget_mergeScans.set_status(row_number=row_number, status=error_msg)
                 # reset intensity to 0.
                 intensity = 0.
                 is_error = True
 
             if len(peak_centre) != 3:
-                print '[DB] Peak centre %s is not correct.' % str(peak_centre)
+                self.pop_one_button_dialog('Peak centre %s is not correct.' % str(peak_centre))
+                return
 
             # set the calculated peak intensity to _peakInfoDict
             status, error_msg = self._myControl.set_peak_intensity(exp_number, scan_number, intensity)
             if status:
                 # set the value to table
-                self.ui.tableWidget_mergeScans.set_peak_intensity(row_number=None,
-                                                                  scan_number=scan_number,
-                                                                  peak_intensity=intensity)
-                self.ui.tableWidget_mergeScans.set_peak_centre(row_number=None,
-                                                               scan_number=scan_number,
-                                                               peak_centre=peak_centre)
+
+                self.ui.tableWidget_mergeScans.set_peak_intensity(row_number=row_number,
+                                                                  peak_intensity=intensity,
+                                                                  lorentz_corrected=False)
+                self.ui.tableWidget_mergeScans.set_peak_centre(row_number=row_number,
+                                                               peak_centre=peak_centre,
+                                                               frame='QSample')
                 if not is_error:
-                    self.ui.tableWidget_mergeScans.set_status(scan_number, 'Done')
+                    self.ui.tableWidget_mergeScans.set_status(row_number, 'Done')
                 else:
-                    self.ui.tableWidget_mergeScans.set_status(scan_number, 'Intensity Error')
+                    self.ui.tableWidget_mergeScans.set_status(row_number, 'Intensity Error')
             else:
                 self._errorMessageEnsemble += error_msg + '\n'
-                self.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
+                self.ui.tableWidget_mergeScans.set_status(row_number, error_msg)
 
         elif mode == 2:
             # end of the whole run
@@ -3341,12 +3346,18 @@ class MainWindow(QtGui.QMainWindow):
         # passed value from PyQt signal might be a unicode code
         message = str(message)
 
+        try:
+            row_number = self.ui.tableWidget_mergeScans.get_row_by_scan(scan_number)
+        except RuntimeError as run_err:
+            self.pop_one_button_dialog(str(run_err))
+            return
+
         # set intensity, state to table
         if mode == 0:
             # error message
-            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number=None, scan_number=scan_number,
-                                                              peak_intensity=0., lorentz_corrected=False)
-            self.ui.tableWidget_mergeScans.set_status(scan_no=scan_number, status=message)
+            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number=row_number, peak_intensity=0.,
+                                                              lorentz_corrected=False)
+            self.ui.tableWidget_mergeScans.set_status(row_number=row_number, status=message)
 
             # set peak value
             status, ret_message = self._myControl.set_peak_intensity(exp_number, scan_number, 0.)
@@ -3356,8 +3367,7 @@ class MainWindow(QtGui.QMainWindow):
         elif mode == 1:
             # merged workspace name
             merged_ws_name = message
-            self.ui.tableWidget_mergeScans.set_ws_names(scan_num=scan_number, merged_md_name=merged_ws_name,
-                                                        ws_group_name='')
+            self.ui.tableWidget_mergeScans.set_ws_names(row_number=row_number, merged_md_name=merged_ws_name)
 
         else:
             raise RuntimeError('Peak-merging mode %d is not supported.' % mode)

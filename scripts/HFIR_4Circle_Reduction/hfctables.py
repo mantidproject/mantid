@@ -552,12 +552,14 @@ class ProcessTableWidget(tableBase.NTableWidget):
                   ('Intensity', 'float'),
                   ('Corrected', 'float'),
                   ('Status', 'str'),
-                  ('Peak Centre', 'str'),  # peak center can be either HKL or Q depending on the unit
-                  ('Unit', 'str'),
-                  ('Total Counts', 'float'),
+                  ('Peak', 'str'),  # peak center can be either HKL or Q depending on the unit
+                  ('Frame', 'str'),
+                  ('HKL', 'str'),
+                  ('Index From', 'str'),  # source of HKL index, either SPICE or calculation
                   ('Motor', 'str'),
+                  ('Motor Step', 'str'),
                   ('Wavelength', 'float'),
-                  ('Merged Workspace', 'str'),
+                  ('Workspace', 'str'),
                   ('K-Index', 'int'),
                   ('Select', 'checkbox')]
 
@@ -570,37 +572,46 @@ class ProcessTableWidget(tableBase.NTableWidget):
         tableBase.NTableWidget.__init__(self, parent)
 
         # some commonly used column index
-        self._colIndexKIndex = None
-        self._colIndexUnit = None
+        self._colIndexScan = None
+        self._colIndexIntensity = None
+        self._colIndexCorrInt = None
+        self._colIndexHKL = None
         self._colIndexStatus = None
-        self._colIndexPeakCentre = None
+        self._colIndexPeak = None
+        self._colIndexFrame = None
+        self._colIndexIndexFrom = None
+        self._colIndexMotor = None
+        self._colIndexMotorStep = None
+        self._colIndexWaveLength = None
+        self._colIndexKIndex = None
+        self._colIndexWorkspace = None
 
         return
 
     @staticmethod
-    def _generate_empty_row(scan_number, num_pt=None, unit='QSample', status='In-Queue', ws_name=''):
+    def _generate_empty_row(scan_number, status='In-Queue', frame='QSample', ws_name=''):
         """ Generate a list for empty row with scan number
         :param scan_number:
-        :param num_pt:
-        :param unit:
         :param status:
+        :param frame: HKL or QSample
         :param ws_name
         :return:
         """
         # check inputs
         assert isinstance(scan_number, int)
-        assert isinstance(num_pt, int) or num_pt is None
         assert isinstance(status, str)
 
         intensity = None
         corr_int = None
-        total_counts = 0
-        motor_info = ''
+        motor_name = None
+        motor_step = None
         wave_length = 0
-        centre = ''
+        peak_center = ''
+        hkl = ''
+        hkl_from = ''
 
-        new_row = [scan_number, intensity, corr_int, status, centre, unit, total_counts,
-                   motor_info, wave_length, ws_name, 0, False]
+        new_row = [scan_number, intensity, corr_int, status, peak_center, frame, hkl, hkl_from,
+                   motor_name, motor_step, wave_length, ws_name, 0, False]
 
         return new_row
 
@@ -623,7 +634,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return
 
-    def append_scans(self, scans, allow_duplicate_scans, unit):
+    def append_scans(self, scans, allow_duplicate_scans):
         """ Append rows for merge in future
         :param scans:
         :param allow_duplicate_scans: does not allow duplicate scan
@@ -646,7 +657,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
                 continue
 
             # add scans to new row
-            new_row = self._generate_empty_row(scan_number=scan, unit=unit)
+            new_row = self._generate_empty_row(scan_number=scan)
             status, err = self.append_row(new_row)
             if status is False:
                 raise RuntimeError(err)
@@ -656,6 +667,29 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return
 
+    def get_row_by_scan(self, scan_number):
+        """
+        get the row number for a gien scan
+        :param scan_number:
+        :return:
+        """
+        assert isinstance(scan_number, int) and scan_number >= 0,\
+            'Scan number %s (type %s) is invalid.  It must be a positive integer.' \
+            '' % (str(scan_number), type(scan_number))
+        num_rows = self.rowCount()
+        ret_row_number = None
+        for i_row in xrange(num_rows):
+            tmp_scan_no = self.get_cell_value(i_row, self._colIndexScan)
+            if scan_number == tmp_scan_no:
+                ret_row_number = True
+                break
+        # END-FOR
+
+        if ret_row_number is None:
+            raise RuntimeError('Scan number %d does not exist in merge-scan-table.' % scan_number)
+
+        return ret_row_number
+
     def get_rows_by_state(self, target_state):
         """ Get the rows' indexes by status' value (state)
         Requirements: target_state is a string
@@ -663,17 +697,14 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :param target_state:
         :return:
         """
-        # Get column index
-        status_col_index = self._myColumnNameList.index('Status')
-
         # Check
-        assert isinstance(target_state, str)
+        assert isinstance(target_state, str), 'blabla'
 
         # Loop around to check
         return_list = list()
         num_rows = self.rowCount()
         for i_row in xrange(num_rows):
-            status_i = self.get_cell_value(i_row, status_col_index)
+            status_i = self.get_cell_value(i_row, self._colIndexStatus)
             if status_i == target_state:
                 return_list.append(i_row)
         # END-FOR (i_row)
@@ -684,19 +715,18 @@ class ProcessTableWidget(tableBase.NTableWidget):
         """
         Get peak index, HKL or a row
         :param row_index: row index (aka number)
-        :return: 3-float-tuple
+        :return: 3-float-tuple or None (not defined)
         """
         # check input's validity
         assert isinstance(row_index, int) and row_index >= 0, 'Row index %s of type %s is not acceptable.' \
                                                               '' % (str(row_index), type(row_index))
 
-        # get unit of this row
-        this_unit = self.cell(row_index, self._colIndexUnit)
-        if this_unit != 'HKL':
-            raise RuntimeError('Row %d does not have HKL but %s instead.' % this_unit)
-
         # retrieve value of HKL as string and then split them into floats
-        hkl_str = self.get_cell_value(row_index, self._colIndexUnit)
+        hkl_str = self.get_cell_value(row_index, self._colIndexHKL)
+        hkl_str = hkl_str.strip()
+        if len(hkl_str) == 0:
+            return None
+
         hkl_str_list = hkl_str.split(',')
         try:
             peak_index_h = float(hkl_str_list[0])
@@ -745,10 +775,9 @@ class ProcessTableWidget(tableBase.NTableWidget):
         """
         scan_list = list()
         num_rows = self.rowCount()
-        col_scan_index = self._myColumnNameList.index('Scan')
 
         for i_row in xrange(num_rows):
-            scan_num = self.get_cell_value(i_row, col_scan_index)
+            scan_num = self.get_cell_value(i_row, self._colIndexScan)
             if output_row_number:
                 scan_list.append((scan_num, i_row))
             else:
@@ -764,11 +793,10 @@ class ProcessTableWidget(tableBase.NTableWidget):
         scan_list = list()
         num_rows = self.rowCount()
         col_select_index = self._myColumnNameList.index('Select')
-        col_scan_index = self._myColumnNameList.index('Scan')
 
         for i_row in xrange(num_rows):
             if self.get_cell_value(i_row, col_select_index) is True:
-                scan_num = self.get_cell_value(i_row, col_scan_index)
+                scan_num = self.get_cell_value(i_row, self._colIndexScan)
                 scan_list.append((scan_num, i_row))
 
         return scan_list
@@ -779,9 +807,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :param row_number:
         :return:
         """
-        col_index = ProcessTableWidget.TableSetup.index(('Scan', 'int'))
-
-        return self.get_cell_value(row_number, col_index)
+        return self.get_cell_value(row_number, self._colIndexScan)
 
     def select_all_nuclear_peaks(self):
         """
@@ -796,6 +822,9 @@ class ProcessTableWidget(tableBase.NTableWidget):
             # get the reading of HKL
             try:
                 hkl_tuple = self.get_hkl(row_index)
+                if hkl_tuple is None:
+                    error_message += 'Row %d has no HKL showed.' % row_index
+                    continue
                 if fourcircle_utility.is_peak_nuclear(hkl_tuple[0], hkl_tuple[1], hkl_tuple[2]):
                     self.select_row(row_index)
             except RuntimeError as error:
@@ -803,46 +832,6 @@ class ProcessTableWidget(tableBase.NTableWidget):
         # END-FOR
 
         return error_message
-
-    def setup(self):
-        """
-        Init setup
-        :return:
-        """
-        self.init_setup(self.TableSetup)
-        self._statusColName = 'Select'
-
-        # set up column index
-        self._colIndexKIndex = self.TableSetup.index(('K-Index', 'int'))
-        self._colIndexUnit = self.TableSetup.index(('Unit', 'str'))
-        self._colIndexStatus = self.TableSetup.index(('Status', 'str'))
-        self._colIndexPeakCentre = self.TableSetup.index(('Peak Centre', 'str'))
-
-        return
-
-    def set_scan_pt(self, scan_no, pt_list):
-        """
-        :param scan_no:
-        :param pt_list:
-        :return:
-        """
-        # Check
-        assert isinstance(scan_no, int)
-
-        num_rows = self.rowCount()
-        set_done = False
-        for i_row in xrange(num_rows):
-            tmp_scan_no = self.get_cell_value(i_row, 0)
-            if scan_no == tmp_scan_no:
-                self.update_cell_value(i_row, 1, len(pt_list))
-                set_done = True
-                break
-        # END-FOR
-
-        if set_done is False:
-            return 'Unable to find scan %d in table.' % scan_no
-
-        return ''
 
     def set_hkl(self, row_number, hkl):
         """ Set Miller index HKL to a row
@@ -853,15 +842,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
         # check
         assert isinstance(row_number, int) and 0 <= row_number < self.rowCount(),\
             'Row number %s is out of range.' % str(row_number)
-        # check wehther the unit of this row is HKL
-        if self.get_cell_value(row_number, self._colIndexUnit) != 'HKL':
-            raise RuntimeError('Row %d has unit %s instead of HKL.'
-                               '' % (row_number, self.get_cell_value(row_number, self._colIndexUnit)))
         assert len(hkl) == 3, 'HKL must be a sequence with 3 items but not %s.' % len(hkl)
 
         # update the cell
         hkl_str = '%.3f, %.3f, %.3f' % (hkl[0], hkl[1], hkl[2])
-        self.update_cell_value(row_number, self._colIndexUnit, hkl_str)
+        self.update_cell_value(row_number, self._colIndexHKL, hkl_str)
 
         return
 
@@ -880,6 +865,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
     def set_motor_info(self, row_number, motor_move_tup):
         """
         Set the motor step information to the 'Motor' cell
+        :param row_number:
         :param motor_move_tup:
         :return:
         """
@@ -888,155 +874,73 @@ class ProcessTableWidget(tableBase.NTableWidget):
         assert len(motor_move_tup) == 3
 
         # get motor information and construct the string
-        motor_info = '%s: %.5f (%.5f)' % (motor_move_tup[0], motor_move_tup[1], motor_move_tup[2])
+        motor_name = motor_move_tup[0]
+        motor_move = '%.3f (%.2E)' % (motor_move_tup[1], motor_move_tup[2])
 
         # set motor step information string to the table cell.
-        motor_col_index = self.TableSetup.index(('Motor', 'str'))
-        self.update_cell_value(row_number, motor_col_index, motor_info)
+        self.update_cell_value(row_number, self._colIndexMotor, motor_name)
+        self.update_cell_value(row_number, self._colIndexMotorStep, motor_move)
 
         return
 
-    def set_peak_centre(self, row_number, scan_number, peak_centre):
+    def set_peak_centre(self, row_number, peak_centre, frame):
         """
         set peak centre value
         :param row_number:
-        :param scan_number:
         :param peak_centre:
+        :param frame:
         :return:
         """
         # check input's validity
-        if row_number is not None and scan_number is not None:
-            raise AssertionError('Row number %s and scan number %s cannot be given simultaneously.' % (
-                str(row_number), str(scan_number)))
-        elif row_number is None and scan_number is None:
-            raise AssertionError('Row number and scan number cannot be left empty simultaneously.')
-
+        assert isinstance(row_number, int) and 0 <= row_number < self.rowCount(), \
+            'Row number %s is not supported or out of boundary.' % str(row_number)
         assert isinstance(peak_centre, str) or len(peak_centre) == 3,\
             'Peak centre %s must be a string or a container with size 3.' % str(peak_centre)
+        assert isinstance(frame, str), 'Frame must be a string either QSample or HKL.'
 
-        # if scan number is given, then find out row number
-        if row_number is None:
-            # row number is not defined.  go through table for scan number
-            row_number = -1
-            num_rows = self.rowCount()
-            scan_col_index = ProcessTableWidget.TableSetup.index(('Scan', 'int'))
-            for row_index in xrange(num_rows):
-                scan_i = self.get_cell_value(row_index, scan_col_index)
-                if scan_i == scan_number:
-                    row_number = row_index
-                    break
-            # check
-            if row_number < 0:
-                raise RuntimeError('Scan %d cannot be found in the table.' % scan_number)
-        # END-IF
-
-        # set value
+        # set value of peak center
         if isinstance(peak_centre, str):
             # string no need to change
             value_to_set = peak_centre
         else:
             # construct the value
-            value_to_set = '%.4f, %.4f, %.4f' % (peak_centre[0], peak_centre[1], peak_centre[2])
+            value_to_set = '%.3f, %.3f, %.3f' % (peak_centre[0], peak_centre[1], peak_centre[2])
 
-        self.update_cell_value(row_number, self._colIndexPeakCentre, value_to_set)
+        self.update_cell_value(row_number, self._colIndexPeak, value_to_set)
+        self.update_cell_value(row_number, self._colIndexFrame, frame)
 
         return
 
-    def set_peak_intensity(self, row_number, scan_number, peak_intensity, lorentz_corrected=False):
+    def set_peak_intensity(self, row_number, peak_intensity, lorentz_corrected=False):
         """ Set peak intensity to a row or scan
         Requirement: Either row number or scan number must be given
         Guarantees: peak intensity is set
         :param row_number:
-        :param scan_number:
         :param peak_intensity:
         :param lorentz_corrected:
         :return:
         """
         # check requirements
-        if row_number is not None and scan_number is not None:
-            raise AssertionError('Row number %s and scan number %s cannot be given simultaneously.' % (
-                str(row_number), str(scan_number)))
-        elif row_number is None and scan_number is None:
-            raise AssertionError('Row number and scan number cannot be left empty simultaneously.')
-        assert isinstance(peak_intensity, float)
-
-        if row_number is None:
-            # row number is not defined.  go through table for scan number
-            row_number = -1
-            num_rows = self.rowCount()
-            scan_col_index = ProcessTableWidget.TableSetup.index(('Scan', 'int'))
-            for row_index in xrange(num_rows):
-                scan_i = self.get_cell_value(row_index, scan_col_index)
-                if scan_i == scan_number:
-                    row_number = row_index
-                    break
-            # check
-            if row_number < 0:
-                raise RuntimeError('Scan %d cannot be found in the table.' % scan_number)
-        # END-IF
+        assert isinstance(peak_intensity, float), 'Peak intensity must be a float.'
 
         if lorentz_corrected:
-            col_name = ('Corrected', 'float')
+            col_index = self._colIndexCorrInt
         else:
-            col_name = ('Intensity', 'float')
-        intensity_col_index = ProcessTableWidget.TableSetup.index(col_name)
-        return self.update_cell_value(row_number, intensity_col_index, peak_intensity)
+            col_index = self._colIndexIntensity
 
-    def set_pt_by_row(self, row_number, pt_list):
-        """
-        :param row_number:
-        :param pt_list:
-        :return:
-        """
-        # Check
-        assert isinstance(row_number, int)
-        assert isinstance(pt_list, list)
+        return self.update_cell_value(row_number, col_index, peak_intensity)
 
-        j_pt = self.get_column_index('Pt')
-        self.update_cell_value(row_number, j_pt, len(pt_list))
-
-        return ''
-
-    def set_status(self, scan_no, status):
+    def set_status(self, row_number, status):
         """
         Set the status for merging scan to QTable
-        :param scan_no: scan number
+        :param row_number: scan number
         :param status:
         :return:
         """
         # Check
-        assert isinstance(scan_no, int)
+        assert isinstance(status, str), 'Status (%s) must be a string, but not %s.' % (str(status), type(status))
 
-        num_rows = self.rowCount()
-        set_done = False
-        for i_row in xrange(num_rows):
-            tmp_scan_no = self.get_cell_value(i_row, 0)
-            if scan_no == tmp_scan_no:
-                self.update_cell_value(i_row, self._colIndexStatus, status)
-                set_done = True
-                break
-        # END-FOR
-
-        if set_done is False:
-            return 'Unable to find scan %d in table.' % scan_no
-
-        return ''
-
-    def set_status_by_row(self, row_number, status):
-        """
-        Set status to a specified row according to row number
-        :param row_number:
-        :param status:
-        :return:
-        """
-        # Check
-        assert isinstance(row_number, int)
-        assert isinstance(status, str), 'Status (description) must be a string, but not %s.' % str(type(status))
-
-        # Set
-        self.update_cell_value(row_number, self._colIndexStatus, status)
-
-        return
+        return self.update_cell_value(row_number, self._colIndexStatus, status)
 
     def set_wave_length(self, row_number, wave_length):
         """ Set wave length to a row
@@ -1054,39 +958,17 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return
 
-    def set_ws_names(self, scan_num, merged_md_name, ws_group_name):
+    def set_ws_names(self, row_number, merged_md_name):
         """
         Set the output workspace and workspace group's names to QTable
-        :param scan_num:
+        :param row_number:
         :param merged_md_name:
-        :param ws_group_name:
         :return:
         """
-        # DEBUG
-        print '[DB...BAT] Set workspace name (table): scan = ', scan_num, ' ws = ', merged_md_name, ws_group_name
-
         # Check
-        assert isinstance(scan_num, int)
-        assert isinstance(merged_md_name, str) or merged_md_name is None
-        assert isinstance(ws_group_name, str) or ws_group_name is None
+        assert isinstance(merged_md_name, str), 'Merged MDWorkspace name must be a string.'
 
-        j_ws_name = self.get_column_index('Merged Workspace')
-
-        num_rows = self.rowCount()
-        set_done = False
-        for i_row in xrange(num_rows):
-            tmp_scan_no = self.get_cell_value(i_row, 0)
-            if scan_num == tmp_scan_no:
-                if merged_md_name is not None:
-                    self.update_cell_value(i_row, j_ws_name, merged_md_name)
-                # if ws_group_name is not None:
-                #     self.update_cell_value(i_row, 4, ws_group_name)
-                set_done = True
-                break
-        # END-FOR
-
-        if set_done is False:
-            return 'Unable to find scan %d in table.' % scan_num
+        self.update_cell_value(row_number, self._colIndexWorkspace, merged_md_name)
 
         return
 
@@ -1107,6 +989,31 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         if merged_md_name is not None:
             self.update_cell_value(row_number, j_ws_name, merged_md_name)
+
+        return
+
+    def setup(self):
+        """
+        Init setup
+        :return:
+        """
+        self.init_setup(self.TableSetup)
+        self._statusColName = 'Select'
+
+        # set up column index
+        self._colIndexScan = ProcessTableWidget.TableSetup.index(('Scan', 'int'))
+        self._colIndexIntensity = self.TableSetup.index(('Intensity', 'float'))
+        self._colIndexCorrInt = self.TableSetup.index(('Corrected', 'float'))
+        self._colIndexStatus = self.TableSetup.index(('Status', 'str'))
+        self._colIndexHKL = ProcessTableWidget.TableSetup.index(('HKL', 'str'))
+        self._colIndexPeak = self.TableSetup.index(('Peak', 'str'))
+        self._colIndexFrame = self.TableSetup.index(('Frame', 'str'))
+        self._colIndexIndexFrom = self.TableSetup.index(('Index From', 'str'))
+        self._colIndexMotor = ProcessTableWidget.TableSetup.index(('Motor', 'str'))
+        self._colIndexMotorStep = ProcessTableWidget.TableSetup.index(('Motor Step', 'str'))
+        self._colIndexWaveLength = self.TableSetup.index(('Wavelength', 'float'))
+        self._colIndexKIndex = self.TableSetup.index(('K-Index', 'int'))
+        self._colIndexWorkspace = self.TableSetup.index(('Workspace', 'str'))
 
         return
 
