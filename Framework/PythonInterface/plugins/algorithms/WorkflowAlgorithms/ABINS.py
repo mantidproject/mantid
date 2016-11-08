@@ -126,11 +126,17 @@ class ABINS(PythonAlgorithm):
             issues["DFTprogram"] = "Support for CRYSTAL DFT program not implemented yet."
 
         workspace_name = self.getPropertyValue("OutputWorkspace")
+        # list of special keywords which cannot be used in the name of workspace
+        forbidden_keywords = ["total"]
         if workspace_name in mtd:
             issues["OutputWorkspace"] = "Workspace with name " + workspace_name + " already in use; please give " \
                                                                                   "a different name for workspace."
         elif workspace_name == "":
             issues["OutputWorkspace"] = "Please specify name of workspace."
+        for word in forbidden_keywords:
+            if word in workspace_name:
+                issues["OutputWorkspace"] = "Keyword: " + word + " cannot be used in the name of workspace."
+                break
 
         return issues
 

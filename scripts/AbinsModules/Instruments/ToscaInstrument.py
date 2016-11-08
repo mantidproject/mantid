@@ -60,33 +60,55 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         @param frequencies:   DFT frequencies for which resolution function should be calculated (frequencies in cm-1)
         @param s_dft:  discrete S calculated directly from DFT
         """
+        if AbinsParameters.pkt_per_peak == 1:
 
-        #  noinspection PyTypeChecker
-        all_points = AbinsParameters.pkt_per_peak * frequencies.shape[0]
+            points_freq = frequencies
+            broadened_spectrum = s_dft
 
-        broadened_spectrum = np.zeros(shape=all_points, dtype=AbinsConstants.float_type)
-        points_freq = np.zeros(shape=all_points, dtype=AbinsConstants.float_type)
+        else:
 
-        sigma = AbinsParameters.TOSCA_A * frequencies ** 2 + \
-                AbinsParameters.TOSCA_B * frequencies + \
-                AbinsParameters.TOSCA_C
+            sigma = AbinsParameters.TOSCA_A * frequencies ** 2 + \
+                    AbinsParameters.TOSCA_B * frequencies + \
+                    AbinsParameters.TOSCA_C
 
-        for indx, freq in np.ndenumerate(frequencies):
+            # freq_num: number of transition energies for the given quantum order event
 
-            local_start = indx[0] * AbinsParameters.pkt_per_peak
-            broad_freq = np.array(np.linspace(freq - AbinsParameters.fwhm * sigma[indx[0]],
-                                              freq + AbinsParameters.fwhm * sigma[indx[0]],
-                                              num=AbinsParameters.pkt_per_peak))
+            # start[freq_num]
+            start = frequencies - AbinsParameters.fwhm * sigma
 
-            points_freq[local_start:local_start + AbinsParameters.pkt_per_peak] = broad_freq
+            # stop[freq_num]
+            stop = frequencies + AbinsParameters.fwhm * sigma
 
-            # noinspection PyPep8
-            temp_spectrum = np.convolve(s_dft[indx[0]], self._gaussian(sigma=sigma[indx[0]],
-                                                                      points=broad_freq,
-                                                                     center=freq))
-            
-            broadened_spectrum[local_start:local_start + AbinsParameters.pkt_per_peak] = temp_spectrum
+            # step[freq_num]
+            step = (stop - start) / float((AbinsParameters.pkt_per_peak - 1))
 
+            # matrix_step[freq_num, AbinsParameters.pkt_per_peak]
+            matrix_step = np.array([step, ] * AbinsParameters.pkt_per_peak).transpose()
+
+            # matrix_start[freq_num, AbinsParameters.pkt_per_peak]
+            matrix_start = np.array([start, ] * AbinsParameters.pkt_per_peak).transpose()
+
+            # broad_freq[freq_num, AbinsParameters.pkt_per_peak]
+            broad_freq = (np.arange(0, AbinsParameters.pkt_per_peak) * matrix_step) + matrix_start
+            broad_freq[..., -1] = stop
+
+            # sigma_matrix[freq_num, AbinsParameters.pkt_per_peak]
+            sigma_matrix = np.array([sigma, ] * AbinsParameters.pkt_per_peak).transpose()
+
+            # frequencies_matrix[freq_num, AbinsParameters.pkt_per_peak]
+            frequencies_matrix = np.array([frequencies, ] * AbinsParameters.pkt_per_peak).transpose()
+
+            # gaussian_val[freq_num, AbinsParameters.pkt_per_peak]
+            gaussian_val = self._gaussian(sigma=sigma_matrix, points=broad_freq, center=frequencies_matrix)
+
+            # s_dft_matrix[freq_num, AbinsParameters.pkt_per_peak]
+            s_dft_matrix = np.array([s_dft, ] * AbinsParameters.pkt_per_peak).transpose()
+
+            # temp_spectrum[freq_num, AbinsParameters.pkt_per_peak]
+            temp_spectrum = s_dft_matrix * gaussian_val
+
+            points_freq = np.ravel(broad_freq)
+            broadened_spectrum = np.ravel(temp_spectrum)
 
         return points_freq, broadened_spectrum
 
@@ -99,4 +121,4 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         @return: numpy array with calculated Gaussian values
         """
         sigma_factor = 2.0 * sigma * sigma
-        return 1.0 / math.sqrt(sigma_factor * np.pi) * np.exp(-(points - center) ** 2 / sigma_factor)
+        return 1.0 / np.sqrt(sigma_factor * np.pi) * np.exp(-(points - center) ** 2 / sigma_factor)
