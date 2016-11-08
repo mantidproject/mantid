@@ -90,6 +90,7 @@ set ( SRC_FILES
 	src/Muon/MuonAnalysisResultTableTab.cpp
   src/Muon/MuonSequentialFitDialog.cpp
   src/ProjectSavePresenter.cpp
+  src/ProjectSaveModel.cpp
   src/Reflectometry/MeasurementItem.cpp
 	src/Reflectometry/QtReflMainWindowView.cpp
 	src/Reflectometry/QtReflRunsTabView.cpp
@@ -246,7 +247,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableCreator.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
 	inc/MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h
-  inc/MantidQtCustomInterfaces/IProjectSaveView.h
+  inc/MantidQtCustomInterfaces/ProjectSaveView.h
+  inc/MantidQtCustomInterfaces/ProjectSaveModel.h
   inc/MantidQtCustomInterfaces/ProjectSavePresenter.h
   inc/MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h
@@ -400,7 +402,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
                 inc/MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h
-                inc/MantidQtCustomInterfaces/IProjectSaveView.h
+                inc/MantidQtCustomInterfaces/ProjectSaveView.h
                 inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflRunsTabView.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflSettingsTabView.h
@@ -522,7 +524,8 @@ set ( TEST_FILES
 	MuonAnalysisHelperTest.h
 	MuonAnalysisResultTableCreatorTest.h
   ProjectSavePresenterTest.h
-	ReflLegacyTransferStrategyTest.h
+  ProjectSaveModelTest.h
+  ReflLegacyTransferStrategyTest.h
 	ReflMainWindowPresenterTest.h
 	ReflMeasureTransferStrategyTest.h
 	ReflNexusMeasurementItemSourceTest.h

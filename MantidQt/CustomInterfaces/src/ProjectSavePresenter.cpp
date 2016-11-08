@@ -9,7 +9,7 @@
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
 
-ProjectSavePresenter::ProjectSavePresenter(IProjectSaveView *view)
+ProjectSavePresenter::ProjectSavePresenter(ProjectSaveView *view)
   : m_view(view), m_model(m_view->getWindows())
 {
   auto workspaceNames = m_model.getWorkspaceNames();

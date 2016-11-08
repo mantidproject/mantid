@@ -3,7 +3,7 @@
 
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtAPI/IProjectSerialisable.h"
-#include "MantidQtCustomInterfaces/IProjectSaveView.h"
+#include "MantidQtCustomInterfaces/ProjectSaveView.h"
 
 #include <gmock/gmock.h>
 
@@ -12,7 +12,7 @@ using namespace MantidQt::CustomInterfaces;
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockProjectSaveView : public IProjectSaveView {
+class MockProjectSaveView : public ProjectSaveView {
 public:
   MOCK_METHOD0(getWindows, std::vector<MantidQt::API::IProjectSerialisable*>());
   MOCK_METHOD0(getCheckedWorkspaceNames, std::vector<std::string>());
