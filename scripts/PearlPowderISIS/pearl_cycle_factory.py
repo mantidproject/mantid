@@ -1,11 +1,10 @@
 # pylint: disable=anomalous-backslash-in-string, too-many-branches, superfluous-parens
 
-from mantid.simpleapi import *
 import pearl_routines
 
 
 def get_cycle_dir(number, currentdatadir):
-    if type(number) is int:
+    if isinstance(number, int):
         runno = number
     else:
         num = number.split("_")

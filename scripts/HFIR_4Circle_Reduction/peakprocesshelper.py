@@ -1,9 +1,5 @@
 #pylint: disable=W0403,R0902
 from fourcircle_utility import *
-
-import sys
-sys.path.append('/Users/wzz/MantidBuild/debug/bin/')
-
 from mantid.api import AnalysisDataService
 from mantid.kernel import V3D
 
@@ -15,6 +11,7 @@ class PeakProcessHelper(object):
     In order to manage some operations for a peak
     It does not contain peak workspace but will hold
     """
+
     def __init__(self, exp_number, scan_number, peak_ws_name):
         """ Initialization
         Purpose: set up unchanged parameters including experiment number, scan number and peak workspace's name

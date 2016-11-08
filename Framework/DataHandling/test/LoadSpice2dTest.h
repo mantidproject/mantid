@@ -1,10 +1,6 @@
 #ifndef LOADSPICE2DTEST_H
 #define LOADSPICE2DTEST_H
 
-//------------------------------------------------
-// Includes
-//------------------------------------------------
-
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadSpice2D.h"
@@ -13,6 +9,7 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidAPI/Run.h"
 #include <Poco/Path.h>
 #include <vector>
 
@@ -124,8 +121,7 @@ public:
     TS_ASSERT_EQUALS(sample_aperture->getNumberParameter("Size")[0], 14.0);
 
     // Check parameter map access
-    const Mantid::Geometry::ParameterMap *m_paraMap =
-        &(ws2d->instrumentParameters());
+    const auto *m_paraMap = &(ws2d->constInstrumentParameters());
 
     // Check that we can get a parameter
     boost::shared_ptr<Mantid::Geometry::Parameter> sample_aperture_size =
@@ -137,6 +133,8 @@ public:
     Mantid::Geometry::ParameterMap &pmap_nonconst =
         ws2d->instrumentParameters();
     pmap_nonconst.addDouble(sample_aperture.get(), "Size", 15.0);
+    // The parameter map was copied by the non-const access, get new reference.
+    m_paraMap = &(ws2d->constInstrumentParameters());
     sample_aperture_size = m_paraMap->get(sample_aperture.get(), "Size");
     TS_ASSERT_EQUALS(sample_aperture_size->value<double>(), 15.0);
 

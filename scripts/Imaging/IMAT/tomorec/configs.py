@@ -25,6 +25,8 @@ pre-processing, reconstruction, and post-processing
 import os
 
 #pylint: disable=too-few-public-methods
+
+
 class ToolAlgorithmConfig(object):
     """
     Reconstruction algorithm specific configuration. Required for any reconstruction:
@@ -158,6 +160,7 @@ class PostProcConfig(object):
         mystr += "Median filter (3d) size:: {0}\n".format(self.median_filter3d_size)
 
         return mystr
+
 
 class ReconstructionConfig(object):
     """

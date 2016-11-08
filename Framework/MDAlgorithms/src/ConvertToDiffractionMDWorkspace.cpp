@@ -3,6 +3,8 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -36,7 +38,6 @@ bool DODEBUG = true;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToDiffractionMDWorkspace)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 ConvertToDiffractionMDWorkspace::ConvertToDiffractionMDWorkspace()
@@ -49,9 +50,6 @@ ConvertToDiffractionMDWorkspace::ConvertToDiffractionMDWorkspace()
       m_extentsMax(nullptr) // will be allocated in exec using nDims
 {}
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ConvertToDiffractionMDWorkspace::init() {
@@ -126,7 +124,6 @@ void ConvertToDiffractionMDWorkspace::init() {
 /// Our MDLeanEvent dimension
 typedef DataObjects::MDLeanEvent<3> MDE;
 
-//----------------------------------------------------------------------------------------------
 /** Convert one spectrum to DataObjects.
  * Depending on options, it uses the histogram view or the
  * pure event view.
@@ -538,7 +535,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
     }
 
     // 2. Process next chunk of spectra (threaded)
-    PARALLEL_FOR1(m_inWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_inWS))
     for (int i = start; i < static_cast<int>(wi); ++i) {
       PARALLEL_START_INTERUPT_REGION
       this->convertSpectrum(static_cast<int>(i));

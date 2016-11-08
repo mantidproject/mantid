@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/PDDetermineCharacterizations.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -24,8 +25,6 @@ const std::string WL_PROP_NAME("WaveLengthLogNames");
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PDDetermineCharacterizations)
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string PDDetermineCharacterizations::name() const {

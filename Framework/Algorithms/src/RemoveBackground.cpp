@@ -3,6 +3,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -24,10 +25,6 @@ DECLARE_ALGORITHM(RemoveBackground)
 
 using namespace Kernel;
 using namespace API;
-
-//---------------------------------------------------------------------------------------------
-// Public methods
-//---------------------------------------------------------------------------------------------
 
 /** Initialization method. Declares properties to be used in algorithm.
 *
@@ -119,7 +116,7 @@ void RemoveBackground::exec() {
                                 inPlace, nullifyNegative);
 
   Progress prog(this, 0.0, 1.0, histnumber);
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int hist = 0; hist < histnumber; ++hist) {
     PARALLEL_START_INTERUPT_REGION
     // get references to output Workspace X-arrays.

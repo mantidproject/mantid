@@ -2,6 +2,7 @@
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -54,7 +55,7 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator,
   // loop through the eventlists
 
   int numSpectra = static_cast<int>(wksp->getNumberHistograms());
-  PARALLEL_FOR1(wksp)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
   for (int i = 0; i < numSpectra; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -128,7 +129,7 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
 
   int numSpectra = static_cast<int>(wksp->getNumberHistograms());
   const bool histogramForm = wksp->isHistogramData();
-  PARALLEL_FOR1(wksp)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
   for (int i = 0; i < numSpectra; ++i) {
     PARALLEL_START_INTERUPT_REGION
 

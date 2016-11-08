@@ -1,9 +1,12 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import AlgorithmFactory
 from mantid.api import PythonAlgorithm
 from mantid.kernel import Direction
 from mantid.simpleapi import *
 import datetime
+
 
 class ViewBOA(PythonAlgorithm):
     def category(self):

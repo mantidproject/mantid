@@ -137,6 +137,15 @@ public:
   void setSharedE(const Kernel::cow_ptr<HistogramE> &e) & ;
   void setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) & ;
 
+  /// Returns the size of the histogram, i.e., the number of Y data points.
+  size_t size() const {
+    if (xMode() == XMode::BinEdges)
+      return m_x->size() - 1;
+    return m_x->size();
+  }
+
+  void resize(size_t n);
+
   // Temporary legacy interface to X
   void setX(const Kernel::cow_ptr<HistogramX> &X) & { m_x = X; }
   MantidVec &dataX() & { return m_x.access().mutableRawData(); }
@@ -196,12 +205,6 @@ private:
   template <class... T> bool selfAssignmentE(const T &...) { return false; }
   void switchDxToBinEdges();
   void switchDxToPoints();
-
-  size_t size() const {
-    if (xMode() == XMode::BinEdges)
-      return m_x->size() - 1;
-    return m_x->size();
-  }
 
   XMode m_xMode;
   YMode m_yMode{YMode::Uninitialized};

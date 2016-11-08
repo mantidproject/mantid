@@ -1,4 +1,5 @@
-﻿# pylint: disable=too-many-lines, invalid-name, bare-except, too-many-instance-attributes
+# pylint: disable=too-many-lines, invalid-name, bare-except, too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
 import math
 import os
 import re
@@ -10,6 +11,7 @@ from mantid.kernel import Logger
 from mantid.kernel import V3D
 import SANSUtility as su
 from math import copysign
+from six import iteritems
 
 sanslog = Logger("SANS")
 
@@ -161,7 +163,7 @@ class DetectorBank(object):
             self.qMin = qMin
             self.qMax = qMax
 
-            if self.qMin == None or self.qMax == None:
+            if self.qMin is None or self.qMax is None:
                 self.qRangeUserSelected = False
             else:
                 self.qRangeUserSelected = True
@@ -172,9 +174,9 @@ class DetectorBank(object):
     def __init__(self, instr, det_type):
         # detectors are known by many names, the 'uni' name is an instrument independent alias the 'long'
         # name is the instrument view name and 'short' name often used for convenience
-        self._names = { \
-            'uni': det_type, \
-            'long': instr.getStringParameter(det_type + '-detector-name')[0], \
+        self._names = {
+            'uni': det_type,
+            'long': instr.getStringParameter(det_type + '-detector-name')[0],
             'short': instr.getStringParameter(det_type + '-detector-short-name')[0]}
         # the bank is often also referred to by its location, as seen by the sample
         if det_type.startswith('low'):
@@ -248,7 +250,7 @@ class DetectorBank(object):
         self._side_corr = None
 
     def get_y_corr(self):
-        if not self._y_corr is None:
+        if self._y_corr is not None:
             return self._y_corr
         else:
             raise NotImplementedError('y correction is not used for this detector')
@@ -258,11 +260,11 @@ class DetectorBank(object):
             Only set the value if it isn't disabled
             @param value: set y_corr to this value, unless it's disabled
         """
-        if not self._y_corr is None:
+        if self._y_corr is not None:
             self._y_corr = value
 
     def get_rot_corr(self):
-        if not self._rot_corr is None:
+        if self._rot_corr is not None:
             return self._rot_corr
         else:
             raise NotImplementedError('rot correction is not used for this detector')
@@ -272,12 +274,12 @@ class DetectorBank(object):
             Only set the value if it isn't disabled
             @param value: set rot_corr to this value, unless it's disabled
         """
-        if not self._rot_corr is None:
+        if self._rot_corr is not None:
             self._rot_corr = value
 
     # 22/3/12 RKH added two new variables radius_corr, side_corr
     def get_radius_corr(self):
-        if not self._radius_corr is None:
+        if self._radius_corr is not None:
             return self._radius_corr
         else:
             raise NotImplementedError('radius correction is not used for this detector')
@@ -287,11 +289,11 @@ class DetectorBank(object):
             Only set the value if it isn't disabled
             @param value: set radius_corr to this value, unless it's disabled
         """
-        if not self._rot_corr is None:
+        if self._rot_corr is not None:
             self._radius_corr = value
 
     def get_side_corr(self):
-        if not self._side_corr is None:
+        if self._side_corr is not None:
             return self._side_corr
         else:
             raise NotImplementedError('side correction is not used for this detector')
@@ -301,7 +303,7 @@ class DetectorBank(object):
             Only set the value if it isn't disabled
             @param value: set side_corr to this value, unless it's disabled
         """
-        if not self._side_corr is None:
+        if self._side_corr is not None:
             self._side_corr = value
 
     y_corr = property(get_y_corr, set_y_corr, None, None)
@@ -323,7 +325,7 @@ class DetectorBank(object):
     def name(self, form='long'):
         if form.lower() == 'inst_view':
             form = 'long'
-        if not self._names.has_key(form):
+        if form not in self._names:
             form = 'long'
 
         return self._names[form]
@@ -390,7 +392,7 @@ class DetectorBank(object):
             is given by an orientation string and this function throws if the string is not recognised
             @param orien: the orienation string must be a string contained in the dictionary _ORIENTED
         """
-        dummy = self._ORIENTED[orien]
+        self._ORIENTED[orien]
         self._orientation = orien
 
     def crop_to_detector(self, input_name, output_name=None):
@@ -590,7 +592,7 @@ class ISISInstrument(BaseInstrument):
             return self.DETECTORS['high-angle']
 
     def getDetector(self, requested):
-        for _n, detect in self.DETECTORS.iteritems():
+        for _n, detect in iteritems(self.DETECTORS):
             if detect.isAlias(requested):
                 return detect
         sanslog.notice("getDetector: Detector " + requested + "not found")
@@ -645,7 +647,7 @@ class ISISInstrument(BaseInstrument):
             @return: the start time, the end time
         """
         monitor = int(monitor)
-        if self._back_ground.has_key(monitor):
+        if monitor in self._back_ground:
             return self._back_ground[int(monitor)]['start'], \
                    self._back_ground[int(monitor)]['end']
         else:
@@ -659,9 +661,9 @@ class ISISInstrument(BaseInstrument):
             @param: end defines the end
             @param monitor: spectrum number of the monitor's spectrum, if none given affect the default
         """
-        if start != None:
+        if start is not None:
             start = float(start)
-        if end != None:
+        if end is not None:
             end = float(end)
 
         if monitor:
@@ -677,7 +679,7 @@ class ISISInstrument(BaseInstrument):
         """
         if monitor:
             monitor = int(monitor)
-            if self._back_ground.has_key(monitor):
+            if monitor in self._back_ground:
                 del self._back_ground[int(monitor)]
         else:
             self._back_ground = {}
@@ -702,9 +704,9 @@ class ISISInstrument(BaseInstrument):
             @param: start : defines the start of the background region for ROI
             @param: end : defines the end of the background region for ROI
         """
-        if start != None:
+        if start is not None:
             start = float(start)
-        if end != None:
+        if end is not None:
             end = float(end)
         self._back_start_ROI = start
         self._back_end_ROI = end
@@ -724,7 +726,7 @@ class ISISInstrument(BaseInstrument):
         MoveInstrumentComponent(Workspace=ws, ComponentName='some-sample-holder', Z=self.SAMPLE_Z_CORR,
                                 RelativePosition=True)
 
-        for i in self.monitor_zs.keys():
+        for i in list(self.monitor_zs.keys()):
             # get the current location
             component = self.monitor_names[i]
             ws = mtd[str(ws)]
@@ -753,13 +755,6 @@ class ISISInstrument(BaseInstrument):
         @param coord2_scale_factor: scale factor for the second coordinate
         @param relative_displacement: If the the displacement is to be relative (it normally should be)
         """
-        dummy_1 = workspace
-        dummy_2 = component_name
-        dummy_3 = coord1
-        dummy_3 = coord2
-        dummy_4 = relative_displacement
-        dummy_5 = coord1_scale_factor
-        dummy_6 = coord2_scale_factor
         raise RuntimeError("Not Implemented")
 
     def cur_detector_position(self, ws_name):
@@ -768,7 +763,6 @@ class ISISInstrument(BaseInstrument):
         @param ws_name: the input workspace name
         @raise RuntimeError: Not implemented
         '''
-        dummy_1 = ws_name
         raise RuntimeError("Not Implemented")
 
     def on_load_sample(self, ws_name, beamcentre, isSample):
@@ -833,7 +827,7 @@ class ISISInstrument(BaseInstrument):
         @param ws_name: the name of the main workspace with the data
         @param calibration_workspace: the name of the calibration workspace
         '''
-        if calib_name == None or ws_name == None:
+        if calib_name is None or ws_name is None:
             return
         workspace = mtd[ws_name]
         calibration_workspace = mtd[calib_name]
@@ -923,7 +917,7 @@ class LOQ(ISISInstrument):
 
         if self.has_m4_monitor:
             self.monitor_names.update({self._m4_det_id: self._m4_monitor_name})
-        elif self._m4_det_id in self.monitor_names.keys():
+        elif self._m4_det_id in list(self.monitor_names.keys()):
             del self.monitor_names[self._m4_det_id]
 
     def move_components(self, ws, xbeam, ybeam):
@@ -1019,6 +1013,7 @@ class LOQ(ISISInstrument):
 
     def get_m4_monitor_det_ID(self):
         return self._m4_det_id
+
 
 class SANS2D(ISISInstrument):
     """
@@ -1370,7 +1365,7 @@ class SANS2D(ISISInstrument):
         for i in range(0, len(existing_values)):
             if math.fabs(existing_values[i] - new_values[i]) > 5e-04:
                 sanslog.warning('values differ between sample and can runs: Sample ' + corr_names[i] + ' = ' + str(
-                    existing_values[i]) + \
+                    existing_values[i]) +
                                 ', can value is ' + str(new_values[i]))
                 errors += 1
 
@@ -1434,6 +1429,7 @@ class LARMOR(ISISInstrument):
     _NAME = 'LARMOR'
     WAV_RANGE_MIN = 0.5
     WAV_RANGE_MAX = 13.5
+
     def __init__(self, idf_path=None):
         # The detector ID for the M4 monitor
         self._m4_det_id = 4
@@ -1591,7 +1587,7 @@ class LARMOR(ISISInstrument):
         for i in range(0, len(existing_values)):
             if math.fabs(existing_values[i] - new_values[i]) > 5e-04:
                 sanslog.warning('values differ between sample and can runs: Sample ' + corr_names[i] + ' = ' + str(
-                    existing_values[i]) + \
+                    existing_values[i]) +
                                 ', can value is ' + str(new_values[i]))
                 errors += 1
 
@@ -1627,9 +1623,9 @@ class LARMOR(ISISInstrument):
         MoveInstrumentComponent(ws, ComponentName=detBench.name(), X=xshift, Y=yshift, Z=zshift)
 
         # Deal with the angle value
-        _total_x_shift = self._rotate_around_y_axis(workspace=ws, component_name=detBench.name(),
-                                                    x_beam=xbeam, x_scale_factor=XSF,
-                                                    bench_rotation=BENCH_ROT)
+        self._rotate_around_y_axis(workspace=ws, component_name=detBench.name(),
+                                   x_beam=xbeam, x_scale_factor=XSF,
+                                   bench_rotation=BENCH_ROT)
 
         # Set the beam centre position afte the move
         self.beam_centre_pos1_after_move = xbeam  # Need to provide the angle in 1000th of a degree
@@ -1652,7 +1648,6 @@ class LARMOR(ISISInstrument):
         @param coord2_scale_factor: scale factor for the second coordinate
         @param relative_displacement: If the the displacement is to be relative (it normally should be)
         """
-        dummy_coord2_scale_factor = coord2_scale_factor
         # Shift the component in the y direction
         MoveInstrumentComponent(Workspace=workspace,
                                 ComponentName=component_name,

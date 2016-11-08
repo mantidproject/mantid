@@ -4,6 +4,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidMDAlgorithms/BinMD.h"
 #include "MantidMDAlgorithms/SaveMD.h"

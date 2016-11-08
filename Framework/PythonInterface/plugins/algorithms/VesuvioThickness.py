@@ -1,8 +1,11 @@
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.kernel import Direction, FloatArrayProperty
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty)
 
 import numpy as np
 import math
+
 
 class VesuvioThickness(PythonAlgorithm):
 
@@ -46,14 +49,12 @@ class VesuvioThickness(PythonAlgorithm):
                              doc="Output Workspace containing the iterative "
                              +"approximation for Transmission.")
 
-
     def _get_properties(self):
         self._masses = self.getProperty("Masses").value
         self._amplitudes = self.getProperty("Amplitudes").value
         self._transmission_guess = self.getProperty("TransmissionGuess").value
         self._thickness = self.getProperty("Thickness").value
         self._number_density = self.getProperty("NumberDensity").value
-
 
     def validateInputs(self):
         self._get_properties()
@@ -62,16 +63,15 @@ class VesuvioThickness(PythonAlgorithm):
         num_masses = len(self._masses)
         num_amplitudes = len(self._amplitudes)
         if num_masses == 0:
-            isuues['Masses'] = ('Must have 1 or more Masses defined')
+            issues['Masses'] = ('Must have 1 or more Masses defined')
         if num_amplitudes == 0:
-            isuues['Amplitudes'] = ('Must have 1 or more Amplitudes defined')
+            issues['Amplitudes'] = ('Must have 1 or more Amplitudes defined')
 
         if num_masses != num_amplitudes:
-            issues['Masses'] = ('The number of masses: %d, ' % num_masses \
+            issues['Masses'] = ('The number of masses: %d, ' % num_masses
                                 + 'is not equal to the number of amplitudes: %d' % num_amplitudes)
 
         return issues
-
 
     def PyExec(self):
         # Create numpy arrays
@@ -117,7 +117,6 @@ class VesuvioThickness(PythonAlgorithm):
 
         self.setProperty("DensityWorkspace", density_guesses_tbl_ws)
         self.setProperty("TransmissionWorkspace", trans_guesses_tbl_ws)
-
 
     def free_xst(self, Mass, scatter_length):
         """

@@ -29,16 +29,16 @@
  *                                                                         *
  ***************************************************************************/
 #include "TranslateCurveTool.h"
+#include "ApplicationWindow.h"
+#include "DataPickerTool.h"
+#include "FunctionCurve.h"
 #include "Graph.h"
 #include "PlotCurve.h"
-#include "FunctionCurve.h"
-#include "ApplicationWindow.h"
-#include "cursors.h"
-#include "DataPickerTool.h"
 #include "ScreenPickerTool.h"
-#include <limits>
-#include <QMessageBox>
+#include "cursors.h"
 #include <QLocale>
+#include <QMessageBox>
+#include <limits>
 #include <qwt_plot_curve.h>
 
 TranslateCurveTool::TranslateCurveTool(Graph *graph, ApplicationWindow *app,
@@ -68,7 +68,7 @@ void TranslateCurveTool::selectCurvePoint(QwtPlotCurve *curve,
   if (!d_sub_tool)
     return;
   DataCurve *c = dynamic_cast<DataCurve *>(curve);
-  if (c && c->type() != Graph::Function) {
+  if (c && c->type() != GraphOptions::Function) {
 
     Table *t = c->table();
     if (!t)
@@ -119,7 +119,7 @@ void TranslateCurveTool::selectDestination(const QwtDoublePoint &point) {
   // Phase 3: execute the translation
 
   if (auto c = dynamic_cast<PlotCurve *>(d_selected_curve)) {
-    if (c->type() == Graph::Function) {
+    if (c->type() == GraphOptions::Function) {
       if (d_dir == Horizontal) {
         QMessageBox::warning(
             d_app, tr("MantidPlot - Warning"),

@@ -11,6 +11,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidDataObjects/Workspace2D.h"
@@ -211,14 +212,13 @@ void CalculateCountRate::calcRateLog(
   double dTRangeMin = static_cast<double>(m_TRangeMin.totalNanoseconds());
   double dTRangeMax = static_cast<double>(m_TRangeMax.totalNanoseconds());
   std::vector<MantidVec> Buff;
-  int nThreads;
 
 #pragma omp parallel
   {
+    int nThreads = PARALLEL_NUMBER_OF_THREADS;
 #pragma omp single
     {
       // initialize thread's histogram buffer
-      nThreads = PARALLEL_NUMBER_OF_THREADS;
       Buff.resize(nThreads);
     }
     auto nThread = PARALLEL_THREAD_NUMBER;

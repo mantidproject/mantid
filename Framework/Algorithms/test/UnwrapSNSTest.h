@@ -87,9 +87,9 @@ public:
     TS_ASSERT(min_eventN < ws->getSpectrum(NUMPIXELS - 1).getTofMin());
     TS_ASSERT(max_eventN < ws->getSpectrum(NUMPIXELS - 1).getTofMax());
 
-    TS_ASSERT_EQUALS(ws->getSpectrum(0).dataX()[0], 0.0);
-    TS_ASSERT_EQUALS(ws->getSpectrum(0).dataX()[1], 2.0);
-    TS_ASSERT_EQUALS(ws->getSpectrum(0).dataX()[2], 4.0);
+    TS_ASSERT_EQUALS(ws->getSpectrum(0).x()[0], 0.0);
+    TS_ASSERT_EQUALS(ws->getSpectrum(0).x()[1], 2.0);
+    TS_ASSERT_EQUALS(ws->getSpectrum(0).x()[2], 4.0);
   }
 };
 

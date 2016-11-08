@@ -1,11 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidCrystal/SCDPanelErrors.h"
 #include "MantidKernel/FileValidator.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"

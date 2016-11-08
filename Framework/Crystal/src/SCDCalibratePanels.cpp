@@ -11,6 +11,7 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidCrystal/SCDPanelErrors.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Sample.h"
 #include <fstream>
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -172,7 +173,7 @@ void SCDCalibratePanels::exec() {
   std::vector<std::string> fit_workspaces(MyBankNames.size(), "fit_");
   std::vector<std::string> parameter_workspaces(MyBankNames.size(), "params_");
 
-  PARALLEL_FOR1(peaksWs)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*peaksWs))
   for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
     const std::string &iBank = *std::next(MyBankNames.begin(), i);
@@ -330,7 +331,7 @@ void SCDCalibratePanels::exec() {
       boost::const_pointer_cast<Geometry::Instrument>(peaksWs->getInstrument());
   Geometry::OrientedLattice lattice0 =
       peaksWs->mutableSample().getOrientedLattice();
-  PARALLEL_FOR1(peaksWs)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*peaksWs))
   for (int i = 0; i < nPeaks; i++) {
     PARALLEL_START_INTERUPT_REGION
     DataObjects::Peak &peak = peaksWs->getPeak(i);
@@ -370,7 +371,7 @@ void SCDCalibratePanels::exec() {
   DblMatrix UB = lattice.getUB();
   // sort again since edge peaks can trace to other banks
   peaksWs->sort(criteria);
-  PARALLEL_FOR3(ColWksp, RowWksp, TofWksp)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ColWksp, *RowWksp, *TofWksp))
   for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
     const std::string &bankName = *std::next(MyBankNames.begin(), i);

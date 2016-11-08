@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
@@ -8,6 +5,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
@@ -1723,8 +1721,13 @@ void LoadNexusProcessed::loadNonSpectraAxis(
     }
   } else if (axis->isText()) {
     NXChar axisData = data.openNXChar("axis2");
-    axisData.load();
-    std::string axisLabels(axisData(), axisData.dim0());
+    std::string axisLabels;
+    try {
+      axisData.load();
+      axisLabels = std::string(axisData(), axisData.dim0());
+    } catch (std::runtime_error &) {
+      axisLabels = "";
+    }
     // Use boost::tokenizer to split up the input
     Mantid::Kernel::StringTokenizer tokenizer(
         axisLabels, "\n", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
@@ -1836,7 +1839,7 @@ void LoadNexusProcessed::readBinMasking(
   }
   NXInt spec = wksp_cls.openNXInt("masked_spectra");
   spec.load();
-  NXInt bins = wksp_cls.openNXInt("masked_bins");
+  NXSize bins = wksp_cls.openNXSize("masked_bins");
   bins.load();
   NXDouble weights = wksp_cls.openNXDouble("mask_weights");
   weights.load();

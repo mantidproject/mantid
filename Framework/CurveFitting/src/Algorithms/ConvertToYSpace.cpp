@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {
@@ -28,14 +29,12 @@ const double MASS_TO_MEV =
     0.5 * PhysicalConstants::NeutronMass / PhysicalConstants::meV;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
 */
 ConvertToYSpace::ConvertToYSpace()
     : Algorithm(), m_inputWS(), m_mass(0.0), m_l1(0.0), m_samplePos(),
       m_outputWS(), m_qOutputWS() {}
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertToYSpace::name() const { return "ConvertToYSpace"; }
 
@@ -47,9 +46,6 @@ const std::string ConvertToYSpace::category() const {
   return "Transforms\\Units";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /**
 * @param ws The workspace with attached instrument
 * @param index Index of the spectrum
@@ -200,7 +196,7 @@ void ConvertToYSpace::exec() {
   const int64_t nreports = nhist;
   auto progress = boost::make_shared<Progress>(this, 0.0, 1.0, nreports);
 
-  PARALLEL_FOR2(m_inputWS, m_outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (int64_t i = 0; i < nhist; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
