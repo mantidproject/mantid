@@ -110,6 +110,10 @@ public:
   virtual void showMDPlot() = 0;
   virtual void showSurfacePlot() = 0;
   virtual void showContourPlot() = 0;
+  virtual MultiLayer *
+  plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
+               MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+               bool errs = false, MultiLayer *plotWindow = nullptr) = 0;
 
   // Interface Methods
   virtual void showVatesSimpleInterface() = 0;

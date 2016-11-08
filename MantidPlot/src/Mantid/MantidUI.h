@@ -244,7 +244,7 @@ public:
   MultiLayer *
   plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
                MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
-               bool errs = false, MultiLayer *plotWindow = nullptr);
+               bool errs = false, MultiLayer *plotWindow = nullptr) override;
 
   MultiLayer *
   plotSubplots(const QMultiMap<QString, int> &toPlot,
