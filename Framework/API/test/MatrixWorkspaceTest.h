@@ -321,27 +321,22 @@ public:
     TS_ASSERT(!parallelException);
   }
 
-  void test_spectrumInfo_fails_threaded() {
+  void test_spectrumInfo_works_threaded() {
     const int numHist(3);
     auto workspace = makeWorkspaceWithDetectors(numHist, 1);
+    std::vector<const SpectrumInfo *> spectrumInfos(numHist);
     std::atomic<bool> parallelException{false};
-    std::atomic<int> threadCount{1};
     PARALLEL_FOR_IF(Kernel::threadSafe(*workspace))
     for (int i = 0; i < numHist; ++i) {
-      // Note: Cannot use INTERUPT_REGION macros since not inside an Algorithm.
-      threadCount = PARALLEL_NUMBER_OF_THREADS;
       try {
-        static_cast<void>(workspace->spectrumInfo());
+        spectrumInfos[i] = &(workspace->spectrumInfo());
       } catch (...) {
         parallelException = true;
       }
     }
-    // If we actually had more than one thread this should throw.
-    if (threadCount > 1) {
-      TS_ASSERT(parallelException);
-    } else {
-      TS_ASSERT(!parallelException);
-    }
+    TS_ASSERT(!parallelException);
+    for (int i = 0; i < numHist; ++i)
+      TS_ASSERT_EQUALS(spectrumInfos[0], spectrumInfos[i]);
   }
 
   void testFlagMasked() {

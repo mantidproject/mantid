@@ -161,7 +161,6 @@ public:
                                    &mockTablePresenter);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
-    EXPECT_CALL(mockMainPresenter, getPlusOptions()).Times(1);
     EXPECT_CALL(mockMainPresenter, getTransmissionOptions()).Times(1);
     presenter.getPreprocessingOptions();
 

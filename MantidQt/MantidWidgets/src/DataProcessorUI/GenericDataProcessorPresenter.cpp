@@ -637,7 +637,10 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
 
     /* The reduction is complete, try to populate the columns */
     for (int i = 0; i < m_columns - 1; i++) {
-      if (data.at(i).empty()) {
+
+      auto columnName = m_whitelist.colNameFromColIndex(i);
+
+      if (data.at(i).empty() && !m_preprocessMap.count(columnName)) {
 
         std::string propValue =
             alg->getPropertyValue(m_whitelist.algPropFromColIndex(i));

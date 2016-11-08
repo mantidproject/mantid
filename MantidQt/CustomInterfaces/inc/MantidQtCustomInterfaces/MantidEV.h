@@ -111,7 +111,8 @@ public:
                      double inner_radius, double outer_radius,
                      bool integrate_edge, bool use_cylinder_integration,
                      double cylinder_length, double cylinder_percent_bkg,
-                     const std::string &cylinder_profile_fit);
+                     const std::string &cylinder_profile_fit, bool adaptiveQBkg,
+                     double adaptiveQMult);
 
   /// Calls worker->sphereIntegrate from a separate thread
   void run() override;
@@ -128,6 +129,8 @@ private:
   double cylinder_length;
   double cylinder_percent_bkg;
   std::string cylinder_profile_fit;
+  bool adaptiveQBkg;
+  double adaptiveQMult;
 };
 
 /// Local class to run PeakIntegration in a Non-Qt thread.

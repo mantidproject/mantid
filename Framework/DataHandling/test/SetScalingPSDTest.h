@@ -56,7 +56,7 @@ public:
     double expectedYPos[5] = {-0.0005, 0.0990, 0.1985, -0.002042, -0.0025133};
     double expectedYScale[3] = {0.995002, 0.995001, 0.995000};
 
-    const ParameterMap &pmap = testWS->instrumentParameters();
+    const auto &pmap = testWS->constInstrumentParameters();
     for (int i = 0; i < ndets; ++i) {
       IDetector_const_sptr det = testWS->getDetector(i);
       V3D newPos = det->getPos();
