@@ -142,13 +142,17 @@ void MantidTreeWidget::mouseMoveEvent(QMouseEvent *e) {
 
 void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e) {
   try {
-    std::string wsName = m_dockWidget->getSelectedWorkspaceNames()[0];
+    auto wsNames = getSelectedWorkspaceNames();
+    if (wsNames.isEmpty()) {
+      return;
+    }
+    auto wsName = wsNames.front();
     Mantid::API::WorkspaceGroup_sptr grpWSPstr;
-    grpWSPstr =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(m_ads.retrieve(wsName));
+    grpWSPstr = boost::dynamic_pointer_cast<WorkspaceGroup>(
+        m_ads.retrieve(wsName.toStdString()));
     if (!grpWSPstr) {
-      if (!wsName.empty()) {
-        m_mantidUI->importWorkspace(QString::fromStdString(wsName), false);
+      if (!wsName.isEmpty()) {
+        m_mantidUI->importWorkspace(wsName, false);
         return;
       }
     }
