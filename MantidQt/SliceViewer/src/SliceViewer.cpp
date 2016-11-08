@@ -705,13 +705,14 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
 }
 
 void SliceViewer::updateNonOrthogonalOverlay() {
-	
+
   if (ui.btnNonOrthogonalToggle->isChecked()) {
     QwtDoubleInterval xint = m_plot->axisScaleDiv(m_spect->xAxis())->interval();
     QwtDoubleInterval yint = m_plot->axisScaleDiv(m_spect->yAxis())->interval();
     m_nonOrthogonalOverlay->zoomChanged(xint, yint);
+  } else {
+    m_nonOrthogonalOverlay->m_showLine = false;
   }
-  else { m_nonOrthogonalOverlay->m_showLine = false; }
 }
 //------------------------------------------------------------------------------
 /** Set the displayed workspace. Updates UI.
@@ -2382,13 +2383,13 @@ void SliceViewer::autoRebinIfRequired() { // probably rename this if forcing it
 
 void SliceViewer::setNonOrthogonalbtn() {
   bool canShowSkewedWS = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
-  if (!canShowSkewedWS && ui.btnNonOrthogonalToggle->isChecked()){ ui.btnNonOrthogonalToggle->toggle(); }
+  if (!canShowSkewedWS && ui.btnNonOrthogonalToggle->isChecked()) {
+    ui.btnNonOrthogonalToggle->toggle();
+  }
   ui.btnNonOrthogonalToggle->setDisabled(!canShowSkewedWS);
   // Orthogonal Overlay axes calculated and appear.
   if (canShowSkewedWS) {
-    m_nonOrthogonalOverlay->calculateAxesSkew(
-        &m_ws, m_dimX,
-        m_dimY); 
+    m_nonOrthogonalOverlay->calculateAxesSkew(&m_ws, m_dimX, m_dimY);
   } else {
     m_nonOrthogonalOverlay->m_showLine = false;
   }
