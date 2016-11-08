@@ -322,15 +322,6 @@ void MantidUI::updateAlgorithms() { m_exploreAlgorithms->update(); }
 /// Updates the workspace tree
 void MantidUI::updateWorkspaces() { m_exploreMantid->refreshWorkspaces(); }
 
-/// Show / hide the AlgorithmDockWidget
-void MantidUI::showAlgWidget(bool on) {
-  if (on) {
-    m_exploreAlgorithms->show();
-  } else {
-    m_exploreAlgorithms->hide();
-  }
-}
-
 void MantidUI::addMenuItems(QMenu *menu) {
   actionToggleMantid = m_exploreMantid->toggleViewAction();
   actionToggleMantid->setIcon(getQPixmap("mantid_matrix_xpm"));
