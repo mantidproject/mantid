@@ -6,28 +6,7 @@ from mantid import config
 import os
 
 
-def _str_or_none(s):
-    if s != '':
-        return s
-    else:
-        return None
-
-
-def _ws_or_none(s):
-    if s != '':
-        return mtd[s]
-    else:
-        return None
-
-
-def _elems_or_none(l):
-    if len(l) != 0:
-        return l
-    else:
-        return None
-
-
-class IndirectEnergyWindowScan(DataProcessorAlgorithm):
+class IndirectQuickRun(DataProcessorAlgorithm):
     _chopped_data = None
     _data_files = None
     _load_logs = None
@@ -96,7 +75,7 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
                              doc='Value selection of the sample environment log entry')
 
         self.declareProperty(name='MSDFit', defaultValue=False,
-                             doc='Perform an MSDFit')
+                             doc='Perform an MSDFit, do not use with GroupingMethod as "All"')
 
         self.declareProperty(name='SumFiles', defaultValue=False,
                              doc='Toggle input file summing or sequential processing')
@@ -106,6 +85,7 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
         self.declareProperty(name='Save', defaultValue=False,
                              doc='Switch Save result to nxs file Off/On')
 
+    # pylint: disable=too-many-locals
     def PyExec(self):
         setup_progress = Progress(self, 0.0, 0.05, 3)
         setup_progress.report('Getting Parameters')
@@ -219,7 +199,7 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
         self._sample_log_value = self.getPropertyValue('SampleEnvironmentLogValue')
 
         self._msdfit = self.getProperty('msdFit').value
-        if (self._msdfit) & (self._grouping_method == 'All'):
+        if self._msdfit and (self._grouping_method == 'All'):
             logger.warning("MSDFit will not run if GroupingMethod is 'All'")
             self._msdfit = False
 
@@ -301,4 +281,4 @@ class IndirectEnergyWindowScan(DataProcessorAlgorithm):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(IndirectEnergyWindowScan)
+AlgorithmFactory.subscribe(IndirectQuickRun)

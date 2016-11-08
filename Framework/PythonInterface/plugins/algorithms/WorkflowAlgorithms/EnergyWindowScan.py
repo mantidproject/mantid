@@ -4,6 +4,7 @@ from mantid import config
 
 import os
 
+
 def _str_or_none(s):
     if s != '':
         return s
@@ -125,7 +126,6 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         self.declareProperty(name='ScanWorkspace', defaultValue='Scan',
                              doc='Workspace for the scan results.')
 
-    # pylint: disable=too-many-locals
     def PyExec(self):
 
         self._setup()
@@ -197,7 +197,6 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         delete_alg.execute()
         delete_alg.setProperty("Workspace", self._scan_ws + '_inel_elf')
         delete_alg.execute()
-
 
         x_values = mtd[self._scan_ws + '_el_eq2'].readX(0)
         num_hist = mtd[self._scan_ws + '_el_eq2'].getNumberHistograms()
