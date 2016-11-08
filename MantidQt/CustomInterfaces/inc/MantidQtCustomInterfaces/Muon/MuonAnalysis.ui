@@ -2455,12 +2455,12 @@ p, li { white-space: pre-wrap; }
              <item row="3" column="0">
               <layout class="QGridLayout" name="gridLayout_21">
                <item row="3" column="0">
-                <widget class="QLabel" name="lblCompatMode">
+                <widget class="QLabel" name="lblEnableMultiFit">
                  <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When selected, uses the old style &amp;quot;Data Analysis&amp;quot; tab that was present pre-Mantid 3.8.&lt;/p&gt;&lt;p&gt;Simultaneous fits are not possible in this mode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enables the new UI for the &amp;quot;Data Analysis&amp;quot; tab introduced in Mantid 3.8.&lt;/p&gt;&lt;p&gt;In this mode, simultaneous fits of multiple datasets are possible.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="text">
-                  <string>Compatibility mode:</string>
+                  <string>Enable multiple fitting:</string>
                  </property>
                 </widget>
                </item>
@@ -2625,9 +2625,9 @@ p, li { white-space: pre-wrap; }
                 </widget>
                </item>
                <item row="3" column="2">
-                <widget class="QCheckBox" name="chkCompatibilityMode">
+                <widget class="QCheckBox" name="chkEnableMultiFit">
                  <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When selected, uses the old style &amp;quot;Data Analysis&amp;quot; tab that was present pre-Mantid 3.8.&lt;/p&gt;&lt;p&gt;Simultaneous fits are not possible in this mode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enables the new UI for the &amp;quot;Data Analysis&amp;quot; tab introduced in Mantid 3.8.&lt;/p&gt;&lt;p&gt;In this mode, simultaneous fits of multiple datasets are possible.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="text">
                   <string/>
