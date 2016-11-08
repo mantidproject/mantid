@@ -548,13 +548,12 @@ class ProcessTableWidget(tableBase.NTableWidget):
     """
     Extended table for peaks used to calculate UB matrix
     """
-    # TODO/NOW/ISSUE - Rename HKL to Unit (HKL/Q-Sample) and then make it meaningful
     TableSetup = [('Scan', 'int'),
                   ('Intensity', 'float'),
                   ('Corrected', 'float'),
                   ('Status', 'str'),
-                  ('Peak Centre', 'str'),
-                  ('HKL', 'str'),
+                  ('Peak Centre', 'str'),  # peak center can be either HKL or Q depending on the unit
+                  ('Unit', 'str'),
                   ('Total Counts', 'float'),
                   ('Motor', 'str'),
                   ('Wavelength', 'float'),
@@ -572,17 +571,18 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         # some commonly used column index
         self._colIndexKIndex = None
-        self._colIndexHKL = None
+        self._colIndexUnit = None
         self._colIndexStatus = None
         self._colIndexPeakCentre = None
 
         return
 
     @staticmethod
-    def _generate_empty_row(scan_number, num_pt=None, status='In-Queue', ws_name=''):
+    def _generate_empty_row(scan_number, num_pt=None, unit='QSample', status='In-Queue', ws_name=''):
         """ Generate a list for empty row with scan number
         :param scan_number:
         :param num_pt:
+        :param unit:
         :param status:
         :param ws_name
         :return:
@@ -598,9 +598,8 @@ class ProcessTableWidget(tableBase.NTableWidget):
         motor_info = ''
         wave_length = 0
         centre = ''
-        hkl = ''
 
-        new_row = [scan_number, intensity, corr_int, status, centre, hkl, total_counts,
+        new_row = [scan_number, intensity, corr_int, status, centre, unit, total_counts,
                    motor_info, wave_length, ws_name, 0, False]
 
         return new_row
@@ -624,7 +623,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return
 
-    def append_scans(self, scans, allow_duplicate_scans):
+    def append_scans(self, scans, allow_duplicate_scans, unit):
         """ Append rows for merge in future
         :param scans:
         :param allow_duplicate_scans: does not allow duplicate scan
@@ -638,22 +637,22 @@ class ProcessTableWidget(tableBase.NTableWidget):
         else:
             scan_list = list()
 
-        print '[DB...BAT] Existing scan list: ', scan_list
-
         # set value as default
         # Append rows
         for scan in scans:
             # add a new row for the scan
-
             if allow_duplicate_scans is False and scan in scan_list:
                 # skip is duplicate scan is not allowed
                 continue
 
             # add scans to new row
-            new_row = self._generate_empty_row(scan_number=scan)
+            new_row = self._generate_empty_row(scan_number=scan, unit=unit)
             status, err = self.append_row(new_row)
             if status is False:
                 raise RuntimeError(err)
+
+            # set unit
+        # END-FOR
 
         return
 
@@ -691,8 +690,13 @@ class ProcessTableWidget(tableBase.NTableWidget):
         assert isinstance(row_index, int) and row_index >= 0, 'Row index %s of type %s is not acceptable.' \
                                                               '' % (str(row_index), type(row_index))
 
+        # get unit of this row
+        this_unit = self.cell(row_index, self._colIndexUnit)
+        if this_unit != 'HKL':
+            raise RuntimeError('Row %d does not have HKL but %s instead.' % this_unit)
+
         # retrieve value of HKL as string and then split them into floats
-        hkl_str = self.get_cell_value(row_index, self._colIndexHKL)
+        hkl_str = self.get_cell_value(row_index, self._colIndexUnit)
         hkl_str_list = hkl_str.split(',')
         try:
             peak_index_h = float(hkl_str_list[0])
@@ -810,7 +814,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         # set up column index
         self._colIndexKIndex = self.TableSetup.index(('K-Index', 'int'))
-        self._colIndexHKL = self.TableSetup.index(('HKL', 'str'))
+        self._colIndexUnit = self.TableSetup.index(('Unit', 'str'))
         self._colIndexStatus = self.TableSetup.index(('Status', 'str'))
         self._colIndexPeakCentre = self.TableSetup.index(('Peak Centre', 'str'))
 
@@ -849,11 +853,15 @@ class ProcessTableWidget(tableBase.NTableWidget):
         # check
         assert isinstance(row_number, int) and 0 <= row_number < self.rowCount(),\
             'Row number %s is out of range.' % str(row_number)
+        # check wehther the unit of this row is HKL
+        if self.get_cell_value(row_number, self._colIndexUnit) != 'HKL':
+            raise RuntimeError('Row %d has unit %s instead of HKL.'
+                               '' % (row_number, self.get_cell_value(row_number, self._colIndexUnit)))
         assert len(hkl) == 3, 'HKL must be a sequence with 3 items but not %s.' % len(hkl)
 
         # update the cell
         hkl_str = '%.3f, %.3f, %.3f' % (hkl[0], hkl[1], hkl[2])
-        self.update_cell_value(row_number, self._colIndexHKL, hkl_str)
+        self.update_cell_value(row_number, self._colIndexUnit, hkl_str)
 
         return
 

@@ -109,11 +109,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_plot_next_pt_raw)
         self.connect(self.ui.pushButton_showPtList, QtCore.SIGNAL('clicked()'),
                      self.show_scan_pt_list)
-        # TODO/ISSUE/NOW - remove it and the function too!
-        # self.connect(self.ui.pushButton_usePt4UB, QtCore.SIGNAL('clicked()'),
-        #              self.do_add_peak_to_find)
-        # TODO/ISSUE/NOW
-        # self.connect(self.ui.pushButton_showSPICEinRaw, QtCore....)
+        self.connect(self.ui.pushButton_showSPICEinRaw, QtCore.SIGNAL('clicked()'),
+                     self.do_show_spice_file_raw)
         self.connect(self.ui.pushButton_addROI, QtCore.SIGNAL('clicked()'),
                      self.do_add_roi)
         self.connect(self.ui.pushButton_cancelROI, QtCore.SIGNAL('clicked()'),
@@ -303,6 +300,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # QSettings
         self.load_settings()
+
+        # pre-define child windows
+        self._spiceViwer = None
 
         return
 
@@ -562,18 +562,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_add_peak_to_find(self):
-        """
-        Add the scan/pt to the next
-        :return:
-        """
-        # peak finding will use all points in the selected scan.
-        scan_no = self.ui.lineEdit_run.text()
-        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Calculate UB'])
-        self.ui.lineEdit_scanNumber.setText(scan_no)
-
-        return
-
     def do_add_peaks_for_ub(self):
         """ In tab-survey, merge selected scans, find peaks in merged data and
          switch to UB matrix calculation tab and add to table
@@ -633,8 +621,18 @@ class MainWindow(QtGui.QMainWindow):
         if len(scan_list) == 0:
             self.pop_one_button_dialog('Scan list is empty.')
 
+        # get unit
+        unit_str = str(self.ui.comboBox_mergeScanFrame.currentText())
+        if unit_str.startswith('HKL'):
+            this_unit = 'HKL'
+        elif unit_str.startswith('Q'):
+            this_unit = 'QSample'
+        else:
+            raise RuntimeError('Merged MD Frame unit %s is not supported.' % this_unit)
+
         # Set table
-        self.ui.tableWidget_mergeScans.append_scans(scans=scan_list, allow_duplicate_scans=False)
+        self.ui.tableWidget_mergeScans.append_scans(scans=scan_list, allow_duplicate_scans=False,
+                                                    unit=this_unit)
 
         return
 
@@ -1824,7 +1822,7 @@ class MainWindow(QtGui.QMainWindow):
         merged_ws_name, status = gutil.get_value(self)
 
         # call the controller to merge the scans
-        message = self._myControl.merge_scans(md_ws_list, peak_center_list, merged_ws_name)
+        message = self._myControl.merge_multiple_scans(md_ws_list, peak_center_list, merged_ws_name)
 
         # information
         self.pop_one_button_dialog(message)
@@ -2466,6 +2464,43 @@ class MainWindow(QtGui.QMainWindow):
         self._spiceViwer.write_text(wbuf)
 
         # show the new window
+        self._spiceViwer.show()
+
+        return
+
+    def do_show_spice_file_raw(self):
+        """
+        show SPICE file in a window from Raw-Tab
+        :return:
+        """
+        # get the files from the GUI
+        exp_number = int(str(self.ui.lineEdit_exp.text()))
+
+        # get the scan number
+        try:
+            scan_number = int(str(self.ui.lineEdit_run.text()))
+        except ValueError as val_err:
+            self.pop_one_button_dialog('Scan number %s in raw-data-view-tab is invalid.'
+                                       '' % str(self.ui.lineEdit_run.text()))
+            return
+
+        # get spice file
+        spice_line_list = self._myControl.read_spice_file(exp_number, scan_number)
+
+        # launch SPICE view
+        if self._spiceViwer is None:
+            # create SPICE viewer if it does not exist
+            self._spiceViwer = viewspicedialog.ViewSpiceDialog(self)
+
+        # form the buffer
+        spice_buffer = ''
+        for line in spice_line_list:
+            spice_buffer += line
+
+        # write out the value
+        self._spiceViwer.write_text(spice_buffer)
+
+        # show
         self._spiceViwer.show()
 
         return

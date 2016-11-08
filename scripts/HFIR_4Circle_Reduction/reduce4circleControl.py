@@ -1517,12 +1517,11 @@ class CWSCDReductionControl(object):
 
         return True, pt_ws_name
 
-    # TODO/NOW/ISSUE - clean up this method!
-    def merge_scans(self, scan_md_ws_list, scan_peak_centre_list, merged_ws_name):
+    def merge_multiple_scans(self, scan_md_ws_list, scan_peak_centre_list, merged_ws_name):
         """
         Merge multiple scans
-        :param scan_md_ws_list:
-        :param scan_peak_centre_list:
+        :param scan_md_ws_list: List of MDWorkspace, each of which is for a scan.
+        :param scan_peak_centre_list: list of peak centres for all scans.
         :param merged_ws_name:
         :return:
         """
@@ -1534,6 +1533,8 @@ class CWSCDReductionControl(object):
         assert len(scan_md_ws_list) >= 2 and len(scan_md_ws_list) == len(scan_peak_centre_list),\
             'Number of MDWorkspace %d and peak centers %d are not correct.' % (len(scan_md_ws_list),
                                                                                len(scan_peak_centre_list))
+        assert isinstance(merged_ws_name, str), 'Target MDWorkspace name for merged scans %s (%s) must ' \
+                                                'be a string.' % (str(merged_ws_name), type(merged_ws_name))
 
         # get the workspace
         ws_name_list = ''
@@ -1551,7 +1552,7 @@ class CWSCDReductionControl(object):
         md_ws = AnalysisDataService.retrieve(scan_md_ws_list[0])
         frame = md_ws.getDimension(0).getMDFrame().name()
 
-        # binning boundary
+        # calculating the new binning boundaries. It will not affect the merge result. but only for user's reference.
         axis0_range = list()
         axis1_range = list()
         axis2_range = list()
