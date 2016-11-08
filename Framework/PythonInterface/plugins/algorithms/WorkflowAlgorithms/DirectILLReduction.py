@@ -294,7 +294,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             # No input diagnostics workspace? Diagnose!
             if not diagnosticsWs:
                 # 1. Detectors with zero counts.
-                outWsName = workspaceNames.badDetector()
+                outWsName = workspaceNames.badDetectors()
                 diagnosticsWs, nFailures = FindDetectorsOutsideLimits(InputWorkspace=workspace,
                                                                       OutputWorkspace=outWsName)
                 # 2. Detectors where FindEPP failed.
@@ -305,19 +305,19 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 # 3. Detectors with high background
                 outWsName = workspaceNames.badDetectorSpuriousBkg()
                 bkgDiagnostics, nFailures = MedianDetectorTest(InputWorkspace=bkgWorkspace,
-                                                               OutputWorkspace=outWsName)
+                                                               OutputWorkspace=outWsName,
+                                                               LowThreshold=0.0)
                 for i in range(diagnosticsWs.getNumberHistograms()):
-                    if bkgDiagnostics.readY(i)[0] == 0:
+                    if bkgDiagnostics.readY(i)[0] != 0:
                         setAsBad(diagnosticsWs, i)
             # Mask detectors identified as bad.
             outWsName = workspaceNames.masked()
             workspace = CloneWorkspace(InputWorkspace=workspace,
                                        OutputWorkspace=outWsName)
             MaskDetectors(Workspace=workspace,
-                          MaskedWorkspace=badDetWorkspace)
+                          MaskedWorkspace=diagnosticsWs)
             # Save output if desired.
-            diagnosticsOutWs = self.getProperty(PROP_OUTPUT_DIAGNOSTICS_WORKSPACE).value
-            if diagnosticsOutWs:
+            if not self.getProperty(PROP_OUTPUT_DIAGNOSTICS_WORKSPACE).isDefault:
                 self.setProperty(PROP_OUTPUT_DIAGNOSTICS_WORKSPACE, diagnosticsWs)
         # Apply user mask.
         userMask = self.getProperty(PROP_USER_MASK).value
