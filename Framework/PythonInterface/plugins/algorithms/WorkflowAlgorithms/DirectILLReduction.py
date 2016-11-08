@@ -65,6 +65,7 @@ def namelogging(method):
     def wrapper(self):
         name = method(self)
         self._names.add(name)
+        return name
     return wrapper
 
 # Name generator for temporary workspaces.
