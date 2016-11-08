@@ -228,6 +228,12 @@ class Pearl(AbstractInst):
         common.remove_intermediate_workspace(shape_ws)
         return absorb_ws
 
+    def _calibration_rebin_to_workspace(self, ws_to_rebin, ws_to_match):
+        rebinned_ws = mantid.RebinToWorkspace(WorkspaceToRebin=ws_to_rebin, WorkspaceToMatch=ws_to_match)
+        common.remove_intermediate_workspace(ws_to_rebin)
+        ws_to_rebin = rebinned_ws
+        return ws_to_rebin
+
     # Implementation of instrument specific steps
 
     def _run_attenuate_workspace(self, input_workspace):

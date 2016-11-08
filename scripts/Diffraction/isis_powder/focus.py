@@ -25,8 +25,9 @@ def _run_focus(instrument, run_number, perform_attenuation, perform_vanadium_nor
     input_workspace = mantid.AlignDetectors(InputWorkspace=input_workspace,
                                             CalibrationFile=calibration_file_paths["calibration"])
 
+    # TODO fix this - maybe have it save solid angle corrections and just load/apply
     input_workspace = instrument._apply_solid_angle_efficiency_corr(ws_to_correct=input_workspace,
-                                                                    vanadium_ws_path=calibration_file_paths["vanadium"])
+                                                                    vanadium_number=calibration_file_paths["vanadium"])
 
     input_workspace = mantid.DiffractionFocussing(InputWorkspace=input_workspace,
                                                   GroupingFileName=calibration_file_paths["grouping"])

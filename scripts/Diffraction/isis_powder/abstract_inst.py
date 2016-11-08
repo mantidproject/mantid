@@ -294,6 +294,9 @@ class AbstractInst(object):
     def _generate_vanadium_absorb_corrections(self, calibration_full_paths, ws_to_match):
         raise NotImplementedError("Not implemented for this instrument yet")
 
+    def _calibration_rebin_to_workspace(self, ws_to_rebin, ws_to_match):
+        return ws_to_rebin
+
 # ----- Private Implementation ----- #
 # These should only be called by the abstract instrument class
 
