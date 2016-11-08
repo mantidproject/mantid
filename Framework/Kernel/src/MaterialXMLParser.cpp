@@ -68,7 +68,8 @@ struct TypedBuilderHandle final : public BuilderHandle {
   typedef typename std::remove_const<
       typename std::remove_reference<ArgType>::type>::type ValueType;
 
-  TypedBuilderHandle(BuilderMethod<ArgType> m) : BuilderHandle(), m_method(m) {}
+  explicit TypedBuilderHandle(BuilderMethod<ArgType> m)
+      : BuilderHandle(), m_method(m) {}
 
   void operator()(MaterialBuilder &builder,
                   const std::string &value) const override {

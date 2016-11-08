@@ -411,12 +411,11 @@ void writeMCNPX(const std::string &Line, std::ostream &OX) {
  *  @param Ln :: line component to strip
  *  @return vector of components
  */
-std::vector<std::string> StrParts(std::string Ln) {
-  std::vector<std::string> Out;
-  std::string Part;
-  while (section(Ln, Part))
-    Out.push_back(Part);
-  return Out;
+std::vector<std::string> StrParts(const std::string &Ln) {
+  auto tokenizer = Mantid::Kernel::StringTokenizer(
+      Ln, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                   Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  return tokenizer.asVector();
 }
 
 /**

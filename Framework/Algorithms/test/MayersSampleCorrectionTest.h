@@ -4,8 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/Material.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -104,8 +104,6 @@ private:
   MatrixWorkspace_sptr createTestWorkspaceForCorrection() {
     using ComponentCreationHelper::createCappedCylinder;
     using ComponentCreationHelper::createTestInstrumentCylindrical;
-    using Mantid::Geometry::ComponentHelper::Absolute;
-    using Mantid::Geometry::ComponentHelper::moveComponent;
     using Mantid::Geometry::ObjComponent;
     using Mantid::Geometry::Object;
     using Mantid::Kernel::Material;
@@ -139,12 +137,10 @@ private:
     testWS->mutableSample().setShape(*cylinder);
 
     // Move the detector to a known position
-    auto &pmap = testWS->instrumentParameters();
     const double twoTheta = 0.10821;
     const double l2 = 2.2;
-    auto det = testWS->getDetector(0);
-    moveComponent(*det, pmap, V3D(l2 * sin(twoTheta), 0.0, l2 * cos(twoTheta)),
-                  Absolute);
+    auto &detInfo = testWS->mutableDetectorInfo();
+    detInfo.setPosition(0, V3D(l2 * sin(twoTheta), 0.0, l2 * cos(twoTheta)));
     return testWS;
   }
 

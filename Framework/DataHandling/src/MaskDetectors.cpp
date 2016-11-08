@@ -235,13 +235,6 @@ void MaskDetectors::exec() {
     MatrixWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
     setProperty("Workspace", ws);
   }
-
-  /*
-  This rebuild request call, gives the workspace the opportunity to rebuild the
-  nearest neighbours map
-  and therefore pick up any detectors newly masked with this algorithm.
-  */
-  WS->rebuildNearestNeighbours();
 }
 /* Verifies input ranges are defined and returns these ranges if they are.
 *
@@ -352,7 +345,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
     DataObjects::MaskWorkspace_sptr maskWS =
         boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
     if (maskWS) {
-      Geometry::ParameterMap &maskPmap = maskWS->instrumentParameters();
+      const auto &maskPmap = maskWS->constInstrumentParameters();
       Instrument_const_sptr maskInstrument = maskWS->getInstrument();
       if (maskInstrument->getDetectorIDs().size() !=
           WS->getInstrument()->getDetectorIDs().size()) {

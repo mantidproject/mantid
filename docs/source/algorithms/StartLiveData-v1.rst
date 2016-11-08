@@ -23,6 +23,29 @@ simply calls :ref:`algm-LoadLiveData` at a fixed interval.
 Instructions for setting up a "fake" data stream are found `here
 <http://www.mantidproject.org/MBC_Live_Data_Simple_Examples>`__.
 
+Listener Properties
+###################
+
+Specific LiveListeners may provide their own properties, in addition to
+properties provided by StartLiveData. For convenience and accessibility, these
+properties are made available through StartLiveData as well.
+
+In the StartLiveData algorithm dialog, a group box called "Listener Properties"
+will appear at the bottom of the sidebar on the left, if the currently selected
+listener provides additional properties.
+
+In the Python API, these listener properties may also be set as keyword
+arguments when calling StartLiveData. For example, in this code snippet:
+
+.. code-block:: python
+
+    StartLiveData(Instrument='ISIS_Histogram', OutputWorkspace='wsOut', UpdateEvery=1,
+                  AccumulationMethod='Replace', PeriodList=[1,3], SpectraList=[2,4,6])
+
+PeriodList and SpectraList are properties of the ISISHistoDataListener. They
+are available as arguments in this call because Instrument is set to
+'ISIS_Histogram', which uses that listener.
+
 Live Plots
 ##########
 
