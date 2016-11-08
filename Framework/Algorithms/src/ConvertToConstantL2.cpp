@@ -74,10 +74,8 @@ void ConvertToConstantL2::exec() {
 
   Geometry::ParameterMap &pmap = m_outputWS->instrumentParameters();
 
-  const size_t numberOfChannels = this->m_inputWS->blocksize();
   // Calculate the number of spectra in this workspace
-  const int numberOfSpectra =
-      static_cast<int>(this->m_inputWS->size() / numberOfChannels);
+  const size_t numberOfSpectra = m_inputWS->getNumberHistograms();
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
 
   int64_t numberOfSpectra_i =
@@ -86,18 +84,15 @@ void ConvertToConstantL2::exec() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
 
   // Loop over the histograms (detector spectra)
-
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     PARALLEL_START_INTERUPT_REGION
+    m_outputWS->setHistogram(i, m_inputWS->histogram(i));
+
     // Should not move the monitors
     if (spectrumInfo.isMonitor(i)) {
       continue;
     }
-
-    m_outputWS->setHistogram(i, m_inputWS->histogram(i));
-    // Copy the energy transfer axis
-    // TOF
 
     // subract the diference in l2
     double thisDetL2 = spectrumInfo.l2(i);
