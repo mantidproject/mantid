@@ -55,10 +55,10 @@ public:
   std::string getFilter() const override;
   /// Returns the reg exp check
   bool getRegExpCheck() const override;
-  /// Returns the list of workspaces
-  std::string getListOfWorkspaces() const override;
-  /// Returns the list of parameters
-  std::string getListOfParameters() const override;
+  /// Returns item at index from list of workspaces
+  std::string getListOfWorkspacesItem(int index) const override;
+  /// Returns item at index from list of parameters
+  std::string getListOfParametersItem(int index) const override;
   /// Returns the spectra list
   std::string getSpectraList() const override;
   /// Returns the file format
@@ -70,6 +70,11 @@ public:
   /// Returns the separator type
   std::string getSeparator() const override;
 
+  /// Clears the 'List of workspaces' text field
+  void clearWorkspaceList() override;
+  /// Sets the 'List of workspaces' text field
+  void setWorkspaceList(std::vector<std::string> &) override;
+
 private:
   /// Initialize the interface
   void initLayout();
@@ -77,7 +82,6 @@ private:
   std::unique_ptr<IReflSaveTabPresenter> m_presenter;
   /// The widget
   Ui::ReflSaveTabWidget m_ui;
-
 };
 
 } // namespace Mantid

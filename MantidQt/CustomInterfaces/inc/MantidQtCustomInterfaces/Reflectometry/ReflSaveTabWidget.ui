@@ -52,7 +52,7 @@
               </property>
             </spacer>
           </item>
-          </layout>
+        </layout>
       </item>
       <item>
         <widget class="QGroupBox" name="customSaveGroup">
@@ -124,7 +124,7 @@
               </widget>
             </item>
             <item row ="2" column="0" colspan="4">
-              <widget class="QTextEdit" name="listOfWorkspacesEdit"/>
+              <widget class="QListWidget" name="listOfWorkspaces"/>
             </item>
             <item row="2" column="4">
               <spacer name="customSaveSpacer2">
@@ -140,7 +140,7 @@
               </spacer>
             </item>
             <item row ="2" column="5">
-              <widget class="QTextEdit" name="listOfLoggedParametersEdit"/>
+              <widget class="QListWidget" name="listOfLoggedParameters"/>
             </item>
             <item row="3" column="0" colspan="4">
               <widget class="QPushButton" name="refreshButton">

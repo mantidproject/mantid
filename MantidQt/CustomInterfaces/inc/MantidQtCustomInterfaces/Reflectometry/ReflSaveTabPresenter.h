@@ -45,6 +45,11 @@ public:
   ~ReflSaveTabPresenter() override;
 
 private:
+  /// Adds all workspace names to the list of workspaces
+  void populateWorkspaceList();
+  /// Obtains all available workspace names
+  std::vector<std::string> getAvailableWorkspaceNames();
+
   /// The view
   IReflSaveTabView *m_view;
 };

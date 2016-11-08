@@ -52,18 +52,18 @@ bool QtReflSaveTabView::getRegExpCheck() const {
   return m_ui.regExpCheckBox->isChecked();
 }
 
-/** Returns the list of workspaces as a single string
-* @return :: List of workspaces
+/** Returns the name of an item at index in 'List of workspaces' widget
+* @return :: item name
 */
-std::string QtReflSaveTabView::getListOfWorkspaces() const {
-  return m_ui.listOfWorkspacesEdit->toPlainText().toStdString();
+std::string QtReflSaveTabView::getListOfWorkspacesItem(int index) const {
+  return m_ui.listOfWorkspaces->item(index)->text().toStdString();
 }
 
-/** Returns the list of logged parameters as a single string
-* @return :: List of parameters
+/** Returns the name of an item at index in 'List of logged parameters' widget
+* @return :: item name
 */
-std::string QtReflSaveTabView::getListOfParameters() const {
-  return m_ui.listOfLoggedParametersEdit->toPlainText().toStdString();
+std::string QtReflSaveTabView::getListOfParametersItem(int index) const {
+  return m_ui.listOfLoggedParameters->item(index)->text().toStdString();
 }
 
 /** Returns the spectra list as a single string
@@ -99,6 +99,21 @@ bool QtReflSaveTabView::getQResolutionCheck() const {
 */
 std::string QtReflSaveTabView::getSeparator() const {
   return m_ui.separatorButtonGroup->checkedButton()->text().toStdString();
+}
+
+/** Clear the 'List of workspaces' widget
+*/
+void QtReflSaveTabView::clearWorkspaceList() {
+  m_ui.listOfWorkspaces->clear();
+}
+
+/** Set the 'List of workspaces' text field with workspace names
+* @param names :: The list of workspace names
+*/
+void QtReflSaveTabView::setWorkspaceList(std::vector<std::string> &names) {
+  for (auto it = names.begin(); it != names.end(); it++) {
+    m_ui.listOfWorkspaces->addItem(QString::fromStdString(*it));
+  }
 }
 
 } // namespace CustomInterfaces

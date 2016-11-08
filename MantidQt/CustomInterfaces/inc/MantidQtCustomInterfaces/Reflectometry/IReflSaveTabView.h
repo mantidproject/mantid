@@ -45,13 +45,16 @@ public:
   virtual std::string getPrefix() const = 0;
   virtual std::string getFilter() const = 0;
   virtual bool getRegExpCheck() const = 0;
-  virtual std::string getListOfWorkspaces() const = 0;
-  virtual std::string getListOfParameters() const = 0;
+  virtual std::string getListOfWorkspacesItem(int index) const = 0;
+  virtual std::string getListOfParametersItem(int index) const = 0;
   virtual std::string getSpectraList() const = 0;
   virtual std::string getFileFormat() const = 0;
   virtual bool getTitleCheck() const = 0;
   virtual bool getQResolutionCheck() const = 0;
   virtual std::string getSeparator() const = 0;
+
+  virtual void clearWorkspaceList() = 0;
+  virtual void setWorkspaceList(std::vector<std::string> &) = 0;
 };
 }
 }
