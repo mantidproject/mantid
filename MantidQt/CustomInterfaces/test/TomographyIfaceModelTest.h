@@ -275,7 +275,7 @@ public:
 
     for (size_t i = 0; i < expectedArgsVector.size(); ++i) {
       // append the whitespace because it is added in the argument separation
-      TS_ASSERT_EQUALS(expectedArgsVector[i] + " ", actualArgsVector[i]);
+      TS_ASSERT_EQUALS(expectedArgsVector[i], actualArgsVector[i]);
     }
   }
 
