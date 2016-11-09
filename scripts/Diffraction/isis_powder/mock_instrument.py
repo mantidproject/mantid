@@ -1,4 +1,4 @@
-from abstract_inst import AbstractInst
+from isis_powder.abstract_inst import AbstractInst
 
 
 class MockInstrument(AbstractInst):
