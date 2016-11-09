@@ -155,4 +155,4 @@ The data used so far is single period, so here we will use MUSR data from the un
 - Set fit function to LinearBackground and the label to "MUSRlabel"
 - Fit - periods will be fitted simultaneously
 
-
+.. categories:: Interfaces Muon
