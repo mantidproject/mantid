@@ -64,7 +64,7 @@ class MedianBinWidth(PythonAlgorithm):
         medians = numpy.empty(n)
         for wsIndex in range(n):
             xs = inputWs.readX(wsIndex)
-            dxs = xs[1:] - xs[:-1]
+            dxs = numpy.diff(xs)
             medians[wsIndex] = numpy.median(dxs)
         binWidth = numpy.mean(medians)
         binWidth = roundinghelper.round(binWidth, roundingMode)
