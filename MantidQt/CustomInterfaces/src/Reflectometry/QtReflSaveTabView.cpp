@@ -11,9 +11,6 @@ QtReflSaveTabView::QtReflSaveTabView(QWidget *parent) : m_presenter() {
 
   UNUSED_ARG(parent);
   initLayout();
-
-  m_presenter.reset(new ReflSaveTabPresenter(this));
-  m_presenter->notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
 }
 
 /** Destructor
@@ -23,7 +20,15 @@ QtReflSaveTabView::~QtReflSaveTabView() {}
 /**
 Initialize the Interface
 */
-void QtReflSaveTabView::initLayout() { m_ui.setupUi(this); }
+void QtReflSaveTabView::initLayout() { 
+  m_ui.setupUi(this); 
+
+  connect(m_ui.filterEdit, SIGNAL(textEdited(const QString &)), this,
+    SLOT(filterWorkspaceList()));
+
+  m_presenter.reset(new ReflSaveTabPresenter(this));
+  m_presenter->notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
+}
 
 /** Returns the save path
 * @return :: The save path
@@ -108,7 +113,7 @@ void QtReflSaveTabView::clearWorkspaceList() const {
   m_ui.listOfWorkspaces->clear();
 }
 
-/** Set the 'List of workspaces' text field with workspace names
+/** Set the 'List of workspaces' widget with workspace names
 * @param names :: The list of workspace names
 */
 void QtReflSaveTabView::setWorkspaceList(
@@ -116,6 +121,12 @@ void QtReflSaveTabView::setWorkspaceList(
   for (auto it = names.begin(); it != names.end(); it++) {
     m_ui.listOfWorkspaces->addItem(QString::fromStdString(*it));
   }
+}
+
+/** Filter the 'List of workspaces' widget
+*/
+void QtReflSaveTabView::filterWorkspaceList() const {
+  m_presenter->notify(IReflSaveTabPresenter::filterWorkspaceListFlag);
 }
 
 } // namespace CustomInterfaces

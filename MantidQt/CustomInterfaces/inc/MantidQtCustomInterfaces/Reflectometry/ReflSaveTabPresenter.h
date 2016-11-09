@@ -47,6 +47,8 @@ public:
 
   /// Adds all workspace names to the list of workspaces
   void populateWorkspaceList();
+  /// Filter workspaces names
+  void filterWorkspaceNames();
 
 private:
   /// Obtains all available workspace names

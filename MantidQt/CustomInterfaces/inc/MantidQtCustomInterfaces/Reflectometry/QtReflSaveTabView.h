@@ -70,10 +70,14 @@ public:
   /// Returns the separator type
   std::string getSeparator() const override;
 
-  /// Clears the 'List of workspaces' text field
+  /// Clears the 'List of workspace' widget
   void clearWorkspaceList() const override;
-  /// Sets the 'List of workspaces' text field
+  /// Sets the 'List of workspaces' widget
   void setWorkspaceList(const std::vector<std::string> &) const override;
+
+public slots:
+  /// Filters the 'List of workspaces' widget
+  void filterWorkspaceList() const;
 
 private:
   /// Initialize the interface
