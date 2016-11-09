@@ -43,10 +43,12 @@ public:
   ReflSaveTabPresenter(IReflSaveTabView *view);
   /// Destructor
   ~ReflSaveTabPresenter() override;
+  void notify(IReflSaveTabPresenter::Flag flag) override;
 
-private:
   /// Adds all workspace names to the list of workspaces
   void populateWorkspaceList();
+
+private:
   /// Obtains all available workspace names
   std::vector<std::string> getAvailableWorkspaceNames();
 

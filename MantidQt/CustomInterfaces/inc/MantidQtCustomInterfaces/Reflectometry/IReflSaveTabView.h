@@ -53,8 +53,8 @@ public:
   virtual bool getQResolutionCheck() const = 0;
   virtual std::string getSeparator() const = 0;
 
-  virtual void clearWorkspaceList() = 0;
-  virtual void setWorkspaceList(std::vector<std::string> &) = 0;
+  virtual void clearWorkspaceList() const = 0;
+  virtual void setWorkspaceList(const std::vector<std::string> &) const = 0;
 };
 }
 }

@@ -13,6 +13,7 @@ QtReflSaveTabView::QtReflSaveTabView(QWidget *parent) : m_presenter() {
   initLayout();
 
   m_presenter.reset(new ReflSaveTabPresenter(this));
+  m_presenter->notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
 }
 
 /** Destructor
@@ -103,14 +104,15 @@ std::string QtReflSaveTabView::getSeparator() const {
 
 /** Clear the 'List of workspaces' widget
 */
-void QtReflSaveTabView::clearWorkspaceList() {
+void QtReflSaveTabView::clearWorkspaceList() const {
   m_ui.listOfWorkspaces->clear();
 }
 
 /** Set the 'List of workspaces' text field with workspace names
 * @param names :: The list of workspace names
 */
-void QtReflSaveTabView::setWorkspaceList(std::vector<std::string> &names) {
+void QtReflSaveTabView::setWorkspaceList(
+    const std::vector<std::string> &names) const {
   for (auto it = names.begin(); it != names.end(); it++) {
     m_ui.listOfWorkspaces->addItem(QString::fromStdString(*it));
   }

@@ -71,9 +71,9 @@ public:
   std::string getSeparator() const override;
 
   /// Clears the 'List of workspaces' text field
-  void clearWorkspaceList() override;
+  void clearWorkspaceList() const override;
   /// Sets the 'List of workspaces' text field
-  void setWorkspaceList(std::vector<std::string> &) override;
+  void setWorkspaceList(const std::vector<std::string> &) const override;
 
 private:
   /// Initialize the interface

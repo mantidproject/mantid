@@ -12,13 +12,18 @@ using namespace Mantid::API;
 */
 ReflSaveTabPresenter::ReflSaveTabPresenter(IReflSaveTabView *view)
     : m_view(view) {
-
-  populateWorkspaceList();
 }
 
 /** Destructor
 */
 ReflSaveTabPresenter::~ReflSaveTabPresenter() {}
+
+void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
+  switch (flag) {
+  case populateWorkspaceListFlag:
+    populateWorkspaceList();
+  }
+}
 
 /** Fills the 'List of Workspaces' text field with the names of all available
 * workspaces

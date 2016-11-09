@@ -35,6 +35,11 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class IReflSaveTabPresenter {
 public:
   virtual ~IReflSaveTabPresenter(){};
+
+  enum Flag { populateWorkspaceListFlag };
+
+  /// Tell the presenter something happened
+  virtual void notify(IReflSaveTabPresenter::Flag flag) = 0;
 };
 }
 }
