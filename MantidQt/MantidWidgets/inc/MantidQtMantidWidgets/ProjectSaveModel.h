@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_PROJECTSAVEMODEL_H
-#define MANTIDQTCUSTOMINTERFACES_PROJECTSAVEMODEL_H
+#ifndef MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODEL_H
+#define MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODEL_H
 
 #include "MantidAPI/Workspace.h"
 #include "MantidQtAPI/IProjectSerialisable.h"
@@ -8,7 +8,7 @@
 #include <unordered_map>
 
 namespace  MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
 class ProjectSaveModel
 {
@@ -37,4 +37,4 @@ private:
 } // CustomInterfaces
 } // MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_PROJECTSAVEMODEL_H
+#endif // MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODEL_H

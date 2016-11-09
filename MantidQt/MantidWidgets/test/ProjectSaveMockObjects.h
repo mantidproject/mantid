@@ -1,14 +1,14 @@
-#ifndef MANTID_CUSTOMINTERFACES_PROJECTSAVEMOCKOBJECTS_H
-#define MANTID_CUSTOMINTERFACES_PROJECTSAVEMOCKOBJECTS_H
+#ifndef MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMOCKOBJECTS_H
+#define MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMOCKOBJECTS_H
 
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtAPI/IProjectSerialisable.h"
-#include "MantidQtCustomInterfaces/IProjectSaveView.h"
+#include "MantidQtMantidWidgets/IProjectSaveView.h"
 
 #include <gmock/gmock.h>
 
 using namespace MantidQt::API;
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::MantidWidgets;
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 

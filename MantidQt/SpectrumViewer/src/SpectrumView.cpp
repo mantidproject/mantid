@@ -388,6 +388,20 @@ std::string SpectrumView::saveToProject(ApplicationWindow *app) {
   return tsv.outputLines();
 }
 
+std::string SpectrumView::getWindowName()
+{
+  return "SpectrumViewer";
+}
+
+std::vector<std::string> SpectrumView::getWorkspaceNames()
+{
+  std::vector<std::string> names;
+  for (auto source : m_dataSource) {
+    names.push_back(source->getWorkspace()->name());
+  }
+  return names;
+}
+
 void SpectrumView::changeTracking(bool on) {
   if (m_spectrumDisplay.isEmpty()) {
     return;

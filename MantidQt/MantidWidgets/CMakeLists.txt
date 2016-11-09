@@ -101,6 +101,9 @@ set ( SRC_FILES
 	src/PeriodicTableWidget.cpp
 	src/PreviewPlot.cpp
 	src/ProcessingAlgoWidget.cpp
+  src/ProjectSaveView.cpp
+  src/ProjectSavePresenter.cpp
+  src/ProjectSaveModel.cpp
 	src/PropertyHandler.cpp
 	src/RangeSelector.cpp
 	src/RenameParDialog.cpp
@@ -152,7 +155,8 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/InstrumentSelector.h
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.h
     inc/MantidQtMantidWidgets/InputController.h
-	inc/MantidQtMantidWidgets/MantidSurfacePlotDialog.h
+    inc/MantidQtMantidWidgets/IProjectSaveView.h
+  inc/MantidQtMantidWidgets/MantidSurfacePlotDialog.h
 	inc/MantidQtMantidWidgets/MantidWSIndexDialog.h
 	inc/MantidQtMantidWidgets/MantidTreeWidget.h
     inc/MantidQtMantidWidgets/MantidHelpWindow.h
@@ -261,7 +265,8 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/IFunctionBrowser.h
 	inc/MantidQtMantidWidgets/IMuonFitDataSelector.h
 	inc/MantidQtMantidWidgets/IMuonFitFunctionControl.h
-	inc/MantidQtMantidWidgets/IWorkspaceFitControl.h
+  inc/MantidQtMantidWidgets/IProjectSaveView.h
+  inc/MantidQtMantidWidgets/IWorkspaceFitControl.h
 	inc/MantidQtMantidWidgets/InstrumentView/BinDialog.h
 	inc/MantidQtMantidWidgets/InstrumentView/CollapsiblePanel.h
 	inc/MantidQtMantidWidgets/InstrumentView/ColorMapWidget.h
@@ -317,6 +322,9 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/ProgressPresenter.h
     inc/MantidQtMantidWidgets/ProgressableView.h
     inc/MantidQtMantidWidgets/ProgressPresenter.h
+    inc/MantidQtMantidWidgets/ProjectSavePresenter.h
+    inc/MantidQtMantidWidgets/ProjectSaveModel.h
+    inc/MantidQtMantidWidgets/ProjectSaveView.h
     inc/MantidQtMantidWidgets/WorkspacePresenter/ViewNotifiable.h
     inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProviderNotifiable.h
     inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h
@@ -350,6 +358,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/UserFunctionDialog.ui
     inc/MantidQtMantidWidgets/PeriodicTableWidget.ui
     inc/MantidQtMantidWidgets/PreviewPlot.ui
+    inc/MantidQtMantidWidgets/ProjectSave.ui
     inc/MantidQtMantidWidgets/pqHelpWindow.ui
     inc/MantidQtMantidWidgets/InstrumentView/UCorrectionDialog.ui
 )
@@ -374,6 +383,9 @@ set ( TEST_FILES
   DataProcessorUI/ParseKeyValueStringTest.h
   DataProcessorUI/QDataProcessorOneLevelTreeModelTest.h
   DataProcessorUI/QDataProcessorTwoLevelTreeModelTest.h
+  ProjectSaveMockObjects.h
+  ProjectSaveModelTest.h
+  ProjectSavePresenterTest.h
   WorkspacePresenter/WorkspacePresenterTest.h
   WorkspacePresenter/ADSAdapterTest.h
 )

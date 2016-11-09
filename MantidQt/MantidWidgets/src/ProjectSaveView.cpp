@@ -1,11 +1,11 @@
 #include "MantidQtAPI/IProjectSerialisable.h"
-#include "MantidQtCustomInterfaces/ProjectSavePresenter.h"
-#include "MantidQtCustomInterfaces/ProjectSaveView.h"
+#include "MantidQtMantidWidgets/ProjectSavePresenter.h"
+#include "MantidQtMantidWidgets/ProjectSaveView.h"
 
 using namespace MantidQt::API;
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
 ProjectSaveView::ProjectSaveView(const std::vector<IProjectSerialisable*> &windows, QWidget *parent)
   : QDialog(parent), m_serialisableWindows(windows.cbegin(), windows.cend()) {

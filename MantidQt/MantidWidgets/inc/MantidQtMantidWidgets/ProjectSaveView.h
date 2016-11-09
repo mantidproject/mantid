@@ -1,8 +1,8 @@
-#ifndef MANTID_CUSTOMINTERFACES_PROJECTSAVEVIEW_H
-#define MANTID_CUSTOMINTERFACES_PROJECTSAVEVIEW_H
+#ifndef MANTIDQT_MANTIDWIDGETS_PROJECTSAVEVIEW_H
+#define MANTIDQT_MANTIDWIDGETS_PROJECTSAVEVIEW_H
 
 #include "MantidQtAPI/IProjectSerialisable.h"
-#include "MantidQtCustomInterfaces/IProjectSaveView.h"
+#include "MantidQtMantidWidgets/IProjectSaveView.h"
 #include "ui_ProjectSave.h"
 
 #include <QWidget>
@@ -12,7 +12,7 @@
 #include <set>
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
 class ProjectSavePresenter;
 
@@ -62,4 +62,4 @@ private:
 };
 }
 }
-#endif /* MANTID_CUSTOMINTERFACES_PROJECTSAVEVIEW_H */
+#endif /* MANTIDQT_MANTIDWIDGETS_PROJECTSAVEVIEW_H */

@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/ProjectSavePresenter.h"
+#include "MantidQtMantidWidgets/ProjectSavePresenter.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
 
@@ -6,7 +6,7 @@
 #include <iterator>
 #include <vector>
 
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 
 ProjectSavePresenter::ProjectSavePresenter(IProjectSaveView *view)

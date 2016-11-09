@@ -11,7 +11,7 @@
 #include <set>
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
 class ProjectSavePresenter;
 

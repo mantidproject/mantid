@@ -1,6 +1,6 @@
 
-#ifndef MANTID_CUSTOMINTERFACES_PROJECTSAVEPRESENTERTEST_H
-#define MANTID_CUSTOMINTERFACES_PROJECTSAVEPRESENTERTEST_H
+#ifndef MANTIDQT_MANTIDWIDGETS_PROJECTSAVEPRESENTERTEST_H
+#define MANTIDQT_MANTIDWIDGETS_PROJECTSAVEPRESENTERTEST_H
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -9,11 +9,11 @@
 #include <QList>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidQtCustomInterfaces/ProjectSavePresenter.h"
+#include "MantidQtMantidWidgets/ProjectSavePresenter.h"
 #include "ProjectSaveMockObjects.h"
 
 using namespace MantidQt::API;
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::MantidWidgets;
 using namespace testing;
 
 //=====================================================================================

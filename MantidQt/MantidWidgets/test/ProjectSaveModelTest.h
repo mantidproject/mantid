@@ -1,16 +1,16 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_PROJECTSAVEMODELTEST_H
-#define MANTIDQTCUSTOMINTERFACES_PROJECTSAVEMODELTEST_H
+#ifndef MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODELTEST_H
+#define MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODELTEST_H
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidQtAPI/IProjectSerialisable.h"
-#include "MantidQtCustomInterfaces/ProjectSavePresenter.h"
-#include "MantidQtCustomInterfaces/ProjectSaveModel.h"
+#include "MantidQtMantidWidgets/ProjectSavePresenter.h"
+#include "MantidQtMantidWidgets/ProjectSaveModel.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "ProjectSaveMockObjects.h"
 
 using namespace MantidQt::API;
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::MantidWidgets;
 
 //=====================================================================================
 // Functional tests
@@ -164,4 +164,4 @@ public:
 
 };
 
-#endif // MANTIDQTCUSTOMINTERFACES_PROJECTSAVEMODELTEST_H
+#endif // MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODELTEST_H

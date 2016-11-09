@@ -1,10 +1,10 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_PROJECTSAVEPRESENTER_H
-#define MANTIDQTCUSTOMINTERFACES_PROJECTSAVEPRESENTER_H
+#ifndef MANTIDQT_MANTIDWIDGETS_PROJECTSAVEPRESENTER_H
+#define MANTIDQT_MANTIDWIDGETS_PROJECTSAVEPRESENTER_H
 
 #include "MantidAPI/Workspace.h"
 #include "MantidQtAPI/IProjectSerialisable.h"
-#include "MantidQtCustomInterfaces/ProjectSaveModel.h"
-#include "MantidQtCustomInterfaces/IProjectSaveView.h"
+#include "MantidQtMantidWidgets/ProjectSaveModel.h"
+#include "MantidQtMantidWidgets/IProjectSaveView.h"
 
 #include <vector>
 
@@ -12,7 +12,7 @@
 //------------------------------------------------
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
 /**
 Implements a presenter for the project saving dialog.

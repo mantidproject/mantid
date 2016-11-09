@@ -1,11 +1,11 @@
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidQtCustomInterfaces/ProjectSaveModel.h"
+#include "MantidQtMantidWidgets/ProjectSaveModel.h"
 
 #include <unordered_set>
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::MantidWidgets;
 
 ProjectSaveModel::ProjectSaveModel(std::vector<IProjectSerialisable*> windows)
 {
