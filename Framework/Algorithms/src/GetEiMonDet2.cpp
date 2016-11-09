@@ -12,7 +12,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/UserStringParser.h"
 #include "MantidKernel/VectorHelper.h"
 
 using namespace Mantid::API;
