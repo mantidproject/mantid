@@ -163,7 +163,7 @@ class NameSource:
         return self._prefix + '_rebinned'
 
     @namelogging
-    def vanadium(self):
+    def vanadiumNormalized(self):
         return self._prefix + '_vnorm'
 
 def guessIncidentEnergyWorkspaceName(eppWorkspace):
@@ -474,7 +474,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # Vanadium normalisation
         vanadiumNormFactors = self.getProperty(PROP_VANADIUM_WORKSPACE).value
         if vanadiumNormFactors:
-            outWs = workspaceNames.vanadiumNormalised()
+            outWs = workspaceNames.vanadiumNormalized()
             workspace = Divide(LHSWorkspace=workspace,
                                RHSWorkspace=vanadiumNormFactors,
                                OutputWorkspace=outWs)
@@ -487,7 +487,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                  EMode = 'Direct')
 
         # KiKf conversion
-        outWs = workspaceNames.kikfConverted()
+        outWs = workspaceNames.kikf()
         workspace = CorrectKiKf(InputWorkspace = workspace,
                                 OutputWorkspace = outWs)
 
