@@ -319,14 +319,15 @@ void LoadNXSPE::exec() {
   // If an instrument name is defined, load instrument parameter file for Emode
   // NB. LoadParameterFile must be used on a workspace with an instrument
   if (!instrument_name.empty()) {
-    std::string IDF_filename = 
-	ExperimentInfo::getInstrumentFilename(instrument_name);
-    std::string instrument_parfile = 
-	IDF_filename.substr(0, IDF_filename.find("_Definition"))
-        + "_Parameters.xml";
+    std::string IDF_filename =
+        ExperimentInfo::getInstrumentFilename(instrument_name);
+    std::string instrument_parfile =
+        IDF_filename.substr(0, IDF_filename.find("_Definition")) +
+        "_Parameters.xml";
     if (Poco::File(instrument_parfile).exists()) {
       try {
-        IAlgorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
+        IAlgorithm_sptr loadParamAlg =
+            createChildAlgorithm("LoadParameterFile");
         loadParamAlg->setProperty("Filename", instrument_parfile);
         loadParamAlg->setProperty("Workspace", outputWS);
         loadParamAlg->execute();
