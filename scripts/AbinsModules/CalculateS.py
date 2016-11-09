@@ -262,9 +262,32 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         factor = (indices[:, 0] == indices[:, 1]) + 1
 
         # noinspection PyPep8
+        # Explanation of used symbols in aCLIMAX manual p. 15
+
+        # num_freq -- total number of transition energies
+        # indices[num_freq]
+        # b_trace[num_freq]
+        # b_tensor[num_freq, 3, 3]
+        # factor[num_freq]
+
+        # Tr B_v_i * Tr B_v_k ->  np.prod(np.take(b_trace, indices=indices), axis=1)
+        #
+        # Operation ":" is a contraction of tensors
+        # B_v_i : B_v_k ->
+        # np.einsum('kli, kil->k', np.take(b_tensor, indices=indices[:, 0], axis=0),
+        # np.take(b_tensor, indices=indices[:, 1], axis=0))
+        #
+        # B_v_k : B_v_i ->
+        # np.einsum('kli, kil->k', np.take(b_tensor, indices=indices[:, 1], axis=0),
+        # np.take(b_tensor, indices=indices[:, 0], axis=0)))
+
         s = q4 * dw * (np.prod(np.take(b_trace, indices=indices), axis=1) +
+
             np.einsum('kli, kil->k', np.take(b_tensor, indices=indices[:, 0], axis=0),
-            np.take(b_tensor, indices=indices[:, 1], axis=0))) / (15.0 * factor)
+            np.take(b_tensor, indices=indices[:, 1], axis=0)) +
+
+            np.einsum('kli, kil->k', np.take(b_tensor, indices=indices[:, 1], axis=0),
+            np.take(b_tensor, indices=indices[:, 0], axis=0))) / (15.0 * factor)
 
         return s
 
