@@ -2350,7 +2350,8 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data,
   t->setColumnType(0, Table::Time);
   t->setTimeFormat("HH:mm:ss", 0, false);
   t->setColName(1, label.section("-", 1));
-
+  t->setColumnType(1, Table::Text);
+  
   // Make both columns read-only
   t->setReadOnlyColumn(0, true);
   t->setReadOnlyColumn(1, true);
@@ -2365,6 +2366,7 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data,
     ds.removeFirst(); // remove date
     ds.removeFirst(); // and time
     t->setText(row, 1, ds.join(" "));
+    t->setTextAlignment(row, 1, Qt::AlignLeft | Qt::AlignVCenter);
   }
 
   // Show table

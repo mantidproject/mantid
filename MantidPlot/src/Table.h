@@ -165,6 +165,7 @@ public slots:
   void setText(int row, int col, const QString &text);
   void setRandomValues();
   void setAscValues();
+  void setTextAlignment(int row, int col, QFlags<Qt::AlignmentFlag> alignment);
 
   virtual void cellEdited(int, int col);
   void moveCurrentCell();

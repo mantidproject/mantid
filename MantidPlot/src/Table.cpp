@@ -3254,6 +3254,20 @@ void Table::recordSelection() {
   }
 }
 
+/**
+ * Set the text alignment of the given cell
+ * @param row :: [input] Row of the cell
+ * @param col :: [input] Column of the cell
+ * @param alignment :: [input] Alignment flags to give the cell
+ */
+void Table::setTextAlignment(int row, int col,
+                             QFlags<Qt::AlignmentFlag> alignment) {
+  auto *cell = d_table->item(row, col);
+  if (cell) {
+    cell->setTextAlignment(alignment);
+  }
+}
+
 /*****************************************************************************
  *
  * Class MyTable
