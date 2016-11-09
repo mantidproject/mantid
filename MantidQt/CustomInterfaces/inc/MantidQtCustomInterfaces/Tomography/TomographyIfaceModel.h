@@ -224,7 +224,7 @@ protected: // protected to expose everything to testing
   bool checkIfToolIsSetupProperly(const std::string &tool,
                                   const std::string &cmd) const;
 
-  std::vector<std::string> makeTomoRecScriptOptions(bool local) const;
+  void makeTomoRecScriptOptions(bool local, std::vector<std::string> &opts) const;
 
   void filtersCfgToCmdOpts(const TomoReconFiltersSettings &filters,
                            const ImageStackPreParams &corRegions, bool local,

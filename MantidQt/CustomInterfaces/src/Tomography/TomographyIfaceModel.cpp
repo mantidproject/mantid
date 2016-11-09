@@ -334,7 +334,7 @@ void TomographyIfaceModel::doQueryJobStatus(const std::string &compRes,
  * @param opt Command line options to the application
  */
 void TomographyIfaceModel::makeRunnableWithOptions(
-    const std::string &comp, std::string &run,
+    const std::string &comp, std::string &runnable,
     std::vector<std::string> &opt) const {
 
   if (!m_currentToolSettings) {
@@ -348,16 +348,26 @@ void TomographyIfaceModel::makeRunnableWithOptions(
   // Special case. Just pass on user inputs.
   if (tool == g_customCmdTool) {
     opt.resize(1);
-    splitCmdLine(cmd, run, opt[0]);
+    splitCmdLine(cmd, runnable, opt[0]);
     return;
   }
   const bool local = (g_LocalResourceName == comp) ? true : false;
 
   std::string longOpt;
-  splitCmdLine(cmd, run, longOpt);
-  checkIfToolIsSetupProperly(tool, cmd);
+  // this gets the runnable from the whole string
+  splitCmdLine(cmd, runnable, longOpt);
 
-  opt = makeTomoRecScriptOptions(local);
+  std::string execScriptPath;
+
+  // this variable holds the input paths, but is discarded for now
+  // until the command line building overhaul
+  std::string discardedInputPaths;
+  // this gets the path to the python script tomo_reconstruct.py
+  splitCmdLine(longOpt, execScriptPath, discardedInputPaths);
+
+  checkIfToolIsSetupProperly(tool, cmd);
+  opt.emplace_back(execScriptPath);
+  makeTomoRecScriptOptions(local, opt);
 }
 
 /**
@@ -369,11 +379,10 @@ void TomographyIfaceModel::makeRunnableWithOptions(
  *
  * @return command options ready for the tomorec script
  */
-std::vector<std::string>
-TomographyIfaceModel::makeTomoRecScriptOptions(const bool local) const {
+void TomographyIfaceModel::makeTomoRecScriptOptions(const bool local, std::vector<std::string> &opts) const {
 
   // options with all the info from filters and regions
-  std::vector<std::string> opts;
+  // 9 is the current number of arguments being added
   opts.reserve(9);
 
   const std::string currentTool = usingTool();
@@ -390,8 +399,6 @@ TomographyIfaceModel::makeTomoRecScriptOptions(const bool local) const {
 
   filtersCfgToCmdOpts(m_prePostProcSettings, m_imageStackPreParams, local,
                       opts);
-
-  return opts;
 }
 
 /** Processes the tool name so that it is appropriate for the command line when
@@ -689,16 +696,14 @@ void TomographyIfaceModel::splitCmdLine(const std::string &cmd,
   if (cmd.empty())
     return;
 
-  // look for the first -- as this is the first cmd line separator and signifies
-  // where the command line starts
-  const auto pos = cmd.find("--");
+  const auto pos = cmd.find(" ");
   if (std::string::npos == pos)
     return;
 
   // pos - 1 to separate on the whitespace between the run info and the cmd line
   // opts
-  run = cmd.substr(0, pos - 1);
-  opts = cmd.substr(pos);
+  run = cmd.substr(0, pos);
+  opts = cmd.substr(pos + 1);
 }
 
 /**
