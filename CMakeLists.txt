@@ -270,17 +270,18 @@ if ( ENABLE_CPACK )
       set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization")
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4,sip" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-six,python-ipython >= 1.1.0,python-ipython-notebook" )
-      # scipy & matplotlib
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy,python-matplotlib" )
+      # scipy
+      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5,jsoncpp >= 0.7.0" )
 
       if( "${UNIX_CODENAME}" MATCHES "Santiago" )
         # On RHEL6 we have to use an updated qscintilla to fix an auto complete bug
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla >= 2.4.6, boost157" )
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla >= 2.4.6, boost157,python-matplotlib" )
         # On RHEL6 we are using SCL packages for Qt
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scl-utils,mantidlibs34,mantidlibs34-runtime,mantidlibs34-qt,mantidlibs34-qt-x11,mantidlibs34-qt-webkit,mantidlibs34-qwt5-qt4" )
       else()
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla,qwt5-qt4,python-matplotlib-qt4,boost >= 1.53.0" )
+        # Require matplotlib >= 1.5 to fix bug in latex rendering
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla,qwt5-qt4,python2-matplotlib-qt4 >= 1.5.2,boost >= 1.53.0" )
       endif()
 
       # Add software collections for RHEL
