@@ -77,6 +77,7 @@ public:
   MOCK_CONST_METHOD0(getSeparator, std::string());
   MOCK_CONST_METHOD0(clearWorkspaceList, void());
   MOCK_CONST_METHOD1(setWorkspaceList, void(const std::vector<std::string> &));
+  MOCK_CONST_METHOD0(filterWorkspaceList, void());
 };
 
 class MockSettingsTabView : public IReflSettingsTabView {

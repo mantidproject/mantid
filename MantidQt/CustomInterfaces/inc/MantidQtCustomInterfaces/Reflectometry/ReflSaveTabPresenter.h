@@ -3,6 +3,7 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h"
+#include "MantidKernel/Logger.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -48,14 +49,15 @@ public:
   /// Adds all workspace names to the list of workspaces
   void populateWorkspaceList();
   /// Filter workspaces names
-  void filterWorkspaceNames();
+  void filterWorkspaceNames(std::string filter, bool regexCheck);
 
 private:
   /// Obtains all available workspace names
   std::vector<std::string> getAvailableWorkspaceNames();
-
   /// The view
   IReflSaveTabView *m_view;
+
+  static Mantid::Kernel::Logger g_log;
 };
 }
 }

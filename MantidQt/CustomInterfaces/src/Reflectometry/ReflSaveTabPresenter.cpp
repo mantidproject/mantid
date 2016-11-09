@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabView.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/FrameworkManager.h"
 
 #include <regex>
 
@@ -9,11 +10,15 @@ namespace CustomInterfaces {
 
 using namespace Mantid::API;
 
+Mantid::Kernel::Logger ReflSaveTabPresenter::g_log("ReflSaveTabPresenter");
+
 /** Constructor
 * @param view :: The view we are handling
 */
 ReflSaveTabPresenter::ReflSaveTabPresenter(IReflSaveTabView *view)
     : m_view(view) {
+
+  FrameworkManager::Instance();
 }
 
 /** Destructor
@@ -26,7 +31,7 @@ void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
     populateWorkspaceList();
     break;
   case filterWorkspaceListFlag:
-    filterWorkspaceNames();
+    filterWorkspaceNames(m_view->getFilter(), m_view->getRegExpCheck());
     break;
   }
 }
@@ -41,21 +46,21 @@ void ReflSaveTabPresenter::populateWorkspaceList() {
 
 /** Filters the names in the 'List of Workspaces' widget
 */
-void ReflSaveTabPresenter::filterWorkspaceNames() {
+void ReflSaveTabPresenter::filterWorkspaceNames(std::string filter, 
+    bool regexCheck) {
   m_view->clearWorkspaceList();
   auto wsNames = getAvailableWorkspaceNames();
-  std::string filter = m_view->getFilter();
   std::vector<std::string> validNames(wsNames.size());
   auto it = validNames.begin();
 
-  if (m_view->getRegExpCheck()) {
+  if (regexCheck) {
     // Use regex search to find names that contain the filter sequence
     try {
       std::regex rgx(filter);
       it = std::copy_if(wsNames.begin(), wsNames.end(), validNames.begin(),
         [rgx](std::string s) { return std::regex_search(s, rgx); });
     } catch (std::regex_error&) {
-      std::cerr << "Error, invalid regular expression\n";
+      g_log.error("Error, invalid regular expression\n");
     }
   } else {
     // Otherwise simply add names where the filter string is found in

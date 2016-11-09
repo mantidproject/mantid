@@ -49,6 +49,50 @@ public:
     // Workspace 'groupWs' should not be included in the workspace list
     EXPECT_CALL(mockView, setWorkspaceList(wsNames)).Times(Exactly(1));
     presenter.populateWorkspaceList();
+    AnalysisDataService::Instance().clear();
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testFilterWorkspaceNoRegex() {
+    MockSaveTabView mockView;
+    ReflSaveTabPresenter presenter(&mockView);
+
+    createWS("anotherWs");
+    createWS("different");
+    createWS("someWsName");
+
+    EXPECT_CALL(mockView, clearWorkspaceList()).Times(Exactly(2));
+    EXPECT_CALL(mockView, setWorkspaceList(
+      std::vector<std::string> { "anotherWs", "different", "someWsName" }))
+      .Times(Exactly(1));
+    EXPECT_CALL(mockView, setWorkspaceList(
+      std::vector<std::string> { "anotherWs", "someWsName" }))
+      .Times(Exactly(1));
+    presenter.populateWorkspaceList();
+    presenter.filterWorkspaceNames("Ws", false);
+    AnalysisDataService::Instance().clear();
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testFilterWorkspaceWithRegex() {
+    MockSaveTabView mockView;
+    ReflSaveTabPresenter presenter(&mockView);
+
+    createWS("_42");
+    createWS("apple_113");
+    createWS("grape_");
+    createWS("pear_cut");
+
+    EXPECT_CALL(mockView, clearWorkspaceList()).Times(Exactly(2));
+    EXPECT_CALL(mockView, setWorkspaceList(
+      std::vector<std::string> { "_42", "apple_113", "grape_", "pear_cut"}))
+      .Times(Exactly(1));
+    EXPECT_CALL(mockView, setWorkspaceList(
+      std::vector<std::string> { "_42", "apple_113" }))
+      .Times(Exactly(1));
+    presenter.populateWorkspaceList();
+    presenter.filterWorkspaceNames("[a-zA-Z]*_[0-9]+", true);
+    AnalysisDataService::Instance().clear();
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 

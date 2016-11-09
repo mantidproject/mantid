@@ -77,7 +77,7 @@ public:
 
 public slots:
   /// Filters the 'List of workspaces' widget
-  void filterWorkspaceList() const;
+  void filterWorkspaceList() const override;
 
 private:
   /// Initialize the interface

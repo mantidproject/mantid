@@ -55,6 +55,7 @@ public:
 
   virtual void clearWorkspaceList() const = 0;
   virtual void setWorkspaceList(const std::vector<std::string> &) const = 0;
+  virtual void filterWorkspaceList() const = 0;
 };
 }
 }
