@@ -15,6 +15,10 @@
 // Qt classes forward declarations
 class QMutex;
 
+namespace Poco{
+  class Pipe;
+}
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -253,6 +257,8 @@ protected: // protected to expose everything to testing
   std::string
   buildOutReconstructionDirFromSamplesDir(const std::string &samplesDir) const;
 
+  /// Prints the streams from the Poco::launch process into mantid
+  void printProcessStreamsToMantidLog(const Poco::Pipe &outPipe, const Poco::Pipe &errPipe);
 private:
   /// facility for the remote compute resource
   const std::string m_facility;

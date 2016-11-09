@@ -6,6 +6,9 @@
 
 #include <Poco/Path.h>
 #include <Poco/Process.h>
+#include <Poco/Pipe.h>
+#include <Poco/PipeStream.h>
+#include <Poco/StreamCopier.h>
 
 #include <QMutex>
 
@@ -345,12 +348,6 @@ void TomographyIfaceModel::makeRunnableWithOptions(
 
   const std::string cmd = m_currentToolSettings->toCommand();
 
-  // Special case. Just pass on user inputs.
-  if (tool == g_customCmdTool) {
-    opt.resize(1);
-    splitCmdLine(cmd, runnable, opt[0]);
-    return;
-  }
   const bool local = (g_LocalResourceName == comp) ? true : false;
 
   std::string longOpt;
@@ -369,6 +366,12 @@ void TomographyIfaceModel::makeRunnableWithOptions(
     checkIfToolIsSetupProperly(tool, cmd);
     opt.emplace_back(execScriptPath);
   }
+  // Special case. Just pass on user inputs.
+  // this stops from appending all the filters and other options
+  if (tool == g_customCmdTool) {
+    return;
+  }
+
   makeTomoRecScriptOptions(local, opt);
 }
 
@@ -500,9 +503,13 @@ void TomographyIfaceModel::doRunReconstructionJobLocal(
 
   // initialise to 0, if the launch fails then the id will not be changed
   Poco::Process::PID pid = 0;
+  Poco::Pipe outPipe;
+  Poco::Pipe errPipe;
   try {
-    Poco::ProcessHandle handle = Poco::Process::launch(run, args);
+    Poco::ProcessHandle handle = Poco::Process::launch(run, args, 0, &outPipe, &errPipe);
     pid = handle.id();
+    
+    printProcessStreamsToMantidLog(outPipe, errPipe);
   } catch (Poco::SystemException &sexc) {
     g_log.error() << "Execution failed. Could not run the tool. Error details: "
                   << std::string(sexc.what());
@@ -517,6 +524,31 @@ void TomographyIfaceModel::doRunReconstructionJobLocal(
 
   doRefreshJobsInfo(g_LocalResourceName);
 }
+
+/** Converts the pipes to strings and prints them into the mantid logger stream
+* 
+* @param outPipe Poco::Pipe that holds the output stream of the process
+* @param errPipe Poco::Pipe that holds the error stream of the process
+*/
+void TomographyIfaceModel::printProcessStreamsToMantidLog(const Poco::Pipe &outPipe, const Poco::Pipe &errPipe){
+    // if the launch is successful then print output streams 
+    // into the g_log so the user can see the information/error
+    Poco::PipeInputStream outstr(outPipe);
+    Poco::PipeInputStream errstr(errPipe);
+    std::string outString;
+    std::string errString;
+    Poco::StreamCopier::copyToString(outstr, outString);
+    Poco::StreamCopier::copyToString(errstr, errString);
+    
+    // print normal output stream if not empty
+    if(!outString.empty())
+      g_log.information(outString);
+
+    // print error output stream if not empty
+    if(!errString.empty())
+      g_log.error(errString);
+}
+
 
 void TomographyIfaceModel::doCancelJobs(const std::string &compRes,
                                         const std::vector<std::string> &ids) {
