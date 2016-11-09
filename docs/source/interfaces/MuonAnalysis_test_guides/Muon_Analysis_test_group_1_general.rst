@@ -68,4 +68,4 @@ Test 5: New style data analysis GUI
 Teardown
 --------
 
-Before moving to group 2, go to the *Settings* tab and set rebinning back to "None". Leave the "Enable multiple fitting" option turned on.
+Before moving to group 2, clear any existing fit curves, then go to the *Settings* tab and set rebinning back to "None". Leave the "Enable multiple fitting" option turned on.

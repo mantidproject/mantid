@@ -11,7 +11,7 @@ Preamble
 This document is intended for developers to use for unscripted testing of the :program:`Muon Analysis` GUI.
 User documentation for this interface can be found at :ref:`Muon_Analysis-ref`.
 
-Testing here mostly focuses on the *Data Analysis* tab, which has been significantly changed for Mantid 3.8.
+Testing here mostly focuses on the changes for Mantid 3.8, but includes other functionality as well.
 The tests follow real use cases provided by scientists and are intended to exercise all the interface's functionality.
 As changes are made to the interface and features added, anything for which it is not possible to write an automated test should have a manual test added to this list.
 
