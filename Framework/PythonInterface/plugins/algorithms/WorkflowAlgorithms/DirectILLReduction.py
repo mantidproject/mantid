@@ -6,7 +6,7 @@ from mantid.simpleapi import AddSampleLog, CalculateFlatBackground,\
                              CloneWorkspace, ComputeCalibrationCoefVan,\
                              ConvertUnits, CorrectKiKf, CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace, DetectorEfficiencyCorUser, Divide, ExtractMonitors, ExtractSpectra, \
                              FindDetectorsOutsideLimits, FindEPP, GetEiMonDet, GroupWorkspaces, Integration, Load,\
-                             MaskDetectors, MedianDetectorTest, MergeRuns, Minus, NormaliseToMonitor, Regroup, Scale
+                             MaskDetectors, MedianDetectorTest, MergeRuns, Minus, NormaliseToMonitor, Rebin, Scale
 import numpy
 
 CLEANUP_DELETE = 'DeleteIntermediateWorkspaces'
@@ -491,14 +491,14 @@ class DirectILLReduction(DataProcessorAlgorithm):
         workspace = CorrectKiKf(InputWorkspace = workspace,
                                 OutputWorkspace = outWs)
 
-        # Regrouping
-        # TODO automatize binning in w. Do we need regrouping in q as well?
+        # Rebinning
+        # TODO automatize binning in w. Do we need rebinning in q as well?
         params = self.getProperty(PROP_BINNING_W).value
         if params:
             outWs = workspaceNames.rebinned()
-            workspace = Regroup(InputWorkspace = workspace,
-                                OutputWorkspace = outWs,
-                                Params = params)
+            workspace = Rebin(InputWorkspace = workspace,
+                              OutputWorkspace = outWs,
+                              Params = params)
 
         # Detector efficiency correction
         outWs = workspaceNames.detectorEfficiencyCorrected()
