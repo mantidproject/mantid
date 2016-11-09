@@ -356,17 +356,19 @@ void TomographyIfaceModel::makeRunnableWithOptions(
   std::string longOpt;
   // this gets the runnable from the whole string
   splitCmdLine(cmd, runnable, longOpt);
+  
+  if(local){
+    std::string execScriptPath;
 
-  std::string execScriptPath;
+    // this variable holds the input paths, but is discarded for now
+    // until the command line building overhaul
+    std::string discardedInputPaths;
+    // this gets the path to the python script tomo_reconstruct.py
+    splitCmdLine(longOpt, execScriptPath, discardedInputPaths);
 
-  // this variable holds the input paths, but is discarded for now
-  // until the command line building overhaul
-  std::string discardedInputPaths;
-  // this gets the path to the python script tomo_reconstruct.py
-  splitCmdLine(longOpt, execScriptPath, discardedInputPaths);
-
-  checkIfToolIsSetupProperly(tool, cmd);
-  opt.emplace_back(execScriptPath);
+    checkIfToolIsSetupProperly(tool, cmd);
+    opt.emplace_back(execScriptPath);
+  }
   makeTomoRecScriptOptions(local, opt);
 }
 
@@ -954,10 +956,6 @@ TomographyIfaceModel::adaptInputPathForExecution(const std::string &path,
       else
         result = result.substr(2);
     }
-
-    // this appends the base path for the instrument data space on the
-    // remote (like '/work/imat' or similar)
-    result = m_systemSettings.m_remote.m_basePathTomoData + result;
   }
 
   return result;
