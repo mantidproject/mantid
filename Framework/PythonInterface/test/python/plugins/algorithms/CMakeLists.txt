@@ -45,12 +45,10 @@ set ( TEST_PY_FILES
   IndirectAnnulusAbsorptionTest.py
   IndirectCylinderAbsorptionTest.py
   IndirectFlatPlateAbsorptionTest.py
-  IndirectILLFixedWindowScansTest.py
-  IndirectILLReductionTest.py
+  IndirectILLEnergyTransferTest.py
   IndirectResolutionTest.py
   IndirectTransmissionTest.py
   IndirectTransmissionMonitorTest.py
-  ILLIN16BCalibrationTest.py
   IqtFitMultipleTest.py
   IqtFitSequentialTest.py
   ISISIndirectDiffractionReductionTest.py
