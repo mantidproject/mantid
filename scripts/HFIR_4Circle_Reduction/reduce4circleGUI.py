@@ -206,6 +206,10 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_clear_merge_table)
         self.connect(self.ui.pushButton_multipleScans, QtCore.SIGNAL('clicked()'),
                      self.do_merge_multi_scans)
+        self.connect(self.ui.pushButton_convertMerged2HKL, QtCore.SIGNAL('clicked()'),
+                     self.do_convert_merged_to_hkl)
+        self.connect(self.ui.pushButton_showScanWSInfo, QtCore.SIGNAL('clicked()'),
+                     self.do_show_workspaces)
 
         # Tab 'Integrate Peaks'
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
@@ -342,6 +346,8 @@ class MainWindow(QtGui.QMainWindow):
         ub_style_group = QtGui.QButtonGroup(self)
         ub_style_group.addButton(self.ui.radioButton_ubMantidStyle)
         ub_style_group.addButton(self.ui.radioButton_ubSpiceStyle)
+
+        self.ui.radioButton_qsample.setChecked(True)
 
         # combo-box
         self.ui.comboBox_kVectors.clear()
@@ -961,6 +967,14 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_convert_merged_to_hkl(self):
+        """
+        convert merged workspace in Q-sample frame to HKL frame
+        :return:
+        """
+        # TODO/NOW/ISSUE - Make this one work!
+        self._myControl.convert_merged_ws_to_hkl()
+
     def do_del_roi(self):
         """ Delete ROI
         :return:
@@ -1043,7 +1057,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # merge peak if necessary
         if self._myControl.has_merged_data(exp_no, scan_no) is False:
-            status, err_msg = self._myControl.merge_pts_in_scan(exp_no, scan_no, [], 'q-sample')
+            status, err_msg = self._myControl.merge_pts_in_scan(exp_no, scan_no, [])
             if status is False:
                 self.pop_one_button_dialog(err_msg)
 
@@ -1292,7 +1306,7 @@ class MainWindow(QtGui.QMainWindow):
             norm_type = ''
 
         # get peak center (weighted)
-        status, ret_obj = self._myControl.calculate_peak_center(exp_number, scan_number)
+        status, ret_obj = self._myControl.find_peak(exp_number, scan_number)
         if status is False:
             error_message = ret_obj
             self.pop_one_button_dialog(error_message)
@@ -1844,6 +1858,9 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog('Merging multiple scans requires more than 1 scan to be selected.')
             return
 
+        # find out the merged workspace is in Q or hkl
+        convert_to_hkl = self.ui.radioButton_hkl.isChecked()
+
         # get the information from table workspace
         exp_number = int(str(self.ui.lineEdit_exp.text()))
         md_ws_list = list()
@@ -1851,8 +1868,10 @@ class MainWindow(QtGui.QMainWindow):
         for i_row in selected_rows:
             # get scan number and md workspace number
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(i_row)
-
             md_ws_name = self.ui.tableWidget_mergeScans.get_merged_ws_name(i_row)
+            if convert_to_hkl:
+                # TODO/NOW/ISSUE - is there any better and more systematic way to find the workspace name???
+                md_ws_name = '%s_HKL' % md_ws_name
             md_ws_list.append(md_ws_name)
             # get peak center in 3-tuple
             peak_center = self._myControl.get_peak_info(exp_number, scan_number).get_peak_centre()
@@ -1875,7 +1894,6 @@ class MainWindow(QtGui.QMainWindow):
         """ Merge each selected scans in the tab-merge-scans
         :return:
         """
-        # TODO/FIXME/NOW/ ----- Need Test!
         # Get UB matrix and set to control
         ub_matrix = self.ui.tableWidget_ubInUse.get_matrix()
         self._myControl.set_ub_matrix(exp_number=None, ub_matrix=ub_matrix)
@@ -1885,7 +1903,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # Process
         row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows(True)
-        frame = 'QSample'
         exp_number = int(str(self.ui.lineEdit_exp.text()))
 
         sum_error_msg = ''
@@ -1905,23 +1922,29 @@ class MainWindow(QtGui.QMainWindow):
 
             self.ui.tableWidget_mergeScans.set_status(row_number, 'In Processing')
             status, ret_tup = self._myControl.merge_pts_in_scan(exp_no=exp_number, scan_no=scan_number,
-                                                                pt_num_list=[], target_frame=frame)
+                                                                pt_num_list=[])
+            # find peaks too
+            status, ret_obj = self._myControl.find_peak(exp_number, scan_number)
+            if status:
+                peak_centre = ret_obj
+            else:
+                peak_centre = None
 
             # process output
             if status:
                 assert len(ret_tup) == 2
-                merge_status = 'Done'
+                merge_status = 'Merged'
                 merged_name = ret_tup[0]
-                group_name = ret_tup[1]
             else:
                 merge_status = 'Failed. Reason: %s' % ret_tup
                 merged_name = 'x'
-                group_name = 'x'
                 print merge_status
 
             # update table
             self.ui.tableWidget_mergeScans.set_status(row_number, merge_status)
             self.ui.tableWidget_mergeScans.set_ws_name(row_number, merged_name)
+            if peak_centre is not None:
+                self.ui.tableWidget_mergeScans.set_peak_centre(row_number, peak_centre)
 
             # Sleep for a while
             time.sleep(0.1)
@@ -2382,7 +2405,6 @@ class MainWindow(QtGui.QMainWindow):
         """ Index all peaks' HKL value in the merged-peak tab by UB matrix that is just calculated
         :return:
         """
-        # TODO/NOW/ISSUE/FIXME - This one does not work well.  Add debugging to fix it!
         # get the parameters
         exp_number = int(self.ui.lineEdit_exp.text())
         hkl_src = str(self.ui.comboBox_indexFrom.currentText())
@@ -2392,11 +2414,16 @@ class MainWindow(QtGui.QMainWindow):
         for row_index in range(num_rows):
             # get scan number
             scan_i = self.ui.tableWidget_mergeScans.get_scan_number(row_index)
+            peak_info_i = self._myControl.get_peak_info(exp_number, scan_number=scan_i)
+
+            # skip non-merged sans
+            if peak_info_i is None:
+                continue
 
             # get or calculate HKL
             if hkl_src == 'From SPICE':
                 # get HKL from SPICE (non-user-hkl)
-                hkl_i = self._myControl.get_peak_info(exp_number, scan_number=scan_i).get_hkl(user_hkl=False)
+                hkl_i = peak_info_i.get_hkl(user_hkl=False)
             else:
                 # calculate HKL from SPICE
                 try:
@@ -2416,12 +2443,15 @@ class MainWindow(QtGui.QMainWindow):
                 # END-IF-ELSE(index)
             # END-IF-ELSE (hkl_from_spice)
 
-            # # round
-            # if round_hkl:
-            #     hkl_i = hb3a.round_hkl(hkl_i)
-
             # set & show
-            self._myControl.get_peak_info(exp_number, scan_i).set_hkl_np_array(hkl_i)
+            peak_info_i.set_hkl_np_array(hkl_i)
+            # self._myControl.get_peak_info(exp_number, scan_i)
+            # round HKL?
+            if self.ui.checkBox_roundHKL.isChecked():
+                hkl_i = [hb3a_util.round_miller_index(hkl_i[0], 0.2),
+                         hb3a_util.round_miller_index(hkl_i[1], 0.2),
+                         hb3a_util.round_miller_index(hkl_i[2], 0.2)]
+
             self.ui.tableWidget_mergeScans.set_hkl(row_index, hkl_i)
         # END-FOR
 
@@ -2560,6 +2590,9 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.plainTextEdit_ubInput.setPlainText(text)
 
         return
+
+    def do_show_workspaces(self):
+        # TODO/NOW/ISSUE - pop out a dialog to show the workspace names...
 
     def do_survey(self):
         """
@@ -3291,8 +3324,7 @@ class MainWindow(QtGui.QMainWindow):
         :param mode:
         :return:
         """
-        # TODO/NOW - Test it! To find out why it is wrong to set value to table (messed row/scan)
-        print '[DB...BAT] UpdatePeakIntegrationValue: Scan = %d' % scan_number
+        # Process signals according to mode
         if mode == 0:
             # start of processing one peak
             progress = int(sig_value - 0.5)
@@ -3344,7 +3376,7 @@ class MainWindow(QtGui.QMainWindow):
                 if is_error:
                     self.ui.tableWidget_mergeScans.set_status(row_number, 'Intensity Error')
                 else:
-                    self.ui.tableWidget_mergeScans.set_status(row_number, 'OK (1)')
+                    self.ui.tableWidget_mergeScans.set_status(row_number, 'Good')
 
             else:
                 self._errorMessageEnsemble += error_msg + '\n'

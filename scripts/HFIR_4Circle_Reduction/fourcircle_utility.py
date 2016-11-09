@@ -684,7 +684,7 @@ def round_hkl(index_h, index_k, index_l):
     return index_h, index_k, index_l
 
 
-def round_index(value, tol):
+def round_miller_index(value, tol):
     """
     round a peak index (h, k, or l) with some tolerance
     :param value:
@@ -713,9 +713,9 @@ def convert_hkl_to_integer(index_h, index_k, index_l, magnetic_tolerance=0.2):
     assert isinstance(magnetic_tolerance, float) and 0. < magnetic_tolerance <= 0.5
 
     #
-    index_h_r = round_index(index_h, magnetic_tolerance)
-    index_k_r = round_index(index_k, magnetic_tolerance)
-    index_l_r = round_index(index_l, magnetic_tolerance)
+    index_h_r = round_miller_index(index_h, magnetic_tolerance)
+    index_k_r = round_miller_index(index_k, magnetic_tolerance)
+    index_l_r = round_miller_index(index_l, magnetic_tolerance)
 
     round_error = math.sqrt((index_h - index_h_r) ** 2 +
                             (index_k - index_k_r) ** 2 +

@@ -553,7 +553,6 @@ class ProcessTableWidget(tableBase.NTableWidget):
                   ('Corrected', 'float'),
                   ('Status', 'str'),
                   ('Peak', 'str'),  # peak center can be either HKL or Q depending on the unit
-                  ('Frame', 'str'),
                   ('HKL', 'str'),
                   ('Index From', 'str'),  # source of HKL index, either SPICE or calculation
                   ('Motor', 'str'),
@@ -578,7 +577,6 @@ class ProcessTableWidget(tableBase.NTableWidget):
         self._colIndexHKL = None
         self._colIndexStatus = None
         self._colIndexPeak = None
-        self._colIndexFrame = None
         self._colIndexIndexFrom = None
         self._colIndexMotor = None
         self._colIndexMotorStep = None
@@ -589,7 +587,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         return
 
     @staticmethod
-    def _generate_empty_row(scan_number, status='In-Queue', frame='QSample', ws_name=''):
+    def _generate_empty_row(scan_number, status='In-Queue', ws_name=''):
         """ Generate a list for empty row with scan number
         :param scan_number:
         :param status:
@@ -610,7 +608,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         hkl = ''
         hkl_from = ''
 
-        new_row = [scan_number, intensity, corr_int, status, peak_center, frame, hkl, hkl_from,
+        new_row = [scan_number, intensity, corr_int, status, peak_center, hkl, hkl_from,
                    motor_name, motor_step, wave_length, ws_name, 0, False]
 
         return new_row
@@ -681,7 +679,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         for i_row in xrange(num_rows):
             tmp_scan_no = self.get_cell_value(i_row, self._colIndexScan)
             if scan_number == tmp_scan_no:
-                ret_row_number = True
+                ret_row_number = i_row
                 break
         # END-FOR
 
@@ -759,13 +757,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
     def get_merged_ws_name(self, i_row):
         """
-        Get ...
+        Get merged workspace name
         :param i_row:
         :return:
         """
-        j_col_merged = self.TableSetup.index(('Merged Workspace', 'str'))
-
-        return self.get_cell_value(i_row, j_col_merged)
+        return self.get_cell_value(i_row, self._colIndexWorkspace)
 
     def get_scan_list(self, output_row_number=True):
         """
@@ -896,7 +892,6 @@ class ProcessTableWidget(tableBase.NTableWidget):
             'Row number %s is not supported or out of boundary.' % str(row_number)
         assert isinstance(peak_centre, str) or len(peak_centre) == 3,\
             'Peak centre %s must be a string or a container with size 3.' % str(peak_centre)
-        assert isinstance(frame, str), 'Frame must be a string either QSample or HKL.'
 
         # set value of peak center
         if isinstance(peak_centre, str):
@@ -907,7 +902,6 @@ class ProcessTableWidget(tableBase.NTableWidget):
             value_to_set = '%.3f, %.3f, %.3f' % (peak_centre[0], peak_centre[1], peak_centre[2])
 
         self.update_cell_value(row_number, self._colIndexPeak, value_to_set)
-        self.update_cell_value(row_number, self._colIndexFrame, frame)
 
         return
 
@@ -987,7 +981,6 @@ class ProcessTableWidget(tableBase.NTableWidget):
         self._colIndexStatus = self.TableSetup.index(('Status', 'str'))
         self._colIndexHKL = ProcessTableWidget.TableSetup.index(('HKL', 'str'))
         self._colIndexPeak = self.TableSetup.index(('Peak', 'str'))
-        self._colIndexFrame = self.TableSetup.index(('Frame', 'str'))
         self._colIndexIndexFrom = self.TableSetup.index(('Index From', 'str'))
         self._colIndexMotor = ProcessTableWidget.TableSetup.index(('Motor', 'str'))
         self._colIndexMotorStep = ProcessTableWidget.TableSetup.index(('Motor Step', 'str'))

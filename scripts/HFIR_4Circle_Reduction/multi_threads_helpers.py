@@ -68,7 +68,7 @@ class AddPeaksThread(QThread):
 
             # merge peak
             status, err_msg = self._mainWindow.controller.merge_pts_in_scan(
-                self._expNumber, scan_number, [], 'q-sample')
+                self._expNumber, scan_number, [])
 
             # continue to the next scan if there is something wrong
             if status is False:
@@ -182,6 +182,8 @@ class IntegratePeaksThread(QThread):
 
             # emit signal for run start (mode 0)
             mode = int(0)
+            print '[DB...BAT] IntegratePeakThread: Sent out signal (1): %d, %d, %f' % (self._expNumber, scan_number,
+                                                                                       float(index))
             self.peakMergeSignal.emit(self._expNumber, scan_number, float(index), [0., 0., 0.], mode)
 
             # merge if not merged
@@ -190,8 +192,7 @@ class IntegratePeaksThread(QThread):
                 try:
                     status, ret_tup = self._mainWindow.controller.merge_pts_in_scan(exp_no=self._expNumber,
                                                                                     scan_no=scan_number,
-                                                                                    pt_num_list=pt_number_list,
-                                                                                    target_frame='q-sample')
+                                                                                    pt_num_list=pt_number_list)
                     if status:
                         merged_ws_name = str(ret_tup[0])
                         error_message = ''
@@ -218,8 +219,10 @@ class IntegratePeaksThread(QThread):
 
             # calculate peak center
             try:
-                status, ret_obj = self._mainWindow.controller.calculate_peak_center(self._expNumber, scan_number,
-                                                                                    pt_number_list)
+                # status, ret_obj = self._mainWindow.controller.calculate_peak_center(self._expNumber, scan_number,
+                #                                                                     pt_number_list)
+                status, ret_obj = self._mainWindow.controller.find_peak(self._expNumber, scan_number, pt_number_list)
+
             except RuntimeError as run_err:
                 status = False
                 ret_obj = 'RuntimeError: %s.' % str(run_err)
@@ -281,6 +284,8 @@ class IntegratePeaksThread(QThread):
             mode = 1
             # center_i
             self.peakMergeSignal.emit(self._expNumber, scan_number, float(intensity_i), list(peak_centre), mode)
+            print '[DB...BAT] IntegratePeakThread: Sent out signal (2): %d, %d, %f' % (self._expNumber, scan_number,
+                                                                                       float(intensity_i))
         # END-FOR
 
         # terminate the process

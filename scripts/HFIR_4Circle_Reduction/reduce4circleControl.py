@@ -187,31 +187,74 @@ class CWSCDReductionControl(object):
 
         return corrected_intensity
 
-    def calculate_peak_center(self, exp_number, scan_number, pt_numbers=None):
-        """
-        Calculate center of peak by weighting the peak centers of multiple Pt (slice from 3D peak)
+    # def calculate_peak_center(self, exp_number, scan_number, pt_numbers=None):
+    #     """
+    #     Calculate center of peak by weighting the peak centers of multiple Pt (slice from 3D peak)
+    #     :param exp_number:
+    #     :param scan_number:
+    #     :param pt_numbers:
+    #     :return: 2-tuple: boolean, peak center (3-tuple of float)
+    #     """
+    #     # Check & set pt. numbers
+    #     assert isinstance(exp_number, int), 'Experiment number %s must be an integer but not %s.' \
+    #                                         '' % (str(exp_number), str(type(exp_number)))
+    #     assert isinstance(scan_number, int), 'Scan number %s must be an integer but not %s.' \
+    #                                          '' % (str(scan_number), str(type(scan_number)))
+    #     if pt_numbers is None:
+    #         status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
+    #         assert status
+    #     else:
+    #         pt_number_list = pt_numbers
+    #     assert isinstance(pt_number_list, list) and len(pt_number_list) > 0
+    #
+    #     # Check whether the MDEventWorkspace used to find peaks exists
+    #     if self.has_merged_data(exp_number, scan_number, pt_number_list):
+    #         pass
+    #     else:
+    #         return False, 'Exp %d Scan %d: data must be merged already.' % (exp_number, scan_number)
+    #
+    #     # Find peak in Q-space
+    #     merged_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
+    #     peak_ws_name = get_peak_ws_name(exp_number, scan_number, pt_number_list)
+    #     mantidsimple.FindPeaksMD(InputWorkspace=merged_ws_name,
+    #                              MaxPeaks=10,
+    #                              PeakDistanceThreshold=5.,
+    #                              DensityThresholdFactor=0.1,
+    #                              OutputWorkspace=peak_ws_name)
+    #     assert AnalysisDataService.doesExist(peak_ws_name), 'Output PeaksWorkspace %s cannot be found.' \
+    #                                                         '' % peak_ws_name
+    #
+    #     # calculate the peaks with weight
+    #     process_record = PeakProcessRecord(exp_number, scan_number, peak_ws_name)
+    #     process_record.calculate_peak_center()
+    #     peak_center = process_record.get_peak_centre()
+    #     # set the merged peak information to data structure
+    #     self._myPeakInfoDict[(exp_number, scan_number)] = process_record
+    #
+    #     return True, peak_center
+
+    def find_peak(self, exp_number, scan_number, pt_number_list=None):
+        """ Find 1 peak in sample Q space for UB matrix
         :param exp_number:
         :param scan_number:
-        :param pt_numbers:
-        :return: 2-tuple: boolean, peak center (3-tuple of float)
+        :param pt_number_list:
+        :return:tuple as (boolean, object) such as (false, error message) and (true, PeakInfo object)
+
+        This part will be redo as 11847_Load_HB3A_Experiment
         """
         # Check & set pt. numbers
-        assert isinstance(exp_number, int), 'Experiment number %s must be an integer but not %s.' \
-                                            '' % (str(exp_number), str(type(exp_number)))
-        assert isinstance(scan_number, int), 'Scan number %s must be an integer but not %s.' \
-                                             '' % (str(scan_number), str(type(scan_number)))
-        if pt_numbers is None:
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+        if pt_number_list is None:
             status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
-            assert status
-        else:
-            pt_number_list = pt_numbers
+            assert status, 'Unable to get Pt numbers from scan %d.' % scan_number
         assert isinstance(pt_number_list, list) and len(pt_number_list) > 0
 
         # Check whether the MDEventWorkspace used to find peaks exists
         if self.has_merged_data(exp_number, scan_number, pt_number_list):
             pass
         else:
-            return False, 'Exp %d Scan %d: data must be merged already.' % (exp_number, scan_number)
+            raise RuntimeError('Data must be merged before')
 
         # Find peak in Q-space
         merged_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
@@ -221,15 +264,15 @@ class CWSCDReductionControl(object):
                                  PeakDistanceThreshold=5.,
                                  DensityThresholdFactor=0.1,
                                  OutputWorkspace=peak_ws_name)
-        assert AnalysisDataService.doesExist(peak_ws_name), 'Output PeaksWorkspace %s cannot be found.' \
-                                                            '' % peak_ws_name
+        assert AnalysisDataService.doesExist(peak_ws_name)
 
-        # calculate the peaks with weight
-        process_record = PeakProcessRecord(exp_number, scan_number, peak_ws_name)
-        process_record.calculate_peak_center()
-        peak_center = process_record.get_peak_centre()
-        # set the merged peak information to data structure
-        self._myPeakInfoDict[(exp_number, scan_number)] = process_record
+        # add peak to UB matrix workspace to manager
+        self._set_peak_info(exp_number, scan_number, peak_ws_name, merged_ws_name)
+
+        # add the merged workspace to list to manage
+        self._add_merged_ws(exp_number, scan_number, pt_number_list)
+
+        peak_center = self._myPeakInfoDict[(exp_number, scan_number)].get_peak_centre()
 
         return True, peak_center
 
@@ -678,47 +721,6 @@ class CWSCDReductionControl(object):
         mantidsimple.DeleteWorkspace(Workspace=temp_out_ws)
 
         return out_file_name
-
-    def find_peak(self, exp_number, scan_number, pt_number_list=None):
-        """ Find 1 peak in sample Q space for UB matrix
-        :param exp_number:
-        :param scan_number:
-        :param pt_number_list:
-        :return:tuple as (boolean, object) such as (false, error message) and (true, PeakInfo object)
-
-        This part will be redo as 11847_Load_HB3A_Experiment
-        """
-        # Check & set pt. numbers
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
-        if pt_number_list is None:
-            status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
-            assert status
-        assert isinstance(pt_number_list, list) and len(pt_number_list) > 0
-
-        # Check whether the MDEventWorkspace used to find peaks exists
-        if self.has_merged_data(exp_number, scan_number, pt_number_list):
-            pass
-        else:
-            raise RuntimeError('Data must be merged before')
-
-        # Find peak in Q-space
-        merged_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
-        peak_ws_name = get_peak_ws_name(exp_number, scan_number, pt_number_list)
-        mantidsimple.FindPeaksMD(InputWorkspace=merged_ws_name,
-                                 MaxPeaks=10,
-                                 PeakDistanceThreshold=5.,
-                                 DensityThresholdFactor=0.1,
-                                 OutputWorkspace=peak_ws_name)
-        assert AnalysisDataService.doesExist(peak_ws_name)
-
-        # add peak to UB matrix workspace to manager
-        self._set_peak_info(exp_number, scan_number, peak_ws_name, merged_ws_name)
-
-        # add the merged workspace to list to manage
-        self._add_merged_ws(exp_number, scan_number, pt_number_list)
-
-        return True, ''
 
     def get_experiment(self):
         """
@@ -1621,7 +1623,7 @@ class CWSCDReductionControl(object):
 
         return binning_script
 
-    def merge_pts_in_scan(self, exp_no, scan_no, pt_num_list, target_frame):
+    def merge_pts_in_scan(self, exp_no, scan_no, pt_num_list):
         """
         Merge Pts in Scan
         All the workspaces generated as internal results will be grouped
@@ -1632,7 +1634,6 @@ class CWSCDReductionControl(object):
         :param exp_no:
         :param scan_no:
         :param pt_num_list: If empty, then merge all Pt. in the scan
-        :param target_frame: string, either 'hkl' or 'q-sample'
         :return: (boolean, error message) # (merged workspace name, workspace group name)
         """
         # Check
@@ -1640,8 +1641,6 @@ class CWSCDReductionControl(object):
             exp_no = self._expNumber
         assert isinstance(exp_no, int) and isinstance(scan_no, int)
         assert isinstance(pt_num_list, list), 'Pt number list must be a list but not %s' % str(type(pt_num_list))
-        assert isinstance(target_frame, str), 'Target %s frame must be string but not %s.' \
-                                              '' % (str(target_frame), type(target_frame))
 
         # Get list of Pt.
         if len(pt_num_list) > 0:
@@ -1711,17 +1710,18 @@ class CWSCDReductionControl(object):
             # analysis data service has the target MD workspace. do not load again
             if out_q_name not in self._myMDWsList:
                 self._myMDWsList.append(out_q_name)
-
         # END-IF-ELSE
 
-        # TODO/NOW/ISSUE - Merge Peak should create PeakProcessRecord
+        return True, (out_q_name, '')
 
-        # Optionally converted to HKL space # Target frame
-        if target_frame.lower().startswith('hkl'):
+    def convert_merged_ws_to_hkl(self, exp_number, scan_number):
+        # TODO/ISSUE/NOW - make this one work!
+
             # retrieve UB matrix stored and convert to a 1-D array
-            assert exp_no in self._myUBMatrixDict
-            ub_matrix_1d = self._myUBMatrixDict[exp_no].reshape(9,)
+            assert exp_number in self._myUBMatrixDict
+            ub_matrix_1d = self._myUBMatrixDict[exp_number].reshape(9,)
             # convert to HKL
+            input_q_name # TODO/ISSUE/NOW - make this work! either from table or from data management
             out_hkl_name = get_merged_hkl_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
             try:
                 mantidsimple.ConvertCWSDMDtoHKL(InputWorkspace=out_q_name,
@@ -1735,15 +1735,7 @@ class CWSCDReductionControl(object):
             # set up output
             out_ws_name = out_hkl_name
 
-        elif target_frame.lower().startswith('q-sample'):
-            # Q-sample
-            out_ws_name = out_q_name
-
-        else:
-            # Unsupported
-            raise RuntimeError('Target frame %s is not supported.' % target_frame)
-
-        return True, (out_ws_name, '')
+            return
 
     def set_roi(self, exp_number, scan_number, lower_left_corner, upper_right_corner):
         """
@@ -2229,7 +2221,6 @@ class CWSCDReductionControl(object):
         :param scan_number:
         :param peak_ws_name:
         :param md_ws_name:
-        :param peak_centre: calculated peak center
         :return: (boolean, PeakInfo/string)
         """
         # check

@@ -143,8 +143,8 @@ class PeakProcessRecord(object):
             ret_hkl = self._userHKL
         else:
             # get HKL from SPICE file
-            if self._spiceHKL is None:
-                self.retrieve_hkl_from_spice_table()
+            # if self._spiceHKL is None:
+            self.retrieve_hkl_from_spice_table()
             ret_hkl = self._spiceHKL
 
         return ret_hkl
