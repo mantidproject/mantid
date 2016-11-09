@@ -268,8 +268,8 @@ public:
     model.makeRunnableWithOptions(localResource, actualRun, actualArgsVector);
 
     std::string expectedRunnable = "interpreterExecutable";
-    std::vector<std::string> expectedArgsVector{
-        "/scriptPath/ --some params --some other params"};
+    std::vector<std::string> expectedArgsVector{"/scriptPath/", "--some params",
+                                                "--some other params"};
     TS_ASSERT_EQUALS(actualRun, expectedRunnable);
     TS_ASSERT_EQUALS(expectedArgsVector.size(), actualArgsVector.size());
 
