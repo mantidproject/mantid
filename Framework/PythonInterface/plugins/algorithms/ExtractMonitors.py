@@ -78,9 +78,11 @@ class ExtractMonitors(DataProcessorAlgorithm):
 
         if detector_ws_name and detectors:
             self.setProperty("DetectorWorkspace", detector_ws)
+            DeleteWorkspace(detector_ws)
 
         if monitor_ws_name and monitors:
             self.setProperty("MonitorWorkspace", monitor_ws)
+            DeleteWorkspace(monitor_ws)
 
         if detector_ws_name and detectors and monitor_ws_name and monitors:
             detector_ws.setMonitorWorkspace(monitor_ws)
