@@ -1640,7 +1640,8 @@ class CWSCDReductionControl(object):
             exp_no = self._expNumber
         assert isinstance(exp_no, int) and isinstance(scan_no, int)
         assert isinstance(pt_num_list, list), 'Pt number list must be a list but not %s' % str(type(pt_num_list))
-        assert isinstance(target_frame, str)
+        assert isinstance(target_frame, str), 'Target %s frame must be string but not %s.' \
+                                              '' % (str(target_frame), type(target_frame))
 
         # Get list of Pt.
         if len(pt_num_list) > 0:
@@ -1712,6 +1713,8 @@ class CWSCDReductionControl(object):
                 self._myMDWsList.append(out_q_name)
 
         # END-IF-ELSE
+
+        # TODO/NOW/ISSUE - Merge Peak should create PeakProcessRecord
 
         # Optionally converted to HKL space # Target frame
         if target_frame.lower().startswith('hkl'):

@@ -958,7 +958,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return
 
-    def set_ws_names(self, row_number, merged_md_name):
+    def set_ws_name(self, row_number, merged_md_name):
         """
         Set the output workspace and workspace group's names to QTable
         :param row_number:
@@ -969,26 +969,6 @@ class ProcessTableWidget(tableBase.NTableWidget):
         assert isinstance(merged_md_name, str), 'Merged MDWorkspace name must be a string.'
 
         self.update_cell_value(row_number, self._colIndexWorkspace, merged_md_name)
-
-        return
-
-    def set_ws_names_by_row(self, row_number, merged_md_name, ws_group_name):
-        """
-        Set the workspaces' names to this table
-        :param row_number:
-        :param merged_md_name:
-        :param ws_group_name:
-        :return:
-        """
-        # Check
-        assert isinstance(row_number, int)
-        assert isinstance(merged_md_name, str) or merged_md_name is None
-        assert isinstance(ws_group_name, str) or ws_group_name is None
-
-        j_ws_name = self.get_column_index('Merged Workspace')
-
-        if merged_md_name is not None:
-            self.update_cell_value(row_number, j_ws_name, merged_md_name)
 
         return
 
