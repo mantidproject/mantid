@@ -29,16 +29,7 @@ NonOrthogonalTransform::NonOrthogonalTransform(
   Mantid::Kernel::DblMatrix skewMatrix(numberOfDimensions, numberOfDimensions,
                                        true);
   API::provideSkewMatrix(skewMatrix, ws);
-
-  // Transform from double to coord_t
-  std::size_t index = 0;
-  for (std::size_t i = 0; i < skewMatrix.numRows(); ++i) {
-    for (std::size_t j = 0; j < skewMatrix.numCols(); ++j) {
-      m_skewMatrix[index] = static_cast<Mantid::coord_t>(skewMatrix[i][j]);
-      ++index;
-    }
-  }
-
+  API::transformFromDoubleToCoordT(skewMatrix, m_skewMatrix);
   checkDimensionsForHKL(ws, dimX, dimY);
 }
 void NonOrthogonalTransform::checkDimensionsForHKL(

@@ -79,14 +79,7 @@ void NonOrthogonalOverlay::setSkewMatrix() {
   Mantid::Kernel::DblMatrix skewMatrix(3, 3, true);
   API::provideSkewMatrix(skewMatrix, *m_ws);
   skewMatrix.Invert();
-  // transform from double to coord_t
-  std::size_t index = 0;
-  for (std::size_t i = 0; i < skewMatrix.numRows(); ++i) {
-    for (std::size_t j = 0; j < skewMatrix.numCols(); ++j) {
-      m_skewMatrix[index] = static_cast<Mantid::coord_t>(skewMatrix[i][j]);
-      ++index;
-    }
-  }
+  API::transformFromDoubleToCoordT(skewMatrix, m_skewMatrix);
 }
 
 QPointF NonOrthogonalOverlay::skewMatrixApply(double x, double y) {

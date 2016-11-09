@@ -93,15 +93,7 @@ void QwtRasterDataMDNonOrthogonal::setWorkspace(IMDWorkspace_const_sptr ws) {
   // Add the skewMatrix for the basis
   Mantid::Kernel::DblMatrix skewMatrix(m_nd, m_nd, true);
   provideSkewMatrix(skewMatrix, ws);
-
-  // Transform from double to coord_t
-  std::size_t index = 0;
-  for (std::size_t i = 0; i < skewMatrix.numRows(); ++i) {
-    for (std::size_t j = 0; j < skewMatrix.numCols(); ++j) {
-      m_skewMatrix[index] = static_cast<Mantid::coord_t>(skewMatrix[i][j]);
-      ++index;
-    }
-  }
+  transformFromDoubleToCoordT(skewMatrix, m_skewMatrix);
 }
 
 void QwtRasterDataMDNonOrthogonal::setSliceParams(

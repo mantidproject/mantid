@@ -214,5 +214,16 @@ bool isHKLDimensions(Mantid::API::IMDWorkspace_const_sptr workspace,
   }
   return dimensionHKL;
 }
+
+void transformFromDoubleToCoordT(Mantid::Kernel::DblMatrix &skewMatrix,
+                                 Mantid::coord_t skewMatrixCoord[9]) {
+  std::size_t index = 0;
+  for (std::size_t i = 0; i < skewMatrix.numRows(); ++i) {
+    for (std::size_t j = 0; j < skewMatrix.numCols(); ++j) {
+      skewMatrixCoord[index] = static_cast<Mantid::coord_t>(skewMatrix[i][j]);
+      ++index;
+    }
+  }
+}
 }
 }
