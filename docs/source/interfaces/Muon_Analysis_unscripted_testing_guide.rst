@@ -8,7 +8,7 @@ Muon Analysis Unscripted Testing
     
 Preamble
 ^^^^^^^^^
-This document is intended for developers to use for unscripted testing of the Muon Analysis GUI.
+This document is intended for developers to use for unscripted testing of the :program:`Muon Analysis` GUI.
 User documentation for this interface can be found at :ref:`Muon_Analysis-ref`.
 
 Testing here mostly focuses on the *Data Analysis* tab, which has been significantly changed for Mantid 3.8.
@@ -21,7 +21,7 @@ Common setup
 ^^^^^^^^^^^^
 - Set your facility to ISIS
 - Ensure the files ``EMU00020918-20`` and ``MUSR00015189`` are in Mantid's path
-- Open *Interfaces/Muon/Muon Analysis*
+- Open :menuselection:`Interfaces --> Muon --> Muon Analysis`
 - At this point, before loading any data, the *Grouping Options* and *Data Analysis* tabs should be disabled.
 
 Group 1: Data loading and old/new fitting UI
