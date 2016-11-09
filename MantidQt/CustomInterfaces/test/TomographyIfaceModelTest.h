@@ -320,7 +320,8 @@ public:
     std::vector<std::string> actualArgsVector;
     model.makeRunnableWithOptions(resource, actualRun, actualArgsVector);
 
-    TSM_ASSERT_EQUALS("Remote script not properly structured", actualRun, expectedRun);
+    TSM_ASSERT_EQUALS("Remote script not properly structured", actualRun,
+                      expectedRun);
     TS_ASSERT_EQUALS(expectedArgsVector.size(), actualArgsVector.size());
 
     // stop the check before
@@ -328,9 +329,9 @@ public:
     // time stamp and will always fail
 
     for (size_t i = 0; i < expectedArgsVector.size(); ++i) {
-      if(6 == i){
+      if (6 == i) {
         // this is the output which varies, so compare only part of it
-        for(size_t j = 0; i < 64; ++i){
+        for (size_t j = 0; i < 64; ++i) {
           TS_ASSERT_EQUALS(expectedArgsVector[6][j], actualArgsVector[6][j]);
         }
 
@@ -339,7 +340,7 @@ public:
       TS_ASSERT_EQUALS(expectedArgsVector[i], actualArgsVector[i]);
     }
   }
-  
+
   void test_makeLocalRunnableWithOptions() {
     std::string inputRunnable = "python "
                                 "/work/imat/phase_commissioning/scripts/"
@@ -356,7 +357,6 @@ public:
         new ToolConfigTomoPy(inputRunnable, pathOut + localOutNameAppendix,
                              pathConfig.pathDarks(), pathConfig.pathOpenBeam(),
                              pathConfig.pathSamples()));
-
 
     TestableTomographyIfaceModel model;
 
@@ -385,17 +385,19 @@ public:
         "--median-filter-size=3", "--cor=0.000000", "--rotation=0",
         "--max-angle=360.000000", "--circular-mask=0.940000",
         "--out-img-format=png"};
-    TSM_ASSERT_EQUALS("Local interpreter executable not properly separated",actualRun, expectedRunnable);
-    TSM_ASSERT_EQUALS("Invalid argument size", expectedArgsVector.size(), actualArgsVector.size());
+    TSM_ASSERT_EQUALS("Local interpreter executable not properly separated",
+                      actualRun, expectedRunnable);
+    TSM_ASSERT_EQUALS("Invalid argument size", expectedArgsVector.size(),
+                      actualArgsVector.size());
 
     // stop the check before
     // reconstruction_TomoPy_gridrec_2016October20_113701_413275000 as that is a
     // time stamp and will always fail
 
     for (size_t i = 0; i < expectedArgsVector.size(); ++i) {
-      if(6 == i){
+      if (6 == i) {
         // this is the output which varies, so compare only part of it
-        for(size_t j = 0; i < 64; ++i){
+        for (size_t j = 0; i < 64; ++i) {
           TS_ASSERT_EQUALS(expectedArgsVector[6][j], actualArgsVector[6][j]);
         }
 
@@ -433,7 +435,8 @@ private:
     // paths that don't make sense, so nothing gets executed even if you have a
     // local installation of tomopy available
     std::shared_ptr<ToolConfigTomoPy> d(
-        new ToolConfigTomoPy("fail /not_exitant_script_path/", "/out/", "/dark/", "/flat/", "/sample/"));
+        new ToolConfigTomoPy("fail /not_exitant_script_path/", "/out/",
+                             "/dark/", "/flat/", "/sample/"));
     model.setCurrentToolSettings(d);
     model.doSubmitReconstructionJob(resource);
 

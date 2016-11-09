@@ -244,8 +244,7 @@ bool TomographyIfaceModel::doPing(const std::string &compRes) {
     tid = alg->getPropertyValue("TransactionID");
     g_log.information() << "Pinged '" << compRes
                         << "'succesfully. Checked that a transaction could "
-                           "be created, with ID: "
-                        << tid << '\n';
+                           "be created, with ID: " << tid << '\n';
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Error. Failed to ping and start a transaction on "
                              "the remote resource." +
@@ -353,8 +352,8 @@ void TomographyIfaceModel::makeRunnableWithOptions(
   std::string longOpt;
   // this gets the runnable from the whole string
   splitCmdLine(cmd, runnable, longOpt);
-  
-  if(local){
+
+  if (local) {
     std::string execScriptPath;
 
     // this variable holds the input paths, but is discarded for now
@@ -384,7 +383,8 @@ void TomographyIfaceModel::makeRunnableWithOptions(
  *
  * @return command options ready for the tomorec script
  */
-void TomographyIfaceModel::makeTomoRecScriptOptions(const bool local, std::vector<std::string> &opts) const {
+void TomographyIfaceModel::makeTomoRecScriptOptions(
+    const bool local, std::vector<std::string> &opts) const {
 
   // options with all the info from filters and regions
   // 9 is the current number of arguments being added
@@ -506,9 +506,10 @@ void TomographyIfaceModel::doRunReconstructionJobLocal(
   Poco::Pipe outPipe;
   Poco::Pipe errPipe;
   try {
-    Poco::ProcessHandle handle = Poco::Process::launch(run, args, 0, &outPipe, &errPipe);
+    Poco::ProcessHandle handle =
+        Poco::Process::launch(run, args, 0, &outPipe, &errPipe);
     pid = handle.id();
-    
+
     printProcessStreamsToMantidLog(outPipe, errPipe);
   } catch (Poco::SystemException &sexc) {
     g_log.error() << "Execution failed. Could not run the tool. Error details: "
@@ -526,29 +527,29 @@ void TomographyIfaceModel::doRunReconstructionJobLocal(
 }
 
 /** Converts the pipes to strings and prints them into the mantid logger stream
-* 
+*
 * @param outPipe Poco::Pipe that holds the output stream of the process
 * @param errPipe Poco::Pipe that holds the error stream of the process
 */
-void TomographyIfaceModel::printProcessStreamsToMantidLog(const Poco::Pipe &outPipe, const Poco::Pipe &errPipe){
-    // if the launch is successful then print output streams 
-    // into the g_log so the user can see the information/error
-    Poco::PipeInputStream outstr(outPipe);
-    Poco::PipeInputStream errstr(errPipe);
-    std::string outString;
-    std::string errString;
-    Poco::StreamCopier::copyToString(outstr, outString);
-    Poco::StreamCopier::copyToString(errstr, errString);
-    
-    // print normal output stream if not empty
-    if(!outString.empty())
-      g_log.information(outString);
+void TomographyIfaceModel::printProcessStreamsToMantidLog(
+    const Poco::Pipe &outPipe, const Poco::Pipe &errPipe) {
+  // if the launch is successful then print output streams
+  // into the g_log so the user can see the information/error
+  Poco::PipeInputStream outstr(outPipe);
+  Poco::PipeInputStream errstr(errPipe);
+  std::string outString;
+  std::string errString;
+  Poco::StreamCopier::copyToString(outstr, outString);
+  Poco::StreamCopier::copyToString(errstr, errString);
 
-    // print error output stream if not empty
-    if(!errString.empty())
-      g_log.error(errString);
+  // print normal output stream if not empty
+  if (!outString.empty())
+    g_log.information(outString);
+
+  // print error output stream if not empty
+  if (!errString.empty())
+    g_log.error(errString);
 }
-
 
 void TomographyIfaceModel::doCancelJobs(const std::string &compRes,
                                         const std::vector<std::string> &ids) {

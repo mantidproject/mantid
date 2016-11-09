@@ -15,8 +15,8 @@
 // Qt classes forward declarations
 class QMutex;
 
-namespace Poco{
-  class Pipe;
+namespace Poco {
+class Pipe;
 }
 
 namespace MantidQt {
@@ -228,7 +228,8 @@ protected: // protected to expose everything to testing
   bool checkIfToolIsSetupProperly(const std::string &tool,
                                   const std::string &cmd) const;
 
-  void makeTomoRecScriptOptions(bool local, std::vector<std::string> &opts) const;
+  void makeTomoRecScriptOptions(bool local,
+                                std::vector<std::string> &opts) const;
 
   void filtersCfgToCmdOpts(const TomoReconFiltersSettings &filters,
                            const ImageStackPreParams &corRegions, bool local,
@@ -258,7 +259,9 @@ protected: // protected to expose everything to testing
   buildOutReconstructionDirFromSamplesDir(const std::string &samplesDir) const;
 
   /// Prints the streams from the Poco::launch process into mantid
-  void printProcessStreamsToMantidLog(const Poco::Pipe &outPipe, const Poco::Pipe &errPipe);
+  void printProcessStreamsToMantidLog(const Poco::Pipe &outPipe,
+                                      const Poco::Pipe &errPipe);
+
 private:
   /// facility for the remote compute resource
   const std::string m_facility;
