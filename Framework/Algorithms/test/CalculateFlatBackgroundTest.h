@@ -6,7 +6,6 @@
 #include "MantidAlgorithms/CalculateFlatBackground.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <boost/lexical_cast.hpp>
