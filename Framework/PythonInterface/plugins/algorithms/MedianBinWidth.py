@@ -68,6 +68,6 @@ class MedianBinWidth(PythonAlgorithm):
             medians[wsIndex] = numpy.median(dxs)
         binWidth = numpy.mean(medians)
         binWidth = roundinghelper.round(binWidth, roundingMode)
-        self.setProperty(self._PROP_BIN_WIDTH, binWidth)
+        self.setProperty(self._PROP_BIN_WIDTH, numpy.abs(binWidth))
 
 AlgorithmFactory.subscribe(MedianBinWidth)

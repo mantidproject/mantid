@@ -69,5 +69,15 @@ class MedianBinWidthTest(unittest.TestCase):
                          'BinWidthAtX', **params)
         DeleteWorkspace(ws)
 
+    def test_positive_output_even_if_descending_x(self):
+        xs = numpy.array([110.0, 60.0, 40.0, -10.0])
+        ys = numpy.zeros(len(xs) - 1)
+        ws = CreateWorkspace(DataX=xs, DataY=ys)
+        params = self._make_algorithm_params(ws)
+        binWidth = self._run_algorithm(params)
+        expectedBinWidth = 50.0
+        self.assertAlmostEqual(binWidth, expectedBinWidth)
+        DeleteWorkspace(ws)
+
 if __name__ == "__main__":
     unittest.main()

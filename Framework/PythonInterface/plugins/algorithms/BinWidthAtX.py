@@ -67,7 +67,11 @@ class BinWidthAtX(PythonAlgorithm):
         widths = numpy.empty(n)
         for wsIndex in range(n):
             xs = inputWs.readX(wsIndex)
-            if x <= xs[0] or x > xs[-1]:
+            lowerBound = xs[0]
+            upperBound = xs[-1]
+            if lowerBound > upperBound:
+                lowerBound, upperBound = upperBound, lowerBound
+            if x <= lowerBound or x > upperBound:
                 raise RuntimeError(
                     self._PROP_X_VALUE +
                     ' = {0} out of range for workspace index {1}'
@@ -77,6 +81,6 @@ class BinWidthAtX(PythonAlgorithm):
             widths[wsIndex] = dx
         binWidth = numpy.mean(widths)
         binWidth = roundinghelper.round(binWidth, roundingMode)
-        self.setProperty(self._PROP_BIN_WIDTH, binWidth)
+        self.setProperty(self._PROP_BIN_WIDTH, numpy.abs(binWidth))
 
 AlgorithmFactory.subscribe(BinWidthAtX)
