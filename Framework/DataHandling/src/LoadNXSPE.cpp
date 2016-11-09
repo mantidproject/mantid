@@ -1,6 +1,7 @@
 #include "MantidDataHandling/LoadNXSPE.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -19,6 +20,8 @@
 #include "MantidGeometry/Surfaces/Sphere.h"
 
 #include <boost/regex.hpp>
+
+#include <Poco/File.h>
 
 #include <map>
 #include <sstream>
@@ -258,41 +261,13 @@ void LoadNXSPE::exec() {
   gm.pushAxis("psi", 0, 1, 0, psi);
   outputWS->mutableRun().setGoniometer(gm, true);
 
-  double l12 = 10.0;
-  // If an instrument name is defined, load instrument
-  if (!instrument_name.empty()) {
-    IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
-    // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-    try {
-      MatrixWorkspace_sptr instrumentWS = outputWS->clone();
-      loadInst->setPropertyValue("InstrumentName", instrument_name);
-      loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", instrumentWS);
-      loadInst->setProperty("RewriteSpectraMap",
-                            Mantid::Kernel::OptionalBool(false));
-      loadInst->execute();
-      // We just want to get whether the instrument is direct or indirect
-      // and the source position (because we can!).
-      // Nothing else is really needed, and also the physical detectors may not
-      // correspond to the data in the nxspe files because they may have been
-      // grouped to get each nxspe spectrum - and this mapping is not stored.
-      Geometry::Instrument_const_sptr inst = instrumentWS->getInstrument();
-      l12 = fabs(inst->getSource()->getDistance(*(inst->getSample())));
-      outputWS->mutableRun().addLogData(new PropertyWithValue<std::string>(
-          "deltaE-mode",
-          Kernel::DeltaEMode::asString(instrumentWS->getEMode())));
-    } catch (...) {
-      g_log.information("Cannot load the instrument definition.");
-      instrument_name.clear();
-    }
-  }
-
   // generate instrument
   Geometry::Instrument_sptr instrument(new Geometry::Instrument(
       instrument_name.empty() ? "NXSPE" : instrument_name));
   outputWS->setInstrument(instrument);
 
   Geometry::ObjComponent *source = new Geometry::ObjComponent("source");
-  source->setPos(0.0, 0.0, -l12);
+  source->setPos(0.0, 0.0, -10.);
   instrument->add(source);
   instrument->markAsSource(source);
   Geometry::ObjComponent *sample = new Geometry::ObjComponent("sample");
@@ -339,6 +314,26 @@ void LoadNXSPE::exec() {
     itdata = (itdataend);
     iterror = (iterrorend);
     prog.report();
+  }
+
+  // If an instrument name is defined, load instrument parameter file for Emode
+  // NB. LoadParameterFile must be used on a workspace with an instrument
+  if (!instrument_name.empty()) {
+    std::string IDF_filename = 
+	ExperimentInfo::getInstrumentFilename(instrument_name);
+    std::string instrument_parfile = 
+	IDF_filename.substr(0, IDF_filename.find("_Definition"))
+        + "_Parameters.xml";
+    if (Poco::File(instrument_parfile).exists()) {
+      try {
+        IAlgorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
+        loadParamAlg->setProperty("Filename", instrument_parfile);
+        loadParamAlg->setProperty("Workspace", outputWS);
+        loadParamAlg->execute();
+      } catch (...) {
+        g_log.information("Cannot load the instrument parameter file.");
+      }
+    }
   }
 
   setProperty("OutputWorkspace", outputWS);
