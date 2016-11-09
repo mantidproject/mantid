@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtCustomInterfaces/ProjectSavePresenter.h"
 #include "MantidQtCustomInterfaces/ProjectSaveModel.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "ProjectSaveMockObjects.h"

@@ -89,8 +89,9 @@ set ( SRC_FILES
 	src/Muon/MuonAnalysisResultTableCreator.cpp
 	src/Muon/MuonAnalysisResultTableTab.cpp
   src/Muon/MuonSequentialFitDialog.cpp
-  src/ProjectSavePresenter.cpp
   src/ProjectSaveModel.cpp
+  src/ProjectSavePresenter.cpp
+  src/ProjectSaveView.cpp
   src/Reflectometry/MeasurementItem.cpp
 	src/Reflectometry/QtReflMainWindowView.cpp
 	src/Reflectometry/QtReflRunsTabView.cpp
@@ -247,6 +248,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableCreator.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
 	inc/MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h
+  inc/MantidQtCustomInterfaces/IProjectSaveView.h
   inc/MantidQtCustomInterfaces/ProjectSaveView.h
   inc/MantidQtCustomInterfaces/ProjectSaveModel.h
   inc/MantidQtCustomInterfaces/ProjectSavePresenter.h
@@ -478,7 +480,8 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Muon/ALCInterface.ui
                inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingView.ui
                inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.ui
-			   inc/MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.ui
+               inc/MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.ui
+               inc/MantidQtCustomInterfaces/ProjectSave.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflMainWindowWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflRunsTabWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflSettingsTabWidget.ui

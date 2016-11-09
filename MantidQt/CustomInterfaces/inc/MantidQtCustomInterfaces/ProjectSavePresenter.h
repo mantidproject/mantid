@@ -4,7 +4,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidQtAPI/IProjectSerialisable.h"
 #include "MantidQtCustomInterfaces/ProjectSaveModel.h"
-#include "MantidQtCustomInterfaces/ProjectSaveView.h"
+#include "MantidQtCustomInterfaces/IProjectSaveView.h"
 
 #include <vector>
 
@@ -46,7 +46,7 @@ public:
     CheckWorkspace,
   };
 
-  ProjectSavePresenter(ProjectSaveView* view);
+  ProjectSavePresenter(IProjectSaveView* view);
   void notify(Notification notification);
 
 private:
@@ -54,7 +54,7 @@ private:
   void excludeWindowsForUncheckedWorkspace();
 
   /// Handle to the view for this presenter
-  ProjectSaveView *m_view;
+  IProjectSaveView *m_view;
   ProjectSaveModel m_model;
 };
 
