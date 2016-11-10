@@ -439,9 +439,10 @@ std::string BinaryOperation::checkSizeCompatibility(
  * @returns True if further processing is not required on the spectra, false if
  * the binary operation should be performed.
  */
-bool BinaryOperation::propagateSpectraMask(
-    const SpectrumInfo &lhsSpectrumInfo, const SpectrumInfo &rhsSpectrumInfo, const int64_t index,
-    API::MatrixWorkspace_sptr out) {
+bool BinaryOperation::propagateSpectraMask(const SpectrumInfo &lhsSpectrumInfo,
+                                           const SpectrumInfo &rhsSpectrumInfo,
+                                           const int64_t index,
+                                           API::MatrixWorkspace_sptr out) {
   bool continueOp(true);
 
   if ((lhsSpectrumInfo.hasDetectors(index) &&

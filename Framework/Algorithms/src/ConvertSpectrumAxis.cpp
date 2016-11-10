@@ -104,7 +104,8 @@ void ConvertSpectrumAxis::exec() {
         twoTheta = spectrumInfo.twoTheta(i);
         l2 = spectrumInfo.l2(i);
         l1val = l1;
-        efixed = getEfixed(spectrumInfo.detector(i), inputWS, emode); // get efixed
+        efixed =
+            getEfixed(spectrumInfo.detector(i), inputWS, emode); // get efixed
       } else {
         twoTheta = 0.0;
         l2 = l1;
@@ -173,9 +174,10 @@ void ConvertSpectrumAxis::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-double ConvertSpectrumAxis::getEfixed(const Mantid::Geometry::IDetector &detector,
-                                      MatrixWorkspace_const_sptr inputWS,
-                                      int emode) const {
+double
+ConvertSpectrumAxis::getEfixed(const Mantid::Geometry::IDetector &detector,
+                               MatrixWorkspace_const_sptr inputWS,
+                               int emode) const {
   double efixed(0);
   double efixedProp = getProperty("Efixed");
   if (efixedProp != EMPTY_DBL()) {

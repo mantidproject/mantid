@@ -156,7 +156,8 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
     double twoTheta(0.0), efixed(0.0);
     if (!spectrumInfo.isMonitor(i)) {
       twoTheta = 0.5 * spectrumInfo.twoTheta(i);
-      efixed = getEfixed(spectrumInfo.detector(i), inputWS, emode); // get efixed
+      efixed =
+          getEfixed(spectrumInfo.detector(i), inputWS, emode); // get efixed
     } else {
       twoTheta = 0.0;
       efixed = DBL_MIN;
@@ -229,9 +230,10 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
   return outputWorkspace;
 }
 
-double ConvertSpectrumAxis2::getEfixed(const Mantid::Geometry::IDetector &detector,
-                                       MatrixWorkspace_const_sptr inputWS,
-                                       int emode) const {
+double
+ConvertSpectrumAxis2::getEfixed(const Mantid::Geometry::IDetector &detector,
+                                MatrixWorkspace_const_sptr inputWS,
+                                int emode) const {
   double efixed(0);
   double efixedProp = getProperty("Efixed");
   if (efixedProp != EMPTY_DBL()) {
