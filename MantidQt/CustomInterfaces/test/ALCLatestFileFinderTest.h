@@ -21,14 +21,16 @@ using Mantid::Kernel::DateAndTime;
 class TestFile {
 public:
   /// Constructor which creates valid filename
-  TestFile(const std::string &time, const std::string &instrument,
-           const std::string &run, const std::string &extension = "nxs")
-      : m_file("", createFileName(instrument, run, extension)) {
+  TestFile(const std::string &time, const std::string &directory,
+           const std::string &instrument, const std::string &run,
+           const std::string &extension = "nxs")
+      : m_file("", createFileName(directory, instrument, run, extension)) {
     adjustFileTime(m_file.getFileName(), time);
   }
   /// Constructor taking any filename
-  TestFile(const std::string &time, const std::string &name)
-      : m_file("", name) {
+  TestFile(const std::string &time, const std::string &directory,
+           const std::string &name)
+      : m_file("", directory + Poco::Path::separator() + name) {
     adjustFileTime(m_file.getFileName(), time);
   }
   std::string getFileName() { return m_file.getFileName(); };
@@ -36,16 +38,20 @@ public:
 private:
   /**
  * Generate a filename from supplied instrument, run number
+ * @param directory :: [input] Name of directory to create files in (must
+ * already exist)
  * @param instrument [input] :: instrument name
  * @param run [input] :: run number
  * @param extension [input] :: extension
  * @returns :: filename
  */
-  std::string createFileName(const std::string &instrument,
+  std::string createFileName(const std::string &directory,
+                             const std::string &instrument,
                              const std::string &run,
                              const std::string &extension) {
     static const size_t numberLength = 8;
     std::ostringstream stream;
+    stream << directory << Poco::Path::separator();
     stream << instrument;
     const size_t numZeros = numberLength - run.size();
     for (size_t i = 0; i < numZeros; i++) {
@@ -92,11 +98,12 @@ public:
    * Should deal with adding and removing files
    */
   void test_getMostRecentFile() {
-    auto files = generateTestFiles();
+    const std::string dirName("test_getMostRecentFile");
+    auto files = generateTestFiles(dirName);
     ALCLatestFileFinder finder(files[0].getFileName());
     TS_ASSERT_EQUALS(finder.getMostRecentFile(), files[2].getFileName());
     { // file added
-      auto newFile = TestFile("2116-03-15T15:00:00", "MUSR", "90003");
+      auto newFile = TestFile("2116-03-15T15:00:00", dirName, "MUSR", "90003");
       TS_ASSERT_EQUALS(finder.getMostRecentFile(), newFile.getFileName());
     }
     // file removed (newFile went out of scope)
@@ -107,8 +114,10 @@ public:
    * Test that the finder ignores non-NeXus files
    */
   void test_ignoreNonNeXus() {
-    auto files = generateTestFiles();
-    auto nonNexus = TestFile("2116-03-15T16:00:00", "MUSR", "90004", "run");
+    const std::string dirName("test_ignoreNonNeXus");
+    auto files = generateTestFiles(dirName);
+    auto nonNexus =
+        TestFile("2116-03-15T16:00:00", dirName, "MUSR", "90004", "run");
     ALCLatestFileFinder finder(files[0].getFileName());
     TS_ASSERT_EQUALS(finder.getMostRecentFile(), files[2].getFileName());
   }
@@ -117,8 +126,10 @@ public:
    * Test that the finder ignores NeXus files from the wrong instrument
    */
   void test_ignoreWrongInstrument() {
-    auto files = generateTestFiles();
-    auto wrongInstrument = TestFile("2116-03-15T16:00:00", "EMU", "80000");
+    const std::string &dirName("test_ignoreWrongInstrument");
+    auto files = generateTestFiles(dirName);
+    auto wrongInstrument =
+        TestFile("2116-03-15T16:00:00", dirName, "EMU", "80000");
     ALCLatestFileFinder finder(files[0].getFileName());
     std::string foundFile;
     TS_ASSERT_THROWS_NOTHING(foundFile = finder.getMostRecentFile());
@@ -129,8 +140,9 @@ public:
    * Test that the finder ignores "invalid" NeXus files
    */
   void test_ignoreInvalidNeXus() {
-    auto files = generateTestFiles();
-    auto badNexus = TestFile("2116-03-15T16:00:00", "ALCResults.nxs");
+    const std::string &dirName("test_ignoreInvalidNeXus");
+    auto files = generateTestFiles(dirName);
+    auto badNexus = TestFile("2116-03-15T16:00:00", dirName, "ALCResults.nxs");
     ALCLatestFileFinder finder(files[0].getFileName());
     std::string foundFile;
     TS_ASSERT_THROWS_NOTHING(foundFile = finder.getMostRecentFile());
@@ -142,14 +154,22 @@ private:
    * Generate three scoped test files
    * The creation dates go in run number order, as is the case with real files
    * (confirmed with scientists that this is always the case)
+   * @param directory :: [input] Name of directory to create files in (will be
+   * created if it doesn't exist)
    * @returns :: vector containing three files
    */
-  std::vector<TestFile> generateTestFiles() {
+  std::vector<TestFile> generateTestFiles(const std::string &directory) {
+    // First ensure the directory exists
+    Poco::Path tmpPath(Mantid::Kernel::ConfigService::Instance().getTempDir());
+    tmpPath.pushDirectory(directory);
+    Poco::File tmpDir(tmpPath);
+    tmpDir.createDirectories();
+    // Now create the files
     std::vector<TestFile> files;
     // 100 years so it won't clash with other files in temp directory
-    files.emplace_back("2116-03-15T12:00:00", "MUSR", "90000");
-    files.emplace_back("2116-03-15T13:00:00", "MUSR", "90001");
-    files.emplace_back("2116-03-15T14:00:00", "MUSR", "90002");
+    files.emplace_back("2116-03-15T12:00:00", directory, "MUSR", "90000");
+    files.emplace_back("2116-03-15T13:00:00", directory, "MUSR", "90001");
+    files.emplace_back("2116-03-15T14:00:00", directory, "MUSR", "90002");
     return files;
   }
 };
