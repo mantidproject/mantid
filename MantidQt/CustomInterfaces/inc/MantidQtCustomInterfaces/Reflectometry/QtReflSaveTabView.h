@@ -78,6 +78,8 @@ public:
   void setParametersList(const std::vector<std::string> &) const override;
 
 public slots:
+  /// Populate the 'List of workspaces' widget
+  void populateListOfWorkspaces() const;
   /// Filters the 'List of workspaces' widget
   void filterWorkspaceList() const;
   /// Request parameters for a workspace of a name

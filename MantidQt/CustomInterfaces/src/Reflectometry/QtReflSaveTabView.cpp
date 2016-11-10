@@ -23,14 +23,16 @@ Initialize the Interface
 void QtReflSaveTabView::initLayout() { 
   m_ui.setupUi(this); 
 
+  connect(m_ui.refreshButton, SIGNAL(clicked()), this,
+          SLOT(populateListOfWorkspaces()));
   connect(m_ui.filterEdit, SIGNAL(textEdited(const QString &)), this,
-    SLOT(filterWorkspaceList()));
+          SLOT(filterWorkspaceList()));
   connect(m_ui.listOfWorkspaces,
-    SIGNAL(itemDoubleClicked(QListWidgetItem*)), this,
-    SLOT(requestWorkspaceParams()));
+          SIGNAL(itemDoubleClicked(QListWidgetItem*)), this,
+          SLOT(requestWorkspaceParams()));
 
   m_presenter.reset(new ReflSaveTabPresenter(this));
-  m_presenter->notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
+  populateListOfWorkspaces();
 }
 
 /** Returns the save path
@@ -134,6 +136,12 @@ void QtReflSaveTabView::setParametersList(
   for (auto it = logs.begin(); it != logs.end(); it++) {
     m_ui.listOfLoggedParameters->addItem(QString::fromStdString(*it));
   }
+}
+
+/** Populate the 'List of workspaces' widget
+*/
+void QtReflSaveTabView::populateListOfWorkspaces() const {
+  m_presenter->notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
 }
 
 /** Filter the 'List of workspaces' widget
