@@ -12,7 +12,8 @@ void TomoToolConfigDialogAstra::setupDialogUi() {
   m_astraUi.setupUi(m_dialog);
   m_astraUi.comboBox_method->clear();
   const auto methods = ToolConfigAstraToolbox::methods();
-  for (size_t i = 0; i < methods.size(); i++) {
+  const size_t methodsSize = methods.size();
+  for (size_t i = 0; i < methodsSize; i++) {
     m_astraUi.comboBox_method->addItem(
         QString::fromStdString(methods[i].second));
   }

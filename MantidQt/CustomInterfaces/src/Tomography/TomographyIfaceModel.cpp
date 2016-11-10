@@ -52,8 +52,7 @@ const std::string TomographyIfaceModel::g_customCmdTool = "Custom command";
 TomographyIfaceModel::TomographyIfaceModel()
     : m_facility("ISIS"), m_experimentRef("RB000000"), m_loggedInUser(""),
       m_loggedInComp(""), m_computeResStatus(), m_reconTools(),
-      m_reconToolsStatus(), m_jobsStatus(), m_toolsSettings(),
-      m_prePostProcSettings(), m_imageStackPreParams(), m_statusMutex(NULL) {
+      m_reconToolsStatus(), m_jobsStatus(), m_prePostProcSettings(), m_imageStackPreParams(), m_statusMutex(NULL) {
 
   m_computeRes = {g_SCARFName, g_LocalResourceName};
 
@@ -392,9 +391,9 @@ void TomographyIfaceModel::makeRunnableWithOptions(
  * arguments will be inserted
  * @return command options ready for the tomorec script
  */
-void TomographyIfaceModel::makeTomoRecScriptOptions(
-    const bool local, std::vector<std::string> &opts) const {
-
+std::vector<std::string> TomographyIfaceModel::makeTomoRecScriptOptions(
+    const bool local) const {
+  std::vector<std::string> opts;
   // options with all the info from filters and regions
   // 9 is the current number of arguments being added
   opts.reserve(9);
@@ -413,6 +412,8 @@ void TomographyIfaceModel::makeTomoRecScriptOptions(
 
   filtersCfgToCmdOpts(m_prePostProcSettings, m_imageStackPreParams, local,
                       opts);
+
+  return opts;
 }
 
 /** Processes the tool name so that it is appropriate for the command line when
@@ -846,7 +847,7 @@ std::string boxCoordinatesToCSV(const ImageStackPreParams::Box2D &coords) {
  */
 void TomographyIfaceModel::filtersCfgToCmdOpts(
     const TomoReconFiltersSettings &filters,
-    const ImageStackPreParams &corRegions, bool local,
+    const ImageStackPreParams &corRegions, const bool local,
     std::vector<std::string> &opts) const {
 
   opts.emplace_back("--input-path=" + adaptInputPathForExecution(
