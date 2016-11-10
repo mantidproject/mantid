@@ -2313,6 +2313,7 @@ void MantidUI::importString(const QString &logName, const QString &data,
 
   appWindow()->initTable(t, appWindow()->generateUniqueName(label + "-"));
   t->setColName(0, "Log entry");
+  t->setColumnType(0, Table::Text);
   t->setReadOnlyColumn(0, true); // Read-only
 
   for (int i = 0; i < loglines.size(); ++i) {
@@ -2324,11 +2325,12 @@ void MantidUI::importString(const QString &logName, const QString &data,
             (qMin(10, 1) + 1) * t->table()->verticalHeader()->sectionSize(0) +
                 100);
   t->setAttribute(Qt::WA_DeleteOnClose);
+  t->resizeColumnsToContents();
   t->showNormal();
 }
 /** Displays a string in a Qtiplot table
 *  @param logName :: the title of the table is based on this
-*  @param data :: a formated string with the time series data to display
+*  @param data :: a formatted string with the time series data to display
 *  @param wsName :: add workspace name to the table window title bar, defaults
 * to logname if left blank
 */
