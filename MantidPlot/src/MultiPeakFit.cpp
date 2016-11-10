@@ -29,11 +29,11 @@
  *                                                                         *
  ***************************************************************************/
 #include "MultiPeakFit.h"
-#include "fit_gsl.h"
-#include "PlotCurve.h"
-#include "FunctionCurve.h"
 #include "ColorBox.h"
+#include "FunctionCurve.h"
 #include "MultiLayer.h"
+#include "PlotCurve.h"
+#include "fit_gsl.h"
 
 #include <gsl/gsl_statistics.h>
 
@@ -232,7 +232,7 @@ void MultiPeakFit::insertPeakFunctionCurve(double *x, double *y, int peak) {
   }
   c->setFormula(
       formula.replace("--", "+").replace("-+", "-").replace("+-", "-"));
-  d_output_graph->insertPlotItem(c, Graph::Line);
+  d_output_graph->insertPlotItem(c, GraphOptions::Line);
   d_output_graph->addFitCurve(c);
 }
 
@@ -355,7 +355,7 @@ void MultiPeakFit::generateFitCurve() {
       else
         c->setPen(QPen(ColorBox::color(d_curveColorIndex), 1));
       c->setData(X.data(), Y.data(), d_points); // c->setData(X, Y, d_points);
-      d_output_graph->insertPlotItem(c, Graph::Line);
+      d_output_graph->insertPlotItem(c, GraphOptions::Line);
       d_output_graph->addFitCurve(c);
 
       if (generate_peak_curves) {
@@ -368,7 +368,7 @@ void MultiPeakFit::generateFitCurve() {
           c->setPen(QPen(ColorBox::color(d_peaks_color), 1));
           c->setData(X.data(), Y.data(),
                      d_points); // c->setData(X, Y, d_points);
-          d_output_graph->insertPlotItem(c, Graph::Line);
+          d_output_graph->insertPlotItem(c, GraphOptions::Line);
           d_output_graph->addFitCurve(c);
         }
       }

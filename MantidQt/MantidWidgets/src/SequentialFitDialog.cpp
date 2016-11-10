@@ -1,6 +1,7 @@
 #include "MantidQtMantidWidgets/SequentialFitDialog.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -15,10 +16,11 @@
 #include <QInputDialog>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QDesktopServices>
 #include <QUrl>
 
 namespace MantidQt {
+using API::MantidDesktopServices;
+
 namespace MantidWidgets {
 
 /// Constructor
@@ -357,7 +359,7 @@ void SequentialFitDialog::finishHandle(const Mantid::API::IAlgorithm *) {
 }
 
 void SequentialFitDialog::helpClicked() {
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl("http://www.mantidproject.org/PlotPeakByLogValue"));
 }
 

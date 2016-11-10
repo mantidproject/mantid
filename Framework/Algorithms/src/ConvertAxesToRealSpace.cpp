@@ -114,7 +114,7 @@ void ConvertAxesToRealSpace::exec() {
 
   const auto &spectrumInfo = summedWs->spectrumInfo();
   // for each spectra
-  PARALLEL_FOR2(summedWs, outputWs)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*summedWs, *outputWs))
   for (int i = 0; i < nHist; ++i) {
     try {
       V3D pos = spectrumInfo.position(i);
@@ -157,7 +157,7 @@ void ConvertAxesToRealSpace::exec() {
         if (axisValue < axisVector[axisIndex].min)
           axisVector[axisIndex].min = axisValue;
       }
-    } catch (Exception::NotFoundError) {
+    } catch (const Exception::NotFoundError &) {
       g_log.debug() << "Could not find detector for workspace index " << i
                     << '\n';
       failedCount++;
@@ -228,7 +228,7 @@ void ConvertAxesToRealSpace::exec() {
 
   // set all the X arrays - share the same vector
   int nOutputHist = static_cast<int>(outputWs->getNumberHistograms());
-  PARALLEL_FOR1(outputWs)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWs))
   for (int i = 0; i < nOutputHist; ++i) {
     outputWs->setPoints(i, x);
   }
@@ -255,7 +255,7 @@ void ConvertAxesToRealSpace::exec() {
   }
 
   // loop over the data and sqrt the errors to complete the error calculation
-  PARALLEL_FOR1(outputWs)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWs))
   for (int i = 0; i < nOutputHist; ++i) {
     auto &errorVec = outputWs->mutableE(i);
     std::transform(errorVec.begin(), errorVec.end(), errorVec.begin(),

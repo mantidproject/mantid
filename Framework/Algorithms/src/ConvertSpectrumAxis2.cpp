@@ -1,5 +1,4 @@
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
-#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
@@ -27,7 +26,6 @@ using namespace Geometry;
 void ConvertSpectrumAxis2::init() {
   // Validator for Input Workspace
   auto wsVal = boost::make_shared<CompositeValidator>();
-  wsVal->add<HistogramValidator>();
   wsVal->add<SpectraAxisValidator>();
   wsVal->add<InstrumentValidator>();
 
@@ -120,10 +118,14 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
       warningGiven = true;
       continue;
     }
-    if (signedTheta)
-      m_indexMap.emplace(spectrumInfo.signedTwoTheta(i) * rad2deg, i);
-    else
-      m_indexMap.emplace(spectrumInfo.twoTheta(i) * rad2deg, i);
+    if (!spectrumInfo.isMonitor(i)) {
+      if (signedTheta)
+        m_indexMap.emplace(spectrumInfo.signedTwoTheta(i) * rad2deg, i);
+      else
+        m_indexMap.emplace(spectrumInfo.twoTheta(i) * rad2deg, i);
+    } else {
+      m_indexMap.emplace(0.0, i);
+    }
 
     progress.report("Converting to theta...");
   }

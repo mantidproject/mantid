@@ -1,4 +1,5 @@
-﻿# pylint: disable=too-many-lines, invalid-name, bare-except, too-many-instance-attributes
+# pylint: disable=too-many-lines, invalid-name, bare-except, too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
 import math
 import os
 import re
@@ -10,6 +11,7 @@ from mantid.kernel import Logger
 from mantid.kernel import V3D
 import SANSUtility as su
 from math import copysign
+from six import iteritems
 
 sanslog = Logger("SANS")
 
@@ -590,7 +592,7 @@ class ISISInstrument(BaseInstrument):
             return self.DETECTORS['high-angle']
 
     def getDetector(self, requested):
-        for _n, detect in self.DETECTORS.iteritems():
+        for _n, detect in iteritems(self.DETECTORS):
             if detect.isAlias(requested):
                 return detect
         sanslog.notice("getDetector: Detector " + requested + "not found")
@@ -724,7 +726,7 @@ class ISISInstrument(BaseInstrument):
         MoveInstrumentComponent(Workspace=ws, ComponentName='some-sample-holder', Z=self.SAMPLE_Z_CORR,
                                 RelativePosition=True)
 
-        for i in self.monitor_zs.keys():
+        for i in list(self.monitor_zs.keys()):
             # get the current location
             component = self.monitor_names[i]
             ws = mtd[str(ws)]
@@ -915,7 +917,7 @@ class LOQ(ISISInstrument):
 
         if self.has_m4_monitor:
             self.monitor_names.update({self._m4_det_id: self._m4_monitor_name})
-        elif self._m4_det_id in self.monitor_names.keys():
+        elif self._m4_det_id in list(self.monitor_names.keys()):
             del self.monitor_names[self._m4_det_id]
 
     def move_components(self, ws, xbeam, ybeam):
@@ -1783,8 +1785,13 @@ class LARMOR(ISISInstrument):
         try:
             run_num = LARMOR.get_run_number_from_workspace_reference(workspace_ref)
         except:
+            # If the workspace does not contain logs from which we can get the run number
+            # then we get the run number from the workspace name which has the form
+            # [\d]+_[sans|trans]_[\d+]. The first set of digits is the one we are after.
+            # The end set of digits corresponds to the period number.
+            # Previously this method looked for the last set. It is not clear why.
             ws_name = workspace_ref.name()
-            run_num = int(re.findall(r'\d+', str(ws_name))[-1])
+            run_num = int(re.findall(r'\d+', str(ws_name))[0])
         if int(run_num) >= 2217:
             return True
         else:
