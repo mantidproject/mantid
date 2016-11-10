@@ -151,7 +151,7 @@ namespace HistogramData {
  * are always calculated points.
  * @param stepSize The space, in indices, between the calculated points
  * @return A new Histogram with the y-values from the result of a linear
- * interpolation. If the XMode of the output will match that of the input
+ * interpolation. The XMode of the output will match the input histogram.
  */
 Histogram interpolateLinear(const Histogram &input, const size_t stepSize) {
   sanityCheck(input, stepSize, 2, LINEAR_NAME);
@@ -188,7 +188,7 @@ void interpolateLinearInplace(Histogram &inOut, const size_t stepSize) {
  * are always calculated points.
  * @param stepSize The space, in indices, between the calculated points
  * @return A new Histogram with the y-values from the result of a linear
- * interpolation. If the XMode of the output will match that of the input
+ * interpolation. The XMode of the output will match the input histogram.
  */
 Histogram interpolateCSpline(const Histogram &input, const size_t stepSize) {
   sanityCheck(input, stepSize, 4, CSPLINE_NAME);
