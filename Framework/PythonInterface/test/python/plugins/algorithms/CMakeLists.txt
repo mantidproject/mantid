@@ -39,6 +39,7 @@ set ( TEST_PY_FILES
   FindReflectometryLinesTest.py
   FitGaussianTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
+  GetQsInQENSDataTest.py
   GSASIIRefineFitPeaksTest.py
   GetEiT0atSNSTest.py
   GetNegMuMuonicXRDTest.py

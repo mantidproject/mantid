@@ -489,7 +489,7 @@ IntegratePeaksCWSD::createPeakworkspace(Kernel::V3D peakCenter,
       Geometry::Instrument_const_sptr instrument = expinfo->getInstrument();
       newpeak.setInstrument(instrument);
       newpeak.setGoniometerMatrix(expinfo->run().getGoniometerMatrix());
-    } catch (std::exception) {
+    } catch (const std::exception &) {
       throw std::runtime_error(
           "Unable to set instrument and goniometer matrix.");
     }

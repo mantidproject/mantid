@@ -1933,10 +1933,13 @@ void MuonAnalysis::startUpLook() {
       m_uiForm.groupTable->setItem(i, 0, it);
     }
   }
+
+  // When first started, no data has yet been loaded
+  noDataAvailable();
 }
 
 /**
-* Time zero returend in ms
+* Time zero returned in ms
 */
 double MuonAnalysis::timeZero() {
   return getValidatedDouble(m_uiForm.timeZeroFront, TIME_ZERO_DEFAULT,
@@ -2823,6 +2826,7 @@ void MuonAnalysis::noDataAvailable() {
   m_uiForm.groupTablePlotButton->setEnabled(false);
   m_uiForm.pairTablePlotButton->setEnabled(false);
   m_uiForm.guessAlphaButton->setEnabled(false);
+  setAnalysisTabsEnabled(false);
 }
 
 /**
@@ -2833,6 +2837,7 @@ void MuonAnalysis::nowDataAvailable() {
   m_uiForm.groupTablePlotButton->setEnabled(true);
   m_uiForm.pairTablePlotButton->setEnabled(true);
   m_uiForm.guessAlphaButton->setEnabled(true);
+  setAnalysisTabsEnabled(true);
 }
 
 void MuonAnalysis::openDirectoryDialog() {
@@ -2975,6 +2980,22 @@ void MuonAnalysis::updateDataPresenterOverwrite(int state) {
   Q_UNUSED(state);
   if (m_fitDataPresenter) {
     m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
+  }
+}
+
+/**
+ * Set the following tabs enabled/disabled:
+ * - Grouping Options
+ * - Data Analysis
+ * (based on whether data is available or not)
+ * @param enabled :: [input] Whether to enable or disable tabs
+ */
+void MuonAnalysis::setAnalysisTabsEnabled(const bool enabled) {
+  const std::vector<QWidget *> tabs{m_uiForm.DataAnalysis,
+                                    m_uiForm.GroupingOptions};
+  for (auto *tab : tabs) {
+    const auto &index = m_uiForm.tabWidget->indexOf(tab);
+    m_uiForm.tabWidget->setTabEnabled(index, enabled);
   }
 }
 

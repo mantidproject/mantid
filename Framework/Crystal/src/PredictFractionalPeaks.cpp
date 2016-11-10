@@ -212,7 +212,7 @@ void PredictFractionalPeaks::exec() {
             }
           } catch (...) {
             if (ErrPos != 1) // setQLabFrame in createPeak throws exception
-              throw new std::invalid_argument("Invalid data at this point");
+              throw std::invalid_argument("Invalid data at this point");
           }
         }
       }

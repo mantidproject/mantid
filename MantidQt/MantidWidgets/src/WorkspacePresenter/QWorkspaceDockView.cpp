@@ -1505,22 +1505,25 @@ void QWorkspaceDockView::onClickPlotSpectraErr() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrumWithErrors);
 }
 
-/** Plots a single spectrum from each selected workspace
-* @param showErrors If true, show error bars. Otherswise no error bars are
+/** Plots one or more spectra from each selected workspace
+* @param showErrors If true, show error bars. Otherwise no error bars are
 * displayed.
 */
 void QWorkspaceDockView::plotSpectrum(bool showErrors) {
   const auto userInput = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum
   // selection
-  if (userInput.plots.empty())
+  if (userInput.plots.empty()) {
     return;
+  }
 
-  bool spectrumPlot(true), clearWindow(false);
-  MultiLayer *window(NULL);
-  m_mantidUI->plot1D(userInput.plots, spectrumPlot,
-                     MantidQt::DistributionDefault, showErrors, window,
-                     clearWindow, userInput.waterfall);
+  if (userInput.tiled) {
+    m_mantidUI->plotSubplots(userInput.plots, MantidQt::DistributionDefault,
+                             showErrors);
+  } else {
+    m_mantidUI->plot1D(userInput.plots, true, MantidQt::DistributionDefault,
+                       showErrors, nullptr, false, userInput.waterfall);
+  }
 }
 
 void QWorkspaceDockView::onClickDrawColorFillPlot() {
