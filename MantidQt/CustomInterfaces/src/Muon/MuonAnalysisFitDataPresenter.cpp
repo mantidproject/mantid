@@ -474,8 +474,14 @@ void MuonAnalysisFitDataPresenter::handleFitFinished(
     const auto groupName =
         MantidWidgets::MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX +
         label.toStdString();
-    handleFittedWorkspaces(groupName);
-    extractFittedWorkspaces(groupName);
+    try {
+      handleFittedWorkspaces(groupName);
+      extractFittedWorkspaces(groupName);
+    } catch (const Mantid::Kernel::Exception::NotFoundError &notFound) {
+      g_log.error()
+          << "Failed to process fitted workspaces as they could not be found ("
+          << groupName << ").\n" << notFound.what();
+    }
   }
 }
 
@@ -485,6 +491,8 @@ void MuonAnalysisFitDataPresenter::handleFitFinished(
  * @param baseName :: [input] Base name for workspaces
  * @param groupName :: [input] Name of group that workspaces belong to. Leave
  * empty to be the same as baseName (usual case).
+ * @throws Mantid::Kernel::Exception::NotFoundError if _Workspaces or
+ * _Parameters are not in the ADS
  */
 void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
     const std::string &baseName, const std::string &groupName) const {
@@ -533,6 +541,8 @@ void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
  * @param baseName :: [input] Base name for workspaces
  * @param groupName :: [input] Name of upper group e.g. "MuonSimulFit_Label". If
  * empty, use same as baseName.
+ * @throws Mantid::Kernel::Exception::NotFoundError if _Workspaces is not in the
+ * ADS
  */
 void MuonAnalysisFitDataPresenter::extractFittedWorkspaces(
     const std::string &baseName, const std::string &groupName) const {
@@ -559,6 +569,7 @@ void MuonAnalysisFitDataPresenter::extractFittedWorkspaces(
  * - "period": period string
  * @param wsName :: [input] Name of workspace to add logs to
  * @param wsParams :: [input] Parameters to get log values from
+ * @throws Mantid::Kernel::Exception::NotFoundError if wsName not in ADS
  */
 void MuonAnalysisFitDataPresenter::addSpecialLogs(
     const std::string &wsName, const Muon::DatasetParams &wsParams) const {
