@@ -972,8 +972,18 @@ class MainWindow(QtGui.QMainWindow):
         convert merged workspace in Q-sample frame to HKL frame
         :return:
         """
-        # TODO/NOW/ISSUE - Make this one work!
-        self._myControl.convert_merged_ws_to_hkl()
+        # TODO/NOW/ - TEST!
+        # get experiment number
+        exp_number = int(str(self.ui.lineEdit_exp.text()))
+
+        # get the lines that are selected
+        selected_row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows(True)
+
+        for row_number in selected_row_number_list:
+            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
+            self._myControl.convert_merged_ws_to_hkl(exp_number, scan_number, pt_num_list)
+
+        return
 
     def do_del_roi(self):
         """ Delete ROI
@@ -1870,8 +1880,8 @@ class MainWindow(QtGui.QMainWindow):
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(i_row)
             md_ws_name = self.ui.tableWidget_mergeScans.get_merged_ws_name(i_row)
             if convert_to_hkl:
-                # TODO/NOW/ISSUE - is there any better and more systematic way to find the workspace name???
-                md_ws_name = '%s_HKL' % md_ws_name
+                # TODO/NOW/ISSUE - how to get pt_list???
+                md_ws_name = hb3a_util.get_merged_hkl_md_name(exp_number, scan_number, pt_list)
             md_ws_list.append(md_ws_name)
             # get peak center in 3-tuple
             peak_center = self._myControl.get_peak_info(exp_number, scan_number).get_peak_centre()
@@ -2592,7 +2602,23 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_show_workspaces(self):
-        # TODO/NOW/ISSUE - pop out a dialog to show the workspace names...
+        """
+        pop out a dialog to show the workspace names that are selected
+        :return:
+        """
+        # get number of rows that are selected
+        row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows(True)
+
+        message = ''
+        for row_number in row_number_list:
+            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
+            md_qample_ws_name = self.ui.tableWidget_mergeScans.get_merged_ws_name(row_number)
+            message += 'Scan %03d: %s\n' % (scan_number, md_qample_ws_name)
+        # END-FOR
+
+        # TODO/NOW/ISSUE - find out a convenient way to pop out a dialog box with information
+
+        return
 
     def do_survey(self):
         """

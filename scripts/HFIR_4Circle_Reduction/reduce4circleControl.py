@@ -1714,28 +1714,38 @@ class CWSCDReductionControl(object):
 
         return True, (out_q_name, '')
 
-    def convert_merged_ws_to_hkl(self, exp_number, scan_number):
-        # TODO/ISSUE/NOW - make this one work!
+    def convert_merged_ws_to_hkl(self, exp_number, scan_number, pt_num_list):
+        """
+        convert a merged scan in MDEventWorkspace to HKL
+        :param exp_number:
+        :param scan_number:
+        :param pt_num_list:
+        :return:
+        """
+        # check inputs' validity
+        assert isinstance(exp_number, int), 'Experiment number must be an integer.'
+        assert isinstance(scan_number, int), 'Scan number must be an integer.'
 
-            # retrieve UB matrix stored and convert to a 1-D array
-            assert exp_number in self._myUBMatrixDict
+        # retrieve UB matrix stored and convert to a 1-D array
+        if exp_number not in self._myUBMatrixDict:
+            raise RuntimeError('There is no UB matrix associated with experiment %d.' % exp_number)
+        else:
             ub_matrix_1d = self._myUBMatrixDict[exp_number].reshape(9,)
-            # convert to HKL
-            input_q_name # TODO/ISSUE/NOW - make this work! either from table or from data management
-            out_hkl_name = get_merged_hkl_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
-            try:
-                mantidsimple.ConvertCWSDMDtoHKL(InputWorkspace=out_q_name,
-                                                UBMatrix=ub_matrix_1d,
-                                                OutputWorkspace=out_hkl_name)
 
-            except RuntimeError as e:
-                err_msg += 'Failed to reduce scan %d from MDWorkspace %s due to %s' % (scan_no, out_q_name, str(e))
-                return False, err_msg
+        # convert to HKL
+        input_md_qsample_ws = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_list=pt_num_list)
+        out_hkl_name = get_merged_hkl_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
+        try:
+            mantidsimple.ConvertCWSDMDtoHKL(InputWorkspace=input_md_qsample_ws,
+                                            UBMatrix=ub_matrix_1d,
+                                            OutputWorkspace=out_hkl_name)
 
-            # set up output
-            out_ws_name = out_hkl_name
+        except RuntimeError as e:
+            err_msg = 'Failed to reduce scan %d from MDWorkspace %s due to %s' % (scan_number, input_md_qsample_ws,
+                                                                                  str(e))
+            return False, err_msg
 
-            return
+        return True, out_hkl_name
 
     def set_roi(self, exp_number, scan_number, lower_left_corner, upper_right_corner):
         """
