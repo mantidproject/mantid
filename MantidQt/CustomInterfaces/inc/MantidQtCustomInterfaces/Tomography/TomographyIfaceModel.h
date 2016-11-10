@@ -11,6 +11,7 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyProcessHandler.h"
 
 // Qt classes forward declarations
 class QMutex;
@@ -318,6 +319,8 @@ private:
   // mutex for the job status info update operations
   // TODO: replace with std::mutex+std::lock_guard
   QMutex *m_statusMutex;
+
+  std::unique_ptr<TomographyProcessHandler> m_process;
 };
 
 } // namespace CustomInterfaces

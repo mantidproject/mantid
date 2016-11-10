@@ -58,6 +58,8 @@ sys.path.insert(0, os.path.split(path.dirname(__file__))[0]) # noqa
 from IMAT.tomorec import reconstruction_command as tomocmd
 import IMAT.tomorec.configs as tomocfg
 
+import pydevd
+pydevd.settrace('localhost', port=40998, stdoutToServer=True, stderrToServer=True)
 
 def setup_cmd_options():
     """

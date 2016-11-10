@@ -509,13 +509,11 @@ void TomographyIfaceModel::doRunReconstructionJobLocal(
     const std::string &run, const std::string &allOpts,
     const std::vector<std::string> &args) {
 
-  // initialise to 0, if the launch fails then the id will not be changed
-  Poco::Process::PID pid = 0;
-  // Poco::Pipe outPipe;
-  // Poco::Pipe errPipe;
+  m_process.reset();
+  m_process = Mantid::Kernel::make_unique<TomographyProcessHandler>();
   try {
-    Poco::ProcessHandle handle = Poco::Process::launch(run, args);
-    pid = handle.id();
+    m_process->setup(run, args);
+    m_process->start();
   }
   catch (Poco::SystemException & sexc) {
     g_log.error() << "Execution failed. Could not run the tool. Error details: "
@@ -523,38 +521,18 @@ void TomographyIfaceModel::doRunReconstructionJobLocal(
   }
 
   Mantid::API::IRemoteJobManager::RemoteJobInfo info;
+  
+  // TODO
+  auto pid = m_process->getPID();
   info.id = boost::lexical_cast<std::string>(pid);
   info.name = pid > 0 ? "Mantid_Local" : "none";
   info.status = pid > 0 ? "Starting" : "Exit";
   info.cmdLine = run + " " + allOpts;
   m_jobsStatusLocal.emplace_back(info);
-
+  // TODO log proper info
+  // g_log.information(m_process.getOutputString());
+  
   doRefreshJobsInfo(g_LocalResourceName);
-}
-
-/** Converts the pipes to strings and prints them into the mantid logger stream
-*
-* @param outPipe Poco::Pipe that holds the output stream of the process
-* @param errPipe Poco::Pipe that holds the error stream of the process
-*/
-void TomographyIfaceModel::printProcessStreamsToMantidLog(
-    const Poco::Pipe &outPipe, const Poco::Pipe &errPipe) {
-  // if the launch is successful then print output streams
-  // into the g_log so the user can see the information/error
-  Poco::PipeInputStream outstr(outPipe);
-  Poco::PipeInputStream errstr(errPipe);
-  std::string outString;
-  std::string errString;
-  Poco::StreamCopier::copyToString(outstr, outString);
-  Poco::StreamCopier::copyToString(errstr, errString);
-
-  // print normal output stream if not empty
-  if (!outString.empty())
-    g_log.information(outString);
-
-  // print error output stream if not empty
-  if (!errString.empty())
-    g_log.error(errString);
 }
 
 void TomographyIfaceModel::doCancelJobs(const std::string &compRes,
@@ -603,6 +581,8 @@ void TomographyIfaceModel::doRefreshJobsInfo(const std::string &compRes) {
 }
 
 void TomographyIfaceModel::refreshLocalJobsInfo() {
+  g_log.information(m_process->getOutputString());
+  
   for (auto &job : m_jobsStatusLocal) {
     if ("Exit" == job.status || "Done" == job.status)
       continue;
