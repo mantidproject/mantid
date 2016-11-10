@@ -278,6 +278,16 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_loadLastNthProject, QtCore.SIGNAL('clicked()'),
                      self.do_load_nth_project)
 
+        # TODO/NOW/ISSUE - Implement
+        """
+        lineEdit_userDetSampleDistance, pushButton_applyCalibratedSampleDistance,
+        add more to --> lineEdit_infoDetSampleDistance
+        pushButton_applyUserWavelength: add more to --> lineEdit_infoWavelength
+
+        lineEdit_detCenterPixHorizontal, lineEdit_detCenterPixVertical,
+        pushButton_applyUserDetCenter, lineEdit_infoDetCenter
+        """
+
         # Validator ... (NEXT)
 
         # Declaration of class variable
@@ -305,7 +315,7 @@ class MainWindow(QtGui.QMainWindow):
         self.load_settings()
 
         # pre-define child windows
-        self._spiceViwer = None
+        self._spiceViewer = None
 
         return
 
@@ -972,7 +982,7 @@ class MainWindow(QtGui.QMainWindow):
         convert merged workspace in Q-sample frame to HKL frame
         :return:
         """
-        # TODO/NOW/ - TEST!
+        # TODO/NOW/ - TEST: Convert to HKL
         # get experiment number
         exp_number = int(str(self.ui.lineEdit_exp.text()))
 
@@ -981,7 +991,14 @@ class MainWindow(QtGui.QMainWindow):
 
         for row_number in selected_row_number_list:
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
-            self._myControl.convert_merged_ws_to_hkl(exp_number, scan_number, pt_num_list)
+            status, ret_obj = self._myControl.get_pt_numbers(exp_number, scan_number)
+            if not status:
+                raise RuntimeError('It is not possible to fail to get Pt number list at this stage.'
+                                   'Error is due to %s.' % str(ret_obj))
+            pt_number_list = ret_obj
+
+            # set intensity to zero and error message if fails to get Pt.
+            self._myControl.convert_merged_ws_to_hkl(exp_number, scan_number, pt_number_list)
 
         return
 
@@ -1880,8 +1897,12 @@ class MainWindow(QtGui.QMainWindow):
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(i_row)
             md_ws_name = self.ui.tableWidget_mergeScans.get_merged_ws_name(i_row)
             if convert_to_hkl:
-                # TODO/NOW/ISSUE - how to get pt_list???
-                md_ws_name = hb3a_util.get_merged_hkl_md_name(exp_number, scan_number, pt_list)
+                status, ret_obj = self._myControl.get_pt_numbers(exp_number, scan_number)
+                if not status:
+                    raise RuntimeError('It is not possible to fail to get Pt number list at this stage.'
+                                       'Error is due to %s.' % str(ret_obj))
+                pt_list = ret_obj
+                md_ws_name = hb3a_util.get_merged_hkl_md_name(self._instrument, exp_number, scan_number, pt_list)
             md_ws_list.append(md_ws_name)
             # get peak center in 3-tuple
             peak_center = self._myControl.get_peak_info(exp_number, scan_number).get_peak_centre()
@@ -2366,6 +2387,9 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_exp.setStyleSheet('color: black')
 
             self.setWindowTitle('%s: Experiment %d' % (self._baseTitle, exp_number))
+
+            # TODO/NOW/ISSUE - if the current data directory is empty or as /HFIR/HB3A/, reset data directory
+
         else:
             err_msg = ret_obj
             self.pop_one_button_dialog('Unable to set experiment as %s' % err_msg)
@@ -2462,7 +2486,7 @@ class MainWindow(QtGui.QMainWindow):
                          hb3a_util.round_miller_index(hkl_i[1], 0.2),
                          hb3a_util.round_miller_index(hkl_i[2], 0.2)]
 
-            self.ui.tableWidget_mergeScans.set_hkl(row_index, hkl_i)
+            self.ui.tableWidget_mergeScans.set_hkl(row_index, hkl_i, hkl_src)
         # END-FOR
 
         return
@@ -2473,6 +2497,9 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         home_dir = os.path.expanduser('~')
+
+        # TODO/NOW/ISSUE - make this one work for server-based
+        # example: os.path.exists('/HFIR/HB3A/exp322') won't take long time to find out the server is off.
 
         # Data cache directory
         data_cache_dir = os.path.join(home_dir, 'Temp/HB3ATest')
@@ -2535,16 +2562,16 @@ class MainWindow(QtGui.QMainWindow):
         # read the spice file into list of lines
         spice_line_list = self._myControl.read_spice_file(exp_number, scan_number_list[0])
 
-        self._spiceViwer = viewspicedialog.ViewSpiceDialog(self)
+        self._spiceViewer = viewspicedialog.ViewSpiceDialog(self)
 
         # Write each line
         wbuf = ''
         for line in spice_line_list:
             wbuf += line
-        self._spiceViwer.write_text(wbuf)
+        self._spiceViewer.write_text(wbuf)
 
         # show the new window
-        self._spiceViwer.show()
+        self._spiceViewer.show()
 
         return
 
@@ -2568,9 +2595,9 @@ class MainWindow(QtGui.QMainWindow):
         spice_line_list = self._myControl.read_spice_file(exp_number, scan_number)
 
         # launch SPICE view
-        if self._spiceViwer is None:
+        if self._spiceViewer is None:
             # create SPICE viewer if it does not exist
-            self._spiceViwer = viewspicedialog.ViewSpiceDialog(self)
+            self._spiceViewer = viewspicedialog.ViewSpiceDialog(self)
 
         # form the buffer
         spice_buffer = ''
@@ -2578,10 +2605,10 @@ class MainWindow(QtGui.QMainWindow):
             spice_buffer += line
 
         # write out the value
-        self._spiceViwer.write_text(spice_buffer)
+        self._spiceViewer.write_text(spice_buffer)
 
         # show
-        self._spiceViwer.show()
+        self._spiceViewer.show()
 
         return
 
@@ -2616,7 +2643,7 @@ class MainWindow(QtGui.QMainWindow):
             message += 'Scan %03d: %s\n' % (scan_number, md_qample_ws_name)
         # END-FOR
 
-        # TODO/NOW/ISSUE - find out a convenient way to pop out a dialog box with information
+        gutil.show_message(message=message)
 
         return
 
@@ -2993,11 +3020,15 @@ class MainWindow(QtGui.QMainWindow):
         selected_rows = self.ui.tableWidget_mergeScans.get_selected_rows(True)
 
         # apply for each row selected for Lorentz correction
+        error_message = ''
         for row_number in selected_rows:
             # get scan number
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
             # get peak information object
             peak_info_obj = self._myControl.get_peak_info(exp_number, scan_number)
+            if peak_info_obj is None:
+                error_message += 'Unable to get peak information from scan %d\n' % scan_number
+                continue
             # get intensity
             peak_intensity = peak_info_obj.get_intensity()
             # get Q-vector of the peak center and calculate |Q| from it
@@ -3020,10 +3051,12 @@ class MainWindow(QtGui.QMainWindow):
             # apply the Lorentz correction to the intensity
             corrected = self._myControl.apply_lorentz_correction(peak_intensity, q, wavelength, motor_step)
 
-            print '[DB...BAT] Calculate Lorentz Correction: Row = %d' % row_number
             self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, corrected, lorentz_corrected=True)
             self._myControl.set_peak_intensity(exp_number, scan_number, corrected)
         # END-FOR (row_number)
+
+        if len(error_message) > 0:
+            self.pop_one_button_dialog(error_message)
 
         return
 
@@ -3397,8 +3430,7 @@ class MainWindow(QtGui.QMainWindow):
                                                                   peak_intensity=intensity,
                                                                   lorentz_corrected=False)
                 self.ui.tableWidget_mergeScans.set_peak_centre(row_number=row_number,
-                                                               peak_centre=peak_centre,
-                                                               frame='QSample')
+                                                               peak_centre=peak_centre)
                 if is_error:
                     self.ui.tableWidget_mergeScans.set_status(row_number, 'Intensity Error')
                 else:

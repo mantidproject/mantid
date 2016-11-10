@@ -829,10 +829,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return error_message
 
-    def set_hkl(self, row_number, hkl):
+    def set_hkl(self, row_number, hkl, hkl_source=None):
         """ Set Miller index HKL to a row
         :param row_number: row number
         :param hkl:
+        :param hkl_source:
         :return:
         """
         # check
@@ -843,6 +844,9 @@ class ProcessTableWidget(tableBase.NTableWidget):
         # update the cell
         hkl_str = '%.3f, %.3f, %.3f' % (hkl[0], hkl[1], hkl[2])
         self.update_cell_value(row_number, self._colIndexHKL, hkl_str)
+
+        if hkl_source is not None:
+            self.update_cell_value(row_number, self._colIndexIndexFrom, hkl_source)
 
         return
 
@@ -879,12 +883,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return
 
-    def set_peak_centre(self, row_number, peak_centre, frame):
+    def set_peak_centre(self, row_number, peak_centre):
         """
         set peak centre value
         :param row_number:
         :param peak_centre:
-        :param frame:
         :return:
         """
         # check input's validity

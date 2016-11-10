@@ -371,7 +371,76 @@ class GetValueDialog(QtGui.QDialog):
 
 # static method to create the dialog and return (date, time, accepted)
 def get_value(parent=None):
-        dialog = GetValueDialog(parent)
-        result = dialog.exec_()
-        value = dialog.get_value()
-        return value, result == QtGui.QDialog.Accepted
+    """ Get value from a pop-up dialog
+    :param parent:
+    :return:
+    """
+    dialog = GetValueDialog(parent)
+    result = dialog.exec_()
+    value = dialog.get_value()
+
+    return value, result == QtGui.QDialog.Accepted
+
+
+class DisplayDialog(QtGui.QDialog):
+    def __init__(self, parent=None):
+        """
+
+        :param parent:
+        """
+        super(DisplayDialog, self).__init__(parent)
+
+        layout = QtGui.QVBoxLayout(self)
+
+        # nice widget for editing the date
+        self.message_edit = QtGui.QPlainTextEdit(self)
+        self.message_edit.setReadOnly(True)
+        layout.addWidget(self.message_edit)
+
+        self.setWindowTitle('Merged Scans Workspace Names')
+
+        # OK and Cancel buttons
+        buttons = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok,
+                                         QtCore.Qt.Horizontal, self)
+
+        buttons.accepted.connect(self.accept)
+        layout.addWidget(buttons)
+
+        return
+
+    def show_message(self, message):
+        """
+        show message
+        :param message:
+        :return:
+        """
+        self.message_edit.setPlainText(message)
+
+        return
+
+
+def show_message(parent=None, message='show message here!'):
+    """
+
+    :param parent:
+    :param message:
+    :return:
+    """
+    dialog = DisplayDialog(parent)
+    dialog.show_message(message)
+
+    result = dialog.exec_()
+
+    return
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtGui.QApplication(sys.argv)
+
+    show_message(message='Test test\nTest test\n\ntest')
+
+    sys.exit(app.exec_())
+
+
+

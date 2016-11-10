@@ -887,7 +887,7 @@ class CWSCDReductionControl(object):
         :param exp_number: experiment number
         :param scan_number:
         :param pt_number:
-        :return: PeakInfo instance
+        :return: PeakInfo instance or None
         """
         # Check for type
         assert isinstance(exp_number, int), 'Experiment %s must be an integer but not of type %s.' \
@@ -909,7 +909,6 @@ class CWSCDReductionControl(object):
             ret_value = self._myPeakInfoDict[p_key]
         else:
             ret_value = None
-            print '[DB...INFO] Peak Key is supposed to be %s of type %s..' % (str(p_key), type(p_key))
 
         return ret_value
 
@@ -1734,7 +1733,7 @@ class CWSCDReductionControl(object):
 
         # convert to HKL
         input_md_qsample_ws = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_list=pt_num_list)
-        out_hkl_name = get_merged_hkl_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
+        out_hkl_name = get_merged_hkl_md_name(self._instrumentName, exp_number, scan_number, pt_num_list)
         try:
             mantidsimple.ConvertCWSDMDtoHKL(InputWorkspace=input_md_qsample_ws,
                                             UBMatrix=ub_matrix_1d,
