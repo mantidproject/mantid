@@ -21,23 +21,23 @@ using Mantid::Kernel::DateAndTime;
 class ScopedDirectory {
 public:
   /// Constructor: create directory in temp folder
-  ScopedDirectory(const std::string &dirName) {
-    Poco::Path tmpPath;
-    tmpPath.pushDirectory(dirName);
+  ScopedDirectory(const std::string &dirName) : m_dirName(dirName) {
+    Poco::Path tmpPath(Mantid::Kernel::ConfigService::Instance().getTempDir());
+    tmpPath.pushDirectory(m_dirName);
     m_directory = Poco::File(tmpPath);
     m_directory.createDirectories();
   }
   /// Destructor: delete the directory
   virtual ~ScopedDirectory() {
-    constexpr bool recursiveRemove(
-        false); // Don't delete whole folder structure
+    constexpr bool recursiveRemove(true);
     m_directory.remove(recursiveRemove);
   }
   /// Get path of directory
-  std::string getPath() const { return m_directory.path(); }
+  std::string getDirectoryName() const { return m_dirName; }
 
 private:
   Poco::File m_directory;
+  const std::string m_dirName;
 };
 
 /**
@@ -124,12 +124,12 @@ public:
    */
   void test_getMostRecentFile() {
     const ScopedDirectory tmpDir("test_getMostRecentFile");
-    auto files = generateTestFiles(tmpDir.getPath());
+    auto files = generateTestFiles(tmpDir.getDirectoryName());
     ALCLatestFileFinder finder(files[0].getFileName());
     TS_ASSERT_EQUALS(finder.getMostRecentFile(), files[2].getFileName());
     { // file added
-      auto newFile =
-          TestFile("2116-03-15T15:00:00", tmpDir.getPath(), "MUSR", "90003");
+      auto newFile = TestFile("2116-03-15T15:00:00", tmpDir.getDirectoryName(),
+                              "MUSR", "90003");
       TS_ASSERT_EQUALS(finder.getMostRecentFile(), newFile.getFileName());
     }
     // file removed (newFile went out of scope)
@@ -141,9 +141,9 @@ public:
    */
   void test_ignoreNonNeXus() {
     const ScopedDirectory tmpDir("test_ignoreNonNeXus");
-    auto files = generateTestFiles(tmpDir.getPath());
-    auto nonNexus = TestFile("2116-03-15T16:00:00", tmpDir.getPath(), "MUSR",
-                             "90004", "run");
+    auto files = generateTestFiles(tmpDir.getDirectoryName());
+    auto nonNexus = TestFile("2116-03-15T16:00:00", tmpDir.getDirectoryName(),
+                             "MUSR", "90004", "run");
     ALCLatestFileFinder finder(files[0].getFileName());
     TS_ASSERT_EQUALS(finder.getMostRecentFile(), files[2].getFileName());
   }
@@ -153,9 +153,9 @@ public:
    */
   void test_ignoreWrongInstrument() {
     const ScopedDirectory tmpDir("test_ignoreWrongInstrument");
-    auto files = generateTestFiles(tmpDir.getPath());
-    auto wrongInstrument =
-        TestFile("2116-03-15T16:00:00", tmpDir.getPath(), "EMU", "80000");
+    auto files = generateTestFiles(tmpDir.getDirectoryName());
+    auto wrongInstrument = TestFile("2116-03-15T16:00:00",
+                                    tmpDir.getDirectoryName(), "EMU", "80000");
     ALCLatestFileFinder finder(files[0].getFileName());
     std::string foundFile;
     TS_ASSERT_THROWS_NOTHING(foundFile = finder.getMostRecentFile());
@@ -167,9 +167,9 @@ public:
    */
   void test_ignoreInvalidNeXus() {
     const ScopedDirectory tmpDir("test_ignoreInvalidNeXus");
-    auto files = generateTestFiles(tmpDir.getPath());
-    auto badNexus =
-        TestFile("2116-03-15T16:00:00", tmpDir.getPath(), "ALCResults.nxs");
+    auto files = generateTestFiles(tmpDir.getDirectoryName());
+    auto badNexus = TestFile("2116-03-15T16:00:00", tmpDir.getDirectoryName(),
+                             "ALCResults.nxs");
     ALCLatestFileFinder finder(files[0].getFileName());
     std::string foundFile;
     TS_ASSERT_THROWS_NOTHING(foundFile = finder.getMostRecentFile());
