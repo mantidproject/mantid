@@ -163,7 +163,7 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     PARALLEL_START_INTERUPT_REGION
 
     auto &outE = outputWS->mutableE(i);
-    //    // The input was cloned so clear the errors out
+    // The input was cloned so clear the errors out
     outE = 0.0;
     // Final detector position
     IDetector_const_sptr detector;
