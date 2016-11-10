@@ -467,6 +467,45 @@ public:
     TS_ASSERT_THROWS(wkspace.binIndexOf(0.), std::out_of_range);
   }
 
+  void testBinIndexOfDescendingBinning() {
+    WorkspaceTester wkspace;
+    wkspace.initialize(1, 4, 3);
+
+    wkspace.dataX(0)[0] = 5.3;
+    wkspace.dataX(0)[1] = 4.3;
+    wkspace.dataX(0)[2] = 3.3;
+    wkspace.dataX(0)[3] = 2.3;
+
+    TS_ASSERT_EQUALS(wkspace.getNumberHistograms(), 1);
+
+    // First boundary
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(5.3), 0)
+    // First bin
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(5.2), 0);
+    // Bin boundary
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(4.3), 0);
+    // Mid range
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(3.8), 1);
+    // Still second bin
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(std::nextafter(3.3, 10.0)), 1);
+    // Last bin
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(3.1), 2);
+    // Last value
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(2.3), 2);
+
+    // Error handling
+
+    // Bad index value
+    TS_ASSERT_THROWS(wkspace.binIndexOf(2.5, 1), std::out_of_range);
+    TS_ASSERT_THROWS(wkspace.binIndexOf(2.5, -1), std::out_of_range);
+
+    // Bad X values
+    TS_ASSERT_THROWS(wkspace.binIndexOf(std::nextafter(5.3, 10.0)), std::out_of_range);
+    TS_ASSERT_THROWS(wkspace.binIndexOf(5.4, 1.0), std::out_of_range);
+    TS_ASSERT_THROWS(wkspace.binIndexOf(std::nextafter(2.3, 0.0)), std::out_of_range);
+    TS_ASSERT_THROWS(wkspace.binIndexOf(0.), std::out_of_range);
+  }
+
   void test_nexus_spectraMap() {
     NexusTestHelper th(true);
     th.createFile("MatrixWorkspaceTest.nxs");
