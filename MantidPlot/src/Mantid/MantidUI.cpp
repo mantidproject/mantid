@@ -3938,17 +3938,23 @@ MantidUI::createSurfacePlotDialog(int flags, QStringList wsNames,
                                      names, plotType);
 }
 
+/**
+ * Create a new MantidWSIndexDialog
+ * @param flags :: [input] Qt::WindowFlags enum as an integer
+ * @param wsNames :: [input] Names of workspaces
+ * @param showWaterfall :: [input] Whether to show "plot as waterfall" option
+ * @param showPlotAll :: [input] Whether to show "plot all" button
+ * @param showTiledOpt :: [input] Whether to show "tiled plot" option
+ * @returns :: New dialog
+ */
 MantidWSIndexDialog *MantidUI::createWorkspaceIndexDialog(int flags,
                                                           QStringList wsNames,
                                                           bool showWaterfall,
-                                                          bool showPlotAll) {
-  QList<QString> names;
-
-  for (auto &name : wsNames)
-    names.append(name);
-
+                                                          bool showPlotAll,
+                                                          bool showTiledOpt) {
   return new MantidWSIndexDialog(m_appWindow, static_cast<Qt::WFlags>(flags),
-                                 names, showWaterfall, showPlotAll);
+                                 wsNames, showWaterfall, showPlotAll,
+                                 showTiledOpt);
 }
 
 void MantidUI::showSurfacePlot() {

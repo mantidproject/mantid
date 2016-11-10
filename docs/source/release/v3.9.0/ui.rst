@@ -55,6 +55,7 @@ Bugs Resolved
 - Fixed crash when clicking "Help->Ask for Help" on Linux-based systems with Firefox set as the default browser.  
 - Fixed crash when loading data and the algorithm widget is hidden
 - Fixed exception being thrown when saving project with custom interfaces open
+- The "Plot Surface from Group" and "Plot Contour from Group" options have been fixed and now work for both histogram and point data. Note that all workspaces in the group must have the same X data.
 - Fixed importing string logs and string series logs into MantidPlot
 
 SliceViewer Improvements

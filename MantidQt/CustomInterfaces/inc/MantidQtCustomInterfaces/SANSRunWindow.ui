@@ -4173,7 +4173,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="3" column="2">
+        <item row="2" column="2">
          <spacer name="verticalSpacer_10">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -4186,7 +4186,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </spacer>
         </item>
-        <item row="4" column="0" colspan="2">
+        <item row="3" column="0" colspan="2">
          <widget class="QLabel" name="label_42">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -4208,14 +4208,14 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="4" column="2">
+        <item row="3" column="2">
          <widget class="QLineEdit" name="new2Add_edit">
           <property name="toolTip">
            <string>Type , separated lists of run numbers or ranges of numbers with a : </string>
           </property>
          </widget>
         </item>
-        <item row="4" column="3">
+        <item row="3" column="3">
          <widget class="QPushButton" name="add_Btn">
           <property name="toolTip">
            <string>Adds entries to the big table, use before clicking &quot;Sum&quot;.</string>
@@ -4225,7 +4225,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="4" column="4">
+        <item row="3" column="4">
          <widget class="QPushButton" name="browse_to_add_Btn">
           <property name="toolTip">
            <string>Find a file on your system</string>
@@ -4235,7 +4235,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="4" column="5">
+        <item row="3" column="5">
          <spacer name="horizontalSpacer_18">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -4251,7 +4251,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </spacer>
         </item>
-        <item row="5" column="0">
+        <item row="4" column="0">
          <widget class="QLabel" name="label_46">
           <property name="toolTip">
            <string>Files to be summed, click at the top of this box or use the &quot;Add&quot; button</string>
@@ -4261,7 +4261,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="5" column="1" rowspan="3" colspan="2">
+        <item row="4" column="1" rowspan="3" colspan="2">
          <widget class="QListWidget" name="toAdd_List">
           <property name="toolTip">
            <string>Files to be summed, click at the top of this box or use the &quot;Add&quot; button</string>
@@ -4283,7 +4283,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="5" column="3">
+        <item row="4" column="3">
          <widget class="QPushButton" name="clear_Btn">
           <property name="toolTip">
            <string>Clear the table</string>
@@ -4293,7 +4293,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="6" column="3">
+        <item row="5" column="3">
          <widget class="QPushButton" name="remove_Btn">
           <property name="toolTip">
            <string>Select rows by clicking on the table and remove then with this button</string>
@@ -4303,7 +4303,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="7" column="3">
+        <item row="6" column="3">
          <spacer name="verticalSpacer_7">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -4326,21 +4326,14 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="2" column="2">
-         <widget class="QCheckBox" name="loadSeparateEntries">
-          <property name="text">
-           <string>Minimise memory usage</string>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="2">
+        <item row="8" column="2">
          <widget class="QLabel" name="histogram_binning_label">
           <property name="text">
            <string>Histogram binning (when adding event data):</string>
           </property>
          </widget>
         </item>
-        <item row="8" column="3">
+        <item row="7" column="3">
          <widget class="QPushButton" name="sum_Btn">
           <property name="toolTip">
            <string>Load the files in the table above and save them to one file</string>
@@ -4350,7 +4343,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="10" column="2">
+        <item row="9" column="2">
          <widget class="QComboBox" name="comboBox_histogram_choice">
           <item>
            <property name="text">
@@ -4369,14 +4362,14 @@ p, li { white-space: pre-wrap; }
           </item>
          </widget>
         </item>
-        <item row="11" column="2">
+        <item row="10" column="2">
          <widget class="QCheckBox" name="overlayCheckBox">
           <property name="text">
            <string>OverlayEventWorkspaces</string>
           </property>
          </widget>
         </item>
-        <item row="12" column="2">
+        <item row="11" column="2">
          <layout class="QHBoxLayout" name="horizontalLayout_2411">
           <item>
            <widget class="QLabel" name="binning_label">
@@ -4756,7 +4749,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>clear_Btn</tabstop>
   <tabstop>remove_Btn</tabstop>
   <tabstop>summedPath_Btn</tabstop>
-  <tabstop>loadSeparateEntries</tabstop>
  </tabstops>
  <resources/>
  <connections/>
