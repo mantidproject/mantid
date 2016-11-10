@@ -500,9 +500,11 @@ public:
     TS_ASSERT_THROWS(wkspace.binIndexOf(2.5, -1), std::out_of_range);
 
     // Bad X values
-    TS_ASSERT_THROWS(wkspace.binIndexOf(std::nextafter(5.3, 10.0)), std::out_of_range);
+    TS_ASSERT_THROWS(wkspace.binIndexOf(std::nextafter(5.3, 10.0)),
+                     std::out_of_range);
     TS_ASSERT_THROWS(wkspace.binIndexOf(5.4, 1.0), std::out_of_range);
-    TS_ASSERT_THROWS(wkspace.binIndexOf(std::nextafter(2.3, 0.0)), std::out_of_range);
+    TS_ASSERT_THROWS(wkspace.binIndexOf(std::nextafter(2.3, 0.0)),
+                     std::out_of_range);
     TS_ASSERT_THROWS(wkspace.binIndexOf(0.), std::out_of_range);
   }
 

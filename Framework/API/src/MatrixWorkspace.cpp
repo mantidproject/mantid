@@ -1130,9 +1130,9 @@ size_t MatrixWorkspace::binIndexOf(const double xValue,
   const bool ascendingOrder = xValues.front() < xValues.back();
   const auto minX = ascendingOrder ? xValues.front() : xValues.back();
   const auto maxX = ascendingOrder ? xValues.back() : xValues.front();
-  if (xValue < minX ) {
-      throw std::out_of_range("MatrixWorkspace::binIndexOf - X value lower"
-                              " than lowest in current range.");
+  if (xValue < minX) {
+    throw std::out_of_range("MatrixWorkspace::binIndexOf - X value lower"
+                            " than lowest in current range.");
   } else if (xValue > maxX) {
     throw std::out_of_range("MatrixWorkspace::binIndexOf - X value greater"
                             " than highest in current range.");
