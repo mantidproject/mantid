@@ -47,16 +47,7 @@ double QwtRasterDataMDNonOrthogonal::value(double x, double y) const {
   }
 
   // Transform the lookpoint to the coordinate of the workspace
-  auto v1 = m_lookPoint[0];
-  auto v2 = m_lookPoint[1];
-  auto v3 = m_lookPoint[2];
-  m_lookPoint[m_dimX] = v1 * m_skewMatrix[0 + 3 * m_dimX] +
-                        v2 * m_skewMatrix[1 + 3 * m_dimX] +
-                        v3 * m_skewMatrix[2 + 3 * m_dimX];
-  m_lookPoint[m_dimY] = v1 * m_skewMatrix[0 + 3 * m_dimY] +
-                        v2 * m_skewMatrix[1 + 3 * m_dimY] +
-                        v3 * m_skewMatrix[2 + 3 * m_dimY];
-
+  transformLookpointToWorkspaceCoord(m_lookPoint, m_skewMatrix, m_dimX, m_dimY);
   // Get the signal at that point
   signal_t value = 0;
 
