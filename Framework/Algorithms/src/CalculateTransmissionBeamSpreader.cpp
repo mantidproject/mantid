@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/CalculateTransmissionBeamSpreader.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -244,7 +245,7 @@ API::MatrixWorkspace_sptr
 CalculateTransmissionBeamSpreader::extractSpectrum(API::MatrixWorkspace_sptr WS,
                                                    const size_t index) {
   // Check that given spectra are monitors
-  if (!WS->getDetector(index)->isMonitor()) {
+  if (!WS->spectrumInfo().isMonitor(index)) {
     g_log.information(
         "The Incident Beam Monitor UDET provided is not marked as a monitor");
   }
