@@ -111,8 +111,8 @@ protected:
   /// masked. If so then the output spectra has zeroed data
   /// and is also masked. The function returns true if further processing is not
   /// required on the spectra.
-  virtual bool propagateSpectraMask(const API::MatrixWorkspace_const_sptr lhs,
-                                    const API::MatrixWorkspace_const_sptr rhs,
+  virtual bool propagateSpectraMask(const API::SpectrumInfo &lhsSpectrumInfo,
+                                    const API::SpectrumInfo &rhsSpectrumInfo,
                                     const int64_t index,
                                     API::MatrixWorkspace_sptr out);
 
