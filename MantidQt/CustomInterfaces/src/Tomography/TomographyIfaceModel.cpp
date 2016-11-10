@@ -24,9 +24,7 @@ using namespace MantidQt::CustomInterfaces;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-namespace {
-Mantid::Kernel::Logger g_log("TomographyGUI");
-}
+namespace { Mantid::Kernel::Logger g_log("TomographyGUI"); }
 
 // names by which we know compute resourcess
 const std::string TomographyIfaceModel::g_SCARFName = "SCARF@STFC";
@@ -55,10 +53,10 @@ TomographyIfaceModel::TomographyIfaceModel()
       m_reconToolsStatus(), m_jobsStatus(), m_toolsSettings(),
       m_prePostProcSettings(), m_imageStackPreParams(), m_statusMutex(NULL) {
 
-  m_computeRes = {g_SCARFName, g_LocalResourceName};
+  m_computeRes = { g_SCARFName, g_LocalResourceName };
 
-  m_SCARFtools = {g_TomoPyTool, g_AstraTool, g_CCPiTool, g_SavuTool,
-                  g_customCmdTool};
+  m_SCARFtools = { g_TomoPyTool, g_AstraTool, g_CCPiTool, g_SavuTool,
+                   g_customCmdTool };
 
   m_currentToolName = m_SCARFtools.front();
 
@@ -116,8 +114,7 @@ TomographyIfaceModel::validateCompResource(const std::string &res) const {
   if (res != supported) {
     throw std::runtime_error("The compute resource selected (" + res +
                              ") is not the one in principle supported by this "
-                             "interface: " +
-                             supported);
+                             "interface: " + supported);
   }
 
   return supported;
@@ -141,11 +138,9 @@ void TomographyIfaceModel::setupComputeResource() {
         " (and not " + m_facility +
         "). "
         "Facility not supported. This interface is designed "
-        "to be used at " +
-        m_facility +
+        "to be used at " + m_facility +
         ". You will probably not be able to use it in a useful way "
-        "because your facility is " +
-        facName +
+        "because your facility is " + facName +
         ". If you have set that facility by mistake in your settings, "
         "please update it.");
   }
@@ -158,14 +153,13 @@ void TomographyIfaceModel::setupComputeResource() {
   // assume the present reality: just SCARF
   const std::string &required = m_computeRes.front();
   std::vector<std::string> res = Mantid::Kernel::ConfigService::Instance()
-                                     .getFacility()
-                                     .computeResources();
+      .getFacility().computeResources();
   if (res.end() == std::find(res.begin(), res.end(), required)) {
     throw std::runtime_error(
         "Required compute resource: '" + required +
         "' not found. "
-        "This interface requires the " +
-        required + " compute resource. Even though your current facility is " +
+        "This interface requires the " + required +
+        " compute resource. Even though your current facility is " +
         "in principle supported, the compute resource was not found. "
         "In principle the compute resource should have been "
         "defined in the facilities file for you facility. "
@@ -245,10 +239,10 @@ bool TomographyIfaceModel::doPing(const std::string &compRes) {
     g_log.information() << "Pinged '" << compRes
                         << "'succesfully. Checked that a transaction could "
                            "be created, with ID: " << tid << '\n';
-  } catch (std::runtime_error &e) {
+  }
+  catch (std::runtime_error & e) {
     throw std::runtime_error("Error. Failed to ping and start a transaction on "
-                             "the remote resource." +
-                             std::string(e.what()));
+                             "the remote resource." + std::string(e.what()));
   }
 
   return true;
@@ -272,11 +266,11 @@ void TomographyIfaceModel::doLogin(const std::string &compRes,
     alg->setPropertyValue("ComputeResource", compRes);
     alg->setPropertyValue("Password", pw);
     alg->execute();
-  } catch (std::runtime_error &e) {
+  }
+  catch (std::runtime_error & e) {
     throw std::runtime_error("Unexpected error when trying to log into the "
-                             "remote compute resource " +
-                             compRes + " with username " + user + ": " +
-                             e.what());
+                             "remote compute resource " + compRes +
+                             " with username " + user + ": " + e.what());
   }
 
   // Status: logged in
@@ -295,7 +289,8 @@ void TomographyIfaceModel::doLogout(const std::string &compRes,
     alg->setProperty("ComputeResource", compRes);
     alg->setProperty("UserName", username);
     alg->execute();
-  } catch (std::runtime_error &e) {
+  }
+  catch (std::runtime_error & e) {
     throw std::runtime_error(
         "Error when trying to log out from the remote compute resource " +
         compRes + " with username " + username + ": " + e.what());
@@ -315,7 +310,8 @@ void TomographyIfaceModel::doQueryJobStatus(const std::string &compRes,
     alg->initialize();
     alg->setPropertyValue("ComputeResource", compRes);
     alg->execute();
-  } catch (std::runtime_error &e) {
+  }
+  catch (std::runtime_error & e) {
     throw std::runtime_error(
         "Error when trying to query the status of jobs in " + compRes + ": " +
         e.what());
@@ -331,6 +327,11 @@ void TomographyIfaceModel::doQueryJobStatus(const std::string &compRes,
  * compute resource. Produces a (normally full) path to a runnable, and
  * the options (quite like $0 and $* in scripts).
  *
+ * The local and remote command lines look a bit different:
+ * - local also has the interpreter path at the front: python /scriptPath/
+ * --params..
+ * - remote only has the script path: /scriptPathOnRemote/ --params..
+ * 
  * @param comp Compute resource for which the command line is being prepared
  * @param run Path to a runnable application (script, python module, etc.)
  * @param opt Command line options to the application
@@ -352,6 +353,14 @@ void TomographyIfaceModel::makeRunnableWithOptions(
   std::string longOpt;
   // this gets the runnable from the whole string
   splitCmdLine(cmd, runnable, longOpt);
+  // Special case. Just pass on user inputs.
+  // this stops from appending all the filters and other options
+  if (tool == g_customCmdTool) {
+    opt.resize(1);
+    // this will pass on all the arguments
+    opt[0] = longOpt;
+    return;
+  }
 
   if (local) {
     std::string execScriptPath;
@@ -364,11 +373,6 @@ void TomographyIfaceModel::makeRunnableWithOptions(
 
     checkIfToolIsSetupProperly(tool, cmd);
     opt.emplace_back(execScriptPath);
-  }
-  // Special case. Just pass on user inputs.
-  // this stops from appending all the filters and other options
-  if (tool == g_customCmdTool) {
-    return;
   }
 
   makeTomoRecScriptOptions(local, opt);
@@ -421,7 +425,7 @@ std::string TomographyIfaceModel::prepareToolNameForArgs(
 
 std::string TomographyIfaceModel::constructSingleStringFromVector(
     const std::vector<std::string> args) const {
-  std::string allOpts = "";
+  std::string allOpts;
   for (const auto &arg : args) {
     allOpts += arg + " ";
   }
@@ -431,16 +435,16 @@ std::string TomographyIfaceModel::constructSingleStringFromVector(
 /** Handling the job submission request relies on a submit algorithm.
  * @param compRes The resource to which the request will be made
  */
-void TomographyIfaceModel::doSubmitReconstructionJob(
-    const std::string &compRes) {
+void
+TomographyIfaceModel::doSubmitReconstructionJob(const std::string &compRes) {
   std::string run;
   std::vector<std::string> args;
   try {
     makeRunnableWithOptions(compRes, run, args);
-  } catch (std::exception &e) {
+  }
+  catch (std::exception & e) {
     g_log.error() << "Could not prepare the requested reconstruction job "
-                     "submission. There was an error: " +
-                         std::string(e.what());
+                     "submission. There was an error: " + std::string(e.what());
     throw;
   }
 
@@ -462,9 +466,10 @@ void TomographyIfaceModel::doSubmitReconstructionJob(
   }
 }
 
-void TomographyIfaceModel::doRunReconstructionJobRemote(
-    const std::string &compRes, const std::string &run,
-    const std::string &allOpts) {
+void
+TomographyIfaceModel::doRunReconstructionJobRemote(const std::string &compRes,
+                                                   const std::string &run,
+                                                   const std::string &allOpts) {
   // with SCARF we use one (pseudo)-transaction for every submission
   auto transAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "StartRemoteTransaction");
@@ -474,7 +479,8 @@ void TomographyIfaceModel::doRunReconstructionJobRemote(
   try {
     transAlg->execute();
     tid = transAlg->getPropertyValue("TransactionID");
-  } catch (std::runtime_error &e) {
+  }
+  catch (std::runtime_error & e) {
     throw std::runtime_error("Error when trying to start a transaction right "
                              "before submitting a reconstruction job: " +
                              std::string(e.what()));
@@ -490,7 +496,8 @@ void TomographyIfaceModel::doRunReconstructionJobRemote(
   submitAlg->setProperty("ScriptParams", allOpts);
   try {
     submitAlg->execute();
-  } catch (std::runtime_error &e) {
+  }
+  catch (std::runtime_error & e) {
     throw std::runtime_error(
         "Error when trying to submit a reconstruction job: " +
         std::string(e.what()));
@@ -511,7 +518,8 @@ void TomographyIfaceModel::doRunReconstructionJobLocal(
     pid = handle.id();
 
     printProcessStreamsToMantidLog(outPipe, errPipe);
-  } catch (Poco::SystemException &sexc) {
+  }
+  catch (Poco::SystemException & sexc) {
     g_log.error() << "Execution failed. Could not run the tool. Error details: "
                   << std::string(sexc.what());
   }
@@ -562,7 +570,8 @@ void TomographyIfaceModel::doCancelJobs(const std::string &compRes,
     algJob->setPropertyValue("JobID", id);
     try {
       algJob->execute();
-    } catch (std::runtime_error &e) {
+    }
+    catch (std::runtime_error & e) {
       throw std::runtime_error(
           "Error when trying to cancel a reconstruction job: " +
           std::string(e.what()));
@@ -583,15 +592,15 @@ void TomographyIfaceModel::doRefreshJobsInfo(const std::string &compRes) {
   // to delays in the connection, etc.
   try {
     getJobStatusInfo(compRes);
-  } catch (std::runtime_error &e) {
-    g_log.warning() << "There was an issue while trying to retrieve job status "
-                       "information from the remote compute resource ("
-                    << compRes
-                    << "). Stopping periodic (automatic) status update to "
-                       "prevent more failures. You can start the automatic "
-                       "update mechanism again by logging in, as apparently "
-                       "there is some problem with the last session: "
-                    << e.what() << '\n';
+  }
+  catch (std::runtime_error & e) {
+    g_log.warning()
+        << "There was an issue while trying to retrieve job status "
+           "information from the remote compute resource (" << compRes
+        << "). Stopping periodic (automatic) status update to "
+           "prevent more failures. You can start the automatic "
+           "update mechanism again by logging in, as apparently "
+           "there is some problem with the last session: " << e.what() << '\n';
   }
 }
 
@@ -665,8 +674,7 @@ void TomographyIfaceModel::checkDataPathsSet() const {
         "define these paths in the settings of the interface. ";
     throw std::runtime_error(
         "Cannot run any reconstruction job without the "
-        "paths to the sample, dark and open beam images. " +
-        detail);
+        "paths to the sample, dark and open beam images. " + detail);
   }
 }
 
@@ -705,13 +713,13 @@ bool TomographyIfaceModel::processIsRunning(int pid) {
  * @param tool Name of the tool this warning applies to
  * @param cmd command/script/executable derived from the settings
  */
-bool TomographyIfaceModel::checkIfToolIsSetupProperly(
-    const std::string &tool, const std::string &cmd) const {
+bool
+TomographyIfaceModel::checkIfToolIsSetupProperly(const std::string &tool,
+                                                 const std::string &cmd) const {
   if (tool.empty() || cmd.empty()) {
     const std::string detail =
         "Please define the settings of this tool. "
-        "You have not defined any settings for this tool: " +
-        tool +
+        "You have not defined any settings for this tool: " + tool +
         ". Before running it you need to define its settings "
         "(method, parameters, etc.). You can do so by clicking on the setup "
         "button.";
@@ -735,8 +743,6 @@ void TomographyIfaceModel::splitCmdLine(const std::string &cmd,
   if (std::string::npos == pos)
     return;
 
-  // pos - 1 to separate on the whitespace between the run info and the cmd line
-  // opts
   run = cmd.substr(0, pos);
   opts = cmd.substr(pos + 1);
 }
@@ -768,11 +774,11 @@ TomographyIfaceModel::loadFITSImage(const std::string &path) {
   alg->setProperty("LoadAsRectImg", true);
   try {
     alg->execute();
-  } catch (std::exception &e) {
+  }
+  catch (std::exception & e) {
     throw std::runtime_error(
         "Failed to load image. Could not load this file as a "
-        "FITS image: " +
-        std::string(e.what()));
+        "FITS image: " + std::string(e.what()));
   }
   if (!alg->isExecuted()) {
     throw std::runtime_error(
@@ -785,12 +791,12 @@ TomographyIfaceModel::loadFITSImage(const std::string &path) {
     wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
     ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         wsg->getNames()[0]);
-  } catch (std::exception &e) {
+  }
+  catch (std::exception & e) {
     throw std::runtime_error(
         "Could not load image contents. An unrecoverable error "
         "happened when trying to load the image contents. Cannot "
-        "display it. Error details: " +
-        std::string(e.what()));
+        "display it. Error details: " + std::string(e.what()));
   }
 
   // draw image from workspace
@@ -1047,10 +1053,10 @@ std::string TomographyIfaceModel::buildOutReconstructionDirFromSystemRoot(
   if (sampleName.empty())
     sampleName = "sample";
 
-  const std::string outBase = rootBase + "/" +
-                              m_systemSettings.m_pathComponents[0] + "/" +
-                              m_experimentRef + "/" + sampleName + "/" +
-                              m_systemSettings.m_outputPathCompReconst;
+  const std::string outBase =
+      rootBase + "/" + m_systemSettings.m_pathComponents[0] + "/" +
+      m_experimentRef + "/" + sampleName + "/" +
+      m_systemSettings.m_outputPathCompReconst;
 
   return outBase;
 }
