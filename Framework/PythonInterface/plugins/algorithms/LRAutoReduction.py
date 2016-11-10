@@ -68,7 +68,8 @@ class LRAutoReduction(PythonAlgorithm):
                              "Read the run sequence information from the file, not the title")
         self.declareProperty("ForceSequenceNumber", 0,
                              "Force the sequence number value if it's not available")
-
+        self.declareProperty("OrderDirectBeamsByRunNumber", False,
+                             "Force the sequence of direct beam files to be ordered by run number")
         self.declareProperty(FileProperty('OutputFilename', '', action=FileAction.OptionalSave, extensions=["txt"]),
                              doc='Name of the reflectivity file output')
         self.declareProperty(FileProperty("OutputDirectory", "", FileAction.Directory))
@@ -603,6 +604,7 @@ class LRAutoReduction(PythonAlgorithm):
             logger.notice("Using automated scaling factor calculator")
             output_dir = self.getProperty("OutputDirectory").value
             sf_tof_step = self.getProperty("ScalingFactorTOFStep").value
+            order_by_runs = self.getProperty("OrderDirectBeamsByRunNumber").value
 
             # The medium for these direct beam runs may not be what was set in the template,
             # so either use the medium in the data file or a default name
@@ -615,6 +617,7 @@ class LRAutoReduction(PythonAlgorithm):
                              UseLowResCut=True, ComputeScalingFactors=True, TOFSteps=sf_tof_step,
                              IncidentMedium=incident_medium,
                              SlitTolerance=slit_tolerance,
+                             OrderDirectBeamsByRunNumber=order_by_runs,
                              ScalingFactorFile=os.path.join(output_dir, "sf_%s_%s_auto.cfg" % (first_run_of_set, file_id)))
             return
         elif not do_reduction:

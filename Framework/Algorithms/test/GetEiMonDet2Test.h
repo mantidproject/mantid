@@ -113,7 +113,7 @@ public:
         algorithm.setProperty("DetectorEPPTable", detectorEPPTable))
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("IndexType", "SpectrumNumber"))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Detectors", "2"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Detectors", "2"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("NominalIncidentEnergy", EI))
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("MonitorWorkspace", monitorWs))
@@ -140,7 +140,7 @@ public:
     maskDetectors.initialize();
     maskDetectors.setChild(true);
     maskDetectors.setProperty("Workspace", ws);
-    maskDetectors.setPropertyValue("WorkspaceIndexList", "1");
+    maskDetectors.setProperty("WorkspaceIndexList", "1");
     maskDetectors.execute();
     GetEiMonDet2 algorithm;
     setupSimple(ws, eppTable, algorithm);
@@ -159,7 +159,7 @@ public:
     maskDetectors.initialize();
     maskDetectors.setChild(true);
     maskDetectors.setProperty("Workspace", ws);
-    maskDetectors.setPropertyValue("WorkspaceIndexList", "0");
+    maskDetectors.setProperty("WorkspaceIndexList", "0");
     maskDetectors.execute();
     GetEiMonDet2 algorithm;
     setupSimple(ws, eppTable, algorithm);
@@ -209,7 +209,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("DetectorEPPTable", eppTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Detectors", "1"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Detectors", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(!algorithm.isExecuted())
@@ -231,7 +231,7 @@ public:
         algorithm.setProperty("DetectorEPPTable", eppTable))
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("IndexType", "WorkspaceIndex"))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Detectors", "1"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Detectors", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "-1"))
     const std::string exceptionMessage("Monitor cannot be negative.");
     TS_ASSERT_THROWS_EQUALS(algorithm.execute(), const std::runtime_error &e,
@@ -252,7 +252,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("DetectorEPPTable", eppTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Detectors", "42"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Detectors", "42"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "0"))
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(!algorithm.isExecuted())
@@ -271,7 +271,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("DetectorEPPTable", eppTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Detectors", "1"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Detectors", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "42"))
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(!algorithm.isExecuted())
@@ -342,7 +342,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("DetectorEPPTable", eppTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Detectors", "1"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Detectors", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "0"))
   }
 };

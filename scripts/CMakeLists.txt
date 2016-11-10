@@ -48,6 +48,7 @@ set ( TEST_PY_FILES
       test/SANSUserFileParserTest.py
       test/SANSUtilityTest.py
       test/SANSIsisInstrumentTest.py
+      test/SANSReducerTest.py
       test/SANSReductionStepsUserFileTest.py
       test/SettingsTest.py
       test/VesuvioBackgroundTest.py

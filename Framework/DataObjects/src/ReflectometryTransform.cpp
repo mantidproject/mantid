@@ -48,33 +48,32 @@ void writeRow(boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
 *  Adds the column headings to a table
 *  @param vertexes : Table to which the columns are written to.
 */
-void addColumnHeadings(
-    boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
-    std::string outputDimensions) {
+void addColumnHeadings(Mantid::DataObjects::TableWorkspace &vertexes,
+                       const std::string &outputDimensions) {
 
   if (outputDimensions == "Q (lab frame)") {
-    vertexes->addColumn("double", "Qx");
-    vertexes->addColumn("double", "Qy");
-    vertexes->addColumn("int", "OriginIndex");
-    vertexes->addColumn("int", "OriginBin");
-    vertexes->addColumn("double", "CellSignal");
-    vertexes->addColumn("double", "CellError");
+    vertexes.addColumn("double", "Qx");
+    vertexes.addColumn("double", "Qy");
+    vertexes.addColumn("int", "OriginIndex");
+    vertexes.addColumn("int", "OriginBin");
+    vertexes.addColumn("double", "CellSignal");
+    vertexes.addColumn("double", "CellError");
   }
   if (outputDimensions == "P (lab frame)") {
-    vertexes->addColumn("double", "Pi+Pf");
-    vertexes->addColumn("double", "Pi-Pf");
-    vertexes->addColumn("int", "OriginIndex");
-    vertexes->addColumn("int", "OriginBin");
-    vertexes->addColumn("double", "CellSignal");
-    vertexes->addColumn("double", "CellError");
+    vertexes.addColumn("double", "Pi+Pf");
+    vertexes.addColumn("double", "Pi-Pf");
+    vertexes.addColumn("int", "OriginIndex");
+    vertexes.addColumn("int", "OriginBin");
+    vertexes.addColumn("double", "CellSignal");
+    vertexes.addColumn("double", "CellError");
   }
   if (outputDimensions == "K (incident, final)") {
-    vertexes->addColumn("double", "Ki");
-    vertexes->addColumn("double", "Kf");
-    vertexes->addColumn("int", "OriginIndex");
-    vertexes->addColumn("int", "OriginBin");
-    vertexes->addColumn("double", "CellSignal");
-    vertexes->addColumn("double", "CellError");
+    vertexes.addColumn("double", "Ki");
+    vertexes.addColumn("double", "Kf");
+    vertexes.addColumn("int", "OriginIndex");
+    vertexes.addColumn("int", "OriginBin");
+    vertexes.addColumn("double", "CellSignal");
+    vertexes.addColumn("double", "CellError");
   }
 }
 }
@@ -464,7 +463,7 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   std::vector<specnum_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
   // Create a table for the output if we want to debug vertex positioning
-  addColumnHeadings(vertexes, outputDimensions);
+  addColumnHeadings(*vertexes, outputDimensions);
   for (size_t i = 0; i < nHistos; ++i) {
     IDetector_const_sptr detector = inputWS->getDetector(i);
     if (!detector || detector->isMasked() || detector->isMonitor()) {

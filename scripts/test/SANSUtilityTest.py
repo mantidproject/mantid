@@ -231,7 +231,7 @@ class TestBundleAddedEventDataFilesToGroupWorkspaceFile(unittest.TestCase):
 
         # Act
         group_ws_name = 'g_ws'
-        output_group_file_name = su.bundle_added_event_data_as_group(file_names[0], file_names[1])
+        output_group_file_name = su.bundle_added_event_data_as_group(file_names[0], file_names[1], False)
 
         Load(Filename = output_group_file_name, OutputWorkspace = group_ws_name)
         group_ws = mtd[group_ws_name]
@@ -342,9 +342,6 @@ class TestLoadingAddedEventWorkspaceExtraction(unittest.TestCase):
     def test_extract_data_and_monitor_child_ws(self):
         # Check when there is no special ending
         self.do_test_extraction(TEST_STRING_DATA, TEST_STRING_MON)
-
-
-
 
 
 class AddOperationTest(unittest.TestCase):

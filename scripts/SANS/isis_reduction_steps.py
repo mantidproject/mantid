@@ -195,7 +195,9 @@ class LoadRun(object):
 
         # Handle Multi-period Event data
         if not added_event_data_flag:
-            if isinstance(outWs, WorkspaceGroup) and len(outWs) > 0 and isinstance(outWs[0], IEventWorkspace):
+            if isinstance(outWs, WorkspaceGroup) and len(outWs) > 0 and check_child_ws_for_name_and_type_for_added_eventdata(outWs):
+                pass
+            elif isinstance(outWs, WorkspaceGroup) and len(outWs) > 0 and isinstance(outWs[0], IEventWorkspace):
                 load_monitors_for_multiperiod_event_data(workspace=outWs, data_file=self._data_file,
                                                          monitor_appendix=appendix)
 

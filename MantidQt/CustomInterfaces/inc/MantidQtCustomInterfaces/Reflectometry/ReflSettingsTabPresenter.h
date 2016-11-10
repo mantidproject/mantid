@@ -3,9 +3,14 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 // Forward decs
 class IReflMainWindowPresenter;
@@ -46,9 +51,9 @@ public:
   ~ReflSettingsTabPresenter() override;
   /// Accept a main presenter
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
+  void notify(IReflSettingsTabPresenter::Flag flag) override;
+  void setInstrumentName(const std::string instName) override;
 
-  /// Returns global options for 'Plus' algorithm
-  std::string getPlusOptions() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   std::string getTransmissionOptions() const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
@@ -57,15 +62,19 @@ public:
   std::string getStitchOptions() const override;
 
 private:
-  void createPlusHints();
-  void createTransmissionHints();
-  void createReductionHints();
   void createStitchHints();
+  void getExpDefaults();
+  void getInstDefaults();
+  IAlgorithm_sptr createReductionAlg();
+  Instrument_const_sptr createEmptyInstrument(std::string instName);
+  std::string getTransmissionRuns() const;
 
   /// The view we are managing
   IReflSettingsTabView *m_view;
   /// The main presenter
   IReflMainWindowPresenter *m_mainPresenter;
+  /// Name of the current instrument in use
+  std::string m_currentInstrumentName;
 };
 }
 }

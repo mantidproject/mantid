@@ -4,11 +4,16 @@
 default TextTestRunner.
 """
 
+from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 import time
 from unittest import TestResult, _TextTestResult, TextTestRunner
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
+import collections
 
 
 class _TestInfo(object):
@@ -17,7 +22,7 @@ class _TestInfo(object):
     """
     
     # Possible test outcomes
-    (SUCCESS, FAILURE, ERROR) = range(3)
+    (SUCCESS, FAILURE, ERROR) = list(range(3))
     
     def __init__(self, test_result, test_method, outcome=SUCCESS, err=None):
         "Create a new instance of _TestInfo."
@@ -95,7 +100,7 @@ class _XMLTestResult(_TextTestResult):
         _TextTestResult.stopTest(self, test)
         self.stop_time = time.time()
         
-        if self.callback and callable(self.callback):
+        if self.callback and isinstance(self.callback, collections.Callable):
             self.callback()
             self.callback = None
     
@@ -154,7 +159,7 @@ class _XMLTestResult(_TextTestResult):
                 # testcase = Module.TestClass
                 testcase_name = module + testcase_barename
 
-                if not tests_by_testcase.has_key(testcase_name):
+                if testcase_name not in tests_by_testcase:
                     tests_by_testcase[testcase_name] = []
                 tests_by_testcase[testcase_name].append(test_info)
         
@@ -169,12 +174,12 @@ class _XMLTestResult(_TextTestResult):
         testsuite.setAttribute('tests', str(len(tests)))
         
         testsuite.setAttribute('time', '%.3f' % \
-            sum(map(lambda e: e.get_elapsed_time(), tests)))
+            sum([e.get_elapsed_time() for e in tests]))
         
-        failures = filter(lambda e: e.outcome==_TestInfo.FAILURE, tests)
+        failures = [e for e in tests if e.outcome==_TestInfo.FAILURE]
         testsuite.setAttribute('failures', str(len(failures)))
         
-        errors = filter(lambda e: e.outcome==_TestInfo.ERROR, tests)
+        errors = [e for e in tests if e.outcome==_TestInfo.ERROR]
         testsuite.setAttribute('errors', str(len(errors)))
         
         return testsuite
@@ -249,7 +254,7 @@ class _XMLTestResult(_TextTestResult):
             xml_content = doc.toprettyxml(indent='\t')
             
             if type(test_runner.output) is str:
-                report_file = file('%s%sTEST-%s.xml' % \
+                report_file = open('%s%sTEST-%s.xml' % \
                     (test_runner.output, os.sep, suite), 'w')
                 try:
                     report_file.write(xml_content)

@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import sys
 import unittest
 from PyQt4 import QtCore, QtGui
@@ -30,14 +31,14 @@ class MWRunFilesTest(unittest.TestCase):
         self.assertTrue(isinstance(self.mwrunfiles,mantidqtpython.MantidQt.MantidWidgets.MWRunFiles), "Created object is not an instance of MWRunFiles")
 
     def test_lineedit_text(self):
-        self.assertTrue(self.mwrunfiles.text().isEmpty())
+        self.assertEqual(len(self.mwrunfiles.text()), 0)
         self.mwrunfiles.setText("a/file")
-        self.assertEquals(self.mwrunfiles.text(), "a/file")
+        self.assertEqual(self.mwrunfiles.text(), "a/file")
 
     def test_setUserInput(self):
         self.assertFalse(self.mwrunfiles.isValid())
         self.mwrunfiles.setUserInput("CNCS7860")
-        self.assertEquals(self.mwrunfiles.text(), "CNCS7860")
+        self.assertEqual(self.mwrunfiles.text(), "CNCS7860")
 
 if __name__ == '__main__':
     unittest.main()

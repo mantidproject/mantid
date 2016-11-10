@@ -752,7 +752,7 @@
              <string>Save</string>
             </property>
             <layout class="QGridLayout" name="gridLayout">
-             <item row="0" column="5" rowspan="2">
+             <item row="0" column="6" rowspan="2">
               <widget class="QPushButton" name="saveFilename_btn">
                <property name="minimumSize">
                 <size>
@@ -769,16 +769,6 @@
               </widget>
              </item>
              <item row="3" column="5">
-              <widget class="QCheckBox" name="saveCSV_check">
-               <property name="toolTip">
-                <string>Select one or more file formats</string>
-               </property>
-               <property name="text">
-                <string>CSV</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="4">
               <widget class="QCheckBox" name="saveRKH_check">
                <property name="toolTip">
                 <string>Select one or more file formats</string>
@@ -788,7 +778,7 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="3">
+             <item row="3" column="4">
               <widget class="QCheckBox" name="saveCan_check">
                <property name="toolTip">
                 <string>Select one or more file formats</string>
@@ -801,7 +791,10 @@
              <item row="3" column="1">
               <widget class="QCheckBox" name="saveNex_check">
                <property name="toolTip">
-                <string>Select one or more file formats</string>
+                <string>Select one or more file formats.
+ The Nexus format can be used to save 1D and 2D data. 
+Consider using NxCanSAS format since this can be 
+ imported into SasView.</string>
                </property>
                <property name="text">
                 <string>Nexus</string>
@@ -828,7 +821,7 @@
                </property>
               </widget>
              </item>
-             <item row="4" column="1" colspan="2">
+             <item row="4" column="1" colspan="3">
               <widget class="QPushButton" name="saveDefault_btn">
                <property name="toolTip">
                 <string>Save the workspace from a single run file reduction</string>
@@ -838,14 +831,14 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="1" colspan="4">
+             <item row="1" column="1" colspan="5">
               <widget class="QLineEdit" name="outfile_edit">
                <property name="toolTip">
                 <string>Save the output workspace to this file</string>
                </property>
               </widget>
              </item>
-             <item row="4" column="4" colspan="2">
+             <item row="4" column="5" colspan="2">
               <widget class="QPushButton" name="saveSel_btn">
                <property name="toolTip">
                 <string>Save multiple workspaces</string>
@@ -855,7 +848,7 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="2">
+             <item row="3" column="3">
               <widget class="QCheckBox" name="saveNIST_Qxy_check">
                <property name="text">
                 <string>NIST Qxy</string>
@@ -873,6 +866,27 @@ Zero Error</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="6">
+              <widget class="QCheckBox" name="saveCSV_check">
+               <property name="toolTip">
+                <string>Select one or more file formats</string>
+               </property>
+               <property name="text">
+                <string>CSV</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="2">
+              <widget class="QCheckBox" name="saveNXcanSAS_check">
+               <property name="toolTip">
+                <string>Select one or more file formats. 
+The NXcanSAS format can be used to save 1D and 2D data. </string>
+               </property>
+               <property name="text">
+                <string>NxCanSAS</string>
                </property>
               </widget>
              </item>
@@ -4159,7 +4173,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="3" column="2">
+        <item row="2" column="2">
          <spacer name="verticalSpacer_10">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -4172,7 +4186,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </spacer>
         </item>
-        <item row="4" column="0" colspan="2">
+        <item row="3" column="0" colspan="2">
          <widget class="QLabel" name="label_42">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -4194,14 +4208,14 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="4" column="2">
+        <item row="3" column="2">
          <widget class="QLineEdit" name="new2Add_edit">
           <property name="toolTip">
            <string>Type , separated lists of run numbers or ranges of numbers with a : </string>
           </property>
          </widget>
         </item>
-        <item row="4" column="3">
+        <item row="3" column="3">
          <widget class="QPushButton" name="add_Btn">
           <property name="toolTip">
            <string>Adds entries to the big table, use before clicking &quot;Sum&quot;.</string>
@@ -4211,7 +4225,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="4" column="4">
+        <item row="3" column="4">
          <widget class="QPushButton" name="browse_to_add_Btn">
           <property name="toolTip">
            <string>Find a file on your system</string>
@@ -4221,7 +4235,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="4" column="5">
+        <item row="3" column="5">
          <spacer name="horizontalSpacer_18">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -4237,7 +4251,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </spacer>
         </item>
-        <item row="5" column="0">
+        <item row="4" column="0">
          <widget class="QLabel" name="label_46">
           <property name="toolTip">
            <string>Files to be summed, click at the top of this box or use the &quot;Add&quot; button</string>
@@ -4247,7 +4261,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="5" column="1" rowspan="3" colspan="2">
+        <item row="4" column="1" rowspan="3" colspan="2">
          <widget class="QListWidget" name="toAdd_List">
           <property name="toolTip">
            <string>Files to be summed, click at the top of this box or use the &quot;Add&quot; button</string>
@@ -4269,7 +4283,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="5" column="3">
+        <item row="4" column="3">
          <widget class="QPushButton" name="clear_Btn">
           <property name="toolTip">
            <string>Clear the table</string>
@@ -4279,7 +4293,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="6" column="3">
+        <item row="5" column="3">
          <widget class="QPushButton" name="remove_Btn">
           <property name="toolTip">
            <string>Select rows by clicking on the table and remove then with this button</string>
@@ -4289,7 +4303,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="7" column="3">
+        <item row="6" column="3">
          <spacer name="verticalSpacer_7">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -4312,21 +4326,14 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="2" column="2">
-         <widget class="QCheckBox" name="loadSeparateEntries">
-          <property name="text">
-           <string>Minimise memory usage</string>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="2">
+        <item row="8" column="2">
          <widget class="QLabel" name="histogram_binning_label">
           <property name="text">
            <string>Histogram binning (when adding event data):</string>
           </property>
          </widget>
         </item>
-        <item row="8" column="3">
+        <item row="7" column="3">
          <widget class="QPushButton" name="sum_Btn">
           <property name="toolTip">
            <string>Load the files in the table above and save them to one file</string>
@@ -4336,7 +4343,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="10" column="2">
+        <item row="9" column="2">
          <widget class="QComboBox" name="comboBox_histogram_choice">
           <item>
            <property name="text">
@@ -4355,14 +4362,14 @@ p, li { white-space: pre-wrap; }
           </item>
          </widget>
         </item>
-        <item row="11" column="2">
+        <item row="10" column="2">
          <widget class="QCheckBox" name="overlayCheckBox">
           <property name="text">
            <string>OverlayEventWorkspaces</string>
           </property>
          </widget>
         </item>
-        <item row="12" column="2">
+        <item row="11" column="2">
          <layout class="QHBoxLayout" name="horizontalLayout_2411">
           <item>
            <widget class="QLabel" name="binning_label">
@@ -4742,7 +4749,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>clear_Btn</tabstop>
   <tabstop>remove_Btn</tabstop>
   <tabstop>summedPath_Btn</tabstop>
-  <tabstop>loadSeparateEntries</tabstop>
  </tabstops>
  <resources/>
  <connections/>

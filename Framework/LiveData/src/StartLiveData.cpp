@@ -59,21 +59,6 @@ void StartLiveData::init() {
       "If you specify 0, MonitorLiveData will not launch and you will get only "
       "one chunk.");
 
-  // Properties used with ISISHistoDataListener
-  declareProperty(make_unique<ArrayProperty<specnum_t>>("SpectraList"),
-                  "An optional list of spectra to load. If blank, all "
-                  "available spectra will be loaded. Applied to ISIS histogram"
-                  " data only.");
-  getPointerToProperty("SpectraList")->setGroup(listenerPropertyGroup);
-
-  auto validator = boost::make_shared<ArrayBoundedValidator<int>>();
-  validator->setLower(1);
-  declareProperty(make_unique<ArrayProperty<int>>("PeriodList", validator),
-                  "An optional list of periods to load. If blank, all "
-                  "available periods will be loaded. Applied to ISIS histogram"
-                  " data only.");
-  getPointerToProperty("PeriodList")->setGroup(listenerPropertyGroup);
-
   // Initialize the properties common to LiveDataAlgorithm.
   initProps();
 
@@ -83,6 +68,52 @@ void StartLiveData::init() {
                   "A handle to the MonitorLiveData algorithm instance that "
                   "continues to read live data after this algorithm "
                   "completes.");
+}
+
+/**
+ * After Instrument property is set copy any properties that the instrument's
+ * listener may have to this algorithm.
+ */
+void StartLiveData::afterPropertySet(const std::string &propName) {
+  if (propName == "Instrument") {
+    // Properties of old listener, if any, need to be removed
+    removeListenerProperties();
+
+    // Get of instance of listener for this instrument
+    auto listener = LiveListenerFactory::Instance().create(
+        getPropertyValue(propName), false);
+
+    // Copy over properties of new listener to this algorithm
+    copyListenerProperties(listener);
+  }
+}
+
+/**
+ * Copies properties from an ILiveListener to this algorithm. This makes them
+ * appear in the "listener properties" group on the StartLiveData custom dialog.
+ *
+ * @param listener ILiveListener from which to copy properties
+ */
+void StartLiveData::copyListenerProperties(
+    const boost::shared_ptr<ILiveListener> &listener) {
+  // Add clones of listener's properties to this algorithm
+  for (auto listenerProp : listener->getProperties()) {
+    auto prop = std::unique_ptr<Property>(listenerProp->clone());
+    prop->setGroup(listenerPropertyGroup);
+    declareProperty(std::move(prop));
+  }
+}
+
+/**
+ * Removes previously copied ILiveListener properties.
+ */
+void StartLiveData::removeListenerProperties() {
+  // Remove all properties tagged with the listener property group
+  for (auto prop : getProperties()) {
+    if (prop->getGroup() == listenerPropertyGroup) {
+      removeProperty(prop->name());
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------------
