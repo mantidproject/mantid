@@ -54,6 +54,25 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
+  void testRefreshWorkspaceList() {
+    MockSaveTabView mockView;
+    ReflSaveTabPresenter presenter(&mockView);
+
+    createWS("ws1");
+
+    EXPECT_CALL(mockView, clearWorkspaceList()).Times(Exactly(2));
+    EXPECT_CALL(mockView, setWorkspaceList(std::vector<std::string> { "ws1" })).
+      Times(Exactly(1));
+    EXPECT_CALL(mockView, 
+      setWorkspaceList(std::vector<std::string> { "ws1", "ws2" })).
+      Times(Exactly(1));
+    presenter.populateWorkspaceList();
+    createWS("ws2");
+    presenter.populateWorkspaceList();
+    AnalysisDataService::Instance().clear();
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
   void testFilterWorkspaceNoRegex() {
     MockSaveTabView mockView;
     ReflSaveTabPresenter presenter(&mockView);
