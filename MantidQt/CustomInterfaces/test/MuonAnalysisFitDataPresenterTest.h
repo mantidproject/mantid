@@ -322,6 +322,19 @@ public:
     checkFittedWorkspacesHandledCorrectly(label, inputNames);
   }
 
+  void test_handleFitFinished_cannotFindWorkspaces_doesNotThrow() {
+    ON_CALL(*m_dataSelector, getSimultaneousFitLabel())
+        .WillByDefault(Return("UniqueLabelThatIsNotInTheADS"));
+    EXPECT_CALL(*m_dataSelector, getFitType())
+        .Times(1)
+        .WillOnce(Return(IMuonFitDataSelector::FitType::Simultaneous));
+    ON_CALL(*m_dataSelector, getChosenGroups())
+        .WillByDefault(Return(QStringList({"long"})));
+    ON_CALL(*m_dataSelector, getPeriodSelections())
+        .WillByDefault(Return(QStringList({"1"})));
+    TS_ASSERT_THROWS_NOTHING(m_presenter->handleFitFinished());
+  }
+
   void test_handleDatasetIndexChanged() {
     const int index = 2;
     EXPECT_CALL(*m_fitBrowser, userChangedDataset(index)).Times(1);
@@ -438,6 +451,13 @@ public:
     checkFittedWorkspacesHandledCorrectly(label, inputNames, false, true);
   }
 
+  void test_handleFittedWorkspaces_cannotFindWorkspaces_throws() {
+    const std::string baseName("MuonSimulFit_UniqueLabelThatIsNotInTheADS");
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist(baseName));
+    TS_ASSERT_THROWS(m_presenter->handleFittedWorkspaces(baseName),
+                     Mantid::Kernel::Exception::NotFoundError);
+  }
+
   void test_extractFittedWorkspaces_defaultGroupName() {
     // Set up workspaces
     auto &ads = AnalysisDataService::Instance();
@@ -495,6 +515,13 @@ public:
     for (const auto &name : workspaceNames) {
       TS_ASSERT(baseWS->contains(name));
     }
+  }
+
+  void test_extractFittedWorkspaces_cannotFindWorkspaces_throws() {
+    const std::string baseName = "MuonSimulFit_UniqueLabelThatIsNotInTheADS";
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist(baseName));
+    TS_ASSERT_THROWS(m_presenter->extractFittedWorkspaces(baseName),
+                     Mantid::Kernel::Exception::NotFoundError);
   }
 
   void test_checkAndUpdateFitLabel_Simultaneous_NoOverwrite_ShouldUpdate() {
