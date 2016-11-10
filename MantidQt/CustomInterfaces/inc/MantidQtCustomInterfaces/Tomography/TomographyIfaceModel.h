@@ -15,9 +15,7 @@
 // Qt classes forward declarations
 class QMutex;
 
-namespace Poco {
-class Pipe;
-}
+namespace Poco { class Pipe; }
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -106,7 +104,7 @@ public:
   }
 
   //--------------------------------------------
-  // Access to the system settings informationp
+  // Access to the system settings information
   //--------------------------------------------
   // get the remote scripts base dir from the system settings
   std::string getCurrentRemoteScriptsBasePath() const {
@@ -205,8 +203,8 @@ public:
   static const std::string g_tomoScriptFolderPath;
 
 protected: // protected to expose everything to testing
-  std::string
-  constructSingleStringFromVector(const std::vector<std::string> args) const;
+  std::string constructSingleStringFromVector(
+      const std::vector<std::string> args) const;
 
   void doRunReconstructionJobLocal(const std::string &run,
                                    const std::string &allOpts,
@@ -252,11 +250,11 @@ protected: // protected to expose everything to testing
   bool processIsRunning(int pid);
 
   std::string
-  buildOutReconstructionDirFromSystemRoot(const std::string &samplesDir,
-                                          bool local) const;
+      buildOutReconstructionDirFromSystemRoot(const std::string &samplesDir,
+                                              bool local) const;
 
-  std::string
-  buildOutReconstructionDirFromSamplesDir(const std::string &samplesDir) const;
+  std::string buildOutReconstructionDirFromSamplesDir(
+      const std::string &samplesDir) const;
 
   /// Prints the streams from the Poco::launch process into mantid
   void printProcessStreamsToMantidLog(const Poco::Pipe &outPipe,
