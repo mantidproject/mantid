@@ -135,6 +135,9 @@ ReflectometryReductionOne2::validateInputs() {
 
   std::map<std::string, std::string> results;
 
+  auto wavelength = validateWavelengthRanges();
+  results.insert(wavelength.begin(), wavelength.end());
+
   auto directBeam = validateDirectBeamProperties();
   results.insert(directBeam.begin(), directBeam.end());
 
