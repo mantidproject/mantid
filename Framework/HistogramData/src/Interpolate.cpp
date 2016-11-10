@@ -32,6 +32,11 @@ constexpr size_t numberCalculated(const size_t ysize, const size_t stepSize) {
  * @param stepSize See interpolateLinear
  * @param minCalculated The minimum number of calculated values required
  * by the routine
+ * @param method A string providing the name of the interpolation method. Used
+ * in error messages
+ * @throws std::runtime_error if input.yMode() == Uninitialized or
+ * stepSize is invalid or the number of calculated points is less than the
+ * the required value
  */
 void sanityCheck(const Histogram &input, const size_t stepSize,
                  const size_t minCalculated, const char *method) {
@@ -61,7 +66,6 @@ void sanityCheck(const Histogram &input, const size_t stepSize,
  * @param input See interpolateLinear
  * @param stepSize See interpolateLinear
  * @param ynew A reference to the output Y values
- * @return See interpolateLinear
  */
 void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
                                HistogramY &ynew) {
@@ -98,7 +102,6 @@ void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
  * @param input See interpolateCSpline
  * @param stepSize See interpolateCSpline
  * @param ynew A reference to the output Y values
- * @return See interpolateCSpline
  */
 void interpolateYCSplineInplace(const Histogram &input, const size_t stepSize,
                                 HistogramY &ynew) {
