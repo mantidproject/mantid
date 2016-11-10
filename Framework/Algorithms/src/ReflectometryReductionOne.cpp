@@ -290,8 +290,8 @@ ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr &toCorrect,
                                            const bool isPointDetector) {
   g_log.debug("Correcting position using theta.");
 
-  auto correctPosAlg =
-      this->createChildAlgorithm("SpecularReflectionPositionCorrect");
+  auto correctPosAlg = this->createChildAlgorithm(
+      "SpecularReflectionPositionCorrect", -1, -1, true, 1);
   correctPosAlg->initialize();
   correctPosAlg->setProperty("InputWorkspace", toCorrect);
 
