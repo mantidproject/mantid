@@ -4,6 +4,7 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
 
+#include <memory>
 #include <sstream>
 
 using Mantid::HistogramData::Histogram;
@@ -120,15 +121,21 @@ void interpolateYCSplineInplace(const Histogram &input, const size_t stepSize,
   xc.back() = xold.back();
   yc.back() = yold.back();
 
-  gsl_interp_accel *acc = gsl_interp_accel_alloc();
-  gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, ncalc);
-  gsl_spline_init(spline, xc.data(), yc.data(), ncalc);
+  // Manage gsl memory with unique_ptrs
+  using gsl_spline_uptr = std::unique_ptr<gsl_spline, void (*)(gsl_spline *)>;
+  auto spline = gsl_spline_uptr(gsl_spline_alloc(gsl_interp_cspline, ncalc),
+                                [](gsl_spline *sp) { gsl_spline_free(sp); });
+  // Compute spline
+  gsl_spline_init(spline.get(), xc.data(), yc.data(), ncalc);
   // Evaluate each point for the full range
+  using gsl_interp_accel_uptr =
+      std::unique_ptr<gsl_interp_accel, void (*)(gsl_interp_accel *)>;
+  auto lookupTable = gsl_interp_accel_uptr(
+      gsl_interp_accel_alloc(),
+      [](gsl_interp_accel *acc) { gsl_interp_accel_free(acc); });
   for (size_t i = 0; i < nypts; ++i) {
-    ynew[i] = gsl_spline_eval(spline, xold[i], acc);
+    ynew[i] = gsl_spline_eval(spline.get(), xold[i], lookupTable.get());
   }
-  gsl_spline_free(spline);
-  gsl_interp_accel_free(acc);
 }
 
 } // end anonymous namespace
