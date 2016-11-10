@@ -1657,8 +1657,11 @@ TomographyIfaceViewQtGUI::grabSystemSettingsFromUser() const {
   setts.m_local.m_reconScriptsPath =
       m_uiTabSystemSettings.lineEdit_local_recon_scripts->text().toStdString();
 
+  setts.m_local.m_externalInterpreterPath = m_uiTabSystemSettings.lineEdit_local_external_interpreter->text().toStdString();
+
   setts.m_experimentReference =
       m_uiTabRun.lineEdit_experiment_reference->text().toStdString();
+
   return setts;
 }
 
