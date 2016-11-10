@@ -20,7 +20,6 @@ using namespace Mantid::Kernel;
 static const int NUMBINS = 31;
 static const int NUMSPECS = 4;
 
-
 class CalculateFlatBackgroundTest : public CxxTest::TestSuite {
   /// Tests each method in CalculateFlatBackground using different parameter
   /// sets to make sure the returns are as expected
@@ -205,21 +204,21 @@ public:
     }
   }
 
-  void testExecPointData(){
-      runCalculateFlatBackground(1);
+  void testExecPointData() {
+    runCalculateFlatBackground(1);
 
-      MatrixWorkspace_sptr inputWS =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              "calcFlatBGpointdata");
-      MatrixWorkspace_sptr outputWS =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed");
-      // The X vectors should be the same
-      //TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
-      // Just do a spot-check on Y & E
-      auto &Y = outputWS->y(0);
-      for (unsigned int i = 0; i < Y.size(); ++i) {
-        TS_ASSERT_LESS_THAN(Y[i], 1.5)
-      }
+    MatrixWorkspace_sptr inputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "calcFlatBGpointdata");
+    MatrixWorkspace_sptr outputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed");
+    // The X vectors should be the same
+    // TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
+    // Just do a spot-check on Y & E
+    auto &Y = outputWS->y(0);
+    for (unsigned int i = 0; i < Y.size(); ++i) {
+      TS_ASSERT_LESS_THAN(Y[i], 1.5)
+    }
   }
 
   void testExecWithReturnBackground() {

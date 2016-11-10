@@ -30,8 +30,7 @@ enum class Modes { LINEAR_FIT, MEAN, MOVING_AVERAGE };
 
 void CalculateFlatBackground::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>(
-          "InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The input workspace must either have constant width bins or is a "
       "distribution\n"
       "workspace. It is also assumed that all spectra have the same X bin "
@@ -298,7 +297,7 @@ void CalculateFlatBackground::convertToDistribution(
     std::adjacent_difference(X.begin() + 1, X.end(), adjacents.begin());
     // the first entry from adjacent difference is just a copy of the first
     // entry in the input vector, ignore this.
-    if (X.size() > 1){
+    if (X.size() > 1) {
       MantidVec widths(adjacents.begin() + 1, adjacents.end());
       if (!VectorHelper::isConstantValue(widths)) {
         variationFound = true;
