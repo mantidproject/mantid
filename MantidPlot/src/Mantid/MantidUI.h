@@ -499,7 +499,7 @@ public slots:
   QString
   findInputWorkspaceProperty(Mantid::API::IAlgorithm_sptr algorithm) const;
   // Show Qt critical error message box
-  void showCritical(const QString &);
+  void showCritical(const QString &) override;
   // Show the dialog monitoring currently running algorithms
   void showAlgMonitor();
   // Called from ApplicationWindow to customize the main menu

@@ -131,6 +131,7 @@ public:
                              bool showPlotAll, bool showTiledOpt) = 0;
 
   virtual void updateProject() = 0;
+  virtual void showCritical(const QString &) {}
 #ifdef MAKE_VATES
   virtual bool doesVatesSupportOpenGL() = 0;
 #endif
