@@ -32,18 +32,23 @@ def _run_focus(instrument, run_number, perform_attenuation, perform_vanadium_nor
                                                   GroupingFileName=calibration_file_paths["grouping"])
 
     # Process
+    rebinning_params = instrument.calculate_focus_binning_params(sample=input_workspace)
+
     calibrated_spectra = _divide_sample_by_vanadium(instrument=instrument, run_number=run_number,
                                                     input_workspace=input_workspace,
                                                     perform_vanadium_norm=perform_vanadium_norm)
 
-    common.remove_intermediate_workspace(read_ws)
-    common.remove_intermediate_workspace(input_workspace)
+    _apply_binning_to_spectra(spectra_list=calibrated_spectra, binning_list=rebinning_params)
 
     # Output
     processed_nexus_files = instrument._process_focus_output(calibrated_spectra, run_number, attenuate=perform_attenuation)
 
+    # Tidy
+    common.remove_intermediate_workspace(read_ws)
+    common.remove_intermediate_workspace(input_workspace)
     for ws in calibrated_spectra:
-        common.remove_intermediate_workspace(ws)
+        #  common.remove_intermediate_workspace(ws)
+        pass
 
     return processed_nexus_files
 
@@ -69,3 +74,13 @@ def _divide_sample_by_vanadium(instrument, run_number, input_workspace, perform_
                 instrument.correct_sample_vanadium(focused_ws=input_workspace, index=index))
 
     return processed_spectra
+
+
+def _apply_binning_to_spectra(spectra_list, binning_list):
+    if not binning_list:
+        return
+
+    for ws, bin_params in zip(spectra_list, binning_list):
+        # Starting bin edge / bin width / last bin edge
+        rebin_string = bin_params[0] + ',' + bin_params[1] + ',' + bin_params[2]
+        mantid.Rebin(InputWorkspace=ws, OutputWorkspace=ws, Params=rebin_string)

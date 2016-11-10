@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
+import math
 import mantid.simpleapi as mantid
 
 from isis_powder.abstract_inst import AbstractInst
@@ -14,7 +15,9 @@ class Polaris(AbstractInst):
     _lower_lambda_range = 0.25
     _upper_lambda_range = 2.50  # TODO populate this
 
-    _focus_tof_binning_params = None  # TODO
+    _focus_crop_start = 2  # These are used when calculating binning range
+    _focus_crop_end = 0.95
+    _focus_bin_widths = [-0.0050, -0.0010, -0.0010, -0.0010, -0.00050]
 
     _calibration_grouping_names = None
 
@@ -32,9 +35,6 @@ class Polaris(AbstractInst):
     # Abstract implementation
     def _get_lambda_range(self):
         return self._lower_lambda_range, self._upper_lambda_range
-
-    def _get_focus_tof_binning(self):
-        return self._focus_tof_binning_params
 
     def _get_create_van_tof_binning(self):
         return self._create_van_calib_tof_binning
@@ -142,8 +142,9 @@ class Polaris(AbstractInst):
 
     def correct_sample_vanadium(self, focused_ws, index, vanadium_ws=None):
         spectra_name = "sample_ws-" + str(index + 1)
-        mantid.CropWorkspace(InputWorkspace=focused_ws, OutputWorkspace=spectra_name,
-                             StartWorkspaceIndex=index, EndWorkspaceIndex=index)
+        sample = mantid.CropWorkspace(InputWorkspace=focused_ws, OutputWorkspace=spectra_name,
+                                      StartWorkspaceIndex=index, EndWorkspaceIndex=index)
+
         if vanadium_ws:
             van_rebinned = mantid.RebinToWorkspace(WorkspaceToRebin=vanadium_ws, WorkspaceToMatch=spectra_name)
             mantid.Divide(LHSWorkspace=spectra_name, RHSWorkspace=van_rebinned, OutputWorkspace=spectra_name)
@@ -198,6 +199,23 @@ class Polaris(AbstractInst):
                                               ExpMethod=exp_method)
         return absorb_ws
 
+    def calculate_focus_binning_params(self, sample):
+        calculated_binning_params = []
+
+        for i in range(0, self._number_of_banks):
+            sample_data = sample.readX(i)
+            starting_bin = _calculate_focus_bin_first_edge(bin_value=sample_data[0], crop_value=self._focus_crop_start)
+            ending_bin = _calculate_focus_bin_last_edge(bin_value=sample_data[-1], crop_value=self._focus_crop_end)
+            bin_width = _calculate_focus_bin_width(sample_data)
+
+            if bin_width > self._focus_bin_widths[i]:
+                bin_width = self._focus_bin_widths[i]
+
+            bank_binning_params = [str(starting_bin), str(bin_width), str(ending_bin)]
+            calculated_binning_params.append(bank_binning_params)
+
+        return calculated_binning_params
+
     def _read_masking_file(self):
         all_banks_masking_list = []
         bank_masking_list = []
@@ -230,6 +248,7 @@ class Polaris(AbstractInst):
             output_list.append(splined_ws)
 
         return output_list
+
 
 # Class private implementation
 
@@ -266,3 +285,24 @@ def _apply_masking(workspaces_to_mask, mask_list):
 
     return output_workspaces
 
+
+def _calculate_focus_bin_first_edge(bin_value, crop_value):
+    return bin_value * (1 + crop_value)
+
+
+def _calculate_focus_bin_last_edge(bin_value, crop_value):
+    return bin_value * crop_value
+
+
+def _calculate_focus_bin_width(bin_data):
+    first_val = bin_data[0]
+    last_val = bin_data[-1]
+    number_of_bins = len(bin_data) - 1
+
+    bin_delta = last_val / first_val
+    delta_logarithm = math.log(bin_delta)
+    avg_delta = delta_logarithm / number_of_bins
+
+    rebin_width = math.exp(avg_delta) - 1
+    rebin_width = -1 * math.fabs(rebin_width)
+    return rebin_width

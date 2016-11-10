@@ -284,6 +284,8 @@ class AbstractInst(object):
     def correct_sample_vanadium(self, focused_ws, index, vanadium_ws=None):
         raise NotImplementedError("Cannot process the sample with a vanadium run for this instrument")
 
+    def calculate_focus_binning_params(self, sample):
+        return None
 
 # ----- Private Implementation ----- #
 # These should only be called by the abstract instrument class
