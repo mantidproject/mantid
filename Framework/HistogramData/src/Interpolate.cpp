@@ -69,16 +69,16 @@ void sanityCheck(const Histogram &input, const size_t stepSize,
  */
 void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
                                HistogramY &ynew) {
-  auto xold = input.points();
-  auto &yold = input.y();
-  auto nypts = yold.size();
+  const auto xold = input.points();
+  const auto &yold = input.y();
+  const auto nypts = yold.size();
   size_t step(stepSize), index2(0);
   double x1(0.), x2(0.), y1(0.), y2(0.), overgap(0.);
   // Copy over end value skipped by loop
   ynew.back() = yold.back();
   for (size_t i = 0; i < nypts - 1; ++i) // Last point has been calculated
   {
-    double xp = xold[i];
+    const double xp = xold[i];
     if (step == stepSize) {
       x1 = xp;
       index2 = ((i + stepSize) >= nypts ? nypts - 1 : (i + stepSize));
@@ -96,6 +96,7 @@ void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
     step++;
   }
 }
+
 /**
  * Perform cubic spline interpolation. It is assumed all sanity checks have been
  * performed by the interpolateCSpline entry point.
@@ -105,13 +106,13 @@ void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
  */
 void interpolateYCSplineInplace(const Histogram &input, const size_t stepSize,
                                 HistogramY &ynew) {
-  auto xold = input.points();
-  auto &yold = input.y();
-  auto nypts = yold.size();
+  const auto xold = input.points();
+  const auto &yold = input.y();
+  const auto nypts = yold.size();
 
   const auto ncalc = numberCalculated(nypts, stepSize);
   std::vector<double> xc(ncalc), yc(ncalc);
-  for (size_t step = 0, i = 0; step < nypts; step += stepSize, i += 1) {
+  for (size_t step = 0, i = 0; step < nypts; step += stepSize, ++i) {
     xc[i] = xold[step];
     yc[i] = yold[step];
   }
