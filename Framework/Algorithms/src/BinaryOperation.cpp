@@ -1,13 +1,13 @@
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Timer.h"
 
@@ -444,17 +444,14 @@ bool BinaryOperation::propagateSpectraMask(
     const API::MatrixWorkspace_const_sptr rhs, const int64_t index,
     API::MatrixWorkspace_sptr out) {
   bool continueOp(true);
-  IDetector_const_sptr det_lhs, det_rhs;
-  try {
-    det_lhs = lhs->getDetector(index);
-    det_rhs = rhs->getDetector(index);
-  } catch (std::runtime_error &) {
-  } catch (std::domain_error &) {
-    // try statement will throw a domain_error when the axis is not a spectra
-    // axis.
-    return continueOp;
-  }
-  if ((det_lhs && det_lhs->isMasked()) || (det_rhs && det_rhs->isMasked())) {
+
+  auto lhsSpectrumInfo = lhs->spectrumInfo();
+  auto rhsSpectrumInfo = rhs->spectrumInfo();
+
+  if ((lhsSpectrumInfo.hasDetectors(index) &&
+       lhsSpectrumInfo.isMasked(index)) ||
+      (rhsSpectrumInfo.hasDetectors(index) &&
+       lhsSpectrumInfo.isMasked(index))) {
     continueOp = false;
     out->maskWorkspaceIndex(index);
   }
