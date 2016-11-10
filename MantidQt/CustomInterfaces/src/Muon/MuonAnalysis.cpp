@@ -654,13 +654,11 @@ void MuonAnalysis::runLoadCurrent() {
 
   if (instname == "EMU" || instname == "HIFI" || instname == "MUSR" ||
       instname == "CHRONUS" || instname == "ARGUS") {
-    QString instDirectory = instname;
-    if (instname == "CHRONUS")
-      instDirectory = "NDW1030";
+    const QString instDirectory = instname == "CHRONUS" ? "NDW1030" : instname;
     std::string autosavePointsTo = "";
-    std::string autosaveFile =
-        "\\\\" + instDirectory.toStdString() + "\\data\\autosave.run";
-    Poco::File pathAutosave(autosaveFile);
+    const std::string autosaveDir = "\\\\" + instDirectory.toStdString();
+    const std::string autosaveFile = autosaveDir + "\\data\\autosave.run";
+    const Poco::File pathAutosave(autosaveFile);
 
     try // check if exists
     {
@@ -668,7 +666,7 @@ void MuonAnalysis::runLoadCurrent() {
         std::ifstream autofileIn(autosaveFile.c_str(), std::ifstream::in);
         autofileIn >> autosavePointsTo;
       }
-    } catch (Poco::Exception &) {
+    } catch (const Poco::Exception &) {
       QString message("Can't read from the selected directory, either the "
                       "computer you are trying"
                       "\nto access is down or your computer is not "
@@ -685,7 +683,7 @@ void MuonAnalysis::runLoadCurrent() {
     else
       psudoDAE = "\\\\" + instDirectory + "\\data\\" + autosavePointsTo.c_str();
 
-    Poco::File l_path(psudoDAE.toStdString());
+    const Poco::File l_path(psudoDAE.toStdString());
     try {
       if (!l_path.exists()) {
         QMessageBox::warning(this, "Mantid - MuonAnalysis",
@@ -694,7 +692,7 @@ void MuonAnalysis::runLoadCurrent() {
                                  QString("does not seem to exist"));
         return;
       }
-    } catch (Poco::Exception &) {
+    } catch (const Poco::Exception &) {
       QMessageBox::warning(this, "Mantid - MuonAnalysis",
                            QString("Can't load ") + "Current data since\n" +
                                psudoDAE + QString("\n") +
