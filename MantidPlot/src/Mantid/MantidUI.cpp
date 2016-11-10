@@ -2351,7 +2351,7 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data,
   t->setTimeFormat("HH:mm:ss", 0, false);
   t->setColName(1, label.section("-", 1));
   t->setColumnType(1, Table::Text);
-  
+
   // Make both columns read-only
   t->setReadOnlyColumn(0, true);
   t->setReadOnlyColumn(1, true);
