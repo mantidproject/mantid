@@ -21,6 +21,8 @@ For version 1 of the algorithm, please see `SpecularReflectionPositionCorrect-v1
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 **Example - Correct 'point-detector'**
 
 .. testcode:: SpecularReflectionPositionCorrectPointDetector
