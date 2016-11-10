@@ -54,23 +54,6 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
                              doc='Run number(s) of vanadium run(s) used for '
                                  'peak alignment for UnmirrorOption=[5, 7]')
 
-        self.declareProperty(FileProperty('MapFile', '',
-                                          action=FileAction.OptionalLoad,
-                                          extensions=['xml']),
-                             doc='Filename of the detector grouping map file to use. \n'
-                                 'If left blank the default will be used '
-                                 '(i.e. all vertical pixels will be summed in each PSD tube.)')
-
-        self.declareProperty(name='Analyser',
-                             defaultValue='silicon',
-                             validator=StringListValidator(['silicon']),
-                             doc='Analyser crystal.')
-
-        self.declareProperty(name='Reflection',
-                             defaultValue='111',
-                             validator=StringListValidator(['111', '311']),
-                             doc='Analyser reflection.')
-
         self.declareProperty(name='SumRuns',
                              defaultValue=False,
                              doc='Whether to sum all the input runs.')
@@ -108,6 +91,23 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         self.declareProperty(name='CalibrationPeakRange', defaultValue=[-0.003,0.003],
                              validator=FloatArrayMandatoryValidator(),
                              doc='Peak range for integration over calibration file peak (in mev)')
+
+        self.declareProperty(FileProperty('MapFile', '',
+                                          action=FileAction.OptionalLoad,
+                                          extensions=['xml']),
+                             doc='Filename of the detector grouping map file to use. \n'
+                                 'If left blank the default will be used '
+                                 '(i.e. all vertical pixels will be summed in each PSD tube.)')
+
+        self.declareProperty(name='Analyser',
+                             defaultValue='silicon',
+                             validator=StringListValidator(['silicon']),
+                             doc='Analyser crystal.')
+
+        self.declareProperty(name='Reflection',
+                             defaultValue='111',
+                             validator=StringListValidator(['111', '311']),
+                             doc='Analyser reflection.')
 
         self.declareProperty(WorkspaceGroupProperty("OutputWorkspace", "red",
                                                     optional=PropertyMode.Optional,

@@ -12,7 +12,7 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
     _runs = dict([('one_wing_QENS', '090660'),
                   ('one_wing_EFWS', '083072'),
                   ('one_wing_IFWS', '083073'),
-                  ('two_wing_QENS', '136558'),
+                  ('two_wing_QENS', '136558-136559'),
                   ('two_wing_EFWS', '143720'),
                   ('two_wing_IFWS', '170300')])
 

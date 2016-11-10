@@ -14,7 +14,6 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
     _sample_files = None
     _background_files = None
     _calibration_files = None
-    _mirror_sense = None
     _observable = None
     _sortX = None
     _red_ws = None
@@ -59,6 +58,10 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
                              defaultValue=False,
                              doc='Whether or not to sort the x-axis\n')
 
+        self.declareProperty(name='BackgroundScalingFactor', defaultValue=1.,
+                             validator=FloatBoundedValidator(lower=0),
+                             doc='Scaling factor for background subtraction')
+
         self.declareProperty(FileProperty('MapFile', '',
                                           action=FileAction.OptionalLoad,
                                           extensions=['xml']),
@@ -76,14 +79,6 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
                              validator=StringListValidator(['111', '311']),
                              doc='Analyser reflection.')
 
-        self.declareProperty(name='MirrorSense',
-                             defaultValue=False,
-                             doc='Whether the runs where recorded in mirror sense.')
-
-        self.declareProperty(name='BackgroundScalingFactor', defaultValue=1.,
-                             validator=FloatBoundedValidator(lower=0),
-                             doc='Scaling factor for background subtraction')
-
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', 'red',
                                                     direction=Direction.Output),
                              doc='Output workspace group')
@@ -99,7 +94,6 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         self._sample_files = self.getPropertyValue('Run')
         self._background_files = self.getPropertyValue('BackgroundRun')
         self._calibration_files = self.getPropertyValue('CalibrationRun')
-        self._mirror_sense = self.getProperty('MirrorSense').value
         self._observable = self.getPropertyValue('Observable')
         self._sortX = self.getProperty('SortXAxis').value
         self._back_scaling =self.getProperty('BackgroundScalingFactor').value
@@ -113,11 +107,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
         # Nexus metadata criteria for FWS type of data (both EFWS and IFWS)
         self._criteria = '($/entry0/instrument/Doppler/maximum_delta_energy$ == 0. or ' \
-                         '$/entry0/instrument/Doppler/velocity_profile$ == 1) and ' \
-                         '$/entry0/instrument/Doppler/mirror_sense$ == '
-
-        # mirror sense criteria
-        self._criteria += '14' if self._mirror_sense else '16'
+                         '$/entry0/instrument/Doppler/velocity_profile$ == 1)'
 
         # make sure observable entry also exists (value is not important)
         self._criteria += ' and ($/entry0/' + self._observable.replace('.', '/') + '$ or True)'
@@ -184,7 +174,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         Sums the integrals of left and right for two wings, or returns the integral of one wing
         @param ws :: group workspace containing one ws for one wing, and two ws for two wing data
         '''
-        if self._mirror_sense:
+        if mtd[groupws].getNumberOfEntries() == 2: # two wings, sum
             left = mtd[groupws].getItem(0).getName()
             right = mtd[groupws].getItem(1).getName()
             UnGroupWorkspace(groupws)
