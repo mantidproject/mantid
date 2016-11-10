@@ -1,7 +1,9 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabView.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Run.h"
 
 #include <regex>
 
@@ -31,7 +33,10 @@ void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
     populateWorkspaceList();
     break;
   case filterWorkspaceListFlag:
-    filterWorkspaceNames(m_view->getFilter(), m_view->getRegExpCheck());
+    filterWorkspaceNames(m_view->getFilter(), m_view->getRegexCheck());
+    break;
+  case workspaceParamsFlag:
+    populateParametersList(m_view->getCurrentWorkspaceName());
     break;
   }
 }
@@ -45,6 +50,8 @@ void ReflSaveTabPresenter::populateWorkspaceList() {
 }
 
 /** Filters the names in the 'List of Workspaces' widget
+* @param filter :: filter text string
+* @param regexCheck :: whether to use regex in filtering
 */
 void ReflSaveTabPresenter::filterWorkspaceNames(std::string filter, 
     bool regexCheck) {
@@ -72,6 +79,21 @@ void ReflSaveTabPresenter::filterWorkspaceNames(std::string filter,
   m_view->setWorkspaceList(validNames);
 }
 
+/** Fills the 'List of Logged Parameters' widget with the parameters of the
+* currently selected workspace
+* @param wsName :: name of selected workspace
+*/
+void ReflSaveTabPresenter::populateParametersList(std::string wsName) {
+  m_view->clearParametersList();
+
+  std::vector<std::string> logs;
+  const auto &properties = AnalysisDataService::Instance().retrieveWS
+    <MatrixWorkspace>(wsName)->run().getProperties();
+  for (auto it = properties.begin(); it != properties.end(); it++) {
+    logs.push_back((*it)->name());
+  }
+  m_view->setParametersList(logs);
+}
 
 /** Obtains all available workspace names to save
 * @return :: list of workspace names

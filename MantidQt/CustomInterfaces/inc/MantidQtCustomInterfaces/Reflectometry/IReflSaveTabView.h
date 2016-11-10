@@ -44,9 +44,8 @@ public:
   virtual std::string getSavePath() const = 0;
   virtual std::string getPrefix() const = 0;
   virtual std::string getFilter() const = 0;
-  virtual bool getRegExpCheck() const = 0;
-  virtual std::string getListOfWorkspacesItem(int index) const = 0;
-  virtual std::string getListOfParametersItem(int index) const = 0;
+  virtual bool getRegexCheck() const = 0;
+  virtual std::string getCurrentWorkspaceName() const = 0;
   virtual std::string getSpectraList() const = 0;
   virtual std::string getFileFormat() const = 0;
   virtual bool getTitleCheck() const = 0;
@@ -54,8 +53,9 @@ public:
   virtual std::string getSeparator() const = 0;
 
   virtual void clearWorkspaceList() const = 0;
+  virtual void clearParametersList() const = 0;
   virtual void setWorkspaceList(const std::vector<std::string> &) const = 0;
-  virtual void filterWorkspaceList() const = 0;
+  virtual void setParametersList(const std::vector<std::string> &) const = 0;
 };
 }
 }

@@ -25,6 +25,9 @@ void QtReflSaveTabView::initLayout() {
 
   connect(m_ui.filterEdit, SIGNAL(textEdited(const QString &)), this,
     SLOT(filterWorkspaceList()));
+  connect(m_ui.listOfWorkspaces,
+    SIGNAL(itemDoubleClicked(QListWidgetItem*)), this,
+    SLOT(requestWorkspaceParams()));
 
   m_presenter.reset(new ReflSaveTabPresenter(this));
   m_presenter->notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
@@ -52,24 +55,18 @@ std::string QtReflSaveTabView::getFilter() const {
 }
 
 /** Returns the regular expression check value
-* @return :: The reg exp check
+* @return :: The regex check
 */
-bool QtReflSaveTabView::getRegExpCheck() const {
-  return m_ui.regExpCheckBox->isChecked();
+bool QtReflSaveTabView::getRegexCheck() const {
+  return m_ui.regexCheckBox->isChecked();
 }
 
-/** Returns the name of an item at index in 'List of workspaces' widget
+/** Returns the name of the currently selected workspace from the 'List of
+* workspaces' widget
 * @return :: item name
 */
-std::string QtReflSaveTabView::getListOfWorkspacesItem(int index) const {
-  return m_ui.listOfWorkspaces->item(index)->text().toStdString();
-}
-
-/** Returns the name of an item at index in 'List of logged parameters' widget
-* @return :: item name
-*/
-std::string QtReflSaveTabView::getListOfParametersItem(int index) const {
-  return m_ui.listOfLoggedParameters->item(index)->text().toStdString();
+std::string QtReflSaveTabView::getCurrentWorkspaceName() const {
+  return m_ui.listOfWorkspaces->currentItem()->text().toStdString();
 }
 
 /** Returns the spectra list as a single string
@@ -113,6 +110,12 @@ void QtReflSaveTabView::clearWorkspaceList() const {
   m_ui.listOfWorkspaces->clear();
 }
 
+/** Clear the 'List of Logged Parameters' widget
+*/
+void QtReflSaveTabView::clearParametersList() const {
+  m_ui.listOfLoggedParameters->clear();
+}
+
 /** Set the 'List of workspaces' widget with workspace names
 * @param names :: The list of workspace names
 */
@@ -123,10 +126,26 @@ void QtReflSaveTabView::setWorkspaceList(
   }
 }
 
+/** Set the 'List of logged parameters' widget with workspace run logs
+* @param names :: The list of workspace run logs
+*/
+void QtReflSaveTabView::setParametersList(
+  const std::vector<std::string> &logs) const {
+  for (auto it = logs.begin(); it != logs.end(); it++) {
+    m_ui.listOfLoggedParameters->addItem(QString::fromStdString(*it));
+  }
+}
+
 /** Filter the 'List of workspaces' widget
 */
 void QtReflSaveTabView::filterWorkspaceList() const {
   m_presenter->notify(IReflSaveTabPresenter::filterWorkspaceListFlag);
+}
+
+/** Request for the parameters of a workspace
+*/
+void QtReflSaveTabView::requestWorkspaceParams() const {
+  m_presenter->notify(IReflSaveTabPresenter::workspaceParamsFlag);
 }
 
 } // namespace CustomInterfaces

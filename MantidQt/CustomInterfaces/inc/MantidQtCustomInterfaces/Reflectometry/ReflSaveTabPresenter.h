@@ -48,6 +48,8 @@ public:
 
   /// Adds all workspace names to the list of workspaces
   void populateWorkspaceList();
+  /// Adds all workspace params to the list of logged parameters
+  void populateParametersList(std::string wsName);
   /// Filter workspaces names
   void filterWorkspaceNames(std::string filter, bool regexCheck);
 

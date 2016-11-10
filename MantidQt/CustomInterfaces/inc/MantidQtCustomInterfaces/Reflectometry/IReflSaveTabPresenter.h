@@ -36,7 +36,8 @@ class IReflSaveTabPresenter {
 public:
   virtual ~IReflSaveTabPresenter(){};
 
-  enum Flag { populateWorkspaceListFlag, filterWorkspaceListFlag };
+  enum Flag { populateWorkspaceListFlag, filterWorkspaceListFlag, 
+      workspaceParamsFlag };
 
   /// Tell the presenter something happened
   virtual void notify(IReflSaveTabPresenter::Flag flag) = 0;

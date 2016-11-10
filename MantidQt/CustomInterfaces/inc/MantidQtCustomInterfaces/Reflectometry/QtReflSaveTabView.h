@@ -53,12 +53,10 @@ public:
   std::string getPrefix() const override;
   /// Returns the filter
   std::string getFilter() const override;
-  /// Returns the reg exp check
-  bool getRegExpCheck() const override;
-  /// Returns item at index from list of workspaces
-  std::string getListOfWorkspacesItem(int index) const override;
-  /// Returns item at index from list of parameters
-  std::string getListOfParametersItem(int index) const override;
+  /// Returns the regex check
+  bool getRegexCheck() const override;
+  /// Get name of the currently selected workspace name
+  std::string getCurrentWorkspaceName() const override;
   /// Returns the spectra list
   std::string getSpectraList() const override;
   /// Returns the file format
@@ -70,14 +68,20 @@ public:
   /// Returns the separator type
   std::string getSeparator() const override;
 
-  /// Clears the 'List of workspace' widget
+  /// Clears the 'List of Workspaces' widget
   void clearWorkspaceList() const override;
+  /// Clears the 'List of Logged Parameters' widget
+  void clearParametersList() const override;
   /// Sets the 'List of workspaces' widget
   void setWorkspaceList(const std::vector<std::string> &) const override;
+  /// Sets the 'List of logged parameters' widget
+  void setParametersList(const std::vector<std::string> &) const override;
 
 public slots:
   /// Filters the 'List of workspaces' widget
-  void filterWorkspaceList() const override;
+  void filterWorkspaceList() const;
+  /// Request parameters for a workspace of a name
+  void requestWorkspaceParams() const;
 
 private:
   /// Initialize the interface

@@ -74,12 +74,12 @@
               <widget class="QLineEdit" name="filterEdit"/>
             </item>
             <item row="0" column="2">
-              <widget class="QCheckBox" name="regExpCheckBox"/>
+              <widget class="QCheckBox" name="regexCheckBox"/>
             </item>
             <item row="0" column="3">
-              <widget class="QLabel" name="regExpLabel">
+              <widget class="QLabel" name="regexLabel">
                 <property name="text">
-                  <string>RegExp</string>
+                  <string>Regex</string>
                 </property>
               </widget>
             </item>
