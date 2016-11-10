@@ -10,6 +10,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
@@ -92,6 +93,29 @@ public:
       .Times(Exactly(1));
     presenter.populateWorkspaceList();
     presenter.filterWorkspaceNames("[a-zA-Z]*_[0-9]+", true);
+    AnalysisDataService::Instance().clear();
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testPopulateParametersList() {
+    MockSaveTabView mockView;
+    ReflSaveTabPresenter presenter(&mockView);
+
+    createWS("ws1");
+    std::vector<std::string> logs;
+    const auto &properties = AnalysisDataService::Instance().retrieveWS
+      <MatrixWorkspace>("ws1")->run().getProperties();
+    for (auto it = properties.begin(); it != properties.end(); it++) {
+      logs.push_back((*it)->name());
+    }
+
+    EXPECT_CALL(mockView, clearWorkspaceList()).Times(Exactly(1));
+    EXPECT_CALL(mockView, setWorkspaceList(std::vector<std::string> { "ws1" }))
+      .Times(Exactly(1));
+    EXPECT_CALL(mockView, clearParametersList()).Times(Exactly(1));
+    EXPECT_CALL(mockView, setParametersList(logs)).Times(Exactly(1));
+    presenter.populateWorkspaceList();
+    presenter.populateParametersList("ws1");
     AnalysisDataService::Instance().clear();
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }

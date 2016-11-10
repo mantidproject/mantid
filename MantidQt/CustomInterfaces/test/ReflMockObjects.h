@@ -67,9 +67,8 @@ public:
   MOCK_CONST_METHOD0(getSavePath, std::string());
   MOCK_CONST_METHOD0(getPrefix, std::string());
   MOCK_CONST_METHOD0(getFilter, std::string());
-  MOCK_CONST_METHOD0(getRegExpCheck, bool());
-  MOCK_CONST_METHOD1(getListOfWorkspacesItem, std::string(int));
-  MOCK_CONST_METHOD1(getListOfParametersItem, std::string(int));
+  MOCK_CONST_METHOD0(getRegexCheck, bool());
+  MOCK_CONST_METHOD0(getCurrentWorkspaceName, std::string());
   MOCK_CONST_METHOD0(getSpectraList, std::string());
   MOCK_CONST_METHOD0(getFileFormat, std::string());
   MOCK_CONST_METHOD0(getTitleCheck, bool());
@@ -78,6 +77,8 @@ public:
   MOCK_CONST_METHOD0(clearWorkspaceList, void());
   MOCK_CONST_METHOD1(setWorkspaceList, void(const std::vector<std::string> &));
   MOCK_CONST_METHOD0(filterWorkspaceList, void());
+  MOCK_CONST_METHOD0(clearParametersList, void());
+  MOCK_CONST_METHOD1(setParametersList, void(const std::vector<std::string> &));
 };
 
 class MockSettingsTabView : public IReflSettingsTabView {
