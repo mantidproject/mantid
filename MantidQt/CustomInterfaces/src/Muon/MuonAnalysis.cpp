@@ -648,6 +648,9 @@ void MuonAnalysis::runClearGroupingButton() { clearTablesAndCombo(); }
 
 /**
  * Load current (slot)
+ * N.B. This method will only work if
+ * - using Windows
+ * - connected to the ISIS network
  */
 void MuonAnalysis::runLoadCurrent() {
   QString instname = m_uiForm.instrSelector->currentText().toUpper();
@@ -656,8 +659,8 @@ void MuonAnalysis::runLoadCurrent() {
       instname == "CHRONUS" || instname == "ARGUS") {
     const QString instDirectory = instname == "CHRONUS" ? "NDW1030" : instname;
     std::string autosavePointsTo = "";
-    const std::string autosaveDir = "\\\\" + instDirectory.toStdString();
-    const std::string autosaveFile = autosaveDir + "\\data\\autosave.run";
+    const std::string autosaveFile =
+        "\\\\" + instDirectory.toStdString() + "\\data\\autosave.run";
     const Poco::File pathAutosave(autosaveFile);
 
     try // check if exists
@@ -675,6 +678,12 @@ void MuonAnalysis::runLoadCurrent() {
       QMessageBox::warning(this, "MantidPlot - MuonAnalysis", message);
       return;
     }
+
+    // If this directory is not in Mantid's data search list, add it now
+    // Must use forward slash format for this list, even on Windows
+    const std::string autosaveDir =
+        "//" + instDirectory.toStdString() + "/data";
+    Mantid::Kernel::ConfigService::Instance().appendDataSearchDir(autosaveDir);
 
     QString psudoDAE;
     if (autosavePointsTo.empty())
