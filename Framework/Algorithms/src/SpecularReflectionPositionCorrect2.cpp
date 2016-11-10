@@ -24,8 +24,7 @@ const std::string SpecularReflectionPositionCorrect2::name() const {
 
 /// Algorithm's summary. @see Algorithm::summary
 const std::string SpecularReflectionPositionCorrect2::summary() const {
-  return "Correct detector positions vertically based on the specular "
-         "reflection condition.";
+  return "Corrects a detector component vertically based on TwoTheta.";
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
@@ -52,9 +51,9 @@ void SpecularReflectionPositionCorrect2::init() {
   thetaValidator->add(
       boost::make_shared<BoundedValidator<double>>(0, 90, true));
   declareProperty(
-      make_unique<PropertyWithValue<double>>("TwoThetaIn", Mantid::EMPTY_DBL(),
+      make_unique<PropertyWithValue<double>>("TwoTheta", Mantid::EMPTY_DBL(),
                                              thetaValidator, Direction::Input),
-      "Two theta angle in degrees.");
+      "Angle used to correct the detector component.");
 
   declareProperty(
       Mantid::Kernel::make_unique<PropertyWithValue<std::string>>(
@@ -89,7 +88,7 @@ void SpecularReflectionPositionCorrect2::exec() {
   MatrixWorkspace_sptr outWS =
       boost::dynamic_pointer_cast<MatrixWorkspace>(tmp);
 
-  const double twoThetaIn = getProperty("TwoThetaIn");
+  const double twoThetaIn = getProperty("TwoTheta");
   const double twoThetaInRad = twoThetaIn * (M_PI / 180.0);
 
   auto inst = outWS->getInstrument();

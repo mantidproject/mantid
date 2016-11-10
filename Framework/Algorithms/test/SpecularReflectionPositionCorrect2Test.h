@@ -65,9 +65,9 @@ public:
     alg.setProperty("InputWorkspace", m_interWS);
     alg.setProperty("DetectorComponentName", "point-detector");
     alg.setPropertyValue("OutputWorkspace", "test_out");
-    TS_ASSERT_THROWS(alg.setProperty("TwoThetaIn", 0.0),
+    TS_ASSERT_THROWS(alg.setProperty("TwoTheta", 0.0),
                      std::invalid_argument &);
-    TS_ASSERT_THROWS(alg.setProperty("TwoThetaIn", 90.0),
+    TS_ASSERT_THROWS(alg.setProperty("TwoTheta", 90.0),
                      std::invalid_argument &);
   }
 
@@ -76,7 +76,7 @@ public:
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspace", m_interWS);
-    alg.setProperty("TwoThetaIn", 1.4);
+    alg.setProperty("TwoTheta", 1.4);
     alg.setPropertyValue("OutputWorkspace", "test_out");
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
@@ -86,7 +86,7 @@ public:
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspace", m_interWS);
-    alg.setProperty("TwoThetaIn", 1.4);
+    alg.setProperty("TwoTheta", 1.4);
     alg.setProperty("DetectorComponentName", "point-detector");
     alg.setPropertyValue("OutputWorkspace", "test_out");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -114,7 +114,7 @@ public:
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspace", m_interWS);
-    alg.setProperty("TwoThetaIn", 1.4);
+    alg.setProperty("TwoTheta", 1.4);
     alg.setProperty("DetectorComponentName", "linear-detector");
     alg.setPropertyValue("OutputWorkspace", "test_out");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
