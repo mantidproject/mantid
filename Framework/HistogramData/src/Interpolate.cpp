@@ -21,7 +21,7 @@ constexpr const char *CSPLINE_NAME = "CSpline";
  * @param stepSize The step size between each calculated point
  * @return The number of calculated nodes
  */
-inline size_t numberCalculated(const size_t ysize, const size_t stepSize) {
+constexpr size_t numberCalculated(const size_t ysize, const size_t stepSize) {
   // First and last points are always assumed to be calculated
   return 1 + ((ysize - 1) / stepSize);
 }
