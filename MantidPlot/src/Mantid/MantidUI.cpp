@@ -2375,6 +2375,7 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data,
                     t->table()->verticalHeader()->sectionSize(0) +
                 100);
   t->setAttribute(Qt::WA_DeleteOnClose);
+  t->resizeColumnsToContents();
   t->showNormal();
 }
 

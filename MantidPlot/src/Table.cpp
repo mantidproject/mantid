@@ -3268,6 +3268,11 @@ void Table::setTextAlignment(int row, int col,
   }
 }
 
+/**
+ * Resizes column widths to their contents
+ */
+void Table::resizeColumnsToContents() { d_table->resizeColumnsToContents(); }
+
 /*****************************************************************************
  *
  * Class MyTable
