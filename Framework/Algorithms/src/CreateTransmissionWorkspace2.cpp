@@ -92,27 +92,10 @@ CreateTransmissionWorkspace2::validateInputs() {
   std::map<std::string, std::string> results;
 
   // Validate wavelength range
-  double wavMin = getProperty("WavelengthMin");
-  double wavMax = getProperty("WavelengthMax");
-  if (wavMin > wavMax)
-    results["WavelengthMin"] =
-        "WavelengthMax must be greater than WavelengthMin";
-
   // Validate monitor background range
-  double monMin = getProperty("MonitorBackgroundWavelengthMin");
-  double monMax = getProperty("MonitorBackgroundWavelengthMax");
-  if (monMin > monMax)
-    results["MonitorBackgroundWavelengthMin"] =
-        "MonitorBackgroundWavelengthMax must be greater than "
-        "MonitorBackgroundWavelengthMin";
-
   // Validate monitor integration range
-  double monIntMin = getProperty("MonitorIntegrationWavelengthMin");
-  double monIntMax = getProperty("MonitorIntegrationWavelengthMax");
-  if (monIntMin > monIntMax)
-    results["MonitorIntegrationWavelengthMax"] =
-        "MonitorIntegrationWavelengthMax must be greater than "
-        "MonitorIntegrationWavelengthMin";
+  auto wavelength = validateWavelengthRanges();
+  results.insert(wavelength.begin(), wavelength.end());
 
   return results;
 }

@@ -1,6 +1,8 @@
+#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -8,6 +10,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 
 namespace Mantid {
 namespace Algorithms {
@@ -115,12 +118,21 @@ void ReflectometryWorkflowBase2::initStitchProperties() {
 }
 
 /** Initialize algorithmic correction properties
+*
+* @param autoDetect :: True to include 'AutoDetect' option. False otherwise.
 */
-void ReflectometryWorkflowBase2::initAlgorithmicProperties() {
+void ReflectometryWorkflowBase2::initAlgorithmicProperties(bool autoDetect) {
 
   std::vector<std::string> correctionAlgorithms = {
       "None", "PolynomialCorrection", "ExponentialCorrection"};
-  declareProperty("CorrectionAlgorithm", "None",
+  std::string defaultCorrection = "None";
+
+  if (autoDetect) {
+    correctionAlgorithms.insert(correctionAlgorithms.begin() + 1, "AutoDetect");
+    defaultCorrection = "AutoDetect";
+  }
+
+  declareProperty("CorrectionAlgorithm", defaultCorrection,
                   boost::make_shared<StringListValidator>(correctionAlgorithms),
                   "The type of correction to perform.");
 
@@ -223,6 +235,41 @@ ReflectometryWorkflowBase2::validateTransmissionProperties() {
                                           "be in TOF";
     }
   }
+
+  return results;
+}
+
+/** Validate various wavelength ranges
+*
+* @return :: A map with results of validation
+*/
+std::map<std::string, std::string>
+ReflectometryWorkflowBase2::validateWavelengthRanges() {
+
+  std::map<std::string, std::string> results;
+
+  // Validate wavelength range
+  double wavMin = getProperty("WavelengthMin");
+  double wavMax = getProperty("WavelengthMax");
+  if (wavMin > wavMax)
+    results["WavelengthMin"] =
+        "WavelengthMax must be greater than WavelengthMin";
+
+  // Validate monitor background range
+  double monMin = getProperty("MonitorBackgroundWavelengthMin");
+  double monMax = getProperty("MonitorBackgroundWavelengthMax");
+  if (monMin > monMax)
+    results["MonitorBackgroundWavelengthMin"] =
+        "MonitorBackgroundWavelengthMax must be greater than "
+        "MonitorBackgroundWavelengthMin";
+
+  // Validate monitor integration range
+  double monIntMin = getProperty("MonitorIntegrationWavelengthMin");
+  double monIntMax = getProperty("MonitorIntegrationWavelengthMax");
+  if (monIntMin > monIntMax)
+    results["MonitorIntegrationWavelengthMax"] =
+        "MonitorIntegrationWavelengthMax must be greater than "
+        "MonitorIntegrationWavelengthMin";
 
   return results;
 }
@@ -348,6 +395,102 @@ ReflectometryWorkflowBase2::makeMonitorWS(MatrixWorkspace_sptr inputWS,
       integrationAlg->getProperty("OutputWorkspace");
 
   return integratedMonitor;
+}
+
+/** Set monitor properties
+*
+* @param alg :: ReflectometryReductionOne algorithm
+* @param instrument :: the instrument attached to the workspace
+*/
+void ReflectometryWorkflowBase2::populateMonitorProperties(
+    IAlgorithm_sptr alg, Instrument_const_sptr instrument) {
+
+  auto monitorIndex = checkForOptionalInstrumentDefault<int>(
+      this, "I0MonitorIndex", instrument, "I0MonitorIndex");
+  if (monitorIndex.is_initialized())
+    alg->setProperty("I0MonitorIndex", monitorIndex.get());
+  auto backgroundMin = checkForOptionalInstrumentDefault<double>(
+      this, "MonitorBackgroundWavelengthMin", instrument,
+      "MonitorBackgroundMin");
+  if (backgroundMin.is_initialized())
+    alg->setProperty("MonitorBackgroundWavelengthMin", backgroundMin.get());
+  auto backgroundMax = checkForOptionalInstrumentDefault<double>(
+      this, "MonitorBackgroundWavelengthMax", instrument,
+      "MonitorBackgroundMax");
+  if (backgroundMax.is_initialized())
+    alg->setProperty("MonitorBackgroundWavelengthMax", backgroundMax.get());
+  auto integrationMin = checkForOptionalInstrumentDefault<double>(
+      this, "MonitorIntegrationWavelengthMin", instrument,
+      "MonitorIntegralMin");
+  if (integrationMin.is_initialized())
+    alg->setProperty("MonitorIntegrationWavelengthMin", integrationMin.get());
+  auto integrationMax = checkForOptionalInstrumentDefault<double>(
+      this, "MonitorIntegrationWavelengthMax", instrument,
+      "MonitorIntegralMax");
+  if (integrationMax.is_initialized())
+    alg->setProperty("MonitorIntegrationWavelengthMax", integrationMax.get());
+}
+
+/** Set processing instructions
+*
+* @param alg :: ReflectometryReductionOne algorithm
+* @param instrument :: the instrument attached to the workspace
+* @param inputWS :: the input workspace
+* @return :: processing instructions as a string
+*/
+std::string ReflectometryWorkflowBase2::populateProcessingInstructions(
+    IAlgorithm_sptr alg, Instrument_const_sptr instrument,
+    MatrixWorkspace_sptr inputWS) {
+
+  if (!getPointerToProperty("ProcessingInstructions")->isDefault()) {
+    std::string instructions = getProperty("ProcessingInstructions");
+    alg->setProperty("ProcessingInstructions", instructions);
+    return instructions;
+  }
+
+  std::string analysisMode = getProperty("AnalysisMode");
+
+  if (analysisMode == "PointDetectorAnalysis") {
+    std::vector<double> pointStart =
+        instrument->getNumberParameter("PointDetectorStart");
+    std::vector<double> pointStop =
+        instrument->getNumberParameter("PointDetectorStop");
+
+    if (pointStart.empty() || pointStop.empty())
+      throw std::runtime_error("Could not find 'PointDetectorStart' and/or "
+                               "'PointDetectorStop' in parameter file. Please "
+                               "provide processing instructions manually or "
+                               "set analysis mode to 'MultiDetectorAnalysis'.");
+
+    const int detStart = static_cast<int>(pointStart[0]);
+    const int detStop = static_cast<int>(pointStop[0]);
+
+    if (detStart == detStop) {
+      auto instructions = std::to_string(detStart);
+      alg->setProperty("ProcessingInstructions", instructions);
+      return instructions;
+    } else {
+      auto instructions =
+          std::to_string(detStart) + ":" + std::to_string(detStop);
+      alg->setProperty("ProcessingInstructions", instructions);
+      return instructions;
+    }
+  }
+
+  else {
+    std::vector<double> multiStart =
+        instrument->getNumberParameter("MultiDetectorStart");
+    if (multiStart.empty())
+      throw std::runtime_error("Could not find 'MultiDetectorStart in "
+                               "parameter file. Please provide processing "
+                               "instructions manually or set analysis mode to "
+                               "'PointDetectorAnalysis'.");
+
+    auto instructions = std::to_string(static_cast<int>(multiStart[0])) + ":" +
+                        std::to_string(inputWS->getNumberHistograms() - 1);
+    alg->setProperty("ProcessingInstructions", instructions);
+    return instructions;
+  }
 }
 
 } // namespace Algorithms

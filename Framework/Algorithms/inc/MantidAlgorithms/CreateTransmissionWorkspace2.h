@@ -10,7 +10,7 @@ namespace Algorithms {
 /** CreateTransmissionWorkspace2 : Create a transmission run workspace in
  Wavelength given one or more TOF workspaces. Version 2 of the algorithm.
 
- Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
  National Laboratory & European Spallation Source
 
  This file is part of Mantid.

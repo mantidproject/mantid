@@ -3,6 +3,7 @@
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidGeometry/Instrument_fwd.h"
 
 #include <map>
 #include <string>
@@ -46,13 +47,15 @@ protected:
   /// Initialize properties for stitching transmission runs
   void initStitchProperties();
   /// Initialize corection algorithm properties
-  void initAlgorithmicProperties();
+  void initAlgorithmicProperties(bool autodetect = false);
   /// Initialize momentum transfer properties
   void initMomentumTransferProperties();
   /// Validate direct beam properties
   std::map<std::string, std::string> validateDirectBeamProperties();
   /// Validate transmission properties
   std::map<std::string, std::string> validateTransmissionProperties();
+  /// Validate wavelength range
+  std::map<std::string, std::string> validateWavelengthRanges();
   /// Convert a workspace from TOF to wavelength
   Mantid::API::MatrixWorkspace_sptr
   convertToWavelength(Mantid::API::MatrixWorkspace_sptr inputWS);
@@ -66,6 +69,15 @@ protected:
   Mantid::API::MatrixWorkspace_sptr
   makeMonitorWS(Mantid::API::MatrixWorkspace_sptr inputWS,
                 bool integratedMonitors);
+  // Read monitor properties from instrument
+  void
+  populateMonitorProperties(Mantid::API::IAlgorithm_sptr alg,
+                            Mantid::Geometry::Instrument_const_sptr instrument);
+  /// Populate processing instructions
+  std::string
+  populateProcessingInstructions(Mantid::API::IAlgorithm_sptr alg,
+                                 Mantid::Geometry::Instrument_const_sptr instr,
+                                 Mantid::API::MatrixWorkspace_sptr inputWS);
 };
 } // namespace Algorithms
 } // namespace Mantid
