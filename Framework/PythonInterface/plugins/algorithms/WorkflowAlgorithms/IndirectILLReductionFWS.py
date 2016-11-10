@@ -241,7 +241,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
         IndirectILLEnergyTransfer(Run=run,OutputWorkspace=ws,**self._common_args)
 
-        energy = mtd[ws].getItem(0).getRun().getLogData('Doppler.maximum_delta_energy').value
+        energy = round(mtd[ws].getItem(0).getRun().getLogData('Doppler.maximum_delta_energy').value,2)
 
         if energy == 0.:
             # Elastic, integrate over full energy range

@@ -41,10 +41,6 @@ bool ILLEnergyTransfer::validate() {
   if (!m_uiForm.rfInput->isValid())
     uiv.addErrorMessage("Run File is invalid.");
 
-  // Validate calibration file/workspace if it is being used
-  if (m_uiForm.cbUseCalibration->isChecked())
-    uiv.checkDataSelectorIsValid("Calibration", m_uiForm.dsCalibration);
-
   // Validate map file if it is being used
   bool useMapFile = m_uiForm.rdGroupChoose->isChecked();
   if (useMapFile && !m_uiForm.rfMapFile->isValid())
@@ -65,20 +61,15 @@ bool ILLEnergyTransfer::validate() {
   if (m_uiForm.rdQENS->isChecked()) {
   int useVanadiumRun = m_uiForm.sbUnmirrorOption->value();
   if ((useVanadiumRun == 5 || useVanadiumRun == 7) &&
-      !m_uiForm.rfVanadiumRun->isValid())
+      !m_uiForm.rfAlignmentRun->isValid())
     uiv.addErrorMessage("Vanadium run is invalid.");
   }
 
   // Validate FWS specific
-  // Validate calibration file
   if (m_uiForm.rdFWS->isChecked()) {
-    if (m_uiForm.cbUseCalibration->isChecked() &&
-        m_uiForm.dsCalibration->isWorkspaceSelectorVisible()) {
-      uiv.addErrorMessage("Please choose calibration File (not a workspace) "
-                          "for FWS type of reduction.");
-    }
     if (m_uiForm.cbObservable->currentText().toStdString().empty()) {
-        uiv.addErrorMessage("Observable is invalid");
+        uiv.addErrorMessage("Observable is invalid, check the sample logs "
+                            "for available options");
     }
   }
 
@@ -94,11 +85,9 @@ void ILLEnergyTransfer::run() {
 
   IAlgorithm_sptr reductionAlg = nullptr;
 
-  bool useCalibration = m_uiForm.cbUseCalibration->isChecked();
-
   if (m_uiForm.rdQENS->isChecked()) // QENS
   {
-    reductionAlg = AlgorithmManager::Instance().create("IndirectILLReduction");
+    reductionAlg = AlgorithmManager::Instance().create("IndirectILLReductionQENS");
     reductionAlg->initialize();
 
     // Set options
@@ -106,23 +95,9 @@ void ILLEnergyTransfer::run() {
     reductionAlg->setProperty("UnmirrorOption", uo);
     reductionAlg->setProperty("SumRuns", m_uiForm.ckSum->isChecked());
 
-    // Handle calibration
-    if (useCalibration) {
-      std::string calibrationName;
-      if (m_uiForm.dsCalibration->isWorkspaceSelectorVisible()) {
-        calibrationName =
-            m_uiForm.dsCalibration->getCurrentDataName().toStdString();
-      } else {
-        generateCalibrationWorkspace();
-        calibrationName = "calib";
-      }
-
-      reductionAlg->setProperty("CalibrationWorkspace", calibrationName);
-    }
-
     // Vanadium run
     if (uo == 5 || uo == 7) {
-      QString vanFilename = m_uiForm.rfVanadiumRun->getUserInput().toString();
+      QString vanFilename = m_uiForm.rfAlignmentRun->getUserInput().toString();
       reductionAlg->setProperty("VanadiumRun", vanFilename.toStdString());
     }
 
@@ -135,40 +110,28 @@ void ILLEnergyTransfer::run() {
         AlgorithmManager::Instance().create("IndirectILLFixedWindowScans");
     reductionAlg->initialize();
 
-    // Handle calibration
-    if (useCalibration) {
-      if (m_uiForm.dsCalibration->isFileSelectorVisible()) {
-        QString calibrationWsName =
-            m_uiForm.dsCalibration->getCurrentDataName();
-        reductionAlg->setProperty("CalibrationRun",
-                                  calibrationWsName.toStdString());
-      }
-    }
-
     reductionAlg->setProperty(
         "Observable", m_uiForm.cbObservable->currentText().toStdString());
 
     reductionAlg->setProperty("SortXAxis", m_uiForm.cbSortX->isChecked());
   }
 
-  // options common for QENS and FWS
-  reductionAlg->setProperty("Analyser", instDetails["analyser"].toStdString());
-  reductionAlg->setProperty("Reflection",
-                            instDetails["reflection"].toStdString());
-
-  reductionAlg->setProperty("DebugMode", m_uiForm.ckDebugMode->isChecked());
-
   // Handle input files
   QString runFilename = m_uiForm.rfInput->getUserInput().toString();
   reductionAlg->setProperty("Run", runFilename.toStdString());
 
-  // Output workspace name
-  QString outws = m_uiForm.leOutWS->text();
-  reductionAlg->setProperty("OutputWorkspace", outws.toStdString());
-
   // Handle background file
   QString backgroundFilename = m_uiForm.rfBackgroundRun->getUserInput().toString();
   reductionAlg->setProperty("BackgroundRun", backgroundFilename.toStdString());
+
+  // Handle calibration file
+  QString calibrationFilename = m_uiForm.rfCalibrationRun->getUserInput().toString();
+  reductionAlg->setProperty("CalibrationRun", calibrationFilename.toStdString());
+
+  // options common for QENS and FWS
+  reductionAlg->setProperty("Analyser", instDetails["analyser"].toStdString());
+  reductionAlg->setProperty("Reflection",
+                            instDetails["reflection"].toStdString());
 
   // Handle mapping file
   bool useMapFile = m_uiForm.rdGroupChoose->isChecked();
@@ -176,6 +139,10 @@ void ILLEnergyTransfer::run() {
     QString mapFilename = m_uiForm.rfMapFile->getFirstFilename();
     reductionAlg->setProperty("MapFile", mapFilename.toStdString());
   }
+
+  // Output workspace name
+  QString outws = m_uiForm.leOutWS->text();
+  reductionAlg->setProperty("OutputWorkspace", outws.toStdString());
 
   m_batchAlgoRunner->addAlgorithm(reductionAlg);
   m_batchAlgoRunner->executeBatchAsync();
@@ -223,17 +190,6 @@ void ILLEnergyTransfer::save() {
   pyInput += "\",\"";
   pyInput += m_uiForm.leOutWS->text();
   pyInput += ".nxs\")\n";
-  m_pythonRunner.runPythonCode(pyInput);
-}
-
-/**
- * Runs ILLIN16BCalibration
- */
-void ILLEnergyTransfer::generateCalibrationWorkspace() {
-  QString pyInput;
-  pyInput += "ILLIN16BCalibration(\"";
-  pyInput += m_uiForm.dsCalibration->getCurrentDataName();
-  pyInput += "\")\n";
   m_pythonRunner.runPythonCode(pyInput);
 }
 
