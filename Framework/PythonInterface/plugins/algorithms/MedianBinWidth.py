@@ -61,11 +61,9 @@ class MedianBinWidth(PythonAlgorithm):
         roundingMode = self.getProperty(
             roundinghelper.PROP_NAME_ROUNDING_MODE).value
         n = inputWs.getNumberHistograms()
-        medians = numpy.empty(n)
-        for wsIndex in range(n):
-            xs = inputWs.readX(wsIndex)
-            dxs = numpy.diff(xs)
-            medians[wsIndex] = numpy.median(dxs)
+        xs = inputWs.extractX()
+        dxs = numpy.diff(xs)
+        medians = numpy.median(dxs, axis=1)
         binWidth = numpy.mean(medians)
         binWidth = roundinghelper.round(binWidth, roundingMode)
         self.setProperty(self._PROP_BIN_WIDTH, numpy.abs(binWidth))
