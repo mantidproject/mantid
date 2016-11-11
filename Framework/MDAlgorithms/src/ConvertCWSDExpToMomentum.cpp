@@ -279,7 +279,7 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
     try {
       float time_f = m_expDataTableWS->cell<float>(ir, m_iTime);
       time = static_cast<double>(time_f);
-    } catch (std::runtime_error) {
+    } catch (const std::runtime_error &) {
       time = m_expDataTableWS->cell<double>(ir, m_iTime);
     }
 

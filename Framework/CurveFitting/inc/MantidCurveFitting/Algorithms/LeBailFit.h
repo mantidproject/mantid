@@ -12,9 +12,15 @@
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/IFunction.h"
+
 #include <gsl/gsl_sf_erf.h>
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramX;
+class HistogramY;
+}
+
 namespace CurveFitting {
 namespace Algorithms {
 
@@ -102,19 +108,6 @@ private:
   /// Calculate LeBail pattern from from input peak parameters
   void execPatternCalculation();
 
-  /// LeBailFit
-  void execLeBailFit();
-
-  /// Do 1 iteration in Le Bail fit
-  bool do1StepLeBailFit(std::map<std::string, Parameter> &parammap);
-
-  /// Set up fit/tie/parameter values to all peaks functions (calling GSL
-  /// library)
-  void setLeBailFitParameters();
-
-  /// Do 1 fit on LeBailFunction
-  bool fitLeBailFunction(std::map<std::string, Parameter> &parammap);
-
   /// Calcualte background by fitting peak heights
   void execRefineBackground();
 
@@ -126,50 +119,14 @@ private:
   API::MatrixWorkspace_sptr cropWorkspace(API::MatrixWorkspace_sptr inpws,
                                           size_t wsindex);
 
-  //-------------- Operation with Bragg Peaks -------------------------------
-  /// Create a list of peaks
-  bool generatePeaksFromInput();
-
   /// Process and calculate input background
   void processInputBackground();
-
-  /// Examine whether the insturment parameter set to a peak can cause a valid
-  /// set of peak profile of that peak
-  bool examinInstrumentParameterValid(
-      Functions::ThermalNeutronBk2BkExpConvPVoigt_sptr peak, double &d_h,
-      double &tof_h, std::string &errmsg);
-
-  /// Set parameters to each peak
-  // void setPeakParameters(ThermalNeutronBk2BkExpConvPVoigt_sptr peak,
-  // map<string, Parameter> parammap,
-  // double peakheight, bool setpeakheight);
-
-  /// From table/map to set parameters to all peaks.
-  // void setPeaksParameters(vector<pair<double,
-  // ThermalNeutronBk2BkExpConvPVoigt_sptr> > peaks,
-  // map<std::string, Parameter> parammap,
-  // double peakheight, bool setpeakheight);
-
-  /// Check whether a parameter is a profile parameter
-  bool hasProfileParameter(std::string paramname);
 
   //--------------  Le Bail Formular: Calculate Peak Intensities ------------
   /// Calcualte peak heights from model to data
   bool calculatePeaksIntensities(API::MatrixWorkspace_sptr dataws,
                                  size_t workspaceindex, bool zerobackground,
                                  std::vector<double> &allpeaksvalues);
-
-  /// Group peaks together
-  void groupPeaks(std::vector<std::vector<
-      std::pair<double, Functions::ThermalNeutronBk2BkExpConvPVoigt_sptr>>> &
-                      peakgroupvec);
-
-  /// Calcualate the peak heights of a group of overlapped peaks
-  bool calculateGroupPeakIntensities(
-      std::vector<std::pair<
-          double, Functions::ThermalNeutronBk2BkExpConvPVoigt_sptr>> peakgroup,
-      API::MatrixWorkspace_sptr dataws, size_t wsindex, bool zerobackground,
-      std::vector<double> &allpeaksvalues);
 
   //--------------  Import and Export ---------------------------------------
   /// Import peak parameters
@@ -194,21 +151,6 @@ private:
   /// Create output data workspace
   void createOutputDataWorkspace();
 
-  /// Fake calculated pattern
-  // Disabled void writeFakedDataToOutputWS(size_t workspaceindex, int
-  // functionmode);
-
-  /// Write out (domain, values) to output workspace
-  void writeToOutputWorkspace(size_t wsindex,
-                              API::FunctionDomain1DVector domain,
-                              API::FunctionValues values);
-  // void writeToOutputWorkspace(API::FunctionDomain1DVector domain,
-  // API::FunctionValues values);
-
-  /// Write input data and difference to output workspace
-  void writeInputDataNDiff(size_t workspaceindex,
-                           API::FunctionDomain1DVector domain);
-
   //--------------  Random Walk Suite ----------------------------------------
   /// Main for random walk process
   void execRandomWalkMinimizer(size_t maxcycles,
@@ -216,8 +158,8 @@ private:
 
   /// Work on Markov chain to 'solve' LeBail function
   void doMarkovChain(const std::map<std::string, Parameter> &parammap,
-                     const std::vector<double> &vecX,
-                     const std::vector<double> &vecPurePeak,
+                     const Mantid::HistogramData::HistogramX &vecX,
+                     const Mantid::HistogramData::HistogramY &vecPurePeak,
                      const std::vector<double> &vecBkgd, size_t maxcycles,
                      const Kernel::Rfactor &startR, int randomseed);
 
@@ -232,15 +174,11 @@ private:
                                 std::string parname);
 
   /// Calculate diffraction pattern in Le Bail algorithm for MC Random walk
-  bool calculateDiffractionPattern(const MantidVec &vecX, const MantidVec &vecY,
-                                   bool inputraw, bool outputwithbkgd,
-                                   const MantidVec &vecBkgd, MantidVec &values,
-                                   Kernel::Rfactor &rfactor);
-
-  /// Calculate powder diffraction statistic Rwp
-  // void calculatePowderPatternStatistic(const MantidVec &values, const
-  // vector<double> &background,
-  //                                   double &rwp, double &rp);
+  bool calculateDiffractionPattern(
+      const Mantid::HistogramData::HistogramX &vecX,
+      const Mantid::HistogramData::HistogramY &vecY, bool inputraw,
+      bool outputwithbkgd, const Mantid::HistogramData::HistogramY &vecBkgd,
+      std::vector<double> &values, Kernel::Rfactor &rfactor);
 
   /// Determine whether the proposed value should be accepted or denied
   bool acceptOrDeny(Kernel::Rfactor currR, Kernel::Rfactor newR);
@@ -264,26 +202,6 @@ private:
   void applyParameterValues(std::map<std::string, Parameter> &srcparammap,
                             std::map<std::string, Parameter> &tgtparammap);
 
-  //--------------  Background function Suite
-  //----------------------------------------
-  /// Re-fit background according to the new values
-  void fitBackground(size_t wsindex, API::FunctionDomain1DVector domain,
-                     API::FunctionValues values,
-                     std::vector<double> &background);
-
-  /// Smooth background by exponential smoothing algorithm
-  void smoothBackgroundExponential(size_t wsindex,
-                                   API::FunctionDomain1DVector domain,
-                                   API::FunctionValues peakdata,
-                                   std::vector<double> &background);
-
-  /// Smooth background by fitting the background to specified background
-  /// function
-  void smoothBackgroundAnalytical(size_t wsindex,
-                                  API::FunctionDomain1DVector domain,
-                                  API::FunctionValues peakdata,
-                                  std::vector<double> &background);
-
   /// Store/buffer current background parameters
   void storeBackgroundParameters(std::vector<double> &bkgdparamvec);
 
@@ -294,20 +212,9 @@ private:
   /// Propose new background parameters
   void proposeNewBackgroundValues();
 
-  /// Minimize a give function
-  bool minimizeFunction(API::MatrixWorkspace_sptr dataws, size_t wsindex,
-                        double tofmin, double tofmax, std::string minimizer,
-                        double dampfactor, int numiteration,
-                        std::string &status, double &chi2,
-                        bool outputcovarmatrix);
-
   //--------------------------------------------------------------------------------------------
 
-  /// Map to contain function variables
-  // map<string, Parameter> m_functionParameters;
-
-  /// Le Bail Function (Composite) (old: API::CompositeFunction_sptr
-  /// m_lebailFunction)
+  /// Le Bail Function (Composite)
   LeBailFunction_sptr m_lebailFunction;
 
   /// Instance data
@@ -320,26 +227,8 @@ private:
 
   double m_startX, m_endX;
 
-  /// Peaks about input and etc.
-  //  These two are used for sorting peaks.
-  //  std::vector<int> mPeakHKL2; // Peak's h^2+k^2+l^2: seaving as key for
-  //  mPeakHeights adn mPeaks
-
-  // std::vector<std::vector<int> > mPeakHKLs;
-
   /// Input Bragg peak information for future processing;
   std::vector<std::pair<std::vector<int>, double>> m_inputPeakInfoVec;
-
-  /// Vector of pairs of d-spacing and peak reference for all Bragg peaks
-  // std::vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> >
-  // m_dspPeaks;
-
-  /* Phase out (HKL)^2 may not be in order of peak position if lattice is not
-  cubic
-  std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPVoigt_sptr> m_peaks;
-  This can be assimilated to m_dspPeaks()
-  std::map<int, double> mPeakHeights;
-  -------------------------------*/
 
   /// Background function
   Functions::BackgroundFunction_sptr m_backgroundFunction;
@@ -349,15 +238,6 @@ private:
       m_funcParameters; // char = f: fit... = t: tie to value
   /// Input function parameters that are stored for reference
   std::map<std::string, double> m_origFuncParameters;
-  /// Peak parameters list
-  // std::vector<std::string> m_peakParameterNames; // Peak parameters' names of
-  // the peak
-
-  /// Parameter error: this should be a field in m_funcParameters
-  // std::map<std::string, double> mFuncParameterErrors;
-
-  /// Calculate some statistics for fitting/calculating result
-  // void calChiSquare();
 
   /// Convert a map of Parameter to a map of double
   std::map<std::string, double>
@@ -367,9 +247,6 @@ private:
 
   std::string m_peakType;
 
-  /// Vector for miller indexes
-  // std::vector<std::vector<int> > m_vecHKL;
-
   /// Background type
   std::string m_backgroundType;
 
@@ -377,17 +254,6 @@ private:
   std::vector<double> m_backgroundParameters;
   std::vector<std::string> m_backgroundParameterNames;
   unsigned int m_bkgdorder;
-
-  // size_t mWSIndexToWrite;
-
-  /// Map to store peak group information: key (int) = (hkl)^2; value = group ID
-  std::map<int, size_t> mPeakGroupMap;
-
-  /// Map to store fitting Chi^2: key = group index; value = chi^2
-  std::map<size_t, double> mPeakGroupFitChi2Map;
-
-  /// Map to store fitting Status: key = group index; value = fit status
-  std::map<size_t, std::string> mPeakGroupFitStatusMap;
 
   /// Peak Radius
   int mPeakRadius;
@@ -452,26 +318,10 @@ private:
   double m_peakCentreTol;
 };
 
-/// Auxiliary.  Split composite function name to function index and parameter
-/// name
-void parseCompFunctionParameterName(std::string fullparname,
-                                    std::string &parname, size_t &funcindex);
-
-/// Write domain and value to a column file
-void exportDomainValueToFile(API::FunctionDomain1DVector domain,
-                             API::FunctionValues values, std::string filename);
-
 /// Write a set of (XY) data to a column file
 void writeRfactorsToFile(std::vector<double> vecX,
                          std::vector<Kernel::Rfactor> vecR,
                          std::string filename);
-
-/// Convert a Table to space to some vectors of maps
-void convertTableWorkspaceToMaps(
-    DataObjects::TableWorkspace_sptr tablews,
-    std::vector<std::map<std::string, int>> intmaps,
-    std::vector<std::map<std::string, std::string>> strmaps,
-    std::vector<std::map<std::string, double>> dblmaps);
 
 } // namespace Algorithms
 } // namespace CurveFitting

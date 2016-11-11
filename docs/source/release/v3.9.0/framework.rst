@@ -11,6 +11,7 @@ Algorithms
 New
 ###
 
+- :ref:`ConvertToConstantL2 <algm-ConvertToConstantL2>` is the new name for CorrectFlightPaths.
 
 Improved
 ########
@@ -20,6 +21,8 @@ Improved
 
 Deprecated
 ##########
+
+- :ref:`CorrectFlightPaths <algm-CorrectFlightPaths>` has been renamed to ConvertToConstantL2.
 
 MD Algorithms (VATES CLI)
 #########################
@@ -48,6 +51,7 @@ Bug Fixes
 
 - Bin masking information was wrongly saved when saving workspaces into nexus files, which is now fixed.
 - :ref:`LoadEventNexus <algm-LoadEventNexus>` should no longer leak memory when the execution is cancelled.
+- :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` will now load the stored workspace names from a processed Nexus file in the case of multiperiod data.
 - If a run is aborted and restarted, the ``running`` log in the workspace will correctly reflect this. (``running`` will be false at all times before the abort.)
 
 Full list of

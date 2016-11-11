@@ -210,7 +210,7 @@ std::vector<Workspace_sptr> PoldiIndexKnownCompounds::getWorkspaces(
       } else {
         workspaces.insert(workspaces.end(), currentWorkspace);
       }
-    } catch (Kernel::Exception::NotFoundError) {
+    } catch (const Kernel::Exception::NotFoundError &) {
       Workspace_sptr invalid;
       workspaces.insert(workspaces.end(), invalid);
     }

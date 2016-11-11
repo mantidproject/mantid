@@ -8,6 +8,27 @@
 
 using Mantid::CurveFitting::Algorithms::NormaliseByPeakArea;
 
+namespace {
+
+Mantid::API::MatrixWorkspace_sptr
+createTwoSpectrumWorkspace(double x0 = 50, double x1 = 300, double dx = 0.5) {
+  auto twoSpectrum =
+      ComptonProfileTestHelpers::createTestWorkspace(2, x0, x1, dx, true, true);
+  return twoSpectrum;
+}
+
+Mantid::API::IAlgorithm_sptr createAlgorithm() {
+  Mantid::API::IAlgorithm_sptr alg = boost::make_shared<NormaliseByPeakArea>();
+  alg->initialize();
+  alg->setChild(true);
+  alg->setPropertyValue("OutputWorkspace", "__UNUSED__");
+  alg->setPropertyValue("YSpaceDataWorkspace", "__UNUSED__");
+  alg->setPropertyValue("FittedWorkspace", "__UNUSED__");
+  alg->setPropertyValue("SymmetrisedWorkspace", "__UNUSED__");
+  return alg;
+}
+}
+
 class NormaliseByPeakAreaTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -61,9 +82,9 @@ public:
 
     // Test a few values
     // ====== TOF data ======
-    const auto &outX = outputWS->readX(0);
-    const auto &outY = outputWS->readY(0);
-    const auto &outE = outputWS->readE(0);
+    const auto &outX = outputWS->x(0);
+    const auto &outY = outputWS->y(0);
+    const auto &outE = outputWS->e(0);
     const size_t npts = outputWS->blocksize();
 
     // X
@@ -80,9 +101,9 @@ public:
     TS_ASSERT_DELTA(0.02000724, outE.back(), 1e-08);
 
     // ====== Y-space =====
-    const auto &ysX = yspaceWS->readX(0);
-    const auto &ysY = yspaceWS->readY(0);
-    const auto &ysE = yspaceWS->readE(0);
+    const auto &ysX = yspaceWS->x(0);
+    const auto &ysY = yspaceWS->y(0);
+    const auto &ysE = yspaceWS->e(0);
     // X
     TS_ASSERT_DELTA(-18.71348856, ysX.front(), 1e-08);
     TS_ASSERT_DELTA(-1.670937938, ysX[npts / 2], 1e-08);
@@ -97,9 +118,9 @@ public:
     TS_ASSERT_DELTA(138.38603736, ysE.back(), 1e-08);
 
     // ====== Fitted ======
-    const auto &fitX = fittedWS->readX(0);
-    const auto &fitY = fittedWS->readY(0);
-    const auto &fitE = fittedWS->readE(0);
+    const auto &fitX = fittedWS->x(0);
+    const auto &fitY = fittedWS->y(0);
+    const auto &fitE = fittedWS->e(0);
 
     // X
     TS_ASSERT_DELTA(-18.71348856, fitX.front(), 1e-08);
@@ -115,9 +136,9 @@ public:
     TS_ASSERT_DELTA(138.38603736, fitE.back(), 1e-08);
 
     // ====== Symmetrised ======
-    const auto &symX = symmetrisedWS->readX(0);
-    const auto &symY = symmetrisedWS->readY(0);
-    const auto &symE = symmetrisedWS->readE(0);
+    const auto &symX = symmetrisedWS->x(0);
+    const auto &symY = symmetrisedWS->y(0);
+    const auto &symE = symmetrisedWS->e(0);
 
     // X
     TS_ASSERT_DELTA(-18.71348856, symX.front(), 1e-08);
@@ -169,9 +190,9 @@ public:
 
     // Test a few values
     // ====== TOF data ======
-    const auto &outX = outputWS->readX(0);
-    const auto &outY = outputWS->readY(0);
-    const auto &outE = outputWS->readE(0);
+    const auto &outX = outputWS->x(0);
+    const auto &outY = outputWS->y(0);
+    const auto &outE = outputWS->e(0);
     size_t npts = outputWS->blocksize();
 
     // X
@@ -189,9 +210,9 @@ public:
     TS_ASSERT_DELTA(0.00302395, outE.back(), 1e-08);
 
     // ====== Y-space =====
-    const auto &ysX = yspaceWS->readX(0);
-    const auto &ysY = yspaceWS->readY(0);
-    const auto &ysE = yspaceWS->readE(0);
+    const auto &ysX = yspaceWS->x(0);
+    const auto &ysY = yspaceWS->y(0);
+    const auto &ysE = yspaceWS->e(0);
     npts = yspaceWS->blocksize();
 
     // X
@@ -208,9 +229,9 @@ public:
     TS_ASSERT_DELTA(137.96461559, ysE.back(), 1e-08);
 
     // ====== Fitted ======
-    const auto &fitX = fittedWS->readX(0);
-    const auto &fitY = fittedWS->readY(0);
-    const auto &fitE = fittedWS->readE(0);
+    const auto &fitX = fittedWS->x(0);
+    const auto &fitY = fittedWS->y(0);
+    const auto &fitE = fittedWS->e(0);
 
     // X
     TS_ASSERT_DELTA(-18.46348856, fitX.front(), 1e-08);
@@ -230,9 +251,9 @@ public:
     TS_ASSERT_DELTA(137.96461559, fitE.back(), 1e-08);
 
     // ====== Symmetrised ======
-    const auto &symX = symmetrisedWS->readX(0);
-    const auto &symY = symmetrisedWS->readY(0);
-    const auto &symE = symmetrisedWS->readE(0);
+    const auto &symX = symmetrisedWS->x(0);
+    const auto &symY = symmetrisedWS->y(0);
+    const auto &symE = symmetrisedWS->e(0);
 
     // X
     TS_ASSERT_DELTA(-18.46348856, symX.front(), 1e-08);
@@ -251,26 +272,45 @@ public:
     TS_ASSERT_DELTA(71.30383310, symE[npts / 2], 1e-08);
     TS_ASSERT_DELTA(48.83869866, symE.back(), 1e-08);
   }
+};
+
+class NormaliseByPeakAreaTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static NormaliseByPeakAreaTestPerformance *createSuite() {
+    return new NormaliseByPeakAreaTestPerformance();
+  }
+  static void destroySuite(NormaliseByPeakAreaTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override { testWS = createTwoSpectrumWorkspace(); }
+
+  void test_sum_false() {
+    using namespace Mantid::API;
+
+    auto alg = createAlgorithm();
+    auto testWS = createTwoSpectrumWorkspace(50, 2000, 0.1);
+    alg->setProperty("InputWorkspace", testWS);
+    alg->setProperty("Mass", 1.0097);
+    alg->setProperty("Sum", false);
+    alg->execute();
+  }
+
+  void test_sum_true() {
+    using namespace Mantid::API;
+
+    auto alg = createAlgorithm();
+    auto testWS = createTwoSpectrumWorkspace(50, 5000, 0.0005);
+    alg->setProperty("InputWorkspace", testWS);
+    alg->setProperty("Mass", 1.0097);
+    alg->setProperty("Sum", true);
+    alg->execute();
+  }
 
 private:
-  Mantid::API::IAlgorithm_sptr createAlgorithm() {
-    Mantid::API::IAlgorithm_sptr alg =
-        boost::make_shared<NormaliseByPeakArea>();
-    alg->initialize();
-    alg->setChild(true);
-    alg->setPropertyValue("OutputWorkspace", "__UNUSED__");
-    alg->setPropertyValue("YSpaceDataWorkspace", "__UNUSED__");
-    alg->setPropertyValue("FittedWorkspace", "__UNUSED__");
-    alg->setPropertyValue("SymmetrisedWorkspace", "__UNUSED__");
-    return alg;
-  }
-
-  Mantid::API::MatrixWorkspace_sptr createTwoSpectrumWorkspace() {
-    double x0(50.0), x1(300.0), dx(0.5);
-    auto twoSpectrum = ComptonProfileTestHelpers::createTestWorkspace(
-        2, x0, x1, dx, true, true);
-    return twoSpectrum;
-  }
+  Mantid::API::MatrixWorkspace_sptr testWS;
 };
 
 #endif /* MANTID_CURVEFITTING_NORMALISEBYPEAKAREATEST_H_ */
