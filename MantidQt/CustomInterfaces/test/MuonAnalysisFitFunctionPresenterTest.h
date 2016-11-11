@@ -10,11 +10,11 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionPresenter.h"
 #include "MantidQtMantidWidgets/IFunctionBrowser.h"
-#include "MantidQtMantidWidgets/IMuonFitFunctionControl.h"
+#include "MantidQtMantidWidgets/IMuonFitFunctionModel.h"
 
 using MantidQt::CustomInterfaces::MuonAnalysisFitFunctionPresenter;
 using MantidQt::MantidWidgets::IFunctionBrowser;
-using MantidQt::MantidWidgets::IMuonFitFunctionControl;
+using MantidQt::MantidWidgets::IMuonFitFunctionModel;
 using namespace testing;
 
 // Mock function browser widget
@@ -52,7 +52,7 @@ private:
 };
 
 // Mock muon fit property browser
-class MockFitFunctionControl : public IMuonFitFunctionControl {
+class MockFitFunctionControl : public IMuonFitFunctionModel {
 public:
   GCC_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD1(setFunction, void(const Mantid::API::IFunction_sptr));

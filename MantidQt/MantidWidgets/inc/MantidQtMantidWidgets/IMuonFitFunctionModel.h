@@ -1,5 +1,5 @@
-#ifndef MANTID_MANTIDWIDGETS_IMUONFITFUNCTIONCONTROL_H_
-#define MANTID_MANTIDWIDGETS_IMUONFITFUNCTIONCONTROL_H_
+#ifndef MANTID_MANTIDWIDGETS_IMUONFITFUNCTIONMODEL_H_
+#define MANTID_MANTIDWIDGETS_IMUONFITFUNCTIONMODEL_H_
 
 #include "WidgetDllOption.h"
 #include "MantidAPI/IFunction.h"
@@ -8,7 +8,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-/** IMuonFitFunctionControl: set function to fit for a muon fit property browser
+/** IMuonFitFunctionModel: set function to fit for a muon fit property browser
 
   Abstract base class to be implemented
 
@@ -33,9 +33,9 @@ namespace MantidWidgets {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IMuonFitFunctionControl {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IMuonFitFunctionModel {
 public:
-  virtual ~IMuonFitFunctionControl() {}
+  virtual ~IMuonFitFunctionModel() {}
   virtual void setFunction(const Mantid::API::IFunction_sptr func) = 0;
   virtual void runFit() = 0;
   virtual void runSequentialFit() = 0;
@@ -52,4 +52,4 @@ signals:
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif // MANTID_MANTIDWIDGETS_IMUONFITFUNCTIONCONTROL_H
+#endif // MANTID_MANTIDWIDGETS_IMUONFITFUNCTIONMODEL_H

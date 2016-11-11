@@ -260,7 +260,7 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/HintStrategy.h
 	inc/MantidQtMantidWidgets/IFunctionBrowser.h
 	inc/MantidQtMantidWidgets/IMuonFitDataSelector.h
-	inc/MantidQtMantidWidgets/IMuonFitFunctionControl.h
+	inc/MantidQtMantidWidgets/IMuonFitFunctionModel.h
 	inc/MantidQtMantidWidgets/IWorkspaceFitControl.h
 	inc/MantidQtMantidWidgets/InstrumentView/BinDialog.h
 	inc/MantidQtMantidWidgets/InstrumentView/CollapsiblePanel.h
