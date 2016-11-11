@@ -1822,7 +1822,7 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
   bool norunendset = false;
   try {
     runendtime = m_dataWS->run().endTime();
-  } catch (std::runtime_error err) {
+  } catch (const std::runtime_error &) {
     norunendset = true;
   }
 
