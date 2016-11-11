@@ -207,8 +207,8 @@ public:
     model.setupRunTool("Local");
     model.usingTool("Custom command");
 
-    std::shared_ptr<ToolConfigCustom> d(
-        new ToolConfigCustom("fail", "/scriptpath/ --some params"));
+    auto d = std::make_shared<ToolConfigCustom>("fail",
+                                                "/scriptpath/ --some params");
     model.setCurrentToolSettings(d);
     model.doSubmitReconstructionJob("Local");
   }
@@ -273,12 +273,9 @@ public:
     std::vector<std::string> expectedArgsVector{
         "--some params --some other params "};
     TS_ASSERT_EQUALS(actualRun, expectedRunnable);
-    TS_ASSERT_EQUALS(expectedArgsVector.size(), actualArgsVector.size());
 
-    for (size_t i = 0; i < expectedArgsVector.size(); ++i) {
-      // append the whitespace because it is added in the argument separation
-      TS_ASSERT_EQUALS(expectedArgsVector[i], actualArgsVector[i]);
-    }
+    // checks size and elements
+    TS_ASSERT(actualArgsVector == expectedArgsVector);
   }
 
   void test_makeLocalRunnableWithOptionsCustom() {
@@ -312,12 +309,8 @@ public:
     std::vector<std::string> expectedArgsVector{
         "/scriptPath/ --some params --some other params "};
     TS_ASSERT_EQUALS(actualRun, expectedRunnable);
-    TS_ASSERT_EQUALS(expectedArgsVector.size(), actualArgsVector.size());
-
-    for (size_t i = 0; i < expectedArgsVector.size(); ++i) {
-      // append the whitespace because it is added in the argument separation
-      TS_ASSERT_EQUALS(expectedArgsVector[i], actualArgsVector[i]);
-    }
+    // checks size and elements
+    TS_ASSERT(actualArgsVector == expectedArgsVector);
   }
 
   void test_makeRemoteRunnableWithOptions() {

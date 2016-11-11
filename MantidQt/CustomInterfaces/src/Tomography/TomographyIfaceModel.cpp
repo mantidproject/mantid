@@ -5,9 +5,9 @@
 #include "MantidQtAPI/AlgorithmRunner.h"
 
 #include <Poco/Path.h>
-#include <Poco/Process.h>
 #include <Poco/Pipe.h>
 #include <Poco/PipeStream.h>
+#include <Poco/Process.h>
 #include <Poco/StreamCopier.h>
 
 #include <QMutex>
@@ -52,7 +52,8 @@ const std::string TomographyIfaceModel::g_customCmdTool = "Custom command";
 TomographyIfaceModel::TomographyIfaceModel()
     : m_facility("ISIS"), m_experimentRef("RB000000"), m_loggedInUser(""),
       m_loggedInComp(""), m_computeResStatus(), m_reconTools(),
-      m_reconToolsStatus(), m_jobsStatus(), m_prePostProcSettings(), m_imageStackPreParams(), m_statusMutex(NULL) {
+      m_reconToolsStatus(), m_jobsStatus(), m_prePostProcSettings(),
+      m_imageStackPreParams(), m_statusMutex(NULL) {
 
   m_computeRes = {g_SCARFName, g_LocalResourceName};
 
@@ -243,7 +244,8 @@ bool TomographyIfaceModel::doPing(const std::string &compRes) {
     tid = alg->getPropertyValue("TransactionID");
     g_log.information() << "Pinged '" << compRes
                         << "'succesfully. Checked that a transaction could "
-                           "be created, with ID: " << tid << '\n';
+                           "be created, with ID: "
+                        << tid << '\n';
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Error. Failed to ping and start a transaction on "
                              "the remote resource." +
@@ -391,9 +393,8 @@ void TomographyIfaceModel::makeRunnableWithOptions(
  * arguments will be inserted
  * @return command options ready for the tomorec script
  */
-std::vector<std::string> TomographyIfaceModel::makeTomoRecScriptOptions(
-    const bool local) const {
-  std::vector<std::string> opts;
+void TomographyIfaceModel::makeTomoRecScriptOptions(
+    const bool local, std::vector<std::string> &opts) const {
   // options with all the info from filters and regions
   // 9 is the current number of arguments being added
   opts.reserve(9);
@@ -412,8 +413,6 @@ std::vector<std::string> TomographyIfaceModel::makeTomoRecScriptOptions(
 
   filtersCfgToCmdOpts(m_prePostProcSettings, m_imageStackPreParams, local,
                       opts);
-
-  return opts;
 }
 
 /** Processes the tool name so that it is appropriate for the command line when
