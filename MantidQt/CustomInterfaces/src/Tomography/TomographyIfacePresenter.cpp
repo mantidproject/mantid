@@ -1,3 +1,4 @@
+#include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
@@ -6,7 +7,6 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
-#include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -289,13 +289,13 @@ void TomographyIfacePresenter::setupConfigDialogSettings(
  */
 void TomographyIfacePresenter::setupConfigDialogSettingsForLocal(
     TomoToolConfigDialogBase &dialog) {
-  std::string run = m_model->getExeternalInterpreterPath() + " " +
-                    m_model->getCurrentLocalScriptsBasePath() +
-                    m_model->getTomoScriptLocationPath();
+  const std::string run = m_model->getExeternalInterpreterPath() + " " +
+                          m_model->getCurrentLocalScriptsBasePath() +
+                          m_model->getTomoScriptLocationPath();
 
-  TomoPathsConfig paths = m_view->currentPathsConfig();
+  const TomoPathsConfig paths = m_view->currentPathsConfig();
 
-  std::string pathOut = Poco::Path::expand(
+  const std::string pathOut = Poco::Path::expand(
       g_defOutPathLocal + "/" + m_model->getCurrentExperimentReference());
   static size_t reconIdx = 1;
   const std::string localOutNameAppendix =
@@ -317,12 +317,12 @@ void TomographyIfacePresenter::setupConfigDialogSettingsForLocal(
 void TomographyIfacePresenter::setupConfigDialogSettingsForRemote(
     TomoToolConfigDialogBase &dialog) {
   // set up all the information we need for the dialog
-  std::string run = m_model->getCurrentRemoteScriptsBasePath() +
-                    m_model->getTomoScriptFolderPath() +
-                    m_model->getTomoScriptLocationPath();
+  const std::string run = m_model->getCurrentRemoteScriptsBasePath() +
+                          m_model->getTomoScriptFolderPath() +
+                          m_model->getTomoScriptLocationPath();
 
-  TomoPathsConfig paths = m_view->currentPathsConfig();
-  std::string pathOut = Poco::Path::expand(
+  const TomoPathsConfig paths = m_view->currentPathsConfig();
+  const std::string pathOut = Poco::Path::expand(
       g_defOutPathLocal + "/" + m_model->getCurrentExperimentReference());
   static size_t reconIdx = 1;
   const std::string localOutNameAppendix =

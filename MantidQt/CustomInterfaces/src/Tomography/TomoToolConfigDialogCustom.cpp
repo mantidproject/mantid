@@ -12,18 +12,22 @@ const std::string TomoToolConfigDialogCustom::DEFAULT_TOOL_METHOD = "";
 
 std::string TomoToolConfigDialogCustom::m_backupCommandLine = "";
 
+/** Reads the current strings in the dialogue and creates
+* the tool settings from them. If the dialogue is not initialised yet
+* the strings will be empty, thus we put the default values
+*/
 void TomoToolConfigDialogCustom::setupToolSettingsFromPaths() {
 
   if (m_isInitialised) {
     // None of the other paths matter, because the user could've changed
     // them, so ignore them and load the current ones on the dialogue
-    QString run = m_customUi.lineEdit_runnable->text(); // current path
-    QString opts =
-        m_customUi.textEdit_cl_opts->toPlainText(); // current commands
+    const std::string run =
+        m_customUi.lineEdit_runnable->text().toStdString(); // current path
+    const std::string opts = m_customUi.textEdit_cl_opts->toPlainText()
+                                 .toStdString(); // current commands
 
     // update the settings with the newest information
-    m_toolSettings = std::make_shared<ToolConfigCustom>(run.toStdString(),
-                                                        opts.toStdString());
+    m_toolSettings = std::make_shared<ToolConfigCustom>(run, opts);
   } else {
     // create settings with the default values
     m_toolSettings = std::make_shared<ToolConfigCustom>(m_runPath, "--help");
@@ -45,11 +49,11 @@ void TomoToolConfigDialogCustom::setupDialogUi() {
   }
 
   // get default options from command line
-  QString opts = m_customUi.textEdit_cl_opts->toPlainText();
+  const std::string opts =
+      m_customUi.textEdit_cl_opts->toPlainText().toStdString();
 
   // create the default settings
-  m_toolSettings =
-      std::make_shared<ToolConfigCustom>(m_runPath, opts.toStdString());
+  m_toolSettings = std::make_shared<ToolConfigCustom>(m_runPath, opts);
 }
 
 void TomoToolConfigDialogCustom::initialiseDialog() { m_dialog = new QDialog; }

@@ -11,11 +11,9 @@ void TomoToolConfigDialogTomoPy::setupDialogUi() {
   m_tomoPyUi.setupUi(m_dialog);
   m_tomoPyUi.comboBox_method->clear();
 
-  const auto methods = ToolConfigTomoPy::methods();
-  const size_t methodsSize = methods.size();
-  for (size_t i = 0; i < methodsSize; i++) {
-    m_tomoPyUi.comboBox_method->addItem(
-        QString::fromStdString(methods[i].second));
+  const auto &methods = getToolMethods();
+  for (auto &method : methods) {
+    m_tomoPyUi.comboBox_method->addItem(QString::fromStdString(method.second));
   }
 }
 
@@ -30,7 +28,7 @@ void TomoToolConfigDialogTomoPy::setupToolSettingsFromPaths() {
 }
 void TomoToolConfigDialogTomoPy::setupMethodSelected() {
   // move to member/global variable and use more space OR keep here
-  const auto methods = ToolConfigTomoPy::methods();
+  const auto &methods = getToolMethods();
 
   const int mi = m_tomoPyUi.comboBox_method->currentIndex();
   // TODO maybe comboBox_method->currentText?
@@ -41,5 +39,9 @@ void TomoToolConfigDialogTomoPy::setupMethodSelected() {
 */
 int TomoToolConfigDialogTomoPy::executeQt() { return m_dialog->exec(); }
 
+std::vector<std::pair<std::string, std::string>>
+TomoToolConfigDialogTomoPy::getToolMethods() {
+  return ToolConfigTomoPy::methods();
+}
 } // Custominterfaces
 } // MantidQt
