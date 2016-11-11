@@ -8,6 +8,7 @@
 #include <QThread>
 #include <iostream>
 #include <memory>
+#include <mutex>
 #include <utility>
 
 // more things
@@ -91,8 +92,8 @@ private:
 // };
 class TomographyProcessHandler : public QThread {
 public:
-  TomographyProcessHandler()
-      : m_outPipe(), m_errPipe(), m_outstr(m_outPipe), m_errstr(m_errPipe) {}
+  TomographyProcessHandler(std::ostream &stream)
+      : m_stream(&stream), m_outPipe(), m_errPipe(), m_outstr(m_outPipe), m_errstr(m_errPipe) {}
 
   void setup(const std::string runnable, const std::vector<std::string> args) {
     // move the copies
@@ -100,7 +101,7 @@ public:
     m_args = std::move(args);
   }
 
-  Poco::Process::PID getPID() { return m_pid; }
+  Poco::Process::PID getPID() const { return m_pid; }
 
   std::string getOutputString() { return getStringFromStream(m_outstr); }
 
@@ -112,24 +113,37 @@ private:
     m_handle = Mantid::Kernel::make_unique<Poco::ProcessHandle>(
         Poco::Process::launch(m_runnable, m_args));
     m_pid = m_handle->id();
+    m_mutex.lock();
+    Poco::StreamCopier::copyStream(m_outstr, *m_stream);
+    // Poco::StreamCopier::copyToString(m_outstr, m_outString);
+    m_mutex.unlock();
     
   }
 
   std::string getStringFromStream(Poco::PipeInputStream &str) {
     // avoid deadlocking    
-    if (m_pid > 0) {
+    // if (m_pid > 0) {
+    //   return "Reconstruction process running...";
+    // }
+
+    if(!m_mutex.try_lock()){
       return "Reconstruction process running...";
     }
-    std::string outstring;
-    Poco::StreamCopier::copyToString(str, outstring);
-    if (!outstring.empty())
-      return outstring;
+    // std::string outstring;
+    // Poco::StreamCopier::copyToString(str, outstring, 256);
+    // if (!outstring.empty())
+    //   return outstring;
+    // remove the trylock
+    m_mutex.unlock();  
+    if (!m_outString.empty())
+      return m_outString;
     return "Reconstruction process encountered unknown error! Please check reconstruction "
            "logs.";
   }
 
-  // std::mutex m_mutex;
-  std::string m_output;
+  std::mutex m_mutex;
+  std::ostream * m_stream;
+  std::string m_outString;
   std::string m_runnable;
   std::vector<std::string> m_args;
   Poco::Process::PID m_pid;

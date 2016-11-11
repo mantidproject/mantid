@@ -510,7 +510,7 @@ void TomographyIfaceModel::doRunReconstructionJobLocal(
     const std::vector<std::string> &args) {
 
   m_process.reset();
-  m_process = Mantid::Kernel::make_unique<TomographyProcessHandler>();
+  m_process = Mantid::Kernel::make_unique<TomographyProcessHandler>(g_log.notice());
   try {
     m_process->setup(run, args);
     m_process->start();
@@ -530,7 +530,7 @@ void TomographyIfaceModel::doRunReconstructionJobLocal(
   info.cmdLine = run + " " + allOpts;
   m_jobsStatusLocal.emplace_back(info);
   // TODO log proper info
-  g_log.information(m_process.getOutputString());
+  g_log.information(m_process->getOutputString());
   
   doRefreshJobsInfo(g_LocalResourceName);
 }
