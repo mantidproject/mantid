@@ -65,8 +65,6 @@ private:
   void
   changeOutputDir(Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo);
   void setOutDir(std::string dir);
-  void readSettings();
-  void saveSettings();
   bool checkValidityTimeShiftsForAddedEventFiles();
 
 private slots:
