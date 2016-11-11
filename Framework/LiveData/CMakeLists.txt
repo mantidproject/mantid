@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/FileEventDataListener.cpp
 	src/ISIS/DAE/idc.cpp
 	src/ISIS/DAE/isisds_command.cpp
+	src/ISIS/FakeISISEventDAE.cpp
 	src/ISIS/FakeISISHistoDAE.cpp
 	src/ISIS/ISISHistoDataListener.cpp
 	src/ISIS/ISISLiveEventDataListener.cpp
@@ -26,6 +27,7 @@ set ( INC_FILES
 	inc/MantidLiveData/Exception.h
 	inc/MantidLiveData/FakeEventDataListener.h
 	inc/MantidLiveData/FileEventDataListener.h
+	inc/MantidLiveData/ISIS/FakeISISEventDAE.h
 	inc/MantidLiveData/ISIS/FakeISISHistoDAE.h
 	inc/MantidLiveData/ISIS/TCPEventStreamDefs.h
 	inc/MantidLiveData/ISIS/ISISHistoDataListener.h
