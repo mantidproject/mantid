@@ -72,7 +72,7 @@ public:
 
     const auto status = model.reconToolsStatus();
 
-    const std::vector<bool> expected = { true, true, false, false, true };
+    const std::vector<bool> expected = {true, true, false, false, true};
     TSM_ASSERT_EQUALS("Unexpected number of reconstruction tools (status)",
                       status.size(), 5);
     for (size_t idx = 0; idx < status.size(); ++idx) {
@@ -92,8 +92,8 @@ public:
     auto isSupported = model.facilitySupported();
     TSM_ASSERT("This facility should be supported", isSupported);
 
-    const std::vector<std::string> otherFacilities = { "SNS", "HFIR", "ILL",
-                                                       "ANSTO", "TEST_LIVE" };
+    const std::vector<std::string> otherFacilities = {"SNS", "HFIR", "ILL",
+                                                      "ANSTO", "TEST_LIVE"};
     for (const auto &facility : otherFacilities) {
       Mantid::Kernel::ConfigService::Instance().setFacility(facility);
       TSM_ASSERT("This facility should not be supported",
@@ -195,7 +195,7 @@ public:
 
     TSM_ASSERT_EQUALS("Should not be logged in", model.loggedIn(), "");
 
-    const std::vector<std::string> ids = { "none", "inexistent" };
+    const std::vector<std::string> ids = {"none", "inexistent"};
     TSM_ASSERT_THROWS("Exception not thrown as expected - login local",
                       model.doCancelJobs("Local", ids), std::invalid_argument);
   }
@@ -207,8 +207,8 @@ public:
     model.setupRunTool("Local");
     model.usingTool("Custom command");
 
-    std::shared_ptr<ToolConfigCustom> d(
-        new ToolConfigCustom("fail", "/scriptpath/ --some params"));
+    auto d = std::make_shared<ToolConfigCustom>("fail",
+                                                "/scriptpath/ --some params");
     model.setCurrentToolSettings(d);
     model.doSubmitReconstructionJob("Local");
   }
@@ -245,10 +245,8 @@ public:
   void test_makeRemoteRunnableWithOptionsCustom() {
     std::string inputRunnable = "/scriptPath/";
     // the custom one just processes a single member
-    std::vector<std::string> inputArgsVector {
-      "--some params --some other params"
-    }
-    ;
+    std::vector<std::string> inputArgsVector{
+        "--some params --some other params"};
 
     TestableTomographyIfaceModel model;
 
@@ -272,26 +270,19 @@ public:
     std::string expectedRunnable = "/scriptPath/";
     // the space at the end is necessary, because of how
     // constructSingleStringFromVector works
-    std::vector<std::string> expectedArgsVector {
-      "--some params --some other params "
-    }
-    ;
+    std::vector<std::string> expectedArgsVector{
+        "--some params --some other params "};
     TS_ASSERT_EQUALS(actualRun, expectedRunnable);
-    TS_ASSERT_EQUALS(expectedArgsVector.size(), actualArgsVector.size());
 
-    for (size_t i = 0; i < expectedArgsVector.size(); ++i) {
-      // append the whitespace because it is added in the argument separation
-      TS_ASSERT_EQUALS(expectedArgsVector[i], actualArgsVector[i]);
-    }
+    // checks size and elements
+    TS_ASSERT(actualArgsVector == expectedArgsVector);
   }
 
   void test_makeLocalRunnableWithOptionsCustom() {
     std::string inputRunnable = "python /scriptPath/";
     // the custom one just processes a single member
-    std::vector<std::string> inputArgsVector {
-      "--some params --some other params"
-    }
-    ;
+    std::vector<std::string> inputArgsVector{
+        "--some params --some other params"};
 
     TestableTomographyIfaceModel model;
 
@@ -315,17 +306,11 @@ public:
     std::string expectedRunnable = "python";
     // the space at the end is necessary, because of how
     // constructSingleStringFromVector works
-    std::vector<std::string> expectedArgsVector {
-      "/scriptPath/ --some params --some other params "
-    }
-    ;
+    std::vector<std::string> expectedArgsVector{
+        "/scriptPath/ --some params --some other params "};
     TS_ASSERT_EQUALS(actualRun, expectedRunnable);
-    TS_ASSERT_EQUALS(expectedArgsVector.size(), actualArgsVector.size());
-
-    for (size_t i = 0; i < expectedArgsVector.size(); ++i) {
-      // append the whitespace because it is added in the argument separation
-      TS_ASSERT_EQUALS(expectedArgsVector[i], actualArgsVector[i]);
-    }
+    // checks size and elements
+    TS_ASSERT(actualArgsVector == expectedArgsVector);
   }
 
   void test_makeRemoteRunnableWithOptions() {
@@ -336,9 +321,9 @@ public:
 
     const std::string pathOut = "/work/imat";
     static size_t reconIdx = 1;
-    const std::string localOutNameAppendix =
-        std::string("/processed/") + "reconstruction_" +
-        std::to_string(reconIdx);
+    const std::string localOutNameAppendix = std::string("/processed/") +
+                                             "reconstruction_" +
+                                             std::to_string(reconIdx);
 
     std::shared_ptr<TomoRecToolConfig> d = std::shared_ptr<TomoRecToolConfig>(
         new ToolConfigTomoPy(expectedRunnable, pathOut + localOutNameAppendix,
@@ -358,18 +343,16 @@ public:
     std::vector<std::string> actualArgsVector;
     model.makeRunnableWithOptions(resource, actualRunnable, actualArgsVector);
 
-    std::vector<std::string> expectedArgsVector {
-      "--tool=tomopy", "--algorithm=gridrec", "--num-iter=5",
-          "--input-path=" + pathConfig.pathSamples(),
-          "--input-path-flat=" + pathConfig.pathOpenBeam(),
-          "--input-path-dark=" + pathConfig.pathDarks(),
-          "--output=\"/work/imat/phase_commissioning/processed/"
-          "reconstruction_TomoPy_gridrec_2016October20_113701_413275000",
-          "--median-filter-size=3", "--cor=0.000000", "--rotation=0",
-          "--max-angle=360.000000", "--circular-mask=0.940000",
-          "--out-img-format=png"
-    }
-    ;
+    std::vector<std::string> expectedArgsVector{
+        "--tool=tomopy", "--algorithm=gridrec", "--num-iter=5",
+        "--input-path=" + pathConfig.pathSamples(),
+        "--input-path-flat=" + pathConfig.pathOpenBeam(),
+        "--input-path-dark=" + pathConfig.pathDarks(),
+        "--output=\"/work/imat/phase_commissioning/processed/"
+        "reconstruction_TomoPy_gridrec_2016October20_113701_413275000",
+        "--median-filter-size=3", "--cor=0.000000", "--rotation=0",
+        "--max-angle=360.000000", "--circular-mask=0.940000",
+        "--out-img-format=png"};
     doTestExpectedRunnableAndArguemnts(expectedRunnable, actualRunnable,
                                        expectedArgsVector, actualArgsVector);
   }
@@ -382,9 +365,9 @@ public:
     TomoPathsConfig pathConfig;
     const std::string pathOut = "~/imat/RB000XXX";
     static size_t reconIdx = 1;
-    const std::string localOutNameAppendix =
-        std::string("/processed/") + "reconstruction_" +
-        std::to_string(reconIdx);
+    const std::string localOutNameAppendix = std::string("/processed/") +
+                                             "reconstruction_" +
+                                             std::to_string(reconIdx);
 
     std::shared_ptr<TomoRecToolConfig> d = std::shared_ptr<TomoRecToolConfig>(
         new ToolConfigTomoPy(inputRunnable, pathOut + localOutNameAppendix,
@@ -406,20 +389,18 @@ public:
     model.makeRunnableWithOptions(resource, actualRunnable, actualArgsVector);
 
     std::string expectedRunnable = "python";
-    std::vector<std::string> expectedArgsVector {
-      "/work/imat/phase_commissioning/scripts/Imaging/IMAT/"
-      "tomo_reconstruct.py",
-          "--tool=tomopy", "--algorithm=gridrec", "--num-iter=5",
-          "--input-path=/work/imat/phase_commissioning/data",
-          "--input-path-flat=/work/imat/phase_commissioning/flat",
-          "--input-path-dark=/work/imat/phase_commissioning/dark",
-          "--output=/work/imat/phase_commissioning/processed/"
-          "reconstruction_TomoPy_gridrec_2016October20_113701_413275000",
-          "--median-filter-size=3", "--cor=0.000000", "--rotation=0",
-          "--max-angle=360.000000", "--circular-mask=0.940000",
-          "--out-img-format=png"
-    }
-    ;
+    std::vector<std::string> expectedArgsVector{
+        "/work/imat/phase_commissioning/scripts/Imaging/IMAT/"
+        "tomo_reconstruct.py",
+        "--tool=tomopy", "--algorithm=gridrec", "--num-iter=5",
+        "--input-path=/work/imat/phase_commissioning/data",
+        "--input-path-flat=/work/imat/phase_commissioning/flat",
+        "--input-path-dark=/work/imat/phase_commissioning/dark",
+        "--output=/work/imat/phase_commissioning/processed/"
+        "reconstruction_TomoPy_gridrec_2016October20_113701_413275000",
+        "--median-filter-size=3", "--cor=0.000000", "--rotation=0",
+        "--max-angle=360.000000", "--circular-mask=0.940000",
+        "--out-img-format=png"};
 
     doTestExpectedRunnableAndArguemnts(expectedRunnable, actualRunnable,
                                        expectedArgsVector, actualArgsVector);

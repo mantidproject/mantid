@@ -7,16 +7,18 @@
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconFiltersSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyProcessHandler.h"
 
 // Qt classes forward declarations
 class QMutex;
 
-namespace Poco { class Pipe; }
+namespace Poco {
+class Pipe;
+}
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -204,8 +206,8 @@ public:
   static const std::string g_tomoScriptFolderPath;
 
 protected: // protected to expose everything to testing
-  std::string constructSingleStringFromVector(
-      const std::vector<std::string> args) const;
+  std::string
+  constructSingleStringFromVector(const std::vector<std::string> args) const;
 
   void doRunReconstructionJobLocal(const std::string &run,
                                    const std::string &allOpts,
@@ -227,11 +229,12 @@ protected: // protected to expose everything to testing
   bool checkIfToolIsSetupProperly(const std::string &tool,
                                   const std::string &cmd) const;
 
-  void makeTomoRecScriptOptions(bool local,
+  void makeTomoRecScriptOptions(const bool local,
                                 std::vector<std::string> &opts) const;
 
   void filtersCfgToCmdOpts(const TomoReconFiltersSettings &filters,
-                           const ImageStackPreParams &corRegions, bool local,
+                           const ImageStackPreParams &corRegions,
+                           const bool local,
                            std::vector<std::string> &opts) const;
 
   void splitCmdLine(const std::string &cmd, std::string &run,
@@ -251,11 +254,11 @@ protected: // protected to expose everything to testing
   bool processIsRunning(int pid);
 
   std::string
-      buildOutReconstructionDirFromSystemRoot(const std::string &samplesDir,
-                                              bool local) const;
+  buildOutReconstructionDirFromSystemRoot(const std::string &samplesDir,
+                                          bool local) const;
 
-  std::string buildOutReconstructionDirFromSamplesDir(
-      const std::string &samplesDir) const;
+  std::string
+  buildOutReconstructionDirFromSamplesDir(const std::string &samplesDir) const;
 
   /// Prints the streams from the Poco::launch process into mantid
   void printProcessStreamsToMantidLog(const Poco::Pipe &outPipe,
@@ -293,9 +296,6 @@ private:
 
   // System settting including several paths and parameters (local and remote)
   TomoSystemSettings m_systemSettings;
-
-  // DEPRECATED Settings for the third party (tomographic reconstruction) tools
-  TomoReconToolsUserSettings m_toolsSettings;
 
   //--------------------------------
   // Current tool variables
