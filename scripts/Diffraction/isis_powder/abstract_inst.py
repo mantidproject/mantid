@@ -97,7 +97,9 @@ class AbstractInst(object):
     # These are to be called from either concrete instruments or common not by users
     # Common steps to all instruments
 
-    def _generate_out_file_paths(self, run_number, output_directory):
+    def _generate_out_file_paths(self, run_number, output_directory=None):
+        if not output_directory:
+            output_directory = self._output_dir
         file_name = self._generate_inst_file_name(run_number=run_number)
         nxs_file = os.path.join(output_directory, (str(file_name) + ".nxs"))
         gss_file = os.path.join(output_directory + (str(file_name) + ".gss"))

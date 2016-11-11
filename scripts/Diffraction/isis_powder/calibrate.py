@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
+import os
 import mantid.simpleapi as mantid
 
 import isis_powder.common as common
@@ -48,7 +49,7 @@ def create_van(instrument, van, empty, output_van_file_name, num_of_splines, abs
     if instrument._PEARL_filename_is_full_path():
         out_van_file_path = output_van_file_name
     else:
-        out_van_file_path = instrument.calibration_dir + output_van_file_name
+        out_van_file_path = os.path.join(instrument.calibration_dir, output_van_file_name)
 
     append = False
     for ws in splined_ws_list:

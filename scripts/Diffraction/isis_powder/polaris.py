@@ -219,13 +219,20 @@ class Polaris(AbstractInst):
         return calculated_binning_params
 
     def _process_focus_output(self, processed_spectra, run_number, attenuate=False):
-        return _create_d_spacing_tof_output(processed_spectra)
-        # TODO saving out to GSS/XYE/..etc.
+        d_spacing_group, tof_group = _create_d_spacing_tof_output(processed_spectra)
+        output_paths = self._generate_out_file_paths(run_number=run_number)
+
+        mantid.SaveGSS(InputWorkspace=tof_group, Filename=output_paths["gss_filename"], SplitFiles=False, Append=False)
+        mantid.SaveNexusProcessed(InputWorkspace=tof_group, Filename=output_paths["nxs_filename"], Append=False)
+        self._save_xye(ws_group=d_spacing_group, ws_units="d_spacing", run_number=run_number)
+        self._save_xye(ws_group=tof_group, ws_units="TOF", run_number=run_number)
+
+        return d_spacing_group, tof_group
 
     def _read_masking_file(self):
         all_banks_masking_list = []
         bank_masking_list = []
-        mask_path = self.raw_data_dir + self._masking_file_name
+        mask_path = os.path.join(self.raw_data_dir, self._masking_file_name)
 
         ignore_line_prefixes = (' ', '\n', '\t', '#')  # Matches whitespace or # symbol
 
@@ -254,6 +261,15 @@ class Polaris(AbstractInst):
             output_list.append(splined_ws)
 
         return output_list
+
+    def _save_xye(self, ws_group, ws_units, run_number):
+        bank_index = 1
+        for ws in ws_group:
+            outfile_name = str(run_number) + "-b_" + str(bank_index) + "-" + ws_units + ".dat"
+            bank_index += 1
+            full_file_path = os.path.join(self._output_dir, outfile_name)
+
+            mantid.SaveFocusedXYE(InputWorkspace=ws, Filename=full_file_path, SplitFiles=False, IncludeHeader=False)
 
 
 # Class private implementation
@@ -334,3 +350,4 @@ def _create_d_spacing_tof_output(processed_spectra):
     tof_group = mantid.GroupWorkspaces(InputWorkspaces=tof_output, OutputWorkspace=tof_group_name)
 
     return d_spacing_group, tof_group
+
