@@ -63,7 +63,7 @@ public:
   MOCK_CONST_METHOD0(getFunction, Mantid::API::IFunction_sptr());
   MOCK_CONST_METHOD0(getWorkspaceNamesToFit, std::vector<std::string>());
   MOCK_METHOD1(userChangedDatasetIndex, void(int));
-  MOCK_METHOD1(setCompatibilityMode, void(bool));
+  MOCK_METHOD1(setMultiFittingMode, void(bool));
   MOCK_METHOD1(fitRawDataClicked, void(bool));
   GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
@@ -95,7 +95,8 @@ public:
     m_fitBrowser = new NiceMock<MockFitFunctionControl>();
     m_presenter = new MuonAnalysisFitFunctionPresenter(nullptr, m_fitBrowser,
                                                        m_funcBrowser);
-    m_presenter->setCompatibilityMode(false);
+    m_presenter->setMultiFitState(
+        MantidQt::CustomInterfaces::Muon::MultiFitState::Enabled);
   }
 
   /// Run after each test to check expectations and remove mocks
@@ -146,13 +147,15 @@ public:
   }
 
   void test_handleFitFinished() {
-    m_presenter->setCompatibilityMode(false);
+    m_presenter->setMultiFitState(
+        MantidQt::CustomInterfaces::Muon::MultiFitState::Enabled);
     doTest_HandleFitFinishedOrUndone("MUSR00015189; Pair; long; Asym; 1; #1",
                                      false);
   }
 
-  void test_handleFitFinished_compatibilityMode() {
-    m_presenter->setCompatibilityMode(true);
+  void test_handleFitFinished_multiFitDisabled() {
+    m_presenter->setMultiFitState(
+        MantidQt::CustomInterfaces::Muon::MultiFitState::Disabled);
     doTest_HandleFitFinishedOrUndone("MUSR00015189; Pair; long; Asym; 1; #1",
                                      true);
   }
@@ -207,14 +210,16 @@ public:
     m_presenter->handleDatasetIndexChanged(index);
   }
 
-  void test_setCompatibilityMode_On() {
-    EXPECT_CALL(*m_fitBrowser, setCompatibilityMode(true)).Times(1);
-    m_presenter->setCompatibilityMode(true);
+  void test_setMultiFitMode_On() {
+    EXPECT_CALL(*m_fitBrowser, setMultiFittingMode(true)).Times(1);
+    m_presenter->setMultiFitState(
+        MantidQt::CustomInterfaces::Muon::MultiFitState::Enabled);
   }
 
-  void test_setCompatibilityMode_Off() {
-    EXPECT_CALL(*m_fitBrowser, setCompatibilityMode(false)).Times(1);
-    m_presenter->setCompatibilityMode(false);
+  void test_setMultiFitMode_Off() {
+    EXPECT_CALL(*m_fitBrowser, setMultiFittingMode(false)).Times(1);
+    m_presenter->setMultiFitState(
+        MantidQt::CustomInterfaces::Muon::MultiFitState::Disabled);
   }
 
 private:
