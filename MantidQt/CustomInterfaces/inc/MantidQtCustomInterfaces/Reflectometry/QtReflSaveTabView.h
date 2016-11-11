@@ -49,6 +49,8 @@ public:
 
   /// Returns the save path
   std::string getSavePath() const override;
+  /// Sets the save path
+  void setSavePath(const std::string &path) const override;
   /// Returns the prefix
   std::string getPrefix() const override;
   /// Returns the filter
@@ -57,10 +59,14 @@ public:
   bool getRegexCheck() const override;
   /// Get name of the currently selected workspace name
   std::string getCurrentWorkspaceName() const override;
+  /// Returns a list of names of selected workspaces
+  std::vector<std::string> getSelectedWorkspaces() const override;
+  /// Returns a list of names of selected parameters
+  std::vector<std::string> getSelectedParameters() const override;
   /// Returns the spectra list
   std::string getSpectraList() const override;
-  /// Returns the file format
-  std::string getFileFormat() const override;
+  /// Returns the index of selected file format
+  int getFileFormatIndex() const override;
   /// Returns the title check
   bool getTitleCheck() const override;
   /// Returns the Q resolution check
@@ -84,6 +90,8 @@ public slots:
   void filterWorkspaceList() const;
   /// Request parameters for a workspace of a name
   void requestWorkspaceParams() const;
+  /// Save selected workspaces
+  void saveWorkspaces() const;
 
 private:
   /// Initialize the interface

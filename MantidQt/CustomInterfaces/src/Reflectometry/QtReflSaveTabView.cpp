@@ -25,6 +25,8 @@ void QtReflSaveTabView::initLayout() {
 
   connect(m_ui.refreshButton, SIGNAL(clicked()), this,
           SLOT(populateListOfWorkspaces()));
+  connect(m_ui.saveButton, SIGNAL(clicked()), this,
+          SLOT(saveWorkspaces()));
   connect(m_ui.filterEdit, SIGNAL(textEdited(const QString &)), this,
           SLOT(filterWorkspaceList()));
   connect(m_ui.listOfWorkspaces,
@@ -40,6 +42,12 @@ void QtReflSaveTabView::initLayout() {
 */
 std::string QtReflSaveTabView::getSavePath() const { 
   return m_ui.savePathEdit->text().toStdString(); 
+}
+
+/** Sets the save path
+*/
+void QtReflSaveTabView::setSavePath(const std::string &path) const {
+  return m_ui.savePathEdit->setText(QString::fromStdString(path));
 }
 
 /** Returns the file name prefix
@@ -71,6 +79,30 @@ std::string QtReflSaveTabView::getCurrentWorkspaceName() const {
   return m_ui.listOfWorkspaces->currentItem()->text().toStdString();
 }
 
+/** Returns a list of names of currently selected workspaces
+* @return :: workspace names
+*/
+std::vector<std::string> QtReflSaveTabView::getSelectedWorkspaces() const {
+  std::vector<std::string> itemNames;
+  auto items = m_ui.listOfWorkspaces->selectedItems();
+  for (auto it = items.begin(); it != items.end(); it++) {
+    itemNames.push_back((*it)->text().toStdString());
+  }
+  return itemNames;
+}
+
+/** Returns a list of names of currently selected parameters
+* @return :: parameter names
+*/
+std::vector<std::string> QtReflSaveTabView::getSelectedParameters() const {
+  std::vector<std::string> paramNames;
+  auto items = m_ui.listOfLoggedParameters->selectedItems();
+  for (auto it = items.begin(); it != items.end(); it++) {
+    paramNames.push_back((*it)->text().toStdString());
+  }
+  return paramNames;
+}
+
 /** Returns the spectra list as a single string
 * @return :: Spectra list
 */
@@ -78,11 +110,11 @@ std::string QtReflSaveTabView::getSpectraList() const {
   return m_ui.spectraListEdit->text().toStdString();
 }
 
-/** Returns the file format
-* @return :: File format
+/** Returns the index of the selected file format
+* @return :: File format index
 */
-std::string QtReflSaveTabView::getFileFormat() const {
-  return m_ui.fileFormatComboBox->currentText().toStdString();
+int QtReflSaveTabView::getFileFormatIndex() const {
+  return m_ui.fileFormatComboBox->currentIndex();
 }
 
 /** Returns the title check value
@@ -154,6 +186,12 @@ void QtReflSaveTabView::filterWorkspaceList() const {
 */
 void QtReflSaveTabView::requestWorkspaceParams() const {
   m_presenter->notify(IReflSaveTabPresenter::workspaceParamsFlag);
+}
+
+/** Save selected workspaces
+*/
+void QtReflSaveTabView::saveWorkspaces() const {
+  m_presenter->notify(IReflSaveTabPresenter::saveWorkspacesFlag);
 }
 
 } // namespace CustomInterfaces

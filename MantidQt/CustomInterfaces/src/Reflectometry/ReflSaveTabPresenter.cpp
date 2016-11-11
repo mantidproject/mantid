@@ -3,7 +3,10 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Run.h"
+#include "Poco/File.h"
+#include "Poco/Path.h"
 
 #include <regex>
 
@@ -21,6 +24,9 @@ ReflSaveTabPresenter::ReflSaveTabPresenter(IReflSaveTabView *view)
     : m_view(view) {
 
   FrameworkManager::Instance();
+  saveAlgs = { "SaveReflCustomAscii", "SaveReflThreeColumnAscii",
+    "SaveANSTOAscii", "SaveILLCosmosAscii" };
+  saveExts = { ".dat", ".dat", ".txt", ".mft" };
 }
 
 /** Destructor
@@ -37,6 +43,9 @@ void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
     break;
   case workspaceParamsFlag:
     populateParametersList(m_view->getCurrentWorkspaceName());
+    break;
+  case saveWorkspacesFlag:
+    saveWorkspaces();
     break;
   }
 }
@@ -93,6 +102,53 @@ void ReflSaveTabPresenter::populateParametersList(std::string wsName) {
     logs.push_back((*it)->name());
   }
   m_view->setParametersList(logs);
+}
+
+/** Saves selected workspaces
+*/
+void ReflSaveTabPresenter::saveWorkspaces() {
+  // Check that save directory is valid
+  std::string saveDir = m_view->getSavePath();
+  if (saveDir.empty() || Poco::File(saveDir).isDirectory() == false) {
+    g_log.error("Directory specified doesn't exist or was invalid for your operating system");
+    return;
+  }
+
+  // Create the appropriate save algorithm
+  int formatIndex = m_view->getFileFormatIndex();
+  std::string algName = saveAlgs[formatIndex];
+  std::string extension = saveExts[formatIndex];
+  IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create(algName);
+ 
+  auto wsNames = m_view->getSelectedWorkspaces();
+  for (auto it = wsNames.begin(); it != wsNames.end(); it++) {
+    // Add any additional algorithm-specific properties and execute
+    switch (formatIndex) {
+    case 0: // SaveReflCustomAscii
+      saveAlg->setProperty("LogList", m_view->getSelectedParameters());
+      if (m_view->getTitleCheck())
+        saveAlg->setProperty("Title", *it);
+      saveAlg->setProperty("WriteDeltaQ", m_view->getQResolutionCheck());
+      break;
+    case 1: // SaveReflThreeColumnAscii
+      if (m_view->getTitleCheck())
+        saveAlg->setProperty("Title", *it);
+      saveAlg->setProperty("LogList", m_view->getSelectedParameters());
+      break;
+    case 3: // SaveILLCosmosAscii
+      saveAlg->setProperty("LogList", m_view->getSelectedParameters());
+      if (m_view->getTitleCheck())
+        saveAlg->setProperty("Title", *it);
+      break;
+    }
+
+    auto path = Poco::Path(saveDir);
+    path.append(m_view->getPrefix() + *it + extension);
+    saveAlg->setProperty("Filename", path.toString());
+    saveAlg->setProperty("InputWorkspace",
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(*it));
+    saveAlg->execute();
+  }
 }
 
 /** Obtains all available workspace names to save

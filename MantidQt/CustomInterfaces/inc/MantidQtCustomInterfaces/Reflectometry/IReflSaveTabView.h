@@ -42,12 +42,15 @@ public:
   virtual ~IReflSaveTabView(){};
 
   virtual std::string getSavePath() const = 0;
+  virtual void setSavePath(const std::string &path) const = 0;
   virtual std::string getPrefix() const = 0;
   virtual std::string getFilter() const = 0;
   virtual bool getRegexCheck() const = 0;
   virtual std::string getCurrentWorkspaceName() const = 0;
+  virtual std::vector<std::string> getSelectedWorkspaces() const = 0;
+  virtual std::vector<std::string> getSelectedParameters() const = 0;
   virtual std::string getSpectraList() const = 0;
-  virtual std::string getFileFormat() const = 0;
+  virtual int getFileFormatIndex() const = 0;
   virtual bool getTitleCheck() const = 0;
   virtual bool getQResolutionCheck() const = 0;
   virtual std::string getSeparator() const = 0;

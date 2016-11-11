@@ -124,7 +124,11 @@
               </widget>
             </item>
             <item row ="2" column="0" colspan="4">
-              <widget class="QListWidget" name="listOfWorkspaces"/>
+              <widget class="QListWidget" name="listOfWorkspaces">
+                <property name="selectionMode">
+                  <enum>QAbstractItemView::ExtendedSelection</enum>
+                </property>
+              </widget>
             </item>
             <item row="2" column="4">
               <spacer name="customSaveSpacer2">
@@ -140,7 +144,11 @@
               </spacer>
             </item>
             <item row ="2" column="5">
-              <widget class="QListWidget" name="listOfLoggedParameters"/>
+              <widget class="QListWidget" name="listOfLoggedParameters">
+                <property name="selectionMode">
+                  <enum>QAbstractItemView::ExtendedSelection</enum>
+                </property>
+              </widget>
             </item>
             <item row="3" column="0" colspan="4">
               <widget class="QPushButton" name="refreshButton">
