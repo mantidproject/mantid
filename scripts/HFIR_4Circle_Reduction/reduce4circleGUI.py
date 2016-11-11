@@ -2587,8 +2587,8 @@ class MainWindow(QtGui.QMainWindow):
         try:
             scan_number = int(str(self.ui.lineEdit_run.text()))
         except ValueError as val_err:
-            self.pop_one_button_dialog('Scan number %s in raw-data-view-tab is invalid.'
-                                       '' % str(self.ui.lineEdit_run.text()))
+            self.pop_one_button_dialog('Scan number %s in raw-data-view-tab is invalid. Error: %s'
+                                       '' % str(self.ui.lineEdit_run.text()), str(val_err))
             return
 
         # get spice file

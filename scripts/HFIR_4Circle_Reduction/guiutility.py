@@ -421,7 +421,7 @@ class DisplayDialog(QtGui.QDialog):
 
 def show_message(parent=None, message='show message here!'):
     """
-
+    show message
     :param parent:
     :param message:
     :return:
@@ -431,16 +431,4 @@ def show_message(parent=None, message='show message here!'):
 
     result = dialog.exec_()
 
-    return
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-
-    show_message(message='Test test\nTest test\n\ntest')
-
-    sys.exit(app.exec_())
-
-
-
+    return result
