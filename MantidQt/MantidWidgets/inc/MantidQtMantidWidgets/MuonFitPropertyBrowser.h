@@ -79,7 +79,7 @@ public:
   /// Set multiple fitting mode on or off
   void setMultiFittingMode(bool enabled) override;
   /// After fit checks done, continue
-  void continueAfterChecks() override;
+  void continueAfterChecks(bool sequential) override;
 
 public slots:
   /// Perform the fit algorithm

@@ -139,8 +139,8 @@ void MuonAnalysisFitDataPresenter::doConnect() {
             SLOT(handleXRangeChangedGraphically(double, double)));
     connect(fitBrowser, SIGNAL(sequentialFitRequested()), this,
             SLOT(openSequentialFitDialog()));
-    connect(fitBrowser, SIGNAL(functionUpdateAndFitRequested(bool)), this,
-            SLOT(checkAndUpdateFitLabel(bool)));
+    connect(fitBrowser, SIGNAL(preFitChecksRequested(bool)), this,
+            SLOT(doPreFitChecks(bool)));
     connect(fitBrowser, SIGNAL(fitRawDataClicked(bool)), this,
             SLOT(handleFitRawData(bool)));
   }
@@ -374,9 +374,9 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
   // load original data - need to get filename(s) of individual run(s)
   QStringList filenames;
   for (const int run : params.runs) {
-    filenames.append(
-        QString::fromStdString(MuonAnalysisHelper::getRunLabel(
-                                   params.instrument, {run})).append(".nxs"));
+    filenames.append(QString::fromStdString(MuonAnalysisHelper::getRunLabel(
+                                                params.instrument, {run}))
+                         .append(".nxs"));
   }
   try {
     // This will sum multiple runs together
@@ -829,6 +829,33 @@ void MuonAnalysisFitDataPresenter::updateFitLabelFromRuns() {
     m_dataSelector->setSimultaneousFitLabel(runString);
     m_fitModel->setSimultaneousLabel(runString.toStdString());
   }
+}
+
+/**
+ * Perform pre-fit checks and, if OK, tell the model it can go ahead with the
+ * fit.
+ * Checks are:
+ * - Has the fit label already been used? If so, ask user whether to overwrite.
+ * - Is the input run string valid?
+ * @param sequential :: [input] Whether fit is sequential or not
+ */
+void MuonAnalysisFitDataPresenter::doPreFitChecks(bool sequential) {
+  checkAndUpdateFitLabel(sequential);
+  if (isRunStringValid()) {
+    m_fitModel->continueAfterChecks(sequential);
+  } else {
+    g_log.error("Pre-fit checks failed: run string is not valid.\nCheck that "
+                "the data files are in Mantid's data search path.");
+  }
+}
+
+/**
+ * Check if the user has input a valid range of runs, i.e. that the red star is
+ * not shown on the interface
+ * @returns :: whether the runs are valid or not
+ */
+bool MuonAnalysisFitDataPresenter::isRunStringValid() {
+  return !m_dataSelector->getRuns().isEmpty();
 }
 
 } // namespace CustomInterfaces

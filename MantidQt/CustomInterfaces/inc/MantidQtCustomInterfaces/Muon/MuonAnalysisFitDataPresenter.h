@@ -118,10 +118,10 @@ public slots:
   void handleDatasetIndexChanged(int index);
   /// Open sequential fit dialog
   void openSequentialFitDialog();
-  /// Updates label to avoid overwriting existing results
-  void checkAndUpdateFitLabel(bool sequentialFit);
   /// Handles "fit raw data" selection/deselection
   void handleFitRawData(bool enabled, bool updateWorkspaces = true);
+  /// Perform pre-fit checks
+  void doPreFitChecks(bool sequentialFit);
 
 private:
   /// Generate names of workspaces to be created
@@ -149,8 +149,12 @@ private:
   void setUpDataSelector(const QString &wsName);
   /// Check if multiple runs are selected
   bool isMultipleRuns() const;
+  /// Updates label to avoid overwriting existing results
+  void checkAndUpdateFitLabel(bool sequentialFit);
   /// Update fit label to match run number(s)
   void updateFitLabelFromRuns();
+  /// Checks that runs are valid before fit
+  bool isRunStringValid();
   /// Fit browser to update (non-owning pointer to FitPropertyBrowser interface)
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
   /// Muon fit browser to update (non-owning pointer to MuonFitPropertyBrowser

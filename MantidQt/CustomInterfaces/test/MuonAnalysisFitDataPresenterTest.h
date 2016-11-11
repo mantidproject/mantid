@@ -82,7 +82,7 @@ public:
   MOCK_METHOD1(setSimultaneousLabel, void(const std::string &));
   MOCK_METHOD1(userChangedDataset, void(int));
   MOCK_CONST_METHOD0(rawData, bool());
-  MOCK_METHOD0(continueAfterChecks, void());
+  MOCK_METHOD1(continueAfterChecks, void(bool));
   void preFitChecksRequested(bool sequential) override{};
   GCC_DIAG_ON_SUGGEST_OVERRIDE
 };

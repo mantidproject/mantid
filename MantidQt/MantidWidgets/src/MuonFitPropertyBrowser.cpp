@@ -282,11 +282,9 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
 }
 
 /**
- * Updates function prior to running a fit
+ * Requests checks and updates prior to running a fit
  */
-void MuonFitPropertyBrowser::fit() {
-  emit functionUpdateAndFitRequested(false);
-}
+void MuonFitPropertyBrowser::fit() { emit preFitChecksRequested(false); }
 
 /**
  * Creates an instance of Fit algorithm, sets its properties and launches it.
@@ -376,10 +374,10 @@ void MuonFitPropertyBrowser::runSequentialFit() {
 }
 
 /**
- * Update function prior to running a sequential fit
+ * Requests checks and updates prior to running a sequential fit
  */
 void MuonFitPropertyBrowser::sequentialFit() {
-  emit functionUpdateAndFitRequested(true);
+  emit preFitChecksRequested(true);
 }
 
 /**
@@ -570,8 +568,13 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
   }
 }
 
-void MuonFitPropertyBrowser::continueAfterChecks() {
-  //TODO: implement
+/**
+ * The pre-fit checks have been successfully completed. Continue by emitting a
+ * signal to update the function and request the fit.
+ * @param sequential :: [input] Whether fit is sequential or not
+ */
+void MuonFitPropertyBrowser::continueAfterChecks(bool sequential) {
+  emit functionUpdateAndFitRequested(sequential);
 }
 
 } // MantidQt

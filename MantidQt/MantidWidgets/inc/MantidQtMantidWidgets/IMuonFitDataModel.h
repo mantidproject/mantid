@@ -40,7 +40,7 @@ public:
   virtual void workspacesToFitChanged(int n) = 0;
   virtual void setSimultaneousLabel(const std::string &label) = 0;
   virtual void userChangedDataset(int index) = 0;
-  virtual void continueAfterChecks() = 0;
+  virtual void continueAfterChecks(bool sequential) = 0;
 signals:
   virtual void preFitChecksRequested(bool sequential) = 0;
 };
