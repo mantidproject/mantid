@@ -152,14 +152,13 @@ void PDLoadCharacterizations::exec() {
 
   this->canColumnNames = extra_columns(filenames);
 
-  // TODO number of columns changes with the addition of a version1 file
   // setup the default table workspace for the characterization runs
   ITableWorkspace_sptr wksp = WorkspaceFactory::Instance().createTable();
   wksp->addColumn("double", "frequency");
   wksp->addColumn("double", "wavelength");
   wksp->addColumn("int", "bank");
   wksp->addColumn("str", "vanadium");
-  // TODO need vanadium background ?!?!?!?!?!
+  wksp->addColumn("str", "vanadium_background");
   wksp->addColumn("str", "container");
   wksp->addColumn("str", "empty_environment");
   wksp->addColumn("str", "empty_instrument");
@@ -205,8 +204,7 @@ std::vector<std::string> PDLoadCharacterizations::getFilenames() {
     throw std::runtime_error("Can only specify up to 2 characterization files");
   }
 
-  // fill the output array - TODO
-  // <<<<<<<<<<<<<<<<<<<<<==================================
+  // fill the output array
   std::vector<std::string> filenames(F_INDEX_SIZE);
   filenames[F_INDEX_V0] = filenamesFromPropertyUnraveld[0];
   if (filenamesFromPropertyUnraveld.size() > 1)
@@ -308,9 +306,10 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
     row << boost::lexical_cast<double>(splitted[1]);  // wavelength
     row << boost::lexical_cast<int32_t>(splitted[2]); // bank
     row << splitted[3];                               // vanadium
+    row << splitted[5];                              // vanadium_background
     row << splitted[4];                               // container
-    row << "0";                                       // empty_environment - TODO
-    row << splitted[5];                               // empty_instrument
+    row << "0";                                      // empty_environment
+    row << "0";                                      // empty_instrument
     row << splitted[6];                               // d_min
     row << splitted[7];                               // d_max
     row << boost::lexical_cast<double>(splitted[8]);  // tof_min
@@ -385,8 +384,7 @@ void updateRow(API::ITableWorkspace_sptr &wksp, const size_t rowNum,
                const std::vector<std::string> &names,
                const std::vector<std::string> &values) {
   wksp->getRef<std::string>("vanadium", rowNum) = values[2];
-  // TODO this is the vanadium background, not the empty container
-  wksp->getRef<std::string>("container", rowNum) = values[3]; // TODO
+  wksp->getRef<std::string>("vanadium_background", rowNum) = values[3];
   wksp->getRef<std::string>("empty_environment", rowNum) = values[4];
   wksp->getRef<std::string>("empty_instrument", rowNum) = values[5];
   for (size_t i = 0; i < names.size(); ++i) {
@@ -430,7 +428,6 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
     boost::smatch result;
     // all instances of table headers
     if (boost::regex_search(line, result, V1_TABLE_REG_EXP)) {
-      std::cout << "found header: " << line << std::endl;
       if (result.size() == 2) {
         line = Strings::strip(result[1]);
         Kernel::StringTokenizer tokenizer(line, " ", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
@@ -441,7 +438,6 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
     } else {
       if (columnNames.empty()) // should never happen
         throw std::runtime_error("file missing column names");
-      std::cout << "not         : " << line << std::endl;
 
       line = Strings::strip(line);
       Kernel::StringTokenizer tokenizer(
@@ -462,9 +458,9 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
         row << boost::lexical_cast<double>(valuesAsStr[1]); // wavelength
         row << boost::lexical_cast<int32_t>(1);             // bank
         row << valuesAsStr[2];                              // vanadium
-        // TODO valuesAsStr[3] is the vanadium background  NOT the container
-        row << valuesAsStr[3]; // TODO container should be "0"
-        row << valuesAsStr[4]; // empty_environment - TODO
+        row << valuesAsStr[3]; // vanadium_background
+        row << "0";            // container
+        row << valuesAsStr[4]; // empty_environment
         row << valuesAsStr[5]; // empty_instrument
         row << "0";            // d_min
         row << "0";            // d_max
@@ -526,9 +522,9 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename,
     if (splitted[0] == EXP_INI_VAN_KEY) {
       wksp->getRef<std::string>("vanadium", 0) = splitted[1];
     } else if (splitted[0] == EXP_INI_EMPTY_KEY) {
-      wksp->getRef<std::string>("container", 0) = splitted[1];
+      wksp->getRef<std::string>("vanadium_background", 0) = splitted[1];
     } else if (splitted[0] == EXP_INI_CAN_KEY) {
-      wksp->getRef<std::string>("empty_instrument", 0) = splitted[1];
+      wksp->getRef<std::string>("container", 0) = splitted[1];
     }
   }
 }

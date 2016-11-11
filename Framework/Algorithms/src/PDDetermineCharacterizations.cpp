@@ -51,6 +51,7 @@ const std::string PDDetermineCharacterizations::summary() const {
  * - "bank" (integer)
  * - "container" (string)
  * - "vanadium" (string)
+ * - "vanadium_background" (string)
  * - "empty" (string)
  * - "d_min" (string)
  * - "d_max" (string)
@@ -61,10 +62,19 @@ const std::string PDDetermineCharacterizations::summary() const {
  * @return The list of expected column names
  */
 std::vector<std::string> getColumnNames() {
-  return {"frequency",        "wavelength", "bank",
-          "container",        "vanadium",   "empty_environment",
-          "empty_instrument", "d_min",      "d_max",
-          "tof_min",          "tof_max",    "wavelength_min",
+  return {"frequency",
+          "wavelength",
+          "bank",
+          "container",
+          "vanadium",
+          "vanadium_background",
+          "empty_environment",
+          "empty_instrument",
+          "d_min",
+          "d_max",
+          "tof_min",
+          "tof_max",
+          "wavelength_min",
           "wavelength_max"};
 }
 
@@ -125,6 +135,9 @@ void PDDetermineCharacterizations::init() {
   declareProperty(
       Kernel::make_unique<Kernel::ArrayProperty<int32_t>>("NormBackRun", "0"),
       "Normalization background" + defaultMsg);
+  declareProperty(
+      Kernel::make_unique<Kernel::ArrayProperty<int32_t>>("EmptyInstr", "0"),
+      "Empty instrument" + defaultMsg);
 
   std::vector<std::string> defaultFrequencyNames{"SpeedRequest1", "Speed1",
                                                  "frequency"};
@@ -200,10 +213,16 @@ void PDDetermineCharacterizations::getInformationFromTable(
       m_propertyManager->setProperty(
           "vanadium", m_characterizations->getRef<std::string>("vanadium", i));
       m_propertyManager->setProperty(
+          "vanadium_background",
+          m_characterizations->getRef<std::string>("vanadium_background", i));
+      m_propertyManager->setProperty(
           "container",
           m_characterizations->getRef<std::string>("container", i));
       m_propertyManager->setProperty(
-          "empty",
+          "empty_environment",
+          m_characterizations->getRef<std::string>("empty_environment", i));
+      m_propertyManager->setProperty(
+          "empty_instrument",
           m_characterizations->getRef<std::string>("empty_instrument", i));
 
       return;
@@ -308,13 +327,22 @@ void PDDetermineCharacterizations::setDefaultsInPropManager() {
     m_propertyManager->declareProperty(
         Kernel::make_unique<ArrayProperty<int32_t>>("vanadium", "0"));
   }
+  if (!m_propertyManager->existsProperty("vanadium_background")) {
+    m_propertyManager->declareProperty(
+        Kernel::make_unique<ArrayProperty<int32_t>>("vanadium_background",
+                                                    "0"));
+  }
   if (!m_propertyManager->existsProperty("container")) {
     m_propertyManager->declareProperty(
         Kernel::make_unique<ArrayProperty<int32_t>>("container", "0"));
   }
-  if (!m_propertyManager->existsProperty("empty")) {
+  if (!m_propertyManager->existsProperty("empty_environment")) {
     m_propertyManager->declareProperty(
-        Kernel::make_unique<ArrayProperty<int32_t>>("empty", "0"));
+        Kernel::make_unique<ArrayProperty<int32_t>>("empty_environment", "0"));
+  }
+  if (!m_propertyManager->existsProperty("empty_instrument")) {
+    m_propertyManager->declareProperty(
+        Kernel::make_unique<ArrayProperty<int32_t>>("empty_instrument", "0"));
   }
 }
 
@@ -367,7 +395,8 @@ void PDDetermineCharacterizations::exec() {
 
   overrideRunNumProperty("BackRun", "container");
   overrideRunNumProperty("NormRun", "vanadium");
-  overrideRunNumProperty("NormBackRun", "empty");
+  overrideRunNumProperty("NormBackRun", "vanadium_background");
+  overrideRunNumProperty("EmptyInstr", "empty_instrument");
 
   std::vector<std::string> expectedNames = getColumnNames();
   for (auto &expectedName : expectedNames) {

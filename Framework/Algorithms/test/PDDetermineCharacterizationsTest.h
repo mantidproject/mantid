@@ -67,14 +67,16 @@ public:
   }
 
   void addRow(ITableWorkspace_sptr wksp, double freq, double wl, int bank,
-              std::string van, std::string can, std::string empty_env,
-              std::string empty_inst, std::string dmin, std::string dmax,
-              double tofmin, double tofmax, double wlmin, double wlmax) {
+              std::string van, std::string van_back, std::string can,
+              std::string empty_env, std::string empty_inst, std::string dmin,
+              std::string dmax, double tofmin, double tofmax, double wlmin,
+              double wlmax) {
     Mantid::API::TableRow row = wksp->appendRow();
     row << freq;
     row << wl;
     row << bank;
     row << van;
+    row << van_back;
     row << can;
     row << empty_env;
     row << empty_inst;
@@ -92,6 +94,7 @@ public:
     wksp->addColumn("double", "wavelength");
     wksp->addColumn("int", "bank");
     wksp->addColumn("str", "vanadium");
+    wksp->addColumn("str", "vanadium_background");
     wksp->addColumn("str", "container");
     wksp->addColumn("str", "empty_environment");
     wksp->addColumn("str", "empty_instrument");
@@ -108,14 +111,14 @@ public:
   ITableWorkspace_sptr createTableWkspPG3() {
     ITableWorkspace_sptr wksp = createEmptyTableWksp();
 
-    addRow(wksp, 60., 0.533, 1, "17702", "17711", "0", "0", "0.05", "2.20",
+    addRow(wksp, 60., 0.533, 1, "17702", "0", "17711", "0", "0", "0.05", "2.20",
            0000.00, 16666.67, 0., 0.);
-    addRow(wksp, 60., 1.333, 3, "17703", "17712", "0", "0", "0.43", "5.40",
+    addRow(wksp, 60., 1.333, 3, "17703", "0", "17712", "0", "0", "0.43", "5.40",
            12500.00, 29166.67, 0., 0.);
-    addRow(wksp, 60., 2.665, 4, "17704", "17713", "0", "0", "1.15", "9.20",
+    addRow(wksp, 60., 2.665, 4, "17704", "0", "17713", "0", "0", "1.15", "9.20",
            33333.33, 50000.00, 0., 0.);
-    addRow(wksp, 60., 4.797, 5, "17705", "17714", "0", "0", "2.00", "15.35",
-           66666.67, 83333.67, 0., 0.);
+    addRow(wksp, 60., 4.797, 5, "17705", "0", "17714", "0", "0", "2.00",
+           "15.35", 66666.67, 83333.67, 0., 0.);
 
     return wksp;
   }
@@ -123,8 +126,9 @@ public:
   ITableWorkspace_sptr createTableWkspNOM() {
     ITableWorkspace_sptr wksp = createEmptyTableWksp();
 
-    addRow(wksp, 60., 1.4, 1, "0", "0", "0", "0", ".31,.25,.13,.13,.13,.42",
-           "13.66,5.83,3.93,2.09,1.57,31.42", 300.00, 16666.67, 0., 0.);
+    addRow(wksp, 60., 1.4, 1, "0", "0", "0", "0", "0",
+           ".31,.25,.13,.13,.13,.42", "13.66,5.83,3.93,2.09,1.57,31.42", 300.00,
+           16666.67, 0., 0.);
 
     return wksp;
   }
@@ -132,17 +136,20 @@ public:
   ITableWorkspace_sptr createTableWkspNOM_withwl() {
     ITableWorkspace_sptr wksp = createEmptyTableWksp();
 
-    addRow(wksp, 60., 1.4, 1, "0", "0", "0", "0", ".31,.25,.13,.13,.13,.42",
-           "13.66,5.83,3.93,2.09,1.57,31.42", 300.00, 16666.67, .9, 2.1);
+    addRow(wksp, 60., 1.4, 1, "0", "0", "0", "0", "0",
+           ".31,.25,.13,.13,.13,.42", "13.66,5.83,3.93,2.09,1.57,31.42", 300.00,
+           16666.67, .9, 2.1);
 
     return wksp;
   }
 
-  PropertyManager_sptr createExpectedInfo(
-      const double freq, const double wl, const int bank,
-      const std::string &van, const std::string &can, const std::string &empty,
-      const std::string &dmin, const std::string &dmax, const double tofmin,
-      const double tofmax, const double wlmin, const double wlmax) {
+  PropertyManager_sptr
+  createExpectedInfo(const double freq, const double wl, const int bank,
+                     const std::string &van, const std::string &vanback,
+                     const std::string &can, const std::string &empty,
+                     const std::string &dmin, const std::string &dmax,
+                     const double tofmin, const double tofmax,
+                     const double wlmin, const double wlmax) {
 
     PropertyManager_sptr expectedInfo = boost::make_shared<PropertyManager>();
     expectedInfo->declareProperty(
@@ -154,9 +161,16 @@ public:
     expectedInfo->declareProperty(
         Mantid::Kernel::make_unique<ArrayProperty<int32_t>>("vanadium", van));
     expectedInfo->declareProperty(
+        Mantid::Kernel::make_unique<ArrayProperty<int32_t>>(
+            "vanadium_background", vanback));
+    expectedInfo->declareProperty(
         Mantid::Kernel::make_unique<ArrayProperty<int32_t>>("container", can));
     expectedInfo->declareProperty(
-        Mantid::Kernel::make_unique<ArrayProperty<int32_t>>("empty", empty));
+        Mantid::Kernel::make_unique<ArrayProperty<int32_t>>("empty_environment",
+                                                            "0"));
+    expectedInfo->declareProperty(
+        Mantid::Kernel::make_unique<ArrayProperty<int32_t>>("empty_instrument",
+                                                            empty));
     expectedInfo->declareProperty(
         Mantid::Kernel::make_unique<ArrayProperty<double>>("d_min", dmin));
     expectedInfo->declareProperty(
@@ -205,8 +219,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    auto expectedInfo =
-        createExpectedInfo(0., 0., 1, "0", "0", "0", "", "", 0., 0., 0., 0.);
+    auto expectedInfo = createExpectedInfo(0., 0., 1, "0", "0", "0", "0", "",
+                                           "", 0., 0., 0., 0.);
 
     compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
                                     PROPERTY_MANAGER_NAME));
@@ -226,8 +240,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    auto expectedInfo =
-        createExpectedInfo(0., 0., 1, "0", "0", "0", "", "", 0., 0., 0., 0.);
+    auto expectedInfo = createExpectedInfo(0., 0., 1, "0", "0", "0", "0", "",
+                                           "", 0., 0., 0., 0.);
 
     compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
                                     PROPERTY_MANAGER_NAME));
@@ -248,8 +262,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     auto expectedInfo =
-        createExpectedInfo(60., 0.533, 1, "17702", "17711", "0", "0.05", "2.20",
-                           0000.00, 16666.67, 0., 0.);
+        createExpectedInfo(60., 0.533, 1, "17702", "0", "17711", "0", "0.05",
+                           "2.20", 0000.00, 16666.67, 0., 0.);
 
     compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
                                     PROPERTY_MANAGER_NAME));
@@ -272,8 +286,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    auto expectedInfo = createExpectedInfo(60., 0.533, 1, "0", "0", "0", "0.05",
-                                           "2.20", 0000.00, 16666.67, 0., 0.);
+    auto expectedInfo =
+        createExpectedInfo(60., 0.533, 1, "0", "0", "0", "0", "0.05", "2.20",
+                           0000.00, 16666.67, 0., 0.);
 
     compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
                                     PROPERTY_MANAGER_NAME));
@@ -294,7 +309,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     auto expectedInfo = createExpectedInfo(
-        60., 1.4, 1, "0", "0", "0", ".31,.25,.13,.13,.13,.42",
+        60., 1.4, 1, "0", "0", "0", "0", ".31,.25,.13,.13,.13,.42",
         "13.66,5.83,3.93,2.09,1.57,31.42", 300.00, 16666.67, 0., 0.);
 
     compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
@@ -319,7 +334,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     auto expectedInfo = createExpectedInfo(
-        60., 1.4, 1, "1,2", "3,4", "5,6", ".31,.25,.13,.13,.13,.42",
+        60., 1.4, 1, "1,2", "5,6", "3,4", "0", ".31,.25,.13,.13,.13,.42",
         "13.66,5.83,3.93,2.09,1.57,31.42", 300.00, 16666.67, 0., 0.);
 
     compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
@@ -341,7 +356,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     auto expectedInfo = createExpectedInfo(
-        60., 1.4, 1, "0", "0", "0", ".31,.25,.13,.13,.13,.42",
+        60., 1.4, 1, "0", "0", "0", "0", ".31,.25,.13,.13,.13,.42",
         "13.66,5.83,3.93,2.09,1.57,31.42", 300.00, 16666.67, .9, 2.1);
 
     compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
