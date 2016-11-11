@@ -276,7 +276,8 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
              "may be invalid. Using a 0 threshold instead.\n";
       thresholdDensity = 0;
     }
-    g_log.notice() << "Threshold signal density: " << thresholdDensity << '\n';
+    g_log.information() << "Threshold signal density: " << thresholdDensity
+                        << '\n';
 
     typedef API::IMDNode *boxPtr;
     // We will fill this vector with pointers to all the boxes (up to a given
@@ -472,7 +473,8 @@ void FindPeaksMD::findPeaksHisto(
              "may be invalid. Using a 0 threshold instead.\n";
       thresholdDensity = 0;
     }
-    g_log.notice() << "Threshold signal density: " << thresholdDensity << '\n';
+    g_log.information() << "Threshold signal density: " << thresholdDensity
+                        << '\n';
 
     // -------------- Sort and Filter by Density -----------------------------
     progress(0.20, "Sorting Boxes by Density");

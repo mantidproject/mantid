@@ -45,6 +45,9 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         self._resolutionX = 0.005
         self._resolutionY = 0.005
 
+        # parent window
+        self._myParentWindow = None
+
         return
 
     def add_roi(self, roi_start, roi_end):
@@ -73,7 +76,19 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         """
         assert isinstance(state, bool)
 
+        # set
         self._roiSelectMode = state
+
+        if state:
+            # new in add-ROI mode
+            self._roiStart = None
+            self._roiEnd = None
+            self._myPolygon = None
+
+        # # reset _myPolygen
+        # if state is False:
+        #     if self._myPolygon is not None:
+        #         self.remove_roi()
 
         return
 
@@ -213,16 +228,15 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         self._currX = event.xdata
         self._currY = event.ydata
 
+        # update button
+        prev_mouse_pressed = self._mousePressed
+        self._mousePressed = Detector2DView.MousePress.RELEASED
+
         # do something
-        if self._roiSelectMode is True and self._mousePressed == Detector2DView.MousePress.LEFT:
+        if self._roiSelectMode and prev_mouse_pressed == Detector2DView.MousePress.LEFT:
             # end the ROI selection mode
             self.update_roi_poly(self._currX, self._currY)
-
-            # release the mode
-            # self._roiStart = self._roiEnd = None
-
-        # update button
-        self._mousePressed = Detector2DView.MousePress.RELEASED
+        # END-IF
 
         return
 
@@ -239,6 +253,18 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         :return:
         """
         return (self.y_max - self.y_min) * self._resolutionY
+
+    def set_parent_window(self, parent_window):
+        """
+        Set the parent window for synchronizing the operation
+        :param parent_window:
+        :return:
+        """
+        assert parent_window is not None, 'blabla'
+
+        self._myParentWindow = parent_window
+
+        return
 
     def update_roi_poly(self, cursor_x, cursor_y):
         """ Update region of interest.  It is to
@@ -261,5 +287,9 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
         # plot the new polygon
         self.plot_roi()
+
+        # update
+        if self._myPolygon is not None:
+            self._myParentWindow.do_apply_roi()
 
         return
