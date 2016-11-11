@@ -1,5 +1,7 @@
 #include "MantidDataHandling/LoadNXSPE.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/DeltaEMode.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -18,6 +20,8 @@
 #include "MantidGeometry/Surfaces/Sphere.h"
 
 #include <boost/regex.hpp>
+
+#include <Poco/File.h>
 
 #include <map>
 #include <sstream>
@@ -215,6 +219,17 @@ void LoadNXSPE::exec() {
   }
 
   file.closeGroup(); // data group
+
+  file.openGroup("instrument", "NXinstrument");
+  entries = file.getEntries();
+  std::string instrument_name;
+  if (entries.count("name")) {
+    file.openData("name");
+    instrument_name = file.getStrData();
+    file.closeData();
+  }
+  file.closeGroup(); // instrument group
+
   file.closeGroup(); // Main entry
   file.close();
 
@@ -247,11 +262,12 @@ void LoadNXSPE::exec() {
   outputWS->mutableRun().setGoniometer(gm, true);
 
   // generate instrument
-  Geometry::Instrument_sptr instrument(new Geometry::Instrument("NXSPE"));
+  Geometry::Instrument_sptr instrument(new Geometry::Instrument(
+      instrument_name.empty() ? "NXSPE" : instrument_name));
   outputWS->setInstrument(instrument);
 
   Geometry::ObjComponent *source = new Geometry::ObjComponent("source");
-  source->setPos(0.0, 0.0, -10.0);
+  source->setPos(0.0, 0.0, -10.);
   instrument->add(source);
   instrument->markAsSource(source);
   Geometry::ObjComponent *sample = new Geometry::ObjComponent("sample");
@@ -298,6 +314,27 @@ void LoadNXSPE::exec() {
     itdata = (itdataend);
     iterror = (iterrorend);
     prog.report();
+  }
+
+  // If an instrument name is defined, load instrument parameter file for Emode
+  // NB. LoadParameterFile must be used on a workspace with an instrument
+  if (!instrument_name.empty()) {
+    std::string IDF_filename =
+        ExperimentInfo::getInstrumentFilename(instrument_name);
+    std::string instrument_parfile =
+        IDF_filename.substr(0, IDF_filename.find("_Definition")) +
+        "_Parameters.xml";
+    if (Poco::File(instrument_parfile).exists()) {
+      try {
+        IAlgorithm_sptr loadParamAlg =
+            createChildAlgorithm("LoadParameterFile");
+        loadParamAlg->setProperty("Filename", instrument_parfile);
+        loadParamAlg->setProperty("Workspace", outputWS);
+        loadParamAlg->execute();
+      } catch (...) {
+        g_log.information("Cannot load the instrument parameter file.");
+      }
+    }
   }
 
   setProperty("OutputWorkspace", outputWS);
