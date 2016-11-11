@@ -151,8 +151,11 @@ private:
   bool isMultipleRuns() const;
   /// Update fit label to match run number(s)
   void updateFitLabelFromRuns();
-  /// Fit browser to update (non-owning pointer)
+  /// Fit browser to update (non-owning pointer to FitPropertyBrowser interface)
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
+  /// Muon fit browser to update (non-owning pointer to MuonFitPropertyBrowser
+  /// interface)
+  MantidQt::MantidWidgets::IMuonFitDataModel *m_fitModel;
   /// Data selector to get input from (non-owning pointer)
   MantidQt::MantidWidgets::IMuonFitDataSelector *m_dataSelector;
   /// Workspace assigned to peak picker

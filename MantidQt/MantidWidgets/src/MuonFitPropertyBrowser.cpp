@@ -521,9 +521,6 @@ void MuonFitPropertyBrowser::setFunction(const IFunction_sptr func) {
  * @param wsNames :: [input] List of workspace names to fit
  */
 void MuonFitPropertyBrowser::setWorkspaceNames(const QStringList &wsNames) {
-  // Extend base class behaviour
-  IWorkspaceFitControl::setWorkspaceNames(wsNames);
-
   m_workspacesToFit.clear();
   std::transform(wsNames.begin(), wsNames.end(),
                  std::back_inserter(m_workspacesToFit),
@@ -571,6 +568,10 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
       widget->setVisible(enabled);
     }
   }
+}
+
+void MuonFitPropertyBrowser::continueAfterChecks() {
+  //TODO: implement
 }
 
 } // MantidQt

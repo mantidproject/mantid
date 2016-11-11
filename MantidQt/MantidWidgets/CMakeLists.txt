@@ -259,6 +259,7 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/ErrorCurve.h
 	inc/MantidQtMantidWidgets/HintStrategy.h
 	inc/MantidQtMantidWidgets/IFunctionBrowser.h
+    inc/MantidQtMantidWidgets/IMuonFitDataModel.h
 	inc/MantidQtMantidWidgets/IMuonFitDataSelector.h
 	inc/MantidQtMantidWidgets/IMuonFitFunctionModel.h
 	inc/MantidQtMantidWidgets/IWorkspaceFitControl.h

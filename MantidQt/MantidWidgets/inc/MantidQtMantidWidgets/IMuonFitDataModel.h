@@ -1,13 +1,15 @@
-#ifndef MANTID_MANTIDWIDGETS_IWORKSPACEFITCONTROL_H_
-#define MANTID_MANTIDWIDGETS_IWORKSPACEFITCONTROL_H_
+#ifndef MANTID_MANTIDWIDGETS_IMUONFITDATAMODEL_H_
+#define MANTID_MANTIDWIDGETS_IMUONFITDATAMODEL_H_
 
 #include "WidgetDllOption.h"
+#include <QObject>
 #include <QString>
+#include <QStringList>
 
 namespace MantidQt {
 namespace MantidWidgets {
 
-/** IWorkspaceFitControl: set data to fit for a fit property browser
+/** IMuonFitDataModel: set data to fit for a muon fit property browser
 
   Abstract base class to be implemented
 
@@ -32,18 +34,18 @@ namespace MantidWidgets {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IWorkspaceFitControl {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IMuonFitDataModel {
 public:
-  virtual ~IWorkspaceFitControl() {}
-  virtual void setWorkspaceName(const QString &wsName) = 0;
-  virtual void setStartX(double start) = 0;
-  virtual void setEndX(double end) = 0;
-  virtual void setWorkspaceIndex(int i) = 0;
-  virtual void allowSequentialFits(bool allow) = 0;
-  virtual bool rawData() const = 0;
+  virtual void setWorkspaceNames(const QStringList &wsNames) = 0;
+  virtual void workspacesToFitChanged(int n) = 0;
+  virtual void setSimultaneousLabel(const std::string &label) = 0;
+  virtual void userChangedDataset(int index) = 0;
+  virtual void continueAfterChecks() = 0;
+signals:
+  virtual void preFitChecksRequested(bool sequential) = 0;
 };
 
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif // MANTID_MANTIDWIDGETS_IWORKSPACEFITCONTROL_H_
+#endif // MANTID_MANTIDWIDGETS_IMUONFITDATAMODEL_H

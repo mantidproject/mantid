@@ -18,12 +18,14 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisDataLoader.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
+#include "MantidQtMantidWidgets/IMuonFitDataModel.h"
 #include "MantidQtMantidWidgets/IMuonFitDataSelector.h"
 #include "MantidQtMantidWidgets/IWorkspaceFitControl.h"
 
 using MantidQt::CustomInterfaces::MuonAnalysisDataLoader;
 using MantidQt::CustomInterfaces::MuonAnalysisFitDataPresenter;
 using MantidQt::CustomInterfaces::Muon::DeadTimesType;
+using MantidQt::MantidWidgets::IMuonFitDataModel;
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
 using Mantid::API::AnalysisDataService;
@@ -67,7 +69,7 @@ public:
 };
 
 /// Mock fit property browser
-class MockFitBrowser : public IWorkspaceFitControl {
+class MockFitBrowser : public IWorkspaceFitControl, public IMuonFitDataModel {
 public:
   GCC_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD1(setWorkspaceName, void(const QString &));
@@ -80,6 +82,8 @@ public:
   MOCK_METHOD1(setSimultaneousLabel, void(const std::string &));
   MOCK_METHOD1(userChangedDataset, void(int));
   MOCK_CONST_METHOD0(rawData, bool());
+  MOCK_METHOD0(continueAfterChecks, void());
+  void preFitChecksRequested(bool sequential) override{};
   GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
 

@@ -12,6 +12,7 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include <boost/lexical_cast.hpp>
 
+using MantidQt::MantidWidgets::IMuonFitDataModel;
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
 using Mantid::API::AnalysisDataService;
@@ -107,10 +108,19 @@ MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
     MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
     const Muon::PlotType &plotType, double timeZero,
     const RebinOptions &rebinArgs)
-    : m_fitBrowser(fitBrowser), m_dataSelector(dataSelector),
-      m_dataLoader(dataLoader), m_timeZero(timeZero), m_rebinArgs(rebinArgs),
-      m_grouping(grouping), m_plotType(plotType),
-      m_fitRawData(fitBrowser->rawData()), m_overwrite(false) {
+    : m_fitBrowser(fitBrowser), m_fitModel(nullptr),
+      m_dataSelector(dataSelector), m_dataLoader(dataLoader),
+      m_timeZero(timeZero), m_rebinArgs(rebinArgs), m_grouping(grouping),
+      m_plotType(plotType), m_fitRawData(fitBrowser->rawData()),
+      m_overwrite(false) {
+  // Make sure the FitPropertyBrowser passed in implements the required
+  // interfaces
+  m_fitModel = dynamic_cast<IMuonFitDataModel *>(m_fitBrowser);
+  if (!m_fitModel) {
+    throw std::invalid_argument(
+        "Fit property browser does not implement required interface");
+  }
+
   // Ensure this is set correctly at the start
   handleSimultaneousFitLabelChanged();
   doConnect();
@@ -237,7 +247,7 @@ void MuonAnalysisFitDataPresenter::updateWorkspaceNames(
   std::transform(
       names.begin(), names.end(), std::back_inserter(qNames),
       [](const std::string &s) { return QString::fromStdString(s); });
-  m_fitBrowser->setWorkspaceNames(qNames);
+  m_fitModel->setWorkspaceNames(qNames);
   m_dataSelector->setDatasetNames(qNames);
 
   // Quietly update the workspace name set in the fit property browser
@@ -454,7 +464,7 @@ std::string MuonAnalysisFitDataPresenter::getRebinParams(
  */
 void MuonAnalysisFitDataPresenter::handleSimultaneousFitLabelChanged() const {
   const QString label = m_dataSelector->getSimultaneousFitLabel();
-  m_fitBrowser->setSimultaneousLabel(label.toStdString());
+  m_fitModel->setSimultaneousLabel(label.toStdString());
 }
 
 /**
@@ -641,7 +651,7 @@ MuonAnalysisFitDataPresenter::generateParametersTable(
  * @param index :: [input] Selected dataset index
  */
 void MuonAnalysisFitDataPresenter::handleDatasetIndexChanged(int index) {
-  m_fitBrowser->userChangedDataset(index);
+  m_fitModel->userChangedDataset(index);
 }
 
 /**
@@ -715,7 +725,7 @@ void MuonAnalysisFitDataPresenter::checkAndUpdateFitLabel(bool sequentialFit) {
     }
 
     m_dataSelector->setSimultaneousFitLabel(QString::fromStdString(uniqueName));
-    m_fitBrowser->setSimultaneousLabel(uniqueName);
+    m_fitModel->setSimultaneousLabel(uniqueName);
   }
 }
 
@@ -817,7 +827,7 @@ void MuonAnalysisFitDataPresenter::updateFitLabelFromRuns() {
     // replace with current run string
     const auto &runString = m_dataSelector->getRuns();
     m_dataSelector->setSimultaneousFitLabel(runString);
-    m_fitBrowser->setSimultaneousLabel(runString.toStdString());
+    m_fitModel->setSimultaneousLabel(runString.toStdString());
   }
 }
 
