@@ -123,23 +123,13 @@ void ReflSaveTabPresenter::saveWorkspaces() {
   auto wsNames = m_view->getSelectedWorkspaces();
   for (auto it = wsNames.begin(); it != wsNames.end(); it++) {
     // Add any additional algorithm-specific properties and execute
-    switch (formatIndex) {
-    case 0: // SaveReflCustomAscii
-      saveAlg->setProperty("LogList", m_view->getSelectedParameters());
+    if (algName != "SaveANSTOAscii") {
       if (m_view->getTitleCheck())
         saveAlg->setProperty("Title", *it);
+      saveAlg->setProperty("LogList", m_view->getSelectedParameters());
+    }
+    if (algName == "SaveReflCustomAscii") {
       saveAlg->setProperty("WriteDeltaQ", m_view->getQResolutionCheck());
-      break;
-    case 1: // SaveReflThreeColumnAscii
-      if (m_view->getTitleCheck())
-        saveAlg->setProperty("Title", *it);
-      saveAlg->setProperty("LogList", m_view->getSelectedParameters());
-      break;
-    case 3: // SaveILLCosmosAscii
-      saveAlg->setProperty("LogList", m_view->getSelectedParameters());
-      if (m_view->getTitleCheck())
-        saveAlg->setProperty("Title", *it);
-      break;
     }
 
     auto path = Poco::Path(saveDir);
