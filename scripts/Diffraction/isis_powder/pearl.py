@@ -63,10 +63,11 @@ class Pearl(AbstractInst):
 
     # Methods #
 
-    def _get_calibration_full_paths(self, cycle):
+    def _get_calibration_full_paths(self, run_number):
+        cycle_dict = self._get_cycle_information(run_number=run_number)
 
         calibration_file, grouping_file, van_absorb, van_file =\
-            pearl_calib_factory.get_calibration_filename(cycle=cycle, tt_mode=self._tt_mode)
+            pearl_calib_factory.get_calibration_filename(cycle=cycle_dict["cycle"], tt_mode=self._tt_mode)
 
         calibration_dir = self.calibration_dir
 
@@ -86,7 +87,18 @@ class Pearl(AbstractInst):
 
     @staticmethod
     def _get_cycle_information(run_number):
-        cycle, instrument_version = pearl_cycle_factory.get_cycle_dir(run_number)
+        run_input = ""
+        if not run_number.isdigit():
+            # Only take first valid number as it is probably of the form 12345_12350
+            for character in run_number:
+                if character.isdigit():
+                    run_input += character
+                else:
+                    break
+        else:
+            run_input = run_number
+
+        cycle, instrument_version = pearl_cycle_factory.get_cycle_dir(run_input)
 
         cycle_information = {'cycle': cycle,
                              'instrument_version': instrument_version}

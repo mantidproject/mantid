@@ -7,8 +7,6 @@ import isis_powder.common as common
 
 
 def create_van(instrument, van, empty, output_van_file_name, num_of_splines, absorb, gen_absorb):
-    cycle_information = instrument._get_cycle_information(van)
-
     input_van_ws = common._load_current_normalised_ws(number=van, instrument=instrument)
     input_empty_ws = common._load_current_normalised_ws(number=empty, instrument=instrument)
 
@@ -17,7 +15,7 @@ def create_van(instrument, van, empty, output_van_file_name, num_of_splines, abs
     common.remove_intermediate_workspace(input_empty_ws)
     common.remove_intermediate_workspace(input_van_ws)
 
-    calibration_full_paths = instrument._get_calibration_full_paths(cycle=cycle_information["cycle"])
+    calibration_full_paths = instrument._get_calibration_full_paths(run_number=van)
 
     # Absorb was here
 
@@ -43,6 +41,7 @@ def create_van(instrument, van, empty, output_van_file_name, num_of_splines, abs
 
     common.remove_intermediate_workspace(corrected_van_ws)
 
+    cycle_information = instrument._get_cycle_information(run_number=van)
     splined_ws_list = instrument._spline_background(focused_van_file, num_of_splines,
                                                     cycle_information["instrument_version"])
 

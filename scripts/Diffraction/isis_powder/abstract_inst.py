@@ -24,7 +24,7 @@ class AbstractInst(object):
         self._calibration_dir = calibration_dir
         self._raw_data_dir = raw_data_dir
         self._output_dir = output_dir
-        self._default_input_ext = _append_dot_to_ext(default_input_ext)
+        self._default_input_ext = _prefix_dot_to_ext(default_input_ext)
         self._focus_mode = None
 
     @property
@@ -45,7 +45,7 @@ class AbstractInst(object):
 
     @default_input_ext.setter
     def default_input_ext(self, new_ext):
-        self._default_input_ext = _append_dot_to_ext(new_ext)
+        self._default_input_ext = _prefix_dot_to_ext(new_ext)
 
     @property
     def focus_mode(self):
@@ -162,13 +162,7 @@ class AbstractInst(object):
     # Instrument specific methods
 
     @abstractmethod
-    def _get_calibration_full_paths(self, cycle):
-        """
-        Gets the current calibration file names for this cycle
-        @param cycle: The cycle string to lookup for this run
-        @return: A dictionary the containing the full paths as values for the following keys:
-        "calibration", "grouping", "vanadium_absorption", "vanadium"
-        """
+    def _get_calibration_full_paths(self, run_number):
         pass
 
     @staticmethod
@@ -179,7 +173,7 @@ class AbstractInst(object):
         @param run_number: The run number to turn into a filename
         @return: The filename of the file - Without the path or extension
         """
-        pass
+
 
     @staticmethod
     @abstractmethod
@@ -293,7 +287,7 @@ class AbstractInst(object):
 # These should only be called by the abstract instrument class
 
 
-def _append_dot_to_ext(ext):
+def _prefix_dot_to_ext(ext):
     if not ext.startswith('.'):
         return '.' + ext
     else:

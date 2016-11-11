@@ -21,7 +21,7 @@ class MockInstrument(AbstractInst):
     def _get_default_group_names(self):
         return None
 
-    def _get_calibration_full_paths(self, cycle):
+    def _get_calibration_full_paths(self, run_number):
         # This is here to help remind people of the dict that is expected
         calibration_details = {"calibration": "cal",
                                "grouping": "group",

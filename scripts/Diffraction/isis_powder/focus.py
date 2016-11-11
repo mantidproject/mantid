@@ -14,8 +14,7 @@ def _run_focus(instrument, run_number, perform_attenuation, perform_vanadium_nor
     read_ws = common._load_current_normalised_ws(number=run_number, instrument=instrument)
     input_workspace = instrument._do_tof_rebinning_focus(read_ws)  # Rebins for PEARL
 
-    cycle_information = instrument._get_cycle_information(run_number=run_number)
-    calibration_file_paths = instrument._get_calibration_full_paths(cycle=cycle_information["cycle"])
+    calibration_file_paths = instrument._get_calibration_full_paths(run_number=run_number)
 
     # Compensate for empty sample if specified
     input_workspace = instrument._subtract_sample_empty(input_workspace)
@@ -57,9 +56,9 @@ def _run_focus(instrument, run_number, perform_attenuation, perform_vanadium_nor
 def _divide_sample_by_vanadium(instrument, run_number, input_workspace, perform_vanadium_norm):
     processed_spectra = []
 
-    cycle_information = instrument._get_cycle_information(run_number=run_number)
-    input_file_paths = instrument._get_calibration_full_paths(cycle=cycle_information["cycle"])
+    input_file_paths = instrument._get_calibration_full_paths(run_number=run_number)
 
+    cycle_information = instrument._get_cycle_information(run_number=run_number)
     alg_range, save_range = instrument._get_instrument_alg_save_ranges(cycle_information["instrument_version"])
 
     for index in range(0, alg_range):
