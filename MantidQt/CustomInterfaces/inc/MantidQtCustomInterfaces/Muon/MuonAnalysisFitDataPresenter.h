@@ -104,6 +104,8 @@ public:
   void setSelectedWorkspace(const QString &wsName);
   /// Updates "overwrite" setting
   void setOverwrite(bool enabled) { m_overwrite = enabled; }
+  /// Updates label to avoid overwriting existing results
+  void checkAndUpdateFitLabel(bool sequentialFit);
 
 public slots:
   /// Transforms fit results when a simultaneous fit finishes
@@ -149,8 +151,6 @@ private:
   void setUpDataSelector(const QString &wsName);
   /// Check if multiple runs are selected
   bool isMultipleRuns() const;
-  /// Updates label to avoid overwriting existing results
-  void checkAndUpdateFitLabel(bool sequentialFit);
   /// Update fit label to match run number(s)
   void updateFitLabelFromRuns();
   /// Checks that runs are valid before fit

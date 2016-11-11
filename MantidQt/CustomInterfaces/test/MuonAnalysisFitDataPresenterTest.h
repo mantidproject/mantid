@@ -696,6 +696,26 @@ public:
     m_presenter->setSelectedWorkspace(wsName);
   }
 
+  void test_doPreFitChecks_nonSequential_invalidRuns_doesNotFit() {
+    const QString invalidRuns("");
+    doTest_doPreFitChecks(false, invalidRuns, false);
+  }
+
+  void test_doPreFitChecks_nonSequential_validRuns_doesFit() {
+    const QString validRuns("15189-91");
+    doTest_doPreFitChecks(false, validRuns, true);
+  }
+
+  void test_doPreFitChecks_sequential_invalidRuns_doesNotFit() {
+    const QString invalidRuns("");
+    doTest_doPreFitChecks(true, invalidRuns, false);
+  }
+
+  void test_doPreFitChecks_sequential_validRuns_doesFit() {
+    const QString validRuns("15189-91");
+    doTest_doPreFitChecks(true, validRuns, true);
+  }
+
 private:
   void
   doTest_generateWorkspaceNames(const IMuonFitDataSelector::FitType &fitType,
@@ -998,6 +1018,22 @@ private:
     ON_CALL(*m_dataSelector, getRuns()).WillByDefault(Return("15189-91"));
     ON_CALL(*m_dataSelector, getStartTime()).WillByDefault(Return(0.55));
     ON_CALL(*m_dataSelector, getEndTime()).WillByDefault(Return(10.0));
+  }
+
+  void doTest_doPreFitChecks(bool sequential, const QString &runString,
+                             bool willFit) {
+    setupGroupPeriodSelections();
+    ON_CALL(*m_dataSelector, getFitType())
+        .WillByDefault(Return(IMuonFitDataSelector::FitType::Single));
+    EXPECT_CALL(*m_dataSelector, getRuns())
+        .Times(1)
+        .WillOnce(Return(runString));
+    if (willFit) {
+      EXPECT_CALL(*m_fitBrowser, continueAfterChecks(sequential)).Times(1);
+    } else {
+      EXPECT_CALL(*m_fitBrowser, continueAfterChecks(_)).Times(0);
+    }
+    m_presenter->doPreFitChecks(sequential);
   }
 
   MockDataSelector *m_dataSelector;
