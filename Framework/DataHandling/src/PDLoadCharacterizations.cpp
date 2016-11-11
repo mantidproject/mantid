@@ -159,6 +159,7 @@ void PDLoadCharacterizations::exec() {
   wksp->addColumn("double", "wavelength");
   wksp->addColumn("int", "bank");
   wksp->addColumn("str", "vanadium");
+  // TODO need vanadium background ?!?!?!?!?!
   wksp->addColumn("str", "container");
   wksp->addColumn("str", "empty_environment");
   wksp->addColumn("str", "empty_instrument");
@@ -350,6 +351,50 @@ void PDLoadCharacterizations::readVersion0(const std::string &filename,
   file.close();
 }
 
+bool closeEnough(const double left, const double right) {
+  // the same value
+  const double diff = fabs(left - right);
+  if (diff == 0.)
+    return true;
+
+  // same within 5%
+  const double relativeDiff = diff * 2 / (left + right);
+  return relativeDiff < .05;
+}
+
+int findRow(API::ITableWorkspace_sptr &wksp,
+            const std::vector<std::string> &values) {
+  const double frequency = boost::lexical_cast<double>(values[0]);
+  const double wavelength = boost::lexical_cast<double>(values[1]);
+
+  // find the correct row
+  const size_t numRows = wksp->rowCount();
+  for (size_t i = 0; i < numRows; ++i) {
+    const double frequencyRow = wksp->getRef<double>("frequency", i);
+    const double wavelengthRow = wksp->getRef<double>("wavelength", i);
+    if (closeEnough(frequency, frequencyRow) &&
+        closeEnough(wavelength, wavelengthRow)) {
+      return static_cast<int>(i);
+    }
+  }
+  // fall through behavior is -1
+  return -1;
+}
+
+void updateRow(API::ITableWorkspace_sptr &wksp, const size_t rowNum,
+               const std::vector<std::string> &names,
+               const std::vector<std::string> &values) {
+  wksp->getRef<std::string>("vanadium", rowNum) = values[2];
+  // TODO this is the vanadium background, not the empty container
+  wksp->getRef<std::string>("container", rowNum) = values[3]; // TODO
+  wksp->getRef<std::string>("empty_environment", rowNum) = values[4];
+  wksp->getRef<std::string>("empty_instrument", rowNum) = values[5];
+  for (size_t i = 0; i < names.size(); ++i) {
+    const auto name = names[i];
+    wksp->getRef<std::string>(name, rowNum) = values[i + 6];
+  }
+}
+
 void PDLoadCharacterizations::readVersion1(const std::string &filename,
                                            API::ITableWorkspace_sptr &wksp) {
   // don't bother if there isn't a filename
@@ -366,13 +411,15 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
   std::string line = Strings::getLine(file);
   boost::smatch result;
   if (boost::regex_search(line, result, VERSION_REG_EXP) && result.size() == 2) {
-    g_log.information() << "Found version " << result[1] << "\n";
+    g_log.debug() << "Found version " << result[1] << "\n";
   } else {
     file.close();
     throw std::runtime_error("file must have \"version=1\" as the first line");
   }
 
-  // TODO
+  // store the names of the columns in order
+  std::vector<std::string> columnNames;
+
   for (std::string line = Strings::getLine(file); !file.eof();
        line = Strings::getLine(file)) {
     if (line.empty())
@@ -388,11 +435,48 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
         line = Strings::strip(result[1]);
         Kernel::StringTokenizer tokenizer(line, " ", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
         for (const auto & token : tokenizer) {
-//          columnSet.insert(token);
+          columnNames.push_back(token);
         }
       }
     } else {
+      if (columnNames.empty()) // should never happen
+        throw std::runtime_error("file missing column names");
       std::cout << "not         : " << line << std::endl;
+
+      line = Strings::strip(line);
+      Kernel::StringTokenizer tokenizer(
+          line, " ", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      std::vector<std::string> valuesAsStr;
+      for (const auto &token : tokenizer) {
+        valuesAsStr.push_back(token);
+      }
+
+      const int row = findRow(wksp, valuesAsStr);
+
+      if (row >= 0) {
+        updateRow(wksp, static_cast<size_t>(row), columnNames, valuesAsStr);
+      } else {
+        // add the row
+        API::TableRow row = wksp->appendRow();
+        row << boost::lexical_cast<double>(valuesAsStr[0]); // frequency
+        row << boost::lexical_cast<double>(valuesAsStr[1]); // wavelength
+        row << boost::lexical_cast<int32_t>(1);             // bank
+        row << valuesAsStr[2];                              // vanadium
+        // TODO valuesAsStr[3] is the vanadium background  NOT the container
+        row << valuesAsStr[3]; // TODO container should be "0"
+        row << valuesAsStr[4]; // empty_environment - TODO
+        row << valuesAsStr[5]; // empty_instrument
+        row << "0";            // d_min
+        row << "0";            // d_max
+        row << 0.;             // tof_min
+        row << 0.;             // tof_max
+        row << 0.;             // wavelength_min
+        row << 0.;             // wavelength_max
+        // insert all the extras
+        for (size_t i = 6; i < valuesAsStr.size(); ++i) {
+          row << valuesAsStr[i];
+        }
+      }
     }
     // TODO need to get the extras line
   }

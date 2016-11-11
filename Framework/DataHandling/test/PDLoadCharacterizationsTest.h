@@ -114,7 +114,6 @@ public:
     TS_ASSERT_EQUALS(wksp->columnCount(), 16);
     TS_ASSERT_EQUALS(wksp->rowCount(), 8);
 
-    /*
     // check all of the contents of row 0
     TS_ASSERT_EQUALS(wksp->Double(0, 0), 60.);
     TS_ASSERT_EQUALS(wksp->Double(0, 1), 0.900);
@@ -127,19 +126,47 @@ public:
     TS_ASSERT_EQUALS(wksp->String(0, 8), "4.12");
     TS_ASSERT_EQUALS(wksp->Double(0, 9), 4700.);
     TS_ASSERT_EQUALS(wksp->Double(0,10), 21200.);
+    TS_ASSERT_EQUALS(wksp->Double(0, 11), 0.);
+    TS_ASSERT_EQUALS(wksp->Double(0, 12), 0.);
+    TS_ASSERT_EQUALS(wksp->String(0, 13), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 14), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 15), "0");
 
-    // check all of the contents of row 5
-    TS_ASSERT_EQUALS(wksp->Double(5, 0), 10.);
-    TS_ASSERT_EQUALS(wksp->Double(5, 1), 3.198);
-    TS_ASSERT_EQUALS(wksp->Int(5, 2), 1);
-    TS_ASSERT_EQUALS(wksp->String(5, 3), "15033");
-    TS_ASSERT_EQUALS(wksp->String(5, 4), "15042");
-    TS_ASSERT_EQUALS(wksp->String(5, 5), "0");
-    TS_ASSERT_EQUALS(wksp->String(5, 6), "0");
-    TS_ASSERT_EQUALS(wksp->String(5, 7), "0.05");
-    TS_ASSERT_EQUALS(wksp->String(5, 8), "15.40");
-    TS_ASSERT_EQUALS(wksp->Double(5, 9), 0.);
-    TS_ASSERT_EQUALS(wksp->Double(5,10), 100000.);*/
+    // check all of the contents of row 4
+    TS_ASSERT_EQUALS(wksp->Double(4, 0), 60.);
+    TS_ASSERT_EQUALS(wksp->Double(4, 1), 4.797);
+    TS_ASSERT_EQUALS(wksp->Int(4, 2), 5);
+    TS_ASSERT_EQUALS(wksp->String(4, 3), "27061");
+    TS_ASSERT_EQUALS(wksp->String(4, 4), "27055");
+    TS_ASSERT_EQUALS(wksp->String(4, 5), "0");
+    TS_ASSERT_EQUALS(wksp->String(4, 6), "0");
+    TS_ASSERT_EQUALS(wksp->String(4, 7), "2.00");
+    TS_ASSERT_EQUALS(wksp->String(4, 8), "15.35");
+    TS_ASSERT_EQUALS(wksp->Double(4, 9), 66666.67);
+    TS_ASSERT_EQUALS(wksp->Double(4, 10), 83333.67);
+    TS_ASSERT_EQUALS(wksp->Double(4, 11), 0.);
+    TS_ASSERT_EQUALS(wksp->Double(4, 12), 0.);
+    TS_ASSERT_EQUALS(wksp->String(4, 13), "27049");
+    TS_ASSERT_EQUALS(wksp->String(4, 14), "27037");
+    TS_ASSERT_EQUALS(wksp->String(4, 15), "27043");
+
+    // check all of the contents of row 7
+    TS_ASSERT_EQUALS(wksp->Double(7, 0), 60.);
+    TS_ASSERT_EQUALS(wksp->Double(7, 1), 3.731);
+    TS_ASSERT_EQUALS(wksp->Int(7, 2), 1);
+    TS_ASSERT_EQUALS(wksp->String(7, 3), "27060");
+    TS_ASSERT_EQUALS(wksp->String(7, 4), "27054");
+    TS_ASSERT_EQUALS(wksp->String(7, 5), "0");
+    TS_ASSERT_EQUALS(wksp->String(7, 6), "0");
+    TS_ASSERT_EQUALS(wksp->String(7, 7), "0");
+    TS_ASSERT_EQUALS(wksp->String(7, 8), "0");
+    TS_ASSERT_EQUALS(wksp->Double(7, 9), 0.);
+    TS_ASSERT_EQUALS(wksp->Double(7, 10), 0.);
+    TS_ASSERT_EQUALS(wksp->Double(7, 11), 0.);
+    TS_ASSERT_EQUALS(wksp->Double(7, 12), 0.);
+    TS_ASSERT_EQUALS(wksp->String(7, 13), "27048");
+    TS_ASSERT_EQUALS(wksp->String(7, 14), "27036");
+    TS_ASSERT_EQUALS(wksp->String(7, 15), "27042");
   }
 
   void test_Init() {
