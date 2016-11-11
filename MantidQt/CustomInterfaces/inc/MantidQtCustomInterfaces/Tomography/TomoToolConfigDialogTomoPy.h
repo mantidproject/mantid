@@ -24,7 +24,7 @@ private:
   void setupToolSettingsFromPaths() override;
   void setupDialogUi() override;
   int executeQt() override;
-
+  std::vector<std::pair<std::string, std::string>> getToolMethods() override;
   // initialised in .cpp file
   static const std::string DEFAULT_TOOL_NAME;
   static const std::string DEFAULT_TOOL_METHOD;

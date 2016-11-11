@@ -42,9 +42,11 @@ public:
   }
   virtual ~TomoToolConfigDialogBase() {}
 
+  /// public static function accessor to create dialogues
   static std::unique_ptr<TomoToolConfigDialogBase>
   getToolDialogFor(const std::string &toolName);
 
+  /// Sets up the dialogue settings, but does not initialise a QDialog
   void setupDialog(const std::string &runPath, const TomoPathsConfig &paths,
                    const std::string &pathOut,
                    const std::string &localOutNameAppendix) {
@@ -53,14 +55,17 @@ public:
     setupToolSettingsFromPaths();
   }
 
-  /// Runs the dialogue and handles the returns
+  /// initialises a QDialog and handles the returns
   virtual int initialiseGUIandExecute() {
     if (!isInitialised()) {
       // set up the tool's method on the first run
+      // this prevents from creating and destroying many dialogues if the user
+      // decides to scroll quickly, and the dialogue is only initialised if the
+      // user clicks the "Setup" button. If the tool is not setup the default
+      // settings will be provided if the user clicks Reconstruct
       initialiseDialog();
       setupDialogUi();
       setupMethodSelected();
-      // setupToolSettingsFromPaths();
 
       m_isInitialised = true;
     }
@@ -82,7 +87,6 @@ public:
   std::string getSelectedToolName() const { return m_toolName; }
 
 protected:
-  // TODO this has empty body just for the sake running the test right now
   virtual void initialiseDialog() = 0;
 
   virtual void handleDialogResult(const int result);
@@ -121,6 +125,9 @@ protected:
   /// provided virtual function to add Qt execute behaviour as necessary
   virtual int executeQt() = 0; // this class doesn't inherit from Qt and doesnt
                                // have this->exec()
+
+  // empty function body as not all tools have methods
+  virtual std::vector<std::pair<std::string, std::string>> getToolMethods(){ return {};}
 
   std::shared_ptr<TomoRecToolConfig> m_toolSettings;
 

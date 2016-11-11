@@ -317,12 +317,12 @@ void TomographyIfacePresenter::setupConfigDialogSettingsForLocal(
 void TomographyIfacePresenter::setupConfigDialogSettingsForRemote(
     TomoToolConfigDialogBase &dialog) {
   // set up all the information we need for the dialog
-  std::string run = m_model->getCurrentRemoteScriptsBasePath() +
+  const std::string run = m_model->getCurrentRemoteScriptsBasePath() +
                     m_model->getTomoScriptFolderPath() +
                     m_model->getTomoScriptLocationPath();
 
-  TomoPathsConfig paths = m_view->currentPathsConfig();
-  std::string pathOut = Poco::Path::expand(
+  const TomoPathsConfig paths = m_view->currentPathsConfig();
+  const std::string pathOut = Poco::Path::expand(
       g_defOutPathLocal + "/" + m_model->getCurrentExperimentReference());
   static size_t reconIdx = 1;
   const std::string localOutNameAppendix =
