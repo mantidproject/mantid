@@ -20,7 +20,7 @@ Setup
 - Ensure the files ``EMU00020918-20`` are in Mantid's path
 - Open *Interfaces/Muon/Muon Analysis*
 - At this point, before loading any data, the *Grouping Options* and *Data Analysis* tabs should be disabled.
-- On *Settings* tab, uncheck "Compatibility mode" if checked
+- On *Settings* tab, check the box for "Enable multiple fits" (will be unselected by default).
 - Set instrument to EMU, type "20918" in the "Load run" box and hit return
 - Now that data has been loaded, all tabs on the interface should be enabled.
 

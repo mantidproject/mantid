@@ -3,7 +3,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Statistics.h"
-#include "MantidKernel/Statistics.h"
 
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/Column.h"
@@ -27,9 +26,6 @@
 #include "MantidCurveFitting/Functions/ThermalNeutronBk2BkExpConvPVoigt.h"
 #include "MantidCurveFitting/FuncMinimizers/DampingMinimizer.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
-
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/split.hpp>
 
 #include <fstream>
 
@@ -225,10 +221,8 @@ void FitPowderDiffPeaks::exec() {
   // 6. Fit peaks & get peak centers
   m_indexGoodFitPeaks.clear();
   m_chi2GoodFitPeaks.clear();
-  size_t numpts = m_dataWS->readX(m_wsIndex).size();
-  m_peakData.reserve(numpts);
-  for (size_t i = 0; i < numpts; ++i)
-    m_peakData.push_back(0.0);
+  size_t numpts = m_dataWS->x(m_wsIndex).size();
+  m_peakData.resize(numpts);
 
   g_log.information() << "[FitPeaks] Total Number of Peak = "
                       << m_vecPeakFunctions.size() << '\n';
@@ -291,9 +285,9 @@ void FitPowderDiffPeaks::processInputProperties() {
   m_tofMin = getProperty("MinTOF");
   m_tofMax = getProperty("MaxTOF");
   if (m_tofMin == EMPTY_DBL())
-    m_tofMin = m_dataWS->readX(m_wsIndex)[0];
+    m_tofMin = m_dataWS->x(m_wsIndex)[0];
   if (m_tofMax == EMPTY_DBL())
-    m_tofMax = m_dataWS->readX(m_wsIndex).back();
+    m_tofMax = m_dataWS->x(m_wsIndex).back();
 
   m_minimumHKL = getProperty("MinimumHKL");
   m_numPeaksLowerToMin = getProperty("NumberPeaksToFitBelowLowLimit");
@@ -547,7 +541,7 @@ void FitPowderDiffPeaks::observePeakRange(BackToBackExponential_sptr thispeak,
   }
 
   // 2. Search for maximum
-  const MantidVec &vecX = m_dataWS->readX(m_wsIndex);
+  const auto &vecX = m_dataWS->x(m_wsIndex);
 
   size_t icentre =
       findMaxValue(m_dataWS, m_wsIndex, peakleftbound, peakrightbound);
@@ -624,10 +618,9 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
 
   stringstream dbss;
   dbss << "[DBx203] Removed background peak data: \n";
-  for (size_t i = 0; i < peakws->readX(peak_wsindex).size(); ++i)
-    dbss << peakws->readX(peak_wsindex)[i] << "\t\t"
-         << peakws->readY(peak_wsindex)[i] << "\t\t"
-         << peakws->readE(peak_wsindex)[i] << '\n';
+  for (size_t i = 0; i < peakws->x(peak_wsindex).size(); ++i)
+    dbss << peakws->x(peak_wsindex)[i] << "\t\t" << peakws->y(peak_wsindex)[i]
+         << "\t\t" << peakws->e(peak_wsindex)[i] << '\n';
   g_log.debug(dbss.str());
 
   // 3. Estimate FWHM, peak centre, and height
@@ -827,7 +820,7 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
   }
 
   // 9. Plot function
-  FunctionDomain1DVector domain(peakws->readX(0));
+  FunctionDomain1DVector domain(peakws->x(0).rawData());
   plotFunction(peak, backgroundfunction, domain);
 
   return fitgood;
@@ -1069,7 +1062,7 @@ bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(
     }
 
     // Plot the peak
-    FunctionDomain1DVector domain(peakws->readX(1));
+    FunctionDomain1DVector domain(peakws->x(1));
     plotFunction(peak, backgroundfunction, domain);
 
     // Debug print the best solutions
@@ -1240,15 +1233,14 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
 
   stringstream dbss2;
   dbss2 << "[T] Partial workspace No Background: \n";
-  for (size_t i = 0; i < peakdataws->readX(1).size(); ++i)
-    dbss2 << peakdataws->readX(1)[i] << "\t\t" << peakdataws->readY(1)[i]
-          << "\t\t" << peakdataws->readE(1)[i] << "\t\t"
-          << peakdataws->readY(0)[i] << '\n';
+  for (size_t i = 0; i < peakdataws->x(1).size(); ++i)
+    dbss2 << peakdataws->x(1)[i] << "\t\t" << peakdataws->y(1)[i] << "\t\t"
+          << peakdataws->e(1)[i] << "\t\t" << peakdataws->y(0)[i] << '\n';
   g_log.notice(dbss2.str());
 
   // 3. Estimate peak heights
-  size_t imaxheight = findMaxValue(peakdataws->readY(1));
-  double maxheight = peakdataws->readY(1)[imaxheight];
+  size_t imaxheight = findMaxValue(peakdataws->y(1).rawData());
+  double maxheight = peakdataws->y(1)[imaxheight];
   if (maxheight <= m_minPeakHeight) {
     // Max height / peak height is smaller than user defined minimum height.  No
     // fit, Zero
@@ -1428,7 +1420,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
 
   // 6. Plot the peak in the output workspace data
   if (goodfit) {
-    FunctionDomain1DVector domain(peakdataws->readX(1));
+    FunctionDomain1DVector domain(peakdataws->x(1).rawData());
     plotFunction(peak, backgroundfunction, domain);
   } else {
     // Throw exception if fit peak bad.  This is NOT a PERMANANT solution.
@@ -1672,10 +1664,10 @@ bool FitPowderDiffPeaks::doFit1PeakSimple(
   vector<string> names = peakfunction->getParameterNames();
   for (auto &name : names)
     dbss << name << "= " << peakfunction->getParameter(name) << ", \t";
-  for (size_t i = 0; i < dataws->readX(workspaceindex).size(); ++i)
-    dbss << dataws->readX(workspaceindex)[i] << "\t\t"
-         << dataws->readY(workspaceindex)[i] << "\t\t"
-         << dataws->readE(workspaceindex)[i] << '\n';
+  for (size_t i = 0; i < dataws->x(workspaceindex).size(); ++i)
+    dbss << dataws->x(workspaceindex)[i] << "\t\t"
+         << dataws->y(workspaceindex)[i] << "\t\t"
+         << dataws->e(workspaceindex)[i] << '\n';
   g_log.debug() << "DBx430 " << dbss.str() << '\n';
 
   // 1. Peak height
@@ -1764,8 +1756,8 @@ bool FitPowderDiffPeaks::doFit1PeakSequential(
                    << ", Minimizer = " << minimizer
                    << ", Max Iterations = " << maxiteration
                    << ", Workspace Index = " << workspaceindex
-                   << ", Data Range = " << dataws->readX(workspaceindex)[0]
-                   << ", " << dataws->readX(workspaceindex).back() << '\n';
+                   << ", Data Range = " << dataws->x(workspaceindex)[0] << ", "
+                   << dataws->x(workspaceindex).back() << '\n';
 
     storeFunctionParameters(peakfunction, parambeforefit);
 
@@ -1800,8 +1792,8 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
                                            double rightfwhm, double &center,
                                            double &sigma, double &height) {
   // 1. Estimate
-  const MantidVec &X = dataws->readX(workspaceindex);
-  const MantidVec &Y = dataws->readY(workspaceindex);
+  const auto &X = dataws->x(workspaceindex);
+  const auto &Y = dataws->y(workspaceindex);
 
   height = 0;
   for (size_t i = 1; i < X.size(); ++i) {
@@ -1867,23 +1859,6 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   g_log.information() << "[DBx133] Fitted Gaussian Parameters: \n" << infofit
                       << '\n';
 
-  // DB output for data
-  /*
-  API::MatrixWorkspace_sptr outdataws = fitalg->getProperty("OutputWorkspace");
-  const MantidVec& allX = outdataws->readX(0);
-  const MantidVec& fitY = outdataws->readY(1);
-  const MantidVec& rawY = outdataws->readY(0);
-
-  std::stringstream datass;
-  for (size_t i = 0; i < fitY.size(); ++i)
-  {
-    datass << allX[i] << setw(5) << " " << fitY[i] << "  " << rawY[i] <<
-  '\n';
-  }
-  std::cout << "Fitted Gaussian Peak:  Index, Fittet, Raw\n" << datass.str() <<
-  ".........................\n";
-  */
-
   return true;
 }
 
@@ -1938,9 +1913,9 @@ bool FitPowderDiffPeaks::fitOverlappedPeaks(
 
   stringstream datass;
   datass << "Partial workspace for peaks: \n";
-  for (size_t i = 0; i < peaksws->readX(0).size(); ++i)
-    datass << peaksws->readX(1)[i] << "\t\t" << peaksws->readY(1)[i] << "\t\t"
-           << peaksws->readE(1)[i] << "\t\t" << peaksws->readY(0)[i] << '\n';
+  for (size_t i = 0; i < peaksws->x(0).size(); ++i)
+    datass << peaksws->x(1)[i] << "\t\t" << peaksws->y(1)[i] << "\t\t"
+           << peaksws->e(1)[i] << "\t\t" << peaksws->y(0)[i] << '\n';
   g_log.information() << "[DB1042] " << datass.str();
 
   // 5. Estimate peak height according to pre-set peak value
@@ -1962,7 +1937,7 @@ bool FitPowderDiffPeaks::fitOverlappedPeaks(
 
   // 9. Plot peaks
   if (fitsuccess) {
-    FunctionDomain1DVector domain(peaksws->readX(1));
+    FunctionDomain1DVector domain(peaksws->x(1).rawData());
     plotFunction(peaksfunction, backgroundfunction, domain);
   }
 
@@ -2069,7 +2044,7 @@ bool FitPowderDiffPeaks::doFitMultiplePeaks(
     restoreFunctionParameters(peaksfunc, peaksfuncparams);
 
   // -1. Final debug output
-  FunctionDomain1DVector domain(dataws->readX(wsindex));
+  FunctionDomain1DVector domain(dataws->x(wsindex).rawData());
   FunctionValues values(domain);
   peaksfunc->function(domain, values);
   stringstream rss;
@@ -2090,7 +2065,7 @@ void FitPowderDiffPeaks::estimatePeakHeightsLeBail(
     Workspace2D_sptr dataws, size_t wsindex,
     vector<BackToBackExponential_sptr> peaks) {
   // 1. Build data structures
-  FunctionDomain1DVector domain(dataws->readX(wsindex));
+  FunctionDomain1DVector domain(dataws->x(wsindex).rawData());
   FunctionValues values(domain);
   vector<vector<double>> peakvalues;
   for (size_t i = 0; i < (peaks.size() + 1); ++i) {
@@ -2111,7 +2086,7 @@ void FitPowderDiffPeaks::estimatePeakHeightsLeBail(
   }
 
   // 3. Calculate peak height
-  const MantidVec &vecY = dataws->readY(wsindex);
+  const auto &vecY = dataws->y(wsindex);
   for (size_t ipk = 0; ipk < peaks.size(); ++ipk) {
     double height = 0.0;
     for (size_t j = 0; j < domain.size() - 1; ++j) {
@@ -2363,8 +2338,7 @@ Workspace2D_sptr
 FitPowderDiffPeaks::genOutputFittedPatternWorkspace(std::vector<double> pattern,
                                                     int workspaceindex) {
   // 1. Init
-  const MantidVec &X = m_dataWS->readX(workspaceindex);
-  const MantidVec &Y = m_dataWS->readY(workspaceindex);
+  const auto &X = m_dataWS->x(workspaceindex);
 
   if (pattern.size() != X.size()) {
     stringstream errmsg;
@@ -2384,20 +2358,12 @@ FitPowderDiffPeaks::genOutputFittedPatternWorkspace(std::vector<double> pattern,
 
   // 3. Set up
   for (size_t iw = 0; iw < 5; ++iw) {
-    MantidVec &newX = dataws->dataX(iw);
-    for (size_t i = 0; i < numpts; ++i) {
-      newX[i] = X[i];
-    }
+    dataws->setSharedX(iw, m_dataWS->sharedX(workspaceindex));
   }
 
-  MantidVec &newY0 = dataws->dataY(0);
-  MantidVec &newY1 = dataws->dataY(1);
-  MantidVec &newY2 = dataws->dataY(2);
-  for (size_t i = 0; i < numpts; ++i) {
-    newY0[i] = Y[i];
-    newY1[i] = pattern[i];
-    newY2[i] = Y[i] - pattern[i];
-  }
+  dataws->setSharedY(0, m_dataWS->sharedY(workspaceindex));
+  dataws->mutableY(1) = pattern;
+  dataws->mutableY(2) = m_dataWS->y(workspaceindex) - pattern;
 
   // 4. Debug
   // FIXME Remove this section after unit test is finished.
@@ -2405,8 +2371,8 @@ FitPowderDiffPeaks::genOutputFittedPatternWorkspace(std::vector<double> pattern,
   ofile.open("fittedpeaks.dat");
   for (size_t i = 0; i < numpts; ++i) {
     ofile << setw(12) << setprecision(5) << X[i] << setw(12) << setprecision(5)
-          << pattern[i] << setw(12) << setprecision(5) << dataws->readY(0)[i]
-          << setw(12) << setprecision(5) << dataws->readY(2)[i] << '\n';
+          << pattern[i] << setw(12) << setprecision(5) << dataws->y(0)[i]
+          << setw(12) << setprecision(5) << dataws->y(2)[i] << '\n';
   }
   ofile.close();
 
@@ -2453,16 +2419,14 @@ Workspace2D_sptr FitPowderDiffPeaks::genPeakParameterDataWorkspace() {
   Workspace2D_sptr paramws = boost::dynamic_pointer_cast<Workspace2D>(
       WorkspaceFactory::Instance().create("Workspace2D", 4, numgoodpeaks,
                                           numgoodpeaks));
-  for (size_t i = 0; i < numgoodpeaks; ++i) {
-    for (size_t j = 0; j < 4; ++j) {
-      paramws->dataX(j)[i] = vecdh[i];
-      paramws->dataE(j)[i] = vecchi2[i];
-    }
-    paramws->dataY(0)[i] = vectofh[i];
-    paramws->dataY(1)[i] = vecalpha[i];
-    paramws->dataY(2)[i] = vecbeta[i];
-    paramws->dataY(3)[i] = vecsigma[i];
+  for (size_t j = 0; j < 4; ++j) {
+    paramws->mutableX(j) = vecdh;
+    paramws->mutableE(j) = vecchi2;
   }
+  paramws->mutableY(0) = std::move(vectofh);
+  paramws->mutableY(1) = std::move(vecalpha);
+  paramws->mutableY(2) = std::move(vecbeta);
+  paramws->mutableY(3) = std::move(vecsigma);
 
   // 4. Set Axis label
   paramws->getAxis(0)->setUnit("dSpacing");
@@ -2672,8 +2636,8 @@ void FitPowderDiffPeaks::genPeaksFromTable(TableWorkspace_sptr peakparamws) {
   sort(m_vecPeakFunctions.begin(), m_vecPeakFunctions.end());
 
   // Remove all peaks outside of tof_min and tof_max
-  double tofmin = m_dataWS->readX(m_wsIndex)[0];
-  double tofmax = m_dataWS->readX(m_wsIndex).back();
+  double tofmin = m_dataWS->x(m_wsIndex)[0];
+  double tofmax = m_dataWS->x(m_wsIndex).back();
 
   stringstream dbss;
   dbss << "Specified range for peaks in TOF: " << tofmin << ", " << tofmax
@@ -2955,7 +2919,7 @@ void FitPowderDiffPeaks::plotFunction(IFunction_sptr peakfunction,
                                       BackgroundFunction_sptr background,
                                       FunctionDomain1DVector domain) {
   // 1. Determine range
-  const MantidVec &vecX = m_dataWS->readX(m_wsIndex);
+  const auto &vecX = m_dataWS->x(m_wsIndex);
   double x0 = domain[0];
   auto viter = lower_bound(vecX.cbegin(), vecX.cend(), x0);
   int ix0 = static_cast<int>(std::distance(vecX.cbegin(), viter));
@@ -3041,9 +3005,8 @@ void FitPowderDiffPeaks::cropWorkspace(double tofmin, double tofmax) {
     g_log.error(errmsg.str());
     throw std::runtime_error(errmsg.str());
   } else {
-    cout << "[DBx211] Cropped Workspace Range: "
-         << m_dataWS->readX(m_wsIndex)[0] << ", "
-         << m_dataWS->readX(m_wsIndex).back() << '\n';
+    cout << "[DBx211] Cropped Workspace Range: " << m_dataWS->x(m_wsIndex)[0]
+         << ", " << m_dataWS->x(m_wsIndex).back() << '\n';
   }
 }
 
@@ -3080,9 +3043,9 @@ FitPowderDiffPeaks::buildPartialWorkspace(API::MatrixWorkspace_sptr sourcews,
                                           size_t workspaceindex,
                                           double leftbound, double rightbound) {
   // 1. Check
-  const MantidVec &X = sourcews->readX(workspaceindex);
-  const MantidVec &Y = sourcews->readY(workspaceindex);
-  const MantidVec &E = sourcews->readE(workspaceindex);
+  const auto &X = sourcews->x(workspaceindex);
+  const auto &Y = sourcews->y(workspaceindex);
+  const auto &E = sourcews->e(workspaceindex);
 
   if (leftbound >= rightbound) {
     stringstream errmsg;
@@ -3121,8 +3084,8 @@ FitPowderDiffPeaks::buildPartialWorkspace(API::MatrixWorkspace_sptr sourcews,
       nX[i] = X[i + ileft];
     }
   }
-  MantidVec &nY = partws->dataY(0);
-  MantidVec &nE = partws->dataE(0);
+  auto &nY = partws->mutableY(0);
+  auto &nE = partws->mutableE(0);
   for (size_t i = 0; i < wssize; ++i) {
     nY[i] = Y[i + ileft];
     nE[i] = E[i + ileft];
@@ -3172,8 +3135,8 @@ void estimateBackgroundCoarse(DataObjects::Workspace2D_sptr dataws,
           << " spectra.";
     throw runtime_error(errss.str());
   }
-  const MantidVec &X = dataws->readX(wsindexraw);
-  const MantidVec &Y = dataws->readY(wsindexraw);
+  const auto &X = dataws->x(wsindexraw);
+  const auto &Y = dataws->y(wsindexraw);
 
   // TODO: This is a magic number!
   size_t numsamplepts = 2;
@@ -3210,19 +3173,14 @@ void estimateBackgroundCoarse(DataObjects::Workspace2D_sptr dataws,
   background->setParameter("A1", b1);
 
   // 4. Calcualte background
-  FunctionDomain1DVector domain(X);
+  FunctionDomain1DVector domain(X.rawData());
   FunctionValues values(domain);
   background->function(domain, values);
 
-  MantidVec &bY = dataws->dataY(wsindexbkgd);
-  MantidVec &pY = dataws->dataY(wsindexpeak);
-  MantidVec &pE = dataws->dataE(wsindexpeak);
-  const MantidVec &origE = dataws->dataE(wsindexraw);
-  for (size_t i = 0; i < bY.size(); ++i) {
-    bY[i] = values[i];
-    pY[i] = Y[i] - bY[i];
-    pE[i] = origE[i];
-  }
+  dataws->mutableY(wsindexbkgd) = values.toVector();
+  dataws->mutableY(wsindexpeak) =
+      dataws->y(wsindexraw) - dataws->y(wsindexbkgd);
+  dataws->mutableE(wsindexpeak) = dataws->e(wsindexraw);
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -3243,11 +3201,11 @@ bool observePeakParameters(Workspace2D_sptr dataws, size_t wsindex,
                            double &centre, double &height, double &fwhm,
                            string &errmsg) {
   // 1. Get the value of the Max Height
-  const MantidVec &X = dataws->readX(wsindex);
-  const MantidVec &Y = dataws->readY(wsindex);
+  const auto &X = dataws->x(wsindex);
+  const auto &Y = dataws->y(wsindex);
 
   // 2. The highest peak should be the centre
-  size_t icentre = findMaxValue(Y);
+  size_t icentre = findMaxValue(Y.rawData());
   centre = X[icentre];
   height = Y[icentre];
 
@@ -3339,18 +3297,10 @@ bool observePeakParameters(Workspace2D_sptr dataws, size_t wsindex,
  * @param Y :: vector to get maximum value from
  * @return index of the maximum value
  */
-size_t findMaxValue(const MantidVec Y) {
-  size_t imax = 0;
-  double maxy = Y[imax];
+size_t findMaxValue(const std::vector<double> &Y) {
 
-  for (size_t i = 0; i < Y.size(); ++i) {
-    if (Y[i] > maxy) {
-      maxy = Y[i];
-      imax = i;
-    }
-  }
-
-  return imax;
+  auto maxIt = std::max_element(Y.begin(), Y.end());
+  return std::distance(Y.begin(), maxIt);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -3363,8 +3313,8 @@ size_t findMaxValue(const MantidVec Y) {
  */
 size_t findMaxValue(MatrixWorkspace_sptr dataws, size_t wsindex,
                     double leftbound, double rightbound) {
-  const MantidVec &X = dataws->readX(wsindex);
-  const MantidVec &Y = dataws->readY(wsindex);
+  const auto &X = dataws->x(wsindex);
+  const auto &Y = dataws->y(wsindex);
 
   // 1. Determine xmin, xmax range
   std::vector<double>::const_iterator viter;
