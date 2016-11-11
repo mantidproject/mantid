@@ -440,7 +440,7 @@ std::string TomographyIfaceModel::constructSingleStringFromVector(
  * @param compRes The resource to which the request will be made
  */
 void TomographyIfaceModel::doSubmitReconstructionJob(
-    const std::string &compRes) {
+    const std::string &compRes, QThread &thread, TomographyProcessHandler &worker) {
   std::string run;
   std::vector<std::string> args;
   try {
@@ -464,7 +464,7 @@ void TomographyIfaceModel::doSubmitReconstructionJob(
          ", with parameters: " + allOpts);
 
   if (g_LocalResourceName == compRes) {
-    doRunReconstructionJobLocal(run, allOpts, args);
+    doRunReconstructionJobLocal(run, allOpts, args, thread, worker);
   } else {
     doRunReconstructionJobRemote(compRes, run, allOpts);
   }
@@ -507,13 +507,12 @@ void TomographyIfaceModel::doRunReconstructionJobRemote(
 
 void TomographyIfaceModel::doRunReconstructionJobLocal(
     const std::string &run, const std::string &allOpts,
-    const std::vector<std::string> &args) {
-
-  m_process.reset();
-  m_process = Mantid::Kernel::make_unique<TomographyProcessHandler>(g_log.notice());
+    const std::vector<std::string> &args, QThread &thread, TomographyProcessHandler &worker) {
+  
   try {
-    m_process->setup(run, args);
-    m_process->start();
+    // Can only run one reconstruction at a time. you can cancel the recon
+    worker.setup(run, args);
+    thread.start();
   }
   catch (Poco::SystemException & sexc) {
     g_log.error() << "Execution failed. Could not run the tool. Error details: "
@@ -521,16 +520,16 @@ void TomographyIfaceModel::doRunReconstructionJobLocal(
   }
 
   Mantid::API::IRemoteJobManager::RemoteJobInfo info;
-  
-  // TODO
-  auto pid = m_process->getPID();
+
+  // crash here  
+  auto pid = thread.currentThreadId();
   info.id = boost::lexical_cast<std::string>(pid);
   info.name = pid > 0 ? "Mantid_Local" : "none";
   info.status = pid > 0 ? "Starting" : "Exit";
   info.cmdLine = run + " " + allOpts;
   m_jobsStatusLocal.emplace_back(info);
   // TODO log proper info
-  g_log.information(m_process->getOutputString());
+  // g_log.notice(m_process->getOutputString());
   
   doRefreshJobsInfo(g_LocalResourceName);
 }
@@ -580,7 +579,7 @@ void TomographyIfaceModel::doRefreshJobsInfo(const std::string &compRes) {
 }
 
 void TomographyIfaceModel::refreshLocalJobsInfo() {
-  g_log.information(m_process->getOutputString());
+  // g_log.notice(m_process->getOutputString());
   
   for (auto &job : m_jobsStatusLocal) {
     if ("Exit" == job.status || "Done" == job.status)

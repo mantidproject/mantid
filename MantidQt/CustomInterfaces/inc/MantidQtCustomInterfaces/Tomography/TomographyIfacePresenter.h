@@ -80,6 +80,7 @@ protected:
 protected slots:
   /// It may be run on user request, or periodically from a timer/thread
   void processRefreshJobs();
+  void reconstructionFinished();
 
 protected:
   void processCancelJobs();
@@ -151,6 +152,8 @@ private:
   // for periodic update of the job status table/tree
   QTimer *m_keepAliveTimer;
   QThread *m_keepAliveThread;
+
+  std::unique_ptr<QThread> m_workerThread;
 
   std::unique_ptr<TomoToolConfigDialogBase> m_configDialog;
 

@@ -7,6 +7,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyProcessHandler.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -555,11 +556,27 @@ void TomographyIfacePresenter::processRunRecon() {
   m_model->setImageStackPreParams(m_view->currentROIEtcParams());
 
   try {
-    m_model->doSubmitReconstructionJob(m_view->currentComputeResource());
+    m_workerThread.reset();
+    m_workerThread = Mantid::Kernel::make_unique<QThread>(this);
+    std::unique_ptr<MantidQt::CustomInterfaces::TomographyProcessHandler> worker = 
+        Mantid::Kernel::make_unique<MantidQt::CustomInterfaces::TomographyProcessHandler>(this);
+    worker->moveToThread(m_workerThread.get());
+
+    connect(m_workerThread.get(), SIGNAL(started()), worker.get(), SLOT(startWorker()));
+    connect(worker.get(), SIGNAL(finished()), this, SLOT(reconstructionFinished()));
+    connect(m_workerThread.get(), SIGNAL(finished()), m_workerThread.get(),
+          SLOT(deleteLater()), Qt::DirectConnection);
+    connect(worker.get(), SIGNAL(finished()), worker.get(), SLOT(deleteLater()));
+
+    m_model->doSubmitReconstructionJob(m_view->currentComputeResource(), *(m_workerThread.get()), *(worker.get()));
   } catch (std::exception &e) {
     m_view->userWarning("Issue when trying to start a job", e.what());
   }
   processRefreshJobs();
+}
+
+void TomographyIfacePresenter::reconstructionFinished(){
+  // TOOD
 }
 
 bool TomographyIfacePresenter::isLocalResourceSelected() const {
