@@ -14,11 +14,11 @@ TomoToolConfigDialogBase::getToolDialogFor(const std::string &toolName) {
 
   if (toolName == "TomoPy") {
     return Mantid::Kernel::make_unique<TomoToolConfigDialogTomoPy>();
-  }else if (toolName == "Astra") {
+  } else if (toolName == "Astra") {
     return Mantid::Kernel::make_unique<TomoToolConfigDialogAstra>();
-  }else if (toolName == "Savu") {
+  } else if (toolName == "Savu") {
     return Mantid::Kernel::make_unique<TomoToolConfigDialogSavu>();
-  }else if (toolName == "Custom command") {
+  } else if (toolName == "Custom command") {
     return Mantid::Kernel::make_unique<TomoToolConfigDialogCustom>();
   }
   // tool doesn't exist, return nullptr

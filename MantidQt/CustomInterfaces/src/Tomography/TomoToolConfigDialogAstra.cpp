@@ -12,9 +12,8 @@ void TomoToolConfigDialogAstra::setupDialogUi() {
   m_astraUi.setupUi(m_dialog);
   m_astraUi.comboBox_method->clear();
   const auto &methods = getToolMethods();
-  for(auto &method : methods){
-    m_astraUi.comboBox_method->addItem(
-        QString::fromStdString(method.second));
+  for (auto &method : methods) {
+    m_astraUi.comboBox_method->addItem(QString::fromStdString(method.second));
   }
 }
 
@@ -37,7 +36,8 @@ void TomoToolConfigDialogAstra::setupMethodSelected() {
 */
 int TomoToolConfigDialogAstra::executeQt() { return m_dialog->exec(); }
 
-std::vector<std::pair<std::string, std::string>> TomoToolConfigDialogAstra::getToolMethods() {
+std::vector<std::pair<std::string, std::string>>
+TomoToolConfigDialogAstra::getToolMethods() {
   return ToolConfigAstraToolbox::methods();
 }
 

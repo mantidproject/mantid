@@ -12,9 +12,8 @@ void TomoToolConfigDialogTomoPy::setupDialogUi() {
   m_tomoPyUi.comboBox_method->clear();
 
   const auto &methods = getToolMethods();
-  for(auto &method : methods){
-    m_tomoPyUi.comboBox_method->addItem(
-        QString::fromStdString(method.second));
+  for (auto &method : methods) {
+    m_tomoPyUi.comboBox_method->addItem(QString::fromStdString(method.second));
   }
 }
 
@@ -40,7 +39,8 @@ void TomoToolConfigDialogTomoPy::setupMethodSelected() {
 */
 int TomoToolConfigDialogTomoPy::executeQt() { return m_dialog->exec(); }
 
-std::vector<std::pair<std::string, std::string>> TomoToolConfigDialogTomoPy::getToolMethods() {
+std::vector<std::pair<std::string, std::string>>
+TomoToolConfigDialogTomoPy::getToolMethods() {
   return ToolConfigTomoPy::methods();
 }
 } // Custominterfaces

@@ -127,7 +127,9 @@ protected:
                                // have this->exec()
 
   // empty function body as not all tools have methods
-  virtual std::vector<std::pair<std::string, std::string>> getToolMethods(){ return {};}
+  virtual std::vector<std::pair<std::string, std::string>> getToolMethods() {
+    return {};
+  }
 
   std::shared_ptr<TomoRecToolConfig> m_toolSettings;
 
