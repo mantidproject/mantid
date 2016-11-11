@@ -2244,13 +2244,13 @@ void SliceViewer::dynamicRebinComplete(bool error) {
 
   if (m_overlayWS) {
     // Position the outline according to the position of the workspace.
-    auto xBinWidth = m_overlayWS->getDimension(m_dimY)->getBinWidth();
-    auto yBinWidth = m_overlayWS->getDimension(m_dimY)->getBinWidth();
-    double yMin = m_overlayWS->getDimension(m_dimY)->getMinimum() - yBinWidth;
-    double yMax = m_overlayWS->getDimension(m_dimY)->getMaximum() + yBinWidth;
+    double yMin = m_overlayWS->getDimension(m_dimY)->getMinimum();
+    double yMax = m_overlayWS->getDimension(m_dimY)->getMaximum();
     double yMiddle = (yMin + yMax) / 2.0;
-    QPointF pointA(m_overlayWS->getDimension(m_dimX)->getMinimum() - xBinWidth, yMiddle);
-    QPointF pointB(m_overlayWS->getDimension(m_dimX)->getMaximum() + xBinWidth, yMiddle);
+    QPointF pointA(m_overlayWS->getDimension(m_dimX)->getMinimum(),
+                   yMiddle);
+    QPointF pointB(m_overlayWS->getDimension(m_dimX)->getMaximum(),
+                   yMiddle);
     m_overlayWSOutline->setPointA(pointA);
     m_overlayWSOutline->setPointB(pointB);
     m_overlayWSOutline->setWidth((yMax - yMin) / 2.0);
