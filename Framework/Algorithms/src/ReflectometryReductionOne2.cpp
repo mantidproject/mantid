@@ -205,8 +205,6 @@ void ReflectometryReductionOne2::exec() {
     IvsLam = transmissionCorrection(IvsLam);
   } else if (getPropertyValue("CorrectionAlgorithm") != "None") {
     IvsLam = algorithmicCorrection(IvsLam);
-  } else {
-    g_log.warning("No transmission correction will be applied.");
   }
 
   // Convert to Q
