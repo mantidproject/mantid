@@ -83,7 +83,9 @@ public:
   MOCK_METHOD1(userChangedDataset, void(int));
   MOCK_CONST_METHOD0(rawData, bool());
   MOCK_METHOD1(continueAfterChecks, void(bool));
-  void preFitChecksRequested(bool sequential) override{};
+  void preFitChecksRequested(bool sequential) override {
+    UNUSED_ARG(sequential);
+  }
   GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
 

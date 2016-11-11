@@ -374,9 +374,9 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
   // load original data - need to get filename(s) of individual run(s)
   QStringList filenames;
   for (const int run : params.runs) {
-    filenames.append(QString::fromStdString(MuonAnalysisHelper::getRunLabel(
-                                                params.instrument, {run}))
-                         .append(".nxs"));
+    filenames.append(
+        QString::fromStdString(MuonAnalysisHelper::getRunLabel(
+                                   params.instrument, {run})).append(".nxs"));
   }
   try {
     // This will sum multiple runs together
