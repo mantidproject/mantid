@@ -3508,8 +3508,8 @@ void MantidUI::plotLayerOfMultilayer(MultiLayer *multi, const bool plotErrors,
     legendText += "\\l(" + QString::number(++curveIndex) + ")" +
                   getLegendKey(wsName, spec) + "\n";
   }
-  setInitialAutoscale(layer);
   formatPlot(layer, legendText, row, col);
+  setInitialAutoscale(layer);
   incrementCounters(row, col);
 }
 
