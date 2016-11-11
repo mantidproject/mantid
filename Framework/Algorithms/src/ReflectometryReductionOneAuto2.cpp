@@ -474,65 +474,58 @@ bool ReflectometryReductionOneAuto2::processGroups() {
 
   const std::string firstTrans = getPropertyValue("FirstTransmissionRun");
   WorkspaceGroup_sptr firstTransG;
+  MatrixWorkspace_sptr firstTransSum;
   if (!firstTrans.empty()) {
     auto firstTransWS =
         AnalysisDataService::Instance().retrieveWS<Workspace>(firstTrans);
     firstTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
     if (!firstTransG) {
       alg->setProperty("FirstTransmissionRun", firstTrans);
+    } else if (polarizationAnalysisOn) {
+      firstTransSum = sumTransmissionWorkspaces(firstTransG);
     }
   }
   const std::string secondTrans = getPropertyValue("SecondTransmissionRun");
   WorkspaceGroup_sptr secondTransG;
+  MatrixWorkspace_sptr secondTransSum;
   if (!secondTrans.empty()) {
     auto secondTransWS =
         AnalysisDataService::Instance().retrieveWS<Workspace>(secondTrans);
     secondTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
     if (!secondTransG) {
       alg->setProperty("SecondTransmissionRun", secondTrans);
+    } else if (polarizationAnalysisOn) {
+      secondTransSum = sumTransmissionWorkspaces(secondTransG);
     }
   }
 
   std::vector<std::string> IvsQGroup, IvsLamGroup;
 
-  // Execute algorithm over each group member (or period, if this is
-  // multiperiod)
-  size_t numMembers = group->size();
-  for (size_t i = 0; i < numMembers; ++i) {
+  // Execute algorithm over each group member
+  for (size_t i = 0; i < group->size(); ++i) {
+
     const std::string IvsQName = outputIvsQ + "_" + std::to_string(i + 1);
     const std::string IvsLamName = outputIvsLam + "_" + std::to_string(i + 1);
 
-    // If our transmission run is a group and PolarizationCorrection is on
-    // then we sum our transmission group members.
-    //
-    // This is done inside of the for loop to avoid the wrong workspace being
-    // used when these arguments are passed through to the exec() method.
-    // If this is not set in the loop, exec() will fetch the first workspace
-    // from the specified Transmission Group workspace that the user entered.
-    if (firstTransG && polarizationAnalysisOn) {
-      auto firstTransmissionSum = sumTransmissionWorkspaces(firstTransG);
-      alg->setProperty("FirstTransmissionRun", firstTransmissionSum);
+    if (firstTransG) {
+      if (!polarizationAnalysisOn)
+        alg->setProperty("FirstTransmissionRun",
+                         firstTransG->getItem(i)->name());
+      else
+        alg->setProperty("FirstTransmissionRun", firstTransSum);
     }
-    if (secondTransG && polarizationAnalysisOn) {
-      auto secondTransmissionSum = sumTransmissionWorkspaces(secondTransG);
-      alg->setProperty("SecondTransmissionRun", secondTransmissionSum);
+    if (secondTransG) {
+      if (!polarizationAnalysisOn)
+        alg->setProperty("SecondTransmissionRun",
+                         secondTransG->getItem(i)->name());
+      else
+        alg->setProperty("SecondTransmissionRun", secondTransSum);
     }
-
-    // Otherwise, if polarization correction is off, we process them
-    // using one transmission group member at a time.
-    if (firstTransG && !polarizationAnalysisOn)
-      alg->setProperty("FirstTransmissionRun", firstTransG->getItem(i)->name());
-    if (secondTransG && !polarizationAnalysisOn)
-      alg->setProperty("SecondTransmissionRun",
-                       secondTransG->getItem(i)->name());
 
     alg->setProperty("InputWorkspace", group->getItem(i)->name());
     alg->setProperty("OutputWorkspace", IvsQName);
     alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
     alg->execute();
-
-    MatrixWorkspace_sptr tempFirstTransWS =
-        alg->getProperty("FirstTransmissionRun");
 
     IvsQGroup.push_back(IvsQName);
     IvsLamGroup.push_back(IvsLamName);
@@ -583,7 +576,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   alg->setProperty("SecondTransmissionRun", "");
   alg->setProperty("CorrectionAlgorithm", "None");
   alg->setProperty("ThetaIn", Mantid::EMPTY_DBL());
-  for (size_t i = 0; i < numMembers; ++i) {
+  for (size_t i = 0; i < group->size(); ++i) {
     const std::string IvsQName = outputIvsQ + "_" + std::to_string(i + 1);
     const std::string IvsLamName = outputIvsLam + "_" + std::to_string(i + 1);
     alg->setProperty("InputWorkspace", IvsLamName);
