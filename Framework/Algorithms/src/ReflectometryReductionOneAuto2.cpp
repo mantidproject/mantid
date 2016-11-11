@@ -72,7 +72,7 @@ ReflectometryReductionOneAuto2::validateInputs() {
     const bool polarizationCorrections =
         getPropertyValue("PolarizationAnalysis") != "None";
 
-    if (group->size() != firstTransGroup->size() && polarizationCorrections) {
+    if (group->size() != firstTransGroup->size() && !polarizationCorrections) {
       // If they are not the same size then we cannot associate a transmission
       // group member with every input group member.
       results["FirstTransmissionRun"] =
@@ -95,7 +95,7 @@ ReflectometryReductionOneAuto2::validateInputs() {
     const bool polarizationCorrections =
         getPropertyValue("PolarizationAnalysis") != "None";
 
-    if (group->size() != secondTransGroup->size() && polarizationCorrections) {
+    if (group->size() != secondTransGroup->size() && !polarizationCorrections) {
       results["SecondTransmissionRun"] =
           "SecondTransmissionRun group must be the "
           "same size as the InputWorkspace group "
@@ -439,9 +439,6 @@ bool ReflectometryReductionOneAuto2::checkGroups() {
  * documentation of this algorithm for more details.
 */
 bool ReflectometryReductionOneAuto2::processGroups() {
-  const bool isPolarizationCorrectionOn =
-      getPropertyValue("PolarizationAnalysis") != "None";
-
   // this algorithm effectively behaves as MultiPeriodGroupAlgorithm
   m_usingBaseProcessGroups = true;
 
@@ -470,47 +467,32 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     }
   }
 
+  const bool polarizationAnalysisOn =
+      getPropertyValue("PolarizationAnalysis") != "None";
+
   // Check if the transmission runs are groups or not
+
   const std::string firstTrans = getPropertyValue("FirstTransmissionRun");
   WorkspaceGroup_sptr firstTransG;
   if (!firstTrans.empty()) {
     auto firstTransWS =
         AnalysisDataService::Instance().retrieveWS<Workspace>(firstTrans);
     firstTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
-
     if (!firstTransG) {
-      // we only have one transmission workspace, so we use it as it is.
       alg->setProperty("FirstTransmissionRun", firstTrans);
-    } else if (group->size() != firstTransG->size() &&
-               !isPolarizationCorrectionOn) {
-      // if they are not the same size then we cannot associate a transmission
-      // group workspace member with every input group workpspace member.
-      throw std::runtime_error("FirstTransmissionRun WorkspaceGroup must be "
-                               "the same size as the InputWorkspace "
-                               "WorkspaceGroup");
     }
   }
-
   const std::string secondTrans = getPropertyValue("SecondTransmissionRun");
   WorkspaceGroup_sptr secondTransG;
   if (!secondTrans.empty()) {
     auto secondTransWS =
         AnalysisDataService::Instance().retrieveWS<Workspace>(secondTrans);
     secondTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
-
-    if (!secondTransG)
-      // we only have one transmission workspace, so we use it as it is.
+    if (!secondTransG) {
       alg->setProperty("SecondTransmissionRun", secondTrans);
-
-    else if (group->size() != secondTransG->size() &&
-             !isPolarizationCorrectionOn) {
-      // if they are not the same size then we cannot associate a transmission
-      // group workspace member with every input group workpspace member.
-      throw std::runtime_error("SecondTransmissionRun WorkspaceGroup must be "
-                               "the same size as the InputWorkspace "
-                               "WorkspaceGroup");
     }
   }
+
   std::vector<std::string> IvsQGroup, IvsLamGroup;
 
   // Execute algorithm over each group member (or period, if this is
@@ -527,20 +509,20 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     // used when these arguments are passed through to the exec() method.
     // If this is not set in the loop, exec() will fetch the first workspace
     // from the specified Transmission Group workspace that the user entered.
-    if (firstTransG && isPolarizationCorrectionOn) {
+    if (firstTransG && polarizationAnalysisOn) {
       auto firstTransmissionSum = sumTransmissionWorkspaces(firstTransG);
       alg->setProperty("FirstTransmissionRun", firstTransmissionSum);
     }
-    if (secondTransG && isPolarizationCorrectionOn) {
+    if (secondTransG && polarizationAnalysisOn) {
       auto secondTransmissionSum = sumTransmissionWorkspaces(secondTransG);
       alg->setProperty("SecondTransmissionRun", secondTransmissionSum);
     }
 
     // Otherwise, if polarization correction is off, we process them
     // using one transmission group member at a time.
-    if (firstTransG && !isPolarizationCorrectionOn) // polarization off
+    if (firstTransG && !polarizationAnalysisOn)
       alg->setProperty("FirstTransmissionRun", firstTransG->getItem(i)->name());
-    if (secondTransG && !isPolarizationCorrectionOn) // polarization off
+    if (secondTransG && !polarizationAnalysisOn)
       alg->setProperty("SecondTransmissionRun",
                        secondTransG->getItem(i)->name());
 
@@ -560,53 +542,54 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   Algorithm_sptr groupAlg = createChildAlgorithm("GroupWorkspaces");
   groupAlg->setChild(false);
   groupAlg->setRethrows(true);
-
   groupAlg->setProperty("InputWorkspaces", IvsLamGroup);
   groupAlg->setProperty("OutputWorkspace", outputIvsLam);
   groupAlg->execute();
-
   groupAlg->setProperty("InputWorkspaces", IvsQGroup);
   groupAlg->setProperty("OutputWorkspace", outputIvsQ);
   groupAlg->execute();
 
-  // If this is a multiperiod workspace and we have polarization corrections
-  // enabled
-  if (isPolarizationCorrectionOn) {
-    if (group->isMultiperiod()) {
-      // Perform polarization correction over the IvsLam group
-      Algorithm_sptr polAlg = createChildAlgorithm("PolarizationCorrection");
-      polAlg->setChild(false);
-      polAlg->setRethrows(true);
+  if (!polarizationAnalysisOn) {
+    // No polarization analysis. Reduction stops here
+    setPropertyValue("OutputWorkspace", outputIvsQ);
+    setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
+    return true;
+  }
 
-      polAlg->setProperty("InputWorkspace", outputIvsLam);
-      polAlg->setProperty("OutputWorkspace", outputIvsLam);
-      polAlg->setProperty("PolarizationAnalysis",
-                          getPropertyValue("PolarizationAnalysis"));
-      polAlg->setProperty("CPp", getPropertyValue("CPp"));
-      polAlg->setProperty("CRho", getPropertyValue("CRho"));
-      polAlg->setProperty("CAp", getPropertyValue("CAp"));
-      polAlg->setProperty("CAlpha", getPropertyValue("CAlpha"));
-      polAlg->execute();
+  if (!group->isMultiperiod()) {
+    g_log.warning("Polarization corrections can only be performed on "
+                  "multiperiod workspaces.");
+    setPropertyValue("OutputWorkspace", outputIvsQ);
+    setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
+    return true;
+  }
 
-      // Now we've overwritten the IvsLam workspaces, we'll need to recalculate
-      // the IvsQ ones
-      alg->setProperty("FirstTransmissionRun", "");
-      alg->setProperty("SecondTransmissionRun", "");
-      alg->setProperty("ThetaIn", Mantid::EMPTY_DBL());
-      for (size_t i = 0; i < numMembers; ++i) {
-        const std::string IvsQName = outputIvsQ + "_" + std::to_string(i + 1);
-        const std::string IvsLamName =
-            outputIvsLam + "_" + std::to_string(i + 1);
-        alg->setProperty("InputWorkspace", IvsLamName);
-        alg->setProperty("OutputWorkspace", IvsQName);
-        alg->setProperty("CorrectionAlgorithm", "None");
-        alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
-        alg->execute();
-      }
-    } else {
-      g_log.warning("Polarization corrections can only be performed on "
-                    "multiperiod workspaces.");
-    }
+  Algorithm_sptr polAlg = createChildAlgorithm("PolarizationCorrection");
+  polAlg->setChild(false);
+  polAlg->setRethrows(true);
+  polAlg->setProperty("InputWorkspace", outputIvsLam);
+  polAlg->setProperty("OutputWorkspace", outputIvsLam);
+  polAlg->setProperty("PolarizationAnalysis",
+                      getPropertyValue("PolarizationAnalysis"));
+  polAlg->setProperty("CPp", getPropertyValue("CPp"));
+  polAlg->setProperty("CRho", getPropertyValue("CRho"));
+  polAlg->setProperty("CAp", getPropertyValue("CAp"));
+  polAlg->setProperty("CAlpha", getPropertyValue("CAlpha"));
+  polAlg->execute();
+
+  // Now we've overwritten the IvsLam workspaces, we'll need to recalculate
+  // the IvsQ ones
+  alg->setProperty("FirstTransmissionRun", "");
+  alg->setProperty("SecondTransmissionRun", "");
+  alg->setProperty("CorrectionAlgorithm", "None");
+  alg->setProperty("ThetaIn", Mantid::EMPTY_DBL());
+  for (size_t i = 0; i < numMembers; ++i) {
+    const std::string IvsQName = outputIvsQ + "_" + std::to_string(i + 1);
+    const std::string IvsLamName = outputIvsLam + "_" + std::to_string(i + 1);
+    alg->setProperty("InputWorkspace", IvsLamName);
+    alg->setProperty("OutputWorkspace", IvsQName);
+    alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
+    alg->execute();
   }
 
   setPropertyValue("OutputWorkspace", outputIvsQ);
@@ -632,15 +615,6 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::sumTransmissionWorkspaces(
   plusAlg->initialize();
 
   for (size_t item = 1; item < transGroup->size(); item++) {
-
-    MatrixWorkspace_sptr lhs =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(sumWS);
-    MatrixWorkspace_sptr rhs =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(transGroup->getItem(item));
-    std::cout << lhs->blocksize() << "\t" << rhs->blocksize() << "\n";
-    std::cout << lhs->getNumberHistograms() << "\t"
-              << rhs->getNumberHistograms() << "\n";
-
     plusAlg->setProperty("LHSWorkspace", sumWS);
     plusAlg->setProperty("RHSWorkspace", transGroup->getItem(item));
     plusAlg->setProperty("OutputWorkspace", transSum);
