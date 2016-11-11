@@ -226,9 +226,7 @@ public:
     std::vector<std::string> tools{"Astra", "TomoPy"};
 
     TomoPathsConfig toolPaths;
-    const size_t toolsize = tools.size();
 
-    // for (size_t i = 0; i < toolsize; i++) {
     for (const auto &tool : tools) {
       // expect the current paths config will be read only once
       EXPECT_CALL(mockView, currentPathsConfig())
