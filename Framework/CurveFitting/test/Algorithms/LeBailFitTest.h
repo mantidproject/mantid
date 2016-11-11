@@ -1388,7 +1388,7 @@ public:
   }
   static void destroySuite(LeBailFitTestPerformance *suite) { delete suite; }
 
-  void setUp() {
+  void setUp() override {
     dataws1 = createInputDataWorkspace(1);
     dataws9 = createInputDataWorkspace(9);
     map<string, double> modmap;

@@ -285,7 +285,7 @@ public:
     delete suite;
   }
 
-  void setUp() { testWS = createTwoSpectrumWorkspace(); }
+  void setUp() override { testWS = createTwoSpectrumWorkspace(); }
 
   void test_sum_false() {
     using namespace Mantid::API;

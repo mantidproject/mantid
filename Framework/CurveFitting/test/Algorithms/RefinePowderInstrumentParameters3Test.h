@@ -309,7 +309,7 @@ public:
     delete suite;
   }
 
-  void setUp() {
+  void setUp() override {
     posWS = generatePeakPositionWorkspace(1);
     profWS = generateInstrumentProfileTableBank1();
 
@@ -318,7 +318,7 @@ public:
                                                  profWS);
   }
 
-  void tearDown() {
+  void tearDown() override {
 
     AnalysisDataService::Instance().remove("Bank1PeakPositions");
     AnalysisDataService::Instance().remove("Bank1FittedPositions");
