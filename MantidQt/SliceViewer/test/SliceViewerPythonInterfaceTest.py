@@ -480,8 +480,8 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertEqual(ws.getNumDims(), 3)
         self.assertEqual(ws.getDimension(0).getNBins(), 10)
         self.assertEqual(ws.getDimension(1).getNBins(), 10)
-        self.assertEqual(ws.getDimension(2).getNBins(), 30)
-        self.assertEqual(ws.getNPoints(), 10*10*30)
+        self.assertEqual(ws.getDimension(2).getNBins(), 1)
+        self.assertEqual(ws.getNPoints(), 10*10)
 
         svw.deleteLater()
 
