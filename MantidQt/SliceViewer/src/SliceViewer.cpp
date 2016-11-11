@@ -2174,15 +2174,8 @@ void SliceViewer::rebinParamsChanged() {
     double min = 0;
     double max = 1;
     int numBins = 1;
-    if (m_ws->isMDHistoWorkspace()) {
-      // If rebinning from an existing MDHistoWorkspaces we should take exents
-      // from the existing workspace.
-      auto dim = m_ws->getDimension(d);
-      min = dim->getMinimum();
-      max = dim->getMaximum();
-      // And the user-entered number of bins
-      numBins = widget->getNumBins();
-    } else if (widget->getShownDim() < 0) {
+
+    if (widget->getShownDim() < 0) {
       // Slice point. So integrate with a thickness
       min = widget->getSlicePoint() - widget->getThickness();
       max = widget->getSlicePoint() + widget->getThickness();
@@ -2251,11 +2244,13 @@ void SliceViewer::dynamicRebinComplete(bool error) {
 
   if (m_overlayWS) {
     // Position the outline according to the position of the workspace.
-    double yMin = m_overlayWS->getDimension(m_dimY)->getMinimum();
-    double yMax = m_overlayWS->getDimension(m_dimY)->getMaximum();
+    auto xBinWidth = m_overlayWS->getDimension(m_dimY)->getBinWidth();
+    auto yBinWidth = m_overlayWS->getDimension(m_dimY)->getBinWidth();
+    double yMin = m_overlayWS->getDimension(m_dimY)->getMinimum() - yBinWidth;
+    double yMax = m_overlayWS->getDimension(m_dimY)->getMaximum() + yBinWidth;
     double yMiddle = (yMin + yMax) / 2.0;
-    QPointF pointA(m_overlayWS->getDimension(m_dimX)->getMinimum(), yMiddle);
-    QPointF pointB(m_overlayWS->getDimension(m_dimX)->getMaximum(), yMiddle);
+    QPointF pointA(m_overlayWS->getDimension(m_dimX)->getMinimum() - xBinWidth, yMiddle);
+    QPointF pointB(m_overlayWS->getDimension(m_dimX)->getMaximum() + xBinWidth, yMiddle);
     m_overlayWSOutline->setPointA(pointA);
     m_overlayWSOutline->setPointB(pointB);
     m_overlayWSOutline->setWidth((yMax - yMin) / 2.0);
