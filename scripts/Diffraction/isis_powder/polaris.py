@@ -130,11 +130,12 @@ class Polaris(AbstractInst):
         else:
             solid_angle_vanadium_ws = mantid.Load(Filename=vanadium_path)
 
-        solid_angle_vanadium_ws = self._normalise_ws(solid_angle_vanadium_ws)
-        corrections = self._calculate_solid_angle_efficiency_corrections(solid_angle_vanadium_ws)
+        normalised_vanadium_ws = self._normalise_ws(solid_angle_vanadium_ws)
+        corrections = self._calculate_solid_angle_efficiency_corrections(normalised_vanadium_ws)
 
         corrected_ws = mantid.Divide(LHSWorkspace=ws_to_correct, RHSWorkspace=corrections)
         common.remove_intermediate_workspace(solid_angle_vanadium_ws)
+        common.remove_intermediate_workspace(normalised_vanadium_ws)
         common.remove_intermediate_workspace(corrections)
         common.remove_intermediate_workspace(ws_to_correct)
         ws_to_correct = corrected_ws
@@ -215,6 +216,10 @@ class Polaris(AbstractInst):
             calculated_binning_params.append(bank_binning_params)
 
         return calculated_binning_params
+
+    def _process_focus_output(self, processed_spectra, run_number, attenuate=False):
+        return _create_d_spacing_tof_output(processed_spectra)
+        # TODO saving out to GSS/XYE/..etc.
 
     def _read_masking_file(self):
         all_banks_masking_list = []
@@ -306,3 +311,25 @@ def _calculate_focus_bin_width(bin_data):
     rebin_width = math.exp(avg_delta) - 1
     rebin_width = -1 * math.fabs(rebin_width)
     return rebin_width
+
+
+def _create_d_spacing_tof_output(processed_spectra):
+    name_index = 1
+    d_spacing_output = []
+    tof_output = []
+    for ws in processed_spectra:
+        d_spacing_out_name = "ResultD-" + str(name_index)
+        tof_out_name = "ResultTOF-" + str(name_index)
+        name_index += 1
+        # Rename d-spacing workspaces
+        d_spacing_output.append(mantid.CloneWorkspace(InputWorkspace=ws, OutputWorkspace=d_spacing_out_name))
+        # Convert to TOF
+        tof_output.append(mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=tof_out_name, Target="TOF"))
+
+    # Group the outputs
+    d_spacing_group_name = "Results-D-Grp"
+    d_spacing_group = mantid.GroupWorkspaces(InputWorkspaces=d_spacing_output, OutputWorkspace=d_spacing_group_name)
+    tof_group_name = "Results-TOF-Grp"
+    tof_group = mantid.GroupWorkspaces(InputWorkspaces=tof_output, OutputWorkspace=tof_group_name)
+
+    return d_spacing_group, tof_group

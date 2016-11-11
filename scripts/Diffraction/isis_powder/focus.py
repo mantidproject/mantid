@@ -28,14 +28,14 @@ def _run_focus(instrument, run_number, perform_attenuation, perform_vanadium_nor
     input_workspace = instrument._apply_solid_angle_efficiency_corr(ws_to_correct=input_workspace,
                                                                     vanadium_path=calibration_file_paths["vanadium"])
 
-    input_workspace = mantid.DiffractionFocussing(InputWorkspace=input_workspace,
-                                                  GroupingFileName=calibration_file_paths["grouping"])
+    focused_ws = mantid.DiffractionFocussing(InputWorkspace=input_workspace,
+                                             GroupingFileName=calibration_file_paths["grouping"])
 
     # Process
-    rebinning_params = instrument.calculate_focus_binning_params(sample=input_workspace)
+    rebinning_params = instrument.calculate_focus_binning_params(sample=focused_ws)
 
     calibrated_spectra = _divide_sample_by_vanadium(instrument=instrument, run_number=run_number,
-                                                    input_workspace=input_workspace,
+                                                    input_workspace=focused_ws,
                                                     perform_vanadium_norm=perform_vanadium_norm)
 
     _apply_binning_to_spectra(spectra_list=calibrated_spectra, binning_list=rebinning_params)
@@ -46,8 +46,9 @@ def _run_focus(instrument, run_number, perform_attenuation, perform_vanadium_nor
     # Tidy
     common.remove_intermediate_workspace(read_ws)
     common.remove_intermediate_workspace(input_workspace)
+    common.remove_intermediate_workspace(focused_ws)
     for ws in calibrated_spectra:
-        #  common.remove_intermediate_workspace(ws)
+        common.remove_intermediate_workspace(ws)
         pass
 
     return processed_nexus_files
