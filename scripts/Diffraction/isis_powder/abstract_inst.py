@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
 from six import add_metaclass
+import os
 
 from isis_powder import common
 from isis_powder import focus
@@ -98,10 +99,10 @@ class AbstractInst(object):
 
     def _generate_out_file_paths(self, run_number, output_directory):
         file_name = self._generate_inst_file_name(run_number=run_number)
-        nxs_file = output_directory + str(file_name) + ".nxs"
-        gss_file = output_directory + str(file_name) + ".gss"
-        tof_xye_file = output_directory + str(file_name) + "_tof_xye.dat"
-        d_xye_file = output_directory + str(file_name) + "_d_xye.dat"
+        nxs_file = os.path.join(output_directory, (str(file_name) + ".nxs"))
+        gss_file = os.path.join(output_directory + (str(file_name) + ".gss"))
+        tof_xye_file = os.path.join(output_directory + (str(file_name) + "_tof_xye.dat"))
+        d_xye_file = os.path.join(output_directory + (str(file_name) + "_d_xye.dat"))
         out_name = str(file_name)
 
         out_file_names = {"nxs_filename": nxs_file,
@@ -118,8 +119,7 @@ class AbstractInst(object):
         str_run_cycle = str(run_cycle)
 
         # Append current cycle to raw data directory
-        generated_dir = self.raw_data_dir + str_run_cycle
-        generated_dir = _append_path_dividers_to_end(generated_dir, self.raw_data_dir)
+        generated_dir = os.path.join(self.raw_data_dir, str_run_cycle)
 
         return generated_dir
 
@@ -127,7 +127,7 @@ class AbstractInst(object):
         # Uses runtime polymorphism to generate the full run name
         file_name = self._generate_inst_file_name(run_number)
         extension = self.default_input_ext
-        return input_dir + file_name + extension
+        return os.path.join(input_dir, (file_name + extension))
 
     # Instrument specific properties to be implemented by base classes #
 
@@ -297,15 +297,6 @@ def _append_dot_to_ext(ext):
     else:
         return ext
 
-
-def _append_path_dividers_to_end(generated_dir, raw_data_dir):
-    if raw_data_dir.endswith('\\'):
-        generated_dir += '\\'
-    elif raw_data_dir.endswith('/'):
-        generated_dir += '/'
-    else:
-        raise ValueError("Path :" + raw_data_dir + "\n Does not end with a \\ or / character")
-    return generated_dir
 
 
 # These empty hooks can be used to diagnose when an override hasn't

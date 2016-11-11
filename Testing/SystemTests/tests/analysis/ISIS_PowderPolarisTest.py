@@ -112,7 +112,7 @@ def setup_polaris_instrument():
     user_name = "Test"
 
     calibration_dir = _get_calibration_dir()
-    raw_data_dir = os.path.join(DIRS[0], "POLARIS/")
+    raw_data_dir = os.path.join(DIRS[0], "POLARIS")
     output_dir = _get_output_dir()
 
     polaris_obj = polaris.Polaris(user_name=user_name, calibration_dir=calibration_dir, raw_data_dir=raw_data_dir,
@@ -125,8 +125,8 @@ def _get_calibration_output_name():
 
 
 def _get_output_dir():
-    return os.path.join(DIRS[0], "POLARIS/DataOut/")
+    return os.path.join(DIRS[0], "POLARIS/DataOut")
 
 
 def _get_calibration_dir():
-    return os.path.join(DIRS[0], "POLARIS/test/Cycle_15_2/Calibration/")
+    return os.path.join(DIRS[0], "POLARIS/test/Cycle_15_2/Calibration")

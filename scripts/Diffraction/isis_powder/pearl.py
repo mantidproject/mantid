@@ -39,15 +39,13 @@ class Pearl(AbstractInst):
         # path given for raw files.
         self._disable_appending_cycle_to_raw_dir = False
 
-        # live_data_directory = None  # TODO deal with this
-
         # Old API support
         self._old_atten_file = None
         self._old_api_uses_full_paths = False
 
         # File names
         pearl_mc_absorption_file_name = "PRL112_DC25_10MM_FF.OUT"  # TODO
-        self._attenuation_full_path = calibration_dir + pearl_mc_absorption_file_name  # TODO
+        self._attenuation_full_path = os.path.join(calibration_dir, pearl_mc_absorption_file_name)
 
     # --- Abstract Implementation ---- #
 
@@ -72,11 +70,10 @@ class Pearl(AbstractInst):
 
         calibration_dir = self.calibration_dir
 
-        # TODO move this to use OS.path.join
-        calibration_full_path = calibration_dir + calibration_file
-        grouping_full_path = calibration_dir + grouping_file
-        van_absorb_full_path = calibration_dir + van_absorb
-        van_file_full_path = calibration_dir + van_file
+        calibration_full_path = os.path.join(calibration_dir, calibration_file)
+        grouping_full_path = os.path.join(calibration_dir, grouping_file)
+        van_absorb_full_path = os.path.join(calibration_dir, van_absorb)
+        van_file_full_path = os.path.join(calibration_dir, van_file)
 
         # TODO when we move PEARL to save out splined vanadium files support them below
         calibration_details = {"calibration": calibration_full_path,
@@ -112,7 +109,6 @@ class Pearl(AbstractInst):
         input_ws = common._load_current_normalised_ws(number=calibration_runs, instrument=self)
         cycle_information = self._get_cycle_information(calibration_runs)
 
-        # TODO move these hard coded params to instrument specific
         if cycle_information["instrument_version"] == "new" or cycle_information["instrument_version"] == "new2":
             input_ws = mantid.Rebin(InputWorkspace=input_ws, Params="100,-0.0006,19950")
 
@@ -133,8 +129,8 @@ class Pearl(AbstractInst):
             grouping_file_path = grouping_file_name
             offset_file_path = offset_file_name
         else:
-            offset_file_path = self.calibration_dir + offset_file_name
-            grouping_file_path = self.calibration_dir + grouping_file_name
+            offset_file_path = os.path.join(self.calibration_dir, offset_file_name)
+            grouping_file_path = os.path.join(self.calibration_dir, grouping_file_name)
 
         # Ceo Cell refined to 5.4102(3) so 220 is 1.912795
         offset_output_path = mantid.GetDetectorOffsets(InputWorkspace=cross_cor_ws, Step=0.002, DReference=1.912795,
