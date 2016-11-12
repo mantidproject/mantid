@@ -180,7 +180,7 @@ int vtkMDHWNexusReader::CanReadFile(const char *fname) {
   return temp.canReadFile();
 }
 
-unsigned long vtkMDHWNexusReader::GetMTime() { return Superclass::GetMTime(); }
+vtkMTimeType vtkMDHWNexusReader::GetMTime() { return Superclass::GetMTime(); }
 
 /**
   Update/Set the progress.
