@@ -70,4 +70,4 @@ changes on GitHub
 VSI Improvements
 ----------------
 
-ParaView updated to v5.2.0-RC3
+ParaView updated to v5.2.0
