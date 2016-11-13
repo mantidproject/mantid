@@ -16,7 +16,7 @@ WorkspacePresenter::~WorkspacePresenter() {}
 
 /// Initialises the view weak pointer for the Workspace Provider.
 void WorkspacePresenter::init() {
-  m_adapter->registerPresenter(std::move(m_view.lock()->getPresenterWeakPtr()));
+  m_adapter->registerPresenter(m_view.lock()->getPresenterWeakPtr());
 }
 
 /// Handle WorkspaceProvider (ADS) notifications
@@ -442,7 +442,7 @@ DockView_sptr WorkspacePresenter::lockView() {
   if (view_sptr == nullptr)
     throw std::runtime_error("Could not obtain pointer to DockView.");
 
-  return std::move(view_sptr);
+  return view_sptr;
 }
 
 /// Update the view by publishing the ADS contents.
