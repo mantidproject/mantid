@@ -3,6 +3,8 @@ from mantid import logger
 from mantid.simpleapi import mtd
 from mantid.simpleapi import ABINS, Scale, CompareWorkspaces, Load, DeleteWorkspace
 
+from AbinsModules import AbinsConstants
+
 import os
 
 try:
@@ -42,11 +44,13 @@ class ABINSTest(unittest.TestCase):
         self._temperature = 10.0  # temperature 10 K
         self._scale = 1.0
         self._sample_form = "Powder"
-        self._instrument = "TOSCA"
+        self._instrument_name = "TOSCA"
         self._atoms = ""  # if no atoms are specified then all atoms are taken into account
         self._sum_contributions = True
-        self._evaluate_overtones = False
-        self._evaluate_combinations = False
+
+        # this is a string; once it is read it is converted internally to  integer
+        self._quantum_order_events_number = str(AbinsConstants.fundamentals)
+
         self._cross_section_factor = "Incoherent"
         self._workspace_name = "output_workspace"
         self._tolerance = 0.0001
@@ -57,12 +61,11 @@ class ABINSTest(unittest.TestCase):
                                          ExperimentalFile=self._experimental_file,
                                          Temperature=self._temperature,
                                          SampleForm=self._sample_form,
-                                         Instrument=self._instrument,
+                                         Instrument=self._instrument_name,
                                          Atoms=self._atoms,
                                          Scale=self._scale,
                                          SumContributions=self._sum_contributions,
-                                         Overtones=self._evaluate_overtones,
-                                         Combinations=self._evaluate_combinations,
+                                         QuantumOrderEventsNumber=self._quantum_order_events_number,
                                          ScaleByCrossSection=self._cross_section_factor,
                                          OutputWorkspace=self.Si2 + "_ref"),
 
@@ -71,12 +74,11 @@ class ABINSTest(unittest.TestCase):
                                               ExperimentalFile=self._experimental_file,
                                               Temperature=self._temperature,
                                               SampleForm=self._sample_form,
-                                              Instrument=self._instrument,
+                                              Instrument=self._instrument_name,
                                               Atoms=self._atoms,
                                               Scale=self._scale,
                                               SumContributions=self._sum_contributions,
-                                              Overtones=self._evaluate_overtones,
-                                              Combinations=self._evaluate_combinations,
+                                              QuantumOrderEventsNumber=self._quantum_order_events_number,
                                               ScaleByCrossSection=self._cross_section_factor,
                                               OutputWorkspace=self.Squaricn + "_ref")
                          }
@@ -98,6 +100,10 @@ class ABINSTest(unittest.TestCase):
         # no name for workspace
         self.assertRaises(RuntimeError, ABINS, PhononFile=self.Si2 + ".phonon", Temperature=self._temperature)
 
+        # keyword total in the name of the workspace
+        self.assertRaises(RuntimeError, ABINS, PhononFile=self.Si2 + ".phonon", Temperature=self._temperature,
+                          OutputWorkspace=self._workspace_name + "total")
+
         # negative temperature in K
         self.assertRaises(RuntimeError, ABINS, PhononFile=self.Si2 + ".phonon", Temperature=-1.0,
                           OutputWorkspace=self._workspace_name)
@@ -105,11 +111,6 @@ class ABINSTest(unittest.TestCase):
         # negative scale
         self.assertRaises(RuntimeError, ABINS, PhononFile=self.Si2 + ".phonon", Scale=-0.2,
                           OutputWorkspace=self._workspace_name)
-
-        # overtones cannot be set in case we have single crystal
-        # (don't know expansion of S in terms of overtones for SingleCrystal case)
-        self.assertRaises(RuntimeError, ABINS, PhononFile=self.Si2 + ".phonon", SampleForm="SingleCrystal",
-                          Overtones=True, OutputWorkspace=self._workspace_name)
 
     # test if intermediate results are consistent
     def test_non_unique_atoms(self):
@@ -136,10 +137,10 @@ class ABINSTest(unittest.TestCase):
                     PhononFile=self.Squaricn + ".phonon",
                     Temperature=self._temperature,
                     SampleForm=self._sample_form,
-                    Instrument=self._instrument,
+                    Instrument=self._instrument_name,
                     Atoms=self._atoms,
                     SumContributions=self._sum_contributions,
-                    Overtones=self._evaluate_overtones,
+                    QuantumOrderEventsNumber=self._quantum_order_events_number,
                     Scale=10,
                     ScaleByCrossSection=self._cross_section_factor,
                     OutputWorkspace="squaricn_no_scale")
@@ -159,11 +160,11 @@ class ABINSTest(unittest.TestCase):
               ExperimentalFile="benzene_ABINS.dat",
               Temperature=self._temperature,
               SampleForm=self._sample_form,
-              Instrument=self._instrument,
+              Instrument=self._instrument_name,
               Atoms=self._atoms,
               Scale=self._scale,
               SumContributions=self._sum_contributions,
-              Overtones=self._evaluate_overtones,
+              QuantumOrderEventsNumber=self._quantum_order_events_number,
               ScaleByCrossSection=self._cross_section_factor,
               OutputWorkspace="benzene_exp")
 
@@ -181,12 +182,12 @@ class ABINSTest(unittest.TestCase):
         wks_all_atoms_explicitly = ABINS(PhononFile=self.Squaricn + ".phonon",
                                          Atoms="H, C, O",
                                          SumContributions=self._sum_contributions,
-                                         Overtones=self._evaluate_overtones,
+                                         QuantumOrderEventsNumber=self._quantum_order_events_number,
                                          OutputWorkspace="explicit")
 
         wsk_all_atoms_default = ABINS(PhononFile=self.Squaricn + ".phonon",
                                       SumContributions=self._sum_contributions,
-                                      Overtones=self._evaluate_overtones,
+                                      QuantumOrderEventsNumber=self._quantum_order_events_number,
                                       OutputWorkspace="default")
 
         (result, messages) = CompareWorkspaces(wks_all_atoms_explicitly, wsk_all_atoms_default,
@@ -200,7 +201,7 @@ class ABINSTest(unittest.TestCase):
     # main tests
     def test_good_cases_from_scratch(self):
         """
-        Test case when simulation is started from scratch
+        Test case when simulation is started from scratch.
         @return:
         """
         self._good_case_from_scratch(self.Squaricn)
@@ -212,10 +213,10 @@ class ABINSTest(unittest.TestCase):
                                PhononFile=filename + ".phonon",
                                Temperature=self._temperature,
                                SampleForm=self._sample_form,
-                               Instrument=self._instrument,
+                               Instrument=self._instrument_name,
                                Atoms=self._atoms,
                                SumContributions=self._sum_contributions,
-                               Overtones=self._evaluate_overtones,
+                               QuantumOrderEventsNumber=self._quantum_order_events_number,
                                ScaleByCrossSection=self._cross_section_factor,
                                OutputWorkspace=filename + "_scratch")
 
@@ -229,7 +230,7 @@ class ABINSTest(unittest.TestCase):
     def _good_case_restart(self, filename):
         """
         Test case of restart. The considered testing scenario looks as follows. First the user performs the simulation
-        for T=20K (first run). Then the user changes T to 10K (second run). For T=10K both DW factors and S have to be
+        for T=20K (first run). Then the user changes T to 10K (second run). For T=10K  S has to be
         recalculated. After that the user performs simulation with the same parameters as initial simulation, e.g.,
         T=10K (third run). In the third run all required data will be read from hdf file. It is checked if workspace for
         the initial run and third run is the same (should be the same). It is also checked if the workspace from the
@@ -245,10 +246,10 @@ class ABINSTest(unittest.TestCase):
                             PhononFile=filename + ".phonon",
                             Temperature=temperature_for_test,
                             SampleForm=self._sample_form,
-                            Instrument=self._instrument,
+                            Instrument=self._instrument_name,
                             Atoms=self._atoms,
                             SumContributions=self._sum_contributions,
-                            Overtones=self._evaluate_overtones,
+                            QuantumOrderEventsNumber=self._quantum_order_events_number,
                             ScaleByCrossSection=self._cross_section_factor,
                             OutputWorkspace=wrk_name + "init")
 
@@ -256,10 +257,10 @@ class ABINSTest(unittest.TestCase):
                         PhononFile=filename + ".phonon",
                         Temperature=self._temperature,
                         SampleForm=self._sample_form,
-                        Instrument=self._instrument,
+                        Instrument=self._instrument_name,
                         Atoms=self._atoms,
                         SumContributions=self._sum_contributions,
-                        Overtones=self._evaluate_overtones,
+                        QuantumOrderEventsNumber=self._quantum_order_events_number,
                         ScaleByCrossSection=self._cross_section_factor,
                         OutputWorkspace=wrk_name + "_mod")
 
@@ -267,10 +268,10 @@ class ABINSTest(unittest.TestCase):
                             PhononFile=filename + ".phonon",
                             Temperature=temperature_for_test,
                             SampleForm=self._sample_form,
-                            Instrument=self._instrument,
+                            Instrument=self._instrument_name,
                             Atoms=self._atoms,
                             SumContributions=self._sum_contributions,
-                            Overtones=self._evaluate_overtones,
+                            QuantumOrderEventsNumber=self._quantum_order_events_number,
                             ScaleByCrossSection=self._cross_section_factor,
                             OutputWorkspace=wrk_name + "restart")
 

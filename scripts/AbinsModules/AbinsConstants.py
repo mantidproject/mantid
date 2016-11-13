@@ -56,8 +56,8 @@ all_keywords_atoms_data = ["symbol", "fract_coord", "atom", "sort", "mass"]
 all_keywords_powder_data = ["b_tensors", "a_tensors"]
 
 # keywords which define data structure for SData
-all_keywords_s_data = ["atoms_data", "frequencies"]
-all_keywords_atoms_s_data = ["sort", "symbol", "s"]
+all_keywords_s_data = ["data"]
+all_keywords_atoms_s_data = ["sort", "symbol", "s", "frequencies"]
 
 float_id = np.dtype(np.float64).num
 float_type = np.dtype(np.float64)
@@ -129,3 +129,7 @@ quantum_order_one = 1
 quantum_order_two = 2
 quantum_order_three = 3
 quantum_order_four = 4
+
+
+# values of S below that are considered to be zero
+s_threshold = 10e-8

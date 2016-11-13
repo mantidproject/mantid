@@ -42,7 +42,7 @@ crystal_data_group = "Crystal"  # name of the group where CrystalData is stored
 
 S_data_group = "S"  # name of the group where dynamical factor is stored
 
-pkt_per_peak = 50  # number of points for each peak broadened by the experimental resolution
+pkt_per_peak = 100  # number of points for each peak broadened by the experimental resolution
 bin_width = 1.0  # defines width of bins used in rebining of S
 max_wavenumber = 4100  # maximum wavenumber in cm^1 taken into account while creating workspaces (exclusive)
 min_wavenumber = 0.0  # minimal wavenumber in cm^-1 taken into account while creating workspaces (exclusive)

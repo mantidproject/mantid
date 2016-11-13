@@ -3,11 +3,12 @@ class Instrument(object):
 
     _name = None
 
-    def calculate_q_powder(self, quantum_order_events_num=None):
+    def _calculate_q_powder(self, frequencies=None):
         """
         Calculates q vectors.
 
-        @param quantum_order_events_num: True if combinations should be calculated, otherwise False
+
+        @param frequencies: frequencies for which Q2 should be calculated
         @return:  numpy array with Q data
         """
         ""

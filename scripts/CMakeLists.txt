@@ -58,7 +58,6 @@ set ( TEST_PY_FILES
       test/ABINSLoadCASTEPTest.py
       test/ABINSCalculateQToscaTest.py
       test/ABINSFrequencyPowderGeneratorTest.py
-      test/ABINSQDataTest.py
       test/ABINSKpointsDataTest.py
       test/ABINSAtomsDataTest.py
       test/ABINSDwCrystalDataTest.py

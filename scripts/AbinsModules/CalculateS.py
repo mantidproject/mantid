@@ -5,8 +5,6 @@ from mantid.kernel import logger
 
 from IOmodule import IOmodule
 from AbinsData import AbinsData
-from QData import QData
-from CalculateQ import CalculateQ
 from InstrumentProducer import InstrumentProducer
 from CalculatePowder import CalculatePowder
 from CrystalData import CrystalData
@@ -59,6 +57,9 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
 
         if instrument_name in AbinsConstants.all_instruments:
             self._instrument_name = instrument_name
+            _instrument_producer = InstrumentProducer()
+            self._instrument = _instrument_producer.produceInstrument(name=self._instrument_name)
+
         else:
             raise ValueError("Unknown instrument %s" % instrument_name)
 
@@ -75,23 +76,12 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
 
     def _calculate_s(self):
 
-        # Produce instrument object
-        _instrument_producer = InstrumentProducer()
-        _instrument = _instrument_producer.produceInstrument(name=self._instrument_name)
-
-        # Calculate Q
-        _q_calculator = CalculateQ(filename=self._input_filename, instrument=_instrument, sample_form=self._sample_form,
-                                   k_points_data=self._abins_data.getKpointsData(),
-                                   quantum_order_num=self._quantum_order_num)
-
-        _q_vectors = _q_calculator.getData()
-
         # Powder case: calculate A and B tensors
         if self._sample_form == "Powder":
 
             _powder_calculator = CalculatePowder(filename=self._input_filename, abins_data=self._abins_data)
             _powder_data = _powder_calculator.getData()
-            _s_data = self._calculate_s_powder_1D(q_data=_q_vectors, powder_data=_powder_data, instrument=_instrument)
+            _s_data = self._calculate_s_powder_1D(powder_data=_powder_data)
 
         # Crystal case: calculate DW
         else:
@@ -123,32 +113,22 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         return k_points
 
     # noinspection PyTypeChecker,PyPep8Naming
-    def _calculate_s_powder_1D(self, q_data=None, powder_data=None, instrument=None):
+    def _calculate_s_powder_1D(self, powder_data=None):
         """
         Calculates S for the powder case.
 
-        @param q_data:  data with squared Q vectors; it is an object of type QData
         @param powder_data: object of type PowderData with mean square displacements and Debye-Waller factors for
                             the case of powder
-        @param instrument: object of type Instrument; instance of the instrument for which the whole simulation is
-                           performed
         @return: object of type SData with dynamical structure factors for the powder case
         """
-        if not isinstance(q_data, QData):
-            raise ValueError("Input parameter 'q_data'  should be of type QData.")
-
         if not isinstance(powder_data, PowderData):
             raise ValueError("Input parameter 'powder_data' should be of type PowderData.")
-
-        if not isinstance(instrument, Instrument):
-            raise ValueError("Input parameter 'instrument' should be of type Instrument.")
 
         atom_items = {}
         powder_atoms_data = powder_data.extract()
         num_atoms = powder_atoms_data["a_tensors"].shape[0]
         a_traces = np.trace(a=powder_atoms_data["a_tensors"], axis1=1, axis2=2)
         b_traces = np.trace(a=powder_atoms_data["b_tensors"], axis1=2, axis2=3)
-        extracted_q_data = q_data.extract()
         abins_data_extracted = self._abins_data.extract()
         atom_data = abins_data_extracted["atoms_data"]
         k_points_data = self._get_gamma_data(abins_data_extracted["k_points_data"])
@@ -158,11 +138,41 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         s = {}
         s_frequencies = {}
 
-        # calculate frequencies
-        local_freq = fundamentals_freq
+        # calculate s for each atom
+        for atom in range(num_atoms):
+
+            s_frequencies, s = self._calculate_s_powder_1d_one_atom(atom=atom, powder_atoms_data=powder_atoms_data,
+                                                                    a_traces=a_traces, b_traces=b_traces,
+                                                                    fundamentals_freq=fundamentals_freq)
+
+            logger.notice("S for atom %s" % atom + " has been calculated.")
+
+            atom_items["atom_%s" % atom] = {"s": copy(s),
+                                            "frequencies": s_frequencies,
+                                            "symbol": atom_data[atom]["symbol"],
+                                            "sort": atom_data[atom]["sort"]}
+
+        s_data = SData(temperature=self._temperature, sample_form=self._sample_form)
+        s_data.set(items=atom_items)
+
+        return s_data
+
+    def _calculate_s_powder_1d_one_atom(self, atom=None, powder_atoms_data=None, a_traces=None,
+                                        b_traces=None, fundamentals_freq=None):
+        """
+
+        @param atom: number of atom
+        @param powder_atoms_data:  powder data
+        @param a_traces: a_traces for all atoms
+        @param b_traces: b_traces for all atoms
+        @param fundamentals_freq: fundamental frequencies
+        @return: s, and corresponding frequencies for all quantum events taken into account
+        """
+        s = {}
+        s_frequencies = {}
+
+        local_freq = np.copy(fundamentals_freq)
         local_coeff = np.arange(fundamentals_freq.size, dtype=AbinsConstants.int_type)
-        generated_frequencies = []
-        generated_coefficients = []
 
         for order in range(AbinsConstants.fundamentals, self._quantum_order_num + AbinsConstants.s_last_index):
 
@@ -171,48 +181,33 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                                                                        fundamentals_array=fundamentals_freq,
                                                                        quantum_order=order)
 
-            generated_frequencies.append(local_freq)
-            generated_coefficients.append(local_coeff)
+            q2 = self._instrument._calculate_q_powder(frequencies=local_freq)
 
-        # calculate s for each atom
-        for atom in range(num_atoms):
+            value_dft = self._calculate_order[order](q2=q2,
+                                                     frequencies=local_freq,
+                                                     indices=local_coeff,
+                                                     a_tensor=powder_atoms_data["a_tensors"][atom],
+                                                     a_trace=a_traces[atom],
+                                                     b_tensor=powder_atoms_data["b_tensors"][atom],
+                                                     b_trace=b_traces[atom])
 
-            for order in range(AbinsConstants.fundamentals,
-                               self._quantum_order_num + AbinsConstants.s_last_index):
+            # neglect S below s_threshold
+            indices = value_dft > AbinsConstants.s_threshold
+            value_dft = value_dft[indices]
+            local_freq = local_freq[indices]
+            local_coeff = local_coeff[indices]
 
-                q2 = extracted_q_data["order_%s" % order]
-                order_indx = order - AbinsConstants.python_index_shift
+            rebined_freq, rebined_spectrum = self._rebin_data(array_x=local_freq,
+                                                              array_y=value_dft)
 
-                value_dft = self._calculate_order[order](q2=q2,
-                                                         frequencies=generated_frequencies[order_indx],
-                                                         indices=generated_coefficients[order_indx],
-                                                         a_tensor=powder_atoms_data["a_tensors"][atom],
-                                                         a_trace=a_traces[atom],
-                                                         b_tensor=powder_atoms_data["b_tensors"][atom],
-                                                         b_trace=b_traces[atom])
+            freq, broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=rebined_freq,
+                                                                                      s_dft=rebined_spectrum)
 
-                rebined_freq, rebined_spectrum = self._rebin_data(array_x=generated_frequencies[order_indx],
-                                                                  array_y=value_dft)
+            rebined_broad_freq, rebined_broad_spectrum = self._rebin_data(array_x=freq, array_y=broad_spectrum)
+            s["order_%s" % order] = rebined_broad_spectrum
+            s_frequencies["order_%s" % order] = rebined_broad_freq
 
-                freq, broad_spectrum = instrument.convolve_with_resolution_function(frequencies=rebined_freq,
-                                                                                    s_dft=rebined_spectrum)
-
-                rebined_broad_freq, rebined_broad_spectrum = self._rebin_data(array_x=freq, array_y=broad_spectrum)
-                s["order_%s" % order] = rebined_broad_spectrum
-
-                if atom == 1:
-                    s_frequencies["order_%s" % order] = rebined_broad_freq
-
-            logger.notice("S for atom %s" % atom + " has been calculated.")
-
-            atom_items["atom_%s" % atom] = {"s": copy(s),
-                                            "symbol": atom_data[atom]["symbol"],
-                                            "sort": atom_data[atom]["sort"]}
-
-        s_data = SData(temperature=self._temperature, sample_form=self._sample_form)
-        s_data.set(items={"atoms_data": atom_items, "frequencies": s_frequencies})
-
-        return s_data
+        return s_frequencies, s
 
     # noinspection PyUnusedLocal
     def _calculate_order_one(self, q2=None, frequencies=None, indices=None, a_tensor=None, a_trace=None,
@@ -382,21 +377,22 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
             logger.notice("User requested a smaller number of quantum events than in the previous calculations. "
                           "S Data from hdf file which corresponds only to requested quantum order events will be "
                           "loaded.")
-            temp_data = {"frequencies": {}, "atoms_data": {}}
 
-            # load necessary frequencies
-            for i in range(AbinsConstants.fundamentals, self._quantum_order_num + AbinsConstants.s_last_index):
-                temp_data["frequencies"]["order_%s" % i] = data["datasets"]["data"]["frequencies"]["order_%s" % i]
+            temp_data = {}
 
             # load atoms_data
-            n_atom = len(data["datasets"]["data"]["atoms_data"])
+            n_atom = len(data["datasets"]["data"])
             for i in range(n_atom):
-                sort = data["datasets"]["data"]["atoms_data"]["atom_%s" % i]["sort"]
-                symbol = data["datasets"]["data"]["atoms_data"]["atom_%s" % i]["symbol"]
-                temp_data["atoms_data"]["atom_%s" % i] = {"sort": sort,  "symbol":  symbol, "s": {}}
+                sort = data["datasets"]["data"]["atom_%s" % i]["sort"]
+                symbol = data["datasets"]["data"]["atom_%s" % i]["symbol"]
+                temp_data["atom_%s" % i] = {"sort": sort,  "symbol":  symbol, "s": {}, "frequencies": {}}
                 for j in range(AbinsConstants.fundamentals, self._quantum_order_num + AbinsConstants.s_last_index):
-                    temp_val = data["datasets"]["data"]["atoms_data"]["atom_%s" % i]["s"]["order_%s" % j]
-                    temp_data["atoms_data"]["atom_%s" % i]["s"]["order_%s" % j] = temp_val
+
+                    temp_val = data["datasets"]["data"]["atom_%s" % i]["s"]["order_%s" % j]
+                    temp_data["atom_%s" % i]["s"]["order_%s" % j] = temp_val
+
+                    temp_val = data["datasets"]["data"]["atom_%s" % i]["frequencies"]["order_%s" % j]
+                    temp_data["atom_%s" % i]["frequencies"]["order_%s" % j] = temp_val
 
             # reduce the data which is loaded to only this data which is required by the user
             data["datasets"]["data"] = temp_data

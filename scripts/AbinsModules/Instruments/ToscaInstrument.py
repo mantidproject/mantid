@@ -17,34 +17,14 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         self._k_points_data = None
         super(ToscaInstrument, self).__init__()
 
-    def calculate_q_powder(self, quantum_order_events_num=None):
+    def _calculate_q_powder(self, frequencies=None):
         """
         Calculates squared Q vectors for TOSCA and TOSCA-like instruments.
         """
-        if not isinstance(quantum_order_events_num, int):
-            raise ValueError("Invalid value of overtones. Expected values are: True, False.")
-
-        const = 1.0 / AbinsConstants.cm1_2_hartree
-        fundamental_frequencies = self._k_points_data["frequencies"][0][AbinsConstants.first_optical_phonon:] * const
-
-        q_data = {}
-
-        local_freq = fundamental_frequencies
-        local_coeff = np.eye(fundamental_frequencies.size, dtype=AbinsConstants.float_type)
-        for quantum_order in range(AbinsConstants.fundamentals, quantum_order_events_num + AbinsConstants.q_last_index):
-
-            local_freq, local_coeff = self.construct_freq_combinations(previous_array=local_freq,
-                                                                       previous_coefficients=local_coeff,
-                                                                       fundamentals_array=fundamental_frequencies,
-                                                                       quantum_order=quantum_order)
-
-            k2_i = (local_freq + AbinsParameters.TOSCA_final_neutron_energy) * AbinsConstants.TOSCA_constant
-            k2_f = AbinsParameters.TOSCA_final_neutron_energy * AbinsConstants.TOSCA_constant
-            temp = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * AbinsParameters.TOSCA_cos_scattering_angle
-
-            q_data["order_%s" % quantum_order] = temp
-
-        return q_data
+        k2_i = (frequencies + AbinsParameters.TOSCA_final_neutron_energy) * AbinsConstants.TOSCA_constant
+        k2_f = AbinsParameters.TOSCA_final_neutron_energy * AbinsConstants.TOSCA_constant
+        result = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * AbinsParameters.TOSCA_cos_scattering_angle
+        return result
 
     def collect_K_data(self, k_points_data=None):
         """

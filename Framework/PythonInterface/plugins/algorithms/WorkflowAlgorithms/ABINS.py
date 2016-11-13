@@ -238,7 +238,8 @@ class ABINS(PythonAlgorithm):
         @return: workspaces for list of atoms types, S for the particular type of atom
         """
         s_data_extracted = s_data.extract()
-        freq_dic = s_data_extracted["frequencies"]
+        first_atom = 0
+        freq_dic = s_data_extracted["atom_%s" % first_atom]["frequencies"]
         max_size = freq_dic["order_%s" % AbinsConstants.fundamentals].size
         items = freq_dic.keys()
         items.remove("order_%s" % AbinsConstants.fundamentals)
@@ -247,33 +248,37 @@ class ABINS(PythonAlgorithm):
                 max_size = freq_dic[item].size
         freq = np.zeros((self._num_quantum_order_events, max_size))
 
-        for exponential in range(AbinsConstants.fundamentals,
-                                 self._num_quantum_order_events + AbinsConstants.s_last_index):
-            exponential_indx = exponential - AbinsConstants.python_index_shift
-            temp_freq = freq_dic["order_%s" % exponential]
-            freq[exponential_indx][:temp_freq.size] = temp_freq
-
         s_atom_data = np.copy(freq)
-        atoms_data = s_data_extracted["atoms_data"]
+        atoms_data = s_data_extracted
         num_atoms = len(atoms_data)
         result_workspaces = []
         temp_s_atom_data = np.copy(s_atom_data)
+
         for atom_symbol in atoms_symbols:
             # create partial workspaces for the given type of atom
             atom_workspaces = []
             s_atom_data.fill(0.0)
+            freq.fill(0)
+            constructed_freq = False
             for atom in range(num_atoms):
                 if atoms_data["atom_%s" % atom]["symbol"] == atom_symbol:
                     temp_s_atom_data.fill(0)
                     for order in range(AbinsConstants.fundamentals,
                                        self._num_quantum_order_events + AbinsConstants.s_last_index):
+
                         order_indx = order - AbinsConstants.python_index_shift
-                        temp_order = atoms_data["atom_%s" % atom]["s"]["order_%s" % order]
-                        temp_s_atom_data[order_indx, :temp_order.size] = temp_order
+
+                        if not constructed_freq:
+                            temp_freq_order = atoms_data["atom_%s" % atom]["frequencies"]["order_%s" % order]
+                            freq[order_indx, :temp_freq_order.size] = temp_freq_order
+
+                        temp_s_order = atoms_data["atom_%s" % atom]["s"]["order_%s" % order]
+                        temp_s_atom_data[order_indx, :temp_s_order.size] = temp_s_order
+                    constructed_freq = True
                     np.add(s_atom_data, temp_s_atom_data, s_atom_data)  # sum S over the atoms of the same type
 
             atom_workspaces.append(self._create_workspace(atom_name=atom_symbol,
-                                                          frequencies=freq,
+                                                          frequencies=np.copy(freq),
                                                           s_points=np.copy(s_atom_data)))
 
             # create total workspace for the given type of atom

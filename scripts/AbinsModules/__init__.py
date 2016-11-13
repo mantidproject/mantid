@@ -29,7 +29,6 @@ from GeneralDFTProgram import GeneralDFTProgram
 from LoadCASTEP import LoadCASTEP
 
 # Calculating modules
-from CalculateQ import CalculateQ
 from CalculatePowder import CalculatePowder
 from CalculateDWCrystal import CalculateDWCrystal
 from CalculateCrystal import CalculateCrystal
@@ -37,7 +36,6 @@ from CalculateS import CalculateS
 
 # Data
 from GeneralData import GeneralData
-from QData import QData
 from KpointsData import KpointsData
 from AtomsData import AtomsDaTa
 from AbinsData import AbinsData

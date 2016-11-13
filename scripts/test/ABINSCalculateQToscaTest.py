@@ -23,7 +23,6 @@ except ImportError:
     logger.warning("Failure of CalculateQTest because h5py is unavailable.")
     exit(1)
 
-from AbinsModules import CalculateQ
 from AbinsModules import KpointsData
 from AbinsModules.InstrumentProducer import InstrumentProducer
 from AbinsModules import AbinsConstants, AbinsParameters
@@ -32,11 +31,8 @@ from AbinsModules import AbinsConstants, AbinsParameters
 class ABINSCalculateQToscaTest(unittest.TestCase):
 
     def setUp(self):
-        _core = "../ExternalData/Testing/Data/UnitTest/"
         producer = InstrumentProducer()
         self._tosca_instrument = producer.produceInstrument("TOSCA")
-        self._filename = path.relpath(_core + "Si2-sc_Q_test.phonon")
-        self._sample_form = "Powder"
         self._raw_data = KpointsData(num_k=1, num_atoms=2)
         self._raw_data.set({"k_vectors": np.asarray([[0.0, 0.0, 0.0]]),
                             "weights": np.asarray([0.3]),
@@ -53,41 +49,6 @@ class ABINSCalculateQToscaTest(unittest.TestCase):
                                          [[1.0, 1.0, 1.0], [1.0, 1.0, 111.0], [1.0, 1.0, 1.0],
                                           [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],  [1.0, 1.0, 1.0]]]]).astype(complex)})
 
-    def test_simple(self):
-        """
-        Tests various  assertions
-        """
-
-        # wrong file name
-        with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename=1, instrument=self._tosca_instrument, sample_form=self._sample_form,
-                                           k_points_data=self._raw_data,
-                                           quantum_order_num=AbinsConstants.fundamentals)
-
-        # wrong instrument
-        with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename=self._filename, instrument="Different_instrument",
-                                           sample_form=self._sample_form, k_points_data=self._raw_data,
-                                           quantum_order_num=AbinsConstants.fundamentals)
-
-        # wrong sample form
-        with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument,
-                                           sample_form="Solid", k_points_data=self._raw_data,
-                                           quantum_order_num=AbinsConstants.fundamentals)
-
-        # no k_points_data
-        with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument,
-                                           sample_form=self._sample_form,
-                                           quantum_order_num=AbinsConstants.fundamentals)
-
-        # wrong value of quantum_order_events_num
-        with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument,
-                                           sample_form=self._sample_form, k_points_data=self._raw_data,
-                                           quantum_order_num=-1)
-
     # Use case: TOSCA instrument
     def test_TOSCA(self):
 
@@ -101,22 +62,10 @@ class ABINSCalculateQToscaTest(unittest.TestCase):
         # noinspection PyTypeChecker
         correct_q_data = k2_i + k2_f - 2 * np.power(k2_i * k2_f, 0.5) * AbinsParameters.TOSCA_cos_scattering_angle
 
-        q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument,
-                                  sample_form=self._sample_form, k_points_data=self._raw_data,
-                                  quantum_order_num=AbinsConstants.fundamentals)
-        q_vectors = q_calculator.calculateData()
+        q2 = self._tosca_instrument._calculate_q_powder(freq)
 
         # noinspection PyTypeChecker
-        self.assertEqual(True, np.allclose(correct_q_data,
-                                           q_vectors.extract()["order_%s" % AbinsConstants.fundamentals]))
-
-        # check loading data
-        loaded_q = q_calculator.loadData()
-
-        # noinspection PyTypeChecker
-        self.assertEqual(True, np.allclose(correct_q_data,
-                                           loaded_q.extract()["order_%s" % AbinsConstants.fundamentals]))
-
+        self.assertEqual(True, np.allclose(correct_q_data, q2))
 
 if __name__ == '__main__':
     unittest.main()

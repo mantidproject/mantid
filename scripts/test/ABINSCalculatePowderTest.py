@@ -65,9 +65,7 @@ class ABINSCalculatePowderTest(unittest.TestCase):
 
         # check if evaluated powder data  is correct
         for key in _good_data["powder"]:
-            print key, _good_data["powder"][key]
-            print "\n\n\n"
-            print calculated_data[key]
+
             self.assertEqual(True, np.allclose(_good_data["powder"][key], calculated_data[key]))
 
         # check if loading powder data is correct
@@ -91,7 +89,8 @@ class ABINSCalculatePowderTest(unittest.TestCase):
                                                        replace("array" , "").
                                                        replace("(["    , "[").
                                                        replace("])"    , "]").
-                                                       replace("'"     , '"'))
+                                                       replace("'"     , '"').
+                                                       replace("0. "   ,"0.0"))
 
         for key in correct_data.keys():
             correct_data[key] = np.asarray(correct_data[key])

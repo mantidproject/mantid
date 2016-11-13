@@ -29,8 +29,7 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
     _temperature = 10  # 10 K,  temperature for the benchmark
     _sample_form = "Powder"
     _instrument_name = "TOSCA"
-    _overtones = False
-    _combinations = False
+    _order_event = AbinsConstants.fundamentals
 
     # data
     core = "../ExternalData/Testing/Data/UnitTest/"
@@ -65,30 +64,30 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             poor_S = CalculateS(filename=1, temperature=self._temperature, sample_form=self._sample_form,
                                 abins_data=_good_data, instrument_name=self._instrument_name,
-                                quantum_order_num=self._combinations)
+                                quantum_order_num=self._order_event)
 
         # wrong temperature
         with self.assertRaises(ValueError):
             poor_S = CalculateS(filename=filename, temperature=-1, sample_form=self._sample_form, abins_data=_good_data,
-                                instrument_name=self._instrument_name, quantum_order_num=self._combinations)
+                                instrument_name=self._instrument_name, quantum_order_num=self._order_event)
 
         # wrong sample
         with self.assertRaises(ValueError):
             poor_S = CalculateS(filename=filename, temperature=self._temperature, sample_form="SOLID",
                                 abins_data=_good_data, instrument_name=self._instrument_name,
-                                quantum_order_num=self._combinations)
+                                quantum_order_num=self._order_event)
 
         # wrong abins data: content of abins data instead of object abins_data
         with self.assertRaises(ValueError):
             poor_S = CalculateS(filename=filename, temperature=self._temperature, sample_form=self._sample_form,
                                 abins_data=_good_data.extract(), instrument_name=self._instrument_name,
-                                quantum_order_num=self._combinations)
+                                quantum_order_num=self._order_event)
 
         # wrong instrument
         with self.assertRaises(ValueError):
             poor_S = CalculateS(filename=filename, temperature=self._temperature, sample_form=self._sample_form,
                                 abins_data=_good_data.extract(), instrument_name=self._instrument_name,
-                                quantum_order_num=self._combinations)
+                                quantum_order_num=self._order_event)
 
     #  main test
     def test_good_case(self):
@@ -101,7 +100,7 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
         _good_data = self._get_good_data(filename=name)
         _good_tester = CalculateS(filename=name + ".phonon", temperature=self._temperature,
                                   sample_form=self._sample_form, abins_data=_good_data["DFT"],
-                                  instrument_name=self._instrument_name, quantum_order_num=self._combinations)
+                                  instrument_name=self._instrument_name, quantum_order_num=self._order_event)
         calculated_data = _good_tester.getData()
 
         self._check_data(good_data=_good_data["S"], data=calculated_data.extract())
@@ -109,7 +108,7 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
         # check if loading powder data is correct
         new_tester = CalculateS(filename=name + ".phonon", temperature=self._temperature, sample_form=self._sample_form,
                                 abins_data=_good_data["DFT"], instrument_name=self._instrument_name,
-                                quantum_order_num=self._combinations)
+                                quantum_order_num=self._order_event)
         loaded_data = new_tester.loadData()
 
         self._check_data(good_data=_good_data["S"], data=loaded_data.extract())
@@ -128,33 +127,37 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
             # noinspection PyPep8
             correct_data = json.loads(data_file.read().replace("\\n", " ").
                                       replace("array",    "").
-                                      replace("(["    ,  "[").
-                                      replace("])"    ,  "]").
-                                      replace("'"     ,  '"').
-                                      replace("0. "   , "0.0"))
+                                      replace("([",  "[").
+                                      replace("])",  "]").
+                                      replace("'",  '"').
+                                      replace("0. ", "0.0"))
 
-        temp = np.asarray(correct_data["frequencies"]["order_%s" % AbinsConstants.fundamentals])
-        correct_data["frequencies"]["order_%s" % AbinsConstants.fundamentals] = temp
+        for el in range(len(correct_data)):
 
-        for el in range(len(correct_data["atoms_data"])):
-            temp = np.asarray(correct_data["atoms_data"]["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals])
-            correct_data["atoms_data"]["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals] = temp
+            temp = np.asarray(correct_data["atom_%s" % el]["frequencies"]["order_%s" % AbinsConstants.fundamentals])
+            correct_data["atom_%s" % el]["frequencies"]["order_%s" % AbinsConstants.fundamentals] = temp
+
+            temp = np.asarray(correct_data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals])
+            correct_data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals] = temp
 
         return correct_data
 
     def _check_data(self, good_data=None, data=None):
 
-        self.assertEqual(True, np.allclose(good_data["frequencies"]["order_%s" % AbinsConstants.fundamentals],
-                                           data["frequencies"]["order_%s" % AbinsConstants.fundamentals]))
+        for el in range(len(good_data)):
 
-        for el in range(len(good_data["atoms_data"])):
-            good_temp = good_data["atoms_data"]["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals]
-            data_temp = data["atoms_data"]["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals]
+            good_temp = good_data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals]
+            data_temp = data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals]
             self.assertEqual(True, np.allclose(good_temp, data_temp))
-            self.assertEqual(good_data["atoms_data"]["atom_%s" % el]["sort"],
-                             data["atoms_data"]["atom_%s" % el]["sort"])
-            self.assertEqual(good_data["atoms_data"]["atom_%s" % el]["symbol"],
-                             data["atoms_data"]["atom_%s" % el]["symbol"])
+
+            good_temp = good_data["atom_%s" % el]["frequencies"]["order_%s" % AbinsConstants.fundamentals]
+            data_temp = data["atom_%s" % el]["frequencies"]["order_%s" % AbinsConstants.fundamentals]
+            self.assertEqual(True, np.allclose(good_temp, data_temp))
+
+            self.assertEqual(good_data["atom_%s" % el]["sort"],
+                             data["atom_%s" % el]["sort"])
+            self.assertEqual(good_data["atom_%s" % el]["symbol"],
+                             data["atom_%s" % el]["symbol"])
 
 
 if __name__ == '__main__':
