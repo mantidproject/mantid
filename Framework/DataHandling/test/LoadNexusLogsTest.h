@@ -170,6 +170,27 @@ public:
                       uniquePeriods.size());
   }
 
+  void test_extract_run_title_from_event_nexus() {
+
+    auto testWS = createTestWorkspace();
+    auto run = testWS->run();
+
+    LoadNexusLogs loader;
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Workspace", testWS);
+    loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
+    loader.execute();
+    run = testWS->run();
+
+    const bool hasTitle = run.hasProperty("run_title");
+    TSM_ASSERT("Should have run_title now we have run LoadNexusLogs", hasTitle);
+
+    std::string title = run.getPropertyValueAsType<std::string>("run_title");
+    TSM_ASSERT_EQUALS("Run title is not correct",
+                      "3He polariser test 0.9bar Long Polariser 0.75A", title);
+  }
+
   void test_log_non_default_entry() {
     auto testWS = createTestWorkspace();
     LoadNexusLogs loader;
