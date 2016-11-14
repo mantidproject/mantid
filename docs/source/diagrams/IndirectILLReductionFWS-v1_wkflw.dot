@@ -1,5 +1,5 @@
-digraph IndirectILLFixedWindowScans {
-  label="IndirectILLFixedWindowScans Flowchart"
+digraph IndirectILLReductionFWS {
+  label="IndirectILLReductionFWS Flowchart"
   $global_style
 
   subgraph values {
@@ -21,24 +21,26 @@ digraph IndirectILLFixedWindowScans {
 
   subgraph algorithms {
   	$algorithm_style
-  	IndirectILLReduction
+  	IndirectILLEnergyTransfer
     SelectNexusFilesByMetadata
     Integration
+    GroupWorkspaces
+    SplineInterpolation
   }
 
   subgraph processes {
   	$process_style
-  	PostProcessing
-  	Interpolation
+  	Scan
   }
 
   Run -> SelectNexusFilesByMetadata
-  SelectNexusFilesByMetadata -> IndirectILLReduction
-  IndirectILLReduction -> Integration
-  Integration -> PostProcessing
-  Observable -> PostProcessing
-  CalibrationRun -> Interpolation
-  BackgroundRun -> Interpolation
-  Interpolation -> PostProcessing
-  PostProcessing -> OutputWorkspace
+  SelectNexusFilesByMetadata -> IndirectILLEnergyTransfer
+  IndirectILLEnergyTransfer -> Integration
+  Integration -> Scan
+  Observable -> Scan
+  CalibrationRun -> SplineInterpolation
+  BackgroundRun -> SplineInterpolation
+  SplineInterpolation -> Scan
+  Scan -> GroupWorkspaces
+  GroupWorkspaces -> OutputWorkspace
 }

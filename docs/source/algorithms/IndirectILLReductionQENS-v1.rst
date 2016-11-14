@@ -19,6 +19,7 @@ Run property needs to be specified following the syntax in `MultiFileLoading <ht
 When ``SumRuns=True``, all the runs will be merged while loading.
 Note, for **Range** and **Stepped Range**, ``SumRuns`` will be ignored.
 Use **Added Range** and **Added Stepped Range** instead (see `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_).
+For ``BackgroundRun``, ``CalibrationRun`` and ``AlignmentRun`` all the runs will be automatically summed.
 
 Unmirror Options
 ~~~~~~~~~~~~~~~~
@@ -71,17 +72,17 @@ Usage
 
 .. testcode:: ExIndirectILLReductionQENS
 
-    out = IndirectILLReductionQENS(Run='136553:136555')
-    print "Result is WorkspaceGroup, that contains %d workspaces" % out.getNumberOfEntries()
-    print "the name of the first one is %s corresponding to run 136553" % out.getItem(0).getName()
-    print "it has %d spectra and %d bins" % (out.getItem(0).getNumberHistograms(),out.getItem(0).blocksize())
+    ws = IndirectILLReductionQENS(Run='136553:136555')
+    print "Result is a WorkspaceGroup, that contains %d workspaces" % ws.getNumberOfEntries()
+    print "the name of the first one is %s corresponding to run 136553" % ws.getItem(0).getName()
+    print "it has %d spectra and %d bins" % (ws.getItem(0).getNumberHistograms(),ws.getItem(0).blocksize())
 
 Output:
 
 .. testoutput:: ExIndirectILLReductionQENS
 
     Result is WorkspaceGroup, that contains 3 workspaces
-    the name of the first one is 136553_out corresponding to run 136553
+    the name of the first one is 136553_ws corresponding to run 136553
     it has 18 spectra and 1024 bins
 
 .. categories::

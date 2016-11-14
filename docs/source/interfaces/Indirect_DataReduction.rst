@@ -184,56 +184,76 @@ ILL Energy Transfer
 
 This tab handles the reduction of data from the IN16B instrument at the ILL.
 
-Options
-~~~~~~~
+Reduction Type
+~~~~~~~~~~~~~~
+
+There are two reduction types of IN16B data: Quasi-Elastic Neutron Scattering (QENS) or Fixed Window Scans (FWS),
+which can be either Elastic (EFWS) or Inelastic (IFWS).
+If one or another reduction type is checked, the corresponding algorithm will be invoked
+(see :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` and :ref:`IndirectILLReductionFWS <algm-IndirectILLReductionFWS>`).
+There are several properties in common between the two, and several others that are specific to one or the other.
+The latter will show up or disappear corresponding to the choice of the reduction type.
+
+Common Options
+~~~~~~~~~~~~~~
 
 Input File
-  Used to select the raw data in *.nxs* format. Note that multiple files can be specified following
-  `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_ instructions. If *Sum Runs* is checked,
-  all the input runs will be summed while loading.
-
-Reduction Type
-  There are two reduction types of IN16B data: Quasi-Elastic Neutron Scattering (QENS) or Fixed Window Scans (FWS),
-  which can be either Elastic (EFWS) or Inelastic (IFWS). In case of the FWS, an observable can be specified that will be
-  the x-axis on the final reduced workspace. If one or another reduction type is checked, the corresponding algorithm will be run.
+  Used to select the raw data in ``.nxs`` format. Note that multiple files can be specified following
+  `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_ instructions.
 
 Detector Grouping
   Used to switch between grouping as per the IDF (*Default*) or grouping using a
-  mapping file (*Map File*). This defines e.g. the summing of the 128 vertical pixels per PSDs.
+  mapping file (*Map File*). This defines e.g. the summing of the vertical pixels per PSDs.
 
 Background Subtraction
-  Used to specify a background (i.e. empty can) subtraction. If multiple files are given, they will be automatically
-  summed. A scale factor can be applied to background subtraction.
+  Used to specify the background (i.e. empty can) runs to subtract. A scale factor can be applied to background subtraction.
 
 Detector Calibration
-  Gives the option of applying workspace of calibration constants produced
-  with the ILL Calibration tab or :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>` algorithm.
-  If file option is selected, one can choose directly the calibration
-  files, and then first :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>` algorithm
-  will be run over the files to produce the constants, which will then be seeded into the
-  main reduction workflow. If multiple files are given they will be automatically summed.
-
-Unmirror Options
-  This is used to choose the option of summing og the left and right wings of the data, when recorded in mirror sense.
-  See :ref:`IndirectILLReduction <algm-IndirectILLReduction>` for full details. Unmirror option 5 and 7 require vanadium run.
-  Note, that this is not necessarily the same as the file used to derive the calibration constants. Vanadium run will be used
-  only for left and right wing peak alignment for unmirror options 5 and 7. If multiple files are specified, they will be
-  automatically summed.
+  Used to specify the calibration (i.e. vanadium) runs to divide by.
 
 Output Name
-  This will be the name of the resulting reduced workspace group, that will contain workspaces for each individual run
-  bearing run numbers as prefix.
+  This will be the name of the resulting reduced workspace group.
 
 Plot
-  If enabled will plot the result (of the first run) as a contour plot.
-
-Debug Mode
-  If enabled, a set of auxiliary control workspaces will be created to monitor the reduction workflow at various pre-defined
-  intermediate steps.
+  If enabled, will plot the result (of the first run) as a contour plot.
 
 Save
-  If enabled the reduced workspace will be saved as a NeXus file in the default save
+  If enabled the reduced workspace group will be saved as a ``.nxs`` file in the default save
   directory.
+
+QENS-only Options
+~~~~~~~~~~~~~~~~~
+
+Sum All Runs
+  If checked, all the input runs will be summed while loading.
+
+Crop Dead Monitor Channels
+  If checked, the few channels in the beginning and at the end of the spectra, that contain zero monitor counts will be cropped out.
+  As a result, the doppler maximum energy will be mapped to the first and last non-zero monitor channels, resulting in narrower peaks.
+  Care must be taken with this option; since this alters the total number of bins,
+  problems might occur while subtracting the background or performing unmirroring, if the number of dead monitor channels are different.
+
+Calibration Peak Range
+  This defines the integration range over the peak in calibration run in ``mev``.
+
+Unmirror Options
+  This is used to choose the option of summing of the left and right wings of the data, when recorded in mirror sense.
+  See :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` for full details.
+  Unmirror option 5 and 7 require vanadium alignment run.
+
+Mask Bins
+  If checked, this will mask out all the bins in the tails of the spectra, that overflew the x-axis as a result of the circular shift in unmirroring step.
+
+FWS-only Options
+~~~~~~~~~~~~~~~~
+
+Observable
+  This is the scanning ovservable, that will become the x-axis of the final result.
+  It can be any sample parameter defined in Sample Logs.
+
+Sort X Axis
+  If checked, this will sort the x-axis of the final result.
+
 
 ISIS Calibration & Resolution
 -----------------------------
