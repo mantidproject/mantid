@@ -141,6 +141,10 @@ class NameSource:
         return self._prefix + '_masked'
 
     @namelogging
+    def merged(self):
+        return self._prefix + '_merged'
+
+    @namelogging
     def monitor(self):
         return self._prefix + '_monitors'
 
@@ -210,7 +214,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              OutputWorkspace=outWs)
 
             # Now merge the loaded files (if required)
-            workspace = MergeRuns(workspace)
+            outWsName = workspaceNames.merged()
+            workspace = MergeRuns(InputWorkspaces=workspace,
+                                  OutputWorkspace=outWsName)
 
         elif self.getProperty(PROP_INPUT_WORKSPACE).value:
             workspace = self.getProperty(PROP_INPUT_WORKSPACE).value
