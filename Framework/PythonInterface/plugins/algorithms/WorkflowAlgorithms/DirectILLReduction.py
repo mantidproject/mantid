@@ -72,9 +72,11 @@ def namelogging(method):
 # TODO We may want to hide these and delete afterwards.
 class NameSource:
 
-    def __init__(self, prefix):
+    def __init__(self, prefix, cleanupMode):
         self._names = set()
         self._prefix = prefix
+        if cleanupMode == CLEANUP_DELETE:
+            self._prefix = '__' + prefix
 
     @namelogging
     def background(self):
@@ -195,9 +197,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         reductionType = self.getProperty(PROP_REDUCTION_TYPE).value
         workspaceNamePrefix = self.getProperty(PROP_OUTPUT_PREFIX).value
         cleanupMode = self.getProperty(PROP_CLEANUP_MODE).value
-        if cleanupMode == CLEANUP_DELETE:
-            workspaceNamePrefix = '__' + workspaceNamePrefix
-        workspaceNames = NameSource(workspaceNamePrefix)
+        workspaceNames = NameSource(workspaceNamePrefix, cleanupMode)
         indexType = self.getProperty(PROP_INDEX_TYPE).value
 
         if self.getProperty(PROP_INPUT_FILE).value:
