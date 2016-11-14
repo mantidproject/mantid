@@ -63,19 +63,9 @@ const std::string PDDetermineCharacterizations::summary() const {
  * @return The list of expected column names
  */
 std::vector<std::string> getColumnNames() {
-  return {"frequency",
-          "wavelength",
-          "bank",
-          "container",
-          "vanadium",
-          "vanadium_background",
-          "empty_environment",
-          "empty_instrument",
-          "d_min",
-          "d_max",
-          "tof_min",
-          "tof_max",
-          "wavelength_min",
+  return {"frequency", "wavelength", "bank", "container", "vanadium",
+          "vanadium_background", "empty_environment", "empty_instrument",
+          "d_min", "d_max", "tof_min", "tof_max", "wavelength_min",
           "wavelength_max"};
 }
 

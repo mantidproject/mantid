@@ -42,9 +42,11 @@ const boost::regex V1_TABLE_REG_EXP{"^freq.*\\s+w.*l.*\\s+"
 const boost::regex VERSION_REG_EXP{"^version=([0-9]+)"};
 
 /**
- * Use the files to determine if there is any "extra" columns that need to be added to the output TableWorkspace.
+ * Use the files to determine if there is any "extra" columns that need to be
+ * added to the output TableWorkspace.
  */
-std::vector<std::string> extra_columns(const std::vector<std::string> &filenames) {
+std::vector<std::string>
+extra_columns(const std::vector<std::string> &filenames) {
   // only version1 files generate extra columns
   if (filenames[F_INDEX_V1].empty())
     return std::vector<std::string>();
@@ -64,8 +66,9 @@ std::vector<std::string> extra_columns(const std::vector<std::string> &filenames
     if (boost::regex_search(line, result, V1_TABLE_REG_EXP)) {
       if (result.size() == 2) {
         line = Strings::strip(result[1]);
-        Kernel::StringTokenizer tokenizer(line, " ", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-        for (const auto & token : tokenizer) {
+        Kernel::StringTokenizer tokenizer(
+            line, " ", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        for (const auto &token : tokenizer) {
           columnSet.insert(token);
         }
       }
@@ -74,15 +77,14 @@ std::vector<std::string> extra_columns(const std::vector<std::string> &filenames
   }
   file.close();
 
-
   // convert the result to a sorted vector
   std::vector<std::string> columnnames;
-  std::copy(columnSet.begin(), columnSet.end(), std::back_inserter(columnnames));
+  std::copy(columnSet.begin(), columnSet.end(),
+            std::back_inserter(columnnames));
   std::sort(columnnames.begin(), columnnames.end());
 
   return columnnames;
 }
-
 }
 
 //----------------------------------------------------------------------------------------------
@@ -306,10 +308,10 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
     row << boost::lexical_cast<double>(splitted[1]);  // wavelength
     row << boost::lexical_cast<int32_t>(splitted[2]); // bank
     row << splitted[3];                               // vanadium
-    row << splitted[5];                              // vanadium_background
+    row << splitted[5];                               // vanadium_background
     row << splitted[4];                               // container
-    row << "0";                                      // empty_environment
-    row << "0";                                      // empty_instrument
+    row << "0";                                       // empty_environment
+    row << "0";                                       // empty_instrument
     row << splitted[6];                               // d_min
     row << splitted[7];                               // d_max
     row << boost::lexical_cast<double>(splitted[8]);  // tof_min
@@ -408,7 +410,8 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
   // first line must be version string
   std::string line = Strings::getLine(file);
   boost::smatch result;
-  if (boost::regex_search(line, result, VERSION_REG_EXP) && result.size() == 2) {
+  if (boost::regex_search(line, result, VERSION_REG_EXP) &&
+      result.size() == 2) {
     g_log.debug() << "Found version " << result[1] << "\n";
   } else {
     file.close();
@@ -422,7 +425,7 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
        line = Strings::getLine(file)) {
     if (line.empty())
       continue;
-    if (line.substr(0,1) == "#")
+    if (line.substr(0, 1) == "#")
       continue;
 
     boost::smatch result;
@@ -430,8 +433,9 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
     if (boost::regex_search(line, result, V1_TABLE_REG_EXP)) {
       if (result.size() == 2) {
         line = Strings::strip(result[1]);
-        Kernel::StringTokenizer tokenizer(line, " ", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-        for (const auto & token : tokenizer) {
+        Kernel::StringTokenizer tokenizer(
+            line, " ", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        for (const auto &token : tokenizer) {
           columnNames.push_back(token);
         }
       }
