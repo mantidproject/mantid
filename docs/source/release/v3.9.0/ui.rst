@@ -56,6 +56,7 @@ Bugs Resolved
 - Fixed crash when loading data and the algorithm widget is hidden
 - Fixed exception being thrown when saving project with custom interfaces open
 - The "Plot Surface from Group" and "Plot Contour from Group" options have been fixed and now work for both histogram and point data. Note that all workspaces in the group must have the same X data.
+- Legend placement has been fixed in the "tiled plot"/``plotSubplots`` option, and these graphs now use Mantid's default plot style options.
 
 SliceViewer Improvements
 ------------------------
