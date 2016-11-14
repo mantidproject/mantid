@@ -3508,22 +3508,21 @@ void MantidUI::plotLayerOfMultilayer(MultiLayer *multi, const bool plotErrors,
   };
 
   // Lambda to set axis label hiding
-  const auto formatAxes = [&nRows, &nCols, &nPlots](
-      Graph *layer, const int row, const int col) {
-    const bool drawYAxisLabel = col == 0;
-    if (!drawXAxisLabel(row, col, nRows, nCols, nPlots)) {
-      layer->setXAxisTitle(QString::null);
-    }
-    if (!drawYAxisLabel) {
-      layer->setYAxisTitle(QString::null);
-    }
-  };
+  const auto formatAxes =
+      [&nRows, &nCols, &nPlots](Graph *layer, const int row, const int col) {
+        const bool drawYAxisLabel = col == 0;
+        if (!drawXAxisLabel(row, col, nRows, nCols, nPlots)) {
+          layer->setXAxisTitle(QString::null);
+        }
+        if (!drawYAxisLabel) {
+          layer->setYAxisTitle(QString::null);
+        }
+      };
 
   const bool isFitResult = workspaceIsFitResult(wsName);
 
   const int layerIndex = row * nCols + col + 1; // layers numbered from 1
   auto *layer = multi->layer(layerIndex);
-  int curveIndex(0);
   for (const int spec : spectra) {
     const auto plotType = isFitResult ? getCurveTypeForFitResult(spec)
                                       : GraphOptions::Unspecified;
