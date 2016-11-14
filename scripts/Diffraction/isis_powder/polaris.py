@@ -120,24 +120,34 @@ class Polaris(AbstractInst):
             common.remove_intermediate_workspace(empty_sample)
         return input_sample
 
-    def _apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number=None, vanadium_path=None):
-        assert(vanadium_number or vanadium_path)
+    def _apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number=None, calibration_dict=None):
+        assert(vanadium_number or calibration_dict)
 
-        if vanadium_number:
-            solid_angle_vanadium_ws = common._load_raw_files(run_number=vanadium_number, instrument=self)
+        if not calibration_dict or not os.path.isfile(calibration_dict["solid_angle_corr"]):
+            corrections = self.generate_solid_angle_corrections(calibration_dict, vanadium_number)
         else:
-            solid_angle_vanadium_ws = mantid.Load(Filename=vanadium_path)
-
-        normalised_vanadium_ws = self._normalise_ws(solid_angle_vanadium_ws)
-        corrections = self._calculate_solid_angle_efficiency_corrections(normalised_vanadium_ws)
+            corrections = mantid.Load(Filename=calibration_dict["solid_angle_corr"])
 
         corrected_ws = mantid.Divide(LHSWorkspace=ws_to_correct, RHSWorkspace=corrections)
-        common.remove_intermediate_workspace(solid_angle_vanadium_ws)
-        common.remove_intermediate_workspace(normalised_vanadium_ws)
         common.remove_intermediate_workspace(corrections)
         common.remove_intermediate_workspace(ws_to_correct)
         ws_to_correct = corrected_ws
         return ws_to_correct
+
+    def generate_solid_angle_corrections(self, calibration_dict, vanadium_number):
+        if vanadium_number:
+            solid_angle_vanadium_ws = common._load_raw_files(run_number=vanadium_number, instrument=self)
+        else:
+            solid_angle_vanadium_ws = mantid.Load(Filename=calibration_dict["vanadium"])
+        normalised_vanadium_ws = self._normalise_ws(solid_angle_vanadium_ws)
+        corrections = self._calculate_solid_angle_efficiency_corrections(normalised_vanadium_ws)
+
+        if calibration_dict:
+            mantid.SaveNexusProcessed(InputWorkspace=corrections, Filename=calibration_dict["solid_angle_corr"])
+
+        common.remove_intermediate_workspace(solid_angle_vanadium_ws)
+        common.remove_intermediate_workspace(normalised_vanadium_ws)
+        return corrections
 
     def correct_sample_vanadium(self, focused_ws, index, vanadium_ws=None):
         spectra_name = "sample_ws-" + str(index + 1)

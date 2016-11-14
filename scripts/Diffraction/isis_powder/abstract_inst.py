@@ -262,7 +262,7 @@ class AbstractInst(object):
     def _subtract_sample_empty(self, input_sample):
         return input_sample
 
-    def _apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number=None, vanadium_path=None):
+    def _apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number=None, calibration_dict=None):
         return ws_to_correct
 
     def _load_monitor(self, number, cycle):
