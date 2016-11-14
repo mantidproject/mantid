@@ -297,12 +297,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 outWsName = workspaceNames.badDetectors()
                 diagnosticsWs, nFailures = FindDetectorsOutsideLimits(InputWorkspace=workspace,
                                                                       OutputWorkspace=outWsName)
-                # 2. Detectors where FindEPP failed.
-                # TODO Should this be stored in a separate temp ws for debuggin?
-                for i in range(diagnosticsWs.getNumberHistograms()):
-                    if eppWorkspace.cell('FitStatus', i) != 'success':
-                        setAsBad(diagnosticsWs, i)
-                # 3. Detectors with high background
+                # 2. Detectors with high background
                 outWsName = workspaceNames.badDetectorSpuriousBkg()
                 bkgDiagnostics, nFailures = MedianDetectorTest(InputWorkspace=bkgWorkspace,
                                                                OutputWorkspace=outWsName,
