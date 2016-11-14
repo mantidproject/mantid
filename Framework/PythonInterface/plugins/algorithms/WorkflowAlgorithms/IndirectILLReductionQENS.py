@@ -15,7 +15,6 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
     _sum_all_runs = None
     _mask_bins = None
     _unmirror_option = None
-    _mirror_sense = None
     _back_scaling = None
     _criteria = None
     _progress = None
@@ -58,10 +57,6 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
                              defaultValue=False,
                              doc='Whether to sum all the input runs.')
 
-        self.declareProperty(name='MirrorSense',
-                             defaultValue=False,
-                             doc='Whether the runs where recorded in mirror sense.')
-
         self.declareProperty(name='MaskOverflownBins',
                              defaultValue=True,
                              doc='Whether to mask the bins that overflow the x-axis '
@@ -74,7 +69,7 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
 
         self.declareProperty(name='UnmirrorOption', defaultValue=6,
                              validator=IntBoundedValidator(lower=0, upper=7),
-                             doc='Unmirroring options (for MirrorSense): \n'
+                             doc='Unmirroring options : \n'
                                  '0 no unmirroring\n'
                                  '1 sum of left and right\n'
                                  '2 left\n'
@@ -120,16 +115,8 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
 
         uo = self.getProperty('UnmirrorOption').value
 
-        ms = self.getProperty('MirrorSense').value
-
-        if (uo == 5 or uo == 7) and ms and not self.getPropertyValue('AlignmentRun'):
+        if (uo == 5 or uo == 7) and not self.getPropertyValue('AlignmentRun'):
             issues['AlignmentRun'] = 'Given UnmirrorOption requires alignment run to be set'
-
-        if (uo > 0 and uo < 6) and not ms:
-            issues['UnmirrorOption'] = 'For the given MirrorSense setting only UnmirrorOption 0,6,7 are valid.'
-
-        if ms and uo == 0:
-            issues['UnmirrorOption'] = 'For the given MirrorSense setting UnmirrorOption 0 is not valid.'
 
         return issues
 
@@ -142,7 +129,6 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         self._sum_all_runs = self.getProperty('SumRuns').value
         self._mask_bins = self.getProperty('MaskOverflownBins').value
         self._unmirror_option = self.getProperty('UnmirrorOption').value
-        self._mirror_sense = self.getProperty('MirrorSense').value
         self._back_scaling = self.getProperty('BackgroundScalingFactor').value
         self._peak_range = self.getProperty('CalibrationPeakRange').value
         self._red_ws = self.getPropertyValue('OutputWorkspace')
@@ -159,11 +145,7 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
 
         # Nexus metadata criteria for QENS type of data
         self._criteria = '$/entry0/instrument/Doppler/maximum_delta_energy$ != 0. and ' \
-                         '$/entry0/instrument/Doppler/velocity_profile$ == 0 and ' \
-                         '$/entry0/instrument/Doppler/mirror_sense$ == '
-
-        # mirror sense criteria
-        self._criteria += '14' if self._mirror_sense else '16'
+                         '$/entry0/instrument/Doppler/velocity_profile$ == 0'
 
         # empty list
         self._runs = []
@@ -180,7 +162,8 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         files = SelectNexusFilesByMetadata(files, self._criteria)
 
         if not files:
-            raise RuntimeError('None of the {0} runs satisfied the QENS and MirrorSense criteria.'.format(label))
+            raise RuntimeError('None of the {0} runs are of QENS type.'
+                               'Check the files or reduction type.'.format(label))
         else:
             self.log().information('Filtered {0} runs are: {0} \\n'.format(label,files.replace(',','\\n')))
 
@@ -292,14 +275,16 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
 
         outname = mtd[ws].getName()
 
-        self.log().information('Unmirroring workspace {0} with option {1} and mirror sense {2}'
-                               .format(outname,self._unmirror_option, self._mirror_sense))
+        wings = mtd[ws].getNumberOfEntries()
 
-        if not self._mirror_sense:   # one wing
+        self.log().information('Unmirroring workspace {0} with option {1}'
+                               .format(outname,self._unmirror_option))
+
+        if wings == 1:   # one wing
 
             name = mtd[ws].getItem(0).getName()
 
-            if self._unmirror_option == 0:
+            if self._unmirror_option < 6:  # do unmirror 0, i.e. nothing
                 RenameWorkspace(InputWorkspace = name, OutputWorkspace = outname)
             elif self._unmirror_option == 6:
                 MatchPeaks(InputWorkspace = name, OutputWorkspace = outname, MaskBins = self._mask_bins)
@@ -309,11 +294,16 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
                            MatchInput2ToCenter = True, OutputWorkspace = outname, MaskBins = self._mask_bins)
                 DeleteWorkspace(name)
 
-        else:  # two wing
+        elif wings == 2:  # two wing
 
             left = mtd[ws].getItem(0).getName()
             right = mtd[ws].getItem(1).getName()
-            UnGroupWorkspace(ws)
+
+            if self._unmirror_option > 0:
+                UnGroupWorkspace(ws)
+            else:
+                RenameWorkspace(InputWorkspace=left,OutputWorkspace='_'.join(left.split('_')[1:]))
+                RenameWorkspace(InputWorkspace=right, OutputWorkspace='_'.join(right.split('_')[1:]))
 
             if self._unmirror_option == 2:
                 RenameWorkspace(InputWorkspace=left, OutputWorkspace=outname)

@@ -94,6 +94,8 @@ void ILLEnergyTransfer::run() {
     long int uo = m_uiForm.sbUnmirrorOption->value();
     reductionAlg->setProperty("UnmirrorOption", uo);
     reductionAlg->setProperty("SumRuns", m_uiForm.ckSum->isChecked());
+    reductionAlg->setProperty("MaskOverflownBins",m_uiForm.cbMaskBins->isChecked());
+    reductionAlg->setProperty("CropDeadMonitorChannels",m_uiForm.cbCrop->isChecked());
 
     // Vanadium run
     if (uo == 5 || uo == 7) {
@@ -101,13 +103,10 @@ void ILLEnergyTransfer::run() {
       reductionAlg->setProperty("VanadiumRun", vanFilename.toStdString());
     }
 
-    // Handle background scaling factor
-    reductionAlg->setProperty("BackgroundScalingFactor",m_backScaling);
-
   } else { // FWS
 
     reductionAlg =
-        AlgorithmManager::Instance().create("IndirectILLFixedWindowScans");
+        AlgorithmManager::Instance().create("IndirectILLReductionFWS");
     reductionAlg->initialize();
 
     reductionAlg->setProperty(
@@ -115,6 +114,8 @@ void ILLEnergyTransfer::run() {
 
     reductionAlg->setProperty("SortXAxis", m_uiForm.cbSortX->isChecked());
   }
+
+  // options common for QENS and FWS
 
   // Handle input files
   QString runFilename = m_uiForm.rfInput->getUserInput().toString();
@@ -124,11 +125,13 @@ void ILLEnergyTransfer::run() {
   QString backgroundFilename = m_uiForm.rfBackgroundRun->getUserInput().toString();
   reductionAlg->setProperty("BackgroundRun", backgroundFilename.toStdString());
 
+  // Handle background scaling factor
+  reductionAlg->setProperty("BackgroundScalingFactor",m_backScaling);
+
   // Handle calibration file
   QString calibrationFilename = m_uiForm.rfCalibrationRun->getUserInput().toString();
   reductionAlg->setProperty("CalibrationRun", calibrationFilename.toStdString());
 
-  // options common for QENS and FWS
   reductionAlg->setProperty("Analyser", instDetails["analyser"].toStdString());
   reductionAlg->setProperty("Reflection",
                             instDetails["reflection"].toStdString());
