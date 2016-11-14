@@ -15,6 +15,9 @@ CLEANUP_KEEP   = 'KeepIntermediateWorkspaces'
 DIAGNOSTICS_YES   = 'UseDetectorDiagnostics'
 DIAGNOSTICS_NO    = 'OmitDetectorDiagnostics'
 
+INCIDENT_ENERGY_CALIBRATION_NO  = 'OmitIncidentEnergyCalibration'
+INCIDENT_ENERGY_CALIBRATION_YES = 'CalibrateIncidentEnergy'
+
 INDEX_TYPE_DETECTOR_ID     = 'DetectorID'
 INDEX_TYPE_SPECTRUM_NUMBER = 'SpectrumNumber'
 INDEX_TYPE_WORKSPACE_INDEX = 'WorkspaceIndex'
@@ -34,6 +37,7 @@ PROP_EPP_WORKSPACE                    = 'EPPWorkspace'
 PROP_FLAT_BACKGROUND_SCALING          = 'FlatBackgroundScaling'
 PROP_FLAT_BACKGROUND_WINDOW           = 'FlatBackgroundAveragingWindow'
 PROP_FLAT_BACKGROUND_WORKSPACE        = 'FlatBackgroundWorkspace'
+PROP_INCIDENT_ENERGY_CALIBRATION      = 'IncidentEnergyCalibration'
 PROP_INDEX_TYPE                       = 'IndexType'
 PROP_INPUT_FILE                       = 'InputFile'
 PROP_INPUT_WORKSPACE                  = 'InputWorkspace'
@@ -323,57 +327,59 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # Get calibrated incident energy from somewhere
         # It should come from the same place as the epp workspace.
         # Or should it?
-        instrument = workspace.getInstrument().getName()
-        eiCalibrationDets = self.getProperty(PROP_DETECTORS_FOR_EI_CALIBRATION).value
-        if instrument in ['IN4', 'IN6']  and eiCalibrationDets:
-            eiWsName = guessIncidentEnergyWorkspaceName(eppWorkspace)
-            if not AnalysisDataServiceImpl.Instance().doesExist(eiWsName):
-                # TODO this should go into the LoadILL algorithm.
-                instrument = workspace.getInstrument().getName()
-                if instrument == 'IN4':
-                    fermiChopperSpeed = workspace.run().getLogData('FC.rotation_speed').value
-                    backgroundChopper1Speed = workspace.run().getLogData('BC1.rotation_speed').value
-                    backgroundChopper2Speed = workspace.run().getLogData('BC2.rotation_speed').value
-                    if abs(backgroundChopper1Speed - backgroundChopper2Speed) > 1:
-                        raise RuntimeError('background choppers 1 and 2 have different speeds')
-                    n = fermiChopperSpeed / backgroundChopper1Speed / 4
-                    pulseInterval = 60.0 / (2 * fermiChopperSpeed) * n
-                elif instrument == 'IN6':
-                    fermiChopperSpeed = workspace.run().getLogData('Fermi.rotation_speed').value
-                    suppressorSpeed = workspace.run().getLogData('Suppressor.rotation_speed').value
-                    n = fermiChopperSpeed / suppressorSpeed
-                    pulseInterval = 60.0 / (2 * fermiChopperSpeed) * n
-                energy = GetEiMonDet(DetectorWorkspace=workspace,
-                                     DetectorEPPTable=eppWorkspace,
-                                     IndexType=indexType,
-                                     Detectors=eiCalibrationDets,
-                                     MonitorWorkspace=monitorWorkspace,
-                                     MonitorEppTable=monitorEppWorkspace,
-                                     Monitor=self.getProperty(PROP_MONITOR_INDEX).value,
-                                     PulseInterval=pulseInterval)
-                eiWsName = workspaceNames.incidentEnergy()
-                CreateSingleValuedWorkspace(OutputWorkspace=eiWsName,
-                                            DataValue=energy)
-            # Update incident energy
-            energy = mtd[eiWsName].readY(0)[0]
-            outWs = workspaceNames.eiCalibrated()
-            workspace = CloneWorkspace(InputWorkspace=workspace,
-                                       OutputWorkspace=outWs)
-            AddSampleLog(Workspace=workspace,
-                         LogName='Ei',
-                         LogText=str(energy),
-                         LogType='Number',
-                         NumberType='Double',
-                         LogUnit='meV')
-            wavelength = UnitConversion.run('Energy', 'Wavelength', energy, 0, 0, 0, Direct, 5)
-            AddSampleLog(Workspace=workspace,
-                         Logname='wavelength',
-                         LogText=str(wavelength),
-                         LogType='Number',
-                         NumberType='Double',
-                         LogUnit='Ångström')
-        else:
-            self.log().information('Skipping incident energy calibration for ' + instrument)
+        eiCalibration = self.getProperty(PROP_INCIDENT_ENERGY_CALIBRATION).value
+        if eiCalibration == INCIDENT_ENERGY_CALIBRATION_YES:
+            instrument = workspace.getInstrument().getName()
+            if instrument in ['IN4', 'IN6']:
+                eiCalibrationDets = self.getProperty(PROP_DETECTORS_FOR_EI_CALIBRATION).value
+                eiWsName = guessIncidentEnergyWorkspaceName(eppWorkspace)
+                if not AnalysisDataServiceImpl.Instance().doesExist(eiWsName):
+                    # TODO this should go into the LoadILL algorithm.
+                    instrument = workspace.getInstrument().getName()
+                    if instrument == 'IN4':
+                        fermiChopperSpeed = workspace.run().getLogData('FC.rotation_speed').value
+                        backgroundChopper1Speed = workspace.run().getLogData('BC1.rotation_speed').value
+                        backgroundChopper2Speed = workspace.run().getLogData('BC2.rotation_speed').value
+                        if abs(backgroundChopper1Speed - backgroundChopper2Speed) > 1:
+                            raise RuntimeError('background choppers 1 and 2 have different speeds')
+                        n = fermiChopperSpeed / backgroundChopper1Speed / 4
+                        pulseInterval = 60.0 / (2 * fermiChopperSpeed) * n
+                    elif instrument == 'IN6':
+                        fermiChopperSpeed = workspace.run().getLogData('Fermi.rotation_speed').value
+                        suppressorSpeed = workspace.run().getLogData('Suppressor.rotation_speed').value
+                        n = fermiChopperSpeed / suppressorSpeed
+                        pulseInterval = 60.0 / (2 * fermiChopperSpeed) * n
+                    energy = GetEiMonDet(DetectorWorkspace=workspace,
+                                         DetectorEPPTable=eppWorkspace,
+                                         IndexType=indexType,
+                                         Detectors=eiCalibrationDets,
+                                         MonitorWorkspace=monitorWorkspace,
+                                         MonitorEppTable=monitorEppWorkspace,
+                                         Monitor=self.getProperty(PROP_MONITOR_INDEX).value,
+                                         PulseInterval=pulseInterval)
+                    eiWsName = workspaceNames.incidentEnergy()
+                    CreateSingleValuedWorkspace(OutputWorkspace=eiWsName,
+                                                DataValue=energy)
+                # Update incident energy
+                energy = mtd[eiWsName].readY(0)[0]
+                outWs = workspaceNames.eiCalibrated()
+                workspace = CloneWorkspace(InputWorkspace=workspace,
+                                           OutputWorkspace=outWs)
+                AddSampleLog(Workspace=workspace,
+                             LogName='Ei',
+                             LogText=str(energy),
+                             LogType='Number',
+                             NumberType='Double',
+                             LogUnit='meV')
+                wavelength = UnitConversion.run('Energy', 'Wavelength', energy, 0, 0, 0, Direct, 5)
+                AddSampleLog(Workspace=workspace,
+                             Logname='wavelength',
+                             LogText=str(wavelength),
+                             LogType='Number',
+                             NumberType='Double',
+                             LogUnit='Ångström')
+            else:
+                self.log().warning('Instrument ' + instrument + ' not supported for incident energy calibration')
 
         # Normalisation to monitor/time
         normalisationMethod = self.getProperty(PROP_NORMALISATION).value
@@ -530,6 +536,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              validator=StringListValidator([REDUCTION_TYPE_SAMPLE, REDUCTION_TYPE_VANADIUM, REDUCTION_TYPE_CD, REDUCTION_TYPE_EC]),
                              direction=Direction.Input,
                              doc='Type of reduction workflow to be run on ' + PROP_INPUT_FILE)
+        self.declareProperty(PROP_INCIDENT_ENERGY_CALIBRATION,
+                             INCIDENT_ENERGY_CALIBRATION_YES,
+                             validator=StringListValidator([INCIDENT_ENERGY_CALIBRATION_YES, INCIDENT_ENERGY_CALIBRATION_YES]),
+                             direction=Direction.Input,
+                             doc='Enable or disable incident energy calibration on IN4 and IN6')
         self.declareProperty(PROP_NORMALISATION,
                              NORM_METHOD_MONITOR,
                              validator=StringListValidator([NORM_METHOD_MONITOR, NORM_METHOD_TIME]),
