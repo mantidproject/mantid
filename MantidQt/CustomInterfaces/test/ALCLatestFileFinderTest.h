@@ -18,7 +18,7 @@ using Mantid::Kernel::DateAndTime;
 /**
  * Temporary directory that is deleted when it goes out of scope
  */
-class ScopedDirectory {
+class ScopedDirectory final {
 public:
   /// Constructor: create directory in temp folder
   ScopedDirectory(const std::string &dirName) : m_dirName(dirName) {
@@ -28,16 +28,16 @@ public:
     m_directory.createDirectories();
   }
   /// Destructor: delete the directory
-  virtual ~ScopedDirectory() {
+  ~ScopedDirectory() {
     constexpr bool recursiveRemove(true);
     m_directory.remove(recursiveRemove);
   }
   /// Get path of directory
-  std::string getDirectoryName() const { return m_dirName; }
+  const std::string &getDirectoryName() const { return m_dirName; }
 
 private:
   Poco::File m_directory;
-  const std::string m_dirName;
+  std::string m_dirName;
 };
 
 /**
@@ -186,12 +186,11 @@ private:
    * @returns :: vector containing three files
    */
   std::vector<TestFile> generateTestFiles(const std::string &directory) {
-    std::vector<TestFile> files;
     // 100 years so it won't clash with other files in temp directory
-    files.emplace_back("2116-03-15T12:00:00", directory, "MUSR", "90000");
-    files.emplace_back("2116-03-15T13:00:00", directory, "MUSR", "90001");
-    files.emplace_back("2116-03-15T14:00:00", directory, "MUSR", "90002");
-    return files;
+    return std::vector<TestFile>{
+        {"2116-03-15T12:00:00", directory, "MUSR", "90000"},
+        {"2116-03-15T13:00:00", directory, "MUSR", "90001"},
+        {"2116-03-15T14:00:00", directory, "MUSR", "90002"}};
   }
 };
 
