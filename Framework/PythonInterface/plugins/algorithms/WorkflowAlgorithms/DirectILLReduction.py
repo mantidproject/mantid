@@ -521,11 +521,14 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                      '',
                                                      optional=PropertyMode.Optional,
                                                      direction=Direction.Input))
+        self.declareProperty(WorkspaceProperty(PROP_OUTPUT_WORKSPACE,
+                             '',
+                             direction=Direction.Output),
+                             doc='The output of the algorithm')
         self.declareProperty(PROP_OUTPUT_PREFIX,
                              '',
                              direction=Direction.Input,
                              doc='String to use as prefix in output workspace names')
-        
         self.declareProperty(PROP_CLEANUP_MODE,
                              CLEANUP_DELETE,
                              validator=StringListValidator([CLEANUP_DELETE, CLEANUP_KEEP]),
@@ -584,10 +587,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                      Direction.Input,
                                                      PropertyMode.Optional),
                              doc='Workspace from which to get flat background data')
-        self.declareProperty(PROP_MONITOR_INDEX,
-                             0,
-                             direction=Direction.Input,
-                             doc='Index of the main monitor spectrum.')
         self.declareProperty(IntArrayProperty(PROP_USER_MASK,
                                               '',
                                               direction=Direction.Input),
@@ -602,6 +601,18 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                      Direction.Input,
                                                      PropertyMode.Optional),
                              doc='Detector diagnostics workspace obtained from another reduction run.')
+        self.declareProperty(PROP_INDEX_TYPE,
+                             INDEX_TYPE_WORKSPACE_INDEX,
+                             direction=Direction.Input,
+                             doc='Type of numbers in ' + PROP_MONITOR_INDEX + ' and ' + PROP_DETECTORS_FOR_EI_CALIBRATION + ' properties')
+        self.declareProperty(PROP_MONITOR_INDEX,
+                             0,
+                             direction=Direction.Input,
+                             doc='Index of the main monitor spectrum.')
+        self.declareProperty(PROP_DETECTORS_FOR_EI_CALIBRATION,
+                             '',
+                             direction=Direction.Input,
+                             doc='List of detectors used for the incident energy calibration')
         self.declareProperty(PROP_TRANSMISSION,
                              1.0,
                              direction=Direction.Input,
@@ -614,15 +625,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              '',
                              direction=Direction.Input,
                              doc='Rebinning in w')
-        self.declareProperty(PROP_DETECTORS_FOR_EI_CALIBRATION,
-                             '',
-                             direction=Direction.Input,
-                             doc='List of detectors used for the incident energy calibration')
-        self.declareProperty(PROP_INDEX_TYPE,
-                             INDEX_TYPE_WORKSPACE_INDEX,
-                             direction=Direction.Input,
-                             doc='Type of numbers in ' + PROP_MONITOR_INDEX + ' and ' + PROP_DETECTORS_FOR_EI_CALIBRATION + ' properties')
-        # Output
+        # Rest of the output properties.
         self.declareProperty(ITableWorkspaceProperty(PROP_OUTPUT_EPP_WORKSPACE,
                              '',
                              direction=Direction.Output,
@@ -643,10 +646,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                direction=Direction.Output,
                                                optional=PropertyMode.Optional),
                              doc='Output workspace for detector diagnostics')
-        self.declareProperty(WorkspaceProperty(PROP_OUTPUT_WORKSPACE,
-                             '',
-                             direction=Direction.Output),
-                             doc='The output of the algorithm')
 
     def validateInputs(self):
         """
