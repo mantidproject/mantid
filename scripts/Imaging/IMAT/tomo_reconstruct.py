@@ -55,11 +55,12 @@ from os import path
 # So insert in the path the directory that contains this file
 sys.path.insert(0, os.path.split(path.dirname(__file__))[0]) # noqa
 
-from IMAT.tomorec import reconstruction_command as tomocmd
-import IMAT.tomorec.configs as tomocfg
+import pydevd
+pydevd.settrace('localhost', port=61845, stdoutToServer=True, stderrToServer=True)
 
-# import pydevd
-# pydevd.settrace('localhost', port=40998, stdoutToServer=True, stderrToServer=True)
+from tomorec import reconstruction_command as tomocmd
+import tomorec.configs as tomocfg
+
 
 def setup_cmd_options():
     """
@@ -269,6 +270,7 @@ def grab_postproc_options(args):
 def main_tomo_rec():
     # several dependencies (numpy, scipy) are too out-of-date in standard Python 2.6
     # distributions, as found for example on rhel6
+
     vers = sys.version_info
     if vers < (2,7,0):
         raise RuntimeError("Not running this test as it requires Python >= 2.7. Version found: {0}".
@@ -276,7 +278,7 @@ def main_tomo_rec():
 
     import inspect
 
-    import IMAT.tomorec.io as tomoio
+    import tomorec.io as tomoio
 
     arg_parser = setup_cmd_options()
     args = arg_parser.parse_args()

@@ -153,7 +153,7 @@ private:
   QTimer *m_keepAliveTimer;
   QThread *m_keepAliveThread;
 
-  std::unique_ptr<QThread> m_workerThread;
+  std::unique_ptr<TomographyThreadHandler> m_workerThread;
 
   std::unique_ptr<TomoToolConfigDialogBase> m_configDialog;
 

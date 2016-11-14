@@ -30,7 +30,8 @@ namespace CustomInterfaces {
 //             SLOT(readNewData()));
 //   }
 //   // intentionally copy the vector
-//   void setup(const std::string runnable, const std::vector<std::string> &args) {
+//   void setup(const std::string runnable, const std::vector<std::string>
+//   &args) {
 //     // m_process = Mantid::Kernel::make_unique<QProcess>();
 //     m_qRunnable = std::move(QString::fromStdString(runnable));
 //     m_qListArgs = std::move(constructArgumentsFromVector(args));
@@ -66,11 +67,10 @@ namespace CustomInterfaces {
 //   // Poco::Process::PID m_pid = 0;
 // };
 
-class TomographyProcessHandler : public QProcess{
+class TomographyProcessHandler : public QProcess {
   Q_OBJECT
-  public:
-    TomographyProcessHandler(QObject * parent):QProcess(parent){
-    }
+public:
+  TomographyProcessHandler(QObject *parent) : QProcess(parent) {}
 
   // intentionally copy the vector
   void setup(const std::string runnable, const std::vector<std::string> &args) {
@@ -79,6 +79,20 @@ class TomographyProcessHandler : public QProcess{
     m_args = std::move(constructArgumentsFromVector(args));
   }
 
+public slots:
+  void startWorker() {
+    std::cout << "\n\nDEBUG >> STARTING PROCESS\n\n";
+    start(m_runnable, m_args);
+    QString output(readAllStandardOutput());
+    std::string fafaf = output.toStdString();
+    std::cout << fafaf << "\n\n";
+    emit finished();
+  }
+
+signals:
+  void finished();
+
+private:
   QStringList
   constructArgumentsFromVector(const std::vector<std::string> &args) {
     QStringList list;
@@ -90,28 +104,41 @@ class TomographyProcessHandler : public QProcess{
     return list;
   }
 
-public slots:
-  void startWorker(){
-    this->execute(m_runnable, m_args);
-  }
-
-signals:
-    void finished();
-
-private:
   QString m_runnable;
   QStringList m_args;
 };
 
+class TomographyThreadHandler : public QThread {
+  Q_OBJECT
+public:
+  TomographyThreadHandler(QObject *parent) : QThread(parent) {}
+
+  void run() {
+    std::cout << "\n\nDEBUG >> STARTING THREAD\n\n";
+    emit started();
+    this->exec();
+  }
+  size_t getPID() {
+    auto pid = this->currentThreadId();
+
+    // u wot? static_cast?
+    return (long long)pid;
+  }
+
+signals:
+  void started();
+};
 // class TomographyProcessHandler : public QThread {
 // public:
 //   TomographyProcessHandler()
-//       : m_pid(0), m_outPipe(), m_errPipe(), m_outstr(m_outPipe), m_errstr(m_errPipe) {}
+//       : m_pid(0), m_outPipe(), m_errPipe(), m_outstr(m_outPipe),
+//       m_errstr(m_errPipe) {}
 
 //   ~TomographyProcessHandler(){
 //     Poco::Process::kill(m_pid);
 //   }
-//   void setup(const std::string runnable, const std::vector<std::string> args) {
+//   void setup(const std::string runnable, const std::vector<std::string> args)
+//   {
 //     // move the copies
 //     m_runnable = std::move(runnable);
 //     m_args = std::move(args);
@@ -119,7 +146,7 @@ private:
 //   int exit(){
 //     this->exit();
 //   }
-//   Poco::Process::PID getPID() const { 
+//   Poco::Process::PID getPID() const {
 //     if(this->isRunning())
 //       while(m_pid == 0){
 //       }
@@ -130,12 +157,12 @@ private:
 //   std::string getOutputString() { return getStringFromStream(m_outstr); }
 
 //   std::string getErrorString() { return getStringFromStream(m_errstr); }
-  
+
 //   bool runzz(Poco::Process::PID pid) const {
-//     return this->isRunning() && Poco::Process::isRunning(pid);  
+//     return this->isRunning() && Poco::Process::isRunning(pid);
 //   }
 //   bool runzz() const {
-//     return this->isRunning() && Poco::Process::isRunning(m_pid);      
+//     return this->isRunning() && Poco::Process::isRunning(m_pid);
 //   }
 
 // private:
@@ -150,9 +177,9 @@ private:
 //     // }
 //     m_mutex.unlock();
 //   }
-  
+
 //   std::string getStringFromStream(Poco::PipeInputStream &str) {
-//     // avoid deadlocking    
+//     // avoid deadlocking
 //     // if (m_pid > 0) {
 //     //   return "Reconstruction process running...";
 //     // }
@@ -165,10 +192,11 @@ private:
 //     // if (!outstring.empty())
 //     //   return outstring;
 //     // remove the trylock
-//     m_mutex.unlock();  
+//     m_mutex.unlock();
 //     if (!m_outString.empty())
 //       return m_outString;
-//     return "Reconstruction process encountered unknown error! Please check reconstruction "
+//     return "Reconstruction process encountered unknown error! Please check
+//     reconstruction "
 //            "logs.";
 //   }
 

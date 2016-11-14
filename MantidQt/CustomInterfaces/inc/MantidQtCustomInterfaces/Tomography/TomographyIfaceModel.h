@@ -151,7 +151,10 @@ public:
                         std::vector<std::string> &status,
                         std::vector<std::string> &cmds);
   /// Submit a new job to the (remote or local) compute resource
-  void doSubmitReconstructionJob(const std::string &compRes, QThread &thread, MantidQt::CustomInterfaces::TomographyProcessHandler &worker);
+  void doSubmitReconstructionJob(
+      const std::string &compRes,
+      MantidQt::CustomInterfaces::TomographyThreadHandler &thread,
+      MantidQt::CustomInterfaces::TomographyProcessHandler &worker);
 
   /// Cancel a previously submitted job
   void doCancelJobs(const std::string &compRes,
@@ -210,11 +213,11 @@ protected: // protected to expose everything to testing
   std::string
   constructSingleStringFromVector(const std::vector<std::string> args) const;
 
-  void doRunReconstructionJobLocal(const std::string &run,
-                                   const std::string &allOpts,
-                                   const std::vector<std::string> &args, 
-                                   QThread &thread, 
-                                   MantidQt::CustomInterfaces::TomographyProcessHandler &worker);
+  void doRunReconstructionJobLocal(
+      const std::string &run, const std::string &allOpts,
+      const std::vector<std::string> &args,
+      MantidQt::CustomInterfaces::TomographyThreadHandler &thread,
+      MantidQt::CustomInterfaces::TomographyProcessHandler &worker);
 
   void doRunReconstructionJobRemote(const std::string &compRes,
                                     const std::string &run,

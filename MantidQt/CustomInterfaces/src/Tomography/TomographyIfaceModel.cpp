@@ -244,7 +244,8 @@ bool TomographyIfaceModel::doPing(const std::string &compRes) {
     tid = alg->getPropertyValue("TransactionID");
     g_log.information() << "Pinged '" << compRes
                         << "'succesfully. Checked that a transaction could "
-                           "be created, with ID: " << tid << '\n';
+                           "be created, with ID: "
+                        << tid << '\n';
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Error. Failed to ping and start a transaction on "
                              "the remote resource." +
@@ -440,7 +441,8 @@ std::string TomographyIfaceModel::constructSingleStringFromVector(
  * @param compRes The resource to which the request will be made
  */
 void TomographyIfaceModel::doSubmitReconstructionJob(
-    const std::string &compRes, QThread &thread, TomographyProcessHandler &worker) {
+    const std::string &compRes, TomographyThreadHandler &thread,
+    TomographyProcessHandler &worker) {
   std::string run;
   std::vector<std::string> args;
   try {
@@ -507,22 +509,23 @@ void TomographyIfaceModel::doRunReconstructionJobRemote(
 
 void TomographyIfaceModel::doRunReconstructionJobLocal(
     const std::string &run, const std::string &allOpts,
-    const std::vector<std::string> &args, QThread &thread, TomographyProcessHandler &worker) {
-  
+    const std::vector<std::string> &args, TomographyThreadHandler &thread,
+    TomographyProcessHandler &worker) {
+
   try {
     // Can only run one reconstruction at a time. you can cancel the recon
     worker.setup(run, args);
     thread.start();
-  }
-  catch (Poco::SystemException & sexc) {
+    // TODO no more POCO
+  } catch (Poco::SystemException &sexc) {
     g_log.error() << "Execution failed. Could not run the tool. Error details: "
                   << std::string(sexc.what());
   }
 
   Mantid::API::IRemoteJobManager::RemoteJobInfo info;
 
-  // crash here  
-  auto pid = thread.currentThreadId();
+  // crash here
+  auto pid = thread.getPID();
   info.id = boost::lexical_cast<std::string>(pid);
   info.name = pid > 0 ? "Mantid_Local" : "none";
   info.status = pid > 0 ? "Starting" : "Exit";
@@ -530,7 +533,7 @@ void TomographyIfaceModel::doRunReconstructionJobLocal(
   m_jobsStatusLocal.emplace_back(info);
   // TODO log proper info
   // g_log.notice(m_process->getOutputString());
-  
+
   doRefreshJobsInfo(g_LocalResourceName);
 }
 
@@ -580,7 +583,7 @@ void TomographyIfaceModel::doRefreshJobsInfo(const std::string &compRes) {
 
 void TomographyIfaceModel::refreshLocalJobsInfo() {
   // g_log.notice(m_process->getOutputString());
-  
+
   for (auto &job : m_jobsStatusLocal) {
     if ("Exit" == job.status || "Done" == job.status)
       continue;

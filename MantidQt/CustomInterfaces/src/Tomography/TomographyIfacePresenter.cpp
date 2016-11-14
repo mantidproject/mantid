@@ -557,26 +557,31 @@ void TomographyIfacePresenter::processRunRecon() {
 
   try {
     m_workerThread.reset();
-    m_workerThread = Mantid::Kernel::make_unique<QThread>(this);
-    std::unique_ptr<MantidQt::CustomInterfaces::TomographyProcessHandler> worker = 
-        Mantid::Kernel::make_unique<MantidQt::CustomInterfaces::TomographyProcessHandler>(this);
+    m_workerThread = Mantid::Kernel::make_unique<TomographyThreadHandler>(this);
+    auto *worker =
+        new MantidQt::CustomInterfaces::TomographyProcessHandler(this);
     worker->moveToThread(m_workerThread.get());
 
-    connect(m_workerThread.get(), SIGNAL(started()), worker.get(), SLOT(startWorker()));
-    connect(worker.get(), SIGNAL(finished()), this, SLOT(reconstructionFinished()));
-    connect(m_workerThread.get(), SIGNAL(finished()), m_workerThread.get(),
-          SLOT(deleteLater()), Qt::DirectConnection);
-    connect(worker.get(), SIGNAL(finished()), worker.get(), SLOT(deleteLater()));
+    connect(m_workerThread.get(), SIGNAL(started()), worker,
+            SLOT(startWorker()));
 
-    m_model->doSubmitReconstructionJob(m_view->currentComputeResource(), *(m_workerThread.get()), *(worker.get()));
+    connect(worker, SIGNAL(finished()), this, SLOT(reconstructionFinished()));
+
+    connect(m_workerThread.get(), SIGNAL(finished()), m_workerThread.get(),
+            SLOT(deleteLater()), Qt::DirectConnection);
+
+    connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+
+    m_model->doSubmitReconstructionJob(m_view->currentComputeResource(),
+                                       *m_workerThread, *worker);
   } catch (std::exception &e) {
     m_view->userWarning("Issue when trying to start a job", e.what());
   }
   processRefreshJobs();
 }
 
-void TomographyIfacePresenter::reconstructionFinished(){
-  // TOOD
+void TomographyIfacePresenter::reconstructionFinished() {
+  std::cout << "\n\nDEBUG >> WORKER FINISHED\n\n";
 }
 
 bool TomographyIfacePresenter::isLocalResourceSelected() const {
