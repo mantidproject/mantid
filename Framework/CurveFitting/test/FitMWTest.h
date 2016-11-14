@@ -34,36 +34,43 @@ using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 
-class FitMWTest : public CxxTest::TestSuite {
-public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static FitMWTest *createSuite() { return new FitMWTest(); }
-  static void destroySuite(FitMWTest *suite) { delete suite; }
+namespace {
+API::MatrixWorkspace_sptr createTestWorkspace(const bool histogram,
+                                              size_t NVectors = 2,
+                                              size_t YLength = 20) {
+  MatrixWorkspace_sptr ws2(new WorkspaceTester);
+  size_t XLength = YLength + (histogram ? 1 : 0);
+  ws2->initialize(NVectors, XLength, YLength);
 
-  FitMWTest() {
-    // need to have DataObjects loaded
-    FrameworkManager::Instance();
+  for (size_t is = 0; is < ws2->getNumberHistograms(); ++is) {
+    auto &x = ws2->mutableX(is);
+    auto &y = ws2->mutableY(is);
+    for (size_t i = 0; i < ws2->blocksize(); ++i) {
+      x[i] = 0.1 * double(i);
+      y[i] = (10.0 + double(is)) * exp(-(x[i]) / (0.5 * (1 + double(is))));
+    }
+    if (histogram)
+      x.back() = x[x.size() - 2] + 0.1;
   }
+  return ws2;
+}
 
-  void test_exec_point_data() {
-    const bool histogram(false);
-    auto ws2 = createTestWorkspace(histogram);
+void doTestExecPointData(API::MatrixWorkspace_sptr ws2,
+                         bool performance = false) {
+  API::IFunction_sptr fun(new ExpDecay);
+  fun->setParameter("Height", 1.);
+  fun->setParameter("Lifetime", 1.0);
 
-    API::IFunction_sptr fun(new ExpDecay);
-    fun->setParameter("Height", 1.);
-    fun->setParameter("Lifetime", 1.0);
+  Algorithms::Fit fit;
+  fit.initialize();
 
-    Algorithms::Fit fit;
-    fit.initialize();
+  fit.setProperty("Function", fun);
+  fit.setProperty("InputWorkspace", ws2);
+  fit.setProperty("WorkspaceIndex", 0);
+  fit.setProperty("CreateOutput", true);
 
-    fit.setProperty("Function", fun);
-    fit.setProperty("InputWorkspace", ws2);
-    fit.setProperty("WorkspaceIndex", 0);
-    fit.setProperty("CreateOutput", true);
-
-    fit.execute();
-
+  fit.execute();
+  if (!performance) {
     TS_ASSERT(fit.isExecuted());
 
     TS_ASSERT_DELTA(fun->getParameter("Height"), 10.0, 1e-3);
@@ -86,9 +93,9 @@ public:
     TS_ASSERT_EQUALS(axis->label(1), "Calc");
     TS_ASSERT_EQUALS(axis->label(2), "Diff");
 
-    const Mantid::MantidVec &Data = outWS->readY(0);
-    const Mantid::MantidVec &Calc = outWS->readY(1);
-    const Mantid::MantidVec &Diff = outWS->readY(2);
+    const auto &Data = outWS->y(0);
+    const auto &Calc = outWS->y(1);
+    const auto &Diff = outWS->y(2);
     for (size_t i = 0; i < outWS->blocksize(); ++i) {
       TS_ASSERT_EQUALS(Data[i] - Calc[i], Diff[i]);
     }
@@ -132,10 +139,10 @@ public:
     TS_ASSERT_EQUALS(params->Double(0, 2), fun->getError(0));
     TS_ASSERT_EQUALS(params->Double(1, 2), fun->getError(1));
     TS_ASSERT_EQUALS(params->Double(2, 2), 0.0);
-
-    API::AnalysisDataService::Instance().clear();
-    //--------------------------------------------------//
-
+  }
+  API::AnalysisDataService::Instance().clear();
+  //--------------------------------------------------//
+  if (!performance) {
     // Fit fit1;
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("Fit");
@@ -153,47 +160,71 @@ public:
     TS_ASSERT_DELTA(fun->getParameter("Height"), 11.0, 1e-3);
     TS_ASSERT_DELTA(fun->getParameter("Lifetime"), 1.0, 1e-4);
   }
+}
+void doTestExecHistogramData(API::MatrixWorkspace_sptr ws2,
+                             bool performance = false) {
+  API::IFunction_sptr fun(new ExpDecay);
+  fun->setParameter("Height", 1.);
+  fun->setParameter("Lifetime", 1.);
 
-  void test_exec_histogram_data() {
-    const bool histogram(true);
-    auto ws2 = createTestWorkspace(histogram);
+  Algorithms::Fit fit;
+  fit.initialize();
 
-    API::IFunction_sptr fun(new ExpDecay);
-    fun->setParameter("Height", 1.);
-    fun->setParameter("Lifetime", 1.);
+  fit.setProperty("Function", fun);
+  fit.setProperty("InputWorkspace", ws2);
+  fit.setProperty("WorkspaceIndex", 0);
 
-    Algorithms::Fit fit;
-    fit.initialize();
+  fit.execute();
 
-    fit.setProperty("Function", fun);
-    fit.setProperty("InputWorkspace", ws2);
-    fit.setProperty("WorkspaceIndex", 0);
-
-    fit.execute();
-
+  if (!performance) {
     TS_ASSERT(fit.isExecuted());
 
     TS_ASSERT_DELTA(fun->getParameter("Height"), 11.0517, 1e-3);
     TS_ASSERT_DELTA(fun->getParameter("Lifetime"), 0.5, 1e-4);
+  }
 
-    Fit fit1;
-    fit1.initialize();
+  Fit fit1;
+  fit1.initialize();
 
-    fit1.setProperty("Function", fun);
-    fit1.setProperty("InputWorkspace", ws2);
-    fit1.setProperty("WorkspaceIndex", 1);
+  fit1.setProperty("Function", fun);
+  fit1.setProperty("InputWorkspace", ws2);
+  fit1.setProperty("WorkspaceIndex", 1);
 
-    fit1.execute();
-
+  fit1.execute();
+  if (!performance) {
     TS_ASSERT(fit1.isExecuted());
 
     TS_ASSERT_DELTA(fun->getParameter("Height"), 11.5639, 1e-3);
     TS_ASSERT_DELTA(fun->getParameter("Lifetime"), 1.0, 1e-4);
   }
+}
+}
+
+class FitMWTest : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static FitMWTest *createSuite() { return new FitMWTest(); }
+  static void destroySuite(FitMWTest *suite) { delete suite; }
+
+  FitMWTest() {
+    // need to have DataObjects loaded
+    FrameworkManager::Instance();
+  }
+
+  void test_exec_point_data() {
+    const bool histogram = false;
+    doTestExecPointData(createTestWorkspace(histogram));
+  }
+
+  void test_exec_histogram_data() {
+    const bool histogram = true;
+    doTestExecHistogramData(createTestWorkspace(histogram));
+  }
 
   void test_exec_distribution_data_produces_distribution_data() {
     // Arrange
-    const bool histogram(true);
+    const bool histogram = true;
     auto ws3 = createTestWorkspace(histogram);
     API::WorkspaceHelpers::makeDistribution(ws3);
 
@@ -226,7 +257,7 @@ public:
 
   // test that errors of the calculated output are reasonable
   void test_output_errors() {
-    const bool histogram(true);
+    const bool histogram = true;
     auto ws2 = createTestWorkspace(histogram);
 
     API::IFunction_sptr fun(new Polynomial);
@@ -249,7 +280,7 @@ public:
             .retrieveWS<Mantid::API::MatrixWorkspace>("out_Workspace");
     TS_ASSERT(out_ws);
     TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 3);
-    auto &e = out_ws->readE(1);
+    auto &e = out_ws->e(1);
     for (size_t i = 0; i < e.size(); ++i) {
       TS_ASSERT(e[i] < 1.0);
     }
@@ -341,7 +372,7 @@ public:
       fitmw.setNormalise(true);
       fitmw.createDomain(domain, values);
 
-      auto &y = ws->readY(1);
+      auto &y = ws->y(1);
 
       for (size_t i = 0; i < values->size(); ++i) {
         TS_ASSERT_DELTA((*values).getFitData(i), y[i] / 0.1, 1e-8);
@@ -368,8 +399,8 @@ public:
     ws2->initialize(2, 11, 10);
 
     for (size_t is = 0; is < ws2->getNumberHistograms(); ++is) {
-      Mantid::MantidVec &x = ws2->dataX(is);
-      Mantid::MantidVec &y = ws2->dataY(is);
+      auto &x = ws2->mutableX(is);
+      auto &y = ws2->mutableY(is);
       // Mantid::MantidVec& e = ws2->dataE(is);
       for (size_t i = 0; i < ws2->blocksize(); ++i) {
         x[i] = 0.1 * double(i);
@@ -453,7 +484,7 @@ public:
 
   void
   test_Composite_Function_With_SeparateMembers_Option_On_FitMW_Outputs_Composite_Values_Plus_Each_Member() {
-    const bool histogram(true);
+    const bool histogram = true;
     auto ws2 = createTestWorkspace(histogram);
     const std::string inputWSName = "FitMWTest_CompositeTest";
     // AnalysisDataService::Instance().add(inputWSName, ws2);
@@ -522,9 +553,9 @@ public:
         8.1873075308, 3.294074078, 4.893233452, 1.391615229, 1.902458849};
 
     for (size_t i = 0; i < nExpectedHist; ++i) {
-      TS_ASSERT_DELTA(outputWS->readY(i)[1], yValues[i], 1e-8);
-      TS_ASSERT_DELTA(outputWS->readE(i)[1], eValues[i], 1e-8);
-      TS_ASSERT_DELTA(outputWS->readX(i)[1], ws2->readX(0)[1], 1e-8);
+      TS_ASSERT_DELTA(outputWS->y(i)[1], yValues[i], 1e-8);
+      TS_ASSERT_DELTA(outputWS->e(i)[1], eValues[i], 1e-8);
+      TS_ASSERT_DELTA(outputWS->x(i)[1], ws2->readX(0)[1], 1e-8);
     }
   }
 
@@ -680,8 +711,10 @@ public:
     boost::shared_ptr<WorkspaceTester> data =
         boost::make_shared<WorkspaceTester>();
     data->init(1, 100, 100);
+
+    auto &xData = data->mutableX(0);
     for (size_t i = 0; i < data->blocksize(); i++) {
-      data->dataX(0)[i] = -10.0 + 0.2 * double(i);
+      xData[i] = -10.0 + 0.2 * double(i);
     }
 
     FunctionDomain_sptr domain;
@@ -741,7 +774,8 @@ public:
     TS_ASSERT_EQUALS(axis->label(3), "Convolution");
     TS_ASSERT_EQUALS(axis->label(4), "Convolution");
 
-    FunctionDomain1DView x(data->dataX(0).data(), data->dataX(0).size());
+    FunctionDomain1DView x(data->mutableX(0).rawData().data(),
+                           data->mutableX(0).size());
     FunctionValues gaus1Values(x);
     FunctionValues gaus2Values(x);
 
@@ -751,8 +785,8 @@ public:
     conv1.function(x, gaus1Values);
 
     for (size_t i = 0; i < data->blocksize(); i++) {
-      TS_ASSERT_EQUALS(outputWS->dataY(3)[i], gaus1Values[i]);
-      TS_ASSERT_DIFFERS(outputWS->dataY(3)[i], 0.0);
+      TS_ASSERT_EQUALS(outputWS->y(3)[i], gaus1Values[i]);
+      TS_ASSERT_DIFFERS(outputWS->y(3)[i], 0.0);
     }
 
     Convolution conv2;
@@ -761,9 +795,9 @@ public:
     conv2.function(x, gaus2Values);
 
     for (size_t i = 0; i < data->blocksize(); i++) {
-      TS_ASSERT_EQUALS(outputWS->dataY(4)[i], gaus2Values[i]);
-      TS_ASSERT_DIFFERS(outputWS->dataY(4)[i], 0.0);
-      TS_ASSERT_DIFFERS(outputWS->dataY(4)[i], outputWS->dataY(3)[i]);
+      TS_ASSERT_EQUALS(outputWS->y(4)[i], gaus2Values[i]);
+      TS_ASSERT_DIFFERS(outputWS->y(4)[i], 0.0);
+      TS_ASSERT_DIFFERS(outputWS->y(4)[i], outputWS->y(3)[i]);
     }
   }
 
@@ -774,26 +808,37 @@ public:
   void test_convolve_members_option_with_background() {
     do_test_convolve_members_option(true);
   }
-
-private:
-  API::MatrixWorkspace_sptr createTestWorkspace(const bool histogram) {
-    MatrixWorkspace_sptr ws2(new WorkspaceTester);
-    size_t ny = 20;
-    size_t nx = ny + (histogram ? 1 : 0);
-    ws2->initialize(2, nx, ny);
-
-    for (size_t is = 0; is < ws2->getNumberHistograms(); ++is) {
-      Mantid::MantidVec &x = ws2->dataX(is);
-      Mantid::MantidVec &y = ws2->dataY(is);
-      for (size_t i = 0; i < ws2->blocksize(); ++i) {
-        x[i] = 0.1 * double(i);
-        y[i] = (10.0 + double(is)) * exp(-(x[i]) / (0.5 * (1 + double(is))));
-      }
-      if (histogram)
-        x.back() = x[x.size() - 2] + 0.1;
-    }
-    return ws2;
-  }
 };
 
+class FitMWTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static FitMWTestPerformance *createSuite() {
+    return new FitMWTestPerformance();
+  }
+  static void destroySuite(FitMWTestPerformance *suite) { delete suite; }
+
+  FitMWTestPerformance() {
+    bool histogram = false;
+    binsWS = createTestWorkspace(histogram, NVectors, YLength);
+
+    histogram = true;
+    histWS = createTestWorkspace(histogram, NVectors, YLength);
+  }
+
+  void test_exec_point_data_performance() {
+    doTestExecPointData(binsWS, performance);
+  }
+  void test_exec_histogram_data_performance() {
+    doTestExecHistogramData(histWS, performance);
+  }
+
+private:
+  API::MatrixWorkspace_sptr histWS;
+  API::MatrixWorkspace_sptr binsWS;
+  const bool performance = true;
+  const size_t NVectors = 2000;
+  const size_t YLength = 10000;
+};
 #endif /*CURVEFITTING_FITMWTEST_H_*/

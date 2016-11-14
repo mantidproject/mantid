@@ -101,7 +101,7 @@ public:
   void testCreateDomain() {
     TestableSeqDomainSpectrumCreator creator(NULL, "");
     creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::Create2DWorkspace123(4, 12));
+        WorkspaceCreationHelper::Create2DWorkspace123(4, 12, true));
 
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
@@ -133,7 +133,7 @@ public:
     std::set<int64_t> masked;
     masked.insert(2);
     creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::Create2DWorkspace123(4, 12, false, masked));
+        WorkspaceCreationHelper::Create2DWorkspace123(4, 12, true, masked));
 
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
@@ -166,6 +166,7 @@ public:
     double slope = 2.0;
     // all x values are 1.0
 
+    // TODO is the workspace created with the wrong values here
     MatrixWorkspace_sptr matrixWs =
         WorkspaceCreationHelper::Create2DWorkspace123(4, 12);
 
@@ -181,6 +182,7 @@ public:
     testFunction->initialize();
     testFunction->setParameter("Slope", slope);
 
+    // TODO or are the output values from createOutputWorkspace wrong
     Workspace_sptr outputWs =
         creator.createOutputWorkspace("", testFunction, domain, values);
 

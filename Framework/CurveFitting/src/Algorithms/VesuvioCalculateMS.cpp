@@ -61,7 +61,6 @@ VesuvioCalculateMS::VesuvioCalculateMS()
 /// Destructor
 VesuvioCalculateMS::~VesuvioCalculateMS() {
   delete m_randgen;
-  delete m_progress;
   delete m_sampleProps;
 }
 
@@ -146,14 +145,14 @@ void VesuvioCalculateMS::exec() {
 
   // Setup progress
   const size_t nhist = m_inputWS->getNumberHistograms();
-  m_progress = new API::Progress(this, 0.0, 1.0, nhist * m_nruns * 2);
+  m_progress =
+      Kernel::make_unique<Progress>(this, 0.0, 1.0, nhist * m_nruns * 2);
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   for (size_t i = 0; i < nhist; ++i) {
 
-    // Copy over the X-values
-    const MantidVec &xValues = m_inputWS->readX(i);
-    totalsc->dataX(i) = xValues;
-    multsc->dataX(i) = xValues;
+    // set common X-values
+    totalsc->setSharedX(i, m_inputWS->sharedX(i));
+    multsc->setSharedX(i, m_inputWS->sharedX(i));
 
     // Final detector position
     if (!spectrumInfo.hasDetectors(i)) {
@@ -214,7 +213,7 @@ void VesuvioCalculateMS::cacheInputs() {
   m_halfSampleThick = 0.5 * boxWidth[m_beamIdx];
 
   // -- Workspace --
-  const auto &inX = m_inputWS->readX(0);
+  const auto &inX = m_inputWS->x(0);
   m_tmin = inX.front() * 1e-06;
   m_tmax = inX.back() * 1e-06;
   m_delt = (inX[1] - inX.front());
@@ -371,22 +370,22 @@ void VesuvioCalculateMS::assignToOutput(
     const CurveFitting::MSVesuvioHelper::SimulationWithErrors &avgCounts,
     API::ISpectrum &totalsc, API::ISpectrum &multsc) const {
   // Sum up all multiple scatter events
-  auto &msscatY = multsc.dataY();
-  auto &msscatE = multsc.dataE();
+  auto &msscatY = multsc.mutableY();
+  auto &msscatE = multsc.mutableE();
   for (size_t i = 1; i < m_nscatters; ++i) //(i >= 1 for multiple scatters)
   {
     const auto &counts = avgCounts.sim.counts[i];
-    // equivalent to msscatY[j] += counts[j]
-    std::transform(counts.begin(), counts.end(), msscatY.begin(),
-                   msscatY.begin(), std::plus<double>());
+
+    msscatY += counts;
+
     const auto &scerrors = avgCounts.errors[i];
     // sum errors in quadrature
     std::transform(scerrors.begin(), scerrors.end(), msscatE.begin(),
                    msscatE.begin(), VectorHelper::SumGaussError<double>());
   }
   // for total scattering add on single-scatter events
-  auto &totalscY = totalsc.dataY();
-  auto &totalscE = totalsc.dataE();
+  auto &totalscY = totalsc.mutableY();
+  auto &totalscE = totalsc.mutableE();
   const auto &counts0 = avgCounts.sim.counts.front();
   std::transform(counts0.begin(), counts0.end(), msscatY.begin(),
                  totalscY.begin(), std::plus<double>());
@@ -485,7 +484,7 @@ double VesuvioCalculateMS::calculateCounts(
   }
 
   // force all orders in to current detector
-  const auto &inX = m_inputWS->readX(0);
+  const auto &inX = m_inputWS->x(0);
   for (size_t i = 0; i < m_nscatters; ++i) {
     double scang(0.0), distToExit(0.0);
     V3D detPos = generateDetectorPos(detpar.pos, en1[i], scatterPts[i],
