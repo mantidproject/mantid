@@ -99,10 +99,6 @@ class NameSource:
         return self._prefix + '_bkgdiang'
 
     @namelogging
-    def badDetectorEPPFails(self):
-        return self._prefix + '_eppfaildiagn'
-
-    @namelogging
     def badDetectorZeroCounts(self):
         return self._prefix + '_zerocountdiagn'
 
@@ -269,7 +265,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             if not eppOutWs:
                 eppOutWs = workspaceNames.epp()
             if not monitorEppOutWs:
-                monitorEppOutWs = workspaceNames.monitorEpp()
+                monitorEppOutWs = workspaceNames.monitorEPP()
             eppWorkspace = FindEPP(InputWorkspace = workspace,
                                    OutputWorkspace = eppOutWs)
             monitorEppWorkspace = FindEPP(InputWorkspace = monitorWorkspace,
