@@ -226,9 +226,6 @@ public:
     std::vector<std::string> tools{"Astra", "TomoPy"};
 
     TomoPathsConfig toolPaths;
-    const size_t toolsize = tools.size();
-
-    // for (size_t i = 0; i < toolsize; i++) {
     for (const auto &tool : tools) {
       // expect the current paths config will be read only once
       EXPECT_CALL(mockView, currentPathsConfig())
@@ -309,7 +306,8 @@ public:
       EXPECT_CALL(
           mockView,
           showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
-              testing::_))).Times(0);
+              testing::_)))
+          .Times(0);
       EXPECT_CALL(mockView,
                   showImage(testing::Matcher<const std::string &>(testing::_)))
           .Times(0);
@@ -369,7 +367,8 @@ public:
     EXPECT_CALL(
         mockView,
         showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
-            testing::_))).Times(0);
+            testing::_)))
+        .Times(0);
     EXPECT_CALL(mockView,
                 showImage(testing::Matcher<const std::string &>(testing::_)))
         .Times(0);
@@ -818,7 +817,8 @@ public:
     EXPECT_CALL(
         mockView,
         showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
-            testing::_))).Times(1);
+            testing::_)))
+        .Times(1);
     EXPECT_CALL(mockView,
                 showImage(testing::Matcher<const std::string &>(testing::_)))
         .Times(0);

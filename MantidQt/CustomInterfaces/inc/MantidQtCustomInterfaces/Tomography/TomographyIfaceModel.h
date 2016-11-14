@@ -245,7 +245,7 @@ protected: // protected to expose everything to testing
   void checkDataPathsSet() const;
 
   std::string adaptInputPathForExecution(const std::string &path,
-                                         bool local) const;
+                                         const bool local) const;
 
   std::string buildOutReconstructionDir(const std::string &samplesDir,
                                         bool) const;
