@@ -75,17 +75,76 @@ public:
   // intentionally copy the vector
   void setup(const std::string runnable, const std::vector<std::string> &args) {
     // m_process = Mantid::Kernel::make_unique<QProcess>();
-    m_runnable = std::move(QString::fromStdString(runnable));
+    // const std::vector<std::string> argggggggg = {
+    //     "C:/Users/QBR77747/Documents/mantid_fourth/mantid/scripts/Imaging/IMAT/"
+    //     "tomo_reconstruct.py",
+    //     "--tool=tomopy", "--algorithm=gridrec,", "--num-iter=5",
+    //     "--input-path=C:/Users/QBR77747/Documents/mantid_workspaces/imaging/"
+    //     "RB000888_test_stack_larmor_summed_201510/data_stack_larmor_summed",
+    //     "--input-path-flat=C:/Users/QBR77747/Documents/mantid_workspaces/"
+    //     "imaging/"
+    //     "RB000888_test_stack_larmor_summed_201510/flat_stack_larmor_summed",
+    //     "--input-path-dark=C:/Users/QBR77747/Documents/mantid_workspaces/"
+    //     "imaging/"
+    //     "RB000888_test_stack_larmor_summed_201510/dark_stack_larmor_summed",
+    //     "--output=C:/Users/QBR77747/Documents/mantid_workspaces/imaging/"
+    //     "RB000888_test_stack_larmor_summed_201510/processed/"
+    //     "reconstruction_TomoPy_gridrec_2016November14_160724_215398000",
+    //     "--median-filter-size=3", "--cor=0.000000", "--rotation=0",
+    //     "--max-angle=360.000000", "--circular-mask=0.940000",
+    //     "--out-img-format=png"};
+    // const std::vector<std::string> argggggggg = {
+    //     "C:\\Users\\QBR77747\\Documents\\mantid_"
+    //     "fourth\\mantid\\scripts\\Imaging\\IMAT\\"
+    //     "tomo_reconstruct.py",
+    //     "--tool=tomopy", "--algorithm=gridrec,", "--num-iter=5",
+    //     "--input-path=C:\\Users\\QBR77747\\Documents\\mantid_"
+    //     "workspaces\\imaging\\"
+    //     "RB000888_test_stack_larmor_summed_201510\\data_stack_larmor_summed",
+    //     "--input-path-flat=C:\\Users\\QBR77747\\Documents\\mantid_workspaces\\"
+    //     "imaging\\"
+    //     "RB000888_test_stack_larmor_summed_201510\\flat_stack_larmor_summed",
+    //     "--input-path-dark=C:\\Users\\QBR77747\\Documents\\mantid_workspaces\\"
+    //     "imaging\\"
+    //     "RB000888_test_stack_larmor_summed_201510\\dark_stack_larmor_summed",
+    //     "--output=C:\\Users\\QBR77747\\Documents\\mantid_workspaces\\imaging\\"
+    //     "RB000888_test_stack_larmor_summed_201510\\processed\\"
+    //     "reconstruction_TomoPy_gridrec_2016November14_160724_215398000",
+    //     "--median-filter-size=3", "--cor=0.000000", "--rotation=0",
+    //     "--max-angle=360.000000", "--circular-mask=0.940000",
+    //     "--out-img-format=png"};
+    const std::string runnnnnnnn = "C:\\Anaconda\\python.exe";
+    m_runnable = std::move(QString::fromStdString(runnnnnnnn));
     m_args = std::move(constructArgumentsFromVector(args));
+
+    std::cout << "\nDEBUG >> SETUP PROCESS >> " << m_runnable.toStdString()
+              << " ARGS >> " << constructSingleStringFromVector(m_args);
+  }
+
+  std::string constructSingleStringFromVector(const QStringList &args) const {
+    std::string allOpts;
+    for (const auto &arg : args) {
+      allOpts += arg.toStdString() + " ";
+    }
+    return allOpts;
   }
 
 public slots:
+  bool isRunning() { return this->state() == QProcess::ProcessState::Running; }
   void startWorker() {
-    std::cout << "\n\nDEBUG >> STARTING PROCESS\n\n";
+    std::cout << "\nDEBUG >> STARTING PROCESS\n";
     start(m_runnable, m_args);
+    std::cout << "\nDEBUG >> PROCESSID " << this->pid() << " ... "
+              << (long long)this->pid() << "\n";
+    while (waitForReadyRead(10000)) {
+    }
+
     QString output(readAllStandardOutput());
-    std::string fafaf = output.toStdString();
-    std::cout << fafaf << "\n\n";
+    QString error(readAllStandardError());
+    std::string stdOutput = output.toStdString();
+    std::cout << "\nDEBUG >> PROCESS STDOUT" << stdOutput << "\n";
+    std::string stdError = error.toStdString();
+    std::cout << "\nDEBUG >> PROCESS ERROR" << stdError << "\n";
     emit finished();
   }
 

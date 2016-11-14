@@ -53,10 +53,13 @@ import sys
 import os
 from os import path
 # So insert in the path the directory that contains this file
+ff = os.path.split(path.dirname(__file__))[0]
+print(sys.version, ff)
+print(sys.path)
 sys.path.insert(0, os.path.split(path.dirname(__file__))[0]) # noqa
 
-import pydevd
-pydevd.settrace('localhost', port=61845, stdoutToServer=True, stderrToServer=True)
+# import pydevd
+# pydevd.settrace('localhost', port=61845, stdoutToServer=True, stderrToServer=True)
 
 from tomorec import reconstruction_command as tomocmd
 import tomorec.configs as tomocfg

@@ -525,6 +525,7 @@ void TomographyIfaceModel::doRunReconstructionJobLocal(
   Mantid::API::IRemoteJobManager::RemoteJobInfo info;
 
   // crash here
+  // thread not always started at this point, could use a signal and send the pid from that!
   auto pid = thread.getPID();
   info.id = boost::lexical_cast<std::string>(pid);
   info.name = pid > 0 ? "Mantid_Local" : "none";
