@@ -1,9 +1,10 @@
 #include "MantidAlgorithms/PDDetermineCharacterizations.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/PropertyManagerDataService.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
@@ -170,7 +171,8 @@ bool closeEnough(const double left, const double right) {
 
 /// Fill in the property manager from the correct line in the table
 void PDDetermineCharacterizations::getInformationFromTable(
-    const double frequency, const double wavelength) {
+    const double frequency, const double wavelength,
+    const std::string &canName) {
   size_t numRows = m_characterizations->rowCount();
 
   for (size_t i = 0; i < numRows; ++i) {
@@ -224,6 +226,23 @@ void PDDetermineCharacterizations::getInformationFromTable(
       m_propertyManager->setProperty(
           "empty_instrument",
           m_characterizations->getRef<std::string>("empty_instrument", i));
+
+      // something special if the container was specified
+      if (!canName.empty()) {
+        const auto columnNames = m_characterizations->getColumnNames();
+        if (std::find(columnNames.begin(), columnNames.end(), canName) ==
+            columnNames.end()) {
+          g_log.warning() << "Failed to find container name \"" << canName
+                          << "\" in characterizations table \""
+                          << m_characterizations->name() << "\"\n";
+        } else {
+          const auto canRuns =
+              m_characterizations->getRef<std::string>(canName, i);
+          g_log.information() << "Updating container identifier to \""
+                              << canRuns << "\"\n";
+          m_propertyManager->setProperty("container", canRuns);
+        }
+      }
 
       return;
     }
@@ -390,7 +409,27 @@ void PDDetermineCharacterizations::exec() {
 
     double wavelength = getLogValue(run, WL_PROP_NAME);
 
-    getInformationFromTable(frequency, wavelength);
+    // determine the container name
+    std::string container;
+    if (run.hasProperty("SampleContainer")) {
+      const auto containerProp = run.getLogData("SampleContainer");
+
+      // the property is normally a TimeSeriesProperty
+      const auto containerPropSeries =
+          dynamic_cast<TimeSeriesProperty<std::string> *>(containerProp);
+      if (bool(containerPropSeries)) {
+        // assume that only the first value matters
+        container = containerPropSeries->valuesAsVector().front();
+      } else {
+        // try as a normal Property
+        container = containerProp->value();
+      }
+
+      // remove whitespace from the value
+      container = Kernel::Strings::replaceAll(container, " ", "");
+    }
+
+    getInformationFromTable(frequency, wavelength, container);
   }
 
   overrideRunNumProperty("BackRun", "container");
