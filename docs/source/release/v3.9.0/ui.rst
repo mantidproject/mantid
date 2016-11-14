@@ -46,6 +46,11 @@ Scripting Window
 Documentation
 #############
 
+Custom Interfaces
+-----------------
+
+- Indirect Data Reduction (facility ILL, instrument IN16B) is face-lifted to incorporate the new reduction algorithms options.
+
 Bugs Resolved
 -------------
 

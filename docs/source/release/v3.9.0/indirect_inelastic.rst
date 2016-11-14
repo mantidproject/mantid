@@ -18,8 +18,10 @@ Data Reduction
 
 - Q-values in :ref:`BASISReduction <algm-BASISReduction>` output are now point data so that their values display correctly when plotted
 - :ref:`LoadILLIndirect <algm-LoadILLIndirect>` now checks in the ``.nxs`` files which single detectors (SD) are enabled, and loads only those instead of all.
-- :ref:`IndirectILLReduction <algm-IndirectILLReduction>` and :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>` algorithms are refactored to accommodate new requirements. This includes now handling of multiple files, unmirroring logic, debug mode, etc.. Changes are incorporated in Indirect Data Reduction GUI.
-- :ref:`IndirectILLFixedWindowScans <algm-IndirectILLFixedWindowScans>` algorithm treats the elastic and inelastic fixed-window scan data from IN16B instrument at ILL.
+- New :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>` algorithm performs initial data reduction steps for IN16B instrument data at ILL.
+- New :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` algorithm performs complete multiple file reduction for Quasi-Elastic Neutron Scattering (QENS) data from IN16B instrument at ILL.
+- New :ref:`IndirectILLReductionFWS <algm-IndirectILLReductionFWS>` algorithm performs complete multiple file reduction for
+the elastic and inelastic fixed-window scan data from IN16B instrument at ILL.
 
 
 Data Analysis
