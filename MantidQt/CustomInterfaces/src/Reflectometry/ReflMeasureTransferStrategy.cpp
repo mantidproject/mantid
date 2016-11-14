@@ -99,6 +99,11 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
     std::map<std::string, size_t> subIdMap;
     for (size_t i = 0; i < group->second.size(); ++i) {
       const MeasurementItem &measurementItem = group->second[i];
+
+      std::string title = measurementItem.title();
+      std::string groupName = std::to_string(nextGroupId) + " - " +
+                              title.substr(0, title.find(":th"));
+
       if (subIdMap.find(measurementItem.subId()) != subIdMap.end()) {
         // We already have that subid.
         const size_t rowIndex = subIdMap[measurementItem.subId()];
@@ -112,9 +117,7 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
         std::map<std::string, std::string> row;
         row[ReflTableSchema::RUNS] = measurementItem.run();
         row[ReflTableSchema::ANGLE] = measurementItem.angleStr();
-        std::stringstream buffer;
-        buffer << nextGroupId;
-        row[ReflTableSchema::GROUP] = buffer.str();
+        row[ReflTableSchema::GROUP] = groupName;
         // run was successful so add it to 'runs'
         results.addTransferRow(row);
         // get successful transfers to get size for subIdMap
