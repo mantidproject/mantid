@@ -1,105 +1,62 @@
-digraph IndirectILLReduction {
-  label="IndirectILLReduction Flowchart"
+digraph IndirectILLReductionQENS {
+  label="IndirectILLReductionQENS Flowchart"
   $global_style
 
   subgraph values {
     $value_style
-    ScaleF [label="0.5"]
-    Monitor
-    Left 
-    Right
-    VLeft  					 
-    VRight 
-    MaskingRange                  
-    OutputWorkspace [label="Output Workspace"]
+    OutputWorkspace
   }
 
   subgraph descision {
     $decision_style
-    HaveCalibrationWorkspace
-    HaveBackgroundRun
-    UnmirrorOption
   }
 
   subgraph params {
   	$param_style
   	Run
-  	VanadiumRun
-  	MapFile
-  	CalibrationWorkspace
   	BackgroundRun
+  	CalibrationRun
+  	AlignmentRun
   	BackgroundScalingFactor
-  	Analyser
-  	Reflection
+  	CalibrationPeakRange
   	UnmirrorOption
+  	CropDeadMonitorChannels
+  	MaskOverflownBins
   }
 
   subgraph algorithms {
   	$algorithm_style
-  	Load
-  	MaskBins
-    M_MaskBins [label="MaskBins"]
-  	IndirectILLReduction
-    LoadParameterFile
-    GroupDetectors
-    ExtractSngleSpectrum
-    NormaliseToMonitor
-    ConvertAxisByFormula_Left [label="ConvertAxisByFormula"]
-    ConvertAxisByFormula_Right [label="ConvertAxisByFormula"]
-    GroupWorkspaces
-    Divide
+  	SelectNexusFilesByMetadata
+  	IndirectILLEnergyTransfer
+  	Integration
+  	Minus
+  	Divide
     Plus
     Scale
-    Minus
-    SelectNexusFilesByMetadata
+    MatchPeaks
+    GroupWorkspaces
   }
 
   subgraph processes {
   	$process_style
-  	ExtractWorkspace
-    ShiftSpectra
   }
 
   Run -> SelectNexusFilesByMetadata
-  SelectNexusFilesByMetadata -> Load
-  Analyser -> LoadParameterFile
-  Load -> LoadParameterFile
-  Reflection -> LoadParameterFile
-  LoadParameterFile -> ExtractSngleSpectrum 
-  ExtractSngleSpectrum -> Monitor
-  Monitor -> MaskingRange
-  LoadParameterFile -> GroupDetectors
-  MapFile -> GroupDetectors
-  Monitor -> NormaliseToMonitor
-  GroupDetectors -> NormaliseToMonitor
-  NormaliseToMonitor -> M_MaskBins
-  MaskingRange -> M_MaskBins
-  M_MaskBins -> HaveBackgroundRun
-  HaveBackgroundRun -> Minus [label="Yes"]
-  HaveBackgroundRun -> HaveCalibrationWorkspace [label="No"]
-  BackgroundRun -> HaveBackgroundRun
-  BackgroundScalingFactor -> HaveBackgroundRun
-  Minus -> HaveCalibrationWorkspace
-  HaveCalibrationWorkspace -> ExtractWorkspace [label="No"]
-  HaveCalibrationWorkspace -> Divide [label="Yes"]
-  CalibrationWorkspace -> Divide
-  Divide -> ExtractWorkspace
-  ExtractWorkspace -> ConvertAxisByFormula_Left [label="Left"]
-  ExtractWorkspace -> ConvertAxisByFormula_Right [label="Right"]
-  ConvertAxisByFormula_Left -> Left
-  ConvertAxisByFormula_Right -> Right
-  UnmirrorOption -> ShiftSpectra
-  Left -> ShiftSpectra
-  Right -> ShiftSpectra
-  VanadiumRun -> IndirectILLReduction
-  IndirectILLReduction -> VLeft
-  IndirectILLReduction -> VRight
-  VLeft -> ShiftSpectra
-  VRight -> ShiftSpectra
-  ShiftSpectra -> Plus
-  Plus -> Scale
-  ScaleF -> Scale
-  Scale -> MaskBins
-  MaskBins -> GroupWorkspaces
+  SelectNexusFilesByMetadata -> IndirectILLEnergyTransfer
+  CropDeadMonitorChannels -> IndirectILLEnergyTransfer
+  IndirectILLEnergyTransfer -> Minus
+  BackgroundRun -> Scale
+  BackgroundScalingFactor -> Scale
+  Scale -> Minus
+  CalibrationRun -> Integration
+  CalibrationPeakRange -> Integration
+  Integration -> Divide
+  Minus -> Divide
+  Divide -> MatchPeaks
+  UnmirrorOption -> MatchPeaks
+  AlignmentRun -> MatchPeaks
+  MaskOverflownBins -> MatchPeaks
+  MatchPeaks -> Plus
+  Plus -> GroupWorkspaces
   GroupWorkspaces -> OutputWorkspace
 }

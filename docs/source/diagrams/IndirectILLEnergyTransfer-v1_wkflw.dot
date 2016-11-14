@@ -39,7 +39,7 @@ digraph IndirectILLEnergyTransfer {
   NormaliseToMonitor -> CropDeadMonitorChannels
   CropDeadMonitorChannels -> CropWorkspace [label="yes"]
   CropDeadMonitorChannels -> MaskBins [label="no"]
-  CropWorkspaces -> ConvertAxisByFormula
+  CropWorkspace -> ConvertAxisByFormula
   MaskBins -> ConvertAxisByFormula
   ConvertAxisByFormula -> ConvertSpectrumAxis
   ConvertSpectrumAxis -> GroupWorkspaces
