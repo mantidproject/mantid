@@ -42,7 +42,7 @@ PROP_INDEX_TYPE                       = 'IndexType'
 PROP_INPUT_FILE                       = 'InputFile'
 PROP_INPUT_WORKSPACE                  = 'InputWorkspace'
 PROP_MONITOR_EPP_WORKSPACE            = 'MonitorEPPWorkspace'
-PROP_MONITOR_FOR_EI_CALIBRATION       = 'IncidentEnergyCalibrationMonitor'
+PROP_MONITOR_INDEX                    = 'Monitor'
 PROP_NAME_PREFIX                      = 'IntermediateWorkspacePrefix'
 PROP_NORMALISATION                    = 'Normalisation'
 PROP_OUTPUT_DIAGNOSTICS_WORKSPACE     = 'OutputDiagnosticsWorkspace'
@@ -221,6 +221,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
         workspace, monitorWorkspace = ExtractMonitors(InputWorkspace=workspace,
                                                       DetectorWorkspace=outWsName,
                                                       MonitorWorkspace=monitorWorkspace)
+        monitorIndex = self.getProperty(PROP_MONITOR_INDEX).value
+        monitorIndex = self._convertToWorkspaceIndex(monitorIndex, monitorWorkspace)
 
         # Fit time-independent background
         # ATM monitor background is ignored
@@ -332,7 +334,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if eiCalibration == INCIDENT_ENERGY_CALIBRATION_YES:
             instrument = workspace.getInstrument().getName()
             if instrument in ['IN4', 'IN6']:
-                eiCalibrationMonitor = self.getProperty(PROP_MONITOR_FOR_EI_CALIBRATION).value
                 eiCalibrationDets = self.getProperty(PROP_DETECTORS_FOR_EI_CALIBRATION).value
                 eiWsName = guessIncidentEnergyWorkspaceName(eppWorkspace)
                 if not AnalysisDataServiceImpl.Instance().doesExist(eiWsName):
@@ -357,7 +358,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                          Detectors=eiCalibrationDets,
                                          MonitorWorkspace=monitorWorkspace,
                                          MonitorEppTable=monitorEppWorkspace,
-                                         Monitor=eiCalibrationMonitor,
+                                         Monitor=monitorIndex,
                                          PulseInterval=pulseInterval)
                     eiWsName = workspaceNames.incidentEnergy()
                     CreateSingleValuedWorkspace(OutputWorkspace=eiWsName,
@@ -537,6 +538,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              validator=StringMandatoryValidator(),
                              direction=Direction.Input,
                              doc='String to use as prefix in intermediate workspace names')
+        self.declareProperty(PROP_MONITOR_INDEX,
+                             0,
+                             direction=Direction.Input,
+                             doc='Index of the main monitor')
         self.declareProperty(PROP_CLEANUP_MODE,
                              CLEANUP_DELETE,
                              validator=StringListValidator([CLEANUP_DELETE, CLEANUP_KEEP]),
@@ -570,16 +575,12 @@ class DirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(PROP_INDEX_TYPE,
                              INDEX_TYPE_WORKSPACE_INDEX,
                              direction=Direction.Input,
-                             doc='Type of numbers in ' + PROP_MONITOR_FOR_EI_CALIBRATION + ' and ' + PROP_DETECTORS_FOR_EI_CALIBRATION + ' properties')
+                             doc='Type of numbers in ' + PROP_MONITOR_INDEX + ' and ' + PROP_DETECTORS_FOR_EI_CALIBRATION + ' properties')
         self.declareProperty(PROP_INCIDENT_ENERGY_CALIBRATION,
                              INCIDENT_ENERGY_CALIBRATION_YES,
                              validator=StringListValidator([INCIDENT_ENERGY_CALIBRATION_YES, INCIDENT_ENERGY_CALIBRATION_YES]),
                              direction=Direction.Input,
                              doc='Enable or disable incident energy calibration on IN4 and IN6')
-        self.declareProperty(PROP_MONITOR_FOR_EI_CALIBRATION,
-                             0,
-                             direction=Direction.Input,
-                             doc='Index of the main monitor spectrum for the incident energy calibration')
         self.declareProperty(PROP_DETECTORS_FOR_EI_CALIBRATION,
                              '',
                              direction=Direction.Input,
