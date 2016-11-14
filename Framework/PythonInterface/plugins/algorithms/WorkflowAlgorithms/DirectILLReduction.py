@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from mantid.api import AlgorithmFactory, AnalysisDataServiceImpl, DataProcessorAlgorithm, FileAction, FileProperty, ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, PropertyMode,  WorkspaceProperty
-from mantid.kernel import Direct, Direction, IntArrayProperty, StringListValidator, UnitConversion
+from mantid.kernel import Direct, Direction, IntArrayProperty, StringListValidator, StringMandatoryValidator, UnitConversion
 from mantid.simpleapi import AddSampleLog, CalculateFlatBackground,\
                              CloneWorkspace, ComputeCalibrationCoefVan,\
                              ConvertUnits, CorrectKiKf, CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace, DetectorEfficiencyCorUser, Divide, ExtractMonitors, ExtractSpectra, \
@@ -42,13 +42,13 @@ PROP_INDEX_TYPE                       = 'IndexType'
 PROP_INPUT_FILE                       = 'InputFile'
 PROP_INPUT_WORKSPACE                  = 'InputWorkspace'
 PROP_MONITOR_EPP_WORKSPACE            = 'MonitorEPPWorkspace'
-PROP_MONITOR_INDEX                    = 'MonitorIndex'
+PROP_MONITOR_FOR_EI_CALIBRATION       = 'IncidentEnergyCalibrationMonitor'
+PROP_NAME_PREFIX                      = 'IntermediateWorkspacePrefix'
 PROP_NORMALISATION                    = 'Normalisation'
 PROP_OUTPUT_DIAGNOSTICS_WORKSPACE     = 'OutputDiagnosticsWorkspace'
 PROP_OUTPUT_EPP_WORKSPACE             = 'OutputEPPWorkspace'
 PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE = 'OutputFlatBackgroundWorkspace'
 PROP_OUTPUT_MONITOR_EPP_WORKSPACE     = 'OutputMonitorEPPWorkspace'
-PROP_OUTPUT_PREFIX                    = 'OutputPrefix'
 PROP_OUTPUT_WORKSPACE                 = 'OutputWorkspace'
 PROP_REDUCTION_TYPE                   = 'ReductionType'
 PROP_TRANSMISSION                     = 'Transmission'
@@ -199,7 +199,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
         reductionType = self.getProperty(PROP_REDUCTION_TYPE).value
-        workspaceNamePrefix = self.getProperty(PROP_OUTPUT_PREFIX).value
+        workspaceNamePrefix = self.getProperty(PROP_NAME_PREFIX).value
         cleanupMode = self.getProperty(PROP_CLEANUP_MODE).value
         workspaceNames = NameSource(workspaceNamePrefix, cleanupMode)
         indexType = self.getProperty(PROP_INDEX_TYPE).value
@@ -225,9 +225,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
         workspace, monitorWorkspace = ExtractMonitors(InputWorkspace=workspace,
                                                       DetectorWorkspace=outWsName,
                                                       MonitorWorkspace=monitorWorkspace)
-
-        monitorIndex = self.getProperty(PROP_MONITOR_INDEX).value
-        monitorIndex = self._convertToWorkspaceIndex(monitorIndex, monitorWorkspace)
 
         # Fit time-independent background
         # ATM monitor background is ignored
@@ -320,9 +317,17 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 self.setProperty(PROP_OUTPUT_DIAGNOSTICS_WORKSPACE, diagnosticsWs)
         # Apply user mask.
         userMask = self.getProperty(PROP_USER_MASK).value
-        MaskDetectors(Workspace=workspace,
-                      DetectorList=userMask)
-
+        if indexType == INDEX_TYPE_DETECTOR_ID:
+            MaskDetectors(Workspace=workspace,
+                          DetectorList=userMask)
+        elif indexType == INDEX_TYPE_SPECTRUM_NUMBER:
+            MaskDetectors(Workspace=workspace,
+                          SpectraList=userMask)
+        elif indexType == INDEX_TYPE_WORKSPACE_INDEX:
+            MaskDetectors(Workspace=workspace,
+                          WorkspaceIndexList=userMask)
+        else:
+            raise RuntimeError('Unknown ' + PROP_INDEX_TYPE)
 
         # Get calibrated incident energy from somewhere
         # It should come from the same place as the epp workspace.
@@ -331,6 +336,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if eiCalibration == INCIDENT_ENERGY_CALIBRATION_YES:
             instrument = workspace.getInstrument().getName()
             if instrument in ['IN4', 'IN6']:
+                eiCalibrationMonitor = self.getProperty(PROP_MONITOR_FOR_EI_CALIBRATION).value
                 eiCalibrationDets = self.getProperty(PROP_DETECTORS_FOR_EI_CALIBRATION).value
                 eiWsName = guessIncidentEnergyWorkspaceName(eppWorkspace)
                 if not AnalysisDataServiceImpl.Instance().doesExist(eiWsName):
@@ -355,7 +361,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                          Detectors=eiCalibrationDets,
                                          MonitorWorkspace=monitorWorkspace,
                                          MonitorEppTable=monitorEppWorkspace,
-                                         Monitor=self.getProperty(PROP_MONITOR_INDEX).value,
+                                         Monitor=eiCalibrationMonitor,
                                          PulseInterval=pulseInterval)
                     eiWsName = workspaceNames.incidentEnergy()
                     CreateSingleValuedWorkspace(OutputWorkspace=eiWsName,
@@ -525,30 +531,21 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              '',
                              direction=Direction.Output),
                              doc='The output of the algorithm')
-        self.declareProperty(PROP_OUTPUT_PREFIX,
-                             '',
-                             direction=Direction.Input,
-                             doc='String to use as prefix in output workspace names')
-        self.declareProperty(PROP_CLEANUP_MODE,
-                             CLEANUP_DELETE,
-                             validator=StringListValidator([CLEANUP_DELETE, CLEANUP_KEEP]),
-                             direction=Direction.Input,
-                             doc='Whether or not to clean up intermediate workspaces')
         self.declareProperty(PROP_REDUCTION_TYPE,
                              REDUCTION_TYPE_SAMPLE,
                              validator=StringListValidator([REDUCTION_TYPE_SAMPLE, REDUCTION_TYPE_VANADIUM, REDUCTION_TYPE_CD, REDUCTION_TYPE_EC]),
                              direction=Direction.Input,
-                             doc='Type of reduction workflow to be run on ' + PROP_INPUT_FILE)
-        self.declareProperty(PROP_INCIDENT_ENERGY_CALIBRATION,
-                             INCIDENT_ENERGY_CALIBRATION_YES,
-                             validator=StringListValidator([INCIDENT_ENERGY_CALIBRATION_YES, INCIDENT_ENERGY_CALIBRATION_YES]),
+                             doc='Type of the reduction workflow and output')
+        self.declareProperty(PROP_NAME_PREFIX,
+                             '',
+                             validator=StringMandatoryValidator(),
                              direction=Direction.Input,
-                             doc='Enable or disable incident energy calibration on IN4 and IN6')
-        self.declareProperty(PROP_NORMALISATION,
-                             NORM_METHOD_MONITOR,
-                             validator=StringListValidator([NORM_METHOD_MONITOR, NORM_METHOD_TIME]),
+                             doc='String to use as prefix in intermediate workspace names')
+        self.declareProperty(PROP_CLEANUP_MODE,
+                             CLEANUP_DELETE,
+                             validator=StringListValidator([CLEANUP_DELETE, CLEANUP_KEEP]),
                              direction=Direction.Input,
-                             doc='Normalisation method')
+                             doc='What to do with intermediate workspaces')
         self.declareProperty(MatrixWorkspaceProperty(PROP_VANADIUM_WORKSPACE,
                                                      '',
                                                      Direction.Input,
@@ -574,6 +571,23 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                      Direction.Input,
                                                      PropertyMode.Optional),
                              doc='Table workspace containing results from the FindEPP algorithm for the monitor workspace')
+        self.declareProperty(PROP_INDEX_TYPE,
+                             INDEX_TYPE_WORKSPACE_INDEX,
+                             direction=Direction.Input,
+                             doc='Type of numbers in ' + PROP_MONITOR_FOR_EI_CALIBRATION + ' and ' + PROP_DETECTORS_FOR_EI_CALIBRATION + ' properties')
+        self.declareProperty(PROP_INCIDENT_ENERGY_CALIBRATION,
+                             INCIDENT_ENERGY_CALIBRATION_YES,
+                             validator=StringListValidator([INCIDENT_ENERGY_CALIBRATION_YES, INCIDENT_ENERGY_CALIBRATION_YES]),
+                             direction=Direction.Input,
+                             doc='Enable or disable incident energy calibration on IN4 and IN6')
+        self.declareProperty(PROP_MONITOR_FOR_EI_CALIBRATION,
+                             0,
+                             direction=Direction.Input,
+                             doc='Index of the main monitor spectrum for the incident energy calibration')
+        self.declareProperty(PROP_DETECTORS_FOR_EI_CALIBRATION,
+                             '',
+                             direction=Direction.Input,
+                             doc='List of detectors used for the incident energy calibration')
         self.declareProperty(PROP_FLAT_BACKGROUND_SCALING,
                              1.0,
                              direction=Direction.Input,
@@ -601,18 +615,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                      Direction.Input,
                                                      PropertyMode.Optional),
                              doc='Detector diagnostics workspace obtained from another reduction run.')
-        self.declareProperty(PROP_INDEX_TYPE,
-                             INDEX_TYPE_WORKSPACE_INDEX,
+        self.declareProperty(PROP_NORMALISATION,
+                             NORM_METHOD_MONITOR,
+                             validator=StringListValidator([NORM_METHOD_MONITOR, NORM_METHOD_TIME]),
                              direction=Direction.Input,
-                             doc='Type of numbers in ' + PROP_MONITOR_INDEX + ' and ' + PROP_DETECTORS_FOR_EI_CALIBRATION + ' properties')
-        self.declareProperty(PROP_MONITOR_INDEX,
-                             0,
-                             direction=Direction.Input,
-                             doc='Index of the main monitor spectrum.')
-        self.declareProperty(PROP_DETECTORS_FOR_EI_CALIBRATION,
-                             '',
-                             direction=Direction.Input,
-                             doc='List of detectors used for the incident energy calibration')
+                             doc='Normalisation method')
         self.declareProperty(PROP_TRANSMISSION,
                              1.0,
                              direction=Direction.Input,
