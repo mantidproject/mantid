@@ -43,5 +43,13 @@ NormalDistribution::NormalDistribution(const size_t seedValue,
 double NormalDistribution::nextValue() {
   return m_generator(m_uniform_generator);
 }
+
+/// Generate a random number from a distribution with given mean and sigma.
+/// @param argMean :: A mean of the distribution.
+/// @param argSigma :: A sigma of the distribution.
+double NormalDistribution::randomValue(double argMean, double argSigma) {
+  boost::normal_distribution<double>::param_type param(argMean, argSigma);
+  return m_generator(m_uniform_generator, param);
+}
 }
 }

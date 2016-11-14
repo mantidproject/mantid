@@ -57,6 +57,8 @@ public:
   double mean() const {return m_generator.mean();}
   /// Get the sigma of the distribution
   double sigma() const {return m_generator.sigma();}
+  /// Generate a random number from a distribution with given mean and sigma
+  double randomValue(double argMean, double argSigma);
 
 private:
   /// The boost Mersenne Twister generator
