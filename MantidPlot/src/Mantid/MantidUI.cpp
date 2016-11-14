@@ -3507,11 +3507,11 @@ void MantidUI::plotLayerOfMultilayer(MultiLayer *multi, const bool plotErrors,
     legendText += "\\l(" + QString::number(++curveIndex) + ")" +
                   getLegendKey(wsName, spec) + "\n";
   }
-  formatAxes(layer, row, col);
   m_appWindow->setPreferences(layer); // apply default style
   layer->removeTitle();
   layer->newLegend(legendText);
   setInitialAutoscale(layer);
+  formatAxes(layer, row, col);
   incrementCounters(row, col);
 }
 
