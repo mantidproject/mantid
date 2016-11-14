@@ -518,21 +518,24 @@ public:
     const double y1 = -23;
     const double y2 = -42;
     const std::string outWsName("Removed1");
-    const std::vector<std::string> modes{"Linear Fit", "Mean", "Moving Average"};
+    const std::vector<std::string> modes{"Linear Fit", "Mean",
+                                         "Moving Average"};
     for (const auto &mode : modes) {
-      executeWithTwoBinInputWorkspace(y1, y2, outWsName, mode, "Subtract Background");
+      executeWithTwoBinInputWorkspace(y1, y2, outWsName, mode,
+                                      "Subtract Background");
       MatrixWorkspace_sptr outputWS =
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outWsName);
+              outWsName);
       TS_ASSERT_DELTA(outputWS->y(0)[0], y1, 1e-12)
       TS_ASSERT_DELTA(outputWS->y(0)[1], y2, 1e-12)
       AnalysisDataService::Instance().remove(outWsName);
     }
     for (const auto &mode : modes) {
-      executeWithTwoBinInputWorkspace(y1, y2, outWsName, mode, "Return Background");
+      executeWithTwoBinInputWorkspace(y1, y2, outWsName, mode,
+                                      "Return Background");
       MatrixWorkspace_sptr outputWS =
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outWsName);
+              outWsName);
       TS_ASSERT_DELTA(outputWS->y(0)[0], 0, 1e-12)
       TS_ASSERT_DELTA(outputWS->y(0)[1], 0, 1e-12)
       AnalysisDataService::Instance().remove(outWsName);
@@ -668,7 +671,10 @@ private:
     AnalysisDataService::Instance().remove("Removed1");
   }
 
-  void executeWithTwoBinInputWorkspace(const double y1, const double y2, const std::string& outWsName, const std::string& mode, const std::string& outputMode) {
+  void executeWithTwoBinInputWorkspace(const double y1, const double y2,
+                                       const std::string &outWsName,
+                                       const std::string &mode,
+                                       const std::string &outputMode) {
     const size_t spectraCount = 1;
     const size_t binCount = 2;
     Mantid::DataObjects::Workspace2D_sptr WS(

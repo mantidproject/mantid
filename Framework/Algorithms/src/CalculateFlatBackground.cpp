@@ -221,7 +221,7 @@ void CalculateFlatBackground::exec() {
         if (removeBackground) {
           g_log.warning() << " The spectrum has been left unchanged.\n";
           continue;
-         } else {
+        } else {
           g_log.warning() << " The output background has been set to zero.\n";
           background = 0;
         }
