@@ -30,7 +30,7 @@ See Also
 Workflow
 --------
 
-.. diagram:: IndirectILLFixedWindowScans-v1_wkflw.dot
+.. diagram:: IndirectILLReductionFWS-v1_wkflw.dot
 
 Usage
 -----
