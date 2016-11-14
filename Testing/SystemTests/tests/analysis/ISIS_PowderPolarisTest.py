@@ -63,6 +63,9 @@ def _run_vanadium_calibration():
     gen_absorb = True
 
     polaris_obj = setup_polaris_instrument()
+    # Try it without an output name
+    polaris_obj.create_calibration_vanadium(vanadium_runs=vanadium_run, empty_runs=empty_run,
+                                            gen_absorb_correction=gen_absorb)
 
     return polaris_obj.create_calibration_vanadium(vanadium_runs=vanadium_run, empty_runs=empty_run,
                                                    output_file_name=output_file_name, gen_absorb_correction=gen_absorb)

@@ -82,7 +82,7 @@ class AbstractInst(object):
         self._create_calibration_silicon(calibration_runs=calibration_runs, cal_file_name=cal_file_name,
                                          grouping_file_name=grouping_file_name)
 
-    def create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name, num_of_splines=None,
+    def create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name=None, num_of_splines=None,
                                     do_absorb_corrections=True, gen_absorb_correction=False):
         calibrate.create_van(instrument=self, van=vanadium_runs, empty=empty_runs,
                              output_van_file_name=output_file_name, num_of_splines=num_of_splines,

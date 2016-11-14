@@ -17,8 +17,6 @@ def create_van(instrument, van, empty, output_van_file_name, num_of_splines, abs
 
     calibration_full_paths = instrument._get_calibration_full_paths(run_number=van)
 
-    # Absorb was here
-
     corrected_van_ws = instrument. _apply_van_calibration_tof_rebinning(vanadium_ws=corrected_van_ws,
                                                                         tof_rebin_pass=1, return_units="TOF")
 
@@ -47,8 +45,14 @@ def create_van(instrument, van, empty, output_van_file_name, num_of_splines, abs
 
     if instrument._PEARL_filename_is_full_path():
         out_van_file_path = output_van_file_name
-    else:
+    elif output_van_file_name:
+        # The user has manually specified the output file name
         out_van_file_path = os.path.join(instrument.calibration_dir, output_van_file_name)
+    else:
+        try:
+            out_van_file_path = calibration_full_paths["calibrated_vanadium"]
+        except KeyError:
+            raise ValueError("The output name must be manually specified for this instrument/run")
 
     append = False
     for ws in splined_ws_list:
