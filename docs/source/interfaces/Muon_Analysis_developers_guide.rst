@@ -354,3 +354,4 @@ Future work
 Open muon issues can be found on Github with the `Component: Muon <https://github.com/mantidproject/mantid/issues?q=is%3Aopen+is%3Aissue+label%3A%22Component%3A+Muon%22>`_ label.
 Those marked ``Misc: Roadmap`` are the most important.
 
+.. categories:: Interfaces Muon
