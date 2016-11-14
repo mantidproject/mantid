@@ -514,6 +514,31 @@ public:
     movingAverageTest(binCount, spectraCount, binCount);
   }
 
+  void test_spectraLeftUnchangedIfUnableToCalculate() {
+    const double y1 = -23;
+    const double y2 = -42;
+    const std::string outWsName("Removed1");
+    const std::vector<std::string> modes{"Linear Fit", "Mean", "Moving Average"};
+    for (const auto &mode : modes) {
+      executeWithTwoBinInputWorkspace(y1, y2, outWsName, mode, "Subtract Background");
+      MatrixWorkspace_sptr outputWS =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outWsName);
+      TS_ASSERT_DELTA(outputWS->y(0)[0], y1, 1e-12)
+      TS_ASSERT_DELTA(outputWS->y(0)[1], y2, 1e-12)
+      AnalysisDataService::Instance().remove(outWsName);
+    }
+    for (const auto &mode : modes) {
+      executeWithTwoBinInputWorkspace(y1, y2, outWsName, mode, "Return Background");
+      MatrixWorkspace_sptr outputWS =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outWsName);
+      TS_ASSERT_DELTA(outputWS->y(0)[0], 0, 1e-12)
+      TS_ASSERT_DELTA(outputWS->y(0)[1], 0, 1e-12)
+      AnalysisDataService::Instance().remove(outWsName);
+    }
+  }
+
 private:
   double bg;
 
@@ -641,6 +666,36 @@ private:
       TS_ASSERT(flatBG.isExecuted())
     }
     AnalysisDataService::Instance().remove("Removed1");
+  }
+
+  void executeWithTwoBinInputWorkspace(const double y1, const double y2, const std::string& outWsName, const std::string& mode, const std::string& outputMode) {
+    const size_t spectraCount = 1;
+    const size_t binCount = 2;
+    Mantid::DataObjects::Workspace2D_sptr WS(
+        new Mantid::DataObjects::Workspace2D);
+    WS->initialize(spectraCount, binCount + 1, binCount);
+    const double xBegin = -0.2;
+    const double xEnd = 0.6;
+    WS->mutableX(0)[0] = xBegin;
+    WS->mutableX(0)[1] = xBegin + (xEnd - xBegin) / 2.0;
+    WS->mutableX(0)[2] = xEnd;
+    WS->mutableY(0)[0] = y1;
+    WS->mutableY(0)[1] = y2;
+    WS->mutableE(0)[0] = std::sqrt(std::abs(y1));
+    WS->mutableE(0)[1] = std::sqrt(std::abs(y2));
+    Mantid::Algorithms::CalculateFlatBackground flatBG;
+    TS_ASSERT_THROWS_NOTHING(flatBG.initialize());
+    TS_ASSERT(flatBG.isInitialized())
+    flatBG.setRethrows(true);
+    flatBG.setProperty("InputWorkspace", WS);
+    flatBG.setPropertyValue("OutputWorkspace", outWsName);
+    flatBG.setProperty("StartX", xBegin);
+    flatBG.setProperty("EndX", xEnd);
+    flatBG.setPropertyValue("Mode", mode);
+    flatBG.setPropertyValue("OutputMode", outputMode);
+    flatBG.setProperty("AveragingWindowWidth", 1);
+    TS_ASSERT_THROWS_NOTHING(flatBG.execute())
+    TS_ASSERT(flatBG.isExecuted())
   }
 };
 

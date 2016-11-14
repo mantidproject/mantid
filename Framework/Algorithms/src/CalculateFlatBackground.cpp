@@ -214,12 +214,17 @@ void CalculateFlatBackground::exec() {
         break;
       }
       if (background < 0) {
-        g_log.warning() << "Problem with calculating the background number of "
-                           "counts spectrum with index " << currentSpec
-                        << ". The spectrum has been left unchanged.\n";
         g_log.debug() << "The background for spectra index " << currentSpec
                       << "was calculated to be " << background << '\n';
-        continue;
+        g_log.warning() << "Problem with calculating the background number of "
+                           "counts spectrum with index " << currentSpec << ".";
+        if (removeBackground) {
+          g_log.warning() << " The spectrum has been left unchanged.\n";
+          continue;
+         } else {
+          g_log.warning() << " The output background has been set to zero.\n";
+          background = 0;
+        }
       } else { // only used for the logging that gets done at the end
         backgroundTotal += background;
       }
