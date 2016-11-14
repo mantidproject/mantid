@@ -3482,11 +3482,10 @@ void MantidUI::plotLayerOfMultilayer(MultiLayer *multi, const bool plotErrors,
     }
   };
 
-  // Lambda to set legend and axis label hiding
-  const auto formatPlot = [&nRows, &nCols, &nPlots](
-      Graph *layer, const QString &legendText, const int row, const int col) {
+  // Lambda to set axis label hiding
+  const auto formatAxes = [&nRows, &nCols, &nPlots](
+      Graph *layer, const int row, const int col) {
     const bool drawYAxisLabel = col == 0;
-    layer->newLegend(legendText);
     if (!drawXAxisLabel(row, col, nRows, nCols, nPlots)) {
       layer->setXAxisTitle(QString::null);
     }
@@ -3508,7 +3507,10 @@ void MantidUI::plotLayerOfMultilayer(MultiLayer *multi, const bool plotErrors,
     legendText += "\\l(" + QString::number(++curveIndex) + ")" +
                   getLegendKey(wsName, spec) + "\n";
   }
-  formatPlot(layer, legendText, row, col);
+  formatAxes(layer, row, col);
+  m_appWindow->setPreferences(layer); // apply default style
+  layer->removeTitle();
+  layer->newLegend(legendText);
   setInitialAutoscale(layer);
   incrementCounters(row, col);
 }
