@@ -128,6 +128,17 @@ QString getLegendKey(const QString &wsName, const int spectrum) {
   return QString();
 }
 
+/// Get all graph legend keys in one string
+QString getLegendKeys(const QString &wsName, const std::set<int> &spectra) {
+  QString legendText = wsName + '\n';
+  int curveIndex(0);
+  for (const auto &spec : spectra) {
+    legendText += "\\l(" + QString::number(++curveIndex) + ")" +
+                  getLegendKey(wsName, spec) + "\n";
+  }
+  return legendText;
+}
+
 /// Decide whether this graph in a multilayer plot should have an X axis label
 bool drawXAxisLabel(const int row, const int col, const int nRows,
                     const int nCols, const int nPlots) {
@@ -3427,25 +3438,39 @@ MultiLayer *MantidUI::plotSubplots(const QMultiMap<QString, set<int>> &toPlot,
   multi->setCloseOnEmpty(true);
   multi->arrangeLayers(true, true);
 
+  QStringList legends; // Legends for each plot
+  legends.reserve(nSubplots);
   int row(0), col(0);
   if (nWorkspaces == 1) {
     // One workspace, each spectrum in its own subplot
     const auto &wsName = toPlot.begin().key();
     const auto &spectra = toPlot.begin().value();
     for (const auto &spec : spectra) {
+      const std::set<int> spectraSet{spec};
       plotLayerOfMultilayer(multi, errs, plotAsDistribution, row, col, wsName,
-                            std::set<int>{spec});
+                            spectraSet);
+      legends.append(getLegendKeys(wsName, spectraSet));
     }
   } else {
     // Each workspace in its own subplot
     for (auto iter = toPlot.constBegin(); iter != toPlot.constEnd(); ++iter) {
-      plotLayerOfMultilayer(multi, errs, plotAsDistribution, row, col,
-                            iter.key(), iter.value());
+      const auto &wsName = iter.key();
+      const auto &spectra = iter.value();
+      plotLayerOfMultilayer(multi, errs, plotAsDistribution, row, col, wsName,
+                            spectra);
+      legends.append(getLegendKeys(wsName, spectra));
     }
   }
 
   multi->setCommonAxisScales();
   multi->arrangeLayers(true, true);
+
+  // add legends last of all, so they are in the correct place
+  for (int index = 0; index < multi->layers(); ++index) {
+    auto *layer = multi->layer(index + 1); // MultiLayer has 1-based indices
+    layer->newLegend(legends[index]);
+  }
+
   // Check if window does not contain any curves and should be closed
   multi->maybeNeedToClose();
 
@@ -3498,18 +3523,14 @@ void MantidUI::plotLayerOfMultilayer(MultiLayer *multi, const bool plotErrors,
 
   const int layerIndex = row * nCols + col + 1; // layers numbered from 1
   auto *layer = multi->layer(layerIndex);
-  QString legendText = wsName + '\n';
   int curveIndex(0);
   for (const int spec : spectra) {
     const auto plotType = isFitResult ? getCurveTypeForFitResult(spec)
                                       : GraphOptions::Unspecified;
     layer->insertCurve(wsName, spec, plotErrors, plotType, plotDist);
-    legendText += "\\l(" + QString::number(++curveIndex) + ")" +
-                  getLegendKey(wsName, spec) + "\n";
   }
   m_appWindow->setPreferences(layer); // apply default style
   layer->removeTitle();
-  layer->newLegend(legendText);
   setInitialAutoscale(layer);
   formatAxes(layer, row, col);
   incrementCounters(row, col);
