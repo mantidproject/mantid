@@ -96,7 +96,7 @@ class NameSource:
 
     @namelogging
     def badDetectorSpuriousBkg(self):
-        return self._prefix + '_bkgdiang'
+        return self._prefix + '_bkgdiagn'
 
     @namelogging
     def badDetectorZeroCounts(self):
