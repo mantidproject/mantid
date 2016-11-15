@@ -47,7 +47,7 @@ void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
     populateParametersList(m_view->getCurrentWorkspaceName());
     break;
   case saveWorkspacesFlag:
-    saveWorkspaces();
+    saveWorkspaces(m_view->getSavePath());
     break;
   }
 }
@@ -108,34 +108,37 @@ void ReflSaveTabPresenter::populateParametersList(std::string wsName) {
 
 /** Saves selected workspaces
 */
-void ReflSaveTabPresenter::saveWorkspaces() {
+void ReflSaveTabPresenter::saveWorkspaces(std::string saveDir) {
   // Check that save directory is valid
-  std::string saveDir = m_view->getSavePath();
   if (saveDir.empty() || Poco::File(saveDir).isDirectory() == false) {
     g_log.error("Directory specified doesn't exist or was invalid for your operating system");
     return;
   }
 
   // Create the appropriate save algorithm
+  bool titleCheck = m_view->getTitleCheck();
+  auto wsNames = m_view->getSelectedWorkspaces();
+  auto selectedParameters = m_view->getSelectedParameters();
+  bool qResolutionCheck = m_view->getQResolutionCheck();
+  std::string prefix = m_view->getPrefix();
   int formatIndex = m_view->getFileFormatIndex();
   std::string algName = saveAlgs[formatIndex];
   std::string extension = saveExts[formatIndex];
   IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create(algName);
  
-  auto wsNames = m_view->getSelectedWorkspaces();
   for (auto it = wsNames.begin(); it != wsNames.end(); it++) {
     // Add any additional algorithm-specific properties and execute
     if (algName != "SaveANSTOAscii") {
-      if (m_view->getTitleCheck())
+      if (titleCheck)
         saveAlg->setProperty("Title", *it);
-      saveAlg->setProperty("LogList", m_view->getSelectedParameters());
+      saveAlg->setProperty("LogList", selectedParameters);
     }
     if (algName == "SaveReflCustomAscii") {
-      saveAlg->setProperty("WriteDeltaQ", m_view->getQResolutionCheck());
+      saveAlg->setProperty("WriteDeltaQ", qResolutionCheck);
     }
 
     auto path = Poco::Path(saveDir);
-    path.append(m_view->getPrefix() + *it + extension);
+    path.append(prefix + *it + extension);
     saveAlg->setProperty("Filename", path.toString());
     saveAlg->setProperty("InputWorkspace",
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(*it));

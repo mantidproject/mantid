@@ -11,6 +11,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "Poco/File.h"
+#include "Poco/Path.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
@@ -128,13 +130,39 @@ public:
       logs.push_back((*it)->name());
     }
 
-    EXPECT_CALL(mockView, clearWorkspaceList()).Times(Exactly(1));
-    EXPECT_CALL(mockView, setWorkspaceList(std::vector<std::string> { "ws1" }))
-      .Times(Exactly(1));
     EXPECT_CALL(mockView, clearParametersList()).Times(Exactly(1));
     EXPECT_CALL(mockView, setParametersList(logs)).Times(Exactly(1));
-    presenter.populateWorkspaceList();
     presenter.populateParametersList("ws1");
+    AnalysisDataService::Instance().clear();
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testSaveWorkspaces() {
+    MockSaveTabView mockView;
+    ReflSaveTabPresenter presenter(&mockView);
+
+    std::string savePath = createSavePath();
+    std::vector<std::string> wsNames = { "ws1", "ws2", "ws3" };
+    createWS(wsNames[0]);
+    createWS(wsNames[1]);
+    createWS(wsNames[2]);
+
+    EXPECT_CALL(mockView, setWorkspaceList(wsNames)).Times(Exactly(1));
+    EXPECT_CALL(mockView, getTitleCheck()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getSelectedParameters())
+      .Times(Exactly(1))
+      .WillOnce(Return(std::vector<std::string>()));
+    EXPECT_CALL(mockView, getQResolutionCheck()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getPrefix()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getFileFormatIndex()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getSelectedWorkspaces())
+      .Times(Exactly(1))
+      .WillOnce(Return(wsNames));
+    mockView.setWorkspaceList(wsNames);
+    presenter.saveWorkspaces(savePath);
+    Poco::File(savePath + wsNames[0] + ".dat").remove();
+    Poco::File(savePath + wsNames[1] + ".dat").remove();
+    Poco::File(savePath + wsNames[2] + ".dat").remove();
     AnalysisDataService::Instance().clear();
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -146,6 +174,17 @@ private:
     alg->setProperty("DataY", std::vector<double> { 1, 2 });
     alg->setProperty("OutputWorkspace", name);
     alg->execute();
+  }
+
+  std::string createSavePath() {
+    // First attempt to obtain path from default save directory
+    std::string savePath = Mantid::Kernel::ConfigService::Instance().getString(
+      "defaultsave.directory");
+    if (savePath.empty())
+      // Otherwise use current path as save directory
+      savePath = Poco::Path::current();
+    
+    return savePath;
   }
 };
 

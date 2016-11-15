@@ -47,7 +47,7 @@ std::string QtReflSaveTabView::getSavePath() const {
 /** Sets the save path
 */
 void QtReflSaveTabView::setSavePath(const std::string &path) const {
-  return m_ui.savePathEdit->setText(QString::fromStdString(path));
+  m_ui.savePathEdit->setText(QString::fromStdString(path));
 }
 
 /** Returns the file name prefix

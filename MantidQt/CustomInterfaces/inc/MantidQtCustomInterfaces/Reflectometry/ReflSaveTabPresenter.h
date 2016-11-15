@@ -54,8 +54,8 @@ public:
   void filterWorkspaceNames(std::string filter, bool regexCheck);
   /// Suggest a save directory
   void suggestSaveDir();
-  /// Save selected workspaces
-  void saveWorkspaces();
+  /// Save selected workspaces to a directory
+  void saveWorkspaces(std::string saveDir);
 
 private:
   /// Obtains all available workspace names
