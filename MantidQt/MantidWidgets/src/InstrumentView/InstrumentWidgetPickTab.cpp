@@ -931,14 +931,16 @@ QString ComponentInfoController::displayPeakAngles(
   auto pos2 = peak2->getDetector()->getPos();
 
   auto angle = pos1.angle(pos2) * double_constants::radian;
-  auto distance = pos1 - pos2;
+  auto distance = pos2 - pos1;
   auto dirAngles = distance.directionAngles();
+
+  auto x = dirAngles[0];
+  auto y = dirAngles[1];
 
   text << "Angle between: " << angle << "\n";
   text << "Direction angles: ";
-  text << " a: " << dirAngles[0];
-  text << " b: " << dirAngles[1];
-  text << " c: " << dirAngles[2];
+  text << " x: " << x;
+  text << " y: " << y;
   text << "\n";
 
   return QString::fromStdString(text.str());
