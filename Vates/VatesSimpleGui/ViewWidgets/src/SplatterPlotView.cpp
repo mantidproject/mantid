@@ -22,6 +22,7 @@
 #include <pqObjectBuilder.h>
 #include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
+#include <pqPipelineFilter.h>
 #include <pqRenderView.h>
 #include <pqServerManagerModel.h>
 #include <vtkDataObject.h>
@@ -54,7 +55,8 @@ Mantid::Kernel::Logger g_log("SplatterPlotView");
 }
 
 SplatterPlotView::SplatterPlotView(
-    QWidget *parent, RebinnedSourcesManager *rebinnedSourcesManager)
+    QWidget *parent, RebinnedSourcesManager *rebinnedSourcesManager,
+    bool createRenderProxy)
     : ViewBase(parent, rebinnedSourcesManager),
       m_cameraManager(boost::make_shared<CameraManager>()),
       m_peaksTableController(NULL), m_peaksWorkspaceNameDelimiter(";") {
@@ -83,7 +85,9 @@ SplatterPlotView::SplatterPlotView(
   QObject::connect(this->m_ui.pickModeButton, SIGNAL(toggled(bool)), this,
                    SLOT(onPickModeToggled(bool)));
 
-  this->m_view = this->createRenderView(this->m_ui.renderFrame);
+  if (createRenderProxy)
+    this->m_view = this->createRenderView(this->m_ui.renderFrame);
+
   this->installEventFilter(this);
 
   setupVisiblePeaksButtons();
@@ -633,6 +637,33 @@ void SplatterPlotView::destroyAllSourcesInView() {
   builder->destroySources();
 }
 
+void SplatterPlotView::setView(pqRenderView *view) {
+  clearRenderLayout(this->m_ui.renderFrame);
+
+  auto &activeObjects = pqActiveObjects::instance();
+  this->m_view = view;
+
+  auto server = activeObjects.activeServer();
+  auto model = pqApplicationCore::instance()->getServerManagerModel();
+  auto filters = model->findItems<pqPipelineFilter *>(server);
+  this->m_splatSource = findFilter(
+      filters, MantidQt::API::MdConstants::MantidParaViewSplatterPlot);
+  this->m_peaksFilter = findFilter(
+      filters, MantidQt::API::MdConstants::MantidParaViewPeaksFilter);
+  this->m_threshSource =
+      findFilter(filters, MantidQt::API::MdConstants::Threshold);
+  this->m_probeSource =
+      findFilter(filters, MantidQt::API::MdConstants::ProbePoint);
+
+  QHBoxLayout *hbox = new QHBoxLayout(this->m_ui.renderFrame);
+  hbox->setMargin(0);
+  hbox->addWidget(m_view->widget());
+}
+
+ModeControlWidget::Views SplatterPlotView::getViewType() {
+  return ModeControlWidget::Views::SPLATTERPLOT;
+}
+
 void SplatterPlotView::destroyFiltersForSplatterPlotView() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   if (this->m_peaksFilter) {
@@ -650,6 +681,31 @@ void SplatterPlotView::destroyFiltersForSplatterPlotView() {
   }
   if (this->m_splatSource) {
     builder->destroy(this->m_splatSource);
+  }
+}
+
+/* Find a pqPipelineFilter using the XML name of the proxy
+ *
+ * If there is more than one match only the first found is returned. If no items
+ * are matched a nullptr is returned.
+ *
+ * @param filters :: a list of filters to search
+ * @param name :: the XML name of the item to find
+ * @return pointer to the pqPipelineFilter found in filters
+ */
+pqPipelineFilter *
+SplatterPlotView::findFilter(const QList<pqPipelineFilter *> &filters,
+                             const QString &name) const {
+  auto result = std::find_if(filters.begin(), filters.end(),
+                             [&name](const pqPipelineFilter *src) {
+                               return strcmp(src->getProxy()->GetXMLName(),
+                                             name.toStdString().c_str()) == 0;
+                             });
+
+  if (result != filters.end()) {
+    return result[0];
+  } else {
+    return nullptr;
   }
 }
 

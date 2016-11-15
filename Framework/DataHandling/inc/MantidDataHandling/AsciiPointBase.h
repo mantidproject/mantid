@@ -62,10 +62,6 @@ private:
   void init() override;
   /// Overwrites Algorithm method
   void exec() override;
-  /// returns true if the value is NaN
-  bool checkIfNan(const double &value) const;
-  /// returns true if the value if + or - infinity
-  bool checkIfInfinite(const double &value) const;
   /// print the appropriate value to file
   void outputval(double val, std::ofstream &file, bool leadingSep = true);
   /// write the top of the file

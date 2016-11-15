@@ -3,6 +3,7 @@ import stresstesting
 from mantid import *
 from mantid.simpleapi import *
 
+
 class LRPrimaryFractionTest(stresstesting.MantidStressTest):
     scaling_factor = None
 
@@ -19,6 +20,7 @@ class LRPrimaryFractionTest(stresstesting.MantidStressTest):
                                                                                   self.scaling_factor[1]))
                 return False
         return True
+
 
 class LRPrimaryFractionWithRangeTest(stresstesting.MantidStressTest):
     scaling_factor = None
@@ -37,6 +39,7 @@ class LRPrimaryFractionWithRangeTest(stresstesting.MantidStressTest):
                                                                                   self.scaling_factor[1]))
                 return False
         return True
+
 
 class ApplyToReducedDataTest(stresstesting.MantidStressTest):
     def runTest(self):
@@ -89,4 +92,3 @@ class ApplyToReducedDataTest(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "reflectivity_119816", 'LiquidsReflectometryReductionTestWithBackground.nxs'
-

@@ -4,6 +4,7 @@ from stresstesting import MantidStressTest
 import mantid.simpleapi as ms
 import Direct.DirectEnergyConversion as reduction
 
+
 class DirectInelasticDiagnostic(MantidStressTest):
     saved_diag_file=""
 

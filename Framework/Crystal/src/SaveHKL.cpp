@@ -1,4 +1,6 @@
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidCrystal/SaveHKL.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Utils.h"
@@ -11,7 +13,7 @@
 #include <fstream>
 
 #include <Poco/File.h>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -26,7 +28,6 @@ namespace Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveHKL)
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SaveHKL::init() {
@@ -92,7 +93,6 @@ void SaveHKL::init() {
                   "DirectionCosines.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SaveHKL::exec() {
@@ -321,8 +321,8 @@ void SaveHKL::exec() {
       for (auto wi : ids) {
 
         Peak &p = peaks[wi];
-        if (p.getIntensity() == 0.0 || boost::math::isnan(p.getIntensity()) ||
-            boost::math::isnan(p.getSigmaIntensity())) {
+        if (p.getIntensity() == 0.0 || !(std::isfinite(p.getIntensity())) ||
+            !(std::isfinite(p.getSigmaIntensity()))) {
           banned.insert(wi);
           continue;
         }

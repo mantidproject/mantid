@@ -23,8 +23,8 @@ struct LoadResult {
   Mantid::API::Workspace_sptr loadedGrouping;
   Mantid::API::Workspace_sptr loadedDeadTimes;
   std::string mainFieldDirection;
-  double timeZero;
-  double firstGoodData;
+  double timeZero = 0;
+  double firstGoodData = 0;
   std::string label;
 };
 
@@ -32,13 +32,13 @@ struct LoadResult {
 struct AnalysisOptions {
   std::string summedPeriods;            /// Set of periods to sum
   std::string subtractedPeriods;        /// Set of periods to subtract
-  double timeZero;                      /// Value to use for t0 correction
-  double loadedTimeZero;                /// Time zero from data file
+  double timeZero = 0;                  /// Value to use for t0 correction
+  double loadedTimeZero = 0;            /// Time zero from data file
   std::pair<double, double> timeLimits; /// Min, max X values
   std::string rebinArgs;     /// Arguments for rebin (empty to not rebin)
   std::string groupPairName; /// Name of group or pair to use
   const Mantid::API::Grouping grouping; /// Grouping to use
-  PlotType plotType;                    /// Type of analysis to perform
+  PlotType plotType = {};               /// Type of analysis to perform
   explicit AnalysisOptions(const Mantid::API::Grouping &g) : grouping(g){};
 };
 } // namespace Muon

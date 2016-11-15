@@ -1,9 +1,12 @@
 #pylint: disable=no-init,invalid-name,too-many-locals,too-many-branches
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import *
 from mantid.kernel import *
 import math
 
 from mantid.kernel import logger
+
 
 class SANSAzimuthalAverage1D(PythonAlgorithm):
 
@@ -20,8 +23,8 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
                                                      direction=Direction.Input))
 
-        self.declareProperty(FloatArrayProperty("Binning", values=[0.,0.,0.],\
-                             direction=Direction.InOut), "Positive is linear bins, negative is logarithmic")
+        self.declareProperty(FloatArrayProperty("Binning", values=[0.,0.,0.],
+                                                direction=Direction.InOut), "Positive is linear bins, negative is logarithmic")
 
         self.declareProperty("NumberOfBins", 100, validator=IntBoundedValidator(lower=1),
                              doc="Number of Q bins to use if binning is not supplied")
@@ -181,15 +184,14 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
                 alg.setProperty("InputWorkspace", wedge_i)
                 alg.execute()
 
-            self.declareProperty(MatrixWorkspaceProperty("WedgeWorkspace_%s" % i, "",\
-                                                        direction = Direction.Output))
+            self.declareProperty(MatrixWorkspaceProperty("WedgeWorkspace_%s" % i, "",
+                                                         direction = Direction.Output))
             self.setPropertyValue("WedgeWorkspace_%s" % i, wedge_i_name)
             self.setProperty("WedgeWorkspace_%s" % i, wedge_i)
 
         msg = "Performed radial averaging between Q=%g and Q=%g" % (qmin, qmax)
         self.setProperty("OutputMessage", msg)
         self.setProperty("OutputWorkspace", output_ws)
-
 
     def _get_binning(self, workspace, wavelength_min, wavelength_max):
         log_binning = self.getProperty("LogBinning").value
@@ -205,14 +207,14 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             pixel_size_y = workspace.getInstrument().getNumberParameter("y-pixel-size")[0]
 
             if workspace.getRun().hasProperty("beam_center_x") and \
-                workspace.getRun().hasProperty("beam_center_y"):
+                    workspace.getRun().hasProperty("beam_center_y"):
                 beam_ctr_x = workspace.getRun().getProperty("beam_center_x").value
                 beam_ctr_y = workspace.getRun().getProperty("beam_center_y").value
             else:
                 property_manager_name = self.getProperty("ReductionProperties").value
                 property_manager = PropertyManagerDataService.retrieve(property_manager_name)
                 if property_manager.existsProperty("LatestBeamCenterX") and \
-                    property_manager.existsProperty("LatestBeamCenterY"):
+                        property_manager.existsProperty("LatestBeamCenterY"):
                     beam_ctr_x = property_manager.getProperty("LatestBeamCenterX").value
                     beam_ctr_y = property_manager.getProperty("LatestBeamCenterY").value
                 else:

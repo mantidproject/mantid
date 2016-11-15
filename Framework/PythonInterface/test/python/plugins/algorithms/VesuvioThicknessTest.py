@@ -50,16 +50,16 @@ class VesuvioThicknessTest(unittest.TestCase):
                           TransmissionWorkspace='trans_tbl')
 
     def test_no_masses_input(self):
-	masses = []
-	amplitudes =[1.0, 2.0]
+        masses = []
+        amplitudes =[1.0, 2.0]
         self.assertRaises(RuntimeError, VesuvioThickness, Masses=masses,
                           Amplitudes=amplitudes,
                           DensityWorkspace='dens_tbl',
                           TransmissionWorkspace='trans_tbl')
 
     def test_no_amplitudes_input(self):
-	masses = [1.0, 2.0]
-	amplitudes =[]
+        masses = [1.0, 2.0]
+        amplitudes =[]
         self.assertRaises(RuntimeError, VesuvioThickness, Masses=masses,
                           Amplitudes=amplitudes,
                           DensityWorkspace='dens_tbl',

@@ -1,4 +1,5 @@
 #include "MantidAPI/RefAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -181,6 +182,39 @@ DateAndTime EventWorkspace::getPulseTimeMax() const {
   }
   return tMax;
 }
+/**
+Get the maximum and mimumum pulse time for events accross the entire workspace.
+@param Tmin minimal pulse time as a DateAndTime.
+@param Tmax maximal pulse time as a DateAndTime.
+*/
+void EventWorkspace::getPulseTimeMinMax(
+    Mantid::Kernel::DateAndTime &Tmin,
+    Mantid::Kernel::DateAndTime &Tmax) const {
+
+  Tmax = DateAndTime::minimum();
+  Tmin = DateAndTime::maximum();
+
+  int64_t numWorkspace = static_cast<int64_t>(this->data.size());
+#pragma omp parallel
+  {
+    DateAndTime tTmax = DateAndTime::minimum();
+    DateAndTime tTmin = DateAndTime::maximum();
+#pragma omp for nowait
+    for (int64_t workspaceIndex = 0; workspaceIndex < numWorkspace;
+         workspaceIndex++) {
+      const EventList &evList = this->getSpectrum(workspaceIndex);
+      DateAndTime tempMin, tempMax;
+      evList.getPulseTimeMinMax(tempMin, tempMax);
+      tTmin = std::min(tTmin, tempMin);
+      tTmax = std::max(tTmax, tempMax);
+    }
+#pragma omp critical
+    {
+      Tmin = std::min(Tmin, tTmin);
+      Tmax = std::max(Tmax, tTmax);
+    }
+  }
+}
 
 /**
  Get the minimum time at sample for events across the entire workspace.
@@ -296,16 +330,25 @@ void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const {
   // set to crazy values to start
   xmin = std::numeric_limits<double>::max();
   xmax = -1.0 * xmin;
-  size_t numWorkspace = this->data.size();
-  for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
-       workspaceIndex++) {
-    const EventList &evList = this->getSpectrum(workspaceIndex);
-    double temp = evList.getTofMin();
-    if (temp < xmin)
-      xmin = temp;
-    temp = evList.getTofMax();
-    if (temp > xmax)
-      xmax = temp;
+  int64_t numWorkspace = static_cast<int64_t>(this->data.size());
+#pragma omp parallel
+  {
+    double tXmin = xmin;
+    double tXmax = xmax;
+#pragma omp for nowait
+    for (int64_t workspaceIndex = 0; workspaceIndex < numWorkspace;
+         workspaceIndex++) {
+      const EventList &evList = this->getSpectrum(workspaceIndex);
+      double temp = evList.getTofMin();
+      tXmin = std::min(temp, tXmin);
+      temp = evList.getTofMax();
+      tXmax = std::max(temp, tXmax);
+    }
+#pragma omp critical
+    {
+      xmin = std::min(xmin, tXmin);
+      xmax = std::max(xmax, tXmax);
+    }
   }
 }
 

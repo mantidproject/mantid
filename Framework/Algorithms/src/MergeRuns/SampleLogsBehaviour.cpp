@@ -1,4 +1,5 @@
-#include <MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h>
+#include "MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h"
+#include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 

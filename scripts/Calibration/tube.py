@@ -383,7 +383,6 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
                   "that arguments are case sensitive" % key
             raise RuntimeError(msg)
 
-
     # check parameter ws: if it was given as string, transform it in
     # mantid object
     if isinstance(ws, str):
@@ -440,7 +439,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     # not given, it will create a FITPAR 'guessing' the centre positions,
     # and allowing the find peaks calibration methods to adjust the parameter
     # for the peaks automatically
-    if kwargs.has_key(FITPAR):
+    if FITPAR in kwargs:
         fitPar = kwargs[FITPAR]
         # fitPar must be a TubeCalibFitParams
         if not isinstance(fitPar, TubeCalibFitParams):
@@ -467,9 +466,8 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         # guess positions given by centre_pixel
         fitPar.setAutomatic(True)
 
-
     # check the MARGIN paramter (optional)
-    if kwargs.has_key(MARGIN):
+    if MARGIN in kwargs:
         try:
             margin = float(kwargs[MARGIN])
         except:
@@ -477,7 +475,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         fitPar.setMargin(margin)
 
     # deal with RANGELIST parameter
-    if kwargs.has_key(RANGELIST):
+    if RANGELIST in kwargs:
         rangeList = kwargs[RANGELIST]
         if isinstance(rangeList, int):
             rangeList = [rangeList]
@@ -491,7 +489,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         rangeList = range(tubeSet.getNumTubes())
 
     # check if the user passed the option calibTable
-    if kwargs.has_key(CALIBTABLE):
+    if CALIBTABLE in kwargs:
         calibTable = kwargs[CALIBTABLE]
         # ensure the correct type is passed
         # if a string was passed, transform it in mantid object
@@ -517,9 +515,8 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         # "Detector Position" column required by ApplyCalibration
         calibTable.addColumn(type="V3D", name="Detector Position")
 
-
     # deal with plotTube option
-    if kwargs.has_key(PLOTTUBE):
+    if PLOTTUBE in kwargs:
         plotTube = kwargs[PLOTTUBE]
         if isinstance(plotTube, int):
             plotTube = [plotTube]
@@ -531,7 +528,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         plotTube = []
 
     # deal with minimun tubes sizes
-    if kwargs.has_key(EXCLUDESHORT):
+    if EXCLUDESHORT in kwargs:
         excludeShortTubes = kwargs[EXCLUDESHORT]
         try:
             excludeShortTubes = float(excludeShortTubes)
@@ -543,7 +540,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         excludeShortTubes = 0.0
 
     # deal with OVERRIDEPEAKS parameters
-    if kwargs.has_key(OVERRIDEPEAKS):
+    if OVERRIDEPEAKS in kwargs:
         overridePeaks = kwargs[OVERRIDEPEAKS]
         try:
             nPeaks = len(idealTube.getArray())
@@ -564,9 +561,8 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     else:
         overridePeaks = dict()
 
-
     # deal with FITPOLIN parameter
-    if kwargs.has_key(FITPOLIN):
+    if FITPOLIN in kwargs:
         polinFit = kwargs[FITPOLIN]
         if polinFit not in [1, 2, 3]:
             raise RuntimeError(
@@ -577,7 +573,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
 
     # deal with OUTPUT PEAK
     deletePeakTableAfter = False
-    if kwargs.has_key(OUTPUTPEAK):
+    if OUTPUTPEAK in kwargs:
         outputPeak = kwargs[OUTPUTPEAK]
     else:
         outputPeak = False
@@ -595,7 +591,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         for i in range(len(idealTube.getArray())):
             outputPeak.addColumn(type='float', name='Peak%d' % (i + 1))
 
-    getCalibration(ws, tubeSet, calibTable, fitPar, idealTube, outputPeak, \
+    getCalibration(ws, tubeSet, calibTable, fitPar, idealTube, outputPeak,
                    overridePeaks, excludeShortTubes, plotTube, rangeList, polinFit)
 
     if deletePeakTableAfter:

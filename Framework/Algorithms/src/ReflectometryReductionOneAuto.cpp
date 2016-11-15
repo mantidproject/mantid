@@ -568,8 +568,10 @@ void ReflectometryReductionOneAuto::exec() {
     setProperty("MomentumTransferMaximum",
                 boost::lexical_cast<double>(
                     refRedOne->getPropertyValue("MomentumTransferMaximum")));
-    setProperty("ThetaIn", boost::lexical_cast<double>(
-                               refRedOne->getPropertyValue("ThetaIn")));
+    if (theta_in.is_initialized())
+      setProperty("ThetaIn", theta_in.get());
+    else
+      setProperty("ThetaIn", thetaOut1 / 2.);
 
   } else {
     throw std::runtime_error(

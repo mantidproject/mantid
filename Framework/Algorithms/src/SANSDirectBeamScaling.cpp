@@ -83,11 +83,11 @@ void SANSDirectBeamScaling::exec() {
   Progress progress(this, 0.0, 1.0, numHists);
 
   // Number of X bins
-  const int64_t xLength = inputWS->readY(0).size();
+  const int64_t xLength = inputWS->y(0).size();
 
   // Monitor counts
   double monitor = 0.0;
-  const MantidVec &MonIn = inputWS->readY(index[0]);
+  const auto &MonIn = inputWS->y(index[0]);
   for (int64_t j = 0; j < xLength; j++)
     monitor += MonIn[j];
 
@@ -111,8 +111,8 @@ void SANSDirectBeamScaling::exec() {
     if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
       continue;
 
-    const MantidVec &YIn = inputWS->readY(i);
-    const MantidVec &EIn = inputWS->readE(i);
+    const auto &YIn = inputWS->y(i);
+    const auto &EIn = inputWS->e(i);
 
     // Sum up all the counts
     V3D pos = spectrumInfo.position(i) - V3D(sourcePos.X(), sourcePos.Y(), 0.0);

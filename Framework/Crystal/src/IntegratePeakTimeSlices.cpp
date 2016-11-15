@@ -17,12 +17,15 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#include "MantidHistogramData/BinEdges.h"
+
 #include <boost/math/special_functions/round.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using namespace Mantid::HistogramData;
 using namespace std;
 namespace Mantid {
 namespace Crystal {
@@ -277,7 +280,7 @@ void IntegratePeakTimeSlices::exec() {
     R = 2 * R; // Gets a few more background cells.
     int Chan;
 
-    const MantidVec &X = inpWkSpace->dataX(wsIndx);
+    const auto &X = inpWkSpace->x(wsIndx);
     int dChan = CalculateTimeChannelSpan(peak, dQ, X, int(wsIndx), Chan);
 
     dChan = max<int>(dChan, MinTimeSpan);
@@ -588,7 +591,7 @@ void IntegratePeakTimeSlices::exec() {
           if (!done) {
 
             // Now set up the center for this peak
-            int i = find("Mrow", names);
+            int i = findNameInVector("Mrow", names);
             if (i < 0) {
               throw std::runtime_error("Inconsistency found in algorithm "
                                        "execution. The index for the parameter "
@@ -596,7 +599,7 @@ void IntegratePeakTimeSlices::exec() {
             }
 
             lastRow = static_cast<int>(params[i] + .5);
-            i = find("Mcol", names);
+            i = findNameInVector("Mcol", names);
             if (i >= 0)
               lastCol = static_cast<int>(params[i] + .5);
             prog.report();
@@ -811,18 +814,18 @@ IntegratePeakTimeSlices::CalculatePositionSpan(Geometry::IPeak const &peak,
  * @return The number of time channels around Centerchan to use
  */
 int IntegratePeakTimeSlices::CalculateTimeChannelSpan(
-    Geometry::IPeak const &peak, const double dQ, Mantid::MantidVec const &X,
+    Geometry::IPeak const &peak, const double dQ, const HistogramX &X,
     const int specNum, int &Centerchan) {
   UNUSED_ARG(specNum);
   double Q = peak.getQLabFrame().norm(); // getQ( peak)/2/M_PI;
 
   double time = peak.getTOF();
   double dtime = dQ / Q * time;
-  int chanCenter = find(X, time);
+  int chanCenter = findTimeChannel(X, time);
 
   Centerchan = chanCenter;
-  int chanLeft = find(X, time - dtime);
-  int chanRight = find(X, time + dtime);
+  int chanLeft = findTimeChannel(X, time - dtime);
+  int chanRight = findTimeChannel(X, time + dtime);
   int dchan = abs(chanCenter - chanLeft);
 
   if (abs(chanRight - chanCenter) > dchan)
@@ -1229,9 +1232,9 @@ double DataModeHandler::getNewRCRadius() {
  * @param yvals   The y(row) values of the data to be considered
  * @param counts  The intensity at the given row and column (and timeslice)
  */
-void DataModeHandler::setHeightHalfWidthInfo(const MantidVec &xvals,
-                                             const MantidVec &yvals,
-                                             const MantidVec &counts) {
+void DataModeHandler::setHeightHalfWidthInfo(
+    const std::vector<double> &xvals, const std::vector<double> &yvals,
+    const std::vector<double> &counts) {
   double minCount, maxCount;
   const auto &X = xvals;
   const auto &Y = yvals;
@@ -1566,10 +1569,10 @@ void IntegratePeakTimeSlices::SetUpData1(
   for (int i = 0; i < NAttributes + 2; i++)
     StatBase.push_back(0);
 
-  Mantid::MantidVec yvalB;
-  Mantid::MantidVec errB;
-  Mantid::MantidVec xvalB;
-  Mantid::MantidVec YvalB;
+  std::vector<double> yvalB;
+  std::vector<double> errB;
+  std::vector<double> xvalB;
+  std::vector<double> YvalB;
 
   double TotBoundaryIntensities = 0;
   int nBoundaryCells = 0;
@@ -1582,7 +1585,7 @@ void IntegratePeakTimeSlices::SetUpData1(
 
   int jj = 0;
 
-  Mantid::MantidVec xRef;
+  std::vector<double> xRef;
   for (int i = 2; i < m_NeighborIDs[1]; i++) {
     int DetID = m_NeighborIDs[i];
 
@@ -1620,9 +1623,9 @@ void IntegratePeakTimeSlices::SetUpData1(
       if (row > NBadEdges && col > NBadEdges &&
           (m_NROWS < 0 || row < m_NROWS - NBadEdges) &&
           (m_NCOLS < 0 || col < m_NCOLS - NBadEdges)) {
-        Mantid::MantidVec histogram = inpWkSpace->readY(workspaceIndex);
+        auto &histogram = inpWkSpace->y(workspaceIndex);
 
-        Mantid::MantidVec histoerrs = inpWkSpace->readE(workspaceIndex);
+        auto &histoerrs = inpWkSpace->e(workspaceIndex);
         double intensity = 0;
         double variance = 0;
         for (int chan = chanMin; chan <= chanMax; chan++) {
@@ -1711,8 +1714,8 @@ void IntegratePeakTimeSlices::SetUpData1(
  * @param time  The desired time
  * @return the time channel
  */
-int IntegratePeakTimeSlices::find(Mantid::MantidVec const &X,
-                                  const double time) {
+int IntegratePeakTimeSlices::findTimeChannel(const HistogramX &X,
+                                             const double time) {
   int sgn = 1;
 
   if (X[0] > X[1])
@@ -1797,8 +1800,8 @@ std::string IntegratePeakTimeSlices::CalculateFunctionProperty_Fit() {
  *
  *  @return the position in the vector of oneName or -1.
  */
-int IntegratePeakTimeSlices::find(std::string const &oneName,
-                                  std::vector<std::string> const &nameList)
+int IntegratePeakTimeSlices::findNameInVector(
+    std::string const &oneName, std::vector<std::string> const &nameList)
 
 {
   for (size_t i = 0; i < nameList.size(); i++)
@@ -2196,7 +2199,7 @@ void IntegratePeakTimeSlices::PreFit(MatrixWorkspace_sptr &Data,
   }
   vector<std::string> ParNames(m_ParameterNames, m_ParameterNames + NParams);
   for (int i = 0; i < NParams; i++) {
-    int k = find(Bestnames[i], ParNames);
+    int k = findNameInVector(Bestnames[i], ParNames);
     if (k >= 0 && k < NParams)
       m_ParameterValues[k] = Bestparams[k];
   }
@@ -2219,13 +2222,13 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
                                         std::vector<double> const &errs,
                                         std::vector<std::string> const &names,
                                         double chisqOverDOF) {
-  int Ibk = find("Background", names);
+  int Ibk = findNameInVector("Background", names);
   if (Ibk < 0)
     throw std::runtime_error(
         "Irrecoverable inconsistency found. The index for the "
         "parameter 'Background' is lower than zero.");
 
-  int IIntensity = find("Intensity", names);
+  int IIntensity = findNameInVector("Intensity", names);
   if (IIntensity < 0)
     throw std::runtime_error(
         "Irrecoverable inconsistency found. The index for the "
@@ -2497,13 +2500,13 @@ int IntegratePeakTimeSlices::UpdateOutputWS(
     std::vector<double> const &params, std::vector<double> const &errs,
     std::vector<std::string> const &names, const double Chisq,
     const double time, string spec_idList) {
-  int Ibk = find("Background", names);
-  int IIntensity = find("Intensity", names);
-  int IVx = find("SScol", names);
-  int IVy = find("SSrow", names);
-  int IVxy = find("SSrc", names);
-  int Irow = find("Mrow", names);
-  int Icol = find("Mcol", names);
+  int Ibk = findNameInVector("Background", names);
+  int IIntensity = findNameInVector("Intensity", names);
+  int IVx = findNameInVector("SScol", names);
+  int IVy = findNameInVector("SSrow", names);
+  int IVxy = findNameInVector("SSrc", names);
+  int Irow = findNameInVector("Mrow", names);
+  int Icol = findNameInVector("Mcol", names);
 
   if (Ibk < 0 || IIntensity < 0 || IVx < 0 || IVy < 0 || IVxy < 0 || Irow < 0 ||
       Icol < 0) {

@@ -1,5 +1,4 @@
 #include "MantidQtMantidWidgets/MWView.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 // includes for workspace handling
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
@@ -16,6 +15,7 @@
 #include <qwt_color_map.h>
 #include <qwt_double_rect.h>
 // system includes
+#include <cmath>
 
 namespace {
 Mantid::Kernel::Logger g_log("MWView");
@@ -219,8 +219,7 @@ void MWView::checkRangeLimits() {
       max = min;
       min = tmp;
     }
-    if (boost::math::isnan(min) || boost::math::isinf(min) ||
-        boost::math::isnan(max) || boost::math::isinf(max)) {
+    if (!std::isfinite(min) || !std::isfinite(max)) {
       mess << "Dimension " << m_workspace->getDimension(d)->getName()
            << " has a bad range: (";
       mess << min << ", " << max << ")\n";

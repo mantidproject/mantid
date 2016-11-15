@@ -36,9 +36,9 @@ namespace {
 /// @param LtL :: A work matrix.
 /// @param x :: A vector that receives the solution.
 /// @param inform :: The information struct.
-void solve_spd(const DoubleFortranMatrix &A, const DoubleFortranVector &b,
-               DoubleFortranMatrix &LtL, DoubleFortranVector &x,
-               nlls_inform &inform) {
+void solveSpd(const DoubleFortranMatrix &A, const DoubleFortranVector &b,
+              DoubleFortranMatrix &LtL, DoubleFortranVector &x,
+              nlls_inform &inform) {
   // Fortran code uses this:
   // dposv('L', n, 1, LtL, n, x, n, inform.external_return)
   // This is the GSL replacement:
@@ -56,8 +56,8 @@ void solve_spd(const DoubleFortranMatrix &A, const DoubleFortranVector &b,
 /// @param sigma :: A variable to receive the value of the smallest
 ///        eigenvalue.
 /// @param y :: A vector that receives the corresponding eigenvector.
-void min_eig_symm(const DoubleFortranMatrix &A, double &sigma,
-                  DoubleFortranVector &y) {
+void minEigSymm(const DoubleFortranMatrix &A, double &sigma,
+                DoubleFortranVector &y) {
   auto M = A;
   DoubleFortranVector ew;
   DoubleFortranMatrix ev;
@@ -75,8 +75,8 @@ void min_eig_symm(const DoubleFortranMatrix &A, double &sigma,
 /// Calculate AplusSigma = A + sigma * I
 /// @param sigma :: The value of the diagonal shift.
 /// @param AplusSigma :: The resulting matrix.
-void shift_matrix(const DoubleFortranMatrix &A, double sigma,
-                  DoubleFortranMatrix &AplusSigma) {
+void shiftMatrix(const DoubleFortranMatrix &A, double sigma,
+                 DoubleFortranMatrix &AplusSigma) {
   AplusSigma = A;
   auto n = A.len1();
   for (int i = 1; i <= n; ++i) { // for_do(i,1,n)
@@ -100,14 +100,14 @@ DoubleFortranVector negative(const DoubleFortranVector &v) {
 /// @param options :: The options.
 /// @param inform :: The inform struct.
 /// @param w :: The work struct.
-void get_pd_shift(double &sigma, DoubleFortranVector &d,
-                  const nlls_options &options, nlls_inform &inform,
-                  more_sorensen_work &w) {
+void getPdShift(double &sigma, DoubleFortranVector &d,
+                const nlls_options &options, nlls_inform &inform,
+                more_sorensen_work &w) {
   int no_shifts = 0;
   bool successful_shift = false;
   while (!successful_shift) {
-    shift_matrix(w.A, sigma, w.AplusSigma);
-    solve_spd(w.AplusSigma, negative(w.v), w.LtL, d, inform);
+    shiftMatrix(w.A, sigma, w.AplusSigma);
+    solveSpd(w.AplusSigma, negative(w.v), w.LtL, d, inform);
     if (inform.status != NLLS_ERROR::OK) {
       // reset the error calls -- handled in the code....
       inform.status = NLLS_ERROR::OK;
@@ -136,7 +136,7 @@ void get_pd_shift(double &sigma, DoubleFortranVector &d,
 /// @param Delta :: The Delta.
 /// @param beta :: The beta.
 /// @param inform :: The inform struct.
-void findbeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
+void findBeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
               double Delta, double &beta, nlls_inform &inform) {
 
   auto c = a.dot(b);
@@ -147,7 +147,7 @@ void findbeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
   double discrim = pow(c, 2) + (normb2) * (pow(Delta, 2) - norma2);
   if (discrim < zero) {
     inform.status = NLLS_ERROR::FIND_BETA;
-    inform.external_name = "findbeta";
+    inform.external_name = "findBeta";
     return;
   }
 
@@ -175,11 +175,11 @@ void findbeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
 /// @param options :: The options.
 /// @param inform :: The inform struct.
 /// @param w :: The work struct.
-void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-                   const DoubleFortranMatrix &hf, double Delta,
-                   DoubleFortranVector &d, double &nd,
-                   const nlls_options &options, nlls_inform &inform,
-                   more_sorensen_work &w) {
+void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
+                  const DoubleFortranMatrix &hf, double Delta,
+                  DoubleFortranVector &d, double &nd,
+                  const nlls_options &options, nlls_inform &inform,
+                  more_sorensen_work &w) {
 
   // The code finds
   //  d = arg min_p   v^T p + 0.5 * p^T A p
@@ -188,20 +188,20 @@ void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   // set A and v for the model being considered here...
 
   // Set A = J^T J
-  matmult_inner(J, w.A);
+  matmultInner(J, w.A);
   // add any second order information...
   // so A = J^T J + HF
   w.A += hf;
   // now form v = J^T f
-  mult_Jt(J, f, w.v);
+  multJt(J, f, w.v);
 
   // if scaling needed, do it
   if (options.scale != 0) {
-    apply_scaling(J, w.A, w.v, w.apply_scaling_ws, options, inform);
+    applyScaling(J, w.A, w.v, w.apply_scaling_ws, options, inform);
   }
 
   auto n = J.len2();
-  auto scale_back = [n, &d, &options, &w]() {
+  auto scaleBack = [n, &d, &options, &w]() {
     if (options.scale != 0) {
       for (int i = 1; i <= n; ++i) {
         d(i) = d(i) / w.apply_scaling_ws.diag(i);
@@ -213,7 +213,7 @@ void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   // d = -A\v
   DoubleFortranVector negv = w.v;
   negv *= -1.0;
-  solve_spd(w.A, negv, w.LtL, d, inform);
+  solveSpd(w.A, negv, w.LtL, d, inform);
   double sigma = 0.0;
   if (inform.status == NLLS_ERROR::OK) {
     // A is symmetric positive definite....
@@ -223,16 +223,16 @@ void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     inform.status = NLLS_ERROR::OK;
     inform.external_return = 0;
     inform.external_name = "";
-    min_eig_symm(w.A, sigma, w.y1);
+    minEigSymm(w.A, sigma, w.y1);
     if (inform.status != NLLS_ERROR::OK) {
-      scale_back();
+      scaleBack();
       return;
     }
     sigma = -(sigma - local_ms_shift);
     // find a shift that makes (A + sigma I) positive definite
-    get_pd_shift(sigma, d, options, inform, w);
+    getPdShift(sigma, d, options, inform, w);
     if (inform.status != NLLS_ERROR::OK) {
-      scale_back();
+      scaleBack();
       return;
     }
   }
@@ -261,7 +261,7 @@ void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
       }
       if (w.y1.len() == n) {
         double alpha = 0.0;
-        findbeta(d, w.y1, Delta, alpha, inform);
+        findBeta(d, w.y1, Delta, alpha, inform);
         if (inform.status == NLLS_ERROR::OK) {
           DoubleFortranVector tmp = w.y1;
           tmp *= alpha;
@@ -287,7 +287,7 @@ void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     if (fabs(sigma_shift) < options.more_sorensen_tiny * fabs(sigma)) {
       if (no_restarts < 1) {
         // find a shift that makes (A + sigma I) positive definite
-        get_pd_shift(sigma, d, options, inform, w);
+        getPdShift(sigma, d, options, inform, w);
         if (inform.status != NLLS_ERROR::OK) {
           break;
         }
@@ -301,10 +301,10 @@ void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
       sigma = sigma + sigma_shift;
     }
 
-    shift_matrix(w.A, sigma, w.AplusSigma);
+    shiftMatrix(w.A, sigma, w.AplusSigma);
     DoubleFortranVector negv = w.v;
     negv *= -1.0;
-    solve_spd(w.AplusSigma, negv, w.LtL, d, inform);
+    solveSpd(w.AplusSigma, negv, w.LtL, d, inform);
     if (inform.status != NLLS_ERROR::OK) {
       break;
     }
@@ -316,18 +316,18 @@ void more_sorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     // maxits reached, not converged
     inform.status = NLLS_ERROR::MS_MAXITS;
   }
-  scale_back();
+  scaleBack();
 }
 
 } // namespace
 
 /// Implements the abstarct method of TrustRegionMinimizer.
-void MoreSorensenMinimizer::calculate_step(
+void MoreSorensenMinimizer::calculateStep(
     const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     const DoubleFortranMatrix &hf, const DoubleFortranVector &, double Delta,
     DoubleFortranVector &d, double &normd, const NLLS::nlls_options &options,
     NLLS::nlls_inform &inform, NLLS::calculate_step_work &w) {
-  more_sorensen(J, f, hf, Delta, d, normd, options, inform, w.more_sorensen_ws);
+  moreSorensen(J, f, hf, Delta, d, normd, options, inform, w.more_sorensen_ws);
 }
 
 } // namespace FuncMinimisers

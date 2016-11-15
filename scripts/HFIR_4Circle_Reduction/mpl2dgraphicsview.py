@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0902,too-many-branches,C0302
+#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0901,R0902,too-many-branches,C0302
 import os
 import numpy as np
 
@@ -15,6 +15,7 @@ class Mpl2dGraphicsView(QtGui.QWidget):
     """ A combined graphics view including matplotlib canvas and
     a navigation tool bar for 2D image specifically
     """
+
     def __init__(self, parent):
         """ Initialization
         """
@@ -123,6 +124,7 @@ class Qt4Mpl2dCanvas(FigureCanvas):
     """  A customized Qt widget for matplotlib 2D image.
     It can be used to replace GraphicsView of QtGui
     """
+
     def __init__(self, parent):
         """  Initialization
         """
@@ -411,4 +413,3 @@ class MyNavigationToolbar(NavigationToolbar2):
         self._myParent.evt_view_updated()
 
         return
-

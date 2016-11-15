@@ -11,6 +11,7 @@ import SANSUtility as su
 import os
 from ISISCommandInterface import *
 
+
 def get_full_path_SANS_system_test(filename):
     '''
     Check if the file is in one of the directories or not
@@ -30,6 +31,7 @@ def get_full_path_SANS_system_test(filename):
         if _useDir(directory) and os.path.isfile(full_path):
             return True, full_path
     return False, ""
+
 
 class SANSFileCheckingTest(unittest.TestCase):
     def _do_test(self, file_name, expected_time):
@@ -58,7 +60,6 @@ class SANSFileCheckingTest(unittest.TestCase):
         file_name = 'LOQ74014.nxs'
         expected_time = '2012-10-22T11:14:54'
         self._do_test(file_name, expected_time)
-
 
     def test_that_SANS2D_RAW_file_with_date_is_evaluated_correctly(self):
         file_name = 'SANS2D00005546.raw'
@@ -230,4 +231,3 @@ class SANSSwitchIDFTestRunner(stresstesting.MantidStressTest):
 
     def validate(self):
         return self._success
-

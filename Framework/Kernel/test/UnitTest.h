@@ -63,7 +63,7 @@ std::string convert_units_check_range(const Unit &aUnit,
   const size_t nSteps(100);
 
   double step = (range.second - range.first) / nSteps;
-  if (step == std::numeric_limits<double>::infinity()) {
+  if (std::isinf(step)) {
     step = (DBL_MAX / nSteps) * 2;
   }
 

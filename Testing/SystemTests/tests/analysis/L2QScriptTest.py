@@ -4,8 +4,8 @@ import stresstesting
 from mantid.simpleapi import *
 from isis_reflectometry.l2q import *
 
-class L2QScriptTest(stresstesting.MantidStressTest):
 
+class L2QScriptTest(stresstesting.MantidStressTest):
 
     def runTest(self):
         ws = Load(Filename="INTER00013469.nxs")
@@ -18,9 +18,6 @@ class L2QScriptTest(stresstesting.MantidStressTest):
         theta = 0.7
         l2q(ws, detector_component_name, theta, sample_component_name) # This generates an output workspace called IvsQ
 
-
     def validate(self):
         self.disableChecking.append('Instrument')
         return 'IvsQ','L2QReferenceResult.nxs'
-
-

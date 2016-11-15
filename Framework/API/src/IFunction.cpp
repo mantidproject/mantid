@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Jacobian.h"
@@ -23,6 +20,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ProgressBase.h"
+#include "MantidKernel/IPropertyManager.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -713,7 +711,7 @@ void IFunction::setMatrixWorkspace(
 
     // check if parameter are specified in instrument definition file
 
-    const Geometry::ParameterMap &paramMap = workspace->instrumentParameters();
+    const auto &paramMap = workspace->constInstrumentParameters();
 
     Geometry::IDetector_const_sptr det;
     size_t numDetectors = workspace->getSpectrum(wi).getDetectorIDs().size();

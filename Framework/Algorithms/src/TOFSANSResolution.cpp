@@ -12,8 +12,6 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include "boost/math/special_functions/fpclassify.hpp"
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -102,7 +100,7 @@ void TOFSANSResolution::exec() {
   const std::vector<double> binParams = getProperty("OutputBinning");
 
   // Count histogram for normalization
-  const int xLength = static_cast<int>(iqWS->readX(0).size());
+  const int xLength = static_cast<int>(iqWS->x(0).size());
   std::vector<double> XNorm(xLength - 1, 0.0);
 
   // Create workspaces with each component of the resolution for debugging
@@ -112,21 +110,19 @@ void TOFSANSResolution::exec() {
       make_unique<WorkspaceProperty<>>("ThetaError", "", Direction::Output));
   setPropertyValue("ThetaError", "__" + iqWS->getName() + "_theta_error");
   setProperty("ThetaError", thetaWS);
-  thetaWS->setX(0, iqWS->refX(0));
-  MantidVec &ThetaY = thetaWS->dataY(0);
+  thetaWS->setSharedX(0, iqWS->sharedX(0));
+  auto &ThetaY = thetaWS->mutableY(0);
 
   MatrixWorkspace_sptr tofWS = WorkspaceFactory::Instance().create(iqWS);
   declareProperty(
       make_unique<WorkspaceProperty<>>("TOFError", "", Direction::Output));
   setPropertyValue("TOFError", "__" + iqWS->getName() + "_tof_error");
   setProperty("TOFError", tofWS);
-  tofWS->setX(0, iqWS->refX(0));
-  MantidVec &TOFY = tofWS->dataY(0);
+  tofWS->setSharedX(0, iqWS->sharedX(0));
+  auto &TOFY = tofWS->mutableY(0);
 
   // Initialize Dq
-  MantidVec &DxOut = iqWS->dataDx(0);
-  for (int i = 0; i < xLength; i++)
-    DxOut[i] = 0.0;
+  HistogramData::HistogramDx DxOut(xLength - 1, 0.0);
 
   const int numberOfSpectra =
       static_cast<int>(reducedWS->getNumberHistograms());
@@ -135,7 +131,7 @@ void TOFSANSResolution::exec() {
   const auto &spectrumInfo = reducedWS->spectrumInfo();
   const double L1 = spectrumInfo.l1();
 
-  PARALLEL_FOR2(reducedWS, iqWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*reducedWS, *iqWS))
   for (int i = 0; i < numberOfSpectra; i++) {
     PARALLEL_START_INTERUPT_REGION
     if (!spectrumInfo.hasDetectors(i)) {
@@ -154,8 +150,8 @@ void TOFSANSResolution::exec() {
     const double theta = spectrumInfo.twoTheta(i);
     const double factor = 4.0 * M_PI * sin(0.5 * theta);
 
-    const MantidVec &XIn = reducedWS->readX(i);
-    const MantidVec &YIn = reducedWS->readY(i);
+    const auto &XIn = reducedWS->x(i);
+    const auto &YIn = reducedWS->y(i);
     const int wlLength = static_cast<int>(XIn.size());
 
     std::vector<double> _dx(xLength - 1, 0.0);
@@ -203,7 +199,7 @@ void TOFSANSResolution::exec() {
       // By using only events with a positive weight, we use only the data
       // distribution and leave out the background events.
       // Note: we are looping over bins, therefore the xLength-1.
-      if (iq >= 0 && iq < xLength - 1 && !boost::math::isnan(dq_over_q) &&
+      if (iq >= 0 && iq < xLength - 1 && !std::isnan(dq_over_q) &&
           dq_over_q > 0 && YIn[j] > 0) {
         _dx[iq] += q * dq_over_q * YIn[j];
         _norm[iq] += YIn[j];
@@ -236,6 +232,7 @@ void TOFSANSResolution::exec() {
     TOFY[i] /= XNorm[i];
     ThetaY[i] /= XNorm[i];
   }
+  iqWS->setPointStandardDeviations(0, std::move(DxOut));
 }
 } // namespace Algorithms
 } // namespace Mantid

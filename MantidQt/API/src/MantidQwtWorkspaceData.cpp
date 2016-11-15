@@ -1,6 +1,6 @@
 #include "MantidQtAPI/MantidQwtWorkspaceData.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 MantidQwtWorkspaceData::MantidQwtWorkspaceData(bool logScaleY)
     : m_logScaleY(logScaleY), m_minY(0), m_minPositive(0), m_maxY(0),
@@ -35,7 +35,7 @@ void MantidQwtWorkspaceData::calculateYMinAndMax() const {
   for (size_t i = 0; i < size(); ++i) {
     auto val = y(i);
     // skip NaNs
-    if ((boost::math::isnan)(val) || (boost::math::isinf)(val))
+    if (!std::isfinite(val))
       continue;
 
     // Update our values as appropriate

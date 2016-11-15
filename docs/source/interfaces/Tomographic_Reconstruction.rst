@@ -86,7 +86,7 @@ SCARF and some ISIS machines:
 * `TomoPy
   <https://www1.aps.anl.gov/Science/Scientific-Software/TomoPy>`_
 
-* `Astra Toolbox <http://visielab.uantwerpen.be/software>`_ found from
+* `Astra Toolbox <http://visielab.uantwerpen.be/astra-toolbox>`_ found from
   `here <http://sourceforge.net/p/astra-toolbox/wiki/Home/>`_.
 
 References for the Astra Toolbox:

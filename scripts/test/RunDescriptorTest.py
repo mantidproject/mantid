@@ -1,4 +1,5 @@
-﻿import os,sys,inspect
+from __future__ import (absolute_import, division, print_function)
+import os,sys,inspect
 from mantid.simpleapi import *
 from mantid import api
 import unittest

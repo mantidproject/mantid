@@ -1,5 +1,6 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid {

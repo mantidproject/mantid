@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/MultipleScatteringCylinderAbsorption.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -169,7 +170,7 @@ void MultipleScatteringCylinderAbsorption::exec() {
 
     // now do the correction
     const auto &spectrumInfo = out_WSevent->spectrumInfo();
-    PARALLEL_FOR1(out_WSevent)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*out_WSevent))
     for (int64_t index = 0; index < NUM_HIST; ++index) {
       PARALLEL_START_INTERUPT_REGION
       if (!spectrumInfo.hasDetectors(index))

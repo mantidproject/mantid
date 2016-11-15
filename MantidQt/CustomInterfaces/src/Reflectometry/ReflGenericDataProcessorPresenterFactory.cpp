@@ -103,7 +103,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
       std::set<std::string>{"InputWorkspaces", "OutputWorkspace"});
 
   return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-      whitelist, preprocessMap, processor, postprocessor);
+      whitelist, preprocessMap, processor, postprocessor, "LoadISISNexus");
 }
 }
 }

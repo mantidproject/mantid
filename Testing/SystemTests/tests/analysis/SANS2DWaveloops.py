@@ -3,6 +3,7 @@ import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
 
+
 class SANS2DWaveloops(stresstesting.MantidStressTest):
 
     def runTest(self):

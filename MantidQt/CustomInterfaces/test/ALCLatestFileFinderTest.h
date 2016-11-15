@@ -16,19 +16,46 @@ using ScopedFileHelper::ScopedFile;
 using Mantid::Kernel::DateAndTime;
 
 /**
+ * Temporary directory that is deleted when it goes out of scope
+ */
+class ScopedDirectory final {
+public:
+  /// Constructor: create directory in temp folder
+  ScopedDirectory(const std::string &dirName) : m_dirName(dirName) {
+    Poco::Path tmpPath(Mantid::Kernel::ConfigService::Instance().getTempDir());
+    tmpPath.pushDirectory(m_dirName);
+    m_directory = Poco::File(tmpPath);
+    m_directory.createDirectories();
+  }
+  /// Destructor: delete the directory
+  ~ScopedDirectory() {
+    constexpr bool recursiveRemove(true);
+    m_directory.remove(recursiveRemove);
+  }
+  /// Get path of directory
+  const std::string &getDirectoryName() const { return m_dirName; }
+
+private:
+  Poco::File m_directory;
+  std::string m_dirName;
+};
+
+/**
  * Extension of ScopedFile used for testing purposes
  */
 class TestFile {
 public:
   /// Constructor which creates valid filename
-  TestFile(const std::string &time, const std::string &instrument,
-           const std::string &run, const std::string &extension = "nxs")
-      : m_file("", createFileName(instrument, run, extension)) {
+  TestFile(const std::string &time, const std::string &directory,
+           const std::string &instrument, const std::string &run,
+           const std::string &extension = "nxs")
+      : m_file("", createFileName(directory, instrument, run, extension)) {
     adjustFileTime(m_file.getFileName(), time);
   }
   /// Constructor taking any filename
-  TestFile(const std::string &time, const std::string &name)
-      : m_file("", name) {
+  TestFile(const std::string &time, const std::string &directory,
+           const std::string &name)
+      : m_file("", directory + Poco::Path::separator() + name) {
     adjustFileTime(m_file.getFileName(), time);
   }
   std::string getFileName() { return m_file.getFileName(); };
@@ -36,16 +63,20 @@ public:
 private:
   /**
  * Generate a filename from supplied instrument, run number
+ * @param directory :: [input] Name of directory to create files in (must
+ * already exist)
  * @param instrument [input] :: instrument name
  * @param run [input] :: run number
  * @param extension [input] :: extension
  * @returns :: filename
  */
-  std::string createFileName(const std::string &instrument,
+  std::string createFileName(const std::string &directory,
+                             const std::string &instrument,
                              const std::string &run,
                              const std::string &extension) {
     static const size_t numberLength = 8;
     std::ostringstream stream;
+    stream << directory << Poco::Path::separator();
     stream << instrument;
     const size_t numZeros = numberLength - run.size();
     for (size_t i = 0; i < numZeros; i++) {
@@ -92,11 +123,13 @@ public:
    * Should deal with adding and removing files
    */
   void test_getMostRecentFile() {
-    auto files = generateTestFiles();
+    const ScopedDirectory tmpDir("test_getMostRecentFile");
+    auto files = generateTestFiles(tmpDir.getDirectoryName());
     ALCLatestFileFinder finder(files[0].getFileName());
     TS_ASSERT_EQUALS(finder.getMostRecentFile(), files[2].getFileName());
     { // file added
-      auto newFile = TestFile("2116-03-15T15:00:00", "MUSR", "90003");
+      auto newFile = TestFile("2116-03-15T15:00:00", tmpDir.getDirectoryName(),
+                              "MUSR", "90003");
       TS_ASSERT_EQUALS(finder.getMostRecentFile(), newFile.getFileName());
     }
     // file removed (newFile went out of scope)
@@ -107,8 +140,10 @@ public:
    * Test that the finder ignores non-NeXus files
    */
   void test_ignoreNonNeXus() {
-    auto files = generateTestFiles();
-    auto nonNexus = TestFile("2116-03-15T16:00:00", "MUSR", "90004", "run");
+    const ScopedDirectory tmpDir("test_ignoreNonNeXus");
+    auto files = generateTestFiles(tmpDir.getDirectoryName());
+    auto nonNexus = TestFile("2116-03-15T16:00:00", tmpDir.getDirectoryName(),
+                             "MUSR", "90004", "run");
     ALCLatestFileFinder finder(files[0].getFileName());
     TS_ASSERT_EQUALS(finder.getMostRecentFile(), files[2].getFileName());
   }
@@ -117,8 +152,10 @@ public:
    * Test that the finder ignores NeXus files from the wrong instrument
    */
   void test_ignoreWrongInstrument() {
-    auto files = generateTestFiles();
-    auto wrongInstrument = TestFile("2116-03-15T16:00:00", "EMU", "80000");
+    const ScopedDirectory tmpDir("test_ignoreWrongInstrument");
+    auto files = generateTestFiles(tmpDir.getDirectoryName());
+    auto wrongInstrument = TestFile("2116-03-15T16:00:00",
+                                    tmpDir.getDirectoryName(), "EMU", "80000");
     ALCLatestFileFinder finder(files[0].getFileName());
     std::string foundFile;
     TS_ASSERT_THROWS_NOTHING(foundFile = finder.getMostRecentFile());
@@ -129,8 +166,10 @@ public:
    * Test that the finder ignores "invalid" NeXus files
    */
   void test_ignoreInvalidNeXus() {
-    auto files = generateTestFiles();
-    auto badNexus = TestFile("2116-03-15T16:00:00", "ALCResults.nxs");
+    const ScopedDirectory tmpDir("test_ignoreInvalidNeXus");
+    auto files = generateTestFiles(tmpDir.getDirectoryName());
+    auto badNexus = TestFile("2116-03-15T16:00:00", tmpDir.getDirectoryName(),
+                             "ALCResults.nxs");
     ALCLatestFileFinder finder(files[0].getFileName());
     std::string foundFile;
     TS_ASSERT_THROWS_NOTHING(foundFile = finder.getMostRecentFile());
@@ -142,15 +181,16 @@ private:
    * Generate three scoped test files
    * The creation dates go in run number order, as is the case with real files
    * (confirmed with scientists that this is always the case)
+   * @param directory :: [input] Name of directory to create files in (must
+   * already exist)
    * @returns :: vector containing three files
    */
-  std::vector<TestFile> generateTestFiles() {
-    std::vector<TestFile> files;
+  std::vector<TestFile> generateTestFiles(const std::string &directory) {
     // 100 years so it won't clash with other files in temp directory
-    files.emplace_back("2116-03-15T12:00:00", "MUSR", "90000");
-    files.emplace_back("2116-03-15T13:00:00", "MUSR", "90001");
-    files.emplace_back("2116-03-15T14:00:00", "MUSR", "90002");
-    return files;
+    return std::vector<TestFile>{
+        {"2116-03-15T12:00:00", directory, "MUSR", "90000"},
+        {"2116-03-15T13:00:00", directory, "MUSR", "90001"},
+        {"2116-03-15T14:00:00", directory, "MUSR", "90002"}};
   }
 };
 
@@ -171,7 +211,8 @@ public:
       std::ostringstream time, run;
       time << "2116-03-16T18:00:" << i;
       run << "900" << i;
-      m_files.emplace_back(time.str(), "MUSR", run.str());
+      m_files.emplace_back(time.str(), m_tmpDir.getDirectoryName(), "MUSR",
+                           run.str());
     }
   }
 
@@ -188,6 +229,8 @@ public:
   }
 
 private:
+  const ScopedDirectory m_tmpDir =
+      ScopedDirectory("ALCLatestFileFinderTestPerformance");
   std::vector<TestFile> m_files;
   std::string m_mostRecent;
 };

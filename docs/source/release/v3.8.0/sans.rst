@@ -13,6 +13,7 @@ Features
 - Enable the CanSAS1D algorithms to handle geometry inforamtion.
 - Add sort option to :ref:`CropToComponent <algm-CropToComponent>`
 - Provide warning when users try to use a 2D reduction together with a merged reduction selection.
+- Processing of LOQ M4 in the SANS reduction was added
 - :ref:`UnwrapMonitorsInTOF <algm-UnwrapMonitorsInTOF>` handles the data which was collected beyond the end of a frame.
 
 

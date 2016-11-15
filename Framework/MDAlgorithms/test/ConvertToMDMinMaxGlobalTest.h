@@ -11,6 +11,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Sample.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 using Mantid::MDAlgorithms::ConvertToMDMinMaxGlobal;

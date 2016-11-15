@@ -1,15 +1,18 @@
 #include "MantidAlgorithms/RadiusSum.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/IObjComponent.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/IObjComponent.h"
+#include "MantidKernel/VisibleWhenProperty.h"
+
+#include "MantidHistogramData/LinearGenerator.h"
 
 #include <boost/foreach.hpp>
 
@@ -108,6 +111,7 @@ std::vector<double> RadiusSum::processInstrumentRadiusSum() {
 
   g_log.debug() << "For every detector in the image get its position "
                 << " and sum up all the counts inside the related spectrum\n";
+
   const auto &spectrumInfo = inputWS->spectrumInfo();
   for (size_t i = 0; i < inputWS->getNumberHistograms(); i++) {
     if (!spectrumInfo.hasDetectors(i)) {
@@ -124,8 +128,8 @@ std::vector<double> RadiusSum::processInstrumentRadiusSum() {
     if (bin_n < 0)
       continue; // not in the limits of min_radius and max_radius
 
-    auto &refY = inputWS->getSpectrum(i).readY();
-    accumulator[bin_n] += std::accumulate(refY.begin(), refY.end(), 0.0);
+    auto &refY = inputWS->getSpectrum(i).y();
+    accumulator[bin_n] += std::accumulate(refY.cbegin(), refY.cend(), 0.0);
   }
   return accumulator;
 }
@@ -148,23 +152,14 @@ std::vector<double> RadiusSum::processNumericImageRadiusSum() {
   // or the center of the bin, if it is a histogram.
 
   g_log.debug() << "Define the X positions of the pixels\n";
-  auto &refX = inputWS->getSpectrum(0).readX();
-  auto &refY = inputWS->getSpectrum(0).readY();
-  std::vector<double> x_pos(refY.size());
-
-  if (refY.size() == refX.size()) { // non-histogram workspace X has n values
-    std::copy(refX.begin(), refX.end(), x_pos.begin());
-  } else { // histogram based workspace X has n+1 values
-    for (size_t ind = 0; ind < x_pos.size(); ind++)
-      x_pos[ind] = (refX[ind] + refX[ind + 1]) / 2.0;
-  }
+  auto x_pos = inputWS->points(0);
 
   g_log.debug() << "For every pixel define its bin position and sum them up\n";
   // for each row in the image
   for (size_t i = 0; i < inputWS->getNumberHistograms(); i++) {
 
     // pixel values
-    auto &refY = inputWS->getSpectrum(i).readY();
+    auto &refY = inputWS->getSpectrum(i).y();
 
     // for every pixel
     for (size_t j = 0; j < refY.size(); j++) {
@@ -301,7 +296,7 @@ RadiusSum::getBoundariesOfNumericImage(API::MatrixWorkspace_sptr inWS) {
   // horizontal axis
 
   // get the pixel position in the horizontal axis from the middle of the image.
-  const MantidVec &refX = inWS->readX(inWS->getNumberHistograms() / 2);
+  const auto &refX = inWS->x(inWS->getNumberHistograms() / 2);
 
   double min_x, max_x;
 
@@ -553,7 +548,7 @@ double RadiusSum::getMinBinSizeForNumericImage(API::MatrixWorkspace_sptr inWS) {
   //  The minimum bin size is the smallest value between this two values.
 
   std::vector<double> boundaries = getBoundariesOfNumericImage(inWS);
-  const MantidVec &refX = inWS->readX(inputWS->getNumberHistograms() / 2);
+  const auto &refX = inWS->x(inputWS->getNumberHistograms() / 2);
   int nX = static_cast<int>(refX.size());
   int nY = static_cast<int>(inWS->getAxis(1)->length());
 
@@ -619,16 +614,14 @@ void RadiusSum::setUpOutputWorkspace(std::vector<double> &values) {
       inputWS, 1, values.size() + 1, values.size());
 
   g_log.debug() << "Set the data\n";
-  MantidVec &refY = outputWS->dataY(0);
-  std::copy(values.begin(), values.end(), refY.begin());
+  outputWS->mutableY(0) = values;
 
   g_log.debug() << "Set the bins limits\n";
-  MantidVec &refX = outputWS->dataX(0);
-  double bin_size = (max_radius - min_radius) / num_bins;
 
-  for (int i = 0; i < (static_cast<int>(refX.size())) - 1; i++)
-    refX[i] = min_radius + i * bin_size;
-  refX.back() = max_radius;
+  auto xSize = outputWS->mutableX(0).size();
+  double bin_size = (max_radius - min_radius) / num_bins;
+  outputWS->setBinEdges(0, xSize,
+                        HistogramData::LinearGenerator(min_radius, bin_size));
 
   // configure the axis:
   // for numeric images, the axis are the same as the input workspace, and are
@@ -637,7 +630,7 @@ void RadiusSum::setUpOutputWorkspace(std::vector<double> &values) {
   // for instrument related, the axis Y (1) continues to be the same.
   // it is necessary to change only the axis X. We have to change it to radius.
   if (inputWorkspaceHasInstrumentAssociated(inputWS)) {
-    API::Axis *const horizontal = new API::NumericAxis(refX.size());
+    API::Axis *const horizontal = new API::NumericAxis(xSize);
     auto labelX = UnitFactory::Instance().create("Label");
     boost::dynamic_pointer_cast<Units::Label>(labelX)->setLabel("Radius");
     horizontal->unit() = labelX;

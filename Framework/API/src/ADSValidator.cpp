@@ -2,6 +2,7 @@
 #include "MantidKernel/TypedValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace API {

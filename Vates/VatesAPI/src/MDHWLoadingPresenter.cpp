@@ -23,6 +23,10 @@
 #include <vtkFieldData.h>
 #include <vtkDataSet.h>
 
+namespace {
+Mantid::Kernel::Logger g_log("MDHWLoadingPresenter");
+}
+
 namespace Mantid {
 namespace VATES {
 

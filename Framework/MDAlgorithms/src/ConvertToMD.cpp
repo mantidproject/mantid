@@ -4,6 +4,7 @@
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 
 #include "MantidKernel/ArrayProperty.h"

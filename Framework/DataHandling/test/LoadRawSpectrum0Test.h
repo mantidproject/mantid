@@ -11,6 +11,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
 #include "MantidGeometry/Instrument.h"
 
 #include <Poco/Path.h>

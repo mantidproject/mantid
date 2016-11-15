@@ -141,7 +141,7 @@ void Integration::exec() {
   const bool axisIsNumeric = localworkspace->getAxis(1)->isNumeric();
 
   // Loop over spectra
-  PARALLEL_FOR2(localworkspace, outputWorkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace, *outputWorkspace))
   for (int i = minSpec; i <= maxSpec; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Workspace index on the output

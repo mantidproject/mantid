@@ -33,7 +33,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             wsName));
-    const ParameterMap &paramMap = output->instrumentParameters();
+    const auto &paramMap = output->constInstrumentParameters();
     std::string descr = paramMap.getDescription("nickel-holder", "fjols");
     TS_ASSERT_EQUALS(descr, "test fjols description.");
 
@@ -145,7 +145,7 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             wsName));
 
-    const ParameterMap &paramMap = output->instrumentParameters();
+    const auto &paramMap = output->constInstrumentParameters();
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     boost::shared_ptr<const IDetector> ptrDet = i->getDetector(1008);
     TS_ASSERT_EQUALS(ptrDet->getID(), 1008);

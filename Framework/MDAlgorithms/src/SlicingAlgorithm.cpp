@@ -10,6 +10,7 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
+#include "MantidAPI/Run.h"
 
 #include <boost/regex.hpp>
 
@@ -21,7 +22,6 @@ using Mantid::Kernel::Strings::strip;
 namespace Mantid {
 namespace MDAlgorithms {
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 SlicingAlgorithm::SlicingAlgorithm()
@@ -30,7 +30,6 @@ SlicingAlgorithm::SlicingAlgorithm()
       m_axisAligned(true), m_outD(0), // unititialized and should be invalid
       m_NormalizeBasisVectors(false) {}
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SlicingAlgorithm::initSlicingProps() {

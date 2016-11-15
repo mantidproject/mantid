@@ -190,12 +190,12 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         self.failed_tests = []
         for current_item in dir(self):
             m = getattr(self, current_item)
-            if current_item.startswith("test_") and type(m) == types.MethodType:
+            if current_item.startswith("test_") and isinstance(m, types.MethodType):
                 self.n_tests += 1
                 t = TestStub(m)
                 result = t.run_test()
                 self._cleanup()
-                if result is None or result == True:
+                if result is None or result:
                     self.n_passed += 1
                 else:
                     self.failed_tests.append(current_item)

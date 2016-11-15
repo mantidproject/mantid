@@ -35,6 +35,23 @@ set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #e
 set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 
 ###########################################################################
+# Set ParaView information since later items depend on it
+###########################################################################
+# VATES flag. Requires ParaView
+set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
+if ( ENABLE_MANTIDPLOT AND MAKE_VATES )
+  find_package( ParaView )
+  if( ParaView_FOUND )
+    add_definitions ( -DMAKE_VATES )
+    # Poco::File throws an exception when a backslash is used.
+    string ( REPLACE "\\" "/" ParaView_DIR ${ParaView_DIR} )
+  endif ()
+endif ()
+if ( ENABLE_MANTIDPLOT )
+  include ( ParaViewSetup )
+endif ()
+
+###########################################################################
 # Bootstrap any dependencies
 ###########################################################################
 include ( Bootstrap )
@@ -68,13 +85,6 @@ if ( NOT OPENGL_FOUND )
 endif ()
 
 find_package(TBB REQUIRED)
-
-###########################################################################
-# Set ParaView information since later items depend on it
-###########################################################################
-if (ENABLE_MANTIDPLOT)
-  include ( ParaViewSetup )
-endif ()
 
 # We probably don't want this to run on every build.
 option(COVERALLS "Generate coveralls data" OFF)
@@ -128,16 +138,6 @@ set( DOCS_BUILDDIR ${CMAKE_BINARY_DIR}/docs )
 # Framework Build options
 set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each package run together")
 set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to the list of tests run by ctest?")
-
-
-# VATES flag. Requires ParaView
-set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
-if (ENABLE_MANTIDPLOT AND MAKE_VATES )
-  find_package(ParaView)
-  if(ParaView_FOUND)
-    add_definitions ( -DMAKE_VATES )
-  endif()
-endif()
 
 add_subdirectory ( Framework )
 
@@ -323,7 +323,7 @@ if ( ENABLE_CPACK )
                            "python-pycifrw (>= 4.2.1)" )
         set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
         if( "${UNIX_CODENAME}" STREQUAL "xenial")
-            list ( APPEND DEPENDS_LIST ", libnexus0v5 (>= 4.3),libjsoncpp1,libqscintilla2-12v5, libmuparser2v5,libqwtplot3d-qt4-0v5,libgsl2,liboce-foundation10,liboce-modeling10")
+            list ( APPEND DEPENDS_LIST ", libhdf5-cpp-11,libnexus0v5 (>= 4.3),libjsoncpp1,libqscintilla2-12v5, libmuparser2v5,libqwtplot3d-qt4-0v5,libgsl2,liboce-foundation10,liboce-modeling10")
             list (REMOVE_ITEM DEPENDS_LIST "libjsoncpp0 (>=0.7.0)," "libqscintilla2-11," "libmuparser2," "libnexus0 (>= 4.3)," "libqwtplot3d-qt4-0," "libgsl0ldbl," "liboce-foundation8,liboce-modeling8,")
         endif()
         # parse list to string required for deb package

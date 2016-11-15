@@ -27,18 +27,6 @@ public:
 
   ReflMainWindowPresenterTest() {}
 
-  void testGetPlusOptions() {
-    MockMainWindowView mockView;
-    MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsTabPresenter mockSettingsPresenter;
-    ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
-                                      &mockSettingsPresenter);
-
-    EXPECT_CALL(mockSettingsPresenter, getPlusOptions()).Times(Exactly(1));
-    presenter.getPlusOptions();
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockSettingsPresenter));
-  }
-
   void testGetTransmissionOptions() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;

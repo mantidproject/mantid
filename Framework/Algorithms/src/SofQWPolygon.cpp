@@ -58,7 +58,7 @@ void SofQWPolygon::exec() {
   this->initCachedValues(inputWS);
 
   const size_t nTheta = m_thetaPts.size();
-  const MantidVec &X = inputWS->readX(0);
+  const auto &X = inputWS->x(0);
 
   // Holds the spectrum-detector mapping
   std::vector<specnum_t> specNumberMapping;
@@ -75,7 +75,7 @@ void SofQWPolygon::exec() {
     qCalculator = &SofQWPolygon::calculateIndirectQ;
   }
 
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nTheta);
        ++i) // signed for openmp
   {

@@ -60,8 +60,8 @@ void TrustRegionMinimizer::initialize(API::ICostFunction_sptr costFunction,
 /// Evaluate the fitting function and calculate the residuals.
 /// @param x :: The fitting parameters as a fortran 1d array.
 /// @param f :: The output fortran vector with the weighted residuals.
-void TrustRegionMinimizer::eval_F(const DoubleFortranVector &x,
-                                  DoubleFortranVector &f) const {
+void TrustRegionMinimizer::evalF(const DoubleFortranVector &x,
+                                 DoubleFortranVector &f) const {
   m_leastSquares->setParameters(x);
   auto &domain = *m_leastSquares->getDomain();
   auto &values = *m_leastSquares->getValues();
@@ -79,8 +79,8 @@ void TrustRegionMinimizer::eval_F(const DoubleFortranVector &x,
 /// Evaluate the Jacobian
 /// @param x :: The fitting parameters as a fortran 1d array.
 /// @param J :: The output fortran matrix with the weighted Jacobian.
-void TrustRegionMinimizer::eval_J(const DoubleFortranVector &x,
-                                  DoubleFortranMatrix &J) const {
+void TrustRegionMinimizer::evalJ(const DoubleFortranVector &x,
+                                 DoubleFortranMatrix &J) const {
   m_leastSquares->setParameters(x);
   auto &domain = *m_leastSquares->getDomain();
   auto &values = *m_leastSquares->getValues();
@@ -103,9 +103,9 @@ void TrustRegionMinimizer::eval_J(const DoubleFortranVector &x,
 /// @param x :: The fitting parameters as a fortran 1d array.
 /// @param f :: The fortran vector with the weighted residuals.
 /// @param h :: The fortran matrix with the Hessian.
-void TrustRegionMinimizer::eval_HF(const DoubleFortranVector &x,
-                                   const DoubleFortranVector &f,
-                                   DoubleFortranMatrix &h) const {
+void TrustRegionMinimizer::evalHF(const DoubleFortranVector &x,
+                                  const DoubleFortranVector &f,
+                                  DoubleFortranMatrix &h) const {
   UNUSED_ARG(x);
   UNUSED_ARG(f);
   int n = static_cast<int>(m_leastSquares->nParams());
@@ -132,11 +132,11 @@ bool TrustRegionMinimizer::iterate(size_t) {
     w.first_call = 1; // ?
 
     // evaluate the residual
-    eval_F(X, w.f);
+    evalF(X, w.f);
     inform.f_eval = inform.f_eval + 1;
 
     // and evaluate the jacobian
-    eval_J(X, w.J);
+    evalJ(X, w.J);
     inform.g_eval = inform.g_eval + 1;
 
     if (options.relative_tr_radius == 1) {
@@ -160,14 +160,14 @@ bool TrustRegionMinimizer::iterate(size_t) {
 
     if (options.calculate_svd_J) {
       // calculate the svd of J (if needed)
-      get_svd_J(w.J, w.smallest_sv(1), w.largest_sv(1));
+      getSvdJ(w.J, w.smallest_sv(1), w.largest_sv(1));
     }
 
     w.normF = norm2(w.f);
     w.normF0 = w.normF;
 
     // g = -J^Tf
-    mult_Jt(w.J, w.f, w.g);
+    multJt(w.J, w.f, w.g);
     w.g *= -1.0;
     w.normJF = norm2(w.g);
     w.normJF0 = w.normJF;
@@ -196,7 +196,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
     case 2: // second order
     {
       if (options.exact_second_derivatives) {
-        eval_HF(X, w.f, w.hf);
+        evalHF(X, w.f, w.hf);
         inform.h_eval = inform.h_eval + 1;
       } else {
         // S_0 = 0 (see Dennis, Gay and Welsch)
@@ -239,13 +239,13 @@ bool TrustRegionMinimizer::iterate(size_t) {
       return true;
     }
     // Calculate the step d that the model thinks we should take next
-    calculate_step(w.J, w.f, w.hf, w.g, w.Delta, w.d, w.normd, options, inform,
-                   w.calculate_step_ws);
+    calculateStep(w.J, w.f, w.hf, w.g, w.Delta, w.d, w.normd, options, inform,
+                  w.calculate_step_ws);
 
     // Accept the step?
     w.Xnew = X;
     w.Xnew += w.d;
-    eval_F(w.Xnew, w.fnew);
+    evalF(w.Xnew, w.fnew);
     inform.f_eval = inform.f_eval + 1;
     normFnew = norm2(w.fnew);
 
@@ -253,7 +253,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
     //      md :=   m_k(d)
     // evaluated at the new step
     double md =
-        evaluate_model(w.f, w.J, w.hf, w.d, options, w.evaluate_model_ws);
+        evaluateModel(w.f, w.J, w.hf, w.d, options, w.evaluate_model_ws);
 
     // Calculate the quantity
     //   rho = 0.5||f||^2 - 0.5||fnew||^2 =   actual_reduction
@@ -261,14 +261,14 @@ bool TrustRegionMinimizer::iterate(size_t) {
     //             m_k(0)  - m_k(d)         predicted_reduction
     //
     // if model is good, rho should be close to one
-    rho = calculate_rho(w.normF, normFnew, md, options);
+    rho = calculateRho(w.normF, normFnew, md, options);
     if (!std::isfinite(rho) || rho <= options.eta_successful) {
       if ((w.use_second_derivatives) && (options.model == 3) &&
           (no_reductions == 1)) {
         // recalculate rho based on the approx GN model
         // (i.e. the Gauss-Newton model evaluated at the Quasi-Newton step)
-        double rho_gn = calculate_rho(w.normF, normFnew,
-                                      w.evaluate_model_ws.md_gn, options);
+        double rho_gn =
+            calculateRho(w.normF, normFnew, w.evaluate_model_ws.md_gn, options);
         if (rho_gn > options.eta_successful) {
           // switch back to gauss-newton
           w.use_second_derivatives = false;
@@ -281,7 +281,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
     }
 
     // Update the TR radius
-    update_trust_region_radius(rho, options, inform, w);
+    updateTrustRegionRadius(rho, options, inform, w);
 
     if (!success) {
       // finally, check d makes progress
@@ -302,20 +302,20 @@ bool TrustRegionMinimizer::iterate(size_t) {
     // g_old = -J_k^T r_k
     w.g_old = w.g;
     // g_mixed = -J_k^T r_{k+1}
-    mult_Jt(w.J, w.fnew, w.g_mixed);
+    multJt(w.J, w.fnew, w.g_mixed);
     w.g_mixed *= -1.0;
   }
 
   // evaluate J and hf at the new point
-  eval_J(X, w.J);
+  evalJ(X, w.J);
   inform.g_eval = inform.g_eval + 1;
 
   if (options.calculate_svd_J) {
-    get_svd_J(w.J, w.smallest_sv(w.iter + 1), w.largest_sv(w.iter + 1));
+    getSvdJ(w.J, w.smallest_sv(w.iter + 1), w.largest_sv(w.iter + 1));
   }
 
   // g = -J^Tf
-  mult_Jt(w.J, w.f, w.g);
+  multJt(w.J, w.f, w.g);
   w.g *= -1.0;
 
   w.normJFold = w.normJF;
@@ -363,20 +363,20 @@ bool TrustRegionMinimizer::iterate(size_t) {
       // call apply_second_order_info anyway, so that we update the
       // second order approximation
       if (!options.exact_second_derivatives) {
-        rank_one_update(w.hf_temp, w);
+        rankOneUpdate(w.hf_temp, w);
       }
     }
   }
 
   if (w.use_second_derivatives) {
-    // apply_second_order_info(n, m, X, w, eval_HF, params, options, inform,
+    // apply_second_order_info(n, m, X, w, evalHF, params, options, inform,
     //                        weights);
     if (options.exact_second_derivatives) {
-      eval_HF(X, w.f, w.hf);
+      evalHF(X, w.f, w.hf);
       inform.h_eval = inform.h_eval + 1;
     } else {
       // use the rank-one approximation...
-      rank_one_update(w.hf, w);
+      rankOneUpdate(w.hf, w);
     }
   }
 
@@ -390,7 +390,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
   }
 
   // Test convergence
-  test_convergence(w.normF, w.normJF, w.normF0, w.normJF0, options, inform);
+  testConvergence(w.normF, w.normJF, w.normF0, w.normJF0, options, inform);
 
   if (inform.convergence_normf == 1 || inform.convergence_normg == 1) {
     return false;

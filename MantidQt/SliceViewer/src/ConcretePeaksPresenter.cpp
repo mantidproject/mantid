@@ -11,6 +11,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Logger.h"
 #include <boost/scoped_ptr.hpp>

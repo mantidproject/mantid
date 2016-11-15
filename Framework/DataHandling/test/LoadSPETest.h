@@ -5,6 +5,7 @@
 #include "MantidDataHandling/LoadSPE.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid::API;
 

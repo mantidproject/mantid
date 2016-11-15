@@ -22,7 +22,6 @@ namespace Geometry {
 // Forward declarations
 //---------------------------------------------------------------------------
 class BoundingBox;
-class NearestNeighbours;
 
 /** @class ParameterMap ParameterMap.h
 

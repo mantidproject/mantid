@@ -2,6 +2,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IEventList.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -44,7 +45,6 @@ namespace { // anonymous
 const auto isNonZero = [](const double value) { return value != 0.; };
 }
 
-//----------------------------------------------------------------------------------------------
 /// private inner class
 class PDCalibration::FittedPeaks {
 public:
@@ -60,8 +60,8 @@ public:
     }
     this->detid = *(detIds.begin());
 
-    const MantidVec &X = spectrum.readX();
-    const MantidVec &Y = spectrum.readY();
+    const auto &X = spectrum.x();
+    const auto &Y = spectrum.y();
     tofMin = X.front();
     tofMax = X.back();
 
@@ -115,7 +115,7 @@ public:
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-PDCalibration::PDCalibration() {}
+PDCalibration::PDCalibration() : m_tofMin(0), m_tofMax(0), m_hasDasIds(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -806,7 +806,7 @@ void PDCalibration::createNewCalTable() {
     const size_t wi = it->second;
     API::TableRow newRow = m_calibrationTable->appendRow();
     newRow << detID;
-    newRow << difcWS->readY(wi)[0];
+    newRow << difcWS->y(wi)[0];
     newRow << 0.;      // difa
     newRow << 0.;      // tzero
     newRow << 0.;      // tofmin

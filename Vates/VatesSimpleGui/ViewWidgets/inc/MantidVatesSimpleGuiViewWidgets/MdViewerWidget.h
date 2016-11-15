@@ -91,6 +91,10 @@ public:
                        std::string instrumentName) override;
   /// See MantidQt::API::VatesViewerInterface
   void setupPluginMode() override;
+  /// Load the state of the window from a Mantid project file
+  void loadFromProject(const std::string &lines) override;
+  /// Save the state of the window to a Mantid project file
+  std::string saveToProject(ApplicationWindow *app) override;
 
 public slots:
   /// Seet MantidQt::API::VatesViewerInterface
@@ -215,7 +219,8 @@ private:
   void setupUiAndConnections();
   /// Create the requested view.
   ViewBase *createAndSetMainViewWidget(QWidget *container,
-                                       ModeControlWidget::Views v);
+                                       ModeControlWidget::Views v,
+                                       bool createRenderProxy = true);
   /// Helper function to swap current and hidden view pointers.
   void swapViews();
   /// Update the state of application widgets.
@@ -267,6 +272,12 @@ private:
   void restoreViewState(ViewBase *view, ModeControlWidget::Views vtype);
   /// Get the current grid axes setting
   bool areGridAxesOn();
+  /// Load the state of VSI from an XML file
+  bool loadVSIState(const std::string &fileName);
+  /// Setup the view using the last active view and source from a project
+  void setupViewFromProject(ModeControlWidget::Views vtype);
+  /// Set the active objects on the current server
+  void setActiveObjects(pqView *view, pqPipelineSource *source);
 };
 
 } // SimpleGui

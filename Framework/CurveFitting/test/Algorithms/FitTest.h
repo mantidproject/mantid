@@ -21,7 +21,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/File.h>
-#include <gsl/gsl_version.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -902,22 +901,25 @@ public:
 
   void test_function_crystal_field_peaks_fit() {
 
+    // Changed output intensity from barn to mb/sr
+    const double c_mbsr = 79.5774715459;
+
     auto data = TableWorkspace_sptr(new TableWorkspace);
     data->addColumn("double", "Energy");
     data->addColumn("double", "Intensity");
 
     TableRow row = data->appendRow();
-    row << 0.0 << 2.74937;
+    row << 0.0 << 2.74937 * c_mbsr;
     row = data->appendRow();
-    row << 29.3261 << 0.7204;
+    row << 29.3261 << 0.7204 * c_mbsr;
     row = data->appendRow();
-    row << 44.3412 << 0.429809;
+    row << 44.3412 << 0.429809 * c_mbsr;
 
     Fit fit;
     fit.initialize();
     fit.setProperty("Function",
                     "name=CrystalFieldPeaks,Ion=Ce,Symmetry=Ci,Temperature="
-                    "44,ToleranceEnergy=1e-10,ToleranceIntensity=0.001,"
+                    "44,ToleranceEnergy=1e-10,ToleranceIntensity=0.1,"
                     "BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0,B20=0."
                     "37,B21=0,B22=3.9,B40=-0.03,B41=0,B42=-0.11,B43=0,B44=-"
                     "0.12,B60=0,B61=0,B62=0,B63=0,B64=0,B65=0,B66=0,IB21=0,"
@@ -938,11 +940,11 @@ public:
 
     Mantid::API::IFunction_sptr outF = fit.getProperty("Function");
 
-    TS_ASSERT_DELTA(outF->getParameter("B20"), 0.366336, 0.0001);
-    TS_ASSERT_DELTA(outF->getParameter("B22"), 3.98132, 0.0001);
-    TS_ASSERT_DELTA(outF->getParameter("B40"), -0.0304001, 0.0001);
-    TS_ASSERT_DELTA(outF->getParameter("B42"), -0.119605, 0.0001);
-    TS_ASSERT_DELTA(outF->getParameter("B44"), -0.130124, 0.0001);
+    TS_ASSERT_DELTA(outF->getParameter("B20"), 0.366336, 0.0001 * c_mbsr);
+    TS_ASSERT_DELTA(outF->getParameter("B22"), 3.98132, 0.0001 * c_mbsr);
+    TS_ASSERT_DELTA(outF->getParameter("B40"), -0.0304001, 0.0001 * c_mbsr);
+    TS_ASSERT_DELTA(outF->getParameter("B42"), -0.119605, 0.0001 * c_mbsr);
+    TS_ASSERT_DELTA(outF->getParameter("B44"), -0.130124, 0.0001 * c_mbsr);
 
     ITableWorkspace_sptr output =
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
@@ -956,17 +958,17 @@ public:
       TS_ASSERT_DELTA(column->toDouble(1), 29.3261, 0.0001);
       TS_ASSERT_DELTA(column->toDouble(2), 44.3412, 0.0001);
       column = output->getColumn("Intensity");
-      TS_ASSERT_DELTA(column->toDouble(0), 2.74937, 0.0001);
-      TS_ASSERT_DELTA(column->toDouble(1), 0.7204, 0.0001);
-      TS_ASSERT_DELTA(column->toDouble(2), 0.429809, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(0), 2.74937 * c_mbsr, 0.0001 * c_mbsr);
+      TS_ASSERT_DELTA(column->toDouble(1), 0.7204 * c_mbsr, 0.0001 * c_mbsr);
+      TS_ASSERT_DELTA(column->toDouble(2), 0.429809 * c_mbsr, 0.0001 * c_mbsr);
       column = output->getColumn("Energy_calc");
       TS_ASSERT_DELTA(column->toDouble(0), 0.0, 0.0001);
       TS_ASSERT_DELTA(column->toDouble(1), 29.3261, 0.0001);
       TS_ASSERT_DELTA(column->toDouble(2), 44.3412, 0.0001);
       column = output->getColumn("Intensity_calc");
-      TS_ASSERT_DELTA(column->toDouble(0), 2.74937, 0.0001);
-      TS_ASSERT_DELTA(column->toDouble(1), 0.7204, 0.0001);
-      TS_ASSERT_DELTA(column->toDouble(2), 0.429809, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(0), 2.74937 * c_mbsr, 0.0001 * c_mbsr);
+      TS_ASSERT_DELTA(column->toDouble(1), 0.7204 * c_mbsr, 0.0001 * c_mbsr);
+      TS_ASSERT_DELTA(column->toDouble(2), 0.429809 * c_mbsr, 0.0001 * c_mbsr);
     }
   }
 
@@ -1069,12 +1071,15 @@ public:
 
   void test_function_Multidomain_Fit() {
     auto multi = Mantid::TestHelpers::makeMultiDomainFunction3();
-    multi->getFunction(0)->setParameter("A", 0);
-    multi->getFunction(0)->setParameter("B", 0);
-    multi->getFunction(1)->setParameter("A", 0);
-    multi->getFunction(1)->setParameter("B", 0);
-    multi->getFunction(2)->setParameter("A", 0);
-    multi->getFunction(2)->setParameter("B", 0);
+    multi->getFunction(0)->setParameter("A", 1);
+    multi->getFunction(0)->setParameter("B", 1);
+    multi->getFunction(0)->setAttributeValue("Order", 1);
+    multi->getFunction(1)->setParameter("A", 1);
+    multi->getFunction(1)->setParameter("B", 1);
+    multi->getFunction(1)->setAttributeValue("Order", 3);
+    multi->getFunction(2)->setParameter("A", 1);
+    multi->getFunction(2)->setParameter("B", 1);
+    multi->getFunction(2)->setAttributeValue("Order", 5);
 
     Algorithms::Fit fit;
     fit.initialize();
@@ -1093,15 +1098,13 @@ public:
     fit.execute();
     TS_ASSERT(fit.isExecuted());
 
-#if GSL_MAJOR_VERSION < 2
     IFunction_sptr fun = fit.getProperty("Function");
-    TS_ASSERT_DELTA(fun->getParameter("f0.A"), 0, 1e-8);
-    TS_ASSERT_DELTA(fun->getParameter("f0.B"), 1, 1e-8);
-    TS_ASSERT_DELTA(fun->getParameter("f1.A"), 1, 1e-8);
-    TS_ASSERT_DELTA(fun->getParameter("f1.B"), 2, 1e-8);
-    TS_ASSERT_DELTA(fun->getParameter("f2.A"), 2, 1e-8);
-    TS_ASSERT_DELTA(fun->getParameter("f2.B"), 3, 1e-8);
-#endif
+    TS_ASSERT_DELTA(fun->getParameter("f0.A"), 0.5, 1e-8);
+    TS_ASSERT_DELTA(fun->getParameter("f0.B"), 5, 1e-8);
+    TS_ASSERT_DELTA(fun->getParameter("f1.A"), -4, 1e-8);
+    TS_ASSERT_DELTA(fun->getParameter("f1.B"), -20, 1e-8);
+    TS_ASSERT_DELTA(fun->getParameter("f2.A"), 4, 1e-8);
+    TS_ASSERT_DELTA(fun->getParameter("f2.B"), 16, 1e-8);
   }
 
   void test_function_Multidomain_one_function_to_two_parts_of_workspace() {

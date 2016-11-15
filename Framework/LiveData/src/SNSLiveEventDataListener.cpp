@@ -6,6 +6,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument.h"
@@ -1255,6 +1256,10 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
   auto tmp = createWorkspace<DataObjects::EventWorkspace>(
       m_eventBuffer->getInstrument()->getDetectorIDs(true).size(), 2, 1);
   WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer, tmp, true);
+  if (m_eventBuffer->getNumberHistograms() != tmp->getNumberHistograms()) {
+    // need to generate the spectra to detector map
+    tmp->rebuildSpectraMapping();
+  }
   m_eventBuffer = std::move(tmp);
 
   // Set the units

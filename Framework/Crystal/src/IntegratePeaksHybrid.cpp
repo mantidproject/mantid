@@ -51,7 +51,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 #include <boost/format.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -173,7 +173,7 @@ void IntegratePeaksHybrid::exec() {
 
   Progress progress(this, 0, 1, peakWS->getNumberPeaks());
 
-  PARALLEL_FOR1(peakWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*peakWS))
   for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {
 
     PARALLEL_START_INTERUPT_REGION
@@ -232,7 +232,7 @@ void IntegratePeaksHybrid::exec() {
     const Mantid::signal_t signalValue = localProjection.signalAtPeakCenter(
         peak); // No normalization when extracting label ids!
 
-    if (boost::math::isnan(signalValue)) {
+    if (std::isnan(signalValue)) {
       g_log.warning()
           << "Warning: image for integration is off edge of detector for peak "
           << i << '\n';

@@ -13,6 +13,7 @@ import math
 import numpy as np
 from mantid.api import IPeakFunction, FunctionFactory
 
+
 class ExamplePeakFunction(IPeakFunction):
 
     _nterms = None

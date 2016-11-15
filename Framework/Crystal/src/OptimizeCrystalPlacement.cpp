@@ -7,6 +7,8 @@
  */
 #include "MantidCrystal/OptimizeCrystalPlacement.h"
 
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -34,9 +36,12 @@ DECLARE_ALGORITHM(OptimizeCrystalPlacement)
 
 class OrEnabledWhenProperties : public Kernel::IPropertySettings {
 public:
-  OrEnabledWhenProperties(std::string prop1Name, ePropertyCriterion prop1Crit,
-                          std::string prop1Value, std::string prop2Name,
-                          ePropertyCriterion prop2Crit, std::string prop2Value)
+  OrEnabledWhenProperties(const std::string &prop1Name,
+                          ePropertyCriterion prop1Crit,
+                          const std::string &prop1Value,
+                          const std::string &prop2Name,
+                          ePropertyCriterion prop2Crit,
+                          const std::string &prop2Value)
       : IPropertySettings(), propName1(prop1Name), propName2(prop2Name),
         Criteria1(prop1Crit), Criteria2(prop2Crit), value1(prop1Value),
         value2(prop2Value)

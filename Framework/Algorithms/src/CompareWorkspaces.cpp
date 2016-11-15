@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/CompareWorkspaces.h"
 
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -8,6 +5,8 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -25,19 +24,16 @@ using namespace Mantid::Geometry;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CompareWorkspaces)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 CompareWorkspaces::CompareWorkspaces()
     : API::Algorithm(), m_Result(false), m_Prog(nullptr),
       m_ParallelComparison(true) {}
 
-//----------------------------------------------------------------------------------------------
 /** Destructor
  */
 CompareWorkspaces::~CompareWorkspaces() { delete m_Prog; }
 
-//----------------------------------------------------------------------------------------------
 /// Algorithms name for identification. @see Algorithm::name
 const std::string CompareWorkspaces::name() const {
   return "CompareWorkspaces";
@@ -58,7 +54,6 @@ const std::string CompareWorkspaces::summary() const {
          "testing process.";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CompareWorkspaces::init() {
@@ -118,7 +113,6 @@ void CompareWorkspaces::init() {
   m_Messages->addColumn("str", "Workspace 2");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void CompareWorkspaces::exec() {
@@ -764,8 +758,8 @@ bool CompareWorkspaces::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
     return false;
   }
 
-  const Geometry::ParameterMap &ws1_parmap = ws1->instrumentParameters();
-  const Geometry::ParameterMap &ws2_parmap = ws2->instrumentParameters();
+  const Geometry::ParameterMap &ws1_parmap = ws1->constInstrumentParameters();
+  const Geometry::ParameterMap &ws2_parmap = ws2->constInstrumentParameters();
 
   if (ws1_parmap != ws2_parmap) {
     g_log.debug()

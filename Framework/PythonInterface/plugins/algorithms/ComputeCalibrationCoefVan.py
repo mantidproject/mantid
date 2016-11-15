@@ -10,6 +10,7 @@ import scipy as sp
 class ComputeCalibrationCoefVan(PythonAlgorithm):
     """ Calculate coefficients to normalize by Vanadium and correct Debye Waller factor
     """
+
     def __init__(self):
         """
         Init
@@ -62,9 +63,9 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         if table.rowCount() != inws.getNumberHistograms():
             issues['EPPTable'] = "Number of rows in the table must match to the input workspace dimension."
         # table must have 'PeakCentre' and 'Sigma' columns
-        if not 'PeakCentre' in table.getColumnNames():
+        if 'PeakCentre' not in table.getColumnNames():
             issues['EPPTable'] = "EPP Table must have the PeakCentre column."
-        if not 'Sigma' in table.getColumnNames():
+        if 'Sigma' not in table.getColumnNames():
             issues['EPPTable'] = "EPP Table must have the Sigma column."
 
         return issues

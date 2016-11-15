@@ -30,7 +30,7 @@
  *                                                                         *
  ***************************************************************************/
 #include "ApplicationWindow.h"
-#include "pixmaps.h"
+#include <MantidQtAPI/pixmaps.h>
 #include "CurvesDialog.h"
 #include "PlotDialog.h"
 #include "AxesDialog.h"
@@ -193,6 +193,7 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtAPI/Message.h"
 
 #include "MantidQtMantidWidgets/CatalogHelper.h"
@@ -315,6 +316,19 @@ void ApplicationWindow::handleConfigDir() {
     oldConfigDir.rmdir(oldConfig.path());
   }
 #endif
+}
+/**
+ * Cache the working directory in the QSettings.
+ *
+ * store the working directory in the settings so it may be accessed
+ * elsewhere in the Qt layer.
+ *
+ */
+void ApplicationWindow::cacheWorkingDirectory() const {
+  QSettings settings;
+  settings.beginGroup("/Project");
+  settings.setValue("/WorkingDirectory", workingDir);
+  settings.endGroup();
 }
 
 /**
@@ -814,7 +828,7 @@ void ApplicationWindow::initGlobalConstants() {
   d_print_cropmarks = false;
   d_synchronize_graph_scales = true;
 
-  defaultCurveStyle = static_cast<int>(Graph::Line);
+  defaultCurveStyle = static_cast<int>(GraphOptions::Line);
   defaultCurveLineWidth = 1;
   defaultSymbolSize = 7;
 
@@ -1798,18 +1812,18 @@ void ApplicationWindow::plot3DTrajectory() {
         tr("You must select exactly one column for plotting!")); // Mantid
 }
 
-void ApplicationWindow::plotBoxDiagram() { generate2DGraph(Graph::Box); }
+void ApplicationWindow::plotBoxDiagram() { generate2DGraph(GraphOptions::Box); }
 
 void ApplicationWindow::plotVerticalBars() {
-  generate2DGraph(Graph::VerticalBars);
+  generate2DGraph(GraphOptions::VerticalBars);
 }
 
 void ApplicationWindow::plotHorizontalBars() {
-  generate2DGraph(Graph::HorizontalBars);
+  generate2DGraph(GraphOptions::HorizontalBars);
 }
 
 MultiLayer *ApplicationWindow::plotHistogram() {
-  return generate2DGraph(Graph::Histogram);
+  return generate2DGraph(GraphOptions::Histogram);
 }
 
 MultiLayer *ApplicationWindow::plotHistogram(Matrix *m) {
@@ -1832,7 +1846,7 @@ MultiLayer *ApplicationWindow::plotHistogram(Matrix *m) {
   return g;
 }
 
-void ApplicationWindow::plotArea() { generate2DGraph(Graph::Area); }
+void ApplicationWindow::plotArea() { generate2DGraph(GraphOptions::Area); }
 
 void ApplicationWindow::plotPie() {
   Table *table = dynamic_cast<Table *>(activeWindow(TableWindow));
@@ -1848,31 +1862,31 @@ void ApplicationWindow::plotPie() {
 
   QStringList s = table->selectedColumns();
   if (s.count() > 0) {
-    multilayerPlot(table, s, Graph::Pie, table->topSelectedRow(),
+    multilayerPlot(table, s, GraphOptions::Pie, table->topSelectedRow(),
                    table->bottomSelectedRow());
   } else
     QMessageBox::warning(this, tr("MantidPlot - Error"),
                          tr("Please select a column to plot!")); // Mantid
 }
 
-void ApplicationWindow::plotL() { generate2DGraph(Graph::Line); }
+void ApplicationWindow::plotL() { generate2DGraph(GraphOptions::Line); }
 
-void ApplicationWindow::plotP() { generate2DGraph(Graph::Scatter); }
+void ApplicationWindow::plotP() { generate2DGraph(GraphOptions::Scatter); }
 
-void ApplicationWindow::plotLP() { generate2DGraph(Graph::LineSymbols); }
+void ApplicationWindow::plotLP() { generate2DGraph(GraphOptions::LineSymbols); }
 
 void ApplicationWindow::plotVerticalDropLines() {
-  generate2DGraph(Graph::VerticalDropLines);
+  generate2DGraph(GraphOptions::VerticalDropLines);
 }
 
-void ApplicationWindow::plotSpline() { generate2DGraph(Graph::Spline); }
+void ApplicationWindow::plotSpline() { generate2DGraph(GraphOptions::Spline); }
 
 void ApplicationWindow::plotVertSteps() {
-  generate2DGraph(Graph::VerticalSteps);
+  generate2DGraph(GraphOptions::VerticalSteps);
 }
 
 void ApplicationWindow::plotHorSteps() {
-  generate2DGraph(Graph::HorizontalSteps);
+  generate2DGraph(GraphOptions::HorizontalSteps);
 }
 
 void ApplicationWindow::plotVectXYXY() {
@@ -1884,7 +1898,7 @@ void ApplicationWindow::plotVectXYXY() {
 
   QStringList s = table->selectedColumns();
   if (s.count() == 4) {
-    multilayerPlot(table, s, Graph::VectXYXY, table->topSelectedRow(),
+    multilayerPlot(table, s, GraphOptions::VectXYXY, table->topSelectedRow(),
                    table->bottomSelectedRow());
   } else
     QMessageBox::warning(
@@ -1901,7 +1915,7 @@ void ApplicationWindow::plotVectXYAM() {
 
   QStringList s = table->selectedColumns();
   if (s.count() == 4) {
-    multilayerPlot(table, s, Graph::VectXYAM, table->topSelectedRow(),
+    multilayerPlot(table, s, GraphOptions::VectXYAM, table->topSelectedRow(),
                    table->bottomSelectedRow());
   } else
     QMessageBox::warning(
@@ -2171,7 +2185,7 @@ void ApplicationWindow::remove3DMatrixPlots(Matrix *m) {
       QList<Graph *> layers = ml->layersList();
       foreach (Graph *g, layers) {
         for (int i = 0; i < g->curves(); i++) {
-          if (g->curveType(i) == Graph::Histogram) {
+          if (g->curveType(i) == GraphOptions::Histogram) {
             QwtHistogram *h = dynamic_cast<QwtHistogram *>(g->plotItem(i));
             if (h && h->matrix() == m)
               g->removeCurve(i);
@@ -2209,7 +2223,7 @@ void ApplicationWindow::updateMatrixPlots(MdiSubWindow *window) {
       QList<Graph *> layers = ml->layersList();
       foreach (Graph *g, layers) {
         for (int i = 0; i < g->curves(); i++) {
-          if (g->curveType(i) == Graph::Histogram) {
+          if (g->curveType(i) == GraphOptions::Histogram) {
             QwtHistogram *h = dynamic_cast<QwtHistogram *>(g->plotItem(i));
             if (h && h->matrix() == m)
               h->loadData();
@@ -2699,15 +2713,16 @@ void ApplicationWindow::loadScriptRepo() {
 }
 
 void ApplicationWindow::polishGraph(Graph *g, int style) {
-  if (style == Graph::VerticalBars || style == Graph::HorizontalBars ||
-      style == Graph::Histogram) {
+  if (style == GraphOptions::VerticalBars ||
+      style == GraphOptions::HorizontalBars ||
+      style == GraphOptions::Histogram) {
     QList<int> ticksList;
     int ticksStyle = ScaleDraw::Out;
     ticksList << ticksStyle << ticksStyle << ticksStyle << ticksStyle;
     g->setMajorTicksType(ticksList);
     g->setMinorTicksType(ticksList);
   }
-  if (style == Graph::HorizontalBars) {
+  if (style == GraphOptions::HorizontalBars) {
     g->setAxisTitle(QwtPlot::xBottom, tr("X Axis Title"));
     g->setAxisTitle(QwtPlot::yLeft, tr("Y Axis Title"));
   }
@@ -4174,7 +4189,7 @@ ApplicationWindow *ApplicationWindow::plotFile(const QString &fn) {
                  app->d_ASCII_import_comments, app->d_ASCII_comment_string,
                  app->d_ASCII_import_read_only, Table::Overwrite, app->d_eol);
   t->setCaptionPolicy(MdiSubWindow::Both);
-  app->multilayerPlot(t, t->YColumns(), Graph::LineSymbols);
+  app->multilayerPlot(t, t->YColumns(), GraphOptions::LineSymbols);
   QApplication::restoreOverrideCursor();
   return 0;
 }
@@ -4573,13 +4588,7 @@ void ApplicationWindow::openRecentProject(QAction *action) {
     // Have to change the working directory here because that is used when
     // finding the nexus files to load
     workingDir = QFileInfo(f).absolutePath();
-
-    // store the working directory in the settings so it may be accessed
-    // elsewhere in the Qt layer.
-    QSettings settings;
-    settings.beginGroup("/Project");
-    settings.setValue("/WorkingDirectory", workingDir);
-    settings.endGroup();
+    cacheWorkingDirectory();
 
     ApplicationWindow *a = open(fn, false, false);
     if (a && (fn.endsWith(".qti", Qt::CaseInsensitive) ||
@@ -4615,13 +4624,7 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
   newProject();
   m_mantidmatrixWindows.clear();
 
-  // store the working directory in the settings so it may be accessed
-  // elsewhere in the Qt layer.
-  QSettings settings;
-  settings.beginGroup("/Project");
-  settings.setValue("/WorkingDirectory", workingDir);
-  settings.endGroup();
-
+  cacheWorkingDirectory();
   projectname = filename;
   setWindowTitle("MantidPlot - " + filename);
 
@@ -5104,7 +5107,8 @@ void ApplicationWindow::readSettings() {
   settings.endGroup(); // General
 
   settings.beginGroup("/Curves");
-  defaultCurveStyle = settings.value("/Style", Graph::LineSymbols).toInt();
+  defaultCurveStyle =
+      settings.value("/Style", GraphOptions::LineSymbols).toInt();
   defaultCurveLineWidth = settings.value("/LineWidth", 1).toDouble();
   defaultSymbolSize = settings.value("/SymbolSize", 3).toInt();
   applyCurveStyleToMantid = settings.value("/ApplyMantid", true).toBool();
@@ -6117,6 +6121,7 @@ void ApplicationWindow::saveProjectAs(const QString &fileName, bool compress) {
       }
 
       workingDir = directory.absolutePath();
+      cacheWorkingDirectory();
       QString projectFileName = directory.dirName();
       projectFileName.append(".mantid");
       projectname = directory.absoluteFilePath(projectFileName);
@@ -7070,7 +7075,7 @@ void ApplicationWindow::plotStackedLayers() {
 }
 
 void ApplicationWindow::plotStackedHistograms() {
-  multilayerPlot(1, -1, Graph::Histogram);
+  multilayerPlot(1, -1, GraphOptions::Histogram);
 }
 
 void ApplicationWindow::showMatrixDialog() {
@@ -7285,10 +7290,10 @@ void ApplicationWindow::showCurveContextMenu(int curveKey) {
   curveMenu.addAction(actionHideCurve);
   actionHideCurve->setData(curveKey);
 
-  if (g->visibleCurves() > 1 && c->type() == Graph::Function) {
+  if (g->visibleCurves() > 1 && c->type() == GraphOptions::Function) {
     curveMenu.addAction(actionHideOtherCurves);
     actionHideOtherCurves->setData(curveKey);
-  } else if (c->type() != Graph::Function) {
+  } else if (c->type() != GraphOptions::Function) {
     if ((g->visibleCurves() - c->errorBarsList().count()) > 1) {
       curveMenu.addAction(actionHideOtherCurves);
       actionHideOtherCurves->setData(curveKey);
@@ -7305,11 +7310,11 @@ void ApplicationWindow::showCurveContextMenu(int curveKey) {
       curveMenu.addAction(actionCopySelection);
   }
 
-  if (c->type() == Graph::Function) {
+  if (c->type() == GraphOptions::Function) {
     curveMenu.addSeparator();
     curveMenu.addAction(actionEditFunction);
     actionEditFunction->setData(curveKey);
-  } else if (c->type() != Graph::ErrorBars) {
+  } else if (c->type() != GraphOptions::ErrorBars) {
     if (g->activeTool()) {
       if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector ||
           g->activeTool()->rtti() == PlotToolInterface::Rtti_DataPicker) {
@@ -7424,7 +7429,7 @@ void ApplicationWindow::showCurveWorksheet(Graph *g, int curveIndex) {
 
   if (sp && sp->matrix())
     sp->matrix()->showMaximized();
-  if (pc && pc->type() == Graph::Function)
+  if (pc && pc->type() == GraphOptions::Function)
     g->createTable(pc);
 
   if (!pc && !sp)
@@ -7720,8 +7725,8 @@ void ApplicationWindow::showFitDialog() {
   else if (w->inherits("Table")) {
     Table *t = dynamic_cast<Table *>(w);
     if (t)
-      plot =
-          multilayerPlot(t, t->drawableColumnSelection(), Graph::LineSymbols);
+      plot = multilayerPlot(t, t->drawableColumnSelection(),
+                            GraphOptions::LineSymbols);
   }
 
   if (!plot)
@@ -13091,7 +13096,7 @@ Graph3D *ApplicationWindow::plot3DMatrix(Matrix *m, int style) {
 MultiLayer *ApplicationWindow::plotGrayScale(Matrix *m) {
   if (!m) {
     // Mantid
-    MultiLayer *plot = mantidUI->plotSpectrogram(Graph::GrayScale);
+    MultiLayer *plot = mantidUI->plotSpectrogram(GraphOptions::GrayScale);
     if (plot)
       return plot;
     m = dynamic_cast<Matrix *>(activeWindow(MatrixWindow));
@@ -13099,13 +13104,13 @@ MultiLayer *ApplicationWindow::plotGrayScale(Matrix *m) {
       return 0;
   }
 
-  return plotSpectrogram(m, Graph::GrayScale);
+  return plotSpectrogram(m, GraphOptions::GrayScale);
 }
 
 MultiLayer *ApplicationWindow::plotContour(Matrix *m) {
   if (!m) {
     // Mantid
-    MultiLayer *plot = mantidUI->plotSpectrogram(Graph::Contour);
+    MultiLayer *plot = mantidUI->plotSpectrogram(GraphOptions::Contour);
     if (plot)
       return plot;
     m = dynamic_cast<Matrix *>(activeWindow(MatrixWindow));
@@ -13113,13 +13118,13 @@ MultiLayer *ApplicationWindow::plotContour(Matrix *m) {
       return 0;
   }
 
-  return plotSpectrogram(m, Graph::Contour);
+  return plotSpectrogram(m, GraphOptions::Contour);
 }
 
 MultiLayer *ApplicationWindow::plotColorMap(Matrix *m) {
   if (!m) {
     // Mantid
-    MultiLayer *plot = mantidUI->plotSpectrogram(Graph::ColorMapContour);
+    MultiLayer *plot = mantidUI->plotSpectrogram(GraphOptions::ColorMapContour);
     if (plot)
       return plot;
     m = dynamic_cast<Matrix *>(activeWindow(MatrixWindow));
@@ -13127,7 +13132,7 @@ MultiLayer *ApplicationWindow::plotColorMap(Matrix *m) {
       return 0;
   }
 
-  return plotSpectrogram(m, Graph::ColorMapContour);
+  return plotSpectrogram(m, GraphOptions::ColorMapContour);
 }
 
 MultiLayer *ApplicationWindow::plotNoContourColorMap(Matrix *m) {
@@ -13136,9 +13141,9 @@ MultiLayer *ApplicationWindow::plotNoContourColorMap(Matrix *m) {
     m = qobject_cast<Matrix *>(activeWindow(MatrixWindow));
   }
   if (m) {
-    ml = plotSpectrogram(m, Graph::ColorMap);
+    ml = plotSpectrogram(m, GraphOptions::ColorMap);
   } else {
-    ml = mantidUI->plotSpectrogram(Graph::ColorMap);
+    ml = mantidUI->plotSpectrogram(GraphOptions::ColorMap);
   }
   if (!ml) {
     QApplication::restoreOverrideCursor();
@@ -13160,7 +13165,7 @@ MultiLayer *ApplicationWindow::plotImage(Matrix *m) {
     plot = g->activeGraph();
     setPreferences(plot);
 
-    Spectrogram *s = plot->plotSpectrogram(m, Graph::GrayScale);
+    Spectrogram *s = plot->plotSpectrogram(m, GraphOptions::GrayScale);
     if (!s) {
       QApplication::restoreOverrideCursor();
       return 0;
@@ -13172,7 +13177,7 @@ MultiLayer *ApplicationWindow::plotImage(Matrix *m) {
                    qMax(m->yStart(), m->yEnd()), 0.0, 5, 5,
                    GraphOptions::Linear, true);
   } else {
-    g = mantidUI->plotSpectrogram(Graph::GrayScale);
+    g = mantidUI->plotSpectrogram(GraphOptions::GrayScale);
     if (!g) {
       QApplication::restoreOverrideCursor();
       return 0;
@@ -13194,10 +13199,10 @@ MultiLayer *ApplicationWindow::plotImage(Matrix *m) {
 }
 
 MultiLayer *ApplicationWindow::plotSpectrogram(Matrix *m,
-                                               Graph::CurveType type) {
-  if (type == Graph::ImagePlot)
+                                               GraphOptions::CurveType type) {
+  if (type == GraphOptions::ImagePlot)
     return plotImage(m);
-  else if (type == Graph::Histogram)
+  else if (type == GraphOptions::Histogram)
     return plotHistogram(m);
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -13287,7 +13292,7 @@ void ApplicationWindow::deleteFitTables() {
           if (!curve)
             continue;
 
-          if (curve->type() != Graph::Function) {
+          if (curve->type() != GraphOptions::Function) {
             auto dc = dynamic_cast<DataCurve *>(c);
             if (!dc)
               continue;
@@ -13500,7 +13505,7 @@ void ApplicationWindow::disregardCol() {
 }
 
 void ApplicationWindow::showHomePage() {
-  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org"));
+  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org"));
 }
 void ApplicationWindow::showMantidConcepts() { HelpWindow::showConcept(this); }
 void ApplicationWindow::showalgorithmDescriptions() {
@@ -13520,7 +13525,7 @@ void ApplicationWindow::showFirstTimeSetup() {
 void ApplicationWindow::showmantidplotHelp() { HelpWindow::showPage(this); }
 
 void ApplicationWindow::showBugTracker() {
-  QDesktopServices::openUrl(QUrl("http://forum.mantidproject.org/"));
+  MantidDesktopServices::openUrl(QUrl("http://forum.mantidproject.org/"));
 }
 
 /*
@@ -14852,7 +14857,7 @@ bool ApplicationWindow::validFor2DPlot(Table *table) {
   return true;
 }
 
-MultiLayer *ApplicationWindow::generate2DGraph(Graph::CurveType type) {
+MultiLayer *ApplicationWindow::generate2DGraph(GraphOptions::CurveType type) {
   MdiSubWindow *w = activeWindow();
   if (!w)
     return 0;
@@ -15825,7 +15830,7 @@ MultiLayer *ApplicationWindow::waterfallPlot(Table *t,
   g->setTitle(QString::null);
   g->setMargin(0);
   g->setFrame(0);
-  g->addCurves(t, list, Graph::Line);
+  g->addCurves(t, list, GraphOptions::Line);
   g->setWaterfallOffset(10, 20);
 
   initMultilayerPlot(ml);

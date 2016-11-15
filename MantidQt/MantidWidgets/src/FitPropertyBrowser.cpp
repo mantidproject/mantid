@@ -2,6 +2,7 @@
 #include "MantidQtMantidWidgets/PropertyHandler.h"
 #include "MantidQtMantidWidgets/SequentialFitDialog.h"
 #include "MantidQtMantidWidgets/MultifitSetupDialog.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -51,12 +52,13 @@
 #include <QSignalMapper>
 #include <QMetaMethod>
 #include <QTreeWidget>
-#include <QDesktopServices>
 #include <QUrl>
 
 #include <algorithm>
 
 namespace MantidQt {
+using API::MantidDesktopServices;
+
 namespace MantidWidgets {
 
 /**
@@ -71,9 +73,9 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
       m_logValue(NULL), m_plotDiff(NULL), m_plotCompositeMembers(NULL),
       m_convolveMembers(NULL), m_rawData(NULL), m_xColumn(NULL),
       m_yColumn(NULL), m_errColumn(NULL), m_showParamErrors(NULL),
-      m_compositeFunction(), m_browser(NULL), m_fitActionUndoFit(NULL),
-      m_fitActionSeqFit(NULL), m_fitActionFit(NULL), m_fitActionEvaluate(NULL),
-      m_functionsGroup(NULL), m_settingsGroup(NULL),
+      m_evaluationType(nullptr), m_compositeFunction(), m_browser(NULL),
+      m_fitActionUndoFit(NULL), m_fitActionSeqFit(NULL), m_fitActionFit(NULL),
+      m_fitActionEvaluate(NULL), m_functionsGroup(NULL), m_settingsGroup(NULL),
       m_customSettingsGroup(NULL), m_changeSlotsEnabled(false),
       m_guessOutputName(true),
       m_updateObserver(*this, &FitPropertyBrowser::handleFactoryUpdate),
@@ -169,8 +171,7 @@ void FitPropertyBrowser::init() {
   m_minimizer = m_enumManager->addProperty("Minimizer");
   m_minimizers << "Levenberg-Marquardt"
                << "Levenberg-MarquardtMD"
-               << "More-Sorensen"
-               << "DTRS"
+               << "Trust Region"
                << "Simplex"
                << "FABADA"
                << "Conjugate gradient (Fletcher-Reeves imp.)"
@@ -3034,7 +3035,7 @@ void FitPropertyBrowser::functionHelp() {
     QString url =
         QString::fromStdString("http://docs.mantidproject.org/fitfunctions/" +
                                handler->ifun()->name());
-    QDesktopServices::openUrl(QUrl(url));
+    MantidDesktopServices::openUrl(QUrl(url));
   }
 }
 
@@ -3042,9 +3043,10 @@ void FitPropertyBrowser::functionHelp() {
  * Show online browser help
  */
 void FitPropertyBrowser::browserHelp() {
-  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/"
-                                 "MantidPlot:_Simple_Peak_Fitting_with_the_Fit_"
-                                 "Wizard#Fit_Properties_Browser"));
+  MantidDesktopServices::openUrl(
+      QUrl("http://www.mantidproject.org/"
+           "MantidPlot:_Simple_Peak_Fitting_with_the_Fit_"
+           "Wizard#Fit_Properties_Browser"));
 }
 
 /**=================================================================================================

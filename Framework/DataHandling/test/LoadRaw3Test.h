@@ -11,6 +11,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -430,7 +431,7 @@ public:
     Mantid::Geometry::IDetector_const_sptr ptrDet = i->getDetector(60);
     TS_ASSERT_EQUALS(ptrDet->getID(), 60);
 
-    Mantid::Geometry::ParameterMap &pmap = output2D->instrumentParameters();
+    const auto &pmap = output2D->constInstrumentParameters();
     TS_ASSERT_EQUALS(static_cast<int>(pmap.size()), 160);
     AnalysisDataService::Instance().remove("parameterIDF");
   }

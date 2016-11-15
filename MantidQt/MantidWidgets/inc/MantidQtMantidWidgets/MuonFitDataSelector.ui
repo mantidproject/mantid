@@ -303,7 +303,7 @@
            <bool>false</bool>
           </property>
           <property name="text">
-           <string>Label</string>
+           <string>0</string>
           </property>
          </widget>
         </item>

@@ -18,6 +18,8 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/LogManager.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "PropertyManagerHelper.h"
 
 #include <Poco/File.h>

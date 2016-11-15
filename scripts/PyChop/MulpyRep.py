@@ -9,6 +9,7 @@ spectrometer. Python implementation by D J Voneshen based on the original Matlab
 import numpy as np
 import copy
 
+
 def findLine(chop_times, chopDist, moderator_limits):
     """
     Calculates the lines on the limit of each chopper
@@ -28,6 +29,7 @@ def findLine(chop_times, chopDist, moderator_limits):
         rightC = -rightM*moderator_limits[1]
         lines.append([[leftM, leftC], [rightM, rightC]])
     return lines
+
 
 def checkPath(chop_times, lines, chopDist, chop5Dist):
     """
@@ -72,6 +74,7 @@ def checkPath(chop_times, lines, chopDist, chop5Dist):
                 newLines.append([[leftM, leftC], line[1]])
     return newLines
 
+
 def calcEnergy(lines, samDist):
     """
     Calculates the energies of neutrons which can pass through choppering openings.
@@ -84,6 +87,7 @@ def calcEnergy(lines, samDist):
         v = samDist / (x1-lines[i][0][1])
         Ei[i] = (v*1e6)**2 * massN/2. * 6.242e21
     return Ei
+
 
 def calcRes(ei, chop_times, lastChopDist, samDist, detDist):
     """
@@ -117,6 +121,7 @@ def calcRes(ei, chop_times, lastChopDist, samDist, detDist):
         chwid.append(chop_width[1])
         modwid.append(mod_width)
     return res, percent, chwid, modwid
+
 
 def calcFlux(Ei, freq1, percent, slot):
     """

@@ -33,7 +33,6 @@ Description          : QtiPlot's main window
 #define APPLICATION_H
 
 #include <QBuffer>
-#include <QDesktopServices>
 #include <QFile>
 #include <QLocale>
 #include <QMainWindow>
@@ -242,7 +241,7 @@ public slots:
   * @param fn :: is read as a data file with the default column separator (as
   *set by the user)
   * and inserted as a table into a new, empty project.
-  * This table is then plotted with the Graph::LineSymbols style.
+  * This table is then plotted with the GraphOptions::LineSymbols style.
   */
   ApplicationWindow *plotFile(const QString &fn);
 
@@ -314,7 +313,7 @@ public slots:
   void deleteLayer();
 
   //! Creates a new spectrogram graph
-  MultiLayer *plotSpectrogram(Matrix *m, Graph::CurveType type);
+  MultiLayer *plotSpectrogram(Matrix *m, GraphOptions::CurveType type);
   MultiLayer *plotGrayScale(Matrix *m = 0);
   MultiLayer *plotContour(Matrix *m = 0);
   MultiLayer *plotColorMap(Matrix *m = 0);
@@ -543,7 +542,7 @@ public slots:
   // error if not
   bool validFor2DPlot(Table *table);
   //! Generate a new 2D graph
-  MultiLayer *generate2DGraph(Graph::CurveType type);
+  MultiLayer *generate2DGraph(GraphOptions::CurveType type);
   //@}
 
   //! \name Image Analysis
@@ -1133,6 +1132,8 @@ private:
   bool shouldExecuteAndQuit(const QString &arg);
   bool isSilentStartup(const QString &arg);
   void handleConfigDir();
+  /// Save the working directory to QSettings
+  void cacheWorkingDirectory() const;
 
 private slots:
   //! \name Initialization

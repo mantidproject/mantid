@@ -2,6 +2,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/CreateChunkingFromInstrument.h"
@@ -47,7 +48,6 @@ const string PARAM_OUT_WKSP("OutputWorkspace");
 const string PARAM_MAX_BANK_NUM("MaxBankNumber");
 }
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const string CreateChunkingFromInstrument::name() const {
   return "CreateChunkingFromInstrument";
@@ -67,7 +67,6 @@ const string CreateChunkingFromInstrument::summary() const {
          "components.";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CreateChunkingFromInstrument::init() {

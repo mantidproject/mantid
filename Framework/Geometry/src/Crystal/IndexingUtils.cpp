@@ -3,7 +3,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Quat.h"
 #include <algorithm>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 #include <boost/math/special_functions/round.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 #include <stdexcept>
@@ -723,7 +723,7 @@ double IndexingUtils::Optimize_UB(DblMatrix &UB,
 
     for (size_t i = 0; i < 3; i++) {
       double value = gsl_vector_get(UB_row, i);
-      if (gsl_isnan(value) || gsl_isinf(value))
+      if (!std::isfinite(value))
         found_UB = false;
     }
 
@@ -843,7 +843,7 @@ double IndexingUtils::Optimize_Direction(V3D &best_vec,
 
   for (size_t i = 0; i < 3; i++) {
     double value = gsl_vector_get(x, i);
-    if (gsl_isnan(value) || gsl_isinf(value))
+    if (!std::isfinite(value))
       found_best_vec = false;
   }
 
@@ -1773,7 +1773,7 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
           if ((length_diff / current_length) < len_tol) // continue scan
           {
             angle = current_dir.angle(next_dir) * RAD_TO_DEG;
-            if ((boost::math::isnan)(angle))
+            if ((std::isnan)(angle))
               angle = 0;
             if ((angle < ang_tol) || (angle > (180.0 - ang_tol))) {
               temp.push_back(next_dir);
@@ -1951,8 +1951,7 @@ bool IndexingUtils::CheckUB(const DblMatrix &UB) {
 
   for (size_t row = 0; row < 3; row++)
     for (size_t col = 0; col < 3; col++) {
-      if ((boost::math::isnan)(UB[row][col]) ||
-          (boost::math::isinf)(UB[row][col])) {
+      if (!std::isfinite(UB[row][col])) {
         return false;
       }
     }

@@ -161,7 +161,7 @@ private:
   /// Addition tables for event workspaces
   std::vector<AdditionTable> m_tables;
   /// Total number of histograms in the output workspace
-  size_t m_outputSize;
+  size_t m_outputSize = 0;
 };
 
 } // namespace Algorithm
