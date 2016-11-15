@@ -74,10 +74,10 @@ protected:
   populateMonitorProperties(Mantid::API::IAlgorithm_sptr alg,
                             Mantid::Geometry::Instrument_const_sptr instrument);
   /// Populate processing instructions
-  std::string
-  populateProcessingInstructions(Mantid::API::IAlgorithm_sptr alg,
-                                 Mantid::Geometry::Instrument_const_sptr instr,
-                                 Mantid::API::MatrixWorkspace_sptr inputWS);
+  std::string populateProcessingInstructions(
+      Mantid::API::IAlgorithm_sptr alg,
+      Mantid::Geometry::Instrument_const_sptr instrument,
+      Mantid::API::MatrixWorkspace_sptr inputWS);
 };
 } // namespace Algorithms
 } // namespace Mantid
