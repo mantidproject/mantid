@@ -64,24 +64,25 @@ public:
 
 class MockSaveTabView : public IReflSaveTabView {
 public:
-  MOCK_CONST_METHOD0(getSavePath, std::string());
   MOCK_CONST_METHOD1(setSavePath, void(const std::string &path));
   MOCK_CONST_METHOD0(getPrefix, std::string());
-  MOCK_CONST_METHOD0(getFilter, std::string());
-  MOCK_CONST_METHOD0(getRegexCheck, bool());
-  MOCK_CONST_METHOD0(getCurrentWorkspaceName, std::string());
   MOCK_CONST_METHOD0(getSelectedWorkspaces, std::vector<std::string>());
   MOCK_CONST_METHOD0(getSelectedParameters, std::vector<std::string>());
-  MOCK_CONST_METHOD0(getSpectraList, std::string());
   MOCK_CONST_METHOD0(getFileFormatIndex, int());
   MOCK_CONST_METHOD0(getTitleCheck, bool());
   MOCK_CONST_METHOD0(getQResolutionCheck, bool());
   MOCK_CONST_METHOD0(getSeparator, std::string());
   MOCK_CONST_METHOD0(clearWorkspaceList, void());
   MOCK_CONST_METHOD1(setWorkspaceList, void(const std::vector<std::string> &));
-  MOCK_CONST_METHOD0(filterWorkspaceList, void());
   MOCK_CONST_METHOD0(clearParametersList, void());
   MOCK_CONST_METHOD1(setParametersList, void(const std::vector<std::string> &));
+
+  // Calls we don't care about
+  std::string getSavePath() const override { return ""; }
+  std::string getFilter() const override { return ""; }
+  bool getRegexCheck() const override { return false; }
+  std::string getCurrentWorkspaceName() const override { return ""; }
+  std::string getSpectraList() const override { return ""; }
 };
 
 class MockSettingsTabView : public IReflSettingsTabView {

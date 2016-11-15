@@ -167,6 +167,18 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
+  void testSuggestSaveDir() {
+    MockSaveTabView mockView;
+    ReflSaveTabPresenter presenter(&mockView);
+
+    std::string saveDir = Mantid::Kernel::ConfigService::Instance().getString(
+      "defaultsave.directory");
+
+    EXPECT_CALL(mockView, setSavePath(saveDir)).Times(Exactly(1));
+    presenter.suggestSaveDir();
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
 private:
   void createWS(std::string name) {
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("CreateWorkspace");
