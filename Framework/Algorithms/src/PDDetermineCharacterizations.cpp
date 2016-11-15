@@ -410,7 +410,7 @@ void PDDetermineCharacterizations::exec() {
       // the property is normally a TimeSeriesProperty
       const auto containerPropSeries =
           dynamic_cast<TimeSeriesProperty<std::string> *>(containerProp);
-      if (bool(containerPropSeries)) {
+      if (containerPropSeries) {
         // assume that only the first value matters
         container = containerPropSeries->valuesAsVector().front();
       } else {
