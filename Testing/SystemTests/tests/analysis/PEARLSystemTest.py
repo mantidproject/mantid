@@ -1,18 +1,16 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 from mantid import *
 import os
 import numpy as n
-from abc import ABCMeta, abstractmethod
 
 #pylint: disable=too-many-instance-attributes
 
 
 class PEARL_Reduction(stresstesting.MantidStressTest):
     '''Test adapted from actual script used by the scientists'''
-
-    __metaclass__ = ABCMeta # Mark as an abstract class
     validate=None
 
     def __init__(self):
@@ -92,7 +90,7 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
         else:
             loop=0
             num=files.split("_")
-            frange=range(int(num[0]),int(num[1])+1)
+            frange=list(range(int(num[0]),int(num[1])+1))
             for i in frange:
                 infile=self.PEARL_getfilename(i,ext)
                 outwork="run"+str(i)
@@ -119,7 +117,7 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
         else:
             loop=0
             num=files.split("_")
-            frange=range(int(num[0]),int(num[1])+1)
+            frange=list(range(int(num[0]),int(num[1])+1))
             mspectra=self.PEARL_getmonitorspectrum(int(num[0]))
             for i in frange:
                 infile=self.PEARL_getfilename(i,ext)
@@ -167,7 +165,6 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
         mtd.remove(monitor)
         return
 
-    #pylint: disable=too-many-arguments,too-many-branches
     def PEARL_focus(self, number,ext="raw",fmode="trans",ttmode="TT70",atten=True,van_norm=True):
 
         self.tt_mode=ttmode
@@ -332,7 +329,7 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
             mtd.remove(output)
 
         else:
-            print "Sorry I don't know that mode", mode
+            print("Sorry I don't know that mode", mode)
             return
 
         LoadNexus(Filename=outfile,OutputWorkspace=outwork)

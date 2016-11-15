@@ -28,6 +28,8 @@ Reflectometry Reduction Interface
 ISIS Reflectometry (Polref)
 ###########################
 
+- Settings tab now displays individual global options for experiment and instrument settings.
+
 ISIS Reflectometry
 ##################
 
