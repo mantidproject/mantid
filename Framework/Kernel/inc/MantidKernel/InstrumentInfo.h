@@ -25,6 +25,7 @@ namespace Kernel {
 // Forward declarations
 //----------------------------------------------------------------------
 class FacilityInfo;
+class LiveListenerInfo;
 
 /** A class that holds information about an instrument.
 
@@ -66,8 +67,7 @@ public:
   std::string delimiter() const;
   /// Returns the name of the live listener
   const std::string &liveListener() const;
-  /// Returns an object representing the host & port to connect to for a live
-  /// data stream
+  /// Returns a string containing the "host:port" to connect to
   const std::string &liveDataAddress() const;
   /// Return list of techniques
   const std::set<std::string> &techniques() const;

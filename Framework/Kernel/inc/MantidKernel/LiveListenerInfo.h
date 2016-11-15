@@ -6,8 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include <string>
-//#include <set>
-//#include <map>
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -52,7 +50,7 @@ class InstrumentInfo;
 class MANTID_KERNEL_DLL LiveListenerInfo {
 public:
   LiveListenerInfo(const InstrumentInfo *inst, const Poco::XML::Element *elem);
-  bool operator==(const LiveListenerInfo &rhs) const;
+  //bool operator==(const LiveListenerInfo &rhs) const;
 
   /// Return the name of this LiveListener connection
   const std::string &name() const;
