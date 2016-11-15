@@ -432,8 +432,8 @@ std::string BinaryOperation::checkSizeCompatibility(
  * Checks if the spectra at the given index of either input workspace is masked.
  * If so then the output spectra has zeroed data
  * and is also masked.
- * @param lhs :: A pointer to the left-hand operand
- * @param rhs :: A pointer to the right-hand operand
+ * @param lhsSpectrumInfo :: The LHS spectrum info object
+ * @param rhsSpectrumInfo :: The RHS spectrum info object
  * @param index :: The workspace index to check
  * @param out :: A pointer to the output workspace
  * @returns True if further processing is not required on the spectra, false if
