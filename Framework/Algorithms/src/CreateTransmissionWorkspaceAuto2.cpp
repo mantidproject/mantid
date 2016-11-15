@@ -106,8 +106,8 @@ void CreateTransmissionWorkspaceAuto2::exec() {
   // Monitor properties
   populateMonitorProperties(alg, instrument);
 
-  std::string processingCommands =
-      populateProcessingInstructions(alg, instrument, firstWS);
+  // Processing instructions
+  populateProcessingInstructions(alg, instrument, firstWS);
 
   alg->execute();
   MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
