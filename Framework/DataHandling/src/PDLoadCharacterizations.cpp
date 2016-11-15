@@ -105,8 +105,8 @@ const std::string PDLoadCharacterizations::category() const {
 /** Initialize the algorithm's properties.
  */
 void PDLoadCharacterizations::init() {
-  declareProperty(make_unique<MultipleFileProperty>(
-                      "Filename", std::vector<std::string>({".txt"})),
+  const auto exts = std::vector<std::string>({".txt"});
+  declareProperty(make_unique<MultipleFileProperty>("Filename", exts),
                   "Characterizations file");
   declareProperty(make_unique<FileProperty>("ExpIniFilename", "",
                                             FileProperty::OptionalLoad, "ini"),
