@@ -65,8 +65,7 @@ public:
     alg.setProperty("InputWorkspace", m_interWS);
     alg.setProperty("DetectorComponentName", "point-detector");
     alg.setPropertyValue("OutputWorkspace", "test_out");
-    TS_ASSERT_THROWS(alg.setProperty("TwoTheta", 0.0),
-                     std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("TwoTheta", 0.0), std::invalid_argument &);
     TS_ASSERT_THROWS(alg.setProperty("TwoTheta", 90.0),
                      std::invalid_argument &);
   }
@@ -132,7 +131,7 @@ public:
     // 'point-detector' should have been moved vertically only
     auto detIn = instrIn->getComponentByName("linear-detector")->getPos();
     auto detOut = instrOut->getComponentByName("linear-detector")->getPos();
-	TS_ASSERT_EQUALS(detIn.X(), detOut.X());
+    TS_ASSERT_EQUALS(detIn.X(), detOut.X());
     TS_ASSERT_EQUALS(detIn.Z(), detOut.Z());
     TS_ASSERT_DELTA(detOut.Y(), 0.07730, 1e-5);
   }

@@ -180,12 +180,12 @@ public:
     auto results = alg.validateInputs();
     TS_ASSERT(results.count("FirstTransmissionRun"));
 
-	AnalysisDataService::Instance().remove("input");
-	AnalysisDataService::Instance().remove("input_1");
-	AnalysisDataService::Instance().remove("input_2");
-	AnalysisDataService::Instance().remove("trans");
-	AnalysisDataService::Instance().remove("trans_3");
-	AnalysisDataService::Instance().remove("trans_4");
+    AnalysisDataService::Instance().remove("input");
+    AnalysisDataService::Instance().remove("input_1");
+    AnalysisDataService::Instance().remove("input_2");
+    AnalysisDataService::Instance().remove("trans");
+    AnalysisDataService::Instance().remove("trans_3");
+    AnalysisDataService::Instance().remove("trans_4");
   }
 
   void test_bad_second_transmission_group_size() {
@@ -215,13 +215,13 @@ public:
     TS_ASSERT(!results.count("FirstTransmissionRun"));
     TS_ASSERT(results.count("SecondTransmissionRun"));
 
-	AnalysisDataService::Instance().remove("input");
-	AnalysisDataService::Instance().remove("input_1");
-	AnalysisDataService::Instance().remove("first_trans");
-	AnalysisDataService::Instance().remove("first_trans_1");
-	AnalysisDataService::Instance().remove("second_trans");
-	AnalysisDataService::Instance().remove("second_trans_1");
-	AnalysisDataService::Instance().remove("second_trans_2");
+    AnalysisDataService::Instance().remove("input");
+    AnalysisDataService::Instance().remove("input_1");
+    AnalysisDataService::Instance().remove("first_trans");
+    AnalysisDataService::Instance().remove("first_trans_1");
+    AnalysisDataService::Instance().remove("second_trans");
+    AnalysisDataService::Instance().remove("second_trans_1");
+    AnalysisDataService::Instance().remove("second_trans_2");
   }
 
   void test_correct_detector_position_INTER() {

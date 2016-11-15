@@ -98,9 +98,9 @@ void CreateTransmissionWorkspaceAuto2::exec() {
   // Second transmission run and stitching params
   if (secondWS) {
     alg->setProperty("SecondTransmissionRun", secondWS);
-	alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
-	alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
-	alg->setPropertyValue("Params", getPropertyValue("Params"));
+    alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
+    alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
+    alg->setPropertyValue("Params", getPropertyValue("Params"));
   }
 
   // Monitor properties
