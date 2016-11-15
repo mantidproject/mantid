@@ -106,7 +106,7 @@ const std::string PDLoadCharacterizations::category() const {
  */
 void PDLoadCharacterizations::init() {
   const auto exts = std::vector<std::string>({".txt"});
-  declareProperty(make_unique<MultipleFileProperty>("Filename", exts),
+  declareProperty(Kernel::make_unique<MultipleFileProperty>("Filename", exts),
                   "Characterizations file");
   declareProperty(make_unique<FileProperty>("ExpIniFilename", "",
                                             FileProperty::OptionalLoad, "ini"),
