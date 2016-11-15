@@ -42,9 +42,13 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Sample test load data without instrument
-   * @brief test_LoadHB3AXML
+   * test data: HB3A_exp355_scan0001_0522
+   *   2theta = 42.70975 degree
+   * check:
+   *   sample logs: including run_start, monitor, omega, chi, phi and 2theta
+   * @brief Load data without instrument
    */
-  void test_LoadHB3AXML() {
+  void test_LoadDataNoInstrument() {
     LoadSpiceXML2DDet loader;
     loader.initialize();
 
@@ -121,13 +125,14 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test algorithm with loading HB3A with instrument and presense of SPICE
-   * scan table
-   *  such that it can be set to zero-2-theta position
-   * @brief test_LoadHB3AXML2InstrumentedWS
-   * Testing include
-   * 1. 2theta = 0 degree: scattering angle of all 4 corners should be same;
+   * scan table such that it will override 2theta value in the XML file
+   * Test: Set 2theta = 0
+   *  1. Detector should be symmetric along the X-axis and about the center of detector;
+   *  2. All pixels on the X-axis will have position Y value zero;
+   *  3. All pixels on the Y-axis will ahve position X value zero
+   * @brief test: load data with instrument whose detector's 2theta value is 0.
    */
-  void test_LoadHB3ADataZeroPosition() {
+  void test_LoadDataOverwrite2ThetaZero() {
     // Test 2theta at 0 degree
     LoadSpiceXML2DDet loader;
     loader.initialize();
@@ -142,7 +147,7 @@ public:
     loader.setProperty("DetectorGeometry", sizelist);
     loader.setProperty("LoadInstrument", true);
     loader.setProperty("SpiceTableWorkspace", scantablews);
-    loader.setProperty("PtNumber", 3);
+    loader.setProperty("PtNumber", 3);  // pt number 3 has 2theta value as 0.0
     loader.setProperty("ShiftedDetectorDistance", 0.);
 
     loader.execute();
