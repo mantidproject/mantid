@@ -167,7 +167,7 @@ public:
     // check center of the detector @ (128, 115)
     size_t center_col = 128;
     size_t center_row = 115;
-    size_t center_ws_index = (center_row - 1) * 256 + (center_col - 1);
+    size_t center_ws_index = (center_row - 1)  + (center_col - 1) *  256;
     Kernel::V3D det_center = outws->getDetector(center_ws_index)->getPos();
     // distance to sample
     double dist_r = det_center.distance(sample);
@@ -182,22 +182,22 @@ public:
     // ll: low-left, lr: low-right, ul: upper-left; ur: upper-right
     size_t row_ll = 0;
     size_t col_ll = 2;
-    size_t ws_index_ll = row_ll * 256 + col_ll;
+    size_t ws_index_ll = row_ll + col_ll * 256;
     Kernel::V3D det_ll_pos = outws->getDetector(ws_index_ll)->getPos();
 
     size_t row_lr = 0;
     size_t col_lr = 2 * 127 - 2;
-    size_t ws_index_lr = row_lr * 256 + col_lr;
+    size_t ws_index_lr = row_lr+ col_lr * 256 ;
     Kernel::V3D det_lr_pos = outws->getDetector(ws_index_lr)->getPos();
 
     size_t row_ul = 114 * 2;
     size_t col_ul = 2;
-    size_t ws_index_ul = row_ul * 256 + col_ul;
+    size_t ws_index_ul = row_ul + col_ul* 256 ;
     Kernel::V3D det_ul_pos = outws->getDetector(ws_index_ul)->getPos();
 
     size_t row_ur = 114 * 2;
     size_t col_ur = 2 * 127 - 2;
-    size_t ws_index_ur = row_ur * 256 + col_ur;
+    size_t ws_index_ur = row_ur + col_ur * 256 ;
     Kernel::V3D det_ur_pos = outws->getDetector(ws_index_ur)->getPos();
 
     double det_size = 0.0508; // meter
@@ -279,7 +279,7 @@ public:
     // check the center position
     size_t center_row = 115 - 1;
     size_t center_col = 128 - 1;
-    size_t center_ws_index = 256 * center_row + center_col;
+    size_t center_ws_index = 256 * center_col + center_row;
     Kernel::V3D center_det_pos = outws->getDetector(center_ws_index)->getPos();
     TS_ASSERT_DELTA(center_det_pos.Y(), 0., 0.00000001);
     double sample_center_distance = sample.distance(center_det_pos);
@@ -294,7 +294,7 @@ public:
     double ll_sample_r = sample.distance(ll_det_pos);
     TS_ASSERT_DELTA(ll_sample_r, 0.37597, 0.001);
 
-    size_t lu_ws_index = 255 * 256; // row = 255, col = 1
+    size_t lu_ws_index = 255; // row = 255, col = 1
     Kernel::V3D lu_det_pos = outws->getDetector(lu_ws_index)->getPos();
     double lu_sample_r = sample.distance(lu_det_pos);
     TS_ASSERT_DELTA(lu_sample_r, 0.37689, 0.001);
@@ -357,7 +357,7 @@ public:
     // check center of the detector @ (128, 115)
     size_t center_col = 128;
     size_t center_row = 115;
-    size_t center_ws_index = (center_row - 1) * 256 + (center_col - 1);
+    size_t center_ws_index = (center_row - 1) + (center_col - 1)* 256 ;
     Kernel::V3D center_det_pos = outws->getDetector(center_ws_index)->getPos();
     // distance to sample
     double dist_r = center_det_pos.distance(sample);
@@ -373,22 +373,22 @@ public:
     // ll: low-left, lr: low-right, ul: upper-left; ur: upper-right
     size_t row_ll = 0;
     size_t col_ll = 2;
-    size_t ws_index_ll = row_ll * 256 + col_ll;
+    size_t ws_index_ll = row_ll  + col_ll* 256;
     Kernel::V3D det_ll_pos = outws->getDetector(ws_index_ll)->getPos();
 
     size_t row_lr = 0;
     size_t col_lr = 2 * 127 - 2;
-    size_t ws_index_lr = row_lr * 256 + col_lr;
+    size_t ws_index_lr = row_lr + col_lr * 256;
     Kernel::V3D det_lr_pos = outws->getDetector(ws_index_lr)->getPos();
 
     size_t row_ul = 114 * 2;
     size_t col_ul = 2;
-    size_t ws_index_ul = row_ul * 256 + col_ul;
+    size_t ws_index_ul = row_ul+ col_ul * 256 ;
     Kernel::V3D det_ul_pos = outws->getDetector(ws_index_ul)->getPos();
 
     size_t row_ur = 114 * 2;
     size_t col_ur = 2 * 127 - 2;
-    size_t ws_index_ur = row_ur * 256 + col_ur;
+    size_t ws_index_ur = row_ur + col_ur* 256 ;
     Kernel::V3D det_ur_pos = outws->getDetector(ws_index_ur)->getPos();
 
     // Check symmetry
