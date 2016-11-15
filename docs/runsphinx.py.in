@@ -19,6 +19,7 @@ SPHINX_BUILD_DIR = "@SPHINX_BUILD_DIR@"
 SCREENSHOTS_DIR = "@SCREENSHOTS_DIR@"
 DIAGRAMS_DIR = "@DIAGRAMS_DIR@"
 DOT_EXECUTABLE = "@DOT_EXECUTABLE@"
+BUILD_DIR = "@CMAKE_BINARY_DIR@"
 
 ###############################################################################
 # Main
@@ -102,7 +103,8 @@ def parseargs(arglist):
     parser = OptionParser(usage="Usage: %prog [options]",
                           conflict_handler='error')
     parser.add_option("-m", "--mantidpath", dest="mantidpath",
-                      help="Location of mantid package. Has no effect if run inside MantidPlot")
+                      help="Location of mantid package. Has no effect if run inside MantidPlot (default='%s')" % BUILD_DIR,
+                      default=BUILD_DIR)
     parser.add_option("-R", "--tests-regex", dest="testinclude",
                       help="Regex specifying which tests to run. It is matched against the "
                       "filename when considering whether to run a test.")
@@ -127,6 +129,11 @@ def update_path(mantidpath):
     # If it's MantidPlot then we already know what our paths should be so ignore it
     if gui:
         return
+
+    # add 'bin' if the subdirectory exists and isn't named
+    if os.path.split(mantidpath)[-1] != 'bin':
+        if os.path.isdir(os.path.join(mantidpath, 'bin')):
+            mantidpath = os.path.join(mantidpath, 'bin')
 
     # check for directory
     if not os.path.isdir(os.path.join(mantidpath, "mantid")):
