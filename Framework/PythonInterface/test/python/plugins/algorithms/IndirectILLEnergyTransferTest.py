@@ -9,7 +9,7 @@ from mantid import config
 
 class IndirectILLEnergyTransferTest(unittest.TestCase):
 
-    _runs = dict([('one_wing_QENS', '090660'),
+    _runs = dict([('one_wing_QENS', '090661'),
                   ('one_wing_EFWS', '083072'),
                   ('one_wing_IFWS', '083073'),
                   ('two_wing_QENS', '136558-136559'),
