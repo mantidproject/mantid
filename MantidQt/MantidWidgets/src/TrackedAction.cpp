@@ -41,10 +41,11 @@ void TrackedAction::setTrackingName(const std::string &name) {
 }
 
 /** Gets the tracking name for this action
-*   If the tacking name is not set a default name will be generated using generateTrackingName
+*   If the tacking name is not set a default name will be generated using
+*generateTrackingName
 *   @returns The tracking name for this action
 **/
-std::string TrackedAction::getTrackingName()  const {
+std::string TrackedAction::getTrackingName() const {
   if (m_trackingName.empty()) {
     m_trackingName = generateTrackingName();
   }
@@ -91,10 +92,9 @@ void TrackedAction::trackActivation(const bool checked) {
 /** Registers the feature usage with the usage service
 *   @param name The name to use when registering usage
 **/
-void TrackedAction::registerUsage(const std::string& name)
-{
-  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-    "Feature", name, false);
+void TrackedAction::registerUsage(const std::string &name) {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage("Feature", name,
+                                                                false);
 }
 } // namespace MantidWidgets
 } // namespace Mantid

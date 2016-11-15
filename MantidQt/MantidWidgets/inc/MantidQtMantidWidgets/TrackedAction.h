@@ -4,11 +4,11 @@
 #include "WidgetDllOption.h"
 #include <QAction>
 
-
 namespace MantidQt {
 namespace MantidWidgets {
 
-/** TrackedAction : This is a version of QAction that tracks usage through the Mantid usage service
+/** TrackedAction : This is a version of QAction that tracks usage through the
+  Mantid usage service
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -31,25 +31,23 @@ namespace MantidWidgets {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS TrackedAction : public QAction 
-{
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS TrackedAction : public QAction {
   Q_OBJECT
 public:
-  TrackedAction(QObject* parent);
-  TrackedAction(const QString& text, QObject* parent);
-  TrackedAction(const QIcon& icon, const QString& text, QObject* parent);
-  virtual ~TrackedAction() {};
+  TrackedAction(QObject *parent);
+  TrackedAction(const QString &text, QObject *parent);
+  TrackedAction(const QIcon &icon, const QString &text, QObject *parent);
+  virtual ~TrackedAction(){};
 
-  void setTrackingName(const std::string& name);
+  void setTrackingName(const std::string &name);
   std::string getTrackingName() const;
 
   void setIsTracking(const bool enableTracking);
   bool getIsTracking() const;
 
-
 protected:
   virtual std::string generateTrackingName() const;
-  virtual void registerUsage(const std::string& name);
+  virtual void registerUsage(const std::string &name);
 
 private:
   void setupTracking();
