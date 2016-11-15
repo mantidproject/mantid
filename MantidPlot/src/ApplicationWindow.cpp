@@ -201,6 +201,7 @@
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MessageDisplay.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/TrackedAction.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -11470,125 +11471,125 @@ void ApplicationWindow::setPlot3DOptions() {
 }
 
 void ApplicationWindow::createActions() {
-  actionCustomActionDialog = new QAction(tr("Manage Custom Menus..."), this);
+  actionCustomActionDialog = new MantidQt::MantidWidgets::TrackedAction(tr("Manage Custom Menus..."), this);
   connect(actionCustomActionDialog, SIGNAL(triggered()), this,
           SLOT(showCustomActionDialog()));
 
-  actionManageDirs = new QAction(QIcon(getQPixmap("managefolders_xpm")),
+  actionManageDirs = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("managefolders_xpm")),
                                  tr("Manage User Directories"), this);
   connect(actionManageDirs, SIGNAL(triggered()), this,
           SLOT(showUserDirectoryDialog()));
 
-  actionFirstTimeSetup = new QAction(tr("First Time Setup"), this);
+  actionFirstTimeSetup = new MantidQt::MantidWidgets::TrackedAction(tr("First Time Setup"), this);
   connect(actionFirstTimeSetup, SIGNAL(triggered()), this,
           SLOT(showFirstTimeSetup()));
 
   actionNewProject =
-      new QAction(QIcon(":/NewProject16x16.png"), tr("New &Project"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(":/NewProject16x16.png"), tr("New &Project"), this);
   actionNewProject->setShortcut(tr("Ctrl+N"));
   connect(actionNewProject, SIGNAL(triggered()), this, SLOT(newProject()));
 
   actionSaveProject =
-      new QAction(QIcon(":/SaveProject16x16.png"), tr("Save &Project"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(":/SaveProject16x16.png"), tr("Save &Project"), this);
   actionSaveProject->setShortcut(tr("Ctrl+Shift+S"));
   connect(actionSaveProject, SIGNAL(triggered()), this, SLOT(saveProject()));
 
-  actionSaveFile = new QAction(QIcon(getQPixmap("filesave_nexus_xpm")),
+  actionSaveFile = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("filesave_nexus_xpm")),
                                tr("Save Nexus &File"), this);
   actionSaveFile->setShortcut(tr("Ctrl+S"));
   connect(actionSaveFile, SIGNAL(triggered()), this, SLOT(savetoNexusFile()));
 
   actionNewGraph =
-      new QAction(QIcon(getQPixmap("new_graph_xpm")), tr("New &Graph"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("new_graph_xpm")), tr("New &Graph"), this);
   actionNewGraph->setShortcut(tr("Ctrl+G"));
   connect(actionNewGraph, SIGNAL(triggered()), this, SLOT(newGraph()));
 
   actionNewNote =
-      new QAction(QIcon(getQPixmap("new_note_xpm")), tr("New &Note"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("new_note_xpm")), tr("New &Note"), this);
   connect(actionNewNote, SIGNAL(triggered()), this, SLOT(newNote()));
 
   actionNewTable =
-      new QAction(QIcon(getQPixmap("table_xpm")), tr("New &Table"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("table_xpm")), tr("New &Table"), this);
   actionNewTable->setShortcut(tr("Ctrl+T"));
   connect(actionNewTable, SIGNAL(triggered()), this, SLOT(newTable()));
 
-  actionNewTiledWindow = new QAction(QIcon(getQPixmap("tiledwindow_xpm")),
+  actionNewTiledWindow = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("tiledwindow_xpm")),
                                      tr("New Tiled &Window"), this);
   actionNewTiledWindow->setShortcut(tr("Ctrl+Shift+T"));
   connect(actionNewTiledWindow, SIGNAL(triggered()), this,
           SLOT(newTiledWindow()));
 
   actionNewMatrix =
-      new QAction(QIcon(getQPixmap("new_matrix_xpm")), tr("New &Matrix"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("new_matrix_xpm")), tr("New &Matrix"), this);
   actionNewMatrix->setShortcut(tr("Ctrl+M"));
   connect(actionNewMatrix, SIGNAL(triggered()), this, SLOT(newMatrix()));
 
-  actionNewFunctionPlot = new QAction(QIcon(getQPixmap("newF_xpm")),
+  actionNewFunctionPlot = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("newF_xpm")),
                                       tr("New &Function Plot"), this);
   connect(actionNewFunctionPlot, SIGNAL(triggered()), this,
           SLOT(functionDialog()));
 
-  actionNewSurfacePlot = new QAction(QIcon(getQPixmap("newFxy_xpm")),
+  actionNewSurfacePlot = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("newFxy_xpm")),
                                      tr("New 3D &Surface Plot"), this);
   actionNewSurfacePlot->setShortcut(tr("Ctrl+ALT+Z"));
   connect(actionNewSurfacePlot, SIGNAL(triggered()), this,
           SLOT(newSurfacePlot()));
 
   actionOpenProj =
-      new QAction(QIcon(":/LoadProject16x16.png"), tr("&Project"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(":/LoadProject16x16.png"), tr("&Project"), this);
   actionOpenProj->setShortcut(tr("Ctrl+Shift+O"));
   connect(actionOpenProj, SIGNAL(triggered()), this, SLOT(open()));
 
   actionLoadFile =
-      new QAction(QIcon(":/Open-icon16x16.png"), tr("Data File"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(":/Open-icon16x16.png"), tr("Data File"), this);
   actionLoadFile->setShortcut(tr("Ctrl+Shift+F"));
   connect(actionLoadFile, SIGNAL(triggered()), this, SLOT(loadDataFile()));
 
-  actionLoadImage = new QAction(tr("Open Image &File"), this);
+  actionLoadImage = new MantidQt::MantidWidgets::TrackedAction(tr("Open Image &File"), this);
   actionLoadImage->setShortcut(tr("Ctrl+I"));
   connect(actionLoadImage, SIGNAL(triggered()), this, SLOT(loadImage()));
 
-  actionScriptRepo = new QAction(tr("Script Repositor&y"), this);
+  actionScriptRepo = new MantidQt::MantidWidgets::TrackedAction(tr("Script Repositor&y"), this);
   connect(actionScriptRepo, SIGNAL(triggered()), this, SLOT(loadScriptRepo()));
 
-  actionImportImage = new QAction(tr("Import I&mage..."), this);
+  actionImportImage = new MantidQt::MantidWidgets::TrackedAction(tr("Import I&mage..."), this);
   connect(actionImportImage, SIGNAL(triggered()), this, SLOT(importImage()));
 
-  actionSaveProjectAs = new QAction(QIcon(":/SaveProject16x16.png"),
+  actionSaveProjectAs = new MantidQt::MantidWidgets::TrackedAction(QIcon(":/SaveProject16x16.png"),
                                     tr("Save Project &As..."), this);
   connect(actionSaveProjectAs, SIGNAL(triggered()), this,
           SLOT(saveProjectAs()));
   actionSaveProjectAs->setEnabled(false);
 
-  actionSaveNote = new QAction(tr("Save Note As..."), this);
+  actionSaveNote = new MantidQt::MantidWidgets::TrackedAction(tr("Save Note As..."), this);
   connect(actionSaveNote, SIGNAL(triggered()), this, SLOT(saveNoteAs()));
 
-  actionLoad = new QAction(QIcon(getQPixmap("import_xpm")),
+  actionLoad = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("import_xpm")),
                            tr("&Import ASCII..."), this);
   connect(actionLoad, SIGNAL(triggered()), this, SLOT(importASCII()));
 
   actionCopyWindow =
-      new QAction(QIcon(getQPixmap("duplicate_xpm")), tr("&Duplicate"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("duplicate_xpm")), tr("&Duplicate"), this);
   connect(actionCopyWindow, SIGNAL(triggered()), this, SLOT(clone()));
 
   actionCutSelection =
-      new QAction(QIcon(getQPixmap("cut_xpm")), tr("Cu&t Selection"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("cut_xpm")), tr("Cu&t Selection"), this);
   actionCutSelection->setShortcut(tr("Ctrl+X"));
   connect(actionCutSelection, SIGNAL(triggered()), this, SLOT(cutSelection()));
 
   actionCopySelection =
-      new QAction(QIcon(getQPixmap("copy_xpm")), tr("&Copy Selection"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("copy_xpm")), tr("&Copy Selection"), this);
   actionCopySelection->setShortcut(tr("Ctrl+C"));
   connect(actionCopySelection, SIGNAL(triggered()), this,
           SLOT(copySelection()));
 
   actionPasteSelection =
-      new QAction(QIcon(getQPixmap("paste_xpm")), tr("&Paste Selection"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("paste_xpm")), tr("&Paste Selection"), this);
   actionPasteSelection->setShortcut(tr("Ctrl+V"));
   connect(actionPasteSelection, SIGNAL(triggered()), this,
           SLOT(pasteSelection()));
 
-  actionClearSelection = new QAction(QIcon(getQPixmap("erase_xpm")),
+  actionClearSelection = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("erase_xpm")),
                                      tr("&Delete Selection"), this);
   actionClearSelection->setShortcut(tr("Del", "delete key"));
   connect(actionClearSelection, SIGNAL(triggered()), this,
@@ -11603,7 +11604,7 @@ void ApplicationWindow::createActions() {
 
 #ifdef SCRIPTING_PYTHON
   actionShowScriptWindow =
-      new QAction(getQPixmap("python_xpm"), tr("Toggle &Script Window"), this);
+      new MantidQt::MantidWidgets::TrackedAction(getQPixmap("python_xpm"), tr("Toggle &Script Window"), this);
 #ifdef __APPLE__
   actionShowScriptWindow->setShortcut(
       tr("Ctrl+3")); // F3 is used by the window manager on Mac
@@ -11614,7 +11615,7 @@ void ApplicationWindow::createActions() {
   connect(actionShowScriptWindow, SIGNAL(triggered()), this,
           SLOT(showScriptWindow()));
 
-  actionShowScriptInterpreter = new QAction(
+  actionShowScriptInterpreter = new MantidQt::MantidWidgets::TrackedAction(
       getQPixmap("python_xpm"), tr("Toggle Script &Interpreter"), this);
 #ifdef __APPLE__
   actionShowScriptInterpreter->setShortcut(
@@ -11628,782 +11629,782 @@ void ApplicationWindow::createActions() {
 #endif
 
   actionAddLayer =
-      new QAction(QIcon(getQPixmap("newLayer_xpm")), tr("Add La&yer"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("newLayer_xpm")), tr("Add La&yer"), this);
   actionAddLayer->setShortcut(tr("Alt+L"));
   connect(actionAddLayer, SIGNAL(triggered()), this, SLOT(addLayer()));
 
-  actionShowLayerDialog = new QAction(QIcon(getQPixmap("arrangeLayers_xpm")),
+  actionShowLayerDialog = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("arrangeLayers_xpm")),
                                       tr("Arran&ge Layers"), this);
   actionShowLayerDialog->setShortcut(tr("Alt+A"));
   connect(actionShowLayerDialog, SIGNAL(triggered()), this,
           SLOT(showLayerDialog()));
 
-  actionAutomaticLayout = new QAction(QIcon(getQPixmap("auto_layout_xpm")),
+  actionAutomaticLayout = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("auto_layout_xpm")),
                                       tr("Automatic Layout"), this);
   connect(actionAutomaticLayout, SIGNAL(triggered()), this,
           SLOT(autoArrangeLayers()));
 
-  actionExportGraph = new QAction(tr("&Current"), this);
+  actionExportGraph = new MantidQt::MantidWidgets::TrackedAction(tr("&Current"), this);
   actionExportGraph->setShortcut(tr("Alt+G"));
   connect(actionExportGraph, SIGNAL(triggered()), this, SLOT(exportGraph()));
 
-  actionExportAllGraphs = new QAction(tr("&All"), this);
+  actionExportAllGraphs = new MantidQt::MantidWidgets::TrackedAction(tr("&All"), this);
   actionExportAllGraphs->setShortcut(tr("Alt+X"));
   connect(actionExportAllGraphs, SIGNAL(triggered()), this,
           SLOT(exportAllGraphs()));
 
   actionExportPDF =
-      new QAction(QIcon(getQPixmap("pdf_xpm")), tr("&Export PDF"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("pdf_xpm")), tr("&Export PDF"), this);
   actionExportPDF->setShortcut(tr("Ctrl+Alt+P"));
   connect(actionExportPDF, SIGNAL(triggered()), this, SLOT(exportPDF()));
 
   actionPrint =
-      new QAction(QIcon(getQPixmap("fileprint_xpm")), tr("&Print"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("fileprint_xpm")), tr("&Print"), this);
   actionPrint->setShortcut(tr("Ctrl+P"));
   connect(actionPrint, SIGNAL(triggered()), this, SLOT(print()));
 
-  actionPrintAllPlots = new QAction(tr("Print All Plo&ts"), this);
+  actionPrintAllPlots = new MantidQt::MantidWidgets::TrackedAction(tr("Print All Plo&ts"), this);
   connect(actionPrintAllPlots, SIGNAL(triggered()), this,
           SLOT(printAllPlots()));
 
-  actionShowExportASCIIDialog = new QAction(tr("E&xport ASCII"), this);
+  actionShowExportASCIIDialog = new MantidQt::MantidWidgets::TrackedAction(tr("E&xport ASCII"), this);
   connect(actionShowExportASCIIDialog, SIGNAL(triggered()), this,
           SLOT(showExportASCIIDialog()));
 
   actionCloseAllWindows =
-      new QAction(QIcon(getQPixmap("quit_xpm")), tr("&Quit"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("quit_xpm")), tr("&Quit"), this);
   actionCloseAllWindows->setShortcut(tr("Ctrl+Q"));
   connect(actionCloseAllWindows, SIGNAL(triggered()), qApp,
           SLOT(closeAllWindows()));
 
-  actionDeleteFitTables = new QAction(QIcon(getQPixmap("close_xpm")),
+  actionDeleteFitTables = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("close_xpm")),
                                       tr("Delete &Fit Tables"), this);
   connect(actionDeleteFitTables, SIGNAL(triggered()), this,
           SLOT(deleteFitTables()));
 
   actionShowPlotWizard =
-      new QAction(QIcon(getQPixmap("wizard_xpm")), tr("Plot &Wizard"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("wizard_xpm")), tr("Plot &Wizard"), this);
   actionShowPlotWizard->setShortcut(tr("Ctrl+Alt+W"));
   connect(actionShowPlotWizard, SIGNAL(triggered()), this,
           SLOT(showPlotWizard()));
 
   actionShowConfigureDialog =
-      new QAction(QIcon(":/configure.png"), tr("&Preferences..."), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(":/configure.png"), tr("&Preferences..."), this);
   connect(actionShowConfigureDialog, SIGNAL(triggered()), this,
           SLOT(showPreferencesDialog()));
 
-  actionShowCurvesDialog = new QAction(QIcon(getQPixmap("curves_xpm")),
+  actionShowCurvesDialog = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("curves_xpm")),
                                        tr("Add/Remove &Curve..."), this);
   actionShowCurvesDialog->setShortcut(tr("Ctrl+Alt+C"));
   connect(actionShowCurvesDialog, SIGNAL(triggered()), this,
           SLOT(showCurvesDialog()));
 
-  actionAddErrorBars = new QAction(QIcon(getQPixmap("errors_xpm")),
+  actionAddErrorBars = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("errors_xpm")),
                                    tr("Add &Error Bars..."), this);
   actionAddErrorBars->setShortcut(tr("Ctrl+Alt+E"));
   connect(actionAddErrorBars, SIGNAL(triggered()), this, SLOT(addErrorBars()));
 
-  actionRemoveErrorBars = new QAction(QIcon(getQPixmap("errors_remove_xpm")),
+  actionRemoveErrorBars = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("errors_remove_xpm")),
                                       tr("&Remove Error Bars..."), this);
   actionRemoveErrorBars->setShortcut(tr("Ctrl+Alt+R"));
   connect(actionRemoveErrorBars, SIGNAL(triggered()), this,
           SLOT(removeErrorBars()));
 
   actionAddFunctionCurve =
-      new QAction(QIcon(getQPixmap("fx_xpm")), tr("Add &Function..."), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("fx_xpm")), tr("Add &Function..."), this);
   actionAddFunctionCurve->setShortcut(tr("Ctrl+Alt+F"));
   connect(actionAddFunctionCurve, SIGNAL(triggered()), this,
           SLOT(addFunctionCurve()));
 
-  actionUnzoom = new QAction(QIcon(getQPixmap("unzoom_xpm")),
+  actionUnzoom = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("unzoom_xpm")),
                              tr("&Rescale to Show All"), this);
   actionUnzoom->setShortcut(tr("Ctrl+Shift+R"));
   connect(actionUnzoom, SIGNAL(triggered()), this, SLOT(setAutoScale()));
 
   actionNewLegend =
-      new QAction(QIcon(getQPixmap("legend_xpm")), tr("New &Legend"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("legend_xpm")), tr("New &Legend"), this);
   actionNewLegend->setShortcut(tr("Ctrl+Alt+L"));
   connect(actionNewLegend, SIGNAL(triggered()), this, SLOT(newLegend()));
 
   actionTimeStamp =
-      new QAction(QIcon(getQPixmap("clock_xpm")), tr("Add Time &Stamp"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("clock_xpm")), tr("Add Time &Stamp"), this);
   actionTimeStamp->setShortcut(tr("Ctrl+ALT+S"));
   connect(actionTimeStamp, SIGNAL(triggered()), this, SLOT(addTimeStamp()));
 
   actionAddImage =
-      new QAction(QIcon(getQPixmap("monalisa_xpm")), tr("Add &Image"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("monalisa_xpm")), tr("Add &Image"), this);
   actionAddImage->setShortcut(tr("Ctrl+Alt+I"));
   connect(actionAddImage, SIGNAL(triggered()), this, SLOT(addImage()));
 
-  actionPlotL = new QAction(QIcon(getQPixmap("lPlot_xpm")), tr("&Line"), this);
+  actionPlotL = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("lPlot_xpm")), tr("&Line"), this);
   connect(actionPlotL, SIGNAL(triggered()), this, SLOT(plotL()));
 
   actionPlotP =
-      new QAction(QIcon(getQPixmap("pPlot_xpm")), tr("&Scatter"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("pPlot_xpm")), tr("&Scatter"), this);
   connect(actionPlotP, SIGNAL(triggered()), this, SLOT(plotP()));
 
   actionPlotLP =
-      new QAction(QIcon(getQPixmap("lpPlot_xpm")), tr("Line + S&ymbol"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("lpPlot_xpm")), tr("Line + S&ymbol"), this);
   connect(actionPlotLP, SIGNAL(triggered()), this, SLOT(plotLP()));
 
-  actionPlotVerticalDropLines = new QAction(QIcon(getQPixmap("dropLines_xpm")),
+  actionPlotVerticalDropLines = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("dropLines_xpm")),
                                             tr("Vertical &Drop Lines"), this);
   connect(actionPlotVerticalDropLines, SIGNAL(triggered()), this,
           SLOT(plotVerticalDropLines()));
 
   actionPlotSpline =
-      new QAction(QIcon(getQPixmap("spline_xpm")), tr("&Spline"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("spline_xpm")), tr("&Spline"), this);
   connect(actionPlotSpline, SIGNAL(triggered()), this, SLOT(plotSpline()));
 
   actionPlotHorSteps =
-      new QAction(getQPixmap("hor_steps_xpm"), tr("&Horizontal Steps"), this);
+      new MantidQt::MantidWidgets::TrackedAction(getQPixmap("hor_steps_xpm"), tr("&Horizontal Steps"), this);
   connect(actionPlotHorSteps, SIGNAL(triggered()), this, SLOT(plotHorSteps()));
 
-  actionPlotVertSteps = new QAction(QIcon(getQPixmap("vert_steps_xpm")),
+  actionPlotVertSteps = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("vert_steps_xpm")),
                                     tr("&Vertical Steps"), this);
   connect(actionPlotVertSteps, SIGNAL(triggered()), this,
           SLOT(plotVertSteps()));
 
   actionPlotVerticalBars =
-      new QAction(QIcon(getQPixmap("vertBars_xpm")), tr("&Columns"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("vertBars_xpm")), tr("&Columns"), this);
   connect(actionPlotVerticalBars, SIGNAL(triggered()), this,
           SLOT(plotVerticalBars()));
 
   actionPlotHorizontalBars =
-      new QAction(QIcon(getQPixmap("hBars_xpm")), tr("&Rows"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("hBars_xpm")), tr("&Rows"), this);
   connect(actionPlotHorizontalBars, SIGNAL(triggered()), this,
           SLOT(plotHorizontalBars()));
 
   actionPlotArea =
-      new QAction(QIcon(getQPixmap("area_xpm")), tr("&Area"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("area_xpm")), tr("&Area"), this);
   connect(actionPlotArea, SIGNAL(triggered()), this, SLOT(plotArea()));
 
-  actionPlotPie = new QAction(QIcon(getQPixmap("pie_xpm")), tr("&Pie"), this);
+  actionPlotPie = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("pie_xpm")), tr("&Pie"), this);
   connect(actionPlotPie, SIGNAL(triggered()), this, SLOT(plotPie()));
 
   actionPlotVectXYAM =
-      new QAction(QIcon(getQPixmap("vectXYAM_xpm")), tr("Vectors XY&AM"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("vectXYAM_xpm")), tr("Vectors XY&AM"), this);
   connect(actionPlotVectXYAM, SIGNAL(triggered()), this, SLOT(plotVectXYAM()));
 
-  actionPlotVectXYXY = new QAction(QIcon(getQPixmap("vectXYXY_xpm")),
+  actionPlotVectXYXY = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("vectXYXY_xpm")),
                                    tr("&Vectors &XYXY"), this);
   connect(actionPlotVectXYXY, SIGNAL(triggered()), this, SLOT(plotVectXYXY()));
 
   actionPlotHistogram =
-      new QAction(QIcon(getQPixmap("histogram_xpm")), tr("&Histogram"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("histogram_xpm")), tr("&Histogram"), this);
   connect(actionPlotHistogram, SIGNAL(triggered()), this,
           SLOT(plotHistogram()));
 
-  actionPlotStackedHistograms = new QAction(
+  actionPlotStackedHistograms = new MantidQt::MantidWidgets::TrackedAction(
       QIcon(getQPixmap("stacked_hist_xpm")), tr("&Stacked Histogram"), this);
   connect(actionPlotStackedHistograms, SIGNAL(triggered()), this,
           SLOT(plotStackedHistograms()));
 
   actionStemPlot =
-      new QAction(QIcon(":/leaf.png"), tr("Stem-and-&Leaf Plot"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(":/leaf.png"), tr("Stem-and-&Leaf Plot"), this);
   connect(actionStemPlot, SIGNAL(triggered()), this, SLOT(newStemPlot()));
 
-  actionPlot2VerticalLayers = new QAction(QIcon(getQPixmap("panel_v2_xpm")),
+  actionPlot2VerticalLayers = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("panel_v2_xpm")),
                                           tr("&Vertical 2 Layers"), this);
   connect(actionPlot2VerticalLayers, SIGNAL(triggered()), this,
           SLOT(plot2VerticalLayers()));
 
-  actionPlot2HorizontalLayers = new QAction(QIcon(getQPixmap("panel_h2_xpm")),
+  actionPlot2HorizontalLayers = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("panel_h2_xpm")),
                                             tr("&Horizontal 2 Layers"), this);
   connect(actionPlot2HorizontalLayers, SIGNAL(triggered()), this,
           SLOT(plot2HorizontalLayers()));
 
   actionPlot4Layers =
-      new QAction(QIcon(getQPixmap("panel_4_xpm")), tr("&4 Layers"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("panel_4_xpm")), tr("&4 Layers"), this);
   connect(actionPlot4Layers, SIGNAL(triggered()), this, SLOT(plot4Layers()));
 
-  actionPlotStackedLayers = new QAction(QIcon(getQPixmap("stacked_xpm")),
+  actionPlotStackedLayers = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("stacked_xpm")),
                                         tr("&Stacked Layers"), this);
   connect(actionPlotStackedLayers, SIGNAL(triggered()), this,
           SLOT(plotStackedLayers()));
 
   actionPlot3DRibbon =
-      new QAction(QIcon(getQPixmap("ribbon_xpm")), tr("&Ribbon"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("ribbon_xpm")), tr("&Ribbon"), this);
   connect(actionPlot3DRibbon, SIGNAL(triggered()), this, SLOT(plot3DRibbon()));
 
   actionPlot3DBars =
-      new QAction(QIcon(getQPixmap("bars_xpm")), tr("&Bars"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("bars_xpm")), tr("&Bars"), this);
   connect(actionPlot3DBars, SIGNAL(triggered()), this, SLOT(plot3DBars()));
 
   actionPlot3DScatter =
-      new QAction(QIcon(getQPixmap("scatter_xpm")), tr("&Scatter"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("scatter_xpm")), tr("&Scatter"), this);
   connect(actionPlot3DScatter, SIGNAL(triggered()), this,
           SLOT(plot3DScatter()));
 
   actionPlot3DTrajectory =
-      new QAction(QIcon(getQPixmap("trajectory_xpm")), tr("&Trajectory"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("trajectory_xpm")), tr("&Trajectory"), this);
   connect(actionPlot3DTrajectory, SIGNAL(triggered()), this,
           SLOT(plot3DTrajectory()));
 
-  actionShowColStatistics = new QAction(QIcon(getQPixmap("col_stat_xpm")),
+  actionShowColStatistics = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("col_stat_xpm")),
                                         tr("Statistics on &Columns"), this);
   connect(actionShowColStatistics, SIGNAL(triggered()), this,
           SLOT(showColStatistics()));
 
-  actionShowRowStatistics = new QAction(QIcon(getQPixmap("stat_rows_xpm")),
+  actionShowRowStatistics = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("stat_rows_xpm")),
                                         tr("Statistics on &Rows"), this);
   connect(actionShowRowStatistics, SIGNAL(triggered()), this,
           SLOT(showRowStatistics()));
 
-  actionIntegrate = new QAction(tr("&Integrate"), this);
+  actionIntegrate = new MantidQt::MantidWidgets::TrackedAction(tr("&Integrate"), this);
   connect(actionIntegrate, SIGNAL(triggered()), this, SLOT(integrate()));
 
-  actionShowIntDialog = new QAction(tr("Integr&ate Function..."), this);
+  actionShowIntDialog = new MantidQt::MantidWidgets::TrackedAction(tr("Integr&ate Function..."), this);
   connect(actionShowIntDialog, SIGNAL(triggered()), this,
           SLOT(showIntegrationDialog()));
 
-  actionInterpolate = new QAction(tr("Inte&rpolate ..."), this);
+  actionInterpolate = new MantidQt::MantidWidgets::TrackedAction(tr("Inte&rpolate ..."), this);
   connect(actionInterpolate, SIGNAL(triggered()), this,
           SLOT(showInterpolationDialog()));
 
-  actionLowPassFilter = new QAction(tr("&Low Pass..."), this);
+  actionLowPassFilter = new MantidQt::MantidWidgets::TrackedAction(tr("&Low Pass..."), this);
   connect(actionLowPassFilter, SIGNAL(triggered()), this,
           SLOT(lowPassFilterDialog()));
 
-  actionHighPassFilter = new QAction(tr("&High Pass..."), this);
+  actionHighPassFilter = new MantidQt::MantidWidgets::TrackedAction(tr("&High Pass..."), this);
   connect(actionHighPassFilter, SIGNAL(triggered()), this,
           SLOT(highPassFilterDialog()));
 
-  actionBandPassFilter = new QAction(tr("&Band Pass..."), this);
+  actionBandPassFilter = new MantidQt::MantidWidgets::TrackedAction(tr("&Band Pass..."), this);
   connect(actionBandPassFilter, SIGNAL(triggered()), this,
           SLOT(bandPassFilterDialog()));
 
-  actionBandBlockFilter = new QAction(tr("&Band Block..."), this);
+  actionBandBlockFilter = new MantidQt::MantidWidgets::TrackedAction(tr("&Band Block..."), this);
   connect(actionBandBlockFilter, SIGNAL(triggered()), this,
           SLOT(bandBlockFilterDialog()));
 
-  actionFFT = new QAction(tr("&FFT..."), this);
+  actionFFT = new MantidQt::MantidWidgets::TrackedAction(tr("&FFT..."), this);
   connect(actionFFT, SIGNAL(triggered()), this, SLOT(showFFTDialog()));
 
-  actionSmoothSavGol = new QAction(tr("&Savitzky-Golay..."), this);
+  actionSmoothSavGol = new MantidQt::MantidWidgets::TrackedAction(tr("&Savitzky-Golay..."), this);
   connect(actionSmoothSavGol, SIGNAL(triggered()), this,
           SLOT(showSmoothSavGolDialog()));
 
-  actionSmoothFFT = new QAction(tr("&FFT Filter..."), this);
+  actionSmoothFFT = new MantidQt::MantidWidgets::TrackedAction(tr("&FFT Filter..."), this);
   connect(actionSmoothFFT, SIGNAL(triggered()), this,
           SLOT(showSmoothFFTDialog()));
 
-  actionSmoothAverage = new QAction(tr("Moving Window &Average..."), this);
+  actionSmoothAverage = new MantidQt::MantidWidgets::TrackedAction(tr("Moving Window &Average..."), this);
   connect(actionSmoothAverage, SIGNAL(triggered()), this,
           SLOT(showSmoothAverageDialog()));
 
-  actionDifferentiate = new QAction(tr("&Differentiate"), this);
+  actionDifferentiate = new MantidQt::MantidWidgets::TrackedAction(tr("&Differentiate"), this);
   connect(actionDifferentiate, SIGNAL(triggered()), this,
           SLOT(differentiate()));
 
-  actionFitLinear = new QAction(tr("Fit &Linear"), this);
+  actionFitLinear = new MantidQt::MantidWidgets::TrackedAction(tr("Fit &Linear"), this);
   connect(actionFitLinear, SIGNAL(triggered()), this, SLOT(fitLinear()));
 
-  actionShowFitPolynomDialog = new QAction(tr("Fit &Polynomial ..."), this);
+  actionShowFitPolynomDialog = new MantidQt::MantidWidgets::TrackedAction(tr("Fit &Polynomial ..."), this);
   connect(actionShowFitPolynomDialog, SIGNAL(triggered()), this,
           SLOT(showFitPolynomDialog()));
 
-  actionShowExpDecayDialog = new QAction(tr("&First Order ..."), this);
+  actionShowExpDecayDialog = new MantidQt::MantidWidgets::TrackedAction(tr("&First Order ..."), this);
   connect(actionShowExpDecayDialog, SIGNAL(triggered()), this,
           SLOT(showExpDecayDialog()));
 
-  actionShowTwoExpDecayDialog = new QAction(tr("&Second Order ..."), this);
+  actionShowTwoExpDecayDialog = new MantidQt::MantidWidgets::TrackedAction(tr("&Second Order ..."), this);
   connect(actionShowTwoExpDecayDialog, SIGNAL(triggered()), this,
           SLOT(showTwoExpDecayDialog()));
 
-  actionShowExpDecay3Dialog = new QAction(tr("&Third Order ..."), this);
+  actionShowExpDecay3Dialog = new MantidQt::MantidWidgets::TrackedAction(tr("&Third Order ..."), this);
   connect(actionShowExpDecay3Dialog, SIGNAL(triggered()), this,
           SLOT(showExpDecay3Dialog()));
 
-  actionFitExpGrowth = new QAction(tr("Fit Exponential Gro&wth ..."), this);
+  actionFitExpGrowth = new MantidQt::MantidWidgets::TrackedAction(tr("Fit Exponential Gro&wth ..."), this);
   connect(actionFitExpGrowth, SIGNAL(triggered()), this,
           SLOT(showExpGrowthDialog()));
 
-  actionFitSigmoidal = new QAction(tr("Fit &Boltzmann (Sigmoidal)"), this);
+  actionFitSigmoidal = new MantidQt::MantidWidgets::TrackedAction(tr("Fit &Boltzmann (Sigmoidal)"), this);
   connect(actionFitSigmoidal, SIGNAL(triggered()), this, SLOT(fitSigmoidal()));
 
-  actionFitGauss = new QAction(tr("Fit &Gaussian"), this);
+  actionFitGauss = new MantidQt::MantidWidgets::TrackedAction(tr("Fit &Gaussian"), this);
   connect(actionFitGauss, SIGNAL(triggered()), this, SLOT(fitGauss()));
 
-  actionFitLorentz = new QAction(tr("Fit Lorent&zian"), this);
+  actionFitLorentz = new MantidQt::MantidWidgets::TrackedAction(tr("Fit Lorent&zian"), this);
   connect(actionFitLorentz, SIGNAL(triggered()), this, SLOT(fitLorentz()));
 
-  actionShowFitDialog = new QAction(tr("Fit &Wizard..."), this);
+  actionShowFitDialog = new MantidQt::MantidWidgets::TrackedAction(tr("Fit &Wizard..."), this);
   actionShowFitDialog->setShortcut(tr("Ctrl+Y"));
   connect(actionShowFitDialog, SIGNAL(triggered()), this,
           SLOT(showFitDialog()));
 
-  actionShowPlotDialog = new QAction(tr("&Plot ..."), this);
+  actionShowPlotDialog = new MantidQt::MantidWidgets::TrackedAction(tr("&Plot ..."), this);
   connect(actionShowPlotDialog, SIGNAL(triggered()), this,
           SLOT(showGeneralPlotDialog()));
 
-  actionShowScaleDialog = new QAction(tr("&Scales..."), this);
+  actionShowScaleDialog = new MantidQt::MantidWidgets::TrackedAction(tr("&Scales..."), this);
   connect(actionShowScaleDialog, SIGNAL(triggered()), this,
           SLOT(showScaleDialog()));
 
-  actionShowAxisDialog = new QAction(tr("&Axes..."), this);
+  actionShowAxisDialog = new MantidQt::MantidWidgets::TrackedAction(tr("&Axes..."), this);
   connect(actionShowAxisDialog, SIGNAL(triggered()), this,
           SLOT(showAxisDialog()));
 
-  actionShowGridDialog = new QAction(tr("&Grid ..."), this);
+  actionShowGridDialog = new MantidQt::MantidWidgets::TrackedAction(tr("&Grid ..."), this);
   connect(actionShowGridDialog, SIGNAL(triggered()), this,
           SLOT(showGridDialog()));
 
-  actionShowTitleDialog = new QAction(tr("&Title ..."), this);
+  actionShowTitleDialog = new MantidQt::MantidWidgets::TrackedAction(tr("&Title ..."), this);
   connect(actionShowTitleDialog, SIGNAL(triggered()), this,
           SLOT(showTitleDialog()));
 
-  actionShowColumnOptionsDialog = new QAction(tr("Column &Options ..."), this);
+  actionShowColumnOptionsDialog = new MantidQt::MantidWidgets::TrackedAction(tr("Column &Options ..."), this);
   actionShowColumnOptionsDialog->setShortcut(tr("Ctrl+Alt+O"));
   connect(actionShowColumnOptionsDialog, SIGNAL(triggered()), this,
           SLOT(showColumnOptionsDialog()));
 
-  actionShowColumnValuesDialog = new QAction(
+  actionShowColumnValuesDialog = new MantidQt::MantidWidgets::TrackedAction(
       QIcon(getQPixmap("formula_xpm")), tr("Set Column &Values ..."), this);
   connect(actionShowColumnValuesDialog, SIGNAL(triggered()), this,
           SLOT(showColumnValuesDialog()));
   actionShowColumnValuesDialog->setShortcut(tr("Alt+Q"));
 
-  actionTableRecalculate = new QAction(tr("Recalculate"), this);
+  actionTableRecalculate = new MantidQt::MantidWidgets::TrackedAction(tr("Recalculate"), this);
   actionTableRecalculate->setShortcut(tr("Ctrl+Return"));
   connect(actionTableRecalculate, SIGNAL(triggered()), this,
           SLOT(recalculateTable()));
 
-  actionHideSelectedColumns = new QAction(tr("&Hide Selected"), this);
+  actionHideSelectedColumns = new MantidQt::MantidWidgets::TrackedAction(tr("&Hide Selected"), this);
   connect(actionHideSelectedColumns, SIGNAL(triggered()), this,
           SLOT(hideSelectedColumns()));
 
-  actionShowAllColumns = new QAction(tr("Sho&w All Columns"), this);
+  actionShowAllColumns = new MantidQt::MantidWidgets::TrackedAction(tr("Sho&w All Columns"), this);
   connect(actionShowAllColumns, SIGNAL(triggered()), this,
           SLOT(showAllColumns()));
 
-  actionSwapColumns = new QAction(QIcon(getQPixmap("swap_columns_xpm")),
+  actionSwapColumns = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("swap_columns_xpm")),
                                   tr("&Swap columns"), this);
   connect(actionSwapColumns, SIGNAL(triggered()), this, SLOT(swapColumns()));
 
-  actionMoveColRight = new QAction(QIcon(getQPixmap("move_col_right_xpm")),
+  actionMoveColRight = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("move_col_right_xpm")),
                                    tr("Move &Right"), this);
   connect(actionMoveColRight, SIGNAL(triggered()), this,
           SLOT(moveColumnRight()));
 
-  actionMoveColLeft = new QAction(QIcon(getQPixmap("move_col_left_xpm")),
+  actionMoveColLeft = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("move_col_left_xpm")),
                                   tr("Move &Left"), this);
   connect(actionMoveColLeft, SIGNAL(triggered()), this, SLOT(moveColumnLeft()));
 
-  actionMoveColFirst = new QAction(QIcon(getQPixmap("move_col_first_xpm")),
+  actionMoveColFirst = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("move_col_first_xpm")),
                                    tr("Move to F&irst"), this);
   connect(actionMoveColFirst, SIGNAL(triggered()), this,
           SLOT(moveColumnFirst()));
 
-  actionMoveColLast = new QAction(QIcon(getQPixmap("move_col_last_xpm")),
+  actionMoveColLast = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("move_col_last_xpm")),
                                   tr("Move to Las&t"), this);
   connect(actionMoveColLast, SIGNAL(triggered()), this, SLOT(moveColumnLast()));
 
-  actionShowColsDialog = new QAction(tr("&Columns..."), this);
+  actionShowColsDialog = new MantidQt::MantidWidgets::TrackedAction(tr("&Columns..."), this);
   connect(actionShowColsDialog, SIGNAL(triggered()), this,
           SLOT(showColsDialog()));
 
-  actionShowRowsDialog = new QAction(tr("&Rows..."), this);
+  actionShowRowsDialog = new MantidQt::MantidWidgets::TrackedAction(tr("&Rows..."), this);
   connect(actionShowRowsDialog, SIGNAL(triggered()), this,
           SLOT(showRowsDialog()));
 
-  actionDeleteRows = new QAction(tr("&Delete Rows Interval..."), this);
+  actionDeleteRows = new MantidQt::MantidWidgets::TrackedAction(tr("&Delete Rows Interval..."), this);
   connect(actionDeleteRows, SIGNAL(triggered()), this,
           SLOT(showDeleteRowsDialog()));
 
-  actionAbout = new QAction(tr("&About MantidPlot"), this); // Mantid
+  actionAbout = new MantidQt::MantidWidgets::TrackedAction(tr("&About MantidPlot"), this); // Mantid
   actionAbout->setShortcut(tr("F1"));
   connect(actionAbout, SIGNAL(triggered()), this, SLOT(about()));
 
-  actionShowHelp = new QAction(tr("&Help"), this);
+  actionShowHelp = new MantidQt::MantidWidgets::TrackedAction(tr("&Help"), this);
   actionShowHelp->setShortcut(tr("Ctrl+H"));
   connect(actionShowHelp, SIGNAL(triggered()), this, SLOT(showHelp()));
 
-  actionMantidConcepts = new QAction(tr("&Mantid Concepts"), this);
+  actionMantidConcepts = new MantidQt::MantidWidgets::TrackedAction(tr("&Mantid Concepts"), this);
   connect(actionMantidConcepts, SIGNAL(triggered()), this,
           SLOT(showMantidConcepts()));
 
-  actionMantidAlgorithms = new QAction(tr("&Algorithm Descriptions"), this);
+  actionMantidAlgorithms = new MantidQt::MantidWidgets::TrackedAction(tr("&Algorithm Descriptions"), this);
   connect(actionMantidAlgorithms, SIGNAL(triggered()), this,
           SLOT(showalgorithmDescriptions()));
 
-  actionmantidplotHelp = new QAction(tr("&MantidPlot Help"), this);
+  actionmantidplotHelp = new MantidQt::MantidWidgets::TrackedAction(tr("&MantidPlot Help"), this);
   connect(actionmantidplotHelp, SIGNAL(triggered()), this,
           SLOT(showmantidplotHelp()));
 
-  actionChooseHelpFolder = new QAction(tr("&Choose Help Folder..."), this);
+  actionChooseHelpFolder = new MantidQt::MantidWidgets::TrackedAction(tr("&Choose Help Folder..."), this);
   connect(actionChooseHelpFolder, SIGNAL(triggered()), this,
           SLOT(chooseHelpFolder()));
 
-  actionRename = new QAction(tr("&Rename Window"), this);
+  actionRename = new MantidQt::MantidWidgets::TrackedAction(tr("&Rename Window"), this);
   connect(actionRename, SIGNAL(triggered()), this, SLOT(rename()));
 
   actionCloseWindow =
-      new QAction(QIcon(getQPixmap("close_xpm")), tr("Close &Window"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("close_xpm")), tr("Close &Window"), this);
   actionCloseWindow->setShortcut(tr("Ctrl+W"));
   connect(actionCloseWindow, SIGNAL(triggered()), this,
           SLOT(closeActiveWindow()));
 
   actionAddColToTable =
-      new QAction(QIcon(getQPixmap("addCol_xpm")), tr("Add Column"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("addCol_xpm")), tr("Add Column"), this);
   connect(actionAddColToTable, SIGNAL(triggered()), this,
           SLOT(addColToTable()));
 
-  actionGoToRow = new QAction(tr("&Go to Row..."), this);
+  actionGoToRow = new MantidQt::MantidWidgets::TrackedAction(tr("&Go to Row..."), this);
   actionGoToRow->setShortcut(tr("Ctrl+Alt+G"));
   connect(actionGoToRow, SIGNAL(triggered()), this, SLOT(goToRow()));
 
-  actionGoToColumn = new QAction(tr("Go to Colum&n..."), this);
+  actionGoToColumn = new MantidQt::MantidWidgets::TrackedAction(tr("Go to Colum&n..."), this);
   actionGoToColumn->setShortcut(tr("Ctrl+Alt+C"));
   connect(actionGoToColumn, SIGNAL(triggered()), this, SLOT(goToColumn()));
 
-  actionClearTable = new QAction(getQPixmap("erase_xpm"), tr("Clear"), this);
+  actionClearTable = new MantidQt::MantidWidgets::TrackedAction(getQPixmap("erase_xpm"), tr("Clear"), this);
   connect(actionClearTable, SIGNAL(triggered()), this, SLOT(clearTable()));
 
   actionDeleteLayer =
-      new QAction(QIcon(getQPixmap("erase_xpm")), tr("&Remove Layer"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("erase_xpm")), tr("&Remove Layer"), this);
   actionDeleteLayer->setShortcut(tr("Alt+R"));
   connect(actionDeleteLayer, SIGNAL(triggered()), this, SLOT(deleteLayer()));
 
-  actionResizeActiveWindow = new QAction(QIcon(getQPixmap("resize_xpm")),
+  actionResizeActiveWindow = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("resize_xpm")),
                                          tr("Window &Geometry..."), this);
   connect(actionResizeActiveWindow, SIGNAL(triggered()), this,
           SLOT(resizeActiveWindow()));
 
-  actionHideActiveWindow = new QAction(tr("&Hide Window"), this);
+  actionHideActiveWindow = new MantidQt::MantidWidgets::TrackedAction(tr("&Hide Window"), this);
   connect(actionHideActiveWindow, SIGNAL(triggered()), this,
           SLOT(hideActiveWindow()));
 
-  actionShowMoreWindows = new QAction(tr("More windows..."), this);
+  actionShowMoreWindows = new MantidQt::MantidWidgets::TrackedAction(tr("More windows..."), this);
   connect(actionShowMoreWindows, SIGNAL(triggered()), this,
           SLOT(showMoreWindows()));
 
-  actionPixelLineProfile = new QAction(QIcon(getQPixmap("pixelProfile_xpm")),
+  actionPixelLineProfile = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("pixelProfile_xpm")),
                                        tr("&View Pixel Line Profile"), this);
   connect(actionPixelLineProfile, SIGNAL(triggered()), this,
           SLOT(pixelLineProfile()));
 
-  actionIntensityTable = new QAction(tr("&Intensity Table"), this);
+  actionIntensityTable = new MantidQt::MantidWidgets::TrackedAction(tr("&Intensity Table"), this);
   connect(actionIntensityTable, SIGNAL(triggered()), this,
           SLOT(intensityTable()));
 
-  actionShowLineDialog = new QAction(tr("&Properties"), this);
+  actionShowLineDialog = new MantidQt::MantidWidgets::TrackedAction(tr("&Properties"), this);
   connect(actionShowLineDialog, SIGNAL(triggered()), this,
           SLOT(showLineDialog()));
 
-  actionShowImageDialog = new QAction(tr("&Properties"), this);
+  actionShowImageDialog = new MantidQt::MantidWidgets::TrackedAction(tr("&Properties"), this);
   connect(actionShowImageDialog, SIGNAL(triggered()), this,
           SLOT(showImageDialog()));
 
-  actionShowTextDialog = new QAction(tr("&Properties"), this);
+  actionShowTextDialog = new MantidQt::MantidWidgets::TrackedAction(tr("&Properties"), this);
   connect(actionShowTextDialog, SIGNAL(triggered()), this,
           SLOT(showTextDialog()));
 
-  actionActivateWindow = new QAction(tr("&Activate Window"), this);
+  actionActivateWindow = new MantidQt::MantidWidgets::TrackedAction(tr("&Activate Window"), this);
   connect(actionActivateWindow, SIGNAL(triggered()), this,
           SLOT(activateWindow()));
 
-  actionMinimizeWindow = new QAction(tr("Mi&nimize Window"), this);
+  actionMinimizeWindow = new MantidQt::MantidWidgets::TrackedAction(tr("Mi&nimize Window"), this);
   connect(actionMinimizeWindow, SIGNAL(triggered()), this,
           SLOT(minimizeWindow()));
 
-  actionMaximizeWindow = new QAction(tr("Ma&ximize Window"), this);
+  actionMaximizeWindow = new MantidQt::MantidWidgets::TrackedAction(tr("Ma&ximize Window"), this);
   connect(actionMaximizeWindow, SIGNAL(triggered()), this,
           SLOT(maximizeWindow()));
 
-  actionHideWindow = new QAction(tr("&Hide Window"), this);
+  actionHideWindow = new MantidQt::MantidWidgets::TrackedAction(tr("&Hide Window"), this);
   connect(actionHideWindow, SIGNAL(triggered()), this, SLOT(hideWindow()));
 
-  actionResizeWindow = new QAction(QIcon(getQPixmap("resize_xpm")),
+  actionResizeWindow = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("resize_xpm")),
                                    tr("Re&size Window..."), this);
   connect(actionResizeWindow, SIGNAL(triggered()), this, SLOT(resizeWindow()));
 
-  actionEditSurfacePlot = new QAction(tr("&Surface..."), this);
+  actionEditSurfacePlot = new MantidQt::MantidWidgets::TrackedAction(tr("&Surface..."), this);
   connect(actionEditSurfacePlot, SIGNAL(triggered()), this,
           SLOT(editSurfacePlot()));
 
-  actionAdd3DData = new QAction(tr("&Data Set..."), this);
+  actionAdd3DData = new MantidQt::MantidWidgets::TrackedAction(tr("&Data Set..."), this);
   connect(actionAdd3DData, SIGNAL(triggered()), this, SLOT(add3DData()));
 
-  actionSetMatrixProperties = new QAction(tr("Set &Properties..."), this);
+  actionSetMatrixProperties = new MantidQt::MantidWidgets::TrackedAction(tr("Set &Properties..."), this);
   connect(actionSetMatrixProperties, SIGNAL(triggered()), this,
           SLOT(showMatrixDialog()));
 
-  actionSetMatrixDimensions = new QAction(tr("Set &Dimensions..."), this);
+  actionSetMatrixDimensions = new MantidQt::MantidWidgets::TrackedAction(tr("Set &Dimensions..."), this);
   connect(actionSetMatrixDimensions, SIGNAL(triggered()), this,
           SLOT(showMatrixSizeDialog()));
   actionSetMatrixDimensions->setShortcut(tr("Ctrl+D"));
 
   actionSetMatrixValues =
-      new QAction(QIcon(getQPixmap("formula_xpm")), tr("Set &Values..."), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("formula_xpm")), tr("Set &Values..."), this);
   connect(actionSetMatrixValues, SIGNAL(triggered()), this,
           SLOT(showMatrixValuesDialog()));
   actionSetMatrixValues->setShortcut(tr("Alt+Q"));
 
   actionImagePlot =
-      new QAction(QIcon(getQPixmap("image_plot_xpm")), tr("&Image Plot"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("image_plot_xpm")), tr("&Image Plot"), this);
   connect(actionImagePlot, SIGNAL(triggered()), this, SLOT(plotImage()));
 
-  actionTransposeMatrix = new QAction(tr("&Transpose"), this);
+  actionTransposeMatrix = new MantidQt::MantidWidgets::TrackedAction(tr("&Transpose"), this);
   connect(actionTransposeMatrix, SIGNAL(triggered()), this,
           SLOT(transposeMatrix()));
 
   actionFlipMatrixVertically =
-      new QAction(QIcon(getQPixmap("flip_vertical_xpm")), tr("Flip &V"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("flip_vertical_xpm")), tr("Flip &V"), this);
   actionFlipMatrixVertically->setShortcut(tr("Ctrl+Shift+V"));
   connect(actionFlipMatrixVertically, SIGNAL(triggered()), this,
           SLOT(flipMatrixVertically()));
 
-  actionFlipMatrixHorizontally = new QAction(
+  actionFlipMatrixHorizontally = new MantidQt::MantidWidgets::TrackedAction(
       QIcon(getQPixmap("flip_horizontal_xpm")), tr("Flip &H"), this);
   actionFlipMatrixHorizontally->setShortcut(tr("Ctrl+Shift+H"));
   connect(actionFlipMatrixHorizontally, SIGNAL(triggered()), this,
           SLOT(flipMatrixHorizontally()));
 
-  actionRotateMatrix = new QAction(QIcon(getQPixmap("rotate_clockwise_xpm")),
+  actionRotateMatrix = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("rotate_clockwise_xpm")),
                                    tr("R&otate 90"), this);
   actionRotateMatrix->setShortcut(tr("Ctrl+Shift+R"));
   connect(actionRotateMatrix, SIGNAL(triggered()), this,
           SLOT(rotateMatrix90()));
 
   actionRotateMatrixMinus =
-      new QAction(QIcon(getQPixmap("rotate_counterclockwise_xpm")),
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("rotate_counterclockwise_xpm")),
                   tr("Rotate &-90"), this);
   actionRotateMatrixMinus->setShortcut(tr("Ctrl+Alt+R"));
   connect(actionRotateMatrixMinus, SIGNAL(triggered()), this,
           SLOT(rotateMatrixMinus90()));
 
-  actionInvertMatrix = new QAction(tr("&Invert"), this);
+  actionInvertMatrix = new MantidQt::MantidWidgets::TrackedAction(tr("&Invert"), this);
   connect(actionInvertMatrix, SIGNAL(triggered()), this, SLOT(invertMatrix()));
 
-  actionMatrixDeterminant = new QAction(tr("&Determinant"), this);
+  actionMatrixDeterminant = new MantidQt::MantidWidgets::TrackedAction(tr("&Determinant"), this);
   connect(actionMatrixDeterminant, SIGNAL(triggered()), this,
           SLOT(matrixDeterminant()));
 
-  actionViewMatrixImage = new QAction(tr("&Image mode"), this);
+  actionViewMatrixImage = new MantidQt::MantidWidgets::TrackedAction(tr("&Image mode"), this);
   actionViewMatrixImage->setShortcut(tr("Ctrl+Shift+I"));
   connect(actionViewMatrixImage, SIGNAL(triggered()), this,
           SLOT(viewMatrixImage()));
   actionViewMatrixImage->setCheckable(true);
 
-  actionViewMatrix = new QAction(tr("&Data mode"), this);
+  actionViewMatrix = new MantidQt::MantidWidgets::TrackedAction(tr("&Data mode"), this);
   actionViewMatrix->setShortcut(tr("Ctrl+Shift+D"));
   connect(actionViewMatrix, SIGNAL(triggered()), this, SLOT(viewMatrixTable()));
   actionViewMatrix->setCheckable(true);
 
-  actionMatrixXY = new QAction(tr("Show &X/Y"), this);
+  actionMatrixXY = new MantidQt::MantidWidgets::TrackedAction(tr("Show &X/Y"), this);
   actionMatrixXY->setShortcut(tr("Ctrl+Shift+X"));
   connect(actionMatrixXY, SIGNAL(triggered()), this, SLOT(viewMatrixXY()));
   actionMatrixXY->setCheckable(true);
 
-  actionMatrixColumnRow = new QAction(tr("Show &Column/Row"), this);
+  actionMatrixColumnRow = new MantidQt::MantidWidgets::TrackedAction(tr("Show &Column/Row"), this);
   actionMatrixColumnRow->setShortcut(tr("Ctrl+Shift+C"));
   connect(actionMatrixColumnRow, SIGNAL(triggered()), this,
           SLOT(viewMatrixColumnRow()));
   actionMatrixColumnRow->setCheckable(true);
 
-  actionMatrixGrayScale = new QAction(tr("&Gray Scale"), this);
+  actionMatrixGrayScale = new MantidQt::MantidWidgets::TrackedAction(tr("&Gray Scale"), this);
   connect(actionMatrixGrayScale, SIGNAL(triggered()), this,
           SLOT(setMatrixGrayScale()));
   actionMatrixGrayScale->setCheckable(true);
 
-  actionMatrixRainbowScale = new QAction(tr("&Rainbow"), this);
+  actionMatrixRainbowScale = new MantidQt::MantidWidgets::TrackedAction(tr("&Rainbow"), this);
   connect(actionMatrixRainbowScale, SIGNAL(triggered()), this,
           SLOT(setMatrixRainbowScale()));
   actionMatrixRainbowScale->setCheckable(true);
 
-  actionMatrixCustomScale = new QAction(tr("&Custom"), this);
+  actionMatrixCustomScale = new MantidQt::MantidWidgets::TrackedAction(tr("&Custom"), this);
   connect(actionMatrixCustomScale, SIGNAL(triggered()), this,
           SLOT(showColorMapDialog()));
   actionMatrixCustomScale->setCheckable(true);
 
-  actionExportMatrix = new QAction(tr("&Export Image ..."), this);
+  actionExportMatrix = new MantidQt::MantidWidgets::TrackedAction(tr("&Export Image ..."), this);
   connect(actionExportMatrix, SIGNAL(triggered()), this, SLOT(exportMatrix()));
 
-  actionConvertMatrixDirect = new QAction(tr("&Direct"), this);
+  actionConvertMatrixDirect = new MantidQt::MantidWidgets::TrackedAction(tr("&Direct"), this);
   connect(actionConvertMatrixDirect, SIGNAL(triggered()), this,
           SLOT(convertMatrixToTableDirect()));
 
-  actionConvertMatrixXYZ = new QAction(tr("&XYZ Columns"), this);
+  actionConvertMatrixXYZ = new MantidQt::MantidWidgets::TrackedAction(tr("&XYZ Columns"), this);
   connect(actionConvertMatrixXYZ, SIGNAL(triggered()), this,
           SLOT(convertMatrixToTableXYZ()));
 
-  actionConvertMatrixYXZ = new QAction(tr("&YXZ Columns"), this);
+  actionConvertMatrixYXZ = new MantidQt::MantidWidgets::TrackedAction(tr("&YXZ Columns"), this);
   connect(actionConvertMatrixYXZ, SIGNAL(triggered()), this,
           SLOT(convertMatrixToTableYXZ()));
 
-  actionMatrixFFTDirect = new QAction(tr("&Forward FFT"), this);
+  actionMatrixFFTDirect = new MantidQt::MantidWidgets::TrackedAction(tr("&Forward FFT"), this);
   connect(actionMatrixFFTDirect, SIGNAL(triggered()), this,
           SLOT(matrixDirectFFT()));
 
-  actionMatrixFFTInverse = new QAction(tr("&Inverse FFT"), this);
+  actionMatrixFFTInverse = new MantidQt::MantidWidgets::TrackedAction(tr("&Inverse FFT"), this);
   connect(actionMatrixFFTInverse, SIGNAL(triggered()), this,
           SLOT(matrixInverseFFT()));
 
-  actionConvertTable = new QAction(tr("Convert to &Matrix"), this);
+  actionConvertTable = new MantidQt::MantidWidgets::TrackedAction(tr("Convert to &Matrix"), this);
   connect(actionConvertTable, SIGNAL(triggered()), this,
           SLOT(convertTableToMatrix()));
 
   actionConvertTableToWorkspace =
-      new QAction(tr("Convert to Table&Workspace"), this);
+      new MantidQt::MantidWidgets::TrackedAction(tr("Convert to Table&Workspace"), this);
   connect(actionConvertTableToWorkspace, SIGNAL(triggered()), this,
           SLOT(convertTableToWorkspace()));
 
   actionConvertTableToMatrixWorkspace =
-      new QAction(tr("Convert to MatrixWorkspace"), this);
+      new MantidQt::MantidWidgets::TrackedAction(tr("Convert to MatrixWorkspace"), this);
   connect(actionConvertTableToMatrixWorkspace, SIGNAL(triggered()), this,
           SLOT(convertTableToMatrixWorkspace()));
 
-  actionPlot3DWireFrame = new QAction(QIcon(getQPixmap("lineMesh_xpm")),
+  actionPlot3DWireFrame = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("lineMesh_xpm")),
                                       tr("3D &Wire Frame"), this);
   connect(actionPlot3DWireFrame, SIGNAL(triggered()), this,
           SLOT(plot3DWireframe()));
 
-  actionPlot3DHiddenLine = new QAction(QIcon(getQPixmap("grid_only_xpm")),
+  actionPlot3DHiddenLine = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("grid_only_xpm")),
                                        tr("3D &Hidden Line"), this);
   connect(actionPlot3DHiddenLine, SIGNAL(triggered()), this,
           SLOT(plot3DHiddenLine()));
 
   actionPlot3DPolygons =
-      new QAction(QIcon(getQPixmap("no_grid_xpm")), tr("3D &Polygons"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("no_grid_xpm")), tr("3D &Polygons"), this);
   connect(actionPlot3DPolygons, SIGNAL(triggered()), this,
           SLOT(plot3DPolygons()));
 
-  actionPlot3DWireSurface = new QAction(QIcon(getQPixmap("grid_poly_xpm")),
+  actionPlot3DWireSurface = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("grid_poly_xpm")),
                                         tr("3D Wire &Surface"), this);
   connect(actionPlot3DWireSurface, SIGNAL(triggered()), this,
           SLOT(plot3DWireSurface()));
 
-  actionColorMap = new QAction(QIcon(getQPixmap("color_map_xpm")),
+  actionColorMap = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("color_map_xpm")),
                                tr("Contour - &Color Fill"), this);
   connect(actionColorMap, SIGNAL(triggered()), this, SLOT(plotColorMap()));
 
-  actionContourMap = new QAction(QIcon(getQPixmap("contour_map_xpm")),
+  actionContourMap = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("contour_map_xpm")),
                                  tr("Contour &Lines"), this);
   connect(actionContourMap, SIGNAL(triggered()), this, SLOT(plotContour()));
 
-  actionGrayMap = new QAction(QIcon(getQPixmap("gray_map_xpm")),
+  actionGrayMap = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("gray_map_xpm")),
                               tr("&Gray Scale Map"), this);
   connect(actionGrayMap, SIGNAL(triggered()), this, SLOT(plotGrayScale()));
 
   actionNoContourColorMap =
-      new QAction(QIcon(getQPixmap("color_map_xpm")), tr("Color &Fill"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("color_map_xpm")), tr("Color &Fill"), this);
   connect(actionNoContourColorMap, SIGNAL(triggered()), this,
           SLOT(plotNoContourColorMap()));
 
-  actionSortTable = new QAction(tr("Sort Ta&ble"), this);
+  actionSortTable = new MantidQt::MantidWidgets::TrackedAction(tr("Sort Ta&ble"), this);
   connect(actionSortTable, SIGNAL(triggered()), this, SLOT(sortActiveTable()));
 
-  actionSortSelection = new QAction(tr("Sort Columns"), this);
+  actionSortSelection = new MantidQt::MantidWidgets::TrackedAction(tr("Sort Columns"), this);
   connect(actionSortSelection, SIGNAL(triggered()), this,
           SLOT(sortSelection()));
 
-  actionNormalizeTable = new QAction(tr("&Table"), this);
+  actionNormalizeTable = new MantidQt::MantidWidgets::TrackedAction(tr("&Table"), this);
   connect(actionNormalizeTable, SIGNAL(triggered()), this,
           SLOT(normalizeActiveTable()));
 
-  actionNormalizeSelection = new QAction(tr("&Columns"), this);
+  actionNormalizeSelection = new MantidQt::MantidWidgets::TrackedAction(tr("&Columns"), this);
   connect(actionNormalizeSelection, SIGNAL(triggered()), this,
           SLOT(normalizeSelection()));
 
-  actionCorrelate = new QAction(tr("Co&rrelate"), this);
+  actionCorrelate = new MantidQt::MantidWidgets::TrackedAction(tr("Co&rrelate"), this);
   connect(actionCorrelate, SIGNAL(triggered()), this, SLOT(correlate()));
 
-  actionAutoCorrelate = new QAction(tr("&Autocorrelate"), this);
+  actionAutoCorrelate = new MantidQt::MantidWidgets::TrackedAction(tr("&Autocorrelate"), this);
   connect(actionAutoCorrelate, SIGNAL(triggered()), this,
           SLOT(autoCorrelate()));
 
-  actionConvolute = new QAction(tr("&Convolute"), this);
+  actionConvolute = new MantidQt::MantidWidgets::TrackedAction(tr("&Convolute"), this);
   connect(actionConvolute, SIGNAL(triggered()), this, SLOT(convolute()));
 
-  actionDeconvolute = new QAction(tr("&Deconvolute"), this);
+  actionDeconvolute = new MantidQt::MantidWidgets::TrackedAction(tr("&Deconvolute"), this);
   connect(actionDeconvolute, SIGNAL(triggered()), this, SLOT(deconvolute()));
 
-  actionSetAscValues = new QAction(QIcon(getQPixmap("rowNumbers_xpm")),
+  actionSetAscValues = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("rowNumbers_xpm")),
                                    tr("Ro&w Numbers"), this);
   connect(actionSetAscValues, SIGNAL(triggered()), this, SLOT(setAscValues()));
 
-  actionSetRandomValues = new QAction(QIcon(getQPixmap("randomNumbers_xpm")),
+  actionSetRandomValues = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("randomNumbers_xpm")),
                                       tr("&Random Values"), this);
   connect(actionSetRandomValues, SIGNAL(triggered()), this,
           SLOT(setRandomValues()));
 
-  actionReadOnlyCol = new QAction(tr("&Read Only"), this);
+  actionReadOnlyCol = new MantidQt::MantidWidgets::TrackedAction(tr("&Read Only"), this);
   connect(actionReadOnlyCol, SIGNAL(triggered()), this, SLOT(setReadOnlyCol()));
 
-  actionSetXCol = new QAction(QIcon(getQPixmap("x_col_xpm")), tr("&X"), this);
+  actionSetXCol = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("x_col_xpm")), tr("&X"), this);
   connect(actionSetXCol, SIGNAL(triggered()), this, SLOT(setXCol()));
 
-  actionSetYCol = new QAction(QIcon(getQPixmap("y_col_xpm")), tr("&Y"), this);
+  actionSetYCol = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("y_col_xpm")), tr("&Y"), this);
   connect(actionSetYCol, SIGNAL(triggered()), this, SLOT(setYCol()));
 
-  actionSetZCol = new QAction(QIcon(getQPixmap("z_col_xpm")), tr("&Z"), this);
+  actionSetZCol = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("z_col_xpm")), tr("&Z"), this);
   connect(actionSetZCol, SIGNAL(triggered()), this, SLOT(setZCol()));
 
-  actionSetXErrCol = new QAction(tr("X E&rror"), this);
+  actionSetXErrCol = new MantidQt::MantidWidgets::TrackedAction(tr("X E&rror"), this);
   connect(actionSetXErrCol, SIGNAL(triggered()), this, SLOT(setXErrCol()));
 
   actionSetYErrCol =
-      new QAction(QIcon(getQPixmap("errors_xpm")), tr("Y &Error"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("errors_xpm")), tr("Y &Error"), this);
   connect(actionSetYErrCol, SIGNAL(triggered()), this, SLOT(setYErrCol()));
 
-  actionDisregardCol = new QAction(QIcon(getQPixmap("disregard_col_xpm")),
+  actionDisregardCol = new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("disregard_col_xpm")),
                                    tr("&Disregard"), this);
   connect(actionDisregardCol, SIGNAL(triggered()), this, SLOT(disregardCol()));
 
   actionSetLabelCol =
-      new QAction(QIcon(getQPixmap("set_label_col_xpm")), tr("&Label"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("set_label_col_xpm")), tr("&Label"), this);
   connect(actionSetLabelCol, SIGNAL(triggered()), this, SLOT(setLabelCol()));
 
   actionBoxPlot =
-      new QAction(QIcon(getQPixmap("boxPlot_xpm")), tr("&Box Plot"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(getQPixmap("boxPlot_xpm")), tr("&Box Plot"), this);
   connect(actionBoxPlot, SIGNAL(triggered()), this, SLOT(plotBoxDiagram()));
 
-  actionHomePage = new QAction(tr("&Mantid Homepage"), this); // Mantid change
+  actionHomePage = new MantidQt::MantidWidgets::TrackedAction(tr("&Mantid Homepage"), this); // Mantid change
   connect(actionHomePage, SIGNAL(triggered()), this, SLOT(showHomePage()));
 
-  actionHelpBugReports = new QAction(tr("Report a &Bug"), this);
+  actionHelpBugReports = new MantidQt::MantidWidgets::TrackedAction(tr("Report a &Bug"), this);
   connect(actionHelpBugReports, SIGNAL(triggered()), this,
           SLOT(showBugTracker()));
 
-  actionAskHelp = new QAction(tr("Ask for Help"), this);
+  actionAskHelp = new MantidQt::MantidWidgets::TrackedAction(tr("Ask for Help"), this);
   connect(actionAskHelp, SIGNAL(triggered()), this, SLOT(showBugTracker()));
 
-  actionShowCurvePlotDialog = new QAction(tr("&Plot details..."), this);
+  actionShowCurvePlotDialog = new MantidQt::MantidWidgets::TrackedAction(tr("&Plot details..."), this);
   connect(actionShowCurvePlotDialog, SIGNAL(triggered()), this,
           SLOT(showCurvePlotDialog()));
 
-  actionShowCurveWorksheet = new QAction(tr("&Worksheet"), this);
+  actionShowCurveWorksheet = new MantidQt::MantidWidgets::TrackedAction(tr("&Worksheet"), this);
   connect(actionShowCurveWorksheet, SIGNAL(triggered()), this,
           SLOT(showCurveWorksheet()));
 
-  actionCurveFullRange = new QAction(tr("&Reset to Full Range"), this);
+  actionCurveFullRange = new MantidQt::MantidWidgets::TrackedAction(tr("&Reset to Full Range"), this);
   connect(actionCurveFullRange, SIGNAL(triggered()), this,
           SLOT(setCurveFullRange()));
 
-  actionEditCurveRange = new QAction(tr("Edit &Range..."), this);
+  actionEditCurveRange = new MantidQt::MantidWidgets::TrackedAction(tr("Edit &Range..."), this);
   connect(actionEditCurveRange, SIGNAL(triggered()), this,
           SLOT(showCurveRangeDialog()));
 
-  actionRemoveCurve = new QAction(getQPixmap("close_xpm"), tr("&Delete"), this);
+  actionRemoveCurve = new MantidQt::MantidWidgets::TrackedAction(getQPixmap("close_xpm"), tr("&Delete"), this);
   connect(actionRemoveCurve, SIGNAL(triggered()), this, SLOT(removeCurve()));
 
-  actionHideCurve = new QAction(tr("&Hide"), this);
+  actionHideCurve = new MantidQt::MantidWidgets::TrackedAction(tr("&Hide"), this);
   connect(actionHideCurve, SIGNAL(triggered()), this, SLOT(hideCurve()));
 
-  actionHideOtherCurves = new QAction(tr("Hide &Other Curves"), this);
+  actionHideOtherCurves = new MantidQt::MantidWidgets::TrackedAction(tr("Hide &Other Curves"), this);
   connect(actionHideOtherCurves, SIGNAL(triggered()), this,
           SLOT(hideOtherCurves()));
 
-  actionShowAllCurves = new QAction(tr("&Show All Curves"), this);
+  actionShowAllCurves = new MantidQt::MantidWidgets::TrackedAction(tr("&Show All Curves"), this);
   connect(actionShowAllCurves, SIGNAL(triggered()), this,
           SLOT(showAllCurves()));
 
-  actionEditFunction = new QAction(tr("&Edit Function..."), this);
+  actionEditFunction = new MantidQt::MantidWidgets::TrackedAction(tr("&Edit Function..."), this);
   connect(actionEditFunction, SIGNAL(triggered()), this,
           SLOT(showFunctionDialog()));
 
-  actionFontBold = new QAction("B", this);
+  actionFontBold = new MantidQt::MantidWidgets::TrackedAction("B", this);
   actionFontBold->setToolTip(tr("Bold"));
   QFont font = appFont;
   font.setBold(true);
@@ -12411,7 +12412,7 @@ void ApplicationWindow::createActions() {
   actionFontBold->setCheckable(true);
   connect(actionFontBold, SIGNAL(toggled(bool)), this, SLOT(setBoldFont(bool)));
 
-  actionFontItalic = new QAction("It", this);
+  actionFontItalic = new MantidQt::MantidWidgets::TrackedAction("It", this);
   actionFontItalic->setToolTip(tr("Italic"));
   font = appFont;
   font.setItalic(true);
@@ -12421,16 +12422,16 @@ void ApplicationWindow::createActions() {
           SLOT(setItalicFont(bool)));
 
   actionSuperscript =
-      new QAction(getQPixmap("exp_xpm"), tr("Superscript"), this);
+      new MantidQt::MantidWidgets::TrackedAction(getQPixmap("exp_xpm"), tr("Superscript"), this);
   connect(actionSuperscript, SIGNAL(triggered()), this,
           SLOT(insertSuperscript()));
   actionSuperscript->setEnabled(false);
 
-  actionSubscript = new QAction(getQPixmap("index_xpm"), tr("Subscript"), this);
+  actionSubscript = new MantidQt::MantidWidgets::TrackedAction(getQPixmap("index_xpm"), tr("Subscript"), this);
   connect(actionSubscript, SIGNAL(triggered()), this, SLOT(insertSubscript()));
   actionSubscript->setEnabled(false);
 
-  actionUnderline = new QAction("U", this);
+  actionUnderline = new MantidQt::MantidWidgets::TrackedAction("U", this);
   actionUnderline->setToolTip(tr("Underline (Ctrl+U)"));
   actionUnderline->setShortcut(tr("Ctrl+U"));
   font = appFont;
@@ -12440,50 +12441,50 @@ void ApplicationWindow::createActions() {
   actionUnderline->setEnabled(false);
 
   actionGreekSymbol =
-      new QAction(QString(QChar(0x3B1)) + QString(QChar(0x3B2)), this);
+      new MantidQt::MantidWidgets::TrackedAction(QString(QChar(0x3B1)) + QString(QChar(0x3B2)), this);
   actionGreekSymbol->setToolTip(tr("Greek"));
   connect(actionGreekSymbol, SIGNAL(triggered()), this,
           SLOT(insertGreekSymbol()));
 
-  actionGreekMajSymbol = new QAction(QString(QChar(0x393)), this);
+  actionGreekMajSymbol = new MantidQt::MantidWidgets::TrackedAction(QString(QChar(0x393)), this);
   actionGreekMajSymbol->setToolTip(tr("Greek"));
   connect(actionGreekMajSymbol, SIGNAL(triggered()), this,
           SLOT(insertGreekMajSymbol()));
 
-  actionMathSymbol = new QAction(QString(QChar(0x222B)), this);
+  actionMathSymbol = new MantidQt::MantidWidgets::TrackedAction(QString(QChar(0x222B)), this);
   actionMathSymbol->setToolTip(tr("Mathematical Symbols"));
   connect(actionMathSymbol, SIGNAL(triggered()), this,
           SLOT(insertMathSymbol()));
 
-  actionclearAllMemory = new QAction("&Clear All Memory", this);
+  actionclearAllMemory = new MantidQt::MantidWidgets::TrackedAction("&Clear All Memory", this);
   actionclearAllMemory->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
   connect(actionclearAllMemory, SIGNAL(triggered()), mantidUI,
           SLOT(clearAllMemory()));
 
-  actionPanPlot = new QAction(QIcon(":/panning.png"), tr("Panning tool"), this);
+  actionPanPlot = new MantidQt::MantidWidgets::TrackedAction(QIcon(":/panning.png"), tr("Panning tool"), this);
   connect(actionPanPlot, SIGNAL(triggered()), this, SLOT(panOnPlot()));
 
-  actionCatalogLogin = new QAction("Login", this);
+  actionCatalogLogin = new MantidQt::MantidWidgets::TrackedAction("Login", this);
   actionCatalogLogin->setToolTip(tr("Catalog Login"));
   connect(actionCatalogLogin, SIGNAL(triggered()), this, SLOT(CatalogLogin()));
 
-  actionCatalogSearch = new QAction("Search", this);
+  actionCatalogSearch = new MantidQt::MantidWidgets::TrackedAction("Search", this);
   actionCatalogSearch->setToolTip(tr("Search data in archives."));
   connect(actionCatalogSearch, SIGNAL(triggered()), this,
           SLOT(CatalogSearch()));
 
-  actionCatalogPublish = new QAction("Publish", this);
+  actionCatalogPublish = new MantidQt::MantidWidgets::TrackedAction("Publish", this);
   actionCatalogPublish->setToolTip(tr("Publish data to the archives."));
   connect(actionCatalogPublish, SIGNAL(triggered()), this,
           SLOT(CatalogPublish()));
 
-  actionCatalogLogout = new QAction("Logout", this);
+  actionCatalogLogout = new MantidQt::MantidWidgets::TrackedAction("Logout", this);
   actionCatalogLogout->setToolTip(tr("Catalog Logout"));
   connect(actionCatalogLogout, SIGNAL(triggered()), this,
           SLOT(CatalogLogout()));
 
   actionWaterfallPlot =
-      new QAction(QIcon(":/waterfall_plot.png"), tr("&Waterfall Plot"), this);
+      new MantidQt::MantidWidgets::TrackedAction(QIcon(":/waterfall_plot.png"), tr("&Waterfall Plot"), this);
   connect(actionWaterfallPlot, SIGNAL(triggered()), this,
           SLOT(waterfallPlot()));
 }
