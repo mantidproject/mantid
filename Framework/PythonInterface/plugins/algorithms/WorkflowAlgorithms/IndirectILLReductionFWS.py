@@ -320,7 +320,12 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
                             WorkspaceTitle=wsname, Distribution=True, ParentWorkspace=mtd[ws_list[0]],
                             OutputWorkspace=wsname)
 
-            # AddSampleLog(Workspace=wsname, LogName='ReducedRuns', LogText=str(run_numbers))
+            run_list = '' # to set to sample logs
+
+            for ws in ws_list:
+                run_list += ws.split('_')[0] + ','
+
+            AddSampleLog(Workspace=wsname, LogName='ReducedRunsList', LogText=run_list.rstrip(','))
 
             for spectrum in range(nspectra):
 
