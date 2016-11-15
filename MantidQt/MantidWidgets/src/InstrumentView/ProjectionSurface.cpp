@@ -526,7 +526,6 @@ void ProjectionSurface::drawPeakComparisonLine(QPainter &painter) const {
     windowRect.findTransform(transform, painter.viewport());
     auto p1 = transform.map(m_selectedMarkers.first);
     auto p2 = transform.map(m_selectedMarkers.second);
-
     painter.setPen(Qt::red);
     painter.drawLine(p1, p2);
   }
@@ -647,6 +646,10 @@ void ProjectionSurface::clearPeakOverlays() {
     m_peakShapesStyle = 0;
     emit peaksWorkspaceDeleted();
   }
+  m_selectedPeaks.first = nullptr;
+  m_selectedPeaks.second = nullptr;
+  m_selectedMarkers.first = QPointF();
+  m_selectedMarkers.second = QPointF();
 }
 
 /**
@@ -738,6 +741,20 @@ void ProjectionSurface::touchComponentAt(int x, int y) {
 void ProjectionSurface::erasePeaks(const QRect &rect) {
   foreach (PeakOverlay *po, m_peakShapes) {
     po->selectIn(rect);
+    auto peakMarkers = po->getSelectedPeakMarkers();
+
+    // clear selected peak markers
+    for (auto marker : peakMarkers) {
+      auto peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
+      if (m_selectedPeaks.first == peak ||
+          m_selectedPeaks.second == peak) {
+        m_selectedPeaks.first = nullptr;
+        m_selectedPeaks.second = nullptr;
+        m_selectedMarkers.first = QPointF();
+        m_selectedMarkers.second = QPointF();
+      }
+    }
+
     po->removeSelectedShapes();
   }
 }
