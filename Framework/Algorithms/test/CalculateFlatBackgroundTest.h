@@ -521,7 +521,7 @@ public:
     const std::vector<std::string> modes{"Linear Fit", "Mean",
                                          "Moving Average"};
     for (const auto &mode : modes) {
-      executeWithTwoBinInputWorkspace(y1, y2, outWsName, mode,
+      executeWithTwoBinInputWorkspace(y1, y2, 1, outWsName, mode, "",
                                       "Subtract Background");
       MatrixWorkspace_sptr outputWS =
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -531,7 +531,7 @@ public:
       AnalysisDataService::Instance().remove(outWsName);
     }
     for (const auto &mode : modes) {
-      executeWithTwoBinInputWorkspace(y1, y2, outWsName, mode,
+      executeWithTwoBinInputWorkspace(y1, y2, 1, outWsName, mode, "",
                                       "Return Background");
       MatrixWorkspace_sptr outputWS =
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -540,6 +540,42 @@ public:
       TS_ASSERT_DELTA(outputWS->y(0)[1], 0, 1e-12)
       AnalysisDataService::Instance().remove(outWsName);
     }
+  }
+
+  void test_SubtractBackgroundWhenNotAllSpectraSelected() {
+    const double y1 = 23;
+    const double y2 = 42;
+    const std::string outWsName("Removed1");
+    // Subtract background only from spectrum index 1.
+    // The spectrum at index 0 should be left unchanged.
+    executeWithTwoBinInputWorkspace(y1, y2, 2, outWsName, "Mean", "1",
+                                    "Subtract Background");
+    MatrixWorkspace_sptr outputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outWsName);
+    TS_ASSERT_DELTA(outputWS->y(0)[0], y1, 1e-12)
+    TS_ASSERT_DELTA(outputWS->y(0)[1], y2, 1e-12)
+    TS_ASSERT_DELTA(outputWS->y(1)[0], y1 - (y1 + y2) / 2, 1e-12)
+    TS_ASSERT_DELTA(outputWS->y(1)[1], y2 - (y1 + y2) / 2, 1e-12)
+    AnalysisDataService::Instance().remove(outWsName);
+  }
+
+  void test_ReturnBackgroundWhenNotAllSpectraSelected() {
+    const double y1 = 23;
+    const double y2 = 42;
+    const std::string outWsName("Removed1");
+    // Return background only for spectrum index 1.
+    // The output at spectrum index 0 should be zero.
+    executeWithTwoBinInputWorkspace(y1, y2, 2, outWsName, "Mean", "1",
+                                    "Return Background");
+    MatrixWorkspace_sptr outputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outWsName);
+    TS_ASSERT_DELTA(outputWS->y(0)[0], 0, 1e-12)
+    TS_ASSERT_DELTA(outputWS->y(0)[1], 0, 1e-12)
+    TS_ASSERT_DELTA(outputWS->y(1)[0], (y1 + y2) / 2, 1e-12)
+    TS_ASSERT_DELTA(outputWS->y(1)[1], (y1 + y2) / 2, 1e-12)
+    AnalysisDataService::Instance().remove(outWsName);
   }
 
 private:
@@ -672,23 +708,26 @@ private:
   }
 
   void executeWithTwoBinInputWorkspace(const double y1, const double y2,
+                                       const size_t histogramCount,
                                        const std::string &outWsName,
                                        const std::string &mode,
+                                       const std::string &wsIndexList,
                                        const std::string &outputMode) {
-    const size_t spectraCount = 1;
     const size_t binCount = 2;
     Mantid::DataObjects::Workspace2D_sptr WS(
         new Mantid::DataObjects::Workspace2D);
-    WS->initialize(spectraCount, binCount + 1, binCount);
+    WS->initialize(histogramCount, binCount + 1, binCount);
     const double xBegin = -0.2;
     const double xEnd = 0.6;
-    WS->mutableX(0)[0] = xBegin;
-    WS->mutableX(0)[1] = xBegin + (xEnd - xBegin) / 2.0;
-    WS->mutableX(0)[2] = xEnd;
-    WS->mutableY(0)[0] = y1;
-    WS->mutableY(0)[1] = y2;
-    WS->mutableE(0)[0] = std::sqrt(std::abs(y1));
-    WS->mutableE(0)[1] = std::sqrt(std::abs(y2));
+    for (size_t i = 0; i < histogramCount; ++i) {
+      WS->mutableX(i)[0] = xBegin;
+      WS->mutableX(i)[1] = xBegin + (xEnd - xBegin) / 2.0;
+      WS->mutableX(i)[2] = xEnd;
+      WS->mutableY(i)[0] = y1;
+      WS->mutableY(i)[1] = y2;
+      WS->mutableE(i)[0] = std::sqrt(std::abs(y1));
+      WS->mutableE(i)[1] = std::sqrt(std::abs(y2));
+    }
     Mantid::Algorithms::CalculateFlatBackground flatBG;
     TS_ASSERT_THROWS_NOTHING(flatBG.initialize());
     TS_ASSERT(flatBG.isInitialized())
@@ -697,8 +736,10 @@ private:
     flatBG.setPropertyValue("OutputWorkspace", outWsName);
     flatBG.setProperty("StartX", xBegin);
     flatBG.setProperty("EndX", xEnd);
+    flatBG.setPropertyValue("WorkspaceIndexList", wsIndexList);
     flatBG.setPropertyValue("Mode", mode);
     flatBG.setPropertyValue("OutputMode", outputMode);
+    flatBG.setProperty("NullifyNegativeValues", false);
     flatBG.setProperty("AveragingWindowWidth", 1);
     TS_ASSERT_THROWS_NOTHING(flatBG.execute())
     TS_ASSERT(flatBG.isExecuted())
