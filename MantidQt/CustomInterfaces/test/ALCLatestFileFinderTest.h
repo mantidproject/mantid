@@ -211,7 +211,8 @@ public:
       std::ostringstream time, run;
       time << "2116-03-16T18:00:" << i;
       run << "900" << i;
-      m_files.emplace_back(time.str(), "MUSR", run.str());
+      m_files.emplace_back(time.str(), m_tmpDir.getDirectoryName(), "MUSR",
+                           run.str());
     }
   }
 
@@ -228,6 +229,8 @@ public:
   }
 
 private:
+  const ScopedDirectory m_tmpDir =
+      ScopedDirectory("ALCLatestFileFinderTestPerformance");
   std::vector<TestFile> m_files;
   std::string m_mostRecent;
 };
