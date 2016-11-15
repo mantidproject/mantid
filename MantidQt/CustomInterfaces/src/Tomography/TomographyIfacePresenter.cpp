@@ -561,7 +561,17 @@ void TomographyIfacePresenter::processRunRecon() {
     auto *worker =
         new MantidQt::CustomInterfaces::TomographyProcessHandler(this);
     worker->moveToThread(m_workerThread.get());
-
+    // QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    // auto currentPath = env.value("PATH");
+    // std::cout << "\n DEBUG >> PRESENTER CURRENT PATH >> "
+    //           << currentPath.toStdString() << "\n";
+    // QString newPath =
+    //     currentPath + ";C:\\Anaconda\\Lib;C:\\Anaconda\\Lib\\site-packages";
+    // std::cout << "\n DEBUG >> PRESENTER NEW PATH >> " <<
+    // newPath.toStdString()
+    //           << "\n";
+    // env.insert("PATH", newPath);
+    // worker->setProcessEnvironment(env);
     connect(m_workerThread.get(), SIGNAL(started()), worker,
             SLOT(startWorker()));
 

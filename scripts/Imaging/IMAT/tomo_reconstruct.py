@@ -55,7 +55,7 @@ from os import path
 # So insert in the path the directory that contains this file
 ff = os.path.split(path.dirname(__file__))[0]
 print(sys.version, ff)
-print(sys.path)
+print(sys.path) #y u no correct
 sys.path.insert(0, os.path.split(path.dirname(__file__))[0]) # noqa
 
 # import pydevd

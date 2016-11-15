@@ -113,8 +113,8 @@ public:
     //     "--median-filter-size=3", "--cor=0.000000", "--rotation=0",
     //     "--max-angle=360.000000", "--circular-mask=0.940000",
     //     "--out-img-format=png"};
-    const std::string runnnnnnnn = "C:\\Anaconda\\python.exe";
-    m_runnable = std::move(QString::fromStdString(runnnnnnnn));
+    // const std::string runnnnnnnn = "C:\\Anaconda\\python.exe";
+    m_runnable = std::move(QString::fromStdString(runnable));
     m_args = std::move(constructArgumentsFromVector(args));
 
     std::cout << "\nDEBUG >> SETUP PROCESS >> " << m_runnable.toStdString()
@@ -132,10 +132,21 @@ public:
 public slots:
   bool isRunning() { return this->state() == QProcess::ProcessState::Running; }
   void startWorker() {
-    std::cout << "\nDEBUG >> STARTING PROCESS\n";
+    std::cout << "\n\n\nDEBUG >> STARTING PROCESS <<<<<<<<\n\n\n";
     start(m_runnable, m_args);
+    auto env = this->processEnvironment();
     std::cout << "\nDEBUG >> PROCESSID " << this->pid() << " ... "
               << (long long)this->pid() << "\n";
+    auto currentPath = env.value("PATH");
+    std::cout << "\nDEBUG >> PROCESS CURRENT PATH >> "
+              << currentPath.toStdString() << "\n";
+    QString newPath =
+        currentPath + ";C:\\Anaconda\\Lib;C:\\Anaconda\\Lib\\site-packages";
+    std::cout << "\nDEBUG >> PROCESS NEW PATH >> " << newPath.toStdString()
+              << "\n";
+    env.insert("PATH", newPath);
+    this->setProcessEnvironment(env);
+    // pretty sure this blocks the main thread..
     while (waitForReadyRead(10000)) {
     }
 
