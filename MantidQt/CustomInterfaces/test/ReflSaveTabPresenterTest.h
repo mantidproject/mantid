@@ -37,17 +37,18 @@ public:
     MockSaveTabView mockView;
     ReflSaveTabPresenter presenter(&mockView);
 
-    std::vector<std::string> wsNames = { "ws1", "ws2", "ws3" };
+    std::vector<std::string> wsNames = {"ws1", "ws2", "ws3"};
     createWS(wsNames[0]);
     createWS(wsNames[1]);
     createWS(wsNames[2]);
 
     // Group workspaces 1 and 2 together
-    IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
+    IAlgorithm_sptr groupAlg =
+        AlgorithmManager::Instance().create("GroupWorkspaces");
     groupAlg->setProperty("InputWorkspaces", {"ws1", "ws2"});
     groupAlg->setProperty("OutputWorkspace", "groupWs");
     groupAlg->execute();
-    
+
     EXPECT_CALL(mockView, clearWorkspaceList()).Times(Exactly(1));
     // Workspace 'groupWs' should not be included in the workspace list
     EXPECT_CALL(mockView, setWorkspaceList(wsNames)).Times(Exactly(1));
@@ -63,11 +64,11 @@ public:
     createWS("ws1");
 
     EXPECT_CALL(mockView, clearWorkspaceList()).Times(Exactly(2));
-    EXPECT_CALL(mockView, setWorkspaceList(std::vector<std::string> { "ws1" })).
-      Times(Exactly(1));
-    EXPECT_CALL(mockView, 
-      setWorkspaceList(std::vector<std::string> { "ws1", "ws2" })).
-      Times(Exactly(1));
+    EXPECT_CALL(mockView, setWorkspaceList(std::vector<std::string>{"ws1"}))
+        .Times(Exactly(1));
+    EXPECT_CALL(mockView,
+                setWorkspaceList(std::vector<std::string>{"ws1", "ws2"}))
+        .Times(Exactly(1));
     presenter.populateWorkspaceList();
     createWS("ws2");
     presenter.populateWorkspaceList();
@@ -84,12 +85,11 @@ public:
     createWS("someWsName");
 
     EXPECT_CALL(mockView, clearWorkspaceList()).Times(Exactly(2));
-    EXPECT_CALL(mockView, setWorkspaceList(
-      std::vector<std::string> { "anotherWs", "different", "someWsName" }))
-      .Times(Exactly(1));
-    EXPECT_CALL(mockView, setWorkspaceList(
-      std::vector<std::string> { "anotherWs", "someWsName" }))
-      .Times(Exactly(1));
+    EXPECT_CALL(mockView, setWorkspaceList(std::vector<std::string>{
+                              "anotherWs", "different", "someWsName"}))
+        .Times(Exactly(1));
+    EXPECT_CALL(mockView, setWorkspaceList(std::vector<std::string>{
+                              "anotherWs", "someWsName"})).Times(Exactly(1));
     presenter.populateWorkspaceList();
     presenter.filterWorkspaceNames("Ws", false);
     AnalysisDataService::Instance().clear();
@@ -106,12 +106,12 @@ public:
     createWS("pear_cut");
 
     EXPECT_CALL(mockView, clearWorkspaceList()).Times(Exactly(2));
-    EXPECT_CALL(mockView, setWorkspaceList(
-      std::vector<std::string> { "_42", "apple_113", "grape_", "pear_cut"}))
-      .Times(Exactly(1));
-    EXPECT_CALL(mockView, setWorkspaceList(
-      std::vector<std::string> { "_42", "apple_113" }))
-      .Times(Exactly(1));
+    EXPECT_CALL(mockView, setWorkspaceList(std::vector<std::string>{
+                              "_42", "apple_113", "grape_", "pear_cut"}))
+        .Times(Exactly(1));
+    EXPECT_CALL(mockView,
+                setWorkspaceList(std::vector<std::string>{"_42", "apple_113"}))
+        .Times(Exactly(1));
     presenter.populateWorkspaceList();
     presenter.filterWorkspaceNames("[a-zA-Z]*_[0-9]+", true);
     AnalysisDataService::Instance().clear();
@@ -124,8 +124,10 @@ public:
 
     createWS("ws1");
     std::vector<std::string> logs;
-    const auto &properties = AnalysisDataService::Instance().retrieveWS
-      <MatrixWorkspace>("ws1")->run().getProperties();
+    const auto &properties = AnalysisDataService::Instance()
+                                 .retrieveWS<MatrixWorkspace>("ws1")
+                                 ->run()
+                                 .getProperties();
     for (auto it = properties.begin(); it != properties.end(); it++) {
       logs.push_back((*it)->name());
     }
@@ -142,7 +144,7 @@ public:
     ReflSaveTabPresenter presenter(&mockView);
 
     std::string savePath = createSavePath();
-    std::vector<std::string> wsNames = { "ws1", "ws2", "ws3" };
+    std::vector<std::string> wsNames = {"ws1", "ws2", "ws3"};
     createWS(wsNames[0]);
     createWS(wsNames[1]);
     createWS(wsNames[2]);
@@ -150,14 +152,14 @@ public:
     EXPECT_CALL(mockView, setWorkspaceList(wsNames)).Times(Exactly(1));
     EXPECT_CALL(mockView, getTitleCheck()).Times(Exactly(1));
     EXPECT_CALL(mockView, getSelectedParameters())
-      .Times(Exactly(1))
-      .WillOnce(Return(std::vector<std::string>()));
+        .Times(Exactly(1))
+        .WillOnce(Return(std::vector<std::string>()));
     EXPECT_CALL(mockView, getQResolutionCheck()).Times(Exactly(1));
     EXPECT_CALL(mockView, getPrefix()).Times(Exactly(1));
     EXPECT_CALL(mockView, getFileFormatIndex()).Times(Exactly(1));
     EXPECT_CALL(mockView, getSelectedWorkspaces())
-      .Times(Exactly(1))
-      .WillOnce(Return(wsNames));
+        .Times(Exactly(1))
+        .WillOnce(Return(wsNames));
     mockView.setWorkspaceList(wsNames);
     presenter.saveWorkspaces(savePath);
     Poco::File(savePath + wsNames[0] + ".dat").remove();
@@ -172,7 +174,7 @@ public:
     ReflSaveTabPresenter presenter(&mockView);
 
     std::string saveDir = Mantid::Kernel::ConfigService::Instance().getString(
-      "defaultsave.directory");
+        "defaultsave.directory");
 
     EXPECT_CALL(mockView, setSavePath(saveDir)).Times(Exactly(1));
     presenter.suggestSaveDir();
@@ -181,9 +183,10 @@ public:
 
 private:
   void createWS(std::string name) {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("CreateWorkspace");
-    alg->setProperty("DataX", std::vector<double> { 1, 2, 3 });
-    alg->setProperty("DataY", std::vector<double> { 1, 2 });
+    IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create("CreateWorkspace");
+    alg->setProperty("DataX", std::vector<double>{1, 2, 3});
+    alg->setProperty("DataY", std::vector<double>{1, 2});
     alg->setProperty("OutputWorkspace", name);
     alg->execute();
   }
@@ -191,11 +194,11 @@ private:
   std::string createSavePath() {
     // First attempt to obtain path from default save directory
     std::string savePath = Mantid::Kernel::ConfigService::Instance().getString(
-      "defaultsave.directory");
+        "defaultsave.directory");
     if (savePath.empty())
       // Otherwise use current path as save directory
       savePath = Poco::Path::current();
-    
+
     return savePath;
   }
 };

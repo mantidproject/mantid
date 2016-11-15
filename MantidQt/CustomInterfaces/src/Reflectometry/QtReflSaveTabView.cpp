@@ -20,18 +20,16 @@ QtReflSaveTabView::~QtReflSaveTabView() {}
 /**
 Initialize the Interface
 */
-void QtReflSaveTabView::initLayout() { 
-  m_ui.setupUi(this); 
+void QtReflSaveTabView::initLayout() {
+  m_ui.setupUi(this);
 
   connect(m_ui.refreshButton, SIGNAL(clicked()), this,
           SLOT(populateListOfWorkspaces()));
-  connect(m_ui.saveButton, SIGNAL(clicked()), this,
-          SLOT(saveWorkspaces()));
+  connect(m_ui.saveButton, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
   connect(m_ui.filterEdit, SIGNAL(textEdited(const QString &)), this,
           SLOT(filterWorkspaceList()));
-  connect(m_ui.listOfWorkspaces,
-          SIGNAL(itemDoubleClicked(QListWidgetItem*)), this,
-          SLOT(requestWorkspaceParams()));
+  connect(m_ui.listOfWorkspaces, SIGNAL(itemDoubleClicked(QListWidgetItem *)),
+          this, SLOT(requestWorkspaceParams()));
 
   m_presenter.reset(new ReflSaveTabPresenter(this));
   populateListOfWorkspaces();
@@ -40,8 +38,8 @@ void QtReflSaveTabView::initLayout() {
 /** Returns the save path
 * @return :: The save path
 */
-std::string QtReflSaveTabView::getSavePath() const { 
-  return m_ui.savePathEdit->text().toStdString(); 
+std::string QtReflSaveTabView::getSavePath() const {
+  return m_ui.savePathEdit->text().toStdString();
 }
 
 /** Sets the save path
@@ -164,7 +162,7 @@ void QtReflSaveTabView::setWorkspaceList(
 * @param names :: The list of workspace run logs
 */
 void QtReflSaveTabView::setParametersList(
-  const std::vector<std::string> &logs) const {
+    const std::vector<std::string> &logs) const {
   for (auto it = logs.begin(); it != logs.end(); it++) {
     m_ui.listOfLoggedParameters->addItem(QString::fromStdString(*it));
   }

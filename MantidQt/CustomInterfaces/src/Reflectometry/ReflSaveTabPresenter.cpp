@@ -25,9 +25,9 @@ ReflSaveTabPresenter::ReflSaveTabPresenter(IReflSaveTabView *view)
     : m_view(view) {
 
   FrameworkManager::Instance();
-  saveAlgs = { "SaveReflCustomAscii", "SaveReflThreeColumnAscii",
-    "SaveANSTOAscii", "SaveILLCosmosAscii" };
-  saveExts = { ".dat", ".dat", ".txt", ".mft" };
+  saveAlgs = {"SaveReflCustomAscii", "SaveReflThreeColumnAscii",
+              "SaveANSTOAscii", "SaveILLCosmosAscii"};
+  saveExts = {".dat", ".dat", ".txt", ".mft"};
 }
 
 /** Destructor
@@ -64,8 +64,8 @@ void ReflSaveTabPresenter::populateWorkspaceList() {
 * @param filter :: filter text string
 * @param regexCheck :: whether to use regex in filtering
 */
-void ReflSaveTabPresenter::filterWorkspaceNames(std::string filter, 
-    bool regexCheck) {
+void ReflSaveTabPresenter::filterWorkspaceNames(std::string filter,
+                                                bool regexCheck) {
   m_view->clearWorkspaceList();
   auto wsNames = getAvailableWorkspaceNames();
   std::vector<std::string> validNames(wsNames.size());
@@ -75,15 +75,18 @@ void ReflSaveTabPresenter::filterWorkspaceNames(std::string filter,
     // Use regex search to find names that contain the filter sequence
     try {
       std::regex rgx(filter);
-      it = std::copy_if(wsNames.begin(), wsNames.end(), validNames.begin(),
-        [rgx](std::string s) { return std::regex_search(s, rgx); });
-    } catch (std::regex_error&) {
+      it = std::copy_if(
+          wsNames.begin(), wsNames.end(), validNames.begin(),
+          [rgx](std::string s) { return std::regex_search(s, rgx); });
+    } catch (std::regex_error &) {
       g_log.error("Error, invalid regular expression\n");
     }
   } else {
     // Otherwise simply add names where the filter string is found in
     it = std::copy_if(wsNames.begin(), wsNames.end(), validNames.begin(),
-      [filter](std::string s) { return s.find(filter) != std::string::npos; });
+                      [filter](std::string s) {
+                        return s.find(filter) != std::string::npos;
+                      });
   }
 
   validNames.resize(std::distance(validNames.begin(), it));
@@ -98,8 +101,10 @@ void ReflSaveTabPresenter::populateParametersList(std::string wsName) {
   m_view->clearParametersList();
 
   std::vector<std::string> logs;
-  const auto &properties = AnalysisDataService::Instance().retrieveWS
-    <MatrixWorkspace>(wsName)->run().getProperties();
+  const auto &properties = AnalysisDataService::Instance()
+                               .retrieveWS<MatrixWorkspace>(wsName)
+                               ->run()
+                               .getProperties();
   for (auto it = properties.begin(); it != properties.end(); it++) {
     logs.push_back((*it)->name());
   }
@@ -111,7 +116,8 @@ void ReflSaveTabPresenter::populateParametersList(std::string wsName) {
 void ReflSaveTabPresenter::saveWorkspaces(std::string saveDir) {
   // Check that save directory is valid
   if (saveDir.empty() || Poco::File(saveDir).isDirectory() == false) {
-    g_log.error("Directory specified doesn't exist or was invalid for your operating system");
+    g_log.error("Directory specified doesn't exist or was invalid for your "
+                "operating system");
     return;
   }
 
@@ -125,7 +131,7 @@ void ReflSaveTabPresenter::saveWorkspaces(std::string saveDir) {
   std::string algName = saveAlgs[formatIndex];
   std::string extension = saveExts[formatIndex];
   IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create(algName);
- 
+
   for (auto it = wsNames.begin(); it != wsNames.end(); it++) {
     // Add any additional algorithm-specific properties and execute
     if (algName != "SaveANSTOAscii") {
@@ -140,8 +146,9 @@ void ReflSaveTabPresenter::saveWorkspaces(std::string saveDir) {
     auto path = Poco::Path(saveDir);
     path.append(prefix + *it + extension);
     saveAlg->setProperty("Filename", path.toString());
-    saveAlg->setProperty("InputWorkspace",
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(*it));
+    saveAlg->setProperty(
+        "InputWorkspace",
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(*it));
     saveAlg->execute();
   }
 }
@@ -150,7 +157,7 @@ void ReflSaveTabPresenter::saveWorkspaces(std::string saveDir) {
 */
 void ReflSaveTabPresenter::suggestSaveDir() {
   std::string path = Mantid::Kernel::ConfigService::Instance().getString(
-    "defaultsave.directory");
+      "defaultsave.directory");
   m_view->setSavePath(path);
 }
 
@@ -161,10 +168,11 @@ std::vector<std::string> ReflSaveTabPresenter::getAvailableWorkspaceNames() {
   auto allNames = AnalysisDataService::Instance().getObjectNames();
   // Exclude workspace groups as they cannot be saved to ascii
   std::vector<std::string> validNames(allNames.size());
-  auto it = std::copy_if(allNames.begin(), allNames.end(), validNames.begin(),
-    [](std::string s) { return (
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(s) == false); 
-  });
+  auto it = std::copy_if(
+      allNames.begin(), allNames.end(), validNames.begin(), [](std::string s) {
+        return (AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(s) ==
+                false);
+      });
   validNames.resize(std::distance(validNames.begin(), it));
 
   return validNames;

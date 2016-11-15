@@ -65,8 +65,8 @@ IReflSettingsTabPresenter *QtReflMainWindowView::createSettingsTab() {
 */
 void QtReflMainWindowView::createSaveTab() {
 
-	QtReflSaveTabView *saveTab = new QtReflSaveTabView(this);
-	m_ui.mainTab->addTab(saveTab, QString("Save ASCII"));
+  QtReflSaveTabView *saveTab = new QtReflSaveTabView(this);
+  m_ui.mainTab->addTab(saveTab, QString("Save ASCII"));
 }
 
 /**
