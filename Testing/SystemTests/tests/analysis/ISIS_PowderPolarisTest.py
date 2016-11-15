@@ -14,6 +14,7 @@ DIRS = config['datasearch.directories'].split(';')
 class isis_powder_PolarisVanadiumCalTest(stresstesting.MantidStressTest):
 
     calibration_results = None
+    existing_config = config['datasearch.directories']
 
     def requiredFiles(self):
         return _gen_required_files()
@@ -26,12 +27,14 @@ class isis_powder_PolarisVanadiumCalTest(stresstesting.MantidStressTest):
 
     def cleanup(self):
         # TODO clean up reference files properly
+        config['datasearch.directories'] = self.existing_config
         _clean_up()
 
 
 class isis_powder_PolarisFocusTest(stresstesting.MantidStressTest):
 
     focus_results = None
+    existing_config = config['datasearch.directories']
 
     def requiredFiles(self):
         return _gen_required_files()
@@ -45,7 +48,7 @@ class isis_powder_PolarisFocusTest(stresstesting.MantidStressTest):
         return _calibration_validation(self, self.focus_results)
 
     def cleanup(self):
-        pass
+        config['datasearch.directories'] = self.existing_config
         # TODO
 
 
@@ -115,11 +118,11 @@ def setup_polaris_instrument():
     user_name = "Test"
 
     calibration_dir = _get_calibration_dir()
-    raw_data_dir = os.path.join(DIRS[0], "POLARIS")
+    path_to_add = os.path.join(DIRS[0], "POLARIS")
+    config['datasearch.directories'] += ";" + path_to_add
     output_dir = _get_output_dir()
 
-    polaris_obj = polaris.Polaris(user_name=user_name, calibration_dir=calibration_dir, raw_data_dir=raw_data_dir,
-                                  output_dir=output_dir)
+    polaris_obj = polaris.Polaris(user_name=user_name, calibration_dir=calibration_dir, output_dir=output_dir)
     return polaris_obj
 
 

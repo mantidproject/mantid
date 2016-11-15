@@ -1,6 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
+from mantid import config
+
 import numpy as numpy
 
 import os
@@ -10,6 +12,7 @@ import isis_powder.common as common
 
 from isis_powder import pearl_calib_factory
 from isis_powder import pearl_cycle_factory
+from isis_powder.RunDetails import RunDetails
 
 from isis_powder.pearl_routines import fmode_output
 
@@ -30,7 +33,7 @@ class Pearl(AbstractInst):
     def __init__(self, user_name=None, calibration_dir=None, raw_data_dir=None, output_dir=None,
                  input_file_ext=".raw", tt_mode="TT88"):
 
-        super(Pearl, self).__init__(user_name=user_name, calibration_dir=calibration_dir, raw_data_dir=raw_data_dir,
+        super(Pearl, self).__init__(user_name=user_name, calibration_dir=calibration_dir,
                                     output_dir=output_dir, default_input_ext=input_file_ext)
 
         self._tt_mode = tt_mode
@@ -41,7 +44,7 @@ class Pearl(AbstractInst):
 
         # Old API support
         self._old_atten_file = None
-        self._old_api_uses_full_paths = False
+        self._existing_config = None
 
         # File names
         pearl_mc_absorption_file_name = "PRL112_DC25_10MM_FF.OUT"  # TODO
@@ -63,11 +66,13 @@ class Pearl(AbstractInst):
 
     # Methods #
 
-    def _get_calibration_full_paths(self, run_number):
-        cycle_dict = self._get_cycle_information(run_number=run_number)
+    def _get_run_details(self, run_number):
+        # TODO once we migrate this to another format (i.e. not the if/elif/else) implement cached val
+        cycle_dict = self._get_label_information(run_number=run_number)
 
         calibration_file, grouping_file, van_absorb, van_file =\
             pearl_calib_factory.get_calibration_filename(cycle=cycle_dict["cycle"], tt_mode=self._tt_mode)
+        cycle, instrument_version = pearl_cycle_factory.get_cycle_dir(run_number)
 
         calibration_dir = self.calibration_dir
 
@@ -76,17 +81,19 @@ class Pearl(AbstractInst):
         van_absorb_full_path = os.path.join(calibration_dir, van_absorb)
         van_file_full_path = os.path.join(calibration_dir, van_file)
 
-        # TODO when we move PEARL to save out splined vanadium files support them below
-        calibration_details = {"calibration": calibration_full_path,
-                               "grouping": grouping_full_path,
-                               "vanadium_absorption": van_absorb_full_path,
-                               "vanadium": van_file_full_path,
-                               "calibrated_vanadium": van_file_full_path}
+        run_details = RunDetails(calibration_path=calibration_full_path, grouping_path=grouping_full_path,
+                                 vanadium_name=van_file_full_path, run_number=run_number)
+        run_details.vanadium_absorption = van_absorb_full_path
+        run_details.label = cycle
+        run_details.instrument_version = instrument_version
 
-        return calibration_details
+        # TODO remove this when we move to saving splined van ws on PEARL
+        run_details.splined_vanadium = run_details.vanadium
 
-    @staticmethod
-    def _get_cycle_information(run_number):
+        return run_details
+
+    def _get_label_information(self, run_number):
+        # TODO remove this when we move to combining CAL/RUN factories
         run_input = ""
         if not run_number.isdigit():
             # Only take first valid number as it is probably of the form 12345_12350
@@ -119,7 +126,7 @@ class Pearl(AbstractInst):
 
     def _create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
         input_ws = common._load_current_normalised_ws(number=calibration_runs, instrument=self)
-        cycle_information = self._get_cycle_information(calibration_runs)
+        cycle_information = self._get_label_information(calibration_runs)
 
         if cycle_information["instrument_version"] == "new" or cycle_information["instrument_version"] == "new2":
             input_ws = mantid.Rebin(InputWorkspace=input_ws, Params="100,-0.0006,19950")
@@ -283,7 +290,7 @@ class Pearl(AbstractInst):
     def _do_silicon_calibration(self, runs_to_process, cal_file_name, grouping_file_name):
         # TODO fix all of this as the script is too limited to be useful
         create_si_ws = common._load_current_normalised_ws(number=runs_to_process, instrument=self)
-        cycle_details = self._get_cycle_information(runs_to_process)
+        cycle_details = self._get_label_information(runs_to_process)
         instrument_version = cycle_details["instrument_version"]
 
         if instrument_version == "new" or instrument_version == "new2":
@@ -364,6 +371,17 @@ class Pearl(AbstractInst):
             mspectra = 1
         return mspectra
 
+    def _generate_raw_data_cycle_dir(self, run_cycle):
+        if self._skip_appending_cycle_to_raw_dir():
+            return self.raw_data_dir
+        str_run_cycle = str(run_cycle)
+
+        # Append current cycle to raw data directory
+        generated_dir = os.path.join(self.raw_data_dir, str_run_cycle)
+        generated_dir += '/'
+
+        return generated_dir
+
     # Support for old API - This can be removed when PEARL_routines is removed
     def _old_api_constructor_set(self, user_name=None, calibration_dir=None, raw_data_dir=None, output_dir=None,
                                  input_file_ext=None, tt_mode=None):
@@ -388,7 +406,7 @@ class Pearl(AbstractInst):
         self._calibration_dir = calib_dir
 
     def _old_api_set_raw_data_dir(self, raw_data_dir):
-        self._disable_appending_cycle_to_raw_dir = True
+        self._old_api_uses_full_paths = True
         self._raw_data_dir = raw_data_dir
 
     def _old_api_set_output_dir(self, output_dir):
@@ -405,6 +423,14 @@ class Pearl(AbstractInst):
 
     def _PEARL_filename_is_full_path(self):
         return self._old_api_uses_full_paths
+
+    def PEARL_populate_user_dirs(self, run_number):
+        run_details = self._get_run_details(run_number=run_number)
+        generated_path = self._generate_raw_data_cycle_dir(run_cycle=run_details.label)
+        user_dirs = config['datasearch.directories']
+        user_dirs_list = user_dirs.split(';')
+        if generated_path not in user_dirs_list:
+            config['datasearch.directories'] += ';' + generated_path
 
     def _get_focus_tof_binning(self):
         return self._focus_tof_binning

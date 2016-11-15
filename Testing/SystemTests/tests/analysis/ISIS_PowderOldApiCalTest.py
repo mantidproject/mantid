@@ -14,6 +14,8 @@ DIRS = config['datasearch.directories'].split(';')
 
 
 class PowderDiffOldApiCalibrateTest(stresstesting.MantidStressTest):
+    _existing_config = None
+
     def requiredFiles(self):
         filenames = []
 
@@ -49,6 +51,7 @@ class PowderDiffOldApiCalibrateTest(stresstesting.MantidStressTest):
 
     def runTest(self):
         self._success = False
+        self._existing_config = config['datasearch.directories']
 
         pearl_routines.PEARL_startup("Calib", "15_3")
 

@@ -1,6 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
-import mantid.simpleapi as mantid
 
+from six.moves import xrange
+
+import mantid.simpleapi as mantid
 
 # --- Public API --- #
 
@@ -56,7 +58,7 @@ def _load_monitor_sum_range(files, input_dir, instrument):
     # TODO refactor this - it probably doesn't work at the moment
     loop = 0
     num = files.split("_")
-    frange = list(range(int(num[0]), int(num[1]) + 1))
+    frange = xrange(int(num[0]), int(num[1]) + 1)
     mspectra = instrument._get_monitor_spectra(int(num[0]))
     for i in frange:
         file_path = instrument._generate_input_full_path(i, input_dir)
@@ -79,26 +81,26 @@ def _load_monitor_sum_range(files, input_dir, instrument):
 
 
 def _load_raw_files(run_number, instrument):
-    cycle_information = instrument._get_cycle_information(run_number=run_number)
-    input_dir = instrument._generate_raw_data_cycle_dir(cycle_information["cycle"])
+    run_name = instrument._generate_inst_file_name(run_number=run_number)
+
+    instrument.PEARL_populate_user_dirs(run_number=run_number)
 
     if isinstance(run_number, int):
-        infile = instrument._generate_input_full_path(run_number=run_number, input_dir=input_dir)
-        load_raw_ws = mantid.LoadRaw(Filename=infile, LoadLogFiles="0")
+        load_raw_ws = mantid.Load(Filename=run_name, LoadLogFiles="0")
     else:
-        load_raw_ws = _load_raw_file_range(run_number, input_dir, instrument)
+        load_raw_ws = _load_raw_file_range(run_number, instrument)
     return load_raw_ws
 
 
-def _load_raw_file_range(files, input_dir, instrument):
+def _load_raw_file_range(files, instrument):
     loop = 0
     num = files.split("_")
-    frange = list(range(int(num[0]), int(num[1]) + 1))
+    frange = xrange(int(num[0]), int(num[1]) + 1)
     out_ws = None
     for i in frange:
-        file_path = instrument._generate_input_full_path(i, input_dir)
+        file_name = instrument._generate_inst_file_name(run_number=i)
         outwork = "run" + str(i)
-        mantid.LoadRaw(Filename=file_path, OutputWorkspace=outwork, LoadLogFiles="0")
+        mantid.Load(Filename=file_name, OutputWorkspace=outwork, LoadLogFiles="0")
         loop += 1
         if loop == 2:
             firstwk = "run" + str(i - 1)
@@ -118,8 +120,8 @@ def _load_current_normalised_ws(number, instrument):
 
     read_in_ws = _load_raw_files(run_number=number, instrument=instrument)
 
-    cycle_information = instrument._get_cycle_information(run_number=number)
-    load_monitor_ws = instrument._load_monitor(number=number, cycle=cycle_information["cycle"])
+    run_information = instrument._get_run_details(run_number=number)
+    load_monitor_ws = instrument._load_monitor(number=number, cycle=run_information.label)
 
     read_ws = instrument._normalise_ws(ws_to_correct=read_in_ws, monitor_ws=load_monitor_ws, spline_terms=20)
 

@@ -5,10 +5,10 @@ import os
 import mantid.simpleapi as mantid
 
 from isis_powder.abstract_inst import AbstractInst
-from isis_powder.polaris_routines import polaris_calib_factory
 from isis_powder.polaris_routines import polaris_calib_parser
 
 import isis_powder.common as common
+from isis_powder.RunDetails import RunDetails
 
 
 class Polaris(AbstractInst):
@@ -25,13 +25,17 @@ class Polaris(AbstractInst):
     _number_of_banks = 5
 
     def __init__(self, user_name=None, calibration_dir=None, raw_data_dir=None, output_dir=None,
-                 input_file_ext=".raw", sample_empty_name=None):
+                 input_file_ext=".raw", chopper_on=True):
 
-        super(Polaris, self).__init__(user_name=user_name, calibration_dir=calibration_dir, raw_data_dir=raw_data_dir,
+        super(Polaris, self).__init__(user_name=user_name, calibration_dir=calibration_dir,
                                       output_dir=output_dir, default_input_ext=input_file_ext)
 
+        self._chopper_on = chopper_on
         self._masking_file_name = "VanaPeaks.dat"
-        self._sample_empty = sample_empty_name
+
+        # Caches the last dictionary to avoid us having to keep parsing the YAML
+        self._run_details_last_run_number = None
+        self._run_details_cached_obj = None
 
     # Abstract implementation
     def _get_lambda_range(self):
@@ -43,26 +47,33 @@ class Polaris(AbstractInst):
     def _get_default_group_names(self):
         return self._calibration_grouping_names
 
-    def _get_calibration_full_paths(self, run_number):
-        # offset_file_name, grouping_file_name, vanadium_file_name = polaris_calib_factory.get_calibration_file(cycle)
-        cycle_dict = self._get_cycle_information(run_number=run_number)
-        configuration = polaris_calib_parser.get_calibration_dict(cycle_dict["cycle"])
+    def _get_run_details(self, run_number):
+        # TODO rename this from get calibration to get run details
+        if self._run_details_last_run_number == run_number:
+            return self._run_details_cached_obj
+
+        configuration = polaris_calib_parser.get_calibration_dict(run_number=run_number)
         calibration_dir = self.calibration_dir
 
-        # Assume the raw vanadium is with other raw files
-        vanadium_full_path = os.path.join(self.raw_data_dir, configuration["vanadium_file_name"])
-
+        # Common to all runs
         calibration_full_path = os.path.join(calibration_dir, configuration["offset_file_name"])
         grouping_full_path = os.path.join(calibration_dir, configuration["grouping_file_name"])
+        if self._chopper_on:
+            chopper_config = configuration["chopper_on"]
+        else:
+            chopper_config = configuration["chopper_off"]
+        vanadium_file = self._generate_inst_file_name(run_number=chopper_config["vanadium_file_name"])
+        splined_vanadium = os.path.join(calibration_dir, chopper_config["splined_vanadium_file_name"])
+        solid_angle_file_path = os.path.join(calibration_dir, chopper_config["solid_angle_file_name"])
 
-        calibrated_full_path = os.path.join(calibration_dir, configuration["calibrated_vanadium_file_name"])
-        solid_angle_file_path = os.path.join(calibration_dir, configuration["solid_angle_file_name"])
+        calibration_details = RunDetails(calibration_path=calibration_full_path, grouping_path=grouping_full_path,
+                                         vanadium_name=vanadium_file, run_number=run_number)
+        calibration_details.splined_vanadium = splined_vanadium
+        calibration_details.solid_angle_corr = solid_angle_file_path
+        calibration_details.label = configuration["label"]
 
-        calibration_details = {"calibration": calibration_full_path,
-                               "grouping": grouping_full_path,
-                               "vanadium": vanadium_full_path,
-                               "calibrated_vanadium": calibrated_full_path,
-                               "solid_angle_corr": solid_angle_file_path}
+        self._run_details_last_run_number = run_number
+        self._run_details_cached_obj = calibration_details
 
         return calibration_details
 
@@ -74,11 +85,6 @@ class Polaris(AbstractInst):
     def _get_instrument_alg_save_ranges(instrument=''):
         alg_range = 5
         return alg_range, None
-
-    @staticmethod
-    def _get_cycle_information(run_number):
-        return {"cycle": "test",  # TODO implement properly
-                "instrument_version": ""}
 
     def _normalise_ws(self, ws_to_correct, monitor_ws=None, spline_terms=20):
         normalised_ws = mantid.NormaliseByCurrent(InputWorkspace=ws_to_correct)
@@ -112,6 +118,8 @@ class Polaris(AbstractInst):
         return corrections_ws
 
     def _subtract_sample_empty(self, input_sample):
+        # TODO when calibration mapping has sample.empty enable this
+        return input_sample
         if self._sample_empty is not None:
             empty_sample_path = os.path.join(self.calibration_dir, self._sample_empty)
             empty_sample = mantid.Load(Filename=empty_sample_path)
@@ -120,13 +128,13 @@ class Polaris(AbstractInst):
             common.remove_intermediate_workspace(empty_sample)
         return input_sample
 
-    def _apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number=None, calibration_dict=None):
-        assert(vanadium_number or calibration_dict)
+    def _apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number=None, run_details=None):
+        assert(vanadium_number or run_details)
 
-        if not calibration_dict or not os.path.isfile(calibration_dict["solid_angle_corr"]):
-            corrections = self.generate_solid_angle_corrections(calibration_dict, vanadium_number)
+        if not run_details or not os.path.isfile(run_details.solid_angle_corr):
+            corrections = self.generate_solid_angle_corrections(run_details, vanadium_number)
         else:
-            corrections = mantid.Load(Filename=calibration_dict["solid_angle_corr"])
+            corrections = mantid.Load(Filename=run_details.solid_angle_corr)
 
         corrected_ws = mantid.Divide(LHSWorkspace=ws_to_correct, RHSWorkspace=corrections)
         common.remove_intermediate_workspace(corrections)
@@ -134,16 +142,18 @@ class Polaris(AbstractInst):
         ws_to_correct = corrected_ws
         return ws_to_correct
 
-    def generate_solid_angle_corrections(self, calibration_dict, vanadium_number):
+    def generate_solid_angle_corrections(self, run_details, vanadium_number):
         if vanadium_number:
             solid_angle_vanadium_ws = common._load_raw_files(run_number=vanadium_number, instrument=self)
+        elif run_details:
+            solid_angle_vanadium_ws = mantid.Load(Filename=run_details.vanadium)
         else:
-            solid_angle_vanadium_ws = mantid.Load(Filename=calibration_dict["vanadium"])
+            raise RuntimeError("Got no run_details of vanadium_number in gen solid angle corrections")
         normalised_vanadium_ws = self._normalise_ws(solid_angle_vanadium_ws)
         corrections = self._calculate_solid_angle_efficiency_corrections(normalised_vanadium_ws)
 
-        if calibration_dict:
-            mantid.SaveNexusProcessed(InputWorkspace=corrections, Filename=calibration_dict["solid_angle_corr"])
+        if run_details:
+            mantid.SaveNexusProcessed(InputWorkspace=corrections, Filename=run_details.solid_angle_corr)
 
         common.remove_intermediate_workspace(solid_angle_vanadium_ws)
         common.remove_intermediate_workspace(normalised_vanadium_ws)
@@ -241,7 +251,7 @@ class Polaris(AbstractInst):
     def _read_masking_file(self):
         all_banks_masking_list = []
         bank_masking_list = []
-        mask_path = os.path.join(self.raw_data_dir, self._masking_file_name)
+        mask_path = os.path.join(self.calibration_dir, self._masking_file_name)
 
         ignore_line_prefixes = (' ', '\n', '\t', '#')  # Matches whitespace or # symbol
 

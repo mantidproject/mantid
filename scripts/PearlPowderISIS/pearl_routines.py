@@ -100,7 +100,7 @@ def PEARL_getmonitorspectrum(runno):
 
 def PEARL_getcycle(number):
     pearl_obj = _pearl_obj_singleton()
-    cycle_information = pearl_obj._get_cycle_information(number)
+    cycle_information = pearl_obj._get_label_information(number)
     datadir = pearl_obj.output_dir
     updated_vals = {"cycle"   : cycle_information["cycle"],
                     "instver" : cycle_information["instrument_version"],
@@ -124,7 +124,7 @@ def PEARL_getcalibfiles():
     pearl_obj._old_api_set_tt_mode(g_oldParams["tt_mode"])
     pearl_obj._old_api_set_calib_dir(g_oldParams["pearl_file_dir"])
 
-    cal_dict = pearl_obj._get_calibration_full_paths(cycle=cycle)
+    cal_dict = pearl_obj._get_run_details(cycle=cycle)
     print ("Setting calibration for cycle", cycle)
 
     updated_vals = {"calfile"     : cal_dict["calibration"],

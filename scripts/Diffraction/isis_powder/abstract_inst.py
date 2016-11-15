@@ -15,14 +15,13 @@ from isis_powder import calibrate
 
 @add_metaclass(ABCMeta)
 class AbstractInst(object):
-    def __init__(self, user_name=None, calibration_dir=None, raw_data_dir=None, output_dir=None,
+    def __init__(self, user_name=None, calibration_dir=None, output_dir=None,
                  default_input_ext=".raw"):
         # ----- Properties common to ALL instruments -------- #
         if user_name is None:
             raise ValueError("A user name must be specified")
         self._user_name = user_name
         self._calibration_dir = calibration_dir
-        self._raw_data_dir = raw_data_dir
         self._output_dir = output_dir
         self._default_input_ext = _prefix_dot_to_ext(default_input_ext)
         self._focus_mode = None
@@ -115,16 +114,6 @@ class AbstractInst(object):
 
         return out_file_names
 
-    def _generate_raw_data_cycle_dir(self, run_cycle):
-        if self._skip_appending_cycle_to_raw_dir():
-            return self.raw_data_dir
-        str_run_cycle = str(run_cycle)
-
-        # Append current cycle to raw data directory
-        generated_dir = os.path.join(self.raw_data_dir, str_run_cycle)
-
-        return generated_dir
-
     def _generate_input_full_path(self, run_number, input_dir):
         # Uses runtime polymorphism to generate the full run name
         file_name = self._generate_inst_file_name(run_number)
@@ -162,7 +151,7 @@ class AbstractInst(object):
     # Instrument specific methods
 
     @abstractmethod
-    def _get_calibration_full_paths(self, run_number):
+    def _get_run_details(self, run_number):
         pass
 
     @staticmethod
@@ -185,16 +174,6 @@ class AbstractInst(object):
         @param instrument: The version of the instrument if applicable
         @return: The algorithm and save range in that order
         """
-
-    @staticmethod
-    @abstractmethod
-    def _get_cycle_information(run_number):
-        """
-        Gets all the information about this run for this cycle and returns it in a dictionary
-        @param run_number: The run to match the cycle to
-        @return: Dictionary with the following keys: "cycle", "instrument_version"
-        """
-        pass
 
     # --- Instrument optional hooks ----#
     # TODO cull some of these hooks once we unify the scripts
@@ -262,7 +241,7 @@ class AbstractInst(object):
     def _subtract_sample_empty(self, input_sample):
         return input_sample
 
-    def _apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number=None, calibration_dict=None):
+    def _apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number=None, run_details=None):
         return ws_to_correct
 
     def _load_monitor(self, number, cycle):
@@ -281,6 +260,9 @@ class AbstractInst(object):
         raise NotImplementedError("Cannot process the sample with a vanadium run for this instrument")
 
     def calculate_focus_binning_params(self, sample):
+        return None
+
+    def PEARL_populate_user_dirs(self, run_number):
         return None
 
 # ----- Private Implementation ----- #

@@ -7,9 +7,23 @@
 #  calibrated_vanadium_file_name : "calibrated_vanadium_name.nxs"
 #  solid_angle_file_name : "solid_angle_corrections.nxs"
 
-test:
+#test:
+#  offset_file_name : "offsets_2011_cycle111b.cal"
+#  grouping_file_name : "offsets_2011_cycle111b.cal"
+#  vanadium_file_name : "POL78338.raw"
+#  calibrated_vanadium_file_name : "calibrated_vanadium_name.nxs"
+#  solid_angle_file_name : "solid_angle_corrections.nxs"
+#
+
+78334-82415:
   offset_file_name : "offsets_2011_cycle111b.cal"
   grouping_file_name : "offsets_2011_cycle111b.cal"
-  vanadium_file_name : "POL78338.raw"
-  calibrated_vanadium_file_name : "calibrated_vanadium_name.nxs"
-  solid_angle_file_name : "solid_angle_corrections.nxs"
+  label : "15_2"
+  chopper_on:
+    vanadium_file_name : "78338"
+    splined_vanadium_file_name : "chopper_on_van_calib.nxs"
+    solid_angle_file_name : "chopper_on_sac.nxs"
+  chopper_off:
+    vanadium_file_name : "78338"
+    splined_vanadium_file_name : "chopper_off_van_calib.nxs"
+    solid_angle_file_name : "chopper_off_sac.nxs"

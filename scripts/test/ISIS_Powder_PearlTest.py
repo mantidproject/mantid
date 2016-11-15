@@ -13,7 +13,7 @@ class isis_powder_PearlTest(unittest.TestCase):
 
     def test_cycle_information_generates_correctly(self):
         # This checks that the cycle information generates using the correct keys for the dict
-        output = self._get_pearl_inst_defaults()._get_cycle_information(85500)
+        output = self._get_pearl_inst_defaults()._get_label_information(85500)
         expected_cycle = "14_1"
         expected_inst_vers = "new2"
         self.assertEquals(output["cycle"], expected_cycle)
@@ -57,7 +57,7 @@ class isis_powder_PearlTest(unittest.TestCase):
         expected_calibration_dir = self.calibration_dir
 
         pearl_obj = self._get_pearl_inst_defaults()
-        output = pearl_obj._get_calibration_full_paths(input_cycle)
+        output = pearl_obj._get_run_details(input_cycle)
 
         self.assertEquals(output["calibration"], expected_calibration_dir + expected_calfile)
         self.assertEquals(output["grouping"], expected_calibration_dir + expected_grouping_file)

@@ -9,7 +9,7 @@ import isis_powder.common as common
 
 def generate_and_save_focus_output(instrument, processed_spectra, run_number, perform_attenuation, focus_mode=None,):
     output_file_paths = instrument._generate_out_file_paths(run_number, instrument.output_dir)
-    cycle_information = instrument._get_cycle_information(run_number)
+    cycle_information = instrument._get_label_information(run_number)
     unused, save_range = instrument._get_instrument_alg_save_ranges(cycle_information["instrument_version"])
 
     if focus_mode == "all":
