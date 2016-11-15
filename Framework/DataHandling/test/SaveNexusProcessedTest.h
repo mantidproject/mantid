@@ -732,6 +732,85 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void testSaveTableEmptyColumn() {
+    std::string outputFileName = "SaveNexusProcessedTest_testSaveTable.nxs";
+
+    // Create a table which we will save
+    auto table =
+        boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
+            WorkspaceFactory::Instance().createTable());
+    table->setRowCount(3);
+    table->addColumn("int", "IntColumn");
+    {
+      auto &data = table->getColVector<int>("IntColumn");
+      data[0] = 5;
+      data[1] = 2;
+      data[2] = 3;
+    }
+    table->addColumn("str", "EmptyColumn");
+
+    SaveNexusProcessed alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", table);
+    alg.setPropertyValue("Filename", outputFileName);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    if (!alg.isExecuted())
+      return; // Nothing to check
+
+    // Get full output file path
+    outputFileName = alg.getPropertyValue("Filename");
+
+    NeXus::File savedNexus(outputFileName);
+
+    savedNexus.openGroup("mantid_workspace_1", "NXentry");
+    savedNexus.openGroup("table_workspace", "NXdata");
+
+    {
+      savedNexus.openData("column_1");
+      doTestColumnInfo(savedNexus, NX_INT32, "", "IntColumn");
+      int32_t expectedData[] = {5, 2, 3};
+      doTestColumnData("IntColumn", savedNexus, expectedData);
+    }
+
+    {
+      savedNexus.openData("column_2");
+
+      NeXus::Info columnInfo = savedNexus.getInfo();
+      TS_ASSERT_EQUALS(columnInfo.dims.size(), 2);
+      TS_ASSERT_EQUALS(columnInfo.dims[0], 3);
+      TS_ASSERT_EQUALS(columnInfo.dims[1], 1);
+      TS_ASSERT_EQUALS(columnInfo.type, NX_CHAR);
+
+      std::vector<NeXus::AttrInfo> attrInfos = savedNexus.getAttrInfos();
+      TS_ASSERT_EQUALS(attrInfos.size(), 3);
+
+      if (attrInfos.size() == 3) {
+        TS_ASSERT_EQUALS(attrInfos[1].name, "interpret_as");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[1]), "A string");
+
+        TS_ASSERT_EQUALS(attrInfos[2].name, "name");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[2]), "EmptyColumn");
+
+        TS_ASSERT_EQUALS(attrInfos[0].name, "units");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[0]), "N/A");
+      }
+
+      std::vector<char> data;
+      savedNexus.getData(data);
+      TS_ASSERT_EQUALS(data.size(), 3);
+      TS_ASSERT_EQUALS(data[0], ' ');
+      TS_ASSERT_EQUALS(data[1], ' ');
+      TS_ASSERT_EQUALS(data[2], ' ');
+    }
+
+    savedNexus.close();
+    Poco::File(outputFileName).remove();
+    AnalysisDataService::Instance().clear();
+  }
+
 private:
   void doTestColumnInfo(NeXus::File &file, int type,
                         const std::string &interpret_as,
