@@ -1,8 +1,8 @@
 """
-Classes and utility functions to support benchmarking of fitting in
+Classes and utility functions to support benchmarking of fitting minimizers in
 Mantid or other packages useable from Python.  These benchmarks are
-focused on comparing differnt minimizers in terms of accuracy and
-computation time (or iterations of the minimizers).
+focused on comparing different minimizers in terms of accuracy and
+computation time.
 """
 # Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD
 # Oak Ridge National Laboratory & European Spallation Source
@@ -41,11 +41,15 @@ def run_all_with_or_without_errors(problem_files_path, use_errors, minimizers,
                                    group_names, group_suffix_names, color_scale):
     """
     Run all benchmark problems available, with/without using weights in the cost
-    function (observational errors). This is just a convenience
-    function meant to be used by system/unit tests, or other scripts.
+    function. This is just a convenience function meant to be used by system/unit tests, or other scripts.
+    
+    ALL means: NIST + CUTEST + any fitting problems against observed Neutron data (+ any other
+    which may be added in the future)
 
-    Be warned this function ca be extremely verbose.
+    Be warned this function can be verbose.
 
+    @param problem_files_path :: list of directories where to load other neutron data problems
+    @param use_errors :: whether to use observational errors as weights in the cost function
     @param minimizers :: list of minimizers to test
     @param group_names :: names for display purposes
     @param group_suffix_names :: group names to use as suffixes, for example in file names
@@ -87,7 +91,7 @@ def do_fitting_benchmark(include_nist=True, include_cutest=True, data_groups_dir
 
     @param include_nist :: whether to try to load NIST problems
     @param include_nist :: whether to try to load CUTEst problems
-    @param data_groups_dirs :: list of directories where to load other / neutron data problems
+    @param data_groups_dirs :: list of directories where to load other neutron data problems
     @param minimizers :: list of minimizers to test
     @param use_errors :: whether to use observational errors as weights in the cost function
     """
@@ -101,9 +105,11 @@ def do_fitting_benchmark(include_nist=True, include_cutest=True, data_groups_dir
     problem_blocks = []
 
     if include_nist:
+        # get NIST problems grouped into blocks of problems, in blocks of increasing difficulty
         problem_blocks.extend(get_nist_problem_files(search_dir))
 
     if include_cutest:
+        # get CUTEet problems - just treated as one block of problems
         problem_blocks.extend([get_cutest_problem_files(search_dir)])
 
     if data_groups_dirs:
@@ -121,12 +127,12 @@ def do_fitting_benchmark(include_nist=True, include_cutest=True, data_groups_dir
 
 def do_fitting_benchmark_group(problem_files, minimizers, use_errors=True):
     """
-    Applies one minmizer to a block/list of test problems
+    Applies minmizers to a group (collection) of test problems. For example the 
+    collection of all NIST problems
 
-    @param problem_files :: a list of list of files that define a block of
-    test problems, for example the "lower difficulty" NIST files . The first list level
-    is for different blocks of test problems. The second level is for different individual
-    problems/files.
+    @param problem_files :: a list of list of files that define a group of
+    test problems. For example all the NIST files sub-groupped according to level
+    of fitting difficulty, where the lowest list level list the file names
 
     @param minimizers :: list of minimizers to test
     @param use_errors :: whether to use observational errors as weights in the cost function
@@ -139,6 +145,7 @@ def do_fitting_benchmark_group(problem_files, minimizers, use_errors=True):
     results_per_problem = []
     for prob_file in problem_files:
         try:
+            # Note the CUTEst problem are assumed to be expressed in NIST format
             prob = iparsing.load_nist_fitting_problem_file(prob_file)
         except (AttributeError, RuntimeError):
             prob = iparsing.load_neutron_data_fitting_problem_file(prob_file)
@@ -154,7 +161,7 @@ def do_fitting_benchmark_group(problem_files, minimizers, use_errors=True):
 def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True):
     """
     One problem with potentially several starting points, returns a list (start points) of
-    lists (minimizers)
+    lists (minimizers).
 
     @param prob :: fitting problem
     @param mnimizers :: list of minimizers to evaluate/compare
@@ -164,11 +171,13 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True):
 
     wks, cost_function = prepare_wks_cost_function(prob, use_errors)
 
-    # For NIST problems this will generate two results per file (two different starting points)
+    # Each NIST problem generate two results per file - from two different starting points
     results_fit_problem = []
 
+    # Get function definitions for the problem - one for each starting point 
     function_defs = get_function_definitions(prob)
 
+    # Loop over the different starting points
     for user_func in function_defs:
         results_problem_start = []
         for minimizer_name in minimizers:
@@ -313,9 +322,11 @@ def get_function_definitions(prob):
 
 def get_nist_problem_files(search_dir):
     """
-       Gets the problem files grouped in blocks, where the blocks would
-       normally be the different levels of difficulty (lower, average,
-       higher).
+    Group the NIST problem files into separeate blocks according
+    to assumed fitting different levels: lower, average,
+    higher.
+    
+    @returns :: list of list of problem files
     """
     # Grouped by "level of difficulty"
     nist_lower = [ 'Misra1a.dat', 'Chwirut2.dat', 'Chwirut1.dat', 'Lanczos3.dat',
@@ -331,8 +342,7 @@ def get_nist_problem_files(search_dir):
     nist_higher = [ 'MGH09.dat','Thurber.dat', 'BoxBOD.dat', 'Rat42.dat',
                     'MGH10.dat', 'Eckerle4.dat', 'Rat43.dat', 'Bennett5.dat' ]
 
-    nist_names = nist_lower + nist_average + nist_higher
-
+    # Currently HARDCODED relative path! where to find NIST problems 
     nist_subdir = 'NIST_nonlinear_regression'
 
     nist_lower_files = [os.path.join(search_dir, nist_subdir, fname) for fname in nist_lower]
