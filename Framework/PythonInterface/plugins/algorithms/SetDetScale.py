@@ -45,7 +45,6 @@ class SetDetScale(PythonAlgorithm):
                                           extensions=["txt"]),
                              "Optional text file with detector number and its scale on each line separated by spaces")
 
-
     def PyExec(self):
         ws = self.getProperty("Workspace").value
 
