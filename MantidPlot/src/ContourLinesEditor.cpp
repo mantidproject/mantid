@@ -176,7 +176,7 @@ void ContourLinesEditor::insertLevel() {
 
   DoubleSpinBox *sb;
   QwtDoubleInterval range = d_spectrogram->data().range();
-  double val = (range.maxValue() + range.minValue())/2.0;
+  double val = (range.maxValue() + range.minValue()) / 2.0;
   if (row >= 0) {
     sb = table_cellWidget<DoubleSpinBox>(row, 0);
 
@@ -186,10 +186,8 @@ void ContourLinesEditor::insertLevel() {
     if (sb)
       previous_value = sb->value();
     val = 0.5 * (current_value + previous_value);
-  } 
-  else
-  {
-    //no rows at present, set insertion point
+  } else {
+    // no rows at present, set insertion point
     row = 0;
   }
 
