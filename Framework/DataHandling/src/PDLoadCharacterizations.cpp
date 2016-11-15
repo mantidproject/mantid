@@ -186,6 +186,25 @@ void PDLoadCharacterizations::exec() {
   this->setProperty("OutputWorkspace", wksp);
 }
 
+int getVersion(const std::string &filename) {
+  std::ifstream file(filename.c_str());
+  if (!file) {
+    throw Exception::FileError("Unable to open file", filename);
+  }
+  // first line must be version string
+  std::string line = Strings::getLine(file);
+
+  boost::smatch result;
+  if (boost::regex_search(line, result, VERSION_REG_EXP) &&
+      result.size() == 2) {
+    return boost::lexical_cast<int>(result[1]);
+  }
+  file.close();
+
+  // otherwise it is a version=0
+  return 0;
+}
+
 /**
  * This ignores the traditional interpretation of
  * Mantid::API::MultipleFileProperty
@@ -206,11 +225,25 @@ std::vector<std::string> PDLoadCharacterizations::getFilenames() {
     throw std::runtime_error("Can only specify up to 2 characterization files");
   }
 
+  // sort out which file is which
+  int v0_index = -1;
+  int v1_index = -1;
+  for (size_t i = 0; i < filenamesFromPropertyUnraveld.size(); ++i) {
+    const int version = getVersion(filenamesFromPropertyUnraveld[i]);
+    g_log.debug() << "Found version " << version << " in \""
+                  << filenamesFromPropertyUnraveld[i] << "\"\n";
+    if (version == 0)
+      v0_index = static_cast<int>(i);
+    else if (version == 1)
+      v1_index = static_cast<int>(i);
+  }
+
   // fill the output array
   std::vector<std::string> filenames(F_INDEX_SIZE);
-  filenames[F_INDEX_V0] = filenamesFromPropertyUnraveld[0];
-  if (filenamesFromPropertyUnraveld.size() > 1)
-    filenames[F_INDEX_V1] = filenamesFromPropertyUnraveld[1];
+  if (v0_index >= 0)
+    filenames[F_INDEX_V0] = filenamesFromPropertyUnraveld[v0_index];
+  if (v1_index >= 0)
+    filenames[F_INDEX_V1] = filenamesFromPropertyUnraveld[v1_index];
 
   // optional exp.ini file for NOMAD
   std::string iniFilename = this->getProperty("ExpIniFilename");

@@ -345,27 +345,31 @@ public:
     const std::string CHAR_FILES("Test_characterizations_char.txt,"
                                  "PG3_char_2016_02_15-PAC-single.txt");
 
-    std::cout << ">>>>>>>>>>>>>>>>>>>>test_version2" << std::endl;
-
     // initialize and run the algorithm
     ITableWorkspace_sptr wksp;
     PDLoadCharacterizations alg;
     runAlg(alg, wksp, CHAR_FILES);
 
     checkPG3WithContainers(wksp);
-
-    std::cout << "<<<<<<<<<<<<<<<<<<<<" << std::endl;
   }
 
   void test_version2_wrongOrder() {
     const std::string CHAR_FILES("PG3_char_2016_02_15-PAC-single.txt,"
                                  "Test_characterizations_char.txt");
+    // initialize and run the algorithm
+    ITableWorkspace_sptr wksp;
+    PDLoadCharacterizations alg;
+    runAlg(alg, wksp, CHAR_FILES);
+
+    checkPG3WithContainers(wksp);
   }
 
-  void test_version2_extras() {
+  /* TODO this is for a later iteration
+  void xtest_version2_extras() {
     const std::string CHAR_FILES("Test_characterizations_char.txt,"
                                  "PG3_char_2016_02_15-PAC-extras.txt");
   }
+  */
 };
 
 #endif /* MANTID_DATAHANDLING_LOADPDCHARACTERIZATIONSTEST_H_ */
