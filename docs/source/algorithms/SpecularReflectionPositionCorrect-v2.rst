@@ -27,64 +27,64 @@ Usage
 
 .. testcode:: SpecularReflectionPositionCorrectPointDetector
 
-   offspec = Load(Filename=r'OFFSPEC00010791.raw', PeriodList=1)
-   offspec = offspec[0]
+   polref = Load(Filename=r'POLREF00004699.raw', PeriodList=1)
+   polref = polref[0]
 
-   instr = offspec.getInstrument()
+   instr = polref.getInstrument()
    print instr.getComponentByName('point-detector').getPos()
 
-   offspec = SpecularReflectionPositionCorrect(offspec, TwoTheta = 2*0.3, DetectorComponentName='point-detector')
-   instr = offspec.getInstrument()
+   polref = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='point-detector')
+   instr = polref.getInstrument()
    print instr.getComponentByName('point-detector').getPos()
    
 Output:
 
 .. testoutput:: SpecularReflectionPositionCorrectPointDetector 
  
-   [0,0,3.19]
-   [0,0.0334068,3.19]
+   [25.6,0,0]
+   [25.6,0,0.0444753]
 
-**Example - Correct 'LinearDetector'**
+**Example - Correct 'lineardetector'**
 
 .. testcode:: SpecularReflectionPositionCorrectLinearDetector
 
-   offspec = Load(Filename=r'OFFSPEC00010791.raw', PeriodList=1)
-   offspec = offspec[0]
+   polref = Load(Filename=r'POLREF00004699.raw', PeriodList=1)
+   polref = polref[0]
 
-   instr = offspec.getInstrument()
-   print instr.getComponentByName('LinearDetector').getPos()
+   instr = polref.getInstrument()
+   print instr.getComponentByName('lineardetector').getPos()
 
-   offspec = SpecularReflectionPositionCorrect(offspec, TwoTheta = 2*0.3, DetectorComponentName='LinearDetector')
-   instr = offspec.getInstrument()
-   print instr.getComponentByName('LinearDetector').getPos()
+   polref = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='lineardetector')
+   instr = polref.getInstrument()
+   print instr.getComponentByName('lineardetector').getPos()
    
 Output:
 
 .. testoutput:: SpecularReflectionPositionCorrectLinearDetector 
  
-   [0,0,3.65]
-   [0,0.0382241,3.65]
+   [26,0,0]
+   [26,0,0.0513177]
 
-**Example - Correct 'WLSFDetector'**
+**Example - Correct 'OSMOND'**
 
-.. testcode:: SpecularReflectionPositionCorrectWLSFDetector
+.. testcode:: SpecularReflectionPositionCorrectOSMONDDetector
 
-   offspec = Load(Filename=r'OFFSPEC00010791.raw', PeriodList=1)
-   offspec = offspec[0]
+   polref = Load(Filename=r'POLREF00004699.raw', PeriodList=1)
+   polref = polref[0]
 
-   instr = offspec.getInstrument()
-   print instr.getComponentByName('WLSFDetector').getPos()
+   instr = polref.getInstrument()
+   print instr.getComponentByName('OSMOND').getPos()
 
-   offspec = SpecularReflectionPositionCorrect(offspec, TwoTheta = 2*0.3, DetectorComponentName='WLSFDetector')
-   instr = offspec.getInstrument()
-   print instr.getComponentByName('WLSFDetector').getPos()
+   polref = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='OSMOND')
+   instr = polref.getInstrument()
+   print instr.getComponentByName('OSMOND').getPos()
    
 Output:
 
-.. testoutput:: SpecularReflectionPositionCorrectWLSFDetector 
+.. testoutput:: SpecularReflectionPositionCorrectOSMONDDetector 
  
-   [0,0,3.62]
-   [0,0.0379099,3.62]
+   [26,0,0]
+   [26,0,0.0513177]
 
 .. categories::
 
