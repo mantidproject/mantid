@@ -127,6 +127,9 @@ void PDDetermineCharacterizations::init() {
       Kernel::make_unique<Kernel::ArrayProperty<int32_t>>("NormBackRun", "0"),
       "Normalization background" + defaultMsg);
   declareProperty(
+      Kernel::make_unique<Kernel::ArrayProperty<int32_t>>("EmptyEnv", "0"),
+      "Empty sample environment" + defaultMsg);
+  declareProperty(
       Kernel::make_unique<Kernel::ArrayProperty<int32_t>>("EmptyInstr", "0"),
       "Empty instrument" + defaultMsg);
 
@@ -425,6 +428,7 @@ void PDDetermineCharacterizations::exec() {
   overrideRunNumProperty("BackRun", "container");
   overrideRunNumProperty("NormRun", "vanadium");
   overrideRunNumProperty("NormBackRun", "vanadium_background");
+  overrideRunNumProperty("EmptyEnv", "empty_environment");
   overrideRunNumProperty("EmptyInstr", "empty_instrument");
 
   std::vector<std::string> expectedNames = getColumnNames();
