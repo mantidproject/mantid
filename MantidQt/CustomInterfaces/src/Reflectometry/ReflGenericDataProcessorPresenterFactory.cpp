@@ -78,7 +78,8 @@ ReflGenericDataProcessorPresenterFactory::create() {
           "ThetaIn", "ThetaOut", "InputWorkspace", "OutputWorkspace",
           "OutputWorkspaceWavelength", "FirstTransmissionRun",
           "SecondTransmissionRun", "MomentumTransferMinimum",
-          "MomentumTransferMaximum", "MomentumTransferStep", "ScaleFactor"});
+          "MomentumTransferMaximum", "MomentumTransferStep", "ScaleFactor"},
+      1);
 
   // Pre-processing instructions as a map:
   // Keys are the column names
@@ -95,7 +96,8 @@ ReflGenericDataProcessorPresenterFactory::create() {
        DataProcessorPreprocessingAlgorithm(
            "CreateTransmissionWorkspaceAuto", "TRANS_",
            std::set<std::string>{"FirstTransmissionRun",
-                                 "SecondTransmissionRun", "OutputWorkspace"})}};
+                                 "SecondTransmissionRun", "OutputWorkspace"},
+           1)}};
 
   // The post-processing algorithm
   DataProcessorPostprocessingAlgorithm postprocessor(

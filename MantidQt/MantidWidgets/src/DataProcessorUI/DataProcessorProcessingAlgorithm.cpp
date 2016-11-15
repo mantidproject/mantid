@@ -8,11 +8,13 @@ namespace MantidWidgets {
 * @param prefix : The list of prefixes that will be used for the output
 * workspaces' names
 * @param blacklist : The list of properties we do not want to show
+* @param version : The version of this algorithm
 */
 DataProcessorProcessingAlgorithm::DataProcessorProcessingAlgorithm(
     const std::string &name, const std::vector<std::string> &prefix,
-    const std::set<std::string> &blacklist)
-    : DataProcessorProcessingAlgorithmBase(name, blacklist), m_prefix(prefix) {
+    const std::set<std::string> &blacklist, int version)
+    : DataProcessorProcessingAlgorithmBase(name, blacklist, version),
+      m_prefix(prefix) {
 
   m_inputProperties = getInputWsProperties();
   if (!m_inputProperties.size())

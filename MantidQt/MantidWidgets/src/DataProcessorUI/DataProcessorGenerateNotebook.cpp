@@ -327,7 +327,7 @@ boost::tuple<std::string, std::string> postprocessGroupString(
       postprocessor.prefix() + boost::algorithm::join(outputName, "_");
   stitch_string << outputWSName;
   stitch_string << completeOutputProperties(
-                       postprocessor.name(),
+                       postprocessor.name(), postprocessor.version(),
                        postprocessor.numberOfOutputProperties()) << " = ";
   stitch_string << postprocessor.name() << "(";
   stitch_string << postprocessor.inputProperty() << " = '";
@@ -518,7 +518,8 @@ boost::tuple<std::string, std::string> reduceRowString(
   std::ostringstream process_string;
   process_string << outputPropertiesStr;
   process_string << completeOutputProperties(
-      processor.name(), processor.numberOfOutputProperties());
+      processor.name(), processor.version(),
+      processor.numberOfOutputProperties());
   process_string << " = " << processor.name() << "(";
   process_string << boost::algorithm::join(algProperties, ", ");
   process_string << ")";
@@ -630,10 +631,11 @@ loadRunString(const std::string &run, const std::string &instrument,
 
 /** Given an algorithm's name, completes the list of output properties
 * @param algName : The name of the algorithm
+* @param algVersion : The version of the algorithm
 * @param currentProperties : The number of output properties that are workspaces
 * @return : The list of output properties as a string
 */
-std::string completeOutputProperties(const std::string &algName,
+std::string completeOutputProperties(const std::string &algName, int algVersion,
                                      size_t currentProperties) {
 
   // In addition to output ws properties, our reduction and post-processing
@@ -642,7 +644,7 @@ std::string completeOutputProperties(const std::string &algName,
   // We need to specify those too in our python code
 
   Mantid::API::IAlgorithm_sptr alg =
-      Mantid::API::AlgorithmManager::Instance().create(algName);
+      Mantid::API::AlgorithmManager::Instance().create(algName, algVersion);
   auto properties = alg->getProperties();
   int totalOutputProp = 0;
   for (auto &prop : properties) {

@@ -96,8 +96,9 @@ boost::tuple<std::string, std::string> DLLExport
 loadRunString(const std::string &run, const std::string &instrument,
               const std::string &prefix);
 
-std::string DLLExport
-completeOutputProperties(const std::string &algName, size_t currentProperties);
+std::string DLLExport completeOutputProperties(const std::string &algName,
+                                               int algVersion,
+                                               size_t currentProperties);
 
 class DLLExport DataProcessorGenerateNotebook {
 

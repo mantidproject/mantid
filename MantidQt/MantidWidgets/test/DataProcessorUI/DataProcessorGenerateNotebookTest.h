@@ -28,8 +28,8 @@ private:
          DataProcessorPreprocessingAlgorithm(
              "CreateTransmissionWorkspaceAuto", "TRANS_",
              std::set<std::string>{"FirstTransmissionRun",
-                                   "SecondTransmissionRun",
-                                   "OutputWorkspace"})}};
+                                   "SecondTransmissionRun", "OutputWorkspace"},
+             1)}};
   }
 
   // Creates a reflectometry processing algorithm
@@ -40,7 +40,8 @@ private:
         std::vector<std::string>{"IvsQ_", "IvsLam_"},
         std::set<std::string>{"ThetaIn", "ThetaOut", "InputWorkspace",
                               "OutputWorkspace", "OutputWorkspaceWavelength",
-                              "FirstTransmissionRun", "SecondTransmissionRun"});
+                              "FirstTransmissionRun", "SecondTransmissionRun"},
+        1);
   }
 
   DataProcessorPostprocessingAlgorithm reflPostprocessor() {
