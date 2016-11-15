@@ -25,7 +25,7 @@ Mantid Documentation
    concepts/index
    interfaces/index
    fitfunctions/*
-   fitminimizers/*
+   fitminimizers/index
    api/index
    release/index
 
