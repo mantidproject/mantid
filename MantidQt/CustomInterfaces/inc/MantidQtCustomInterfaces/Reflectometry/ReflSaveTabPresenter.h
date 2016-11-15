@@ -52,12 +52,15 @@ public:
   void populateParametersList(std::string wsName);
   /// Filter workspaces names
   void filterWorkspaceNames(std::string filter, bool regexCheck);
+  /// Suggest a save directory
+  void suggestSaveDir();
   /// Save selected workspaces
   void saveWorkspaces();
 
 private:
   /// Obtains all available workspace names
   std::vector<std::string> getAvailableWorkspaceNames();
+
   /// The view
   IReflSaveTabView *m_view;
   /// Names of possible save algorithms

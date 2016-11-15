@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabView.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -37,6 +38,7 @@ void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
   switch (flag) {
   case populateWorkspaceListFlag:
     populateWorkspaceList();
+    suggestSaveDir();
     break;
   case filterWorkspaceListFlag:
     filterWorkspaceNames(m_view->getFilter(), m_view->getRegexCheck());
@@ -139,6 +141,14 @@ void ReflSaveTabPresenter::saveWorkspaces() {
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(*it));
     saveAlg->execute();
   }
+}
+
+/** Suggests a save directory and sets it in the 'Save path' text field
+*/
+void ReflSaveTabPresenter::suggestSaveDir() {
+  std::string path = Mantid::Kernel::ConfigService::Instance().getString(
+    "defaultsave.directory");
+  m_view->setSavePath(path);
 }
 
 /** Obtains all available workspace names to save
