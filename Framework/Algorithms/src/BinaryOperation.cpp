@@ -448,7 +448,7 @@ bool BinaryOperation::propagateSpectraMask(const SpectrumInfo &lhsSpectrumInfo,
   if ((lhsSpectrumInfo.hasDetectors(index) &&
        lhsSpectrumInfo.isMasked(index)) ||
       (rhsSpectrumInfo.hasDetectors(index) &&
-       lhsSpectrumInfo.isMasked(index))) {
+       rhsSpectrumInfo.isMasked(index))) {
     continueOp = false;
     out->maskWorkspaceIndex(index);
   }
