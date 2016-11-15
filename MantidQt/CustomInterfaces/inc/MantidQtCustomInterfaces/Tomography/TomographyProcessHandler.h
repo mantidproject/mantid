@@ -74,6 +74,7 @@ public:
 
   // intentionally copy the vector
   void setup(const std::string runnable, const std::vector<std::string> &args) {
+    // DEBUG
     // m_process = Mantid::Kernel::make_unique<QProcess>();
     // const std::vector<std::string> argggggggg = {
     //     "C:/Users/QBR77747/Documents/mantid_fourth/mantid/scripts/Imaging/IMAT/"
@@ -117,6 +118,7 @@ public:
     m_runnable = std::move(QString::fromStdString(runnable));
     m_args = std::move(constructArgumentsFromVector(args));
 
+    // DEBUG
     std::cout << "\nDEBUG >> SETUP PROCESS >> " << m_runnable.toStdString()
               << " ARGS >> " << constructSingleStringFromVector(m_args);
   }
@@ -132,35 +134,23 @@ public:
 public slots:
   bool isRunning() { return this->state() == QProcess::ProcessState::Running; }
   void startWorker() {
+    // DEBUG
     std::cout << "\n\n\nDEBUG >> STARTING PROCESS <<<<<<<<\n\n\n";
-    start(m_runnable, m_args);
-    auto env = this->processEnvironment();
-    std::cout << "\nDEBUG >> PROCESSID " << this->pid() << " ... "
-              << (long long)this->pid() << "\n";
-    auto currentPath = env.value("PATH");
-    std::cout << "\nDEBUG >> PROCESS CURRENT PATH >> "
-              << currentPath.toStdString() << "\n";
-    QString newPath =
-        currentPath + ";C:\\Anaconda\\Lib;C:\\Anaconda\\Lib\\site-packages";
-    std::cout << "\nDEBUG >> PROCESS NEW PATH >> " << newPath.toStdString()
-              << "\n";
-    env.insert("PATH", newPath);
-    this->setProcessEnvironment(env);
-    // pretty sure this blocks the main thread..
-    while (waitForReadyRead(10000)) {
-    }
 
-    QString output(readAllStandardOutput());
-    QString error(readAllStandardError());
-    std::string stdOutput = output.toStdString();
-    std::cout << "\nDEBUG >> PROCESS STDOUT" << stdOutput << "\n";
-    std::string stdError = error.toStdString();
-    std::cout << "\nDEBUG >> PROCESS ERROR" << stdError << "\n";
-    emit finished();
+    start(m_runnable, m_args);
   }
 
-signals:
-  void finished();
+  void readStdOut() {
+    QString output(readAllStandardOutput());
+    std::string stdOutput = output.toStdString();
+    std::cout << "\nDEBUG >> PROCESS STDOUT" << stdOutput << "\n";
+  }
+
+  void readStdErr() {
+    QString error(readAllStandardError());
+    std::string stdError = error.toStdString();
+    std::cout << "\nDEBUG >> PROCESS ERROR" << stdError << "\n";
+  }
 
 private:
   QStringList
@@ -184,19 +174,22 @@ public:
   TomographyThreadHandler(QObject *parent) : QThread(parent) {}
 
   void run() {
-    std::cout << "\n\nDEBUG >> STARTING THREAD\n\n";
-    emit started();
+    auto pid = getPID();
+    std::cout << "\n\nDEBUG >> STARTING THREAD WITH ID: " << pid << "\n";
     this->exec();
   }
-  size_t getPID() {
-    auto pid = this->currentThreadId();
 
-    // u wot? static_cast?
-    return (long long)pid;
+  size_t getPID() { return m_pid; }
+
+public slots:
+  void getThreadPID() {
+    auto pid = this->currentThreadId();
+    m_pid = (long long)pid;
   }
 
-signals:
-  void started();
+private:
+  bool m_pidReady = false;
+  size_t m_pid = 0;
 };
 // class TomographyProcessHandler : public QThread {
 // public:

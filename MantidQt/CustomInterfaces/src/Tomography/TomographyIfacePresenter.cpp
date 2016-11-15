@@ -561,25 +561,22 @@ void TomographyIfacePresenter::processRunRecon() {
     auto *worker =
         new MantidQt::CustomInterfaces::TomographyProcessHandler(this);
     worker->moveToThread(m_workerThread.get());
-    // QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    // auto currentPath = env.value("PATH");
-    // std::cout << "\n DEBUG >> PRESENTER CURRENT PATH >> "
-    //           << currentPath.toStdString() << "\n";
-    // QString newPath =
-    //     currentPath + ";C:\\Anaconda\\Lib;C:\\Anaconda\\Lib\\site-packages";
-    // std::cout << "\n DEBUG >> PRESENTER NEW PATH >> " <<
-    // newPath.toStdString()
-    //           << "\n";
-    // env.insert("PATH", newPath);
-    // worker->setProcessEnvironment(env);
+
+    connect(m_workerThread.get(), SIGNAL(started()), m_workerThread.get(),
+            SLOT(getThreadPID()), Qt::DirectConnection);
+
     connect(m_workerThread.get(), SIGNAL(started()), worker,
             SLOT(startWorker()));
 
-    connect(worker, SIGNAL(finished()), this, SLOT(reconstructionFinished()));
+    connect(worker, SIGNAL(readyReadStandardOutput()), worker,
+            SLOT(readStdOut()));
+    connect(worker, SIGNAL(readyReadStandardError()), worker,
+            SLOT(readStdErr()));
 
     connect(m_workerThread.get(), SIGNAL(finished()), m_workerThread.get(),
             SLOT(deleteLater()), Qt::DirectConnection);
 
+    connect(worker, SIGNAL(finished()), worker, SLOT(reconstructionFinished()));
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
 
     m_model->doSubmitReconstructionJob(m_view->currentComputeResource(),
@@ -591,7 +588,7 @@ void TomographyIfacePresenter::processRunRecon() {
 }
 
 void TomographyIfacePresenter::reconstructionFinished() {
-  std::cout << "\n\nDEBUG >> WORKER FINISHED\n\n";
+  std::cout << "\n\nDEBUG >> STDOUT READY TO BE READ\n\n";
 }
 
 bool TomographyIfacePresenter::isLocalResourceSelected() const {

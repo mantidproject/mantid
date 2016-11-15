@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 # Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 # Oak Ridge National Laboratory & European Spallation Source
 #
@@ -53,16 +54,13 @@ import sys
 import os
 from os import path
 # So insert in the path the directory that contains this file
-ff = os.path.split(path.dirname(__file__))[0]
-print(sys.version, ff)
-print(sys.path) #y u no correct
 sys.path.insert(0, os.path.split(path.dirname(__file__))[0]) # noqa
 
-# import pydevd
-# pydevd.settrace('localhost', port=61845, stdoutToServer=True, stderrToServer=True)
+import pydevd
+pydevd.settrace('localhost', port=61845, stdoutToServer=True, stderrToServer=True)
 
-from tomorec import reconstruction_command as tomocmd
-import tomorec.configs as tomocfg
+from IMAT.tomorec import reconstruction_command as tomocmd
+import IMAT.tomorec.configs as tomocfg
 
 
 def setup_cmd_options():
