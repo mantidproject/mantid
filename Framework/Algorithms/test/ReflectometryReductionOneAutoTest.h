@@ -135,7 +135,7 @@ public:
 
   IAlgorithm_sptr construct_standard_algorithm() {
     auto alg =
-        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto", 1);
     alg->initialize();
     alg->setProperty("InputWorkspace", m_TOF);
     alg->setProperty("WavelengthMin", 0.0);
@@ -196,7 +196,7 @@ public:
 
   void test_must_provide_wavelengths() {
     auto algWithMax =
-        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto", 1);
     algWithMax->initialize();
     algWithMax->setProperty("InputWorkspace", m_TOF);
     algWithMax->setProperty("FirstTransmissionRun", m_TOF);
@@ -210,7 +210,7 @@ public:
     TS_ASSERT_THROWS(algWithMax->execute(), std::runtime_error);
 
     auto algWithMin =
-        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto", 1);
     algWithMin->initialize();
     algWithMin->setProperty("InputWorkspace", m_TOF);
     algWithMin->setProperty("FirstTransmissionRun", m_TOF);
@@ -294,7 +294,7 @@ public:
   }
   void test_exec() {
     IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto", 1);
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
     TS_ASSERT_THROWS_NOTHING(
@@ -373,7 +373,7 @@ public:
         new PropertyWithValue<std::string>("run_number", "12345"));
 
     IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto", 1);
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", tinyWS));
@@ -469,7 +469,7 @@ public:
 
     // Reduce
     IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto", 1);
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inWSName));
@@ -546,7 +546,7 @@ public:
 
     // Reduce
     IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+        AlgorithmManager::Instance().create("ReflectometryReductionOneAuto", 1);
     alg->setRethrows(true);
     alg->setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
