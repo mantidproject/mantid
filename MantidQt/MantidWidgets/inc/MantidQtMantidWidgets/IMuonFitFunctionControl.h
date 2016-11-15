@@ -41,7 +41,7 @@ public:
   virtual void runSequentialFit() = 0;
   virtual Mantid::API::IFunction_sptr getFunction() const = 0;
   virtual std::vector<std::string> getWorkspaceNamesToFit() const = 0;
-  virtual void setCompatibilityMode(bool enabled) = 0;
+  virtual void setMultiFittingMode(bool enabled) = 0;
 signals:
   virtual void functionUpdateRequested() = 0;
   virtual void functionUpdateAndFitRequested(bool sequential) = 0;

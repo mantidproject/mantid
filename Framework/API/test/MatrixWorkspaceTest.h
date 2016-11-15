@@ -321,27 +321,22 @@ public:
     TS_ASSERT(!parallelException);
   }
 
-  void test_spectrumInfo_fails_threaded() {
+  void test_spectrumInfo_works_threaded() {
     const int numHist(3);
     auto workspace = makeWorkspaceWithDetectors(numHist, 1);
+    std::vector<const SpectrumInfo *> spectrumInfos(numHist);
     std::atomic<bool> parallelException{false};
-    std::atomic<int> threadCount{1};
     PARALLEL_FOR_IF(Kernel::threadSafe(*workspace))
     for (int i = 0; i < numHist; ++i) {
-      // Note: Cannot use INTERUPT_REGION macros since not inside an Algorithm.
-      threadCount = PARALLEL_NUMBER_OF_THREADS;
       try {
-        static_cast<void>(workspace->spectrumInfo());
+        spectrumInfos[i] = &(workspace->spectrumInfo());
       } catch (...) {
         parallelException = true;
       }
     }
-    // If we actually had more than one thread this should throw.
-    if (threadCount > 1) {
-      TS_ASSERT(parallelException);
-    } else {
-      TS_ASSERT(!parallelException);
-    }
+    TS_ASSERT(!parallelException);
+    for (int i = 0; i < numHist; ++i)
+      TS_ASSERT_EQUALS(spectrumInfos[0], spectrumInfos[i]);
   }
 
   void testFlagMasked() {
@@ -469,6 +464,47 @@ public:
 
     // Bad X values
     TS_ASSERT_THROWS(wkspace.binIndexOf(5.), std::out_of_range);
+    TS_ASSERT_THROWS(wkspace.binIndexOf(0.), std::out_of_range);
+  }
+
+  void testBinIndexOfDescendingBinning() {
+    WorkspaceTester wkspace;
+    wkspace.initialize(1, 4, 3);
+
+    wkspace.dataX(0)[0] = 5.3;
+    wkspace.dataX(0)[1] = 4.3;
+    wkspace.dataX(0)[2] = 3.3;
+    wkspace.dataX(0)[3] = 2.3;
+
+    TS_ASSERT_EQUALS(wkspace.getNumberHistograms(), 1);
+
+    // First boundary
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(5.3), 0)
+    // First bin
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(5.2), 0);
+    // Bin boundary
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(4.3), 0);
+    // Mid range
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(3.8), 1);
+    // Still second bin
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(std::nextafter(3.3, 10.0)), 1);
+    // Last bin
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(3.1), 2);
+    // Last value
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(2.3), 2);
+
+    // Error handling
+
+    // Bad index value
+    TS_ASSERT_THROWS(wkspace.binIndexOf(2.5, 1), std::out_of_range);
+    TS_ASSERT_THROWS(wkspace.binIndexOf(2.5, -1), std::out_of_range);
+
+    // Bad X values
+    TS_ASSERT_THROWS(wkspace.binIndexOf(std::nextafter(5.3, 10.0)),
+                     std::out_of_range);
+    TS_ASSERT_THROWS(wkspace.binIndexOf(5.4), std::out_of_range);
+    TS_ASSERT_THROWS(wkspace.binIndexOf(std::nextafter(2.3, 0.0)),
+                     std::out_of_range);
     TS_ASSERT_THROWS(wkspace.binIndexOf(0.), std::out_of_range);
   }
 

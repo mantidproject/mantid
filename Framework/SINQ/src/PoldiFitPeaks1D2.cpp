@@ -338,7 +338,7 @@ int PoldiFitPeaks1D2::getBestChebyshevPolynomialDegree(
 
       ++n;
     }
-  } catch (std::runtime_error) {
+  } catch (const std::runtime_error &) {
     nMin = -1;
   }
 

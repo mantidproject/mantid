@@ -758,8 +758,8 @@ bool CompareWorkspaces::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
     return false;
   }
 
-  const Geometry::ParameterMap &ws1_parmap = ws1->instrumentParameters();
-  const Geometry::ParameterMap &ws2_parmap = ws2->instrumentParameters();
+  const Geometry::ParameterMap &ws1_parmap = ws1->constInstrumentParameters();
+  const Geometry::ParameterMap &ws2_parmap = ws2->constInstrumentParameters();
 
   if (ws1_parmap != ws2_parmap) {
     g_log.debug()

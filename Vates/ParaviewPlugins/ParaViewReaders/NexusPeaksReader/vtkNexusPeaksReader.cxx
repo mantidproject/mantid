@@ -215,10 +215,8 @@ int vtkNexusPeaksReader::CanReadFile(const char* fname)
   return 0;
 }
 
-unsigned long vtkNexusPeaksReader::GetMTime()
-{
-  unsigned long mTime = this->Superclass::GetMTime();
-  return mTime;
+vtkMTimeType vtkNexusPeaksReader::GetMTime() {
+  return this->Superclass::GetMTime();
 }
 
 /**

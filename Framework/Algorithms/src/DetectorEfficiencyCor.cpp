@@ -157,7 +157,7 @@ void DetectorEfficiencyCor::exec() {
 void DetectorEfficiencyCor::retrieveProperties() {
   // these first three properties are fully checked by validators
   m_inputWS = getProperty("InputWorkspace");
-  m_paraMap = &(m_inputWS->instrumentParameters());
+  m_paraMap = &(m_inputWS->constInstrumentParameters());
 
   m_Ei = getProperty("IncidentEnergy");
   // If we're not given an Ei, see if one has been set.
