@@ -24,6 +24,9 @@ DECLARE_ALGORITHM(MonteCarloParameters)
 
 namespace {
 
+const size_t MAX_APPROX_SIZE = 129;
+const double MIN_APPROX_TOLERANCE = 1e-4;
+
 /// Return a sum of constraints penalty values.
 double
 getConstraints(const std::vector<std::unique_ptr<IConstraint>> &constraints) {
@@ -33,16 +36,24 @@ getConstraints(const std::vector<std::unique_ptr<IConstraint>> &constraints) {
                          });
 }
 
+/// Defines a 1D slice of a cost function along direction of
+/// one of its parameters.
 struct Slice {
   double operator()(double p) {
     m_costFunction.setParameter(m_paramIndex, p);
     m_costFunction.applyTies();
     return m_costFunction.val();
   }
+  /// The cost function
   CostFunctions::CostFuncFitting &m_costFunction;
+  /// Index of the running parameter
   size_t m_paramIndex;
 };
 
+/// Try to estimate if any of the parameters can cause problems during fitting.
+/// If such parameters are found - fix them.
+/// @param costFunction :: The cost function.
+/// @param ranges :: The ranges of values within which the parameters may change. 
 void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
                       const std::vector<std::pair<double, double>> &ranges) {
   std::vector<double> P, A, D;
@@ -54,27 +65,28 @@ void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
     auto lBound = ranges[j].first;
     auto rBound = ranges[j].second;
     auto storedParam = fun.getParameter(i);
+    Slice slice{costFunction, j};
     auto base = Functions::ChebfunBase::bestFitAnyTolerance(
-        lBound, rBound, Slice{costFunction, j}, P, A, 1.0, 1e-4, 129);
+        lBound, rBound, slice, P, A, 1.0, MIN_APPROX_TOLERANCE, MAX_APPROX_SIZE);
     fun.setParameter(i, storedParam);
     bool fix = false;
     if (!base) {
-      base = boost::make_shared<Functions::ChebfunBase>(129, lBound, rBound, 1e-4);
-      P = base->fit(Slice{costFunction, j});
+      base = boost::make_shared<Functions::ChebfunBase>(MAX_APPROX_SIZE, lBound, rBound, MIN_APPROX_TOLERANCE);
+      P = base->fit(slice);
       A = base->calcA(P);
     }
     base->derivative(A, D);
     auto roots = base->roots(D);
     if (!roots.empty()) {
       if (roots.size() * 2 >= base->size()) {
+        // If the approximating polynomial oscillates too much
+        // the parameter is likely to be bad.
         fix = true;
       }
     }
 
     if (fix) {
-      // If a slice along a parameter direction cannot be approximated by
-      // a polynomial of quite high order it is safer to exclude that
-      // paramater from a fit.
+      // Parameter is bad - fix it.
       fun.tie(fun.parameterName(i), std::to_string(fun.getParameter(i)));
     }
     ++j;
@@ -88,13 +100,17 @@ void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
 /// @param ranges :: The ranges of values defining the uniform distributions for the parameters.
 /// @param constraints :: Additional constraints.
 /// @param nSamples :: A number of samples to generate.
+/// @param seed :: A seed for the random number generator.
 void runMonteCarlo(CostFunctions::CostFuncFitting &costFunction,
                    const std::vector<std::pair<double, double>> &ranges,
                    const std::vector<std::unique_ptr<IConstraint>> &constraints,
-                   size_t nSamples) {
+                   size_t nSamples, size_t seed) {
   auto nParams = costFunction.nParams();
 
   Kernel::MersenneTwister randGenerator;
+  if (seed != 0) {
+    randGenerator.setSeed(seed);
+  }
   GSLVector bestParams;
   costFunction.getParameters(bestParams);
   double bestValue = costFunction.val() + getConstraints(constraints);
@@ -134,11 +150,12 @@ void runMonteCarlo(CostFunctions::CostFuncFitting &costFunction,
 /// @param nSamples :: A number of parameter sets (samples) generated in step 1.
 /// @param nSelection :: A number of sets selected in step 2.
 /// @param nIterations :: A number of iterations of the algorithm.
+/// @param seed :: A seed for the random number generator.
 void runCrossEntropy(
     CostFunctions::CostFuncFitting &costFunction,
     const std::vector<std::pair<double, double>> &ranges,
     const std::vector<std::unique_ptr<IConstraint>> &constraints,
-    size_t nSamples, size_t nSelection, size_t nIterations) {
+    size_t nSamples, size_t nSelection, size_t nIterations, size_t seed) {
   // Initialise the normal distribution parameters (mean and sigma for each function parameter).
   std::vector<std::pair<double, double>> distributionParams;
   for (auto &range : ranges) {
@@ -149,6 +166,9 @@ void runCrossEntropy(
 
   auto nParams = costFunction.nParams();
   Kernel::NormalDistribution distribution;
+  if (seed != 0) {
+    distribution.setSeed(seed);
+  }
   // Sets of function parameters (GSLVector) and corresponding values of the
   // cost function (double)
   using ParameterSet = std::pair<double, GSLVector>;
@@ -245,6 +265,9 @@ void MonteCarloParameters::initConcrete() {
   declareProperty("FixBadParameters", false, "If true try to estimate which "
                                              "parameters may cause problems "
                                              "for fitting and fix them.");
+  declareProperty("Seed", 0, "A seed value for the random number generator. "
+                             "The default value (0) makes the generator use a "
+                             "random seed.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -299,15 +322,22 @@ void MonteCarloParameters::execConcrete() {
   }
   // Number of parameters could have changed
   costFunction->reset();
+  if (costFunction->nParams() == 0) {
+    throw std::runtime_error("No parameters are given for which to estimate "
+                             "initial values. Set boundary constraints to "
+                             "parameters that need to be estimated.");
+  }
+
   size_t nSamples = static_cast<int>(getProperty("NSamples"));
+  size_t seed = static_cast<int>(getProperty("Seed"));
 
   if (getPropertyValue("Type") == "Monte Carlo") {
-    runMonteCarlo(*costFunction, ranges, constraints, nSamples);
+    runMonteCarlo(*costFunction, ranges, constraints, nSamples, seed);
   } else {
     size_t nSelection = static_cast<int>(getProperty("Selection"));
     size_t nIterations = static_cast<int>(getProperty("NIterations"));
     runCrossEntropy(*costFunction, ranges, constraints, nSamples, nSelection,
-                    nIterations);
+                    nIterations, seed);
   }
   bool fixBad = getProperty("FixBadParameters");
   if (fixBad) {

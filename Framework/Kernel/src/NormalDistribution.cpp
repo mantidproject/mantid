@@ -39,6 +39,12 @@ NormalDistribution::NormalDistribution(const size_t seedValue,
   }
 }
 
+/// Set the random number seed.
+/// @param seedValue :: A seed for the generator.
+void NormalDistribution::setSeed(const size_t seedValue) {
+  m_uniform_generator.setSeed(seedValue);
+}
+
 /// Generate the next random number in the sequence
 double NormalDistribution::nextValue() {
   return m_generator(m_uniform_generator);

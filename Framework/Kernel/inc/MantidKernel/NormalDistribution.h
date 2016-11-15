@@ -51,6 +51,8 @@ public:
   NormalDistribution(const NormalDistribution &) = delete;
   NormalDistribution &operator=(const NormalDistribution&) = delete;
 
+  /// Set the random number seed
+  void setSeed(const size_t seedValue);
   /// Generate the next random number in the sequence
   double nextValue();
   /// Get the mean of the distribution

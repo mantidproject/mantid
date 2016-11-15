@@ -25,6 +25,7 @@ public:
 
   void test_standard_normal_distribution() {
     NormalDistribution norm;
+    norm.setSeed(1);
     size_t in(0), out(0);
     for(size_t i = 0; i < 100; ++i) {
       auto value = norm.nextValue();
@@ -34,11 +35,13 @@ public:
         ++out;
       }
     }
-    TS_ASSERT_LESS_THAN(out, in);
+    TS_ASSERT_EQUALS(in, 67);
+    TS_ASSERT_EQUALS(out, 33);
   }
 
   void test_normal_distribution() {
     NormalDistribution norm(30.0, 5.0);
+    norm.setSeed(2);
     size_t in(0), out(0);
     for(size_t i = 0; i < 100; ++i) {
       auto value = (norm.nextValue() - 30.0) / 5.0;
@@ -48,7 +51,8 @@ public:
         ++out;
       }
     }
-    TS_ASSERT_LESS_THAN(out, in);
+    TS_ASSERT_EQUALS(in, 58);
+    TS_ASSERT_EQUALS(out, 42);
   }
 
 };
