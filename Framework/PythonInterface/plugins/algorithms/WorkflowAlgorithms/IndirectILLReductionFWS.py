@@ -304,8 +304,9 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
         togroup = []
 
-        for energy, ws_list in self._all_runs[label].iteritems():
+        for energy in sorted(self._all_runs[label]):
 
+            ws_list = self._all_runs[label][energy]
             size = len(self._all_runs[label][energy])
             wsname = self._red_ws+'_'+str(energy)
             togroup.append(wsname)
