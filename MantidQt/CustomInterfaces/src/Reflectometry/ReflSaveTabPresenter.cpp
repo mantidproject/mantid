@@ -171,7 +171,7 @@ std::vector<std::string> ReflSaveTabPresenter::getAvailableWorkspaceNames() {
   auto it = std::copy_if(
       allNames.begin(), allNames.end(), validNames.begin(), [](std::string s) {
         return (AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(s) ==
-                false);
+                NULL);
       });
   validNames.resize(std::distance(validNames.begin(), it));
 
