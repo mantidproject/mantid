@@ -455,7 +455,7 @@ public:
     TS_ASSERT_DELTA(EOut[20], 37.2677, 0.001)
   }
 
-  void test_skipMonitors() {
+  void testSkipMonitors() {
 
     Mantid::Algorithms::CalculateFlatBackground flatBG;
     TS_ASSERT_THROWS_NOTHING(flatBG.initialize())
@@ -499,7 +499,7 @@ public:
     AnalysisDataService::Instance().remove("Removed1");
   }
 
-  void test_movingAverageThrowsOnlyWithInvalidWindowWidth() {
+  void testMovingAverageThrowsOnlyWithInvalidWindowWidth() {
     size_t binCount = 5;
     movingAverageWindowWidthTest(0, binCount, true);
     movingAverageWindowWidthTest(1, binCount, false);
@@ -508,25 +508,25 @@ public:
     movingAverageWindowWidthTest(binCount + 1, binCount, true);
   }
 
-  void test_movingAverageModeWhenWindowWidthIsOne() {
+  void testMovingAverageModeWhenWindowWidthIsOne() {
     const size_t spectraCount = 3;
     const size_t binCount = 4;
     movingAverageTest(1, spectraCount, binCount);
   }
 
-  void test_movingAverageModeWhenWindowWidthIsTwo() {
+  void testMovingAverageModeWhenWindowWidthIsTwo() {
     const size_t spectraCount = 2;
     const size_t binCount = 7;
     movingAverageTest(2, spectraCount, binCount);
   }
 
-  void test_movingAverageModeWithMaximalWindowWidth() {
+  void testMovingAverageModeWithMaximalWindowWidth() {
     const size_t spectraCount = 4;
     const size_t binCount = 9;
     movingAverageTest(binCount, spectraCount, binCount);
   }
 
-  void test_spectraLeftUnchangedIfUnableToCalculate() {
+  void testSpectraLeftUnchangedIfUnableToCalculate() {
     const double y1 = -23;
     const double y2 = -42;
     const std::string outWsName("Removed1");
@@ -554,7 +554,7 @@ public:
     }
   }
 
-  void test_SubtractBackgroundWhenNotAllSpectraSelected() {
+  void testSubtractBackgroundWhenNotAllSpectraSelected() {
     const double y1 = 23;
     const double y2 = 42;
     const std::string outWsName("Removed1");
@@ -572,7 +572,7 @@ public:
     AnalysisDataService::Instance().remove(outWsName);
   }
 
-  void test_ReturnBackgroundWhenNotAllSpectraSelected() {
+  void testReturnBackgroundWhenNotAllSpectraSelected() {
     const double y1 = 23;
     const double y2 = 42;
     const std::string outWsName("Removed1");
