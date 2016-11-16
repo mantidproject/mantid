@@ -56,6 +56,7 @@ Bugs Resolved
 - Fixed crash when loading data and the algorithm widget is hidden
 - Fixed exception being thrown when saving project with custom interfaces open
 - The "Plot Surface from Group" and "Plot Contour from Group" options have been fixed and now work for both histogram and point data. Note that all workspaces in the group must have the same X data.
+- Fixed a bug where enabling auto rebinning in the slice viewer and zooming would not rebin the workspace if it was a histogram workspace.
 - Fixed importing string logs and string series logs into MantidPlot
 
 SliceViewer Improvements
@@ -68,3 +69,9 @@ Full list of
 and
 `Documentation <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Documentation%22>`_
 changes on GitHub
+
+
+VSI Improvements
+----------------
+
+ParaView updated to v5.2.0

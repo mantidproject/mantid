@@ -14,9 +14,9 @@ SCRIPT_DIR=$(dirname "$0")
 BUILDPKG=true
 
 ###############################################################################
-# All nodes currently have PARAVIEW_DIR=5.1.0 and PARAVIEW_NEXT_DIR=5.1.2
+# All nodes currently have PARAVIEW_DIR=5.2.0 and PARAVIEW_NEXT_DIR=5.1.2
 ###############################################################################
-export PARAVIEW_DIR=${PARAVIEW_NEXT_DIR}
+export PARAVIEW_DIR=${PARAVIEW_DIR}
 
 ###############################################################################
 # Print out the versions of things we are using
