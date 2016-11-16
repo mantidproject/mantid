@@ -1,17 +1,5 @@
 #pylint: disable=invalid-name,no-init,too-many-lines
-"""*WIKI*
-
-The purpose of this algorithm is to do a full reduction of SNAP
-data. This alloWS several runs, and with all the typical options that
-are usually used at the beamline, including calibrate from a cal file
-and from Convert Units, mask from file workspace and default masks,
-several groupings and save in GSAS or Fullprof format
-
-*WIKI*
-
-"""
 from __future__ import (absolute_import, division, print_function)
-
 from mantid.kernel import Direction, FloatArrayProperty, IntArrayBoundedValidator, \
     IntArrayProperty, StringListValidator
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, \
