@@ -166,7 +166,7 @@ def find_test_files(src_dir, name_re):
     for dirpath, dirnames, filenames in os.walk(src_dir):
         testfiles = find_matching_tests(filenames, name_re_comp)
         # Join each filename with the current path and extend the list
-        testpaths.extend(map(lambda x: os.path.join(dirpath, x), testfiles))
+        testpaths.extend([os.path.join(dirpath, x) for x in testfiles])
 
     return testpaths
 
