@@ -179,6 +179,7 @@ public:
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
     alg->setPropertyValue("Title", "Testing this algorithm");
+    alg->setPropertyValue("Separator", ",");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
 
     if (!alg->isExecuted()) {
@@ -193,7 +194,7 @@ public:
     getline(in, fullline);
 
     std::vector<std::string> columns;
-    boost::split(columns, fullline, boost::is_any_of("\t"),
+    boost::split(columns, fullline, boost::is_any_of(","),
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 4);
     // the first is black due to the leading tab

@@ -184,6 +184,7 @@ public:
     alg->setPropertyValue("Filename", m_filename);
     alg->setPropertyValue("UserContact", "John Smith");
     alg->setPropertyValue("Title", "Testing this algorithm");
+    alg->setPropertyValue("Separator", ",");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
 
     if (!alg->isExecuted()) {
@@ -194,11 +195,11 @@ public:
     TS_ASSERT(Poco::File(m_long_filename).exists());
     std::ifstream in(m_long_filename.c_str());
     std::string fullline;
-    headingsTests(in, fullline, true);
+    headingsTests(in, fullline, true, ",");
     getline(in, fullline);
 
     std::vector<std::string> columns;
-    boost::split(columns, fullline, boost::is_any_of("\t"),
+    boost::split(columns, fullline, boost::is_any_of(","),
                  boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 5);
     // the first is black due to the leading tab
@@ -228,7 +229,7 @@ public:
 
 private:
   void headingsTests(std::ifstream &in, std::string &fullline,
-                     bool propertiesLogs = false) {
+                     bool propertiesLogs = false, std::string sep = "\t") {
     getline(in, fullline);
     TS_ASSERT(fullline == "MFT");
     getline(in, fullline);
@@ -258,10 +259,12 @@ private:
     getline(in, fullline);
     TS_ASSERT(fullline == "Number of file format: 2");
     getline(in, fullline);
-    TS_ASSERT(fullline == "Number of data points:\t9");
+    std::cout << sep;
+    TS_ASSERT(fullline == "Number of data points:" + sep + "9");
     getline(in, fullline);
     getline(in, fullline);
-    TS_ASSERT(fullline == "\tq\trefl\trefl_err\tq_res");
+    TS_ASSERT(fullline == sep + "q" + sep + "refl" + sep + "refl_err" + sep +
+              "q_res");
   }
   void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false,
                 bool createLogs = false) {

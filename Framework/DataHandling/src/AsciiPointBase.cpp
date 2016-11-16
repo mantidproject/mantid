@@ -33,12 +33,12 @@ void AsciiPointBase::init() {
                                                     FileProperty::Save, ext()),
                   "The filename of the output file.");
 
-  std::vector<char> propOptions;
-  propOptions.push_back(',');
-  propOptions.push_back(' ');
-  propOptions.push_back('\t');
-  declareProperty("Separator", '\t',
-      boost::make_shared<ListValidator<char>>(propOptions),
+  std::vector<std::string> propOptions;
+  propOptions.push_back(",");
+  propOptions.push_back(" ");
+  propOptions.push_back("\t");
+  declareProperty("Separator", "\t",
+      boost::make_shared<StringListValidator>(propOptions),
       "The separator used for splitting data columns. Comma, space or tab.");
   extraProps();
 }
@@ -56,7 +56,8 @@ void AsciiPointBase::exec() {
   }
   m_ws = getProperty("InputWorkspace");
   g_log.information("FILENAME: " + filename);
-  sep = boost::lexical_cast<char>(getProperty("Separator"));
+  std::string sepString = getProperty("Separator");
+  sep = boost::lexical_cast<char>(sepString);
   std::vector<double> XData = header(file);
   extraHeaders(file);
   data(file, XData);
