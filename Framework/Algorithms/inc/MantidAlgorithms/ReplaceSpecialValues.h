@@ -96,7 +96,7 @@ private:
   bool m_performBigCheck; ///< Flag to indicate if the 'big number' check is to
   /// be performed
   bool m_performSmallCheck; ///< Flag to indicate if the 'small number' check is
-                            ///to
+  /// to
   /// be performed
 };
 
