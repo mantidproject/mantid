@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init,too-many-lines
 """*WIKI*
 
 The purpose of this algorithm is to do a full reduction of SNAP
@@ -9,6 +10,7 @@ several groupings and save in GSAS or Fullprof format
 *WIKI*
 
 """
+from __future__ import (absolute_import, division, print_function)
 
 from mantid.kernel import Direction, FloatArrayProperty, IntArrayBoundedValidator, \
     IntArrayProperty, StringListValidator
@@ -34,7 +36,7 @@ class SNAP_Reduce(DataProcessorAlgorithm):
 
     def get_Run_Log_Local(self, run):
 
-        runs = range(run-5, run+1)
+        runs = list(range(run-5, run+1))
         file_Str = ''
 
         while len(runs) > 0:
@@ -65,7 +67,7 @@ class SNAP_Reduce(DataProcessorAlgorithm):
         sm = np.zeros(len(data))
         factor = order/2+1
 
-        for i in xrange(len(data)):
+        for i in range(len(data)):
             temp = 0
             ave = 0
             for r in range(max(0, i-order/2), min(i+order/2, len(data)-1)+1):
@@ -93,7 +95,7 @@ class SNAP_Reduce(DataProcessorAlgorithm):
         start_data = np.copy(data)
 
         window = win
-        print smooth_window
+        self.log().information(str(smooth_window))
 
         if smooth_window > 0:
             data = self.smooth(data, smooth_window)
@@ -104,9 +106,9 @@ class SNAP_Reduce(DataProcessorAlgorithm):
         temp = data.copy()
 
         if decrese:
-            scan = range(window+1, 0, -1)
+            scan = list(range(window+1, 0, -1))
         else:
-            scan = range(1, window+1)
+            scan = list(range(1, window+1))
 
         for w in scan:
             for i in range(len(temp)):
@@ -121,7 +123,7 @@ class SNAP_Reduce(DataProcessorAlgorithm):
         if LLS:
             temp = self.Inv_LLS_transformation(temp)
 
-        print min(start_data-temp)
+        self.log().information(str((min(start_data-temp)))
 
         index = np.where((start_data - temp) == min(start_data - temp))[0][0]
 
@@ -317,7 +319,7 @@ class SNAP_Reduce(DataProcessorAlgorithm):
         Tag = 'SNAP'
         for r in in_Runs:
             self.log().notice("processing run %s" % r)
-            print self.get_IPTS_Local(r)
+            self.log().information(str(self.get_IPTS_Local(r)))
             if self.getProperty("LiveData").value:
                 Tag = 'Live'
                 WS = LoadPreNexusLive(Instrument='SNAP')
