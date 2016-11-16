@@ -184,7 +184,7 @@ public:
     alg->setPropertyValue("Filename", m_filename);
     alg->setPropertyValue("UserContact", "John Smith");
     alg->setPropertyValue("Title", "Testing this algorithm");
-    alg->setPropertyValue("Separator", ",");
+    alg->setPropertyValue("Separator", "comma");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
 
     if (!alg->isExecuted()) {

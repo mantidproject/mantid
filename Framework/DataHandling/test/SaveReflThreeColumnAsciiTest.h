@@ -172,7 +172,7 @@ public:
         "SaveReflThreeColumnAscii");
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
-    alg->setPropertyValue("Separator", ",");
+    alg->setPropertyValue("Separator", "comma");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
 
     if (!alg->isExecuted()) {
