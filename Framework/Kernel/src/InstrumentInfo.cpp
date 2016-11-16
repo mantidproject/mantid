@@ -122,6 +122,10 @@ std::string InstrumentInfo::filePrefix(unsigned int runNumber) const {
 
 /// Returns the name of the live listener
 const std::string &InstrumentInfo::liveListener() const {
+  // TODO: Return "" if no LiveListenerInfo?
+  static std::string foobar;
+  if (!hasLiveListenerInfo()) return foobar;
+
   return liveListenerInfo().listener();
 }
 
@@ -130,6 +134,10 @@ const std::string &InstrumentInfo::liveListener() const {
  *    - the caller should check this themselves
  */
 const std::string &InstrumentInfo::liveDataAddress() const {
+  // TODO: Return "" if no LiveListenerInfo?
+  static std::string foobar;
+  if (!hasLiveListenerInfo()) return foobar;
+
   return liveListenerInfo().address();
 }
 
@@ -137,7 +145,7 @@ const std::string &InstrumentInfo::liveDataAddress() const {
  * @brief Get LiveListenerInfo for specified connection (or default)
  * @param name Name attribute of connection to return info on
  * @return Reference to LiveListenerInfo for specified connection
- * @throw std::runtime_error When connection by given name not found
+ * @throw std::runtime_error When no listeners, or name not found
  */
 const LiveListenerInfo &InstrumentInfo::liveListenerInfo(
     std::string name) const {
@@ -165,6 +173,11 @@ const LiveListenerInfo &InstrumentInfo::liveListenerInfo(
 bool InstrumentInfo::hasLiveListenerInfo() const
 {
   return m_listeners.size() > 0;
+}
+
+const std::vector<LiveListenerInfo> &InstrumentInfo::liveListenerInfoList() const
+{
+  return m_listeners;
 }
 
 /// Return list of techniques
