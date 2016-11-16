@@ -60,7 +60,6 @@ class MedianBinWidth(PythonAlgorithm):
         inputWs = self.getProperty(self._PROP_INPUT_WS).value
         roundingMode = self.getProperty(
             roundinghelper.PROP_NAME_ROUNDING_MODE).value
-        n = inputWs.getNumberHistograms()
         xs = inputWs.extractX()
         dxs = numpy.diff(xs)
         medians = numpy.median(dxs, axis=1)
