@@ -18,7 +18,9 @@ following:
 #. The algorithm determine the X boundaries for each group as the upper
    and lower limits of all contributing detectors to this group and
    determine a logarithmic step that will ensure preserving the number
-   of bins in the initial workspace.
+   of bins in the initial workspace. It assumes that the entire data set
+   uses logarithmic binning in the process (i.e. it does not check for 
+   constant width binning).
 #. All histograms are read and rebinned to the new grid for their group.
 #. A new workspace with N histograms is created.
 
