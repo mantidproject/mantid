@@ -43,19 +43,27 @@ LiveListenerInfo::LiveListenerInfo(const InstrumentInfo *inst,
   m_name = elem->getAttribute("name");
   if (m_name.empty()) {
     //throw std::runtime_error("Listener name is not defined");
-    g_log.warning() << "Listener name is not defined\n";
+    g_log.error() << "Listener connection name is not defined. "
+                  << "This listener will not be selectable.\n";
   }
 
   m_address = elem->getAttribute("address");
   if (m_address.empty()) {
     //throw std::runtime_error("Listener address is not defined");
-    g_log.warning() << "Listener address for " << m_name << " is not defined\n";
+    g_log.error() << "Listener address for " << m_name << " is not defined\n";
   }
 
   m_listener = elem->getAttribute("listener");
   if (m_listener.empty()) {
-    m_listener = inst->facility().liveListener();
+    //m_listener = inst->facility().liveListener();
+    g_log.error() << "Listener class for " << m_name << " is not defined\n";
   }
+}
+
+bool LiveListenerInfo::operator==(const LiveListenerInfo &rhs) const
+{
+  return (this->address() == rhs.address() &&
+          this->listener() == rhs.listener());
 }
 
 const std::string &LiveListenerInfo::name() const
