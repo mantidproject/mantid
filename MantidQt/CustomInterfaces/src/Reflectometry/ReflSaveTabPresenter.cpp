@@ -9,7 +9,7 @@
 #include "Poco/File.h"
 #include "Poco/Path.h"
 
-#include <regex>
+#include <boost/regex.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -74,11 +74,11 @@ void ReflSaveTabPresenter::filterWorkspaceNames(std::string filter,
   if (regexCheck) {
     // Use regex search to find names that contain the filter sequence
     try {
-      std::regex rgx(filter);
+      boost::regex rgx(filter);
       it = std::copy_if(
           wsNames.begin(), wsNames.end(), validNames.begin(),
-          [rgx](std::string s) { return std::regex_search(s, rgx); });
-    } catch (std::regex_error &) {
+          [rgx](std::string s) { return boost::regex_search(s, rgx); });
+    } catch (boost::regex_error &) {
       g_log.error("Error, invalid regular expression\n");
     }
   } else {
