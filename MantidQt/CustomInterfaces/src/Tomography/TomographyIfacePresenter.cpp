@@ -569,6 +569,9 @@ void TomographyIfacePresenter::processRunRecon() {
     connect(m_workerThread.get(), SIGNAL(started()), worker,
             SLOT(startWorker()));
 
+    connect(m_workerThread.get(), SIGNAL(stdOutReady(QString)), this, SLOT(readWorkerStdOut(QString)));
+    connect(m_workerThread.get(), SIGNAL(stdErrReady(QString)), this, SLOT(readWorkerStdErr(QString)));
+
     connect(m_workerThread.get(), SIGNAL(finished()), m_workerThread.get(),
             SLOT(deleteLater()), Qt::DirectConnection);
 
@@ -582,10 +585,12 @@ void TomographyIfacePresenter::processRunRecon() {
   processRefreshJobs();
 }
 
-void TomographyIfacePresenter::readWorkerStdOut(TomographyProcessHandler *worker) {
-    QString error(worker->readAllStandardError());
-    std::string stdError = error.toStdString();
-    std::cout << "\nDEBUG >> PROCESS ERROR" << stdError << "\n";
+void TomographyIfacePresenter::readWorkerStdOut(const QString &s) {
+    m_model->logMsg(s.toStdString());
+}
+
+void TomographyIfacePresenter::readWorkerStdErr(const QString &s) {
+    m_model->logErrMsg(s.toStdString());
 }
 
 bool TomographyIfacePresenter::isLocalResourceSelected() const {

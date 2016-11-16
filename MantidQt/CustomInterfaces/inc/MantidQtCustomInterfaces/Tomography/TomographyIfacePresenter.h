@@ -61,6 +61,12 @@ public:
 
   void notify(ITomographyIfacePresenter::Notification notif) override;
 
+public slots:
+  /// It may be run on user request, or periodically from a timer/thread
+  void processRefreshJobs();
+  void readWorkerStdOut(const QString &s);
+  void readWorkerStdErr(const QString &s);
+
 protected:
   void initialize();
 
@@ -77,11 +83,6 @@ protected:
   void processLogout();
   void processSetupReconTool();
   void processRunRecon();
-
-protected slots:
-  /// It may be run on user request, or periodically from a timer/thread
-  void processRefreshJobs();
-  void readWorkerStdOut(TomographyProcessHandler *worker);
 
 protected:
   void processCancelJobs();

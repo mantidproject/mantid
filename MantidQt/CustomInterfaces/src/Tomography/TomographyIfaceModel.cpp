@@ -796,6 +796,10 @@ void TomographyIfaceModel::logMsg(const std::string &msg) {
   g_log.notice() << msg << '\n';
 }
 
+void TomographyIfaceModel::logErrMsg(const std::string &msg) {
+  g_log.error() << msg << '\n';
+}
+
 /**
  * Produces a comma separated list of coordinates as a string of real values
  *

@@ -21,52 +21,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-// class TomographyProcess : public QProcess {
-//   Q_OBJECT
-// public:
-//   TomographyThread(QObject *parent) {
-//     m_process = Mantid::Kernel::make_unique<QProcess>(parent);
-//     connect(m_process.get(), SIGNAL(readyReadStandardOutput()), this,
-//             SLOT(readNewData()));
-//   }
-//   // intentionally copy the vector
-//   void setup(const std::string runnable, const std::vector<std::string>
-//   &args) {
-//     // m_process = Mantid::Kernel::make_unique<QProcess>();
-//     m_qRunnable = std::move(QString::fromStdString(runnable));
-//     m_qListArgs = std::move(constructArgumentsFromVector(args));
-//     m_ready = true;
-//   }
-
-//   QStringList
-//   constructArgumentsFromVector(const std::vector<std::string> &args) {
-//     QStringList list;
-
-//     for (auto &arg : args) {
-//       list << QString::fromStdString(arg);
-//     }
-
-//     return list;
-//   }
-
-//   Qt::HANDLE getPID() { return thread()->currentThreadId(); }
-
-// public slots:
-//   void readNewData() {
-//     // ...
-//     std::cout << "Im handling the output\n\n";
-//   }
-
-// private:
-//   void run() { m_process->start(m_qRunnable, m_qListArgs); }
-
-//   QString m_qRunnable;
-//   QStringList m_qListArgs;
-//   bool m_ready = false;
-//   std::unique_ptr<QProcess> m_process;
-//   // Poco::Process::PID m_pid = 0;
-// };
-
 class TomographyProcessHandler : public QProcess {
   Q_OBJECT
 public:
@@ -74,51 +28,9 @@ public:
 
   // intentionally copy the vector
   void setup(const std::string runnable, const std::vector<std::string> &args) {
-    // DEBUG
-    // m_process = Mantid::Kernel::make_unique<QProcess>();
-    // const std::vector<std::string> argggggggg = {
-    //     "C:/Users/QBR77747/Documents/mantid_fourth/mantid/scripts/Imaging/IMAT/"
-    //     "tomo_reconstruct.py",
-    //     "--tool=tomopy", "--algorithm=gridrec,", "--num-iter=5",
-    //     "--input-path=C:/Users/QBR77747/Documents/mantid_workspaces/imaging/"
-    //     "RB000888_test_stack_larmor_summed_201510/data_stack_larmor_summed",
-    //     "--input-path-flat=C:/Users/QBR77747/Documents/mantid_workspaces/"
-    //     "imaging/"
-    //     "RB000888_test_stack_larmor_summed_201510/flat_stack_larmor_summed",
-    //     "--input-path-dark=C:/Users/QBR77747/Documents/mantid_workspaces/"
-    //     "imaging/"
-    //     "RB000888_test_stack_larmor_summed_201510/dark_stack_larmor_summed",
-    //     "--output=C:/Users/QBR77747/Documents/mantid_workspaces/imaging/"
-    //     "RB000888_test_stack_larmor_summed_201510/processed/"
-    //     "reconstruction_TomoPy_gridrec_2016November14_160724_215398000",
-    //     "--median-filter-size=3", "--cor=0.000000", "--rotation=0",
-    //     "--max-angle=360.000000", "--circular-mask=0.940000",
-    //     "--out-img-format=png"};
-    // const std::vector<std::string> argggggggg = {
-    //     "C:\\Users\\QBR77747\\Documents\\mantid_"
-    //     "fourth\\mantid\\scripts\\Imaging\\IMAT\\"
-    //     "tomo_reconstruct.py",
-    //     "--tool=tomopy", "--algorithm=gridrec,", "--num-iter=5",
-    //     "--input-path=C:\\Users\\QBR77747\\Documents\\mantid_"
-    //     "workspaces\\imaging\\"
-    //     "RB000888_test_stack_larmor_summed_201510\\data_stack_larmor_summed",
-    //     "--input-path-flat=C:\\Users\\QBR77747\\Documents\\mantid_workspaces\\"
-    //     "imaging\\"
-    //     "RB000888_test_stack_larmor_summed_201510\\flat_stack_larmor_summed",
-    //     "--input-path-dark=C:\\Users\\QBR77747\\Documents\\mantid_workspaces\\"
-    //     "imaging\\"
-    //     "RB000888_test_stack_larmor_summed_201510\\dark_stack_larmor_summed",
-    //     "--output=C:\\Users\\QBR77747\\Documents\\mantid_workspaces\\imaging\\"
-    //     "RB000888_test_stack_larmor_summed_201510\\processed\\"
-    //     "reconstruction_TomoPy_gridrec_2016November14_160724_215398000",
-    //     "--median-filter-size=3", "--cor=0.000000", "--rotation=0",
-    //     "--max-angle=360.000000", "--circular-mask=0.940000",
-    //     "--out-img-format=png"};
-    // const std::string runnnnnnnn = "C:\\Anaconda\\python.exe";
     m_runnable = std::move(QString::fromStdString(runnable));
     m_args = std::move(constructArgumentsFromVector(args));
 
-    // DEBUG
     std::cout << "\nDEBUG >> SETUP PROCESS >> " << m_runnable.toStdString()
               << " ARGS >> " << constructSingleStringFromVector(m_args);
   }
@@ -135,20 +47,20 @@ public slots:
   bool isRunning() { return this->state() == QProcess::ProcessState::Running; }
   void startWorker() {
     // DEBUG
-    std::cout << "\n\n\nDEBUG >> STARTING PROCESS <<\n";
+    std::cout << "\nDEBUG >> STARTING PROCESS <<";
     start(m_runnable, m_args);
   }
 
   void readStdOut() {
     QString output(readAllStandardOutput());
     std::string stdOutput = output.toStdString();
-    std::cout << "\nDEBUG >> PROCESS STDOUT" << "\n";
+    std::cout << "\nDEBUG >> PROCESS STDOUT";
   }
 
   void readStdErr() {
     QString error(readAllStandardError());
     std::string stdError = error.toStdString();
-    std::cout << "\nDEBUG >> PROCESS ERROR" << "\n";
+    std::cout << "\nDEBUG >> PROCESS ERROR";
   }
 
 private:
@@ -196,106 +108,25 @@ public slots:
   void readWorkerStdOut() {
     auto * worker = qobject_cast<TomographyProcessHandler*>(sender());
     QString output(worker->readAllStandardOutput());
-    std::string stdOutput = output.toStdString();
-    std::cout << "\nDEBUG >> PROCESS STDOUT" << stdOutput << "\n";
+    emit stdOutReady(output);    
   }
 
   void readWorkerStdErr() {
     auto * worker = qobject_cast<TomographyProcessHandler*>(sender());
-    QString error(worker->readAllStandardError());
-    std::string stdError = error.toStdString();
-    std::cout << "\nDEBUG >> PROCESS ERROR" << stdError << "\n";
+    QString output(worker->readAllStandardError());
+    emit stdErrReady(output);    
   }
 
+signals:
+  void stdOutReady(const QString &s);
+  void stdErrReady(const QString &s);
 
 private:
+  std::unique_ptr<QString> m_stdOut;
+  std::unique_ptr<QString> m_stdErr;
   bool m_pidReady = false;
   size_t m_pid = 0;
 };
-// class TomographyProcessHandler : public QThread {
-// public:
-//   TomographyProcessHandler()
-//       : m_pid(0), m_outPipe(), m_errPipe(), m_outstr(m_outPipe),
-//       m_errstr(m_errPipe) {}
-
-//   ~TomographyProcessHandler(){
-//     Poco::Process::kill(m_pid);
-//   }
-//   void setup(const std::string runnable, const std::vector<std::string> args)
-//   {
-//     // move the copies
-//     m_runnable = std::move(runnable);
-//     m_args = std::move(args);
-//   }
-//   int exit(){
-//     this->exit();
-//   }
-//   Poco::Process::PID getPID() const {
-//     if(this->isRunning())
-//       while(m_pid == 0){
-//       }
-//       return m_pid;
-//     return 0;
-//   }
-
-//   std::string getOutputString() { return getStringFromStream(m_outstr); }
-
-//   std::string getErrorString() { return getStringFromStream(m_errstr); }
-
-//   bool runzz(Poco::Process::PID pid) const {
-//     return this->isRunning() && Poco::Process::isRunning(pid);
-//   }
-//   bool runzz() const {
-//     return this->isRunning() && Poco::Process::isRunning(m_pid);
-//   }
-
-// private:
-//   void run() {
-//     m_handle = Mantid::Kernel::make_unique<Poco::ProcessHandle>(
-//         Poco::Process::launch(m_runnable, m_args));
-//     m_pid = m_handle->id();
-//     m_mutex.lock();
-//     // Poco::StreamCopier::copyStream(m_outstr, *m_stream);
-//     // while(Poco::Process::isRunning(m_handle.get())){
-//     Poco::StreamCopier::copyToString(m_outstr, m_outString);
-//     // }
-//     m_mutex.unlock();
-//   }
-
-//   std::string getStringFromStream(Poco::PipeInputStream &str) {
-//     // avoid deadlocking
-//     // if (m_pid > 0) {
-//     //   return "Reconstruction process running...";
-//     // }
-
-//     if(!m_mutex.try_lock()){
-//       return "Reconstruction in progress...";
-//     }
-//     // std::string outstring;
-//     // Poco::StreamCopier::copyToString(str, outstring, 256);
-//     // if (!outstring.empty())
-//     //   return outstring;
-//     // remove the trylock
-//     m_mutex.unlock();
-//     if (!m_outString.empty())
-//       return m_outString;
-//     return "Reconstruction process encountered unknown error! Please check
-//     reconstruction "
-//            "logs.";
-//   }
-
-//   std::mutex m_mutex;
-//   std::ostream * m_stream;
-//   std::string m_outString = "Reconstruction in progress...";
-//   std::string m_runnable;
-//   std::vector<std::string> m_args;
-//   Poco::Process::PID m_pid;
-//   Poco::Pipe m_outPipe;
-//   Poco::Pipe m_errPipe;
-//   Poco::PipeInputStream m_outstr;
-//   Poco::PipeInputStream m_errstr;
-//   std::unique_ptr<Poco::ProcessHandle> m_handle;
-// };
 } // CustomInterfaces
 } // MantidQt
 #endif

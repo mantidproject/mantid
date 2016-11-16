@@ -184,6 +184,7 @@ public:
 
   /// Log this message through the system logging
   void logMsg(const std::string &msg);
+  void logErrMsg(const std::string &msg);
 
   /// for clean destruction
   void cleanup();
