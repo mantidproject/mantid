@@ -75,6 +75,8 @@ public:
   const LiveListenerInfo &liveListenerInfo(std::string name = "") const;
   /// Returns true if this instrument has at least one live listener defined
   bool hasLiveListenerInfo() const;
+  /// Returns all available LiveListenerInfos as a vector
+  const std::vector<LiveListenerInfo> &liveListenerInfoList() const;
   /// Return list of techniques
   const std::set<std::string> &techniques() const;
   /// The facility to which this instrument belongs
