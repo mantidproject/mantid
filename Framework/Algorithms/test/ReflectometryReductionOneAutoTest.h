@@ -124,13 +124,15 @@ public:
     temp = lAlg->getProperty("OutputWorkspace");
     m_multiDetectorWorkspace =
         boost::dynamic_pointer_cast<WorkspaceGroup>(temp);
-    // m_multiDetectorWorkspace =
-    // AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-    // "multidetector_ws_1");
+    AnalysisDataService::Instance().addOrReplace("multidetector_group",
+                                                 m_multiDetectorWorkspace);
   }
   ~ReflectometryReductionOneAutoTest() override {
     AnalysisDataService::Instance().remove("TOF");
     AnalysisDataService::Instance().remove("NotTOF");
+    AnalysisDataService::Instance().remove("multidetector_group");
+    AnalysisDataService::Instance().remove("multidetector_group_1");
+    AnalysisDataService::Instance().remove("multidetector_group_2");
   }
 
   IAlgorithm_sptr construct_standard_algorithm() {
@@ -569,6 +571,225 @@ public:
 
     // reset the instrument associated with m_dataWorkspace
     m_dataWorkspace->setInstrument(m_dataWorkspaceInstHolder);
+  }
+
+  void test_point_detector_run_with_single_transmission_workspace() {
+    ReflectometryReductionOneAuto alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 2.0);
+    alg.setProperty("I0MonitorIndex", 0);
+    alg.setProperty("ProcessingInstructions", "3,4");
+    alg.setProperty("MonitorBackgroundWavelengthMin", 0.0);
+    alg.setProperty("MonitorBackgroundWavelengthMax", 1.0);
+    alg.setProperty("MonitorIntegrationWavelengthMin", 0.0);
+    alg.setProperty("MonitorIntegrationWavelengthMax", 1.0);
+    alg.setProperty("InputWorkspace", m_dataWorkspace);
+    alg.setProperty("FirstTransmissionRun", m_transWorkspace1);
+    alg.setProperty("ThetaIn", 0.2);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    double thetaOut = alg.getProperty("ThetaOut");
+    TSM_ASSERT_EQUALS("Theta in and out should be the same", thetaOut, 0.2);
+
+    MatrixWorkspace_sptr IvsLam = alg.getProperty("OutputWorkspaceWavelength");
+    TSM_ASSERT("OutputWorkspaceWavelength should be a valid matrix workspace",
+               IvsLam);
+
+    MatrixWorkspace_sptr IvsQ = alg.getProperty("OutputWorkspace");
+    TSM_ASSERT("OutputWorkspace should be a valid matrix workspace", IvsQ);
+
+    TSM_ASSERT_EQUALS("OutputWorkspaceWavelength should have two histograms",
+                      IvsLam->getNumberHistograms(), 2);
+  }
+
+  void test_point_detector_run_with_two_transmission_workspaces() {
+    ReflectometryReductionOneAuto alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 2.0);
+    alg.setProperty("I0MonitorIndex", 0);
+    alg.setProperty("ProcessingInstructions", "3, 4");
+    alg.setProperty("MonitorBackgroundWavelengthMin", 0.0);
+    alg.setProperty("MonitorBackgroundWavelengthMax", 1.0);
+    alg.setProperty("MonitorIntegrationWavelengthMin", 0.0);
+    alg.setProperty("MonitorIntegrationWavelengthMax", 1.0);
+    alg.setProperty("InputWorkspace", m_dataWorkspace);
+    alg.setProperty("FirstTransmissionRun", m_transWorkspace1);
+    alg.setProperty("SecondTransmissionRun", m_transWorkspace2);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+  }
+
+  void test_spectrum_map_mismatch_throws_when_strict() {
+    ReflectometryReductionOneAuto alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 2.0);
+    alg.setProperty("I0MonitorIndex", 0);
+    alg.setProperty("ProcessingInstructions", "0");
+    alg.setProperty("MonitorBackgroundWavelengthMin", 0.0);
+    alg.setProperty("MonitorBackgroundWavelengthMax", 1.0);
+    alg.setProperty("MonitorIntegrationWavelengthMin", 0.0);
+    alg.setProperty("MonitorIntegrationWavelengthMax", 1.0);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+
+    alg.setProperty("InputWorkspace", m_dataWorkspace);
+    alg.execute();
+
+    MatrixWorkspace_sptr trans = alg.getProperty("OutputWorkspaceWavelength");
+    alg.setProperty("FirstTransmissionRun", trans);
+    alg.setProperty("ProcessingInstructions", "1");
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
+  }
+
+  void test_spectrum_map_mismatch_doesnt_throw_when_not_strict() {
+    ReflectometryReductionOneAuto alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 2.0);
+    alg.setProperty("I0MonitorIndex", 0);
+    alg.setProperty("ProcessingInstructions", "0");
+    alg.setProperty("MonitorBackgroundWavelengthMin", 0.0);
+    alg.setProperty("MonitorBackgroundWavelengthMax", 1.0);
+    alg.setProperty("MonitorIntegrationWavelengthMin", 0.0);
+    alg.setProperty("MonitorIntegrationWavelengthMax", 1.0);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+
+    alg.setProperty("InputWorkspace", m_dataWorkspace);
+    alg.execute();
+
+    MatrixWorkspace_sptr trans = alg.getProperty("OutputWorkspaceWavelength");
+    alg.setProperty("FirstTransmissionRun", trans);
+    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("StrictSpectrumChecking", "0");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+  }
+
+  void test_multidetector_run() {
+    ReflectometryReductionOneAuto alg;
+    alg.initialize();
+    alg.setChild(false);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 2.0);
+    alg.setProperty("I0MonitorIndex", 0);
+    alg.setProperty("ProcessingInstructions", "10");
+    alg.setProperty("AnalysisMode", "MultiDetectorAnalysis");
+    alg.setProperty("CorrectDetectorPositions", "0");
+    alg.setProperty("DetectorComponentName", "lineardetector");
+    alg.setProperty("RegionOfDirectBeam", "20, 30");
+    alg.setProperty("MonitorBackgroundWavelengthMin", 0.0);
+    alg.setProperty("MonitorBackgroundWavelengthMax", 1.0);
+    alg.setProperty("MonitorIntegrationWavelengthMin", 0.0);
+    alg.setProperty("MonitorIntegrationWavelengthMax", 1.0);
+    alg.setProperty("ThetaIn", 0.1);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.setPropertyValue("InputWorkspace", "multidetector_group");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    MatrixWorkspace_sptr IvsLam_1 =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("IvsLam_1");
+    TSM_ASSERT("OutputWorkspaceWavelength should be a matrix workspace",
+               IvsLam_1);
+    TS_ASSERT_EQUALS("Wavelength", IvsLam_1->getAxis(0)->unit()->unitID());
+    MatrixWorkspace_sptr IvsLam_2 =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("IvsLam_2");
+    TSM_ASSERT("OutputWorkspaceWavelength should be a matrix workspace",
+               IvsLam_2);
+    TS_ASSERT_EQUALS("Wavelength", IvsLam_2->getAxis(0)->unit()->unitID());
+
+    MatrixWorkspace_sptr IvsQ_1 =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("IvsQ_1");
+    TSM_ASSERT("OutputWorkspace should be a matrix workspace", IvsQ_1);
+    TS_ASSERT_EQUALS("MomentumTransfer", IvsQ_1->getAxis(0)->unit()->unitID());
+    MatrixWorkspace_sptr IvsQ_2 =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("IvsQ_2");
+    TSM_ASSERT("OutputWorkspace should be a matrix workspace", IvsQ_2);
+    TS_ASSERT_EQUALS("MomentumTransfer", IvsQ_2->getAxis(0)->unit()->unitID());
+
+    MatrixWorkspace_sptr tempWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        m_multiDetectorWorkspace->getItem(0));
+    auto instrBefore = tempWS->getInstrument();
+    auto detectorBefore = instrBefore->getComponentByName("lineardetector");
+    auto instrAfter = IvsLam_1->getInstrument();
+    auto detectorAfter = instrAfter->getComponentByName("lineardetector");
+    TS_ASSERT_DELTA(detectorBefore->getPos().Z(), detectorAfter->getPos().Z(),
+                    0.0001)
+
+    AnalysisDataService::Instance().remove("IvsLam");
+    AnalysisDataService::Instance().remove("IvsLam_1");
+    AnalysisDataService::Instance().remove("IvsLam_2");
+    AnalysisDataService::Instance().remove("IvsQ");
+    AnalysisDataService::Instance().remove("IvsQ_1");
+    AnalysisDataService::Instance().remove("IvsQ_2");
+  }
+
+  void test_multidetector_run_correct_positions() {
+    ReflectometryReductionOneAuto alg;
+    alg.initialize();
+    alg.setChild(false);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 2.0);
+    alg.setProperty("I0MonitorIndex", 0);
+    alg.setProperty("ProcessingInstructions", "73");
+    alg.setProperty("AnalysisMode", "MultiDetectorAnalysis");
+    alg.setProperty("CorrectDetectorPositions", "1");
+    alg.setProperty("DetectorComponentName", "lineardetector");
+    alg.setProperty("RegionOfDirectBeam", "28, 29");
+    alg.setProperty("MonitorBackgroundWavelengthMin", 0.0);
+    alg.setProperty("MonitorBackgroundWavelengthMax", 1.0);
+    alg.setProperty("MonitorIntegrationWavelengthMin", 0.0);
+    alg.setProperty("MonitorIntegrationWavelengthMax", 1.0);
+    alg.setProperty("ThetaIn", 0.49);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.setPropertyValue("InputWorkspace", "multidetector_group");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    MatrixWorkspace_sptr IvsLam_1 =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("IvsLam_1");
+    TSM_ASSERT("OutputWorkspaceWavelength should be a matrix workspace",
+               IvsLam_1);
+    TS_ASSERT_EQUALS("Wavelength", IvsLam_1->getAxis(0)->unit()->unitID());
+    MatrixWorkspace_sptr IvsLam_2 =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("IvsLam_2");
+    TSM_ASSERT("OutputWorkspaceWavelength should be a matrix workspace",
+               IvsLam_2);
+    TS_ASSERT_EQUALS("Wavelength", IvsLam_2->getAxis(0)->unit()->unitID());
+
+    MatrixWorkspace_sptr IvsQ_1 =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("IvsQ_1");
+    TSM_ASSERT("OutputWorkspace should be a matrix workspace", IvsQ_1);
+    TS_ASSERT_EQUALS("MomentumTransfer", IvsQ_1->getAxis(0)->unit()->unitID());
+    MatrixWorkspace_sptr IvsQ_2 =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("IvsQ_2");
+    TSM_ASSERT("OutputWorkspace should be a matrix workspace", IvsQ_2);
+    TS_ASSERT_EQUALS("MomentumTransfer", IvsQ_2->getAxis(0)->unit()->unitID());
+
+    auto instr = IvsLam_1->getInstrument();
+    auto detectorPos = instr->getComponentByName("lineardetector");
+    TS_ASSERT_DELTA(-0.05714, detectorPos->getPos().Z(), 0.0001)
+
+    AnalysisDataService::Instance().remove("IvsLam");
+    AnalysisDataService::Instance().remove("IvsLam_1");
+    AnalysisDataService::Instance().remove("IvsLam_2");
+    AnalysisDataService::Instance().remove("IvsQ");
+    AnalysisDataService::Instance().remove("IvsQ_1");
+    AnalysisDataService::Instance().remove("IvsQ_2");
   }
 };
 
