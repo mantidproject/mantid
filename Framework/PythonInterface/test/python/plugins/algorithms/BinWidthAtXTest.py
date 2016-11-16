@@ -87,7 +87,7 @@ class BinWidthAtXTest(unittest.TestCase):
         X = -0.3
         params = self._make_algorithm_params(ws, X)
         self.assertRaises(ValueError, testhelpers.create_algorithm,
-                         'BinWidthAtX', **params)
+                          'BinWidthAtX', **params)
         DeleteWorkspace(ws)
 
     def test_positive_output_even_if_descending_x(self):
