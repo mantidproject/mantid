@@ -70,7 +70,7 @@ namespace CustomInterfaces {
 class TomographyProcessHandler : public QProcess {
   Q_OBJECT
 public:
-  TomographyProcessHandler(QObject *parent) : QProcess(parent) {}
+  TomographyProcessHandler() : QProcess() {}
 
   // intentionally copy the vector
   void setup(const std::string runnable, const std::vector<std::string> &args) {
@@ -135,21 +135,20 @@ public slots:
   bool isRunning() { return this->state() == QProcess::ProcessState::Running; }
   void startWorker() {
     // DEBUG
-    std::cout << "\n\n\nDEBUG >> STARTING PROCESS <<<<<<<<\n\n\n";
-
+    std::cout << "\n\n\nDEBUG >> STARTING PROCESS <<\n";
     start(m_runnable, m_args);
   }
 
   void readStdOut() {
     QString output(readAllStandardOutput());
     std::string stdOutput = output.toStdString();
-    std::cout << "\nDEBUG >> PROCESS STDOUT" << stdOutput << "\n";
+    std::cout << "\nDEBUG >> PROCESS STDOUT" << "\n";
   }
 
   void readStdErr() {
     QString error(readAllStandardError());
     std::string stdError = error.toStdString();
-    std::cout << "\nDEBUG >> PROCESS ERROR" << stdError << "\n";
+    std::cout << "\nDEBUG >> PROCESS ERROR" << "\n";
   }
 
 private:
@@ -171,7 +170,10 @@ private:
 class TomographyThreadHandler : public QThread {
   Q_OBJECT
 public:
-  TomographyThreadHandler(QObject *parent) : QThread(parent) {}
+  TomographyThreadHandler(QObject *parent, TomographyProcessHandler * worker) : QThread(parent) {
+    connect(worker, SIGNAL(readyReadStandardOutput()), this, SLOT(readWorkerStdOut()));
+    connect(worker, SIGNAL(readyReadStandardError()), this, SLOT(readWorkerStdErr()));
+  }
 
   void run() {
     auto pid = getPID();
@@ -179,13 +181,32 @@ public:
     this->exec();
   }
 
-  size_t getPID() { return m_pid; }
 
 public slots:
-  void getThreadPID() {
-    auto pid = this->currentThreadId();
-    m_pid = (long long)pid;
+  size_t getPID() {
+    // auto pid = this->currentThreadId();
+//    #ifdef _WIN32
+    // m_pid = (long long)pid;
+//    #else
+//    m_pid = pid;
+//    #endif
+
+    return 0;
   }
+  void readWorkerStdOut() {
+    auto * worker = qobject_cast<TomographyProcessHandler*>(sender());
+    QString output(worker->readAllStandardOutput());
+    std::string stdOutput = output.toStdString();
+    std::cout << "\nDEBUG >> PROCESS STDOUT" << stdOutput << "\n";
+  }
+
+  void readWorkerStdErr() {
+    auto * worker = qobject_cast<TomographyProcessHandler*>(sender());
+    QString error(worker->readAllStandardError());
+    std::string stdError = error.toStdString();
+    std::cout << "\nDEBUG >> PROCESS ERROR" << stdError << "\n";
+  }
+
 
 private:
   bool m_pidReady = false;

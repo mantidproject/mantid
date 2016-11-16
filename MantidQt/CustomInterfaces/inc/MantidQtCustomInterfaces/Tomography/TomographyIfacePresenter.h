@@ -13,6 +13,7 @@
 // Qt classes forward declarations
 class QThread;
 class QTimer;
+class QSignalMapper;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -80,7 +81,7 @@ protected:
 protected slots:
   /// It may be run on user request, or periodically from a timer/thread
   void processRefreshJobs();
-  void reconstructionFinished();
+  void readWorkerStdOut(TomographyProcessHandler *worker);
 
 protected:
   void processCancelJobs();

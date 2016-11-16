@@ -19,6 +19,7 @@
 #include <QString>
 #include <QThread>
 #include <QTimer>
+#include <QSignalMapper>
 
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 
@@ -557,26 +558,20 @@ void TomographyIfacePresenter::processRunRecon() {
 
   try {
     m_workerThread.reset();
-    m_workerThread = Mantid::Kernel::make_unique<TomographyThreadHandler>(this);
-    auto *worker =
-        new MantidQt::CustomInterfaces::TomographyProcessHandler(this);
+    auto *worker = new MantidQt::CustomInterfaces::TomographyProcessHandler();
+    m_workerThread = Mantid::Kernel::make_unique<TomographyThreadHandler>(this, worker);
     worker->moveToThread(m_workerThread.get());
 
+    // doesnt work, should set in run() TODO
     connect(m_workerThread.get(), SIGNAL(started()), m_workerThread.get(),
             SLOT(getThreadPID()), Qt::DirectConnection);
 
     connect(m_workerThread.get(), SIGNAL(started()), worker,
             SLOT(startWorker()));
 
-    connect(worker, SIGNAL(readyReadStandardOutput()), worker,
-            SLOT(readStdOut()));
-    connect(worker, SIGNAL(readyReadStandardError()), worker,
-            SLOT(readStdErr()));
-
     connect(m_workerThread.get(), SIGNAL(finished()), m_workerThread.get(),
             SLOT(deleteLater()), Qt::DirectConnection);
 
-    connect(worker, SIGNAL(finished()), worker, SLOT(reconstructionFinished()));
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
 
     m_model->doSubmitReconstructionJob(m_view->currentComputeResource(),
@@ -587,8 +582,10 @@ void TomographyIfacePresenter::processRunRecon() {
   processRefreshJobs();
 }
 
-void TomographyIfacePresenter::reconstructionFinished() {
-  std::cout << "\n\nDEBUG >> STDOUT READY TO BE READ\n\n";
+void TomographyIfacePresenter::readWorkerStdOut(TomographyProcessHandler *worker) {
+    QString error(worker->readAllStandardError());
+    std::string stdError = error.toStdString();
+    std::cout << "\nDEBUG >> PROCESS ERROR" << stdError << "\n";
 }
 
 bool TomographyIfacePresenter::isLocalResourceSelected() const {
