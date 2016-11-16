@@ -68,11 +68,11 @@ private:
   virtual std::vector<double> header(std::ofstream &file);
 
 protected:
-  /// Return the separator character
-  virtual char sep() { return '\t'; }
   /// write the main content of the data
   virtual void data(std::ofstream &file, const std::vector<double> &XData,
                     bool exportDeltaQ = true);
+  /// The separator character
+  char sep;
   double m_qres = 0.0;
   size_t m_xlength = 0;
 

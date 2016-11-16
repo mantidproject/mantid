@@ -74,10 +74,10 @@ void SaveILLCosmosAscii::extraHeaders(std::ofstream &file) {
   }
 
   file << "Number of file format: 2\n";
-  file << "Number of data points:" << sep() << m_xlength << '\n';
+  file << "Number of data points:" << sep << m_xlength << '\n';
   file << '\n';
 
-  file << sep() << "q" << sep() << "refl" << sep() << "refl_err" << sep()
+  file << sep << "q" << sep << "refl" << sep << "refl_err" << sep
        << "q_res\n";
 }
 } // namespace DataHandling

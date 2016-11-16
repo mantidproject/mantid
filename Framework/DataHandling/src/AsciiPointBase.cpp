@@ -10,9 +10,11 @@ GUI
 #include "MantidDataHandling/AsciiPointBase.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ListValidator.h"
 
 #include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
+#include <boost/make_shared.hpp>
 #include <cmath>
 #include <fstream>
 
@@ -30,6 +32,14 @@ void AsciiPointBase::init() {
   declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
                                                     FileProperty::Save, ext()),
                   "The filename of the output file.");
+
+  std::vector<std::string> propOptions;
+  propOptions.push_back(",");
+  propOptions.push_back(" ");
+  propOptions.push_back("\t");
+  declareProperty("Separator", "\t",
+      boost::make_shared<StringListValidator>(propOptions),
+      "The separator used for splitting data columns. Comma, space or tab.");
   extraProps();
 }
 
@@ -46,7 +56,8 @@ void AsciiPointBase::exec() {
   }
   m_ws = getProperty("InputWorkspace");
   g_log.information("FILENAME: " + filename);
-
+  std::string sepString = getProperty("Separator");
+  sep = sepString[0];
   std::vector<double> XData = header(file);
   extraHeaders(file);
   data(file, XData);
@@ -114,7 +125,7 @@ void AsciiPointBase::outputval(double val, std::ofstream &file,
   bool nancheck = std::isnan(val);
   bool infcheck = std::isinf(val);
   if (leadingSep) {
-    file << sep();
+    file << sep;
   }
   if (!nancheck && !infcheck) {
     file << val;
@@ -126,6 +137,5 @@ void AsciiPointBase::outputval(double val, std::ofstream &file,
     file << "nan";
   }
 }
-
 } // namespace DataHandling
 } // namespace Mantid
