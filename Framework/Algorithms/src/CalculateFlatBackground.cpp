@@ -26,6 +26,7 @@ DECLARE_ALGORITHM(CalculateFlatBackground)
 using namespace Kernel;
 using namespace API;
 
+/// Enumeration for the different operating modes.
 enum class Modes { LINEAR_FIT, MEAN, MOVING_AVERAGE };
 
 void CalculateFlatBackground::init() {
@@ -266,10 +267,11 @@ void CalculateFlatBackground::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-/** Checks that the range parameters have been set correctly
-*  @param startX :: The starting point
-*  @param endX ::   The ending point
-*  @throw std::invalid_argument If XMin or XMax are not set, or XMax is less
+/**
+* Checks that the range parameters have been set correctly.
+* @param startX the starting point
+* @param endX the ending point
+* @throw std::invalid_argument if XMin or XMax are not set, or XMax is less
 * than XMin
 */
 void CalculateFlatBackground::checkRange(double &startX, double &endX) {
@@ -284,10 +286,11 @@ void CalculateFlatBackground::checkRange(double &startX, double &endX) {
   }
 }
 
-/** checks if the array is empty and if so fills it with all the index numbers
-*  in the workspace. Non-empty arrays are left untouched
-*  @param output :: the array to be checked
-*  @param workspaceTotal :: required to be the total number of spectra in the
+/**
+* Checks if the array is empty and if so fills it with all the index numbers
+* in the workspace. Non-empty arrays are left untouched.
+* @param output the array to be checked
+* @param workspaceTotal required to be the total number of spectra in the
 * workspace
 */
 void CalculateFlatBackground::getWsInds(std::vector<int> &output,
@@ -300,18 +303,19 @@ void CalculateFlatBackground::getWsInds(std::vector<int> &output,
   std::iota(output.begin(), output.end(), 0);
 }
 
-/** Gets the mean number of counts in each bin the background region and the
-* variance (error^2) of that number. Adjusts the y errors accordingly.
-*  @param histogram :: a histogram from the input workspace
-*  @param background :: the mean background
-*  @param variance :: the variance of the background
-*  @param startX :: a X-value in the first bin that will be considered, must not
+/**
+* Gets the mean number of counts in each bin the background region and the
+* variance (error^2) of that number.
+* @param histogram the histogram to operate on
+* @param background an output variable for the calculated background
+* @param variance an output variable for background's variance.
+* @param startX an X-value in the first bin that will be considered, must not
 * be greater endX
-*  @param endX :: a X-value in the last bin that will be considered, must not
+* @param endX an X-value in the last bin that will be considered, must not
 * less than startX
-*  @throw out_of_range if either startX or endX are out of the range of X-values
+* @throw out_of_range if either startX or endX are out of the range of X-values
 * in the specified spectrum
-*  @throw invalid_argument if endX has the value of first X-value one of the
+* @throw invalid_argument if endX has the value of first X-value one of the
 * spectra
 */
 void CalculateFlatBackground::Mean(const HistogramData::Histogram &histogram,
@@ -370,12 +374,11 @@ void CalculateFlatBackground::Mean(const HistogramData::Histogram &histogram,
 
 /**
 * Uses linear algorithm to do the fitting.
-*
-* @param WS The workspace to fit
-* @param spectrum The spectrum number to fit, using the workspace numbering of
-*the spectra
-* @param startX An X value in the first bin to be included in the fit
-* @param endX An X value in the last bin to be included in the fit
+* @param Histogram the histogram to fit
+* @param background an output variable for the calculated background
+* @param variance an output variable for background's variance, currently always zero.
+* @param startX an X value in the first bin to be included in the fit
+* @param endX an X value in the last bin to be included in the fit
 */
 void CalculateFlatBackground::LinearFit(const HistogramData::Histogram &histogram,
                                           double &background, double &variance,
@@ -431,9 +434,10 @@ void CalculateFlatBackground::LinearFit(const HistogramData::Histogram &histogra
 /**
 * Utilizes cyclic boundary conditions when calculating the
 * average in the window.
-* @param WS The workspace to operate on
-* @param wsIndex The workspace index to operate on
-* @param windowWidth Width of the averaging window in bins
+* @param histogram the histogram to operate on
+* @param background an output variable for the calculated background
+* @param variance an output variable for background's variance.
+* @param windowWidth the width of the averaging window in bins
 */
 void
 CalculateFlatBackground::MovingAverage(const HistogramData::Histogram &histogram,
