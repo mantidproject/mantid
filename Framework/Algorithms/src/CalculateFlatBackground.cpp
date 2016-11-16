@@ -97,16 +97,16 @@ void CalculateFlatBackground::exec() {
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
   // Copy over all the data
-  const int numHists = static_cast<int>(inputWS->getNumberHistograms());
-  const int blocksize = static_cast<int>(inputWS->blocksize());
+  const size_t numHists = inputWS->getNumberHistograms();
+  const size_t blocksize = inputWS->blocksize();
 
   if (blocksize == 1)
     throw std::runtime_error("CalculateFlatBackground with only one bin is "
                              "not possible.");
 
-  m_skipMonitors = getProperty("SkipMonitors");
-  m_nullifyNegative = getProperty("NullifyNegativeValues");
-  std::string modeString = getProperty("Mode");
+  const bool skipMonitors = getProperty("SkipMonitors");
+  const bool nullifyNegative = getProperty("NullifyNegativeValues");
+  const std::string modeString = getProperty("Mode");
   Modes mode = Modes::LINEAR_FIT;
   if (modeString == "Mean") {
     mode = Modes::MEAN;
@@ -136,7 +136,7 @@ void CalculateFlatBackground::exec() {
     if (windowWidth <= 0) {
       throw std::runtime_error("AveragingWindowWidth zero or negative");
     }
-    if (blocksize < windowWidth) {
+    if (blocksize < static_cast<size_t>(windowWidth)) {
       throw std::runtime_error("AveragingWindowWidth is larger than the number "
                                "of bins in InputWorkspace");
     }
@@ -152,183 +152,120 @@ void CalculateFlatBackground::exec() {
       std::string(getProperty("outputMode")) == "Subtract Background";
 
   // Initialize the progress reporting object
-  m_progress = new Progress(this, 0.0, 0.2, numHists);
+  m_progress.reset(new Progress(this, 0.0, 0.2, numHists));
 
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (outputWS != inputWS) {
     outputWS = WorkspaceFactory::Instance().create(inputWS);
-    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
-    for (int i = 0; i < numHists; ++i) {
-      PARALLEL_START_INTERUPT_REGION
-      outputWS->setHistogram(i, inputWS->histogram(i));
-      m_progress->report();
-      PARALLEL_END_INTERUPT_REGION
-    }
-    PARALLEL_CHECK_INTERUPT_REGION
   }
 
-  // Only convert histogram data to a distribution
-  convertToDistribution(outputWS);
+  // For logging purposes.
+  double backgroundTotal = 0;
+  size_t calculationCount = 0;
 
-  // these are used to report information to the user, one progress update for
-  // each percent and a report on the size of the background found
-  double prg(0.2), backgroundTotal(0);
-  const double toFitsize(static_cast<double>(wsInds.size()));
-  const int progStep(static_cast<int>(ceil(toFitsize / 80.0)));
-
-  // Now loop over the required spectra
-  std::vector<int>::const_iterator specIt;
-  // local cache for global variable
-  bool skipMonitors(m_skipMonitors);
-  const auto &spectrumInfo = outputWS->spectrumInfo();
-  for (specIt = wsInds.begin(); specIt != wsInds.end(); ++specIt) {
-    const int currentSpec = *specIt;
-    try {
-      if (skipMonitors) {
-        if (!spectrumInfo.hasDetectors(currentSpec)) {
-          // Do nothing.
-          // not every spectra is the monitor or detector, some spectra have no
-          // instrument components attached.
-          g_log.information(" Can not find detector for spectra N: " +
-                            std::to_string(currentSpec) +
-                            " Processing background anyway\n");
-        } else {
-          if (spectrumInfo.isMonitor(currentSpec))
-            continue;
-        }
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
+  for (size_t i = 0; i < numHists; ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    // Extract a histogram from inputWS, work on it and, finally, put it to
+    // outputWS.
+    auto histogram = inputWS->histogram(i);
+    bool wasCounts = false;
+    if (histogram.yMode() == HistogramData::Histogram::YMode::Counts) {
+      wasCounts = true;
+      histogram.convertToFrequencies();
+    }
+    bool skipCalculation = std::find(wsInds.cbegin(), wsInds.cend(), i) == wsInds.cend();
+    if (!skipCalculation && skipMonitors) {
+      const auto &spectrumInfo = inputWS->spectrumInfo();
+      if (!spectrumInfo.hasDetectors(i)) {
+        // Do nothing.
+        // not every spectra is the monitor or detector, some spectra have no
+        // instrument components attached.
+        g_log.information(" Can not find detector for spectra N: " +
+                          std::to_string(i) +
+                          " Processing background anyway\n");
+      } else if (spectrumInfo.isMonitor(i)) {
+        skipCalculation = true;
       }
-
+    }
+    double background = 0;
+    double variance = 0;
+    if (!skipCalculation) {
+      ++calculationCount;
       // Now call the function the user selected to calculate the background
-      double background = -1;
       switch (mode) {
       case Modes::LINEAR_FIT:
-        background = LinearFit(outputWS, currentSpec, startX, endX);
+        LinearFit(histogram, background, variance, startX, endX);
         break;
       case Modes::MEAN:
-        background = Mean(outputWS, currentSpec, startX, endX);
+        Mean(histogram, background, variance, startX, endX);
         break;
       case Modes::MOVING_AVERAGE:
-        background = MovingAverage(outputWS, currentSpec, windowWidth);
+        MovingAverage(histogram, background, variance, windowWidth);
         break;
       }
-      if (background < 0) {
-        g_log.debug() << "The background for spectra index " << currentSpec
-                      << "was calculated to be " << background << '\n';
-        g_log.warning() << "Problem with calculating the background number of "
-                           "counts spectrum with index " << currentSpec << ".";
-        if (removeBackground) {
-          g_log.warning() << " The spectrum has been left unchanged.\n";
-          continue;
-        } else {
-          g_log.warning() << " The output background has been set to zero.\n";
-          background = 0;
-        }
-      } else { // only used for the logging that gets done at the end
-        backgroundTotal += background;
+    }
+    if (background < 0) {
+      g_log.debug() << "The background for spectra index " << i
+                    << "was calculated to be " << background << '\n';
+      g_log.warning() << "Problem with calculating the background number of "
+                         "counts spectrum with index " << i << ".";
+      if (removeBackground) {
+        g_log.warning() << " The spectrum has been left unchanged.\n";
+      } else {
+        g_log.warning() << " The output background has been set to zero.\n";
       }
-
-      // Get references to the current spectrum
-      auto &Y = outputWS->mutableY(currentSpec);
-      auto &E = outputWS->mutableE(currentSpec);
-      // Now subtract the background from the data
-      for (int j = 0; j < blocksize; ++j) {
-        if (removeBackground) {
-          Y[j] -= background;
-        } else {
-          Y[j] = background;
-        }
-        // remove negative values
-        if (m_nullifyNegative && Y[j] < 0.0) {
-          Y[j] = 0;
+      background = 0;
+      variance = 0;
+    }
+    backgroundTotal += background;
+    HistogramData::Histogram outHistogram(histogram);
+    auto &ys = outHistogram.mutableY();
+    auto &es = outHistogram.mutableE();
+    if (removeBackground) {
+      for (size_t j = 0; j < ys.size(); ++j) {
+        double val = ys[j] - background;
+        double err = std::sqrt(es[j] * es[j] + variance);
+        if (nullifyNegative && val < 0) {
+          val = 0;
           // The error estimate must go up in this nonideal situation and the
           // value of background is a good estimate for it. However, don't
           // reduce the error if it was already more than that
-          E[j] = E[j] > background ? E[j] : background;
+          err = es[j] > background ? es[j] : background;
+        }
+        ys[j] = val;
+        es[j] = err;
+      }
+    } else {
+      for (size_t j = 0; j < ys.size(); ++j) {
+        const double originalVal = inputWS->y(i)[j];
+        if (nullifyNegative && background > originalVal) {
+          ys[j] = originalVal;
+          es[j] = es[j] > background ? es[j] : background;
+        } else {
+          ys[j] = background;
+          es[j] = std::sqrt(variance);
         }
       }
-    } catch (std::exception &) {
-      g_log.error() << "Error processing the spectrum with index "
-                    << currentSpec << '\n';
-      throw;
     }
-
-    // make regular progress reports and check for canceling the algorithm
-    if (static_cast<int>(wsInds.end() - wsInds.begin()) % progStep == 0) {
-      interruption_point();
-      prg += (progStep * 0.7 / toFitsize);
-      progress(prg);
+    if (wasCounts) {
+      outHistogram.convertToCounts();
     }
-  } // Loop over spectra to be fitted
-
-  g_log.debug() << toFitsize << " spectra corrected\n";
-  if (!m_convertedFromRawCounts) {
-    g_log.information() << "The mean background over the spectra region was "
-                        << backgroundTotal / toFitsize << " per bin\n";
-  } else {
-    g_log.information()
-        << "Background corrected in uneven bin sized workspace\n";
+    outputWS->setHistogram(i, outHistogram);
+    m_progress->report();
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
-  restoreDistributionState(outputWS);
-
+  g_log.debug() << calculationCount << " spectra corrected\n";
+  g_log.information() << "The mean background was "
+                      << backgroundTotal / static_cast<double>(calculationCount) << ".\n";
   // Assign the output workspace to its property
   setProperty("OutputWorkspace", outputWS);
 }
-/** Converts only if the workspace requires it: workspaces that are
-* distributions or have constant width bins
-*  aren't affected. A flag is set if there was a change allowing the workspace
-* to be converted back
-*  @param workspace the workspace to check and possibly convert
-*/
-void CalculateFlatBackground::convertToDistribution(
-    API::MatrixWorkspace_sptr workspace) {
-  if (workspace->isDistribution()) {
-    return;
-  }
 
-  bool variationFound(false);
-  // the number of spectra we need to check to assess if the bin widths are all
-  // the same
-  const size_t total = WorkspaceHelpers::commonBoundaries(workspace)
-                           ? 1
-                           : workspace->getNumberHistograms();
-
-  MantidVec adjacents(workspace->x(0).size() - 1);
-  for (std::size_t i = 0; i < total; ++i) {
-    auto &X = workspace->x(i);
-    // Calculate bin widths
-    std::adjacent_difference(X.begin() + 1, X.end(), adjacents.begin());
-    // the first entry from adjacent difference is just a copy of the first
-    // entry in the input vector, ignore this.
-    if (X.size() > 1) {
-      MantidVec widths(adjacents.begin() + 1, adjacents.end());
-      if (!VectorHelper::isConstantValue(widths)) {
-        variationFound = true;
-        break;
-      }
-    }
-  }
-
-  if (variationFound) {
-    // after all the above checks the conclusion is we need the conversion
-    WorkspaceHelpers::makeDistribution(workspace, true);
-    m_convertedFromRawCounts = true;
-  }
-}
-/** Converts the workspace to a raw counts workspace if the flag
-* m_convertedFromRawCounts
-*  is set
-*  @param workspace the workspace to, possibly, convert
-*/
-void CalculateFlatBackground::restoreDistributionState(
-    API::MatrixWorkspace_sptr workspace) {
-  if (m_convertedFromRawCounts) {
-    WorkspaceHelpers::makeDistribution(workspace, false);
-    m_convertedFromRawCounts = false;
-  }
-}
 /** Checks that the range parameters have been set correctly
 *  @param startX :: The starting point
 *  @param endX ::   The ending point
@@ -354,36 +291,37 @@ void CalculateFlatBackground::checkRange(double &startX, double &endX) {
 * workspace
 */
 void CalculateFlatBackground::getWsInds(std::vector<int> &output,
-                                        const int workspaceTotal) {
+                                        const size_t workspaceTotal) {
   if (!output.empty()) {
     return;
   }
 
   output.resize(workspaceTotal);
-  for (int i = 0; i < workspaceTotal; ++i) {
-    output[i] = i;
-  }
+  std::iota(output.begin(), output.end(), 0);
 }
+
 /** Gets the mean number of counts in each bin the background region and the
 * variance (error^2) of that number. Adjusts the y errors accordingly.
-*  @param WS :: points to the input workspace
-*  @param wsInd :: index of the spectrum to process
+*  @param histogram :: a histogram from the input workspace
+*  @param background :: the mean background
+*  @param variance :: the variance of the background
 *  @param startX :: a X-value in the first bin that will be considered, must not
 * be greater endX
 *  @param endX :: a X-value in the last bin that will be considered, must not
 * less than startX
-*  @return the mean number of counts in each bin the background region
 *  @throw out_of_range if either startX or endX are out of the range of X-values
 * in the specified spectrum
 *  @throw invalid_argument if endX has the value of first X-value one of the
 * spectra
 */
-double CalculateFlatBackground::Mean(const API::MatrixWorkspace_sptr WS,
-                                     const int wsInd, const double startX,
-                                     const double endX) const {
-  auto &XS = WS->x(wsInd);
-  auto &YS = WS->y(wsInd);
-  auto &ES = WS->mutableE(wsInd);
+void CalculateFlatBackground::Mean(const HistogramData::Histogram &histogram,
+                                   double &background,
+                                   double &variance,
+                                   const double startX,
+                                   const double endX) const {
+  const auto &XS = histogram.x();
+  const auto &YS = histogram.y();
+  const auto &ES = histogram.e();
   // the function checkRange should already have checked that startX <= endX,
   // but we still need to check values weren't out side the ranges
   if (endX > XS.back() || startX < XS.front()) {
@@ -417,23 +355,17 @@ double CalculateFlatBackground::Mean(const API::MatrixWorkspace_sptr WS,
   const double numBins = static_cast<double>(1 + endInd - startInd);
   // the +1 here is because the accumulate() stops one before the location of
   // the last iterator
-  double background =
+  background =
       std::accumulate(YS.begin() + startInd, YS.begin() + endInd + 1, 0.0) /
       numBins;
   // The error on the total number of background counts in the background region
   // is taken as the sqrt the total number counts. To get the the error on the
   // counts in each bin just divide this by the number of bins. The variance =
   // error^2 that is the total variance divide by the number of bins _squared_.
-  const double variance =
+  variance =
       std::accumulate(ES.begin() + startInd, ES.begin() + endInd + 1, 0.0,
                       VectorHelper::SumSquares<double>()) /
       (numBins * numBins);
-  // adjust the errors using the variance (variance = error^2)
-  std::transform(ES.begin(), ES.end(), ES.begin(),
-                 std::bind2nd(VectorHelper::AddVariance<double>(), variance));
-  // return mean number of counts in each bin, the sum of the number of counts
-  // in all the bins divided by the number of bins used in that sum
-  return background;
 }
 
 /**
@@ -444,12 +376,13 @@ double CalculateFlatBackground::Mean(const API::MatrixWorkspace_sptr WS,
 *the spectra
 * @param startX An X value in the first bin to be included in the fit
 * @param endX An X value in the last bin to be included in the fit
-*
-* @return The value of the flat background
 */
-double CalculateFlatBackground::LinearFit(API::MatrixWorkspace_sptr WS,
-                                          int spectrum, double startX,
-                                          double endX) {
+void CalculateFlatBackground::LinearFit(const HistogramData::Histogram &histogram,
+                                          double &background, double &variance,
+                                          const double startX,
+                                          const double endX) {
+  MatrixWorkspace_sptr WS = WorkspaceFactory::Instance().create("Workspace2D", 1, histogram.x().size(), histogram.y().size());
+  WS->setHistogram(0, histogram);
   IAlgorithm_sptr childAlg = createChildAlgorithm("Fit");
 
   IFunction_sptr func =
@@ -458,7 +391,7 @@ double CalculateFlatBackground::LinearFit(API::MatrixWorkspace_sptr WS,
 
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<bool>("CreateOutput", true);
-  childAlg->setProperty<int>("WorkspaceIndex", spectrum);
+  childAlg->setProperty<int>("WorkspaceIndex", 0);
   childAlg->setProperty<double>("StartX", startX);
   childAlg->setProperty<double>("EndX", endX);
   // Default minimizer doesn't work properly even on the easiest cases,
@@ -470,7 +403,8 @@ double CalculateFlatBackground::LinearFit(API::MatrixWorkspace_sptr WS,
   std::string outputStatus = childAlg->getProperty("OutputStatus");
   if (outputStatus != "success") {
     g_log.warning("Unable to successfully fit the data: " + outputStatus);
-    return -1.0;
+    background = -1;
+    return;
   }
 
   Mantid::API::ITableWorkspace_sptr output =
@@ -489,7 +423,9 @@ double CalculateFlatBackground::LinearFit(API::MatrixWorkspace_sptr WS,
 
   // Calculate the value of the flat background by taking the value at the
   // centre point of the fit
-  return slope * centre + intercept;
+  background = slope * centre + intercept;
+  // ATM we don't calculate the error here.
+  variance = 0;
 }
 
 /**
@@ -498,32 +434,38 @@ double CalculateFlatBackground::LinearFit(API::MatrixWorkspace_sptr WS,
 * @param WS The workspace to operate on
 * @param wsIndex The workspace index to operate on
 * @param windowWidth Width of the averaging window in bins
-* @return Minimum
 */
-double
-CalculateFlatBackground::MovingAverage(API::MatrixWorkspace_const_sptr WS,
-                                       int wsIndex, size_t windowWidth) const {
-  const auto &ys = WS->y(wsIndex);
+void
+CalculateFlatBackground::MovingAverage(const HistogramData::Histogram &histogram,
+                                       double &background, double &variance,
+                                       size_t windowWidth) const {
+  const auto &ys = histogram.y();
+  const auto &es = histogram.e();
   double currentMin = std::numeric_limits<double>::max();
+  double currentVariance = 0;
 
-  // Initialize sum.
-  double sum = 0;
-  for (size_t i = 0; i < windowWidth; ++i) {
-    sum += ys[i];
-  }
   // When moving the window, we need to subtract the single point "falling off"
   // while adding a new point. Saves us summing all the points in the window.
-  for (size_t i = 0; i < ys.size() - 1; ++i) {
-    currentMin = std::min(currentMin, sum / static_cast<double>(windowWidth));
-    size_t j = i + windowWidth;
-    // Cyclic boundary conditions.
-    if (j >= ys.size()) {
-      j -= ys.size();
+  for (size_t i = 0; i < ys.size(); ++i) {
+    double sum = 0;
+    double varSqSum = 0;
+    for (size_t j = 0; j < windowWidth; ++j) {
+      size_t index = i + j;
+      if (index >= ys.size()) {
+        // Cyclic boundary conditions.
+        index -= ys.size();
+      }
+      sum += ys[index];
+      varSqSum += es[index] * es[index];
     }
-    sum += ys[j] - ys[i];
+    const double average = sum / static_cast<double>(windowWidth);
+    if (average < currentMin) {
+      currentMin = average;
+      currentVariance = varSqSum / static_cast<double>(windowWidth * windowWidth);
+    }
   }
-  currentMin = std::min(currentMin, sum / static_cast<double>(windowWidth));
-  return currentMin;
+  background = currentMin;
+  variance = currentVariance;
 }
 
 } // namespace Algorithms

@@ -7,6 +7,9 @@
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
+  namespace HistogramData {
+    class Histogram;
+  }
 namespace Algorithms {
 /** Finds a constant background value of each desired spectrum
     and optionally subtracts that value from the entire spectrum.
@@ -54,14 +57,10 @@ class DLLExport CalculateFlatBackground : public API::Algorithm {
 public:
   /// (Empty) Constructor
   CalculateFlatBackground()
-      : API::Algorithm(), m_convertedFromRawCounts(false),
-        m_skipMonitors(false), m_nullifyNegative(true), m_progress(nullptr) {}
+      : API::Algorithm(), m_progress(nullptr) {}
   /// Virtual destructor
-  ~CalculateFlatBackground() override {
-    if (m_progress)
-      delete m_progress;
-    m_progress = nullptr;
-  }
+  ~CalculateFlatBackground() = default;
+
   /// Algorithm's name
   const std::string name() const override { return "CalculateFlatBackground"; }
   /// Summary of algorithms purpose
@@ -86,24 +85,16 @@ private:
   void convertToDistribution(API::MatrixWorkspace_sptr workspace);
   void restoreDistributionState(API::MatrixWorkspace_sptr workspace);
   void checkRange(double &startX, double &endX);
-  void getWsInds(std::vector<int> &output, const int workspaceTotal);
-  double Mean(const API::MatrixWorkspace_sptr WS, const int wsInd,
+  void getWsInds(std::vector<int> &output, const size_t workspaceTotal);
+  void Mean(const HistogramData::Histogram &histogram, double &background, double &variance,
               const double startX, const double endX) const;
-  double LinearFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX,
-                   double endX);
-  double MovingAverage(API::MatrixWorkspace_const_sptr WS, int wsIndex,
+  void LinearFit(const HistogramData::Histogram &histogram, double &background, double &variance,
+                   const double startX, const double endX);
+  void MovingAverage(const HistogramData::Histogram &histogram, double &background, double &variance,
                        size_t windowWidth) const;
 
-  /// variable bin width raw count data must be converted to distributions first
-  /// and then converted back, keep track of this
-  bool m_convertedFromRawCounts;
-  /// the variable which specifies if background should be removed from monitors
-  /// too.
-  bool m_skipMonitors;
-  // if true, negative signals appearing after background removals are set to 0
-  bool m_nullifyNegative;
   /// Progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace Algorithms

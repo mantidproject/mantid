@@ -40,6 +40,7 @@ private:
 
     // common beginning
     Mantid::Algorithms::CalculateFlatBackground flatBG;
+    flatBG.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(flatBG.initialize())
     TS_ASSERT(flatBG.isInitialized())
 
@@ -308,10 +309,17 @@ public:
       background /= 15.0;
       backError = std::sqrt(backError) / 15.0;
       for (int i = 0; i < NUMBINS; ++i) {
-        TS_ASSERT_DELTA(YOut[i], background, 1e-6)
-        TS_ASSERT_DELTA(EOut[i],
-                        std::sqrt((EIn[i] * EIn[i]) + (backError * backError)),
-                        1e-6)
+        if (background <= YIn[i]) {
+          TS_ASSERT_DELTA(YOut[i], background, 1e-6)
+          TS_ASSERT_DELTA(EOut[i], backError, 1e-6)
+        } else {
+          TS_ASSERT_DELTA(YOut[i], YIn[i], 1e-6)
+          if (background < EIn[i]) {
+            TS_ASSERT_DELTA(EOut[i], EIn[i], 1e-6)
+          } else {
+            TS_ASSERT_DELTA(EOut[i], background, 1e-6)
+          }
+        }
       }
     }
   }
@@ -345,15 +353,19 @@ public:
       background /= numSummed;
       backError = std::sqrt(backError) / numSummed;
       for (int i = 0; i < NUMBINS; ++i) {
-        double correct = (YIn[i] - background) > 0 ? YIn[i] - background : 0;
-        TS_ASSERT_DELTA(YOut[i], correct, 1e-6)
-
-        if (YIn[i] - background < 0 && EIn[i] < background) {
-          TS_ASSERT_DELTA(EOut[i], background, 1e-6)
-        } else {
+        double correct = YIn[i] > background ? YIn[i] - background : 0;
+        if (YIn[i] > background) {
+          TS_ASSERT_DELTA(YOut[i], correct, 1e-6)
           TS_ASSERT_DELTA(
               EOut[i], std::sqrt((EIn[i] * EIn[i]) + (backError * backError)),
               1e-6)
+        } else {
+          TS_ASSERT_DELTA(YOut[i], 0, 1e-6)
+          if (EIn[i] < background) {
+            TS_ASSERT_DELTA(EOut[i], background, 1e-6)
+          } else {
+            TS_ASSERT_DELTA(EOut[i], EIn[i], 1e-6)
+          }
         }
       }
     }
@@ -666,8 +678,9 @@ private:
       flatBG.setProperty("InputWorkspace", WS);
       flatBG.setPropertyValue("OutputWorkspace", "Removed1");
       flatBG.setPropertyValue("Mode", "Moving Average");
-      flatBG.setProperty("AveragingWindowWidth", static_cast<int>(windowWidth));
       flatBG.setPropertyValue("OutputMode", "Return Background");
+      flatBG.setProperty("NullifyNegativeValues", false);
+      flatBG.setProperty("AveragingWindowWidth", static_cast<int>(windowWidth));
       TS_ASSERT_THROWS_NOTHING(flatBG.execute())
       TS_ASSERT(flatBG.isExecuted())
       MatrixWorkspace_sptr outputWS =
