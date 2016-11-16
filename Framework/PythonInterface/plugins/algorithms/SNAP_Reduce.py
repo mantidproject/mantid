@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,no-init,too-many-lines
+# pylint: disable=invalid-name,no-init,too-many-lines
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import Direction, FloatArrayProperty, IntArrayBoundedValidator, \
     IntArrayProperty, StringListValidator
@@ -24,7 +24,7 @@ class SNAP_Reduce(DataProcessorAlgorithm):
 
     def get_Run_Log_Local(self, run):
 
-        runs = list(range(run-5, run+1))
+        runs = list(range(run - 5, run + 1))
         file_Str = ''
 
         while len(runs) > 0:
@@ -53,28 +53,28 @@ class SNAP_Reduce(DataProcessorAlgorithm):
         # weighted 4, i=/- 1 weighted 3, i+/-2 weighted 2 and i+/-3
         # weighted 1 this input is only the y values
         sm = np.zeros(len(data))
-        factor = order/2+1
+        factor = order / 2 + 1
 
         for i in range(len(data)):
             temp = 0
             ave = 0
-            for r in range(max(0, i-order/2), min(i+order/2, len(data)-1)+1):
-                temp = temp+(factor-abs(r-i))*data[r]
-                ave = ave + factor - abs(r-i)
-            sm[i] = temp/ave
+            for r in range(max(0, i - order / 2), min(i + order / 2, len(data) - 1) + 1):
+                temp = temp + (factor - abs(r - i)) * data[r]
+                ave = ave + factor - abs(r - i)
+            sm[i] = temp / ave
 
         return sm
 
     def LLS_transformation(self, input):
         # this transforms data to be more sensitive to weak peaks. The
         # function is reversed by the Inv_LLS function below
-        out = np.log(np.log((input+1)**0.5+1)+1)
+        out = np.log(np.log((input + 1)**0.5 + 1) + 1)
 
         return out
 
     def Inv_LLS_transformation(self, input):
         # See Function LLS function above
-        out = (np.exp(np.exp(input)-1)-1)**2-1
+        out = (np.exp(np.exp(input) - 1) - 1)**2 - 1
 
         return out
 
@@ -94,24 +94,24 @@ class SNAP_Reduce(DataProcessorAlgorithm):
         temp = data.copy()
 
         if decrese:
-            scan = list(range(window+1, 0, -1))
+            scan = list(range(window + 1, 0, -1))
         else:
-            scan = list(range(1, window+1))
+            scan = list(range(1, window + 1))
 
         for w in scan:
             for i in range(len(temp)):
-                if i < w or i > (len(temp)-w-1):
+                if i < w or i > (len(temp) - w - 1):
                     continue
                 else:
-                    win_array = temp[i-w:i+w+1].copy()
+                    win_array = temp[i - w:i + w + 1].copy()
                     win_array_reversed = win_array[::-1]
-                    average = (win_array+win_array_reversed) / 2
+                    average = (win_array + win_array_reversed) / 2
                     temp[i] = np.min(average[:len(average) / 2])
 
         if LLS:
             temp = self.Inv_LLS_transformation(temp)
 
-        self.log().information(str((min(start_data-temp)))
+        self.log().information(str(min(start_data - temp)))
 
         index = np.where((start_data - temp) == min(start_data - temp))[0][0]
 
@@ -134,7 +134,8 @@ class SNAP_Reduce(DataProcessorAlgorithm):
                              "Read live data - requires a saved run in the current IPTS "
                              + "with the same Instrument configuration as the live run")
 
-        mask = ["None", "Horizontal", "Vertical", "Masking Workspace", "Custom - xml masking file"]
+        mask = ["None", "Horizontal", "Vertical",
+                "Masking Workspace", "Custom - xml masking file"]
         self.declareProperty("Masking", "None", StringListValidator(mask),
                              "Mask to be applied to the data")
 
@@ -148,7 +149,8 @@ class SNAP_Reduce(DataProcessorAlgorithm):
                              doc="The file containing the xml mask.")
 
         self.declareProperty(name="Calibration", defaultValue="Convert Units",
-                             validator=StringListValidator(["Convert Units", "Calibration File"]),
+                             validator=StringListValidator(
+                                 ["Convert Units", "Calibration File"]),
                              direction=Direction.Input,
                              doc="The type of conversion to d_spacing to be used.")
 
@@ -160,7 +162,8 @@ class SNAP_Reduce(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty("Binning", [0.5, -0.004, 7.0]),
                              "Min, Step, and Max of d-space bins.  Logarithmic binning is used if Step is negative.")
 
-        nor_corr = ["None", "From Workspace", "From Processed Nexus", "Extracted from Data"]
+        nor_corr = ["None", "From Workspace",
+                    "From Processed Nexus", "Extracted from Data"]
         self.declareProperty("Normalization", "None", StringListValidator(nor_corr),
                              "If needed what type of input to use as normalization, Extracted from "
                              + "Data uses a background determination that is peak independent.This "
@@ -216,7 +219,8 @@ class SNAP_Reduce(DataProcessorAlgorithm):
         elif masking in ("Custom - xml masking file"):
             filename = self.getProperty("MaskingFilename").value
             if len(filename) <= 0:
-                issues["MaskingFilename"] = "Masking=\"%s\" requires a filename" % masking
+                issues[
+                    "MaskingFilename"] = "Masking=\"%s\" requires a filename" % masking
         elif masking == "MaskingWorkspace":
             mask_workspace = self.getPropertyValue("MaskingWorkspace")
             if mask_workspace is None or len(mask_workspace) <= 0:
@@ -236,7 +240,8 @@ class SNAP_Reduce(DataProcessorAlgorithm):
                 issues["NormalizationFilename"] = "Normalization=\"%s\" requires a filename" \
                                                   % normalization
         else:
-            raise RuntimeError("Normalization value \"%s\" not supported" % normalization)
+            raise RuntimeError(
+                "Normalization value \"%s\" not supported" % normalization)
 
         return issues
 
@@ -302,7 +307,7 @@ class SNAP_Reduce(DataProcessorAlgorithm):
 
         save_Data = self.getProperty("SaveData").value
 
-        # --------------------------- REDUCE DATA ------------------------------------------------
+        # --------------------------- REDUCE DATA -----------------------------
 
         Tag = 'SNAP'
         for r in in_Runs:
@@ -312,31 +317,39 @@ class SNAP_Reduce(DataProcessorAlgorithm):
                 Tag = 'Live'
                 WS = LoadPreNexusLive(Instrument='SNAP')
             else:
-                WS = Load(Filename='SNAP'+str(r), Outputworkspace='WS')
-                WS = NormaliseByCurrent(InputWorkspace=WS, Outputworkspace='WS')
+                WS = Load(Filename='SNAP' + str(r), Outputworkspace='WS')
+                WS = NormaliseByCurrent(
+                    InputWorkspace=WS, Outputworkspace='WS')
 
             WS = CompressEvents(InputWorkspace=WS, Outputworkspace='WS')
-            WS = CropWorkspace(InputWorkspace='WS', OutputWorkspace='WS', XMax=50000)
+            WS = CropWorkspace(InputWorkspace='WS',
+                               OutputWorkspace='WS', XMax=50000)
             WS = RemovePromptPulse(InputWorkspace=WS, OutputWorkspace='WS',
                                    Width='1600', Frequency='60.4')
 
             if masking == "Custom - xml masking file":
                 WS = MaskDetectors(Workspace=WS, MaskedWorkspace='CustomMask')
             elif masking == "Masking Workspace":
-                WS = MaskDetectors(Workspace=WS, MaskedWorkspace=mask_workspace)
+                WS = MaskDetectors(
+                    Workspace=WS, MaskedWorkspace=mask_workspace)
             elif masking == "Vertical":
-                WS = MaskDetectors(Workspace=WS, MaskedWorkspace='VerticalMask')
+                WS = MaskDetectors(
+                    Workspace=WS, MaskedWorkspace='VerticalMask')
             elif masking == "Horizontal":
-                WS = MaskDetectors(Workspace=WS, MaskedWorkspace='HorizontalMask')
+                WS = MaskDetectors(
+                    Workspace=WS, MaskedWorkspace='HorizontalMask')
 
             if calib == "Convert Units":
-                WS_d = ConvertUnits(InputWorkspace='WS', Target='dSpacing', Outputworkspace='WS_d')
+                WS_d = ConvertUnits(InputWorkspace='WS',
+                                    Target='dSpacing', Outputworkspace='WS_d')
 
             else:
                 self.log().notice("\n calibration file : %s" % cal_File)
-                WS_d = AlignDetectors(InputWorkspace='WS', CalibrationFile=cal_File, Outputworkspace='WS_d')
+                WS_d = AlignDetectors(
+                    InputWorkspace='WS', CalibrationFile=cal_File, Outputworkspace='WS_d')
 
-            WS_d = Rebin(InputWorkspace=WS_d, Params=params, Outputworkspace='WS_d')
+            WS_d = Rebin(InputWorkspace=WS_d, Params=params,
+                         Outputworkspace='WS_d')
 
             if group == "Low Res 5:6-high Res 1:4":
                 WS_red = GroupDetectors(InputWorkspace=WS_d,
@@ -347,7 +360,8 @@ class SNAP_Reduce(DataProcessorAlgorithm):
                                               PreserveEvents=False)
 
             if norm == "From Processed Nexus":
-                WS_nor = Divide(LHSWorkspace=WS_red, RHSWorkspace=Normalization)
+                WS_nor = Divide(LHSWorkspace=WS_red,
+                                RHSWorkspace=Normalization)
             elif norm == "From Workspace":
                 WS_nor = Divide(LHSWorkspace=WS_red, RHSWorkspace=normWS)
             elif norm == "Extracted from Data":
@@ -384,32 +398,37 @@ class SNAP_Reduce(DataProcessorAlgorithm):
                 saveDir = self.getProperty("OutputDirectory").value.strip()
                 if len(saveDir) <= 0:
                     self.log().notice('Using default save location')
-                    saveDir = os.path.join(self.get_IPTS_Local(r), 'shared', 'data')
+                    saveDir = os.path.join(
+                        self.get_IPTS_Local(r), 'shared', 'data')
                 self.log().notice('Writing to \'' + saveDir + '\'')
 
                 basename = '%s_%s_%s' % (new_Tag, r, group)
 
                 if norm == 'None':
-                    WS_tof = ConvertUnits(InputWorkspace="WS_red", Target="TOF", AlignBins=False)
+                    WS_tof = ConvertUnits(
+                        InputWorkspace="WS_red", Target="TOF", AlignBins=False)
                 else:
-                    WS_tof = ConvertUnits(InputWorkspace="WS_nor", Target="TOF", AlignBins=False)
+                    WS_tof = ConvertUnits(
+                        InputWorkspace="WS_nor", Target="TOF", AlignBins=False)
 
                 if norm == 'None':
                     SaveNexusProcessed(InputWorkspace=WS_red,
-                                       Filename=os.path.join(saveDir, 'nexus', basename+'.nxs'))
+                                       Filename=os.path.join(saveDir, 'nexus', basename + '.nxs'))
                     SaveAscii(InputWorkspace=WS_red,
-                              Filename=os.path.join(saveDir, 'd_spacing', basename+'.dat'))
+                              Filename=os.path.join(saveDir, 'd_spacing', basename + '.dat'))
                 else:
                     SaveNexusProcessed(InputWorkspace=WS_nor,
-                                       Filename=os.path.join(saveDir, 'nexus', basename+'.nxs'))
+                                       Filename=os.path.join(saveDir, 'nexus', basename + '.nxs'))
                     SaveAscii(InputWorkspace=WS_nor,
-                              Filename=os.path.join(saveDir, 'd_spacing', basename+'.dat'))
+                              Filename=os.path.join(saveDir, 'd_spacing', basename + '.dat'))
 
                 SaveGSS(InputWorkspace=WS_tof,
-                        Filename=os.path.join(saveDir, 'gsas', basename+'.gsa'),
+                        Filename=os.path.join(
+                            saveDir, 'gsas', basename + '.gsa'),
                         Format='SLOG', SplitFiles=False, Append=False, ExtendedHeader=True)
                 SaveFocusedXYE(InputWorkspace=WS_tof,
-                               Filename=os.path.join(saveDir, 'fullprof', basename+'.dat'),
+                               Filename=os.path.join(
+                                   saveDir, 'fullprof', basename + '.dat'),
                                SplitFiles=True, Append=False)
                 DeleteWorkspace(Workspace='WS_tof')
 
@@ -441,9 +460,10 @@ class SNAP_Reduce(DataProcessorAlgorithm):
                     RenameWorkspace(Inputworkspace='peak_clip_WS',
                                     OutputWorkspace='%s_%s_normalizer' % (new_Tag, r))
 
-            propertyName='OutputWorkspace'
+            propertyName = 'OutputWorkspace'
             wksp = '%s_%s_%s_nor' % (new_Tag, r, group)
-            self.declareProperty(WorkspaceProperty(propertyName, wksp, Direction.Output))
+            self.declareProperty(WorkspaceProperty(
+                propertyName, wksp, Direction.Output))
             self.setProperty(propertyName, wksp)
 
 AlgorithmFactory.subscribe(SNAP_Reduce)
