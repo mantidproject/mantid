@@ -8,6 +8,7 @@
 #include "MantidQtMantidWidgets/IMuonFitDataSelector.h"
 #include "MantidQtMantidWidgets/IWorkspaceFitControl.h"
 #include <QObject>
+#include <boost/optional/optional.hpp>
 
 /// Save some typing
 typedef std::pair<
@@ -22,6 +23,17 @@ class Grouping;
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+namespace Muon {
+/// Holds information on the current run's file path
+struct CurrentRun {
+public:
+  CurrentRun(int runNumber, const QString &pathToFile)
+      : run(runNumber), filePath(pathToFile) {}
+  int run;          // run number
+  QString filePath; // path to file - may be a temp file
+};
+}
 
 /** MuonAnalysisFitDataPresenter : Updates fit browser from data widget
 
@@ -75,7 +87,8 @@ public:
   /// Handles "selected data changed"
   void handleSelectedDataChanged(bool overwrite);
   /// Handles peak picker being reassigned to a new graph
-  void setAssignedFirstRun(const QString &wsName);
+  void setAssignedFirstRun(const QString &wsName,
+                           const boost::optional<QString> &filePath);
   /// Get the workspace the peak picker is currently assigned to
   QString getAssignedFirstRun() const { return m_PPAssignedFirstRun; };
   /// Change the stored time zero
@@ -101,7 +114,8 @@ public:
   void extractFittedWorkspaces(const std::string &baseName,
                                const std::string &groupName = "") const;
   /// Set selected workspace
-  void setSelectedWorkspace(const QString &wsName);
+  void setSelectedWorkspace(const QString &wsName,
+                            const boost::optional<QString> &filePath);
   /// Updates "overwrite" setting
   void setOverwrite(bool enabled) { m_overwrite = enabled; }
   /// Updates label to avoid overwriting existing results
@@ -148,7 +162,8 @@ private:
   /// Checks if current fit is simultaneous
   bool isSimultaneousFit() const;
   /// Set up UI based on workspace
-  void setUpDataSelector(const QString &wsName);
+  void setUpDataSelector(const QString &wsName,
+                         const boost::optional<QString> &filePath);
   /// Check if multiple runs are selected
   bool isMultipleRuns() const;
   /// Update fit label to match run number(s)
@@ -178,6 +193,8 @@ private:
   bool m_fitRawData;
   /// Whether "overwrite" option is set or not
   bool m_overwrite;
+  /// Key for where "current run" file is
+  boost::optional<Muon::CurrentRun> m_currentRun;
 };
 } // namespace CustomInterfaces
 } // namespace Mantid

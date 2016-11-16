@@ -202,13 +202,16 @@ void MuonAnalysisFitDataPresenter::handleXRangeChangedGraphically(double start,
  * Sets run number, instrument and workspace index in the data selector.
  * If multiple runs selected, disable sequential fit option.
  * @param wsName :: [input] Name of new workspace
+ * @param filePath :: [input] Optional path to workspace in case of load current
+ * run, when it has a temporary name like MUSRauto_E.tmp
  */
-void MuonAnalysisFitDataPresenter::setAssignedFirstRun(const QString &wsName) {
+void MuonAnalysisFitDataPresenter::setAssignedFirstRun(
+    const QString &wsName, const boost::optional<QString> &filePath) {
   if (wsName == m_PPAssignedFirstRun)
     return;
 
   m_PPAssignedFirstRun = wsName;
-  setUpDataSelector(wsName);
+  setUpDataSelector(wsName, filePath);
 }
 
 /**
@@ -374,9 +377,14 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
   // load original data - need to get filename(s) of individual run(s)
   QStringList filenames;
   for (const int run : params.runs) {
-    filenames.append(
-        QString::fromStdString(MuonAnalysisHelper::getRunLabel(
-                                   params.instrument, {run})).append(".nxs"));
+    // Check if this run is the "current run"
+    if (m_currentRun && m_currentRun->run == run) {
+      filenames.append(m_currentRun->filePath);
+    } else {
+      filenames.append(QString::fromStdString(MuonAnalysisHelper::getRunLabel(
+                                                  params.instrument, {run}))
+                           .append(".nxs"));
+    }
   }
   try {
     // This will sum multiple runs together
@@ -750,17 +758,25 @@ bool MuonAnalysisFitDataPresenter::isSimultaneousFit() const {
  * Resets the input of the data selector to the workspace that's selected on the
  * Home tab.
  * @param wsName :: [input] Current workspace name
+ * @param filePath :: [input] Path to the data file - this is important in the
+ * case of "load current run" when the file may have a special name like
+ * MUSRauto_E.tmp
  */
-void MuonAnalysisFitDataPresenter::setSelectedWorkspace(const QString &wsName) {
+void MuonAnalysisFitDataPresenter::setSelectedWorkspace(
+    const QString &wsName, const boost::optional<QString> &filePath) {
   updateWorkspaceNames(std::vector<std::string>{wsName.toStdString()});
-  setUpDataSelector(wsName);
+  setUpDataSelector(wsName, filePath);
 }
 
 /**
  * Based on the given workspace name, set UI of data selector
  * @param wsName :: [input] Workspace name
+ * @param filePath :: [input] (optional) Path to the data file - this is
+ * important in the case of "load current run" when the file may have a special
+ * name like MUSRauto_E.tmp.
  */
-void MuonAnalysisFitDataPresenter::setUpDataSelector(const QString &wsName) {
+void MuonAnalysisFitDataPresenter::setUpDataSelector(
+    const QString &wsName, const boost::optional<QString> &filePath) {
   // Parse workspace name here for run number and instrument name
   const auto wsParams =
       MuonAnalysisHelper::parseWorkspaceName(wsName.toStdString());
@@ -768,7 +784,7 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(const QString &wsName) {
   const int firstZero = instRun.indexOf("0");
   const QString numberString = instRun.right(instRun.size() - firstZero);
   m_dataSelector->setWorkspaceDetails(
-      numberString, QString::fromStdString(wsParams.instrument));
+      numberString, QString::fromStdString(wsParams.instrument), filePath);
   m_dataSelector->setWorkspaceIndex(0u); // always has only one spectrum
 
   // Set selected groups/pairs and periods here too
@@ -783,6 +799,13 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(const QString &wsName) {
   }
   if (!periodToSet.isEmpty() && !periods.contains(periodToSet)) {
     m_dataSelector->setChosenPeriod(periodToSet);
+  }
+
+  // If given an optional file path to "current run", cache it for later use
+  if (filePath && !wsParams.runs.empty()) {
+    m_currentRun = Muon::CurrentRun(wsParams.runs.front(), filePath.get());
+  } else {
+    m_currentRun = boost::none;
   }
 }
 

@@ -4,6 +4,7 @@
 #include "WidgetDllOption.h"
 #include <QString>
 #include <QStringList>
+#include <boost/optional/optional.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -24,8 +25,9 @@ public:
   virtual void setNumPeriods(size_t numPeriods) = 0;
   virtual void setChosenPeriod(const QString &period) = 0;
   virtual QStringList getPeriodSelections() const = 0;
-  virtual void setWorkspaceDetails(const QString &runNumbers,
-                                   const QString &instName) = 0;
+  virtual void
+  setWorkspaceDetails(const QString &runNumbers, const QString &instName,
+                      const boost::optional<QString> &filePath) = 0;
   virtual void setAvailableGroups(const QStringList &groupNames) = 0;
   virtual QStringList getChosenGroups() const = 0;
   virtual void setChosenGroup(const QString &group) = 0;

@@ -1802,8 +1802,12 @@ bool MuonAnalysis::plotExists(const QString &wsName) {
 /**
  * Enable PP tool for the plot of the given WS.
  * @param wsName Name of the WS which plot PP tool will be attached to.
+ * @param filePath :: [input] Optional path to file that is actually used. This
+ * is for "load current run" where the data file has a temporary name like
+ * MUSRauto_E.tmp
  */
-void MuonAnalysis::selectMultiPeak(const QString &wsName) {
+void MuonAnalysis::selectMultiPeak(const QString &wsName,
+                                   const boost::optional<QString> &filePath) {
   disableAllTools();
 
   if (!plotExists(wsName)) {
@@ -1825,7 +1829,7 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName) {
     m_dataSelector->setNumPeriods(m_numPeriods);
 
     // Set the selected run, group/pair and period
-    m_fitDataPresenter->setAssignedFirstRun(wsName);
+    m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
   }
 
   QString code;
@@ -2379,8 +2383,10 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     // - Show connected plot and attach PP tool to it (if has been assigned)
     // - Set input of data selector to selected workspace
     if (m_currentDataName != NOT_AVAILABLE) {
-      m_fitDataPresenter->setSelectedWorkspace(m_currentDataName);
-      selectMultiPeak(m_currentDataName);
+      const boost::optional<QString> filePath =
+          m_uiForm.mwRunFiles->getUserInput().toString();
+      m_fitDataPresenter->setSelectedWorkspace(m_currentDataName, filePath);
+      selectMultiPeak(m_currentDataName, filePath);
     }
 
     // In future, when workspace gets changed, show its plot and attach PP tool
