@@ -25,18 +25,16 @@ Several minimizers are included with Mantid and can be selected in the
 or when using the algorithm :ref:`Fit <algm-Fit>` The following
 options are available:
 
-- `Simplex <../FitMinimizers/Simplex.html>`__
-- `SteepestDescent <../FitMinimizers/GradientDescent.html>`__
-- `Conjugate gradient (Fletcher-Reeves imp.) <../FitMinimizers/FletcherReeves.html>`__
-- `Conjugate gradient (Polak-Ribiere imp.) <../FitMinimizers/PolakRibiere.html>`__
-- `BFGS (Broyden-Fletcher-Goldfarb-Shanno) <../FitMinimizers/BFGS.html>`__
-- `Levenberg-Marquardt <../FitMinimizers/LevenbergMarquardt.html>`__ (default)
+- `Simplex <../fitminimizers/Simplex.html>`__
+- `SteepestDescent <../fitminimizers/GradientDescent.html>`__
+- `Conjugate gradient (Fletcher-Reeves imp.) <../fitminimizers/FletcherReeves.html>`__
+- `Conjugate gradient (Polak-Ribiere imp.) <../fitminimizers/PolakRibiere.html>`__
+- `BFGS (Broyden-Fletcher-Goldfarb-Shanno) <../fitminimizers/BFGS.html>`__
+- `Levenberg-Marquardt <../fitminimizers/LevenbergMarquardt.html>`__ (default)
 - Levenberg-MarquardtMD
 
   A `Levenberg-Marquardt <https://en.wikipedia.org/wiki/Levenberg-Marquardt_algorithm>`__ implementation generalised to allow different cost functions, and supporting chunking techniques for large datasets.
-- Damping 
-
-  A `Gauss-Newton <../FitMinimizers/GaussNewton.html>`__ algorithm with damping.
+- `Gauss-Newton <../fitminimizers/GaussNewton.html>`__ algorithm with damping.
 - :ref:`FABADA <FABADA>`
 - `Trust region
   <https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls>`__: a `trust
