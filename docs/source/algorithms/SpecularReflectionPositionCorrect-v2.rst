@@ -41,7 +41,7 @@ Output:
 
 .. testoutput:: SpecularReflectionPositionCorrectPointDetector 
  
-   [25.6,0,0]
+   [25.6,0,0.0444961]
    [25.6,0,0.0444753]
 
 **Example - Correct 'lineardetector'**

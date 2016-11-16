@@ -141,7 +141,7 @@ Output:
 
     # Find the PolynomialCorrection entry in the workspace's history
     algHist = IvsLam.getHistory()
-    refRedOneAutoHist = findByName(algHist.getAlgorithmHistories(), "ReflectometryReductionOneAuto", Version=1)
+    refRedOneAutoHist = findByName(algHist.getAlgorithmHistories(), "ReflectometryReductionOneAuto")
     refRedOneHist = findByName(refRedOneAutoHist.getChildHistories(), "ReflectometryReductionOne")
     polyCorHist = findByName(refRedOneHist.getChildHistories(), "PolynomialCorrection")
 
