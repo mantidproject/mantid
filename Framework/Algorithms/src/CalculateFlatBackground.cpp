@@ -448,8 +448,6 @@ CalculateFlatBackground::MovingAverage(const HistogramData::Histogram &histogram
   double currentMin = std::numeric_limits<double>::max();
   double currentVariance = 0;
 
-  // When moving the window, we need to subtract the single point "falling off"
-  // while adding a new point. Saves us summing all the points in the window.
   for (size_t i = 0; i < ys.size(); ++i) {
     double sum = 0;
     double varSqSum = 0;
