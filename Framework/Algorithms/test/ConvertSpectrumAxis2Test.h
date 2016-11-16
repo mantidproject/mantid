@@ -406,7 +406,8 @@ public:
     std::string inputWSName("inputWS");
     std::string outputWSName("outputWS");
 
-    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(20000, 20000);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        20000, 20000);
     AnalysisDataService::Instance().addOrReplace(inputWSName, testWS);
 
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
