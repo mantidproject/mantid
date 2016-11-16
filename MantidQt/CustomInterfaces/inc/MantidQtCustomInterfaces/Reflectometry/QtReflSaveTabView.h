@@ -1,11 +1,9 @@
 #ifndef MANTID_CUSTOMINTERFACES_QTREFLSAVETABVIEW_H_
 #define MANTID_CUSTOMINTERFACES_QTREFLSAVETABVIEW_H_
 
-#include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabView.h"
-#include <memory>
-
 #include "ui_ReflSaveTabWidget.h"
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {

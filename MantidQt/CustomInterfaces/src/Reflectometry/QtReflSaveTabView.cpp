@@ -159,7 +159,7 @@ void QtReflSaveTabView::setWorkspaceList(
 }
 
 /** Set the 'List of logged parameters' widget with workspace run logs
-* @param names :: The list of workspace run logs
+* @param logs :: The list of workspace run logs
 */
 void QtReflSaveTabView::setParametersList(
     const std::vector<std::string> &logs) const {

@@ -2,6 +2,8 @@
 #define MANTID_CUSTOMINTERFACES_IREFLSAVETABVIEW_H
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
