@@ -14,3 +14,5 @@ It makes use of the
 `GSL routines for least-squares fitting
 <https://www.gnu.org/software/gsl/manual/html_node/Least_002dSquares-Fitting.html#Least_002dSquares-Fitting>`__.
 
+.. categories:: FitMinimizers
+
