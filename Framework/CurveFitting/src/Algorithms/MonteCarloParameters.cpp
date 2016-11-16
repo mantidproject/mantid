@@ -68,9 +68,9 @@ void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
     Slice slice{costFunction, j};
     auto base = Functions::ChebfunBase::bestFitAnyTolerance(
         lBound, rBound, slice, P, A, 1.0, MIN_APPROX_TOLERANCE, MAX_APPROX_SIZE);
-    fun.setParameter(i, storedParam);
     bool fix = false;
     if (!base) {
+      fun.setParameter(i, storedParam);
       base = boost::make_shared<Functions::ChebfunBase>(MAX_APPROX_SIZE, lBound, rBound, MIN_APPROX_TOLERANCE);
       P = base->fit(slice);
       A = base->calcA(P);
@@ -84,6 +84,7 @@ void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
         fix = true;
       }
     }
+    fun.setParameter(i, storedParam);
 
     if (fix) {
       // Parameter is bad - fix it.
@@ -94,7 +95,7 @@ void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
 }
 
 /// Run the Monte Carlo version of the algorithm.
-/// Generate randon values of function parameters and return those that
+/// Generate random values of function parameters and return those that
 /// give the smallest cost function.
 /// @param costFunction :: The cost function.
 /// @param ranges :: The ranges of values defining the uniform distributions for the parameters.

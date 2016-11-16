@@ -194,6 +194,40 @@ public:
 
   }
 
+  void test_fix_bad_parameters_doesnt_change_values() {
+    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        [](double x, int) { return exp(-x*x/4.0); }, 1, -8.5, 8.5, 1.0);
+
+    std::string funStr("name=BackToBackExponential,S=1.1,constraints=(0.01<I<200,0.001<A<300,0.001<B<300,-5<X0<5,0.001<S<4)");
+
+    MonteCarloParameters alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    alg.setPropertyValue("Function", funStr);
+    alg.setProperty("InputWorkspace", ws);
+    alg.setProperty("NSamples", 100);
+    alg.setProperty("Selection", 10);
+    alg.setProperty("NIterations", 10);
+    alg.setProperty("Type", "Cross Entropy");
+    alg.setProperty("FixBadParameters", false);
+    alg.setProperty("Seed", 11);
+    alg.execute();
+    IFunction_sptr fun = alg.getProperty("Function");
+    double A = fun->getParameter("A");
+    double B = fun->getParameter("B");
+    double I = fun->getParameter("I");
+    double S = fun->getParameter("S");
+    TS_ASSERT_DELTA(A, 199.3392, 1e-4);
+    TS_ASSERT_DELTA(B, 130.9085, 1e-4);
+    TS_ASSERT_DELTA(I, 3.5418, 1e-4);
+    TS_ASSERT_DELTA(S, 1.4130, 1e-4);
+    TS_ASSERT(!fun->isFixed(fun->parameterIndex("A")));
+    TS_ASSERT(!fun->isFixed(fun->parameterIndex("B")));
+    TS_ASSERT(!fun->isFixed(fun->parameterIndex("I")));
+    TS_ASSERT(!fun->isFixed(fun->parameterIndex("S")));
+
+  }
+
 };
 
 #endif /* MANTID_CURVEFITTING_MONTECARLOPARAMETERSTEST_H_ */
