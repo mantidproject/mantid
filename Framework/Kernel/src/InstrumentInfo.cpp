@@ -284,7 +284,7 @@ void InstrumentInfo::fillLiveData(const Poco::XML::Element *elem) {
       elem->getElementsByTagName("connection");
 
   // Load connection info for each child element
-  for (ulong i = 0; i < connections->length(); ++i) {
+  for (unsigned long i = 0; i < connections->length(); ++i) {
     auto *conn = dynamic_cast<Poco::XML::Element *>(connections->item(i));
     try {
       m_listeners.emplace_back(LiveListenerInfo(this, conn));
