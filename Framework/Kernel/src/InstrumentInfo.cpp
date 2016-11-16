@@ -124,7 +124,8 @@ std::string InstrumentInfo::filePrefix(unsigned int runNumber) const {
 const std::string &InstrumentInfo::liveListener() const {
   // TODO: Return "" if no LiveListenerInfo?
   static std::string foobar;
-  if (!hasLiveListenerInfo()) return foobar;
+  if (!hasLiveListenerInfo())
+    return foobar;
 
   return liveListenerInfo().listener();
 }
@@ -136,7 +137,8 @@ const std::string &InstrumentInfo::liveListener() const {
 const std::string &InstrumentInfo::liveDataAddress() const {
   // TODO: Return "" if no LiveListenerInfo?
   static std::string foobar;
-  if (!hasLiveListenerInfo()) return foobar;
+  if (!hasLiveListenerInfo())
+    return foobar;
 
   return liveListenerInfo().address();
 }
@@ -147,20 +149,22 @@ const std::string &InstrumentInfo::liveDataAddress() const {
  * @return Reference to LiveListenerInfo for specified connection
  * @throw std::runtime_error When no listeners, or name not found
  */
-const LiveListenerInfo &InstrumentInfo::liveListenerInfo(
-    std::string name) const {
+const LiveListenerInfo &
+InstrumentInfo::liveListenerInfo(std::string name) const {
   if (!hasLiveListenerInfo())
-    throw std::runtime_error("Attempted to access live listener for " +
-                             m_name + " instrument, which has no listeners.");
+    throw std::runtime_error("Attempted to access live listener for " + m_name +
+                             " instrument, which has no listeners.");
 
   // Default to specified default connection
-  if (name.empty()) name = m_defaultListener;
+  if (name.empty())
+    name = m_defaultListener;
 
   // If no default connection specified, fallback to first connection
-  if (name.empty()) return m_listeners.front();
+  if (name.empty())
+    return m_listeners.front();
 
   // Name specified, find requested connection
-  for (auto& listener : m_listeners) {
+  for (auto &listener : m_listeners) {
     if (listener.name() == name)
       return listener;
   }
@@ -170,13 +174,12 @@ const LiveListenerInfo &InstrumentInfo::liveListenerInfo(
                            " for instrument " + m_name);
 }
 
-bool InstrumentInfo::hasLiveListenerInfo() const
-{
+bool InstrumentInfo::hasLiveListenerInfo() const {
   return m_listeners.size() > 0;
 }
 
-const std::vector<LiveListenerInfo> &InstrumentInfo::liveListenerInfoList() const
-{
+const std::vector<LiveListenerInfo> &
+InstrumentInfo::liveListenerInfoList() const {
   return m_listeners;
 }
 
@@ -270,7 +273,8 @@ void InstrumentInfo::fillTechniques(const Poco::XML::Element *elem) {
 void InstrumentInfo::fillLiveData(const Poco::XML::Element *elem) {
   // See if we have a <livedata> element (will be NULL if there's none)
   Poco::XML::Element *live = elem->getChildElement("livedata");
-  if (!live) return;
+  if (!live)
+    return;
 
   // Load default connection name attribute
   m_defaultListener = live->getAttribute("default");

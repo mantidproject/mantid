@@ -119,7 +119,7 @@ private:
   std::vector<std::string>
       m_archiveSearch; ///< names of the archive search interface
   std::vector<InstrumentInfo>
-      m_instruments;          ///< list of instruments of this facility
+      m_instruments;   ///< list of instruments of this facility
   bool m_noFilePrefix; ///< flag indicating if prefix is required in file names
   std::vector<ComputeResourceInfo> m_computeResInfos; ///< (remote) compute
   /// resources available in

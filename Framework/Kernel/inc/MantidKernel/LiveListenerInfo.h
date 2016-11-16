@@ -66,14 +66,14 @@ public:
 
 private:
   const InstrumentInfo *m_instrument; ///< Instrument this listener belongs to
-  std::string m_name;       ///< Listener name
-  std::string m_address;    ///< Listener address
-  std::string m_listener;   ///< Listener classname
+  std::string m_name;                 ///< Listener name
+  std::string m_address;              ///< Listener address
+  std::string m_listener;             ///< Listener classname
 };
 
 /// Allow this object to be printed to a stream
-MANTID_KERNEL_DLL std::ostream &
-operator<<(std::ostream &buffer, const LiveListenerInfo &listener);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &buffer,
+                                           const LiveListenerInfo &listener);
 
 } // namespace Kernel
 } // namespace Mantid

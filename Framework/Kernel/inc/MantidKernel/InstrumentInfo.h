@@ -107,8 +107,8 @@ private:
   std::set<std::string>
       m_technique; ///< List of techniques the instrument can do
 
-  std::vector<LiveListenerInfo> m_listeners;  ///< LiveListener connections
-  std::string m_defaultListener;  ///< Default LiveListener connection to use
+  std::vector<LiveListenerInfo> m_listeners; ///< LiveListener connections
+  std::string m_defaultListener; ///< Default LiveListener connection to use
 };
 
 /// Allow this object to be printed to a stream
