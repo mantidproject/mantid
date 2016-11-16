@@ -2,6 +2,7 @@
 <facilities>
 
 <facility name="ISIS" zeropadding="5" FileExtensions=".nxs,.raw,.sav,.n*,.s*,.add,.nxspe">
+
   <archive>
     <archiveSearch plugin="ISISDataSearch" />
   </archive>
@@ -39,7 +40,7 @@
   <instrument name="ENGIN-X" shortname="ENGINX" >
     <zeropadding size="8" />
     <technique>Neutron Diffraction</technique>
-    <livedata>
+    <livedata default="histo">
       <connection name="histo" address="NDXENGINX:6789" listener="ISISHistoDataListener" />
       <connection name="event" address="NDXENGINX:10000" listener="ISISLiveEventDataListener" />
     </livedata>
@@ -349,9 +350,8 @@
     </livedata>
   </instrument>
 
-
-
 </facility>
+
 
 <facility name="HFIR" FileExtensions=".nxs,.dat,.xml">
 
@@ -387,7 +387,6 @@
       <technique>technique</technique>
    </instrument>
 
-
    <instrument name="GPSANS">
       <technique>Small Angle Scattering</technique>
    </instrument>
@@ -405,6 +404,7 @@
    </instrument>
 
 </facility>
+
 
 <facility name="SNS" delimiter="_" FileExtensions=".nxs.h5,_event.nxs,.nxs,.dat,_runinfo.xml,_histo.nxs">
 
