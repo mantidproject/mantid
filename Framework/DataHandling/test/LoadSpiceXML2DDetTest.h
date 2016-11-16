@@ -129,7 +129,7 @@ public:
    * Test: Set 2theta = 0
    *  1. Detector should be symmetric along the X-axis and about the center of detector;
    *  2. All pixels on the X-axis will have position Y value zero;
-   *  3. All pixels on the Y-axis will ahve position X value zero
+   *  3. All pixels on the Y-axis will have position X value zero
    * @brief test: load data with instrument whose detector's 2theta value is 0.
    */
   void test_LoadDataOverwrite2ThetaZero() {
@@ -160,6 +160,7 @@ public:
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
 
     // Value
+    // pixels at
     TS_ASSERT_DELTA(outws->readY(255 * 256)[0], 1.0, 0.0001);
     TS_ASSERT_DELTA(outws->readY(9 * 256 + 253)[0], 1.0, 0.00001);
 
@@ -226,12 +227,15 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Test with loading instrument but without Spice scan Table.
-   *  Other tests include check the positions of detectors
-   *  2-theta = 42.797
-   * @brief test_LoadHB3AXMLInstrumentNoTable
+  /** Test with loading instrument without Spice scan Table, while the 2theta value is from sample
+   *    sample log
+   *  Testing includes:
+   *  1. Load the instrument without Spice Table;
+   *  2. Check the positions of detectors.
+   *    (a) at center pixel, 2-theta = 42.797
+   * @brief Load data and instrument with sample log value
    */
-  void test_LoadHB3AXMLInstrumentNoTable() {
+  void test_loadDataUsingSampleLogValue() {
     // initialize the algorithm
     LoadSpiceXML2DDet loader;
     loader.initialize();
