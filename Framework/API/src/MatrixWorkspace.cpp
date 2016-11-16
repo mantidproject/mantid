@@ -1118,7 +1118,7 @@ Kernel::DateAndTime MatrixWorkspace::getLastPulseTime() const {
 * Returns the bin index of the given X value
 * @param xValue :: The X value to search for
 * @param index :: The index within the workspace to search within (default = 0)
-* @returns An index that
+* @returns An index to the bin containing X
 */
 size_t MatrixWorkspace::binIndexOf(const double xValue,
                                    const std::size_t index) const {
@@ -1126,24 +1126,35 @@ size_t MatrixWorkspace::binIndexOf(const double xValue,
     throw std::out_of_range(
         "MatrixWorkspace::binIndexOf - Index out of range.");
   }
-  const MantidVec &xValues = this->readX(index);
-  // Lower bound will test if the value is greater than the last but we need to
-  // see if X is valid at the start
-  if (xValue < xValues.front()) {
-    throw std::out_of_range("MatrixWorkspace::binIndexOf - X value lower than "
-                            "lowest in current range.");
+  const auto &xValues = this->x(index);
+  const bool ascendingOrder = xValues.front() < xValues.back();
+  const auto minX = ascendingOrder ? xValues.front() : xValues.back();
+  const auto maxX = ascendingOrder ? xValues.back() : xValues.front();
+  if (xValue < minX) {
+    throw std::out_of_range("MatrixWorkspace::binIndexOf - X value lower"
+                            " than lowest in current range.");
+  } else if (xValue > maxX) {
+    throw std::out_of_range("MatrixWorkspace::binIndexOf - X value greater"
+                            " than highest in current range.");
   }
-  auto lowit = std::lower_bound(xValues.cbegin(), xValues.cend(), xValue);
-  if (lowit == xValues.end()) {
-    throw std::out_of_range("MatrixWorkspace::binIndexOf - X value greater "
-                            "than highest in current range.");
+  size_t hops;
+  if (ascendingOrder) {
+    auto lowit = std::lower_bound(xValues.cbegin(), xValues.cend(), xValue);
+    // If we are pointing at the first value then that means we still want to be
+    // in the first bin
+    if (lowit == xValues.cbegin()) {
+      ++lowit;
+    }
+    hops = std::distance(xValues.cbegin(), lowit);
+  } else {
+    auto lowit = std::upper_bound(xValues.crbegin(), xValues.crend(), xValue);
+    if (lowit == xValues.crend()) {
+      --lowit;
+    } else if (lowit == xValues.crbegin()) {
+      ++lowit;
+    }
+    hops = xValues.size() - std::distance(xValues.crbegin(), lowit);
   }
-  // If we are pointing at the first value then that means we still want to be
-  // in the first bin
-  if (lowit == xValues.begin()) {
-    ++lowit;
-  }
-  size_t hops = std::distance(xValues.begin(), lowit);
   // The bin index is offset by one from the number of hops between iterators as
   // they start at zero
   return hops - 1;

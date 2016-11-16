@@ -299,7 +299,7 @@ void PawleyFit::exec() {
   int wsIndex = getProperty("WorkspaceIndex");
 
   // Get x-range start and end values, depending on user input
-  const MantidVec &xData = ws->readX(static_cast<size_t>(wsIndex));
+  const auto &xData = ws->x(static_cast<size_t>(wsIndex));
   double startX = xData.front();
   double endX = xData.back();
 
