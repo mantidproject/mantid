@@ -381,9 +381,9 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     if (m_currentRun && m_currentRun->run == run) {
       filenames.append(m_currentRun->filePath);
     } else {
-      filenames.append(QString::fromStdString(MuonAnalysisHelper::getRunLabel(
-                                                  params.instrument, {run}))
-                           .append(".nxs"));
+      filenames.append(
+          QString::fromStdString(MuonAnalysisHelper::getRunLabel(
+                                     params.instrument, {run})).append(".nxs"));
     }
   }
   try {

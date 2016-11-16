@@ -47,7 +47,8 @@ public:
   MOCK_METHOD1(setNumPeriods, void(size_t));
   MOCK_METHOD1(setChosenPeriod, void(const QString &));
   MOCK_CONST_METHOD0(getPeriodSelections, QStringList());
-  MOCK_METHOD2(setWorkspaceDetails, void(const QString &, const QString &));
+  MOCK_METHOD3(setWorkspaceDetails, void(const QString &, const QString &,
+                                         const boost::optional<QString> &));
   MOCK_METHOD1(setAvailableGroups, void(const QStringList &));
   MOCK_CONST_METHOD0(getChosenGroups, QStringList());
   MOCK_METHOD1(setChosenGroup, void(const QString &));
@@ -182,21 +183,23 @@ public:
   void test_setAssignedFirstRun_singleWorkspace() {
     setupGroupPeriodSelections();
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
-    EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(QString("00015189"),
-                                                     QString("MUSR"))).Times(1);
+    EXPECT_CALL(*m_dataSelector,
+                setWorkspaceDetails(QString("00015189"), QString("MUSR"),
+                                    boost::optional<QString>{})).Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
-    m_presenter->setAssignedFirstRun(wsName);
+    m_presenter->setAssignedFirstRun(wsName, boost::none);
   }
 
   void test_setAssignedFirstRun_contiguousRange() {
     setupGroupPeriodSelections();
     const QString wsName("MUSR00015189-91; Pair; long; Asym; 1; #1");
-    EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(QString("00015189-91"),
-                                                     QString("MUSR"))).Times(1);
+    EXPECT_CALL(*m_dataSelector,
+                setWorkspaceDetails(QString("00015189-91"), QString("MUSR"),
+                                    boost::optional<QString>{})).Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
-    m_presenter->setAssignedFirstRun(wsName);
+    m_presenter->setAssignedFirstRun(wsName, boost::none);
   }
 
   void test_setAssignedFirstRun_nonContiguousRange() {
@@ -204,29 +207,42 @@ public:
     const QString wsName("MUSR00015189-91, 15193; Pair; long; Asym; 1; #1");
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189-91, 15193"),
-                                    QString("MUSR"))).Times(1);
+                                    QString("MUSR"),
+                                    boost::optional<QString>{})).Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
-    m_presenter->setAssignedFirstRun(wsName);
+    m_presenter->setAssignedFirstRun(wsName, boost::none);
   }
 
   void test_setAssignedFirstRun_alreadySet() {
     setupGroupPeriodSelections();
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
-    m_presenter->setAssignedFirstRun(wsName);
-    EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(_, _)).Times(0);
+    m_presenter->setAssignedFirstRun(wsName, boost::none);
+    EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(_, _, _)).Times(0);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(_)).Times(0);
     EXPECT_CALL(*m_fitBrowser, allowSequentialFits(_)).Times(0);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(0);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(0);
-    m_presenter->setAssignedFirstRun(wsName);
+    m_presenter->setAssignedFirstRun(wsName, boost::none);
+  }
+
+  void test_setAssignedFirstRun_loadCurrentRun() {
+    setupGroupPeriodSelections();
+    const boost::optional<QString> currentRunPath{
+        "\\\\musr\\data\\MUSRauto_A.tmp"};
+    const QString wsName("MUSR00061335; Pair; long; Asym; 1; #1");
+    EXPECT_CALL(*m_dataSelector,
+                setWorkspaceDetails(QString("00061335"), QString("MUSR"),
+                                    currentRunPath)).Times(1);
+    EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
+    m_presenter->setAssignedFirstRun(wsName, currentRunPath);
   }
 
   void test_getAssignedFirstRun() {
     setupGroupPeriodSelections();
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
-    m_presenter->setAssignedFirstRun(wsName);
+    m_presenter->setAssignedFirstRun(wsName, boost::none);
     TS_ASSERT_EQUALS(wsName, m_presenter->getAssignedFirstRun());
   }
 
@@ -659,13 +675,14 @@ public:
     EXPECT_CALL(*m_dataSelector, setDatasetNames(wsNameList)).Times(1);
 
     // Expect it will update the UI from workspace details
-    EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(QString("00015189-91"),
-                                                     QString("MUSR"))).Times(1);
+    EXPECT_CALL(*m_dataSelector,
+                setWorkspaceDetails(QString("00015189-91"), QString("MUSR"),
+                                    boost::optional<QString>{})).Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0)).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("fwd"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
 
-    m_presenter->setSelectedWorkspace(wsName);
+    m_presenter->setSelectedWorkspace(wsName, boost::none);
   }
 
   void test_setSelectedWorkspace_groupsAlreadySelected_shouldNotUnselect() {
@@ -680,7 +697,7 @@ public:
     // It should NOT deselect the already selected groups
     EXPECT_CALL(*m_dataSelector, setChosenGroup(_)).Times(0);
 
-    m_presenter->setSelectedWorkspace(wsName);
+    m_presenter->setSelectedWorkspace(wsName, boost::none);
   }
 
   void test_setSelectedWorkspace_periodsAlreadySelected_shouldNotUnselect() {
@@ -695,7 +712,30 @@ public:
     // It should NOT deselect the already selected periods
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(_)).Times(0);
 
-    m_presenter->setSelectedWorkspace(wsName);
+    m_presenter->setSelectedWorkspace(wsName, boost::none);
+  }
+
+  void test_setSelectedWorkspace_loadCurrentRun() {
+    setupGroupPeriodSelections();
+    const QString wsName("MUSR00061335; Group; fwd; Asym; 1; #1");
+    const QStringList wsNameList{wsName};
+    const boost::optional<QString> currentRunPath{
+        "\\\\musr\\data\\MUSRauto_A.tmp"};
+
+    // Expect it will update the workspace names
+    EXPECT_CALL(*m_fitBrowser, setWorkspaceNames(wsNameList)).Times(1);
+    EXPECT_CALL(*m_fitBrowser, setWorkspaceName(wsName)).Times(1);
+    EXPECT_CALL(*m_dataSelector, setDatasetNames(wsNameList)).Times(1);
+
+    // Expect it will update the UI from workspace details
+    EXPECT_CALL(*m_dataSelector,
+                setWorkspaceDetails(QString("00061335"), QString("MUSR"),
+                                    currentRunPath)).Times(1);
+    EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0)).Times(1);
+    EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("fwd"))).Times(1);
+    EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
+
+    m_presenter->setSelectedWorkspace(wsName, currentRunPath);
   }
 
   void test_doPreFitChecks_nonSequential_invalidRuns_doesNotFit() {
