@@ -72,7 +72,7 @@ protected:
   virtual void data(std::ofstream &file, const std::vector<double> &XData,
                     bool exportDeltaQ = true);
   /// The separator character
-  char sep;
+  char m_sep;
   double m_qres = 0.0;
   size_t m_xlength = 0;
 

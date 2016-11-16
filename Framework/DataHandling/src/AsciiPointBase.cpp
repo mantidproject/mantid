@@ -39,7 +39,7 @@ void AsciiPointBase::init() {
   propOptions.push_back("tab");
   declareProperty("Separator", "tab",
       boost::make_shared<StringListValidator>(propOptions),
-      "The separator used for splitting data columns. Allowed values: ['comma', 'space', 'tab']");
+      "The separator used for splitting data columns.");
   extraProps();
 }
 
@@ -58,11 +58,11 @@ void AsciiPointBase::exec() {
   g_log.information("FILENAME: " + filename);
   std::string sepOption = getProperty("Separator");
   if (sepOption == "comma") {
-    sep = ',';
+    m_sep = ',';
   } else if (sepOption == "space") {
-    sep = ' ';
+    m_sep = ' ';
   } else {
-    sep = '\t';
+    m_sep = '\t';
   }
   std::vector<double> XData = header(file);
   extraHeaders(file);
@@ -131,7 +131,7 @@ void AsciiPointBase::outputval(double val, std::ofstream &file,
   bool nancheck = std::isnan(val);
   bool infcheck = std::isinf(val);
   if (leadingSep) {
-    file << sep;
+    file << m_sep;
   }
   if (!nancheck && !infcheck) {
     file << val;
