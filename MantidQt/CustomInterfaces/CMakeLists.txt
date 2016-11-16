@@ -420,11 +420,6 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertViewQtWidget.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
-                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h
-                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogTomoPy.h
-                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogCustom.h
-                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogSavu.h
-                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogAstra.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui

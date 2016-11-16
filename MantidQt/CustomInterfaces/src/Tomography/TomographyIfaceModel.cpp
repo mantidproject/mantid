@@ -968,7 +968,7 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
  */
 std::string
 TomographyIfaceModel::adaptInputPathForExecution(const std::string &path,
-                                                 bool local) const {
+                                                 const bool local) const {
   if (local)
     return path;
 
