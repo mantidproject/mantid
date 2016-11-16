@@ -442,7 +442,7 @@ void CalculateFlatBackground::LinearFit(const HistogramData::Histogram &histogra
 void
 CalculateFlatBackground::MovingAverage(const HistogramData::Histogram &histogram,
                                        double &background, double &variance,
-                                       size_t windowWidth) const {
+                                       const size_t windowWidth) const {
   const auto &ys = histogram.y();
   const auto &es = histogram.e();
   double currentMin = std::numeric_limits<double>::max();

@@ -91,7 +91,7 @@ private:
   void LinearFit(const HistogramData::Histogram &histogram, double &background, double &variance,
                    const double startX, const double endX);
   void MovingAverage(const HistogramData::Histogram &histogram, double &background, double &variance,
-                       size_t windowWidth) const;
+                       const size_t windowWidth) const;
 
   /// Progress reporting
   std::unique_ptr<API::Progress> m_progress;
