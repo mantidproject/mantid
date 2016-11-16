@@ -56,6 +56,7 @@ Bugs Resolved
 - Fixed crash when loading data and the algorithm widget is hidden
 - Fixed exception being thrown when saving project with custom interfaces open
 - The "Plot Surface from Group" and "Plot Contour from Group" options have been fixed and now work for both histogram and point data. Note that all workspaces in the group must have the same X data.
+- Fixed a bug where enabling auto rebinning in the slice viewer and zooming would not rebin the workspace if it was a histogram workspace.
 
 SliceViewer Improvements
 ------------------------
