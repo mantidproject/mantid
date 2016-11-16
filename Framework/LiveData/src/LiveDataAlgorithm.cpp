@@ -32,7 +32,7 @@ void LiveDataAlgorithm::initProps() {
   auto &instrInfo =
       Kernel::ConfigService::Instance().getFacility().instruments();
   for (const auto &instrument : instrInfo) {
-    if (!instrument.liveDataAddress().empty()) {
+    if (instrument.hasLiveListenerInfo()) {
       instruments.push_back(instrument.name());
     }
   }
