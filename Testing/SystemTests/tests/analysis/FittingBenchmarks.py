@@ -15,15 +15,11 @@ import fitting_benchmarking as fitbk
 class FittingBenchmarkTests(unittest.TestCase):
 
     def setUp(self):
-        # TO-DO related to this: expose API::FuncMinimizerFactory to Python
-        # TOTHINK: use different interface as in the API::FunctionFactory?
-        # But still, do we want to enforce a particular ordering for the tables?
-        minimizers_pseudofactory = ['BFGS', 'Conjugate gradient (Fletcher-Reeves imp.)',
+        self.minimizers = ['BFGS', 'Conjugate gradient (Fletcher-Reeves imp.)',
                                     'Conjugate gradient (Polak-Ribiere imp.)', 'Damping',
-                                    #'FABADA', # hide FABADA
+                                    #'FABADA', # Note the mantid FABADA Bayesian minimizer is not local minimization mimimizer   
                                     'Levenberg-Marquardt', 'Levenberg-MarquardtMD',
                                     'Simplex', 'SteepestDescent', 'DTRS']
-        self.minimizers = minimizers_pseudofactory
         self.group_names = ['NIST, "lower" difficulty', 'NIST, "average" difficulty', 'NIST, "higher" difficulty', "CUTEst", "Neutron data"]
         self.group_suffix_names = ['nist_lower', 'nist_average', 'nist_higher', 'cutest', 'neutron_data']
         self.color_scale = [(1.1, 'ranking-top-1'),
@@ -40,11 +36,12 @@ class FittingBenchmarkTests(unittest.TestCase):
         @param use_errors : whether to use errors as weights in the cost funtion
                             (weighted least squares)
         """
-        # pick data file from system tests path
-        input_data_dir = msapi.config['datasearch.directories'].split(';')[0]
-        # Look for the specific fitting test files location
-        problem_files_path = os.path.join(input_data_dir, 'fitting_test_problems','Neutron_data')
-        fitbk.run_all_with_or_without_errors([problem_files_path], use_errors, self.minimizers,
+        # Create the path for the specific fitting test files location
+        input_data_dir = msapi.config['datasearch.directories'].split(';')[0]        
+        base_problem_files_dir = os.path.join(input_data_dir, 'fitting_test_problems')
+        
+        # run fit minimizer benchmarking tests
+        fitbk.run_all_with_or_without_errors(base_problem_files_dir, use_errors, self.minimizers,
                                              self.group_names, self.group_suffix_names, self.color_scale)
 
     def test_rank_accuracy_runtime_with_errors(self):

@@ -37,7 +37,7 @@ import input_parsing as iparsing
 import results_output as fitout
 import test_result
 
-def run_all_with_or_without_errors(problem_files_path, use_errors, minimizers,
+def run_all_with_or_without_errors(base_problem_files_dir, use_errors, minimizers,
                                    group_names, group_suffix_names, color_scale):
     """
     Run all benchmark problems available, with/without using weights in the cost
@@ -45,10 +45,17 @@ def run_all_with_or_without_errors(problem_files_path, use_errors, minimizers,
     
     ALL means: NIST + CUTEST + any fitting problems against observed Neutron data (+ any other
     which may be added in the future)
+    
+    At this point in time it is assumed that the problem files are in store relative to 
+    a base_problem_files_dir as follows:
+        
+        CUTEst/
+        NIST_nonlinear_regression/
+        Neutron_data/
 
     Be warned this function can be verbose.
 
-    @param problem_files_path :: list of directories where to load other neutron data problems
+    @param base_problem_files_dir :: base directory path of all the benchmark problems
     @param use_errors :: whether to use observational errors as weights in the cost function
     @param minimizers :: list of minimizers to test
     @param group_names :: names for display purposes
@@ -56,8 +63,15 @@ def run_all_with_or_without_errors(problem_files_path, use_errors, minimizers,
     @param color_scale :: list with pairs of threshold value - color, to produce color
     """
 
-    problems, results_per_group = do_fitting_benchmark(include_nist=True, include_cutest=True,
-                                                       data_groups_dirs = problem_files_path,
+    # Assume the benchmark problems are stores as follows
+    nist_group_dir = os.path.join(base_problem_files_dir, 'NIST_nonlinear_regression')
+    cutest_group_dir = os.path.join(base_problem_files_dir, 'CUTEst')
+    neutron_data_group_dirs = [os.path.join(base_problem_files_dir, 'Neutron_data')]
+    
+
+    problems, results_per_group = do_fitting_benchmark(nist_group_dir=nist_group_dir, 
+                                                       cutest_group_dir=cutest_group_dir,
+                                                       neutron_data_group_dirs=neutron_data_group_dirs,
                                                        minimizers=minimizers, use_errors=use_errors)
 
     # Results for every test problem in each group
@@ -82,38 +96,45 @@ def run_all_with_or_without_errors(problem_files_path, use_errors, minimizers,
     import sys
     sys.stdout.flush()
 
-def do_fitting_benchmark(include_nist=True, include_cutest=True, data_groups_dirs=None,
+def do_fitting_benchmark(nist_group_dir=None, cutest_group_dir=None, neutron_data_group_dirs=None,
                          minimizers=None, use_errors=True):
     """
-    Run a fitting benchmark made of different groups (NIST, CUTEst,
-    Neutron data, etc.)  This gets the groups of files that look like
-    test problem definitions and runs tests for every group.
+    Run a fit minimizer benchmark against groups of fitting problems. 
+    
+    Unless group directories of fitting problems are specified no fitting benchmarking is done.
+    
+    NIST and CUTEst refer to the NIST and CUTEst fitting test problem sets, where 
+    for example CUTEst is used for fit tests in the mathematical numerical literature. 
+    
+    The Neutron_data group contain fit tests against real noisy experimental neutron data. 
+    This latter group may grow to contain fitting example from multiple directories.    
 
-    @param include_nist :: whether to try to load NIST problems
-    @param include_nist :: whether to try to load CUTEst problems
-    @param data_groups_dirs :: list of directories where to load other neutron data problems
+    @param nist_group_dir :: whether to try to load NIST problems
+    @param cutest_group_dir :: whether to try to load CUTEst problems
+    @param neutron_data_group_dirs :: base directory where fitting problems are located including NIST+CUTEst
+    @param problem_files_sub_dirs :: list of sub-directories of where to load other neutron data problems    
     @param minimizers :: list of minimizers to test
     @param use_errors :: whether to use observational errors as weights in the cost function
     """
-    if data_groups_dirs:
-        search_dir = os.path.split(data_groups_dirs[0])[0]
-    else:
-        search_dir = os.getcwd()
+    #if data_groups_dirs:
+    #    search_dir = os.path.split(data_groups_dirs[0])[0]
+    #else:
+    #    search_dir = os.getcwd()
 
     # Several blocks of problems. Results for each block will be calculated sequentially, and
     # will go into a separate table
     problem_blocks = []
 
-    if include_nist:
+    if nist_group_dir:
         # get NIST problems grouped into blocks of problems, in blocks of increasing difficulty
-        problem_blocks.extend(get_nist_problem_files(search_dir))
+        problem_blocks.extend(get_nist_problem_files(nist_group_dir))
 
-    if include_cutest:
+    if cutest_group_dir:
         # get CUTEet problems - just treated as one block of problems
-        problem_blocks.extend([get_cutest_problem_files(search_dir)])
+        problem_blocks.extend([get_cutest_problem_files(cutest_group_dir)])
 
-    if data_groups_dirs:
-        problem_blocks.extend(get_data_groups(data_groups_dirs))
+    if neutron_data_group_dirs:
+        problem_blocks.extend(get_data_groups(neutron_data_group_dirs))
 
     prob_results = [do_fitting_benchmark_group(block, minimizers, use_errors=use_errors) for
                     block in problem_blocks]
@@ -127,7 +148,7 @@ def do_fitting_benchmark(include_nist=True, include_cutest=True, data_groups_dir
 
 def do_fitting_benchmark_group(problem_files, minimizers, use_errors=True):
     """
-    Applies minmizers to a group (collection) of test problems. For example the 
+    Applies minimizers to a group (collection) of test problems. For example the 
     collection of all NIST problems
 
     @param problem_files :: a list of list of files that define a group of
@@ -342,12 +363,9 @@ def get_nist_problem_files(search_dir):
     nist_higher = [ 'MGH09.dat','Thurber.dat', 'BoxBOD.dat', 'Rat42.dat',
                     'MGH10.dat', 'Eckerle4.dat', 'Rat43.dat', 'Bennett5.dat' ]
 
-    # Currently HARDCODED relative path! where to find NIST problems 
-    nist_subdir = 'NIST_nonlinear_regression'
-
-    nist_lower_files = [os.path.join(search_dir, nist_subdir, fname) for fname in nist_lower]
-    nist_average_files = [os.path.join(search_dir, nist_subdir, fname) for fname in nist_average]
-    nist_higher_files = [os.path.join(search_dir, nist_subdir, fname) for fname in nist_higher]
+    nist_lower_files = [os.path.join(search_dir, fname) for fname in nist_lower]
+    nist_average_files = [os.path.join(search_dir, fname) for fname in nist_average]
+    nist_higher_files = [os.path.join(search_dir, fname) for fname in nist_higher]
     problem_files = [nist_lower_files, nist_average_files, nist_higher_files]
 
     return problem_files
@@ -355,8 +373,8 @@ def get_nist_problem_files(search_dir):
 def get_cutest_problem_files(search_dir):
 
     cutest_all = [ 'PALMER6C.dat', 'PALMER7C.dat', 'PALMER8C.dat', 'YFITU.dat', 'VESUVIOLS.dat', 'DMN15102LS.dat' ]
-    cutest_subdir = 'CUTEst'
-    cutest_files = [os.path.join(search_dir, cutest_subdir, fname) for fname in cutest_all]
+
+    cutest_files = [os.path.join(search_dir, fname) for fname in cutest_all]
 
     return cutest_files
 
