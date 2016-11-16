@@ -84,9 +84,10 @@ private:
   /// considered 'big'
   double m_bigValue; ///< The replacement value for big numbers
   double m_bigError; ///< The replacement error value for big numbers
-  double m_smallThreshold; ///< The threshold value below which a value is 'small'
-  double m_smallValue; ///< The replacement value for small numbers
-  double m_smallError; ///< The replacement error value for small numbers
+  double
+      m_smallThreshold; ///< The threshold value below which a value is 'small'
+  double m_smallValue;  ///< The replacement value for small numbers
+  double m_smallError;  ///< The replacement error value for small numbers
 
   bool m_performNaNCheck; ///< Flag to indicate if the NaN check is to be
   /// performed
@@ -94,7 +95,8 @@ private:
   /// be performed
   bool m_performBigCheck; ///< Flag to indicate if the 'big number' check is to
   /// be performed
-  bool m_performSmallCheck; ///< Flag to indicate if the 'small number' check is to
+  bool m_performSmallCheck; ///< Flag to indicate if the 'small number' check is
+                            ///to
   /// be performed
 };
 
