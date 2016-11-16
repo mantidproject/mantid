@@ -12,7 +12,6 @@ Fitting Minimizers
 ==================
 
 .. toctree::
-   :hidden:
    :glob:
    :maxdepth: 1
 
