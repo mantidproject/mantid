@@ -263,8 +263,8 @@ private:
     TS_ASSERT(fullline == "Number of data points:" + sep + "9");
     getline(in, fullline);
     getline(in, fullline);
-    TS_ASSERT(fullline == sep + "q" + sep + "refl" + sep + "refl_err" + sep +
-              "q_res");
+    TS_ASSERT(fullline ==
+              sep + "q" + sep + "refl" + sep + "refl_err" + sep + "q_res");
   }
   void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false,
                 bool createLogs = false) {

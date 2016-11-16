@@ -168,8 +168,8 @@ public:
     createWS();
 
     Mantid::API::IAlgorithm_sptr alg =
-      Mantid::API::AlgorithmManager::Instance().create(
-        "SaveReflThreeColumnAscii");
+        Mantid::API::AlgorithmManager::Instance().create(
+            "SaveReflThreeColumnAscii");
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
     alg->setPropertyValue("Separator", "comma");
@@ -186,7 +186,7 @@ public:
     getline(in, fullline);
     std::vector<std::string> columns;
     boost::split(columns, fullline, boost::is_any_of(","),
-      boost::token_compress_on);
+                 boost::token_compress_on);
     TS_ASSERT_EQUALS(columns.size(), 4); // first blank
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);

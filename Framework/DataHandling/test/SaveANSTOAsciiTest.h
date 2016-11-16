@@ -164,7 +164,7 @@ public:
     createWS();
 
     Mantid::API::IAlgorithm_sptr alg =
-      Mantid::API::AlgorithmManager::Instance().create("SaveANSTOAscii");
+        Mantid::API::AlgorithmManager::Instance().create("SaveANSTOAscii");
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
     alg->setPropertyValue("Separator", "comma");
