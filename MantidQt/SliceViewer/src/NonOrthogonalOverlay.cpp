@@ -84,38 +84,33 @@ void NonOrthogonalOverlay::setSkewMatrix() {
 
 QPointF NonOrthogonalOverlay::skewMatrixApply(double x, double y) {
   // keyed array,
-  std::vector<double> dimensions(3, 0);
-  dimensions.at(m_dimX) = x;
-  dimensions.at(m_dimY) = y;
-  const auto angle_H = dimensions[0];
-  const auto angle_K = dimensions[1];
-  const auto angle_L = dimensions[2];
+	VMD coords(m_ws->get()->getNumDims());
+	coords[m_dimX] = x;
+	coords[m_dimY] = y;
+	API::transformLookpointToWorkspaceCoordGeneric(coords, m_skewMatrix, m_dimX, m_dimY);
+	auto xNew = coords[m_dimX];
+	auto yNew = coords[m_dimY];
 
-  auto dimX = angle_H * m_skewMatrix[0 + 3 * m_dimX] +
-              angle_K * m_skewMatrix[1 + 3 * m_dimX] +
-              angle_L * m_skewMatrix[2 + 3 * m_dimX];
-  auto dimY = angle_H * m_skewMatrix[0 + 3 * m_dimY] +
-              angle_K * m_skewMatrix[1 + 3 * m_dimY] +
-              angle_L * m_skewMatrix[2 + 3 * m_dimY];
-
-  return QPointF(dimX, dimY);
+  return QPointF(xNew, yNew);
 }
+
+//void NonOrthogonalOverlay::testSkewMatrixApply()
 
 void NonOrthogonalOverlay::zoomChanged(QwtDoubleInterval xint,
                                        QwtDoubleInterval yint) {
+	std::cout << "zoom changed hit" << std::endl;
   m_xMinVis = xint.minValue();
   m_xMaxVis = xint.maxValue();
   m_yMinVis = yint.minValue();
   m_yMaxVis = yint.maxValue();
+  m_xRange = (m_xMaxVis - m_xMinVis);
+  m_yRange = (m_yMaxVis - m_yMinVis);
+  m_xMaxVisBuffered = m_xMaxVis + m_xRange;
+  m_xMinVisBuffered = m_xMinVis - m_xRange;
+  m_yMaxVisBuffered = m_yMaxVis + m_yRange;
+  m_yMinVisBuffered = m_yMinVis - m_yRange;
 
-  double xBuffer = (m_xMaxVis - m_xMinVis);
-  double yBuffer = (m_yMaxVis - m_yMinVis);
-  m_xMaxVisBuffered = m_xMaxVis + xBuffer;
-  m_xMinVisBuffered = m_xMinVis - xBuffer;
-  m_yMaxVisBuffered = m_yMaxVis + yBuffer;
-  m_yMinVisBuffered = m_yMinVis - yBuffer;
-
-  calculateTickMarks();
+  //calculateTickMarks();
 }
 
 void NonOrthogonalOverlay::setAxesPoints() {
@@ -134,10 +129,12 @@ void NonOrthogonalOverlay::calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws,
   m_ws = ws;
   m_dimX = dimX;
   m_dimY = dimY;
+  
 
   if (API::isHKLDimensions(*m_ws, m_dimX, m_dimY)) {
     setSkewMatrix();
     setAxesPoints();
+	
   }
 }
 
@@ -154,30 +151,21 @@ void NonOrthogonalOverlay::clearAllAxisPointVectors() {
 
 void NonOrthogonalOverlay::calculateTickMarks() { // assumes X axis
   clearAllAxisPointVectors();
+  // overlay grid in static fashion
+  auto result = m_xRange / width();
+	//take Xmin etc etc, figure out where on xaxis all points want to be and THEN convert them into width() num,
+  // can take care of number issue later!
+  //minimum test case - calculate line of half xMax and conver that into width, see if it moves around
+  //really need to sort it so calculate tick marks is just called once! per axis change ... change number is for zoom
+  auto xMidPoint = m_xRange / 2 + m_xMinVis;
+  auto skewLow = skewMatrixApply(xMidPoint, m_yMinVis);
+  auto skewHigh = skewMatrixApply(xMidPoint, m_yMaxVis);
+  auto skewLowXTranslated = skewLow.x()*result;
+  auto skewLowYTranslated = skewLow.y()*result;
+  auto skewHighXTranslated = skewHigh.x()*result;
+  auto skewHighYTranslated = skewHigh.y()*result;
+  
 
-  auto percentageOfLineX =
-      (((m_xMaxVisBuffered) - (m_xMinVisBuffered)) / m_tickNumber);
-  auto percentageOfLineY =
-      (((m_yMaxVisBuffered) - (m_yMinVisBuffered)) / m_tickNumber);
-  for (size_t i = 0; i <= static_cast<size_t>(m_tickNumber); i++) {
-    double i_doub = static_cast<double>(i);
-    double axisPointX = (percentageOfLineX * i_doub) + m_xMinVisBuffered;
-    double axisPointY = (percentageOfLineY * i_doub) + m_yMinVisBuffered;
-    m_axisXPointVec.push_back(axisPointX);
-    m_xNumbers.push_back(skewMatrixApply(axisPointX, m_yMinVis));
-    m_xNumbers[i].setY(m_yMinVis);
-    m_yNumbers.push_back(skewMatrixApply(m_xMinVis, axisPointY));
-    m_yNumbers[i].setX(m_xMinVis);
-    m_xAxisTickStartVec.push_back(
-        skewMatrixApply(axisPointX, (m_yMinVisBuffered)));
-    m_xAxisTickEndVec.push_back(
-        skewMatrixApply(axisPointX, (m_yMaxVisBuffered)));
-    m_axisYPointVec.push_back(axisPointY);
-    m_yAxisTickStartVec.push_back(
-        skewMatrixApply((m_xMinVisBuffered), axisPointY));
-    m_yAxisTickEndVec.push_back(
-        skewMatrixApply((m_xMaxVisBuffered), axisPointY));
-  }
 
   update();
 }
@@ -198,28 +186,42 @@ void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
     painter.setPen(centerPen);
     painter.drawLine(transform(m_pointA), transform(m_pointB));
     painter.drawLine(transform(m_pointA), transform(m_pointC));
-    gridPen.setWidth(1);
+	//remember width() always farthest right, height() always bottom
+	//take Xmin etc etc, figure out where on xaxis all points want to be and THEN convert them into width() num,
+	// can take care of number issue later!
+	//minimum test case - calculate line of half xMax and conver that into width, see if it moves around
+	//translate an Xmin to Width() correctly
+	//have problem when trying to divide by zero...
+	//real quick check ratio has been set
+	 
+	
+	auto xMid = m_xMinVis + (m_xRange / 3);
+	//need to get m_range % from xMId
+	auto percentageWeight = m_xMinVis / xMid;
+	auto removedWeighting = xMid - (xMid*percentageWeight);
+	auto ratio = width() / (m_xRange);
+	auto widthMid = width() / 3; //should show as same as widthTranslate
+	auto widthTranslate = ratio * (removedWeighting);
+	painter.drawLine(transform(QPointF(xMid, m_yMinVis)), transform(QPointF(xMid, m_yMaxVis)));
+	painter.drawLine(QPointF(widthTranslate, 0), QPointF(widthTranslate, height()));
+
+	//produce original m_xRange number
+	/*auto minVisPercent = m_xMinVis / xMid;
+	auto removedWeighting = xMid*minVisPercent;
+	auto rw = xMid - removedWeighting; //<--- works!
+	auto skewLineLow = skewMatrixApply(xMid, m_yMinVis);
+	auto skewLineHigh = skewMatrixApply(xMid, m_yMaxVis);
+	auto origWidth = width() / 3;
+	auto widthFromxMin = //figure out ratio and apply here
+	auto tryWidthLow = skewLineLow.x() - (skewLineLow.x()*minVisPercent);
+	auto tryWidthHigh = skewLineHigh.x() - (skewLineHigh.x()*minVisPercent);
+	painter.drawLine(transform(skewLineLow), transform(skewLineHigh));
+	painter.drawLine(QPointF(origWidth, height()), QPointF(origWidth, 0));
+	painter.drawLine(QPointF(tryWidthLow, height()), QPointF(tryWidthHigh, 0));*/
+	gridPen.setWidth(1);
     gridPen.setCapStyle(Qt::FlatCap);
     gridPen.setStyle(Qt::DashLine);
-
-    for (size_t i = 0; i < m_axisYPointVec.size(); i++) {
-      painter.setPen(gridPen);
-      painter.drawLine(transform(m_xAxisTickStartVec[i]),
-                       transform(m_xAxisTickEndVec[i]));
-      painter.drawLine(transform(m_yAxisTickStartVec[i]),
-                       transform(m_yAxisTickEndVec[i]));
-      painter.setPen(numberPen);
-      if ((m_xNumbers[i].x() > m_xMinVis) &&
-          (m_xNumbers[i].x() < (m_xMaxVis * m_numberAxisEdge))) {
-        painter.drawText(transform(m_xNumbers[i]),
-                         QString::number(m_axisXPointVec[i], 'g', 3));
-      }
-      if ((m_yNumbers[i].y() > m_yMinVis) &&
-          (m_yNumbers[i].y() < (m_yMaxVis * m_numberAxisEdge))) {
-        painter.drawText(transform(m_yNumbers[i]),
-                         QString::number(m_axisYPointVec[i], 'g', 3));
-      }
-    }
+	
   }
 }
 

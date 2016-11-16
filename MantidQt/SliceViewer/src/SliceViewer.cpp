@@ -569,8 +569,8 @@ void SliceViewer::initZoomer() {
   // Hook-up listener to rescaled event
   QObject::connect(magnif, SIGNAL(rescaled(double)), this,
                    SLOT(magnifierRescaled(double)));
-  QObject::connect(magnif, SIGNAL(rescaled(double)), this,
-                   SLOT(updateNonOrthogonalOverlay()));
+  //QObject::connect(magnif, SIGNAL(rescaled(double)), this,
+    //               SLOT(updateNonOrthogonalOverlay()));
   // Pan using the right mouse button + drag
   QwtPlotPanner *panner = new QwtPlotPanner(m_plot->canvas());
   panner->setMouseButton(Qt::RightButton);
@@ -691,7 +691,7 @@ void SliceViewer::updateDimensionSliceWidgets() {
 void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
   if (useNonOrthogonal && ui.btnNonOrthogonalToggle->isChecked()) {
     m_data = Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
-    updateNonOrthogonalOverlay();
+    //updateNonOrthogonalOverlay();
 
   } else {
     m_data = Kernel::make_unique<API::QwtRasterDataMD>();
@@ -711,9 +711,10 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
 void SliceViewer::updateNonOrthogonalOverlay() {
 
   if (ui.btnNonOrthogonalToggle->isChecked()) {
+	  std::cout << "currently doing nothing!" << std::endl;
     QwtDoubleInterval xint = m_plot->axisScaleDiv(m_spect->xAxis())->interval();
     QwtDoubleInterval yint = m_plot->axisScaleDiv(m_spect->yAxis())->interval();
-    m_nonOrthogonalOverlay->zoomChanged(xint, yint);
+//    m_nonOrthogonalOverlay->zoomChanged(xint, yint);
   } else {
     m_nonOrthogonalOverlay->m_showLine = false;
   }
@@ -734,8 +735,8 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
                    SLOT(switchQWTRaster(bool)));
   QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
                    SLOT(setNonOrthogonalbtn()));
-  QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
-                   SLOT(updateNonOrthogonalOverlay()));
+  //QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
+   //                SLOT(updateNonOrthogonalOverlay()));
   emit setNonOrthogonalbtn();
   m_firstNonOrthogonalWorkspaceOpen = true;
   m_data->setWorkspace(ws);
@@ -1181,6 +1182,7 @@ void SliceViewer::RebinMode_toggled(bool checked) {
     this->m_data->setOverlayWorkspace(m_overlayWS);
     // Set the normalization from the original workspace
     this->setNormalization(m_ws->displayNormalization());
+	m_overlayWSOutline->setShown(false);
   } else {
     setIconFromString(ui.btnRebinMode, g_iconRebinOn, QIcon::Normal, QIcon::On);
     // Start the rebin
@@ -1241,7 +1243,7 @@ void SliceViewer::resetZoom() {
   m_plot->replot();
   autoRebinIfRequired();
   updatePeaksOverlay();
-  updateNonOrthogonalOverlay();
+  //updateNonOrthogonalOverlay();
 }
 
 //------------------------------------------------------------------------------
@@ -2344,8 +2346,9 @@ void SliceViewer::panned(int, int) {
   autoRebinIfRequired();
 
   applyColorScalingForCurrentSliceIfRequired();
-
+  //updateNonOrthogonalOverlay();
   this->updatePeaksOverlay();
+
 }
 
 /**
@@ -2382,7 +2385,7 @@ void SliceViewer::autoRebinIfRequired() { // probably rename this if forcing it
   if (isAutoRebinSet()) {
     rebinParamsChanged();
   }
-  updateNonOrthogonalOverlay();
+  //updateNonOrthogonalOverlay();
 }
 /** NON ORTHOGONAL STUFF **/
 
@@ -2395,6 +2398,9 @@ void SliceViewer::setNonOrthogonalbtn() {
   // Orthogonal Overlay axes calculated and appear.
   if (canShowSkewedWS) {
     m_nonOrthogonalOverlay->calculateAxesSkew(&m_ws, m_dimX, m_dimY);
+	QwtDoubleInterval xint = m_plot->axisScaleDiv(m_spect->xAxis())->interval();
+	QwtDoubleInterval yint = m_plot->axisScaleDiv(m_spect->yAxis())->interval();
+	m_nonOrthogonalOverlay->zoomChanged(xint, yint);
   } else {
     m_nonOrthogonalOverlay->m_showLine = false;
   }

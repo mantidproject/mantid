@@ -194,11 +194,7 @@ bool requiresSkewMatrix(Mantid::API::IMDWorkspace_const_sptr workspace) {
                  boost::dynamic_pointer_cast<
                      const Mantid::API::IMDHistoWorkspace>(workspace)) {
     requiresSkewMatrix = doRequiresSkewMatrix(histoWorkspace);
-  } else {
-    throw std::invalid_argument("NonOrthogonal: The provided workspace "
-                                "must either be an IMDEvent or IMDHisto "
-                                "workspace.");
-  }
+  } 
   return requiresSkewMatrix;
 }
 bool isHKLDimensions(Mantid::API::IMDWorkspace_const_sptr workspace,
@@ -225,6 +221,7 @@ void transformFromDoubleToCoordT(Mantid::Kernel::DblMatrix &skewMatrix,
     }
   }
 }
+/*
 template <typename T>
 void transformLookpointToWorkspaceCoordGeneric(T &lookPoint,
 	Mantid::coord_t skewMatrix[9], size_t &dimX, size_t &dimY) {
@@ -237,7 +234,7 @@ void transformLookpointToWorkspaceCoordGeneric(T &lookPoint,
 	lookPoint[dimY] = v1 * skewMatrix[0 + 3 * dimY] +
 		v2 * skewMatrix[1 + 3 * dimY] +
 		v3 * skewMatrix[2 + 3 * dimY];
-}
+}*/
 void transformVMDToWorkspaceCoord(Mantid::Kernel::VMD &lookPoint,
 	Mantid::coord_t skewMatrix[9], size_t &dimX, size_t &dimY) {
 	transformLookpointToWorkspaceCoordGeneric(lookPoint, skewMatrix, dimX, dimY);

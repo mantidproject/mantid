@@ -91,6 +91,8 @@ private:
   double m_xMaxVis;
   double m_yMinVis;
   double m_yMaxVis;
+  double m_yRange;
+  double m_xRange;
   double m_xMaxVisBuffered;
   double m_xMinVisBuffered;
   double m_yMaxVisBuffered;
