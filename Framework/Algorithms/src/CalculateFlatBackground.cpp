@@ -374,7 +374,7 @@ void CalculateFlatBackground::Mean(const HistogramData::Histogram &histogram,
 
 /**
 * Uses linear algorithm to do the fitting.
-* @param Histogram the histogram to fit
+* @param histogram the histogram to fit
 * @param background an output variable for the calculated background
 * @param variance an output variable for background's variance, currently always
 * zero.
