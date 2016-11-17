@@ -61,7 +61,8 @@ const std::string MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX{"MuonSimulFit_"};
 */
 MuonFitPropertyBrowser::MuonFitPropertyBrowser(QWidget *parent,
                                                QObject *mantidui)
-    : FitPropertyBrowser(parent, mantidui), m_widgetSplitter(nullptr) {}
+    : FitPropertyBrowser(parent, mantidui), m_widgetSplitter(nullptr),
+      m_mainSplitter(nullptr) {}
 
 /**
 * Initialise the muon fit property browser.
@@ -156,16 +157,23 @@ void MuonFitPropertyBrowser::init() {
   initLayout(w);
 
   // Create an empty splitter that can hold extra widgets
-  // and add it after the buttons but before the browser
-  m_widgetSplitter = new QSplitter(w);
-  m_widgetSplitter->setOrientation(Qt::Vertical);
+  m_widgetSplitter = new QSplitter(Qt::Vertical, w);
   m_widgetSplitter->setSizePolicy(QSizePolicy::Policy::Expanding,
                                   QSizePolicy::Policy::Expanding);
+
+  // This splitter separates the "extra widgets" region from the browser
+  m_mainSplitter = new QSplitter(Qt::Vertical, w);
+  m_mainSplitter->insertWidget(0, m_widgetSplitter);
+  m_mainSplitter->insertWidget(1, m_browser);
+  m_mainSplitter->setStretchFactor(0, 1);
+  m_mainSplitter->setStretchFactor(1, 0);
+
+  // Insert after the buttons
   auto parentLayout = qobject_cast<QVBoxLayout *>(w->layout());
   if (parentLayout) {
-    const int index = parentLayout->count() - 2;
+    const int index = parentLayout->count() - 1;
     constexpr int stretchFactor = 10; // so these widgets get any extra space
-    parentLayout->insertWidget(index, m_widgetSplitter, stretchFactor);
+    parentLayout->insertWidget(index, m_mainSplitter, stretchFactor);
     parentLayout->setSpacing(0);
     parentLayout->setMargin(0);
     parentLayout->setContentsMargins(0, 0, 0, 0);
