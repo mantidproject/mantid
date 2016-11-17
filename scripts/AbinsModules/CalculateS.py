@@ -188,8 +188,11 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                                                      b_tensor=powder_atoms_data["b_tensors"][atom],
                                                      b_trace=b_traces[atom])
 
-            # neglect S below s_threshold
-            indices = value_dft > AbinsConstants.s_threshold
+            # neglect S below threshold
+            threshold = max(np.max(a=value_dft) * AbinsParameters.s_relative_threshold,
+                            AbinsParameters.s_absolute_threshold)
+
+            indices = value_dft > threshold
             value_dft = value_dft[indices]
             local_freq = local_freq[indices]
             local_coeff = local_coeff[indices]

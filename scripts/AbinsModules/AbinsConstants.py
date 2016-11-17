@@ -72,16 +72,10 @@ int_type = np.dtype(np.uint16)
 total_workspace_size = int(round(AbinsParameters.max_wavenumber / float(AbinsParameters.bin_width), 0))
 higher_order_quantum_events = 3  # number of quantum order effects taken into account
 higher_order_quantum_events_dim = higher_order_quantum_events
-max_array_size = 1000000  # maximum size for storing frequencies for each quantum order
-
 
 # constant to be used when iterating with range() over all considered quantum effects
 # (range() is exclusive with respect to the last element)
 s_last_index = 1
-
-# constant to be used when iterating with range() over all considered quantum effects
-#  (range() is exclusive with respect to the last element)
-q_last_index = 1
 
 
 # construction of aCLIMAX constant which is used to evaluate mean square displacement (u)
@@ -121,9 +115,6 @@ m_n_decomposition = math.frexp(constants.m_n)
 TOSCA_constant = m_n_decomposition[0] * kg2amu_decomposition[0] / aCLIMAX_constant_decomposition[0]
 TOSCA_constant *= 2 ** (m_n_decomposition[1] + kg2amu_decomposition[1] - aCLIMAX_constant_decomposition[1])
 
-# symbolic representation of empty slot in coefficients array
-empty_slot = 0
-
 # constants which represent quantum order effects
 quantum_order_one = 1
 quantum_order_two = 2
@@ -131,5 +122,3 @@ quantum_order_three = 3
 quantum_order_four = 4
 
 
-# values of S below that are considered to be zero
-s_threshold = 10e-8
