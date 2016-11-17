@@ -4,6 +4,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -174,6 +175,8 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
       boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
   assert(static_cast<bool>(eventWS) == m_inputEvents); // Sanity check
 
+  auto spectrumInfo = outputWS->spectrumInfo();
+
   // TODO: Check why this parallel stuff breaks
   // Loop over the histograms (detector spectra)
   // PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
@@ -185,12 +188,12 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
 
     std::size_t wsid = i;
 
-    try {
+    if (spectrumInfo.hasUniqueDetector(i)) {
 
       double deg2rad = M_PI / 180.;
 
-      auto det = outputWS->getDetector(i);
-      int specNo = det->getID();
+      auto &det = spectrumInfo.detector(i);
+      int specNo = det.getID();
 
       // int spectraNumber = static_cast<int>(spectraColumn->toDouble(i));
       // wsid = outputWS->getIndexFromSpectrumNumber(spectraNumber);
@@ -251,7 +254,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
         outputWS->maskWorkspaceIndex(wsid);
       }
 
-    } catch (Exception::NotFoundError &) {
+    } else {
       // Get to here if exception thrown when calculating distance to detector
       failedDetectorCount++;
       // Since you usually (always?) get to here when there's no attached
