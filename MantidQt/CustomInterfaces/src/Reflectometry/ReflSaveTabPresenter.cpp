@@ -36,7 +36,7 @@ ReflSaveTabPresenter::~ReflSaveTabPresenter() {}
 * @param mainPresenter :: [input] The main presenter
 */
 void ReflSaveTabPresenter::acceptMainPresenter(
-  IReflMainWindowPresenter *mainPresenter) {
+    IReflMainWindowPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
 }
 
@@ -88,7 +88,7 @@ void ReflSaveTabPresenter::filterWorkspaceNames() {
           [rgx](std::string s) { return boost::regex_search(s, rgx); });
     } catch (boost::regex_error &) {
       m_mainPresenter->giveUserCritical("Error, invalid regular expression\n",
-        "Invalid regex");
+                                        "Invalid regex");
     }
   } else {
     // Otherwise simply add names where the filter string is found in
@@ -128,7 +128,7 @@ void ReflSaveTabPresenter::saveWorkspaces() {
   if (saveDir.empty() || Poco::File(saveDir).isDirectory() == false) {
     m_mainPresenter->giveUserCritical("Directory specified doesn't exist or "
                                       "was invalid for your operating system",
-      "Invalid directory");
+                                      "Invalid directory");
     return;
   }
 
@@ -137,7 +137,7 @@ void ReflSaveTabPresenter::saveWorkspaces() {
   if (wsNames.empty()) {
     m_mainPresenter->giveUserCritical("No workspaces selected. You must select "
                                       "the workspaces to save.",
-      "No workspaces selected");
+                                      "No workspaces selected");
   }
 
   // Create the appropriate save algorithm

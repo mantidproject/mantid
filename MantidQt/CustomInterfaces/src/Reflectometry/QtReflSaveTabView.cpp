@@ -44,7 +44,6 @@ IReflSaveTabPresenter *QtReflSaveTabView::getPresenter() const {
   return m_presenter.get();
 }
 
-
 /** Returns the save path
 * @return :: The save path
 */
@@ -200,7 +199,6 @@ void QtReflSaveTabView::saveWorkspaces() const {
 void QtReflSaveTabView::suggestSaveDir() const {
   m_presenter->notify(IReflSaveTabPresenter::suggestSaveDirFlag);
 }
-
 
 } // namespace CustomInterfaces
 } // namespace Mantid

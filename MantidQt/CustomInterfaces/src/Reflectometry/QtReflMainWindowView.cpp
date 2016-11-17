@@ -35,8 +35,8 @@ void QtReflMainWindowView::initLayout() {
   auto savePresenter = createSaveTab();
 
   // Create the presenter
-  m_presenter.reset(
-      new ReflMainWindowPresenter(this, runsPresenter, settingsPresenter, savePresenter));
+  m_presenter.reset(new ReflMainWindowPresenter(
+      this, runsPresenter, settingsPresenter, savePresenter));
 }
 
 /** Creates the 'Runs' tab and returns a pointer to its presenter

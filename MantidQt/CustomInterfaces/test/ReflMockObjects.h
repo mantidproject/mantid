@@ -158,9 +158,8 @@ public:
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
     UNUSED_ARG(presenter);
   };
-  ~MockSaveTabPresenter() override {};
+  ~MockSaveTabPresenter() override{};
 };
-
 
 class MockMainWindowPresenter : public IReflMainWindowPresenter {
 public:
