@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import xml.etree.ElementTree as XML
 import os.path
 
@@ -44,7 +45,7 @@ class Settings(object):
             if not value:
                 raise ValueError("Missing value for Setting element")
             temp[key] = value
-        self.__contents = dict(frozenset(temp.items()))
+        self.__contents = dict(frozenset(list(temp.items())))
 
     def get_all_entries(self):
         return self.__contents

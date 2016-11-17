@@ -542,15 +542,11 @@ void LoadTOFRawNexus::exec() {
   const auto id_to_wi = WS->getDetectorIDToWorkspaceIndexMap();
 
   // Load each bank sequentially
-  // PARALLEL_FOR1(WS)
   for (const auto &bankName : bankNames) {
-    //    PARALLEL_START_INTERUPT_REGION
     prog->report("Loading bank " + bankName);
     g_log.debug() << "Loading bank " << bankName << '\n';
     loadBank(filename, entry_name, bankName, WS, id_to_wi);
-    //    PARALLEL_END_INTERUPT_REGION
   }
-  //  PARALLEL_CHECK_INTERUPT_REGION
 
   // Set some units
   if (m_xUnits == "Ang")

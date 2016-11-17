@@ -102,7 +102,7 @@ public:
 
 class SetUncertaintiesTestPerformance : public CxxTest::TestSuite {
 public:
-  void setUp() {
+  void setUp() override {
     algZero.initialize();
     algCalc.initialize();
 

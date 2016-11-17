@@ -51,27 +51,44 @@ class FindEPP(PythonAlgorithm):
             self.log().warning("Workspace %s, detector %d has maximum <= 0" % (self.workspace.getName(), index))
             return result
 
-        # guess sigma (assume the signal is sufficiently smooth)
-        # the _only_ peak is at least three samples wide
-        # selecting samples above .5 ("full width at half maximum")
-        indices  = np.argwhere(y_values > 0.5*height)
-        nentries = len(indices)
+        # Get the positions around the max, where the y value first drops down 0.5*height
+        # This is a better approach when there is a higher noise in the tails in real data
+        fwhm_right = x_values.size - 1 - imax # number of bins from max to the right end
+        fwhm_left = imax                      # number of bins from max to the left end
 
-        if nentries < 3:
+        if imax < y_values.size - 1:
+            y_right = y_values[imax+1:]
+            y_right_below = np.argwhere(y_right < 0.5 * height)
+            if y_right_below.size != 0:
+                fwhm_right = y_right_below[0][0]
+
+        if imax > 0:
+            y_left = y_values[:imax]
+            y_left = y_left[::-1]
+            y_left_below = np.argwhere(y_left < 0.5 * height)
+            if y_left_below.size != 0:
+                fwhm_left = y_left_below[0][0]
+
+        fwhm_pos = np.minimum(imax+fwhm_right,x_values.size-1)
+        fwhm_neg = np.maximum(imax-fwhm_left,0)
+
+        self.log().debug("(spectrum %d) : FWHM lower edge is %d, upper edge is %d" % (index,fwhm_neg,fwhm_pos))
+
+        if fwhm_pos - fwhm_neg + 1 < 3:
             self.log().warning("Spectrum " + str(index) + " in workspace " + self.workspace.getName() +
                                " has a too narrow peak. Cannot guess sigma. Check your data.")
             return result
 
-        minIndex = indices[0,0]
-        maxIndex = indices[-1,0]
+        fwhm = x_values[fwhm_pos] - x_values[fwhm_neg]
 
-        # full width at half maximum: fwhm = sigma * (2.*np.sqrt(2.*np.log(2.)))
-        fwhm  = np.fabs(x_values[maxIndex] - x_values[minIndex])
+        self.log().debug("(spectrum %d) : FWHM is %f" % (index, fwhm))
+
         sigma = fwhm / (2.*np.sqrt(2.*np.log(2.)))
 
         # execute Fit algorithm
         tryCentre = x_values[imax]
         fitFun = "name=Gaussian,PeakCentre=%s,Height=%s,Sigma=%s" % (tryCentre,height,sigma)
+
         startX = tryCentre - 3.0*fwhm
         endX   = tryCentre + 3.0*fwhm
 
@@ -83,7 +100,7 @@ class FindEPP(PythonAlgorithm):
         return result
 
     def PyExec(self):
-        self.workspace   = self.getProperty("InputWorkspace").value
+        self.workspace = self.getProperty("InputWorkspace").value
         outws_name = self.getPropertyValue("OutputWorkspace")
 
         # create table and columns

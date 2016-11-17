@@ -7,6 +7,7 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTabPresenter.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -33,7 +34,7 @@ public:
   }
   static void destroySuite(ReflSaveTabPresenterTest *suite) { delete suite; }
 
-  ReflSaveTabPresenterTest() {}
+  ReflSaveTabPresenterTest() { FrameworkManager::Instance(); }
 
   void testPopulateWorkspaceList() {
     MockSaveTabView mockView;
@@ -176,7 +177,9 @@ public:
     EXPECT_CALL(mockView, getQResolutionCheck())
         .Times(Exactly(1))
         .WillOnce(Return(false));
-    EXPECT_CALL(mockView, getPrefix()).Times(Exactly(1)).WillOnce(Return(""));
+    EXPECT_CALL(mockView, getPrefix())
+        .Times(Exactly(1))
+        .WillOnce(Return(""));
     EXPECT_CALL(mockView, getFileFormatIndex())
         .Times(Exactly(1))
         .WillOnce(Return(0));

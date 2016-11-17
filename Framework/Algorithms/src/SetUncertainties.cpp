@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/SetUncertainties.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
@@ -76,23 +74,6 @@ void SetUncertainties::init() {
                   "How to reset the uncertainties");
 }
 
-namespace {
-inline bool isMasked(MatrixWorkspace_const_sptr wksp, const size_t index) {
-  if (!bool(wksp->getInstrument()))
-    return false;
-
-  try {
-    const auto det = wksp->getDetector(index);
-    if (bool(det))
-      return det->isMasked();
-  } catch (Kernel::Exception::NotFoundError &e) {
-    UNUSED_ARG(e);
-  }
-
-  return false;
-}
-} // anonymous namespace
-
 void SetUncertainties::exec() {
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   std::string errorType = getProperty("SetError");
@@ -108,10 +89,11 @@ void SetUncertainties::exec() {
       WorkspaceFactory::Instance().create(inputWorkspace);
 
   // ...but not the data, so do that here.
+  const auto &spectrumInfo = inputWorkspace->spectrumInfo();
   const size_t numHists = inputWorkspace->getNumberHistograms();
   Progress prog(this, 0.0, 1.0, numHists);
 
-  PARALLEL_FOR2(inputWorkspace, outputWorkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -126,7 +108,8 @@ void SetUncertainties::exec() {
     }
 
     // ZERO mode doesn't calculate anything further
-    if ((!zeroError) && (!isMasked(inputWorkspace, i))) {
+    if ((!zeroError) &&
+        (!(spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i)))) {
       auto &E = outputWorkspace->mutableE(i);
       if (takeSqrt) {
         const auto &Y = outputWorkspace->y(i);

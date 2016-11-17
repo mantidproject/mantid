@@ -182,7 +182,7 @@ public:
 
 class SmoothDataTestPerformance : public CxxTest::TestSuite {
 public:
-  void setUp() {
+  void setUp() override {
 
     // Set up a small workspace for testing
     constexpr size_t numHistograms(1);
@@ -211,7 +211,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(smoothAlg.execute());
   }
 
-  void tearDown() { AnalysisDataService::Instance().remove("outputWS"); }
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("outputWS");
+  }
 
 private:
   Workspace2D_sptr inputWs;

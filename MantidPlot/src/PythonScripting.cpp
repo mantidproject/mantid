@@ -119,10 +119,10 @@ void PythonScripting::redirectStdOut(bool on) {
     setQObject(this, "stdout", m_sys);
     setQObject(this, "stderr", m_sys);
   } else {
-    PyDict_SetItemString(m_sys, "stdout",
-                         PyDict_GetItemString(m_sys, "__stdout__"));
-    PyDict_SetItemString(m_sys, "stderr",
-                         PyDict_GetItemString(m_sys, "__stderr__"));
+    PyDict_SetItem(m_sys, FROM_CSTRING("stdout"),
+                   PyDict_GetItemString(m_sys, "__stdout__"));
+    PyDict_SetItem(m_sys, FROM_CSTRING("stderr"),
+                   PyDict_GetItemString(m_sys, "__stderr__"));
   }
 }
 

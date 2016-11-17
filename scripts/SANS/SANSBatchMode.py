@@ -1,4 +1,4 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
 #
 # SANSBatchMode.py
 #
@@ -30,6 +30,7 @@
 # The save directory must currently be specified in the Mantid.user.properties file
 
 #Make the reduction module available
+from __future__ import (absolute_import, division, print_function)
 from ISISCommandInterface import *
 import SANSUtility as su
 from mantid.simpleapi import *
@@ -48,7 +49,7 @@ if sys.version_info[0] == 2 and sys.version_info[1] == 6:
     import types
 
     def _deepcopy_method(x, memo):
-        return type(x)(x.im_func, copy.deepcopy(x.im_self, memo), x.im_class)
+        return type(x)(x.__func__, copy.deepcopy(x.__self__, memo), x.__self__.__class__)
     copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
 ################################################################################
 
@@ -129,8 +130,18 @@ def addRunToStore(parts, run_store):
     return 0
 
 
-def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False,
-                centreit=False, reducer=None, combineDet=None, save_as_zero_error_free=False):
+def get_transmission_properties(workspace):
+    transmission_properties = dict()
+    for prop in ['Transmission','TransmissionCan']:
+        if workspace.getRun().hasProperty(prop):
+            ws_name = workspace.getRun().getLogData(prop).value
+            if mtd.doesExist(ws_name): # ensure the workspace has not been deleted
+                transmission_properties[prop] = workspace.getRun().getLogData(prop).value
+    return transmission_properties
+
+
+def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False,  # noqa
+                centreit=False, reducer=None, combineDet=None, save_as_zero_error_free=False):  # noqa
     """
         @param filename: the CSV file with the list of runs to analyse
         @param format: type of file to load, nxs for Nexus, etc.
@@ -216,15 +227,15 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
             # DefaultTrans or CalcTrans:
             reduced = WavRangeReduction(combineDet=combineDet, out_fit_settings=scale_shift)
 
-        except SkipEntry, reason:
+        except SkipEntry as reason:
             #this means that a load step failed, the warning and the fact that the results aren't there is enough for the user
             issueWarning(str(reason)+ ', skipping entry')
             continue
-        except SkipReduction, reason:
+        except SkipReduction as reason:
             #this means that a load step failed, the warning and the fact that the results aren't there is enough for the user
             issueWarning(str(reason)+ ', skipping reduction')
             continue
-        except ValueError, reason:
+        except ValueError as reason:
             issueWarning('Cannot load file :'+str(reason))
             #when we are all up to Python 2.5 replace the duplicated code below with one finally:
             delete_workspaces(raw_workspaces)
@@ -287,7 +298,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
             # else we map it to itself.
             save_names_dict = get_mapped_workspaces(save_names, save_as_zero_error_free)
 
-            for algor in saveAlgs.keys():
+            for algor in list(saveAlgs.keys()):
                 for workspace_name in save_names:
                     #add the file extension, important when saving different types of file so they don't over-write each other
                     ext = saveAlgs[algor]
@@ -297,17 +308,19 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                         # From v2, SaveCanSAS1D is able to save the Transmission workspaces related to the
                         # reduced data. The name of workspaces of the Transmission are available at the
                         # sample logs.
-                        extra_param = dict()
                         _ws = mtd[workspace_name]
-                        for prop in ['Transmission','TransmissionCan']:
-                            if _ws.getRun().hasProperty(prop):
-                                ws_name = _ws.getRun().getLogData(prop).value
-                                if mtd.doesExist(ws_name): # ensure the workspace has not been deleted
-                                    extra_param[prop] = _ws.getRun().getLogData(prop).value
+                        transmission_properties = get_transmission_properties(_ws)
                         # Call the SaveCanSAS1D with the Transmission and TransmissionCan if they are
                         # available
                         SaveCanSAS1D(save_names_dict[workspace_name], workspace_name+ext, DetectorNames=detnames,
-                                     **extra_param)
+                                     **transmission_properties)
+                    elif algor == "SaveNXcanSAS":
+                        _ws = mtd[workspace_name]
+                        transmission_properties = get_transmission_properties(_ws)
+                        # Call the SaveNXcanSAS with the Transmission and TransmissionCan if they are
+                        # available
+                        SaveNXcanSAS(save_names_dict[workspace_name], workspace_name+ext, DetectorNames=detnames,
+                                     **transmission_properties)
                     elif algor == "SaveRKH":
                         SaveRKH(save_names_dict[workspace_name], workspace_name+ext, Append=False)
                     else:

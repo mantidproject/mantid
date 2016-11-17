@@ -1,4 +1,4 @@
-﻿# pylint: disable=too-many-arguments,unused-variable
+# pylint: disable=too-many-arguments,unused-variable
 
 from mantid.simpleapi import *
 from os.path import join

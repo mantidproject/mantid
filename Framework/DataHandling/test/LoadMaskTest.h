@@ -204,7 +204,6 @@ public:
 
       index++;
     }
-    source->buildNearestNeighbours(true);
 
     auto masker = AlgorithmManager::Instance().create("MaskDetectors");
     masker->initialize();

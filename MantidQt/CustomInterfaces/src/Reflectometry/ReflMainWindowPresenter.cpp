@@ -23,21 +23,14 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
   m_runsPresenter->acceptMainPresenter(this);
   m_settingsPresenter->acceptMainPresenter(this);
   m_savePresenter->acceptMainPresenter(this);
+
+  // Trigger the setting of the current instrument name in settings tab
+  m_runsPresenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
 }
 
 /** Destructor
 */
 ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
-
-/** Returns global options for 'Plus' algorithm
-* @return :: Global options for 'Plus' algorithm
-*/
-std::string ReflMainWindowPresenter::getPlusOptions() const {
-
-  checkPtrValid(m_settingsPresenter);
-
-  return m_settingsPresenter->getPlusOptions();
-}
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
@@ -140,6 +133,16 @@ std::string
 ReflMainWindowPresenter::runPythonAlgorithm(const std::string &pythonCode) {
 
   return m_view->runPythonAlgorithm(pythonCode);
+}
+
+/**
+Tells the setting tab presenter what to set its current instrument name to
+* @param instName : The name of the instrument to be set
+*/
+void ReflMainWindowPresenter::setInstrumentName(
+    const std::string &instName) const {
+
+  m_settingsPresenter->setInstrumentName(instName);
 }
 
 /** Checks for null pointer

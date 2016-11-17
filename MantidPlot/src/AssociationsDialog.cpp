@@ -28,23 +28,23 @@
  *                                                                         *
  ***************************************************************************/
 #include "AssociationsDialog.h"
-#include "Table.h"
+#include "BoxCurve.h"
 #include "FunctionCurve.h"
 #include "PlotCurve.h"
-#include "BoxCurve.h"
 #include "QwtErrorPlotCurve.h"
 #include "QwtPieCurve.h"
+#include "Table.h"
 #include "VectorCurve.h"
 
+#include <QApplication>
+#include <QEvent>
+#include <QHeaderView>
 #include <QLabel>
+#include <QLayout>
 #include <QListWidget>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QTableWidget>
-#include <QHeaderView>
-#include <QEvent>
-#include <QLayout>
-#include <QApplication>
-#include <QMessageBox>
 
 AssociationsDialog::AssociationsDialog(Graph *g, Qt::WFlags fl)
     : QDialog(g, fl) {
@@ -382,7 +382,7 @@ void AssociationsDialog::setGraph(Graph *g) {
       continue;
 
     auto dataCurve = dynamic_cast<const DataCurve *>(it);
-    if (dataCurve && dataCurve->type() != Graph::Function) {
+    if (dataCurve && dataCurve->type() != GraphOptions::Function) {
       QString s = dataCurve->plotAssociation();
       if (auto table = dataCurve->table()) {
         QString tableName = table->objectName();

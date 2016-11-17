@@ -262,8 +262,11 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
   // around `open`. `open` is slow for large multiperiod datasets, because it
   // does a search upon the entire HDF5 tree. `openLocal` is *much* quicker, as
   // it only searches the current group. It does, however, require that the
-  // parent
-  // group is currently open.
+  // parent group is currently open.
+  // Words of Warning: While the openLocal construct is an optimization,
+  // it is very dangerous. Forgetting to close an entry of an NXEntry in a
+  // completely unrelated part of the code can result in us opening the
+  // wrong NXEntry here!
   NXEntry mtdEntry(root, entryName);
   mtdEntry.openLocal();
 
@@ -421,9 +424,10 @@ void LoadNexusProcessed::exec() {
     std::string base_name = getPropertyValue("OutputWorkspace");
     // First member of group should be the group itself, for some reason!
 
-    // load names of each of the workspaces and check for a common stem
-    std::vector<std::string> names(nWorkspaceEntries + 1);
-    bool commonStem = bIsMultiPeriod || checkForCommonNameStem(root, names);
+    // load names of each of the workspaces. Note that if we have duplicate
+    // names then we don't select them
+    auto names =
+        extractWorkspaceNames(root, static_cast<size_t>(nWorkspaceEntries));
 
     // remove existing workspace and replace with the one being loaded
     bool wsExists = AnalysisDataService::Instance().doesExist(base_name);
@@ -464,8 +468,7 @@ void LoadNexusProcessed::exec() {
       os << p;
 
       // decide what the workspace should be called
-      std::string wsName =
-          buildWorkspaceName(names[p], base_name, p, commonStem);
+      std::string wsName = buildWorkspaceName(names[p], base_name, p);
 
       Workspace_sptr local_workspace;
 
@@ -507,34 +510,24 @@ void LoadNexusProcessed::exec() {
 /**
 * Decides what to call a child of a group workspace.
 *
-* This function uses information about if the child workspace has a common stem
-* and checks if the file contained a workspace name to decide what it should be
-*called
+* This function builds the workspace name bsed on either a workspace name
+* which was stored in the file or the base name.
 *
 * @param name :: The name loaded from the file (possibly the empty string if
 *none was loaded)
 * @param baseName :: The name group workspace
 * @param wsIndex :: The current index of this workspace
-* @param commonStem :: Whether the workspaces share a common name stem
 *
 * @return The name of the workspace
 */
 std::string LoadNexusProcessed::buildWorkspaceName(const std::string &name,
                                                    const std::string &baseName,
-                                                   size_t wsIndex,
-                                                   bool commonStem) {
+                                                   size_t wsIndex) {
   std::string wsName;
   std::string index = std::to_string(wsIndex);
 
-  // if we don't have a common stem then use name tag
-  if (!commonStem) {
-    if (!name.empty()) {
-      // use name loaded from file there's no common stem
-      wsName = name;
-    } else {
-      // if the name property wasn't defined just use <OutputWorkspaceName>_n
-      wsName = baseName + index;
-    }
+  if (!name.empty()) {
+    wsName = name;
   } else {
     // we have a common stem so rename accordingly
     boost::smatch results;
@@ -543,9 +536,11 @@ std::string LoadNexusProcessed::buildWorkspaceName(const std::string &name,
     if (boost::regex_search(name, results, exp)) {
       wsName = baseName + std::string(results[1].first, results[1].second);
     } else {
-      // use default name if we couldn't match for some reason
+      // if the name property wasn't defined just use <OutputWorkspaceName>_n
       wsName = baseName + index;
     }
+
+    wsName = baseName + index;
   }
 
   correctForWorkspaceNameClash(wsName);
@@ -577,33 +572,29 @@ void LoadNexusProcessed::correctForWorkspaceNameClash(std::string &wsName) {
 }
 
 /**
-* Check if the workspace name contains a common stem and load the workspace
-*names
+* Extract the workspace names from the file (if any are stored)
 *
 * @param root :: the root for the NeXus document
-* @param names :: vector to store the names to be loaded.
-* @return Whether there was a common stem.
+* @param nWorkspaceEntries :: the number of workspace entries
 */
-bool LoadNexusProcessed::checkForCommonNameStem(
-    NXRoot &root, std::vector<std::string> &names) {
-  bool success(true);
-  size_t nWorkspaceEntries = root.groups().size();
+std::vector<std::string>
+LoadNexusProcessed::extractWorkspaceNames(NXRoot &root,
+                                          size_t nWorkspaceEntries) {
+  std::vector<std::string> names(nWorkspaceEntries + 1);
   for (size_t p = 1; p <= nWorkspaceEntries; ++p) {
-    std::ostringstream os;
-    os << p;
-
-    names[p] = loadWorkspaceName(root, "mantid_workspace_" + os.str());
-
-    boost::smatch results;
-    const boost::regex exp(".*_\\d+$");
-
-    // check if the workspace name has an index on the end
-    if (!boost::regex_match(names[p], results, exp)) {
-      success = false;
-    }
+    auto period = std::to_string(p);
+    names[p] = loadWorkspaceName(root, "mantid_workspace_" + period);
   }
 
-  return success;
+  // Check that there are no duplicates in the workspace name
+  // This can cause severe problems
+  auto it = std::unique(names.begin(), names.end());
+  if (it != names.end()) {
+    auto size = names.size();
+    names.clear();
+    names.resize(size);
+  }
+  return names;
 }
 
 /**
@@ -617,11 +608,13 @@ std::string
 LoadNexusProcessed::loadWorkspaceName(NXRoot &root,
                                       const std::string &entry_name) {
   NXEntry mtd_entry = root.openEntry(entry_name);
+  std::string workspaceName = std::string();
   try {
-    return mtd_entry.getString("workspace_name");
+    workspaceName = mtd_entry.getString("workspace_name");
   } catch (std::runtime_error &) {
-    return std::string();
   }
+  mtd_entry.close();
+  return workspaceName;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1721,8 +1714,13 @@ void LoadNexusProcessed::loadNonSpectraAxis(
     }
   } else if (axis->isText()) {
     NXChar axisData = data.openNXChar("axis2");
-    axisData.load();
-    std::string axisLabels(axisData(), axisData.dim0());
+    std::string axisLabels;
+    try {
+      axisData.load();
+      axisLabels = std::string(axisData(), axisData.dim0());
+    } catch (std::runtime_error &) {
+      axisLabels = "";
+    }
     // Use boost::tokenizer to split up the input
     Mantid::Kernel::StringTokenizer tokenizer(
         axisLabels, "\n", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);

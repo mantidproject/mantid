@@ -131,7 +131,7 @@ void TOFSANSResolution::exec() {
   const auto &spectrumInfo = reducedWS->spectrumInfo();
   const double L1 = spectrumInfo.l1();
 
-  PARALLEL_FOR2(reducedWS, iqWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*reducedWS, *iqWS))
   for (int i = 0; i < numberOfSpectra; i++) {
     PARALLEL_START_INTERUPT_REGION
     if (!spectrumInfo.hasDetectors(i)) {

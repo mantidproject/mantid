@@ -101,7 +101,7 @@ void MayersSampleCorrection::exec() {
   Progress prog(this, 0., 1., nhist);
   prog.setNotifyStep(0.01);
 
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) {
     PARALLEL_START_INTERUPT_REGION
 

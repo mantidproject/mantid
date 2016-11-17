@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/IDetector.h"
@@ -140,13 +141,6 @@ void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
   // Calculate centre neutron velocity
   m_centreVelocity = WAVELENGTH_TO_VELOCITY / centrewavelength;
   g_log.notice() << "Centre neutron velocity = " << m_centreVelocity << "\n";
-
-  // Calculate L1 sample to source
-  Instrument_const_sptr instrument = m_inputWS->getInstrument();
-  V3D samplepos = instrument->getSample()->getPos();
-  V3D sourcepos = instrument->getSource()->getPos();
-  m_L1 = samplepos.distance(sourcepos);
-  g_log.notice() << "L1 = " << m_L1 << "\n";
 }
 
 /**
@@ -163,8 +157,10 @@ void EstimateResolutionDiffraction::createOutputWorkspace() {
 /**
   */
 void EstimateResolutionDiffraction::estimateDetectorResolution() {
-  Instrument_const_sptr instrument = m_inputWS->getInstrument();
-  V3D samplepos = instrument->getSample()->getPos();
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const auto l1 = spectrumInfo.l1();
+  g_log.notice() << "L1 = " << l1 << "\n";
+  const V3D samplepos = spectrumInfo.samplePosition();
 
   size_t numspec = m_inputWS->getNumberHistograms();
 
@@ -177,13 +173,9 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
   size_t count_nodetsize = 0;
 
   for (size_t i = 0; i < numspec; ++i) {
-    // Get detector
-    IDetector_const_sptr det = m_inputWS->getDetector(i);
-
+    const auto &det = spectrumInfo.detector(i);
     double detdim;
-
-    boost::shared_ptr<const Detector> realdet =
-        boost::dynamic_pointer_cast<const Detector>(det);
+    const auto realdet = dynamic_cast<const Detector *>(&det);
     if (realdet) {
       double dy = realdet->getHeight();
       double dx = realdet->getWidth();
@@ -195,27 +187,27 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     }
 
     // Get the distance from detector to source
-    V3D detpos = det->getPos();
-    double l2 = detpos.distance(samplepos);
-    if (l2 < 0)
-      throw runtime_error("L2 is negative");
+    double l2 = spectrumInfo.l2(i);
 
     // Calculate T
-    double centraltof = (m_L1 + l2) / m_centreVelocity;
+    double centraltof = (l1 + l2) / m_centreVelocity;
 
     // Angle
-    double twotheta = m_inputWS->detectorTwoTheta(*det);
+    double twotheta =
+        spectrumInfo.isMonitor(i) ? 0.0 : spectrumInfo.twoTheta(i);
     double theta = 0.5 * twotheta;
 
-    double solidangle = det->solidAngle(samplepos);
+    double solidangle = det.solidAngle(samplepos);
     double deltatheta = sqrt(solidangle);
 
     // Resolution
     double t1 = m_deltaT / centraltof;
-    double t2 = detdim / (m_L1 + l2);
+    double t2 = detdim / (l1 + l2);
     double t3 = deltatheta * (cos(theta) / sin(theta));
 
     double resolution = sqrt(t1 * t1 + t2 * t2 + t3 * t3);
+    if (spectrumInfo.isMonitor(i))
+      resolution = 0.0;
 
     m_outputWS->mutableX(i)[0] = static_cast<double>(i);
     m_outputWS->mutableY(i)[0] = resolution;
@@ -230,7 +222,7 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     else if (fabs(t3) > maxt3)
       maxt3 = fabs(t3);
 
-    g_log.debug() << det->type() << " " << i << "\t\t" << twotheta
+    g_log.debug() << det.type() << " " << i << "\t\t" << twotheta
                   << "\t\tdT/T = " << t1 * t1 << "\t\tdL/L = " << t2
                   << "\t\tdTheta*cotTheta = " << t3 << "\n";
   }

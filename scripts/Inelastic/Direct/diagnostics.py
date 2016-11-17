@@ -11,11 +11,13 @@ The output of each function is a workspace containing a single bin where:
 This workspace can be summed with other masked workspaces to accumulate
 masking and also passed to MaskDetectors to match masking there.
 """
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.kernel.funcinspect import lhs_info
 import os
 import Direct.RunDescriptor as RunDescriptor
 from Direct.PropertyManager import PropertyManager
+from six import iteritems
 # Reference to reducer used if necessary for working with run descriptors (in diagnostics)
 __Reducer__ = None
 
@@ -412,13 +414,13 @@ def print_test_summary(test_results,test_name=None):
     """
 
     if len(test_results) == 0:
-        print "No tests have been run!"
+        print("No tests have been run!")
         return
 
     if test_name is None:
-        print '======== Diagnostic Test Summary '
+        print('======== Diagnostic Test Summary ')
     else:
-        print '======== Diagnostic Test Summary {0} '.format(test_name)
+        print('======== Diagnostic Test Summary {0} '.format(test_name))
 
     max_test_len = 0
     max_ws_len = 0
@@ -432,10 +434,10 @@ def print_test_summary(test_results,test_name=None):
 
     for t_name in test_results:
         t_result = test_results[t_name]
-        print format_string.format(t_name,t_result[0],t_result[1])
+        print(format_string.format(t_name,t_result[0],t_result[1]))
     # Append a new line
-    print '================================================================'
-    print ''
+    print('================================================================')
+    print('')
 
 
 #-------------------------------------------------------------------------------
@@ -470,5 +472,5 @@ class ArgumentParser(object):
     def __init__(self, keywords):
         self.start_index = None # Make this more general for anything that is missing!
         self.end_index = None
-        for key, value in keywords.iteritems():
+        for key, value in iteritems(keywords):
             setattr(self, key, value)

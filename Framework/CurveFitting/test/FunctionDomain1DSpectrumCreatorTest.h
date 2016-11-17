@@ -82,37 +82,6 @@ public:
     TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(), std::invalid_argument);
   }
 
-  void testGetVectorHistogram() {
-    TestableFunctionDomain1DSpectrumCreator creator;
-    creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 5, 0.0, 1.0));
-    creator.setWorkspaceIndex(0);
-
-    std::vector<double> xValues = creator.getVectorHistogram();
-
-    TS_ASSERT_EQUALS(xValues.size(), 5);
-    for (size_t i = 0; i < xValues.size(); ++i) {
-      TS_ASSERT_EQUALS(xValues[i], (static_cast<double>(i) + 0.5) * 1.0);
-    }
-  }
-
-  void testGetVectorNonHistogram() {
-    TestableFunctionDomain1DSpectrumCreator creator;
-    creator.setMatrixWorkspace(
-        WorkspaceCreationHelper::Create2DWorkspace123(1, 5));
-    creator.setWorkspaceIndex(0);
-
-    std::vector<double> xValues = creator.getVectorNonHistogram();
-
-    TS_ASSERT_EQUALS(xValues.size(), 5);
-
-    std::vector<double> xValuesWs = creator.m_matrixWorkspace->readX(0);
-
-    for (size_t i = 0; i < xValues.size(); ++i) {
-      TS_ASSERT_EQUALS(xValues[i], xValuesWs[i]);
-    }
-  }
-
   void testGetDomainSize() {
     FunctionDomain1DSpectrumCreator creator;
     creator.setMatrixWorkspace(

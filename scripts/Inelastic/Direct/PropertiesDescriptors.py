@@ -1,8 +1,9 @@
-﻿#pylint: disable=too-many-lines
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """ File contains collection of Descriptors used to define complex
     properties in NonIDF_Properties and PropertyManager classes
 """
+from __future__ import (absolute_import, division, print_function)
 import os
 import numpy as np
 import math
@@ -17,6 +18,7 @@ from mantid import api,geometry,config
 import Direct.ReductionHelpers as prop_helpers
 #pylint: disable=unused-import
 import Direct.CommonFunctions as common
+import collections
 
 
 #-----------------------------------------------------------------------------------------
@@ -194,7 +196,7 @@ class IncidentEnergy(PropDescriptor):
                 else:
                     if value.find('[') > -1:
                         energy_list = True
-                        value = value.translate(None, '[]').strip()
+                        value = value.replace('[','').replace(']','').strip()
                     else:
                         energy_list = False
                     en_list = str.split(value,',')
@@ -381,7 +383,7 @@ class EnergyBins(PropDescriptor):
     def __set__(self,instance,values):
         if values is not None:
             if isinstance(values,str):
-                values = values.translate(None, '[]').strip()
+                values = values.replace('[','').replace(']','').strip()
                 lst = values.split(',')
                 self.__set__(instance,lst)
                 return
@@ -514,7 +516,7 @@ class SaveFileName(PropDescriptor):
 
         if value is None:
             self._file_name = None
-        elif callable(value):
+        elif isinstance(value, collections.Callable):
             self._custom_print = value
         else:
             self._file_name = str(value)
@@ -1067,7 +1069,7 @@ class EiMonSpectra(prop_helpers.ComplexProperty):
             tDict = instance.__dict__
 
         if isinstance(value,str):
-            val =  value.translate(None,'[]').strip()
+            val =  value.replace('[','').replace(']','').strip()
             if val.find(':')>-1:
                 val = val.split(':')
             else:

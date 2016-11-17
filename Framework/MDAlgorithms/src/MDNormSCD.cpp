@@ -401,7 +401,7 @@ void MDNormSCD::calculateNormalization(
       solidAngleWS->getDetectorIDToWorkspaceIndexMap();
 
   auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
-  PARALLEL_FOR1(integrFlux)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*integrFlux))
   for (int64_t i = 0; i < ndets; i++) {
     PARALLEL_START_INTERUPT_REGION
 

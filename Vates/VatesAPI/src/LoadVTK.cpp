@@ -258,7 +258,7 @@ void LoadVTK::execMDEvent(vtkDataSet *readDataset,
   ws->initialize();
 
   if (errorsSQ == NULL) {
-    PARALLEL_FOR1(ws)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
     for (int64_t i = 0; i < nPoints; ++i) {
       PARALLEL_START_INTERUPT_REGION
       double coordinates[3];
@@ -275,7 +275,7 @@ void LoadVTK::execMDEvent(vtkDataSet *readDataset,
     }
     PARALLEL_CHECK_INTERUPT_REGION
   } else {
-    PARALLEL_FOR1(ws)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
     for (int64_t i = 0; i < nPoints; ++i) {
       PARALLEL_START_INTERUPT_REGION
       double coordinates[3];
