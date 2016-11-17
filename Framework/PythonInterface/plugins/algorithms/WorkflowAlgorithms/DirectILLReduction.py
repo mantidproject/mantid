@@ -6,7 +6,7 @@ from mantid.simpleapi import AddSampleLog, CalculateFlatBackground,\
                              CloneWorkspace, ComputeCalibrationCoefVan,\
                              ConvertUnits, CorrectKiKf, CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace, DetectorEfficiencyCorUser, Divide, ExtractMonitors, ExtractSpectra, \
                              FindDetectorsOutsideLimits, FindEPP, GetEiMonDet, GroupWorkspaces, Integration, Load,\
-                             MaskDetectors, MedianDetectorTest, MergeRuns, Minus, NormaliseToMonitor, Rebin, Scale
+                             MaskDetectors, MedianDetectorTest, MergeRuns, Minus, NormaliseToMonitor, Plus, Rebin, Scale
 import numpy
 
 CLEANUP_DELETE = 'DeleteIntermediateWorkspaces'
@@ -91,10 +91,6 @@ class NameSource:
         return self._prefix + '_bkgsubtr'
 
     @namelogging
-    def badDetectors(self):
-        return self._prefix + '_alldiagn'
-
-    @namelogging
     def badDetectorSpuriousBkg(self):
         return self._prefix + '_bkgdiagn'
 
@@ -105,6 +101,10 @@ class NameSource:
     @namelogging
     def detectorEfficiencyCorrected(self):
         return self._prefix + '_deteff'
+
+    @namelogging
+    def diagnostics(self):
+        return self._prefix + '_diagnostics_all'
 
     @namelogging
     def ecSubtracted(self):
@@ -299,17 +299,20 @@ class DirectILLReduction(DataProcessorAlgorithm):
             # No input diagnostics workspace? Diagnose!
             if not diagnosticsWs:
                 # 1. Detectors with zero counts.
-                outWsName = workspaceNames.badDetectors()
-                diagnosticsWs, nFailures = FindDetectorsOutsideLimits(InputWorkspace=workspace,
-                                                                      OutputWorkspace=outWsName)
+                outWsName = workspaceNames.badDetectorZeroCounts()
+                zeroCountDiagnostics, nFailures = FindDetectorsOutsideLimits(InputWorkspace=workspace,
+                                                                             OutputWorkspace=outWsName)
                 # 2. Detectors with high background
                 outWsName = workspaceNames.badDetectorSpuriousBkg()
                 bkgDiagnostics, nFailures = MedianDetectorTest(InputWorkspace=bkgWorkspace,
                                                                OutputWorkspace=outWsName,
-                                                               LowThreshold=0.0)
-                for i in range(diagnosticsWs.getNumberHistograms()):
-                    if bkgDiagnostics.readY(i)[0] != 0:
-                        setAsBad(diagnosticsWs, i)
+                                                               LowThreshold=0.0,
+                                                               HighThreshold=10,
+                                                               LowOutlier=0.0)
+                outWsName = workspaceNames.diagnostics()
+                diagnosticsWs = Plus(LHSWorkspace=zeroCountDiagnostics,
+                                     RHSWorkspace=bkgDiagnostics,
+                                     OutputWorkspace=outWsName)
             # Mask detectors identified as bad.
             outWsName = workspaceNames.masked()
             workspace = CloneWorkspace(InputWorkspace=workspace,
