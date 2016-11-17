@@ -159,6 +159,9 @@ public:
   /// Cancel a previously submitted job
   void doCancelJobs(const std::string &compRes,
                     const std::vector<std::string> &id);
+
+  void addJobToStatus(const qint64 pid, const std::string &run,
+                      const std::string &allOpts);
   /// Get fresh status information on running/recent jobs
   void doRefreshJobsInfo(const std::string &compRes);
 
@@ -258,7 +261,7 @@ protected: // protected to expose everything to testing
   std::string buildOutReconstructionDir(const std::string &samplesDir,
                                         bool) const;
 
-  bool processIsRunning(int pid);
+  bool processIsRunning(qint64 pid);
 
   std::string
   buildOutReconstructionDirFromSystemRoot(const std::string &samplesDir,

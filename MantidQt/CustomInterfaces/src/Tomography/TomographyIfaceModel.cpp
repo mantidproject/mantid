@@ -516,28 +516,21 @@ void TomographyIfaceModel::doRunReconstructionJobLocal(
     // Can only run one reconstruction at a time. you can cancel the recon
     worker.setup(run, args);
     thread.start();
-    // TODO no more POCO
   } catch (Poco::SystemException &sexc) {
     g_log.error() << "Execution failed. Could not run the tool. Error details: "
                   << std::string(sexc.what());
   }
+}
 
+void TomographyIfaceModel::addJobToStatus(const qint64 pid,
+                                          const std::string &run,
+                                          const std::string &allOpts) {
   Mantid::API::IRemoteJobManager::RemoteJobInfo info;
-
-  // crash here
-  // thread not always started at this point, could use a signal and send the
-  // pid from that!
-  // remove the PID, we can refresh just from tracking the process/thread with
-  // isRunning(), the user shouldnt care about the PID and neither should we
-  auto pid = thread.getPID();
   info.id = boost::lexical_cast<std::string>(pid);
   info.name = pid > 0 ? "Mantid_Local" : "none";
   info.status = pid > 0 ? "Starting" : "Exit";
   info.cmdLine = run + " " + allOpts;
   m_jobsStatusLocal.emplace_back(info);
-  // TODO log proper info
-  // g_log.notice(m_process->getOutputString());
-
   doRefreshJobsInfo(g_LocalResourceName);
 }
 
@@ -586,8 +579,6 @@ void TomographyIfaceModel::doRefreshJobsInfo(const std::string &compRes) {
 }
 
 void TomographyIfaceModel::refreshLocalJobsInfo() {
-  // g_log.notice(m_process->getOutputString());
-
   for (auto &job : m_jobsStatusLocal) {
     if ("Exit" == job.status || "Done" == job.status)
       continue;
@@ -674,7 +665,7 @@ void TomographyIfaceModel::checkDataPathsSet() const {
  *
  * @return running status
  */
-bool TomographyIfaceModel::processIsRunning(int pid) {
+bool TomographyIfaceModel::processIsRunning(qint64 pid) {
 #ifdef _WIN32
   HANDLE handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
   DWORD code;
@@ -687,6 +678,7 @@ bool TomographyIfaceModel::processIsRunning(int pid) {
   }
   return (0 == kill(pid, 0));
 #endif
+  // return Poco::Process::isRunning(pid);
 }
 
 /**
@@ -793,11 +785,16 @@ TomographyIfaceModel::loadFITSImage(const std::string &path) {
 }
 
 void TomographyIfaceModel::logMsg(const std::string &msg) {
-  g_log.notice() << msg << '\n';
+  std::cout << "\nDEBUG >> LOG MSG: " + msg << "\n";
+  g_log.notice("Test test test\n");
+  g_log.notice(msg + '\n');
 }
 
 void TomographyIfaceModel::logErrMsg(const std::string &msg) {
-  g_log.error() << msg << '\n';
+  // prints properly to stdout, msg is not empty
+  std::cout << "\nDEBUG >> LOG MSG: " + msg << "\n";
+  g_log.notice("Test test test\n"); // doesnt show anything
+  g_log.error(msg + '\n');          // also doesnt show anything
 }
 
 /**

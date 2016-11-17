@@ -61,12 +61,6 @@ public:
 
   void notify(ITomographyIfacePresenter::Notification notif) override;
 
-public slots:
-  /// It may be run on user request, or periodically from a timer/thread
-  void processRefreshJobs();
-  void readWorkerStdOut(const QString &s);
-  void readWorkerStdErr(const QString &s);
-
 protected:
   void initialize();
 
@@ -83,15 +77,12 @@ protected:
   void processLogout();
   void processSetupReconTool();
   void processRunRecon();
-
-protected:
   void processCancelJobs();
   void processVisualizeJobs();
   void processViewImg();
   void processLogMsg();
   void processAggregateEnergyBands();
   void processShutDown();
-
   void doVisualize(const std::vector<std::string> &ids);
 
   /// To prepare a local run
@@ -111,6 +102,13 @@ protected:
   void killKeepAliveMechanism();
 
   bool isLocalResourceSelected() const;
+
+protected slots:
+  /// It may be run on user request, or periodically from a timer/thread
+  void processRefreshJobs();
+  void readWorkerStdOut(const QString &s);
+  void readWorkerStdErr(const QString &s);
+  void addProcessToJobList();
 
 private:
   /// creates the correct dialog pointer and sets it to the member variable

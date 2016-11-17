@@ -32,35 +32,18 @@ public:
     m_args = std::move(constructArgumentsFromVector(args));
 
     std::cout << "\nDEBUG >> SETUP PROCESS >> " << m_runnable.toStdString()
-              << " ARGS >> " << constructSingleStringFromVector(m_args);
+              << " ARGS >> " << m_allArgs;
   }
 
-  std::string constructSingleStringFromVector(const QStringList &args) const {
-    std::string allOpts;
-    for (const auto &arg : args) {
-      allOpts += arg.toStdString() + " ";
-    }
-    return allOpts;
-  }
+  std::string getRunnable() { return m_runnable.toStdString(); }
+  std::string getArgs() { return m_allArgs; }
+  Q_PID getPID() { return this->pid(); }
 
 public slots:
-  bool isRunning() { return this->state() == QProcess::ProcessState::Running; }
   void startWorker() {
     // DEBUG
     std::cout << "\nDEBUG >> STARTING PROCESS <<";
     start(m_runnable, m_args);
-  }
-
-  void readStdOut() {
-    QString output(readAllStandardOutput());
-    std::string stdOutput = output.toStdString();
-    std::cout << "\nDEBUG >> PROCESS STDOUT";
-  }
-
-  void readStdErr() {
-    QString error(readAllStandardError());
-    std::string stdError = error.toStdString();
-    std::cout << "\nDEBUG >> PROCESS ERROR";
   }
 
 private:
@@ -70,6 +53,7 @@ private:
 
     for (auto &arg : args) {
       list << QString::fromStdString(arg);
+      m_allArgs += arg + " ";
     }
 
     return list;
@@ -77,44 +61,32 @@ private:
 
   QString m_runnable;
   QStringList m_args;
+
+  std::string m_allArgs;
 };
 
 class TomographyThreadHandler : public QThread {
   Q_OBJECT
 public:
-  TomographyThreadHandler(QObject *parent, TomographyProcessHandler * worker) : QThread(parent) {
-    connect(worker, SIGNAL(readyReadStandardOutput()), this, SLOT(readWorkerStdOut()));
-    connect(worker, SIGNAL(readyReadStandardError()), this, SLOT(readWorkerStdErr()));
+  TomographyThreadHandler(QObject *parent, TomographyProcessHandler *worker)
+      : QThread(parent) {
+    connect(worker, SIGNAL(readyReadStandardOutput()), this,
+            SLOT(readWorkerStdOut()));
+    connect(worker, SIGNAL(readyReadStandardError()), this,
+            SLOT(readWorkerStdErr()));
   }
-
-  void run() {
-    auto pid = getPID();
-    std::cout << "\n\nDEBUG >> STARTING THREAD WITH ID: " << pid << "\n";
-    this->exec();
-  }
-
 
 public slots:
-  size_t getPID() {
-    // auto pid = this->currentThreadId();
-//    #ifdef _WIN32
-    // m_pid = (long long)pid;
-//    #else
-//    m_pid = pid;
-//    #endif
-
-    return 0;
-  }
   void readWorkerStdOut() {
-    auto * worker = qobject_cast<TomographyProcessHandler*>(sender());
+    auto *worker = qobject_cast<TomographyProcessHandler *>(sender());
     QString output(worker->readAllStandardOutput());
-    emit stdOutReady(output);    
+    emit stdOutReady(output);
   }
 
   void readWorkerStdErr() {
-    auto * worker = qobject_cast<TomographyProcessHandler*>(sender());
+    auto *worker = qobject_cast<TomographyProcessHandler *>(sender());
     QString output(worker->readAllStandardError());
-    emit stdErrReady(output);    
+    emit stdErrReady(output);
   }
 
 signals:

@@ -559,7 +559,8 @@ void TomographyIfacePresenter::processRunRecon() {
   try {
     m_workerThread.reset();
     auto *worker = new MantidQt::CustomInterfaces::TomographyProcessHandler();
-    m_workerThread = Mantid::Kernel::make_unique<TomographyThreadHandler>(this, worker);
+    m_workerThread =
+        Mantid::Kernel::make_unique<TomographyThreadHandler>(this, worker);
     worker->moveToThread(m_workerThread.get());
 
     // doesnt work, should set in run() TODO
@@ -569,12 +570,15 @@ void TomographyIfacePresenter::processRunRecon() {
     connect(m_workerThread.get(), SIGNAL(started()), worker,
             SLOT(startWorker()));
 
-    connect(m_workerThread.get(), SIGNAL(stdOutReady(QString)), this, SLOT(readWorkerStdOut(QString)));
-    connect(m_workerThread.get(), SIGNAL(stdErrReady(QString)), this, SLOT(readWorkerStdErr(QString)));
+    connect(m_workerThread.get(), SIGNAL(stdOutReady(QString)), this,
+            SLOT(readWorkerStdOut(QString)));
+    connect(m_workerThread.get(), SIGNAL(stdErrReady(QString)), this,
+            SLOT(readWorkerStdErr(QString)));
 
     connect(m_workerThread.get(), SIGNAL(finished()), m_workerThread.get(),
             SLOT(deleteLater()), Qt::DirectConnection);
 
+    connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
 
     m_model->doSubmitReconstructionJob(m_view->currentComputeResource(),
@@ -585,12 +589,28 @@ void TomographyIfacePresenter::processRunRecon() {
   processRefreshJobs();
 }
 
+void TomographyIfacePresenter::addProcessToJobList() {
+  auto *worker = qobject_cast<TomographyProcessHandler *>(sender());
+  auto pid = worker->getPID();
+
+#ifdef _WIN32
+  // windows gets a struct object with more info
+  auto actualpid = static_cast<qint64>(pid->dwProcessId);
+#else
+  // linux gets just the PID as unsigned long long
+  auto actualpid = static_cast<qint64>(pid);
+#endif
+  auto runnable = worker->getRunnable();
+  auto args = worker->getArgs();
+
+  m_model->addJobToStatus(actualpid, runnable, args);
+}
 void TomographyIfacePresenter::readWorkerStdOut(const QString &s) {
-    m_model->logMsg(s.toStdString());
+  m_model->logMsg(s.toStdString());
 }
 
 void TomographyIfacePresenter::readWorkerStdErr(const QString &s) {
-    m_model->logErrMsg(s.toStdString());
+  m_model->logErrMsg(s.toStdString());
 }
 
 bool TomographyIfacePresenter::isLocalResourceSelected() const {
