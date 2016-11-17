@@ -5,18 +5,20 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTabPresenter.h"
-#include "ReflMockObjects.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "ReflMockObjects.h"
 #include "Poco/File.h"
 #include "Poco/Path.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
 using namespace testing;
+
+using Mantid::DataObjects::Workspace2D_sptr;
 
 //=====================================================================================
 // Functional tests
@@ -31,7 +33,7 @@ public:
   }
   static void destroySuite(ReflSaveTabPresenterTest *suite) { delete suite; }
 
-  ReflSaveTabPresenterTest() { FrameworkManager::Instance(); }
+  ReflSaveTabPresenterTest() { }
 
   void testPopulateWorkspaceList() {
     MockSaveTabView mockView;
@@ -205,12 +207,8 @@ public:
 
 private:
   void createWS(std::string name) {
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("CreateWorkspace");
-    alg->setProperty("DataX", std::vector<double>{1, 2, 3});
-    alg->setProperty("DataY", std::vector<double>{1, 2});
-    alg->setProperty("OutputWorkspace", name);
-    alg->execute();
+    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().addOrReplace(name, ws);
   }
 
   std::string createSavePath() {

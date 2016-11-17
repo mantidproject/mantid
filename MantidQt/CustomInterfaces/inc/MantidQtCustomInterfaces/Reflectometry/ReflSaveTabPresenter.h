@@ -3,7 +3,6 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h"
-#include "MantidKernel/Logger.h"
 #include <vector>
 
 namespace MantidQt {
@@ -72,8 +71,6 @@ private:
   std::vector<std::string> saveAlgs;
   /// Extensions used for each save algorithm
   std::vector<std::string> saveExts;
-
-  static Mantid::Kernel::Logger g_log;
 };
 }
 }
