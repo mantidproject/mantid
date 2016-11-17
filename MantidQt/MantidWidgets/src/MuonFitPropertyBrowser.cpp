@@ -164,12 +164,18 @@ void MuonFitPropertyBrowser::init() {
     const int index = parentLayout->count() - 2;
     constexpr int stretchFactor = 10; // so these widgets get any extra space
     parentLayout->insertLayout(index, m_additionalLayout, stretchFactor);
+    parentLayout->setSpacing(0);
+    parentLayout->setMargin(0);
+    parentLayout->setContentsMargins(0, 0, 0, 0);
   }
   m_widgetSplitter = new QSplitter(w);
   m_widgetSplitter->setOrientation(Qt::Vertical);
   m_widgetSplitter->setSizePolicy(QSizePolicy::Policy::Expanding,
                                   QSizePolicy::Policy::Expanding);
   m_additionalLayout->addWidget(m_widgetSplitter);
+  m_additionalLayout->setSpacing(0);
+  m_additionalLayout->setMargin(0);
+  m_additionalLayout->setContentsMargins(0, 0, 0, 0);
 }
 
 /**
