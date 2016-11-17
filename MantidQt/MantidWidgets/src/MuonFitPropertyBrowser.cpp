@@ -61,8 +61,7 @@ const std::string MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX{"MuonSimulFit_"};
 */
 MuonFitPropertyBrowser::MuonFitPropertyBrowser(QWidget *parent,
                                                QObject *mantidui)
-    : FitPropertyBrowser(parent, mantidui), m_additionalLayout(nullptr),
-      m_widgetSplitter(nullptr) {}
+    : FitPropertyBrowser(parent, mantidui), m_widgetSplitter(nullptr) {}
 
 /**
 * Initialise the muon fit property browser.
@@ -156,26 +155,21 @@ void MuonFitPropertyBrowser::init() {
   // Initialise the layout.
   initLayout(w);
 
-  // Create an empty layout that can hold extra widgets
+  // Create an empty splitter that can hold extra widgets
   // and add it after the buttons but before the browser
-  m_additionalLayout = new QVBoxLayout();
-  auto parentLayout = qobject_cast<QVBoxLayout *>(w->layout());
-  if (parentLayout) {
-    const int index = parentLayout->count() - 2;
-    constexpr int stretchFactor = 10; // so these widgets get any extra space
-    parentLayout->insertLayout(index, m_additionalLayout, stretchFactor);
-    parentLayout->setSpacing(0);
-    parentLayout->setMargin(0);
-    parentLayout->setContentsMargins(0, 0, 0, 0);
-  }
   m_widgetSplitter = new QSplitter(w);
   m_widgetSplitter->setOrientation(Qt::Vertical);
   m_widgetSplitter->setSizePolicy(QSizePolicy::Policy::Expanding,
                                   QSizePolicy::Policy::Expanding);
-  m_additionalLayout->addWidget(m_widgetSplitter);
-  m_additionalLayout->setSpacing(0);
-  m_additionalLayout->setMargin(0);
-  m_additionalLayout->setContentsMargins(0, 0, 0, 0);
+  auto parentLayout = qobject_cast<QVBoxLayout *>(w->layout());
+  if (parentLayout) {
+    const int index = parentLayout->count() - 2;
+    constexpr int stretchFactor = 10; // so these widgets get any extra space
+    parentLayout->insertWidget(index, m_widgetSplitter, stretchFactor);
+    parentLayout->setSpacing(0);
+    parentLayout->setMargin(0);
+    parentLayout->setContentsMargins(0, 0, 0, 0);
+  }
 }
 
 /**
@@ -509,7 +503,7 @@ void MuonFitPropertyBrowser::finishAfterSimultaneousFit(
 void MuonFitPropertyBrowser::addExtraWidget(QWidget *widget) {
   widget->setSizePolicy(QSizePolicy::Policy::Expanding,
                         QSizePolicy::Policy::Expanding);
-  if (m_additionalLayout && m_widgetSplitter) {
+  if (m_widgetSplitter) {
     m_widgetSplitter->addWidget(widget);
   }
 }
@@ -572,8 +566,8 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
   m_browser->setItemVisible(m_settingsGroup, !enabled);
 
   // Show or hide additional widgets
-  for (int i = 0; i < m_additionalLayout->count(); ++i) {
-    if (auto *widget = m_additionalLayout->itemAt(i)->widget()) {
+  for (int i = 0; i < m_widgetSplitter->count(); ++i) {
+    if (auto *widget = m_widgetSplitter->widget(i)) {
       widget->setVisible(enabled);
     }
   }

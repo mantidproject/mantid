@@ -113,8 +113,6 @@ private:
   /// workspaces
   void finishAfterSimultaneousFit(const Mantid::API::IAlgorithm *fitAlg,
                                   const int nWorkspaces) const;
-  /// Layout for extra widgets
-  QVBoxLayout *m_additionalLayout;
   /// Splitter for additional widgets
   QSplitter *m_widgetSplitter;
   /// Names of workspaces to fit
