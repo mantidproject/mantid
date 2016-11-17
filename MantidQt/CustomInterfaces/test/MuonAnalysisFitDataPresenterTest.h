@@ -36,6 +36,19 @@ using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceGroup;
 using namespace testing;
 
+/// This is necessary for using Google Mock with boost::optional
+/// (the RHEL6 build fails if this is not present)
+namespace boost {
+template <class CharType, class CharTrait>
+std::basic_ostream<CharType, CharTrait> &
+operator<<(std::basic_ostream<CharType, CharTrait> &out,
+           optional<QString> const &maybe) {
+  if (maybe)
+    out << maybe->toStdString();
+  return out;
+}
+}
+
 /// Mock data selector widget
 class MockDataSelector : public IMuonFitDataSelector {
 public:
@@ -185,7 +198,7 @@ public:
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189"), QString("MUSR"),
-                                    boost::optional<QString>{})).Times(1);
+                                    Eq(boost::optional<QString>{}))).Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
     m_presenter->setAssignedFirstRun(wsName, boost::none);
   }
@@ -195,7 +208,7 @@ public:
     const QString wsName("MUSR00015189-91; Pair; long; Asym; 1; #1");
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189-91"), QString("MUSR"),
-                                    boost::optional<QString>{})).Times(1);
+                                    Eq(boost::optional<QString>{}))).Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
@@ -208,7 +221,7 @@ public:
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189-91, 15193"),
                                     QString("MUSR"),
-                                    boost::optional<QString>{})).Times(1);
+                                    Eq(boost::optional<QString>{}))).Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
@@ -234,7 +247,7 @@ public:
     const QString wsName("MUSR00061335; Pair; long; Asym; 1; #1");
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00061335"), QString("MUSR"),
-                                    currentRunPath)).Times(1);
+                                    Eq(currentRunPath))).Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
     m_presenter->setAssignedFirstRun(wsName, currentRunPath);
   }
@@ -677,7 +690,7 @@ public:
     // Expect it will update the UI from workspace details
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189-91"), QString("MUSR"),
-                                    boost::optional<QString>{})).Times(1);
+                                    Eq(boost::none))).Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0)).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("fwd"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
@@ -730,7 +743,7 @@ public:
     // Expect it will update the UI from workspace details
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00061335"), QString("MUSR"),
-                                    currentRunPath)).Times(1);
+                                    Eq(currentRunPath))).Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0)).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("fwd"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
