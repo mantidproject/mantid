@@ -167,7 +167,7 @@ void CalculateFlatBackground::exec() {
   size_t calculationCount = 0;
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
-  for (size_t i = 0; i < numHists; ++i) {
+  for (int64_t i = 0; i < static_cast<int64_t>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Extract a histogram from inputWS, work on it and, finally, put it to
     // outputWS.
