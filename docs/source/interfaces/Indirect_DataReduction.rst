@@ -328,9 +328,7 @@ ILL Calibration
 .. interface:: Data Reduction
   :widget: tabILLCalibration
 
-This tab is used to create calibration workspaces for the IN16B spectrometer at
-the ILL using the :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>`
-algorithm.
+**This tab is deprecated.** Use CalibrationRun in EnergyTransfer tab.
 
 Options
 ~~~~~~~

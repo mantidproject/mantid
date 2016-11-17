@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>543</width>
-    <height>294</height>
+    <width>500</width>
+    <height>344</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -20,31 +20,26 @@
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_10">
+   <item alignment="Qt::AlignTop">
+    <widget class="QLabel" name="label">
+     <property name="styleSheet">
+      <string notr="true">background:rgb(255, 251, 125)</string>
+     </property>
+     <property name="text">
+      <string>This tab is deprecated. Use CalibrationRun in Energy Transfer tab.</string>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QGroupBox" name="gbInput">
      <property name="title">
-      <string>Input File (s)</string>
+      <string>Input</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfRunFile" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Input run file (numor)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
         <property name="label" stdset="0">
          <string>Run File</string>
-        </property>
-        <property name="algorithmAndProperty" stdset="0">
-         <string>IndirectILLReduction|Run</string>
-        </property>
-        <property name="multipleFiles" stdset="0">
-         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -53,52 +48,28 @@
    </item>
    <item>
     <widget class="QGroupBox" name="gbCalibGrouping">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
      <property name="title">
-      <string>Detector Grouping</string>
+      <string>Grouping</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <widget class="QRadioButton" name="rdDefault">
-        <property name="text">
-         <string>Default</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-        <attribute name="buttonGroup">
-         <string notr="true">buttonGroup</string>
-        </attribute>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="rdChoose">
-        <property name="text">
-         <string>Choose File</string>
-        </property>
-        <attribute name="buttonGroup">
-         <string notr="true">buttonGroup</string>
-        </attribute>
+       <widget class="QComboBox" name="cbGrouping">
+        <item>
+         <property name="text">
+          <string>Default</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>File</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
        <widget class="QStackedWidget" name="swCalibGrouping">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Detector grouping .xml file&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="pgCGDefault"/>
         <widget class="QWidget" name="pgCGMapFile">
@@ -117,9 +88,6 @@
           </property>
           <item>
            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfMapFile" native="true">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
             <property name="label" stdset="0">
              <string/>
             </property>
@@ -127,9 +95,6 @@
              <stringlist>
               <string>.xml</string>
              </stringlist>
-            </property>
-            <property name="algorithmAndProperty" stdset="0">
-             <string>ILLIN16BCalibration|MapFile</string>
             </property>
            </widget>
           </item>
@@ -142,15 +107,77 @@
    </item>
    <item>
     <widget class="QGroupBox" name="gbCalibration">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Calibration</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="7">
-       <widget class="QDoubleSpinBox" name="spScaleFactor">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Scale factor&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <item row="0" column="0">
+       <widget class="QLabel" name="lbPeakRange">
+        <property name="text">
+         <string>Peak range:</string>
         </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lbScaleFactor">
+        <property name="text">
+         <string>Scale factor:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QDoubleSpinBox" name="spPeakLower">
+        <property name="suffix">
+         <string> meV</string>
+        </property>
+        <property name="decimals">
+         <number>5</number>
+        </property>
+        <property name="minimum">
+         <double>-99.989999999999995</double>
+        </property>
+        <property name="singleStep">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="value">
+         <double>-0.010000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QDoubleSpinBox" name="spPeakUpper">
+        <property name="suffix">
+         <string> meV</string>
+        </property>
+        <property name="decimals">
+         <number>5</number>
+        </property>
+        <property name="minimum">
+         <double>-99.989999999999995</double>
+        </property>
+        <property name="singleStep">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.010000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="lbPeakRangeTo">
+        <property name="text">
+         <string>to</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="spScaleFactor">
         <property name="decimals">
          <number>3</number>
         </property>
@@ -162,93 +189,10 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1" alignment="Qt::AlignLeft">
-       <widget class="QDoubleSpinBox" name="spPeakLower">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Peak integration range&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="suffix">
-         <string> meV</string>
-        </property>
-        <property name="decimals">
-         <number>3</number>
-        </property>
-        <property name="minimum">
-         <double>-99.989999999999995</double>
-        </property>
-        <property name="singleStep">
-         <double>0.001000000000000</double>
-        </property>
-        <property name="value">
-         <double>-0.010000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2" alignment="Qt::AlignHCenter">
-       <widget class="QLabel" name="lbPeakRangeTo">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Peak integration range&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
+      <item row="2" column="1">
+       <widget class="QCheckBox" name="ckMirrorMode">
         <property name="text">
-         <string>to</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="5">
-       <widget class="QDoubleSpinBox" name="spPeakUpper">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Peak integration range&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="suffix">
-         <string> meV</string>
-        </property>
-        <property name="decimals">
-         <number>3</number>
-        </property>
-        <property name="minimum">
-         <double>-99.989999999999995</double>
-        </property>
-        <property name="singleStep">
-         <double>0.001000000000000</double>
-        </property>
-        <property name="value">
-         <double>0.010000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="8">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="0" column="0" alignment="Qt::AlignLeft">
-       <widget class="QLabel" name="lbPeakRange">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Peak integration range&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="text">
-         <string>Peak range:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="6">
-       <widget class="QLabel" name="lbScaleFactor">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Scale factor&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-        <property name="text">
-         <string>Scale factor:</string>
+         <string>Mirror Mode</string>
         </property>
        </widget>
       </item>
@@ -263,7 +207,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>10</height>
+       <height>40</height>
       </size>
      </property>
     </spacer>
@@ -319,45 +263,29 @@
  </customwidgets>
  <tabstops>
   <tabstop>spPeakLower</tabstop>
+  <tabstop>spPeakUpper</tabstop>
+  <tabstop>spScaleFactor</tabstop>
+  <tabstop>ckMirrorMode</tabstop>
   <tabstop>ckPlot</tabstop>
   <tabstop>ckSave</tabstop>
  </tabstops>
  <resources/>
  <connections>
   <connection>
-   <sender>rdDefault</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>rfMapFile</receiver>
-   <slot>setDisabled(bool)</slot>
+   <sender>cbGrouping</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>swCalibGrouping</receiver>
+   <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>59</x>
-     <y>103</y>
+     <x>236</x>
+     <y>93</y>
     </hint>
     <hint type="destinationlabel">
-     <x>381</x>
-     <y>104</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>rdChoose</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>rfMapFile</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>151</x>
-     <y>103</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>381</x>
-     <y>104</y>
+     <x>354</x>
+     <y>90</y>
     </hint>
    </hints>
   </connection>
  </connections>
- <buttongroups>
-  <buttongroup name="buttonGroup"/>
- </buttongroups>
 </ui>

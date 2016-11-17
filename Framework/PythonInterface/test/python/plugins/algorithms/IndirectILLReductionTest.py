@@ -1,121 +1,101 @@
-#pylint:disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
-import os
-import unittest
+import unittest, os
+import mantid
 from mantid.simpleapi import *
-from mantid.api import MatrixWorkspace, WorkspaceGroup, AnalysisDataService
-from mantid import config
-from testhelpers import run_algorithm
-
 
 class IndirectILLReductionTest(unittest.TestCase):
 
     _output_workspaces = []
-    _args = {}
-    _run_name = None
-    _run_path = None
-    _run = None
-    # cache the def instrument and data search dirs
-    _def_fac = config['default.facility']
-    _def_inst = config['default.instrument']
-    _data_dirs = config['datasearch.directories']
 
     def setUp(self):
-        # set instrument and append datasearch directory
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'IN16B'
-        config.appendDataSearchSubDir('ILL/IN16B/')
-
-        self._run_name = '146191'
-        self._multi_runs = '146191,146192'
-
-        # Reference workspace after loading (comparisons using blocksize(), getNumberHistograms(), ( SampleLogs, ...))
-        ws_loaded = Load(self._run_name)
-        self._run = ws_loaded
+        run_name = 'ILLIN16B_034745'
+        self.kwargs = {}
+        self.kwargs['Run'] = run_name + '.nxs'
+        self.kwargs['Analyser'] = 'silicon'
+        self.kwargs['Reflection'] = '111'
+        self.kwargs['RawWorkspace'] = run_name + '_' + self.kwargs['Analyser'] + self.kwargs['Reflection'] + '_raw'
+        self.kwargs['ReducedWorkspace'] = run_name + '_' + self.kwargs['Analyser'] + self.kwargs['Reflection'] + '_red'
 
     def tearDown(self):
-        # set cached facility and datasearch directory
-        config['default.facility'] = self._def_fac
-        config['default.instrument'] = self._def_inst
-        config['datasearch.directories'] = self._data_dirs
+        #clean up any files we made
+        for ws in self._output_workspaces[1:]:
+            path = os.path.join(config['defaultsave.directory'], ws.name() + '.nxs')
+            if (os.path.isfile(path)):
+                try:
+                    os.remove(path)
+                except IOError as e:
+                    continue
+
+        #reset output workspaces list
         self._output_workspaces = []
 
-    def test_multifiles(self):
-        self._args['Run'] = self._multi_runs
+    def test_minimal(self):
+        IndirectILLReduction(**self.kwargs)
 
-        alg_test = run_algorithm('IndirectILLReduction', **self._args)
+        red_workspace = mtd[self.kwargs['ReducedWorkspace']]
 
-        self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
-        self.assertEqual(mtd['red'].size(), 2, "WorkspaceGroup red should contain two runs")
+        self.assertTrue(isinstance(red_workspace, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual(red_workspace.getAxis(0).getUnit().unitID(), "DeltaE")
 
-        self._workspace_properties(mtd['red'])
+    def test_mirror_mode(self):
+        self.kwargs['MirrorMode'] = True
+        self.kwargs['LeftWorkspace'] = self.kwargs['ReducedWorkspace'] + '_left'
+        self.kwargs['RightWorkspace'] = self.kwargs['ReducedWorkspace'] + '_right'
 
-    def test_sumruns(self):
-        self._args['Run'] = self._multi_runs
-        self._args['SumRuns'] = True
+        IndirectILLReduction(**self.kwargs)
 
-        alg_test = run_algorithm('IndirectILLReduction', **self._args)
+        red_workspace = mtd[self.kwargs['ReducedWorkspace']]
+        left_red_workspace = mtd[self.kwargs['LeftWorkspace']]
+        right_red_workspace = mtd[self.kwargs['RightWorkspace']]
 
-        self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
-        self.assertEqual(mtd['red'].size(), 1, "WorkspaceGroup red should contain one workspace")
+        self.assertTrue(isinstance(red_workspace, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual(red_workspace.getAxis(0).getUnit().unitID(), "DeltaE")
 
-        self._workspace_properties(mtd['red'])
+        self.assertTrue(isinstance(left_red_workspace, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual(left_red_workspace.getAxis(0).getUnit().unitID(), "DeltaE")
+
+        self.assertTrue(isinstance(right_red_workspace, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual(right_red_workspace.getAxis(0).getUnit().unitID(), "DeltaE")
+
+    def test_mirror_mode_default_names(self):
+        self.kwargs['MirrorMode'] = True
+
+        self.assertRaises(RuntimeError, IndirectILLReduction, **self.kwargs)
+
+        left = self.kwargs['ReducedWorkspace'] + '_left'
+        right = self.kwargs['ReducedWorkspace'] + '_right'
+
+        self.assertTrue(mtd.doesExist(left))
+        self.assertTrue(mtd.doesExist(right))
+
+    def test_save_results(self):
+        self.kwargs['Save'] = True
+
+        self._output_workspaces = IndirectILLReduction(**self.kwargs)
+
+        path = os.path.join(config['defaultsave.directory'], self.kwargs['ReducedWorkspace'] + '.nxs')
+        self.assertTrue(os.path.isfile(path))
+
+    def test_save_mirror_mode_output(self):
+        self.kwargs['Save'] = True
+        self.kwargs['MirrorMode'] = True
+        self.kwargs['LeftWorkspace'] = self.kwargs['ReducedWorkspace'] + '_left'
+        self.kwargs['RightWorkspace'] = self.kwargs['ReducedWorkspace'] + '_right'
+
+        self._output_workspaces = IndirectILLReduction(**self.kwargs)
+
+        for ws in self._output_workspaces[1:]:
+            path = os.path.join(config['defaultsave.directory'], ws.name() + '.nxs')
+            self.assertTrue(os.path.isfile(path))
 
     def test_no_verbose(self):
-        self._args['Run'] = self._run_name
+        IndirectILLReduction(**self.kwargs)
 
-        IndirectILLReduction(**self._args)
-
-        self.assertEqual(mtd['red'].size(), 1, "WorkspaceGroup red should contain one workspace")
-        self._workspace_properties(mtd['red'])
-
-    def test_debug_mode(self):
-        self._args['Run'] = self._run_name
-        self._args['DebugMode'] = True
-
-        alg_test = run_algorithm('IndirectILLReduction', **self._args)
-
-        self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction failed")
-
-        self._workspace_properties(mtd['red'])
-        self._workspace_properties(mtd['red_raw'])
-        self._workspace_properties(mtd['red_left'])
-        self._workspace_properties(mtd['red_right'])
-        self._workspace_properties(mtd['red_monitor'])
-        self._workspace_properties(mtd['red_mnorm'])
-        self._workspace_properties(mtd['red_detgrouped'])
-
-        size = self._run.blocksize()
-
-        # Further workspace characteristics
-        self.assertEqual(size / 2, mtd['red'].getItem(0).blocksize())
-        self.assertEqual(size, mtd['red_raw'].getItem(0).blocksize())
-        self.assertEqual(size / 2, mtd['red_left'].getItem(0).blocksize())
-        self.assertEqual(size / 2, mtd['red_right'].getItem(0).blocksize())
-        self.assertEqual(size, mtd['red_monitor'].getItem(0).blocksize())
-        self.assertEqual(size, mtd['red_mnorm'].getItem(0).blocksize())
-        self.assertEqual(size, mtd['red_detgrouped'].getItem(0).blocksize())
-
-        self.assertEqual(self._run.getNumberHistograms(), mtd['red_raw'].getItem(0).getNumberHistograms())
-        #compare = CompareWorkspaces(self._run, mtd['red_raw'].getItem(0), CheckInstrument=False, CheckAxes=False)
-        #self.assertTrue(compare[0])
-
-    def test_debug_calibration(self):
-
-        self._args['Run'] = self._run_name
-        self._args['DebugMode'] = True
-        self._args['CalibrationWorkspace'] = ILLIN16BCalibration(self._run_name)
-
-        alg_test = run_algorithm('IndirectILLReduction', **self._args)
-
-        self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction failed")
-        self._workspace_properties(mtd['red_vnorm'])
-        self.assertEqual(self._run.blocksize(), mtd['red_vnorm'].getItem(0).blocksize())
+        red_workspace = mtd[self.kwargs['ReducedWorkspace']]
+        self.assertTrue(isinstance(red_workspace, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
 
     def test_mapping_file_option(self):
-        self._args['Run'] = self._run_name
-
         # manually get name of grouping file from parameter file
         idf = os.path.join(config['instrumentDefinition.directory'], "IN16B_Definition.xml")
         ipf = os.path.join(config['instrumentDefinition.directory'], "IN16B_Parameters.xml")
@@ -128,69 +108,12 @@ class IndirectILLReductionTest(unittest.TestCase):
 
         #supply grouping file as option to algorithm, this tests that a different file can be used
         #rather than reading the default directly from the IP File.
-        self._args['MapFile'] = os.path.join(config['groupingFiles.directory'], grouping_filename)
+        self.kwargs['MapFile'] = os.path.join(config['groupingFiles.directory'], grouping_filename)
 
-        alg_test = run_algorithm('IndirectILLReduction', **self._args)
+        IndirectILLReduction(**self.kwargs)
+        red_workspace = mtd[self.kwargs['ReducedWorkspace']]
+        self.assertEqual(24, red_workspace.getNumberHistograms())
 
-        self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
-        self._workspace_properties(mtd['red'])
-
-    def _test_unmirror_1_2_3(self):
-        self._args['Run'] = '146007'
-
-        self._args['UnmirrorOption'] = 1
-        red = IndirectILLReduction(**self._args)
-
-        self._args['UnmirrorOption'] = 2
-        left = IndirectILLReduction(**self._args)
-
-        self._args['UnmirrorOption'] = 3
-        right = IndirectILLReduction(**self._args)
-
-        summed = Plus(left.getItem(0),right.getItem(0))
-
-        result = CompareWorkspaces(summed,red.getItem(0))
-
-        self._assertTrue(result[0],"Unmirror 1 should be the sum of 2 and 3")
-
-    def _test_unmirror_4_5(self):
-        self._args['Run'] = '146007'
-        self._args['UnmirrorOption'] = 4
-
-        vana4 = IndirectILLReduction(**self._args)
-
-        self._args['VanadiumRun'] = '146007'
-        self._args['UnmirrorOption'] = 5
-
-        vana5 = IndirectILLReduction(**self._args)
-
-        result = CompareWorkspaces(vana4.getItem(0), vana5.getItem(0))
-
-        self._assertTrue(result[0], "Unmirror 4 should be the same as 5 if "
-                                    "the same run is also defined as vanadium run")
-
-    def _test_unmirror_6_7(self):
-        self._args['Run'] = '146007'
-        self._args['UnmirrorOption'] = 6
-
-        vana6 = IndirectILLReduction(**self._args)
-
-        self._args['VanadiumRun'] = '146007'
-        self._args['UnmirrorOption'] = 7
-
-        vana7 = IndirectILLReduction(**self._args)
-
-        result = CompareWorkspaces(vana6.getItem(0),vana7.getItem(0))
-
-        self._assertTrue(result[0], "Unmirror 6 should be the same as 7 if "
-                                    "the same run is also defined as vanadium run")
-
-    def _workspace_properties(self, ws):
-
-        self.assertTrue(isinstance(ws, WorkspaceGroup), "Should be a group workspace")
-        self.assertTrue(isinstance(ws.getItem(0), MatrixWorkspace), "Should be a matrix workspace")
-        self.assertTrue(ws.getItem(0).getSampleDetails(), "Should have SampleLogs")
-        self.assertTrue(ws.getItem(0).getHistory().lastAlgorithm(), "Should have AlgorithmsHistory")
 
 if __name__ == '__main__':
     unittest.main()

@@ -42,7 +42,11 @@ void ILLCalibration::run() {
   QString runFilename = m_uiForm.rfRunFile->getFirstFilename();
   calibrationAlg->setProperty("Run", runFilename.toStdString());
 
-  bool useMapFile = m_uiForm.rdChoose->isChecked();
+  // Set options
+  bool mirrorMode = m_uiForm.ckMirrorMode->isChecked();
+  calibrationAlg->setProperty("MirrorMode", mirrorMode);
+
+  bool useMapFile = m_uiForm.cbGrouping->currentText() == "File";
   if (useMapFile) {
     QString mapFilename = m_uiForm.rfMapFile->getFirstFilename();
     calibrationAlg->setProperty("MapFile", mapFilename.toStdString());
@@ -58,7 +62,9 @@ void ILLCalibration::run() {
 
   // Get the name format for output files
   QFileInfo runFileInfo(runFilename);
-  QString outputWsName = runFileInfo.baseName() + "_calib";
+  QString outputWsName = runFileInfo.baseName() + "_" +
+                         instDetails["analyser"] + "_" +
+                         instDetails["reflection"] + "_calib";
 
   // Set output workspace properties
   calibrationAlg->setProperty("OutputWorkspace", outputWsName.toStdString());
@@ -94,7 +100,7 @@ void ILLCalibration::algorithmComplete(bool error) {
 bool ILLCalibration::validate() {
   MantidQt::CustomInterfaces::UserInputValidator uiv;
 
-  bool useMapFile = m_uiForm.rdChoose->isChecked();
+  bool useMapFile = m_uiForm.cbGrouping->currentText() == "File";
   if (useMapFile && !m_uiForm.rfMapFile->isValid())
     uiv.addErrorMessage("Grouping file is invalid.");
 

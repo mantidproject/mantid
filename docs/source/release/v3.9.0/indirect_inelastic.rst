@@ -22,6 +22,7 @@ Data Reduction
 - New :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` algorithm performs complete multiple file reduction for Quasi-Elastic Neutron Scattering (QENS) data from IN16B instrument at ILL.
 - New :ref:`IndirectILLReductionFWS <algm-IndirectILLReductionFWS>` algorithm performs complete multiple file reduction for
 the elastic and inelastic fixed-window scan data from IN16B instrument at ILL.
+- Deprecated :ref:`IndirectILLReduction <algm-IndirectILLReduction>` and :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>` algorithms.
 
 
 Data Analysis
