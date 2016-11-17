@@ -567,10 +567,13 @@
       <item row="0" column="4">
        <widget class="QCheckBox" name="cbMaskBins">
         <property name="toolTip">
-         <string>Whether to mask the bins overflown the range during circular shift.</string>
+         <string>Whether to mask the bins overflown the x-axis range during circular shift.</string>
         </property>
         <property name="text">
          <string>Mask Bins</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -985,7 +988,7 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>

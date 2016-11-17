@@ -46,11 +46,24 @@ bool ILLEnergyTransfer::validate() {
   if (useMapFile && !m_uiForm.rfMapFile->isValid())
     uiv.addErrorMessage("Grouping file is invalid.");
 
-  bool ok = true;
-  m_backScaling = m_uiForm.leBackgroundFactor->text().toDouble(&ok);
-  if (!ok || m_backScaling <= 0) {
-    uiv.addErrorMessage("BackgroundScaleFactor is invalid.");
+  // Validate background file
+  if (!m_uiForm.rfBackgroundRun->isValid()) {
+    uiv.addErrorMessage("Background Run File is invalid.");
+  } else {
+    bool ok = true;
+    m_backScaling = m_uiForm.leBackgroundFactor->text().toDouble(&ok);
+    if ((!ok || m_backScaling <= 0) &&
+        !m_uiForm.rfBackgroundRun->getUserInput()
+             .toString()
+             .toStdString()
+             .empty()) {
+      uiv.addErrorMessage("BackgroundScaleFactor is invalid.");
+    }
   }
+
+  // Validate calibration file
+  if (!m_uiForm.rfCalibrationRun->isValid())
+    uiv.addErrorMessage("Calibration Run File is invalid.");
 
   // Validate if the output workspace name is not empty
   if (m_uiForm.leOutWS->text().toStdString().empty())
