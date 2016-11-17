@@ -11,6 +11,7 @@ namespace CustomInterfaces {
 * @param view :: [input] The view we are managing
 * @param runsPresenter :: [input] A pointer to the 'Runs' tab presenter
 * @param settingsPresenter :: [input] A pointer to the 'Settings' tab presenter
+* @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
 */
 ReflMainWindowPresenter::ReflMainWindowPresenter(
     IReflMainWindowView *view, IReflRunsTabPresenter *runsPresenter,

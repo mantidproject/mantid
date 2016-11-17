@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h"
 #include <vector>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
