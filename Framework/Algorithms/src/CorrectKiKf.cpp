@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/CorrectKiKf.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -95,6 +96,7 @@ void CorrectKiKf::exec() {
 
   // Get the parameter map
   const ParameterMap &pmap = outputWS->constInstrumentParameters();
+  const auto spectrumInfo = inputWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i) {
@@ -105,27 +107,9 @@ void CorrectKiKf::exec() {
     if (emodeStr == "Indirect") {
       if (efixedProp != EMPTY_DBL())
         Efi = efixedProp;
-      else
-        try {
-          IDetector_const_sptr det = inputWS->getDetector(i);
-          if (!det->isMonitor()) {
-            try {
-              Parameter_sptr par = pmap.getRecursive(det.get(), "Efixed");
-              if (par) {
-                Efi = par->value<double>();
-                g_log.debug() << "Detector: " << det->getID()
-                              << " EFixed: " << Efi << "\n";
-              }
-            } catch (std::runtime_error &) { /* Throws if a DetectorGroup, use
-                                                single provided value */
-            }
-          }
-
-        } catch (std::runtime_error &) {
-          g_log.information() << "Workspace Index " << i
-                              << ": cannot find detector"
-                              << "\n";
-        }
+      else if (spectrumInfo.hasUniqueDetector(i)) {
+        getEfixedFromParameterMap(Efi, i, spectrumInfo, pmap);
+      }
     }
 
     auto &yOut = outputWS->mutableY(i);
@@ -221,6 +205,7 @@ void CorrectKiKf::execEvent() {
   const ParameterMap &pmap = outputWS->constInstrumentParameters();
 
   int64_t numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
+  const auto spectrumInfo = inputWS->spectrumInfo();
   API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numHistograms; ++i) {
@@ -232,27 +217,8 @@ void CorrectKiKf::execEvent() {
     if (emodeStr == "Indirect") {
       if (efixedProp != EMPTY_DBL())
         Efi = efixedProp;
-      else
-        try {
-          IDetector_const_sptr det = inputWS->getDetector(i);
-          if (!det->isMonitor()) {
-            try {
-              Parameter_sptr par = pmap.getRecursive(det.get(), "Efixed");
-              if (par) {
-                Efi = par->value<double>();
-                g_log.debug() << "Detector: " << det->getID()
-                              << " EFixed: " << Efi << "\n";
-              }
-            } catch (std::runtime_error &) { /* Throws if a DetectorGroup, use
-                                                single provided value */
-            }
-          }
-
-        } catch (std::runtime_error &) {
-          g_log.information() << "Workspace Index " << i
-                              << ": cannot find detector"
-                              << "\n";
-        }
+      else if (spectrumInfo.hasUniqueDetector(i))
+        getEfixedFromParameterMap(Efi, i, spectrumInfo, pmap);
     }
 
     if (emodeStr == "Indirect")
@@ -307,7 +273,7 @@ void CorrectKiKf::correctKiKfEventHelper(std::vector<T> &wevector,
     {
       Ei = efixed;
       Ef = Ei - it->tof();
-    } else // Ef=Efixed
+    } else // Ef=Efixedty
     {
       Ef = efixed;
       Ei = Ef + it->tof();
@@ -321,6 +287,20 @@ void CorrectKiKf::correctKiKfEventHelper(std::vector<T> &wevector,
       it->m_errorSquared *= kioverkf * kioverkf;
       ++it;
     }
+  }
+}
+
+void CorrectKiKf::getEfixedFromParameterMap(double &Efi, int64_t i,
+                                            const SpectrumInfo &spectrumInfo,
+                                            const ParameterMap &pmap) {
+  if (spectrumInfo.isMonitor(i))
+    return;
+
+  const auto &det = spectrumInfo.detector(i);
+  Parameter_sptr par = pmap.getRecursive(&det, "Efixed");
+  if (par) {
+    Efi = par->value<double>();
+    g_log.debug() << "Detector: " << det.getID() << " EFixed: " << Efi << "\n";
   }
 }
 
