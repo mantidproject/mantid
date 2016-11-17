@@ -128,7 +128,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._save = self.getProperty('Save').value
         self._plot = self.getProperty('Plot').value
 
-        LoadILLIndirect(FileName=run_path, OutputWorkspace=self._raw_workspace)
+        LoadILLIndirect(FileName=run_path, OutputWorkspace=self._raw_workspace, Version=1)
 
         instrument = mtd[self._raw_workspace].getInstrument()
         self._instrument_name = instrument.getName()

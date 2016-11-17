@@ -1,66 +1,70 @@
-#ifndef MANTID_DATAHANDLING_LOADILLINDIRECTTEST_H_
-#define MANTID_DATAHANDLING_LOADILLINDIRECTTEST_H_
+#ifndef MANTID_DATAHANDLING_LOADILLINDIRECT2TEST_H_
+#define MANTID_DATAHANDLING_LOADILLINDIRECT2TEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataHandling/LoadILLIndirect.h"
+#include "MantidDataHandling/LoadILLIndirect2.h"
 
 using namespace Mantid::API;
-using Mantid::DataHandling::LoadILLIndirect;
+using Mantid::DataHandling::LoadILLIndirect2;
 
-class LoadILLIndirectTest : public CxxTest::TestSuite {
+class LoadILLIndirect2Test : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadILLIndirectTest *createSuite() {
-    return new LoadILLIndirectTest();
+  static LoadILLIndirect2Test *createSuite() {
+    return new LoadILLIndirect2Test();
   }
-  static void destroySuite(LoadILLIndirectTest *suite) { delete suite; }
+  static void destroySuite(LoadILLIndirect2Test *suite) { delete suite; }
 
-  LoadILLIndirectTest()
+  LoadILLIndirect2Test()
       : m_dataFile2013("ILLIN16B_034745.nxs"),
         m_dataFile2015("ILLIN16B_127500.nxs") {}
 
   void test_Init() {
-    LoadILLIndirect loader;
+    LoadILLIndirect2 loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())
   }
 
   void test_Name() {
-    LoadILLIndirect loader;
+    LoadILLIndirect2 loader;
     TS_ASSERT_EQUALS(loader.name(), "LoadILLIndirect");
   }
 
   void test_Version() {
-    LoadILLIndirect loader;
-    TS_ASSERT_EQUALS(loader.version(), 1);
+    LoadILLIndirect2 loader;
+    TS_ASSERT_EQUALS(loader.version(), 2);
   }
 
-  void test_Load_2013_Format() { doExecTest(m_dataFile2013); }
+  void test_Load_2013_Format() {
+    doExecTest(m_dataFile2013, 2057); // all single detectors
+  }
 
-  void test_Load_2015_Format() { doExecTest(m_dataFile2015); }
+  void test_Load_2015_Format() {
+    doExecTest(m_dataFile2015, 2051); // only 2 out of 8 single detectors
+  }
 
   void test_Confidence_2013_Format() { doConfidenceTest(m_dataFile2013); }
 
   void test_Confidence_2015_Format() { doConfidenceTest(m_dataFile2015); }
 
   void doConfidenceTest(const std::string &file) {
-    LoadILLIndirect alg;
+    LoadILLIndirect2 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     alg.setPropertyValue("Filename", file);
     Mantid::Kernel::NexusDescriptor descr(alg.getPropertyValue("Filename"));
-    TS_ASSERT_EQUALS(alg.confidence(descr), 70);
+    TS_ASSERT_EQUALS(alg.confidence(descr), 80);
   }
 
-  void doExecTest(const std::string &file) {
+  void doExecTest(const std::string &file, int numHist) {
     // Name of the output workspace.
     std::string outWSName("LoadILLIndirectTest_OutputWS");
 
-    LoadILLIndirect loader;
+    LoadILLIndirect2 loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", file));
@@ -78,7 +82,7 @@ public:
 
     MatrixWorkspace_sptr output2D =
         boost::dynamic_pointer_cast<MatrixWorkspace>(output);
-    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 2057);
+    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), numHist);
 
     const Mantid::API::Run &runlogs = output->run();
     TS_ASSERT(runlogs.hasProperty("Facility"));
@@ -93,4 +97,4 @@ private:
   std::string m_dataFile2015;
 };
 
-#endif /* MANTID_DATAHANDLING_LOADILLINDIRECTTEST_H_ */
+#endif /* MANTID_DATAHANDLING_LOADILLINDIRECT2TEST_H_ */
