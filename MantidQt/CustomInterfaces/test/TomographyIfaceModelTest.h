@@ -307,7 +307,7 @@ public:
     // the space at the end is necessary, because of how
     // constructSingleStringFromVector works
     std::vector<std::string> expectedArgsVector{
-        "/scriptPath/ --some params --some other params "};
+        "/scriptPath/"," --some params --some other params "};
     TS_ASSERT_EQUALS(actualRun, expectedRunnable);
     // checks size and elements
     TS_ASSERT(actualArgsVector == expectedArgsVector);
