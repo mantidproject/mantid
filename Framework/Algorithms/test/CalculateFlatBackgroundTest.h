@@ -746,6 +746,10 @@ private:
                                      movingAverageStandardY(j)) /
                                 static_cast<double>(windowWidth);
         TS_ASSERT_DELTA(outputWS->y(j)[0], expected, 1e-12)
+        const double expectedError = std::sqrt(static_cast<double>(windowWidth) *
+                                          movingAverageStandardY(j) /
+                                     static_cast<double>(windowWidth * windowWidth));
+        TS_ASSERT_DELTA(outputWS->e(j)[0], expectedError, 1e-12)
       }
       AnalysisDataService::Instance().remove("Removed1");
     }
