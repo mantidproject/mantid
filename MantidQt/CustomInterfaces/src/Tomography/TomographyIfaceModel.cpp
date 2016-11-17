@@ -358,26 +358,22 @@ void TomographyIfaceModel::makeRunnableWithOptions(
   std::string longOpt;
   // this gets the runnable from the whole string
   splitCmdLine(cmd, runnable, longOpt);
-  // Special case. Just pass on user inputs.
-  // this stops from appending all the filters and other options
-  if (tool == g_customCmdTool) {
-    opt.resize(1);
-    // this will pass on all the arguments as a single member
-    opt[0] = longOpt;
-    return;
-  }
 
   if (local) {
     std::string execScriptPath;
 
     // this variable holds the input paths, but is discarded for now
     // until the command line building overhaul
-    std::string discardedInputPaths;
+    std::string trailingCommands;
     // this gets the path to the python script tomo_reconstruct.py
-    splitCmdLine(longOpt, execScriptPath, discardedInputPaths);
+    splitCmdLine(longOpt, execScriptPath, trailingCommands);
 
     checkIfToolIsSetupProperly(tool, cmd);
     opt.emplace_back(execScriptPath);
+    if (tool == g_customCmdTool) {
+      opt.emplace_back(trailingCommands);
+      return;
+    }
   }
 
   makeTomoRecScriptOptions(local, opt);
@@ -784,17 +780,10 @@ TomographyIfaceModel::loadFITSImage(const std::string &path) {
   }
 }
 
-void TomographyIfaceModel::logMsg(const std::string &msg) {
-  std::cout << "\nDEBUG >> LOG MSG: " + msg << "\n";
-  g_log.notice("Test test test\n");
-  g_log.notice(msg + '\n');
-}
+void TomographyIfaceModel::logMsg(const std::string &msg) { g_log.notice(msg); }
 
 void TomographyIfaceModel::logErrMsg(const std::string &msg) {
-  // prints properly to stdout, msg is not empty
-  std::cout << "\nDEBUG >> LOG MSG: " + msg << "\n";
-  g_log.notice("Test test test\n"); // doesnt show anything
-  g_log.error(msg + '\n');          // also doesnt show anything
+  g_log.error(msg);
 }
 
 /**

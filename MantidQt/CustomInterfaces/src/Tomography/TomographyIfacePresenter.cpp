@@ -597,7 +597,7 @@ void TomographyIfacePresenter::addProcessToJobList() {
   // windows gets a struct object with more info
   auto actualpid = static_cast<qint64>(pid->dwProcessId);
 #else
-  // linux gets just the PID as unsigned long long
+  // linux gets just the PID
   auto actualpid = static_cast<qint64>(pid);
 #endif
   auto runnable = worker->getRunnable();
