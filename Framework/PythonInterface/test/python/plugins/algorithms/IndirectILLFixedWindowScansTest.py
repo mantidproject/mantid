@@ -17,15 +17,15 @@ class IndirectILLFixedWindowScansTest(unittest.TestCase):
     _data_dirs = config['datasearch.directories']
 
     # EFWS+IFWS, one wing
-    _run_one_wing_mixed = '170257,170258,171001,171003'
-    _one_wing = ['[170257, 170258]', # EFWS
-                 '[171001, 171003]'] # IFWS @ 2 microEV
+    _run_one_wing_mixed = '170257, 170258, 171001, 171003'
+    _one_wing = ['[170257, 170258]',  # EFWS
+                 '[171001, 171003]']  # IFWS @ 2 microEV
 
     # EFWS+IFWS, two wings
     _run_two_wings_mixed = '083072:083077'
-    _two_wings = ['[83072, 83075]', # EFWS
-                  '[83073, 83076]', # IFWS @ 1.5 microEV
-                  '[83074, 83077]'] # IFWS @ 3.0 microEV
+    _two_wings = ['[83072, 83075]',  # EFWS
+                  '[83073, 83076]',  # IFWS @ 1.5 microEV
+                  '[83074, 83077]']  # IFWS @ 3.0 microEV
 
     def setUp(self):
         # set instrument and append datasearch directory
@@ -49,7 +49,7 @@ class IndirectILLFixedWindowScansTest(unittest.TestCase):
 
         for i in range(mtd['result'].getNumberOfEntries()):
             _item = mtd['result'].getItem(i)
-            self.assertEquals(_item.getRun().getLogData('ReducedRuns').value,self._one_wing[i])
+            self.assertEquals(_item.getRun().getLogData('ReducedRuns').value, self._one_wing[i])
             self._workspace_properties(_item, 2)
 
     def test_two_wings(self):
@@ -62,7 +62,7 @@ class IndirectILLFixedWindowScansTest(unittest.TestCase):
 
         for i in range(mtd['result'].getNumberOfEntries()):
             _item = mtd['result'].getItem(i)
-            self.assertEquals(_item.getRun().getLogData('ReducedRuns').value,self._two_wings[i])
+            self.assertEquals(_item.getRun().getLogData('ReducedRuns').value, self._two_wings[i])
             self._workspace_properties(_item, 2)
 
     def _workspace_group_properties(self, ws, n_uniqueE):
