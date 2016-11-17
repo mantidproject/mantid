@@ -8,6 +8,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class IReflSaveTabPresenter;
+
 /** @class IReflSaveTabView
 
 IReflSaveTabView is the base view class for the tab "Save ASCII" in the
@@ -42,6 +44,8 @@ public:
   IReflSaveTabView(){};
   /// Destructor
   virtual ~IReflSaveTabView(){};
+  /// Returns the presenter managing this view
+  virtual IReflSaveTabPresenter *getPresenter() const = 0;
 
   virtual std::string getSavePath() const = 0;
   virtual void setSavePath(const std::string &path) const = 0;
@@ -51,7 +55,6 @@ public:
   virtual std::string getCurrentWorkspaceName() const = 0;
   virtual std::vector<std::string> getSelectedWorkspaces() const = 0;
   virtual std::vector<std::string> getSelectedParameters() const = 0;
-  virtual std::string getSpectraList() const = 0;
   virtual int getFileFormatIndex() const = 0;
   virtual bool getTitleCheck() const = 0;
   virtual bool getQResolutionCheck() const = 0;

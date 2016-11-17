@@ -10,6 +10,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 // Forward decs
+class IReflMainWindowPresenter;
 class IReflSaveTabView;
 
 /** @class ReflSaveTabPresenter
@@ -45,25 +46,28 @@ public:
   ReflSaveTabPresenter(IReflSaveTabView *view);
   /// Destructor
   ~ReflSaveTabPresenter() override;
+  /// Accept a main presenter
+  void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflSaveTabPresenter::Flag flag) override;
 
+private:
   /// Adds all workspace names to the list of workspaces
   void populateWorkspaceList();
   /// Adds all workspace params to the list of logged parameters
-  void populateParametersList(std::string wsName);
+  void populateParametersList();
   /// Filter workspaces names
-  void filterWorkspaceNames(std::string filter, bool regexCheck);
+  void filterWorkspaceNames();
   /// Suggest a save directory
   void suggestSaveDir();
   /// Save selected workspaces to a directory
-  void saveWorkspaces(std::string saveDir);
-
-private:
+  void saveWorkspaces();
   /// Obtains all available workspace names
   std::vector<std::string> getAvailableWorkspaceNames();
 
   /// The view
   IReflSaveTabView *m_view;
+  /// The main presenter
+  IReflMainWindowPresenter *m_mainPresenter;
   /// Names of possible save algorithms
   std::vector<std::string> saveAlgs;
   /// Extensions used for each save algorithm

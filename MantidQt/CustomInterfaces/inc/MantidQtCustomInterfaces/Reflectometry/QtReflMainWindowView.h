@@ -11,6 +11,7 @@ namespace CustomInterfaces {
 class IReflMainWindowPresenter;
 class IReflRunsTabPresenter;
 class IReflSettingsTabPresenter;
+class IReflSaveTabPresenter;
 
 /** @class ReflMainWindowView
 
@@ -71,7 +72,7 @@ private:
   /// Creates the 'Settings' tab
   IReflSettingsTabPresenter *createSettingsTab();
   /// Creates the 'Save ASCII' tab
-  void createSaveTab();
+  IReflSaveTabPresenter *createSaveTab();
 
   /// Interface definition with widgets for the main interface window
   Ui::RelMainWindowWidget m_ui;

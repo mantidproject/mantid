@@ -2,6 +2,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -13,13 +14,15 @@ namespace CustomInterfaces {
 */
 ReflMainWindowPresenter::ReflMainWindowPresenter(
     IReflMainWindowView *view, IReflRunsTabPresenter *runsPresenter,
-    IReflSettingsTabPresenter *settingsPresenter)
+    IReflSettingsTabPresenter *settingsPresenter,
+    IReflSaveTabPresenter *savePresenter)
     : m_view(view), m_runsPresenter(runsPresenter),
-      m_settingsPresenter(settingsPresenter) {
+      m_settingsPresenter(settingsPresenter), m_savePresenter(savePresenter) {
 
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
   m_settingsPresenter->acceptMainPresenter(this);
+  m_savePresenter->acceptMainPresenter(this);
 }
 
 /** Destructor

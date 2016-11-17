@@ -35,12 +35,15 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class IReflSaveTabPresenter {
 public:
   virtual ~IReflSaveTabPresenter(){};
+  /// Accept a main presenter
+  virtual void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) = 0;
 
   enum Flag {
     populateWorkspaceListFlag,
     filterWorkspaceListFlag,
     workspaceParamsFlag,
-    saveWorkspacesFlag
+    saveWorkspacesFlag,
+    suggestSaveDirFlag
   };
 
   /// Tell the presenter something happened

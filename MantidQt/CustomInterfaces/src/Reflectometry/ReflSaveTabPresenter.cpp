@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -16,15 +17,12 @@ namespace CustomInterfaces {
 
 using namespace Mantid::API;
 
-Mantid::Kernel::Logger ReflSaveTabPresenter::g_log("ReflSaveTabPresenter");
-
 /** Constructor
 * @param view :: The view we are handling
 */
 ReflSaveTabPresenter::ReflSaveTabPresenter(IReflSaveTabView *view)
-    : m_view(view) {
+    : m_view(view), m_mainPresenter() {
 
-  FrameworkManager::Instance();
   saveAlgs = {"SaveReflCustomAscii", "SaveReflThreeColumnAscii",
               "SaveANSTOAscii", "SaveILLCosmosAscii"};
   saveExts = {".dat", ".dat", ".txt", ".mft"};
@@ -34,20 +32,30 @@ ReflSaveTabPresenter::ReflSaveTabPresenter(IReflSaveTabView *view)
 */
 ReflSaveTabPresenter::~ReflSaveTabPresenter() {}
 
+/** Accept a main presenter
+* @param mainPresenter :: [input] The main presenter
+*/
+void ReflSaveTabPresenter::acceptMainPresenter(
+  IReflMainWindowPresenter *mainPresenter) {
+  m_mainPresenter = mainPresenter;
+}
+
 void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
   switch (flag) {
   case populateWorkspaceListFlag:
     populateWorkspaceList();
-    suggestSaveDir();
     break;
   case filterWorkspaceListFlag:
-    filterWorkspaceNames(m_view->getFilter(), m_view->getRegexCheck());
+    filterWorkspaceNames();
     break;
   case workspaceParamsFlag:
-    populateParametersList(m_view->getCurrentWorkspaceName());
+    populateParametersList();
     break;
   case saveWorkspacesFlag:
-    saveWorkspaces(m_view->getSavePath());
+    saveWorkspaces();
+    break;
+  case suggestSaveDirFlag:
+    suggestSaveDir();
     break;
   }
 }
@@ -61,12 +69,12 @@ void ReflSaveTabPresenter::populateWorkspaceList() {
 }
 
 /** Filters the names in the 'List of Workspaces' widget
-* @param filter :: filter text string
-* @param regexCheck :: whether to use regex in filtering
 */
-void ReflSaveTabPresenter::filterWorkspaceNames(std::string filter,
-                                                bool regexCheck) {
+void ReflSaveTabPresenter::filterWorkspaceNames() {
   m_view->clearWorkspaceList();
+
+  std::string filter = m_view->getFilter();
+  bool regexCheck = m_view->getRegexCheck();
   auto wsNames = getAvailableWorkspaceNames();
   std::vector<std::string> validNames(wsNames.size());
   auto it = validNames.begin();
@@ -79,7 +87,8 @@ void ReflSaveTabPresenter::filterWorkspaceNames(std::string filter,
           wsNames.begin(), wsNames.end(), validNames.begin(),
           [rgx](std::string s) { return boost::regex_search(s, rgx); });
     } catch (boost::regex_error &) {
-      g_log.error("Error, invalid regular expression\n");
+      m_mainPresenter->giveUserCritical("Error, invalid regular expression\n",
+        "Invalid regex");
     }
   } else {
     // Otherwise simply add names where the filter string is found in
@@ -95,11 +104,11 @@ void ReflSaveTabPresenter::filterWorkspaceNames(std::string filter,
 
 /** Fills the 'List of Logged Parameters' widget with the parameters of the
 * currently selected workspace
-* @param wsName :: name of selected workspace
 */
-void ReflSaveTabPresenter::populateParametersList(std::string wsName) {
+void ReflSaveTabPresenter::populateParametersList() {
   m_view->clearParametersList();
 
+  std::string wsName = m_view->getCurrentWorkspaceName();
   std::vector<std::string> logs;
   const auto &properties = AnalysisDataService::Instance()
                                .retrieveWS<MatrixWorkspace>(wsName)
@@ -113,17 +122,26 @@ void ReflSaveTabPresenter::populateParametersList(std::string wsName) {
 
 /** Saves selected workspaces
 */
-void ReflSaveTabPresenter::saveWorkspaces(std::string saveDir) {
+void ReflSaveTabPresenter::saveWorkspaces() {
   // Check that save directory is valid
+  std::string saveDir = m_view->getSavePath();
   if (saveDir.empty() || Poco::File(saveDir).isDirectory() == false) {
-    g_log.error("Directory specified doesn't exist or was invalid for your "
-                "operating system");
+    m_mainPresenter->giveUserCritical("Directory specified doesn't exist or "
+                                      "was invalid for your operating system",
+      "Invalid directory");
     return;
+  }
+
+  // Check that at least one workspace has been selected for saving
+  auto wsNames = m_view->getSelectedWorkspaces();
+  if (wsNames.empty()) {
+    m_mainPresenter->giveUserCritical("No workspaces selected. You must select "
+                                      "the workspaces to save.",
+      "No workspaces selected");
   }
 
   // Create the appropriate save algorithm
   bool titleCheck = m_view->getTitleCheck();
-  auto wsNames = m_view->getSelectedWorkspaces();
   auto selectedParameters = m_view->getSelectedParameters();
   bool qResolutionCheck = m_view->getQResolutionCheck();
   std::string prefix = m_view->getPrefix();

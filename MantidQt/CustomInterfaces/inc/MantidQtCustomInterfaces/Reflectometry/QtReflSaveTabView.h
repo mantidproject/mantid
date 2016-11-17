@@ -44,6 +44,8 @@ public:
   QtReflSaveTabView(QWidget *parent = 0);
   /// Destructor
   ~QtReflSaveTabView() override;
+  /// Returns the presenter managing this view
+  IReflSaveTabPresenter *getPresenter() const override;
 
   /// Returns the save path
   std::string getSavePath() const override;
@@ -61,8 +63,6 @@ public:
   std::vector<std::string> getSelectedWorkspaces() const override;
   /// Returns a list of names of selected parameters
   std::vector<std::string> getSelectedParameters() const override;
-  /// Returns the spectra list
-  std::string getSpectraList() const override;
   /// Returns the index of selected file format
   int getFileFormatIndex() const override;
   /// Returns the title check
@@ -90,6 +90,8 @@ public slots:
   void requestWorkspaceParams() const;
   /// Save selected workspaces
   void saveWorkspaces() const;
+  /// Suggest a save directory
+  void suggestSaveDir() const;
 
 private:
   /// Initialize the interface

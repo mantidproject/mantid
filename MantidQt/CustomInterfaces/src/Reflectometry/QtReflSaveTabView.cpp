@@ -33,7 +33,17 @@ void QtReflSaveTabView::initLayout() {
 
   m_presenter.reset(new ReflSaveTabPresenter(this));
   populateListOfWorkspaces();
+  suggestSaveDir();
 }
+
+/** Returns the presenter managing this view
+* @return :: A pointer to the presenter
+*/
+IReflSaveTabPresenter *QtReflSaveTabView::getPresenter() const {
+
+  return m_presenter.get();
+}
+
 
 /** Returns the save path
 * @return :: The save path
@@ -99,13 +109,6 @@ std::vector<std::string> QtReflSaveTabView::getSelectedParameters() const {
     paramNames.push_back((*it)->text().toStdString());
   }
   return paramNames;
-}
-
-/** Returns the spectra list as a single string
-* @return :: Spectra list
-*/
-std::string QtReflSaveTabView::getSpectraList() const {
-  return m_ui.spectraListEdit->text().toStdString();
 }
 
 /** Returns the index of the selected file format
@@ -191,6 +194,13 @@ void QtReflSaveTabView::requestWorkspaceParams() const {
 void QtReflSaveTabView::saveWorkspaces() const {
   m_presenter->notify(IReflSaveTabPresenter::saveWorkspacesFlag);
 }
+
+/** Suggest a save directory
+*/
+void QtReflSaveTabView::suggestSaveDir() const {
+  m_presenter->notify(IReflSaveTabPresenter::suggestSaveDirFlag);
+}
+
 
 } // namespace CustomInterfaces
 } // namespace Mantid

@@ -32,11 +32,11 @@ void QtReflMainWindowView::initLayout() {
   // Create the tabs
   auto runsPresenter = createRunsTab();
   auto settingsPresenter = createSettingsTab();
-  createSaveTab();
+  auto savePresenter = createSaveTab();
 
   // Create the presenter
   m_presenter.reset(
-      new ReflMainWindowPresenter(this, runsPresenter, settingsPresenter));
+      new ReflMainWindowPresenter(this, runsPresenter, settingsPresenter, savePresenter));
 }
 
 /** Creates the 'Runs' tab and returns a pointer to its presenter
@@ -61,12 +61,15 @@ IReflSettingsTabPresenter *QtReflMainWindowView::createSettingsTab() {
   return settingsTab->getPresenter();
 }
 
-/** Creates the 'Save ASCII' tab
+/** Creates the 'Save ASCII' tab and returns a pointer to its presenter
+* @return :: A pointer to the presenter managing the 'Save ASCII' tab
 */
-void QtReflMainWindowView::createSaveTab() {
+IReflSaveTabPresenter *QtReflMainWindowView::createSaveTab() {
 
   QtReflSaveTabView *saveTab = new QtReflSaveTabView(this);
   m_ui.mainTab->addTab(saveTab, QString("Save ASCII"));
+
+  return saveTab->getPresenter();
 }
 
 /**

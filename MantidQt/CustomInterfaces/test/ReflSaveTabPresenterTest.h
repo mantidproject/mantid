@@ -52,7 +52,7 @@ public:
     EXPECT_CALL(mockView, clearWorkspaceList()).Times(Exactly(1));
     // Workspace 'groupWs' should not be included in the workspace list
     EXPECT_CALL(mockView, setWorkspaceList(wsNames)).Times(Exactly(1));
-    presenter.populateWorkspaceList();
+    presenter.notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
     AnalysisDataService::Instance().clear();
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -69,9 +69,9 @@ public:
     EXPECT_CALL(mockView,
                 setWorkspaceList(std::vector<std::string>{"ws1", "ws2"}))
         .Times(Exactly(1));
-    presenter.populateWorkspaceList();
+    presenter.notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
     createWS("ws2");
-    presenter.populateWorkspaceList();
+    presenter.notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
     AnalysisDataService::Instance().clear();
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -88,10 +88,14 @@ public:
     EXPECT_CALL(mockView, setWorkspaceList(std::vector<std::string>{
                               "anotherWs", "different", "someWsName"}))
         .Times(Exactly(1));
+    EXPECT_CALL(mockView, getFilter()).Times(Exactly(1)).WillOnce(Return("Ws"));
+    EXPECT_CALL(mockView, getRegexCheck())
+        .Times(Exactly(1))
+        .WillOnce(Return(false));
     EXPECT_CALL(mockView, setWorkspaceList(std::vector<std::string>{
                               "anotherWs", "someWsName"})).Times(Exactly(1));
-    presenter.populateWorkspaceList();
-    presenter.filterWorkspaceNames("Ws", false);
+    presenter.notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
+    presenter.notify(IReflSaveTabPresenter::filterWorkspaceListFlag);
     AnalysisDataService::Instance().clear();
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -109,11 +113,17 @@ public:
     EXPECT_CALL(mockView, setWorkspaceList(std::vector<std::string>{
                               "_42", "apple_113", "grape_", "pear_cut"}))
         .Times(Exactly(1));
+    EXPECT_CALL(mockView, getFilter())
+        .Times(Exactly(1))
+        .WillOnce(Return("[a-zA-Z]*_[0-9]+"));
+    EXPECT_CALL(mockView, getRegexCheck())
+        .Times(Exactly(1))
+        .WillOnce(Return(true));
     EXPECT_CALL(mockView,
                 setWorkspaceList(std::vector<std::string>{"_42", "apple_113"}))
         .Times(Exactly(1));
-    presenter.populateWorkspaceList();
-    presenter.filterWorkspaceNames("[a-zA-Z]*_[0-9]+", true);
+    presenter.notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
+    presenter.notify(IReflSaveTabPresenter::filterWorkspaceListFlag);
     AnalysisDataService::Instance().clear();
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -133,8 +143,11 @@ public:
     }
 
     EXPECT_CALL(mockView, clearParametersList()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getCurrentWorkspaceName())
+        .Times(Exactly(1))
+        .WillOnce(Return("ws1"));
     EXPECT_CALL(mockView, setParametersList(logs)).Times(Exactly(1));
-    presenter.populateParametersList("ws1");
+    presenter.notify(IReflSaveTabPresenter::workspaceParamsFlag);
     AnalysisDataService::Instance().clear();
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -149,22 +162,31 @@ public:
     createWS(wsNames[1]);
     createWS(wsNames[2]);
 
-    EXPECT_CALL(mockView, setWorkspaceList(wsNames)).Times(Exactly(1));
-    EXPECT_CALL(mockView, getTitleCheck()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getSavePath())
+        .Times(Exactly(1))
+        .WillOnce(Return(savePath));
+    EXPECT_CALL(mockView, getTitleCheck())
+        .Times(Exactly(1))
+        .WillOnce(Return(false));
     EXPECT_CALL(mockView, getSelectedParameters())
         .Times(Exactly(1))
         .WillOnce(Return(std::vector<std::string>()));
-    EXPECT_CALL(mockView, getQResolutionCheck()).Times(Exactly(1));
-    EXPECT_CALL(mockView, getPrefix()).Times(Exactly(1));
-    EXPECT_CALL(mockView, getFileFormatIndex()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getQResolutionCheck())
+        .Times(Exactly(1))
+        .WillOnce(Return(false));
+    EXPECT_CALL(mockView, getPrefix())
+        .Times(Exactly(1))
+        .WillOnce(Return(""));
+    EXPECT_CALL(mockView, getFileFormatIndex())
+        .Times(Exactly(1))
+        .WillOnce(Return(0));
     EXPECT_CALL(mockView, getSelectedWorkspaces())
         .Times(Exactly(1))
         .WillOnce(Return(wsNames));
-    mockView.setWorkspaceList(wsNames);
-    presenter.saveWorkspaces(savePath);
-    Poco::File(savePath + wsNames[0] + ".dat").remove();
-    Poco::File(savePath + wsNames[1] + ".dat").remove();
-    Poco::File(savePath + wsNames[2] + ".dat").remove();
+    presenter.notify(IReflSaveTabPresenter::saveWorkspacesFlag);
+    for (auto it = wsNames.begin(); it != wsNames.end(); it++) {
+      Poco::File(savePath + *it + ".dat").remove();
+    }
     AnalysisDataService::Instance().clear();
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -176,8 +198,8 @@ public:
     std::string saveDir = Mantid::Kernel::ConfigService::Instance().getString(
         "defaultsave.directory");
 
-    EXPECT_CALL(mockView, setSavePath(saveDir)).Times(Exactly(1));
-    presenter.suggestSaveDir();
+    EXPECT_CALL(mockView, setSavePath(saveDir));
+    presenter.notify(IReflSaveTabPresenter::suggestSaveDirFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
