@@ -1,14 +1,16 @@
 #ifndef FLATBACKGROUNDTEST_H_
 #define FLATBACKGROUNDTEST_H_
 
+#include "MantidAlgorithms/CalculateFlatBackground.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
+#include "MantidAlgorithms/Minus.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAlgorithms/CalculateFlatBackground.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/lexical_cast.hpp>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -590,6 +592,58 @@ public:
     AnalysisDataService::Instance().remove(outWsName);
   }
 
+  void testMeanSubtractBackgroundAndReturnBackgroundEquivalent() {
+    const double y1 = 31;
+    const double y2 = 39;
+    const std::string outBackgroundWSName("background");
+    const std::string outSubtractedWSName("subtracted");
+    executeWithTwoBinInputWorkspace(y1, y2, 1, outBackgroundWSName, "Mean", "",
+                                    "Return Background");
+    MatrixWorkspace_sptr inputWS =
+        executeWithTwoBinInputWorkspace(y1, y2, 1, outSubtractedWSName, "Mean", "",
+                                        "Subtract Background");
+    compareSubtractedAndBackgroundWorkspaces(inputWS,
+                                             outSubtractedWSName,
+                                             outBackgroundWSName);
+    AnalysisDataService::Instance().remove(outBackgroundWSName);
+    AnalysisDataService::Instance().remove(outSubtractedWSName);
+  }
+
+  void testLinearFitSubtractBackgroundAndReturnBackgroundEquivalent() {
+    const double y1 = 31;
+    const double y2 = 39;
+    const std::string outBackgroundWSName("background");
+    const std::string outSubtractedWSName("subtracted");
+    executeWithTwoBinInputWorkspace(y1, y2, 1, outBackgroundWSName, "Linear Fit", "",
+                                    "Return Background");
+    MatrixWorkspace_sptr inputWS =
+        executeWithTwoBinInputWorkspace(y1, y2, 1, outSubtractedWSName, "Linear Fit", "",
+                                        "Subtract Background");
+    compareSubtractedAndBackgroundWorkspaces(inputWS,
+                                             outSubtractedWSName,
+                                             outBackgroundWSName);
+    AnalysisDataService::Instance().remove(outBackgroundWSName);
+    AnalysisDataService::Instance().remove(outSubtractedWSName);
+  }
+
+
+  void testMovingAverageSubtractBackgroundAndReturnBackgroundEquivalent() {
+    const double y1 = 31;
+    const double y2 = 39;
+    const std::string outBackgroundWSName("background");
+    const std::string outSubtractedWSName("subtracted");
+    executeWithTwoBinInputWorkspace(y1, y2, 1, outBackgroundWSName, "Moving Average", "",
+                                    "Return Background");
+    MatrixWorkspace_sptr inputWS =
+        executeWithTwoBinInputWorkspace(y1, y2, 1, outSubtractedWSName, "Moving Average", "",
+                                        "Subtract Background");
+    compareSubtractedAndBackgroundWorkspaces(inputWS,
+                                             outSubtractedWSName,
+                                             outBackgroundWSName);
+    AnalysisDataService::Instance().remove(outBackgroundWSName);
+    AnalysisDataService::Instance().remove(outSubtractedWSName);
+  }
+
 private:
   double bg;
 
@@ -720,12 +774,13 @@ private:
     AnalysisDataService::Instance().remove("Removed1");
   }
 
-  void executeWithTwoBinInputWorkspace(const double y1, const double y2,
-                                       const size_t histogramCount,
-                                       const std::string &outWsName,
-                                       const std::string &mode,
-                                       const std::string &wsIndexList,
-                                       const std::string &outputMode) {
+  MatrixWorkspace_sptr
+      executeWithTwoBinInputWorkspace(const double y1, const double y2,
+                                      const size_t histogramCount,
+                                      const std::string &outWsName,
+                                      const std::string &mode,
+                                      const std::string &wsIndexList,
+                                      const std::string &outputMode) {
     const size_t binCount = 2;
     Mantid::DataObjects::Workspace2D_sptr WS(
         new Mantid::DataObjects::Workspace2D);
@@ -756,6 +811,38 @@ private:
     flatBG.setProperty("AveragingWindowWidth", 1);
     TS_ASSERT_THROWS_NOTHING(flatBG.execute())
     TS_ASSERT(flatBG.isExecuted())
+    return WS;
+  }
+
+  void compareSubtractedAndBackgroundWorkspaces(MatrixWorkspace_sptr originalWS,
+                                                const std::string &subtractedWSName,
+                                                const std::string &backgroundWSName) {
+    const std::string minusWSName("minused");
+    MatrixWorkspace_sptr backgroundWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            backgroundWSName);
+    MatrixWorkspace_sptr subtractedWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            subtractedWSName);
+    Algorithms::Minus minus;
+    minus.initialize();
+    minus.setProperty("LHSWorkspace", originalWS);
+    minus.setProperty("RHSWorkspace", backgroundWS);
+    minus.setPropertyValue("OutputWorkspace", minusWSName);
+    minus.execute();
+    MatrixWorkspace_sptr minusWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            minusWSName);
+    Algorithms::CompareWorkspaces comparison;
+    comparison.initialize();
+    comparison.setProperty("Workspace1", subtractedWS);
+    comparison.setProperty("Workspace2", minusWSName);
+    comparison.setProperty("Tolerance", 1e-6);
+    comparison.setProperty("ToleranceRelErr", true);
+    comparison.execute();
+    bool result = comparison.getProperty("Result");
+    TS_ASSERT(result)
+    AnalysisDataService::Instance().remove(minusWSName);
   }
 };
 
