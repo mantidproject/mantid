@@ -6,6 +6,10 @@
 
 .. properties::
 
+.. warning::
+
+   This algorithm is deprecated (20-Nov-2016). Please, use :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` instead.
+
 Description
 -----------
 
