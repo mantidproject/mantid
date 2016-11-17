@@ -177,7 +177,8 @@ void CalculateFlatBackground::exec() {
       wasCounts = true;
       histogram.convertToFrequencies();
     }
-    bool skipCalculation = std::find(wsInds.cbegin(), wsInds.cend(), i) == wsInds.cend();
+    bool skipCalculation =
+        std::find(wsInds.cbegin(), wsInds.cend(), i) == wsInds.cend();
     if (!skipCalculation && skipMonitors) {
       const auto &spectrumInfo = inputWS->spectrumInfo();
       if (!spectrumInfo.hasDetectors(i)) {
@@ -262,7 +263,8 @@ void CalculateFlatBackground::exec() {
 
   g_log.debug() << calculationCount << " spectra corrected\n";
   g_log.information() << "The mean background was "
-                      << backgroundTotal / static_cast<double>(calculationCount) << ".\n";
+                      << backgroundTotal / static_cast<double>(calculationCount)
+                      << ".\n";
   // Assign the output workspace to its property
   setProperty("OutputWorkspace", outputWS);
 }
@@ -319,8 +321,7 @@ void CalculateFlatBackground::getWsInds(std::vector<int> &output,
 * spectra
 */
 void CalculateFlatBackground::Mean(const HistogramData::Histogram &histogram,
-                                   double &background,
-                                   double &variance,
+                                   double &background, double &variance,
                                    const double startX,
                                    const double endX) const {
   const auto &XS = histogram.x();
@@ -366,25 +367,25 @@ void CalculateFlatBackground::Mean(const HistogramData::Histogram &histogram,
   // is taken as the sqrt the total number counts. To get the the error on the
   // counts in each bin just divide this by the number of bins. The variance =
   // error^2 that is the total variance divide by the number of bins _squared_.
-  variance =
-      std::accumulate(ES.begin() + startInd, ES.begin() + endInd + 1, 0.0,
-                      VectorHelper::SumSquares<double>()) /
-      (numBins * numBins);
+  variance = std::accumulate(ES.begin() + startInd, ES.begin() + endInd + 1,
+                             0.0, VectorHelper::SumSquares<double>()) /
+             (numBins * numBins);
 }
 
 /**
 * Uses linear algorithm to do the fitting.
 * @param Histogram the histogram to fit
 * @param background an output variable for the calculated background
-* @param variance an output variable for background's variance, currently always zero.
+* @param variance an output variable for background's variance, currently always
+* zero.
 * @param startX an X value in the first bin to be included in the fit
 * @param endX an X value in the last bin to be included in the fit
 */
-void CalculateFlatBackground::LinearFit(const HistogramData::Histogram &histogram,
-                                          double &background, double &variance,
-                                          const double startX,
-                                          const double endX) {
-  MatrixWorkspace_sptr WS = WorkspaceFactory::Instance().create("Workspace2D", 1, histogram.x().size(), histogram.y().size());
+void CalculateFlatBackground::LinearFit(
+    const HistogramData::Histogram &histogram, double &background,
+    double &variance, const double startX, const double endX) {
+  MatrixWorkspace_sptr WS = WorkspaceFactory::Instance().create(
+      "Workspace2D", 1, histogram.x().size(), histogram.y().size());
   WS->setHistogram(0, histogram);
   IAlgorithm_sptr childAlg = createChildAlgorithm("Fit");
 
@@ -439,10 +440,9 @@ void CalculateFlatBackground::LinearFit(const HistogramData::Histogram &histogra
 * @param variance an output variable for background's variance.
 * @param windowWidth the width of the averaging window in bins
 */
-void
-CalculateFlatBackground::MovingAverage(const HistogramData::Histogram &histogram,
-                                       double &background, double &variance,
-                                       const size_t windowWidth) const {
+void CalculateFlatBackground::MovingAverage(
+    const HistogramData::Histogram &histogram, double &background,
+    double &variance, const size_t windowWidth) const {
   const auto &ys = histogram.y();
   const auto &es = histogram.e();
   double currentMin = std::numeric_limits<double>::max();
@@ -463,7 +463,8 @@ CalculateFlatBackground::MovingAverage(const HistogramData::Histogram &histogram
     const double average = sum / static_cast<double>(windowWidth);
     if (average < currentMin) {
       currentMin = average;
-      currentVariance = varSqSum / static_cast<double>(windowWidth * windowWidth);
+      currentVariance =
+          varSqSum / static_cast<double>(windowWidth * windowWidth);
     }
   }
   background = currentMin;

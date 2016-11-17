@@ -565,8 +565,7 @@ public:
     executeWithTwoBinInputWorkspace(y1, y2, 2, outWsName, "Mean", "1",
                                     "Subtract Background");
     MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outWsName);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
     TS_ASSERT_DELTA(outputWS->y(0)[0], y1, 1e-12)
     TS_ASSERT_DELTA(outputWS->y(0)[1], y2, 1e-12)
     TS_ASSERT_DELTA(outputWS->y(1)[0], y1 - (y1 + y2) / 2, 1e-12)
@@ -583,8 +582,7 @@ public:
     executeWithTwoBinInputWorkspace(y1, y2, 2, outWsName, "Mean", "1",
                                     "Return Background");
     MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outWsName);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
     TS_ASSERT_DELTA(outputWS->y(0)[0], 0, 1e-12)
     TS_ASSERT_DELTA(outputWS->y(0)[1], 0, 1e-12)
     TS_ASSERT_DELTA(outputWS->y(1)[0], (y1 + y2) / 2, 1e-12)
@@ -599,11 +597,9 @@ public:
     const std::string outSubtractedWSName("subtracted");
     executeWithTwoBinInputWorkspace(y1, y2, 1, outBackgroundWSName, "Mean", "",
                                     "Return Background");
-    MatrixWorkspace_sptr inputWS =
-        executeWithTwoBinInputWorkspace(y1, y2, 1, outSubtractedWSName, "Mean", "",
-                                        "Subtract Background");
-    compareSubtractedAndBackgroundWorkspaces(inputWS,
-                                             outSubtractedWSName,
+    MatrixWorkspace_sptr inputWS = executeWithTwoBinInputWorkspace(
+        y1, y2, 1, outSubtractedWSName, "Mean", "", "Subtract Background");
+    compareSubtractedAndBackgroundWorkspaces(inputWS, outSubtractedWSName,
                                              outBackgroundWSName);
     AnalysisDataService::Instance().remove(outBackgroundWSName);
     AnalysisDataService::Instance().remove(outSubtractedWSName);
@@ -614,31 +610,28 @@ public:
     const double y2 = 39;
     const std::string outBackgroundWSName("background");
     const std::string outSubtractedWSName("subtracted");
-    executeWithTwoBinInputWorkspace(y1, y2, 1, outBackgroundWSName, "Linear Fit", "",
-                                    "Return Background");
-    MatrixWorkspace_sptr inputWS =
-        executeWithTwoBinInputWorkspace(y1, y2, 1, outSubtractedWSName, "Linear Fit", "",
-                                        "Subtract Background");
-    compareSubtractedAndBackgroundWorkspaces(inputWS,
-                                             outSubtractedWSName,
+    executeWithTwoBinInputWorkspace(y1, y2, 1, outBackgroundWSName,
+                                    "Linear Fit", "", "Return Background");
+    MatrixWorkspace_sptr inputWS = executeWithTwoBinInputWorkspace(
+        y1, y2, 1, outSubtractedWSName, "Linear Fit", "",
+        "Subtract Background");
+    compareSubtractedAndBackgroundWorkspaces(inputWS, outSubtractedWSName,
                                              outBackgroundWSName);
     AnalysisDataService::Instance().remove(outBackgroundWSName);
     AnalysisDataService::Instance().remove(outSubtractedWSName);
   }
-
 
   void testMovingAverageSubtractBackgroundAndReturnBackgroundEquivalent() {
     const double y1 = 31;
     const double y2 = 39;
     const std::string outBackgroundWSName("background");
     const std::string outSubtractedWSName("subtracted");
-    executeWithTwoBinInputWorkspace(y1, y2, 1, outBackgroundWSName, "Moving Average", "",
-                                    "Return Background");
-    MatrixWorkspace_sptr inputWS =
-        executeWithTwoBinInputWorkspace(y1, y2, 1, outSubtractedWSName, "Moving Average", "",
-                                        "Subtract Background");
-    compareSubtractedAndBackgroundWorkspaces(inputWS,
-                                             outSubtractedWSName,
+    executeWithTwoBinInputWorkspace(y1, y2, 1, outBackgroundWSName,
+                                    "Moving Average", "", "Return Background");
+    MatrixWorkspace_sptr inputWS = executeWithTwoBinInputWorkspace(
+        y1, y2, 1, outSubtractedWSName, "Moving Average", "",
+        "Subtract Background");
+    compareSubtractedAndBackgroundWorkspaces(inputWS, outSubtractedWSName,
                                              outBackgroundWSName);
     AnalysisDataService::Instance().remove(outBackgroundWSName);
     AnalysisDataService::Instance().remove(outSubtractedWSName);
@@ -746,9 +739,9 @@ private:
                                      movingAverageStandardY(j)) /
                                 static_cast<double>(windowWidth);
         TS_ASSERT_DELTA(outputWS->y(j)[0], expected, 1e-12)
-        const double expectedError = std::sqrt(static_cast<double>(windowWidth) *
-                                          movingAverageStandardY(j) /
-                                     static_cast<double>(windowWidth * windowWidth));
+        const double expectedError = std::sqrt(
+            static_cast<double>(windowWidth) * movingAverageStandardY(j) /
+            static_cast<double>(windowWidth * windowWidth));
         TS_ASSERT_DELTA(outputWS->e(j)[0], expectedError, 1e-12)
       }
       AnalysisDataService::Instance().remove("Removed1");
@@ -778,13 +771,10 @@ private:
     AnalysisDataService::Instance().remove("Removed1");
   }
 
-  MatrixWorkspace_sptr
-      executeWithTwoBinInputWorkspace(const double y1, const double y2,
-                                      const size_t histogramCount,
-                                      const std::string &outWsName,
-                                      const std::string &mode,
-                                      const std::string &wsIndexList,
-                                      const std::string &outputMode) {
+  MatrixWorkspace_sptr executeWithTwoBinInputWorkspace(
+      const double y1, const double y2, const size_t histogramCount,
+      const std::string &outWsName, const std::string &mode,
+      const std::string &wsIndexList, const std::string &outputMode) {
     const size_t binCount = 2;
     Mantid::DataObjects::Workspace2D_sptr WS(
         new Mantid::DataObjects::Workspace2D);
@@ -818,9 +808,9 @@ private:
     return WS;
   }
 
-  void compareSubtractedAndBackgroundWorkspaces(MatrixWorkspace_sptr originalWS,
-                                                const std::string &subtractedWSName,
-                                                const std::string &backgroundWSName) {
+  void compareSubtractedAndBackgroundWorkspaces(
+      MatrixWorkspace_sptr originalWS, const std::string &subtractedWSName,
+      const std::string &backgroundWSName) {
     const std::string minusWSName("minused");
     MatrixWorkspace_sptr backgroundWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(

@@ -7,9 +7,9 @@
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
-  namespace HistogramData {
-    class Histogram;
-  }
+namespace HistogramData {
+class Histogram;
+}
 namespace Algorithms {
 /** Finds a constant background value of each desired spectrum
     and optionally subtracts that value from the entire spectrum.
@@ -56,8 +56,7 @@ namespace Algorithms {
 class DLLExport CalculateFlatBackground : public API::Algorithm {
 public:
   /// (Empty) Constructor
-  CalculateFlatBackground()
-      : API::Algorithm(), m_progress(nullptr) {}
+  CalculateFlatBackground() : API::Algorithm(), m_progress(nullptr) {}
   /// Virtual destructor
   ~CalculateFlatBackground() = default;
 
@@ -85,12 +84,13 @@ private:
   void restoreDistributionState(API::MatrixWorkspace_sptr workspace);
   void checkRange(double &startX, double &endX);
   void getWsInds(std::vector<int> &output, const size_t workspaceTotal);
-  void Mean(const HistogramData::Histogram &histogram, double &background, double &variance,
-              const double startX, const double endX) const;
-  void LinearFit(const HistogramData::Histogram &histogram, double &background, double &variance,
-                   const double startX, const double endX);
-  void MovingAverage(const HistogramData::Histogram &histogram, double &background, double &variance,
-                       const size_t windowWidth) const;
+  void Mean(const HistogramData::Histogram &histogram, double &background,
+            double &variance, const double startX, const double endX) const;
+  void LinearFit(const HistogramData::Histogram &histogram, double &background,
+                 double &variance, const double startX, const double endX);
+  void MovingAverage(const HistogramData::Histogram &histogram,
+                     double &background, double &variance,
+                     const size_t windowWidth) const;
 
   /// Progress reporting
   std::unique_ptr<API::Progress> m_progress;
