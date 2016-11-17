@@ -65,8 +65,7 @@ public:
   const std::string name() const override { return "CalculateFlatBackground"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Finds a constant background value of each desired spectrum and "
-           "optionally subtracts that value from the entire spectrum.";
+    return "Finds a constant background value of each desired histogram.";
   }
 
   /// Algorithm's version
