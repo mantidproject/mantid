@@ -157,7 +157,7 @@ void ConvertAxesToRealSpace::exec() {
         if (axisValue < axisVector[axisIndex].min)
           axisVector[axisIndex].min = axisValue;
       }
-    } catch (Exception::NotFoundError) {
+    } catch (const Exception::NotFoundError &) {
       g_log.debug() << "Could not find detector for workspace index " << i
                     << '\n';
       failedCount++;

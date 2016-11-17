@@ -302,8 +302,8 @@ mxArray *ixbcreateclassarray(const char *class_name, int *n) {
   */
 int CreateFrameworkManager(int nlhs, mxArray *plhs[], int nrhs,
                            const mxArray *prhs[]) {
-  mwSize dims[2] = {1, 1};
   try {
+    mwSize dims[2] = {1, 1};
     FrameworkManagerImpl &fmgr = FrameworkManager::Instance();
     plhs[0] = mxCreateNumericArray(2, dims, mxUINT64_CLASS, mxREAL);
     uint64_t *data = (uint64_t *)mxGetData(plhs[0]);
