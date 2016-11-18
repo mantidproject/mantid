@@ -326,7 +326,7 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
 
             left = mtd[ws].getItem(0).getName()
             right = mtd[ws].getItem(1).getName()
-            
+
             mask_min = 0
             mask_max = mtd[left].blocksize()
 
@@ -334,15 +334,15 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
                 left_splited = left.split('_')
                 right_splited = right.split('_')
                 RenameWorkspace(InputWorkspace=left,
-                                OutputWorkspace=left_splited[2]+'_'+left_splited[3]+'_'+left_splited[5])
+                                OutputWorkspace=left_splited[2]+'_'+self._red_ws+'_left')
                 RenameWorkspace(InputWorkspace=right,
-                                OutputWorkspace=right_splited[2]+'_'+right_splited[3]+'_'+right_splited[5])
+                                OutputWorkspace=right_splited[2]+'_'+self._red_ws+'_right')
             elif self._unmirror_option == 1:
                 Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace='__tmp_'+outname)
-                RenameWorkspace(InputWorkspace='__tmp_'+outname,OutputWorkspace=outname)
-                Scale(InputWorkspace=outname, OutputWorkspace=outname, Factor=0.5)
                 DeleteWorkspace(left)
                 DeleteWorkspace(right)
+                RenameWorkspace(InputWorkspace='__tmp_'+outname,OutputWorkspace=outname)
+                Scale(InputWorkspace=outname, OutputWorkspace=outname, Factor=0.5)
             elif self._unmirror_option == 2:
                 RenameWorkspace(InputWorkspace=left, OutputWorkspace=outname)
                 DeleteWorkspace(right)
