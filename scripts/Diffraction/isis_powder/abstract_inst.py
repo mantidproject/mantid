@@ -200,7 +200,7 @@ class AbstractInst(object):
         """
         raise NotImplementedError("Create calibration from a silicon run is not yet implemented for this instrument")
 
-    def _normalise_ws(self, ws_to_correct, monitor_ws=None, spline_terms=20):
+    def _normalise_ws(self, ws_to_correct, run_details=None):
         return _empty_hook_return_none()
 
     def _get_monitor_spectra(self, run_number):
@@ -244,9 +244,6 @@ class AbstractInst(object):
     def _apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number=None, run_details=None):
         return ws_to_correct
 
-    def _load_monitor(self, number, cycle):
-        return None
-
     def _apply_van_calibration_tof_rebinning(self, vanadium_ws, tof_rebin_pass, return_units):
         return vanadium_ws
 
@@ -262,7 +259,7 @@ class AbstractInst(object):
     def calculate_focus_binning_params(self, sample):
         return None
 
-    def PEARL_populate_user_dirs(self, run_number):
+    def PEARL_setup_input_directories(self, run_number):
         return None
 
 # ----- Private Implementation ----- #

@@ -125,7 +125,7 @@ class Pearl(AbstractInst):
         return self._run_attenuate_workspace(input_workspace=input_workspace)
 
     def _create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
-        input_ws = common._load_current_normalised_ws(number=calibration_runs, instrument=self)
+        input_ws = common._load_current_normalised_ws(run_number=calibration_runs, instrument=self)
         cycle_information = self._get_label_information(calibration_runs)
 
         if cycle_information["instrument_version"] == "new" or cycle_information["instrument_version"] == "new2":
@@ -166,9 +166,12 @@ class Pearl(AbstractInst):
     def _create_calibration_silicon(self, calibration_runs, cal_file_name, grouping_file_name):
         self._do_silicon_calibration(calibration_runs, cal_file_name, grouping_file_name)
 
-    def _normalise_ws(self, ws_to_correct, monitor_ws=None, spline_terms=20):
+    def _normalise_ws(self, ws_to_correct, run_details=None):
+        if not run_details:
+            raise RuntimeError("Run details was not passed into PEARL: normalise_ws")
+        monitor_ws = common.load_monitor(run_numbers=run_details.run_number, instrument=self)
         return self._normalise_current_ws(ws_to_correct=ws_to_correct, load_monitor_ws=monitor_ws,
-                                          spline_terms=spline_terms)
+                                          spline_terms=20)
 
     def _get_monitor_spectra(self, run_number):
         return self._get_monitor_spectrum(run_number=run_number)
@@ -200,19 +203,6 @@ class Pearl(AbstractInst):
         return fmode_output.generate_and_save_focus_output(self, processed_spectra=processed_spectra,
                                                            run_number=run_number, perform_attenuation=attenuate,
                                                            focus_mode=self._focus_mode)
-
-    def _load_monitor(self, number, cycle):
-        input_dir = self._generate_raw_data_cycle_dir(run_cycle=cycle)
-        # TODO refactor all of this
-        if isinstance(number, int):
-            full_file_path = self._generate_input_full_path(run_number=number, input_dir=input_dir)
-            mspectra = self._get_monitor_spectra(number)
-            load_monitor_ws = mantid.LoadRaw(Filename=full_file_path, SpectrumMin=mspectra, SpectrumMax=mspectra,
-                                             LoadLogFiles="0")
-        else:
-            load_monitor_ws = common._load_monitor_sum_range(files=number, input_dir=input_dir, instrument=self)
-
-        return load_monitor_ws
 
     def _apply_van_calibration_tof_rebinning(self, vanadium_ws, tof_rebin_pass, return_units):
         tof_rebin_param_dict = self._get_create_van_tof_binning()
@@ -289,7 +279,7 @@ class Pearl(AbstractInst):
 
     def _do_silicon_calibration(self, runs_to_process, cal_file_name, grouping_file_name):
         # TODO fix all of this as the script is too limited to be useful
-        create_si_ws = common._load_current_normalised_ws(number=runs_to_process, instrument=self)
+        create_si_ws = common._load_current_normalised_ws(run_number=runs_to_process, instrument=self)
         cycle_details = self._get_label_information(runs_to_process)
         instrument_version = cycle_details["instrument_version"]
 
@@ -424,7 +414,7 @@ class Pearl(AbstractInst):
     def _PEARL_filename_is_full_path(self):
         return self._old_api_uses_full_paths
 
-    def PEARL_populate_user_dirs(self, run_number):
+    def PEARL_setup_input_directories(self, run_number):
         run_details = self._get_run_details(run_number=run_number)
         generated_path = self._generate_raw_data_cycle_dir(run_cycle=run_details.label)
         user_dirs = config['datasearch.directories']

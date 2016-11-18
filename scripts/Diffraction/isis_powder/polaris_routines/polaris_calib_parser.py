@@ -7,7 +7,20 @@ import yaml
 
 def get_calibration_dict(run_number):
     config_file = _open_yaml_file()
-    run_key = _get_dictionary_key(config_handle=config_file, run_number=run_number)
+
+    # First check exceptions list as it should be shorter
+    exception_key = _check_if_run_is_exception(config_handle=config_file, run_number=run_number)
+    if exception_key:
+        exceptions_dict = config_file["exceptions"]
+        return exceptions_dict[exception_key]
+
+    # Otherwise parse the entire YAML file
+    run_key = _find_dictionary_key(dict_to_search=config_file, run_number=run_number)
+
+    # If we have not found the run in either
+    if not run_key:
+        raise ValueError("Run number " + str(run_number) + " not recognised in calibration mapping")
+
     return config_file[run_key]
 
 
@@ -27,16 +40,24 @@ def _open_yaml_file():
     return read_config
 
 
-def _get_dictionary_key(config_handle, run_number):
+def _check_if_run_is_exception(config_handle, run_number):
+    try:
+        exceptions_dict = config_handle["exceptions"]
+    except KeyError:
+        return None
 
-    for key in config_handle:
+    return _find_dictionary_key(dict_to_search=exceptions_dict, run_number=run_number)
+
+
+def _find_dictionary_key(dict_to_search, run_number):
+
+    for key in dict_to_search:
         run_generator = _parse_number_key(input_string=key)
         for run_list in run_generator:
             if run_number in run_list:
                 return key
 
-    # If we hit this point the run_number isn't in any of the keys in the YAML file
-    raise ValueError("Run number " + str(run_number) + " not recognised in calibration mapping")
+    return None
 
 
 def _parse_number_key(input_string):
