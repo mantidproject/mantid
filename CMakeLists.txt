@@ -320,7 +320,8 @@ if ( ENABLE_CPACK )
                            "python-scipy,"
                            "libtbb2,"
                            "libpocofoundation${POCO_SOLIB_VERSION},libpocoutil${POCO_SOLIB_VERSION},libpoconet${POCO_SOLIB_VERSION},libpoconetssl${POCO_SOLIB_VERSION},libpococrypto${POCO_SOLIB_VERSION},libpocoxml${POCO_SOLIB_VERSION},"
-                           "python-pycifrw (>= 4.2.1)" )
+                           "python-pycifrw (>= 4.2.1),"
+                           "python-yaml")
         set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
         if( "${UNIX_CODENAME}" STREQUAL "xenial")
             list ( APPEND DEPENDS_LIST ", libhdf5-cpp-11,libnexus0v5 (>= 4.3),libjsoncpp1,libqscintilla2-12v5, libmuparser2v5,libqwtplot3d-qt4-0v5,libgsl2,liboce-foundation10,liboce-modeling10")
