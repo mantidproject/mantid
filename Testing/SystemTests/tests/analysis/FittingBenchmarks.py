@@ -1,5 +1,8 @@
 """
-Benchmarks for accuracy (and time / iterations).
+Benchmarks for accuracy and time.
+
+This systemtest tests that the fitting executes with different minimizers for the fitting tests used for comparing 
+minimizers, and tests the scripts used for this are working
 """
 from __future__ import (absolute_import, division, print_function)
 
@@ -19,7 +22,7 @@ class FittingBenchmarkTests(unittest.TestCase):
                                     'Conjugate gradient (Polak-Ribiere imp.)', 'Damping',
                                     #'FABADA', # Note the mantid FABADA Bayesian minimizer is not local minimization mimimizer   
                                     'Levenberg-Marquardt', 'Levenberg-MarquardtMD',
-                                    'Simplex', 'SteepestDescent', 'DTRS']
+                                    'Simplex', 'SteepestDescent', 'Trust Region']
         self.group_names = ['NIST, "lower" difficulty', 'NIST, "average" difficulty', 'NIST, "higher" difficulty', "CUTEst", "Neutron data"]
         self.group_suffix_names = ['nist_lower', 'nist_average', 'nist_higher', 'cutest', 'neutron_data']
         self.color_scale = [(1.1, 'ranking-top-1'),
@@ -28,6 +31,7 @@ class FittingBenchmarkTests(unittest.TestCase):
                             (3, 'ranking-low-4'),
                             (float('nan'), 'ranking-low-5')
                            ]
+        self.save_to_file = False  # print to standard out but don't save rst tables to files 
 
     def run_all_with_or_without_errors(self, use_errors):
         """
@@ -42,7 +46,8 @@ class FittingBenchmarkTests(unittest.TestCase):
         
         # run fit minimizer benchmarking tests
         fitbk.run_all_with_or_without_errors(base_problem_files_dir, use_errors, self.minimizers,
-                                             self.group_names, self.group_suffix_names, self.color_scale)
+                                             self.group_names, self.group_suffix_names, self.color_scale, 
+                                             self.save_to_file)
 
     def test_rank_accuracy_runtime_with_errors(self):
         self.run_all_with_or_without_errors(use_errors=True)

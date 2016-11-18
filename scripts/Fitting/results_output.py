@@ -34,7 +34,7 @@ FILENAME_SUFFIX_RUNTIME = 'runtime'
 import post_processing as postproc
 
 def print_group_results_tables(minimizers, results_per_test, problems_obj, group_name, use_errors,
-                               simple_text=True, rst=False, color_scale=None):
+                               simple_text=True, rst=False, save_to_file=False, color_scale=None):
     """
     Prints in possibly several alternative formats.
 
@@ -47,6 +47,7 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
     @param simple_text :: whether to print the tables in a simple text format
     @param rst :: whether to print the tables in rst format. They are printed to the standard outputs
                   and to files following specific naming conventions
+    @param save_to_file :: If rst=True, whether to save the tables to files following specific naming conventions                  
     @param color_scale :: threshold-color pairs. This is used for RST tables. The number of levels
                           must be consistent with the style sheet used in the documentation pages (5
                           at the moment).
@@ -71,11 +72,12 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
         print(header)
         print (tbl_acc_indiv)
 
-        fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
+        if save_to_file:
+            fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
                  format(weighted=weighted_suffix_string(use_errors),
                         version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_ACCURACY, group_name=group_name))
-        with open(fname, 'w') as tbl_file:
-            print(tbl_acc_indiv, file=tbl_file)
+            with open(fname, 'w') as tbl_file:
+                print(tbl_acc_indiv, file=tbl_file)
 
         # extended summary
         ext_summary_cols = minimizers
@@ -95,11 +97,13 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
         header += "\n\n"
         print(header)
         print (tbl_runtime_indiv)
-        fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
+        
+        if save_to_file:
+            fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
                  format(weighted=weighted_suffix_string(use_errors),
                         version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_RUNTIME, group_name=group_name))
-        with open(fname, 'w') as tbl_file:
-            print(tbl_runtime_indiv, file=tbl_file)
+            with open(fname, 'w') as tbl_file:
+                print(tbl_runtime_indiv, file=tbl_file)
 
         # extended summary
         tbl_runtime_summary = build_rst_table(ext_summary_cols, ext_summary_rows, summary_cells_runtime,
@@ -166,7 +170,7 @@ def build_group_linked_names(group_names):
     return linked_names
 
 def print_overall_results_table(minimizers, group_results, problems, group_names, use_errors,
-                                simple_text=True, rst=False):
+                                simple_text=True, save_to_file=False):
 
     groups_norm_acc, groups_norm_runtime = postproc.calc_summary_table(minimizers, group_results)
 
@@ -178,11 +182,13 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
                                           comparison_type='summary', comparison_dim='accuracy',
                                           using_errors=use_errors)
     print(tbl_all_summary_acc)
-    fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
-             format(weighted=weighted_suffix_string(use_errors),
-                    version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_ACCURACY, group_name='summary'))
-    with open(fname, 'w') as tbl_file:
-        print(tbl_all_summary_acc, file=tbl_file)
+    
+    if save_to_file:
+        fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
+                 format(weighted=weighted_suffix_string(use_errors),
+                        version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_ACCURACY, group_name='summary'))
+        with open(fname, 'w') as tbl_file:
+            print(tbl_all_summary_acc, file=tbl_file)
 
     header = '**************** Runtime ******** \n\n'
     print(header)
@@ -190,11 +196,13 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
                                               comparison_type='summary', comparison_dim='runtime',
                                               using_errors=use_errors)
     print(tbl_all_summary_runtime)
-    fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
-             format(weighted=weighted_suffix_string(use_errors),
-                    version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_RUNTIME, group_name='summary'))
-    with open(fname, 'w') as tbl_file:
-        print(tbl_all_summary_runtime, file=tbl_file)
+    
+    if save_to_file:    
+        fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
+                 format(weighted=weighted_suffix_string(use_errors),
+                        version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_RUNTIME, group_name='summary'))
+        with open(fname, 'w') as tbl_file:
+            print(tbl_all_summary_runtime, file=tbl_file)
 
 
 def weighted_suffix_string(use_errors):

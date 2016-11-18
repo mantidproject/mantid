@@ -38,7 +38,7 @@ import results_output as fitout
 import test_result
 
 def run_all_with_or_without_errors(base_problem_files_dir, use_errors, minimizers,
-                                   group_names, group_suffix_names, color_scale):
+                                   group_names, group_suffix_names, color_scale, save_to_file=False):
     """
     Run all benchmark problems available, with/without using weights in the cost
     function. This is just a convenience function meant to be used by system/unit tests, or other scripts.
@@ -61,6 +61,7 @@ def run_all_with_or_without_errors(base_problem_files_dir, use_errors, minimizer
     @param group_names :: names for display purposes
     @param group_suffix_names :: group names to use as suffixes, for example in file names
     @param color_scale :: list with pairs of threshold value - color, to produce color
+    @param save_to_file :: whether to save the table outputs to files following specific naming conventions    
     """
 
     # Assume the benchmark problems are stores as follows
@@ -84,13 +85,14 @@ def run_all_with_or_without_errors(base_problem_files_dir, use_errors, minimizer
         fitout.print_group_results_tables(minimizers, group_results, problems[idx],
                                           group_name=group_suffix_names[idx],
                                           use_errors=use_errors,
-                                          simple_text=True, rst=True, color_scale=color_scale)
+                                          simple_text=True, rst=True, save_to_file=save_to_file, 
+                                          color_scale=color_scale)
 
     # Results aggregated (median) by group (NIST, Neutron data, CUTEst, etc.)
     header = '\n\n**************** OVERALL SUMMARY - ALL GROUPS ******** \n\n'
     print(header)
     fitout.print_overall_results_table(minimizers, results_per_group, problems, group_names,
-                                       use_errors=use_errors, rst=True)
+                                       use_errors=use_errors, save_to_file=save_to_file)
 
     # Flush to reduce mix-up with system tests/runner output
     import sys
