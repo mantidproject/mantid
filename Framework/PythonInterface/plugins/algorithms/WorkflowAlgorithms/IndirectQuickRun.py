@@ -259,14 +259,13 @@ class IndirectQuickRun(DataProcessorAlgorithm):
 
     def _plot_result(self):
         import mantidplot as mp
-        nhist = mtd[self._scan_ws + '_el_eq1'].getNumberHistograms()  # noqa
-        el_eq1_plot = mp.plotSpectrum(self._scan_ws + '_el_eq1', 0, error_bars=True)  # noqa
-        inel_eq1_plot = mp.plotSpectrum(self._scan_ws + '_inel_eq1', 0, error_bars=True)  # noqa
-        el_eq2_plot = mp.plotSpectrum(self._scan_ws + '_el_eq2', 0, error_bars=True)  # noqa
-        inel_eq2_plot = mp.plotSpectrum(self._scan_ws + '_inel_eq2', 0, error_bars=True)  # noqa
-        eisf_plot = mp.plotSpectrum(self._scan_ws + '_eisf', 0, error_bars=True)  # noqa
+        mp.plotSpectrum(self._scan_ws + '_el_eq1', 0, error_bars=True)
+        mp.plotSpectrum(self._scan_ws + '_inel_eq1', 0, error_bars=True)
+        mp.plotSpectrum(self._scan_ws + '_el_eq2', 0, error_bars=True)
+        mp.plotSpectrum(self._scan_ws + '_inel_eq2', 0, error_bars=True)
+        mp.plotSpectrum(self._scan_ws + '_eisf', 0, error_bars=True)
         if self._msdfit:
-            msd_plot = mp.plotSpectrum(self._scan_ws + '_msd', 1, error_bars=True)  # noqa
+            mp.plotSpectrum(self._scan_ws + '_msd', 1, error_bars=True)
 
     def _format_runs(self, runs):
         run_list = []
