@@ -619,6 +619,7 @@ void TomographyIfacePresenter::addProcessToJobList() {
   auto args = worker->getArgs();
 
   m_model->addJobToStatus(actualpid, runnable, args);
+  processRefreshJobs();
 }
 
 void TomographyIfacePresenter::readWorkerStdOut(const QString &s) {
