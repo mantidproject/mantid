@@ -672,6 +672,11 @@ int NexusFileIO::writeNexusTableWorkspace(
         if (col->cell<std::string>(ii).size() > maxStr)
           maxStr = col->cell<std::string>(ii).size();
       }
+      // If the column is empty fill the data with spaces.
+      // Strings containing spaces only will be read back in as empty strings.
+      if (maxStr == 0) {
+        maxStr = 1;
+      }
       int dims_array[2] = {nRows, static_cast<int>(maxStr)};
       int asize[2] = {1, dims_array[1]};
 
