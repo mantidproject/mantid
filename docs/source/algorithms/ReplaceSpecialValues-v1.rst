@@ -74,16 +74,16 @@ Output:
     ws.setY(0, wsYArray)
     ws = ReplaceSpecialValues(ws, SmallNumberThreshold=1e-6)
     
-    print("Before\t After")
-    print("%s\t%s", wsYArray[0], ws.readY(0)[0])
+    print("Before\t\t After")
+    print("{0}\t{1}".format(wsYArray[0], ws.readY(0)[0]))
     
 Output:
 
 .. testoutput:: replaceSVFloatingPointErrors
     :options: +NORMALIZE_WHITESPACE
 
-    Before  After
-    0       0
+    Before		  After
+    9.99999993923e-09	0.0
 
 
 .. categories::
