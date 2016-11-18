@@ -289,13 +289,14 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         run = mtd[ws_name].getRun()
 
         if self._sample_log_name in run:
-            # Look for temperature in logs in workspace
+            # Look for sample unit in logs in workspace
             tmp = run[self._sample_log_name].value
             value_action = {'last_value': lambda x: x[len(x)-1],
                             'average': lambda x: x.mean()}
-            temp = value_action[self._sample_log_value](tmp)
-            logger.debug('Temperature %d K found for run: %s' % (temp, run_name))
-            return temp
+            sample = value_action[self._sample_log_value](tmp)
+            unit = run[self._sample_log_name].units
+            logger.debug('%d %s found for run: %s' % (sample, unit, run_name))
+            return sample
 
         else:
             # Logs not in workspace, try loading from file
