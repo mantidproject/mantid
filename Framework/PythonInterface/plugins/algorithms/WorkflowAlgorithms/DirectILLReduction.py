@@ -100,6 +100,14 @@ class NameSource:
         return self._prefix + '_zerocountdiagn'
 
     @namelogging
+    def cdSubtractedEc(self):
+        return self._prefix + '_Cd_subtracted_EC'
+
+    @namelogging
+    def cdSubtractedSample(self):
+        return self._prefix + '_Cd_subtracted'
+
+    @namelogging
     def detectorEfficiencyCorrected(self):
         return self._prefix + '_deteff'
 
@@ -180,6 +188,18 @@ class NameSource:
     @namelogging
     def rebinned(self):
         return self._prefix + '_rebinned'
+
+    @namelogging
+    def transmission(self):
+        return self._prefix + '_transmission'
+
+    @namelogging
+    def transmissionCorrectedCdSubtracted(self):
+        return self._prefix + '_transmission_corrected_Cd_subtracted'
+
+    @namelogging
+    def transmissionCorrectedEc(self):
+        return self._prefix + '_transmission_corrected_EC'
 
     @namelogging
     def vanadiumNormalized(self):
@@ -432,39 +452,39 @@ class DirectILLReduction(DataProcessorAlgorithm):
             outWs = workspaceNames.ecSubtracted()
             cdWs = self.getProperty(PROP_CD_WORKSPACE).value
             transmission = self.getProperty(PROP_TRANSMISSION).value
-            tempWsName1 = '__transmission_for_' + outWs
-            transmission = CreateSingleValuedWorkspace(OutputWorkspace=tempWsName1,
+            transmissionWsName = workspaceNames.transmission()
+            transmission = CreateSingleValuedWorkspace(OutputWorkspace=transmissionWsName,
                                                        DataValue=transmission)
-            tempWsName2 = '__input_minus_Cd_for_' + outWs
-            tempWsName3 = '__EC_minus_Cd_for_' + outWs
             # If Cd, calculate
             # out = (in - Cd) / transmission - (EC - Cd)
             if cdWs:
-                workspace = Minus(LHSWorkspace=workspace,
-                                  RHSWorkspace=cdWs,
-                                  OutputWorkspace=tempWsName2)
+                cdSubtractedEcWsName = workspaceNames.cdSubtractedEc()
                 ecWs = Minus(LHSWorkspace=ecWs,
                              RHSWorkspace=cdWs,
-                             OutputWorkspace=tempWsNamw3)
+                             OutputWorkspace=cdSubtractedEcWsName)
+                cdSubtractedWsName = workspaceNames.cdSubtractedSample()
+                workspace = Minus(LHSWorkspace=workspace,
+                                  RHSWorkspace=cdWs,
+                                  OutputWorkspace=cdSubtractedWsName)
+                correctedCdSubtractedWsName = workspaceNames.transmissionCorrectedCdSubtracted()
                 workspace = Divide(LHSWorkspace=workspace,
                                    RHSWorkspace=transmission,
-                                   OutputWorkspace=outWs)
+                                   OutputWorkspace=correctedCdSubtractedWsName)
+                ecSubtractedWsName = workspaceNames.ecSubtracted()
                 workspace = Minus(LHSWorkspace=workspace,
                                   RHSWorkspace=ecWs,
-                                  OutputWorkspace=workspace)
-                # Cleanup
-                DeleteWorkspace(Workspace=tempWsName1)
-                DeleteWorkspace(Workspace=tempWsName2)
-                DeleteWorkspace(Workspace=tempWsName3)
+                                  OutputWorkspace=ecSubtractedWsName)
             # If no Cd, calculate
             # out = in - transmission * EC
             else:
+                correctedEcWsName = workspaceNames.transmissionCorrectedEc()
                 ecWs = Multiply(LHSWorkspace=ecWs,
                                 RHSWorkspace=transmission,
-                                OutputWorkspace=ecWs)
+                                OutputWorkspace=correctedEcWsName)
+                ecSubtractedWsName = workspaceNames.ecSubtracted()
                 workspace = Minus(LHSWorkspace=workspace,
-                                  RHSWorkspace=inEC,
-                                  OutputWorkspace=workspace)
+                                  RHSWorkspace=ecWs,
+                                  OutputWorkspace=ecSubtractedWsName)
 
         # Reduction for vanadium ends here.
         if reductionType == REDUCTION_TYPE_VANADIUM:
