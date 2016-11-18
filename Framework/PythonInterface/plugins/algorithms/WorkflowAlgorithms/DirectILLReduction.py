@@ -215,7 +215,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         monitorEppOutWs = self.getPropertyValue(PROP_OUTPUT_MONITOR_EPP_WORKSPACE)
         # Same as with time-independent backgrounds: the EPP table may
         # came from outside. Otherwise make our own.
-        if eppOutWs or not eppInWs:
+        if not eppInWs:
             if not eppOutWs:
                 eppOutWs = wsNames.withSuffix('epp')
                 wsCleanup.protect(eppOutWs)
@@ -233,13 +233,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if eppInWs:
             eppWorkspace = self.getProperty(PROP_EPP_WORKSPACE).value
             monitorEppWorkspace = self.getProperty(PROP_MONITOR_EPP_WORKSPACE).value
-            if not eppOutWs:
-                # In any case, some output is required.
-                eppOutWs = "dummy_output"
-                emptyOutput = CreateSingleValuedWorkspace(OutputWorkspace=bkgOutWs,
-                                                          DataValue = 0)
-                self.setProperty(PROP_OUTPUT_EPP_WORKSPACE, eppOutWs)
-                self.setProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE, eppOutWs)
         wsCleanup.cleanup()
 
         # Detector diagnostics, if requested.
