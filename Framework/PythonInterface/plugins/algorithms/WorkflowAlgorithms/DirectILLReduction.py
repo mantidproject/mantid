@@ -157,6 +157,14 @@ class NameSource:
         return self._prefix + '_detectors'
 
     @namelogging
+    def normalizationFactorMonitor(self):
+        return self._prefix + '_mon_norm_factor'
+
+    @namelogging
+    def normalizationFactorTime(self):
+        return self._prefix + '_time_norm_factor'
+
+    @namelogging
     def normalised(self):
         return self._prefix + '_norm'
 
@@ -398,6 +406,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if normalisationMethod:
             if normalisationMethod == NORM_METHOD_MONITOR:
                 outWs = workspaceNames.normalised()
+                normFactorWsName = workspaceNames.normalizationFactorMonitor()
                 eppRow = monitorEppWorkspace.row(monitorIndex)
                 sigma = eppRow['Sigma']
                 centre = eppRow['PeakCentre']
@@ -408,14 +417,15 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                            MonitorWorkspace=monitorWorkspace,
                                                            MonitorWorkspaceIndex=monitorIndex,
                                                            IntegrationRangeMin=begin,
-                                                           IntegrationRangeMax=end)
+                                                           IntegrationRangeMax=end,
+                                                           NormFactorWS=normFactorWsName)
             elif normalisationMethod == NORM_METHOD_TIME:
                 outWs = workspaceNames.normalised()
-                tempWsName = '__actual_time_for_' + outWs
-                time = CreateSingleValuedWorkspace(OutputWorkspace=tempWsName,
+                normFactorWsName=workspaceNames.normalizationFactorTime()
+                time = CreateSingleValuedWorkspace(OutputWorkspace=normFactorWsName,
                                                    DataValue=inWs.getLogData('actual_time').value)
                 workspace = Divide(LHSWorkspace=workspace,
-                                   RHSWorkspace=tempWsName,
+                                   RHSWorkspace=time,
                                    OutputWorkspace=outWs)
                 DeleteWorkspace(Workspace=time)
             else:
