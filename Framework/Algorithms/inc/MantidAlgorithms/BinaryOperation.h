@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataObjects/EventList.h"
@@ -114,7 +115,7 @@ protected:
   virtual bool propagateSpectraMask(const API::SpectrumInfo &lhsSpectrumInfo,
                                     const API::SpectrumInfo &rhsSpectrumInfo,
                                     const int64_t index,
-                                    API::MatrixWorkspace_sptr out);
+                                    API::MatrixWorkspace &out);
 
   /** Carries out the binary operation on a single spectrum, with another
    *spectrum as the right-hand operand.

@@ -179,7 +179,7 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
       try {
         const auto detIndex = m_detectorInfo.indexOf(id);
         det_ptrs.push_back(m_detectorInfo.getDetectorPtr(detIndex));
-      } catch (std::out_of_range) {
+      } catch (std::out_of_range &) {
         // Workspaces can contain invalid detector IDs. Those IDs will be
         // silently ignored here until this is fixed. Some valid IDs will exist
         // if hasDetectors or hasUniqueDetectors has returned true, but there

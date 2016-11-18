@@ -177,7 +177,7 @@ public:
     for (int i = 0; i < nHist; ++i) {
       auto spectrumInfo = output->spectrumInfo();
 
-      TSM_ASSERT("Detector was found", spectrumInfo.hasDetectors(i));
+      TSM_ASSERT("Detector was not found", spectrumInfo.hasDetectors(i));
       if (spectrumInfo.hasDetectors(i)) {
         if (masking.count(i) == 0) {
           TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), false);
