@@ -59,6 +59,31 @@ Output:
     2       -inf    1000.0
     3       nan     0.0
     4       8e-07   200.0
+    
+.. testcode:: replaceSVFloatingPointErrors
+
+    import numpy as np
+    ws = CreateSampleWorkspace(BankPixelWidth=1)
+
+    value1 = 1.00000004
+    value2 = 1.00000003
+    valueDiff = value1 - value2
+    
+    wsYArray = np.array(ws.readY(0))
+    wsYArray[0] = valueDiff
+    ws.setY(0, wsYArray)
+    ws = ReplaceSpecialValues(ws, SmallNumberThreshold=1e-6)
+    
+    print("Before\t After")
+    print("%s\t%s", wsYArray[0], ws.readY(0)[0])
+    
+Output:
+
+.. testoutput:: replaceSVFloatingPointErrors
+    :options: +NORMALIZE_WHITESPACE
+
+    Before  After
+    0       0
 
 
 .. categories::
