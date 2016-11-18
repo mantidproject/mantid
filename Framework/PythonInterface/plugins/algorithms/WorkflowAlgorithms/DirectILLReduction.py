@@ -38,6 +38,7 @@ PROP_FLAT_BACKGROUND_SCALING          = 'FlatBackgroundScaling'
 PROP_FLAT_BACKGROUND_WINDOW           = 'FlatBackgroundAveragingWindow'
 PROP_FLAT_BACKGROUND_WORKSPACE        = 'FlatBackgroundWorkspace'
 PROP_INCIDENT_ENERGY_CALIBRATION      = 'IncidentEnergyCalibration'
+PROP_INCIDENT_ENERGY_WORKSPACE        = 'IncidentEnergyWorkspace'
 PROP_INDEX_TYPE                       = 'IndexType'
 PROP_INPUT_FILE                       = 'InputFile'
 PROP_INPUT_WORKSPACE                  = 'InputWorkspace'
@@ -47,6 +48,7 @@ PROP_NORMALISATION                    = 'Normalisation'
 PROP_OUTPUT_DIAGNOSTICS_WORKSPACE     = 'OutputDiagnosticsWorkspace'
 PROP_OUTPUT_EPP_WORKSPACE             = 'OutputEPPWorkspace'
 PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE = 'OutputFlatBackgroundWorkspace'
+PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE = 'OutputIncidentEnergyWorkspace'
 PROP_OUTPUT_MONITOR_EPP_WORKSPACE     = 'OutputMonitorEPPWorkspace'
 PROP_OUTPUT_WORKSPACE                 = 'OutputWorkspace'
 PROP_REDUCTION_TYPE                   = 'ReductionType'
@@ -114,6 +116,10 @@ class NameSource:
         return self._prefix + '_ecalib'
 
     @namelogging
+    def eiCalibration(self):
+        return self._prefix + '_calibrated_incident_energy'
+
+    @namelogging
     def energyConverted(self):
         return self._prefix +'_econv'
 
@@ -178,11 +184,6 @@ class NameSource:
     @namelogging
     def vanadiumNormalized(self):
         return self._prefix + '_vnorm'
-
-def guessIncidentEnergyWorkspaceName(eppWorkspace):
-    # This can be considered a bit of a hack.
-    splits = eppWorkspace.getName().split('_')
-    return ''.join(splits[:-1]) + '_ie'
 
 def setAsBad(ws, index):
     ws.dataY(index)[0] += 1
@@ -349,36 +350,24 @@ class DirectILLReduction(DataProcessorAlgorithm):
         eiCalibration = self.getProperty(PROP_INCIDENT_ENERGY_CALIBRATION).value
         if eiCalibration == INCIDENT_ENERGY_CALIBRATION_YES:
             instrument = workspace.getInstrument().getName()
-            if instrument in ['IN4', 'IN6']:
+            eiWs = self.getProperty(PROP_INCIDENT_ENERGY_WORKSPACE).value
+            if not eiWs and instrument in ['IN4', 'IN6']:
                 eiCalibrationDets = self.getProperty(PROP_DETECTORS_FOR_EI_CALIBRATION).value
-                eiWsName = guessIncidentEnergyWorkspaceName(eppWorkspace)
-                if not AnalysisDataServiceImpl.Instance().doesExist(eiWsName):
-                    # TODO this should go into the LoadILL algorithm.
-                    instrument = workspace.getInstrument().getName()
-                    if instrument == 'IN4':
-                        fermiChopperSpeed = workspace.run().getLogData('FC.rotation_speed').value
-                        backgroundChopper1Speed = workspace.run().getLogData('BC1.rotation_speed').value
-                        backgroundChopper2Speed = workspace.run().getLogData('BC2.rotation_speed').value
-                        if abs(backgroundChopper1Speed - backgroundChopper2Speed) > 1:
-                            raise RuntimeError('background choppers 1 and 2 have different speeds')
-                        n = fermiChopperSpeed / backgroundChopper1Speed / 4
-                        pulseInterval = 60.0 / (2 * fermiChopperSpeed) * n
-                    elif instrument == 'IN6':
-                        fermiChopperSpeed = workspace.run().getLogData('Fermi.rotation_speed').value
-                        suppressorSpeed = workspace.run().getLogData('Suppressor.rotation_speed').value
-                        n = fermiChopperSpeed / suppressorSpeed
-                        pulseInterval = 60.0 / (2 * fermiChopperSpeed) * n
-                    energy = GetEiMonDet(DetectorWorkspace=workspace,
-                                         DetectorEPPTable=eppWorkspace,
-                                         IndexType=indexType,
-                                         Detectors=eiCalibrationDets,
-                                         MonitorWorkspace=monitorWorkspace,
-                                         MonitorEppTable=monitorEppWorkspace,
-                                         Monitor=monitorIndex,
-                                         PulseInterval=pulseInterval)
-                    eiWsName = workspaceNames.incidentEnergy()
-                    CreateSingleValuedWorkspace(OutputWorkspace=eiWsName,
-                                                DataValue=energy)
+                pulseInterval = workspace.getRun().getLogData('pulse_interval').value
+                energy = GetEiMonDet(DetectorWorkspace=workspace,
+                                     DetectorEPPTable=eppWorkspace,
+                                     IndexType=indexType,
+                                     Detectors=eiCalibrationDets,
+                                     MonitorWorkspace=monitorWorkspace,
+                                     MonitorEppTable=monitorEppWorkspace,
+                                     Monitor=monitorIndex,
+                                     PulseInterval=pulseInterval)
+                eiWsName = workspaceNames.incidentEnergy()
+                eiWs = CreateSingleValuedWorkspace(OutputWorkspace=eiWsName,
+                                                   DataValue=energy)
+            else:
+                self.log().error('Instrument ' + instrument + ' not supported for incident energy calibration')
+            if eiWs:
                 # Update incident energy
                 energy = mtd[eiWsName].readY(0)[0]
                 outWs = workspaceNames.eiCalibrated()
@@ -397,8 +386,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              LogType='Number',
                              NumberType='Double',
                              LogUnit='Ångström')
-            else:
-                self.log().warning('Instrument ' + instrument + ' not supported for incident energy calibration')
+                if not self.getProperty(PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE).isDefault:
+                    self.setProperty(PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE, eiWs)
 
         # Normalisation to monitor/time
         normalisationMethod = self.getProperty(PROP_NORMALISATION).value
@@ -598,6 +587,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              '',
                              direction=Direction.Input,
                              doc='List of detectors used for the incident energy calibration')
+        self.declareProperty(MatrixWorkspaceProperty(PROP_INCIDENT_ENERGY_WORKSPACE,
+                                                     '',
+                                                     Direction.Input,
+                                                     PropertyMode.Optional),
+                             doc='A single-valued workspace holding the calibrated incident energy')
         self.declareProperty(PROP_FLAT_BACKGROUND_SCALING,
                              1.0,
                              direction=Direction.Input,
@@ -648,6 +642,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              direction=Direction.Output,
                              optional=PropertyMode.Optional),
                              doc='Output workspace for elastic peak positions')
+        self.declareProperty(WorkspaceProperty(PROP_OUTPUT_INCIDENT_ENERGY_WORKSPACE,
+                                               '',
+                                               direction=Direction.Output,
+                                               optional=PropertyMode.Optional),
+                             doc='Output workspace for calibrated inciden energy')
         self.declareProperty(ITableWorkspaceProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE,
                              '',
                              direction=Direction.Output,
