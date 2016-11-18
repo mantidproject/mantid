@@ -2747,24 +2747,29 @@ void FitPropertyBrowser::setWorkspaceProperties() {
   if (!ws)
     return;
 
-  m_settingsGroup->property()->removeSubProperty(m_evaluationType);
+  // If this is a MuonFitPropertyBrowser, "evaluation type" goes in the Custom Settings group.
+  // If not, there is no Custom Settings group and it goes in the regular Settings group.
+  auto *settings =
+      m_customSettingsGroup ? m_customSettingsGroup : m_settingsGroup;
+
+  settings->property()->removeSubProperty(m_evaluationType);
   m_evaluationType->setEnabled(false);
   // if it is a MatrixWorkspace insert WorkspaceIndex
-  if (m_browser->isItemVisible(m_settingsGroup)) {
-    auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
-    if (mws) {
+  auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+  if (mws) {
+    if (m_browser->isItemVisible(m_settingsGroup)) {
       if (!m_settingsGroup->property()->subProperties().contains(
               m_workspaceIndex)) {
         m_settingsGroup->property()->insertSubProperty(m_workspaceIndex,
                                                        m_workspace);
       }
-      auto isHistogram = mws->isHistogramData();
-      m_evaluationType->setEnabled(isHistogram);
-      if (isHistogram) {
-        m_settingsGroup->property()->addSubProperty(m_evaluationType);
-      }
-      return;
     }
+    auto isHistogram = mws->isHistogramData();
+    m_evaluationType->setEnabled(isHistogram);
+    if (isHistogram) {
+      settings->property()->addSubProperty(m_evaluationType);
+    }
+    return;
   }
 
   // if it is a TableWorkspace insert the column properties
