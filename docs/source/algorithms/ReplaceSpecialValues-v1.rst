@@ -58,7 +58,7 @@ Output:
     1       inf     1000.0
     2       -inf    1000.0
     3       nan     0.0
-    4       8e-7    200
+    4       8e-07   200.0
 
 
 .. categories::

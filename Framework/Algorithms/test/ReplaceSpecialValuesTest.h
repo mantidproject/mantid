@@ -210,7 +210,7 @@ public:
 
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
       for (int j = 0; j < 4; ++j) {
-        if (i == 0 && j == 1 || !std::isnormal(inputWS->y(i)[j])) {
+        if ((i == 0 && j == 1) || !std::isnormal(inputWS->y(i)[j])) {
           // Skip our changed one or any we can't compare
           continue;
         } else {
