@@ -408,12 +408,12 @@ public:
 
     auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         20000, 20000);
-    AnalysisDataService::Instance().addOrReplace(inputWSName, testWS);
 
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
 
     conv.initialize();
-    conv.setPropertyValue("InputWorkspace", inputWSName);
+    conv.setChild(true);
+    conv.setProperty("InputWorkspace", testWS);
     conv.setPropertyValue("OutputWorkspace", outputWSName);
     conv.setPropertyValue("Target", "SignedTheta");
     conv.setPropertyValue("EFixed", "10.0");
