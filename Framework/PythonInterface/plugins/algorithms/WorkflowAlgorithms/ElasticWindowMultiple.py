@@ -309,16 +309,17 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                 run_logs = mtd[ws_name].getRun()
                 if self._sample_log_name in run_logs:
                     tmp = run_logs[self._sample_log_name].value
-                    temp = tmp[len(tmp) - 1]
-                    logger.debug('Temperature %d K found for run: %s' % (temp, run_name))
-                    return temp
+                    sample = tmp[len(tmp) - 1]
+                    unit = run[self._sample_log_name].units
+                    logger.debug('%d %s found for run: %s' % (sample, unit, run_name))
+                    return sample
                 else:
                     logger.warning('Log entry %s for run %s not found' % (self._sample_log_name, run_name))
             else:
                 logger.warning('Log file for run %s not found' % run_name)
 
         # Can't find log file
-        logger.warning('No temperature found for run: %s' % run_name)
+        logger.warning('No sample units found for run: %s' % run_name)
         return None
 
 
