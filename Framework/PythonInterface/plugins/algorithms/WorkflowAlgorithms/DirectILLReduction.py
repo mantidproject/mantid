@@ -40,6 +40,7 @@ PROP_FLAT_BACKGROUND_WORKSPACE        = 'FlatBackgroundWorkspace'
 PROP_INCIDENT_ENERGY_CALIBRATION      = 'IncidentEnergyCalibration'
 PROP_INCIDENT_ENERGY_WORKSPACE        = 'IncidentEnergyWorkspace'
 PROP_INDEX_TYPE                       = 'IndexType'
+PROP_INITIAL_ELASTIC_PEAK_REFERENCE   = 'InitialElasticPeakReference'
 PROP_INPUT_FILE                       = 'InputFile'
 PROP_INPUT_WORKSPACE                  = 'InputWorkspace'
 PROP_MONITOR_EPP_WORKSPACE            = 'MonitorEPPWorkspace'
@@ -232,15 +233,26 @@ class DirectILLReduction(DataProcessorAlgorithm):
         workspaceNames = NameSource(workspaceNamePrefix, cleanupMode)
         indexType = self.getProperty(PROP_INDEX_TYPE).value
 
+        # The variable 'workspace' shall hold the current 'main' data
+        # throughout the algorithm.
         if self.getProperty(PROP_INPUT_FILE).value:
             # Load data
             inputFilename = self.getProperty(PROP_INPUT_FILE).value
             outWs = workspaceNames.raw()
-            # The variable 'workspace' shall hold the current 'main' data
-            # throughout the algorithm.
-            workspace = Load(Filename=inputFilename,
-                             OutputWorkspace=outWs)
-
+            eppReference = self.getProperty(PROP_INITIAL_ELASTIC_PEAK_REFERENCE).value
+            if eppReference:
+                if mtd.doesExist(str(eppReference)):
+                    workspace = Load(Filename=inputFilename,
+                                     OutputWorkspace=outWs,
+                                     WorkspaceVanadium=eppReference)
+                else:
+                    workspace = Load(Filename=inputFilename,
+                                     OutputWorkspace=outWs,
+                                     FilenameVanadium=eppReference)
+            else:
+                workspace = Load(Filename=inputFilename,
+                                 OutputWorkspace=outWs,
+                                 FilenameVanadium=eppReference)
             # Now merge the loaded files (if required)
             outWsName = workspaceNames.merged()
             workspace = MergeRuns(InputWorkspaces=workspace,
@@ -560,15 +572,15 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              validator=StringListValidator([REDUCTION_TYPE_SAMPLE, REDUCTION_TYPE_VANADIUM, REDUCTION_TYPE_CD, REDUCTION_TYPE_EC]),
                              direction=Direction.Input,
                              doc='Type of the reduction workflow and output')
-        self.declareProperty(PROP_MONITOR_INDEX,
-                             0,
-                             direction=Direction.Input,
-                             doc='Index of the main monitor')
         self.declareProperty(PROP_CLEANUP_MODE,
                              CLEANUP_DELETE,
                              validator=StringListValidator([CLEANUP_DELETE, CLEANUP_KEEP]),
                              direction=Direction.Input,
                              doc='What to do with intermediate workspaces')
+        self.declareProperty(PROP_INITIAL_ELASTIC_PEAK_REFERENCE,
+                             '',
+                             direction=Direction.Input,
+                             doc="Reference file or workspace for initial 'EPP' sample log entry")
         self.declareProperty(MatrixWorkspaceProperty(PROP_VANADIUM_WORKSPACE,
                                                      '',
                                                      Direction.Input,
@@ -598,6 +610,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              INDEX_TYPE_WORKSPACE_INDEX,
                              direction=Direction.Input,
                              doc='Type of numbers in ' + PROP_MONITOR_INDEX + ' and ' + PROP_DETECTORS_FOR_EI_CALIBRATION + ' properties')
+        self.declareProperty(PROP_MONITOR_INDEX,
+                             0,
+                             direction=Direction.Input,
+                             doc='Index of the main monitor')
         self.declareProperty(PROP_INCIDENT_ENERGY_CALIBRATION,
                              INCIDENT_ENERGY_CALIBRATION_YES,
                              validator=StringListValidator([INCIDENT_ENERGY_CALIBRATION_YES, INCIDENT_ENERGY_CALIBRATION_YES]),
