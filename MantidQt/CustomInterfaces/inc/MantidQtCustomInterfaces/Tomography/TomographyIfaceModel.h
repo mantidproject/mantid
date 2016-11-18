@@ -151,24 +151,25 @@ public:
                         std::vector<std::string> &status,
                         std::vector<std::string> &cmds);
   /// Submit a new job to the (remote or local) compute resource
-  void prepareSubmissionArguments(const bool local, std::string &run,
+  void prepareSubmissionArguments(const bool local, std::string &runnable,
                                   std::vector<std::string> &args,
                                   std::string &allOpts);
 
-  void doRunReconstructionJobLocal(
-      const std::string &run, const std::vector<std::string> &args,
+  void doLocalRunReconstructionJob(
+      const std::string &runnable, const std::vector<std::string> &args,
+      const std::string &allOpts,
       MantidQt::CustomInterfaces::TomographyThreadHandler &thread,
       MantidQt::CustomInterfaces::TomographyProcessHandler &worker);
 
-  void doRunReconstructionJobRemote(const std::string &compRes,
-                                    const std::string &run,
+  void doRemoteRunReconstructionJob(const std::string &compRes,
+                                    const std::string &runnable,
                                     const std::string &allOpts);
 
   /// Cancel a previously submitted job
   void doCancelJobs(const std::string &compRes,
                     const std::vector<std::string> &id);
 
-  void addJobToStatus(const qint64 pid, const std::string &run,
+  void addJobToStatus(const qint64 pid, const std::string &runnable,
                       const std::string &allOpts);
   /// Get fresh status information on running/recent jobs
   void doRefreshJobsInfo(const std::string &compRes);
@@ -230,12 +231,9 @@ protected: // protected to expose everything to testing
 
   std::string validateCompResource(const std::string &res) const;
 
-  /// makes the command line string to run on the remote/local
-  void makeRunnableWithOptions(const bool local, std::string &run,
-                               std::vector<std::string> &opt) const;
-
   bool checkIfToolIsSetupProperly(const std::string &tool,
-                                  const std::string &cmd) const;
+                                  const std::string &cmd,
+                                  const std::vector<std::string> &args) const;
 
   void makeTomoRecScriptOptions(const bool local,
                                 std::vector<std::string> &opts) const;
@@ -245,7 +243,7 @@ protected: // protected to expose everything to testing
                            const bool local,
                            std::vector<std::string> &opts) const;
 
-  void splitCmdLine(const std::string &cmd, std::string &run,
+  void splitCmdLine(const std::string &cmd, std::string &runnable,
                     std::string &opts) const;
 
   /// process the tool name to be appropriate for the command line arg
@@ -300,6 +298,7 @@ private:
   /// reconstruction tools available on SCARF
   std::vector<std::string> m_SCARFtools;
 
+  // Paths for the sample, flat and dark images
   TomoPathsConfig m_pathsConfig;
 
   // System settting including several paths and parameters (local and remote)
@@ -327,8 +326,6 @@ private:
   // mutex for the job status info update operations
   // TODO: replace with std::mutex+std::lock_guard
   QMutex *m_statusMutex;
-
-  std::unique_ptr<TomographyProcessHandler> m_process;
 };
 
 } // namespace CustomInterfaces

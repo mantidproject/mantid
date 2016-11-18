@@ -67,6 +67,7 @@ protected:
   /// clean shut down of model, view, etc.
   void cleanup();
 
+  // notification methods
   void processSystemSettingsUpdated();
   void processSetupResourcesAndTools();
   void processCompResourceChanged();
@@ -83,11 +84,8 @@ protected:
   void processLogMsg();
   void processAggregateEnergyBands();
   void processShutDown();
-  void doVisualize(const std::vector<std::string> &ids);
 
-  /// To prepare a local run
-  void makeRunnableWithOptionsLocal(const std::string &comp, std::string &run,
-                                    std::string &opt);
+  void doVisualize(const std::vector<std::string> &ids);
 
   /// auto-guess additional directories when the user gives the samples path
   void findFlatsDarksFromSampleGivenByUser(TomoPathsConfig &cfg);
@@ -111,6 +109,10 @@ protected slots:
   void addProcessToJobList();
 
 private:
+  void
+  prepareThreadAndRunLocalReconstruction(const std::string &runnable,
+                                         const std::vector<std::string> &args,
+                                         const std::string &allOpts);
   /// creates the correct dialog pointer and sets it to the member variable
   void createConfigDialogUsingToolName(const std::string &toolName);
 

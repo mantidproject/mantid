@@ -560,40 +560,18 @@ void TomographyIfacePresenter::processRunRecon() {
   try {
     const bool local = isLocalResourceSelected();
 
-    std::string run;
+    std::string runnable;
     std::vector<std::string> args;
     std::string allOpts;
 
-    m_model->prepareSubmissionArguments(local, run, args, allOpts);
+    m_model->prepareSubmissionArguments(local, runnable, args, allOpts);
     if (local) {
-      // localRunReconstruction();
-      m_workerThread.reset();
-      auto *worker = new MantidQt::CustomInterfaces::TomographyProcessHandler();
-      m_workerThread =
-          Mantid::Kernel::make_unique<TomographyThreadHandler>(this, worker);
-      worker->moveToThread(m_workerThread.get());
-
-      connect(m_workerThread.get(), SIGNAL(started()), worker,
-              SLOT(startWorker()));
-
-      connect(m_workerThread.get(), SIGNAL(stdOutReady(QString)), this,
-              SLOT(readWorkerStdOut(QString)));
-      connect(m_workerThread.get(), SIGNAL(stdErrReady(QString)), this,
-              SLOT(readWorkerStdErr(QString)));
-
-      connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
-      connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()),
-              Qt::DirectConnection);
-      connect(worker, SIGNAL(finished()), m_workerThread.get(),
-              SIGNAL(finished()));
-      connect(m_workerThread.get(), SIGNAL(finished()), m_workerThread.get(),
-              SLOT(deleteLater()), Qt::DirectConnection);
-      m_model->doRunReconstructionJobLocal(run, args, *m_workerThread, *worker);
-
+      prepareThreadAndRunLocalReconstruction(runnable, args, allOpts);
     } else {
       // get the actual compute resource name
       const std::string computingResouce = m_view->currentComputeResource();
-      m_model->doRunReconstructionJobRemote(computingResouce, run, allOpts);
+      m_model->doRemoteRunReconstructionJob(computingResouce, runnable,
+                                            allOpts);
     }
 
     // m_model->doSubmitReconstructionJob(m_view->currentComputeResource(),
@@ -602,6 +580,36 @@ void TomographyIfacePresenter::processRunRecon() {
     m_view->userWarning("Issue when trying to start a job", e.what());
   }
   processRefreshJobs();
+}
+
+void TomographyIfacePresenter::prepareThreadAndRunLocalReconstruction(
+    const std::string &runnable, const std::vector<std::string> &args,
+    const std::string &allOpts) {
+  // currently this kill any other threads/processes without giving a chance for
+  // graceful exit, could do something like emit killThread() that then calls
+  // quit() on the thread itself
+  m_workerThread.reset();
+  auto *worker = new MantidQt::CustomInterfaces::TomographyProcessHandler();
+  m_workerThread =
+      Mantid::Kernel::make_unique<TomographyThreadHandler>(this, worker);
+  worker->moveToThread(m_workerThread.get());
+
+  connect(m_workerThread.get(), SIGNAL(started()), worker, SLOT(startWorker()));
+
+  connect(m_workerThread.get(), SIGNAL(stdOutReady(QString)), this,
+          SLOT(readWorkerStdOut(QString)));
+  connect(m_workerThread.get(), SIGNAL(stdErrReady(QString)), this,
+          SLOT(readWorkerStdErr(QString)));
+
+  connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
+  connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()),
+          Qt::DirectConnection);
+  connect(worker, SIGNAL(finished()), m_workerThread.get(), SIGNAL(finished()));
+  connect(m_workerThread.get(), SIGNAL(finished()), m_workerThread.get(),
+          SLOT(deleteLater()), Qt::DirectConnection);
+
+  m_model->doLocalRunReconstructionJob(runnable, args, allOpts, *m_workerThread,
+                                       *worker);
 }
 
 void TomographyIfacePresenter::addProcessToJobList() {
@@ -643,14 +651,7 @@ void TomographyIfacePresenter::processRefreshJobs() {
     return;
   }
 
-  // TODOPRES is this necessary? if we're logged in, we will never refresh the
-  // jobs for 'Local', also will need to be removed if more remote resources are
-  // added
-  std::string comp = m_view->currentComputeResource();
-  if (isLocalResourceSelected()) {
-    comp = "SCARF@STFC";
-  }
-  m_model->doRefreshJobsInfo(comp);
+  m_model->doRefreshJobsInfo(m_view->currentComputeResource());
 
   {
     // update widgets from that info

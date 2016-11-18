@@ -337,44 +337,47 @@ void TomographyIfaceModel::doQueryJobStatus(const std::string &compRes,
  * --params..
  * - remote only has the script path: /scriptPathOnRemote/ --params..
  *
- * @param comp Compute resource for which the command line is being prepared
+ * @param local Is the resource local or remote
  * @param runnable Path to a runnable application (script, python module, etc.)
- * @param opt Command line options to the application
+ * @param args A vector that contains all the arguments
+ * @param allOpts The concatenated arguments in a single string
  */
-void TomographyIfaceModel::makeRunnableWithOptions(
-    const bool local, std::string &runnable,
-    std::vector<std::string> &opt) const {
-
+void TomographyIfaceModel::prepareSubmissionArguments(
+    const bool local, std::string &runnable, std::vector<std::string> &args,
+    std::string &allOpts) {
   if (!m_currentToolSettings) {
     throw std::invalid_argument("Settings for tool not set up");
   }
-
   const std::string tool = usingTool();
-
   const std::string cmd = m_currentToolSettings->toCommand();
 
   std::string longOpt;
   // this gets the runnable from the whole string
   splitCmdLine(cmd, runnable, longOpt);
 
+  // this is discarded for all tools but the custom command
+  std::string trailingCommands;
   if (local) {
     std::string execScriptPath;
-
-    // this variable holds the input paths, but is discarded for now
-    // until the command line building overhaul
-    std::string trailingCommands;
-    // this gets the path to the python script tomo_reconstruct.py
     splitCmdLine(longOpt, execScriptPath, trailingCommands);
-
-    checkIfToolIsSetupProperly(tool, cmd);
-    opt.emplace_back(execScriptPath);
-    if (tool == g_customCmdTool) {
-      opt.emplace_back(trailingCommands);
-      return;
-    }
+    args.emplace_back(execScriptPath);
   }
 
-  makeTomoRecScriptOptions(local, opt);
+  if (tool == g_customCmdTool) {
+    args.emplace_back(local ? trailingCommands : longOpt);
+    return;
+  }
+
+  // appends the additional options tool name, algorithm name, filters, etc
+  makeTomoRecScriptOptions(local, args);
+
+  checkIfToolIsSetupProperly(tool, cmd, args);
+
+  // used for remote submission
+  allOpts = constructSingleStringFromVector(args);
+
+  logMsg("Running " + usingTool() + ", with binary: " + runnable +
+         ", with parameters: " + allOpts);
 }
 
 /**
@@ -431,38 +434,8 @@ std::string TomographyIfaceModel::constructSingleStringFromVector(
   return allOpts;
 }
 
-/** Prepare the submission arguments for either local or remote
- * @param local Is the resource local or remote
- * @param run The runnable path
- * @param args A vector that contains all the arguments
- * @param allOpts The concatenated arguments in a single string
- */
-void TomographyIfaceModel::prepareSubmissionArguments(
-    const bool local, std::string &run, std::vector<std::string> &args,
-    std::string &allOpts) {
-  try {
-    makeRunnableWithOptions(local, run, args);
-  } catch (std::exception &e) {
-    g_log.error() << "Could not prepare the requested reconstruction job "
-                     "submission. There was an error: " +
-                         std::string(e.what());
-    throw;
-  }
-
-  if (run.empty() || args.empty()) {
-    throw std::runtime_error(
-        "The script or executable to run is not defined "
-        "(empty string). You need to setup the reconstruction tool.");
-  }
-
-  allOpts = constructSingleStringFromVector(args);
-
-  logMsg("Running " + usingTool() + ", with binary: " + run +
-         ", with parameters: " + allOpts);
-}
-
-void TomographyIfaceModel::doRunReconstructionJobRemote(
-    const std::string &compRes, const std::string &run,
+void TomographyIfaceModel::doRemoteRunReconstructionJob(
+    const std::string &compRes, const std::string &runnable,
     const std::string &allOpts) {
   // with SCARF we use one (pseudo)-transaction for every submission
   auto transAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
@@ -485,7 +458,7 @@ void TomographyIfaceModel::doRunReconstructionJobRemote(
   submitAlg->setProperty("ComputeResource", compRes);
   submitAlg->setProperty("TaskName", "Mantid tomographic reconstruction job");
   submitAlg->setProperty("TransactionID", tid);
-  submitAlg->setProperty("ScriptName", run);
+  submitAlg->setProperty("ScriptName", runnable);
   submitAlg->setProperty("ScriptParams", allOpts);
   try {
     submitAlg->execute();
@@ -496,13 +469,22 @@ void TomographyIfaceModel::doRunReconstructionJobRemote(
   }
 }
 
-void TomographyIfaceModel::doRunReconstructionJobLocal(
-    const std::string &run, const std::vector<std::string> &args,
-    TomographyThreadHandler &thread, TomographyProcessHandler &worker) {
+/** Starts the local thread with the external reconstruction process
+ * @param runnable Path to a runnable application (script, python module, etc.)
+ * @param args A vector that contains all the arguments
+ * @param allOpts The concatenated arguments in a single string
+ * @param thread This thread will be started after the worker is set up with the
+ *    runnable and the arguments
+ * @param worker The worker will only be set up with the runnable and arguments
+ */
+void TomographyIfaceModel::doLocalRunReconstructionJob(
+    const std::string &runnable, const std::vector<std::string> &args,
+    const std::string &allOpts, TomographyThreadHandler &thread,
+    TomographyProcessHandler &worker) {
 
   try {
     // Can only run one reconstruction at a time. you can cancel the recon
-    worker.setup(run, args);
+    worker.setup(runnable, args, allOpts);
     thread.start();
   } catch (Poco::SystemException &sexc) {
     g_log.error() << "Execution failed. Could not run the tool. Error details: "
@@ -511,13 +493,13 @@ void TomographyIfaceModel::doRunReconstructionJobLocal(
 }
 
 void TomographyIfaceModel::addJobToStatus(const qint64 pid,
-                                          const std::string &run,
+                                          const std::string &runnable,
                                           const std::string &allOpts) {
   Mantid::API::IRemoteJobManager::RemoteJobInfo info;
   info.id = boost::lexical_cast<std::string>(pid);
   info.name = pid > 0 ? "Mantid_Local" : "none";
   info.status = pid > 0 ? "Starting" : "Exit";
-  info.cmdLine = run + " " + allOpts;
+  info.cmdLine = runnable + " " + allOpts;
   m_jobsStatusLocal.emplace_back(info);
   doRefreshJobsInfo(g_LocalResourceName);
 }
@@ -678,8 +660,9 @@ bool TomographyIfaceModel::processIsRunning(qint64 pid) {
  * @param cmd command/script/executable derived from the settings
  */
 bool TomographyIfaceModel::checkIfToolIsSetupProperly(
-    const std::string &tool, const std::string &cmd) const {
-  if (tool.empty() || cmd.empty()) {
+    const std::string &tool, const std::string &cmd,
+    const std::vector<std::string> &args) const {
+  if (tool.empty() || cmd.empty() || args.empty()) {
     const std::string detail =
         "Please define the settings of this tool. "
         "You have not defined any settings for this tool: " +
@@ -698,7 +681,7 @@ bool TomographyIfaceModel::checkIfToolIsSetupProperly(
  * when the code is reorganized to use the tool settings objects better.
  */
 void TomographyIfaceModel::splitCmdLine(const std::string &cmd,
-                                        std::string &run,
+                                        std::string &runnable,
                                         std::string &opts) const {
   if (cmd.empty())
     return;
@@ -707,7 +690,7 @@ void TomographyIfaceModel::splitCmdLine(const std::string &cmd,
   if (std::string::npos == pos)
     return;
 
-  run = cmd.substr(0, pos);
+  runnable = cmd.substr(0, pos);
   opts = cmd.substr(pos + 1);
 }
 

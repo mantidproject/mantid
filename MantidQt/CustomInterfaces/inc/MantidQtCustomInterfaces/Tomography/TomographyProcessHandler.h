@@ -24,10 +24,12 @@ namespace CustomInterfaces {
 class TomographyProcessHandler : public QProcess {
   Q_OBJECT
 public:
-  TomographyProcessHandler() : QProcess() {}
+  TomographyProcessHandler() : QProcess(nullptr) {}
 
   // intentionally copy the vector
-  void setup(const std::string runnable, const std::vector<std::string> &args) {
+  void setup(const std::string runnable, const std::vector<std::string> &args,
+             const std::string &allOpts) {
+    m_allArgs = allOpts;
     m_runnable = std::move(QString::fromStdString(runnable));
     m_args = std::move(constructArgumentsFromVector(args));
 
@@ -53,7 +55,6 @@ private:
 
     for (auto &arg : args) {
       list << QString::fromStdString(arg);
-      m_allArgs += arg + " ";
     }
 
     return list;

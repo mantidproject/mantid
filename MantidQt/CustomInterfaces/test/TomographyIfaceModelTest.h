@@ -171,25 +171,6 @@ public:
     TS_ASSERT_EQUALS(cmds.size(), 0);
   }
 
-  void test_submitFailEmptyDefinition() {
-    TomographyIfaceModel model;
-
-    TSM_ASSERT_THROWS("Exception not thrown as expected - submit local",
-                      model.doSubmitReconstructionJob("Local"),
-                      std::invalid_argument);
-  }
-
-  void test_submitFailEmptyTool() {
-    TomographyIfaceModel model;
-
-    model.setupComputeResource();
-    model.setupRunTool("Local");
-    model.usingTool("TomoPy");
-    TSM_ASSERT_THROWS("Exception not thrown as expected - submit local",
-                      model.doSubmitReconstructionJob("Local"),
-                      std::invalid_argument);
-  }
-
   void test_cancelFail() {
     TomographyIfaceModel model;
 
@@ -199,23 +180,6 @@ public:
     TSM_ASSERT_THROWS("Exception not thrown as expected - login local",
                       model.doCancelJobs("Local", ids), std::invalid_argument);
   }
-
-  void test_runCustomCommandLocally() {
-    TomographyIfaceModel model;
-
-    model.setupComputeResource();
-    model.setupRunTool("Local");
-    model.usingTool("Custom command");
-
-    auto d = std::make_shared<ToolConfigCustom>("fail",
-                                                "/scriptpath/ --some params");
-    model.setCurrentToolSettings(d);
-    model.doSubmitReconstructionJob("Local");
-  }
-
-  void test_setupToolsTomoPy() { dryRunToolLocal("TomoPy", "gridrec"); }
-
-  void test_setupToolsAstra() { dryRunToolLocal("Astra", "FBP3D_CUDA"); }
 
   void test_loadFITSFail() {
     TomographyIfaceModel model;
@@ -261,21 +225,21 @@ public:
 
     model.setCurrentToolSettings(d);
 
-    const std::string resource = TestableTomographyIfaceModel::g_SCARFName;
+    const bool local = false;
 
-    std::string actualRun;
+    std::string actualRunnable;
+    std::string allOpts;
     std::vector<std::string> actualArgsVector;
-    model.makeRunnableWithOptions(resource, actualRun, actualArgsVector);
+    model.prepareSubmissionArguments(local, actualRunnable, actualArgsVector,
+                                     allOpts);
 
     std::string expectedRunnable = "/scriptPath/";
     // the space at the end is necessary, because of how
     // constructSingleStringFromVector works
     std::vector<std::string> expectedArgsVector{
         "--some params --some other params "};
-    TS_ASSERT_EQUALS(actualRun, expectedRunnable);
-
-    // checks size and elements
-    TS_ASSERT(actualArgsVector == expectedArgsVector);
+    doTestExpectedRunnableAndArguments(expectedRunnable, actualRunnable,
+                                       expectedArgsVector, actualArgsVector);
   }
 
   void test_makeLocalRunnableWithOptionsCustom() {
@@ -297,20 +261,22 @@ public:
 
     model.setCurrentToolSettings(d);
 
-    const std::string resource = model.localComputeResource();
+    const bool local = true;
 
-    std::string actualRun;
+    std::string actualRunnable;
+    std::string allOpts;
+
     std::vector<std::string> actualArgsVector;
-    model.makeRunnableWithOptions(resource, actualRun, actualArgsVector);
+    model.prepareSubmissionArguments(local, actualRunnable, actualArgsVector,
+                                     allOpts);
 
     std::string expectedRunnable = "python";
     // the space at the end is necessary, because of how
     // constructSingleStringFromVector works
     std::vector<std::string> expectedArgsVector{
-        "/scriptPath/"," --some params --some other params "};
-    TS_ASSERT_EQUALS(actualRun, expectedRunnable);
-    // checks size and elements
-    TS_ASSERT(actualArgsVector == expectedArgsVector);
+        "/scriptPath/", "--some params --some other params "};
+    doTestExpectedRunnableAndArguments(expectedRunnable, actualRunnable,
+                                       expectedArgsVector, actualArgsVector);
   }
 
   void test_makeRemoteRunnableWithOptions() {
@@ -337,11 +303,13 @@ public:
 
     model.setCurrentToolSettings(d);
 
-    const std::string resource = TestableTomographyIfaceModel::g_SCARFName;
+    const bool local = false;
 
+    std::string allOpts;
     std::string actualRunnable;
     std::vector<std::string> actualArgsVector;
-    model.makeRunnableWithOptions(resource, actualRunnable, actualArgsVector);
+    model.prepareSubmissionArguments(local, actualRunnable, actualArgsVector,
+                                     allOpts);
 
     std::vector<std::string> expectedArgsVector{
         "--tool=tomopy", "--algorithm=gridrec", "--num-iter=5",
@@ -353,7 +321,7 @@ public:
         "--median-filter-size=3", "--cor=0.000000", "--rotation=0",
         "--max-angle=360.000000", "--circular-mask=0.940000",
         "--out-img-format=png"};
-    doTestExpectedRunnableAndArguemnts(expectedRunnable, actualRunnable,
+    doTestExpectedRunnableAndArguments(expectedRunnable, actualRunnable,
                                        expectedArgsVector, actualArgsVector);
   }
 
@@ -381,12 +349,14 @@ public:
 
     model.setCurrentToolSettings(d);
 
-    const std::string resource = model.localComputeResource();
+    const bool local = true;
 
     // should be just the externalInterpretor path
     std::string actualRunnable;
+    std::string allOpts;
     std::vector<std::string> actualArgsVector;
-    model.makeRunnableWithOptions(resource, actualRunnable, actualArgsVector);
+    model.prepareSubmissionArguments(local, actualRunnable, actualArgsVector,
+                                     allOpts);
 
     std::string expectedRunnable = "python";
     std::vector<std::string> expectedArgsVector{
@@ -402,7 +372,7 @@ public:
         "--max-angle=360.000000", "--circular-mask=0.940000",
         "--out-img-format=png"};
 
-    doTestExpectedRunnableAndArguemnts(expectedRunnable, actualRunnable,
+    doTestExpectedRunnableAndArguments(expectedRunnable, actualRunnable,
                                        expectedArgsVector, actualArgsVector);
   }
 
@@ -413,7 +383,7 @@ private:
     TestableTomographyIfaceModel() : TomographyIfaceModel() {}
   };
 
-  void doTestExpectedRunnableAndArguemnts(
+  void doTestExpectedRunnableAndArguments(
       const std::string &expectedRunnable, const std::string &actualRunnable,
       const std::vector<std::string> &expectedArguments,
       const std::vector<std::string> &actualArguments) {
@@ -429,37 +399,6 @@ private:
       }
       TS_ASSERT_EQUALS(expectedArguments[i], actualArguments[i]);
     }
-  }
-  void dryRunToolLocal(const std::string &tool, const std::string &method,
-                       const std::string &resource = "Local") {
-    TomographyIfaceModel model;
-    model.setupComputeResource();
-    model.setupRunTool(model.localComputeResource());
-    model.usingTool(tool);
-    model.setCurrentToolMethod(method);
-
-    TSM_ASSERT_EQUALS("Unexpected number of reconstruction tools",
-                      model.reconTools().size(), 5);
-
-    auto localSts = model.jobsStatusLocal();
-    TSM_ASSERT_EQUALS("Unexpected number of jobs (local)", localSts.size(), 0);
-
-    // default/empty paths, to make sure nothing will be found
-    TomoPathsConfig paths;
-    model.setTomoPathsConfig(paths);
-
-    // paths that don't make sense, so nothing gets executed even if you have a
-    // local installation of tomopy available
-    std::shared_ptr<ToolConfigTomoPy> d(
-        new ToolConfigTomoPy("fail /not_exitant_script_path/", "/out/",
-                             "/dark/", "/flat/", "/sample/"));
-    model.setCurrentToolSettings(d);
-    model.doSubmitReconstructionJob(resource);
-
-    model.refreshLocalJobsInfo();
-    localSts = model.jobsStatusLocal();
-    TSM_ASSERT_EQUALS("Unexpected number of jobs (local), after refreshing",
-                      localSts.size(), 1);
   }
 };
 
