@@ -151,6 +151,23 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         # empty list
         self._runs = []
 
+    def _mask(self, ws, xstart, xend):
+        """
+        Masks the first and last bins
+        @param   ws           :: input workspace name
+        @param   xstart       :: MaskBins between x[0] and x[xstart]
+        @param   xend         :: MaskBins between x[xend] and x[-1]
+        """
+        x_values = mtd[ws].readX(0)
+
+        if xstart > 0:
+            self.log().debug('Mask bins smaller than {0}'.format(xstart))
+            MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=x_values[0], XMax=x_values[xstart])
+
+        if xend < len(x_values) - 1:
+            self.log().debug('Mask bins larger than {0}'.format(xend))
+            MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=x_values[xend + 1], XMax=x_values[-1])
+
     def _filter_files(self, files, label):
         '''
         Filters the given list of files according to nexus criteria
@@ -200,7 +217,8 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         for item in range(mtd[tmp_int].getNumberOfEntries()):
             for index in range(mtd[tmp_int].getItem(item).getNumberHistograms()):
                 if mtd[tmp_int].getItem(item).readY(index)[0] <= 0:
-                    raise RuntimeError('Negative or 0 integral in spectrum #{0} {1}'.format(index,message))
+                    raise RuntimeError('Negative or 0 integral in spectrum #{0} {1} '
+                                       'Check calibration peak range.'.format(index,message))
 
         DeleteWorkspace(tmp_int)
 
@@ -211,17 +229,20 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         self._filter_all_input_files()
 
         if self._background_file:
-            IndirectILLEnergyTransfer(Run = self._background_file, OutputWorkspace = 'background', **self._common_args)
-            Scale(InputWorkspace='background',Factor=self._back_scaling,OutputWorkspace='background')
+            background = '__background_'+self._red_ws
+            IndirectILLEnergyTransfer(Run = self._background_file, OutputWorkspace = background, **self._common_args)
+            Scale(InputWorkspace=background ,Factor=self._back_scaling,OutputWorkspace=background)
 
         if self._calibration_file:
-            IndirectILLEnergyTransfer(Run = self._calibration_file, OutputWorkspace = 'calibration', **self._common_args)
-            Integration(InputWorkspace='calibration',RangeLower=self._peak_range[0],RangeUpper=self._peak_range[1],
-                        OutputWorkspace='calibration')
-            self._warn_negative_integral('calibration','in calibration workspace.')
+            calibration = '__calibration_'+self._red_ws
+            IndirectILLEnergyTransfer(Run = self._calibration_file, OutputWorkspace = calibration, **self._common_args)
+            Integration(InputWorkspace=calibration,RangeLower=self._peak_range[0],RangeUpper=self._peak_range[1],
+                        OutputWorkspace=calibration)
+            self._warn_negative_integral(calibration,'in calibration workspace.')
 
         if self._unmirror_option == 5 or self._unmirror_option == 7:
-            IndirectILLEnergyTransfer(Run = self._alignment_file, OutputWorkspace = 'alignment', **self._common_args)
+            alignment = '__alignment_'+self._red_ws
+            IndirectILLEnergyTransfer(Run = self._alignment_file, OutputWorkspace = alignment, **self._common_args)
 
         runs = self._sample_file.split(',')
 
@@ -231,13 +252,13 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
             self._reduce_run(run)
 
         if self._background_file:
-            DeleteWorkspace('background')
+            DeleteWorkspace(background)
 
         if self._calibration_file:
-            DeleteWorkspace('calibration')
+            DeleteWorkspace(calibration)
 
         if self._unmirror_option == 5 or self._unmirror_option == 7:
-            DeleteWorkspace('alignment')
+            DeleteWorkspace(alignment)
 
         GroupWorkspaces(InputWorkspaces=self._runs,OutputWorkspace=self._red_ws)
         self.setProperty('OutputWorkspace',self._red_ws)
@@ -257,11 +278,11 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         IndirectILLEnergyTransfer(Run = run, OutputWorkspace = ws, **self._common_args)
 
         if self._background_file:
-            Minus(LHSWorkspace=ws, RHSWorkspace='background', OutputWorkspace=ws)
+            Minus(LHSWorkspace=ws, RHSWorkspace='__background_'+self._red_ws, OutputWorkspace=ws)
             self._warn_negative_integral(ws,'after background subtraction.')
 
         if self._calibration_file:
-            Divide(LHSWorkspace=ws, RHSWorkspace='calibration', OutputWorkspace=ws)
+            Divide(LHSWorkspace=ws, RHSWorkspace='__calibration_'+self._red_ws, OutputWorkspace=ws)
 
         self._perform_unmirror(ws)
 
@@ -281,6 +302,8 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         self.log().information('Unmirroring workspace {0} with option {1}'
                                .format(outname,self._unmirror_option))
 
+        alignment = '__alignment_'+self._red_ws
+
         if wings == 1:   # one wing
 
             name = mtd[ws].getItem(0).getName()
@@ -291,7 +314,7 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
                 MatchPeaks(InputWorkspace = name, OutputWorkspace = outname, MaskBins = True)
                 DeleteWorkspace(name)
             elif self._unmirror_option == 7:
-                MatchPeaks(InputWorkspace = name, InputWorkspace2 = mtd['alignment'].getItem(0).getName(),
+                MatchPeaks(InputWorkspace = name, InputWorkspace2 = mtd[alignment].getItem(0).getName(),
                            MatchInput2ToCenter = True, OutputWorkspace = outname, MaskBins = True)
                 DeleteWorkspace(name)
 
@@ -299,6 +322,9 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
 
             left = mtd[ws].getItem(0).getName()
             right = mtd[ws].getItem(1).getName()
+
+            mask_min = 0
+            mask_max = mtd[left].blocksize()
 
             if self._unmirror_option > 0:
                 UnGroupWorkspace(ws)
@@ -313,24 +339,52 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
                 RenameWorkspace(InputWorkspace=right, OutputWorkspace=outname)
                 DeleteWorkspace(left)
             elif self._unmirror_option == 4:
-                MatchPeaks(InputWorkspace=right, InputWorkspace2=left, OutputWorkspace=right, MaskBins = True)
+                bin_range_table = '__um4_'+right
+                MatchPeaks(InputWorkspace=right, InputWorkspace2=left, OutputWorkspace=right,
+                           MaskBins = True, BinRangeTable = bin_range_table)
+                mask_min = mtd[bin_range_table].row(0)['MinBin']
+                mask_max = mtd[bin_range_table].row(0)['MaxBin']
+                DeleteWorkspace(bin_range_table)
             elif self._unmirror_option == 5:
-                MatchPeaks(InputWorkspace=right, InputWorkspace2=mtd['alignment'].getItem(0).getName(),
-                           InputWorkspace3=mtd['alignment'].getItem(1).getName(), OutputWorkspace=right, MaskBins = True)
+                bin_range_table = '__um5_' + right
+                MatchPeaks(InputWorkspace=right, InputWorkspace2=mtd[alignment].getItem(0).getName(),
+                           InputWorkspace3=mtd[alignment].getItem(1).getName(), OutputWorkspace=right,
+                           MaskBins = True, BinRangeTable = bin_range_table)
+                mask_min = mtd[bin_range_table].row(0)['MinBin']
+                mask_max = mtd[bin_range_table].row(0)['MaxBin']
+                DeleteWorkspace(bin_range_table)
             elif self._unmirror_option == 6:
-                MatchPeaks(InputWorkspace=left, OutputWorkspace=left, MaskBins = True)
-                MatchPeaks(InputWorkspace=right, OutputWorkspace=right, MaskBins = True)
+                bin_range_table_left = '__um6_' + left
+                bin_range_table_right = '__um6_' + right
+                MatchPeaks(InputWorkspace=left, OutputWorkspace=left, MaskBins = True,
+                           BinRangeTable = bin_range_table_left)
+                MatchPeaks(InputWorkspace=right, OutputWorkspace=right, MaskBins = True,
+                           BinRangeTable=bin_range_table_right)
+                mask_min = max(mtd[bin_range_table_left].row(0)['MinBin'],mtd[bin_range_table_right].row(0)['MinBin'])
+                mask_max = min(mtd[bin_range_table_left].row(0)['MaxBin'],mtd[bin_range_table_right].row(0)['MaxBin'])
+                DeleteWorkspace(bin_range_table_left)
+                DeleteWorkspace(bin_range_table_right)
             elif self._unmirror_option == 7:
-                MatchPeaks(InputWorkspace=left, InputWorkspace2=mtd['alignment'].getItem(0).getName(),
-                           OutputWorkspace=left,MatchInput2ToCenter=True, MaskBins = True)
-                MatchPeaks(InputWorkspace=right, InputWorkspace2=mtd['alignment'].getItem(1).getName(),
-                           OutputWorkspace=right, MatchInput2ToCenter=True, MaskBins = True)
+                bin_range_table_left = '__um7_' + left
+                bin_range_table_right = '__um7_' + right
+                MatchPeaks(InputWorkspace=left, InputWorkspace2=mtd[alignment].getItem(0).getName(),
+                           OutputWorkspace=left,MatchInput2ToCenter=True,
+                           MaskBins = True, BinRangeTable=bin_range_table_left)
+                MatchPeaks(InputWorkspace=right, InputWorkspace2=mtd[alignment].getItem(1).getName(),
+                           OutputWorkspace=right, MatchInput2ToCenter=True,
+                           MaskBins = True, BinRangeTable=bin_range_table_right)
+                mask_min = max(mtd[bin_range_table_left].row(0)['MinBin'], mtd[bin_range_table_right].row(0)['MinBin'])
+                mask_max = min(mtd[bin_range_table_left].row(0)['MaxBin'], mtd[bin_range_table_right].row(0)['MaxBin'])
+                DeleteWorkspace(bin_range_table_left)
+                DeleteWorkspace(bin_range_table_right)
 
             if self._unmirror_option > 3 or self._unmirror_option == 1:
                 Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=outname)
                 Scale(InputWorkspace=outname, OutputWorkspace=outname, Factor=0.5)
                 DeleteWorkspace(left)
                 DeleteWorkspace(right)
+                if self._unmirror_option > 3:
+                    self._mask(outname, mask_min, mask_max)
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLReductionQENS)

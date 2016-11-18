@@ -241,7 +241,7 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
 
         run = '{0:06d}'.format(mtd[self._red_ws].getRunNumber())
 
-        self._ws = run + '_' + self._red_ws
+        self._ws = self._red_ws + '_' + run
 
         RenameWorkspace(InputWorkspace=self._red_ws, OutputWorkspace=self._ws)
 

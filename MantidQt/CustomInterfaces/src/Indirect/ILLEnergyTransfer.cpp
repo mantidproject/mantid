@@ -95,15 +95,21 @@ bool ILLEnergyTransfer::validate() {
     uiv.addErrorMessage("OutputWorkspace name is invalid.");
 
   // Validate QENS specific
+
   // Validate vanadium file if it is being used
   if (m_uiForm.rdQENS->isChecked()) {
     int useVanadiumRun = m_uiForm.sbUnmirrorOption->value();
     if ((useVanadiumRun == 5 || useVanadiumRun == 7) &&
-        !m_uiForm.rfAlignmentRun->isValid())
-      uiv.addErrorMessage("Vanadium run is invalid.");
+        (!m_uiForm.rfAlignmentRun->isValid() ||
+         m_uiForm.rfAlignmentRun->getUserInput()
+             .toString()
+             .toStdString()
+             .empty()))
+      uiv.addErrorMessage("Alignment run is invalid.");
   }
 
   // Validate FWS specific
+
   if (m_uiForm.rdFWS->isChecked()) {
     if (m_uiForm.cbObservable->currentText().toStdString().empty()) {
         uiv.addErrorMessage("Observable is invalid, check the sample logs "
@@ -149,10 +155,10 @@ void ILLEnergyTransfer::run() {
       reductionAlg->setProperty("CalibrationPeakRange", peakRange);
     }
 
-    // Vanadium run
+    // Vanadium alignment run
     if (uo == 5 || uo == 7) {
       QString vanFilename = m_uiForm.rfAlignmentRun->getUserInput().toString();
-      reductionAlg->setProperty("VanadiumRun", vanFilename.toStdString());
+      reductionAlg->setProperty("AlignmentRun", vanFilename.toStdString());
     }
 
   } else { // FWS
