@@ -43,7 +43,6 @@ PROP_INPUT_FILE                       = 'InputFile'
 PROP_INPUT_WORKSPACE                  = 'InputWorkspace'
 PROP_MONITOR_EPP_WORKSPACE            = 'MonitorEPPWorkspace'
 PROP_MONITOR_INDEX                    = 'Monitor'
-PROP_NAME_PREFIX                      = 'IntermediateWorkspacePrefix'
 PROP_NORMALISATION                    = 'Normalisation'
 PROP_OUTPUT_DIAGNOSTICS_WORKSPACE     = 'OutputDiagnosticsWorkspace'
 PROP_OUTPUT_EPP_WORKSPACE             = 'OutputEPPWorkspace'
@@ -207,7 +206,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
         reductionType = self.getProperty(PROP_REDUCTION_TYPE).value
-        workspaceNamePrefix = self.getProperty(PROP_NAME_PREFIX).value
+        workspaceNamePrefix = self.getProperty(PROP_OUTPUT_WORKSPACE).valueAsStr
         cleanupMode = self.getProperty(PROP_CLEANUP_MODE).value
         workspaceNames = NameSource(workspaceNamePrefix, cleanupMode)
         indexType = self.getProperty(PROP_INDEX_TYPE).value
@@ -552,11 +551,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              validator=StringListValidator([REDUCTION_TYPE_SAMPLE, REDUCTION_TYPE_VANADIUM, REDUCTION_TYPE_CD, REDUCTION_TYPE_EC]),
                              direction=Direction.Input,
                              doc='Type of the reduction workflow and output')
-        self.declareProperty(PROP_NAME_PREFIX,
-                             '',
-                             validator=StringMandatoryValidator(),
-                             direction=Direction.Input,
-                             doc='String to use as prefix in intermediate workspace names')
         self.declareProperty(PROP_MONITOR_INDEX,
                              0,
                              direction=Direction.Input,
