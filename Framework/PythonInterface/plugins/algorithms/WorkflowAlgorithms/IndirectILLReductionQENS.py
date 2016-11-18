@@ -273,7 +273,9 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
 
         self._progress.report("Reducing run #" + run)
 
-        ws = runnumber + '_' + self._red_ws
+        name = runnumber + '_' + self._red_ws
+
+        ws = '__' + name
 
         IndirectILLEnergyTransfer(Run = run, OutputWorkspace = ws, **self._common_args)
 
@@ -286,8 +288,10 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
 
         self._perform_unmirror(ws)
 
+        RenameWorkspace(InputWorkspace=ws,OutputWorkspace=name)
+
         # register to reduced runs list
-        self._runs.append(ws)
+        self._runs.append(name)
 
     def _perform_unmirror(self, ws):
         '''
@@ -322,17 +326,24 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
 
             left = mtd[ws].getItem(0).getName()
             right = mtd[ws].getItem(1).getName()
-
+            
             mask_min = 0
             mask_max = mtd[left].blocksize()
 
-            if self._unmirror_option > 0:
-                UnGroupWorkspace(ws)
-            else:
-                RenameWorkspace(InputWorkspace=left,OutputWorkspace='_'.join(left.split('_')[1:]))
-                RenameWorkspace(InputWorkspace=right, OutputWorkspace='_'.join(right.split('_')[1:]))
-
-            if self._unmirror_option == 2:
+            if self._unmirror_option == 0:
+                left_splited = left.split('_')
+                right_splited = right.split('_')
+                RenameWorkspace(InputWorkspace=left,
+                                OutputWorkspace=left_splited[2]+'_'+left_splited[3]+'_'+left_splited[5])
+                RenameWorkspace(InputWorkspace=right,
+                                OutputWorkspace=right_splited[2]+'_'+right_splited[3]+'_'+right_splited[5])
+            elif self._unmirror_option == 1:
+                Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace='__tmp_'+outname)
+                RenameWorkspace(InputWorkspace='__tmp_'+outname,OutputWorkspace=outname)
+                Scale(InputWorkspace=outname, OutputWorkspace=outname, Factor=0.5)
+                DeleteWorkspace(left)
+                DeleteWorkspace(right)
+            elif self._unmirror_option == 2:
                 RenameWorkspace(InputWorkspace=left, OutputWorkspace=outname)
                 DeleteWorkspace(right)
             elif self._unmirror_option == 3:
@@ -378,13 +389,12 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
                 DeleteWorkspace(bin_range_table_left)
                 DeleteWorkspace(bin_range_table_right)
 
-            if self._unmirror_option > 3 or self._unmirror_option == 1:
+            if self._unmirror_option > 3:
                 Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=outname)
                 Scale(InputWorkspace=outname, OutputWorkspace=outname, Factor=0.5)
+                self._mask(outname, mask_min, mask_max)
                 DeleteWorkspace(left)
                 DeleteWorkspace(right)
-                if self._unmirror_option > 3:
-                    self._mask(outname, mask_min, mask_max)
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLReductionQENS)

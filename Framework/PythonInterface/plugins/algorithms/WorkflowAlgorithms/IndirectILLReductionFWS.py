@@ -177,7 +177,6 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         if mtd[groupws].getNumberOfEntries() == 2: # two wings, sum
             left = mtd[groupws].getItem(0).getName()
             right = mtd[groupws].getItem(1).getName()
-            UnGroupWorkspace(groupws)
             sum = '__sum_'+groupws
             Plus(LHSWorkspace=left,RHSWorkspace=right,OutputWorkspace=sum)
             DeleteWorkspace(left)
@@ -235,7 +234,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
         runnumber = os.path.basename(run.split('+')[0]).split('.')[0]
 
-        ws = runnumber + '_' + label
+        ws = '__' + runnumber + '_' + label
 
         self._progress.report("Reducing run #" + runnumber)
 
