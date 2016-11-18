@@ -53,9 +53,9 @@ private slots:
 private:
   Ui::ILLEnergyTransfer m_uiForm;
   double m_backScaling = 1.;
+  double m_peakRange[2];
   void save();
   void plot();
-  void generateCalibrationWorkspace();
 };
 } // namespace CustomInterfaces
 } // namespace Mantid

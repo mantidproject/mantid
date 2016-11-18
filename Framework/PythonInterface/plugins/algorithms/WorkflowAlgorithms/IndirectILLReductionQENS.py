@@ -13,7 +13,6 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
     _background_files = None
     _calibration_files = None
     _sum_all_runs = None
-    _mask_bins = None
     _unmirror_option = None
     _back_scaling = None
     _criteria = None
@@ -56,12 +55,6 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         self.declareProperty(name='SumRuns',
                              defaultValue=False,
                              doc='Whether to sum all the input runs.')
-
-        self.declareProperty(name='MaskOverflownBins',
-                             defaultValue=True,
-                             doc='Whether to mask the bins that overflow the x-axis '
-                                 'after performing circular shift for peak alignment '
-                                 'during unmirroring step.')
 
         self.declareProperty(name='CropDeadMonitorChannels', defaultValue=False,
                              doc='Whether or not to exclude the first and last few channels '
@@ -118,6 +111,15 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         if (uo == 5 or uo == 7) and not self.getPropertyValue('AlignmentRun'):
             issues['AlignmentRun'] = 'Given UnmirrorOption requires alignment run to be set'
 
+        if self.getPropertyValue('CalibrationRun'):
+            range = self.getProperty('CalibrationPeakRange').value
+            if len(range) != 2:
+                issues['CalibrationPeakRange'] = 'Please provide valid calibration range ' \
+                                                 '(comma separated 2 energy values).'
+            elif range[0] >= range[1]:
+                issues['CalibrationPeakRange'] = 'Please provide valid calibration range. ' \
+                                                 'Start energy is bigger than end energy.'
+
         return issues
 
     def setUp(self):
@@ -127,7 +129,6 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         self._background_file = self.getPropertyValue('BackgroundRun').replace(',', '+') # automatic summing
         self._calibration_file = self.getPropertyValue('CalibrationRun').replace(',', '+') # automatic summing
         self._sum_all_runs = self.getProperty('SumRuns').value
-        self._mask_bins = self.getProperty('MaskOverflownBins').value
         self._unmirror_option = self.getProperty('UnmirrorOption').value
         self._back_scaling = self.getProperty('BackgroundScalingFactor').value
         self._peak_range = self.getProperty('CalibrationPeakRange').value
@@ -287,11 +288,11 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
             if self._unmirror_option < 6:  # do unmirror 0, i.e. nothing
                 RenameWorkspace(InputWorkspace = name, OutputWorkspace = outname)
             elif self._unmirror_option == 6:
-                MatchPeaks(InputWorkspace = name, OutputWorkspace = outname, MaskBins = self._mask_bins)
+                MatchPeaks(InputWorkspace = name, OutputWorkspace = outname, MaskBins = True)
                 DeleteWorkspace(name)
             elif self._unmirror_option == 7:
                 MatchPeaks(InputWorkspace = name, InputWorkspace2 = mtd['alignment'].getItem(0).getName(),
-                           MatchInput2ToCenter = True, OutputWorkspace = outname, MaskBins = self._mask_bins)
+                           MatchInput2ToCenter = True, OutputWorkspace = outname, MaskBins = True)
                 DeleteWorkspace(name)
 
         elif wings == 2:  # two wing
@@ -312,18 +313,18 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
                 RenameWorkspace(InputWorkspace=right, OutputWorkspace=outname)
                 DeleteWorkspace(left)
             elif self._unmirror_option == 4:
-                MatchPeaks(InputWorkspace=right, InputWorkspace2=left, OutputWorkspace=right, MaskBins = self._mask_bins)
+                MatchPeaks(InputWorkspace=right, InputWorkspace2=left, OutputWorkspace=right, MaskBins = True)
             elif self._unmirror_option == 5:
                 MatchPeaks(InputWorkspace=right, InputWorkspace2=mtd['alignment'].getItem(0).getName(),
-                           InputWorkspace3=mtd['alignment'].getItem(1).getName(),OutputWorkspace=right)
+                           InputWorkspace3=mtd['alignment'].getItem(1).getName(), OutputWorkspace=right, MaskBins = True)
             elif self._unmirror_option == 6:
-                MatchPeaks(InputWorkspace=left, OutputWorkspace=left)
-                MatchPeaks(InputWorkspace=right, OutputWorkspace=right)
+                MatchPeaks(InputWorkspace=left, OutputWorkspace=left, MaskBins = True)
+                MatchPeaks(InputWorkspace=right, OutputWorkspace=right, MaskBins = True)
             elif self._unmirror_option == 7:
                 MatchPeaks(InputWorkspace=left, InputWorkspace2=mtd['alignment'].getItem(0).getName(),
-                           OutputWorkspace=left,MatchInput2ToCenter=True)
+                           OutputWorkspace=left,MatchInput2ToCenter=True, MaskBins = True)
                 MatchPeaks(InputWorkspace=right, InputWorkspace2=mtd['alignment'].getItem(1).getName(),
-                           OutputWorkspace=right, MatchInput2ToCenter=True)
+                           OutputWorkspace=right, MatchInput2ToCenter=True, MaskBins = True)
 
             if self._unmirror_option > 3 or self._unmirror_option == 1:
                 Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=outname)
