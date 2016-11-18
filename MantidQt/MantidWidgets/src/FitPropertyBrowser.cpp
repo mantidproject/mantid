@@ -2747,8 +2747,10 @@ void FitPropertyBrowser::setWorkspaceProperties() {
   if (!ws)
     return;
 
-  // If this is a MuonFitPropertyBrowser, "evaluation type" goes in the Custom Settings group.
-  // If not, there is no Custom Settings group and it goes in the regular Settings group.
+  // If this is a MuonFitPropertyBrowser, "evaluation type" goes in the Custom
+  // Settings group.
+  // If not, there is no Custom Settings group and it goes in the regular
+  // Settings group.
   auto *settings =
       m_customSettingsGroup ? m_customSettingsGroup : m_settingsGroup;
 
