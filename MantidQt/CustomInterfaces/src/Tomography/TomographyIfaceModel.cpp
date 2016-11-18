@@ -1,14 +1,13 @@
-#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 
+#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyProcess.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyThread.h"
+
 #include <Poco/Path.h>
-#include <Poco/Pipe.h>
-#include <Poco/PipeStream.h>
-#include <Poco/Process.h>
-#include <Poco/StreamCopier.h>
 
 #include <QMutex>
 
@@ -479,8 +478,8 @@ void TomographyIfaceModel::doRemoteRunReconstructionJob(
  */
 void TomographyIfaceModel::doLocalRunReconstructionJob(
     const std::string &runnable, const std::vector<std::string> &args,
-    const std::string &allOpts, TomographyThreadHandler &thread,
-    TomographyProcessHandler &worker) {
+    const std::string &allOpts, TomographyThread &thread,
+    TomographyProcess &worker) {
 
   try {
     // Can only run one reconstruction at a time. you can cancel the recon
