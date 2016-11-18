@@ -241,7 +241,6 @@ public:
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00061335"), QString("MUSR"),
                                     Eq(currentRunPath))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
     m_presenter->setAssignedFirstRun(wsName, currentRunPath);
   }
 
@@ -736,7 +735,6 @@ public:
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00061335"), QString("MUSR"),
                                     Eq(currentRunPath))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0)).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("fwd"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
 
