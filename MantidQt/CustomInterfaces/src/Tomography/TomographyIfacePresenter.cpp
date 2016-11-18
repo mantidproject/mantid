@@ -556,33 +556,48 @@ void TomographyIfacePresenter::processRunRecon() {
   // center of rotation and regions
   m_model->setImageStackPreParams(m_view->currentROIEtcParams());
 
+  // we have to branch out to handle local and remote somewhere
   try {
-    m_workerThread.reset();
-    auto *worker = new MantidQt::CustomInterfaces::TomographyProcessHandler();
-    m_workerThread =
-        Mantid::Kernel::make_unique<TomographyThreadHandler>(this, worker);
-    worker->moveToThread(m_workerThread.get());
+    const bool local = isLocalResourceSelected();
 
-    // doesnt work, should set in run() TODO
-    connect(m_workerThread.get(), SIGNAL(started()), m_workerThread.get(),
-            SLOT(getThreadPID()), Qt::DirectConnection);
+    std::string run;
+    std::vector<std::string> args;
+    std::string allOpts;
 
-    connect(m_workerThread.get(), SIGNAL(started()), worker,
-            SLOT(startWorker()));
+    m_model->prepareSubmissionArguments(local, run, args, allOpts);
+    if (local) {
+      // localRunReconstruction();
+      m_workerThread.reset();
+      auto *worker = new MantidQt::CustomInterfaces::TomographyProcessHandler();
+      m_workerThread =
+          Mantid::Kernel::make_unique<TomographyThreadHandler>(this, worker);
+      worker->moveToThread(m_workerThread.get());
 
-    connect(m_workerThread.get(), SIGNAL(stdOutReady(QString)), this,
-            SLOT(readWorkerStdOut(QString)));
-    connect(m_workerThread.get(), SIGNAL(stdErrReady(QString)), this,
-            SLOT(readWorkerStdErr(QString)));
+      connect(m_workerThread.get(), SIGNAL(started()), worker,
+              SLOT(startWorker()));
 
-    connect(m_workerThread.get(), SIGNAL(finished()), m_workerThread.get(),
-            SLOT(deleteLater()), Qt::DirectConnection);
+      connect(m_workerThread.get(), SIGNAL(stdOutReady(QString)), this,
+              SLOT(readWorkerStdOut(QString)));
+      connect(m_workerThread.get(), SIGNAL(stdErrReady(QString)), this,
+              SLOT(readWorkerStdErr(QString)));
 
-    connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
-    connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+      connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
+      connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()),
+              Qt::DirectConnection);
+      connect(worker, SIGNAL(finished()), m_workerThread.get(),
+              SIGNAL(finished()));
+      connect(m_workerThread.get(), SIGNAL(finished()), m_workerThread.get(),
+              SLOT(deleteLater()), Qt::DirectConnection);
+      m_model->doRunReconstructionJobLocal(run, args, *m_workerThread, *worker);
 
-    m_model->doSubmitReconstructionJob(m_view->currentComputeResource(),
-                                       *m_workerThread, *worker);
+    } else {
+      // get the actual compute resource name
+      const std::string computingResouce = m_view->currentComputeResource();
+      m_model->doRunReconstructionJobRemote(computingResouce, run, allOpts);
+    }
+
+    // m_model->doSubmitReconstructionJob(m_view->currentComputeResource(),
+    //                                    *m_workerThread, *worker);
   } catch (std::exception &e) {
     m_view->userWarning("Issue when trying to start a job", e.what());
   }
@@ -605,6 +620,7 @@ void TomographyIfacePresenter::addProcessToJobList() {
 
   m_model->addJobToStatus(actualpid, runnable, args);
 }
+
 void TomographyIfacePresenter::readWorkerStdOut(const QString &s) {
   m_model->logMsg(s.toStdString());
 }

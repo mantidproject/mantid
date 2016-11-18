@@ -342,7 +342,7 @@ void TomographyIfaceModel::doQueryJobStatus(const std::string &compRes,
  * @param opt Command line options to the application
  */
 void TomographyIfaceModel::makeRunnableWithOptions(
-    const std::string &comp, std::string &runnable,
+    const bool local, std::string &runnable,
     std::vector<std::string> &opt) const {
 
   if (!m_currentToolSettings) {
@@ -352,8 +352,6 @@ void TomographyIfaceModel::makeRunnableWithOptions(
   const std::string tool = usingTool();
 
   const std::string cmd = m_currentToolSettings->toCommand();
-
-  const bool local = (g_LocalResourceName == comp) ? true : false;
 
   std::string longOpt;
   // this gets the runnable from the whole string
@@ -433,16 +431,17 @@ std::string TomographyIfaceModel::constructSingleStringFromVector(
   return allOpts;
 }
 
-/** Handling the job submission request relies on a submit algorithm.
- * @param compRes The resource to which the request will be made
+/** Prepare the submission arguments for either local or remote
+ * @param local Is the resource local or remote
+ * @param run The runnable path
+ * @param args A vector that contains all the arguments
+ * @param allOpts The concatenated arguments in a single string
  */
-void TomographyIfaceModel::doSubmitReconstructionJob(
-    const std::string &compRes, TomographyThreadHandler &thread,
-    TomographyProcessHandler &worker) {
-  std::string run;
-  std::vector<std::string> args;
+void TomographyIfaceModel::prepareSubmissionArguments(
+    const bool local, std::string &run, std::vector<std::string> &args,
+    std::string &allOpts) {
   try {
-    makeRunnableWithOptions(compRes, run, args);
+    makeRunnableWithOptions(local, run, args);
   } catch (std::exception &e) {
     g_log.error() << "Could not prepare the requested reconstruction job "
                      "submission. There was an error: " +
@@ -450,22 +449,16 @@ void TomographyIfaceModel::doSubmitReconstructionJob(
     throw;
   }
 
-  if (run.empty()) {
+  if (run.empty() || args.empty()) {
     throw std::runtime_error(
         "The script or executable to run is not defined "
         "(empty string). You need to setup the reconstruction tool.");
   }
 
-  std::string allOpts = constructSingleStringFromVector(args);
+  allOpts = constructSingleStringFromVector(args);
 
   logMsg("Running " + usingTool() + ", with binary: " + run +
          ", with parameters: " + allOpts);
-
-  if (g_LocalResourceName == compRes) {
-    doRunReconstructionJobLocal(run, allOpts, args, thread, worker);
-  } else {
-    doRunReconstructionJobRemote(compRes, run, allOpts);
-  }
 }
 
 void TomographyIfaceModel::doRunReconstructionJobRemote(
@@ -504,9 +497,8 @@ void TomographyIfaceModel::doRunReconstructionJobRemote(
 }
 
 void TomographyIfaceModel::doRunReconstructionJobLocal(
-    const std::string &run, const std::string &allOpts,
-    const std::vector<std::string> &args, TomographyThreadHandler &thread,
-    TomographyProcessHandler &worker) {
+    const std::string &run, const std::vector<std::string> &args,
+    TomographyThreadHandler &thread, TomographyProcessHandler &worker) {
 
   try {
     // Can only run one reconstruction at a time. you can cancel the recon

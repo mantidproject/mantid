@@ -151,10 +151,18 @@ public:
                         std::vector<std::string> &status,
                         std::vector<std::string> &cmds);
   /// Submit a new job to the (remote or local) compute resource
-  void doSubmitReconstructionJob(
-      const std::string &compRes,
+  void prepareSubmissionArguments(const bool local, std::string &run,
+                                  std::vector<std::string> &args,
+                                  std::string &allOpts);
+
+  void doRunReconstructionJobLocal(
+      const std::string &run, const std::vector<std::string> &args,
       MantidQt::CustomInterfaces::TomographyThreadHandler &thread,
       MantidQt::CustomInterfaces::TomographyProcessHandler &worker);
+
+  void doRunReconstructionJobRemote(const std::string &compRes,
+                                    const std::string &run,
+                                    const std::string &allOpts);
 
   /// Cancel a previously submitted job
   void doCancelJobs(const std::string &compRes,
@@ -217,23 +225,13 @@ protected: // protected to expose everything to testing
   std::string
   constructSingleStringFromVector(const std::vector<std::string> args) const;
 
-  void doRunReconstructionJobLocal(
-      const std::string &run, const std::string &allOpts,
-      const std::vector<std::string> &args,
-      MantidQt::CustomInterfaces::TomographyThreadHandler &thread,
-      MantidQt::CustomInterfaces::TomographyProcessHandler &worker);
-
-  void doRunReconstructionJobRemote(const std::string &compRes,
-                                    const std::string &run,
-                                    const std::string &allOpts);
-
   /// retrieve info from compute resource into status table
   void getJobStatusInfo(const std::string &compRes);
 
   std::string validateCompResource(const std::string &res) const;
 
   /// makes the command line string to run on the remote/local
-  void makeRunnableWithOptions(const std::string &comp, std::string &run,
+  void makeRunnableWithOptions(const bool local, std::string &run,
                                std::vector<std::string> &opt) const;
 
   bool checkIfToolIsSetupProperly(const std::string &tool,
