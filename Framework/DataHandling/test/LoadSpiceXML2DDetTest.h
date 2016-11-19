@@ -461,6 +461,126 @@ public:
     AnalysisDataService::Instance().remove("Exp0335_S0038D");
   }
 
+
+  //----------------------------------------------------------------------------------------------
+  /** Test with loading instrument without Spice scan Table and detector is shifted from original
+   *  center
+   *
+   *  Testing includes:
+   *  1. Load the instrument without Spice Table;
+   *  2. Check the positions of shifted detector: from (115, 128) to (127,137)
+   *    (a) at center pixel, 2-theta = 42.797 and pixel ID
+   *  3. Check the symmetry of the peak positions
+   * @brief Load data and instrument with sample log value
+   */
+  void test_loadDataShiftDetectorCenter() {
+    // initialize the algorithm
+    LoadSpiceXML2DDet loader;
+    loader.initialize();
+
+    // calculate shift of the detector center from (115, 128) to (127, 127)
+    double det_step_x = -0.0001984375;
+    double shift_x = static_cast<double>(137 - 128) * det_step_x * -1.;  // shift x comes from column
+    double det_step_y = 0.0001984375;
+    double shift_y = static_cast<double>(127 - 115) * det_step_y * -1;  // shift y comes from row
+
+    // set up properties
+    const std::string filename("HB3A_exp355_scan0001_0522.xml");
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setProperty("OutputWorkspace", "Exp0335_S0038C"));
+    std::vector<size_t> sizelist(2);
+    sizelist[0] = 256;
+    sizelist[1] = 256;
+    loader.setProperty("DetectorGeometry", sizelist);
+    loader.setProperty("LoadInstrument", true);
+    loader.setProperty("ShiftedDetectorDistance", 0.);
+    loader.setProperty("DetectorCenterXShift", shift_x);
+    loader.setProperty("DetectorCenterYShift", shift_y);
+
+    loader.execute();
+    TS_ASSERT(loader.isExecuted());
+
+    // Get data
+    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("Exp0335_S0038C"));
+    TS_ASSERT(outws);
+    TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
+
+    // Value
+    // test signal value on various pixels
+    // pixel at (256, 1): column 1
+    TS_ASSERT_DELTA(outws->readY(255)[0], 1.0, 0.0001);
+    // pixel at (254, 256): column 256
+    TS_ASSERT_DELTA(outws->readY(255 * 256 + 138)[0], 2.0, 0.00001);
+
+    // Instrument
+    TS_ASSERT(outws->getInstrument());
+
+    // get 2theta from workspace
+    double twotheta_raw =
+        atof(outws->run().getProperty("_2theta")->value().c_str());
+
+    Kernel::Property *raw_property = outws->run().getProperty("2theta");
+    Kernel::TimeSeriesProperty<double> *twotheta_property =
+        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(raw_property);
+    TS_ASSERT(twotheta_property);
+    double twotheta_log = twotheta_property->valuesAsVector()[0];
+    TS_ASSERT_DELTA(twotheta_log, 42.70975, 0.0001);
+
+    TS_ASSERT_EQUALS(twotheta_raw, twotheta_log);
+
+    // check the center of the detector
+    Kernel::V3D source = outws->getInstrument()->getSource()->getPos();
+    Kernel::V3D sample = outws->getInstrument()->getSample()->getPos();
+
+    // check the center position
+    size_t center_row = 127 - 1;
+    size_t center_col = 137 - 1;
+    size_t center_ws_index = 256 * center_col + center_row;
+    // y should be 0. in the Z-Y plane
+    Kernel::V3D center_det_pos = outws->getDetector(center_ws_index)->getPos();
+    TS_ASSERT_DELTA(center_det_pos.Y(), 0., 0.00000001);
+    double sample_center_distance = sample.distance(center_det_pos);
+    // distance
+    std::cout << "Sample center distance: " << sample_center_distance << "\n";
+    TS_ASSERT_DELTA(sample_center_distance, 0.3750, 0.0000001);
+    // 2-theta angle
+    double sample_center_angle =
+        (sample - source).angle(center_det_pos - sample);
+    TS_ASSERT_DELTA(sample_center_angle * 180. / M_PI, twotheta_log, 0.0001);
+
+    // symmetry from now on!
+    size_t ws_d_row = 10;
+    size_t ws_d_col = 15;
+
+    size_t ll_ws_index = (center_row - ws_d_row) + (center_col - ws_d_col) * 256;
+    Kernel::V3D ll_det_pos = outws->getDetector(ll_ws_index)->getPos();
+    double ll_sample_r = sample.distance(ll_det_pos);
+
+    size_t lr_ws_index = (center_row + ws_d_row) + (center_col - ws_d_col) * 256;
+    Kernel::V3D lr_det_pos = outws->getDetector(lr_ws_index)->getPos();
+    double lr_sample_r = sample.distance(lr_det_pos);
+
+    TS_ASSERT_DELTA(ll_sample_r, lr_sample_r, 0.0000001);
+
+    size_t ur_ws_index = (center_row + ws_d_row) + (center_col + ws_d_col) * 256;
+    Kernel::V3D ur_det_pos = outws->getDetector(ur_ws_index)->getPos();
+    double ur_sample_r = sample.distance(ur_det_pos);
+
+    TS_ASSERT_DELTA(ll_sample_r, ur_sample_r, 0.0000001);
+
+    size_t ul_ws_index = (center_row - ws_d_row) + (center_col + ws_d_col) * 256;
+    Kernel::V3D ul_det_pos = outws->getDetector(ul_ws_index)->getPos();
+    double ul_sample_r = sample.distance(ul_det_pos);
+
+    TS_ASSERT_DELTA(ul_sample_r, ur_sample_r, 0.0000001);
+
+    // Clean
+    AnalysisDataService::Instance().remove("Exp0335_S0038C");
+  }
+
+
   /** Create SPICE scan table workspace
    * @brief createSpiceScanTable
    * @return

@@ -210,6 +210,10 @@ void LoadSpiceXML2DDet::init() {
                   "User can specify the wave length of the instrument if it is "
                   "drifted from the designed value."
                   "It haappens often.");
+
+  declareProperty("DetectorCenterXShift", 0.0, "The amount of shift of detector center along X direction in the unit meter.");
+
+  declareProperty("DetectorCenterYShift", 0.0, "The amount of shift of detector center along Y direction in the unit meter.");
 }
 
 /** Process inputs arguments
@@ -240,6 +244,9 @@ void LoadSpiceXML2DDet::processInputs() {
   m_ptNumber4Log = getProperty("PtNumber");
 
   m_userSpecifiedWaveLength = getProperty("UserSpecifiedWaveLength");
+
+  m_detXShift = getProperty("DetectorCenterXShift");
+  m_detYShift = getProperty("DetectorCenterYShift");
 }
 
 /** Set up sample logs especially 2theta and diffr for loading instrument
@@ -254,12 +261,13 @@ bool LoadSpiceXML2DDet::setupSampleLogs(API::MatrixWorkspace_sptr outws) {
     setupSampleLogFromSpiceTable(outws, spicetablews, m_ptNumber4Log);
   }
 
+  Kernel::DateAndTime anytime(1000);
+
   // Process 2theta
   bool return_true = true;
   if (!outws->run().hasProperty("2theta") &&
       outws->run().hasProperty("_2theta")) {
     // Set up 2theta if it is not set up yet
-    Kernel::DateAndTime anytime(1000);
     double logvalue =
         atof(outws->run().getProperty("_2theta")->value().c_str());
     TimeSeriesProperty<double> *newlogproperty =
@@ -275,8 +283,17 @@ bool LoadSpiceXML2DDet::setupSampleLogs(API::MatrixWorkspace_sptr outws) {
     return_true = false;
   }
 
+  // set up the caibrated detector center to beam
+ TimeSeriesProperty<double> *det_dx = new TimeSeriesProperty<double>("deltax");
+ det_dx->addValue(anytime, m_detXShift);
+ outws->mutableRun().addProperty(det_dx);
+
+ TimeSeriesProperty<double> *det_dy = new TimeSeriesProperty<double>("deltay");
+ det_dy->addValue(anytime, m_detYShift);
+ outws->mutableRun().addProperty(det_dy);
+
+
   // set up Sample-detetor distance calibration
-  Kernel::DateAndTime anytime(1000);
   double sampledetdistance = m_detSampleDistanceShift;
   TimeSeriesProperty<double> *distproperty =
       new TimeSeriesProperty<double>("diffr");

@@ -32,10 +32,10 @@
 	  <component type="panel">
 		  <location>
 			  <parameter name="x">
-				  <value val="0"/>
+				  <logfile eq='value' id='deltax'/>
 			  </parameter>
 			  <parameter name="y">
-				  <value val="0"/>
+				  <logfile eq='value' id='deltay'/>
 			  </parameter>
 		  </location>
 	  </component>
