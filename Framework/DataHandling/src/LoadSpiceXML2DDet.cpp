@@ -465,7 +465,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
                     << "\n";
 
       // XML file records data in the order of column-major
-      size_t icol = 0;
+      size_t i_col = 0;
       for (size_t i = 0; i < vecLines.size(); ++i) {
         std::string &line = vecLines[i];
 
@@ -476,9 +476,9 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
         }
 
         // Check whether it exceeds boundary
-        if (icol == numpixelx) {
+        if (i_col == numpixelx) {
           std::stringstream errss;
-          errss << "Number of non-empty rows (" << icol + 1
+          errss << "Number of non-empty rows (" << i_col + 1
                 << ") in detector data "
                 << "exceeds user defined geometry size " << numpixelx << ".";
           throw std::runtime_error(errss.str());
@@ -492,18 +492,20 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
         // in Y direction
         if (veccounts.size() != numpixely) {
           std::stringstream errss;
-          errss << "Row " << icol << " contains " << veccounts.size()
+          errss << "Row " << i_col << " contains " << veccounts.size()
                 << " items other than " << numpixely
                 << " counts specified by user.";
           throw std::runtime_error(errss.str());
         }
 
-        // scan per row
+        // scan per column
         for (size_t j_row = 0; j_row < veccounts.size(); ++j_row) {
           double counts = atof(veccounts[j_row].c_str());
 
           if (loadinstrument) {
-            size_t wsindex = j_row * numpixely + icol;
+            // the detector ID and ws index are set up in column-major too!
+            size_t wsindex = i_col * numpixelx + j_row;
+            //  size_t wsindex = j_row * numpixely + icol;
             // size_t wsindex = icol * numpixelx + j_row;
             outws->dataX(wsindex)[0] = static_cast<double>(wsindex);
             outws->dataY(wsindex)[0] = counts;
@@ -513,12 +515,12 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
               outws->dataE(wsindex)[0] = 1.0;
 
           } else {
-            outws->dataX(j_row)[icol] = static_cast<double>(j_row);
-            outws->dataY(j_row)[icol] = counts;
+            outws->dataX(j_row)[i_col] = static_cast<double>(j_row);
+            outws->dataY(j_row)[i_col] = counts;
             if (counts > 0)
-              outws->dataE(j_row)[icol] = sqrt(counts);
+              outws->dataE(j_row)[i_col] = sqrt(counts);
             else
-              outws->dataE(j_row)[icol] = 1.0;
+              outws->dataE(j_row)[i_col] = 1.0;
           }
 
           // record max count
@@ -527,8 +529,8 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
           }
         }
 
-        // Update irow
-        icol += 1;
+        // Updae column index (i.e., column number)
+        i_col += 1;
       } // END-FOR (i-vec line)
 
       // Set flag

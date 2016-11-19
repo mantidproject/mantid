@@ -159,10 +159,11 @@ public:
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
 
-    // Value
-    // pixels at
-    TS_ASSERT_DELTA(outws->readY(255 * 256)[0], 1.0, 0.0001);
-    TS_ASSERT_DELTA(outws->readY(9 * 256 + 253)[0], 1.0, 0.00001);
+    // test signal value on various pixels
+    // pixel at (256, 1): column 1
+    TS_ASSERT_DELTA(outws->readY(255)[0], 1.0, 0.0001);
+    // pixel at (254, 256): colun 256
+    TS_ASSERT_DELTA(outws->readY(255 * 256 + 138)[0], 2.0, 0.00001);
 
     // Instrument
     TS_ASSERT(outws->getInstrument());
@@ -180,7 +181,47 @@ public:
     TS_ASSERT_DELTA(dist_r, 0.3750, 0.0001);
     // center of the detector must be at zero
     TS_ASSERT_DELTA(det_center.X(), 0.0, 0.0000001);
-    TS_ASSERT_DELTA(det_center.Y(), 0.0, 0.0000001)
+    TS_ASSERT_DELTA(det_center.Y(), 0.0, 0.0000001);
+
+    // check the sequence of the detector to each ws index
+    detid_t det0id = outws->getDetector(0)->getID();
+    TS_ASSERT_EQUALS(det0id, 0);
+    detid_t det1id = outws->getDetector(1)->getID();
+    TS_ASSERT_EQUALS(det1id, 1);
+    detid_t detlastid = outws->getDetector(256 * 255 + 255)->getID();
+    TS_ASSERT_EQUALS(detlastid, 255 * 256 + 255);
+    // test the whole sequence
+    for (size_t irow = 1; irow < 250; ++irow)
+      for (size_t jcol = 10; jcol < 20; ++jcol) {
+        size_t iws = irow + jcol * 256;
+        detid_t detid = outws->getDetector(iws)->getID();
+        TS_ASSERT_EQUALS(detid, static_cast<detid_t>(iws));
+      }
+
+    // test the geometry position whether det ID is from lower right corner and
+    // move along positive Y direction
+    // right most column
+    Kernel::V3D det0pos = outws->getDetector(0)->getPos();
+    TS_ASSERT_DELTA(det0pos.X(), 0.0252015625, 0.000001);
+    TS_ASSERT_DELTA(det0pos.Y(), -0.022621875, 0.000001);
+    TS_ASSERT_DELTA(det0pos.Z(), 0.375, 0.0001);
+
+    double dY = 0.0001984375;
+
+    Kernel::V3D det1pos = outws->getDetector(1)->getPos();
+    TS_ASSERT_DELTA(det1pos.X(), 0.0252015625, 0.000001);
+    TS_ASSERT_DELTA(det1pos.Y(), -0.022621875 + dY, 0.000001);
+    TS_ASSERT_DELTA(det1pos.Z(), 0.375, 0.0001);
+
+    // center is tested before
+
+    // lower left column
+    size_t i_wsll = 255 * 256 + 1;
+    double dX = -0.0001984375;
+    Kernel::V3D detllpos = outws->getDetector(i_wsll)->getPos();
+    TS_ASSERT_DELTA(detllpos.X(), 0.0252015625 + 255 * dX, 0.000001);
+    TS_ASSERT_DELTA(detllpos.Y(), -0.022621875 + dY, 0.000001);
+    TS_ASSERT_DELTA(detllpos.Z(), 0.375, 0.0001);
 
     // test the detectors with symmetric to each other
     // they should have opposite X or Y
@@ -262,8 +303,11 @@ public:
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
 
     // Value
-    TS_ASSERT_DELTA(outws->readY(255 * 256)[0], 1.0, 0.0001);
-    TS_ASSERT_DELTA(outws->readY(9 * 256 + 253)[0], 1.0, 0.00001);
+    // test signal value on various pixels
+    // pixel at (256, 1): column 1
+    TS_ASSERT_DELTA(outws->readY(255)[0], 1.0, 0.0001);
+    // pixel at (254, 256): colun 256
+    TS_ASSERT_DELTA(outws->readY(255 * 256 + 138)[0], 2.0, 0.00001);
 
     // Instrument
     TS_ASSERT(outws->getInstrument());
@@ -353,8 +397,11 @@ public:
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
 
     // Value
-    TS_ASSERT_DELTA(outws->readY(255 * 256)[0], 1.0, 0.0001);
-    TS_ASSERT_DELTA(outws->readY(9 * 256 + 253)[0], 1.0, 0.00001);
+    // test signal value on various pixels
+    // pixel at (256, 1): column 1
+    TS_ASSERT_DELTA(outws->readY(255)[0], 1.0, 0.0001);
+    // pixel at (254, 256): colun 256
+    TS_ASSERT_DELTA(outws->readY(255 * 256 + 138)[0], 2.0, 0.00001);
 
     // Instrument
     TS_ASSERT(outws->getInstrument());
