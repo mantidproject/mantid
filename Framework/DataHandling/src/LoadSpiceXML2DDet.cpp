@@ -211,9 +211,13 @@ void LoadSpiceXML2DDet::init() {
                   "drifted from the designed value."
                   "It haappens often.");
 
-  declareProperty("DetectorCenterXShift", 0.0, "The amount of shift of detector center along X direction in the unit meter.");
+  declareProperty("DetectorCenterXShift", 0.0, "The amount of shift of "
+                                               "detector center along X "
+                                               "direction in the unit meter.");
 
-  declareProperty("DetectorCenterYShift", 0.0, "The amount of shift of detector center along Y direction in the unit meter.");
+  declareProperty("DetectorCenterYShift", 0.0, "The amount of shift of "
+                                               "detector center along Y "
+                                               "direction in the unit meter.");
 }
 
 /** Process inputs arguments
@@ -284,14 +288,13 @@ bool LoadSpiceXML2DDet::setupSampleLogs(API::MatrixWorkspace_sptr outws) {
   }
 
   // set up the caibrated detector center to beam
- TimeSeriesProperty<double> *det_dx = new TimeSeriesProperty<double>("deltax");
- det_dx->addValue(anytime, m_detXShift);
- outws->mutableRun().addProperty(det_dx);
+  TimeSeriesProperty<double> *det_dx = new TimeSeriesProperty<double>("deltax");
+  det_dx->addValue(anytime, m_detXShift);
+  outws->mutableRun().addProperty(det_dx);
 
- TimeSeriesProperty<double> *det_dy = new TimeSeriesProperty<double>("deltay");
- det_dy->addValue(anytime, m_detYShift);
- outws->mutableRun().addProperty(det_dy);
-
+  TimeSeriesProperty<double> *det_dy = new TimeSeriesProperty<double>("deltay");
+  det_dy->addValue(anytime, m_detYShift);
+  outws->mutableRun().addProperty(det_dy);
 
   // set up Sample-detetor distance calibration
   double sampledetdistance = m_detSampleDistanceShift;

@@ -461,9 +461,9 @@ public:
     AnalysisDataService::Instance().remove("Exp0335_S0038D");
   }
 
-
   //----------------------------------------------------------------------------------------------
-  /** Test with loading instrument without Spice scan Table and detector is shifted from original
+  /** Test with loading instrument without Spice scan Table and detector is
+   *shifted from original
    *  center
    *
    *  Testing includes:
@@ -480,9 +480,11 @@ public:
 
     // calculate shift of the detector center from (115, 128) to (127, 127)
     double det_step_x = -0.0001984375;
-    double shift_x = static_cast<double>(137 - 128) * det_step_x * -1.;  // shift x comes from column
+    double shift_x = static_cast<double>(137 - 128) * det_step_x *
+                     -1.; // shift x comes from column
     double det_step_y = 0.0001984375;
-    double shift_y = static_cast<double>(127 - 115) * det_step_y * -1;  // shift y comes from row
+    double shift_y = static_cast<double>(127 - 115) * det_step_y *
+                     -1; // shift y comes from row
 
     // set up properties
     const std::string filename("HB3A_exp355_scan0001_0522.xml");
@@ -554,23 +556,27 @@ public:
     size_t ws_d_row = 10;
     size_t ws_d_col = 15;
 
-    size_t ll_ws_index = (center_row - ws_d_row) + (center_col - ws_d_col) * 256;
+    size_t ll_ws_index =
+        (center_row - ws_d_row) + (center_col - ws_d_col) * 256;
     Kernel::V3D ll_det_pos = outws->getDetector(ll_ws_index)->getPos();
     double ll_sample_r = sample.distance(ll_det_pos);
 
-    size_t lr_ws_index = (center_row + ws_d_row) + (center_col - ws_d_col) * 256;
+    size_t lr_ws_index =
+        (center_row + ws_d_row) + (center_col - ws_d_col) * 256;
     Kernel::V3D lr_det_pos = outws->getDetector(lr_ws_index)->getPos();
     double lr_sample_r = sample.distance(lr_det_pos);
 
     TS_ASSERT_DELTA(ll_sample_r, lr_sample_r, 0.0000001);
 
-    size_t ur_ws_index = (center_row + ws_d_row) + (center_col + ws_d_col) * 256;
+    size_t ur_ws_index =
+        (center_row + ws_d_row) + (center_col + ws_d_col) * 256;
     Kernel::V3D ur_det_pos = outws->getDetector(ur_ws_index)->getPos();
     double ur_sample_r = sample.distance(ur_det_pos);
 
     TS_ASSERT_DELTA(ll_sample_r, ur_sample_r, 0.0000001);
 
-    size_t ul_ws_index = (center_row - ws_d_row) + (center_col + ws_d_col) * 256;
+    size_t ul_ws_index =
+        (center_row - ws_d_row) + (center_col + ws_d_col) * 256;
     Kernel::V3D ul_det_pos = outws->getDetector(ul_ws_index)->getPos();
     double ul_sample_r = sample.distance(ul_det_pos);
 
@@ -579,7 +585,6 @@ public:
     // Clean
     AnalysisDataService::Instance().remove("Exp0335_S0038C");
   }
-
 
   /** Create SPICE scan table workspace
    * @brief createSpiceScanTable
