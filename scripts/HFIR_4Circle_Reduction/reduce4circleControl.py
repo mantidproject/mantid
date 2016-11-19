@@ -92,6 +92,8 @@ class CWSCDReductionControl(object):
 
         # A dictionary to manage all loaded and processed MDEventWorkspaces
         # self._expDataDict = {}
+        self._detSampleDistanceDict = dict()
+        self._detCenterDict = dict()
 
         # register startup
         mantid.UsageService.registerFeatureUsage("Interface","4-Circle Reduction",False)
@@ -1675,6 +1677,7 @@ class CWSCDReductionControl(object):
             # - construct a configuration with 1 scan and multiple Pts.
             scan_info_table_name = get_merge_pt_info_ws_name(exp_no, scan_no)
             try:
+                # TODO/NOW/ISSUE - Shall I think of put new detector center here???
                 mantidsimple.CollectHB3AExperimentInfo(ExperimentNumber=exp_no,
                                                        ScanList='%d' % scan_no,
                                                        PtLists=pt_list_str,
@@ -1692,6 +1695,7 @@ class CWSCDReductionControl(object):
 
             # create MD workspace in Q-sample
             try:
+                # TODO/ISSUE/NOW - Add Detector Center and Detector Distance!!!
                 mantidsimple.ConvertCWSDExpToMomentum(InputWorkspace=scan_info_table_name,
                                                       CreateVirtualInstrument=False,
                                                       OutputWorkspace=out_q_name,
@@ -1774,6 +1778,31 @@ class CWSCDReductionControl(object):
         # and only the latest is saved by this key
         self._roiDict[(exp_number, scan_number)] = ((ll_x, ll_y), (ur_x, ur_y))
         self._roiDict[exp_number] = ((ll_x, ll_y), (ur_x, ur_y))
+
+        return
+
+    def set_detector_center(self, exp_number, center_row, center_col):
+        """
+
+        :param exp_number:
+        :param center_row:
+        :param center_col:
+        :return:
+        """
+        # TODO/NOW/ISSUE - check and doc
+        self._detCenterDict[exp_number] = (center_row, center_col)
+
+        return
+
+    def set_detector_sample_distance(self, exp_number, sample_det_distance):
+        """
+
+        :param exp_number:
+        :param sample_det_distance:
+        :return:
+        """
+        # TODO/NOW/ISSUE - check and doc
+        self._detSampleDistanceDict[exp_number] = sample_det_distance
 
         return
 

@@ -97,6 +97,19 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_download_spice_data)
         self.connect(self.ui.comboBox_mode, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.do_change_data_access_mode)
+        self.connect(self.ui.pushButton_applyCalibratedSampleDistance, QtCore.SIGNAL('clicked()'),
+                     self.do_set_user_detector_distance)
+        self.connect(self.ui.pushButton_applyUserDetCenter, QtCore.SIGNAL('clicked()'),
+                     self.do_set_user_detector_center)
+
+        # TODO/NOW/ISSUE - Implement
+        """
+
+        add more to --> lineEdit_infoDetSampleDistance
+        pushButton_applyUserWavelength: add more to --> lineEdit_infoWavelength
+
+
+        """
 
         # Tab 'View Raw Data'
         self.connect(self.ui.pushButton_setScanInfo, QtCore.SIGNAL('clicked()'),
@@ -277,16 +290,6 @@ class MainWindow(QtGui.QMainWindow):
 
         self.connect(self.ui.pushButton_loadLastNthProject, QtCore.SIGNAL('clicked()'),
                      self.do_load_nth_project)
-
-        # TODO/NOW/ISSUE - Implement
-        """
-        lineEdit_userDetSampleDistance, pushButton_applyCalibratedSampleDistance,
-        add more to --> lineEdit_infoDetSampleDistance
-        pushButton_applyUserWavelength: add more to --> lineEdit_infoWavelength
-
-        lineEdit_detCenterPixHorizontal, lineEdit_detCenterPixVertical,
-        pushButton_applyUserDetCenter, lineEdit_infoDetCenter
-        """
 
         # Validator ... (NEXT)
 
@@ -2545,6 +2548,56 @@ class MainWindow(QtGui.QMainWindow):
         ub_matrix = gutil.convert_str_to_matrix(ub_str, (3, 3))
 
         return ub_matrix
+
+    def do_set_user_detector_distance(self):
+        """ Set up the user-defined detector distance for loading instrument with data
+                lineEdit_userDetSampleDistance, pushButton_applyCalibratedSampleDistance,
+        :param self:
+        :return:
+        """
+        user_det_distance_str = str(self.ui.lineEdit_userDetSampleDistance.text()).strip()
+        if len(user_det_distance_str) == 0:
+            return
+
+        # convert to float
+        try:
+            user_det_distance = float(user_det_distance_str)
+        except ValueError:
+            self.pop_one_button_dialog('User detector-sample distance %s must be a float.' % user_det_distance_str)
+            return
+
+        # check distance value because it cannot be too far
+        default_det_distance = float(str(self.ui.lineEdit_defaultSampleDetDistance.text()))
+        distance_tol = float(str(self.ui.lineEdit_sampleDetDistTol.text()))
+        if abs((user_det_distance - default_det_distance) / default_det_distance) > distance_tol:
+            self.pop_one_button_dialog('User specified sample-detector distance is not reasonable.')
+            return
+
+        # set to controller
+        exp_number = int(str(self.ui.lineEdit_exp.text()))
+        self._myControl.set_detector_sample_distance(exp_number, user_det_distance)
+
+        return
+
+    def do_set_user_detector_center(self):
+        """
+
+        :return:
+        """
+        # TODO/NOW/ISSUE/ Check and doc
+        #         lineEdit_detCenterPixHorizontal, lineEdit_detCenterPixVertical,
+        # pushButton_applyUserDetCenter, lineEdit_infoDetCenter
+
+        exp_number = int(str(self.ui.lineEdit_exp.text()))
+
+        # TODO/ISSUE/NOW : what if empty string (default) or bad???
+        user_center_row = int(str(self.ui.lineEdit_detCenterPixHorizontal.text()))
+        user_center_col = int(str(self.ui.lineEdit_detCenterPixVertical.text()))
+
+        self._myControl.set_detector_center(exp_number, user_center_row, user_center_col)
+
+
+        return
 
     def do_show_spice_file(self):
         """

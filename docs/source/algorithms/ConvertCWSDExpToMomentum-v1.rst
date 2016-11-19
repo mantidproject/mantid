@@ -234,7 +234,7 @@ Output:
 
   Output MDEventWorkspace has 397 events.
   There are 1 peaks found in output MDWorkspace
-  In Q-sample frame, center of peak 0 is at (-3.58246, -4.40803, -3.06320) at detector with ID 32881
+  In Q-sample frame, center of peak 0 is at (-3.58246, -4.40802, -3.06320) at detector with ID 32881
 
 .. categories::
 
