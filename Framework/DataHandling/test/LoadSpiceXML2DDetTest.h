@@ -127,7 +127,8 @@ public:
   /** Test algorithm with loading HB3A with instrument and presense of SPICE
    * scan table such that it will override 2theta value in the XML file
    * Test: Set 2theta = 0
-   *  1. Detector should be symmetric along the X-axis and about the center of detector;
+   *  1. Detector should be symmetric along the X-axis and about the center of
+   * detector;
    *  2. All pixels on the X-axis will have position Y value zero;
    *  3. All pixels on the Y-axis will have position X value zero
    * @brief test: load data with instrument whose detector's 2theta value is 0.
@@ -147,7 +148,7 @@ public:
     loader.setProperty("DetectorGeometry", sizelist);
     loader.setProperty("LoadInstrument", true);
     loader.setProperty("SpiceTableWorkspace", scantablews);
-    loader.setProperty("PtNumber", 3);  // pt number 3 has 2theta value as 0.0
+    loader.setProperty("PtNumber", 3); // pt number 3 has 2theta value as 0.0
     loader.setProperty("ShiftedDetectorDistance", 0.);
 
     loader.execute();
@@ -174,7 +175,7 @@ public:
     // check center of the detector @ (128, 115)
     size_t center_col = 128;
     size_t center_row = 115;
-    size_t center_ws_index = (center_row - 1)  + (center_col - 1) *  256;
+    size_t center_ws_index = (center_row - 1) + (center_col - 1) * 256;
     Kernel::V3D det_center = outws->getDetector(center_ws_index)->getPos();
     // distance to sample
     double dist_r = det_center.distance(sample);
@@ -234,17 +235,17 @@ public:
 
     size_t row_lr = 0;
     size_t col_lr = 2 * 127 - 2;
-    size_t ws_index_lr = row_lr+ col_lr * 256 ;
+    size_t ws_index_lr = row_lr + col_lr * 256;
     Kernel::V3D det_lr_pos = outws->getDetector(ws_index_lr)->getPos();
 
     size_t row_ul = 114 * 2;
     size_t col_ul = 2;
-    size_t ws_index_ul = row_ul + col_ul* 256 ;
+    size_t ws_index_ul = row_ul + col_ul * 256;
     Kernel::V3D det_ul_pos = outws->getDetector(ws_index_ul)->getPos();
 
     size_t row_ur = 114 * 2;
     size_t col_ur = 2 * 127 - 2;
-    size_t ws_index_ur = row_ur + col_ur * 256 ;
+    size_t ws_index_ur = row_ur + col_ur * 256;
     Kernel::V3D det_ur_pos = outws->getDetector(ws_index_ur)->getPos();
 
     double det_size = 0.0508; // meter
@@ -268,7 +269,8 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Test with loading instrument without Spice scan Table, while the 2theta value is from sample
+  /** Test with loading instrument without Spice scan Table, while the 2theta
+   * value is from sample
    *    sample log
    *  Testing includes:
    *  1. Load the instrument without Spice Table;
@@ -413,7 +415,7 @@ public:
     // check center of the detector @ (128, 115)
     size_t center_col = 128;
     size_t center_row = 115;
-    size_t center_ws_index = (center_row - 1) + (center_col - 1)* 256 ;
+    size_t center_ws_index = (center_row - 1) + (center_col - 1) * 256;
     Kernel::V3D center_det_pos = outws->getDetector(center_ws_index)->getPos();
     // distance to sample
     double dist_r = center_det_pos.distance(sample);
@@ -429,7 +431,7 @@ public:
     // ll: low-left, lr: low-right, ul: upper-left; ur: upper-right
     size_t row_ll = 0;
     size_t col_ll = 2;
-    size_t ws_index_ll = row_ll  + col_ll* 256;
+    size_t ws_index_ll = row_ll + col_ll * 256;
     Kernel::V3D det_ll_pos = outws->getDetector(ws_index_ll)->getPos();
 
     size_t row_lr = 0;
@@ -439,12 +441,12 @@ public:
 
     size_t row_ul = 114 * 2;
     size_t col_ul = 2;
-    size_t ws_index_ul = row_ul+ col_ul * 256 ;
+    size_t ws_index_ul = row_ul + col_ul * 256;
     Kernel::V3D det_ul_pos = outws->getDetector(ws_index_ul)->getPos();
 
     size_t row_ur = 114 * 2;
     size_t col_ur = 2 * 127 - 2;
-    size_t ws_index_ur = row_ur + col_ur* 256 ;
+    size_t ws_index_ur = row_ur + col_ur * 256;
     Kernel::V3D det_ur_pos = outws->getDetector(ws_index_ur)->getPos();
 
     // Check symmetry
