@@ -177,6 +177,9 @@ public:
     EXPECT_CALL(mockView, getQResolutionCheck())
         .Times(Exactly(1))
         .WillOnce(Return(false));
+    EXPECT_CALL(mockView, getSeparator())
+        .Times(Exactly(1))
+        .WillOnce(Return("comma"));
     EXPECT_CALL(mockView, getPrefix()).Times(Exactly(1)).WillOnce(Return(""));
     EXPECT_CALL(mockView, getFileFormatIndex())
         .Times(Exactly(1))
