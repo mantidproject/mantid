@@ -174,6 +174,8 @@ endif ()
 
 install ( DIRECTORY ${PYQT4_PYTHONPATH}/uic DESTINATION ${BIN_DIR}/PyQt4 )
 
+install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPlot.icns
+          DESTINATION MantidPlot.app/Contents/Resources/ )
 # Add launcher script for mantid python
 install ( PROGRAMS ${CMAKE_BINARY_DIR}/mantidpython_osx_install
           DESTINATION MantidPlot.app/Contents/MacOS/
