@@ -1,12 +1,12 @@
 from __future__ import (absolute_import, division, print_function)
 
-from abc import ABCMeta, abstractmethod
-from six import add_metaclass
 import os
+from abc import ABCMeta, abstractmethod
 
-from isis_powder import common
-from isis_powder import focus
-from isis_powder import calibrate
+from six import add_metaclass
+
+from isis_powder.routines import calibrate, focus, common
+
 
 # This class provides common hooks for instruments to override
 # if they want to define the behaviour of the hook. Otherwise it
@@ -223,9 +223,6 @@ class AbstractInst(object):
     def _skip_appending_cycle_to_raw_dir(self):
         return True
         # TODO set this to False if they just dump their raw files in one folder
-
-    def _mask_noisy_detectors(self, vanadium_run):
-        pass
 
     def _calculate_solid_angle_efficiency_corrections(self, vanadium_ws):
         return _empty_hook_return_none()

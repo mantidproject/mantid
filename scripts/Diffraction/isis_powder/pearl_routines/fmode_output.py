@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
 
-import isis_powder.common as common
+import isis_powder.routines.common as common
 
 # This file generates the various outputs for the PEARL instruments and saves them to their respective files
 
@@ -138,7 +138,7 @@ def _focus_mode_all(output_file_paths, calibrated_spectra):
     first_spectrum = calibrated_spectra[0]
     summed_spectra = mantid.CloneWorkspace(InputWorkspace=first_spectrum)
 
-    for i in range(1, 9):  # TODO why is this 1-8
+    for i in range(1, 9):
         summed_spectra = mantid.Plus(LHSWorkspace=summed_spectra, RHSWorkspace=calibrated_spectra[i])
 
     summed_spectra_name = output_file_paths["output_name"] + "_mods1-9"

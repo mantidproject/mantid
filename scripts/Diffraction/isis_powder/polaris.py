@@ -1,14 +1,13 @@
 from __future__ import (absolute_import, division, print_function)
 
-import math
 import os
+
 import mantid.simpleapi as mantid
 
+import isis_powder.routines.common as common
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.polaris_routines import polaris_calib_parser
-
-import isis_powder.common as common
-from isis_powder.RunDetails import RunDetails
+from isis_powder.routines.RunDetails import RunDetails
 
 
 class Polaris(AbstractInst):
@@ -99,12 +98,6 @@ class Polaris(AbstractInst):
     def _normalise_ws(self, ws_to_correct, run_details=None):
         normalised_ws = mantid.NormaliseByCurrent(InputWorkspace=ws_to_correct)
         return normalised_ws
-
-    def _mask_noisy_detectors(self, vanadium_ws):
-        summed_van_ws = mantid.Integration(InputWorkspace=vanadium_ws)
-        # TODO do they want this masking detectors with too high a contribution?
-        mantid.MaskDetectorsIf(InputWorkspace=summed_van_ws, InputCalFile=self._grouping_file_path,
-                               OutputCalFile=self._cal_file_path, Mode="DeselectIf", Operator="LessEqual", Value=10)
 
     def _calculate_solid_angle_efficiency_corrections(self, vanadium_ws):
         solid_angle_ws = mantid.SolidAngle(InputWorkspace=vanadium_ws)

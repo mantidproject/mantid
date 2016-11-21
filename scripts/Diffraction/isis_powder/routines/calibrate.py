@@ -1,9 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
+
 import mantid.simpleapi as mantid
 
-import isis_powder.common as common
+import isis_powder.routines.common as common
 
 
 def create_van(instrument, van, empty, output_van_file_name, num_of_splines, absorb, gen_absorb):

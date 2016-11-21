@@ -1,20 +1,16 @@
 from __future__ import (absolute_import, division, print_function)
 
-import mantid.simpleapi as mantid
-from mantid import config
-
-import numpy as numpy
-
 import os
 
+import mantid.simpleapi as mantid
+import numpy as numpy
+from mantid import config
+
+import isis_powder.routines.common as common
 from isis_powder.abstract_inst import AbstractInst
-import isis_powder.common as common
+from isis_powder.pearl_routines import fmode_output, pearl_calib_factory, pearl_cycle_factory
+from isis_powder.routines.RunDetails import RunDetails
 
-from isis_powder import pearl_calib_factory
-from isis_powder import pearl_cycle_factory
-from isis_powder.RunDetails import RunDetails
-
-from isis_powder.pearl_routines import fmode_output
 
 class Pearl(AbstractInst):
 
@@ -49,7 +45,6 @@ class Pearl(AbstractInst):
         # File names
         pearl_mc_absorption_file_name = "PRL112_DC25_10MM_FF.OUT"  # TODO
         self._attenuation_full_path = os.path.join(calibration_dir, pearl_mc_absorption_file_name)
-
 
     # --- Abstract Implementation ---- #
 

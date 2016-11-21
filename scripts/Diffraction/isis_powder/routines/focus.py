@@ -1,7 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
-import isis_powder.common as common
+
+import isis_powder.routines.common as common
 
 
 def focus(number, instrument, attenuate=True, van_norm=True):

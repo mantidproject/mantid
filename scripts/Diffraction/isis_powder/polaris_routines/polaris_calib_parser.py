@@ -1,8 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
-import isis_powder.common
 
 import os
+
 import yaml
+
+import isis_powder.routines.common
 
 
 def get_calibration_dict(run_number):
@@ -52,7 +54,7 @@ def _check_if_run_is_exception(config_handle, run_number):
 def _find_dictionary_key(dict_to_search, run_number):
 
     for key in dict_to_search:
-        generated_runs = isis_powder.common.generate_run_numbers(run_number_string=key)
+        generated_runs = isis_powder.routines.common.generate_run_numbers(run_number_string=key)
         if run_number in generated_runs:
             return key
 
