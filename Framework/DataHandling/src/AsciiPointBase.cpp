@@ -145,8 +145,8 @@ void AsciiPointBase::appendSeparatorProperty() {
   propOptions.push_back("space");
   propOptions.push_back("tab");
   declareProperty("Separator", "tab",
-    boost::make_shared<StringListValidator>(propOptions),
-    "The separator used for splitting data columns.");
+                  boost::make_shared<StringListValidator>(propOptions),
+                  "The separator used for splitting data columns.");
 }
 } // namespace DataHandling
 } // namespace Mantid
