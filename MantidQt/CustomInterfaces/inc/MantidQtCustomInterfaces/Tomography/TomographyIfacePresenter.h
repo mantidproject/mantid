@@ -6,9 +6,9 @@
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 
-#include <boost/scoped_ptr.hpp>
 #include <QMutex>
 #include <QObject>
+#include <boost/scoped_ptr.hpp>
 
 // Qt classes forward declarations
 class QThread;
