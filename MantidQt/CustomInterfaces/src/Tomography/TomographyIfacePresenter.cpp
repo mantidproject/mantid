@@ -6,8 +6,10 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
-#include "MantidQtCustomInterfaces/Tomography/TomographyProcessHandler.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyProcess.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyThread.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -19,9 +21,6 @@
 #include <QString>
 #include <QThread>
 #include <QTimer>
-#include <QSignalMapper>
-
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -589,13 +588,12 @@ void TomographyIfacePresenter::prepareThreadAndRunLocalReconstruction(
   // graceful exit, could do something like emit killThread() that then calls
   // quit() on the thread itself
   m_workerThread.reset();
-  auto *worker = new MantidQt::CustomInterfaces::TomographyProcessHandler();
-  m_workerThread =
-      Mantid::Kernel::make_unique<TomographyThreadHandler>(this, worker);
-  worker->moveToThread(m_workerThread.get());
+  auto *worker = new MantidQt::CustomInterfaces::TomographyProcess();
+  m_workerThread = Mantid::Kernel::make_unique<TomographyThread>(this, worker);
 
-  connect(m_workerThread.get(), SIGNAL(started()), worker, SLOT(startWorker()));
-
+  // we do this so the thread can independently read the process' output and
+  // only signal the presenter after it's done reading and has something to
+  // share so it doesn't block the presenter
   connect(m_workerThread.get(), SIGNAL(stdOutReady(QString)), this,
           SLOT(readWorkerStdOut(QString)));
   connect(m_workerThread.get(), SIGNAL(stdErrReady(QString)), this,
@@ -604,29 +602,18 @@ void TomographyIfacePresenter::prepareThreadAndRunLocalReconstruction(
   connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
   connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()),
           Qt::DirectConnection);
-  connect(worker, SIGNAL(finished()), m_workerThread.get(), SIGNAL(finished()));
-  connect(m_workerThread.get(), SIGNAL(finished()), m_workerThread.get(),
-          SLOT(deleteLater()), Qt::DirectConnection);
 
   m_model->doLocalRunReconstructionJob(runnable, args, allOpts, *m_workerThread,
                                        *worker);
 }
 
 void TomographyIfacePresenter::addProcessToJobList() {
-  auto *worker = qobject_cast<TomographyProcessHandler *>(sender());
+  auto *worker = qobject_cast<TomographyProcess *>(sender());
   auto pid = worker->getPID();
-
-#ifdef _WIN32
-  // windows gets a struct object with more info
-  auto actualpid = static_cast<qint64>(pid->dwProcessId);
-#else
-  // linux gets just the PID
-  auto actualpid = static_cast<qint64>(pid);
-#endif
   auto runnable = worker->getRunnable();
   auto args = worker->getArgs();
 
-  m_model->addJobToStatus(actualpid, runnable, args);
+  m_model->addJobToStatus(pid, runnable, args);
   processRefreshJobs();
 }
 

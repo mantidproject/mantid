@@ -51,7 +51,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTIDQT_CUSTOMINTERFACES_DLL TomographyIfacePresenter
     : public QObject,
       public ITomographyIfacePresenter {
-  // Q_OBJECT for the 'keep alive' signals
   Q_OBJECT
 
 public:
@@ -155,7 +154,7 @@ private:
   QTimer *m_keepAliveTimer;
   QThread *m_keepAliveThread;
 
-  std::unique_ptr<TomographyThreadHandler> m_workerThread;
+  std::unique_ptr<TomographyThread> m_workerThread;
 
   std::unique_ptr<TomoToolConfigDialogBase> m_configDialog;
 

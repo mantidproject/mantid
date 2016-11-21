@@ -11,19 +11,15 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoReconFiltersSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
-#include "MantidQtCustomInterfaces/Tomography/TomographyProcessHandler.h"
 
 // Qt classes forward declarations
 class QMutex;
-class QThread;
-
-namespace Poco {
-class Pipe;
-}
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class TomographyProcess;
+class TomographyThread;
 /**
 Tomography GUI. Model for the interface (as in the MVP
 (Model-View-Presenter) pattern). In principle, in a strict MVP setup,
@@ -158,8 +154,8 @@ public:
   void doLocalRunReconstructionJob(
       const std::string &runnable, const std::vector<std::string> &args,
       const std::string &allOpts,
-      MantidQt::CustomInterfaces::TomographyThreadHandler &thread,
-      MantidQt::CustomInterfaces::TomographyProcessHandler &worker);
+      MantidQt::CustomInterfaces::TomographyThread &thread,
+      MantidQt::CustomInterfaces::TomographyProcess &worker);
 
   void doRemoteRunReconstructionJob(const std::string &compRes,
                                     const std::string &runnable,
@@ -265,10 +261,6 @@ protected: // protected to expose everything to testing
 
   std::string
   buildOutReconstructionDirFromSamplesDir(const std::string &samplesDir) const;
-
-  /// Prints the streams from the Poco::launch process into mantid
-  void printProcessStreamsToMantidLog(const Poco::Pipe &outPipe,
-                                      const Poco::Pipe &errPipe);
 
 private:
   /// facility for the remote compute resource
