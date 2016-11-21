@@ -1,6 +1,3 @@
-#pylint: disable=no-init, unused-variable, too-many-lines
-# we need to disable unused_variable because ws.dataY(n) returns a reference  to the underlying c++ object
-# that can be modified inplace
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
@@ -33,8 +30,6 @@ FORWARD = 1
 
 # Child Algorithm logging
 _LOGGING_ = False
-
-#pylint: disable=too-many-instance-attributes
 
 
 class LoadVesuvio(LoadEmptyVesuvio):
@@ -346,7 +341,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             elif self._diff_opt == "FoilInOut":
                 raw_grp_indices = list(range(0, self._nperiods))
             else:
-                raise RuntimeError("Unknown single foil mode: %s." % (self._diff_opt))
+                raise RuntimeError("Unknown single foil mode: %s." % self._diff_opt)
 
             dataY = foil_out.dataY(ws_index)
             dataE = foil_out.dataE(ws_index)
@@ -455,7 +450,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         def to_range_tuple(str_range):
             """Return a list of 2 floats giving the lower,upper range"""
             elements = str_range.split("-")
-            return (float(elements[0]),float(elements[1]))
+            return float(elements[0]), float(elements[1])
 
         self._back_mon_norm = to_range_tuple(self.backward_monitor_norm)
         self._back_period_sum1 = to_range_tuple(self.backward_period_sum1)
@@ -625,7 +620,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         Sums together all the monitors for one run
         @param monitor_group    :: All the monitor workspaces for a single run
         @param output_ws        :: The workspace that will contain the summed monitor data
-        @return                 :: The workspace contianing the summed monitor data
+        @return                 :: The workspace containing the summed monitor data
         """
 
         for mon_index in range(1, monitor_group.getNumberOfEntries()):
@@ -682,16 +677,14 @@ class LoadVesuvio(LoadEmptyVesuvio):
 #----------------------------------------------------------------------------------------
 
     def _is_back_scattering(self, spectrum_no):
-        return spectrum_no >= self._backward_spectra_list[0] and \
-            spectrum_no <= self._backward_spectra_list[-1]
+        return self._backward_spectra_list[0] <= spectrum_no <= self._backward_spectra_list[-1]
 
-#----------------------------------------------------------------------------------------
+    #----------------------------------------------------------------------------------------
 
     def _is_fwd_scattering(self, spectrum_no):
-        return spectrum_no >= self._forward_spectra_list[0] and \
-            spectrum_no <= self._forward_spectra_list[-1]
+        return self._forward_spectra_list[0] <= spectrum_no <= self._forward_spectra_list[-1]
 
-#----------------------------------------------------------------------------------------
+    #----------------------------------------------------------------------------------------
 
     def _integrate_periods(self):
         """
@@ -818,7 +811,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
-    #pylint: disable=too-many-arguments
     def _sum_foils(self, foil_ws, mon_ws, sum_index, foil_periods, mon_periods=None):
         """
         Sums the counts from the given foil periods in the raw data group
@@ -1045,7 +1037,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self.setProperty(WKSP_PROP, self.foil_out)
         # Add OutputWorkspace property for Monitors
         if self._load_monitors:
-            # Check property is not being re-decalred
+            # Check property is not being re-declared
             if not self.existsProperty(WKSP_PROP_LOAD_MON):
                 mon_out_name = self.getPropertyValue(WKSP_PROP) + '_monitors'
                 self.declareProperty(WorkspaceProperty(WKSP_PROP_LOAD_MON, mon_out_name, Direction.Output),
@@ -1074,7 +1066,7 @@ class SpectraToFoilPeriodMap(object):
     one_to_one          :: Only used in back scattering where there is a single
                            static foil
     odd_even/even_odd   :: Only used in forward scatter models when the foil
-                           is/isn't infront of each detector. First bank 135-142
+                           is/isn't in front of each detector. First bank 135-142
                            is odd_even, second (143-150) is even_odd and so on.
     """
 
@@ -1147,10 +1139,10 @@ class SpectraToFoilPeriodMap(object):
 
         if spectrum_no < 135:
             foil_periods = [1,2,3]
-        elif (spectrum_no >= 135 and spectrum_no <= 142) or \
-             (spectrum_no >= 151 and spectrum_no <= 158) or \
-             (spectrum_no >= 167 and spectrum_no <= 174) or \
-             (spectrum_no >= 183 and spectrum_no <= 190):
+        elif (135 <= spectrum_no <= 142) or \
+             (151 <= spectrum_no <= 158) or \
+             (167 <= spectrum_no <= 174) or \
+             (183 <= spectrum_no <= 190):
             foil_periods = [2,4,6] if foil_out else [1,3,5]
         else:
             foil_periods = [1,3,5] if foil_out else [2,4,6]
@@ -1163,7 +1155,7 @@ class SpectraToFoilPeriodMap(object):
         Returns a tuple of indices that can be used to access the Workspace within
         a WorkspaceGroup that corresponds to the foil state numbers given
         @param spectrum_no :: A spectrum number (1->nspectra)
-        @param foil_state_no :: A number between 1 & 6(inclusive) that defines which foil
+        @param foil_state_numbers :: A number between 1 & 6(inclusive) that defines which foil
                                 state is required
         @returns A tuple of indices in a WorkspaceGroup that gives the associated Workspace
         """
@@ -1189,10 +1181,10 @@ class SpectraToFoilPeriodMap(object):
         # For the back scattering banks or foil states > 6 then there is a 1:1 map
         if foil_state_no > 6 or spectrum_no < 135:
             foil_periods = self._one_to_one
-        elif (spectrum_no >= 135 and spectrum_no <= 142) or \
-             (spectrum_no >= 151 and spectrum_no <= 158) or \
-             (spectrum_no >= 167 and spectrum_no <= 174) or \
-             (spectrum_no >= 183 and spectrum_no <= 190):
+        elif (135 <= spectrum_no <= 142) or \
+             (151 <= spectrum_no <= 158) or \
+             (167 <= spectrum_no <= 174) or \
+             (183 <= spectrum_no <= 190):
              # For each alternating forward scattering bank :: foil_in = 1,3,5, foil out = 2,4,6
             foil_periods = self._odd_even
         else:
