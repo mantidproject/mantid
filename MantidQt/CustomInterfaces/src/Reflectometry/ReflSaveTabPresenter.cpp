@@ -140,6 +140,11 @@ void ReflSaveTabPresenter::saveWorkspaces() {
                                       "No workspaces selected");
   }
 
+  // Obtain workspace titles
+  std::vector<std::string> wsTitles(wsNames.size());
+  std::transform(wsNames.begin(), wsNames.end(), wsTitles.begin(),
+    [](std::string s) { return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(s)->getTitle(); });
+
   // Create the appropriate save algorithm
   bool titleCheck = m_view->getTitleCheck();
   auto selectedParameters = m_view->getSelectedParameters();
@@ -150,11 +155,11 @@ void ReflSaveTabPresenter::saveWorkspaces() {
   std::string extension = saveExts[formatIndex];
   IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create(algName);
 
-  for (auto it = wsNames.begin(); it != wsNames.end(); it++) {
+  for (int i = 0; i < wsNames.size(); i++) {
     // Add any additional algorithm-specific properties and execute
     if (algName != "SaveANSTOAscii") {
       if (titleCheck)
-        saveAlg->setProperty("Title", *it);
+        saveAlg->setProperty("Title", wsTitles[i]);
       saveAlg->setProperty("LogList", selectedParameters);
     }
     if (algName == "SaveReflCustomAscii") {
@@ -162,11 +167,12 @@ void ReflSaveTabPresenter::saveWorkspaces() {
     }
 
     auto path = Poco::Path(saveDir);
-    path.append(prefix + *it + extension);
+    auto wsName = wsNames[i];
+    path.append(prefix + wsName + extension);
     saveAlg->setProperty("Filename", path.toString());
     saveAlg->setProperty(
         "InputWorkspace",
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(*it));
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
     saveAlg->execute();
   }
 }
@@ -195,5 +201,10 @@ std::vector<std::string> ReflSaveTabPresenter::getAvailableWorkspaceNames() {
 
   return validNames;
 }
+
+/** Obtains a list of workspace titles given a list of workspace names
+* @param workspaceNames :: vector of workspace name strings
+* @return 
+*/
 }
 }

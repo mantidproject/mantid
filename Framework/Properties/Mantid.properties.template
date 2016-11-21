@@ -113,7 +113,7 @@ defaultsave.directory =
 # ICat download directory
 icatDownload.directory =
 # ICat mount point. Directory where archive is mounted. See Facility.xml filelocation.
-icatDownload.mountPoint =
+icatDownload.mountPoint = /Volumes/inst$
 
 # The Number of algorithms properties to retain im memory for refence in scripts.
 algorithms.retained = 50

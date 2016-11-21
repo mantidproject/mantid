@@ -112,7 +112,6 @@ public:
   MOCK_CONST_METHOD0(getFileFormatIndex, int());
   MOCK_CONST_METHOD0(getTitleCheck, bool());
   MOCK_CONST_METHOD0(getQResolutionCheck, bool());
-  MOCK_CONST_METHOD0(getSeparator, std::string());
   MOCK_CONST_METHOD0(clearWorkspaceList, void());
   MOCK_CONST_METHOD1(setWorkspaceList, void(const std::vector<std::string> &));
   MOCK_CONST_METHOD0(clearParametersList, void());

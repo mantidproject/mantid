@@ -267,29 +267,6 @@
                 </layout>
               </widget>
             </item>     
-            <item row ="4" column="0">
-              <widget class="QLabel" name="spectraListLabel">
-                <property name="text">
-                  <string>Spectra list</string>
-                </property>
-              </widget>
-            </item>
-            <item row="4" column="1" colspan="3">
-              <widget class="QLineEdit" name="spectraListEdit"/>
-            </item>
-            <item row="4" column="4">
-              <spacer name="customSaveSpacer4">
-                <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                  <size>
-                    <width>20</width>
-                    <height>20</height>
-                  </size>
-                </property>
-              </spacer>
-            </item>            
             <item row ="5" column="0">
               <widget class="QLabel" name="fileFormatLabel">
                 <property name="text">

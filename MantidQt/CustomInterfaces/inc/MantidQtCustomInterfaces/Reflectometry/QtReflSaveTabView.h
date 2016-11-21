@@ -69,8 +69,6 @@ public:
   bool getTitleCheck() const override;
   /// Returns the Q resolution check
   bool getQResolutionCheck() const override;
-  /// Returns the separator type
-  std::string getSeparator() const override;
 
   /// Clears the 'List of Workspaces' widget
   void clearWorkspaceList() const override;
