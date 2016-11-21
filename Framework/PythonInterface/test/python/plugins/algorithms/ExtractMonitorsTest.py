@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.simpleapi import *
 
@@ -70,6 +72,22 @@ class ExtractMonitorsTest(unittest.TestCase):
         self.assertRaises(KeyError, mtd.retrieve, 'mon')
 
         self.assertEquals(detectors.getNumberHistograms(), 200)
+
+    def test_workspace_with_same_input_ws_and_detector_ws_names(self):
+        CreateSampleWorkspace(OutputWorkspace='testWS', NumMonitors = 3)
+        ExtractMonitors(InputWorkspace = 'testWS', DetectorWorkspace = 'testWS', MonitorWorkspace = 'mon')
+        detectors = mtd['testWS']
+        monitors = mtd['mon']
+
+        self.assertEquals(detectors.getNumberHistograms(), 200)
+        self.assertEquals(monitors.getNumberHistograms(), 3)
+        self.assertEquals(detectors.getMonitorWorkspace().name(), "mon")
+
+        for i in range(monitors.getNumberHistograms()):
+            self.assertTrue(monitors.getDetector(i).isMonitor())
+
+        for i in range(detectors.getNumberHistograms()):
+            self.assertFalse(detectors.getDetector(i).isMonitor())
 
 if __name__=="__main__":
     unittest.main()

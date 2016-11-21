@@ -11,11 +11,13 @@ The output of each function is a workspace containing a single bin where:
 This workspace can be summed with other masked workspaces to accumulate
 masking and also passed to MaskDetectors to match masking there.
 """
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.kernel.funcinspect import lhs_info
 import os
 import Direct.RunDescriptor as RunDescriptor
 from Direct.PropertyManager import PropertyManager
+from six import iteritems
 # Reference to reducer used if necessary for working with run descriptors (in diagnostics)
 __Reducer__ = None
 
@@ -77,7 +79,7 @@ def diagnose(white_int,**kwargs):
     # process subsequent calls to this routine, when white mask is already defined
     white= kwargs.get('white_mask',None) # and white beam is not changed
     #white mask assumed to be global so no sectors in there
-    if not white is None and isinstance(white,RunDescriptor.RunDescriptor):
+    if white is not None and isinstance(white,RunDescriptor.RunDescriptor):
         hardmask_file = None
         white_mask,num_failed = white.get_masking(2)
         add_masking(white_int, white_mask)
@@ -86,7 +88,7 @@ def diagnose(white_int,**kwargs):
         white_mask = None
         van_mask = CloneWorkspace(white_int)
 
-    if not hardmask_file is None:
+    if hardmask_file is not None:
         if parser.mapmask_ref_ws is None:
             ref_ws = white_int
         else:
@@ -334,13 +336,6 @@ def do_background_test(background_int, median_lo, median_hi, sigma, mask_zero,
     """
     logger.notice('Running background count test')
 
-    # What shall we call the output
-    lhs_names = lhs_info('names')
-    if len(lhs_names) > 0:
-        ws_name = lhs_names[0]
-    else:
-        ws_name = '__do_background_test'
-
     mask_bkgd, num_failures = MedianDetectorTest(InputWorkspace=background_int,
                                                  StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,
                                                  SignificanceTest=sigma,
@@ -419,13 +414,13 @@ def print_test_summary(test_results,test_name=None):
     """
 
     if len(test_results) == 0:
-        print "No tests have been run!"
+        print("No tests have been run!")
         return
 
     if test_name is None:
-        print '======== Diagnostic Test Summary '
+        print('======== Diagnostic Test Summary ')
     else:
-        print '======== Diagnostic Test Summary {0} '.format(test_name)
+        print('======== Diagnostic Test Summary {0} '.format(test_name))
 
     max_test_len = 0
     max_ws_len = 0
@@ -439,10 +434,10 @@ def print_test_summary(test_results,test_name=None):
 
     for t_name in test_results:
         t_result = test_results[t_name]
-        print format_string.format(t_name,t_result[0],t_result[1])
+        print(format_string.format(t_name,t_result[0],t_result[1]))
     # Append a new line
-    print '================================================================'
-    print ''
+    print('================================================================')
+    print('')
 
 
 #-------------------------------------------------------------------------------
@@ -477,5 +472,5 @@ class ArgumentParser(object):
     def __init__(self, keywords):
         self.start_index = None # Make this more general for anything that is missing!
         self.end_index = None
-        for key, value in keywords.iteritems():
+        for key, value in iteritems(keywords):
             setattr(self, key, value)

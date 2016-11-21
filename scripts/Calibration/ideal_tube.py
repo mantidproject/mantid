@@ -1,5 +1,3 @@
-from mantid.simpleapi import *
-from mantid.kernel import *
 import numpy
 
 # This class is the ideal tube, which specifies where the peaks formed by slits or edges should occur

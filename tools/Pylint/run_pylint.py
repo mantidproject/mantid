@@ -248,7 +248,7 @@ def check_module_imports():
     msg = ""
     #pylint: disable=unused-variable
     try:
-        import mantid
+        import mantid # noqa
     except ImportError, exc:
         msg = "Unable to import mantid module: '%s'\n"\
               "Try passing the -m option along with the path to the module"\
@@ -353,7 +353,6 @@ def get_proc_results(processes, wait=False):
       (Updated processes, results)
     """
     results = Results()
-    nprocs = len(processes)
     running = []
     for index, proc_info in enumerate(processes):
         if wait:

@@ -49,8 +49,12 @@ class IndirectTransmission(PythonAlgorithm):
         self.declareProperty(name='ChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
 
-        self.declareProperty(name='NumberDensity', defaultValue=0.1,
-                             doc='Number denisty (atoms/Angstrom^3). Default=0.1')
+        self.declareProperty(name='DensityType', defaultValue = 'Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
+                             doc = 'Use of Mass density or Number density')
+
+        self.declareProperty(name='Density', defaultValue=0.1,
+                             doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3). Default=0.1')
 
         self.declareProperty(name='Thickness', defaultValue=0.1,
                              doc='Sample thickness (cm). Default=0.1')
@@ -64,7 +68,11 @@ class IndirectTransmission(PythonAlgorithm):
         analyser = self.getPropertyValue('Analyser')
         reflection = self.getPropertyValue('Reflection')
         formula = self.getPropertyValue('ChemicalFormula')
-        density = self.getPropertyValue('NumberDensity')
+        densityType = self.getPropertyValue('DensityType')
+        density = self.getProperty('Density').value
+        if densityType == 'Mass Density':
+            mat = MaterialBuilder().setFormula(formula).setMassDensity(density).build()
+            density = mat.numberDensity
         thickness = self.getPropertyValue('Thickness')
 
         # Create an empty instrument workspace

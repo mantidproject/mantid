@@ -16,6 +16,6 @@ if __name__ == '__main__':
     window = PyChopGui.PyChopGui()
     window.show()
     try: # check if started from within mantidplot
-        import mantidplot
+        import mantidplot # noqa
     except ImportError:
         sys.exit(app.exec_())

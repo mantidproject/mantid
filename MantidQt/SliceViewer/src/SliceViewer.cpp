@@ -22,6 +22,7 @@
 #include "MantidKernel/ReadLock.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/PlotAxis.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtAPI/MdSettings.h"
 #include "MantidQtAPI/SignalBlocker.h"
 #include "MantidQtAPI/SignalRange.h"
@@ -54,6 +55,7 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
+using MantidQt::API::MantidDesktopServices;
 using MantidQt::API::SyncedCheckboxes;
 using MantidQt::API::SignalBlocker;
 using Poco::XML::DOMParser;
@@ -1158,20 +1160,20 @@ void SliceViewer::zoomRectSlot(const QwtDoubleRect &rect) {
 /// Slot for opening help page
 void SliceViewer::helpSliceViewer() {
   QString helpPage = "MantidPlot:_SliceViewer";
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl(QString("http://www.mantidproject.org/") + helpPage));
 }
 
 /// Slot for opening help page
 void SliceViewer::helpLineViewer() {
   QString helpPage = "MantidPlot:_LineViewer";
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl(QString("http://www.mantidproject.org/") + helpPage));
 }
 
 void SliceViewer::helpPeaksViewer() {
   QString helpPage = "PeaksViewer";
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl(QString("http://www.mantidproject.org/") + helpPage));
 }
 
@@ -2172,15 +2174,8 @@ void SliceViewer::rebinParamsChanged() {
     double min = 0;
     double max = 1;
     int numBins = 1;
-    if (m_ws->isMDHistoWorkspace()) {
-      // If rebinning from an existing MDHistoWorkspaces we should take exents
-      // from the existing workspace.
-      auto dim = m_ws->getDimension(d);
-      min = dim->getMinimum();
-      max = dim->getMaximum();
-      // And the user-entered number of bins
-      numBins = widget->getNumBins();
-    } else if (widget->getShownDim() < 0) {
+
+    if (widget->getShownDim() < 0) {
       // Slice point. So integrate with a thickness
       min = widget->getSlicePoint() - widget->getThickness();
       max = widget->getSlicePoint() + widget->getThickness();

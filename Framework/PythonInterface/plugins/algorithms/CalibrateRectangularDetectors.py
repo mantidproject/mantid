@@ -6,7 +6,6 @@ from mantid.kernel import *
 from mantid.simpleapi import *
 import os
 from time import strftime
-from mantid import config
 from mantid.kernel import Direction
 
 COMPRESS_TOL_TOF = .01

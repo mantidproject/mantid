@@ -3,7 +3,6 @@
     This class holds all the necessary information to create a reduction script.
 """
 import time
-import os
 from reduction_gui.reduction.scripter import BaseReductionScripter
 
 

@@ -1,10 +1,8 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
+from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
-import os
 import sys
 from reduction_gui.reduction.sans.hfir_detector_script import Detector
-from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_hfir_detector
 
@@ -147,7 +145,6 @@ class DetectorWidget(BaseWidget):
 
             try:
                 reduction_table_ws = self.options_callback()
-                patch_output = AnalysisDataService.doesExist(patch_ws)
                 filename = self._content.sensitivity_file_edit.text()
                 script  = "ComputeSensitivity(Filename='%s',\n" % filename
                 script += "                   ReductionProperties='%s',\n" % reduction_table_ws

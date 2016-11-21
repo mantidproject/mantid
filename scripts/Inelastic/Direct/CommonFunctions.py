@@ -1,11 +1,3 @@
-#pylint: disable=invalid-name
-import mantid
-from mantid.simpleapi import *
-from mantid import api
-import os
-import string
-
-
 class switch(object):
     """ Helper class providing nice switch statement"""
 

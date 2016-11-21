@@ -152,7 +152,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
             temp.attrs['units'] = units
 
     def _writeProtonCharge(self, nxentry, wksp):
-        if not 'gd_prtn_chrg' in wksp.run():
+        if 'gd_prtn_chrg' not in wksp.run():
             return  # nothing to do
 
         pcharge = wksp.run()['gd_prtn_chrg']

@@ -35,7 +35,8 @@ for ticket in ticketList:
     ticketHash[ticket] = readWebPage( r"http://trac.mantidproject.org/mantid/ticket/" + str(ticket))
 
 usagePattern = re.compile('Usage', re.IGNORECASE)
-excusesPattern = re.compile('(rarely called directly|designed to work with other algorithms|only used for testing|deprecated)', re.IGNORECASE)
+excusesPattern = re.compile('(rarely called directly|designed to work with other algorithms|only used for testing|deprecated)',
+                            re.IGNORECASE)
 
 
 algs = AlgorithmFactory.getRegisteredAlgorithms(True)
@@ -51,5 +52,5 @@ for alg in algs:
                 #check if already in a ticket
                 usageTicket = ticketExists(alg,ticketHash)
                 outputError(alg, algVersion, "No usage section", usageTicket)
-    if fileFound==False:
+    if not fileFound:
         outputError(alg, algVersion, "File not found")

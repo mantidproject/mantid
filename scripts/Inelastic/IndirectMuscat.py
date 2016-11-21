@@ -5,7 +5,7 @@ MUSIC : Version of Minus for MIDAS
 """
 
 from IndirectImport import *
-if is_supported_f2py_platform():
+if is_supported_f2py_platform(): # noqa
     muscat = import_f2py("muscat")
 else:
     unsupported_message()
@@ -14,7 +14,6 @@ from mantid.simpleapi import *
 from mantid import config, logger, mtd
 from IndirectCommon import *
 import sys
-import platform
 import math
 import os.path
 import numpy as np
@@ -245,11 +244,9 @@ def MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
 #   ims = [NMST, NQ, NW, Nel, KR1]
     nmst = neut[4]
     ims = [neut[4], nq, nw, nel, 1]
-    nw2 = 2*ims[2]+1
 #   dqw = [DQ, DW]
     dqw = [dq, dw]
     sname = sname[:-4]
-    ySin = []
     Qaxis = ''
     for m in range(0,mang):
 #     rinstr = [efixed, theta, alfa]
@@ -387,6 +384,6 @@ def MuscatDataStart(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
 
 def plotMuscat(inWS,spec_list,Plot):
     if Plot == 'Totals' or Plot == 'All':
-        tot_plot=mp.plotSpectrum(inWS+'_Totals',spec_list)
+        mp.plotSpectrum(inWS+'_Totals',spec_list)
     if Plot == 'Scat1' or Plot == 'All':
         mp.importMatrixWorkspace(inWS+'_1').plotGraph2D()

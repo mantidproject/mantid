@@ -102,7 +102,7 @@ void DiffractionFocussing2::exec() {
   std::string unitid = axis->unit()->unitID();
   if (unitid != "dSpacing" && unitid != "MomentumTransfer" && unitid != "TOF") {
     g_log.error() << "UnitID " << unitid << " is not a supported spacing\n";
-    throw new std::invalid_argument("Workspace Invalid Spacing/UnitID");
+    throw std::invalid_argument("Workspace Invalid Spacing/UnitID");
   }
   // --- Do we need to read the grouping workspace? ----
   if (groupingFileName != "") {
@@ -170,9 +170,8 @@ void DiffractionFocussing2::exec() {
   Progress *prog;
   prog = new API::Progress(this, 0.2, 1.00,
                            static_cast<int>(totalHistProcess) + nGroups);
-#ifndef __APPLE__
-  PARALLEL_FOR2(m_matrixInputW, out)
-#endif
+
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_matrixInputW, *out))
   for (int outWorkspaceIndex = 0;
        outWorkspaceIndex < static_cast<int>(m_validGroups.size());
        outWorkspaceIndex++) {
@@ -181,9 +180,8 @@ void DiffractionFocussing2::exec() {
 
     // Get the group
     auto it = group2xvector.find(group);
-    group2vectormap::difference_type dif =
-        std::distance(group2xvector.begin(), it);
-    auto &Xout = (*it).second;
+    auto dif = std::distance(group2xvector.begin(), it);
+    auto &Xout = it->second;
 
     // Assign the new X axis only once (i.e when this group is encountered the
     // first time)
@@ -433,7 +431,7 @@ void DiffractionFocussing2::execEvent() {
     // ------ PARALLELIZE BY GROUPS -------------------------
 
     int nValidGroups = static_cast<int>(this->m_validGroups.size());
-    PARALLEL_FOR1(m_eventW)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_eventW))
     for (int iGroup = 0; iGroup < nValidGroups; iGroup++) {
       PARALLEL_START_INTERUPT_REGION
       const int group = this->m_validGroups[iGroup];

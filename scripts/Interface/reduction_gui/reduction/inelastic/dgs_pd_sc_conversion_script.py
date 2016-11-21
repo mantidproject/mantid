@@ -3,8 +3,6 @@
     from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
-import os
-import time
 import xml.dom.minidom
 
 from reduction_gui.reduction.scripter import BaseScriptElement

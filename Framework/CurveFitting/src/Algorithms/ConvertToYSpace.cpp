@@ -196,7 +196,7 @@ void ConvertToYSpace::exec() {
   const int64_t nreports = nhist;
   auto progress = boost::make_shared<Progress>(this, 0.0, 1.0, nreports);
 
-  PARALLEL_FOR2(m_inputWS, m_outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (int64_t i = 0; i < nhist; ++i) {
     PARALLEL_START_INTERUPT_REGION
 

@@ -1,8 +1,9 @@
-﻿#pylint: disable=too-many-lines
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 #pylint: disable=attribute-defined-outside-init
 """ File contains Descriptors used describe run for direct inelastic reduction """
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from Direct.PropertiesDescriptors import *
 import re
@@ -51,7 +52,7 @@ class RunList(object):
                 if not fnames_given:
                     local_fnames.append(file_path)
                 if not fext_given:
-                    if not fext is None:
+                    if fext is not None:
                         if len(fext)==0:
                             fext=None
                     local_fext.append(fext)
@@ -354,7 +355,7 @@ class RunDescriptor(PropDescriptor):
     def __init__(self,prop_name,DocString=None):
         """ """
         self._prop_name = prop_name
-        if not DocString is None:
+        if DocString is not None:
             self.__doc__ = DocString
 
         self._ws_name = None
@@ -500,7 +501,7 @@ class RunDescriptor(PropDescriptor):
                     # Change existing file path and file extension if alternatives are provided
                     if len(file_path)>0:
                         self._run_file_path = file_path
-                    if not fext is None: # Change only if real new extension is provided
+                    if fext is not None: # Change only if real new extension is provided
                         self._fext = fext
 
 
@@ -790,7 +791,7 @@ class RunDescriptor(PropDescriptor):
                 self.apply_calibration(ws,RunDescriptor._holder.det_cal_file,prefer_ws_calibration)
                 return ws
         else:
-            if not self._run_number is None:
+            if self._run_number is not None:
                 prefer_ws_calibration = self._check_calibration_source()
                 inst_name = RunDescriptor._holder.short_inst_name
                 calibration = RunDescriptor._holder.det_cal_file
@@ -1054,7 +1055,7 @@ class RunDescriptor(PropDescriptor):
             except RuntimeError:
                 message = '*** Cannot find file matching hint {0} on Mantid search paths '.\
                         format(file_hint)
-                if not 'be_quet' in kwargs:
+                if 'be_quet' not in kwargs:
                     RunDescriptor._logger(message,'warning')
                 return (False,message)
 #--------------------------------------------------------------------------------------------------------------------
@@ -1178,7 +1179,7 @@ class RunDescriptor(PropDescriptor):
         else:
             targ_ws = mtd[other_workspace]
 
-        if not 'NormalizationFactor' in source_ws.getRun():
+        if 'NormalizationFactor' not in source_ws.getRun():
             raise RuntimeError(""" Can not change normalization of target workspace {0}
                                as source workspace {1} is not normalized"""
                                .format(source_ws.name(),targ_ws.name()))
@@ -1339,7 +1340,7 @@ class RunDescriptor(PropDescriptor):
 # Hell knows how to redefine these warnings or if they are valid or not
 #pylint: disable=W0141
 #pylint: disable=W0110
-            self._ws_cname = part_ind + filter(lambda c: not c.isdigit(), name)
+            self._ws_cname = part_ind + ''.join(re.findall('\D+', name))
         else:
 #pylint: disable=attribute-defined-outside-init
             self._ws_cname = part_ind + name
@@ -1661,7 +1662,7 @@ def build_run_file_name(run_num,inst,file_path='',fext=''):
         run_num_str  = str(run_num).zfill(zero_padding)
 
     fname = '{0}{1}{2}'.format(inst,run_num_str,fext)
-    if not file_path is None:
+    if file_path is not None:
         if os.path.exists(file_path):
             fname = os.path.join(file_path,fname)
     return fname

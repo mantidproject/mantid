@@ -79,7 +79,7 @@ def ReadIbackGroup(a, first):  # read Ascii block of spectrum values
     next = first
     line1 = a[next]
     next += 1
-    _val = ExtractInt(a[next])
+
     if line1.startswith('S'):
         error = ''
     else:
@@ -146,7 +146,6 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
     logger.information('Reading file : ' + path)
 
     asc = loadFile(path)
-    _lasc = len(asc)
 
     # raw head
     text = asc[1]
@@ -157,8 +156,6 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
     title = asc[next]  # title line
     next += 1
     text = asc[next]  # user line
-    _user = text[20:32]
-    _time = text[40:50]
     next += 6  # 5 lines of text
     # back head1
     next, Fval = Fblock(asc, next)
@@ -168,15 +165,11 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
         freq = Fval[2]
         amp = Fval[3]
         wave = Fval[69]
-        _Ef = 81.787 / (4.0 * wave * wave)
         npt = int(Fval[6])
         nsp = int(Fval[7])
     # back head2
     next, Fval = Fblock(asc, next)
-    _k0 = 4.0 * math.pi / wave
-    _d2r = math.pi / 180.0
     theta = []
-    _Q = []
     for m in range(0, nsp):
         theta.append(Fval[m])
     # raw spectra
@@ -253,14 +246,14 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
            AllowDifferentNumberSpectra=True)
     DeleteWorkspace(monWS)  # delete monitor WS
     InstrParas(ascWS, instr, ana, refl)
-    _efixed = RunParas(ascWS, instr, run, title)
+    RunParas(ascWS, instr, run, title)
     ChangeAngles(ascWS, instr, theta)
     if useM:
         map = ReadMap(mapPath)
         UseMap(ascWS, map)
     if rejectZ:
         RejectZero(ascWS, tot)
-    if useM == False and rejectZ == False:
+    if not useM and not rejectZ:
         CloneWorkspace(InputWorkspace=ascWS, OutputWorkspace=outWS)
     if Save:
         opath = os.path.join(workdir, outWS + '.nxs')
@@ -304,7 +297,6 @@ def InxStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):
     val = ExtractInt(asc[0])
     lgrp = int(val[0])
     ngrp = int(val[2])
-    _npt = int(val[7])
     title = asc[1]
     ltot = ngrp * lgrp
     logger.information('Number of spectra : ' + str(ngrp))
@@ -354,7 +346,7 @@ def InxStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):
         UseMap(ascWS, map)
     if rejectZ:
         RejectZero(ascWS, tot)
-    if useM == False and rejectZ == False:
+    if not useM and not rejectZ:
         CloneWorkspace(InputWorkspace=ascWS, OutputWorkspace=outWS)
     if Save:
         opath = os.path.join(workdir, outWS + '.nxs')
@@ -386,8 +378,6 @@ def RejectZero(inWS, tot):
 
 
 def ReadMap(path):
-    _workdir = config['defaultsave.directory']
-
     asc = loadFile(path)
 
     lasc = len(asc)
@@ -486,7 +476,7 @@ def RunParas(ascWS, _instr, run, title):
 
 def IN13Start(instr, run, ana, refl, _rejectZ, _useM, _mapPath, Plot, Save):  # Ascii start routine
     StartTime('IN13')
-    _samWS = IN13Read(instr, run, ana, refl, Plot, Save)
+    IN13Read(instr, run, ana, refl, Plot, Save)
     EndTime('IN13')
 
 
@@ -498,14 +488,12 @@ def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
     logger.information('Reading file : ' + path)
 
     asc = loadFile(path)
-    _lasc = len(asc)
 
     # header block
     text = asc[1]
     run = text[:8]
     text = asc[4]  # run line
     instr = text[:4]
-    _time = text[14:33]  # user line
     next, Ival = Iblock(asc, 5)
     nsubsp = Ival[0]
     nspec = Ival[153] - 2
@@ -540,7 +528,6 @@ def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
     # monitors
     psd = next + (nspec + 2048) * lspec
     l1m1 = psd + 1
-    _txt = asc[l1m1]
     l2m1 = l1m1 + 3
     mon1 = ExtractFloat(asc[l2m1])
     logger.information('Mon1 : Line ' + str(l2m1) + ' : ' + asc[l2m1])

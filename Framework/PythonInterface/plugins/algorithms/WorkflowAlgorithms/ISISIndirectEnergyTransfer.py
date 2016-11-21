@@ -9,9 +9,16 @@ from mantid import config
 import os
 
 
-_str_or_none = lambda s: s if s != '' else None
-_ws_or_none = lambda s: mtd[s] if s != '' else None
-_elems_or_none = lambda l: l if len(l) != 0 else None
+def _str_or_none(s):
+    return s if s != '' else None
+
+
+def _ws_or_none(s):
+    return mtd[s] if s != '' else None
+
+
+def _elems_or_none(l):
+    return l if len(l) != 0 else None
 
 
 class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):

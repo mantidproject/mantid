@@ -7,9 +7,6 @@ TOFTOF reduction workflow gui.
 """
 import xml.dom.minidom
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui  import *
-
 from reduction_gui.reduction.scripter import BaseScriptElement, BaseReductionScripter
 
 #-------------------------------------------------------------------------------

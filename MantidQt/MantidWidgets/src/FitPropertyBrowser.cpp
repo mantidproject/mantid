@@ -2,6 +2,7 @@
 #include "MantidQtMantidWidgets/PropertyHandler.h"
 #include "MantidQtMantidWidgets/SequentialFitDialog.h"
 #include "MantidQtMantidWidgets/MultifitSetupDialog.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -51,12 +52,13 @@
 #include <QSignalMapper>
 #include <QMetaMethod>
 #include <QTreeWidget>
-#include <QDesktopServices>
 #include <QUrl>
 
 #include <algorithm>
 
 namespace MantidQt {
+using API::MantidDesktopServices;
+
 namespace MantidWidgets {
 
 /**
@@ -2745,24 +2747,31 @@ void FitPropertyBrowser::setWorkspaceProperties() {
   if (!ws)
     return;
 
-  m_settingsGroup->property()->removeSubProperty(m_evaluationType);
+  // If this is a MuonFitPropertyBrowser, "evaluation type" goes in the Custom
+  // Settings group.
+  // If not, there is no Custom Settings group and it goes in the regular
+  // Settings group.
+  auto *settings =
+      m_customSettingsGroup ? m_customSettingsGroup : m_settingsGroup;
+
+  settings->property()->removeSubProperty(m_evaluationType);
   m_evaluationType->setEnabled(false);
   // if it is a MatrixWorkspace insert WorkspaceIndex
-  if (m_browser->isItemVisible(m_settingsGroup)) {
-    auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
-    if (mws) {
+  auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+  if (mws) {
+    if (m_browser->isItemVisible(m_settingsGroup)) {
       if (!m_settingsGroup->property()->subProperties().contains(
               m_workspaceIndex)) {
         m_settingsGroup->property()->insertSubProperty(m_workspaceIndex,
                                                        m_workspace);
       }
-      auto isHistogram = mws->isHistogramData();
-      m_evaluationType->setEnabled(isHistogram);
-      if (isHistogram) {
-        m_settingsGroup->property()->addSubProperty(m_evaluationType);
-      }
-      return;
     }
+    auto isHistogram = mws->isHistogramData();
+    m_evaluationType->setEnabled(isHistogram);
+    if (isHistogram) {
+      settings->property()->addSubProperty(m_evaluationType);
+    }
+    return;
   }
 
   // if it is a TableWorkspace insert the column properties
@@ -3033,7 +3042,7 @@ void FitPropertyBrowser::functionHelp() {
     QString url =
         QString::fromStdString("http://docs.mantidproject.org/fitfunctions/" +
                                handler->ifun()->name());
-    QDesktopServices::openUrl(QUrl(url));
+    MantidDesktopServices::openUrl(QUrl(url));
   }
 }
 
@@ -3041,9 +3050,10 @@ void FitPropertyBrowser::functionHelp() {
  * Show online browser help
  */
 void FitPropertyBrowser::browserHelp() {
-  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/"
-                                 "MantidPlot:_Simple_Peak_Fitting_with_the_Fit_"
-                                 "Wizard#Fit_Properties_Browser"));
+  MantidDesktopServices::openUrl(
+      QUrl("http://www.mantidproject.org/"
+           "MantidPlot:_Simple_Peak_Fitting_with_the_Fit_"
+           "Wizard#Fit_Properties_Browser"));
 }
 
 /**=================================================================================================

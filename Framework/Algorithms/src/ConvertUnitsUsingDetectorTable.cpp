@@ -176,7 +176,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
 
   // TODO: Check why this parallel stuff breaks
   // Loop over the histograms (detector spectra)
-  // PARALLEL_FOR1(outputWS)
+  // PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
 
     // Lets find what row this spectrum Number appears in our detector table.

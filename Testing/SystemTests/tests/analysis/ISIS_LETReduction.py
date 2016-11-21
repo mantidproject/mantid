@@ -20,7 +20,7 @@ def find_binning_range(energy,ebin):
     """
 
     InstrName =  config['default.instrument'][0:3]
-    if not InstrName in ['MER','LET']:
+    if InstrName not in ['MER','LET']:
         InstrName = 'LET'
     if InstrName.find('LET')>-1:
         ls  =25

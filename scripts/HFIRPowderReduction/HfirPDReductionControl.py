@@ -5,7 +5,6 @@
 # Key Words: FUTURE
 #
 ############################################################################
-import sys
 import os
 import urllib2
 import math
@@ -15,11 +14,6 @@ import numpy
 import HfirUtility as hutil
 
 # Import mantid
-curdir = os.getcwd()
-libpath = os.path.join(curdir.split('Code')[0], 'Code/debug/bin')
-if os.path.exists(libpath) is False:
-    libpath = os.path.join(curdir.split('Code')[0], 'Code/release/bin')
-sys.path.append(libpath)
 import mantid.simpleapi as api
 from mantid.simpleapi import AnalysisDataService
 #from mantid.kernel import ConfigService

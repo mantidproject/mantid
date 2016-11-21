@@ -39,7 +39,7 @@ import os
 import sys
 import time
 import ReduceDictionary
-sys.path.append("/opt/mantidnightly/bin")
+sys.path.append("/opt/mantidnightly/bin") # noqa
 #sys.path.append("/opt/Mantid/bin")
 
 from mantid.simpleapi import *
@@ -326,8 +326,7 @@ elif use_cylindrical_integration:
                                  Cylinder='1', CylinderLength = cylinder_length,
                                  PercentBackground = '20', ProfileFunction = 'NoFit',
                                  ProfilesFile = profiles_filename,
-                                 PeaksWorkspace=peaks_ws,
-                               )
+                                 PeaksWorkspace=peaks_ws)
 
 #
 # Save the final integrated peaks, using the Niggli reduced cell.
@@ -342,14 +341,14 @@ else:
 
 # Print warning if user is trying to integrate using the cylindrical method and transorm the cell
 if use_cylindrical_integration:
-    if (not cell_type is None) or (not centering is None):
+    if (cell_type is not None) or (centering is not None):
         print "WARNING: Cylindrical profiles are NOT transformed!!!"
 #
 # If requested, also switch to the specified conventional cell and save the
 # corresponding matrix and integrate file
 #
 else:
-    if (not cell_type is None) and (not centering is None) :
+    if (cell_type is not None) and (centering is not None) :
         run_conventional_matrix_file = output_directory + "/" + run + "_" +        \
                                    cell_type + "_" + centering + ".mat"
         if output_nexus:

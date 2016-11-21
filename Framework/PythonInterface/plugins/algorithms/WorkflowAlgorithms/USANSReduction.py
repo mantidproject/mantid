@@ -275,8 +275,8 @@ class USANSReduction(PythonAlgorithm):
         __point = _execute('CropWorkspace', InputWorkspace=sample_monitor,
                            XMin=tof_min, XMax=tof_max,
                            OutputWorkspace='__point')
-        __monitor_count = _execute('Integration', InputWorkspace=__point,
-                                   OutputWorkspace='__monitor_count')
+        #__monitor_count = _execute('Integration', InputWorkspace=__point,
+        #                           OutputWorkspace='__monitor_count')
 
         # The monitor count normalization cancels out when doing the transmission correction
         # of the scattering signal below

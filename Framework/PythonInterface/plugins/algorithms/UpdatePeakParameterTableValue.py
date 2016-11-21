@@ -84,7 +84,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
             icolumn = colnamedict[colname]
         else:
             raise NotImplementedError("Column name %s does not exist in TableWorkspace %s"
-                                      % (colname, tablews.name()))
+                                      % (colname, tableWS.name()))
 
         # 3. Set value
         if colname in ["FitOrTie", "Name"]:

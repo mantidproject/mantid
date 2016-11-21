@@ -6,7 +6,6 @@ from reduction_gui.reduction.sans.data_cat import DataCatalog as BaseCatalog
 from reduction_gui.reduction.sans.data_cat import DataSet
 from data_cat import DataType
 import re
-import time
 import datetime
 
 # Check whether Mantid is available
@@ -61,7 +60,7 @@ class EQSANSDataSet(DataSet):
         else:
             # Check whether we simply have a run number
             try:
-                run = int(file_path)
+                int(file_path)
                 return file_path
             except:
                 return None

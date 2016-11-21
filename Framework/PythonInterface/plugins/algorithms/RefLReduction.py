@@ -2,15 +2,14 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.simpleapi import *
+from mantid.kernel import *
 
 # import sfCalculator
 import sys
 import os
 sys.path.insert(0,os.path.dirname(__file__))
-import sfCalculator
+import sfCalculator # noqa
 sys.path.pop(0)
-
-from mantid.kernel import *
 
 
 class RefLReduction(PythonAlgorithm):
@@ -131,7 +130,7 @@ class RefLReduction(PythonAlgorithm):
 
         # NORM
         normalizationRunNumber = self.getProperty("NormalizationRunNumber").value
-        normFlag = self.getProperty("NormFlag")
+        # normFlag = self.getProperty("NormFlag")
         normBackRange = self.getProperty("NormBackgroundPixelRange").value
         normPeakRange = self.getProperty("NormPeakPixelRange").value
         normBackFlag = self.getProperty("SubtractNormBackground").value
@@ -164,9 +163,6 @@ class RefLReduction(PythonAlgorithm):
 
         # angle offset
         angleOffsetDeg = self.getProperty("AngleOffset").value
-
-        h = 6.626e-34  #m^2 kg s^-1
-        m = 1.675e-27     #kg
 
         # sfCalculator settings
         slitsValuePrecision = sfCalculator.PRECISION
@@ -365,9 +361,6 @@ class RefLReduction(PythonAlgorithm):
 #                                         y_axis,
 #                                         y_error_axis)
 
-        sz = q_axis.shape
-        nbr_pixel = sz[0]
-
         # create workspace
         q_workspace = wks_utility.createQworkspace(q_axis, y_axis, y_error_axis)
 
@@ -378,8 +371,6 @@ class RefLReduction(PythonAlgorithm):
         # keep only the q values that have non zero counts
         nonzero_q_rebin_wks = wks_utility.cropAxisToOnlyNonzeroElements(q_rebin,
                                                                         dataPeakRange)
-        new_q_axis = nonzero_q_rebin_wks.readX(0)[:]
-
         # integrate spectra (normal mean) and remove first and last Q value
         [final_x_axis, final_y_axis, final_error_axis] = wks_utility.integrateOverPeakRange(nonzero_q_rebin_wks, dataPeakRange)
 
@@ -392,11 +383,11 @@ class RefLReduction(PythonAlgorithm):
         _time = int(time.time())
         name_output_ws = self.getPropertyValue("OutputWorkspace")
         name_output_ws = name_output_ws + '_#' + str(_time) + 'ts'
-        final_workspace = wks_utility.createFinalWorkspace(final_x_axis,
-                                                           final_y_axis,
-                                                           final_y_error_axis,
-                                                           name_output_ws,
-                                                           ws_event_data)
+        wks_utility.createFinalWorkspace(final_x_axis,
+                                         final_y_axis,
+                                         final_y_error_axis,
+                                         name_output_ws,
+                                         ws_event_data)
         AddSampleLog(Workspace=name_output_ws,
                      LogName='isSFfound',
                      LOgText=str(isSFfound))

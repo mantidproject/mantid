@@ -1,9 +1,4 @@
 #pylint: disable=invalid-name,attribute-defined-outside-init
-import sys
-
-if __name__ == "__main__":
-  # it is just to allow running this test in Mantid, allowing the following import
-    sys.path.append('/apps/mantid/systemtests/StressTestFramework/')
 
 import stresstesting
 
@@ -24,7 +19,7 @@ class SANS2DMinimalBatchReductionSliced(stresstesting.MantidStressTest):
         i.SANS2D()
         i.MaskFile(MASKFILE)
         i.SetEventSlices("0.0-451, 5-10")
-        fit_settings = batch.BatchReduce(BATCHFILE, '.nxs',saveAlgs={}, combineDet='rear')
+        batch.BatchReduce(BATCHFILE, '.nxs',saveAlgs={}, combineDet='rear')
 
     def validate(self):
         self.tolerance = 0.02

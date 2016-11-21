@@ -6,10 +6,10 @@ import numpy
 import matplotlib
 matplotlib.use('Qt4Agg')
 matplotlib.rcParams['backend.qt4']='PyQt4'
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas # noqa
+from matplotlib.figure import Figure # noqa
+from mpl_toolkits.mplot3d import Axes3D # noqa
+import matplotlib.pyplot # noqa
 try:
     from PyQt4.QtCore import QString
 except ImportError:

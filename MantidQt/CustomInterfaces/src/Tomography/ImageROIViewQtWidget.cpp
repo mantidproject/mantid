@@ -340,7 +340,7 @@ std::string ImageROIViewQtWidget::askImgOrStackPath() {
                             "(*.tif *.tiff);;"
                             "PNG, Portable Network Graphics "
                             "(*.png);;"
-                            "Other extensions/all files (*.*)");
+                            "Other extensions/all files (*)");
   QString prevPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
   QString path(QFileDialog::getExistingDirectory(
@@ -364,7 +364,7 @@ std::string ImageROIViewQtWidget::askSingleImagePath() {
                             "(*.tif *.tiff);;"
                             "PNG, Portable Network Graphics "
                             "(*.png);;"
-                            "Other extensions/all files (*.*)");
+                            "Other extensions/all files (*)");
   QString prevPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
   QString filepath(

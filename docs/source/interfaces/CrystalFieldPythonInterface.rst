@@ -38,13 +38,13 @@ its default value is 0. To set a parameter pass it to the `CrystalField` constru
 
   cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770)
 
-An alternative way to set a parameter is to use the `param` property of a `CrystalField` object::
+An alternative way to set a parameter is to use the square brackets with a `CrystalField` object::
 
-  cf.param['B40'] = -0.031
+  cf['B40'] = -0.031
   
-The `param` property can also be used to query the value of a parameter::
+Wich can also be used to query the value of a parameter::
 
-  b = cf.param['B40']
+  b = cf['B40']
 
 
 Calculating the Eigensystem
@@ -227,6 +227,43 @@ which is equivalent to::
     cf.peaks.ties('f1.Sigma=f0.Sigma', 'f2.Sigma=f0.Sigma', 'f3.Sigma=f0.Sigma')
 
 
+Setting Resolution Model
+------------------------
+
+Resolution model here is a way to constrain widths of the peaks to realistic numbers which agree with a measured or
+calculated instrument resolution function. A model is a function that returns a FWHM for a peak centre. The Crystal
+Field python interface defines helper class `ResolutionModel` to help define and set resolution models.
+
+To construct an instance of `ResolutionModel` one needs to provide up to four input parameters. The first parameter, `model`, is
+mandatory and can be either of the two
+
+1. A tuple containing two arrays (lists) of real numbers which will be interpreted as tabulated values of the model function. The first element of the tuple is a list of increasing values for peak centres, and the second element is a list of corresponding widths. Values between the tabulated peak positions will be linearly interpolated.
+
+2. A python function that takes a numpy array of peak positions and returns a numpy array of widths.
+
+If the model is a tuple of two arrays then no additional parameters are required. If it's a function then the rest of the parameters define how to tabulate this
+function. `xstart` and `xend` define the interval of interpolation which must include all fitted peaks. The last argument is `accuracy` that defaults to
+:math:`10^{-4}` and defines an approximate desired accuracy of the approximation. The interval will be split until the largest error of the interpolation
+is smaller than `accuracy`. Note that subdivision cannot go on to infinity as the number of points is limited by the class member `ResolutionModel.max_model_size`.
+
+Example of setting a resolution model::
+
+    rm = ResolutionModel(([1, 2, 3, ...., 100], [0.1, 0.3, 0.35, ..., 2.1]))
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm)
+
+    ...
+
+    rm = ResolutionModel(my_func, xstart=0.0, xend=120.0, accuracy=0.01)
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm)
+
+When a resolution model is set the peak width will be constrained to have a value close to the model. The degree of deviation is controled by the
+`FWHMVariation` parameter. It has the default of 0.1 and is an absolute maximum difference a width can have. If set to 0 the widths will be fixed
+to their calculated values (depending on the instant values of their peak centres). For example::
+
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, ..., Temperature=44.0, ResolutionModel=rm, FWHMVariation=0.001)
+
+
+
 Defining Multiple Spectra
 -------------------------
 
@@ -257,6 +294,16 @@ change::
     cf.background[1].peak.constraints('Sigma > 0.2')
     cf.peaks[1].tieAll('FWHM=2*f1.FWHM', 2, 5)
     cf.peaks[0].constrainAll('FWHM < 2.2', 1, 6)
+
+The resolution model also needs to be initialised from a list::
+
+    x0, y0, x1, y1 = [ ... ], [ ... ], [ ... ], [ ... ]
+    rm = ResolutionModel([(x0, y0), (x1, y1)])
+
+    # or
+
+    rm = ResolutionModel([func0, func1], 0, 100, accuracy = 0.01)
+
 
 To calcualte a spectrum call the same method `getSpectrum` but pass the pectrum index as its first parameter::
 

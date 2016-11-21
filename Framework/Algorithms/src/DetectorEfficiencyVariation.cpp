@@ -210,7 +210,7 @@ int DetectorEfficiencyVariation::doDetectorTests(
   const double deadValue(1.0);
   int numFailed(0);
   const auto &spectrumInfo = counts1->spectrumInfo();
-  PARALLEL_FOR3(counts1, counts2, maskWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*counts1, *counts2, *maskWS))
   for (int i = 0; i < numSpec; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // move progress bar

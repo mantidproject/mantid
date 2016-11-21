@@ -236,8 +236,8 @@ public:
         result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
 
-    const Mantid::MantidVec &xOUT = result->dataX(0);
-    const Mantid::MantidVec &xIN = testWorkspace->dataX(0);
+    const auto &xOUT = result->x(0);
+    const auto &xIN = testWorkspace->x(0);
 
     TSM_ASSERT_EQUALS("Output should have the same binning as the input.",
                       xOUT.size(), xIN.size());

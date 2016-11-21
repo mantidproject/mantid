@@ -1,9 +1,7 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
+from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
-import os
 from reduction_gui.reduction.sans.hfir_background_script import Background
-from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 from hfir_sample_data import BeamSpreader, DirectBeam
 import ui.sans.ui_hfir_background

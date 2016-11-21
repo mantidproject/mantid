@@ -110,7 +110,7 @@ class Algorithms(stresstesting.MantidStressTest):
 
     def verifyProperty(self, alg_descr, name):
         upper = name.upper()
-        if (upper in SPECIAL_UPPER) and (not name in SPECIAL):
+        if (upper in SPECIAL_UPPER) and (name not in SPECIAL):
             index = SPECIAL_UPPER.index(upper)
             print alg_descr + " property (" + name + ") has special name "\
                 + "with wrong case: " + name + " should be " + SPECIAL[index]

@@ -92,15 +92,14 @@ private:
 
   /// Create the workspace name if it's part of a group workspace
   std::string buildWorkspaceName(const std::string &name,
-                                 const std::string &baseName, size_t wsIndex,
-                                 bool commonStem);
+                                 const std::string &baseName, size_t wsIndex);
 
   /// Add an index to the name if it already exists in the workspace
   void correctForWorkspaceNameClash(std::string &wsName);
 
-  /// Check if group workspace share a common name stem
-  bool checkForCommonNameStem(Mantid::NeXus::NXRoot &root,
-                              std::vector<std::string> &names);
+  /// Extract the workspace name
+  std::vector<std::string> extractWorkspaceNames(Mantid::NeXus::NXRoot &root,
+                                                 size_t nWorkspaceEntries);
 
   /// Load the workspace name attribute if it exists
   std::string loadWorkspaceName(Mantid::NeXus::NXRoot &root,

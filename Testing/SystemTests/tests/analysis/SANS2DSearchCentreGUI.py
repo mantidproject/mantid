@@ -1,8 +1,4 @@
 ﻿#pylint: disable=invalid-name
-import sys
-if __name__ == "__main__":
-  # it is just to allow running this test in Mantid, allowing the following import
-    sys.path.append('/apps/mantid/systemtests/StressTestFramework/')
 from mantid.simpleapi import *
 import ISISCommandInterface as i
 import isis_reducer

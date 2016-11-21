@@ -50,7 +50,7 @@ void RayTracerTester::exec() {
 
   detid2index_map detTowi = ws->getDetectorIDToWorkspaceIndexMap();
   for (size_t i = 0; i < ws->getNumberHistograms(); i++)
-    ws->dataY(i)[0] = 0.0;
+    ws->mutableY(i)[0] = 0.0;
 
   int NumAzimuth = getProperty("NumAzimuth");
   int NumZenith = getProperty("NumZenith");
@@ -72,7 +72,7 @@ void RayTracerTester::exec() {
       if (det) {
         size_t wi = detTowi[det->getID()];
         g_log.information() << "Found detector " << det->getID() << '\n';
-        ws->dataY(wi)[0] = double(int(az * 57.3) * 1000 + int(iz));
+        ws->mutableY(wi)[0] = double(int(az * 57.3) * 1000 + int(iz));
       }
     }
   }

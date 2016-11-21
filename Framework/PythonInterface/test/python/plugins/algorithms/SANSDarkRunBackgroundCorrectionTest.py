@@ -8,6 +8,7 @@ from testhelpers import run_algorithm
 import numpy as np
 from SANSDarkRunBackgroundCorrection import DarkRunMonitorAndDetectorRemover
 from SANSDarkRunBackgroundCorrection import SANSDarkRunBackgroundCorrection
+from six.moves import range
 
 class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
     #-----
@@ -77,8 +78,8 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
                                     e_value_scatter_run,name_scatter, spectra)
 
         bin_boundaries_dark_run = 20
-        y_value_spectra_even_dark_run = [0.3 for element in xrange(bin_boundaries_dark_run - 1)]
-        y_value_spectra_odd_dark_run = [0.2 for element in xrange(bin_boundaries_dark_run - 1)]
+        y_value_spectra_even_dark_run = [0.3 for element in range(bin_boundaries_dark_run - 1)]
+        y_value_spectra_odd_dark_run = [0.2 for element in range(bin_boundaries_dark_run - 1)]
         y_value_dark_run = (y_value_spectra_even_dark_run + y_value_spectra_odd_dark_run + 
                             y_value_spectra_even_dark_run + y_value_spectra_odd_dark_run)
         e_value_dark_run = 0
@@ -126,13 +127,13 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         spectra = 4
 
         bin_boundaries= 5
-        y_value_scatter_run = spectra*[element for element in xrange(bin_boundaries-1)]
+        y_value_scatter_run = spectra*[element for element in range(bin_boundaries-1)]
         e_value_scatter_run = 1.
         name_scatter = "_scatter_SANS_test"
         self._provide_workspace2D(bin_boundaries, y_value_scatter_run,
                                     e_value_scatter_run,name_scatter, spectra, True)
 
-        y_value_dark_run = spectra*[element*0.2 for element in xrange(bin_boundaries - 1)]
+        y_value_dark_run = spectra*[element*0.2 for element in range(bin_boundaries - 1)]
         e_value_dark_run = 0
         name_dark_run = "_dark_run_SANS_test"
         self._provide_workspace2D(bin_boundaries, y_value_dark_run,
@@ -500,13 +501,13 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
                 self.assertAlmostEqual(expected, y_corrected[elem], 4)
 
     def _provide_workspace2D(self, bin_boundaries, y_value, e_value, name, spectra, use_y_list = False):
-        x = spectra*[element for element in xrange(bin_boundaries)]
+        x = spectra*[element for element in range(bin_boundaries)]
         y = None
         if use_y_list:
             y = y_value
         else:
-            y = spectra*[y_value for element in xrange(bin_boundaries - 1)]
-        e = spectra*[e_value for element in xrange(bin_boundaries - 1)]
+            y = spectra*[y_value for element in range(bin_boundaries - 1)]
+        e = spectra*[e_value for element in range(bin_boundaries - 1)]
         self._create_test_workspace(name, x, y, e, spectra)
 
     def _clean_up(self, ws_to_clean):

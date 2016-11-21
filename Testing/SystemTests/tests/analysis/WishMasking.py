@@ -21,7 +21,7 @@ class WishMasking(stresstesting.MantidStressTest):
             try:
                 index = int(line_contents[0].strip())
                 select = int(line_contents[3].strip())
-                dummy_group = int(line_contents[4].strip())
+                int(line_contents[4].strip())
                 if index == requested_index:
                     return select
             except ValueError:

@@ -1,16 +1,14 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
+from PyQt4 import QtGui, QtCore
 import sip
 import os
 import sys
-from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
-import reduction_gui.widgets.util as util
 import ui.reflectometer.ui_refl_stitching
 
 import mantidplot
 from mantid.simpleapi import *
-from LargeScaleStructures.data_stitching import DataSet, Stitcher, RangeSelector
+from LargeScaleStructures.data_stitching import DataSet, Stitcher
 
 from reduction_gui.reduction.scripter import BaseScriptElement
 
@@ -560,7 +558,8 @@ class StitcherWidget(BaseWidget):
 
         else: #REF_M
             for item in AnalysisDataService.getObjectNames():
-                if item.startswith("reflectivity") and not item.endswith("scaled") and item.find('On_Off')<0 and item.find('Off_On')<0  and item.find('On_On')<0:
+                if item.startswith("reflectivity") and not item.endswith("scaled") and \
+                   item.find('On_Off')<0 and item.find('Off_On')<0  and item.find('On_On')<0:
                     self._add_entry(item)
 
         if len(self._workspace_list)>0:

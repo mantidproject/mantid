@@ -90,7 +90,7 @@ class FitGaussian(PythonAlgorithm):
 
         if not 'success' == fitStatus:
             self._warning("For detector " + str(index) + " in workspace " + workspace.getName() +
-                          "fit was not successful. Input guess parameters were " + str(fitFunc))
+                          "fit was not successful. Input guess parameters were " + str(fitFun))
             return
 
         fitParams = paramTable.column(1)

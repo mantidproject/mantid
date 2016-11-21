@@ -8,7 +8,6 @@ from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspace
 from mantid.kernel import Direction
 from mantid import logger
 
-import os.path
 import numpy as np
 
 
@@ -34,7 +33,7 @@ class SofQWMoments(DataProcessorAlgorithm):
 
     #pylint: disable=too-many-locals
     def PyExec(self):
-        from IndirectCommon import CheckHistZero, CheckElimits, getDefaultWorkingDirectory
+        from IndirectCommon import CheckHistZero, CheckElimits
 
         workflow_prog = Progress(self, start=0.0, end=1.0, nreports=20)
         workflow_prog.report('Setting up algorithm')

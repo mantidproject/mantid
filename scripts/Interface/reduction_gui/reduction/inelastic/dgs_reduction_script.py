@@ -4,8 +4,6 @@
     from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
-import xml.dom.minidom
-import os
 import time
 import mantid
 from reduction_gui.reduction.scripter import BaseReductionScripter
@@ -121,7 +119,6 @@ class DgsReductionScripter(BaseReductionScripter):
         """
         """
         data_files = []
-        data_options = None
         for item in self._observers:
             state = item.state()
             if state is not None:

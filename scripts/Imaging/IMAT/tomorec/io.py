@@ -30,8 +30,6 @@ import re
 
 import numpy as np
 
-__AGG_IMG_IDX = 0
-
 
 def _import_pyfits():
     """
@@ -183,9 +181,6 @@ def avg_image_files(path, base_path, file_extension=None, agg_method='average'):
 
     accum = np.zeros((imgs[0].shape[0], imgs[0].shape[1]), dtype=data_dtype)
 
-    if 'average' == agg_method:
-        __AGG_IMG_IDX = 1
-
     for ifile in img_files:
         hdu = None
         try:
@@ -221,7 +216,6 @@ def _agg_img(acc, img_data, agg_method=None, index=1):
         acc = np.add(acc, img_data)
     elif 'average' == agg_method:
         acc = np.add((index-1)*acc/index, img_data/index)
-        __AGG_IMG_IDX += 1
 
     return acc
 

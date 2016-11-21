@@ -48,7 +48,6 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         # Get the workspaces
         workspace = self.getProperty("InputWorkspace").value
         dark_run = self.getProperty("DarkRun").value
-        dummy_output_ws_name = self.getPropertyValue("OutputWorkspace")
 
         # Provide progress reporting
         progress = Progress(self, 0, 1, 4)
@@ -378,7 +377,7 @@ class DarkRunMonitorAndDetectorRemover(object):
         '''
         det_id_list = []
         if len(monitor_list) != 0:
-            det_id_list = zip(*monitor_list)[1]
+            det_id_list = list(zip(*monitor_list))[1]
 
         selected_monitors = []
         if len(monitor_selection) > 0:

@@ -13,12 +13,12 @@ class MainWindow(QtGui.QMainWindow):
 
     def thetaEnable (self, enabled):
         self.ui.scatteringAngleInput.setEnabled(enabled)
-        if  enabled == False:
+        if  not enabled:
             self.ui.scatteringAngleInput.clear()
 
     def flightPathEnable (self, enabled):
         self.ui.totalFlightPathInput.setEnabled(enabled)
-        if  enabled == False:
+        if  not enabled:
             self.ui.totalFlightPathInput.clear()
 
     def setInstrumentInputs (self):

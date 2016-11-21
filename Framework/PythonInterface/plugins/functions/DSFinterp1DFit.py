@@ -187,7 +187,7 @@ class DSFinterp1DFit(IFunction1D):
 # Required to have Mantid recognize the new function
 #pylint: disable=unused-import
 try:
-    import dsfinterp
+    import dsfinterp # noqa
     FunctionFactory.subscribe(DSFinterp1DFit)
 except ImportError:
     logger.debug('Failed to subscribe fit function DSFinterp1DFit. '+

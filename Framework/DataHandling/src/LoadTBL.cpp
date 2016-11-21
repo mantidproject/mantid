@@ -58,7 +58,7 @@ int LoadTBL::confidence(Kernel::FileDescriptor &descriptor) const {
       {
         confidence = 0;
       }
-    } catch (std::length_error) {
+    } catch (const std::length_error &) {
       confidence = 0;
     }
   }

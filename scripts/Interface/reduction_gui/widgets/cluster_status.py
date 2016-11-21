@@ -1,15 +1,12 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
-import os
+from PyQt4 import QtGui, QtCore
 import sys
-import datetime
 from functools import partial
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.widgets import util
 import ui.ui_cluster_status
 
-import mantid.simpleapi as api
 from mantid.kernel import ConfigService, DateAndTime, Logger
 from mantid.api import AlgorithmManager
 
@@ -172,7 +169,6 @@ class RemoteJobsWidget(BaseWidget):
         job_name = alg.getProperty("JobName").value
         job_trans_id = alg.getProperty("TransID").value
 
-        njobs = len(job_name)
         job_start = alg.getProperty("StartDate").value
         job_end = alg.getProperty("CompletionDate").value
 

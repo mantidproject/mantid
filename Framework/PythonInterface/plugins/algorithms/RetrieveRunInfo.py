@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
 from mantid.simpleapi import *
 from mantid.kernel import StringMandatoryValidator, Direction
-from mantid import logger, config
+from mantid import config
 import os
 from six.moves import filterfalse
 
