@@ -143,7 +143,11 @@ void ReflSaveTabPresenter::saveWorkspaces() {
   // Obtain workspace titles
   std::vector<std::string> wsTitles(wsNames.size());
   std::transform(wsNames.begin(), wsNames.end(), wsTitles.begin(),
-    [](std::string s) { return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(s)->getTitle(); });
+                 [](std::string s) {
+                   return AnalysisDataService::Instance()
+                       .retrieveWS<MatrixWorkspace>(s)
+                       ->getTitle();
+                 });
 
   // Create the appropriate save algorithm
   bool titleCheck = m_view->getTitleCheck();
@@ -203,6 +207,5 @@ std::vector<std::string> ReflSaveTabPresenter::getAvailableWorkspaceNames() {
 
   return validNames;
 }
-
 }
 }
