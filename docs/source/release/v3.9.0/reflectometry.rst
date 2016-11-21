@@ -16,6 +16,7 @@ ISIS Reflectometry (Polref)
 ###########################
 
 - Settings tab now displays individual global options for experiment and instrument settings.
+- Documentation regarding the interface has been updated accordingly.
 
 ISIS Reflectometry
 ##################
