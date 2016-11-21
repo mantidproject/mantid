@@ -326,7 +326,7 @@ PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue,
      * The algorithm used for this depends on the intended use.
      */
     return reduceChopperSlitList(current, weight);
-  } catch (std::domain_error) {
+  } catch (const std::domain_error &) {
     /* Trying to construct an UncertainValue with negative error will throw, so
      * to preserve
      * the old "checking behavior", this exception is caught here.
@@ -552,7 +552,7 @@ double PoldiAutoCorrelationCore::reduceChopperSlitList(
     return pow(static_cast<double>(valuesWithSigma.size()), 2.0) /
            std::accumulate(signalToNoise.begin(), signalToNoise.end(), 0.0) *
            weight;
-  } catch (std::domain_error) {
+  } catch (const std::domain_error &) {
     return 0.0;
   }
 }

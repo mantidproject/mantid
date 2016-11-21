@@ -13,9 +13,6 @@
 #include <mutex>
 
 namespace Mantid {
-//---------------------------------------------------------------------------
-// Forward declaration
-//---------------------------------------------------------------------------
 namespace Kernel {
 class Property;
 }
@@ -25,10 +22,8 @@ class XMLInstrumentParameter;
 }
 
 namespace API {
-//---------------------------------------------------------------------------
-// Forward declaration
-//---------------------------------------------------------------------------
 class ChopperModel;
+class DetectorInfo;
 class ModeratorModel;
 class Run;
 class Sample;
@@ -46,7 +41,7 @@ public:
   /// Default constructor
   ExperimentInfo();
   /// Virtual destructor
-  virtual ~ExperimentInfo() = default;
+  virtual ~ExperimentInfo();
   /// Copy constructor
   ExperimentInfo(const ExperimentInfo &);
   /// Copy everything from the given experiment object
@@ -58,7 +53,7 @@ public:
   virtual const std::string toString() const;
 
   /// Instrument accessors
-  virtual void setInstrument(const Geometry::Instrument_const_sptr &instr);
+  void setInstrument(const Geometry::Instrument_const_sptr &instr);
   /// Returns the parameterized instrument
   virtual Geometry::Instrument_const_sptr getInstrument() const;
 
@@ -164,7 +159,13 @@ public:
   static std::string getInstrumentFilename(const std::string &instrumentName,
                                            const std::string &date = "");
 
+  const DetectorInfo &detectorInfo() const;
+  DetectorInfo &mutableDetectorInfo();
+
 protected:
+  /// Called when instrument or parameter map is reset to notify child classes.
+  virtual void invalidateInstrumentReferences() const {}
+
   /// Description of the source object
   boost::shared_ptr<ModeratorModel> m_moderatorModel;
   /// Description of the choppers for this experiment.
@@ -203,6 +204,9 @@ private:
   det2group_map m_detgroups;
   /// Mutex to protect against cow_ptr copying
   mutable std::recursive_mutex m_mutex;
+
+  mutable std::unique_ptr<DetectorInfo> m_detectorInfo;
+  mutable std::mutex m_detectorInfoMutex;
 };
 
 /// Shared pointer to ExperimentInfo

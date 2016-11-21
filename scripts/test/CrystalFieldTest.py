@@ -1031,7 +1031,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.0112, 4)
         self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.5811, 4)
-        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.7947, 4)
+        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.794, 2)
 
     def test_resolution_single_spectrum_fit_variation(self):
         from CrystalField import CrystalField, CrystalFieldFit
