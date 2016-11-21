@@ -479,14 +479,10 @@ void TomographyIfaceModel::doLocalRunReconstructionJob(
     const std::string &allOpts, TomographyThread &thread,
     TomographyProcess &worker) {
 
-  try {
-    // Can only run one reconstruction at a time. you can cancel the recon
-    worker.setup(runnable, args, allOpts);
-    thread.start();
-  } catch (Poco::SystemException &sexc) {
-    g_log.error() << "Execution failed. Could not run the tool. Error details: "
-                  << std::string(sexc.what());
-  }
+  // Can only run one reconstruction at a time
+  // Qt doesn't use exceptions so we can't make sure it ran here
+  worker.setup(runnable, args, allOpts);
+  thread.start();
 }
 
 void TomographyIfaceModel::addJobToStatus(const qint64 pid,

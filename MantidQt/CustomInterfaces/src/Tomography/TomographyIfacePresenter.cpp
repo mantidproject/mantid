@@ -600,6 +600,8 @@ void TomographyIfacePresenter::prepareThreadAndRunLocalReconstruction(
           SLOT(readWorkerStdErr(QString)));
 
   connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
+  connect(worker, SIGNAL(terminated()), worker, SLOT(deleteLater()),
+          Qt::DirectConnection);
   connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()),
           Qt::DirectConnection);
 

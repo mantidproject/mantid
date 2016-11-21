@@ -52,7 +52,7 @@ public:
     // windows gets a struct object with more info
     auto actualpid = static_cast<qint64>(pid->dwProcessId);
 #else
-    // linux gets just the PID
+    // linux just gets the PID
     auto actualpid = static_cast<qint64>(pid);
 #endif
     return actualpid;

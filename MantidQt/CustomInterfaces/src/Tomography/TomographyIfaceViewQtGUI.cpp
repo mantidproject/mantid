@@ -1155,8 +1155,8 @@ void TomographyIfaceViewQtGUI::browseImageClicked() {
  */
 void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
     const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-        localStatus) {
+    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+        &localStatus) {
 
   QTableWidget *t = m_uiTabRun.tableWidget_run_jobs;
   bool sort = t->isSortingEnabled();
@@ -1355,11 +1355,13 @@ void TomographyIfaceViewQtGUI::browseLocalReconScriptsDirClicked() {
                      "Select location of scripts (scripts subdirectory/folder "
                      "in the Mantid installation",
                      false);
+  systemSettingsEdited();
 }
 
 void TomographyIfaceViewQtGUI::browseLocalExternalInterpreterClicked() {
   checkUserBrowseFile(m_uiTabSystemSettings.lineEdit_local_external_interpreter,
                       "Select interpreter executable", false);
+  systemSettingsEdited();
 }
 
 /**
@@ -1657,7 +1659,9 @@ TomographyIfaceViewQtGUI::grabSystemSettingsFromUser() const {
   setts.m_local.m_reconScriptsPath =
       m_uiTabSystemSettings.lineEdit_local_recon_scripts->text().toStdString();
 
-  setts.m_local.m_externalInterpreterPath = m_uiTabSystemSettings.lineEdit_local_external_interpreter->text().toStdString();
+  setts.m_local.m_externalInterpreterPath =
+      m_uiTabSystemSettings.lineEdit_local_external_interpreter->text()
+          .toStdString();
 
   setts.m_experimentReference =
       m_uiTabRun.lineEdit_experiment_reference->text().toStdString();
