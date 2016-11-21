@@ -42,7 +42,7 @@ class FittingBenchmarkTests(unittest.TestCase):
         """
         # Create the path for the specific fitting test files location
         input_data_dir = msapi.config['datasearch.directories'].split(';')[0]        
-        base_problem_files_dir = os.path.join(input_data_dir, 'fitting_test_problems')
+        base_problem_files_dir = os.path.join(input_data_dir, 'FittingTestProblems')
         
         # run fit minimizer benchmarking tests
         fitbk.run_all_with_or_without_errors(base_problem_files_dir, use_errors, self.minimizers,
