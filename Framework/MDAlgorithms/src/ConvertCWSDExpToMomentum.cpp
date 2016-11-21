@@ -37,14 +37,17 @@ void ConvertCWSDExpToMomentum::init() {
                                                       Direction::Input),
       "Name of table workspace for data file names in the experiment.");
 
-  declareProperty("DetectorSampleDistanceShift", 0.0,
-                  "Amount of shift in sample-detector distance from 0.3750 meter.");
+  declareProperty(
+      "DetectorSampleDistanceShift", 0.0,
+      "Amount of shift in sample-detector distance from 0.3750 meter.");
 
-  declareProperty("DetectorCenterXShift", 0.0,
-                  "Amount of shift of detector center in X-direction from (115, 128).");
+  declareProperty(
+      "DetectorCenterXShift", 0.0,
+      "Amount of shift of detector center in X-direction from (115, 128).");
 
-  declareProperty("DetectorCenterYShift", 0.0,
-                  "Amount of shift of detector center in Y-direction from (115, 128).");
+  declareProperty(
+      "DetectorCenterYShift", 0.0,
+      "Amount of shift of detector center in Y-direction from (115, 128).");
 
   declareProperty("CreateVirtualInstrument", false,
                   "Flag to create virtual instrument.");

@@ -97,7 +97,8 @@ private:
   API::IMDEventWorkspace_sptr m_outputWS;
   Geometry::Instrument_sptr m_virtualInstrument;
 
-  /// Shifts in detector position set from user (calibration): all in the unit as meter
+  /// Shifts in detector position set from user (calibration): all in the unit
+  /// as meter
   double m_detSampleDistanceShift;
   double m_detXShift;
   double m_detYShift;

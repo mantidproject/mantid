@@ -136,7 +136,6 @@ private:
   /// shift of detector on X and Y direction
   double m_detXShift;
   double m_detYShift;
-
 };
 
 } // namespace DataHandling

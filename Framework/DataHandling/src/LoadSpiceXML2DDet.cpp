@@ -201,7 +201,6 @@ void LoadSpiceXML2DDet::init() {
   declareProperty("PtNumber", 0,
                   "Pt. value for the row to get sample log from. ");
 
-
   declareProperty("UserSpecifiedWaveLength", EMPTY_DBL(),
                   "User can specify the wave length of the instrument if it is "
                   "drifted from the designed value."
