@@ -503,7 +503,11 @@ class CWSCDReductionControl(object):
         if pt_number is None:
             # no pt number, then check SPICE file
             spice_file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
-            file_name = os.path.join(self._dataDir, spice_file_name)
+            try:
+                file_name = os.path.join(self._dataDir, spice_file_name)
+            except AttributeError:
+                raise AttributeError('Unable to create SPICE file name from directory %s and file name %s.'
+                                     '' % (self._dataDir, spice_file_name))
         else:
             # pt number given, then check
             xml_file_name = get_det_xml_file_name(self._instrumentName, exp_number, scan_number,
@@ -784,7 +788,7 @@ class CWSCDReductionControl(object):
         array2d = numpy.ndarray(shape=(DET_X_SIZE, DET_Y_SIZE), dtype='float')
         for i in xrange(DET_X_SIZE):
             for j in xrange(DET_Y_SIZE):
-                array2d[i][j] = raw_ws.readY(i * DET_X_SIZE + j)[0]
+                array2d[i][j] = raw_ws.readY(j * DET_X_SIZE + i)[0]
 
         # Flip the 2D array to look detector from sample
         array2d = numpy.flipud(array2d)
@@ -1697,11 +1701,32 @@ class CWSCDReductionControl(object):
 
             # create MD workspace in Q-sample
             try:
-                # TODO/ISSUE/NOW - Add Detector Center and Detector Distance!!!
-                mantidsimple.ConvertCWSDExpToMomentum(InputWorkspace=scan_info_table_name,
-                                                      CreateVirtualInstrument=False,
-                                                      OutputWorkspace=out_q_name,
-                                                      Directory=self._dataDir)
+                # set up the basic algorithm parameters
+                alg_args = dict()
+                alg_args['InputWorkspace'] = scan_info_table_name
+                alg_args['CreateVirtualInstrument'] = False
+                alg_args['OutputWorkspace'] = out_q_name
+                alg_args['Directory'] = self._dataDir
+
+                # get the sample-detector distance
+                # TODO/ISSUE/NOW - Add Detector Center and Detector Distance!!!  - Trace up how to calculate shifts!
+                print '[DB...BAT] Scan %d: Det-Sample Dict: ' % scan_no, self._detSampleDistanceDict
+                print '[DB...BAT] Scan %d: Det-Center Dict: ' % scan_no, self._detCenterDict
+
+                if scan_no in self._detSampleDistanceDict:
+                    alg_args['DetectorSampleDistanceShift'] = self._detSampleDistanceDict[scan_no]
+                if scan_no in self._detCenterDict:
+                    shift_x, shift_y = self._detCenterDict[scan_no]
+                    alg_args['DetectorCenterXShift'] = shift_x
+                    alg_args['DetectorCenterYShift'] = shift_y
+
+                # call:
+                mantidsimple.ConvertCWSDExpToMomentum(**alg_args)
+
+                # mantidsimple.ConvertCWSDExpToMomentum(InputWorkspace=scan_info_table_name,
+                #                                       CreateVirtualInstrument=False,
+                #                                       OutputWorkspace=out_q_name,
+                #                                       Directory=self._dataDir)
                 self._myMDWsList.append(out_q_name)
             except RuntimeError as e:
                 err_msg += 'Unable to convert scan %d data to Q-sample MDEvents due to %s' % (scan_no, str(e))
@@ -1890,7 +1915,7 @@ class CWSCDReductionControl(object):
                 return False, str(os_err)
 
         # Check whether the target is writable: if and only if the data directory is not from data server
-        if local_dir.startswith('/HFIR/HB3A/') and os.access(local_dir, os.W_OK) is False:
+        if not local_dir.startswith('/HFIR/HB3A/') and os.access(local_dir, os.W_OK) is False:
             return False, 'Specified local data directory %s is not writable.' % local_dir
 
         # Successful

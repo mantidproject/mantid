@@ -738,7 +738,9 @@ class MainWindow(QtGui.QMainWindow):
         data_server = str(self.ui.lineEdit_url.text()).strip()
 
         # set to my controller
-        self._myControl.set_local_data_dir(local_data_dir)
+        status, err_msg = self._myControl.set_local_data_dir(local_data_dir)
+        if not status:
+            raise RuntimeError(err_msg)
         self._myControl.set_working_directory(working_dir)
         self._myControl.set_server_url(data_server, check_link=False)
 
