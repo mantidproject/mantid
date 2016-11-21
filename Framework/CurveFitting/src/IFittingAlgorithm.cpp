@@ -270,8 +270,9 @@ std::vector<std::string> IFittingAlgorithm::getCostFunctionNames() const {
   auto &factory = CostFunctionFactory::Instance();
   auto names = factory.getKeys();
   out.reserve(names.size());
-  for(auto &name : names) {
-    if (boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(factory.create(name))) {
+  for (auto &name : names) {
+    if (boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
+            factory.create(name))) {
       out.push_back(name);
     }
   }
@@ -281,7 +282,8 @@ std::vector<std::string> IFittingAlgorithm::getCostFunctionNames() const {
 /// Declare a "CostFunction" property.
 void IFittingAlgorithm::declareCostFunctionProperty() {
   Kernel::IValidator_sptr costFuncValidator =
-      boost::make_shared<Kernel::ListValidator<std::string>>(getCostFunctionNames());
+      boost::make_shared<Kernel::ListValidator<std::string>>(
+          getCostFunctionNames());
   declareProperty(
       "CostFunction", "Least squares", costFuncValidator,
       "The cost function to be used for the fit, default is Least squares",
@@ -289,7 +291,8 @@ void IFittingAlgorithm::declareCostFunctionProperty() {
 }
 
 /// Create a cost function from the "CostFunction" property.
-boost::shared_ptr<CostFunctions::CostFuncFitting> IFittingAlgorithm::getCostFunctionProperty() const {
+boost::shared_ptr<CostFunctions::CostFuncFitting>
+IFittingAlgorithm::getCostFunctionProperty() const {
   // Function may need some preparation.
   m_function->setUpForFit();
 
@@ -301,9 +304,10 @@ boost::shared_ptr<CostFunctions::CostFuncFitting> IFittingAlgorithm::getCostFunc
   m_domainCreator->initFunction(m_function);
 
   // get the cost function which must be a CostFuncFitting
-  auto costFunction = boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
-      API::CostFunctionFactory::Instance().create(
-          getPropertyValue("CostFunction")));
+  auto costFunction =
+      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
+          API::CostFunctionFactory::Instance().create(
+              getPropertyValue("CostFunction")));
 
   costFunction->setFittingFunction(m_function, domain, values);
 

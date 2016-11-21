@@ -84,9 +84,9 @@ public:
   /// nothing has been saved
   void restore() override;
   /// Return the minimum value of the range
-  double min() const override {return m_start;}
+  double min() const override { return m_start; }
   /// Return the maximum value of the range
-  double max() const override {return m_end;}
+  double max() const override { return m_end; }
 
 private:
   /// The boost Mersenne Twister generator

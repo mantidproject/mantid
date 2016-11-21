@@ -565,9 +565,9 @@ protected:
                               const API::IFunction::Attribute &value) const;
 
   /// Write the list of ties to a stream
-  void writeTies(std::ostringstream& ostr) const;
+  void writeTies(std::ostringstream &ostr) const;
   /// Write the list of constraints to a stream
-  void writeConstraints(std::ostringstream& ostr) const;
+  void writeConstraints(std::ostringstream &ostr) const;
 
   friend class ParameterTie;
   friend class CompositeFunction;

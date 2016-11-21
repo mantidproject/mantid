@@ -83,7 +83,6 @@ public:
   /// Get values of all parameters
   void getParameters(GSLVector &params) const;
 
-
 protected:
   /**
    * Calculates covariance matrix for fitting function's active parameters.

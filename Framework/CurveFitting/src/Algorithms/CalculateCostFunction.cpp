@@ -26,7 +26,8 @@ int CalculateCostFunction::version() const { return 1; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CalculateCostFunction::summary() const {
-  return "Calculate cost function for a function and a data set in a workspace.";
+  return "Calculate cost function for a function and a data set in a "
+         "workspace.";
 }
 
 //----------------------------------------------------------------------------------------------

@@ -53,7 +53,8 @@ struct Slice {
 /// Try to estimate if any of the parameters can cause problems during fitting.
 /// If such parameters are found - fix them.
 /// @param costFunction :: The cost function.
-/// @param ranges :: The ranges of values within which the parameters may change. 
+/// @param ranges :: The ranges of values within which the parameters may
+/// change.
 void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
                       const std::vector<std::pair<double, double>> &ranges) {
   std::vector<double> P, A, D;
@@ -67,11 +68,13 @@ void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
     auto storedParam = fun.getParameter(i);
     Slice slice{costFunction, j};
     auto base = Functions::ChebfunBase::bestFitAnyTolerance(
-        lBound, rBound, slice, P, A, 1.0, MIN_APPROX_TOLERANCE, MAX_APPROX_SIZE);
+        lBound, rBound, slice, P, A, 1.0, MIN_APPROX_TOLERANCE,
+        MAX_APPROX_SIZE);
     bool fix = false;
     if (!base) {
       fun.setParameter(i, storedParam);
-      base = boost::make_shared<Functions::ChebfunBase>(MAX_APPROX_SIZE, lBound, rBound, MIN_APPROX_TOLERANCE);
+      base = boost::make_shared<Functions::ChebfunBase>(
+          MAX_APPROX_SIZE, lBound, rBound, MIN_APPROX_TOLERANCE);
       P = base->fit(slice);
       A = base->calcA(P);
     }
@@ -98,7 +101,8 @@ void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
 /// Generate random values of function parameters and return those that
 /// give the smallest cost function.
 /// @param costFunction :: The cost function.
-/// @param ranges :: The ranges of values defining the uniform distributions for the parameters.
+/// @param ranges :: The ranges of values defining the uniform distributions for
+/// the parameters.
 /// @param constraints :: Additional constraints.
 /// @param nSamples :: A number of samples to generate.
 /// @param seed :: A seed for the random number generator.
@@ -138,15 +142,21 @@ void runMonteCarlo(CostFunctions::CostFuncFitting &costFunction,
 /// Run the Cross Entropy version of the algorithm.
 /// https://en.wikipedia.org/wiki/Cross-entropy_method
 /// How it works:
-///   1. Generate a few sets of function parameters such that their values are drawn from
+///   1. Generate a few sets of function parameters such that their values are
+///   drawn from
 ///   normal distributions with given means and sigmas.
-///   2. Calculate the cost function for each set of parameters and select a number of smallest values.
-///   3. Find the sample means and sigmas of the parameters from the subset selected in step 2.
+///   2. Calculate the cost function for each set of parameters and select a
+///   number of smallest values.
+///   3. Find the sample means and sigmas of the parameters from the subset
+///   selected in step 2.
 ///   4. Repeat steps 1 - 3 a few times.
-///   5. Return parameters for the smallest cost function value found in the last iteration.
+///   5. Return parameters for the smallest cost function value found in the
+///   last iteration.
 /// @param costFunction :: The cost function.
-/// @param ranges :: The ranges of values defining the initial distributions for the parameters:
-///     The middle of the range gives the mean and the spread from the mean is a sigma.
+/// @param ranges :: The ranges of values defining the initial distributions for
+/// the parameters:
+///     The middle of the range gives the mean and the spread from the mean is a
+///     sigma.
 /// @param constraints :: Additional constraints.
 /// @param nSamples :: A number of parameter sets (samples) generated in step 1.
 /// @param nSelection :: A number of sets selected in step 2.
@@ -157,7 +167,8 @@ void runCrossEntropy(
     const std::vector<std::pair<double, double>> &ranges,
     const std::vector<std::unique_ptr<IConstraint>> &constraints,
     size_t nSamples, size_t nSelection, size_t nIterations, size_t seed) {
-  // Initialise the normal distribution parameters (mean and sigma for each function parameter).
+  // Initialise the normal distribution parameters (mean and sigma for each
+  // function parameter).
   std::vector<std::pair<double, double>> distributionParams;
   for (auto &range : ranges) {
     auto mean = (range.first + range.second) / 2;
@@ -196,9 +207,10 @@ void runCrossEntropy(
       }
       // Calculate the cost function with those parameters
       costFunction.setParameters(paramSet.second);
-      paramSet.first = costFunction.val();// + getConstraints(constraints);
+      paramSet.first = costFunction.val(); // + getConstraints(constraints);
     }
-    // Partially sort the parameter sets in ascending order of the cost function.
+    // Partially sort the parameter sets in ascending order of the cost
+    // function.
     // Find nSelection smallest values.
     std::partial_sort(sampleSets.begin(), sampleSets.begin() + nSelection,
                       sampleSets.end(), compareSets);
@@ -257,8 +269,11 @@ void MonteCarloParameters::initConcrete() {
   declareProperty("NSamples", 100, "Number of samples.");
   declareProperty("Constraints", "",
                   "Additional constraints on tied parameters.");
-  declareProperty("Type","Monte Carlo", "Type of the algorithm: \"Monte Carlo\" or \"Cross Entropy\"");
-  declareProperty("NIterations", 10, "Number of iterations of the Cross Entropy algorithm.");
+  declareProperty(
+      "Type", "Monte Carlo",
+      "Type of the algorithm: \"Monte Carlo\" or \"Cross Entropy\"");
+  declareProperty("NIterations", 10,
+                  "Number of iterations of the Cross Entropy algorithm.");
   declareProperty("Selection", 10, "Size of the selection in the Cross Entropy "
                                    "algorithm from which to estimate new "
                                    "distribution parameters for the next "

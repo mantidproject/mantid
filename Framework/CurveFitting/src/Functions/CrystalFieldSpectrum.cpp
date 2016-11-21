@@ -131,7 +131,8 @@ std::string CrystalFieldSpectrum::asString() const {
     for (size_t i = 0; i < peak.nParams(); i++) {
       const ParameterTie *tie = peak.getTie(i);
       if (!tie || !tie->isDefault()) {
-        ostr << ",f" << ip << "." << peak.parameterName(i) << '=' << peak.getParameter(i);
+        ostr << ",f" << ip << "." << peak.parameterName(i) << '='
+             << peak.getParameter(i);
       }
     }
   }

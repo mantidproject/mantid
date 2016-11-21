@@ -17,7 +17,6 @@ namespace CostFunctions {
 class CostFuncFitting;
 }
 
-
 /**
 
   A base class for fitting algorithms. It declares two properties:
@@ -75,7 +74,8 @@ protected:
   void addWorkspaces();
   std::vector<std::string> getCostFunctionNames() const;
   void declareCostFunctionProperty();
-  boost::shared_ptr<CostFunctions::CostFuncFitting> getCostFunctionProperty() const;
+  boost::shared_ptr<CostFunctions::CostFuncFitting>
+  getCostFunctionProperty() const;
 
   /// Keep the domain type
   API::IDomainCreator::DomainType m_domainType{API::IDomainCreator::Simple};

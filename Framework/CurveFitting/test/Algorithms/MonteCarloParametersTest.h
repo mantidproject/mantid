@@ -39,40 +39,44 @@ public:
     MonteCarloParameters alg;
     alg.initialize();
     alg.setRethrows(true);
-    alg.setPropertyValue("Function", "name=UserFunction,Formula=a*x+b,a=1,ties=(b=0)");
+    alg.setPropertyValue("Function",
+                         "name=UserFunction,Formula=a*x+b,a=1,ties=(b=0)");
     alg.setProperty("InputWorkspace", ws);
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
   void test_no_lower_bound() {
     auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        [](double x, int i) { return 2.0 + 3.0*x; }, 1, 0, 1, 0.1);
+        [](double x, int i) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
 
     MonteCarloParameters alg;
     alg.initialize();
     alg.setRethrows(true);
-    alg.setPropertyValue("Function", "name=UserFunction,Formula=a*x+b,constraints=(a<4, b<4)");
+    alg.setPropertyValue(
+        "Function", "name=UserFunction,Formula=a*x+b,constraints=(a<4, b<4)");
     alg.setProperty("InputWorkspace", ws);
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
   void test_no_upper_bound() {
     auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        [](double x, int i) { return 2.0 + 3.0*x; }, 1, 0, 1, 0.1);
+        [](double x, int i) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
 
     MonteCarloParameters alg;
     alg.initialize();
     alg.setRethrows(true);
-    alg.setPropertyValue("Function", "name=UserFunction,Formula=a*x+b,constraints=(a>4, b>4)");
+    alg.setPropertyValue(
+        "Function", "name=UserFunction,Formula=a*x+b,constraints=(a>4, b>4)");
     alg.setProperty("InputWorkspace", ws);
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
   void test_all_free() {
     auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        [](double x, int i) { return 2.0 + 3.0*x; }, 1, 0, 1, 0.1);
+        [](double x, int i) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
 
-    std::string funStr("name=UserFunction,Formula=a*x+b,a=0,b=0,constraints=(1<a<4, 0<b<4)");
+    std::string funStr(
+        "name=UserFunction,Formula=a*x+b,a=0,b=0,constraints=(1<a<4, 0<b<4)");
     CalculateCostFunction calc;
     calc.initialize();
     calc.setPropertyValue("Function", funStr);
@@ -100,9 +104,10 @@ public:
 
   void test_fixed() {
     auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        [](double x, int i) { return 2.0 + 3.0*x; }, 1, 0, 1, 0.1);
+        [](double x, int i) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
 
-    std::string funStr("name=UserFunction,Formula=a*x+b,a=0,ties=(b=1.9),constraints=(1<a<4)");
+    std::string funStr(
+        "name=UserFunction,Formula=a*x+b,a=0,ties=(b=1.9),constraints=(1<a<4)");
     CalculateCostFunction calc;
     calc.initialize();
     calc.setPropertyValue("Function", funStr);
@@ -129,9 +134,10 @@ public:
 
   void test_tied() {
     auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        [](double x, int i) { return 2.0 + 3.0*x; }, 1, 0, 1, 0.1);
+        [](double x, int i) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
 
-    std::string funStr("name=UserFunction,Formula=a*x+b,a=0,ties=(b=a-1),constraints=(1<a<4)");
+    std::string funStr(
+        "name=UserFunction,Formula=a*x+b,a=0,ties=(b=a-1),constraints=(1<a<4)");
     CalculateCostFunction calc;
     calc.initialize();
     calc.setPropertyValue("Function", funStr);
@@ -162,9 +168,10 @@ public:
 
   void test_fix_bad_parameters() {
     auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        [](double x, int) { return exp(-x*x/4.0); }, 1, -8.5, 8.5, 1.0);
+        [](double x, int) { return exp(-x * x / 4.0); }, 1, -8.5, 8.5, 1.0);
 
-    std::string funStr("name=BackToBackExponential,S=1.1,constraints=(0.01<I<200,0.001<A<300,0.001<B<300,-5<X0<5,0.001<S<4)");
+    std::string funStr("name=BackToBackExponential,S=1.1,constraints=(0.01<I<"
+                       "200,0.001<A<300,0.001<B<300,-5<X0<5,0.001<S<4)");
 
     MonteCarloParameters alg;
     alg.initialize();
@@ -191,14 +198,14 @@ public:
     TS_ASSERT(fun->isFixed(fun->parameterIndex("B")));
     TS_ASSERT(!fun->isFixed(fun->parameterIndex("I")));
     TS_ASSERT(!fun->isFixed(fun->parameterIndex("S")));
-
   }
 
   void test_fix_bad_parameters_doesnt_change_values() {
     auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        [](double x, int) { return exp(-x*x/4.0); }, 1, -8.5, 8.5, 1.0);
+        [](double x, int) { return exp(-x * x / 4.0); }, 1, -8.5, 8.5, 1.0);
 
-    std::string funStr("name=BackToBackExponential,S=1.1,constraints=(0.01<I<200,0.001<A<300,0.001<B<300,-5<X0<5,0.001<S<4)");
+    std::string funStr("name=BackToBackExponential,S=1.1,constraints=(0.01<I<"
+                       "200,0.001<A<300,0.001<B<300,-5<X0<5,0.001<S<4)");
 
     MonteCarloParameters alg;
     alg.initialize();
@@ -225,9 +232,7 @@ public:
     TS_ASSERT(!fun->isFixed(fun->parameterIndex("B")));
     TS_ASSERT(!fun->isFixed(fun->parameterIndex("I")));
     TS_ASSERT(!fun->isFixed(fun->parameterIndex("S")));
-
   }
-
 };
 
 #endif /* MANTID_CURVEFITTING_MONTECARLOPARAMETERSTEST_H_ */

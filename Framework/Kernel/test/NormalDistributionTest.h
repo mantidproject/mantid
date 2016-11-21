@@ -27,7 +27,7 @@ public:
     NormalDistribution norm;
     norm.setSeed(1);
     size_t in(0), out(0);
-    for(size_t i = 0; i < 100; ++i) {
+    for (size_t i = 0; i < 100; ++i) {
       auto value = norm.nextValue();
       if (std::fabs(value) < 1.0) {
         ++in;
@@ -43,7 +43,7 @@ public:
     NormalDistribution norm(30.0, 5.0);
     norm.setSeed(2);
     size_t in(0), out(0);
-    for(size_t i = 0; i < 100; ++i) {
+    for (size_t i = 0; i < 100; ++i) {
       auto value = (norm.nextValue() - 30.0) / 5.0;
       if (std::fabs(value) < 1.0) {
         ++in;
@@ -54,7 +54,6 @@ public:
     TS_ASSERT_EQUALS(in, 58);
     TS_ASSERT_EQUALS(out, 42);
   }
-
 };
 
 #endif // NORMALDISTRIBUTIONTEST_H_

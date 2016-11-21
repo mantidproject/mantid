@@ -84,8 +84,9 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
     double value = alg.getProperty("Value");
-    auto sum = std::accumulate(ws->x(0).begin(), ws->x(0).end(), 0.0,
-                               [](double s, double a) { return s + (a - 1.0) * (a - 1.0); });
+    auto sum = std::accumulate(
+        ws->x(0).begin(), ws->x(0).end(), 0.0,
+        [](double s, double a) { return s + (a - 1.0) * (a - 1.0); });
     TS_ASSERT_DELTA(value, sum / 2, 1e-15);
   }
 };

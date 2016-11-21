@@ -629,8 +629,10 @@ private:
     return std::make_pair(bc->lower(), bc->upper());
   }
 
-  MatrixWorkspace_sptr createWorkspace(const IFunction &fun, double x0, double x1, size_t nbins) {
-    auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, nbins, nbins);
+  MatrixWorkspace_sptr createWorkspace(const IFunction &fun, double x0,
+                                       double x1, size_t nbins) {
+    auto ws =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, nbins, nbins);
     FunctionDomain1DVector x(x0, x1, nbins);
     FunctionValues y(x);
     fun.function(x, y);

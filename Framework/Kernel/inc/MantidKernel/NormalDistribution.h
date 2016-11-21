@@ -46,19 +46,20 @@ public:
   NormalDistribution(const double mean, const double sigma);
   /// Construct the generator with initial distribution parameters and
   /// a seed value.
-  NormalDistribution(const size_t seedValue, const double mean, const double sigma);
+  NormalDistribution(const size_t seedValue, const double mean,
+                     const double sigma);
 
   NormalDistribution(const NormalDistribution &) = delete;
-  NormalDistribution &operator=(const NormalDistribution&) = delete;
+  NormalDistribution &operator=(const NormalDistribution &) = delete;
 
   /// Set the random number seed
   void setSeed(const size_t seedValue);
   /// Generate the next random number in the sequence
   double nextValue();
   /// Get the mean of the distribution
-  double mean() const {return m_generator.mean();}
+  double mean() const { return m_generator.mean(); }
   /// Get the sigma of the distribution
-  double sigma() const {return m_generator.sigma();}
+  double sigma() const { return m_generator.sigma(); }
   /// Generate a random number from a distribution with given mean and sigma
   double randomValue(double argMean, double argSigma);
 

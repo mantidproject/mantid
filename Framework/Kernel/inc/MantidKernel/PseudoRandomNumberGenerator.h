@@ -61,7 +61,7 @@ public:
   /// Return the maximum value of the range
   virtual double max() const = 0;
   /// Return next random value
-  double operator()() {return nextValue();}
+  double operator()() { return nextValue(); }
 
 private:
   DISABLE_COPY_AND_ASSIGN(PseudoRandomNumberGenerator)

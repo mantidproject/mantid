@@ -150,7 +150,7 @@ void IFunction::removeTie(const std::string &parName) {
 }
 
 /// Write the list of ties to a stream
-void IFunction::writeTies(std::ostringstream& ostr) const {
+void IFunction::writeTies(std::ostringstream &ostr) const {
   // collect the non-default ties
   std::string ties;
   for (size_t i = 0; i < nParams(); i++) {
@@ -172,7 +172,7 @@ void IFunction::writeTies(std::ostringstream& ostr) const {
 }
 
 /// Write the list of constraints to a stream
-void IFunction::writeConstraints(std::ostringstream& ostr) const {
+void IFunction::writeConstraints(std::ostringstream &ostr) const {
   // collect non-default constraints
   std::string constraints;
   for (size_t i = 0; i < nParams(); i++) {
