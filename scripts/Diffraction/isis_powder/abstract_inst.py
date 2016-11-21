@@ -57,10 +57,8 @@ class AbstractInst(object):
     # --- Public API ---- #
 
     # Script entry points
-    def focus(self, run_number, focus_mode, input_ext=None, do_attenuation=True, do_van_normalisation=True):
+    def focus(self, run_number, focus_mode=None, do_attenuation=True, do_van_normalisation=True):
         self._focus_mode = focus_mode
-        if input_ext is not None:
-            self.default_input_ext = input_ext
 
         return focus.focus(instrument=self, number=run_number,
                            attenuate=do_attenuation, van_norm=do_van_normalisation)
@@ -96,14 +94,14 @@ class AbstractInst(object):
     # These are to be called from either concrete instruments or common not by users
     # Common steps to all instruments
 
-    def _generate_out_file_paths(self, run_number, output_directory=None):
+    def _generate_out_file_paths(self, run_details, output_directory=None):
         if not output_directory:
-            output_directory = self._output_dir
-        file_name = self._generate_inst_file_name(run_number=run_number)
+            output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
+        file_name = self._generate_inst_file_name(run_number=run_details.run_number)
         nxs_file = os.path.join(output_directory, (str(file_name) + ".nxs"))
-        gss_file = os.path.join(output_directory + (str(file_name) + ".gss"))
-        tof_xye_file = os.path.join(output_directory + (str(file_name) + "_tof_xye.dat"))
-        d_xye_file = os.path.join(output_directory + (str(file_name) + "_d_xye.dat"))
+        gss_file = os.path.join(output_directory, (str(file_name) + ".gss"))
+        tof_xye_file = os.path.join(output_directory, (str(file_name) + "_tof_xye.dat"))
+        d_xye_file = os.path.join(output_directory, (str(file_name) + "_d_xye.dat"))
         out_name = str(file_name)
 
         out_file_names = {"nxs_filename": nxs_file,
@@ -235,7 +233,7 @@ class AbstractInst(object):
     def _do_tof_rebinning_focus(self, input_workspace):
         return input_workspace
 
-    def _process_focus_output(self, processed_spectra, run_number, attenuate=False):
+    def _process_focus_output(self, processed_spectra, run_details, attenuate=False):
         return _empty_hook_return_none()
 
     def _subtract_sample_empty(self, input_sample):

@@ -122,7 +122,8 @@ def setup_polaris_instrument():
     config['datasearch.directories'] += ";" + path_to_add
     output_dir = _get_output_dir()
 
-    polaris_obj = polaris.Polaris(user_name=user_name, calibration_dir=calibration_dir, output_dir=output_dir)
+    polaris_obj = polaris.Polaris(user_name=user_name, chopper_on=True,
+                                  calibration_dir=calibration_dir, output_dir=output_dir)
     return polaris_obj
 
 

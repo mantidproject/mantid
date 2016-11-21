@@ -24,8 +24,8 @@ class Polaris(AbstractInst):
 
     _number_of_banks = 5
 
-    def __init__(self, user_name=None, calibration_dir=None, raw_data_dir=None, output_dir=None,
-                 input_file_ext=".raw", chopper_on=True):
+    def __init__(self, user_name, chopper_on, calibration_dir=None, output_dir=None,
+                 input_file_ext=".raw"):
 
         super(Polaris, self).__init__(user_name=user_name, calibration_dir=calibration_dir,
                                       output_dir=output_dir, default_input_ext=input_file_ext)
@@ -65,9 +65,9 @@ class Polaris(AbstractInst):
             chopper_config = configuration["chopper_off"]
 
         vanadium_runs = chopper_config["vanadium_run_numbers"]
-        solid_angle_file_name = "SAC_" + vanadium_runs + '_' + chopper_config["solid_angle_file_name"]
+        solid_angle_file_name = "SAC_" + vanadium_runs
         solid_angle_file_path = os.path.join(calibration_dir, solid_angle_file_name)
-        splined_vanadium_name = "SVan_" + vanadium_runs + '_' + chopper_config["splined_vanadium_file_name"]
+        splined_vanadium_name = "SplinedVan_" + vanadium_runs
         splined_vanadium = os.path.join(calibration_dir, splined_vanadium_name)
 
         calibration_details = RunDetails(calibration_path=calibration_full_path, grouping_path=grouping_full_path,
@@ -244,14 +244,14 @@ class Polaris(AbstractInst):
 
         return calculated_binning_params
 
-    def _process_focus_output(self, processed_spectra, run_number, attenuate=False):
+    def _process_focus_output(self, processed_spectra, run_details, attenuate=False):
         d_spacing_group, tof_group = _create_d_spacing_tof_output(processed_spectra)
-        output_paths = self._generate_out_file_paths(run_number=run_number)
+        output_paths = self._generate_out_file_paths(run_details=run_details)
 
         mantid.SaveGSS(InputWorkspace=tof_group, Filename=output_paths["gss_filename"], SplitFiles=False, Append=False)
         mantid.SaveNexusProcessed(InputWorkspace=tof_group, Filename=output_paths["nxs_filename"], Append=False)
-        self._save_xye(ws_group=d_spacing_group, ws_units="d_spacing", run_number=run_number)
-        self._save_xye(ws_group=tof_group, ws_units="TOF", run_number=run_number)
+        self._save_xye(ws_group=d_spacing_group, ws_units="d_spacing", run_number=run_details.run_number)
+        self._save_xye(ws_group=tof_group, ws_units="TOF", run_number=run_details.run_number)
 
         return d_spacing_group, tof_group
 

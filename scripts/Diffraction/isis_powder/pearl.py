@@ -30,7 +30,7 @@ class Pearl(AbstractInst):
     _create_van_first_tof_binning = "100,-0.0006,19990"
     _create_van_second_tof_binning = "150,-0.0006,19900"
 
-    def __init__(self, user_name=None, calibration_dir=None, raw_data_dir=None, output_dir=None,
+    def __init__(self, user_name=None, calibration_dir=None, output_dir=None,
                  input_file_ext=".raw", tt_mode="TT88"):
 
         super(Pearl, self).__init__(user_name=user_name, calibration_dir=calibration_dir,
@@ -49,6 +49,7 @@ class Pearl(AbstractInst):
         # File names
         pearl_mc_absorption_file_name = "PRL112_DC25_10MM_FF.OUT"  # TODO
         self._attenuation_full_path = os.path.join(calibration_dir, pearl_mc_absorption_file_name)
+
 
     # --- Abstract Implementation ---- #
 
@@ -199,9 +200,10 @@ class Pearl(AbstractInst):
     def _focus_processing(self, run_number, input_workspace, perform_vanadium_norm):
         return self._perform_focus_loading(run_number, input_workspace, perform_vanadium_norm)
 
-    def _process_focus_output(self, processed_spectra, run_number, attenuate=False):
+    def _process_focus_output(self, processed_spectra, run_details, attenuate=False):
         return fmode_output.generate_and_save_focus_output(self, processed_spectra=processed_spectra,
-                                                           run_number=run_number, perform_attenuation=attenuate,
+                                                           run_details=run_details,
+                                                           perform_attenuation=attenuate,
                                                            focus_mode=self._focus_mode)
 
     def _apply_van_calibration_tof_rebinning(self, vanadium_ws, tof_rebin_pass, return_units):

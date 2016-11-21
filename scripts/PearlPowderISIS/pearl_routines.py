@@ -22,8 +22,7 @@ g_pearl_obj = None
 def _pearl_obj_singleton():
     global g_pearl_obj
     if g_pearl_obj is None:
-        g_pearl_obj = Pearl(user_name="NotSet", calibration_dir="NotSet",
-                            raw_data_dir="NotSet", output_dir="NotSet",
+        g_pearl_obj = Pearl(user_name="NotSet", calibration_dir="NotSet", output_dir="NotSet",
                             input_file_ext=".raw", tt_mode="NotSet")
     return g_pearl_obj
 
@@ -216,8 +215,9 @@ def PEARL_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van
 
     pearl_obj = _pearl_obj_singleton()
     pearl_obj._old_api_set_tt_mode(ttmode)
+    pearl_obj._old_api_set_ext(ext)
     pearl_obj.set_debug_mode(debug)
-    return pearl_obj.focus(run_number=number, focus_mode=fmode, input_ext=ext, do_attenuation=atten,
+    return pearl_obj.focus(run_number=number, focus_mode=fmode, do_attenuation=atten,
                            do_van_normalisation=van_norm)
 
 
@@ -227,8 +227,9 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
 
     pearl_obj = _pearl_obj_singleton()
     pearl_obj._old_api_set_tt_mode(ttmode)
+    pearl_obj._old_api_set_ext(ext)
     pearl_obj.set_debug_mode(debug)
-    return pearl_obj.focus(run_number=number, focus_mode=fmode, input_ext=ext, do_attenuation=atten,
+    return pearl_obj.focus(run_number=number, focus_mode=fmode, do_attenuation=atten,
                            do_van_normalisation=van_norm)
 
 

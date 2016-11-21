@@ -14,20 +14,20 @@ def _run_focus(instrument, run_number, perform_attenuation, perform_vanadium_nor
     read_ws = common.load_current_normalised_ws(run_number_string=run_number, instrument=instrument)
     input_workspace = instrument._do_tof_rebinning_focus(read_ws)  # Rebins for PEARL
 
-    calibration_file_paths = instrument._get_run_details(run_number=run_number)
+    run_details = instrument._get_run_details(run_number=run_number)
 
     # Compensate for empty sample if specified
     input_workspace = instrument._subtract_sample_empty(input_workspace)
 
     # Align / Focus
     input_workspace = mantid.AlignDetectors(InputWorkspace=input_workspace,
-                                            CalibrationFile=calibration_file_paths.calibration)
+                                            CalibrationFile=run_details.calibration)
 
     input_workspace = instrument._apply_solid_angle_efficiency_corr(ws_to_correct=input_workspace,
-                                                                    run_details=calibration_file_paths)
+                                                                    run_details=run_details)
 
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=input_workspace,
-                                             GroupingFileName=calibration_file_paths.grouping)
+                                             GroupingFileName=run_details.grouping)
 
     # Process
     rebinning_params = instrument.calculate_focus_binning_params(sample=focused_ws)
@@ -39,7 +39,8 @@ def _run_focus(instrument, run_number, perform_attenuation, perform_vanadium_nor
     _apply_binning_to_spectra(spectra_list=calibrated_spectra, binning_list=rebinning_params)
 
     # Output
-    processed_nexus_files = instrument._process_focus_output(calibrated_spectra, run_number, attenuate=perform_attenuation)
+    processed_nexus_files = instrument._process_focus_output(calibrated_spectra, run_details=run_details,
+                                                             attenuate=perform_attenuation)
 
     # Tidy
     common.remove_intermediate_workspace(read_ws)
