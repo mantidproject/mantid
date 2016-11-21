@@ -121,4 +121,7 @@ quantum_order_two = 2
 quantum_order_three = 3
 quantum_order_four = 4
 
+large_size = 10000000  # if resulting S is bigger than that switch to processing in loop to save memory
+
+
 

@@ -53,6 +53,9 @@ s_relative_threshold = 0.001
 # case s_relative_threshold is larger than s_absolute_threshold)
 s_absolute_threshold = 10e-8
 
+optimal_size = 5000000  # this is used to create optimal size of chunk energies for which S is calculated
+# Actual chunk of energies < optimal_size
+
 ######################################ABINS internal parameters end ###########################
 
 

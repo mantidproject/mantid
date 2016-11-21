@@ -13,12 +13,14 @@ class FrequencyPowderGenerator(object):
         super(FrequencyPowderGenerator, self).__init__()
 
     def construct_freq_combinations(self, previous_array=None, previous_coefficients=None,
-                                    fundamentals_array=None, quantum_order=None):
+                                    fundamentals_array=None, fundamentals_coefficients=None, quantum_order=None):
         """
         Generates frequencies for the given order of quantum event.
+
         @param previous_array: array with frequencies for the previous quantum event
         @param previous_coefficients: coefficients which correspond to the previous order quantum event
         @param fundamentals_array: array with frequencies for fundamentals
+        @param fundamentals_coefficients: coefficients for fundamentals
         @param quantum_order: number of quantum order event for which new array should be constructed
         @return: array with frequencies for the required quantum number event, array which stores coefficients for all
                  frequencies
@@ -26,8 +28,16 @@ class FrequencyPowderGenerator(object):
         if not (isinstance(fundamentals_array, np.ndarray) and
                 len(fundamentals_array.shape) == 1 and
                 fundamentals_array.dtype.num == AbinsConstants.float_id):
-
             raise ValueError("Fundamentals in the form of one dimentional array are expected.")
+
+        if not (isinstance(fundamentals_coefficients, np.ndarray) and
+                len(fundamentals_coefficients.shape) == 1 and
+                fundamentals_coefficients.dtype.num == AbinsConstants.int_id):
+            raise ValueError("Coefficients of fundamentals in the form of one dimentional array are expected.")
+
+        if fundamentals_coefficients.size != fundamentals_array.size:
+            raise ValueError("Inconsistent size of fundamentals and corresponding coefficients. "
+                             "(%s != %s)" % (fundamentals_coefficients.size, fundamentals_array.size))
 
         if not (isinstance(quantum_order, int) and
                 AbinsConstants.fundamentals <= quantum_order <=
@@ -36,7 +46,7 @@ class FrequencyPowderGenerator(object):
 
         # frequencies for fundamentals
         if quantum_order == AbinsConstants.fundamentals:
-            return fundamentals_array, np.arange(fundamentals_array.size)
+            return fundamentals_array, fundamentals_coefficients
 
         # higher order quantum events
         else:
@@ -46,19 +56,27 @@ class FrequencyPowderGenerator(object):
                     previous_array.dtype.num == AbinsConstants.float_id):
                 raise ValueError("One dimentional array is expected.")
 
-            if not isinstance(previous_coefficients, np.ndarray):
+            if not (isinstance(previous_coefficients, np.ndarray) and
+                    len(previous_coefficients.shape) == min(2, quantum_order - 1) and
+                    previous_coefficients.dtype.num == AbinsConstants.int_id):
                 raise ValueError("Numpy array is expected.")
 
             # generate indices
             fundamentals_size = fundamentals_array.size
-            fund_indices = np.arange(fundamentals_size)
             previous_size = previous_array.size
-            prev_indices = np.arange(previous_size)
+            prev_indices = np.arange(start=0, step=1, stop=previous_size, dtype=AbinsConstants.int_type)
+
+            # indices in fundamentals array. Not necessarily the same as fundamentals_coefficients!!!
+            # This will be the same in case full array with transitions is processed
+            # but in case array of transitions is huge and we proceed chunk by chunk then
+            # fundamentals_ind differ from fundamentals_coefficients
+            fundamentals_ind = np.arange(start=0, step=1, stop=fundamentals_size, dtype=AbinsConstants.int_type)
+
             n = fundamentals_size * previous_size
             num_of_arrays = 2
             ind = np.zeros(shape=(n, num_of_arrays), dtype=AbinsConstants.int_type)
             ind[:, 0] = np.repeat(prev_indices, fundamentals_size)
-            ind[:, 1] = np.tile(fund_indices, previous_size)
+            ind[:, 1] = np.tile(fundamentals_ind, previous_size)
 
             # calculate energies for quantum order event
             energies = np.take(a=previous_array, indices=ind[:, 0]) + np.take(a=fundamentals_array, indices=ind[:, 1])
@@ -72,7 +90,7 @@ class FrequencyPowderGenerator(object):
                 previous_coefficients_dim = previous_coefficients.shape[-1]
 
             coeff[:previous_coefficients_dim] = np.take(a=previous_coefficients, indices=ind[:, 0])
-            coeff[previous_coefficients_dim] = np.take(a=fund_indices, indices=ind[:, 1])
+            coeff[previous_coefficients_dim] = np.take(a=fundamentals_coefficients, indices=ind[:, 1])
             coeff = coeff.T
 
             # extract energies within valid energy window
