@@ -136,7 +136,7 @@ bool QtReflSaveTabView::getQResolutionCheck() const {
 */
 std::string QtReflSaveTabView::getSeparator() const {
   auto sep = m_ui.separatorButtonGroup->checkedButton()->text().toStdString();
-  std::transform(sep.begin(), sep.end(), sep.begin(), ::tolower); // lowercase
+  boost::to_lower(sep); // lowercase
   return sep;
 }
 

@@ -203,10 +203,5 @@ std::vector<std::string> ReflSaveTabPresenter::getAvailableWorkspaceNames() {
 
   return validNames;
 }
-
-/** Obtains a list of workspace titles given a list of workspace names
-* @param workspaceNames :: vector of workspace name strings
-* @return 
-*/
 }
 }
