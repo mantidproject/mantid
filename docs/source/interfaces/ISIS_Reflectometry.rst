@@ -398,7 +398,7 @@ following algorithms:
 - :ref:`CreateTransmissionWorkspaceAuto <algm-CreateTransmissionWorkspaceAuto>`
   (applied to **Transmission Run(s)**).
 - :ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`, main reduction algorithm.
-- :ref:`Stitch1DMany <algm-Stitch1DMany>`(note that at least a bin width must be
+- :ref:`Stitch1DMany <algm-Stitch1DMany>` (note that at least a bin width must be
   specified for this algorithm to run successfully, for instance *Params="-0.03"*).
 
 Note that when conflicting options are specified for the reduction, i.e. different
