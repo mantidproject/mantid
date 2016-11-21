@@ -131,6 +131,13 @@ bool QtReflSaveTabView::getQResolutionCheck() const {
   return m_ui.qResolutionCheckBox->isChecked();
 }
 
+/** Returns the separator type
+* @return :: The separator
+*/
+std::string QtReflSaveTabView::getSeparator() const {
+  return m_ui.separatorButtonGroup->checkedButton()->text().toStdString();
+}
+
 /** Clear the 'List of workspaces' widget
 */
 void QtReflSaveTabView::clearWorkspaceList() const {

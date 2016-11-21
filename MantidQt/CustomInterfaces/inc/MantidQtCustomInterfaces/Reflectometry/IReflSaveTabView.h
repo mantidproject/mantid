@@ -58,6 +58,7 @@ public:
   virtual int getFileFormatIndex() const = 0;
   virtual bool getTitleCheck() const = 0;
   virtual bool getQResolutionCheck() const = 0;
+  virtual std::string getSeparator() const = 0;
 
   virtual void clearWorkspaceList() const = 0;
   virtual void clearParametersList() const = 0;
