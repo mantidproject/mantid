@@ -319,23 +319,11 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """
         Execution path when a single foil state is requested
         """
-        runs = self._get_runs()
-        if len(runs) > 1:
-            raise RuntimeError("Single foil state mode does not currently support summing "
-                               "multiple files")
-
-        isis = config.getFacility("ISIS")
-        inst_prefix = isis.instrument("VESUVIO").shortName()
-
-        try:
-            run_str = inst_prefix + runs[0]
-        except ValueError:
-            run_str = runs[0]
-
-        self._raise_error_period_scatter(run_str, self._back_scattering)
         all_spectra = [item for sublist in self._spectra for item in sublist]
 
-        self._load_single_run_spec_and_mon(all_spectra, run_str)
+        self._set_spectra_type(all_spectra[0])
+        self._setup_raw(all_spectra)
+        self._create_foil_workspaces()
 
         raw_group = mtd[SUMMED_WS]
         self._nperiods = raw_group.size()
@@ -367,6 +355,19 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 dataE += np.square(raw_group[group_index].readE(ws_index))
             np.sqrt(dataE, dataE)
             foil_out.setX(ws_index, x_values)
+
+            if self._nperiods == 6 and self._spectra_type == FORWARD:
+                mon_periods = (5, 6)
+            else:
+                mon_periods = foil_out_periods
+            raw_grp_indices = foil_map.get_indices(spectrum_no, mon_periods)
+            outY = self.mon_out.dataY(ws_index)
+            for grp_index in raw_grp_indices:
+                raw_ws = self._raw_monitors[grp_index]
+                outY += raw_ws.readY(self._mon_index)
+
+            self._ws_index = ws_index
+            self._normalise_by_monitor()
 
         ip_file = self.getPropertyValue(INST_PAR_PROP)
         if len(ip_file) > 0:
@@ -589,15 +590,16 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 ms.DeleteWorkspace(out_mon, EnableLogging=_LOGGING_)
 
         # Check to see if extra data needs to be loaded to normalise in data
-        x_max = self._tof_max
-        if self._foil_out_norm_end > self._tof_max:
-            x_max = self._foil_out_norm_end
-            self._crop_required = True
+        if "Difference" in self._diff_opt:
+            x_max = self._tof_max
+            if self._foil_out_norm_end > self._tof_max:
+                x_max = self._foil_out_norm_end
+                self._crop_required = True
 
-        ms.CropWorkspace(Inputworkspace= SUMMED_WS,
-                         OutputWorkspace=SUMMED_WS,
-                         XMax=x_max,
-                         EnableLogging=_LOGGING_)
+            ms.CropWorkspace(Inputworkspace= SUMMED_WS,
+                             OutputWorkspace=SUMMED_WS,
+                             XMax=x_max,
+                             EnableLogging=_LOGGING_)
 
         summed_data, summed_mon = mtd[SUMMED_WS], mtd[SUMMED_WS + '_monitors']
 
@@ -611,8 +613,8 @@ class LoadVesuvio(LoadEmptyVesuvio):
             self._load_monitors_workspace = clone.getProperty("OutputWorkspace").value
             self._load_monitors_workspace = self._sum_monitors_in_group(summed_mon,
                                                                         self._load_monitors_workspace)
-
-        self._load_diff_mode_parameters(summed_data)
+        if "Difference" in self._diff_opt:
+            self._load_diff_mode_parameters(summed_data)
         return summed_data, summed_mon
 
 
