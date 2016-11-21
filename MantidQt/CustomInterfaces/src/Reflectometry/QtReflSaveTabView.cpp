@@ -135,7 +135,9 @@ bool QtReflSaveTabView::getQResolutionCheck() const {
 * @return :: The separator
 */
 std::string QtReflSaveTabView::getSeparator() const {
-  return m_ui.separatorButtonGroup->checkedButton()->text().toStdString();
+  auto sep = m_ui.separatorButtonGroup->checkedButton()->text().toStdString();
+  std::transform(sep.begin(), sep.end(), sep.begin(), ::tolower); // lowercase
+  return sep;
 }
 
 /** Clear the 'List of workspaces' widget

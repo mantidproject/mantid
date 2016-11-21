@@ -149,6 +149,7 @@ void ReflSaveTabPresenter::saveWorkspaces() {
   bool titleCheck = m_view->getTitleCheck();
   auto selectedParameters = m_view->getSelectedParameters();
   bool qResolutionCheck = m_view->getQResolutionCheck();
+  std::string separator = m_view->getSeparator();
   std::string prefix = m_view->getPrefix();
   int formatIndex = m_view->getFileFormatIndex();
   std::string algName = saveAlgs[formatIndex];
@@ -169,6 +170,7 @@ void ReflSaveTabPresenter::saveWorkspaces() {
     auto path = Poco::Path(saveDir);
     auto wsName = wsNames[i];
     path.append(prefix + wsName + extension);
+    saveAlg->setProperty("Separator", separator);
     saveAlg->setProperty("Filename", path.toString());
     saveAlg->setProperty(
         "InputWorkspace",
