@@ -13,7 +13,7 @@
     splined_vanadium_file_name : "chopper_off_van_calib.nxs"
     solid_angle_file_name : "chopper_off_sac.nxs"
 
-93107-95614:
+93105-95614:
   # Calibration run
   offset_file_name : "offsets_2011_cycle111b.cal"
   label : "15_2"

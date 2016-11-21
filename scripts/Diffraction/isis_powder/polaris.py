@@ -12,9 +12,6 @@ from isis_powder.routines.RunDetails import RunDetails
 
 class Polaris(AbstractInst):
 
-    _lower_lambda_range = 0.25
-    _upper_lambda_range = 2.50
-
     _focus_crop_start = 2  # These are used when calculating binning range
     _focus_crop_end = 0.95
     _focus_bin_widths = [-0.0050, -0.0010, -0.0010, -0.0010, -0.00050]
@@ -107,8 +104,7 @@ class Polaris(AbstractInst):
 
         efficiency_ws = mantid.Divide(LHSWorkspace=vanadium_ws, RHSWorkspace=solid_angle_ws)
         efficiency_ws = mantid.ConvertUnits(InputWorkspace=efficiency_ws, Target="Wavelength")
-        efficiency_ws = mantid.Integration(InputWorkspace=efficiency_ws,
-                                           RangeLower=self._lower_lambda_range, RangeUpper=self._upper_lambda_range)
+        efficiency_ws = mantid.Integration(InputWorkspace=efficiency_ws)
 
         corrections_ws = mantid.Multiply(LHSWorkspace=solid_angle_ws, RHSWorkspace=efficiency_ws)
         corrections_divisor_ws = mantid.CreateSingleValuedWorkspace(DataValue=str(100000))
