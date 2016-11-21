@@ -367,6 +367,10 @@ void DataProcessorTwoLevelTreeManager::pasteSelected(const std::string &text) {
 void DataProcessorTwoLevelTreeManager::newTable(
     const DataProcessorWhiteList &whitelist) {
 
+  size_t nrows = m_ws->rowCount();
+  for (size_t row = 0; row < nrows; row++)
+    m_ws->removeRow(0);
+
   m_model.reset(new QDataProcessorTwoLevelTreeModel(
       createDefaultWorkspace(whitelist), whitelist));
 }
