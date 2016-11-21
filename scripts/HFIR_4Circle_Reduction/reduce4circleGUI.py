@@ -985,7 +985,7 @@ class MainWindow(QtGui.QMainWindow):
         convert merged workspace in Q-sample frame to HKL frame
         :return:
         """
-        # TODO/NOW/ - TEST: Convert to HKL
+        # TODO/NOW/TEST/ - Convert to HKL
         # get experiment number
         exp_number = int(str(self.ui.lineEdit_exp.text()))
 
@@ -1880,7 +1880,7 @@ class MainWindow(QtGui.QMainWindow):
         Merge several scans to a single MDWorkspace and give suggestion for re-binning
         :return:
         """
-        # TODO/NOW/ISSUE - Test this!
+        # TODO/NOW/TEST/ - merge multiple scans
 
         # find the selected scans
         selected_rows = self.ui.tableWidget_mergeScans.get_selected_rows(True)
@@ -2380,18 +2380,23 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
-        if status is True:
+        if status:
+            # new experiment number
             exp_number = ret_obj[0]
+            # current experiment to be replaced: warning
             curr_exp_number = self._myControl.get_experiment()
             if curr_exp_number is not None and exp_number != curr_exp_number:
                 self.pop_one_button_dialog('Changing experiment to %d.  Clean previous experiment %d\'s result'
                                            ' in Mantid manually.' % (exp_number, curr_exp_number))
+            # set the new experiment number
             self._myControl.set_exp_number(exp_number)
             self.ui.lineEdit_exp.setStyleSheet('color: black')
-
             self.setWindowTitle('%s: Experiment %d' % (self._baseTitle, exp_number))
 
-            # TODO/NOW/ISSUE - if the current data directory is empty or as /HFIR/HB3A/, reset data directory
+            # try to set the default
+            default_data_dir = '/HFIR/HB3A/exp%d/Datafiles' % exp_number
+            if os.path.exists(default_data_dir):
+                self.ui.lineEdit_localSpiceDir.setText(default_data_dir)
 
         else:
             err_msg = ret_obj
@@ -2501,15 +2506,18 @@ class MainWindow(QtGui.QMainWindow):
         """
         home_dir = os.path.expanduser('~')
 
-        # TODO/NOW/ISSUE - make this one work for server-based
+        # TODO/NOW/TEST - make this one work for server-based
         # example: os.path.exists('/HFIR/HB3A/exp322') won't take long time to find out the server is off.
 
         # Data cache directory
-        data_cache_dir = os.path.join(home_dir, 'Temp/HB3ATest')
-        self.ui.lineEdit_localSpiceDir.setText(data_cache_dir)
-        self.ui.lineEdit_localSrcDir.setText(data_cache_dir)
+        project_cache_dir = os.path.join(home_dir, 'Temp/HB3ATest')
+        if os.path.exists('/HFIR/HB3A/'):
+            self.ui.lineEdit_localSrcDir.setText('/HFIR/HB3A/')
+        else:
+            self.ui.lineEdit_localSpiceDir.setText(project_cache_dir)
 
-        work_dir = os.path.join(data_cache_dir, 'Workspace')
+        # working directory
+        work_dir = os.path.join(project_cache_dir, 'Workspace')
         self.ui.lineEdit_workDir.setText(work_dir)
 
         return
@@ -2581,21 +2589,26 @@ class MainWindow(QtGui.QMainWindow):
 
     def do_set_user_detector_center(self):
         """
-
+        set the user-defined detector center
         :return:
         """
-        # TODO/NOW/ISSUE/ Check and doc
-        #         lineEdit_detCenterPixHorizontal, lineEdit_detCenterPixVertical,
-        # pushButton_applyUserDetCenter, lineEdit_infoDetCenter
+        # TODO/NOW/TEST/ - set detector center
 
-        exp_number = int(str(self.ui.lineEdit_exp.text()))
+        # get information
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
+                                                        self.ui.lineEdit_detCenterPixHorizontal,
+                                                        self.ui.lineEdit_detCenterPixVertical],
+                                                       allow_blank=True)
 
-        # TODO/ISSUE/NOW : what if empty string (default) or bad???
-        user_center_row = int(str(self.ui.lineEdit_detCenterPixHorizontal.text()))
-        user_center_col = int(str(self.ui.lineEdit_detCenterPixVertical.text()))
+        if not status:
+            self.pop_one_button_dialog(str(ret_obj))
+            return
+
+        assert isinstance(ret_obj, list) and len(ret_obj) == 3, 'Error!'
+        exp_number, user_center_row, user_center_col = ret_obj
+        assert isinstance(exp_number, int), 'Experiment number must be set up.'
 
         self._myControl.set_detector_center(exp_number, user_center_row, user_center_col)
-
 
         return
 

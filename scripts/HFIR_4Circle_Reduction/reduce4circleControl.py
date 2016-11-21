@@ -1677,7 +1677,9 @@ class CWSCDReductionControl(object):
             # - construct a configuration with 1 scan and multiple Pts.
             scan_info_table_name = get_merge_pt_info_ws_name(exp_no, scan_no)
             try:
-                # TODO/NOW/ISSUE - Shall I think of put new detector center here???
+                # collect HB3A exp info only need corrected detector position to build virtual instrument.
+                # so it is not necessary to specify the detector center now as virtual instrument
+                # is abandoned due to speed issue.
                 mantidsimple.CollectHB3AExperimentInfo(ExperimentNumber=exp_no,
                                                        ScanList='%d' % scan_no,
                                                        PtLists=pt_list_str,
@@ -1783,25 +1785,36 @@ class CWSCDReductionControl(object):
 
     def set_detector_center(self, exp_number, center_row, center_col):
         """
-
+        Set detector center
         :param exp_number:
         :param center_row:
         :param center_col:
         :return:
         """
-        # TODO/NOW/ISSUE - check and doc
+        # check
+        assert isinstance(exp_number, int) and exp_number > 0, 'Experiment number must be integer'
+        assert center_row is None or (isinstance(center_row, int) and center_row >= 0), \
+            'Center row number must either None or non-negative integer.'
+        assert center_col is None or (isinstance(center_col, int) and center_col >= 0), \
+            'Center column number must be either Noe or non-negative integer.'
+
         self._detCenterDict[exp_number] = (center_row, center_col)
 
         return
 
     def set_detector_sample_distance(self, exp_number, sample_det_distance):
         """
-
+        set instrument's detector - sample distance
         :param exp_number:
         :param sample_det_distance:
         :return:
         """
-        # TODO/NOW/ISSUE - check and doc
+        # check
+        assert isinstance(exp_number, int) and exp_number > 0, 'Experiment number must be integer'
+        assert isinstance(sample_det_distance, float) and sample_det_distance > 0, \
+            'Sample - detector distance must be a positive float.'
+
+        # set
         self._detSampleDistanceDict[exp_number] = sample_det_distance
 
         return
@@ -1876,8 +1889,8 @@ class CWSCDReductionControl(object):
             except OSError as os_err:
                 return False, str(os_err)
 
-        # Check whether the target is writable
-        if os.access(local_dir, os.W_OK) is False:
+        # Check whether the target is writable: if and only if the data directory is not from data server
+        if local_dir.startswith('/HFIR/HB3A/') and os.access(local_dir, os.W_OK) is False:
             return False, 'Specified local data directory %s is not writable.' % local_dir
 
         # Successful

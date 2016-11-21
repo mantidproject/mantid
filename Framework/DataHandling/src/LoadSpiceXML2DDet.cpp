@@ -201,15 +201,16 @@ void LoadSpiceXML2DDet::init() {
   declareProperty("PtNumber", 0,
                   "Pt. value for the row to get sample log from. ");
 
-  declareProperty(
-      "ShiftedDetectorDistance", 0.,
-      "Amount of shift of the distance between source and detector centre."
-      "It is used to apply instrument calibration.");
 
   declareProperty("UserSpecifiedWaveLength", EMPTY_DBL(),
                   "User can specify the wave length of the instrument if it is "
                   "drifted from the designed value."
                   "It haappens often.");
+
+  declareProperty(
+      "ShiftedDetectorDistance", 0.,
+      "Amount of shift of the distance between source and detector centre."
+      "It is used to apply instrument calibration.");
 
   declareProperty("DetectorCenterXShift", 0.0, "The amount of shift of "
                                                "detector center along X "
