@@ -35,7 +35,7 @@ g_ads_workaround = {"read_ws": _read_ws_count}
 
 
 def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument, group_names):
-    input_ws = _load_current_normalised_ws(calibration_runs, instrument)
+    input_ws = load_current_normalised_ws(calibration_runs, instrument)
     calibration_d_spacing_ws = mantid.ConvertUnits(InputWorkspace=input_ws, Target="dSpacing")
     mantid.CreateCalFileByNames(InstrumentWorkspace=calibration_d_spacing_ws,
                                 GroupingFileName=out_grouping_file_name, GroupNames=group_names)
@@ -58,7 +58,7 @@ def load_monitor(run_numbers, instrument):
     return load_monitor_ws
 
 
-def load_raw_files(run_number_string, instrument):
+def _load_raw_files(run_number_string, instrument):
     run_number_list = generate_run_numbers(run_number_string=run_number_string)
     instrument.PEARL_setup_input_directories(run_number=run_number_list[0])
     load_raw_ws = _load_sum_file_range(run_number_list, instrument)
@@ -125,10 +125,10 @@ def __run_number_generator(processed_string):
             raise ValueError("The run number " + str(entry) + " is incorrect in calibration mapping")
 
 
-def _load_current_normalised_ws(run_number, instrument):
-    read_in_ws = load_raw_files(run_number_string=run_number, instrument=instrument)
+def load_current_normalised_ws(run_number_string, instrument):
+    read_in_ws = _load_raw_files(run_number_string=run_number_string, instrument=instrument)
 
-    run_information = instrument._get_run_details(run_number_input=run_number)
+    run_information = instrument._get_run_details(run_number=run_number_string)
 
     read_ws = instrument._normalise_ws(ws_to_correct=read_in_ws, run_details=run_information)
 

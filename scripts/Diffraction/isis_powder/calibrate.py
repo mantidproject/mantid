@@ -7,15 +7,15 @@ import isis_powder.common as common
 
 
 def create_van(instrument, van, empty, output_van_file_name, num_of_splines, absorb, gen_absorb):
-    input_van_ws = common._load_current_normalised_ws(run_number=van, instrument=instrument)
-    input_empty_ws = common._load_current_normalised_ws(run_number=empty, instrument=instrument)
+    input_van_ws = common.load_current_normalised_ws(run_number_string=van, instrument=instrument)
+    input_empty_ws = common.load_current_normalised_ws(run_number_string=empty, instrument=instrument)
 
     corrected_van_ws = mantid.Minus(LHSWorkspace=input_van_ws, RHSWorkspace=input_empty_ws)
 
     common.remove_intermediate_workspace(input_empty_ws)
     common.remove_intermediate_workspace(input_van_ws)
 
-    run_details = instrument._get_run_details(run_number_input=van)
+    run_details = instrument._get_run_details(run_number=van)
 
     corrected_van_ws = instrument. _apply_van_calibration_tof_rebinning(vanadium_ws=corrected_van_ws,
                                                                         tof_rebin_pass=1, return_units="TOF")
@@ -39,7 +39,7 @@ def create_van(instrument, van, empty, output_van_file_name, num_of_splines, abs
 
     common.remove_intermediate_workspace(corrected_van_ws)
 
-    cycle_information = instrument._get_run_details(run_number_input=van)
+    cycle_information = instrument._get_run_details(run_number=van)
     splined_ws_list = instrument._spline_background(focused_van_file, num_of_splines,
                                                     cycle_information.instrument_version)
     # Figure out who will provide the path name

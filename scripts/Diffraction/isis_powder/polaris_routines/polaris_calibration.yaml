@@ -15,11 +15,10 @@
 #  solid_angle_file_name : "solid_angle_corrections.nxs"
 #
 
-# NOTE: All of the data below is TEST data - it is not representitive of any actual cycles/data values used 
+# NOTE: All of the data below is TEST data - it is not representitive of any actual cycles/data values used
 
 78334-82415:
   offset_file_name : "offsets_2011_cycle111b.cal"
-  grouping_file_name : "offsets_2011_cycle111b.cal"
   label : "15_2"
   chopper_on:
     vanadium_run_numbers : "78338"
@@ -33,7 +32,6 @@
 93107-95614:
   # Calibration run
   offset_file_name : "offsets_2011_cycle111b.cal"
-  grouping_file_name : "offsets_2011_cycle111b.cal"
   label : "16_4"
   chopper_on:
     vanadium_run_numbers : "95603-95607,95613-95614"

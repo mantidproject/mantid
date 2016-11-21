@@ -82,7 +82,7 @@ class Pearl(AbstractInst):
         van_file_full_path = os.path.join(calibration_dir, van_file)
 
         run_details = RunDetails(calibration_path=calibration_full_path, grouping_path=grouping_full_path,
-                                 vanadium_name=van_file_full_path, run_number=run_number)
+                                 vanadium_runs=van_file_full_path, run_number=run_number)
         run_details.vanadium_absorption = van_absorb_full_path
         run_details.label = cycle
         run_details.instrument_version = instrument_version
@@ -95,15 +95,15 @@ class Pearl(AbstractInst):
     def _get_label_information(self, run_number):
         # TODO remove this when we move to combining CAL/RUN factories
         run_input = ""
-        if not run_number.isdigit():
+        if isinstance(run_number, int) or run_number.isdigit():
+            run_input = int(run_number)
+        else:
             # Only take first valid number as it is probably of the form 12345_12350
             for character in run_number:
                 if character.isdigit():
                     run_input += character
                 else:
                     break
-        else:
-            run_input = run_number
 
         cycle, instrument_version = pearl_cycle_factory.get_cycle_dir(run_input)
 
@@ -125,7 +125,7 @@ class Pearl(AbstractInst):
         return self._run_attenuate_workspace(input_workspace=input_workspace)
 
     def _create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
-        input_ws = common._load_current_normalised_ws(run_number=calibration_runs, instrument=self)
+        input_ws = common.load_current_normalised_ws(run_number_string=calibration_runs, instrument=self)
         cycle_information = self._get_label_information(calibration_runs)
 
         if cycle_information["instrument_version"] == "new" or cycle_information["instrument_version"] == "new2":
@@ -279,7 +279,7 @@ class Pearl(AbstractInst):
 
     def _do_silicon_calibration(self, runs_to_process, cal_file_name, grouping_file_name):
         # TODO fix all of this as the script is too limited to be useful
-        create_si_ws = common._load_current_normalised_ws(run_number=runs_to_process, instrument=self)
+        create_si_ws = common.load_current_normalised_ws(run_number_string=runs_to_process, instrument=self)
         cycle_details = self._get_label_information(runs_to_process)
         instrument_version = cycle_details["instrument_version"]
 

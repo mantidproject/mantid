@@ -28,7 +28,7 @@ class isis_powder_PolarisVanadiumCalTest(stresstesting.MantidStressTest):
     def cleanup(self):
         # TODO clean up reference files properly
         config['datasearch.directories'] = self.existing_config
-        _clean_up()
+        # _clean_up()
 
 
 class isis_powder_PolarisFocusTest(stresstesting.MantidStressTest):
@@ -86,7 +86,7 @@ def _calibration_validation(cls, results):
     ws_to_validate_output_name = "pearl_van_cal_output"
     mantid.LoadNexus(Filename=output_full_path, OutputWorkspace=ws_to_validate_output_name)
 
-    reference_file_name = "POLARIS_PowderDiffVanCalibration.nxs"
+    reference_file_name = "ISIS_Powder-PEARL78338_Van_Cal.nxs"
     return ws_to_validate_output_name, reference_file_name
 
 
@@ -135,4 +135,4 @@ def _get_output_dir():
 
 
 def _get_calibration_dir():
-    return os.path.join(DIRS[0], "POLARIS/test/Cycle_15_2/Calibration")
+    return os.path.join(DIRS[0], "POLARIS/Calibration")

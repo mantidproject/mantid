@@ -47,41 +47,49 @@ class Polaris(AbstractInst):
     def _get_default_group_names(self):
         return self._calibration_grouping_names
 
-    def _get_run_details(self, run_number_input):
-        if self._run_details_last_run_number == run_number_input:
+    def _get_run_details(self, run_number):
+        if self._run_details_last_run_number == run_number:
             return self._run_details_cached_obj
 
-        run_number_list = common.generate_run_numbers(run_number_string=run_number_input)
-        configuration = polaris_calib_parser.get_calibration_dict(run_number=run_number_list[0])
-        calibration_dir = self.calibration_dir
+        input_run_number_list = common.generate_run_numbers(run_number_string=run_number)
+        configuration = polaris_calib_parser.get_calibration_dict(run_number=input_run_number_list[0])
+        cycle = configuration["label"]
+        calibration_dir = os.path.join(self.calibration_dir, cycle)
 
         calibration_full_path = os.path.join(calibration_dir, configuration["offset_file_name"])
-        grouping_full_path = os.path.join(calibration_dir, configuration["grouping_file_name"])
+        grouping_full_path = os.path.join(calibration_dir, configuration["offset_file_name"])
 
         if self._chopper_on:
             chopper_config = configuration["chopper_on"]
         else:
             chopper_config = configuration["chopper_off"]
 
-        vanadium_file = self._generate_inst_file_name(run_number=chopper_config["vanadium_run_numbers"])
-        splined_vanadium = os.path.join(calibration_dir, chopper_config["splined_vanadium_file_name"])
-        solid_angle_file_path = os.path.join(calibration_dir, chopper_config["solid_angle_file_name"])
+        vanadium_runs = chopper_config["vanadium_run_numbers"]
+        solid_angle_file_name = "SAC_" + vanadium_runs + '_' + chopper_config["solid_angle_file_name"]
+        solid_angle_file_path = os.path.join(calibration_dir, solid_angle_file_name)
+        splined_vanadium_name = "SVan_" + vanadium_runs + '_' + chopper_config["splined_vanadium_file_name"]
+        splined_vanadium = os.path.join(calibration_dir, splined_vanadium_name)
 
         calibration_details = RunDetails(calibration_path=calibration_full_path, grouping_path=grouping_full_path,
-                                         vanadium_name=vanadium_file, run_number=run_number_input)
-        calibration_details.label = configuration["label"]
+                                         vanadium_runs=vanadium_runs, run_number=run_number)
+        calibration_details.label = cycle
         calibration_details.splined_vanadium = splined_vanadium
         calibration_details.solid_angle_corr = solid_angle_file_path
 
         # Hold obj in case same run range is requested
-        self._run_details_last_run_number = run_number_input
+        self._run_details_last_run_number = run_number
         self._run_details_cached_obj = calibration_details
 
         return calibration_details
 
     @staticmethod
     def _generate_inst_file_name(run_number):
-        return "POL" + str(run_number)  # TODO check this is correct
+        if isinstance(run_number, list):
+            for val in run_number:
+                val = "POL" + str(val)
+            return run_number
+        else:
+            return "POL" + str(run_number)
 
     @staticmethod
     def _get_instrument_alg_save_ranges(instrument=''):
@@ -146,19 +154,19 @@ class Polaris(AbstractInst):
 
     def generate_solid_angle_corrections(self, run_details, vanadium_number):
         if vanadium_number:
-            solid_angle_vanadium_ws = common.load_raw_files(run_number_string=vanadium_number, instrument=self)
+            solid_angle_vanadium_ws = common.load_current_normalised_ws(run_number_string=vanadium_number,
+                                                                        instrument=self)
         elif run_details:
-            solid_angle_vanadium_ws = mantid.Load(Filename=run_details.vanadium)
+            solid_angle_vanadium_ws = common.load_current_normalised_ws(run_number_string=run_details.vanadium,
+                                                                        instrument=self)
         else:
-            raise RuntimeError("Got no run_details of vanadium_number in gen solid angle corrections")
-        normalised_vanadium_ws = self._normalise_ws(solid_angle_vanadium_ws)
-        corrections = self._calculate_solid_angle_efficiency_corrections(normalised_vanadium_ws)
+            raise RuntimeError("Got no run_details or vanadium_number in gen solid angle corrections")
 
+        corrections = self._calculate_solid_angle_efficiency_corrections(solid_angle_vanadium_ws)
         if run_details:
             mantid.SaveNexusProcessed(InputWorkspace=corrections, Filename=run_details.solid_angle_corr)
 
         common.remove_intermediate_workspace(solid_angle_vanadium_ws)
-        common.remove_intermediate_workspace(normalised_vanadium_ws)
         return corrections
 
     def correct_sample_vanadium(self, focused_ws, index, vanadium_ws=None):
