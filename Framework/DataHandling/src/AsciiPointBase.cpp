@@ -33,13 +33,6 @@ void AsciiPointBase::init() {
                                                     FileProperty::Save, ext()),
                   "The filename of the output file.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("comma");
-  propOptions.push_back("space");
-  propOptions.push_back("tab");
-  declareProperty("Separator", "tab",
-                  boost::make_shared<StringListValidator>(propOptions),
-                  "The separator used for splitting data columns.");
   extraProps();
 }
 
@@ -142,6 +135,18 @@ void AsciiPointBase::outputval(double val, std::ofstream &file,
     // not a number - output nan
     file << "nan";
   }
+}
+
+/** appends the separator property to the algorithm
+ */
+void AsciiPointBase::appendSeparatorProperty() {
+  std::vector<std::string> propOptions;
+  propOptions.push_back("comma");
+  propOptions.push_back("space");
+  propOptions.push_back("tab");
+  declareProperty("Separator", "tab",
+    boost::make_shared<StringListValidator>(propOptions),
+    "The separator used for splitting data columns.");
 }
 } // namespace DataHandling
 } // namespace Mantid
