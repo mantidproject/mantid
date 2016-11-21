@@ -523,7 +523,7 @@ class ReconstructionCommand(object):
                 data[idx] = scipy.ndimage.median_filter(data[idx], cfg.median_filter_size, mode='mirror')
                 #, mode='nearest')
             print(" * Finished noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
-                   format(data.dtype, cfg.median_filter_size))
+                  format(data.dtype, cfg.median_filter_size))
         else:
             print(" * Note: not applying noise filter /median.")
 
@@ -554,7 +554,7 @@ class ReconstructionCommand(object):
             dark = self._rotate_imgs(dark, cfg)
 
         print(" * Finished rotation step ({0} degrees clockwise), with pixel data type: {1}".
-               format(cfg.rotation * 90, data.dtype))
+              format(cfg.rotation * 90, data.dtype))
 
         return (data, white, dark)
 
@@ -613,7 +613,15 @@ class ReconstructionCommand(object):
                 tomopy = tti.import_tomo_tool('tomopy')
                 print("proj_data: ", proj_data.shape)
                 print("proj_angles: ", proj_angles.shape)
-                tomopy_cor = tomopy.find_center(tomo=proj_data, theta=proj_angles, ind=slice_idx, emission=False)
+                # Temporary fix to support newer tomopy reconstructions,
+                # this does not guarantee that their output will be correct,
+                # but only patches the removal of the emission keyword and allows the recon to run
+                if(int(tomopy.__version__[0]) < 1):
+                    # for tomopy versions 0.x.x
+                    tomopy_cor = tomopy.find_center(tomo=proj_data, theta=proj_angles, ind=slice_idx, emission=False)
+                else:
+                    # for tomopy versions 1.x.x
+                    tomopy_cor = tomopy.find_center(tomo=proj_data, theta=proj_angles, ind=slice_idx)
                 if not preproc_cfg.cor:
                     preproc_cfg.cor = tomopy_cor
                 print(" > Center of rotation found by tomopy.find_center:  {0}".format(tomopy_cor))
@@ -814,7 +822,7 @@ class ReconstructionCommand(object):
         if cfg.median_filter_size and cfg.median_filter_size > 1:
             recon_data = scipy.ndimage.median_filter(recon_data, cfg.median_filter_size)
             print(" * Applied median_filter on reconstructed volume, with filtersize: {0}".
-                   format(cfg.median_filter_size))
+                  format(cfg.median_filter_size))
         else:
             print(" * Note: not applied median_filter on reconstructed volume")
 
