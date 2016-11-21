@@ -12,8 +12,8 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
-// Qt classes forward declarations
-class QMutex;
+// Include instead of forward declare so we have definition of qint64
+#include <QMutex>
 
 namespace MantidQt {
 namespace CustomInterfaces {

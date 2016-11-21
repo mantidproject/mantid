@@ -609,7 +609,7 @@ void TomographyIfacePresenter::prepareThreadAndRunLocalReconstruction(
 
 void TomographyIfacePresenter::addProcessToJobList() {
   auto *worker = qobject_cast<TomographyProcess *>(sender());
-  auto pid = worker->getPID();
+  qint64 pid = worker->getPID();
   auto runnable = worker->getRunnable();
   auto args = worker->getArgs();
 

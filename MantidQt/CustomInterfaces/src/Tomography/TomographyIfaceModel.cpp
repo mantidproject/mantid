@@ -9,8 +9,6 @@
 
 #include <Poco/Path.h>
 
-#include <QMutex>
-
 #ifndef _WIN32
 // This is exclusively for kill/waitpid (interim solution, see below)
 #include <signal.h>
@@ -636,7 +634,7 @@ void TomographyIfaceModel::checkDataPathsSet() const {
  */
 bool TomographyIfaceModel::processIsRunning(qint64 pid) {
 #ifdef _WIN32
-  HANDLE handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+  HANDLE handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, static_cast<int>(pid));
   DWORD code;
   BOOL rc = GetExitCodeProcess(handle, &code);
   CloseHandle(handle);
@@ -645,7 +643,7 @@ bool TomographyIfaceModel::processIsRunning(qint64 pid) {
   // zombie/defunct processes
   while (waitpid(-1, 0, WNOHANG) > 0) {
   }
-  return (0 == kill(pid, 0));
+  return (0 == kill(static_cast<int>(pid), 0));
 #endif
   // return Poco::Process::isRunning(pid);
 }
