@@ -52,36 +52,32 @@ def load_monitor(run_numbers, instrument):
         load_monitor_ws = mantid.Load(Filename=file_name, LoadLogFiles="0",
                                       SpectrumMin=monitor_spectra, SpectrumMax=monitor_spectra)
     else:
-        load_monitor_ws = _load_sum_file_range(run_numbers=number_list, instrument=instrument)
+        load_monitor_ws = _load_sum_file_range(run_numbers_list=number_list, instrument=instrument)
         load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=load_monitor_ws, WorkspaceIndex=monitor_spectra)
 
     return load_monitor_ws
 
 
-def _load_raw_files(run_number, instrument):
-    run_number_list = generate_run_numbers(run_number_string=run_number)
+def load_raw_files(run_number_string, instrument):
+    run_number_list = generate_run_numbers(run_number_string=run_number_string)
     instrument.PEARL_setup_input_directories(run_number=run_number_list[0])
-    if len(run_number_list) == 1:
-        run_number = instrument._generate_inst_file_name(run_number=run_number_list[0])
-        load_raw_ws = mantid.Load(Filename=run_number, LoadLogFiles="0")
-    else:
-        load_raw_ws = _load_sum_file_range(run_number_list, instrument)
+    load_raw_ws = _load_sum_file_range(run_number_list, instrument)
     return load_raw_ws
 
 
-def _load_sum_file_range(run_numbers, instrument):
+def _load_sum_file_range(run_numbers_list, instrument):
     read_ws_list = []
-    for run_number in run_numbers:
+
+    _check_load_range(list_of_runs_to_load=run_numbers_list)
+
+    for run_number in run_numbers_list:
         file_name = instrument._generate_inst_file_name(run_number=run_number)
         read_ws = mantid.Load(Filename=file_name, LoadLogFiles="0")
-        output_name = "read_ws_output-" + str(g_ads_workaround["read_ws"])
-        g_ads_workaround["read_ws"] += 1
-        read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=output_name))
+        read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=str(file_name)))
 
     # Sum all workspaces
     out_ws_name = "summed_range_load-" + str(g_ads_workaround["read_ws"])
     g_ads_workaround["read_ws"] += 1
-
     summed_ws = mantid.RenameWorkspace(InputWorkspace=read_ws_list[0], OutputWorkspace=out_ws_name)
     for ws in read_ws_list[1:]:  # Skip first member
         summed_ws = mantid.Plus(LHSWorkspace=summed_ws, RHSWorkspace=ws, OutputWorkspace=out_ws_name)
@@ -90,20 +86,47 @@ def _load_sum_file_range(run_numbers, instrument):
     return summed_ws
 
 
+def _check_load_range(list_of_runs_to_load):
+    MAXIMUM_RANGE_LEN = 20  # If more than this number of runs is entered probably wrong
+    if len(list_of_runs_to_load) > MAXIMUM_RANGE_LEN:
+        raise ValueError("More than " + str(MAXIMUM_RANGE_LEN) + " runs were selected."
+                         " Found " + str(len(list_of_runs_to_load)) + " Aborting.")
+
+
 def generate_run_numbers(run_number_string):
+
     # Check its not a single run
     if isinstance(run_number_string, int) or run_number_string.isdigit():
         return [int(run_number_string)]  # Cast into a list and return
 
     # If its a string we must parse it
+    run_number_string = run_number_string.strip()
     run_boundaries = run_number_string.replace('_', '-')  # Accept either _ or - delimiters
-    run_boundaries = run_boundaries.split("-")
-    run_range = xrange(int(run_boundaries[0]), int(run_boundaries[-1]) + 1)  # TODO test for skip conditions
-    return run_range
+    run_range_lists = __run_number_generator(processed_string=run_boundaries)
+    out_range = []
+    for range_list in run_range_lists:
+        out_range.extend(range_list)
+
+    return out_range
+
+
+def __run_number_generator(processed_string):
+    # Expands run numbers of the form 1-10, 12, 14-20, 23 to 1,2,3,..,8,9,10,12,14,15,16...,19,20,23
+    for entry in processed_string.split(','):
+        # Split between comma separated values
+        numbers = entry.split('-')
+        # Check if we are using a dash separator and return the range between those values
+        if len(numbers) == 1:
+            yield list(numbers)
+        elif len(numbers) == 2:
+            # Add 1 so it includes the final number '-' range
+            yield range(int(numbers[0]), int(numbers[-1]) + 1)
+        else:
+            raise ValueError("The run number " + str(entry) + " is incorrect in calibration mapping")
 
 
 def _load_current_normalised_ws(run_number, instrument):
-    read_in_ws = _load_raw_files(run_number=run_number, instrument=instrument)
+    read_in_ws = load_raw_files(run_number_string=run_number, instrument=instrument)
 
     run_information = instrument._get_run_details(run_number_input=run_number)
 

@@ -1,5 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
-from six.moves import xrange
+import isis_powder.common
 
 import os
 import yaml
@@ -52,27 +52,9 @@ def _check_if_run_is_exception(config_handle, run_number):
 def _find_dictionary_key(dict_to_search, run_number):
 
     for key in dict_to_search:
-        run_generator = _parse_number_key(input_string=key)
-        for run_list in run_generator:
-            if run_number in run_list:
-                return key
+        generated_runs = isis_powder.common.generate_run_numbers(run_number_string=key)
+        if run_number in generated_runs:
+            return key
 
     return None
 
-
-def _parse_number_key(input_string):
-    # Expands run numbers of the form 1-10, 12, 14-20, 23 to 1,2,3,..,8,9,10,12,14,15,16...,19,20,23
-
-    string_to_parse = str(input_string).strip()
-
-    for entry in string_to_parse.split(','):
-        # Split between comma separated values
-        numbers = entry.split('-')
-        # Check if we are using a dash separator and return the range between those values
-        if len(numbers) == 1:
-            yield numbers
-        elif len(numbers) == 2:
-            # Add 1 so it includes the final number '-' range
-            yield xrange(int(numbers[0]), int(numbers[-1]) + 1)
-        else:
-            raise ValueError("The run number " + str(entry) + " is incorrect in calibration mapping")

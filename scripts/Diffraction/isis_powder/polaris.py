@@ -63,7 +63,7 @@ class Polaris(AbstractInst):
         else:
             chopper_config = configuration["chopper_off"]
 
-        vanadium_file = self._generate_inst_file_name(run_number=chopper_config["vanadium_file_name"])
+        vanadium_file = self._generate_inst_file_name(run_number=chopper_config["vanadium_run_numbers"])
         splined_vanadium = os.path.join(calibration_dir, chopper_config["splined_vanadium_file_name"])
         solid_angle_file_path = os.path.join(calibration_dir, chopper_config["solid_angle_file_name"])
 
@@ -146,7 +146,7 @@ class Polaris(AbstractInst):
 
     def generate_solid_angle_corrections(self, run_details, vanadium_number):
         if vanadium_number:
-            solid_angle_vanadium_ws = common._load_raw_files(run_number_list=vanadium_number, instrument=self)
+            solid_angle_vanadium_ws = common.load_raw_files(run_number_string=vanadium_number, instrument=self)
         elif run_details:
             solid_angle_vanadium_ws = mantid.Load(Filename=run_details.vanadium)
         else:
@@ -229,10 +229,7 @@ class Polaris(AbstractInst):
             sample_data = sample.readX(i)
             starting_bin = _calculate_focus_bin_first_edge(bin_value=sample_data[0], crop_value=self._focus_crop_start)
             ending_bin = _calculate_focus_bin_last_edge(bin_value=sample_data[-1], crop_value=self._focus_crop_end)
-            bin_width = _calculate_focus_bin_width(sample_data)
-
-            if bin_width > self._focus_bin_widths[i]:
-                bin_width = self._focus_bin_widths[i]
+            bin_width = self._focus_bin_widths[i]
 
             bank_binning_params = [str(starting_bin), str(bin_width), str(ending_bin)]
             calculated_binning_params.append(bank_binning_params)
@@ -335,20 +332,6 @@ def _calculate_focus_bin_first_edge(bin_value, crop_value):
 
 def _calculate_focus_bin_last_edge(bin_value, crop_value):
     return bin_value * crop_value
-
-
-def _calculate_focus_bin_width(bin_data):
-    first_val = bin_data[0]
-    last_val = bin_data[-1]
-    number_of_bins = len(bin_data) - 1
-
-    bin_delta = last_val / first_val
-    delta_logarithm = math.log(bin_delta)
-    avg_delta = delta_logarithm / number_of_bins
-
-    rebin_width = math.exp(avg_delta) - 1
-    rebin_width = -1 * math.fabs(rebin_width)
-    return rebin_width
 
 
 def _create_d_spacing_tof_output(processed_spectra):
