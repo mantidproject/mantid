@@ -1,7 +1,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflSaveTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSaveTabPresenter.h"
 
-#include <boost/algorithm/string.hpp> 
+#include <boost/algorithm/string.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {

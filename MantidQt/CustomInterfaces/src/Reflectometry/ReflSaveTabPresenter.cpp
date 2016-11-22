@@ -24,7 +24,7 @@ ReflSaveTabPresenter::ReflSaveTabPresenter(IReflSaveTabView *view)
     : m_view(view), m_mainPresenter() {
 
   m_saveAlgs = {"SaveReflCustomAscii", "SaveReflThreeColumnAscii",
-              "SaveANSTOAscii", "SaveILLCosmosAscii"};
+                "SaveANSTOAscii", "SaveILLCosmosAscii"};
   m_saveExts = {".dat", ".dat", ".txt", ".mft"};
 }
 
