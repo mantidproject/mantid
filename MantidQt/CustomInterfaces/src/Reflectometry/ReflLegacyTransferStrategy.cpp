@@ -61,7 +61,9 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
     // If there isn't a group for this description (ignoring differences in
     // theta) yet, make one
     if (groupsByDesc[cleanDesc].empty())
-      groupsByDesc[cleanDesc] = boost::lexical_cast<std::string>(nextGroupId++);
+      groupsByDesc[cleanDesc] =
+          boost::lexical_cast<std::string>(nextGroupId++) + " - " +
+          desc.substr(0, desc.find("th") - 1);
 
     // Assign this description to the group it belongs to
     groupsByDesc[desc] = groupsByDesc[cleanDesc];
