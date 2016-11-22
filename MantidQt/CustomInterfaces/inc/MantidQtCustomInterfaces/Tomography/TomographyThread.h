@@ -34,27 +34,27 @@ public:
       : QThread(parent) {
     // interactions between the thread and the worker are defined here
     connect(this, SIGNAL(started()), worker, SLOT(startWorker()));
+
     connect(worker, SIGNAL(readyReadStandardOutput()), this,
             SLOT(readWorkerStdOut()));
     connect(worker, SIGNAL(readyReadStandardError()), this,
             SLOT(readWorkerStdErr()));
 
-    // not a valid signal?? why
     connect(worker, SIGNAL(finished(int)), this, SLOT(workerFinished(int)));
 
+    // make sure we know who the worker is
     connect(this, SIGNAL(finished()), this, SLOT(deleteLater()),
             Qt::DirectConnection);
+
     worker->moveToThread(this);
+    m_worker = worker;
   }
 
-  ~TomographyThread() { delete m_worker; }
-
 public slots:
-
   void workerFinished(int exitCode) {
-    // do stuff
-    std::cout << "Worker called finished()\n";
-    emit finished();
+    // queue up object deletion
+    m_worker->deleteLater();
+    emit workerFinished();
   }
 
   void readWorkerStdOut() const {
@@ -70,6 +70,7 @@ public slots:
   }
 
 signals:
+  void workerFinished();
   void stdOutReady(const QString &s) const;
   void stdErrReady(const QString &s) const;
 

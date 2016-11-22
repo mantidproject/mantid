@@ -568,7 +568,7 @@ void TomographyIfacePresenter::processRunRecon() {
 
     m_model->prepareSubmissionArguments(local, runnable, args, allOpts);
     if (local) {
-      prepareThreadAndRunLocalReconstruction(runnable, args, allOpts);
+      setupAndRunLocalReconstruction(runnable, args, allOpts);
     } else {
       // get the actual compute resource name
       const std::string computingResouce = m_view->currentComputeResource();
@@ -584,11 +584,10 @@ void TomographyIfacePresenter::processRunRecon() {
   processRefreshJobs();
 }
 
-void TomographyIfacePresenter::prepareThreadAndRunLocalReconstruction(
+void TomographyIfacePresenter::setupAndRunLocalReconstruction(
     const std::string &runnable, const std::vector<std::string> &args,
     const std::string &allOpts) {
 
-  QMutexLocker lockit(m_processStartMutex);
   if (m_reconRunning) {
     auto result = m_view->userConfirmation(
         "Reconstruction is RUNNING",
@@ -601,6 +600,7 @@ void TomographyIfacePresenter::prepareThreadAndRunLocalReconstruction(
     }
   }
 
+  // TODO dont create a new thread each time, just run the new process
   m_workerThread.reset();
   auto *worker = new MantidQt::CustomInterfaces::TomographyProcess();
   m_workerThread = Mantid::Kernel::make_unique<TomographyThread>(this, worker);
@@ -613,15 +613,19 @@ void TomographyIfacePresenter::prepareThreadAndRunLocalReconstruction(
   connect(m_workerThread.get(), SIGNAL(stdErrReady(QString)), this,
           SLOT(readWorkerStdErr(QString)));
 
+  // remove the user confirmation for running recon, if the recon has finished
+  connect(m_workerThread.get(), SIGNAL(workerFinished()), this,
+          SLOT(workerFinished()));
+
   connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
-  // connect(worker, SIGNAL(terminated()), worker, SLOT(deleteLater()),
-  //         Qt::DirectConnection);
-  // connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()),
-  //         Qt::DirectConnection);
 
   m_model->doLocalRunReconstructionJob(runnable, args, allOpts, *m_workerThread,
                                        *worker);
   m_reconRunning = true;
+}
+
+void TomographyIfacePresenter::workerFinished() {
+  m_reconRunning = false;
 }
 
 /** Simply reset the boolean that tracks if a recon is running
@@ -630,11 +634,6 @@ void TomographyIfacePresenter::reconProcessFailedToStart() {
   m_view->userError("Reconstruction failed to start",
                     "The reconstruction process has encountered an error and "
                     "has failed to start.");
-}
-/** Simply reset the boolean that tracks if a recon is running
-*/
-void TomographyIfacePresenter::resetRunningReconPrompt(int exitCode) {
-  m_reconRunning = false;
 }
 
 void TomographyIfacePresenter::addProcessToJobList() {

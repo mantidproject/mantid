@@ -107,14 +107,13 @@ protected slots:
   void readWorkerStdOut(const QString &s);
   void readWorkerStdErr(const QString &s);
   void addProcessToJobList();
-  void resetRunningReconPrompt(int exitCode);
   void reconProcessFailedToStart();
+  void workerFinished();
 
 private:
-  void
-  prepareThreadAndRunLocalReconstruction(const std::string &runnable,
-                                         const std::vector<std::string> &args,
-                                         const std::string &allOpts);
+  void setupAndRunLocalReconstruction(const std::string &runnable,
+                                      const std::vector<std::string> &args,
+                                      const std::string &allOpts);
   /// creates the correct dialog pointer and sets it to the member variable
   void createConfigDialogUsingToolName(const std::string &toolName);
 

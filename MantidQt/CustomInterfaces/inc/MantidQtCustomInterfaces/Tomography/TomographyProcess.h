@@ -59,12 +59,16 @@ public:
   }
 
 public slots:
+  /** This method should be used to start the worker as it passes the setup
+   * runnable and args parameters into the base start method
+  */
   void startWorker() { start(m_runnable, m_args); }
 
 private:
   QStringList
   constructArgumentsFromVector(const std::vector<std::string> &args) const {
     QStringList list;
+    list.reserve(static_cast<int>(args.size()));
 
     for (auto &arg : args) {
       list << QString::fromStdString(arg);
