@@ -39,7 +39,7 @@ public:
     Run &run = ws->mutableRun();
     // Do we have all we expect
     const std::vector<Property *> &logs = run.getLogData();
-    TS_ASSERT_EQUALS(logs.size(), 74);
+    TS_ASSERT_EQUALS(logs.size(), 75);
     Property *prop;
     TimeSeriesProperty<double> *dProp;
 
@@ -84,7 +84,7 @@ public:
     const API::Run &run = testWS->run();
     const std::vector<Property *> &logs = run.getLogData();
     TS_ASSERT_EQUALS(logs.size(),
-                     34); // 33 logs in file + 1 synthetic nperiods log
+                     35); // 34 logs in file + 1 synthetic nperiods log
 
     TimeSeriesProperty<std::string> *slog =
         dynamic_cast<TimeSeriesProperty<std::string> *>(
