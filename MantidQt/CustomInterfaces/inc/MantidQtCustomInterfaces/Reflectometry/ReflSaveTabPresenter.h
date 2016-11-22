@@ -69,9 +69,9 @@ private:
   /// The main presenter
   IReflMainWindowPresenter *m_mainPresenter;
   /// Names of possible save algorithms
-  std::vector<std::string> saveAlgs;
+  std::vector<std::string> m_saveAlgs;
   /// Extensions used for each save algorithm
-  std::vector<std::string> saveExts;
+  std::vector<std::string> m_saveExts;
 };
 }
 }

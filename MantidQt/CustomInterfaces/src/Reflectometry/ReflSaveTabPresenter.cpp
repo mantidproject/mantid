@@ -23,9 +23,9 @@ using namespace Mantid::API;
 ReflSaveTabPresenter::ReflSaveTabPresenter(IReflSaveTabView *view)
     : m_view(view), m_mainPresenter() {
 
-  saveAlgs = {"SaveReflCustomAscii", "SaveReflThreeColumnAscii",
+  m_saveAlgs = {"SaveReflCustomAscii", "SaveReflThreeColumnAscii",
               "SaveANSTOAscii", "SaveILLCosmosAscii"};
-  saveExts = {".dat", ".dat", ".txt", ".mft"};
+  m_saveExts = {".dat", ".dat", ".txt", ".mft"};
 }
 
 /** Destructor
@@ -156,8 +156,8 @@ void ReflSaveTabPresenter::saveWorkspaces() {
   std::string separator = m_view->getSeparator();
   std::string prefix = m_view->getPrefix();
   int formatIndex = m_view->getFileFormatIndex();
-  std::string algName = saveAlgs[formatIndex];
-  std::string extension = saveExts[formatIndex];
+  std::string algName = m_saveAlgs[formatIndex];
+  std::string extension = m_saveExts[formatIndex];
   IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create(algName);
 
   for (int i = 0; i < wsNames.size(); i++) {
