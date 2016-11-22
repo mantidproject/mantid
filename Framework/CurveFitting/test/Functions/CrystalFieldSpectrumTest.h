@@ -615,42 +615,41 @@ public:
 
   void test_change_number_of_fixed_params() {
 
-      std::string funDef =
-          "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,"
-          "Temperature=44,FWHM=1.0,B20=0.37737,B22=3.977,"
-          "B40=-0.031787,B42=-0.11611,B44=-0.12544, "
-          "ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,BmolY=0,BmolZ=0,"
-          "BextX=0,BextY=0,BextZ=0,f2.FWHM=2.1);"
-          "name=CrystalFieldSpectrum,Ion=Pr,Symmetry=C2v,"
-          "Temperature=44,FWHM=1.0,B20=0.37737,B22=3.977,"
-          "B40=-0.031787,B42=-0.11611,B44=-0.12544, "
-          "ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,BmolY=0,BmolZ=0,"
-          "BextX=0,BextY=0,BextZ=0)";
-      auto fun = FunctionFactory::Instance().createInitialized(funDef);
-      auto ws = createWorkspace(*fun, -20, 170, 100);
+    std::string funDef =
+        "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,"
+        "Temperature=44,FWHM=1.0,B20=0.37737,B22=3.977,"
+        "B40=-0.031787,B42=-0.11611,B44=-0.12544, "
+        "ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,BmolY=0,BmolZ=0,"
+        "BextX=0,BextY=0,BextZ=0,f2.FWHM=2.1);"
+        "name=CrystalFieldSpectrum,Ion=Pr,Symmetry=C2v,"
+        "Temperature=44,FWHM=1.0,B20=0.37737,B22=3.977,"
+        "B40=-0.031787,B42=-0.11611,B44=-0.12544, "
+        "ties=(B60=0,B62=0,B64=0,B66=0,BmolX=0,BmolY=0,BmolZ=0,"
+        "BextX=0,BextY=0,BextZ=0)";
+    auto fun = FunctionFactory::Instance().createInitialized(funDef);
+    auto ws = createWorkspace(*fun, -20, 170, 100);
 
-      funDef = "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,Temperature=44.0,"
-               "ToleranceEnergy=1e-10,ToleranceIntensity=0.1,PeakShape="
-               "Lorentzian,FWHM=1.1,B44=-0.125,B40=-0.03,B42=-0.116,ties=(IB63="
-               "0,IB62=0,IB61=0,IB66=0,IB65=0,IB64=0,IB41=0,IB43=0,IB42=0,IB44="
-               "0,B22=3.977,B21=0,B20=0.37737,IB22=0,IB21=0,BextX=0,BextY=0,"
-               "BextZ=0,B66=0,B63=0,B62=0,B61=0,B60=0,B41=0,B43=0,B65=0,B64=0,"
-               "BmolZ=0,BmolY=0,BmolX=0);name=CrystalFieldSpectrum,Ion=Pr,"
-               "Symmetry=C2v,Temperature=44.0,ToleranceEnergy=1.0,"
-               "ToleranceIntensity=6.0,PeakShape=Lorentzian,FWHM=1.1,B44=-0."
-               "125,B40=-0.03,B42=-0.116,ties=(IB63=0,IB62=0,IB61=0,IB66=0,"
-               "IB65=0,IB64=0,IB41=0,IB43=0,IB42=0,IB44=0,B22=3.977,B21=0,B20="
-               "0.37737,IB22=0,IB21=0,BextX=0,BextY=0,BextZ=0,B66=0,B63=0,B62="
-               "0,B61=0,B60=0,B41=0,B43=0,B65=0,B64=0,BmolZ=0,BmolY=0,BmolX=0)";
-      fun = FunctionFactory::Instance().createInitialized(funDef);
-      auto fit = AlgorithmFactory::Instance().create("Fit", -1);
-      fit->setRethrows(true);
-      fit->initialize();
-      fit->setProperty("Function", fun);
-      fit->setProperty("InputWorkspace", ws);
-      fit->setProperty("Output", "out");
-      TS_ASSERT_THROWS_NOTHING(fit->execute());
-
+    funDef = "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,Temperature=44.0,"
+             "ToleranceEnergy=1e-10,ToleranceIntensity=0.1,PeakShape="
+             "Lorentzian,FWHM=1.1,B44=-0.125,B40=-0.03,B42=-0.116,ties=(IB63="
+             "0,IB62=0,IB61=0,IB66=0,IB65=0,IB64=0,IB41=0,IB43=0,IB42=0,IB44="
+             "0,B22=3.977,B21=0,B20=0.37737,IB22=0,IB21=0,BextX=0,BextY=0,"
+             "BextZ=0,B66=0,B63=0,B62=0,B61=0,B60=0,B41=0,B43=0,B65=0,B64=0,"
+             "BmolZ=0,BmolY=0,BmolX=0);name=CrystalFieldSpectrum,Ion=Pr,"
+             "Symmetry=C2v,Temperature=44.0,ToleranceEnergy=1.0,"
+             "ToleranceIntensity=6.0,PeakShape=Lorentzian,FWHM=1.1,B44=-0."
+             "125,B40=-0.03,B42=-0.116,ties=(IB63=0,IB62=0,IB61=0,IB66=0,"
+             "IB65=0,IB64=0,IB41=0,IB43=0,IB42=0,IB44=0,B22=3.977,B21=0,B20="
+             "0.37737,IB22=0,IB21=0,BextX=0,BextY=0,BextZ=0,B66=0,B63=0,B62="
+             "0,B61=0,B60=0,B41=0,B43=0,B65=0,B64=0,BmolZ=0,BmolY=0,BmolX=0)";
+    fun = FunctionFactory::Instance().createInitialized(funDef);
+    auto fit = AlgorithmFactory::Instance().create("Fit", -1);
+    fit->setRethrows(true);
+    fit->initialize();
+    fit->setProperty("Function", fun);
+    fit->setProperty("InputWorkspace", ws);
+    fit->setProperty("Output", "out");
+    TS_ASSERT_THROWS_NOTHING(fit->execute());
   }
 
 private:
