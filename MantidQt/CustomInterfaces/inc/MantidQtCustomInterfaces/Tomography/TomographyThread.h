@@ -52,6 +52,7 @@ public:
 
 public slots:
   void workerFinished(int exitCode) {
+    UNUSED_ARG(exitCode);
     // queue up object deletion
     m_worker->deleteLater();
     emit workerFinished();
