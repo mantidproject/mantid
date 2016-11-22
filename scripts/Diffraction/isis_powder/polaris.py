@@ -17,21 +17,28 @@ class Polaris(AbstractInst):
     _focus_bin_widths = [-0.0050, -0.0010, -0.0010, -0.0010, -0.00050]
 
     _calibration_grouping_names = None
+    _masking_file_name = "VanaPeaks.dat"
 
     _number_of_banks = 5
 
-    def __init__(self, user_name, chopper_on, calibration_dir=None, output_dir=None,
-                 input_file_ext=".raw"):
+    def __init__(self, user_name, chopper_on, calibration_dir=None, output_dir=None, **kwargs):
 
         super(Polaris, self).__init__(user_name=user_name, calibration_dir=calibration_dir,
-                                      output_dir=output_dir, default_input_ext=input_file_ext)
+                                      output_dir=output_dir, kwargs=kwargs)
 
-        self._chopper_on = chopper_on
-        self._masking_file_name = "VanaPeaks.dat"
+        self._chopper_on = kwargs.get("chopper_on")
 
         # Caches the last dictionary to avoid us having to keep parsing the YAML
         self._run_details_last_run_number = None
         self._run_details_cached_obj = None
+
+        # Properties set in later calls:
+        self._apply_solid_angle = None
+
+    def focus(self, run_number, apply_solid_angle=True, do_attenuation=True, do_van_normalisation=True):
+        self._apply_solid_angle = apply_solid_angle
+        return self._focus(run_number=run_number, do_attenuation=do_attenuation,
+                           do_van_normalisation=do_van_normalisation)
 
     # Abstract implementation
     def _get_lambda_range(self):

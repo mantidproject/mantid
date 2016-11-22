@@ -15,16 +15,16 @@ from isis_powder.routines import calibrate, focus, common
 
 @add_metaclass(ABCMeta)
 class AbstractInst(object):
-    def __init__(self, user_name=None, calibration_dir=None, output_dir=None,
-                 default_input_ext=".raw"):
+    def __init__(self, user_name=None, calibration_dir=None, output_dir=None, **kwargs):
         # ----- Properties common to ALL instruments -------- #
         if user_name is None:
             raise ValueError("A user name must be specified")
         self._user_name = user_name
         self._calibration_dir = calibration_dir
         self._output_dir = output_dir
-        self._default_input_ext = _prefix_dot_to_ext(default_input_ext)
-        self._focus_mode = None
+
+        # Advanced settings
+        self._default_input_ext = _prefix_dot_to_ext(kwargs.get("default_input_ext", '.raw'))
 
     @property
     def calibration_dir(self):
@@ -57,9 +57,7 @@ class AbstractInst(object):
     # --- Public API ---- #
 
     # Script entry points
-    def focus(self, run_number, focus_mode=None, do_attenuation=True, do_van_normalisation=True):
-        self._focus_mode = focus_mode
-
+    def _focus(self, run_number, do_attenuation, do_van_normalisation):
         return focus.focus(instrument=self, number=run_number,
                            attenuate=do_attenuation, van_norm=do_van_normalisation)
 

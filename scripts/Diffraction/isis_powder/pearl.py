@@ -26,13 +26,13 @@ class Pearl(AbstractInst):
     _create_van_first_tof_binning = "100,-0.0006,19990"
     _create_van_second_tof_binning = "150,-0.0006,19900"
 
-    def __init__(self, user_name=None, calibration_dir=None, output_dir=None,
-                 input_file_ext=".raw", tt_mode="TT88"):
+    def __init__(self, user_name, tt_mode="TT88", calibration_dir=None, output_dir=None, **kwargs):
 
         super(Pearl, self).__init__(user_name=user_name, calibration_dir=calibration_dir,
-                                    output_dir=output_dir, default_input_ext=input_file_ext)
+                                    output_dir=output_dir, kwargs=kwargs)
 
         self._tt_mode = tt_mode
+        self._focus_mode = None
 
         # This advanced option disables appending the current cycle to the
         # path given for raw files.
@@ -43,10 +43,15 @@ class Pearl(AbstractInst):
         self._existing_config = None
 
         # File names
-        pearl_mc_absorption_file_name = "PRL112_DC25_10MM_FF.OUT"  # TODO
+        pearl_mc_absorption_file_name = "PRL112_DC25_10MM_FF.OUT"  # TODO how often does this change
         self._attenuation_full_path = os.path.join(calibration_dir, pearl_mc_absorption_file_name)
 
     # --- Abstract Implementation ---- #
+
+    def focus(self, run_number, focus_mode, do_attenuation=True, do_van_normalisation=True):
+        self._focus_mode = focus_mode
+        return self._focus(run_number=run_number,
+                           do_attenuation=do_attenuation, do_van_normalisation=do_van_normalisation)
 
     # Params #
     def _get_default_group_names(self):

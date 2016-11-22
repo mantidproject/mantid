@@ -6,12 +6,12 @@
   label : "15_2"
   chopper_on:
     vanadium_run_numbers : "78338"
-    splined_vanadium_file_name : "chopper_on_van_calib.nxs"
-    solid_angle_file_name : "chopper_on_sac.nxs"
+    empty_run = "78339"
+
   chopper_off:
     vanadium_run_numbers : "78338"
-    splined_vanadium_file_name : "chopper_off_van_calib.nxs"
-    solid_angle_file_name : "chopper_off_sac.nxs"
+    empty_run = "78339"
+
 
 93105-95614:
   # Calibration run

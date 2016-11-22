@@ -123,15 +123,8 @@ def PEARL_getcalibfiles():
     pearl_obj._old_api_set_tt_mode(g_oldParams["tt_mode"])
     pearl_obj._old_api_set_calib_dir(g_oldParams["pearl_file_dir"])
 
-    cal_dict = pearl_obj._get_run_details(cycle=cycle)
     print ("Setting calibration for cycle", cycle)
 
-    updated_vals = {"calfile"     : cal_dict["calibration"],
-                    "groupfile"   : cal_dict["grouping"],
-                    "vabsorbfile" : cal_dict["vanadium_absorption"],
-                    "vanfile"     : cal_dict["vanadium"]}
-
-    _merge_dict_into_global(updated_vals)
     return
 
 
