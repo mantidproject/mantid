@@ -68,8 +68,8 @@ private:
   /// Calculate error for y
   static double calculateError(double in) { return sqrt(in); }
 
-  void moveComponent(const std::string &, double, double);
-  void moveSingleDetectors();
+  void moveComponent(const std::string &, double);
+  void moveSingleDetectors(NeXus::NXEntry &entry);
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 

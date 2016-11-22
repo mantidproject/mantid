@@ -115,7 +115,8 @@ void LoadILLIndirect2::exec() {
   g_log.debug("Loading instrument definition...");
   runLoadInstrument();
 
-  // moveSingleDetectors(); Work in progress
+  g_log.debug("Movind SDs...");
+  moveSingleDetectors(firstEntry);
 
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
@@ -375,7 +376,7 @@ void LoadILLIndirect2::runLoadInstrument() {
 }
 
 void LoadILLIndirect2::moveComponent(const std::string &componentName,
-                                    double twoTheta, double offSet) {
+                                     double twoTheta) {
 
   try {
 
@@ -384,18 +385,15 @@ void LoadILLIndirect2::moveComponent(const std::string &componentName,
     Geometry::IComponent_const_sptr component =
         instrument->getComponentByName(componentName);
 
-    double r, theta, phi, newTheta, newR;
+    double r, theta, phi;
     V3D oldPos = component->getPos();
     oldPos.getSpherical(r, theta, phi);
 
-    newTheta = twoTheta;
-    newR = offSet;
-
     V3D newPos;
-    newPos.spherical(newR, newTheta, phi);
+    newPos.spherical(r, twoTheta, phi);
 
-    // g_log.debug() << tube->getName() << " : t = " << theta << " ==> t = " <<
-    // newTheta << "\n";
+    g_log.debug() << componentName << " : t = " << theta
+                  << " ==> t = " << twoTheta << "\n";
     Geometry::ParameterMap &pmap = m_localWorkspace->instrumentParameters();
     Geometry::ComponentHelper::moveComponent(
         *component, pmap, newPos, Geometry::ComponentHelper::Absolute);
@@ -412,16 +410,26 @@ void LoadILLIndirect2::moveComponent(const std::string &componentName,
 /**
  * IN16B has a few single detectors that are place around the sample.
  * They are moved according to some values in the nexus file.
- * This is not implemented yet.
  */
-void LoadILLIndirect2::moveSingleDetectors() {
+void LoadILLIndirect2::moveSingleDetectors(NeXus::NXEntry &entry) {
 
   std::string prefix("single_tube_");
 
-  for (int i = 1; i <= 8; i++) {
-    std::string componentName = prefix + std::to_string(i);
+  int index = 1;
 
-    moveComponent(componentName, i * 20.0, 2.0 + i / 10.0);
+  for (auto i : m_activeSDIndices) {
+
+    std::string angleEntry =
+        boost::str(boost::format("instrument/SingleD/SD%i angle") % i);
+
+    NXFloat angleSD = entry.openNXFloat(angleEntry);
+
+    angleSD.load();
+
+    g_log.debug("Moving single detector " + std::to_string(i) + " to t=" +
+                std::to_string(angleSD[0]));
+    moveComponent(prefix + std::to_string(index), angleSD[0]);
+    index++;
   }
 }
 
