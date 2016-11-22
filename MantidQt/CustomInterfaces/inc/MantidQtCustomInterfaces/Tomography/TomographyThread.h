@@ -1,6 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYTHREAD_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYTHREAD_H_
 
+// included for UNUSED_ARG
+#include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyProcess.h"
 #include <QString>
 #include <QThread>
