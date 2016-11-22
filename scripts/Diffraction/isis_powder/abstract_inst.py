@@ -77,8 +77,8 @@ class AbstractInst(object):
         self._create_calibration_silicon(calibration_runs=calibration_runs, cal_file_name=cal_file_name,
                                          grouping_file_name=grouping_file_name)
 
-    def create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name=None, num_of_splines=None,
-                                    do_absorb_corrections=True, gen_absorb_correction=False):
+    def _create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name=None, num_of_splines=None,
+                                     do_absorb_corrections=True, gen_absorb_correction=False):
         calibrate.create_van(instrument=self, van=vanadium_runs, empty=empty_runs,
                              output_van_file_name=output_file_name, num_of_splines=num_of_splines,
                              absorb=do_absorb_corrections, gen_absorb=gen_absorb_correction)
@@ -222,16 +222,13 @@ class AbstractInst(object):
         return True
         # TODO set this to False if they just dump their raw files in one folder
 
-    def _calculate_solid_angle_efficiency_corrections(self, vanadium_ws):
-        return _empty_hook_return_none()
-
     def _do_tof_rebinning_focus(self, input_workspace):
         return input_workspace
 
     def _process_focus_output(self, processed_spectra, run_details, attenuate=False):
         return _empty_hook_return_none()
 
-    def apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number=None, run_details=None):
+    def apply_solid_angle_efficiency_corr(self, ws_to_correct, run_details):
         return ws_to_correct
 
     def _apply_van_calibration_tof_rebinning(self, vanadium_ws, tof_rebin_pass, return_units):

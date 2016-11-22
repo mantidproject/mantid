@@ -8,10 +8,10 @@ import isis_powder.routines.common as common
 
 
 def create_van(instrument, van, empty, output_van_file_name, num_of_splines, absorb, gen_absorb):
-    input_van_ws = common.load_current_normalised_ws(run_number_string=van, instrument=instrument)
 
+    input_van_ws = common.load_current_normalised_ws(run_number_string=van, instrument=instrument)
     corrected_van_ws = common.subtract_sample_empty(ws_to_correct=input_van_ws, empty_sample_ws_string=empty,
-                                                instrument=instrument)
+                                                    instrument=instrument)
 
     common.remove_intermediate_workspace(input_van_ws)
 
@@ -24,7 +24,7 @@ def create_van(instrument, van, empty, output_van_file_name, num_of_splines, abs
                                              CalibrationFile=run_details.calibration)
 
     corrected_van_ws = instrument.apply_solid_angle_efficiency_corr(ws_to_correct=corrected_van_ws,
-                                                                    vanadium_number=van)
+                                                                    run_details=run_details)
     if absorb:
         corrected_van_ws = _apply_absorb_corrections(instrument=instrument,
                                                      run_details=run_details,

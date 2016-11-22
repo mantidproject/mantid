@@ -40,6 +40,12 @@ class Polaris(AbstractInst):
         return self._focus(run_number=run_number, do_attenuation=do_attenuation,
                            do_van_normalisation=do_van_normalisation)
 
+    def create_calibration_vanadium(self, run_in_range, do_absorb_corrections=True, gen_absorb_correction=False):
+        run_details = self._get_run_details(run_number=int(run_in_range))
+        self._create_calibration_vanadium(vanadium_runs=run_details.vanadium, empty_runs=run_details.sample_empty,
+                                          do_absorb_corrections=do_absorb_corrections,
+                                          gen_absorb_correction=gen_absorb_correction)
+
     # Abstract implementation
     def _get_lambda_range(self):
         return self._lower_lambda_range, self._upper_lambda_range
@@ -64,8 +70,8 @@ class Polaris(AbstractInst):
 
         empty_runs = chopper_config["empty_run_numbers"]
         vanadium_runs = chopper_config["vanadium_run_numbers"]
-        solid_angle_file_name = "SAC_" + vanadium_runs
-        splined_vanadium_name = "SplinedVan_" + vanadium_runs
+        solid_angle_file_name = self._generate_solid_angle_file_name(vanadium_run_string=vanadium_runs)
+        splined_vanadium_name = self._generate_splined_van_name(vanadium_run_string=vanadium_runs)
         cycle = configuration["label"]
 
         calibration_dir = os.path.join(self.calibration_dir, cycle)
@@ -104,34 +110,12 @@ class Polaris(AbstractInst):
         normalised_ws = mantid.NormaliseByCurrent(InputWorkspace=ws_to_correct)
         return normalised_ws
 
-    def _calculate_solid_angle_efficiency_corrections(self, vanadium_ws):
-        solid_angle_ws = mantid.SolidAngle(InputWorkspace=vanadium_ws)
-        solid_angle_multiplicand = mantid.CreateSingleValuedWorkspace(DataValue=str(100))
-        solid_angle_ws = mantid.Multiply(LHSWorkspace=solid_angle_ws, RHSWorkspace=solid_angle_multiplicand)
-        common.remove_intermediate_workspace(solid_angle_multiplicand)
-
-        efficiency_ws = mantid.Divide(LHSWorkspace=vanadium_ws, RHSWorkspace=solid_angle_ws)
-        efficiency_ws = mantid.ConvertUnits(InputWorkspace=efficiency_ws, Target="Wavelength")
-        efficiency_ws = mantid.Integration(InputWorkspace=efficiency_ws)
-
-        corrections_ws = mantid.Multiply(LHSWorkspace=solid_angle_ws, RHSWorkspace=efficiency_ws)
-        corrections_divisor_ws = mantid.CreateSingleValuedWorkspace(DataValue=str(100000))
-        corrections_ws = mantid.Divide(LHSWorkspace=corrections_ws, RHSWorkspace=corrections_divisor_ws)
-
-        common.remove_intermediate_workspace(corrections_divisor_ws)
-        common.remove_intermediate_workspace(solid_angle_ws)
-        common.remove_intermediate_workspace(efficiency_ws)
-
-        return corrections_ws
-
-    def apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number=None, run_details=None):
+    def apply_solid_angle_efficiency_corr(self, ws_to_correct, run_details):
         if not self._apply_solid_angle:
             return ws_to_correct
 
-        assert(vanadium_number or run_details)
-
         if not run_details or not os.path.isfile(run_details.solid_angle_corr):
-            corrections = self.generate_solid_angle_corrections(run_details, vanadium_number)
+            corrections = self.generate_solid_angle_corrections(run_details)
         else:
             corrections = mantid.Load(Filename=run_details.solid_angle_corr)
 
@@ -141,19 +125,12 @@ class Polaris(AbstractInst):
         ws_to_correct = corrected_ws
         return ws_to_correct
 
-    def generate_solid_angle_corrections(self, run_details, vanadium_number):
-        if vanadium_number:
-            solid_angle_vanadium_ws = common.load_current_normalised_ws(run_number_string=vanadium_number,
-                                                                        instrument=self)
-        elif run_details:
-            solid_angle_vanadium_ws = common.load_current_normalised_ws(run_number_string=run_details.vanadium,
-                                                                        instrument=self)
-        else:
-            raise RuntimeError("Got no run_details or vanadium_number in gen solid angle corrections")
+    def generate_solid_angle_corrections(self, run_details):
+        solid_angle_vanadium_ws = common.load_current_normalised_ws(run_number_string=run_details.vanadium,
+                                                                    instrument=self)
 
-        corrections = self._calculate_solid_angle_efficiency_corrections(solid_angle_vanadium_ws)
-        if run_details:
-            mantid.SaveNexusProcessed(InputWorkspace=corrections, Filename=run_details.solid_angle_corr)
+        corrections = _calculate_solid_angle_efficiency_corrections(solid_angle_vanadium_ws)
+        mantid.SaveNexusProcessed(InputWorkspace=corrections, Filename=run_details.solid_angle_corr)
 
         common.remove_intermediate_workspace(solid_angle_vanadium_ws)
         return corrections
@@ -286,6 +263,25 @@ class Polaris(AbstractInst):
 
             mantid.SaveFocusedXYE(InputWorkspace=ws, Filename=full_file_path, SplitFiles=False, IncludeHeader=False)
 
+    def _generate_solid_angle_file_name(self, vanadium_run_string):
+        if self._chopper_on:
+            return "SAC_chopperOn_" + vanadium_run_string + ".nxs"
+        else:
+            return "SAC_chopperOff_" + vanadium_run_string + ".nxs"
+
+    def _generate_splined_van_name(self, vanadium_run_string):
+        output_string = "SVan_" + str(vanadium_run_string) + "_chopper"
+        if self._chopper_on:
+            output_string += "On"
+        else:
+            output_string += "Off"
+
+        if self._apply_solid_angle:
+            output_string += "_SAC"
+        else:
+            output_string += "_noSAC"
+
+        return output_string
 
 # Class private implementation
 
@@ -351,3 +347,24 @@ def _create_d_spacing_tof_output(processed_spectra):
     tof_group = mantid.GroupWorkspaces(InputWorkspaces=tof_output, OutputWorkspace=tof_group_name)
 
     return d_spacing_group, tof_group
+
+
+def _calculate_solid_angle_efficiency_corrections(vanadium_ws):
+    solid_angle_ws = mantid.SolidAngle(InputWorkspace=vanadium_ws)
+    solid_angle_multiplicand = mantid.CreateSingleValuedWorkspace(DataValue=str(100))
+    solid_angle_ws = mantid.Multiply(LHSWorkspace=solid_angle_ws, RHSWorkspace=solid_angle_multiplicand)
+    common.remove_intermediate_workspace(solid_angle_multiplicand)
+
+    efficiency_ws = mantid.Divide(LHSWorkspace=vanadium_ws, RHSWorkspace=solid_angle_ws)
+    efficiency_ws = mantid.ConvertUnits(InputWorkspace=efficiency_ws, Target="Wavelength")
+    efficiency_ws = mantid.Integration(InputWorkspace=efficiency_ws)
+
+    corrections_ws = mantid.Multiply(LHSWorkspace=solid_angle_ws, RHSWorkspace=efficiency_ws)
+    corrections_divisor_ws = mantid.CreateSingleValuedWorkspace(DataValue=str(100000))
+    corrections_ws = mantid.Divide(LHSWorkspace=corrections_ws, RHSWorkspace=corrections_divisor_ws)
+
+    common.remove_intermediate_workspace(corrections_divisor_ws)
+    common.remove_intermediate_workspace(solid_angle_ws)
+    common.remove_intermediate_workspace(efficiency_ws)
+
+    return corrections_ws
