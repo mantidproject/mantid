@@ -87,6 +87,9 @@ extra_columns(const std::vector<std::string> &filenames) {
 }
 }
 
+PDLoadCharacterizations::PDLoadCharacterizations()
+    : hasExtras(false), canColumnNames() {}
+
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PDLoadCharacterizations::name() const {
