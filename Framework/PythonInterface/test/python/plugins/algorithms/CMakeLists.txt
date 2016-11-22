@@ -4,6 +4,7 @@
 
 set ( TEST_PY_FILES
   ABINSTest.py
+  ABINSAdvancedParametersTest.py
   AddSampleLogMultipleTest.py
   AlignComponentsTest.py
   ApplyPaalmanPingsCorrectionTest.py

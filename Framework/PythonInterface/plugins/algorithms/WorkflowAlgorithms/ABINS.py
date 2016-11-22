@@ -138,6 +138,8 @@ class ABINS(PythonAlgorithm):
                 issues["OutputWorkspace"] = "Keyword: " + word + " cannot be used in the name of workspace."
                 break
 
+        self._check_advanced_parameter()
+
         return issues
 
     def PyExec(self):
@@ -412,7 +414,7 @@ class ABINS(PythonAlgorithm):
         ws_name = self._out_ws_name + "_" + atom_name
         self._fill_s_workspace(freq=frequencies, s_points=s_points, workspace=ws_name)
 
-        # rebining
+        # rebinning
         Rebin(InputWorkspace=ws_name,
               Params=[AbinsParameters.min_wavenumber,  AbinsParameters.bin_width, AbinsParameters.max_wavenumber],
               OutputWorkspace=ws_name)
@@ -489,6 +491,115 @@ class ABINS(PythonAlgorithm):
 
         mtd[wrk].setYUnitLabel("S /Arbitrary Units")
         mtd[wrk].setYUnit("Arbitrary Units")
+
+    def _check_advanced_parameter(self):
+        """
+        Checks if parameters from AbinsParameters.py are valid. If any parameter is invalid then RuntimeError is thrown
+        with meaningful message.
+        """
+
+        message_end = " in AbinsParameters.py. "
+
+        # check fwhm
+        fwhm = AbinsParameters.fwhm
+        if not (isinstance(fwhm, float) and 0.0 < fwhm < 10.0):
+            raise RuntimeError("Invalid value of fwhm" + message_end)
+
+        # check delta_width
+        delta_width = AbinsParameters.delta_width
+        if not (isinstance(delta_width, float) and 0.0 < delta_width < 1.0):
+            raise RuntimeError("Invalid value of delta_width" + message_end)
+
+        # check TOSCA parameters
+        # TOSCA final energy in cm^-1
+        final_energy = AbinsParameters.TOSCA_final_neutron_energy
+        if not (isinstance(final_energy, float) and final_energy > 0.0):
+            raise RuntimeError("Invalid value of final_neutron_energy for TOSCA" + message_end)
+
+        angle = AbinsParameters.TOSCA_cos_scattering_angle
+        if not isinstance(angle, float):
+            raise RuntimeError("Invalid value of cosines scattering angle for TOSCA" + message_end)
+
+        resolution_const_a = AbinsParameters.TOSCA_A
+        if not isinstance(resolution_const_a, float):
+            raise RuntimeError("Invalid value of constant A for TOSCA (used by the resolution TOSCA function)" +
+                               message_end)
+
+        resolution_const_b = AbinsParameters.TOSCA_B
+        if not isinstance(resolution_const_b, float):
+            raise RuntimeError("Invalid value of constant B for TOSCA (used by the resolution TOSCA function)" +
+                               message_end)
+
+        resolution_const_c = AbinsParameters.TOSCA_C
+        if not isinstance(resolution_const_c, float):
+            raise RuntimeError("Invalid value of constant C for TOSCA (used by the resolution TOSCA function)" +
+                               message_end)
+
+        # check folders names
+        folder_names = []
+        dft_group = AbinsParameters.DFT_group
+        if not isinstance(dft_group, str) or dft_group == "":
+            raise RuntimeError("Invalid name for folder in which the DFT data should be stored.")
+        folder_names.append(dft_group)
+
+        powder_data_group = AbinsParameters.powder_data_group
+        if not isinstance(powder_data_group, str) or powder_data_group == "":
+            raise RuntimeError("Invalid value of powder_data_group" + message_end)
+        elif powder_data_group in folder_names:
+            raise RuntimeError("Name for powder_data_group  already used by as name of another folder.")
+        folder_names.append(powder_data_group)
+
+        crystal_data_group = AbinsParameters.crystal_data_group
+        if not isinstance(crystal_data_group, str) or crystal_data_group == "":
+            raise RuntimeError("Invalid value of crystal_data_group" + message_end)
+        elif crystal_data_group in folder_names:
+            raise RuntimeError("Name for crystal_data_group already used as a name of another folder.")
+
+        s_data_group = AbinsParameters.s_data_group
+        if not isinstance(s_data_group, str) or s_data_group == "":
+            raise RuntimeError("Invalid value of s_data_group" + message_end)
+        elif s_data_group in folder_names:
+            raise RuntimeError("Name for s_data_group already used as a name of another folder.")
+
+        # check rebinning parameters
+        pkt_per_peak = AbinsParameters.pkt_per_peak
+        if not (isinstance(pkt_per_peak, (int, long)) and 1 <= pkt_per_peak <= 1000):
+            raise RuntimeError("Invalid value of pkt_per_peak" + message_end)
+
+        # bin width is expressed in cm^-1
+        bin_width = AbinsParameters.bin_width
+        if not (isinstance(bin_width, float) and 0.0 < bin_width <= 10.0):
+            raise RuntimeError("Invalid value of bin_width" + message_end)
+
+        min_wavenumber = AbinsParameters.min_wavenumber
+        if not (isinstance(min_wavenumber, float) and min_wavenumber >= 0.0):
+            raise RuntimeError("Invalid value of min_wavenumber" + message_end)
+
+        max_wavenumber = AbinsParameters.max_wavenumber
+        if not (isinstance(max_wavenumber, float) and max_wavenumber > 0.0):
+            raise RuntimeError("Invalid number of max_wavenumber" + message_end)
+
+        if min_wavenumber > max_wavenumber:
+            raise RuntimeError("Invalid energy window for rebinning.")
+
+        # check acoustic phonon threshold
+        acoustic_threshold = AbinsParameters.acoustic_phonon_threshold
+        if not (isinstance(acoustic_threshold, float) and acoustic_threshold >= 0.0):
+            raise RuntimeError("Invalid value of acoustic_phonon_threshold" + message_end)
+
+        # check s threshold
+        s_absolute_threshold = AbinsParameters.s_absolute_threshold
+        if not (isinstance(s_absolute_threshold, float) and s_absolute_threshold > 0.0):
+            raise RuntimeError("Invalid value of s_absolute_threshold" + message_end)
+
+        s_relative_threshold = AbinsParameters.s_relative_threshold
+        if not (isinstance(s_relative_threshold, float) and s_relative_threshold > 0.0):
+            raise RuntimeError("Invalid value of s_relative_threshold" + message_end)
+
+        # check optimal size of chunk
+        optimal_size = AbinsParameters.optimal_size
+        if not (isinstance(optimal_size, (int, long)) and optimal_size > 0):
+            raise RuntimeError("Invalid value of optimal_size" + message_end)
 
     def _validate_crystal_input_file(self, filename=None):
         """

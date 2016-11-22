@@ -65,7 +65,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
 
         IOmodule.__init__(self,
                           input_filename=filename,
-                          group_name=(AbinsParameters.S_data_group + "/" + self._instrument_name + "/" +
+                          group_name=(AbinsParameters.s_data_group + "/" + self._instrument_name + "/" +
                                       self._sample_form + "/%sK" % self._temperature))
         FrequencyPowderGenerator.__init__(self)
 

@@ -10,11 +10,10 @@ fwhm = 3.0  # approximate value for the full width at half maximum for Gaussian 
 
 # None instrument
 delta_width = 0.0005  # width of narrow Gaussian which approximates Dirac delta
-q_mesh = [10, 10, 10] # Q grid
 
 # TOSCA instrument
-#    TOSCA parameters for calculating Q^2
-TOSCA_final_neutron_energy = 32  # Final energy on the crystal analyser cm^-1
+# TOSCA parameters for calculating Q^2
+TOSCA_final_neutron_energy = 32.0  # Final energy on the crystal analyser cm^-1
 TOSCA_cos_scattering_angle = math.cos(2.356)  # Angle of the crystal analyser radians
 
 
@@ -38,11 +37,11 @@ powder_data_group = "Powder"  # name of the group where PowderData is stored
 
 crystal_data_group = "Crystal"  # name of the group where CrystalData is stored
 
-S_data_group = "S"  # name of the group where dynamical factor is stored
+s_data_group = "S"  # name of the group where dynamical factor is stored
 
 pkt_per_peak = 50  # number of points for each peak broadened by the experimental resolution
-bin_width = 1.0  # defines width of bins used in rebining of S
-max_wavenumber = 4100  # maximum wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
+bin_width = 1.0  # defines width of bins used in rebinning of S
+max_wavenumber = 4100.0  # maximum wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
 min_wavenumber = 0.0  # minimal wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
 acoustic_phonon_threshold = 0.0  # frequencies below this value are treated as acoustic and neglected.
 
