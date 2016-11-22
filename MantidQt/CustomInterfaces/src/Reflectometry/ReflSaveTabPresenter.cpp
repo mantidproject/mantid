@@ -160,7 +160,7 @@ void ReflSaveTabPresenter::saveWorkspaces() {
   std::string extension = m_saveExts[formatIndex];
   IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create(algName);
 
-  for (int i = 0; i < wsNames.size(); i++) {
+  for (size_t i = 0; i < wsNames.size(); i++) {
     // Add any additional algorithm-specific properties and execute
     if (algName != "SaveANSTOAscii") {
       if (titleCheck)
