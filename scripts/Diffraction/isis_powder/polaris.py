@@ -21,7 +21,8 @@ class Polaris(AbstractInst):
 
     _number_of_banks = 5
 
-    def __init__(self, user_name, chopper_on, calibration_dir=None, output_dir=None, **kwargs):
+    def __init__(self, user_name, chopper_on, apply_solid_angle=True,
+                 calibration_dir=None, output_dir=None, **kwargs):
 
         super(Polaris, self).__init__(user_name=user_name, calibration_dir=calibration_dir,
                                       output_dir=output_dir, kwargs=kwargs)
@@ -33,10 +34,9 @@ class Polaris(AbstractInst):
         self._run_details_cached_obj = None
 
         # Properties set in later calls:
-        self._apply_solid_angle = None
-
-    def focus(self, run_number, apply_solid_angle=True, do_attenuation=True, do_van_normalisation=True):
         self._apply_solid_angle = apply_solid_angle
+
+    def focus(self, run_number, do_attenuation=True, do_van_normalisation=True):
         return self._focus(run_number=run_number, do_attenuation=do_attenuation,
                            do_van_normalisation=do_van_normalisation)
 
@@ -90,9 +90,8 @@ class Polaris(AbstractInst):
     @staticmethod
     def _generate_inst_file_name(run_number):
         if isinstance(run_number, list):
-            for val in run_number:
-                val = "POL" + str(val)
-            return run_number
+            updated_list = ["POL" + str(val) for val in run_number]
+            return updated_list
         else:
             return "POL" + str(run_number)
 
@@ -125,7 +124,10 @@ class Polaris(AbstractInst):
 
         return corrections_ws
 
-    def _apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number=None, run_details=None):
+    def apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number=None, run_details=None):
+        if not self._apply_solid_angle:
+            return ws_to_correct
+
         assert(vanadium_number or run_details)
 
         if not run_details or not os.path.isfile(run_details.solid_angle_corr):

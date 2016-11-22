@@ -31,8 +31,8 @@ def _run_focus(instrument, run_number, perform_attenuation, perform_vanadium_nor
     input_workspace = mantid.AlignDetectors(InputWorkspace=input_workspace,
                                             CalibrationFile=run_details.calibration)
 
-    input_workspace = instrument._apply_solid_angle_efficiency_corr(ws_to_correct=input_workspace,
-                                                                    run_details=run_details)
+    input_workspace = instrument.apply_solid_angle_efficiency_corr(ws_to_correct=input_workspace,
+                                                                   run_details=run_details)
 
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=input_workspace,
                                              GroupingFileName=run_details.grouping)

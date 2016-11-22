@@ -231,7 +231,7 @@ class AbstractInst(object):
     def _process_focus_output(self, processed_spectra, run_details, attenuate=False):
         return _empty_hook_return_none()
 
-    def _apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number=None, run_details=None):
+    def apply_solid_angle_efficiency_corr(self, ws_to_correct, vanadium_number=None, run_details=None):
         return ws_to_correct
 
     def _apply_van_calibration_tof_rebinning(self, vanadium_ws, tof_rebin_pass, return_units):

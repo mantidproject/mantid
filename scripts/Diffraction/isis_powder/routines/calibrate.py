@@ -23,8 +23,8 @@ def create_van(instrument, van, empty, output_van_file_name, num_of_splines, abs
     corrected_van_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
                                              CalibrationFile=run_details.calibration)
 
-    corrected_van_ws = instrument._apply_solid_angle_efficiency_corr(ws_to_correct=corrected_van_ws,
-                                                                     vanadium_number=van)
+    corrected_van_ws = instrument.apply_solid_angle_efficiency_corr(ws_to_correct=corrected_van_ws,
+                                                                    vanadium_number=van)
     if absorb:
         corrected_van_ws = _apply_absorb_corrections(instrument=instrument,
                                                      run_details=run_details,
