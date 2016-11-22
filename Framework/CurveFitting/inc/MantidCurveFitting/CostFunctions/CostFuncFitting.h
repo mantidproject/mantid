@@ -77,7 +77,7 @@ public:
   /// Apply ties in the fitting function
   void applyTies();
   /// Reset the fitting function (neccessary if parameters get fixed/unfixed)
-  void reset();
+  void reset() const;
   /// Set all parameters
   void setParameters(const GSLVector &params);
   /// Get values of all parameters
@@ -102,7 +102,9 @@ protected:
   /// Shared poinetr to the function values
   API::FunctionValues_sptr m_values;
   /// maps the cost function's parameters to the ones of the fitting function.
-  std::vector<size_t> m_indexMap;
+  mutable std::vector<size_t> m_indexMap;
+  /// Number of all parameters in the fitting function.
+  mutable size_t m_numberFunParams;
 
   mutable bool m_dirtyVal;     /// dirty value flag
   mutable bool m_dirtyDeriv;   /// dirty derivatives flag

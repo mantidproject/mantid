@@ -34,7 +34,7 @@ public:
 
   void test_no_constraints() {
     auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        [](double x, int i) { return 0.0; }, 1, 0, 1, 0.1);
+        [](double, int) { return 0.0; }, 1, 0, 1, 0.1);
 
     MonteCarloParameters alg;
     alg.initialize();
@@ -47,7 +47,7 @@ public:
 
   void test_no_lower_bound() {
     auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        [](double x, int i) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
+        [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
 
     MonteCarloParameters alg;
     alg.initialize();
@@ -60,7 +60,7 @@ public:
 
   void test_no_upper_bound() {
     auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        [](double x, int i) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
+        [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
 
     MonteCarloParameters alg;
     alg.initialize();
@@ -73,7 +73,7 @@ public:
 
   void test_all_free() {
     auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        [](double x, int i) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
+        [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
 
     std::string funStr(
         "name=UserFunction,Formula=a*x+b,a=0,b=0,constraints=(1<a<4, 0<b<4)");
@@ -104,7 +104,7 @@ public:
 
   void test_fixed() {
     auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        [](double x, int i) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
+        [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
 
     std::string funStr(
         "name=UserFunction,Formula=a*x+b,a=0,ties=(b=1.9),constraints=(1<a<4)");
@@ -134,7 +134,7 @@ public:
 
   void test_tied() {
     auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        [](double x, int i) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
+        [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
 
     std::string funStr(
         "name=UserFunction,Formula=a*x+b,a=0,ties=(b=a-1),constraints=(1<a<4)");
