@@ -95,14 +95,18 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
   for (auto group = mapOfMeasurements.begin(); group != mapOfMeasurements.end();
        ++group) {
 
+    std::string groupName;
+
     // Map keyed by subId to index of exisiting subid written.
     std::map<std::string, size_t> subIdMap;
     for (size_t i = 0; i < group->second.size(); ++i) {
       const MeasurementItem &measurementItem = group->second[i];
 
-      std::string title = measurementItem.title();
-      std::string groupName = std::to_string(nextGroupId) + " - " +
-                              title.substr(0, title.find(":th"));
+      if (i == 0) {
+        std::string title = measurementItem.title();
+        groupName = std::to_string(nextGroupId) + " - " +
+                    title.substr(0, title.find(":th"));
+      }
 
       if (subIdMap.find(measurementItem.subId()) != subIdMap.end()) {
         // We already have that subid.

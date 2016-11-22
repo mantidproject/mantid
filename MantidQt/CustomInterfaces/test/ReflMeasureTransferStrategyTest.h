@@ -346,6 +346,63 @@ public:
     TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource_ptr));
   }
 
+  void test_same_id_but_different_title() {
+
+    SearchResultMap data;
+    data.insert(
+        std::make_pair<std::string, SearchResult>("14913", SearchResult()));
+    data.insert(
+        std::make_pair<std::string, SearchResult>("14914", SearchResult()));
+
+    auto mockMeasurementItemSource =
+        Mantid::Kernel::make_unique<MockReflMeasurementItemSource>();
+    auto mockMeasurementItemSource_ptr = mockMeasurementItemSource.get();
+
+    // Same measurment id but different title
+    EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
+        .Times(Exactly(static_cast<int>(data.size())))
+        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.1, "14913",
+                                         "Sample 1 H=0.10")))
+        .WillOnce(Return(MeasurementItem("m1", "s2", "l1", "t1", 0.1, "14914",
+                                         "Sample 1 H=0.09")));
+
+    auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
+    auto mockCatInfo_ptr = mockCatInfo.get();
+    // We expect that every location will be translated/transformed to make it
+    // os specific
+    EXPECT_CALL(*mockCatInfo, transformArchivePath(_))
+        .Times(Exactly(static_cast<int>(data.size())))
+        .WillRepeatedly(Return(std::string()));
+
+    MockProgressBase progress;
+    // Expect a progress update
+    EXPECT_CALL(progress, doReport(_))
+        .Times(Exactly(static_cast<int>(data.size())));
+
+    // Make the transfer stragegy
+    ReflMeasureTransferStrategy strategy(std::move(mockCatInfo),
+                                         std::move(mockMeasurementItemSource));
+
+    // Do the transfer
+    auto transferResult = strategy.transferRuns(data, progress);
+    auto successfulRuns = transferResult.getTransferRuns();
+
+    // Check the transfer entries
+    TSM_ASSERT_EQUALS("Should have two rows", 2, successfulRuns.size());
+    TSM_ASSERT_DIFFERS("Runs should be the different for both columns",
+                       successfulRuns[0][ReflTableSchema::RUNS],
+                       successfulRuns[1][ReflTableSchema::RUNS]);
+    TSM_ASSERT_EQUALS("Group should be '0 - Sample 1 H=0.10'",
+                      successfulRuns[0][ReflTableSchema::GROUP],
+                      "0 - Sample 1 H=0.10");
+    TSM_ASSERT_EQUALS("Group should be '0 - Sample 1 H=0.10'",
+                      successfulRuns[1][ReflTableSchema::GROUP],
+                      "0 - Sample 1 H=0.10");
+
+    TS_ASSERT(Mock::VerifyAndClear(mockCatInfo_ptr));
+    TS_ASSERT(Mock::VerifyAndClear(mockMeasurementItemSource_ptr));
+  }
+
   void test_do_not_include_invalid_measurements() {
     // Search result inforation not used in the following since we mock the
     // return from the measurementSource
