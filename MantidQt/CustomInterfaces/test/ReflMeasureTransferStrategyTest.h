@@ -95,9 +95,12 @@ public:
     // id
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
-        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.1, "111", "title")))
-        .WillOnce(Return(MeasurementItem("m1", "s2", "l1", "t1", 0.2, "122", "title")))
-        .WillOnce(Return(MeasurementItem("m2", "s2", "l1", "t1", 0.2, "123", "title")));
+        .WillOnce(Return(
+            MeasurementItem("m1", "s1", "l1", "t1", 0.1, "111", "title")))
+        .WillOnce(Return(
+            MeasurementItem("m1", "s2", "l1", "t1", 0.2, "122", "title")))
+        .WillOnce(Return(
+            MeasurementItem("m2", "s2", "l1", "t1", 0.2, "123", "title")));
 
     auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
     auto mockCatInfo_ptr = mockCatInfo.get();
@@ -162,9 +165,12 @@ public:
     // We have 2 with valid measurement ids and 1 with no measurement id
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
-        .WillOnce(Return(MeasurementItem("", "s1", "l1", "t1", 0.1, "111", "title")))
-        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.2, "122", "title")))
-        .WillOnce(Return(MeasurementItem("m1", "s2", "l1", "t1", 0.2, "123", "title")));
+        .WillOnce(
+             Return(MeasurementItem("", "s1", "l1", "t1", 0.1, "111", "title")))
+        .WillOnce(Return(
+            MeasurementItem("m1", "s1", "l1", "t1", 0.2, "122", "title")))
+        .WillOnce(Return(
+            MeasurementItem("m1", "s2", "l1", "t1", 0.2, "123", "title")));
 
     auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
     auto mockCatInfo_ptr = mockCatInfo.get();
@@ -223,9 +229,12 @@ public:
     // All 3 have same measurment id, but we also have 2 with same sub id.
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
-        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.1, "111", "title")))
-        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.2, "122", "title")))
-        .WillOnce(Return(MeasurementItem("m1", "s2", "l1", "t1", 0.2, "123", "title")));
+        .WillOnce(Return(
+            MeasurementItem("m1", "s1", "l1", "t1", 0.1, "111", "title")))
+        .WillOnce(Return(
+            MeasurementItem("m1", "s1", "l1", "t1", 0.2, "122", "title")))
+        .WillOnce(Return(
+            MeasurementItem("m1", "s2", "l1", "t1", 0.2, "123", "title")));
 
     auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
     auto mockCatInfo_ptr = mockCatInfo.get();
@@ -289,11 +298,14 @@ public:
     // All 3 have same measurment id, but we also have 2 with same sub id.
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
-        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.1, "14913", "title")))
-        .WillOnce(Return(MeasurementItem("m1", "s1", "l1", "t1", 0.1, "14914", "title")))
-        .WillOnce(Return(MeasurementItem("m2", "s1", "l1", "t1", 0.2, "14915", "title")))
-        .WillOnce(
-            Return(MeasurementItem("m2", "s1", "l1", "t1", 0.2, "14916", "title")));
+        .WillOnce(Return(
+            MeasurementItem("m1", "s1", "l1", "t1", 0.1, "14913", "title")))
+        .WillOnce(Return(
+            MeasurementItem("m1", "s1", "l1", "t1", 0.1, "14914", "title")))
+        .WillOnce(Return(
+            MeasurementItem("m2", "s1", "l1", "t1", 0.2, "14915", "title")))
+        .WillOnce(Return(
+            MeasurementItem("m2", "s1", "l1", "t1", 0.2, "14916", "title")));
 
     auto mockCatInfo = Mantid::Kernel::make_unique<MockICatalogInfo>();
     auto mockCatInfo_ptr = mockCatInfo.get();
