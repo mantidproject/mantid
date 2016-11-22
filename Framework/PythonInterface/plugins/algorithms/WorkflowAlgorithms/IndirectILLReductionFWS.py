@@ -1,4 +1,3 @@
-#pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
 
@@ -7,6 +6,7 @@ from mantid.kernel import *  # noqa
 from mantid.api import *  # noqa
 from mantid import mtd
 import numpy as np
+import time
 
 
 class IndirectILLReductionFWS(DataProcessorAlgorithm):
@@ -276,19 +276,33 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         Retrives the needed sample log values for the given list of workspaces
         @param ws_list :: list of workspaces
         @returns :: array of observable values
+        @throws  :: ValueError if the log entry is not a number nor time-stamp
         '''
 
         result = []
 
-        for ws in ws_list:
-            value = mtd[ws].getRun().getLogData(self._observable).value
+        zero_time = 0
 
-            if 'start_time' not in self._observable:
+        pattern = '%Y-%m-%dT%H:%M:%S'
+
+        for i,ws in enumerate(ws_list):
+
+            log = mtd[ws].getRun().getLogData(self._observable)
+            value = log.value
+
+            if log.type == 'number':
                 value = float(value)
             else:
-                # start_time is a string like 2016-09-12T09:09:15,
-                # find an elegant way to convert to absolute time
-                pass
+                try:
+                    value = time.mktime(time.strptime(value, pattern))
+                except ValueError:
+                    raise ValueError("Invalid observable. "
+                                     "Provide a numeric (sample.*, run_number, etc.) or time-stamp "
+                                     "like string (e.g. start_time) log.")
+                if i == 0:
+                    zero_time = value
+
+                value = value - zero_time
 
             result.append(value)
 
@@ -363,10 +377,10 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
             axis.setUnit("Label").setLabel('Temperature', 'K')
         elif self._observable == 'sample.pressure':
             axis.setUnit("Label").setLabel('Pressure', 'P')
-        elif self._observable == 'start_time':
+        elif 'time' in self._observable:
             axis.setUnit("Label").setLabel('Time', 'seconds')
         else:
-            axis.setUnit("Label").setLabel(self._observable, 'Unknown')
+            axis.setUnit("Label").setLabel(self._observable, '')
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLReductionFWS)
