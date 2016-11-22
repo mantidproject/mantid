@@ -84,8 +84,8 @@ void FindUBUsingLatticeParameters::exec() {
                                         gamma, tolerance, base_index,
                                         num_initial, degrees_per_step, fixAll);
 
-  std::cout << "Error = " << error << '\n';
-  std::cout << "UB = " << UB << '\n';
+  g_log.notice() << "Error = " << error << '\n';
+  g_log.notice() << "UB = " << UB << '\n';
 
   if (!IndexingUtils::CheckUB(UB)) // UB not found correctly
   {
