@@ -216,8 +216,11 @@ class Polaris(AbstractInst):
 
         mantid.SaveGSS(InputWorkspace=tof_group, Filename=output_paths["gss_filename"], SplitFiles=False, Append=False)
         mantid.SaveNexusProcessed(InputWorkspace=tof_group, Filename=output_paths["nxs_filename"], Append=False)
-        self._save_xye(ws_group=d_spacing_group, ws_units="d_spacing", run_number=run_details.run_number)
-        self._save_xye(ws_group=tof_group, ws_units="TOF", run_number=run_details.run_number)
+
+        _save_xye(ws_group=d_spacing_group, ws_units="d_spacing", run_number=run_details.run_number,
+                  output_folder=output_paths["output_folder"])
+        _save_xye(ws_group=tof_group, ws_units="TOF", run_number=run_details.run_number,
+                  output_folder=output_paths["output_folder"])
 
         return d_spacing_group, tof_group
 
@@ -254,15 +257,6 @@ class Polaris(AbstractInst):
 
         return output_list
 
-    def _save_xye(self, ws_group, ws_units, run_number):
-        bank_index = 1
-        for ws in ws_group:
-            outfile_name = str(run_number) + "-b_" + str(bank_index) + "-" + ws_units + ".dat"
-            bank_index += 1
-            full_file_path = os.path.join(self._output_dir, outfile_name)
-
-            mantid.SaveFocusedXYE(InputWorkspace=ws, Filename=full_file_path, SplitFiles=False, IncludeHeader=False)
-
     def _generate_solid_angle_file_name(self, vanadium_run_string):
         if self._chopper_on:
             return "SAC_chopperOn_" + vanadium_run_string + ".nxs"
@@ -282,8 +276,6 @@ class Polaris(AbstractInst):
             output_string += "_noSAC"
 
         return output_string
-
-# Class private implementation
 
 
 def _extract_bank_spectra(ws_to_split, num_banks):
@@ -368,3 +360,13 @@ def _calculate_solid_angle_efficiency_corrections(vanadium_ws):
     common.remove_intermediate_workspace(efficiency_ws)
 
     return corrections_ws
+
+
+def _save_xye(ws_group, ws_units, run_number, output_folder):
+    bank_index = 1
+    for ws in ws_group:
+        outfile_name = str(run_number) + "-b_" + str(bank_index) + "-" + ws_units + ".dat"
+        bank_index += 1
+        full_file_path = os.path.join(output_folder, outfile_name)
+
+        mantid.SaveFocusedXYE(InputWorkspace=ws, Filename=full_file_path, SplitFiles=False, IncludeHeader=False)

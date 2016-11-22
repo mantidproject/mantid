@@ -106,7 +106,8 @@ class AbstractInst(object):
                           "gss_filename": gss_file,
                           "tof_xye_filename": tof_xye_file,
                           "dspacing_xye_filename": d_xye_file,
-                          "output_name": out_name}
+                          "output_name": out_name,
+                          "output_folder": output_directory}
 
         return out_file_names
 

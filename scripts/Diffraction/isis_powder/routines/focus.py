@@ -21,7 +21,8 @@ def _run_focus(instrument, run_number, perform_attenuation, perform_vanadium_nor
     # Check the necessary splined vanadium file has been created
     if not os.path.isfile(run_details.splined_vanadium):
         raise ValueError("Processed vanadium runs not found at this path: "
-                         + str(run_details.splined_vanadium) + " \n\nHave you created a vanadium calibration yet?")
+                         + str(run_details.splined_vanadium) +
+                         " \n\nHave you created a vanadium calibration with these settings yet?")
 
     # Compensate for empty sample if specified
     input_workspace = common.subtract_sample_empty(ws_to_correct=input_workspace, instrument=instrument,
