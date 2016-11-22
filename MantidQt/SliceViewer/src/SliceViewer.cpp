@@ -569,8 +569,8 @@ void SliceViewer::initZoomer() {
   // Hook-up listener to rescaled event
   QObject::connect(magnif, SIGNAL(rescaled(double)), this,
                    SLOT(magnifierRescaled(double)));
-  //QObject::connect(magnif, SIGNAL(rescaled(double)), this,
-    //               SLOT(updateNonOrthogonalOverlay()));
+  QObject::connect(magnif, SIGNAL(rescaled(double)), this,
+                   SLOT(updateNonOrthogonalOverlay()));
   // Pan using the right mouse button + drag
   QwtPlotPanner *panner = new QwtPlotPanner(m_plot->canvas());
   panner->setMouseButton(Qt::RightButton);
@@ -735,8 +735,8 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
                    SLOT(switchQWTRaster(bool)));
   QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
                    SLOT(setNonOrthogonalbtn()));
-  //QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
-   //                SLOT(updateNonOrthogonalOverlay()));
+  QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
+                   SLOT(updateNonOrthogonalOverlay()));
   emit setNonOrthogonalbtn();
   m_firstNonOrthogonalWorkspaceOpen = true;
   m_data->setWorkspace(ws);
@@ -1243,7 +1243,7 @@ void SliceViewer::resetZoom() {
   m_plot->replot();
   autoRebinIfRequired();
   updatePeaksOverlay();
-  //updateNonOrthogonalOverlay();
+  updateNonOrthogonalOverlay();
 }
 
 //------------------------------------------------------------------------------
@@ -2346,7 +2346,7 @@ void SliceViewer::panned(int, int) {
   autoRebinIfRequired();
 
   applyColorScalingForCurrentSliceIfRequired();
-  //updateNonOrthogonalOverlay();
+  updateNonOrthogonalOverlay();
   this->updatePeaksOverlay();
 
 }
@@ -2385,7 +2385,7 @@ void SliceViewer::autoRebinIfRequired() { // probably rename this if forcing it
   if (isAutoRebinSet()) {
     rebinParamsChanged();
   }
-  //updateNonOrthogonalOverlay();
+ updateNonOrthogonalOverlay();
 }
 /** NON ORTHOGONAL STUFF **/
 

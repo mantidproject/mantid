@@ -152,19 +152,8 @@ void NonOrthogonalOverlay::clearAllAxisPointVectors() {
 void NonOrthogonalOverlay::calculateTickMarks() { // assumes X axis
   clearAllAxisPointVectors();
   // overlay grid in static fashion
-  auto result = m_xRange / width();
-	//take Xmin etc etc, figure out where on xaxis all points want to be and THEN convert them into width() num,
-  // can take care of number issue later!
-  //minimum test case - calculate line of half xMax and conver that into width, see if it moves around
-  //really need to sort it so calculate tick marks is just called once! per axis change ... change number is for zoom
-  auto xMidPoint = m_xRange / 2 + m_xMinVis;
-  auto skewLow = skewMatrixApply(xMidPoint, m_yMinVis);
-  auto skewHigh = skewMatrixApply(xMidPoint, m_yMaxVis);
-  auto skewLowXTranslated = skewLow.x()*result;
-  auto skewLowYTranslated = skewLow.y()*result;
-  auto skewHighXTranslated = skewHigh.x()*result;
-  auto skewHighYTranslated = skewHigh.y()*result;
-  
+ 
+  API::getSkewingAngleInDegreesForDimension()// tanAlpha deltaX value
 
 
   update();

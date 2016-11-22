@@ -7,6 +7,11 @@
 
 namespace MantidQt {
 namespace API {
+
+	enum class DimensionSelection { H, K, L };
+	double EXPORT_OPT_MANTIDQT_API
+		getSkewingAngleInDegreesForDimension(Mantid::Kernel::DblMatrix &skewMatrix, DimensionSelection dimension);
+
 void EXPORT_OPT_MANTIDQT_API
 provideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
                   Mantid::API::IMDWorkspace_const_sptr workspace);

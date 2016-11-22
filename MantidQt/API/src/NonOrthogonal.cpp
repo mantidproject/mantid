@@ -10,6 +10,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 
+#include <cmath>
 #include <boost/pointer_cast.hpp>
 
 namespace {
@@ -161,6 +162,20 @@ template <typename T> bool doRequiresSkewMatrix(T workspace) {
 
   return requiresSkew;
 }
+
+size_t convertDimensionSelectionToIndex(MantidQt::API::DimensionSelection dimension) {
+	size_t index = 0;
+	switch (dimension)
+	{
+	case MantidQt::API::DimensionSelection::H: index = 0;  break;
+	case MantidQt::API::DimensionSelection::K: index = 1; break;
+	case MantidQt::API::DimensionSelection::L: index = 2;  break;
+	default: 
+		throw std::invalid_argument("Dimension selection is not valid.");
+	}
+	return index;
+}
+
 }
 
 namespace MantidQt {
@@ -253,6 +268,24 @@ void transformLookpointToWorkspaceCoord(Mantid::coord_t *lookPoint,
 	lookPoint[dimY] = v1 * skewMatrix[0 + 3 * dimY] +
 		v2 * skewMatrix[1 + 3 * dimY] +
 		v3 * skewMatrix[2 + 3 * dimY];
+
+}
+
+double getSkewingAngleInDegreesForDimension(Mantid::Kernel::DblMatrix &skewMatrix, DimensionSelection dimension) {
+	double canonicalUnitVector[3] = { 0,0,0 };
+	
+	const auto index = convertDimensionSelectionToIndex(dimension);
+	canonicalUnitVector[index] = 1;
+	//populate skewed unit vector
+	double skewedUnitVector[3] = { 0,0,0 };
+	for (size_t i = 0; i < 3; ++i) {
+		skewedUnitVector[i] = *skewMatrix[index+(i*3)];
+	}
+
+	const auto dotProduct = std::inner_product(std::begin(canonicalUnitVector), std::end(canonicalUnitVector), std::begin(skewedUnitVector), 0);
+	const auto angle = std::acos(dotProduct); //sin issue here re: direction of angles? Need reference plane 
+	return angle;
+
 
 }
 
