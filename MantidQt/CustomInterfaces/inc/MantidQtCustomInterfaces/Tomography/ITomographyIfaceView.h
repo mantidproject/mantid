@@ -6,8 +6,8 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconFiltersSettings.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
@@ -282,8 +282,8 @@ public:
    */
   virtual void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-          localStatus) = 0;
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+          &localStatus) = 0;
 
   /**
    * Save settings (normally when closing the interface). This refers
@@ -319,6 +319,16 @@ public:
    * @param alg algorithm initialized and ready to run.
    */
   virtual void runAggregateBands(Mantid::API::IAlgorithm_sptr alg) = 0;
+
+  /**
+   * Prompts the user for confirmation with a yes/no dialogue.
+   * The body can use HTML formatting.
+   *
+   * @param title The title that the message has
+   * @param body The body that the message has. This CAN use HTML formatting
+   */
+  virtual bool userConfirmation(const std::string &title,
+                                const std::string &body) = 0;
 };
 
 } // namespace CustomInterfaces

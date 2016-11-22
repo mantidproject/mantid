@@ -38,13 +38,25 @@ public:
             SLOT(readWorkerStdOut()));
     connect(worker, SIGNAL(readyReadStandardError()), this,
             SLOT(readWorkerStdErr()));
-    connect(worker, SIGNAL(finished()), this, SIGNAL(finished()));
+
+    // not a valid signal?? why
+    connect(worker, SIGNAL(finished(int)), this, SLOT(workerFinished(int)));
+
     connect(this, SIGNAL(finished()), this, SLOT(deleteLater()),
             Qt::DirectConnection);
     worker->moveToThread(this);
   }
 
+  ~TomographyThread() { delete m_worker; }
+
 public slots:
+
+  void workerFinished(int exitCode) {
+    // do stuff
+    std::cout << "Worker called finished()\n";
+    emit finished();
+  }
+
   void readWorkerStdOut() const {
     auto *worker = qobject_cast<TomographyProcess *>(sender());
     QString output(worker->readAllStandardOutput());
@@ -60,6 +72,9 @@ public slots:
 signals:
   void stdOutReady(const QString &s) const;
   void stdErrReady(const QString &s) const;
+
+private:
+  TomographyProcess *m_worker;
 };
 } // CustomInterfaces
 } // MantidQt

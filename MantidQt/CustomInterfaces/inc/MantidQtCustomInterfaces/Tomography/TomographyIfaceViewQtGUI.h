@@ -119,8 +119,8 @@ public:
 
   void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-          localStatus) override;
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+          &localStatus) override;
 
   std::vector<std::string> processingJobsIDs() const override {
     return m_processingJobsIDs;
@@ -156,6 +156,9 @@ public:
   }
 
   void runAggregateBands(Mantid::API::IAlgorithm_sptr alg) override;
+
+  bool userConfirmation(const std::string &title,
+                        const std::string &body) override;
 
 private slots:
   /// for buttons, run tab, and similar

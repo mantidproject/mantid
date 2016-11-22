@@ -1917,17 +1917,31 @@ void TomographyIfaceViewQtGUI::systemSettingsNumericEdited() {
 }
 
 void TomographyIfaceViewQtGUI::resetSystemSettings() {
-  auto reply = QMessageBox::question(
-      this, "Reset Confirmation", "Are you sure you want to <br><strong>RESET "
-                                  "ALL</strong> System settings?<br>This "
-                                  "action cannot be undone!",
-      QMessageBox::Yes | QMessageBox::No);
+  auto title = "Reset Confirmation";
+  auto body = "Are you sure you want to <br><strong>RESET "
+              "ALL</strong> System settings?<br>This "
+              "action cannot be undone!";
   // default constructors with factory defaults
-  if (reply == QMessageBox::Yes) {
+  if (userConfirmation(title, body)) {
     // From factory defaults
     TomoSystemSettings defaults;
     updateSystemSettingsTabFields(defaults);
   }
+}
+
+/**
+ * Prompts the user for confirmation with a yes/no dialogue.
+ * The body can use HTML formatting.
+ *
+ * @param title The title that the message has
+ * @param body The body that the message has. This CAN use HTML formatting
+ */
+bool TomographyIfaceViewQtGUI::userConfirmation(const std::string &title,
+                                                const std::string &body) {
+  auto reply = QMessageBox::question(this, QString::fromStdString(title),
+                                     QString::fromStdString(body),
+                                     QMessageBox::Yes | QMessageBox::No);
+  return reply == QMessageBox::Yes;
 }
 
 /**

@@ -8,6 +8,7 @@
 
 #include <QMutex>
 #include <QObject>
+#include <QProcess>
 #include <boost/scoped_ptr.hpp>
 
 // Qt classes forward declarations
@@ -106,6 +107,8 @@ protected slots:
   void readWorkerStdOut(const QString &s);
   void readWorkerStdErr(const QString &s);
   void addProcessToJobList();
+  void resetRunningReconPrompt(int exitCode);
+  void reconProcessFailedToStart();
 
 private:
   void
@@ -149,6 +152,7 @@ private:
   // TODO: replace this with an std::mutex. Also below for threads.
   // mutex for the job status info update operations on the view
   QMutex *m_statusMutex;
+  QMutex *m_processStartMutex;
 
   // for periodic update of the job status table/tree
   QTimer *m_keepAliveTimer;
@@ -160,6 +164,8 @@ private:
 
   static const std::string g_defOutPathLocal;
   static const std::string g_defOutPathRemote;
+
+  bool m_reconRunning = false;
 };
 
 } // namespace CustomInterfaces

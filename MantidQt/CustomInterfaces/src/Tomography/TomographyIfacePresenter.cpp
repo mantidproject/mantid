@@ -43,14 +43,14 @@ const std::string TomographyIfacePresenter::g_defOutPathRemote =
 #endif
 
 TomographyIfacePresenter::TomographyIfacePresenter(ITomographyIfaceView *view)
-    : m_view(view), m_model(new TomographyIfaceModel()), m_statusMutex(NULL),
+    : m_view(view), m_model(new TomographyIfaceModel()),
+      m_statusMutex(new QMutex()), m_processStartMutex(new QMutex()),
       m_keepAliveTimer(NULL), m_keepAliveThread(NULL) {
   if (!m_view) {
     throw std::runtime_error("Severe inconsistency found. Presenter created "
                              "with an empty/null view (tomography interface). "
                              "Cannot continue.");
   }
-  m_statusMutex = new QMutex();
 }
 
 TomographyIfacePresenter::~TomographyIfacePresenter() {
@@ -64,6 +64,9 @@ TomographyIfacePresenter::~TomographyIfacePresenter() {
 
   if (m_statusMutex)
     delete m_statusMutex;
+
+  if (m_processStartMutex)
+    delete m_processStartMutex;
 }
 
 /**
@@ -584,9 +587,20 @@ void TomographyIfacePresenter::processRunRecon() {
 void TomographyIfacePresenter::prepareThreadAndRunLocalReconstruction(
     const std::string &runnable, const std::vector<std::string> &args,
     const std::string &allOpts) {
-  // currently this kill any other threads/processes without giving a chance for
-  // graceful exit, could do something like emit killThread() that then calls
-  // quit() on the thread itself
+
+  QMutexLocker lockit(m_processStartMutex);
+  if (m_reconRunning) {
+    auto result = m_view->userConfirmation(
+        "Reconstruction is RUNNING",
+        "Are you sure you want to<br>cancel the running reconstruction?");
+
+    if (!result) {
+      // user clicked NO, so we don't terminate the running reconstruction and
+      // simply return
+      return;
+    }
+  }
+
   m_workerThread.reset();
   auto *worker = new MantidQt::CustomInterfaces::TomographyProcess();
   m_workerThread = Mantid::Kernel::make_unique<TomographyThread>(this, worker);
@@ -600,13 +614,27 @@ void TomographyIfacePresenter::prepareThreadAndRunLocalReconstruction(
           SLOT(readWorkerStdErr(QString)));
 
   connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
-  connect(worker, SIGNAL(terminated()), worker, SLOT(deleteLater()),
-          Qt::DirectConnection);
-  connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()),
-          Qt::DirectConnection);
+  // connect(worker, SIGNAL(terminated()), worker, SLOT(deleteLater()),
+  //         Qt::DirectConnection);
+  // connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()),
+  //         Qt::DirectConnection);
 
   m_model->doLocalRunReconstructionJob(runnable, args, allOpts, *m_workerThread,
                                        *worker);
+  m_reconRunning = true;
+}
+
+/** Simply reset the boolean that tracks if a recon is running
+*/
+void TomographyIfacePresenter::reconProcessFailedToStart() {
+  m_view->userError("Reconstruction failed to start",
+                    "The reconstruction process has encountered an error and "
+                    "has failed to start.");
+}
+/** Simply reset the boolean that tracks if a recon is running
+*/
+void TomographyIfacePresenter::resetRunningReconPrompt(int exitCode) {
+  m_reconRunning = false;
 }
 
 void TomographyIfacePresenter::addProcessToJobList() {
