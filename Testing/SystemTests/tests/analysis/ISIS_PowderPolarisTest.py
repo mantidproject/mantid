@@ -77,13 +77,13 @@ def _run_vanadium_calibration():
 def _run_focus():
     run_number = 79514
     polaris_obj = setup_polaris_instrument()
-    return polaris_obj.focus(run_number=run_number, focus_mode="")
+    return polaris_obj.focus(run_number=run_number)
 
 
 def _calibration_validation(cls, results):
     _validation_setup(cls)
     output_full_path = os.path.join(_get_calibration_dir(), _get_calibration_output_name())
-    ws_to_validate_output_name = "pearl_van_cal_output"
+    ws_to_validate_output_name = "POLARIS_Vanadium_Calibration_Output"
     mantid.LoadNexus(Filename=output_full_path, OutputWorkspace=ws_to_validate_output_name)
 
     reference_file_name = "ISIS_Powder-PEARL78338_Van_Cal.nxs"

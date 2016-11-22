@@ -9,11 +9,10 @@ import isis_powder.routines.common as common
 
 def create_van(instrument, van, empty, output_van_file_name, num_of_splines, absorb, gen_absorb):
     input_van_ws = common.load_current_normalised_ws(run_number_string=van, instrument=instrument)
-    input_empty_ws = common.load_current_normalised_ws(run_number_string=empty, instrument=instrument)
 
-    corrected_van_ws = mantid.Minus(LHSWorkspace=input_van_ws, RHSWorkspace=input_empty_ws)
+    corrected_van_ws = common.subtract_sample_empty(ws_to_correct=input_van_ws, empty_sample_ws_string=empty,
+                                                instrument=instrument)
 
-    common.remove_intermediate_workspace(input_empty_ws)
     common.remove_intermediate_workspace(input_van_ws)
 
     run_details = instrument._get_run_details(run_number=van)

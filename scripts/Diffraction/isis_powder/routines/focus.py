@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
+import os
 
 
 def focus(number, instrument, attenuate=True, van_norm=True):
@@ -17,8 +18,14 @@ def _run_focus(instrument, run_number, perform_attenuation, perform_vanadium_nor
 
     run_details = instrument._get_run_details(run_number=run_number)
 
+    # Check the necessary splined vanadium file has been created
+    if not os.path.isfile(run_details.splined_vanadium):
+        raise ValueError("Processed vanadium runs not found at this path: "
+                         + str(run_details.splined_vanadium) + " \n\nHave you created a vanadium calibration yet?")
+
     # Compensate for empty sample if specified
-    input_workspace = instrument._subtract_sample_empty(input_workspace)
+    input_workspace = common.subtract_sample_empty(ws_to_correct=input_workspace, instrument=instrument,
+                                                   empty_sample_ws_string=run_details.sample_empty)
 
     # Align / Focus
     input_workspace = mantid.AlignDetectors(InputWorkspace=input_workspace,

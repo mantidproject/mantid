@@ -58,6 +58,16 @@ def load_monitor(run_numbers, instrument):
     return load_monitor_ws
 
 
+def subtract_sample_empty(ws_to_correct, empty_sample_ws_string, instrument):
+    output = ws_to_correct
+    if empty_sample_ws_string is not None:
+        empty_sample = load_current_normalised_ws(run_number_string=empty_sample_ws_string, instrument=instrument)
+        corrected_ws = mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample)
+        remove_intermediate_workspace(empty_sample)
+        output = corrected_ws
+    return output
+
+
 def _load_raw_files(run_number_string, instrument):
     run_number_list = generate_run_numbers(run_number_string=run_number_string)
     instrument.PEARL_setup_input_directories(run_number=run_number_list[0])
