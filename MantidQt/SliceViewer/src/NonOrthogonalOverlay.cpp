@@ -20,15 +20,25 @@ namespace SliceViewer {
  */
 NonOrthogonalOverlay::NonOrthogonalOverlay(QwtPlot *plot, QWidget *parent)
     : QWidget(parent), m_plot(plot), m_tickNumber(20), m_numberAxisEdge(0.95) {
-  m_skewMatrix[0] = 1.0;
-  m_skewMatrix[1] = 0.0;
-  m_skewMatrix[2] = 0.0;
-  m_skewMatrix[3] = 0.0;
-  m_skewMatrix[4] = 1.0;
-  m_skewMatrix[5] = 0.0;
-  m_skewMatrix[6] = 0.0;
-  m_skewMatrix[7] = 0.0;
-  m_skewMatrix[8] = 1.0;
+  m_fromHklToOrthogonal[0] = 1.0;
+  m_fromHklToOrthogonal[1] = 0.0;
+  m_fromHklToOrthogonal[2] = 0.0;
+  m_fromHklToOrthogonal[3] = 0.0;
+  m_fromHklToOrthogonal[4] = 1.0;
+  m_fromHklToOrthogonal[5] = 0.0;
+  m_fromHklToOrthogonal[6] = 0.0;
+  m_fromHklToOrthogonal[7] = 0.0;
+  m_fromHklToOrthogonal[8] = 1.0;
+
+  m_fromOrthogonalToHkl[0] = 1.0;
+  m_fromOrthogonalToHkl[1] = 0.0;
+  m_fromOrthogonalToHkl[2] = 0.0;
+  m_fromOrthogonalToHkl[3] = 0.0;
+  m_fromOrthogonalToHkl[4] = 1.0;
+  m_fromOrthogonalToHkl[5] = 0.0;
+  m_fromOrthogonalToHkl[6] = 0.0;
+  m_fromOrthogonalToHkl[7] = 0.0;
+  m_fromOrthogonalToHkl[8] = 1.0;
 
   m_pointA = QPointF(0, 0);
   m_pointB = QPointF(0, 0);
@@ -78,8 +88,12 @@ QPointF NonOrthogonalOverlay::invTransform(QPoint pixels) const {
 void NonOrthogonalOverlay::setSkewMatrix() {
   Mantid::Kernel::DblMatrix skewMatrix(3, 3, true);
   API::provideSkewMatrix(skewMatrix, *m_ws);
+  API::transformFromDoubleToCoordT(skewMatrix, m_fromOrthogonalToHkl);
   skewMatrix.Invert();
-  API::transformFromDoubleToCoordT(skewMatrix, m_skewMatrix);
+  API::transformFromDoubleToCoordT(skewMatrix, m_fromHklToOrthogonal);
+  auto angles = MantidQt::API::getAnglesInRadian(m_fromHklToOrthogonal, m_dimX, m_dimY);
+  m_angleX = static_cast<double>(angles.first);
+  m_angleY = static_cast<double>(angles.second);
 }
 
 QPointF NonOrthogonalOverlay::skewMatrixApply(double x, double y) {
@@ -87,7 +101,7 @@ QPointF NonOrthogonalOverlay::skewMatrixApply(double x, double y) {
 	VMD coords(m_ws->get()->getNumDims());
 	coords[m_dimX] = x;
 	coords[m_dimY] = y;
-	API::transformLookpointToWorkspaceCoordGeneric(coords, m_skewMatrix, m_dimX, m_dimY);
+	API::transformLookpointToWorkspaceCoordGeneric(coords, m_fromOrthogonalToHkl, m_dimX, m_dimY);
 	auto xNew = coords[m_dimX];
 	auto yNew = coords[m_dimY];
 
@@ -153,10 +167,10 @@ void NonOrthogonalOverlay::calculateTickMarks() { // assumes X axis
   clearAllAxisPointVectors();
   // overlay grid in static fashion
  
-  API::getSkewingAngleInDegreesForDimension()// tanAlpha deltaX value
+  //API::getSkewingAngleInDegreesForDimension()// tanAlpha deltaX value
 
 
-  update();
+  //update();
 }
 
 //----------------------------------------------------------------------------------------------
@@ -175,43 +189,96 @@ void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
     painter.setPen(centerPen);
     painter.drawLine(transform(m_pointA), transform(m_pointB));
     painter.drawLine(transform(m_pointA), transform(m_pointC));
-	//remember width() always farthest right, height() always bottom
-	//take Xmin etc etc, figure out where on xaxis all points want to be and THEN convert them into width() num,
-	// can take care of number issue later!
-	//minimum test case - calculate line of half xMax and conver that into width, see if it moves around
-	//translate an Xmin to Width() correctly
-	//have problem when trying to divide by zero...
-	//real quick check ratio has been set
-	 
-	
-	auto xMid = m_xMinVis + (m_xRange / 3);
-	//need to get m_range % from xMId
-	auto percentageWeight = m_xMinVis / xMid;
-	auto removedWeighting = xMid - (xMid*percentageWeight);
-	auto ratio = width() / (m_xRange);
-	auto widthMid = width() / 3; //should show as same as widthTranslate
-	auto widthTranslate = ratio * (removedWeighting);
-	painter.drawLine(transform(QPointF(xMid, m_yMinVis)), transform(QPointF(xMid, m_yMaxVis)));
-	painter.drawLine(QPointF(widthTranslate, 0), QPointF(widthTranslate, height()));
 
-	//produce original m_xRange number
-	/*auto minVisPercent = m_xMinVis / xMid;
-	auto removedWeighting = xMid*minVisPercent;
-	auto rw = xMid - removedWeighting; //<--- works!
-	auto skewLineLow = skewMatrixApply(xMid, m_yMinVis);
-	auto skewLineHigh = skewMatrixApply(xMid, m_yMaxVis);
-	auto origWidth = width() / 3;
-	auto widthFromxMin = //figure out ratio and apply here
-	auto tryWidthLow = skewLineLow.x() - (skewLineLow.x()*minVisPercent);
-	auto tryWidthHigh = skewLineHigh.x() - (skewLineHigh.x()*minVisPercent);
-	painter.drawLine(transform(skewLineLow), transform(skewLineHigh));
-	painter.drawLine(QPointF(origWidth, height()), QPointF(origWidth, 0));
-	painter.drawLine(QPointF(tryWidthLow, height()), QPointF(tryWidthHigh, 0));*/
+
+
+
 	gridPen.setWidth(1);
     gridPen.setCapStyle(Qt::FlatCap);
     gridPen.setStyle(Qt::DashLine);
+	const auto widthScreen = width();
+	const auto heightScreen = height();
+	painter.setPen(gridPen);
+	
+	const int numberOfGridLines = 10;
+	drawYLines(painter, numberPen, gridPen, widthScreen, heightScreen, numberOfGridLines, m_angleY);
+	drawXLines(painter, numberPen, gridPen, widthScreen, heightScreen, numberOfGridLines, m_angleX);
+	
 	
   }
+}
+
+void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen& numberPen, QPen& gridPen, int widthScreen, int heightScreen,
+	int numberOfGridLines, double angle)
+	 {
+	
+		    // Draw Y grid lines - in a orthogonal world these lines will be parallel to
+		    // the Y axes.
+		const auto increment = widthScreen / numberOfGridLines;
+	
+		    // We need the -1 since we the angle is defined in the mathematical positive
+		    // sense but we are taking the angle against the y axis in the mathematical
+		    // negative sense.
+		auto xOffsetForYLine = angle == 0. ? 0. : heightScreen
+		 *std::tan(-1 * angle);
+	
+		    // We need to make sure that the we don't have a blank area. This "blankness"
+		    // is determined by the angle. The extra lines which need to be drawn are given by
+		    // lineSpacing/(x offset of line on the top), ie. increment/xOffsetForYLine
+		const int additionalLinesToDraw = static_cast<int>(std::ceil(xOffsetForYLine / increment));
+	int index = angle < 0 ? 0 - additionalLinesToDraw
+		 : additionalLinesToDraw;
+	
+		QString label;
+	for (; index < numberOfGridLines; ++index) {
+		const auto xValue = increment * index;
+		auto start = QPointF(xValue, heightScreen);
+		auto end = QPointF(xValue + xOffsetForYLine, 0);
+		painter.setPen(gridPen);
+		painter.drawLine(start, end);
+		
+			        // Set the label on the x axis
+			auto pointInOrthogonalCoordinates = invTransform(start.toPoint());
+		auto pointInNonOrthogonalCoordinates = skewMatrixApply(pointInOrthogonalCoordinates.x(),
+			pointInOrthogonalCoordinates.y());
+		label = QString::number(pointInNonOrthogonalCoordinates.x(), 'e', 2);
+		painter.setPen(numberPen);
+		painter.drawText(start, label);
+		
+	}
+	}
+
+void NonOrthogonalOverlay::drawXLines(QPainter &painter, QPen& numberPen, QPen& gridPen, int widthScreen, int heightScreen,
+	int numberOfGridLines, double angle)
+	 {
+	
+		    // Draw X grid lines - in a orthogonal world these lines will be parallel to
+		    // the X axes.
+		const auto increment = heightScreen / numberOfGridLines;
+	
+		auto yOffsetForXLine = angle == 0. ? 0. : widthScreen
+		 *std::tan(angle);
+	
+		const int additionalLinesToDraw = static_cast<int>(std::ceil(yOffsetForXLine / increment));
+	int index = angle > 0 ? additionalLinesToDraw
+		 : 0 - additionalLinesToDraw;
+	QString label;
+	for (; index < numberOfGridLines; ++index) {
+		const auto yValue = increment * index;
+		auto start = QPointF(0, yValue);
+		auto end = QPointF(widthScreen, yValue - yOffsetForXLine);
+		painter.setPen(gridPen);
+		painter.drawLine(start, end);
+		
+			        // Set the label on the y axis
+			auto pointInOrthogonalCoordinates = invTransform(start.toPoint());
+		auto pointInNonOrthogonalCoordinates = skewMatrixApply(pointInOrthogonalCoordinates.x(),
+			pointInOrthogonalCoordinates.y());
+		label = QString::number(pointInNonOrthogonalCoordinates.y(), 'e', 2);
+		painter.setPen(numberPen);
+		painter.drawText(QPointF(label.size(), yValue), label);
+		
+	}
 }
 
 } // namespace Mantid

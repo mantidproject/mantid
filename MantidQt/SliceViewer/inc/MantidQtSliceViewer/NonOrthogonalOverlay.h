@@ -65,11 +65,17 @@ private:
   int width() const;
   /// QwtPlot containing this
   QwtPlot *m_plot;
-  Mantid::coord_t m_skewMatrix[9];
+  Mantid::coord_t m_fromHklToOrthogonal[9];
+  Mantid::coord_t m_fromOrthogonalToHkl[9];
   Mantid::API::IMDWorkspace_sptr *m_ws;
 
   QPoint transform(QPointF coords) const;
   QPointF invTransform(QPoint pixels) const;
+
+  void drawYLines(QPainter &painter, QPen& numberPen, QPen& gridPen, int widthScreen, int heightScreen,
+	  int numberOfGridLines, double angle);
+  void drawXLines(QPainter &painter, QPen& numberPen, QPen& gridPen, int widthScreen, int heightScreen,
+	  int numberOfGridLines, double angle);
 
   void setAxesPoints(); // below are set in function
   double m_dim0Max;
@@ -121,6 +127,8 @@ private:
   void paintEvent(QPaintEvent *event) override;
   const double m_numberAxisEdge; // prevents numbers from only being half shown
                                  // on the axis by making boundary smaller
+  double m_angleX;
+  double m_angleY;
 };
 
 } // namespace SliceViewer
