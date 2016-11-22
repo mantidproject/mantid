@@ -3,10 +3,9 @@ from isis_powder.abstract_inst import AbstractInst
 
 class MockInstrument(AbstractInst):
 
-    def __init__(self, user_name, calibration_dir, raw_data_dir, output_dir, default_ext="", tt_mode=None):
+    def __init__(self, user_name, calibration_dir, output_dir, default_ext=""):
         super(MockInstrument, self).__init__(user_name=user_name, calibration_dir=calibration_dir,
-                                             raw_data_dir=raw_data_dir, output_dir=output_dir,
-                                             default_input_ext=default_ext, tt_mode=tt_mode)
+                                             output_dir=output_dir, default_input_ext=default_ext)
         self.generate_cycle_dir_flag = False
 
     def _get_lambda_range(self):
