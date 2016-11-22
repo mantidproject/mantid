@@ -127,8 +127,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         files = SelectNexusFilesByMetadata(files, self._criteria)
 
         if not files:
-            raise RuntimeError('None of the {0} runs satisfied the FWS, '
-                               'MirrorSense and Observable criteria.'.format(label))
+            raise RuntimeError('None of the {0} runs satisfied the FWS and Observable criteria.'.format(label))
         else:
             self.log().information('Filtered {0} runs are: {0} \\n'.format(label,files.replace(',','\\n')))
 
@@ -154,11 +153,11 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         @param ws :: input workspace group
         '''
 
-        for index in range(mtd[wsgroup].getNumberOfEntries()):
-            ws = mtd[wsgroup].getItem(index).getName()
-            size = mtd[ws].blocksize()
+        for item in mtd[wsgroup]:
+            ws = item.getName()
+            size = item.blocksize()
             imin, imax = self._ifws_peak_bins(ws)
-            x_values = mtd[ws].readX(0)
+            x_values = item.readX(0)
             int1 = '__int1_' + ws
             int2 = '__int2_' + ws
             Integration(InputWorkspace=ws, OutputWorkspace=int1,

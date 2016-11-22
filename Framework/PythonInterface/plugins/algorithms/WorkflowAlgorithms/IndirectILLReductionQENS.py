@@ -214,11 +214,10 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         tmp_int = '__tmp_int'+ws
         Integration(InputWorkspace=ws,OutputWorkspace=tmp_int)
 
-        for item in range(mtd[tmp_int].getNumberOfEntries()):
-            for index in range(mtd[tmp_int].getItem(item).getNumberHistograms()):
-                if mtd[tmp_int].getItem(item).readY(index)[0] <= 0:
-                    raise RuntimeError('Negative or 0 integral in spectrum #{0} {1} '
-                                       'Check calibration peak range.'.format(index,message))
+        for item in mtd[tmp_int]:
+            for index in range(item.getNumberHistograms()):
+                if item.readY(index)[0] <= 0:
+                    raise RuntimeError('Negative or 0 integral in spectrum #{0} {1}'.format(index,message))
 
         DeleteWorkspace(tmp_int)
 
@@ -238,7 +237,7 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
             IndirectILLEnergyTransfer(Run = self._calibration_file, OutputWorkspace = calibration, **self._common_args)
             Integration(InputWorkspace=calibration,RangeLower=self._peak_range[0],RangeUpper=self._peak_range[1],
                         OutputWorkspace=calibration)
-            self._warn_negative_integral(calibration,'in calibration workspace.')
+            self._warn_negative_integral(calibration,'in calibration run.')
 
         if self._unmirror_option == 5 or self._unmirror_option == 7:
             alignment = '__alignment_'+self._red_ws
