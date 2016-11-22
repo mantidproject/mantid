@@ -59,4 +59,3 @@ def _find_dictionary_key(dict_to_search, run_number):
             return key
 
     return None
-

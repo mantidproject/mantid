@@ -160,7 +160,6 @@ class AbstractInst(object):
         @return: The filename of the file - Without the path or extension
         """
 
-
     @staticmethod
     @abstractmethod
     def _get_instrument_alg_save_ranges(instrument=''):
@@ -259,7 +258,6 @@ def _prefix_dot_to_ext(ext):
         return '.' + ext
     else:
         return ext
-
 
 
 # These empty hooks can be used to diagnose when an override hasn't

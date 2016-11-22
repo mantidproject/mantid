@@ -138,8 +138,8 @@ class Polaris(AbstractInst):
 
     def correct_sample_vanadium(self, focused_ws, index, vanadium_ws=None):
         spectra_name = "sample_ws-" + str(index + 1)
-        sample = mantid.CropWorkspace(InputWorkspace=focused_ws, OutputWorkspace=spectra_name,
-                                      StartWorkspaceIndex=index, EndWorkspaceIndex=index)
+        mantid.CropWorkspace(InputWorkspace=focused_ws, OutputWorkspace=spectra_name,
+                             StartWorkspaceIndex=index, EndWorkspaceIndex=index)
 
         if vanadium_ws:
             van_rebinned = mantid.RebinToWorkspace(WorkspaceToRebin=vanadium_ws, WorkspaceToMatch=spectra_name)
