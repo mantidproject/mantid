@@ -42,9 +42,10 @@ class Polaris(AbstractInst):
 
     def create_calibration_vanadium(self, run_in_range, do_absorb_corrections=True, gen_absorb_correction=False):
         run_details = self._get_run_details(run_number=int(run_in_range))
-        self._create_calibration_vanadium(vanadium_runs=run_details.vanadium, empty_runs=run_details.sample_empty,
-                                          do_absorb_corrections=do_absorb_corrections,
-                                          gen_absorb_correction=gen_absorb_correction)
+        return self._create_calibration_vanadium(vanadium_runs=run_details.vanadium,
+                                                 empty_runs=run_details.sample_empty,
+                                                 do_absorb_corrections=do_absorb_corrections,
+                                                 gen_absorb_correction=gen_absorb_correction)
 
     # Abstract implementation
     def _get_lambda_range(self):

@@ -79,9 +79,9 @@ class AbstractInst(object):
 
     def _create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name=None, num_of_splines=None,
                                      do_absorb_corrections=True, gen_absorb_correction=False):
-        calibrate.create_van(instrument=self, van=vanadium_runs, empty=empty_runs,
-                             output_van_file_name=output_file_name, num_of_splines=num_of_splines,
-                             absorb=do_absorb_corrections, gen_absorb=gen_absorb_correction)
+        return calibrate.create_van(instrument=self, van=vanadium_runs, empty=empty_runs,
+                                    output_van_file_name=output_file_name, num_of_splines=num_of_splines,
+                                    absorb=do_absorb_corrections, gen_absorb=gen_absorb_correction)
 
     @staticmethod
     def set_debug_mode(val):

@@ -23,7 +23,7 @@ class isis_powder_PolarisVanadiumCalTest(stresstesting.MantidStressTest):
         self.calibration_results = _run_vanadium_calibration()
 
     def validate(self):
-        return _calibration_validation(self, self.calibration_results)
+        return _calibration_validation(self, self.calibration_results)  # First element is WS Group
 
     def cleanup(self):
         # TODO clean up reference files properly
@@ -45,7 +45,7 @@ class isis_powder_PolarisFocusTest(stresstesting.MantidStressTest):
         self.focus_results = _run_focus()
 
     def validation(self):
-        return _calibration_validation(self, self.focus_results)
+        return _focus_validation(self, self.focus_results)
 
     def cleanup(self):
         config['datasearch.directories'] = self.existing_config
@@ -61,17 +61,13 @@ def _gen_required_files():
 
 def _run_vanadium_calibration():
     vanadium_run = 78338
-    empty_run = 78339
-    output_file_name = _get_calibration_output_name()
     gen_absorb = True
 
     polaris_obj = setup_polaris_instrument()
     # Try it without an output name
-    polaris_obj.create_calibration_vanadium(vanadium_runs=vanadium_run, empty_runs=empty_run,
-                                            gen_absorb_correction=gen_absorb)
 
-    return polaris_obj.create_calibration_vanadium(vanadium_runs=vanadium_run, empty_runs=empty_run,
-                                                   output_file_name=output_file_name, gen_absorb_correction=gen_absorb)
+    return polaris_obj.create_calibration_vanadium(run_in_range=vanadium_run,
+                                                   gen_absorb_correction=gen_absorb)
 
 
 def _run_focus():
@@ -82,12 +78,9 @@ def _run_focus():
 
 def _calibration_validation(cls, results):
     _validation_setup(cls)
-    output_full_path = os.path.join(_get_calibration_dir(), _get_calibration_output_name())
-    ws_to_validate_output_name = "POLARIS_Vanadium_Calibration_Output"
-    mantid.LoadNexus(Filename=output_full_path, OutputWorkspace=ws_to_validate_output_name)
-
+    results_name = results[0].getName()
     reference_file_name = "ISIS_Powder-PEARL78338_Van_Cal.nxs"
-    return ws_to_validate_output_name, reference_file_name
+    return results_name, reference_file_name
 
 
 def _focus_validation(cls, results):
