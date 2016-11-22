@@ -30,8 +30,8 @@ public:
 protected:
   void copyFrom(const QwtRasterDataMDNonOrthogonal &source,
                 QwtRasterDataMDNonOrthogonal &dest) const;
-  //Mantid::coord_t *m_lookPoint;
-  //Mantid::coord_t m_skewMatrix[9];
+  // Mantid::coord_t *m_lookPoint;
+  // Mantid::coord_t m_skewMatrix[9];
 };
 
 } // namespace SliceViewer

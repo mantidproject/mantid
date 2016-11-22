@@ -40,7 +40,7 @@ void NonOrthogonalTransform::checkDimensionsForHKL(
 void NonOrthogonalTransform::transform(Mantid::Kernel::VMD &coords, size_t dimX,
                                        size_t dimY) {
   if (m_dimensionsHKL) {
-	API::transformVMDToWorkspaceCoord(coords, m_skewMatrix, dimX, dimY);
+    API::transformVMDToWorkspaceCoord(coords, m_skewMatrix, dimX, dimY);
   }
 }
 

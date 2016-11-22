@@ -691,7 +691,7 @@ void SliceViewer::updateDimensionSliceWidgets() {
 void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
   if (useNonOrthogonal && ui.btnNonOrthogonalToggle->isChecked()) {
     m_data = Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
-    //updateNonOrthogonalOverlay();
+    // updateNonOrthogonalOverlay();
 
   } else {
     m_data = Kernel::make_unique<API::QwtRasterDataMD>();
@@ -711,10 +711,10 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
 void SliceViewer::updateNonOrthogonalOverlay() {
 
   if (ui.btnNonOrthogonalToggle->isChecked()) {
-	  std::cout << "currently doing nothing!" << std::endl;
+    std::cout << "currently doing nothing!" << std::endl;
     QwtDoubleInterval xint = m_plot->axisScaleDiv(m_spect->xAxis())->interval();
     QwtDoubleInterval yint = m_plot->axisScaleDiv(m_spect->yAxis())->interval();
-//    m_nonOrthogonalOverlay->zoomChanged(xint, yint);
+    //    m_nonOrthogonalOverlay->zoomChanged(xint, yint);
   } else {
     m_nonOrthogonalOverlay->m_showLine = false;
   }
@@ -1182,7 +1182,7 @@ void SliceViewer::RebinMode_toggled(bool checked) {
     this->m_data->setOverlayWorkspace(m_overlayWS);
     // Set the normalization from the original workspace
     this->setNormalization(m_ws->displayNormalization());
-	m_overlayWSOutline->setShown(false);
+    m_overlayWSOutline->setShown(false);
   } else {
     setIconFromString(ui.btnRebinMode, g_iconRebinOn, QIcon::Normal, QIcon::On);
     // Start the rebin
@@ -2348,7 +2348,6 @@ void SliceViewer::panned(int, int) {
   applyColorScalingForCurrentSliceIfRequired();
   updateNonOrthogonalOverlay();
   this->updatePeaksOverlay();
-
 }
 
 /**
@@ -2385,7 +2384,7 @@ void SliceViewer::autoRebinIfRequired() { // probably rename this if forcing it
   if (isAutoRebinSet()) {
     rebinParamsChanged();
   }
- updateNonOrthogonalOverlay();
+  updateNonOrthogonalOverlay();
 }
 /** NON ORTHOGONAL STUFF **/
 
@@ -2398,9 +2397,9 @@ void SliceViewer::setNonOrthogonalbtn() {
   // Orthogonal Overlay axes calculated and appear.
   if (canShowSkewedWS) {
     m_nonOrthogonalOverlay->calculateAxesSkew(&m_ws, m_dimX, m_dimY);
-	QwtDoubleInterval xint = m_plot->axisScaleDiv(m_spect->xAxis())->interval();
-	QwtDoubleInterval yint = m_plot->axisScaleDiv(m_spect->yAxis())->interval();
-	m_nonOrthogonalOverlay->zoomChanged(xint, yint);
+    QwtDoubleInterval xint = m_plot->axisScaleDiv(m_spect->xAxis())->interval();
+    QwtDoubleInterval yint = m_plot->axisScaleDiv(m_spect->yAxis())->interval();
+    m_nonOrthogonalOverlay->zoomChanged(xint, yint);
   } else {
     m_nonOrthogonalOverlay->m_showLine = false;
   }

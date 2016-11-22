@@ -167,93 +167,93 @@ template <typename T> bool doRequiresSkewMatrix(T workspace) {
 }
 
 template <typename T, size_t N>
-std::array<T, N> getTransformedArray(T skewMatrix[N*N], size_t dimension) {
-	std::array<T, N> vec = { 0., 0., 0. };
-	for (size_t index = 0; index < N; ++index) {
-		vec[index] = skewMatrix[dimension + index*N];		
-	}
-	return vec;
-	
+std::array<T, N> getTransformedArray(T skewMatrix[N * N], size_t dimension) {
+  std::array<T, N> vec = {0., 0., 0.};
+  for (size_t index = 0; index < N; ++index) {
+    vec[index] = skewMatrix[dimension + index * N];
+  }
+  return vec;
 }
 
-template<typename T, size_t N>
-void normalizeVector(std::array<T, N>& vector) {
-	auto sumOfSquares = [](double sum, double element) { return sum + element*element; };
-	auto norm = std::accumulate(vector.begin(), vector.end(), 0.f, sumOfSquares);
-	norm = std::sqrt(norm);
-	for (auto& element : vector) {
-		element /= norm;
-		
-	}
-	
+template <typename T, size_t N> void normalizeVector(std::array<T, N> &vector) {
+  auto sumOfSquares =
+      [](double sum, double element) { return sum + element * element; };
+  auto norm = std::accumulate(vector.begin(), vector.end(), 0.f, sumOfSquares);
+  norm = std::sqrt(norm);
+  for (auto &element : vector) {
+    element /= norm;
+  }
 }
-template<typename T>
-std::array<T, 3> getNormalVector(std::array<T, 3>& dimXTransformed,
-	std::array<T, 3>& dimYTransformed) {
-	std::array<T, 3> normalVector;
-	for (size_t index = 0; index < 3; ++index) {
-		normalVector[index] = dimXTransformed[(index + 1) % 3] * dimYTransformed[(index + 2) % 3] -
-			dimXTransformed[(index + 2) % 3] * dimYTransformed[(index + 1) % 3];
-		
-	}
-	
-		  // Make sure that the output is truely normalized
-		normalizeVector<T, 3>(normalVector);
-	return normalVector;
-	
+template <typename T>
+std::array<T, 3> getNormalVector(std::array<T, 3> &dimXTransformed,
+                                 std::array<T, 3> &dimYTransformed) {
+  std::array<T, 3> normalVector;
+  for (size_t index = 0; index < 3; ++index) {
+    normalVector[index] =
+        dimXTransformed[(index + 1) % 3] * dimYTransformed[(index + 2) % 3] -
+        dimXTransformed[(index + 2) % 3] * dimYTransformed[(index + 1) % 3];
+  }
+
+  // Make sure that the output is truely normalized
+  normalizeVector<T, 3>(normalVector);
+  return normalVector;
 }
 
 /**
-  * Calculate the angle for a given dimension. Note that this function expects all vectors to be normalized.
+  * Calculate the angle for a given dimension. Note that this function expects
+ * all vectors to be normalized.
   */
-	template<typename T, size_t N>
-	T getAngleInRadian(std::array<T, N> vector1, std::array<T, N> vector2, std::array<T, N> normalVector) {
-	normalizeVector<T, N>(vector1);
-	normalizeVector<T, N>(vector2);
-	
-		
-		  // Get the value of the angle from the dot product: v1*v2 = cos (a)*|v1|*|v2|
-		auto dotProduct = std::inner_product(vector1.begin(), vector1.end(), vector2.begin(), 0.f);
-	
-		  // Handle case where the dotProduct is 1 or -1
-		T angle = 0.;
-	if (dotProduct == 1.) {
-		angle = 0.;
-		
-	}
-	else if (dotProduct == -1.) {
-		angle = M_PI;
-		
-	}
-	else {
-		angle = std::acos(dotProduct);
-		
-	}
-	// Get the direction of the angle
-	auto normalForDirection = getNormalVector<Mantid::coord_t>(vector1, vector2);
-	auto direction = std::inner_product(normalForDirection.begin(), normalForDirection.end(), normalVector.begin(), 0.f);
-	
-		if (direction < 0) {
-		angle *= -1.f;
-		
-	}
-	return angle;
-	
-	}
+template <typename T, size_t N>
+T getAngleInRadian(std::array<T, N> vector1, std::array<T, N> vector2,
+                   std::array<T, N> normalVector) {
+  normalizeVector<T, N>(vector1);
+  normalizeVector<T, N>(vector2);
 
-size_t convertDimensionSelectionToIndex(MantidQt::API::DimensionSelection dimension) {
-	size_t index = 0;
-	switch (dimension)
-	{
-	case MantidQt::API::DimensionSelection::H: index = 0;  break;
-	case MantidQt::API::DimensionSelection::K: index = 1; break;
-	case MantidQt::API::DimensionSelection::L: index = 2;  break;
-	default: 
-		throw std::invalid_argument("Dimension selection is not valid.");
-	}
-	return index;
+  // Get the value of the angle from the dot product: v1*v2 = cos (a)*|v1|*|v2|
+  auto dotProduct =
+      std::inner_product(vector1.begin(), vector1.end(), vector2.begin(), 0.f);
+
+  // Handle case where the dotProduct is 1 or -1
+  T angle = 0.;
+  if (dotProduct == 1.) {
+    angle = 0.;
+
+  } else if (dotProduct == -1.) {
+    angle = M_PI;
+
+  } else {
+    angle = std::acos(dotProduct);
+  }
+  // Get the direction of the angle
+  auto normalForDirection = getNormalVector<Mantid::coord_t>(vector1, vector2);
+  auto direction =
+      std::inner_product(normalForDirection.begin(), normalForDirection.end(),
+                         normalVector.begin(), 0.f);
+
+  if (direction < 0) {
+    angle *= -1.f;
+  }
+  return angle;
 }
 
+size_t
+convertDimensionSelectionToIndex(MantidQt::API::DimensionSelection dimension) {
+  size_t index = 0;
+  switch (dimension) {
+  case MantidQt::API::DimensionSelection::H:
+    index = 0;
+    break;
+  case MantidQt::API::DimensionSelection::K:
+    index = 1;
+    break;
+  case MantidQt::API::DimensionSelection::L:
+    index = 2;
+    break;
+  default:
+    throw std::invalid_argument("Dimension selection is not valid.");
+  }
+  return index;
+}
 }
 
 namespace MantidQt {
@@ -287,7 +287,7 @@ bool requiresSkewMatrix(Mantid::API::IMDWorkspace_const_sptr workspace) {
                  boost::dynamic_pointer_cast<
                      const Mantid::API::IMDHistoWorkspace>(workspace)) {
     requiresSkewMatrix = doRequiresSkewMatrix(histoWorkspace);
-  } 
+  }
   return requiresSkewMatrix;
 }
 bool isHKLDimensions(Mantid::API::IMDWorkspace_const_sptr workspace,
@@ -317,58 +317,64 @@ void transformFromDoubleToCoordT(Mantid::Kernel::DblMatrix &skewMatrix,
 /*
 template <typename T>
 void transformLookpointToWorkspaceCoordGeneric(T &lookPoint,
-	Mantid::coord_t skewMatrix[9], size_t &dimX, size_t &dimY) {
-	auto v1 = lookPoint[0];
-	auto v2 = lookPoint[1];
-	auto v3 = lookPoint[2];
-	lookPoint[dimX] = v1 * skewMatrix[0 + 3 * dimX] +
-		v2 * skewMatrix[1 + 3 * dimX] +
-		v3 * skewMatrix[2 + 3 * dimX];
-	lookPoint[dimY] = v1 * skewMatrix[0 + 3 * dimY] +
-		v2 * skewMatrix[1 + 3 * dimY] +
-		v3 * skewMatrix[2 + 3 * dimY];
+        Mantid::coord_t skewMatrix[9], size_t &dimX, size_t &dimY) {
+        auto v1 = lookPoint[0];
+        auto v2 = lookPoint[1];
+        auto v3 = lookPoint[2];
+        lookPoint[dimX] = v1 * skewMatrix[0 + 3 * dimX] +
+                v2 * skewMatrix[1 + 3 * dimX] +
+                v3 * skewMatrix[2 + 3 * dimX];
+        lookPoint[dimY] = v1 * skewMatrix[0 + 3 * dimY] +
+                v2 * skewMatrix[1 + 3 * dimY] +
+                v3 * skewMatrix[2 + 3 * dimY];
 }*/
 void transformVMDToWorkspaceCoord(Mantid::Kernel::VMD &lookPoint,
-	Mantid::coord_t skewMatrix[9], size_t &dimX, size_t &dimY) {
-	transformLookpointToWorkspaceCoordGeneric(lookPoint, skewMatrix, dimX, dimY);
+                                  Mantid::coord_t skewMatrix[9], size_t &dimX,
+                                  size_t &dimY) {
+  transformLookpointToWorkspaceCoordGeneric(lookPoint, skewMatrix, dimX, dimY);
 }
 
 void transformLookpointToWorkspaceCoord(Mantid::coord_t *lookPoint,
-	const Mantid::coord_t skewMatrix[9], const size_t &dimX, const size_t &dimY) {
+                                        const Mantid::coord_t skewMatrix[9],
+                                        const size_t &dimX,
+                                        const size_t &dimY) {
 
-	//transformLookpointToWorkspaceCoordGeneric(&lookPoint, skewMatrix, dimX, dimY);
-	auto v1 = lookPoint[0];
-	auto v2 = lookPoint[1];
-	auto v3 = lookPoint[2];
-	lookPoint[dimX] = v1 * skewMatrix[0 + 3 * dimX] +
-		v2 * skewMatrix[1 + 3 * dimX] +
-		v3 * skewMatrix[2 + 3 * dimX];
-	lookPoint[dimY] = v1 * skewMatrix[0 + 3 * dimY] +
-		v2 * skewMatrix[1 + 3 * dimY] +
-		v3 * skewMatrix[2 + 3 * dimY];
-
+  // transformLookpointToWorkspaceCoordGeneric(&lookPoint, skewMatrix, dimX,
+  // dimY);
+  auto v1 = lookPoint[0];
+  auto v2 = lookPoint[1];
+  auto v3 = lookPoint[2];
+  lookPoint[dimX] = v1 * skewMatrix[0 + 3 * dimX] +
+                    v2 * skewMatrix[1 + 3 * dimX] +
+                    v3 * skewMatrix[2 + 3 * dimX];
+  lookPoint[dimY] = v1 * skewMatrix[0 + 3 * dimY] +
+                    v2 * skewMatrix[1 + 3 * dimY] +
+                    v3 * skewMatrix[2 + 3 * dimY];
 }
 
-std::pair<float, float> getAnglesInRadian(Mantid::coord_t skewMatrixCoord[9], size_t dimX, size_t dimY) {
-	std::array<Mantid::coord_t, 3> dimXOriginal = { 0., 0., 0. };
-	std::array<Mantid::coord_t, 3> dimYOriginal = { 0., 0., 0. };
-	dimXOriginal[dimX] = 1.0;
-	dimYOriginal[dimY] = 1.0;
-	
-		  // Get the tranformed values
-		auto dimXTransformed = getTransformedArray<Mantid::coord_t, 3>(skewMatrixCoord, dimX);
-	auto dimYTransformed = getTransformedArray<Mantid::coord_t, 3>(skewMatrixCoord, dimY);
-	
-		  // Calculate the normal vector of the the transformed environment
-		auto normalVector = getNormalVector<Mantid::coord_t>(dimXTransformed, dimYTransformed);
-	
-		  // Get the angle for dimX and dimY
-		auto angleDimX = getAngleInRadian(dimXOriginal, dimXTransformed, normalVector);
-	auto angleDimY = getAngleInRadian(dimYOriginal, dimYTransformed, normalVector);
-	return std::make_pair(angleDimX, angleDimY);
-	
-}
+std::pair<float, float> getAnglesInRadian(Mantid::coord_t skewMatrixCoord[9],
+                                          size_t dimX, size_t dimY) {
+  std::array<Mantid::coord_t, 3> dimXOriginal = {0., 0., 0.};
+  std::array<Mantid::coord_t, 3> dimYOriginal = {0., 0., 0.};
+  dimXOriginal[dimX] = 1.0;
+  dimYOriginal[dimY] = 1.0;
 
-}
-}
+  // Get the tranformed values
+  auto dimXTransformed =
+      getTransformedArray<Mantid::coord_t, 3>(skewMatrixCoord, dimX);
+  auto dimYTransformed =
+      getTransformedArray<Mantid::coord_t, 3>(skewMatrixCoord, dimY);
 
+  // Calculate the normal vector of the the transformed environment
+  auto normalVector =
+      getNormalVector<Mantid::coord_t>(dimXTransformed, dimYTransformed);
+
+  // Get the angle for dimX and dimY
+  auto angleDimX =
+      getAngleInRadian(dimXOriginal, dimXTransformed, normalVector);
+  auto angleDimY =
+      getAngleInRadian(dimYOriginal, dimYTransformed, normalVector);
+  return std::make_pair(angleDimX, angleDimY);
+}
+}
+}

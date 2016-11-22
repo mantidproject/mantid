@@ -91,28 +91,30 @@ void NonOrthogonalOverlay::setSkewMatrix() {
   API::transformFromDoubleToCoordT(skewMatrix, m_fromOrthogonalToHkl);
   skewMatrix.Invert();
   API::transformFromDoubleToCoordT(skewMatrix, m_fromHklToOrthogonal);
-  auto angles = MantidQt::API::getAnglesInRadian(m_fromHklToOrthogonal, m_dimX, m_dimY);
+  auto angles =
+      MantidQt::API::getAnglesInRadian(m_fromHklToOrthogonal, m_dimX, m_dimY);
   m_angleX = static_cast<double>(angles.first);
   m_angleY = static_cast<double>(angles.second);
 }
 
 QPointF NonOrthogonalOverlay::skewMatrixApply(double x, double y) {
   // keyed array,
-	VMD coords(m_ws->get()->getNumDims());
-	coords[m_dimX] = x;
-	coords[m_dimY] = y;
-	API::transformLookpointToWorkspaceCoordGeneric(coords, m_fromOrthogonalToHkl, m_dimX, m_dimY);
-	auto xNew = coords[m_dimX];
-	auto yNew = coords[m_dimY];
+  VMD coords(m_ws->get()->getNumDims());
+  coords[m_dimX] = x;
+  coords[m_dimY] = y;
+  API::transformLookpointToWorkspaceCoordGeneric(coords, m_fromOrthogonalToHkl,
+                                                 m_dimX, m_dimY);
+  auto xNew = coords[m_dimX];
+  auto yNew = coords[m_dimY];
 
   return QPointF(xNew, yNew);
 }
 
-//void NonOrthogonalOverlay::testSkewMatrixApply()
+// void NonOrthogonalOverlay::testSkewMatrixApply()
 
 void NonOrthogonalOverlay::zoomChanged(QwtDoubleInterval xint,
                                        QwtDoubleInterval yint) {
-	std::cout << "zoom changed hit" << std::endl;
+  std::cout << "zoom changed hit" << std::endl;
   m_xMinVis = xint.minValue();
   m_xMaxVis = xint.maxValue();
   m_yMinVis = yint.minValue();
@@ -124,7 +126,7 @@ void NonOrthogonalOverlay::zoomChanged(QwtDoubleInterval xint,
   m_yMaxVisBuffered = m_yMaxVis + m_yRange;
   m_yMinVisBuffered = m_yMinVis - m_yRange;
 
-  //calculateTickMarks();
+  // calculateTickMarks();
 }
 
 void NonOrthogonalOverlay::setAxesPoints() {
@@ -143,12 +145,10 @@ void NonOrthogonalOverlay::calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws,
   m_ws = ws;
   m_dimX = dimX;
   m_dimY = dimY;
-  
 
   if (API::isHKLDimensions(*m_ws, m_dimX, m_dimY)) {
     setSkewMatrix();
     setAxesPoints();
-	
   }
 }
 
@@ -166,11 +166,10 @@ void NonOrthogonalOverlay::clearAllAxisPointVectors() {
 void NonOrthogonalOverlay::calculateTickMarks() { // assumes X axis
   clearAllAxisPointVectors();
   // overlay grid in static fashion
- 
-  //API::getSkewingAngleInDegreesForDimension()// tanAlpha deltaX value
 
+  // API::getSkewingAngleInDegreesForDimension()// tanAlpha deltaX value
 
-  //update();
+  // update();
 }
 
 //----------------------------------------------------------------------------------------------
@@ -190,95 +189,91 @@ void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
     painter.drawLine(transform(m_pointA), transform(m_pointB));
     painter.drawLine(transform(m_pointA), transform(m_pointC));
 
-
-
-
-	gridPen.setWidth(1);
+    gridPen.setWidth(1);
     gridPen.setCapStyle(Qt::FlatCap);
     gridPen.setStyle(Qt::DashLine);
-	const auto widthScreen = width();
-	const auto heightScreen = height();
-	painter.setPen(gridPen);
-	
-	const int numberOfGridLines = 10;
-	drawYLines(painter, numberPen, gridPen, widthScreen, heightScreen, numberOfGridLines, m_angleY);
-	drawXLines(painter, numberPen, gridPen, widthScreen, heightScreen, numberOfGridLines, m_angleX);
-	
-	
+    const auto widthScreen = width();
+    const auto heightScreen = height();
+    painter.setPen(gridPen);
+
+    const int numberOfGridLines = 10;
+    drawYLines(painter, numberPen, gridPen, widthScreen, heightScreen,
+               numberOfGridLines, m_angleY);
+    drawXLines(painter, numberPen, gridPen, widthScreen, heightScreen,
+               numberOfGridLines, m_angleX);
   }
 }
 
-void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen& numberPen, QPen& gridPen, int widthScreen, int heightScreen,
-	int numberOfGridLines, double angle)
-	 {
-	
-		    // Draw Y grid lines - in a orthogonal world these lines will be parallel to
-		    // the Y axes.
-		const auto increment = widthScreen / numberOfGridLines;
-	
-		    // We need the -1 since we the angle is defined in the mathematical positive
-		    // sense but we are taking the angle against the y axis in the mathematical
-		    // negative sense.
-		auto xOffsetForYLine = angle == 0. ? 0. : heightScreen
-		 *std::tan(-1 * angle);
-	
-		    // We need to make sure that the we don't have a blank area. This "blankness"
-		    // is determined by the angle. The extra lines which need to be drawn are given by
-		    // lineSpacing/(x offset of line on the top), ie. increment/xOffsetForYLine
-		const int additionalLinesToDraw = static_cast<int>(std::ceil(xOffsetForYLine / increment));
-	int index = angle < 0 ? 0 - additionalLinesToDraw
-		 : additionalLinesToDraw;
-	
-		QString label;
-	for (; index < numberOfGridLines; ++index) {
-		const auto xValue = increment * index;
-		auto start = QPointF(xValue, heightScreen);
-		auto end = QPointF(xValue + xOffsetForYLine, 0);
-		painter.setPen(gridPen);
-		painter.drawLine(start, end);
-		
-			        // Set the label on the x axis
-			auto pointInOrthogonalCoordinates = invTransform(start.toPoint());
-		auto pointInNonOrthogonalCoordinates = skewMatrixApply(pointInOrthogonalCoordinates.x(),
-			pointInOrthogonalCoordinates.y());
-		label = QString::number(pointInNonOrthogonalCoordinates.x(), 'e', 2);
-		painter.setPen(numberPen);
-		painter.drawText(start, label);
-		
-	}
-	}
+void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &numberPen,
+                                      QPen &gridPen, int widthScreen,
+                                      int heightScreen, int numberOfGridLines,
+                                      double angle) {
 
-void NonOrthogonalOverlay::drawXLines(QPainter &painter, QPen& numberPen, QPen& gridPen, int widthScreen, int heightScreen,
-	int numberOfGridLines, double angle)
-	 {
-	
-		    // Draw X grid lines - in a orthogonal world these lines will be parallel to
-		    // the X axes.
-		const auto increment = heightScreen / numberOfGridLines;
-	
-		auto yOffsetForXLine = angle == 0. ? 0. : widthScreen
-		 *std::tan(angle);
-	
-		const int additionalLinesToDraw = static_cast<int>(std::ceil(yOffsetForXLine / increment));
-	int index = angle > 0 ? additionalLinesToDraw
-		 : 0 - additionalLinesToDraw;
-	QString label;
-	for (; index < numberOfGridLines; ++index) {
-		const auto yValue = increment * index;
-		auto start = QPointF(0, yValue);
-		auto end = QPointF(widthScreen, yValue - yOffsetForXLine);
-		painter.setPen(gridPen);
-		painter.drawLine(start, end);
-		
-			        // Set the label on the y axis
-			auto pointInOrthogonalCoordinates = invTransform(start.toPoint());
-		auto pointInNonOrthogonalCoordinates = skewMatrixApply(pointInOrthogonalCoordinates.x(),
-			pointInOrthogonalCoordinates.y());
-		label = QString::number(pointInNonOrthogonalCoordinates.y(), 'e', 2);
-		painter.setPen(numberPen);
-		painter.drawText(QPointF(label.size(), yValue), label);
-		
-	}
+  // Draw Y grid lines - in a orthogonal world these lines will be parallel to
+  // the Y axes.
+  const auto increment = widthScreen / numberOfGridLines;
+
+  // We need the -1 since we the angle is defined in the mathematical positive
+  // sense but we are taking the angle against the y axis in the mathematical
+  // negative sense.
+  auto xOffsetForYLine = angle == 0. ? 0. : heightScreen * std::tan(-1 * angle);
+
+  // We need to make sure that the we don't have a blank area. This "blankness"
+  // is determined by the angle. The extra lines which need to be drawn are
+  // given by
+  // lineSpacing/(x offset of line on the top), ie. increment/xOffsetForYLine
+  const int additionalLinesToDraw =
+      static_cast<int>(std::ceil(xOffsetForYLine / increment));
+  int index = angle < 0 ? 0 - additionalLinesToDraw : additionalLinesToDraw;
+
+  QString label;
+  for (; index < numberOfGridLines; ++index) {
+    const auto xValue = increment * index;
+    auto start = QPointF(xValue, heightScreen);
+    auto end = QPointF(xValue + xOffsetForYLine, 0);
+    painter.setPen(gridPen);
+    painter.drawLine(start, end);
+
+    // Set the label on the x axis
+    auto pointInOrthogonalCoordinates = invTransform(start.toPoint());
+    auto pointInNonOrthogonalCoordinates = skewMatrixApply(
+        pointInOrthogonalCoordinates.x(), pointInOrthogonalCoordinates.y());
+    label = QString::number(pointInNonOrthogonalCoordinates.x(), 'e', 2);
+    painter.setPen(numberPen);
+    painter.drawText(start, label);
+  }
+}
+
+void NonOrthogonalOverlay::drawXLines(QPainter &painter, QPen &numberPen,
+                                      QPen &gridPen, int widthScreen,
+                                      int heightScreen, int numberOfGridLines,
+                                      double angle) {
+
+  // Draw X grid lines - in a orthogonal world these lines will be parallel to
+  // the X axes.
+  const auto increment = heightScreen / numberOfGridLines;
+
+  auto yOffsetForXLine = angle == 0. ? 0. : widthScreen * std::tan(angle);
+
+  const int additionalLinesToDraw =
+      static_cast<int>(std::ceil(yOffsetForXLine / increment));
+  int index = angle > 0 ? additionalLinesToDraw : 0 - additionalLinesToDraw;
+  QString label;
+  for (; index < numberOfGridLines; ++index) {
+    const auto yValue = increment * index;
+    auto start = QPointF(0, yValue);
+    auto end = QPointF(widthScreen, yValue - yOffsetForXLine);
+    painter.setPen(gridPen);
+    painter.drawLine(start, end);
+
+    // Set the label on the y axis
+    auto pointInOrthogonalCoordinates = invTransform(start.toPoint());
+    auto pointInNonOrthogonalCoordinates = skewMatrixApply(
+        pointInOrthogonalCoordinates.x(), pointInOrthogonalCoordinates.y());
+    label = QString::number(pointInNonOrthogonalCoordinates.y(), 'e', 2);
+    painter.setPen(numberPen);
+    painter.drawText(QPointF(label.size(), yValue), label);
+  }
 }
 
 } // namespace Mantid
