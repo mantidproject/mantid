@@ -53,7 +53,7 @@ dialog will open. Select ``INTER_NR_test2.tbl`` as the file, and enter ``MyTable
 as the output workspace.
 
 A table workspace called ``MyTable`` should now exist in the ADS (:ref:`Analysis Data Service <Analysis Data Service>`).
-In addition the table workspace should be opened as well and  The processing table
+In addition the table workspace should be opened as well and the processing table
 (shown below) should now contain four rows (13460, 13462, 13469, 13470).
 
 .. figure:: /images/ISISReflectometryPolref_INTER_table.PNG
@@ -360,9 +360,9 @@ Measure Based Search Transfer
 
 Measure based search transfer uses the log-values within nexus files from the experiment to assemble the batch. Since the files themselves are required, not just the overview metadata, the files must be accessible by mantid. One way of doing this is to mount the archive and set the user property ``icatDownload.mountPoint`` to your mount point. It may end up looking something like this ``icatDownload.mountPoint=/Volumes/inst$``. Alternately, you can download the files to your local disk and simply add that directory to the managed search directories in ``Manage User Directories``.
 
-- Any runs with the measurement_id log, will be
+- Any runs with the ``measurement_id`` log, will be
   placed into the same group.
-- Any runs with the ``same measurement_id`` and the same ``measurement_subid`` logs, will be merged into a single row, with all the runs listed in the **Run(s)** column in the format, ``123+124+125``.
+- Any runs with the same ``measurement_id`` and the same ``measurement_subid`` logs, will be merged into a single row, with all the runs listed in the **Run(s)** column in the format, ``123+124+125``.
 
 Failed transfers
 ================
@@ -460,11 +460,7 @@ ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext
 |                               | multi-select in order to allow for the save output   |
 |                               | to contain multiple parameter notes.                 |
 +-------------------------------+------------------------------------------------------+
-| Spectra list                  | Spectra list entry allows you to specify what        |
-|                               | spectra you want in the output file. If this is      |
-|                               | blank, all spectra are included.                     |
-+-------------------------------+------------------------------------------------------+
-| File format                   | This dialog can save to ANSTO, Ill cosmos, 3-column, |
+| File format                   | This dialog can save to ANSTO, ILL cosmos, 3-column, |
 |                               | and a customisable format. It doesn't save from      |
 |                               | the main interface's table, but from workspaces      |
 |                               | loaded into mantid. All algorithms are also          |
@@ -472,7 +468,7 @@ ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext
 +-------------------------------+------------------------------------------------------+
 | Custom Format Options         | When saving in 'Custom' this section allows you      |
 |                               | to specify if you want a Title and/or Q Resolution   |
-|                               | headings as well as specifying the delimiter.        |
+|                               | column as well as specifying the delimiter.          |
 +-------------------------------+------------------------------------------------------+
 
 .. _ISIS_Reflectomety-Options:
