@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import glob
 from mantid.api import AlgorithmFactory, AnalysisDataServiceImpl, DataProcessorAlgorithm, FileAction, FileProperty, ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, PropertyMode,  WorkspaceProperty
 from mantid.kernel import Direct, Direction, IntArrayProperty, StringListValidator, StringMandatoryValidator, UnitConversion
 from mantid.simpleapi import AddSampleLog, CalculateFlatBackground,\
@@ -8,6 +9,7 @@ from mantid.simpleapi import AddSampleLog, CalculateFlatBackground,\
                              FindDetectorsOutsideLimits, FindEPP, GetEiMonDet, GroupWorkspaces, Integration, Load,\
                              MaskDetectors, MedianDetectorTest, MergeRuns, Minus, Multiply, NormaliseToMonitor, Plus, Rebin, Scale
 import numpy
+from os import path
 
 CLEANUP_DELETE = 'DeleteIntermediateWorkspaces'
 CLEANUP_KEEP   = 'KeepIntermediateWorkspaces'
@@ -148,9 +150,30 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                      OutputWorkspace=outWs,
                                      FilenameVanadium=eppReference)
             else:
-                workspace = Load(Filename=inputFilename,
-                                 OutputWorkspace=outWs,
-                                 FilenameVanadium=eppReference)
+                # For multiple files, we need an EPP reference workspace
+                # anyway, so we'll use the first file the user wants to
+                # load.
+                head, tail = path.split(inputFilename)
+                # Loop over known MultipleFileProperty file list
+                # specifiers.
+                for separator in [':', ',', '-', '+']:
+                    referenceFilename, sep, rest = tail.partition(separator)
+                    if referenceFilename:
+                        break;
+                if referenceFilename:
+                    referenceFilename = path.join(head, referenceFilename)
+                    self.log().information('Using ' + referenceFilename + ' as initial EPP reference.')
+                    outWsName = wsNames.withSuffix('initial_epp_reference')
+                    wsCleanup.toBeCleanedUp(outWsName)
+                    referenceWs = Load(Filename=referenceFilename,
+                                       OutputWorkspace=outWsName)
+                    workspace = Load(Filename=inputFilename,
+                                     OutputWorkspace=outWs,
+                                     WorkspaceVanadium=referenceWs)
+                else:
+                    # Single file, no EPP reference.
+                    workspace = Load(Filename=inputFilename,
+                                     OutputWorkspace=outWs)
             # Now merge the loaded files (if required)
             outWsName = wsNames.withSuffix('merged')
             wsCleanup.protect(outWsName)
