@@ -222,12 +222,12 @@
         </item>
         <item>
          <property name="text">
-          <string>sample.start_time</string>
+          <string>start_time</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string/>
+          <string>run_number</string>
          </property>
         </item>
        </widget>
