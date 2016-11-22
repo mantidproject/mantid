@@ -2,6 +2,7 @@ import stresstesting
 from mantid.simpleapi import *
 from mantid import config
 
+
 class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
     # cache default instrument and datadirs
@@ -38,14 +39,14 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
         self.disableChecking = ['Instrument']
 
-        result = IndirectILLReductionQENS(Run="136558-136559",
-                                          CalibrationRun="136553-136554",
-                                          BackgroundRun="136599-136600",
-                                          AlignmentRun="136555-136556",
-                                          BackgroundScalingFactor=0.1,
-                                          UnmirrorOption=7)
+        IndirectILLReductionQENS(Run="136558-136559",
+                                 CalibrationRun="136553-136554",
+                                 BackgroundRun="136599-136600",
+                                 AlignmentRun="136555-136556",
+                                 BackgroundScalingFactor=0.1,
+                                 UnmirrorOption=7)
 
         self.tearDown()
 
     def validate(self):
-        return ['136558_result','ILLIN16B_QENS.nxs']
+        return ['136558_red','ILLIN16B_QENS.nxs']
