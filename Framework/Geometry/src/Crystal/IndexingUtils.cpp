@@ -90,7 +90,8 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
                               double a, double b, double c, double alpha,
                               double beta, double gamma,
                               double required_tolerance, int base_index,
-                              size_t num_initial, double degrees_per_step) {
+                              size_t num_initial, double degrees_per_step,
+                              bool fixAll) {
   if (UB.numRows() != 3 || UB.numCols() != 3) {
     throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
@@ -159,11 +160,21 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   ScanFor_UB(UB, some_qs, a, b, c, alpha, beta, gamma, degrees_per_step,
              required_tolerance);
 
+
   double fit_error = 0;
   std::vector<V3D> miller_ind;
   std::vector<V3D> indexed_qs;
   miller_ind.reserve(q_vectors.size());
   indexed_qs.reserve(q_vectors.size());
+
+  // If the user has requested we fix all parameters then return here with the
+  // found UB and do not optimise it.
+  if (fixAll) {
+    GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind, indexed_qs,
+                    fit_error);
+    return fit_error;
+  }
+
   // now gradually bring in the remaining
   // peaks and re-optimize the UB to index
   // them as well
@@ -180,10 +191,11 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
       some_qs.push_back(sorted_qs[i]);
 
     try {
+      std::vector<double> sigabc(7);
       GetIndexedPeaks(UB, some_qs, required_tolerance, miller_ind, indexed_qs,
                       fit_error);
       Matrix<double> temp_UB(3, 3, false);
-      fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
+      fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs, sigabc);
       UB = temp_UB;
     } catch (...) {
       // failed to fit using these peaks, so add some more and try again
@@ -193,10 +205,11 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   if (q_vectors.size() >= 3) // try one last refinement using all peaks
   {
     try {
+      std::vector<double> sigabc(7);
       GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind, indexed_qs,
                       fit_error);
       Matrix<double> temp_UB(3, 3, false);
-      fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
+      fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs, sigabc);
       UB = temp_UB;
     } catch (...) {
       // failed to improve UB using these peaks, so just return the current UB
@@ -583,7 +596,9 @@ double IndexingUtils::Optimize_UB(DblMatrix &UB,
                                   const std::vector<V3D> &hkl_vectors,
                                   const std::vector<V3D> &q_vectors,
                                   std::vector<double> &sigabc) {
-  double result = Optimize_UB(UB, hkl_vectors, q_vectors);
+  double result = 0;
+  result = Optimize_UB(UB, hkl_vectors, q_vectors);
+
   if (sigabc.size() < 6) {
     sigabc.clear();
     return result;
@@ -611,11 +626,10 @@ double IndexingUtils::Optimize_UB(DblMatrix &UB,
     for (int c = 0; c < 3; c++) {
 
       UB[r][c] += SMALL;
-
       GetLatticeParameters(UB, latNew);
       UB[r][c] -= SMALL;
 
-      for (int l = 0; l < 7; l++)
+      for (size_t l = 0; l < 7; l++)
         derivs[c][l] = (latNew[l] - latOrig[l]) / SMALL;
     }
 

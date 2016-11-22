@@ -44,6 +44,8 @@ void FindUBUsingLatticeParameters::init() {
                         "Lattice parameter gamma");
   this->declareProperty("NumInitial", 15, moreThan2Int,
                         "Number of Peaks to Use on First Pass(15)");
+  this->declareProperty("FixAll", false,
+                        "Do not optimise the UB lattice parameters");
   this->declareProperty("Tolerance", 0.15, mustBePositive,
                         "Indexing Tolerance (0.15)");
 }
@@ -59,6 +61,7 @@ void FindUBUsingLatticeParameters::exec() {
   double gamma = this->getProperty("gamma");
   int num_initial = this->getProperty("NumInitial");
   double tolerance = this->getProperty("Tolerance");
+  auto fixAll = this->getProperty("FixAll");
 
   int base_index = -1; // these "could" be properties if need be
   double degrees_per_step = 1.5;
@@ -79,7 +82,7 @@ void FindUBUsingLatticeParameters::exec() {
   Matrix<double> UB(3, 3, false);
   double error = IndexingUtils::Find_UB(UB, q_vectors, a, b, c, alpha, beta,
                                         gamma, tolerance, base_index,
-                                        num_initial, degrees_per_step);
+                                        num_initial, degrees_per_step, fixAll);
 
   std::cout << "Error = " << error << '\n';
   std::cout << "UB = " << UB << '\n';
@@ -93,15 +96,17 @@ void FindUBUsingLatticeParameters::exec() {
   {      // and save the UB in the sample
 
     std::vector<double> sigabc(7);
-    std::vector<V3D> miller_ind;
-    std::vector<V3D> indexed_qs;
-    double fit_error;
-    miller_ind.reserve(q_vectors.size());
-    indexed_qs.reserve(q_vectors.size());
-    IndexingUtils::GetIndexedPeaks(UB, q_vectors, tolerance, miller_ind,
-                                   indexed_qs, fit_error);
+//    std::vector<V3D> miller_ind;
+//    std::vector<V3D> indexed_qs;
+//    double fit_error;
+//    miller_ind.reserve(q_vectors.size());
+//    indexed_qs.reserve(q_vectors.size());
+//    IndexingUtils::GetIndexedPeaks(UB, q_vectors, tolerance, miller_ind,
+//                                   indexed_qs, fit_error);
 
-    IndexingUtils::Optimize_UB(UB, miller_ind, indexed_qs, sigabc);
+////    if(!fixAll) {
+////      IndexingUtils::Optimize_UB(UB, miller_ind, indexed_qs, sigabc, fixAngles);
+////    }
 
     char logInfo[200];
     int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);

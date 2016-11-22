@@ -54,7 +54,8 @@ public:
                         const std::vector<Kernel::V3D> &q_vectors, double a,
                         double b, double c, double alpha, double beta,
                         double gamma, double required_tolerance, int base_index,
-                        size_t num_initial, double degrees_per_step);
+                        size_t num_initial, double degrees_per_step,
+                        bool fixAll = false);
 
   /// Find the UB matrix that most nearly indexes the specified qxyz values
   /// given the range of possible real space unit cell edge lengths.
