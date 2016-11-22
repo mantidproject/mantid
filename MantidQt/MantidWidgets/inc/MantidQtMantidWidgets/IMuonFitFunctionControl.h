@@ -42,6 +42,9 @@ public:
   virtual Mantid::API::IFunction_sptr getFunction() const = 0;
   virtual std::vector<std::string> getWorkspaceNamesToFit() const = 0;
   virtual void setMultiFittingMode(bool enabled) = 0;
+  virtual void doRemoveGuess() = 0;
+  virtual void doPlotGuess() = 0;
+  virtual bool hasGuess() const = 0;
 signals:
   virtual void functionUpdateRequested() = 0;
   virtual void functionUpdateAndFitRequested(bool sequential) = 0;
