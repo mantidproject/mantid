@@ -38,18 +38,20 @@ public:
 
     expectedRow[ReflTableSchema::RUNS] = "1234";
     expectedRow[ReflTableSchema::ANGLE] = "";
-    expectedRow[ReflTableSchema::GROUP] = "0 - fictitious run on gold";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on gold";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1235";
     expectedRow[ReflTableSchema::ANGLE] = "";
-    expectedRow[ReflTableSchema::GROUP] = "1 - fictitious run on silver";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on silver";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1236";
     expectedRow[ReflTableSchema::ANGLE] = "";
-    expectedRow[ReflTableSchema::GROUP] = "2 - fictitious run on bronze";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on bronze";
     expected.push_back(expectedRow);
+
+    std::sort(expected.begin(), expected.end());
 
     ReflLegacyTransferStrategy strategy;
 
@@ -74,18 +76,20 @@ public:
 
     expectedRow[ReflTableSchema::RUNS] = "1233";
     expectedRow[ReflTableSchema::ANGLE] = "";
-    expectedRow[ReflTableSchema::GROUP] = "0 - fictitious run on platinum";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on platinum";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1234+1235";
     expectedRow[ReflTableSchema::ANGLE] = "";
-    expectedRow[ReflTableSchema::GROUP] = "1 - fictitious run on gold";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on gold";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1236";
     expectedRow[ReflTableSchema::ANGLE] = "";
-    expectedRow[ReflTableSchema::GROUP] = "2 - fictitious run on silver";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on silver";
     expected.push_back(expectedRow);
+
+    std::sort(expected.begin(), expected.end());
 
     ReflLegacyTransferStrategy strategy;
 
@@ -112,23 +116,22 @@ public:
 
     expectedRow[ReflTableSchema::RUNS] = "1234";
     expectedRow[ReflTableSchema::ANGLE] = "";
-    expectedRow[ReflTableSchema::GROUP] = "0 - fictitious run on gold";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on gold";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1235";
     expectedRow[ReflTableSchema::ANGLE] = "3.14";
-    expectedRow[ReflTableSchema::GROUP] =
-        "1 - fictitious run on silver in 3.14";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on silver in 3.14";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1236";
     expectedRow[ReflTableSchema::ANGLE] = "2.17";
-    expectedRow[ReflTableSchema::GROUP] = "2 - fictitious run on bronze";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on bronze";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1237";
     expectedRow[ReflTableSchema::ANGLE] = "1.23";
-    expectedRow[ReflTableSchema::GROUP] = "3 - fictitious run on platinum";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on platinum";
     expected.push_back(expectedRow);
 
     std::sort(expected.begin(), expected.end());
@@ -162,39 +165,37 @@ public:
 
     expectedRow[ReflTableSchema::RUNS] = "1230";
     expectedRow[ReflTableSchema::ANGLE] = "";
-    expectedRow[ReflTableSchema::GROUP] = "0 - fictitious run on gold";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on gold";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1231+1232";
     expectedRow[ReflTableSchema::ANGLE] = "3.14";
-    expectedRow[ReflTableSchema::GROUP] =
-        "1 - fictitious run on silver in 3.14";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on silver in 3.14";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1233";
     expectedRow[ReflTableSchema::ANGLE] = "2.17";
-    expectedRow[ReflTableSchema::GROUP] =
-        "1 - fictitious run on silver in 3.14";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on silver in 3.14";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1234";
     expectedRow[ReflTableSchema::ANGLE] = "2.17";
-    expectedRow[ReflTableSchema::GROUP] = "2 - fictitious run on bronze";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on bronze";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1235";
     expectedRow[ReflTableSchema::ANGLE] = "1.23";
-    expectedRow[ReflTableSchema::GROUP] = "2 - fictitious run on bronze";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on bronze";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1236";
     expectedRow[ReflTableSchema::ANGLE] = "1.23";
-    expectedRow[ReflTableSchema::GROUP] = "3 - fictitious run on platinum";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on platinum";
     expected.push_back(expectedRow);
 
     expectedRow[ReflTableSchema::RUNS] = "1237";
     expectedRow[ReflTableSchema::ANGLE] = "";
-    expectedRow[ReflTableSchema::GROUP] = "4 - fictitious run on fool's gold";
+    expectedRow[ReflTableSchema::GROUP] = "fictitious run on fool's gold";
     expected.push_back(expectedRow);
 
     std::sort(expected.begin(), expected.end());
