@@ -98,10 +98,9 @@ void NonOrthogonalOverlay::setSkewMatrix() {
 }
 
 QPointF NonOrthogonalOverlay::skewMatrixApply(double x, double y) {
-  // keyed array,
   VMD coords(m_ws->get()->getNumDims());
-  coords[m_dimX] = x;
-  coords[m_dimY] = y;
+  coords[m_dimX] = static_cast<float>(x);
+  coords[m_dimY] = static_cast<float>(y);
   API::transformLookpointToWorkspaceCoordGeneric(coords, m_fromOrthogonalToHkl,
                                                  m_dimX, m_dimY);
   auto xNew = coords[m_dimX];
@@ -110,24 +109,6 @@ QPointF NonOrthogonalOverlay::skewMatrixApply(double x, double y) {
   return QPointF(xNew, yNew);
 }
 
-// void NonOrthogonalOverlay::testSkewMatrixApply()
-
-void NonOrthogonalOverlay::zoomChanged(QwtDoubleInterval xint,
-                                       QwtDoubleInterval yint) {
-  std::cout << "zoom changed hit" << std::endl;
-  m_xMinVis = xint.minValue();
-  m_xMaxVis = xint.maxValue();
-  m_yMinVis = yint.minValue();
-  m_yMaxVis = yint.maxValue();
-  m_xRange = (m_xMaxVis - m_xMinVis);
-  m_yRange = (m_yMaxVis - m_yMinVis);
-  m_xMaxVisBuffered = m_xMaxVis + m_xRange;
-  m_xMinVisBuffered = m_xMinVis - m_xRange;
-  m_yMaxVisBuffered = m_yMaxVis + m_yRange;
-  m_yMinVisBuffered = m_yMinVis - m_yRange;
-
-  // calculateTickMarks();
-}
 
 void NonOrthogonalOverlay::setAxesPoints() {
   auto ws = m_ws->get();
@@ -152,25 +133,6 @@ void NonOrthogonalOverlay::calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws,
   }
 }
 
-void NonOrthogonalOverlay::clearAllAxisPointVectors() {
-  m_axisXPointVec.clear();
-  m_axisYPointVec.clear();
-  m_xAxisTickStartVec.clear();
-  m_yAxisTickStartVec.clear();
-  m_xAxisTickEndVec.clear();
-  m_yAxisTickEndVec.clear();
-  m_xNumbers.clear();
-  m_yNumbers.clear();
-}
-
-void NonOrthogonalOverlay::calculateTickMarks() { // assumes X axis
-  clearAllAxisPointVectors();
-  // overlay grid in static fashion
-
-  // API::getSkewingAngleInDegreesForDimension()// tanAlpha deltaX value
-
-  // update();
-}
 
 //----------------------------------------------------------------------------------------------
 /// Paint the overlay
@@ -178,16 +140,10 @@ void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
 
   QPainter painter(this);
 
-  QPen centerPen(QColor(0, 0, 0, 200));     // black
   QPen gridPen(QColor(160, 160, 160, 100)); // grey
   QPen numberPen(QColor(160, 160, 160, 255));
   // --- Draw the central line ---
   if (m_showLine) {
-    centerPen.setWidth(2);
-    centerPen.setCapStyle(Qt::SquareCap);
-    painter.setPen(centerPen);
-    painter.drawLine(transform(m_pointA), transform(m_pointB));
-    painter.drawLine(transform(m_pointA), transform(m_pointC));
 
     gridPen.setWidth(1);
     gridPen.setCapStyle(Qt::FlatCap);

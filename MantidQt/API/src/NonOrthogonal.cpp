@@ -219,7 +219,7 @@ T getAngleInRadian(std::array<T, N> vector1, std::array<T, N> vector2,
     angle = 0.;
 
   } else if (dotProduct == -1.) {
-    angle = M_PI;
+    angle = static_cast<float>(M_PI);
 
   } else {
     angle = std::acos(dotProduct);
@@ -236,24 +236,6 @@ T getAngleInRadian(std::array<T, N> vector1, std::array<T, N> vector2,
   return angle;
 }
 
-size_t
-convertDimensionSelectionToIndex(MantidQt::API::DimensionSelection dimension) {
-  size_t index = 0;
-  switch (dimension) {
-  case MantidQt::API::DimensionSelection::H:
-    index = 0;
-    break;
-  case MantidQt::API::DimensionSelection::K:
-    index = 1;
-    break;
-  case MantidQt::API::DimensionSelection::L:
-    index = 2;
-    break;
-  default:
-    throw std::invalid_argument("Dimension selection is not valid.");
-  }
-  return index;
-}
 }
 
 namespace MantidQt {

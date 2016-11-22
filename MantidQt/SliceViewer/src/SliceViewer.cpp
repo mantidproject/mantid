@@ -2399,7 +2399,7 @@ void SliceViewer::setNonOrthogonalbtn() {
     m_nonOrthogonalOverlay->calculateAxesSkew(&m_ws, m_dimX, m_dimY);
     QwtDoubleInterval xint = m_plot->axisScaleDiv(m_spect->xAxis())->interval();
     QwtDoubleInterval yint = m_plot->axisScaleDiv(m_spect->yAxis())->interval();
-    m_nonOrthogonalOverlay->zoomChanged(xint, yint);
+    //m_nonOrthogonalOverlay->zoomChanged(xint, yint);
   } else {
     m_nonOrthogonalOverlay->m_showLine = false;
   }
