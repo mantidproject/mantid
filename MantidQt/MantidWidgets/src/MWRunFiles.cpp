@@ -446,7 +446,7 @@ void MWRunFiles::liveButtonState(const LiveButtonOpts option) {
   m_liveButtonState = option;
   if (m_liveButtonState == Hide) {
     m_uiForm.liveButton->hide();
-  } else if (m_liveButtonState == AlwaysShow) {
+  } else if (m_liveButtonState == Show) {
     m_uiForm.liveButton->show();
   }
 }

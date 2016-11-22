@@ -55,7 +55,6 @@ public:
          const Kernel::IPropertyManager *properties = nullptr) const;
   LiveListenerFactoryImpl(const LiveListenerFactoryImpl &) = delete;
   LiveListenerFactoryImpl &operator=(const LiveListenerFactoryImpl &) = delete;
-  bool checkConnection(const std::string &instrumentName) const;
 
 private:
   friend struct Kernel::CreateUsingNew<LiveListenerFactoryImpl>;
