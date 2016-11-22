@@ -624,9 +624,7 @@ void TomographyIfacePresenter::setupAndRunLocalReconstruction(
   m_reconRunning = true;
 }
 
-void TomographyIfacePresenter::workerFinished() {
-  m_reconRunning = false;
-}
+void TomographyIfacePresenter::workerFinished() { m_reconRunning = false; }
 
 /** Simply reset the boolean that tracks if a recon is running
 */
@@ -679,12 +677,12 @@ void TomographyIfacePresenter::processRefreshJobs() {
 }
 
 void TomographyIfacePresenter::processCancelJobs() {
-  if (m_model->loggedIn().empty())
-    return;
-
-  const std::string &resource = m_view->currentComputeResource();
-  if (!isLocalResourceSelected()) {
-    m_model->doCancelJobs(resource, m_view->processingJobsIDs());
+  if (isLocalResourceSelected()) {
+    // this will stop the current reconstruction
+    m_workerThread.reset();
+  } else {
+    m_model->doCancelJobs(m_view->currentComputeResource(),
+                          m_view->processingJobsIDs());
   }
 }
 

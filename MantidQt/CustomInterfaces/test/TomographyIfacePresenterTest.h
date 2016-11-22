@@ -306,7 +306,8 @@ public:
       EXPECT_CALL(
           mockView,
           showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
-              testing::_))).Times(0);
+              testing::_)))
+          .Times(0);
       EXPECT_CALL(mockView,
                   showImage(testing::Matcher<const std::string &>(testing::_)))
           .Times(0);
@@ -366,7 +367,8 @@ public:
     EXPECT_CALL(
         mockView,
         showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
-            testing::_))).Times(0);
+            testing::_)))
+        .Times(0);
     EXPECT_CALL(mockView,
                 showImage(testing::Matcher<const std::string &>(testing::_)))
         .Times(0);
@@ -665,7 +667,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_sillySessionLocal() {
+  void test_sillySessionRemote() {
     // the user does a few silly things...
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
@@ -727,10 +729,11 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_sillySessionLocalRemote() {
+  void test_sillySessionLocal() {
     // the user does a few silly things...
     testing::NiceMock<MockTomographyIfaceView> mockView;
-    MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
+    MantidQt::CustomInterfaces::TomographyIfacePresenter *pres =
+        new MantidQt::CustomInterfaces::TomographyIfacePresenter(&mockView);
 
     EXPECT_CALL(mockView, systemSettings()).Times(0);
 
@@ -739,12 +742,12 @@ public:
         .WillOnce(Return(TomoPathsConfig()));
 
     // user changes some paths
-    pres.notify(ITomographyIfacePresenter::TomoPathsChanged);
+    pres->notify(ITomographyIfacePresenter::TomoPathsChanged);
     EXPECT_CALL(mockView, currentComputeResource())
         .WillRepeatedly(Return("Local"));
 
     // user changes the compute resource
-    pres.notify(ITomographyIfacePresenter::CompResourceChanged);
+    pres->notify(ITomographyIfacePresenter::CompResourceChanged);
 
     EXPECT_CALL(mockView, currentReconTool())
         .Times(2)
@@ -756,9 +759,9 @@ public:
         .WillOnce(Return(TomoPathsConfig()));
 
     // the tool changed event sets up the tool's paths
-    pres.notify(ITomographyIfacePresenter::ToolChanged);
+    pres->notify(ITomographyIfacePresenter::ToolChanged);
     // user opens dialog and sets up a reconstruction tool
-    pres.notify(ITomographyIfacePresenter::SetupReconTool);
+    pres->notify(ITomographyIfacePresenter::SetupReconTool);
 
     TomoPathsConfig pathsCfg;
     EXPECT_CALL(mockView, currentPathsConfig())
@@ -780,7 +783,11 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     // finally, user tries to run a reconstruction job
-    pres.notify(ITomographyIfacePresenter::RunReconstruct);
+    pres->notify(ITomographyIfacePresenter::RunReconstruct);
+
+    // necessary or the test crashes because the external process thread is
+    // not freed from a Qt thread
+    pres->notify(ITomographyIfacePresenter::CancelJobFromTable);
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
         "satisfied.",
@@ -815,7 +822,8 @@ public:
     EXPECT_CALL(
         mockView,
         showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
-            testing::_))).Times(1);
+            testing::_)))
+        .Times(1);
     EXPECT_CALL(mockView,
                 showImage(testing::Matcher<const std::string &>(testing::_)))
         .Times(0);
