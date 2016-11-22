@@ -21,6 +21,7 @@ void SaveILLCosmosAscii::extraProps() {
   declareProperty("UserContact", "",
                   "Text to be written to the User-local contact field");
   declareProperty("Title", "", "Text to be written to the Title field");
+  appendSeparatorProperty();
 }
 
 /** virtual method to add information to the file before the data

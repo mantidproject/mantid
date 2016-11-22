@@ -71,6 +71,8 @@ protected:
   /// write the main content of the data
   virtual void data(std::ofstream &file, const std::vector<double> &XData,
                     bool exportDeltaQ = true);
+  /// Retrieves the separator property
+  virtual void appendSeparatorProperty();
   /// The separator character
   char m_sep;
   double m_qres = 0.0;
