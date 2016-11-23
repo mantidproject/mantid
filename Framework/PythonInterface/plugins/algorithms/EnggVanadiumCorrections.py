@@ -83,6 +83,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
         The sums and fits are done in d-spacing.
         """
+
         ws = self.getProperty('Workspace').value
         vanWS = self.getProperty('VanadiumWorkspace').value
         integWS = self.getProperty('IntegrationWorkspace').value
@@ -154,7 +155,8 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         divides by a curve fitted to the sum of the set of spectra of the corresponding bank.
 
         @param ws :: workspace to work on / correct
-        @param curvesWS :: a workspace with the per-bank curves for Vanadium data
+        @param curvesWS :: a workspace with the per-bank curves for Vanadium data,
+                this will contain 3 histograms per instrument bank
         """
         curvesDict = self._precalcWStoDict(curvesWS)
 
@@ -390,14 +392,16 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         curves = {}
 
         if 0 != (ws.getNumberHistograms() % 3):
-            raise RuntimeError("A workspace without instrument definition has ben passed, so it is "
+            raise RuntimeError("A workspace without instrument definition has been passed, so it is "
                                "expected to have fitting results, but it does not have a number of "
                                "histograms multiple of 3. Number of hsitograms found: %d"%
                                ws.getNumberHistograms())
 
         for wi in range(0, int(ws.getNumberHistograms()/3)):
             indiv = EnggUtils.cropData(self, ws, [wi, wi+2])
-            curves.update({wi: indiv})
+            # the bank id is +1 because wi starts from 0
+            bankid = wi + 1
+            curves.update({bankid: indiv})
 
         return curves
 

@@ -2174,15 +2174,8 @@ void SliceViewer::rebinParamsChanged() {
     double min = 0;
     double max = 1;
     int numBins = 1;
-    if (m_ws->isMDHistoWorkspace()) {
-      // If rebinning from an existing MDHistoWorkspaces we should take exents
-      // from the existing workspace.
-      auto dim = m_ws->getDimension(d);
-      min = dim->getMinimum();
-      max = dim->getMaximum();
-      // And the user-entered number of bins
-      numBins = widget->getNumBins();
-    } else if (widget->getShownDim() < 0) {
+
+    if (widget->getShownDim() < 0) {
       // Slice point. So integrate with a thickness
       min = widget->getSlicePoint() - widget->getThickness();
       max = widget->getSlicePoint() + widget->getThickness();

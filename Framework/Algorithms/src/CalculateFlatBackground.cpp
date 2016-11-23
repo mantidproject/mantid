@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/CalculateFlatBackground.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -10,7 +10,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidHistogramData/Histogram.h"
 #include <algorithm>
@@ -31,9 +30,7 @@ enum class Modes { LINEAR_FIT, MEAN, MOVING_AVERAGE };
 
 void CalculateFlatBackground::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>(
-          "InputWorkspace", "", Direction::Input,
-          boost::make_shared<HistogramValidator>()),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The input workspace must either have constant width bins or is a "
       "distribution\n"
       "workspace. It is also assumed that all spectra have the same X bin "
@@ -97,7 +94,8 @@ void CalculateFlatBackground::init() {
 
 void CalculateFlatBackground::exec() {
   // Retrieve the input workspace
-  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+
   // Copy over all the data
   const int numHists = static_cast<int>(inputWS->getNumberHistograms());
   const int blocksize = static_cast<int>(inputWS->blocksize());
@@ -171,6 +169,7 @@ void CalculateFlatBackground::exec() {
     PARALLEL_CHECK_INTERUPT_REGION
   }
 
+  // Only convert histogram data to a distribution
   convertToDistribution(outputWS);
 
   // these are used to report information to the user, one progress update for
@@ -211,7 +210,7 @@ void CalculateFlatBackground::exec() {
         background = Mean(outputWS, currentSpec, startX, endX);
         break;
       case Modes::MOVING_AVERAGE:
-        background = movingAverage(outputWS, currentSpec, windowWidth);
+        background = MovingAverage(outputWS, currentSpec, windowWidth);
         break;
       }
       if (background < 0) {
@@ -297,12 +296,13 @@ void CalculateFlatBackground::convertToDistribution(
     // Calculate bin widths
     std::adjacent_difference(X.begin() + 1, X.end(), adjacents.begin());
     // the first entry from adjacent difference is just a copy of the first
-    // entry in the input vector, ignore this. The histogram validator for this
-    // algorithm ensures that X.size() > 1
-    MantidVec widths(adjacents.begin() + 1, adjacents.end());
-    if (!VectorHelper::isConstantValue(widths)) {
-      variationFound = true;
-      break;
+    // entry in the input vector, ignore this.
+    if (X.size() > 1) {
+      MantidVec widths(adjacents.begin() + 1, adjacents.end());
+      if (!VectorHelper::isConstantValue(widths)) {
+        variationFound = true;
+        break;
+      }
     }
   }
 
@@ -496,7 +496,7 @@ double CalculateFlatBackground::LinearFit(API::MatrixWorkspace_sptr WS,
 * @return Minimum
 */
 double
-CalculateFlatBackground::movingAverage(API::MatrixWorkspace_const_sptr WS,
+CalculateFlatBackground::MovingAverage(API::MatrixWorkspace_const_sptr WS,
                                        int wsIndex, size_t windowWidth) const {
   const auto &ys = WS->y(wsIndex);
   double currentMin = std::numeric_limits<double>::max();
