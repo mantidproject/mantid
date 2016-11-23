@@ -348,7 +348,8 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
     row << boost::lexical_cast<double>(splitted[10]); // wavelength_min
     row << boost::lexical_cast<double>(splitted[11]); // wavelength_max
 
-    // pad all extras with empty string
+    // pad all extras with empty string - the 14 required columns have
+    // already been added to the row
     for (size_t i = 14; i < num_of_columns; ++i) {
       row << "0";
     }
