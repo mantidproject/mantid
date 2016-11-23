@@ -13,16 +13,17 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/RebinnedOutput.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Run.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/make_unique.h"
 
@@ -75,6 +76,24 @@ private:
   std::unique_ptr<Mantid::API::Progress> m_Progress;
   /// logger -> to provide logging,
   static Mantid::Kernel::Logger &g_log;
+};
+
+struct EPPTableRow {
+  enum class FitStatus {
+    SUCCESS,
+    FAILURE
+  };
+
+  EPPTableRow() = default;
+  EPPTableRow(const double peakCentre, const double sigma, const double height, const FitStatus fitStatus);
+  double peakCentre = 0;
+  double peakCentreError = 0;
+  double sigma = 0;
+  double sigmaError = 0;
+  double height = 0;
+  double heightError = 0;
+  double chiSq = 0;
+  FitStatus fitStatus = FitStatus::SUCCESS;
 };
 
 /// Adds a workspace to the ADS
@@ -333,6 +352,9 @@ void createInstrumentForWorkspaceWithDistances(
     const Mantid::Kernel::V3D &samplePosition,
     const Mantid::Kernel::V3D &sourcePosition,
     const std::vector<Mantid::Kernel::V3D> &detectorPositions);
-}
+
+Mantid::API::ITableWorkspace_sptr createEPPTableWorkspace(const std::vector<EPPTableRow> &rows);
+
+} // namespace WorkspaceCreationHelper
 
 #endif /*WORKSPACECREATIONHELPER_H_*/

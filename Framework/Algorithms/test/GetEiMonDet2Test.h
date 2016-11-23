@@ -58,8 +58,11 @@ public:
     const double realEi = 0.97 * EI;
     const auto peaks =
         peakCentres(100, realEi, std::numeric_limits<double>::max());
-    std::vector<bool> successes(peaks.size(), true);
-    auto eppTable = createEPPTable(peaks, successes);
+    std::vector<EPPTableRow> eppRows(peaks.size());
+    for (size_t i = 0; i < peaks.size(); ++i) {
+      eppRows[i].peakCentre = peaks[i];
+    }
+    auto eppTable = createEPPTableWorkspace(eppRows);
     auto ws = createWorkspace();
     GetEiMonDet2 algorithm;
     setupSimple(ws, eppTable, algorithm);
@@ -77,13 +80,20 @@ public:
     auto detectorPeakCentres =
         peakCentres(timeAtMonitor, realEi, pulseInterval);
     detectorPeakCentres.erase(detectorPeakCentres.begin());
-    std::vector<bool> successes(detectorPeakCentres.size(), true);
-    auto detectorEPPTable = createEPPTable(detectorPeakCentres, successes);
+    std::vector<EPPTableRow> eppRows(detectorPeakCentres.size());
+    for (size_t i = 0; i < detectorPeakCentres.size(); ++i) {
+      eppRows[i].peakCentre = detectorPeakCentres[i];
+    }
+    auto detectorEPPTable = createEPPTableWorkspace(eppRows);
+    eppRows.clear();
     auto monitorPeakCentres = peakCentres(timeAtMonitor, realEi, pulseInterval);
     monitorPeakCentres.erase(monitorPeakCentres.begin() + 1,
                              monitorPeakCentres.end());
-    successes = std::vector<bool>(monitorPeakCentres.size(), true);
-    auto monitorEPPTable = createEPPTable(monitorPeakCentres, successes);
+    eppRows.resize(monitorPeakCentres.size());
+    for (size_t i = 0; i < monitorPeakCentres.size(); ++i) {
+      eppRows[i].peakCentre = monitorPeakCentres[i];
+    }
+    auto monitorEPPTable = createEPPTableWorkspace(eppRows);
     auto ws = createWorkspace();
     ws->mutableRun().removeProperty("Ei");
     // Break workspace into separate monitor and detector workspaces.
@@ -133,8 +143,11 @@ public:
     const double realEi = EI;
     const auto peaks =
         peakCentres(100, realEi, std::numeric_limits<double>::max());
-    std::vector<bool> successes(peaks.size(), true);
-    auto eppTable = createEPPTable(peaks, successes);
+    std::vector<EPPTableRow> eppRows(peaks.size());
+    for (size_t i = 0; i < peaks.size(); ++i) {
+      eppRows[i].peakCentre = peaks[i];
+    }
+    auto eppTable = createEPPTableWorkspace(eppRows);
     auto ws = createWorkspace();
     MaskDetectors maskDetectors;
     maskDetectors.initialize();
@@ -152,8 +165,11 @@ public:
     const double realEi = EI;
     const auto peaks =
         peakCentres(100, realEi, std::numeric_limits<double>::max());
-    std::vector<bool> successes(peaks.size(), true);
-    auto eppTable = createEPPTable(peaks, successes);
+    std::vector<EPPTableRow> eppRows(peaks.size());
+    for (size_t i = 0; i < peaks.size(); ++i) {
+      eppRows[i].peakCentre = peaks[i];
+    }
+    auto eppTable = createEPPTableWorkspace(eppRows);
     auto ws = createWorkspace();
     MaskDetectors maskDetectors;
     maskDetectors.initialize();
@@ -171,10 +187,14 @@ public:
     const double realEi = EI;
     const auto peaks =
         peakCentres(100, realEi, std::numeric_limits<double>::max());
-    std::vector<bool> successes(peaks.size(), false);
+    std::vector<EPPTableRow> eppRows(peaks.size());
+    for (size_t i = 0; i < peaks.size(); ++i) {
+      eppRows[i].peakCentre = peaks[i];
+      eppRows[i].fitStatus = EPPTableRow::FitStatus::FAILURE;
+    }
     // Monitor should still say 'success'.
-    successes.front() = true;
-    auto eppTable = createEPPTable(peaks, successes);
+    eppRows.front().fitStatus = EPPTableRow::FitStatus::SUCCESS;
+    auto eppTable = createEPPTableWorkspace(eppRows);
     auto ws = createWorkspace();
     GetEiMonDet2 algorithm;
     setupSimple(ws, eppTable, algorithm);
@@ -186,9 +206,12 @@ public:
     const double realEi = EI;
     const auto peaks =
         peakCentres(100, realEi, std::numeric_limits<double>::max());
-    std::vector<bool> successes(peaks.size(), true);
-    successes.front() = false;
-    auto eppTable = createEPPTable(peaks, successes);
+    std::vector<EPPTableRow> eppRows(peaks.size());
+    for (size_t i = 0; i < peaks.size(); ++i) {
+      eppRows[i].peakCentre = peaks[i];
+    }
+    eppRows.front().fitStatus = EPPTableRow::FitStatus::FAILURE;
+    auto eppTable = createEPPTableWorkspace(eppRows);
     auto ws = createWorkspace();
     GetEiMonDet2 algorithm;
     setupSimple(ws, eppTable, algorithm);
@@ -200,8 +223,11 @@ public:
     const double realEi = EI;
     const auto peaks =
         peakCentres(100, realEi, std::numeric_limits<double>::max());
-    std::vector<bool> successes(peaks.size(), true);
-    auto eppTable = createEPPTable(peaks, successes);
+    std::vector<EPPTableRow> eppRows(peaks.size());
+    for (size_t i = 0; i < peaks.size(); ++i) {
+      eppRows[i].peakCentre = peaks[i];
+    }
+    auto eppTable = createEPPTableWorkspace(eppRows);
     auto ws = createWorkspace();
     GetEiMonDet2 algorithm;
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
@@ -219,8 +245,11 @@ public:
     const double realEi = EI;
     const auto peaks =
         peakCentres(100, realEi, std::numeric_limits<double>::max());
-    std::vector<bool> successes(peaks.size(), true);
-    auto eppTable = createEPPTable(peaks, successes);
+    std::vector<EPPTableRow> eppRows(peaks.size());
+    for (size_t i = 0; i < peaks.size(); ++i) {
+      eppRows[i].peakCentre = peaks[i];
+    }
+    auto eppTable = createEPPTableWorkspace(eppRows);
     auto ws = createWorkspace();
     GetEiMonDet2 algorithm;
     algorithm.setRethrows(true);
@@ -243,8 +272,11 @@ public:
     const double realEi = EI;
     const auto peaks =
         peakCentres(100, realEi, std::numeric_limits<double>::max());
-    std::vector<bool> successes(peaks.size(), true);
-    auto eppTable = createEPPTable(peaks, successes);
+    std::vector<EPPTableRow> eppRows(peaks.size());
+    for (size_t i = 0; i < peaks.size(); ++i) {
+      eppRows[i].peakCentre = peaks[i];
+    }
+    auto eppTable = createEPPTableWorkspace(eppRows);
     auto ws = createWorkspace();
     GetEiMonDet2 algorithm;
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
@@ -262,8 +294,11 @@ public:
     const double realEi = EI;
     const auto peaks =
         peakCentres(100, realEi, std::numeric_limits<double>::max());
-    std::vector<bool> successes(peaks.size(), true);
-    auto eppTable = createEPPTable(peaks, successes);
+    std::vector<EPPTableRow> eppRows(peaks.size());
+    for (size_t i = 0; i < peaks.size(); ++i) {
+      eppRows[i].peakCentre = peaks[i];
+    }
+    auto eppTable = createEPPTableWorkspace(eppRows);
     auto ws = createWorkspace();
     GetEiMonDet2 algorithm;
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
@@ -278,23 +313,6 @@ public:
   }
 
 private:
-  ITableWorkspace_sptr
-  createEPPTable(const std::vector<double> &peakCentres,
-                 const std::vector<bool> &fitSuccesses,
-                 const std::string &centresColumnName = "PeakCentre",
-                 const std::string &successesColumnName = "FitStatus") {
-    ITableWorkspace_sptr ws =
-        boost::make_shared<TableWorkspace>(peakCentres.size());
-    auto centreColumn = ws->addColumn("double", centresColumnName);
-    auto statusColumn = ws->addColumn("str", successesColumnName);
-    for (size_t i = 0; i != peakCentres.size(); ++i) {
-      centreColumn->cell<double>(i) = peakCentres[i];
-      statusColumn->cell<std::string>(i) =
-          fitSuccesses[i] ? "success" : "failed";
-    }
-    return ws;
-  }
-
   static void attachInstrument(MatrixWorkspace_sptr targetWs) {
     // The reference frame used by createInstrumentForWorkspaceWithDistances
     // is left handed with y pointing up, x along beam (2016-08-12).
