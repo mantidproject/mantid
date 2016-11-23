@@ -201,7 +201,9 @@ SaveMDWorkspaceToVTKImpl::getPresenter(bool isHistoWorkspace,
 
 void ProgressFunction(vtkObject *caller, long unsigned int vtkNotUsed(eventId),
                       void *clientData, void *vtkNotUsed(callData)) {
-  vtkXMLWriter *testFilter = static_cast<vtkXMLWriter *>(caller);
+  vtkXMLWriter *testFilter = dynamic_cast<vtkXMLWriter *>(caller);
+  if (!testFilter)
+    return;
   const char *progressText = testFilter->GetProgressText();
   if (progressText) {
     reinterpret_cast<Kernel::ProgressBase *>(clientData)
