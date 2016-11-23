@@ -1,3 +1,9 @@
+%if 0%{?fedora} || 0%{?rhel} >= 8
+  %global with_python3 1
+%else
+  %global with_python3 0
+%endif
+
 Name:           mantid-developer
 Version:        1.20
 Release:        1%{?dist}
@@ -84,7 +90,7 @@ Requires: qt-devel
 Requires: qtwebkit-devel
 %endif
 Requires: graphviz
-%if 0%{?fedora}
+%if %{with_python3}
 Requires: python3-sip-devel
 Requires: python3-PyQt4-devel
 Requires: python3-numpy
@@ -92,8 +98,10 @@ Requires: python3-scipy
 Requires: python3-sphinx
 Requires: python3-sphinx-theme-bootstrap
 Requires: python3-dateutil
-Requires: python3-matplotlib
+Requires: python3-h5py
 Requires: python3-ipython-gui
+Requires: python3-matplotlib
+Requires: python3-PyYAML
 Requires: boost-python3-devel
 %endif
 
