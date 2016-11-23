@@ -122,7 +122,7 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-**Example - Basic reduction with no transmission run**
+**Example - Basic reduction with no transmission run, polynomial corrections will be automatically applied**
 
 .. testcode:: ExReflRedOneAutoSimple
 
@@ -138,10 +138,10 @@ Output:
 
 .. testoutput:: ExReflRedOneAutoSimple
 
-    0.00042
-    0.00040
-    0.00043
-    0.00042
+    0.56682
+    0.59735
+    0.57476
+    0.54633
 
 **Example - Basic reduction with a transmission run**
 
@@ -181,10 +181,10 @@ Output:
 
 .. testoutput:: ExReflRedOneAutoOverload
 
-    0.00041
-    0.00040
-    0.00042
-    0.00042
+    0.50401
+    0.52599
+    0.51160
+    0.48843
 
 .. categories::
 
