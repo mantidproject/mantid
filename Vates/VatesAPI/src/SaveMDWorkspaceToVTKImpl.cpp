@@ -202,16 +202,14 @@ SaveMDWorkspaceToVTKImpl::getPresenter(bool isHistoWorkspace,
 void ProgressFunction(vtkObject *caller, long unsigned int vtkNotUsed(eventId),
                       void *clientData, void *vtkNotUsed(callData)) {
   vtkXMLWriter *testFilter = static_cast<vtkXMLWriter *>(caller);
-  std::cout << "Progress: " << testFilter->GetProgress() << std::endl;
-  const char *meow = testFilter->GetProgressText();
-  if (meow) {
-    std::cout << testFilter->GetProgressText() << '\n';
-    reinterpret_cast<API::Progress *>(clientData)
-        ->reportIncrement(
-            boost::math::iround(testFilter->GetProgress() * 100.0), meow);
+  const char *progressText = testFilter->GetProgressText();
+  if (progressText) {
+    reinterpret_cast<Kernel::ProgressBase *>(clientData)
+        ->report(
+            boost::math::iround(testFilter->GetProgress() * 100.0), progressText);
   } else {
-    reinterpret_cast<API::Progress *>(clientData)
-        ->reportIncrement(
+    reinterpret_cast<Kernel::ProgressBase *>(clientData)
+        ->report(
             boost::math::iround(testFilter->GetProgress() * 100.0));
   }
 }
@@ -227,10 +225,9 @@ void ProgressFunction(vtkObject *caller, long unsigned int vtkNotUsed(eventId),
 int SaveMDWorkspaceToVTKImpl::writeDataSetToVTKFile(
     vtkXMLWriter *writer, vtkDataSet *dataSet, const std::string &filename,
     vtkXMLWriter::CompressorType compressor) const {
-
-  auto progressCallback = vtkCallbackCommand::New();
+  vtkNew<vtkCallbackCommand> progressCallback;
   progressCallback->SetCallback(ProgressFunction);
-  writer->AddObserver(vtkCommand::ProgressEvent, progressCallback);
+  writer->AddObserver(vtkCommand::ProgressEvent, progressCallback.GetPointer());
   progressCallback->SetClientData(const_cast<API::Progress *>(&m_progress));
   writer->SetFileName(filename.c_str());
   writer->SetInputData(dataSet);
