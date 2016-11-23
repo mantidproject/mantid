@@ -29,7 +29,7 @@ Logger g_log("InstrumentInfo");
 }
 
 /**
- * Constructor.
+ * Construct from Facility Info XML.
  *
  * @param inst :: InstrumentInfo for the instrument this listener belongs to
  * @param elem :: The Poco::XML::Element to read the data from
@@ -55,6 +55,24 @@ LiveListenerInfo::LiveListenerInfo(const InstrumentInfo *inst,
     // m_listener = inst->facility().liveListener();
     g_log.error() << "Listener class for " << m_name << " is not defined\n";
   }
+}
+
+/**
+ * Construct manually.
+ *
+ * @param listener Class name of specific listener to use
+ * @param address Address which listener should use to connect
+ * @param name Name designator for this listener connection info
+ * @param inst Pointer to instrument this listener should be associated with
+ */
+LiveListenerInfo::LiveListenerInfo(const std::string &listener,
+                                   const std::string &address,
+                                   const std::string &name,
+                                   const InstrumentInfo *inst)
+  : m_instrument(inst)
+  , m_name(name)
+  , m_address(address)
+  , m_listener(listener) {
 }
 
 bool LiveListenerInfo::operator==(const LiveListenerInfo &rhs) const {
