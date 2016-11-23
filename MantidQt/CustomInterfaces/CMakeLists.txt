@@ -425,7 +425,6 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogSavu.h								
                 inc/MantidQtCustomInterfaces/Tomography/TomographyProcess.h								
                 inc/MantidQtCustomInterfaces/Tomography/TomographyThread.h
-												
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui

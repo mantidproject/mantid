@@ -8,13 +8,11 @@
 
 #include <QMutex>
 #include <QObject>
-#include <QProcess>
 #include <boost/scoped_ptr.hpp>
 
 // Qt classes forward declarations
 class QThread;
 class QTimer;
-class QSignalMapper;
 
 namespace MantidQt {
 namespace CustomInterfaces {
