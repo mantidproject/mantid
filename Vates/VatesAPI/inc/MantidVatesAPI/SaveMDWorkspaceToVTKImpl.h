@@ -46,7 +46,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport SaveMDWorkspaceToVTKImpl {
 public:
-  SaveMDWorkspaceToVTKImpl(SaveMDWorkspaceToVTK *parent);
+  SaveMDWorkspaceToVTKImpl(SaveMDWorkspaceToVTK *parent = nullptr);
   ~SaveMDWorkspaceToVTKImpl() {}
   void saveMDWorkspace(Mantid::API::IMDWorkspace_sptr workspace,
                        const std::string &filename,
