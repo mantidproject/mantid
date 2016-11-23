@@ -30,8 +30,7 @@ Kernel::Logger g_log("LiveListenerFactory");
  *                             configured address.
  */
 boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
-    const std::string &instrumentName,
-    bool connect,
+    const std::string &instrumentName, bool connect,
     const Kernel::IPropertyManager *properties,
     const std::string &listenerConnectionName) const {
   // Look up LiveListenerInfo based on given instrument and listener names
@@ -50,8 +49,7 @@ boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
  * @return
  */
 boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
-    const Kernel::LiveListenerInfo &info,
-    bool connect,
+    const Kernel::LiveListenerInfo &info, bool connect,
     const Kernel::IPropertyManager *properties) const {
 
   ILiveListener_sptr listener =
@@ -100,5 +98,6 @@ LiveListenerFactoryImpl::createUnwrapped(const std::string &className) const {
   throw Kernel::Exception::NotImplementedError(
       "Don't use this method - use the safe one!!!");
 }
+
 } // namespace Mantid
 } // namespace API
