@@ -113,7 +113,6 @@ double SpectrumInfo::eFixed(const size_t index) const {
   return eFixed / static_cast<double>(dets.size());
 }
 
-
 /// Returns true if the spectrum is associated with detectors in the instrument.
 bool SpectrumInfo::hasDetectors(const size_t index) const {
   // Workspaces can contain invalid detector IDs. Those IDs will be silently
