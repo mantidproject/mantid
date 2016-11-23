@@ -4,9 +4,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/ReflectometryReductionOneAuto2.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -430,6 +430,91 @@ public:
     // Output workspace
     TS_ASSERT_EQUALS(sum->blocksize(), 20);
     TS_ASSERT_DELTA(sum->y(0)[0], 4 * 2, 1e-6);
+  }
+
+  void test_monitors_not_integrated_with_polynomial_corrections() {
+
+    // I need to change some values in the monitor spectrum to get reasonable
+    // numbers
+    auto inputWS = m_TOF;
+    auto &Y = inputWS->mutableY(0);
+    std::fill(Y.begin(), Y.begin() + 2, 1.0);
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("WavelengthMin", 0.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("I0MonitorIndex", "0");
+    alg.setProperty("MonitorBackgroundWavelengthMin", 0.5);
+    alg.setProperty("MonitorBackgroundWavelengthMax", 3.0);
+    alg.setProperty("NormalizeByIntegratedMonitors", "1");
+    alg.setProperty("MonitorIntegrationWavelengthMin", 1.5);
+    alg.setProperty("MonitorIntegrationWavelengthMax", 15.0);
+    alg.setProperty("CorrectionAlgorithm", "PolynomialCorrection");
+    alg.setProperty("Polynomial", "1, 0, 0");
+    alg.setPropertyValue("ProcessingInstructions", "1");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+
+    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outLam->blocksize(), 10);
+    // Expected values are 2.4996 = 3.15301 (detectors) / 1.26139 (monitors)
+    TSM_ASSERT_DELTA(
+        "With a correction algorithm, monitors should not be integrated",
+        outLam->y(0)[2], 2.4996, 0.0001);
+    TSM_ASSERT_DELTA(
+        "With a correction algorithm, monitors should not be integrated",
+        outLam->y(0)[4], 2.4996, 0.0001);
+    TSM_ASSERT_DELTA(
+        "With a correction algorithm, monitors should not be integrated",
+        outLam->y(0)[7], 2.4996, 0.0001);
+  }
+
+  void test_monitors_not_integrated_with_exponential_corrections() {
+
+    // I need to change some values in the monitor spectrum to get reasonable
+    // numbers
+    auto inputWS = m_TOF;
+    auto &Y = inputWS->mutableY(0);
+    std::fill(Y.begin(), Y.begin() + 2, 1.0);
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("WavelengthMin", 0.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("I0MonitorIndex", "0");
+    alg.setProperty("MonitorBackgroundWavelengthMin", 0.5);
+    alg.setProperty("MonitorBackgroundWavelengthMax", 3.0);
+    alg.setProperty("NormalizeByIntegratedMonitors", "1");
+    alg.setProperty("MonitorIntegrationWavelengthMin", 1.5);
+    alg.setProperty("MonitorIntegrationWavelengthMax", 15.0);
+    alg.setProperty("CorrectionAlgorithm", "ExponentialCorrection");
+    alg.setProperty("C0", 1.0);
+    alg.setProperty("C1", 0.0);
+    alg.setPropertyValue("ProcessingInstructions", "1");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+
+    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outLam->blocksize(), 10);
+    // Expected values are 2.4996 = 3.15301 (detectors) / 1.26139 (monitors)
+    TSM_ASSERT_DELTA(
+        "With a correction algorithm, monitors should not be integrated",
+        outLam->y(0)[2], 2.4996, 0.0001);
+    TSM_ASSERT_DELTA(
+        "With a correction algorithm, monitors should not be integrated",
+        outLam->y(0)[4], 2.4996, 0.0001);
+    TSM_ASSERT_DELTA(
+        "With a correction algorithm, monitors should not be integrated",
+        outLam->y(0)[7], 2.4996, 0.0001);
   }
 };
 

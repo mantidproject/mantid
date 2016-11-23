@@ -61,6 +61,8 @@ from the instrument parameters, :literal:`C0` and :literal:`C1`. All these value
 can be specified manually by setting the :literal:`CorrectionAlgorithm` to either
 :literal:`PolynomialCorrection` or :literal:`ExponentialCorrection` and setting
 :literal:`Polynomial` or :literal:`C0` and :literal:`C1` properties accordingly.
+Note that when using a correction algorithm, monitors will not be integrated, even if
+:literal:`NormalizeByIntegratedMonitors` was set to true.
 
 Finally, properties :literal:`MomentumTransferMin`, :literal:`MomentumTransferStep` and :literal:`MomentumTransferMax` are
 used to rebin the output workspace in Q, and :literal:`ScaleFactor` is used to scale the final workspace. When they

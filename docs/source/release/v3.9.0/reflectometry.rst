@@ -17,6 +17,9 @@ Algorithms
 
   * When :literal:`CorrectionAlgorithm` was set to :literal:`AutoDetect` the algorithm was not able to find polynomial
     corrections, as it was searching for :literal:`polynomial` instead of :literal:`polystring`.
+  * When an correction algorithm was applied, monitors were integrated if :literal:`NormalizeByIntegratedMonitors`
+    was set to true, which is the default. In the new version of the algorithms, monitors will never be integrated if a correction algorithm
+    is specified, even if :literal:`NormalizeByIntegratedMonitors` is set to true.
   * Fix some problems when moving the detector components in the instrument. The new version uses :literal:`ProcessingInstructions`
     to determine which detector components need to be moved.
   * Monitor integration range was not being applied properly to CRISP data. The problem was that in the parameter

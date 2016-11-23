@@ -232,11 +232,10 @@ void ReflectometryReductionOneAuto2::exec() {
 
   populateDirectBeamProperties(alg);
   populateMonitorProperties(alg, instrument);
-  populateTransmissionProperties(alg, instrument);
-  populateMomentumTransferProperties(alg);
-
   alg->setPropertyValue("NormalizeByIntegratedMonitors",
                         getPropertyValue("NormalizeByIntegratedMonitors"));
+  populateTransmissionProperties(alg, instrument);
+  populateMomentumTransferProperties(alg);
 
   alg->setProperty("InputWorkspace", inputWS);
   alg->execute();
@@ -353,14 +352,17 @@ void ReflectometryReductionOneAuto2::populateTransmissionProperties(
   }
 
   // No transmission runs, try algorithmic corrections
+  // With algorithmic corrections, monitors should not be integrated, see below
 
   std::string correctionAlgorithm = getProperty("CorrectionAlgorithm");
 
   if (correctionAlgorithm == "PolynomialCorrection") {
+    alg->setProperty("NormalizeByIntegratedMonitors", false);
     alg->setProperty("CorrectionAlgorithm", "PolynomialCorrection");
     alg->setPropertyValue("Polynomial", getPropertyValue("Polynomial"));
 
   } else if (correctionAlgorithm == "ExponentialCorrection") {
+    alg->setProperty("NormalizeByIntegratedMonitors", false);
     alg->setProperty("CorrectionAlgorithm", "ExponentialCorrection");
     alg->setProperty("C0", getPropertyValue("C0"));
     alg->setProperty("C1", getPropertyValue("C1"));
@@ -400,6 +402,7 @@ void ReflectometryReductionOneAuto2::populateTransmissionProperties(
         alg->setProperty("C0", c0Vec[0]);
         alg->setProperty("C1", c1Vec[0]);
       }
+      alg->setProperty("NormalizeByIntegratedMonitors", false);
     } catch (std::runtime_error &e) {
       g_log.error() << e.what()
                     << ". Polynomial correction will not be performed.";
