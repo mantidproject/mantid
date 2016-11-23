@@ -90,7 +90,6 @@ Requires: qt-devel
 Requires: qtwebkit-devel
 %endif
 Requires: graphviz
-Requires: PyYAML
 %if %{with_python3}
 Requires: python3-sip-devel
 Requires: python3-PyQt4-devel
