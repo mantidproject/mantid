@@ -24,6 +24,7 @@ Kernel::Logger g_log("LiveListenerFactory");
  *                        the given instrument.
  *  @param properties     Property manager to copy property values to the
  *                        listener if it has any.
+ *  @param listenerConnectionName Name of LiveListenerInfo connection to use.
  *  @returns A shared pointer to the created ILiveListener implementation
  *  @throws Exception::NotFoundError If the requested listener is not registered
  *  @throws std::runtime_error If unable to connect to the listener at the

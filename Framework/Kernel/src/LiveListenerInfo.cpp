@@ -11,15 +11,6 @@
 
 #include <Poco/DOM/Element.h>
 
-//#include <algorithm>
-//
-//#include "MantidKernel/Strings.h"
-//
-//#include <boost/lexical_cast.hpp>
-//
-//#include <Poco/AutoPtr.h>
-//#include <Poco/DOM/NodeList.h>
-//#include <Poco/DOM/Text.h>
 
 namespace Mantid {
 namespace Kernel {
@@ -31,7 +22,6 @@ Logger g_log("InstrumentInfo");
 /**
  * Construct from Facility Info XML.
  *
- * @param inst :: InstrumentInfo for the instrument this listener belongs to
  * @param elem :: The Poco::XML::Element to read the data from
  */
 LiveListenerInfo::LiveListenerInfo(const Poco::XML::Element *elem) {
@@ -61,7 +51,6 @@ LiveListenerInfo::LiveListenerInfo(const Poco::XML::Element *elem) {
  * @param listener Class name of specific listener to use
  * @param address Address which listener should use to connect
  * @param name Name designator for this listener connection info
- * @param inst Pointer to instrument this listener should be associated with
  */
 LiveListenerInfo::LiveListenerInfo(const std::string &listener,
                                    const std::string &address,
