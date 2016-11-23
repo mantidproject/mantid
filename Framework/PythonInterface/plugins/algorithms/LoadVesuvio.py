@@ -585,15 +585,16 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 ms.DeleteWorkspace(out_mon, EnableLogging=_LOGGING_)
 
         # Check to see if extra data needs to be loaded to normalise in data
-        x_max = self._tof_max
-        if self._foil_out_norm_end > self._tof_max:
-            x_max = self._foil_out_norm_end
-            self._crop_required = True
+        if "Difference" in self._diff_opt:
+            x_max = self._tof_max
+            if self._foil_out_norm_end > self._tof_max:
+                x_max = self._foil_out_norm_end
+                self._crop_required = True
 
-        ms.CropWorkspace(Inputworkspace= SUMMED_WS,
-                         OutputWorkspace=SUMMED_WS,
-                         XMax=x_max,
-                         EnableLogging=_LOGGING_)
+            ms.CropWorkspace(Inputworkspace= SUMMED_WS,
+                             OutputWorkspace=SUMMED_WS,
+                             XMax=x_max,
+                             EnableLogging=_LOGGING_)
 
         summed_data, summed_mon = mtd[SUMMED_WS], mtd[SUMMED_WS + '_monitors']
 
@@ -607,8 +608,8 @@ class LoadVesuvio(LoadEmptyVesuvio):
             self._load_monitors_workspace = clone.getProperty("OutputWorkspace").value
             self._load_monitors_workspace = self._sum_monitors_in_group(summed_mon,
                                                                         self._load_monitors_workspace)
-
-        self._load_diff_mode_parameters(summed_data)
+        if "Difference" in self._diff_opt:
+            self._load_diff_mode_parameters(summed_data)
         return summed_data, summed_mon
 
 
