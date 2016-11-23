@@ -37,6 +37,8 @@ public:
         IDetector_const_sptr det = m_workspace.getDetector(i);
         pmap.addBool(det.get(), "masked", true);
       }
+      pmap.addDouble(m_workspace.getDetector(i).get(), "Efixed",
+                     static_cast<double>(i));
     }
 
     m_workspaceNoInstrument.init(numberOfHistograms, numberOfBins,
@@ -150,6 +152,15 @@ public:
     TS_ASSERT_EQUALS(detectorInfo.position(2), V3D(0.0, 0.1, 5.0));
     TS_ASSERT_EQUALS(detectorInfo.position(3), V3D(0.0, 0.0, -9.0));
     TS_ASSERT_EQUALS(detectorInfo.position(4), V3D(0.0, 0.0, -2.0));
+  }
+
+  void test_eFixed() {
+    const auto &detectorInfo = m_workspace.detectorInfo();
+    TS_ASSERT_EQUALS(detectorInfo.eFixed(0), 0.0);
+    TS_ASSERT_EQUALS(detectorInfo.eFixed(1), 1.0);
+    TS_ASSERT_EQUALS(detectorInfo.eFixed(2), 2.0);
+    TS_ASSERT_EQUALS(detectorInfo.eFixed(3), 3.0);
+    TS_ASSERT_EQUALS(detectorInfo.eFixed(4), 4.0);
   }
 
   void test_setPosition() {
