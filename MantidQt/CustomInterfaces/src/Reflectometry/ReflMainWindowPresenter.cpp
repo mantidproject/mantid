@@ -2,6 +2,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -10,16 +11,19 @@ namespace CustomInterfaces {
 * @param view :: [input] The view we are managing
 * @param runsPresenter :: [input] A pointer to the 'Runs' tab presenter
 * @param settingsPresenter :: [input] A pointer to the 'Settings' tab presenter
+* @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
 */
 ReflMainWindowPresenter::ReflMainWindowPresenter(
     IReflMainWindowView *view, IReflRunsTabPresenter *runsPresenter,
-    IReflSettingsTabPresenter *settingsPresenter)
+    IReflSettingsTabPresenter *settingsPresenter,
+    IReflSaveTabPresenter *savePresenter)
     : m_view(view), m_runsPresenter(runsPresenter),
-      m_settingsPresenter(settingsPresenter) {
+      m_settingsPresenter(settingsPresenter), m_savePresenter(savePresenter) {
 
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
   m_settingsPresenter->acceptMainPresenter(this);
+  m_savePresenter->acceptMainPresenter(this);
 
   // Trigger the setting of the current instrument name in settings tab
   m_runsPresenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);

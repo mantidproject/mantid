@@ -581,5 +581,19 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
   }
 }
 
+/**
+ * Returns whether or not a guess is plotted
+ * @returns :: True if a plot guess is plotted, false if not.
+ */
+bool MuonFitPropertyBrowser::hasGuess() const {
+  auto *handler = getHandler();
+  if (handler) {
+    const bool hasPlot = handler->hasPlot(); // don't allow caller to modify
+    return hasPlot;
+  } else {
+    return false;
+  }
+}
+
 } // MantidQt
 } // API
