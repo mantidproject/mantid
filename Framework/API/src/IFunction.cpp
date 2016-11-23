@@ -609,7 +609,8 @@ void IFunction::Attribute::fromString(const std::string &str) {
 /// parameters different from the declared
 double IFunction::activeParameter(size_t i) const {
   if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter " + parameterName(i));
+    throw std::runtime_error("Attempt to use an inactive parameter " +
+                             parameterName(i));
   }
   return getParameter(i);
 }
@@ -618,7 +619,8 @@ double IFunction::activeParameter(size_t i) const {
 /// parameters different from the declared
 void IFunction::setActiveParameter(size_t i, double value) {
   if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter");
+    throw std::runtime_error("Attempt to use an inactive parameter " +
+                             parameterName(i));
   }
   setParameter(i, value);
 }
@@ -629,7 +631,8 @@ void IFunction::setActiveParameter(size_t i, double value) {
  */
 std::string IFunction::nameOfActive(size_t i) const {
   if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter");
+    throw std::runtime_error("Attempt to use an inactive parameter " +
+                             parameterName(i));
   }
   return parameterName(i);
 }
@@ -640,7 +643,8 @@ std::string IFunction::nameOfActive(size_t i) const {
  */
 std::string IFunction::descriptionOfActive(size_t i) const {
   if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter");
+    throw std::runtime_error("Attempt to use an inactive parameter " +
+                             parameterName(i));
   }
   return parameterDescription(i);
 }

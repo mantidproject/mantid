@@ -91,12 +91,13 @@ void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
     fun.setParameter(i, storedParam);
 
     if (fix) {
-      // Parameter is bad - fix it. Delay actual fixing until all bad ones found.
+      // Parameter is bad - fix it. Delay actual fixing until all bad ones
+      // found.
       indicesOfFixed.push_back(i);
     }
     ++j;
   }
-  for(auto i : indicesOfFixed) {
+  for (auto i : indicesOfFixed) {
     fun.tie(fun.parameterName(i), std::to_string(fun.getParameter(i)));
   }
 }
