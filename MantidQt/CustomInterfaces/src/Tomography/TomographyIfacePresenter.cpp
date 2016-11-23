@@ -64,9 +64,6 @@ TomographyIfacePresenter::~TomographyIfacePresenter() {
 
   if (m_statusMutex)
     delete m_statusMutex;
-
-  if (m_processStartMutex)
-    delete m_processStartMutex;
 }
 
 /**

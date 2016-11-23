@@ -345,11 +345,12 @@ Running jobs locally
 You can run local reconstructions as well, however that requires properly setting up the:
 
 - External python interpretor path, for example:
-  - C:\Anaconda\python.exe for Windows
+  - C:/Anaconda/python.exe for Windows
   - ~/Anaconda2/bin/python for Linux
-- PYTHONPATH environment variable should contain the Python directories that contain the installed plugins for the supported tools
+- PYTHONPATH environment variable should contain the Python directories 
+that have the installed plugins for the supported tools
 - (Optional) Scripts directory
-  -By default this will be properly setup from the Mantid installation
+  - By default this will be properly setup from the Mantid installation
 
 Visualization
 -------------
