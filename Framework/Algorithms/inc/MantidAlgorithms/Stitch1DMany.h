@@ -64,6 +64,7 @@ private:
   double m_manualScaleFactor = 1.0;
   bool m_scaleRHSWorkspace = true;
   bool m_useManualScaleFactor = false;
+  size_t m_scaleFactorFromPeriod = 0;
 };
 
 } // namespace Algorithms

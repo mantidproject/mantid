@@ -60,6 +60,14 @@ void Stitch1DMany::init() {
   declareProperty(
       make_unique<ArrayProperty<double>>("OutScaleFactors", Direction::Output),
       "The actual used values for the scaling factors at each stitch step.");
+
+  auto scaleFactorFromPeriodValidator =
+      boost::make_shared<BoundedValidator<size_t>>();
+  scaleFactorFromPeriodValidator->setLower(0);
+  declareProperty(make_unique<PropertyWithValue<size_t>>(
+                      "ScaleFactorFromPeriod", 0,
+                      scaleFactorFromPeriodValidator, Direction::Input),
+                  "Provided index of period to obtain scale factor from.");
 }
 
 /** Load and validate the algorithm's properties.
@@ -200,6 +208,43 @@ void Stitch1DMany::exec() {
       groupWorkspaces.push_back(
           boost::dynamic_pointer_cast<WorkspaceGroup>(inputWorkspace));
 
+    // Obtain global scale factor (if using manual scale factor)
+    std::vector<double> periodScaleFactors;
+    if (m_useManualScaleFactor) {
+      /*
+      Property *msfProp = this->getProperty("ManualScaleFactor");
+      if (msfProp->isDefault())
+      {
+        // THIS REALLY SHOULD BE COMPACTED LATER SOMEHOW
+
+        // List of workspaces to stitch
+        std::vector<std::string> toProcess;
+
+        for (auto &groupWorkspace : groupWorkspaces) {
+          const std::string wsName = 
+            groupWorkspace->getItem(m_scaleFactorFromPeriod)->name();
+          toProcess.push_back(wsName);
+          outName += "_" + wsName;
+        }
+
+        IAlgorithm_sptr stitchAlg = createChildAlgorithm("Stitch1DMany");
+        stitchAlg->initialize();
+        stitchAlg->setAlwaysStoreInADS(false);
+        stitchAlg->setProperty("InputWorkspaces", toProcess);
+        stitchAlg->setProperty("OutputWorkspace", "outWS");
+        stitchAlg->setProperty("StartOverlaps", m_startOverlaps);
+        stitchAlg->setProperty("EndOverlaps", m_endOverlaps);
+        stitchAlg->setProperty("Params", m_params);
+        stitchAlg->setProperty("ScaleRHSWorkspace", m_scaleRHSWorkspace);
+        stitchAlg->setProperty("UseManualScaleFactor", m_useManualScaleFactor);
+        if (m_useManualScaleFactor)
+          stitchAlg->setProperty("ManualScaleFactor", m_manualScaleFactor);
+        stitchAlg->execute();
+
+        periodScaleFactors = stitchAlg->getProperty("OutScaleFactors");
+      }*/
+    }
+
     // List of workspaces to be grouped
     std::vector<std::string> toGroup;
 
@@ -258,6 +303,5 @@ void Stitch1DMany::exec() {
   this->setProperty("OutputWorkspace", m_outputWorkspace);
   this->setProperty("OutScaleFactors", m_scaleFactors);
 }
-
 } // namespace Algorithms
 } // namespace Mantid
