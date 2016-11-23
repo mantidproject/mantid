@@ -11,7 +11,6 @@
 
 #include <Poco/DOM/Element.h>
 
-
 namespace Mantid {
 namespace Kernel {
 namespace {
