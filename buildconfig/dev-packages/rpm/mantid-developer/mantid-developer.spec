@@ -1,5 +1,5 @@
 Name:           mantid-developer
-Version:        1.19
+Version:        1.20
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -83,6 +83,7 @@ Requires: qt-devel
 Requires: qtwebkit-devel
 %endif
 Requires: graphviz
+Requires: PyYAML
 %if 0%{?fedora}
 Requires: python3-sip-devel
 Requires: python3-PyQt4-devel
@@ -91,8 +92,10 @@ Requires: python3-scipy
 Requires: python3-sphinx
 Requires: python3-sphinx-theme-bootstrap
 Requires: python3-dateutil
-Requires: python3-matplotlib
+Requires: python3-h5py
 Requires: python3-ipython-gui
+Requires: python3-matplotlib
+Requires: python3-PyYAML
 Requires: boost-python3-devel
 %endif
 
