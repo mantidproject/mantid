@@ -186,11 +186,11 @@ public:
     alg.setProperty("Seed", 11);
     alg.execute();
     IFunction_sptr fun = alg.getProperty("Function");
+#ifdef _WIN32
     double A = fun->getParameter("A");
     double B = fun->getParameter("B");
     double I = fun->getParameter("I");
     double S = fun->getParameter("S");
-#ifdef _WIN32
     TS_ASSERT_DELTA(A, 199.3392, 1e-4);
     TS_ASSERT_DELTA(B, 130.9085, 1e-4);
     TS_ASSERT_DELTA(I, 3.5418, 1e-4);
@@ -222,11 +222,11 @@ public:
     alg.setProperty("Seed", 11);
     alg.execute();
     IFunction_sptr fun = alg.getProperty("Function");
+#ifdef _WIN32
     double A = fun->getParameter("A");
     double B = fun->getParameter("B");
     double I = fun->getParameter("I");
     double S = fun->getParameter("S");
-#ifdef _WIN32
     TS_ASSERT_DELTA(A, 199.3392, 1e-4);
     TS_ASSERT_DELTA(B, 130.9085, 1e-4);
     TS_ASSERT_DELTA(I, 3.5418, 1e-4);
