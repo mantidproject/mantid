@@ -361,6 +361,11 @@ void TomographyIfaceModel::prepareSubmissionArguments(
   }
 
   if (tool == g_customCmdTool) {
+    // if it's local we need to append the trailingCommands, as the
+    // external interpreter and script path are already appended, the script
+    // path has to be in a separate argument member otherwise running the
+    // external interpreter fails if remote we just want to append all of the
+    // options, the script path is already appended
     args.emplace_back(local ? trailingCommands : longOpt);
     return;
   }

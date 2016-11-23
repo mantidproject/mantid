@@ -572,9 +572,6 @@ void TomographyIfacePresenter::processRunRecon() {
       m_model->doRemoteRunReconstructionJob(computingResouce, runnable,
                                             allOpts);
     }
-
-    // m_model->doSubmitReconstructionJob(m_view->currentComputeResource(),
-    //                                    *m_workerThread, *worker);
   } catch (std::exception &e) {
     m_view->userWarning("Issue when trying to start a job", e.what());
   }
@@ -597,7 +594,7 @@ void TomographyIfacePresenter::setupAndRunLocalReconstruction(
     }
   }
 
-  // TODO dont create a new thread each time, just run the new process
+  // this kills the previous thread forcefully
   m_workerThread.reset();
   auto *worker = new MantidQt::CustomInterfaces::TomographyProcess();
   m_workerThread = Mantid::Kernel::make_unique<TomographyThread>(this, worker);
