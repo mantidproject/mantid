@@ -101,17 +101,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_set_user_detector_distance)
         self.connect(self.ui.pushButton_applyUserDetCenter, QtCore.SIGNAL('clicked()'),
                      self.do_set_user_detector_center)
-        self.connect(self.pushButton_applyUserWavelength, QtCore.SIGNAL('clicked()'),
+        self.connect(self.ui.pushButton_applyUserWavelength, QtCore.SIGNAL('clicked()'),
                      self.do_set_user_wave_length)
-
-        # TODO/NOW/ISSUE - Implement
-        """
-
-        add more to --> lineEdit_infoDetSampleDistance
-        : add more to -->
-
-
-        """
 
         # Tab 'View Raw Data'
         self.connect(self.ui.pushButton_setScanInfo, QtCore.SIGNAL('clicked()'),
@@ -2632,7 +2623,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         try:
             exp_number = int(str(self.ui.lineEdit_exp.text()))
-            user_lambda = float(str(self.ui.lineEdit_infoWavelength.text()))
+            user_lambda = float(str(self.ui.lineEdit_userWaveLength.text()))
         except ValueError:
             self.pop_one_button_dialog('Unable to set user wave length with value %s.'
                                        '' % str(self.ui.lineEdit_infoWavelength.text()))
