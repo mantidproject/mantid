@@ -246,17 +246,21 @@ void TOFAxisCorrection::correctManually(API::MatrixWorkspace_sptr outputWs) {
   size_t indexEPP = 0;
   averageL2AndEPPIndex(spectrumInfo, l2, indexEPP);
   double Ei = getProperty(PropertyNames::INCIDENT_ENERGY);
-  if (Ei == EMPTY_LONG()) {
+  if (Ei == EMPTY_DBL()) {
     Ei = m_inputWs->run().getPropertyAsSingleValue(SampleLog::INCIDENT_ENERGY);
   }
   // In microseconds.
   const double TOF =
           (l1 + l2) / std::sqrt(2 * Ei * PhysicalConstants::meV / PhysicalConstants::NeutronMass) * 1e6;
+  g_log.information() << "Calculated TOF for L1+L2 distance of " << l1 + l2 << "m: " << TOF << '\n';
   const int64_t histogramCount = static_cast<int64_t>(m_inputWs->getNumberHistograms());
   PARALLEL_FOR_IF(threadSafe(*m_inputWs, *outputWs))
   for (int64_t i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     const double shift = TOF - m_inputWs->x(i)[indexEPP];
+    if (i == 0) {
+      g_log.debug() << "TOF shift: " << shift << '\n';
+    }
     auto &xsOut = outputWs->mutableX(i);
     for (auto &x : xsOut) {
       x += shift;
@@ -322,7 +326,8 @@ void TOFAxisCorrection::averageL2AndEPPIndex(const API::SpectrumInfo &spectrumIn
   l2 = l2Sum / static_cast<double>(n);
   g_log.information() << "Average L2 distance: "
                       << l2 << ".\n";
-  indexEPP = static_cast<size_t>(std::round(eppSum / static_cast<double>(n)));
+  const double meanEPP = eppSum / static_cast<double>(n);
+  indexEPP = m_inputWs->binIndexOf(meanEPP);
   g_log.information() << "Average detector EPP index: " << indexEPP << ".\n";
 }
 
