@@ -22,6 +22,8 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
     _progress = None
     _analyser = None
     _reflection = None
+    _back_option = None
+    _calib_option = None
     _common_args = {}
     _all_runs = None
 
@@ -62,6 +64,16 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(lower=0),
                              doc='Scaling factor for background subtraction')
 
+        self.declareProperty(name='BackgroundOption',
+                             defaultValue='Sum',
+                             validator=StringListValidator(['Sum','Interpolate']),
+                             doc='Whether to sum or interpolate the background runs.')
+
+        self.declareProperty(name='CalibrationOption',
+                             defaultValue='Sum',
+                             validator=StringListValidator(['Sum', 'Interpolate']),
+                             doc='Whether to sum or interpolate the calibration runs.')
+
         self.declareProperty(FileProperty('MapFile', '',
                                           action=FileAction.OptionalLoad,
                                           extensions=['xml']),
@@ -96,7 +108,9 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         self._calibration_files = self.getPropertyValue('CalibrationRun')
         self._observable = self.getPropertyValue('Observable')
         self._sortX = self.getProperty('SortXAxis').value
-        self._back_scaling =self.getProperty('BackgroundScalingFactor').value
+        self._back_scaling = self.getProperty('BackgroundScalingFactor').value
+        self._back_option = self.getPropertyValue('BackgroundOption')
+        self._calib_option = self.getPropertyValue('CalibrationOption')
 
         # arguments to pass to IndirectILLEnergyTransfer
         self._common_args['MapFile'] = self.getPropertyValue('MapFile')
@@ -112,7 +126,12 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         # make sure observable entry also exists (value is not important)
         self._criteria += ' and ($/entry0/' + self._observable.replace('.', '/') + '$ or True)'
 
-        # empty dictionary
+        if (self._back_option == 'Interpolate' or self._calib_option == 'Interpolate') \
+                and not self._sortX:
+            self.log().warning('Interpolation option requested, X-axis will be sorted.')
+            self._sortX = True
+
+        # empty dictionary to store all runs
         self._all_runs = dict()
 
     def _filter_files(self, files, label):
