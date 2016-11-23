@@ -66,7 +66,7 @@ def create_van(instrument, van, empty, output_van_file_name, num_of_splines, abs
 def _apply_absorb_corrections(instrument, run_details, corrected_van_ws, gen_absorb):
     corrected_van_ws = mantid.ConvertUnits(InputWorkspace=corrected_van_ws, Target="Wavelength")
 
-    if gen_absorb:
+    if gen_absorb or not run_details.vanadium_absorption:
         absorb_ws = instrument._generate_vanadium_absorb_corrections(run_details, corrected_van_ws)
     else:
         absorb_ws = mantid.LoadNexus(Filename=run_details.vanadium_absorption)
