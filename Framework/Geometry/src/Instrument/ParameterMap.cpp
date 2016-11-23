@@ -85,7 +85,6 @@ const std::string &ParameterMap::pV3D() { return V3D_PARAM_NAME; }
 
 const std::string &ParameterMap::pQuat() { return QUAT_PARAM_NAME; }
 
-
 /**
  * Compares the values in this object with that given for inequality
  * The order of the values in the map is not important.
