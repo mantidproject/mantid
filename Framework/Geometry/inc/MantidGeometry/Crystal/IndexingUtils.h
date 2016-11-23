@@ -7,6 +7,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Logger.h"
@@ -51,11 +52,10 @@ public:
   /// Find the UB matrix that most nearly indexes the specified qxyz values
   /// given the lattice parameters
   static double Find_UB(Kernel::DblMatrix &UB,
-                        const std::vector<Kernel::V3D> &q_vectors, double a,
-                        double b, double c, double alpha, double beta,
-                        double gamma, double required_tolerance, int base_index,
-                        size_t num_initial, double degrees_per_step,
-                        bool fixAll = false);
+                        const std::vector<Kernel::V3D> &q_vectors,
+                        OrientedLattice& lattice, double required_tolerance,
+                        int base_index, size_t num_initial,
+                        double degrees_per_step, bool fixAll = false);
 
   /// Find the UB matrix that most nearly indexes the specified qxyz values
   /// given the range of possible real space unit cell edge lengths.
@@ -89,9 +89,9 @@ public:
 
   /// Scan rotations to find UB that indexes peaks given lattice parameters
   static double ScanFor_UB(Kernel::DblMatrix &UB,
-                           const std::vector<Kernel::V3D> &q_vectors, double a,
-                           double b, double c, double alpha, double beta,
-                           double gamma, double degrees_per_step,
+                           const std::vector<Kernel::V3D> &q_vectors,
+                           const UnitCell& lattice,
+                           double degrees_per_step,
                            double required_tolerance);
 
   /// Get list of possible directions and lengths for real space unit cell
