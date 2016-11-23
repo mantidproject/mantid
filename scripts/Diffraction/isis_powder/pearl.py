@@ -53,7 +53,7 @@ class Pearl(AbstractInst):
         return self._focus(run_number=run_number,
                            do_attenuation=do_attenuation, do_van_normalisation=do_van_normalisation)
 
-    def create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name=None, num_of_splines=None,
+    def create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name=None, num_of_splines=60,
                                     do_absorb_corrections=True, gen_absorb_correction=False):
 
         self._create_calibration_vanadium(vanadium_runs=vanadium_runs, empty_runs=empty_runs,
