@@ -13,64 +13,70 @@ namespace {
 Kernel::Logger g_log("LiveListenerFactory");
 }
 
-/** Creates an instance of the appropriate listener for the given instrument,
- * and establishes the
- *  connection to the data acquisition.
+/**
+ * Creates an instance of the appropriate listener for the given instrument,
+ * and establishes the connection to the data acquisition.
+ *
  *  @param instrumentName The name of the instrument to 'listen to' (Note that
- * the argument has
- *                        different semantics to the base class create method).
+ *                        the argument has different semantics to the base class
+ *                        create method).
  *  @param connect        Whether to connect the listener to the data stream for
- * the given instrument.
+ *                        the given instrument.
  *  @param properties     Property manager to copy property values to the
- * listener if it has any.
+ *                        listener if it has any.
  *  @returns A shared pointer to the created ILiveListener implementation
  *  @throws Exception::NotFoundError If the requested listener is not registered
  *  @throws std::runtime_error If unable to connect to the listener at the
- * configured address
+ *                             configured address.
  */
 boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
-    const std::string &instrumentName, bool connect,
+    const std::string &instrumentName,
+    bool connect,
+    const Kernel::IPropertyManager *properties,
+    const std::string &listenerConnectionName) const {
+  // Look up LiveListenerInfo based on given instrument and listener names
+  auto inst = Kernel::ConfigService::Instance().getInstrument(instrumentName);
+  auto info = inst.liveListenerInfo(listenerConnectionName);
+
+  // Defer creation logic to other create overload
+  return create(info, connect, properties);
+}
+
+/**
+ * @brief LiveListenerFactoryImpl::create
+ * @param info
+ * @param connect
+ * @param properties
+ * @return
+ */
+boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
+    const Kernel::LiveListenerInfo &info,
+    bool connect,
     const Kernel::IPropertyManager *properties) const {
-  ILiveListener_sptr listener;
-  // See if we know about the instrument with the given name
+
+  ILiveListener_sptr listener =
+      Kernel::DynamicFactory<ILiveListener>::create(info.listener());
+
+  // Give LiveListener additional properties if provided
+  if (properties) {
+    listener->updatePropertyValues(*properties);
+  }
+
   try {
-    Kernel::InstrumentInfo inst =
-        Kernel::ConfigService::Instance().getInstrument(instrumentName);
-    listener =
-        Kernel::DynamicFactory<ILiveListener>::create(inst.liveListener());
-    // set the properties
-    if (properties) {
-      listener->updatePropertyValues(*properties);
-    }
     if (connect &&
-        !listener->connect(Poco::Net::SocketAddress(inst.liveDataAddress()))) {
-      // If we can't connect, log and throw an exception
-      std::stringstream ss;
-      ss << "Unable to connect listener " << listener->name() << " to "
-         << inst.liveDataAddress();
-      g_log.debug(ss.str());
-      throw std::runtime_error(ss.str());
+        !listener->connect(Poco::Net::SocketAddress(info.address()))) {
+      // If we can't connect, throw an exception to be handled below
+      throw Poco::Exception("Connection attempt failed.");
     }
-  } catch (Kernel::Exception::NotFoundError &) {
-    // If we get to here either we don't know of the instrument name given, or
-    // the the live
-    // listener class given for the instrument is not known.
-    // During development, and for testing, we allow the direct passing in of a
-    // listener name
-    //   - so try to create that. Will throw if it doesn't exist - let that
-    //   exception get out
-    listener = Kernel::DynamicFactory<ILiveListener>::create(instrumentName);
-    if (connect)
-      listener->connect(Poco::Net::SocketAddress()); // Dummy argument for now
   }
   // The Poco SocketAddress can throw all manner of exceptions if the address
-  // string it gets is
-  // badly formed, or it can't successfully look up the server given, or .......
+  // string it gets is badly formed, or it can't successfully look up the
+  // server given, or .......
   // Just catch the base class exception
   catch (Poco::Exception &pocoEx) {
     std::stringstream ss;
-    ss << "Unable to connect listener " << listener->name() << " to "
-       << instrumentName << ": " << pocoEx.what();
+    ss << "Unable to connect listener [" << info.listener() << "] to ["
+       << info.address() << "]: " << pocoEx.what();
     g_log.debug(ss.str());
     throw std::runtime_error(ss.str());
   }
