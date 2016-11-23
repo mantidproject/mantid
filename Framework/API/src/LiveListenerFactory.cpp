@@ -33,12 +33,21 @@ boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
     const std::string &instrumentName, bool connect,
     const Kernel::IPropertyManager *properties,
     const std::string &listenerConnectionName) const {
-  // Look up LiveListenerInfo based on given instrument and listener names
-  auto inst = Kernel::ConfigService::Instance().getInstrument(instrumentName);
-  auto info = inst.liveListenerInfo(listenerConnectionName);
+  try {
+    // Look up LiveListenerInfo based on given instrument and listener names
+    auto inst = Kernel::ConfigService::Instance().getInstrument(instrumentName);
+    auto info = inst.liveListenerInfo(listenerConnectionName);
 
-  // Defer creation logic to other create overload
-  return create(info, connect, properties);
+    // Defer creation logic to other create overload
+    return create(info, connect, properties);
+
+  } catch (Kernel::Exception::NotFoundError&) {
+    // Could not determine LiveListenerInfo for instrumentName
+    // Attempt to interpret instrumentName as listener class name instead, to
+    // support legacy usage in unit tests.
+    Kernel::LiveListenerInfo info(instrumentName);
+    return create(info, connect, properties);
+  }
 }
 
 /**
@@ -60,23 +69,30 @@ boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
     listener->updatePropertyValues(*properties);
   }
 
-  try {
-    if (connect &&
-        !listener->connect(Poco::Net::SocketAddress(info.address()))) {
+  if (connect) {
+    try {
+      Poco::Net::SocketAddress address;
+
+      // To allow listener::connect to be called even when no address is given
+      if (!info.address().empty())
+        address = Poco::Net::SocketAddress(info.address());
+
       // If we can't connect, throw an exception to be handled below
-      throw Poco::Exception("Connection attempt failed.");
+      if (!listener->connect(address)) {
+        throw Poco::Exception("Connection attempt failed.");
+      }
     }
-  }
-  // The Poco SocketAddress can throw all manner of exceptions if the address
-  // string it gets is badly formed, or it can't successfully look up the
-  // server given, or .......
-  // Just catch the base class exception
-  catch (Poco::Exception &pocoEx) {
-    std::stringstream ss;
-    ss << "Unable to connect listener [" << info.listener() << "] to ["
-       << info.address() << "]: " << pocoEx.what();
-    g_log.debug(ss.str());
-    throw std::runtime_error(ss.str());
+    // The Poco SocketAddress can throw all manner of exceptions if the address
+    // string it gets is badly formed, or it can't successfully look up the
+    // server given, or .......
+    // Just catch the base class exception
+    catch (Poco::Exception &pocoEx) {
+      std::stringstream ss;
+      ss << "Unable to connect listener [" << info.listener() << "] to ["
+         << info.address() << "]: " << pocoEx.what();
+      g_log.debug(ss.str());
+      throw std::runtime_error(ss.str());
+    }
   }
 
   // If we get to here, it's all good!
