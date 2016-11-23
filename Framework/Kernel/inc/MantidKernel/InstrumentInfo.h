@@ -68,9 +68,9 @@ public:
   /// Returns the default delimiter between instrument name and run number
   std::string delimiter() const;
   /// Returns the name of the default live listener
-  const std::string &liveListener() const;
+  std::string liveListener(const std::string &name = "") const;
   /// Returns a string containing the "host:port" for default live listener
-  const std::string &liveDataAddress() const;
+  std::string liveDataAddress(const std::string &name = "") const;
   /// Returns LiveListenerInfo for specified connection name (or default)
   const LiveListenerInfo &liveListenerInfo(std::string name = "") const;
   /// Returns true if this instrument has at least one live listener defined

@@ -121,26 +121,22 @@ std::string InstrumentInfo::filePrefix(unsigned int runNumber) const {
 }
 
 /// Returns the name of the live listener
-const std::string &InstrumentInfo::liveListener() const {
-  // TODO: Return "" if no LiveListenerInfo?
-  static std::string foobar;
+std::string InstrumentInfo::liveListener(const std::string &name) const {
   if (!hasLiveListenerInfo())
-    return foobar;
+    return "";
 
-  return liveListenerInfo().listener();
+  return liveListenerInfo(name).listener();
 }
 
 /** Returns the host & port to connect to for a live data stream
  *  No guarantees are given that the provided string is well-formed and valid
  *    - the caller should check this themselves
  */
-const std::string &InstrumentInfo::liveDataAddress() const {
-  // TODO: Return "" if no LiveListenerInfo?
-  static std::string foobar;
+std::string InstrumentInfo::liveDataAddress(const std::string &name) const {
   if (!hasLiveListenerInfo())
-    return foobar;
+    return "";
 
-  return liveListenerInfo().address();
+  return liveListenerInfo(name).address();
 }
 
 /**
