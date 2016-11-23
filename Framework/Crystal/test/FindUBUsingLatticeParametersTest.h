@@ -5,6 +5,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataHandling/DeleteTableRows.h"
 
 #include "MantidCrystal/FindUBUsingLatticeParameters.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
@@ -112,6 +113,63 @@ public:
     TS_ASSERT_DELTA(latt.alpha(), 90.0, 5e-10);
     TS_ASSERT_DELTA(latt.beta(), 105.071, 5e-10);
     TS_ASSERT_DELTA(latt.gamma(), 90.0, 5e-10);
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(ws->name());
+  }
+
+  void test_smallNumberOfPeaks() {
+    // Use a tiny set of 3 peaks - the minimum required
+    ///to successfully find a UB matrix this checks the case that we still
+    /// get a UB (although perhaps not a very good one).
+    auto ws = loadPeaksWorkspace();
+    std::vector<size_t> rows;
+    for (size_t i = 3; i < ws->rowCount(); ++i) {
+      rows.push_back(i);
+    }
+
+    DataHandling::DeleteTableRows removeRowAlg;
+    removeRowAlg.initialize();
+    removeRowAlg.setPropertyValue("TableWorkspace", ws->name());
+    removeRowAlg.setProperty("Rows", rows);
+    removeRowAlg.execute();
+
+    FindUBUsingLatticeParameters alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", ws->name()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("a", "14.131"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("b", "19.247"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("c", "8.606"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("alpha", "90.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("beta", "105.071"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("gamma", "90.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NumInitial", "15"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.12"));
+//    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FixAll", true));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Check that we set an oriented lattice
+    TS_ASSERT(ws->mutableSample().hasOrientedLattice());
+    // Check that the UB matrix is the same as in TOPAZ_3007.mat
+    OrientedLattice latt = ws->mutableSample().getOrientedLattice();
+
+    double correct_UB[] = {0.0450, 0.0407, 0.0127,
+                           -0.0008, -0.0044, -0.1158,
+                           -0.0584, 0.0307, -0.0242};
+
+    std::vector<double> UB_calculated = latt.getUB().getVector();
+
+    for (size_t i = 0; i < 9; i++) {
+      TS_ASSERT_DELTA(correct_UB[i], UB_calculated[i], 5e-4);
+    }
+    TS_ASSERT_DELTA(latt.a(), 13.9520, 5e-4);
+    TS_ASSERT_DELTA(latt.b(), 19.5145, 5e-4);
+    TS_ASSERT_DELTA(latt.c(), 8.6566, 5e-4);
+    TS_ASSERT_DELTA(latt.alpha(), 92.6267, 5e-4);
+    TS_ASSERT_DELTA(latt.beta(), 103.7440, 5e-4);
+    TS_ASSERT_DELTA(latt.gamma(), 90.0272, 5e-4);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(ws->name());
