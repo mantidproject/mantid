@@ -87,9 +87,6 @@ extra_columns(const std::vector<std::string> &filenames) {
 }
 }
 
-PDLoadCharacterizations::PDLoadCharacterizations()
-    : hasExtras(false), canColumnNames() {}
-
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PDLoadCharacterizations::name() const {
@@ -148,14 +145,8 @@ void PDLoadCharacterizations::init() {
 /** Execute the algorithm.
  */
 void PDLoadCharacterizations::exec() {
-  this->hasExtras = false;
   auto filenames = this->getFilenames();
-
-  for (const auto filename : filenames) { // REMOVE
-    std::cout << filename << std::endl;   // REMOVE
-  }                                       // REMOVE
-
-  this->canColumnNames = extra_columns(filenames);
+  const std::vector<std::string> canColumnNames = extra_columns(filenames);
 
   // setup the default table workspace for the characterization runs
   ITableWorkspace_sptr wksp = WorkspaceFactory::Instance().createTable();
@@ -173,7 +164,7 @@ void PDLoadCharacterizations::exec() {
   wksp->addColumn("double", "tof_max");
   wksp->addColumn("double", "wavelength_min");
   wksp->addColumn("double", "wavelength_max");
-  for (const auto name : this->canColumnNames) {
+  for (const auto name : canColumnNames) {
     wksp->addColumn("str", name); // all will be strings
   }
 
@@ -320,6 +311,8 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
   if (file.eof())
     return;
 
+  const size_t num_of_columns = wksp->columnCount();
+
   // parse the file
   for (std::string line = Strings::getLine(file); !file.eof();
        line = Strings::getLine(file)) {
@@ -354,9 +347,11 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
     row << boost::lexical_cast<double>(splitted[9]);  // tof_max
     row << boost::lexical_cast<double>(splitted[10]); // wavelength_min
     row << boost::lexical_cast<double>(splitted[11]); // wavelength_max
+
     // pad all extras with empty string
-    for (const auto name : this->canColumnNames)
+    for (size_t i = 14; i < num_of_columns; ++i) {
       row << "0";
+    }
   }
 }
 
