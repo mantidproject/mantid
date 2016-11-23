@@ -37,7 +37,7 @@ public:
         IDetector_const_sptr det = m_workspace.getDetector(i);
         pmap.addBool(det.get(), "masked", true);
       }
-      pmap.addDouble(m_workspace.getDetector(i).get(), "Efixed",
+      pmap.addDouble(m_workspace.getDetector(i).get(), ParameterMap::eFixed(),
                      static_cast<double>(i));
     }
 

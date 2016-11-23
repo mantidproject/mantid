@@ -95,7 +95,8 @@ Kernel::Quat DetectorInfo::rotation(const size_t index) const {
 
 double DetectorInfo::eFixed(const size_t index) const {
   const auto &detector = getDetector(index);
-  auto eFixedVector = detector.getNumberParameter("Efixed");
+  auto eFixedVector =
+      detector.getNumberParameter(Geometry::ParameterMap::eFixed());
 
   double eFixed = 0.0;
 

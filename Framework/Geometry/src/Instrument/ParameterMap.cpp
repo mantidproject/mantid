@@ -29,6 +29,8 @@ const std::string ROTX_PARAM_NAME = "rotx";
 const std::string ROTY_PARAM_NAME = "roty";
 const std::string ROTZ_PARAM_NAME = "rotz";
 
+const std::string EFIXED_PARAM_NAME = "Efixed";
+
 const std::string DOUBLE_PARAM_NAME = "double";
 const std::string INT_PARAM_NAME = "int";
 const std::string BOOL_PARAM_NAME = "bool";
@@ -69,6 +71,8 @@ const std::string &ParameterMap::roty() { return ROTY_PARAM_NAME; }
 const std::string &ParameterMap::rotz() { return ROTZ_PARAM_NAME; }
 
 // Other types
+const std::string &ParameterMap::eFixed() { return EFIXED_PARAM_NAME; }
+
 const std::string &ParameterMap::pDouble() { return DOUBLE_PARAM_NAME; }
 
 const std::string &ParameterMap::pInt() { return INT_PARAM_NAME; }
@@ -80,6 +84,7 @@ const std::string &ParameterMap::pString() { return STRING_PARAM_NAME; }
 const std::string &ParameterMap::pV3D() { return V3D_PARAM_NAME; }
 
 const std::string &ParameterMap::pQuat() { return QUAT_PARAM_NAME; }
+
 
 /**
  * Compares the values in this object with that given for inequality
