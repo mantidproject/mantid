@@ -17,6 +17,7 @@ ISIS Reflectometry (Polref)
 
 - Settings tab now displays individual global options for experiment and instrument settings.
 - Documentation regarding the interface has been updated accordingly.
+- New 'Save ASCII' tab added, similar in function and purpose to the 'Save Workspaces' window accessible from Interfaces->ISIS Reflectometry->File->Save Workspaces.
 
 ISIS Reflectometry
 ##################
