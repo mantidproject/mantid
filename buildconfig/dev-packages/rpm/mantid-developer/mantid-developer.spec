@@ -55,6 +55,7 @@ Requires: python-matplotlib
 Requires: python-pip
 Requires: python-sphinx
 Requires: python-sphinx-theme-bootstrap
+Requires: PyYAML
 Requires: qscintilla-devel
 Requires: qt-devel >= 4.6
 %if 0%{?el6}
@@ -127,6 +128,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Fri Nov 18 2016 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Require PyYAML
+
 * Fri Sep 23 2016 Stuart Campbell <campbellsi@ornl.gov>
 - Require poco >= 1.4.6
 
