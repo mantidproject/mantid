@@ -2,7 +2,6 @@
 #define MANTID_CURVEFITTING_CRYSTALFIELDPEAKSBASE_H_
 
 #include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/IFunctionGeneral.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/FortranDefs.h"
@@ -37,8 +36,7 @@ namespace Functions {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_CURVEFITTING_DLL CrystalFieldPeaksBase
-    : public API::IFunctionGeneral,
-      public API::ParamFunction {
+    : public API::ParamFunction {
 public:
   CrystalFieldPeaksBase();
   void setAttribute(const std::string &name, const Attribute &) override;

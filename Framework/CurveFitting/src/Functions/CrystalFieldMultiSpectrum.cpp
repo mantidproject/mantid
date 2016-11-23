@@ -5,6 +5,7 @@
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/ParameterTie.h"
@@ -25,7 +26,8 @@ namespace {
 
 /// Define the source function for CrystalFieldMultiSpectrum.
 /// Its function() method is not needed.
-class Peaks : public CrystalFieldPeaksBase {
+class Peaks : public CrystalFieldPeaksBase, 
+              public API::IFunctionGeneral {
 public:
   Peaks() : CrystalFieldPeaksBase() {}
   std::string name() const override { return "Peaks"; }

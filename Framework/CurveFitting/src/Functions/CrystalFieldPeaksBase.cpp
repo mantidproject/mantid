@@ -269,7 +269,7 @@ const std::map<std::string, std::function<void(API::IFunction &)>> SYMMETRY_MAP{
 
 /// Constructor
 CrystalFieldPeaksBase::CrystalFieldPeaksBase()
-    : API::IFunctionGeneral(), API::ParamFunction(), m_defaultDomainSize(0) {
+    : API::ParamFunction(), m_defaultDomainSize(0) {
 
   declareAttribute("Ion", Attribute("Ce"));
   declareAttribute("Symmetry", Attribute("Ci"));
