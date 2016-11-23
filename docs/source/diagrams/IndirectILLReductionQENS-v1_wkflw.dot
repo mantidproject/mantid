@@ -1,0 +1,62 @@
+digraph IndirectILLReductionQENS {
+  label="IndirectILLReductionQENS Flowchart"
+  $global_style
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph descision {
+    $decision_style
+  }
+
+  subgraph params {
+  	$param_style
+  	Run
+  	BackgroundRun
+  	CalibrationRun
+  	AlignmentRun
+  	BackgroundScalingFactor
+  	CalibrationPeakRange
+  	UnmirrorOption
+  	CropDeadMonitorChannels
+  	MaskOverflownBins
+  }
+
+  subgraph algorithms {
+  	$algorithm_style
+  	SelectNexusFilesByMetadata
+  	IndirectILLEnergyTransfer
+  	Integration
+  	Minus
+  	Divide
+    Plus
+    Scale
+    MatchPeaks
+    GroupWorkspaces
+  }
+
+  subgraph processes {
+  	$process_style
+  }
+
+  Run -> SelectNexusFilesByMetadata
+  SelectNexusFilesByMetadata -> IndirectILLEnergyTransfer
+  CropDeadMonitorChannels -> IndirectILLEnergyTransfer
+  IndirectILLEnergyTransfer -> Minus
+  BackgroundRun -> Scale
+  BackgroundScalingFactor -> Scale
+  Scale -> Minus
+  CalibrationRun -> Integration
+  CalibrationPeakRange -> Integration
+  Integration -> Divide
+  Minus -> Divide
+  Divide -> MatchPeaks
+  UnmirrorOption -> MatchPeaks
+  AlignmentRun -> MatchPeaks
+  MaskOverflownBins -> MatchPeaks
+  MatchPeaks -> Plus
+  Plus -> GroupWorkspaces
+  GroupWorkspaces -> OutputWorkspace
+}

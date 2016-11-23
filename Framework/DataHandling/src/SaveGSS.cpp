@@ -142,7 +142,7 @@ void SaveGSS::exec() {
     errss << "Number of Spectra (" << nHist
           << ") cannot be larger than 99 for GSAS file";
     g_log.error(errss.str());
-    throw new std::invalid_argument(errss.str());
+    throw std::invalid_argument(errss.str());
   }
 
   std::string filename = getProperty("Filename");

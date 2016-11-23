@@ -9,7 +9,7 @@ from mantid import config
 
 class IndirectILLEnergyTransferTest(unittest.TestCase):
 
-    _runs = dict([('one_wing_QENS', '090660'),
+    _runs = dict([('one_wing_QENS', '090661'),
                   ('one_wing_EFWS', '083072'),
                   ('one_wing_IFWS', '083073'),
                   ('two_wing_QENS', '136558-136559'),
@@ -56,32 +56,27 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         self._check_workspace_group(mtd['red'], 2, 18, 1017)
 
     def test_one_wing_QENS(self):
-        args = {}
-        args['Run'] = self._runs['one_wing_QENS']
+        args = {'Run': self._runs['one_wing_QENS']}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 18, 1024)
 
     def test_one_wing_EFWS(self):
-        args = {}
-        args['Run'] = self._runs['one_wing_EFWS']
+        args = {'Run': self._runs['one_wing_EFWS']}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 18, 256)
 
     def test_one_wing_IFWS(self):
-        args = {}
-        args['Run'] = self._runs['one_wing_IFWS']
+        args = {'Run': self._runs['one_wing_IFWS']}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 18, 256)
 
     def test_two_wing_EFWS(self):
-        args = {}
-        args['Run'] = self._runs['two_wing_EFWS']
+        args = {'Run': self._runs['two_wing_EFWS']}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 2, 18, 8)
 
     def test_two_wing_IFWS(self):
-        args = {}
-        args['Run'] = self._runs['two_wing_IFWS']
+        args = {'Run': self._runs['two_wing_IFWS']}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 2, 18, 512)
 

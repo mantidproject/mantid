@@ -38,6 +38,11 @@ public:
           options,
       int nWorkspaces);
 
+  /// Tests if WorkspaceGroup contents all have same X for given spectrum
+  static bool
+  groupContentsHaveSameX(const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
+                         const size_t index);
+
 private:
   /// Type of graph to plot
   enum class Type { Surface, Contour };
@@ -50,10 +55,10 @@ private:
 
   /// Creates a single workspace to plot from
   const Mantid::API::MatrixWorkspace_sptr createWorkspaceForGroupPlot(
+      Type graphType,
       boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup,
       const MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface &
-          options,
-      QString *xAxisTitle) const;
+          options) const;
 
   /// Returns a single log value from the given workspace
   double
@@ -64,14 +69,14 @@ private:
   /// Returns a single log value from supplied custom log
   double getSingleLogValue(int wsIndex, const std::set<double> &values) const;
 
-  /// Converts histogram to point data, if not already
-  void convertHistoToPoints(Mantid::API::MatrixWorkspace_sptr ws) const;
+  /// Get X axis title
+  QString getXAxisTitle(
+      const boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup) const;
 
-  /// Converts point to histogram data, if not already
-  void convertPointsToHisto(Mantid::API::MatrixWorkspace_sptr ws) const;
-
-  /// Converts X data to correct (point/histo) format for the graph type
-  void convertXData(Mantid::API::MatrixWorkspace_sptr ws, Type graphType) const;
+  /// Validate chosen workspaces/spectra
+  void validateWorkspaceChoices(
+      const boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup,
+      const size_t spectrum) const;
 
   /// Pointer to the Mantid UI
   MantidQt::MantidWidgets::MantidDisplayBase *const m_mantidUI;

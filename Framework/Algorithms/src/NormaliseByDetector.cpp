@@ -95,7 +95,7 @@ void NormaliseByDetector::processHistogram(size_t wsIndex,
                                            MatrixWorkspace_const_sptr inWS,
                                            MatrixWorkspace_sptr denominatorWS,
                                            Progress &prog) {
-  const Geometry::ParameterMap &paramMap = inWS->instrumentParameters();
+  const auto &paramMap = inWS->constInstrumentParameters();
   Geometry::IDetector_const_sptr det = inWS->getDetector(wsIndex);
   const std::string type = "fitting";
   Geometry::Parameter_sptr foundParam =

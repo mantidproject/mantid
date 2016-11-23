@@ -1,0 +1,46 @@
+digraph IndirectILLReductionFWS {
+  label="IndirectILLReductionFWS Flowchart"
+  $global_style
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph descision {
+    $decision_style
+  }
+
+  subgraph params {
+  	$param_style
+  	Run
+  	Observable
+  	CalibrationRun
+  	BackgroundRun
+  }
+
+  subgraph algorithms {
+  	$algorithm_style
+  	IndirectILLEnergyTransfer
+    SelectNexusFilesByMetadata
+    Integration
+    GroupWorkspaces
+    SplineInterpolation
+  }
+
+  subgraph processes {
+  	$process_style
+  	Scan
+  }
+
+  Run -> SelectNexusFilesByMetadata
+  SelectNexusFilesByMetadata -> IndirectILLEnergyTransfer
+  IndirectILLEnergyTransfer -> Integration
+  Integration -> Scan
+  Observable -> Scan
+  CalibrationRun -> SplineInterpolation
+  BackgroundRun -> SplineInterpolation
+  SplineInterpolation -> Scan
+  Scan -> GroupWorkspaces
+  GroupWorkspaces -> OutputWorkspace
+}
