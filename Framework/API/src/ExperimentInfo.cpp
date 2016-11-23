@@ -638,29 +638,17 @@ ExperimentInfo::getEFixed(const Geometry::IDetector_const_sptr detector) const {
     if (!detector)
       throw std::runtime_error("ExperimentInfo::getEFixed - Indirect mode "
                                "efixed requested without a valid detector.");
-    Parameter_sptr par =
-        constInstrumentParameters().getRecursive(detector.get(), "Efixed");
-    if (par) {
-      return par->value<double>();
+    const auto detectorIndex = detectorInfo().indexOf(detector->getID());
+    double eFixed = detectorInfo().eFixed(detectorIndex);
+    if (eFixed != 0.0) {
+      return eFixed;
     } else {
-      std::vector<double> efixedVec = detector->getNumberParameter("Efixed");
-      if (efixedVec.empty()) {
-        int detid = detector->getID();
-        IDetector_const_sptr detectorSingle =
-            getInstrument()->getDetector(detid);
-        efixedVec = detectorSingle->getNumberParameter("Efixed");
-      }
-      if (!efixedVec.empty()) {
-        return efixedVec.at(0);
-      } else {
         std::ostringstream os;
         os << "ExperimentInfo::getEFixed - Indirect mode efixed requested but "
-              "detector has no Efixed parameter attached. ID="
-           << detector->getID();
+              "detector has no Efixed parameter attached. ID=" << detector->getID();
         throw std::runtime_error(os.str());
-      }
     }
-  } else {
+    } else {
     throw std::runtime_error("ExperimentInfo::getEFixed - EFixed requested for "
                              "elastic mode, don't know what to do!");
   }

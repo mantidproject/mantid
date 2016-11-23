@@ -93,6 +93,19 @@ Kernel::Quat DetectorInfo::rotation(const size_t index) const {
   return getDetector(index).getRotation();
 }
 
+double DetectorInfo::eFixed(const size_t index) const {
+  const auto &detector = getDetector(index);
+  auto eFixedVector = detector.getNumberParameter("Efixed");
+
+  double eFixed = 0.0;
+
+  if (!eFixedVector.empty()) {
+    eFixed = eFixedVector.front();
+  }
+
+  return eFixed;
+}
+
 /// Set the absolute position of the detector with given index.
 void DetectorInfo::setPosition(const size_t index,
                                const Kernel::V3D &position) {
