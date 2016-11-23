@@ -177,7 +177,8 @@ This is still there, but only the bottom section ("Settings") and the three butt
 The "Function" and "Data" sections are hidden.
 In their place are two new widgets - this is achieved by inserting an extra ``Layout`` into the muon fit property browser and adding the widgets to this layout.
 
-Since the ``MuonFitPropertyBrowser`` is all still there underneath, this is how "Compatibility mode" works - an option on the Settings tab that hides the new widgets and shows the previously hidden sections of the fit browser.
+The above assumes that the "Enable multiple fitting" option is selected on the Settings tab.
+Since the ``MuonFitPropertyBrowser`` is all still there underneath, deselecting this option will hide the new widgets and show the previously hidden sections of the fit browser - note that, at present this option is *deselected* by default (i.e. the interface has the old UI).
 
 This tab can be thought of as something like an MVP (model-view-presenter) architecture.
 Of course, it's not *properly* MVP, as that would have required a rewrite - the focus was on reusing as much existing code as possible!
@@ -353,3 +354,4 @@ Future work
 Open muon issues can be found on Github with the `Component: Muon <https://github.com/mantidproject/mantid/issues?q=is%3Aopen+is%3Aissue+label%3A%22Component%3A+Muon%22>`_ label.
 Those marked ``Misc: Roadmap`` are the most important.
 
+.. categories:: Interfaces Muon

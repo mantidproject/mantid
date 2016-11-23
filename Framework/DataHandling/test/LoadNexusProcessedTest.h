@@ -930,6 +930,81 @@ public:
     doTestLoadAndSavePointWS(true);
   }
 
+  void test_that_workspace_name_is_loaded() {
+    // Arrange
+    LoadNexusProcessed loader;
+    loader.setChild(false);
+    loader.initialize();
+    loader.setPropertyValue("Filename", "POLREF00004699_nexus.nxs");
+    loader.setPropertyValue("OutputWorkspace", "ws");
+    loader.setProperty("FastMultiPeriod", true);
+    // Act
+    TS_ASSERT(loader.execute());
+    // Assert
+    TSM_ASSERT(
+        "Can access workspace via name which was set in file",
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("y_1"));
+    TSM_ASSERT(
+        "Can access workspace via name which was set in file",
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("y_2"));
+    // Clean up
+    AnalysisDataService::Instance().remove("y_1");
+    AnalysisDataService::Instance().remove("y_2");
+  }
+
+  void test_that_workspace_name_is_not_loaded_when_is_duplicate() {
+    // Arrange
+    SaveNexusProcessed alg;
+    alg.initialize();
+    std::string tempFile = "LoadNexusProcessed_TmpTestWorkspace.nxs";
+    alg.setPropertyValue("Filename", tempFile);
+
+    std::string workspaceName = "test_workspace_name";
+    for (size_t index = 0; index < 2; ++index) {
+      // Create a sample workspace and add it to the ADS, so it gets a name.
+      auto ws = WorkspaceCreationHelper::Create1DWorkspaceConstant(
+          3, static_cast<double>(index), static_cast<double>(index));
+      AnalysisDataService::Instance().addOrReplace(workspaceName, ws);
+      alg.setProperty("InputWorkspace",
+                      boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
+      if (index == 0) {
+        alg.setProperty("Append", false);
+      } else {
+        alg.setProperty("Append", true);
+      }
+      alg.execute();
+    }
+    // Delete the workspace
+    AnalysisDataService::Instance().remove(workspaceName);
+
+    tempFile = alg.getPropertyValue("Filename");
+
+    // Load the data
+    LoadNexusProcessed loader;
+    loader.setChild(false);
+    loader.initialize();
+    loader.setPropertyValue("Filename", tempFile);
+    loader.setPropertyValue("OutputWorkspace", "ws_loaded");
+    // Act
+    loader.execute();
+
+    // Assert
+    TSM_ASSERT("Can access workspace via name which is the name of the file "
+               "with an index",
+               AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+                   "ws_loaded_1"));
+    TSM_ASSERT("Can access workspace via name which is the name of the file "
+               "with an index",
+               AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+                   "ws_loaded_2"));
+    // Clean up
+    AnalysisDataService::Instance().remove("ws_loaded_1");
+    AnalysisDataService::Instance().remove("ws_loaded_2");
+    if (!tempFile.empty() && Poco::File(tempFile).exists()) {
+      Poco::File(tempFile).remove();
+    }
+  }
+
   void do_load_multiperiod_workspace(bool fast) {
     LoadNexusProcessed loader;
     loader.setChild(true);
@@ -949,6 +1024,7 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(asGroupWS->getItem(0));
     MatrixWorkspace_sptr period2 =
         boost::dynamic_pointer_cast<MatrixWorkspace>(asGroupWS->getItem(1));
+
     TSM_ASSERT("We expect the group workspace is multiperiod",
                asGroupWS->isMultiperiod());
     TSM_ASSERT_EQUALS("X-data should be identical", period1->x(0),

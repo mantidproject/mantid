@@ -4,6 +4,7 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
 
+#include <memory>
 #include <sstream>
 
 using Mantid::HistogramData::Histogram;
@@ -21,7 +22,7 @@ constexpr const char *CSPLINE_NAME = "CSpline";
  * @param stepSize The step size between each calculated point
  * @return The number of calculated nodes
  */
-inline size_t numberCalculated(const size_t ysize, const size_t stepSize) {
+constexpr size_t numberCalculated(const size_t ysize, const size_t stepSize) {
   // First and last points are always assumed to be calculated
   return 1 + ((ysize - 1) / stepSize);
 }
@@ -32,6 +33,11 @@ inline size_t numberCalculated(const size_t ysize, const size_t stepSize) {
  * @param stepSize See interpolateLinear
  * @param minCalculated The minimum number of calculated values required
  * by the routine
+ * @param method A string providing the name of the interpolation method. Used
+ * in error messages
+ * @throws std::runtime_error if input.yMode() == Uninitialized or
+ * stepSize is invalid or the number of calculated points is less than the
+ * the required value
  */
 void sanityCheck(const Histogram &input, const size_t stepSize,
                  const size_t minCalculated, const char *method) {
@@ -61,20 +67,19 @@ void sanityCheck(const Histogram &input, const size_t stepSize,
  * @param input See interpolateLinear
  * @param stepSize See interpolateLinear
  * @param ynew A reference to the output Y values
- * @return See interpolateLinear
  */
 void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
                                HistogramY &ynew) {
-  auto xold = input.points();
-  auto &yold = input.y();
-  auto nypts = yold.size();
+  const auto xold = input.points();
+  const auto &yold = input.y();
+  const auto nypts = yold.size();
   size_t step(stepSize), index2(0);
   double x1(0.), x2(0.), y1(0.), y2(0.), overgap(0.);
   // Copy over end value skipped by loop
   ynew.back() = yold.back();
   for (size_t i = 0; i < nypts - 1; ++i) // Last point has been calculated
   {
-    double xp = xold[i];
+    const double xp = xold[i];
     if (step == stepSize) {
       x1 = xp;
       index2 = ((i + stepSize) >= nypts ? nypts - 1 : (i + stepSize));
@@ -92,23 +97,23 @@ void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
     step++;
   }
 }
+
 /**
  * Perform cubic spline interpolation. It is assumed all sanity checks have been
  * performed by the interpolateCSpline entry point.
  * @param input See interpolateCSpline
  * @param stepSize See interpolateCSpline
  * @param ynew A reference to the output Y values
- * @return See interpolateCSpline
  */
 void interpolateYCSplineInplace(const Histogram &input, const size_t stepSize,
                                 HistogramY &ynew) {
-  auto xold = input.points();
-  auto &yold = input.y();
-  auto nypts = yold.size();
+  const auto xold = input.points();
+  const auto &yold = input.y();
+  const auto nypts = yold.size();
 
   const auto ncalc = numberCalculated(nypts, stepSize);
   std::vector<double> xc(ncalc), yc(ncalc);
-  for (size_t step = 0, i = 0; step < nypts; step += stepSize, i += 1) {
+  for (size_t step = 0, i = 0; step < nypts; step += stepSize, ++i) {
     xc[i] = xold[step];
     yc[i] = yold[step];
   }
@@ -116,15 +121,20 @@ void interpolateYCSplineInplace(const Histogram &input, const size_t stepSize,
   xc.back() = xold.back();
   yc.back() = yold.back();
 
-  gsl_interp_accel *acc = gsl_interp_accel_alloc();
-  gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, ncalc);
-  gsl_spline_init(spline, xc.data(), yc.data(), ncalc);
+  // Manage gsl memory with unique_ptrs
+  using gsl_spline_uptr = std::unique_ptr<gsl_spline, void (*)(gsl_spline *)>;
+  auto spline = gsl_spline_uptr(gsl_spline_alloc(gsl_interp_cspline, ncalc),
+                                gsl_spline_free);
+  // Compute spline
+  gsl_spline_init(spline.get(), xc.data(), yc.data(), ncalc);
   // Evaluate each point for the full range
+  using gsl_interp_accel_uptr =
+      std::unique_ptr<gsl_interp_accel, void (*)(gsl_interp_accel *)>;
+  auto lookupTable =
+      gsl_interp_accel_uptr(gsl_interp_accel_alloc(), gsl_interp_accel_free);
   for (size_t i = 0; i < nypts; ++i) {
-    ynew[i] = gsl_spline_eval(spline, xold[i], acc);
+    ynew[i] = gsl_spline_eval(spline.get(), xold[i], lookupTable.get());
   }
-  gsl_spline_free(spline);
-  gsl_interp_accel_free(acc);
 }
 
 } // end anonymous namespace
@@ -140,7 +150,7 @@ namespace HistogramData {
  * are always calculated points.
  * @param stepSize The space, in indices, between the calculated points
  * @return A new Histogram with the y-values from the result of a linear
- * interpolation. If the XMode of the output will match that of the input
+ * interpolation. The XMode of the output will match the input histogram.
  */
 Histogram interpolateLinear(const Histogram &input, const size_t stepSize) {
   sanityCheck(input, stepSize, 2, LINEAR_NAME);
@@ -177,7 +187,7 @@ void interpolateLinearInplace(Histogram &inOut, const size_t stepSize) {
  * are always calculated points.
  * @param stepSize The space, in indices, between the calculated points
  * @return A new Histogram with the y-values from the result of a linear
- * interpolation. If the XMode of the output will match that of the input
+ * interpolation. The XMode of the output will match the input histogram.
  */
 Histogram interpolateCSpline(const Histogram &input, const size_t stepSize) {
   sanityCheck(input, stepSize, 4, CSPLINE_NAME);
