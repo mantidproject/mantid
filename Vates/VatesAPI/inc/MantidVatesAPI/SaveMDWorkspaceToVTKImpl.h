@@ -2,8 +2,10 @@
 #define VATES_API_SAVE_MD_WORKSPACE_TO_VTK_IMPL_H_
 
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidKernel/System.h"
 #include "MantidVatesAPI/Normalization.h"
+#include "MantidVatesAPI/SaveMDWorkspaceToVTK.h"
 #include "MantidVatesAPI/ThresholdRange.h"
 
 #include <map>
@@ -44,7 +46,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport SaveMDWorkspaceToVTKImpl {
 public:
-  SaveMDWorkspaceToVTKImpl();
+  SaveMDWorkspaceToVTKImpl(SaveMDWorkspaceToVTK *parent);
   ~SaveMDWorkspaceToVTKImpl() {}
   void saveMDWorkspace(Mantid::API::IMDWorkspace_sptr workspace,
                        const std::string &filename,
@@ -66,6 +68,7 @@ public:
   bool is3DWorkspace(Mantid::API::IMDWorkspace_sptr workspace) const;
 
 private:
+  API::Progress m_progress;
   std::map<std::string, VisualNormalization> m_normalizations;
   std::vector<std::string> m_thresholds;
 

@@ -44,6 +44,7 @@ public:
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
+  void doProgress(double prog) { this->progress(prog); }
 
 private:
   void init() override;
