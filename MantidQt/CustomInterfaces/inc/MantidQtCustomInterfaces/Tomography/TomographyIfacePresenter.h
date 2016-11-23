@@ -151,7 +151,6 @@ private:
   // TODO: replace this with an std::mutex. Also below for threads.
   // mutex for the job status info update operations on the view
   QMutex *m_statusMutex;
-  QMutex *m_processStartMutex;
 
   // for periodic update of the job status table/tree
   QTimer *m_keepAliveTimer;

@@ -44,8 +44,8 @@ const std::string TomographyIfacePresenter::g_defOutPathRemote =
 
 TomographyIfacePresenter::TomographyIfacePresenter(ITomographyIfaceView *view)
     : m_view(view), m_model(new TomographyIfaceModel()),
-      m_statusMutex(new QMutex()), m_processStartMutex(new QMutex()),
-      m_keepAliveTimer(NULL), m_keepAliveThread(NULL) {
+      m_statusMutex(new QMutex()), m_keepAliveTimer(NULL),
+      m_keepAliveThread(NULL) {
   if (!m_view) {
     throw std::runtime_error("Severe inconsistency found. Presenter created "
                              "with an empty/null view (tomography interface). "
