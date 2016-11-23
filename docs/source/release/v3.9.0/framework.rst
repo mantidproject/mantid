@@ -20,6 +20,7 @@ Improved
 - :ref:`StartLiveData <algm-StartLiveData>` and its dialog now support dynamic listener properties, based on the specific LiveListener being used.
 - :ref: All algorithms using `AsciiPointBase` now have a new property 'Separator' which allows the delimiter to be set to either comma, space or tab. This affects `SaveReflCustomAscii <algm-SaveReflCustomAscii>`, `SaveReflThreeColumnAscii <algm-SaveReflThreeColumnAscii>`, `SaveANSTOAscii <algm-SaveANSTOAscii>` and `SaveILLCosmosAscii <algm-SaveILLCosmosAscii>`.
 - :ref:`ReplaceSpecialValues <algm_ReplaceSpecialValues>` now can replace 'small' values below a user specified threshold.
+- :ref:`SaveMDWorkspaceToVTK <algm_SaveMDWorkspaceToVTK>` has a working progress bar.
 
 Deprecated
 ##########
