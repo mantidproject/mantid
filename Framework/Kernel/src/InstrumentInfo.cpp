@@ -287,7 +287,7 @@ void InstrumentInfo::fillLiveData(const Poco::XML::Element *elem) {
   for (unsigned long i = 0; i < connections->length(); ++i) {
     auto *conn = dynamic_cast<Poco::XML::Element *>(connections->item(i));
     try {
-      m_listeners.emplace_back(LiveListenerInfo(this, conn));
+      m_listeners.emplace_back(LiveListenerInfo(conn));
     } catch (...) {
       g_log.error() << "Exception occurred while loading livedata for "
                     << m_name << " instrument. Skipping faulty connection.\n";

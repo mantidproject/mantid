@@ -34,9 +34,7 @@ Logger g_log("InstrumentInfo");
  * @param inst :: InstrumentInfo for the instrument this listener belongs to
  * @param elem :: The Poco::XML::Element to read the data from
  */
-LiveListenerInfo::LiveListenerInfo(const InstrumentInfo *inst,
-                                   const Poco::XML::Element *elem)
-    : m_instrument(inst) {
+LiveListenerInfo::LiveListenerInfo(const Poco::XML::Element *elem) {
   m_name = elem->getAttribute("name");
   if (m_name.empty()) {
     // throw std::runtime_error("Listener name is not defined");
@@ -67,13 +65,8 @@ LiveListenerInfo::LiveListenerInfo(const InstrumentInfo *inst,
  */
 LiveListenerInfo::LiveListenerInfo(const std::string &listener,
                                    const std::string &address,
-                                   const std::string &name,
-                                   const InstrumentInfo *inst)
-  : m_instrument(inst)
-  , m_name(name)
-  , m_address(address)
-  , m_listener(listener) {
-}
+                                   const std::string &name)
+  : m_name(name), m_address(address), m_listener(listener) {}
 
 bool LiveListenerInfo::operator==(const LiveListenerInfo &rhs) const {
   return (this->address() == rhs.address() &&
@@ -85,10 +78,6 @@ const std::string &LiveListenerInfo::name() const { return m_name; }
 const std::string &LiveListenerInfo::address() const { return m_address; }
 
 const std::string &LiveListenerInfo::listener() const { return m_listener; }
-
-const InstrumentInfo &LiveListenerInfo::instrument() const {
-  return *m_instrument;
-}
 
 //-------------------------------------------------------------------------
 // Non-member functions

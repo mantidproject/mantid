@@ -57,7 +57,7 @@ public:
          const std::string &listenerConnectionName = "") const;
 
   boost::shared_ptr<ILiveListener>
-  create(const Kernel::LiveListenerInfo& info, bool connect = false,
+  create(const Kernel::LiveListenerInfo &info, bool connect = false,
          const Kernel::IPropertyManager *properties = nullptr) const;
 
   LiveListenerFactoryImpl(const LiveListenerFactoryImpl &) = delete;

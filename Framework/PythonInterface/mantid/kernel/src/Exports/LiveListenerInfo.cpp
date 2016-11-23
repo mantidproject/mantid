@@ -23,10 +23,5 @@ void export_LiveListenerInfo() {
 
       .def("listener", &LiveListenerInfo::listener, arg("self"),
            return_value_policy<copy_const_reference>(),
-           "Returns the name of the specific LiveListener class used")
-
-      .def("instrument", &LiveListenerInfo::instrument, arg("self"),
-           return_value_policy<copy_const_reference>(),
-           "Returns the InstrumentInfo for the instrument that this listener "
-           "belongs to.");
+           "Returns the name of the specific LiveListener class used");
 }

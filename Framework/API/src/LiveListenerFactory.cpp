@@ -41,7 +41,7 @@ boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
     // Defer creation logic to other create overload
     return create(info, connect, properties);
 
-  } catch (Kernel::Exception::NotFoundError&) {
+  } catch (Kernel::Exception::NotFoundError &) {
     // Could not determine LiveListenerInfo for instrumentName
     // Attempt to interpret instrumentName as listener class name instead, to
     // support legacy usage in unit tests.
