@@ -66,7 +66,7 @@ LiveListenerInfo::LiveListenerInfo(const Poco::XML::Element *elem) {
 LiveListenerInfo::LiveListenerInfo(const std::string &listener,
                                    const std::string &address,
                                    const std::string &name)
-  : m_name(name), m_address(address), m_listener(listener) {}
+    : m_name(name), m_address(address), m_listener(listener) {}
 
 bool LiveListenerInfo::operator==(const LiveListenerInfo &rhs) const {
   return (this->address() == rhs.address() &&
