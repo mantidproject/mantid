@@ -205,12 +205,11 @@ void ProgressFunction(vtkObject *caller, long unsigned int vtkNotUsed(eventId),
   const char *progressText = testFilter->GetProgressText();
   if (progressText) {
     reinterpret_cast<Kernel::ProgressBase *>(clientData)
-        ->report(
-            boost::math::iround(testFilter->GetProgress() * 100.0), progressText);
+        ->report(boost::math::iround(testFilter->GetProgress() * 100.0),
+                 progressText);
   } else {
     reinterpret_cast<Kernel::ProgressBase *>(clientData)
-        ->report(
-            boost::math::iround(testFilter->GetProgress() * 100.0));
+        ->report(boost::math::iround(testFilter->GetProgress() * 100.0));
   }
 }
 
