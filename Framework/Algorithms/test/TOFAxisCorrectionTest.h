@@ -37,7 +37,6 @@ public:
 
   void test_CorrectionWithoutReferenceWorkspace()
   {
-    // Create test input if necessary
     auto inputWs = createEmptyIN4Workspace("ws");
     const size_t blocksize = 512;
     const double x0 = 1402;
