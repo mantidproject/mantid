@@ -57,6 +57,7 @@ struct Slice {
 /// change.
 void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
                       const std::vector<std::pair<double, double>> &ranges) {
+  std::vector<size_t> indicesOfFixed;
   std::vector<double> P, A, D;
   auto &fun = *costFunction.getFittingFunction();
   for (size_t i = 0, j = 0; i < fun.nParams(); ++i) {
@@ -90,10 +91,13 @@ void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
     fun.setParameter(i, storedParam);
 
     if (fix) {
-      // Parameter is bad - fix it.
-      fun.tie(fun.parameterName(i), std::to_string(fun.getParameter(i)));
+      // Parameter is bad - fix it. Delay actual fixing until all bad ones found.
+      indicesOfFixed.push_back(i);
     }
     ++j;
+  }
+  for(auto i : indicesOfFixed) {
+    fun.tie(fun.parameterName(i), std::to_string(fun.getParameter(i)));
   }
 }
 
@@ -110,15 +114,15 @@ void runMonteCarlo(CostFunctions::CostFuncFitting &costFunction,
                    const std::vector<std::pair<double, double>> &ranges,
                    const std::vector<std::unique_ptr<IConstraint>> &constraints,
                    size_t nSamples, size_t seed) {
-  auto nParams = costFunction.nParams();
 
   Kernel::MersenneTwister randGenerator;
   if (seed != 0) {
     randGenerator.setSeed(seed);
   }
+  double bestValue = costFunction.val() + getConstraints(constraints);
+  auto nParams = costFunction.nParams();
   GSLVector bestParams;
   costFunction.getParameters(bestParams);
-  double bestValue = costFunction.val() + getConstraints(constraints);
 
   // Implicit cast from int to size_t
   for (size_t it = 0; it < nSamples; ++it) {
@@ -132,6 +136,11 @@ void runMonteCarlo(CostFunctions::CostFuncFitting &costFunction,
       continue;
     }
     auto value = costFunction.val();
+    if (costFunction.nParams() != nParams) {
+      throw std::runtime_error("Cost function changed number of parameters " +
+                               std::to_string(nParams) + " -> " +
+                               std::to_string(costFunction.nParams()));
+    }
     if (value < bestValue) {
       bestValue = value;
       costFunction.getParameters(bestParams);
@@ -207,7 +216,12 @@ void runCrossEntropy(
       }
       // Calculate the cost function with those parameters
       costFunction.setParameters(paramSet.second);
-      paramSet.first = costFunction.val(); // + getConstraints(constraints);
+      paramSet.first = costFunction.val() + getConstraints(constraints);
+      if (costFunction.nParams() != nParams) {
+        throw std::runtime_error("Cost function changed number of parameters " +
+                                 std::to_string(nParams) + " -> " +
+                                 std::to_string(costFunction.nParams()));
+      }
     }
     // Partially sort the parameter sets in ascending order of the cost
     // function.

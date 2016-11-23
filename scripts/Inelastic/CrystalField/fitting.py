@@ -57,7 +57,8 @@ class CrystalField(object):
                         ToleranceEnergy:     energy tolerance,
                         ToleranceIntensity:  intensity tolerance,
                         ResolutionModel:     A resolution model.
-                        FWHMVariation:      Absolute value of allowed variation of a peak width during a fit.
+                        FWHMVariation:       Absolute value of allowed variation of a peak width during a fit.
+                        FixAllPeaks:         A boolean flag that fixes all parameters of the peaks.
 
                         Field parameters:
 
@@ -119,6 +120,7 @@ class CrystalField(object):
         self._intensityScaling = 1.0
         self._resolutionModel = None
         self._fwhmVariation = None
+        self._fixAllPeaks = False
 
         for key in kwargs:
             if key == 'ToleranceEnergy':
@@ -135,6 +137,8 @@ class CrystalField(object):
                 self._temperature = kwargs[key]
             elif key == 'FWHMVariation':
                 self._fwhmVariation = kwargs[key]
+            elif key == 'FixAllPeaks':
+                self._fixAllPeaks = kwargs[key]
             else:
                 # Crystal field parameters
                 self._fieldParameters[key] = kwargs[key]
@@ -181,6 +185,7 @@ class CrystalField(object):
         temperature = self._getTemperature(i)
         out = 'name=CrystalFieldSpectrum,Ion=%s,Symmetry=%s,Temperature=%s' % (self._ion, self._symmetry, temperature)
         out += ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
+        out += ',FixAllPeaks=%s' % self._fixAllPeaks
         out += ',PeakShape=%s' % self.getPeak(i).name
         if self._FWHM is not None:
             out += ',FWHM=%s' % self._getFWHM(i)
@@ -225,6 +230,7 @@ class CrystalField(object):
         out = 'name=CrystalFieldMultiSpectrum,Ion=%s,Symmetry=%s' % (self._ion, self._symmetry)
         out += ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
         out += ',PeakShape=%s' % self.getPeak().name
+        out += ',FixAllPeaks=%s' % self._fixAllPeaks
         if self.background is not None:
             out += ',Background=%s' % self.background[0].nameString()
         out += ',Temperatures=(%s)' % ','.join(map(str, self._temperature))
@@ -406,6 +412,14 @@ class CrystalField(object):
             self._resolutionModel = value
         else:
             self._resolutionModel = ResolutionModel(value)
+
+    @property
+    def FixAllPeaks(self):
+        return self._fixAllPeaks
+
+    @FixAllPeaks.setter
+    def FixAllPeaks(self, value):
+        self._fixAllPeaks = value
 
     def ties(self, **kwargs):
         """Set ties on the field parameters.

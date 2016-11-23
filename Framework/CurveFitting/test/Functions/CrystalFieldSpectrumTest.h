@@ -596,7 +596,7 @@ public:
     mc->setPropertyValue(
         "Function",
         "name=CrystalFieldSpectrum,Ion=Ce,"
-        "Symmetry=C2v,Temperature=44.0,FWHM=1.0,NPeaks=3,"
+        "Symmetry=C2v,Temperature=44.0,FWHM=1.0,NPeaks=3,FixAllPeaks=1,"
         "constraints=(0<B20<2,1<B22<4,-0.1<B40<0.1,-0.1<B42<0.1,-0.1<B44<0.1)");
     mc->setProperty("InputWorkspace", ws);
     mc->setProperty("NSamples", 1000);

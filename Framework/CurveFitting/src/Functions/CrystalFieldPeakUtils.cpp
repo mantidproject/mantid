@@ -111,6 +111,7 @@ inline void ignorePeak(API::IPeakFunction &peak, double fwhm) {
 /// @param defaultFWHM :: A default value for the FWHM to use if xVec and yVec
 ///        are empty.
 /// @param nRequiredPeaks :: A number of peaks required to be created.
+/// @param fixAllPeaks :: If true fix all peak parameters
 /// @return :: The number of peaks that will be actually fitted.
 size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
                              const std::string &peakShape,
@@ -118,7 +119,7 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
                              const std::vector<double> &xVec,
                              const std::vector<double> &yVec,
                              double fwhmVariation, double defaultFWHM,
-                             size_t nRequiredPeaks) {
+                             size_t nRequiredPeaks, bool fixAllPeaks) {
   if (xVec.size() != yVec.size()) {
     throw std::runtime_error("WidthX and WidthY must have the same size.");
   }
@@ -154,6 +155,9 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
       peak->fixIntensity();
     } else {
       ignorePeak(*peak, defaultFWHM);
+    }
+    if (fixAllPeaks) {
+      peak->fixAll();
     }
     spectrum.addFunction(peak);
   }

@@ -85,6 +85,7 @@ bool CostFuncFitting::isValid() const {
         reset();
         break;
       }
+      ++j;
     }
   }
   return true;

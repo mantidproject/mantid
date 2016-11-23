@@ -609,7 +609,7 @@ void IFunction::Attribute::fromString(const std::string &str) {
 /// parameters different from the declared
 double IFunction::activeParameter(size_t i) const {
   if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter");
+    throw std::runtime_error("Attempt to use an inactive parameter " + parameterName(i));
   }
   return getParameter(i);
 }

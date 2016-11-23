@@ -32,6 +32,7 @@ CrystalFieldSpectrum::CrystalFieldSpectrum()
   declareAttribute("FWHMY", Attribute(vec));
   declareAttribute("FWHMVariation", Attribute(0.1));
   declareAttribute("NPeaks", Attribute(0));
+  declareAttribute("FixAllPeaks", Attribute(false));
 }
 
 /// Uses m_crystalField to calculate peak centres and intensities
@@ -55,16 +56,17 @@ void CrystalFieldSpectrum::buildTargetFunction() const {
         "CrystalFieldPeaks returned odd number of values.");
   }
 
-  auto xVec = IFunction::getAttribute("FWHMX").asVector();
-  auto yVec = IFunction::getAttribute("FWHMY").asVector();
+  auto xVec = getAttribute("FWHMX").asVector();
+  auto yVec = getAttribute("FWHMY").asVector();
   auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
 
-  auto peakShape = IFunction::getAttribute("PeakShape").asString();
-  auto defaultFWHM = IFunction::getAttribute("FWHM").asDouble();
-  size_t nRequiredPeaks = IFunction::getAttribute("NPeaks").asInt();
+  auto peakShape = getAttribute("PeakShape").asString();
+  auto defaultFWHM = getAttribute("FWHM").asDouble();
+  size_t nRequiredPeaks = getAttribute("NPeaks").asInt();
+  bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
   m_nPeaks = CrystalFieldUtils::buildSpectrumFunction(
       *spectrum, peakShape, values, xVec, yVec, fwhmVariation, defaultFWHM,
-      nRequiredPeaks);
+      nRequiredPeaks, fixAllPeaks);
   storeReadOnlyAttribute("NPeaks", Attribute(static_cast<int>(m_nPeaks)));
 }
 
@@ -75,8 +77,8 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
     return;
   }
   m_dirty = false;
-  auto xVec = IFunction::getAttribute("FWHMX").asVector();
-  auto yVec = IFunction::getAttribute("FWHMY").asVector();
+  auto xVec = getAttribute("FWHMX").asVector();
+  auto yVec = getAttribute("FWHMY").asVector();
   auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
   FunctionDomainGeneral domain;
   FunctionValues values;
