@@ -34,9 +34,7 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
     def test_two_wing(self):
 
-        args = {}
-
-        args['Run'] = self._run_two_wing_mixed
+        args = {'Run': self._run_two_wing_mixed}
 
         alg_test = run_algorithm('IndirectILLReductionFWS', **args)
 
@@ -46,9 +44,7 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
     def test_one_wing(self):
 
-        args = {}
-
-        args['Run'] = self._run_one_wing_mixed
+        args = {'Run': self._run_one_wing_mixed}
 
         alg_test = run_algorithm('IndirectILLReductionFWS', **args)
 
@@ -56,13 +52,26 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
         self._check_workspace_group(mtd['red'], 3, 18, 2)
 
+    def test_interpolation(self):
+        # Test if workspace of missing background energy 2.0 will be trated correctly
+        # Test extrapolation of two background runs given, which larger than the sample temperature range
+        args = {'Run': self._run_two_wing_mixed,
+                'BackgroundRun': '170300:170303',
+                'SortXAxis': True}
+
+        alg_test = run_algorithm('IndirectILLReductionFWS', **args)
+
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionFWS not executed")
+
+        self._check_workspace_group(mtd['red'], 2, 18, 3)
+
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
 
         self.assertTrue(isinstance(wsgroup, WorkspaceGroup),
                         "{0} should be a group workspace".format(wsgroup.getName()))
 
-        self.assertEquals(wsgroup.getNumberOfEntries(),nentries,
-                          "{0} should contain {1} workspaces".format(wsgroup.getName(),nentries))
+        self.assertEquals(wsgroup.getNumberOfEntries(), nentries,
+                          "{0} should contain {1} workspaces".format(wsgroup.getName(), nentries))
 
         item = wsgroup.getItem(0)
 
@@ -71,8 +80,8 @@ class IndirectILLReductionFWS(unittest.TestCase):
         self.assertTrue(isinstance(item, MatrixWorkspace),
                         "{0} should be a matrix workspace".format(name))
 
-        self.assertEquals(item.getNumberHistograms(),nspectra,
-                          "{0} should contain {1} spectra".format(name,nspectra))
+        self.assertEquals(item.getNumberHistograms(), nspectra,
+                          "{0} should contain {1} spectra".format(name, nspectra))
 
         self.assertEquals(item.blocksize(), nbins,
                           "{0} should contain {1} bins".format(name, nbins))

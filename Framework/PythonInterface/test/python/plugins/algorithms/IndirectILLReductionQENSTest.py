@@ -33,9 +33,8 @@ class IndirectILLReductionQENSTest(unittest.TestCase):
         config['datasearch.directories'] = self._data_dirs
 
     def test_multifiles(self):
-        args = {}
 
-        args['Run'] = self._runs_two_wing_multi
+        args = {'Run': self._runs_two_wing_multi}
 
         alg_test = run_algorithm('IndirectILLReductionQENS', **args)
 
@@ -52,9 +51,8 @@ class IndirectILLReductionQENSTest(unittest.TestCase):
         self._check_workspace_group(mtd['red'], 1, 18, 1024)
 
     def test_one_wing(self):
-        args = {}
 
-        args['Run'] = self._run_one_wing
+        args = {'Run': self._run_one_wing}
 
         alg_test = run_algorithm('IndirectILLReductionQENS', **args)
 

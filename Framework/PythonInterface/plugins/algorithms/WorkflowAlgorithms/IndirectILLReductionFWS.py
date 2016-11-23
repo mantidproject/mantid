@@ -6,6 +6,7 @@ from mantid.kernel import *  # noqa
 from mantid.api import *  # noqa
 from mantid import mtd
 import numpy as np
+import re
 import time
 
 
@@ -31,7 +32,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         return 'Workflow\\MIDAS;Inelastic\\Reduction'
 
     def summary(self):
-        return 'Performs complete FWS multiple file reduction (both elastic and inelastic) ' \
+        return 'Performs fixed-window scan (FWS) multiple file reduction (both elastic and inelastic) ' \
                'for ILL indirect geometry data, instrument IN16B.'
 
     def name(self):
@@ -126,7 +127,8 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         # make sure observable entry also exists (value is not important)
         self._criteria += ' and ($/entry0/' + self._observable.replace('.', '/') + '$ or True)'
 
-        if (self._back_option == 'Interpolate' or self._calib_option == 'Interpolate') \
+        if ((self._back_option == 'Interpolate' and self._background_files) or
+                (self._calib_option == 'Interpolate' and self._calibration_files)) \
                 and not self._sortX:
             self.log().warning('Interpolation option requested, X-axis will be sorted.')
             self._sortX = True
@@ -148,7 +150,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         if not files:
             raise RuntimeError('None of the {0} runs satisfied the FWS and Observable criteria.'.format(label))
         else:
-            self.log().information('Filtered {0} runs are: {0} \\n'.format(label,files.replace(',','\\n')))
+            self.log().information('Filtered {0} runs are: {0} \\n'.format(label, files.replace(',', '\\n')))
 
         return files
 
@@ -183,7 +185,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
                         RangeLower=x_values[0], RangeUpper=x_values[2*imin])
             Integration(InputWorkspace=ws, OutputWorkspace=int2,
                         RangeLower=x_values[-2*(size-imax)], RangeUpper=x_values[-1])
-            Plus(LHSWorkspace=int1, RHSWorkspace = int2, OutputWorkspace = ws)
+            Plus(LHSWorkspace=int1, RHSWorkspace=int2, OutputWorkspace=ws)
             DeleteWorkspace(int1)
             DeleteWorkspace(int2)
 
@@ -192,16 +194,16 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         Sums the integrals of left and right for two wings, or returns the integral of one wing
         @param ws :: group workspace containing one ws for one wing, and two ws for two wing data
         '''
-        if mtd[groupws].getNumberOfEntries() == 2: # two wings, sum
+        if mtd[groupws].getNumberOfEntries() == 2:  # two wings, sum
             left = mtd[groupws].getItem(0).getName()
             right = mtd[groupws].getItem(1).getName()
             sum = '__sum_'+groupws
-            Plus(LHSWorkspace=left,RHSWorkspace=right,OutputWorkspace=sum)
+            Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=sum)
             DeleteWorkspace(left)
             DeleteWorkspace(right)
-            RenameWorkspace(InputWorkspace=sum,OutputWorkspace=groupws)
+            RenameWorkspace(InputWorkspace=sum, OutputWorkspace=groupws)
         else:
-            RenameWorkspace(InputWorkspace=mtd[groupws].getItem(0),OutputWorkspace=groupws)
+            RenameWorkspace(InputWorkspace=mtd[groupws].getItem(0), OutputWorkspace=groupws)
 
     def PyExec(self):
 
@@ -212,27 +214,34 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
         self._progress = Progress(self, start=0.0, end=1.0, nreports=total)
 
-        self._reduce_multiple_runs(self._sample_files,'sample')
+        self._reduce_multiple_runs(self._sample_files, 'sample')
 
         if self._background_files:
-            self._reduce_multiple_runs(self._background_files,'background')
-            # interpolate, minus, delete background
+            self._reduce_multiple_runs(self._background_files, 'background')
+            Scale(InputWorkspace=self._red_ws + '_background',
+                  Factor=self._back_scaling,
+                  OutputWorkspace=self._red_ws + '_background')
+            self._interpolate(self._red_ws + '_sample', self._red_ws + '_background', 'backg_interp', 'background')
+            Minus(LHSWorkspace=self._red_ws + '_sample', RHSWorkspace='backg_interp',
+                  OutputWorkspace=self._red_ws + '_sample')
+            DeleteWorkspace('backg_interp')
+            DeleteWorkspace(self._red_ws + '_background')
 
         if self._calibration_files:
-            self._reduce_multiple_runs(self._calibration_files,'calibration')
+            self._reduce_multiple_runs(self._calibration_files, 'calibration')
             # interpolate, divide, delete calibration
 
-        self.log().information('Run files map is :'+str(self._all_runs))
+        self.log().debug('Run files map is :'+str(self._all_runs))
 
-        RenameWorkspace(InputWorkspace=self._red_ws+'_sample',OutputWorkspace=self._red_ws)
+        #RenameWorkspace(InputWorkspace=self._red_ws+'_sample',OutputWorkspace=self._red_ws)
 
         self.setProperty('OutputWorkspace',self._red_ws)
 
     def _reduce_multiple_runs(self, files, label):
         '''
         Filters and reduces multiple files
-        @param runs :: list of run paths
-        @param ws :: output ws name
+        @param files :: list of run paths
+        @param label :: output ws name
         '''
 
         files = self._filter_files(files, label)
@@ -256,9 +265,9 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
         self._progress.report("Reducing run #" + runnumber)
 
-        IndirectILLEnergyTransfer(Run=run,OutputWorkspace=ws,**self._common_args)
+        IndirectILLEnergyTransfer(Run=run, OutputWorkspace=ws, **self._common_args)
 
-        energy = round(mtd[ws].getItem(0).getRun().getLogData('Doppler.maximum_delta_energy').value,2)
+        energy = round(mtd[ws].getItem(0).getRun().getLogData('Doppler.maximum_delta_energy').value, 2)
 
         if energy == 0.:
             # Elastic, integrate over full energy range
@@ -326,6 +335,259 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
         return result
 
+    def _get_energies(self, input_workspace):
+        '''
+        Returns a list of unique energies
+        @ param input_workspace :: input group workspace
+        @ return :: arrays of energy values and corresponding indices
+        '''
+        energies = []
+        number_of_workspaces = mtd[input_workspace].getNumberOfEntries()
+
+        # Count appearances of energy, this will be the number of GroupWorkspaces needed
+        for i in range(number_of_workspaces):
+            the_workspace = mtd[input_workspace].getItem(i).getRun()
+            if the_workspace.hasProperty('Doppler.maximum_delta_energy'):
+                energy = round(the_workspace.getLogData('Doppler.maximum_delta_energy').value, 2)
+            else:
+                energy = float('nan')
+            energies.append(energy)
+
+        # return_counts would be nice to use here but requires numpy version 1.9.0
+        # return_inverse would give indices in addition
+        energy_values = np.unique(energies)
+        self.log().information('FWS energies: {0}'.format(energy_values))
+
+        return energy_values.tolist()
+
+    def _empty_workspace(self, input_workspace, workspace_name):
+        n_hists = mtd[input_workspace].getNumberHistograms()
+
+        zero_data = np.zeros(n_hists * len(mtd[input_workspace].readX(0)))
+
+        # Setting up matrix of same size as sample run
+        self.log().debug('Creating workspace with {0} spectra and {1} channel(s)'.
+                         format(n_hists, len(mtd[input_workspace].readX(0))))
+
+        # ParentWorkspace needed for getting observable (for example)
+        CreateWorkspace(OutputWorkspace=workspace_name,
+                        DataX=mtd[input_workspace].extractX(),
+                        DataY=zero_data,
+                        NSpec=mtd[input_workspace].getNumberHistograms(),
+                        Distribution=True,
+                        ParentWorkspace=mtd[input_workspace])
+        self._set_x_label(workspace_name)
+
+    def _interpolate(self, sample_ws, to_be_interpolated_ws, interpolated_ws, label):
+        '''
+        Create a group workspace containing interpolated to_be_interpolated_ws intensities.
+        The individual workspaces must have the same size as the sample input workspaces or must have one single column
+        in case of one observable.
+        In case there are more workspaces for the reference or to_be_interpolated_ws that do not have corresponding
+        energies in the sample workspace group, those workspaces will not be considered.
+        In case there are less workspaces for the to_be_interpolated_ws (missing corresponding energies in the sample
+        workspace group), workspaces will be added but will contain only zeros and do not disturb later subtraction
+        The output workspace group needs to be sorted
+
+        @param sample_ws input sample_ws (group ws)
+        @param to_be_interpolated_ws input group workspace
+        @param interpolated_ws name of the output workspace
+        @param label should be 'background' or another existing label
+        '''
+
+        list_result_workspace = []
+
+        # Add empty workspace in case to_be_interpolated_ws workspace does not contain energy of sample workspace group
+        # Skip to_be_interpolated_ws energies that are additional and not represented in sample workspace group
+
+        to_be_interpolated_energies = self._get_energies(to_be_interpolated_ws)
+        sample_energies = self._get_energies(sample_ws)
+
+        # Set of energies that are in sample_energies but not in to_be_interpolated_energies
+        missing_ref_energies = set(sample_energies) - set(to_be_interpolated_energies)
+
+        while missing_ref_energies:
+
+            energy_value = missing_ref_energies.pop()
+
+            # Sample workspace contains energy_value
+            sample_index = sample_energies.index(energy_value)
+
+            result_name = 'interpolated_' + self._red_ws + '_' + label + '_' + str(energy_value)
+
+            self.log().debug('Add empty workspace {0}'.format(result_name))
+
+            # Add empty workspace to the group
+            self._empty_workspace(mtd[sample_ws].getItem(sample_index).getName(), result_name)
+            list_result_workspace.append(result_name)
+
+        # Take all remaining to_be_interpolated_ws workspaces into account
+
+        ref_energies = set(to_be_interpolated_energies)
+        while ref_energies:
+
+            energy_value = ref_energies.pop()
+
+            # Reference workspace contains the energy_value
+            ref_index = to_be_interpolated_energies.index(energy_value)
+
+            # Sample workspace may contain the energy_value of the reference workspace, if sample and reference
+            # workspaces are compatible!
+            try:
+                sample_index = sample_energies.index(energy_value)
+            except (RuntimeError, ValueError):
+                error_msg = 'No workspace for energy {0} found for group workspace {1}: skip interpolation'.\
+                    format(energy_value, sample_ws)
+                self.log().warning(error_msg)
+                break
+
+            result_name = 'interpolated_' + mtd[to_be_interpolated_ws].getItem(ref_index).getName()
+
+            self.log().debug('Add new workspace {0}, {1}th workspace of the group {2}'.
+                             format(result_name, ref_index, to_be_interpolated_ws))
+
+            # Get observables of the sample workspace
+            observables_all = mtd[sample_ws].getItem(sample_index).readX(0)
+            self.log().debug('Observables of group {0}, workspace {1}: {2}'.
+                             format(sample_ws, mtd[sample_ws].getItem(sample_index).getName(), observables_all))
+            # Get observables of the to_be_interpolated_ws runs
+            observables_to_be_interpolated = mtd[to_be_interpolated_ws].getItem(ref_index).readX(0)
+            self.log().debug('Observables of group {0}, workspace {1}: {2}'.
+                             format(to_be_interpolated_ws, mtd[to_be_interpolated_ws].getItem(ref_index).getName(),
+                                    observables_to_be_interpolated))
+
+            # Number of histograms in to_be_interpolated_ws and sample files must be compatible
+            number_histograms = mtd[sample_ws].getItem(sample_index).getNumberHistograms()
+            if mtd[sample_ws].getItem(sample_index).getNumberHistograms() != \
+                    mtd[to_be_interpolated_ws].getItem(ref_index).getNumberHistograms():
+                self.log().notice('Sample {0} and reference workspace {1} workspace do not have the same number of'
+                                  'histograms'.format(sample_ws, to_be_interpolated_ws))
+
+            # Check if to_be_interpolated_ws needs to be cropped
+
+            # Create a to_be_interpolated_ws workspace
+            if len(observables_to_be_interpolated) > 2:
+                SplineInterpolation(WorkspaceToMatch=mtd[sample_ws].getItem(sample_index),
+                                    WorkspaceToInterpolate=mtd[to_be_interpolated_ws].getItem(ref_index),
+                                    OutputWorkspace=result_name)
+            else:
+                if len(observables_to_be_interpolated) == 1:
+                    CloneWorkspace(InputWorkspace=mtd[to_be_interpolated_ws].getItem(ref_index).getName(),
+                                   OutputWorkspace=result_name)
+                elif len(observables_to_be_interpolated) == 2:
+                    self.log().notice('Perform linear interpolation')
+                    self._empty_workspace(mtd[sample_ws].getItem(sample_index).getName(), result_name)
+                    # Linear interpolation
+                    from scipy.interpolate import interp1d
+                    self.log().debug('Set linear interpolation x-range')
+                    # Crop all x-values that are outside of the integration x-range
+                    xmin = max(observables_all[0], observables_to_be_interpolated[0])
+                    xmax = min(observables_all[-1], observables_to_be_interpolated[-1])
+
+                    if (observables_all[0] <= observables_to_be_interpolated[0]) and \
+                            (observables_all[-1] >= observables_to_be_interpolated[-1]):
+                        # Integration range is smaller than the sample range
+                        CloneWorkspace(InputWorkspace=mtd[to_be_interpolated_ws].getItem(ref_index).getName(),
+                                       OutputWorkspace='interpolation')
+                        CropWorkspace(InputWorkspace=mtd[sample_ws].getItem(sample_index).getName(),
+                                      OutputWorkspace='_sample', XMin=xmin, XMax=xmax)
+                    elif observables_to_be_interpolated[-1] < observables_all[0]:
+                        # Special case: return single column, which is the second column of the to_be_interpolated_ws
+                        CropWorkspace(InputWorkspace=mtd[to_be_interpolated_ws].getItem(ref_index).getName(),
+                                      OutputWorkspace=result_name, XMin=observables_to_be_interpolated[-1])
+                        list_result_workspace.append(result_name)
+                        continue
+                    elif observables_to_be_interpolated[0] > observables_all[-1]:
+                        # Special case: return single column, which is the first column of the to_be_interpolated_ws
+                        CropWorkspace(InputWorkspace=mtd[to_be_interpolated_ws].getItem(ref_index).getName(),
+                                      OutputWorkspace=result_name, XMax=observables_to_be_interpolated[0])
+                        list_result_workspace.append(result_name)
+                        continue
+                    elif (observables_all[0] <= observables_to_be_interpolated[0]) and \
+                            (observables_all[-1] < observables_to_be_interpolated[-1]):
+                        # Only left integration boundary inside sample range, while right boundary is larger
+                        CloneWorkspace(InputWorkspace=mtd[to_be_interpolated_ws].getItem(ref_index).getName(),
+                                       OutputWorkspace='interpolation')
+                        CropWorkspace(InputWorkspace=mtd[sample_ws].getItem(sample_index).getName(),
+                                      OutputWorkspace='_sample', XMin=xmin)
+                    elif (observables_all[0] > observables_to_be_interpolated[0]) and \
+                            (observables_all[-1] >= observables_to_be_interpolated[-1]):
+                        # Only right integration boundary inside sample range, while left boundary is smaller
+                        CloneWorkspace(InputWorkspace=mtd[to_be_interpolated_ws].getItem(ref_index).getName(),
+                                       OutputWorkspace='interpolation')
+                        CropWorkspace(InputWorkspace=mtd[sample_ws].getItem(sample_index).getName(),
+                                      OutputWorkspace='_sample', XMax=xmax)
+                    else:
+                        # Sample range is smaller than the integration range
+                        CloneWorkspace(InputWorkspace=mtd[to_be_interpolated_ws].getItem(ref_index).getName(),
+                                       OutputWorkspace='interpolation')
+                        CloneWorkspace(InputWorkspace=mtd[sample_ws].getItem(sample_index).getName(),
+                                       OutputWorkspace='_sample')
+
+                    # Left values: take first observable of x _sample, find all smaller observables in sample
+                    # Right values: take last observable of x _sample, find all larger observables in sample
+                    self.log().debug('Attempt to get bin index of {0} and {1}'.
+                                     format(mtd['_sample'].readX(0)[0],
+                                            mtd['_sample'].readX(0)[1]))
+                    left_bins = mtd[sample_ws].getItem(sample_index).binIndexOf(
+                        mtd['_sample'].readX(0)[0]) + 1
+                    right_bins = mtd[sample_ws].getItem(sample_index).binIndexOf(
+                        mtd['_sample'].readX(0)[1]) + 1
+
+                    size = mtd[sample_ws].getItem(sample_index).blocksize() - 1
+
+                    for i in range(number_histograms):
+                        # Y values and E values
+                        yfunction = interp1d(mtd['interpolation'].readX(i), mtd['interpolation'].readY(i))
+                        efunction = interp1d(mtd['interpolation'].readX(i), mtd['interpolation'].readE(i))
+                        # Y and E start and stop values
+                        y_left = mtd['_sample'].readY(i)[0]
+                        e_left = mtd['_sample'].readE(i)[0]
+                        y_right = mtd['_sample'].readY(i)[-1]
+                        e_right = mtd['_sample'].readE(i)[-1]
+
+                        if (observables_all[0] <= observables_to_be_interpolated[0]) and \
+                                (observables_all[-1] >= observables_to_be_interpolated[-1]):
+                            # Integration range is smaller than tha sample range
+                            yvals = np.append(np.ones(left_bins) * y_left, yfunction(mtd['_sample'].readX(i)))
+                            yvals = np.append(yvals, np.ones(size - right_bins) * y_right)
+                            evals = np.append(np.ones(left_bins) * e_left, efunction(mtd['_sample'].readX(i)))
+                            evals = np.append(evals, np.ones(size - right_bins) * e_right)
+                        elif (observables_all[0] <= observables_to_be_interpolated[0]) and \
+                                (observables_all[-1] < observables_to_be_interpolated[-1]):
+                            # Only left integration boundary inside sample range, while right boundary is larger
+                            yvals = np.append(np.ones(left_bins) * y_left, yfunction(mtd['_sample'].readX(i)))
+                            evals = np.append(np.ones(left_bins) * e_left, efunction(mtd['_sample'].readX(i)))
+                        elif (observables_all[0] > observables_to_be_interpolated[0]) and \
+                                (observables_all[-1] >= observables_to_be_interpolated[-1]):
+                            # Only right integration boundary inside sample range, while left boundary is smaller
+                            yvals = np.append(yfunction(mtd['_sample'].readX(i)), np.ones(size - right_bins) * y_right)
+                            evals = np.append(efunction(mtd['_sample'].readX(i)), np.ones(size - right_bins) * e_right)
+                        else:
+                            # Sample range is smaller than the integration range
+                            yvals = yfunction(mtd['_sample'].readX(i))
+                            evals = efunction(mtd['_sample'].readX(i))
+
+                        self.log().debug('Set Y values for spectrum {0}: {1}'.format(i, yvals))
+                        self.log().debug('Set E values for spectrum {0}: {1}'.format(i, evals))
+                        mtd[result_name].setY(i, yvals[:size+1])
+                        mtd[result_name].setE(i, evals[:size+1])
+
+                    DeleteWorkspace('interpolation')
+                    DeleteWorkspace('_sample')
+
+            list_result_workspace.append(result_name)
+
+        self.log().debug('List of workspaces to be sorted: {0}'.format(list_result_workspace))
+
+        # Workspaces must be sorted to allow group operations with the sample workspace
+        def _key(item):
+            set_item = re.findall(r"\d+\.\d", item)
+            return float(set_item[0])
+
+        GroupWorkspaces(InputWorkspaces=sorted(list_result_workspace, key=_key),
+                        OutputWorkspace=interpolated_ws)
+
     def _create_matrices(self, label):
         '''
         For each reduction type concatenates the workspaces putting the given sample log value as x-axis
@@ -335,11 +597,18 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
         togroup = []
 
+        groupname = self._red_ws
+
+        if label != 'sample':
+            groupname += '_' + label
+
         for energy in sorted(self._all_runs[label]):
 
             ws_list = self._all_runs[label][energy]
             size = len(self._all_runs[label][energy])
-            wsname = self._red_ws+'_'+str(energy)
+
+            wsname = groupname + '_' + str(energy)
+
             togroup.append(wsname)
             nspectra = mtd[ws_list[0]].getNumberHistograms()
             observable_array = self._get_observable_values(self._all_runs[label][energy])
@@ -352,7 +621,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
                             WorkspaceTitle=wsname, Distribution=True, ParentWorkspace=mtd[ws_list[0]],
                             OutputWorkspace=wsname)
 
-            run_list = '' # to set to sample logs
+            run_list = ''  # to set to sample logs
 
             for ws in ws_list:
                 run_list += ws.split('_')[0] + ','
@@ -366,9 +635,9 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
                 y_data = np.zeros(size)
                 e_data = np.zeros(size)
 
-                for bin in range(size):
-                    y_data[bin] = mtd[ws_list[bin]].readY(spectrum)[0]
-                    e_data[bin] = mtd[ws_list[bin]].readE(spectrum)[0]
+                for channel in range(size):
+                    y_data[channel] = mtd[ws_list[channel]].readY(spectrum)[0]
+                    e_data[channel] = mtd[ws_list[channel]].readE(spectrum)[0]
 
                 mtd[wsname].setY(spectrum, y_data)
                 mtd[wsname].setE(spectrum, e_data)
@@ -378,11 +647,11 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
             self._set_x_label(wsname)
 
-        for energy, ws_list in self._all_runs[label].iteritems():
+        for energy, ws_list in iteritems(self._all_runs[label]):
             for ws in ws_list:
                 DeleteWorkspace(ws)
 
-        GroupWorkspaces(InputWorkspaces=togroup,OutputWorkspace=self._red_ws+'_'+label)
+        GroupWorkspaces(InputWorkspaces=togroup, OutputWorkspace=groupname)
 
     def _set_x_label(self, ws):
         '''
