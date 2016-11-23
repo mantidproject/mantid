@@ -48,23 +48,24 @@ class CalculateDWCrystal(object):
         _DW = DwCrystalData(temperature=self._temperature, num_atoms=self._num_atoms)
 
         _data = self._abins_data.extract()
-        _mass_hartree_factor = np.asarray([1.0 / ( atom["mass"] * 2)  for atom in _data["atoms_data"]])
-        _frequencies_hartree = _data["k_points_data"]["frequencies"]
+        _mass_hartree_factor = np.asarray([1.0 / ( atom["mass"] * AbinsConstants.m_2_hartree * 2)
+                                           for atom in _data["atoms_data"]])
+        _frequencies_hartree = _data["k_points_data"]["frequencies"] * AbinsConstants.cm1_2_hartree
         _temperature_hartree = self._temperature * AbinsConstants.k_2_hartree
 
         _weights = _data["k_points_data"]["weights"]
-        _atomic_displacements = _data["k_points_data"]["atomic_displacements"]
+        _atomic_displacements = _data["k_points_data"]["atomic_displacements"] / AbinsConstants.atomic_length_2_angstrom
 
-        _coth_factor = 1.0 / (2.0 * _temperature_hartree) # coth( _coth_factor * omega)
+        _coth_factor = 1.0 / (2.0 * _temperature_hartree)  # coth( _coth_factor * omega)
 
-        _tanh =  np.tanh(np.multiply(_coth_factor,  _frequencies_hartree))
-        _coth_over_omega = np.divide(1.0, np.multiply(_tanh ,_frequencies_hartree)) # coth(...)/omega
+        _tanh = np.tanh(np.multiply(_coth_factor, _frequencies_hartree))
+        _coth_over_omega = np.divide(1.0, np.multiply(_tanh, _frequencies_hartree))  # coth(...)/omega
 
-        _item_k = np.zeros((3, 3), dtype=AbinsConstants.float_type) # stores DW for one atom
+        _item_k = np.zeros((3, 3), dtype=AbinsConstants.float_type)  # stores DW for one atom
         _item_freq = np.zeros((3, 3), dtype=AbinsConstants.float_type)
 
         for num in range(self._num_atoms):
-            _item_k.fill(0.0) # erase stored information so that it can be filled with content for the next atom
+            _item_k.fill(0.0)  # erase stored information so that it can be filled with content for the next atom
 
             for k in range(self._num_k):
 
@@ -77,9 +78,9 @@ class CalculateDWCrystal(object):
                 for n_freq in range(start, self._num_freq):
 
                     displacement = _atomic_displacements[k, num, n_freq, :]
-                    tensor = np.outer(displacement, displacement.conjugate()).real # DW factors are real
+                    tensor = np.outer(displacement, displacement.conjugate()).real  # DW factors are real
                     np.multiply(tensor, _coth_over_omega[k, n_freq], tensor)
-                    np.add(_item_freq , tensor, _item_freq)
+                    np.add(_item_freq, tensor, _item_freq)
 
                 np.add(_item_k, np.multiply(_item_freq, _weights[k]), _item_k)
 

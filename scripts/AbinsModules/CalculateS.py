@@ -149,8 +149,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         abins_data_extracted = self._abins_data.extract()
         atom_data = abins_data_extracted["atoms_data"]
         k_points_data = self._get_gamma_data(abins_data_extracted["k_points_data"])
-        fundamentals_freq = np.multiply(k_points_data["frequencies"][0][AbinsConstants.first_optical_phonon:],
-                                        1.0 / AbinsConstants.cm1_2_hartree)
+        fundamentals_freq = k_points_data["frequencies"][0][AbinsConstants.first_optical_phonon:]
 
         # calculate s for each atom
         for atom in range(num_atoms):

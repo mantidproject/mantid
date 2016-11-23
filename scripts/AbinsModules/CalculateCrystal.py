@@ -1,9 +1,10 @@
-from IOmodule import  IOmodule
+from IOmodule import IOmodule
 from CalculateDWCrystal import CalculateDWCrystal
 from DwCrystalData import DwCrystalData
 from CrystalData import CrystalData
 from AbinsData import AbinsData
 import AbinsParameters
+
 
 class CalculateCrystal(IOmodule):
     def __init__(self, filename=None, abins_data=None, temperature=None):
@@ -20,10 +21,11 @@ class CalculateCrystal(IOmodule):
             raise ValueError("Invalid value of temperature.")
         if temperature < 0:
             raise ValueError("Temperature cannot be negative.")
-        self._temperature = float(temperature) # temperature in K
+        self._temperature = float(temperature)  # temperature in K
 
-        super(CalculateCrystal, self).__init__(input_filename=filename, group_name=AbinsParameters.crystal_data_group + "/" + "%sK"%self._temperature)
-
+        super(CalculateCrystal, self).__init__(input_filename=filename,
+                                               group_name=AbinsParameters.crystal_data_group + "/" + "%sK" %
+                                                                                                     self._temperature)
 
     def _calculate_crystal(self):
 
@@ -34,22 +36,22 @@ class CalculateCrystal(IOmodule):
 
         return _crystal_data
 
-
     def calculateData(self):
         """
-        Calculates data needed for calculation of S(Q, omega) in case experimental sample is in  the form of single crystal.
+        Calculates data needed for calculation of S(Q, omega) in case experimental sample is in  the form
+        of single crystal.
         Saves calculated data to an hdf file.
         @return:  object of type CrystalData
         """
 
         data = self._calculate_crystal()
         self.addFileAttributes()
-        self.addData("dw", data.extract()["dw_crystal_data"]) # AbinsData is already stored in an hdf file so only data for DW factors should be stored.
+        # AbinsData is already stored in an hdf file so only data for DW factors should be stored.
+        self.addData("dw", data.extract()["dw_crystal_data"])
 
         self.save()
 
         return data
-
 
     def loadData(self):
 

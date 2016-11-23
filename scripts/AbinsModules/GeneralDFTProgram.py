@@ -154,14 +154,12 @@ class GeneralDFTProgram(IOmodule):
                       # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
                       "k_vectors": data["k_vectors"],
                       # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
-                      "frequencies": data["frequencies"] * AbinsConstants.cm1_2_hartree,
+                      "frequencies": data["frequencies"],
                       # 4D array [k][atom_n][freq][3] (one entry corresponds to
                       # one coordinate for atom atom_n, frequency  freq and k-point k )
                       "atomic_displacements": data["atomic_displacements"] * AbinsConstants.atomic_length_2_angstrom})
 
         atoms = AtomsDaTa(num_atoms=self._num_atoms)
-        for atom in data["atoms"]:
-            atom["mass"] = atom["mass"] * AbinsConstants.m_2_hartree
         atoms.set(data["atoms"])
 
         result_data = AbinsData()
