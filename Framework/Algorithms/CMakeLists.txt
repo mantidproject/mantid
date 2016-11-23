@@ -18,9 +18,9 @@ set ( SRC_FILES
 	src/AverageLogData.cpp
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
-	src/CalculateCountRate.cpp
 	src/CalMuonDeadTime.cpp
 	src/CalMuonDetectorPhases.cpp
+	src/CalculateCountRate.cpp
 	src/CalculateDIFC.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
@@ -275,6 +275,7 @@ set ( SRC_FILES
 	src/SumNeighbours.cpp
 	src/SumRowColumn.cpp
 	src/SumSpectra.cpp
+	src/TOFAxisCorrection.cpp
 	src/TOFSANSResolution.cpp
 	src/TOFSANSResolutionByPixel.cpp
 	src/TOFSANSResolutionByPixelCalculator.cpp
@@ -326,9 +327,9 @@ set ( INC_FILES
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
-	inc/MantidAlgorithms/CalculateCountRate.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalMuonDetectorPhases.h
+	inc/MantidAlgorithms/CalculateCountRate.h
 	inc/MantidAlgorithms/CalculateDIFC.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
@@ -588,6 +589,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SumNeighbours.h
 	inc/MantidAlgorithms/SumRowColumn.h
 	inc/MantidAlgorithms/SumSpectra.h
+	inc/MantidAlgorithms/TOFAxisCorrection.h
 	inc/MantidAlgorithms/TOFSANSResolution.h
 	inc/MantidAlgorithms/TOFSANSResolutionByPixel.h
 	inc/MantidAlgorithms/TOFSANSResolutionByPixelCalculator.h
@@ -646,9 +648,9 @@ set ( TEST_FILES
 	AverageLogDataTest.h
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
-	CalculateCountRateTest.h
 	CalMuonDeadTimeTest.h
 	CalMuonDetectorPhasesTest.h
+	CalculateCountRateTest.h
 	CalculateDIFCTest.h
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
@@ -880,6 +882,7 @@ set ( TEST_FILES
 	SumNeighboursTest.h
 	SumRowColumnTest.h
 	SumSpectraTest.h
+	TOFAxisCorrectionTest.h
 	TOFSANSResolutionByPixelCalculatorTest.h
 	TOFSANSResolutionByPixelTest.h
 	TimeAtSampleStrategyDirectTest.h
