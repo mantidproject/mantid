@@ -21,7 +21,10 @@ Output
 A :ref:`WorkspaceGroup <WorkspaceGroup>` that contains as many workspaces as many distinct Doppler's energy values were present in input files list (including E=0 for EFWS).
 Each Workspace in the group will have the given observable as the x-axis and as many bins, as many files were given corresponding to the same energy.
 Y-axis will be detector angle, and the values would be the intensities integrated over the whole spectra (for EFWS) or over the two peaks
-(symmetric around each peak) at the beginning and the end of the spectra (for IFWS). ``BackgroundRun`` s and ``CalibrationRun`` s will be interpolated to the same observable values, as
+(symmetric around each peak) at the beginning and the end of the spectra (for IFWS).
+Scanning observable can be any numeric or time-stamp-like string parameter.
+See ``sample.*`` or e.g. ``start_time`` in Sample Logs.
+``BackgroundRun`` s and ``CalibrationRun`` s will be interpolated to the same observable values, as
 present in the (sample) ``Run`` .
 
 Workflow

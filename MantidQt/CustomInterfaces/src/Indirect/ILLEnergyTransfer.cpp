@@ -46,10 +46,48 @@ bool ILLEnergyTransfer::validate() {
   if (useMapFile && !m_uiForm.rfMapFile->isValid())
     uiv.addErrorMessage("Grouping file is invalid.");
 
-  bool ok = true;
-  m_backScaling = m_uiForm.leBackgroundFactor->text().toDouble(&ok);
-  if (!ok || m_backScaling <= 0) {
-    uiv.addErrorMessage("BackgroundScaleFactor is invalid.");
+  // Validate background file
+  if (!m_uiForm.rfBackgroundRun->isValid()) {
+    uiv.addErrorMessage("Background Run File is invalid.");
+  } else {
+    bool ok = true;
+    m_backScaling = m_uiForm.leBackgroundFactor->text().toDouble(&ok);
+    if ((!ok || m_backScaling <= 0) &&
+        !m_uiForm.rfBackgroundRun->getUserInput()
+             .toString()
+             .toStdString()
+             .empty()) {
+      uiv.addErrorMessage("BackgroundScaleFactor is invalid.");
+    }
+  }
+
+  // Validate calibration file
+  if (!m_uiForm.rfCalibrationRun->isValid()) {
+    uiv.addErrorMessage("Calibration Run File is invalid.");
+  } else if (!m_uiForm.rfCalibrationRun->getUserInput()
+                  .toString()
+                  .toStdString()
+                  .empty()) {
+    auto range = m_uiForm.lePeakRange->text().split(';');
+    if (range.size() != 2) {
+      uiv.addErrorMessage("Calibration Peak Range is invalid. \n"
+                          "Provide ; separated two energy values in meV.");
+    } else {
+      bool ok1 = true;
+      m_peakRange[0] = range[0].toDouble(&ok1);
+      bool ok2 = true;
+      m_peakRange[1] = range[1].toDouble(&ok2);
+
+      if (!ok1 || !ok2) {
+        uiv.addErrorMessage("Calibration Peak Range is invalid. \n"
+                            "Provide ; separated two energy values in meV.");
+      } else {
+        if (m_peakRange[0] >= m_peakRange[1]) {
+          uiv.addErrorMessage("Calibration Peak Range is invalid. \n"
+                              "Start energy is bigger then the end energy.");
+        }
+      }
+    }
   }
 
   // Validate if the output workspace name is not empty
@@ -57,15 +95,21 @@ bool ILLEnergyTransfer::validate() {
     uiv.addErrorMessage("OutputWorkspace name is invalid.");
 
   // Validate QENS specific
+
   // Validate vanadium file if it is being used
   if (m_uiForm.rdQENS->isChecked()) {
-  int useVanadiumRun = m_uiForm.sbUnmirrorOption->value();
-  if ((useVanadiumRun == 5 || useVanadiumRun == 7) &&
-      !m_uiForm.rfAlignmentRun->isValid())
-    uiv.addErrorMessage("Vanadium run is invalid.");
+    int useVanadiumRun = m_uiForm.sbUnmirrorOption->value();
+    if ((useVanadiumRun == 5 || useVanadiumRun == 7) &&
+        (!m_uiForm.rfAlignmentRun->isValid() ||
+         m_uiForm.rfAlignmentRun->getUserInput()
+             .toString()
+             .toStdString()
+             .empty()))
+      uiv.addErrorMessage("Alignment run is invalid.");
   }
 
   // Validate FWS specific
+
   if (m_uiForm.rdFWS->isChecked()) {
     if (m_uiForm.cbObservable->currentText().toStdString().empty()) {
         uiv.addErrorMessage("Observable is invalid, check the sample logs "
@@ -83,24 +127,38 @@ bool ILLEnergyTransfer::validate() {
 void ILLEnergyTransfer::run() {
   QMap<QString, QString> instDetails = getInstrumentDetails();
 
+  QString runFilename = m_uiForm.rfInput->getUserInput().toString();
+  QString backgroundFilename =
+      m_uiForm.rfBackgroundRun->getUserInput().toString();
+  QString calibrationFilename =
+      m_uiForm.rfCalibrationRun->getUserInput().toString();
+
   IAlgorithm_sptr reductionAlg = nullptr;
 
   if (m_uiForm.rdQENS->isChecked()) // QENS
   {
-    reductionAlg = AlgorithmManager::Instance().create("IndirectILLReductionQENS");
+    reductionAlg =
+        AlgorithmManager::Instance().create("IndirectILLReductionQENS");
     reductionAlg->initialize();
 
     // Set options
     long int uo = m_uiForm.sbUnmirrorOption->value();
     reductionAlg->setProperty("UnmirrorOption", uo);
     reductionAlg->setProperty("SumRuns", m_uiForm.ckSum->isChecked());
-    reductionAlg->setProperty("MaskOverflownBins",m_uiForm.cbMaskBins->isChecked());
-    reductionAlg->setProperty("CropDeadMonitorChannels",m_uiForm.cbCrop->isChecked());
+    reductionAlg->setProperty("CropDeadMonitorChannels",
+                              m_uiForm.cbCrop->isChecked());
 
-    // Vanadium run
+    // Calibraiton peak range
+    if (!calibrationFilename.toStdString().empty()) {
+      auto peakRange = boost::lexical_cast<std::string>(m_peakRange[0]) + "," +
+                       boost::lexical_cast<std::string>(m_peakRange[1]);
+      reductionAlg->setProperty("CalibrationPeakRange", peakRange);
+    }
+
+    // Vanadium alignment run
     if (uo == 5 || uo == 7) {
       QString vanFilename = m_uiForm.rfAlignmentRun->getUserInput().toString();
-      reductionAlg->setProperty("VanadiumRun", vanFilename.toStdString());
+      reductionAlg->setProperty("AlignmentRun", vanFilename.toStdString());
     }
 
   } else { // FWS
@@ -112,25 +170,33 @@ void ILLEnergyTransfer::run() {
     reductionAlg->setProperty(
         "Observable", m_uiForm.cbObservable->currentText().toStdString());
 
+    reductionAlg->setProperty(
+        "BackgroundOption", m_uiForm.cbBackOption->currentText().toStdString());
+
+    reductionAlg->setProperty(
+        "CalibrationOption",
+        m_uiForm.cbCalibOption->currentText().toStdString());
+
     reductionAlg->setProperty("SortXAxis", m_uiForm.cbSortX->isChecked());
   }
 
   // options common for QENS and FWS
 
   // Handle input files
-  QString runFilename = m_uiForm.rfInput->getUserInput().toString();
   reductionAlg->setProperty("Run", runFilename.toStdString());
 
   // Handle background file
-  QString backgroundFilename = m_uiForm.rfBackgroundRun->getUserInput().toString();
-  reductionAlg->setProperty("BackgroundRun", backgroundFilename.toStdString());
-
-  // Handle background scaling factor
-  reductionAlg->setProperty("BackgroundScalingFactor",m_backScaling);
+  if (!backgroundFilename.toStdString().empty()) {
+    reductionAlg->setProperty("BackgroundRun",
+                              backgroundFilename.toStdString());
+    reductionAlg->setProperty("BackgroundScalingFactor", m_backScaling);
+  }
 
   // Handle calibration file
-  QString calibrationFilename = m_uiForm.rfCalibrationRun->getUserInput().toString();
-  reductionAlg->setProperty("CalibrationRun", calibrationFilename.toStdString());
+  if (!calibrationFilename.toStdString().empty()) {
+    reductionAlg->setProperty("CalibrationRun",
+                              calibrationFilename.toStdString());
+  }
 
   reductionAlg->setProperty("Analyser", instDetails["analyser"].toStdString());
   reductionAlg->setProperty("Reflection",

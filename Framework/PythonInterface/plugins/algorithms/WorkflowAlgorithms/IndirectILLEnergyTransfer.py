@@ -241,7 +241,7 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
 
         run = '{0:06d}'.format(mtd[self._red_ws].getRunNumber())
 
-        self._ws = run + '_' + self._red_ws
+        self._ws = self._red_ws + '_' + run
 
         RenameWorkspace(InputWorkspace=self._red_ws, OutputWorkspace=self._ws)
 
@@ -308,8 +308,8 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
         x = mtd[ws].readX(0)
 
         if self._reduction_type == 'QENS':
-            # Normalise bin-to-bin
-            NormaliseToMonitor(InputWorkspace=ws, OutputWorkspace=ws, MonitorWorkspace=mon)
+            # Normalise bin-to-bin, do not use NormaliseToMonitor, it uses scaling that we don't want
+            Divide(LHSWorkspace=ws,OutputWorkspace=ws,RHSWorkspace=mon)
 
         elif self._reduction_type == 'EFWS':
             # Integrate over the whole range

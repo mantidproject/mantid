@@ -1,13 +1,14 @@
-#include "MantidDataHandling/LoadILLIndirect.h"
+#include "MantidDataHandling/LoadILLIndirect2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 
 #include <nexus/napi.h>
 
@@ -19,27 +20,25 @@ using namespace API;
 using namespace NeXus;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLIndirect)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLIndirect2)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadILLIndirect::LoadILLIndirect()
+LoadILLIndirect2::LoadILLIndirect2()
     : API::IFileLoader<Kernel::NexusDescriptor>(), m_numberOfTubes(0),
       m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
-      m_numberOfSimpleDetectors(0), m_numberOfHistograms(0) {
+      m_numberOfSimpleDetectors(0), m_numberOfHistograms(0),
+      m_numberOfMonitors(0) {
   m_supportedInstruments.emplace_back("IN16B");
 }
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string LoadILLIndirect::name() const { return "LoadILLIndirect"; }
-
-/// Algorithm's version for identification. @see Algorithm::version
-int LoadILLIndirect::version() const { return 1; }
+const std::string LoadILLIndirect2::name() const { return "LoadILLIndirect"; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadILLIndirect::category() const {
+const std::string LoadILLIndirect2::category() const {
   return "DataHandling\\Nexus";
 }
 
@@ -51,7 +50,7 @@ const std::string LoadILLIndirect::category() const {
 * @returns An integer specifying the confidence level. 0 indicates it will not
 * be used
 */
-int LoadILLIndirect::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadILLIndirect2::confidence(Kernel::NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL
   if (descriptor.pathExists("/entry0/wavelength")               // ILL
@@ -64,7 +63,7 @@ int LoadILLIndirect::confidence(Kernel::NexusDescriptor &descriptor) const {
        (descriptor.pathExists("/entry0/instrument/Doppler/doppler_frequency") &&
         descriptor.pathExists("/entry0/dataSD/dataSD")) // IN16B old
        )) {
-    return 70;
+    return 80;
   } else {
     return 0;
   }
@@ -73,7 +72,7 @@ int LoadILLIndirect::confidence(Kernel::NexusDescriptor &descriptor) const {
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void LoadILLIndirect::init() {
+void LoadILLIndirect2::init() {
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
       "File path of the Data file to load");
@@ -86,7 +85,8 @@ void LoadILLIndirect::init() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void LoadILLIndirect::exec() {
+void LoadILLIndirect2::exec() {
+
   // Retrieve filename
   std::string filenameData = getPropertyValue("Filename");
 
@@ -115,7 +115,8 @@ void LoadILLIndirect::exec() {
   g_log.debug("Loading instrument definition...");
   runLoadInstrument();
 
-  // moveSingleDetectors(); Work in progress
+  g_log.debug("Movind SDs...");
+  moveSingleDetectors(firstEntry);
 
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
@@ -124,7 +125,7 @@ void LoadILLIndirect::exec() {
 /**
 * Set member variable with the instrument name
 */
-void LoadILLIndirect::setInstrumentName(const NeXus::NXEntry &firstEntry,
+void LoadILLIndirect2::setInstrumentName(const NeXus::NXEntry &firstEntry,
                                         const std::string &instrumentNamePath) {
 
   if (instrumentNamePath == "") {
@@ -142,7 +143,7 @@ void LoadILLIndirect::setInstrumentName(const NeXus::NXEntry &firstEntry,
 * Load Data details (number of tubes, channels, etc)
 * @param entry First entry of nexus file
 */
-void LoadILLIndirect::loadDataDetails(NeXus::NXEntry &entry) {
+void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
   // read in the data
   NXData dataGroup = entry.openNXData("data");
   NXInt data = dataGroup.openIntData();
@@ -151,10 +152,31 @@ void LoadILLIndirect::loadDataDetails(NeXus::NXEntry &entry) {
   m_numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
   m_numberOfChannels = static_cast<size_t>(data.dim2());
 
+  // check which single detectors are enabled, and store their indices
   NXData dataSDGroup = entry.openNXData("dataSD");
   NXInt dataSD = dataSDGroup.openIntData();
 
-  m_numberOfSimpleDetectors = static_cast<size_t>(dataSD.dim0());
+  for (int i = 1; i <= dataSD.dim0(); ++i) {
+    try {
+      std::string entryNameFlagSD =
+          boost::str(boost::format("instrument/SingleD/tubes%i_function") % i);
+      NXFloat flagSD = entry.openNXFloat(entryNameFlagSD);
+      flagSD.load();
+
+      if (flagSD[0] == 1.0) // is enabled
+      {
+        m_activeSDIndices.insert(i);
+      }
+    } catch (...) {
+      // if the flags are not present in the file (e.g. old format), load all
+      m_activeSDIndices.insert(i);
+    }
+  }
+
+  m_numberOfSimpleDetectors = m_activeSDIndices.size();
+
+  g_log.information() << "Number of activated single detectors is: "
+                      << m_numberOfSimpleDetectors << std::endl;
 }
 
 /**
@@ -164,7 +186,7 @@ void LoadILLIndirect::loadDataDetails(NeXus::NXEntry &entry) {
    *
    */
 std::vector<std::vector<int>>
-LoadILLIndirect::loadMonitors(NeXus::NXEntry &entry) {
+LoadILLIndirect2::loadMonitors(NeXus::NXEntry &entry) {
   // read in the data
   g_log.debug("Fetching monitor data...");
 
@@ -179,6 +201,7 @@ LoadILLIndirect::loadMonitors(NeXus::NXEntry &entry) {
   std::vector<std::vector<int>> monitors(1);
   std::vector<int> monitor(data(), data() + data.size());
   monitors[0].swap(monitor);
+  m_numberOfMonitors = monitors.size();
   return monitors;
 }
 
@@ -190,7 +213,7 @@ LoadILLIndirect::loadMonitors(NeXus::NXEntry &entry) {
    * @param monitorsData :: Monitors data already loaded
    *
    */
-void LoadILLIndirect::initWorkSpace(
+void LoadILLIndirect2::initWorkSpace(
     NeXus::NXEntry & /*entry*/, std::vector<std::vector<int>> monitorsData) {
 
   // dim0 * m_numberOfPixelsPerTube is the total number of detectors
@@ -224,7 +247,7 @@ void LoadILLIndirect::initWorkSpace(
    * @param monitorsData :: Monitors data already loaded
    *
    */
-void LoadILLIndirect::loadDataIntoTheWorkSpace(
+void LoadILLIndirect2::loadDataIntoTheWorkSpace(
     NeXus::NXEntry &entry, std::vector<std::vector<int>> monitorsData) {
 
   // read in the data
@@ -244,11 +267,10 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   /// detectorTofBins.end());
 
   size_t spec = 0;
-  size_t nb_monitors = monitorsData.size();
-  size_t nb_SD_detectors = dataSD.dim0();
 
   Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube +
-                                    nb_monitors + nb_SD_detectors);
+                                    m_numberOfMonitors +
+                                    m_numberOfSimpleDetectors);
 
   // Assign fake values to first X axis <<to be completed>>
   for (size_t i = 0; i <= m_numberOfChannels; ++i) {
@@ -256,7 +278,7 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   }
 
   // First, Monitor
-  for (size_t im = 0; im < nb_monitors; im++) {
+  for (size_t im = 0; im < m_numberOfMonitors; im++) {
 
     if (im > 0) {
       m_localWorkspace->dataX(im) = m_localWorkspace->readX(0);
@@ -264,8 +286,8 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
 
     // Assign Y
     int *monitor_p = monitorsData[im].data();
-    m_localWorkspace->dataY(im)
-        .assign(monitor_p, monitor_p + m_numberOfChannels);
+    m_localWorkspace->dataY(im).assign(monitor_p,
+                                       monitor_p + m_numberOfChannels);
 
     progress.report();
   }
@@ -275,17 +297,18 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
 
       // just copy the time binning axis to every spectra
-      m_localWorkspace->dataX(spec + nb_monitors) = m_localWorkspace->readX(0);
+      m_localWorkspace->dataX(spec + m_numberOfMonitors) =
+          m_localWorkspace->readX(0);
 
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      m_localWorkspace->dataY(spec + nb_monitors)
+      m_localWorkspace->dataY(spec + m_numberOfMonitors)
           .assign(data_p, data_p + m_numberOfChannels);
 
       // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec + nb_monitors);
+      MantidVec &E = m_localWorkspace->dataE(spec + m_numberOfMonitors);
       std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-                     LoadILLIndirect::calculateError);
+                     LoadILLIndirect2::calculateError);
 
       ++spec;
       progress.report();
@@ -293,23 +316,24 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   } // for m_numberOfTubes
 
   // Then add Simple Detector (SD)
-  for (int i = 0; i < dataSD.dim0(); ++i) {
-
+  size_t offset = 0;
+  for (auto &index : m_activeSDIndices) {
     // just copy again the time binning axis to every spectra
-    m_localWorkspace->dataX(spec + nb_monitors + i) =
+    m_localWorkspace->dataX(spec + m_numberOfMonitors + offset) =
         m_localWorkspace->readX(0);
 
-    // Assign Y
-    int *dataSD_p = &dataSD(i, 0, 0);
-    m_localWorkspace->dataY(spec + nb_monitors + i)
+    // Assign Y, note that index starts from 1
+    int *dataSD_p = &dataSD(index - 1, 0, 0);
+    m_localWorkspace->dataY(spec + m_numberOfMonitors + offset)
         .assign(dataSD_p, dataSD_p + m_numberOfChannels);
 
     progress.report();
+    ++offset;
   }
 
 } // LoadILLIndirect::loadDataIntoTheWorkSpace
 
-void LoadILLIndirect::loadNexusEntriesIntoProperties(
+void LoadILLIndirect2::loadNexusEntriesIntoProperties(
     std::string nexusfilename) {
 
   API::Run &runDetails = m_localWorkspace->mutableRun();
@@ -334,7 +358,7 @@ void LoadILLIndirect::loadNexusEntriesIntoProperties(
 /**
    * Run the Child Algorithm LoadInstrument.
    */
-void LoadILLIndirect::runLoadInstrument() {
+void LoadILLIndirect2::runLoadInstrument() {
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
@@ -351,8 +375,8 @@ void LoadILLIndirect::runLoadInstrument() {
   }
 }
 
-void LoadILLIndirect::moveComponent(const std::string &componentName,
-                                    double twoTheta, double offSet) {
+void LoadILLIndirect2::moveComponent(const std::string &componentName,
+                                     double twoTheta) {
 
   try {
 
@@ -361,18 +385,15 @@ void LoadILLIndirect::moveComponent(const std::string &componentName,
     Geometry::IComponent_const_sptr component =
         instrument->getComponentByName(componentName);
 
-    double r, theta, phi, newTheta, newR;
+    double r, theta, phi;
     V3D oldPos = component->getPos();
     oldPos.getSpherical(r, theta, phi);
 
-    newTheta = twoTheta;
-    newR = offSet;
-
     V3D newPos;
-    newPos.spherical(newR, newTheta, phi);
+    newPos.spherical(r, twoTheta, phi);
 
-    // g_log.debug() << tube->getName() << " : t = " << theta << " ==> t = " <<
-    // newTheta << "\n";
+    g_log.debug() << componentName << " : t = " << theta
+                  << " ==> t = " << twoTheta << "\n";
     Geometry::ParameterMap &pmap = m_localWorkspace->instrumentParameters();
     Geometry::ComponentHelper::moveComponent(
         *component, pmap, newPos, Geometry::ComponentHelper::Absolute);
@@ -389,16 +410,26 @@ void LoadILLIndirect::moveComponent(const std::string &componentName,
 /**
  * IN16B has a few single detectors that are place around the sample.
  * They are moved according to some values in the nexus file.
- * This is not implemented yet.
  */
-void LoadILLIndirect::moveSingleDetectors() {
+void LoadILLIndirect2::moveSingleDetectors(NeXus::NXEntry &entry) {
 
   std::string prefix("single_tube_");
 
-  for (int i = 1; i <= 8; i++) {
-    std::string componentName = prefix + std::to_string(i);
+  int index = 1;
 
-    moveComponent(componentName, i * 20.0, 2.0 + i / 10.0);
+  for (auto i : m_activeSDIndices) {
+
+    std::string angleEntry =
+        boost::str(boost::format("instrument/SingleD/SD%i angle") % i);
+
+    NXFloat angleSD = entry.openNXFloat(angleEntry);
+
+    angleSD.load();
+
+    g_log.debug("Moving single detector " + std::to_string(i) + " to t=" +
+                std::to_string(angleSD[0]));
+    moveComponent(prefix + std::to_string(index), angleSD[0]);
+    index++;
   }
 }
 

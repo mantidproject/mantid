@@ -222,12 +222,12 @@
         </item>
         <item>
          <property name="text">
-          <string>sample.start_time</string>
+          <string>start_time</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string/>
+          <string>run_number</string>
          </property>
         </item>
        </widget>
@@ -255,6 +255,12 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>80</height>
+      </size>
      </property>
      <property name="title">
       <string>Detector Grouping</string>
@@ -308,7 +314,7 @@
           </property>
           <item alignment="Qt::AlignVCenter">
            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfMapFile" native="true">
-            <property name="enabled">
+            <property name="visible">
              <bool>false</bool>
             </property>
             <property name="toolTip">
@@ -362,6 +368,39 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="lbScale">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Scaling Factor</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QComboBox" name="cbBackOption">
+        <property name="toolTip">
+         <string>Background subtraction option</string>
+        </property>
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+        <item>
+         <property name="text">
+          <string>Sum</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Interpolate</string>
+         </property>
+        </item>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfBackgroundRun" native="true">
         <property name="sizePolicy">
@@ -372,7 +411,7 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>270</width>
+          <width>230</width>
           <height>20</height>
          </size>
         </property>
@@ -393,16 +432,13 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="lbScale">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+      <item row="0" column="3">
+       <widget class="QLabel" name="lbBackOption">
         <property name="text">
-         <string>Scaling Factor</string>
+         <string>Option</string>
+        </property>
+        <property name="visible">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -421,6 +457,39 @@
       <string>Detector Calibration</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="1">
+       <widget class="QLabel" name="lbPeakRange">
+        <property name="text">
+         <string>Peak Range</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLineEdit" name="lePeakRange">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Peak integration range for calibration (in mev) [start;end].</string>
+        </property>
+        <property name="text">
+         <string>-0.003;0.003</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLabel" name="lbCalibOption">
+        <property name="text">
+         <string>Option</string>
+        </property>
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfCalibrationRun" native="true">
         <property name="enabled">
@@ -455,27 +524,24 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="lbPeakRange">
-        <property name="text">
-         <string>Peak Range</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLineEdit" name="lePeakRange">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+      <item row="0" column="4">
+       <widget class="QComboBox" name="cbCalibOption">
         <property name="toolTip">
-         <string>Peak integration range for calibration (in mev).</string>
+         <string>Detector calibratino option</string>
         </property>
-        <property name="text">
-         <string>-0.003,0.003</string>
+        <property name="visible">
+         <bool>false</bool>
         </property>
+        <item>
+         <property name="text">
+          <string>Sum</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Interpolate</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>
@@ -561,16 +627,6 @@
         </property>
         <property name="value">
          <number>6</number>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QCheckBox" name="cbMaskBins">
-        <property name="toolTip">
-         <string>Whether to mask the bins overflown the range during circular shift.</string>
-        </property>
-        <property name="text">
-         <string>Mask Bins</string>
         </property>
        </widget>
       </item>
@@ -795,7 +851,7 @@
    <sender>rdGroupDefault</sender>
    <signal>clicked(bool)</signal>
    <receiver>rfMapFile</receiver>
-   <slot>setDisabled(bool)</slot>
+   <slot>setHidden(bool)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>59</x>
@@ -811,7 +867,7 @@
    <sender>rdGroupChoose</sender>
    <signal>clicked(bool)</signal>
    <receiver>rfMapFile</receiver>
-   <slot>setEnabled(bool)</slot>
+   <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>151</x>
@@ -983,9 +1039,137 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbBackOption</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>446</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbCalibOption</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>446</x>
+     <y>318</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbBackOption</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>523</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbCalibOption</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>523</x>
+     <y>318</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbBackOption</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>446</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbCalibOption</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>446</x>
+     <y>318</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbBackOption</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>523</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbCalibOption</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>523</x>
+     <y>318</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>

@@ -1,4 +1,3 @@
-#pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
 
@@ -8,6 +7,7 @@ from mantid.api import *  # noqa
 from mantid import mtd
 import numpy as np
 import re
+import time
 
 
 class IndirectILLReductionFWS(DataProcessorAlgorithm):
@@ -132,8 +132,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         files = SelectNexusFilesByMetadata(files, self._criteria)
 
         if not files:
-            raise RuntimeError('None of the {0} runs satisfied the FWS, '
-                               'MirrorSense and Observable criteria.'.format(label))
+            raise RuntimeError('None of the {0} runs satisfied the FWS and Observable criteria.'.format(label))
         else:
             self.log().information('Filtered {0} runs are: {0} \\n'.format(label, files.replace(',', '\\n')))
 
@@ -159,11 +158,11 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         @param ws :: input workspace group
         '''
 
-        for index in range(mtd[wsgroup].getNumberOfEntries()):
-            ws = mtd[wsgroup].getItem(index).getName()
-            size = mtd[ws].blocksize()
+        for item in mtd[wsgroup]:
+            ws = item.getName()
+            size = item.blocksize()
             imin, imax = self._ifws_peak_bins(ws)
-            x_values = mtd[ws].readX(0)
+            x_values = item.readX(0)
             int1 = '__int1_' + ws
             int2 = '__int2_' + ws
             Integration(InputWorkspace=ws, OutputWorkspace=int1,
@@ -182,12 +181,11 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         if mtd[groupws].getNumberOfEntries() == 2:  # two wings, sum
             left = mtd[groupws].getItem(0).getName()
             right = mtd[groupws].getItem(1).getName()
-            UnGroupWorkspace(groupws)
-            summed = '__sum_' + groupws
-            Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=summed)
+            sum = '__sum_'+groupws
+            Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=sum)
             DeleteWorkspace(left)
             DeleteWorkspace(right)
-            RenameWorkspace(InputWorkspace=summed, OutputWorkspace=groupws)
+            RenameWorkspace(InputWorkspace=sum, OutputWorkspace=groupws)
         else:
             RenameWorkspace(InputWorkspace=mtd[groupws].getItem(0), OutputWorkspace=groupws)
 
@@ -208,10 +206,10 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
                   Factor=self._back_scaling,
                   OutputWorkspace=self._red_ws + '_background')
             self._interpolate(self._red_ws + '_sample', self._red_ws + '_background', 'backg_interp', 'background')
-            #Minus(LHSWorkspace=self._red_ws + '_sample', RHSWorkspace='backg_interp',
-            #      OutputWorkspace=self._red_ws + '_sample')
-            #DeleteWorkspace('backg_interp')
-            #DeleteWorkspace(self._red_ws + '_background')
+            Minus(LHSWorkspace=self._red_ws + '_sample', RHSWorkspace='backg_interp',
+                  OutputWorkspace=self._red_ws + '_sample')
+            DeleteWorkspace('backg_interp')
+            DeleteWorkspace(self._red_ws + '_background')
 
         if self._calibration_files:
             self._reduce_multiple_runs(self._calibration_files, 'calibration')
@@ -219,9 +217,9 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
         self.log().information('Run files map is :'+str(self._all_runs))
 
-        #RenameWorkspace(InputWorkspace=self._red_ws + '_sample', OutputWorkspace=self._red_ws)
+        RenameWorkspace(InputWorkspace=self._red_ws + '_sample', OutputWorkspace=self._red_ws)
 
-        self.setProperty('OutputWorkspace', self._red_ws + '_sample')
+        self.setProperty('OutputWorkspace', self._red_ws)
 
     def _reduce_multiple_runs(self, files, label):
         '''
@@ -247,7 +245,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
         runnumber = os.path.basename(run.split('+')[0]).split('.')[0]
 
-        ws = runnumber + '_' + label
+        ws = '__' + runnumber + '_' + label
 
         self._progress.report("Reducing run #" + runnumber)
 
@@ -289,19 +287,33 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         Retrives the needed sample log values for the given list of workspaces
         @param ws_list :: list of workspaces
         @returns :: array of observable values
+        @throws  :: ValueError if the log entry is not a number nor time-stamp
         '''
 
         result = []
 
-        for ws in ws_list:
-            value = mtd[ws].getRun().getLogData(self._observable).value
+        zero_time = 0
 
-            if 'start_time' not in self._observable:
+        pattern = '%Y-%m-%dT%H:%M:%S'
+
+        for i,ws in enumerate(ws_list):
+
+            log = mtd[ws].getRun().getLogData(self._observable)
+            value = log.value
+
+            if log.type == 'number':
                 value = float(value)
             else:
-                # start_time is a string like 2016-09-12T09:09:15,
-                # find an elegant way to convert to absolute time
-                pass
+                try:
+                    value = time.mktime(time.strptime(value, pattern))
+                except ValueError:
+                    raise ValueError("Invalid observable. "
+                                     "Provide a numeric (sample.*, run_number, etc.) or time-stamp "
+                                     "like string (e.g. start_time) log.")
+                if i == 0:
+                    zero_time = value
+
+                value = value - zero_time
 
             result.append(value)
 
@@ -568,6 +580,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         '''
 
         togroup = []
+
         for energy in sorted(self._all_runs[label]):
 
             ws_list = self._all_runs[label][energy]
@@ -628,10 +641,10 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
             axis.setUnit("Label").setLabel('Temperature', 'K')
         elif self._observable == 'sample.pressure':
             axis.setUnit("Label").setLabel('Pressure', 'P')
-        elif self._observable == 'start_time':
+        elif 'time' in self._observable:
             axis.setUnit("Label").setLabel('Time', 'seconds')
         else:
-            axis.setUnit("Label").setLabel(self._observable, 'Unknown')
+            axis.setUnit("Label").setLabel(self._observable, '')
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLReductionFWS)

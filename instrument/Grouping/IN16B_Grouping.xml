@@ -17,8 +17,8 @@
   <group name="psd15"> <ids val="1794-1921"/> </group> 
   <group name="psd16"> <ids val="1922-2049"/> </group> 
 
-  <group name="tube4"> <ids val="2050"/> </group>
-  <group name="tube5"> <ids val="2051"/> </group>
+  <group name="tube1"> <ids val="2050"/> </group>
+  <group name="tube2"> <ids val="2051"/> </group>
 
   <!-- There are 2 SD active, though 8 slots available
   <group name="tube3"><ids val="2052"/></group>

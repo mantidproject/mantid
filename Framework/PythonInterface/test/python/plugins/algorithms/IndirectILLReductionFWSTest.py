@@ -40,7 +40,7 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionFWS not executed")
 
-        self._check_workspace_group(mtd['red_sample'], 2, 18, 3)
+        self._check_workspace_group(mtd['red'], 2, 18, 3)
 
     def test_one_wing(self):
 
@@ -50,7 +50,7 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionFWS not executed")
 
-        self._check_workspace_group(mtd['red_sample'], 3, 18, 2)
+        self._check_workspace_group(mtd['red'], 3, 18, 2)
 
     def test_interpolation(self):
         # Test if workspace of missing background energy 2.0 will be trated correctly
@@ -63,7 +63,7 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionFWS not executed")
 
-        self._check_workspace_group(mtd['red_sample'], 2, 18, 3)
+        self._check_workspace_group(mtd['red'], 2, 18, 3)
 
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
 
