@@ -73,12 +73,15 @@ class ProjectManager(object):
         :param overwrite: if specified, then any existing files with same name will be rewritten
         :return:
         """
+        # create workspace directory
         self.create_workspace_directory()
+
+        print '[INFO] Saving %d MDEventWorkspaces to %s' % (len(self._wsList), self._wsDir)
 
         # save MDs
         for ws_name in self._wsList:
             md_file_name = os.path.join(self._wsDir, ws_name + '.nxs')
-            if overwrite or os.path.exists(md_file_name):
+            if overwrite or not os.path.exists(md_file_name):
                 mantidsimple.SaveMD(InputWorkspace=ws_name, Filename=md_file_name)
 
         with open(self._projectPath, 'w') as pickle_file:

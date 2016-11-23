@@ -49,6 +49,9 @@ void ConvertCWSDExpToMomentum::init() {
       "DetectorCenterYShift", 0.0,
       "Amount of shift of detector center in Y-direction from (115, 128).");
 
+  declareProperty("UserDefinedWavelength", EMPTY_DBL(),
+                  "User defined wave length if it is specified.");
+
   declareProperty("CreateVirtualInstrument", false,
                   "Flag to create virtual instrument.");
 
@@ -618,6 +621,12 @@ ConvertCWSDExpToMomentum::loadSpiceData(const std::string &filename,
     loader->setProperty("ShiftedDetectorDistance", m_detSampleDistanceShift);
     loader->setProperty("DetectorCenterXShift", m_detXShift);
     loader->setProperty("DetectorCenterYShift", m_detYShift);
+
+    double wavelength = getProperty("UserDefinedWavelength");
+
+    if (wavelength != EMPTY_DBL()) {
+      loader->setProperty("UserSpecifiedWaveLength", wavelength);
+    }
 
     loader->execute();
 

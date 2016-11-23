@@ -56,6 +56,16 @@ class CWSCDReductionControl(object):
         # Some set up
         self._expNumber = None
 
+        # instrument default constants
+        self._defaultDetectorSampleDistance = None
+        # geometry of pixel
+        self._defaultPixelSizeX = None
+        self._defaultPixelSizeY = None
+        # user-defined wave length
+        self._userWavelengthDict = dict()
+        # default peak center
+        self._defaultDetectorCenter = None
+
         # Container for MDEventWorkspace for each Pt.
         self._myMDWsList = list()
         # Container for loaded workspaces
@@ -554,14 +564,18 @@ class CWSCDReductionControl(object):
 
         return self._myUBMatrixDict[exp_number]
 
-    @staticmethod
-    def get_wave_length(exp_number, scan_number_list):
+    def get_wave_length(self, exp_number, scan_number_list):
         """
         Get the wavelength.
         Exception: RuntimeError if there are more than 1 wavelength found with all given scan numbers
+        :param exp_number:
         :param scan_number_list:
         :return:
         """
+        # check whether there is use wave length
+        if exp_number in self._userWavelengthDict:
+            return self._userWavelengthDict[exp_number]
+
         # get the SPICE workspace
         wave_length_set = set()
 
@@ -1708,25 +1722,34 @@ class CWSCDReductionControl(object):
                 alg_args['OutputWorkspace'] = out_q_name
                 alg_args['Directory'] = self._dataDir
 
-                # get the sample-detector distance
                 # TODO/ISSUE/NOW - Add Detector Center and Detector Distance!!!  - Trace up how to calculate shifts!
                 print '[DB...BAT] Scan %d: Det-Sample Dict: ' % scan_no, self._detSampleDistanceDict
                 print '[DB...BAT] Scan %d: Det-Center Dict: ' % scan_no, self._detCenterDict
 
-                if scan_no in self._detSampleDistanceDict:
-                    alg_args['DetectorSampleDistanceShift'] = self._detSampleDistanceDict[scan_no]
-                if scan_no in self._detCenterDict:
-                    shift_x, shift_y = self._detCenterDict[scan_no]
+                # calculate the sample-detector distance shift if it is defined
+                if exp_no in self._detSampleDistanceDict:
+                    alg_args['DetectorSampleDistanceShift'] = self._detSampleDistanceDict[exp_no] - \
+                                                              self._defaultDetectorSampleDistance
+                # calculate the shift of detector center
+                if exp_no in self._detCenterDict:
+                    user_center_row, user_center_col = self._detCenterDict[exp_no]
+                    delta_row = user_center_row - self._defaultDetectorCenter[0]
+                    delta_col = user_center_col - self._defaultDetectorCenter[1]
+                    # use LoadSpiceXML2DDet's unit test as a template
+                    shift_x = float(delta_col) * self._defaultPixelSizeX
+                    shift_y = float(delta_row) * self._defaultPixelSizeY * -1.
+                    # set to argument
                     alg_args['DetectorCenterXShift'] = shift_x
                     alg_args['DetectorCenterYShift'] = shift_y
 
+                # set up the user-defined wave length
+                if exp_no in self._userWavelengthDict:
+                    alg_args['UserDefinedWavelength'] = self._userWavelengthDict[exp_no]
+
                 # call:
+                print '[DB...BAT] Input for ConvertCWSDExpToMomentum: ', alg_args
                 mantidsimple.ConvertCWSDExpToMomentum(**alg_args)
 
-                # mantidsimple.ConvertCWSDExpToMomentum(InputWorkspace=scan_info_table_name,
-                #                                       CreateVirtualInstrument=False,
-                #                                       OutputWorkspace=out_q_name,
-                #                                       Directory=self._dataDir)
                 self._myMDWsList.append(out_q_name)
             except RuntimeError as e:
                 err_msg += 'Unable to convert scan %d data to Q-sample MDEvents due to %s' % (scan_no, str(e))
@@ -1808,12 +1831,13 @@ class CWSCDReductionControl(object):
 
         return
 
-    def set_detector_center(self, exp_number, center_row, center_col):
+    def set_detector_center(self, exp_number, center_row, center_col, default=False):
         """
         Set detector center
         :param exp_number:
         :param center_row:
         :param center_col:
+        :param default:
         :return:
         """
         # check
@@ -1823,7 +1847,10 @@ class CWSCDReductionControl(object):
         assert center_col is None or (isinstance(center_col, int) and center_col >= 0), \
             'Center column number must be either Noe or non-negative integer.'
 
-        self._detCenterDict[exp_number] = (center_row, center_col)
+        if default:
+            self._defaultDetectorCenter = (center_row, center_col)
+        else:
+            self._detCenterDict[exp_number] = (center_row, center_col)
 
         return
 
@@ -1841,6 +1868,34 @@ class CWSCDReductionControl(object):
 
         # set
         self._detSampleDistanceDict[exp_number] = sample_det_distance
+
+        return
+
+    def set_default_detector_sample_distance(self, default_det_sample_distance):
+        """
+        set default detector-sample distance
+        :param default_det_sample_distance:
+        :return:
+        """
+        assert isinstance(default_det_sample_distance, float) and default_det_sample_distance > 0,\
+            'Wrong %s' % str(default_det_sample_distance)
+
+        self._defaultDetectorSampleDistance = default_det_sample_distance
+
+        return
+
+    def set_default_pixel_size(self, pixel_x_size, pixel_y_size):
+        """
+        set default pixel size
+        :param pixel_x_size:
+        :param pixel_y_size:
+        :return:
+        """
+        assert isinstance(pixel_x_size, float) and pixel_x_size > 0, 'Pixel size-X %s is bad!' % str(pixel_x_size)
+        assert isinstance(pixel_y_size, float) and pixel_y_size > 0, 'Pixel size-Y %s is bad!' % str(pixel_y_size)
+
+        self._defaultPixelSizeX = pixel_x_size
+        self._defaultPixelSizeY = pixel_y_size
 
         return
 
@@ -1940,6 +1995,23 @@ class CWSCDReductionControl(object):
 
         # Set up
         self._myUBMatrixDict[exp_number] = ub_matrix
+
+        return
+
+    def set_user_wave_length(self, exp_number, wave_length):
+        """
+        set the user wave length for future operation
+        :param exp_number:
+        :param wave_length:
+        :return:
+        """
+        assert isinstance(exp_number, int)
+        assert isinstance(wave_length, float) and wave_length > 0, 'Wave length %s must be a positive float but ' \
+                                                                   'not %s.' % (str(wave_length), type(wave_length))
+
+        self._userWavelengthDict[exp_number] = wave_length
+
+        return
 
     def set_working_directory(self, work_dir):
         """

@@ -101,12 +101,14 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_set_user_detector_distance)
         self.connect(self.ui.pushButton_applyUserDetCenter, QtCore.SIGNAL('clicked()'),
                      self.do_set_user_detector_center)
+        self.connect(self.pushButton_applyUserWavelength, QtCore.SIGNAL('clicked()'),
+                     self.do_set_user_wave_length)
 
         # TODO/NOW/ISSUE - Implement
         """
 
         add more to --> lineEdit_infoDetSampleDistance
-        pushButton_applyUserWavelength: add more to --> lineEdit_infoWavelength
+        : add more to -->
 
 
         """
@@ -472,8 +474,14 @@ class MainWindow(QtGui.QMainWindow):
         project_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Specify Project File', os.getcwd()))
         # NEXT ISSUE - consider to allow incremental project saving technique
         if os.path.exists(project_file_name):
-            self.pop_one_button_dialog('Project file %s does exist. Choose another name.' % project_file_name)
-            return
+            yes = gutil.show_message(self, 'Project file %s does exist. This is supposed to be '
+                                           'an incremental save.' % project_file_name)
+            if yes:
+                print '[INFO] Save project in incremental way.'
+            else:
+                print '[INFO] Saving activity is cancelled.'
+        else:
+            print '[INFO] Saving current project to %s.' % project_file_name
 
         # gather some useful information
         ui_dict = dict()
@@ -2404,8 +2412,34 @@ class MainWindow(QtGui.QMainWindow):
             err_msg = ret_obj
             self.pop_one_button_dialog('Unable to set experiment as %s' % err_msg)
             self.ui.lineEdit_exp.setStyleSheet('color: red')
+            return
 
         self.ui.tabWidget.setCurrentIndex(0)
+
+        # set the instrument geometry constants
+        status, ret_obj = gutil.parse_float_editors([self.ui.lineEdit_defaultSampleDetDistance,
+                                                     self.ui.lineEdit_pixelSizeX,
+                                                     self.ui.lineEdit_pixelSizeY],
+                                                    allow_blank=False)
+        if status:
+            default_det_sample_distance, pixel_x_size, pixel_y_size = ret_obj
+            self._myControl.set_default_detector_sample_distance(default_det_sample_distance)
+            self._myControl.set_default_pixel_size(pixel_x_size, pixel_y_size)
+        else:
+            self.pop_one_button_dialog('[ERROR] Unable to parse default instrument geometry constants '
+                                       'due to %s.' % str(ret_obj))
+            return
+
+        # set the detector center
+        det_center_str = str(self.ui.lineEdit_defaultDetCenter.text())
+        try:
+            terms = det_center_str.split(',')
+            center_row = int(terms[0])
+            center_col = int(terms[1])
+            self._myControl.set_detector_center(exp_number, center_row, center_col, default=True)
+        except (IndexError, ValueError) as error:
+            self.pop_one_button_dialog('[ERROR] Unable to parse default detector center %s due to %s.'
+                                       '' % (det_center_str, str(error)))
 
         return
 
@@ -2560,9 +2594,8 @@ class MainWindow(QtGui.QMainWindow):
         return ub_matrix
 
     def do_set_user_detector_distance(self):
-        """ Set up the user-defined detector distance for loading instrument with data
-                lineEdit_userDetSampleDistance, pushButton_applyCalibratedSampleDistance,
-        :param self:
+        """
+        Set up the user-defined detector distance for loading instrument with data
         :return:
         """
         user_det_distance_str = str(self.ui.lineEdit_userDetSampleDistance.text()).strip()
@@ -2586,6 +2619,29 @@ class MainWindow(QtGui.QMainWindow):
         # set to controller
         exp_number = int(str(self.ui.lineEdit_exp.text()))
         self._myControl.set_detector_sample_distance(exp_number, user_det_distance)
+
+        # update the GUI for information
+        self.ui.lineEdit_infoDetSampleDistance.setText('%.5f' % user_det_distance)
+
+        return
+
+    def do_set_user_wave_length(self):
+        """
+
+        :return:
+        """
+        try:
+            exp_number = int(str(self.ui.lineEdit_exp.text()))
+            user_lambda = float(str(self.ui.lineEdit_infoWavelength.text()))
+        except ValueError:
+            self.pop_one_button_dialog('Unable to set user wave length with value %s.'
+                                       '' % str(self.ui.lineEdit_infoWavelength.text()))
+            return
+
+        self._myControl.set_user_wave_length(exp_number, user_lambda)
+
+        # set back to GUI
+        self.ui.lineEdit_infoWavelength.setText('%.5f' % user_lambda)
 
         return
 
@@ -2611,6 +2667,9 @@ class MainWindow(QtGui.QMainWindow):
         assert isinstance(exp_number, int), 'Experiment number must be set up.'
 
         self._myControl.set_detector_center(exp_number, user_center_row, user_center_col)
+
+        # apply to the GUI
+        self.ui.lineEdit_infoDetCenter.setText('%d, %d' % (user_center_row, user_center_col))
 
         return
 
