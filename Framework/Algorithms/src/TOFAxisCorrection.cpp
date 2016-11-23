@@ -243,8 +243,8 @@ void TOFAxisCorrection::correctManually(API::MatrixWorkspace_sptr outputWs) {
   const auto &spectrumInfo = m_inputWs->spectrumInfo();
   const double l1 = spectrumInfo.l1();
   double l2 = 0;
-  size_t indexEPP = 0;
-  averageL2AndEPPIndex(spectrumInfo, l2, indexEPP);
+  double averageEPP = 0;
+  averageL2AndEPP(spectrumInfo, l2, averageEPP);
   double Ei = getProperty(PropertyNames::INCIDENT_ENERGY);
   if (Ei == EMPTY_DBL()) {
     Ei = m_inputWs->run().getPropertyAsSingleValue(SampleLog::INCIDENT_ENERGY);
@@ -257,7 +257,7 @@ void TOFAxisCorrection::correctManually(API::MatrixWorkspace_sptr outputWs) {
   PARALLEL_FOR_IF(threadSafe(*m_inputWs, *outputWs))
   for (int64_t i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    const double shift = TOF - m_inputWs->x(i)[indexEPP];
+    const double shift = TOF - averageEPP;
     if (i == 0) {
       g_log.debug() << "TOF shift: " << shift << '\n';
     }
@@ -279,8 +279,8 @@ void TOFAxisCorrection::correctManually(API::MatrixWorkspace_sptr outputWs) {
  *  @param detectorEPP An output parameter for the average position
  *         of the detectors' elastic peak
  */
-void TOFAxisCorrection::averageL2AndEPPIndex(const API::SpectrumInfo &spectrumInfo,
-    double &l2, size_t &indexEPP) {
+void TOFAxisCorrection::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo,
+    double &l2, double &epp) {
   auto peakPositionColumn =
       m_eppTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
   auto fitStatusColumn =
@@ -326,9 +326,8 @@ void TOFAxisCorrection::averageL2AndEPPIndex(const API::SpectrumInfo &spectrumIn
   l2 = l2Sum / static_cast<double>(n);
   g_log.information() << "Average L2 distance: "
                       << l2 << ".\n";
-  const double meanEPP = eppSum / static_cast<double>(n);
-  indexEPP = m_inputWs->binIndexOf(meanEPP);
-  g_log.information() << "Average detector EPP index: " << indexEPP << ".\n";
+  epp = eppSum / static_cast<double>(n);
+  g_log.information() << "Average detector EPP: " << epp << ".\n";
 }
 
 /** Parser detector and monitor indices from user's input and

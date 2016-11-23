@@ -80,11 +80,11 @@ public:
     TS_ASSERT( outputWs );
     for (size_t i = 0; i < inputWs->getNumberHistograms(); ++i) {
       for (size_t j = 0; j < blocksize; ++j) {
-        TS_ASSERT( outputWs->x(i)[j] - inputWs->x(i)[j] + TOFshift <= dx )
+        TS_ASSERT_DELTA( outputWs->x(i)[j], inputWs->x(i)[j] + TOFshift, 1e-6 )
         TS_ASSERT_EQUALS( outputWs->y(i)[j], inputWs->y(i)[j] )
         TS_ASSERT_EQUALS( outputWs->e(i)[j], inputWs->e(i)[j] )
       }
-      TS_ASSERT( outputWs->x(i).back() - inputWs->x(i).back() + TOFshift <= dx )
+      TS_ASSERT_DELTA( outputWs->x(i).back(), inputWs->x(i).back() + TOFshift, 1e-6 )
     }
   }
 
