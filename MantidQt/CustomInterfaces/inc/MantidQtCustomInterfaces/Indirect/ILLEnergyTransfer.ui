@@ -368,6 +368,39 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="lbScale">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Scaling Factor</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QComboBox" name="cbBackOption">
+        <property name="toolTip">
+         <string>Background subtraction option</string>
+        </property>
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+        <item>
+         <property name="text">
+          <string>Sum</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Interpolate</string>
+         </property>
+        </item>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfBackgroundRun" native="true">
         <property name="sizePolicy">
@@ -378,7 +411,7 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>270</width>
+          <width>230</width>
           <height>20</height>
          </size>
         </property>
@@ -399,16 +432,13 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="lbScale">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+      <item row="0" column="3">
+       <widget class="QLabel" name="lbBackOption">
         <property name="text">
-         <string>Scaling Factor</string>
+         <string>Option</string>
+        </property>
+        <property name="visible">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -427,6 +457,39 @@
       <string>Detector Calibration</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="1">
+       <widget class="QLabel" name="lbPeakRange">
+        <property name="text">
+         <string>Peak Range</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLineEdit" name="lePeakRange">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Peak integration range for calibration (in mev) [start;end].</string>
+        </property>
+        <property name="text">
+         <string>-0.003;0.003</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLabel" name="lbCalibOption">
+        <property name="text">
+         <string>Option</string>
+        </property>
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfCalibrationRun" native="true">
         <property name="enabled">
@@ -461,27 +524,24 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="lbPeakRange">
-        <property name="text">
-         <string>Peak Range</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLineEdit" name="lePeakRange">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+      <item row="0" column="4">
+       <widget class="QComboBox" name="cbCalibOption">
         <property name="toolTip">
-         <string>Peak integration range for calibration (in mev) [start;end].</string>
+         <string>Detector calibratino option</string>
         </property>
-        <property name="text">
-         <string>-0.003;0.003</string>
+        <property name="visible">
+         <bool>false</bool>
         </property>
+        <item>
+         <property name="text">
+          <string>Sum</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Interpolate</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>
@@ -976,6 +1036,134 @@
     <hint type="destinationlabel">
      <x>510</x>
      <y>298</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbBackOption</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>446</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbCalibOption</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>446</x>
+     <y>318</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbBackOption</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>523</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbCalibOption</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>523</x>
+     <y>318</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbBackOption</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>446</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbCalibOption</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>446</x>
+     <y>318</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbBackOption</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>523</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbCalibOption</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>523</x>
+     <y>318</y>
     </hint>
    </hints>
   </connection>

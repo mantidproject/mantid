@@ -27,16 +27,17 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
 
     def requiredFiles(self):
 
-        return ["136553.nxs","136554.nxs",  # calibration vanadium files
-                "136555.nxs","136556.nxs",  # alignment vanadium files
-                "136599.nxs","136600.nxs",  # background (empty can)
-                "136558.nxs","136559.nxs"]  # sample
+        return ["083072.nxs","083073.nxs",
+                "083074.nxs","083075.nxs",
+                "083076.nxs","083077.nxs"]
 
     def runTest(self):
 
         self.tolerance = 1e-6
 
+        IndirectILLReductionFWS(Run="083072:083073")
+
         self.tearDown()
 
     def validate(self):
-        return ['result','ILLIN16B_QENS.nxs']
+        return ['red','ILLIN16B_FWS.nxs']

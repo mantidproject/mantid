@@ -170,6 +170,13 @@ void ILLEnergyTransfer::run() {
     reductionAlg->setProperty(
         "Observable", m_uiForm.cbObservable->currentText().toStdString());
 
+    reductionAlg->setProperty(
+        "BackgroundOption", m_uiForm.cbBackOption->currentText().toStdString());
+
+    reductionAlg->setProperty(
+        "CalibrationOption",
+        m_uiForm.cbCalibOption->currentText().toStdString());
+
     reductionAlg->setProperty("SortXAxis", m_uiForm.cbSortX->isChecked());
   }
 
