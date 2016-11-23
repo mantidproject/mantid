@@ -247,7 +247,7 @@ void TOFAxisCorrection::correctManually(API::MatrixWorkspace_sptr outputWs) {
   averageL2AndEPPIndex(spectrumInfo, l2, indexEPP);
   double Ei = getProperty(PropertyNames::INCIDENT_ENERGY);
   if (Ei == EMPTY_LONG()) {
-    Ei = std::stod(m_inputWs->run().getProperty(SampleLog::INCIDENT_ENERGY)->value());
+    Ei = m_inputWs->run().getPropertyAsSingleValue(SampleLog::INCIDENT_ENERGY);
   }
   // In microseconds.
   const double TOF =
