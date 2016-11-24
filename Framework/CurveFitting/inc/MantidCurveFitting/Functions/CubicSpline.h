@@ -9,7 +9,6 @@
 #include <boost/scoped_array.hpp>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
-#include <valarray>
 
 namespace Mantid {
 namespace CurveFitting {

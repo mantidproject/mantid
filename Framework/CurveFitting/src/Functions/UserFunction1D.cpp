@@ -4,7 +4,6 @@
 #include "MantidCurveFitting/Functions/UserFunction1D.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidKernel/UnitFactory.h"
 
 namespace Mantid {
 namespace CurveFitting {

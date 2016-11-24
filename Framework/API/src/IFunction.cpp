@@ -22,7 +22,6 @@
 #include <MantidKernel/StringTokenizer.h>
 
 #include <limits>
-#include <sstream>
 #include <algorithm>
 
 namespace Mantid {
