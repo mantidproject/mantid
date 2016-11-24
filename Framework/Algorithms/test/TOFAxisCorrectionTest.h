@@ -102,8 +102,13 @@ public:
     const double length = flightLengthIN4(inputWs);
     const double velocity = length / (eppTOF * 1e-6);
     const double nominalEi = Mantid::PhysicalConstants::NeutronMass * velocity * velocity / 2 / Mantid::PhysicalConstants::meV;
+    inputWs->mutableRun().addProperty("EI", nominalEi);
+    const double nominalWavelength = Mantid::PhysicalConstants::h / velocity / Mantid::PhysicalConstants::NeutronMass * 1e10;
+    inputWs->mutableRun().addProperty("wavelength", nominalWavelength);
     const double actualEi = 1.05 * nominalEi;
     const double actualElasticTOF = length / (std::sqrt(2 * actualEi * Mantid::PhysicalConstants::meV / Mantid::PhysicalConstants::NeutronMass)) / 1e-6;
+    const double actualVelocity = length / (actualElasticTOF * 1e-6);
+    const double actualWavelength = Mantid::PhysicalConstants::h / actualVelocity / Mantid::PhysicalConstants::NeutronMass * 1e10;
     const double TOFshift = actualElasticTOF - eppTOF;
     ITableWorkspace_sptr eppTable = createEPPTableWorkspace(eppRows);
     TOFAxisCorrection alg;
@@ -123,6 +128,8 @@ public:
 
     MatrixWorkspace_sptr outputWs = alg.getProperty("OutputWorkspace");
     TS_ASSERT( outputWs );
+    TS_ASSERT_EQUALS( outputWs->run().getPropertyAsSingleValue("EI"), actualEi );
+    TS_ASSERT_EQUALS( outputWs->run().getPropertyAsSingleValue("wavelength"), actualWavelength )
     for (size_t i = 0; i < inputWs->getNumberHistograms(); ++i) {
       for (size_t j = 0; j < blocksize; ++j) {
         TS_ASSERT_DELTA( outputWs->x(i)[j], inputWs->x(i)[j] + TOFshift, 1e-6 )
@@ -175,6 +182,8 @@ public:
 
     MatrixWorkspace_sptr outputWs = alg.getProperty("OutputWorkspace");
     TS_ASSERT( outputWs );
+    TS_ASSERT_EQUALS( outputWs->run().getPropertyAsSingleValue("EI"), actualEi );
+    TS_ASSERT( !outputWs->run().hasProperty("wavelength") )
     for (size_t i = 0; i < inputWs->getNumberHistograms(); ++i) {
       for (size_t j = 0; j < blocksize; ++j) {
         TS_ASSERT_DELTA( outputWs->x(i)[j], inputWs->x(i)[j] + TOFshift, 1e-6 )

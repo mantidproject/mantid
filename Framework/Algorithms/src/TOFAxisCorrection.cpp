@@ -12,6 +12,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/UnitConversion.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -249,6 +250,11 @@ void TOFAxisCorrection::correctManually(API::MatrixWorkspace_sptr outputWs) {
   double Ei = getProperty(PropertyNames::INCIDENT_ENERGY);
   if (Ei == EMPTY_DBL()) {
     Ei = m_inputWs->run().getPropertyAsSingleValue(SampleLog::INCIDENT_ENERGY);
+  } else {
+    // Save user-given Ei and wavelength to the output workspace.
+    outputWs->mutableRun().addProperty(SampleLog::INCIDENT_ENERGY, Ei, true);
+    const double wavelength = Kernel::UnitConversion::run("Energy", "Wavelength", Ei, l1, l2, 0, Kernel::DeltaEMode::Direct, 0);
+    outputWs->mutableRun().addProperty(SampleLog::WAVELENGTH, wavelength, true);
   }
   // In microseconds.
   const double TOF =
