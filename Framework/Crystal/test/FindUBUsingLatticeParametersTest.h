@@ -1,11 +1,11 @@
 #ifndef MANTID_CRYSTAL_FIND_UB_USING_LATTICE_PARAMETERS_TEST_H_
 #define MANTID_CRYSTAL_FIND_UB_USING_LATTICE_PARAMETERS_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/DeleteTableRows.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/FindUBUsingLatticeParameters.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
@@ -33,7 +33,8 @@ public:
     FindUBUsingLatticeParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", ws->name()));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PeaksWorkspace", ws->name()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("a", "14.131"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("b", "19.247"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("c", "8.606"));
@@ -87,7 +88,8 @@ public:
     FindUBUsingLatticeParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", ws->name()));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PeaksWorkspace", ws->name()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("a", "14.131"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("b", "19.247"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("c", "8.606"));
@@ -129,7 +131,7 @@ public:
 
   void test_smallNumberOfPeaks() {
     // Use a tiny set of 3 peaks - the minimum required
-    ///to successfully find a UB matrix this checks the case that we still
+    /// to successfully find a UB matrix this checks the case that we still
     /// get a UB (although perhaps not a very good one).
     auto ws = loadPeaksWorkspace();
     std::vector<size_t> rows;
@@ -146,7 +148,8 @@ public:
     FindUBUsingLatticeParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", ws->name()));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PeaksWorkspace", ws->name()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("a", "14.131"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("b", "19.247"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("c", "8.606"));
@@ -155,7 +158,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("gamma", "90.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NumInitial", "15"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.12"));
-//    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FixAll", true));
+    //    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FixAll", true));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -164,9 +167,8 @@ public:
     // Check that the UB matrix is the same as in TOPAZ_3007.mat
     OrientedLattice latt = ws->mutableSample().getOrientedLattice();
 
-    double correct_UB[] = {0.0450, 0.0407, 0.0127,
-                           -0.0008, -0.0044, -0.1158,
-                           -0.0584, 0.0307, -0.0242};
+    double correct_UB[] = {0.0450,  0.0407,  0.0127, -0.0008, -0.0044,
+                           -0.1158, -0.0584, 0.0307, -0.0242};
 
     std::vector<double> UB_calculated = latt.getUB().getVector();
 

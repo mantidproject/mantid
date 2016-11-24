@@ -52,7 +52,8 @@ const constexpr double RAD_TO_DEG = 180. / M_PI;
   @param  q_vectors           std::vector of V3D objects that contains the
                               list of q_vectors that are to be indexed
                               NOTE: There must be at least 2 q_vectors.
-  @param  lattice							The orientated lattice with the lattice
+  @param  lattice							The orientated
+  lattice with the lattice
                               parameters a,b,c and alpha, beta, gamma. The found
                               UB and errors will be set on this lattice.
   @param  required_tolerance  The maximum allowed deviation of Miller indices
@@ -83,7 +84,7 @@ const constexpr double RAD_TO_DEG = 180. / M_PI;
                                  is <= 0.
 */
 double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
-                              OrientedLattice& lattice,
+                              OrientedLattice &lattice,
                               double required_tolerance, int base_index,
                               size_t num_initial, double degrees_per_step,
                               bool fixAll) {
@@ -154,7 +155,6 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
 
   ScanFor_UB(UB, some_qs, lattice, degrees_per_step, required_tolerance);
 
-
   double fit_error = 0;
   std::vector<V3D> miller_ind;
   std::vector<V3D> indexed_qs;
@@ -188,7 +188,8 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   }
 
   std::vector<double> sigabc(7);
-  if (!fixAll && q_vectors.size() >= 3) // try one last refinement using all peaks
+  if (!fixAll &&
+      q_vectors.size() >= 3) // try one last refinement using all peaks
   {
     try {
       GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind, indexed_qs,
@@ -208,7 +209,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   // set the error on the lattice parameters
   lattice.setUB(UB);
   lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
-      sigabc[5]);
+                   sigabc[5]);
   return fit_error;
 }
 
@@ -883,7 +884,8 @@ double IndexingUtils::Optimize_Direction(V3D &best_vec,
     @param UB                 This will be set to the UB matrix that best
                               indexes the supplied list of q_vectors.
     @param q_vectors          List of locations of peaks in "Q".
-    @param cell								Unit cell defining the parameters a,b,c and
+    @param cell								Unit cell defining the parameters
+  a,b,c and
                               alpha, beta, gamma.
     @param degrees_per_step   The number of degrees per step used when
                               scanning through all possible directions and
@@ -906,8 +908,7 @@ double IndexingUtils::Optimize_Direction(V3D &best_vec,
  */
 double IndexingUtils::ScanFor_UB(DblMatrix &UB,
                                  const std::vector<V3D> &q_vectors,
-                                 const UnitCell& cell,
-                                 double degrees_per_step,
+                                 const UnitCell &cell, double degrees_per_step,
                                  double required_tolerance) {
   if (UB.numRows() != 3 || UB.numCols() != 3) {
     throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");

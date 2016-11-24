@@ -81,9 +81,9 @@ void FindUBUsingLatticeParameters::exec() {
 
   Matrix<double> UB(3, 3, false);
   OrientedLattice lattice(a, b, c, alpha, beta, gamma);
-  double error = IndexingUtils::Find_UB(UB, q_vectors, lattice,	tolerance,
-                                        base_index, num_initial,
-                                        degrees_per_step, fixAll);
+  double error =
+      IndexingUtils::Find_UB(UB, q_vectors, lattice, tolerance, base_index,
+                             num_initial, degrees_per_step, fixAll);
 
   g_log.notice() << "Error = " << error << '\n';
   g_log.notice() << "UB = " << UB << '\n';

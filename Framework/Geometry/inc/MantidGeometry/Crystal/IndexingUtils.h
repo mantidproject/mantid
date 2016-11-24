@@ -6,11 +6,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Matrix.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -53,7 +53,7 @@ public:
   /// given the lattice parameters
   static double Find_UB(Kernel::DblMatrix &UB,
                         const std::vector<Kernel::V3D> &q_vectors,
-                        OrientedLattice& lattice, double required_tolerance,
+                        OrientedLattice &lattice, double required_tolerance,
                         int base_index, size_t num_initial,
                         double degrees_per_step, bool fixAll = false);
 
@@ -90,8 +90,7 @@ public:
   /// Scan rotations to find UB that indexes peaks given lattice parameters
   static double ScanFor_UB(Kernel::DblMatrix &UB,
                            const std::vector<Kernel::V3D> &q_vectors,
-                           const UnitCell& lattice,
-                           double degrees_per_step,
+                           const UnitCell &lattice, double degrees_per_step,
                            double required_tolerance);
 
   /// Get list of possible directions and lengths for real space unit cell
