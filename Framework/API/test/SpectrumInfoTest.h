@@ -252,17 +252,17 @@ public:
 
   void test_eFixed() {
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    TS_ASSERT_EQUALS(spectrumInfo.eFixed(0), 0.0);
-    TS_ASSERT_EQUALS(spectrumInfo.eFixed(1), 1.0);
-    TS_ASSERT_EQUALS(spectrumInfo.eFixed(2), 2.0);
-    TS_ASSERT_EQUALS(spectrumInfo.eFixed(3), 3.0);
-    TS_ASSERT_EQUALS(spectrumInfo.eFixed(4), 4.0);
+    TS_ASSERT_EQUALS(spectrumInfo.eFixed(0), 1.0);
+    TS_ASSERT_EQUALS(spectrumInfo.eFixed(1), 2.0);
+    TS_ASSERT_EQUALS(spectrumInfo.eFixed(2), 3.0);
+    TS_ASSERT_EQUALS(spectrumInfo.eFixed(3), 4.0);
+    TS_ASSERT_EQUALS(spectrumInfo.eFixed(4), 5.0);
   }
 
   void test_grouped_eFixed() {
     const auto &spectrumInfo = m_grouped.spectrumInfo();
-    TS_ASSERT_EQUALS(spectrumInfo.eFixed(0), 1.5);
-    TS_ASSERT_EQUALS(spectrumInfo.eFixed(1), 0.5);
+    TS_ASSERT_EQUALS(spectrumInfo.eFixed(0), 2.5);
+    TS_ASSERT_EQUALS(spectrumInfo.eFixed(1), 1.5);
     // Other eFixed values are not sensible since the detectors include monitors
   }
 
@@ -397,7 +397,8 @@ private:
         IDetector_const_sptr det = ws.getDetector(i);
         pmap.addBool(det.get(), "masked", true);
       }
-      pmap.addDouble(ws.getDetector(i).get(), "Efixed", static_cast<double>(i));
+      pmap.addDouble(ws.getDetector(i).get(), ParameterMap::eFixed(),
+                     static_cast<double>(i + 1));
     }
     return ws;
   }
