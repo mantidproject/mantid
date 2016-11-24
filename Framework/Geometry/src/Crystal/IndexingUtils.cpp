@@ -52,7 +52,8 @@ const constexpr double RAD_TO_DEG = 180. / M_PI;
   @param  q_vectors           std::vector of V3D objects that contains the
                               list of q_vectors that are to be indexed
                               NOTE: There must be at least 2 q_vectors.
-  @param  lattice							The orientated
+  @param  lattice							The
+  orientated
   lattice with the lattice
                               parameters a,b,c and alpha, beta, gamma. The found
                               UB and errors will be set on this lattice.
@@ -884,7 +885,8 @@ double IndexingUtils::Optimize_Direction(V3D &best_vec,
     @param UB                 This will be set to the UB matrix that best
                               indexes the supplied list of q_vectors.
     @param q_vectors          List of locations of peaks in "Q".
-    @param cell								Unit cell defining the parameters
+    @param cell								Unit cell defining the
+  parameters
   a,b,c and
                               alpha, beta, gamma.
     @param degrees_per_step   The number of degrees per step used when
