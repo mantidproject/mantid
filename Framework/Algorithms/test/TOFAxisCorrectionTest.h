@@ -133,6 +133,58 @@ public:
     }
   }
 
+  void test_UseEiFromSampleLogs()
+  {
+    auto inputWs = createEmptyIN4Workspace("ws");
+    const size_t blocksize = 512;
+    const double x0 = 1390.1;
+    const double dx = 0.24;
+    const size_t eppIndex = 2 * blocksize / 3;
+    const double eppTOF = x0 + static_cast<double>(eppIndex) * dx + dx / 2;
+    const double sigma = 4 * dx;
+    auto gaussianPeak = [x0, sigma](const double x) {
+      const double a = -(x - x0) / sigma;
+      return std::exp(-a * a / 2);
+    };
+    fillWorkspace(inputWs, blocksize, x0, dx, gaussianPeak);
+    std::vector<EPPTableRow> eppRows(inputWs->getNumberHistograms());
+    for (auto &row : eppRows) {
+      row.peakCentre = eppTOF;
+    }
+    const double length = flightLengthIN4(inputWs);
+    const double velocity = length / (eppTOF * 1e-6);
+    const double nominalEi = Mantid::PhysicalConstants::NeutronMass * velocity * velocity / 2 / Mantid::PhysicalConstants::meV;
+    const double actualEi = 0.93 * nominalEi;
+    inputWs->mutableRun().addProperty("EI", actualEi, true);
+    const double actualElasticTOF = length / (std::sqrt(2 * actualEi * Mantid::PhysicalConstants::meV / Mantid::PhysicalConstants::NeutronMass)) / 1e-6;
+    const double TOFshift = actualElasticTOF - eppTOF;
+    ITableWorkspace_sptr eppTable = createEPPTableWorkspace(eppRows);
+    TOFAxisCorrection alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inputWs) )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "_unused_for_child") )
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("EPPTable", eppTable) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("IndexType", "WorkspaceIndex") )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ReferenceSpectra", "1-300") )
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+
+    MatrixWorkspace_sptr outputWs = alg.getProperty("OutputWorkspace");
+    TS_ASSERT( outputWs );
+    for (size_t i = 0; i < inputWs->getNumberHistograms(); ++i) {
+      for (size_t j = 0; j < blocksize; ++j) {
+        TS_ASSERT_DELTA( outputWs->x(i)[j], inputWs->x(i)[j] + TOFshift, 1e-6 )
+        TS_ASSERT_EQUALS( outputWs->y(i)[j], inputWs->y(i)[j] )
+        TS_ASSERT_EQUALS( outputWs->e(i)[j], inputWs->e(i)[j] )
+      }
+      TS_ASSERT_DELTA( outputWs->x(i).back(), inputWs->x(i).back() + TOFshift, 1e-6 )
+    }
+  }
+
 private:
   MatrixWorkspace_sptr createEmptyIN4Workspace(const std::string &wsName) const {
     Mantid::DataHandling::LoadEmptyInstrument loadInstrument;
