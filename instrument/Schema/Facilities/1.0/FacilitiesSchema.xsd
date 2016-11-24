@@ -83,14 +83,14 @@
                     <xs:element name="livedata">
                       <xs:complexType>
                         <xs:attribute name="default" type="xs:string" use="optional"/>
+                        <xs:element name="connection" minOccurs="1" maxOccurs="unbounded">
+                          <xs:complexType>
+                            <xs:attribute name="name" type="xs:string" use="required"/>
+                            <xs:attribute name="address" type="xs:string" use="required"/>
+                            <xs:attribute name="listener" type="xs:string" use="required"/>
+                          </xs:complexType>
+                        </xs:element>
                       </xs:complexType>
-                      <xs:element name="connection" minOccurs="1" maxOccurs="unbounded">
-                        <xs:complexType>
-                          <xs:attribute name="name" type="xs:string" use="required"/>
-                          <xs:attribute name="address" type="xs:string" use="required"/>
-                          <xs:attribute name="listener" type="xs:string" use="required"/>
-                        </xs:complexType>
-                      </xs:element>
                     </xs:element>
                   </xs:choice>
                   <xs:attribute name="name" type="xs:string" use="required"/>
