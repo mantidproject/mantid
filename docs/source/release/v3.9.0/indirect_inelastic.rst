@@ -58,7 +58,8 @@ Transmission
 Improvements
 ------------
 
- - Data saved in an ASCII format using the *EnergyTransfer* interface can be re-loaded into Mantid
+- Data saved in an ASCII format using the *EnergyTransfer* interface can be re-loaded into Mantid
+- TOSCA instrument definition file has been updated
 
 
 Bugfixes
