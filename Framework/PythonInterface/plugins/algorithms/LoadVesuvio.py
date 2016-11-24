@@ -314,11 +314,27 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """
         Execution path when a single foil state is requested
         """
+
+        runs = self._get_runs()
+
         all_spectra = [item for sublist in self._spectra for item in sublist]
 
-        self._set_spectra_type(all_spectra[0])
-        self._setup_raw(all_spectra)
-        self._create_foil_workspaces()
+        if len(runs) > 1:
+            self._set_spectra_type(all_spectra[0])
+            self._setup_raw(all_spectra)
+        else:
+            isis = config.getFacility("ISIS")
+            inst_prefix = isis.instrument("VESUVIO").shortName()
+
+            try:
+                run_str = inst_prefix + runs[0]
+            except ValueError:
+                run_str = runs[0]
+
+            self._raise_error_period_scatter(run_str, self._back_scattering)
+            all_spectra = [item for sublist in self._spectra for item in sublist]
+
+            self._load_single_run_spec_and_mon(all_spectra, run_str)
 
         raw_group = mtd[SUMMED_WS]
         self._nperiods = raw_group.size()
@@ -351,18 +367,37 @@ class LoadVesuvio(LoadEmptyVesuvio):
             np.sqrt(dataE, dataE)
             foil_out.setX(ws_index, x_values)
 
-            if self._nperiods == 6 and self._spectra_type == FORWARD:
-                mon_periods = (5, 6)
-            else:
-                mon_periods = foil_out_periods
-            raw_grp_indices = foil_map.get_indices(spectrum_no, mon_periods)
-            outY = self.mon_out.dataY(ws_index)
-            for grp_index in raw_grp_indices:
-                raw_ws = self._raw_monitors[grp_index]
-                outY += raw_ws.readY(self._mon_index)
+            if len(runs) > 1:
+                # Create monitor workspace for normalisation
+                first_mon_ws = self._raw_monitors[0]
+                nmonitor_bins = first_mon_ws.blocksize()
+                nhists = first_ws.getNumberHistograms()
+                data_kwargs = {'NVectors': nhists, 'XLength': nmonitor_bins, 'YLength': nmonitor_bins}
+                mon_out = WorkspaceFactory.create(first_mon_ws, **data_kwargs)
 
-            self._ws_index = ws_index
-            self._normalise_by_monitor()
+                mon_raw_t = self._raw_monitors[0].readX(0)
+                delay = mon_raw_t[2] - mon_raw_t[1]
+                # The original EVS loader, raw.for/rawb.for, does this. Done here to match results
+                mon_raw_t = mon_raw_t - delay
+                self.mon_pt_times = mon_raw_t[1:]
+
+                if self._nperiods == 6 and self._spectra_type == FORWARD:
+                    mon_periods = (5, 6)
+                    raw_grp_indices = foil_map.get_indices(spectrum_no, mon_periods)
+
+                outY = mon_out.dataY(ws_index)
+                for grp_index in raw_grp_indices:
+                    raw_ws = self._raw_monitors[grp_index]
+                    outY += raw_ws.readY(self._mon_index)
+
+                # Normalise by monitor
+                indices_in_range = np.where((self.mon_pt_times >= self._mon_norm_start) & (self.mon_pt_times < self._mon_norm_end))
+                mon_values = mon_out.readY(ws_index)
+                mon_values_sum = np.sum(mon_values[indices_in_range])
+                foil_state = foil_out.dataY(ws_index)
+                foil_state *= (self._mon_scale/mon_values_sum)
+                err = foil_out.dataE(ws_index)
+                err *= (self._mon_scale/mon_values_sum)
 
         ip_file = self.getPropertyValue(INST_PAR_PROP)
         if len(ip_file) > 0:
@@ -373,18 +408,21 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         ms.DeleteWorkspace(Workspace=SUMMED_WS)
         self._store_results()
+        self._cleanup_raw()
 
 #----------------------------------------------------------------------------------------
 
     def _load_single_run_spec_and_mon(self, all_spectra, run_str):
         # check if the monitor spectra are already in the spectra list
         filtered_spectra = sorted([i for i in all_spectra if i <= self._mon_spectra[-1]])
+        mons_in_ws = False
         if filtered_spectra == self._mon_spectra and self._load_monitors:
             # Load monitors in workspace if defined by user
             self._load_monitors = False
+            mons_in_ws = True
             logger.warning("LoadMonitors is true while monitor spectra are defined in the spectra list.")
             logger.warning("Monitors have been loaded into the data workspace not separately.")
-        if not self._load_monitors:
+        if mons_in_ws:
             ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spectra,
                        EnableLogging=_LOGGING_)
         else:
@@ -392,17 +430,17 @@ class LoadVesuvio(LoadEmptyVesuvio):
             all_spec_inc_mon.extend(all_spectra)
             ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spec_inc_mon,
                        LoadMonitors='Separate', EnableLogging=_LOGGING_)
-            monitor_group = mtd[SUMMED_WS +'_monitors']
-            mon_out_name = self.getPropertyValue(WKSP_PROP) + "_monitors"
-            clone = self.createChildAlgorithm("CloneWorkspace", False)
-            clone.setProperty("InputWorkspace", monitor_group.getItem(0))
-            clone.setProperty("OutputWorkspace", mon_out_name)
-            clone.execute()
-            self._load_monitors_workspace = clone.getProperty("OutputWorkspace").value
-            self._load_monitors_workspace = self._sum_monitors_in_group(monitor_group,
-                                                                        self._load_monitors_workspace)
-            ms.DeleteWorkspace(Workspace=monitor_group)
-
+            if self._load_monitors:
+                monitor_group = mtd[SUMMED_WS +'_monitors']
+                mon_out_name = self.getPropertyValue(WKSP_PROP) + "_monitors"
+                clone = self.createChildAlgorithm("CloneWorkspace", False)
+                clone.setProperty("InputWorkspace", monitor_group.getItem(0))
+                clone.setProperty("OutputWorkspace", mon_out_name)
+                clone.execute()
+                self._load_monitors_workspace = clone.getProperty("OutputWorkspace").value
+                self._load_monitors_workspace = self._sum_monitors_in_group(monitor_group,
+                                                                            self._load_monitors_workspace)
+            self._raw_monitors = mtd[SUMMED_WS +'_monitors']
 #----------------------------------------------------------------------------------------
 
     def _load_common_inst_parameters(self):
