@@ -47,7 +47,7 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
     @param simple_text :: whether to print the tables in a simple text format
     @param rst :: whether to print the tables in rst format. They are printed to the standard outputs
                   and to files following specific naming conventions
-    @param save_to_file :: If rst=True, whether to save the tables to files following specific naming conventions                  
+    @param save_to_file :: If rst=True, whether to save the tables to files following specific naming conventions
     @param color_scale :: threshold-color pairs. This is used for RST tables. The number of levels
                           must be consistent with the style sheet used in the documentation pages (5
                           at the moment).
@@ -56,8 +56,8 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
 
     # Calculate summary tables
     accuracy_tbl, runtime_tbl = postproc.calc_accuracy_runtime_tbls(results_per_test, minimizers)
-    norm_acc_rankings, norm_runtimes, summary_cells_acc, summary_cells_runtime = postproc.calc_norm_summary_tables(accuracy_tbl, 
-                                                                                                                   runtime_tbl)
+    norm_acc_rankings, norm_runtimes, summary_cells_acc, summary_cells_runtime = \
+        postproc.calc_norm_summary_tables(accuracy_tbl, runtime_tbl)
 
     if simple_text:
         print_tables_simple_text(minimizers, results_per_test, accuracy_tbl, runtime_tbl, norm_acc_rankings)
@@ -74,8 +74,8 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
 
         if save_to_file:
             fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
-                 format(weighted=weighted_suffix_string(use_errors),
-                        version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_ACCURACY, group_name=group_name))
+                     format(weighted=weighted_suffix_string(use_errors),
+                            version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_ACCURACY, group_name=group_name))
             with open(fname, 'w') as tbl_file:
                 print(tbl_acc_indiv, file=tbl_file)
 

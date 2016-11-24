@@ -42,14 +42,14 @@ def run_all_with_or_without_errors(base_problem_files_dir, use_errors, minimizer
                                    group_names, group_suffix_names, color_scale, save_to_file=False):
     """
     Run all benchmark problems available, with/without using weights in the cost
-    function. This is just a convenience function meant to be used by system/unit tests, or other scripts.
-    
+    function. This is just a convenience function meant to be used by system/unit tests, or other scripts
+
     ALL means: NIST + CUTEST + any fitting problems against observed Neutron data (+ any other
     which may be added in the future)
-    
+
     At this point in time it is assumed that the problem files are in store relative to 
     a base_problem_files_dir as follows:
-        
+
         CUTEst/
         NIST_nonlinear_regression/
         Neutron_data/
@@ -62,7 +62,7 @@ def run_all_with_or_without_errors(base_problem_files_dir, use_errors, minimizer
     @param group_names :: names for display purposes
     @param group_suffix_names :: group names to use as suffixes, for example in file names
     @param color_scale :: list with pairs of threshold value - color, to produce color
-    @param save_to_file :: whether to save the table outputs to files following specific naming conventions    
+    @param save_to_file :: whether to save the table outputs to files following specific naming conventions
     """
 
     # Assume the benchmark problems are stores as follows
@@ -70,7 +70,7 @@ def run_all_with_or_without_errors(base_problem_files_dir, use_errors, minimizer
     cutest_group_dir = os.path.join(base_problem_files_dir, 'CUTEst')
     neutron_data_group_dirs = [os.path.join(base_problem_files_dir, 'Neutron_data')]
 
-    problems, results_per_group = do_fitting_benchmark(nist_group_dir=nist_group_dir, 
+    problems, results_per_group = do_fitting_benchmark(nist_group_dir=nist_group_dir,
                                                        cutest_group_dir=cutest_group_dir,
                                                        neutron_data_group_dirs=neutron_data_group_dirs,
                                                        minimizers=minimizers, use_errors=use_errors)
@@ -85,7 +85,7 @@ def run_all_with_or_without_errors(base_problem_files_dir, use_errors, minimizer
         fitout.print_group_results_tables(minimizers, group_results, problems[idx],
                                           group_name=group_suffix_names[idx],
                                           use_errors=use_errors,
-                                          simple_text=True, rst=True, save_to_file=save_to_file, 
+                                          simple_text=True, rst=True, save_to_file=save_to_file,
                                           color_scale=color_scale)
 
     # Results aggregated (median) by group (NIST, Neutron data, CUTEst, etc.)
@@ -102,15 +102,15 @@ def run_all_with_or_without_errors(base_problem_files_dir, use_errors, minimizer
 def do_fitting_benchmark(nist_group_dir=None, cutest_group_dir=None, neutron_data_group_dirs=None,
                          minimizers=None, use_errors=True):
     """
-    Run a fit minimizer benchmark against groups of fitting problems. 
-    
+    Run a fit minimizer benchmark against groups of fitting problems.
+
     Unless group directories of fitting problems are specified no fitting benchmarking is done.
-    
-    NIST and CUTEst refer to the NIST and CUTEst fitting test problem sets, where 
-    for example CUTEst is used for fit tests in the mathematical numerical literature. 
-    
-    The Neutron_data group contain fit tests against real noisy experimental neutron data. 
-    This latter group may grow to contain fitting example from multiple directories.    
+
+    NIST and CUTEst refer to the NIST and CUTEst fitting test problem sets, where
+    for example CUTEst is used for fit tests in the mathematical numerical literature.
+
+    The Neutron_data group contain fit tests against real noisy experimental neutron data.
+    This latter group may grow to contain fitting example from multiple directories.
 
     @param nist_group_dir :: whether to try to load NIST problems
     @param cutest_group_dir :: whether to try to load CUTEst problems
@@ -147,7 +147,7 @@ def do_fitting_benchmark(nist_group_dir=None, cutest_group_dir=None, neutron_dat
 
 def do_fitting_benchmark_group(problem_files, minimizers, use_errors=True):
     """
-    Applies minimizers to a group (collection) of test problems. For example the 
+    Applies minimizers to a group (collection) of test problems. For example the
     collection of all NIST problems
 
     @param problem_files :: a list of list of files that define a group of
@@ -195,7 +195,7 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True):
     # Each NIST problem generate two results per file - from two different starting points
     results_fit_problem = []
 
-    # Get function definitions for the problem - one for each starting point 
+    # Get function definitions for the problem - one for each starting point
     function_defs = get_function_definitions(prob)
 
     # Loop over the different starting points
@@ -350,7 +350,7 @@ def get_nist_problem_files(search_dir):
     Group the NIST problem files into separeate blocks according
     to assumed fitting different levels: lower, average,
     higher.
-    
+
     @returns :: list of list of problem files
     """
     # Grouped by "level of difficulty"

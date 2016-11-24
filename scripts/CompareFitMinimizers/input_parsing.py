@@ -81,7 +81,7 @@ def parse_equation(eq_text):
         equation = "exp(" + match.group(1).strip() + ")"
     else:
         raise RuntimeError("Unrecognized equation syntax when trying to parse a NIST "
-                           "equation: " + equation_text)
+                           "equation: " + eq_text)
 
     # 'NIST equation syntax' => muparser syntax
     # brackets for muparser
@@ -175,7 +175,7 @@ def parse_nist_file_line_by_line(lines):
             # idx += 3
 
             # Before 'y = ...' there can be lines like 'pi = 3.14159...'
-            while (not re.match(r'\s*y\s*=(.+)', lines[idx])\
+            while (not re.match(r'\s*y\s*=(.+)', lines[idx])
                    and not re.match(r'\s*log\[y\]\s*=(.+)', lines[idx]))\
                    and idx < len(lines):  # [\s*\+\s*e]
                 idx += 1
