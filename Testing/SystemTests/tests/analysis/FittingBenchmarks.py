@@ -51,7 +51,7 @@ class FittingBenchmarkTests(unittest.TestCase):
         
         # run fit minimizer benchmarking tests
         fitbk.run_all_with_or_without_errors(base_problem_files_dir, use_errors, self.minimizers,
-                                             self.group_names, self.group_suffix_names, self.color_scale, 
+                                             self.group_names, self.group_suffix_names, self.color_scale,
                                              self.save_to_file)
 
     def test_all_nist_problem(self):
@@ -66,14 +66,14 @@ class FittingBenchmarkTests(unittest.TestCase):
         group_suffix_names = ['nist_lower', 'nist_average', 'nist_higher']
         
         use_errors = False
-        
+
         nist_group_dir = os.path.join(self.base_problem_files_dir, 'NIST_nonlinear_regression')
-        
+
         # test that fit executes on all NIST problems against a number of different minimizers
-        problems, results_per_group = fitbk.do_fitting_benchmark(nist_group_dir=nist_group_dir, 
+        problems, results_per_group = fitbk.do_fitting_benchmark(nist_group_dir=nist_group_dir,
                                                                  minimizers=minimizers, use_errors=use_errors)
                                              
-        # test that can print individual group tables                                     
+        # test that can print individual group tables
         for idx, group_results in enumerate(results_per_group):
             print("\n\n")
             print("********************************************************")
@@ -84,8 +84,8 @@ class FittingBenchmarkTests(unittest.TestCase):
                                               group_name=group_suffix_names[idx], use_errors=use_errors,
                                               simple_text=True, rst=True, save_to_file=False,
                                               color_scale=self.color_scale)
-                                          
-        # test that can print summary tables                                    
+
+        # test that can print summary tables
         header = '\n\n**************** OVERALL SUMMARY - ALL GROUPS ******** \n\n'
         print(header)
         fitout.print_overall_results_table(minimizers, results_per_group, problems, group_names,
@@ -101,14 +101,14 @@ class FittingBenchmarkTests(unittest.TestCase):
         group_suffix_names = ['cutest']
         
         use_errors = True
-        
+
         cutest_group_dir = os.path.join(self.base_problem_files_dir, 'CUTEst')
-        
+
         # test that fit executes on all NIST problems against a number of different minimizers
         problems, results_per_group = fitbk.do_fitting_benchmark(cutest_group_dir=cutest_group_dir,
                                                                  minimizers=minimizers, use_errors=use_errors)
-                                             
-        # test that can print individual group table                                    
+
+        # test that can print individual group table
         for idx, group_results in enumerate(results_per_group):
             fitout.print_group_results_tables(minimizers, group_results, problems[idx],
                                               group_name=group_suffix_names[idx], use_errors=use_errors,
@@ -122,16 +122,16 @@ class FittingBenchmarkTests(unittest.TestCase):
         """
         minimizers = ['Trust Region']
         group_suffix_names = ['neutron_data']
-        
+
         use_errors = True
         
         neutron_data_group_dirs = [os.path.join(self.base_problem_files_dir, 'Neutron_data')]
-        
+
         # test that fit executes on all Neutron data problems
-        problems, results_per_group = fitbk.do_fitting_benchmark(neutron_data_group_dirs=neutron_data_group_dirs, 
+        problems, results_per_group = fitbk.do_fitting_benchmark(neutron_data_group_dirs=neutron_data_group_dirs,
                                                                  minimizers=minimizers, use_errors=use_errors)
-                                             
-        # test that can print individual group table                                    
+
+        # test that can print individual group table
         for idx, group_results in enumerate(results_per_group):
             fitout.print_group_results_tables(minimizers, group_results, problems[idx],
                                               group_name=group_suffix_names[idx], use_errors=use_errors,
