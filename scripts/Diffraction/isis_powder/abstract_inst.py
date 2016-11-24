@@ -120,15 +120,6 @@ class AbstractInst(object):
     # Instrument specific properties to be implemented by base classes #
 
     @abstractmethod
-    def _get_lambda_range(self):
-        """
-        Returns the lower and upper lambda range for this instrument
-        @param self: The instrument to query the values of lambda for
-        @return: The lower and uppers lambda range (in that order)
-        """
-        pass
-
-    @abstractmethod
     def _get_create_van_tof_binning(self):
         """
         Holds the TOF rebin params for create vanadium calibration

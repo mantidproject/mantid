@@ -41,6 +41,16 @@ def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument,
     remove_intermediate_workspace(input_ws)
 
 
+def extract_bank_spectra(ws_to_split, num_banks):
+    spectra_bank_list = []
+    for i in range(0, num_banks):
+        output_name = "bank-" + str(i + 1)
+        # Have to use crop workspace as extract single spectrum struggles with the variable bin widths
+        spectra_bank_list.append(mantid.CropWorkspace(InputWorkspace=ws_to_split, OutputWorkspace=output_name,
+                                                      StartWorkspaceIndex=i, EndWorkspaceIndex=i))
+    return spectra_bank_list
+
+
 def load_monitor(run_numbers, instrument):
     number_list = generate_run_numbers(run_numbers)
     monitor_spectra = instrument._get_monitor_spectra(number_list[0])
