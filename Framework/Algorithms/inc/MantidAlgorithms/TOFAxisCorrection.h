@@ -16,7 +16,7 @@ class SpectrumInfo;
 namespace Algorithms {
 
 /** TOFAxisCorrection : Corrects the time-of-flight axis with regards to
-  the incident energy and the L1+L2 distance.
+  the incident energy and the L1+L2 distance or a reference workspace.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source

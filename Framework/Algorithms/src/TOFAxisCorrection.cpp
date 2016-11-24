@@ -24,6 +24,8 @@ using Mantid::API::WorkspaceProperty;
 DECLARE_ALGORITHM(TOFAxisCorrection)
 
 namespace {
+/** A private namespace holding some column names for FindEPP algorithm's output table.
+ */
 namespace EPPTableLiterals {
 /// Title of the fit status column in EPP tables
 const static std::string FIT_STATUS_COLUMN("FitStatus");
@@ -33,9 +35,9 @@ const static std::string PEAK_CENTRE_COLUMN("PeakCentre");
 const static std::string FIT_STATUS_SUCCESS("success");
 } // namespace EPPTableLiterals
 
-  /** A private namespace listing the different ways to index
-   *  spectra in Mantid.
-   */
+/** A private namespace listing the different ways to index
+ *  spectra in Mantid.
+ */
 namespace IndexTypes {
 /// Tag for detector ids
 const static std::string DETECTOR_ID("DetectorID");
@@ -45,6 +47,8 @@ const static std::string SPECTRUM_NUMBER("SpectrumNumber");
 const static std::string WORKSPACE_INDEX("WorkspaceIndex");
 } // namespace IndexTypes
 
+/** A private namespace listing the properties of TOFAxisCorrection.
+ */
 namespace PropertyNames {
 const static std::string EPP_TABLE("EPPTable");
 const static std::string INCIDENT_ENERGY("IncidentEnergy");
@@ -55,20 +59,17 @@ const static std::string REFERENCE_SPECTRA("ReferenceSpectra");
 const static std::string REFERENCE_WORKSPACE("ReferenceWorkspace");
 } // namespace PropertyNames
 
+/** A private namespace listing some sample log entries.
+ */
 namespace SampleLog {
 const static std::string INCIDENT_ENERGY("Ei");
 const static std::string WAVELENGTH("wavelength");
 } //namespace SampleLog
 
-/** Transforms detector and monitor indices according to given maps.
- *  @param detectors A vector of detector indices to be transformed
- *  @param monitor A monitor index to be transformed
- *  @param detectorIndexMap A map from detector to workspace indices
- *  @param monitorIndexMap A map from monitor to workspace indices
- *  @param detectorIndices Output parameter for the detector
- *         workspace indices
- *  @param monitorIndex Output parameter for the monitor
- *         workspace indices
+/** Transforms indices according to given maps.
+ *  @param spectra A vector of indices to be transformed
+ *  @param indexMap A map to use in the transformation
+ *  @param workspaceIndices An output parameter for the transformed indices
  */
 template <typename Map>
 void mapIndices(const std::vector<int> &spectra, const Map &indexMap, std::vector<size_t> &workspaceIndices) {
@@ -99,7 +100,7 @@ const std::string TOFAxisCorrection::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string TOFAxisCorrection::summary() const {
-  return "Corrects the time-of-flight axis with regards to the incident energy and the L1+L2 distance.";
+  return "Corrects the time-of-flight axis with regards to the incident energy and the L1+L2 distance or a reference workspace.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -142,6 +143,9 @@ void TOFAxisCorrection::init() {
                   "Incident energy if EI sample log is not present/incorrect.", Direction::Input);
 }
 
+/** Validate the algorithm's input properties.
+ *  Also does some setup for the exec() method.
+ */
 std::map<std::string, std::string> TOFAxisCorrection::validateInputs() {
   std::map<std::string, std::string> issues;
   m_inputWs = getProperty(PropertyNames::INPUT_WORKSPACE);
@@ -228,6 +232,10 @@ void TOFAxisCorrection::exec() {
   setProperty(PropertyNames::OUTPUT_WORKSPACE, outputWs);
 }
 
+/** Correct with regards to a reference workspace.
+ *  Copies the X axis as well as the 'Ei' and 'wavelength' sample logs to the corrected workspace.
+ *  @param outputWs The corrected workspace
+ */
 void TOFAxisCorrection::useReferenceWorkspace(API::MatrixWorkspace_sptr outputWs) {
   const int64_t histogramCount = static_cast<int64_t>(m_referenceWs->getNumberHistograms());
   PARALLEL_FOR_IF(threadSafe(*m_referenceWs, *outputWs))
@@ -241,6 +249,13 @@ void TOFAxisCorrection::useReferenceWorkspace(API::MatrixWorkspace_sptr outputWs
   outputWs->mutableRun().getProperty(SampleLog::WAVELENGTH)->setValueFromProperty(*m_referenceWs->run().getProperty(SampleLog::WAVELENGTH));
 }
 
+/** Do manual TOF axis correction.
+ *  Resolves the L1 and average L2 distances and calculates the time-of-flight
+ *  corresponding to the given incident energy. The X axis of the input workspace
+ *  is shifted correspondingly. If the incident energy is given specifically, also
+ *  adjusts the 'Ei' and 'wavelength' sample logs.
+ *  @param outputWs The corrected workspace
+ */
 void TOFAxisCorrection::correctManually(API::MatrixWorkspace_sptr outputWs) {
   const auto &spectrumInfo = m_inputWs->spectrumInfo();
   const double l1 = spectrumInfo.l1();
@@ -277,13 +292,11 @@ void TOFAxisCorrection::correctManually(API::MatrixWorkspace_sptr outputWs) {
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-/** Calculates the average distance between the sample and given
+/** Calculates the average L2 distance between the sample and given
  *  detectors.
- *  @param detectorIndices A vector containing workspace indices
- *         to the detectors
- *  @param sampleToDetectorDistance An output parameter for the
- *         average distance between the sample and the detectors
- *  @param detectorEPP An output parameter for the average position
+ *  @param spectrumInfo A spectrum info for the input workspace
+ *  @param l2 An output parameter for the average L2 distance
+ *  @param epp An output parameter for the average position
  *         of the detectors' elastic peak
  */
 void TOFAxisCorrection::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo,
@@ -337,11 +350,8 @@ void TOFAxisCorrection::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo,
   g_log.information() << "Average detector EPP: " << epp << ".\n";
 }
 
-/** Parser detector and monitor indices from user's input and
- *  transfrorms them to workspace indices.
- *  @param detectorIndices Output parameter for the detector workspace
- *         indices
- *  @param monitorIndex Output parameter for the monitor workspace index
+/** Transform spectrum numbers or detector IDs to workspace indices.
+ *  @return The transformed workspace indices.
  */
 std::vector<size_t> TOFAxisCorrection::referenceWorkspaceIndices() const {
   const std::vector<int> spectra = getProperty(PropertyNames::REFERENCE_SPECTRA);
