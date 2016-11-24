@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYPROCESS_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYPROCESS_H_
 
+#include <vector>
 #include <QProcess>
 #include <QString>
 #include <QStringList>
@@ -39,8 +40,8 @@ public:
   void setup(const std::string runnable, const std::vector<std::string> &args,
              const std::string &allOpts) {
     m_allArgs = allOpts;
-    m_runnable = std::move(QString::fromStdString(runnable));
-    m_args = std::move(constructArgumentsFromVector(args));
+    m_runnable = QString::fromStdString(runnable);
+    m_args = constructArgumentsFromVector(args);
   }
 
   std::string getRunnable() const { return m_runnable.toStdString(); }
@@ -70,7 +71,7 @@ private:
     QStringList list;
     list.reserve(static_cast<int>(args.size()));
 
-    for (auto &arg : args) {
+    for (const auto &arg : args) {
       list << QString::fromStdString(arg);
     }
 

@@ -62,14 +62,12 @@ public slots:
 
   void readWorkerStdOut() const {
     auto *worker = qobject_cast<TomographyProcess *>(sender());
-    QString output(worker->readAllStandardOutput());
-    emit stdOutReady(output);
+    emit stdOutReady(worker->readAllStandardOutput());
   }
 
   void readWorkerStdErr() const {
     auto *worker = qobject_cast<TomographyProcess *>(sender());
-    QString output(worker->readAllStandardError());
-    emit stdErrReady(output);
+    emit stdErrReady(worker->readAllStandardError());
   }
 
 signals:

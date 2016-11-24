@@ -1155,8 +1155,8 @@ void TomographyIfaceViewQtGUI::browseImageClicked() {
  */
 void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
     const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-        localStatus) {
+    const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+        &localStatus) {
 
   QTableWidget *t = m_uiTabRun.tableWidget_run_jobs;
   bool sort = t->isSortingEnabled();
@@ -1917,10 +1917,10 @@ void TomographyIfaceViewQtGUI::systemSettingsNumericEdited() {
 }
 
 void TomographyIfaceViewQtGUI::resetSystemSettings() {
-  auto title = "Reset Confirmation";
-  auto body = "Are you sure you want to <br><strong>RESET "
-              "ALL</strong> System settings?<br>This "
-              "action cannot be undone!";
+  const auto title = "Reset Confirmation";
+  const auto body = "Are you sure you want to <br><strong>RESET "
+                    "ALL</strong> System settings?<br>This "
+                    "action cannot be undone!";
   // default constructors with factory defaults
   if (userConfirmation(title, body)) {
     // From factory defaults

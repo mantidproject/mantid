@@ -583,7 +583,7 @@ void TomographyIfacePresenter::setupAndRunLocalReconstruction(
     const std::string &allOpts) {
 
   if (m_reconRunning) {
-    auto result = m_view->userConfirmation(
+    const auto result = m_view->userConfirmation(
         "Reconstruction is RUNNING",
         "Are you sure you want to<br>cancel the running reconstruction?");
 
@@ -618,10 +618,10 @@ void TomographyIfacePresenter::setupAndRunLocalReconstruction(
   m_reconRunning = true;
 }
 
+/** Simply reset the switch that tracks if a recon is running
+*/
 void TomographyIfacePresenter::workerFinished() { m_reconRunning = false; }
 
-/** Simply reset the boolean that tracks if a recon is running
-*/
 void TomographyIfacePresenter::reconProcessFailedToStart() {
   m_view->userError("Reconstruction failed to start",
                     "The reconstruction process has encountered an error and "

@@ -241,7 +241,8 @@ bool TomographyIfaceModel::doPing(const std::string &compRes) {
     tid = alg->getPropertyValue("TransactionID");
     g_log.information() << "Pinged '" << compRes
                         << "'succesfully. Checked that a transaction could "
-                           "be created, with ID: " << tid << '\n';
+                           "be created, with ID: "
+                        << tid << '\n';
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Error. Failed to ping and start a transaction on "
                              "the remote resource." +
@@ -632,7 +633,7 @@ void TomographyIfaceModel::checkDataPathsSet() const {
  *
  * @return running status
  */
-bool TomographyIfaceModel::processIsRunning(qint64 pid) {
+bool TomographyIfaceModel::processIsRunning(qint64 pid) const {
 #ifdef _WIN32
   HANDLE handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, static_cast<int>(pid));
   DWORD code;
@@ -655,6 +656,7 @@ bool TomographyIfaceModel::processIsRunning(qint64 pid) {
  *
  * @param tool Name of the tool this warning applies to
  * @param cmd command/script/executable derived from the settings
+ * @param args All the arguments for the run
  */
 bool TomographyIfaceModel::checkIfToolIsSetupProperly(
     const std::string &tool, const std::string &cmd,

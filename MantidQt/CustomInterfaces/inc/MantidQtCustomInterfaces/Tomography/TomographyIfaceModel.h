@@ -253,7 +253,7 @@ protected: // protected to expose everything to testing
   std::string buildOutReconstructionDir(const std::string &samplesDir,
                                         bool) const;
 
-  bool processIsRunning(qint64 pid);
+  bool processIsRunning(qint64 pid) const;
 
   std::string
   buildOutReconstructionDirFromSystemRoot(const std::string &samplesDir,
