@@ -47,7 +47,7 @@ def run_all_with_or_without_errors(base_problem_files_dir, use_errors, minimizer
     ALL means: NIST + CUTEST + any fitting problems against observed Neutron data (+ any other
     which may be added in the future)
 
-    At this point in time it is assumed that the problem files are in store relative to 
+    At this point in time it is assumed that the problem files are in store relative to
     a base_problem_files_dir as follows:
 
         CUTEst/

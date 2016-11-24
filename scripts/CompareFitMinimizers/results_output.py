@@ -97,11 +97,11 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
         header += "\n\n"
         print(header)
         print (tbl_runtime_indiv)
-        
+
         if save_to_file:
             fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
-                 format(weighted=weighted_suffix_string(use_errors),
-                        version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_RUNTIME, group_name=group_name))
+                     format(weighted=weighted_suffix_string(use_errors),
+                            version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_RUNTIME, group_name=group_name))
             with open(fname, 'w') as tbl_file:
                 print(tbl_runtime_indiv, file=tbl_file)
 
@@ -183,7 +183,7 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
                                           comparison_type='summary', comparison_dim='accuracy',
                                           using_errors=use_errors)
     print(tbl_all_summary_acc)
-    
+
     if save_to_file:
         fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
                  format(weighted=weighted_suffix_string(use_errors),
@@ -197,8 +197,8 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
                                               comparison_type='summary', comparison_dim='runtime',
                                               using_errors=use_errors)
     print(tbl_all_summary_runtime)
-    
-    if save_to_file:    
+
+    if save_to_file:
         fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
                  format(weighted=weighted_suffix_string(use_errors),
                         version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_RUNTIME, group_name='summary'))
