@@ -885,7 +885,8 @@ double IndexingUtils::Optimize_Direction(V3D &best_vec,
     @param UB                 This will be set to the UB matrix that best
                               indexes the supplied list of q_vectors.
     @param q_vectors          List of locations of peaks in "Q".
-    @param cell								Unit cell defining the
+    @param cell								Unit cell defining
+  the
   parameters
   a,b,c and
                               alpha, beta, gamma.
