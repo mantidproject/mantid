@@ -108,11 +108,18 @@ void StartLiveData::copyListenerProperties(
  * Removes previously copied ILiveListener properties.
  */
 void StartLiveData::removeListenerProperties() {
-  // Remove all properties tagged with the listener property group
-  for (auto prop : getProperties()) {
+  std::vector<std::string> propertiesToRemove;
+
+  // Find properties tagged with the listener property group
+  for (const auto &prop : getProperties()) {
     if (prop->getGroup() == listenerPropertyGroup) {
-      removeProperty(prop->name());
+      propertiesToRemove.push_back(prop->name());
     }
+  }
+
+  // Remove identified properties
+  for (const auto &prop : propertiesToRemove) {
+    removeProperty(prop);
   }
 }
 
