@@ -47,15 +47,15 @@ def generate_vanadium_absob_corrections(van_ws):
 def get_instrument_ranges(instrument_version):
     # TODO rename this to get number of banks/save range
     if instrument_version == "new" or instrument_version == "old":  # New and old have identical ranges
-        alg_range = 12
+        num_of_banks = 12
         save_range = 3
     elif instrument_version == "new2":
-        alg_range = 14
+        num_of_banks = 14
         save_range = 5
     else:
         raise ValueError("Instrument version unknown")
 
-    return alg_range, save_range
+    return num_of_banks, save_range
 
 
 def get_run_details(tt_mode, run_number_string, label, calibration_dir):

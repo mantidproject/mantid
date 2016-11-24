@@ -14,10 +14,10 @@ class MockInstrument(AbstractInst):
     def _get_focus_tof_binning(self):
         return None
 
-    def _get_create_van_tof_binning(self):
+    def get_create_van_tof_binning(self):
         return None
 
-    def _get_default_group_names(self):
+    def get_default_group_names(self):
         return None
 
     def get_run_details(self, run_number):
@@ -29,11 +29,11 @@ class MockInstrument(AbstractInst):
         return calibration_details
 
     @staticmethod
-    def _generate_inst_file_name(run_number):
+    def generate_inst_file_name(run_number):
         return "generate_inst_file_name" + str(run_number)
 
     @staticmethod
-    def _get_instrument_alg_save_ranges(instrument=''):
+    def get_num_of_banks(instrument=''):
         return None
 
     @staticmethod

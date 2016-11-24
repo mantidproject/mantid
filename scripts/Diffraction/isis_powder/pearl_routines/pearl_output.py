@@ -9,7 +9,7 @@ import isis_powder.routines.common as common
 
 def generate_and_save_focus_output(instrument, processed_spectra, run_details, perform_attenuation, focus_mode=None):
     output_file_paths = instrument._generate_out_file_paths(run_details=run_details)
-    unused, save_range = instrument._get_instrument_alg_save_ranges(run_details.instrument_version)
+    save_range = instrument.get_save_range(run_details.instrument_version)
 
     if focus_mode == "all":
         processed_nexus_files = _focus_mode_all(output_file_paths, processed_spectra)
@@ -111,10 +111,9 @@ def _focus_mode_groups(instrument_version, output_file_paths, save_range, calibr
                            Bank=index)
 
         workspace_names = ws.name()
-        dspacing_ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=workspace_names, Target="dSpacing")
-        common.remove_intermediate_workspace(ws)
-        output_list.append(dspacing_ws)
-        mantid.SaveNexus(Filename=output_file_paths["nxs_filename"], InputWorkspace=dspacing_ws, Append=append)
+        ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=workspace_names, Target="dSpacing")
+        output_list.append(ws)
+        mantid.SaveNexus(Filename=output_file_paths["nxs_filename"], InputWorkspace=ws, Append=append)
         append = True
         index += 1
 

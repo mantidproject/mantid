@@ -2,44 +2,18 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
 
+# A small workaround to ensure when reading workspaces in a loop
+# the previous workspace does not got overridden
+_read_ws_count = 0
+global g_ads_workaround
+g_ads_workaround = {"read_ws": _read_ws_count}
+
 # --- Public API --- #
 
 
 def create_calibration_by_names(calibration_runs, startup_objects, grouping_file_name, group_names):
     _create_blank_cal_file(calibration_runs=calibration_runs, group_names=group_names,
                            out_grouping_file_name=grouping_file_name, instrument=startup_objects)
-
-
-def set_debug(debug_on=False):
-    global g_debug
-    g_debug = debug_on
-
-
-def remove_intermediate_workspace(workspace_name):
-    _remove_ws(ws_to_remove=workspace_name)
-
-# --- Private Implementation --- #
-
-# Please note these functions can change in any way at any time.
-# For this reason please do not call them directly and instead use the Public API provided.
-
-# If this doesn't quite provide what you need please let a developer know so we can create
-# another API or update an existing one
-
-
-_read_ws_count = 0
-global g_ads_workaround
-g_ads_workaround = {"read_ws": _read_ws_count}
-
-
-def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument, group_names):
-    input_ws = load_current_normalised_ws(calibration_runs, instrument)
-    calibration_d_spacing_ws = mantid.ConvertUnits(InputWorkspace=input_ws, Target="dSpacing")
-    mantid.CreateCalFileByNames(InstrumentWorkspace=calibration_d_spacing_ws,
-                                GroupingFileName=out_grouping_file_name, GroupNames=group_names)
-    remove_intermediate_workspace(calibration_d_spacing_ws)
-    remove_intermediate_workspace(input_ws)
-
 
 def extract_bank_spectra(ws_to_split, num_banks):
     spectra_bank_list = []
@@ -51,12 +25,29 @@ def extract_bank_spectra(ws_to_split, num_banks):
     return spectra_bank_list
 
 
+def generate_run_numbers(run_number_string):
+
+    # Check its not a single run
+    if isinstance(run_number_string, int) or run_number_string.isdigit():
+        return [int(run_number_string)]  # Cast into a list and return
+
+    # If its a string we must parse it
+    run_number_string = run_number_string.strip()
+    run_boundaries = run_number_string.replace('_', '-')  # Accept either _ or - delimiters
+    run_range_lists = __run_number_generator(processed_string=run_boundaries)
+    out_range = []
+    for range_list in run_range_lists:
+        out_range.extend(range_list)
+
+    return out_range
+
+
 def load_monitor(run_numbers, instrument):
     number_list = generate_run_numbers(run_numbers)
     monitor_spectra = instrument._get_monitor_spectra(number_list[0])
 
     if len(number_list) == 1:
-        file_name = instrument._generate_inst_file_name(run_number=number_list[0])
+        file_name = instrument.generate_inst_file_name(run_number=number_list[0])
         load_monitor_ws = mantid.Load(Filename=file_name, LoadLogFiles="0",
                                       SpectrumMin=monitor_spectra, SpectrumMax=monitor_spectra)
     else:
@@ -64,6 +55,11 @@ def load_monitor(run_numbers, instrument):
         load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=load_monitor_ws, WorkspaceIndex=monitor_spectra)
 
     return load_monitor_ws
+
+
+def remove_intermediate_workspace(workspace_name):
+    mantid.DeleteWorkspace(workspace_name)
+    del workspace_name  # Mark it as deleted so that more information is preserved on throw
 
 
 def subtract_sample_empty(ws_to_correct, empty_sample_ws_string, instrument):
@@ -74,6 +70,15 @@ def subtract_sample_empty(ws_to_correct, empty_sample_ws_string, instrument):
         remove_intermediate_workspace(empty_sample)
         output = corrected_ws
     return output
+
+
+def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument, group_names):
+    input_ws = load_current_normalised_ws(calibration_runs, instrument)
+    calibration_d_spacing_ws = mantid.ConvertUnits(InputWorkspace=input_ws, Target="dSpacing")
+    mantid.CreateCalFileByNames(InstrumentWorkspace=calibration_d_spacing_ws,
+                                GroupingFileName=out_grouping_file_name, GroupNames=group_names)
+    remove_intermediate_workspace(calibration_d_spacing_ws)
+    remove_intermediate_workspace(input_ws)
 
 
 def _load_raw_files(run_number_string, instrument):
@@ -89,7 +94,7 @@ def _load_sum_file_range(run_numbers_list, instrument):
     _check_load_range(list_of_runs_to_load=run_numbers_list)
 
     for run_number in run_numbers_list:
-        file_name = instrument._generate_inst_file_name(run_number=run_number)
+        file_name = instrument.generate_inst_file_name(run_number=run_number)
         read_ws = mantid.Load(Filename=file_name, LoadLogFiles="0")
         read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=str(file_name)))
 
@@ -109,23 +114,6 @@ def _check_load_range(list_of_runs_to_load):
     if len(list_of_runs_to_load) > MAXIMUM_RANGE_LEN:
         raise ValueError("More than " + str(MAXIMUM_RANGE_LEN) + " runs were selected."
                          " Found " + str(len(list_of_runs_to_load)) + " Aborting.")
-
-
-def generate_run_numbers(run_number_string):
-
-    # Check its not a single run
-    if isinstance(run_number_string, int) or run_number_string.isdigit():
-        return [int(run_number_string)]  # Cast into a list and return
-
-    # If its a string we must parse it
-    run_number_string = run_number_string.strip()
-    run_boundaries = run_number_string.replace('_', '-')  # Accept either _ or - delimiters
-    run_range_lists = __run_number_generator(processed_string=run_boundaries)
-    out_range = []
-    for range_list in run_range_lists:
-        out_range.extend(range_list)
-
-    return out_range
 
 
 def __run_number_generator(processed_string):
@@ -156,20 +144,3 @@ def load_current_normalised_ws(run_number_string, instrument):
 
     remove_intermediate_workspace(read_in_ws)
     return read_ws
-
-
-def _remove_ws(ws_to_remove):
-    """
-    Removes any intermediate workspaces if debug is set to false
-        @param ws_to_remove: The workspace to remove from the ADS
-    """
-    try:
-        if not g_debug:
-            _remove_ws_wrapper(ws=ws_to_remove)
-    except NameError:  # If g_debug has not been set
-        _remove_ws_wrapper(ws=ws_to_remove)
-
-
-def _remove_ws_wrapper(ws):
-    mantid.DeleteWorkspace(ws)
-    del ws  # Mark it as deleted so that Python can throw before Mantid preserving more information

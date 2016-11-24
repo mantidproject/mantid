@@ -73,7 +73,7 @@ def get_run_details(chopper_on, sac_on, run_number, calibration_dir):
     else:
         chopper_config = yaml_dict["chopper_off"]
 
-    cycle = yaml_dict["label"]
+    label = yaml_dict["label"]
     empty_runs = chopper_config["empty_run_numbers"]
     vanadium_runs = chopper_config["vanadium_run_numbers"]
 
@@ -82,7 +82,7 @@ def get_run_details(chopper_on, sac_on, run_number, calibration_dir):
     splined_vanadium_name = _generate_splined_van_name(chopper_on=chopper_on, sac_applied=sac_on,
                                                        vanadium_run_string=vanadium_runs)
 
-    in_calib_dir = os.path.join(calibration_dir, cycle)
+    in_calib_dir = os.path.join(calibration_dir, label)
     calibration_full_path = os.path.join(in_calib_dir, yaml_dict["offset_file_name"])
     grouping_full_path = os.path.join(in_calib_dir, yaml_dict["offset_file_name"])
     solid_angle_file_path = os.path.join(in_calib_dir, solid_angle_file_name)
@@ -90,7 +90,7 @@ def get_run_details(chopper_on, sac_on, run_number, calibration_dir):
 
     run_details = RunDetails(calibration_path=calibration_full_path, grouping_path=grouping_full_path,
                              vanadium_runs=vanadium_runs, run_number=run_number)
-    run_details.label = cycle
+    run_details.label = label
     run_details.sample_empty = empty_runs
     run_details.splined_vanadium = splined_vanadium
     run_details.solid_angle_corr = solid_angle_file_path

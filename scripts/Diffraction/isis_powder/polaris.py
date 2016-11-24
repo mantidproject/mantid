@@ -40,10 +40,10 @@ class Polaris(AbstractInst):
 
     # Abstract implementation
 
-    def _get_create_van_tof_binning(self):
+    def get_create_van_tof_binning(self):
         return self._create_van_calib_tof_binning
 
-    def _get_default_group_names(self):
+    def get_default_group_names(self):
         return self._calibration_grouping_names
 
     def get_run_details(self, run_number):
@@ -60,17 +60,15 @@ class Polaris(AbstractInst):
         return run_details
 
     @staticmethod
-    def _generate_inst_file_name(run_number):
+    def generate_inst_file_name(run_number):
         if isinstance(run_number, list):
             updated_list = ["POL" + str(val) for val in run_number]
             return updated_list
         else:
             return "POL" + str(run_number)
 
-    @staticmethod
-    def _get_instrument_alg_save_ranges(instrument=''):
-        alg_range = 5
-        return alg_range, None
+    def get_num_of_banks(self, instrument_version=''):
+        return self._number_of_banks
 
     def _normalise_ws(self, ws_to_correct, run_details=None):
         normalised_ws = mantid.NormaliseByCurrent(InputWorkspace=ws_to_correct)

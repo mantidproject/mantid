@@ -56,13 +56,13 @@ class Pearl(AbstractInst):
         pearl_calibration_algs.do_silicon_calibration(self, calibration_runs, cal_file_name, grouping_file_name)
 
     # Params #
-    def _get_default_group_names(self):
+    def get_default_group_names(self):
         return self._default_group_names
 
     def _get_lambda_range(self):
         return self._lambda_lower, self._lambda_upper
 
-    def _get_create_van_tof_binning(self):
+    def get_create_van_tof_binning(self):
         return_dict = {"1": self._create_van_first_tof_binning,
                        "2": self._create_van_second_tof_binning}
         return return_dict
@@ -97,12 +97,17 @@ class Pearl(AbstractInst):
                              'instrument_version': instrument_version}
         return cycle_information
 
-    @staticmethod
-    def _get_instrument_alg_save_ranges(instrument=''):
-        return pearl_algs.get_instrument_ranges(instrument_version=instrument)
+    def get_num_of_banks(self, instrument_version=''):
+        num_of_banks, save_range = pearl_algs.get_instrument_ranges(instrument_version=instrument_version)
+        return num_of_banks
 
     @staticmethod
-    def _generate_inst_file_name(run_number):
+    def get_save_range(instrument_version):
+        num_of_banks, save_range = pearl_algs.get_instrument_ranges(instrument_version=instrument_version)
+        return save_range
+
+    @staticmethod
+    def generate_inst_file_name(run_number):
         return generate_file_name(run_number=run_number)
 
     # Hook overrides
@@ -149,7 +154,7 @@ class Pearl(AbstractInst):
                                                            perform_attenuation=attenuate)
 
     def _apply_van_calibration_tof_rebinning(self, vanadium_ws, tof_rebin_pass, return_units):
-        tof_rebin_param_dict = self._get_create_van_tof_binning()
+        tof_rebin_param_dict = self.get_create_van_tof_binning()
         tof_rebin_param = tof_rebin_param_dict[str(tof_rebin_pass)]
 
         out_ws = pearl_algs.apply_tof_rebinning(ws_to_rebin=vanadium_ws, tof_params=tof_rebin_param,
@@ -182,8 +187,6 @@ class Pearl(AbstractInst):
 
         if vanadium_ws:
             mantid.Scale(InputWorkspace=data_processed, Factor=10, OutputWorkspace=data_processed)
-
-        common.remove_intermediate_workspace(data_ws)
 
         return data_processed
 

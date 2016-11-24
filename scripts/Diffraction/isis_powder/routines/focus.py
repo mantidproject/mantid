@@ -6,12 +6,7 @@ import isis_powder.routines.common as common
 import os
 
 
-def focus(number, instrument, attenuate=True, van_norm=True):
-    return _run_focus(run_number=number, perform_attenuation=attenuate,
-                      perform_vanadium_norm=van_norm, instrument=instrument)
-
-
-def _run_focus(instrument, run_number, perform_attenuation, perform_vanadium_norm):
+def focus(run_number, instrument, perform_attenuation=True, perform_vanadium_norm=True):
     # Read
     read_ws = common.load_current_normalised_ws(run_number_string=run_number, instrument=instrument)
     input_workspace = instrument._do_tof_rebinning_focus(read_ws)  # Rebins for PEARL
@@ -64,19 +59,16 @@ def _run_focus(instrument, run_number, perform_attenuation, perform_vanadium_nor
 
 def _divide_sample_by_vanadium(instrument, run_number, input_workspace, perform_vanadium_norm):
     processed_spectra = []
-
     run_details = instrument.get_run_details(run_number=run_number)
+    num_of_banks = instrument.get_num_of_banks(run_details.instrument_version)
 
-    alg_range, save_range = instrument._get_instrument_alg_save_ranges(run_details.instrument_version)
-
-    for index in range(0, alg_range):
+    for index in range(0, num_of_banks):
         if perform_vanadium_norm:
             vanadium_ws = mantid.LoadNexus(Filename=run_details.splined_vanadium, EntryNumber=index + 1)
 
             processed_spectra.append(
                 instrument.correct_sample_vanadium(focused_ws=input_workspace, index=index, vanadium_ws=vanadium_ws))
 
-            common.remove_intermediate_workspace(vanadium_ws)
         else:
             processed_spectra.append(
                 instrument.correct_sample_vanadium(focused_ws=input_workspace, index=index))

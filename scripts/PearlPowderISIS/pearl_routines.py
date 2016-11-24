@@ -179,7 +179,7 @@ def PEARL_datadir():
 def PEARL_getfilename(run_number, ext):
     pearl_obj = _pearl_obj_singleton()
     pearl_obj._old_api_set_ext(ext)
-    return pearl_obj._generate_inst_file_name(run_number)
+    return pearl_obj.generate_inst_file_name(run_number)
 
 
 def PearlLoad(files, ext, outname):
@@ -209,7 +209,6 @@ def PEARL_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van
     pearl_obj = _pearl_obj_singleton()
     pearl_obj._old_api_set_tt_mode(ttmode)
     pearl_obj._old_api_set_ext(ext)
-    pearl_obj.set_debug_mode(debug)
     return pearl_obj.focus(run_number=number, focus_mode=fmode, do_attenuation=atten,
                            do_van_normalisation=van_norm)
 
@@ -221,7 +220,6 @@ def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True,
     pearl_obj = _pearl_obj_singleton()
     pearl_obj._old_api_set_tt_mode(ttmode)
     pearl_obj._old_api_set_ext(ext)
-    pearl_obj.set_debug_mode(debug)
     return pearl_obj.focus(run_number=number, focus_mode=fmode, do_attenuation=atten,
                            do_van_normalisation=van_norm)
 
@@ -237,7 +235,6 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     pearl_obj = _pearl_obj_singleton()
     pearl_obj._old_api_set_tt_mode(ttmode)
     pearl_obj._old_api_set_ext(ext)
-    pearl_obj.set_debug_mode(debug)
     pearl_obj._old_api_uses_full_paths = True
     return_val = pearl_obj.create_calibration_vanadium(vanadium_runs=van, empty_runs=empty,
                                                        output_file_name=nvanfile, num_of_splines=nspline,

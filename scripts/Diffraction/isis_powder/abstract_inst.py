@@ -54,13 +54,13 @@ class AbstractInst(object):
 
     # Script entry points
     def _focus(self, run_number, do_attenuation, do_van_normalisation):
-        return focus.focus(instrument=self, number=run_number,
-                           attenuate=do_attenuation, van_norm=do_van_normalisation)
+        return focus.focus(run_number=run_number, perform_attenuation=do_attenuation,
+                           perform_vanadium_norm=do_van_normalisation, instrument=self)
 
     def create_empty_calibration_by_names(self, calibration_numbers, output_file_name, group_names=None):
 
         if group_names is None:
-            group_names = self._get_default_group_names()
+            group_names = self.get_default_group_names()
 
         common.create_calibration_by_names(calibration_runs=calibration_numbers, grouping_file_name=output_file_name,
                                            group_names=group_names, startup_objects=self)
@@ -71,11 +71,6 @@ class AbstractInst(object):
                                     output_van_file_name=output_file_name, num_of_splines=num_of_splines,
                                     absorb=do_absorb_corrections, gen_absorb=gen_absorb_correction)
 
-    @staticmethod
-    def set_debug_mode(val):
-        assert isinstance(val, bool)
-        common.set_debug(val)
-
     # ---- Private API ---- #
     # These are to be called from either concrete instruments or common not by users
     # Common steps to all instruments
@@ -83,7 +78,7 @@ class AbstractInst(object):
     def _generate_out_file_paths(self, run_details, output_directory=None):
         if not output_directory:
             output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
-        file_name = self._generate_inst_file_name(run_number=run_details.run_number)
+        file_name = self.generate_inst_file_name(run_number=run_details.run_number)
         nxs_file = os.path.join(output_directory, (str(file_name) + ".nxs"))
         gss_file = os.path.join(output_directory, (str(file_name) + ".gss"))
         tof_xye_file = os.path.join(output_directory, (str(file_name) + "_tof_xye.dat"))
@@ -101,14 +96,14 @@ class AbstractInst(object):
 
     def _generate_input_full_path(self, run_number, input_dir):
         # Uses runtime polymorphism to generate the full run name
-        file_name = self._generate_inst_file_name(run_number)
+        file_name = self.generate_inst_file_name(run_number)
         extension = self.default_input_ext
         return os.path.join(input_dir, (file_name + extension))
 
     # Instrument specific properties to be implemented by base classes #
 
     @abstractmethod
-    def _get_create_van_tof_binning(self):
+    def get_create_van_tof_binning(self):
         """
         Holds the TOF rebin params for create vanadium calibration
         @return: The TOF rebin params as a dictionary of strings numbered 1,2,3...n
@@ -118,7 +113,7 @@ class AbstractInst(object):
     # Instrument default parameters
 
     @abstractmethod
-    def _get_default_group_names(self):
+    def get_default_group_names(self):
         """
         Returns the default names for creating a blank calibration by names
         @return: The default grouping names as a string
@@ -132,7 +127,7 @@ class AbstractInst(object):
 
     @staticmethod
     @abstractmethod
-    def _generate_inst_file_name(run_number):
+    def generate_inst_file_name(run_number):
         """
         Generates the conforming file names for an instrument
         @param run_number: The run number to turn into a filename
@@ -141,17 +136,15 @@ class AbstractInst(object):
 
     @staticmethod
     @abstractmethod
-    def _get_instrument_alg_save_ranges(instrument=''):
-        #  TODO we need to move save range out into a separate hook and make alg
-        #  range represent the number of banks
-        """
-        Gets the instruments ranges for running the algorithm and saving
-        @param instrument: The version of the instrument if applicable
-        @return: The algorithm and save range in that order
-        """
+    def get_num_of_banks(self, instrument_version=''):
+        pass
 
     # --- Instrument optional hooks ----#
     # TODO cull some of these hooks once we unify the scripts
+
+    @staticmethod
+    def get_save_range(instrument_version):
+        return None
 
     def _attenuate_workspace(self, input_workspace):
         return _empty_hook_return_input(input_workspace)
