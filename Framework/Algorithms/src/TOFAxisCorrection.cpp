@@ -144,7 +144,8 @@ void TOFAxisCorrection::init() {
 std::map<std::string, std::string> TOFAxisCorrection::validateInputs() {
   std::map<std::string, std::string> issues;
   m_inputWs = getProperty(PropertyNames::INPUT_WORKSPACE);
-  if (!getPointerToProperty(PropertyNames::REFERENCE_WORKSPACE)->isDefault()) {
+  m_referenceWs = getProperty(PropertyNames::REFERENCE_WORKSPACE);
+  if (m_referenceWs) {
     m_referenceWs = getProperty(PropertyNames::REFERENCE_WORKSPACE);
     if (m_inputWs->getNumberHistograms() != m_referenceWs->getNumberHistograms()) {
       issues[PropertyNames::REFERENCE_WORKSPACE] = "Number of histograms don't match with" + PropertyNames::INPUT_WORKSPACE + ".";
@@ -218,7 +219,7 @@ void TOFAxisCorrection::exec() {
   if (outputWs != m_inputWs) {
     outputWs = m_inputWs->clone();
   }
-  if (!getPointerToProperty(PropertyNames::REFERENCE_WORKSPACE)->isDefault()) {
+  if (m_referenceWs) {
     useReferenceWorkspace(outputWs);
   } else {
     correctManually(outputWs);

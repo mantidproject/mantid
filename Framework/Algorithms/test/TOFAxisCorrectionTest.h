@@ -32,7 +32,53 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
 
-  void test_CorrectionWithReferenceWorkspace() {
+  void test_CorrectionUsingReferenceWorkspace() {
+    const size_t blocksize = 16;
+    const double x0 = 23.66;
+    const double dx = 0.05;
+    auto inputData = [](const double x) {
+      return 1.97 * x;
+    };
+    auto inputWs = createEmptyIN4Workspace("ws");
+    fillWorkspace(inputWs, blocksize, x0, dx, inputData);
+    const double inputEi = 11.05;
+    const double inputWavelength = 6.26;
+    inputWs->mutableRun().addProperty("EI", inputEi, true);
+    inputWs->mutableRun().addProperty("wavelength", inputWavelength, true);
+    const double TOFshift = -1.69;
+    MatrixWorkspace_sptr referenceWs = inputWs->clone();
+    auto referenceData = [](const double x) {
+      return 999.98 * x + 2.3;
+    };
+    fillWorkspace(referenceWs, blocksize, x0+TOFshift, dx, referenceData);
+    const double referenceEi = 1.1 * inputEi;
+    const double referenceWavelength = 0.77 * inputWavelength;
+    referenceWs->mutableRun().addProperty("EI", referenceEi, true);
+    referenceWs->mutableRun().addProperty("wavelength", referenceWavelength, true);
+    TOFAxisCorrection alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inputWs) )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "_unused_for_child") )
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("ReferenceWorkspace", referenceWs) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+
+    MatrixWorkspace_sptr outputWs = alg.getProperty("OutputWorkspace");
+    TS_ASSERT( outputWs );
+    TS_ASSERT_EQUALS( outputWs->run().getPropertyAsSingleValue("EI"), referenceEi )
+    TS_ASSERT_EQUALS( outputWs->run().getPropertyAsSingleValue("wavelength"), referenceWavelength )
+    for (size_t i = 0; i < inputWs->getNumberHistograms(); ++i) {
+      for (size_t j = 0; j < blocksize; ++j) {
+        TS_ASSERT_DELTA( outputWs->x(i)[j], referenceWs->x(i)[j], 1e-6 )
+        TS_ASSERT_EQUALS( outputWs->y(i)[j], inputWs->y(i)[j] )
+        TS_ASSERT_EQUALS( outputWs->e(i)[j], inputWs->e(i)[j] )
+      }
+      TS_ASSERT_DELTA( outputWs->x(i).back(), referenceWs->x(i).back(), 1e-6 )
+    }
   }
 
   void test_CorrectionWithoutReferenceWorkspace()
