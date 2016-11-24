@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import warnings
 
 # directories generator
-from isis_powder.pearl import Pearl
+from isis_powder.pearl_routines.PearlRoutinesWrapper import PearlRoutinesWrapper
 
 # --------------------------------------------------------------------------------
 # This script has been refactored into the isis_powder module and is provided for
@@ -22,8 +22,8 @@ g_pearl_obj = None
 def _pearl_obj_singleton():
     global g_pearl_obj
     if g_pearl_obj is None:
-        g_pearl_obj = Pearl(user_name="NotSet", calibration_dir="NotSet", output_dir="NotSet",
-                            input_file_ext=".raw", tt_mode="NotSet")
+        g_pearl_obj = PearlRoutinesWrapper(user_name="NotSet", tt_mode="NotSet",
+                                           calibration_dir="NotSet", output_dir="NotSet")
     return g_pearl_obj
 
 
@@ -87,7 +87,7 @@ def PEARL_getlambdarange():
 
 
 def PEARL_gettofrange():
-    return _pearl_obj_singleton()._get_focus_tof_binning()
+    return _pearl_obj_singleton()._old_api_get_focus_tof_binning()
 
 
 def PEARL_getmonitorspectrum(runno):

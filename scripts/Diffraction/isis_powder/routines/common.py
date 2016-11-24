@@ -78,7 +78,7 @@ def subtract_sample_empty(ws_to_correct, empty_sample_ws_string, instrument):
 
 def _load_raw_files(run_number_string, instrument):
     run_number_list = generate_run_numbers(run_number_string=run_number_string)
-    instrument.PEARL_setup_input_directories(run_number=run_number_list[0])
+    instrument._old_api_PEARL_setup_input_dirs(run_number=run_number_list[0])
     load_raw_ws = _load_sum_file_range(run_number_list, instrument)
     return load_raw_ws
 

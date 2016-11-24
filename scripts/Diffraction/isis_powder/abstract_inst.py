@@ -47,10 +47,6 @@ class AbstractInst(object):
         self._default_input_ext = _prefix_dot_to_ext(new_ext)
 
     @property
-    def focus_mode(self):
-        return self._focus_mode
-
-    @property
     def user_name(self):
         return self._user_name
 
@@ -193,7 +189,7 @@ class AbstractInst(object):
     def _get_monitor_spectra(self, run_number):
         return _empty_hook_return_empty_string()
 
-    def _PEARL_filename_is_full_path(self):
+    def _old_api_PEARL_filename_is_full_path(self):
         """
         Only used by PEARL to maintain compatibility with old routines code
         @return: Whether the "filename" is actually a full path
@@ -237,7 +233,7 @@ class AbstractInst(object):
     def calculate_focus_binning_params(self, sample):
         return None
 
-    def PEARL_setup_input_directories(self, run_number):
+    def _old_api_PEARL_setup_input_dirs(self, run_number):
         return None
 
 # ----- Private Implementation ----- #

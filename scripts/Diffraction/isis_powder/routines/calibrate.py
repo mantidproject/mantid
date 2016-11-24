@@ -43,7 +43,7 @@ def create_van(instrument, van, empty, output_van_file_name, num_of_splines, abs
     splined_ws_list = instrument._spline_background(focused_van_file, num_of_splines,
                                                     cycle_information.instrument_version)
     # Figure out who will provide the path name
-    if instrument._PEARL_filename_is_full_path():
+    if instrument._old_api_PEARL_filename_is_full_path():
         out_van_file_path = output_van_file_name
     elif output_van_file_name:
         # The user has manually specified the output file
