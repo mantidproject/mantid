@@ -79,6 +79,11 @@ The algorithm proceeds as follows. For each spectrum:
 
 #. finally, interpolate through the unsimulated wavelength points using the selected method
 
+Interpolation
+#############
+
+The default linear interpolation method will produce an absorption curve that is not smooth. CSpline interpolation will produce a smoother result by using a 3rd-order polynomial to approximate the original points. 
+
 Usage
 -----
 
