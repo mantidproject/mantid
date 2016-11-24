@@ -99,14 +99,14 @@ def PEARL_getmonitorspectrum(runno):
 
 def PEARL_getcycle(number):
     pearl_obj = _pearl_obj_singleton()
-    cycle_information = pearl_obj._get_label_information(number)
+    run_details = pearl_obj.get_run_details(number)
     datadir = pearl_obj.output_dir
-    updated_vals = {"cycle"   : cycle_information["cycle"],
-                    "instver" : cycle_information["instrument_version"],
+    updated_vals = {"cycle"   : run_details.label,
+                    "instver" : run_details.instrument_version,
                     "datadir" : datadir}
 
     _merge_dict_into_global(updated_vals)
-    print ("ISIS cycle is set to", cycle_information["cycle"])
+    print ("ISIS cycle is set to", run_details.label)
     return
 
 

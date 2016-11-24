@@ -16,7 +16,7 @@ def _run_focus(instrument, run_number, perform_attenuation, perform_vanadium_nor
     read_ws = common.load_current_normalised_ws(run_number_string=run_number, instrument=instrument)
     input_workspace = instrument._do_tof_rebinning_focus(read_ws)  # Rebins for PEARL
 
-    run_details = instrument._get_run_details(run_number=run_number)
+    run_details = instrument.get_run_details(run_number=run_number)
 
     # Check the necessary splined vanadium file has been created
     if not os.path.isfile(run_details.splined_vanadium):
@@ -65,7 +65,7 @@ def _run_focus(instrument, run_number, perform_attenuation, perform_vanadium_nor
 def _divide_sample_by_vanadium(instrument, run_number, input_workspace, perform_vanadium_norm):
     processed_spectra = []
 
-    run_details = instrument._get_run_details(run_number=run_number)
+    run_details = instrument.get_run_details(run_number=run_number)
 
     alg_range, save_range = instrument._get_instrument_alg_save_ranges(run_details.instrument_version)
 

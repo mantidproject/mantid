@@ -55,7 +55,6 @@ class Pearl(AbstractInst):
     def create_calibration_si(self, calibration_runs, cal_file_name, grouping_file_name):
         pearl_calibration_algs.do_silicon_calibration(self, calibration_runs, cal_file_name, grouping_file_name)
 
-
     # Params #
     def _get_default_group_names(self):
         return self._default_group_names
@@ -70,14 +69,16 @@ class Pearl(AbstractInst):
 
     # Methods #
 
-    def _get_run_details(self, run_number):
+    def get_run_details(self, run_number):
         # TODO once we migrate this to another format (i.e. not the if/elif/else) implement cached val
-        cycle_dict = self._get_label_information(run_number=run_number)
+        cycle_dict = self._get_cycle_factory_dict(run_number=run_number)
 
-        return pearl_algs.get_run_details(tt_mode=self._tt_mode, run_number_string=run_number,
-                                          label=cycle_dict["cycle"], calibration_dir=self._calibration_dir)
+        run_details = pearl_algs.get_run_details(tt_mode=self._tt_mode, run_number_string=run_number,
+                                                 label=cycle_dict["cycle"], calibration_dir=self._calibration_dir)
+        run_details.instrument_version = cycle_dict["instrument_version"]
+        return run_details
 
-    def _get_label_information(self, run_number):
+    def _get_cycle_factory_dict(self, run_number):
         # TODO remove this when we move to combining CAL/RUN factories
         run_input = ""
         if isinstance(run_number, int) or run_number.isdigit():

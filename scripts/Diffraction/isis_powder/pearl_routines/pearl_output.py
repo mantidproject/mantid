@@ -9,14 +9,13 @@ import isis_powder.routines.common as common
 
 def generate_and_save_focus_output(instrument, processed_spectra, run_details, perform_attenuation, focus_mode=None):
     output_file_paths = instrument._generate_out_file_paths(run_details=run_details)
-    cycle_information = instrument._get_label_information(run_details.run_number)
-    unused, save_range = instrument._get_instrument_alg_save_ranges(cycle_information["instrument_version"])
+    unused, save_range = instrument._get_instrument_alg_save_ranges(run_details.instrument_version)
 
     if focus_mode == "all":
         processed_nexus_files = _focus_mode_all(output_file_paths, processed_spectra)
 
     elif focus_mode == "groups":
-        processed_nexus_files = _focus_mode_groups(cycle_information, output_file_paths, save_range,
+        processed_nexus_files = _focus_mode_groups(run_details.instrument_version, output_file_paths, save_range,
                                                    processed_spectra)
 
     elif focus_mode == "trans":
@@ -92,7 +91,7 @@ def _focus_mode_trans(output_file_paths, atten, instrument, calibrated_spectra):
     return output_list
 
 
-def _focus_mode_groups(cycle_information, output_file_paths, save_range, calibrated_spectra):
+def _focus_mode_groups(instrument_version, output_file_paths, save_range, calibrated_spectra):
     output_list = []
     to_save = _sum_groups_of_three_ws(calibrated_spectra, output_file_paths)
 
@@ -104,10 +103,10 @@ def _focus_mode_groups(cycle_information, output_file_paths, save_range, calibra
     append = False
     index = 1
     for ws in to_save:
-        if cycle_information["instrument_version"] == "new":
+        if instrument_version == "new":
             mantid.SaveGSS(InputWorkspace=ws, Filename=output_file_paths["gss_filename"], Append=append,
                            Bank=index)
-        elif cycle_information["instrument_version"] == "new2":
+        elif instrument_version == "new2":
             mantid.SaveGSS(InputWorkspace=ws, Filename=output_file_paths["gss_filename"], Append=False,
                            Bank=index)
 

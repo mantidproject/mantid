@@ -64,7 +64,7 @@ class PearlRoutinesWrapper(Pearl):
         return self._old_api_uses_full_paths
 
     def _old_api_PEARL_setup_input_dirs(self, run_number):
-        run_details = self._get_run_details(run_number=run_number)
+        run_details = self.get_run_details(run_number=run_number)
         generated_path = self._generate_raw_data_cycle_dir(run_cycle=run_details.label)
         user_dirs = config['datasearch.directories']
         user_dirs_list = user_dirs.split(';')

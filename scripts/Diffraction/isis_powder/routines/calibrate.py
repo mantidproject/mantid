@@ -15,7 +15,7 @@ def create_van(instrument, van, empty, output_van_file_name, num_of_splines, abs
 
     common.remove_intermediate_workspace(input_van_ws)
 
-    run_details = instrument._get_run_details(run_number=van)
+    run_details = instrument.get_run_details(run_number=van)
 
     corrected_van_ws = instrument. _apply_van_calibration_tof_rebinning(vanadium_ws=corrected_van_ws,
                                                                         tof_rebin_pass=1, return_units="TOF")
@@ -39,7 +39,7 @@ def create_van(instrument, van, empty, output_van_file_name, num_of_splines, abs
 
     common.remove_intermediate_workspace(corrected_van_ws)
 
-    cycle_information = instrument._get_run_details(run_number=van)
+    cycle_information = instrument.get_run_details(run_number=van)
     splined_ws_list = instrument._spline_background(focused_van_file, num_of_splines,
                                                     cycle_information.instrument_version)
     # Figure out who will provide the path name

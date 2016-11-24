@@ -9,19 +9,19 @@ import isis_powder.routines.common as common
 
 def create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
     input_ws = common.load_current_normalised_ws(run_number_string=calibration_runs, instrument=self)
-    cycle_information = self._get_label_information(calibration_runs)
+    run_details = self.get_run_details(calibration_runs)
 
-    if cycle_information["instrument_version"] == "new" or cycle_information["instrument_version"] == "new2":
+    if run_details.instrument_version == "new" or run_details.instrument_version == "new2":
         input_ws = mantid.Rebin(InputWorkspace=input_ws, Params="100,-0.0006,19950")
 
     d_spacing_cal = mantid.ConvertUnits(InputWorkspace=input_ws, Target="dSpacing")
     d_spacing_cal = mantid.Rebin(InputWorkspace=d_spacing_cal, Params="1.8,0.002,2.1")
 
-    if cycle_information["instrument_version"] == "new2":
+    if run_details.instrument_version == "new2":
         cross_cor_ws = mantid.CrossCorrelate(InputWorkspace=d_spacing_cal, ReferenceSpectra=20,
                                              WorkspaceIndexMin=9, WorkspaceIndexMax=1063, XMin=1.8, XMax=2.1)
 
-    elif cycle_information["instrument_version"] == "new":
+    elif run_details.instrument_version == "new":
         cross_cor_ws = mantid.CrossCorrelate(InputWorkspace=d_spacing_cal, ReferenceSpectra=20,
                                              WorkspaceIndexMin=9, WorkspaceIndexMax=943, XMin=1.8, XMax=2.1)
     else:

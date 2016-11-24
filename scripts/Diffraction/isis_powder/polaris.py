@@ -32,7 +32,7 @@ class Polaris(AbstractInst):
                            do_van_normalisation=do_van_normalisation)
 
     def create_calibration_vanadium(self, run_in_range, do_absorb_corrections=True, gen_absorb_correction=False):
-        run_details = self._get_run_details(run_number=int(run_in_range))
+        run_details = self.get_run_details(run_number=int(run_in_range))
         return self._create_calibration_vanadium(vanadium_runs=run_details.vanadium,
                                                  empty_runs=run_details.sample_empty,
                                                  do_absorb_corrections=do_absorb_corrections,
@@ -46,7 +46,7 @@ class Polaris(AbstractInst):
     def _get_default_group_names(self):
         return self._calibration_grouping_names
 
-    def _get_run_details(self, run_number):
+    def get_run_details(self, run_number):
         if self._run_details_last_run_number == run_number:
             return self._run_details_cached_obj
 

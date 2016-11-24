@@ -65,7 +65,6 @@ class AbstractInst(object):
         common.create_calibration_by_names(calibration_runs=calibration_numbers, grouping_file_name=output_file_name,
                                            group_names=group_names, startup_objects=self)
 
-
     def _create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name=None, num_of_splines=None,
                                      do_absorb_corrections=True, gen_absorb_correction=False):
         return calibrate.create_van(instrument=self, van=vanadium_runs, empty=empty_runs,
@@ -128,7 +127,7 @@ class AbstractInst(object):
     # Instrument specific methods
 
     @abstractmethod
-    def _get_run_details(self, run_number):
+    def get_run_details(self, run_number):
         pass
 
     @staticmethod

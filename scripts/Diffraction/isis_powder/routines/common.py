@@ -146,7 +146,7 @@ def __run_number_generator(processed_string):
 def load_current_normalised_ws(run_number_string, instrument):
     read_in_ws = _load_raw_files(run_number_string=run_number_string, instrument=instrument)
 
-    run_information = instrument._get_run_details(run_number=run_number_string)
+    run_information = instrument.get_run_details(run_number=run_number_string)
 
     read_ws = instrument._normalise_ws(ws_to_correct=read_in_ws, run_details=run_information)
 
