@@ -158,150 +158,127 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
 /** Execute the algorithm.
  */
 void Stitch1DMany::exec() {
-  // Check we're not dealing with group workspaces
-  if (!boost::dynamic_pointer_cast<WorkspaceGroup>(m_inputWorkspaces[0])) {
-    MatrixWorkspace_sptr lhsWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(m_inputWorkspaces[0]);
+  MatrixWorkspace_sptr lhsWS =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(m_inputWorkspaces[0]);
 
-    for (size_t i = 1; i < m_numWorkspaces; ++i) {
-      MatrixWorkspace_sptr rhsWS =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(m_inputWorkspaces[i]);
+  for (size_t i = 1; i < m_numWorkspaces; ++i) {
+    MatrixWorkspace_sptr rhsWS =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(m_inputWorkspaces[i]);
 
-      IAlgorithm_sptr stitchAlg = createChildAlgorithm("Stitch1D");
-      stitchAlg->initialize();
+    IAlgorithm_sptr stitchAlg = createChildAlgorithm("Stitch1D");
+    stitchAlg->initialize();
 
-      stitchAlg->setProperty("LHSWorkspace", lhsWS);
-      stitchAlg->setProperty("RHSWorkspace", rhsWS);
-      if (m_startOverlaps.size() > i - 1) {
-        stitchAlg->setProperty("StartOverlap", m_startOverlaps[i - 1]);
-        stitchAlg->setProperty("EndOverlap", m_endOverlaps[i - 1]);
-      }
-      stitchAlg->setProperty("Params", m_params);
-      stitchAlg->setProperty("ScaleRHSWorkspace", m_scaleRHSWorkspace);
-      stitchAlg->setProperty("UseManualScaleFactor", m_useManualScaleFactor);
-      if (m_useManualScaleFactor)
-        stitchAlg->setProperty("ManualScaleFactor", m_manualScaleFactor);
-
-      stitchAlg->execute();
-
-      lhsWS = stitchAlg->getProperty("OutputWorkspace");
-      m_scaleFactors.push_back(stitchAlg->getProperty("OutScaleFactor"));
+    stitchAlg->setProperty("LHSWorkspace", lhsWS);
+    stitchAlg->setProperty("RHSWorkspace", rhsWS);
+    if (m_startOverlaps.size() > i - 1) {
+      stitchAlg->setProperty("StartOverlap", m_startOverlaps[i - 1]);
+      stitchAlg->setProperty("EndOverlap", m_endOverlaps[i - 1]);
     }
+    stitchAlg->setProperty("Params", m_params);
+    stitchAlg->setProperty("ScaleRHSWorkspace", m_scaleRHSWorkspace);
+    stitchAlg->setProperty("UseManualScaleFactor", m_useManualScaleFactor);
+    if (m_useManualScaleFactor)
+      stitchAlg->setProperty("ManualScaleFactor", m_manualScaleFactor);
 
-    if (!isChild()) {
-      // Copy each input workspace's history into our output workspace's history
-      for (auto &inputWorkspace : m_inputWorkspaces)
-        lhsWS->history().addHistory(inputWorkspace->getHistory());
-    }
-    // We're a child algorithm, but we're recording history anyway
-    else if (isRecordingHistoryForChild() && m_parentHistory) {
-      m_parentHistory->addChildHistory(m_history);
-    }
+    stitchAlg->execute();
 
-    m_outputWorkspace = lhsWS;
+    lhsWS = stitchAlg->getProperty("OutputWorkspace");
+    m_scaleFactors.push_back(stitchAlg->getProperty("OutScaleFactor"));
   }
-  // We're dealing with group workspaces
-  else {
-    std::vector<WorkspaceGroup_sptr> groupWorkspaces;
-    groupWorkspaces.reserve(m_inputWorkspaces.size());
+
+  if (!isChild()) {
+    // Copy each input workspace's history into our output workspace's history
     for (auto &inputWorkspace : m_inputWorkspaces)
-      groupWorkspaces.push_back(
-          boost::dynamic_pointer_cast<WorkspaceGroup>(inputWorkspace));
-
-    // Obtain global scale factor (if using manual scale factor)
-    std::vector<double> periodScaleFactors;
-    if (m_useManualScaleFactor) {
-      /*
-      Property *msfProp = this->getProperty("ManualScaleFactor");
-      if (msfProp->isDefault())
-      {
-        // THIS REALLY SHOULD BE COMPACTED LATER SOMEHOW
-
-        // List of workspaces to stitch
-        std::vector<std::string> toProcess;
-
-        for (auto &groupWorkspace : groupWorkspaces) {
-          const std::string wsName = 
-            groupWorkspace->getItem(m_scaleFactorFromPeriod)->name();
-          toProcess.push_back(wsName);
-          outName += "_" + wsName;
-        }
-
-        IAlgorithm_sptr stitchAlg = createChildAlgorithm("Stitch1DMany");
-        stitchAlg->initialize();
-        stitchAlg->setAlwaysStoreInADS(false);
-        stitchAlg->setProperty("InputWorkspaces", toProcess);
-        stitchAlg->setProperty("OutputWorkspace", "outWS");
-        stitchAlg->setProperty("StartOverlaps", m_startOverlaps);
-        stitchAlg->setProperty("EndOverlaps", m_endOverlaps);
-        stitchAlg->setProperty("Params", m_params);
-        stitchAlg->setProperty("ScaleRHSWorkspace", m_scaleRHSWorkspace);
-        stitchAlg->setProperty("UseManualScaleFactor", m_useManualScaleFactor);
-        if (m_useManualScaleFactor)
-          stitchAlg->setProperty("ManualScaleFactor", m_manualScaleFactor);
-        stitchAlg->execute();
-
-        periodScaleFactors = stitchAlg->getProperty("OutScaleFactors");
-      }*/
-    }
-
-    // List of workspaces to be grouped
-    std::vector<std::string> toGroup;
-
-    const std::string groupName = this->getProperty("OutputWorkspace");
-
-    size_t numWSPerGroup = groupWorkspaces[0]->size();
-
-    for (size_t i = 0; i < numWSPerGroup; ++i) {
-      // List of workspaces to stitch
-      std::vector<std::string> toProcess;
-      // The name of the resulting workspace
-      std::string outName = groupName;
-
-      for (auto &groupWorkspace : groupWorkspaces) {
-        const std::string wsName = groupWorkspace->getItem(i)->name();
-        toProcess.push_back(wsName);
-        outName += "_" + wsName;
-      }
-
-      IAlgorithm_sptr stitchAlg = createChildAlgorithm("Stitch1DMany");
-      stitchAlg->initialize();
-      stitchAlg->setAlwaysStoreInADS(true);
-      stitchAlg->setProperty("InputWorkspaces", toProcess);
-      stitchAlg->setProperty("OutputWorkspace", outName);
-      stitchAlg->setProperty("StartOverlaps", m_startOverlaps);
-      stitchAlg->setProperty("EndOverlaps", m_endOverlaps);
-      stitchAlg->setProperty("Params", m_params);
-      stitchAlg->setProperty("ScaleRHSWorkspace", m_scaleRHSWorkspace);
-      stitchAlg->setProperty("UseManualScaleFactor", m_useManualScaleFactor);
-      if (m_useManualScaleFactor)
-        stitchAlg->setProperty("ManualScaleFactor", m_manualScaleFactor);
-      stitchAlg->execute();
-
-      // Add the resulting workspace to the list to be grouped together
-      toGroup.push_back(outName);
-
-      // Add the scalefactors to the list so far
-      const std::vector<double> scaleFactors =
-          stitchAlg->getProperty("OutScaleFactors");
-      m_scaleFactors.insert(m_scaleFactors.end(), scaleFactors.begin(),
-                            scaleFactors.end());
-    }
-
-    IAlgorithm_sptr groupAlg = createChildAlgorithm("GroupWorkspaces");
-    groupAlg->initialize();
-    groupAlg->setAlwaysStoreInADS(true);
-    groupAlg->setProperty("InputWorkspaces", toGroup);
-    groupAlg->setProperty("OutputWorkspace", groupName);
-    groupAlg->execute();
-
-    m_outputWorkspace =
-        AnalysisDataService::Instance().retrieveWS<Workspace>(groupName);
+      lhsWS->history().addHistory(inputWorkspace->getHistory());
   }
+  // We're a child algorithm, but we're recording history anyway
+  else if (isRecordingHistoryForChild() && m_parentHistory) {
+    m_parentHistory->addChildHistory(m_history);
+  }
+
+  m_outputWorkspace = lhsWS;
 
   // Save output
   this->setProperty("OutputWorkspace", m_outputWorkspace);
   this->setProperty("OutScaleFactors", m_scaleFactors);
+}
+
+bool Stitch1DMany::checkGroups() {
+  std::vector<std::string> wsNames = getProperty("InputWorkspaces");
+
+  try {
+    if (AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsNames[0]))
+      return true;
+  }
+  catch (...) { }
+  return false;
+}
+
+bool Stitch1DMany::processGroups() {
+  validateInputs();
+
+  std::vector<WorkspaceGroup_sptr> groupWorkspaces;
+  groupWorkspaces.reserve(m_inputWorkspaces.size());
+  for (auto &inputWorkspace : m_inputWorkspaces)
+    groupWorkspaces.push_back(
+      boost::dynamic_pointer_cast<WorkspaceGroup>(inputWorkspace));
+
+  // List of workspaces to be grouped
+  std::vector<std::string> toGroup;
+
+  const std::string groupName = this->getProperty("OutputWorkspace");
+
+  size_t numWSPerGroup = groupWorkspaces[0]->size();
+
+  for (size_t i = 0; i < numWSPerGroup; ++i) {
+    // List of workspaces to stitch
+    std::vector<std::string> toProcess;
+    // The name of the resulting workspace
+    std::string outName = groupName;
+
+    for (auto &groupWorkspace : groupWorkspaces) {
+      const std::string wsName = groupWorkspace->getItem(i)->name();
+      toProcess.push_back(wsName);
+      outName += "_" + wsName;
+    }
+
+    IAlgorithm_sptr stitchAlg = createChildAlgorithm("Stitch1DMany");
+    stitchAlg->initialize();
+    stitchAlg->setAlwaysStoreInADS(true);
+    stitchAlg->setProperty("InputWorkspaces", toProcess);
+    stitchAlg->setProperty("OutputWorkspace", outName);
+    stitchAlg->setProperty("StartOverlaps", m_startOverlaps);
+    stitchAlg->setProperty("EndOverlaps", m_endOverlaps);
+    stitchAlg->setProperty("Params", m_params);
+    stitchAlg->setProperty("ScaleRHSWorkspace", m_scaleRHSWorkspace);
+    stitchAlg->setProperty("UseManualScaleFactor", m_useManualScaleFactor);
+    if (m_useManualScaleFactor)
+      stitchAlg->setProperty("ManualScaleFactor", m_manualScaleFactor);
+    stitchAlg->execute();
+
+    // Add the resulting workspace to the list to be grouped together
+    toGroup.push_back(outName);
+
+    // Add the scalefactors to the list so far
+    const std::vector<double> scaleFactors =
+      stitchAlg->getProperty("OutScaleFactors");
+    m_scaleFactors.insert(m_scaleFactors.end(), scaleFactors.begin(),
+      scaleFactors.end());
+  }
+
+  IAlgorithm_sptr groupAlg = createChildAlgorithm("GroupWorkspaces");
+  groupAlg->initialize();
+  groupAlg->setAlwaysStoreInADS(true);
+  groupAlg->setProperty("InputWorkspaces", toGroup);
+  groupAlg->setProperty("OutputWorkspace", groupName);
+  groupAlg->execute();
+
+  m_outputWorkspace =
+    AnalysisDataService::Instance().retrieveWS<Workspace>(groupName);
+
+  this->setProperty("OutputWorkspace", m_outputWorkspace);
+  this->setProperty("OutScaleFactors", m_scaleFactors);
+  return true;
 }
 } // namespace Algorithms
 } // namespace Mantid

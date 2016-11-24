@@ -46,6 +46,10 @@ public:
   /// Validates algorithm inputs
   std::map<std::string, std::string> validateInputs() override;
 
+  /// For (multiperiod) workspace groups
+  bool checkGroups() override;
+  bool processGroups() override;
+
 private:
   /// Overwrites Algorithm method.
   void init() override;
