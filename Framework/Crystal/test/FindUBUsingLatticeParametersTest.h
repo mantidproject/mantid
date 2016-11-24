@@ -87,7 +87,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("gamma", "90.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NumInitial", "15"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.12"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FixAll", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FixParameters", true));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 

@@ -44,8 +44,8 @@ void FindUBUsingLatticeParameters::init() {
                         "Lattice parameter gamma");
   this->declareProperty("NumInitial", 15, moreThan2Int,
                         "Number of Peaks to Use on First Pass(15)");
-  this->declareProperty("FixAll", false,
-                        "Do not optimise the UB lattice parameters");
+  this->declareProperty("FixParameters", false,
+                        "Do not optimise the UB after finding the orientation");
   this->declareProperty("Tolerance", 0.15, mustBePositive,
                         "Indexing Tolerance (0.15)");
 }
@@ -61,7 +61,7 @@ void FindUBUsingLatticeParameters::exec() {
   double gamma = this->getProperty("gamma");
   int num_initial = this->getProperty("NumInitial");
   double tolerance = this->getProperty("Tolerance");
-  auto fixAll = this->getProperty("FixAll");
+  auto fixAll = this->getProperty("FixParameters");
 
   int base_index = -1; // these "could" be properties if need be
   double degrees_per_step = 1.5;
