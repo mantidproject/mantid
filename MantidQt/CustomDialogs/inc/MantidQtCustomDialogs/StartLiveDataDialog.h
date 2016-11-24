@@ -34,6 +34,8 @@ private slots:
   void updateUiElements(const QString &);
   void accept() override;
   void initListenerPropLayout(const QString &);
+  void updateConnectionChoices(const QString &inst_name);
+  void updateConnectionDetails(const QString &connection);
 
 private:
   /// Initialize the layout

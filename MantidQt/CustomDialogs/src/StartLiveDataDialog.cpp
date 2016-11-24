@@ -12,6 +12,7 @@
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include <QtGui>
 #include "MantidQtAPI/AlgorithmInputHistory.h"
@@ -21,6 +22,7 @@ using namespace MantidQt::API;
 using Mantid::API::AlgorithmManager;
 using Mantid::API::Algorithm_sptr;
 using Mantid::Kernel::DateAndTime;
+using Mantid::Kernel::ConfigService;
 
 namespace {
 class LiveDataAlgInputHistoryImpl : public AbstractAlgorithmInputHistory {
@@ -177,6 +179,8 @@ void StartLiveDataDialog::initLayout() {
   radioPostProcessClicked();
   setDefaultAccumulationMethod(ui.cmbInstrument->currentText());
   updateUiElements(ui.cmbInstrument->currentText());
+  updateConnectionChoices(ui.cmbInstrument->currentText());
+  updateConnectionDetails(ui.cmbConnection->currentText());
 
   //=========== Listener's properties =============
 
@@ -217,6 +221,11 @@ void StartLiveDataDialog::initLayout() {
           SLOT(initListenerPropLayout(const QString &)));
   connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(updateUiElements(const QString &)));
+  connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
+          SLOT(updateConnectionChoices(const QString &)));
+
+  connect(ui.cmbConnection, SIGNAL(currentIndexChanged(const QString &)), this,
+          SLOT(updateConnectionDetails(const QString &)));
 
   QLayout *buttonLayout = this->createDefaultButtonLayout();
   ui.mainLayout->addLayout(buttonLayout);
@@ -439,5 +448,70 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &inst) {
   }
   ui.listenerProps->setVisible(true);
 }
+
+/**
+ * Slot to update list of available connections when instrument is changed
+ *
+ * @param inst Name of selected instrument
+ */
+void StartLiveDataDialog::updateConnectionChoices(const QString &inst_name) {
+  // Reset the connections listed
+  ui.cmbConnection->clear();
+  ui.cmbConnection->addItem("[Custom]");
+
+  // Add available LiveListenerInfo names based on selected instrument
+  const auto &inst = ConfigService::Instance().getInstrument(
+                       inst_name.toStdString());
+  for (const auto &listener : inst.liveListenerInfoList()) {
+    ui.cmbConnection->addItem(QString::fromStdString(listener.name()));
+  }
+
+  // Select default item
+  auto selectName = QString::fromStdString(inst.liveListenerInfo().name());
+  auto index = ui.cmbConnection->findText(selectName);
+  ui.cmbConnection->setCurrentIndex(index);
+}
+
+/**
+ * Slot to update connection parameters when connection selected
+ *
+ * @param name
+ */
+void StartLiveDataDialog::updateConnectionDetails(const QString &connection) {
+
+  // Add available listeners to combo box
+  ui.cmbConnListener->clear();
+  std::vector<std::string> listeners =
+      Mantid::API::LiveListenerFactory::Instance().getKeys();
+  for (const auto &listener : listeners) {
+    ui.cmbConnListener->addItem(QString::fromStdString(listener));
+  }
+
+  // Custom connections just enable editting connection parameters
+  if (connection == "[Custom]") {
+    ui.cmbConnListener->setEnabled(true);
+    ui.edtConnAddress->setEnabled(true);
+    return;
+  }
+
+  // User shouldn't be able to edit values loaded from Facilities.xml
+  ui.cmbConnListener->setEnabled(false);
+  ui.edtConnAddress->setEnabled(false);
+
+  // Get live listener for select instrument and connection
+  const auto &inst = ConfigService::Instance().getInstrument(
+                       ui.cmbInstrument->currentText().toStdString());
+  const auto &info = inst.liveListenerInfo(connection.toStdString());
+
+  // Select correct listener
+  auto listener = QString::fromStdString(info.listener());
+  auto index = ui.cmbConnListener->findText(listener);
+  ui.cmbConnListener->setCurrentIndex(index);
+
+  // Set address text box
+  auto address = QString::fromStdString(info.address());
+  ui.edtConnAddress->setText(address);
+}
+
 }
 }
