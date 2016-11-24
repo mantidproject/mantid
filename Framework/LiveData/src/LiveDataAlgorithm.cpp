@@ -36,13 +36,7 @@ void LiveDataAlgorithm::initProps() {
       instruments.push_back(instrument.name());
     }
   }
-#ifndef NDEBUG
-  // Debug builds only: Add all the listeners by hand for development testing
-  // purposes
-  std::vector<std::string> listeners =
-      Mantid::API::LiveListenerFactory::Instance().getKeys();
-  instruments.insert(instruments.end(), listeners.begin(), listeners.end());
-#endif
+
   declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
                       "Instrument", "",
                       boost::make_shared<StringListValidator>(instruments)),
