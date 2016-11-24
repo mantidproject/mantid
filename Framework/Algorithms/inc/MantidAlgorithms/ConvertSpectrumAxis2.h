@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
@@ -83,7 +84,7 @@ private:
   std::multimap<double, size_t> m_indexMap;
 
   /// Getting Efixed
-  double getEfixed(const Mantid::Geometry::IDetector &detector,
+  double getEfixed(const API::SpectrumInfo spectrumInfo, size_t i,
                    API::MatrixWorkspace_const_sptr inputWS, int emode) const;
 };
 
