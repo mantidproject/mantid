@@ -527,7 +527,7 @@
       <item row="0" column="4">
        <widget class="QComboBox" name="cbCalibOption">
         <property name="toolTip">
-         <string>Detector calibratino option</string>
+         <string>Detector calibration option</string>
         </property>
         <property name="visible">
          <bool>false</bool>

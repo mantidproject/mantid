@@ -53,8 +53,7 @@ class IndirectILLReductionFWS(unittest.TestCase):
         self._check_workspace_group(mtd['red'], 3, 18, 2)
 
     def test_interpolation(self):
-        # Test if workspace of missing background energy 2.0 will be trated correctly
-        # Test extrapolation of two background runs given, which larger than the sample temperature range
+
         args = {'Run': self._run_two_wing_mixed,
                 'BackgroundRun': '170300:170303',
                 'SortXAxis': True}

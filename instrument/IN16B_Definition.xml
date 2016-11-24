@@ -258,7 +258,7 @@
 
   <!-- Definition of single_tube -->
 
-  <type name="single_tube" outline="yes">
+  <type name="single_tube">
     <component type="single_pixel">
       <location />
     </component>
