@@ -83,7 +83,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("InputWorkspace", inputWs) )
     TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace", "_unused_for_child") )
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("EPPTable", eppTable) );
-    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("IndexType", "WorkspaceIndex") )
+    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("IndexType", "Workspace Index") )
     TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("ReferenceSpectra", "1-300") )
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("IncidentEnergy", actualEi) )
     TS_ASSERT_THROWS_NOTHING( alg->execute() );
@@ -153,7 +153,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("InputWorkspace", inputWs) )
     TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace", "_unused_for_child") )
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("EPPTable", eppTable) );
-    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("IndexType", "WorkspaceIndex") )
+    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("IndexType", "Workspace Index") )
     TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("ReferenceSpectra", "1-300") )
     TS_ASSERT_THROWS_ANYTHING( alg->execute() );
     TS_ASSERT( !alg->isExecuted() );
@@ -189,7 +189,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("InputWorkspace", inputWs) )
     TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace", "_unused_for_child") )
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("EPPTable", eppTable) );
-    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("IndexType", "WorkspaceIndex") )
+    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("IndexType", "Workspace Index") )
     TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("ReferenceSpectra", "1-300") )
     TS_ASSERT_THROWS_NOTHING( alg->execute() );
     TS_ASSERT( alg->isExecuted() );

@@ -40,11 +40,11 @@ const static std::string FIT_STATUS_SUCCESS("success");
  */
 namespace IndexTypes {
 /// Tag for detector ids
-const static std::string DETECTOR_ID("DetectorID");
+const static std::string DETECTOR_ID("Detector ID");
 /// Tag for spectrum numbers
-const static std::string SPECTRUM_NUMBER("SpectrumNumber");
+const static std::string SPECTRUM_NUMBER("Spectrum Number");
 /// Tag for workspace indices
-const static std::string WORKSPACE_INDEX("WorkspaceIndex");
+const static std::string WORKSPACE_INDEX("Workspace Index");
 } // namespace IndexTypes
 
 /** A private namespace listing the properties of TOFAxisCorrection.
