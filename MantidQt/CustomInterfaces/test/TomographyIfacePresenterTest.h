@@ -783,9 +783,6 @@ public:
     // finally, user tries to run a reconstruction job
     pres->notify(ITomographyIfacePresenter::RunReconstruct);
 
-    // necessary or the test crashes because the external process thread is
-    // not freed from a Qt thread
-    pres->notify(ITomographyIfacePresenter::CancelJobFromTable);
     TSM_ASSERT(
         "Mock not used as expected. Some EXPECT_CALL conditions were not "
         "satisfied.",

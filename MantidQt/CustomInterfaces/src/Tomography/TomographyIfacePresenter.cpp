@@ -671,12 +671,12 @@ void TomographyIfacePresenter::processRefreshJobs() {
 }
 
 void TomographyIfacePresenter::processCancelJobs() {
-  if (isLocalResourceSelected()) {
-    // this will stop the current reconstruction
-    m_workerThread.reset();
-  } else {
-    m_model->doCancelJobs(m_view->currentComputeResource(),
-                          m_view->processingJobsIDs());
+  if (m_model->loggedIn().empty())
+    return;
+
+  const std::string &resource = m_view->currentComputeResource();
+  if (!isLocalResourceSelected()) {
+    m_model->doCancelJobs(resource, m_view->processingJobsIDs());
   }
 }
 
