@@ -51,6 +51,9 @@ private:
                                     const ComplexFortranMatrix &wf,
                                     double temperature, double fwhm,
                                     size_t i) const;
+  API::IFunction_sptr buildPhysprop(int nre, const DoubleFortranVector &en, 
+                                    const ComplexFortranMatrix &wf,
+                                    size_t iSpec) const;
   /// Update a function for a single spectrum.
   void updateSpectrum(API::IFunction &spectrum, int nre,
                       const DoubleFortranVector &en,
@@ -62,6 +65,8 @@ private:
                        API::FunctionValues &values, size_t iSpec) const;
   /// Cache number of fitted peaks
   mutable std::vector<size_t> m_nPeaks;
+  /// Cache the list of "spectra" corresponding to physical properties
+  mutable std::vector<int> m_physprops;
   /// Caches of the width functions
   mutable std::vector<std::vector<double>> m_fwhmX;
   mutable std::vector<std::vector<double>> m_fwhmY;

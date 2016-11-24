@@ -42,13 +42,13 @@ public:
   CrystalFieldHeatCapacity();
   std::string name() const override { return "CrystalHeatCapacity"; }
   const std::string category() const override { return "General"; }
-  void set_eigensystem(const DoubleFortranVector &en_in, const ComplexFortranMatrix &wf_in);
-  void calculate(double *out, const double *xValues, const size_t nData, 
-      const ComplexFortranMatrix &wf, const DoubleFortranVector &en) const;
+  void set_eigensystem(const DoubleFortranVector &en_in, 
+      const ComplexFortranMatrix &wf_in, const int nre_in);
   void function1D(double *out, const double *xValues, const size_t nData) const override;
 private:
   DoubleFortranVector en;
   ComplexFortranMatrix wf;
+  int nre;
   bool setDirect;
 };
 

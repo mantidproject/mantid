@@ -2,6 +2,7 @@
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeakUtils.h"
+#include "MantidCurveFitting/Functions/CrystalFieldHeatCapacity.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
@@ -65,6 +66,7 @@ CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum()
   declareAttribute("FWHMX0", Attribute(std::vector<double>()));
   declareAttribute("FWHMY0", Attribute(std::vector<double>()));
   declareAttribute("FWHMVariation", Attribute(0.1));
+  declareAttribute("PhysicalProperties", Attribute(std::vector<double>(1, 0.0)));
 }
 
 size_t CrystalFieldMultiSpectrum::getNumberDomains() const {
@@ -139,20 +141,41 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
                                "Temperatures or have size 1.");
     }
   }
-  // Create the single-spectrum functions.
   auto nSpec = temperatures.size();
+  // Get a list of "spectra" which corresponds to physical properties
+  auto physprops = getAttribute("PhysicalProperties").asVector();
+  if (physprops.empty()) {
+    m_physprops.resize(nSpec, 0);  // Assume no physical properties - just INS
+  }
+  else if (physprops.size() != nSpec) {
+    if (physprops.size() == 1) {
+      int physprop = (int)physprops.front();
+      m_physprops.resize(nSpec, physprop);
+    } else {
+      throw std::runtime_error("Vector of PhysicalProperties must have same "
+                               "size as Temperatures or size 1.");
+    }
+  } else {
+    m_physprops.assign(physprops.begin(), physprops.end());
+  }
+  // Create the single-spectrum functions.
   m_nPeaks.resize(nSpec);
   if (m_fwhmX.empty()) {
     m_fwhmX.resize(nSpec);
     m_fwhmY.resize(nSpec);
   }
   for (size_t i = 0; i < nSpec; ++i) {
-    if (m_fwhmX[i].empty()) {
-      auto suffix = std::to_string(i);
-      m_fwhmX[i] = IFunction::getAttribute("FWHMX" + suffix).asVector();
-      m_fwhmY[i] = IFunction::getAttribute("FWHMY" + suffix).asVector();
+    if (m_physprops[i] > 0) {
+      // This "spectrum" is actually a physical properties dataset.
+      fun->addFunction(buildPhysprop(nre, en, wf, i));
+    } else {
+      if (m_fwhmX[i].empty()) {
+        auto suffix = std::to_string(i);
+        m_fwhmX[i] = IFunction::getAttribute("FWHMX" + suffix).asVector();
+        m_fwhmY[i] = IFunction::getAttribute("FWHMY" + suffix).asVector();
+      }
+      fun->addFunction(buildSpectrum(nre, en, wf, temperatures[i], fwhms[i], i));
     }
-    fun->addFunction(buildSpectrum(nre, en, wf, temperatures[i], fwhms[i], i));
     fun->setDomainIndex(i, i);
   }
 }
@@ -213,6 +236,18 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(
   return IFunction_sptr(spectrum);
 }
 
+API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
+    int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
+    size_t iSpec) const {
+  switch(m_physprops[iSpec]) {
+    case 1: // Heat capacity
+      auto spectrum = new CrystalFieldHeatCapacity;
+      spectrum->set_eigensystem(en, wf, nre);
+      return IFunction_sptr(spectrum);
+  }
+  throw std::runtime_error("Physical property type not understood");
+}
+
 /// Update m_spectrum function.
 void CrystalFieldMultiSpectrum::updateTargetFunction() const {
   if (!m_target) {
@@ -238,13 +273,21 @@ void CrystalFieldMultiSpectrum::updateTargetFunction() const {
 void CrystalFieldMultiSpectrum::updateSpectrum(
     API::IFunction &spectrum, int nre, const DoubleFortranVector &en,
     const ComplexFortranMatrix &wf, double temperature, size_t iSpec) const {
-  auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
-  FunctionValues values;
-  calcExcitations(nre, en, wf, temperature, values, iSpec);
-  auto &composite = dynamic_cast<API::CompositeFunction &>(spectrum);
-  m_nPeaks[iSpec] = CrystalFieldUtils::updateSpectrumFunction(
-      composite, values, m_nPeaks[iSpec], 1, m_fwhmX[iSpec], m_fwhmY[iSpec],
-      fwhmVariation);
+  switch(m_physprops[iSpec]) {
+    case 1: {
+      auto &heatcap = dynamic_cast<CrystalFieldHeatCapacity &>(spectrum);
+      heatcap.set_eigensystem(en, wf, nre);
+      break;
+    }
+    default:
+      auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
+      FunctionValues values;
+      calcExcitations(nre, en, wf, temperature, values, iSpec);
+      auto &composite = dynamic_cast<API::CompositeFunction &>(spectrum);
+      m_nPeaks[iSpec] = CrystalFieldUtils::updateSpectrumFunction(
+          composite, values, m_nPeaks[iSpec], 1, m_fwhmX[iSpec], m_fwhmY[iSpec],
+          fwhmVariation);
+  }
 }
 
 } // namespace Functions
