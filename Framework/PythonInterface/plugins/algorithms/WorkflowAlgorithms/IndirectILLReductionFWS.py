@@ -11,6 +11,10 @@ import time
 
 class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
+    _SAMPLE = 'sample'
+    _BACKGROUND = 'background'
+    _CALIBRATION = 'calibration'
+
     _sample_files = None
     _background_files = None
     _calibration_files = None
@@ -214,37 +218,37 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
         self._progress = Progress(self, start=0.0, end=1.0, nreports=total)
 
-        self._reduce_multiple_runs(self._sample_files, 'sample')
+        self._reduce_multiple_runs(self._sample_files, self._SAMPLE)
 
         if self._background_files:
 
-            self._reduce_multiple_runs(self._background_files, 'background')
+            self._reduce_multiple_runs(self._background_files, self._BACKGROUND)
 
-            Scale(InputWorkspace=self._red_ws + '_background',
-                  Factor=self._back_scaling,
-                  OutputWorkspace=self._red_ws + '_background')
+            back_ws = self._red_ws + '_' + self._BACKGROUND
+
+            Scale(InputWorkspace=back_ws, Factor=self._back_scaling, OutputWorkspace=back_ws)
 
             if self._back_option == 'Sum':
-                self._integrate('background')
+                self._integrate(self._BACKGROUND)
             else:
-                self._interpolate('background')
+                self._interpolate(self._BACKGROUND)
 
             self._subtract_background()
 
-            DeleteWorkspace(self._red_ws + '_background')
+            DeleteWorkspace(back_ws)
 
         if self._calibration_files:
 
-            self._reduce_multiple_runs(self._calibration_files, 'calibration')
+            self._reduce_multiple_runs(self._calibration_files, self._CALIBRATION)
 
             if self._back_option == 'Sum':
-                self._integrate('calibration')
+                self._integrate(self._CALIBRATION)
             else:
-                self._interpolate('calibration')
+                self._interpolate(self._CALIBRATION)
 
             self._calibrate()
 
-            DeleteWorkspace(self._red_ws + '_calibration')
+            DeleteWorkspace(self._red_ws + '_' + self._CALIBRATION)
 
         self.log().debug('Run files map is :'+str(self._all_runs))
 
@@ -330,7 +334,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         @param label  :: calibration or background
         '''
 
-        for energy in self._all_runs['sample']:
+        for energy in self._all_runs[self._SAMPLE]:
             if energy in self._all_runs[label]:
                 ref = self._red_ws + '_' + str(energy)
                 ws = self._red_ws + '_' + label + '_' + str(energy)
@@ -342,10 +346,10 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         Subtracts the background per each energy if background run is available
         '''
 
-        for energy in self._all_runs['sample']:
-            if energy in self._all_runs['background']:
+        for energy in self._all_runs[self._SAMPLE]:
+            if energy in self._all_runs[self._BACKGROUND]:
                 sample_ws = self._red_ws + '_' + str(energy)
-                back_ws = self._red_ws + '_background_' + str(energy)
+                back_ws = self._red_ws + '_' + self._BACKGROUND + '_' + str(energy)
                 Minus(LHSWorkspace=sample_ws, RHSWorkspace=back_ws, OutputWorkspace=sample_ws)
             else:
                 self.log().warning('No background subtraction can be performed for doppler energy of {0} microEV, '
@@ -356,10 +360,10 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         Peforms calibration per each energy if calibration run is available
         '''
 
-        for energy in self._all_runs['sample']:
-            if energy in self._all_runs['calibration']:
+        for energy in self._all_runs[self._SAMPLE]:
+            if energy in self._all_runs[self._CALIBRATION]:
                 sample_ws = self._red_ws + '_' + str(energy)
-                calib_ws = self._red_ws + '_calibration_' + str(energy)
+                calib_ws = self._red_ws + '_' + self._CALIBRATION + '_' + str(energy)
                 Divide(LHSWorkspace=sample_ws, RHSWorkspace=calib_ws, OutputWorkspace=sample_ws)
             else:
                 self.log().warning('No calibration can be performed for doppler energy of {0} microEV, '
@@ -413,7 +417,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
         groupname = self._red_ws
 
-        if label != 'sample':
+        if label != self._SAMPLE:
             groupname += '_' + label
 
         for energy in sorted(self._all_runs[label]):
