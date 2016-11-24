@@ -45,6 +45,8 @@ public:
   }
   /// Validates algorithm inputs
   std::map<std::string, std::string> validateInputs() override;
+  /// Validates algorithm inputs for group workspaces
+  void validateGroupWorkspacesInputs();
 
   /// For (multiperiod) workspace groups
   bool checkGroups() override;
@@ -58,6 +60,7 @@ private:
 
   // Data
   std::vector<Mantid::API::Workspace_sptr> m_inputWorkspaces;
+  std::vector<Mantid::API::WorkspaceGroup_sptr> m_inputWorkspaceGroups;
   std::vector<double> m_startOverlaps;
   std::vector<double> m_endOverlaps;
   std::vector<double> m_params;
