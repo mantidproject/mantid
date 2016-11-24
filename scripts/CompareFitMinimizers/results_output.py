@@ -25,13 +25,13 @@ formats such as RST and plain text.
 from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
+import post_processing as postproc
 
 # Some naming conventions for the output files
 BENCHMARK_VERSION_STR = 'v3.8'
 FILENAME_SUFFIX_ACCURACY = 'acc'
 FILENAME_SUFFIX_RUNTIME = 'runtime'
 
-import post_processing as postproc
 
 def print_group_results_tables(minimizers, results_per_test, problems_obj, group_name, use_errors,
                                simple_text=True, rst=False, save_to_file=False, color_scale=None):
@@ -169,6 +169,7 @@ def build_group_linked_names(group_names):
 
     return linked_names
 
+
 def print_overall_results_table(minimizers, group_results, problems, group_names, use_errors,
                                 simple_text=True, save_to_file=False):
 
@@ -213,6 +214,7 @@ def weighted_suffix_string(use_errors):
     values = {True: 'weighted', False: 'unweighted'}
     return values[use_errors]
 
+
 def display_name_for_minimizers(names):
     """
     Converts minimizer names into their "display names". For example
@@ -226,6 +228,7 @@ def display_name_for_minimizers(names):
             display_names[idx] = 'Trust Region'
 
     return display_names
+
 
 def calc_cell_len_rst_table(columns_txt, items_link):
     """
@@ -254,6 +257,7 @@ def calc_cell_len_rst_table(columns_txt, items_link):
     cell_len += int(additional_len/1.2)
 
     return cell_len
+
 
 def build_rst_table(columns_txt, rows_txt, cells, comparison_type, comparison_dim,
                     using_errors, color_scale=None):
@@ -303,12 +307,13 @@ def build_rst_table(columns_txt, rows_txt, cells, comparison_type, comparison_di
 
         tbl_body += '|' + rows_txt[row].ljust(first_col_len, ' ') + '|'
         for col in range(0, cells.shape[1]):
-            tbl_body += format_cell_value_rst(cells[row,col], cell_len, color_scale, link) + '|'
+            tbl_body += format_cell_value_rst(cells[row, col], cell_len, color_scale, link) + '|'
 
         tbl_body += '\n'
         tbl_body += tbl_footer
 
     return tbl_header + tbl_body
+
 
 def build_rst_table_header_chunks(first_col_len, cell_len, columns_txt):
     """
@@ -324,13 +329,14 @@ def build_rst_table_header_chunks(first_col_len, cell_len, columns_txt):
     # First column in the header for the name of the test or statistics
     tbl_header_top += '-'.ljust(first_col_len, '-') + '+'
     tbl_header_text += ' '.ljust(first_col_len, ' ') + '|'
-    tbl_header_bottom += '='.ljust(first_col_len,'=') + '+'
+    tbl_header_bottom += '='.ljust(first_col_len, '=') + '+'
     for col_name in columns_txt:
         tbl_header_top += '-'.ljust(cell_len, '-') + '+'
         tbl_header_text += col_name.ljust(cell_len, ' ') + '|'
-        tbl_header_bottom += '='.ljust(cell_len,'=') + '+'
+        tbl_header_bottom += '='.ljust(cell_len, '=') + '+'
 
     return tbl_header_top, tbl_header_text, tbl_header_bottom
+
 
 def calc_first_col_len(cell_len, rows_txt):
     first_col_len = cell_len
@@ -340,6 +346,7 @@ def calc_first_col_len(cell_len, rows_txt):
             first_col_len = name_len
 
     return first_col_len
+
 
 def build_items_links(comparison_type, comparison_dim, using_errors):
     """
@@ -352,17 +359,17 @@ def build_items_links(comparison_type, comparison_dim, using_errors):
     @returns :: link or links to use from table cells.
     """
     if 'summary' == comparison_type:
-        items_link = [ 'Minimizers_{0}_comparison_in_terms_of_{1}_nist_lower'.
-                       format(weighted_suffix_string(using_errors), comparison_dim),
-                       'Minimizers_{0}_comparison_in_terms_of_{1}_nist_average'.
-                       format(weighted_suffix_string(using_errors), comparison_dim),
-                       'Minimizers_{0}_comparison_in_terms_of_{1}_nist_higher'.
-                       format(weighted_suffix_string(using_errors), comparison_dim),
-                       'Minimizers_{0}_comparison_in_terms_of_{1}_cutest'.
-                       format(weighted_suffix_string(using_errors), comparison_dim),
-                       'Minimizers_{0}_comparison_in_terms_of_{1}_neutron_data'.
-                       format(weighted_suffix_string(using_errors), comparison_dim),
-                     ]
+        items_link = ['Minimizers_{0}_comparison_in_terms_of_{1}_nist_lower'.
+                      format(weighted_suffix_string(using_errors), comparison_dim),
+                      'Minimizers_{0}_comparison_in_terms_of_{1}_nist_average'.
+                      format(weighted_suffix_string(using_errors), comparison_dim),
+                      'Minimizers_{0}_comparison_in_terms_of_{1}_nist_higher'.
+                      format(weighted_suffix_string(using_errors), comparison_dim),
+                      'Minimizers_{0}_comparison_in_terms_of_{1}_cutest'.
+                      format(weighted_suffix_string(using_errors), comparison_dim),
+                      'Minimizers_{0}_comparison_in_terms_of_{1}_neutron_data'.
+                      format(weighted_suffix_string(using_errors), comparison_dim),
+                      ]
     elif 'accuracy' == comparison_type or 'runtime' == comparison_type:
         if using_errors:
             items_link = 'FittingMinimizersComparisonDetailedWithWeights'
@@ -372,6 +379,7 @@ def build_items_links(comparison_type, comparison_dim, using_errors):
         items_link = ''
 
     return items_link
+
 
 def format_cell_value_rst(value, width, color_scale=None, items_link=None):
     """
@@ -396,6 +404,7 @@ def format_cell_value_rst(value, width, color_scale=None, items_link=None):
 
     return value_text
 
+
 def print_tables_simple_text(minimizers, results_per_test, accuracy_tbl, time_tbl, norm_acc_rankings):
     """
     Produces tables in plain ascii, without any markup.  This is much
@@ -410,7 +419,7 @@ def print_tables_simple_text(minimizers, results_per_test, accuracy_tbl, time_tb
 
     for minimiz in minimizers:
         header += " {0} |".format(minimiz)
-    header +="\n"
+    header += "\n"
     print(header)
 
     min_sum_err_sq = np.amin(accuracy_tbl, 1)

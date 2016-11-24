@@ -32,9 +32,11 @@ import numpy as np
 
 import test_problem
 
+
 def load_nist_fitting_problem_file(problem_filename):
     with open(problem_filename) as spec_file:
         return parse_nist_file(spec_file)
+
 
 def parse_data_pattern(data_text):
     """
@@ -56,6 +58,7 @@ def parse_data_pattern(data_text):
         data_points[idx, :] = point
 
     return data_points
+
 
 def parse_equation(eq_text):
     """
@@ -88,6 +91,7 @@ def parse_equation(eq_text):
     equation = equation.replace('**', '^')
     return equation
 
+
 def parse_starting_values(lines):
     starting_vals = []
     for line in lines:
@@ -109,6 +113,7 @@ def parse_starting_values(lines):
 
     return starting_vals
 
+
 def parse_nist_file(spec_file):
     """
     Produce a fitting test problem definition object from a NIST text file.
@@ -119,7 +124,7 @@ def parse_nist_file(spec_file):
     lines = spec_file.readlines()
     equation_text, data_pattern_text, starting_values, residual_sum_sq = parse_nist_file_line_by_line(lines)
 
-    if not  equation_text or not data_pattern_text:
+    if not equation_text or not data_pattern_text:
         raise RuntimeError('Could not find the equation and data after parsing the lines of this file: {0}'.
                            format(spec_file.name))
 
@@ -137,6 +142,7 @@ def parse_nist_file(spec_file):
     prob.ref_residual_sum_sq = residual_sum_sq
 
     return prob
+
 
 def parse_nist_file_line_by_line(lines):
     """
@@ -171,7 +177,7 @@ def parse_nist_file_line_by_line(lines):
             # Before 'y = ...' there can be lines like 'pi = 3.14159...'
             while (not re.match(r'\s*y\s*=(.+)', lines[idx])\
                    and not re.match(r'\s*log\[y\]\s*=(.+)', lines[idx]))\
-                   and idx < len(lines): # [\s*\+\s*e]
+                   and idx < len(lines):  # [\s*\+\s*e]
                 idx += 1
             # Next non-empty lines are assumed to continue the equation
             equation_text = ''
@@ -201,6 +207,7 @@ def parse_nist_file_line_by_line(lines):
 
     return equation_text, data_pattern_text, starting_values, residual_sum_sq
 
+
 def load_neutron_data_fitting_problem_file(fname):
     """
     Builds a FittingTestProblem object from a text file. The file is expected to
@@ -225,6 +232,7 @@ def load_neutron_data_fitting_problem_file(fname):
 
     return prob
 
+
 def get_neutron_data_problem_entries(problem_file):
     """
     Get values from the lines of a "neutron fitting problem definition file",
@@ -244,6 +252,7 @@ def get_neutron_data_problem_entries(problem_file):
         entries[lhs.strip()] = eval(rhs.strip())
 
     return entries
+
 
 def get_fitting_neutron_data(fname, prob):
     """

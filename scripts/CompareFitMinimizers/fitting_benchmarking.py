@@ -37,6 +37,7 @@ import input_parsing as iparsing
 import results_output as fitout
 import test_result
 
+
 def run_all_with_or_without_errors(base_problem_files_dir, use_errors, minimizers,
                                    group_names, group_suffix_names, color_scale, save_to_file=False):
     """
@@ -68,7 +69,6 @@ def run_all_with_or_without_errors(base_problem_files_dir, use_errors, minimizer
     nist_group_dir = os.path.join(base_problem_files_dir, 'NIST_nonlinear_regression')
     cutest_group_dir = os.path.join(base_problem_files_dir, 'CUTEst')
     neutron_data_group_dirs = [os.path.join(base_problem_files_dir, 'Neutron_data')]
-    
 
     problems, results_per_group = do_fitting_benchmark(nist_group_dir=nist_group_dir, 
                                                        cutest_group_dir=cutest_group_dir,
@@ -98,6 +98,7 @@ def run_all_with_or_without_errors(base_problem_files_dir, use_errors, minimizer
     import sys
     sys.stdout.flush()
 
+
 def do_fitting_benchmark(nist_group_dir=None, cutest_group_dir=None, neutron_data_group_dirs=None,
                          minimizers=None, use_errors=True):
     """
@@ -114,14 +115,9 @@ def do_fitting_benchmark(nist_group_dir=None, cutest_group_dir=None, neutron_dat
     @param nist_group_dir :: whether to try to load NIST problems
     @param cutest_group_dir :: whether to try to load CUTEst problems
     @param neutron_data_group_dirs :: base directory where fitting problems are located including NIST+CUTEst
-    @param problem_files_sub_dirs :: list of sub-directories of where to load other neutron data problems    
     @param minimizers :: list of minimizers to test
     @param use_errors :: whether to use observational errors as weights in the cost function
     """
-    #if data_groups_dirs:
-    #    search_dir = os.path.split(data_groups_dirs[0])[0]
-    #else:
-    #    search_dir = os.getcwd()
 
     # Several blocks of problems. Results for each block will be calculated sequentially, and
     # will go into a separate table
@@ -147,6 +143,7 @@ def do_fitting_benchmark(nist_group_dir=None, cutest_group_dir=None, neutron_dat
         raise RuntimeError('probs : {0}, prob_results: {1}'.format(len(probs), len(results)))
 
     return probs, results
+
 
 def do_fitting_benchmark_group(problem_files, minimizers, use_errors=True):
     """
@@ -181,13 +178,14 @@ def do_fitting_benchmark_group(problem_files, minimizers, use_errors=True):
 
     return problems, results_per_problem
 
+
 def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True):
     """
     One problem with potentially several starting points, returns a list (start points) of
     lists (minimizers).
 
     @param prob :: fitting problem
-    @param mnimizers :: list of minimizers to evaluate/compare
+    @param minimizers :: list of minimizers to evaluate/compare
     @param use_errors :: whether to use observational errors when evaluating accuracy (in the
                          cost function)
     """
@@ -240,6 +238,7 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True):
 
     return results_fit_problem
 
+
 def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function='Least squares'):
     """
     Fits the data in a workspace with a function, using the algorithm Fit.
@@ -289,13 +288,14 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
 
     return status, chi2, fit_wks, params, errors
 
+
 def prepare_wks_cost_function(prob, use_errors):
     """
     Build a workspace ready for Fit() and a cost function string according to the problem
     definition.
     """
-    data_e = None
     if use_errors:
+        data_e = None
         if not isinstance(prob.data_pattern_obs_errors, np.ndarray):
             # Fake observational errors
             data_e = np.sqrt(prob.data_pattern_in)
@@ -310,6 +310,7 @@ def prepare_wks_cost_function(prob, use_errors):
         cost_function = 'Unweighted least squares'
 
     return wks, cost_function
+
 
 def get_function_definitions(prob):
     """
@@ -329,7 +330,7 @@ def get_function_definitions(prob):
 
             print("=================== starting values,: {0}, with idx: {1} ================".
                   format(prob.starting_values, start_idx))
-            start_string = '' # like: 'b1=250, b2=0.0005'
+            start_string = ''  # like: 'b1=250, b2=0.0005'
             for param in prob.starting_values:
                 start_string += ('{0}={1},'.format(param[0], param[1][start_idx]))
 
@@ -343,6 +344,7 @@ def get_function_definitions(prob):
 
     return function_defs
 
+
 def get_nist_problem_files(search_dir):
     """
     Group the NIST problem files into separeate blocks according
@@ -352,18 +354,18 @@ def get_nist_problem_files(search_dir):
     @returns :: list of list of problem files
     """
     # Grouped by "level of difficulty"
-    nist_lower = [ 'Misra1a.dat', 'Chwirut2.dat', 'Chwirut1.dat', 'Lanczos3.dat',
-                   'Gauss1.dat', 'Gauss2.dat', 'DanWood.dat', 'Misra1b.dat' ]
+    nist_lower = ['Misra1a.dat', 'Chwirut2.dat', 'Chwirut1.dat', 'Lanczos3.dat',
+                  'Gauss1.dat', 'Gauss2.dat', 'DanWood.dat', 'Misra1b.dat']
 
-    nist_average = [ 'Kirby2.dat', 'Hahn1.dat',
-                     # 'Nelson.dat' needs log[y] parsing / DONE, needs x1, x2
-                     'MGH17.dat', 'Lanczos1.dat', 'Lanczos2.dat', 'Gauss3.dat',
-                     'Misra1c.dat', 'Misra1d.dat',
-                     # 'Roszman1.dat' <=== needs handling the  'pi = 3.1415...' / DOME
-                     # And the 'arctan()'/ DONE, but generated lots of NaNs
-                     'ENSO.dat' ]
-    nist_higher = [ 'MGH09.dat','Thurber.dat', 'BoxBOD.dat', 'Rat42.dat',
-                    'MGH10.dat', 'Eckerle4.dat', 'Rat43.dat', 'Bennett5.dat' ]
+    nist_average = ['Kirby2.dat', 'Hahn1.dat',
+                    # 'Nelson.dat' needs log[y] parsing / DONE, needs x1, x2
+                    'MGH17.dat', 'Lanczos1.dat', 'Lanczos2.dat', 'Gauss3.dat',
+                    'Misra1c.dat', 'Misra1d.dat',
+                    # 'Roszman1.dat' <=== needs handling the  'pi = 3.1415...' / DOME
+                    # And the 'arctan()'/ DONE, but generated lots of NaNs
+                    'ENSO.dat']
+    nist_higher = ['MGH09.dat', 'Thurber.dat', 'BoxBOD.dat', 'Rat42.dat',
+                   'MGH10.dat', 'Eckerle4.dat', 'Rat43.dat', 'Bennett5.dat']
 
     nist_lower_files = [os.path.join(search_dir, fname) for fname in nist_lower]
     nist_average_files = [os.path.join(search_dir, fname) for fname in nist_average]
@@ -372,13 +374,15 @@ def get_nist_problem_files(search_dir):
 
     return problem_files
 
+
 def get_cutest_problem_files(search_dir):
 
-    cutest_all = [ 'PALMER6C.dat', 'PALMER7C.dat', 'PALMER8C.dat', 'YFITU.dat', 'VESUVIOLS.dat', 'DMN15102LS.dat' ]
+    cutest_all = ['PALMER6C.dat', 'PALMER7C.dat', 'PALMER8C.dat', 'YFITU.dat', 'VESUVIOLS.dat', 'DMN15102LS.dat']
 
     cutest_files = [os.path.join(search_dir, fname) for fname in cutest_all]
 
     return cutest_files
+
 
 def get_data_groups(data_groups_dirs):
 
@@ -387,6 +391,7 @@ def get_data_groups(data_groups_dirs):
         problem_groups.append(get_data_group_problem_files(grp_dir))
 
     return problem_groups
+
 
 def get_data_group_problem_files(grp_dir):
     import glob

@@ -20,6 +20,7 @@
 
 import numpy as np
 
+
 def calc_summary_table(minimizers, group_results):
     """
     Calculates a summary from problem-individual results. At the moment the only summary
@@ -62,6 +63,7 @@ def calc_summary_table(minimizers, group_results):
 
     return groups_norm_acc, groups_norm_runtime
 
+
 def calc_accuracy_runtime_tbls(results_per_test, minimizers):
     """
     This produces a numpy matrix for convenience, with
@@ -77,6 +79,7 @@ def calc_accuracy_runtime_tbls(results_per_test, minimizers):
             time_tbl[test_idx, minimiz_idx] = results_per_test[test_idx][minimiz_idx].runtime
 
     return accuracy_tbl, time_tbl
+
 
 def calc_norm_summary_tables(accuracy_tbl, time_tbl):
     """
@@ -101,14 +104,14 @@ def calc_norm_summary_tables(accuracy_tbl, time_tbl):
                                   np.nanmedian(norm_acc_rankings, 0),
                                   np.nanpercentile(norm_acc_rankings, 25, axis=0),
                                   np.nanpercentile(norm_acc_rankings, 75, axis=0)
-                                 ])
+                                  ])
 
-    summary_cells_runtime =  np.array([np.nanmin(norm_runtimes, 0),
-                                       np.nanmax(norm_runtimes, 0),
-                                       np.nanmean(norm_runtimes, 0),
-                                       np.nanmedian(norm_runtimes, 0),
-                                       np.nanpercentile(norm_runtimes, 25, axis=0),
-                                       np.nanpercentile(norm_runtimes, 75, axis=0)
+    summary_cells_runtime = np.array([np.nanmin(norm_runtimes, 0),
+                                      np.nanmax(norm_runtimes, 0),
+                                      np.nanmean(norm_runtimes, 0),
+                                      np.nanmedian(norm_runtimes, 0),
+                                      np.nanpercentile(norm_runtimes, 25, axis=0),
+                                      np.nanpercentile(norm_runtimes, 75, axis=0)
                                       ])
 
     return norm_acc_rankings, norm_runtimes, summary_cells_acc, summary_cells_runtime
