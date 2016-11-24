@@ -2,6 +2,7 @@ import unittest
 
 import mantid as mantid  # For next import to work
 from isis_powder.mock_instrument import MockInstrument
+import os
 
 
 class isis_powder_AbstractInstTest(unittest.TestCase):
@@ -22,8 +23,8 @@ class isis_powder_AbstractInstTest(unittest.TestCase):
         inst = self._get_abstract_inst_all_specified()
         run_number = 12345
         inst_file_name = inst._generate_inst_file_name(run_number)
-        input_path = "test\\"
-        reference_output = input_path + inst_file_name + self.default_ext
+        input_path = "test"
+        reference_output = os.path.join(input_path, (inst_file_name + self.default_ext))
 
         output = inst._generate_input_full_path(run_number, input_path)
         self.assertEquals(output, reference_output)
