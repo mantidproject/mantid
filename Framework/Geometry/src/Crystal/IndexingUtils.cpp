@@ -194,7 +194,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
       GetIndexedPeaks(UB, q_vectors, required_tolerance, miller_ind, indexed_qs,
                       fit_error);
       Matrix<double> temp_UB = UB;
-      fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs);
+      fit_error = Optimize_UB(temp_UB, miller_ind, indexed_qs, sigabc);
       UB = temp_UB;
     } catch (...) {
       // failed to improve UB using these peaks, so just return the current UB

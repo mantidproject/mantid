@@ -68,6 +68,15 @@ public:
     TS_ASSERT_DELTA(latt.beta(), 105.071, 5e-1);
     TS_ASSERT_DELTA(latt.gamma(), 90.0, 5e-1);
 
+    // Check errors
+    TS_ASSERT_DELTA(latt.errora(), 0.0134, 5e-4);
+    TS_ASSERT_DELTA(latt.errorb(), 0.0243, 5e-4);
+    TS_ASSERT_DELTA(latt.errorc(), 0.0101, 5e-4);
+
+    TS_ASSERT_DELTA(latt.erroralpha(), 0.0994, 5e-4);
+    TS_ASSERT_DELTA(latt.errorbeta(), 0.0773, 5e-4);
+    TS_ASSERT_DELTA(latt.errorgamma(), 0.0906, 5e-4);
+
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(ws->name());
   }
