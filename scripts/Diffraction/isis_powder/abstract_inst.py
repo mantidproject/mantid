@@ -65,13 +65,6 @@ class AbstractInst(object):
         common.create_calibration_by_names(calibration_runs=calibration_numbers, grouping_file_name=output_file_name,
                                            group_names=group_names, startup_objects=self)
 
-    def create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
-        self._create_calibration(calibration_runs=calibration_runs,
-                                 offset_file_name=offset_file_name, grouping_file_name=grouping_file_name)
-
-    def create_calibration_si(self, calibration_runs, cal_file_name, grouping_file_name):
-        self._create_calibration_silicon(calibration_runs=calibration_runs, cal_file_name=cal_file_name,
-                                         grouping_file_name=grouping_file_name)
 
     def _create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name=None, num_of_splines=None,
                                      do_absorb_corrections=True, gen_absorb_correction=False):
@@ -163,25 +156,6 @@ class AbstractInst(object):
 
     def _attenuate_workspace(self, input_workspace):
         return _empty_hook_return_input(input_workspace)
-
-    def _create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
-        # TODO what from
-        """
-        Creates a calibration run from
-        @param calibration_runs: The runs to use to create the calibration
-        @param offset_file_name: The calibration filename to be created
-        @param grouping_file_name: The grouping filename to be created
-        """
-        raise NotImplementedError("Create calibration is not yet implemented for this instrument")
-
-    def _create_calibration_silicon(self, calibration_runs, cal_file_name, grouping_file_name):
-        """
-        Creates a calibration file from a silicon run
-        @param calibration_runs: The silicon calibration runs to process
-        @param cal_file_name: The calibration filename to be created
-        @param grouping_file_name: The grouping filename to be created
-        """
-        raise NotImplementedError("Create calibration from a silicon run is not yet implemented for this instrument")
 
     def _normalise_ws(self, ws_to_correct, run_details=None):
         return _empty_hook_return_none()

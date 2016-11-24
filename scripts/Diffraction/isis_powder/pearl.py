@@ -5,16 +5,15 @@ import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
 from isis_powder.abstract_inst import AbstractInst
-from isis_powder.pearl_routines import pearl_algs, pearl_output, pearl_cycle_factory, pearl_spline
+from isis_powder.pearl_routines import pearl_algs, pearl_calibration_algs, pearl_output, pearl_cycle_factory, \
+    pearl_spline
 
 
 class Pearl(AbstractInst):
 
-    # # Instrument default settings
+    # Instrument default settings
     _default_input_ext = '.raw'
     _default_group_names = "bank1,bank2,bank3,bank4"
-
-
 
     _focus_tof_binning = "1500,-0.0006,19900"
 
@@ -47,6 +46,15 @@ class Pearl(AbstractInst):
                                           output_file_name=output_file_name, num_of_splines=num_of_splines,
                                           do_absorb_corrections=do_absorb_corrections,
                                           gen_absorb_correction=gen_absorb_correction)
+
+    def create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
+        pearl_calibration_algs.create_calibration(self, calibration_runs=calibration_runs,
+                                                  offset_file_name=offset_file_name,
+                                                  grouping_file_name=grouping_file_name)
+
+    def create_calibration_si(self, calibration_runs, cal_file_name, grouping_file_name):
+        pearl_calibration_algs.do_silicon_calibration(self, calibration_runs, cal_file_name, grouping_file_name)
+
 
     # Params #
     def _get_default_group_names(self):
@@ -99,49 +107,11 @@ class Pearl(AbstractInst):
     # Hook overrides
 
     def _attenuate_workspace(self, input_workspace):
-        return self._run_attenuate_workspace(input_workspace=input_workspace)
-
-    def _create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
-        input_ws = common.load_current_normalised_ws(run_number_string=calibration_runs, instrument=self)
-        cycle_information = self._get_label_information(calibration_runs)
-
-        if cycle_information["instrument_version"] == "new" or cycle_information["instrument_version"] == "new2":
-            input_ws = mantid.Rebin(InputWorkspace=input_ws, Params="100,-0.0006,19950")
-
-        d_spacing_cal = mantid.ConvertUnits(InputWorkspace=input_ws, Target="dSpacing")
-        d_spacing_cal = mantid.Rebin(InputWorkspace=d_spacing_cal, Params="1.8,0.002,2.1")
-
-        if cycle_information["instrument_version"] == "new2":
-            cross_cor_ws = mantid.CrossCorrelate(InputWorkspace=d_spacing_cal, ReferenceSpectra=20,
-                                                 WorkspaceIndexMin=9, WorkspaceIndexMax=1063, XMin=1.8, XMax=2.1)
-
-        elif cycle_information["instrument_version"] == "new":
-            cross_cor_ws = mantid.CrossCorrelate(InputWorkspace=d_spacing_cal, ReferenceSpectra=20,
-                                                 WorkspaceIndexMin=9, WorkspaceIndexMax=943, XMin=1.8, XMax=2.1)
+        if not self._old_atten_file:  # For old API support
+            attenuation_path = self._attenuation_full_path
         else:
-            cross_cor_ws = mantid.CrossCorrelate(InputWorkspace=d_spacing_cal, ReferenceSpectra=500,
-                                                 WorkspaceIndexMin=1, WorkspaceIndexMax=1440, XMin=1.8, XMax=2.1)
-        if self._old_api_uses_full_paths:  # Workaround for old API setting full paths
-            grouping_file_path = grouping_file_name
-            offset_file_path = offset_file_name
-        else:
-            offset_file_path = os.path.join(self.calibration_dir, offset_file_name)
-            grouping_file_path = os.path.join(self.calibration_dir, grouping_file_name)
-
-        # Ceo Cell refined to 5.4102(3) so 220 is 1.912795
-        offset_output_path = mantid.GetDetectorOffsets(InputWorkspace=cross_cor_ws, Step=0.002, DReference=1.912795,
-                                                       XMin=-200, XMax=200, GroupingFileName=offset_file_path)
-        del offset_output_path  # This isn't used so delete it to keep linters happy
-        aligned_ws = mantid.AlignDetectors(InputWorkspace=input_ws, CalibrationFile=offset_file_path)
-        cal_grouped_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws, GroupingFileName=grouping_file_path)
-
-        common.remove_intermediate_workspace(d_spacing_cal)
-        common.remove_intermediate_workspace(cross_cor_ws)
-        common.remove_intermediate_workspace(aligned_ws)
-        common.remove_intermediate_workspace(cal_grouped_ws)
-
-    def _create_calibration_silicon(self, calibration_runs, cal_file_name, grouping_file_name):
-        self._do_silicon_calibration(calibration_runs, cal_file_name, grouping_file_name)
+            attenuation_path = self._old_atten_file
+        return pearl_algs.attenuate_workspace(attenuation_file_path=attenuation_path, ws_to_correct=input_workspace)
 
     def _normalise_ws(self, ws_to_correct, run_details=None):
         if not run_details:
@@ -186,22 +156,8 @@ class Pearl(AbstractInst):
 
         return out_ws
 
-    def _generate_vanadium_absorb_corrections(self, calibration_full_paths, ws_to_match):
-        raise NotImplementedError("Generating absorption corrections needs to be implemented correctly")
-
-        # TODO are these values applicable to all instruments
-        shape_ws = mantid.CloneWorkspace(InputWorkspace=ws_to_match)
-        mantid.CreateSampleShape(InputWorkspace=shape_ws, ShapeXML='<sphere id="sphere_1"> <centre x="0" y="0" z= "0" />\
-                                                          <radius val="0.005" /> </sphere>')
-
-        absorb_ws = \
-            mantid.AbsorptionCorrection(InputWorkspace=shape_ws, AttenuationXSection="5.08",
-                                        ScatteringXSection="5.1", SampleNumberDensity="0.072",
-                                        NumberOfWavelengthPoints="25", ElementSize="0.05")
-        mantid.SaveNexus(Filename=calibration_full_paths["vanadium_absorption"],
-                         InputWorkspace=absorb_ws, Append=False)
-        common.remove_intermediate_workspace(shape_ws)
-        return absorb_ws
+    def _generate_vanadium_absorb_corrections(self, run_details, ws_to_match):
+        return pearl_algs.generate_vanadium_absob_corrections(van_ws=ws_to_match)
 
     def _calibration_rebin_to_workspace(self, ws_to_rebin, ws_to_match):
         rebinned_ws = mantid.RebinToWorkspace(WorkspaceToRebin=ws_to_rebin, WorkspaceToMatch=ws_to_match)
@@ -231,63 +187,6 @@ class Pearl(AbstractInst):
         return data_processed
 
     # Implementation of instrument specific steps
-
-    def _run_attenuate_workspace(self, input_workspace):
-        if self._old_atten_file is None:  # For old API support
-            attenuation_path = self._attenuation_full_path
-        else:
-            attenuation_path = self._old_atten_file
-
-        wc_attenuated = mantid.PearlMCAbsorption(attenuation_path)
-        wc_attenuated = mantid.ConvertToHistogram(InputWorkspace=wc_attenuated, OutputWorkspace=wc_attenuated)
-        wc_attenuated = mantid.RebinToWorkspace(WorkspaceToRebin=wc_attenuated, WorkspaceToMatch=input_workspace,
-                                                OutputWorkspace=wc_attenuated)
-        pearl_attenuated_ws = mantid.Divide(LHSWorkspace=input_workspace, RHSWorkspace=wc_attenuated)
-        common.remove_intermediate_workspace(workspace_name=wc_attenuated)
-        return pearl_attenuated_ws
-
-    def _do_silicon_calibration(self, runs_to_process, cal_file_name, grouping_file_name):
-        # TODO fix all of this as the script is too limited to be useful
-        create_si_ws = common.load_current_normalised_ws(run_number_string=runs_to_process, instrument=self)
-        cycle_details = self._get_label_information(runs_to_process)
-        instrument_version = cycle_details["instrument_version"]
-
-        if instrument_version == "new" or instrument_version == "new2":
-            create_si_ws = mantid.Rebin(InputWorkspace=create_si_ws, Params="100,-0.0006,19950")
-
-        create_si_d_spacing_ws = mantid.ConvertUnits(InputWorkspace=create_si_ws, Target="dSpacing")
-
-        if instrument_version == "new2":
-            create_si_d_spacing_rebin_ws = mantid.Rebin(InputWorkspace=create_si_d_spacing_ws, Params="1.71,0.002,2.1")
-            create_si_cross_corr_ws = mantid.CrossCorrelate(InputWorkspace=create_si_d_spacing_rebin_ws,
-                                                            ReferenceSpectra=20, WorkspaceIndexMin=9,
-                                                            WorkspaceIndexMax=1063, XMin=1.71, XMax=2.1)
-        elif instrument_version == "new":
-            create_si_d_spacing_rebin_ws = mantid.Rebin(InputWorkspace=create_si_d_spacing_ws, Params="1.85,0.002,2.05")
-            create_si_cross_corr_ws = mantid.CrossCorrelate(InputWorkspace=create_si_d_spacing_rebin_ws,
-                                                            ReferenceSpectra=20, WorkspaceIndexMin=9,
-                                                            WorkspaceIndexMax=943, XMin=1.85, XMax=2.05)
-        elif instrument_version == "old":
-            create_si_d_spacing_rebin_ws = mantid.Rebin(InputWorkspace=create_si_d_spacing_ws, Params="3,0.002,3.2")
-            create_si_cross_corr_ws = mantid.CrossCorrelate(InputWorkspace=create_si_d_spacing_rebin_ws,
-                                                            ReferenceSpectra=500, WorkspaceIndexMin=1,
-                                                            WorkspaceIndexMax=1440, XMin=3, XMax=3.2)
-        else:
-            raise NotImplementedError("The instrument version is not supported for creating a silicon calibration")
-
-        common.remove_intermediate_workspace(create_si_d_spacing_ws)
-        common.remove_intermediate_workspace(create_si_d_spacing_rebin_ws)
-
-        calibration_output_path = self.calibration_dir + cal_file_name
-        create_si_offsets_ws = mantid.GetDetectorOffsets(InputWorkspace=create_si_cross_corr_ws,
-                                                         Step=0.002, DReference=1.920127251, XMin=-200, XMax=200,
-                                                         GroupingFileName=calibration_output_path)
-        create_si_aligned_ws = mantid.AlignDetectors(InputWorkspace=create_si_ws,
-                                                     CalibrationFile=calibration_output_path)
-        grouping_output_path = self.calibration_dir + grouping_file_name
-        create_si_grouped_ws = mantid.DiffractionFocussing(InputWorkspace=create_si_aligned_ws,
-                                                           GroupingFileName=grouping_output_path)
-        del create_si_offsets_ws, create_si_grouped_ws
 
 
 def get_monitor_spectra(run_number, focus_mode):
