@@ -53,8 +53,7 @@ void LiveDataAlgorithm::initProps() {
 
   declareProperty(make_unique<PropertyWithValue<std::string>>(
                       "Listener", "",
-                      boost::make_shared<StringListValidator>(listeners),
-                      Direction::Input),
+                      boost::make_shared<StringListValidator>(listeners)),
                   "Name of the listener class to use. "
                   "If specified, overrides class specified by Connection.");
 
