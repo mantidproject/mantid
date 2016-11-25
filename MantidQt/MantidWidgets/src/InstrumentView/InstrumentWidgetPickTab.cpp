@@ -584,6 +584,11 @@ InstrumentWidgetPickTab::getSurface() const {
   return m_instrWidget->getSurface();
 }
 
+const InstrumentWidget *InstrumentWidgetPickTab::getInstrumentWidget() const
+{
+ return m_instrWidget;
+}
+
 /**
 * Save tab's persistent settings to the provided QSettings instance
 */
@@ -930,15 +935,27 @@ QString ComponentInfoController::displayPeakAngles(
   auto pos1 = peak1->getDetector()->getPos();
   auto pos2 = peak2->getDetector()->getPos();
 
+  // get which way is "up". e.g. y unit vector if this is a cylindrical y
+  // projection
+  auto instWidget = m_tab->getInstrumentWidget();
+  auto surfaceType = instWidget->getSurfaceType();
+  auto axis = instWidget->getSurfaceAxis(surfaceType);
+
+  // get beam direction
+  auto instrument = peak1->getInstrument();
+  auto sample = instrument->getSample()->getPos();
+  auto source = instrument->getSource()->getPos();
+  auto L1 = (sample - source);
+  auto normal = axis.cross_prod(L1);
+
   // always compute the angle from the right most peak
   // relative to the coordinates of the sample
-  if (pos1[0] > pos2[0])
+  if (pos1.scalar_prod(normal) > pos2.scalar_prod(normal))
     std::swap(pos1, pos2);
 
   // compute the angle between -180 and +180
-  const Mantid::Kernel::V3D up(0,1,0);
   auto angle = pos2.angle(pos1);
-  auto refRight = up.cross_prod(pos1);
+  auto refRight = axis.cross_prod(pos1);
   angle = std::copysign(angle, pos2.scalar_prod(refRight));
   angle *= double_constants::radian;
 

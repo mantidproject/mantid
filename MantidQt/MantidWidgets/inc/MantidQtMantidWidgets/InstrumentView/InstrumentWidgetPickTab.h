@@ -86,6 +86,7 @@ public:
   bool addToDisplayContextMenu(QMenu &) const override;
   void selectTool(const ToolType tool);
   boost::shared_ptr<ProjectionSurface> getSurface() const;
+  const InstrumentWidget* getInstrumentWidget() const;
   /// Load settings for the pick tab from a project file
   virtual void loadFromProject(const std::string &lines) override;
   /// Save settings for the pick tab to a project file
