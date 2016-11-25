@@ -50,6 +50,21 @@ def get_monitor_ws(ws_to_process, run_number_string, instrument):
     return load_monitor_ws
 
 
+def load_current_normalised_ws(run_number_string, instrument):
+    read_in_ws = _load_raw_files(run_number_string=run_number_string, instrument=instrument)
+
+    run_information = instrument.get_run_details(run_number=run_number_string)
+
+    read_ws = instrument.normalise_ws(ws_to_correct=read_in_ws, run_details=run_information)
+
+    output_name = "read_ws_output-" + str(g_ads_workaround["read_ws"])
+    g_ads_workaround["read_ws"] += 1
+    read_ws = mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=output_name)
+
+    remove_intermediate_workspace(read_in_ws)
+    return read_ws
+
+
 def remove_intermediate_workspace(workspace_name):
     mantid.DeleteWorkspace(workspace_name)
     del workspace_name  # Mark it as deleted so that more information is preserved on throw
@@ -63,6 +78,13 @@ def subtract_sample_empty(ws_to_correct, empty_sample_ws_string, instrument):
         remove_intermediate_workspace(empty_sample)
         output = corrected_ws
     return output
+
+
+def _check_load_range(list_of_runs_to_load):
+    MAXIMUM_RANGE_LEN = 20  # If more than this number of runs is entered probably wrong
+    if len(list_of_runs_to_load) > MAXIMUM_RANGE_LEN:
+        raise ValueError("More than " + str(MAXIMUM_RANGE_LEN) + " runs were selected."
+                         " Found " + str(len(list_of_runs_to_load)) + " Aborting.")
 
 
 def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument, group_names):
@@ -102,13 +124,6 @@ def _load_sum_file_range(run_numbers_list, instrument):
     return summed_ws
 
 
-def _check_load_range(list_of_runs_to_load):
-    MAXIMUM_RANGE_LEN = 20  # If more than this number of runs is entered probably wrong
-    if len(list_of_runs_to_load) > MAXIMUM_RANGE_LEN:
-        raise ValueError("More than " + str(MAXIMUM_RANGE_LEN) + " runs were selected."
-                         " Found " + str(len(list_of_runs_to_load)) + " Aborting.")
-
-
 def __run_number_generator(processed_string):
     # Expands run numbers of the form 1-10, 12, 14-20, 23 to 1,2,3,..,8,9,10,12,14,15,16...,19,20,23
     for entry in processed_string.split(','):
@@ -122,18 +137,3 @@ def __run_number_generator(processed_string):
             yield range(int(numbers[0]), int(numbers[-1]) + 1)
         else:
             raise ValueError("The run number " + str(entry) + " is incorrect in calibration mapping")
-
-
-def load_current_normalised_ws(run_number_string, instrument):
-    read_in_ws = _load_raw_files(run_number_string=run_number_string, instrument=instrument)
-
-    run_information = instrument.get_run_details(run_number=run_number_string)
-
-    read_ws = instrument.normalise_ws(ws_to_correct=read_in_ws, run_details=run_information)
-
-    output_name = "read_ws_output-" + str(g_ads_workaround["read_ws"])
-    g_ads_workaround["read_ws"] += 1
-    read_ws = mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=output_name)
-
-    remove_intermediate_workspace(read_in_ws)
-    return read_ws
