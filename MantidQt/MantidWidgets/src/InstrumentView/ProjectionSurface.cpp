@@ -766,7 +766,7 @@ void ProjectionSurface::comparePeaks(const QRect &rect) {
   PeakMarker2D *marker = nullptr;
   Mantid::Geometry::IPeak *peak = nullptr;
   QPointF origin;
-  foreach (PeakOverlay *po, m_peakShapes) {
+  for(auto *po : m_peakShapes) {
     po->selectIn(rect);
     const auto markers = po->getSelectedPeakMarkers();
     if (markers.length() > 0) {
