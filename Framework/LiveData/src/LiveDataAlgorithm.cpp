@@ -37,10 +37,33 @@ void LiveDataAlgorithm::initProps() {
     }
   }
 
+  // All available listener class names
+  auto listeners = LiveListenerFactory::Instance().getKeys();
+  listeners.push_back(""); // Allow not specifying a listener too
+
   declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
                       "Instrument", "",
                       boost::make_shared<StringListValidator>(instruments)),
                   "Name of the instrument to monitor.");
+
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "Connection", "",
+                      Direction::Input),
+                  "Selects the listener connection entry to use. "
+                  "Default connection will be used if not specified");
+
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "Listener", "",
+                      boost::make_shared<StringListValidator>(listeners),
+                      Direction::Input),
+                  "Name of the listener class to use. "
+                  "If specified, overrides class specified by Connection.");
+
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "Address", "",
+                      Direction::Input),
+                  "Address for the listener to connect to. "
+                  "If specified, overrides address specified by Connection.");
 
   declareProperty(make_unique<PropertyWithValue<std::string>>("StartTime", "",
                                                               Direction::Input),
@@ -172,17 +195,43 @@ bool LiveDataAlgorithm::hasPostProcessing() const {
  *
  * @return ILiveListener_sptr
  */
-ILiveListener_sptr LiveDataAlgorithm::getLiveListener() {
+ILiveListener_sptr LiveDataAlgorithm::getLiveListener(bool start) {
   if (m_listener)
     return m_listener;
 
-  // Not stored? Need to create it
-  std::string inst = this->getPropertyValue("Instrument");
-  m_listener = LiveListenerFactory::Instance().create(inst, true, this);
+  // Create a new listener
+  m_listener = createLiveListener(start);
 
   // Start at the given date/time
-  m_listener->start(this->getStartTime());
+  if (start)
+    m_listener->start(this->getStartTime());
 
+  return m_listener;
+}
+
+ILiveListener_sptr LiveDataAlgorithm::createLiveListener(bool connect)
+{
+  // Get the LiveListenerInfo from Facilities.xml
+  std::string inst_name = this->getPropertyValue("Instrument");
+  std::string conn_name = this->getPropertyValue("Connection");
+
+  const auto &inst = ConfigService::Instance().getInstrument(inst_name);
+  const auto &conn = inst.liveListenerInfo(conn_name);
+
+  // See if listener and/or address override has been specified
+  std::string listener = this->getPropertyValue("Listener");
+  if (listener.empty())
+    listener = conn.listener();
+
+  std::string address = this->getPropertyValue("Address");
+  if (address.empty())
+    address = conn.address();
+
+  // Construct new LiveListenerInfo with overrides, if given
+  LiveListenerInfo info(listener, address);
+
+  // Create and return
+  m_listener = LiveListenerFactory::Instance().create(info, connect, this);
   return m_listener;
 }
 
@@ -285,9 +334,7 @@ std::map<std::string, std::string> LiveDataAlgorithm::validateInputs() {
   if (m_listener) {
     eventListener = m_listener->buffersEvents();
   } else {
-    eventListener = LiveListenerFactory::Instance()
-                        .create(instrument, false)
-                        ->buffersEvents();
+    eventListener = createLiveListener()->buffersEvents();
   }
   if (!eventListener && getPropertyValue("AccumulationMethod") == "Add") {
     out["AccumulationMethod"] =
