@@ -746,8 +746,7 @@ void ProjectionSurface::erasePeaks(const QRect &rect) {
     // clear selected peak markers
     for (auto marker : peakMarkers) {
       auto peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
-      if (m_selectedPeaks.first == peak ||
-          m_selectedPeaks.second == peak) {
+      if (m_selectedPeaks.first == peak || m_selectedPeaks.second == peak) {
         m_selectedPeaks.first = nullptr;
         m_selectedPeaks.second = nullptr;
         m_selectedMarkers.first = QPointF();
@@ -766,7 +765,7 @@ void ProjectionSurface::comparePeaks(const QRect &rect) {
   PeakMarker2D *marker = nullptr;
   Mantid::Geometry::IPeak *peak = nullptr;
   QPointF origin;
-  for(auto *po : m_peakShapes) {
+  for (auto *po : m_peakShapes) {
     po->selectIn(rect);
     const auto markers = po->getSelectedPeakMarkers();
     if (markers.length() > 0) {

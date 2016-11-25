@@ -210,8 +210,8 @@ void InstrumentWidget::renameWorkspace(const std::string &workspace) {
  * @param surfaceType :: Surface type for this projection
  * @return a V3D for the axis being projected on
  */
-Mantid::Kernel::V3D InstrumentWidget::getSurfaceAxis(const int surfaceType) const
-{
+Mantid::Kernel::V3D
+InstrumentWidget::getSurfaceAxis(const int surfaceType) const {
   Mantid::Kernel::V3D axis;
 
   // define the axis

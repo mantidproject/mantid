@@ -584,9 +584,8 @@ InstrumentWidgetPickTab::getSurface() const {
   return m_instrWidget->getSurface();
 }
 
-const InstrumentWidget *InstrumentWidgetPickTab::getInstrumentWidget() const
-{
- return m_instrWidget;
+const InstrumentWidget *InstrumentWidgetPickTab::getInstrumentWidget() const {
+  return m_instrWidget;
 }
 
 /**
@@ -960,7 +959,8 @@ QString ComponentInfoController::displayPeakAngles(
   angle *= double_constants::radian;
 
   // correct the angle to the range to be 0 < theta < 360
-  if(angle < 0) angle = 360 + angle;
+  if (angle < 0)
+    angle = 360 + angle;
 
   text << "Angle: " << angle << "\n";
 
