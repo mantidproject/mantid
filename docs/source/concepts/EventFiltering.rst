@@ -88,3 +88,5 @@ unfortunately intrudes into :ref:`TimeSeriesProperty`.
 As time splitters are better to be isolated from logs, which are
 recorded in :ref:`TimeSeriesProperty`, it is not
 recommended to set up event filters by this approach.
+
+.. categories:: Concepts

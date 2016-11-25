@@ -568,8 +568,10 @@ void ReflectometryReductionOneAuto::exec() {
     setProperty("MomentumTransferMaximum",
                 boost::lexical_cast<double>(
                     refRedOne->getPropertyValue("MomentumTransferMaximum")));
-    setProperty("ThetaIn", boost::lexical_cast<double>(
-                               refRedOne->getPropertyValue("ThetaIn")));
+    if (theta_in.is_initialized())
+      setProperty("ThetaIn", theta_in.get());
+    else
+      setProperty("ThetaIn", thetaOut1 / 2.);
 
   } else {
     throw std::runtime_error(
@@ -649,6 +651,10 @@ bool ReflectometryReductionOneAuto::processGroups() {
   const bool isPolarizationCorrectionOn =
       this->getPropertyValue("PolarizationAnalysis") !=
       noPolarizationCorrectionMode();
+
+  // this algorithm effectively behaves as MultiPeriodGroupAlgorithm
+  m_usingBaseProcessGroups = true;
+
   // Get our input workspace group
   auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
       getPropertyValue("InputWorkspace"));
@@ -833,9 +839,6 @@ bool ReflectometryReductionOneAuto::processGroups() {
   // setting output properties.
   this->setPropertyValue("OutputWorkspace", outputIvsQ);
   this->setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
-  setExecuted(true);
-  notificationCenter().postNotification(
-      new FinishedNotification(this, isExecuted()));
   return true;
 }
 } // namespace Algorithms

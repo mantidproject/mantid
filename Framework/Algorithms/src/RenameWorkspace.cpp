@@ -182,9 +182,6 @@ bool RenameWorkspace::processGroups() {
   setProperty("OutputWorkspace", inputWS);
 
   // We finished successfully.
-  setExecuted(true);
-  notificationCenter().postNotification(
-      new FinishedNotification(this, isExecuted()));
   g_log.notice() << name() << " successful\n";
 
   return true;

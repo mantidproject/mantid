@@ -46,11 +46,7 @@ void SplineBackground::exec() {
   if (spec > static_cast<int>(inWS->getNumberHistograms()))
     throw std::out_of_range("WorkspaceIndex is out of range.");
 
-  const MantidVec &X = inWS->readX(spec);
-  const MantidVec &Y = inWS->readY(spec);
-  const MantidVec &E = inWS->readE(spec);
-  const bool isHistogram = inWS->isHistogramData();
-
+  const auto &yInputVals = inWS->y(spec);
   const int ncoeffs = getProperty("NCoeff");
   const int k = 4; // order of the spline + 1 (cubic)
   const int nbreak = ncoeffs - (k - 2);
@@ -66,9 +62,9 @@ void SplineBackground::exec() {
   gsl_multifit_linear_workspace *mw;
   double chisq;
 
-  int n = static_cast<int>(Y.size());
+  int n = static_cast<int>(yInputVals.size());
   bool isMasked = inWS->hasMaskedBins(spec);
-  std::vector<int> masked(Y.size());
+  std::vector<int> masked(yInputVals.size());
   if (isMasked) {
     auto maskedBins = inWS->maskedBins(spec);
     for (auto &maskedBin : maskedBins)
@@ -94,15 +90,16 @@ void SplineBackground::exec() {
   mw = gsl_multifit_linear_alloc(n, ncoeffs);
 
   /* this is the data to be fitted */
+  const auto &eInputVals = inWS->e(spec);
+  const auto &xInputPoints = inWS->points(spec);
   int j = 0;
-  for (MantidVec::size_type i = 0; i < Y.size(); ++i) {
+  for (MantidVec::size_type i = 0; i < yInputVals.size(); ++i) {
     if (isMasked && masked[i])
       continue;
-    gsl_vector_set(x, j,
-                   (isHistogram ? (0.5 * (X[i] + X[i + 1]))
-                                : X[i])); // Middle of the bins, if a histogram
-    gsl_vector_set(y, j, Y[i]);
-    gsl_vector_set(w, j, E[i] > 0. ? 1. / (E[i] * E[i]) : 0.);
+    gsl_vector_set(x, j, xInputPoints[i]);
+    gsl_vector_set(y, j, yInputVals[i]);
+    gsl_vector_set(
+        w, j, eInputVals[i] > 0. ? 1. / (eInputVals[i] * eInputVals[i]) : 0.);
 
     ++j;
   }
@@ -121,8 +118,10 @@ void SplineBackground::exec() {
     throw std::runtime_error("Assertion failed: n != j");
   }
 
-  double xStart = X.front();
-  double xEnd = X.back();
+  const auto &xInputVals = inWS->x(spec);
+
+  double xStart = xInputVals.front();
+  double xEnd = xInputVals.back();
 
   /* use uniform breakpoints */
   gsl_bspline_knots_uniform(xStart, xEnd, bw);
@@ -145,20 +144,24 @@ void SplineBackground::exec() {
   gsl_multifit_wlinear(Z, w, y, c, cov, &chisq, mw);
 
   /* output the smoothed curve */
-  API::MatrixWorkspace_sptr outWS =
-      WorkspaceFactory::Instance().create(inWS, 1, X.size(), Y.size());
+  API::MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(
+      inWS, 1, xInputVals.size(), yInputVals.size());
   {
     outWS->getSpectrum(0)
         .setSpectrumNo(inWS->getSpectrum(spec).getSpectrumNo());
     double yi, yerr;
-    for (MantidVec::size_type i = 0; i < Y.size(); i++) {
-      double xi = X[i];
+
+    auto &yVals = outWS->mutableY(0);
+    auto &eVals = outWS->mutableE(0);
+
+    for (MantidVec::size_type i = 0; i < yInputVals.size(); i++) {
+      double xi = xInputVals[i];
       gsl_bspline_eval(xi, B, bw);
       gsl_multifit_linear_est(B, c, cov, &yi, &yerr);
-      outWS->dataY(0)[i] = yi;
-      outWS->dataE(0)[i] = yerr;
+      yVals[i] = yi;
+      eVals[i] = yerr;
     }
-    outWS->dataX(0) = X;
+    outWS->setSharedX(0, inWS->sharedX(0));
   }
 
   gsl_bspline_free(bw);

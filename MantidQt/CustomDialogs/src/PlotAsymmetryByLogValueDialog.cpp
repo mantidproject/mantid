@@ -5,6 +5,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 
 #include <QLabel>
 #include <QLineEdit>
@@ -30,9 +31,6 @@ DECLARE_DIALOG(PlotAsymmetryByLogValueDialog)
 using namespace MantidQt::CustomDialogs;
 using namespace MantidQt::API;
 
-//---------------------------------------
-// Public member functions
-//---------------------------------------
 /**
  * Constructor
  */
@@ -51,9 +49,6 @@ PlotAsymmetryByLogValueDialog::~PlotAsymmetryByLogValueDialog() {
   delete browseButtonMapper;
 }
 
-//---------------------------------------
-// Private member functions
-//---------------------------------------
 /**
  * Reimplemented virtual function to set up the dialog
  */

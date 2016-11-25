@@ -140,6 +140,29 @@ Matrix<T>::Matrix(const std::vector<T> &data)
 }
 
 template <typename T>
+Matrix<T>::Matrix(const std::vector<T> &data, const size_t nrow,
+                  const size_t ncol)
+    : nx(0), ny(0), V(nullptr) {
+  size_t numel = data.size();
+  size_t test = nrow * ncol;
+  if (test != numel) {
+    throw(std::invalid_argument("number of elements in input vector have is "
+                                "incompatible with the number of rows and "
+                                "columns"));
+  }
+
+  setMem(nrow, ncol);
+
+  size_t ic(0);
+  for (size_t i = 0; i < nx; i++) {
+    for (size_t j = 0; j < ny; j++) {
+      V[i][j] = data[ic];
+      ic++;
+    }
+  }
+}
+
+template <typename T>
 Matrix<T>::Matrix(const Matrix<T> &A, const size_t nrow, const size_t ncol)
     : nx(A.nx - 1), ny(A.ny - 1), V(nullptr)
 /**

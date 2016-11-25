@@ -19,24 +19,24 @@ properties (Log values). The properties (Log) names are:
 **NumAllSpectra**, **NumMaskSpectra** and **NumZeroSpectra**,
 where:
 
-* NumAllSpectra is the number of spectra contributed to the sum
+* NumAllSpectra is the number of spectra contributed to the sum
 
-* NumMaskSpectra is the spectra dropped from the summations because they are masked. 
+* NumMaskSpectra is the spectra dropped from the summations because they are masked.
 
-  * If monitors are not included in the summation, they are not counted here.
+  * If monitors are not included in the summation, they are not counted here.
 
-* NumZeroSpectra isthe number of zero bins in histogram workspace or empty spectra for event workspace. 
+* NumZeroSpectra is the number of zero bins in histogram workspace or empty spectra for event workspace.
 
-  * These spectra are dropped from the summation of histogram workspace when WeightedSum property is set to True.
+  * These spectra are dropped from the summation of histogram workspace when WeightedSum property is set to True.
 
 Assuming **pWS** is the output workspace handle, from Python these
 properties can be accessed by the code:
 
 .. code-block:: python
 
-     nSpectra       = pWS.getRun().getLogData("NumAllSpectra").value
-     nMaskedSpectra = pWS.getRun().getLogData("NumMaskSpectra").value 
-     nZeroSpectra   = pWS.getRun().getLogData("NumZeroSpectra").value
+    nSpectra       = pWS.getRun().getLogData("NumAllSpectra").value
+    nMaskedSpectra = pWS.getRun().getLogData("NumMaskSpectra").value
+    nZeroSpectra   = pWS.getRun().getLogData("NumZeroSpectra").value
 
 Usage
 -----

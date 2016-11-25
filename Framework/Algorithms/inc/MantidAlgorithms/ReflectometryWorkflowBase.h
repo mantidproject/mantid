@@ -58,13 +58,13 @@ public:
   toLam(Mantid::API::MatrixWorkspace_sptr toConvert,
         const std::string &processingCommands,
         const OptionalInteger monitorIndex, const MinMax &wavelengthMinMax,
-        const OptionalMinMax &backgroundMinMax, const double &wavelengthStep);
+        const OptionalMinMax &backgroundMinMax);
 
   /// Convert the detector spectrum of the input workspace to wavelength
   API::MatrixWorkspace_sptr
   toLamDetector(const std::string &processingCommands,
                 const API::MatrixWorkspace_sptr &toConvert,
-                const MinMax &wavelengthMinMax, const double &wavelengthStep);
+                const MinMax &wavelengthMinMax);
 
 protected:
   /// Determine if the property has it's default value.

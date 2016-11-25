@@ -40,7 +40,7 @@
 #include "ScriptingEnv.h"
 #include "Scripted.h"
 
-#include "Mantid/IProjectSerialisable.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 
 class QTableWidgetItem;
 
@@ -391,9 +391,9 @@ public slots:
   void showComments(bool on = true);
   bool commentsEnabled() { return d_show_comments; }
 
-  static IProjectSerialisable *loadFromProject(const std::string &lines,
-                                               ApplicationWindow *app,
-                                               const int fileVersion);
+  static MantidQt::API::IProjectSerialisable *
+  loadFromProject(const std::string &lines, ApplicationWindow *app,
+                  const int fileVersion);
   void restore(const QStringList &lst) override;
 
   //! This slot notifies the main application that the table has been modified.

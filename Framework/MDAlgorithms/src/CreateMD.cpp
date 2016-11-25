@@ -1,6 +1,8 @@
 #include "MantidMDAlgorithms/CreateMD.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"

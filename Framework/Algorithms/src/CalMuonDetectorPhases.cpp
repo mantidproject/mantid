@@ -7,6 +7,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -21,7 +22,6 @@ using API::Progress;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalMuonDetectorPhases)
 
-//----------------------------------------------------------------------------------------------
 /** Initializes the algorithm's properties.
  */
 void CalMuonDetectorPhases::init() {
@@ -61,7 +61,6 @@ void CalMuonDetectorPhases::init() {
       "will read from file.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Validates the inputs.
  */
 std::map<std::string, std::string> CalMuonDetectorPhases::validateInputs() {

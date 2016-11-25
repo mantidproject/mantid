@@ -1,6 +1,5 @@
 #include "AlgorithmMonitor.h"
 #include "MantidUI.h"
-#include "MantidDock.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/MaskedProperty.h"
@@ -63,7 +62,6 @@ void AlgorithmMonitor::add(Mantid::API::IAlgorithm_sptr alg) {
   emit algorithmStarted(alg->getAlgorithmID());
   emit countChanged();
   unlock();
-  m_mantidUI->showAlgWidget();
 }
 
 //-----------------------------------------------------------------------------

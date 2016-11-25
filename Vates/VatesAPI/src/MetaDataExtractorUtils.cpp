@@ -96,17 +96,16 @@ MetaDataExtractorUtils::getMinAndMax(Mantid::API::IMDWorkspace_sptr workspace) {
       double minSignal = DBL_MAX;
       double maxSignal = -DBL_MAX;
 
-      auto inf = std::numeric_limits<double>::infinity();
       for (size_t i = 0; i < iterators.size(); i++) {
         delete iterators[i];
 
         double signal;
         signal = intervals[i].minValue();
-        if (signal != inf && signal < minSignal)
+        if (!std::isinf(signal) && signal < minSignal)
           minSignal = signal;
 
         signal = intervals[i].maxValue();
-        if (signal != inf && signal > maxSignal)
+        if (!std::isinf(signal) && signal > maxSignal)
           maxSignal = signal;
       }
 
@@ -157,7 +156,7 @@ MetaDataExtractorUtils::getRange(Mantid::API::IMDIterator *it) {
     double signal = it->getNormalizedSignal();
 
     // Skip any 'infs' as it screws up the color scale
-    if (signal != inf) {
+    if (!std::isinf(signal)) {
       if (signal == 0.0)
         minSignalZeroCheck = signal;
       if (signal < minSignal && signal > 0.0)

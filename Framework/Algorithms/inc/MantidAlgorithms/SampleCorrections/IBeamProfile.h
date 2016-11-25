@@ -8,6 +8,9 @@ namespace Mantid {
 namespace Kernel {
 class PseudoRandomNumberGenerator;
 }
+namespace Geometry {
+class BoundingBox;
+}
 namespace Algorithms {
 
 /**
@@ -44,6 +47,8 @@ public:
 
   virtual ~IBeamProfile() = default;
   virtual Ray generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const = 0;
+  virtual Ray generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
+                            const Geometry::BoundingBox &) const = 0;
 };
 
 } // namespace Algorithms

@@ -5,6 +5,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Property.h"

@@ -41,6 +41,13 @@ public:
   };
   std::string name() override { return std::string("Cut Selected"); }
   std::string icon() override { return std::string("://cut.png"); }
+  std::string tooltip() override { return std::string("Cut selected"); }
+  std::string whatsthis() override {
+    return std::string("Copies the selected rows to the clipboard, and then "
+                       "deletes them. Each row is placed on a new line, and "
+                       "each cell is separated by a tab");
+  }
+  std::string shortcut() override { return std::string("Ctrl+X"); }
 };
 }
 }

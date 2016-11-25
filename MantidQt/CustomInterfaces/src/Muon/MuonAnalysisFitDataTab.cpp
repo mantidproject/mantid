@@ -5,13 +5,11 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
 #include <boost/shared_ptr.hpp>
 
-#include <QDesktopServices>
-#include <QUrl>
 //-----------------------------------------------------------------------------
 
 namespace MantidQt {
@@ -32,8 +30,8 @@ void MuonAnalysisFitDataTab::init() {
 * Muon Analysis Data Analysis help (slot)
 */
 void MuonAnalysisFitDataTab::muonAnalysisHelpDataAnalysisClicked() {
-  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-                                 "MuonAnalysisDataAnalysis"));
+  MantidQt::API::HelpWindow::showCustomInterface(
+      nullptr, QString("Muon_Analysis"), QString("data-analysis"));
 }
 
 /**
@@ -58,7 +56,8 @@ void MuonAnalysisFitDataTab::makeRawWorkspace(const std::string &wsName) {
 *
 * @param workspaceName :: The workspaceName that the fit has been done against
 */
-void MuonAnalysisFitDataTab::groupFittedWorkspaces(QString workspaceName) {
+void MuonAnalysisFitDataTab::groupFittedWorkspaces(
+    const QString &workspaceName) {
   std::string wsNormalised =
       workspaceName.toStdString() + "_NormalisedCovarianceMatrix";
   std::string wsParameters = workspaceName.toStdString() + "_Parameters";

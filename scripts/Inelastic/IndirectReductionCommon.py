@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name,too-many-branches,too-many-arguments,deprecated-module,no-name-in-module,too-many-locals
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
@@ -7,12 +8,13 @@ import numpy as np
 
 #-------------------------------------------------------------------------------
 
+
 def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, load_logs=True, load_opts=None):
     """
     Loads a set of files and extracts just the spectra we care about (i.e. detector range and monitor).
 
     @param data_files List of data file names
-    @param ipf_filename FIle path/name for the instrument parameter file to load
+    @param ipf_filename File path/name for the instrument parameter file to load
     @param spec_min Minimum spectra ID to load
     @param spec_max Maximum spectra ID to load
     @param sum_files Sum loaded files
@@ -66,7 +68,7 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
             chopped_data =  x_max > chop_threshold
         except IndexError:
             chopped_data = False
-        logger.information('Workspace %s need data chop: %s' % (ws_name, str(chopped_data)))
+        logger.information('Workspace {0} need data chop: {1}'.format(ws_name, str(chopped_data)))
 
         workspaces = [ws_name]
         if chopped_data:
@@ -107,6 +109,7 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
     return workspace_names, chopped_data
 
 #-------------------------------------------------------------------------------
+
 
 def sum_regular_runs(workspace_names):
     """
@@ -161,6 +164,7 @@ def sum_regular_runs(workspace_names):
 
 #-------------------------------------------------------------------------------
 
+
 def sum_chopped_runs(workspace_names):
     """
     Sum runs with chopped data.
@@ -214,11 +218,12 @@ def sum_chopped_runs(workspace_names):
 
 #-------------------------------------------------------------------------------
 
+
 def identify_bad_detectors(workspace_name):
     """
     Identify detectors which should be masked
 
-    @param workspace_name Name of worksapce to use ot get masking detectors
+    @param workspace_name Name of workspace to use to get masking detectors
     @return List of masked spectra
     """
     from mantid.simpleapi import (IdentifyNoisyDetectors, DeleteWorkspace)
@@ -230,7 +235,7 @@ def identify_bad_detectors(workspace_name):
     except IndexError:
         masking_type = 'None'
 
-    logger.information('Masking type: %s' % (masking_type))
+    logger.information('Masking type: %s' % masking_type)
 
     masked_spec = list()
 
@@ -246,11 +251,12 @@ def identify_bad_detectors(workspace_name):
         # Remove the temporary masking workspace
         DeleteWorkspace(ws_mask)
 
-    logger.debug('Masked specta for workspace %s: %s' % (workspace_name, str(masked_spec)))
+    logger.debug('Masked spectra for workspace %s: %s' % (workspace_name, str(masked_spec)))
 
     return masked_spec
 
 #-------------------------------------------------------------------------------
+
 
 def unwrap_monitor(workspace_name):
     """
@@ -314,6 +320,7 @@ def unwrap_monitor(workspace_name):
 
 #-------------------------------------------------------------------------------
 
+
 def process_monitor_efficiency(workspace_name):
     """
     Process monitor efficiency for a given workspace.
@@ -333,7 +340,7 @@ def process_monitor_efficiency(workspace_name):
         raise ValueError('Cannot get monitor details form parameter file')
 
     if area == -1 or thickness == -1 or attenuation == -1:
-        logger.information('For workspace %s, skipping monitor efficiency' % (workspace_name))
+        logger.information('For workspace %s, skipping monitor efficiency' % workspace_name)
         return
 
     OneMinusExponentialCor(InputWorkspace=monitor_workspace_name,
@@ -342,6 +349,7 @@ def process_monitor_efficiency(workspace_name):
                            C1=area)
 
 #-------------------------------------------------------------------------------
+
 
 def scale_monitor(workspace_name):
     """
@@ -367,6 +375,7 @@ def scale_monitor(workspace_name):
               Operation='Multiply')
 
 #-------------------------------------------------------------------------------
+
 
 def scale_detectors(workspace_name, e_mode='Indirect'):
     """
@@ -394,10 +403,11 @@ def scale_detectors(workspace_name, e_mode='Indirect'):
 
 #-------------------------------------------------------------------------------
 
+
 def group_spectra(workspace_name, masked_detectors, method, group_file=None, group_ws=None):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod and
-    Workflow.GroupingFile parameters and GrpupingPolicy property.
+    Workflow.GroupingFile parameters and GroupingPolicy property.
 
     @param workspace_name Name of workspace to group spectra of
     @param masked_detectors List of spectra numbers to mask
@@ -454,7 +464,7 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
 
         # If it is still not found just give up
         if not os.path.isfile(grouping_file):
-            raise RuntimeError('Cannot find grouping file: %s' % (grouping_file))
+            raise RuntimeError('Cannot find grouping file: %s' % grouping_file)
 
         # Mask detectors if required
         if len(masked_detectors) > 0:
@@ -478,6 +488,7 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
         raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace_name))
 
 #-------------------------------------------------------------------------------
+
 
 def fold_chopped(workspace_name):
     """
@@ -509,7 +520,7 @@ def fold_chopped(workspace_name):
     for i in range(0, mtd[merged_ws].blocksize()):
         y_val = 0.0
         for rng in ranges:
-            if data_x[i] >= rng[0] and data_x[i] <= rng[1]:
+            if rng[0] <= data_x[i] <= rng[1]:
                 y_val += 1.0
 
         data_y.append(y_val)
@@ -530,9 +541,10 @@ def fold_chopped(workspace_name):
 
 #-------------------------------------------------------------------------------
 
+
 def rename_reduction(workspace_name, multiple_files):
     """
-    Renames a worksapce according to the naming policy in the Workflow.NamingConvention parameter.
+    Renames a workspace according to the naming policy in the Workflow.NamingConvention parameter.
 
     @param workspace_name Name of workspace
     @param multiple_files Insert the multiple file marker
@@ -553,7 +565,7 @@ def rename_reduction(workspace_name, multiple_files):
     try:
         convention = instrument.getStringParameter('Workflow.NamingConvention')[0]
     except IndexError:
-        # Defualt to run title if naming convention parameter not set
+        # Default to run title if naming convention parameter not set
         convention = 'RunTitle'
     logger.information('Naming convention for workspace %s is %s' % (workspace_name, convention))
 
@@ -605,19 +617,20 @@ def rename_reduction(workspace_name, multiple_files):
 
 #-------------------------------------------------------------------------------
 
+
 def plot_reduction(workspace_name, plot_type):
     """
     Plot a given workspace based on the Plot property.
 
     @param workspace_name Name of workspace to plot
-    @param plot_types Type of plot to create
+    @param plot_type Type of plot to create
     """
 
     if plot_type == 'Spectra' or plot_type == 'Both':
         from mantidplot import plotSpectrum
         num_spectra = mtd[workspace_name].getNumberHistograms()
         try:
-            plotSpectrum(workspace_name, range(0, num_spectra))
+            plotSpectrum(workspace_name, range(0, num_spectra), error_bars=True)
         except RuntimeError:
             logger.notice('Spectrum plotting canceled by user')
 
@@ -629,19 +642,21 @@ def plot_reduction(workspace_name, plot_type):
 
 #-------------------------------------------------------------------------------
 
-def save_reduction(worksspace_names, formats, x_units='DeltaE'):
+
+def save_reduction(workspace_names, formats, x_units='DeltaE'):
+
     """
     Saves the workspaces to the default save directory.
 
-    @param worksspace_names List of workspace names to save
+    @param workspace_names List of workspace names to save
     @param formats List of formats to save in
-    @param Output X units
+    @param x_units X units
     """
     from mantid.simpleapi import (SaveSPE, SaveNexusProcessed, SaveNXSPE,
                                   SaveAscii, Rebin, DeleteWorkspace,
                                   ConvertSpectrumAxis, SaveDaveGrp)
 
-    for workspace_name in worksspace_names:
+    for workspace_name in workspace_names:
         if 'spe' in formats:
             SaveSPE(InputWorkspace=workspace_name,
                     Filename=workspace_name + '.spe')
@@ -655,10 +670,9 @@ def save_reduction(worksspace_names, formats, x_units='DeltaE'):
                       Filename=workspace_name + '.nxspe')
 
         if 'ascii' in formats:
-            # Version 1 of SaveAscii produces output that works better with excel/origin
-            # For some reason this has to be done with an algorithm object, using the function
-            # wrapper with Version did not change the version that was run
-            saveAsciiAlg = AlgorithmManager.createUnmanaged('SaveAscii', 1)
+
+            # Changed to version 2 to enable re-loading of files into mantid
+            saveAsciiAlg = AlgorithmManager.createUnmanaged('SaveAscii', 2)
             saveAsciiAlg.initialize()
             saveAsciiAlg.setProperty('InputWorkspace', workspace_name)
             saveAsciiAlg.setProperty('Filename', workspace_name + '.dat')
@@ -689,6 +703,7 @@ def save_reduction(worksspace_names, formats, x_units='DeltaE'):
 
 #-------------------------------------------------------------------------------
 
+
 def get_multi_frame_rebin(workspace_name, rebin_string):
     """
     Creates a rebin string for rebinning multiple frames data.
@@ -717,6 +732,7 @@ def get_multi_frame_rebin(workspace_name, rebin_string):
     return None, None
 
 #-------------------------------------------------------------------------------
+
 
 def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_bins):
     """

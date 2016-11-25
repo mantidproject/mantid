@@ -58,6 +58,20 @@ public:
 
   std::vector<std::string> values(const std::string &name,
                                   const size_t i = 0) const;
+
+  template <typename T> TSVSerialiser &operator>>(std::vector<T> &val) {
+    val.reserve(m_curValues.size() - m_curIndex);
+
+    for (size_t i = m_curIndex; i < m_curValues.size(); ++i) {
+      auto valStr = m_curValues.at(i);
+      std::stringstream valSS(valStr);
+      T ret;
+      valSS >> ret;
+      val.push_back(ret);
+    }
+    return *this;
+  }
+
   std::vector<std::string> sections(const std::string &name) const;
 
   std::string lineAsString(const std::string &name, const size_t i = 0) const;
@@ -73,8 +87,10 @@ public:
   std::string asString(const size_t i) const;
   QString asQString(const size_t i) const;
   bool asBool(const size_t i) const;
-  QRect asQRect(const size_t i) const;
-  QColor asQColor(const size_t i) const;
+  QRect asQRect(const size_t i);
+  QColor asQColor(const size_t i);
+  QPoint asQPoint(const size_t i);
+  QPointF asQPointF(const size_t i);
 
   TSVSerialiser &operator>>(int &val);
   TSVSerialiser &operator>>(size_t &val);
@@ -85,6 +101,8 @@ public:
   TSVSerialiser &operator>>(bool &val);
   TSVSerialiser &operator>>(QRect &val);
   TSVSerialiser &operator>>(QColor &val);
+  TSVSerialiser &operator>>(QPoint &val);
+  TSVSerialiser &operator>>(QPointF &val);
 
   TSVSerialiser &writeLine(const std::string &name);
 
@@ -97,6 +115,8 @@ public:
   TSVSerialiser &operator<<(const bool &val);
   TSVSerialiser &operator<<(const QRect &val);
   TSVSerialiser &operator<<(const QColor &val);
+  TSVSerialiser &operator<<(const QPoint &val);
+  TSVSerialiser &operator<<(const QPointF &val);
 
   void writeRaw(const std::string &raw);
   void writeSection(const std::string &name, const std::string &body);

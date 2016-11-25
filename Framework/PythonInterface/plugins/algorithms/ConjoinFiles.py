@@ -6,6 +6,7 @@ from mantid.kernel import *
 from mantid.simpleapi import *
 import os
 
+
 class ConjoinFiles(PythonAlgorithm):
     def category(self):
         return "DataHandling\\Text"
@@ -67,4 +68,3 @@ class ConjoinFiles(PythonAlgorithm):
         self.setProperty("OutputWorkspace", mtd[wksp])
 
 AlgorithmFactory.subscribe(ConjoinFiles)
-

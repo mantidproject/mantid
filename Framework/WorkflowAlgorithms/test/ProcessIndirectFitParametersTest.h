@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Unit.h"
 
 using Mantid::Algorithms::ProcessIndirectFitParameters;
 using namespace Mantid::API;

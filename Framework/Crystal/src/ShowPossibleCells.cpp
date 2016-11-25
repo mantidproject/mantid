@@ -4,6 +4,7 @@
 #include "MantidGeometry/Crystal/ScalarUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -15,7 +16,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ShowPossibleCells::init() {
@@ -42,7 +42,6 @@ void ShowPossibleCells::init() {
                         "Allow permutations of conventional cells");
 }
 
-//--------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ShowPossibleCells::exec() {

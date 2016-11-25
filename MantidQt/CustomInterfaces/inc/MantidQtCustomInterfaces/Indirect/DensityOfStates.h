@@ -25,6 +25,9 @@ private slots:
   void dosAlgoComplete(bool error);
   void handleFileChange();
   void ionLoadComplete(bool error);
+  /// Handle plotting and saving
+  void plotClicked();
+  void saveClicked();
 
 private:
   /// The ui form

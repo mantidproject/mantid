@@ -3,11 +3,13 @@ import os
 import re
 import argparse
 
+
 def fixBadIndent(toModify,indent):
     err_string=indent.replace(' Bad indentation. Found ','').replace('(bad-indentation)','').split('spaces, expected')
     bad=int(err_string[0])
     good=int(err_string[1])
     return toModify.replace(' '*bad,' '*good)
+
 
 def fixParens(fname,errorlist,errlines):
     tofixf=open(fname,'r')
@@ -24,6 +26,7 @@ def fixParens(fname,errorlist,errlines):
     tofixf=open(fname,'w')
     tofixf.write(''.join(newcontent))
     tofixf.close()
+
 
 def fixSeveralErrors(fname,errorlist,errlines):
     tofixf=open(fname,'r')
@@ -45,6 +48,7 @@ def fixSeveralErrors(fname,errorlist,errlines):
     tofixf.write(''.join(newcontent))
     tofixf.close()
 
+
 def addIgnoreStatement(fname,errorlist):
     tofixf=open(fname,'r')
     file_content=tofixf.readlines()
@@ -63,9 +67,10 @@ def addIgnoreStatement(fname,errorlist):
         tofixf.write(''.join(file_content))
         tofixf.close()
 
+
 def generate_choices():
     ch=['simple','parentheses','add_ignores']
-    ch_help=['simple - fixes the following warning: bad-indentation, missing-final-newline, '+\
+    ch_help=['simple - fixes the following warning: bad-indentation, missing-final-newline, '+
              'mixed_indentation, trailing-whitespace, unnecesary-semicolon',
              'parentheses - fixes superfluous-parens warning',
              'add_ignores - adds ignore statemets at the beginning of each file to ignore invalid-name, no-init, too-many-lines']
@@ -76,8 +81,8 @@ if __name__=='__main__':
     choices,choices_help=generate_choices()
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
                                      epilog=choices_help,
-                                     description='Fix some pylint warnings. It is STRONGLY RECOMMENDED to '+\
-                                                 'rerun the pylintcheck between fixes')
+                                     description='Fix some pylint warnings. It is STRONGLY RECOMMENDED to '+
+                                     'rerun the pylintcheck between fixes')
     parser.add_argument('-fix','--fix', default='simple',
                         choices=choices,
                         help='Select things to fix (default: simple). \nSee the choices options below.')
@@ -97,7 +102,6 @@ if __name__=='__main__':
     filenumber=0
     linenumber=0
     prevFile=True
-
 
     while linenumber<fileindex:
         filename=files[filenumber]
@@ -164,10 +168,3 @@ if __name__=='__main__':
             linenumber+=j-1
         else:
             linenumber+=1
-
-
-
-
-
-
-

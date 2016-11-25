@@ -4,6 +4,7 @@ from mantid.simpleapi import *
 from isis_reflectometry import quick
 from isis_reflectometry import combineMulti
 
+
 class ReflectometryQuickCombineMulti(stresstesting.MantidStressTest):
     """
     This is a system test for the top-level CombineMulti routines. Quick is the name given to the
@@ -48,9 +49,8 @@ class ReflectometryQuickCombineMulti(stresstesting.MantidStressTest):
         IvsQ2Binned = Rebin(InputWorkspace=IvsQ2, Params=self.createBinningParam(run2QLow, -step, run2QHigh))
 
         # Peform the stitching
-        combineMulti.combineDataMulti([IvsQ1Binned.name(), IvsQ2Binned.name()], self.__stitchedWorkspaceName, \
+        combineMulti.combineDataMulti([IvsQ1Binned.name(), IvsQ2Binned.name()], self.__stitchedWorkspaceName,
                                       [run1QLow, run2QLow], [run1QHigh, run2QHigh], run1QLow, run2QHigh, -step, 1)
-
 
     def validate(self):
         self.disableChecking.append('Instrument')

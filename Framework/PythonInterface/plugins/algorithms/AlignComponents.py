@@ -10,6 +10,7 @@ from mantid.kernel import Direction, FloatBoundedValidator, PropertyCriterion, E
     logger, Quat, V3D, StringArrayProperty, StringListValidator
 import mantid.simpleapi as api
 
+
 class AlignComponents(PythonAlgorithm):
     """
     Class to align components

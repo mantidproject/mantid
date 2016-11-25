@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/Sample.h"
 
 #include "MantidCrystal/FindUBUsingLatticeParameters.h"
 #include "MantidCrystal/LoadIsawPeaks.h"

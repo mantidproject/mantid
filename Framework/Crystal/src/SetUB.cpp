@@ -4,6 +4,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/Sample.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -15,7 +16,6 @@ namespace Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetUB)
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SetUB::name() const { return "SetUB"; }
 
@@ -25,7 +25,6 @@ int SetUB::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string SetUB::category() const { return "Crystal\\UBMatrix"; }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SetUB::init() {
@@ -79,7 +78,6 @@ void SetUB::init() {
                         "to all samples");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
   @throws :: |B.u|=0 or |B.v|=0 or u||v
  */

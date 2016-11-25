@@ -13,6 +13,7 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataHandling/LoadPreNexus.h"
 #include "MantidKernel/System.h"
@@ -36,7 +37,6 @@ DECLARE_FILELOADER_ALGORITHM(LoadPreNexus)
 static const string RUNINFO_PARAM("Filename");
 static const string MAP_PARAM("MappingFilename");
 
-//----------------------------------------------------------------------------------------------
 /// @copydoc Mantid::API::IAlgorithm::name()
 const std::string LoadPreNexus::name() const { return "LoadPreNexus"; }
 
@@ -62,7 +62,6 @@ int LoadPreNexus::confidence(Kernel::FileDescriptor &descriptor) const {
     return 0;
 }
 
-//----------------------------------------------------------------------------------------------
 /// @copydoc Mantid::API::Algorithm::init()
 void LoadPreNexus::init() {
   // runfile to read in

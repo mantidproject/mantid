@@ -1,9 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/NearestNeighbourInfo.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/FractionalRebinning.h"
@@ -30,8 +28,6 @@ using namespace Mantid::DataObjects;
 /// Default constructor
 SofQWNormalisedPolygon::SofQWNormalisedPolygon()
     : Rebin2D(), m_Qout(), m_thetaWidth(0.0), m_detNeighbourOffset(-1) {}
-
-//----------------------------------------------------------------------------------------------
 
 /**
  * @return the name of the Algorithm
@@ -100,10 +96,10 @@ void SofQWNormalisedPolygon::exec() {
     this->initAngularCachesPSD(inputWS);
   }
 
-  const MantidVec &X = inputWS->readX(0);
+  const auto &X = inputWS->x(0);
   int emode = m_EmodeProperties.m_emode;
 
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nHistos);
        ++i) // signed for openmp
   {
@@ -187,6 +183,19 @@ void SofQWNormalisedPolygon::exec() {
   // Set the output spectrum-detector mapping
   SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
   outputWS->updateSpectraUsing(outputDetectorMap);
+
+  // Replace any NaNs in outputWorkspace with zeroes
+  if (this->getProperty("ReplaceNaNs")) {
+    auto replaceNans = this->createChildAlgorithm("ReplaceSpecialValues");
+    replaceNans->setChild(true);
+    replaceNans->initialize();
+    replaceNans->setProperty("InputWorkspace", outputWS);
+    replaceNans->setProperty("OutputWorkspace", outputWS);
+    replaceNans->setProperty("NaNValue", 0.0);
+    replaceNans->setProperty("InfinityValue", 0.0);
+    replaceNans->setProperty("BigNumberThreshold", DBL_MAX);
+    replaceNans->execute();
+  }
 }
 
 /**
@@ -305,10 +314,12 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
  */
 void SofQWNormalisedPolygon::initAngularCachesPSD(
     const API::MatrixWorkspace_const_sptr &workspace) {
-  // Trigger a build of the nearst neighbors outside the OpenMP loop
-  const int numNeighbours = 4;
   const size_t nHistos = workspace->getNumberHistograms();
   g_log.debug() << "Number of Histograms: " << nHistos << '\n';
+
+  bool ignoreMasked = true;
+  const int numNeighbours = 4;
+  NearestNeighbourInfo neighbourInfo(*workspace, ignoreMasked, numNeighbours);
 
   this->m_theta = std::vector<double>(nHistos);
   this->m_thetaWidths = std::vector<double>(nHistos);
@@ -320,8 +331,7 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
     DetConstPtr detector = workspace->getDetector(i);
     g_log.debug() << "Current histogram: " << i << '\n';
     specnum_t inSpec = workspace->getSpectrum(i).getSpectrumNo();
-    SpectraDistanceMap neighbours =
-        workspace->getNeighboursExact(inSpec, numNeighbours, true);
+    SpectraDistanceMap neighbours = neighbourInfo.getNeighboursExact(inSpec);
 
     g_log.debug() << "Current ID: " << inSpec << '\n';
     // Convert from spectrum numbers to workspace indices
@@ -379,7 +389,7 @@ RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
     API::MatrixWorkspace_const_sptr inputWorkspace,
     const std::vector<double> &binParams, std::vector<double> &newAxis) {
   // Create vector to hold the new X axis values
-  HistogramData::BinEdges xAxis(inputWorkspace->refX(0));
+  HistogramData::BinEdges xAxis(inputWorkspace->sharedX(0));
   const int xLength = static_cast<int>(xAxis.size());
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that

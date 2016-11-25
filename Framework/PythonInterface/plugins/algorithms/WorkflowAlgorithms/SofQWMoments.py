@@ -1,23 +1,23 @@
 #pylint: disable=no-init,invalid-name
 # Algorithm to start Bayes programs
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, \
                        WorkspaceGroupProperty, Progress
 from mantid.kernel import Direction
 from mantid import logger
 
-import os.path
 import numpy as np
+
 
 class SofQWMoments(DataProcessorAlgorithm):
 
     def category(self):
         return "Workflow\\MIDAS"
 
-
     def summary (self):
         return "Calculates the nth moment of y(q,w)"
-
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("Sample", "", Direction.Input),
@@ -33,7 +33,7 @@ class SofQWMoments(DataProcessorAlgorithm):
 
     #pylint: disable=too-many-locals
     def PyExec(self):
-        from IndirectCommon import CheckHistZero, CheckElimits, getDefaultWorkingDirectory
+        from IndirectCommon import CheckHistZero, CheckElimits
 
         workflow_prog = Progress(self, start=0.0, end=1.0, nreports=20)
         workflow_prog.report('Setting up algorithm')

@@ -8,6 +8,7 @@ import glob
 
 EXPECTED_EXT = '.expected'
 
+
 class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
 
     xsdFile=''
@@ -16,8 +17,8 @@ class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
 
     def skipTests(self):
         try:
-            from genxmlif import GenXmlIfError
-            from minixsv import pyxsval
+            from genxmlif import GenXmlIfError # noqa
+            from minixsv import pyxsval # noqa
         except ImportError:
             return True
         return False
@@ -66,8 +67,6 @@ class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
             # validate XML input file
             return myXsValidator.validateXmlInputForceReadFile (inputFile, inputTreeWrapper, xsdFile)
 
-
-
         direc = config['instrumentDefinition.directory']
         self.xsdFile =  os.path.join(direc,'Schema/IDF/1.0/','IDFSchema.xsd')
         if self.theFileToTest is None:
@@ -93,8 +92,8 @@ class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
             print "SUMMARY OF FAILED FILES"
             for filename in failed:
                 print filename
-            raise RuntimeError("Failed Validation for %d of %d files" \
-                                   % (len(failed), len(files)))
+            raise RuntimeError("Failed Validation for %d of %d files"
+                               % (len(failed), len(files)))
         else:
             print "Succesfully Validated %d files" % len(files)
 
@@ -104,4 +103,3 @@ if __name__ == '__main__':
     # validate specific file
     #valid.theFileToTest = "MARI_Definition.xml"
     valid.runTest()
-

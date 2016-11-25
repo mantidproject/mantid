@@ -464,8 +464,6 @@ private:
                                  QComboBox *selection, QString type);
   /// Update the beam center fields
   void updateBeamCenterCoordinates();
-  /// LOQ specific settings
-  void applyLOQSettings(bool isNowLOQ);
   /// Set the beam finder details
   void setBeamFinderDetails();
   /// Gets the QResolution settings and shows them in the GUI

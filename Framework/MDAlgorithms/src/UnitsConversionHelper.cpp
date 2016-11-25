@@ -2,7 +2,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Strings.h"
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -180,7 +180,7 @@ UnitsConversionHelper::getConversionRange(double x1, double x2) const {
     }
     double tof1 = m_SourceWSUnit->singleToTOF(range.first);
     double tof2 = m_SourceWSUnit->singleToTOF(range.second);
-    if (boost::math::isnan(tof1) || boost::math::isnan(tof2)) {
+    if (std::isnan(tof1) || std::isnan(tof2)) {
       if (range.first < source_range.first)
         range.first = source_range.first;
       if (range.second > source_range.second)

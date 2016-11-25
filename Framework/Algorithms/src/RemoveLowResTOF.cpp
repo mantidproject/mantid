@@ -142,12 +142,12 @@ void RemoveLowResTOF::exec() {
   for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
        workspaceIndex++) {
     // calculate where to zero out to
-    double tofMin = this->calcTofMin(workspaceIndex);
-    const MantidVec &X = m_inputWS->readX(0);
+    const double tofMin = this->calcTofMin(workspaceIndex);
+    const auto &X = m_inputWS->x(0);
     auto last = std::lower_bound(X.cbegin(), X.cend(), tofMin);
     if (last == X.end())
       --last;
-    size_t endBin = last - X.begin();
+    const size_t endBin = last - X.begin();
 
     // flatten out the data
     for (size_t i = 0; i < endBin; i++) {

@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/SANSDirectBeamScaling.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidGeometry/Instrument.h"
@@ -85,11 +83,11 @@ void SANSDirectBeamScaling::exec() {
   Progress progress(this, 0.0, 1.0, numHists);
 
   // Number of X bins
-  const int64_t xLength = inputWS->readY(0).size();
+  const int64_t xLength = inputWS->y(0).size();
 
   // Monitor counts
   double monitor = 0.0;
-  const MantidVec &MonIn = inputWS->readY(index[0]);
+  const auto &MonIn = inputWS->y(index[0]);
   for (int64_t j = 0; j < xLength; j++)
     monitor += MonIn[j];
 
@@ -101,25 +99,23 @@ void SANSDirectBeamScaling::exec() {
   // Sample-detector distance for the contributing pixels
   double sdd = 0.0;
 
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
-    IDetector_const_sptr det;
-    try {
-      det = inputWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
+    if (!spectrumInfo.hasDetectors(i)) {
       g_log.warning() << "Workspace index " << i
                       << " has no detector assigned to it - discarding\n";
       continue;
     }
 
     // Skip if we have a monitor or if the detector is masked.
-    if (det->isMonitor() || det->isMasked())
+    if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
       continue;
 
-    const MantidVec &YIn = inputWS->readY(i);
-    const MantidVec &EIn = inputWS->readE(i);
+    const auto &YIn = inputWS->y(i);
+    const auto &EIn = inputWS->e(i);
 
     // Sum up all the counts
-    V3D pos = det->getPos() - V3D(sourcePos.X(), sourcePos.Y(), 0.0);
+    V3D pos = spectrumInfo.position(i) - V3D(sourcePos.X(), sourcePos.Y(), 0.0);
     const double pixelDistance = pos.Z();
     pos.setZ(0.0);
     if (pos.norm() <= beamRadius) {

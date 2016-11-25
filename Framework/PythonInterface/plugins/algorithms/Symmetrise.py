@@ -1,4 +1,6 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 from mantid import logger, mtd
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
                         ITableWorkspaceProperty, PropertyMode, WorkspaceFactory, Progress)
@@ -8,6 +10,8 @@ import math
 import numpy as np
 
 #pylint: disable=too-many-instance-attributes
+
+
 class Symmetrise(PythonAlgorithm):
 
     _sample = None
@@ -23,10 +27,8 @@ class Symmetrise(PythonAlgorithm):
     def category(self):
         return 'CorrectionFunctions\\SpecialCorrections'
 
-
     def summary(self):
         return 'Make asymmetric workspace data symmetric.'
-
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', Direction.Input),
@@ -38,8 +40,8 @@ class Symmetrise(PythonAlgorithm):
         self.declareProperty('XMin', 0.0, doc='X value marking lower limit of curve to copy')
         self.declareProperty('XMax', 0.0, doc='X value marking upper limit of curve to copy')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',\
-                             Direction.Output), doc='Name to call the output workspace.')
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
+                                                     Direction.Output), doc='Name to call the output workspace.')
 
         self.declareProperty(ITableWorkspaceProperty('OutputPropertiesTable', '',
                                                      Direction.Output, PropertyMode.Optional),
@@ -145,7 +147,6 @@ class Symmetrise(PythonAlgorithm):
         self.setProperty('OutputWorkspace', out_ws)
         end_prog.report('Algorithm Complete')
 
-
     def validateInputs(self):
         """
         Checks for invalid input properties.
@@ -207,7 +208,6 @@ class Symmetrise(PythonAlgorithm):
 
         return issues
 
-
     def _setup(self):
         """
         Get the algorithm properties and validate them.
@@ -229,7 +229,6 @@ class Symmetrise(PythonAlgorithm):
 
         self._output_workspace = self.getPropertyValue('OutputWorkspace')
         self._props_output_workspace = self.getPropertyValue('OutputPropertiesTable')
-
 
     def _calculate_array_points(self, sample_x, sample_array_len):
         """
@@ -257,7 +256,6 @@ class Symmetrise(PythonAlgorithm):
             self._positive_max_index -= 1
         self._check_bounds(self._positive_max_index, sample_array_len, label='Positive')
 
-
     def _check_bounds(self, index, num_pts, label=''):
         """
         Check if the index falls within the bounds of the x range.
@@ -271,7 +269,6 @@ class Symmetrise(PythonAlgorithm):
             raise ValueError('%s point %d < 0' % (label, index))
         elif index >= num_pts:
             raise ValueError('%s point %d > %d' % (label, index, num_pts))
-
 
     def _generate_props_table(self):
         """

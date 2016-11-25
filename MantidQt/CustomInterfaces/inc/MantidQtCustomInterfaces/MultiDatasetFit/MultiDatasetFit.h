@@ -78,12 +78,6 @@ public:
   void setLocalParameterTie(const QString &parName, int i, QString tie);
   /// Log a warning
   static void logWarning(const std::string &msg);
-  /// Get log names from workspace(s)
-  std::vector<std::string> getLogNames() const;
-  /// Get value of log from spectrum
-  double getLogValue(const QString &logName,
-                     const Mantid::Kernel::Math::StatisticType &function,
-                     int i) const;
 
   /// Make it public
   using API::UserSubWindow::runPythonCode;

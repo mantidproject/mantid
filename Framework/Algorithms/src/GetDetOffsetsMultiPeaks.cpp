@@ -886,6 +886,7 @@ int GetDetOffsetsMultiPeaks::fitSpectra(
   // Fit peaks
   API::IAlgorithm_sptr findpeaks =
       createChildAlgorithm("FindPeaks", -1, -1, false);
+  findpeaks->setLoggingOffset(2);
   findpeaks->setProperty("InputWorkspace", inputW);
   findpeaks->setProperty<int>("FWHM", 7);
   findpeaks->setProperty<int>("Tolerance", 4);

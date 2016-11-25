@@ -82,7 +82,7 @@ double Interpolation::value(const double &at) const {
     return m_y[idx - 1] +
            (at - m_x[idx - 1]) * (m_y[idx] - m_y[idx - 1]) /
                (m_x[idx] - m_x[idx - 1]);
-  } catch (std::range_error) {
+  } catch (const std::range_error &) {
     return 0.0;
   }
 }

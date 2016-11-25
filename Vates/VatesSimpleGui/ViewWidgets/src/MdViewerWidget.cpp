@@ -1,24 +1,29 @@
-#include <vector>
-#include <set>
-#include <string>
+#include <Poco/File.h>
 #include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
+#include <set>
+#include <string>
+#include <vector>
 
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidKernel/DynamicFactory.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/UsageService.h"
 #include "MantidQtAPI/InterfaceManager.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtAPI/MdConstants.h"
 #include "MantidQtAPI/MdSettings.h"
-#include "MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 #include "MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorMapEditorPanel.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
+#include "MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h"
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
@@ -58,12 +63,14 @@
 #include <vtkMathTextUtilities.h>
 #include <vtkPVOrthographicSliceView.h>
 #include <vtkPVXMLElement.h>
+#include <vtkPVXMLParser.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxyManager.h>
 #include <vtkSMProxy.h>
 #include <vtkSMReaderFactory.h>
 #include <vtkSMRenderViewProxy.h>
+#include <vtkSMSessionProxyManager.h>
 #include <vtkSMSourceProxy.h>
 #include <vtkSMViewProxy.h>
 #include <vtksys/SystemTools.hxx>
@@ -105,7 +112,6 @@
 #endif
 
 #include <QAction>
-#include <QDesktopServices>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QHBoxLayout>
@@ -248,10 +254,6 @@ void MdViewerWidget::setupUiAndConnections() {
 
   applyBehavior->registerPanel(this->ui.propertiesPanel);
   VatesParaViewApplication::instance()->setupParaViewBehaviors();
-  // this->ui.pipelineBrowser->enableAnnotationFilter(m_widgetName);
-  // this->ui.pipelineBrowser->disableAnnotationFilter();
-  // this->ui.pipelineBrowser->enableAnnotationFilter(m_widgetName);
-  // this->ui.pipelineBrowser->hide();
   g_log.warning("Annotation Name: " + m_widgetName.toStdString());
 
   // Connect the rebinned sources manager
@@ -310,28 +312,34 @@ void MdViewerWidget::connectLoadDataReaction(QAction *action) {
  * registers a usage of the view with the UsageService.
  * @param container the UI widget to associate the view mode with
  * @param v the view mode to set on the main window
+ * @param createRenderProxy :: whether to create a default render proxy for
+ * the view
  * @return the requested view
  */
-ViewBase *
-MdViewerWidget::createAndSetMainViewWidget(QWidget *container,
-                                           ModeControlWidget::Views v) {
+ViewBase *MdViewerWidget::createAndSetMainViewWidget(QWidget *container,
+                                                     ModeControlWidget::Views v,
+                                                     bool createRenderProxy) {
   ViewBase *view;
   std::string featureName("VSI:");
   switch (v) {
   case ModeControlWidget::STANDARD: {
-    view = new StandardView(container, &m_rebinnedSourcesManager);
+    view = new StandardView(container, &m_rebinnedSourcesManager,
+                            createRenderProxy);
     featureName += "StandardView";
   } break;
   case ModeControlWidget::THREESLICE: {
-    view = new ThreeSliceView(container, &m_rebinnedSourcesManager);
+    view = new ThreeSliceView(container, &m_rebinnedSourcesManager,
+                              createRenderProxy);
     featureName += "ThreeSliceView";
   } break;
   case ModeControlWidget::MULTISLICE: {
-    view = new MultiSliceView(container, &m_rebinnedSourcesManager);
+    view = new MultiSliceView(container, &m_rebinnedSourcesManager,
+                              createRenderProxy);
     featureName += "MultiSliceView";
   } break;
   case ModeControlWidget::SPLATTERPLOT: {
-    view = new SplatterPlotView(container, &m_rebinnedSourcesManager);
+    view = new SplatterPlotView(container, &m_rebinnedSourcesManager,
+                                createRenderProxy);
     featureName += "SplatterPlotView";
   } break;
   default:
@@ -363,17 +371,13 @@ void MdViewerWidget::setParaViewComponentsForView() {
                    this->ui.propertiesPanel,
                    SLOT(setOutputPort(pqOutputPort *)));
 
-  // QObject::connect(activeObjects,
-  // SIGNAL(representationChanged(pqRepresentation*)),
-  //                 this->ui.propertiesPanel,
-  //                 SLOT(setRepresentation(pqRepresentation*)));
+  QObject::connect(activeObjects,
+                   SIGNAL(representationChanged(pqDataRepresentation *)),
+                   this->ui.propertiesPanel,
+                   SLOT(setRepresentation(pqDataRepresentation *)));
 
   QObject::connect(activeObjects, SIGNAL(viewChanged(pqView *)),
                    this->ui.propertiesPanel, SLOT(setView(pqView *)));
-
-  // this->ui.propertiesPanel->setOutputPort(activeObjects->activePort());
-  // this->ui.propertiesPanel->setView(this->currentView->getView());
-  // this->ui.propertiesPanel->setRepresentation(activeObjects->activeRepresentation());
 
   QObject::connect(this->currentView, SIGNAL(triggerAccept()),
                    this->ui.propertiesPanel, SLOT(apply()));
@@ -747,36 +751,9 @@ void MdViewerWidget::resetCurrentView(int workspaceType,
   // type and the instrument
   ModeControlWidget::Views initialView =
       getInitialView(workspaceType, instrumentName);
+  auto currentViewType = currentView->getViewType();
 
-  bool isSetToCorrectInitialView = false;
-
-  switch (initialView) {
-  case ModeControlWidget::STANDARD: {
-    isSetToCorrectInitialView =
-        dynamic_cast<StandardView *>(this->currentView) != 0;
-  } break;
-
-  case ModeControlWidget::MULTISLICE: {
-    isSetToCorrectInitialView =
-        dynamic_cast<MultiSliceView *>(this->currentView) != 0;
-  } break;
-
-  case ModeControlWidget::THREESLICE: {
-    isSetToCorrectInitialView =
-        dynamic_cast<ThreeSliceView *>(this->currentView) != 0;
-  } break;
-
-  case ModeControlWidget::SPLATTERPLOT: {
-    isSetToCorrectInitialView =
-        dynamic_cast<SplatterPlotView *>(this->currentView) != 0;
-  } break;
-
-  default:
-    isSetToCorrectInitialView = false;
-    break;
-  }
-
-  if (isSetToCorrectInitialView == false) {
+  if (initialView != currentViewType) {
     this->ui.modeControlWidget->setToSelectedView(initialView);
   } else {
     this->currentView->show();
@@ -924,6 +901,219 @@ void MdViewerWidget::setupPluginMode() {
 }
 
 /**
+ * Load the state of the Vates window from a Mantid project file
+ *
+ * @param lines :: a string representing the state of the Vates window
+ */
+void MdViewerWidget::loadFromProject(const std::string &lines) {
+  this->useCurrentColorSettings = false;
+  this->setupUiAndConnections();
+  this->createMenus();
+
+  TSVSerialiser tsv(lines);
+
+  int viewType;
+  std::string viewName, sourceName, originalSourceName, originalRepName;
+  tsv.selectLine("ViewName");
+  tsv >> viewName;
+  tsv.selectLine("SourceName");
+  tsv >> sourceName;
+  tsv.selectLine("OriginalSourceName");
+  tsv >> originalSourceName;
+  tsv.selectLine("OriginalRepresentationName");
+  tsv >> originalRepName;
+  tsv.selectLine("ViewType");
+  tsv >> viewType;
+
+  auto vtype = static_cast<ModeControlWidget::Views>(viewType);
+
+  // Set the view type on the widget
+  this->ui.modeControlWidget->blockSignals(true);
+  this->ui.modeControlWidget->setToSelectedView(vtype);
+  this->ui.modeControlWidget->blockSignals(false);
+
+  // Load the state of VSI from the XML dump
+  QSettings settings;
+  auto workingDir = settings.value("Project/WorkingDirectory", "").toString();
+  auto fileName = workingDir.toStdString() + "/VSI.xml";
+  Poco::File file(fileName);
+  if (!file.exists())
+    return; // file path invalid.
+
+  auto success = loadVSIState(fileName);
+  if (!success)
+    return; // state could not be loaded. There's nothing left to do!
+
+  auto &activeObjects = pqActiveObjects::instance();
+  auto proxyManager = activeObjects.activeServer()->proxyManager();
+  auto viewProxy = proxyManager->GetProxy("views", viewName.c_str());
+  auto sourceProxy = proxyManager->GetProxy("sources", sourceName.c_str());
+
+  if (!viewProxy || !sourceProxy)
+    return; // could not find the active view/source from last session.
+
+  // Get the active objects from the last session
+  auto model = pqApplicationCore::instance()->getServerManagerModel();
+  auto view = model->findItem<pqRenderView *>(viewProxy);
+  auto source = model->findItem<pqPipelineSource *>(sourceProxy);
+
+  if (!view || !source)
+    return; // could not find the active PV view/source from last session.
+
+  setActiveObjects(view, source);
+  setupViewFromProject(vtype);
+  auto origSrcProxy =
+      proxyManager->GetProxy("sources", originalSourceName.c_str());
+  auto origSrc = model->findItem<pqPipelineSource *>(origSrcProxy);
+  this->currentView->origSrc = qobject_cast<pqPipelineSource *>(origSrc);
+
+  // Work around to force the update of the shader preset.
+  auto rep = pqActiveObjects::instance().activeRepresentation()->getProxy();
+  rep->UpdateProperty("ShaderPreset", 1);
+
+  if (tsv.selectSection("colormap")) {
+    std::string colorMapLines;
+    tsv >> colorMapLines;
+    ui.colorSelectionWidget->loadFromProject(colorMapLines);
+  }
+
+  if (tsv.selectSection("rebinning")) {
+    std::string rebinningLines;
+    tsv >> rebinningLines;
+    m_rebinnedSourcesManager.loadFromProject(rebinningLines);
+  }
+
+  currentView->show();
+
+  // Don't call render on ViewBase here as that will reset the camera.
+  // Instead just directly render the view proxy using render all.
+  this->currentView->renderAll();
+  this->currentView->updateAnimationControls();
+  this->setDestroyedListener();
+  this->currentView->setVisibilityListener();
+}
+
+/**
+ * Load the state of VSI from an XML file.
+ *
+ * @param fileName
+ * @return true if the state was successfully loaded
+ */
+bool MdViewerWidget::loadVSIState(const std::string &fileName) {
+  auto proxyManager =
+      pqActiveObjects::instance().activeServer()->proxyManager();
+
+  try {
+    proxyManager->LoadXMLState(fileName.c_str());
+  } catch (...) {
+    return false;
+  }
+
+  // Update all registered proxies.
+  // Some things may have been incorrectly setup during the loading step
+  // due to the load order.
+  proxyManager->UpdateRegisteredProxiesInOrder(0);
+  return true;
+}
+
+/**
+ * Setup the current view from a project file.
+ *
+ * There's need to create an entirely new view as it already exists in the
+ * loaded project state.
+ *
+ * @param vtype :: the type of view to be created (e.g. Multislice)
+ */
+void MdViewerWidget::setupViewFromProject(ModeControlWidget::Views vtype) {
+  // Initilise the current view to something and setup
+  currentView = createAndSetMainViewWidget(ui.viewWidget, vtype, false);
+  initialView = vtype;
+  currentView->installEventFilter(this);
+  viewLayout = new QHBoxLayout(ui.viewWidget);
+  viewLayout->setMargin(0);
+  viewLayout->setStretch(0, 1);
+  viewLayout->addWidget(currentView);
+
+  auto source = pqActiveObjects::instance().activeSource();
+  auto view = pqActiveObjects::instance().activeView();
+  // Swap out the existing view for the newly loaded source and representation
+  currentView->origSrc = qobject_cast<pqPipelineSource *>(source);
+  currentView->setView(qobject_cast<pqRenderView *>(view));
+  setParaViewComponentsForView();
+}
+
+/**
+ * Set the active objects. This will trigger events to update the properties
+ * panel and the pipeline viewer.
+ *
+ * @param view :: the view to set as currently active
+ * @param source :: the source to set as currently active
+ */
+void MdViewerWidget::setActiveObjects(pqView *view, pqPipelineSource *source) {
+
+  auto &activeObjects = pqActiveObjects::instance();
+  activeObjects.setActiveView(view);
+  activeObjects.setActiveSource(source);
+  activeObjects.setActivePort(source->getOutputPort(0));
+}
+
+/**
+ * Save the state of the Vates window to a Mantid project file
+ *
+ * @param app :: handle to the main application window instance
+ * @return a string representing the current state of the window
+ */
+std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
+  UNUSED_ARG(app);
+  TSVSerialiser tsv, contents;
+
+  // save window position & size
+  contents.writeLine("geometry") << parentWidget()->geometry();
+
+  QSettings settings;
+  auto workingDir = settings.value("Project/WorkingDirectory", "").toString();
+  auto fileName = workingDir.toStdString() + "/VSI.xml";
+
+  // Dump the state of VSI to a XML file
+  auto session = pqActiveObjects::instance().activeServer()->proxyManager();
+  session->SaveXMLState(fileName.c_str());
+  contents.writeLine("FileName") << fileName;
+
+  // Save the view type. e.g. Splatterplot, Multislice...
+  auto vtype = currentView->getViewType();
+  contents.writeLine("ViewType") << static_cast<int>(vtype);
+
+  auto &activeObjects = pqActiveObjects::instance();
+  auto proxyManager = activeObjects.activeServer()->proxyManager();
+  auto view = activeObjects.activeView()->getProxy();
+  auto source = activeObjects.activeSource()->getProxy();
+
+  auto viewName = proxyManager->GetProxyName("views", view);
+  auto sourceName = proxyManager->GetProxyName("sources", source);
+
+  contents.writeLine("ViewName") << viewName;
+  contents.writeLine("SourceName") << sourceName;
+
+  if (this->currentView->origRep) {
+    auto repName = proxyManager->GetProxyName(
+        "representations", this->currentView->origRep->getProxy());
+    contents.writeLine("OriginalRepresentationName") << repName;
+  }
+
+  if (this->currentView->origSrc) {
+    auto srcName = proxyManager->GetProxyName(
+        "sources", this->currentView->origSrc->getProxy());
+    contents.writeLine("OriginalSourceName") << srcName;
+  }
+
+  contents.writeSection("colormap", ui.colorSelectionWidget->saveToProject());
+  contents.writeSection("rebinning", m_rebinnedSourcesManager.saveToProject());
+  tsv.writeSection("vsi", contents.outputLines());
+
+  return tsv.outputLines();
+}
+
+/**
  * This function tells the current view to render the data, perform any
  * necessary checks on the view given the workspace type and update the
  * animation controls if necessary.
@@ -936,16 +1126,6 @@ void MdViewerWidget::renderAndFinalSetup() {
   this->currentView->setColorsForView(this->ui.colorSelectionWidget);
   this->currentView->checkView(this->initialView);
   this->currentView->updateAnimationControls();
-  pqPipelineSource *source = this->currentView->origSrc;
-  // suppress unused variable;
-  (void)source;
-  pqPipelineRepresentation *repr = this->currentView->origRep;
-  // suppress unused variable;
-  (void)repr;
-  // this->ui.proxiesPanel->clear();
-  // this->ui.proxiesPanel->addProxy(source->getProxy(),"datasource",QStringList(),true);
-  // this->ui.proxiesPanel->addProxy(repr->getProxy(),"display",QStringList("CubeAxesVisibility"),true);
-  // this->ui.proxiesPanel->updateLayout();
   this->setDestroyedListener();
   this->currentView->setVisibilityListener();
   this->currentView->onAutoScale(this->ui.colorSelectionWidget);
@@ -1224,8 +1404,8 @@ void MdViewerWidget::onRotationPoint() {
  * browser.
  */
 void MdViewerWidget::onWikiHelp() {
-  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-                                 "VatesSimpleInterface_v2"));
+  MantidDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
+                                      "VatesSimpleInterface_v2"));
 }
 
 /**
@@ -1293,9 +1473,9 @@ void MdViewerWidget::connectDialogs() { this->connectRotationPointDialog(); }
  * like menus, menu items, buttons, views etc.
  */
 void MdViewerWidget::updateAppState() {
-  ThreeSliceView *tsv = dynamic_cast<ThreeSliceView *>(this->currentView);
-  SplatterPlotView *spv = dynamic_cast<SplatterPlotView *>(this->currentView);
-  if (NULL != tsv || NULL != spv) {
+  auto type = currentView->getViewType();
+  if (type == ModeControlWidget::THREESLICE ||
+      type == ModeControlWidget::SPLATTERPLOT) {
     this->currentView->onLodThresholdChange(false, this->lodThreshold);
     this->lodAction->setChecked(false);
   } else {
@@ -1446,7 +1626,7 @@ void MdViewerWidget::handleDragAndDropPeaksWorkspaces(QEvent *e, QString text,
     QString candidate = text.mid(startIndex, endIndex - startIndex);
     // Only append the candidate if SplattorPlotView is selected and an
     // MDWorkspace is loaded.
-    if (dynamic_cast<SplatterPlotView *>(this->currentView) &&
+    if (currentView->getViewType() == ModeControlWidget::Views::SPLATTERPLOT &&
         otherWorkspacePresent()) {
       if (boost::dynamic_pointer_cast<IPeaksWorkspace>(
               AnalysisDataService::Instance().retrieve(
@@ -1496,36 +1676,21 @@ void MdViewerWidget::saveViewState(ViewBase *view) {
   if (!view)
     return;
 
-  ModeControlWidget::Views vtype;
-  if (dynamic_cast<StandardView *>(view))
-    vtype = ModeControlWidget::STANDARD;
-  else if (dynamic_cast<MultiSliceView *>(view))
-    vtype = ModeControlWidget::MULTISLICE;
-  else if (dynamic_cast<ThreeSliceView *>(view))
-    vtype = ModeControlWidget::THREESLICE;
-  else if (dynamic_cast<SplatterPlotView *>(view))
-    vtype = ModeControlWidget::SPLATTERPLOT;
-  else {
-    g_log.warning() << "Trying to save the state of a view of unknown type. "
-                       "This seems to indicate a "
-                       "severe state inconsistency.";
-    return;
-  }
-
+  auto vtype = currentView->getViewType();
   switch (vtype) {
-  case ModeControlWidget::STANDARD: {
+  case ModeControlWidget::Views::STANDARD: {
     m_allViews.stateStandard.TakeReference(
         view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
   } break;
-  case ModeControlWidget::THREESLICE: {
+  case ModeControlWidget::Views::THREESLICE: {
     m_allViews.stateThreeSlice.TakeReference(
         view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
   } break;
-  case ModeControlWidget::MULTISLICE: {
+  case ModeControlWidget::Views::MULTISLICE: {
     m_allViews.stateMulti.TakeReference(
         view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
   } break;
-  case ModeControlWidget::SPLATTERPLOT: {
+  case ModeControlWidget::Views::SPLATTERPLOT: {
     m_allViews.stateSplatter.TakeReference(
         view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
   } break;

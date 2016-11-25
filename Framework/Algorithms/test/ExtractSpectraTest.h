@@ -429,8 +429,8 @@ private:
     auto ws = createInputWorkspaceHisto();
     // Add the delta x values
     for (size_t j = 0; j < nSpec; ++j) {
-      ws->setBinEdgeStandardDeviations(j, nBins + 1);
-      for (size_t k = 0; k <= nBins; ++k) {
+      ws->setPointStandardDeviations(j, nBins);
+      for (size_t k = 0; k < nBins; ++k) {
         // Add a constant error to all spectra
         ws->mutableDx(j)[k] = sqrt(double(k));
       }
@@ -468,13 +468,13 @@ private:
   MatrixWorkspace_sptr createInputWorkspaceEventWithDx() const {
     auto ws = createInputWorkspaceEvent();
     // Add the delta x values
-    auto dXvals = HistogramData::BinEdgeStandardDeviations(nBins + 1, 0.0);
+    auto dXvals = HistogramData::PointStandardDeviations(nBins, 0.0);
     auto &dX = dXvals.mutableData();
-    for (size_t k = 0; k <= nBins; ++k) {
+    for (size_t k = 0; k < nBins; ++k) {
       dX[k] = sqrt(double(k)) + 1;
     }
     for (size_t j = 0; j < nSpec; ++j) {
-      ws->setBinEdgeStandardDeviations(j, dXvals);
+      ws->setPointStandardDeviations(j, dXvals);
     }
     return ws;
   }
@@ -636,11 +636,8 @@ private:
         TS_ASSERT_EQUALS(ws.dx(0)[1], 1.0);
         TS_ASSERT_EQUALS(ws.dx(0)[2], M_SQRT2);
         TS_ASSERT_EQUALS(ws.dx(0)[3], sqrt(3.0));
-        // Check that the length of x and dx is the same
-        auto &x = ws.x(0);
-        auto dX = ws.dx(0);
-        TS_ASSERT_EQUALS(x.size(), dX.size());
-
+        // Check that the length of x and dx differs by 1
+        TS_ASSERT_EQUALS(ws.x(0).size() - 1, ws.dx(0).size());
       } else if (wsType == "event-dx") {
         TS_ASSERT(ws.hasDx(0));
         TS_ASSERT_EQUALS(ws.dx(0)[0], 0.0 + 1.0);
@@ -704,6 +701,47 @@ private:
 
     return MatrixWorkspace_sptr();
   }
+};
+
+class ExtractSpectraTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ExtractSpectraTestPerformance *createSuite() {
+    return new ExtractSpectraTestPerformance();
+  }
+  static void destroySuite(ExtractSpectraTestPerformance *suite) {
+    AnalysisDataService::Instance().clear();
+    delete suite;
+  }
+
+  ExtractSpectraTestPerformance() {
+    input = WorkspaceCreationHelper::Create2DWorkspaceBinned(40000, 10000);
+    inputEvent =
+        WorkspaceCreationHelper::CreateEventWorkspace(40000, 10000, 2000);
+  }
+
+  void testExec2D() {
+    Algorithms::ExtractSpectra alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", input);
+    alg.setProperty("EndWorkspaceIndex", 30000);
+    alg.setPropertyValue("OutputWorkspace", "ExtractSpectra2DOut");
+    alg.execute();
+  }
+
+  void testExecEvent() {
+    Algorithms::ExtractSpectra alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputEvent);
+    alg.setProperty("EndWorkspaceIndex", 30000);
+    alg.setPropertyValue("OutputWorkspace", "ExtractSpectraEventOut");
+    alg.execute();
+  }
+
+private:
+  MatrixWorkspace_sptr input;
+  EventWorkspace_sptr inputEvent;
 };
 
 #endif /* MANTID_ALGORITHMS_EXTRACTSPECTRATEST_H_ */

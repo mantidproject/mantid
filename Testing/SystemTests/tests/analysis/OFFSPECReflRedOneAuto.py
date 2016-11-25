@@ -7,6 +7,7 @@ ReflectometryReductionOneAuto
 import stresstesting
 from mantid.simpleapi import *
 
+
 class OFFSPECReflRedOneAuto(stresstesting.MantidStressTest):
     def runTest(self):
         offspec75 = Load("OFFSPEC00027575.raw") #th=0.35
@@ -17,19 +18,16 @@ class OFFSPECReflRedOneAuto(stresstesting.MantidStressTest):
         #Process using ReflectometryReductionOneAuto
         ivq_75, __, __ = ReflectometryReductionOneAuto(offspec75,
                                                        ThetaIn=0.70,#2*th
-                                                       WavelengthStep=0.05,
                                                        MomentumTransferStep=1e-3,
                                                        FirstTransmissionRun=offspec85)
 
         ivq_76, __, __ = ReflectometryReductionOneAuto(offspec76,
                                                        ThetaIn=2.00,#2*th
-                                                       WavelengthStep=0.05,
                                                        MomentumTransferStep=1e-3,
                                                        FirstTransmissionRun=offspec85)
 
         ivq_78, __, __ = ReflectometryReductionOneAuto(offspec78,
                                                        ThetaIn=3.40,#2*th
-                                                       WavelengthStep=0.05,
                                                        MomentumTransferStep=1e-3,
                                                        FirstTransmissionRun=offspec85)
 

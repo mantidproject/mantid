@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 import mantid
 import SANSUserFileParser as UserFileParser
 

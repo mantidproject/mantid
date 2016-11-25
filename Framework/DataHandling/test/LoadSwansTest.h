@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataHandling/LoadSwans.h"
+#include "MantidAPI/Run.h"
 #include <Poco/TemporaryFile.h>
 
 using Mantid::DataHandling::LoadSwans;

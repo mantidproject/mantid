@@ -10,7 +10,6 @@ subgraph params {
   procCommands        [label="ProcessingCommands"]
   wavMin              [label="WavelengthMin"]
   wavMax              [label="WavelengthMax"]
-  wavStep             [label="WavelengthStep"]
   detWS               [label="DetectorWorkspace"]
   monitorIndex        [label="I0MonitorIndex"]
   regionOfDirectBeam  [label="RegionOf-\nDirectBeam"]
@@ -18,7 +17,6 @@ subgraph params {
   monIntWavMin        [label="MonitorIntegration-\nWavelengthMin"]
   wavMaxRDB           [label="WavelengthMax"]
   wavMinRDB           [label="WavelengthMin"]
-  wavStepRDB          [label="WavelengthStep"]
 }
 
 subgraph decisions {
@@ -36,16 +34,15 @@ subgraph algorithms {
   groupDet      [label="GroupDetectors"]
   intMon        [label="Integration"]
   cropDetWS     [label="CropWorkspace"]
-  rebinDet      [label="Rebin"]
   rebinToWS     [label="RebinToWorkspace"]
   cropMonWS     [label="CropWorkspace"]
   calcFlatBg    [label="CalculateFlatBackground"]
   groupDetRDB   [label="GroupDetectors"]
   convertDetRDB [label="ConvertUnits\n(AlignBins = True)"]
   cropRDBWS     [label="CropWorkspace"]
-  rebinRDB      [label="Rebin"]
   rebinToWSRDB  [label="RebinToWorkspace"]
   divideDetMon  [label="Divide\n(Detectors / Monitors / Unity)"]
+  divideDetRDB	[label="Divide\n(Detectors / DirectBeam"]
 }
 
 subgraph processes {
@@ -75,9 +72,7 @@ checkNormDetMon     -> divideDetMon   [label="No"]
 groupDet            -> cropDetWS
 wavMin              -> cropDetWS
 wavMax              -> cropDetWS
-cropDetWS           -> rebinDet
-wavStep             -> rebinDet
-rebinDet            -> detWS
+cropDetWS           -> detWS
 detWS               -> rebinToWS
 valMon              -> cropMonWS
 monitorIndex        -> cropMonWS
@@ -97,14 +92,13 @@ regionOfDirectBeam  -> groupDetRDB
 groupDetRDB         -> cropRDBWS
 wavMinRDB           -> cropRDBWS
 wavMaxRDB           -> cropRDBWS
-cropRDBWS           -> rebinRDB
-wavStepRDB          -> rebinRDB
-rebinRDB            -> rebinToWSRDB
-rebinToWSRDB        -> divideDetMon
+cropRDBWS           -> rebinToWSRDB
+rebinToWSRDB        -> divideDetRDB
+divideDetRDB	    -> divideDetMon
 divideDetMon        -> outputWS
 
 {rank = same; convertDet; convertMon}
 {rank = same; valUnity; valDet; valMon}
 {rank = same; cropDetWS; cropMonWS}
-
+{rank = same; detWS; calcFlatBg}
 }

@@ -91,7 +91,7 @@ public:
 
     // 3. Check
     for (size_t iws = 0; iws < maskws->getNumberHistograms(); iws++) {
-      double y = maskws->dataY(iws)[0];
+      double y = maskws->y(iws)[0];
       if (iws == 34 || iws == 1000 || iws == 2000) {
         // These 3 workspace index are masked
         TS_ASSERT_DELTA(y, 1.0, 1.0E-5);
@@ -143,7 +143,7 @@ public:
     // 3. Check
     size_t errorcounts = 0;
     for (size_t iws = 0; iws < maskws->getNumberHistograms(); iws++) {
-      double y = maskws->dataY(iws)[0];
+      double y = maskws->y(iws)[0];
       if (iws == 34 || iws == 1000 || iws == 2000 || (iws >= 36 && iws <= 39) ||
           (iws >= 1001 && iws <= 1004)) {
         // All these workspace index are masked
@@ -204,7 +204,6 @@ public:
 
       index++;
     }
-    source->buildNearestNeighbours(true);
 
     auto masker = AlgorithmManager::Instance().create("MaskDetectors");
     masker->initialize();
@@ -266,7 +265,7 @@ public:
       if (source_masked) {
         maskSourceDet.push_back(source->getDetector(i)->getID());
       }
-      bool targ_masked = (maskWs->getSpectrum(i).readY()[0] > 0.5);
+      bool targ_masked = (maskWs->getSpectrum(i).y()[0] > 0.5);
       if (targ_masked) {
         maskTargDet.push_back(maskWs->getDetector(i)->getID());
       }
@@ -278,6 +277,45 @@ public:
     for (size_t i = 0; i < maskSourceDet.size(); i++) {
       TS_ASSERT_EQUALS(maskSourceDet[i], maskTargDet[i]);
     }
+  }
+
+  void test_IDF_acceptedAsFileName() {
+    auto ws_creator = AlgorithmManager::Instance().createUnmanaged(
+        "CreateSimulationWorkspace");
+    ws_creator->initialize();
+    ws_creator->setChild(true);
+
+    ws_creator->setPropertyValue("Instrument", "MARI");
+    ws_creator->setPropertyValue("BinParams", "100,100,300");
+    ws_creator->setPropertyValue("OutputWorkspace", "testWS");
+    ws_creator->setPropertyValue("UnitX", "TOF");
+
+    ws_creator->execute();
+    MatrixWorkspace_sptr source = ws_creator->getProperty("OutputWorkspace");
+    TS_ASSERT(source);
+
+    std::string IDF_name =
+        API::ExperimentInfo::getInstrumentFilename("MARI", "");
+
+    /*Fake export mask algorithm: */
+    std::string mask_contents("4 10-12 100 110 120 130 140 200 300");
+    ScopedFileHelper::ScopedFile testFile(mask_contents, "test_mask_file.msk");
+
+    // 2. Run
+    LoadMask loadMask;
+    loadMask.initialize();
+    loadMask.setChild(true);
+
+    loadMask.setProperty("Instrument", IDF_name);
+    loadMask.setProperty("RefWorkspace", source);
+    loadMask.setProperty("InputFile", testFile.getFileName());
+    loadMask.setProperty("OutputWorkspace", "MaskedWithSample");
+
+    TS_ASSERT_EQUALS(loadMask.execute(), true);
+
+    DataObjects::MaskWorkspace_sptr maskWs =
+        loadMask.getProperty("OutputWorkspace");
+    TS_ASSERT(maskWs);
   }
 
   /*
@@ -468,6 +506,37 @@ public:
 
     return ScopedFileHelper::ScopedFile(ss.str(), maskfilename);
   }
+};
+
+//------------------------------------------------------------------------------
+// Performance test
+//------------------------------------------------------------------------------
+
+class LoadMaskTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoadMaskTestPerformance *createSuite() {
+    return new LoadMaskTestPerformance();
+  }
+
+  static void destroySuite(LoadMaskTestPerformance *suite) { delete suite; }
+
+  void setUp() override {
+    loadFile.initialize();
+    loadFile.setProperty("Instrument", "POWGEN");
+    loadFile.setProperty("InputFile", "testmasking.xml");
+    loadFile.setProperty("OutputWorkspace", "outputWS");
+  }
+
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("outputWS");
+  }
+
+  void testDefaultLoad() { loadFile.execute(); }
+
+private:
+  LoadMask loadFile;
 };
 
 #endif /* MANTID_DATAHANDLING_LOADMASKINGFILETEST_H_ */

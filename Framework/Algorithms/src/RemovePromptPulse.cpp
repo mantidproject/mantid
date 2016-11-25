@@ -50,6 +50,9 @@ void RemovePromptPulse::init() {
 namespace { // anonymous namespace begin
 double getMedian(const API::Run &run, const std::string &name) {
 
+  if (!run.hasProperty(name)) {
+    return Mantid::EMPTY_DBL();
+  }
   Kernel::TimeSeriesProperty<double> *log =
       dynamic_cast<Kernel::TimeSeriesProperty<double> *>(run.getLogData(name));
   if (!log)

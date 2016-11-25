@@ -691,7 +691,7 @@ public:
 
     std::vector<std::string> keys = ConfigService::Instance().keys();
 
-    TS_ASSERT_EQUALS(keys.size(), 17);
+    TS_ASSERT_EQUALS(keys.size(), 18);
   }
 
   void testRemovingProperty() {

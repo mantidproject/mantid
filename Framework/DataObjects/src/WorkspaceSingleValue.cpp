@@ -1,6 +1,7 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/IPropertyManager.h"
 
 namespace Mantid {
 namespace DataObjects {

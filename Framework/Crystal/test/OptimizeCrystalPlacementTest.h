@@ -23,7 +23,6 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include <gsl/gsl_version.h>
 
 using namespace Mantid;
 using namespace Crystal;
@@ -93,9 +92,9 @@ public:
     Kernel::Matrix<double> ZMat(Gon);
 
     Kernel::Matrix<double> Rotx =
-        PeakHKLErrors::RotationMatrixAboutRegAxis(1, 'x');
+        PeakHKLErrors::RotationMatrixAboutRegAxis(0.5, 'x');
     Kernel::Matrix<double> Roty =
-        PeakHKLErrors::RotationMatrixAboutRegAxis(-2, 'y');
+        PeakHKLErrors::RotationMatrixAboutRegAxis(-1, 'y');
 
     for (int i = 0; i < peaks1->getNumberPeaks(); ++i)
       if (peaks1->getPeak(i).getRunNumber() == 5638) {
@@ -125,7 +124,6 @@ public:
     Geometry::Goniometer IGon(origGon5638);
     std::vector<double> GonAngles5638 = IGon.getEulerAngles("YZY");
 
-#if GSL_MAJOR_VERSION < 2
     for (size_t i = 0; i < table->rowCount(); ++i) {
       std::string nm = table->String(i, 0);
       double d = 0.0;
@@ -135,10 +133,8 @@ public:
         d = GonAngles5638[2] - table->Double(i, 1);
       else if (nm == "omega5638")
         d = GonAngles5638[0] - table->Double(i, 1);
-
       TS_ASSERT_DELTA(d, 0, .3);
     }
-#endif
   }
 
   void test_tilt() {

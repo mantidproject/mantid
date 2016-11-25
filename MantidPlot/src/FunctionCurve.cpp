@@ -28,27 +28,27 @@
  *                                                                         *
  ***************************************************************************/
 #include "FunctionCurve.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MyParser.h"
-#include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/AnalysisDataService.h>
 #include <MantidAPI/IFunction.h>
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
+#include <MantidAPI/MatrixWorkspace.h>
 
 #include <QMessageBox>
 
 FunctionCurve::FunctionCurve(const QString &name)
     : PlotCurve(name), d_function_type(Normal), d_variable("x"), d_formulas(),
       d_from(0.0), d_to(0.0), m_identifier(NULL) {
-  setType(Graph::Function);
+  setType(GraphOptions::Function);
 }
 
 FunctionCurve::FunctionCurve(const FunctionType &t, const QString &name)
     : PlotCurve(name), d_function_type(t), d_variable("x"), d_formulas(),
       d_from(0.0), d_to(0.0), m_identifier(NULL) {
   // d_variable = "x";
-  setType(Graph::Function);
+  setType(GraphOptions::Function);
 }
 
 /**
@@ -66,7 +66,7 @@ FunctionCurve::FunctionCurve(const Mantid::API::IFunction *fun,
     : PlotCurve(name), d_function_type(FunctionCurve::Normal),
       d_variable(""), // This indicates that mu::Parser is not used
       d_from(0), d_to(0), m_identifier(fun) {
-  setType(Graph::Function);
+  setType(GraphOptions::Function);
 
   // Save construction information in d_formulas
   d_formulas << "Mantid" << QString::fromStdString(fun->asString()) << wsName

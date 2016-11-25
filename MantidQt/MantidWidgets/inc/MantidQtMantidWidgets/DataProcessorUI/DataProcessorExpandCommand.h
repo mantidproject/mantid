@@ -41,6 +41,16 @@ public:
   };
   std::string name() override { return std::string("Expand Selection"); }
   std::string icon() override { return std::string("://fit_frame.png"); }
+  std::string tooltip() override {
+    return std::string("Selects an entire group");
+  }
+  std::string whatsthis() override {
+    return std::string("Expands the current selection to include any runs that "
+                       "are in the same group as any selected run. This "
+                       "effectively means selecting the group to which the "
+                       "selected run belongs");
+  }
+  std::string shortcut() override { return std::string(); }
 };
 }
 }

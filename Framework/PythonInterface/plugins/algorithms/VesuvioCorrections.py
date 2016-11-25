@@ -1,4 +1,7 @@
 # pylint: disable=no-init, too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
+from six import iteritems
+
 from mantid.kernel import *
 from mantid.api import *
 from vesuvio.base import VesuvioBase, TableWorkspaceDictionaryFacade
@@ -7,6 +10,7 @@ import mantid.simpleapi as ms
 import math
 
 #----------------------------------------------------------------------------------------
+
 
 def create_cuboid_xml(height, width, depth):
     """
@@ -18,19 +22,20 @@ def create_cuboid_xml(height, width, depth):
     """
     half_height, half_width, half_thick = 0.5*height, 0.5*width, 0.5*depth
     xml_str = \
-      " <cuboid id=\"sample-shape\"> " \
-      + "<left-front-bottom-point " \
-      + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (half_width, -half_height, half_thick) \
-      + "<left-front-top-point " \
-      + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (half_width, half_height, half_thick) \
-      + "<left-back-bottom-point " \
-      + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (half_width, -half_height, -half_thick) \
-      + "<right-front-bottom-point " \
-      + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (-half_width, -half_height, half_thick) \
-      + "</cuboid>"
+        " <cuboid id=\"sample-shape\"> " \
+        + "<left-front-bottom-point " \
+        + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (half_width, -half_height, half_thick) \
+        + "<left-front-top-point " \
+        + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (half_width, half_height, half_thick) \
+        + "<left-back-bottom-point " \
+        + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (half_width, -half_height, -half_thick) \
+        + "<right-front-bottom-point " \
+        + "x=\"%f\" y=\"%f\" z=\"%f\" /> " % (-half_width, -half_height, half_thick) \
+        + "</cuboid>"
     return xml_str
 
 #----------------------------------------------------------------------------------------
+
 
 class VesuvioCorrections(VesuvioBase):
 
@@ -304,7 +309,7 @@ class VesuvioCorrections(VesuvioBase):
 
         for idx, wsn in enumerate(fit_workspaces):
             tie = ''
-            for param, value in fixed_parameters.iteritems():
+            for param, value in iteritems(fixed_parameters):
                 if param in wsn:
                     tie = 'Scaling=%f,' % value
             function_str = "name=TabulatedFunction,Workspace=%s," % (wsn) \
@@ -467,7 +472,7 @@ class VesuvioCorrections(VesuvioBase):
         # estimated.
 
         ms.VesuvioCalculateMS(InputWorkspace=self._output_ws,
-                              NoOfMasses=len(atom_props)/3,
+                              NoOfMasses=int(len(atom_props)/3),
                               SampleDensity=self.getProperty("SampleDensity").value/intensity_sum,
                               AtomicProperties=atom_props,
                               BeamRadius=self.getProperty("BeamRadius").value,

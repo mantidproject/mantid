@@ -13,6 +13,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"

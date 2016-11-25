@@ -1,9 +1,8 @@
-//
-// Includes
-//
 #include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MagneticFormFactorTable.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

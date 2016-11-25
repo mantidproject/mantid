@@ -15,7 +15,7 @@ in a workspace will be corrected.
 
 The formula for removing the exponential decay is given by:
 
-.. math:: NewData = (OldData\times{e^\frac{t}{\tau}})/N_0 - 1.0
+.. math:: \textrm{NewData} = (\textrm{OldData}\times{e^\frac{t}{\tau}})/N_0 - 1.0
 
 where :math:`\tau` is the muon lifetime (2.1969811e-6 seconds). :math:`N_0` is a
 fitted normalisation constant.

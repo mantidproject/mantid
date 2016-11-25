@@ -22,14 +22,11 @@ class MuscatSofQW(DataProcessorAlgorithm):
     _out_ws_name = None
     _para_name = None
 
-
     def category(self):
         return "Workflow\\MIDAS"
 
-
     def summary(self):
         return "Calculates an S(Q, w) from fitted parameters for use in Muscat."
-
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
@@ -53,12 +50,10 @@ class MuscatSofQW(DataProcessorAlgorithm):
                                                      direction=Direction.Output),
                              doc='Output workspace in S(Q, w)')
 
-
     def PyExec(self):
         self._setup()
         self._cache_parameter_data()
         self._get_conv_fit_result()
-
 
     def _setup(self):
         self._sam_ws = self.getPropertyValue('SampleWorkspace')
@@ -69,7 +64,6 @@ class MuscatSofQW(DataProcessorAlgorithm):
         self._einc = self.getProperty('EnergyInc').value
 
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
-
 
     def _create_conv_fit_fun(self, peak_idx, delta_1, l_height_1, l_width_1, l_height_2, l_width_2):
         """
@@ -99,7 +93,6 @@ class MuscatSofQW(DataProcessorAlgorithm):
 
         func = '{0};({1}))'.format(pk_1, lor_fun)
         return func
-
 
     def _get_conv_fit_result(self):
         sam_ws = mtd[self._sam_ws]
@@ -175,7 +168,6 @@ class MuscatSofQW(DataProcessorAlgorithm):
                  OutputWorkspace=self._out_ws_name)
 
         self.setProperty('OutputWorkspace', self._out_ws_name)
-
 
     def _cache_parameter_data(self):
         """

@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/Run.h"
 
 #include "MantidDataHandling/LoadVulcanCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
