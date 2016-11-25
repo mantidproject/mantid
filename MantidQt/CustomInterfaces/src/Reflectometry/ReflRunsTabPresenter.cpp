@@ -116,6 +116,9 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
   case IReflRunsTabPresenter::InstrumentChangedFlag:
     m_mainPresenter->setInstrumentName(m_view->getSearchInstrument());
     break;
+  case IReflRunsTabPresenter::GroupChangedFlag:
+    pushCommands();
+    break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
@@ -128,9 +131,8 @@ void ReflRunsTabPresenter::pushCommands() {
 
   // The expected number of commands
   const size_t nCommands = 27;
-  // All the table presenters will push the same list of commands, so we just
-  // get this list from the first presenter
-  auto commands = m_tablePresenters.at(0)->publishCommands();
+  auto commands =
+      m_tablePresenters.at(m_view->getSelectedGroup())->publishCommands();
   if (commands.size() != nCommands) {
     throw std::runtime_error("Invalid list of commands");
   }

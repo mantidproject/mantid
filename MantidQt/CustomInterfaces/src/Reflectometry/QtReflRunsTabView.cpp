@@ -76,6 +76,9 @@ void QtReflRunsTabView::initLayout() {
   // Synchronize the slit calculator
   connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
+  // Selected group changed
+  connect(ui.toolbox, SIGNAL(currentChanged(int)), this,
+          SLOT(groupChanged(int)));
 
   // Synchronize the instrument selection widgets
   // Processing table in group 1
@@ -327,6 +330,14 @@ std::string QtReflRunsTabView::getTransferMethod() const {
 */
 int QtReflRunsTabView::getSelectedGroup() const {
   return ui.toolbox->currentIndex();
+}
+
+/** This is slot is triggered when the selected group changes.
+*
+* @param index : The new current item's index
+*/
+void QtReflRunsTabView::groupChanged(int index) {
+  m_presenter->notify(IReflRunsTabPresenter::GroupChangedFlag);
 }
 
 } // namespace CustomInterfaces
