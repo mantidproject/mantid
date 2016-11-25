@@ -14,6 +14,7 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/LiveListenerInfo.h"
 #include <QtGui>
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
@@ -224,8 +225,8 @@ void StartLiveDataDialog::initLayout() {
   connect(ui.chkPreserveEvents, SIGNAL(toggled(bool)), this,
           SLOT(chkPreserveEventsToggled()));
 
-  connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(setDefaultAccumulationMethod(const QString &)));
+  connect(ui.cmbConnListener, SIGNAL(currentIndexChanged(const QString &)),
+          this, SLOT(setDefaultAccumulationMethod(const QString &)));
   connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(initListenerPropLayout(const QString &)));
   connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
@@ -348,8 +349,8 @@ void StartLiveDataDialog::changePostProcessingAlgorithm() {
  *  Disables the 'Add' option if the listener is going to pass back histograms.
  *  @param inst :: The instrument name.
  */
-void StartLiveDataDialog::setDefaultAccumulationMethod(const QString &inst) {
-  if (inst.isEmpty())
+void StartLiveDataDialog::setDefaultAccumulationMethod(const QString &listener) {
+  if (listener.isEmpty())
     return;
   try {
     // Make sure 'Add' is enabled ahead of the check (the check may throw)
@@ -361,8 +362,8 @@ void StartLiveDataDialog::setDefaultAccumulationMethod(const QString &inst) {
     // Check whether this listener will give back events. If not, disable 'Add'
     // as an option
     // The 'false' 2nd argument means don't connect the created listener
-    if (!Mantid::API::LiveListenerFactory::Instance()
-             .create(inst.toStdString(), false)
+    Mantid::Kernel::LiveListenerInfo info(listener.toStdString());
+    if (!Mantid::API::LiveListenerFactory::Instance().create(info, false)
              ->buffersEvents()) {
       // If 'Add' is currently selected, select 'Replace' instead
       if (ui.cmbAccumulationMethod->currentIndex() == addIndex) {
