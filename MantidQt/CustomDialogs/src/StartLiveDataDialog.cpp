@@ -235,6 +235,11 @@ void StartLiveDataDialog::initLayout() {
 /// Parse input when the dialog is accepted
 void StartLiveDataDialog::parseInput() {
   storePropertyValue("Instrument", ui.cmbInstrument->currentText());
+
+  // "Connection" property does not need to be set, since these override it
+  storePropertyValue("Listener", ui.cmbConnListener->currentText());
+  storePropertyValue("Address", ui.edtConnAddress->text());
+
   storePropertyValue("AccumulationMethod",
                      ui.cmbAccumulationMethod->currentText());
 
