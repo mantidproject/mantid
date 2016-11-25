@@ -46,9 +46,8 @@ void LiveDataAlgorithm::initProps() {
                       boost::make_shared<StringListValidator>(instruments)),
                   "Name of the instrument to monitor.");
 
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
-                      "Connection", "",
-                      Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>("Connection", "",
+                                                              Direction::Input),
                   "Selects the listener connection entry to use. "
                   "Default connection will be used if not specified");
 
@@ -59,9 +58,8 @@ void LiveDataAlgorithm::initProps() {
                   "Name of the listener class to use. "
                   "If specified, overrides class specified by Connection.");
 
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
-                      "Address", "",
-                      Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>("Address", "",
+                                                              Direction::Input),
                   "Address for the listener to connect to. "
                   "If specified, overrides address specified by Connection.");
 
@@ -209,8 +207,7 @@ ILiveListener_sptr LiveDataAlgorithm::getLiveListener(bool start) {
   return m_listener;
 }
 
-ILiveListener_sptr LiveDataAlgorithm::createLiveListener(bool connect)
-{
+ILiveListener_sptr LiveDataAlgorithm::createLiveListener(bool connect) {
   // Get the LiveListenerInfo from Facilities.xml
   std::string inst_name = this->getPropertyValue("Instrument");
   std::string conn_name = this->getPropertyValue("Connection");

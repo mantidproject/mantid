@@ -474,8 +474,8 @@ void StartLiveDataDialog::updateConnectionChoices(const QString &inst_name) {
   ui.cmbConnection->addItem("[Custom]");
 
   // Add available LiveListenerInfo names based on selected instrument
-  const auto &inst = ConfigService::Instance().getInstrument(
-                       inst_name.toStdString());
+  const auto &inst =
+      ConfigService::Instance().getInstrument(inst_name.toStdString());
   for (const auto &listener : inst.liveListenerInfoList()) {
     ui.cmbConnection->addItem(QString::fromStdString(listener.name()));
   }
@@ -505,7 +505,7 @@ void StartLiveDataDialog::updateConnectionDetails(const QString &connection) {
 
   // Get live listener for select instrument and connection
   const auto &inst = ConfigService::Instance().getInstrument(
-                       ui.cmbInstrument->currentText().toStdString());
+      ui.cmbInstrument->currentText().toStdString());
   const auto &info = inst.liveListenerInfo(connection.toStdString());
 
   // Select correct listener
@@ -517,6 +517,5 @@ void StartLiveDataDialog::updateConnectionDetails(const QString &connection) {
   auto address = QString::fromStdString(info.address());
   ui.edtConnAddress->setText(address);
 }
-
 }
 }
