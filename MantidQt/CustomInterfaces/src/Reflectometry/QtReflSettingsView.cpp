@@ -1,5 +1,5 @@
-#include "MantidQtCustomInterfaces/Reflectometry/QtReflSettingsTabView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/QtReflSettingsView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsPresenter.h"
 #include "MantidQtMantidWidgets/HintingLineEdit.h"
 
 namespace MantidQt {
@@ -11,23 +11,23 @@ using namespace MantidQt::MantidWidgets;
 /** Constructor
 * @param parent :: [input] The parent of this widget
 */
-QtReflSettingsTabView::QtReflSettingsTabView(QWidget *parent) {
+QtReflSettingsView::QtReflSettingsView(QWidget *parent) {
 
   UNUSED_ARG(parent);
   initLayout();
 
-  m_presenter.reset(new ReflSettingsTabPresenter(this));
+  m_presenter.reset(new ReflSettingsPresenter(this));
 }
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-QtReflSettingsTabView::~QtReflSettingsTabView() {}
+QtReflSettingsView::~QtReflSettingsView() {}
 
 /**
 Initialise the Interface
 */
-void QtReflSettingsTabView::initLayout() {
+void QtReflSettingsView::initLayout() {
   m_ui.setupUi(this);
 
   connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
@@ -39,7 +39,7 @@ void QtReflSettingsTabView::initLayout() {
 /** Returns the presenter managing this view
 * @return :: A pointer to the presenter
 */
-IReflSettingsTabPresenter *QtReflSettingsTabView::getPresenter() const {
+IReflSettingsPresenter *QtReflSettingsView::getPresenter() const {
 
   return m_presenter.get();
 }
@@ -47,21 +47,21 @@ IReflSettingsTabPresenter *QtReflSettingsTabView::getPresenter() const {
 /** This slot notifies the presenter to fill experiment settings with default
 * values.
 */
-void QtReflSettingsTabView::requestExpDefaults() const {
-  m_presenter->notify(IReflSettingsTabPresenter::ExpDefaultsFlag);
+void QtReflSettingsView::requestExpDefaults() const {
+  m_presenter->notify(IReflSettingsPresenter::ExpDefaultsFlag);
 }
 
 /** This slot notifies the presenter to fill instrument settings with default
 * values.
 */
-void QtReflSettingsTabView::requestInstDefaults() const {
-  m_presenter->notify(IReflSettingsTabPresenter::InstDefaultsFlag);
+void QtReflSettingsView::requestInstDefaults() const {
+  m_presenter->notify(IReflSettingsPresenter::InstDefaultsFlag);
 }
 
 /* Sets default values for all experiment settings given a list of default
 * values.
 */
-void QtReflSettingsTabView::setExpDefaults(
+void QtReflSettingsView::setExpDefaults(
     const std::vector<std::string> &defaults) const {
 
   int amIndex =
@@ -84,7 +84,7 @@ void QtReflSettingsTabView::setExpDefaults(
 /* Sets default values for all instrument settings given a list of default
 * values.
 */
-void QtReflSettingsTabView::setInstDefaults(
+void QtReflSettingsView::setInstDefaults(
     const std::vector<double> &defaults) const {
 
   auto intMonCheckState = (defaults[0] != 0) ? Qt::Checked : Qt::Unchecked;
@@ -102,7 +102,7 @@ void QtReflSettingsTabView::setInstDefaults(
 /* Sets the enabled status of polarisation corrections and parameters
 * @param enable :: [input] bool to enable options or not
 */
-void QtReflSettingsTabView::setPolarisationOptionsEnabled(bool enable) const {
+void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) const {
   m_ui.polCorrComboBox->setEnabled(enable);
   m_ui.CRhoEdit->setEnabled(enable);
   m_ui.CAlphaEdit->setEnabled(enable);
@@ -125,7 +125,7 @@ void QtReflSettingsTabView::setPolarisationOptionsEnabled(bool enable) const {
 /** Returns global options for 'Stitch1DMany'
 * @return :: Global options for 'Stitch1DMany'
 */
-std::string QtReflSettingsTabView::getStitchOptions() const {
+std::string QtReflSettingsView::getStitchOptions() const {
 
   auto widget = m_ui.expSettingsLayout0->itemAtPosition(7, 1)->widget();
   return static_cast<HintingLineEdit *>(widget)->text().toStdString();
@@ -134,7 +134,7 @@ std::string QtReflSettingsTabView::getStitchOptions() const {
 /** Creates hints for 'Stitch1DMany'
 * @param hints :: Hints as a map
 */
-void QtReflSettingsTabView::createStitchHints(
+void QtReflSettingsView::createStitchHints(
     const std::map<std::string, std::string> &hints) {
 
   m_ui.expSettingsLayout0->addWidget(new HintingLineEdit(this, hints), 7, 1, 1,
@@ -144,7 +144,7 @@ void QtReflSettingsTabView::createStitchHints(
 /** Return selected analysis mode
 * @return :: selected analysis mode
 */
-std::string QtReflSettingsTabView::getAnalysisMode() const {
+std::string QtReflSettingsView::getAnalysisMode() const {
 
   return m_ui.analysisModeComboBox->currentText().toStdString();
 }
@@ -152,7 +152,7 @@ std::string QtReflSettingsTabView::getAnalysisMode() const {
 /** Return direct beam
 * @return :: direct beam range
 */
-std::string QtReflSettingsTabView::getDirectBeam() const {
+std::string QtReflSettingsView::getDirectBeam() const {
 
   return m_ui.directBeamEdit->text().toStdString();
 }
@@ -160,7 +160,7 @@ std::string QtReflSettingsTabView::getDirectBeam() const {
 /** Return selected transmission run(s)
 * @return :: selected transmission run(s)
 */
-std::string QtReflSettingsTabView::getTransmissionRuns() const {
+std::string QtReflSettingsView::getTransmissionRuns() const {
 
   return m_ui.transmissionRunsEdit->text().toStdString();
 }
@@ -168,7 +168,7 @@ std::string QtReflSettingsTabView::getTransmissionRuns() const {
 /** Return selected polarisation corrections
 * @return :: selected polarisation corrections
 */
-std::string QtReflSettingsTabView::getPolarisationCorrections() const {
+std::string QtReflSettingsView::getPolarisationCorrections() const {
 
   return m_ui.polCorrComboBox->currentText().toStdString();
 }
@@ -176,7 +176,7 @@ std::string QtReflSettingsTabView::getPolarisationCorrections() const {
 /** Return CRho
 * @return :: polarization correction CRho
 */
-std::string QtReflSettingsTabView::getCRho() const {
+std::string QtReflSettingsView::getCRho() const {
 
   return m_ui.CRhoEdit->text().toStdString();
 }
@@ -184,7 +184,7 @@ std::string QtReflSettingsTabView::getCRho() const {
 /** Return CAlpha
 * @return :: polarization correction CAlpha
 */
-std::string QtReflSettingsTabView::getCAlpha() const {
+std::string QtReflSettingsView::getCAlpha() const {
 
   return m_ui.CAlphaEdit->text().toStdString();
 }
@@ -192,7 +192,7 @@ std::string QtReflSettingsTabView::getCAlpha() const {
 /** Return CAp
 * @return :: polarization correction CAp
 */
-std::string QtReflSettingsTabView::getCAp() const {
+std::string QtReflSettingsView::getCAp() const {
 
   return m_ui.CApEdit->text().toStdString();
 }
@@ -200,7 +200,7 @@ std::string QtReflSettingsTabView::getCAp() const {
 /** Return CPp
 * @return :: polarization correction CPp
 */
-std::string QtReflSettingsTabView::getCPp() const {
+std::string QtReflSettingsView::getCPp() const {
 
   return m_ui.CPpEdit->text().toStdString();
 }
@@ -208,7 +208,7 @@ std::string QtReflSettingsTabView::getCPp() const {
 /** Return momentum transfer limits
 * @return :: momentum transfer limits
 */
-std::string QtReflSettingsTabView::getMomentumTransferStep() const {
+std::string QtReflSettingsView::getMomentumTransferStep() const {
 
   return m_ui.momentumTransferStepEdit->text().toStdString();
 }
@@ -216,7 +216,7 @@ std::string QtReflSettingsTabView::getMomentumTransferStep() const {
 /** Return scale factor
 * @return :: scale factor
 */
-std::string QtReflSettingsTabView::getScaleFactor() const {
+std::string QtReflSettingsView::getScaleFactor() const {
 
   return m_ui.scaleFactorEdit->text().toStdString();
 }
@@ -224,7 +224,7 @@ std::string QtReflSettingsTabView::getScaleFactor() const {
 /** Return integrated monitors option
 * @return :: integrated monitors check
 */
-std::string QtReflSettingsTabView::getIntMonCheck() const {
+std::string QtReflSettingsView::getIntMonCheck() const {
 
   return m_ui.intMonCheckBox->isChecked() ? "1" : "0";
 }
@@ -232,7 +232,7 @@ std::string QtReflSettingsTabView::getIntMonCheck() const {
 /** Return monitor integral wavelength min
 * @return :: monitor integral min
 */
-std::string QtReflSettingsTabView::getMonitorIntegralMin() const {
+std::string QtReflSettingsView::getMonitorIntegralMin() const {
 
   return m_ui.monIntMinEdit->text().toStdString();
 }
@@ -240,7 +240,7 @@ std::string QtReflSettingsTabView::getMonitorIntegralMin() const {
 /** Return monitor integral wavelength max
 * @return :: monitor integral max
 */
-std::string QtReflSettingsTabView::getMonitorIntegralMax() const {
+std::string QtReflSettingsView::getMonitorIntegralMax() const {
 
   return m_ui.monIntMaxEdit->text().toStdString();
 }
@@ -248,7 +248,7 @@ std::string QtReflSettingsTabView::getMonitorIntegralMax() const {
 /** Return monitor background wavelength min
 * @return :: monitor background min
 */
-std::string QtReflSettingsTabView::getMonitorBackgroundMin() const {
+std::string QtReflSettingsView::getMonitorBackgroundMin() const {
 
   return m_ui.monBgMinEdit->text().toStdString();
 }
@@ -256,7 +256,7 @@ std::string QtReflSettingsTabView::getMonitorBackgroundMin() const {
 /** Return monitor background wavelength max
 * @return :: monitor background max
 */
-std::string QtReflSettingsTabView::getMonitorBackgroundMax() const {
+std::string QtReflSettingsView::getMonitorBackgroundMax() const {
 
   return m_ui.monBgMaxEdit->text().toStdString();
 }
@@ -264,7 +264,7 @@ std::string QtReflSettingsTabView::getMonitorBackgroundMax() const {
 /** Return wavelength min
 * @return :: lambda min
 */
-std::string QtReflSettingsTabView::getLambdaMin() const {
+std::string QtReflSettingsView::getLambdaMin() const {
 
   return m_ui.lamMinEdit->text().toStdString();
 }
@@ -272,7 +272,7 @@ std::string QtReflSettingsTabView::getLambdaMin() const {
 /** Return wavelength max
 * @return :: lambda max
 */
-std::string QtReflSettingsTabView::getLambdaMax() const {
+std::string QtReflSettingsView::getLambdaMax() const {
 
   return m_ui.lamMaxEdit->text().toStdString();
 }
@@ -280,7 +280,7 @@ std::string QtReflSettingsTabView::getLambdaMax() const {
 /** Return I0MonitorIndex
 * @return :: I0MonitorIndex
 */
-std::string QtReflSettingsTabView::getI0MonitorIndex() const {
+std::string QtReflSettingsView::getI0MonitorIndex() const {
 
   return m_ui.I0MonIndexEdit->text().toStdString();
 }
@@ -288,7 +288,7 @@ std::string QtReflSettingsTabView::getI0MonitorIndex() const {
 /** Return processing instructions
 * @return :: processing instructions
 */
-std::string QtReflSettingsTabView::getProcessingInstructions() const {
+std::string QtReflSettingsView::getProcessingInstructions() const {
 
   return m_ui.procInstEdit->text().toStdString();
 }

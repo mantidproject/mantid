@@ -1,7 +1,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainWindowPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h"
 
 namespace MantidQt {
@@ -15,7 +15,7 @@ namespace CustomInterfaces {
 */
 ReflMainWindowPresenter::ReflMainWindowPresenter(
     IReflMainWindowView *view, IReflRunsTabPresenter *runsPresenter,
-    IReflSettingsTabPresenter *settingsPresenter,
+    IReflSettingsPresenter *settingsPresenter,
     IReflSaveTabPresenter *savePresenter)
     : m_view(view), m_runsPresenter(runsPresenter),
       m_settingsPresenter(settingsPresenter), m_savePresenter(savePresenter) {
@@ -150,7 +150,7 @@ void ReflMainWindowPresenter::setInstrumentName(
 * @param pointer :: The pointer
 */
 void ReflMainWindowPresenter::checkPtrValid(
-    IReflSettingsTabPresenter *pointer) const {
+    IReflSettingsPresenter *pointer) const {
   if (pointer == nullptr)
     throw std::invalid_argument("Could not read settings");
 }

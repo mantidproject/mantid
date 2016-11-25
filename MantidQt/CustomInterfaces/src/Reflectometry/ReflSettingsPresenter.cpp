@@ -1,6 +1,6 @@
-#include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsView.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -15,7 +15,7 @@ using namespace Mantid::Geometry;
 /** Constructor
 * @param view :: The view we are handling
 */
-ReflSettingsTabPresenter::ReflSettingsTabPresenter(IReflSettingsTabView *view)
+ReflSettingsPresenter::ReflSettingsPresenter(IReflSettingsView *view)
     : m_view(view), m_mainPresenter() {
 
   // Create the 'HintingLineEdits'
@@ -24,24 +24,24 @@ ReflSettingsTabPresenter::ReflSettingsTabPresenter(IReflSettingsTabView *view)
 
 /** Destructor
 */
-ReflSettingsTabPresenter::~ReflSettingsTabPresenter() {}
+ReflSettingsPresenter::~ReflSettingsPresenter() {}
 
 /** Accept a main presenter
 * @param mainPresenter :: [input] The main presenter
 */
-void ReflSettingsTabPresenter::acceptMainPresenter(
+void ReflSettingsPresenter::acceptMainPresenter(
     IReflMainWindowPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
 }
 
 /** Used by the view to tell the presenter something has changed
 */
-void ReflSettingsTabPresenter::notify(IReflSettingsTabPresenter::Flag flag) {
+void ReflSettingsPresenter::notify(IReflSettingsPresenter::Flag flag) {
   switch (flag) {
-  case IReflSettingsTabPresenter::ExpDefaultsFlag:
+  case IReflSettingsPresenter::ExpDefaultsFlag:
     getExpDefaults();
     break;
-  case IReflSettingsTabPresenter::InstDefaultsFlag:
+  case IReflSettingsPresenter::InstDefaultsFlag:
     getInstDefaults();
     break;
   }
@@ -53,7 +53,7 @@ void ReflSettingsTabPresenter::notify(IReflSettingsTabPresenter::Flag flag) {
 * the polarisation corrections option in the view accordingly
 * @param instName :: [input] The name of the instrument to set to
 */
-void ReflSettingsTabPresenter::setInstrumentName(const std::string instName) {
+void ReflSettingsPresenter::setInstrumentName(const std::string instName) {
   m_currentInstrumentName = instName;
   m_view->setPolarisationOptionsEnabled(instName != "INTER" &&
                                         instName != "SURF");
@@ -62,7 +62,7 @@ void ReflSettingsTabPresenter::setInstrumentName(const std::string instName) {
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
 */
-std::string ReflSettingsTabPresenter::getTransmissionOptions() const {
+std::string ReflSettingsPresenter::getTransmissionOptions() const {
 
   std::vector<std::string> options;
 
@@ -117,7 +117,7 @@ std::string ReflSettingsTabPresenter::getTransmissionOptions() const {
 /** Returns global options for 'ReflectometryReductionOneAuto'
 * @return :: Global options for 'ReflectometryReductionOneAuto'
 */
-std::string ReflSettingsTabPresenter::getReductionOptions() const {
+std::string ReflSettingsPresenter::getReductionOptions() const {
 
   std::vector<std::string> options;
 
@@ -226,7 +226,7 @@ std::string ReflSettingsTabPresenter::getReductionOptions() const {
 *
 * @return :: transmission run(s) as a string that will be used for the reduction
 */
-std::string ReflSettingsTabPresenter::getTransmissionRuns() const {
+std::string ReflSettingsPresenter::getTransmissionRuns() const {
 
   auto runs = m_view->getTransmissionRuns();
   if (runs.empty())
@@ -261,14 +261,14 @@ std::string ReflSettingsTabPresenter::getTransmissionRuns() const {
 /** Returns global options for 'Stitch1DMany'
 * @return :: Global options for 'Stitch1DMany'
 */
-std::string ReflSettingsTabPresenter::getStitchOptions() const {
+std::string ReflSettingsPresenter::getStitchOptions() const {
 
   return m_view->getStitchOptions();
 }
 
 /** Creates hints for 'Stitch1DMany'
 */
-void ReflSettingsTabPresenter::createStitchHints() {
+void ReflSettingsPresenter::createStitchHints() {
 
   // The algorithm
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Stitch1DMany");
@@ -282,7 +282,7 @@ void ReflSettingsTabPresenter::createStitchHints() {
 
 /** Fills experiment settings with default values
 */
-void ReflSettingsTabPresenter::getExpDefaults() {
+void ReflSettingsPresenter::getExpDefaults() {
   // Algorithm and instrument
   auto alg = createReductionAlg();
   auto inst = createEmptyInstrument(m_currentInstrumentName);
@@ -315,7 +315,7 @@ void ReflSettingsTabPresenter::getExpDefaults() {
 
 /** Fills instrument settings with default values
 */
-void ReflSettingsTabPresenter::getInstDefaults() {
+void ReflSettingsPresenter::getInstDefaults() {
   // Algorithm and instrument
   auto alg = createReductionAlg();
   auto inst = createEmptyInstrument(m_currentInstrumentName);
@@ -337,14 +337,14 @@ void ReflSettingsTabPresenter::getInstDefaults() {
 
 /** Generates and returns an instance of the ReflectometryReductionOne algorithm
 */
-IAlgorithm_sptr ReflSettingsTabPresenter::createReductionAlg() {
+IAlgorithm_sptr ReflSettingsPresenter::createReductionAlg() {
   return AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
 }
 
 /** Creates and returns an example empty instrument given an instrument name
 */
 Instrument_const_sptr
-ReflSettingsTabPresenter::createEmptyInstrument(std::string instName) {
+ReflSettingsPresenter::createEmptyInstrument(std::string instName) {
   IAlgorithm_sptr loadInst =
       AlgorithmManager::Instance().create("LoadEmptyInstrument");
   loadInst->setChild(true);

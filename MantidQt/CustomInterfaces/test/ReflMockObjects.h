@@ -8,8 +8,8 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
@@ -64,7 +64,7 @@ public:
   IReflRunsTabPresenter *getPresenter() const override { return nullptr; };
 };
 
-class MockSettingsTabView : public IReflSettingsTabView {
+class MockSettingsView : public IReflSettingsView {
 public:
   // Global options
   MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
@@ -97,7 +97,7 @@ public:
   createStitchHints(const std::map<std::string, std::string> &hints) override {
     UNUSED_ARG(hints);
   };
-  IReflSettingsTabPresenter *getPresenter() const override { return nullptr; }
+  IReflSettingsPresenter *getPresenter() const override { return nullptr; }
 };
 
 class MockSaveTabView : public IReflSaveTabView {
@@ -148,7 +148,7 @@ public:
   ~MockRunsTabPresenter() override{};
 };
 
-class MockSettingsTabPresenter : public IReflSettingsTabPresenter {
+class MockSettingsPresenter : public IReflSettingsPresenter {
 public:
   MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
@@ -157,13 +157,13 @@ public:
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
     UNUSED_ARG(presenter);
   };
-  void notify(IReflSettingsTabPresenter::Flag flag) override {
+  void notify(IReflSettingsPresenter::Flag flag) override {
     UNUSED_ARG(flag);
   };
   void setInstrumentName(const std::string instName) override {
     UNUSED_ARG(instName);
   }
-  ~MockSettingsTabPresenter() override{};
+  ~MockSettingsPresenter() override{};
 };
 
 class MockSaveTabPresenter : public IReflSaveTabPresenter {

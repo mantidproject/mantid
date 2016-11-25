@@ -1,17 +1,17 @@
-#ifndef MANTID_CUSTOMINTERFACES_QTREFLSETTINGSTABVIEW_H_
-#define MANTID_CUSTOMINTERFACES_QTREFLSETTINGSTABVIEW_H_
+#ifndef MANTID_CUSTOMINTERFACES_QTREFLSETTINGSVIEW_H_
+#define MANTID_CUSTOMINTERFACES_QTREFLSETTINGSVIEW_H_
 
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h"
-#include "ui_ReflSettingsTabWidget.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsView.h"
+#include "ui_ReflSettingsWidget.h"
 #include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 // Forward decs
-class IReflSettingsTabPresenter;
+class IReflSettingsPresenter;
 
-/** QtReflSettingsTabView : Provides an interface for the "Settings" tab in the
+/** QtReflSettingsView : Provides an interface for the "Settings" widget in the
 Reflectometry (Polref) interface.
 
 Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -35,15 +35,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class QtReflSettingsTabView : public QWidget, public IReflSettingsTabView {
+class QtReflSettingsView : public QWidget, public IReflSettingsView {
   Q_OBJECT
 public:
   /// Constructor
-  QtReflSettingsTabView(QWidget *parent = 0);
+  QtReflSettingsView(QWidget *parent = 0);
   /// Destructor
-  ~QtReflSettingsTabView() override;
+  ~QtReflSettingsView() override;
   /// Returns the presenter managing this view
-  IReflSettingsTabPresenter *getPresenter() const override;
+  IReflSettingsPresenter *getPresenter() const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions() const override;
   /// Return selected analysis mode
@@ -104,12 +104,12 @@ private:
   void initLayout();
 
   /// The widget
-  Ui::ReflSettingsTabWidget m_ui;
+  Ui::ReflSettingsWidget m_ui;
   /// The presenter
-  std::unique_ptr<IReflSettingsTabPresenter> m_presenter;
+  std::unique_ptr<IReflSettingsPresenter> m_presenter;
 };
 
 } // namespace Mantid
 } // namespace CustomInterfaces
 
-#endif /* MANTID_CUSTOMINTERFACES_QTREFLSETTINGSTABVIEW_H_ */
+#endif /* MANTID_CUSTOMINTERFACES_QTREFLSETTINGSVIEW_H_ */

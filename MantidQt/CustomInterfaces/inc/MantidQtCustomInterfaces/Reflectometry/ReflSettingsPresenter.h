@@ -1,8 +1,8 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLSETTINGSTABPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_REFLSETTINGSTABPRESENTER_H
+#ifndef MANTID_CUSTOMINTERFACES_REFLSETTINGSPRESENTER_H
+#define MANTID_CUSTOMINTERFACES_REFLSETTINGSPRESENTER_H
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsPresenter.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidGeometry/Instrument.h"
 
@@ -14,11 +14,11 @@ using namespace Mantid::Geometry;
 
 // Forward decs
 class IReflMainWindowPresenter;
-class IReflSettingsTabView;
+class IReflSettingsView;
 
-/** @class ReflSettingsTabPresenter
+/** @class ReflSettingsPresenter
 
-ReflSettingsTabPresenter is a presenter class for the tab 'Settings' in the
+ReflSettingsPresenter is a presenter class for the widget 'Settings' in the
 Reflectometry (Polref) Interface.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -42,16 +42,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL ReflSettingsTabPresenter
-    : public IReflSettingsTabPresenter {
+class MANTIDQT_CUSTOMINTERFACES_DLL ReflSettingsPresenter
+    : public IReflSettingsPresenter {
 public:
   /// Constructor
-  ReflSettingsTabPresenter(IReflSettingsTabView *view);
+  ReflSettingsPresenter(IReflSettingsView *view);
   /// Destructor
-  ~ReflSettingsTabPresenter() override;
+  ~ReflSettingsPresenter() override;
   /// Accept a main presenter
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
-  void notify(IReflSettingsTabPresenter::Flag flag) override;
+  void notify(IReflSettingsPresenter::Flag flag) override;
   void setInstrumentName(const std::string instName) override;
 
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
@@ -70,7 +70,7 @@ private:
   std::string getTransmissionRuns() const;
 
   /// The view we are managing
-  IReflSettingsTabView *m_view;
+  IReflSettingsView *m_view;
   /// The main presenter
   IReflMainWindowPresenter *m_mainPresenter;
   /// Name of the current instrument in use
@@ -78,4 +78,4 @@ private:
 };
 }
 }
-#endif /* MANTID_CUSTOMINTERFACES_REFLSETTINGSTABPRESENTER_H */
+#endif /* MANTID_CUSTOMINTERFACES_REFLSETTINGSPRESENTER_H */

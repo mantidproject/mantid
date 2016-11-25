@@ -30,7 +30,7 @@ public:
   void testGetTransmissionOptions() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsTabPresenter mockSettingsPresenter;
+    MockSettingsPresenter mockSettingsPresenter;
     MockSaveTabPresenter mockSaveTabPresenter;
     ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
                                       &mockSettingsPresenter,
@@ -45,7 +45,7 @@ public:
   void testGetReductionOptions() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsTabPresenter mockSettingsPresenter;
+    MockSettingsPresenter mockSettingsPresenter;
     MockSaveTabPresenter mockSaveTabPresenter;
     ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
                                       &mockSettingsPresenter,
@@ -59,7 +59,7 @@ public:
   void testStitchOptions() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsTabPresenter mockSettingsPresenter;
+    MockSettingsPresenter mockSettingsPresenter;
     MockSaveTabPresenter mockSaveTabPresenter;
     ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
                                       &mockSettingsPresenter,
@@ -73,7 +73,7 @@ public:
   void testAskUserString() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsTabPresenter mockSettingsPresenter;
+    MockSettingsPresenter mockSettingsPresenter;
     MockSaveTabPresenter mockSaveTabPresenter;
     ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
                                       &mockSettingsPresenter,
@@ -88,7 +88,7 @@ public:
   void testAskUserYesNo() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsTabPresenter mockSettingsPresenter;
+    MockSettingsPresenter mockSettingsPresenter;
     MockSaveTabPresenter mockSaveTabPresenter;
     ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
                                       &mockSettingsPresenter,
@@ -102,7 +102,7 @@ public:
   void testGiveUserWarning() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsTabPresenter mockSettingsPresenter;
+    MockSettingsPresenter mockSettingsPresenter;
     MockSaveTabPresenter mockSaveTabPresenter;
     ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
                                       &mockSettingsPresenter,
@@ -116,7 +116,7 @@ public:
   void testGiveUserCritical() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsTabPresenter mockSettingsPresenter;
+    MockSettingsPresenter mockSettingsPresenter;
     MockSaveTabPresenter mockSaveTabPresenter;
     ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
                                       &mockSettingsPresenter,
@@ -131,7 +131,7 @@ public:
   void testGiveUserInfo() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsTabPresenter mockSettingsPresenter;
+    MockSettingsPresenter mockSettingsPresenter;
     MockSaveTabPresenter mockSaveTabPresenter;
     ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
                                       &mockSettingsPresenter,
@@ -145,7 +145,7 @@ public:
   void testUserPythonCode() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsTabPresenter mockSettingsPresenter;
+    MockSettingsPresenter mockSettingsPresenter;
     MockSaveTabPresenter mockSaveTabPresenter;
     ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
                                       &mockSettingsPresenter,

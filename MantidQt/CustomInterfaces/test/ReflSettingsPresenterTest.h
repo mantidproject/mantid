@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsPresenter.h"
 #include "ReflMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;
@@ -30,23 +30,23 @@ public:
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class ReflSettingsTabPresenterTest : public CxxTest::TestSuite {
+class ReflSettingsPresenterTest : public CxxTest::TestSuite {
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ReflSettingsTabPresenterTest *createSuite() {
-    return new ReflSettingsTabPresenterTest();
+  static ReflSettingsPresenterTest *createSuite() {
+    return new ReflSettingsPresenterTest();
   }
-  static void destroySuite(ReflSettingsTabPresenterTest *suite) {
+  static void destroySuite(ReflSettingsPresenterTest *suite) {
     delete suite;
   }
 
-  ReflSettingsTabPresenterTest() { FrameworkManager::Instance(); }
+  ReflSettingsPresenterTest() { FrameworkManager::Instance(); }
 
   void testGetTransmissionOptions() {
-    MockSettingsTabView mockView;
-    ReflSettingsTabPresenter presenter(&mockView);
+    MockSettingsView mockView;
+    ReflSettingsPresenter presenter(&mockView);
 
     EXPECT_CALL(mockView, getAnalysisMode())
         .Times(Exactly(1))
@@ -93,8 +93,8 @@ public:
   }
 
   void testGetReductionOptions() {
-    MockSettingsTabView mockView;
-    ReflSettingsTabPresenter presenter(&mockView);
+    MockSettingsView mockView;
+    ReflSettingsPresenter presenter(&mockView);
 
     EXPECT_CALL(mockView, getAnalysisMode())
         .Times(Exactly(1))
@@ -182,8 +182,8 @@ public:
   }
 
   void testStitchOptions() {
-    MockSettingsTabView mockView;
-    ReflSettingsTabPresenter presenter(&mockView);
+    MockSettingsView mockView;
+    ReflSettingsPresenter presenter(&mockView);
 
     EXPECT_CALL(mockView, getStitchOptions()).Times(Exactly(1));
     presenter.getStitchOptions();
@@ -191,8 +191,8 @@ public:
   }
 
   void testPolarisationOptionsEnabled() {
-    MockSettingsTabView mockView;
-    ReflSettingsTabPresenter presenter(&mockView);
+    MockSettingsView mockView;
+    ReflSettingsPresenter presenter(&mockView);
 
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(false))
         .Times(Exactly(1));
@@ -203,8 +203,8 @@ public:
   }
 
   void testExperimentDefaults() {
-    MockSettingsTabView mockView;
-    ReflSettingsTabPresenter presenter(&mockView);
+    MockSettingsView mockView;
+    ReflSettingsPresenter presenter(&mockView);
     MockMainWindowPresenter mainPresenter;
 
     // This presenter accepts the main presenter
@@ -223,14 +223,14 @@ public:
         "0.972762,0.001828,-0.000261,0.0", "1"};
 
     EXPECT_CALL(mockView, setExpDefaults(defaults)).Times(1);
-    presenter.notify(IReflSettingsTabPresenter::ExpDefaultsFlag);
+    presenter.notify(IReflSettingsPresenter::ExpDefaultsFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
   void testInstrumentDefaults() {
-    MockSettingsTabView mockView;
+    MockSettingsView mockView;
     MockMainWindowPresenter mainPresenter;
-    ReflSettingsTabPresenter presenter(&mockView);
+    ReflSettingsPresenter presenter(&mockView);
 
     // This presenter accepts the main presenter
     presenter.acceptMainPresenter(&mainPresenter);
@@ -243,7 +243,7 @@ public:
     std::vector<double> defaults = {1., 4.0, 10., 15., 17., 1.0, 17., 2.0};
 
     EXPECT_CALL(mockView, setInstDefaults(defaults)).Times(1);
-    presenter.notify(IReflSettingsTabPresenter::InstDefaultsFlag);
+    presenter.notify(IReflSettingsPresenter::InstDefaultsFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 };
