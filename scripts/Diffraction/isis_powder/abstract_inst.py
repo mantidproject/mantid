@@ -126,7 +126,7 @@ class AbstractInst(object):
     def calculate_focus_binning_params(self, sample):
         return None
 
-    def correct_sample_vanadium(self, focused_ws, index, vanadium_ws=None):
+    def correct_sample_vanadium(self, focus_spectra, vanadium_spectra=None):
         raise NotImplementedError("Cannot process the sample with a vanadium run for this instrument")
 
     def get_default_group_names(self):

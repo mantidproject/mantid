@@ -29,6 +29,8 @@ class Polaris(AbstractInst):
         self._run_details_last_run_number = None
         self._run_details_cached_obj = None
 
+        self._ads_workaround = 0
+
     def focus(self, run_number, do_attenuation=True, do_van_normalisation=True):
         return self._focus(run_number=run_number, do_attenuation=do_attenuation,
                            do_van_normalisation=do_van_normalisation)
@@ -89,14 +91,13 @@ class Polaris(AbstractInst):
         ws_to_correct = corrected_ws
         return ws_to_correct
 
-    def correct_sample_vanadium(self, focused_ws, index, vanadium_ws=None):
-        spectra_name = "sample_ws-" + str(index + 1)
-        mantid.CropWorkspace(InputWorkspace=focused_ws, OutputWorkspace=spectra_name,
-                             StartWorkspaceIndex=index, EndWorkspaceIndex=index)
+    def correct_sample_vanadium(self, focus_spectra, vanadium_spectra=None):
+        spectra_name = "sample_ws-" + str(self._ads_workaround + 1)
+        self._ads_workaround += 1
 
-        if vanadium_ws:
-            van_rebinned = mantid.RebinToWorkspace(WorkspaceToRebin=vanadium_ws, WorkspaceToMatch=spectra_name)
-            mantid.Divide(LHSWorkspace=spectra_name, RHSWorkspace=van_rebinned, OutputWorkspace=spectra_name)
+        if vanadium_spectra:
+            van_rebinned = mantid.RebinToWorkspace(WorkspaceToRebin=vanadium_spectra, WorkspaceToMatch=focus_spectra)
+            mantid.Divide(LHSWorkspace=focus_spectra, RHSWorkspace=van_rebinned, OutputWorkspace=spectra_name)
             common.remove_intermediate_workspace(van_rebinned)
 
         return spectra_name

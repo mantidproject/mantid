@@ -32,6 +32,7 @@ class Pearl(AbstractInst):
         # File names
         pearl_mc_absorption_file_name = "PRL112_DC25_10MM_FF.OUT"  # TODO how often does this change
         self._attenuation_full_path = os.path.join(calibration_dir, pearl_mc_absorption_file_name)
+        self._ads_workaround = 0
 
     # --- Abstract Implementation ---- #
 
@@ -178,21 +179,22 @@ class Pearl(AbstractInst):
         ws_to_rebin = rebinned_ws
         return ws_to_rebin
 
-    def correct_sample_vanadium(self, focused_ws, index, vanadium_ws=None):
-        data_ws = mantid.ExtractSingleSpectrum(InputWorkspace=focused_ws, WorkspaceIndex=index)
-        data_ws = mantid.ConvertUnits(InputWorkspace=data_ws, Target="TOF")
+    def correct_sample_vanadium(self, focus_spectra, vanadium_spectra=None):
+        data_ws = mantid.ConvertUnits(InputWorkspace=focus_spectra, Target="TOF")
         data_ws = mantid.Rebin(InputWorkspace=data_ws, Params=self._focus_tof_binning)
 
-        if vanadium_ws:
-            data_processed = "van_processed" + str(index)  # Workaround for Mantid overwriting the WS in a loop
-            vanadium_ws = mantid.Rebin(InputWorkspace=vanadium_ws, Params=self._focus_tof_binning)
+        if vanadium_spectra:
+            # Workaround for Mantid overwriting the WS in a loop
+            data_processed = "van_processed" + str(self._ads_workaround)
+            vanadium_ws = mantid.Rebin(InputWorkspace=vanadium_spectra, Params=self._focus_tof_binning)
             data_ws = mantid.Divide(LHSWorkspace=data_ws, RHSWorkspace=vanadium_ws, OutputWorkspace=data_processed)
         else:
-            data_processed = "processed-" + str(index)
+            data_processed = "processed-" + str(self._ads_workaround)
 
+        self._ads_workaround += 1
         mantid.CropWorkspace(InputWorkspace=data_ws, XMin=0.1, OutputWorkspace=data_processed)
 
-        if vanadium_ws:
+        if vanadium_spectra:
             mantid.Scale(InputWorkspace=data_processed, Factor=10, OutputWorkspace=data_processed)
 
         return data_processed

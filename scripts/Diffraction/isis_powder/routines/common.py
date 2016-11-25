@@ -15,6 +15,7 @@ def create_calibration_by_names(calibration_runs, startup_objects, grouping_file
     _create_blank_cal_file(calibration_runs=calibration_runs, group_names=group_names,
                            out_grouping_file_name=grouping_file_name, instrument=startup_objects)
 
+
 def extract_bank_spectra(ws_to_split, num_banks):
     spectra_bank_list = []
     for i in range(0, num_banks):
