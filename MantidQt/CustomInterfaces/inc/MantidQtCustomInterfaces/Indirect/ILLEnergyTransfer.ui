@@ -383,11 +383,11 @@
       </item>
       <item row="0" column="4">
        <widget class="QComboBox" name="cbBackOption">
-        <property name="toolTip">
-         <string>Background subtraction option</string>
-        </property>
         <property name="visible">
          <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Background subtraction option</string>
         </property>
         <item>
          <property name="text">
@@ -434,11 +434,11 @@
       </item>
       <item row="0" column="3">
        <widget class="QLabel" name="lbBackOption">
-        <property name="text">
-         <string>Option</string>
-        </property>
         <property name="visible">
          <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Option</string>
         </property>
        </widget>
       </item>
@@ -473,20 +473,20 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Peak integration range for calibration (in mev) [start;end].</string>
+         <string>Peak integration range for calibration (in mev).</string>
         </property>
         <property name="text">
-         <string>-0.003;0.003</string>
+         <string>-0.003,0.003</string>
         </property>
        </widget>
       </item>
       <item row="0" column="3">
        <widget class="QLabel" name="lbCalibOption">
-        <property name="text">
-         <string>Option</string>
-        </property>
         <property name="visible">
          <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Option</string>
         </property>
        </widget>
       </item>
@@ -526,11 +526,11 @@
       </item>
       <item row="0" column="4">
        <widget class="QComboBox" name="cbCalibOption">
-        <property name="toolTip">
-         <string>Detector calibration option</string>
-        </property>
         <property name="visible">
          <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Detector calibration option</string>
         </property>
         <item>
          <property name="text">

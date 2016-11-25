@@ -34,13 +34,14 @@ class IndirectILLReductionQENSTest(unittest.TestCase):
 
     def test_multifiles(self):
 
-        args = {'Run': self._runs_two_wing_multi}
+        args = {'Run': self._runs_two_wing_multi,
+                'OutputWorkspace': 'out_ws'}
 
         alg_test = run_algorithm('IndirectILLReductionQENS', **args)
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed")
 
-        self._check_workspace_group(mtd['red'], 2, 18, 1024)
+        self._check_workspace_group(mtd['out_ws'], 2, 18, 1024)
 
         args['SumRuns'] = True
 
@@ -48,7 +49,7 @@ class IndirectILLReductionQENSTest(unittest.TestCase):
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed")
 
-        self._check_workspace_group(mtd['red'], 1, 18, 1024)
+        self._check_workspace_group(mtd['out_ws'], 1, 18, 1024)
 
     def test_one_wing(self):
 
@@ -60,74 +61,102 @@ class IndirectILLReductionQENSTest(unittest.TestCase):
 
         self._check_workspace_group(mtd['red'], 1, 18, 1024)
 
-    def _test_unmirror_0_1_2_3(self):
+    def test_unmirror_0_1_2_3(self):
 
-        args['Run'] = self._run_two_wing
+        args = {'Run' : self._run_two_wing,
+                'UnmirrorOption' : 0,
+                'OutputWorkspace' : 'both'}
 
-        args['UnmirrorOption'] = 0
+        alg_test = run_algorithm('IndirectILLReductionQENS', **args)
 
-        both = IndirectILLReductionQENS(**self._args)
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 0")
 
         args['UnmirrorOption'] = 1
 
-        red = IndirectILLReductionQENS(**self._args)
+        args['OutputWorkspace'] = 'red'
+
+        alg_test = run_algorithm('IndirectILLReductionQENS', **args)
+
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 1")
 
         args['UnmirrorOption'] = 2
 
-        left = IndirectILLReductionQENS(**self._args)
+        args['OutputWorkspace'] = 'left'
+
+        alg_test = run_algorithm('IndirectILLReductionQENS', **args)
+
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 2")
 
         args['UnmirrorOption'] = 3
 
-        right = IndirectILLReductionQENS(**self._args)
+        args['OutputWorkspace'] = 'right'
 
-        summed = Plus(left.getItem(0),right.getItem(0))
+        alg_test = run_algorithm('IndirectILLReductionQENS', **args)
 
-        result = CompareWorkspaces(summed,red.getItem(0))
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 3")
 
-        self._assertTrue(result[0],"Unmirror 1 should be the sum of 2 and 3")
+        summed = Plus(mtd['left'].getItem(0),mtd['right'].getItem(0))
 
-        left_right = GroupWorkspaces([left.getItem(0).getName(), right.getItem(0).getName()])
+        Scale(InputWorkspace=summed,Factor=0.5,OutputWorkspace=summed)
 
-        result = CompareWorkspaces(left_right,both)
+        result = CompareWorkspaces(summed,mtd['red'].getItem(0))
 
-        self._assertTrue(result[0],"Unmirror 0 should be the group of 2 and 3")
+        self.assertTrue(result[0],"Unmirror 1 should be the sum of 2 and 3")
 
-    def _test_unmirror_4_5(self):
+        left_right = GroupWorkspaces([mtd['left'].getItem(0).getName(), mtd['right'].getItem(0).getName()])
 
-        args['Run'] = '136558'
+        result = CompareWorkspaces(left_right,'both')
 
-        args['UnmirrorOption'] = 4
+        self.assertTrue(result[0],"Unmirror 0 should be the group of 2 and 3")
 
-        vana4 = IndirectILLReductionQENS(**self._args)
+    def test_unmirror_4_5(self):
 
-        args['AlignmentRun'] = '136558'
+        args = {'Run': self._run_two_wing,
+                'UnmirrorOption': 4,
+                'OutputWorkspace': 'vana4'}
+
+        alg_test = run_algorithm('IndirectILLReductionQENS', **args)
+
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 4")
+
+        args['AlignmentRun'] = self._run_two_wing
 
         args['UnmirrorOption'] = 5
 
-        vana5 = IndirectILLReductionQENS(**self._args)
+        args['OutputWorkspace'] = 'vana5'
 
-        result = CompareWorkspaces(vana4, vana5)
+        alg_test = run_algorithm('IndirectILLReductionQENS', **args)
 
-        self._assertTrue(result[0], "Unmirror 4 should be the same as 5 if "
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 5")
+
+        result = CompareWorkspaces('vana4', 'vana5')
+
+        self.assertTrue(result[0], "Unmirror 4 should be the same as 5 if "
                                     "the same run is also defined as alignment run")
 
-    def _test_unmirror_6_7(self):
+    def test_unmirror_6_7(self):
 
-        args['Run'] = '136558'
+        args = {'Run': self._run_two_wing,
+                'UnmirrorOption': 6,
+                'OutputWorkspace': 'vana6'}
 
-        args['UnmirrorOption'] = 6
+        alg_test = run_algorithm('IndirectILLReductionQENS', **args)
 
-        vana6 = IndirectILLReductionQENS(**self._args)
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 6")
 
-        args['VanadiumRun'] = '136558'
+        args['AlignmentRun'] = self._run_two_wing
 
         args['UnmirrorOption'] = 7
 
-        vana7 = IndirectILLReductionQENS(**self._args)
+        args['OutputWorkspace'] = 'vana7'
 
-        result = CompareWorkspaces(vana6,vana7)
+        alg_test = run_algorithm('IndirectILLReductionQENS', **args)
 
-        self._assertTrue(result[0], "Unmirror 6 should be the same as 7 if "
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed for unmirror 7")
+
+        result = CompareWorkspaces('vana6','vana7')
+
+        self.assertTrue(result[0], "Unmirror 6 should be the same as 7 if "
                                     "the same run is also defined as alignment run")
 
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):

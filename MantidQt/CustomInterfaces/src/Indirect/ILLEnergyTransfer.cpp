@@ -68,10 +68,10 @@ bool ILLEnergyTransfer::validate() {
                   .toString()
                   .toStdString()
                   .empty()) {
-    auto range = m_uiForm.lePeakRange->text().split(';');
+    auto range = m_uiForm.lePeakRange->text().split(',');
     if (range.size() != 2) {
       uiv.addErrorMessage("Calibration Peak Range is invalid. \n"
-                          "Provide ; separated two energy values in meV.");
+                          "Provide comma separated two energy values in meV.");
     } else {
       bool ok1 = true;
       m_peakRange[0] = range[0].toDouble(&ok1);
@@ -80,7 +80,7 @@ bool ILLEnergyTransfer::validate() {
 
       if (!ok1 || !ok2) {
         uiv.addErrorMessage("Calibration Peak Range is invalid. \n"
-                            "Provide ; separated two energy values in meV.");
+                            "Provide comma separated two energy values in meV.");
       } else {
         if (m_peakRange[0] >= m_peakRange[1]) {
           uiv.addErrorMessage("Calibration Peak Range is invalid. \n"

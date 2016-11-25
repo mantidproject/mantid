@@ -225,12 +225,15 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
 
         self.setUp()
 
+        self._progress = Progress(self, start=0.0, end=1.0, nreports=self._run_file.count('+'))
+
         # This is faster than Load, moreover MergeRuns handles the metadata correctly
         for i, item in enumerate(self._run_file.split('+')):
+            runnumber = '__' + os.path.basename(item).split('.')[0]
+            self._progress.report("Loading run #"+runnumber)
             if i == 0:
                 LoadILLIndirect(Filename=item,OutputWorkspace=self._red_ws)
             if i > 0:
-                runnumber = '__' + os.path.basename(item).split('.')[0]
                 LoadILLIndirect(Filename=item, OutputWorkspace=runnumber)
                 MergeRuns(InputWorkspaces=[self._red_ws,runnumber],OutputWorkspace=self._red_ws)
                 DeleteWorkspace(runnumber)

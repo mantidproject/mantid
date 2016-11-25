@@ -148,8 +148,8 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         self._criteria = '$/entry0/instrument/Doppler/maximum_delta_energy$ != 0. and ' \
                          '$/entry0/instrument/Doppler/velocity_profile$ == 0'
 
-        # empty list
-        self._runs = []
+        # empty list to store all final workspaces to group
+        self._ws_list = []
 
     def _mask(self, ws, xstart, xend):
         """
@@ -235,6 +235,7 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         if self._calibration_file:
             calibration = '__calibration_'+self._red_ws
             IndirectILLEnergyTransfer(Run = self._calibration_file, OutputWorkspace = calibration, **self._common_args)
+            MatchPeaks(InputWorkspace=calibration,OutputWorkspace=calibration,MaskBins=True)
             Integration(InputWorkspace=calibration,RangeLower=self._peak_range[0],RangeUpper=self._peak_range[1],
                         OutputWorkspace=calibration)
             self._warn_negative_integral(calibration,'in calibration run.')
@@ -259,7 +260,12 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         if self._unmirror_option == 5 or self._unmirror_option == 7:
             DeleteWorkspace(alignment)
 
-        GroupWorkspaces(InputWorkspaces=self._runs,OutputWorkspace=self._red_ws)
+        GroupWorkspaces(InputWorkspaces=self._ws_list,OutputWorkspace=self._red_ws)
+
+        # unhide the final workspaces, i.e. remove __ prefix
+        for ws in mtd[self._red_ws]:
+            RenameWorkspace(InputWorkspace=ws,OutputWorkspace=ws.getName()[2:])
+
         self.setProperty('OutputWorkspace',self._red_ws)
 
     def _reduce_run(self,run):
@@ -272,54 +278,67 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
 
         self._progress.report("Reducing run #" + run)
 
-        name = runnumber + '_' + self._red_ws
+        ws = '__' + runnumber + '_' + self._red_ws
 
-        ws = '__' + name
+        back_ws = '__background_'+self._red_ws
+
+        calib_ws = '__calibration_'+self._red_ws
 
         IndirectILLEnergyTransfer(Run = run, OutputWorkspace = ws, **self._common_args)
 
+        wings = mtd[ws].getNumberOfEntries()
+
         if self._background_file:
-            Minus(LHSWorkspace=ws, RHSWorkspace='__background_'+self._red_ws, OutputWorkspace=ws)
-            self._warn_negative_integral(ws,'after background subtraction.')
+            if wings == mtd[back_ws].getNumberOfEntries():
+                Minus(LHSWorkspace=ws, RHSWorkspace=back_ws, OutputWorkspace=ws)
+                self._warn_negative_integral(ws,'after background subtraction.')
+            else:
+                raise RuntimeError('Inconsistent mirror sense in background run. Unable to perform subtraction.')
 
         if self._calibration_file:
-            Divide(LHSWorkspace=ws, RHSWorkspace='__calibration_'+self._red_ws, OutputWorkspace=ws)
+            if wings == mtd[calib_ws].getNumberOfEntries():
+                Divide(LHSWorkspace=ws, RHSWorkspace=calib_ws, OutputWorkspace=ws)
+            else:
+                raise RuntimeError('Inconsistent mirror sense in calibration run. Unable to perform calibration.')
 
-        self._perform_unmirror(ws)
-
-        RenameWorkspace(InputWorkspace=ws,OutputWorkspace=name)
+        self._perform_unmirror(ws,runnumber)
 
         # register to reduced runs list
-        self._runs.append(name)
+        self._ws_list.append(ws)
 
-    def _perform_unmirror(self, ws):
+    def _perform_unmirror(self, ws, run):
         '''
-        Performs unmirroring, i.e. summing of left and right wings for two-wing data or centering the one wing data
-        @param ws :: input workspace
+        Performs unmirroring, i.e. summing of left and right wings
+        for two-wing data or centering the one wing data
+        @param ws  :: workspace
+        @param run :: runnumber
         '''
 
-        outname = mtd[ws].getName()
+        outname = ws + '_tmp'
 
         wings = mtd[ws].getNumberOfEntries()
 
         self.log().information('Unmirroring workspace {0} with option {1}'
-                               .format(outname,self._unmirror_option))
+                               .format(ws,self._unmirror_option))
 
         alignment = '__alignment_'+self._red_ws
+
+        # make sure the sample and alignment runs have the same mirror sense for unmirror 5,7
+        if self._unmirror_option == 5 or self._unmirror_option == 7:
+            if wings != mtd[alignment].getNumberOfEntries():
+                raise RuntimeError('Inconsistent mirror sense in alignment run. Unable to perform unmirror.')
 
         if wings == 1:   # one wing
 
             name = mtd[ws].getItem(0).getName()
 
             if self._unmirror_option < 6:  # do unmirror 0, i.e. nothing
-                RenameWorkspace(InputWorkspace = name, OutputWorkspace = outname)
+                CloneWorkspace(InputWorkspace = name, OutputWorkspace = outname)
             elif self._unmirror_option == 6:
                 MatchPeaks(InputWorkspace = name, OutputWorkspace = outname, MaskBins = True)
-                DeleteWorkspace(name)
             elif self._unmirror_option == 7:
                 MatchPeaks(InputWorkspace = name, InputWorkspace2 = mtd[alignment].getItem(0).getName(),
                            MatchInput2ToCenter = True, OutputWorkspace = outname, MaskBins = True)
-                DeleteWorkspace(name)
 
         elif wings == 2:  # two wing
 
@@ -330,24 +349,18 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
             mask_max = mtd[left].blocksize()
 
             if self._unmirror_option == 0:
-                left_splited = left.split('_')
-                right_splited = right.split('_')
-                RenameWorkspace(InputWorkspace=left,
-                                OutputWorkspace=left_splited[2]+'_'+self._red_ws+'_left')
-                RenameWorkspace(InputWorkspace=right,
-                                OutputWorkspace=right_splited[2]+'_'+self._red_ws+'_right')
+                left_out = '__'+run+'_'+self._red_ws+'_left'
+                right_out = '__'+run+'_'+self._red_ws+'_right'
+                CloneWorkspace(InputWorkspace=left, OutputWorkspace=left_out)
+                CloneWorkspace(InputWorkspace=right, OutputWorkspace=right_out)
+                GroupWorkspaces(InputWorkspaces=[left_out,right_out],OutputWorkspace=outname)
             elif self._unmirror_option == 1:
-                Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace='__tmp_'+outname)
-                DeleteWorkspace(left)
-                DeleteWorkspace(right)
-                RenameWorkspace(InputWorkspace='__tmp_'+outname,OutputWorkspace=outname)
+                Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=outname)
                 Scale(InputWorkspace=outname, OutputWorkspace=outname, Factor=0.5)
             elif self._unmirror_option == 2:
-                RenameWorkspace(InputWorkspace=left, OutputWorkspace=outname)
-                DeleteWorkspace(right)
+                CloneWorkspace(InputWorkspace=left, OutputWorkspace=outname)
             elif self._unmirror_option == 3:
-                RenameWorkspace(InputWorkspace=right, OutputWorkspace=outname)
-                DeleteWorkspace(left)
+                CloneWorkspace(InputWorkspace=right, OutputWorkspace=outname)
             elif self._unmirror_option == 4:
                 bin_range_table = '__um4_'+right
                 MatchPeaks(InputWorkspace=right, InputWorkspace2=left, OutputWorkspace=right,
@@ -392,8 +405,9 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
                 Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=outname)
                 Scale(InputWorkspace=outname, OutputWorkspace=outname, Factor=0.5)
                 self._mask(outname, mask_min, mask_max)
-                DeleteWorkspace(left)
-                DeleteWorkspace(right)
+
+        DeleteWorkspace(ws)
+        RenameWorkspace(InputWorkspace=outname,OutputWorkspace=ws)
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLReductionQENS)
