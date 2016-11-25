@@ -280,13 +280,13 @@ private:
                                              nBins + 1, nBins);
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       for (size_t j = 0; j < nBins; ++j) {
-        const double x = x0 + j * dx;
+        const double x = x0 + static_cast<double>(j) * dx;
         ws->mutableX(i)[j] = x;
         const double y = yFromX(x + dx / 2);
         ws->mutableY(i)[j] = y;
         ws->mutableE(i)[j] = std::sqrt(y);
       }
-      ws->mutableX(i).back() = x0 + nBins * dx;
+      ws->mutableX(i).back() = x0 + static_cast<double>(nBins) * dx;
     }
   }
 
