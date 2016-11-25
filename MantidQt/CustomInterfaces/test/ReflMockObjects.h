@@ -51,6 +51,7 @@ public:
   MOCK_CONST_METHOD0(getTransferMethod, std::string());
   MOCK_CONST_METHOD0(getAlgorithmRunner,
                      boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
+  MOCK_CONST_METHOD0(getSelectedGroup, int());
   MOCK_METHOD1(setTransferMethods, void(const std::set<std::string> &));
   MOCK_METHOD0(setTableCommandsProxy, void());
   MOCK_METHOD0(setRowCommandsProxy, void());
@@ -60,7 +61,7 @@ public:
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
-  IReflRunsTabPresenter *getPresenter() const override { return nullptr; }
+  IReflRunsTabPresenter *getPresenter() const override { return nullptr; };
 };
 
 class MockSettingsTabView : public IReflSettingsTabView {

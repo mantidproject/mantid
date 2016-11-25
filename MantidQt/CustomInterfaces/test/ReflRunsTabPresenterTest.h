@@ -78,7 +78,7 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_3));
   }
 
-  void test_presenter_sets_commands_when_notified() {
+  void test_presenter_sets_commands_when_ADS_changed() {
     NiceMock<MockRunsTabView> mockRunsTabView;
     MockProgressableView mockProgress;
     NiceMock<MockDataProcessorPresenter> mockTablePresenter;
@@ -240,6 +240,37 @@ public:
     presenter.getPostprocessingOptions();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void test_when_group_changes_commands_are_updated() {
+    NiceMock<MockRunsTabView> mockRunsTabView;
+    MockProgressableView mockProgress;
+    NiceMock<MockDataProcessorPresenter> mockTablePresenter_0;
+    NiceMock<MockDataProcessorPresenter> mockTablePresenter_1;
+    NiceMock<MockDataProcessorPresenter> mockTablePresenter_2;
+    MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter_0);
+    tablePresenterVec.push_back(&mockTablePresenter_1);
+    tablePresenterVec.push_back(&mockTablePresenter_2);
+
+    ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
+                                   tablePresenterVec);
+    presenter.acceptMainPresenter(&mockMainPresenter);
+
+    EXPECT_CALL(mockRunsTabView, getSelectedGroup())
+        .Times(Exactly(1))
+        .WillOnce(Return(1));
+    // Commands should be updated with presenter of selected group
+    EXPECT_CALL(mockTablePresenter_0, publishCommandsMocked()).Times(0);
+    EXPECT_CALL(mockTablePresenter_1, publishCommandsMocked()).Times(1);
+    EXPECT_CALL(mockTablePresenter_2, publishCommandsMocked()).Times(0);
+    presenter.notify(IReflRunsTabPresenter::GroupChangedFlag);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_0));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_1));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_2));
   }
 };
 
