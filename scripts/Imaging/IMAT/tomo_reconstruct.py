@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 # Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 # Oak Ridge National Laboratory & European Spallation Source
 #
@@ -361,6 +362,7 @@ def grab_postproc_options(args):
 def main_tomo_rec():
     # several dependencies (numpy, scipy) are too out-of-date in standard Python 2.6
     # distributions, as found for example on rhel6
+
     vers = sys.version_info
     if vers < (2, 7, 0):
         raise RuntimeError(
@@ -369,6 +371,7 @@ def main_tomo_rec():
 
     import inspect
 
+<<<<<<< .merge_file_a05276
     import IMAT.tomorec.io as tomoio
     from IMAT.tomorec import reconstruction_command as tomocmd
     import IMAT.tomorec.configs as tomocfg
@@ -376,6 +379,11 @@ def main_tomo_rec():
     import pydevd
     pydevd.settrace(
         'localhost', port=61845, stdoutToServer=True, stderrToServer=True)
+||||||| .merge_file_a02148
+    import IMAT.tomorec.io as tomoio
+=======
+    import tomorec.io as tomoio
+>>>>>>> .merge_file_a14496
 
     arg_parser = setup_cmd_options()
     args = arg_parser.parse_args()

@@ -711,8 +711,7 @@ std::string RebinnedSourcesManager::saveToProject() {
 void RebinnedSourcesManager::loadFromProject(const std::string &lines) {
   MantidQt::API::TSVSerialiser tsv(lines);
 
-  std::string rebinWorkspaceName, originalWorkspaceName, rebinProxyName,
-      originalProxyName;
+  std::string rebinWorkspaceName, originalWorkspaceName, rebinProxyName;
   tsv.selectLine("RebinnedWorkspaceName");
   tsv >> rebinWorkspaceName;
   tsv.selectLine("OriginalWorkspaceName");

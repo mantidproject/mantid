@@ -2,6 +2,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -10,31 +11,27 @@ namespace CustomInterfaces {
 * @param view :: [input] The view we are managing
 * @param runsPresenter :: [input] A pointer to the 'Runs' tab presenter
 * @param settingsPresenter :: [input] A pointer to the 'Settings' tab presenter
+* @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
 */
 ReflMainWindowPresenter::ReflMainWindowPresenter(
     IReflMainWindowView *view, IReflRunsTabPresenter *runsPresenter,
-    IReflSettingsTabPresenter *settingsPresenter)
+    IReflSettingsTabPresenter *settingsPresenter,
+    IReflSaveTabPresenter *savePresenter)
     : m_view(view), m_runsPresenter(runsPresenter),
-      m_settingsPresenter(settingsPresenter) {
+      m_settingsPresenter(settingsPresenter), m_savePresenter(savePresenter) {
 
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
   m_settingsPresenter->acceptMainPresenter(this);
+  m_savePresenter->acceptMainPresenter(this);
+
+  // Trigger the setting of the current instrument name in settings tab
+  m_runsPresenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
 }
 
 /** Destructor
 */
 ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
-
-/** Returns global options for 'Plus' algorithm
-* @return :: Global options for 'Plus' algorithm
-*/
-std::string ReflMainWindowPresenter::getPlusOptions() const {
-
-  checkPtrValid(m_settingsPresenter);
-
-  return m_settingsPresenter->getPlusOptions();
-}
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
@@ -137,6 +134,16 @@ std::string
 ReflMainWindowPresenter::runPythonAlgorithm(const std::string &pythonCode) {
 
   return m_view->runPythonAlgorithm(pythonCode);
+}
+
+/**
+Tells the setting tab presenter what to set its current instrument name to
+* @param instName : The name of the instrument to be set
+*/
+void ReflMainWindowPresenter::setInstrumentName(
+    const std::string &instName) const {
+
+  m_settingsPresenter->setInstrumentName(instName);
 }
 
 /** Checks for null pointer

@@ -39,7 +39,7 @@ vtkSmartPointer<vtkPVClipDataSet> DLLExport
 getClippedDataSet(vtkSmartPointer<vtkDataSet> dataSet);
 
 /// Create name with timestamp attached.
-std::string DLLExport createTimeStampedName(std::string name);
+std::string DLLExport createTimeStampedName(const std::string &name);
 }
 }
 

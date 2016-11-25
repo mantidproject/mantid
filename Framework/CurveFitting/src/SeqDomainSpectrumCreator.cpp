@@ -226,7 +226,7 @@ bool SeqDomainSpectrumCreator::histogramIsUsable(size_t i) const {
     }
 
     return !detector->isMasked();
-  } catch (Kernel::Exception::NotFoundError) {
+  } catch (const Kernel::Exception::NotFoundError &) {
     return true;
   }
 }

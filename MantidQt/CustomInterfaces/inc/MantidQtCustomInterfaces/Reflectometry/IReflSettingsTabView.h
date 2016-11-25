@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_IREFLSETTINGSTABVIEW_H
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include <vector>
 #include <map>
 
 namespace MantidQt {
@@ -47,21 +48,39 @@ public:
   /// Returns the presenter managing this view
   virtual IReflSettingsTabPresenter *getPresenter() const = 0;
 
-  /// Pre-processing
-  virtual std::string getPlusOptions() const = 0;
-  virtual std::string getTransmissionOptions() const = 0;
-  virtual void
-  createPlusHints(const std::map<std::string, std::string> &hints) = 0;
-  virtual void
-  createTransmissionHints(const std::map<std::string, std::string> &hints) = 0;
-  /// Processing
-  virtual std::string getReductionOptions() const = 0;
-  virtual void
-  createReductionHints(const std::map<std::string, std::string> &hints) = 0;
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
   virtual void
   createStitchHints(const std::map<std::string, std::string> &hints) = 0;
+
+  /// Experiment settings
+  virtual std::string getAnalysisMode() const = 0;
+  virtual std::string getDirectBeam() const = 0;
+  virtual std::string getTransmissionRuns() const = 0;
+  virtual std::string getPolarisationCorrections() const = 0;
+  virtual std::string getCRho() const = 0;
+  virtual std::string getCAlpha() const = 0;
+  virtual std::string getCAp() const = 0;
+  virtual std::string getCPp() const = 0;
+  virtual std::string getMomentumTransferStep() const = 0;
+  virtual std::string getScaleFactor() const = 0;
+  /// Instrument settings
+  virtual std::string getIntMonCheck() const = 0;
+  virtual std::string getMonitorIntegralMin() const = 0;
+  virtual std::string getMonitorIntegralMax() const = 0;
+  virtual std::string getMonitorBackgroundMin() const = 0;
+  virtual std::string getMonitorBackgroundMax() const = 0;
+  virtual std::string getLambdaMin() const = 0;
+  virtual std::string getLambdaMax() const = 0;
+  virtual std::string getI0MonitorIndex() const = 0;
+  virtual std::string getProcessingInstructions() const = 0;
+
+  /// Set default values for settings
+  virtual void setExpDefaults(const std::vector<std::string> &) const = 0;
+  virtual void setInstDefaults(const std::vector<double> &) const = 0;
+
+  /// Set polarisation corrections and parameters enabled/disabled
+  virtual void setPolarisationOptionsEnabled(bool enable) const = 0;
 };
 }
 }
