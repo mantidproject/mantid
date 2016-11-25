@@ -38,7 +38,8 @@ namespace API {
 class MANTID_API_DLL IPeakFunction : public IFunctionWithLocation {
 public:
   /// Constructor
-  IPeakFunction();
+  IPeakFunction(int peakRadius = g_maxPeakRadius);
+
   /// Returns the peak FWHM
   virtual double fwhm() const = 0;
 
@@ -58,7 +59,12 @@ public:
   void functionDeriv1D(Jacobian *out, const double *xValues,
                        const size_t nData) override;
   /// Set new peak radius
-  static void setPeakRadius(const int &r = 5);
+  void setPeakRadius(const int &r);
+
+  /// Get the interval on which the peak has all its values above a certain
+  /// level
+  virtual std::pair<double, double>
+  getDomainInterval(double level = DEFAULT_SEARCH_LEVEL) const;
 
   /// Function evaluation method to be implemented in the inherited classes
   virtual void functionLocal(double *out, const double *xValues,
@@ -86,7 +92,11 @@ public:
 protected:
   /// Defines the area around the centre where the peak values are to be
   /// calculated (in FWHM).
-  static int s_peakRadius;
+  int m_peakRadius;
+  /// A number for a peak radius large enough to be practically infinite
+  static const int g_maxPeakRadius;
+  /// The default level for searching a domain interval (getDomainInterval())
+  static constexpr double DEFAULT_SEARCH_LEVEL = 1e-5;
 };
 
 typedef boost::shared_ptr<IPeakFunction> IPeakFunction_sptr;
