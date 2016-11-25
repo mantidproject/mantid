@@ -71,19 +71,18 @@ void StartLiveData::init() {
 }
 
 /**
- * After Instrument property is set copy any properties that the instrument's
- * listener may have to this algorithm.
+ * After Listener or Connection properties are set, copy any properties that
+ * the listener may have to this algorithm.
  */
 void StartLiveData::afterPropertySet(const std::string &propName) {
-  if (propName == "Instrument") {
+  if (propName == "Listener" || propName == "Connection") {
     // Properties of old listener, if any, need to be removed
     removeListenerProperties();
 
-    // Get of instance of listener for this instrument
-    auto listener = LiveListenerFactory::Instance().create(
-        getPropertyValue(propName), false);
+    // Get of instance of listener for this instrument with current properties
+    auto listener = createLiveListener();
 
-    // Copy over properties of new listener to this algorithm
+    // Copy over properties of listener to this algorithm
     copyListenerProperties(listener);
   }
 }
