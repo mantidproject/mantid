@@ -310,6 +310,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogCustom.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogSavu.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogAstra.h
+	inc/MantidQtCustomInterfaces/Tomography/TomographyCommandArguments.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h

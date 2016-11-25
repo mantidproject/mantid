@@ -6,6 +6,7 @@
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyProcess.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyThread.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyCommandArguments.h"
 
 #include <Poco/Path.h>
 
@@ -241,7 +242,8 @@ bool TomographyIfaceModel::doPing(const std::string &compRes) {
     tid = alg->getPropertyValue("TransactionID");
     g_log.information() << "Pinged '" << compRes
                         << "'succesfully. Checked that a transaction could "
-                           "be created, with ID: " << tid << '\n';
+                           "be created, with ID: "
+                        << tid << '\n';
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Error. Failed to ping and start a transaction on "
                              "the remote resource." +
@@ -798,6 +800,15 @@ void TomographyIfaceModel::filtersCfgToCmdOpts(
     const ImageStackPreParams &corRegions, const bool local,
     std::vector<std::string> &opts) const {
 
+  // paths config
+  /*
+  for( const auto &path : m_pathsConfig){
+    if(!path.empty()){
+    opts.emplace_back(path.first, adaptInputPathForExecution(path.second,
+  local));
+  }
+  }
+  */
   opts.emplace_back("--input-path=" + adaptInputPathForExecution(
                                           m_pathsConfig.pathSamples(), local));
 
