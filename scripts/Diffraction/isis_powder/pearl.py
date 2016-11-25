@@ -141,28 +141,26 @@ class Pearl(AbstractInst):
     def get_monitor_spectra_index(self, run_number):
         return get_monitor_spectra(run_number=run_number, focus_mode=self._focus_mode)
 
-    def _skip_appending_cycle_to_raw_dir(self):
-        return self._disable_appending_cycle_to_raw_dir
 
-    def _spline_vanadium(self, focused_vanadium_ws, instrument_version=''):
+    def spline_vanadium_ws(self, focused_vanadium_ws, instrument_version=''):
         # TODO move spline number into the class
         return pearl_spline.spline_vanadium_for_focusing(focused_vanadium_ws=focused_vanadium_ws,
                                                          spline_number=self._spline_coeff,
                                                          instrument_version=instrument_version)
 
-    def _do_tof_rebinning_focus(self, input_workspace):
+    def pearl_focus_tof_rebinning(self, input_workspace):
         input_workspace = mantid.Rebin(InputWorkspace=input_workspace, Params=self._focus_tof_binning)
         return input_workspace
 
     def _focus_processing(self, run_number, input_workspace, perform_vanadium_norm):
         return self._perform_focus_loading(run_number, input_workspace, perform_vanadium_norm)
 
-    def _process_focus_output(self, processed_spectra, run_details, attenuate=False):
+    def output_focused_ws(self, processed_spectra, run_details, attenuate=False):
         return pearl_output.generate_and_save_focus_output(self, processed_spectra=processed_spectra,
                                                            run_details=run_details, focus_mode=self._focus_mode,
                                                            perform_attenuation=attenuate)
 
-    def _apply_van_calibration_tof_rebinning(self, vanadium_ws, tof_rebin_pass, return_units):
+    def pearl_van_calibration_tof_rebinning(self, vanadium_ws, tof_rebin_pass, return_units):
         tof_rebin_param_dict = self.get_create_van_tof_binning()
         tof_rebin_param = tof_rebin_param_dict[str(tof_rebin_pass)]
 
@@ -174,7 +172,7 @@ class Pearl(AbstractInst):
     def _generate_vanadium_absorb_corrections(self, run_details, ws_to_match):
         return pearl_algs.generate_vanadium_absorb_corrections(van_ws=ws_to_match)
 
-    def _calibration_rebin_to_workspace(self, ws_to_rebin, ws_to_match):
+    def pearl_rebin_to_workspace(self, ws_to_rebin, ws_to_match):
         rebinned_ws = mantid.RebinToWorkspace(WorkspaceToRebin=ws_to_rebin, WorkspaceToMatch=ws_to_match)
         common.remove_intermediate_workspace(ws_to_rebin)
         ws_to_rebin = rebinned_ws

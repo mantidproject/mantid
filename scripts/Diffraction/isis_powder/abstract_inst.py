@@ -155,14 +155,7 @@ class AbstractInst(object):
     def get_monitor_spectra_index(self, run_number):
         return _empty_hook_return_empty_string()
 
-    def _old_api_PEARL_filename_is_full_path(self):
-        """
-        Only used by PEARL to maintain compatibility with old routines code
-        @return: Whether the "filename" is actually a full path
-        """
-        return False
-
-    def _spline_vanadium(self, focused_vanadium_ws, instrument_version=''):
+    def spline_vanadium_ws(self, focused_vanadium_ws, instrument_version=''):
         """
         Splines the background in a way specific to the instrument
         @param focused_vanadium_ws: The workspace to perform spline backgrounds on
@@ -171,26 +164,22 @@ class AbstractInst(object):
         """
         return _empty_hook_return_none()
 
-    def _skip_appending_cycle_to_raw_dir(self):
-        return True
-        # TODO set this to False if they just dump their raw files in one folder
-
-    def _do_tof_rebinning_focus(self, input_workspace):
+    def pearl_focus_tof_rebinning(self, input_workspace):
         return input_workspace
 
-    def _process_focus_output(self, processed_spectra, run_details, attenuate=False):
+    def output_focused_ws(self, processed_spectra, run_details, attenuate=False):
         return _empty_hook_return_none()
 
     def apply_solid_angle_efficiency_corr(self, ws_to_correct, run_details):
         return ws_to_correct
 
-    def _apply_van_calibration_tof_rebinning(self, vanadium_ws, tof_rebin_pass, return_units):
+    def pearl_van_calibration_tof_rebinning(self, vanadium_ws, tof_rebin_pass, return_units):
         return vanadium_ws
 
     def _generate_vanadium_absorb_corrections(self, calibration_full_paths, ws_to_match):
         raise NotImplementedError("Not implemented for this instrument yet")
 
-    def _calibration_rebin_to_workspace(self, ws_to_rebin, ws_to_match):
+    def pearl_rebin_to_workspace(self, ws_to_rebin, ws_to_match):
         return ws_to_rebin
 
     def correct_sample_vanadium(self, focused_ws, index, vanadium_ws=None):
@@ -199,8 +188,16 @@ class AbstractInst(object):
     def calculate_focus_binning_params(self, sample):
         return None
 
-    def _old_api_PEARL_setup_input_dirs(self, run_number):
+    def _old_api_pearl_setup_input_dirs(self, run_number):
         return None
+
+    def _old_api_pearl_filename_is_full_path(self):
+        """
+        Only used by PEARL to maintain compatibility with old routines code
+        @return: Whether the "filename" is actually a full path
+        """
+        return False
+
 
 # ----- Private Implementation ----- #
 # These should only be called by the abstract instrument class

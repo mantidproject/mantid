@@ -43,9 +43,6 @@ class MockInstrument(AbstractInst):
                              "instrument_version": "test_v1"}
         return cycle_information
 
-    def _skip_appending_cycle_to_raw_dir(self):
-        return self.generate_cycle_dir_flag
-
     def test_set_raw_data_dir(self, new_dir):
         # Used for testing to set a new raw_data_dir
         self._raw_data_dir = new_dir

@@ -17,8 +17,8 @@ def create_van(instrument, van, empty, output_van_file_name, absorb, gen_absorb)
 
     run_details = instrument.get_run_details(run_number=van)
 
-    corrected_van_ws = instrument. _apply_van_calibration_tof_rebinning(vanadium_ws=corrected_van_ws,
-                                                                        tof_rebin_pass=1, return_units="TOF")
+    corrected_van_ws = instrument. pearl_van_calibration_tof_rebinning(vanadium_ws=corrected_van_ws,
+                                                                       tof_rebin_pass=1, return_units="TOF")
 
     corrected_van_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
                                              CalibrationFile=run_details.calibration)
@@ -34,14 +34,14 @@ def create_van(instrument, van, empty, output_van_file_name, absorb, gen_absorb)
                                                    GroupingFileName=run_details.grouping)
 
     # Optional
-    focused_van_file = instrument. _apply_van_calibration_tof_rebinning(vanadium_ws=focused_van_file,
-                                                                        tof_rebin_pass=2, return_units="dSpacing")
+    focused_van_file = instrument. pearl_van_calibration_tof_rebinning(vanadium_ws=focused_van_file,
+                                                                       tof_rebin_pass=2, return_units="dSpacing")
 
     common.remove_intermediate_workspace(corrected_van_ws)
 
-    splined_ws_list = instrument._spline_vanadium(focused_van_file, run_details.instrument_version)
+    splined_ws_list = instrument.spline_vanadium_ws(focused_van_file, run_details.instrument_version)
     # Figure out who will provide the path name
-    if instrument._old_api_PEARL_filename_is_full_path():
+    if instrument._old_api_pearl_filename_is_full_path():
         out_van_file_path = output_van_file_name
     elif output_van_file_name:
         # The user has manually specified the output file
@@ -70,7 +70,7 @@ def _apply_absorb_corrections(instrument, run_details, corrected_van_ws, gen_abs
         absorb_ws = mantid.LoadNexus(Filename=run_details.vanadium_absorption)
 
     # PEARL rebins whilst POLARIS does not as some of the older absorption files have different number of bins
-    corrected_van_ws = instrument._calibration_rebin_to_workspace(ws_to_rebin=corrected_van_ws, ws_to_match=absorb_ws)
+    corrected_van_ws = instrument.pearl_rebin_to_workspace(ws_to_rebin=corrected_van_ws, ws_to_match=absorb_ws)
     corrected_van_ws = mantid.Divide(LHSWorkspace=corrected_van_ws, RHSWorkspace=absorb_ws)
     corrected_van_ws = mantid.ConvertUnits(InputWorkspace=corrected_van_ws, Target="dSpacing")
     common.remove_intermediate_workspace(absorb_ws)

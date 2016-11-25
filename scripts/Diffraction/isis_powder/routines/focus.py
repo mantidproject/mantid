@@ -10,7 +10,7 @@ def focus(run_number, instrument, perform_attenuation=True, perform_vanadium_nor
     # Read
 
     read_ws = common.load_current_normalised_ws(run_number_string=run_number, instrument=instrument)
-    input_workspace = instrument._do_tof_rebinning_focus(read_ws)  # Rebins for PEARL
+    input_workspace = instrument.pearl_focus_tof_rebinning(read_ws)  # Rebins for PEARL
     run_details = instrument.get_run_details(run_number=run_number)
 
     # Check the necessary splined vanadium file has been created
@@ -43,8 +43,8 @@ def focus(run_number, instrument, perform_attenuation=True, perform_vanadium_nor
     _apply_binning_to_spectra(spectra_list=calibrated_spectra, binning_list=rebinning_params)
 
     # Output
-    processed_nexus_files = instrument._process_focus_output(calibrated_spectra, run_details=run_details,
-                                                             attenuate=perform_attenuation)
+    processed_nexus_files = instrument.output_focused_ws(calibrated_spectra, run_details=run_details,
+                                                         attenuate=perform_attenuation)
 
     # Tidy
     common.remove_intermediate_workspace(read_ws)

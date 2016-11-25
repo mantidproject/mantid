@@ -60,10 +60,10 @@ class PearlRoutinesWrapper(Pearl):
     def _old_api_set_full_paths(self, val):
         self._old_api_uses_full_paths = val
 
-    def _old_api_PEARL_filename_is_full_path(self):
+    def _old_api_pearl_filename_is_full_path(self):
         return self._old_api_uses_full_paths
 
-    def _old_api_PEARL_setup_input_dirs(self, run_number):
+    def _old_api_pearl_setup_input_dirs(self, run_number):
         run_details = self.get_run_details(run_number=run_number)
         generated_path = self._generate_raw_data_cycle_dir(run_cycle=run_details.label)
         user_dirs = config['datasearch.directories']
@@ -75,7 +75,7 @@ class PearlRoutinesWrapper(Pearl):
         return self._focus_tof_binning
 
     def _generate_raw_data_cycle_dir(self, run_cycle):
-        if self._skip_appending_cycle_to_raw_dir():
+        if self._disable_appending_cycle_to_raw_dir:
             return self.raw_data_dir
         str_run_cycle = str(run_cycle)
 

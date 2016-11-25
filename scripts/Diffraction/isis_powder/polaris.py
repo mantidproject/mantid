@@ -104,7 +104,7 @@ class Polaris(AbstractInst):
 
         return spectra_name
 
-    def _spline_vanadium(self, focused_vanadium_ws, instrument_version=''):
+    def spline_vanadium_ws(self, focused_vanadium_ws, instrument_version=''):
         extracted_spectra = common.extract_bank_spectra(focused_vanadium_ws, self._number_of_banks)
         mode = "spline"
 
@@ -126,7 +126,7 @@ class Polaris(AbstractInst):
                                                                                 num_of_banks=self._number_of_banks)
         return calculated_binning_params
 
-    def _process_focus_output(self, processed_spectra, run_details, attenuate=False):
+    def output_focused_ws(self, processed_spectra, run_details, attenuate=False):
         d_spacing_group, tof_group = polaris_algs.split_into_tof_d_spacing_groups(processed_spectra)
         output_paths = self._generate_out_file_paths(run_details=run_details)
 
