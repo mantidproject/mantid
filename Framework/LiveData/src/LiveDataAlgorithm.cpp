@@ -227,8 +227,7 @@ ILiveListener_sptr LiveDataAlgorithm::createLiveListener(bool connect) {
   LiveListenerInfo info(listener, address);
 
   // Create and return
-  m_listener = LiveListenerFactory::Instance().create(info, connect, this);
-  return m_listener;
+  return LiveListenerFactory::Instance().create(info, connect, this);
 }
 
 //----------------------------------------------------------------------------------------------
