@@ -39,8 +39,7 @@ def create_van(instrument, van, empty, output_van_file_name, absorb, gen_absorb)
 
     common.remove_intermediate_workspace(corrected_van_ws)
 
-    cycle_information = instrument.get_run_details(run_number=van)
-    splined_ws_list = instrument._spline_vanadium(focused_van_file, cycle_information.instrument_version)
+    splined_ws_list = instrument._spline_vanadium(focused_van_file, run_details.instrument_version)
     # Figure out who will provide the path name
     if instrument._old_api_PEARL_filename_is_full_path():
         out_van_file_path = output_van_file_name

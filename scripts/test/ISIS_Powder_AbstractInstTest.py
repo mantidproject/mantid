@@ -48,7 +48,7 @@ class isis_powder_AbstractInstTest(unittest.TestCase):
     def test_get_monitor_spectra_hook(self):
         inst = self._get_abstract_inst_defaults()
         unused_param = None
-        output = inst._get_monitor_spectra(unused_param)
+        output = inst.get_monitor_spectra_index(unused_param)
 
         # Should return empty string
         self.assertEquals(output, str(""))

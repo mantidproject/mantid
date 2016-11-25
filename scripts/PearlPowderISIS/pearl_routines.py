@@ -94,7 +94,7 @@ def PEARL_getmonitorspectrum(runno):
     pearl_obj = _pearl_obj_singleton()
     # Ensure mode is set to latest value
     pearl_obj._old_api_constructor_set(tt_mode=g_oldParams["mode"])
-    return pearl_obj._get_monitor_spectra(runno)
+    return pearl_obj.get_monitor_spectra_index(runno)
 
 
 def PEARL_getcycle(number):

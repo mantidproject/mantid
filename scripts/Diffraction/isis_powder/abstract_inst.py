@@ -152,7 +152,7 @@ class AbstractInst(object):
     def _normalise_ws(self, ws_to_correct, run_details=None):
         return _empty_hook_return_none()
 
-    def _get_monitor_spectra(self, run_number):
+    def get_monitor_spectra_index(self, run_number):
         return _empty_hook_return_empty_string()
 
     def _old_api_PEARL_filename_is_full_path(self):

@@ -115,23 +115,30 @@ class Pearl(AbstractInst):
     # Hook overrides
 
     def _attenuate_workspace(self, input_workspace):
-        if not self._old_atten_file:  # For old API support
+        try:
+            old_full_path = self._old_atten_file
+        except AttributeError:
+            old_full_path = None
+
+        if not old_full_path:
+            # If the old API hasn't set the path use the standard default
             attenuation_path = self._attenuation_full_path
         else:
+            # Otherwise respect the one set through the API
             attenuation_path = self._old_atten_file
         return pearl_algs.attenuate_workspace(attenuation_file_path=attenuation_path, ws_to_correct=input_workspace)
 
     def _normalise_ws(self, ws_to_correct, run_details=None):
         if not run_details:
             raise RuntimeError("Run details was not passed into PEARL: normalise_ws")
-        # TODO remove the loading the monitor separately if possible
-        monitor_ws = common.load_monitor(run_numbers=run_details.run_number, instrument=self)
+        monitor_ws = common.get_monitor_ws(ws_to_process=ws_to_correct, run_number_string=run_details.run_number,
+                                           instrument=self)
         normalised_ws = pearl_algs.normalise_ws_current(ws_to_correct=ws_to_correct, monitor_ws=monitor_ws,
                                                         spline_coeff=20)
         common.remove_intermediate_workspace(monitor_ws)
         return normalised_ws
 
-    def _get_monitor_spectra(self, run_number):
+    def get_monitor_spectra_index(self, run_number):
         return get_monitor_spectra(run_number=run_number, focus_mode=self._focus_mode)
 
     def _skip_appending_cycle_to_raw_dir(self):

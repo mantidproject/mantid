@@ -8,9 +8,9 @@ import os
 
 def focus(run_number, instrument, perform_attenuation=True, perform_vanadium_norm=True):
     # Read
+
     read_ws = common.load_current_normalised_ws(run_number_string=run_number, instrument=instrument)
     input_workspace = instrument._do_tof_rebinning_focus(read_ws)  # Rebins for PEARL
-
     run_details = instrument.get_run_details(run_number=run_number)
 
     # Check the necessary splined vanadium file has been created

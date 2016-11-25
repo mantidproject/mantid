@@ -42,18 +42,10 @@ def generate_run_numbers(run_number_string):
     return out_range
 
 
-def load_monitor(run_numbers, instrument):
-    number_list = generate_run_numbers(run_numbers)
-    monitor_spectra = instrument._get_monitor_spectra(number_list[0])
-
-    if len(number_list) == 1:
-        file_name = instrument.generate_inst_file_name(run_number=number_list[0])
-        load_monitor_ws = mantid.Load(Filename=file_name, LoadLogFiles="0",
-                                      SpectrumMin=monitor_spectra, SpectrumMax=monitor_spectra)
-    else:
-        load_monitor_ws = _load_sum_file_range(run_numbers_list=number_list, instrument=instrument)
-        load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=load_monitor_ws, WorkspaceIndex=monitor_spectra)
-
+def get_monitor_ws(ws_to_process, run_number_string, instrument):
+    number_list = generate_run_numbers(run_number_string)
+    monitor_spectra = instrument.get_monitor_spectra_index(number_list[0])
+    load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=ws_to_process, WorkspaceIndex=monitor_spectra)
     return load_monitor_ws
 
 
