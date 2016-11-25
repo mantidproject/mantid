@@ -1,10 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYPROCESS_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYPROCESS_H_
 
-#include <vector>
 #include <QProcess>
 #include <QString>
 #include <QStringList>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -66,8 +66,7 @@ public slots:
   void startWorker() { start(m_runnable, m_args); }
 
 private:
-  QStringList
-  buildArguments(const std::vector<std::string> &args) const {
+  QStringList buildArguments(const std::vector<std::string> &args) const {
     QStringList list;
     list.reserve(static_cast<int>(args.size()));
 
