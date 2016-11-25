@@ -10,7 +10,7 @@ namespace CustomInterfaces {
 
 class IReflMainWindowPresenter;
 class IReflRunsTabPresenter;
-class IReflSettingsPresenter;
+class IReflSettingsTabPresenter;
 class IReflSaveTabPresenter;
 
 /** @class ReflMainWindowView
@@ -70,7 +70,7 @@ private:
   /// Creates the 'Runs' tab
   IReflRunsTabPresenter *createRunsTab();
   /// Creates the 'Settings' tab
-  IReflSettingsPresenter *createSettingsTab();
+  IReflSettingsTabPresenter *createSettingsTab();
   /// Creates the 'Save ASCII' tab
   IReflSaveTabPresenter *createSaveTab();
 

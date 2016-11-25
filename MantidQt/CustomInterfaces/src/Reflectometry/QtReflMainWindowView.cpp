@@ -1,7 +1,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflMainWindowView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflRunsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflSaveTabView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/QtReflSettingsView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/QtReflSettingsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainWindowPresenter.h"
 
 #include <qinputdialog.h>
@@ -53,9 +53,9 @@ IReflRunsTabPresenter *QtReflMainWindowView::createRunsTab() {
 /** Creates the 'Settings' tab and returns a pointer to its presenter
 * @return :: A pointer to the presenter managing the 'Settings' tab
 */
-IReflSettingsPresenter *QtReflMainWindowView::createSettingsTab() {
+IReflSettingsTabPresenter *QtReflMainWindowView::createSettingsTab() {
 
-  QtReflSettingsView *settingsTab = new QtReflSettingsView(this);
+  QtReflSettingsTabView *settingsTab = new QtReflSettingsTabView(this);
   m_ui.mainTab->addTab(settingsTab, QString("Settings"));
 
   return settingsTab->getPresenter();

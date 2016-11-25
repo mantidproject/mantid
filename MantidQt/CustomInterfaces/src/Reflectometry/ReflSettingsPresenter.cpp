@@ -1,5 +1,5 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsView.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -16,7 +16,7 @@ using namespace Mantid::Geometry;
 * @param view :: The view we are handling
 */
 ReflSettingsPresenter::ReflSettingsPresenter(IReflSettingsView *view)
-    : m_view(view), m_mainPresenter() {
+    : m_view(view) {
 
   // Create the 'HintingLineEdits'
   createStitchHints();
@@ -25,14 +25,6 @@ ReflSettingsPresenter::ReflSettingsPresenter(IReflSettingsView *view)
 /** Destructor
 */
 ReflSettingsPresenter::~ReflSettingsPresenter() {}
-
-/** Accept a main presenter
-* @param mainPresenter :: [input] The main presenter
-*/
-void ReflSettingsPresenter::acceptMainPresenter(
-    IReflMainWindowPresenter *mainPresenter) {
-  m_mainPresenter = mainPresenter;
-}
 
 /** Used by the view to tell the presenter something has changed
 */

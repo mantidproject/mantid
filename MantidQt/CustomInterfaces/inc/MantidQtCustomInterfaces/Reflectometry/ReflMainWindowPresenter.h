@@ -9,7 +9,7 @@ namespace CustomInterfaces {
 
 class IReflMainWindowView;
 class IReflRunsTabPresenter;
-class IReflSettingsPresenter;
+class IReflSettingsTabPresenter;
 class IReflSaveTabPresenter;
 
 /** @class ReflMainWindowPresenter
@@ -44,7 +44,7 @@ public:
   /// Constructor
   ReflMainWindowPresenter(IReflMainWindowView *view,
                           IReflRunsTabPresenter *runsPresenter,
-                          IReflSettingsPresenter *settingsPresenter,
+                          IReflSettingsTabPresenter *settingsPresenter,
                           IReflSaveTabPresenter *savePresenter);
   /// Destructor
   ~ReflMainWindowPresenter() override;
@@ -71,13 +71,13 @@ public:
 
 private:
   /// Check for null pointer
-  void checkPtrValid(IReflSettingsPresenter *pointer) const;
+  void checkPtrValid(IReflSettingsTabPresenter *pointer) const;
   /// The view we are handling
   IReflMainWindowView *m_view;
   /// The presenter of tab 'Runs'
   IReflRunsTabPresenter *m_runsPresenter;
   /// The presenter of tab 'Settings'
-  IReflSettingsPresenter *m_settingsPresenter;
+  IReflSettingsTabPresenter *m_settingsPresenter;
   /// The presenter of tab 'Save ASCII'
   IReflSaveTabPresenter *m_savePresenter;
 };
