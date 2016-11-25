@@ -345,7 +345,8 @@ std::map<std::string, std::string>
 ReflRunsTabPresenter::getPreprocessingOptions() const {
 
   std::map<std::string, std::string> options;
-  options["Transmission Run(s)"] = m_mainPresenter->getTransmissionOptions();
+  options["Transmission Run(s)"] =
+      m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup());
 
   return options;
 }
@@ -355,7 +356,7 @@ ReflRunsTabPresenter::getPreprocessingOptions() const {
 * @return :: Global pre-processing options
 */
 std::string ReflRunsTabPresenter::getProcessingOptions() const {
-  return m_mainPresenter->getReductionOptions();
+  return m_mainPresenter->getReductionOptions(m_view->getSelectedGroup());
 }
 
 /** Requests global pre-processing options. Options are supplied by the main
@@ -363,7 +364,7 @@ std::string ReflRunsTabPresenter::getProcessingOptions() const {
 * @return :: Global pre-processing options
 */
 std::string ReflRunsTabPresenter::getPostprocessingOptions() const {
-  return m_mainPresenter->getStitchOptions();
+  return m_mainPresenter->getStitchOptions(m_view->getSelectedGroup());
 }
 
 /**

@@ -494,6 +494,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflMainWindowWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflRunsTabWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflSaveTabWidget.ui
+               inc/MantidQtCustomInterfaces/Reflectometry/ReflSettingsTabWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflSettingsWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflWindow.ui
                inc/MantidQtCustomInterfaces/SampleTransmission.ui

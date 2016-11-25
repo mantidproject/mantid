@@ -11,6 +11,7 @@ using namespace Mantid::API;
 
 // Forward decs
 class IReflMainWindowPresenter;
+class IReflSettingsPresenter;
 
 /** @class ReflSettingsTabPresenter
 
@@ -42,7 +43,7 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ReflSettingsTabPresenter
     : public IReflSettingsTabPresenter {
 public:
   /// Constructor
-  ReflSettingsTabPresenter();
+  ReflSettingsTabPresenter(std::vector<IReflSettingsPresenter *> presenters);
   /// Destructor
   ~ReflSettingsTabPresenter() override;
   /// Accept a main presenter
@@ -50,15 +51,17 @@ public:
   void setInstrumentName(const std::string instName) override;
 
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
-  std::string getTransmissionOptions() const override;
+  std::string getTransmissionOptions(int group) const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
-  std::string getReductionOptions() const override;
+  std::string getReductionOptions(int group) const override;
   /// Returns global options for 'Stitch1DMany'
-  std::string getStitchOptions() const override;
+  std::string getStitchOptions(int group) const override;
 
 private:
   /// The main presenter
   IReflMainWindowPresenter *m_mainPresenter;
+  /// The presenters for each group as a vector
+  std::vector<IReflSettingsPresenter *> m_settingsPresenters;
 };
 }
 }

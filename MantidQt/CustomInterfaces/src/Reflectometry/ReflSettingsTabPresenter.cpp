@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsPresenter.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -11,15 +12,20 @@ using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
 /** Constructor
+*
 * @param view :: The view we are handling
 */
-ReflSettingsTabPresenter::ReflSettingsTabPresenter() : m_mainPresenter() {}
+ReflSettingsTabPresenter::ReflSettingsTabPresenter(
+    std::vector<IReflSettingsPresenter *> presenters)
+    : m_mainPresenter(), m_settingsPresenters(presenters) {}
 
 /** Destructor
+*
 */
 ReflSettingsTabPresenter::~ReflSettingsTabPresenter() {}
 
 /** Accept a main presenter
+*
 * @param mainPresenter :: [input] The main presenter
 */
 void ReflSettingsTabPresenter::acceptMainPresenter(
@@ -29,45 +35,42 @@ void ReflSettingsTabPresenter::acceptMainPresenter(
 
 /** Sets the current instrument name and changes accessibility status of
 * the polarisation corrections option in the view accordingly
+*
 * @param instName :: [input] The name of the instrument to set to
 */
 void ReflSettingsTabPresenter::setInstrumentName(const std::string instName) {
-  // m_currentInstrumentName = instName;
-  // m_view->setPolarisationOptionsEnabled(instName != "INTER" &&
-  //                                      instName != "SURF");
+  for (auto presenter : m_settingsPresenters)
+    presenter->setInstrumentName(instName);
 }
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
+*
+* @param group :: The group from which to get the options
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
 */
-std::string ReflSettingsTabPresenter::getTransmissionOptions() const {
+std::string ReflSettingsTabPresenter::getTransmissionOptions(int group) const {
 
-  std::vector<std::string> options;
-
-  // TODO
-
-  return boost::algorithm::join(options, ",");
+  return m_settingsPresenters.at(group)->getTransmissionOptions();
 }
 
 /** Returns global options for 'ReflectometryReductionOneAuto'
+*
+* @param group :: The group from which to get the options
 * @return :: Global options for 'ReflectometryReductionOneAuto'
 */
-std::string ReflSettingsTabPresenter::getReductionOptions() const {
+std::string ReflSettingsTabPresenter::getReductionOptions(int group) const {
 
-  std::vector<std::string> options;
-
-  // TODO
-
-  return boost::algorithm::join(options, ",");
+  return m_settingsPresenters.at(group)->getReductionOptions();
 }
 
 /** Returns global options for 'Stitch1DMany'
+*
+* @param group :: The group from which to get the options
 * @return :: Global options for 'Stitch1DMany'
 */
-std::string ReflSettingsTabPresenter::getStitchOptions() const {
+std::string ReflSettingsTabPresenter::getStitchOptions(int group) const {
 
-  // TODO
-  return std::string();
+  return m_settingsPresenters.at(group)->getStitchOptions();
 }
 }
 }
