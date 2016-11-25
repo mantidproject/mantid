@@ -169,7 +169,7 @@ class Pearl(AbstractInst):
 
         return out_ws
 
-    def _generate_vanadium_absorb_corrections(self, run_details, ws_to_match):
+    def generate_vanadium_absorb_corrections(self, run_details, ws_to_match):
         return pearl_algs.generate_vanadium_absorb_corrections(van_ws=ws_to_match)
 
     def pearl_rebin_to_workspace(self, ws_to_rebin, ws_to_match):

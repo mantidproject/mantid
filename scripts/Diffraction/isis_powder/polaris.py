@@ -115,7 +115,7 @@ class Polaris(AbstractInst):
 
         return output
 
-    def _generate_vanadium_absorb_corrections(self, calibration_full_paths, ws_to_match):
+    def generate_vanadium_absorb_corrections(self, calibration_full_paths, ws_to_match):
         return polaris_algs.generate_absorb_corrections(ws_to_match=ws_to_match)
 
     def calculate_focus_binning_params(self, sample):

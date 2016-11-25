@@ -100,14 +100,7 @@ class AbstractInst(object):
         extension = self.default_input_ext
         return os.path.join(input_dir, (file_name + extension))
 
-    @abstractmethod
-    def get_default_group_names(self):
-        """
-        Returns the default names for creating a blank calibration by names
-        @return: The default grouping names as a string
-        """
-
-    # Instrument specific methods
+    # Instrument specific properties
 
     @abstractmethod
     def get_run_details(self, run_number):
@@ -116,74 +109,64 @@ class AbstractInst(object):
     @staticmethod
     @abstractmethod
     def generate_inst_file_name(run_number):
-        """
-        Generates the conforming file names for an instrument
-        @param run_number: The run number to turn into a filename
-        @return: The filename of the file - Without the path or extension
-        """
+        pass
 
     @abstractmethod
     def get_num_of_banks(self, instrument_version=''):
         pass
 
     # --- Instrument optional hooks ----#
-    # TODO cull some of these hooks once we unify the scripts
 
-    @staticmethod
-    def get_save_range(instrument_version):
-        return None
+    def apply_solid_angle_efficiency_corr(self, ws_to_correct, run_details):
+        return ws_to_correct
 
     def attenuate_workspace(self, input_workspace):
         return input_workspace
 
-    def normalise_ws(self, ws_to_correct, run_details=None):
+    def calculate_focus_binning_params(self, sample):
+        return None
+
+    def correct_sample_vanadium(self, focused_ws, index, vanadium_ws=None):
+        raise NotImplementedError("Cannot process the sample with a vanadium run for this instrument")
+
+    def get_default_group_names(self):
         return None
 
     def get_monitor_spectra_index(self, run_number):
         return str()
 
-    def spline_vanadium_ws(self, focused_vanadium_ws, instrument_version=''):
-        """
-        Splines the background in a way specific to the instrument
-        @param focused_vanadium_ws: The workspace to perform spline backgrounds on
-        @param instrument_version: (Optional) Used for instruments with multiple versions
-        @return: List of workspaces with splined backgrounds
-        """
+    def generate_vanadium_absorb_corrections(self, calibration_full_paths, ws_to_match):
+        raise NotImplementedError("Not implemented for this instrument yet")
+
+    @staticmethod
+    def get_save_range(instrument_version):
+        return None
+
+    def normalise_ws(self, ws_to_correct, run_details=None):
+        return None
+
+    def output_focused_ws(self, processed_spectra, run_details, attenuate=False):
         return None
 
     def pearl_focus_tof_rebinning(self, input_workspace):
         return input_workspace
 
-    def output_focused_ws(self, processed_spectra, run_details, attenuate=False):
-        return None
-
-    def apply_solid_angle_efficiency_corr(self, ws_to_correct, run_details):
-        return ws_to_correct
-
     def pearl_van_calibration_tof_rebinning(self, vanadium_ws, tof_rebin_pass, return_units):
         return vanadium_ws
-
-    def _generate_vanadium_absorb_corrections(self, calibration_full_paths, ws_to_match):
-        raise NotImplementedError("Not implemented for this instrument yet")
 
     def pearl_rebin_to_workspace(self, ws_to_rebin, ws_to_match):
         return ws_to_rebin
 
-    def correct_sample_vanadium(self, focused_ws, index, vanadium_ws=None):
-        raise NotImplementedError("Cannot process the sample with a vanadium run for this instrument")
-
-    def calculate_focus_binning_params(self, sample):
+    def spline_vanadium_ws(self, focused_vanadium_ws, instrument_version=''):
         return None
+
+    # Support for old API - can be removed when Pearl_routines is removed
+
+    def _old_api_pearl_filename_is_full_path(self):
+        return False
 
     def _old_api_pearl_setup_input_dirs(self, run_number):
         return None
-
-    def _old_api_pearl_filename_is_full_path(self):
-        """
-        Only used by PEARL to maintain compatibility with old routines code
-        @return: Whether the "filename" is actually a full path
-        """
-        return False
 
 
 # ----- Private Implementation ----- #
