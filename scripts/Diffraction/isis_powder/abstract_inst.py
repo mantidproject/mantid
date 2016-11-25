@@ -65,10 +65,10 @@ class AbstractInst(object):
         common.create_calibration_by_names(calibration_runs=calibration_numbers, grouping_file_name=output_file_name,
                                            group_names=group_names, startup_objects=self)
 
-    def _create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name=None, num_of_splines=None,
+    def _create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name=None,
                                      do_absorb_corrections=True, gen_absorb_correction=False):
         return calibrate.create_van(instrument=self, van=vanadium_runs, empty=empty_runs,
-                                    output_van_file_name=output_file_name, num_of_splines=num_of_splines,
+                                    output_van_file_name=output_file_name,
                                     absorb=do_absorb_corrections, gen_absorb=gen_absorb_correction)
 
     # ---- Private API ---- #
@@ -162,7 +162,7 @@ class AbstractInst(object):
         """
         return False
 
-    def _spline_background(self, focused_vanadium_ws, spline_number, instrument_version=''):
+    def _spline_vanadium(self, focused_vanadium_ws, instrument_version=''):
         """
         Splines the background in a way specific to the instrument
         @param focused_vanadium_ws: The workspace to perform spline backgrounds on

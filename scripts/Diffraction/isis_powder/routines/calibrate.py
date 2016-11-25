@@ -7,7 +7,7 @@ import mantid.simpleapi as mantid
 import isis_powder.routines.common as common
 
 
-def create_van(instrument, van, empty, output_van_file_name, num_of_splines, absorb, gen_absorb):
+def create_van(instrument, van, empty, output_van_file_name, absorb, gen_absorb):
 
     input_van_ws = common.load_current_normalised_ws(run_number_string=van, instrument=instrument)
     corrected_van_ws = common.subtract_sample_empty(ws_to_correct=input_van_ws, empty_sample_ws_string=empty,
@@ -40,8 +40,7 @@ def create_van(instrument, van, empty, output_van_file_name, num_of_splines, abs
     common.remove_intermediate_workspace(corrected_van_ws)
 
     cycle_information = instrument.get_run_details(run_number=van)
-    splined_ws_list = instrument._spline_background(focused_van_file, num_of_splines,
-                                                    cycle_information.instrument_version)
+    splined_ws_list = instrument._spline_vanadium(focused_van_file, cycle_information.instrument_version)
     # Figure out who will provide the path name
     if instrument._old_api_PEARL_filename_is_full_path():
         out_van_file_path = output_van_file_name

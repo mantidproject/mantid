@@ -27,6 +27,7 @@ class Pearl(AbstractInst):
 
         self._tt_mode = tt_mode
         self._focus_mode = None
+        self._spline_coeff = None
 
         # File names
         pearl_mc_absorption_file_name = "PRL112_DC25_10MM_FF.OUT"  # TODO how often does this change
@@ -41,9 +42,10 @@ class Pearl(AbstractInst):
 
     def create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name=None, num_of_splines=60,
                                     do_absorb_corrections=True, gen_absorb_correction=False):
+        self._spline_coeff = num_of_splines
 
         self._create_calibration_vanadium(vanadium_runs=vanadium_runs, empty_runs=empty_runs,
-                                          output_file_name=output_file_name, num_of_splines=num_of_splines,
+                                          output_file_name=output_file_name,
                                           do_absorb_corrections=do_absorb_corrections,
                                           gen_absorb_correction=gen_absorb_correction)
 
@@ -135,10 +137,10 @@ class Pearl(AbstractInst):
     def _skip_appending_cycle_to_raw_dir(self):
         return self._disable_appending_cycle_to_raw_dir
 
-    def _spline_background(self, focused_vanadium_ws, spline_number, instrument_version=''):
+    def _spline_vanadium(self, focused_vanadium_ws, instrument_version=''):
         # TODO move spline number into the class
         return pearl_spline.spline_vanadium_for_focusing(focused_vanadium_ws=focused_vanadium_ws,
-                                                         spline_number=spline_number,
+                                                         spline_number=self._spline_coeff,
                                                          instrument_version=instrument_version)
 
     def _do_tof_rebinning_focus(self, input_workspace):
@@ -163,7 +165,7 @@ class Pearl(AbstractInst):
         return out_ws
 
     def _generate_vanadium_absorb_corrections(self, run_details, ws_to_match):
-        return pearl_algs.generate_vanadium_absob_corrections(van_ws=ws_to_match)
+        return pearl_algs.generate_vanadium_absorb_corrections(van_ws=ws_to_match)
 
     def _calibration_rebin_to_workspace(self, ws_to_rebin, ws_to_match):
         rebinned_ws = mantid.RebinToWorkspace(WorkspaceToRebin=ws_to_rebin, WorkspaceToMatch=ws_to_match)

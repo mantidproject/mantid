@@ -57,7 +57,7 @@ class isis_powder_AbstractInstTest(unittest.TestCase):
         inst = self._get_abstract_inst_defaults()
         # Use type this isn't None to make sure its not returning to us
         unused_param = "unused"
-        output = inst._spline_background(unused_param, unused_param, unused_param)
+        output = inst._spline_vanadium(unused_param, unused_param, unused_param)
 
         self.assertEquals(isinstance(output, type(None)), True)
 

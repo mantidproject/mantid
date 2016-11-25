@@ -26,7 +26,7 @@ def apply_tof_rebinning(ws_to_rebin, tof_params, return_units=None):
     return rebinned_ws
 
 
-def generate_vanadium_absob_corrections(van_ws):
+def generate_vanadium_absorb_corrections(van_ws):
     raise NotImplementedError("Generating absorption corrections needs to be implemented correctly")
 
     # TODO are these values applicable to all instruments

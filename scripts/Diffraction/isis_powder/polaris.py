@@ -23,6 +23,8 @@ class Polaris(AbstractInst):
         self._chopper_on = chopper_on
         self._apply_solid_angle = apply_solid_angle
 
+        self._spline_coeff = 100
+
         # Caches the last dictionary to avoid us having to keep parsing the YAML
         self._run_details_last_run_number = None
         self._run_details_cached_obj = None
@@ -102,15 +104,14 @@ class Polaris(AbstractInst):
 
         return spectra_name
 
-    def _spline_background(self, focused_vanadium_ws, spline_number, instrument_version=''):
+    def _spline_vanadium(self, focused_vanadium_ws, instrument_version=''):
         extracted_spectra = common.extract_bank_spectra(focused_vanadium_ws, self._number_of_banks)
         mode = "spline"
 
-        if spline_number is None:
-            spline_number = 100
         masking_file_path = os.path.join(self.calibration_dir, self._masking_file_name)
-        output = polaris_algs.process_vanadium_for_focusing(bank_spectra=extracted_spectra, mode=mode,
-                                                            spline_number=spline_number, mask_path=masking_file_path)
+        output = polaris_algs.process_vanadium_for_focusing(bank_spectra=extracted_spectra,
+                                                            spline_number=self._spline_coeff,
+                                                            mode=mode, mask_path=masking_file_path)
 
         for ws in extracted_spectra:
             common.remove_intermediate_workspace(ws)
