@@ -172,26 +172,13 @@ void Stitch1DMany::exec() {
   for (size_t i = 1; i < m_numWorkspaces; ++i) {
     MatrixWorkspace_sptr rhsWS =
         boost::dynamic_pointer_cast<MatrixWorkspace>(m_inputWorkspaces[i]);
+    double outScaleFactor;
 
-    IAlgorithm_sptr stitchAlg = createChildAlgorithm("Stitch1D");
-    stitchAlg->initialize();
+    doStitch1D(lhsWS, rhsWS, i, m_startOverlaps, m_endOverlaps, m_params,
+        m_scaleRHSWorkspace, m_useManualScaleFactor, m_manualScaleFactor, lhsWS,
+        outScaleFactor);
 
-    stitchAlg->setProperty("LHSWorkspace", lhsWS);
-    stitchAlg->setProperty("RHSWorkspace", rhsWS);
-    if (m_startOverlaps.size() > i - 1) {
-      stitchAlg->setProperty("StartOverlap", m_startOverlaps[i - 1]);
-      stitchAlg->setProperty("EndOverlap", m_endOverlaps[i - 1]);
-    }
-    stitchAlg->setProperty("Params", m_params);
-    stitchAlg->setProperty("ScaleRHSWorkspace", m_scaleRHSWorkspace);
-    stitchAlg->setProperty("UseManualScaleFactor", m_useManualScaleFactor);
-    if (m_useManualScaleFactor)
-      stitchAlg->setProperty("ManualScaleFactor", m_manualScaleFactor);
-
-    stitchAlg->execute();
-
-    lhsWS = stitchAlg->getProperty("OutputWorkspace");
-    m_scaleFactors.push_back(stitchAlg->getProperty("OutScaleFactor"));
+    m_scaleFactors.push_back(outScaleFactor);
   }
 
   if (!isChild()) {
@@ -209,6 +196,34 @@ void Stitch1DMany::exec() {
   // Save output
   this->setProperty("OutputWorkspace", m_outputWorkspace);
   this->setProperty("OutScaleFactors", m_scaleFactors);
+}
+
+/** Performs the Stitch1D algorithm at a specific workspace index
+*/
+void Stitch1DMany::doStitch1D(MatrixWorkspace_sptr lhsWS,
+    MatrixWorkspace_sptr rhsWS, size_t wsIndex,
+    std::vector<double> startOverlaps, std::vector<double> endOverlaps,
+    std::vector<double> params, bool scaleRhsWS, bool useManualScaleFactor,
+    double manualScaleFactor, MatrixWorkspace_sptr &outWS,
+    double &outScaleFactor) {
+
+  IAlgorithm_sptr alg = createChildAlgorithm("Stitch1D");
+  alg->initialize();
+  alg->setProperty("LHSWorkspace", lhsWS);
+  alg->setProperty("RHSWorkspace", rhsWS);
+  if (startOverlaps.size() > wsIndex - 1) {
+    alg->setProperty("StartOverlap", startOverlaps[wsIndex - 1]);
+    alg->setProperty("EndOverlap", endOverlaps[wsIndex - 1]);
+  }
+  alg->setProperty("Params", params);
+  alg->setProperty("ScaleRHSWorkspace", scaleRhsWS);
+  alg->setProperty("UseManualScaleFactor", useManualScaleFactor);
+  if (useManualScaleFactor)
+    alg->setProperty("ManualScaleFactor", manualScaleFactor);
+  alg->execute();
+
+  outWS = alg->getProperty("OutputWorkspace");
+  outScaleFactor = alg->getProperty("OutScaleFactor");
 }
 
 bool Stitch1DMany::checkGroups() {

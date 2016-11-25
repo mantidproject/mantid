@@ -4,6 +4,8 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 
+using namespace Mantid::API;
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -47,6 +49,12 @@ public:
   std::map<std::string, std::string> validateInputs() override;
   /// Validates algorithm inputs for group workspaces
   void validateGroupWorkspacesInputs();
+  /// Performs the Stitch1D algorithm at a workspace index
+  void doStitch1D(MatrixWorkspace_sptr lhsWS, MatrixWorkspace_sptr rhsWS,
+      size_t wsIndex, std::vector<double> startOverlaps,
+      std::vector<double> endOverlaps, std::vector<double> params,
+      bool scaleRhsWS, bool useManualScaleFactor, double manualScaleFactor,
+      MatrixWorkspace_sptr &outWS, double &outScaleFactor);
 
   /// For (multiperiod) workspace groups
   bool checkGroups() override;
@@ -59,8 +67,8 @@ private:
   void exec() override;
 
   // Data
-  std::vector<Mantid::API::Workspace_sptr> m_inputWorkspaces;
-  std::vector<Mantid::API::WorkspaceGroup_sptr> m_inputWorkspaceGroups;
+  std::vector<Workspace_sptr> m_inputWorkspaces;
+  std::vector<WorkspaceGroup_sptr> m_inputWorkspaceGroups;
   std::vector<double> m_startOverlaps;
   std::vector<double> m_endOverlaps;
   std::vector<double> m_params;
