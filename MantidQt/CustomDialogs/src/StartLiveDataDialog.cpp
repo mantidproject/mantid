@@ -186,6 +186,15 @@ void StartLiveDataDialog::initLayout() {
 
   initListenerPropLayout(ui.cmbInstrument->currentText());
 
+  //=========== Load Listener Class Names =============
+  // Add available listeners to combo box
+  ui.cmbConnListener->clear();
+  std::vector<std::string> listeners =
+      Mantid::API::LiveListenerFactory::Instance().getKeys();
+  for (const auto &listener : listeners) {
+    ui.cmbConnListener->addItem(QString::fromStdString(listener));
+  }
+
   //=========== SLOTS =============
   connect(ui.processingAlgo, SIGNAL(changedAlgorithm()), this,
           SLOT(changeProcessingAlgorithm()));
@@ -483,15 +492,6 @@ void StartLiveDataDialog::updateConnectionChoices(const QString &inst_name) {
  * @param name
  */
 void StartLiveDataDialog::updateConnectionDetails(const QString &connection) {
-
-  // Add available listeners to combo box
-  ui.cmbConnListener->clear();
-  std::vector<std::string> listeners =
-      Mantid::API::LiveListenerFactory::Instance().getKeys();
-  for (const auto &listener : listeners) {
-    ui.cmbConnListener->addItem(QString::fromStdString(listener));
-  }
-
   // Custom connections just enable editting connection parameters
   if (connection == "[Custom]") {
     ui.cmbConnListener->setEnabled(true);
