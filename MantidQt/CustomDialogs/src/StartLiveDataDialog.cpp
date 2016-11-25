@@ -177,16 +177,6 @@ void StartLiveDataDialog::initLayout() {
     }
   }
 
-  radioPostProcessClicked();
-  setDefaultAccumulationMethod(ui.cmbInstrument->currentText());
-  updateUiElements(ui.cmbInstrument->currentText());
-  updateConnectionChoices(ui.cmbInstrument->currentText());
-  updateConnectionDetails(ui.cmbConnection->currentText());
-
-  //=========== Listener's properties =============
-
-  initListenerPropLayout(ui.cmbInstrument->currentText());
-
   //=========== Load Listener Class Names =============
   // Add available listeners to combo box
   ui.cmbConnListener->clear();
@@ -195,6 +185,16 @@ void StartLiveDataDialog::initLayout() {
   for (const auto &listener : listeners) {
     ui.cmbConnListener->addItem(QString::fromStdString(listener));
   }
+
+  //=========== Update UI Elements =============
+  radioPostProcessClicked();
+  updateUiElements(ui.cmbInstrument->currentText());
+  updateConnectionChoices(ui.cmbInstrument->currentText());
+  updateConnectionDetails(ui.cmbConnection->currentText());
+  setDefaultAccumulationMethod(ui.cmbConnListener->currentText());
+
+  //=========== Listener's properties =============
+  initListenerPropLayout(ui.cmbInstrument->currentText());
 
   //=========== SLOTS =============
   connect(ui.processingAlgo, SIGNAL(changedAlgorithm()), this,
@@ -367,7 +367,8 @@ void StartLiveDataDialog::setDefaultAccumulationMethod(const QString &listener) 
              ->buffersEvents()) {
       // If 'Add' is currently selected, select 'Replace' instead
       if (ui.cmbAccumulationMethod->currentIndex() == addIndex) {
-        ui.cmbAccumulationMethod->setItemText(-1, "Replace");
+        int replaceIndex = ui.cmbAccumulationMethod->findText("Replace");
+        ui.cmbAccumulationMethod->setCurrentIndex(replaceIndex);
       }
       // Disable the 'Add' option in the combobox. It just wouldn't make sense.
       ui.cmbAccumulationMethod->setItemData(addIndex, false, Qt::UserRole - 1);
