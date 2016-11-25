@@ -112,7 +112,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("DetectorEPPTable", detectorEPPTable))
     TS_ASSERT_THROWS_NOTHING(
-        algorithm.setProperty("IndexType", "SpectrumNumber"))
+        algorithm.setProperty("IndexType", "Spectrum Number"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Detectors", "2"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("NominalIncidentEnergy", EI))
     TS_ASSERT_THROWS_NOTHING(
@@ -230,7 +230,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("DetectorEPPTable", eppTable))
     TS_ASSERT_THROWS_NOTHING(
-        algorithm.setProperty("IndexType", "WorkspaceIndex"))
+        algorithm.setProperty("IndexType", "Workspace Index"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Detectors", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "-1"))
     const std::string exceptionMessage("Monitor cannot be negative.");
