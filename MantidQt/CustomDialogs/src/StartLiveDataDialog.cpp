@@ -347,7 +347,7 @@ void StartLiveDataDialog::changePostProcessingAlgorithm() {
 //------------------------------------------------------------------------------
 /** Slot called when picking a different instrument.
  *  Disables the 'Add' option if the listener is going to pass back histograms.
- *  @param inst :: The instrument name.
+ *  @param listener :: The listener class name.
  */
 void StartLiveDataDialog::setDefaultAccumulationMethod(
     const QString &listener) {
@@ -470,7 +470,7 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &inst) {
 /**
  * Slot to update list of available connections when instrument is changed
  *
- * @param inst Name of selected instrument
+ * @param inst_name Name of selected instrument
  */
 void StartLiveDataDialog::updateConnectionChoices(const QString &inst_name) {
   // Reset the connections listed
@@ -493,7 +493,7 @@ void StartLiveDataDialog::updateConnectionChoices(const QString &inst_name) {
 /**
  * Slot to update connection parameters when connection selected
  *
- * @param name
+ * @param connection Name of selected live listener connection
  */
 void StartLiveDataDialog::updateConnectionDetails(const QString &connection) {
   // Custom connections just enable editting connection parameters
