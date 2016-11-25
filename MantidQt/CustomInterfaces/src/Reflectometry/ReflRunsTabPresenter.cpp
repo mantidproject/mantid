@@ -34,21 +34,22 @@ namespace CustomInterfaces {
 /** Constructor
 * @param mainView :: [input] The view we're managing
 * @param progressableView :: [input] The view reporting progress
-* @param tablePresenter :: [input] The data processor presenter
+* @param tablePresenters :: [input] The data processor presenters
 * @param searcher :: [input] The search implementation
 */
 ReflRunsTabPresenter::ReflRunsTabPresenter(
     IReflRunsTabView *mainView, ProgressableView *progressableView,
-    DataProcessorPresenter *tablePresenter,
+    std::vector<DataProcessorPresenter *> tablePresenters,
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
-      m_tablePresenter(tablePresenter), m_mainPresenter(),
+      m_tablePresenters(tablePresenters), m_mainPresenter(),
       m_searcher(searcher) {
 
   // Register this presenter as the workspace receiver
-  // When doing so, the inner presenter will notify this
+  // When doing so, the inner presenters will notify this
   // presenter with the list of commands
-  m_tablePresenter->accept(this);
+  for (const auto &presenter : m_tablePresenters)
+    presenter->accept(this);
 
   // If we don't have a searcher yet, use ReflCatalogSearcher
   if (!m_searcher)
@@ -75,10 +76,12 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
   if (std::find(instruments.begin(), instruments.end(), defaultInst) !=
       instruments.end()) {
     m_view->setInstrumentList(instruments, defaultInst);
-    m_tablePresenter->setInstrumentList(instruments, defaultInst);
+    for (const auto &presenter : m_tablePresenters)
+      presenter->setInstrumentList(instruments, defaultInst);
   } else {
     m_view->setInstrumentList(instruments, "INTER");
-    m_tablePresenter->setInstrumentList(instruments, "INTER");
+    for (const auto &presenter : m_tablePresenters)
+      presenter->setInstrumentList(instruments, "INTER");
   }
 }
 
@@ -125,7 +128,9 @@ void ReflRunsTabPresenter::pushCommands() {
 
   // The expected number of commands
   const size_t nCommands = 27;
-  auto commands = m_tablePresenter->publishCommands();
+  // All the table presenters will push the same list of commands, so we just
+  // get this list from the first presenter
+  auto commands = m_tablePresenters.at(0)->publishCommands();
   if (commands.size() != nCommands) {
     throw std::runtime_error("Invalid list of commands");
   }
@@ -274,7 +279,8 @@ void ReflRunsTabPresenter::transfer() {
     }
   }
 
-  m_tablePresenter->transfer(results.getTransferRuns());
+  m_tablePresenters.at(m_view->getSelectedGroup())
+      ->transfer(results.getTransferRuns());
 }
 
 /**
