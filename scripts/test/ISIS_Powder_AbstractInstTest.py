@@ -34,7 +34,7 @@ class isis_powder_AbstractInstTest(unittest.TestCase):
         inst = self._get_abstract_inst_defaults()
         input_ws = "ws_in"
 
-        output_ws = inst._attenuate_workspace(input_ws)
+        output_ws = inst.attenuate_workspace(input_ws)
         self.assertEquals(input_ws, output_ws)
 
     def test_create_calibration_si(self):

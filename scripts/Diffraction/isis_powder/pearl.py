@@ -64,10 +64,6 @@ class Pearl(AbstractInst):
     def _get_lambda_range(self):
         return self._lambda_lower, self._lambda_upper
 
-    def get_create_van_tof_binning(self):
-        return_dict = {"1": self._create_van_first_tof_binning,
-                       "2": self._create_van_second_tof_binning}
-        return return_dict
 
     # Methods #
 
@@ -114,7 +110,7 @@ class Pearl(AbstractInst):
 
     # Hook overrides
 
-    def _attenuate_workspace(self, input_workspace):
+    def attenuate_workspace(self, input_workspace):
         try:
             old_full_path = self._old_atten_file
         except AttributeError:
@@ -128,7 +124,7 @@ class Pearl(AbstractInst):
             attenuation_path = self._old_atten_file
         return pearl_algs.attenuate_workspace(attenuation_file_path=attenuation_path, ws_to_correct=input_workspace)
 
-    def _normalise_ws(self, ws_to_correct, run_details=None):
+    def normalise_ws(self, ws_to_correct, run_details=None):
         if not run_details:
             raise RuntimeError("Run details was not passed into PEARL: normalise_ws")
         monitor_ws = common.get_monitor_ws(ws_to_process=ws_to_correct, run_number_string=run_details.run_number,
@@ -161,8 +157,12 @@ class Pearl(AbstractInst):
                                                            perform_attenuation=attenuate)
 
     def pearl_van_calibration_tof_rebinning(self, vanadium_ws, tof_rebin_pass, return_units):
-        tof_rebin_param_dict = self.get_create_van_tof_binning()
-        tof_rebin_param = tof_rebin_param_dict[str(tof_rebin_pass)]
+        if tof_rebin_pass == 1:
+            tof_rebin_param = self._create_van_first_tof_binning
+        elif tof_rebin_pass == 2:
+            tof_rebin_param = self._create_van_second_tof_binning
+        else:
+            raise ValueError("Got a value that didn't match the expected number of passes")
 
         out_ws = pearl_algs.apply_tof_rebinning(ws_to_rebin=vanadium_ws, tof_params=tof_rebin_param,
                                                 return_units=return_units)

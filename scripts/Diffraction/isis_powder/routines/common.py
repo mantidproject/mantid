@@ -128,7 +128,7 @@ def load_current_normalised_ws(run_number_string, instrument):
 
     run_information = instrument.get_run_details(run_number=run_number_string)
 
-    read_ws = instrument._normalise_ws(ws_to_correct=read_in_ws, run_details=run_information)
+    read_ws = instrument.normalise_ws(ws_to_correct=read_in_ws, run_details=run_information)
 
     output_name = "read_ws_output-" + str(g_ads_workaround["read_ws"])
     g_ads_workaround["read_ws"] += 1

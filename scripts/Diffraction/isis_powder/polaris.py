@@ -42,9 +42,6 @@ class Polaris(AbstractInst):
 
     # Abstract implementation
 
-    def get_create_van_tof_binning(self):
-        return self._create_van_calib_tof_binning
-
     def get_default_group_names(self):
         return self._calibration_grouping_names
 
@@ -72,7 +69,7 @@ class Polaris(AbstractInst):
     def get_num_of_banks(self, instrument_version=''):
         return self._number_of_banks
 
-    def _normalise_ws(self, ws_to_correct, run_details=None):
+    def normalise_ws(self, ws_to_correct, run_details=None):
         normalised_ws = mantid.NormaliseByCurrent(InputWorkspace=ws_to_correct)
         return normalised_ws
 

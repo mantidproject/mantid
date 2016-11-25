@@ -100,18 +100,6 @@ class AbstractInst(object):
         extension = self.default_input_ext
         return os.path.join(input_dir, (file_name + extension))
 
-    # Instrument specific properties to be implemented by base classes #
-
-    @abstractmethod
-    def get_create_van_tof_binning(self):
-        """
-        Holds the TOF rebin params for create vanadium calibration
-        @return: The TOF rebin params as a dictionary of strings numbered 1,2,3...n
-        """
-        pass
-
-    # Instrument default parameters
-
     @abstractmethod
     def get_default_group_names(self):
         """
@@ -134,7 +122,6 @@ class AbstractInst(object):
         @return: The filename of the file - Without the path or extension
         """
 
-    @staticmethod
     @abstractmethod
     def get_num_of_banks(self, instrument_version=''):
         pass
@@ -146,14 +133,14 @@ class AbstractInst(object):
     def get_save_range(instrument_version):
         return None
 
-    def _attenuate_workspace(self, input_workspace):
-        return _empty_hook_return_input(input_workspace)
+    def attenuate_workspace(self, input_workspace):
+        return input_workspace
 
-    def _normalise_ws(self, ws_to_correct, run_details=None):
-        return _empty_hook_return_none()
+    def normalise_ws(self, ws_to_correct, run_details=None):
+        return None
 
     def get_monitor_spectra_index(self, run_number):
-        return _empty_hook_return_empty_string()
+        return str()
 
     def spline_vanadium_ws(self, focused_vanadium_ws, instrument_version=''):
         """
@@ -162,13 +149,13 @@ class AbstractInst(object):
         @param instrument_version: (Optional) Used for instruments with multiple versions
         @return: List of workspaces with splined backgrounds
         """
-        return _empty_hook_return_none()
+        return None
 
     def pearl_focus_tof_rebinning(self, input_workspace):
         return input_workspace
 
     def output_focused_ws(self, processed_spectra, run_details, attenuate=False):
-        return _empty_hook_return_none()
+        return None
 
     def apply_solid_angle_efficiency_corr(self, ws_to_correct, run_details):
         return ws_to_correct
@@ -208,19 +195,3 @@ def _prefix_dot_to_ext(ext):
         return '.' + ext
     else:
         return ext
-
-
-# These empty hooks can be used to diagnose when an override hasn't
-# fired or if steps are correctly being skipped
-
-def _empty_hook_return_empty_string():
-    return str('')
-
-
-def _empty_hook_return_none():
-    return None
-
-
-def _empty_hook_return_input(param):
-    # We should return the input workspace untouched
-    return param

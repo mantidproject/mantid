@@ -62,7 +62,7 @@ def _focus_mode_trans(output_file_paths, atten, instrument, calibrated_spectra):
         mantid.CloneWorkspace(InputWorkspace=summed_ws, OutputWorkspace=no_att)
 
         summed_ws = mantid.ConvertUnits(InputWorkspace=summed_ws, Target="dSpacing")
-        summed_ws = instrument._attenuate_workspace(summed_ws)
+        summed_ws = instrument.attenuate_workspace(summed_ws)
         summed_ws = mantid.ConvertUnits(InputWorkspace=summed_ws, Target="TOF")
 
     mantid.SaveGSS(InputWorkspace=summed_ws, Filename=output_file_paths["gss_filename"], Append=False, Bank=1)
