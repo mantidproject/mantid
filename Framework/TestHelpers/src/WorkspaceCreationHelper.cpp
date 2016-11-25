@@ -49,10 +49,10 @@ MockAlgorithm::MockAlgorithm(size_t nSteps) {
   m_Progress = Mantid::Kernel::make_unique<API::Progress>(this, 0, 1, nSteps);
 }
 
-EPPTableRow::EPPTableRow(const double peakCentre_, const double sigma_, const double height_, const FitStatus fitStatus_)
-  : peakCentre(peakCentre_), peakCentreError(0), sigma(sigma_), sigmaError(0), height(height_), heightError(0), chiSq(0), fitStatus(fitStatus_) {
-
-}
+EPPTableRow::EPPTableRow(const double peakCentre_, const double sigma_,
+                         const double height_, const FitStatus fitStatus_)
+    : peakCentre(peakCentre_), peakCentreError(0), sigma(sigma_), sigmaError(0),
+      height(height_), heightError(0), chiSq(0), fitStatus(fitStatus_) {}
 
 /**
  * @param name :: The name of the workspace
@@ -1318,8 +1318,7 @@ void create2DAngles(std::vector<double> &L2, std::vector<double> &polar,
 
 ITableWorkspace_sptr
 createEPPTableWorkspace(const std::vector<EPPTableRow> &rows) {
-  ITableWorkspace_sptr ws =
-      boost::make_shared<TableWorkspace>(rows.size());
+  ITableWorkspace_sptr ws = boost::make_shared<TableWorkspace>(rows.size());
   auto wsIndexColumn = ws->addColumn("int", "WorkspaceIndex");
   auto centreColumn = ws->addColumn("double", "PeakCentre");
   auto centreErrorColumn = ws->addColumn("double", "PeakCentreError");
@@ -1330,7 +1329,7 @@ createEPPTableWorkspace(const std::vector<EPPTableRow> &rows) {
   auto chiSqColumn = ws->addColumn("double", "chiSq");
   auto statusColumn = ws->addColumn("str", "FitStatus");
   for (size_t i = 0; i != rows.size(); ++i) {
-    const auto& row = rows[i];
+    const auto &row = rows[i];
     wsIndexColumn->cell<int>(i) = static_cast<int>(i);
     centreColumn->cell<double>(i) = row.peakCentre;
     centreErrorColumn->cell<double>(i) = row.peakCentreError;

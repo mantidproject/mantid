@@ -56,8 +56,8 @@ private:
   void exec() override;
   void useReferenceWorkspace(API::MatrixWorkspace_sptr outputWs);
   void correctManually(API::MatrixWorkspace_sptr outputWs);
-  void averageL2AndEPP(const API::SpectrumInfo &spectrumInfo,
-      double &l2, double &epp);
+  void averageL2AndEPP(const API::SpectrumInfo &spectrumInfo, double &l2,
+                       double &epp);
   std::vector<size_t> referenceWorkspaceIndices() const;
 };
 

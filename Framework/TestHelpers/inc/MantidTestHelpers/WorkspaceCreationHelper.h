@@ -81,15 +81,13 @@ private:
 /// A struct containing the cells of an EPP table row.
 struct EPPTableRow {
   /// FindEPP algorithm fitting success status.
-  enum class FitStatus {
-    SUCCESS,
-    FAILURE
-  };
+  enum class FitStatus { SUCCESS, FAILURE };
 
   /// Construct a row with the default values.
   EPPTableRow() = default;
   /// Construct a row with errors set to zero.
-  EPPTableRow(const double peakCentre, const double sigma, const double height, const FitStatus fitStatus);
+  EPPTableRow(const double peakCentre, const double sigma, const double height,
+              const FitStatus fitStatus);
   double peakCentre = 0;
   double peakCentreError = 0;
   double sigma = 0;
@@ -358,7 +356,8 @@ void createInstrumentForWorkspaceWithDistances(
     const std::vector<Mantid::Kernel::V3D> &detectorPositions);
 
 /// Create a table workspace corresponding to what the FindEPP algorithm gives.
-Mantid::API::ITableWorkspace_sptr createEPPTableWorkspace(const std::vector<EPPTableRow> &rows);
+Mantid::API::ITableWorkspace_sptr
+createEPPTableWorkspace(const std::vector<EPPTableRow> &rows);
 
 } // namespace WorkspaceCreationHelper
 
