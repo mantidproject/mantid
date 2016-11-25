@@ -349,7 +349,8 @@ void StartLiveDataDialog::changePostProcessingAlgorithm() {
  *  Disables the 'Add' option if the listener is going to pass back histograms.
  *  @param inst :: The instrument name.
  */
-void StartLiveDataDialog::setDefaultAccumulationMethod(const QString &listener) {
+void StartLiveDataDialog::setDefaultAccumulationMethod(
+    const QString &listener) {
   if (listener.isEmpty())
     return;
   try {
@@ -363,7 +364,8 @@ void StartLiveDataDialog::setDefaultAccumulationMethod(const QString &listener) 
     // as an option
     // The 'false' 2nd argument means don't connect the created listener
     Mantid::Kernel::LiveListenerInfo info(listener.toStdString());
-    if (!Mantid::API::LiveListenerFactory::Instance().create(info, false)
+    if (!Mantid::API::LiveListenerFactory::Instance()
+             .create(info, false)
              ->buffersEvents()) {
       // If 'Add' is currently selected, select 'Replace' instead
       if (ui.cmbAccumulationMethod->currentIndex() == addIndex) {
