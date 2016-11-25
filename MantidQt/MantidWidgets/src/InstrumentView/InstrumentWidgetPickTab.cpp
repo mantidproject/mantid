@@ -930,18 +930,22 @@ QString ComponentInfoController::displayPeakAngles(
   auto pos1 = peak1->getDetector()->getPos();
   auto pos2 = peak2->getDetector()->getPos();
 
-  auto angle = pos1.angle(pos2) * double_constants::radian;
-  auto distance = pos2 - pos1;
-  auto dirAngles = distance.directionAngles();
+  // always compute the angle from the right most peak
+  // relative to the coordinates of the sample
+  if (pos1[0] > pos2[0])
+    std::swap(pos1, pos2);
 
-  auto x = dirAngles[0];
-  auto y = dirAngles[1];
+  // compute the angle between -180 and +180
+  const Mantid::Kernel::V3D up(0,1,0);
+  auto angle = pos2.angle(pos1);
+  auto refRight = up.cross_prod(pos1);
+  angle = std::copysign(angle, pos2.scalar_prod(refRight));
+  angle *= double_constants::radian;
 
-  text << "Angle between: " << angle << "\n";
-  text << "Direction angles: ";
-  text << " x: " << x;
-  text << " y: " << y;
-  text << "\n";
+  // correct the angle to the range to be 0 < theta < 360
+  if(angle < 0) angle = 360 + angle;
+
+  text << "Angle: " << angle << "\n";
 
   return QString::fromStdString(text.str());
 }
@@ -959,7 +963,6 @@ void ComponentInfoController::displayComparePeaksInfo(
   text << displayPeakInfo(peak2).toStdString();
   text << "-------------------------------\n";
   text << displayPeakAngles(peaks).toStdString();
-
   m_selectionInfoDisplay->setText(QString::fromStdString(text.str()));
 }
 
