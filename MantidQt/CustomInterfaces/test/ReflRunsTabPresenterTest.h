@@ -32,11 +32,9 @@ public:
   void test_constructor_sets_possible_transfer_methods() {
     NiceMock<MockRunsTabView> mockRunsTabView;
     MockProgressableView mockProgress;
-    MockDataProcessorPresenter mockTablePresenter;
-
-    // Expect that the table presenter accepts this presenter as a workspace
-    // receiver
-    EXPECT_CALL(mockTablePresenter, accept(_)).Times(Exactly(1));
+    NiceMock<MockDataProcessorPresenter> mockTablePresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
 
     // Expect that the transfer methods get initialized on the view
     EXPECT_CALL(mockRunsTabView, setTransferMethods(_)).Times(Exactly(1));
@@ -45,20 +43,50 @@ public:
 
     // Constructor
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   &mockTablePresenter);
+                                   tablePresenterVec);
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter));
   }
 
+  void test_table_presenters_accept_this_presenter() {
+    NiceMock<MockRunsTabView> mockRunsTabView;
+    MockProgressableView mockProgress;
+    MockDataProcessorPresenter mockTablePresenter_1;
+    MockDataProcessorPresenter mockTablePresenter_2;
+    MockDataProcessorPresenter mockTablePresenter_3;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter_1);
+    tablePresenterVec.push_back(&mockTablePresenter_2);
+    tablePresenterVec.push_back(&mockTablePresenter_3);
+
+    // Expect that the table presenters accept this presenter as a workspace
+    // receiver
+    EXPECT_CALL(mockTablePresenter_1, accept(_)).Times(Exactly(1));
+    EXPECT_CALL(mockTablePresenter_2, accept(_)).Times(Exactly(1));
+    EXPECT_CALL(mockTablePresenter_3, accept(_)).Times(Exactly(1));
+
+    // Constructor
+    ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
+                                   tablePresenterVec);
+
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_1));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_2));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_3));
+  }
+
   void test_presenter_sets_commands_when_notified() {
     NiceMock<MockRunsTabView> mockRunsTabView;
     MockProgressableView mockProgress;
     NiceMock<MockDataProcessorPresenter> mockTablePresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
 
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   &mockTablePresenter);
+                                   tablePresenterVec);
 
     // Expect that the view clears the list of commands
     EXPECT_CALL(mockRunsTabView, clearCommands()).Times(Exactly(1));
@@ -78,8 +106,11 @@ public:
     MockProgressableView mockProgress;
     NiceMock<MockDataProcessorPresenter> mockTablePresenter;
     MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
+
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   &mockTablePresenter);
+                                   tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     EXPECT_CALL(mockMainPresenter,
@@ -94,8 +125,10 @@ public:
     MockProgressableView mockProgress;
     NiceMock<MockDataProcessorPresenter> mockTablePresenter;
     MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   &mockTablePresenter);
+                                   tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     EXPECT_CALL(mockMainPresenter, askUserYesNo("Prompt", "Title")).Times(1);
@@ -109,8 +142,10 @@ public:
     MockProgressableView mockProgress;
     NiceMock<MockDataProcessorPresenter> mockTablePresenter;
     MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   &mockTablePresenter);
+                                   tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     EXPECT_CALL(mockMainPresenter, giveUserWarning("Prompt", "Warning Message"))
@@ -125,8 +160,10 @@ public:
     MockProgressableView mockProgress;
     NiceMock<MockDataProcessorPresenter> mockTablePresenter;
     MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   &mockTablePresenter);
+                                   tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     EXPECT_CALL(mockMainPresenter,
@@ -141,8 +178,10 @@ public:
     MockProgressableView mockProgress;
     NiceMock<MockDataProcessorPresenter> mockTablePresenter;
     MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   &mockTablePresenter);
+                                   tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     EXPECT_CALL(mockMainPresenter, runPythonAlgorithm("Python code to run"))
@@ -157,8 +196,10 @@ public:
     MockProgressableView mockProgress;
     NiceMock<MockDataProcessorPresenter> mockTablePresenter;
     MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   &mockTablePresenter);
+                                   tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     EXPECT_CALL(mockMainPresenter, getTransmissionOptions()).Times(1);
@@ -172,8 +213,10 @@ public:
     MockProgressableView mockProgress;
     NiceMock<MockDataProcessorPresenter> mockTablePresenter;
     MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   &mockTablePresenter);
+                                   tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     EXPECT_CALL(mockMainPresenter, getReductionOptions()).Times(1);
@@ -187,8 +230,10 @@ public:
     MockProgressableView mockProgress;
     NiceMock<MockDataProcessorPresenter> mockTablePresenter;
     MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-                                   &mockTablePresenter);
+                                   tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     EXPECT_CALL(mockMainPresenter, getStitchOptions()).Times(1);
