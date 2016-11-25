@@ -52,7 +52,7 @@ void LiveDataAlgorithm::initProps() {
                   "Default connection will be used if not specified");
 
   declareProperty(
-      make_unique<PropertyWithValue<std::string>>(
+      Kernel::make_unique<PropertyWithValue<std::string>>(
           "Listener", "", boost::make_shared<StringListValidator>(listeners)),
       "Name of the listener class to use. "
       "If specified, overrides class specified by Connection.");
