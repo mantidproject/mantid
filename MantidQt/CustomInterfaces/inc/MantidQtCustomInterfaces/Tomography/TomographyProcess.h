@@ -41,7 +41,7 @@ public:
              const std::string &allOpts) {
     m_allArgs = allOpts;
     m_runnable = QString::fromStdString(runnable);
-    m_args = constructArgumentsFromVector(args);
+    m_args = buildArguments(args);
   }
 
   std::string getRunnable() const { return m_runnable.toStdString(); }
@@ -67,7 +67,7 @@ public slots:
 
 private:
   QStringList
-  constructArgumentsFromVector(const std::vector<std::string> &args) const {
+  buildArguments(const std::vector<std::string> &args) const {
     QStringList list;
     list.reserve(static_cast<int>(args.size()));
 
