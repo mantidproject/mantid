@@ -10,7 +10,7 @@
 Description
 -----------
 
-This algorithm is meant to adjust the time-of-flight axis so that the elastic peak is at zero energy transfer after unit conversion from 'TOF' to 'DeltaE'. The algorithm has to modes: either it uses a given *ReferenceWorkspace*, or it calculates a constant time-of-flight shift using the L1 + L2 distances of the *InputWorkspace* and incident energy.
+This algorithm is meant to adjust the time-of-flight axis so that the elastic peak is at zero energy transfer after unit conversion from 'TOF' to 'DeltaE'. The algorithm has two modes: either it uses a given *ReferenceWorkspace*, or it calculates a constant time-of-flight shift using the L1 + L2 distances of the *InputWorkspace* and incident energy.
 
 If *ReferenceWorkspace* is set, this algorithm copies the X axis as well as the 'Ei' and 'wavelength' sample logs to the *OutputWorkspace*. The rest of the input properties are discarded.
 

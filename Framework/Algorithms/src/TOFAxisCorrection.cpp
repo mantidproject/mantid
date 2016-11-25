@@ -125,7 +125,7 @@ void TOFAxisCorrection::init() {
   declareProperty(
         Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::REFERENCE_WORKSPACE, "",
                                                                    Direction::Input, API::PropertyMode::Optional, tofWorkspace),
-        "A reference workspace from which to copy the TOF axis, Ei and wavelength.");
+        "A reference workspace from which to copy the TOF axis as well as the 'Ei' and 'wavelength' sample logs.");
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
           PropertyNames::EPP_TABLE.c_str(), "", Direction::Input, API::PropertyMode::Optional),
@@ -135,7 +135,7 @@ void TOFAxisCorrection::init() {
                                             IndexTypes::WORKSPACE_INDEX};
   declareProperty(PropertyNames::INDEX_TYPE, IndexTypes::DETECTOR_ID,
                   boost::make_shared<Kernel::StringListValidator>(indexTypes),
-                  "The type of indices used in " + PropertyNames::REFERENCE_SPECTRA + ".");
+                  "The type of indices used in " + PropertyNames::REFERENCE_SPECTRA + " (default: '" + IndexTypes::DETECTOR_ID + "').");
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<int>>(
                       PropertyNames::REFERENCE_SPECTRA.c_str()),
                   "A list of reference spectra.");
