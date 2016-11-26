@@ -35,20 +35,20 @@ class FittingBenchmarkTests(unittest.TestCase):
                             ]
 
         # Create the path for the specific fitting test files location
-        input_data_dir = msapi.config['datasearch.directories'].split(';')[0]        
+        input_data_dir = msapi.config['datasearch.directories'].split(';')[0]
         self.base_problem_files_dir = os.path.join(input_data_dir, 'FittingTestProblems')
 
     def run_all_with_or_without_errors(self, use_errors):
         """
         Runs benchmark on all the available tes problems.
-        
+
         @param use_errors : whether to use errors as weights in the cost funtion
                             (weighted least squares)
         """
         # Create the path for the specific fitting test files location
-        input_data_dir = msapi.config['datasearch.directories'].split(';')[0]        
+        input_data_dir = msapi.config['datasearch.directories'].split(';')[0]
         base_problem_files_dir = os.path.join(input_data_dir, 'FittingTestProblems')
-        
+
         # run fit minimizer benchmarking tests
         fitbk.run_all_with_or_without_errors(base_problem_files_dir, use_errors, self.minimizers,
                                              self.group_names, self.group_suffix_names, self.color_scale,
@@ -64,7 +64,7 @@ class FittingBenchmarkTests(unittest.TestCase):
                       'Conjugate gradient (Polak-Ribiere imp.)', 'Damping']
         group_names = ['NIST, "lower" difficulty', 'NIST, "average" difficulty', 'NIST, "higher" difficulty']
         group_suffix_names = ['nist_lower', 'nist_average', 'nist_higher']
-        
+
         use_errors = False
 
         nist_group_dir = os.path.join(self.base_problem_files_dir, 'NIST_nonlinear_regression')
@@ -72,7 +72,7 @@ class FittingBenchmarkTests(unittest.TestCase):
         # test that fit executes on all NIST problems against a number of different minimizers
         problems, results_per_group = fitbk.do_fitting_benchmark(nist_group_dir=nist_group_dir,
                                                                  minimizers=minimizers, use_errors=use_errors)
-                                             
+
         # test that can print individual group tables
         for idx, group_results in enumerate(results_per_group):
             print("\n\n")
@@ -99,7 +99,7 @@ class FittingBenchmarkTests(unittest.TestCase):
         minimizers = ['Levenberg-Marquardt', 'Levenberg-MarquardtMD',
                       'Simplex', 'SteepestDescent', 'Trust Region']
         group_suffix_names = ['cutest']
-        
+
         use_errors = True
 
         cutest_group_dir = os.path.join(self.base_problem_files_dir, 'CUTEst')
@@ -124,7 +124,7 @@ class FittingBenchmarkTests(unittest.TestCase):
         group_suffix_names = ['neutron_data']
 
         use_errors = True
-        
+
         neutron_data_group_dirs = [os.path.join(self.base_problem_files_dir, 'Neutron_data')]
 
         # test that fit executes on all Neutron data problems
