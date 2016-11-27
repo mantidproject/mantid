@@ -229,7 +229,7 @@ int SaveMDWorkspaceToVTKImpl::writeDataSetToVTKFile(
   vtkNew<vtkCallbackCommand> progressCallback;
   progressCallback->SetCallback(ProgressFunction);
   writer->AddObserver(vtkCommand::ProgressEvent, progressCallback.GetPointer());
-  progressCallback->SetClientData(const_cast<API::Progress *>(&m_progress));
+  progressCallback->SetClientData(&m_progress);
   writer->SetFileName(filename.c_str());
   writer->SetInputData(dataSet);
   writer->SetCompressorType(compressor);

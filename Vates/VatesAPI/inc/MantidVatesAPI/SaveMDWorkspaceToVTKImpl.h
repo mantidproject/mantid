@@ -68,7 +68,7 @@ public:
   bool is3DWorkspace(Mantid::API::IMDWorkspace_sptr workspace) const;
 
 private:
-  API::Progress m_progress;
+  mutable API::Progress m_progress;
   std::map<std::string, VisualNormalization> m_normalizations;
   std::vector<std::string> m_thresholds;
 
