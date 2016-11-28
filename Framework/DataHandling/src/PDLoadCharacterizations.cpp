@@ -59,7 +59,7 @@ extra_columns(const std::vector<std::string> &filenames) {
     throw Exception::FileError("Unable to open file", filenames[F_INDEX_V1]);
   }
 
-  for (std::string line = Strings::getLine(file, line); !file.eof();
+  for (std::string line = Strings::getLine(file); !file.eof();
        Strings::getLine(file, line)) {
     boost::smatch result;
     // all instances of table headers
