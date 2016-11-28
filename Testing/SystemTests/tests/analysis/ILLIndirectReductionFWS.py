@@ -27,15 +27,14 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
 
     def requiredFiles(self):
 
-        return ["083072.nxs","083073.nxs",
-                "083074.nxs","083075.nxs",
-                "083076.nxs","083077.nxs"]
+        return ["165944.nxs", "165945.nxs", "165946.nxs", "165947.nxs", "165948.nxs",
+                "165949.nxs", "165950.nxs", "165951.nxs", "165952.nxs", "165953.nxs"]
 
     def runTest(self):
 
         self.tolerance = 1e-6
 
-        IndirectILLReductionFWS(Run="083072:083073")
+        IndirectILLReductionFWS(Run="165944:166042")
 
         self.tearDown()
 
