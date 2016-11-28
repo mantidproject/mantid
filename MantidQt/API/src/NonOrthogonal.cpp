@@ -10,11 +10,34 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 
-#include <cmath>
 #include <boost/pointer_cast.hpp>
 #include <array>
-#include <math.h>
 #include <algorithm>
+#include <math.h>
+
+/**
+*
+* There are several things which should be clarified.
+*
+* 1. We are dealing with a (potentially non-orthogonal system) defined by
+* the basisi vectors a*, b* and c* with the coordinates h, k, l. On occasion
+* H, K, and L are used to describe the basisi vectors.
+*
+* 2. What we call a skewMatrix is a modified BW (and sometimes a modified (BW)^-1) matrix.
+* The BW matrix transforms from the non-orhtogonal presentation to the orthogonal representation.
+* The (BW)^-1 transforms form the orhtogonal presentation to the non-orthogonal representation.
+* The orthogonal representation is a orthogonal coordinate system with coordinates (x, y, z),
+* where the basis vector eX assoicated with x is aligned with the H. The basis vector eY
+* associated with y is in the H-K plane and perpendicular to x. The basis vector eZ associated
+* with z is orthgonal to x and y.
+*
+* This is important. H is always parallel to eX, K is always in the x-y plane and L can be pretty
+* much anything.
+*
+* 3. The screen coordinate system consists of Xs and Ys.
+*
+*
+*/
 
 namespace {
 void checkForSampleAndRunEntries(
@@ -166,9 +189,9 @@ template <typename T> bool doRequiresSkewMatrix(T workspace) {
   return requiresSkew;
 }
 
-template <typename T, size_t N>
-std::array<T, N> getTransformedArray(T skewMatrix[N * N], size_t dimension) {
-  std::array<T, N> vec = {0., 0., 0.};
+template <size_t N>
+std::array<Mantid::coord_t, N> getTransformedArray(Mantid::coord_t skewMatrix[N*N], size_t dimension) {
+	std::array<Mantid::coord_t, N> vec = { 0., 0., 0. };
   for (size_t index = 0; index < N; ++index) {
     vec[index] = skewMatrix[dimension + index * N];
   }
@@ -184,37 +207,89 @@ template <typename T, size_t N> void normalizeVector(std::array<T, N> &vector) {
     element /= norm;
   }
 }
-template <typename T>
-std::array<T, 3> getNormalVector(std::array<T, 3> &dimXTransformed,
-                                 std::array<T, 3> &dimYTransformed) {
-  std::array<T, 3> normalVector;
-  for (size_t index = 0; index < 3; ++index) {
-    normalVector[index] =
-        dimXTransformed[(index + 1) % 3] * dimYTransformed[(index + 2) % 3] -
-        dimXTransformed[(index + 2) % 3] * dimYTransformed[(index + 1) % 3];
-  }
+/**
+* Gets the normal vector for two specified vectors
+*
+*/
+std::array<Mantid::coord_t, 3> getNormalVector(std::array<Mantid::coord_t, 3> vector1, std::array<Mantid::coord_t, 3> vector2) {
+	std::array<Mantid::coord_t, 3> normalVector;
+	for (size_t index = 0; index < 3; ++index) {
+		normalVector[index] = vector1[(index + 1) % 3] * vector2[(index + 2) % 3] -
+			vector1[(index + 2) % 3] * vector1[(index + 1) % 3];
+	}
 
   // Make sure that the output is truely normalized
-  normalizeVector<T, 3>(normalVector);
+  normalizeVector<Mantid::coord_t, 3>(normalVector);
   return normalVector;
 }
 
 /**
-  * Calculate the angle for a given dimension. Note that this function expects
- * all vectors to be normalized.
-  */
-template <typename T, size_t N>
-T getAngleInRadian(std::array<T, N> vector1, std::array<T, N> vector2,
-                   std::array<T, N> normalVector) {
-  normalizeVector<T, N>(vector1);
-  normalizeVector<T, N>(vector2);
+* The normal vector will depend on the chosen dimensions and the order of these dimensions:
+* It is essentially the cross product of vect(dimX) x vect(dimY), e.g.
+* x-y -> z
+* y-x -> -z ...
+*
+*/
+std::array<Mantid::coord_t, 3> getNormalVector(size_t dimX, size_t dimY) {
+	std::array<Mantid::coord_t, 3> vector1 = { 0., 0., 0. };
+	std::array<Mantid::coord_t, 3> vector2 = { 0., 0., 0. };
+	vector1[dimX] = 1.0;
+	vector2[dimY] = 1.0;
 
-  // Get the value of the angle from the dot product: v1*v2 = cos (a)*|v1|*|v2|
-  auto dotProduct =
-      std::inner_product(vector1.begin(), vector1.end(), vector2.begin(), 0.f);
+	std::array<Mantid::coord_t, 3> normalVector;
+	for (size_t index = 0; index < 3; ++index) {
+		normalVector[index] = vector1[(index + 1) % 3] * vector2[(index + 2) % 3] -
+			vector1[(index + 2) % 3] * vector1[(index + 1) % 3];
+	}
 
-  // Handle case where the dotProduct is 1 or -1
-  T angle = 0.;
+	// Make sure that the output is normalized
+	normalizeVector<Mantid::coord_t, 3>(normalVector);
+	return normalVector;
+}
+/**
+* Calculate the angle for a given dimension. Note that this function expects all vectors to be normalized.
+*/
+template<size_t N>
+double getAngleInRadian(std::array<Mantid::coord_t, N> orthogonalVector, std::array<Mantid::coord_t, N> nonOrthogonalVector,
+	const std::array<Mantid::coord_t, N>& normalVector, size_t currentDimension, size_t otherDimension) {
+	// We want to get the angle between an orthogonal basis vector eX, eY, eZ and the corresponding
+	// nonorthogonal basis vector H, K, L
+	// There are several special cases to consider.
+	// 1. When the currentDimension or otherDimension is x, then the angle is 0 since x and H are aligned
+	// 2. When currentDimension is y and otherDimension is z,
+	//    then the angle betwee K and eY  is set to 0. This is a slight
+	//    oddity since  y-z and K are not in a plane. Mathematically, there is of course a potentially non-zero
+	//    angle between K and eY, but this is not relevant for our 2D display.
+	// 3. When dimX/Y is z, then L needs to be projected onto either the x-z or the y-z plane (denpending
+	//    on the current selection). The angle is calculatd between the projection and the eZ axis.
+
+
+	double angle(0.);
+	if (currentDimension == 0) {
+		// Handle case 1.
+		return 0.;
+	}
+	else if (currentDimension == 1 && otherDimension == 2) {
+		// Handle case 2.
+		return 0.;
+	}
+	else if (currentDimension == 2) {
+		// Handle case 3.
+		normalizeVector<Mantid::coord_t, N>(orthogonalVector);
+		normalizeVector<Mantid::coord_t, N>(nonOrthogonalVector);
+
+		std::array<Mantid::coord_t, 3> temporaryNonOrthogonal{ 0.f, 0.f, 0.f };
+		temporaryNonOrthogonal[currentDimension] = nonOrthogonalVector[currentDimension];
+		temporaryNonOrthogonal[otherDimension] = nonOrthogonalVector[otherDimension];
+		nonOrthogonalVector = temporaryNonOrthogonal;
+	}
+
+	normalizeVector<Mantid::coord_t, N>(orthogonalVector);
+	normalizeVector<Mantid::coord_t, N>(nonOrthogonalVector);
+	// Get the value of the angle from the dot product: v1*v2 = cos (a)*|v1|*|v2|
+	auto dotProduct = std::inner_product(orthogonalVector.begin(), orthogonalVector.end(), nonOrthogonalVector.begin(), 0.f);
+
+  // Handle case where the dotProduct is 1 or -
   if (dotProduct == 1.) {
     angle = 0.;
 
@@ -225,7 +300,7 @@ T getAngleInRadian(std::array<T, N> vector1, std::array<T, N> vector2,
     angle = std::acos(dotProduct);
   }
   // Get the direction of the angle
-  auto normalForDirection = getNormalVector<Mantid::coord_t>(vector1, vector2);
+  auto normalForDirection = getNormalVector(orthogonalVector, nonOrthogonalVector);
   auto direction =
       std::inner_product(normalForDirection.begin(), normalForDirection.end(),
                          normalVector.begin(), 0.f);
@@ -334,28 +409,39 @@ void transformLookpointToWorkspaceCoord(Mantid::coord_t *lookPoint,
                     v3 * skewMatrix[2 + 3 * dimY];
 }
 
-std::pair<float, float> getAnglesInRadian(Mantid::coord_t skewMatrixCoord[9],
-                                          size_t dimX, size_t dimY) {
+/**
+* We get the angles that are used for plotting of the grid lines. There are several scenarios:
+* x-y (when H and K are selected)
+* y-x (when K and H are selected)
+* x-z (when H and L are selected)
+* z-x (when L and H are selected)
+* y-z (when K and L are selected)
+* z-y (when L and K are selected)
+*
+* Some things to consider the BW transformation provides a system where x is aligned with a*,
+* where y is in the same plane as
+*
+*
+* @param skewMatrixCoord The tranformation matrix from the non-orthogonal system to the orthogonal system
+* @param dimX the selected orthogonal dimension for the x axis of the screen
+* @param dimY the selected orthogonal dimension for the y axis of the screen
+* @return an angle for the x grid lines and an angle for the y grid lines. Both are measured from the x axis.
+*/
+std::pair<double, double> getGridLineAnglesInRadian(Mantid::coord_t skewMatrixCoord[9], size_t dimX, size_t dimY) {
+	// Get the two vectors for the selected dimensions in the orthogonal axis representation.
   std::array<Mantid::coord_t, 3> dimXOriginal = {0., 0., 0.};
   std::array<Mantid::coord_t, 3> dimYOriginal = {0., 0., 0.};
   dimXOriginal[dimX] = 1.0;
   dimYOriginal[dimY] = 1.0;
+  auto dimXTransformed = getTransformedArray<3>(skewMatrixCoord, dimX);
+  auto dimYTransformed = getTransformedArray<3>(skewMatrixCoord, dimY);
 
-  // Get the tranformed values
-  auto dimXTransformed =
-      getTransformedArray<Mantid::coord_t, 3>(skewMatrixCoord, dimX);
-  auto dimYTransformed =
-      getTransformedArray<Mantid::coord_t, 3>(skewMatrixCoord, dimY);
-
-  // Calculate the normal vector of the the transformed environment
-  auto normalVector =
-      getNormalVector<Mantid::coord_t>(dimXTransformed, dimYTransformed);
+  // Get the normal vector for the selected dimensions
+  auto normalVector = getNormalVector(dimX, dimY);
 
   // Get the angle for dimX and dimY
-  auto angleDimX =
-      getAngleInRadian(dimXOriginal, dimXTransformed, normalVector);
-  auto angleDimY =
-      getAngleInRadian(dimYOriginal, dimYTransformed, normalVector);
+  auto angleDimX = getAngleInRadian(dimXOriginal, dimXTransformed, normalVector, dimX, dimY);
+  auto angleDimY = getAngleInRadian(dimYOriginal, dimYTransformed, normalVector, dimY, dimX);
   return std::make_pair(angleDimX, angleDimY);
 }
 }

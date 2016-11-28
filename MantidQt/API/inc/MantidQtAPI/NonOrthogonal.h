@@ -50,8 +50,8 @@ void transformLookpointToWorkspaceCoordGeneric(T &lookPoint,
                     v3 * skewMatrix[2 + 3 * dimY];
 }
 
-std::pair<float, float> EXPORT_OPT_MANTIDQT_API
-getAnglesInRadian(Mantid::coord_t skewMatrixCoord[9], size_t dimX, size_t dimY);
+std::pair<double, double> EXPORT_OPT_MANTIDQT_API
+getGridLineAnglesInRadian(Mantid::coord_t skewMatrixCoord[9], size_t dimX, size_t dimY);
 }
 }
 

@@ -54,86 +54,57 @@ public:
   bool m_showLine;
 
   void calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws, size_t dimX,
-                         size_t dimY);
+	  size_t dimY, Mantid::Kernel::VMD slicePoint);
 
-  void zoomChanged(QwtDoubleInterval xint, QwtDoubleInterval yint);
+  void setSlicePoint(Mantid::Kernel::VMD slicePoint);
+
+  void enable();
+
+  void disable();
 
 private:
-  QSize sizeHint() const override;
-  QSize size() const;
-  int height() const;
-  int width() const;
-  /// QwtPlot containing this
-  QwtPlot *m_plot;
-  Mantid::coord_t m_fromHklToOrthogonal[9];
-  Mantid::coord_t m_fromOrthogonalToHkl[9];
-  Mantid::API::IMDWorkspace_sptr *m_ws;
+	QSize sizeHint() const override;
+	QSize size() const;
 
-  QPoint transform(QPointF coords) const;
-  QPointF invTransform(QPoint pixels) const;
+	int height() const;
+	int width() const;
 
-  void drawYLines(QPainter &painter, QPen &numberPen, QPen &gridPen,
-                  int widthScreen, int heightScreen, int numberOfGridLines,
-                  double angle);
-  void drawXLines(QPainter &painter, QPen &numberPen, QPen &gridPen,
-                  int widthScreen, int heightScreen, int numberOfGridLines,
-                  double angle);
+	QPoint transform(QPointF coords) const;
+	QPointF invTransform(QPoint pixels) const;
 
-  void setAxesPoints(); // below are set in function
-  double m_dim0Max;
-  double m_originPoint;
-  double m_endPoint;
-  /// First point of the line (in coordinates of the plot)
-  QPointF m_pointA;
-  /// Second point of the line (in coordinates of the plot)
-  QPointF m_pointB;
-  /// Third point of the line (in coordinates of the plot)
-  QPointF m_pointC;
+	void drawYLines(QPainter &painter, QPen& numberPen, QPen& gridPen, int widthScreen, int heightScreen,
+		int numberOfGridLines, double angle);
+	void drawXLines(QPainter &painter, QPen& numberPen, QPen& gridPen, int widthScreen, int heightScreen,
+		int numberOfGridLines, double angle);
 
-  void setSkewMatrix();
+	void setAxesPoints();
+	void setSkewMatrix();
 
-  QPointF skewMatrixApply(double x, double y);
+	QPointF skewMatrixApply(double x, double y);
 
-  // set in ZoomChanged
-  double m_xMinVis;
-  double m_xMaxVis;
-  double m_yMinVis;
-  double m_yMaxVis;
-  double m_yRange;
-  double m_xRange;
-  double m_xMaxVisBuffered;
-  double m_xMinVisBuffered;
-  double m_yMaxVisBuffered;
-  double m_yMinVisBuffered;
+	void paintEvent(QPaintEvent *event) override;
 
-  // set in calculateAxesSkew
-  size_t m_dimY;
-  size_t m_dimX;
+	bool m_enabled;
 
-  void calculateTickMarks();
-  const double m_tickNumber;
-  std::vector<double> m_axisXPointVec;
-  std::vector<double> m_axisYPointVec;
-  std::vector<QPointF> m_xNumbers;
-  std::vector<QPointF> m_yNumbers;
-  std::vector<QPointF> m_xAxisTickStartVec;
-  std::vector<QPointF> m_xAxisTickEndVec;
-  std::vector<QPointF> m_yAxisTickStartVec;
-  std::vector<QPointF> m_yAxisTickEndVec;
+	QwtPlot *m_plot;
+	Mantid::API::IMDWorkspace_sptr *m_ws;
 
-  void clearAllAxisPointVectors();
+	Mantid::coord_t m_fromHklToOrthogonal[9];
+	Mantid::coord_t m_fromOrthogonalToHkl[9];
 
-  /// Width of the line (in coordinates of the plot)
-  double m_width;
-  // QRect drawHandle(QPainter &painter, QPointF coords, QColor brush);
-  void paintEvent(QPaintEvent *event) override;
-  const double m_numberAxisEdge; // prevents numbers from only being half shown
-                                 // on the axis by making boundary smaller
-  double m_angleX;
-  double m_angleY;
+	size_t m_dimY;
+	size_t m_dimX;
+	Mantid::Kernel::VMD m_slicePoint;
+
+	/// Width of the line (in coordinates of the plot)
+	double m_width;
+
+	double m_angleX;
+	double m_angleY;
 };
 
 } // namespace SliceViewer
 } // namespace Mantid
+
 
 #endif /* MANTID_SLICEVIEWER_NONORTHOGONALOVERLAY_H_ */
