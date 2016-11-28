@@ -37,6 +37,8 @@ Performance
 CurveFitting
 ------------
 
+- Systemtest, FittingBenchmarks, added for testing fit minimizer benchmarking scripts generating the tables displayed on :ref:`FittingMinimzers page <FittingMinimizers>`. This Systemtest also demo how these tables can be created as a standard Mantid script.
+
 Improved
 ########
 
