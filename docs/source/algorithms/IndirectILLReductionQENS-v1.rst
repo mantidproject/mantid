@@ -29,7 +29,7 @@ deceleration phase of the Doppler drive are recorded separately, or without.
 Technically this is defined in the ``Doppler.mirror_sense`` entry in the sample logs.
 For the data without mirror sense (i.e. mirror_sense = 16) only three unmirror options are valid:
 
-0: No x-axis shift.
+0: No x-axis shift. (Options 0-5 will fall back to 0).
 
 6: Centering the peaks at the zero energy transfer.
 

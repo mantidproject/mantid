@@ -26,7 +26,7 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         return "Workflow\\MIDAS;Inelastic\\Reduction"
 
     def summary(self):
-        return 'Performs complete QENS multiple file reduction for ILL indirect geometry data, instrument IN16B.'
+        return 'Performs quasi-elastic neutron scattering (QENS) multiple file reduction for ILL indirect geometry data, instrument IN16B.'
 
     def name(self):
         return "IndirectILLReductionQENS"

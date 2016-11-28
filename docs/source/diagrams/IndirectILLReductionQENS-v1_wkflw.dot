@@ -27,7 +27,13 @@ digraph IndirectILLReductionQENS {
   subgraph algorithms {
   	$algorithm_style
   	SelectNexusFilesByMetadata
-  	IndirectILLEnergyTransfer
+  	SelectNexusFilesByMetadataA [label="SelectNexusFilesByMetadata"]
+  	SelectNexusFilesByMetadataB [label="SelectNexusFilesByMetadata"]
+    SelectNexusFilesByMetadataC [label="SelectNexusFilesByMetadata"]
+    IndirectILLEnergyTransfer
+    IndirectILLEnergyTransferA [label="IndirectILLEnergyTransfer"]
+    IndirectILLEnergyTransferB [label="IndirectILLEnergyTransfer"]
+  	IndirectILLEnergyTransferC [label="IndirectILLEnergyTransfer"]
   	Integration
   	Minus
   	Divide
@@ -45,16 +51,22 @@ digraph IndirectILLReductionQENS {
   SelectNexusFilesByMetadata -> IndirectILLEnergyTransfer
   CropDeadMonitorChannels -> IndirectILLEnergyTransfer
   IndirectILLEnergyTransfer -> Minus
-  BackgroundRun -> Scale
+  BackgroundRun -> SelectNexusFilesByMetadataB
+  SelectNexusFilesByMetadataB -> IndirectILLEnergyTransferB
+  IndirectILLEnergyTransferB -> Scale
   BackgroundScalingFactor -> Scale
   Scale -> Minus
-  CalibrationRun -> Integration
+  CalibrationRun -> SelectNexusFilesByMetadataC
+  SelectNexusFilesByMetadataC -> IndirectILLEnergyTransferC
+  IndirectILLEnergyTransferC -> Integration
   CalibrationPeakRange -> Integration
   Integration -> Divide
   Minus -> Divide
   Divide -> MatchPeaks
   UnmirrorOption -> MatchPeaks
-  AlignmentRun -> MatchPeaks
+  AlignmentRun -> SelectNexusFilesByMetadataA
+  SelectNexusFilesByMetadataA -> IndirectILLEnergyTransferA
+  IndirectILLEnergyTransferA -> MatchPeaks
   MaskOverflownBins -> MatchPeaks
   MatchPeaks -> Plus
   Plus -> GroupWorkspaces

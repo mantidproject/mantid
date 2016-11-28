@@ -24,8 +24,7 @@ Y-axis will be detector angle, and the values would be the intensities integrate
 (symmetric around each peak) at the beginning and the end of the spectra (for IFWS).
 Scanning observable can be any numeric or time-stamp-like string parameter.
 See ``sample.*`` or e.g. ``start_time`` in Sample Logs.
-``BackgroundRun`` s and ``CalibrationRun`` s will be interpolated to the same observable values, as
-present in the (sample) ``Run`` .
+``BackgroundRun`` s and ``CalibrationRun`` s will be averaged or interpolated over all the ovservable points according to option.
 
 Workflow
 --------

@@ -22,15 +22,28 @@ digraph IndirectILLReductionFWS {
   subgraph algorithms {
   	$algorithm_style
   	IndirectILLEnergyTransfer
+  	IndirectILLEnergyTransferB [label="IndirectILLEnergyTransfer"]
+  	IndirectILLEnergyTransferC [label="IndirectILLEnergyTransfer"]
     SelectNexusFilesByMetadata
+    SelectNexusFilesByMetadataB [label="SelectNexusFilesByMetadata"]
+    SelectNexusFilesByMetadataC [label="SelectNexusFilesByMetadata"]
     Integration
+    IntegrationB [label="Integration"]
+    IntegrationC [label="Integration"]
     GroupWorkspaces
-    SplineInterpolation
+    SplineInterpolationB [label="SplineInterpolation"]
+    SplineInterpolationC [label="SplineInterpolation"]
+    IntegrationBB [label="Integration"]
+    IntegrationCC [label="Integration"]
+    Minus
+    Divide
   }
 
   subgraph processes {
   	$process_style
   	Scan
+  	ScanB [label="Scan"]
+  	ScanC [label="Scan"]
   }
 
   Run -> SelectNexusFilesByMetadata
@@ -38,9 +51,24 @@ digraph IndirectILLReductionFWS {
   IndirectILLEnergyTransfer -> Integration
   Integration -> Scan
   Observable -> Scan
-  CalibrationRun -> SplineInterpolation
-  BackgroundRun -> SplineInterpolation
-  SplineInterpolation -> Scan
-  Scan -> GroupWorkspaces
+  BackgroundRun -> SelectNexusFilesByMetadataB
+  SelectNexusFilesByMetadataB -> IndirectILLEnergyTransferB
+  IndirectILLEnergyTransferB ->
+  IntegrationB -> ScanB
+  ScanB -> IntegrationBB [label="Sum"]
+  ScanB -> SplineInterpolationB [label="Interpolate"]
+  CalibrationRun -> SelectNexusFilesByMetadataC
+  SelectNexusFilesByMetadataC -> IndirectILLEnergyTransferC
+  IndirectILLEnergyTransferC -> IntegrationC
+  IntegrationC -> ScanC
+  ScanC -> IntegrationCC [label="Sum"]
+  ScanC -> SplineInterpolationC [label="Interpolate"]
+  Scan -> Minus
+  IntegrationBB -> Minus
+  SplineInterpolationB -> Minus
+  Minus -> Divide
+  IntegrationCC -> Divide
+  SplineInterpolationC -> Divide
+  Divide -> GroupWorkspaces
   GroupWorkspaces -> OutputWorkspace
 }
