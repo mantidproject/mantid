@@ -182,8 +182,6 @@ void EnggDiffractionPresenter::notify(
 void EnggDiffractionPresenter::processStart() {
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
   m_view->showStatus("Ready");
-
-  // updateNewCalib(m_view->currentCalibFile());
 }
 
 void EnggDiffractionPresenter::processLoadExistingCalib() {
