@@ -132,7 +132,8 @@ void GetEiMonDet2::init() {
   declareProperty(PropertyNames::MONITOR, EMPTY_INT(), mandatoryIntProperty,
                   "Monitor's detector id/spectrum number/workspace index.");
   declareProperty(PropertyNames::PULSE_INTERVAL, EMPTY_DBL(),
-                  "Interval between neutron pulses, in microseconds. Taken from the sample logs, if not specified.");
+                  "Interval between neutron pulses, in microseconds. Taken "
+                  "from the sample logs, if not specified.");
   declareProperty(
       PropertyNames::NOMINAL_ENERGY, EMPTY_DBL(), mustBePositive,
       "Incident energy guess. Taken from the sample logs, if not specified.");
@@ -289,7 +290,8 @@ double GetEiMonDet2::computeTOF(const double distance, const double detectorEPP,
   double pulseInterval = getProperty(PropertyNames::PULSE_INTERVAL);
   if (pulseInterval == EMPTY_DBL()) {
     if (m_detectorWs->run().hasProperty(SampleLogs::PULSE_INTERVAL)) {
-      pulseInterval = m_detectorWs->run().getPropertyAsSingleValue(SampleLogs::PULSE_INTERVAL);
+      pulseInterval = m_detectorWs->run().getPropertyAsSingleValue(
+          SampleLogs::PULSE_INTERVAL);
     }
   }
   const double pulseIntervalLimit = nominalTimeOfFlight - pulseInterval / 2;
@@ -311,8 +313,8 @@ double GetEiMonDet2::computeTOF(const double distance, const double detectorEPP,
     // Neutrons hit the detectors in a later frame.
     interruption_point();
     if (pulseInterval == EMPTY_DBL()) {
-          throw std::runtime_error(PropertyNames::PULSE_INTERVAL +
-                                   " not specified nor found in sample logs");
+      throw std::runtime_error(PropertyNames::PULSE_INTERVAL +
+                               " not specified nor found in sample logs");
     }
     ++delayFrameCount;
     timeOfFlight = delayFrameCount * pulseInterval - monitorEPP + detectorEPP;

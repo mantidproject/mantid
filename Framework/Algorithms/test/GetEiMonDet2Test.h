@@ -138,7 +138,6 @@ public:
     runPulseIntervalInputsTest(PulseIntervalInputs::AS_SAMLPE_LOG);
   }
 
-
   void testFailureOnAllDetectorsMasked() {
     const double realEi = EI;
     const auto peaks =
@@ -364,18 +363,14 @@ private:
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "0"))
   }
 
-  enum class PulseIntervalInputs {
-    AS_PROPERTY,
-    AS_SAMLPE_LOG,
-    NONE
-  };
+  enum class PulseIntervalInputs { AS_PROPERTY, AS_SAMLPE_LOG, NONE };
 
-  void runPulseIntervalInputsTest(const PulseIntervalInputs pulseIntervalInput) {
+  void
+  runPulseIntervalInputsTest(const PulseIntervalInputs pulseIntervalInput) {
     const double realEi = 1.18 * EI;
     const double pulseInterval = std::floor(time_of_flight(velocity(EI)) / 2);
     const double timeAtMonitor = 0.34 * pulseInterval;
-    auto peaks =
-        peakCentres(timeAtMonitor, realEi, pulseInterval);
+    auto peaks = peakCentres(timeAtMonitor, realEi, pulseInterval);
     std::vector<bool> successes(peaks.size(), true);
     auto eppTable = createEPPTable(peaks, successes);
     auto ws = createWorkspace();
@@ -386,8 +381,7 @@ private:
     algorithm.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT(algorithm.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        algorithm.setProperty("DetectorWorkspace", ws));
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws));
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("DetectorEPPTable", eppTable))
     TS_ASSERT_THROWS_NOTHING(
@@ -395,7 +389,8 @@ private:
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Detectors", "2"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Monitor", 1))
     if (pulseIntervalInput == PulseIntervalInputs::AS_PROPERTY) {
-      TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("PulseInterval", pulseInterval));
+      TS_ASSERT_THROWS_NOTHING(
+          algorithm.setProperty("PulseInterval", pulseInterval));
     }
     if (pulseIntervalInput == PulseIntervalInputs::NONE) {
       TS_ASSERT_THROWS(algorithm.execute(), std::runtime_error)
@@ -403,9 +398,9 @@ private:
     } else {
       TS_ASSERT_THROWS_NOTHING(algorithm.execute())
       TS_ASSERT(algorithm.isExecuted())
-      TS_ASSERT_DELTA(
-          static_cast<decltype(realEi)>(algorithm.getProperty("IncidentEnergy")),
-          realEi, 1e-6)
+      TS_ASSERT_DELTA(static_cast<decltype(realEi)>(
+                          algorithm.getProperty("IncidentEnergy")),
+                      realEi, 1e-6)
     }
   }
 };
