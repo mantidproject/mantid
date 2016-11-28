@@ -1,3 +1,4 @@
+#include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
@@ -6,7 +7,6 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
-#include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -19,11 +19,27 @@
 #include <QThread>
 #include <QTimer>
 
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
+
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+const std::string TomographyIfacePresenter::g_defOutPathLocal =
+#ifdef _WIN32
+    "D:/imat-data/";
+#else
+    "~/imat/";
+#endif
+
+const std::string TomographyIfacePresenter::g_defOutPathRemote =
+#ifdef _WIN32
+    "I:/imat/imat-data/";
+#else
+    "~/imat-data/";
+#endif
 
 TomographyIfacePresenter::TomographyIfacePresenter(ITomographyIfaceView *view)
     : m_view(view), m_model(new TomographyIfaceModel()), m_statusMutex(NULL),
@@ -134,7 +150,10 @@ void TomographyIfacePresenter::notify(
 }
 
 void TomographyIfacePresenter::processSystemSettingsUpdated() {
-  m_model->updateSystemSettings(m_view->systemSettings());
+  m_model->setSystemSettings(m_view->systemSettings());
+
+  // update the tool information with the new system settings
+  setupConfigDialogSettingsAndUpdateModel(m_configDialog.get());
 }
 
 void TomographyIfacePresenter::processSetupResourcesAndTools() {
@@ -177,43 +196,187 @@ void TomographyIfacePresenter::processSetupResourcesAndTools() {
 void TomographyIfacePresenter::processCompResourceChanged() {
   const std::string comp = m_view->currentComputeResource();
 
+  // TODOPRES find a better way to set up the run tool in model
   m_model->setupRunTool(comp);
 
-  if ("Local" == comp) {
+  if (isLocalResourceSelected()) {
     m_view->enableLoggedActions(true);
   } else {
     const bool status = !m_model->loggedIn().empty();
     m_view->enableLoggedActions(status);
   }
+
+  // this will udpate the tool after a resource change
+  setupConfigDialogSettingsAndUpdateModel(m_configDialog.get());
 }
 
+/** Called when the event ToolChanged fires. It gets the name for the current
+ * tabToolTip and first tries to create it (if valid tool name), and if that
+ * succeeds then updates the tool's settings to hold the current path and
+ * afterwards updates the model's information about the tool's current settings
+ */
 void TomographyIfacePresenter::processToolChanged() {
-  const std::string tool = m_view->currentReconTool();
+  const std::string toolName = m_view->currentReconTool();
 
   // disallow reconstruct on tools that don't run yet: Savu and CCPi
-  if (TomographyIfaceModel::g_CCPiTool == tool) {
+  if (TomographyIfaceModel::g_CCPiTool == toolName) {
     m_view->enableRunReconstruct(false);
     m_view->enableConfigTool(false);
-  } else if (TomographyIfaceModel::g_SavuTool == tool) {
+  } else if (TomographyIfaceModel::g_SavuTool == toolName) {
     // for now, show setup dialog, but cannot run
     m_view->enableRunReconstruct(false);
     m_view->enableConfigTool(true);
   } else {
     // No need to be logged in anymore when local is selected
-    const bool runningLocally = "Local" == m_view->currentComputeResource();
+    const bool runningLocally = isLocalResourceSelected();
     m_view->enableRunReconstruct(runningLocally ||
                                  !(m_model->loggedIn().empty()));
     m_view->enableConfigTool(true);
   }
 
-  m_model->usingTool(tool);
+  // return if empty string
+  if ("" == toolName) {
+    return;
+  }
+
+  createConfigDialogUsingToolName(toolName);
+  // this will set the default settings for the dialog
+  setupConfigDialogSettingsAndUpdateModel(m_configDialog.get());
+}
+
+void TomographyIfacePresenter::setupConfigDialogSettingsAndUpdateModel(
+    TomoToolConfigDialogBase *dialog) {
+
+  // this check prevents a crash on initialisation where Qt passes a tool name
+  // of "" and then we have a nullptr dialogue
+  if (dialog) {
+    setupConfigDialogSettings(*dialog);
+    updateModelAfterToolChanged(*dialog);
+  }
+}
+
+/** Uses the static method in TomoToolConfigDialogBase to create the proper tool
+ * from the provided name
+ * @param toolName The string holding the tool's name
+ */
+void TomographyIfacePresenter::createConfigDialogUsingToolName(
+    const std::string &toolName) {
+  // free the previous dialogue pointer if any
+  m_configDialog.reset();
+  m_configDialog = TomoToolConfigDialogBase::getToolDialogFor(toolName);
+}
+
+/** Depending on whether local or remote resource is selected, do setup
+* the tool's run path, the paths out, the reconstruction index and
+* the localOutNameAppendix
+*
+* @param dialog The dialog pointer that will be set up
+*/
+void TomographyIfacePresenter::setupConfigDialogSettings(
+    TomoToolConfigDialogBase &dialog) {
+
+  if (isLocalResourceSelected()) {
+    setupConfigDialogSettingsForLocal(dialog);
+  } else {
+    setupConfigDialogSettingsForRemote(dialog);
+  }
+}
+
+/** Configures the dialog settings for local reconstruction, this means settings
+ * the run command, the pathOut and the name of the output folder
+ *
+ * @param dialog The raw dialog pointer that will be configured.
+ */
+void TomographyIfacePresenter::setupConfigDialogSettingsForLocal(
+    TomoToolConfigDialogBase &dialog) {
+  const std::string run = m_model->getExeternalInterpreterPath() + " " +
+                          m_model->getCurrentLocalScriptsBasePath() +
+                          m_model->getTomoScriptLocationPath();
+
+  const TomoPathsConfig paths = m_view->currentPathsConfig();
+
+  const std::string pathOut = Poco::Path::expand(
+      g_defOutPathLocal + "/" + m_model->getCurrentExperimentReference());
+  static size_t reconIdx = 1;
+  const std::string localOutNameAppendix =
+      std::string("/processed/") + "reconstruction_" + std::to_string(reconIdx);
+
+  dialog.setupDialog(run, paths, pathOut, localOutNameAppendix);
+}
+
+/** Configures the dialog settings for remote reconstruction, this means
+ * settings
+ * the run command, the pathOut and the name of the output folder
+ *
+ * Currently it does NOT take into account the remote, this is
+ * something that might be needed in the future if more remote reconstruction
+ * locations are added, as currently the only one is SCARF
+ *
+ * @param dialog The raw dialog pointer that will be configured.
+ */
+void TomographyIfacePresenter::setupConfigDialogSettingsForRemote(
+    TomoToolConfigDialogBase &dialog) {
+  // set up all the information we need for the dialog
+  const std::string run = m_model->getCurrentRemoteScriptsBasePath() +
+                          m_model->getTomoScriptFolderPath() +
+                          m_model->getTomoScriptLocationPath();
+
+  const TomoPathsConfig paths = m_view->currentPathsConfig();
+  const std::string pathOut = Poco::Path::expand(
+      g_defOutPathLocal + "/" + m_model->getCurrentExperimentReference());
+  static size_t reconIdx = 1;
+  const std::string localOutNameAppendix =
+      std::string("/processed/") + "reconstruction_" + std::to_string(reconIdx);
+
+  dialog.setupDialog(run, paths, pathOut, localOutNameAppendix);
+}
+
+/** Updated  the model's information about the current tool
+ * The settings that are updated are:
+ *  - the current tool name
+ *  - the current tool method
+ *  - the current tool settings
+ *
+ * @param dialog The raw dialog pointer that will be configured.
+ */
+void TomographyIfacePresenter::updateModelAfterToolChanged(
+    const TomoToolConfigDialogBase &dialog) {
+
+  // if passed an empty string don't remove the name
+  updateModelCurrentToolName(dialog);
+  updateModelCurrentToolMethod(dialog);
+  updateModelCurrentToolSettings(dialog);
+}
+
+/** Sets the model's current tool name by getting the tool name from the
+* dialogue itself
+*/
+void TomographyIfacePresenter::updateModelCurrentToolName(
+    const TomoToolConfigDialogBase &dialog) {
+  m_model->usingTool(dialog.getSelectedToolName());
+}
+/** Sets the model's current tool method by coyping the
+* string over to the model, getting it from the dialogue itself
+*/
+void TomographyIfacePresenter::updateModelCurrentToolMethod(
+    const TomoToolConfigDialogBase &dialog) {
+  m_model->setCurrentToolMethod(dialog.getSelectedToolMethod());
+}
+
+/** Shares the pointer with the model's tool settings. We don't want a
+* unique_ptr, because the dialogs don't die after they are closed, they die if
+* the tool is changed or the whole interface is closed
+*/
+void TomographyIfacePresenter::updateModelCurrentToolSettings(
+    const TomoToolConfigDialogBase &dialog) {
+  m_model->setCurrentToolSettings(dialog.getSelectedToolSettings());
 }
 
 /**
  * Simply take the paths that the user has provided.
  */
 void TomographyIfacePresenter::processTomoPathsChanged() {
-  m_model->updateTomoPathsConfig(m_view->currentPathsConfig());
+  m_model->setTomoPathsConfig(m_view->currentPathsConfig());
 }
 
 /**
@@ -239,7 +402,7 @@ void TomographyIfacePresenter::processTomoPathsEditedByUser() {
     m_model->logMsg(msg);
   }
 
-  m_model->updateTomoPathsConfig(cfg);
+  m_model->setTomoPathsConfig(cfg);
   m_view->updatePathsConfig(cfg);
 }
 
@@ -292,7 +455,7 @@ void TomographyIfacePresenter::processLogin() {
 
   std::string compRes = m_view->currentComputeResource();
   // if local is selected, just take the first remote resource
-  if ("Local" == compRes) {
+  if (isLocalResourceSelected()) {
     compRes = "SCARF@STFC";
   }
   try {
@@ -349,7 +512,7 @@ void TomographyIfacePresenter::processLogout() {
   try {
     std::string compRes = m_view->currentComputeResource();
     // if local is selected, just take the first remote resource
-    if ("Local" == compRes) {
+    if (isLocalResourceSelected()) {
       compRes = "SCARF@STFC";
     }
     m_model->doLogout(compRes, m_view->getUsername());
@@ -362,19 +525,21 @@ void TomographyIfacePresenter::processLogout() {
 }
 
 void TomographyIfacePresenter::processSetupReconTool() {
-  if (TomographyIfaceModel::g_CCPiTool != m_view->currentReconTool()) {
-    m_view->showToolConfig(m_view->currentReconTool());
-    m_model->updateReconToolsSettings(m_view->reconToolsSettings());
+  const std::string &currentReconTool = m_view->currentReconTool();
 
-    // TODO: this would make sense if the reconstruct action/button
-    // was only enabled after setting up at least one tool
-    // m_view->enableToolsSetupsActions(true);
+  // this check prevents a crash on initialisation where Qt passes a tool name
+  // of "" and then we have a nullptr dialogue
+  auto dialog = m_configDialog.get();
+  if (dialog) {
+    if (TomographyIfaceModel::g_CCPiTool != currentReconTool) {
+      // give pointer to showToolConfig, so it can run the dialogue
+      m_view->showToolConfig(*dialog);
+      updateModelAfterToolChanged(*dialog);
+    }
   }
 }
 
 void TomographyIfacePresenter::processRunRecon() {
-  // m_model->checkDataPathsSet();
-  // TODO: validate data path with additional rules/constraints?
   TomoPathsConfig paths = m_view->currentPathsConfig();
   if (paths.pathSamples().empty()) {
     m_view->userWarning("Sample images path not set!",
@@ -385,38 +550,20 @@ void TomographyIfacePresenter::processRunRecon() {
   }
 
   // pre-/post processing steps and filters
-  m_model->updatePrePostProcSettings(m_view->prePostProcSettings());
+  m_model->setPrePostProcSettings(m_view->prePostProcSettings());
   // center of rotation and regions
-  m_model->updateImageStackPreParams(m_view->currentROIEtcParams());
-  m_model->updateTomopyMethod(m_view->tomopyMethod());
-  m_model->updateAstraMethod(m_view->astraMethod());
-  const std::string &resource = m_view->currentComputeResource();
-  if (m_model->localComputeResource() == resource) {
-    subprocessRunReconLocal();
-  } else {
-    subprocessRunReconRemote();
-  }
-
-  processRefreshJobs();
-}
-
-void TomographyIfacePresenter::subprocessRunReconRemote() {
-  if (m_model->loggedIn().empty()) {
-    m_view->updateJobsInfoDisplay(m_model->jobsStatus(),
-                                  m_model->jobsStatusLocal());
-    return;
-  }
+  m_model->setImageStackPreParams(m_view->currentROIEtcParams());
 
   try {
-
     m_model->doSubmitReconstructionJob(m_view->currentComputeResource());
   } catch (std::exception &e) {
     m_view->userWarning("Issue when trying to start a job", e.what());
   }
+  processRefreshJobs();
 }
 
-void TomographyIfacePresenter::subprocessRunReconLocal() {
-  m_model->doRunReconstructionJobLocal();
+bool TomographyIfacePresenter::isLocalResourceSelected() const {
+  return m_model->localComputeResource() == m_view->currentComputeResource();
 }
 
 void TomographyIfacePresenter::processRefreshJobs() {
@@ -428,8 +575,11 @@ void TomographyIfacePresenter::processRefreshJobs() {
     return;
   }
 
+  // TODOPRES is this necessary? if we're logged in, we will never refresh the
+  // jobs for 'Local', also will need to be removed if more remote resources are
+  // added
   std::string comp = m_view->currentComputeResource();
-  if ("Local" == comp) {
+  if (isLocalResourceSelected()) {
     comp = "SCARF@STFC";
   }
   m_model->doRefreshJobsInfo(comp);
@@ -448,7 +598,7 @@ void TomographyIfacePresenter::processCancelJobs() {
     return;
 
   const std::string &resource = m_view->currentComputeResource();
-  if (m_model->localComputeResource() != resource) {
+  if (!isLocalResourceSelected()) {
     m_model->doCancelJobs(resource, m_view->processingJobsIDs());
   }
 }
@@ -460,7 +610,10 @@ void TomographyIfacePresenter::processVisualizeJobs() {
 void TomographyIfacePresenter::doVisualize(
     const std::vector<std::string> &ids) {
   m_model->logMsg(" Visualizing results from job: " + ids.front());
-  // TODO: open dialog, send to Paraview, etc.
+  m_view->userWarning("Visualizing not implemented", "Visualizing of the data "
+                                                     "has not been implemented "
+                                                     "yet and is unsupported");
+  // TODOPRES: open dialog, send to Paraview, etc.
 }
 
 void TomographyIfacePresenter::processLogMsg() {
