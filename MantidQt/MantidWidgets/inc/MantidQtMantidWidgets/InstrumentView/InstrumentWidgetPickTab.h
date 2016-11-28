@@ -105,8 +105,8 @@ private slots:
   void removeCurve(const QString &);
   void singleComponentTouched(size_t pickID);
   void singleComponentPicked(size_t pickID);
-  void comparePeaks(const std::pair<Mantid::Geometry::IPeak *,
-                                    Mantid::Geometry::IPeak *> &peaks);
+  void comparePeaks(const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                                    std::vector<Mantid::Geometry::IPeak *>> &peaks);
   void updateSelectionInfoDisplay();
   void shapeCreated();
   void updatePlotMultipleDetectors();
@@ -185,8 +185,9 @@ public:
                           InstrumentActor *instrActor, QTextEdit *infoDisplay);
 public slots:
   void displayInfo(size_t pickID);
-  void displayComparePeaksInfo(
-      std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks);
+  void displayComparePeaksInfo(const std::pair<
+                               std::vector<Mantid::Geometry::IPeak *>,
+                               std::vector<Mantid::Geometry::IPeak *>>& peaks);
   void clear();
 
 private:
@@ -194,7 +195,7 @@ private:
   QString displayNonDetectorInfo(Mantid::Geometry::ComponentID compID);
   QString displayPeakInfo(Mantid::Geometry::IPeak *peak);
   QString displayPeakAngles(
-      std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks);
+      const std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &peaks);
   QString getParameterInfo(Mantid::Geometry::IComponent_const_sptr comp);
   QString getPeakOverlayInfo();
 

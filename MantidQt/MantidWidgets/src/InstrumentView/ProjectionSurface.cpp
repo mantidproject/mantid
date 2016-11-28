@@ -646,8 +646,8 @@ void ProjectionSurface::clearPeakOverlays() {
     m_peakShapesStyle = 0;
     emit peaksWorkspaceDeleted();
   }
-  m_selectedPeaks.first = nullptr;
-  m_selectedPeaks.second = nullptr;
+  m_selectedPeaks.first.clear();
+  m_selectedPeaks.second.clear();
   m_selectedMarkers.first = QPointF();
   m_selectedMarkers.second = QPointF();
 }
@@ -746,9 +746,9 @@ void ProjectionSurface::erasePeaks(const QRect &rect) {
     // clear selected peak markers
     for (auto marker : peakMarkers) {
       auto peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
-      if (m_selectedPeaks.first == peak || m_selectedPeaks.second == peak) {
-        m_selectedPeaks.first = nullptr;
-        m_selectedPeaks.second = nullptr;
+      if (m_selectedPeaks.first.front() == peak || m_selectedPeaks.second.front() == peak) {
+        m_selectedPeaks.first.clear();
+        m_selectedPeaks.second.clear();
         m_selectedMarkers.first = QPointF();
         m_selectedMarkers.second = QPointF();
       }
@@ -760,41 +760,47 @@ void ProjectionSurface::erasePeaks(const QRect &rect) {
 
 void ProjectionSurface::comparePeaks(const QRect &rect) {
   // Find the selected peak across all of the peak overlays.
-  // If more than one peak was found in the selection area just
-  // take the first peak.
-  PeakMarker2D *marker = nullptr;
-  Mantid::Geometry::IPeak *peak = nullptr;
   QPointF origin;
+  std::vector<Mantid::Geometry::IPeak*> peaks;
   for (auto *po : m_peakShapes) {
     po->selectIn(rect);
     const auto markers = po->getSelectedPeakMarkers();
-    if (markers.length() > 0) {
-      marker = markers.first();
-      origin = marker->origin();
-      peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
-      break;
+
+    // make the assumption that the first peak found in the recticule is the one
+    // we wanted.
+    if (markers.length() > 0 && origin.isNull()) {
+      origin = markers.first()->origin();
+    }
+
+    for (auto marker : markers) {
+      // only collect peaks in the same detector & with the same origin
+      if (marker->origin() == origin) {
+        auto peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
+        peaks.push_back(peak);
+      }
     }
   }
 
-  if (!m_selectedPeaks.first) {
+  if (m_selectedPeaks.first.empty()) {
     // No peaks have been selected yet
-    m_selectedPeaks.first = peak;
+    m_selectedPeaks.first = peaks;
     m_selectedMarkers.first = origin;
-  } else if (!m_selectedPeaks.second) {
+  } else if (m_selectedPeaks.second.empty()) {
     // Two peaks have now been selected
-    m_selectedPeaks.second = peak;
+    m_selectedPeaks.second = peaks;
     m_selectedMarkers.second = origin;
-  } else if (m_selectedPeaks.first && m_selectedPeaks.second) {
+  } else if (!m_selectedPeaks.first.empty()
+             && !m_selectedPeaks.second.empty()) {
     // Two peaks have already been selected. Clear the pair and store
     // the new peak as the first entry
-    m_selectedPeaks.first = peak;
+    m_selectedPeaks.first = peaks;
     m_selectedMarkers.first = origin;
-    m_selectedPeaks.second = nullptr;
+    m_selectedPeaks.second.clear();
     m_selectedMarkers.second = QPointF();
   }
 
   // Only emit the signal to update when we have two peaks
-  if (m_selectedPeaks.first && m_selectedPeaks.second) {
+  if (!m_selectedPeaks.first.empty() && !m_selectedPeaks.second.empty()) {
     emit comparePeaks(m_selectedPeaks);
   }
 }
