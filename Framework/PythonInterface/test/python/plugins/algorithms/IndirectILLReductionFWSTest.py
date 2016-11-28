@@ -42,6 +42,14 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
         self._check_workspace_group(mtd['red'], 2, 18, 3)
 
+        runs_log1 = mtd['red'].getItem(0).getRun().getLogData('ReducedRunsList').value
+
+        runs_log2 = mtd['red'].getItem(1).getRun().getLogData('ReducedRunsList').value
+
+        self.assertEquals(runs_log1,'170299,170301,170303',"Reduced runs list mismatch.")
+
+        self.assertEquals(runs_log2,'170300,170302,170304',"Reduced runs list mismatch.")
+
     def test_one_wing(self):
 
         args = {'Run': self._run_one_wing_mixed}
@@ -51,18 +59,6 @@ class IndirectILLReductionFWS(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionFWS not executed")
 
         self._check_workspace_group(mtd['red'], 3, 18, 2)
-
-    def test_interpolation(self):
-
-        args = {'Run': self._run_two_wing_mixed,
-                'BackgroundRun': '170300:170303',
-                'SortXAxis': True}
-
-        alg_test = run_algorithm('IndirectILLReductionFWS', **args)
-
-        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionFWS not executed")
-
-        self._check_workspace_group(mtd['red'], 2, 18, 3)
 
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
 

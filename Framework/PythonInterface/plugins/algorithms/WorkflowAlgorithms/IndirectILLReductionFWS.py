@@ -440,7 +440,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
             run_list = ''  # to set to sample logs
 
             for ws in ws_list:
-                run_list += ws.split('_')[0] + ','
+                run_list += ws.split('_')[2] + ','
 
             AddSampleLog(Workspace=wsname, LogName='ReducedRunsList', LogText=run_list.rstrip(','))
 
