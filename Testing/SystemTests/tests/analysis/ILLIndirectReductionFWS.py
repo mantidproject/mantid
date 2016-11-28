@@ -34,9 +34,11 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
 
         self.tolerance = 1e-6
 
-        IndirectILLReductionFWS(Run="165944:166042")
+        self.disableChecking = ['Instrument']
+
+        ifws = IndirectILLReductionFWS(Run="165944:165953", SortXAxis=True)
 
         self.tearDown()
 
     def validate(self):
-        return ['red','ILLIN16B_FWS.nxs']
+        return ['ifws','ILLIN16B_FWS.nxs']
