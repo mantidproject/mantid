@@ -17,7 +17,7 @@ using namespace MantidQt::MantidWidgets;
 */
 ReflSettingsTabPresenter::ReflSettingsTabPresenter(
     std::vector<IReflSettingsPresenter *> presenters)
-    :m_settingsPresenters(presenters) {}
+    : m_settingsPresenters(presenters) {}
 
 /** Destructor
 *

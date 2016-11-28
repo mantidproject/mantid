@@ -38,9 +38,7 @@ public:
   static ReflSettingsPresenterTest *createSuite() {
     return new ReflSettingsPresenterTest();
   }
-  static void destroySuite(ReflSettingsPresenterTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(ReflSettingsPresenterTest *suite) { delete suite; }
 
   ReflSettingsPresenterTest() { FrameworkManager::Instance(); }
 
