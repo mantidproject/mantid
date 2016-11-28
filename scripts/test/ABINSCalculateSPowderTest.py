@@ -2,7 +2,7 @@ import unittest
 from mantid.simpleapi import *
 from os import path
 import numpy as np
-from AbinsModules import AbinsConstants
+from AbinsModules import AbinsConstants, AbinsParameters
 
 try:
     import simplejson as json
@@ -49,6 +49,7 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
 
     def setUp(self):
         self.remove_hdf_files()
+        AbinsParameters.atoms_threads = 1
 
     def tearDown(self):
         self.remove_hdf_files()

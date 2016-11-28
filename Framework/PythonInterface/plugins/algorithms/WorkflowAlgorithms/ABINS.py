@@ -1,4 +1,4 @@
-import multiprocessing
+import pathos.multiprocessing as mp
 import numpy as np
 
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
@@ -600,6 +600,11 @@ class ABINS(PythonAlgorithm):
         optimal_size = AbinsParameters.optimal_size
         if not (isinstance(optimal_size, (int, long)) and optimal_size > 0):
             raise RuntimeError("Invalid value of optimal_size" + message_end)
+
+        # number of threads
+        atoms_threads = AbinsParameters.atoms_threads
+        if not (isinstance(atoms_threads, (int, long)) and 1 <= atoms_threads <= mp.cpu_count()):
+            raise RuntimeError("Invalid number of threads for parallelization over atoms " + message_end)
 
     def _validate_crystal_input_file(self, filename=None):
         """

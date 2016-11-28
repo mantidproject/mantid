@@ -47,6 +47,7 @@ class ABINSAdvancedParametersTest(unittest.TestCase):
         AbinsParameters.s_relative_threshold = 0.001
         AbinsParameters.s_absolute_threshold = 10e-8
         AbinsParameters.optimal_size = 5000000
+        AbinsParameters.atoms_threads = 1
 
     def tearDown(self):
         # remove all created files
@@ -254,6 +255,10 @@ class ABINSAdvancedParametersTest(unittest.TestCase):
 
         # optimal size must be of type int
         AbinsParameters.optimal_size = 50.0
+        self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+
+    def test_wrong_num_threads(self):
+        AbinsParameters.atoms_threads = -1
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
     def test_good_case(self):

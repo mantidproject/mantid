@@ -1,8 +1,6 @@
 import numpy as np
 from copy import copy
-
-from mantid.kernel import logger
-
+from pathos.multiprocessing import ProcessingPool
 from IOmodule import IOmodule
 from AbinsData import AbinsData
 from InstrumentProducer import InstrumentProducer
@@ -74,6 +72,12 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                                  AbinsConstants.quantum_order_three: self._calculate_order_three,
                                  AbinsConstants.quantum_order_four: self._calculate_order_four}
 
+        self._powder_atoms_data = None
+        self._a_traces = None
+        self._b_traces = None
+        self._atoms_data = None
+        self._fundamentals_freq = None
+
     def _calculate_s(self):
 
         # Powder case: calculate A and B tensors
@@ -142,43 +146,45 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
             raise ValueError("Input parameter 'powder_data' should be of type PowderData.")
 
         atom_items = {}
-        powder_atoms_data = powder_data.extract()
-        num_atoms = powder_atoms_data["a_tensors"].shape[0]
-        a_traces = np.trace(a=powder_atoms_data["a_tensors"], axis1=1, axis2=2)
-        b_traces = np.trace(a=powder_atoms_data["b_tensors"], axis1=2, axis2=3)
+        self._powder_atoms_data = powder_data.extract()
+        num_atoms = self._powder_atoms_data["a_tensors"].shape[0]
+        self._a_traces = np.trace(a=self._powder_atoms_data["a_tensors"], axis1=1, axis2=2)
+        self._b_traces =  np.trace(a=self._powder_atoms_data["b_tensors"], axis1=2, axis2=3)
         abins_data_extracted = self._abins_data.extract()
-        atom_data = abins_data_extracted["atoms_data"]
+        self._atoms_data = abins_data_extracted["atoms_data"]
         k_points_data = self._get_gamma_data(abins_data_extracted["k_points_data"])
-        fundamentals_freq = k_points_data["frequencies"][0][AbinsConstants.first_optical_phonon:]
+        self._fundamentals_freq = k_points_data["frequencies"][0][AbinsConstants.first_optical_phonon:]
 
-        # calculate s for each atom
+        atoms_items = dict()
+        atoms = range(num_atoms)
+
+        p_local = ProcessingPool(ncpus=AbinsParameters.atoms_threads)
+        result = p_local.map(self._calculate_s_powder_1d_one_atom, atoms)
+
         for atom in range(num_atoms):
 
-            s_frequencies, s = self._calculate_s_powder_1d_one_atom(atom=atom, powder_atoms_data=powder_atoms_data,
-                                                                    a_traces=a_traces, b_traces=b_traces,
-                                                                    fundamentals_freq=fundamentals_freq)
+            atoms_items["atom_%s" % atom] = {"frequencies": result[atom][0],
+                                             "s": result[atom][1],
+                                             "symbol": self._atoms_data[atom]["symbol"],
+                                             "sort": self._atoms_data[atom]["sort"]}
 
-            logger.notice("S for atom %s" % atom + " has been calculated.")
-
-            atom_items["atom_%s" % atom] = {"s": copy(s),
-                                            "frequencies": s_frequencies,
-                                            "symbol": atom_data[atom]["symbol"],
-                                            "sort": atom_data[atom]["sort"]}
+            self._report_progress(msg="S for atom %s" % atom + " has been calculated.")
 
         s_data = SData(temperature=self._temperature, sample_form=self._sample_form)
-        s_data.set(items=atom_items)
+        s_data.set(items=atoms_items)
 
         return s_data
 
-    def _calculate_s_powder_1d_one_atom(self, atom=None, powder_atoms_data=None, a_traces=None,
-                                        b_traces=None, fundamentals_freq=None):
+    def _report_progress(self, msg):
         """
+        @param msg:  message to print out
+        """
+        from mantid.kernel import logger
+        logger.notice(msg)
 
+    def _calculate_s_powder_1d_one_atom(self, atom=None):
+        """
         @param atom: number of atom
-        @param powder_atoms_data:  powder data
-        @param a_traces: a_traces for all atoms
-        @param b_traces: b_traces for all atoms
-        @param fundamentals_freq: fundamental frequencies
         @return: s, and corresponding frequencies for all quantum events taken into account
         """
         s = {}
@@ -187,16 +193,16 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         rebined_broad_freq = None
         rebined_broad_spectrum = None
 
-        local_freq = np.copy(fundamentals_freq)
-        local_coeff = np.arange(start=0.0, step=1.0, stop=fundamentals_freq.size, dtype=AbinsConstants.int_type)
+        local_freq = np.copy(self._fundamentals_freq)
+        local_coeff = np.arange(start=0.0, step=1.0, stop=self._fundamentals_freq.size, dtype=AbinsConstants.int_type)
         fund_coeff = np.copy(local_coeff)
 
         for order in range(AbinsConstants.fundamentals, self._quantum_order_num + AbinsConstants.s_last_index):
 
             # in case there is large number of transitions chop it into chunks and process chunk by chunk
-            if local_freq.size * fundamentals_freq.size > AbinsConstants.large_size:
+            if local_freq.size * self._fundamentals_freq.size > AbinsConstants.large_size:
 
-                fund_size = fundamentals_freq.size
+                fund_size = self._fundamentals_freq.size
                 l_size = local_freq.size
                 opt_size = float(AbinsParameters.optimal_size)
 
@@ -205,7 +211,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                 new_dim = int(chunk_num * chunk_size)
                 new_fundamentals = np.zeros(shape=new_dim, dtype=AbinsConstants.float_type)
                 new_fundamentals_coeff = np.zeros(shape=new_dim, dtype=AbinsConstants.int_type)
-                new_fundamentals[:fund_size] = fundamentals_freq
+                new_fundamentals[:fund_size] = self._fundamentals_freq
                 new_fundamentals_coeff[:fund_size] = fund_coeff
 
                 new_fundamentals = new_fundamentals.reshape(chunk_num, int(chunk_size))
@@ -244,10 +250,10 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                         part_value_dft = self._calculate_order[lg_order](q2=q2,
                                                                          frequencies=part_local_freq,
                                                                          indices=part_local_coeff,
-                                                                         a_tensor=powder_atoms_data["a_tensors"][atom],
-                                                                         a_trace=a_traces[atom],
-                                                                         b_tensor=powder_atoms_data["b_tensors"][atom],
-                                                                         b_trace=b_traces[atom])
+                                                                         a_tensor=self._powder_atoms_data["a_tensors"][atom],
+                                                                         a_trace=self._a_traces[atom],
+                                                                         b_tensor=self._powder_atoms_data["b_tensors"][atom],
+                                                                         b_trace=self._b_traces[atom])
 
                         part_value_dft, part_local_freq, part_local_coeff = \
                             self._calculate_s_over_threshold(s=part_value_dft,
@@ -273,7 +279,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
 
                 local_freq, local_coeff = self.construct_freq_combinations(previous_array=local_freq,
                                                                            previous_coefficients=local_coeff,
-                                                                           fundamentals_array=fundamentals_freq,
+                                                                           fundamentals_array=self._fundamentals_freq,
                                                                            fundamentals_coefficients=fund_coeff,
                                                                            quantum_order=order)
 
@@ -282,10 +288,10 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                 value_dft = self._calculate_order[order](q2=q2,
                                                          frequencies=local_freq,
                                                          indices=local_coeff,
-                                                         a_tensor=powder_atoms_data["a_tensors"][atom],
-                                                         a_trace=a_traces[atom],
-                                                         b_tensor=powder_atoms_data["b_tensors"][atom],
-                                                         b_trace=b_traces[atom])
+                                                         a_tensor=self._powder_atoms_data["a_tensors"][atom],
+                                                         a_trace=self._a_traces[atom],
+                                                         b_tensor=self._powder_atoms_data["b_tensors"][atom],
+                                                         b_trace=self._b_traces[atom])
 
                 value_dft, local_freq, local_coeff = self._calculate_s_over_threshold(s=value_dft,
                                                                                       freq=local_freq,
@@ -473,9 +479,11 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
             raise ValueError("User requested a larger number of quantum events to be included in the simulation "
                              "then in the previous calculations. S cannot be loaded from the hdf file.")
         if self._quantum_order_num < data["attributes"]["order_of_quantum_events"]:
-            logger.notice("User requested a smaller number of quantum events than in the previous calculations. "
-                          "S Data from hdf file which corresponds only to requested quantum order events will be "
-                          "loaded.")
+
+            self._report_progress("""
+                         User requested a smaller number of quantum events than in the previous calculations.
+                         S Data from hdf file which corresponds only to requested quantum order events will be
+                         loaded.""")
 
             temp_data = {}
 
