@@ -241,7 +241,7 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
 
             self._reduce_multiple_runs(self._calibration_files, self._CALIBRATION)
 
-            if self._back_option == 'Sum':
+            if self._calib_option == 'Sum':
                 self._integrate(self._CALIBRATION)
             else:
                 self._interpolate(self._CALIBRATION)
