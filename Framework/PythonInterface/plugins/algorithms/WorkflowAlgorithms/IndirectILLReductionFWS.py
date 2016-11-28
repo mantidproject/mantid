@@ -320,10 +320,13 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
         @param label  :: calibration or background
         '''
 
-        for ws in mtd[self._red_ws+'_'+label]:
-            range = ws.readX(0)[-1] - ws.readX(0)[0]
-            Integration(InputWorkspace=ws, OutputWorkspace=ws)
-            Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=1./range)
+        for energy in self._all_runs[self._SAMPLE]:
+            if energy in self._all_runs[label]:
+                ws = self._red_ws + '_' + label + '_' + str(energy)
+                x_range = mtd[ws].readX(0)[-1] - mtd[ws].readX(0)[0]
+                if mtd[ws].blocksize() > 1:
+                    Integration(InputWorkspace=ws, OutputWorkspace=ws)
+                    Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=1./x_range)
 
     def _interpolate(self, label):
         '''

@@ -21,6 +21,9 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
         config['default.instrument'] = 'IN16B'
         config.appendDataSearchSubDir('ILL/IN16B/')
 
+        self.params = {'Tolerance':1e-6,
+                       'CheckInstrument':False}
+
     def tearDown(self):
         config['default.facility'] = self.facility
         config['default.instrument'] = self.instrument
@@ -35,13 +38,28 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
 
     def runTest(self):
 
-        self.tolerance = 1e-6
+        self._run_ifws()
 
-        self.disableChecking = ['Instrument']
+        self._run_efws()
 
+        self._run_sum_interpolate()
+
+        self.tearDown()
+
+    def _run_ifws(self):
         # test EFWS+IFWS mixed
         IndirectILLReductionFWS(Run="165944:165953", SortXAxis=True, OutputWorkspace="ifws")
 
+        LoadNexusProcessed(Filename="ILLIN16B_FWS.nxs",OutputWorkspace="ref")
+
+        result = CompareWorkspaces(Workspace1='ifws',Workspace2='ref',**self.params)
+
+        if result[0]:
+            self.assertTrue(result[0])
+        else:
+            self.assertTrue(result[0],"Mismatch in IFWS: " + result[1].row(0)['Message'])
+
+    def _run_efws(self):
         # test EFWS with sum/interpolate options with background and calibration
         IndirectILLReductionFWS(Run="143720:143728:2",
                                 BackgroundRun="143721,143723,143725",
@@ -51,8 +69,35 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
                                 SortXAxis=True,
                                 OutputWorkspace="efws")
 
-        self.tearDown()
+        LoadNexusProcessed(Filename="ILLIN16B_EFWS.nxs",OutputWorkspace="ref")
 
-    def validate(self):
-        return [['ifws','ILLIN16B_FWS.nxs'],
-                ['efws','ILLIN16B_EFWS.nxs']]
+        result = CompareWorkspaces(Workspace1='efws_0.0',Workspace2='ref',**self.params)
+
+        if result[0]:
+            self.assertTrue(result[0])
+        else:
+            self.assertTrue(result[0], "Mismatch in EFWS: " + result[1].row(0)['Message'])
+
+    def _run_sum_interpolate(self):
+
+        # this cross-tests if only one background point is given,
+        # sum and interpolate options should give the same output
+        IndirectILLReductionFWS(Run="143720:143728:2",
+                                BackgroundRun="143721",
+                                BackgroundOption="Interpolate",
+                                SortXAxis=True,
+                                OutputWorkspace="efws_int")
+
+        IndirectILLReductionFWS(Run="143720:143728:2",
+                                BackgroundRun="143721",
+                                BackgroundOption="Sum",
+                                SortXAxis=True,
+                                OutputWorkspace="efws_sum")
+
+        result = CompareWorkspaces(Workspace1='efws_int', Workspace2='efws_sum', Tolerance=1e-9)
+
+        if result[0]:
+            self.assertTrue(result[0])
+        else:
+            self.assertTrue(result[0], "Sum/interpolate should be the same for one point: "
+                            + result[1].row(0)['Message'])
