@@ -3,11 +3,10 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-
-using namespace Mantid::API;
 
 // Forward decs
 class IReflMainWindowPresenter;

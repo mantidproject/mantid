@@ -8,12 +8,9 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets;
-
 /** Constructor
 *
-* @param view :: The view we are handling
+* @param presenters :: The presenters of each group as a vector
 */
 ReflSettingsTabPresenter::ReflSettingsTabPresenter(
     std::vector<IReflSettingsPresenter *> presenters)
