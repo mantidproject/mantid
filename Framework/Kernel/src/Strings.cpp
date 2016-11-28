@@ -294,7 +294,7 @@ std::string getLine(std::istream &fh) {
  *  @param Line :: string read
  */
 void getLine(std::istream &fh, std::string &Line) {
-  if (std::getline(fh, Line, '\n')) {
+  if (std::getline(fh, Line)) {
     // remove trailing comments
     auto pos = Line.find_first_of("#!");
     if (pos != std::string::npos)
