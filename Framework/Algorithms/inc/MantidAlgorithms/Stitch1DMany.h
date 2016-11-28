@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_STITCH1DMANY_H_
 #define MANTID_ALGORITHMS_STITCH1DMANY_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::API;
 
@@ -49,12 +49,19 @@ public:
   std::map<std::string, std::string> validateInputs() override;
   /// Validates algorithm inputs for group workspaces
   void validateGroupWorkspacesInputs();
-  /// Performs the Stitch1D algorithm at a workspace index
+
+  /// Performs the Stitch1D algorithm at a specific workspace index
   void doStitch1D(MatrixWorkspace_sptr lhsWS, MatrixWorkspace_sptr rhsWS,
-      size_t wsIndex, std::vector<double> startOverlaps,
-      std::vector<double> endOverlaps, std::vector<double> params,
-      bool scaleRhsWS, bool useManualScaleFactor, double manualScaleFactor,
-      MatrixWorkspace_sptr &outWS, double &outScaleFactor);
+                  size_t wsIndex, std::vector<double> startOverlaps,
+                  std::vector<double> endOverlaps, std::vector<double> params,
+                  bool scaleRhsWS, bool useManualScaleFactor,
+                  double manualScaleFactor, MatrixWorkspace_sptr &outWS,
+                  double &outScaleFactor);
+  /// Performs the Stitch1DMany algorithm at a specific period
+  void doStitch1DMany(std::vector<WorkspaceGroup_sptr> inputWSGroups,
+                      int period, bool storeInADS,
+                      std::string &outWSName, 
+                      std::vector<double> &outScaleFactors);
 
   /// For (multiperiod) workspace groups
   bool checkGroups() override;
@@ -79,7 +86,7 @@ private:
   double m_manualScaleFactor = 1.0;
   bool m_scaleRHSWorkspace = true;
   bool m_useManualScaleFactor = false;
-  size_t m_scaleFactorFromPeriod = 0;
+  int m_scaleFactorFromPeriod = 0;
 };
 
 } // namespace Algorithms

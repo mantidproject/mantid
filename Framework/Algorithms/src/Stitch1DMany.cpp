@@ -62,9 +62,9 @@ void Stitch1DMany::init() {
       "The actual used values for the scaling factors at each stitch step.");
 
   auto scaleFactorFromPeriodValidator =
-      boost::make_shared<BoundedValidator<size_t>>();
+      boost::make_shared<BoundedValidator<int>>();
   scaleFactorFromPeriodValidator->setLower(0);
-  declareProperty(make_unique<PropertyWithValue<size_t>>(
+  declareProperty(make_unique<PropertyWithValue<int>>(
                       "ScaleFactorFromPeriod", 0,
                       scaleFactorFromPeriodValidator, Direction::Input),
                   "Provided index of period to obtain scale factor from.");
@@ -161,6 +161,8 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
       throw std::runtime_error("All workspace groups must be the same size.");
     }
   }
+
+  m_numWorkspaces = m_inputWorkspaceGroups.size();
 }
 
 /** Execute the algorithm.
@@ -181,16 +183,6 @@ void Stitch1DMany::exec() {
     m_scaleFactors.push_back(outScaleFactor);
   }
 
-  if (!isChild()) {
-    // Copy each input workspace's history into our output workspace's history
-    for (auto &inputWorkspace : m_inputWorkspaces)
-      lhsWS->history().addHistory(inputWorkspace->getHistory());
-  }
-  // We're a child algorithm, but we're recording history anyway
-  else if (isRecordingHistoryForChild() && m_parentHistory) {
-    m_parentHistory->addChildHistory(m_history);
-  }
-
   m_outputWorkspace = lhsWS;
 
   // Save output
@@ -198,8 +190,18 @@ void Stitch1DMany::exec() {
   this->setProperty("OutScaleFactors", m_scaleFactors);
 }
 
-/** Performs the Stitch1D algorithm at a specific workspace index
-*/
+/** Performs the Stitch1D algorithm at a specific workspace index.
+ * @param lhsWS :: The left-hand workspace to be stitched
+ * @param rhsWS :: The right-hand workspace to be stitched
+ * @param wsIndex :: The index of the rhs workspace being stitched
+ * @param startOverlaps :: Start overlaps for stitched workspaces
+ * @param endOverlaps :: End overlaps for stitched workspaces
+ * @param scaleRhsWS :: Scaling either with respect to left or right workspaces
+ * @param useManualScaleFactor :: True to use a provided value for scale factor
+ * @param manualScaleFactor :: Provided value for scaling factor
+ * @param outWS :: Output stitched workspace
+ * @param outScaleFactor :: Actual value used for scale factor
+ */
 void Stitch1DMany::doStitch1D(MatrixWorkspace_sptr lhsWS,
     MatrixWorkspace_sptr rhsWS, size_t wsIndex,
     std::vector<double> startOverlaps, std::vector<double> endOverlaps,
@@ -222,8 +224,52 @@ void Stitch1DMany::doStitch1D(MatrixWorkspace_sptr lhsWS,
     alg->setProperty("ManualScaleFactor", manualScaleFactor);
   alg->execute();
 
+  if (!isChild()) {
+    // Copy each input workspace's history into our output workspace's history
+    for (auto &inputWorkspace : m_inputWorkspaces)
+      lhsWS->history().addHistory(inputWorkspace->getHistory());
+  }
+  // We're a child algorithm, but we're recording history anyway
+  else if (isRecordingHistoryForChild() && m_parentHistory) {
+    m_parentHistory->addChildHistory(m_history);
+  }
+
   outWS = alg->getProperty("OutputWorkspace");
   outScaleFactor = alg->getProperty("OutScaleFactor");
+}
+
+/** Performs the Stitch1DMany algorithm at a specific period
+ * @param inputWSGroups :: The set of workspace groups to be stitched
+ * @param period :: The period index we are stitching at
+ * @param storeInADS :: True to store in the AnalysisDataService
+ * @param outWSName :: Output stitched workspace name
+ * @param outScaleFactors :: Actual values used for scale factors
+ */
+void Stitch1DMany::doStitch1DMany(
+    std::vector<WorkspaceGroup_sptr> inputWSGroups, int period, bool storeInADS,
+    std::string &outWSName, std::vector<double> &outScaleFactors) {
+
+  // List of workspaces to stitch
+  std::vector<std::string> toProcess;
+
+  for (auto &groupWs : m_inputWorkspaceGroups) {
+    const std::string wsName = groupWs->getItem(period)->name();
+    toProcess.push_back(wsName);
+    outWSName += "_" + wsName;
+  }
+
+  IAlgorithm_sptr alg = createChildAlgorithm("Stitch1DMany");
+  alg->initialize();
+  alg->setAlwaysStoreInADS(storeInADS);
+  for (auto &prop : this->getProperties()) {
+    alg->setProperty(prop->name(), prop->value());
+  }
+  alg->setProperty("InputWorkspaces", toProcess);
+  alg->setProperty("OutputWorkspace", outWSName);
+  alg ->execute();
+
+  outWSName = alg->getProperty("OutputWorkspace");
+  outScaleFactors = alg->getProperty("OutScaleFactors");
 }
 
 bool Stitch1DMany::checkGroups() {
@@ -240,43 +286,59 @@ bool Stitch1DMany::checkGroups() {
 bool Stitch1DMany::processGroups() {
   validateGroupWorkspacesInputs();
 
-  // List of workspaces to be grouped
-  std::vector<std::string> toGroup;
-
-  const std::string groupName = this->getProperty("OutputWorkspace");
-
+  std::vector<std::string> toGroup; // List of workspaces to be grouped
+  std::string groupName = this->getProperty("OutputWorkspace");
   size_t numWSPerGroup = m_inputWorkspaceGroups[0]->size();
 
-  for (size_t i = 0; i < numWSPerGroup; ++i) {
-    // List of workspaces to stitch
-    std::vector<std::string> toProcess;
-    // The name of the resulting workspace
+  // Determine whether or not we are using a global scale factor
+  Property *manualSF = this->getProperty("ManualScaleFactor");
+  bool usingGlobalSF = m_useManualScaleFactor && manualSF->isDefault() == false;
+
+  if (usingGlobalSF) {
+    for (int i = 0; i < numWSPerGroup; ++i) {
+      std::string outName = groupName;
+      std::vector<double> scaleFactors;
+      doStitch1DMany(m_inputWorkspaceGroups, i, true, outName, scaleFactors);
+
+      // Add the resulting workspace to the list to be grouped together
+      toGroup.push_back(outName);
+
+      // Add the scalefactors to the list so far
+      m_scaleFactors.insert(m_scaleFactors.end(), scaleFactors.begin(),
+        scaleFactors.end());
+    }
+  }
+  else {
+    // Obtain scale factors for the specified period
     std::string outName = groupName;
+    std::vector<double> scaleFactors;
+    doStitch1DMany(m_inputWorkspaceGroups, m_scaleFactorFromPeriod, false, outName, scaleFactors);
 
-    for (auto &groupWs : m_inputWorkspaceGroups) {
-      const std::string wsName = groupWs->getItem(i)->name();
-      toProcess.push_back(wsName);
-      outName += "_" + wsName;
+    for (int i = 0; i < numWSPerGroup; i++) {
+      auto lhsWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          m_inputWorkspaceGroups[0]);
+      outName = groupName;
+
+      for (int j = 1; j < m_numWorkspaces; j++) {
+        auto rhsWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+            m_inputWorkspaceGroups[j]);
+        double outScaleFactor;
+
+        doStitch1D(lhsWS, rhsWS, j, m_startOverlaps, m_endOverlaps, m_params,
+            m_scaleRHSWorkspace, m_useManualScaleFactor, scaleFactors[j], lhsWS,
+          outScaleFactor);
+
+        m_scaleFactors.push_back(outScaleFactor);
+      }
+
+      // Add group names
+      std::string outWSName;
+      for (auto &groupWS : m_inputWorkspaceGroups) {
+        const std::string wsName = groupWS->getItem(i)->name();
+        outWSName += "_" + wsName;
+      }
+      toGroup.push_back(outWSName);
     }
-
-    IAlgorithm_sptr stitchAlg = createChildAlgorithm("Stitch1DMany");
-    stitchAlg->initialize();
-    stitchAlg->setAlwaysStoreInADS(true);
-    for (auto &prop : this->getProperties()) {
-      stitchAlg->setProperty(prop->name(), prop->value());
-    }
-    stitchAlg->setProperty("InputWorkspaces", toProcess);
-    stitchAlg->setProperty("OutputWorkspace", outName);
-    stitchAlg->execute();
-
-    // Add the resulting workspace to the list to be grouped together
-    toGroup.push_back(outName);
-
-    // Add the scalefactors to the list so far
-    const std::vector<double> scaleFactors =
-      stitchAlg->getProperty("OutScaleFactors");
-    m_scaleFactors.insert(m_scaleFactors.end(), scaleFactors.begin(),
-      scaleFactors.end());
   }
 
   IAlgorithm_sptr groupAlg = createChildAlgorithm("GroupWorkspaces");
