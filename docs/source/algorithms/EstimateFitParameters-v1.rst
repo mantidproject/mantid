@@ -78,7 +78,7 @@ Usage
 
     # Set up the algorithm.
     from mantid.api import AlgorithmManager
-    alg = AlgorithmManager.createUnmanaged('MonteCarloParameters')
+    alg = AlgorithmManager.createUnmanaged('EstimateFitParameters')
     alg.initialize()
     alg.setProperty('Function', fun)
     alg.setProperty('InputWorkspace', ws)
@@ -98,8 +98,8 @@ Usage
     # Run Fit starting with the new parameters.
     Fit(str(function),ws,Output='fit')
     
-.. figure:: /images/MonteCarloParameters_mcest.png
-.. figure:: /images/MonteCarloParameters_mcfit.png
+.. figure:: /images/EstimateFitParameters_mcest.png
+.. figure:: /images/EstimateFitParameters_mcfit.png
     
 Output:
 
@@ -126,7 +126,7 @@ Output:
 
     # Set up the algorithm.
     from mantid.api import AlgorithmManager
-    alg = AlgorithmManager.createUnmanaged('MonteCarloParameters')
+    alg = AlgorithmManager.createUnmanaged('EstimateFitParameters')
     alg.initialize()
     alg.setProperty('Function', fun)
     alg.setProperty('InputWorkspace', ws)
@@ -152,8 +152,8 @@ Output:
     # Run Fit starting with the new parameters.
     Fit(str(function),ws,Output='fit')
     
-.. figure:: /images/MonteCarloParameters_ceest.png
-.. figure:: /images/MonteCarloParameters_cefit.png
+.. figure:: /images/EstimateFitParameters_ceest.png
+.. figure:: /images/EstimateFitParameters_cefit.png
 
 Output:
 

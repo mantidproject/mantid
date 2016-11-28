@@ -1,4 +1,4 @@
-#include "MantidCurveFitting/Algorithms/MonteCarloParameters.h"
+#include "MantidCurveFitting/Algorithms/EstimateFitParameters.h"
 
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/CostFunctionFactory.h"
@@ -20,7 +20,7 @@ using namespace Kernel;
 using namespace API;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(MonteCarloParameters)
+DECLARE_ALGORITHM(EstimateFitParameters)
 
 namespace {
 
@@ -261,22 +261,22 @@ void runCrossEntropy(
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string MonteCarloParameters::name() const {
-  return "MonteCarloParameters";
+const std::string EstimateFitParameters::name() const {
+  return "EstimateFitParameters";
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int MonteCarloParameters::version() const { return 1; }
+int EstimateFitParameters::version() const { return 1; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string MonteCarloParameters::summary() const {
+const std::string EstimateFitParameters::summary() const {
   return "Estimate parameters of a fitting function using a Monte Carlo "
          "algorithm.";
 }
 
 //----------------------------------------------------------------------------------------------
 /// Initialize the algorithm's properties.
-void MonteCarloParameters::initConcrete() {
+void EstimateFitParameters::initConcrete() {
   std::vector<std::string> types{"Monte Carlo", "Cross Entropy"};
   Kernel::StringListValidator TypesValidator(types);
 
@@ -303,7 +303,7 @@ void MonteCarloParameters::initConcrete() {
 
 //----------------------------------------------------------------------------------------------
 /// Execute the algorithm.
-void MonteCarloParameters::execConcrete() {
+void EstimateFitParameters::execConcrete() {
   auto costFunction = getCostFunctionProperty();
   auto func = costFunction->getFittingFunction();
 

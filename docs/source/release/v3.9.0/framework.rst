@@ -37,7 +37,7 @@ New
 ###
 
 - Algorithm :ref:`CalculateCostFunction <algm-CalculateCostFunction>` calculates a value of any available cost function.
-- Algorithm :ref:`MonteCarloParameters <algm-MonteCarloParameters>` estimates initial values of a fiting function in given intervals.
+- Algorithm :ref:`EstimateFitParameters <algm-EstimateFitParameters>` estimates initial values of a fiting function in given intervals.
 
 Improved
 ########

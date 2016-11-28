@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_MONTECARLOPARAMETERS_H_
-#define MANTID_CURVEFITTING_MONTECARLOPARAMETERS_H_
+#ifndef MANTID_CURVEFITTING_ESTIMATEFITPARAMETERS_H_
+#define MANTID_CURVEFITTING_ESTIMATEFITPARAMETERS_H_
 
 #include "MantidKernel/System.h"
 #include "MantidCurveFitting/IFittingAlgorithm.h"
@@ -33,7 +33,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MonteCarloParameters : public IFittingAlgorithm {
+class DLLExport EstimateFitParameters : public IFittingAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -48,4 +48,4 @@ private:
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /* MANTID_CURVEFITTING_MONTECARLOPARAMETERS_H_ */
+#endif /* MANTID_CURVEFITTING_ESTIMATEFITPARAMETERS_H_ */

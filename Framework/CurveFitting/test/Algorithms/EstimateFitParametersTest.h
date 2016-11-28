@@ -1,33 +1,33 @@
-#ifndef MANTID_CURVEFITTING_MONTECARLOPARAMETERSTEST_H_
-#define MANTID_CURVEFITTING_MONTECARLOPARAMETERSTEST_H_
+#ifndef MANTID_CURVEFITTING_ESTIMATEFITPARAMETERSTEST_H_
+#define MANTID_CURVEFITTING_ESTIMATEFITPARAMETERSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Algorithms/MonteCarloParameters.h"
+#include "MantidCurveFitting/Algorithms/EstimateFitParameters.h"
 #include "MantidCurveFitting/Algorithms/CalculateCostFunction.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::CurveFitting::Algorithms::CalculateCostFunction;
-using Mantid::CurveFitting::Algorithms::MonteCarloParameters;
+using Mantid::CurveFitting::Algorithms::EstimateFitParameters;
 using namespace Mantid;
 using namespace Mantid::API;
 
-class MonteCarloParametersTest : public CxxTest::TestSuite {
+class EstimateFitParametersTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MonteCarloParametersTest *createSuite() {
-    return new MonteCarloParametersTest();
+  static EstimateFitParametersTest *createSuite() {
+    return new EstimateFitParametersTest();
   }
-  static void destroySuite(MonteCarloParametersTest *suite) {
+  static void destroySuite(EstimateFitParametersTest *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;
   }
 
   void test_init() {
-    MonteCarloParameters alg;
+    EstimateFitParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
@@ -36,7 +36,7 @@ public:
     auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
         [](double, int) { return 0.0; }, 1, 0, 1, 0.1);
 
-    MonteCarloParameters alg;
+    EstimateFitParameters alg;
     alg.initialize();
     alg.setRethrows(true);
     alg.setPropertyValue("Function",
@@ -49,7 +49,7 @@ public:
     auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
         [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
 
-    MonteCarloParameters alg;
+    EstimateFitParameters alg;
     alg.initialize();
     alg.setRethrows(true);
     alg.setPropertyValue(
@@ -62,7 +62,7 @@ public:
     auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
         [](double x, int) { return 2.0 + 3.0 * x; }, 1, 0, 1, 0.1);
 
-    MonteCarloParameters alg;
+    EstimateFitParameters alg;
     alg.initialize();
     alg.setRethrows(true);
     alg.setPropertyValue(
@@ -84,7 +84,7 @@ public:
     calc.execute();
     double value = calc.getProperty("Value");
 
-    MonteCarloParameters alg;
+    EstimateFitParameters alg;
     alg.initialize();
     alg.setRethrows(true);
     alg.setPropertyValue("Function", funStr);
@@ -115,7 +115,7 @@ public:
     calc.execute();
     double value = calc.getProperty("Value");
 
-    MonteCarloParameters alg;
+    EstimateFitParameters alg;
     alg.initialize();
     alg.setRethrows(true);
     alg.setPropertyValue("Function", funStr);
@@ -145,7 +145,7 @@ public:
     calc.execute();
     double value = calc.getProperty("Value");
 
-    MonteCarloParameters alg;
+    EstimateFitParameters alg;
     alg.initialize();
     alg.setRethrows(true);
     alg.setPropertyValue("Function", funStr);
@@ -173,7 +173,7 @@ public:
     std::string funStr("name=BackToBackExponential,S=1.1,constraints=(0.01<I<"
                        "200,0.001<A<300,0.001<B<300,-5<X0<5,0.001<S<4)");
 
-    MonteCarloParameters alg;
+    EstimateFitParameters alg;
     alg.initialize();
     alg.setRethrows(true);
     alg.setPropertyValue("Function", funStr);
@@ -209,7 +209,7 @@ public:
     std::string funStr("name=BackToBackExponential,S=1.1,constraints=(0.01<I<"
                        "200,0.001<A<300,0.001<B<300,-5<X0<5,0.001<S<4)");
 
-    MonteCarloParameters alg;
+    EstimateFitParameters alg;
     alg.initialize();
     alg.setRethrows(true);
     alg.setPropertyValue("Function", funStr);
@@ -239,4 +239,4 @@ public:
   }
 };
 
-#endif /* MANTID_CURVEFITTING_MONTECARLOPARAMETERSTEST_H_ */
+#endif /* MANTID_CURVEFITTING_ESTIMATEFITPARAMETERSTEST_H_ */

@@ -880,7 +880,7 @@ class CrystalFieldFit(object):
     def _monte_carlo_single(self, **kwargs):
         from mantid.api import AlgorithmManager
         fun = self.model.makeSpectrumFunction()
-        alg = AlgorithmManager.createUnmanaged('MonteCarloParameters')
+        alg = AlgorithmManager.createUnmanaged('EstimateFitParameters')
         alg.initialize()
         alg.setProperty('Function', fun)
         alg.setProperty('InputWorkspace', self._input_workspace)
@@ -894,7 +894,7 @@ class CrystalFieldFit(object):
     def _monte_carlo_multi(self, **kwargs):
         from mantid.api import AlgorithmManager
         fun = self.model.makeMultiSpectrumFunction()
-        alg = AlgorithmManager.createUnmanaged('MonteCarloParameters')
+        alg = AlgorithmManager.createUnmanaged('EstimateFitParameters')
         alg.initialize()
         alg.setProperty('Function', fun)
         alg.setProperty('InputWorkspace', self._input_workspace[0])
