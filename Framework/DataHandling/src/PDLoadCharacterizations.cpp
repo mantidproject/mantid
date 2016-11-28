@@ -59,8 +59,7 @@ extra_columns(const std::vector<std::string> &filenames) {
     throw Exception::FileError("Unable to open file", filenames[F_INDEX_V1]);
   }
 
-  std::string line;
-  for (Strings::getLine(file, line); !file.eof();
+  for (std::string line = Strings::getLine(file, line); !file.eof();
        Strings::getLine(file, line)) {
     boost::smatch result;
     // all instances of table headers
@@ -269,8 +268,7 @@ void PDLoadCharacterizations::readFocusInfo(std::ifstream &file) {
   std::vector<double> polar;
 
   // parse the file
-  std::string line;
-  for (Strings::getLine(file, line); !file.eof();
+  for (std::string line = Strings::getLine(file); !file.eof();
        Strings::getLine(file, line)) {
     line = Strings::strip(line);
     // skip empty lines and "comments"
@@ -320,8 +318,7 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
     return;
 
   // parse the file
-  std::string line;
-  for (Strings::getLine(file, line); !file.eof();
+  for (std::string line = Strings::getLine(file); !file.eof();
        Strings::getLine(file, line)) {
     line = Strings::strip(line);
     // skip empty lines and "comments"
@@ -540,8 +537,7 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename,
   }
 
   // parse the file
-  std::string line;
-  for (Strings::getLine(file, line); !file.eof();
+  for (std::string line = Strings::getLine(file); !file.eof();
        Strings::getLine(file, line)) {
     line = Strings::strip(line);
     // skip empty lines and "comments"
