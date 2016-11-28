@@ -188,11 +188,11 @@ Reduction Type
 ~~~~~~~~~~~~~~
 
 There are two reduction types of IN16B data: Quasi-Elastic Neutron Scattering (QENS) or Fixed Window Scans (FWS),
-which can be either Elastic (EFWS) or Inelastic (IFWS).
+and the latter can be either Elastic (EFWS) or Inelastic (IFWS).
 If one or another reduction type is checked, the corresponding algorithm will be invoked
 (see :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` and :ref:`IndirectILLReductionFWS <algm-IndirectILLReductionFWS>`).
 There are several properties in common between the two, and several others that are specific to one or the other.
-The latter will show up or disappear corresponding to the choice of the reduction type.
+The specific ones will show up or disappear corresponding to the choice of the reduction type.
 
 Common Options
 ~~~~~~~~~~~~~~
@@ -241,19 +241,22 @@ Unmirror Options
   See :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` for full details.
   Unmirror option 5 and 7 require vanadium alignment run.
 
-Mask Bins
-  If checked, this will mask out all the bins in the tails of the spectra, that overflew the x-axis as a result of the circular shift in unmirroring step.
 
 FWS-only Options
 ~~~~~~~~~~~~~~~~
 
 Observable
   This is the scanning ovservable, that will become the x-axis of the final result.
-  It can be any sample parameter defined in Sample Logs.
+  It can be any numeric sample parameter defined in Sample Logs (e.g. sample.*) or a time-stamp string (e.g. start_time).
+  It can also be the run number. It can not be an instrument parameter.
 
 Sort X Axis
-  If checked, this will sort the x-axis of the final result.
+  If checked, the x-axis of the final results will be sorted.
 
+Sum/Interpolate
+  Both background and calibration have options to use the summed (averaged) or interpolated values over different observable points.
+  Default behaviour is Sum. Interpolation is done using cubic (or linear for 2 measured values only) splines.
+  If interpolation is requested, x-axis will be sorted automatically.
 
 ISIS Calibration & Resolution
 -----------------------------
