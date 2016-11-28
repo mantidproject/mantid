@@ -60,7 +60,7 @@ extra_columns(const std::vector<std::string> &filenames) {
   }
 
   for (std::string line = Strings::getLine(file); !file.eof();
-       line = Strings::getLine(file)) {
+       Strings::getLine(file, line)) {
     boost::smatch result;
     // all instances of table headers
     if (boost::regex_search(line, result, V1_TABLE_REG_EXP)) {
@@ -263,7 +263,7 @@ void PDLoadCharacterizations::readFocusInfo(std::ifstream &file) {
 
   // parse the file
   for (std::string line = Strings::getLine(file); !file.eof();
-       line = Strings::getLine(file)) {
+       Strings::getLine(file, line)) {
     line = Strings::strip(line);
     // skip empty lines and "comments"
     if (line.empty())
@@ -315,9 +315,8 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
 
   // parse the file
   for (std::string line = Strings::getLine(file); !file.eof();
-       line = Strings::getLine(file)) {
+       Strings::getLine(file, line)) {
     line = Strings::strip(line);
-
     // skip empty lines and "comments"
     if (line.empty())
       continue;
@@ -452,9 +451,8 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
 
   // store the names of the columns in order
   std::vector<std::string> columnNames;
-
-  for (std::string line = Strings::getLine(file); !file.eof();
-       line = Strings::getLine(file)) {
+  for (Strings::getLine(file, line); !file.eof();
+       Strings::getLine(file, line)) {
     if (line.empty())
       continue;
     if (line.substr(0, 1) == "#")
@@ -539,7 +537,7 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename,
 
   // parse the file
   for (std::string line = Strings::getLine(file); !file.eof();
-       line = Strings::getLine(file)) {
+       Strings::getLine(file, line)) {
     line = Strings::strip(line);
     // skip empty lines and "comments"
     if (line.empty())
