@@ -590,7 +590,7 @@ public:
     fun.setAttributeValue("Temperature", 44.0);
     fun.setAttributeValue("FWHM", 1.0);
     auto ws = createWorkspace(fun, 0, 50, 100);
-    auto mc = AlgorithmFactory::Instance().create("MonteCarloParameters", -1);
+    auto mc = AlgorithmFactory::Instance().create("EstimateFitParameters", -1);
     mc->initialize();
     mc->setRethrows(true);
     mc->setPropertyValue(

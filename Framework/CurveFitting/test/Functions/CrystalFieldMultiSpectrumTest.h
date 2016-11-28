@@ -341,7 +341,7 @@ public:
     fun.setAttributeValue("FWHMs", std::vector<double>{1.0, 1.5});
     auto ws = createWorkspace(fun, 0, 50, 100);
 
-    auto mc = AlgorithmFactory::Instance().create("MonteCarloParameters", -1);
+    auto mc = AlgorithmFactory::Instance().create("EstimateFitParameters", -1);
     mc->initialize();
     mc->setRethrows(true);
     mc->setPropertyValue(
