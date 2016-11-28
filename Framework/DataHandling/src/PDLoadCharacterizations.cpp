@@ -164,7 +164,7 @@ void PDLoadCharacterizations::exec() {
   wksp->addColumn("double", "tof_max");
   wksp->addColumn("double", "wavelength_min");
   wksp->addColumn("double", "wavelength_max");
-  for (const auto name : canColumnNames) {
+  for (const auto &name : canColumnNames) {
     wksp->addColumn("str", name); // all will be strings
   }
 
