@@ -9,6 +9,8 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/lexical_cast.hpp>
 #include <cxxtest/TestSuite.h>
+#include <limits>
+#include <cmath>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -420,6 +422,40 @@ public:
 
     AnalysisDataService::Instance().remove(inName);
     AnalysisDataService::Instance().remove(outName);
+  }
+
+  void testSpecialValues() {
+    constexpr size_t numOfHistos = 2;
+    auto inWs =
+        WorkspaceCreationHelper::Create2DWorkspace123(numOfHistos, 3, true);
+    auto &yVals = inWs->mutableY(1);
+
+    yVals[0] = std::numeric_limits<double>::infinity();
+    yVals[1] = NAN;
+
+    Mantid::Algorithms::SumSpectra sumSpectraAlg;
+    sumSpectraAlg.initialize();
+    sumSpectraAlg.setProperty("InputWorkspace", inWs);
+    const std::string outWsName = "testSpecialVals";
+    sumSpectraAlg.setPropertyValue("OutputWorkspace", outWsName);
+    sumSpectraAlg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(sumSpectraAlg.execute());
+    TS_ASSERT(sumSpectraAlg.isExecuted());
+
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieve(outWsName));
+    Workspace2D_const_sptr output2D =
+        boost::dynamic_pointer_cast<const Workspace2D>(output);
+
+    auto outYVals = output2D->y(0);
+    // We expect one less because of inf and NaN
+    TS_ASSERT_EQUALS(outYVals[0], 2.);
+    TS_ASSERT_EQUALS(outYVals[1], 2.);
+    // Should get the correct amount now
+    TS_ASSERT_EQUALS(outYVals[2], 4.);
+
+    AnalysisDataService::Instance().remove(outWsName);
   }
 
 private:

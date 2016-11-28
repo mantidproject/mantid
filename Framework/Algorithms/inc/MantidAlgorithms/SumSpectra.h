@@ -34,7 +34,7 @@ namespace Algorithms {
     @author Nick Draper, Tessella Support Services plc
     @date 22/01/2009
 
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
+    Copyright &copy; 2007-2016 ISIS Rutherford Appleton Laboratory, NScD Oak
    Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
@@ -80,8 +80,7 @@ private:
                         API::Progress &progress, size_t &numSpectra,
                         size_t &numMasked, size_t &numZeros);
   /// Handle logic for Workspace2D workspaces
-  void doWorkspace2D(API::MatrixWorkspace_const_sptr localworkspace,
-                     API::ISpectrum &outSpec, API::Progress &progress,
+  void doWorkspace2D(API::ISpectrum &outSpec, API::Progress &progress,
                      size_t &numSpectra, size_t &numMasked, size_t &numZeros);
 
   // Overridden Algorithm methods
@@ -90,6 +89,9 @@ private:
   void execEvent(DataObjects::EventWorkspace_const_sptr localworkspace,
                  std::set<int> &indices);
   specnum_t getOutputSpecNo(API::MatrixWorkspace_const_sptr localworkspace);
+
+  API::MatrixWorkspace_sptr
+  replaceSpecialValues(API::MatrixWorkspace_sptr inputWs);
 
   /// The output spectrum number
   specnum_t m_outSpecNum;
@@ -106,7 +108,7 @@ private:
   /// Set of indicies to sum
   std::set<int> m_indices;
 
-  // if calculateing additional workspace with specially weighted averages is
+  // if calculating additional workspace with specially weighted averages is
   // necessary
   bool m_calculateWeightedSum;
 };
