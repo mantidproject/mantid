@@ -1,6 +1,6 @@
 #include "MantidQtMantidWidgets/MWDiag.h"
 #include "MantidQtMantidWidgets/DiagResults.h"
-#include "MantidQtMantidWidgets/MWRunFiles.h"
+#include "MantidQtAPI/MWRunFiles.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidAPI/FrameworkManager.h"

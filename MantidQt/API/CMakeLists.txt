@@ -24,6 +24,7 @@
 	src/MdPlottingCmapsProvider.cpp
 	src/MdSettings.cpp
 	src/Message.cpp
+	src/MWRunFiles.cpp
 	src/OptionsPropertyWidget.cpp
 	src/pixmaps.cpp
 	src/PlotAxis.cpp
@@ -66,6 +67,7 @@ set ( MOC_FILES
   inc/MantidQtAPI/MantidDialog.h
   inc/MantidQtAPI/MantidHelpInterface.h
   inc/MantidQtAPI/MantidWidget.h
+  inc/MantidQtAPI/MWRunFiles.h
   inc/MantidQtAPI/OptionsPropertyWidget.h
   inc/MantidQtAPI/PropertyWidget.h
   inc/MantidQtAPI/PythonRunner.h
@@ -128,7 +130,13 @@ set ( INC_FILES
 
 set ( UI_FILES
   inc/MantidQtAPI/ManageUserDirectories.ui
+  inc/MantidQtAPI/MWRunFiles.ui
   inc/MantidQtAPI/ScriptRepositoryView.ui
+)
+
+# Python unit tests
+set ( TEST_PY_FILES
+  test/MWRunFilesTest.py
 )
 
 set( TEST_FILES

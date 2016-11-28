@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/MWRunFiles.h"
+#include "MantidQtAPI/MWRunFiles.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -25,7 +25,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::API;
 
 ////////////////////////////////////////////////////////////////////
 // FindFilesThread

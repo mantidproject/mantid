@@ -87,7 +87,6 @@ set ( SRC_FILES
 	src/MantidTreeWidget.cpp
 	src/MantidTreeWidgetItem.cpp
 	src/MWDiag.cpp
-	src/MWRunFiles.cpp
 	src/MWView.cpp
 	src/MantidHelpWindow.cpp
 	src/MantidSurfacePlotDialog.cpp
@@ -125,7 +124,7 @@ set ( SRC_FILES
 )
 
 # Header files with Q_OBJECT that qmake will "moc"
-set ( MOC_FILES 
+set ( MOC_FILES
     inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
     inc/MantidQtMantidWidgets/CheckboxHeader.h
     inc/MantidQtMantidWidgets/ColorBarWidget.h
@@ -162,7 +161,6 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/MuonFitPropertyBrowser.h
     inc/MantidQtMantidWidgets/MuonFunctionBrowser.h
     inc/MantidQtMantidWidgets/MWDiag.h
-    inc/MantidQtMantidWidgets/MWRunFiles.h
     inc/MantidQtMantidWidgets/MWView.h
     inc/MantidQtMantidWidgets/PeakPicker.h
     inc/MantidQtMantidWidgets/PeriodicTableWidget.h
@@ -326,7 +324,7 @@ set ( INC_FILES
 )
 
 # QtDesigner UI files to process
-set ( UI_FILES 
+set ( UI_FILES
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsDialog.ui
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWidget.ui
     inc/MantidQtMantidWidgets/DataSelector.ui
@@ -337,7 +335,6 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.ui
 	inc/MantidQtMantidWidgets/LogValueSelector.ui
     inc/MantidQtMantidWidgets/MWDiag.ui
-    inc/MantidQtMantidWidgets/MWRunFiles.ui
     inc/MantidQtMantidWidgets/MWView.ui
     inc/MantidQtMantidWidgets/MultifitSetupDialog.ui
     inc/MantidQtMantidWidgets/MuonFitDataSelector.ui
@@ -352,11 +349,6 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/PreviewPlot.ui
     inc/MantidQtMantidWidgets/pqHelpWindow.ui
     inc/MantidQtMantidWidgets/InstrumentView/UCorrectionDialog.ui
-)
-
-# Python unit tests
-set ( TEST_PY_FILES
-  test/MWRunFilesTest.py
 )
 
 set ( TEST_FILES
@@ -391,7 +383,7 @@ qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
-qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
+qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images/MantidWidgets.qrc )
 
 include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
@@ -410,7 +402,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidWidgets PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 
-target_link_libraries ( MantidWidgets LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+target_link_libraries ( MantidWidgets LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             MantidQtAPI
             QtPropertyBrowser
             ${CORE_MANTIDLIBS}

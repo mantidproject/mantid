@@ -2,8 +2,8 @@
 #define MANTIDQTMANTIDWIDGETS_MWRUNFILES_H_
 
 #include "ui_MWRunFiles.h"
+#include "MantidQtAPI/DllOption.h"
 #include "MantidQtAPI/MantidWidget.h"
-#include "WidgetDllOption.h"
 #include <QString>
 #include <QSettings>
 #include <QComboBox>
@@ -19,7 +19,7 @@ class IAlgorithm;
 }
 
 namespace MantidQt {
-namespace MantidWidgets {
+namespace API {
 /**
  * A class to allow the asynchronous finding of files.
  */
@@ -97,7 +97,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWRunFiles : public API::MantidWidget {
+class EXPORT_OPT_MANTIDQT_API MWRunFiles : public API::MantidWidget {
   Q_OBJECT
 
   Q_PROPERTY(bool findRunFiles READ isForRunFiles WRITE isForRunFiles)
@@ -254,7 +254,7 @@ public slots:
   void findFiles();
   boost::shared_ptr<const Mantid::API::IAlgorithm> stopLiveAlgorithm();
 
-protected:
+public:
   // Method for handling drop events
   void dropEvent(QDropEvent *) override;
   // called when a drag event enters the class
