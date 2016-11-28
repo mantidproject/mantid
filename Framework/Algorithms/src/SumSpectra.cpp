@@ -257,28 +257,28 @@ void SumSpectra::doWorkspace2D(ISpectrum &outSpec, Progress &progress,
   auto localworkspace = replaceSpecialValues(in_ws);
   const auto &spectrumInfo = localworkspace->spectrumInfo();
   // Loop over spectra
-  for (const auto ws_index : this->m_indices) {
+  for (const auto wsIndex : this->m_indices) {
     // Don't go outside the range.
-    if ((ws_index >= this->m_numberOfSpectra) || (ws_index < 0)) {
-      g_log.error() << "Invalid index " << ws_index
+    if ((wsIndex >= this->m_numberOfSpectra) || (wsIndex < 0)) {
+      g_log.error() << "Invalid index " << wsIndex
                     << " was specified. Sum was aborted.\n";
       break;
     }
 
-    if (spectrumInfo.hasDetectors(ws_index)) {
+    if (spectrumInfo.hasDetectors(wsIndex)) {
       // Skip monitors, if the property is set to do so
-      if (!m_keepMonitors && spectrumInfo.isMonitor(ws_index))
+      if (!m_keepMonitors && spectrumInfo.isMonitor(wsIndex))
         continue;
       // Skip masked detectors
-      if (spectrumInfo.isMasked(ws_index)) {
+      if (spectrumInfo.isMasked(wsIndex)) {
         numMasked++;
         continue;
       }
     }
     numSpectra++;
 
-    const auto &YValues = localworkspace->y(ws_index);
-    const auto &YErrors = localworkspace->e(ws_index);
+    const auto &YValues = localworkspace->y(wsIndex);
+    const auto &YErrors = localworkspace->e(wsIndex);
 
     // Retrieve the spectrum into a vector
 
@@ -301,7 +301,7 @@ void SumSpectra::doWorkspace2D(ISpectrum &outSpec, Progress &progress,
 
     // Map all the detectors onto the spectrum of the output
     outSpec.addDetectorIDs(
-        localworkspace->getSpectrum(ws_index).getDetectorIDs());
+        localworkspace->getSpectrum(wsIndex).getDetectorIDs());
 
     progress.report();
   }
