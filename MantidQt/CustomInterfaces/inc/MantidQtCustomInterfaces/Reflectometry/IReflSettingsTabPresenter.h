@@ -37,8 +37,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class IReflSettingsTabPresenter {
 public:
   virtual ~IReflSettingsTabPresenter(){};
-  /// Accept a main presenter
-  virtual void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) = 0;
   /// Pre-processing
   virtual std::string getTransmissionOptions(int group) const = 0;
   /// Processing

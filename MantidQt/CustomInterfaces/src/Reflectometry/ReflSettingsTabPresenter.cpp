@@ -17,21 +17,12 @@ using namespace MantidQt::MantidWidgets;
 */
 ReflSettingsTabPresenter::ReflSettingsTabPresenter(
     std::vector<IReflSettingsPresenter *> presenters)
-    : m_mainPresenter(), m_settingsPresenters(presenters) {}
+    :m_settingsPresenters(presenters) {}
 
 /** Destructor
 *
 */
 ReflSettingsTabPresenter::~ReflSettingsTabPresenter() {}
-
-/** Accept a main presenter
-*
-* @param mainPresenter :: [input] The main presenter
-*/
-void ReflSettingsTabPresenter::acceptMainPresenter(
-    IReflMainWindowPresenter *mainPresenter) {
-  m_mainPresenter = mainPresenter;
-}
 
 /** Sets the current instrument name and changes accessibility status of
 * the polarisation corrections option in the view accordingly

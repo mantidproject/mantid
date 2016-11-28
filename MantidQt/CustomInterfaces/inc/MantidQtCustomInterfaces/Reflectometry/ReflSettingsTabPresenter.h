@@ -46,8 +46,7 @@ public:
   ReflSettingsTabPresenter(std::vector<IReflSettingsPresenter *> presenters);
   /// Destructor
   ~ReflSettingsTabPresenter() override;
-  /// Accept a main presenter
-  void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
+  /// Set the instrument name
   void setInstrumentName(const std::string &instName) override;
 
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
@@ -58,8 +57,6 @@ public:
   std::string getStitchOptions(int group) const override;
 
 private:
-  /// The main presenter
-  IReflMainWindowPresenter *m_mainPresenter;
   /// The presenters for each group as a vector
   std::vector<IReflSettingsPresenter *> m_settingsPresenters;
 };

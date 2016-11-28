@@ -167,9 +167,6 @@ public:
   void setInstrumentName(const std::string &instName) override {
     UNUSED_ARG(instName);
   };
-  void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
-    UNUSED_ARG(presenter);
-  };
   ~MockSettingsTabPresenter() override{};
 };
 
