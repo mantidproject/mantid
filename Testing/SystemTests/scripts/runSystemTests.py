@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import (absolute_import, division, print_function)
 import optparse
 import os
 import sys
@@ -97,15 +98,15 @@ xml_report.close()
 if options.makeprop:
   mtdconf.restoreconfig()
 
-print
+print()
 if mgr.skippedTests == mgr.totalTests:
-  print "All tests were skipped"
+  print("All tests were skipped")
   success = False # fail if everything was skipped
 else:
   percent = 1.-float(mgr.failedTests)/float(mgr.totalTests-mgr.skippedTests)
   percent = int(100. * percent)
-  print "%d%s tests passed, %d tests failed out of %d (%d skipped)" % \
-      (percent, '%', mgr.failedTests, (mgr.totalTests-mgr.skippedTests), mgr.skippedTests)
-print 'All tests passed? ' + str(success)
+  print("%d%s tests passed, %d tests failed out of %d (%d skipped)" % \
+      (percent, '%', mgr.failedTests, (mgr.totalTests-mgr.skippedTests), mgr.skippedTests))
+print('All tests passed? ' + str(success))
 if not success:
   sys.exit(1)
