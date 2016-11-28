@@ -202,10 +202,15 @@ public:
                                    tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
-    EXPECT_CALL(mockMainPresenter, getTransmissionOptions()).Times(1);
+    int group = 199;
+    EXPECT_CALL(mockRunsTabView, getSelectedGroup())
+        .Times(Exactly(1))
+        .WillOnce(Return(group));
+    EXPECT_CALL(mockMainPresenter, getTransmissionOptions(group)).Times(1);
     presenter.getPreprocessingOptions();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
   }
 
   void test_processingOptions() {
@@ -219,10 +224,15 @@ public:
                                    tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
-    EXPECT_CALL(mockMainPresenter, getReductionOptions()).Times(1);
+    int group = 199;
+    EXPECT_CALL(mockRunsTabView, getSelectedGroup())
+        .Times(Exactly(1))
+        .WillOnce(Return(group));
+    EXPECT_CALL(mockMainPresenter, getReductionOptions(group)).Times(1);
     presenter.getProcessingOptions();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
   }
 
   void test_postprocessingOptions() {
@@ -236,10 +246,15 @@ public:
                                    tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
-    EXPECT_CALL(mockMainPresenter, getStitchOptions()).Times(1);
+    int group = 199;
+    EXPECT_CALL(mockRunsTabView, getSelectedGroup())
+        .Times(Exactly(1))
+        .WillOnce(Return(group));
+    EXPECT_CALL(mockMainPresenter, getStitchOptions(group)).Times(1);
     presenter.getPostprocessingOptions();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
   }
 
   void test_when_group_changes_commands_are_updated() {

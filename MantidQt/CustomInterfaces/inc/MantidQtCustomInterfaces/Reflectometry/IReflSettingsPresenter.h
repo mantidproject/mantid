@@ -49,7 +49,7 @@ public:
   /// Tell the presenter something happened
   virtual void notify(IReflSettingsPresenter::Flag flag) = 0;
   /// Set current instrument name
-  virtual void setInstrumentName(const std::string instName) = 0;
+  virtual void setInstrumentName(const std::string &instName) = 0;
 };
 }
 }

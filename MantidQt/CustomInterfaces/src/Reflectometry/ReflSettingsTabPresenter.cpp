@@ -38,7 +38,7 @@ void ReflSettingsTabPresenter::acceptMainPresenter(
 *
 * @param instName :: [input] The name of the instrument to set to
 */
-void ReflSettingsTabPresenter::setInstrumentName(const std::string instName) {
+void ReflSettingsTabPresenter::setInstrumentName(const std::string &instName) {
   for (auto presenter : m_settingsPresenters)
     presenter->setInstrumentName(instName);
 }

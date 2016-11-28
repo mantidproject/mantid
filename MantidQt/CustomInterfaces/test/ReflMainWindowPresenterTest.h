@@ -30,50 +30,65 @@ public:
   void testGetTransmissionOptions() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsPresenter mockSettingsPresenter;
+    MockSettingsTabPresenter mockSettingsPresenter;
     MockSaveTabPresenter mockSaveTabPresenter;
     ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
                                       &mockSettingsPresenter,
                                       &mockSaveTabPresenter);
 
-    EXPECT_CALL(mockSettingsPresenter, getTransmissionOptions())
+    EXPECT_CALL(mockSettingsPresenter, getTransmissionOptions(0))
         .Times(Exactly(1));
-    presenter.getTransmissionOptions();
+    presenter.getTransmissionOptions(0);
+
+    EXPECT_CALL(mockSettingsPresenter, getTransmissionOptions(1))
+        .Times(Exactly(1));
+    presenter.getTransmissionOptions(1);
+
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockSettingsPresenter));
   }
 
   void testGetReductionOptions() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsPresenter mockSettingsPresenter;
+    MockSettingsTabPresenter mockSettingsPresenter;
     MockSaveTabPresenter mockSaveTabPresenter;
     ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
                                       &mockSettingsPresenter,
                                       &mockSaveTabPresenter);
 
-    EXPECT_CALL(mockSettingsPresenter, getReductionOptions()).Times(Exactly(1));
-    presenter.getReductionOptions();
+    EXPECT_CALL(mockSettingsPresenter, getReductionOptions(0))
+        .Times(Exactly(1));
+    presenter.getReductionOptions(0);
+
+    EXPECT_CALL(mockSettingsPresenter, getReductionOptions(1))
+        .Times(Exactly(1));
+    presenter.getReductionOptions(1);
+
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockSettingsPresenter));
   }
 
   void testStitchOptions() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsPresenter mockSettingsPresenter;
+    MockSettingsTabPresenter mockSettingsPresenter;
     MockSaveTabPresenter mockSaveTabPresenter;
     ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
                                       &mockSettingsPresenter,
                                       &mockSaveTabPresenter);
 
-    EXPECT_CALL(mockSettingsPresenter, getStitchOptions()).Times(Exactly(1));
-    presenter.getStitchOptions();
+    EXPECT_CALL(mockSettingsPresenter, getStitchOptions(0)).Times(Exactly(1));
+    presenter.getStitchOptions(0);
+
+    EXPECT_CALL(mockSettingsPresenter, getStitchOptions(1)).Times(Exactly(1));
+    presenter.getStitchOptions(1);
+
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockSettingsPresenter));
   }
 
   void testAskUserString() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsPresenter mockSettingsPresenter;
+    MockSettingsTabPresenter mockSettingsPresenter;
     MockSaveTabPresenter mockSaveTabPresenter;
     ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
                                       &mockSettingsPresenter,
@@ -88,7 +103,7 @@ public:
   void testAskUserYesNo() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsPresenter mockSettingsPresenter;
+    MockSettingsTabPresenter mockSettingsPresenter;
     MockSaveTabPresenter mockSaveTabPresenter;
     ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
                                       &mockSettingsPresenter,
@@ -102,7 +117,7 @@ public:
   void testGiveUserWarning() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsPresenter mockSettingsPresenter;
+    MockSettingsTabPresenter mockSettingsPresenter;
     MockSaveTabPresenter mockSaveTabPresenter;
     ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
                                       &mockSettingsPresenter,
@@ -116,7 +131,7 @@ public:
   void testGiveUserCritical() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsPresenter mockSettingsPresenter;
+    MockSettingsTabPresenter mockSettingsPresenter;
     MockSaveTabPresenter mockSaveTabPresenter;
     ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
                                       &mockSettingsPresenter,
@@ -131,7 +146,7 @@ public:
   void testGiveUserInfo() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsPresenter mockSettingsPresenter;
+    MockSettingsTabPresenter mockSettingsPresenter;
     MockSaveTabPresenter mockSaveTabPresenter;
     ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
                                       &mockSettingsPresenter,
@@ -145,7 +160,7 @@ public:
   void testUserPythonCode() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;
-    MockSettingsPresenter mockSettingsPresenter;
+    MockSettingsTabPresenter mockSettingsPresenter;
     MockSaveTabPresenter mockSaveTabPresenter;
     ReflMainWindowPresenter presenter(&mockView, &mockRunsPresenter,
                                       &mockSettingsPresenter,

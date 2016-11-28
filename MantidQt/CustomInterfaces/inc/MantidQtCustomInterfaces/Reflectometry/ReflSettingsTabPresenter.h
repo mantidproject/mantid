@@ -48,7 +48,7 @@ public:
   ~ReflSettingsTabPresenter() override;
   /// Accept a main presenter
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
-  void setInstrumentName(const std::string instName) override;
+  void setInstrumentName(const std::string &instName) override;
 
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   std::string getTransmissionOptions(int group) const override;

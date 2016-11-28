@@ -49,7 +49,7 @@ public:
   /// Destructor
   ~ReflSettingsPresenter() override;
   void notify(IReflSettingsPresenter::Flag flag) override;
-  void setInstrumentName(const std::string instName) override;
+  void setInstrumentName(const std::string &instName) override;
 
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   std::string getTransmissionOptions() const override;

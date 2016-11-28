@@ -1,5 +1,5 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLSETTINGSTABPRESENTERTEST_H
-#define MANTID_CUSTOMINTERFACES_REFLSETTINGSTABPRESENTERTEST_H
+#ifndef MANTID_CUSTOMINTERFACES_REFLSETTINGSPRESENTERTEST_H
+#define MANTID_CUSTOMINTERFACES_REFLSETTINGSPRESENTERTEST_H
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -207,9 +207,6 @@ public:
     ReflSettingsPresenter presenter(&mockView);
     MockMainWindowPresenter mainPresenter;
 
-    // This presenter accepts the main presenter
-    presenter.acceptMainPresenter(&mainPresenter);
-
     // Set instrument to 'POLREF'
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(true))
         .Times(Exactly(1));
@@ -232,9 +229,6 @@ public:
     MockMainWindowPresenter mainPresenter;
     ReflSettingsPresenter presenter(&mockView);
 
-    // This presenter accepts the main presenter
-    presenter.acceptMainPresenter(&mainPresenter);
-
     // Set instrument to 'INTER'
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(false))
         .Times(Exactly(1));
@@ -248,4 +242,4 @@ public:
   }
 };
 
-#endif /* MANTID_CUSTOMINTERFACES_REFLSETTINGSTABPRESENTERTEST_H */
+#endif /* MANTID_CUSTOMINTERFACES_REFLSETTINGSPRESENTERTEST_H */

@@ -9,6 +9,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h"
@@ -153,17 +154,23 @@ public:
   MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
-  // Other calls we don't care about
+  MOCK_METHOD1(setInstrumentName, void(const std::string &));
+  void notify(IReflSettingsPresenter::Flag flag) override { UNUSED_ARG(flag); }
+  ~MockSettingsPresenter() override{};
+};
+
+class MockSettingsTabPresenter : public IReflSettingsTabPresenter {
+public:
+  MOCK_CONST_METHOD1(getTransmissionOptions, std::string(int));
+  MOCK_CONST_METHOD1(getReductionOptions, std::string(int));
+  MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
+  void setInstrumentName(const std::string &instName) override {
+    UNUSED_ARG(instName);
+  };
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
     UNUSED_ARG(presenter);
   };
-  void notify(IReflSettingsPresenter::Flag flag) override {
-    UNUSED_ARG(flag);
-  };
-  void setInstrumentName(const std::string instName) override {
-    UNUSED_ARG(instName);
-  }
-  ~MockSettingsPresenter() override{};
+  ~MockSettingsTabPresenter() override{};
 };
 
 class MockSaveTabPresenter : public IReflSaveTabPresenter {
@@ -177,9 +184,9 @@ public:
 
 class MockMainWindowPresenter : public IReflMainWindowPresenter {
 public:
-  MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
-  MOCK_CONST_METHOD0(getReductionOptions, std::string());
-  MOCK_CONST_METHOD0(getStitchOptions, std::string());
+  MOCK_CONST_METHOD1(getTransmissionOptions, std::string(int));
+  MOCK_CONST_METHOD1(getReductionOptions, std::string(int));
+  MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
   MOCK_CONST_METHOD0(getInstrumentName, std::string());
   MOCK_METHOD3(askUserString,
                std::string(const std::string &, const std::string &,

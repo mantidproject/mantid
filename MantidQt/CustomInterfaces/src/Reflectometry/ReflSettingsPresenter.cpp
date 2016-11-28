@@ -45,7 +45,7 @@ void ReflSettingsPresenter::notify(IReflSettingsPresenter::Flag flag) {
 * the polarisation corrections option in the view accordingly
 * @param instName :: [input] The name of the instrument to set to
 */
-void ReflSettingsPresenter::setInstrumentName(const std::string instName) {
+void ReflSettingsPresenter::setInstrumentName(const std::string &instName) {
   m_currentInstrumentName = instName;
   m_view->setPolarisationOptionsEnabled(instName != "INTER" &&
                                         instName != "SURF");
