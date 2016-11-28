@@ -40,7 +40,7 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
       m_viewRect(), m_selectRect(), m_interactionMode(MoveMode),
       m_isLightingOn(false), m_peakLabelPrecision(2), m_showPeakRows(false),
       m_showPeakLabels(false), m_showPeakRelativeIntensity(false),
-      m_peakShapesStyle(0), m_viewChanged(true), m_redrawPicking(true) {
+      m_peakShapesStyle(0),m_selectedAlignmentPeak(nullptr), m_viewChanged(true), m_redrawPicking(true) {
   connect(rootActor, SIGNAL(colorMapChanged()), this, SLOT(colorMapChanged()));
   connect(&m_maskShapes, SIGNAL(shapeCreated()), this, SIGNAL(shapeCreated()));
   connect(&m_maskShapes, SIGNAL(shapeSelected()), this,
@@ -120,6 +120,14 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
   setInputController(ComparePeakMode, compareController);
   connect(compareController, SIGNAL(selection(QRect)), this,
           SLOT(comparePeaks(QRect)));
+
+  // create and connect the peak alignment controller
+  auto alignIcon = new QPixmap(":/PickTools/selection-pointer.png");
+  InputControllerSelection *alignController =
+      new InputControllerSelection(this, alignIcon);
+  setInputController(AlignPeakMode, alignController);
+  connect(alignController, SIGNAL(selection(QRect)), this,
+          SLOT(alignPeaks(QRect)));
 }
 
 ProjectionSurface::~ProjectionSurface() {
@@ -205,6 +213,8 @@ void ProjectionSurface::draw(MantidGLWidget *widget, bool picking) const {
       drawMaskShapes(painter);
       drawPeakMarkers(painter);
       drawPeakComparisonLine(painter);
+      drawPeakAlignmentMarkers(painter);
+
       painter.end();
     }
   } else if (!picking) {
@@ -214,6 +224,7 @@ void ProjectionSurface::draw(MantidGLWidget *widget, bool picking) const {
     drawMaskShapes(painter);
     drawPeakMarkers(painter);
     drawPeakComparisonLine(painter);
+    drawPeakAlignmentMarkers(painter);
     drawSelectionRect(painter);
 
     getController()->onPaint(painter);
@@ -258,6 +269,7 @@ void ProjectionSurface::drawSimple(QWidget *widget) const {
   drawMaskShapes(painter);
   drawPeakMarkers(painter);
   drawPeakComparisonLine(painter);
+  drawPeakAlignmentMarkers(painter);
   drawSelectionRect(painter);
 
   getController()->onPaint(painter);
@@ -568,6 +580,25 @@ void ProjectionSurface::drawSelectionRect(QPainter &painter) const {
 }
 
 /**
+ * Draw the peak alignment marker objects on the surface
+ * @param painter :: The QPainter object to draw the markers with
+ */
+void ProjectionSurface::drawPeakAlignmentMarkers(QPainter &painter) const
+{
+  QTransform transform;
+  auto windowRect = getSurfaceBounds();
+  windowRect.findTransform(transform, painter.viewport());
+
+  painter.setPen(Qt::blue);
+
+  QPolygonF poly;
+  for (auto &origin : m_selectedAlignmentMarkers) {
+    auto point = transform.map(origin);
+    painter.drawEllipse(point, 8, 8);
+  }
+}
+
+/**
 * Returns the current controller. If the controller doesn't exist throws a
 * logic_error exceotion.
 */
@@ -781,6 +812,33 @@ void ProjectionSurface::comparePeaks(const QRect &rect) {
   if (m_selectedPeaks.first && m_selectedPeaks.second) {
     emit comparePeaks(m_selectedPeaks);
   }
+}
+
+void ProjectionSurface::alignPeaks(const QRect &rect)
+{
+  PeakMarker2D *marker = nullptr;
+  Mantid::Geometry::IPeak *peak = nullptr;
+  QPointF origin;
+  foreach (PeakOverlay *po, m_peakShapes) {
+    po->selectIn(rect);
+    const auto markers = po->getSelectedPeakMarkers();
+    if (markers.length() > 0) {
+      marker = markers.first();
+      origin = marker->origin();
+      peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
+      break;
+    }
+  }
+
+  if(m_selectedAlignmentPlane.size() < 3 && peak) {
+    m_selectedAlignmentPlane.push_back(peak);
+    m_selectedAlignmentMarkers.push_back(origin);
+  } else if (peak) {
+    m_selectedAlignmentPeak = peak;
+  }
+
+  if (m_selectedAlignmentPlane.size() >= 3 && m_selectedAlignmentPeak)
+    emit alignPeaks(m_selectedAlignmentPlane, m_selectedAlignmentPeak);
 }
 
 /**

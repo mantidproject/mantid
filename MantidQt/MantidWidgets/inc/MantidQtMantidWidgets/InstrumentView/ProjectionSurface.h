@@ -67,6 +67,7 @@ public:
     PickTubeMode,
     AddPeakMode,
     ComparePeakMode,
+    AlignPeakMode,
     DrawRegularMode,
     DrawFreeMode,
     ErasePeakMode,
@@ -274,6 +275,8 @@ signals:
   void peaksWorkspaceDeleted();
   void comparePeaks(
       const std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &);
+  void alignPeaks(const std::vector<Mantid::Geometry::IPeak*>&,
+                  const Mantid::Geometry::IPeak*);
 
   // other
   void redrawRequired(); ///< request redrawing of self
@@ -290,6 +293,7 @@ protected slots:
   void touchComponentAt(int x, int y);
   void erasePeaks(const QRect &rect);
   void comparePeaks(const QRect &rect);
+  void alignPeaks(const QRect &rect);
 
   void colorMapChanged();
 
@@ -341,6 +345,10 @@ protected:
   std::pair<QPointF, QPointF> m_selectedMarkers;
   std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *>
       m_selectedPeaks;
+
+  std::vector<Mantid::Geometry::IPeak*> m_selectedAlignmentPlane;
+  std::vector<QPointF> m_selectedAlignmentMarkers;
+  Mantid::Geometry::IPeak* m_selectedAlignmentPeak;
   /// use with a new PeakOverlay.
 
 private:
@@ -352,6 +360,8 @@ private:
   void drawMaskShapes(QPainter &painter) const;
   /// Draw the selection rectangle to the surface
   void drawSelectionRect(QPainter &painter) const;
+  /// Draw the alignment markers on the surface
+  void drawPeakAlignmentMarkers(QPainter &painter) const;
   /// Get the current input controller
   MantidQt::MantidWidgets::InputController *getController() const;
 

@@ -236,6 +236,12 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_peakCompare->setIcon(QIcon(":/PickTools/selection-peak-compare.png"));
   m_peakCompare->setToolTip("Compare single crystal peak(s)");
 
+  m_peakAlign = new QPushButton();
+  m_peakAlign->setCheckable(true);
+  m_peakAlign->setAutoExclusive(true);
+  m_peakAlign->setIcon(QIcon(":/PickTools/selection-peak-compare.png"));
+  m_peakAlign->setToolTip("Crystal peak alignment tool");
+
   QGridLayout *toolBox = new QGridLayout();
   toolBox->addWidget(m_zoom, 0, 0);
   toolBox->addWidget(m_edit, 0, 1);
@@ -249,6 +255,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   toolBox->addWidget(m_peak, 1, 2);
   toolBox->addWidget(m_peakSelect, 1, 3);
   toolBox->addWidget(m_peakCompare, 1, 4);
+  toolBox->addWidget(m_peakAlign, 1, 5);
   toolBox->setColumnStretch(6, 1);
   toolBox->setSpacing(2);
   connect(m_zoom, SIGNAL(clicked()), this, SLOT(setSelectionType()));
@@ -257,6 +264,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   connect(m_peak, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_peakSelect, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_peakCompare, SIGNAL(clicked()), this, SLOT(setSelectionType()));
+  connect(m_peakAlign, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_rectangle, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_ellipse, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_ring_ellipse, SIGNAL(clicked()), this, SLOT(setSelectionType()));
@@ -418,6 +426,10 @@ void InstrumentWidgetPickTab::setSelectionType() {
     m_selectionType = ComparePeak;
     m_activeTool->setText("Tool: Compare crystal peak(s)");
     surfaceMode = ProjectionSurface::ComparePeakMode;
+  } else if (m_peakAlign->isChecked()) {
+    m_selectionType = AlignPeak;
+    m_activeTool->setText("Tool: Align crystal peak(s)");
+    surfaceMode = ProjectionSurface::AlignPeakMode;
   } else if (m_rectangle->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Rectangle");
@@ -550,6 +562,13 @@ void InstrumentWidgetPickTab::initSurface() {
       this,
       SLOT(comparePeaks(
           std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *>)));
+  connect(
+      surface,
+      SIGNAL(alignPeaks(
+          const std::vector<Mantid::Geometry::IPeak *>&, const Mantid::Geometry::IPeak *)),
+      this,
+      SLOT(alignPeaks(
+          const std::vector<Mantid::Geometry::IPeak *>, const Mantid::Geometry::IPeak *)));
   connect(surface, SIGNAL(peaksWorkspaceAdded()), this,
           SLOT(updateSelectionInfoDisplay()));
   connect(surface, SIGNAL(peaksWorkspaceDeleted()), this,
@@ -680,6 +699,11 @@ void InstrumentWidgetPickTab::singleComponentPicked(size_t pickID) {
 void InstrumentWidgetPickTab::comparePeaks(const std::pair<
     Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &peaks) {
   m_infoController->displayComparePeaksInfo(peaks);
+}
+
+void InstrumentWidgetPickTab::alignPeaks(const std::vector<Mantid::Geometry::IPeak*> &planePeaks,
+                                         const Mantid::Geometry::IPeak* peak) {
+  m_infoController->displyAlignPeaksInfo(planePeaks, peak);
 }
 
 /**
@@ -957,6 +981,36 @@ void ComponentInfoController::displayComparePeaksInfo(
   text << displayPeakInfo(peak2).toStdString();
   text << "-------------------------------\n";
   text << displayPeakAngles(peaks).toStdString();
+
+  m_selectionInfoDisplay->setText(QString::fromStdString(text.str()));
+}
+
+void ComponentInfoController::displyAlignPeaksInfo(
+    const std::vector<Mantid::Geometry::IPeak *> &planePeaks,
+    const Mantid::Geometry::IPeak *peak)
+{
+  std::stringstream text;
+
+  if (planePeaks.size() < 3)
+    return;
+
+  auto pos1 = planePeaks[0]->getDetectorPosition();
+  auto pos2 = planePeaks[1]->getDetectorPosition();
+  auto pos3 = planePeaks[2]->getDetectorPosition();
+
+  std::vector<Mantid::Kernel::V3D> vs = { (pos2 - pos1), (pos3 - pos1) };
+  auto basis = Mantid::Kernel::V3D::makeVectorsOrthogonal(vs);
+  auto i = basis[0];
+  auto j = basis[1];
+  auto k = basis[2];
+
+  auto pos4 = peak->getDetectorPosition();
+  double r, theta, phi;
+  pos4.reBase(i,j,k);
+  pos4.getSpherical(r, theta, phi);
+
+
+  text << "r: " << r << " theta: " << theta << " phi: " << phi << "\n";
 
   m_selectionInfoDisplay->setText(QString::fromStdString(text.str()));
 }
