@@ -10,7 +10,7 @@ def focus(run_number, instrument, perform_attenuation=True, perform_vanadium_nor
     # Read
 
     read_ws = common.load_current_normalised_ws(run_number_string=run_number, instrument=instrument)
-    input_workspace = instrument.pearl_focus_tof_rebinning(read_ws)  # Rebins for PEARL
+    # input_workspace = instrument.pearl_focus_tof_rebinning(read_ws)  # Rebins for PEARL
     run_details = instrument.get_run_details(run_number=run_number)
 
     # Check the necessary splined vanadium file has been created
@@ -20,7 +20,7 @@ def focus(run_number, instrument, perform_attenuation=True, perform_vanadium_nor
                          " \n\nHave you created a vanadium calibration with these settings yet?")
 
     # Compensate for empty sample if specified
-    input_workspace = common.subtract_sample_empty(ws_to_correct=input_workspace, instrument=instrument,
+    input_workspace = common.subtract_sample_empty(ws_to_correct=read_ws, instrument=instrument,
                                                    empty_sample_ws_string=run_details.sample_empty)
 
     # Align / Focus

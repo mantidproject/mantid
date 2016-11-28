@@ -17,8 +17,8 @@ def create_van(instrument, van, empty, output_van_file_name, absorb, gen_absorb)
 
     run_details = instrument.get_run_details(run_number=van)
 
-    corrected_van_ws = instrument. pearl_van_calibration_tof_rebinning(vanadium_ws=corrected_van_ws,
-                                                                       tof_rebin_pass=1, return_units="TOF")
+    # corrected_van_ws = instrument. pearl_van_calibration_tof_rebinning(vanadium_ws=corrected_van_ws,
+    #                                                                    tof_rebin_pass=1, return_units="TOF")
 
     corrected_van_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
                                              CalibrationFile=run_details.calibration)
@@ -34,8 +34,8 @@ def create_van(instrument, van, empty, output_van_file_name, absorb, gen_absorb)
                                                    GroupingFileName=run_details.grouping)
 
     # Optional
-    focused_van_file = instrument. pearl_van_calibration_tof_rebinning(vanadium_ws=focused_van_file,
-                                                                       tof_rebin_pass=2, return_units="dSpacing")
+    #  focused_van_file = instrument. pearl_van_calibration_tof_rebinning(vanadium_ws=focused_van_file,
+    #                                                                     tof_rebin_pass=2, return_units="dSpacing")
 
     common.remove_intermediate_workspace(corrected_van_ws)
 
