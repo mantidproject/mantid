@@ -44,10 +44,10 @@ void FindUBUsingLatticeParameters::init() {
                         "Lattice parameter gamma");
   this->declareProperty("NumInitial", 15, moreThan2Int,
                         "Number of Peaks to Use on First Pass(15)");
-  this->declareProperty("FixParameters", false,
-                        "Do not optimise the UB after finding the orientation");
   this->declareProperty("Tolerance", 0.15, mustBePositive,
                         "Indexing Tolerance (0.15)");
+  this->declareProperty("FixParameters", false,
+                        "Do not optimise the UB after finding the orientation");
 }
 
 /** Execute the algorithm.
