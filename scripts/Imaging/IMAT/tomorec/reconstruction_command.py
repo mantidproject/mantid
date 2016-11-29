@@ -1,3 +1,4 @@
+
 # Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 # Oak Ridge National Laboratory & European Spallation Source
 #
@@ -1050,38 +1051,47 @@ class ReconstructionCommand(object):
                 "Invalid stack of images data. It does not have 3 dimensions. Shape: {0}".
                 format(data.shape))
 
-    def find_center(self, cfg, cmd_line=None):
+    def find_center(self, cfg):
         self._check_paths_integrity(cfg)
 
         # load in data
-        readme_fullpath = os.path.join(cfg.postproc_cfg.output_dir,
-                                       self._OUT_README_FNAME)
-        tstart = self.gen_readme_summary_begin(readme_fullpath, cfg, cmd_line)
-
         data, white, dark = self.read_in_stack(
             cfg.preproc_cfg.input_dir, cfg.preproc_cfg.in_img_format,
             cfg.preproc_cfg.input_dir_flat, cfg.preproc_cfg.input_dir_dark)
 
         # import tool
         import tomorec.tool_imports as tti
-        tti.import_tomo_tool(cfg.alg_cfg.tool)
+        tomopy = tti.import_tomo_tool(cfg.alg_cfg.tool)
 
         # rotate
         # TODO see if we can ignore adding white and dark
-        data, white, dark = self.rotate_stack(data, cfg)
+        data, white, dark = self.rotate_stack(data, cfg.preproc_cfg)
+
+        # crop the ROI
+        # not optional for now
+        # if self.crop_before_normaliz:
+        data = self.crop_coords(data, cfg.preproc_cfg)
 
         # find center
-        self._check_data_stack(projection_data)
+        self._check_data_stack(data)
 
-        num_projections = projection_data.shape[0]
-        inc = float(preproc_cfg.max_angle) / (num_projections - 1)
+        num_projections = data.shape[0]
+        inc = float(cfg.preproc_cfg.max_angle) / (num_projections - 1)
 
         proj_angles = np.arange(0, num_projections * inc, inc)
         # For tomopy
         proj_angles = np.radians(proj_angles)
-        for slice_idx in [int(num_projections / 2):
-            tomopy_cor = tomopy.find_center(
-                tomo=projection_data, theta=proj_angles, ind=slice_idx, emission=False)
 
+        size = int(num_projections)
+
+        calculated_cors = []
+        # find the COR of the middle slice
+        for slice_idx in [int(size/2)]:
+        # for slice_idx in [int(0.15*size), int(0.30*size), int(0.45*size), int(0.60*size), int(0.75*size), int(0.90*size)]:
+            tomopy_cor = tomopy.find_center(
+                tomo=data, theta=proj_angles, ind=slice_idx, emission=False)
+            calculated_cors.append(tomopy_cor)
         # print to stdout
-        print(tomopy_cor)
+        print(sum(calculated_cors)/float(len(calculated_cors)))
+
+

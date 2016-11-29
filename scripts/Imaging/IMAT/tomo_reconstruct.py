@@ -55,6 +55,12 @@ from os import path
 # So insert in the path the directory that contains this file
 sys.path.insert(0, os.path.split(path.dirname(__file__))[0])  # noqa
 
+from tomorec import reconstruction_command as tomocmd
+import tomorec.configs as tomocfg
+
+import pydevd
+pydevd.settrace(
+    'localhost', port=61845, stdoutToServer=True, stderrToServer=True)
 
 def setup_cmd_options():
     """
@@ -85,8 +91,7 @@ def setup_cmd_options():
         "--cor",
         required=False,
         type=float,
-        help="Center of rotation (in pixels). rotation around y axis is assumed"
-    )
+        help="2")
 
     grp_req.add_argument(
         "-f",
@@ -309,7 +314,8 @@ def grab_preproc_options(args):
     if 'wf' == args.remove_stripes:
         pre_config.stripe_removal_method = 'wavelet-fourier'
 
-    pre_config.cor = int(args.cor)
+    if args.cor:
+        pre_config.cor = int(args.cor)
 
     return pre_config
 
@@ -370,12 +376,6 @@ def main_tomo_rec():
     import inspect
 
     import IMAT.tomorec.io as tomoio
-    from IMAT.tomorec import reconstruction_command as tomocmd
-    import IMAT.tomorec.configs as tomocfg
-
-    import pydevd
-    pydevd.settrace(
-        'localhost', port=61845, stdoutToServer=True, stderrToServer=True)
 
     arg_parser = setup_cmd_options()
     args = arg_parser.parse_args()
@@ -396,7 +396,7 @@ def main_tomo_rec():
     # Does all the real work
     cmd = tomocmd.ReconstructionCommand()
     if (args.find_cor > 0):  # TODO make prettier
-        cmd.find_center(cfg, cmd_line=cmd_line)
+        cmd.find_center(cfg)
     else:
         cmd.do_recon(cfg, cmd_line=cmd_line)
 
