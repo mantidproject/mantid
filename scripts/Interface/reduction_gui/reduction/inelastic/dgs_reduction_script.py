@@ -71,7 +71,8 @@ class DgsReductionScripter(BaseReductionScripter):
             script += 'SaveNexus(DGS_output_data[0],OutputFilename)\n'
         else:
             script += "for i in range("+str(len(filenames))+"):\n"
-            script += DgsReductionScripter.WIDTH+"OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0][i].getInstrument().getName()"
+            script += DgsReductionScripter.WIDTH
+            script +="OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0][i].getInstrument().getName()"
             script +="+str(DGS_output_data[0][i].getRunNumber())+'.nxs')\n"
             script += DgsReductionScripter.WIDTH+'SaveNexus(DGS_output_data[0][i],OutputFilename)\n'
 
