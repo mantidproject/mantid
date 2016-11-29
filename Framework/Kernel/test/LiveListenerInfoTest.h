@@ -156,11 +156,10 @@ private:
         "<facilities>"
         "  <facility name=\"MyFacility\" FileExtensions=\".xyz\">"
         "    <instrument name=\"INST\">"
-        "      <technique>Technique</technique>"
-        + livedataXml +
-        "    </instrument>"
-        "  </facility>"
-        "</facilities>";
+        "      <technique>Technique</technique>" +
+        livedataXml + "    </instrument>"
+                      "  </facility>"
+                      "</facilities>";
 
     return createFacility(xmlStr);
   }
@@ -174,6 +173,5 @@ private:
     return new FacilityInfo(elem);
   }
 };
-
 
 #endif // LIVELISTENERINFOTEST_H_
