@@ -238,6 +238,7 @@ public:
   QStringList getPeaksWorkspaceNames() const;
   void deletePeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws);
   void clearPeakOverlays();
+  void clearAlignmentPlane();
   bool hasPeakOverlays() const { return !m_peakShapes.isEmpty(); }
   void setPeakLabelPrecision(int n);
   int getPeakLabelPrecision() const { return m_peakLabelPrecision; }
@@ -275,7 +276,7 @@ signals:
   void peaksWorkspaceDeleted();
   void comparePeaks(
       const std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &);
-  void alignPeaks(const std::vector<Mantid::Geometry::IPeak*>&,
+  void alignPeaks(const std::vector<Mantid::Kernel::V3D>&,
                   const Mantid::Geometry::IPeak*);
 
   // other
@@ -346,7 +347,7 @@ protected:
   std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *>
       m_selectedPeaks;
 
-  std::vector<Mantid::Geometry::IPeak*> m_selectedAlignmentPlane;
+  std::vector<Mantid::Kernel::V3D> m_selectedAlignmentPlane;
   std::vector<QPointF> m_selectedAlignmentMarkers;
   Mantid::Geometry::IPeak* m_selectedAlignmentPeak;
   /// use with a new PeakOverlay.

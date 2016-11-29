@@ -678,6 +678,15 @@ void ProjectionSurface::clearPeakOverlays() {
     m_peakShapesStyle = 0;
     emit peaksWorkspaceDeleted();
   }
+
+  clearAlignmentPlane();
+}
+
+void ProjectionSurface::clearAlignmentPlane()
+{
+  m_selectedAlignmentPlane.clear();
+  m_selectedAlignmentMarkers.clear();
+  m_selectedAlignmentPeak = nullptr;
 }
 
 /**
@@ -831,7 +840,7 @@ void ProjectionSurface::alignPeaks(const QRect &rect)
   }
 
   if(m_selectedAlignmentPlane.size() < 3 && peak) {
-    m_selectedAlignmentPlane.push_back(peak);
+    m_selectedAlignmentPlane.push_back(peak->getDetPos());
     m_selectedAlignmentMarkers.push_back(origin);
   } else if (peak) {
     m_selectedAlignmentPeak = peak;

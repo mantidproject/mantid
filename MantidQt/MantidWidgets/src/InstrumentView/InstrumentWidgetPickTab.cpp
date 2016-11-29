@@ -565,10 +565,10 @@ void InstrumentWidgetPickTab::initSurface() {
   connect(
       surface,
       SIGNAL(alignPeaks(
-          const std::vector<Mantid::Geometry::IPeak *>&, const Mantid::Geometry::IPeak *)),
+          const std::vector<Mantid::Kernel::V3D>&, const Mantid::Geometry::IPeak *)),
       this,
       SLOT(alignPeaks(
-          const std::vector<Mantid::Geometry::IPeak *>, const Mantid::Geometry::IPeak *)));
+          const std::vector<Mantid::Kernel::V3D>, const Mantid::Geometry::IPeak *)));
   connect(surface, SIGNAL(peaksWorkspaceAdded()), this,
           SLOT(updateSelectionInfoDisplay()));
   connect(surface, SIGNAL(peaksWorkspaceDeleted()), this,
@@ -701,7 +701,7 @@ void InstrumentWidgetPickTab::comparePeaks(const std::pair<
   m_infoController->displayComparePeaksInfo(peaks);
 }
 
-void InstrumentWidgetPickTab::alignPeaks(const std::vector<Mantid::Geometry::IPeak*> &planePeaks,
+void InstrumentWidgetPickTab::alignPeaks(const std::vector<Mantid::Kernel::V3D> &planePeaks,
                                          const Mantid::Geometry::IPeak* peak) {
   m_infoController->displyAlignPeaksInfo(planePeaks, peak);
 }
@@ -986,7 +986,7 @@ void ComponentInfoController::displayComparePeaksInfo(
 }
 
 void ComponentInfoController::displyAlignPeaksInfo(
-    const std::vector<Mantid::Geometry::IPeak *> &planePeaks,
+    const std::vector<Mantid::Kernel::V3D> &planePeaks,
     const Mantid::Geometry::IPeak *peak)
 {
   std::stringstream text;
@@ -994,21 +994,27 @@ void ComponentInfoController::displyAlignPeaksInfo(
   if (planePeaks.size() < 3)
     return;
 
-  auto pos1 = planePeaks[0]->getDetectorPosition();
-  auto pos2 = planePeaks[1]->getDetectorPosition();
-  auto pos3 = planePeaks[2]->getDetectorPosition();
+  auto pos1 = planePeaks[0];
+  auto pos2 = planePeaks[1];
+  auto pos3 = planePeaks[2];
 
-  std::vector<Mantid::Kernel::V3D> vs = { (pos2 - pos1), (pos3 - pos1) };
-  auto basis = Mantid::Kernel::V3D::makeVectorsOrthogonal(vs);
-  auto i = basis[0];
-  auto j = basis[1];
-  auto k = basis[2];
+  auto i = pos2 - pos1;
+  i.normalize();
+  auto j = pos3 - pos1;
+  j.normalize();
+  auto k = i.cross_prod(j);
+  k.normalize();
 
-  auto pos4 = peak->getDetectorPosition();
+  // orthogonalize
+  j = i.cross_prod(k);
+
+  auto pos4 = peak->getDetPos();
+  auto x = pos4.scalar_prod(i);
+  auto y = pos4.scalar_prod(j);
+  auto z = pos4.scalar_prod(k);
+
   double r, theta, phi;
-  pos4.reBase(i,j,k);
-  pos4.getSpherical(r, theta, phi);
-
+  Mantid::Kernel::V3D(x, y, z).getSpherical(r, theta, phi);
 
   text << "r: " << r << " theta: " << theta << " phi: " << phi << "\n";
 
