@@ -77,8 +77,7 @@ void QtReflRunsTabView::initLayout() {
   connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
   // Selected group changed
-  connect(ui.toolbox, SIGNAL(currentChanged(int)), this,
-          SLOT(groupChanged()));
+  connect(ui.toolbox, SIGNAL(currentChanged(int)), this, SLOT(groupChanged()));
 
   // Synchronize the instrument selection widgets
   // Processing table in group 1
