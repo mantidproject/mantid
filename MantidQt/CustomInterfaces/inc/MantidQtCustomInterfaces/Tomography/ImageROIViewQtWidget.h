@@ -170,6 +170,8 @@ private slots:
   void valueUpdatedROI(int v);
   void valueUpdatedNormArea(int v);
 
+  void findCORClicked();
+
 private:
   void setupConnections();
 

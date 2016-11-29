@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 
+=======
+from __future__ import (absolute_import, division, print_function)
+>>>>>>> 4af1c88858d9fb74c3b99674eb1a5be5b6a3a676
 # Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 # Oak Ridge National Laboratory & European Spallation Source
 #
@@ -95,8 +99,8 @@ class ReconstructionCommand(object):
         data, white, dark = self.read_in_stack(
             cfg.preproc_cfg.input_dir, cfg.preproc_cfg.in_img_format,
             cfg.preproc_cfg.input_dir_flat, cfg.preproc_cfg.input_dir_dark)
-        print "Shape of raw data: {0}, dtype: {1}".format(data.shape,
-                                                          data.dtype)
+        print("Shape of raw data: {0}, dtype: {1}".format(data.shape,
+                                                          data.dtype))
 
         # These imports will raise appropriate exceptions in case of error
         import tomorec.tool_imports as tti
@@ -104,8 +108,8 @@ class ReconstructionCommand(object):
 
         preproc_data = self.apply_all_preproc(data, cfg.preproc_cfg, white,
                                               dark)
-        print "Shape of pre-processed data: {0}, dtype: {1}".format(
-            preproc_data.shape, data.dtype)
+        print("Shape of pre-processed data: {0}, dtype: {1}".format(
+            preproc_data.shape, data.dtype))
 
         # Save pre-proc images
         self.save_preproc_images(cfg.postproc_cfg.output_dir, preproc_data,
@@ -129,7 +133,7 @@ class ReconstructionCommand(object):
                                     (data, preproc_data, recon_data), tstart,
                                     t_recon_end - t_recon_start)
 
-        print "Finished reconstruction."
+        print("Finished reconstruction.")
 
     def gen_readme_summary_begin(self, filename, cfg, cmd_line):
         """
@@ -269,10 +273,10 @@ class ReconstructionCommand(object):
         """
         self._check_data_stack(data)
 
-        print " * Beginning pre-processing with pixel data type:", data.dtype
+        print(" * Beginning pre-processing with pixel data type:", data.dtype)
         if 'float64' == data.dtype:
             data = data.astype(dtype='float32')
-            print " * Note: pixel data type changed to:", data.dtype
+            print(" * Note: pixel data type changed to:", data.dtype)
 
         data, white, dark = self.rotate_stack(data, cfg, white, dark)
         if self.crop_before_normaliz:
@@ -314,7 +318,7 @@ class ReconstructionCommand(object):
         self._check_data_stack(imgs_angles)
 
         if not preproc_cfg.line_projection:
-            print " * Note: not applying line projection."
+            print(" * Note: not applying line projection.")
             return imgs_angles
 
         imgs_angles = imgs_angles.astype('float32')
@@ -345,29 +349,33 @@ class ReconstructionCommand(object):
             import prep as iprep
             if 'wavelet-fourier' == cfg.stripe_removal_method.lower():
                 time1 = time.time()
-                print " * Removing stripes/ring artifacts using the method '{0}'".format(
-                    cfg.stripe_removal_method)
+                print(
+                    " * Removing stripes/ring artifacts using the method '{0}'".
+                    format(cfg.stripe_removal_method))
                 #preproc_data = tomopy.prep.stripe.remove_stripe_fw(preproc_data)
                 preproc_data = iprep.filters.remove_stripes_ring_artifacts(
                     preproc_data, 'wavelet-fourier')
                 time2 = time.time()
-                print " * Removed stripes/ring artifacts. Time elapsed: {0:.3f}".format(
-                    time2 - time1)
+                print(
+                    " * Removed stripes/ring artifacts. Time elapsed: {0:.3f}".
+                    format(time2 - time1))
             elif 'titarenko' == cfg.stripe_removal_method.lower():
                 time1 = time.time()
-                print " * Removing stripes/ring artifacts, using the method '{0}'".format(
-                    cfg.stripe_removal_method)
+                print(
+                    " * Removing stripes/ring artifacts, using the method '{0}'".
+                    format(cfg.stripe_removal_method))
                 preproc_data = tomopy.prep.stripe.remove_stripe_ti(
                     preproc_data)
                 time2 = time.time()
-                print " * Removed stripes/ring artifacts, Time elapsed: {0:.3f}".format(
-                    time2 - time1)
+                print(
+                    " * Removed stripes/ring artifacts, Time elapsed: {0:.3f}".
+                    format(time2 - time1))
             else:
                 print(
                     " * WARNING: stripe removal method '{0}' is unknown. Not applying it.".
                     format(cfg.stripe_removal_method))
         else:
-            print " * Note: not applying stripe removal."
+            print(" * Note: not applying stripe removal.")
 
         # Experimental options, disabled and not present in the config objects for now
         # These and related algorithms needs more evaluation/benchmarking
@@ -432,7 +440,7 @@ class ReconstructionCommand(object):
             air_sums = np.true_divide(air_sums, np.amax(air_sums))
             too_verbose = True
             if too_verbose:
-                print " Air region sums (relative to maximum): ", air_sums
+                print(" Air region sums (relative to maximum): ", air_sums)
 
             for idx in range(0, data.shape[0]):
                 data[idx, :, :] = np.true_divide(data[idx, :, :],
@@ -445,7 +453,7 @@ class ReconstructionCommand(object):
                     avg, np.max(air_sums) / avg, np.min(air_sums) / avg))
 
         else:
-            print " * Note: not normalizing by air region"
+            print(" * Note: not normalizing by air region")
 
         return data
 
@@ -474,7 +482,7 @@ class ReconstructionCommand(object):
                     "Error in crop (region of interest) parameter (expecting a list with four integers. "
                     "Got: {0}. Error details: ".format(cfg.crop_coords), exc)
         else:
-            print " * Note: not applying cropping to region of interest."
+            print(" * Note: not applying cropping to region of interest.")
 
         return data
 
@@ -497,7 +505,7 @@ class ReconstructionCommand(object):
                 "configuration")
 
         if not cfg.normalize_flat_dark:
-            print " * Note: not applying normalization by flat/dark images."
+            print(" * Note: not applying normalization by flat/dark images.")
             return data
 
         if isinstance(norm_flat_img, np.ndarray):
@@ -528,8 +536,9 @@ class ReconstructionCommand(object):
                     data[idx, :, :] - norm_dark_img, norm_divide)
             # true_divide produces float64, we assume that precision not needed (definitely not
             # for 16-bit depth output images as we usually have).
-            print " * Finished normalization by flat/dark images with pixel data type: {0}.".format(
-                data.dtype)
+            print(
+                " * Finished normalization by flat/dark images with pixel data type: {0}.".
+                format(data.dtype))
         else:
             print(
                 " * Note: cannot apply normalization by flat/dark images because no valid flat image has been "
@@ -557,22 +566,22 @@ class ReconstructionCommand(object):
 
         # Apply cut-off for the normalization?
         if cfg.cut_off_level and cfg.cut_off_level:
-            print "* Applying cut-off with level: {0}".format(
-                cfg.cut_off_level)
+            print("* Applying cut-off with level: {0}".format(
+                cfg.cut_off_level))
             dmin = np.amin(data)
             dmax = np.amax(data)
             rel_cut_off = dmin + cfg.cut_off_level * (dmax - dmin)
             data[data < rel_cut_off] = dmin
-            print " * Finished cut-off stepa, with pixel data type: {0}".format(
-                data.dtype)
+            print(" * Finished cut-off stepa, with pixel data type: {0}".
+                  format(data.dtype))
         else:
-            print " * Note: not applying cut-off."
+            print(" * Note: not applying cut-off.")
 
         if cfg.mcp_corrections:
-            print " * MCP corrections not implemented in this version"
+            print(" * MCP corrections not implemented in this version")
 
         if cfg.scale_down:
-            print " * Scale down not implemented in this version"
+            print(" * Scale down not implemented in this version")
 
         if cfg.median_filter_size and cfg.median_filter_size > 1:
             for idx in range(0, data.shape[0]):
@@ -583,7 +592,7 @@ class ReconstructionCommand(object):
                 " * Finished noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
                 format(data.dtype, cfg.median_filter_size))
         else:
-            print " * Note: not applying noise filter /median."
+            print(" * Note: not applying noise filter /median.")
 
         return data
 
@@ -604,7 +613,7 @@ class ReconstructionCommand(object):
             )
 
         if not cfg.rotation or cfg.rotation < 0:
-            print " * Note: not rotating the input images."
+            print(" * Note: not rotating the input images.")
             return data, white, dark
 
         data = self._rotate_imgs(data, cfg)
@@ -669,31 +678,40 @@ class ReconstructionCommand(object):
             # run_reconstruct_3d_astra(proj_data, algorithm, cor, proj_angles=proj_angles)
             return self.run_reconstruct_3d_astra_simple(
                 proj_data, proj_angles, alg_cfg, preproc_cfg.cor)
-        
-        # examples to check: [30, 130, 230, 330, 430]:
-        for slice_idx in [int(proj_data.shape[0] / 2)]:  
-            print " > Finding center with tomopy find_center, slice index: {0}.".format(
-                slice_idx)
+
+        for slice_idx in [int(proj_data.shape[0] / 2)
+                          ]:  # examples to check: [30, 130, 230, 330, 430]:
+            print(
+                " > Finding center with tomopy find_center, slice index: {0}.".
+                format(slice_idx))
             import tomorec.tool_imports as tti
             try:
                 tomopy = tti.import_tomo_tool('tomopy')
-                print "proj_data: ", proj_data.shape
-                print "proj_angles: ", proj_angles.shape
-                tomopy_cor = tomopy.find_center(
-                    tomo=proj_data,
-                    theta=proj_angles,
-                    ind=slice_idx,
-                    emission=False)
+                # Temporary fix to support newer tomopy reconstructions,
+                # this does not guarantee that their output will be correct,
+                # but only patches the removal of the emission keyword and allows the recon to run
+                if (int(tomopy.__version__[0]) < 1):
+                    # for tomopy versions 0.x.x
+                    tomopy_cor = tomopy.find_center(
+                        tomo=proj_data,
+                        theta=proj_angles,
+                        ind=slice_idx,
+                        emission=False)
+                else:
+                    # for tomopy versions 1.x.x
+                    tomopy_cor = tomopy.find_center(
+                        tomo=proj_data, theta=proj_angles, ind=slice_idx)
                 if not preproc_cfg.cor:
                     preproc_cfg.cor = tomopy_cor
-                print " > Center of rotation found by tomopy.find_center:  {0}".format(
-                    tomopy_cor)
+                print(
+                    " > Center of rotation found by tomopy.find_center:  {0}".
+                    format(tomopy_cor))
             except ImportError as exc:
                 print(
                     " * WARNING: could not import tomopy so could not use the tomopy method to find the center "
                     "of rotation. Details: {0}".format(exc))
 
-        print "Using center of rotation: {0}".format(preproc_cfg.cor)
+        print("Using center of rotation: {0}".format(preproc_cfg.cor))
         start = time.time()
         if 'tomopy' == alg_cfg.tool and 'gridrec' != alg_cfg.algorithm and 'fbp' != alg_cfg.algorithm:
             if not alg_cfg.num_iter:
@@ -722,8 +740,9 @@ class ReconstructionCommand(object):
                 center=preproc_cfg.cor,
                 algorithm=alg_cfg.algorithm)
         tnow = time.time()
-        print "Reconstructed 3D volume. Time elapsed in reconstruction algorithm: {0:.3f}".format(
-            tnow - start)
+        print(
+            "Reconstructed 3D volume. Time elapsed in reconstruction algorithm: {0:.3f}".
+            format(tnow - start))
 
         return rec
 
@@ -794,7 +813,7 @@ class ReconstructionCommand(object):
 
         nSinos = get_max_frames(algorithm=algorithm)
         iterations = alg_cfg.num_iter
-        print " astra recon - doing {0} iterations".format(iterations)
+        print(" astra recon - doing {0} iterations".format(iterations))
 
         # swaps outermost dimensions so it is sinogram layout
         sinogram = proj_data
@@ -890,19 +909,19 @@ class ReconstructionCommand(object):
         if cfg.circular_mask:
             recon_data = iprep.filters.circular_mask(
                 recon_data, ratio=cfg.circular_mask)
-            print " * Applied circular mask on reconstructed volume"
+            print(" * Applied circular mask on reconstructed volume")
         else:
-            print " * Note: not applied circular mask on reconstructed volume"
+            print(" * Note: not applied circular mask on reconstructed volume")
 
         if cfg.cut_off_level and cfg.cut_off_level > 0.0:
-            print "=== applying cut-off: {0}".format(cfg.cut_off)
+            print("=== applying cut-off: {0}".format(cfg.cut_off))
             dmin = np.amin(recon_data)
             dmax = np.amax(recon_data)
             rel_cut_off = dmin + cfg.cut_off * (dmax - dmin)
             recon_data[recon_data < rel_cut_off] = dmin
 
         if cfg.gaussian_filter_par:
-            print " * Gaussian filter not implemented"
+            print(" * Gaussian filter not implemented")
 
         if cfg.median_filter_size and cfg.median_filter_size > 1:
             recon_data = scipy.ndimage.median_filter(recon_data,
@@ -911,7 +930,7 @@ class ReconstructionCommand(object):
                 " * Applied median_filter on reconstructed volume, with filtersize: {0}".
                 format(cfg.median_filter_size))
         else:
-            print " * Note: not applied median_filter on reconstructed volume"
+            print(" * Note: not applied median_filter on reconstructed volume")
 
         if cfg.median_filter3d_size and cfg.median_filter3d_size > 1:
             kernel_size = 3
@@ -922,7 +941,9 @@ class ReconstructionCommand(object):
                 " * Applied N-dimensional median filter on reconstructed volume, with filter size: {0} ".
                 format(kernel_size))
         else:
-            print " * Note: not applied N-dimensional median filter on reconstructed volume"
+            print(
+                " * Note: not applied N-dimensional median filter on reconstructed volume"
+            )
 
     def read_in_stack(self,
                       sample_path,
@@ -981,8 +1002,8 @@ class ReconstructionCommand(object):
         # output_dir = 'output_recon_tomopy'
         output_dir = cfg.postproc_cfg.output_dir
         out_recon_dir = os.path.join(output_dir, 'reconstructed')
-        print "* Saving slices of the reconstructed volume in: {0}".format(
-            out_recon_dir)
+        print("* Saving slices of the reconstructed volume in: {0}".format(
+            out_recon_dir))
         tomoio.save_recon_as_vertical_slices(
             recon_data,
             out_recon_dir,
@@ -993,7 +1014,7 @@ class ReconstructionCommand(object):
         save_horiz_slices = False
         if save_horiz_slices:
             out_horiz_dir = os.path.join(output_dir, 'horiz_slices')
-            print "* Saving horizontal slices in: {0}".format(out_horiz_dir)
+            print("* Saving horizontal slices in: {0}".format(out_horiz_dir))
             tomoio.save_recon_as_horizontal_slices(
                 recon_data,
                 out_horiz_dir,
@@ -1001,7 +1022,7 @@ class ReconstructionCommand(object):
                 img_format=cfg.preproc_cfg.out_img_format)
 
         if save_netcdf_vol:
-            print "* Saving reconstructed volume as NetCDF"
+            print("* Saving reconstructed volume as NetCDF")
             tomoio.save_recon_netcdf(recon_data, output_dir)
 
     def save_preproc_images(self,
@@ -1018,14 +1039,16 @@ class ReconstructionCommand(object):
         @param out_dtype :: dtype used for the pixel type/depth in the output image files
         """
 
-        print " * Pre-processed images (preproc_data) dtype:", preproc_data.dtype
+        print(" * Pre-processed images (preproc_data) dtype:",
+              preproc_data.dtype)
         min_pix = np.amin(preproc_data)
         max_pix = np.amax(preproc_data)
-        print "   with min_pix: {0}, max_pix: {1}".format(min_pix, max_pix)
+        print("   with min_pix: {0}, max_pix: {1}".format(min_pix, max_pix))
         if preproc_cfg.save_preproc_imgs:
             preproc_dir = os.path.join(output_dir,
                                        self._PREPROC_IMGS_SUBDIR_NAME)
-            print "* Saving pre-processed images into: {0}".format(preproc_dir)
+            print("* Saving pre-processed images into: {0}".format(
+                preproc_dir))
             tomoio.make_dirs_if_needed(preproc_dir)
             for idx in range(0, preproc_data.shape[0]):
                 # rescale_intensity has issues with float64=>int16
@@ -1038,7 +1061,7 @@ class ReconstructionCommand(object):
                     img_format=preproc_cfg.out_img_format,
                     dtype=out_dtype)
         else:
-            print "* NOTE: not saving pre-processed images..."
+            print("* NOTE: not saving pre-processed images...")
 
     def _check_data_stack(self, data):
         if not isinstance(data, np.ndarray):
@@ -1081,6 +1104,13 @@ class ReconstructionCommand(object):
         proj_angles = np.arange(0, num_projections * inc, inc)
         # For tomopy
         proj_angles = np.radians(proj_angles)
+
+        for slice_idx in [int(num_projections / 2)]:
+            tomopy_cor = tomopy.find_center(
+                tomo=projection_data,
+                theta=proj_angles,
+                ind=slice_idx,
+                emission=False)
 
         size = int(num_projections)
 

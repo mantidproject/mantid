@@ -1547,6 +1547,9 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
   } else {
     IFunction_sptr func = FunctionFactory::Instance().createFunction(
         currentFitFunction.toStdString());
+    for (size_t i = 0; i < func->nParams(); i++) {
+      parameters << QString::fromStdString(func->parameterName(i));
+    }
   }
   return parameters;
 }

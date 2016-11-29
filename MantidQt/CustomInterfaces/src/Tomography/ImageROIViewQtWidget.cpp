@@ -130,6 +130,10 @@ void ImageROIViewQtWidget::setupConnections() {
   // "Play" the stack for quick visualization of input images
   connect(m_ui.pushButton_play, SIGNAL(released()), this, SLOT(playClicked()));
 
+  // Clicking Auto COR
+  connect(m_ui.pushButton_center_find, SIGNAL(released()), this,
+          SLOT(findCORClicked()));
+
   // image sequence scroll/slide:
   connect(m_ui.horizontalScrollBar_img_stack, SIGNAL(valueChanged(int)), this,
           SLOT(updateFromImagesSlider(int)));
@@ -148,22 +152,22 @@ void ImageROIViewQtWidget::setupConnections() {
   connect(m_ui.spinBox_cor_y, SIGNAL(valueChanged(int)), this,
           SLOT(valueUpdatedCoR(int)));
 
-  connect(m_ui.spinBox_roi_top_x, SIGNAL(valueChanged(int)), this,
+  connect(m_ui.spinBox_roi_right, SIGNAL(valueChanged(int)), this,
           SLOT(valueUpdatedROI(int)));
-  connect(m_ui.spinBox_roi_top_y, SIGNAL(valueChanged(int)), this,
+  connect(m_ui.spinBox_roi_top, SIGNAL(valueChanged(int)), this,
           SLOT(valueUpdatedROI(int)));
-  connect(m_ui.spinBox_roi_bottom_x, SIGNAL(valueChanged(int)), this,
+  connect(m_ui.spinBox_roi_left, SIGNAL(valueChanged(int)), this,
           SLOT(valueUpdatedROI(int)));
-  connect(m_ui.spinBox_roi_bottom_y, SIGNAL(valueChanged(int)), this,
+  connect(m_ui.spinBox_roi_bottom, SIGNAL(valueChanged(int)), this,
           SLOT(valueUpdatedROI(int)));
 
-  connect(m_ui.spinBox_norm_top_x, SIGNAL(valueChanged(int)), this,
+  connect(m_ui.spinBox_norm_right, SIGNAL(valueChanged(int)), this,
           SLOT(valueUpdatedNormArea(int)));
-  connect(m_ui.spinBox_norm_top_y, SIGNAL(valueChanged(int)), this,
+  connect(m_ui.spinBox_norm_top, SIGNAL(valueChanged(int)), this,
           SLOT(valueUpdatedNormArea(int)));
-  connect(m_ui.spinBox_norm_bottom_x, SIGNAL(valueChanged(int)), this,
+  connect(m_ui.spinBox_norm_left, SIGNAL(valueChanged(int)), this,
           SLOT(valueUpdatedNormArea(int)));
-  connect(m_ui.spinBox_norm_bottom_y, SIGNAL(valueChanged(int)), this,
+  connect(m_ui.spinBox_norm_bottom, SIGNAL(valueChanged(int)), this,
           SLOT(valueUpdatedNormArea(int)));
 
   // colors
@@ -320,6 +324,7 @@ void ImageROIViewQtWidget::enableActions(bool enable) {
   m_ui.pushButton_browse_img->setEnabled(enable);
   m_ui.pushButton_browse_stack->setEnabled(enable);
   m_ui.pushButton_play->setEnabled(enable);
+  m_ui.pushButton_center_find->setEnabled(enable);
 
   m_ui.colorBarWidget->setEnabled(enable);
 
@@ -332,21 +337,12 @@ void ImageROIViewQtWidget::enableActions(bool enable) {
 
 std::string ImageROIViewQtWidget::askImgOrStackPath() {
   // get path
-  QString fitsStr = QString("Supported formats: FITS, TIFF and PNG "
-                            "(*.fits *.fit *.tiff *.tif *.png);;"
-                            "FITS, Flexible Image Transport System images "
-                            "(*.fits *.fit);;"
-                            "TIFF, Tagged Image File Format "
-                            "(*.tif *.tiff);;"
-                            "PNG, Portable Network Graphics "
-                            "(*.png);;"
-                            "Other extensions/all files (*)");
   QString prevPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
   QString path(QFileDialog::getExistingDirectory(
       this, tr("Open a stack of images (directory containing sample, dark and "
                "flat images, or a directory containing images)"),
-      prevPath, QFileDialog::ShowDirsOnly));
+      prevPath));
   if (!path.isEmpty()) {
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
   }
@@ -356,15 +352,20 @@ std::string ImageROIViewQtWidget::askImgOrStackPath() {
 
 std::string ImageROIViewQtWidget::askSingleImagePath() {
   // get path
-  QString fitsStr = QString("Supported formats: FITS, TIFF and PNG "
-                            "(*.fits *.fit *.tiff *.tif *.png);;"
-                            "FITS, Flexible Image Transport System images "
+  // QString fitsStr = QString("Supported formats: FITS, TIFF and PNG "
+  //                           "(*.fits *.fit *.tiff *.tif *.png);;"
+  //                           "FITS, Flexible Image Transport System images "
+  //                           "(*.fits *.fit);;"
+  //                           "TIFF, Tagged Image File Format "
+  //                           "(*.tif *.tiff);;"
+  //                           "PNG, Portable Network Graphics "
+  //                           "(*.png);;"
+  //                           "Other extensions/all files (*)");
+  // only FITS is supported right now
+  QString fitsStr = QString("Supported formats: FITS"
                             "(*.fits *.fit);;"
-                            "TIFF, Tagged Image File Format "
-                            "(*.tif *.tiff);;"
-                            "PNG, Portable Network Graphics "
-                            "(*.png);;"
-                            "Other extensions/all files (*)");
+                            "FITS, Flexible Image Transport System images "
+                            "(*.fits *.fit);;");
   QString prevPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
   QString filepath(
@@ -408,17 +409,17 @@ void ImageROIViewQtWidget::resetCoR() {
 }
 
 void ImageROIViewQtWidget::resetROI() {
-  m_ui.spinBox_roi_top_x->setValue(0);
-  m_ui.spinBox_roi_top_y->setValue(0);
-  m_ui.spinBox_roi_bottom_x->setValue(m_ui.spinBox_roi_bottom_x->maximum());
-  m_ui.spinBox_roi_bottom_y->setValue(m_ui.spinBox_roi_bottom_y->maximum());
+  m_ui.spinBox_roi_right->setValue(0);
+  m_ui.spinBox_roi_top->setValue(0);
+  m_ui.spinBox_roi_left->setValue(m_ui.spinBox_roi_left->maximum());
+  m_ui.spinBox_roi_bottom->setValue(m_ui.spinBox_roi_bottom->maximum());
 }
 
 void ImageROIViewQtWidget::resetNormArea() {
-  m_ui.spinBox_norm_top_x->setValue(0);
-  m_ui.spinBox_norm_top_y->setValue(0);
-  m_ui.spinBox_norm_bottom_x->setValue(0);
-  m_ui.spinBox_norm_bottom_y->setValue(0);
+  m_ui.spinBox_norm_right->setValue(0);
+  m_ui.spinBox_norm_top->setValue(0);
+  m_ui.spinBox_norm_left->setValue(0);
+  m_ui.spinBox_norm_bottom->setValue(0);
 }
 
 void ImageROIViewQtWidget::resetWidgetsOnNewStack() {
@@ -455,18 +456,18 @@ void ImageROIViewQtWidget::grabCoRFromWidgets() {
 
 void ImageROIViewQtWidget::grabROIFromWidgets() {
   m_params.roi =
-      std::make_pair(Mantid::Kernel::V2D(m_ui.spinBox_roi_top_x->value(),
-                                         m_ui.spinBox_roi_top_y->value()),
-                     Mantid::Kernel::V2D(m_ui.spinBox_roi_bottom_x->value(),
-                                         m_ui.spinBox_roi_bottom_y->value()));
+      std::make_pair(Mantid::Kernel::V2D(m_ui.spinBox_roi_right->value(),
+                                         m_ui.spinBox_roi_top->value()),
+                     Mantid::Kernel::V2D(m_ui.spinBox_roi_left->value(),
+                                         m_ui.spinBox_roi_bottom->value()));
 }
 
 void ImageROIViewQtWidget::grabNormAreaFromWidgets() {
   m_params.normalizationRegion =
-      std::make_pair(Mantid::Kernel::V2D(m_ui.spinBox_norm_top_x->value(),
-                                         m_ui.spinBox_norm_top_y->value()),
-                     Mantid::Kernel::V2D(m_ui.spinBox_norm_bottom_x->value(),
-                                         m_ui.spinBox_norm_bottom_y->value()));
+      std::make_pair(Mantid::Kernel::V2D(m_ui.spinBox_norm_right->value(),
+                                         m_ui.spinBox_norm_top->value()),
+                     Mantid::Kernel::V2D(m_ui.spinBox_norm_left->value(),
+                                         m_ui.spinBox_norm_bottom->value()));
 }
 
 /**
@@ -598,27 +599,27 @@ void ImageROIViewQtWidget::initParamWidgets(size_t maxWidth, size_t maxHeight) {
   m_ui.spinBox_cor_y->setMaximum(m_imgHeight - 1);
   resetCoR();
 
-  m_ui.spinBox_roi_top_x->setMinimum(0);
-  m_ui.spinBox_roi_top_x->setMaximum(m_imgWidth - 1);
-  m_ui.spinBox_roi_top_y->setMinimum(0);
-  m_ui.spinBox_roi_top_y->setMaximum(m_imgHeight - 1);
+  m_ui.spinBox_roi_right->setMinimum(0);
+  m_ui.spinBox_roi_right->setMaximum(m_imgWidth - 1);
+  m_ui.spinBox_roi_top->setMinimum(0);
+  m_ui.spinBox_roi_top->setMaximum(m_imgHeight - 1);
 
-  m_ui.spinBox_roi_bottom_x->setMinimum(0);
-  m_ui.spinBox_roi_bottom_x->setMaximum(m_imgWidth - 1);
-  m_ui.spinBox_roi_bottom_y->setMinimum(0);
-  m_ui.spinBox_roi_bottom_y->setMaximum(m_imgHeight - 1);
+  m_ui.spinBox_roi_left->setMinimum(0);
+  m_ui.spinBox_roi_left->setMaximum(m_imgWidth - 1);
+  m_ui.spinBox_roi_bottom->setMinimum(0);
+  m_ui.spinBox_roi_bottom->setMaximum(m_imgHeight - 1);
 
   resetROI();
 
-  m_ui.spinBox_norm_top_x->setMinimum(0);
-  m_ui.spinBox_norm_top_x->setMaximum(m_imgWidth - 1);
-  m_ui.spinBox_norm_top_y->setMinimum(0);
-  m_ui.spinBox_norm_top_y->setMaximum(m_imgHeight - 1);
+  m_ui.spinBox_norm_right->setMinimum(0);
+  m_ui.spinBox_norm_right->setMaximum(m_imgWidth - 1);
+  m_ui.spinBox_norm_top->setMinimum(0);
+  m_ui.spinBox_norm_top->setMaximum(m_imgHeight - 1);
 
-  m_ui.spinBox_norm_bottom_x->setMinimum(0);
-  m_ui.spinBox_norm_bottom_x->setMaximum(m_imgWidth - 1);
-  m_ui.spinBox_norm_bottom_y->setMinimum(0);
-  m_ui.spinBox_norm_bottom_y->setMaximum(m_imgHeight - 1);
+  m_ui.spinBox_norm_left->setMinimum(0);
+  m_ui.spinBox_norm_left->setMaximum(m_imgWidth - 1);
+  m_ui.spinBox_norm_bottom->setMinimum(0);
+  m_ui.spinBox_norm_bottom->setMaximum(m_imgHeight - 1);
 
   resetNormArea();
 }
@@ -634,20 +635,20 @@ void ImageROIViewQtWidget::setParamWidgets(ImageStackPreParams &params) {
   m_ui.spinBox_cor_x->setValue(static_cast<int>(params.cor.X()));
   m_ui.spinBox_cor_y->setValue(static_cast<int>(params.cor.Y()));
 
-  m_ui.spinBox_roi_top_x->setValue(static_cast<int>(params.roi.first.X()));
-  m_ui.spinBox_roi_top_y->setValue(static_cast<int>(params.roi.first.Y()));
+  m_ui.spinBox_roi_right->setValue(static_cast<int>(params.roi.first.X()));
+  m_ui.spinBox_roi_top->setValue(static_cast<int>(params.roi.first.Y()));
 
-  m_ui.spinBox_roi_bottom_x->setValue(static_cast<int>(params.roi.second.X()));
-  m_ui.spinBox_roi_bottom_y->setValue(static_cast<int>(params.roi.second.Y()));
+  m_ui.spinBox_roi_left->setValue(static_cast<int>(params.roi.second.X()));
+  m_ui.spinBox_roi_bottom->setValue(static_cast<int>(params.roi.second.Y()));
 
-  m_ui.spinBox_norm_top_x->setValue(
+  m_ui.spinBox_norm_right->setValue(
       static_cast<int>(params.normalizationRegion.first.X()));
-  m_ui.spinBox_norm_top_y->setValue(
+  m_ui.spinBox_norm_top->setValue(
       static_cast<int>(params.normalizationRegion.first.Y()));
 
-  m_ui.spinBox_norm_bottom_x->setValue(
+  m_ui.spinBox_norm_left->setValue(
       static_cast<int>(params.normalizationRegion.second.X()));
-  m_ui.spinBox_norm_bottom_y->setValue(
+  m_ui.spinBox_norm_bottom->setValue(
       static_cast<int>(params.normalizationRegion.second.Y()));
 }
 
@@ -1117,26 +1118,26 @@ void ImageROIViewQtWidget::grabCoRFromMousePoint(int x, int y) {
 
 void ImageROIViewQtWidget::grabROICorner1FromMousePoint(int x, int y) {
   m_params.roi.first = Mantid::Kernel::V2D(x, y);
-  m_ui.spinBox_roi_top_x->setValue(x);
-  m_ui.spinBox_roi_top_y->setValue(y);
+  m_ui.spinBox_roi_right->setValue(x);
+  m_ui.spinBox_roi_top->setValue(y);
 }
 
 void ImageROIViewQtWidget::grabROICorner2FromMousePoint(int x, int y) {
   m_params.roi.second = Mantid::Kernel::V2D(x, y);
-  m_ui.spinBox_roi_bottom_x->setValue(x);
-  m_ui.spinBox_roi_bottom_y->setValue(y);
+  m_ui.spinBox_roi_left->setValue(x);
+  m_ui.spinBox_roi_bottom->setValue(y);
 }
 
 void ImageROIViewQtWidget::grabNormAreaCorner1FromMousePoint(int x, int y) {
   m_params.normalizationRegion.first = Mantid::Kernel::V2D(x, y);
-  m_ui.spinBox_norm_top_x->setValue(x);
-  m_ui.spinBox_norm_top_y->setValue(y);
+  m_ui.spinBox_norm_right->setValue(x);
+  m_ui.spinBox_norm_top->setValue(y);
 }
 
 void ImageROIViewQtWidget::grabNormAreaCorner2FromMousePoint(int x, int y) {
   m_params.normalizationRegion.second = Mantid::Kernel::V2D(x, y);
-  m_ui.spinBox_norm_bottom_x->setValue(x);
-  m_ui.spinBox_norm_bottom_y->setValue(y);
+  m_ui.spinBox_norm_left->setValue(x);
+  m_ui.spinBox_norm_bottom->setValue(y);
 }
 
 /**
@@ -1252,6 +1253,11 @@ void ImageROIViewQtWidget::colorRangeChanged() {
 void ImageROIViewQtWidget::closeEvent(QCloseEvent *event) {
   m_presenter->notify(IImageROIPresenter::ShutDown);
   event->accept();
+}
+
+void ImageROIViewQtWidget::findCORClicked() {
+  // this should run a --find-cor run on tomopy
+  m_presenter->notify(IImageROIPresenter::FindCoR);
 }
 
 } // namespace CustomInterfaces

@@ -122,7 +122,7 @@ void RefinePowderInstrumentParameters3::exec() {
   setFunctionParameterValues(m_positionFunc, m_profileParameters);
 
   // b) Generate some global useful value and Calculate starting chi^2
-  API::FunctionDomain1DVector domain(m_dataWS->readX(m_wsIndex));
+  API::FunctionDomain1DVector domain(m_dataWS->x(m_wsIndex).rawData());
   API::FunctionValues rawvalues(domain);
   m_positionFunc->function(domain, rawvalues);
 
@@ -333,9 +333,7 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
     map<string, Parameter> inparammap) {
   // 1. Prepare/initialization
   //    Data structure
-  const MantidVec &dataY = m_dataWS->readY(m_wsIndex);
-
-  size_t numpts = dataY.size();
+  size_t numpts = m_dataWS->y(m_wsIndex).size();
 
   vector<double> vecY(numpts, 0.0);
 
@@ -486,7 +484,7 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
   double chisqf0 = calculateFunction(emptymap, vecY);
   g_log.notice() << "Best Chi^2 (L-V) = " << chisqfx
                  << ", (homemade) = " << chisqf0 << '\n';
-  g_log.warning() << "Data Size = " << m_dataWS->readX(m_wsIndex).size()
+  g_log.warning() << "Data Size = " << m_dataWS->x(m_wsIndex).size()
                   << ", Number of parameters = "
                   << m_positionFunc->getParameterNames().size() << '\n';
 
@@ -779,7 +777,7 @@ double RefinePowderInstrumentParameters3::calculateFunction(
     setFunctionParameterValues(m_positionFunc, parammap);
 
   // 2. Calculate
-  const MantidVec &vecX = m_dataWS->readX(m_wsIndex);
+  const auto &vecX = m_dataWS->x(m_wsIndex).rawData();
   //    Check
   if (vecY.size() != vecX.size())
     throw runtime_error("vecY must be initialized with proper size!");
@@ -787,8 +785,8 @@ double RefinePowderInstrumentParameters3::calculateFunction(
   m_positionFunc->function1D(vecY, vecX);
 
   // 3. Calcualte error
-  double chisq = calculateFunctionChiSquare(vecY, m_dataWS->readY(m_wsIndex),
-                                            m_dataWS->readE(m_wsIndex));
+  double chisq = calculateFunctionChiSquare(
+      vecY, m_dataWS->y(m_wsIndex).rawData(), m_dataWS->e(m_wsIndex).rawData());
 
   return chisq;
 }
@@ -975,9 +973,9 @@ bool RefinePowderInstrumentParameters3::doFitFunction(
   stringstream outss;
   outss << "Fit function: " << m_positionFunc->asString()
         << "\nData To Fit: \n";
-  for (size_t i = 0; i < dataws->readX(0).size(); ++i)
-    outss << dataws->readX(wsindex)[i] << "\t\t" << dataws->readY(wsindex)[i]
-          << "\t\t" << dataws->readE(wsindex)[i] << "\n";
+  for (size_t i = 0; i < dataws->x(0).size(); ++i)
+    outss << dataws->x(wsindex)[i] << "\t\t" << dataws->y(wsindex)[i] << "\t\t"
+          << dataws->e(wsindex)[i] << "\n";
   g_log.information() << outss.str();
 
   // 1. Create and setup fit algorithm
@@ -1089,8 +1087,8 @@ void RefinePowderInstrumentParameters3::addOrReplace(
 Workspace2D_sptr RefinePowderInstrumentParameters3::genOutputWorkspace(
     FunctionDomain1DVector domain, FunctionValues rawvalues) {
   // 1. Create and set up output workspace
-  size_t lenx = m_dataWS->readX(m_wsIndex).size();
-  size_t leny = m_dataWS->readY(m_wsIndex).size();
+  size_t lenx = m_dataWS->x(m_wsIndex).size();
+  size_t leny = m_dataWS->y(m_wsIndex).size();
 
   Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>(
       WorkspaceFactory::Instance().create("Workspace2D", 6, lenx, leny));
@@ -1113,26 +1111,20 @@ Workspace2D_sptr RefinePowderInstrumentParameters3::genOutputWorkspace(
   // 4. Add values
   // a) X axis
   for (size_t iws = 0; iws < outws->getNumberHistograms(); ++iws) {
-    MantidVec &vecX = outws->dataX(iws);
-    for (size_t n = 0; n < lenx; ++n)
-      vecX[n] = domain[n];
+    outws->mutableX(iws) = domain.toVector();
   }
 
   // b) Y axis
-  const MantidVec &dataY = m_dataWS->readY(m_wsIndex);
-
-  for (size_t i = 0; i < domain.size(); ++i) {
-    outws->dataY(0)[i] = dataY[i];
-    outws->dataY(1)[i] = funcvalues[i];
-    outws->dataY(2)[i] = dataY[i] - funcvalues[i];
-    outws->dataY(3)[i] = rawvalues[i];
-    outws->dataY(4)[i] = dataY[i] - rawvalues[i];
-  }
+  const auto &dataY = m_dataWS->y(m_wsIndex);
+  outws->setSharedY(0, m_dataWS->sharedY(m_wsIndex));
+  outws->mutableY(1) = funcvalues.toVector();
+  outws->mutableY(2) = dataY - funcvalues.toVector();
+  outws->mutableY(3) = rawvalues.toVector();
+  outws->mutableY(4) = dataY - rawvalues.toVector();
 
   // 5. Zscore
-  vector<double> zscore = Kernel::getZscore(outws->readY(2));
-  for (size_t i = 0; i < domain.size(); ++i)
-    outws->dataY(5)[i] = zscore[i];
+  vector<double> zscore = Kernel::getZscore(outws->y(2).rawData());
+  outws->mutableY(5) = zscore;
 
   return outws;
 }

@@ -169,6 +169,22 @@ public:
     TS_ASSERT_DELTA(6.5735e-05, outputWS->y(0).back(), delta);
   }
 
+  void test_Linear_Interpolation() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
+                                       DeltaEMode::Elastic, -1, -1};
+    const int nlambda(5);
+    auto outputWS = runAlgorithm(wsProps, nlambda);
+
+    verifyDimensions(wsProps, outputWS);
+    const double delta(1e-05);
+    const size_t middle_index(4);
+
+    TS_ASSERT_DELTA(0.019012, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.0026940, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.00042886, outputWS->y(0).back(), delta);
+  }
+
   //---------------------------------------------------------------------------
   // Failure cases
   //---------------------------------------------------------------------------
@@ -198,10 +214,14 @@ public:
 
 private:
   Mantid::API::MatrixWorkspace_const_sptr
-  runAlgorithm(const TestWorkspaceDescriptor &wsProps) {
+  runAlgorithm(const TestWorkspaceDescriptor &wsProps, int nlambda = -1) {
     auto inputWS = setUpWS(wsProps);
     auto mcabs = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("InputWorkspace", inputWS));
+    if (nlambda > 0) {
+      TS_ASSERT_THROWS_NOTHING(
+          mcabs->setProperty("NumberOfWavelengthPoints", nlambda));
+    }
     mcabs->execute();
     return getOutputWorkspace(mcabs);
   }
