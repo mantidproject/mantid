@@ -553,7 +553,7 @@ TMDE(void MDBox)::generalBin(
  */
 TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform,
                                   const coord_t radiusSquared, signal_t &signal,
-                                  signal_t &errorSquared) const {
+                                  signal_t &errorSquared, const coord_t innerRadiusSquared) const {
   // If the box is cached to disk, you need to retrieve it
   const std::vector<MDE> &events = this->getConstEvents();
 
@@ -561,7 +561,7 @@ TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform,
   for (const auto & it :events) {
     coord_t out[nd];
     radiusTransform.apply(it.getCenter(), out);
-    if (out[0] < radiusSquared) {
+    if (out[0] < radiusSquared && out[0] > innerRadiusSquared) {
       signal += static_cast<signal_t>(it.getSignal());
       errorSquared += static_cast<signal_t>(it.getErrorSquared());
     }

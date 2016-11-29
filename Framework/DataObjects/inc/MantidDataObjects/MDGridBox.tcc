@@ -1086,7 +1086,7 @@ TMDE(void MDGridBox)::centerpointBin(MDBin<MDE, nd> &bin,
 TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform,
                                       const coord_t radiusSquared,
                                       signal_t &signal,
-                                      signal_t &errorSquared) const {
+                                      signal_t &errorSquared, const coord_t innerRadiusSquared) const {
   // We start by looking at the vertices at every corner of every box contained,
   // to see which boxes are partially contained/fully contained.
 
@@ -1137,7 +1137,7 @@ TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform,
     // Is this vertex contained?
     coord_t out[nd];
     radiusTransform.apply(vertexCoord, out);
-    if (out[0] < radiusSquared) {
+    if (out[0] < radiusSquared && out[0] > innerRadiusSquared) {
       // Yes, this vertex is contained within the integration volume!
       //        std::cout << "vertex at " << vertexCoord[0] << ", " <<
       //        vertexCoord[1] << ", " << vertexCoord[2] << " is contained\n";
