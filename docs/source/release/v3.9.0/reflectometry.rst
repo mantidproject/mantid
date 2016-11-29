@@ -5,8 +5,12 @@ Reflectometry Changes
 .. contents:: Table of Contents
    :local:
 
-ConvertToReflectometryQ
------------------------
+Algorithms
+----------
+
+* New versions of algorithms :ref:`algm-ReflectometryReductionOne` and :ref:`algm-CreateTransmissionWorkspace`
+have been added to remove duplicate steps in the reduction. An improvement in performance of factor x3 has been
+observed when the reduction is performed with no monitor normalization.
 
 
 Reflectometry Reduction Interface

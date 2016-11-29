@@ -634,8 +634,7 @@ void ReflectometryReductionOne::exec() {
     // if the DQQ is not given for this run.
     // we will use CalculateResoltion to produce this value
     // for us.
-    IAlgorithm_sptr calcResAlg =
-        AlgorithmManager::Instance().create("CalculateResolution");
+    IAlgorithm_sptr calcResAlg = createChildAlgorithm("CalculateResolution");
     calcResAlg->setProperty("Workspace", runWS);
     calcResAlg->setProperty("TwoTheta", theta.get());
     calcResAlg->execute();
@@ -744,7 +743,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
     }
 
     // Make the transmission run.
-    auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
+    auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace", -1, -1,
+                                          true, 1);
     alg->initialize();
     alg->setProperty("FirstTransmissionRun", firstTransmissionRun);
     if (secondTransmissionRun.is_initialized()) {

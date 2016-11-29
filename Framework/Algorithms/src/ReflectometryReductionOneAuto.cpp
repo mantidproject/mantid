@@ -364,7 +364,8 @@ void ReflectometryReductionOneAuto::exec() {
 
   // Pass the arguments and execute the main algorithm.
 
-  IAlgorithm_sptr refRedOne = createChildAlgorithm("ReflectometryReductionOne");
+  IAlgorithm_sptr refRedOne =
+      createChildAlgorithm("ReflectometryReductionOne", -1, -1, true, 1);
   refRedOne->initialize();
   if (refRedOne->isInitialized()) {
     refRedOne->setProperty("InputWorkspace", in_ws);

@@ -78,6 +78,7 @@ set ( SRC_FILES
 	src/CreateSampleWorkspace.cpp
 	src/CreateSingleValuedWorkspace.cpp
 	src/CreateTransmissionWorkspace.cpp
+	src/CreateTransmissionWorkspace2.cpp
 	src/CreateTransmissionWorkspaceAuto.cpp
 	src/CreateUserDefinedBackground.cpp
 	src/CreateWorkspace.cpp
@@ -220,8 +221,10 @@ set ( SRC_FILES
 	src/Rebunch.cpp
 	src/RecordPythonScript.cpp
 	src/ReflectometryReductionOne.cpp
+	src/ReflectometryReductionOne2.cpp
 	src/ReflectometryReductionOneAuto.cpp
 	src/ReflectometryWorkflowBase.cpp
+	src/ReflectometryWorkflowBase2.cpp
 	src/Regroup.cpp
 	src/RemoveBackground.cpp
 	src/RemoveBins.cpp
@@ -387,6 +390,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CreateSampleWorkspace.h
 	inc/MantidAlgorithms/CreateSingleValuedWorkspace.h
 	inc/MantidAlgorithms/CreateTransmissionWorkspace.h
+	inc/MantidAlgorithms/CreateTransmissionWorkspace2.h
 	inc/MantidAlgorithms/CreateTransmissionWorkspaceAuto.h
 	inc/MantidAlgorithms/CreateUserDefinedBackground.h
 	inc/MantidAlgorithms/CreateWorkspace.h
@@ -533,8 +537,10 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Rebunch.h
 	inc/MantidAlgorithms/RecordPythonScript.h
 	inc/MantidAlgorithms/ReflectometryReductionOne.h
+	inc/MantidAlgorithms/ReflectometryReductionOne2.h
 	inc/MantidAlgorithms/ReflectometryReductionOneAuto.h
 	inc/MantidAlgorithms/ReflectometryWorkflowBase.h
+	inc/MantidAlgorithms/ReflectometryWorkflowBase2.h
 	inc/MantidAlgorithms/Regroup.h
 	inc/MantidAlgorithms/RemoveBackground.h
 	inc/MantidAlgorithms/RemoveBins.h
@@ -708,6 +714,7 @@ set ( TEST_FILES
 	CreateSingleValuedWorkspaceTest.h
 	CreateTransmissionWorkspaceAutoTest.h
 	CreateTransmissionWorkspaceTest.h
+	CreateTransmissionWorkspace2Test.h
 	CreateUserDefinedBackgroundTest.h
 	CreateWorkspaceTest.h
 	CropToComponentTest.h
@@ -839,6 +846,7 @@ set ( TEST_FILES
 	RectangularBeamProfileTest.h
 	ReflectometryReductionOneAutoTest.h
 	ReflectometryReductionOneTest.h
+	ReflectometryReductionOne2Test.h
 	RegroupTest.h
 	RemoveBackgroundTest.h
 	RemoveBinsTest.h
