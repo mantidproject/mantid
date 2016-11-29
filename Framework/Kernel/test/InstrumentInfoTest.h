@@ -265,4 +265,4 @@ private:
     return new FacilityInfo(elem);
   }
 };
-#endif /*MANTID_FACILITIESTEST_H_*/
+#endif // INSTRUMENTINFOTEST_H_
