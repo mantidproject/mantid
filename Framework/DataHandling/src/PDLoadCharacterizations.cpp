@@ -60,7 +60,7 @@ extra_columns(const std::vector<std::string> &filenames) {
   }
 
   for (std::string line = Strings::getLine(file); !file.eof();
-       line = Strings::getLine(file)) {
+       Strings::getLine(file, line)) {
     boost::smatch result;
     // all instances of table headers
     if (boost::regex_search(line, result, V1_TABLE_REG_EXP)) {
@@ -145,14 +145,8 @@ void PDLoadCharacterizations::init() {
 /** Execute the algorithm.
  */
 void PDLoadCharacterizations::exec() {
-  this->hasExtras = false;
   auto filenames = this->getFilenames();
-
-  for (const auto filename : filenames) { // REMOVE
-    std::cout << filename << std::endl;   // REMOVE
-  }                                       // REMOVE
-
-  this->canColumnNames = extra_columns(filenames);
+  const std::vector<std::string> canColumnNames = extra_columns(filenames);
 
   // setup the default table workspace for the characterization runs
   ITableWorkspace_sptr wksp = WorkspaceFactory::Instance().createTable();
@@ -170,7 +164,7 @@ void PDLoadCharacterizations::exec() {
   wksp->addColumn("double", "tof_max");
   wksp->addColumn("double", "wavelength_min");
   wksp->addColumn("double", "wavelength_max");
-  for (const auto name : this->canColumnNames) {
+  for (const auto &name : canColumnNames) {
     wksp->addColumn("str", name); // all will be strings
   }
 
@@ -269,7 +263,7 @@ void PDLoadCharacterizations::readFocusInfo(std::ifstream &file) {
 
   // parse the file
   for (std::string line = Strings::getLine(file); !file.eof();
-       line = Strings::getLine(file)) {
+       Strings::getLine(file, line)) {
     line = Strings::strip(line);
     // skip empty lines and "comments"
     if (line.empty())
@@ -317,11 +311,12 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
   if (file.eof())
     return;
 
+  const size_t num_of_columns = wksp->columnCount();
+
   // parse the file
   for (std::string line = Strings::getLine(file); !file.eof();
-       line = Strings::getLine(file)) {
+       Strings::getLine(file, line)) {
     line = Strings::strip(line);
-
     // skip empty lines and "comments"
     if (line.empty())
       continue;
@@ -351,9 +346,12 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
     row << boost::lexical_cast<double>(splitted[9]);  // tof_max
     row << boost::lexical_cast<double>(splitted[10]); // wavelength_min
     row << boost::lexical_cast<double>(splitted[11]); // wavelength_max
-    // pad all extras with empty string
-    for (const auto name : this->canColumnNames)
+
+    // pad all extras with empty string - the 14 required columns have
+    // already been added to the row
+    for (size_t i = 14; i < num_of_columns; ++i) {
       row << "0";
+    }
   }
 }
 
@@ -453,9 +451,8 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
 
   // store the names of the columns in order
   std::vector<std::string> columnNames;
-
-  for (std::string line = Strings::getLine(file); !file.eof();
-       line = Strings::getLine(file)) {
+  for (Strings::getLine(file, line); !file.eof();
+       Strings::getLine(file, line)) {
     if (line.empty())
       continue;
     if (line.substr(0, 1) == "#")
@@ -540,7 +537,7 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename,
 
   // parse the file
   for (std::string line = Strings::getLine(file); !file.eof();
-       line = Strings::getLine(file)) {
+       Strings::getLine(file, line)) {
     line = Strings::strip(line);
     // skip empty lines and "comments"
     if (line.empty())
