@@ -50,9 +50,9 @@ public:
   std::string name() const override { return "LinearBackground"; }
   void function1D(double *out, const double *xValues,
                   const size_t nData) const override;
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
-
+  void derivative1D(double *out, const double *xValues,
+                    const size_t nData,
+                    const size_t order = 1) const override;
   void fit(const std::vector<double> &X, const std::vector<double> &Y) override;
 
   /// Set a value to attribute attName

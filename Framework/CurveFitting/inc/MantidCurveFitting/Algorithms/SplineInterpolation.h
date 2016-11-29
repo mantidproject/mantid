@@ -61,8 +61,10 @@ public:
   /// Summary of algorithm's purpose. @see Algorithm::summary
   const std::string summary() const override {
     return "Interpolates a set of spectra onto a spline defined by a second "
-           "input workspace. Optionally, this algorithm can also calculate "
-           "derivatives up to order 2 as a side product";
+           "input workspace. A linear interpolation can be performed if the "
+           "second input workspace has only two points Optionally, this "
+           "algorithm can also calculate derivatives up to order 2 as a side "
+           "product";
   }
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;

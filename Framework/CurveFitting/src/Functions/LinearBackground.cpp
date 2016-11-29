@@ -39,11 +39,23 @@ void LinearBackground::function1D(double *out, const double *xValues,
   }
 }
 
-void LinearBackground::functionDeriv1D(Jacobian *out, const double *xValues,
-                                       const size_t nData) {
-  for (size_t i = 0; i < nData; i++) {
-    out->set(i, 0, 1);
-    out->set(i, 1, xValues[i]);
+void LinearBackground::derivative1D(double *out, const double *xValues,
+                                       const size_t nData,
+                                       const size_t order) const {
+  // silience unused warning
+  (void)xValues;
+
+  // throw error if the order is not the 1st or 2nd derivative
+  if (order < 1)
+    g_log.warning()
+          << "FlatBackground: order of derivative must be 1 or greater";
+
+  if (order==1){
+    const double a1 = getParameter("A1");
+    std::fill_n(out, nData, a1);
+  }
+  else{
+    std::fill_n(out, nData, 0.0);
   }
 }
 

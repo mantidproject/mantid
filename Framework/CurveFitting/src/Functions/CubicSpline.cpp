@@ -202,8 +202,8 @@ void CubicSpline::calculateDerivative(double *out, const double *xValues,
 
   // throw error if the order is not the 1st or 2nd derivative
   if (order < 1)
-    throw std::invalid_argument(
-        "CubicSpline: order of derivative must be 1 or greater");
+    g_log.warning()
+          << "CubicSpline: order of derivative must be 1 or greater";
 
   for (size_t i = 0; i < nData; ++i) {
     if (checkXInRange(xValues[i])) {

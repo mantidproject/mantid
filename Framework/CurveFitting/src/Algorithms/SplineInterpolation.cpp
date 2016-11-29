@@ -54,7 +54,7 @@ void SplineInterpolation::init() {
                       PropertyMode::Optional),
                   "The workspace containing the calculated derivatives");
 
-  auto validator = boost::make_shared<BoundedValidator<int>>(0, 2);
+  auto validator = boost::make_shared<BoundedValidator<int>>(1, 2);
   declareProperty("DerivOrder", 2, validator,
                   "Order to derivatives to calculate.");
 
