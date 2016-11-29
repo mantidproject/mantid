@@ -39,23 +39,11 @@ void LinearBackground::function1D(double *out, const double *xValues,
   }
 }
 
-void LinearBackground::derivative1D(double *out, const double *xValues,
-                                       const size_t nData,
-                                       const size_t order) const {
-  // silience unused warning
-  (void)xValues;
-
-  // throw error if the order is not the 1st or 2nd derivative
-  if (order < 1)
-    g_log.warning()
-          << "FlatBackground: order of derivative must be 1 or greater";
-
-  if (order==1){
-    const double a1 = getParameter("A1");
-    std::fill_n(out, nData, a1);
-  }
-  else{
-    std::fill_n(out, nData, 0.0);
+void LinearBackground::functionDeriv1D(Jacobian *out, const double *xValues,
+                                       const size_t nData) {
+  for (size_t i = 0; i < nData; i++) {
+    out->set(i, 0, 1);
+    out->set(i, 1, xValues[i]);
   }
 }
 
@@ -103,6 +91,65 @@ void LinearBackground::fit(const std::vector<double> &X,
   setParameter("A1", a1);
 }
 
+/** Set an attribute for the function
+ *
+ * @param attName :: The name of the attribute to set
+ * @param att :: The attribute to set
+ */
+void LinearBackground::setAttribute(const std::string &attName,
+                               const API::IFunction::Attribute &att) {
+
+  if (attName == "n") {
+    // get the new and old number of data points
+    int n = att.asInt();
+    int oldN = getAttribute("n").asInt();
+
+    // check that the number of data points is in a valid range
+    if (n > oldN) {
+      // get the name of the last x data point
+      std::string oldXName = "x" + std::to_string(oldN - 1);
+      double oldX = getAttribute(oldXName).asDouble();
+
+      // create blank a number of new blank parameters and attributes
+      for (int i = oldN; i < n; ++i) {
+        std::string num = std::to_string(i);
+
+        std::string newXName = "x" + num;
+        std::string newYName = "y" + num;
+
+        declareAttribute(newXName,
+                         Attribute(oldX + static_cast<double>(i - oldN + 1)));
+        declareParameter(newYName, 0);
+      }
+    } else if (n < oldN) {
+      throw std::invalid_argument(
+          "Linear Background: Can't decrease the number of attributes");
+    }
+  }
+
+  storeAttributeValue(attName, att);
+}
+
+void LinearBackground::derivative1D(double *out, const double *xValues,
+                                       const size_t nData,
+                                       const size_t order) const {
+  // silience unused warning
+  (void)xValues;
+
+  // throw error if the order is not the 1st or 2nd derivative
+  if (order < 1)
+    g_log.warning()
+          << "FlatBackground: order of derivative must be 1 or greater";
+
+  if (order==1){
+    const double a1 = getParameter("A1");
+    std::fill_n(out, nData, a1);
+  }
+  else{
+    std::fill_n(out, nData, 0.0);
+  }
+}
+
 /// Calculate histogram data for the given bin boundaries.
 /// @param out :: Output bin values (size == nBins) - integrals of the function
 ///    inside each bin.
@@ -144,45 +191,6 @@ void LinearBackground::histogramDerivative1D(Jacobian *jacobian, double left,
     jacobian->set(i, 1, 0.5 * (xr * xr - xl * xl));
     xl = xr;
   }
-}
-
-/** Set an attribute for the function
- *
- * @param attName :: The name of the attribute to set
- * @param att :: The attribute to set
- */
-void LinearBackground::setAttribute(const std::string &attName,
-                               const API::IFunction::Attribute &att) {
-
-  if (attName == "n") {
-    // get the new and old number of data points
-    int n = att.asInt();
-    int oldN = getAttribute("n").asInt();
-
-    // check that the number of data points is in a valid range
-    if (n > oldN) {
-      // get the name of the last x data point
-      std::string oldXName = "x" + std::to_string(oldN - 1);
-      double oldX = getAttribute(oldXName).asDouble();
-
-      // create blank a number of new blank parameters and attributes
-      for (int i = oldN; i < n; ++i) {
-        std::string num = std::to_string(i);
-
-        std::string newXName = "x" + num;
-        std::string newYName = "y" + num;
-
-        declareAttribute(newXName,
-                         Attribute(oldX + static_cast<double>(i - oldN + 1)));
-        declareParameter(newYName, 0);
-      }
-    } else if (n < oldN) {
-      throw std::invalid_argument(
-          "Linear Background: Can't decrease the number of attributes");
-    }
-  }
-
-  storeAttributeValue(attName, att);
 }
 
 } // namespace Functions
