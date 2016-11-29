@@ -357,7 +357,7 @@ Finding Initial Parameters
 
 If the initial values of the fitting parameters are not known they can be estimated using `monte_carlo()` method.
 It randomly searches the parameter space in a given region such that the calculated spectra are as close to the
-fit data as possible. The method uses :ref:`MonteCarloParameters <algm-MonteCarloParameters>` internally. See
+fit data as possible. The method uses :ref:`EstimateFitParameters <algm-EstimateFitParameters>` internally. See
 algorithm's description for the available properties.
 Here is an example of a fit with initial estimation::
 
