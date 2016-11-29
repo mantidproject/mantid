@@ -138,6 +138,10 @@ void ImageROIViewQtWidget::setupConnections() {
   connect(m_ui.horizontalScrollBar_img_stack, SIGNAL(valueChanged(int)), this,
           SLOT(updateFromImagesSlider(int)));
 
+  // changing CoR tool
+  connect(m_ui.comboBox_center_method, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(autoCoRToolChanged(int)));
+
   // image rotation
   connect(m_ui.comboBox_rotation, SIGNAL(currentIndexChanged(int)), this,
           SLOT(rotationUpdated(int)));
@@ -328,6 +332,7 @@ void ImageROIViewQtWidget::enableActions(bool enable) {
 
   m_ui.colorBarWidget->setEnabled(enable);
 
+  m_ui.comboBox_center_method->setEnabled(enable);
   m_ui.comboBox_image_type->setEnabled(enable);
   m_ui.comboBox_rotation->setEnabled(enable);
   m_ui.groupBox_cor->setEnabled(enable);
@@ -730,6 +735,11 @@ void ImageROIViewQtWidget::rotationUpdated(int /* idx */) {
   m_params.rotation =
       static_cast<float>(m_ui.comboBox_rotation->currentIndex()) * 90.0f;
   m_presenter->notify(ImageROIPresenter::ChangeRotation);
+}
+
+void ImageROIViewQtWidget::autoCoRToolChanged(int /* idx */) {
+  // todo notify presenter that the tool is changed, however for now we only
+  // have one tool -> tomopy
 }
 
 size_t ImageROIViewQtWidget::currentImgIndex() const {

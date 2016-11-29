@@ -148,6 +148,7 @@ private slots:
   void browseStackClicked();
 
   void rotationUpdated(int idx);
+  void autoCoRToolChanged(int idx);
 
   void imageTypeUpdated(int idx);
 

@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-
-=======
 from __future__ import (absolute_import, division, print_function)
->>>>>>> 4af1c88858d9fb74c3b99674eb1a5be5b6a3a676
 # Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 # Oak Ridge National Laboratory & European Spallation Source
 #
@@ -1116,12 +1112,10 @@ class ReconstructionCommand(object):
 
         calculated_cors = []
         # find the COR of the middle slice
-        for slice_idx in [int(size/2)]:
-        # for slice_idx in [int(0.15*size), int(0.30*size), int(0.45*size), int(0.60*size), int(0.75*size), int(0.90*size)]:
+        for slice_idx in [int(size / 2)]:
+            # for slice_idx in [int(0.15*size), int(0.30*size), int(0.45*size), int(0.60*size), int(0.75*size), int(0.90*size)]:
             tomopy_cor = tomopy.find_center(
                 tomo=data, theta=proj_angles, ind=slice_idx, emission=False)
             calculated_cors.append(tomopy_cor)
         # print to stdout
-        print(sum(calculated_cors)/float(len(calculated_cors)))
-
-
+        print(sum(calculated_cors) / float(len(calculated_cors)))
