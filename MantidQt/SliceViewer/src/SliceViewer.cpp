@@ -179,7 +179,7 @@ namespace MantidQt {
 
 			// --------- Rescaler --------------------
 			m_rescaler = new QwtPlotRescaler(m_plot->canvas());
-
+			
 			Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
 				"Interface", "SliceViewer", false);
 		}
@@ -209,6 +209,7 @@ namespace MantidQt {
 			m_rescaler->setAspectRatio(QwtPlot::yRight, 0.0);
 			m_rescaler->setAspectRatio(QwtPlot::xTop, 0.0);
 			m_rescaler->setExpandingDirection(QwtPlotRescaler::ExpandBoth);
+
 		}
 
 		//------------------------------------------------------------------------------
@@ -700,6 +701,7 @@ namespace MantidQt {
 			m_coordinateTransform = createCoordinateTransform(m_ws, m_dimX, m_dimY);
 			m_data->setWorkspace(m_ws);
 			this->setTransparentZeros(false);
+			
 
 			if (m_firstNonOrthogonalWorkspaceOpen) {
 				m_firstNonOrthogonalWorkspaceOpen = false;
@@ -1238,6 +1240,9 @@ namespace MantidQt {
 			m_plot->replot();
 			autoRebinIfRequired();
 			updatePeaksOverlay();
+			if (ui.btnNonOrthogonalToggle->isChecked()) {
+				adjustSize();
+			}
 		}
 
 		//------------------------------------------------------------------------------
@@ -1698,6 +1703,7 @@ namespace MantidQt {
 		}
 
 		void SliceViewer::checkForHKLDimension() {
+			
 			if (API::requiresSkewMatrix(m_ws)) {
 				m_coordinateTransform->checkDimensionsForHKL(m_ws, m_dimX, m_dimY);
 				auto isHKL = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
@@ -1715,7 +1721,9 @@ namespace MantidQt {
 					switchQWTRaster(useNonOrthogonal);
 				}
 				emit setNonOrthogonalbtn();
+				
 			}
+
 		}
 		//==============================================================================
 		//================================ PYTHON METHODS ==============================
@@ -2430,6 +2438,7 @@ namespace MantidQt {
 
 			if (checked) {
 				m_nonOrthogonalOverlay->enable();
+				adjustSize();
 			}
 			else {
 				m_nonOrthogonalOverlay->disable();
