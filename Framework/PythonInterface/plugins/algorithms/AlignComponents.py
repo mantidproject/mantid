@@ -375,8 +375,8 @@ class AlignComponents(PythonAlgorithm):
             for iopt,opt in enumerate(self._optionsList):
                 if self._optionsDict[opt]:
                     x0List.append(self._initialPos[iopt])
-                    boundsList.append((self._initialPos[iopt] + self.getProperty("MinXposition").value,
-                                       self._initialPos[iopt] + self.getProperty("MaxXposition").value))
+                    boundsList.append((self._initialPos[iopt] + self.getProperty("Min"+opt).value,
+                                       self._initialPos[iopt] + self.getProperty("Max"+opt).value))
 
             results = minimize(self._minimisation_func, x0=x0List,
                                method='L-BFGS-B',

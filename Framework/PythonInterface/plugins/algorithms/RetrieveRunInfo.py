@@ -199,7 +199,7 @@ class RetrieveRunInfo(PythonAlgorithm):
             StringMandatoryValidator(),
             doc='The range of runs to retrieve the run info for. E.g. "100-105".')
         self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),
-                             doc= """The name of the TableWorkspace that will be created. 
+                             doc= """The name of the TableWorkspace that will be created.
                                      '''You must specify a name that does not already exist.''' """)
 
     def PyExec(self):
