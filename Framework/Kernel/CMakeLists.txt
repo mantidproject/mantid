@@ -351,6 +351,7 @@ set ( TEST_FILES
 	InternetHelperTest.h
 	InterpolationTest.h
 	ListValidatorTest.h
+	LiveListenerInfoTest.h
 	LogFilterTest.h
 	LogParserTest.h
 	LoggerTest.h
