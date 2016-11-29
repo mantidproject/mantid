@@ -5,8 +5,10 @@ Reflectometry Changes
 .. contents:: Table of Contents
    :local:
 
-ConvertToReflectometryQ
------------------------
+Algorithms
+----------
+
+- :ref:`algm-Stitch1D` documentation has been improved, it now includes a workflow diagram illustrating the different steps in the calculation and a note about how errors are propagated.
 
 
 Reflectometry Reduction Interface
