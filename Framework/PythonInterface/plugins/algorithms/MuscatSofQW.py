@@ -81,7 +81,7 @@ class MuscatSofQW(DataProcessorAlgorithm):
         pk_1 = '(composite=Convolution,FixResolution=true,NumDeriv=true;name=Resolution, Workspace="{0}"'.format(self._res_rebin)
 
         if self._lor >= 1:
-            lor_fun = 'composite=ProductFunction,NumDeriv=false;name=Lorentzian,'+
+            lor_fun = 'composite=ProductFunction,NumDeriv=false;name=Lorentzian,'+\
                       'Amplitude={0},PeakCentre=0.0,FWHM={1}'.format(l_height_1[peak_idx], l_width_1[peak_idx])
         elif self._lor == 2:
             funcIndex = 1 if self._delta else 0
