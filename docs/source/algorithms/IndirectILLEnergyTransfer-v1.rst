@@ -34,9 +34,14 @@ Usage
 
 **Example - IndirectILLEnergyTransfer : QENS data without mirror sense**
 
+.. testsetup:: ExIndirectILLEnergyTransfer
+
+   config['default.facility'] = 'ILL'
+   config['default.instrument'] = 'IN16B'
+
 .. testcode:: ExIndirectILLEnergyTransfer
 
-    ws = IndirectILLEnergyTransfer(Run='090660')
+    ws = IndirectILLEnergyTransfer(Run='ILL/IN16B/090660.nxs')
     print "Reduced workspace has %d wing" % ws.getNumberOfEntries()
     print "which has %d spectra" % ws.getItem(0).getNumberHistograms()
     print "and %d bins" % ws.getItem(0).blocksize()
@@ -49,11 +54,20 @@ Output:
     which has 18 spectra
     and 1024 bins
 
+.. testcleanup:: ExIndirectILLEnergyTransfer
+
+   DeleteWorkspace(ws)
+
 **Example - IndirectILLEnergyTransfer : QENS data with mirror sense**
+
+.. testsetup:: ExIndirectILLEnergyTransferMirrorSense
+
+   config['default.facility'] = 'ILL'
+   config['default.instrument'] = 'IN16B'
 
 .. testcode:: ExIndirectILLEnergyTransferMirrorSense
 
-    ws = IndirectILLEnergyTransfer(Run='136553:136555', CropDeadMonitorChannels=True)
+    ws = IndirectILLEnergyTransfer(Run='ILL/IN16B/136553:136555.nxs', CropDeadMonitorChannels=True)
     print "Reduced workspace has %d wings" % ws.getNumberOfEntries()
     print "which have %d spectra" % ws.getItem(0).getNumberHistograms()
     print "and %d bins" % ws.getItem(0).blocksize()
@@ -65,6 +79,10 @@ Output:
     Reduced workspace has 2 wings
     which have 18 spectra
     and 1017 bins
+
+.. testcleanup:: ExIndirectILLEnergyTransferMirrorSense
+
+   DeleteWorkspace(ws)
 
 .. categories::
 

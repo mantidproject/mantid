@@ -291,7 +291,7 @@ class IndirectILLEnergyTransfer(DataProcessorAlgorithm):
 
         if self._reduction_type == 'QENS':
             if self._dead_channels:
-                CropWorkspace(InputWorkspace=ws,OutputWorkspace=ws,XMin=xmin,XMax=xmax+1)
+                CropWorkspace(InputWorkspace=ws,OutputWorkspace=ws,XMin=xmin,XMax=int(xmax+1))
                 n_cropped_bins = mtd[mon].blocksize() - mtd[ws].blocksize() - 1
             else:
                 self._mask(ws, xmin, xmax)

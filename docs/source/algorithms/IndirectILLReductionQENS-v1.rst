@@ -70,9 +70,14 @@ Usage
 
 **Example - IndirectILLReduction : default options**
 
+.. testsetup:: ExIndirectILLReductionQENS
+
+   config['default.facility'] = 'ILL'
+   config['default.instrument'] = 'IN16B'
+
 .. testcode:: ExIndirectILLReductionQENS
 
-    ws = IndirectILLReductionQENS(Run='136553:136555')
+    ws = IndirectILLReductionQENS(Run='ILL/IN16B/136553:136555.nxs')
     print "Result is a WorkspaceGroup, that contains %d workspaces" % ws.getNumberOfEntries()
     print "the name of the first one is %s corresponding to run 136553" % ws.getItem(0).getName()
     print "it has %d spectra and %d bins" % (ws.getItem(0).getNumberHistograms(),ws.getItem(0).blocksize())
@@ -84,6 +89,10 @@ Output:
     Result is WorkspaceGroup, that contains 3 workspaces
     the name of the first one is 136553_ws corresponding to run 136553
     it has 18 spectra and 1024 bins
+
+.. testcleanup:: ExIndirectILLReductionQENS
+
+   DeleteWorkspace(ws)
 
 .. categories::
 

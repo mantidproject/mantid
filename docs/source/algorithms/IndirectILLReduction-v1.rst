@@ -54,6 +54,8 @@ Output:
     Reduced workspace has 24 spectra
     Raw workspace has 2057 spectra
 
+
+
 **Example - Running IndirectILLReduction in mirror mode**
 
 .. testcode:: ExIndirectILLReductionMirrorMode

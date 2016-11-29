@@ -46,7 +46,7 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         DeleteWorkspace(ws)
 
         args = {'Run': self._runs['two_wing_QENS'],
-                'MapFile': str(os.path.join(config['groupingFiles.directory'], grouping_filename)),
+                'MapFile': os.path.join(config['groupingFiles.directory'], grouping_filename),
                 'CropDeadMonitorChannels': True}
 
         IndirectILLEnergyTransfer(**args)

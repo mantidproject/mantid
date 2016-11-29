@@ -36,9 +36,14 @@ Usage
 
 **Example: EFWS+IFWS**
 
+.. testsetup:: ExFixedWindowScans
+
+   config['default.facility'] = 'ILL'
+   config['default.instrument'] = 'IN16B'
+
 .. testcode:: ExFixedWindowScans
 
-    ws = IndirectILLReductionFWS(Run='083072:083077')
+    ws = IndirectILLReductionFWS(Run='ILL/IN16B/083072:083077.nxs')
     print "Result is now a WorkspaceGroup, which has %d workspaces, one per each energy value" % ws.getNumberOfEntries()
     print "first item, called %s corresponds to energy value of %s" % \
     (ws.getItem(0).getName(),ws.getItem(0).getName().split('_')[1])
@@ -52,6 +57,10 @@ Output:
     Result is now a WorkspaceGroup, which has 3 workspaces, one per each energy value
     first item, called ws_0.0 corresponds to energy value of 0.0
     it has 18 histograms and 2 bins, one per each temperature
+
+.. testcleanup:: ExFixedWindowScans
+
+   DeleteWorkspace(ws)
 
 .. categories::
 
