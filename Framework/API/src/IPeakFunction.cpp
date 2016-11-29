@@ -94,6 +94,16 @@ const int IPeakFunction::g_maxPeakRadius = std::numeric_limits<int>::max();
   */
 IPeakFunction::IPeakFunction(int peakRadius) : m_peakRadius(peakRadius) {}
 
+void IPeakFunction::function(const FunctionDomain &domain,
+              FunctionValues &values) const {
+  auto peakRadius =
+      dynamic_cast<const FunctionDomain1D &>(domain).getPeakRadius();
+  if (peakRadius < m_peakRadius) {
+    setPeakRadius(peakRadius);
+  }
+  IFunction1D::function(domain, values);
+}
+
 /**
  * General implementation of the method for all peaks. Limits the peak
  * evaluation to
@@ -158,12 +168,17 @@ void IPeakFunction::functionDeriv1D(Jacobian *out, const double *xValues,
   this->functionDerivLocal(&J, xValues + i0, n);
 }
 
-void IPeakFunction::setPeakRadius(const int &r) {
+void IPeakFunction::setPeakRadius(int r) const {
   if (r > 0) {
     m_peakRadius = r;
   } else if (r == 0) {
     m_peakRadius = g_maxPeakRadius;
   }
+}
+
+/// Get the peak radius
+int IPeakFunction::getPeakRadius() const {
+  return m_peakRadius;
 }
 
 /// Returns the integral intensity of the peak function, using the peak radius
@@ -256,6 +271,11 @@ std::pair<double, double> IPeakFunction::getDomainInterval(double level) const {
   left = findBound(-w);
   right = findBound(w);
   return std::make_pair(left, right);
+}
+
+/// Return a peak radius large enough to be practically infinite
+int IPeakFunction::maxPeakRadius() {
+  return g_maxPeakRadius;
 }
 
 

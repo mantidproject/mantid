@@ -6,6 +6,7 @@
 
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -75,6 +76,14 @@ void Fit::initConcrete() {
       "CostFunction", "Least squares", costFuncValidator,
       "The cost function to be used for the fit, default is Least squares",
       Kernel::Direction::InOut);
+  declareProperty("PeakRadius", 0,
+                  "A value of the peak radius the peak functions should use. A "
+                  "peak radius defines an interval on the x axis around the "
+                  "centre of the peak where its values are calculated. Values "
+                  "outside the interval are not calculated and assumed zeros."
+                  "Numerically the radius is a whole number of peak widths "
+                  "(FWHM) that fit into the interval on each side from the "
+                  "centre. The default value of 0 means the whole x axis.");
   declareProperty(
       "CreateOutput", false,
       "Set to true to create output workspaces with the results of the fit"
@@ -140,6 +149,15 @@ void Fit::execConcrete() {
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
   m_domainCreator->createDomain(domain, values);
+
+  // Set peak radius to the values which will be passed to 
+  // all IPeakFunctions
+  int peakRadius = getProperty("PeakRadius");
+  if (auto d1d = dynamic_cast<API::FunctionDomain1D*>(domain.get())) {
+    if (peakRadius != 0) {
+      d1d->setPeakRadius(peakRadius);
+    }
+  }
 
   // do something with the function which may depend on workspace
   m_domainCreator->initFunction(m_function);

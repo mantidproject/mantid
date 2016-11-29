@@ -40,6 +40,9 @@ public:
   /// Constructor
   IPeakFunction(int peakRadius = g_maxPeakRadius);
 
+  void function(const FunctionDomain &domain,
+                FunctionValues &values) const override;
+
   /// Returns the peak FWHM
   virtual double fwhm() const = 0;
 
@@ -59,7 +62,11 @@ public:
   void functionDeriv1D(Jacobian *out, const double *xValues,
                        const size_t nData) override;
   /// Set new peak radius
-  void setPeakRadius(const int &r);
+  void setPeakRadius(int r) const;
+  /// Get the peak radius
+  int getPeakRadius() const;
+  /// Return a peak radius large enough to be practically infinite
+  static int maxPeakRadius();
 
   /// Get the interval on which the peak has all its values above a certain
   /// level
@@ -92,7 +99,7 @@ public:
 protected:
   /// Defines the area around the centre where the peak values are to be
   /// calculated (in FWHM).
-  int m_peakRadius;
+  mutable int m_peakRadius;
   /// A number for a peak radius large enough to be practically infinite
   static const int g_maxPeakRadius;
   /// The default level for searching a domain interval (getDomainInterval())
