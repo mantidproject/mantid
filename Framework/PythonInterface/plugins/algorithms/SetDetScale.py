@@ -61,12 +61,12 @@ class SetDetScale(PythonAlgorithm):
             for line in lines:
                 columns = line.split() # splits on whitespace characters
                 listParse.append({"ParameterName":"detScale"+columns[0], "Value":columns[1]})
-        
-        #Overwrite any scales given in file      
+
+        #Overwrite any scales given in file
         for component in components:
             comp, value = component.split(":")
             listParse.append({"ParameterName":"detScale"+comp, "Value":value})
-            
+
         for dList in listParse:
             api.SetInstrumentParameter(Workspace=ws,ParameterType="Number",**dList)
 
