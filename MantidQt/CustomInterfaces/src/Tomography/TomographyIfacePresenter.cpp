@@ -599,6 +599,7 @@ void TomographyIfacePresenter::setupAndRunLocalReconstruction(
   auto *worker = new MantidQt::CustomInterfaces::TomographyProcess();
   m_workerThread = Mantid::Kernel::make_unique<TomographyThread>(this, worker);
 
+  // Specific connections for this presenter
   // we do this so the thread can independently read the process' output and
   // only signal the presenter after it's done reading and has something to
   // share so it doesn't block the presenter

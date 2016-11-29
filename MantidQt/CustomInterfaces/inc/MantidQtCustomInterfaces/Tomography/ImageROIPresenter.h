@@ -6,6 +6,7 @@
 #include "MantidQtCustomInterfaces/Tomography/IImageROIView.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h"
+#include <memory>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -18,6 +19,7 @@ class BatchAlgorithmRunner;
 }
 
 namespace CustomInterfaces {
+	class TomographyThread;
 
 /**
 Presenter for the image center of rotation (and other parameters)
@@ -76,6 +78,7 @@ protected:
   void processNewStack(bool singleImage);
   void processLoadSingleImage();
   void processLoadStackOfImages();
+  void processFindCoR();
   void setupAlgorithmRunnerAfterLoad();
   void processChangeImageType();
   void processChangeRotation();
@@ -98,6 +101,8 @@ protected:
 
 private slots:
   void finishedLoadStack(bool error);
+  void readWorkerStdOut(const QString &s);
+  void readWorkerStdErr(const QString &s);
 
 private:
   StackOfImagesDirs checkInputStack(const std::string &path);
@@ -142,6 +147,8 @@ private:
   /// Associated model for this presenter (MVP pattern). This is just
   /// a set of coordinates
   const boost::scoped_ptr<ImageStackPreParams> m_model;
+
+  std::unique_ptr<TomographyThread> m_workerThread;
 };
 
 } // namespace CustomInterfaces

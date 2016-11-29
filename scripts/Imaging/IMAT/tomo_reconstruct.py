@@ -371,7 +371,6 @@ def main_tomo_rec():
 
     import inspect
 
-<<<<<<< .merge_file_a05276
     import IMAT.tomorec.io as tomoio
     from IMAT.tomorec import reconstruction_command as tomocmd
     import IMAT.tomorec.configs as tomocfg
@@ -379,11 +378,6 @@ def main_tomo_rec():
     import pydevd
     pydevd.settrace(
         'localhost', port=61845, stdoutToServer=True, stderrToServer=True)
-||||||| .merge_file_a02148
-    import IMAT.tomorec.io as tomoio
-=======
-    import tomorec.io as tomoio
->>>>>>> .merge_file_a14496
 
     arg_parser = setup_cmd_options()
     args = arg_parser.parse_args()

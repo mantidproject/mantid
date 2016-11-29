@@ -92,38 +92,20 @@ class ReconstructionCommand(object):
                                        self._OUT_README_FNAME)
         tstart = self.gen_readme_summary_begin(readme_fullpath, cfg, cmd_line)
 
-<<<<<<< .merge_file_a09632
         data, white, dark = self.read_in_stack(
             cfg.preproc_cfg.input_dir, cfg.preproc_cfg.in_img_format,
             cfg.preproc_cfg.input_dir_flat, cfg.preproc_cfg.input_dir_dark)
-        print "Shape of raw data: {0}, dtype: {1}".format(data.shape,
-                                                          data.dtype)
-||||||| .merge_file_a07228
-        data, white, dark = self.read_in_stack(cfg.preproc_cfg.input_dir, cfg.preproc_cfg.in_img_format,
-                                               cfg.preproc_cfg.input_dir_flat, cfg.preproc_cfg.input_dir_dark)
-        print "Shape of raw data: {0}, dtype: {1}".format(data.shape, data.dtype)
-=======
-        data, white, dark = self.read_in_stack(cfg.preproc_cfg.input_dir, cfg.preproc_cfg.in_img_format,
-                                               cfg.preproc_cfg.input_dir_flat, cfg.preproc_cfg.input_dir_dark)
-        print("Shape of raw data: {0}, dtype: {1}".format(data.shape, data.dtype))
->>>>>>> .merge_file_a10816
+        print("Shape of raw data: {0}, dtype: {1}".format(data.shape,
+                                                          data.dtype))
 
         # These imports will raise appropriate exceptions in case of error
         import tomorec.tool_imports as tti
         tti.import_tomo_tool(cfg.alg_cfg.tool)
 
-<<<<<<< .merge_file_a09632
         preproc_data = self.apply_all_preproc(data, cfg.preproc_cfg, white,
                                               dark)
-        print "Shape of pre-processed data: {0}, dtype: {1}".format(
-            preproc_data.shape, data.dtype)
-||||||| .merge_file_a07228
-        preproc_data = self.apply_all_preproc(data, cfg.preproc_cfg, white, dark)
-        print "Shape of pre-processed data: {0}, dtype: {1}".format(preproc_data.shape, data.dtype)
-=======
-        preproc_data = self.apply_all_preproc(data, cfg.preproc_cfg, white, dark)
-        print("Shape of pre-processed data: {0}, dtype: {1}".format(preproc_data.shape, data.dtype))
->>>>>>> .merge_file_a10816
+        print("Shape of pre-processed data: {0}, dtype: {1}".format(
+            preproc_data.shape, data.dtype))
 
         # Save pre-proc images
         self.save_preproc_images(cfg.postproc_cfg.output_dir, preproc_data,
@@ -363,49 +345,27 @@ class ReconstructionCommand(object):
             import prep as iprep
             if 'wavelet-fourier' == cfg.stripe_removal_method.lower():
                 time1 = time.time()
-<<<<<<< .merge_file_a09632
-                print " * Removing stripes/ring artifacts using the method '{0}'".format(
-                    cfg.stripe_removal_method)
-||||||| .merge_file_a07228
-                print " * Removing stripes/ring artifacts using the method '{0}'".format(cfg.stripe_removal_method)
-=======
-                print(" * Removing stripes/ring artifacts using the method '{0}'".format(cfg.stripe_removal_method))
->>>>>>> .merge_file_a10816
+                print(
+                    " * Removing stripes/ring artifacts using the method '{0}'".
+                    format(cfg.stripe_removal_method))
                 #preproc_data = tomopy.prep.stripe.remove_stripe_fw(preproc_data)
                 preproc_data = iprep.filters.remove_stripes_ring_artifacts(
                     preproc_data, 'wavelet-fourier')
                 time2 = time.time()
-<<<<<<< .merge_file_a09632
-                print " * Removed stripes/ring artifacts. Time elapsed: {0:.3f}".format(
-                    time2 - time1)
-||||||| .merge_file_a07228
-                print " * Removed stripes/ring artifacts. Time elapsed: {0:.3f}".format(time2 - time1)
-=======
-                print(" * Removed stripes/ring artifacts. Time elapsed: {0:.3f}".format(time2 - time1))
->>>>>>> .merge_file_a10816
+                print(
+                    " * Removed stripes/ring artifacts. Time elapsed: {0:.3f}".
+                    format(time2 - time1))
             elif 'titarenko' == cfg.stripe_removal_method.lower():
                 time1 = time.time()
-<<<<<<< .merge_file_a09632
-                print " * Removing stripes/ring artifacts, using the method '{0}'".format(
-                    cfg.stripe_removal_method)
+                print(
+                    " * Removing stripes/ring artifacts, using the method '{0}'".
+                    format(cfg.stripe_removal_method))
                 preproc_data = tomopy.prep.stripe.remove_stripe_ti(
                     preproc_data)
-||||||| .merge_file_a07228
-                print " * Removing stripes/ring artifacts, using the method '{0}'".format(cfg.stripe_removal_method)
-                preproc_data = tomopy.prep.stripe.remove_stripe_ti(preproc_data)
-=======
-                print(" * Removing stripes/ring artifacts, using the method '{0}'".format(cfg.stripe_removal_method))
-                preproc_data = tomopy.prep.stripe.remove_stripe_ti(preproc_data)
->>>>>>> .merge_file_a10816
                 time2 = time.time()
-<<<<<<< .merge_file_a09632
-                print " * Removed stripes/ring artifacts, Time elapsed: {0:.3f}".format(
-                    time2 - time1)
-||||||| .merge_file_a07228
-                print " * Removed stripes/ring artifacts, Time elapsed: {0:.3f}".format(time2 - time1)
-=======
-                print(" * Removed stripes/ring artifacts, Time elapsed: {0:.3f}".format(time2 - time1))
->>>>>>> .merge_file_a10816
+                print(
+                    " * Removed stripes/ring artifacts, Time elapsed: {0:.3f}".
+                    format(time2 - time1))
             else:
                 print(
                     " * WARNING: stripe removal method '{0}' is unknown. Not applying it.".
@@ -572,14 +532,9 @@ class ReconstructionCommand(object):
                     data[idx, :, :] - norm_dark_img, norm_divide)
             # true_divide produces float64, we assume that precision not needed (definitely not
             # for 16-bit depth output images as we usually have).
-<<<<<<< .merge_file_a09632
-            print " * Finished normalization by flat/dark images with pixel data type: {0}.".format(
-                data.dtype)
-||||||| .merge_file_a07228
-            print " * Finished normalization by flat/dark images with pixel data type: {0}.".format(data.dtype)
-=======
-            print(" * Finished normalization by flat/dark images with pixel data type: {0}.".format(data.dtype))
->>>>>>> .merge_file_a10816
+            print(
+                " * Finished normalization by flat/dark images with pixel data type: {0}.".
+                format(data.dtype))
         else:
             print(
                 " * Note: cannot apply normalization by flat/dark images because no valid flat image has been "
@@ -607,26 +562,14 @@ class ReconstructionCommand(object):
 
         # Apply cut-off for the normalization?
         if cfg.cut_off_level and cfg.cut_off_level:
-<<<<<<< .merge_file_a09632
-            print "* Applying cut-off with level: {0}".format(
-                cfg.cut_off_level)
-||||||| .merge_file_a07228
-            print "* Applying cut-off with level: {0}".format(cfg.cut_off_level)
-=======
-            print("* Applying cut-off with level: {0}".format(cfg.cut_off_level))
->>>>>>> .merge_file_a10816
+            print("* Applying cut-off with level: {0}".format(
+                cfg.cut_off_level))
             dmin = np.amin(data)
             dmax = np.amax(data)
             rel_cut_off = dmin + cfg.cut_off_level * (dmax - dmin)
             data[data < rel_cut_off] = dmin
-<<<<<<< .merge_file_a09632
-            print " * Finished cut-off stepa, with pixel data type: {0}".format(
-                data.dtype)
-||||||| .merge_file_a07228
-            print " * Finished cut-off stepa, with pixel data type: {0}".format(data.dtype)
-=======
-            print(" * Finished cut-off stepa, with pixel data type: {0}".format(data.dtype))
->>>>>>> .merge_file_a10816
+            print(" * Finished cut-off stepa, with pixel data type: {0}".
+                  format(data.dtype))
         else:
             print(" * Note: not applying cut-off.")
 
@@ -641,17 +584,9 @@ class ReconstructionCommand(object):
                 data[idx] = scipy.ndimage.median_filter(
                     data[idx], cfg.median_filter_size, mode='mirror')
                 #, mode='nearest')
-<<<<<<< .merge_file_a09632
             print(
                 " * Finished noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
                 format(data.dtype, cfg.median_filter_size))
-||||||| .merge_file_a07228
-            print (" * Finished noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
-                   format(data.dtype, cfg.median_filter_size))
-=======
-            print(" * Finished noise filter / median, with pixel data type: {0}, filter size/width: {1}.".
-                  format(data.dtype, cfg.median_filter_size))
->>>>>>> .merge_file_a10816
         else:
             print(" * Note: not applying noise filter /median.")
 
@@ -683,17 +618,9 @@ class ReconstructionCommand(object):
         if dark:
             dark = self._rotate_imgs(dark, cfg)
 
-<<<<<<< .merge_file_a09632
         print(
             " * Finished rotation step ({0} degrees clockwise), with pixel data type: {1}".
             format(cfg.rotation * 90, data.dtype))
-||||||| .merge_file_a07228
-        print (" * Finished rotation step ({0} degrees clockwise), with pixel data type: {1}".
-               format(cfg.rotation * 90, data.dtype))
-=======
-        print(" * Finished rotation step ({0} degrees clockwise), with pixel data type: {1}".
-              format(cfg.rotation * 90, data.dtype))
->>>>>>> .merge_file_a10816
 
         return (data, white, dark)
 
@@ -745,63 +672,36 @@ class ReconstructionCommand(object):
         verbosity = 1
         if 'astra' == alg_cfg.tool:
             # run_reconstruct_3d_astra(proj_data, algorithm, cor, proj_angles=proj_angles)
-<<<<<<< .merge_file_a09632
             return self.run_reconstruct_3d_astra_simple(
                 proj_data, proj_angles, alg_cfg, preproc_cfg.cor)
-        
-        # examples to check: [30, 130, 230, 330, 430]:
-        for slice_idx in [int(proj_data.shape[0] / 2)]:  
-            print " > Finding center with tomopy find_center, slice index: {0}.".format(
-                slice_idx)
-||||||| .merge_file_a07228
-            return self.run_reconstruct_3d_astra_simple(proj_data, proj_angles, alg_cfg, preproc_cfg.cor)
 
-        for slice_idx in [int(proj_data.shape[0]/2)]: # examples to check: [30, 130, 230, 330, 430]:
-            print " > Finding center with tomopy find_center, slice index: {0}.".format(slice_idx)
-=======
-            return self.run_reconstruct_3d_astra_simple(proj_data, proj_angles, alg_cfg, preproc_cfg.cor)
-
-        for slice_idx in [int(proj_data.shape[0]/2)]: # examples to check: [30, 130, 230, 330, 430]:
-            print(" > Finding center with tomopy find_center, slice index: {0}.".format(slice_idx))
->>>>>>> .merge_file_a10816
+        for slice_idx in [int(proj_data.shape[0] / 2)
+                          ]:  # examples to check: [30, 130, 230, 330, 430]:
+            print(
+                " > Finding center with tomopy find_center, slice index: {0}.".
+                format(slice_idx))
             import tomorec.tool_imports as tti
             try:
                 tomopy = tti.import_tomo_tool('tomopy')
-<<<<<<< .merge_file_a09632
-                print "proj_data: ", proj_data.shape
-                print "proj_angles: ", proj_angles.shape
-                tomopy_cor = tomopy.find_center(
-                    tomo=proj_data,
-                    theta=proj_angles,
-                    ind=slice_idx,
-                    emission=False)
-||||||| .merge_file_a07228
-                print "proj_data: ", proj_data.shape
-                print "proj_angles: ", proj_angles.shape
-                tomopy_cor = tomopy.find_center(tomo=proj_data, theta=proj_angles, ind=slice_idx, emission=False)
-=======
-                print("proj_data: ", proj_data.shape)
-                print("proj_angles: ", proj_angles.shape)
                 # Temporary fix to support newer tomopy reconstructions,
                 # this does not guarantee that their output will be correct,
                 # but only patches the removal of the emission keyword and allows the recon to run
-                if(int(tomopy.__version__[0]) < 1):
+                if (int(tomopy.__version__[0]) < 1):
                     # for tomopy versions 0.x.x
-                    tomopy_cor = tomopy.find_center(tomo=proj_data, theta=proj_angles, ind=slice_idx, emission=False)
+                    tomopy_cor = tomopy.find_center(
+                        tomo=proj_data,
+                        theta=proj_angles,
+                        ind=slice_idx,
+                        emission=False)
                 else:
                     # for tomopy versions 1.x.x
-                    tomopy_cor = tomopy.find_center(tomo=proj_data, theta=proj_angles, ind=slice_idx)
->>>>>>> .merge_file_a10816
+                    tomopy_cor = tomopy.find_center(
+                        tomo=proj_data, theta=proj_angles, ind=slice_idx)
                 if not preproc_cfg.cor:
                     preproc_cfg.cor = tomopy_cor
-<<<<<<< .merge_file_a09632
-                print " > Center of rotation found by tomopy.find_center:  {0}".format(
-                    tomopy_cor)
-||||||| .merge_file_a07228
-                print " > Center of rotation found by tomopy.find_center:  {0}".format(tomopy_cor)
-=======
-                print(" > Center of rotation found by tomopy.find_center:  {0}".format(tomopy_cor))
->>>>>>> .merge_file_a10816
+                print(
+                    " > Center of rotation found by tomopy.find_center:  {0}".
+                    format(tomopy_cor))
             except ImportError as exc:
                 print(
                     " * WARNING: could not import tomopy so could not use the tomopy method to find the center "
@@ -836,14 +736,9 @@ class ReconstructionCommand(object):
                 center=preproc_cfg.cor,
                 algorithm=alg_cfg.algorithm)
         tnow = time.time()
-<<<<<<< .merge_file_a09632
-        print "Reconstructed 3D volume. Time elapsed in reconstruction algorithm: {0:.3f}".format(
-            tnow - start)
-||||||| .merge_file_a07228
-        print "Reconstructed 3D volume. Time elapsed in reconstruction algorithm: {0:.3f}".format(tnow - start)
-=======
-        print("Reconstructed 3D volume. Time elapsed in reconstruction algorithm: {0:.3f}".format(tnow - start))
->>>>>>> .merge_file_a10816
+        print(
+            "Reconstructed 3D volume. Time elapsed in reconstruction algorithm: {0:.3f}".
+            format(tnow - start))
 
         return rec
 
@@ -1008,17 +903,9 @@ class ReconstructionCommand(object):
         import prep as iprep
 
         if cfg.circular_mask:
-<<<<<<< .merge_file_a09632
             recon_data = iprep.filters.circular_mask(
                 recon_data, ratio=cfg.circular_mask)
-            print " * Applied circular mask on reconstructed volume"
-||||||| .merge_file_a07228
-            recon_data = iprep.filters.circular_mask(recon_data, ratio=cfg.circular_mask)
-            print " * Applied circular mask on reconstructed volume"
-=======
-            recon_data = iprep.filters.circular_mask(recon_data, ratio=cfg.circular_mask)
             print(" * Applied circular mask on reconstructed volume")
->>>>>>> .merge_file_a10816
         else:
             print(" * Note: not applied circular mask on reconstructed volume")
 
@@ -1033,21 +920,11 @@ class ReconstructionCommand(object):
             print(" * Gaussian filter not implemented")
 
         if cfg.median_filter_size and cfg.median_filter_size > 1:
-<<<<<<< .merge_file_a09632
             recon_data = scipy.ndimage.median_filter(recon_data,
                                                      cfg.median_filter_size)
             print(
                 " * Applied median_filter on reconstructed volume, with filtersize: {0}".
                 format(cfg.median_filter_size))
-||||||| .merge_file_a07228
-            recon_data = scipy.ndimage.median_filter(recon_data, cfg.median_filter_size)
-            print (" * Applied median_filter on reconstructed volume, with filtersize: {0}".
-                   format(cfg.median_filter_size))
-=======
-            recon_data = scipy.ndimage.median_filter(recon_data, cfg.median_filter_size)
-            print(" * Applied median_filter on reconstructed volume, with filtersize: {0}".
-                  format(cfg.median_filter_size))
->>>>>>> .merge_file_a10816
         else:
             print(" * Note: not applied median_filter on reconstructed volume")
 
@@ -1060,7 +937,9 @@ class ReconstructionCommand(object):
                 " * Applied N-dimensional median filter on reconstructed volume, with filter size: {0} ".
                 format(kernel_size))
         else:
-            print(" * Note: not applied N-dimensional median filter on reconstructed volume")
+            print(
+                " * Note: not applied N-dimensional median filter on reconstructed volume"
+            )
 
     def read_in_stack(self,
                       sample_path,
@@ -1119,48 +998,24 @@ class ReconstructionCommand(object):
         # output_dir = 'output_recon_tomopy'
         output_dir = cfg.postproc_cfg.output_dir
         out_recon_dir = os.path.join(output_dir, 'reconstructed')
-<<<<<<< .merge_file_a09632
-        print "* Saving slices of the reconstructed volume in: {0}".format(
-            out_recon_dir)
+        print("* Saving slices of the reconstructed volume in: {0}".format(
+            out_recon_dir))
         tomoio.save_recon_as_vertical_slices(
             recon_data,
             out_recon_dir,
             name_prefix=self._OUT_SLICES_FILENAME_PREFIX,
             img_format=cfg.preproc_cfg.out_img_format)
-||||||| .merge_file_a07228
-        print "* Saving slices of the reconstructed volume in: {0}".format(out_recon_dir)
-        tomoio.save_recon_as_vertical_slices(recon_data, out_recon_dir,
-                                             name_prefix=self._OUT_SLICES_FILENAME_PREFIX,
-                                             img_format=cfg.preproc_cfg.out_img_format)
-=======
-        print("* Saving slices of the reconstructed volume in: {0}".format(out_recon_dir))
-        tomoio.save_recon_as_vertical_slices(recon_data, out_recon_dir,
-                                             name_prefix=self._OUT_SLICES_FILENAME_PREFIX,
-                                             img_format=cfg.preproc_cfg.out_img_format)
->>>>>>> .merge_file_a10816
 
         # Sideways slices:
         save_horiz_slices = False
         if save_horiz_slices:
             out_horiz_dir = os.path.join(output_dir, 'horiz_slices')
-<<<<<<< .merge_file_a09632
-            print "* Saving horizontal slices in: {0}".format(out_horiz_dir)
+            print("* Saving horizontal slices in: {0}".format(out_horiz_dir))
             tomoio.save_recon_as_horizontal_slices(
                 recon_data,
                 out_horiz_dir,
                 name_prefix=self._OUT_HORIZ_SLICES_SUBDIR,
                 img_format=cfg.preproc_cfg.out_img_format)
-||||||| .merge_file_a07228
-            print "* Saving horizontal slices in: {0}".format(out_horiz_dir)
-            tomoio.save_recon_as_horizontal_slices(recon_data, out_horiz_dir,
-                                                   name_prefix=self._OUT_HORIZ_SLICES_SUBDIR,
-                                                   img_format=cfg.preproc_cfg.out_img_format)
-=======
-            print("* Saving horizontal slices in: {0}".format(out_horiz_dir))
-            tomoio.save_recon_as_horizontal_slices(recon_data, out_horiz_dir,
-                                                   name_prefix=self._OUT_HORIZ_SLICES_SUBDIR,
-                                                   img_format=cfg.preproc_cfg.out_img_format)
->>>>>>> .merge_file_a10816
 
         if save_netcdf_vol:
             print("* Saving reconstructed volume as NetCDF")
@@ -1180,22 +1035,16 @@ class ReconstructionCommand(object):
         @param out_dtype :: dtype used for the pixel type/depth in the output image files
         """
 
-        print(" * Pre-processed images (preproc_data) dtype:", preproc_data.dtype)
+        print(" * Pre-processed images (preproc_data) dtype:",
+              preproc_data.dtype)
         min_pix = np.amin(preproc_data)
         max_pix = np.amax(preproc_data)
         print("   with min_pix: {0}, max_pix: {1}".format(min_pix, max_pix))
         if preproc_cfg.save_preproc_imgs:
-<<<<<<< .merge_file_a09632
             preproc_dir = os.path.join(output_dir,
                                        self._PREPROC_IMGS_SUBDIR_NAME)
-            print "* Saving pre-processed images into: {0}".format(preproc_dir)
-||||||| .merge_file_a07228
-            preproc_dir = os.path.join(output_dir, self._PREPROC_IMGS_SUBDIR_NAME)
-            print "* Saving pre-processed images into: {0}".format(preproc_dir)
-=======
-            preproc_dir = os.path.join(output_dir, self._PREPROC_IMGS_SUBDIR_NAME)
-            print("* Saving pre-processed images into: {0}".format(preproc_dir))
->>>>>>> .merge_file_a10816
+            print("* Saving pre-processed images into: {0}".format(
+                preproc_dir))
             tomoio.make_dirs_if_needed(preproc_dir)
             for idx in range(0, preproc_data.shape[0]):
                 # rescale_intensity has issues with float64=>int16
@@ -1250,9 +1099,12 @@ class ReconstructionCommand(object):
         proj_angles = np.arange(0, num_projections * inc, inc)
         # For tomopy
         proj_angles = np.radians(proj_angles)
-        for slice_idx in [int(num_projections / 2):
+        for slice_idx in [int(num_projections / 2)]:
             tomopy_cor = tomopy.find_center(
-                tomo=projection_data, theta=proj_angles, ind=slice_idx, emission=False)
+                tomo=projection_data,
+                theta=proj_angles,
+                ind=slice_idx,
+                emission=False)
 
         # print to stdout
         print(tomopy_cor)
