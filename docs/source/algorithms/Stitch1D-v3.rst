@@ -50,7 +50,8 @@ The algorithm workflow is as follows:
    from the right-hand-side workspace) multiplied by the scale factor.
 #. The special values are put back in the output workspace.
 
-Below is a flowchart illustrating the steps in the algorithm. Figure on the left corresponds
+Below is a flowchart illustrating the steps in the algorithm (it assumes :literal:`ScaleRHSWorkspace`
+is true). Figure on the left corresponds
 to the workflow when no scale factor is provided, while figure on the right corresponds to
 workflow with a manual scale factor specified by the user.
 
@@ -61,7 +62,10 @@ Error propagation
 
 Errors are are handled and propagated in every step according to :ref:`Error Propagation`. This
 includes every child algorithm: :ref:`algm-Rebin`, :ref:`algm-Integration`, :ref:`algm-Divide`,
-:ref:`algm-Multiply` and :ref:`algm-WeightedMean`.
+:ref:`algm-Multiply` and :ref:`algm-WeightedMean`. In particular, when the scale factor is calculated
+as the quotient of the left-hand-side integral and the right-hand-side integral, the result is
+a number with an error associated, and therefore the multiplication of the right-hand-side
+workspace by this number takes into account its error.
 
 Usage
 -----
