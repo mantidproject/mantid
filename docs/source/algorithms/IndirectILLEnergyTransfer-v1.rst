@@ -56,7 +56,7 @@ Output:
 
 .. testcleanup:: ExIndirectILLEnergyTransfer
 
-   DeleteWorkspace(ws)
+   DeleteWorkspace('ws)
 
 **Example - IndirectILLEnergyTransfer : QENS data with mirror sense**
 
@@ -82,7 +82,7 @@ Output:
 
 .. testcleanup:: ExIndirectILLEnergyTransferMirrorSense
 
-   DeleteWorkspace(ws)
+   DeleteWorkspace('ws')
 
 .. categories::
 

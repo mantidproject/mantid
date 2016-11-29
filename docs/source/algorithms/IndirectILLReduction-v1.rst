@@ -51,7 +51,7 @@ Output:
 
 .. testoutput:: ExIndirectILLReduction
 
-    Reduced workspace has 24 spectra
+    Reduced workspace has 18 spectra
     Raw workspace has 2057 spectra
 
 
@@ -77,9 +77,9 @@ Output:
 .. testoutput:: ExIndirectILLReductionMirrorMode
 
     Raw workspace has 2057 spectra
-    Reduced workspace has 24 spectra
-    Reduced left workspace has 24 spectra
-    Reduced right workspace has 24 spectra
+    Reduced workspace has 18 spectra
+    Reduced left workspace has 18 spectra
+    Reduced right workspace has 18 spectra
 
 .. categories::
 

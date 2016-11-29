@@ -92,7 +92,7 @@ Output:
 
 .. testcleanup:: ExIndirectILLReductionQENS
 
-   DeleteWorkspace(ws)
+   DeleteWorkspace('ws')
 
 .. categories::
 

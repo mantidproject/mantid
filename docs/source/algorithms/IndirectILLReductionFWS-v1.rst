@@ -60,7 +60,7 @@ Output:
 
 .. testcleanup:: ExFixedWindowScans
 
-   DeleteWorkspace(ws)
+   DeleteWorkspace('ws')
 
 .. categories::
 
