@@ -45,11 +45,9 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         grouping_filename = instrument.getStringParameter('Workflow.GroupingFile')[0]
         DeleteWorkspace(ws)
 
-        args = {}
-
-        args['Run'] = self._runs['two_wing_QENS']
-        args['MapFile'] = os.path.join(config['groupingFiles.directory'], grouping_filename)
-        args['CropDeadMonitorChannels'] = True
+        args = {'Run': self._runs['two_wing_QENS'],
+                'MapFile': str(os.path.join(config['groupingFiles.directory'], grouping_filename)),
+                'CropDeadMonitorChannels': True}
 
         IndirectILLEnergyTransfer(**args)
 
