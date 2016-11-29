@@ -6,8 +6,7 @@ import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
 from isis_powder.abstract_inst import AbstractInst
-from isis_powder.polaris_routines import polaris_algs, polaris_output
-from isis_powder.routines.RunDetails import RunDetails
+from isis_powder.polaris_routines import polaris_algs, polaris_config_parser, polaris_output
 
 
 class Polaris(AbstractInst):
@@ -15,17 +14,20 @@ class Polaris(AbstractInst):
     _masking_file_name = "VanaPeaks.dat"
     _number_of_banks = 5
 
-    def __init__(self, user_name, chopper_on, apply_solid_angle=True,
-                 calibration_dir=None, output_dir=None, **kwargs):
+    def __init__(self, chopper_on, config_file=None, **kwargs):
 
-        super(Polaris, self).__init__(user_name=user_name, calibration_dir=calibration_dir,
-                                      output_dir=output_dir, kwargs=kwargs)
+        _set_kwargs_from_basic_config_file(config_path=config_file, kwargs=kwargs)
+
+        # Have to pass in everything through named types until abstract_inst takes kwargs
+        super(Polaris, self).__init__(user_name=kwargs["user_name"], calibration_dir=kwargs["calibration_directory"],
+                                      output_dir=kwargs["output_directory"], kwargs=kwargs)
+
         self._chopper_on = chopper_on
-        self._apply_solid_angle = apply_solid_angle
+        self._apply_solid_angle = kwargs["apply_solid_angle"]
 
         self._spline_coeff = 100
 
-        # Caches the last dictionary to avoid us having to keep parsing the YAML
+        # Hold the last dictionary later to avoid us having to keep parsing the YAML
         self._run_details_last_run_number = None
         self._run_details_cached_obj = None
 
@@ -42,10 +44,10 @@ class Polaris(AbstractInst):
                                                  do_absorb_corrections=do_absorb_corrections,
                                                  gen_absorb_correction=gen_absorb_correction)
 
-    # Abstract implementation
-
     def get_default_group_names(self):
         return self._calibration_grouping_names
+
+    # Abstract implementation
 
     def get_run_details(self, run_number):
         if self._run_details_last_run_number == run_number:
@@ -132,3 +134,32 @@ class Polaris(AbstractInst):
                                                  output_paths=output_paths, run_number=run_details.run_number)
 
         return d_spacing_group, tof_group
+
+
+def _set_kwargs_from_basic_config_file(config_path, kwargs):
+    if config_path:
+        basic_config_dict = polaris_config_parser.get_basic_config(file_path=config_path)
+    else:
+        # Create an empty dictionary so we still get error checking below and nicer error messages
+        basic_config_dict = {}
+
+    # Set any unset properties:
+    key = "user_name"
+    _set_from_config_kwargs_helper(config_dictionary=basic_config_dict, kwargs=kwargs, key=key)
+    key = "calibration_directory"
+    _set_from_config_kwargs_helper(config_dictionary=basic_config_dict, kwargs=kwargs, key=key)
+    key = "output_directory"
+    _set_from_config_kwargs_helper(config_dictionary=basic_config_dict, kwargs=kwargs, key=key)
+    key = "apply_solid_angle"
+    _set_from_config_kwargs_helper(config_dictionary=basic_config_dict, kwargs=kwargs, key=key)
+
+
+def _set_from_config_kwargs_helper(config_dictionary, kwargs, key):
+    error_first = "Setting with name: '"
+    error_last = "' was not passed in the call or set in the basic config."
+    kwarg_value = kwargs.get(key, None)
+    if not kwarg_value:
+        # Only try to parse it if it wasn't passed
+        value = common.dictionary_key_helper(dictionary=config_dictionary, key=key, throws=True,
+                                             exception_msg=(error_first + key + error_last))
+        kwargs[key] = value

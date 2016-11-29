@@ -65,9 +65,6 @@ class Pearl(AbstractInst):
     def _get_lambda_range(self):
         return self._lambda_lower, self._lambda_upper
 
-
-    # Methods #
-
     def get_run_details(self, run_number):
         # TODO once we migrate this to another format (i.e. not the if/elif/else) implement cached val
         cycle_dict = self._get_cycle_factory_dict(run_number=run_number)
@@ -77,6 +74,7 @@ class Pearl(AbstractInst):
         run_details.instrument_version = cycle_dict["instrument_version"]
         return run_details
 
+    @staticmethod
     def _get_cycle_factory_dict(self, run_number):
         # TODO remove this when we move to combining CAL/RUN factories
         run_input = ""

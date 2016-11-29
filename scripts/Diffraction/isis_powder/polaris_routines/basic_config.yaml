@@ -1,0 +1,9 @@
+# Basic setup
+
+user_name : "Mantid"
+apply_solid_angle : "True"
+
+calibration_directory : ""
+output_directory : ""
+
+advanced_config_file : "Not Set"

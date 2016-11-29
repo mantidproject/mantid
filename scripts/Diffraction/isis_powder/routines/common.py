@@ -16,6 +16,20 @@ def create_calibration_by_names(calibration_runs, startup_objects, grouping_file
                            out_grouping_file_name=grouping_file_name, instrument=startup_objects)
 
 
+def dictionary_key_helper(dictionary, key, throws=True, exception_msg=None):
+    if key in dictionary:
+        return dictionary[key]
+    elif not throws:
+        return None
+    elif exception_msg:
+        # Print user specified message
+        raise KeyError(exception_msg)
+    else:
+        # Raise default python key error:
+        this_throws = dictionary[key]
+        return this_throws  # Never gets this far just makes linters happy
+
+
 def extract_bank_spectra(ws_to_split, num_banks):
     spectra_bank_list = []
     for i in range(0, num_banks):
@@ -51,10 +65,8 @@ def get_monitor_ws(ws_to_process, run_number_string, instrument):
 
 
 def load_current_normalised_ws(run_number_string, instrument):
-    read_in_ws = _load_raw_files(run_number_string=run_number_string, instrument=instrument)
-
     run_information = instrument.get_run_details(run_number=run_number_string)
-
+    read_in_ws = _load_raw_files(run_number_string=run_number_string, instrument=instrument)
     read_ws = instrument.normalise_ws(ws_to_correct=read_in_ws, run_details=run_information)
 
     output_name = "read_ws_output-" + str(g_ads_workaround["read_ws"])
