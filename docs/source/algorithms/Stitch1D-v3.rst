@@ -48,7 +48,9 @@ The algorithm workflow is as follows:
    mean workspace + right-hand-side workspace (values in range [:literal:`EndOverlap`, :literal:`EndX`],
    where :literal:`EndX` is the maximum X value specified via :literal:`Params` or calculated
    from the right-hand-side workspace) multiplied by the scale factor.
-#. The special values are put back in the output workspace.
+#. The special values are put back in the output workspace. Note that if both the left-hand-side
+   workspace and the right-hand-side workspace happen to have a different special value in the same bin, this
+   bin will be set to infinite in the output workspace.
 
 Below is a flowchart illustrating the steps in the algorithm (it assumes :literal:`ScaleRHSWorkspace`
 is true). Figure on the left corresponds
