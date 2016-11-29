@@ -18,10 +18,11 @@ except ImportError:
 
 from AbinsModules import CalculateCrystal, LoadCASTEP
 
+
 class ABINSCalculateCrystalTest(unittest.TestCase):
 
-    _core = "../ExternalData/Testing/Data/UnitTest/" # path to files
-    _temperature = 10 # 10 K,  temperature for the benchmark
+    _core = "../ExternalData/Testing/Data/UnitTest/"  # path to files
+    _temperature = 10  # 10 K,  temperature for the benchmark
 
     # data
     # Use case: one k-point
@@ -35,8 +36,8 @@ class ABINSCalculateCrystalTest(unittest.TestCase):
 
         filename = self.Si2 + ".phonon"
 
-        _castep_reader = LoadCASTEP(input_DFT_filename=filename)
-        _good_data = _castep_reader.readPhononFile()
+        _castep_reader = LoadCASTEP(input_dft_filename=filename)
+        _good_data = _castep_reader.read_phonon_file()
 
         # wrong filename
         with self.assertRaises(ValueError):
@@ -51,56 +52,53 @@ class ABINSCalculateCrystalTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             _poor_tester = CalculateCrystal(filename=filename, temperature=self._temperature, abins_data=bad_data)
 
-
-
     #       main test
     def test_good_case(self):
         self._good_case(name=self.C6H6)
         self._good_case(name=self.Si2)
 
-
     #       helper functions
     def _good_case(self, name=None):
-
 
         # calculation of crystal data
         _good_data = self._get_good_data(filename=name)
 
-        _good_tester = CalculateCrystal(filename=name + ".phonon", temperature=self._temperature, abins_data=_good_data["DFT"])
-        calculated_data = _good_tester.calculateData().extract()
+        _good_tester = CalculateCrystal(filename=name + ".phonon",
+                                        temperature=self._temperature,
+                                        abins_data=_good_data["DFT"])
+        calculated_data = _good_tester.calculate_data().extract()
 
         # check if evaluated crystal data  is correct
         self.assertEqual(True, np.allclose(_good_data["dw_crystal_data"], calculated_data["dw_crystal_data"]))
 
         # check if loading crystal data is correct
-        new_tester =  CalculateCrystal(filename=name + ".phonon", temperature=self._temperature, abins_data=_good_data["DFT"])
-        loaded_data = new_tester.loadData().extract()
+        new_tester = CalculateCrystal(filename=name + ".phonon",
+                                      temperature=self._temperature,
+                                      abins_data=_good_data["DFT"])
+        loaded_data = new_tester.load_data().extract()
 
         self.assertEqual(True, np.allclose(calculated_data["dw_crystal_data"], loaded_data["dw_crystal_data"]))
 
-
     def _get_good_data(self, filename=None):
 
-        _CASTEP_reader = LoadCASTEP(input_DFT_filename=filename + ".phonon")
+        _CASTEP_reader = LoadCASTEP(input_dft_filename=filename + ".phonon")
         _crystal = self._prepare_data(filename=filename + "_crystal_DW.txt")
 
-        return {"DFT":_CASTEP_reader.readPhononFile(), "dw_crystal_data": _crystal}
-
+        return {"DFT": _CASTEP_reader.read_phonon_file(), "dw_crystal_data": _crystal}
 
     def _prepare_data(self, filename=None):
         """Reads a correct values from ASCII file."""
         correct_data = None
         with open(filename) as data_file:
-            correct_data = json.loads(data_file.read().replace("\n"    , " ").
-                                      replace("array" , "").
-                                      replace("(["    , "[").
-                                      replace("])"    , "]").
-                                      replace("'"     , '"'))
+            correct_data = json.loads(data_file.read().replace("\n", " ").
+                                      replace("array", "").
+                                      replace("([",    "[").
+                                      replace("])",    "]").
+                                      replace("'",     '"'))
 
         correct_data = np.asarray(correct_data)
 
         return correct_data
-
 
 if __name__ == '__main__':
     unittest.main()

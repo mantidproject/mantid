@@ -10,21 +10,20 @@ import AbinsParameters
 import AbinsConstants
 
 
-# noinspection PyPep8Naming
 class GeneralDFTProgram(IOmodule):
     """
     A general class which groups all methods which should be inherited or implemented by a DFT program used
     in INS analysis.
     """
-    def __init__(self, input_DFT_filename=None):
+    def __init__(self, input_dft_filename=None):
 
-        super(GeneralDFTProgram, self).__init__(input_filename=input_DFT_filename, group_name=AbinsParameters.DFT_group)
+        super(GeneralDFTProgram, self).__init__(input_filename=input_dft_filename, group_name=AbinsParameters.dft_group)
 
         self._num_k = None
         self._num_atoms = None
         self._sample_form = None
 
-    def readPhononFile(self):
+    def read_phonon_file(self):
         """
         This method is different for different DFT programs. It has to be overridden by inheriting class.
         This method should do the following:
@@ -36,7 +35,7 @@ class GeneralDFTProgram(IOmodule):
           2) Method should read from a phonon file an information about frequencies, atomic displacements,
           k-point vectors, weights of k-points and ions.
 
-          3) Method should reconstruct data for symmetry equivalent k-points (protected method _recoverSymmetryPoints).
+          3) Method should reconstruct data for symmetry equivalent k-points (protected method _recover_symmetry_points).
 
              **Notice: this step is not implemented now. At the moment only Gamma point calculations are supported.**
 
@@ -107,7 +106,7 @@ class GeneralDFTProgram(IOmodule):
         """
         return None
 
-    def loadData(self):
+    def load_data(self):
         """
         Loads data from hdf file.
         @return:
@@ -129,7 +128,7 @@ class GeneralDFTProgram(IOmodule):
         return self._rearrange_data(data=_loaded_data)
 
     # Protected methods which should be reused by classes which read DFT phonon data
-    def _recoverSymmetryPoints(self, data=None):
+    def _recover_symmetry_points(self, data=None):
         """
         This method reconstructs symmetry equivalent k-points.
         @param data: dictionary with the data for only symmetry inequivalent k-points. This methods
@@ -168,21 +167,21 @@ class GeneralDFTProgram(IOmodule):
         result_data.set(k_points_data=k_points, atoms_data=atoms)
         return result_data
 
-    def getData(self):
+    def get_data(self):
 
         # try to load DFT data from *.hdf5 file
         try:
 
-            self.checkPreviousData()
-            dft_data = self.loadData()
+            self.check_previous_data()
+            dft_data = self.load_data()
             logger.notice(str(dft_data) + " has been loaded from the HDF file.")
 
         # if loading from *.hdf5 file failed than read data directly  from input DFT file and erase hdf file
         except (IOError, ValueError) as err:
 
             logger.notice(str(err))
-            self.eraseHDFfile()
-            dft_data = self.readPhononFile()
+            self.erase_hdf_file()
+            dft_data = self.read_phonon_file()
             logger.notice(str(dft_data) + " from DFT input file has been loaded.")
 
         return dft_data

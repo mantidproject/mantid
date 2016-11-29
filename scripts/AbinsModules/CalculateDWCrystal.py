@@ -37,8 +37,7 @@ class CalculateDWCrystal(object):
         self._num_freq = extracted_k_data["atomic_displacements"].shape[2]
         super(CalculateDWCrystal, self).__init__()
 
-
-    def _calculate_DW(self):
+    def _calculate_dw(self):
         """
         The Debye-Waller coefficients are calculated atom by atom.
         For each atom they consist in a 3X3 matrix. The Debye-Waller factors are given in atomic units.
@@ -87,14 +86,13 @@ class CalculateDWCrystal(object):
             _DW._append(item=_item_k, num_atom=num)
         return _DW
 
-
     def calculateData(self):
         """
         Calculates Debye-Waller factors.
         @return: object of type DwData with Debye-Waller factors.
         """
 
-        data = self._calculate_DW()
+        data = self._calculate_dw()
 
         return data
 

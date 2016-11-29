@@ -1,6 +1,7 @@
 from GeneralData import GeneralData
 import AbinsConstants
 
+
 class SData(GeneralData):
     """
     Class for storing S(Q, omega)
@@ -16,9 +17,9 @@ class SData(GeneralData):
         if sample_form in AbinsConstants.all_sample_forms:
             self._sample_form = sample_form
         else:
-            raise ValueError("Invalid sample form %s"%sample_form)
+            raise ValueError("Invalid sample form %s" % sample_form)
 
-        self._data = None # dictionary which stores dynamical structure factor for all atoms
+        self._data = None  # dictionary which stores dynamical structure factor for all atoms
 
     def set(self, items=None):
         """

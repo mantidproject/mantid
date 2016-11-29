@@ -21,9 +21,9 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         """
         Calculates squared Q vectors for TOSCA and TOSCA-like instruments.
         """
-        k2_i = (frequencies + AbinsParameters.TOSCA_final_neutron_energy) * AbinsConstants.TOSCA_constant
-        k2_f = AbinsParameters.TOSCA_final_neutron_energy * AbinsConstants.TOSCA_constant
-        result = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * AbinsParameters.TOSCA_cos_scattering_angle
+        k2_i = (frequencies + AbinsParameters.tosca_final_neutron_energy) * AbinsConstants.TOSCA_constant
+        k2_f = AbinsParameters.tosca_final_neutron_energy * AbinsConstants.TOSCA_constant
+        result = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * AbinsParameters.tosca_cos_scattering_angle
         return result
 
     def collect_K_data(self, k_points_data=None):
@@ -47,9 +47,9 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
 
         else:
 
-            sigma = AbinsParameters.TOSCA_A * frequencies ** 2 + \
-                    AbinsParameters.TOSCA_B * frequencies + \
-                    AbinsParameters.TOSCA_C
+            sigma = AbinsParameters.tosca_a * frequencies ** 2 + \
+                    AbinsParameters.tosca_b * frequencies + \
+                    AbinsParameters.tosca_c
 
             # freq_num: number of transition energies for the given quantum order event
 

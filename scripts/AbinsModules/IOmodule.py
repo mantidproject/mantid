@@ -8,7 +8,6 @@ from AbinsModules import AbinsParameters
 from mantid.kernel import logger
 
 
-# noinspection PyProtectedMember,PyPep8Naming
 class IOmodule(object):
     """
     Class for ABINS I/O HDF file operations.
@@ -19,7 +18,7 @@ class IOmodule(object):
 
             self._input_filename = input_filename
             try:
-                self._hash_input_filename = self.calculateDFTFileHash()
+                self._hash_input_filename = self.calculate_dft_file_hash()
             except (IOError, ValueError) as err:
                 logger.error(str(err))
 
@@ -74,7 +73,7 @@ class IOmodule(object):
         previous_advanced_parameters = self.load(list_of_attributes=["advanced_parameters"])
         return self._advanced_parameters == previous_advanced_parameters["attributes"]["advanced_parameters"]
 
-    def checkPreviousData(self):
+    def check_previous_data(self):
         """
         Checks if currently used DFT file is the same as in the previous calculations. Also checks if currently used
         parameters from AbinsParameters are the same as in the previous calculations.
@@ -87,19 +86,19 @@ class IOmodule(object):
         if not self._valid_advanced_parameters():
             raise ValueError("Different advanced parameters were used in the previous calculations.")
 
-    def loadData(self):
+    def load_data(self):
         """
         Method which loads data from an hdf file. Method which has to be implemented by an inheriting class.
         """
         return None
 
-    def calculateData(self):
+    def calculate_data(self):
         """
         Method which evaluates data in case loading failed. Method which has to be implemented by an inheriting class.
         """
         return None
 
-    def getData(self):
+    def get_data(self):
         """
         Method to obtain data
         @return: obtained data
@@ -108,20 +107,20 @@ class IOmodule(object):
 
         try:
 
-            self.checkPreviousData()
+            self.check_previous_data()
 
-            _data = self.loadData()
+            _data = self.load_data()
             logger.notice(str(_data) + " has been loaded from the HDF file.")
 
         except (IOError, ValueError) as err:
 
             logger.notice("Warning: " + str(err) + " Data has to be calculated.")
-            _data = self.calculateData()
+            _data = self.calculate_data()
             logger.notice(str(_data) + " has been calculated.")
 
         return _data
 
-    def eraseHDFfile(self):
+    def erase_hdf_file(self):
         """
         Erases content of hdf file.
         """
@@ -129,7 +128,7 @@ class IOmodule(object):
         with h5py.File(self._hdf_filename, 'w') as hdf_file:
             pass
 
-    def addAttribute(self, name=None, value=None):
+    def add_attribute(self, name=None, value=None):
         """
         Adds attribute to the dictionary with other attributes.
         @param name: name of the attribute
@@ -137,16 +136,16 @@ class IOmodule(object):
         """
         self._attributes[name] = value
 
-    def addFileAttributes(self):
+    def add_file_attributes(self):
         """
         Adds file attributes: filename and hash of file to the collection of all attributes.
         @return:
         """
-        self.addAttribute("hash", self._hash_input_filename)
-        self.addAttribute("filename", self._input_filename)
-        self.addAttribute("advanced_parameters", self._advanced_parameters)
+        self.add_attribute("hash", self._hash_input_filename)
+        self.add_attribute("filename", self._input_filename)
+        self.add_attribute("advanced_parameters", self._advanced_parameters)
 
-    def addData(self, name=None, value=None):
+    def add_data(self, name=None, value=None):
         """
         Adds data  to the dictionary with the collection of other datasets.
         @param name: name of dataset
@@ -318,34 +317,34 @@ class IOmodule(object):
         assert isinstance(item, unicode)
         return str(item).replace("u'", "'")
 
-    def _convert_unicode_to_str(self, objectToCheck=None):
+    def _convert_unicode_to_str(self, object_to_check=None):
         """
         Converts unicode to Python str, works for nested dicts and lists (recursive algorithm).
 
-        @param objectToCheck: dictionary, or list with names which should be converted from unicode to string.
+        @param object_to_check: dictionary, or list with names which should be converted from unicode to string.
         """
 
-        if isinstance(objectToCheck, list):
-            for i in range(len(objectToCheck)):
-                objectToCheck[i] = self._convert_unicode_to_str(objectToCheck[i])
+        if isinstance(object_to_check, list):
+            for i in range(len(object_to_check)):
+                object_to_check[i] = self._convert_unicode_to_str(object_to_check[i])
 
-        elif isinstance(objectToCheck, dict):
-            for item in objectToCheck:
+        elif isinstance(object_to_check, dict):
+            for item in object_to_check:
                 if isinstance(item, unicode):
 
                     decoded_item = self._convert_unicode_to_string_core(item)
-                    item_dict = objectToCheck[item]
-                    del objectToCheck[item]
-                    objectToCheck[decoded_item] = item_dict
+                    item_dict = object_to_check[item]
+                    del object_to_check[item]
+                    object_to_check[decoded_item] = item_dict
                     item = decoded_item
 
-                objectToCheck[item] = self._convert_unicode_to_str(objectToCheck[item])
+                object_to_check[item] = self._convert_unicode_to_str(object_to_check[item])
 
         # unicode element
-        elif isinstance(objectToCheck, unicode):
-            objectToCheck = self._convert_unicode_to_string_core(objectToCheck)
+        elif isinstance(object_to_check, unicode):
+            object_to_check = self._convert_unicode_to_string_core(object_to_check)
 
-        return objectToCheck
+        return object_to_check
 
     def _load_dataset(self, hdf_file=None, name=None, group=None):
         """
@@ -373,11 +372,11 @@ class IOmodule(object):
                 _structured_dataset_list.append(
                     self._recursively_load_dict_contents_from_group(hdf_file=hdf_file,
                                                                     path=_hdf_group.name + "/%s" % item))
-            return self._convert_unicode_to_str(objectToCheck=_structured_dataset_list)
+            return self._convert_unicode_to_str(object_to_check=_structured_dataset_list)
         else:
             return self._convert_unicode_to_str(
-                objectToCheck=self._recursively_load_dict_contents_from_group(hdf_file=hdf_file,
-                                                                              path=_hdf_group.name+"/"))
+                object_to_check=self._recursively_load_dict_contents_from_group(hdf_file=hdf_file,
+                                                                                path=_hdf_group.name+"/"))
 
     def _recursively_load_dict_contents_from_group(self, hdf_file=None, path=None):
         """
@@ -445,7 +444,7 @@ class IOmodule(object):
         """
         return self._calculate_hash(filename=AbinsParameters.__file__.replace(".pyc", ".py"))
 
-    def calculateDFTFileHash(self):
+    def calculate_dft_file_hash(self):
         """
         This method calculates hash of the phonon file according to SHA-2 algorithm from hashlib library: sha512.
         @return: string representation of hash for phonon file which contains only hexadecimal digits

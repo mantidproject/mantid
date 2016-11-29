@@ -2,6 +2,7 @@ import numpy as np
 from GeneralData import GeneralData
 import AbinsConstants
 
+
 class AtomsDaTa(GeneralData):
 
     def __init__(self, num_atoms=None):
@@ -11,7 +12,6 @@ class AtomsDaTa(GeneralData):
         if num_atoms < 0:
             raise ValueError("Number of atoms cannot be negative.")
         self._num_atoms = num_atoms
-
 
     def _append(self, item=None):
         """
@@ -67,9 +67,7 @@ class AtomsDaTa(GeneralData):
 
         self._data.append(item)
 
-
     def set(self, items=None):
-
 
         if len(items) != self._num_atoms:
             raise ValueError("Inconsistent size of new data and number of atoms. (%s != %s)" %
@@ -80,13 +78,11 @@ class AtomsDaTa(GeneralData):
             for item in items:
                 self._append(item=item)
 
-
     def extract(self):
         if len(self._data) == self._num_atoms:
             return self._data
         else:
             raise ValueError("Size of AtomsData and number of atoms is inconsistent.")
-
 
     def __str__(self):
         return "Atoms data"

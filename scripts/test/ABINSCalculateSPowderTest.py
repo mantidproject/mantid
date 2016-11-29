@@ -20,7 +20,6 @@ except ImportError:
 from AbinsModules import CalculateS, LoadCASTEP
 
 
-# noinspection PyPep8Naming
 class ABINSCalculateSPowderTest(unittest.TestCase):
     """
     Test of  CalculateS for the Powder scenario.
@@ -57,35 +56,35 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
     def test_wrong_input(self):
         filename = self.Si2_path + ".phonon"
 
-        _castep_reader = LoadCASTEP(input_DFT_filename=filename)
-        _good_data = _castep_reader.readPhononFile()
+        _castep_reader = LoadCASTEP(input_dft_filename=filename)
+        _good_data = _castep_reader.read_phonon_file()
 
         # wrong filename
         with self.assertRaises(ValueError):
-            poor_S = CalculateS(filename=1, temperature=self._temperature, sample_form=self._sample_form,
+            poor_s = CalculateS(filename=1, temperature=self._temperature, sample_form=self._sample_form,
                                 abins_data=_good_data, instrument_name=self._instrument_name,
                                 quantum_order_num=self._order_event)
 
         # wrong temperature
         with self.assertRaises(ValueError):
-            poor_S = CalculateS(filename=filename, temperature=-1, sample_form=self._sample_form, abins_data=_good_data,
+            poor_s = CalculateS(filename=filename, temperature=-1, sample_form=self._sample_form, abins_data=_good_data,
                                 instrument_name=self._instrument_name, quantum_order_num=self._order_event)
 
         # wrong sample
         with self.assertRaises(ValueError):
-            poor_S = CalculateS(filename=filename, temperature=self._temperature, sample_form="SOLID",
+            poor_s = CalculateS(filename=filename, temperature=self._temperature, sample_form="SOLID",
                                 abins_data=_good_data, instrument_name=self._instrument_name,
                                 quantum_order_num=self._order_event)
 
         # wrong abins data: content of abins data instead of object abins_data
         with self.assertRaises(ValueError):
-            poor_S = CalculateS(filename=filename, temperature=self._temperature, sample_form=self._sample_form,
+            poor_s = CalculateS(filename=filename, temperature=self._temperature, sample_form=self._sample_form,
                                 abins_data=_good_data.extract(), instrument_name=self._instrument_name,
                                 quantum_order_num=self._order_event)
 
         # wrong instrument
         with self.assertRaises(ValueError):
-            poor_S = CalculateS(filename=filename, temperature=self._temperature, sample_form=self._sample_form,
+            poor_s = CalculateS(filename=filename, temperature=self._temperature, sample_form=self._sample_form,
                                 abins_data=_good_data.extract(), instrument_name=self._instrument_name,
                                 quantum_order_num=self._order_event)
 
@@ -101,7 +100,7 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
         _good_tester = CalculateS(filename=name + ".phonon", temperature=self._temperature,
                                   sample_form=self._sample_form, abins_data=_good_data["DFT"],
                                   instrument_name=self._instrument_name, quantum_order_num=self._order_event)
-        calculated_data = _good_tester.getData()
+        calculated_data = _good_tester.get_data()
 
         self._check_data(good_data=_good_data["S"], data=calculated_data.extract())
 
@@ -109,16 +108,16 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
         new_tester = CalculateS(filename=name + ".phonon", temperature=self._temperature, sample_form=self._sample_form,
                                 abins_data=_good_data["DFT"], instrument_name=self._instrument_name,
                                 quantum_order_num=self._order_event)
-        loaded_data = new_tester.loadData()
+        loaded_data = new_tester.load_data()
 
         self._check_data(good_data=_good_data["S"], data=loaded_data.extract())
 
     def _get_good_data(self, filename=None):
 
-        _CASTEP_reader = LoadCASTEP(input_DFT_filename=filename + ".phonon")
+        _CASTEP_reader = LoadCASTEP(input_dft_filename=filename + ".phonon")
         _S = self._prepare_data(filename=filename + "_S.txt")
 
-        return {"DFT": _CASTEP_reader.readPhononFile(), "S": _S}
+        return {"DFT": _CASTEP_reader.read_phonon_file(), "S": _S}
 
     def _prepare_data(self, filename=None):
         """Reads a correct values from ASCII file."""

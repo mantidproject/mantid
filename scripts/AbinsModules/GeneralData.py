@@ -1,10 +1,10 @@
 import numpy as np
 
+
 class GeneralData(object):
 
     def __init__(self):
-        self._data = [] # data
-
+        self._data = []  # data
 
     def set(self, items=None):
         """
@@ -13,7 +13,6 @@ class GeneralData(object):
 
         return None
 
-
     def extract(self):
         """
         Returns the data.
@@ -21,10 +20,8 @@ class GeneralData(object):
         """
         return None
 
-
     def __str__(self):
         """
-        String representation of class instnaces. Has to be implemented by inheriting classes.
+        String representation of class instances. Has to be implemented by inheriting classes.
         """
         return None
-

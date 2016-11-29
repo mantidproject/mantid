@@ -42,7 +42,7 @@ atomic_length_2_angstrom = constants.codata.value(
 
 m_2_hartree = constants.codata.value("atomic mass unit-hartree relationship")  # amu * m2_hartree =  Hartree
 
-all_instruments = ["None", "TOSCA"]  # supported instruments
+all_instruments = ["TwoDMap", "TOSCA"]  # supported instruments
 
 all_sample_forms = ["SingleCrystal", "Powder"]  # valid forms of samples
 

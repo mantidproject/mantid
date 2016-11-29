@@ -25,18 +25,16 @@ except ImportError:
 from AbinsModules import LoadCASTEP, AbinsConstants
 
 
-
 class ABINSLoadCASTEPTest(unittest.TestCase):
 
     # simple tests
     def test_non_existing_file(self):
         with self.assertRaises(IOError):
-            _bad_CASTEP_reader = LoadCASTEP(input_DFT_filename="NonExistingFile.txt")
-            _bad_CASTEP_reader.readPhononFile()
+            _bad_castep_reader = LoadCASTEP(input_dft_filename="NonExistingFile.txt")
+            _bad_castep_reader.read_phonon_file()
 
         with self.assertRaises(ValueError):
-            poor_CASTEP_reader = LoadCASTEP(input_DFT_filename=1)
-
+            poor_castep_reader = LoadCASTEP(input_dft_filename=1)
 
     #  *************************** USE CASES ********************************************
     _core = "../ExternalData/Testing/Data/UnitTest/"
@@ -45,6 +43,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
     # ===================================================================================
 
     _gamma_sum = "squaricn_sum_LoadCASTEP"
+
     def test_Gamma_sum_correction(self):
         self._check(core=self._core, name=self._gamma_sum)
 
@@ -53,6 +52,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
     # ===================================================================================
 
     _gamma_no_sum = "squaricn_no_sum_LoadCASTEP"
+
     def test_Gamma_no_sum_correction(self):
         self._check(core=self._core, name=self._gamma_no_sum)
     #
@@ -61,7 +61,8 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
     # | Use case: more than one k-point and sum correction       |
     # ===================================================================================
     _many_k_sum = "Si2-phonon_LoadCASTEP"
-    def test_sum_correction_single_ctystal(self):
+
+    def test_sum_correction_single_crystal(self):
         self._check(core=self._core, name=self._many_k_sum)
 
     # ===================================================================================
@@ -69,11 +70,11 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
     # ===================================================================================
     #
     _many_k_no_sum = "Si2-sc_LoadCASTEP"
-    def test_no_sum_correction_sigle_crystal(self):
+
+    def test_no_sum_correction_single_crystal(self):
         self._check(core=self._core, name=self._many_k_no_sum)
 
-
-    # # Helper functions
+    # Helper functions
 
     def _check(self, core=None, name=None):
 
@@ -89,8 +90,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         self._check_reader_data(correct_data=_correct_data, data=_data)
 
         # check loaded data
-        self._check_loader_data(correct_data=_correct_data, input_DFT_filename=input_filename)
-
+        self._check_loader_data(correct_data=_correct_data, input_dft_filename=input_filename)
 
     def _read_DFT(self, filename=None):
         """
@@ -99,9 +99,9 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         @return:
         """
         # 1) Read data
-        data={}
+        data = {}
 
-        _CASTEP_reader = LoadCASTEP(input_DFT_filename=filename)
+        _CASTEP_reader = LoadCASTEP(input_dft_filename=filename)
 
         data = self._get_reader_data(castep_reader=_CASTEP_reader)
 
@@ -110,25 +110,27 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
         return data
 
-
     def _prepare_data(self, filename=None):
         """Reads a correct values from ASCII file."""
         correct_data = None
         with open(filename + "_data.txt") as data_file:
-            correct_data = json.loads(data_file.read().replace("\n"," "))
+            correct_data = json.loads(data_file.read().replace("\n", " "))
 
         array = np.loadtxt(filename + "_atomic_displacements_data.txt").view(complex).reshape(-1)
         k = len(correct_data["datasets"]["k_points_data"]["weights"])
         atoms = len(correct_data["datasets"]["atoms_data"])
-        array = array.reshape(k,atoms,atoms * 3,3)
+        array = array.reshape(k, atoms, atoms * 3, 3)
 
-        correct_data["datasets"]["k_points_data"]["weights"] = np.asarray(correct_data["datasets"]["k_points_data"]["weights"])
-        correct_data["datasets"]["k_points_data"]["frequencies"] = np.asarray(correct_data["datasets"]["k_points_data"]["frequencies"])
+        correct_data["datasets"]["k_points_data"]["weights"] = \
+            np.asarray(correct_data["datasets"]["k_points_data"]["weights"])
+
+        correct_data["datasets"]["k_points_data"]["frequencies"] = \
+            np.asarray(correct_data["datasets"]["k_points_data"]["frequencies"])
+
         correct_data["datasets"]["k_points_data"].update({"atomic_displacements": array})
         correct_data["datasets"].update({"atomic_displacements": array})
 
         return correct_data
-
 
     def _check_reader_data(self, correct_data=None, data=None):
 
@@ -148,7 +150,8 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
             self.assertEqual(_correct_atoms[item]["mass"], _atoms[item]["mass"])
             self.assertEqual(_correct_atoms[item]["symbol"], _atoms[item]["symbol"])
             self.assertEqual(_correct_atoms[item]["atom"], _atoms[item]["atom"])
-            self.assertEqual(True, np.allclose(np.array(_correct_atoms[item]["fract_coord"]), _atoms[item]["fract_coord"]))
+            self.assertEqual(True, np.allclose(np.array(_correct_atoms[item]["fract_coord"]),
+                                               _atoms[item]["fract_coord"]))
 
         # check attributes
         self.assertEqual(correct_data["attributes"]["advanced_parameters"], data["attributes"]["advanced_parameters"])
@@ -156,13 +159,13 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         self.assertEqual(correct_data["attributes"]["DFT_program"], data["attributes"]["DFT_program"])
         self.assertEqual(correct_data["attributes"]["filename"], data["attributes"]["filename"])
 
-
         # check datasets
         self.assertEqual(True, np.allclose(correct_data["datasets"]["unit_cell"], data["datasets"]["unit_cell"]))
 
         items = ["weights", "frequencies", "k_vectors"]
         for item in items:
-            self.assertEqual(True, np.allclose(np.array(correct_data["datasets"]["k_points_data"][item]), data["datasets"]["k_points_data"][item]))
+            self.assertEqual(True, np.allclose(np.array(correct_data["datasets"]["k_points_data"][item]),
+                                               data["datasets"]["k_points_data"][item]))
 
         _correct_atoms = correct_data["datasets"]["atoms_data"]
         _atoms = data["datasets"]["atoms_data"]
@@ -173,14 +176,13 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
             self.assertEqual(_correct_atoms[item]["mass"], _atoms[item]["mass"])
             self.assertEqual(_correct_atoms[item]["symbol"], _atoms[item]["symbol"])
             self.assertEqual(_correct_atoms[item]["atom"], _atoms[item]["atom"])
-            self.assertEqual(True, np.allclose(np.array(_correct_atoms[item]["fract_coord"]), _atoms[item]["fract_coord"]))
+            self.assertEqual(True, np.allclose(np.array(_correct_atoms[item]["fract_coord"]),
+                                               _atoms[item]["fract_coord"]))
 
+    def _check_loader_data(self, correct_data=None, input_dft_filename=None):
 
-    def _check_loader_data(self, correct_data=None, input_DFT_filename=None):
-
-        loader = LoadCASTEP(input_DFT_filename=input_DFT_filename)
-        _loaded_data = loader.loadData().extract()
-
+        loader = LoadCASTEP(input_dft_filename=input_dft_filename)
+        _loaded_data = loader.load_data().extract()
 
         # k points
         _correct_items = correct_data["datasets"]["k_points_data"]
@@ -202,11 +204,11 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
             self.assertEqual(_correct_atoms[item]["mass"], _atoms[item]["mass"])
             self.assertEqual(_correct_atoms[item]["symbol"], _atoms[item]["symbol"])
             self.assertEqual(_correct_atoms[item]["atom"], _atoms[item]["atom"])
-            self.assertEqual(True, np.allclose(np.array(_correct_atoms[item]["fract_coord"]), _atoms[item]["fract_coord"]))
-
+            self.assertEqual(True, np.allclose(np.array(_correct_atoms[item]["fract_coord"]),
+                                               _atoms[item]["fract_coord"]))
 
     def _get_reader_data(self, castep_reader=None):
-        abins_type_data = castep_reader.readPhononFile()
+        abins_type_data = castep_reader.read_phonon_file()
         data = {"datasets": abins_type_data.extract(),
                 "attributes": castep_reader._attributes,
                 }

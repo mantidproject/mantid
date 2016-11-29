@@ -58,14 +58,14 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         if instrument_name in AbinsConstants.all_instruments:
             self._instrument_name = instrument_name
             _instrument_producer = InstrumentProducer()
-            self._instrument = _instrument_producer.produceInstrument(name=self._instrument_name)
+            self._instrument = _instrument_producer.produce_instrument(name=self._instrument_name)
 
         else:
             raise ValueError("Unknown instrument %s" % instrument_name)
 
         IOmodule.__init__(self,
                           input_filename=filename,
-                          group_name=(AbinsParameters.S_data_group + "/" + self._instrument_name + "/" +
+                          group_name=(AbinsParameters.s_data_group + "/" + self._instrument_name + "/" +
                                       self._sample_form + "/%sK" % self._temperature))
         FrequencyPowderGenerator.__init__(self)
 
@@ -80,8 +80,8 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         if self._sample_form == "Powder":
 
             _powder_calculator = CalculatePowder(filename=self._input_filename, abins_data=self._abins_data)
-            _powder_data = _powder_calculator.getData()
-            _s_data = self._calculate_s_powder_1D(powder_data=_powder_data)
+            _powder_data = _powder_calculator.get_data()
+            _s_data = self._calculate_s_powder_1d(powder_data=_powder_data)
 
         # Crystal case: calculate DW
         else:
@@ -112,8 +112,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                     "atomic_displacements": np.asarray([k_data["atomic_displacements"][gamma_pkt_index]])}
         return k_points
 
-    # noinspection PyTypeChecker,PyPep8Naming
-    def _calculate_s_powder_1D(self, powder_data=None):
+    def _calculate_s_powder_1d(self, powder_data=None):
         """
         Calculates S for the powder case.
 
@@ -253,7 +252,6 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         # in case indices are the same factor is 2 otherwise it is 1
         factor = (indices[:, 0] == indices[:, 1]) + 1
 
-        # noinspection PyPep8
         # Explanation of used symbols in aCLIMAX manual p. 15
 
         # num_freq -- total number of transition energies
@@ -275,11 +273,11 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
 
         s = q4 * dw * (np.prod(np.take(b_trace, indices=indices), axis=1) +
 
-            np.einsum('kli, kil->k', np.take(b_tensor, indices=indices[:, 0], axis=0),
-            np.take(b_tensor, indices=indices[:, 1], axis=0)) +
+                       np.einsum('kli, kil->k', np.take(b_tensor, indices=indices[:, 0], axis=0),
+                       np.take(b_tensor, indices=indices[:, 1], axis=0)) +
 
-            np.einsum('kli, kil->k', np.take(b_tensor, indices=indices[:, 1], axis=0),
-            np.take(b_tensor, indices=indices[:, 0], axis=0))) / (15.0 * factor)
+                       np.einsum('kli, kil->k', np.take(b_tensor, indices=indices[:, 1], axis=0),
+                       np.take(b_tensor, indices=indices[:, 0], axis=0))) / (15.0 * factor)
 
         return s
 
@@ -348,20 +346,20 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
             rebined_y = np.asarray([array_y[inds == i].sum() for i in range(1, bins.size)])
             return bins[1:], rebined_y
 
-    def calculateData(self):
+    def calculate_data(self):
         """
         Calculates dynamical structure factor S.
         @return: object of type SData and dictionary with total S.
         """
         data = self._calculate_s()
-        self.addFileAttributes()
-        self.addAttribute(name="order_of_quantum_events", value=self._quantum_order_num)
-        self.addData("data", data.extract())
+        self.add_file_attributes()
+        self.add_attribute(name="order_of_quantum_events", value=self._quantum_order_num)
+        self.add_data("data", data.extract())
         self.save()
 
         return data
 
-    def loadData(self):
+    def load_data(self):
         """
         Loads S from an hdf file.
         @return: object of type SData.
