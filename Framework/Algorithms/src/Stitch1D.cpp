@@ -143,9 +143,10 @@ void Stitch1D::init() {
                   "Rebinning Parameters. See Rebin for format. If only a "
                   "single value is provided, start and end are taken from "
                   "input workspaces.");
-  declareProperty(make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace",
-                                                       true, Direction::Input),
-                  "Scaling either with respect to LHS workspace or RHS workspace");
+  declareProperty(
+      make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace", true,
+                                           Direction::Input),
+      "Scaling either with respect to LHS workspace or RHS workspace");
   declareProperty(make_unique<PropertyWithValue<bool>>("UseManualScaleFactor",
                                                        false, Direction::Input),
                   "True to use a provided value for the scale factor.");
