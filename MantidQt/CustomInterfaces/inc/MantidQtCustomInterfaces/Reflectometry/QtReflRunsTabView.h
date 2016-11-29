@@ -119,7 +119,7 @@ private slots:
   void slitCalculatorTriggered();
   void icatSearchComplete();
   void instrumentChanged(int index);
-  void groupChanged(int index);
+  void groupChanged();
   void showSearchContextMenu(const QPoint &pos);
 };
 

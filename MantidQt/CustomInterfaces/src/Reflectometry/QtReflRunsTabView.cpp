@@ -78,7 +78,7 @@ void QtReflRunsTabView::initLayout() {
           SLOT(instrumentChanged(int)));
   // Selected group changed
   connect(ui.toolbox, SIGNAL(currentChanged(int)), this,
-          SLOT(groupChanged(int)));
+          SLOT(groupChanged()));
 
   // Synchronize the instrument selection widgets
   // Processing table in group 1
@@ -336,7 +336,7 @@ int QtReflRunsTabView::getSelectedGroup() const {
 *
 * @param index : The new current item's index
 */
-void QtReflRunsTabView::groupChanged(int index) {
+void QtReflRunsTabView::groupChanged() {
   m_presenter->notify(IReflRunsTabPresenter::GroupChangedFlag);
 }
 
