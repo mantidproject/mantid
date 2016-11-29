@@ -79,8 +79,9 @@ bool ILLEnergyTransfer::validate() {
       m_peakRange[1] = range[1].toDouble(&ok2);
 
       if (!ok1 || !ok2) {
-        uiv.addErrorMessage("Calibration Peak Range is invalid. \n"
-                            "Provide comma separated two energy values in meV.");
+        uiv.addErrorMessage(
+            "Calibration Peak Range is invalid. \n"
+            "Provide comma separated two energy values in meV.");
       } else {
         if (m_peakRange[0] >= m_peakRange[1]) {
           uiv.addErrorMessage("Calibration Peak Range is invalid. \n"
@@ -112,8 +113,8 @@ bool ILLEnergyTransfer::validate() {
 
   if (m_uiForm.rdFWS->isChecked()) {
     if (m_uiForm.cbObservable->currentText().toStdString().empty()) {
-        uiv.addErrorMessage("Observable is invalid, check the sample logs "
-                            "for available options");
+      uiv.addErrorMessage("Observable is invalid, check the sample logs "
+                          "for available options");
     }
   }
 
@@ -261,7 +262,6 @@ void ILLEnergyTransfer::save() {
   pyInput += ".nxs\")\n";
   m_pythonRunner.runPythonCode(pyInput);
 }
-
 
 /**
  * Called when the instrument has changed, used to update default values.

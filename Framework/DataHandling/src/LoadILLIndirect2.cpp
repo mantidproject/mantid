@@ -125,8 +125,8 @@ void LoadILLIndirect2::exec() {
 /**
 * Set member variable with the instrument name
 */
-void LoadILLIndirect2::setInstrumentName(const NeXus::NXEntry &firstEntry,
-                                        const std::string &instrumentNamePath) {
+void LoadILLIndirect2::setInstrumentName(
+    const NeXus::NXEntry &firstEntry, const std::string &instrumentNamePath) {
 
   if (instrumentNamePath == "") {
     std::string message("Cannot set the instrument name from the Nexus file!");
@@ -286,8 +286,8 @@ void LoadILLIndirect2::loadDataIntoTheWorkSpace(
 
     // Assign Y
     int *monitor_p = monitorsData[im].data();
-    m_localWorkspace->dataY(im).assign(monitor_p,
-                                       monitor_p + m_numberOfChannels);
+    m_localWorkspace->dataY(im)
+        .assign(monitor_p, monitor_p + m_numberOfChannels);
 
     progress.report();
   }
