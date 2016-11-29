@@ -292,6 +292,7 @@ double GetEiMonDet2::computeTOF(const double distance, const double detectorEPP,
     if (m_detectorWs->run().hasProperty(SampleLogs::PULSE_INTERVAL)) {
       pulseInterval = m_detectorWs->run().getPropertyAsSingleValue(
           SampleLogs::PULSE_INTERVAL);
+      pulseInterval *= 1e6; // To microseconds.
     }
   }
   const double pulseIntervalLimit = nominalTimeOfFlight - pulseInterval / 2;

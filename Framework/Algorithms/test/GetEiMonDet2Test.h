@@ -375,7 +375,7 @@ private:
     auto eppTable = createEPPTable(peaks, successes);
     auto ws = createWorkspace();
     if (pulseIntervalInput == PulseIntervalInputs::AS_SAMLPE_LOG) {
-      ws->mutableRun().addProperty("pulse_interval", pulseInterval);
+      ws->mutableRun().addProperty("pulse_interval", pulseInterval * 1e-6);
     }
     GetEiMonDet2 algorithm;
     algorithm.setRethrows(true);
