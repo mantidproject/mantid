@@ -200,7 +200,6 @@ void runCrossEntropy(
     return p1.first < p2.first;
   };
 
-  std::vector<double> badness(nParams);
   // Run nIterations of the algorithm
   for (size_t it = 0; it < nIterations; ++it) {
     for (size_t isam = 0; isam < nSamples; ++isam) {
@@ -245,9 +244,6 @@ void runCrossEntropy(
     for (size_t i = 0; i < nParams; ++i) {
       auto mean = means[i];
       auto sigma = sqrt(variances[i] - mean * mean);
-      if (sigma >= distributionParams[i].second) {
-        badness[i] += double(it + 1);
-      }
       distributionParams[i].first = mean;
       distributionParams[i].second = sigma;
     }
