@@ -72,6 +72,8 @@ private:
     MOCK_CONST_METHOD2(generatePoint,
                        Ray(Mantid::Kernel::PseudoRandomNumberGenerator &,
                            const Mantid::Geometry::BoundingBox &));
+    MOCK_CONST_METHOD1(defineActiveRegion, Mantid::Geometry::BoundingBox(
+                                               const Mantid::API::Sample &));
     GCC_DIAG_ON_SUGGEST_OVERRIDE
   };
 

@@ -47,10 +47,12 @@ class IBeamProfile;
 */
 class MANTID_ALGORITHMS_DLL MCInteractionVolume {
 public:
-  MCInteractionVolume(const API::Sample &sample);
+  MCInteractionVolume(const API::Sample &sample,
+                      const Geometry::BoundingBox &activeRegion);
   // No creation from temporaries as we store a reference to the object in
   // the sample
-  MCInteractionVolume(const API::Sample &&sample) = delete;
+  MCInteractionVolume(const API::Sample &&sample,
+                      const Geometry::BoundingBox &&activeRegion) = delete;
 
   const Geometry::BoundingBox &getBoundingBox() const;
   double calculateAbsorption(Kernel::PseudoRandomNumberGenerator &rng,

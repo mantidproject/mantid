@@ -25,9 +25,9 @@ public:
   void test_Bounding_Volume_Matches_Sample() {
     using namespace MonteCarloTesting;
     auto sample = createTestSample(TestSampleType::SolidSphere);
-    MCInteractionVolume interactor(sample);
-
     const auto sampleBox = sample.getShape().getBoundingBox();
+    MCInteractionVolume interactor(sample, sampleBox);
+
     const auto interactionBox = interactor.getBoundingBox();
     TS_ASSERT_EQUALS(sampleBox.minPoint(), interactionBox.minPoint());
     TS_ASSERT_EQUALS(sampleBox.maxPoint(), interactionBox.maxPoint());
@@ -46,7 +46,7 @@ public:
     EXPECT_CALL(rng, nextValue()).Times(Exactly(1)).WillOnce(Return(0.25));
 
     auto sample = createTestSample(TestSampleType::SolidSphere);
-    MCInteractionVolume interactor(sample);
+    MCInteractionVolume interactor(sample, sample.getShape().getBoundingBox());
     const double factor = interactor.calculateAbsorption(
         rng, startPos, endPos, lambdaBefore, lambdaAfter);
     TS_ASSERT_DELTA(1.06797501e-02, factor, 1e-8);
@@ -67,7 +67,7 @@ public:
     EXPECT_CALL(rng, nextInt(1, 2)).Times(Exactly(1)).WillOnce(Return(1));
     EXPECT_CALL(rng, nextValue()).Times(Exactly(1)).WillOnce(Return(0.25));
 
-    MCInteractionVolume interactor(sample);
+    MCInteractionVolume interactor(sample, sample.getShape().getBoundingBox());
     const double factorSeg1 = interactor.calculateAbsorption(
         rng, startPos, endPos, lambdaBefore, lambdaAfter);
     TS_ASSERT_DELTA(5.35624555e-02, factorSeg1, 1e-8);
@@ -98,7 +98,7 @@ public:
     EXPECT_CALL(rng, nextInt(1, 3)).Times(Exactly(1)).WillOnce(Return(1));
     EXPECT_CALL(rng, nextValue()).Times(Exactly(1)).WillOnce(Return(0.3));
 
-    MCInteractionVolume interactor(sample);
+    MCInteractionVolume interactor(sample, sample.getShape().getBoundingBox());
     const double factorContainer = interactor.calculateAbsorption(
         rng, startPos, endPos, lambdaBefore, lambdaAfter);
     TS_ASSERT_DELTA(6.919239804e-01, factorContainer, 1e-8);
@@ -126,7 +126,7 @@ public:
     EXPECT_CALL(rng, nextValue()).Times(Exactly(0));
 
     auto sample = createTestSample(TestSampleType::SolidSphere);
-    MCInteractionVolume interactor(sample);
+    MCInteractionVolume interactor(sample, sample.getShape().getBoundingBox());
     TS_ASSERT(interactor.calculateAbsorption(rng, startPos, endPos,
                                              lambdaBefore, lambdaAfter) < 0.0);
   }
@@ -139,10 +139,13 @@ public:
 
     Sample sample;
     // nothing
-    TS_ASSERT_THROWS(MCInteractionVolume mcv(sample), std::invalid_argument);
+    TS_ASSERT_THROWS(
+        MCInteractionVolume mcv(sample, sample.getShape().getBoundingBox()),
+        std::invalid_argument);
     // valid shape
     sample.setShape(*ComponentCreationHelper::createSphere(1));
-    TS_ASSERT_THROWS_NOTHING(MCInteractionVolume mcv(sample));
+    TS_ASSERT_THROWS_NOTHING(
+        MCInteractionVolume mcv(sample, sample.getShape().getBoundingBox()));
   }
 };
 

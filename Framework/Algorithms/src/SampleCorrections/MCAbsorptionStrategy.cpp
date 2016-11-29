@@ -25,7 +25,9 @@ namespace Algorithms {
 MCAbsorptionStrategy::MCAbsorptionStrategy(const IBeamProfile &beamProfile,
                                            const API::Sample &sample,
                                            size_t nevents)
-    : m_beamProfile(beamProfile), m_scatterVol(MCInteractionVolume(sample)),
+    : m_beamProfile(beamProfile),
+      m_scatterVol(
+          MCInteractionVolume(sample, beamProfile.defineActiveRegion(sample))),
       m_nevents(nevents), m_error(1.0 / std::sqrt(m_nevents)) {}
 
 /**
@@ -48,11 +50,9 @@ MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
     size_t attempts(0);
     do {
       const auto neutron = m_beamProfile.generatePoint(rng, scatterBounds);
-      
-      
+
       const double wgt = m_scatterVol.calculateAbsorption(
-          rng, neutron.startPos, finalPos, lambdaBefore,
-          lambdaAfter);
+          rng, neutron.startPos, finalPos, lambdaBefore, lambdaAfter);
       if (wgt < 0.0) {
         ++attempts;
       } else {

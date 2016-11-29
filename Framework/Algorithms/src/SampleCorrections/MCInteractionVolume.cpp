@@ -36,13 +36,12 @@ double attenuation(double rho, double sigma, double length) {
  * position.
  * @param sample A reference to a sample object that defines a valid shape
  * & material
- * @param beam A reference to the beam profile to restrict where the position
- * of scattering is generated. Used when the beam size is smaller than the
- * sample.
+ * @param activeRegion Restrict scattering point sampling to this region
  */
-MCInteractionVolume::MCInteractionVolume(const API::Sample &sample)
+MCInteractionVolume::MCInteractionVolume(
+    const API::Sample &sample, const Geometry::BoundingBox &activeRegion)
     : m_sample(sample.getShape()), m_env(nullptr),
-      m_activeRegion(this->getBoundingBox()) {
+      m_activeRegion(activeRegion) {
   if (!m_sample.hasValidShape()) {
     throw std::invalid_argument(
         "MCInteractionVolume() - Sample shape does not have a valid shape.");
