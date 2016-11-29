@@ -56,19 +56,16 @@ public:
                   const size_t nData) const override;
   void derivative1D(double *out, const double *xValues, size_t nData,
                     const size_t order) const override;
-  void setParameter(size_t i, const double &value,
-                    bool explicitlySet = true) override;
-  using ParamFunction::setParameter;
 
   /// Set a value to attribute attName
   void setAttribute(const std::string &attName, const Attribute &) override;
 
-  /// Set the value of a data point location to x
-  void setXAttribute(const size_t index, double x);
-
 private:
   /// Minimum number of data points in spline
   const int m_min_points;
+
+  /// overwrite IFunction base class method, which declares function parameters
+  void init();
 
   /// Functor to free a GSL objects in a shared pointer
   struct GSLFree {

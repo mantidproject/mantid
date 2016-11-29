@@ -28,7 +28,12 @@ DECLARE_FUNCTION(CubicSpline)
 CubicSpline::CubicSpline()
     : m_min_points(3), m_acc(gsl_interp_accel_alloc(), m_gslFree),
       m_spline(gsl_spline_alloc(gsl_interp_cspline, m_min_points), m_gslFree),
-      m_recalculateSpline(true) {
+      m_recalculateSpline(true) {}
+
+/**init() will override IFunction base class
+ * (a protected member that should be called via initialize())
+ */
+void CubicSpline::init(){
   // setup class with a default set of attributes
   declareAttribute("n", Attribute(m_min_points));
 
@@ -233,21 +238,6 @@ void CubicSpline::calculateDerivative(double *out, const double *xValues,
   }
 }
 
-/** Set a parameter for the function and flags the spline for re-calculation
- *
- * @param i :: index of parameter
- * @param value :: value of parameter
- * @param explicitlySet :: whether it's value was explicitly set or not
- */
-void CubicSpline::setParameter(size_t i, const double &value,
-                               bool explicitlySet) {
-  // Call parent setParameter implementation
-  ParamFunction::setParameter(i, value, explicitlySet);
-
-  // recalculate if necessary
-  m_recalculateSpline = true;
-}
-
 /** Set an attribute for the function
  *
  * @param attName :: The name of the attribute to set
@@ -291,26 +281,6 @@ void CubicSpline::setAttribute(const std::string &attName,
   }
 
   storeAttributeValue(attName, att);
-}
-
-/** Set an x attribute for the spline
- *
- * @param index :: index of x attribute to set
- * @param x :: The value of the x attribute
- */
-void CubicSpline::setXAttribute(const size_t index, double x) {
-  size_t n = static_cast<size_t>(getAttribute("n").asInt());
-
-  // check that setting the x attribute is within our range
-  if (index < n) {
-    std::string xName = "x" + std::to_string(index);
-    setAttributeValue(xName, x);
-
-    // attributes updated, flag for recalculation
-    m_recalculateSpline = true;
-  } else {
-    throw std::range_error("Cubic Spline: x index out of range.");
-  }
 }
 
 /** Checks if a call to a GSL function produced a given error or not

@@ -4,6 +4,8 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidCurveFitting/Functions/CubicSpline.h"
+#include "MantidCurveFitting/Functions/LinearBackground.h"
+
 
 namespace Mantid {
 namespace CurveFitting {
@@ -14,6 +16,9 @@ namespace Algorithms {
   and one which contains a number of spectra to be interpolated against spline.
 
   Produces an output workspace containing the interpolated points
+
+  Optionally, the algorithm can perform a linear interpolation, if the
+  WorkspaceToMatch contains two points exactly.
 
   Optionally the algorithm will also produce a grouped workspace of derivatives
   of up to order 2
@@ -45,24 +50,28 @@ namespace Algorithms {
 */
 class DLLExport SplineInterpolation : public API::Algorithm {
 public:
-  SplineInterpolation();
+  SplineInterpolation() = default;
 
+  /// Algorithm's name for identification. @see Algorithm::name
   const std::string name() const override;
+  /// Algorithm's version for identification. @see Algorithm::version
   int version() const override;
+  /// Algorithm's category for identification. @see Algorithm::category
   const std::string category() const override;
-  /// Summary of algorithms purpose
+  /// Summary of algorithm's purpose. @see Algorithm::summary
   const std::string summary() const override {
     return "Interpolates a set of spectra onto a spline defined by a second "
            "input workspace. Optionally, this algorithm can also calculate "
            "derivatives up to order 2 as a side product";
   }
+  /// Cross-check properties with each other @see IAlgorithm::validateInputs
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   void init() override;
   void exec() override;
 
-  /// CubicSpline member used to perform interpolation
-  boost::shared_ptr<Functions::CubicSpline> m_cspline;
+  boost::shared_ptr<Functions::BackgroundFunction> m_interp_type;
 
   /// setup an output workspace using meta data from inws and taking a number of
   /// spectra

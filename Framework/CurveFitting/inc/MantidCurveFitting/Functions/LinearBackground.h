@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
+#include <boost/scoped_array.hpp>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -54,8 +55,11 @@ public:
 
   void fit(const std::vector<double> &X, const std::vector<double> &Y) override;
 
+  /// Set a value to attribute attName
+  void setAttribute(const std::string &attName, const Attribute &) override;
+
 protected:
-  /// overwrite IFunction base class method, which declare function parameters
+  /// overwrite IFunction base class method, which declares function parameters
   void init() override;
   /// Calculate histogram data.
   void histogram1D(double *out, double left, const double *right,

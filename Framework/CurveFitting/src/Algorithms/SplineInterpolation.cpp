@@ -14,12 +14,8 @@ DECLARE_ALGORITHM(SplineInterpolation)
 using namespace API;
 using namespace Kernel;
 using Functions::CubicSpline;
+using Functions::LinearBackground;
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SplineInterpolation::SplineInterpolation()
-    : m_cspline(boost::make_shared<CubicSpline>()) {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -61,12 +57,59 @@ void SplineInterpolation::init() {
   auto validator = boost::make_shared<BoundedValidator<int>>(0, 2);
   declareProperty("DerivOrder", 2, validator,
                   "Order to derivatives to calculate.");
+
+  declareProperty("Linear2Points", false,
+                  "Set to true to perform linear interpolation for 2 points "
+                  "instead.");
+}
+
+//----------------------------------------------------------------------------------------------
+/** Input validation for the WorkspaceToInterpolate
+ * If more than two points given, perform cubic spline interpolation
+ * If only two points given, check if Linear2Points is true and if true, continue
+ * If one point is given interpolation does not make sense
+  */
+std::map<std::string, std::string> SplineInterpolation::validateInputs() {
+  // initialise message and its corresponding map (result)
+  std::string message;
+  std::map<std::string, std::string> result;
+
+  // get inputs that need validation
+  const bool lin2pts = getProperty("Linear2Points");
+
+  MatrixWorkspace_sptr iws_valid = getProperty("WorkspaceToInterpolate");
+  int binsNo = static_cast<int>(iws_valid->blocksize());
+
+  // The minimum number of points for cubic splines is 3,
+  // used and set by function CubicSpline as well
+  switch(binsNo){
+    case 1: message = "Workspace must have minimum two points.";
+            result["WorkspaceToInterpolate"] = message;
+    case 2:
+            if (lin2pts == false){
+              message = "Workspace has only 2 points, "
+                        "you can enable linear interpolation by "
+                        "setting the property Linear2Points. Otherwise"
+                        "you need to provide minimum 3 points.";
+              result["WorkspaceToInterpolate"] = message;
+            }
+  }
+
+  return result;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SplineInterpolation::exec() {
+  const bool type = getProperty("Linear2Points");
+  if (type == true)
+    m_interp_type = boost::make_shared<LinearBackground>();
+  else
+    m_interp_type = boost::make_shared<CubicSpline>();
+
+  m_interp_type->initialize();
+
   // read in algorithm parameters
   int order = static_cast<int>(getProperty("DerivOrder"));
 
@@ -96,8 +139,7 @@ void SplineInterpolation::exec() {
 
   // for each histogram in workspace, calculate interpolation and derivatives
   for (int i = 0; i < histNo; ++i) {
-    // Create and instance of the cubic spline function
-    m_cspline = boost::make_shared<CubicSpline>();
+
     // set the interpolation points
     setInterpolationPoints(iwspt, i);
 
@@ -206,12 +248,23 @@ void SplineInterpolation::setInterpolationPoints(
   int size = static_cast<int>(xIn.size());
 
   // pass x attributes and y parameters to CubicSpline
-  m_cspline->setAttributeValue("n", size);
+  m_interp_type->setAttributeValue("n", size);
 
   for (int i = 0; i < size; ++i) {
-    m_cspline->setXAttribute(i, xIn[i]);
-    m_cspline->setParameter(i, yIn[i]);
+    // check that setting the x attribute is within our range
+    if (i < size) {
+      std::string xName = "x" + std::to_string(i);
+      m_interp_type->setAttributeValue(xName, xIn[i]);
+    } else {
+      throw std::range_error("SplineInterpolation: x index out of range.");
+    }
+    // Call parent setParameter implementation
+    m_interp_type->ParamFunction::setParameter(i, yIn[i], true);
   }
+
+  // recalculation if cubic spline
+  //if (m_interp_type->name() == "CubicSpline")
+  //  m_interp_type->setupInput(xIn, yIn, size);
 }
 
 /** Calculate the derivatives of the given order from the interpolated points
@@ -229,7 +282,7 @@ void SplineInterpolation::calculateDerivatives(
   double *yValues = &(outputWorkspace->mutableY(order - 1)[0]);
 
   // calculate the derivatives
-  m_cspline->derivative1D(yValues, xValues, nData, order);
+  m_interp_type->derivative1D(yValues, xValues, nData, order);
 }
 
 /** Calculate the interpolation of the input points against the spline
@@ -247,7 +300,7 @@ void SplineInterpolation::calculateSpline(
   double *yValues = &(outputWorkspace->mutableY(row)[0]);
 
   // calculate the interpolation
-  m_cspline->function1D(yValues, xValues, nData);
+  m_interp_type->function1D(yValues, xValues, nData);
 }
 
 } // namespace Algorithms

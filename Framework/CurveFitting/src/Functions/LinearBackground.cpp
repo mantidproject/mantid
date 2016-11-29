@@ -17,6 +17,14 @@ using namespace API;
 DECLARE_FUNCTION(LinearBackground)
 
 void LinearBackground::init() {
+  // default attributes and parameters
+  // minimum number of points is 2 (point data, might be 3 for histograms)
+  declareAttribute("n", Attribute(2));
+
+  // non-fitting parameters
+  declareAttribute("x0", Attribute(0.0));
+  declareAttribute("x1", Attribute(1.0));
+
   declareParameter("A0", 0.0, "coefficient for constant term");
   declareParameter("A1", 0.0, "coefficient for linear term");
 }
@@ -124,6 +132,45 @@ void LinearBackground::histogramDerivative1D(Jacobian *jacobian, double left,
     jacobian->set(i, 1, 0.5 * (xr * xr - xl * xl));
     xl = xr;
   }
+}
+
+/** Set an attribute for the function
+ *
+ * @param attName :: The name of the attribute to set
+ * @param att :: The attribute to set
+ */
+void LinearBackground::setAttribute(const std::string &attName,
+                               const API::IFunction::Attribute &att) {
+
+  if (attName == "n") {
+    // get the new and old number of data points
+    int n = att.asInt();
+    int oldN = getAttribute("n").asInt();
+
+    // check that the number of data points is in a valid range
+    if (n > oldN) {
+      // get the name of the last x data point
+      std::string oldXName = "x" + std::to_string(oldN - 1);
+      double oldX = getAttribute(oldXName).asDouble();
+
+      // create blank a number of new blank parameters and attributes
+      for (int i = oldN; i < n; ++i) {
+        std::string num = std::to_string(i);
+
+        std::string newXName = "x" + num;
+        std::string newYName = "y" + num;
+
+        declareAttribute(newXName,
+                         Attribute(oldX + static_cast<double>(i - oldN + 1)));
+        declareParameter(newYName, 0);
+      }
+    } else if (n < oldN) {
+      throw std::invalid_argument(
+          "Linear Background: Can't decrease the number of attributes");
+    }
+  }
+
+  storeAttributeValue(attName, att);
 }
 
 } // namespace Functions

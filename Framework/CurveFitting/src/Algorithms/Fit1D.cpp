@@ -18,9 +18,6 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_version.h>
 
-#include <cmath>
-#include <numeric>
-#include <sstream>
 
 namespace Mantid {
 namespace CurveFitting {
