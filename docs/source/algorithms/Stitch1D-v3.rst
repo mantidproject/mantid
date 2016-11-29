@@ -54,7 +54,7 @@ Below is a flowchart illustrating the steps in the algorithm. Figure on the left
 to the workflow when no scale factor is provided, while figure on the right corresponds to
 workflow with a manual scale factor specified by the user.
 
-.. diagram:: Stitch1D_no_ScaleFactor_given-v3.dot
+.. diagram:: Stitch1D-v3.dot
 
 Error propagation
 #################
