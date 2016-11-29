@@ -61,8 +61,7 @@ public:
                   double &outScaleFactor);
   /// Performs the Stitch1DMany algorithm at a specific period
   void doStitch1DMany(std::vector<WorkspaceGroup_sptr> inputWSGroups,
-                      int period, bool storeInADS,
-                      std::string &outWSName, 
+                      int period, bool storeInADS, std::string &outWSName,
                       std::vector<double> &outScaleFactors);
 
   /// For (multiperiod) workspace groups
