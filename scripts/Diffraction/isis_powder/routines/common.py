@@ -78,13 +78,16 @@ def load_current_normalised_ws(run_number_string, instrument):
 
 
 def remove_intermediate_workspace(workspace_name):
-    mantid.DeleteWorkspace(workspace_name)
-    del workspace_name  # Mark it as deleted so that more information is preserved on throw
+    if mantid.mtd.doesExist(workspace_name):
+        mantid.DeleteWorkspace(workspace_name)
+        del workspace_name  # Mark it as deleted so that more information is preserved on throw
+    else:
+        raise RuntimeError("Tried to remove non-existent workspace: " + str(workspace_name))
 
 
 def subtract_sample_empty(ws_to_correct, empty_sample_ws_string, instrument):
     output = ws_to_correct
-    if empty_sample_ws_string is not None:
+    if empty_sample_ws_string:
         empty_sample = load_current_normalised_ws(run_number_string=empty_sample_ws_string, instrument=instrument)
         corrected_ws = mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample)
         remove_intermediate_workspace(empty_sample)

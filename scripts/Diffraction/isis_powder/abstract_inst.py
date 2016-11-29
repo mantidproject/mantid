@@ -53,10 +53,6 @@ class AbstractInst(object):
     # --- Public API ---- #
 
     # Script entry points
-    def _focus(self, run_number, do_attenuation, do_van_normalisation):
-        return focus.focus(run_number=run_number, perform_attenuation=do_attenuation,
-                           perform_vanadium_norm=do_van_normalisation, instrument=self)
-
     def create_empty_calibration_by_names(self, calibration_numbers, output_file_name, group_names=None):
 
         if group_names is None:
@@ -65,15 +61,19 @@ class AbstractInst(object):
         common.create_calibration_by_names(calibration_runs=calibration_numbers, grouping_file_name=output_file_name,
                                            group_names=group_names, startup_objects=self)
 
+    # ---- Private API ---- #
+    # These are to be called from either concrete instruments or common not by users
+    # Common steps to all instruments
+
     def _create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name=None,
                                      do_absorb_corrections=True, gen_absorb_correction=False):
         return calibrate.create_van(instrument=self, van=vanadium_runs, empty=empty_runs,
                                     output_van_file_name=output_file_name,
                                     absorb=do_absorb_corrections, gen_absorb=gen_absorb_correction)
 
-    # ---- Private API ---- #
-    # These are to be called from either concrete instruments or common not by users
-    # Common steps to all instruments
+    def _focus(self, run_number, do_attenuation, do_van_normalisation):
+        return focus.focus(run_number=run_number, perform_attenuation=do_attenuation,
+                           perform_vanadium_norm=do_van_normalisation, instrument=self)
 
     def _generate_out_file_paths(self, run_details, output_directory=None):
         if not output_directory:
@@ -97,8 +97,7 @@ class AbstractInst(object):
     def _generate_input_full_path(self, run_number, input_dir):
         # Uses runtime polymorphism to generate the full run name
         file_name = self.generate_inst_file_name(run_number)
-        extension = self.default_input_ext
-        return os.path.join(input_dir, (file_name + extension))
+        return os.path.join(input_dir, (file_name + self._default_input_ext))
 
     # Instrument specific properties
 
