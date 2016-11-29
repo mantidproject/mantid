@@ -9,6 +9,7 @@
 #include "MantidKernel/Strings.h"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/Element.h>
@@ -161,7 +162,7 @@ InstrumentInfo::liveListenerInfo(std::string name) const {
 
   // Name specified, find requested connection
   for (auto &listener : m_listeners) {
-    if (listener.name() == name)
+    if (boost::iequals(listener.name(), name))
       return listener;
   }
 
