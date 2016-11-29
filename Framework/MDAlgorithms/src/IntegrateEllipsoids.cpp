@@ -90,7 +90,7 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator,
     double errorSq(1.); // ignorable garbage
     const std::vector<WeightedEventNoTime> &raw_events =
         events.getWeightedEventsNoTime();
-    std::vector<std::pair<double, V3D>> qList;
+    std::vector<std::pair<double, V3D> > qList;
     for (const auto &raw_event : raw_events) {
       double val = unitConverter.convertUnits(raw_event.tof());
       qConverter.calcMatrixCoord(val, locCoord, signal, errorSq);
@@ -155,7 +155,7 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
     double signal(1.);  // ignorable garbage
     double errorSq(1.); // ignorable garbage
 
-    std::vector<std::pair<double, V3D>> qList;
+    std::vector<std::pair<double, V3D> > qList;
 
     for (size_t j = 0; j < yVals.size(); ++j) {
       const double &yVal = yVals[j];
@@ -222,17 +222,17 @@ void IntegrateEllipsoids::init() {
   ws_valid->add<InstrumentValidator>();
   // the validator which checks if the workspace has axis
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace> >(
                       "InputWorkspace", "", Direction::Input, ws_valid),
                   "An input MatrixWorkspace with time-of-flight units along "
                   "X-axis and defined instrument with defined sample");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                       "PeaksWorkspace", "", Direction::InOut),
                   "Workspace with Peaks to be integrated. NOTE: The peaks MUST "
                   "be indexed with integer HKL values.");
 
-  boost::shared_ptr<BoundedValidator<double>> mustBePositive(
+  boost::shared_ptr<BoundedValidator<double> > mustBePositive(
       new BoundedValidator<double>());
   mustBePositive->setLower(0.0);
 
@@ -256,8 +256,8 @@ void IntegrateEllipsoids::init() {
                   "background region");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace> >("OutputWorkspace", "",
+                                                      Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");
 
@@ -277,6 +277,16 @@ void IntegrateEllipsoids::init() {
       "IntegrateIfOnEdge", true,
       "Set to false to not integrate if peak radius is off edge of detector."
       "Background will be scaled if background radius is off edge.");
+
+  declareProperty("AdaptiveQBackground", false,
+                  "Default is false.   If true, "
+                  "BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|**"
+                  "BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**");
+
+  declareProperty("AdaptiveQMultiplier", 0.0,
+                  "PeakRadius + AdaptiveQMultiplier * **|Q|** "
+                  "so each peak has a "
+                  "different integration radius.  Q includes the 2*pi factor.");
 }
 
 //---------------------------------------------------------------------
@@ -314,13 +324,19 @@ void IntegrateEllipsoids::exec() {
   double back_outer_radius = getProperty("BackgroundOuterSize");
   bool hkl_integ = getProperty("IntegrateInHKL");
   bool integrateEdge = getProperty("IntegrateIfOnEdge");
+  bool adaptiveQBackground = getProperty("AdaptiveQBackground");
+  double adaptiveQMultiplier = getProperty("AdaptiveQMultiplier");
+  double adaptiveQBackgroundMultiplier = 0.0;
+  if (adaptiveQBackground)
+    adaptiveQBackgroundMultiplier = adaptiveQMultiplier;
   if (!integrateEdge) {
     // This only fails in the unit tests which say that MaskBTP is not
     // registered
     try {
       runMaskDetectors(in_peak_ws, "Tube", "edges");
       runMaskDetectors(in_peak_ws, "Pixel", "edges");
-    } catch (...) {
+    }
+    catch (...) {
       g_log.error("Can't execute MaskBTP algorithm for this instrument to set "
                   "edge for IntegrateIfOnEdge option");
     }
@@ -341,7 +357,7 @@ void IntegrateEllipsoids::exec() {
   size_t n_peaks = peak_ws->getNumberPeaks();
   size_t indexed_count = 0;
   std::vector<V3D> peak_q_list;
-  std::vector<std::pair<double, V3D>> qList;
+  std::vector<std::pair<double, V3D> > qList;
   std::vector<V3D> hkl_vectors;
   for (size_t i = 0; i < n_peaks; i++) // Note: we skip un-indexed peaks
   {
@@ -417,10 +433,39 @@ void IntegrateEllipsoids::exec() {
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
       peak_q = peaks[i].getQLabFrame();
       std::vector<double> axes_radii;
+      // modulus of Q
+      double lenQpeak = 0.0;
+      if (adaptiveQMultiplier != 0.0) {
+        lenQpeak = 0.0;
+        for (size_t d = 0; d < 3; d++) {
+          lenQpeak += peak_q[d] * peak_q[d];
+        }
+        lenQpeak = std::sqrt(lenQpeak);
+      }
+      double adaptiveRadius = adaptiveQMultiplier * lenQpeak + peak_radius;
+      if (adaptiveRadius <= 0.0) {
+        g_log.error() << "Error: Radius for integration sphere of peak " << i
+                      << " is negative =  " << adaptiveRadius << '\n';
+        adaptiveRadius = 0.;
+        peaks[i].setIntensity(0.0);
+        peaks[i].setSigmaIntensity(0.0);
+        PeakRadiusVector[i] = 0.0;
+        BackgroundInnerRadiusVector[i] = 0.0;
+        BackgroundOuterRadiusVector[i] = 0.0;
+        continue;
+      }
+      double adaptiveBack_inner_radius =
+          adaptiveQBackgroundMultiplier * lenQpeak + back_inner_radius;
+      double adaptiveBack_outer_radius =
+          adaptiveQBackgroundMultiplier * lenQpeak + back_outer_radius;
+      PeakRadiusVector[i] = adaptiveRadius;
+      BackgroundInnerRadiusVector[i] = adaptiveBack_inner_radius;
+      BackgroundOuterRadiusVector[i] = adaptiveBack_outer_radius;
       Mantid::Geometry::PeakShape_const_sptr shape =
           integrator.ellipseIntegrateEvents(
-              E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
-              back_outer_radius, axes_radii, inti, sigi);
+              E1Vec, peak_q, specify_size, adaptiveRadius,
+              adaptiveBack_inner_radius, adaptiveBack_outer_radius, axes_radii,
+              inti, sigi);
       peaks[i].setIntensity(inti);
       peaks[i].setSigmaIntensity(sigi);
       peaks[i].setPeakShape(shape);
@@ -483,9 +528,8 @@ void IntegrateEllipsoids::exec() {
                                                   stats2.standard_deviation),
                                          stats3.standard_deviation);
       back_inner_radius = peak_radius;
-      back_outer_radius =
-          peak_radius *
-          1.25992105; // A factor of 2 ^ (1/3) will make the background
+      back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3)
+                                                    // will make the background
       // shell volume equal to the peak region volume.
       V3D peak_q;
       for (size_t i = 0; i < n_peaks; i++) {
