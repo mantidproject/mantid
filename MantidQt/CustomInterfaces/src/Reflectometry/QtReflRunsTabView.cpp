@@ -333,7 +333,6 @@ int QtReflRunsTabView::getSelectedGroup() const {
 
 /** This is slot is triggered when the selected group changes.
 *
-* @param index : The new current item's index
 */
 void QtReflRunsTabView::groupChanged() {
   m_presenter->notify(IReflRunsTabPresenter::GroupChangedFlag);
