@@ -72,6 +72,9 @@ namespace MantidQt {
 namespace CustomDialogs {
 DECLARE_DIALOG(StartLiveDataDialog)
 
+// Initialize static members
+const QString StartLiveDataDialog::CUSTOM_CONNECTION = "[Custom]";
+
 //----------------------
 // Public member functions
 //----------------------
@@ -475,7 +478,7 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &inst) {
 void StartLiveDataDialog::updateConnectionChoices(const QString &inst_name) {
   // Reset the connections listed
   ui.cmbConnection->clear();
-  ui.cmbConnection->addItem("[Custom]");
+  ui.cmbConnection->addItem(CUSTOM_CONNECTION);
 
   // Add available LiveListenerInfo names based on selected instrument
   const auto &inst =
@@ -497,7 +500,7 @@ void StartLiveDataDialog::updateConnectionChoices(const QString &inst_name) {
  */
 void StartLiveDataDialog::updateConnectionDetails(const QString &connection) {
   // Custom connections just enable editting connection parameters
-  if (connection == "[Custom]") {
+  if (connection == CUSTOM_CONNECTION) {
     ui.cmbConnListener->setEnabled(true);
     ui.edtConnAddress->setEnabled(true);
     return;

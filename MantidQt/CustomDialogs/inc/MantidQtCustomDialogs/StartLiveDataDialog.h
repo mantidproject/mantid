@@ -65,6 +65,9 @@ private:
 
   /// The algorithm for processing the accumulated workspace
   Mantid::API::Algorithm_sptr m_postProcessingAlg;
+
+  /// Constant used for custom listener connection setups
+  static const QString CUSTOM_CONNECTION;
 };
 }
 }
