@@ -141,18 +141,6 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
     }
   }
 
-  // If there is only one period, reshape the input workspace matrix
-  /*
-  if (m_inputWSGroups[0]->size() == 1) {
-    std::vector<std::vector<Workspace_sptr>> reshapedInputWSMatrix;
-    std::vector<Workspace_sptr> inputWorkspaces;
-    for (auto &group : m_inputWSMatrix) {
-      inputWorkspaces.push_back(group[0]);
-    }
-    reshapedInputWSMatrix.push_back(inputWorkspaces);
-    m_inputWSMatrix = reshapedInputWSMatrix;
-  }*/
-
   m_scaleFactorFromPeriod = this->getProperty("ScaleFactorFromPeriod");
 
   // Throw if a common error is found
@@ -242,7 +230,6 @@ void Stitch1DMany::exec() {
 
     m_scaleFactors.push_back(outScaleFactor);
   }
-
   m_outputWorkspace = lhsWS;
 
   // Save output
@@ -253,7 +240,6 @@ void Stitch1DMany::exec() {
 /** Performs the Stitch1D algorithm at a specific workspace index.
  * @param lhsWS :: The left-hand workspace to be stitched
  * @param rhsWS :: The right-hand workspace to be stitched
- * @param storeInADS :: True to store in the AnalysisDataService
  * @param wsIndex :: The index of the rhs workspace being stitched
  * @param startOverlaps :: Start overlaps for stitched workspaces
  * @param endOverlaps :: End overlaps for stitched workspaces
@@ -381,7 +367,7 @@ bool Stitch1DMany::processGroups() {
           boost::dynamic_pointer_cast<MatrixWorkspace>(m_inputWSMatrix[0][i]);
       outName = groupName + "_" + lhsWS->name();
 
-      // Iterate over each group
+      // Perform stiching on the workspace for each group of that period
       for (int j = 1; j < m_numWSPerPeriod; j++) {
         auto rhsWS =
             boost::dynamic_pointer_cast<MatrixWorkspace>(m_inputWSMatrix[j][i]);
@@ -395,7 +381,7 @@ bool Stitch1DMany::processGroups() {
         m_scaleFactors.push_back(outScaleFactor);
       }
 
-      // Add name of stitched workspaces to list and ADS
+      // Add name of stitched workspaces to group list and ADS
       toGroup.push_back(outName);
       AnalysisDataService::Instance().addOrReplace(outName, lhsWS);
     }

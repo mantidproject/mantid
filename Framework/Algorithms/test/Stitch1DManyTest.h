@@ -3,13 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/Stitch1D.h"
-#include "MantidAlgorithms/Stitch1DMany.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/Stitch1D.h"
+#include "MantidAlgorithms/Stitch1DMany.h"
 #include "MantidKernel/UnitFactory.h"
 #include <math.h>
 
