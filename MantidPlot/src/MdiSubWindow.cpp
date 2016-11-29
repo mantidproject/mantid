@@ -134,7 +134,17 @@ MdiSubWindow::loadFromProject(const std::string &lines, ApplicationWindow *app,
 std::string MdiSubWindow::saveToProject(ApplicationWindow *app) {
   Q_UNUSED(app);
   throw std::runtime_error(
-      "SaveToProject not implemented for raw MdiSubWindow");
+        "SaveToProject not implemented for raw MdiSubWindow");
+}
+
+std::vector<std::string> MdiSubWindow::getWorkspaceNames()
+{
+  return {};
+}
+
+std::string MdiSubWindow::getWindowName()
+{
+  return "";
 }
 
 void MdiSubWindow::resizeEvent(QResizeEvent *e) {

@@ -3176,6 +3176,16 @@ Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
   return table;
 }
 
+std::vector<std::string> Table::getWorkspaceNames()
+{
+  return {};
+}
+
+std::string Table::getWindowName()
+{
+  return objectName().toStdString();
+}
+
 std::string Table::saveTableMetadata() {
   MantidQt::API::TSVSerialiser tsv;
   tsv.writeLine("header");

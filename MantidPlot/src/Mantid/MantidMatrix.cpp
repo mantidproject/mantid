@@ -1239,6 +1239,16 @@ std::string MantidMatrix::saveToProject(ApplicationWindow *app) {
   return tsv.outputLines();
 }
 
+std::vector<std::string> MantidMatrix::getWorkspaceNames()
+{
+  return { m_strName };
+}
+
+std::string MantidMatrix::getWindowName()
+{
+  return objectName().toStdString();
+}
+
 /**
  * Creates a MantidMatrixTabExtension of a specified type
  * @param type: the type of the tab extension

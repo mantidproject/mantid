@@ -848,6 +848,7 @@ public slots:
   //@}
   void updateDataCurves();
   void reverseCurveOrder();
+  int getNumCurves() { return n_curves; };
 
 signals:
   void selectedGraph(Graph *);

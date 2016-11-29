@@ -394,6 +394,11 @@ public slots:
   static MantidQt::API::IProjectSerialisable *
   loadFromProject(const std::string &lines, ApplicationWindow *app,
                   const int fileVersion);
+  /// Returns a list of workspace names that are used by this window
+  std::vector<std::string> getWorkspaceNames() override;
+  /// Returns the user friendly name of the window
+  std::string getWindowName() override;
+
   void restore(const QStringList &lst) override;
 
   //! This slot notifies the main application that the table has been modified.

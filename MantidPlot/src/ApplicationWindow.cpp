@@ -6005,8 +6005,6 @@ Folder *ApplicationWindow::projectFolder() const {
 
 bool ApplicationWindow::saveProject(bool compress) {
 
-  ProjectSa
-
   if (projectname == "untitled" ||
       projectname.endsWith(".opj", Qt::CaseInsensitive) ||
       projectname.endsWith(".ogm", Qt::CaseInsensitive) ||
