@@ -48,7 +48,7 @@
   <instrument name="ENGIN-X_EVENT" shortname="ENGINX" >
     <zeropadding size="8" />
     <technique>Neutron Diffraction</technique>
-    <livedata default="histo">
+    <livedata default="event">
       <connection name="event" address="NDXENGINX:10000" listener="ISISLiveEventDataListener" />
     </livedata>
   </instrument>
