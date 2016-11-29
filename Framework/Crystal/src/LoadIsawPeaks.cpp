@@ -106,10 +106,10 @@ void LoadIsawPeaks::exec() {
 }
 
 //----------------------------------------------------------------------------------------------
-std::string
-LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
-                              Geometry::Instrument_const_sptr instr,
-                              double &T0) {
+std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
+                                          std::string startChar,
+                                          Geometry::Instrument_const_sptr instr,
+                                          double &T0) {
 
   ParameterMap_sptr parMap = instr->getParameterMap();
 
