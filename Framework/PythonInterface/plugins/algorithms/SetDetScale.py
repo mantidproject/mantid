@@ -52,6 +52,7 @@ class SetDetScale(PythonAlgorithm):
         components = self.getProperty("DetScaleList").value
 
         listParse = []
+        scaleDict = {}
 
         #Read scales from file
         sc_filename = self.getProperty("DetScaleFile").value
@@ -60,12 +61,17 @@ class SetDetScale(PythonAlgorithm):
             lines = scfile.readlines()
             for line in lines:
                 columns = line.split() # splits on whitespace characters
-                listParse.append({"ParameterName":"detScale"+columns[0], "Value":columns[1]})
+                key = columns[0]
+                scaleDict[key] = columns[1]
 
         #Overwrite any scales given in file
         for component in components:
             comp, value = component.split(":")
-            listParse.append({"ParameterName":"detScale"+comp, "Value":value})
+            key = comp
+            scaleDict[key] = value
+
+        for key in scaleDict.keys():
+            listParse.append({"ParameterName":"detScale"+key, "Value":scaleDict[key]})
 
         for dList in listParse:
             api.SetInstrumentParameter(Workspace=ws,ParameterType="Number",**dList)
