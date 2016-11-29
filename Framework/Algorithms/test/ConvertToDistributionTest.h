@@ -84,7 +84,7 @@ public:
 
 private:
   Workspace_sptr createTestWorkspace() {
-    return WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 10, 0, 0.5);
+    return WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 0, 0.5);
   }
 };
 

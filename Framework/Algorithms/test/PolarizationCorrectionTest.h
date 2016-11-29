@@ -136,7 +136,7 @@ public:
 
   MatrixWorkspace_sptr create1DWorkspace(int size, double signal,
                                          double error) {
-    auto ws = Create1DWorkspaceConstant(size, signal, error);
+    auto ws = create1DWorkspaceConstant(size, signal, error);
     ws->getAxis(0)->setUnit("Wavelength");
     return ws;
   }

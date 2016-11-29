@@ -70,7 +70,7 @@ public:
   void testSetTimeBinWidthFromWorkspace() {
     // workspace with delta x = 1.0, 3 bins (= 4 boundaries)
     MatrixWorkspace_sptr matrixWs =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(1, 3);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(1, 3);
 
     TestablePoldiTruncateData truncate;
     TS_ASSERT_THROWS_NOTHING(truncate.setTimeBinWidthFromWorkspace(matrixWs));
@@ -83,7 +83,7 @@ public:
 
     // matrix workspace with one bin
     MatrixWorkspace_sptr invalidBins =
-        WorkspaceCreationHelper::Create2DWorkspace123(1, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(1, 1);
 
     TS_ASSERT_THROWS(truncate.setTimeBinWidthFromWorkspace(invalidBins),
                      std::invalid_argument);
@@ -293,7 +293,7 @@ private:
     }
 
     MatrixWorkspace_sptr workspace =
-        WorkspaceCreationHelper::Create2DWorkspace123(histograms, binCount);
+        WorkspaceCreationHelper::create2DWorkspace123(histograms, binCount);
 
     for (size_t i = 0; i < histograms; ++i) {
       std::vector<double> &xData = workspace->dataX(i);

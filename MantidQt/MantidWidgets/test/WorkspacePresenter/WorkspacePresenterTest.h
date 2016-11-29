@@ -52,7 +52,7 @@ public:
   }
 
   void testLoadWorkspaceExternal() {
-    auto wksp = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto wksp = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     EXPECT_CALL(*mockView.get(), updateTree(_)).Times(AtLeast(1));
 
@@ -64,8 +64,8 @@ public:
   }
 
   void testDeleteWorkspacesFromDockWithPrompt() {
-    auto ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
-    auto ws2 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws1 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    auto ws2 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().add("ws1", ws1);
     AnalysisDataService::Instance().add("ws2", ws2);
 
@@ -88,8 +88,8 @@ public:
   }
 
   void testDeleteWorkspacesFromDockWithPromptUserDecline() {
-    auto ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
-    auto ws2 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws1 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    auto ws2 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().add("ws1", ws1);
     AnalysisDataService::Instance().add("ws2", ws2);
 
@@ -110,8 +110,8 @@ public:
   }
 
   void testDeleteWorkspacesFromDockWithoutPrompt() {
-    auto ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
-    auto ws2 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws1 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    auto ws2 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().add("ws1", ws1);
     AnalysisDataService::Instance().add("ws2", ws2);
 
@@ -144,7 +144,7 @@ public:
   }
 
   void testDeleteWorkspacesExternal() {
-    auto wksp = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto wksp = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     AnalysisDataService::Instance().add("wksp", wksp);
 
@@ -156,7 +156,7 @@ public:
   }
 
   void testADSCleared() {
-    auto wksp = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto wksp = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     AnalysisDataService::Instance().add("wksp", wksp);
 
@@ -180,7 +180,7 @@ public:
   }
 
   void testRenameWorkspaceExternal() {
-    auto wksp = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto wksp = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     AnalysisDataService::Instance().add("wksp", wksp);
 
@@ -194,8 +194,8 @@ public:
   }
 
   void testWorkspacesGrouped() {
-    auto ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
-    auto ws2 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws1 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    auto ws2 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().add("ws1", ws1);
     AnalysisDataService::Instance().add("ws2", ws2);
     ::testing::DefaultValue<StringList>::Set(StringList{"ws1", "ws2"});
@@ -235,8 +235,8 @@ public:
 
   void testGroupAlreadyExistsUserConfirm() {
     createGroup("NewGroup");
-    auto ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
-    auto ws2 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws1 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    auto ws2 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().add("ws1", ws1);
     AnalysisDataService::Instance().add("ws2", ws2);
 
@@ -356,7 +356,7 @@ public:
     std::string groupName = "group";
     createGroup(groupName);
 
-    auto wksp = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto wksp = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().add("wksp", wksp);
 
     EXPECT_CALL(*mockView.get(), updateTree(_)).Times(AtLeast(1));
@@ -629,7 +629,7 @@ public:
 
   void testClearUBMatrix() {
     ::testing::DefaultValue<StringList>::Set(StringList{"ws1"});
-    auto ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws1 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().add("ws1", ws1);
 
     // Setup a UB matrix before attempting to remove it
@@ -665,9 +665,9 @@ private:
 
   void createGroup(std::string groupName) {
     auto group =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(0, 10, 10, groupName);
-    auto wksp1 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
-    auto wksp2 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::createWorkspaceGroup(0, 10, 10, groupName);
+    auto wksp1 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    auto wksp2 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     AnalysisDataService::Instance().add("wksp1", wksp1);
     AnalysisDataService::Instance().add("wksp2", wksp2);

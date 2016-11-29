@@ -111,7 +111,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   addTestMatrixWorkspaceToADS(const std::string &name) {
     auto &ads = Mantid::API::AnalysisDataService::Instance();
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     ads.add(name, ws);
     return ws;
   }

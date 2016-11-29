@@ -59,7 +59,7 @@ public:
   }
 
   void testSetDeltaTFromWorkspace() {
-    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(1, 10);
     for (size_t i = 0; i <= 10; ++i) {
       ws->dataX(0)[i] = static_cast<double>(i);
     }
@@ -69,7 +69,7 @@ public:
     TS_ASSERT_EQUALS(spectrumCalculator.m_deltaT, 1.0);
 
     MatrixWorkspace_sptr invalidWs =
-        WorkspaceCreationHelper::Create2DWorkspace123(1, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(1, 1);
     TS_ASSERT_THROWS(spectrumCalculator.setDeltaTFromWorkspace(invalidWs),
                      std::invalid_argument);
   }

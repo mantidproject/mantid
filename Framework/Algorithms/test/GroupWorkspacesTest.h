@@ -202,12 +202,12 @@ private:
 
   void addTestMatrixWorkspaceToADS(const std::string &name) {
     auto &ads = Mantid::API::AnalysisDataService::Instance();
-    ads.add(name, WorkspaceCreationHelper::Create2DWorkspace(1, 1));
+    ads.add(name, WorkspaceCreationHelper::create2DWorkspace(1, 1));
   }
 
   void addTestEventWorkspaceToADS(const std::string &name) {
     auto &ads = Mantid::API::AnalysisDataService::Instance();
-    ads.add(name, WorkspaceCreationHelper::CreateEventWorkspace());
+    ads.add(name, WorkspaceCreationHelper::createEventWorkspace());
   }
 
   void addTestTableWorkspaceToADS(const std::string &name) {
