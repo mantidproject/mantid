@@ -105,7 +105,7 @@ private:
   int m_numberOfSpectra;
   /// Blocksize of the input workspace
   int m_yLength;
-  /// Set of indicies to sum
+  /// Set of indices to sum
   std::set<int> m_indices;
 
   // if calculating additional workspace with specially weighted averages is

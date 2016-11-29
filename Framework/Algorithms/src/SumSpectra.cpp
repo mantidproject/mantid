@@ -210,6 +210,12 @@ SumSpectra::getOutputSpecNo(MatrixWorkspace_const_sptr localworkspace) {
   return specId;
 }
 
+/**
+  * Calls an algorithm to replace special values within the workspace
+  * such as NaN or Inf to 0.
+  * @param inputWs The workspace to process
+  * @return The workspace with special floating point values set to 0
+  */
 API::MatrixWorkspace_sptr
 SumSpectra::replaceSpecialValues(API::MatrixWorkspace_sptr inputWs) {
   IAlgorithm_sptr alg = this->createChildAlgorithm("ReplaceSpecialValues");
@@ -226,7 +232,6 @@ SumSpectra::replaceSpecialValues(API::MatrixWorkspace_sptr inputWs) {
 
 /**
  * This function deals with the logic necessary for summing a Workspace2D.
- * @param localworkspace The input workspace for summing.
  * @param outSpec The spectrum for the summed output.
  * @param progress The progress indicator.
  * @param numSpectra The number of spectra contributed to the sum.
