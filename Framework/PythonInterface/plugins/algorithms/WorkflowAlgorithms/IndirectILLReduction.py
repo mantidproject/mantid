@@ -7,7 +7,6 @@ from mantid.api import DataProcessorAlgorithm, PropertyMode, AlgorithmFactory, \
                        FileProperty, FileAction, MatrixWorkspaceProperty
 from mantid import config, logger, mtd
 
-import warnings
 import numpy as np
 import os.path
 

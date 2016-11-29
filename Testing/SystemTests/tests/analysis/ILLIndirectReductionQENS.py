@@ -3,6 +3,7 @@ from mantid.simpleapi import *
 from mantid import config
 from testhelpers import run_algorithm
 
+
 class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
     # cache default instrument and datadirs
@@ -104,7 +105,7 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
         result = CompareWorkspaces('vana4', 'vana5')
 
         self.assertTrue(result[0], "Unmirror 4 should be the same as 5 if "
-                                    "the same run is also defined as alignment run")
+                                   "the same run is also defined as alignment run")
 
     def test_unmirror_6_7(self):
 
@@ -129,7 +130,7 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
         result = CompareWorkspaces('vana6','vana7')
 
         self.assertTrue(result[0], "Unmirror 6 should be the same as 7 if "
-                                    "the same run is also defined as alignment run")
+                                   "the same run is also defined as alignment run")
 
     def runTest(self):
 
