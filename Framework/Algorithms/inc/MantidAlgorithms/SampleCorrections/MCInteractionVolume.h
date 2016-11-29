@@ -2,13 +2,13 @@
 #define MANTID_ALGORITHMS_MCINTERACTIONVOLUME_H_
 
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 
 namespace Mantid {
 namespace API {
 class Sample;
 }
 namespace Geometry {
-class BoundingBox;
 class Object;
 class SampleEnvironment;
 }
@@ -17,6 +17,7 @@ class PseudoRandomNumberGenerator;
 class V3D;
 }
 namespace Algorithms {
+class IBeamProfile;
 
 /**
   Defines a volume where interactions of Tracks and Objects can take place.
@@ -54,13 +55,13 @@ public:
   const Geometry::BoundingBox &getBoundingBox() const;
   double calculateAbsorption(Kernel::PseudoRandomNumberGenerator &rng,
                              const Kernel::V3D &startPos,
-                             const Kernel::V3D &direc,
                              const Kernel::V3D &endPos, double lambdaBefore,
                              double lambdaAfter) const;
 
 private:
   const Geometry::Object &m_sample;
   const Geometry::SampleEnvironment *m_env;
+  const Geometry::BoundingBox m_activeRegion;
 };
 
 } // namespace Algorithms
