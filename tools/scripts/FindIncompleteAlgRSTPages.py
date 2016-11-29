@@ -2,7 +2,7 @@
 import os
 import re
 import urllib2
-
+from mantid.api import AlgorithmFactory
 
 def readWebPage(url):
     proxy = urllib2.ProxyHandler({'http': 'wwwcache.rl.ac.uk:8080'})
