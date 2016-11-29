@@ -69,8 +69,8 @@ public:
   }
 
 private:
-  void init() override{}
-  void exec() override{}
+  void init() override {}
+  void exec() override {}
 
   std::unique_ptr<Mantid::API::Progress> m_Progress;
   /// logger -> to provide logging,
@@ -93,9 +93,8 @@ Mantid::DataObjects::Workspace2D_sptr create1DWorkspaceFib(int size);
 Mantid::DataObjects::Workspace2D_sptr
 create1DWorkspaceConstantWithXerror(int size, double value, double error,
                                     double xError);
-Mantid::DataObjects::Workspace2D_sptr create2DWorkspace(
-    int nhist,
-    int numBoundaries);
+Mantid::DataObjects::Workspace2D_sptr create2DWorkspace(int nhist,
+                                                        int numBoundaries);
 Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceWhereYIsWorkspaceIndex(int nhist, int numBoundaries);
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspace123(
@@ -128,11 +127,9 @@ create2DWorkspaceBinned(int nhist, int nbins, double x0 = 0.0,
  * assumed to be non-uniform and given by the input array
  * Filled with Y = 2.0 and E = sqrt(2.0)w
  */
-Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceBinned(
-    int nhist,
-    const int
-        numBoundaries,
-    const double xBoundaries[]);
+Mantid::DataObjects::Workspace2D_sptr
+create2DWorkspaceBinned(int nhist, const int numBoundaries,
+                        const double xBoundaries[]);
 
 /**
  * Creates a 2D workspace from taking the function values from the input
