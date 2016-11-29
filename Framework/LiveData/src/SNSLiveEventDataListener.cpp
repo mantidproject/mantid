@@ -1198,7 +1198,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
   } // mutex auto unlocks here
 
   // if there's a comment in the packet, log it at the info level
-  std::string comment = pkt.comment();
+  const std::string &comment = pkt.comment();
   if (comment.size() > 0) {
     g_log.information() << "Annotation: " << comment << '\n';
   }

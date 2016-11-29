@@ -270,7 +270,7 @@ std::string LoadInstrument::getFullPathParamIDF(std::string directoryName) {
   directoryPath.makeDirectory();
   // Remove the path from the filename
   Poco::Path filePath(m_filename);
-  std::string instrumentFile = filePath.getFileName();
+  const std::string &instrumentFile = filePath.getFileName();
 
   // First check whether there is a parameter file whose name is the same as the
   // IDF file,

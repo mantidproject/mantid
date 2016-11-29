@@ -162,11 +162,10 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
  * @param ws ::  MDEventWorkspace to clone
  */
 template <typename MDE, size_t nd>
-void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
+void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws2) {
   // CPUTimer tim;
   typename MDEventWorkspace<MDE, nd>::sptr ws1 =
       boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(out);
-  typename MDEventWorkspace<MDE, nd>::sptr ws2 = ws;
   if (!ws1 || !ws2)
     throw std::runtime_error("Incompatible workspace types passed to MergeMD.");
 

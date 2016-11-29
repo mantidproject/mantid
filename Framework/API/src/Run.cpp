@@ -184,7 +184,7 @@ void Run::integrateProtonCharge(const std::string &logname) const {
   if (log) {
     const std::vector<double> logValues = log->valuesAsVector();
     double total = std::accumulate(logValues.begin(), logValues.end(), 0.0);
-    std::string unit = log->units();
+    const std::string &unit = log->units();
     // Do we need to take account of a unit
     if (unit.find("picoCoulomb") != std::string::npos) {
       /// Conversion factor between picoColumbs and microAmp*hours
