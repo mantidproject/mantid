@@ -49,6 +49,8 @@ public:
   std::map<std::string, std::string> validateInputs() override;
   /// Validates algorithm inputs for group workspaces
   void validateGroupWorkspacesInputs();
+  /// Validates inputs common to group and non-group workspaces
+  std::map<std::string, std::string> Stitch1DMany::validateCommonInputs();
 
   /// Performs the Stitch1D algorithm at a specific workspace index
   void doStitch1D(MatrixWorkspace_sptr lhsWS, MatrixWorkspace_sptr rhsWS,
@@ -74,15 +76,16 @@ private:
   void exec() override;
 
   // Data
-  std::vector<Workspace_sptr> m_inputWorkspaces;
-  std::vector<WorkspaceGroup_sptr> m_inputWorkspaceGroups;
+  std::vector<std::vector<Workspace_sptr>> m_inputWSMatrix;
+  std::vector<WorkspaceGroup_sptr> m_inputWSGroups;
   std::vector<double> m_startOverlaps;
   std::vector<double> m_endOverlaps;
   std::vector<double> m_params;
   std::vector<double> m_scaleFactors;
   Mantid::API::Workspace_sptr m_outputWorkspace;
 
-  size_t m_numWorkspaces = 0;
+  size_t m_numWSPerPeriod = 0;
+  size_t m_numWSPerGroup = 0;
   double m_manualScaleFactor = 1.0;
   bool m_scaleRHSWorkspace = true;
   bool m_useManualScaleFactor = false;

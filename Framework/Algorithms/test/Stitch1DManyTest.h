@@ -384,9 +384,7 @@ public:
     alg.setProperty("StartOverlaps", "0.8");
     alg.setProperty("EndOverlaps", "1.1");
     alg.setPropertyValue("OutputWorkspace", "outws");
-    auto results = alg.validateInputs();
-    TS_ASSERT_EQUALS(results["InputWorkspaces"],
-                     "At least 2 input workspaces required.")
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
 
     AnalysisDataService::Instance().clear();
   }
