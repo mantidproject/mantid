@@ -75,7 +75,8 @@ void StartLiveData::init() {
  * the listener may have to this algorithm.
  */
 void StartLiveData::afterPropertySet(const std::string &propName) {
-  if (propName == "Listener" || propName == "Connection") {
+  if (propName == "Instrument" || propName == "Listener" ||
+      propName == "Connection") {
     // Properties of old listener, if any, need to be removed
     removeListenerProperties();
 
