@@ -41,10 +41,10 @@ namespace FuncMinimisers {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport DampingMinimizer : public API::IFuncMinimizer {
+class DLLExport DampedGaussNewtonMinimizer : public API::IFuncMinimizer {
 public:
   /// Constructor
-  DampingMinimizer(double relTol = 0.0001);
+  DampedGaussNewtonMinimizer(double relTol = 0.0001);
   /// Name of the minimizer.
   std::string name() const override { return "DampingMinimizer"; }
 

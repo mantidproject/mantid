@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/FuncMinimizers/DampingMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/DampedGaussNewtonMinimizer.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 
 #include "MantidAPI/CostFunctionFactory.h"
@@ -24,16 +24,16 @@ namespace {
 Kernel::Logger g_log("DampingMinimizer");
 }
 
-DECLARE_FUNCMINIMIZER(DampingMinimizer, Damping)
+DECLARE_FUNCMINIMIZER(DampedGaussNewtonMinimizer, Damping)
 
 /// Constructor
-DampingMinimizer::DampingMinimizer(double relTol)
+DampedGaussNewtonMinimizer::DampedGaussNewtonMinimizer(double relTol)
     : IFuncMinimizer(), m_relTol(relTol) {
   declareProperty("Damping", 0.0, "The damping parameter.");
 }
 
 /// Initialize minimizer, i.e. pass a function to minimize.
-void DampingMinimizer::initialize(API::ICostFunction_sptr function, size_t) {
+void DampedGaussNewtonMinimizer::initialize(API::ICostFunction_sptr function, size_t) {
   m_leastSquares =
       boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
           function);
@@ -44,7 +44,7 @@ void DampingMinimizer::initialize(API::ICostFunction_sptr function, size_t) {
 }
 
 /// Do one iteration.
-bool DampingMinimizer::iterate(size_t) {
+bool DampedGaussNewtonMinimizer::iterate(size_t) {
   const bool debug = false;
 
   const double damping = getProperty("Damping");
@@ -113,7 +113,7 @@ bool DampingMinimizer::iterate(size_t) {
 }
 
 /// Return current value of the cost function
-double DampingMinimizer::costFunctionVal() {
+double DampedGaussNewtonMinimizer::costFunctionVal() {
   if (!m_leastSquares) {
     throw std::runtime_error("Cost function isn't set up.");
   }

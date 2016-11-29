@@ -30,7 +30,7 @@ set ( SRC_FILES
 	src/CostFunctions/CostFuncUnweightedLeastSquares.cpp
 	src/FitMW.cpp
 	src/FuncMinimizers/BFGS_Minimizer.cpp
-	src/FuncMinimizers/DampingMinimizer.cpp
+	src/FuncMinimizers/DampedGaussNewtonMinimizer.cpp
 	src/FuncMinimizers/DerivMinimizer.cpp
 	src/FuncMinimizers/FABADAMinimizer.cpp
 	src/FuncMinimizers/FRConjugateGradientMinimizer.cpp
@@ -181,7 +181,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FortranMatrix.h
 	inc/MantidCurveFitting/FortranVector.h
 	inc/MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h
-	inc/MantidCurveFitting/FuncMinimizers/DampingMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/DampedGaussNewtonMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FRConjugateGradientMinimizer.h
@@ -332,7 +332,7 @@ set ( TEST_FILES
 	FortranMatrixTest.h
 	FortranVectorTest.h
 	FuncMinimizers/BFGSTest.h
-	FuncMinimizers/DampingMinimizerTest.h
+	FuncMinimizers/DampedGaussNewtonMinimizerTest.h
 	FuncMinimizers/FABADAMinimizerTest.h
 	FuncMinimizers/FRConjugateGradientTest.h
 	FuncMinimizers/LevenbergMarquardtMDTest.h
