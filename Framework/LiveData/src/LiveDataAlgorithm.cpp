@@ -184,13 +184,15 @@ bool LiveDataAlgorithm::hasPostProcessing() const {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Return or create the ILiveListener for this algorithm.
+/**
+ * Return or create the ILiveListener for this algorithm.
  *
  * If the ILiveListener has not already been created, it creates it using
  * the properties on the algorithm. It then starts the listener
- * by calling the ILiveListener->start(StartTime) method.
+ * by calling the ILiveListener->start(StartTime) method if start is true.
  *
- * @return ILiveListener_sptr
+ * @param start Whether to start data acquisition right away
+ * @return Shared pointer to interface of this algorithm's LiveListener.
  */
 ILiveListener_sptr LiveDataAlgorithm::getLiveListener(bool start) {
   if (m_listener)
@@ -206,6 +208,18 @@ ILiveListener_sptr LiveDataAlgorithm::getLiveListener(bool start) {
   return m_listener;
 }
 
+/**
+ * Creates a new instance of a LiveListener based on current values of this
+ * algorithm's properties, respecting Facilities.xml defaults as well as any
+ * provided properties to override them.
+ *
+ * The created LiveListener is not stored or cached as this algorithm's
+ * LiveListener. This is useful for creating temporary instances.
+ *
+ * @param connect Whether the created LiveListener should attempt to connect
+ *                immediately after creation.
+ * @return Shared pointer to interface of created LiveListener instance.
+ */
 ILiveListener_sptr LiveDataAlgorithm::createLiveListener(bool connect) {
   // Get the LiveListenerInfo from Facilities.xml
   std::string inst_name = this->getPropertyValue("Instrument");

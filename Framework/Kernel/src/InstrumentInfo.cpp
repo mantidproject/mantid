@@ -141,7 +141,8 @@ std::string InstrumentInfo::liveDataAddress(const std::string &name) const {
 }
 
 /**
- * @brief Get LiveListenerInfo for specified connection (or default)
+ * Get LiveListenerInfo for specified connection (or default).
+ *
  * @param name Name attribute of connection to return info on
  * @return Reference to LiveListenerInfo for specified connection
  * @throw std::runtime_error When no listeners, or name not found

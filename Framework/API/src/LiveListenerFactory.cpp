@@ -17,18 +17,18 @@ Kernel::Logger g_log("LiveListenerFactory");
  * Creates an instance of the appropriate listener for the given instrument,
  * and establishes the connection to the data acquisition.
  *
- *  @param instrumentName The name of the instrument to 'listen to' (Note that
- *                        the argument has different semantics to the base class
- *                        create method).
- *  @param connect        Whether to connect the listener to the data stream for
- *                        the given instrument.
- *  @param properties     Property manager to copy property values to the
- *                        listener if it has any.
- *  @param listenerConnectionName Name of LiveListenerInfo connection to use.
- *  @returns A shared pointer to the created ILiveListener implementation
- *  @throws Exception::NotFoundError If the requested listener is not registered
- *  @throws std::runtime_error If unable to connect to the listener at the
- *                             configured address.
+ * @param instrumentName The name of the instrument to 'listen to' (Note that
+ *                       the argument has different semantics to the base class
+ *                       create method).
+ * @param connect        Whether to connect the listener to the data stream for
+ *                       the given instrument.
+ * @param properties     Property manager to copy property values to the
+ *                       listener if it has any.
+ * @param listenerConnectionName Name of LiveListenerInfo connection to use.
+ * @return A shared pointer to the created ILiveListener implementation
+ * @throws Exception::NotFoundError If the requested listener is not registered
+ * @throws std::runtime_error If unable to connect to the listener at the
+ *                            configured address.
  */
 boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
     const std::string &instrumentName, bool connect,
@@ -52,11 +52,17 @@ boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
 }
 
 /**
- * @brief LiveListenerFactoryImpl::create
- * @param info
- * @param connect
- * @param properties
- * @return
+ * Creates an instance of a specific LiveListener based on the given
+ * LiveListenerInfo instance. The only required data from LiveListenerInfo is
+ * the listener class name. If connect is set to true, a valid address is also
+ * required.
+ *
+ * @param info       LiveListenerInfo based on which to create the LiveListener
+ * @param connect    Whether to connect the listener to the data stream for the
+ *                   given instrument.
+ * @param properties Property manager to copy property values to the listener
+ *                   if it has any.
+ * @return A shared pointer to the created ILiveListener implementation
  */
 boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
     const Kernel::LiveListenerInfo &info, bool connect,
@@ -100,14 +106,14 @@ boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
   return listener;
 }
 
-/** Override the DynamicFactory::createUnwrapped() method. We don't want it used
- * here.
- *  Making it private will prevent most accidental usage, though of course this
- * could
- *  be called through a DynamicFactory pointer or reference.
- *  @param className Argument that's ignored
- *  @returns Never
- *  @throws Exception::NotImplementedError every time!
+/**
+ * Override the DynamicFactory::createUnwrapped() method. We don't want it used
+ * here. Making it private will prevent most accidental usage, though of course
+ * this could be called through a DynamicFactory pointer or reference.
+ *
+ * @param className Argument that's ignored
+ * @returns Never
+ * @throws Exception::NotImplementedError every time!
  */
 ILiveListener *
 LiveListenerFactoryImpl::createUnwrapped(const std::string &className) const {

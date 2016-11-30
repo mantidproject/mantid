@@ -73,14 +73,17 @@ void StartLiveData::init() {
 /**
  * After Listener or Connection properties are set, copy any properties that
  * the listener may have to this algorithm.
+ *
+ * @param propName Name of property that was just set
  */
 void StartLiveData::afterPropertySet(const std::string &propName) {
+  // If any of these properties change, the listener class might change
   if (propName == "Instrument" || propName == "Listener" ||
       propName == "Connection") {
     // Properties of old listener, if any, need to be removed
     removeListenerProperties();
 
-    // Get of instance of listener for this instrument with current properties
+    // Get temp instance of listener for this instrument with current properties
     auto listener = createLiveListener();
 
     // Copy over properties of listener to this algorithm

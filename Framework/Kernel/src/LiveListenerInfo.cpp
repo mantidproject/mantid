@@ -71,7 +71,8 @@ const std::string &LiveListenerInfo::listener() const { return m_listener; }
 // Non-member functions
 //-------------------------------------------------------------------------
 /**
- * Prints the listener to the stream
+ * Prints the listener to the stream.
+ *
  * @param buffer :: A reference to an output stream
  * @param listener :: A reference to a LiveListenerInfo object
  * @return A reference to the stream written to
