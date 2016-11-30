@@ -134,7 +134,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   // update progress after a 1% change
   vtkIdType progressIncrement = imageSize / 50;
   for (vtkIdType index = 0; index < imageSize; ++index) {
-    if ( index % progressIncrement == 0)
+    if (index % progressIncrement == 0)
       progressUpdate.eventRaised(double(index) * progressFactor);
     double signalScalar = signal->GetValue(index);
     bool maskValue = (!std::isfinite(signalScalar) ||
