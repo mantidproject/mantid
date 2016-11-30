@@ -316,7 +316,7 @@ Setter for the algorithm progress.
 void vtkMDEWSource::updateAlgorithmProgress(double progress, const std::string& message)
 {
   this->SetProgressText(message.c_str());
-  this->SetProgress(progress);
+  this->UpdateProgress(progress);
 }
 
 /*
