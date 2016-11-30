@@ -24,6 +24,8 @@ def calculate_focus_binning_params(sample_ws, num_of_banks):
         bank_binning_params = [str(starting_bin), str(bin_width), str(ending_bin)]
         calculated_binning_params.append(bank_binning_params)
 
+    return calculated_binning_params
+
 
 def generate_absorb_corrections(ws_to_match):
     absorb_ws = mantid.CloneWorkspace(InputWorkspace=ws_to_match)

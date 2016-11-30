@@ -1,6 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
+import mantid.kernel as kernel
 import mantid.simpleapi as mantid
+
 
 # A small workaround to ensure when reading workspaces in a loop
 # the previous workspace does not got overridden
@@ -49,7 +51,7 @@ def generate_run_numbers(run_number_string):
     # If its a string we must parse it
     run_number_string = run_number_string.strip()
     run_boundaries = run_number_string.replace('_', '-')  # Accept either _ or - delimiters
-    run_range_lists = __run_number_generator(processed_string=run_boundaries)
+    run_range_lists = _run_number_generator(processed_string=run_boundaries)
     out_range = []
     for range_list in run_range_lists:
         out_range.extend(range_list)
@@ -78,11 +80,11 @@ def load_current_normalised_ws(run_number_string, instrument):
 
 
 def remove_intermediate_workspace(workspace_name):
-    if mantid.mtd.doesExist(workspace_name):
-        mantid.DeleteWorkspace(workspace_name)
-        del workspace_name  # Mark it as deleted so that more information is preserved on throw
-    else:
-        raise RuntimeError("Tried to remove non-existent workspace: " + str(workspace_name))
+    #if mantid.mtd.doesExist(workspace_name):
+    mantid.DeleteWorkspace(workspace_name)
+    #    del workspace_name  # Mark it as deleted so that more information is preserved on throw
+    #else:
+    #    raise RuntimeError("Tried to remove non-existent workspace: " + str(workspace_name))
 
 
 def subtract_sample_empty(ws_to_correct, empty_sample_ws_string, instrument):
@@ -139,7 +141,10 @@ def _load_sum_file_range(run_numbers_list, instrument):
     return summed_ws
 
 
-def __run_number_generator(processed_string):
+def _run_number_generator(processed_string):
+    #number_generator = kernel.IntArrayProperty('array_generator', processed_string)
+    #return number_generator.value.tolist()
+
     # Expands run numbers of the form 1-10, 12, 14-20, 23 to 1,2,3,..,8,9,10,12,14,15,16...,19,20,23
     for entry in processed_string.split(','):
         # Split between comma separated values
@@ -151,4 +156,4 @@ def __run_number_generator(processed_string):
             # Add 1 so it includes the final number '-' range
             yield range(int(numbers[0]), int(numbers[-1]) + 1)
         else:
-            raise ValueError("The run number " + str(entry) + " is incorrect in calibration mapping")
+           raise ValueError("The run number " + str(entry) + " is incorrect in calibration mapping")
