@@ -7,6 +7,8 @@ Diffraction Changes
 
 Crystal Improvements
 --------------------
+:ref:`algm-FindUBUsingLatticeParameters` will now return an oriented lattice even when the number of peaks used is very low.
+:ref:`algm-FindUBUsingLatticeParameters` has a new option to fix lattice parameters. This will find an orientation, but without optimisation between indexed HKLs and q vectors.
 
 Engineering Diffraction
 -----------------------
