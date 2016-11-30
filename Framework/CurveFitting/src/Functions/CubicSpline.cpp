@@ -127,15 +127,6 @@ void CubicSpline::derivative1D(double *out, const double *xValues, size_t nData,
   calculateDerivative(out, xValues, nData, order);
 }
 
-/** Check if the supplied x value falls within the range of the spline
- *
- * @param x :: The x value to check
- * @return Whether the value falls within the range of the spline
- */
-bool CubicSpline::checkXInRange(double x) const {
-  return (x >= m_spline->interp->xmin && x <= m_spline->interp->xmax);
-}
-
 /** Calculate the values on the spline at each point supplied
  *
  * @param out :: The array to store the calculated values
@@ -146,27 +137,10 @@ void CubicSpline::calculateSpline(double *out, const double *xValues,
                                   const size_t nData) const {
   // calculate spline for given input set
   double y(0);
-  bool outOfRange(false);
   for (size_t i = 0; i < nData; ++i) {
-    if (checkXInRange(xValues[i])) {
-      // calculate the y value
-      y = splineEval(xValues[i]);
-      out[i] = y;
-    } else {
-      // if out of range, set it to constant of fringe values
-      outOfRange = true;
-      if (xValues[i] < m_spline->interp->xmin) {
-        out[i] = splineEval(m_spline->interp->xmin);
-      } else {
-        out[i] = splineEval(m_spline->interp->xmax);
-      }
-    }
-  }
-
-  // warn user than some values wern't calculated
-  if (outOfRange) {
-    g_log.warning()
-        << "Some x values where out of range and will not be calculated.\n";
+    // calculate the y value
+    y = splineEval(xValues[i]);
+    out[i] = y;
   }
 }
 
@@ -198,7 +172,6 @@ void CubicSpline::calculateDerivative(double *out, const double *xValues,
                                       const size_t order) const {
   double xDeriv = 0;
   int errorCode = 0;
-  bool outOfRange(false);
 
   // throw error if the order is not the 1st or 2nd derivative
   if (order < 1)
@@ -206,22 +179,16 @@ void CubicSpline::calculateDerivative(double *out, const double *xValues,
           << "CubicSpline: order of derivative must be 1 or greater";
 
   for (size_t i = 0; i < nData; ++i) {
-    if (checkXInRange(xValues[i])) {
-      // choose the order of the derivative
-      if (order == 1) {
-        xDeriv = gsl_spline_eval_deriv(m_spline.get(), xValues[i], m_acc.get());
-        errorCode = gsl_spline_eval_deriv_e(m_spline.get(), xValues[i],
-                                            m_acc.get(), &xDeriv);
-      } else if (order == 2) {
-        xDeriv =
-            gsl_spline_eval_deriv2(m_spline.get(), xValues[i], m_acc.get());
-        errorCode = gsl_spline_eval_deriv2_e(m_spline.get(), xValues[i],
-                                             m_acc.get(), &xDeriv);
-      }
-    } else {
-      // if out of range, just set it to zero
-      outOfRange = true;
-      xDeriv = 0;
+    // choose the order of the derivative
+    if (order == 1) {
+      xDeriv = gsl_spline_eval_deriv(m_spline.get(), xValues[i], m_acc.get());
+      errorCode = gsl_spline_eval_deriv_e(m_spline.get(), xValues[i],
+                                          m_acc.get(), &xDeriv);
+    } else if (order == 2) {
+      xDeriv =
+          gsl_spline_eval_deriv2(m_spline.get(), xValues[i], m_acc.get());
+      errorCode = gsl_spline_eval_deriv2_e(m_spline.get(), xValues[i],
+                                           m_acc.get(), &xDeriv);
     }
 
     // check GSL functions didn't return an error
@@ -229,12 +196,6 @@ void CubicSpline::calculateDerivative(double *out, const double *xValues,
 
     // record the value
     out[i] = xDeriv;
-  }
-
-  // warn user that some values weren't calculated
-  if (outOfRange) {
-    g_log.warning()
-        << "Some x values where out of range and will not be calculated.\n";
   }
 }
 

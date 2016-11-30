@@ -100,6 +100,11 @@ private:
   void calculateDerivatives(API::MatrixWorkspace_const_sptr inputWorkspace,
                             API::MatrixWorkspace_sptr outputWorkspace,
                             int order) const;
+
+  /// Check if an x value falls within the range of the spline
+  void setXRange(
+          API::MatrixWorkspace_sptr inputWorkspace,
+          API::MatrixWorkspace_const_sptr interpolationWorkspace) const;
 };
 
 } // namespace Algorithms

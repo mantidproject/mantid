@@ -102,22 +102,27 @@ std::map<std::string, std::string> SplineInterpolation::validateInputs() {
 /** Execute the algorithm.
  */
 void SplineInterpolation::exec() {
-  const bool type = getProperty("Linear2Points");
-  if (type == true)
-    m_interp_type = boost::make_shared<LinearBackground>();
-  else
-    m_interp_type = boost::make_shared<CubicSpline>();
-
-  m_interp_type->initialize();
-
   // read in algorithm parameters
   int order = static_cast<int>(getProperty("DerivOrder"));
+
+  const bool type = getProperty("Linear2Points");
 
   // set input workspaces
   MatrixWorkspace_sptr mws = getProperty("WorkspaceToMatch");
   MatrixWorkspace_sptr iws = getProperty("WorkspaceToInterpolate");
 
   int histNo = static_cast<int>(iws->getNumberHistograms());
+  int binsNo = static_cast<int>(iws->blocksize());
+
+  if (type == true && binsNo == 2){
+    m_interp_type = boost::make_shared<LinearBackground>();
+    g_log.information() << "Linear interpolation for 2 points.\n";
+  }
+  else{
+    m_interp_type = boost::make_shared<CubicSpline>();
+  }
+
+  m_interp_type->initialize();
 
   // vector of multiple derivative workspaces
   std::vector<MatrixWorkspace_sptr> derivs(histNo);
@@ -157,8 +162,8 @@ void SplineInterpolation::exec() {
         vAxis->setValue(j, j + 1);
         derivs[i]->setSharedX(j, mws->sharedX(0));
         calculateDerivatives(mwspt, derivs[i], j + 1);
-      }
 
+      }
       derivs[i]->replaceAxis(1, vAxis);
     }
 
@@ -171,11 +176,15 @@ void SplineInterpolation::exec() {
     // Store derivatives in a grouped workspace
     WorkspaceGroup_sptr wsg = WorkspaceGroup_sptr(new WorkspaceGroup);
     for (int i = 0; i < histNo; ++i) {
+      setXRange(derivs[i], iws);
       wsg->addWorkspace(derivs[i]);
     }
+    // set y values accorting to integreation range must be set to zero
     setProperty("OutputWorkspaceDeriv", wsg);
   }
 
+  // set y values according to the integreation range
+  setXRange(outputWorkspace, iws);
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
@@ -301,6 +310,51 @@ void SplineInterpolation::calculateSpline(
 
   // calculate the interpolation
   m_interp_type->function1D(yValues, xValues, nData);
+}
+
+/** Check if the supplied x value falls within the range of the spline
+ *
+ * @param inputWorkspace :: The input workspace
+ * @param interpolationWorkspace :: The interpolation workspace
+ * @param row :: The row of the spectra to use
+ */
+void SplineInterpolation::setXRange(
+        MatrixWorkspace_sptr inputWorkspace,
+        MatrixWorkspace_const_sptr interpolationWorkspace) const{
+  // setup input parameters
+  int histNo = static_cast<int>(interpolationWorkspace->getNumberHistograms());
+  const size_t nData = inputWorkspace->y(0).size();
+  const double *xValues = &(inputWorkspace->x(0)[0]);
+
+  const size_t nintegData = interpolationWorkspace->y(0).size();
+  const double *xintegValues = &(interpolationWorkspace->x(0)[0]);
+
+  for (int i = 0; i < histNo; ++i){
+      int nOutsideLeft = 0, nOutsideRight = 0;
+
+      for (size_t i = 0; i < nData; ++i) {
+
+        // determine number of values smaller than the integration range
+        if (xValues[i] <= xintegValues[0])
+          nOutsideLeft++;
+        else if (xValues[i] >= xintegValues[nintegData - 1])
+          nOutsideRight++;
+      }
+
+      double *yValues = &(inputWorkspace->mutableY(i)[0]);
+      if (nOutsideLeft > 0){
+        std::fill_n(yValues, nOutsideLeft, yValues[nOutsideLeft]);
+        g_log.warning()
+            << nOutsideLeft <<
+               " x value(s) larger than integration range, will not be calculated.\n";
+      }
+      for(size_t k=nData - nOutsideRight; k < nData; ++k)
+        yValues[k] = yValues[nData - nOutsideRight];
+      if (nOutsideRight > 0)
+        g_log.warning()
+            << nOutsideRight <<
+               " x value(s) smaller than integration range, will not be calculated.\n";
+  }
 }
 
 } // namespace Algorithms
