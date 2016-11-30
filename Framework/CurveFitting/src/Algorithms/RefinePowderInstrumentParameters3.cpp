@@ -86,9 +86,8 @@ void RefinePowderInstrumentParameters3::init() {
       "Algorithm to calculate the standard error of peak positions.");
 
   // Damping factor
-  declareProperty(
-      "Damping", 1.0,
-      "Damping factor for (1) minimizer 'Damped Gauss-Newton'. (2) Monte Carlo. ");
+  declareProperty("Damping", 1.0, "Damping factor for (1) minimizer 'Damped "
+                                  "Gauss-Newton'. (2) Monte Carlo. ");
 
   // Anealing temperature
   declareProperty("AnnealingTemperature", 1.0,

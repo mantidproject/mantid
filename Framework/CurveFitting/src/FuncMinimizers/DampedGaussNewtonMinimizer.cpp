@@ -24,7 +24,7 @@ namespace {
 Kernel::Logger g_log("DampedGaussNewtonMinimizer");
 }
 
-DECLARE_FUNCMINIMIZER(DampedGaussNewtonMinimizer, Damped Gauss-Newton)
+DECLARE_FUNCMINIMIZER(DampedGaussNewtonMinimizer, Damped Gauss - Newton)
 
 /// Constructor
 DampedGaussNewtonMinimizer::DampedGaussNewtonMinimizer(double relTol)
@@ -33,13 +33,15 @@ DampedGaussNewtonMinimizer::DampedGaussNewtonMinimizer(double relTol)
 }
 
 /// Initialize minimizer, i.e. pass a function to minimize.
-void DampedGaussNewtonMinimizer::initialize(API::ICostFunction_sptr function, size_t) {
+void DampedGaussNewtonMinimizer::initialize(API::ICostFunction_sptr function,
+                                            size_t) {
   m_leastSquares =
       boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
           function);
   if (!m_leastSquares) {
-    throw std::invalid_argument("Damped Gauss-Newton minimizer works only with least "
-                                "squares. Different function was given.");
+    throw std::invalid_argument(
+        "Damped Gauss-Newton minimizer works only with least "
+        "squares. Different function was given.");
   }
 }
 
