@@ -282,8 +282,8 @@ public:
    */
   virtual void updateJobsInfoDisplay(
       const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
-      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
-          localStatus) = 0;
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
+          &localStatus) = 0;
 
   /**
    * Save settings (normally when closing the interface). This refers
@@ -329,6 +329,20 @@ public:
    */
   virtual bool userConfirmation(const std::string &title,
                                 const std::string &body) = 0;
+
+  /**
+   * Returns the cached executable string. This will be cached by calls from the
+   * tabs, and allow the execution of any external program
+   */
+  virtual std::string getCachedExecutable() = 0;
+
+  /**
+   * Returns the cached arguments string. This will be cached by calls from the
+   * tabs, and allow the execution of any external program
+   */
+  virtual std::vector<std::string> getCachedArguments() = 0;
+
+  virtual void externalProcessFinished(const std::string &str) = 0;
 };
 
 } // namespace CustomInterfaces

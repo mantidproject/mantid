@@ -124,6 +124,13 @@ public:
 
   void saveSettings() const override;
 
+signals:
+  void findCORClicked(const std::string &exec,
+                      const std::vector<std::string> &args);
+
+public slots:
+  void readCoRFromProcessOutput(const QString &str);
+
 protected:
   void initLayout();
   void showImg();
@@ -170,7 +177,6 @@ private slots:
   void valueUpdatedCoR(int v);
   void valueUpdatedROI(int v);
   void valueUpdatedNormArea(int v);
-
   void findCORClicked();
 
 private:
@@ -178,17 +184,20 @@ private:
 
   void readSettings();
 
-  /// enable types of images (sample, flat, dark) depending on their
+  /// enable types of images (sample, flat, dark)
+  /// depending on their
   /// availability
   void enableImageTypes(bool enableSamples, bool enableFlats, bool enableDarks);
 
-  /// enable/disable the groups with spin boxes for the center and corners
+  /// enable/disable the groups with spin boxes for the
+  /// center and corners
   void enableParamWidgets(bool enable);
 
   // widget closing
   void closeEvent(QCloseEvent *ev) override;
 
-  /// initialize values to defaults and set max/min for the spin boxes
+  /// initialize values to defaults and set max/min for
+  /// the spin boxes
   void initParamWidgets(size_t maxWidth, size_t maxHeight);
 
   /// Set coordinates in the widgets from a params object
@@ -223,7 +232,8 @@ private:
   void grabNormAreaCorner1FromMousePoint(int x, int y);
   void grabNormAreaCorner2FromMousePoint(int x, int y);
 
-  /// repaint the image with new positions of points and rectangles
+  /// repaint the image with new positions of points and
+  /// rectangles
   void refreshROIetAl();
   void refreshCoR();
   void refreshROI();
@@ -232,11 +242,13 @@ private:
   /// draw a cross/target symbol
   void drawCenterCrossSymbol(QPainter &painter, Mantid::Kernel::V2D &center);
 
-  /// draw a rectangle/box to highlight the ROI: region of interest
+  /// draw a rectangle/box to highlight the ROI: region of
+  /// interest
   void drawBoxROI(QPainter &painter, Mantid::Kernel::V2D &first,
                   Mantid::Kernel::V2D &second);
 
-  /// draw a rectangle/box to highlight the normalization ("air") region
+  /// draw a rectangle/box to highlight the normalization
+  /// ("air") region
   void drawBoxNormalizationRegion(QPainter &painter, Mantid::Kernel::V2D &first,
                                   Mantid::Kernel::V2D &second);
 
@@ -246,7 +258,8 @@ private:
 
   Mantid::API::WorkspaceGroup_sptr m_stackSamples, m_stackFlats, m_stackDarks;
 
-  /// this holds the base image on top of which rectangles and other
+  /// this holds the base image on top of which rectangles
+  /// and other
   /// objects are drawn
   boost::scoped_ptr<QPixmap> m_basePixmap;
 
@@ -265,7 +278,8 @@ private:
   /// max image size for the current stack
   int m_imgWidth, m_imgHeight;
 
-  /// are we picking the CoR, or the first point of the ROI, etc.
+  /// are we picking the CoR, or the first point of the
+  /// ROI, etc.
   SelectionState m_selectionState;
 
   // presenter as in the model-view-presenter

@@ -48,6 +48,7 @@ public:
     LogOutRequested,       ///< user hits 'log out' or similar
     SetupReconTool,        ///< To start the setup (open dialog, etc.)
     RunReconstruct,        ///< user hits 'reconstruct' or similar
+	RunExternalProcess,    ///M run external process using the cached parameters
     RefreshJobs,           ///< get updated jobs info in the table/tree
     CancelJobFromTable,    ///< cancel one job from the list
     VisualizeJobFromTable, ///< open visualization window for one job

@@ -1267,7 +1267,13 @@ void ImageROIViewQtWidget::closeEvent(QCloseEvent *event) {
 
 void ImageROIViewQtWidget::findCORClicked() {
   // this should run a --find-cor run on tomopy
-  m_presenter->notify(IImageROIPresenter::FindCoR);
+  // the argument that will need to be appended to find the CoR
+  // the receiver is the main ViewQtGui
+  emit(findCORClicked("", {"-f 1"}));
+}
+
+void ImageROIViewQtWidget::readCoRFromProcessOutput(const QString &str) {
+	std::cout << "DEBUG >> " << str.toStdString();
 }
 
 } // namespace CustomInterfaces

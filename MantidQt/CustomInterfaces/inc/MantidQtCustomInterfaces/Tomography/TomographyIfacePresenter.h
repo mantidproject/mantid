@@ -72,6 +72,7 @@ protected:
   void processToolChanged();
   void processTomoPathsChanged();
   void processTomoPathsEditedByUser();
+  void processRunExternalProcess();
   void processLogin();
   void processLogout();
   void processSetupReconTool();
@@ -107,11 +108,16 @@ protected slots:
   void addProcessToJobList();
   void reconProcessFailedToStart();
   void workerFinished();
+  void emitExternalProcessOutput();
 
 private:
   void setupAndRunLocalReconstruction(const std::string &runnable,
                                       const std::vector<std::string> &args,
                                       const std::string &allOpts);
+
+  void setupAndRunLocalExternalProcess(const std::string &runnable,
+                                       const std::vector<std::string> &args,
+                                       const std::string &allOpts);
   /// creates the correct dialog pointer and sets it to the member variable
   void createConfigDialogUsingToolName(const std::string &toolName);
 
@@ -155,6 +161,8 @@ private:
   QThread *m_keepAliveThread;
 
   std::unique_ptr<TomographyThread> m_workerThread;
+  std::string m_workerOutputCache;
+  std::string m_workerErrorCache;
 
   std::unique_ptr<TomoToolConfigDialogBase> m_configDialog;
 

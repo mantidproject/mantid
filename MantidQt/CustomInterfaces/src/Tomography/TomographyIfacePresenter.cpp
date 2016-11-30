@@ -120,6 +120,10 @@ void TomographyIfacePresenter::notify(
     processRunRecon();
     break;
 
+  case ITomographyIfacePresenter::RunExternalProcess:
+    processRunExternalProcess();
+    break;
+
   case ITomographyIfacePresenter::RefreshJobs:
     processRefreshJobs();
     break;
@@ -148,6 +152,78 @@ void TomographyIfacePresenter::notify(
     processShutDown();
     break;
   }
+}
+
+void TomographyIfacePresenter::processRunExternalProcess() {
+  // read the cached variables in view
+  std::string cachedExec = m_view->getCachedExecutable();
+  std::vector<std::string> cachedArgs = m_view->getCachedArguments();
+
+  std::string runnable;
+  std::vector<std::string> args;
+  std::string allOpts;
+  m_model->prepareSubmissionArguments(true, runnable, args, allOpts);
+
+  // append the additional args for now
+  for (const auto &arg : cachedArgs) {
+    args.emplace_back(arg);
+    allOpts += arg;
+  }
+
+  // do run local external process
+  // will need to refactor doLocalRunReconstructionJob
+  // TODO create a custom method?, or provide a title for the process?
+  // if no external provided, use the default one from settings
+  setupAndRunLocalExternalProcess(!cachedExec.empty() ? cachedExec : runnable,
+                                  args, allOpts);
+
+  // after we make sure that the output is given back, try reading it back to
+  // ROI
+}
+
+void TomographyIfacePresenter::setupAndRunLocalExternalProcess(
+    const std::string &runnable, const std::vector<std::string> &args,
+    const std::string &allOpts) {
+
+  if (m_reconRunning) {
+    const auto result = m_view->userConfirmation(
+        "Reconstruction is RUNNING",
+        "Are you sure you want to<br>cancel the running reconstruction?");
+
+    if (!result) {
+      // user clicked NO, so we don't terminate the running reconstruction and
+      // simply return
+      return;
+    }
+  }
+
+  // this kills the previous thread forcefully
+  m_workerThread.reset();
+  auto *worker = new MantidQt::CustomInterfaces::TomographyProcess();
+  m_workerThread = Mantid::Kernel::make_unique<TomographyThread>(this, worker);
+
+  // Specific connections for this presenter
+  // we do this so the thread can independently read the process' output and
+  // only signal the presenter after it's done reading and has something to
+  // share so it doesn't block the presenter
+  connect(m_workerThread.get(), SIGNAL(stdOutReady(QString)), this,
+          SLOT(readWorkerStdOut(QString)));
+  connect(m_workerThread.get(), SIGNAL(stdErrReady(QString)), this,
+          SLOT(readWorkerStdErr(QString)));
+
+  // remove the user confirmation for running recon, if the recon has finished
+  connect(m_workerThread.get(), SIGNAL(workerFinished()), this,
+          SLOT(emitExternalProcessOutput()));
+
+  connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
+
+  m_model->doLocalRunReconstructionJob(runnable, args, allOpts, *m_workerThread,
+                                       *worker);
+  m_reconRunning = true;
+}
+
+void TomographyIfacePresenter::emitExternalProcessOutput() {
+  m_view->externalProcessFinished(m_workerOutputCache);
 }
 
 void TomographyIfacePresenter::processSystemSettingsUpdated() {
@@ -640,11 +716,15 @@ void TomographyIfacePresenter::addProcessToJobList() {
 }
 
 void TomographyIfacePresenter::readWorkerStdOut(const QString &s) {
-  m_model->logMsg(s.toStdString());
+  const auto &stdstr = s.toStdString();
+  m_workerOutputCache += stdstr;
+  m_model->logMsg(stdstr);
 }
 
 void TomographyIfacePresenter::readWorkerStdErr(const QString &s) {
-  m_model->logErrMsg(s.toStdString());
+  const auto &stdstr = s.toStdString();
+  m_workerErrorCache += stdstr;
+  m_model->logErrMsg(stdstr);
 }
 
 bool TomographyIfacePresenter::isLocalResourceSelected() const {
