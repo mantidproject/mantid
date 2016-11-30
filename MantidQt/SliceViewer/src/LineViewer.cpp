@@ -1,20 +1,21 @@
+#include "MantidQtSliceViewer/LineViewer.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidKernel/VMD.h"
 #include "MantidKernel/UsageService.h"
-#include "MantidQtSliceViewer/LineViewer.h"
-#include <qwt_plot_curve.h>
-#include <qwt_plot.h>
-#include <qwt_scale_engine.h>
-#include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
-#include "MantidQtSliceViewer/LinePlotOptions.h"
+#include "MantidKernel/VMD.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtSliceViewer/LinePlotOptions.h"
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
+#include <qwt_scale_engine.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -1033,6 +1034,22 @@ void LineViewer::setupScaleEngine(MantidQwtWorkspaceData &curveData) {
   m_plot->setAxisScale(QwtPlot::yLeft, from, to);
 }
 
+/**
+ * Set the slice workspace from the ADS
+ * @param name :: the name of workspace
+ */
+void LineViewer::setSliceWorkspace(const std::string &name) {
+  auto &ads = AnalysisDataService::Instance();
+  if (!ads.doesExist(name))
+    return;
+
+  auto ws = ads.retrieveWS<IMDWorkspace>(name);
+  if (!ws)
+    return;
+
+  m_sliceWS = ws;
+}
+
 //-----------------------------------------------------------------------------
 /** Calculate and show the preview (non-integrated) line,
  * using the current parameters. */
@@ -1069,6 +1086,97 @@ int LineViewer::getXAxisDimensionIndex() const {
   curveData.setPreviewMode(true);
   curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
   return curveData.currentPlotXAxis();
+}
+
+void LineViewer::loadFromProject(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+
+  std::string sliceWSName;
+  std::vector<double> thickness, start, stop;
+  double planeWidth, binWidth;
+  int xDim, yDim;
+  int numBins;
+  bool adaptiveBins, overwriteLines, numBinsChecked, binWidthChecked,
+      allFreeDims;
+
+  if (!tsv.hasLine("SliceWorkspace"))
+    return;
+
+  tsv.selectLine("SliceWorkspace");
+  tsv >> sliceWSName;
+  tsv.selectLine("XDim");
+  tsv >> xDim;
+  tsv.selectLine("YDim");
+  tsv >> yDim;
+  tsv.selectLine("AllFreeDims");
+  tsv >> allFreeDims;
+  tsv.selectLine("Thickness");
+  tsv >> thickness;
+  tsv.selectLine("Start");
+  tsv >> start;
+  tsv.selectLine("Stop");
+  tsv >> stop;
+  tsv.selectLine("PlaneWidth");
+  tsv >> planeWidth;
+  tsv.selectLine("BinWidth");
+  tsv >> binWidth;
+  tsv.selectLine("NumBins");
+  tsv >> numBins;
+  tsv.selectLine("BinWidthChecked");
+  tsv >> binWidthChecked;
+  tsv.selectLine("BinNumChecked");
+  tsv >> numBinsChecked;
+  tsv.selectLine("AdaptiveBins");
+  tsv >> adaptiveBins;
+  tsv.selectLine("OverwriteLines");
+  tsv >> overwriteLines;
+
+  setFreeDimensions(allFreeDims, xDim, yDim);
+  setSliceWorkspace(sliceWSName);
+  for (size_t i = 0; i < thickness.size(); ++i) {
+    setThickness(static_cast<int>(i), thickness[i]);
+  }
+  setStart(Mantid::Kernel::VMD(start));
+  setEnd(Mantid::Kernel::VMD(stop));
+  setPlanarWidth(planeWidth);
+  setNumBins(numBins);
+
+  setFixedBinWidthMode(binWidthChecked, binWidth);
+  ui.radBinWidth->setChecked(binWidthChecked);
+  ui.radNumBins->setChecked(numBinsChecked);
+  ui.chkAdaptiveBins->setChecked(adaptiveBins);
+  ui.ckOverWrite->setChecked(overwriteLines);
+
+  if (tsv.selectSection("lineoptions")) {
+    std::string lineOptionsLines;
+    tsv >> lineOptionsLines;
+    m_lineOptions->loadFromProject(lineOptionsLines);
+  }
+}
+
+std::string LineViewer::saveToProject() const {
+  API::TSVSerialiser tsv;
+
+  if (!m_sliceWS)
+    return "";
+
+  tsv.writeLine("SliceWorkspace") << m_sliceWS->name();
+  tsv.writeLine("XDim") << m_freeDimX;
+  tsv.writeLine("YDim") << m_freeDimY;
+  tsv.writeLine("AllFreeDims") << m_allDimsFree;
+  tsv.writeLine("Thickness") << m_thickness.toString("\t");
+  tsv.writeLine("Start") << m_start.toString("\t");
+  tsv.writeLine("Stop") << m_end.toString("\t");
+  tsv.writeLine("PlaneWidth") << m_planeWidth;
+  tsv.writeLine("NumBins") << m_numBins;
+  tsv.writeLine("BinWidth") << m_binWidth;
+  tsv.writeLine("BinWidthChecked") << ui.radBinWidth->isChecked();
+  tsv.writeLine("BinNumChecked") << ui.radNumBins->isChecked();
+  tsv.writeLine("AdaptiveBins") << ui.chkAdaptiveBins->isChecked();
+  tsv.writeLine("OverwriteLines") << ui.ckOverWrite->isChecked();
+  tsv.writeSection("lineoptions", m_lineOptions->saveToProject());
+
+  return tsv.outputLines();
 }
 
 /**

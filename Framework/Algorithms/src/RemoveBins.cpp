@@ -1,14 +1,12 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/RemoveBins.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -26,8 +24,9 @@ using namespace API;
 DECLARE_ALGORITHM(RemoveBins)
 
 RemoveBins::RemoveBins()
-    : API::Algorithm(), m_inputWorkspace(), m_startX(DBL_MAX), m_endX(-DBL_MAX),
-      m_rangeUnit(), m_interpolate(false) {}
+    : API::Algorithm(), m_inputWorkspace(), m_spectrumInfo(nullptr),
+      m_startX(DBL_MAX), m_endX(-DBL_MAX), m_rangeUnit(), m_interpolate(false) {
+}
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
@@ -111,6 +110,8 @@ void RemoveBins::exec() {
     } catch (...) {
     } // If this fails for any reason, just carry on and do it the other way
   }
+
+  m_spectrumInfo = &m_inputWorkspace->spectrumInfo();
 
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
@@ -228,7 +229,7 @@ void RemoveBins::crop(const double &start, const double &end) {
  *  @param startX :: Returns the start of the range in the workspace's unit
  *  @param endX ::   Returns the end of the range in the workspace's unit
  */
-void RemoveBins::transformRangeUnit(const int &index, double &startX,
+void RemoveBins::transformRangeUnit(const int index, double &startX,
                                     double &endX) {
   const Kernel::Unit_sptr inputUnit = m_inputWorkspace->getAxis(0)->unit();
   // First check for a 'quick' conversion
@@ -265,33 +266,15 @@ void RemoveBins::transformRangeUnit(const int &index, double &startX,
  *  @param l2 ::       Returns the sample-detector distance
  *  @param twoTheta :: Returns the detector's scattering angle
  */
-void RemoveBins::calculateDetectorPosition(const int &index, double &l1,
+void RemoveBins::calculateDetectorPosition(const int index, double &l1,
                                            double &l2, double &twoTheta) {
-  // Get a pointer to the instrument contained in the workspace
-  Geometry::Instrument_const_sptr instrument =
-      m_inputWorkspace->getInstrument();
-  // Get the distance between the source and the sample (assume in metres)
-  Geometry::IComponent_const_sptr sample = instrument->getSample();
-  // Check for valid instrument
-  if (sample == nullptr) {
-    throw Exception::InstrumentDefinitionError(
-        "Instrument not sufficiently defined: failed to get sample");
-  }
-
-  l1 = instrument->getSource()->getDistance(*sample);
-  Geometry::IDetector_const_sptr det = m_inputWorkspace->getDetector(index);
-  // Get the sample-detector distance for this detector (in metres)
-  if (!det->isMonitor()) {
-    l2 = det->getDistance(*sample);
-    // The scattering angle for this detector (in radians).
-    twoTheta = m_inputWorkspace->detectorTwoTheta(*det);
-  } else // If this is a monitor then make l1+l2 = source-detector distance and
-         // twoTheta=0
-  {
-    l2 = det->getDistance(*(instrument->getSource()));
-    l2 = l2 - l1;
+  l1 = m_spectrumInfo->l1();
+  l2 = m_spectrumInfo->l2(index);
+  if (m_spectrumInfo->isMonitor(index))
     twoTheta = 0.0;
-  }
+  else
+    twoTheta = m_spectrumInfo->twoTheta(index);
+
   g_log.debug() << "Detector for index " << index << " has L1+L2=" << l1 + l2
                 << " & 2theta= " << twoTheta << '\n';
 }

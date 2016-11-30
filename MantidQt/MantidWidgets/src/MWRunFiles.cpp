@@ -870,7 +870,7 @@ QString MWRunFiles::createFileFilter() {
     }
   }
 
-  QString allFiles("All Files (*.*)");
+  QString allFiles("All Files (*)");
   if (!fileExts.isEmpty()) {
 
     // The list may contain upper and lower cased versions, ensure these are on

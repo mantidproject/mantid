@@ -11,11 +11,11 @@ from mantid.simpleapi import *
 import isis_reduction_steps as steps
 import ISISCommandInterface as ici
 
+
 class LoadRunTest(unittest.TestCase):
     def setUp(self):
         config['default.instrument'] = 'SANS2D'
         ici.SANS2D()
-
 
     def loadAndAssign(self, run_spec,options=dict()):
         loadRun = steps.LoadRun(str(run_spec), **options)
@@ -26,7 +26,6 @@ class LoadRunTest(unittest.TestCase):
         loadRun = steps.LoadRun(ws, **options)
         loadRun._assignHelper(ici.ReductionSingleton())
         return loadRun
-
 
     def basicChecks(self, loadRun, file_path, runnum, periods_in_file, ws_name):
         self.assertTrue('Data/SystemTest/SANS2D/'+file_path in loadRun._data_file.replace('\\','/'),
@@ -43,8 +42,6 @@ class LoadRunTest(unittest.TestCase):
             self.assertTrue(loadRun.move2ws(0))
             self.assertEqual(loadRun.wksp_name, ws_name)
 
-
-
     def test_single_period_nxs_file(self):
         runnum = 22048
         loadRun = self.loadAndAssign(runnum)
@@ -59,7 +56,6 @@ class LoadRunTest(unittest.TestCase):
         self.basicChecks(loadRun, 'SANS2D0000%d.raw'%(runnum), runnum, 1, '5547_sans_raw')
         self.assertEqual(loadRun._period, -1)
         self.assertEqual(loadRun.ext, 'raw')
-
 
     def test_single_period_from_workspace_reload_true(self):
         runnum = 22048
@@ -112,8 +108,10 @@ class LoadRunTest(unittest.TestCase):
         self.assertTrue(not loadRun.move2ws(1))
         self.assertEqual(loadRun.wksp_name, name)
 
+
 class LoadSampleTest(unittest.TestCase):
     """LoadSample extends LoadRun in order to move the workspaces to the defined centre"""
+
     def setUp(self):
         config['default.instrument'] = 'SANS2D'
         ici.SANS2D()
@@ -142,7 +140,6 @@ class LoadSampleTest(unittest.TestCase):
             self.assertAlmostEqual(cur_pos[1], -0.002)
 
 
-
 class LoadSampleTestStressTest(stresstesting.MantidStressTest):
     def runTest(self):
         self._success = False
@@ -159,6 +156,7 @@ class LoadSampleTestStressTest(stresstesting.MantidStressTest):
 
     def validate(self):
         return self._success
+
 
 class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
     def __init__(self):
@@ -184,7 +182,6 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
         # Need to do validation ourselves since we have to compare to sets of workspace-file pairs
         if self._validateWorkspaceToNeXusCustom():
             self._success = True
-
 
     def _validateWorkspaceToNeXusCustom(self):
         '''

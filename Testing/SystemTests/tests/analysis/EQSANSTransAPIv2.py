@@ -6,6 +6,7 @@ from mantid.api import *
 
 import os
 
+
 def do_cleanup():
     Files = ["EQSANS_4061_event_reduction.log",
              "EQSANS_1466_event_reduction.log"]
@@ -14,6 +15,7 @@ def do_cleanup():
         if os.path.exists(absfile):
             os.remove(absfile)
     return True
+
 
 class EQSANSTransmission(stresstesting.MantidStressTest):
 
@@ -49,6 +51,7 @@ class EQSANSTransmission(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "EQSANS_1466_event_Iq", 'EQSANSTrans.nxs'
+
 
 class EQSANSTransmissionEvent(EQSANSTransmission):
 
@@ -123,6 +126,7 @@ class EQSANSTransmissionDC(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         return "EQSANS_1466_event_Iq", 'EQSANSTransmissionDC.nxs'
 
+
 class EQSANSTransmissionCompatibility(EQSANSTransmission):
     """
         Analysis Tests for EQSANS
@@ -162,6 +166,7 @@ class EQSANSTransmissionCompatibility(EQSANSTransmission):
         self.disableChecking.append('Axes')
         return "EQSANS_1466_event_Iq", 'EQSANSTransmissionCompatibility.nxs'
 
+
 class EQSANSTransmissionFS(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -193,6 +198,7 @@ class EQSANSTransmissionFS(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "EQSANS_4061_event_frame1_Iq", 'EQSANSTransmissionFS.nxs'
+
 
 class EQSANSDirectTransFS(stresstesting.MantidStressTest):
 
@@ -229,4 +235,3 @@ class EQSANSDirectTransFS(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "EQSANS_4061_event_frame1_Iq", 'EQSANSDirectTransFS.nxs'
-

@@ -61,10 +61,9 @@ void FindSXPeaks::exec() {
   m_MinRange = getProperty("RangeLower");
   m_MaxRange = getProperty("RangeUpper");
 
-  int minSpec = getProperty("StartWorkspaceIndex");
-  int maxSpec = getProperty("EndWorkspaceIndex");
-  m_MinSpec = minSpec;
-  m_MaxSpec = maxSpec;
+  // the assignment below is intended and if removed will break the unit tests
+  m_MinSpec = static_cast<int>(getProperty("StartWorkspaceIndex"));
+  m_MaxSpec = static_cast<int>(getProperty("EndWorkspaceIndex"));
   double SB = getProperty("SignalBackground");
 
   // Get the input workspace
@@ -110,27 +109,24 @@ void FindSXPeaks::exec() {
   // unlikely to have more than this.
   entries.reserve(1000);
   // Count the peaks so that we can resize the peakvector at the end.
-  PARALLEL_FOR1(localworkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace))
   for (int i = static_cast<int>(m_MinSpec); i <= static_cast<int>(m_MaxSpec);
        ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Retrieve the spectrum into a vector
-    const MantidVec &X = localworkspace->readX(i);
-    const MantidVec &Y = localworkspace->readY(i);
+    const auto &X = localworkspace->x(i);
+    const auto &Y = localworkspace->y(i);
 
     // Find the range [min,max]
-    MantidVec::const_iterator lowit, highit;
+    auto lowit = (m_MinRange == EMPTY_DBL())
+                     ? X.begin()
+                     : std::lower_bound(X.begin(), X.end(), m_MinRange);
 
-    if (m_MinRange == EMPTY_DBL())
-      lowit = X.begin();
-    else
-      lowit = std::lower_bound(X.begin(), X.end(), m_MinRange);
-
-    if (m_MaxRange == EMPTY_DBL())
-      highit = X.end();
-    else
-      highit = std::find_if(lowit, X.end(),
-                            std::bind2nd(std::greater<double>(), m_MaxRange));
+    auto highit =
+        (m_MaxRange == EMPTY_DBL())
+            ? X.end()
+            : std::find_if(lowit, X.end(),
+                           std::bind2nd(std::greater<double>(), m_MaxRange));
 
     // If range specified doesn't overlap with this spectrum then bail out
     if (lowit == X.end() || highit == X.begin())
@@ -139,23 +135,21 @@ void FindSXPeaks::exec() {
     --highit; // Upper limit is the bin before, i.e. the last value smaller than
               // MaxRange
 
-    MantidVec::difference_type distmin = std::distance(X.begin(), lowit);
-    MantidVec::difference_type distmax = std::distance(X.begin(), highit);
+    auto distmin = std::distance(X.begin(), lowit);
+    auto distmax = std::distance(X.begin(), highit);
 
     // Find the max element
-    MantidVec::const_iterator maxY;
-    if (Y.size() > 1) {
-      maxY = std::max_element(Y.begin() + distmin, Y.begin() + distmax);
-    } else {
-      maxY = Y.begin();
-    }
+    auto maxY = (Y.size() > 1)
+                    ? std::max_element(Y.begin() + distmin, Y.begin() + distmax)
+                    : Y.begin();
+
     double intensity = (*maxY);
     double background = 0.5 * (1.0 + Y.front() + Y.back());
     if (intensity < SB * background) // This is not a peak.
       continue;
 
     // t.o.f. of the peak
-    MantidVec::difference_type d = std::distance(Y.begin(), maxY);
+    auto d = std::distance(Y.begin(), maxY);
     auto leftBinPosition = X.begin() + d;
     double leftBinEdge = *leftBinPosition;
     double rightBinEdge = *std::next(leftBinPosition);

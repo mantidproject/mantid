@@ -1,16 +1,16 @@
 #ifndef MANTID_ALGORITHMS_MODERATORTZEROTEST_H_
 #define MANTID_ALGORITHMS_MODERATORTZEROTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidDataObjects/Events.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAlgorithms/ModeratorTzero.h"
+#include "MantidDataObjects/Events.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/ModeratorTzero.h"
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -19,6 +19,27 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Algorithms;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
+
+namespace {
+void AddToIndirectInstrument(MatrixWorkspace_sptr &testWS,
+                             const bool &add_t0_formula = false,
+                             const bool &add_Efixed = false) {
+
+  if (add_t0_formula)
+    testWS->instrumentParameters().addString(
+        testWS->getInstrument()->getComponentID(), "t0_formula",
+        "50.-(50./52500)*incidentEnergy");
+
+  if (add_Efixed) {
+    const double evalue(2.082); // energy corresponding to the first order
+                                // Bragg peak in the analyzers
+    for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
+      testWS->instrumentParameters().addDouble(
+          testWS->getDetector(ihist)->getComponentID(), "Efixed", evalue);
+    }
+  }
+} // end of void AddToInstrument
+}
 
 class ModeratorTzeroTest : public CxxTest::TestSuite {
 public:
@@ -60,7 +81,7 @@ public:
                           {-9.67714, 1550.63, 3150.16, 4750.07, 6350.04,
                            7950.03, 9550.02, 11150, 12750, 14350, 15950}};
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-      MantidVec xarray = testWS->dataX(ihist);
+      auto &xarray = testWS->x(ihist);
       for (size_t ibin = 0; ibin < xarray.size(); ibin += jump) {
         TS_ASSERT_DELTA(tofs[ihist][ibin / jump], xarray[ibin], 0.1);
       }
@@ -91,7 +112,7 @@ public:
                           {0.0, 1599.32, 3193.02, 4786.52, 6380.87, 7975.78,
                            9571.06, 11166.6, 12762.3, 14358.2, 15954.1}};
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-      MantidVec xarray = testWS->dataX(ihist);
+      auto &xarray = testWS->x(ihist);
       for (size_t ibin = 0; ibin < xarray.size(); ibin += jump) {
         TS_ASSERT_DELTA(tofs[ihist][ibin / jump], xarray[ibin], 0.1);
       }
@@ -124,7 +145,7 @@ public:
         {-10.8185, 1589.18, 3189.18, 4789.18, 6389.18, 7989.18, 9589.18,
          11189.2, 12789.2, 14389.2, 15989.2}};
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-      MantidVec xarray = testWS->dataX(ihist);
+      auto &xarray = testWS->x(ihist);
       for (size_t ibin = 0; ibin < xarray.size(); ibin += jump) {
         TS_ASSERT_DELTA(tofs[ihist][ibin / jump], xarray[ibin], 0.1);
       }
@@ -155,7 +176,7 @@ public:
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
       EventList &evlist = testWS->getSpectrum(ihist);
       MantidVec tofs_b = evlist.getTofs();
-      MantidVec xarray = evlist.readX();
+      auto &xarray = evlist.x();
       for (size_t ibin = 0; ibin < xarray.size(); ibin += jump) {
         TS_ASSERT_DELTA(tofs_a[ibin / jump], xarray[ibin], 0.1);
         TS_ASSERT_DELTA(tofs_a[ibin / jump], tofs_b[ibin], 0.2);
@@ -187,7 +208,7 @@ public:
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
       EventList &evlist = testWS->getSpectrum(ihist);
       MantidVec tofs_b = evlist.getTofs();
-      MantidVec xarray = evlist.readX();
+      auto &xarray = evlist.x();
       for (size_t ibin = 0; ibin < xarray.size(); ibin += jump) {
         TS_ASSERT_DELTA(tofs_a[ibin / jump], xarray[ibin], 0.1);
         TS_ASSERT_DELTA(tofs_a[ibin / jump], tofs_b[ibin], 0.2);
@@ -220,7 +241,7 @@ public:
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
       EventList &evlist = testWS->getSpectrum(ihist);
       MantidVec tofs_b = evlist.getTofs();
-      MantidVec xarray = evlist.readX();
+      auto &xarray = evlist.x();
       for (size_t ibin = 0; ibin < xarray.size(); ibin += jump) {
         TS_ASSERT_DELTA(tofs_a[ibin / jump], xarray[ibin], 0.1);
         TS_ASSERT_DELTA(tofs_a[ibin / jump], tofs_b[ibin], 0.2);
@@ -244,9 +265,11 @@ private:
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
     BinEdges xdata(numBins + 1, LinearGenerator(0.0, 4.0));
     const double peakHeight(1000.), peakCentre(7000.), sigmaSq(1000 * 1000.);
+
+    auto &Y = testWS->mutableY(0);
     // tof ranges from 0 to 16000 (units assumed micro-seconds
     for (int ibin = 0; ibin < numBins; ++ibin) {
-      testWS->dataY(0)[ibin] =
+      Y[ibin] =
           peakHeight * exp(-0.5 * pow(xdata[ibin] - peakCentre, 2.) / sigmaSq);
     }
     for (int ihist = 0; ihist < numHists; ihist++)
@@ -267,34 +290,116 @@ private:
     for (size_t ihist = 0; ihist < numHists; ++ihist) {
       EventList &evlist = testWS->getSpectrum(ihist);
       BinEdges xdata(numBins + 1, LinearGenerator(0.0, rescaling_factor));
-      for (int ibin = 0; ibin <= numBins; ++ibin) {
-        double tof = rescaling_factor * ibin;
-        TofEvent tofevent(tof);
-        evlist.addEventQuickly(tofevent); // insert event
-      }
+
+      for (auto &tof : xdata)
+        evlist.addEventQuickly(TofEvent(tof));
+
       evlist.setX(xdata.cowData()); // set the bins for the associated histogram
     }
     return testWS;
   }
+};
 
-  void AddToIndirectInstrument(MatrixWorkspace_sptr &testWS,
-                               const bool &add_t0_formula = false,
-                               const bool &add_Efixed = false) {
+class ModeratorTzeroTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ModeratorTzeroTestPerformance *createSuite() {
+    return new ModeratorTzeroTestPerformance();
+  }
+  static void destroySuite(ModeratorTzeroTestPerformance *suite) {
+    AnalysisDataService::Instance().clear();
+    delete suite;
+  }
 
-    if (add_t0_formula)
-      testWS->instrumentParameters().addString(
-          testWS->getInstrument()->getComponentID(), "t0_formula",
-          "50.-(50./52500)*incidentEnergy");
+  ModeratorTzeroTestPerformance() {
+    input = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        10000, 1000, true);
+    input->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
-    if (add_Efixed) {
-      const double evalue(2.082); // energy corresponding to the first order
-                                  // Bragg peak in the analyzers
-      for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-        testWS->instrumentParameters().addDouble(
-            testWS->getDetector(ihist)->getComponentID(), "Efixed", evalue);
-      }
-    }
-  } // end of void AddToInstrumen
+    output = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        10000, 1000, true);
+    output->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+
+    inputEvent =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 100,
+                                                                        true);
+    inputEvent->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+
+    outputEvent =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 100,
+                                                                        true);
+    outputEvent->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+
+    test = boost::dynamic_pointer_cast<MatrixWorkspace>(inputEvent);
+    AnalysisDataService::Instance().add("input", input);
+    AnalysisDataService::Instance().add("output", output);
+    AnalysisDataService::Instance().add("inputEvent", inputEvent);
+    AnalysisDataService::Instance().add("outputEvent", outputEvent);
+  }
+
+  ~ModeratorTzeroTestPerformance() {
+    AnalysisDataService::Instance().remove("input");
+    AnalysisDataService::Instance().remove("output");
+    AnalysisDataService::Instance().remove("inputEvent");
+    AnalysisDataService::Instance().remove("outputEvent");
+  }
+
+  void testExecIndirect() {
+    AddToIndirectInstrument(input, true, true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", input);
+    alg.setPropertyValue("OutputWorkspace", "output");
+    alg.setProperty("EMode", "Indirect");
+    alg.execute();
+  }
+
+  void testExecIndirectEvent() {
+    AddToIndirectInstrument(test, true, true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputEvent);
+    alg.setPropertyValue("OutputWorkspace", "outputEvent");
+    alg.setProperty("EMode", "Indirect");
+    alg.execute();
+  }
+
+  void testExecDirect() {
+    input->instrumentParameters().addString(
+        input->getInstrument()->getComponentID(), "t0_formula",
+        "101.9*incidentEnergy^(-0.41)*exp(-incidentEnergy/282.0)");
+    input->mutableRun().addProperty("Ei", 100.0, "meV", true);
+
+    alg.initialize();
+    alg.setProperty("InputWorkspace", input);
+    alg.setPropertyValue("OutputWorkspace", "output");
+    alg.setProperty("EMode", "Direct");
+    alg.execute();
+  }
+
+  void testExecDirectEvent() {
+    inputEvent->instrumentParameters().addString(
+        inputEvent->getInstrument()->getComponentID(), "t0_formula",
+        "101.9*incidentEnergy^(-0.41)*exp(-incidentEnergy/282.0)");
+    inputEvent->mutableRun().addProperty("Ei", 100.0, "meV", true);
+
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputEvent);
+    alg.setPropertyValue("OutputWorkspace", "outputEvent");
+    alg.setProperty("EMode", "Direct");
+    alg.execute();
+  }
+
+private:
+  ModeratorTzero alg;
+  MatrixWorkspace_sptr input;
+  MatrixWorkspace_sptr test;
+  EventWorkspace_sptr inputEvent;
+  MatrixWorkspace_sptr output;
+  EventWorkspace_sptr outputEvent;
 };
 
 #endif /*MANTID_ALGORITHMS_MODERATORTZEROTEST_H_*/

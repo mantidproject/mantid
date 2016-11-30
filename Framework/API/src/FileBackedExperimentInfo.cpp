@@ -1,6 +1,4 @@
-//----------------------------------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------------------------------
+#include "MantidKernel/Logger.h"
 #include "MantidAPI/FileBackedExperimentInfo.h"
 
 #include <sstream>
@@ -60,7 +58,7 @@ FileBackedExperimentInfo::getInstrument() const {
 const Geometry::ParameterMap &
 FileBackedExperimentInfo::instrumentParameters() const {
   populateIfNotLoaded();
-  return ExperimentInfo::instrumentParameters();
+  return ExperimentInfo::constInstrumentParameters();
 }
 
 /**

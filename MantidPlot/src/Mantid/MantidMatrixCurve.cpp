@@ -7,11 +7,11 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "MantidQtAPI/QwtWorkspaceBinData.h"
+#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 
-#include "../Graph.h"
 #include "../ApplicationWindow.h"
+#include "../Graph.h"
 #include "../MultiLayer.h"
 #include "ErrorBarSettings.h"
 #include "MantidKernel/ReadLock.h"
@@ -43,7 +43,7 @@ Mantid::Kernel::Logger g_log("MantidMatrixCurve");
 MantidMatrixCurve::MantidMatrixCurve(const QString &, const QString &wsName,
                                      Graph *g, int index, IndexDir indexType,
                                      bool err, bool distr,
-                                     Graph::CurveType style)
+                                     GraphOptions::CurveType style)
     : MantidCurve(err), m_wsName(wsName), m_index(index),
       m_indexType(indexType) {
   if (!g) {
@@ -67,7 +67,7 @@ MantidMatrixCurve::MantidMatrixCurve(const QString &, const QString &wsName,
  */
 MantidMatrixCurve::MantidMatrixCurve(const QString &wsName, Graph *g, int index,
                                      IndexDir indexType, bool err, bool distr,
-                                     Graph::CurveType style)
+                                     GraphOptions::CurveType style)
     : MantidCurve(err), m_wsName(wsName), m_index(index),
       m_indexType(indexType) {
   init(g, distr, style);
@@ -91,7 +91,8 @@ MantidMatrixCurve::MantidMatrixCurve(const MantidMatrixCurve &c)
  *  @param distr :: True for a distribution
  *  @param style :: The curve type to use
  */
-void MantidMatrixCurve::init(Graph *g, bool distr, Graph::CurveType style) {
+void MantidMatrixCurve::init(Graph *g, bool distr,
+                             GraphOptions::CurveType style) {
   // Will throw if name not found but return NULL ptr if the type is incorrect
   MatrixWorkspace_const_sptr workspace =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -152,7 +153,7 @@ void MantidMatrixCurve::init(Graph *g, bool distr, Graph::CurveType style) {
 
   int lineWidth = 1;
   MultiLayer *ml = dynamic_cast<MultiLayer *>(g->parent()->parent()->parent());
-  if (ml && (style == Graph::Unspecified ||
+  if (ml && (style == GraphOptions::Unspecified ||
              ml->applicationWindow()->applyCurveStyleToMantid)) {
     applyStyleChoice(style, ml, lineWidth);
   } else if (matrixWS->isHistogramData() && !matrixWS->isDistribution()) {

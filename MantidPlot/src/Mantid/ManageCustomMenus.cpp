@@ -2,9 +2,13 @@
 #include "../ApplicationWindow.h"
 
 #include "MantidQtAPI/InterfaceManager.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidKernel/ConfigService.h"
 
 #include <QtGui>
+
+using MantidQt::API::MantidDesktopServices;
+
 /**
 * Constructor for object. Performs initial setup and calls subsequent setup
 * functions.
@@ -224,5 +228,5 @@ void ManageCustomMenus::addMenuClicked() {
 */
 void ManageCustomMenus::helpClicked() {
   QUrl helpUrl("http://www.mantidproject.org/ManageCustomMenus");
-  QDesktopServices::openUrl(helpUrl);
+  MantidDesktopServices::openUrl(helpUrl);
 }

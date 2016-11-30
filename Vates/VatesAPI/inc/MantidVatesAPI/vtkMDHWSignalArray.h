@@ -25,8 +25,6 @@
 #define vtkMDHWSignalArray_h
 
 #include "vtkMappedDataArray.h"
-
-#include "vtkTypeTemplate.h"  // For templated vtkObject API
 #include "vtkObjectFactory.h" // for vtkStandardNewMacro
 #include "vtkIdList.h"
 #include "vtkVariant.h"
@@ -38,11 +36,14 @@ namespace Mantid {
 namespace VATES {
 
 template <class Scalar>
-class vtkMDHWSignalArray : public vtkTypeTemplate<vtkMDHWSignalArray<Scalar>,
-                                                  vtkMappedDataArray<Scalar>> {
+class vtkMDHWSignalArray : public vtkMappedDataArray<Scalar> {
 public:
-  vtkMappedDataArrayNewInstanceMacro(
-      vtkMDHWSignalArray<Scalar>) static vtkMDHWSignalArray *New();
+  // clang-format off
+  vtkAbstractTemplateTypeMacro(vtkMDHWSignalArray<Scalar>,
+                               vtkMappedDataArray<Scalar>)
+  vtkMappedDataArrayNewInstanceMacro(vtkMDHWSignalArray<Scalar>)
+  static vtkMDHWSignalArray *New();
+  // clang-format on
   void PrintSelf(ostream &os, vtkIndent indent) override;
 
   void InitializeArray(

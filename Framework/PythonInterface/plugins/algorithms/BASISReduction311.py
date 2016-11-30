@@ -16,6 +16,7 @@ DEFAULT_CONFIG_DIR = config["instrumentDefinition.directory"]
 
 DEFAULT_ENERGY = 7.6368
 
+
 class BASISReduction311(PythonAlgorithm):
 
     _short_inst = None
@@ -64,15 +65,15 @@ class BASISReduction311(PythonAlgorithm):
                                                 arrVal, direction=Direction.Input),
                              "Wavelength range for normalization. default:(6.24A, 6.30A)")
         self.declareProperty(FloatArrayProperty("EnergyBins", DEFAULT_BINS,
-                                                direction=Direction.Input),\
-                                                "Energy transfer binning scheme (in ueV)")
+                                                direction=Direction.Input),
+                             "Energy transfer binning scheme (in ueV)")
         self.declareProperty(FloatArrayProperty("MomentumTransferBins",
                                                 DEFAULT_QBINS,
-                                                direction=Direction.Input),\
-                                                "Momentum transfer binning scheme")
-        self.declareProperty(FileProperty(name="MaskFile", defaultValue="",\
-                                            action=FileAction.OptionalLoad, extensions=['.xml']),\
-                                            "Directory location for standard masking and grouping files.")
+                                                direction=Direction.Input),
+                             "Momentum transfer binning scheme")
+        self.declareProperty(FileProperty(name="MaskFile", defaultValue="",
+                                          action=FileAction.OptionalLoad, extensions=['.xml']),
+                             "Directory location for standard masking and grouping files.")
         grouping_type = ["None", "Low-Resolution", "By-Tube"]
         self.declareProperty("GroupDetectors", "None",
                              StringListValidator(grouping_type),
@@ -254,8 +255,8 @@ class BASISReduction311(PythonAlgorithm):
                          Target='Wavelength', EMode='Indirect')
 
         if not self._noMonNorm:
-            api.ModeratorTzeroLinear(InputWorkspace=mon_ws,\
-                               OutputWorkspace=mon_ws)
+            api.ModeratorTzeroLinear(InputWorkspace=mon_ws,
+                                     OutputWorkspace=mon_ws)
             api.Rebin(InputWorkspace=mon_ws,
                       OutputWorkspace=mon_ws, Params='10')
             api.ConvertUnits(InputWorkspace=mon_ws,

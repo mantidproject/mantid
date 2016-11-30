@@ -92,6 +92,9 @@ void MSDFit::run() {
 
   m_batchAlgoRunner->addAlgorithm(msdAlg);
   m_batchAlgoRunner->executeBatchAsync();
+
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(algorithmComplete(bool)));
 }
 
 void MSDFit::singleFit() {
@@ -144,6 +147,23 @@ bool MSDFit::validate() {
 
 void MSDFit::loadSettings(const QSettings &settings) {
   m_uiForm.dsSampleInput->readSettings(settings.group());
+}
+
+/**
+ * Handles the completion of the MSDFit algorithm
+ *
+ * @param error If the algorithm chain failed
+ */
+void MSDFit::algorithmComplete(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(algorithmComplete(bool)));
+
+  if (error)
+    return;
+
+  // Enable plot and save
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 }
 
 /**
@@ -296,8 +316,9 @@ void MSDFit::saveClicked() {
  * Handles mantid plotting
  */
 void MSDFit::plotClicked() {
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName + "_A1", true))
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_A1");
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName + "_Workspaces", true))
+    plotSpectrum((QString::fromStdString(m_pythonExportWsName) + "_Workspaces"),
+                 0, 2);
 }
 
 } // namespace IDA

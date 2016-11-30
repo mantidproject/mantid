@@ -3,39 +3,40 @@
 //-------------------------------------------
 #include "ScriptingWindow.h"
 #include "ApplicationWindow.h"
-#include "MultiTabScriptInterpreter.h"
-#include "ScriptingEnv.h"
-#include "ScriptFileInterpreter.h"
 #include "MantidQtAPI/TSVSerialiser.h"
-#include "pixmaps.h"
+#include "MultiTabScriptInterpreter.h"
+#include "ScriptFileInterpreter.h"
+#include "ScriptingEnv.h"
+#include <MantidQtAPI/pixmaps.h>
 
 // Mantid
-#include "Mantid/IProjectSerialisable.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 
 // MantidQt
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtMantidWidgets/ScriptEditor.h"
 
 // Qt
-#include <QTextEdit>
-#include <QMenuBar>
-#include <QMenu>
 #include <QAction>
+#include <QApplication>
 #include <QCloseEvent>
-#include <QSettings>
-#include <QPrintDialog>
-#include <QPrinter>
 #include <QDateTime>
 #include <QFileDialog>
-#include <QMessageBox>
-#include <QApplication>
-#include <QTextStream>
 #include <QList>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QPrintDialog>
+#include <QPrinter>
+#include <QSettings>
+#include <QTextEdit>
+#include <QTextStream>
 #include <QUrl>
 
 using namespace Mantid;
+using namespace MantidQt::API;
 
 namespace {
 /// static logger
@@ -69,6 +70,18 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env, bool capturePrint,
 
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
   setWindowTitle("MantidPlot: " + env->languageName() + " Window");
+
+#ifdef Q_OS_MAC
+  // Work around to ensure that floating windows remain on top of the main
+  // application window, but below other applications on Mac.
+  // Note: Qt::Tool cannot have both a max and min button on OSX
+  flags |= Qt::Tool;
+  flags |= Qt::Dialog;
+  flags |= Qt::CustomizeWindowHint;
+  flags |= Qt::WindowMinimizeButtonHint;
+  flags |= Qt::WindowCloseButtonHint;
+  setWindowFlags(flags);
+#endif
 }
 
 /**
@@ -304,6 +317,16 @@ void ScriptingWindow::updateWindowFlags() {
   if (m_alwaysOnTop->isChecked()) {
     flags |= Qt::WindowStaysOnTopHint;
   }
+#ifdef Q_OS_MAC
+  // Work around to ensure that floating windows remain on top of the main
+  // application window, but below other applications on Mac.
+  // Note: Qt::Tool cannot have both a max and min button on OSX
+  flags |= Qt::Tool;
+  flags |= Qt::CustomizeWindowHint;
+  flags |= Qt::WindowMinimizeButtonHint;
+  flags |= Qt::WindowCloseButtonHint;
+  setWindowFlags(flags);
+#endif
   setWindowFlags(flags);
   // This is necessary due to the setWindowFlags function reparenting the window
   // and causing is

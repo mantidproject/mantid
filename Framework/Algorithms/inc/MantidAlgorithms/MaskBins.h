@@ -9,6 +9,10 @@
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
+
+namespace Histogram {
+class BinEdges;
+}
 namespace Algorithms {
 /** Masks bins in a workspace. Bins falling within the range given (even
    partially) are
@@ -74,7 +78,8 @@ private:
   void exec() override;
   void execEvent();
 
-  void findIndices(const MantidVec &X, MantidVec::difference_type &startBin,
+  void findIndices(const HistogramData::BinEdges &X,
+                   MantidVec::difference_type &startBin,
                    MantidVec::difference_type &endBin);
 
   double m_startX; ///< The range start point

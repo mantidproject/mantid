@@ -70,7 +70,7 @@ void MaskDetectorsIf::exec() {
     if (dets.empty())
       continue;
     else {
-      double val = inputW->readY(i)[0];
+      double val = inputW->y(i)[0];
       if (compar_f(val, value)) {
         for (auto det : dets) {
           umap.emplace(det, select_on);

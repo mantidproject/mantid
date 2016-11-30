@@ -1,10 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/TOFSANSResolutionByPixel.h"
 #include "MantidAlgorithms/GravitySANSHelper.h"
 #include "MantidAlgorithms/TOFSANSResolutionByPixelCalculator.h"
 #include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
@@ -13,8 +11,8 @@
 #include "MantidKernel/Interpolation.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_unique.h"
 
-#include "boost/math/special_functions/fpclassify.hpp"
 #include "boost/lexical_cast.hpp"
 
 namespace Mantid {
@@ -96,8 +94,8 @@ void TOFSANSResolutionByPixel::exec() {
   // create interpolation table from sigmaModeratorVSwavelength
   Kernel::Interpolation lookUpTable;
 
-  const auto xInterpolate = sigmaModeratorVSwavelength->points(0);
-  const MantidVec yInterpolate = sigmaModeratorVSwavelength->readY(0);
+  const auto &xInterpolate = sigmaModeratorVSwavelength->points(0);
+  const auto &yInterpolate = sigmaModeratorVSwavelength->y(0);
 
   // prefer the input to be a pointworkspace and create interpolation function
   if (sigmaModeratorVSwavelength->isHistogramData()) {
@@ -131,46 +129,42 @@ void TOFSANSResolutionByPixel::exec() {
   const int numberOfSpectra = static_cast<int>(inWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
 
+  const auto &spectrumInfo = inWS->spectrumInfo();
   for (int i = 0; i < numberOfSpectra; i++) {
     IDetector_const_sptr det;
-    try {
-      det = inWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
+    if (!spectrumInfo.hasDetectors(i)) {
       g_log.information() << "Workspace index " << i
                           << " has no detector assigned to it - discarding\n";
+      continue;
     }
     // If no detector found or if it's masked or a monitor, skip onto the next
     // spectrum
-    if (!det || det->isMonitor() || det->isMasked())
+    if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
       continue;
 
-    // Get the flight path from the sample to the detector pixel
-    const V3D samplePos = inWS->getInstrument()->getSample()->getPos();
-    const V3D scatteredFlightPathV3D = det->getPos() - samplePos;
-    const double L2 = scatteredFlightPathV3D.norm();
-
+    const double L2 = spectrumInfo.l2(i);
     TOFSANSResolutionByPixelCalculator calculator;
     const double waveLengthIndependentFactor =
         calculator.getWavelengthIndependentFactor(R1, R2, deltaR, LCollim, L2);
 
     // Multiplicative factor to go from lambda to Q
     // Don't get fooled by the function name...
-    const double theta = inWS->detectorTwoTheta(*det);
+    const double theta = spectrumInfo.twoTheta(i);
     double sinTheta = sin(0.5 * theta);
     double factor = 4.0 * M_PI * sinTheta;
 
-    const MantidVec &xIn = inWS->readX(i);
+    const auto &xIn = inWS->x(i);
     const size_t xLength = xIn.size();
 
     // Gravity correction
-    boost::shared_ptr<GravitySANSHelper> grav;
+    std::unique_ptr<GravitySANSHelper> grav;
     if (doGravity) {
-      grav = boost::make_shared<GravitySANSHelper>(inWS, det,
-                                                   getProperty("ExtraLength"));
+      grav = Kernel::make_unique<GravitySANSHelper>(spectrumInfo, i,
+                                                    getProperty("ExtraLength"));
     }
 
     // Get handles on the outputWorkspace
-    MantidVec &yOut = outWS->dataY(i);
+    auto &yOut = outWS->mutableY(i);
     // for each wavelenght bin of each pixel calculate a q-resolution
     for (size_t j = 0; j < xLength - 1; j++) {
       // use the midpoint of each bin

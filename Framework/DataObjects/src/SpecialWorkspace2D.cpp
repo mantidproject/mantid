@@ -1,6 +1,7 @@
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidKernel/IPropertyManager.h"
 
 #include <fstream>
 #include <sstream>

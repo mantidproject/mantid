@@ -1,10 +1,8 @@
 #ifndef MANTID_ALGORITHMS_SPATIAL_GROUPING_H_
 #define MANTID_ALGORITHMS_SPATIAL_GROUPING_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/NearestNeighbourInfo.h"
 #include "MantidGeometry/IDTypes.h"
 
 namespace Mantid {
@@ -12,7 +10,6 @@ namespace Kernel {
 class V3D;
 }
 namespace Geometry {
-/// Forward Declarations
 class IDetector;
 class BoundingBox;
 }
@@ -75,16 +72,16 @@ private:
 
   /// expand our search out to the next neighbours along
   bool expandNet(std::map<specnum_t, Mantid::Kernel::V3D> &nearest,
-                 specnum_t spec, const size_t &noNeighbours,
+                 specnum_t spec, const size_t noNeighbours,
                  const Mantid::Geometry::BoundingBox &bbox);
   /// sort by distance
   void sortByDistance(std::map<specnum_t, Mantid::Kernel::V3D> &nearest,
-                      const size_t &noNeighbours);
+                      const size_t noNeighbours);
   /// create expanded bounding box for our purposes
   void createBox(boost::shared_ptr<const Geometry::IDetector> det,
                  Geometry::BoundingBox &bndbox, double searchDist);
   /// grow dimensions of our bounding box to the factor
-  void growBox(double &min, double &max, const double &factor);
+  void growBox(double &min, double &max, const double factor);
 
   /// map of detectors in the instrument
   std::map<specnum_t, boost::shared_ptr<const Geometry::IDetector>> m_detectors;
@@ -93,8 +90,8 @@ private:
   /// first and last values for each group
   std::vector<std::vector<int>> m_groups;
 
-  /// Source workspace
-  Mantid::API::MatrixWorkspace_const_sptr inputWorkspace;
+  /// NearestNeighbourInfo used by expandNet()
+  std::unique_ptr<API::NearestNeighbourInfo> m_neighbourInfo;
 };
 
 } // namespace Algorithms

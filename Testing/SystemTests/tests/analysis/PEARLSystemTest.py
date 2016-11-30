@@ -1,16 +1,16 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 from mantid import *
 import os
 import numpy as n
-from abc import ABCMeta, abstractmethod
 
 #pylint: disable=too-many-instance-attributes
+
+
 class PEARL_Reduction(stresstesting.MantidStressTest):
     '''Test adapted from actual script used by the scientists'''
-
-    __metaclass__ = ABCMeta # Mark as an abstract class
     validate=None
 
     def __init__(self):
@@ -35,12 +35,12 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
 
     def doValidation(self):
         '''Override doValidation to vaildate two things at the same time'''
-		# reset validate() method to call validateNexus() instead
+                # reset validate() method to call validateNexus() instead
         self.validate = self.validateNexus
         res = self.validateWorkspaceToNeXus()
         if not res:
             return False
-		# reset validate() method to call validateGSS() instead
+                # reset validate() method to call validateGSS() instead
         self.validate = self.validateGSS
         res = self.validateASCII()
         return res
@@ -84,13 +84,13 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
 
     def PearlLoad(self, files,ext,outname):
 
-        if type(files) is int:
+        if isinstance(files, int):
             infile=self.PEARL_getfilename(files,ext)
             LoadRaw(Filename=infile,OutputWorkspace=outname,LoadLogFiles="0")
         else:
             loop=0
             num=files.split("_")
-            frange=range(int(num[0]),int(num[1])+1)
+            frange=list(range(int(num[0]),int(num[1])+1))
             for i in frange:
                 infile=self.PEARL_getfilename(i,ext)
                 outwork="run"+str(i)
@@ -110,14 +110,14 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
 
     def PearlLoadMon(self, files,ext,outname):
 
-        if type(files) is int:
+        if isinstance(files, int):
             infile=self.PEARL_getfilename(files,ext)
             mspectra=self.PEARL_getmonitorspectrum(files)
             LoadRaw(Filename=infile,OutputWorkspace=outname,SpectrumMin=mspectra,SpectrumMax=mspectra,LoadLogFiles="0")
         else:
             loop=0
             num=files.split("_")
-            frange=range(int(num[0]),int(num[1])+1)
+            frange=list(range(int(num[0]),int(num[1])+1))
             mspectra=self.PEARL_getmonitorspectrum(int(num[0]))
             for i in frange:
                 infile=self.PEARL_getfilename(i,ext)
@@ -135,8 +135,6 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
                     Plus(LHSWorkspace=outname,RHSWorkspace=secondwk,OutputWorkspace=outname)
                     mtd.remove(secondwk)
         return
-
-
 
     def PEARL_getmonitor(self, number,ext,spline_terms=20):
 
@@ -157,7 +155,6 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
         SplineBackground(InputWorkspace=works,OutputWorkspace=works,WorkspaceIndex=0,NCoeff=spline_terms)
         return works
 
-
     def PEARL_read(self, number,ext,outname):
         self.PearlLoad(number,ext,outname)
         ConvertUnits(InputWorkspace=outname,OutputWorkspace=outname,Target="Wavelength")
@@ -168,7 +165,6 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
         mtd.remove(monitor)
         return
 
-    #pylint: disable=too-many-arguments,too-many-branches
     def PEARL_focus(self, number,ext="raw",fmode="trans",ttmode="TT70",atten=True,van_norm=True):
 
         self.tt_mode=ttmode
@@ -177,7 +173,7 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
         work="work"
         focus="focus"
 
-        if type(number) is int:
+        if isinstance(number, int):
             outfile="PRL"+str(number)+".nxs"
             gssfile="PRL"+str(number)+".gss"
             outwork="PRL"+str(number)
@@ -333,20 +329,20 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
             mtd.remove(output)
 
         else:
-            print "Sorry I don't know that mode", mode
+            print("Sorry I don't know that mode", mode)
             return
 
         LoadNexus(Filename=outfile,OutputWorkspace=outwork)
 
-		# temporary nxs file to be deleted on cleanup
+                # temporary nxs file to be deleted on cleanup
         self.saved_outfile = os.path.join(config['defaultsave.directory'],outfile)
-		# temporary gss file to be deleted on cleanup
+                # temporary gss file to be deleted on cleanup
         self.saved_gssfile = os.path.join(config['defaultsave.directory'],gssfile).replace('.gss','-0.gss')
-		# name of the reference nxs file which is the same as outfile
+                # name of the reference nxs file which is the same as outfile
         self.reference_nexus = outfile.replace('PRL','PEARL')
-		# name of the reference gss file
+                # name of the reference gss file
         self.reference_gss = gssfile.replace('.gss','-0.gss').replace('PRL','PEARL')
-		# workspace to be compared with reference_nexus
+                # workspace to be compared with reference_nexus
         self.reference_workspace = outwork
 
     def PEARL_atten(self, work,outwork):
@@ -358,10 +354,13 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
         return
 
 #================================================================================
+
+
 class PEARL_Mode_trans(PEARL_Reduction):
     validate=None
+
     def do_focus(self):
-		#self.reference_nexus = "PRL75318_75323.nxs"
+                #self.reference_nexus = "PRL75318_75323.nxs"
         return self.PEARL_focus("75318_75323","raw",fmode="trans",ttmode="TT70",atten=True)
 
     def doValidation(self):
@@ -377,16 +376,20 @@ class PEARL_Mode_trans(PEARL_Reduction):
 
 #================================================================================
 #pylint: disable=too-few-public-methods
+
+
 class PEARL_Mode_all_Si(PEARL_Reduction):
     def do_focus(self):
-		#self.reference_nexus = "PRL74798_74800.nxs"
+                #self.reference_nexus = "PRL74798_74800.nxs"
         return self.PEARL_focus("74798_74800","raw",fmode="all",ttmode="TT70",atten=False)
 
 #================================================================================
 #pylint: disable=too-few-public-methods
+
+
 class PEARL_Mode_all_CeO2(PEARL_Reduction):
     def do_focus(self):
-		#self.reference_nexus = "PRL74795_74797.nxs"
+                #self.reference_nexus = "PRL74795_74797.nxs"
         return self.PEARL_focus("74795_74797","raw",fmode="all",ttmode="TT70",atten=False)
 
 #================================================================================

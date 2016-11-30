@@ -1,6 +1,7 @@
 from mantid.simpleapi import *
 import numpy as np
 
+
 def create_test_ws():
     """
     Creates data used for vesuvio tests
@@ -257,6 +258,7 @@ def create_test_ws():
     tof_ws.setE(0, arr_e_0)
     tof_ws.setE(1, arr_e_1)
     return tof_ws
+
 
 def create_test_container_ws():
     """

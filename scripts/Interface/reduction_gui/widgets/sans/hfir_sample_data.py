@@ -8,6 +8,7 @@ import ui.sans.ui_trans_direct_beam
 import ui.sans.ui_trans_spreader
 import ui.sans.ui_hfir_sample_data
 
+
 class DirectBeam(BaseWidget):
     """
         Widget for the direct beam transmission calculation options.
@@ -85,6 +86,7 @@ class DirectBeam(BaseWidget):
         fname = self.data_browse_dialog()
         if fname:
             self._content.direct_edit.setText(fname)
+
 
 class BeamSpreader(BaseWidget):
     """
@@ -194,6 +196,7 @@ class BeamSpreader(BaseWidget):
         if fname:
             self._content.direct_spread_edit.setText(fname)
 
+
 class SampleDataWidget(BaseWidget):
     """
         Widget that presents the transmission options to the user
@@ -223,7 +226,6 @@ class SampleDataWidget(BaseWidget):
 
         self._last_direct_state = None
         self._last_spreader_state = None
-
 
     def initialize_content(self):
         """
@@ -293,7 +295,6 @@ class SampleDataWidget(BaseWidget):
                     self.get_data_info()
                 else:
                     self._emit_experiment_parameters()
-
 
     def get_state(self):
         """
@@ -406,7 +407,6 @@ class SampleDataWidget(BaseWidget):
 
         spread = self._content.wavelength_spread_edit.text()
         self._settings.emit_key_value("wavelength_spread", spread)
-
 
     def get_data_info(self):
         """

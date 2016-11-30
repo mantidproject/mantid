@@ -5,6 +5,7 @@
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Unit.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 
 #include <boost/make_shared.hpp>
@@ -41,6 +42,7 @@ public:
         sqw.setPropertyValue("QAxisBinning", "0.5,0.25,2"));
     TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("EMode", "Indirect"));
     TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("EFixed", "1.84"));
+    TS_ASSERT_THROWS_NOTHING(sqw.setProperty("ReplaceNaNs", true));
     if (!method.empty())
       sqw.setPropertyValue("Method", method);
     TS_ASSERT_THROWS_NOTHING(sqw.execute());
@@ -50,6 +52,7 @@ public:
     auto result =
         dataStore.retrieveWS<Mantid::API::MatrixWorkspace>(wsname.str());
     dataStore.remove(wsname.str());
+
     return result;
   }
 
@@ -106,6 +109,23 @@ public:
 
     TS_ASSERT(isAlgorithmInHistory(*result, "SofQWPolygon"));
     // results are checked in the dedicated algorithm test
+  }
+
+  void testExecNansReplaced() {
+    auto result =
+        SofQWTest::runSQW<Mantid::Algorithms::SofQW>("NormalisedPolygon");
+    bool nanFound = false;
+
+    for (size_t i = 0; i < result->getNumberHistograms(); i++) {
+      if (std::find_if(result->y(i).begin(), result->y(i).end(), [](double v) {
+            return std::isnan(v);
+          }) != result->y(i).end()) {
+        nanFound = true;
+        break; // NaN found in workspace, no need to keep searching
+      }
+    }
+
+    TS_ASSERT(!nanFound);
   }
 
 private:

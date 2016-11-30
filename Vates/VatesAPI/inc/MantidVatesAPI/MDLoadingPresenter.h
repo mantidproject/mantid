@@ -11,10 +11,6 @@
 #include <string>
 #include <vector>
 
-namespace {
-Mantid::Kernel::Logger g_log("MDLoadingPresenter");
-}
-
 class vtkUnstructuredGrid;
 namespace Mantid {
 namespace VATES {

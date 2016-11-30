@@ -194,7 +194,7 @@ GramCharlierComptonProfile::intensityParameterIndices() const {
  */
 size_t GramCharlierComptonProfile::fillConstraintMatrix(
     Kernel::DblMatrix &cmatrix, const size_t start,
-    const std::vector<double> &errors) const {
+    const HistogramData::HistogramE &errors) const {
   std::vector<double> profile(NFINE_Y, 0.0);
   const size_t nData(ySpace().size());
   std::vector<double> result(nData, 0.0);
@@ -364,13 +364,12 @@ void GramCharlierComptonProfile::setMatrixWorkspace(
 
 /**
  * @param tseconds A vector containing the time-of-flight values in seconds
- * @param isHistogram True if histogram tof values have been passed in
  * @param detpar Structure containing detector parameters
  */
 void GramCharlierComptonProfile::cacheYSpaceValues(
-    const std::vector<double> &tseconds, const bool isHistogram,
+    const HistogramData::Points &tseconds,
     const Algorithms::DetectorParams &detpar) {
-  ComptonProfile::cacheYSpaceValues(tseconds, isHistogram,
+  ComptonProfile::cacheYSpaceValues(tseconds,
                                     detpar); // base-class calculations
 
   // Is FSE fixed at the moment?

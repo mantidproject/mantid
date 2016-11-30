@@ -2,6 +2,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
@@ -120,7 +121,7 @@ void DetectorEfficiencyCor::exec() {
   double numHists_d = static_cast<double>(numHists);
   const int64_t progStep = static_cast<int64_t>(ceil(numHists_d / 100.0));
 
-  PARALLEL_FOR2(m_inputWS, m_outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (int64_t i = 0; i < numHists; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -156,7 +157,7 @@ void DetectorEfficiencyCor::exec() {
 void DetectorEfficiencyCor::retrieveProperties() {
   // these first three properties are fully checked by validators
   m_inputWS = getProperty("InputWorkspace");
-  m_paraMap = &(m_inputWS->instrumentParameters());
+  m_paraMap = &(m_inputWS->constInstrumentParameters());
 
   m_Ei = getProperty("IncidentEnergy");
   // If we're not given an Ei, see if one has been set.

@@ -1,10 +1,11 @@
 #include "MantidQtSliceViewer/LineOverlay.h"
-#include <qwt_plot.h>
-#include <qwt_plot_canvas.h>
-#include <qpainter.h>
+#include "MantidKernel/Utils.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include <QRect>
 #include <QShowEvent>
-#include "MantidKernel/Utils.h"
+#include <qpainter.h>
+#include <qwt_plot.h>
+#include <qwt_plot_canvas.h>
 
 using namespace Mantid::Kernel;
 
@@ -116,6 +117,45 @@ void LineOverlay::setShowLine(bool shown) { m_showLine = shown; }
 void LineOverlay::setCreationMode(bool creation) {
   m_creation = creation;
   this->update();
+}
+
+/** Gets whether any of the control is visible
+ * @return whether the overlay is shown */
+bool LineOverlay::isShown() const { return m_shown; }
+
+void LineOverlay::loadFromProject(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+
+  QPointF a, b;
+  double width;
+  bool shown;
+
+  tsv.selectLine("PointA");
+  tsv >> a;
+  tsv.selectLine("PointB");
+  tsv >> b;
+  tsv.selectLine("Width");
+  tsv >> width;
+  tsv.selectLine("Shown");
+  tsv >> shown;
+
+  setPointA(a);
+  setPointB(b);
+  setWidth(width);
+  setShown(shown);
+
+  setCreationMode(false);
+}
+
+std::string LineOverlay::saveToProject() const {
+  API::TSVSerialiser tsv;
+
+  tsv.writeLine("PointA") << getPointA();
+  tsv.writeLine("PointB") << getPointB();
+  tsv.writeLine("Width") << getWidth();
+  tsv.writeLine("Shown") << isShown();
+
+  return tsv.outputLines();
 }
 
 //----------------------------------------------------------------------------------------------

@@ -7,6 +7,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidDataObjects/CoordTransformAffine.h"

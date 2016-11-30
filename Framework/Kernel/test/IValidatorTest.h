@@ -2,6 +2,7 @@
 #define MANTID_KERNEL_IVALIDATORTEST_H_
 
 #include "MantidKernel/IValidator.h"
+#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 
 namespace {

@@ -1,4 +1,5 @@
 #include "MantidMDAlgorithms/ConvertCWSDExpToMomentum.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/Instrument.h"
@@ -21,7 +22,6 @@ namespace MDAlgorithms {
 
 DECLARE_ALGORITHM(ConvertCWSDExpToMomentum)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
@@ -29,7 +29,6 @@ ConvertCWSDExpToMomentum::ConvertCWSDExpToMomentum()
       m_iMonitorCounts(4), m_iTime(5), m_setQRange(true), m_isBaseName(false),
       m_removeBackground(false) {}
 
-//----------------------------------------------------------------------------------------------
 /** Init to declare property
  */
 void ConvertCWSDExpToMomentum::init() {
@@ -280,7 +279,7 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
     try {
       float time_f = m_expDataTableWS->cell<float>(ir, m_iTime);
       time = static_cast<double>(time_f);
-    } catch (std::runtime_error) {
+    } catch (const std::runtime_error &) {
       time = m_expDataTableWS->cell<double>(ir, m_iTime);
     }
 

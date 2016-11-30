@@ -2,7 +2,6 @@
 #define GETALLEI_TEST_H_
 
 #include <memory>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/GetAllEi.h"
 #include "MantidGeometry/Instrument.h"
@@ -443,8 +442,8 @@ public:
     auto Xsp2 = wws->getSpectrum(1).mutableX();
     size_t nSpectra = Xsp2.size();
     TS_ASSERT_EQUALS(nSpectra, 101);
-    TS_ASSERT(boost::math::isinf(Xsp1[nSpectra - 1]));
-    TS_ASSERT(boost::math::isinf(Xsp2[nSpectra - 1]));
+    TS_ASSERT(std::isinf(Xsp1[nSpectra - 1]));
+    TS_ASSERT(std::isinf(Xsp2[nSpectra - 1]));
 
     // for(size_t i=0;i<Xsp1.size();i++){
     //  TS_ASSERT_DELTA(Xsp1[i],Xsp2[i],1.e-6);

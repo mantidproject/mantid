@@ -57,13 +57,6 @@ void ReflectometryWorkflowBase::initWavelengthInputs() {
                       Direction::Input),
                   "Wavelength maximum in angstroms");
 
-  declareProperty(
-      make_unique<PropertyWithValue<double>>(
-          "WavelengthStep", 0.02,
-          boost::make_shared<MandatoryValidator<double>>(), Direction::Input),
-      "Wavelength rebinning step in angstroms. Defaults to 0.02. Used for "
-      "rebinning intermediate workspaces converted into wavelength.");
-
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
                       Direction::Input),
@@ -407,14 +400,12 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase::toLamMonitor(
  * toConvert workspace.
  * @param toConvert : TOF wavelength to convert.
  * @param wavelengthMinMax : Wavelength minmax to keep. Crop out the rest.
- * @param wavelengthStep : Wavelength step for rebinning
  * @return Detector workspace in wavelength
  */
 MatrixWorkspace_sptr
 ReflectometryWorkflowBase::toLamDetector(const std::string &processingCommands,
                                          const MatrixWorkspace_sptr &toConvert,
-                                         const MinMax &wavelengthMinMax,
-                                         const double &wavelengthStep) {
+                                         const MinMax &wavelengthMinMax) {
 
   auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
   convertUnitsAlg->initialize();
@@ -443,14 +434,6 @@ ReflectometryWorkflowBase::toLamDetector(const std::string &processingCommands,
   cropWorkspaceAlg->setProperty("XMax", wavelengthMinMax.get<1>());
   cropWorkspaceAlg->execute();
   detectorWS = cropWorkspaceAlg->getProperty("OutputWorkspace");
-
-  auto rebinWorkspaceAlg = this->createChildAlgorithm("Rebin");
-  rebinWorkspaceAlg->initialize();
-  std::vector<double> params = {wavelengthStep};
-  rebinWorkspaceAlg->setProperty("Params", params);
-  rebinWorkspaceAlg->setProperty("InputWorkspace", detectorWS);
-  rebinWorkspaceAlg->execute();
-  detectorWS = rebinWorkspaceAlg->getProperty("OutputWorkspace");
 
   return detectorWS;
 }
@@ -481,7 +464,6 @@ ReflectometryWorkflowBase::makeUnityWorkspace(const std::vector<double> &x) {
  * @param wavelengthMinMax : Wavelength min max for detector workspace
  * @param backgroundMinMax : Wavelength min max for flat background correction
  * of monitor workspace
- * @param wavelengthStep : Wavlength step size for rebinning.
  * @return Tuple of detector and monitor workspaces
  */
 ReflectometryWorkflowBase::DetectorMonitorWorkspacePair
@@ -489,11 +471,10 @@ ReflectometryWorkflowBase::toLam(MatrixWorkspace_sptr toConvert,
                                  const std::string &processingCommands,
                                  const OptionalInteger monitorIndex,
                                  const MinMax &wavelengthMinMax,
-                                 const OptionalMinMax &backgroundMinMax,
-                                 const double &wavelengthStep) {
+                                 const OptionalMinMax &backgroundMinMax) {
   // Detector Workspace Processing
-  MatrixWorkspace_sptr detectorWS = toLamDetector(
-      processingCommands, toConvert, wavelengthMinMax, wavelengthStep);
+  MatrixWorkspace_sptr detectorWS =
+      toLamDetector(processingCommands, toConvert, wavelengthMinMax);
 
   MatrixWorkspace_sptr monitorWS;
   if (monitorIndex.is_initialized() && backgroundMinMax.is_initialized()) {

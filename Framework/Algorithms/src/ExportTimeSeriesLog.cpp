@@ -2,6 +2,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IEventList.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -28,7 +29,6 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(ExportTimeSeriesLog)
 
-//----------------------------------------------------------------------------------------------
 /** Definition of all input arguments
  */
 void ExportTimeSeriesLog::init() {
@@ -73,7 +73,6 @@ void ExportTimeSeriesLog::init() {
                                             "is Workspace2D.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Main execution
  */
 void ExportTimeSeriesLog::exec() {
@@ -295,7 +294,7 @@ void ExportTimeSeriesLog::setupEventWorkspace(
         "Output workspace cannot be casted to a MatrixWorkspace.");
 
   // Create the output event list (empty)
-  EventList &outEL = outEventWS->getOrAddEventList(0);
+  EventList &outEL = outEventWS->getSpectrum(0);
   outEL.switchTo(WEIGHTED_NOTIME);
 
   // Allocate all the required memory

@@ -27,26 +27,26 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "MantidQtAPI/qwt_compat.h"
 #include "Plot.h"
 #include "Graph.h"
 #include "Grid.h"
-#include "ScaleDraw.h"
-#include "Spectrogram.h"
-#include "PlotCurve.h"
 #include "LegendWidget.h"
 #include "MantidQtAPI/ScaleEngine.h"
+#include "MantidQtAPI/qwt_compat.h"
+#include "PlotCurve.h"
+#include "ScaleDraw.h"
+#include "Spectrogram.h"
 
-#include <qwt_plot.h>
 #include <qwt_painter.h>
+#include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_plot_layout.h>
-#include <qwt_scale_widget.h>
 #include <qwt_scale_map.h>
+#include <qwt_scale_widget.h>
 #include <qwt_text_label.h>
 
-#include <QPainter>
 #include <QMessageBox>
+#include <QPainter>
 
 #include <limits>
 
@@ -503,7 +503,7 @@ int Plot::closestCurve(int xpos, int ypos, int &dist, int &point) {
       PlotCurve *c = static_cast<PlotCurve *>(item);
       DataCurve *dc = dynamic_cast<DataCurve *>(item);
       if (dc) {
-        if (c->type() != Graph::Function && dc->hasLabels() &&
+        if (c->type() != GraphOptions::Function && dc->hasLabels() &&
             dc->selectedLabels(QPoint(xpos, ypos))) {
           dist = 0;
           return iter.key();
@@ -515,7 +515,7 @@ int Plot::closestCurve(int xpos, int ypos, int &dist, int &point) {
         double cx = map[c->xAxis()].xTransform(c->x(i)) - double(xpos);
         double cy = map[c->yAxis()].xTransform(c->y(i)) - double(ypos);
         double f = qwtSqr(cx) + qwtSqr(cy);
-        if (f < dmin && c->type() != Graph::ErrorBars) {
+        if (f < dmin && c->type() != GraphOptions::ErrorBars) {
           dmin = f;
           key = iter.key();
           point = i;
@@ -691,7 +691,7 @@ void Plot::updateCurveLabels() {
   foreach (QwtPlotItem *i, curves) {
     DataCurve *dc = dynamic_cast<DataCurve *>(i);
     if (dc && i->rtti() != QwtPlotItem::Rtti_PlotSpectrogram &&
-        dc->type() != Graph::Function && dc->hasLabels())
+        dc->type() != GraphOptions::Function && dc->hasLabels())
       dc->updateLabelsPosition();
   }
 }

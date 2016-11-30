@@ -33,7 +33,6 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
 
 #include <boost/tuple/tuple.hpp>
 #include <map>
@@ -44,20 +43,22 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+using RowData = std::vector<std::string>;
+using GroupData = std::map<int, RowData>;
+using TreeData = std::map<int, GroupData>;
+
 std::vector<std::string> DLLExport
 splitByCommas(const std::string &names_string);
 
 std::string DLLExport plot1DString(const std::vector<std::string> &ws_names);
 
-std::string DLLExport tableString(QDataProcessorTreeModel_sptr model,
-                                  const DataProcessorWhiteList &whitelist,
-                                  const std::map<int, std::set<int>> &rows);
+std::string DLLExport
+tableString(const TreeData &treeData, const DataProcessorWhiteList &whitelist);
 
 std::string DLLExport titleString(const std::string &wsName);
 
 boost::tuple<std::string, std::string> DLLExport postprocessGroupString(
-    int group, const std::set<int> &rows, QDataProcessorTreeModel_sptr model,
-    const DataProcessorWhiteList &whitelist,
+    const GroupData &rowMap, const DataProcessorWhiteList &whitelist,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::string &postprocessingOptions);
@@ -68,14 +69,13 @@ plotsString(const std::vector<std::string> &output_ws,
             const DataProcessorProcessingAlgorithm &processor);
 
 std::string DLLExport
-getReducedWorkspaceName(int groupNo, int rowNo,
-                        QDataProcessorTreeModel_sptr model,
+getReducedWorkspaceName(const RowData &data,
                         const DataProcessorWhiteList &whitelist,
                         const std::string &prefix = "");
 
 boost::tuple<std::string, std::string> DLLExport reduceRowString(
-    const int groupNo, const int rowNo, const std::string &instrument,
-    QDataProcessorTreeModel_sptr model, const DataProcessorWhiteList &whitelist,
+    const RowData &data, const std::string &instrument,
+    const DataProcessorWhiteList &whitelist,
     const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
         preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
@@ -103,8 +103,8 @@ class DLLExport DataProcessorGenerateNotebook {
 
 public:
   DataProcessorGenerateNotebook(
-      std::string name, QDataProcessorTreeModel_sptr model,
-      const std::string instrument, const DataProcessorWhiteList &whitelist,
+      std::string name, const std::string instrument,
+      const DataProcessorWhiteList &whitelist,
       const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
           preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
@@ -114,14 +114,11 @@ public:
       const std::string postprocessingInstructions);
   virtual ~DataProcessorGenerateNotebook(){};
 
-  std::string generateNotebook(const std::set<int> &groups,
-                               const std::map<int, std::set<int>> &rows);
+  std::string generateNotebook(const TreeData &data);
 
 private:
   // The table ws name
   std::string m_wsName;
-  // The model
-  QDataProcessorTreeModel_sptr m_model;
   // The instrument
   const std::string m_instrument;
   // The whitelist defining the number of columns, their names and how they

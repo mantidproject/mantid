@@ -2,14 +2,14 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
-#include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
-#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
+#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
@@ -21,9 +21,14 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include "MantidHistogramData/HistogramX.h"
+#include "MantidHistogramData/Interpolate.h"
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::interpolateLinearInplace;
 namespace PhysicalConstants = Mantid::PhysicalConstants;
 
 /// @cond
@@ -38,17 +43,6 @@ inline double toWavelength(double energy) {
       1e10 * PhysicalConstants::h /
       sqrt(2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV);
   return factor / sqrt(energy);
-}
-
-/// Get ith wavelength point for point data
-/// Assumes all checks on sizes have been done before calling
-double getWavelengthPointData(int i, const std::vector<double> &lambdas) {
-  return lambdas[i];
-}
-
-/// Get ith wavelength point for histogram data
-double getWavelengthHistogramData(int i, const std::vector<double> &lambdas) {
-  return 0.5 * (lambdas[i] + lambdas[i + 1]);
 }
 
 struct EFixedProvider {
@@ -163,25 +157,14 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
 
   // Configure strategy
   MCAbsorptionStrategy strategy(*beamProfile, inputWS.sample(), nevents);
-  typedef double (*LambdaPointProvider)(int, const std::vector<double> &);
-  LambdaPointProvider lambda;
-  if (inputWS.isHistogramData()) {
-    lambda = &getWavelengthHistogramData;
-  } else {
-    lambda = &getWavelengthPointData;
-  }
 
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < nhists; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    const auto &xvalues = outputWS->readX(i);
-    auto &signal = outputWS->dataY(i);
-    auto &errors = outputWS->dataE(i);
+    auto &outE = outputWS->mutableE(i);
     // The input was cloned so clear the errors out
-    // Y values are all overwritten later
-    std::fill(errors.begin(), errors.end(), 0.0);
-
+    outE = 0.0;
     // Final detector position
     IDetector_const_sptr detector;
     try {
@@ -194,10 +177,12 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     const double lambdaFixed = toWavelength(efixed.value(detector));
     MersenneTwister rng(seed);
 
+    auto &outY = outputWS->mutableY(i);
+    const auto lambdas = outputWS->points(i);
     // Simulation for each requested wavelength point
     for (int j = 0; j < nbins; j += lambdaStepSize) {
       prog.report(reportMsg);
-      const double lambdaStep = lambda(j, xvalues);
+      const double lambdaStep = lambdas[j];
       double lambdaIn(lambdaStep), lambdaOut(lambdaStep);
       if (efixed.emode() == DeltaEMode::Direct) {
         lambdaIn = lambdaFixed;
@@ -206,7 +191,7 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
       } else {
         // elastic case already initialized
       }
-      std::tie(signal[j], std::ignore) =
+      std::tie(outY[j], std::ignore) =
           strategy.calculate(rng, detPos, lambdaIn, lambdaOut);
 
       // Ensure we have the last point for the interpolation
@@ -217,8 +202,9 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
 
     // Interpolate through points not simulated
     if (lambdaStepSize > 1) {
-      Kernel::VectorHelper::linearlyInterpolateY(xvalues, signal,
-                                                 lambdaStepSize);
+      auto histnew = outputWS->histogram(i);
+      interpolateLinearInplace(histnew, lambdaStepSize);
+      outputWS->setHistogram(i, histnew);
     }
 
     PARALLEL_END_INTERUPT_REGION

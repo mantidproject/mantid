@@ -81,6 +81,11 @@ public:
 
   bool isRebinnedSourceBeingTracked(pqPipelineSource *source);
 
+  /// Save the state of the manager to a Mantid project file
+  std::string saveToProject();
+  /// Load the state of the manager from a Mantid project file
+  void loadFromProject(const std::string &lines);
+
 signals:
   void switchSources(std::string rebinnedWorkspaceName, std::string sourceType);
 

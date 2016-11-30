@@ -4,8 +4,9 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/LoadNexusMonitors.h"
 #include "MantidDataHandling/LoadNexusMonitors2.h"
-#include "MantidAPI/Sample.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidDataObjects/EventWorkspace.h"

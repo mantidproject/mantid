@@ -1,11 +1,13 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/GoniometerAnglesFromPhiRotation.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::Logger;
@@ -21,8 +23,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-
-//--------------------------------------------------------------------------
 
 void GoniometerAnglesFromPhiRotation::init() {
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(

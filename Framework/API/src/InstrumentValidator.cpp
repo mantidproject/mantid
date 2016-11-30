@@ -2,6 +2,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Strings.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace API {

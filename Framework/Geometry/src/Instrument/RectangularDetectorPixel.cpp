@@ -48,17 +48,15 @@ const Kernel::V3D RectangularDetectorPixel::getRelativePos() const {
   // Calculate the x,y position
   double x = m_panel->xstart() + double(m_col) * m_panel->xstep();
   double y = m_panel->ystart() + double(m_row) * m_panel->ystep();
-
   // The parent m_panel is always the unparametrized version,
   // so the xstep() etc. returned are the UNSCALED one.
   if (m_map) {
     // Apply the scaling factors
-    if (m_map->contains(m_panel, "scalex"))
-      x *= m_map->get(m_panel, "scalex")->value<double>();
-    if (m_map->contains(m_panel, "scaley"))
-      y *= m_map->get(m_panel, "scaley")->value<double>();
+    if (auto scalex = m_map->get(m_panel, "scalex"))
+      x *= scalex->value<double>();
+    if (auto scaley = m_map->get(m_panel, "scaley"))
+      y *= scaley->value<double>();
   }
-
   return V3D(x, y, 0);
 }
 

@@ -1,16 +1,24 @@
 #ifndef MANTID_GEOMETRY_INSTRUMENT_NEARESTNEIGHBOURS
 #define MANTID_GEOMETRY_INSTRUMENT_NEARESTNEIGHBOURS
 
-#include "MantidGeometry/Instrument/INearestNeighbours.h"
+#include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/V3D.h"
+// Boost graphing
+#ifndef Q_MOC_RUN
+#include <boost/graph/adjacency_list.hpp>
+#include <unordered_map>
+#include <boost/shared_ptr.hpp>
+#endif
 
 namespace Mantid {
-namespace Kernel {
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
-class V3D;
-}
 namespace Geometry {
+
+class Instrument;
+class IDetector;
+
+typedef std::unordered_map<specnum_t, std::set<detid_t>>
+    ISpectrumDetectorMapping;
 
 /**
  * This class is used to find the nearest neighbours of a detector in the
@@ -50,30 +58,29 @@ namespace Geometry {
  *  File change history is stored at: <https://github.com/mantidproject/mantid>
  *  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_GEOMETRY_DLL NearestNeighbours : public INearestNeighbours {
+class MANTID_GEOMETRY_DLL NearestNeighbours {
 public:
   /// Constructor with an instrument and a spectra map
   NearestNeighbours(boost::shared_ptr<const Instrument> instrument,
                     const ISpectrumDetectorMapping &spectraMap,
-                    bool ignoreMaskedDetectors = true);
+                    bool ignoreMaskedDetectors = false);
 
   /// Constructor with an instrument and a spectra map and number of neighbours
   NearestNeighbours(int nNeighbours,
                     boost::shared_ptr<const Instrument> instrument,
                     const ISpectrumDetectorMapping &spectraMap,
-                    bool ignoreMaskedDetectors = true);
+                    bool ignoreMaskedDetectors = false);
 
   // Neighbouring spectra by radius
   std::map<specnum_t, Mantid::Kernel::V3D>
-  neighboursInRadius(specnum_t spectrum, double radius = 0.0) const override;
+  neighboursInRadius(specnum_t spectrum, double radius = 0.0) const;
 
   // Neighbouring spectra by
-  std::map<specnum_t, Mantid::Kernel::V3D>
-  neighbours(specnum_t spectrum) const override;
+  std::map<specnum_t, Mantid::Kernel::V3D> neighbours(specnum_t spectrum) const;
 
 protected:
   /// Get the spectra associated with all in the instrument
-  std::map<specnum_t, IDetector_const_sptr>
+  std::map<specnum_t, boost::shared_ptr<const IDetector>>
   getSpectraDetectors(boost::shared_ptr<const Instrument> instrument,
                       const ISpectrumDetectorMapping &spectraMap);
 
@@ -113,7 +120,7 @@ private:
   /// property map holding the edge's related Distance value.
   boost::property_map<Graph, boost::edge_name_t>::type m_edgeLength;
   /// V3D for scaling
-  boost::scoped_ptr<Kernel::V3D> m_scale;
+  Kernel::V3D m_scale;
   /// Cached radius value. used to avoid uncessary recalculations.
   mutable double m_radius;
   /// Flag indicating that masked detectors should be ignored

@@ -117,6 +117,8 @@ public:
   double getPropertyAsSingleValue(
       const std::string &name,
       Kernel::Math::StatisticType statistic = Kernel::Math::Mean) const;
+  /// Returns a property as an integer value
+  int getPropertyAsIntegerValue(const std::string &name) const;
   /// Returns the named property as a pointer
   Kernel::Property *getProperty(const std::string &name) const;
 

@@ -198,10 +198,6 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
   // Fresh start
   this->clear(true);
 
-  // Cached values for later checks
-  double inf = std::numeric_limits<double>::infinity();
-  double ninf = -inf;
-
   // Get the input histogram
   const MantidVec &X = inSpec->readX();
   const MantidVec &Y = inSpec->readY();
@@ -219,12 +215,10 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
 
   for (size_t i = 0; i < X.size() - 1; i++) {
     double weight = Y[i];
-    if ((weight != 0.0 || GenerateZeros) && (weight == weight) /*NAN check*/
-        && (weight != inf) && (weight != ninf)) {
+    if ((weight != 0.0 || GenerateZeros) && std::isfinite(weight)) {
       double error = E[i];
       // Also check that the error is not a bad number
-      if ((error == error) /*NAN check*/
-          && (error != inf) && (error != ninf)) {
+      if (std::isfinite(error)) {
         if (GenerateMultipleEvents) {
           // --------- Multiple events per bin ----------
           double errorSquared = error * error;
@@ -1407,7 +1401,7 @@ size_t EventList::histogram_size() const {
 }
 
 // ==============================================================================================
-// --- Setting the Histrogram X axis, without recalculating the histogram
+// --- Setting the Histogram X axis, without recalculating the histogram
 // -----------------------
 // ==============================================================================================
 
@@ -2219,6 +2213,48 @@ void EventList::generateCountsHistogramPulseTime(const MantidVec &X,
       ++itev;
     }
   } // end if (there are any events to histogram)
+}
+
+/** With respect to PulseTime fill a histogram given equal histogram
+*   bins.
+* Number of bins is equal to number of elements in vector Y.
+* Appends values to existing Y values.
+*
+* @param xMin :: Minimal Pulse time (in nanoseconds,
+*                i.e. DateTime->totalNanoseconds()) value to include
+*                in binning.
+* @param xMax :: Maximal Pulse time value to constrain binning by (include the
+*                times smaller than right boundary, excluding equal)
+* @param Y :: The generated counts histogram
+* @param TOF_min -- min TOF to include in histogram.
+* @param TOF_max -- max TOF to constrain values included in histogram.
+*/
+void EventList::generateCountsHistogramPulseTime(const double &xMin,
+                                                 const double &xMax,
+                                                 MantidVec &Y,
+                                                 const double TOF_min,
+                                                 const double TOF_max) const {
+
+  if (this->events.empty())
+    return;
+
+  size_t nBins = Y.size();
+
+  if (nBins == 0)
+    return;
+
+  double step = (xMax - xMin) / static_cast<double>(nBins);
+
+  for (const TofEvent &ev : this->events) {
+    double pulsetime = static_cast<double>(ev.pulseTime().totalNanoseconds());
+    if (pulsetime < xMin || pulsetime >= xMax)
+      continue;
+    if (ev.tof() < TOF_min || ev.tof() >= TOF_max)
+      continue;
+
+    size_t n_bin = static_cast<size_t>((pulsetime - xMin) / step);
+    Y[n_bin]++;
+  }
 }
 
 // --------------------------------------------------------------------------
@@ -3106,6 +3142,56 @@ DateAndTime EventList::getPulseTimeMax() const {
   return tMax;
 }
 
+void EventList::getPulseTimeMinMax(Mantid::Kernel::DateAndTime &tMin,
+                                   Mantid::Kernel::DateAndTime &tMax) const {
+  // set up as the minimum available date time.
+  tMax = DateAndTime::minimum();
+  tMin = DateAndTime::maximum();
+
+  // no events is a soft error
+  if (this->empty())
+    return;
+
+  // when events are ordered by pulse time just need the first/last values
+  if (this->order == PULSETIME_SORT) {
+    switch (eventType) {
+    case TOF:
+      tMin = this->events.begin()->pulseTime();
+      tMax = this->events.rbegin()->pulseTime();
+      return;
+    case WEIGHTED:
+      tMin = this->weightedEvents.begin()->pulseTime();
+      tMax = this->weightedEvents.rbegin()->pulseTime();
+      return;
+    case WEIGHTED_NOTIME:
+      tMin = this->weightedEventsNoTime.begin()->pulseTime();
+      tMax = this->weightedEventsNoTime.rbegin()->pulseTime();
+      return;
+    }
+  }
+
+  // now we are stuck with a linear search
+  size_t numEvents = this->getNumberEvents();
+  DateAndTime temp = tMax; // start with the smallest possible value
+  for (size_t i = 0; i < numEvents; i++) {
+    switch (eventType) {
+    case TOF:
+      temp = this->events[i].pulseTime();
+      break;
+    case WEIGHTED:
+      temp = this->weightedEvents[i].pulseTime();
+      break;
+    case WEIGHTED_NOTIME:
+      temp = this->weightedEventsNoTime[i].pulseTime();
+      break;
+    }
+    if (temp > tMax)
+      tMax = temp;
+    if (temp < tMin)
+      tMin = temp;
+  }
+}
+
 DateAndTime EventList::getTimeAtSampleMax(const double &tofFactor,
                                           const double &tofOffset) const {
   // set up as the minimum available date time.
@@ -3422,7 +3508,7 @@ void EventList::multiplyHistogramHelper(std::vector<T> &events,
     while (bin < x_size - 1) {
       // Event is Within range?
       if ((tof >= X[bin]) && (tof < X[bin + 1])) {
-        // Process this event. Multilpy and calculate error.
+        // Process this event. Multiply and calculate error.
         itev->m_errorSquared =
             static_cast<float>(itev->m_errorSquared * valueSquared +
                                errorSquared * itev->m_weight * itev->m_weight);

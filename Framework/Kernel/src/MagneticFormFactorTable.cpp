@@ -8,15 +8,11 @@ namespace PhysicalConstants {
  * Constructs the table for the given ion, J & L
  * @param length :: scattering length
  * @param ion :: A reference to the required ion
- * @param j :: The total angular momentum
- * @param l :: The orbital angular momentum
  */
 MagneticFormFactorTable::MagneticFormFactorTable(const size_t length,
-                                                 const MagneticIon &ion,
-                                                 const uint16_t j,
-                                                 const uint16_t l)
+                                                 const MagneticIon &ion)
     : m_length(length), m_lookup(length, 0.0), m_delta(0.0) {
-  setup(ion, j, l);
+  setup(ion);
 }
 
 /**
@@ -39,20 +35,18 @@ double MagneticFormFactorTable::value(const double qsqr) const {
 //-------------------------------------------------------------------------------------------------------
 
 /**
- * Setup the table with the values for the given ion, J & L.
+ * Setup the (dipole approximation) form factor table with the
+ * values for the given ion.
  * @param ion :: A reference to the required ion
- * @param j :: The total angular momentum
- * @param l :: The orbital angular momentum
  */
-void MagneticFormFactorTable::setup(const MagneticIon &ion, const uint16_t j,
-                                    const uint16_t l) {
+void MagneticFormFactorTable::setup(const MagneticIon &ion) {
   const size_t length = m_length;
-  const double qsqrMax = MagneticIon::formFactorCutOff(j, l);
+  const double qsqrMax = MagneticIon::formFactorCutOff();
   m_delta = qsqrMax / static_cast<double>(length);
 
   for (size_t i = 0; i < length; ++i) {
     const double qsqr = m_delta * static_cast<double>(i);
-    m_lookup[i] = ion.analyticalFormFactor(qsqr, j, l);
+    m_lookup[i] = ion.analyticalFormFactor(qsqr);
   }
 }
 

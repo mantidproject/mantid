@@ -258,7 +258,7 @@ public:
    * This test loads and sums 2 IN4 runs from ILL
    * without instrument prefix in the file names.
    */
-  void test_ILLLoadMultipleFilesNoPrefix() {
+  void test_ILLINXLoadMultipleFilesNoPrefix() {
 
     ConfigService::Instance().setString("default.instrument", "IN4");
     ConfigService::Instance().appendDataSearchSubDir("ILL/IN4/");

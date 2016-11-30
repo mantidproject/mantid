@@ -46,6 +46,10 @@ public:
                              const bool on);
   void addPeaksModeRequest(PeaksWorkspaceWidget const *const originWidget,
                            const bool on);
+  /// Load the state of the peaks viewer from a Mantid project file
+  void loadFromProject(const std::string &lines);
+  /// Save the state of the peaks viewer to a Mantid project file
+  std::string saveToProject() const;
 
 public slots:
   void onPeakColorChanged(Mantid::API::IPeaksWorkspace_const_sptr,
@@ -63,6 +67,22 @@ public slots:
   void showPeaksTableColumnOptions();
 
 private:
+  /// Get visible columns on the peaks viewer
+  std::set<QString> getVisibleColumns() const;
+  /// Set visible columns on the peaks viewer
+  void setVisibleColumns(const std::set<QString> &columns);
+  /// Show a dialog to choose visible columns
+  std::set<QString>
+  chooseVisibleColumnsFromDialog(const std::set<QString> &columns);
+  /// Get a peaks workspaces from the ADS
+  Mantid::API::IPeaksWorkspace_const_sptr
+  getPeaksWorkspace(const std::string &name) const;
+  /// Load a presented peaks workspace and settings from a project file
+  void loadPresentedWorkspace(const std::string &section);
+  /// Save a presented peaks workspace and settings to a project file
+  std::string
+  savePresentedWorkspace(Mantid::API::IPeaksWorkspace_const_sptr ws) const;
+
   boost::shared_ptr<ProxyCompositePeaksPresenter> m_presenter;
 };
 

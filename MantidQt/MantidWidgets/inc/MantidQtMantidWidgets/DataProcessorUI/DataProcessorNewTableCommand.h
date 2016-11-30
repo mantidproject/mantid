@@ -41,6 +41,11 @@ public:
   };
   std::string name() override { return std::string("New Table"); }
   std::string icon() override { return std::string("://new.png"); }
+  std::string tooltip() override { return std::string("New Table"); }
+  std::string whatsthis() override {
+    return std::string("Loads a blank table into the interface");
+  }
+  std::string shortcut() override { return std::string(); }
 };
 }
 }

@@ -41,7 +41,7 @@ Note: it is not possible to use this :ref:`algorithm <algorithm>` to
 correct for the detector efficiency alone. One solution to this is to
 divide the output of the algorithm by :math:`k_i/k_f` calculated as above.
 
-See also :ref:`algm-DetectorEfficiencyCorUsr` algorithm, which may provide
+See also :ref:`algm-DetectorEfficiencyCorUser` algorithm, which may provide
 more instrument specific efficiency corrections.
 
 Usage

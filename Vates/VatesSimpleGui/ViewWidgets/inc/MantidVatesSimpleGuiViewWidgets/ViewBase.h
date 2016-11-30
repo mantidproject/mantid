@@ -23,6 +23,7 @@ namespace Mantid {
 namespace Vates {
 namespace SimpleGui {
 
+class ModeControlWidget;
 class ColorSelectionWidget;
 class RebinnedSourcesManager;
 
@@ -147,6 +148,10 @@ public:
       origRep; ///< The original source representation
   /// Has active source
   bool hasActiveSource();
+  /// Set the underlying view directly
+  virtual void setView(pqRenderView *view) = 0;
+  /// Get the view type of the current widget
+  virtual ModeControlWidget::Views getViewType() = 0;
 
 public slots:
   /// Set the color scale back to the original bounds.
@@ -241,6 +246,8 @@ protected:
 
   /// Set the Axes Grid
   void setAxesGrid();
+  /// Clear the render layout completely
+  void clearRenderLayout(QFrame *frame);
 
 private:
   Q_DISABLE_COPY(ViewBase)

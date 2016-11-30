@@ -26,11 +26,14 @@ MaxentEntropyPositiveValues::derivative(const std::vector<double> &values,
 /**
 * Returns the second derivative at a given point.
 * @param values : [input] The values of the image as a vector
+* @param background : [input] The background (unused)
 * @return : The second derivative as a vector
 */
-std::vector<double> MaxentEntropyPositiveValues::secondDerivative(
-    const std::vector<double> &values) {
+std::vector<double>
+MaxentEntropyPositiveValues::secondDerivative(const std::vector<double> &values,
+                                              double background) {
 
+  UNUSED_ARG(background);
   // This is referred to as 'second derivative' in the paper, but in the codes
   // I've seen is just the input vector
   return values;

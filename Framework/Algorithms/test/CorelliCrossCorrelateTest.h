@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/CorelliCrossCorrelate.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"

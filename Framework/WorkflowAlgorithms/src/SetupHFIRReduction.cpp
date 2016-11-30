@@ -206,10 +206,7 @@ void SetupHFIRReduction::init() {
 
   // Transmission
   std::string trans_grp = "Transmission";
-  std::vector<std::string> transOptions;
-  transOptions.emplace_back("Value");
-  transOptions.emplace_back("DirectBeam");
-  transOptions.emplace_back("BeamSpreader");
+  std::vector<std::string> transOptions{"Value", "DirectBeam", "BeamSpreader"};
   declareProperty("TransmissionMethod", "Value",
                   boost::make_shared<StringListValidator>(transOptions),
                   "Transmission determination method");

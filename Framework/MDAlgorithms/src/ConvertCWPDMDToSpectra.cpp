@@ -5,6 +5,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument.h"
@@ -22,7 +23,6 @@ DECLARE_ALGORITHM(ConvertCWPDMDToSpectra)
 
 const double BIGNUMBER = 1.0E100;
 
-//----------------------------------------------------------------------------------------------
 void ConvertCWPDMDToSpectra::init() {
 
   declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
@@ -76,7 +76,6 @@ void ConvertCWPDMDToSpectra::init() {
                   "is applied to the case that the bin size is small. ");
 }
 
-//----------------------------------------------------------------------------------------------
 void ConvertCWPDMDToSpectra::exec() {
   // Process input workspaces
   // input data workspace

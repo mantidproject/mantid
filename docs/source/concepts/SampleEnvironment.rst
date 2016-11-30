@@ -21,7 +21,7 @@ A sample environment is defined by:
   geometry and composition.
 
 At a minimum a sample environment is expected to define a container with both its
-geometry and composition. 
+geometry and composition.
 
 XML Definition File
 -------------------
@@ -51,7 +51,7 @@ structure with a single container would have the following form:
     </environmentspec>
 
 The geometry of both the sample and container are defined using the same syntax
-used in the instrument definition files to define detector shapes. See 
+used in the instrument definition files to define detector shapes. See
 :ref:`here <HowToDefineGeometricShape>` for detail on defining shapes in XML.
 
 Multiple containers container be specified in the definition. The correct container for a run
@@ -112,7 +112,7 @@ example, a heat shield container be added to the above definition like so:
        <component id="heat-shield" material="aluminium">
         <geometry>
          <!-- geometry of sheild-->
-        </geometry>       
+        </geometry>
        </component>
       </components>
     </environmentspec>
@@ -120,3 +120,5 @@ example, a heat shield container be added to the above definition like so:
 A new material, ``aluminium`` has been added to the materials list and the heat shield
 is defined as an arbitrary :xml:`component`. The :xml:`component` tag behaves in a similar fashion to
 the :xml:`container` tag with the exception that it container not contain a :xml:`samplegeometry`.
+
+.. categories:: Concepts

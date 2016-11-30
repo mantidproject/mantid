@@ -16,8 +16,8 @@ substantial.
 The sample chemical formula is input for the :ref:`SetSampleMaterial
 <algm-SetSampleMaterial>` algorithm to calculate the cross-sections. The
 instrument analyser reflection is selected to obtain the wavelength of the
-elastic peak to calculate the absorption cross-section. The sample number
-density & thickness is input to then calculate the percentage scattering &
+elastic peak to calculate the absorption cross-section. The sample mass
+density/number density & thickness is input to then calculate the percentage scattering &
 transmission.
 
 Usage
@@ -43,16 +43,16 @@ Output:
     Coherent Xsection : 5.551
     Incoherent Xsection : 0.001
     Total scattering Xsection : 5.552
-    Number density : 0.1
+    Number density : 0.00501398069222
     Thickness : 0.1
-    Transmission (abs+scatt) : 0.945870519609
-    Total scattering : 0.0540068963808
+    Transmission (abs+scatt) : 0.997213629421
+    Total scattering : 0.00277989100754
 
 **Example - Running IndirectTransmission with a specified number density and thickness.**
 
 .. testcode:: ExIndirectTransmissionParams
 
-    table_ws = IndirectTransmission(Instrument='OSIRIS', NumberDensity=0.5, Thickness=0.3, ChemicalFormula="C")
+    table_ws = IndirectTransmission(Instrument='OSIRIS', DensityType='Number Density', Density=0.5, Thickness=0.3, ChemicalFormula="C")
     param_names = table_ws.column(0)
     param_values = table_ws.column(1)
 

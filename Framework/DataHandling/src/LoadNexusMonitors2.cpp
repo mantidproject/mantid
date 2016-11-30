@@ -1,12 +1,10 @@
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include "MantidDataHandling/LoadNexusMonitors2.h"
 
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"

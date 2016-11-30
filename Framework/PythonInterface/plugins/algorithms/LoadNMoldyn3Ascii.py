@@ -13,6 +13,7 @@ import numpy as np
 
 #==============================================================================
 
+
 def _find_starts(data, c, l1):
     for l in range(l1, len(data)):
         char = data[l]
@@ -22,6 +23,7 @@ def _find_starts(data, c, l1):
     return line
 
 #==============================================================================
+
 
 def _find_tab_starts(data, c, l1):
     for l in range(l1, len(data)):
@@ -33,6 +35,7 @@ def _find_tab_starts(data, c, l1):
 
 #==============================================================================
 
+
 def _find_ends(data, c, l1):
     for l in range(l1, len(data)):
         char = data[l]
@@ -43,6 +46,7 @@ def _find_ends(data, c, l1):
 
 #==============================================================================
 
+
 def _make_list(a, l1, l2):
     data = ''
     for m in range(l1, l2 + 1):
@@ -51,6 +55,7 @@ def _make_list(a, l1, l2):
     return alist
 
 #==============================================================================
+
 
 def _cdl_find_dimensions(data):
     """
@@ -77,6 +82,7 @@ def _cdl_find_dimensions(data):
     return num_q, num_t, num_f
 
 #==============================================================================
+
 
 class LoadNMoldyn3Ascii(PythonAlgorithm):
 

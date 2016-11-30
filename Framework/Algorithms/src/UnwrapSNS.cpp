@@ -1,9 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/UnwrapSNS.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -32,7 +30,7 @@ using std::size_t;
 /// Default constructor
 UnwrapSNS::UnwrapSNS()
     : m_conversionConstant(0.), m_inputWS(), m_inputEvWS(), m_LRef(0.),
-      m_L1(0.), m_Tmin(0.), m_Tmax(0.), m_frameWidth(0.), m_numberOfSpectra(0),
+      m_Tmin(0.), m_Tmax(0.), m_frameWidth(0.), m_numberOfSpectra(0),
       m_XSize(0), m_progress(nullptr) {}
 
 /// Destructor
@@ -105,20 +103,10 @@ void UnwrapSNS::exec() {
   // Get the input workspace
   m_inputWS = getProperty("InputWorkspace");
 
-  // without the primary flight path the algorithm cannot work
-  try {
-    Geometry::Instrument_const_sptr instrument = m_inputWS->getInstrument();
-    Geometry::IComponent_const_sptr sample = instrument->getSample();
-    m_L1 = instrument->getSource()->getDistance(*sample);
-  } catch (NotFoundError &) {
-    throw InstrumentDefinitionError(
-        "Unable to calculate source-sample distance", m_inputWS->getTitle());
-  }
-
   // Get the "reference" flightpath (currently passed in as a property)
   m_LRef = getProperty("LRef");
 
-  m_XSize = static_cast<int>(m_inputWS->dataX(0).size());
+  m_XSize = static_cast<int>(m_inputWS->x(0).size());
   m_numberOfSpectra = static_cast<int>(m_inputWS->getNumberHistograms());
   g_log.debug() << "Number of spectra in input workspace: " << m_numberOfSpectra
                 << "\n";
@@ -144,39 +132,47 @@ void UnwrapSNS::exec() {
     setProperty("OutputWorkspace", outputWS);
   }
 
-  PARALLEL_FOR2(m_inputWS, outputWS)
+  // without the primary flight path the algorithm cannot work
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const double L1 = spectrumInfo.l1();
+
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *outputWS))
   for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
        workspaceIndex++) {
     PARALLEL_START_INTERUPT_REGION
-    // get the total flight path
-    bool isMonitor;
-    double Ld = this->calculateFlightpath(workspaceIndex, isMonitor);
-    if (Ld < 0.) {
+    if (!spectrumInfo.hasDetectors(workspaceIndex)) {
       // If the detector flightpath is missing, zero the data
       g_log.debug() << "Detector information for workspace index "
                     << workspaceIndex << " is not available.\n";
-      outputWS->dataX(workspaceIndex) = m_inputWS->dataX(workspaceIndex);
-      outputWS->dataY(workspaceIndex).assign(m_XSize - 1, 0.0);
-      outputWS->dataE(workspaceIndex).assign(m_XSize - 1, 0.0);
+      outputWS->setSharedX(workspaceIndex, m_inputWS->sharedX(workspaceIndex));
+      outputWS->mutableY(workspaceIndex) = 0.0;
+      outputWS->mutableE(workspaceIndex) = 0.0;
     } else {
+      const double Ld = L1 + spectrumInfo.l2(workspaceIndex);
       // fix the x-axis
-      size_t pivot = this->unwrapX(m_inputWS->readX(workspaceIndex),
-                                   outputWS->dataX(workspaceIndex), Ld);
+      MantidVec timeBins;
+      size_t pivot = this->unwrapX(m_inputWS->x(workspaceIndex), timeBins, Ld);
+      outputWS->setBinEdges(workspaceIndex, std::move(timeBins));
+
       pivot++; // one-off difference between x and y
 
       // fix the counts using the pivot point
-      MantidVec yIn = m_inputWS->readY(workspaceIndex);
-      MantidVec &yOut = outputWS->dataY(workspaceIndex);
-      yOut.clear();
-      yOut.insert(yOut.begin(), yIn.begin() + pivot, yIn.end());
-      yOut.insert(yOut.end(), yIn.begin(), yIn.begin() + pivot);
+      auto &yIn = m_inputWS->y(workspaceIndex);
+      auto &yOut = outputWS->mutableY(workspaceIndex);
+
+      auto lengthFirstPartY = std::distance(yIn.begin() + pivot, yIn.end());
+      std::copy(yIn.begin() + pivot, yIn.end(), yOut.begin());
+      std::copy(yIn.begin(), yIn.begin() + pivot,
+                yOut.begin() + lengthFirstPartY);
 
       // fix the uncertainties using the pivot point
-      MantidVec eIn = m_inputWS->readE(workspaceIndex);
-      MantidVec &eOut = outputWS->dataE(workspaceIndex);
-      eOut.clear();
-      eOut.insert(eOut.begin(), eIn.begin() + pivot, eIn.end());
-      eOut.insert(eOut.end(), eIn.begin(), eIn.begin() + pivot);
+      auto &eIn = m_inputWS->e(workspaceIndex);
+      auto &eOut = outputWS->mutableE(workspaceIndex);
+
+      auto lengthFirstPartE = std::distance(eIn.begin() + pivot, eIn.end());
+      std::copy(eIn.begin() + pivot, eIn.end(), eOut.begin());
+      std::copy(eIn.begin(), eIn.begin() + pivot,
+                eOut.begin() + lengthFirstPartE);
     }
     m_progress->report();
     PARALLEL_END_INTERUPT_REGION
@@ -204,20 +200,24 @@ void UnwrapSNS::execEvent() {
 
   this->getTofRangeData(true);
 
+  // without the primary flight path the algorithm cannot work
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const double L1 = spectrumInfo.l1();
+
   // do the actual work
-  //  PARALLEL_FOR2(m_inputWS, outW)
   for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
        workspaceIndex++) {
-    //    PARALLEL_START_INTERUPT_REGION
     std::size_t numEvents = outW->getSpectrum(workspaceIndex).getNumberEvents();
-    bool isMonitor;
-    double Ld = this->calculateFlightpath(workspaceIndex, isMonitor);
+    double Ld = -1.0;
+    if (spectrumInfo.hasDetectors(workspaceIndex))
+      Ld = L1 + spectrumInfo.l2(workspaceIndex);
+
     MantidVec time_bins;
-    if (outW->dataX(0).size() > 2) {
-      this->unwrapX(m_inputWS->dataX(workspaceIndex), time_bins, Ld);
-      outW->setBinEdges(workspaceIndex, time_bins);
+    if (outW->x(0).size() > 2) {
+      this->unwrapX(m_inputWS->x(workspaceIndex), time_bins, Ld);
+      outW->setBinEdges(workspaceIndex, std::move(time_bins));
     } else {
-      outW->setX(workspaceIndex, m_inputWS->refX(workspaceIndex));
+      outW->setSharedX(workspaceIndex, m_inputWS->sharedX(workspaceIndex));
     }
     if (numEvents > 0) {
       MantidVec times(numEvents);
@@ -232,50 +232,14 @@ void UnwrapSNS::execEvent() {
       outW->getSpectrum(workspaceIndex).setTofs(times);
     }
     m_progress->report();
-    //    PARALLEL_END_INTERUPT_REGION
   }
-  //  PARALLEL_CHECK_INTERUPT_REGION
 
   outW->clearMRU();
   this->runMaskDetectors();
 }
 
-/** Calculates the total flightpath for the given detector.
- *  This is L1+L2 normally, but is the source-detector distance for a monitor.
- *  @param spectrum ::  The workspace index
- *  @param isMonitor :: Output: true is this detector is a monitor
- *  @return The flightpath (Ld) for the detector linked to spectrum
- *  @throw Kernel::Exception::InstrumentDefinitionError if the detector position
- * can't be obtained
- */
-double UnwrapSNS::calculateFlightpath(const int &spectrum,
-                                      bool &isMonitor) const {
-  double Ld = -1.0;
-  try {
-    // Get the detector object for this histogram
-    Geometry::IDetector_const_sptr det = m_inputWS->getDetector(spectrum);
-    // Get the sample-detector distance for this detector (or source-detector if
-    // a monitor)
-    // This is the total flightpath
-    isMonitor = det->isMonitor();
-    // Get the L2 distance if this detector is not a monitor
-    if (!isMonitor) {
-      double L2 = det->getDistance(*(m_inputWS->getInstrument()->getSample()));
-      Ld = m_L1 + L2;
-    }
-    // If it is a monitor, then the flightpath is the distance to the source
-    else {
-      Ld = det->getDistance(*(m_inputWS->getInstrument()->getSource()));
-    }
-  } catch (Exception::NotFoundError &) {
-    // If the detector information is missing, return a negative number
-  }
-
-  return Ld;
-}
-
-int UnwrapSNS::unwrapX(const MantidVec &datain, MantidVec &dataout,
-                       const double &Ld) {
+int UnwrapSNS::unwrapX(const Mantid::HistogramData::HistogramX &datain,
+                       MantidVec &dataout, const double &Ld) {
   MantidVec tempX_L; // lower half - to be frame wrapped
   tempX_L.reserve(m_XSize);
   tempX_L.clear();

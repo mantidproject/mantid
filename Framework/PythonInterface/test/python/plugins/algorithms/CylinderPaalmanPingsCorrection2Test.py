@@ -8,7 +8,6 @@ from mantid.simpleapi import (CreateSampleWorkspace, Scale, DeleteWorkspace,
 
 
 class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
-
     def setUp(self):
         """
         Create sample workspaces.
@@ -21,13 +20,13 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
                                        XMin=6.8,
                                        XMax=7.9,
                                        BinWidth=0.1)
+
         self._sample_ws = sample
 
         can = Scale(InputWorkspace=sample, Factor=1.2)
         self._can_ws = can
 
         self._corrections_ws_name = 'corrections'
-
 
     def tearDown(self):
         """
@@ -39,7 +38,6 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
 
         if self._corrections_ws_name in mtd:
             DeleteWorkspace(self._corrections_ws_name)
-
 
     def _verify_workspace(self, ws_name):
         """
@@ -66,7 +64,6 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
         # Check it has X binning matching sample workspace
         self.assertEqual(test_ws.blocksize(), self._sample_ws.blocksize())
 
-
     def _verify_workspaces_for_can(self):
         """
         Do validation on the additional correction factors for sample and can.
@@ -81,7 +78,6 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
 
         for workspace in workspaces:
             self._verify_workspace(workspace)
-
 
     def test_sampleOnly_Indirect(self):
         """
@@ -103,7 +99,7 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
         """
         Test simple run with sample workspace only for direct mode
         """
-    
+
         CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
                                        SampleWorkspace=self._sample_ws,
                                        SampleChemicalFormula='H2-O',
@@ -111,10 +107,9 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
                                        SampleOuterRadius=0.1,
                                        Emode='Direct',
                                        Efixed=1.845)
-    
+
         ass_ws_name = self._corrections_ws_name + '_ass'
         self._verify_workspace(ass_ws_name)
-
 
     def test_sampleAndCan(self):
         """
@@ -136,7 +131,6 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
 
         self._verify_workspaces_for_can()
 
-
     def test_sampleAndCanDefaults(self):
         """
         Test simple run with sample and can workspace using the default values.
@@ -150,6 +144,39 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
 
         self._verify_workspaces_for_can()
 
+    def test_number_density_for_sample_can(self):
+        """
+        Test simple run with sample and can workspace and number density for both
+        """
+
+        CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
+                                       SampleWorkspace=self._sample_ws,
+                                       SampleChemicalFormula='H2-O',
+                                       SampleDensityType='Number Density',
+                                       SampleDensity=0.5,
+                                       CanWorkspace=self._can_ws,
+                                       CanChemicalFormula='V',
+                                       CanDensityType='Number Density',
+                                       CanDensity=0.5)
+
+        self._verify_workspaces_for_can()
+
+    def test_mass_density_for_sample_can(self):
+        """
+        Test simple run with sample and can workspace and mass density for both
+        """
+
+        CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
+                                       SampleWorkspace=self._sample_ws,
+                                       SampleChemicalFormula='H2-O',
+                                       SampleDensityType='Mass Density',
+                                       SampleDensity=0.5,
+                                       CanWorkspace=self._can_ws,
+                                       CanChemicalFormula='V',
+                                       CanDensityType='Mass Density',
+                                       CanDensity=0.5)
+
+        self._verify_workspaces_for_can()
 
     def test_InterpolateDisabled(self):
         """
@@ -169,7 +196,6 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
         # Check each correction workspace has X binning matching NumberWavelengths
         for workspace in corrections_ws:
             self.assertEqual(workspace.blocksize(), 10)
-
 
     def test_validationNoCanFormula(self):
         """
@@ -191,5 +217,5 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
                           Efixed=1.845)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()

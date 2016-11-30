@@ -1,6 +1,7 @@
 #include "MantidQtMantidWidgets/MantidHelpWindow.h"
 #include "MantidQtMantidWidgets/pqHelpWindow.h"
 #include "MantidQtAPI/InterfaceManager.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/RegistrationHelper.h"
@@ -8,7 +9,6 @@
 #include <boost/lexical_cast.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <QDesktopServices>
 #include <QDir>
 #include <QFileInfo>
 #include <QHelpEngine>
@@ -122,7 +122,7 @@ void MantidHelpWindow::showHelp(const QString &url) {
 
 void MantidHelpWindow::openWebpage(const QUrl &url) {
   g_log.debug() << "open url \"" << url.toString().toStdString() << "\"\n";
-  QDesktopServices::openUrl(url);
+  MantidDesktopServices::openUrl(url);
 }
 
 void MantidHelpWindow::showPage(const QString &url) {
@@ -291,24 +291,32 @@ void MantidHelpWindow::showFitFunction(const QString &name) {
  * Show the help page for a given custom interface.
  *
  * @param name The name of the interface to show
+ * @param section :: the section of the interface to show
  */
-void MantidHelpWindow::showCustomInterface(const QString &name) {
-  this->showCustomInterface(name.toStdString());
+void MantidHelpWindow::showCustomInterface(const QString &name,
+                                           const QString &section) {
+  this->showCustomInterface(name.toStdString(), section.toStdString());
 }
 
 /**
  * Show the help page for a given custom interface.
  *
  * @param name The name of the interface to show
+ * @param section :: the section of the interface to show
  */
-void MantidHelpWindow::showCustomInterface(const std::string &name) {
+void MantidHelpWindow::showCustomInterface(const std::string &name,
+                                           const std::string &section) {
   if (bool(g_helpWindow)) {
     QString url(BASE_URL);
     url += "interfaces/";
-    if (name.empty())
+    if (name.empty()) {
       url += "index.html";
-    else
-      url += QString(name.c_str()) + ".html";
+    } else {
+      url += QString::fromStdString(name) + ".html";
+      if (!section.empty()) {
+        url += "#" + QString::fromStdString(section);
+      }
+    }
     this->showHelp(url);
   }
 }
@@ -415,7 +423,7 @@ void MantidHelpWindow::determineFileLocs() {
   // determine cache file location
   m_cacheFile = COLLECTION_FILE.toStdString();
   QString dataLoc =
-      QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+      MantidDesktopServices::storageLocation(QDesktopServices::DataLocation);
   if (dataLoc.endsWith("mantidproject")) {
     Poco::Path path(dataLoc.toStdString(), m_cacheFile);
     m_cacheFile = path.absolute().toString();

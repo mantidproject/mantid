@@ -4,11 +4,10 @@
     from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
-import xml.dom.minidom
-import os
 import time
 import mantid
 from reduction_gui.reduction.scripter import BaseReductionScripter
+
 
 class DgsReductionScripter(BaseReductionScripter):
     """
@@ -29,8 +28,6 @@ class DgsReductionScripter(BaseReductionScripter):
             @param file_name: name of the file to write the script to
         """
 
-
-
         for item in self._observers:
             state = item.state()
             if state is not None:
@@ -38,7 +35,6 @@ class DgsReductionScripter(BaseReductionScripter):
                     data_list = state.sample_file
                 except:
                     pass
-
 
         out_dir_line=""
         script = "# DGS reduction script\n"
@@ -76,7 +72,6 @@ class DgsReductionScripter(BaseReductionScripter):
             script += "for i in range("+str(len(filenames))+"):\n"
             script += DgsReductionScripter.WIDTH+"OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0][i].getInstrument().getName()+str(DGS_output_data[0][i].getRunNumber())+'.nxs')\n"
             script += DgsReductionScripter.WIDTH+'SaveNexus(DGS_output_data[0][i],OutputFilename)\n'
-
 
         if file_name is not None:
             f = open(file_name, 'w')
@@ -124,7 +119,6 @@ class DgsReductionScripter(BaseReductionScripter):
         """
         """
         data_files = []
-        data_options = None
         for item in self._observers:
             state = item.state()
             if state is not None:
@@ -145,7 +139,6 @@ class DgsReductionScripter(BaseReductionScripter):
             script += "import os\n"
             script += "from mantid.simpleapi import *\n"
             script += "config['default.facility']=\"%s\"\n" % self.facility_name
-
 
             script += "\n"
 

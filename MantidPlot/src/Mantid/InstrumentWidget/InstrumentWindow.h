@@ -3,8 +3,8 @@
 
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include <Mantid/IProjectSerialisable.h>
 #include <MantidQtAPI/GraphOptions.h>
+#include <MantidQtAPI/IProjectSerialisable.h>
 
 #include <MdiSubWindow.h>
 #include <boost/shared_ptr.hpp>
@@ -29,9 +29,9 @@ public:
   ~InstrumentWindow() override;
 
   /// Load the state of the instrument window for a Mantid project file
-  static IProjectSerialisable *loadFromProject(const std::string &lines,
-                                               ApplicationWindow *app,
-                                               const int fileVersion);
+  static MantidQt::API::IProjectSerialisable *
+  loadFromProject(const std::string &lines, ApplicationWindow *app,
+                  const int fileVersion);
   /// Save the state of the instrument window to a Mantid project file
   std::string saveToProject(ApplicationWindow *app) override;
   void selectTab(int tab);

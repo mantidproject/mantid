@@ -3,6 +3,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/H5Util.h"
 #include "MantidDataHandling/LoadCalFile.h"
@@ -35,8 +36,6 @@ using namespace H5;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadDiffCal)
 
-//----------------------------------------------------------------------------------------------
-
 /// Algorithms name for identification. @see Algorithm::name
 const std::string LoadDiffCal::name() const { return "LoadDiffCal"; }
 
@@ -53,7 +52,6 @@ const std::string LoadDiffCal::summary() const {
   return "Loads a calibration file for powder diffraction";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadDiffCal::init() {

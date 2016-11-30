@@ -41,6 +41,16 @@ public:
   };
   std::string name() override { return std::string("Process"); }
   std::string icon() override { return std::string("://stat_rows.png"); }
+  std::string tooltip() override {
+    return std::string("Processes selected runs");
+  }
+  std::string whatsthis() override {
+    return std::string("Processes the selected runs. Selected runs are reduced "
+                       "sequentially and independently. If nothing is "
+                       "selected, the behaviour is as if all "
+                       "runs were selected.");
+  }
+  std::string shortcut() override { return std::string(); }
 };
 }
 }

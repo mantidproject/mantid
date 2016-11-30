@@ -38,7 +38,7 @@ OUTPUT workspaces and files:
 ============================
 
 1) The results are saved to an ISAW-like DetCal file and optionally in an xml
-   file that can be used with the :ref:`LoadParameter <algm-LoadParameter>` algorithm.
+   file that can be used with the :ref:`LoadParameterFile <algm-LoadParameterFile>` algorithm.
 
 2) There are two output workspace groups that are output when this algorithm calls the :ref:`Fit <algm-Fit>` algorithm.
 

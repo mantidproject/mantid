@@ -1,10 +1,8 @@
 #ifndef MANTID_LIVEDATA_TESTDATALISTENER_H_
 #define MANTID_LIVEDATA_TESTDATALISTENER_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/ILiveListener.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 

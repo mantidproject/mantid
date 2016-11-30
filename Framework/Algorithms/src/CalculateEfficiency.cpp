@@ -1,7 +1,5 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/CalculateEfficiency.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
@@ -162,15 +160,11 @@ void CalculateEfficiency::sumUnmaskedDetectors(MatrixWorkspace_sptr rebinnedWS,
   error = 0.0;
   nPixels = 0;
 
+  const auto &spectrumInfo = rebinnedWS->spectrumInfo();
   for (int i = 0; i < numberOfSpectra; i++) {
     progress(0.2 + 0.2 * i / numberOfSpectra, "Computing sensitivity");
-    // Get the detector object for this spectrum
-    IDetector_const_sptr det = rebinnedWS->getDetector(i);
-    // If this detector is masked, skip to the next one
-    if (det->isMasked())
-      continue;
-    // If this detector is a monitor, skip to the next one
-    if (det->isMonitor())
+    // Skip if we have a monitor or if the detector is masked.
+    if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
       continue;
 
     // Retrieve the spectrum into a vector
@@ -212,15 +206,14 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
   // range
   std::vector<size_t> dets_to_mask;
 
+  const auto &spectrumInfo = rebinnedWS->spectrumInfo();
   for (size_t i = 0; i < numberOfSpectra; i++) {
     const double currProgress =
         0.4 +
         0.2 * (static_cast<double>(i) / static_cast<double>(numberOfSpectra));
     progress(currProgress, "Computing sensitivity");
-    // Get the detector object for this spectrum
-    IDetector_const_sptr det = rebinnedWS->getDetector(i);
-    // If this detector is masked, skip to the next one
-    if (det->isMasked())
+    // If this spectrum is masked, skip to the next one
+    if (spectrumInfo.isMasked(i))
       continue;
 
     // Retrieve the spectrum into a vector
@@ -229,7 +222,7 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
     auto &YOut = outputWS->mutableY(i);
     auto &EOut = outputWS->mutableE(i);
     // If this detector is a monitor, skip to the next one
-    if (det->isMonitor()) {
+    if (spectrumInfo.isMonitor(i)) {
       YOut[0] = 1.0;
       EOut[0] = 0.0;
       continue;

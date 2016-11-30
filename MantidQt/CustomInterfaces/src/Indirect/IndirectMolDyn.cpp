@@ -19,6 +19,9 @@ IndirectMolDyn::IndirectMolDyn(QWidget *parent)
           SLOT(setEnabled(bool)));
   connect(m_uiForm.cbVersion, SIGNAL(currentIndexChanged(const QString &)),
           this, SLOT(versionSelected(const QString &)));
+  // Handle plotting and saving
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 }
 
 void IndirectMolDyn::setup() {}
@@ -73,8 +76,6 @@ void IndirectMolDyn::run() {
                          m_uiForm.leFunctionNames->text().toStdString());
   molDynAlg->setProperty("SymmetriseEnergy",
                          m_uiForm.ckSymmetrise->isChecked());
-  molDynAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
-  molDynAlg->setProperty("Plot", m_uiForm.cbPlot->currentText().toStdString());
   molDynAlg->setProperty("OutputWorkspace", baseName.toStdString());
 
   // Set energy crop option
@@ -90,6 +91,11 @@ void IndirectMolDyn::run() {
         m_uiForm.dsResolution->getCurrentDataName().toStdString());
 
   runAlgorithm(molDynAlg);
+
+  // Enable plot and save
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+  m_uiForm.cbPlot->setEnabled(true);
 }
 
 /**
@@ -110,6 +116,47 @@ void IndirectMolDyn::loadSettings(const QSettings &settings) {
 void IndirectMolDyn::versionSelected(const QString &version) {
   bool version4(version == "4");
   m_uiForm.mwRun->isForDirectory(version4);
+}
+/**
+ * Handle plotting of mantid workspace
+ */
+void IndirectMolDyn::plotClicked() {
+
+  QString filename = m_uiForm.mwRun->getFirstFilename();
+  QFileInfo fi(filename);
+  QString baseName = fi.baseName();
+
+  if (checkADSForPlotSaveWorkspace(baseName.toStdString(), true)) {
+
+    WorkspaceGroup_sptr diffResultsGroup =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            baseName.toStdString());
+
+    auto names = diffResultsGroup->getNames();
+    auto plotType = m_uiForm.cbPlot->currentText();
+
+    for (const auto wsName : names) {
+      if (plotType == "Spectra" || plotType == "Both")
+        plotSpectrum(QString::fromStdString(wsName));
+
+      if (plotType == "Contour" || plotType == "Both")
+        plot2D(QString::fromStdString(wsName));
+    }
+  }
+}
+
+/**
+ * Handle saving workspaces
+ */
+void IndirectMolDyn::saveClicked() {
+
+  QString filename = m_uiForm.mwRun->getFirstFilename();
+  QFileInfo fi(filename);
+  QString baseName = fi.baseName();
+
+  if (checkADSForPlotSaveWorkspace(baseName.toStdString(), false))
+    addSaveWorkspaceToQueue(baseName);
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
 } // namespace CustomInterfaces

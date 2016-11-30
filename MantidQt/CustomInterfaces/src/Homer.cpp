@@ -3,6 +3,7 @@
 #include "MantidQtCustomInterfaces/deltaECalc.h"
 #include "MantidQtMantidWidgets/MWDiag.h"
 #include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FileProperty.h"
@@ -17,7 +18,6 @@
 #include <QStringList>
 #include <QUrl>
 #include <QSignalMapper>
-#include <QDesktopServices>
 #include <QFileDialog>
 #include <QButtonGroup>
 #include <QAbstractButton>
@@ -28,6 +28,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using MantidQt::API::MantidDesktopServices;
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::CustomInterfaces;
 
@@ -387,7 +388,7 @@ QString Homer::openFileDia(const bool save, const QStringList &exts) {
     }
     filter = filter.trimmed();
   }
-  filter.append(";;All Files (*.*)");
+  filter.append(";;All Files (*)");
 
   QString filename;
   if (save) {
@@ -611,7 +612,7 @@ void Homer::browseSaveFile() {
  * A slot to handle the help button click
  */
 void Homer::helpClicked() {
-  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Homer"));
+  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Homer"));
 }
 
 /** This slot updates the MWDiag and SPE filename suggester with the

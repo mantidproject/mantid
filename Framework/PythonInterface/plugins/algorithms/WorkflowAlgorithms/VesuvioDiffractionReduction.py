@@ -7,6 +7,7 @@ from mantid import config
 
 import os
 
+
 class VesuvioDiffractionReduction(DataProcessorAlgorithm):
 
     _workspace_names = None
@@ -22,14 +23,11 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
     _ipf_filename = None
     _sum_files = None
 
-
     def category(self):
         return 'Diffraction\\Reduction'
 
-
     def summary(self):
         return 'Performs diffraction reduction for VESUVIO'
-
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty('InputFiles'),
@@ -57,7 +55,6 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
                                                     direction=Direction.Output),
                              doc='Group name for the result workspaces.')
 
-
     def validateInputs(self):
         """
         Checks for issues with user input.
@@ -78,7 +75,6 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
                 issues['SpectraRange'] = 'SpectraRange must be in format [lower_index,upper_index]'
 
         return issues
-
 
     def PyExec(self):
         from IndirectReductionCommon import (load_files,
@@ -109,7 +105,6 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
                                                                spec_max=self._spectra_range[1],
                                                                sum_files=self._sum_files,
                                                                load_opts=load_opts)
-
 
         prog_reporter.resetNumSteps(self._workspace_names.__len__(), 0.0, 1.0)
 
@@ -165,7 +160,6 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
                               masked_detectors,
                               self._grouping_method)
 
-
             if is_multi_frame:
                 fold_chopped(c_ws_name)
 
@@ -179,7 +173,6 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
                         OutputWorkspace=self._output_ws)
 
         self.setProperty('OutputWorkspace', self._output_ws)
-
 
     def _setup(self):
         """

@@ -1,3 +1,4 @@
+#include "MantidKernel/make_unique.h"
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h"
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h"
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterItemDelegate.h"
@@ -17,28 +18,19 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace MDF {
 
-/// Constructor.
+/**
+ * Constructor when used as part of MultiDatasetFit interface
+ * @param multifit :: [input] Pointer to parent MultiDatasetFit interface
+ * @param parName :: [input] Name of parameter to edit in this dialog
+ */
 EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit,
                                                    const QString &parName)
     : QDialog(multifit), m_parName(parName) {
   m_uiForm.setupUi(this);
-  m_uiForm.logValueSelector->setCheckboxShown(true);
-  connect(m_uiForm.logValueSelector, SIGNAL(logOptionsEnabled(bool)), this,
-          SIGNAL(logOptionsChecked(bool)));
+  const int n = multifit->getNumberOfSpectra();
+  QStringList wsNames;
+  std::vector<size_t> wsIndices;
 
-  QHeaderView *header = m_uiForm.tableWidget->horizontalHeader();
-  header->setResizeMode(0, QHeaderView::Stretch);
-  connect(m_uiForm.tableWidget, SIGNAL(cellChanged(int, int)), this,
-          SLOT(valueChanged(int, int)));
-  m_uiForm.lblParameterName->setText("Parameter: " + parName);
-
-  // Populate list of logs
-  auto *logCombo = m_uiForm.logValueSelector->getLogComboBox();
-  for (const auto &logName : multifit->getLogNames()) {
-    logCombo->addItem(QString::fromStdString(logName));
-  }
-
-  auto n = multifit->getNumberOfSpectra();
   for (int i = 0; i < n; ++i) {
     double value = multifit->getLocalParameterValue(parName, i);
     m_values.push_back(value);
@@ -46,12 +38,76 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit,
     m_fixes.push_back(fixed);
     auto tie = multifit->getLocalParameterTie(parName, i);
     m_ties.push_back(tie);
+    wsNames.append(multifit->getWorkspaceName(i));
+    wsIndices.push_back(multifit->getWorkspaceIndex(i));
+  }
+
+  doSetup(parName, wsNames, wsIndices);
+}
+
+/**
+ * Constructor when used outside of MultiDatasetFit interface
+ * @param parent :: [input] Parent widget of this dialog
+ * @param funcBrowser :: [input] Function browser this is working with
+ * @param parName :: [input] Name of parameter to edit in this dialog
+ * @param wsNames :: [input] Names of workspaces being fitted
+ * @param wsIndices :: [input] Indices of which spectrum in each workspace is
+ * fitted
+ */
+EditLocalParameterDialog::EditLocalParameterDialog(
+    QWidget *parent, MantidWidgets::IFunctionBrowser *funcBrowser,
+    const QString &parName, const QStringList &wsNames,
+    const std::vector<size_t> &wsIndices)
+    : QDialog(parent), m_parName(parName) {
+  m_uiForm.setupUi(this);
+  const int n = funcBrowser->getNumberOfDatasets();
+  for (int i = 0; i < n; ++i) {
+    const double value = funcBrowser->getLocalParameterValue(parName, i);
+    m_values.push_back(value);
+    const bool fixed = funcBrowser->isLocalParameterFixed(parName, i);
+    m_fixes.push_back(fixed);
+    const auto tie = funcBrowser->getLocalParameterTie(parName, i);
+    m_ties.push_back(tie);
+  }
+
+  doSetup(parName, wsNames, wsIndices);
+}
+
+/**
+ * Common setup method used by both constructors
+ * Prerequisite: one of the constructors must have filled m_values, m_fixes,
+ * m_ties and set up the UI first
+ * @param parName :: [input] Name of parameter to edit in this dialog
+ * @param wsNames :: [input] Names of workspaces being fitted
+ * @param wsIndices :: [input] Indices of which spectrum in each workspace is
+ * fitted
+ */
+void EditLocalParameterDialog::doSetup(const QString &parName,
+                                       const QStringList &wsNames,
+                                       const std::vector<size_t> &wsIndices) {
+  m_logFinder = Mantid::Kernel::make_unique<MDFLogValueFinder>(wsNames);
+  // Populate list of logs
+  auto *logCombo = m_uiForm.logValueSelector->getLogComboBox();
+  for (const auto &logName : m_logFinder->getLogNames()) {
+    logCombo->addItem(QString::fromStdString(logName));
+  }
+
+  m_uiForm.logValueSelector->setCheckboxShown(true);
+  connect(m_uiForm.logValueSelector, SIGNAL(logOptionsEnabled(bool)), this,
+          SIGNAL(logOptionsChecked(bool)));
+  QHeaderView *header = m_uiForm.tableWidget->horizontalHeader();
+  header->setResizeMode(0, QHeaderView::Stretch);
+  connect(m_uiForm.tableWidget, SIGNAL(cellChanged(int, int)), this,
+          SLOT(valueChanged(int, int)));
+  m_uiForm.lblParameterName->setText("Parameter: " + parName);
+
+  assert(wsNames.size() == static_cast<int>(wsIndices.size()));
+  for (int i = 0; i < wsNames.size(); i++) {
     m_uiForm.tableWidget->insertRow(i);
-    auto cell = new QTableWidgetItem(makeNumber(value));
+    auto cell = new QTableWidgetItem(makeNumber(m_values[i]));
     m_uiForm.tableWidget->setItem(i, valueColumn, cell);
-    auto headerItem = new QTableWidgetItem(
-        multifit->getWorkspaceName(i) + " (" +
-        QString::number(multifit->getWorkspaceIndex(i)) + ")");
+    auto headerItem = new QTableWidgetItem(wsNames[i] + " (" +
+                                           QString::number(wsIndices[i]) + ")");
     m_uiForm.tableWidget->setVerticalHeaderItem(i, headerItem);
     cell = new QTableWidgetItem("");
     auto flags = cell->flags();
@@ -289,19 +345,19 @@ bool EditLocalParameterDialog::areOthersTied(int i) const {
 /// @param i :: [input] Index of parameter to set
 void EditLocalParameterDialog::setValueToLog(int i) {
   assert(i < m_values.size());
-  const auto *multifit = static_cast<MultiDatasetFit *>(this->parent());
-  assert(multifit);
 
   const auto &logName = m_uiForm.logValueSelector->getLog();
   const auto &function = m_uiForm.logValueSelector->getFunction();
 
   double value = std::numeric_limits<double>::quiet_NaN();
   try {
-    value = multifit->getLogValue(logName, function, i);
+    value = m_logFinder->getLogValue(logName, function, i);
   } catch (const std::invalid_argument &err) {
     const auto &message =
         QString("Failed to get log value:\n\n %1").arg(err.what());
-    multifit->logWarning(message.toStdString());
+    if (const auto *multifit = static_cast<MultiDatasetFit *>(this->parent())) {
+      multifit->logWarning(message.toStdString());
+    }
     QMessageBox::critical(this, "MantidPlot - Error", message);
   }
   m_values[i] = value;

@@ -32,7 +32,7 @@ Single Crystal Diffraction
 
 - Some improvements were done for creating peaks from python. :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>`
   copies the goniometer from the input MatrixWorkspace to PeaksWorkspace. createPeak for PeaksWorkspace copies goniometer
-  from PeaksWorkspace to peak. setGoniometer for a peak can be done from python and setQLabFrame and setQSampleFrame works
+  from PeaksWorkspace to peak. setGoniometer for a peak can be done from python and setQLabFrame and setQSampleFrame work
   correctly now with one argument.
 
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has been rewritten to calibrate the position and rotations of
@@ -46,6 +46,11 @@ Single Crystal Diffraction
   will set or change the detector bank scales that are used in SaveHKL and AnvredCorrection.  The input format is the same as
   used in anvred3.py, so DetScaleList input can be pasted from the definition of detScale there.  The default values can be
   set in the instrument parameter file. Default values are in the parameter file for the TOPAZ instrument.
+
+- :ref:`SaveLauenorm <algm-SaveLauenorm>`
+  was modified to have an option to use the detector bank scales from the instrument parameters. The values can be
+  set to have defaults in the instrument parameter file or by
+  :ref:`SetDetScale <algm-SetDetScale>`.
 
 
 Engineering Diffraction
@@ -67,6 +72,9 @@ Engineering Diffraction
 - New *Load* button on the Fitting Tab, will enable user to load the
   focused file to the canvas, so that the user can select the peaks
   manually beforehand
+  
+- New tool-tip *How to use* quickly tells users how to use the peak
+  picker tool by simply hovering their cursor over it.
 
 Powder Diffraction
 ------------------
@@ -83,8 +91,7 @@ Powder Diffraction
   ``CalibrationFile``. The documentation for this algorithm has been
   greatly expanded as well.
 
-- :ref:`PDFFourierTransformSNSPowderReduction
-  <algm-PDFFourierTransformSNSPowderReduction>` has been modified to
+- :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been modified to
   look at the signal as well when looking at the ``Q``-range to use
   for the transform.
 
@@ -104,6 +111,9 @@ Powder Diffraction
   <algm-CalibrateRectangularDetectors>` has been modified to output
   ``.h5`` formated calibration files as well as the other versions it
   already supported.
+
+- New algorithm :ref:`PDCalibration <algm-PDCalibration>` for
+  pixel-by-pixel calibration in time-of-flight space.
 
 Imaging
 -------

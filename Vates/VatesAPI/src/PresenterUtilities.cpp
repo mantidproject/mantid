@@ -125,7 +125,7 @@ createFactoryChainForHistoWorkspace(ThresholdRange_scptr threshold,
 * @param name: the input name
 * @return a name with a time stamp
 */
-std::string createTimeStampedName(std::string name) {
+std::string createTimeStampedName(const std::string &name) {
   auto currentTime =
       std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   std::string timeInReadableFormat = std::string(std::ctime(&currentTime));

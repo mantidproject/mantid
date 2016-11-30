@@ -1,7 +1,12 @@
+#pylint: disable=redefined-builtin
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+
 import re
 import numpy as np
 
 import dos.load_helper as load_helper
+
 
 def parse_castep_file(file_name, ir_or_raman):
     """
@@ -23,7 +28,6 @@ def parse_castep_file(file_name, ir_or_raman):
     data_lists = (frequencies, ir_intensities, raman_intensities)
     with open(file_name, 'rU') as f_handle:
         file_data.update(_parse_castep_file_header(f_handle))
-
 
         while True:
             line = f_handle.readline()
@@ -72,6 +76,7 @@ def parse_castep_file(file_name, ir_or_raman):
 
 #----------------------------------------------------------------------------------------
 
+
 def _parse_castep_file_header(f_handle):
     """
     Read information from the header of a <>.castep file
@@ -79,7 +84,7 @@ def _parse_castep_file_header(f_handle):
     @param f_handle - handle to the file.
     @return tuple of the number of ions and branches in the file
     """
-    num_species, num_ions = 0, 0
+    num_species = 0
     file_data = {}
     while True:
         line = f_handle.readline()
@@ -98,6 +103,7 @@ def _parse_castep_file_header(f_handle):
 
 #----------------------------------------------------------------------------------------
 
+
 def _parse_castep_freq_block(f_handle, num_branches, ir_or_raman):
     """
     Iterator to parse a block of frequencies from a .castep file.
@@ -105,7 +111,7 @@ def _parse_castep_freq_block(f_handle, num_branches, ir_or_raman):
     @param f_handle - handle to the file.
     """
 
-    for _ in xrange(num_branches):
+    for _ in range(num_branches):
         line = f_handle.readline()
         line_data = line.strip().split()[1:-1]
         freq = line_data[1]
@@ -146,6 +152,7 @@ def _find_castep_freq_block(f_handle, data_regex):
             return
 
 #----------------------------------------------------------------------------------------
+
 
 def _parse_castep_bond(bond_match):
     """
