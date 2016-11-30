@@ -234,7 +234,7 @@ void CalculateFlatBackground::exec() {
         for (size_t j = 0; j < ys.size(); ++j) {
           double val = ys[j] - background;
           double err = std::sqrt(es[j] * es[j] + variance);
-          if (nullifyNegative && val < 0) {
+          if (nullifyNegative && (val < 0)) {
             val = 0;
             // The error estimate must go up in this nonideal situation and the
             // value of background is a good estimate for it. However, don't
@@ -251,7 +251,7 @@ void CalculateFlatBackground::exec() {
         if (background < 0) {
           ys[j] = 0;
           es[j] = 0;
-        } else if (nullifyNegative && background > originalVal) {
+        } else if (nullifyNegative && (background > originalVal)) {
           ys[j] = originalVal;
           es[j] = es[j] > background ? es[j] : background;
         } else {
@@ -320,7 +320,7 @@ void CalculateFlatBackground::Mean(const HistogramData::Histogram &histogram,
   const auto &ES = histogram.e();
   // the function checkRange should already have checked that startX <= endX,
   // but we still need to check values weren't out side the ranges
-  if (endX > XS.back() || startX < XS.front()) {
+  if ((endX > XS.back()) || (startX < XS.front())) {
     throw std::out_of_range("Either the property startX or endX is outside the "
                             "range of X-values present in one of the specified "
                             "spectra");
