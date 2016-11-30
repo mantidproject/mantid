@@ -644,6 +644,21 @@ public:
     AnalysisDataService::Instance().remove(outSubtractedWSName);
   }
 
+  void testReturnBackgroundReturnsOriginalValuesIfNullifyNegativeValuesIsSet() {
+    const double y1 = 23;
+    const double y2 = 42;
+    const std::string outWsName("Removed1");
+    const bool nullifyNegatives = true;
+    executeWithTwoBinInputWorkspace(y1, y2, 1, outWsName, "Mean", "",
+                                    "Return Background", nullifyNegatives);
+    MatrixWorkspace_sptr outputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outWsName);
+    TS_ASSERT_DELTA(outputWS->y(0)[0], y1, 1e-12)
+    TS_ASSERT_DELTA(outputWS->y(0)[1], (y1 + y2) / 2, 1e-12)
+    AnalysisDataService::Instance().remove(outWsName);
+  }
+
 private:
   double bg;
 

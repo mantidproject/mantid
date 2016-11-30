@@ -247,7 +247,7 @@ void CalculateFlatBackground::exec() {
       }
     } else {
       for (size_t j = 0; j < ys.size(); ++j) {
-        const double originalVal = inputWS->y(i)[j];
+        const double originalVal = histogram.y()[j];
         if (background < 0) {
           ys[j] = 0;
           es[j] = 0;
