@@ -31,7 +31,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     _calibration_workspace = None
 
     def category(self):
-        return "Workflow\\MIDAS;Inelastic\\Reduction;Deprecated"
+        return "Workflow\\MIDAS;Inelastic\\Reduction"
 
     def summary(self):
         return 'Performs an energy transfer reduction for ILL indirect inelastic data.' \

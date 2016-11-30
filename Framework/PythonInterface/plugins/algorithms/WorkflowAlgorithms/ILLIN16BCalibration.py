@@ -17,7 +17,7 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
     _mirror_mode = None
 
     def category(self):
-        return 'Workflow\\Inelastic;Inelastic\\Calibration;Deprecated'
+        return 'Workflow\\Inelastic;Inelastic\\Calibration'
 
     def summary(self):
         return 'Creates a calibration workspace in energy trnasfer for IN16B.' \

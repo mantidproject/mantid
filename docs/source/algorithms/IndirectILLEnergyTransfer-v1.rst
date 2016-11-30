@@ -41,7 +41,7 @@ Usage
 
 .. testcode:: ExIndirectILLEnergyTransfer
 
-    ws = IndirectILLEnergyTransfer(Run='ILL/IN16B/090660.nxs')
+    ws = IndirectILLEnergyTransfer(Run='ILL/IN16B/090661.nxs')
     print "Reduced workspace has %d wing" % ws.getNumberOfEntries()
     print "which has %d spectra" % ws.getItem(0).getNumberHistograms()
     print "and %d bins" % ws.getItem(0).blocksize()
@@ -56,7 +56,7 @@ Output:
 
 .. testcleanup:: ExIndirectILLEnergyTransfer
 
-   DeleteWorkspace('ws)
+   DeleteWorkspace('ws')
 
 **Example - IndirectILLEnergyTransfer : QENS data with mirror sense**
 
