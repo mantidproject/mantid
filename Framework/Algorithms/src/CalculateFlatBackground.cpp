@@ -222,31 +222,36 @@ void CalculateFlatBackground::exec() {
       } else {
         g_log.warning() << " The output background has been set to zero.\n";
       }
-      background = 0;
-      variance = 0;
+    } else {
+      backgroundTotal += background;
     }
-    backgroundTotal += background;
     HistogramData::Histogram outHistogram(histogram);
     auto &ys = outHistogram.mutableY();
     auto &es = outHistogram.mutableE();
     if (removeBackground) {
-      for (size_t j = 0; j < ys.size(); ++j) {
-        double val = ys[j] - background;
-        double err = std::sqrt(es[j] * es[j] + variance);
-        if (nullifyNegative && val < 0) {
-          val = 0;
-          // The error estimate must go up in this nonideal situation and the
-          // value of background is a good estimate for it. However, don't
-          // reduce the error if it was already more than that
-          err = es[j] > background ? es[j] : background;
+      // When subtracting backgrounds, act only if background is positive.
+      if (background >= 0) {
+        for (size_t j = 0; j < ys.size(); ++j) {
+          double val = ys[j] - background;
+          double err = std::sqrt(es[j] * es[j] + variance);
+          if (nullifyNegative && val < 0) {
+            val = 0;
+            // The error estimate must go up in this nonideal situation and the
+            // value of background is a good estimate for it. However, don't
+            // reduce the error if it was already more than that
+            err = es[j] > background ? es[j] : background;
+          }
+          ys[j] = val;
+          es[j] = err;
         }
-        ys[j] = val;
-        es[j] = err;
       }
     } else {
       for (size_t j = 0; j < ys.size(); ++j) {
         const double originalVal = inputWS->y(i)[j];
-        if (nullifyNegative && background > originalVal) {
+        if (background < 0) {
+          ys[j] = 0;
+          es[j] = 0;
+        } else if (nullifyNegative && background > originalVal) {
           ys[j] = originalVal;
           es[j] = es[j] > background ? es[j] : background;
         } else {

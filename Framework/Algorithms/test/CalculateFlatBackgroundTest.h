@@ -534,25 +534,28 @@ public:
     const std::string outWsName("Removed1");
     const std::vector<std::string> modes{"Linear Fit", "Mean",
                                          "Moving Average"};
-    for (const auto &mode : modes) {
-      executeWithTwoBinInputWorkspace(y1, y2, 1, outWsName, mode, "",
-                                      "Subtract Background");
-      MatrixWorkspace_sptr outputWS =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              outWsName);
-      TS_ASSERT_DELTA(outputWS->y(0)[0], y1, 1e-12)
-      TS_ASSERT_DELTA(outputWS->y(0)[1], y2, 1e-12)
-      AnalysisDataService::Instance().remove(outWsName);
-    }
-    for (const auto &mode : modes) {
-      executeWithTwoBinInputWorkspace(y1, y2, 1, outWsName, mode, "",
-                                      "Return Background");
-      MatrixWorkspace_sptr outputWS =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              outWsName);
-      TS_ASSERT_DELTA(outputWS->y(0)[0], 0, 1e-12)
-      TS_ASSERT_DELTA(outputWS->y(0)[1], 0, 1e-12)
-      AnalysisDataService::Instance().remove(outWsName);
+    const std::array<bool, 2> nullifyOptions{true, false};
+    for (const auto nullifyNegatives : nullifyOptions) {
+      for (const auto &mode : modes) {
+        executeWithTwoBinInputWorkspace(y1, y2, 1, outWsName, mode, "",
+                                        "Subtract Background", nullifyNegatives);
+        MatrixWorkspace_sptr outputWS =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+                outWsName);
+        TS_ASSERT_DELTA(outputWS->y(0)[0], y1, 1e-12)
+        TS_ASSERT_DELTA(outputWS->y(0)[1], y2, 1e-12)
+        AnalysisDataService::Instance().remove(outWsName);
+      }
+      for (const auto &mode : modes) {
+        executeWithTwoBinInputWorkspace(y1, y2, 1, outWsName, mode, "",
+                                        "Return Background", nullifyNegatives);
+        MatrixWorkspace_sptr outputWS =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+                outWsName);
+        TS_ASSERT_DELTA(outputWS->y(0)[0], 0, 1e-12)
+        TS_ASSERT_DELTA(outputWS->y(0)[1], 0, 1e-12)
+        AnalysisDataService::Instance().remove(outWsName);
+      }
     }
   }
 
@@ -563,7 +566,7 @@ public:
     // Subtract background only from spectrum index 1.
     // The spectrum at index 0 should be left unchanged.
     executeWithTwoBinInputWorkspace(y1, y2, 2, outWsName, "Mean", "1",
-                                    "Subtract Background");
+                                    "Subtract Background", false);
     MatrixWorkspace_sptr outputWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
     TS_ASSERT_DELTA(outputWS->y(0)[0], y1, 1e-12)
@@ -577,10 +580,11 @@ public:
     const double y1 = 23;
     const double y2 = 42;
     const std::string outWsName("Removed1");
+    const bool nullifyNegatives = false;
     // Return background only for spectrum index 1.
     // The output at spectrum index 0 should be zero.
     executeWithTwoBinInputWorkspace(y1, y2, 2, outWsName, "Mean", "1",
-                                    "Return Background");
+                                    "Return Background", nullifyNegatives);
     MatrixWorkspace_sptr outputWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
     TS_ASSERT_DELTA(outputWS->y(0)[0], 0, 1e-12)
@@ -595,10 +599,11 @@ public:
     const double y2 = 39;
     const std::string outBackgroundWSName("background");
     const std::string outSubtractedWSName("subtracted");
+    const bool nullifyNegatives = false;
     executeWithTwoBinInputWorkspace(y1, y2, 1, outBackgroundWSName, "Mean", "",
-                                    "Return Background");
+                                    "Return Background", nullifyNegatives);
     MatrixWorkspace_sptr inputWS = executeWithTwoBinInputWorkspace(
-        y1, y2, 1, outSubtractedWSName, "Mean", "", "Subtract Background");
+        y1, y2, 1, outSubtractedWSName, "Mean", "", "Subtract Background", nullifyNegatives);
     compareSubtractedAndBackgroundWorkspaces(inputWS, outSubtractedWSName,
                                              outBackgroundWSName);
     AnalysisDataService::Instance().remove(outBackgroundWSName);
@@ -610,11 +615,12 @@ public:
     const double y2 = 39;
     const std::string outBackgroundWSName("background");
     const std::string outSubtractedWSName("subtracted");
+    const bool nullifyNegatives = false;
     executeWithTwoBinInputWorkspace(y1, y2, 1, outBackgroundWSName,
-                                    "Linear Fit", "", "Return Background");
+                                    "Linear Fit", "", "Return Background", nullifyNegatives);
     MatrixWorkspace_sptr inputWS = executeWithTwoBinInputWorkspace(
         y1, y2, 1, outSubtractedWSName, "Linear Fit", "",
-        "Subtract Background");
+        "Subtract Background", nullifyNegatives);
     compareSubtractedAndBackgroundWorkspaces(inputWS, outSubtractedWSName,
                                              outBackgroundWSName);
     AnalysisDataService::Instance().remove(outBackgroundWSName);
@@ -626,11 +632,12 @@ public:
     const double y2 = 39;
     const std::string outBackgroundWSName("background");
     const std::string outSubtractedWSName("subtracted");
+    const bool nullifyNegatives = false;
     executeWithTwoBinInputWorkspace(y1, y2, 1, outBackgroundWSName,
-                                    "Moving Average", "", "Return Background");
+                                    "Moving Average", "", "Return Background", nullifyNegatives);
     MatrixWorkspace_sptr inputWS = executeWithTwoBinInputWorkspace(
         y1, y2, 1, outSubtractedWSName, "Moving Average", "",
-        "Subtract Background");
+        "Subtract Background", nullifyNegatives);
     compareSubtractedAndBackgroundWorkspaces(inputWS, outSubtractedWSName,
                                              outBackgroundWSName);
     AnalysisDataService::Instance().remove(outBackgroundWSName);
@@ -774,7 +781,8 @@ private:
   MatrixWorkspace_sptr executeWithTwoBinInputWorkspace(
       const double y1, const double y2, const size_t histogramCount,
       const std::string &outWsName, const std::string &mode,
-      const std::string &wsIndexList, const std::string &outputMode) {
+      const std::string &wsIndexList, const std::string &outputMode,
+      bool nullifyNegatives) {
     const size_t binCount = 2;
     Mantid::DataObjects::Workspace2D_sptr WS(
         new Mantid::DataObjects::Workspace2D);
@@ -801,7 +809,7 @@ private:
     flatBG.setPropertyValue("WorkspaceIndexList", wsIndexList);
     flatBG.setPropertyValue("Mode", mode);
     flatBG.setPropertyValue("OutputMode", outputMode);
-    flatBG.setProperty("NullifyNegativeValues", false);
+    flatBG.setProperty("NullifyNegativeValues", nullifyNegatives);
     flatBG.setProperty("AveragingWindowWidth", 1);
     TS_ASSERT_THROWS_NOTHING(flatBG.execute())
     TS_ASSERT(flatBG.isExecuted())
