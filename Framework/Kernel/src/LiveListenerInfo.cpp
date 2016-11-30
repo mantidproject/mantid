@@ -21,7 +21,8 @@ Logger g_log("InstrumentInfo");
 /**
  * Construct from Facility Info XML.
  *
- * @param elem :: The Poco::XML::Element to read the data from
+ * @param inst Pointer to InstrumentInfo that this LiveListenerInfo belongs to
+ * @param elem The Poco::XML::Element to read the data from
  */
 LiveListenerInfo::LiveListenerInfo(InstrumentInfo *inst,
                                    const Poco::XML::Element *elem) {
