@@ -243,6 +243,7 @@ void Stitch1DMany::exec() {
  * @param wsIndex :: The index of the rhs workspace being stitched
  * @param startOverlaps :: Start overlaps for stitched workspaces
  * @param endOverlaps :: End overlaps for stitched workspaces
+ * @param params :: Rebinning parameters
  * @param scaleRhsWS :: Scaling either with respect to left or right workspaces
  * @param useManualScaleFactor :: True to use a provided value for scale factor
  * @param manualScaleFactor :: Provided value for scaling factor
@@ -289,13 +290,21 @@ void Stitch1DMany::doStitch1D(
  * @param inputWSGroups :: The set of workspace groups to be stitched
  * @param period :: The period index we are stitching at
  * @param storeInADS :: True to store in the AnalysisDataService
- * @param useManualScaleFactor :: True to use a manual scale factor
+ * @param startOverlaps :: Start overlaps for stitched workspaces
+ * @param endOverlaps :: End overlaps for stitched workspaces
+ * @param params :: Rebinning parameters
+ * @param scaleRhsWS :: Scaling either with respect to left or right workspaces
+ * @param useManualScaleFactor :: True to use a provided value for scale factor
+ * @param manualScaleFactor :: Provided value for scaling factor
  * @param outWSName :: Output stitched workspace name
  * @param outScaleFactors :: Actual values used for scale factors
  */
 void Stitch1DMany::doStitch1DMany(
-    std::vector<WorkspaceGroup_sptr> inputWSGroups, int period, bool storeInADS,
-    bool useManualScaleFactor, std::string &outName, std::vector<double> &outScaleFactors) {
+    std::vector<WorkspaceGroup_sptr> inputWSGroups, size_t period,
+    bool storeInADS, std::vector<double> startOverlaps,
+    std::vector<double> endOverlaps, std::vector<double> params,
+    bool scaleRhsWS, bool useManualScaleFactor, double manualScaleFactor,
+    std::string &outName, std::vector<double> &outScaleFactors) {
 
   // List of workspaces to stitch
   std::vector<std::string> toProcess;
@@ -309,12 +318,15 @@ void Stitch1DMany::doStitch1DMany(
   IAlgorithm_sptr alg = createChildAlgorithm("Stitch1DMany");
   alg->initialize();
   alg->setAlwaysStoreInADS(storeInADS);
-  for (auto &prop : this->getProperties()) {
-    alg->setProperty(prop->name(), prop->value());
-  }
-  alg->setProperty("UseManualScaleFactor", useManualScaleFactor);
   alg->setProperty("InputWorkspaces", toProcess);
   alg->setProperty("OutputWorkspace", outName);
+  alg->setProperty("StartOverlaps", startOverlaps);
+  alg->setProperty("EndOverlaps", endOverlaps);
+  alg->setProperty("Params", params);
+  alg->setProperty("ScaleRHSWorkspace", scaleRhsWS);
+  alg->setProperty("UseManualScaleFactor", useManualScaleFactor);
+  if (useManualScaleFactor)
+    alg->setProperty("ManualScaleFactor", manualScaleFactor);
   alg->execute();
 
   outName = alg->getProperty("OutputWorkspace");
@@ -347,8 +359,9 @@ bool Stitch1DMany::processGroups() {
     for (int i = 0; i < m_numWSPerGroup; ++i) {
       outName = groupName;
       std::vector<double> scaleFactors;
-      doStitch1DMany(m_inputWSGroups, i, true, m_useManualScaleFactor, outName,
-                     scaleFactors);
+      doStitch1DMany(m_inputWSGroups, i, true, m_startOverlaps, m_endOverlaps,
+                     m_params, m_scaleRHSWorkspace, m_useManualScaleFactor,
+                     m_manualScaleFactor, outName, scaleFactors);
 
       // Add the resulting workspace to the list to be grouped together
       toGroup.push_back(outName);
@@ -361,8 +374,10 @@ bool Stitch1DMany::processGroups() {
     // Obtain scale factors for the specified period
     outName = groupName;
     std::vector<double> periodScaleFactors;
-    doStitch1DMany(m_inputWSGroups, m_scaleFactorFromPeriod, false, false,
-                   outName, periodScaleFactors);
+    doStitch1DMany(m_inputWSGroups, m_scaleFactorFromPeriod, false,
+                   m_startOverlaps, m_endOverlaps, m_params,
+                   m_scaleRHSWorkspace, false, m_manualScaleFactor, outName,
+                   periodScaleFactors);
 
     // Iterate over each period
     for (int i = 0; i < m_numWSPerGroup; i++) {

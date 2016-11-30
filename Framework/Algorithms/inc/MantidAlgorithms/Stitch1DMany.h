@@ -59,10 +59,15 @@ public:
                   bool scaleRhsWS, bool useManualScaleFactor,
                   double manualScaleFactor, MatrixWorkspace_sptr &outWS,
                   double &outScaleFactor);
+
   /// Performs the Stitch1DMany algorithm at a specific period
   void doStitch1DMany(std::vector<WorkspaceGroup_sptr> inputWSGroups,
-                      int period, bool storeInADS, bool useManualScaleFactor,
-                      std::string &outWSName, 
+                      size_t period, bool storeInADS,
+                      std::vector<double> startOverlaps,
+                      std::vector<double> endOverlaps,
+                      std::vector<double> params, bool scaleRhsWS,
+                      bool useManualScaleFactor, double manualScaleFactor,
+                      std::string &outName,
                       std::vector<double> &outScaleFactors);
 
   /// For (multiperiod) workspace groups
