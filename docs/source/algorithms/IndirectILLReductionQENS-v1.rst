@@ -86,7 +86,7 @@ Output:
 
 .. testoutput:: ExIndirectILLReductionQENS
 
-    Result is WorkspaceGroup, that contains 3 workspaces
+    Result is a WorkspaceGroup, that contains 3 workspaces
     the name of the first one is 136553_ws corresponding to run 136553
     it has 18 spectra and 1024 bins
 
