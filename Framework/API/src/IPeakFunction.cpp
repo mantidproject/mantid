@@ -95,7 +95,7 @@ const int IPeakFunction::g_maxPeakRadius = std::numeric_limits<int>::max();
 IPeakFunction::IPeakFunction(int peakRadius) : m_peakRadius(peakRadius) {}
 
 void IPeakFunction::function(const FunctionDomain &domain,
-              FunctionValues &values) const {
+                             FunctionValues &values) const {
   auto peakRadius =
       dynamic_cast<const FunctionDomain1D &>(domain).getPeakRadius();
   if (peakRadius < m_peakRadius) {
@@ -177,9 +177,7 @@ void IPeakFunction::setPeakRadius(int r) const {
 }
 
 /// Get the peak radius
-int IPeakFunction::getPeakRadius() const {
-  return m_peakRadius;
-}
+int IPeakFunction::getPeakRadius() const { return m_peakRadius; }
 
 /// Returns the integral intensity of the peak function, using the peak radius
 /// to determine integration borders.
@@ -187,7 +185,8 @@ double IPeakFunction::intensity() const {
   auto interval = getDomainInterval();
 
   PeakFunctionIntegrator integrator;
-  IntegrationResult result = integrator.integrate(*this, interval.first, interval.second);
+  IntegrationResult result =
+      integrator.integrate(*this, interval.first, interval.second);
 
   if (!result.success) {
     return 0.0;
@@ -256,7 +255,7 @@ std::pair<double, double> IPeakFunction::getDomainInterval(double level) const {
   }
 
   auto findBound = [this, c, h, level](double dx) {
-    for(size_t i = 0; i < 100; ++i) {
+    for (size_t i = 0; i < 100; ++i) {
       double x = c + dx;
       double y = 0.0;
       this->functionLocal(&y, &x, 1);
@@ -274,10 +273,7 @@ std::pair<double, double> IPeakFunction::getDomainInterval(double level) const {
 }
 
 /// Return a peak radius large enough to be practically infinite
-int IPeakFunction::maxPeakRadius() {
-  return g_maxPeakRadius;
-}
-
+int IPeakFunction::maxPeakRadius() { return g_maxPeakRadius; }
 
 } // namespace API
 } // namespace Mantid

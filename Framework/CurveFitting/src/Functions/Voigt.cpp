@@ -229,7 +229,6 @@ void Voigt::setIntensity(const double value) {
   setParameter(LORENTZ_AMP, 2.0 * value / (M_PI * lorentzFWHM));
 }
 
-
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

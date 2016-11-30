@@ -24,16 +24,12 @@ std::vector<double> FunctionDomain1D::toVector() const {
  * Set a peak redius to pass to peak functions.
  * @param radius :: New radius value.
  */
-void FunctionDomain1D::setPeakRadius(int radius) {
-  m_peakRadius = radius;
-}
+void FunctionDomain1D::setPeakRadius(int radius) { m_peakRadius = radius; }
 
 /**
  * Get the peak radius.
  */
-int FunctionDomain1D::getPeakRadius() const {
-  return m_peakRadius;
-}
+int FunctionDomain1D::getPeakRadius() const { return m_peakRadius; }
 
 /**
   * Create a domain from a vector.

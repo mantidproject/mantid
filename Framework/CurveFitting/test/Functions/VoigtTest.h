@@ -267,10 +267,9 @@ public:
   }
 
 private:
-  boost::shared_ptr<Mantid::API::IPeakFunction> createFunction(const double a_L,
-                                              const double pos,
-                                              const double gamma_L,
-                                              const double gamma_G) {
+  boost::shared_ptr<Mantid::API::IPeakFunction>
+  createFunction(const double a_L, const double pos, const double gamma_L,
+                 const double gamma_G) {
     boost::shared_ptr<IFunction> voigtFn = boost::make_shared<Voigt>();
     auto peakFn =
         boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);

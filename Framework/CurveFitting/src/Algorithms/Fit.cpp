@@ -150,10 +150,10 @@ void Fit::execConcrete() {
   API::FunctionValues_sptr values;
   m_domainCreator->createDomain(domain, values);
 
-  // Set peak radius to the values which will be passed to 
+  // Set peak radius to the values which will be passed to
   // all IPeakFunctions
   int peakRadius = getProperty("PeakRadius");
-  if (auto d1d = dynamic_cast<API::FunctionDomain1D*>(domain.get())) {
+  if (auto d1d = dynamic_cast<API::FunctionDomain1D *>(domain.get())) {
     if (peakRadius != 0) {
       d1d->setPeakRadius(peakRadius);
     }

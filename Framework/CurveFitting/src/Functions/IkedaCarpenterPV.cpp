@@ -379,7 +379,8 @@ double IkedaCarpenterPV::intensity() const {
   auto interval = getDomainInterval(1e-2);
 
   API::PeakFunctionIntegrator integrator;
-  API::IntegrationResult result = integrator.integrate(*this, interval.first, interval.second);
+  API::IntegrationResult result =
+      integrator.integrate(*this, interval.first, interval.second);
 
   if (!result.success) {
     return 0.0;
@@ -387,7 +388,6 @@ double IkedaCarpenterPV::intensity() const {
 
   return result.result;
 }
-
 
 } // namespace Functions
 } // namespace CurveFitting

@@ -2858,7 +2858,8 @@ FitPropertyBrowser::createMatrixFromTableWorkspace() const {
       return boost::shared_ptr<Mantid::API::Workspace>();
     const size_t rowCount = tws->rowCount();
     if (rowCount == 0) {
-      QMessageBox::critical(nullptr, "Mantid - Error", "TableWorkspace is empty.");
+      QMessageBox::critical(nullptr, "Mantid - Error",
+                            "TableWorkspace is empty.");
       return boost::shared_ptr<Mantid::API::Workspace>();
     }
 
@@ -2867,7 +2868,8 @@ FitPropertyBrowser::createMatrixFromTableWorkspace() const {
     // get the x column
     int ix = m_columnManager->value(m_xColumn);
     if (ix >= static_cast<int>(columns.size())) {
-      QMessageBox::critical(nullptr, "Mantid - Error", "X column was not found.");
+      QMessageBox::critical(nullptr, "Mantid - Error",
+                            "X column was not found.");
       return boost::shared_ptr<Mantid::API::Workspace>();
     }
     auto xcol = tws->getColumn(columns[ix]);
@@ -2875,7 +2877,8 @@ FitPropertyBrowser::createMatrixFromTableWorkspace() const {
     // get the y column
     int iy = m_columnManager->value(m_yColumn);
     if (iy >= static_cast<int>(columns.size())) {
-      QMessageBox::critical(nullptr, "Mantid - Error", "Y column was not found.");
+      QMessageBox::critical(nullptr, "Mantid - Error",
+                            "Y column was not found.");
       return boost::shared_ptr<Mantid::API::Workspace>();
     }
     auto ycol = tws->getColumn(columns[iy]);
