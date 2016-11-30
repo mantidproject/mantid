@@ -1,9 +1,8 @@
 # Basic setup
 
-user_name : "Mantid"
+user_name : "Mantid_David"
 apply_solid_angle : "True"
 
-calibration_directory : ""
-output_directory : ""
-
+calibration_directory : "C:\\Users\\ieb35538\\Documents\\Repos\\a_mantidBuild\\ExternalData\\Testing\\Data\\SystemTest\\POLARIS\\Calibration"
+output_directory : "C:\\Users\\ieb35538\\Documents\\Repos\\a_mantidBuild\\ExternalData\\Testing\\Data\\SystemTest\\POLARIS\\DataOut"
 advanced_config_file : "Not Set"

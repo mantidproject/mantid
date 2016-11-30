@@ -8,17 +8,8 @@ import isis_powder.routines.common
 
 def get_calibration_dict(run_number):
     config_file = _open_yaml_file()
-
-    # First check exceptions list as it should be shorter
-    exception_key = _check_if_run_is_exception(config_handle=config_file, run_number=run_number)
-    if exception_key:
-        exceptions_dict = config_file["exceptions"]
-        return exceptions_dict[exception_key]
-
-    # Otherwise parse the entire YAML file
     run_key = _find_dictionary_key(dict_to_search=config_file, run_number=run_number)
 
-    # If we have not found the run in either
     if not run_key:
         raise ValueError("Run number " + str(run_number) + " not recognised in calibration mapping")
 
@@ -39,15 +30,6 @@ def _open_yaml_file():
             raise RuntimeError("Failed to parse POLARIS calibration YAML file")
 
     return read_config
-
-
-def _check_if_run_is_exception(config_handle, run_number):
-    try:
-        exceptions_dict = config_handle["exceptions"]
-    except KeyError:
-        return None
-
-    return _find_dictionary_key(dict_to_search=exceptions_dict, run_number=run_number)
 
 
 def _find_dictionary_key(dict_to_search, run_number):

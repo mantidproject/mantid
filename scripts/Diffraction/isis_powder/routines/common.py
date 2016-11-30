@@ -51,12 +51,8 @@ def generate_run_numbers(run_number_string):
     # If its a string we must parse it
     run_number_string = run_number_string.strip()
     run_boundaries = run_number_string.replace('_', '-')  # Accept either _ or - delimiters
-    run_range_lists = _run_number_generator(processed_string=run_boundaries)
-    out_range = []
-    for range_list in run_range_lists:
-        out_range.extend(range_list)
-
-    return out_range
+    run_list = _run_number_generator(processed_string=run_boundaries)
+    return run_list
 
 
 def get_monitor_ws(ws_to_process, run_number_string, instrument):
@@ -142,18 +138,8 @@ def _load_sum_file_range(run_numbers_list, instrument):
 
 
 def _run_number_generator(processed_string):
-    #number_generator = kernel.IntArrayProperty('array_generator', processed_string)
-    #return number_generator.value.tolist()
-
-    # Expands run numbers of the form 1-10, 12, 14-20, 23 to 1,2,3,..,8,9,10,12,14,15,16...,19,20,23
-    for entry in processed_string.split(','):
-        # Split between comma separated values
-        numbers = entry.split('-')
-        # Check if we are using a dash separator and return the range between those values
-        if len(numbers) == 1:
-            yield list(numbers)
-        elif len(numbers) == 2:
-            # Add 1 so it includes the final number '-' range
-            yield range(int(numbers[0]), int(numbers[-1]) + 1)
-        else:
-           raise ValueError("The run number " + str(entry) + " is incorrect in calibration mapping")
+    try:
+        number_generator = kernel.IntArrayProperty('array_generator', processed_string)
+        return number_generator.value.tolist()
+    except RuntimeError:
+        raise RuntimeError("Could not generate run numbers from this input: " + processed_string)
