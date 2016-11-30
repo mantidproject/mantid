@@ -101,7 +101,6 @@ set ( SRC_FILES
 	src/PeriodicTableWidget.cpp
 	src/PreviewPlot.cpp
 	src/ProcessingAlgoWidget.cpp
-  src/ProjectSaveView.cpp
   src/ProjectSavePresenter.cpp
   src/ProjectSaveModel.cpp
 	src/PropertyHandler.cpp
@@ -174,7 +173,6 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/PreviewPlot.h
     inc/MantidQtMantidWidgets/PropertyHandler.h
     inc/MantidQtMantidWidgets/ProcessingAlgoWidget.h
-    inc/MantidQtMantidWidgets/ProjectSaveView.h
     inc/MantidQtMantidWidgets/pythonCalc.h
     inc/MantidQtMantidWidgets/RangeSelector.h
     inc/MantidQtMantidWidgets/RenameParDialog.h
@@ -325,7 +323,6 @@ set ( INC_FILES
     inc/MantidQtMantidWidgets/ProgressPresenter.h
     inc/MantidQtMantidWidgets/ProjectSavePresenter.h
     inc/MantidQtMantidWidgets/ProjectSaveModel.h
-    inc/MantidQtMantidWidgets/ProjectSaveView.h
     inc/MantidQtMantidWidgets/WorkspacePresenter/ViewNotifiable.h
     inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProviderNotifiable.h
     inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h
@@ -359,7 +356,6 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/UserFunctionDialog.ui
     inc/MantidQtMantidWidgets/PeriodicTableWidget.ui
     inc/MantidQtMantidWidgets/PreviewPlot.ui
-    inc/MantidQtMantidWidgets/ProjectSave.ui
     inc/MantidQtMantidWidgets/pqHelpWindow.ui
     inc/MantidQtMantidWidgets/InstrumentView/UCorrectionDialog.ui
 )

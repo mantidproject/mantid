@@ -201,7 +201,6 @@
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MessageDisplay.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/ProjectSaveView.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -6051,7 +6050,8 @@ void ApplicationWindow::prepareSaveProject()
       windows.push_back(win);
   }
 
-  m_projectSaveView = new MantidQt::MantidWidgets::ProjectSaveView(windows, this);
+  ProjectSerialiser serialiser(this, currentFolder());
+  m_projectSaveView = new MantidQt::MantidWidgets::ProjectSaveView(serialiser, windows, this);
   m_projectSaveView->show();
 }
 

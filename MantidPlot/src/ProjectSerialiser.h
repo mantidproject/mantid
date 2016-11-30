@@ -53,7 +53,12 @@ class ProjectSerialiser {
 public:
   /// Create a new serialiser with the current application window
   explicit ProjectSerialiser(ApplicationWindow *window);
+  explicit ProjectSerialiser(ApplicationWindow *window, Folder *folder);
+
   /// Save the current state of the project to disk
+  void save(const QString &projectName,
+            const std::vector<std::string>& wsNames,
+            const std::vector<std::string>& windowNames, bool compress = false);
   void save(Folder *folder, const QString &projectName, bool compress = false);
   /// Load a project file from disk
   void load(std::string lines, const int fileVersion,
@@ -66,6 +71,12 @@ private:
 
   /// Store a reference to the caller application window instance
   ApplicationWindow *window;
+  /// Store a reference to the current folder
+  Folder* m_currentFolder;
+  /// Vector of names of windows to save to file
+  std::vector<std::string> m_windowNames;
+  /// Vector of names of workspaces to save to file
+  std::vector<std::string> m_workspaceNames;
   /// Store a count of the number of windows during saving
   int m_windowCount;
 

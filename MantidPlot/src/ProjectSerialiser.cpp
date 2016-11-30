@@ -1,12 +1,12 @@
-#include "globals.h"
+#include "ProjectSerialiser.h"
 #include "ApplicationWindow.h"
 #include "Graph3D.h"
 #include "Matrix.h"
 #include "Note.h"
-#include "ProjectSerialiser.h"
 #include "ScriptingWindow.h"
 #include "TableStatistics.h"
 #include "WindowFactory.h"
+#include "globals.h"
 
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
 #include "Mantid/MantidMatrixFunction.h"
@@ -32,6 +32,20 @@ void file_compress(const char *file, const char *mode);
 ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window)
     : window(window), m_windowCount(0) {}
 
+ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder)
+  : window(window), m_currentFolder(folder), m_windowCount(0) {}
+
+void ProjectSerialiser::save(const QString &projectName,
+                             const std::vector<std::string> &wsNames,
+                             const std::vector<std::string> &windowNames,
+                             bool compress)
+{
+  m_windowNames = windowNames;
+  m_workspaceNames = wsNames;
+
+  save(m_currentFolder, projectName, compress);
+}
+
 /**
  * Save the current state of the application as a Mantid project file
  *
@@ -50,7 +64,10 @@ void ProjectSerialiser::save(Folder *folder, const QString &projectName,
     return;
   }
 
-  QString text = serialiseProjectState(folder);
+  if (!m_currentFolder)
+    m_currentFolder = window->currentFolder();
+
+  QString text = serialiseProjectState(m_currentFolder);
   saveProjectFile(&fileHandle, projectName, text, compress);
 }
 
@@ -249,8 +266,10 @@ bool ProjectSerialiser::canWriteToProject(QFile *fileHandle,
   // check if we can write
   if (!fileHandle->open(QIODevice::WriteOnly)) {
     QMessageBox::about(window, window->tr("MantidPlot - File save error"),
-                       window->tr("The file: <br><b>%1</b> is opened in "
-                                  "read-only mode").arg(projectName)); // Mantid
+                       window
+                           ->tr("The file: <br><b>%1</b> is opened in "
+                                "read-only mode")
+                           .arg(projectName)); // Mantid
     return false;
   }
   return true;
@@ -478,9 +497,10 @@ bool ProjectSerialiser::canBackupProjectFiles(QFile *fileHandle,
         fileHandle->close();
       int choice = QMessageBox::warning(
           window, window->tr("MantidPlot - File backup error"), // Mantid
-          window->tr("Cannot make a backup copy of <b>%1</b> (to %2).<br>If "
-                     "you ignore "
-                     "this, you run the risk of <b>data loss</b>.")
+          window
+              ->tr("Cannot make a backup copy of <b>%1</b> (to %2).<br>If "
+                   "you ignore "
+                   "this, you run the risk of <b>data loss</b>.")
               .arg(projectName)
               .arg(projectName + "~"),
           QMessageBox::Retry | QMessageBox::Default,
@@ -584,8 +604,8 @@ void ProjectSerialiser::populateMantidTreeWidget(const QString &lines) {
   QStringList list = lines.split("\t");
   QStringList::const_iterator line = list.begin();
   for (++line; line != list.end(); ++line) {
-    if ((*line)
-            .contains(',')) // ...it is a group and more work needs to be done
+    if ((*line).contains(
+            ',')) // ...it is a group and more work needs to be done
     {
       // Format of string is "GroupName, Workspace, Workspace, Workspace, ....
       // and so on "

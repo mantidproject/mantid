@@ -1,14 +1,16 @@
 #include "MantidQtAPI/IProjectSerialisable.h"
 #include "MantidQtMantidWidgets/ProjectSavePresenter.h"
-#include "MantidQtMantidWidgets/ProjectSaveView.h"
+#include "MantidQtAPI/FileDialogHandler.h"
+#include "ProjectSaveView.h"
 
 using namespace MantidQt::API;
 
 namespace MantidQt {
 namespace MantidWidgets {
 
-ProjectSaveView::ProjectSaveView(const std::vector<IProjectSerialisable*> &windows, QWidget *parent)
-  : QDialog(parent), m_serialisableWindows(windows.cbegin(), windows.cend()) {
+ProjectSaveView::ProjectSaveView(ProjectSerialiser &serialiser, const std::vector<IProjectSerialisable*> &windows, QWidget *parent)
+  : QDialog(parent), m_serialisableWindows(windows.cbegin(), windows.cend()),
+    m_serialiser(serialiser) {
   m_ui.setupUi(this);
   m_presenter.reset(new ProjectSavePresenter(this));
 
@@ -16,7 +18,16 @@ ProjectSaveView::ProjectSaveView(const std::vector<IProjectSerialisable*> &windo
   connect(m_ui.workspaceList,
           SIGNAL(itemChanged(QTreeWidgetItem *, int)), this,
           SLOT(workspaceItemChanged(QTreeWidgetItem*, int)));
+
+  connect(m_ui.btnBrowseFilePath, SIGNAL(clicked(bool)), this, SLOT(findFilePath()));
+  //Connect signals to listen for when the save/saveAll button is clicked
+  connect(m_ui.btnSave, SIGNAL(clicked(bool)), this, SLOT(save(bool)));
+  connect(m_ui.btnSaveAll, SIGNAL(clicked(bool)), this, SLOT(save(bool)));
+  connect(m_ui.btnCancel, SIGNAL(clicked(bool)), this, SLOT(close()));
 }
+
+// IProjectSaveView interface implementations
+//==============================================================================
 
 std::vector<API::IProjectSerialisable *> ProjectSaveView::getWindows()
 {
@@ -71,6 +82,9 @@ void ProjectSaveView::removeFromExcludedWindowsList(const std::vector<std::strin
   }
 }
 
+// Private slots
+//==============================================================================
+
 void ProjectSaveView::workspaceItemChanged(QTreeWidgetItem *item, int column)
 {
   if(item->checkState(column) == Qt::CheckState::Checked) {
@@ -90,6 +104,68 @@ std::vector<std::string> ProjectSaveView::getItemsWithCheckState(const Qt::Check
        auto name = item->text(0).toStdString();
        names.push_back(name);
      }
+  }
+  return names;
+}
+
+void ProjectSaveView::save(bool checked)
+{
+  UNUSED_ARG(checked);
+  auto wsNames = getCheckedWorkspaceNames();
+  auto windowNames = getIncludedWindowNames();
+  auto filePath = prepareProjectFolder(m_ui.projectPath->text());
+  auto compress = filePath.endsWith(".gz");
+  m_serialiser.save(filePath, wsNames, windowNames, compress);
+  close();
+}
+
+
+void ProjectSaveView::findFilePath()
+{
+  QString fileName = "";
+  QString filter = "MantidPlot project (*.mantid);;";
+  filter += "Compressed MantidPlot project (*.mantid.gz)";
+
+  QString selectedFilter;
+  fileName = MantidQt::API::FileDialogHandler::getSaveFileName(
+        this, tr("Save Project As"), "", filter, &selectedFilter);
+
+  m_ui.projectPath->setText(fileName);
+}
+
+QString ProjectSaveView::prepareProjectFolder(const QString &path)
+{
+  QFileInfo fileInfo(path);
+  bool isFile = fileInfo.path().endsWith(".mantid") ||
+      fileInfo.path().endsWith(".mantid.gz");
+
+  if (!isFile) {
+    QDir directory(path);
+    if (!directory.exists()) {
+      // Make the directory
+      directory.mkdir(path);
+    }
+
+    QString projectFileName = directory.dirName();
+    projectFileName.append(".mantid");
+    return directory.absoluteFilePath(projectFileName);
+
+  } else {
+    return fileInfo.absoluteFilePath();
+  }
+}
+
+// Private helper methods
+//==============================================================================
+
+std::vector<std::string> ProjectSaveView::getIncludedWindowNames() const
+{
+  std::vector<std::string> names;
+  for( int i = 0; i < m_ui.includedWindows->topLevelItemCount(); ++i )
+  {
+     auto item = m_ui.includedWindows->topLevelItem(i);
+     auto name = item->text(0).toStdString();
+     names.push_back(name);
   }
   return names;
 }

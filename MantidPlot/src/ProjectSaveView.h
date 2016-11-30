@@ -4,6 +4,7 @@
 #include "MantidQtAPI/IProjectSerialisable.h"
 #include "MantidQtMantidWidgets/IProjectSaveView.h"
 #include "MantidQtMantidWidgets/ProjectSavePresenter.h"
+#include "ProjectSerialiser.h"
 #include "ui_ProjectSave.h"
 
 #include <QWidget>
@@ -46,21 +47,31 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class ProjectSaveView : public QDialog, IProjectSaveView {
   Q_OBJECT
 public:
-  ProjectSaveView(const std::vector<MantidQt::API::IProjectSerialisable*> &windows, QWidget *parent = nullptr);
+  ProjectSaveView(MantidQt::API::ProjectSerialiser &serialiser,
+                  const std::vector<MantidQt::API::IProjectSerialisable*> &windows,
+                  QWidget *parent = nullptr);
 
   std::vector<MantidQt::API::IProjectSerialisable*> getWindows() override;
   std::vector<std::string> getCheckedWorkspaceNames() override;
   std::vector<std::string> getUncheckedWorkspaceNames() override;
+
   void updateWorkspacesList(const std::vector<std::string>& workspaces) override;
   void updateIncludedWindowsList(const std::vector<std::string>& windows) override;
   void updateExcludedWindowsList(const std::vector<std::string>& windows) override;
   void removeFromIncludedWindowsList(const std::vector<std::string>& windows) override;
   void removeFromExcludedWindowsList(const std::vector<std::string>& windows) override;
 
+signals:
+  void projectSaved();
+
 private slots:
+  void findFilePath();
+  QString prepareProjectFolder(const QString &path);
+  void save(bool checked);
   void workspaceItemChanged(QTreeWidgetItem* item, int column);
 
 private:
+    std::vector<std::string> getIncludedWindowNames() const;
     std::vector<std::string> getItemsWithCheckState(const Qt::CheckState state) const;
     void removeItem(QTreeWidget* widget, const std::string &name);
     void addWindowItem(QTreeWidget* widget, const std::string &name);
@@ -68,6 +79,7 @@ private:
 
     std::vector<MantidQt::API::IProjectSerialisable*> m_serialisableWindows;
     std::unique_ptr<ProjectSavePresenter> m_presenter;
+    MantidQt::API::ProjectSerialiser  m_serialiser;
     Ui::ProjectSave m_ui;
 };
 }
