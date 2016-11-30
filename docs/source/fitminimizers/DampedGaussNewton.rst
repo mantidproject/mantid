@@ -1,7 +1,7 @@
-.. _GaussNewton
+﻿.. _DampedGaussNewton
 
-Damping Gauss-Newton minimizer
-==============================
+Damped Gauss-Newton minimizer
+=============================
 
 This minimizer is
 explained at `Wikipedia <https://en.wikipedia.org/wiki/Gauss–Newton_algorithm#Improved_versions>`__ 
