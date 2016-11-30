@@ -113,7 +113,7 @@ public:
   }
 
   void test_manual_construction() {
-    TS_ASSERT_THROWS_NOTHING(LiveListenerInfo info());
+    TS_ASSERT_THROWS_NOTHING(LiveListenerInfo{});
 
     LiveListenerInfo info;
     TS_ASSERT_EQUALS(info.name(), "");

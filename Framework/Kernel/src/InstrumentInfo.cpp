@@ -162,6 +162,7 @@ InstrumentInfo::liveListenerInfo(std::string name) const {
 
   // Name specified, find requested connection
   for (auto &listener : m_listeners) {
+    // Names are compared case insensitively
     if (boost::iequals(listener.name(), name))
       return listener;
   }
@@ -284,7 +285,7 @@ void InstrumentInfo::fillLiveData(const Poco::XML::Element *elem) {
   for (unsigned long i = 0; i < connections->length(); ++i) {
     auto *conn = dynamic_cast<Poco::XML::Element *>(connections->item(i));
     try {
-      m_listeners.emplace_back(LiveListenerInfo(conn));
+      m_listeners.emplace_back(LiveListenerInfo(this, conn));
     } catch (...) {
       g_log.error() << "Exception occurred while loading livedata for "
                     << m_name << " instrument. Skipping faulty connection.\n";
