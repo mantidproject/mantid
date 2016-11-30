@@ -23,9 +23,15 @@ The workspaces must be histogrammed. Use
 :ref:`algm-ConvertToHistogram` on workspaces prior to
 passing them to this algorithm.
 
+This algorithm is also capable of stitching together matrix workspaces
+from multiple workspace groups. In this case, each group must contain the
+same number of workspaces. The algorithm will stitch together the workspaces
+in the first group before stitching workspaces from the next group on top
+of the previous ones.
+
 Usage
 -----
-**Example - a basic example using Stitch1DMany to stitch two workspaces together.**
+**Example - a basic example using Stitch1DMany to stitch three workspaces together.**
 
 .. testcode:: ExStitch1DManySimple
 
@@ -38,12 +44,14 @@ Usage
     #create two histograms with a single peak in each one
     x1 = np.arange(-1, 1, 0.02)
     x2 = np.arange(0.4, 1.6, 0.02)
+    x3 = np.arange(1.3, 3, 0.02)
     ws1 = CreateWorkspace(UnitX="1/q", DataX=x1, DataY=gaussian(x1[:-1], 0, 0.1)+1)
     ws2 = CreateWorkspace(UnitX="1/q", DataX=x2, DataY=gaussian(x2[:-1], 1, 0.05)+1)
+    ws3 = CreateWorkspace(UnitX="1/q", DataX=x3, DataY=gaussian(x3[:-1], 2, 0.08)+1)
 
     #stitch the histograms together
-    workspaces = ws1.name() + "," + ws2.name()
-    stitched, scale = Stitch1DMany(InputWorkspaces=workspaces, StartOverlaps=[0.4], EndOverlaps=[0.6], Params=[0.02])
+    workspaces = ws1.name() + "," + ws2.name() + "," + ws3.name()
+    stitched, scale = Stitch1DMany(InputWorkspaces=workspaces, StartOverlaps=[0.4, 1.2], EndOverlaps=[0.6, 1.4], Params=[0.02])
 
 Output:
 
@@ -52,18 +60,41 @@ Output:
    :alt: Stitch1D output
    :align: center
 
-**Example - a practical example using reflectometry data and a scale factor.**
+**Example - another example using three group workspaces of two workspaces each.**
 
 .. testcode:: ExStitch1DPractical
 
-  trans1 = Load('INTER00013463')
-  trans2 = Load('INTER00013464')
+    import numpy as np
 
-  trans1_wav = CreateTransmissionWorkspaceAuto(trans1)
-  trans2_wav = CreateTransmissionWorkspaceAuto(trans2)
+    def gaussian(x, mu, sigma):
+      """Creates a gaussian peak centered on mu and with width sigma."""
+      return (1/ sigma * np.sqrt(2 * np.pi)) * np.exp( - (x-mu)**2  / (2*sigma**2))
 
-  workspaces = trans1_wav.name() + ',' + trans2_wav.name()
-  stitched_wav, y = Stitch1DMany(workspaces, params='1, 0.05, 17', UseManualScaleFactor=True, ManualScaleFactor=0.85)
+    # create six histograms with a single peak in each one
+    x1 = np.arange(-1, 1, 0.02)
+    x3 = np.arange(0.3, 1.8, 0.02)
+    x5 = np.arange(1.4, 2.8, 0.02)
+    x2 = np.arange(2.4, 3.5, 0.02)
+    x4 = np.arange(3.2, 4.9, 0.02)
+    x6 = np.arange(4.5, 5.2, 0.02)
+    ws1 = CreateWorkspace(UnitX="1/q", DataX=x1, DataY=gaussian(x1[:-1], 0, 0.1)+1)
+    ws3 = CreateWorkspace(UnitX="1/q", DataX=x3, DataY=gaussian(x3[:-1], 1, 0.05)+1)
+    ws5 = CreateWorkspace(UnitX="1/q", DataX=x5, DataY=gaussian(x5[:-1], 2, 0.12)+1)
+    ws2 = CreateWorkspace(UnitX="1/q", DataX=x2, DataY=gaussian(x2[:-1], 3, 0.08)+1)
+    ws4 = CreateWorkspace(UnitX="1/q", DataX=x4, DataY=gaussian(x4[:-1], 4, 0.06)+1)
+    ws6 = CreateWorkspace(UnitX="1/q", DataX=x6, DataY=gaussian(x6[:-1], 5, 0.04)+1)
+
+    # Group first, second and third pairs of workspaces
+    groupWSNames1 = ws1.name() + "," + ws2.name()
+    gws1 = GroupWorkspaces(InputWorkspaces=groupWSNames1)
+    groupWSNames2 = ws3.name() + "," + ws4.name()
+    gws2 = GroupWorkspaces(InputWorkspaces=groupWSNames2)
+    groupWSNames3 = ws5.name() + "," + ws6.name()
+    gws3 = GroupWorkspaces(InputWorkspaces=groupWSNames3)
+
+    # Stitch together workspaces from each group
+    workspaceNames = gws1.name() + "," + gws2.name() + "," + gws3.name()
+    stitched, scale = Stitch1DMany(InputWorkspaces=workspaceNames, StartOverlaps=[0.3, 1.4], EndOverlaps=[3.3, 4.6], Params=[0.02])
 
 Output:
 
