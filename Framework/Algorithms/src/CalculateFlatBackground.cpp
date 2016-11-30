@@ -146,7 +146,10 @@ void CalculateFlatBackground::exec() {
 
   std::vector<int> wsInds = getProperty("WorkspaceIndexList");
   // check if the user passed an empty list, if so all of spec will be processed
-  getWsInds(wsInds, numHists);
+  if (wsInds.empty()) {
+    wsInds.resize(numHists);
+    std::iota(wsInds.begin(), wsInds.end(), 0);
+  }
 
   // Are we removing the background?
   const bool removeBackground =
@@ -286,23 +289,6 @@ void CalculateFlatBackground::checkRange(double &startX, double &endX) {
     g_log.error(failure);
     throw std::invalid_argument(failure);
   }
-}
-
-/**
-* Checks if the array is empty and if so fills it with all the index numbers
-* in the workspace. Non-empty arrays are left untouched.
-* @param output the array to be checked
-* @param workspaceTotal required to be the total number of spectra in the
-* workspace
-*/
-void CalculateFlatBackground::getWsInds(std::vector<int> &output,
-                                        const size_t workspaceTotal) {
-  if (!output.empty()) {
-    return;
-  }
-
-  output.resize(workspaceTotal);
-  std::iota(output.begin(), output.end(), 0);
 }
 
 /**

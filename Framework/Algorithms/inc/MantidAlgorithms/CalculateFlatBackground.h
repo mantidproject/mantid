@@ -83,7 +83,6 @@ private:
   void convertToDistribution(API::MatrixWorkspace_sptr workspace);
   void restoreDistributionState(API::MatrixWorkspace_sptr workspace);
   void checkRange(double &startX, double &endX);
-  void getWsInds(std::vector<int> &output, const size_t workspaceTotal);
   void Mean(const HistogramData::Histogram &histogram, double &background,
             double &variance, const double startX, const double endX) const;
   void LinearFit(const HistogramData::Histogram &histogram, double &background,
