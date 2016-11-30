@@ -42,6 +42,9 @@ void ProjectSerialiser::save(const QString &projectName,
 {
   m_windowNames = windowNames;
   m_workspaceNames = wsNames;
+  window->projectname = projectName;
+  QFileInfo fileInfo(projectName);
+  window->workingDir = fileInfo.absoluteDir().absolutePath();
 
   save(m_currentFolder, projectName, compress);
 }
@@ -378,6 +381,8 @@ QString ProjectSerialiser::saveFolderSubWindows(Folder *folder) {
   for (auto &w : windows) {
     MantidQt::API::IProjectSerialisable *ips =
         dynamic_cast<MantidQt::API::IProjectSerialisable *>(w);
+    if(!contains(m_windowNames, w->getWindowName()))
+      continue;
 
     if (ips) {
       text += QString::fromUtf8(ips->saveToProject(window).c_str());
@@ -424,6 +429,10 @@ QString ProjectSerialiser::saveWorkspaces() {
   for (auto &itemIter : workspaceItems) {
     QString wsName = QString::fromStdString(itemIter);
 
+    // check whether the user wants to save this workspace
+    if(!contains(m_workspaceNames, wsName.toStdString()))
+      continue;
+
     auto ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
         wsName.toStdString());
     auto group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
@@ -464,7 +473,8 @@ QString ProjectSerialiser::saveAdditionalWindows() {
   QString output;
   for (auto win : window->getSerialisableWindows()) {
     auto serialisableWindow = dynamic_cast<IProjectSerialisable *>(win);
-    if (!serialisableWindow)
+    if (!serialisableWindow ||
+        !contains(m_windowNames, serialisableWindow->getWindowName()))
       continue;
 
     auto lines = serialisableWindow->saveToProject(window);
@@ -763,4 +773,9 @@ QMdiSubWindow *ProjectSerialiser::setupQMdiSubWindow() const {
   subWindow->setWindowTitle("Vates Simple Interface");
   window->connect(window, SIGNAL(shutting_down()), subWindow, SLOT(close()));
   return subWindow;
+}
+
+bool ProjectSerialiser::contains(const std::vector<std::string> &vec, const std::string &value)
+{
+  return std::find(vec.cbegin(), vec.cend(), value) != vec.cend();
 }

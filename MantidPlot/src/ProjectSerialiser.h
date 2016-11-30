@@ -134,6 +134,8 @@ private:
 
   /// Create a handle to a new QMdiSubWindow instance
   QMdiSubWindow *setupQMdiSubWindow() const;
+  /// Check if a vector of strings contains a string
+  bool contains(const std::vector<std::string>& vec, const std::string& value);
 };
 }
 }
