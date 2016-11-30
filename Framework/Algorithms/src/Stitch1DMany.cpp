@@ -289,12 +289,13 @@ void Stitch1DMany::doStitch1D(
  * @param inputWSGroups :: The set of workspace groups to be stitched
  * @param period :: The period index we are stitching at
  * @param storeInADS :: True to store in the AnalysisDataService
+ * @param useManualScaleFactor :: True to use a manual scale factor
  * @param outWSName :: Output stitched workspace name
  * @param outScaleFactors :: Actual values used for scale factors
  */
 void Stitch1DMany::doStitch1DMany(
     std::vector<WorkspaceGroup_sptr> inputWSGroups, int period, bool storeInADS,
-    std::string &outName, std::vector<double> &outScaleFactors) {
+    bool useManualScaleFactor, std::string &outName, std::vector<double> &outScaleFactors) {
 
   // List of workspaces to stitch
   std::vector<std::string> toProcess;
@@ -311,6 +312,7 @@ void Stitch1DMany::doStitch1DMany(
   for (auto &prop : this->getProperties()) {
     alg->setProperty(prop->name(), prop->value());
   }
+  alg->setProperty("UseManualScaleFactor", useManualScaleFactor);
   alg->setProperty("InputWorkspaces", toProcess);
   alg->setProperty("OutputWorkspace", outName);
   alg->execute();
@@ -339,13 +341,14 @@ bool Stitch1DMany::processGroups() {
 
   // Determine whether or not we are using a global scale factor
   Property *manualSF = this->getProperty("ManualScaleFactor");
-  bool usingGlobalSF = m_useManualScaleFactor && manualSF->isDefault() == false;
+  bool usingScaleFromPeriod = m_useManualScaleFactor && manualSF->isDefault();
 
-  if (usingGlobalSF) {
+  if (!usingScaleFromPeriod) {
     for (int i = 0; i < m_numWSPerGroup; ++i) {
       outName = groupName;
       std::vector<double> scaleFactors;
-      doStitch1DMany(m_inputWSGroups, i, true, outName, scaleFactors);
+      doStitch1DMany(m_inputWSGroups, i, true, m_useManualScaleFactor, outName,
+                     scaleFactors);
 
       // Add the resulting workspace to the list to be grouped together
       toGroup.push_back(outName);
@@ -358,8 +361,8 @@ bool Stitch1DMany::processGroups() {
     // Obtain scale factors for the specified period
     outName = groupName;
     std::vector<double> periodScaleFactors;
-    doStitch1DMany(m_inputWSGroups, m_scaleFactorFromPeriod, false, outName,
-                   periodScaleFactors);
+    doStitch1DMany(m_inputWSGroups, m_scaleFactorFromPeriod, false, false,
+                   outName, periodScaleFactors);
 
     // Iterate over each period
     for (int i = 0; i < m_numWSPerGroup; i++) {

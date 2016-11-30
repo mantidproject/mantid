@@ -200,7 +200,7 @@ public:
     TS_ASSERT_DELTA(stitched->readE(1)[9], 1.10982, 0.00001);
     TS_ASSERT_DELTA(stitched->readE(1)[16], 1.79063, 0.00001);
 
-    // Test out sclae factors
+    // Test out scale factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
     TS_ASSERT_EQUALS(scales.size(), 1);
     // Only scale factor for first spectrum is returned
@@ -276,7 +276,7 @@ public:
     TS_ASSERT_DELTA(stitched->readE(1)[16], 1.33430, 0.00001);
     TS_ASSERT_DELTA(stitched->readE(1)[24], 2.00079, 0.00001);
 
-    // Test out sclae factors
+    // Test out scale factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
     TS_ASSERT_EQUALS(scales.size(), 2);
     TS_ASSERT_DELTA(scales.front(), 0.9090, 0.0001);
@@ -352,7 +352,7 @@ public:
     TS_ASSERT_DELTA(stitched->readE(1)[10], 0.72457, 0.00001);
     TS_ASSERT_DELTA(stitched->readE(1)[18], 0.79057, 0.00001);
 
-    // Test out sclae factors
+    // Test out scale factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
     TS_ASSERT_EQUALS(scales.size(), 2);
     TS_ASSERT_EQUALS(scales.front(), 0.5);
@@ -450,7 +450,7 @@ public:
     TS_ASSERT_DELTA(stitched->readE(1)[16], 1.33430, 0.00001);
     TS_ASSERT_DELTA(stitched->readE(1)[24], 2.00079, 0.00001);
 
-    // Test out sclae factors
+    // Test out scale factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
     TS_ASSERT_EQUALS(scales.size(), 2);
     TS_ASSERT_DELTA(scales.front(), 0.9090, 0.0001);
@@ -542,7 +542,7 @@ public:
     TS_ASSERT_DELTA(stitched->readE(1)[9], 1.24263, 0.00001);
     TS_ASSERT_DELTA(stitched->readE(1)[16], 2.00959, 0.00001);
 
-    // Test out sclae factors
+    // Test out scale factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
     TS_ASSERT_EQUALS(scales.size(), 2);
     TS_ASSERT_DELTA(scales.front(), 0.9090, 0.0001); // 1.0/1.1
@@ -599,7 +599,7 @@ public:
 
     // First item in the output group
     auto stitched =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+      boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
     // First spectrum, Y values
@@ -640,11 +640,127 @@ public:
     TS_ASSERT_DELTA(stitched->readE(1)[9], 0.71824, 0.00001);
     TS_ASSERT_DELTA(stitched->readE(1)[16], 0.80622, 0.00001);
 
-    // Test out sclae factors
+    // Test out scale factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
     TS_ASSERT_EQUALS(scales.size(), 2);
     TS_ASSERT_DELTA(scales.front(), 0.5000, 0.0001);
     TS_ASSERT_DELTA(scales.back(), 0.5000, 0.0001);
+
+    // Clear the ADS
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_two_groups_with_three_workspaces_scale_factor_from_period() {
+    // Three groups with two matrix workspaces each.
+    // Each matrix workspace has two spectra.
+
+    // First group
+    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
+    auto ws2 = createUniformWorkspace(0.1, 0.1, 1.5, 2.5);
+    WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
+    group1->addWorkspace(ws1);
+    group1->addWorkspace(ws2);
+    // Second group
+    auto ws3 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
+    auto ws4 = createUniformWorkspace(0.8, 0.1, 1.6, 2.6);
+    WorkspaceGroup_sptr group2 = boost::make_shared<WorkspaceGroup>();
+    group2->addWorkspace(ws3);
+    group2->addWorkspace(ws4);
+    // Third group
+    auto ws5 = createUniformWorkspace(1.6, 0.1, 1.5, 2.5);
+    auto ws6 = createUniformWorkspace(1.6, 0.1, 1.6, 3.0);
+    WorkspaceGroup_sptr group3 = boost::make_shared<WorkspaceGroup>();
+    group3->addWorkspace(ws5);
+    group3->addWorkspace(ws6);
+
+    // The algorithm needs the workspaces to be in the ADS
+    AnalysisDataService::Instance().addOrReplace("group1", group1);
+    AnalysisDataService::Instance().addOrReplace("group2", group2);
+    AnalysisDataService::Instance().addOrReplace("group3", group3);
+
+    // ws1 will be stitched with ws3 and ws5
+    // ws2 will be stitched with ws4 and ws6
+
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "group1, group2, group3");
+    alg.setProperty("Params", "0.1, 0.1, 2.6");
+    alg.setProperty("StartOverlaps", "0.8, 1.6");
+    alg.setProperty("EndOverlaps", "1.1, 1.9");
+    alg.setProperty("UseManualScaleFactor", "1");
+    alg.setProperty("ManualScaleFactor", 1.0);
+    alg.setProperty("ScaleFactorFromPeriod", 1);
+    alg.setPropertyValue("OutputWorkspace", "outws");
+    alg.execute();
+
+    // By setting ManualScaleFactor to 1.0 (default value) it allows workspaces
+    // in other periods to be scaled by scale factors from a specific period.
+    // Periods 0 and 2 workspaces will be scaled by scale factors from period 1.
+
+    // Test output ws
+    Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outws);
+    TS_ASSERT_EQUALS(group->getNumberOfEntries(), 2);
+
+    // First item in the output group
+    auto stitched =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(stitched->blocksize(), 25);
+    // First spectrum, Y values
+    TS_ASSERT_DELTA(stitched->readY(0)[0], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->readY(0)[9], 1.01589, 0.00001);
+    TS_ASSERT_DELTA(stitched->readY(0)[16], 0.97288, 0.00001);
+    TS_ASSERT_DELTA(stitched->readY(0)[24], 0.9375, 0.00001);
+    // Second spectrum, Y values
+    TS_ASSERT_DELTA(stitched->readY(1)[0], 2, 0.00001);
+    TS_ASSERT_DELTA(stitched->readY(1)[9], 1.98375, 0.00001);
+    TS_ASSERT_DELTA(stitched->readY(1)[16], 1.70307, 0.00001);
+    TS_ASSERT_DELTA(stitched->readY(1)[24], 1.56250, 0.00001);
+    // First spectrum, E values
+    TS_ASSERT_DELTA(stitched->readE(0)[0], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->readE(0)[9], 0.70111, 0.00001);
+    TS_ASSERT_DELTA(stitched->readE(0)[16], 0.60401, 0.00001);
+    TS_ASSERT_DELTA(stitched->readE(0)[24], 0.76547, 0.00001);
+    // Second spectrum, E values
+    TS_ASSERT_DELTA(stitched->readE(1)[0], 1.41421, 0.00001);
+    TS_ASSERT_DELTA(stitched->readE(1)[9], 0.97973, 0.00001);
+    TS_ASSERT_DELTA(stitched->readE(1)[16], 0.79916, 0.00001);
+    TS_ASSERT_DELTA(stitched->readE(1)[24], 0.98821, 0.00001);
+
+    // Second item in the output group
+    stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+    TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(stitched->blocksize(), 25);
+    // First spectrum, Y values
+    TS_ASSERT_DELTA(stitched->readY(0)[0], 1.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->readY(0)[9], 1.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->readY(0)[16], 1.15385, 0.00001);
+    TS_ASSERT_DELTA(stitched->readY(0)[24], 1, 0.00001);
+    // Second spectrum, Y values
+    TS_ASSERT_DELTA(stitched->readY(1)[0], 2.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->readY(1)[9], 2.46735, 0.00001);
+    TS_ASSERT_DELTA(stitched->readY(1)[16], 2.06568, 0.00001);
+    TS_ASSERT_DELTA(stitched->readY(1)[24], 1.87500, 0.00001);
+    // First spectrum, E values
+    TS_ASSERT_DELTA(stitched->readE(0)[0], 1.22474, 0.00001);
+    TS_ASSERT_DELTA(stitched->readE(0)[9], 0.85194, 0.00001);
+    TS_ASSERT_DELTA(stitched->readE(0)[16], 0.65779, 0.00001);
+    TS_ASSERT_DELTA(stitched->readE(0)[24], 0.79057, 0.00001);
+    // Second spectrum, E values
+    TS_ASSERT_DELTA(stitched->readE(1)[0], 1.58114, 0.00001);
+    TS_ASSERT_DELTA(stitched->readE(1)[9], 1.09265, 0.00001);
+    TS_ASSERT_DELTA(stitched->readE(1)[16], 0.88013, 0.00001);
+    TS_ASSERT_DELTA(stitched->readE(1)[24], 1.08253, 0.00001);
+
+    // Test out scale factors
+    std::vector<double> scales = alg.getProperty("OutScaleFactors");
+    TS_ASSERT_EQUALS(scales.size(), 4);
+    TS_ASSERT_DELTA(scales[0], 0.9375, 0.0001);
+    TS_ASSERT_DELTA(scales[1], 0.6249, 0.0001);
+    TS_ASSERT_DELTA(scales[2], 0.9375, 0.0001);
+    TS_ASSERT_DELTA(scales[3], 0.6249, 0.0001);
 
     // Clear the ADS
     AnalysisDataService::Instance().clear();
