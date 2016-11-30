@@ -418,7 +418,12 @@ void StartLiveDataDialog::accept() {
   AlgorithmDialog::accept(); // accept executes the algorithm
 }
 
-void StartLiveDataDialog::initListenerPropLayout(const QString &inst) {
+/**
+ * Update the Listener Properties group box for the current LiveListener.
+ *
+ * @param listener Name of the LiveListener class that is selected
+ */
+void StartLiveDataDialog::initListenerPropLayout(const QString &listener) {
   // remove previous listener's properties
   auto props = m_algorithm->getPropertiesInGroup("ListenerProperties");
   for (auto prop = props.begin(); prop != props.end(); ++prop) {
@@ -429,7 +434,7 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &inst) {
   }
 
   // update algorithm's properties
-  m_algorithm->setPropertyValue("Listener", inst.toStdString());
+  m_algorithm->setPropertyValue("Listener", listener.toStdString());
   // create or clear the layout
   QLayout *layout = ui.listenerProps->layout();
   if (!layout) {
