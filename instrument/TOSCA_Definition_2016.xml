@@ -46,7 +46,7 @@
 
   <!-- MONITORS -->
   <component type="monitor1" idlist="monitor1">
-    <location z="-1.1385" />
+    <location z="-8.11" />
   </component>
 
   <type name="monitor1" is="monitor">
@@ -59,7 +59,7 @@
   </type>
 
   <component type="monitor2" idlist="monitor2">
-    <location z="-8.11" />
+    <location z="-1.1385" />
   </component>
 
   <type name="monitor2" is="monitor">
