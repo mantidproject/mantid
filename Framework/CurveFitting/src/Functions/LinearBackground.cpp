@@ -33,10 +33,16 @@ void LinearBackground::function1D(double *out, const double *xValues,
                                   const size_t nData) const {
   const double a0 = getParameter("A0");
   const double a1 = getParameter("A1");
+  const double x0 = getAttribute("x0").asDouble();
+  const double x1 = getAttribute("x1").asDouble();
+
+  const double slope = (a1 - a0) / (x1 - x0);
+  const double constant_term = a1 - slope * x1;
 
   for (size_t i = 0; i < nData; i++) {
-    out[i] = a0 + a1 * xValues[i];
+    out[i] = constant_term + slope * xValues[i];
   }
+
 }
 
 void LinearBackground::functionDeriv1D(Jacobian *out, const double *xValues,

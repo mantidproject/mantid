@@ -340,7 +340,6 @@ void SplineInterpolation::setXRange(
         else if (xValues[i] >= xintegValues[nintegData - 1])
           nOutsideRight++;
       }
-
       double *yValues = &(inputWorkspace->mutableY(i)[0]);
       if (nOutsideLeft > 0){
         std::fill_n(yValues, nOutsideLeft, yValues[nOutsideLeft]);
@@ -348,12 +347,13 @@ void SplineInterpolation::setXRange(
             << nOutsideLeft <<
                " x value(s) larger than integration range, will not be calculated.\n";
       }
-      for(size_t k=nData - nOutsideRight; k < nData; ++k)
-        yValues[k] = yValues[nData - nOutsideRight];
       if (nOutsideRight > 0)
+        nOutsideRight += 1;
         g_log.warning()
             << nOutsideRight <<
                " x value(s) smaller than integration range, will not be calculated.\n";
+      for(size_t k=nData - nOutsideRight; k < nData; ++k)
+        yValues[k] = yValues[nData - nOutsideRight];
   }
 }
 
