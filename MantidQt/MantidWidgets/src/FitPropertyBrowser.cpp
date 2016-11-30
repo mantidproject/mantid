@@ -177,7 +177,7 @@ void FitPropertyBrowser::init() {
                << "Conjugate gradient (Fletcher-Reeves imp.)"
                << "Conjugate gradient (Polak-Ribiere imp.)"
                << "BFGS"
-               << "Damped Gauss-Newton";
+               << "Damped GaussNewton";
 
   m_ignoreInvalidData = m_boolManager->addProperty("Ignore invalid data");
   setIgnoreInvalidData(settings.value("Ignore invalid data", false).toBool());
