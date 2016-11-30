@@ -315,7 +315,7 @@ pqPipelineSource *ViewBase::setPluginSource(QString pluginName, QString wsName,
 
   // Update the source so that it retrieves the data from the Mantid workspace
   src->getProxy()->UpdateVTKObjects();        // Updates all the proxies
-  src->updatePipeline();                      // Updates the pipeline
+  //src->updatePipeline();                      // Updates the pipeline
   src->setModifiedState(pqProxy::UNMODIFIED); // Just to that the UI state looks
                                               // consistent with the apply
 

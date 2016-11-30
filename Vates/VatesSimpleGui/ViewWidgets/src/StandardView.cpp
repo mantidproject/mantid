@@ -212,7 +212,7 @@ void StandardView::render() {
     drep->getProxy()->UpdateVTKObjects();
   }
 
-  this->resetDisplay();
+  //this->resetDisplay();
   emit this->triggerAccept();
 }
 

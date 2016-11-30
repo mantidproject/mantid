@@ -131,8 +131,10 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   signal->InitializeArray(std::move(iterator), offset, imageSize);
   visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
 
+  vtkIdType progressIncrement = imageSize/100;
   for (vtkIdType index = 0; index < imageSize; ++index) {
-    progressUpdate.eventRaised(double(index) * progressFactor);
+    if ( index % progressIncrement == 0)
+      progressUpdate.eventRaised(double(index) * progressFactor);
     double signalScalar = signal->GetValue(index);
     bool maskValue = (!std::isfinite(signalScalar) ||
                       !m_thresholdRange->inRange(signalScalar));
