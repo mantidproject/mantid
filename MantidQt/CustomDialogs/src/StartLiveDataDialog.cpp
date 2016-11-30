@@ -195,9 +195,7 @@ void StartLiveDataDialog::initLayout() {
   updateConnectionChoices(ui.cmbInstrument->currentText());
   updateConnectionDetails(ui.cmbConnection->currentText());
   setDefaultAccumulationMethod(ui.cmbConnListener->currentText());
-
-  //=========== Listener's properties =============
-  initListenerPropLayout(ui.cmbInstrument->currentText());
+  initListenerPropLayout(ui.cmbConnListener->currentText());
 
   //=========== SLOTS =============
   connect(ui.processingAlgo, SIGNAL(changedAlgorithm()), this,
@@ -230,8 +228,8 @@ void StartLiveDataDialog::initLayout() {
 
   connect(ui.cmbConnListener, SIGNAL(currentIndexChanged(const QString &)),
           this, SLOT(setDefaultAccumulationMethod(const QString &)));
-  connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(initListenerPropLayout(const QString &)));
+  connect(ui.cmbConnListener, SIGNAL(currentIndexChanged(const QString &)),
+          this, SLOT(initListenerPropLayout(const QString &)));
   connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(updateUiElements(const QString &)));
   connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
@@ -431,7 +429,7 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &inst) {
   }
 
   // update algorithm's properties
-  m_algorithm->setPropertyValue("Instrument", inst.toStdString());
+  m_algorithm->setPropertyValue("Listener", inst.toStdString());
   // create or clear the layout
   QLayout *layout = ui.listenerProps->layout();
   if (!layout) {
