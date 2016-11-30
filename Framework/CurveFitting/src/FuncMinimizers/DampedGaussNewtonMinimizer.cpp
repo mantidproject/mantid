@@ -21,7 +21,7 @@ namespace FuncMinimisers {
 
 namespace {
 /// static logger
-Kernel::Logger g_log("DampingMinimizer");
+Kernel::Logger g_log("DampedGaussNewtonMinimizer");
 }
 
 DECLARE_FUNCMINIMIZER(DampedGaussNewtonMinimizer, Damped Gauss-Newton)
