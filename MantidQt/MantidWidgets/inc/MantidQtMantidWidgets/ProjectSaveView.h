@@ -62,6 +62,10 @@ private slots:
 
 private:
     std::vector<std::string> getItemsWithCheckState(const Qt::CheckState state) const;
+    void removeItem(QTreeWidget* widget, const std::string &name);
+    void addWindowItem(QTreeWidget* widget, const std::string &name);
+    void addWorkspaceItem(const std::string &name);
+
     std::vector<MantidQt::API::IProjectSerialisable*> m_serialisableWindows;
     std::unique_ptr<ProjectSavePresenter> m_presenter;
     Ui::ProjectSave m_ui;

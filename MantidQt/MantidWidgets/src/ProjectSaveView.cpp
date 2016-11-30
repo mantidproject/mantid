@@ -36,13 +36,8 @@ std::vector<std::string> ProjectSaveView::getUncheckedWorkspaceNames()
 void ProjectSaveView::updateWorkspacesList(const std::vector<std::string> &workspaces)
 {
   m_ui.workspaceList->clear();
-
   for (auto name : workspaces) {
-    QStringList lst(QString::fromStdString(name));
-    lst.append("0");
-    QTreeWidgetItem *item = new QTreeWidgetItem(lst);
-    item->setCheckState(0, Qt::CheckState::Checked);
-    m_ui.workspaceList->addTopLevelItem(item);
+    addWorkspaceItem(name);
   }
 }
 
@@ -50,9 +45,7 @@ void ProjectSaveView::updateIncludedWindowsList(const std::vector<std::string> &
 {
   m_ui.includedWindows->clear();
   for (auto name : windows) {
-    auto it = new QTreeWidgetItem(m_ui.includedWindows);
-    it->setText(0, QString::fromStdString(name));
-    m_ui.includedWindows->addTopLevelItem(it);
+    addWindowItem(m_ui.includedWindows, name);
   }
 }
 
@@ -60,31 +53,21 @@ void ProjectSaveView::updateExcludedWindowsList(const std::vector<std::string> &
 {
   m_ui.excludedWindows->clear();
   for (auto name : windows) {
-    auto it = new QTreeWidgetItem(m_ui.excludedWindows);
-    it->setText(0, QString::fromStdString(name));
-    m_ui.excludedWindows->addTopLevelItem(it);
+    addWindowItem(m_ui.excludedWindows, name);
   }
 }
 
 void ProjectSaveView::removeFromIncludedWindowsList(const std::vector<std::string> &windows)
 {
   for (auto name : windows) {
-    auto qname = QString::fromStdString(name);
-    auto items = m_ui.includedWindows->findItems(qname, Qt::MatchContains );
-    for (auto item : items) {
-      delete item;
-    }
+    removeItem(m_ui.includedWindows, name);
   }
 }
 
 void ProjectSaveView::removeFromExcludedWindowsList(const std::vector<std::string> &windows)
 {
   for (auto name : windows) {
-    auto qname = QString::fromStdString(name);
-    auto items = m_ui.excludedWindows->findItems(qname, Qt::MatchContains );
-    for (auto item : items) {
-      delete item;
-    }
+    removeItem(m_ui.excludedWindows, name);
   }
 }
 
@@ -109,6 +92,31 @@ std::vector<std::string> ProjectSaveView::getItemsWithCheckState(const Qt::Check
      }
   }
   return names;
+}
+
+void ProjectSaveView::removeItem(QTreeWidget *widget, const std::string &name)
+{
+  auto qname = QString::fromStdString(name);
+  auto items = widget->findItems(qname, Qt::MatchContains );
+  for (auto item : items) {
+    delete item;
+  }
+}
+
+void ProjectSaveView::addWindowItem(QTreeWidget *widget, const std::string &name)
+{
+  auto it = new QTreeWidgetItem(widget);
+  it->setText(0, QString::fromStdString(name));
+  widget->addTopLevelItem(it);
+}
+
+void ProjectSaveView::addWorkspaceItem(const std::string &name)
+{
+  QStringList lst(QString::fromStdString(name));
+  lst.append("0");
+  QTreeWidgetItem *item = new QTreeWidgetItem(lst);
+  item->setCheckState(0, Qt::CheckState::Checked);
+  m_ui.workspaceList->addTopLevelItem(item);
 }
 
 }
