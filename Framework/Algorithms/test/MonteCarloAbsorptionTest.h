@@ -174,14 +174,30 @@ public:
     TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
                                        DeltaEMode::Elastic, -1, -1};
     const int nlambda(5);
-    auto outputWS = runAlgorithm(wsProps, nlambda);
+    const std::string interpolation("Linear");
+    auto outputWS = runAlgorithm(wsProps, nlambda, interpolation);
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-05);
-    const size_t middle_index(4);
-
     TS_ASSERT_DELTA(0.019012, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.0026940, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.0044149, outputWS->y(0)[3], delta);
+    TS_ASSERT_DELTA(0.0026940, outputWS->y(0)[4], delta);
+    TS_ASSERT_DELTA(0.00042886, outputWS->y(0).back(), delta);
+  }
+
+  void test_CSpline_Interpolation() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
+                                       DeltaEMode::Elastic, -1, -1};
+    const int nlambda(5);
+    const std::string interpolation("CSpline");
+    auto outputWS = runAlgorithm(wsProps, nlambda, interpolation);
+
+    verifyDimensions(wsProps, outputWS);
+    const double delta(1e-05);
+    TS_ASSERT_DELTA(0.019012, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.0036653, outputWS->y(0)[3], delta);
+    TS_ASSERT_DELTA(0.0026940, outputWS->y(0)[4], delta);
     TS_ASSERT_DELTA(0.00042886, outputWS->y(0).back(), delta);
   }
 
@@ -214,13 +230,18 @@ public:
 
 private:
   Mantid::API::MatrixWorkspace_const_sptr
-  runAlgorithm(const TestWorkspaceDescriptor &wsProps, int nlambda = -1) {
+  runAlgorithm(const TestWorkspaceDescriptor &wsProps, int nlambda = -1,
+               const std::string &interpolate = "") {
     auto inputWS = setUpWS(wsProps);
     auto mcabs = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("InputWorkspace", inputWS));
     if (nlambda > 0) {
       TS_ASSERT_THROWS_NOTHING(
           mcabs->setProperty("NumberOfWavelengthPoints", nlambda));
+    }
+    if (!interpolate.empty()) {
+      TS_ASSERT_THROWS_NOTHING(
+          mcabs->setProperty("Interpolation", interpolate));
     }
     mcabs->execute();
     return getOutputWorkspace(mcabs);
