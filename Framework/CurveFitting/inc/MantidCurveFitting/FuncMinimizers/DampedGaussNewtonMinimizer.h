@@ -16,7 +16,8 @@ class CostFuncLeastSquares;
 namespace FuncMinimisers {
 
 /**
-    Implements a least squares minimization algorithm with damping.
+    Implements a Gauss-Newton minimization algorithm with damping
+    for use with least squares cost function.
 
     @author Roman Tolchenov, Tessella plc
 

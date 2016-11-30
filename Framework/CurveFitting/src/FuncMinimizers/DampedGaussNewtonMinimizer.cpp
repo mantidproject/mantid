@@ -38,7 +38,7 @@ void DampedGaussNewtonMinimizer::initialize(API::ICostFunction_sptr function, si
       boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
           function);
   if (!m_leastSquares) {
-    throw std::invalid_argument("Damping minimizer works only with least "
+    throw std::invalid_argument("Damped Gauss-Newton minimizer works only with least "
                                 "squares. Different function was given.");
   }
 }
