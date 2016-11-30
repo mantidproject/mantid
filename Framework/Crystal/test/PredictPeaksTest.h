@@ -46,7 +46,7 @@ public:
   }
 
   void do_test_exec(std::string reflectionCondition, size_t expectedNumber,
-                    std::vector<V3D> hkls) {
+                    std::vector<V3D> hkls, int convention = 1) {
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
 
@@ -89,7 +89,10 @@ public:
       return;
 
     TS_ASSERT_EQUALS(ws->getNumberPeaks(), expectedNumber);
-    // std::cout << ws->getPeak(0).getHKL() << " hkl\n";
+    V3D hklTest(-10, -6, 1);
+    hklTest *= convention;
+    if (expectedNumber > 1)
+      TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), hklTest);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -103,7 +106,7 @@ public:
   }
 
   void test_exec_withInputHKLList() {
-    std::vector<V3D> hkls{{-6, -9, 1}};
+    std::vector<V3D> hkls{ { -6, -9, 1 } };
     do_test_exec("Primitive", 1, hkls);
   }
 
@@ -139,7 +142,7 @@ public:
     WorkspaceCreationHelper::SetGoniometer(inWS, GonioRotation, 0., 0.);
 
     DblMatrix ub = inWS->sample().getOrientedLattice().getUB();
-    PeaksWorkspace_sptr hklPW = getHKLpw(inst, {{-1, 0, 0}}, 0);
+    PeaksWorkspace_sptr hklPW = getHKLpw(inst, { { -1, 0, 0 } }, 0);
 
     PredictPeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -178,7 +181,7 @@ public:
   void test_crystallography() {
     Kernel::ConfigService::Instance().setString("Q.convention",
                                                 "Crystallography");
-    do_test_exec("Primitive", 10, std::vector<V3D>());
+    do_test_exec("Primitive", 10, std::vector<V3D>(), -1);
   }
 };
 
