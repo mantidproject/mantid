@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_DAMPINGMINIMIZER_H_
-#define MANTID_CURVEFITTING_DAMPINGMINIMIZER_H_
+#ifndef MANTID_CURVEFITTING_DAMPEDGAUSSNEWTONMINIMIZER_H_
+#define MANTID_CURVEFITTING_DAMPEDGAUSSNEWTONMINIMIZER_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -46,7 +46,7 @@ public:
   /// Constructor
   DampedGaussNewtonMinimizer(double relTol = 0.0001);
   /// Name of the minimizer.
-  std::string name() const override { return "DampingMinimizer"; }
+  std::string name() const override { return "DampedGaussNewtonMinimizer"; }
 
   /// Initialize minimizer, i.e. pass a function to minimize.
   void initialize(API::ICostFunction_sptr function,
@@ -68,4 +68,4 @@ private:
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_DAMPINGMINIMIZER_H_*/
+#endif /* MANTID_CURVEFITTING_DAMPEDGAUSSNEWTONMINIMIZER_H_*/

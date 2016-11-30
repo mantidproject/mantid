@@ -24,7 +24,7 @@ namespace {
 Kernel::Logger g_log("DampingMinimizer");
 }
 
-DECLARE_FUNCMINIMIZER(DampedGaussNewtonMinimizer, Damping)
+DECLARE_FUNCMINIMIZER(DampedGaussNewtonMinimizer, Damped Gauss-Newton)
 
 /// Constructor
 DampedGaussNewtonMinimizer::DampedGaussNewtonMinimizer(double relTol)
