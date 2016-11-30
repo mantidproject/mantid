@@ -508,7 +508,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
         Reduce1D()
 
-        property_manager = PropertyManagerDataService.retrieve(ReductionSingleton().get_reduction_table_name())
+        #property_manager = PropertyManagerDataService.retrieve(ReductionSingleton().get_reduction_table_name())
         #_p = property_manager.getProperty("TransmissionAlgorithm")
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
