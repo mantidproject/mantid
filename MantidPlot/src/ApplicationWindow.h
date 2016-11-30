@@ -43,6 +43,7 @@ Description          : QtiPlot's main window
 #include <QSplitter>
 
 #include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtMantidWidgets/ProjectSaveView.h"
 #include "MantidQtAPI/IProjectSerialisable.h"
 #include "Script.h"
 #include "Scripted.h"
@@ -269,6 +270,7 @@ public slots:
   void saveProjectAs(const QString &fileName = QString(),
                      bool compress = false);
   bool saveProject(bool compress = false);
+  void prepareSaveProject();
 
   //! Set the project status to modifed
   void modifiedProject();
@@ -1452,6 +1454,8 @@ private:
   QDockWidget *explorerWindow;
   MantidQt::MantidWidgets::MessageDisplay *resultsLog;
   QMdiArea *d_workspace;
+
+  MantidQt::MantidWidgets::ProjectSaveView *m_projectSaveView;
 
   QToolBar *standardTools, *plotTools, *displayBar;
   QToolBar *formatToolBar;

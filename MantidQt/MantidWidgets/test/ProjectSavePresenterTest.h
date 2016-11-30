@@ -230,6 +230,8 @@ public:
         .WillOnce(Return(workspaces));
     EXPECT_CALL(m_view, updateExcludedWindowsList(windowNames))
         .Times(Exactly(1));
+    EXPECT_CALL(m_view, removeFromIncludedWindowsList(windowNames))
+        .Times(Exactly(1));
 
     ProjectSavePresenter presenter(&m_view);
     presenter.notify(ProjectSavePresenter::Notification::UncheckWorkspace);
@@ -263,6 +265,10 @@ public:
         .Times(Exactly(1));
     EXPECT_CALL(m_view, getCheckedWorkspaceNames())
         .WillOnce(Return(workspaces));
+    EXPECT_CALL(m_view, removeFromIncludedWindowsList(windowNames))
+        .Times(Exactly(1));
+    EXPECT_CALL(m_view, removeFromExcludedWindowsList(windowNames))
+        .Times(Exactly(1));
 
     ProjectSavePresenter presenter(&m_view);
     presenter.notify(ProjectSavePresenter::Notification::UncheckWorkspace);

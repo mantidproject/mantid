@@ -20,6 +20,8 @@ public:
   MOCK_METHOD1(updateWorkspacesList, void(const std::vector<std::string> &));
   MOCK_METHOD1(updateIncludedWindowsList, void(const std::vector<std::string> &));
   MOCK_METHOD1(updateExcludedWindowsList, void(const std::vector<std::string> &));
+  MOCK_METHOD1(removeFromIncludedWindowsList, void(const std::vector<std::string> &));
+  MOCK_METHOD1(removeFromExcludedWindowsList, void(const std::vector<std::string> &));
 };
 
 //==============================================================================

@@ -17,7 +17,7 @@ class ProjectSavePresenter;
 
 /** @class IProjectSaveView
 
-IProjectSaveView is the interaces for defining the functions that the project
+IProjectSaveView is the interface for defining the functions that the project
 save view needs to implement.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -49,6 +49,8 @@ public:
   virtual void updateWorkspacesList(const std::vector<std::string>& workspaces) = 0;
   virtual void updateIncludedWindowsList(const std::vector<std::string>& windows) = 0;
   virtual void updateExcludedWindowsList(const std::vector<std::string>& windows) = 0;
+  virtual void removeFromIncludedWindowsList(const std::vector<std::string>& windows) = 0;
+  virtual void removeFromExcludedWindowsList(const std::vector<std::string>& windows) = 0;
 };
 }
 }

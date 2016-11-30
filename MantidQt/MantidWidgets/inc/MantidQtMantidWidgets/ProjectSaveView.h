@@ -3,6 +3,7 @@
 
 #include "MantidQtAPI/IProjectSerialisable.h"
 #include "MantidQtMantidWidgets/IProjectSaveView.h"
+#include "MantidQtMantidWidgets/ProjectSavePresenter.h"
 #include "ui_ProjectSave.h"
 
 #include <QWidget>
@@ -43,8 +44,8 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class ProjectSaveView : public QDialog, IProjectSaveView {
+  Q_OBJECT
 public:
-
   ProjectSaveView(const std::vector<MantidQt::API::IProjectSerialisable*> &windows, QWidget *parent = nullptr);
 
   std::vector<MantidQt::API::IProjectSerialisable*> getWindows() override;
@@ -53,6 +54,11 @@ public:
   void updateWorkspacesList(const std::vector<std::string>& workspaces) override;
   void updateIncludedWindowsList(const std::vector<std::string>& windows) override;
   void updateExcludedWindowsList(const std::vector<std::string>& windows) override;
+  void removeFromIncludedWindowsList(const std::vector<std::string>& windows) override;
+  void removeFromExcludedWindowsList(const std::vector<std::string>& windows) override;
+
+private slots:
+  void workspaceItemChanged(QTreeWidgetItem* item, int column);
 
 private:
     std::vector<std::string> getItemsWithCheckState(const Qt::CheckState state) const;

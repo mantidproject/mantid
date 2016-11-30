@@ -201,6 +201,7 @@
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MessageDisplay.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/ProjectSaveView.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -6004,7 +6005,6 @@ Folder *ApplicationWindow::projectFolder() const {
 }
 
 bool ApplicationWindow::saveProject(bool compress) {
-
   if (projectname == "untitled" ||
       projectname.endsWith(".opj", Qt::CaseInsensitive) ||
       projectname.endsWith(".ogm", Qt::CaseInsensitive) ||
@@ -6033,6 +6033,26 @@ bool ApplicationWindow::saveProject(bool compress) {
 
   QApplication::restoreOverrideCursor();
   return true;
+}
+
+void ApplicationWindow::prepareSaveProject()
+{
+  std::vector<IProjectSerialisable*> windows;
+
+  for (auto window : getSerialisableWindows()) {
+    auto win = dynamic_cast<IProjectSerialisable *>(window);
+    if (win)
+      windows.push_back(win);
+  }
+
+  for (auto window : windowsList()) {
+    auto win = dynamic_cast<IProjectSerialisable *>(window);
+    if (win)
+      windows.push_back(win);
+  }
+
+  m_projectSaveView = new MantidQt::MantidWidgets::ProjectSaveView(windows, this);
+  m_projectSaveView->show();
 }
 
 void ApplicationWindow::savetoNexusFile() {
@@ -11492,7 +11512,7 @@ void ApplicationWindow::createActions() {
   actionSaveProject =
       new QAction(QIcon(":/SaveProject16x16.png"), tr("Save &Project"), this);
   actionSaveProject->setShortcut(tr("Ctrl+Shift+S"));
-  connect(actionSaveProject, SIGNAL(triggered()), this, SLOT(saveProject()));
+  connect(actionSaveProject, SIGNAL(triggered()), this, SLOT(prepareSaveProject()));
 
   actionSaveFile = new QAction(QIcon(getQPixmap("filesave_nexus_xpm")),
                                tr("Save Nexus &File"), this);

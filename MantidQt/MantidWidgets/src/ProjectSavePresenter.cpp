@@ -35,6 +35,7 @@ void ProjectSavePresenter::includeWindowsForCheckedWorkspace()
   auto wsNames = m_view->getCheckedWorkspaceNames();
   auto names = m_model.getWindowNames(wsNames);
   m_view->updateIncludedWindowsList(names);
+  m_view->removeFromExcludedWindowsList(names);
 }
 
 void ProjectSavePresenter::excludeWindowsForUncheckedWorkspace()
@@ -42,4 +43,5 @@ void ProjectSavePresenter::excludeWindowsForUncheckedWorkspace()
   auto wsNames = m_view->getUncheckedWorkspaceNames();
   auto names = m_model.getWindowNames(wsNames);
   m_view->updateExcludedWindowsList(names);
+  m_view->removeFromIncludedWindowsList(names);
 }

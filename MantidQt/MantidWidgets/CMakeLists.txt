@@ -174,6 +174,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/PreviewPlot.h
     inc/MantidQtMantidWidgets/PropertyHandler.h
     inc/MantidQtMantidWidgets/ProcessingAlgoWidget.h
+    inc/MantidQtMantidWidgets/ProjectSaveView.h
     inc/MantidQtMantidWidgets/pythonCalc.h
     inc/MantidQtMantidWidgets/RangeSelector.h
     inc/MantidQtMantidWidgets/RenameParDialog.h
@@ -383,7 +384,6 @@ set ( TEST_FILES
   DataProcessorUI/ParseKeyValueStringTest.h
   DataProcessorUI/QDataProcessorOneLevelTreeModelTest.h
   DataProcessorUI/QDataProcessorTwoLevelTreeModelTest.h
-  ProjectSaveMockObjects.h
   ProjectSaveModelTest.h
   ProjectSavePresenterTest.h
   WorkspacePresenter/WorkspacePresenterTest.h
