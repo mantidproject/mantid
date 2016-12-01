@@ -25,8 +25,9 @@ Y-axis will be detector angle, and the values would be the intensities integrate
 Scanning observable can be any numeric or time-stamp-like string parameter.
 See ``sample.*`` or e.g. ``start_time`` in Sample Logs.
 ``BackgroundRun`` s and ``CalibrationRun`` s will be averaged or interpolated over all the ovservable points according to option.
-Interpolation is recommended only if there is a strong dependence on the observable. In this case one should consider having many measurements, well covering the observable range
-for the sample measurements, since the extrapolation will be flat only.
+Interpolation is provided by :ref:`SplineInterpolation <algm-SplineInterpolation>`, which does cubic spline (or linear for 2 points only) interpolation inside the range and
+flat extrapolation beyond the range. For the moment it does not give errors on interpolated results.
+Interpolated subtraction or calibration is recommended only if there is a strong dependence on the observable and many measured points in the data to be interpolated.
 
 Workflow
 --------
