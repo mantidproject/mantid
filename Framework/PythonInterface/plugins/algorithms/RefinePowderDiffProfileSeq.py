@@ -921,7 +921,7 @@ class RefineProfileParameters(object):
                 UseInputPeakHeights             = False,
                 PeakRadius                      ='8',
                 Minimizer                       = 'Levenberg-Marquardt',
-                MCSetupWorkspace                = str(wsname),
+                MCSetupWorkspace                = tablews,
                 Damping                         = '5.0',
                 RandomSeed                      = 0,
                 AnnealingTemperature            = 100.0,
