@@ -341,8 +341,8 @@ void Fit::execConcrete() {
       }
       m_domainCreator->separateCompositeMembersInOutput(unrollComposites,
                                                         convolveMembers);
-      m_domainCreator->createOutputWorkspace(baseName, m_function, costFunc->getDomain(),
-                                             costFunc->getValues());
+      m_domainCreator->createOutputWorkspace(
+          baseName, m_function, costFunc->getDomain(), costFunc->getValues());
     }
   }
 

@@ -207,8 +207,7 @@ void FitOptionsBrowser::createCommonProperties() {
     m_intManager->setValue(m_peakRadius, 0);
     m_intManager->setMinimum(m_peakRadius, 0);
     m_browser->addProperty(m_peakRadius);
-    addProperty("PeakRadius", m_peakRadius,
-                &FitOptionsBrowser::getIntProperty,
+    addProperty("PeakRadius", m_peakRadius, &FitOptionsBrowser::getIntProperty,
                 &FitOptionsBrowser::setIntProperty);
   }
 }
