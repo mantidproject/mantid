@@ -13,7 +13,7 @@
     vanadium_run_numbers : "78338"
     empty_run_numbers : "78339"
 
-93104-93107:
+93104-95605:  #93107
   offset_file_name : "offsets_2011_cycle111b.cal"
   label : "15_2"
   chopper_on:
@@ -24,7 +24,7 @@
     vanadium_run_numbers : "93105"
     empty_run_numbers : "93106"
 
-95600-95614:
+95600-:  #95614
   # Calibration run
   offset_file_name : "offsets_2011_cycle111b.cal"
   label : "16_4"
