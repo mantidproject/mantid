@@ -26,11 +26,6 @@ transformFromDoubleToCoordT(Mantid::Kernel::DblMatrix &skewMatrix,
                             Mantid::coord_t skewMatrixCoord[9]);
 
 void EXPORT_OPT_MANTIDQT_API
-transformVMDToWorkspaceCoord(Mantid::Kernel::VMD &lookPoint,
-                             Mantid::coord_t skewMatrix[9], size_t &dimX,
-                             size_t &dimY);
-
-void EXPORT_OPT_MANTIDQT_API
 transformLookpointToWorkspaceCoord(Mantid::coord_t *lookPoint,
                                    const Mantid::coord_t skewMatrix[9],
                                    const size_t &dimX, const size_t &dimY);

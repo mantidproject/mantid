@@ -132,17 +132,29 @@ private:
 			return false;
 		}
 
-	void getExampleCoordTArray(Mantid::coord_t *coordTArrayExample) {
-		coordTArrayExample[0] = 1.0;
-		coordTArrayExample[1] = 0.0;
-		coordTArrayExample[2] = 0.0;
-		coordTArrayExample[3] = 0.0;
-		coordTArrayExample[4] = 1.0;
-		coordTArrayExample[5] = 0.0;
-		coordTArrayExample[6] = 0.0;
-		coordTArrayExample[7] = 0.0;
-		coordTArrayExample[8] = 1.0;
-	
+	void getExampleCoordTArray(Mantid::coord_t *coordTArrayExample, bool default = true) {
+		if (default) {
+			coordTArrayExample[0] = 1.0;
+			coordTArrayExample[1] = 0.0;
+			coordTArrayExample[2] = 0.0;
+			coordTArrayExample[3] = 0.0;
+			coordTArrayExample[4] = 1.0;
+			coordTArrayExample[5] = 0.0;
+			coordTArrayExample[6] = 0.0;
+			coordTArrayExample[7] = 0.0;
+			coordTArrayExample[8] = 1.0;
+		}
+		else {
+			coordTArrayExample[0] = 1.0;
+			coordTArrayExample[1] = 0.0;
+			coordTArrayExample[2] = static_cast<Mantid::coord_t>(-0.57735);
+			coordTArrayExample[3] = 0.0;
+			coordTArrayExample[4] = 1.0;
+			coordTArrayExample[5] = 0.0;
+			coordTArrayExample[6] = 0.0;
+			coordTArrayExample[7] = 0.0;
+			coordTArrayExample[8] = static_cast<Mantid::coord_t>(1.1547);
+		}
 	}
 
 public:
@@ -278,7 +290,42 @@ public:
 	  TSM_ASSERT("When given default array, getGridLinesInRadian should return 0 and 0 result", radianResultCorrect);
   }
 
-//TODO add test for transformLookPointToWorkspace final generic function
+  void test_transformLookpointToWorkspaceCoordWithZeroZeroCoords() {
+	  bool coordsRemainZero;
+	  coordsRemainZero = false;
+	  Mantid::coord_t skewMatrixCoord[9];
+	  getExampleCoordTArray(skewMatrixCoord);
+	  auto eventWorkspace = getOrthogonalEventWorkspace();
+	  Mantid::Kernel::VMD coords = eventWorkspace->getNumDims();
+	  for (size_t d = 0; d < eventWorkspace->getNumDims();
+		  d++) // change to num dims of eventworkspace
+	  {
+		  coords[d] = Mantid::Kernel::VMD_t(0.0);
+	  }
+	  MantidQt::API::transformLookpointToWorkspaceCoordGeneric(coords, skewMatrixCoord, m_dimX, m_dimY);
+	  if ((coords[0] == 0) && (coords[1] == 0)) {
+		  coordsRemainZero = true;
+	  }
+	  TSM_ASSERT("Zero, zero coordinates should not be affected by skewMatrix translation", coordsRemainZero);
+  }
+
+  void test_transformLookPointToWorkspaceCoordWithExampleCoords() {
+	  bool coordsAccurate;
+	  coordsAccurate = false;
+	  Mantid::coord_t skewMatrixCoord[9];
+	  getExampleCoordTArray(skewMatrixCoord, false); 
+	  auto eventWorkspace = getNonOrthogonalEventWorkspace();
+	  Mantid::Kernel::VMD coords = eventWorkspace->getNumDims();
+	  for (size_t d = 0; d < eventWorkspace->getNumDims(); d++) {
+		  coords[d] = Mantid::Kernel::VMD_t(1.5);
+	  }
+	  MantidQt::API::transformLookpointToWorkspaceCoordGeneric(coords, skewMatrixCoord, m_dimX, m_dimY);
+	  if ((skewWithinTolerance(coords[0], static_cast<Mantid::Kernel::VMD_t>(0.633975))) && (coords[1] == 1.5) && (coords[2] == 1.5) && (coords[3] == 1.5)) {
+		  coordsAccurate = true;
+	  }
+	  TSM_ASSERT("Example coordinates skewed result incorrect", coordsAccurate);
+  }
+  
 };
 
 #endif /* MANTIDQT_API_NONORTHOGONALTEST_H_ */
