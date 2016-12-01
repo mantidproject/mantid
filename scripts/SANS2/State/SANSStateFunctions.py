@@ -118,8 +118,8 @@ def is_pure_none_or_not_none(elements_to_check):
 
     if len(elements_to_check) == 0:
         return are_all_none_or_all_not_none
-    return all(element is not None for element in elements_to_check) or \
-           all(element is None for element in elements_to_check)
+    return all(element is not None for element in elements_to_check) or  \
+           all(element is None for element in elements_to_check)  # noqa
 
 
 def is_not_none_and_first_larger_than_second(elements_to_check):

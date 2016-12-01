@@ -5,10 +5,10 @@
 import json
 from SANS2.State.SANSStateBase import (SANSStateBase, sans_parameters, PositiveIntegerParameter,
                                        BoolParameter, PositiveFloatParameter, ClassTypeParameter,
-                                       FloatParameter, DictParameter, StringListParameter, StringParameter,
+                                       FloatParameter, DictParameter, StringListParameter,
                                        PositiveFloatWithNoneParameter)
 from SANS2.Common.SANSType import (RebinType, RangeStepType, FitType, DataType,
-                                           convert_reduction_data_type_to_string)
+                                   convert_reduction_data_type_to_string)
 from SANS2.Common.SANSConfigurations import SANSConfigurations
 from SANS2.State.SANSStateFunctions import (is_pure_none_or_not_none, validation_message,
                                             is_not_none_and_first_larger_than_second, one_is_none)
@@ -33,7 +33,7 @@ class SANSStateTransmissionFit(SANSStateBase):
         self.fit_type = FitType.Linear
         self.polynomial_order = 0
 
-    def validate(self):
+    def validate(self):  # noqa
         is_invalid = {}
         if self.fit_type is not FitType.Polynomial and self.polynomial_order != 0:
             entry = validation_message("You can only set a plynomial order of you selected polynomial fitting.",
@@ -133,9 +133,9 @@ class SANSStateCalculateTransmissionISIS(SANSStateBase, SANSStateCalculateTransm
         # Transmission, either we need some ROI (ie radius, roi files /mask files) or a transmission monitor
         # --------------
         has_no_transmission_monitor_setting = self.transmission_monitor is None and\
-                                              self.default_transmission_monitor is None
-        has_no_transmission_roi_setting = self.transmission_radius_on_detector is None and \
-                                          self.transmission_roi_files is None
+                                              self.default_transmission_monitor is None  # noqa
+        has_no_transmission_roi_setting = self.transmission_radius_on_detector is None and\
+                                          self.transmission_roi_files is None  # noqa
         if has_no_transmission_monitor_setting and has_no_transmission_roi_setting:
             entry = validation_message("No transmission settings were specified.",
                                        "Make sure that transmission settings are specified.",
@@ -190,7 +190,8 @@ class SANSStateCalculateTransmissionISIS(SANSStateBase, SANSStateCalculateTransm
                                            {"wavelength_full_range_low": self.wavelength_full_range_low,
                                             "wavelength_full_range_high": self.wavelength_full_range_high})
                 is_invalid.update(entry)
-            if is_not_none_and_first_larger_than_second([self.wavelength_full_range_low, self.wavelength_full_range_high]):
+            if is_not_none_and_first_larger_than_second([self.wavelength_full_range_low,
+                                                         self.wavelength_full_range_high]):
                 entry = validation_message("Incorrect wavelength bounds.",
                                            "Make sure that lower full wavelength bound is smaller then upper bound.",
                                            {"wavelength_full_range_low": self.wavelength_full_range_low,

@@ -7,8 +7,7 @@ from SANS2.State.SANSStateBase import (SANSStateBase, StringParameter, PositiveI
                                        ClassTypeParameter, sans_parameters)
 from SANS2.Common.SANSType import SANSInstrument
 from SANS2.Common.SANSConstants import SANSConstants
-from SANS2.State.SANSStateFunctions import (is_pure_none_or_not_none, is_not_none_and_first_larger_than_second,
-                                            one_is_none, validation_message)
+from SANS2.State.SANSStateFunctions import (is_pure_none_or_not_none, validation_message)
 
 
 # ------------------------------------------------

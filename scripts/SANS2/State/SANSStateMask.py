@@ -5,12 +5,10 @@
 import json
 from SANS2.State.SANSStateBase import (SANSStateBase, BoolParameter, StringListParameter, StringParameter,
                                        PositiveFloatParameter, FloatParameter, FloatListParameter,
-                                       DictParameter, PositiveIntegerListParameter, sans_parameters,
-                                       PositiveFloatWithNoneParameter)
+                                       DictParameter, PositiveIntegerListParameter, sans_parameters)
 from SANS2.Common.SANSConstants import SANSConstants
 from SANS2.Common.SANSFileInformation import find_full_file_path
-from SANS2.State.SANSStateFunctions import (is_pure_none_or_not_none, is_not_none_and_first_larger_than_second,
-                                            one_is_none, validation_message)
+from SANS2.State.SANSStateFunctions import (is_pure_none_or_not_none, validation_message)
 
 
 def range_check(start, stop, invalid_dict, start_name, stop_name, general_name=None):
@@ -196,7 +194,7 @@ class SANSStateMaskISIS(SANSStateBase, SANSStateMask):
         # --------------------
         # Radius mask rule: the min radius must be less or equal to the max radius
         if self.radius_max is not None and self.radius_min is not None and\
-                        self.radius_max != -1 and self.radius_min != -1:
+           self.radius_max != -1 and self.radius_min != -1:  # noqa
             if self.radius_min > 0 and self.radius_max > 0 and (self.radius_min > self.radius_max):
                 entry = validation_message("Incorrect radius bounds.",
                                            "Makes sure that the lower radius bound is smaller than the"

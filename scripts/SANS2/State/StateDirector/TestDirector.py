@@ -16,7 +16,7 @@ from SANS2.State.StateBuilder.SANSStateConvertToQBuilder import get_convert_to_q
 
 
 from SANS2.Common.SANSType import (SANSFacility, ISISReductionMode, ReductionDimensionality,
-                                           FitModeForMerge, RebinType, RangeStepType, SaveType, FitType, SampleShape)
+                                   FitModeForMerge, RebinType, RangeStepType, SaveType, FitType, SampleShape)
 
 
 class TestDirector(object):

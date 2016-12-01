@@ -1,6 +1,5 @@
 """ Defines the state of the goemetry and unit scaling."""
 
-import json
 from SANS2.State.SANSStateBase import (SANSStateBase, sans_parameters, PositiveFloatParameter, ClassTypeParameter)
 from SANS2.Common.SANSType import SampleShape
 
