@@ -4,6 +4,7 @@ from mantid.simpleapi import *  # noqa
 from mantid.kernel import *  # noqa
 from mantid.api import *  # noqa
 from mantid import mtd
+import numpy
 
 
 class IndirectILLReductionQENS(DataProcessorAlgorithm):
@@ -298,6 +299,7 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
         if self._calibration_file:
             if wings == mtd[calib_ws].getNumberOfEntries():
                 Divide(LHSWorkspace=ws, RHSWorkspace=calib_ws, OutputWorkspace=ws)
+                self._scale_calibration(ws, calib_ws)
             else:
                 raise RuntimeError('Inconsistent mirror sense in calibration run. Unable to perform calibration.')
 
@@ -305,6 +307,24 @@ class IndirectILLReductionQENS(DataProcessorAlgorithm):
 
         # register to reduced runs list
         self._ws_list.append(ws)
+
+    def _scale_calibration(self, ws, calib_ws):
+        '''
+        Scales the wings of calibrated sample ws with the maximum
+        of the integrated intensities in each wing of calib ws
+        @param ws       :: calibrated sample workspace
+        @param calib_ws :: calibration workspace
+        '''
+
+        # number of wings are checked to be the same in ws and calib_ws here already
+
+        for wing in range(mtd[ws].getNumberOfEntries()):
+            sample = mtd[ws].getItem(wing).getName()
+            integral = mtd[calib_ws].getItem(wing).getName()
+            scale = numpy.max(mtd[integral].extractY()[:,0])
+            self.log().information("Wing {0} will be scaled up with {1} after calibration"
+                                   .format(wing,scale))
+            Scale(InputWorkspace=sample,Factor=scale,OutputWorkspace=sample,Operation='Multiply')
 
     def _perform_unmirror(self, ws, run):
         '''

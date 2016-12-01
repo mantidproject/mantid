@@ -21,7 +21,6 @@ digraph IndirectILLReductionQENS {
   	CalibrationPeakRange
   	UnmirrorOption
   	CropDeadMonitorChannels
-  	MaskOverflownBins
   }
 
   subgraph algorithms {
@@ -67,7 +66,6 @@ digraph IndirectILLReductionQENS {
   AlignmentRun -> SelectNexusFilesByMetadataA
   SelectNexusFilesByMetadataA -> IndirectILLEnergyTransferA
   IndirectILLEnergyTransferA -> MatchPeaks
-  MaskOverflownBins -> MatchPeaks
   MatchPeaks -> Plus
   Plus -> GroupWorkspaces
   GroupWorkspaces -> OutputWorkspace
