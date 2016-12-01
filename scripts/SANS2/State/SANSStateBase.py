@@ -348,7 +348,10 @@ def provide_class_from_module_and_class_name(module_name, class_name):
         from importlib import import_module
         module = import_module(module_name)
     except ImportError:
-        _, mod_name = module_name.rsplit(".", 1)
+        if "." in module_name:
+            _, mod_name = module_name.rsplit(".", 1)
+        else:
+            mod_name = None
         if not mod_name:
             module = __import__(module_name)
         else:

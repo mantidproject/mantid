@@ -147,7 +147,7 @@ class SANSParameterTest(unittest.TestCase):
 # ----------------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------------------
 
-sans_parameters
+@sans_parameters
 class VerySimpleState(SANSStateBase):
     string_parameter = StringParameter()
 
