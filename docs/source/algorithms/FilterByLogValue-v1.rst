@@ -109,7 +109,7 @@ Output:
 .. testoutput:: FilterByLogValue
 
    The unfiltered workspace ws has 1900 events and a peak value of 257.00
-   The filtered workspace wsOut has 950 events and a peak value of 131.00
+   The filtered workspace wsOut has 950 events and a peak value of 126.00
 
 
 .. categories::

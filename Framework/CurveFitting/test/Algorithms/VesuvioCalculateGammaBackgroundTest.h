@@ -62,15 +62,15 @@ public:
     TS_ASSERT_DELTA(corrE.back(), inE.back(), 1e-08);
 
     const auto &corrY(correctedWS->y(0));
-    TS_ASSERT_DELTA(corrY.front(), -0.00253802, 1e-08);
-    TS_ASSERT_DELTA(corrY[npts / 2], 0.15060372, 1e-08);
-    TS_ASSERT_DELTA(corrY.back(), -0.01696477, 1e-08);
+    TS_ASSERT_DELTA(corrY.front(), 0.01029966, 1e-08);
+    TS_ASSERT_DELTA(corrY[npts / 2], 0.17260418, 1e-08);
+    TS_ASSERT_DELTA(corrY.back(), 0.00251563, 1e-08);
 
     // Background Y values = 0.0
     const auto &backY(backgroundWS->y(0));
-    TS_ASSERT_DELTA(backY.front(), -0.00000138, 1e-08);
-    TS_ASSERT_DELTA(backY[npts / 2], -0.00015056, 1e-08);
-    TS_ASSERT_DELTA(backY.back(), 0.01650629, 1e-08);
+    TS_ASSERT_DELTA(backY.front(), -1.39e-06, 1e-08);
+    TS_ASSERT_DELTA(backY[npts / 2], -0.00015235, 1e-08);
+    TS_ASSERT_DELTA(backY.back(), 0.01670309, 1e-08);
   }
 
   void
@@ -159,15 +159,15 @@ public:
 
     // Corrected values
     const auto &corrY(correctedWS->y(0));
-    TS_ASSERT_DELTA(corrY.front(), -0.00253802, 1e-08);
-    TS_ASSERT_DELTA(corrY[npts / 2], 0.15060372, 1e-08);
-    TS_ASSERT_DELTA(corrY.back(), -0.01696477, 1e-08);
+    TS_ASSERT_DELTA(corrY.front(), 0.01029966, 1e-08);
+    TS_ASSERT_DELTA(corrY[npts / 2], 0.17260418, 1e-08);
+    TS_ASSERT_DELTA(corrY.back(), 0.00251563, 1e-08);
 
     // Background Y values = 0.0
     const auto &backY(backgroundWS->y(0));
-    TS_ASSERT_DELTA(backY.front(), -0.00000138, 1e-08);
-    TS_ASSERT_DELTA(backY[npts / 2], -0.00015056, 1e-08);
-    TS_ASSERT_DELTA(backY.back(), 0.01650629, 1e-08);
+    TS_ASSERT_DELTA(backY.front(), -1.39e-06, 1e-08);
+    TS_ASSERT_DELTA(backY[npts / 2], -0.00015235, 1e-08);
+    TS_ASSERT_DELTA(backY.back(), 0.01670309, 1e-08);
   }
 
   //------------------------------------ Error cases

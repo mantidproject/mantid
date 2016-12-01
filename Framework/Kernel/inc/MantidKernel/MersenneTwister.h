@@ -6,10 +6,7 @@
 //------------------------------------------------------------------------------
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/ClassMacros.h"
-
-#ifndef Q_MOC_RUN
-#include <boost/random/mersenne_twister.hpp>
-#endif
+#include <random>
 
 namespace Mantid {
 namespace Kernel {
@@ -81,18 +78,18 @@ public:
   void restore() override;
 
 private:
-  /// The boost Mersenne Twister generator
-  boost::mt19937 m_generator;
+  /// The Mersenne Twister generator
+  std::mt19937 m_generator;
   /// Minimum in range
   double m_start;
   /// Maximum in range
   double m_end;
   /// The current seed
-  boost::mt19937::result_type m_currentSeed;
+  std::mt19937::result_type m_currentSeed;
   /// A generator that will take the value when save is requested. Pointer so
   /// that
   /// it is only instantiated when required
-  boost::mt19937 *m_savedStateGenerator;
+  std::mt19937 *m_savedStateGenerator;
 };
 }
 }

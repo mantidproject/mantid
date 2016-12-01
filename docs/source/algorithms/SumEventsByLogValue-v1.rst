@@ -80,9 +80,9 @@ Output:
 .. testoutput:: Single-Spectrum
 
     Events were split into 3 sections based on the log 'Log2FilterBy'.
-     section 1: 615.00
-     section 2: 629.00
-     section 3: 656.00
+     section 1: 641.00
+     section 2: 624.00
+     section 3: 635.00
     Totalling 1900 events, matching the 1900 events in the input workspace
 
 
