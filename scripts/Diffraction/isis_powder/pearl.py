@@ -138,7 +138,6 @@ class Pearl(AbstractInst):
     def get_monitor_spectra_index(self, run_number):
         return get_monitor_spectra(run_number=run_number, focus_mode=self._focus_mode)
 
-
     def spline_vanadium_ws(self, focused_vanadium_ws, instrument_version=''):
         # TODO move spline number into the class
         return pearl_spline.spline_vanadium_for_focusing(focused_vanadium_ws=focused_vanadium_ws,
@@ -148,7 +147,7 @@ class Pearl(AbstractInst):
     def pearl_focus_tof_rebinning(self, workspace):
         out_name = workspace.name() + "_rebinned"
         out_ws = mantid.Rebin(InputWorkspace=workspace, Params=self._focus_tof_binning,
-                                 OutputWorkspace=out_name)
+                              OutputWorkspace=out_name)
         return out_ws
 
     def _focus_processing(self, run_number, input_workspace, perform_vanadium_norm):

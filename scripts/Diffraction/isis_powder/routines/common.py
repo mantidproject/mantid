@@ -155,10 +155,7 @@ def _sum_ws_range(ws_list):
     # Sum all workspaces
     out_ws_name = "summed_" + ws_list[0].name() + '_' + ws_list[-1].name()
 
-    summed_ws = mantid.CloneWorkspace(InputWorkspace=ws_list[0], OutputWorkspace=out_ws_name)
-    for ws in ws_list[1:]:  # Skip the first element
-        summed_ws = mantid.Plus(LHSWorkspace=summed_ws, RHSWorkspace=ws, OutputWorkspace=out_ws_name)
-
+    summed_ws = mantid.MergeRuns(InputWorkspaces=ws_list, OutputWorkspace=out_ws_name)
     return summed_ws
 
 
