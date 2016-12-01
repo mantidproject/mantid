@@ -10,8 +10,8 @@ using Mantid::Kernel::InstrumentInfo;
 using namespace boost::python;
 
 // To support default arguments
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(liveListener_overloads,
-                                       liveListener, 0, 1)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(liveListener_overloads, liveListener, 0,
+                                       1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(liveDataAddress_overloads,
                                        liveDataAddress, 0, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(liveListenerInfo_overloads,
@@ -58,11 +58,11 @@ void export_InstrumentInfo() {
 
       .def("liveListener", &InstrumentInfo::liveListener,
            liveListener_overloads(
-             args("self", "name"),
-             "Returns the name of the specific LiveListener class that is used "
-             "by the given connection name. If no name is provided, the "
-             "default connection is used."
-           ))
+               args("self", "name"),
+               "Returns the name of the specific LiveListener class that is "
+               "used "
+               "by the given connection name. If no name is provided, the "
+               "default connection is used."))
 
       // Unclear why this is named "instdae", leaving in case legacy req'd
       .def("instdae", &InstrumentInfo::liveDataAddress, arg("self"),
@@ -71,26 +71,22 @@ void export_InstrumentInfo() {
 
       .def("liveDataAddress", &InstrumentInfo::liveDataAddress,
            liveDataAddress_overloads(
-             args("self", "name"),
-             "Returns the Address string of a live data connection on this "
-             "instrument. If no connection name is provided, the default "
-             "connection is used."
-           ))
+               args("self", "name"),
+               "Returns the Address string of a live data connection on this "
+               "instrument. If no connection name is provided, the default "
+               "connection is used."))
 
       .def("liveListenerInfo", &InstrumentInfo::liveListenerInfo,
            return_value_policy<copy_const_reference>(),
            liveListenerInfo_overloads(
-             args("self", "name"),
-             "Returns a LiveListenerInfo instance for"
-           ))
+               args("self", "name"), "Returns a LiveListenerInfo instance for"))
 
       .def("hasLiveListenerInfo", &InstrumentInfo::hasLiveListenerInfo,
            arg("self"),
            "Returns true if this instrument has at least one LiveListenerInfo")
 
       .def("liveListenerInfoList", &InstrumentInfo::liveListenerInfoList,
-           return_value_policy<copy_const_reference>(),
-           arg("self"),
+           return_value_policy<copy_const_reference>(), arg("self"),
            "Returns all available LiveListenerInfo instances as a vector")
 
       ;

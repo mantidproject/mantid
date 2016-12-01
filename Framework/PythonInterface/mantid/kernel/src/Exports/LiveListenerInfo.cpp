@@ -13,10 +13,9 @@ void export_LiveListenerInfo() {
   std_vector_exporter<LiveListenerInfo>::wrap("std_vector_LiveListenerInfo");
 
   class_<LiveListenerInfo>("LiveListenerInfo", no_init)
-      .def(init<optional<std::string, std::string, std::string> >(
-             "Manually construct a LiveListenerInfo",
-             args("self", "listener", "address", "name")
-           ))
+      .def(init<optional<std::string, std::string, std::string>>(
+          "Manually construct a LiveListenerInfo",
+          args("self", "listener", "address", "name")))
 
       .def("name", &LiveListenerInfo::name, arg("self"),
            return_value_policy<copy_const_reference>(),
