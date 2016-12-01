@@ -95,6 +95,8 @@ def _focus_one_ws(ws, run_number, instrument, perform_attenuation=True, perform_
 
 def _individual_run_focusing(input_batching, instrument, perform_attenuation, perform_vanadium_norm, run_number):
     # Load and process one by one
+    import pydevd
+    pydevd.settrace('localhost', port=51205, stdoutToServer=True, stderrToServer=True)
     run_numbers = common.generate_run_numbers(run_number_string=run_number)
     for run in run_numbers:
         ws = common.load_current_normalised_ws_list(run_number_string=run, instrument=instrument,
