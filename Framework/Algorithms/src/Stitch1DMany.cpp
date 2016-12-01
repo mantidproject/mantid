@@ -274,7 +274,7 @@ void Stitch1DMany::doStitch1D(
 
   if (!isChild()) {
     // Copy each input workspace's history into our output workspace's history
-    for (auto &inputWS : m_inputWSMatrix[wsIndex])
+    for (auto &inputWS : m_inputWSMatrix[0])
       lhsWS->history().addHistory(inputWS->getHistory());
   }
   // We're a child algorithm, but we're recording history anyway
