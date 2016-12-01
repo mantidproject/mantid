@@ -534,7 +534,7 @@ public:
     const std::string outWsName("Removed1");
     const std::vector<std::string> modes{"Linear Fit", "Mean",
                                          "Moving Average"};
-    const std::array<bool, 2> nullifyOptions{ {true, false} };
+    const std::array<bool, 2> nullifyOptions{{true, false}};
     for (const auto nullifyNegatives : nullifyOptions) {
       for (const auto &mode : modes) {
         executeWithTwoBinInputWorkspace(y1, y2, 1, outWsName, mode, "",
