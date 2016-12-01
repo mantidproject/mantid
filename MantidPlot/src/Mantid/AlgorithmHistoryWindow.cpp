@@ -8,7 +8,6 @@
 
 #include <QLineEdit>
 #include <QLabel>
-#include <QFileDialog>
 #include <QDateTime>
 #include <QFormLayout>
 #include <QMenu>

@@ -1,7 +1,6 @@
 #include "TextFileIO.h"
 
 #include <QFile>
-#include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QTextStream>

@@ -33,7 +33,6 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <QFileDialog>
 #include <QMessageBox>
 #include <QTextCodec>
 #include <QTextStream>

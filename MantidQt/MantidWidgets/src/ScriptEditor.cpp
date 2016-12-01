@@ -9,7 +9,6 @@
 #include <QApplication>
 #include <QFile>
 #include <QFileInfo>
-#include <QFileDialog>
 
 #include <QTextStream>
 #include <QMessageBox>

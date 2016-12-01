@@ -29,7 +29,6 @@
 #include <QDoubleValidator>
 #include <QDragEnterEvent>
 #include <QDropEvent>
-#include <QFileDialog>
 #include <QFileInfo>
 #include <QGridLayout>
 #include <QGroupBox>
