@@ -5,20 +5,25 @@ import os
 import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
+from isis_powder.routines.common_enums import InputBatchingEnum
 
 
 def create_van(instrument, van, empty, output_van_file_name, absorb, gen_absorb):
 
-    input_van_ws = common.load_current_normalised_ws(run_number_string=van, instrument=instrument)
+    # Always sum a range of inputs as its a vanadium run over multiple captures
+    input_van_ws_list = common.load_current_normalised_ws_list(run_number_string=van, instrument=instrument,
+                                                               input_batching=InputBatchingEnum.Summed)
+
+    input_van_ws = input_van_ws_list[0]  # As we asked for a summed ws there should only be one returned
+
     corrected_van_ws = common.subtract_sample_empty(ws_to_correct=input_van_ws, empty_sample_ws_string=empty,
                                                     instrument=instrument)
-
     common.remove_intermediate_workspace(input_van_ws)
 
     run_details = instrument.get_run_details(run_number=van)
 
-    # corrected_van_ws = instrument. pearl_van_calibration_tof_rebinning(vanadium_ws=corrected_van_ws,
-    #                                                                    tof_rebin_pass=1, return_units="TOF")
+    corrected_van_ws = instrument. pearl_van_calibration_tof_rebinning(vanadium_ws=corrected_van_ws,
+                                                                       tof_rebin_pass=1, return_units="TOF")
 
     corrected_van_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
                                              CalibrationFile=run_details.calibration)
@@ -34,8 +39,8 @@ def create_van(instrument, van, empty, output_van_file_name, absorb, gen_absorb)
                                                    GroupingFileName=run_details.grouping)
 
     # Optional
-    #  focused_van_file = instrument. pearl_van_calibration_tof_rebinning(vanadium_ws=focused_van_file,
-    #                                                                     tof_rebin_pass=2, return_units="dSpacing")
+    focused_van_file = instrument. pearl_van_calibration_tof_rebinning(vanadium_ws=focused_van_file,
+                                                                       tof_rebin_pass=2, return_units="dSpacing")
 
     common.remove_intermediate_workspace(corrected_van_ws)
 

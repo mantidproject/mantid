@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 import os
 import isis_powder.routines.common as common
+from isis_powder.routines.common_enums import InputBatchingEnum
 from isis_powder.polaris_routines import polaris_calib_parser
 from isis_powder.routines.RunDetails import RunDetails
 
@@ -59,8 +60,9 @@ def generate_absorb_corrections(ws_to_match):
 
 
 def generate_solid_angle_corrections(run_details, instrument):
-    vanadium_ws = common.load_current_normalised_ws(run_number_string=run_details.vanadium, instrument=instrument)
-    corrections = _calculate_solid_angle_efficiency_corrections(vanadium_ws)
+    vanadium_ws = common.load_current_normalised_ws_list(run_number_string=run_details.vanadium, instrument=instrument,
+                                                         input_batching=InputBatchingEnum.Summed)
+    corrections = _calculate_solid_angle_efficiency_corrections(vanadium_ws[0])
     mantid.SaveNexusProcessed(InputWorkspace=corrections, Filename=run_details.solid_angle_corr)
     common.remove_intermediate_workspace(vanadium_ws)
     return corrections
@@ -180,9 +182,9 @@ def _calculate_solid_angle_efficiency_corrections(vanadium_ws):
 
 def _generate_solid_angle_file_name(chopper_on, vanadium_run_string):
     if chopper_on:
-        return "SAC_chopperOn_" + vanadium_run_string + ".nxs"
+        return "SAC_" + vanadium_run_string + "_chopperOn"
     else:
-        return "SAC_chopperOff_" + vanadium_run_string + ".nxs"
+        return "SAC_" + vanadium_run_string + "_chopperOff"
 
 
 def _generate_splined_van_name(chopper_on, sac_applied, vanadium_run_string):

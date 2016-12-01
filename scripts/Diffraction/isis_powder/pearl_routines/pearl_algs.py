@@ -14,7 +14,7 @@ def attenuate_workspace(attenuation_file_path, ws_to_correct):
     wc_attenuated = mantid.RebinToWorkspace(WorkspaceToRebin=wc_attenuated, WorkspaceToMatch=ws_to_correct,
                                             OutputWorkspace=wc_attenuated)
     pearl_attenuated_ws = mantid.Divide(LHSWorkspace=ws_to_correct, RHSWorkspace=wc_attenuated)
-    common.remove_intermediate_workspace(workspace_name=wc_attenuated)
+    common.remove_intermediate_workspace(workspaces=wc_attenuated)
     return pearl_attenuated_ws
 
 

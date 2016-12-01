@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
-
+from isis_powder.routines.common_enums import InputBatchingEnum
 
 # A small workaround to ensure when reading workspaces in a loop
 # the previous workspace does not got overridden
@@ -62,46 +62,56 @@ def get_monitor_ws(ws_to_process, run_number_string, instrument):
     return load_monitor_ws
 
 
-def load_current_normalised_ws(run_number_string, instrument):
+def load_current_normalised_ws_list(run_number_string, instrument, input_batching):
     run_information = instrument.get_run_details(run_number=run_number_string)
-    read_in_ws = _load_raw_files(run_number_string=run_number_string, instrument=instrument)
-    read_ws = instrument.normalise_ws(ws_to_correct=read_in_ws, run_details=run_information)
+    raw_ws_list = _load_raw_files(run_number_string=run_number_string, instrument=instrument)
 
-    output_name = "read_ws_output-" + str(g_ads_workaround["read_ws"])
-    g_ads_workaround["read_ws"] += 1
-    read_ws = mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=output_name)
+    if input_batching.lower() == InputBatchingEnum.Summed.lower():
+        summed_ws = _sum_ws_range(ws_list=raw_ws_list)
+        remove_intermediate_workspace(raw_ws_list)
+        raw_ws_list = [summed_ws]
 
-    remove_intermediate_workspace(read_in_ws)
-    return read_ws
+    normalised_ws_list = _normalise_workspaces(ws_list=raw_ws_list, run_information=run_information,
+                                               instrument=instrument)
+
+    return normalised_ws_list
 
 
-def remove_intermediate_workspace(workspace_name):
-    #if mantid.mtd.doesExist(workspace_name):
-    mantid.DeleteWorkspace(workspace_name)
-    #    del workspace_name  # Mark it as deleted so that more information is preserved on throw
-    #else:
-    #    raise RuntimeError("Tried to remove non-existent workspace: " + str(workspace_name))
+def remove_intermediate_workspace(workspaces):
+    if isinstance(workspaces, list):
+        for ws in workspaces:
+            mantid.DeleteWorkspace(ws)
+    else:
+        mantid.DeleteWorkspace(workspaces)
 
 
 def subtract_sample_empty(ws_to_correct, empty_sample_ws_string, instrument):
-    output = ws_to_correct
     if empty_sample_ws_string:
-        empty_sample = load_current_normalised_ws(run_number_string=empty_sample_ws_string, instrument=instrument)
-        corrected_ws = mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample)
+        empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
+                                                       input_batching=InputBatchingEnum.Summed)
+        mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample[0], OutputWorkspace=ws_to_correct)
         remove_intermediate_workspace(empty_sample)
-        output = corrected_ws
-    return output
+
+    return ws_to_correct
+
+
+def _normalise_workspaces(ws_list, instrument, run_information):
+    output_list = []
+    for ws in ws_list:
+        output_list.append(instrument.normalise_ws(ws_to_correct=ws, run_details=run_information))
+
+    return output_list
 
 
 def _check_load_range(list_of_runs_to_load):
-    MAXIMUM_RANGE_LEN = 20  # If more than this number of runs is entered probably wrong
+    MAXIMUM_RANGE_LEN = 1000  # If more than this number of runs is entered probably wrong
     if len(list_of_runs_to_load) > MAXIMUM_RANGE_LEN:
         raise ValueError("More than " + str(MAXIMUM_RANGE_LEN) + " runs were selected."
                          " Found " + str(len(list_of_runs_to_load)) + " Aborting.")
 
 
 def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument, group_names):
-    input_ws = load_current_normalised_ws(calibration_runs, instrument)
+    input_ws = load_current_normalised_ws_list(calibration_runs, instrument, input_batching=InputBatchingEnum.Summed)
     calibration_d_spacing_ws = mantid.ConvertUnits(InputWorkspace=input_ws, Target="dSpacing")
     mantid.CreateCalFileByNames(InstrumentWorkspace=calibration_d_spacing_ws,
                                 GroupingFileName=out_grouping_file_name, GroupNames=group_names)
@@ -112,27 +122,29 @@ def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument,
 def _load_raw_files(run_number_string, instrument):
     run_number_list = generate_run_numbers(run_number_string=run_number_string)
     instrument._old_api_pearl_setup_input_dirs(run_number=run_number_list[0])
-    load_raw_ws = _load_sum_file_range(run_number_list, instrument)
+    load_raw_ws = _load_list_of_files(run_number_list, instrument)
     return load_raw_ws
 
 
-def _load_sum_file_range(run_numbers_list, instrument):
+def _load_list_of_files(run_numbers_list, instrument):
     read_ws_list = []
-
     _check_load_range(list_of_runs_to_load=run_numbers_list)
 
     for run_number in run_numbers_list:
         file_name = instrument.generate_inst_file_name(run_number=run_number)
-        read_ws = mantid.Load(Filename=file_name, LoadLogFiles="0")
+        read_ws = mantid.Load(Filename=file_name)
         read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=str(file_name)))
 
+    return read_ws_list
+
+
+def _sum_ws_range(ws_list):
     # Sum all workspaces
-    out_ws_name = "summed_range_load-" + str(g_ads_workaround["read_ws"])
-    g_ads_workaround["read_ws"] += 1
-    summed_ws = mantid.RenameWorkspace(InputWorkspace=read_ws_list[0], OutputWorkspace=out_ws_name)
-    for ws in read_ws_list[1:]:  # Skip first member
+    out_ws_name = "summed_" + ws_list[0].name() + '_' + ws_list[-1].name()
+
+    summed_ws = mantid.CloneWorkspace(InputWorkspace=ws_list[0], OutputWorkspace=out_ws_name)
+    for ws in ws_list[1:]:  # Skip the first element
         summed_ws = mantid.Plus(LHSWorkspace=summed_ws, RHSWorkspace=ws, OutputWorkspace=out_ws_name)
-        remove_intermediate_workspace(ws)
 
     return summed_ws
 

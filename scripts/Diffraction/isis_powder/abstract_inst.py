@@ -71,8 +71,8 @@ class AbstractInst(object):
                                     output_van_file_name=output_file_name,
                                     absorb=do_absorb_corrections, gen_absorb=gen_absorb_correction)
 
-    def _focus(self, run_number, do_attenuation, do_van_normalisation):
-        return focus.focus(run_number=run_number, perform_attenuation=do_attenuation,
+    def _focus(self, run_number, input_batching, do_attenuation, do_van_normalisation):
+        return focus.focus(run_number=run_number, perform_attenuation=do_attenuation, input_batching=input_batching,
                            perform_vanadium_norm=do_van_normalisation, instrument=self)
 
     def _generate_out_file_paths(self, run_details, output_directory=None):

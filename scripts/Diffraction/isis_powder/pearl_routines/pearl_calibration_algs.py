@@ -8,7 +8,7 @@ import isis_powder.routines.common as common
 
 
 def create_calibration(self, calibration_runs, offset_file_name, grouping_file_name):
-    input_ws = common.load_current_normalised_ws(run_number_string=calibration_runs, instrument=self)
+    input_ws = common.load_current_normalised_ws_list(run_number_string=calibration_runs, instrument=self)
     run_details = self.get_run_details(calibration_runs)
 
     if run_details.instrument_version == "new" or run_details.instrument_version == "new2":
@@ -49,7 +49,7 @@ def create_calibration(self, calibration_runs, offset_file_name, grouping_file_n
 
 def do_silicon_calibration(self, runs_to_process, cal_file_name, grouping_file_name):
     # TODO fix all of this as the script is too limited to be useful
-    create_si_ws = common.load_current_normalised_ws(run_number_string=runs_to_process, instrument=self)
+    create_si_ws = common.load_current_normalised_ws_list(run_number_string=runs_to_process, instrument=self)
     cycle_details = self._get_label_information(runs_to_process)
     instrument_version = cycle_details["instrument_version"]
 

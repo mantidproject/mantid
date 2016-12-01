@@ -33,8 +33,8 @@ class Polaris(AbstractInst):
 
         self._ads_workaround = 0
 
-    def focus(self, run_number, do_attenuation=True, do_van_normalisation=True):
-        return self._focus(run_number=run_number, do_attenuation=do_attenuation,
+    def focus(self, run_number, input_mode, do_attenuation=True, do_van_normalisation=True):
+        return self._focus(run_number=run_number, input_batching=input_mode, do_attenuation=do_attenuation,
                            do_van_normalisation=do_van_normalisation)
 
     def create_calibration_vanadium(self, run_in_range, do_absorb_corrections=True, gen_absorb_correction=False):
@@ -74,7 +74,7 @@ class Polaris(AbstractInst):
         return self._number_of_banks
 
     def normalise_ws(self, ws_to_correct, run_details=None):
-        normalised_ws = mantid.NormaliseByCurrent(InputWorkspace=ws_to_correct)
+        normalised_ws = mantid.NormaliseByCurrent(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct)
         return normalised_ws
 
     def apply_solid_angle_efficiency_corr(self, ws_to_correct, run_details):
