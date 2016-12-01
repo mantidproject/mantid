@@ -9,13 +9,21 @@
 using Mantid::Kernel::InstrumentInfo;
 using namespace boost::python;
 
+namespace {
 // To support default arguments
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(liveListener_overloads, liveListener, 0,
                                        1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(liveDataAddress_overloads,
                                        liveDataAddress, 0, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(liveListenerInfo_overloads,
                                        liveListenerInfo, 0, 1)
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+}
 
 void export_InstrumentInfo() {
   using namespace Mantid::PythonInterface;
