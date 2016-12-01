@@ -144,7 +144,8 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
         MonteCarloAbsorption(InputWorkspace=sample_wave_ws,
                              OutputWorkspace=self._ass_ws,
                              EventsPerPoint=self._events,
-                             NumberOfWavelengthPoints=self._number_wavelengths)
+                             NumberOfWavelengthPoints=self._number_wavelengths,
+                             Interpolation = 'CSpline')
 
         group = self._ass_ws
 
@@ -201,7 +202,8 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                 MonteCarloAbsorption(InputWorkspace=can_wave_ws,
                                      OutputWorkspace=self._acc_ws,
                                      EventsPerPoint=self._events,
-                                     NumberOfWavelengthPoints=self._number_wavelengths)
+                                     NumberOfWavelengthPoints=self._number_wavelengths,
+                                     Interpolation = 'CSpline')
 
                 divide_alg.setProperty("LHSWorkspace", can_wave_ws)
                 divide_alg.setProperty("RHSWorkspace", self._acc_ws)

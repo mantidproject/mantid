@@ -156,7 +156,8 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         MonteCarloAbsorption(InputWorkspace=sample_wave_ws,
                              OutputWorkspace=self._ass_ws,
                              EventsPerPoint=self._events,
-                             NumberOfWavelengthPoints=self._number_wavelengths)
+                             NumberOfWavelengthPoints=self._number_wavelengths,
+                             Interpolation = 'CSpline')
 
         group = self._ass_ws
 
@@ -224,7 +225,8 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                 MonteCarloAbsorption(InputWorkspace=can1_wave_ws,
                                      OutputWorkspace='__Acc1',
                                      EventsPerPoint=self._events,
-                                     NumberOfWavelengthPoints=self._number_wavelengths)
+                                     NumberOfWavelengthPoints=self._number_wavelengths,
+                                     Interpolation = 'CSpline')
 
                 SetBeam(can2_wave_ws,
                         Geometry={'Shape': 'Slit',
@@ -243,7 +245,8 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                 MonteCarloAbsorption(InputWorkspace=can2_wave_ws,
                                      OutputWorkspace='__Acc2',
                                      EventsPerPoint=self._events,
-                                     NumberOfWavelengthPoints=self._number_wavelengths)
+                                     NumberOfWavelengthPoints=self._number_wavelengths,
+                                     Interpolation = 'CSpline')
 
                 multiply_alg.setProperty("LHSWorkspace", '__Acc1')
                 multiply_alg.setProperty("RHSWorkspace", '__Acc2')
