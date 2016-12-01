@@ -4,6 +4,7 @@ import os
 import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
+from isis_powder.routines.common_enums import InputBatchingEnum
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.pearl_routines import pearl_algs, pearl_calibration_algs, pearl_output, pearl_cycle_factory, \
     pearl_spline
@@ -38,7 +39,8 @@ class Pearl(AbstractInst):
 
     def focus(self, run_number, focus_mode, do_attenuation=True, do_van_normalisation=True):
         self._focus_mode = focus_mode
-        return self._focus(run_number=run_number,
+        # TODO come back and allow PEARL to select their input batching method
+        return self._focus(run_number=run_number, input_batching=InputBatchingEnum.Summed,
                            do_attenuation=do_attenuation, do_van_normalisation=do_van_normalisation)
 
     def create_calibration_vanadium(self, vanadium_runs, empty_runs, output_file_name=None, num_of_splines=60,
@@ -75,7 +77,7 @@ class Pearl(AbstractInst):
         return run_details
 
     @staticmethod
-    def _get_cycle_factory_dict(self, run_number):
+    def _get_cycle_factory_dict(run_number):
         # TODO remove this when we move to combining CAL/RUN factories
         run_input = ""
         if isinstance(run_number, int) or run_number.isdigit():
@@ -143,9 +145,11 @@ class Pearl(AbstractInst):
                                                          spline_number=self._spline_coeff,
                                                          instrument_version=instrument_version)
 
-    def pearl_focus_tof_rebinning(self, input_workspace):
-        input_workspace = mantid.Rebin(InputWorkspace=input_workspace, Params=self._focus_tof_binning)
-        return input_workspace
+    def pearl_focus_tof_rebinning(self, workspace):
+        out_name = workspace.name() + "_rebinned"
+        out_ws = mantid.Rebin(InputWorkspace=workspace, Params=self._focus_tof_binning,
+                                 OutputWorkspace=out_name)
+        return out_ws
 
     def _focus_processing(self, run_number, input_workspace, perform_vanadium_norm):
         return self._perform_focus_loading(run_number, input_workspace, perform_vanadium_norm)

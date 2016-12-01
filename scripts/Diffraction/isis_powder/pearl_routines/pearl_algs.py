@@ -100,10 +100,11 @@ def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff):
     splined_monitor_ws = mantid.SplineBackground(InputWorkspace=processed_monitor_ws,
                                                  WorkspaceIndex=0, NCoeff=spline_coeff)
 
-    normalised_ws = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target="Wavelength")
+    normalised_ws = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target="Wavelength", OutputWorkspace=ws_to_correct)
     normalised_ws = mantid.NormaliseToMonitor(InputWorkspace=normalised_ws, MonitorWorkspace=splined_monitor_ws,
-                                              IntegrationRangeMin=0.6, IntegrationRangeMax=5.0)
-    normalised_ws = mantid.ConvertUnits(InputWorkspace=normalised_ws, Target="TOF")
+                                              IntegrationRangeMin=0.6, IntegrationRangeMax=5.0,
+                                              OutputWorkspace=normalised_ws)
+    normalised_ws = mantid.ConvertUnits(InputWorkspace=normalised_ws, Target="TOF", OutputWorkspace=normalised_ws)
 
     common.remove_intermediate_workspace(processed_monitor_ws)
     common.remove_intermediate_workspace(splined_monitor_ws)

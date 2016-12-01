@@ -123,12 +123,12 @@ def _check_load_range(list_of_runs_to_load):
 
 
 def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument, group_names):
-    input_ws = load_current_normalised_ws_list(calibration_runs, instrument, input_batching=InputBatchingEnum.Summed)
-    calibration_d_spacing_ws = mantid.ConvertUnits(InputWorkspace=input_ws, Target="dSpacing")
+    input_ws_list = load_current_normalised_ws_list(calibration_runs, instrument, input_batching=InputBatchingEnum.Summed)
+    calibration_d_spacing_ws = mantid.ConvertUnits(InputWorkspace=input_ws_list[0], Target="dSpacing")
     mantid.CreateCalFileByNames(InstrumentWorkspace=calibration_d_spacing_ws,
                                 GroupingFileName=out_grouping_file_name, GroupNames=group_names)
     remove_intermediate_workspace(calibration_d_spacing_ws)
-    remove_intermediate_workspace(input_ws)
+    remove_intermediate_workspace(input_ws_list)
 
 
 def _load_raw_files(run_number_string, instrument):

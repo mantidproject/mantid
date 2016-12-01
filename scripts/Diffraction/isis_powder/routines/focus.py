@@ -9,20 +9,21 @@ import os
 
 def focus(run_number, instrument, input_batching, perform_attenuation=True, perform_vanadium_norm=True):
     if input_batching.lower() == InputBatchingEnum.Individual.lower():
-        _individual_run_focusing(input_batching, instrument, perform_attenuation, perform_vanadium_norm, run_number)
+        return _individual_run_focusing(input_batching, instrument, perform_attenuation, perform_vanadium_norm,
+                                        run_number)
     else:
-        _batched_run_focusing(input_batching, instrument, perform_attenuation, perform_vanadium_norm, run_number)
+        return _batched_run_focusing(input_batching, instrument, perform_attenuation, perform_vanadium_norm, run_number)
 
 
 def _batched_run_focusing(input_batching, instrument, perform_attenuation, perform_vanadium_norm, run_number):
-    import pydevd
-    pydevd.settrace('localhost', port=51205, stdoutToServer=True, stderrToServer=True)
     read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number,
                                                           input_batching=input_batching, instrument=instrument)
+    output = None
     for ws in read_ws_list:
-        _focus_one_ws(ws=ws, run_number=run_number, instrument=instrument, perform_attenuation=perform_attenuation,
-                      perform_vanadium_norm=perform_vanadium_norm)
+        output = _focus_one_ws(ws=ws, run_number=run_number, instrument=instrument,
+                               perform_attenuation=perform_attenuation, perform_vanadium_norm=perform_vanadium_norm)
         common.remove_intermediate_workspace(ws)
+    return output
 
 
 def _divide_sample_by_vanadium(instrument, run_number, input_workspace, perform_vanadium_norm):
@@ -49,7 +50,6 @@ def _divide_sample_by_vanadium(instrument, run_number, input_workspace, perform_
 
 
 def _focus_one_ws(ws, run_number, instrument, perform_attenuation=True, perform_vanadium_norm=True):
-    # input_workspace = instrument.pearl_focus_tof_rebinning(read_ws)  # Rebins for PEARL
     run_details = instrument.get_run_details(run_number=run_number)
 
     # Check the necessary splined vanadium file has been created
@@ -58,10 +58,12 @@ def _focus_one_ws(ws, run_number, instrument, perform_attenuation=True, perform_
                          + str(run_details.splined_vanadium) +
                          " \n\nHave you created a vanadium calibration with these settings yet?")
 
+    in_ws_name = ws.name()  # Setup for later check that ws doesn't shadow
+
+    ws = instrument.pearl_focus_tof_rebinning(ws)  # Rebins for PEARL
     # Compensate for empty sample if specified
     input_workspace = common.subtract_sample_empty(ws_to_correct=ws, instrument=instrument,
                                                    empty_sample_ws_string=run_details.sample_empty)
-
     # Align / Focus
     input_workspace = mantid.AlignDetectors(InputWorkspace=input_workspace,
                                             CalibrationFile=run_details.calibration)
@@ -90,20 +92,24 @@ def _focus_one_ws(ws, run_number, instrument, perform_attenuation=True, perform_
     common.remove_intermediate_workspace(focused_ws)
     common.remove_intermediate_workspace(calibrated_spectra)
 
+    if ws.name() != in_ws_name:
+        # We have rebinned and will leak a workspace as there is now two 'ws' variables shadowing one ADS entry
+        common.remove_intermediate_workspace(ws)
+
     return processed_nexus_files
 
 
 def _individual_run_focusing(input_batching, instrument, perform_attenuation, perform_vanadium_norm, run_number):
     # Load and process one by one
-    import pydevd
-    pydevd.settrace('localhost', port=51205, stdoutToServer=True, stderrToServer=True)
     run_numbers = common.generate_run_numbers(run_number_string=run_number)
+    output = None
     for run in run_numbers:
         ws = common.load_current_normalised_ws_list(run_number_string=run, instrument=instrument,
                                                     input_batching=input_batching)
-        _focus_one_ws(ws=ws[0], run_number=run, instrument=instrument, perform_attenuation=perform_attenuation,
-                      perform_vanadium_norm=perform_vanadium_norm)
+        output = _focus_one_ws(ws=ws[0], run_number=run, instrument=instrument,
+                               perform_attenuation=perform_attenuation, perform_vanadium_norm=perform_vanadium_norm)
         common.remove_intermediate_workspace(ws)
+    return output
 
 
 def _apply_binning_to_spectra(spectra_list, binning_list):

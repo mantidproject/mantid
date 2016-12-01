@@ -9,18 +9,13 @@ from isis_powder.routines.common_enums import InputBatchingEnum
 
 
 def create_van(instrument, van, empty, output_van_file_name, absorb, gen_absorb):
-
+    run_details = instrument.get_run_details(run_number=van)
     # Always sum a range of inputs as its a vanadium run over multiple captures
     input_van_ws_list = common.load_current_normalised_ws_list(run_number_string=van, instrument=instrument,
                                                                input_batching=InputBatchingEnum.Summed)
-
     input_van_ws = input_van_ws_list[0]  # As we asked for a summed ws there should only be one returned
-
     corrected_van_ws = common.subtract_sample_empty(ws_to_correct=input_van_ws, empty_sample_ws_string=empty,
                                                     instrument=instrument)
-    common.remove_intermediate_workspace(input_van_ws)
-
-    run_details = instrument.get_run_details(run_number=van)
 
     corrected_van_ws = instrument. pearl_van_calibration_tof_rebinning(vanadium_ws=corrected_van_ws,
                                                                        tof_rebin_pass=1, return_units="TOF")
