@@ -366,9 +366,31 @@ class IndirectILLReductionFWS(DataProcessorAlgorithm):
                 sample_ws = self._red_ws + '_' + str(energy)
                 calib_ws = self._red_ws + '_' + self._CALIBRATION + '_' + str(energy)
                 Divide(LHSWorkspace=sample_ws, RHSWorkspace=calib_ws, OutputWorkspace=sample_ws)
+                self._scale_calibration(sample_ws,calib_ws)
             else:
                 self.log().warning('No calibration can be performed for doppler energy of {0} microEV, '
                                    'since no calibration run was provided for the same energy value.'.format(energy))
+
+    def _scale_calibration(self, sample, calib):
+        '''
+        Scales sample workspace after calibration up by the maximum of integral intensity
+        in calibration run for each observable point
+        @param sample  :: sample workspace after calibration
+        @param calib   :: calibration workspace
+        '''
+
+        if mtd[calib].blocksize() == 1:
+            scale = np.max(mtd[calib].extractY()[:,0])
+            Scale(InputWorkspace=sample,Factor=scale,OutputWorkspace=sample,Operation='Multiply')
+        else:
+            # here calib and sample have the same size already
+            for column in range(mtd[sample].blocksize()):
+                scale = np.max(mtd[calib].extractY()[:,column])
+                for spectrum in range(mtd[sample].getNumberHistograms()):
+                    y = mtd[sample].dataY(spectrum)[column]
+                    e = mtd[sample].dataE(spectrum)[column]
+                    y *= scale
+                    e *= scale
 
     def _get_observable_values(self, ws_list):
         '''
