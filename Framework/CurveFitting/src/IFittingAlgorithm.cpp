@@ -93,6 +93,14 @@ void IFittingAlgorithm::init() {
                   "centre of each bin. If it is \"Histogram\" then function is "
                   "integrated within the bin and the integrals returned.",
                   Kernel::Direction::Input);
+  declareProperty("PeakRadius", 0,
+                  "A value of the peak radius the peak functions should use. A "
+                  "peak radius defines an interval on the x axis around the "
+                  "centre of the peak where its values are calculated. Values "
+                  "outside the interval are not calculated and assumed zeros."
+                  "Numerically the radius is a whole number of peak widths "
+                  "(FWHM) that fit into the interval on each side from the "
+                  "centre. The default value of 0 means the whole x axis.");
 
   initConcrete();
 }
@@ -299,6 +307,15 @@ IFittingAlgorithm::getCostFunctionProperty() const {
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
   m_domainCreator->createDomain(domain, values);
+
+  // Set peak radius to the values which will be passed to
+  // all IPeakFunctions
+  int peakRadius = getProperty("PeakRadius");
+  if (auto d1d = dynamic_cast<API::FunctionDomain1D *>(domain.get())) {
+    if (peakRadius != 0) {
+      d1d->setPeakRadius(peakRadius);
+    }
+  }
 
   // Do something with the function which may depend on workspace.
   m_domainCreator->initFunction(m_function);
