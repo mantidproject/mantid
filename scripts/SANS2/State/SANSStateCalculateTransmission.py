@@ -117,7 +117,7 @@ class SANSStateCalculateTransmissionISIS(SANSStateBase, SANSStateCalculateTransm
                     convert_reduction_data_type_to_string(DataType.Can): SANSStateTransmissionFit()}
         self.use_full_wavelength_range = False
 
-    def validate(self):
+    def validate(self):  # noqa
         is_invalid = {}
         # -----------------
         # Incident monitor
