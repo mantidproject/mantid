@@ -526,6 +526,7 @@ void StartLiveDataDialog::updateConnectionDetails(const QString &connection) {
   // Set address text box
   auto address = QString::fromStdString(info.address());
   ui.edtConnAddress->setText(address);
+  ui.edtConnAddress->home(false); // display long lines from beginning, not end
 }
 }
 }
