@@ -150,6 +150,50 @@ void IFunction::removeTie(const std::string &parName) {
   this->removeTie(i);
 }
 
+/// Write the list of ties to a stream
+void IFunction::writeTies(std::ostringstream &ostr) const {
+  // collect the non-default ties
+  std::string ties;
+  for (size_t i = 0; i < nParams(); i++) {
+    const ParameterTie *tie = getTie(i);
+    if (tie && !tie->isDefault()) {
+      std::string tmp = tie->asString(this);
+      if (!tmp.empty()) {
+        if (!ties.empty()) {
+          ties += ",";
+        }
+        ties += tmp;
+      }
+    }
+  }
+  // print the ties
+  if (!ties.empty()) {
+    ostr << ",ties=(" << ties << ")";
+  }
+}
+
+/// Write the list of constraints to a stream
+void IFunction::writeConstraints(std::ostringstream &ostr) const {
+  // collect non-default constraints
+  std::string constraints;
+  for (size_t i = 0; i < nParams(); i++) {
+    const IConstraint *c = getConstraint(i);
+    if (c && !c->isDefault()) {
+      std::string tmp = c->asString();
+      if (!tmp.empty()) {
+        if (!constraints.empty()) {
+          constraints += ",";
+        }
+        constraints += tmp;
+      }
+    }
+  }
+  // print constraints
+  if (!constraints.empty()) {
+    ostr << ",constraints=(" << constraints << ")";
+  }
+}
+
 /**
  * Writes a string that can be used in Fit.IFunction to create a copy of this
  * IFunction
@@ -173,42 +217,8 @@ std::string IFunction::asString() const {
       ostr << ',' << parameterName(i) << '=' << getParameter(i);
     }
   }
-  // collect non-default constraints
-  std::string constraints;
-  for (size_t i = 0; i < nParams(); i++) {
-    const IConstraint *c = getConstraint(i);
-    if (c && !c->isDefault()) {
-      std::string tmp = c->asString();
-      if (!tmp.empty()) {
-        if (!constraints.empty()) {
-          constraints += ",";
-        }
-        constraints += tmp;
-      }
-    }
-  }
-  // print constraints
-  if (!constraints.empty()) {
-    ostr << ",constraints=(" << constraints << ")";
-  }
-  // collect the non-default ties
-  std::string ties;
-  for (size_t i = 0; i < nParams(); i++) {
-    const ParameterTie *tie = getTie(i);
-    if (tie && !tie->isDefault()) {
-      std::string tmp = tie->asString(this);
-      if (!tmp.empty()) {
-        if (!ties.empty()) {
-          ties += ",";
-        }
-        ties += tmp;
-      }
-    }
-  }
-  // print the ties
-  if (!ties.empty()) {
-    ostr << ",ties=(" << ties << ")";
-  }
+  writeConstraints(ostr);
+  writeTies(ostr);
   return ostr.str();
 }
 
@@ -600,7 +610,8 @@ void IFunction::Attribute::fromString(const std::string &str) {
 /// parameters different from the declared
 double IFunction::activeParameter(size_t i) const {
   if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter");
+    throw std::runtime_error("Attempt to use an inactive parameter " +
+                             parameterName(i));
   }
   return getParameter(i);
 }
@@ -609,7 +620,8 @@ double IFunction::activeParameter(size_t i) const {
 /// parameters different from the declared
 void IFunction::setActiveParameter(size_t i, double value) {
   if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter");
+    throw std::runtime_error("Attempt to use an inactive parameter " +
+                             parameterName(i));
   }
   setParameter(i, value);
 }
@@ -620,7 +632,8 @@ void IFunction::setActiveParameter(size_t i, double value) {
  */
 std::string IFunction::nameOfActive(size_t i) const {
   if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter");
+    throw std::runtime_error("Attempt to use an inactive parameter " +
+                             parameterName(i));
   }
   return parameterName(i);
 }
@@ -631,7 +644,8 @@ std::string IFunction::nameOfActive(size_t i) const {
  */
 std::string IFunction::descriptionOfActive(size_t i) const {
   if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter");
+    throw std::runtime_error("Attempt to use an inactive parameter " +
+                             parameterName(i));
   }
   return parameterDescription(i);
 }
@@ -1070,6 +1084,17 @@ void IFunction::storeAttributeValue(const std::string &name,
         "ParamFunctionAttributeHolder::setAttribute - Unknown attribute '" +
         name + "'");
   }
+}
+
+/**
+*  Store a value to a named attribute if it can be considered "mutable" or
+*  read only, which simply reflects the current state of the function.
+*  @param name :: The name of the attribute
+*  @param value :: The value of the attribute
+*/
+void IFunction::storeReadOnlyAttribute(
+    const std::string &name, const API::IFunction::Attribute &value) const {
+  const_cast<IFunction *>(this)->storeAttributeValue(name, value);
 }
 
 /**
