@@ -74,21 +74,6 @@ namespace Mantid {
 namespace VATES {
 
 /**
- * This function constructs and executes the helper class.
- * @param dataset : The VTK data to modify
- * @param name : The MDWorkspace containing the information to construct.
- * @param workspaceProvider: The provider of one or multiple workspaces.
-
- */
-void vtkDataSetToNonOrthogonalDataSet::exec(
-    vtkDataSet *dataset, std::string name,
-    std::unique_ptr<WorkspaceProvider> workspaceProvider) {
-  vtkDataSetToNonOrthogonalDataSet temp(dataset, name,
-                                        std::move(workspaceProvider));
-  temp.execute();
-}
-
-/**
  * This is the private class constructor.
  * @param dataset : The VTK data to modify
  * @param name : The MDWorkspace containing the information to construct.
@@ -118,7 +103,7 @@ vtkDataSetToNonOrthogonalDataSet::vtkDataSetToNonOrthogonalDataSet(
  */
 vtkDataSetToNonOrthogonalDataSet::~vtkDataSetToNonOrthogonalDataSet() {}
 
-void vtkDataSetToNonOrthogonalDataSet::execute() {
+void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
   // Downcast to a vtkPointSet
   vtkPointSet *data = vtkPointSet::SafeDownCast(m_dataSet);
   if (NULL == data) {
@@ -234,9 +219,19 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
   } else if (points->GetNumberOfComponents() != 3) {
     throw std::runtime_error("points array must have 3 components.");
   }
+  float *end = points->GetPointer(points->GetNumberOfValues());
 
-  float *end = points->GetPointer(points->GetNumberOfTuples() * 3);
+  vtkIdType progressIncrement = points->GetNumberOfValues() / 25;
+
+  double progressFactor = 0.25 / points->GetNumberOfValues();
+
   for (float *it = points->GetPointer(0); it < end; std::advance(it, 3)) {
+    if (progress) {
+      vtkIdType index = std::distance(points->GetPointer(0), it);
+      if (index % progressIncrement == 0)
+        progress->eventRaised(0.75 +
+                              static_cast<double>(index) * progressFactor);
+    }
     float v1 = it[0];
     float v2 = it[1];
     float v3 = it[2];

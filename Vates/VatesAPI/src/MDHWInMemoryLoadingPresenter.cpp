@@ -68,7 +68,7 @@ bool MDHWInMemoryLoadingPresenter::canReadFile() const {
 namespace {
 class CellVisibility {
 public:
-  CellVisibility(vtkStructuredGrid *structuredGrid)
+  explicit CellVisibility(vtkStructuredGrid *structuredGrid)
       : MASKED_CELL_VALUE(vtkDataSetAttributes::HIDDENCELL |
                           vtkDataSetAttributes::REFINEDCELL),
         InputCellGhostArray(

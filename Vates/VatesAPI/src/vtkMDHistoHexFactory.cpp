@@ -171,7 +171,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   }
   float *it = pointsarray->WritePointer(0, nPointsX * nPointsY * nPointsZ * 3);
   // Array with the point IDs (only set where needed)
-  progressFactor = 0.5 / static_cast<double>(nPointsZ);
+  progressFactor = 0.25 / static_cast<double>(nPointsZ);
   double progressOffset = 0.5;
   for (int z = 0; z < nPointsZ; z++) {
     // Report progress updates for the last 50%

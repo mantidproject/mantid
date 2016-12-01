@@ -41,11 +41,12 @@ void MDLoadingPresenter::setDefaultCOBandBoundaries(vtkDataSet *visualDataSet) {
  */
 void MDLoadingPresenter::makeNonOrthogonal(
     vtkDataSet *visualDataSet,
-    std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider) {
+    std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider,
+    ProgressAction *progress) {
   std::string wsName = vtkDataSetToWsName::exec(visualDataSet);
   vtkDataSetToNonOrthogonalDataSet converter(visualDataSet, wsName,
                                              std::move(workspaceProvider));
-  converter.execute();
+  converter.execute(progress);
 }
 }
 }
