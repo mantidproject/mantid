@@ -12,15 +12,19 @@ New
 ###
 
 - :ref:`ConvertToConstantL2 <algm-ConvertToConstantL2>` is the new name for CorrectFlightPaths.
+- :ref:`BinWidthAtX <algm-BinWidthAtX>` and :ref:`MedianBinWidth <algm-MedianBinWidth>` provide information about the bin widths of histograms.
+
 
 Improved
 ########
 
-- :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` has now a new mode 'Moving Average' which takes the minimum of a moving window average as the flat background.
+- :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` has a new mode 'Moving Average' which takes the minimum of a moving window average as the flat background.
 - :ref:`StartLiveData <algm-StartLiveData>` and its dialog now support dynamic listener properties, based on the specific LiveListener being used.
 - All algorithms using AsciiPointBase now have a new property 'Separator' which allows the delimiter to be set to either comma, space or tab. This affects :ref:`SaveReflCustomAscii <algm-SaveReflCustomAscii>`, :ref:`SaveReflThreeColumnAscii <algm-SaveReflThreeColumnAscii>`, :ref:`SaveANSTOAscii <algm-SaveANSTOAscii>` and :ref:`SaveILLCosmosAscii <algm-SaveILLCosmosAscii>`.
 - :ref:`ReplaceSpecialValues <algm_ReplaceSpecialValues>` now can replace 'small' values below a user specified threshold.
 - :ref:`Stitch1DMany <algm-Stitch1DMany>` has a new property 'ScaleFactorFromPeriod' which enables it to apply scale factors from a particular period when stitching group workspaces. The documentation for this algorithm has also been improved.
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` gained a new option: `Interpolation`.
+  This controls the method used for interpolation. Availabile options are: `Linear` & `CSpline`.
 
 Deprecated
 ##########
@@ -62,8 +66,3 @@ Full list of
 and
 `Python <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Python%22>`__
 changes on GitHub
-
-Bug Fixes
----------
-
-- Fixed several issues with masked detectors and neighbour counts in the nearest-neighbour code used by a few algorithms.
