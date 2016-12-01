@@ -17,6 +17,7 @@
 #include "MantidKernel/MDUnit.h"
 
 #include "MantidVatesAPI/vtkRectilinearGrid_Silent.h"
+#include "MockObjects.h"
 #include <vtkDataArray.h>
 #include <vtkFieldData.h>
 #include <vtkFloatArray.h>
