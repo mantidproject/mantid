@@ -67,6 +67,11 @@ public:
   std::string filePrefix(unsigned int runNumber) const;
   /// Returns the default delimiter between instrument name and run number
   std::string delimiter() const;
+  /// Return list of techniques
+  const std::set<std::string> &techniques() const;
+  /// The facility to which this instrument belongs
+  const FacilityInfo &facility() const;
+
   /// Returns the name of the default live listener
   std::string liveListener(const std::string &name = "") const;
   /// Returns a string containing the "host:port" for default live listener
@@ -77,10 +82,6 @@ public:
   bool hasLiveListenerInfo() const;
   /// Returns all available LiveListenerInfos as a vector
   const std::vector<LiveListenerInfo> &liveListenerInfoList() const;
-  /// Return list of techniques
-  const std::set<std::string> &techniques() const;
-  /// The facility to which this instrument belongs
-  const FacilityInfo &facility() const;
 
 private:
   void fillTechniques(const Poco::XML::Element *elem);
