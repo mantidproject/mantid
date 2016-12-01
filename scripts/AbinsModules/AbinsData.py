@@ -33,12 +33,13 @@ class AbinsData(GeneralData):
             self._atoms_data = atoms_data
         else:
             raise ValueError("Invalid type of atoms data.")
+
         self._data = {"k_points_data": k_points_data.extract(), "atoms_data": atoms_data.extract()}
 
-        def getKpointsData(self):
+    def get_kpoints_data(self):
             return self._kpoints_data
 
-        def getAtomsData(self):
+    def get_atoms_data(self):
             return self._atoms_data
 
     def extract(self):

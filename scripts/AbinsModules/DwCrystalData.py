@@ -26,7 +26,7 @@ class DwCrystalData(GeneralData):
         else:
             raise ValueError("Improper number of atoms.")
 
-        self._data = np.zeros((self._num_atoms, 3, 3), dtype=AbinsConstants.float_type)
+        self._data = np.zeros((self._num_atoms, 3, 3), dtype=AbinsConstants.FLOAT_TYPE)
 
     def _append(self, item=None, num_atom=None):
         """
@@ -74,7 +74,7 @@ class DwCrystalData(GeneralData):
         if data.shape != (3, 3):
             raise ValueError("Debye-Waller factor should have a form of 3x3 numpy array"
                              " (outer product of atomic displacements).")
-        if data.dtype.num != AbinsConstants.float_id:
+        if data.dtype.num != AbinsConstants.FLOAT_ID:
             raise ValueError("Invalid type of DW factors. Floating numbers are expected.")
 
     def _check_items(self, items=None):
@@ -89,5 +89,5 @@ class DwCrystalData(GeneralData):
         if items.shape != (self._num_atoms, 3, 3):
             raise ValueError("Debye-Waller factor should have a form of 3x3 numpy array"
                              " (outer product of atomic displacements).")
-        if items.dtype.num != AbinsConstants.float_id:
+        if items.dtype.num != AbinsConstants.FLOAT_ID:
             raise ValueError("Invalid type of DW factors. Floating numbers are expected.")

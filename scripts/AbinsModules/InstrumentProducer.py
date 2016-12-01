@@ -8,7 +8,7 @@ class InstrumentProducer(object):
 
     def produce_instrument(self, name=None):
 
-        if name not in AbinsConstants.all_instruments:
+        if name not in AbinsConstants.ALL_INSTRUMENTS:
             raise ValueError("Unknown instrument: %s" % name)
         elif name == "TOSCA":
             return ToscaInstrument("TOSCA")

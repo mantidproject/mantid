@@ -31,9 +31,9 @@ class PowderData(GeneralData):
 
         if not isinstance(items, dict):
             raise ValueError("Invalid value. Dictionary with the following entries : %s" %
-                             AbinsConstants.all_keywords_powder_data + " was expected.")
+                             AbinsConstants.ALL_KEYWORDS_POWDER_DATA + " was expected.")
 
-        if sorted(items.keys()) != sorted(AbinsConstants.all_keywords_powder_data):
+        if sorted(items.keys()) != sorted(AbinsConstants.ALL_KEYWORDS_POWDER_DATA):
             raise ValueError("Invalid structure of the dictionary.")
 
         if not isinstance(items["a_tensors"], np.ndarray):

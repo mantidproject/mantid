@@ -49,7 +49,7 @@ class CalculateDWCrystal(object):
         _data = self._abins_data.extract()
         _mass_hartree_factor = np.asarray([1.0 / ( atom["mass"] * 2)  for atom in _data["atoms_data"]])
         _frequencies_hartree = _data["k_points_data"]["frequencies"]
-        _temperature_hartree = self._temperature * AbinsConstants.k_2_hartree
+        _temperature_hartree = self._temperature * AbinsConstants.K_2_HARTREE
 
         _weights = _data["k_points_data"]["weights"]
         _atomic_displacements = _data["k_points_data"]["atomic_displacements"]
@@ -59,8 +59,8 @@ class CalculateDWCrystal(object):
         _tanh =  np.tanh(np.multiply(_coth_factor,  _frequencies_hartree))
         _coth_over_omega = np.divide(1.0, np.multiply(_tanh ,_frequencies_hartree)) # coth(...)/omega
 
-        _item_k = np.zeros((3, 3), dtype=AbinsConstants.float_type) # stores DW for one atom
-        _item_freq = np.zeros((3, 3), dtype=AbinsConstants.float_type)
+        _item_k = np.zeros((3, 3), dtype=AbinsConstants.FLOAT_TYPE) # stores DW for one atom
+        _item_freq = np.zeros((3, 3), dtype=AbinsConstants.FLOAT_TYPE)
 
         for num in range(self._num_atoms):
             _item_k.fill(0.0) # erase stored information so that it can be filled with content for the next atom
@@ -68,7 +68,7 @@ class CalculateDWCrystal(object):
             for k in range(self._num_k):
 
                 # correction for acoustic modes at Gamma point
-                if np.linalg.norm(_data["k_points_data"]["k_vectors"][k]) < AbinsConstants.small_k: start = 3
+                if np.linalg.norm(_data["k_points_data"]["k_vectors"][k]) < AbinsConstants.SMALL_K: start = 3
                 else: start = 0
 
                 _item_freq.fill(0.0)
@@ -86,7 +86,7 @@ class CalculateDWCrystal(object):
             _DW._append(item=_item_k, num_atom=num)
         return _DW
 
-    def calculateData(self):
+    def calculate_data(self):
         """
         Calculates Debye-Waller factors.
         @return: object of type DwData with Debye-Waller factors.

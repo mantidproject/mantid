@@ -28,7 +28,7 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
     _temperature = 10  # 10 K,  temperature for the benchmark
     _sample_form = "Powder"
     _instrument_name = "TOSCA"
-    _order_event = AbinsConstants.fundamentals
+    _order_event = AbinsConstants.FUNDAMENTALS
 
     # data
     core = "../ExternalData/Testing/Data/UnitTest/"
@@ -133,11 +133,11 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
 
         for el in range(len(correct_data)):
 
-            temp = np.asarray(correct_data["atom_%s" % el]["frequencies"]["order_%s" % AbinsConstants.fundamentals])
-            correct_data["atom_%s" % el]["frequencies"]["order_%s" % AbinsConstants.fundamentals] = temp
+            temp = np.asarray(correct_data["atom_%s" % el]["frequencies"]["order_%s" % AbinsConstants.FUNDAMENTALS])
+            correct_data["atom_%s" % el]["frequencies"]["order_%s" % AbinsConstants.FUNDAMENTALS] = temp
 
-            temp = np.asarray(correct_data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals])
-            correct_data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals] = temp
+            temp = np.asarray(correct_data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.FUNDAMENTALS])
+            correct_data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.FUNDAMENTALS] = temp
 
         return correct_data
 
@@ -145,12 +145,12 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
 
         for el in range(len(good_data)):
 
-            good_temp = good_data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals]
-            data_temp = data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.fundamentals]
+            good_temp = good_data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.FUNDAMENTALS]
+            data_temp = data["atom_%s" % el]["s"]["order_%s" % AbinsConstants.FUNDAMENTALS]
             self.assertEqual(True, np.allclose(good_temp, data_temp))
 
-            good_temp = good_data["atom_%s" % el]["frequencies"]["order_%s" % AbinsConstants.fundamentals]
-            data_temp = data["atom_%s" % el]["frequencies"]["order_%s" % AbinsConstants.fundamentals]
+            good_temp = good_data["atom_%s" % el]["frequencies"]["order_%s" % AbinsConstants.FUNDAMENTALS]
+            data_temp = data["atom_%s" % el]["frequencies"]["order_%s" % AbinsConstants.FUNDAMENTALS]
             self.assertEqual(True, np.allclose(good_temp, data_temp))
 
             self.assertEqual(good_data["atom_%s" % el]["sort"],

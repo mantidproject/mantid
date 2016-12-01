@@ -38,7 +38,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
             raise ValueError("Temperature cannot be negative.")
         self._temperature = float(temperature)
 
-        if sample_form in AbinsConstants.all_sample_forms:
+        if sample_form in AbinsConstants.ALL_SAMPLE_FORMS:
             self._sample_form = sample_form
         else:
             raise ValueError("Invalid sample form %s" % sample_form)
@@ -48,14 +48,14 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         else:
             raise ValueError("Object of type AbinsData was expected.")
 
-        min_order = AbinsConstants.fundamentals
-        max_order = AbinsConstants.fundamentals + AbinsConstants.higher_order_quantum_events
+        min_order = AbinsConstants.FUNDAMENTALS
+        max_order = AbinsConstants.FUNDAMENTALS + AbinsConstants.HIGHER_ORDER_QUANTUM_EVENTS
         if isinstance(quantum_order_num, int) and min_order <= quantum_order_num <= max_order:
             self._quantum_order_num = quantum_order_num
         else:
             raise ValueError("Invalid number of quantum order events.")
 
-        if instrument_name in AbinsConstants.all_instruments:
+        if instrument_name in AbinsConstants.ALL_INSTRUMENTS:
             self._instrument_name = instrument_name
             _instrument_producer = InstrumentProducer()
             self._instrument = _instrument_producer.produce_instrument(name=self._instrument_name)
@@ -69,10 +69,10 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                                       self._sample_form + "/%sK" % self._temperature))
         FrequencyPowderGenerator.__init__(self)
 
-        self._calculate_order = {AbinsConstants.quantum_order_one: self._calculate_order_one,
-                                 AbinsConstants.quantum_order_two: self._calculate_order_two,
-                                 AbinsConstants.quantum_order_three: self._calculate_order_three,
-                                 AbinsConstants.quantum_order_four: self._calculate_order_four}
+        self._calculate_order = {AbinsConstants.QUANTUM_ORDER_ONE: self._calculate_order_one,
+                                 AbinsConstants.QUANTUM_ORDER_TWO: self._calculate_order_two,
+                                 AbinsConstants.QUANTUM_ORDER_THREE: self._calculate_order_three,
+                                 AbinsConstants.QUANTUM_ORDER_FOUR: self._calculate_order_four}
 
     def _calculate_s(self):
 
@@ -100,7 +100,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         # look for index of Gamma point
         num_k = k_data["k_vectors"].shape[0]
         for k in range(num_k):
-            if np.linalg.norm(k_data["k_vectors"][k]) < AbinsConstants.small_k:
+            if np.linalg.norm(k_data["k_vectors"][k]) < AbinsConstants.SMALL_K:
                 gamma_pkt_index = k
                 break
         if gamma_pkt_index == -1:
@@ -131,8 +131,8 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         abins_data_extracted = self._abins_data.extract()
         atom_data = abins_data_extracted["atoms_data"]
         k_points_data = self._get_gamma_data(abins_data_extracted["k_points_data"])
-        fundamentals_freq = np.multiply(k_points_data["frequencies"][0][AbinsConstants.first_optical_phonon:],
-                                        1.0 / AbinsConstants.cm1_2_hartree)
+        fundamentals_freq = np.multiply(k_points_data["frequencies"][0][AbinsConstants.FIRST_OPTICAL_PHONON:],
+                                        1.0 / AbinsConstants.CM1_2_HARTREE)
 
         # calculate s for each atom
         for atom in range(num_atoms):
@@ -168,9 +168,9 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         s_frequencies = {}
 
         local_freq = np.copy(fundamentals_freq)
-        local_coeff = np.arange(fundamentals_freq.size, dtype=AbinsConstants.int_type)
+        local_coeff = np.arange(fundamentals_freq.size, dtype=AbinsConstants.INT_TYPE)
 
-        for order in range(AbinsConstants.fundamentals, self._quantum_order_num + AbinsConstants.s_last_index):
+        for order in range(AbinsConstants.FUNDAMENTALS, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
 
             local_freq, local_coeff = self.construct_freq_combinations(previous_array=local_freq,
                                                                        previous_coefficients=local_coeff,
@@ -187,8 +187,8 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                                                      b_tensor=powder_atoms_data["b_tensors"][atom],
                                                      b_trace=b_traces[atom])
 
-            # neglect S below s_threshold
-            indices = value_dft > AbinsConstants.s_threshold
+            # neglect S below S_THRESHOLD
+            indices = value_dft > AbinsConstants.S_THRESHOLD
             value_dft = value_dft[indices]
             local_freq = local_freq[indices]
             local_coeff = local_coeff[indices]
@@ -220,8 +220,8 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         @return: s for the first quantum order event for the given atom
         """
         trace_ba = np.einsum('kli, il->k', b_tensor, a_tensor)
-        coth = 1.0 / np.tanh(frequencies * AbinsConstants.cm1_2_hartree /
-                             (2.0 * self._temperature * AbinsConstants.k_2_hartree))
+        coth = 1.0 / np.tanh(frequencies * AbinsConstants.CM1_2_HARTREE /
+                             (2.0 * self._temperature * AbinsConstants.K_2_HARTREE))
 
         s = q2 * b_trace / 3.0 * np.exp(-q2 * (a_trace + 2.0 * trace_ba / b_trace) / 5.0 * coth * coth)
 
@@ -243,8 +243,8 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         @param b_trace: frequency dependent MSD trace for the given atom
         @return: s for the second quantum order event for the given atom
         """
-        coth = 1.0 / np.tanh(frequencies * AbinsConstants.cm1_2_hartree /
-                             (2.0 * self._temperature * AbinsConstants.k_2_hartree))
+        coth = 1.0 / np.tanh(frequencies * AbinsConstants.CM1_2_HARTREE /
+                             (2.0 * self._temperature * AbinsConstants.K_2_HARTREE))
 
         dw = np.exp(-q2 * a_trace / 3.0 * coth * coth)
         q4 = q2 ** 2
@@ -295,8 +295,8 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         @param b_trace: frequency dependent MSD trace for the given atom
         @return: s for the third quantum order event for the given atom
         """
-        coth = 1.0 / np.tanh(frequencies * AbinsConstants.cm1_2_hartree /
-                             (2.0 * self._temperature * AbinsConstants.k_2_hartree))
+        coth = 1.0 / np.tanh(frequencies * AbinsConstants.CM1_2_HARTREE /
+                             (2.0 * self._temperature * AbinsConstants.K_2_HARTREE))
         s = 9.0 / 543.0 * q2 ** 3 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
             np.exp(-q2 * a_trace / 3.0 * coth * coth)
 
@@ -316,8 +316,8 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
         @param b_trace: frequency dependent MSD trace for the given atom
         @return: s for the forth quantum order event for the given atom
         """
-        coth = 1.0 / np.tanh(frequencies * AbinsConstants.cm1_2_hartree /
-                             (2.0 * self._temperature * AbinsConstants.k_2_hartree))
+        coth = 1.0 / np.tanh(frequencies * AbinsConstants.CM1_2_HARTREE /
+                             (2.0 * self._temperature * AbinsConstants.K_2_HARTREE))
         s = 27.0 / 9850.0 * q2 ** 4 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
             np.exp(-q2 * a_trace / 3.0 * coth * coth)
 
@@ -381,7 +381,7 @@ class CalculateS(IOmodule, FrequencyPowderGenerator):
                 sort = data["datasets"]["data"]["atom_%s" % i]["sort"]
                 symbol = data["datasets"]["data"]["atom_%s" % i]["symbol"]
                 temp_data["atom_%s" % i] = {"sort": sort,  "symbol":  symbol, "s": {}, "frequencies": {}}
-                for j in range(AbinsConstants.fundamentals, self._quantum_order_num + AbinsConstants.s_last_index):
+                for j in range(AbinsConstants.FUNDAMENTALS, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
 
                     temp_val = data["datasets"]["data"]["atom_%s" % i]["s"]["order_%s" % j]
                     temp_data["atom_%s" % i]["s"]["order_%s" % j] = temp_val

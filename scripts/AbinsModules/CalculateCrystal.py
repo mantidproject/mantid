@@ -30,7 +30,7 @@ class CalculateCrystal(IOmodule):
     def _calculate_crystal(self):
 
         _dw_crystal = CalculateDWCrystal(temperature=self._temperature, abins_data=self._abins_data)
-        _dw_crystal_data = _dw_crystal.calculateData()
+        _dw_crystal_data = _dw_crystal.calculate_data()
         _crystal_data = CrystalData()
         _crystal_data.set(abins_data=self._abins_data, dw_crystal_data=_dw_crystal_data)
 
