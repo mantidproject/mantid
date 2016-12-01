@@ -566,6 +566,9 @@ void TomographyIfacePresenter::processRunRecon() {
     m_model->prepareSubmissionArguments(local, runnable, args, allOpts);
     if (local) {
       setupAndRunLocalReconstruction(runnable, args, allOpts);
+
+      // start the refresh jobs timer if not running
+      startKeepAliveMechanism(m_view->keepAlivePeriod());
     } else {
       // get the actual compute resource name
       const std::string computingResouce = m_view->currentComputeResource();
@@ -575,6 +578,7 @@ void TomographyIfacePresenter::processRunRecon() {
   } catch (std::exception &e) {
     m_view->userWarning("Issue when trying to start a job", e.what());
   }
+
   processRefreshJobs();
 }
 
@@ -639,6 +643,7 @@ void TomographyIfacePresenter::addProcessToJobList() {
 }
 
 void TomographyIfacePresenter::readWorkerStdOut(const QString &s) {
+  // TODO test if works
   m_model->logMsg(s.toStdString());
 }
 
@@ -832,6 +837,11 @@ void TomographyIfacePresenter::startKeepAliveMechanism(int period) {
     return;
   }
 
+  // timer is already running, so return
+  if (m_keepAliveTimer || m_keepAliveThread) {
+    return;
+  }
+
   m_model->logMsg(
       "Tomography GUI: starting mechanism to periodically query the "
       "status of jobs. This will update the status of running jobs every " +
@@ -851,6 +861,10 @@ void TomographyIfacePresenter::startKeepAliveMechanism(int period) {
 
   m_keepAliveTimer->setInterval(1000 * period); // interval in ms
   m_keepAliveTimer->moveToThread(m_keepAliveThread);
+
+  // remove previous connections
+  m_keepAliveTimer->disconnect();
+  m_keepAliveThread->disconnect();
   // direct connection from the thread
   connect(m_keepAliveTimer, SIGNAL(timeout()), SLOT(processRefreshJobs()),
           Qt::DirectConnection);

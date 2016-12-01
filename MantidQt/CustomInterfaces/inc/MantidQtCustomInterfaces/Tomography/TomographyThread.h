@@ -48,6 +48,9 @@ public:
     connect(this, SIGNAL(finished()), this, SLOT(deleteLater()),
             Qt::DirectConnection);
 
+    // TODO test if terminates process
+    connect(this, SIGNAL(terminated()), worker, SLOT(terminate()));
+
     worker->moveToThread(this);
     m_worker = worker;
   }
@@ -62,12 +65,17 @@ public slots:
 
   void readWorkerStdOut() const {
     auto *worker = qobject_cast<TomographyProcess *>(sender());
-    emit stdOutReady(worker->readAllStandardOutput());
+    QString out(worker->readAllStandardOutput());
+    if (!out.isEmpty())
+      emit stdOutReady(out.trimmed());
   }
 
   void readWorkerStdErr() const {
     auto *worker = qobject_cast<TomographyProcess *>(sender());
-    emit stdErrReady(worker->readAllStandardError());
+    QString out(worker->readAllStandardError());
+
+    if (!out.isEmpty())
+      emit stdErrReady(out.trimmed());
   }
 
 signals:
