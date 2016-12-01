@@ -12,6 +12,8 @@ using namespace boost::python;
 namespace {
 // To support default arguments
 #ifdef __clang__
+#pragma push
+#pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(liveListener_overloads, liveListener, 0,
