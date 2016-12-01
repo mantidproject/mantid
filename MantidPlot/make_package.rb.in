@@ -347,7 +347,7 @@ end
 copyOptionalFile("#{path}/mistune.so")
 
 `mkdir Contents/MacOS/bin`
-`cp /usr/local/bin/ipython Contents/MacOS/bin/`
+`cp /usr/local/bin/ipython@PYTHON_VERSION_MAJOR@ Contents/MacOS/bin/`
 
 #Lastly check for any libraries in the package linking against homebrew libraries.
 search_patterns.each do |pattern|
