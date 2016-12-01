@@ -413,14 +413,13 @@ void PredictPeaks::setStructureFactorCalculatorFromSample(
  * @param orientedUB
  * @param goniometerMatrix
  */
-void PredictPeaks::calculateQAndAddToOutput(V3D &hkl,
+void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
                                             const DblMatrix &orientedUB,
                                             const DblMatrix &goniometerMatrix) {
   // The q-vector direction of the peak is = goniometer * ub * hkl_vector
   // This is in inelastic convention: momentum transfer of the LATTICE!
   // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
-  hkl *= m_qConventionFactor;
-  V3D q = orientedUB * hkl * (2.0 * M_PI);
+  V3D q = orientedUB * hkl * (2.0 * M_PI * m_qConventionFactor);
 
   // Create the peak using the Q in the lab framewith all its info:
   Peak p(m_inst, q);
@@ -433,7 +432,7 @@ void PredictPeaks::calculateQAndAddToOutput(V3D &hkl,
     p.setGoniometerMatrix(goniometerMatrix);
     // Save the run number found before.
     p.setRunNumber(m_runNumber);
-    p.setHKL(hkl);
+    p.setHKL(hkl * m_qConventionFactor);
 
     if (m_sfCalculator) {
       p.setIntensity(m_sfCalculator->getFSquared(hkl));

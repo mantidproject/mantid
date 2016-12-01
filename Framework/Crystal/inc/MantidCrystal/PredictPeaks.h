@@ -58,7 +58,7 @@ private:
 
   void setStructureFactorCalculatorFromSample(const API::Sample &sample);
 
-  void calculateQAndAddToOutput(Kernel::V3D &hkl,
+  void calculateQAndAddToOutput(const Kernel::V3D &hkl,
                                 const Kernel::DblMatrix &orientedUB,
                                 const Kernel::DblMatrix &goniometerMatrix);
 
