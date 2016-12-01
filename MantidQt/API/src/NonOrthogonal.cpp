@@ -429,6 +429,7 @@ void transformLookpointToWorkspaceCoord(Mantid::coord_t *lookPoint,
 */
 std::pair<double, double> getGridLineAnglesInRadian(Mantid::coord_t skewMatrixCoord[9], size_t dimX, size_t dimY) {
 	// Get the two vectors for the selected dimensions in the orthogonal axis representation.
+
   std::array<Mantid::coord_t, 3> dimXOriginal = {0., 0., 0.};
   std::array<Mantid::coord_t, 3> dimYOriginal = {0., 0., 0.};
   dimXOriginal[dimX] = 1.0;
