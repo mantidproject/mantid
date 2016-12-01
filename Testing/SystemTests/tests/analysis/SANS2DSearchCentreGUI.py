@@ -1,4 +1,5 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
+import mantid
 import ISISCommandInterface as i
 import isis_reducer
 import isis_instrument
