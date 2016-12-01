@@ -289,6 +289,11 @@ void LoadILLIndirect2::loadDataIntoTheWorkSpace(
     m_localWorkspace->dataY(im)
         .assign(monitor_p, monitor_p + m_numberOfChannels);
 
+    // Assign Error
+    MantidVec &E = m_localWorkspace->dataE(im);
+    std::transform(monitor_p, monitor_p + m_numberOfChannels, E.begin(),
+                   LoadILLIndirect2::calculateError);
+
     progress.report();
   }
 
@@ -326,6 +331,11 @@ void LoadILLIndirect2::loadDataIntoTheWorkSpace(
     int *dataSD_p = &dataSD(index - 1, 0, 0);
     m_localWorkspace->dataY(spec + m_numberOfMonitors + offset)
         .assign(dataSD_p, dataSD_p + m_numberOfChannels);
+
+    // Assign Error
+    MantidVec &E = m_localWorkspace->dataE(spec + m_numberOfMonitors + offset);
+    std::transform(dataSD_p, dataSD_p + m_numberOfChannels, E.begin(),
+                   LoadILLIndirect2::calculateError);
 
     progress.report();
     ++offset;
