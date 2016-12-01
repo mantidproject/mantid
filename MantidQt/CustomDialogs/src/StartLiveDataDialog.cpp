@@ -434,6 +434,8 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &listener) {
   }
 
   // update algorithm's properties
+  m_algorithm->setPropertyValue("Instrument", ui.cmbInstrument->currentText()
+                                .toStdString());
   m_algorithm->setPropertyValue("Listener", listener.toStdString());
   // create or clear the layout
   QLayout *layout = ui.listenerProps->layout();
