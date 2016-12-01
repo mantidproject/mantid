@@ -24,8 +24,9 @@ class Polaris(AbstractInst):
 
         self._chopper_on = chopper_on
         self._apply_solid_angle = kwargs["apply_solid_angle"]
+        self._calibration_mapping_path = kwargs["calibration_mapping_file"]
 
-        self._spline_coeff = 100
+        self._spline_coeff = 100  # TODO move this out into advanced config
 
         # Hold the last dictionary later to avoid us having to keep parsing the YAML
         self._run_details_last_run_number = None
@@ -54,7 +55,8 @@ class Polaris(AbstractInst):
             return self._run_details_cached_obj
 
         run_details = polaris_algs.get_run_details(chopper_on=self._chopper_on, sac_on=self._apply_solid_angle,
-                                                   run_number=run_number, calibration_dir=self.calibration_dir)
+                                                   run_number_string=run_number, calibration_dir=self._calibration_dir,
+                                                   mapping_path=self._calibration_mapping_path)
 
         # Hold obj in case same run range is requested
         self._run_details_last_run_number = run_number
@@ -144,14 +146,9 @@ def _set_kwargs_from_basic_config_file(config_path, kwargs):
         basic_config_dict = {}
 
     # Set any unset properties:
-    key = "user_name"
-    _set_from_config_kwargs_helper(config_dictionary=basic_config_dict, kwargs=kwargs, key=key)
-    key = "calibration_directory"
-    _set_from_config_kwargs_helper(config_dictionary=basic_config_dict, kwargs=kwargs, key=key)
-    key = "output_directory"
-    _set_from_config_kwargs_helper(config_dictionary=basic_config_dict, kwargs=kwargs, key=key)
-    key = "apply_solid_angle"
-    _set_from_config_kwargs_helper(config_dictionary=basic_config_dict, kwargs=kwargs, key=key)
+    keys = ["user_name", "calibration_directory", "output_directory", "apply_solid_angle", "calibration_mapping_file"]
+    for key in keys:
+        _set_from_config_kwargs_helper(config_dictionary=basic_config_dict, kwargs=kwargs, key=key)
 
 
 def _set_from_config_kwargs_helper(config_dictionary, kwargs, key):

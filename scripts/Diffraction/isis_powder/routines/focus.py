@@ -56,7 +56,7 @@ def _focus_one_ws(ws, run_number, instrument, perform_attenuation=True, perform_
     if not os.path.isfile(run_details.splined_vanadium):
         raise ValueError("Processed vanadium runs not found at this path: "
                          + str(run_details.splined_vanadium) +
-                         " \n\nHave you created a vanadium calibration with these settings yet?")
+                         " \nHave you created a vanadium calibration with these settings yet?\n")
 
     in_ws_name = ws.name()  # Setup for later check that ws doesn't shadow
 
