@@ -21,7 +21,7 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
         config['default.instrument'] = 'IN16B'
         config.appendDataSearchSubDir('ILL/IN16B/')
 
-        self.params = {'Tolerance':1e-6,
+        self.params = {'Tolerance':1e-4,
                        'CheckInstrument':False}
 
     def tearDown(self):
@@ -81,7 +81,7 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
     def _run_sum_interpolate(self):
 
         # this cross-tests if only one background point is given,
-        # sum and interpolate options should give the same output
+        # sum and interpolate options should give identical output
         IndirectILLReductionFWS(Run="143720:143728:2",
                                 BackgroundRun="143721",
                                 BackgroundOption="Interpolate",

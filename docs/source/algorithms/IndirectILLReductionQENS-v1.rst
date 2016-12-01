@@ -55,6 +55,17 @@ For the data with mirror sense (i.e. mirror_sense = 14) there are 8 options avai
 
 Options 5 and 7 require the ``AlignmentRun`` (vanadium) to determine the peak positions to align with.
 
+:ref:`MatchPeaks <algm-MatchPeaks>` algorithm is invoked for aligning the peaks with different options.
+
+Note, that both detector calibration and background subtraction are performed wing-by-wing, i.e. unmirroring is the very final step.
+
+Vanadium Calibration
+~~~~~~~~~~~~~~~~~~~~
+
+Integration range can be specified to integrate over spectra in ``CalibrationRun``. Note, that before integration, the spectra will be
+centered at 0-energy transfer (see Unmirror Option 6 above) for the calibration run.
+
+
 Output
 ------
 
