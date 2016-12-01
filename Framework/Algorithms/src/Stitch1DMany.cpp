@@ -146,7 +146,7 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
   // Throw if a common error is found
   auto commonErrors = validateCommonInputs();
   if (commonErrors.size() > 0) {
-    auto &error = commonErrors.begin();
+    auto error = commonErrors.begin();
     throw std::runtime_error(error->second);
   }
 }
@@ -296,7 +296,7 @@ void Stitch1DMany::doStitch1D(
  * @param scaleRhsWS :: Scaling either with respect to left or right workspaces
  * @param useManualScaleFactor :: True to use a provided value for scale factor
  * @param manualScaleFactor :: Provided value for scaling factor
- * @param outWSName :: Output stitched workspace name
+ * @param outName :: Output stitched workspace name
  * @param outScaleFactors :: Actual values used for scale factors
  */
 void Stitch1DMany::doStitch1DMany(
@@ -329,7 +329,7 @@ void Stitch1DMany::doStitch1DMany(
     alg->setProperty("ManualScaleFactor", manualScaleFactor);
   alg->execute();
 
-  outName = alg->getProperty("OutputWorkspace");
+  outName = (std::string)alg->getProperty("OutputWorkspace");
   outScaleFactors = alg->getProperty("OutScaleFactors");
 }
 
@@ -356,7 +356,7 @@ bool Stitch1DMany::processGroups() {
   bool usingScaleFromPeriod = m_useManualScaleFactor && manualSF->isDefault();
 
   if (!usingScaleFromPeriod) {
-    for (int i = 0; i < m_numWSPerGroup; ++i) {
+    for (size_t i = 0; i < m_numWSPerGroup; ++i) {
       outName = groupName;
       std::vector<double> scaleFactors;
       doStitch1DMany(m_inputWSGroups, i, true, m_startOverlaps, m_endOverlaps,
@@ -380,13 +380,13 @@ bool Stitch1DMany::processGroups() {
                    periodScaleFactors);
 
     // Iterate over each period
-    for (int i = 0; i < m_numWSPerGroup; i++) {
+    for (size_t i = 0; i < m_numWSPerGroup; i++) {
       auto lhsWS =
           boost::dynamic_pointer_cast<MatrixWorkspace>(m_inputWSMatrix[0][i]);
       outName = groupName + "_" + lhsWS->name();
 
       // Perform stiching on the workspace for each group of that period
-      for (int j = 1; j < m_numWSPerPeriod; j++) {
+      for (size_t j = 1; j < m_numWSPerPeriod; j++) {
         auto rhsWS =
             boost::dynamic_pointer_cast<MatrixWorkspace>(m_inputWSMatrix[j][i]);
         outName += "_" + rhsWS->name(); // add name

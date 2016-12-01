@@ -50,7 +50,7 @@ public:
   /// Validates algorithm inputs for group workspaces
   void validateGroupWorkspacesInputs();
   /// Validates inputs common to group and non-group workspaces
-  std::map<std::string, std::string> Stitch1DMany::validateCommonInputs();
+  std::map<std::string, std::string> validateCommonInputs();
 
   /// Performs the Stitch1D algorithm at a specific workspace index
   void doStitch1D(MatrixWorkspace_sptr lhsWS, MatrixWorkspace_sptr rhsWS,
