@@ -5,6 +5,7 @@
 	src/AlgorithmRunner.cpp
 	src/BatchAlgorithmRunner.cpp
 	src/BoolPropertyWidget.cpp
+        src/FileDialogHandler.cpp
 	src/FilePropertyWidget.cpp
 	src/GenericDialog.cpp
 	src/HelpWindow.cpp
