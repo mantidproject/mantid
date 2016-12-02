@@ -1082,6 +1082,7 @@ TMDE(void MDGridBox)::centerpointBin(MDBin<MDE, nd> &bin,
  * @param radiusSquared :: radius^2 below which to integrate
  * @param signal [out] :: set to the integrated signal
  * @param errorSquared [out] :: set to the integrated squared error.
+ * @param innerRadiusSquared :: radius^2 above which to integrate
  */
 TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform,
                                       const coord_t radiusSquared,
@@ -1214,7 +1215,7 @@ TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform,
       coord_t out[nd];
       radiusTransform.apply(boxCenter, out);
 
-      if (out[0] < diagonalSquared * 0.72 + radiusSquared) {
+      if (out[0] < diagonalSquared * 0.72 + radiusSquared || out[0] < diagonalSquared * 0.72 + innerRadiusSquared) {
         // If the center is closer than the size of the box, then it MIGHT be
         // touching.
         // (We multiply by 0.72 (about sqrt(2)) to look for half the diagonal).
@@ -1231,7 +1232,7 @@ TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform,
     if (partialBox) {
       // Use the detailed integration method.
       box->integrateSphere(radiusTransform, radiusSquared, signal,
-                           errorSquared);
+                           errorSquared, innerRadiusSquared);
       //        std::cout << ".signal=" << signal << "\n";
       numPartiallyContained++;
     }

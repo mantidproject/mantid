@@ -550,6 +550,7 @@ TMDE(void MDBox)::generalBin(
  * @param radiusSquared :: radius^2 below which to integrate
  * @param[out] signal :: set to the integrated signal
  * @param[out] errorSquared :: set to the integrated squared error.
+ * @param innerRadiusSquared :: radius^2 above which to integrate
  */
 TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform,
                                   const coord_t radiusSquared, signal_t &signal,
