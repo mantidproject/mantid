@@ -55,6 +55,10 @@ public:
     m_worker = worker;
   }
 
+  ~TomographyThread() override {
+	  emit terminated(); // TODO try this tomorrow!
+  }
+
 public slots:
   void workerFinished(int exitCode) {
     UNUSED_ARG(exitCode);
