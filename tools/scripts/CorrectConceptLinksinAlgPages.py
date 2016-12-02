@@ -1,6 +1,7 @@
 #pylint: disable=invalid-name
 import os
 import re
+from mantid.api import AlgorithmFactory
 
 concepts = ['Algorithm',
             'Analysis_Data_Service',

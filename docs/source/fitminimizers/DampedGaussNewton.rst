@@ -1,4 +1,4 @@
-﻿.. _DampedGaussNewton:
+.. _DampedGaussNewton:
 
 Damped Gauss-Newton minimizer
 =============================
