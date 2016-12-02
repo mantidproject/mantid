@@ -106,9 +106,11 @@ protected slots:
   void readWorkerStdErr(const QString &s);
   void addProcessToJobList();
   void reconProcessFailedToStart();
-  void workerFinished(int exitCode);
+  void workerFinished(const int exitCode);
 
 private:
+  /// Asks the user for permission to cancel the running reconstruction
+  bool userConfirmationToCancelRecon();
   void setupAndRunLocalReconstruction(const std::string &runnable,
                                       const std::vector<std::string> &args,
                                       const std::string &allOpts);

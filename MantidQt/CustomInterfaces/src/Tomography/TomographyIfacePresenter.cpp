@@ -582,10 +582,7 @@ void TomographyIfacePresenter::processRunRecon() {
   processRefreshJobs();
 }
 
-void TomographyIfacePresenter::setupAndRunLocalReconstruction(
-    const std::string &runnable, const std::vector<std::string> &args,
-    const std::string &allOpts) {
-
+bool TomographyIfacePresenter::userConfirmationToCancelRecon() {
   if (m_reconRunning) {
     const auto result = m_view->userConfirmation(
         "Reconstruction is RUNNING",
@@ -594,8 +591,20 @@ void TomographyIfacePresenter::setupAndRunLocalReconstruction(
     if (!result) {
       // user clicked NO, so we don't terminate the running reconstruction and
       // simply return
-      return;
+      return false;
     }
+    m_reconRunning = false;
+    return true;
+  }
+}
+
+void TomographyIfacePresenter::setupAndRunLocalReconstruction(
+    const std::string &runnable, const std::vector<std::string> &args,
+    const std::string &allOpts) {
+
+  if (!userConfirmationToCancelRecon()) {
+    // user didnt confirm
+    return;
   }
 
   // this kills the previous thread forcefully
@@ -624,9 +633,10 @@ void TomographyIfacePresenter::setupAndRunLocalReconstruction(
 
 /** Simply reset the switch that tracks if a recon is running
 */
-void TomographyIfacePresenter::workerFinished(int exitCode) {
+void TomographyIfacePresenter::workerFinished(const int exitCode) {
   m_reconRunning = false;
   m_model->updateProcessInJobList(m_runningProcessPID, exitCode);
+  processRefreshJobs();
 }
 
 void TomographyIfacePresenter::reconProcessFailedToStart() {
@@ -680,11 +690,13 @@ void TomographyIfacePresenter::processRefreshJobs() {
 }
 
 void TomographyIfacePresenter::processCancelJobs() {
-  if (m_model->loggedIn().empty())
-    return;
-
   const std::string &resource = m_view->currentComputeResource();
-  if (!isLocalResourceSelected()) {
+  if (isLocalResourceSelected()) {
+    if (userConfirmationToCancelRecon()) {
+      // user confirmed
+      m_workerThread.reset();
+    }
+  } else {
     m_model->doCancelJobs(resource, m_view->processingJobsIDs());
   }
 }

@@ -42,11 +42,12 @@ public:
     connect(worker, SIGNAL(readyReadStandardError()), this,
             SLOT(readWorkerStdErr()));
 
-    connect(worker, SIGNAL(finished(int)), this, SLOT(workerFinished(int)));
+    connect(worker, SIGNAL(finished(int)), this, SLOT(finished(int)));
 
     connect(this, SIGNAL(finished()), this, SLOT(deleteLater()),
             Qt::DirectConnection);
 
+    connect(this, SIGNAL(terminated()), worker, SLOT(terminate()));
     m_worker->moveToThread(this);
   }
 
@@ -55,16 +56,17 @@ public:
     // thus not allowing to have multiple reconstructions running at the same
     // time
     emit terminated();
+    // emit that the worker has been forcefully closed, exit with error code 1
+    emit workerFinished(1);
   }
 
 public slots:
-  void workerFinished(int exitCode) {
-    UNUSED_ARG(exitCode);
+  void finished(const int exitCode) {
     // queue up object deletion
     m_worker->deleteLater();
-    emit workerFinished();
-    // DEBUG :: this segfaults
-    this->deleteLater();
+
+    // emit the exit code to the presenter so the process info can be updated
+    emit workerFinished(exitCode);
   }
 
   void readWorkerStdOut() const {
@@ -83,7 +85,7 @@ public slots:
   }
 
 signals:
-  void workerFinished();
+  void workerFinished(int);
   void stdOutReady(const QString &s) const;
   void stdErrReady(const QString &s) const;
 

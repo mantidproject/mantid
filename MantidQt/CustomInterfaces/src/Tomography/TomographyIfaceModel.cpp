@@ -559,14 +559,13 @@ void TomographyIfaceModel::refreshLocalJobsInfo() {
   }
 }
 
-void TomographyIfaceModel::updateProcessInJobList(qint64 pid, int exitCode) {
+void TomographyIfaceModel::updateProcessInJobList(const qint64 pid,
+                                                  const int exitCode) {
   // cast down from qint64
-  int processPID = static_cast<int>(pid);
-  std::cout << "PID :: " << processPID << " exited with code :: " << exitCode
-            << '\n';
+  const std::string processPID = std::to_string(static_cast<int>(pid));
   for (auto &job : m_jobsStatusLocal) {
     if (job.id == static_cast<int>(pid)) {
-      if (exitCode != 0 || exitCode != 1) {
+      if (exitCode == 1) {
         job.status = "Exit";
       }
     }
