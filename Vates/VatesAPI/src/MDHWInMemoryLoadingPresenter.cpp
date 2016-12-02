@@ -11,6 +11,7 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <qwt_double_interval.h>
 
+#include "tbb/tbb.h"
 #include "vtkStructuredGrid.h"
 #include "vtkUnsignedCharArray.h"
 #include "vtkUnstructuredGrid.h"
@@ -101,6 +102,34 @@ void ComputeScalarRange(vtkStructuredGrid *grid, double *cellRange) {
       maxvalue = std::max(maxvalue, s);
     }
   }
+
+  auto minimum = tbb::parallel_reduce(
+      tbb::blocked_range<int>(0, num), VTK_DOUBLE_MAX,
+      [&isCellVisible, cellScalars](tbb::blocked_range<int> &r,
+                                    double current_min) -> double {
+        for (int id = r.begin(); id != r.end(); ++id) {
+          double s = cellScalars->GetComponent(id, 0);
+          current_min = std::min(current_min, s);
+        }
+        return current_min;
+      },
+      [](double s1, double s2) { return std::min(s1, s2); });
+
+  auto maximum = tbb::parallel_reduce(
+      tbb::blocked_range<int>(0, num), VTK_DOUBLE_MIN,
+      [&isCellVisible, cellScalars](tbb::blocked_range<int> &r,
+                                    double current_max) -> double {
+        for (int id = r.begin(); id != r.end(); ++id) {
+          double s = cellScalars->GetComponent(id, 0);
+          current_max = std::max(current_max, s);
+        }
+        return current_max;
+      },
+      [](double s1, double s2) { return std::max(s1, s2); });
+
+  std::cout << minvalue << " " << minimum << std::endl;
+  std::cout << maxvalue << " " << maximum << std::endl;
+
   cellRange[0] = minvalue;
   cellRange[1] = maxvalue;
 }
