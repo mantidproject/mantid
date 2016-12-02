@@ -1999,7 +1999,8 @@ public:
       fit.setProperty("MaxIterations", 0);
       fit.setProperty("Output", "out");
       fit.execute();
-      auto res = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out_Workspace");
+      auto res = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          "out_Workspace");
       auto y = res->y(1);
       TS_ASSERT_DIFFERS(y.front(), 0.0);
       TS_ASSERT_DIFFERS(y.back(), 0.0);
@@ -2013,11 +2014,12 @@ public:
       fit.setProperty("MaxIterations", 0);
       fit.setProperty("Output", "out");
       fit.execute();
-      auto res = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out_Workspace");
+      auto res = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          "out_Workspace");
       auto y = res->y(1);
-      for(size_t i = 0; i < 25; ++i) {
+      for (size_t i = 0; i < 25; ++i) {
         TS_ASSERT_EQUALS(y[i], 0.0);
-        TS_ASSERT_EQUALS(y[nbins-i-1], 0.0);
+        TS_ASSERT_EQUALS(y[nbins - i - 1], 0.0);
       }
       TS_ASSERT_DIFFERS(y[26], 0.0);
       TS_ASSERT_DIFFERS(y[26], 0.0);
