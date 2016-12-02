@@ -152,6 +152,7 @@ void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &numberPen,
   // We need the -1 since we the angle is defined in the mathematical positive
   // sense but we are taking the angle against the y axis in the mathematical
   // negative sense.
+  angle *= -1.f;
   auto xOffsetForYLine = angle == 0. ? 0. : heightScreen * std::tan(angle);
 
   // We need to make sure that the we don't have a blank area. This "blankness"
@@ -159,7 +160,7 @@ void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &numberPen,
   // given by
   // lineSpacing/(x offset of line on the top), ie. increment/xOffsetForYLine
   int additionalLinesToDraw =
-      static_cast<int>(std::ceil(xOffsetForYLine / increment));
+      static_cast<int>(std::abs(std::ceil(xOffsetForYLine / increment)));
   int index = 0;
   if (angle < 0) {
     // If the angle is positive, then we need to add more lines at the left side
@@ -202,8 +203,8 @@ void NonOrthogonalOverlay::drawXLines(QPainter &painter, QPen &numberPen,
   auto yOffsetForXLine = angle == 0. ? 0. : widthScreen * std::tan(angle);
 
   int additionalLinesToDraw =
-      static_cast<int>(std::ceil(yOffsetForXLine / increment));
-
+      static_cast<int>(std::abs(std::ceil(yOffsetForXLine / increment)));
+  
   int index = 0;
   if (angle > 0) {
     // If the angle is positive, then we need to add more lines at the bottom of

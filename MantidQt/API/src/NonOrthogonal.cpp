@@ -225,7 +225,7 @@ std::array<Mantid::coord_t, 3>
   std::array<Mantid::coord_t, 3> normalVector;
   for (size_t index = 0; index < 3; ++index) {
     normalVector[index] = vector1[(index + 1) % 3] * vector2[(index + 2) % 3] -
-                          vector1[(index + 2) % 3] * vector1[(index + 1) % 3];
+                          vector1[(index + 2) % 3] * vector2[(index + 1) % 3];
   }
 
   // Make sure that the output is truely normalized
@@ -250,7 +250,7 @@ std::array<Mantid::coord_t, 3> getNormalVector(size_t dimX, size_t dimY) {
   std::array<Mantid::coord_t, 3> normalVector;
   for (size_t index = 0; index < 3; ++index) {
     normalVector[index] = vector1[(index + 1) % 3] * vector2[(index + 2) % 3] -
-                          vector1[(index + 2) % 3] * vector1[(index + 1) % 3];
+                          vector1[(index + 2) % 3] * vector2[(index + 1) % 3];
   }
 
   // Make sure that the output is normalized
@@ -294,6 +294,7 @@ double getAngleInRadian(std::array<Mantid::coord_t, N> orthogonalVector,
     normalizeVector<Mantid::coord_t, N>(orthogonalVector);
     normalizeVector<Mantid::coord_t, N>(nonOrthogonalVector);
 
+	//projecting onto third dimension by setting dimension coming out of screen to zero
     std::array<Mantid::coord_t, 3> temporaryNonOrthogonal{0.f, 0.f, 0.f};
     temporaryNonOrthogonal[currentDimension] =
         nonOrthogonalVector[currentDimension];
