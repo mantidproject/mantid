@@ -222,7 +222,8 @@ void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
   }
   float *end = points->GetPointer(points->GetNumberOfValues());
 
-  vtkIdType progressIncrement = std::max(1, points->GetNumberOfValues() / 25);
+  vtkIdType progressIncrement =
+      std::max(static_cast<vtkIdType>(1), points->GetNumberOfValues() / 25);
 
   double progressFactor =
       0.25 / static_cast<double>(points->GetNumberOfValues());
