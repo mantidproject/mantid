@@ -5,8 +5,10 @@ Reflectometry Changes
 .. contents:: Table of Contents
    :local:
 
-ConvertToReflectometryQ
------------------------
+Algorithms
+----------
+
+- :ref:`algm-Stitch1D` documentation has been improved, it now includes a workflow diagram illustrating the different steps in the calculation and a note about how errors are propagated.
 
 
 Reflectometry Reduction Interface
@@ -14,6 +16,11 @@ Reflectometry Reduction Interface
 
 ISIS Reflectometry (Polref)
 ###########################
+
+- Settings tab now displays individual global options for experiment and instrument settings.
+- New 'Save ASCII' tab added, similar in function and purpose to the 'Save Workspaces' window accessible from Interfaces->ISIS Reflectometry->File->Save Workspaces.
+- Column :literal:`dQ/Q` is used as the rebin parameter to stitch workspaces.
+- Documentation regarding the interface has been updated accordingly.
 
 ISIS Reflectometry
 ##################

@@ -1895,5 +1895,6 @@ void MultiLayer::setCommonAxisScales() {
     auto *plot = layer(i)->plotWidget();
     plot->setAxisScale(AXIS_X, lowestX, highestX);
     plot->setAxisScale(AXIS_Y, lowestY, highestY);
+    layer(i)->replot();
   }
 }

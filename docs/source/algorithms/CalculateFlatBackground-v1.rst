@@ -35,15 +35,15 @@ is added in quadrature to the errors in each bin.
 Usage
 -----
 
-**Example - Subtracting background using Linear Fit:**
+**Example - Subtracting background using Linear Fit (using a distribution):**
 
 .. testcode:: ExSubLinFit
 
    import numpy as np
 
    y = [3, 1, 1, 1, 7, -3]
-   x = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5]
-   input = CreateWorkspace(x,y)
+   x = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5]
+   input = CreateWorkspace(x, y, Distribution=True)
 
    output = CalculateFlatBackground('input',
                                     StartX=2,
@@ -59,7 +59,7 @@ Output:
 
    Values with subtracted background: [ 2.  0.  0.  0.  6.  0.]
 
-**Example - Returning background using Mean:**
+**Example - Returning background using Mean (using a histogram):**
 
 .. testcode:: ExReturnMean
 
@@ -67,7 +67,7 @@ Output:
 
    y = [3, 4, 2, 3, -3]
    x = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5]
-   input = CreateWorkspace(x,y)
+   input = CreateWorkspace(x, y)
 
    output = CalculateFlatBackground('input',
                                     StartX=1,
@@ -83,7 +83,7 @@ Output:
 
    Calculated Mean background: [ 3.  3.  3.  3.  3.]
 
-**Example - Returning background using Moving Average:**
+**Example - Returning background using Moving Average (using a histogram):**
 
 .. testcode:: ExReturnMovingAverage
 
@@ -99,7 +99,7 @@ Output:
    x = np.arange(0.5, 9.1, 0.2)
    # y is a bin shorter than x and has to be evaluated at bin centres.
    y = spectrum(x[:-1] + 0.5 * (x[1] - x[0]))
-   input = CreateWorkspace(x,y)
+   input = CreateWorkspace(x, y)
 
    output = CalculateFlatBackground('input',
                                     AveragingWindowWidth=3,
