@@ -51,8 +51,8 @@ public:
   NonOrthogonalOverlay(QwtPlot *plot, QWidget *parent);
   ~NonOrthogonalOverlay() override;
 
- void calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws, size_t dimX,
-	  size_t dimY, Mantid::Kernel::VMD slicePoint);
+  void calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws, size_t dimX,
+                         size_t dimY, Mantid::Kernel::VMD slicePoint);
 
   void setSlicePoint(Mantid::Kernel::VMD slicePoint);
 
@@ -61,47 +61,48 @@ public:
   void disable();
 
 private:
-	QSize sizeHint() const override;
-	QSize size() const;
+  QSize sizeHint() const override;
+  QSize size() const;
 
-	int height() const;
-	int width() const;
+  int height() const;
+  int width() const;
 
-	QPoint transform(QPointF coords) const;
-	QPointF invTransform(QPoint pixels) const;
+  QPoint transform(QPointF coords) const;
+  QPointF invTransform(QPoint pixels) const;
 
-	void drawYLines(QPainter &painter, QPen& numberPen, QPen& gridPen, int widthScreen, int heightScreen,
-		int numberOfGridLines, double angle);
-	void drawXLines(QPainter &painter, QPen& numberPen, QPen& gridPen, int widthScreen, int heightScreen,
-		int numberOfGridLines, double angle);
+  void drawYLines(QPainter &painter, QPen &numberPen, QPen &gridPen,
+                  int widthScreen, int heightScreen, int numberOfGridLines,
+                  double angle);
+  void drawXLines(QPainter &painter, QPen &numberPen, QPen &gridPen,
+                  int widthScreen, int heightScreen, int numberOfGridLines,
+                  double angle);
 
-	void setSkewMatrix();
+  void setSkewMatrix();
 
-	QPointF skewMatrixApply(double x, double y);
+  QPointF skewMatrixApply(double x, double y);
 
-	void paintEvent(QPaintEvent *event) override;
+  void paintEvent(QPaintEvent *event) override;
 
-	bool m_enabled;
+  bool m_enabled;
 
-	QwtPlot *m_plot;
-	Mantid::API::IMDWorkspace_sptr *m_ws;
+  QwtPlot *m_plot;
+  Mantid::API::IMDWorkspace_sptr *m_ws;
 
-	Mantid::coord_t m_fromHklToOrthogonal[9];
-	Mantid::coord_t m_fromOrthogonalToHkl[9];
+  Mantid::coord_t m_fromHklToOrthogonal[9];
+  Mantid::coord_t m_fromOrthogonalToHkl[9];
 
-	size_t m_dimY;
-	size_t m_dimX;
-	Mantid::Kernel::VMD m_slicePoint;
+  size_t m_dimY;
+  size_t m_dimX;
+  Mantid::Kernel::VMD m_slicePoint;
 
-	/// Width of the line (in coordinates of the plot)
-	double m_width;
+  /// Width of the line (in coordinates of the plot)
+  double m_width;
 
-	double m_angleX;
-	double m_angleY;
+  double m_angleX;
+  double m_angleY;
 };
 
 } // namespace SliceViewer
 } // namespace Mantid
-
 
 #endif /* MANTID_SLICEVIEWER_NONORTHOGONALOVERLAY_H_ */
