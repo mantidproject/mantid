@@ -47,7 +47,7 @@ public:
   }
 
   void do_test_exec(std::string reflectionCondition, size_t expectedNumber,
-                    std::vector<V3D> hkls) {
+                    std::vector<V3D> hkls, int convention = 1) {
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
 
@@ -90,7 +90,10 @@ public:
       return;
 
     TS_ASSERT_EQUALS(ws->getNumberPeaks(), expectedNumber);
-    // std::cout << ws->getPeak(0).getHKL() << " hkl\n";
+    V3D hklTest(-10, -6, 1);
+    hklTest *= convention;
+    if (expectedNumber > 1)
+      TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), hklTest);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -179,7 +182,7 @@ public:
   void test_crystallography() {
     Kernel::ConfigService::Instance().setString("Q.convention",
                                                 "Crystallography");
-    do_test_exec("Primitive", 10, std::vector<V3D>());
+    do_test_exec("Primitive", 10, std::vector<V3D>(), -1);
   }
 };
 

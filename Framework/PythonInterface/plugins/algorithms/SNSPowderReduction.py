@@ -1244,7 +1244,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 van_run_ws_name = self._loadAndSum([van_run_number], van_run_ws_name, **vanFilterWall)
 
             # load the vanadium background (if appropriate)
-            van_bkgd_run_number_list = self._info["empty"].value
+            van_bkgd_run_number_list = self._info["vanadium_background"].value
             van_bkgd_run_number_list = ['%s_%d' % (self._instrument, value)
                                         for value in van_bkgd_run_number_list]
             if not noRunSpecified(van_bkgd_run_number_list):

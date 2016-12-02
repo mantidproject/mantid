@@ -51,8 +51,8 @@ public:
     // Bank 1 got scaled
     V3D pos;
     pos = det->getAtXY(1, 1)->getPos();
-    TS_ASSERT(ws->instrumentParameters().contains(det.get(), "scalex"));
-    TS_ASSERT(ws->instrumentParameters().contains(det.get(), "scaley"));
+    TS_ASSERT(ws->constInstrumentParameters().contains(det.get(), "scalex"));
+    TS_ASSERT(ws->constInstrumentParameters().contains(det.get(), "scaley"));
     TS_ASSERT_EQUALS(pos, V3D(0.008 * 2, 0.008 * 0.5, 5.0));
     TS_ASSERT_DELTA(det->xstep(), 0.008 * 2, 1e-6);
 

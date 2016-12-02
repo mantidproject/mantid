@@ -5,9 +5,9 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/CalculateFlatBackground.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <boost/lexical_cast.hpp>
@@ -31,12 +31,13 @@ private:
   /// algorithm in order to set the properties
   void runCalculateFlatBackground(int functindex) {
     // functindex key
-    // 1 = exec
+    // 1 = exec (Linear Fit)
     // 2 = execwithreturnbg
     // 3 = testMeanFirst
     // 4 = testMeanFirstWithReturnBackground
     // 5 = testMeanSecond
     // 6 = testLeaveNegativeValues
+    // 7 = testExecPointData (Linear Fit)
 
     // common beginning
     Mantid::Algorithms::CalculateFlatBackground flatBG;
@@ -94,6 +95,17 @@ private:
 
         flatBG.setProperty("NullifyNegativeValues", false);
       }
+    } else if (functindex == 7) {
+      // exec for point data option Linear Fit
+      TS_ASSERT_THROWS_NOTHING(
+          flatBG.setPropertyValue("InputWorkspace", "calcFlatBGpointdata"))
+      TS_ASSERT_THROWS_NOTHING(
+          flatBG.setPropertyValue("OutputWorkspace", "Removed"))
+      TS_ASSERT_THROWS_NOTHING(
+          flatBG.setPropertyValue("WorkspaceIndexList", "0"))
+      TS_ASSERT_THROWS_NOTHING(flatBG.setPropertyValue("StartX", "9.5"))
+      TS_ASSERT_THROWS_NOTHING(flatBG.setPropertyValue("EndX", "20.5"))
+      TS_ASSERT_THROWS_NOTHING(flatBG.setPropertyValue("Mode", "Linear Fit"))
     }
 
     // common ending
@@ -111,12 +123,15 @@ public:
     FrameworkManager::Instance();
 
     bg = 100.0;
+    const size_t seed(12345);
+    const double lower(-1.0), upper(1.0);
+
+    MersenneTwister randGen(seed, lower, upper);
+
+    // histogram
     Mantid::DataObjects::Workspace2D_sptr WS(
         new Mantid::DataObjects::Workspace2D);
     WS->initialize(1, NUMBINS + 1, NUMBINS);
-    const size_t seed(12345);
-    const double lower(-1.0), upper(1.0);
-    MersenneTwister randGen(seed, lower, upper);
 
     for (int i = 0; i < NUMBINS; ++i) {
       WS->mutableX(0)[i] = i;
@@ -127,7 +142,7 @@ public:
 
     AnalysisDataService::Instance().add("calcFlatBG", WS);
 
-    // create another test workspace
+    // create another test workspace (histogram)
     Mantid::DataObjects::Workspace2D_sptr WS2D(
         new Mantid::DataObjects::Workspace2D);
     WS2D->initialize(NUMSPECS, NUMBINS + 1, NUMBINS);
@@ -146,10 +161,25 @@ public:
 
     AnalysisDataService::Instance().add("calculateflatbackgroundtest_ramp",
                                         WS2D);
+
+    // test workspace, which contains point data
+    Mantid::DataObjects::Workspace2D_sptr WSpointdata(
+        new Mantid::DataObjects::Workspace2D);
+    WSpointdata->initialize(1, NUMBINS, NUMBINS);
+
+    for (int i = 0; i < NUMBINS; ++i) {
+      WSpointdata->mutableX(0)[i] = i;
+      WSpointdata->mutableY(0)[i] = bg + randGen.nextValue();
+      WSpointdata->mutableE(0)[i] = 0.05 * WSpointdata->y(0)[i];
+    }
+
+    AnalysisDataService::Instance().add("calcFlatBGpointdata", WSpointdata);
   }
 
   ~CalculateFlatBackgroundTest() override {
+    AnalysisDataService::Instance().remove("calcFlatBG");
     AnalysisDataService::Instance().remove("calculateflatbackgroundtest_ramp");
+    AnalysisDataService::Instance().remove("calcFlatBGpointdata");
   }
 
   void testStatics() {
@@ -168,6 +198,23 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed");
     // The X vectors should be the same
     TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
+    // Just do a spot-check on Y & E
+    auto &Y = outputWS->y(0);
+    for (unsigned int i = 0; i < Y.size(); ++i) {
+      TS_ASSERT_LESS_THAN(Y[i], 1.5)
+    }
+  }
+
+  void testExecPointData() {
+    runCalculateFlatBackground(1);
+
+    MatrixWorkspace_sptr inputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "calcFlatBGpointdata");
+    MatrixWorkspace_sptr outputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed");
+    // The X vectors should be the same
+    // TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
     // Just do a spot-check on Y & E
     auto &Y = outputWS->y(0);
     for (unsigned int i = 0; i < Y.size(); ++i) {
@@ -312,6 +359,7 @@ public:
       }
     }
   }
+
   void testLeaveNegatives() {
 
     runCalculateFlatBackground(6);

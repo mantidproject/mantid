@@ -216,8 +216,8 @@ std::vector<MDLeanEvent<1>> makeMDEvents1(size_t num) {
  */
 Mantid::DataObjects::MDHistoWorkspace_sptr
 makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins,
-                         coord_t max, double errorSquared, std::string name,
-                         double numEvents) {
+                         coord_t max, double errorSquared,
+                         const std::string &name, double numEvents) {
   // Create MDFrame of General Frame type
   Mantid::Geometry::GeneralFrame frame(
       Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");

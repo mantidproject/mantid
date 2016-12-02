@@ -47,6 +47,7 @@ ${MANTID_SUBPROJECT_LIBS}
 VatesSimpleGuiQtWidgets
 VatesSimpleGuiViewWidgets
 MantidQtAPI
+vtkInteractionStyle
 vtkRenderingFreeType
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}

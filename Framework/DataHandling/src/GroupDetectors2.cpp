@@ -621,7 +621,7 @@ void GroupDetectors2::processGroupingWorkspace(
             unUsedSpec[targetWSIndex] = (USED);
           }
         }
-      } catch (Mantid::Kernel::Exception::NotFoundError) {
+      } catch (const Mantid::Kernel::Exception::NotFoundError &) {
         // the detector was not found - don't add it
       }
     }
@@ -687,7 +687,7 @@ void GroupDetectors2::processMatrixWorkspace(
           }
         }
       }
-    } catch (Mantid::Kernel::Exception::NotFoundError) {
+    } catch (const Mantid::Kernel::Exception::NotFoundError &) {
       // the detector was not found - don't add it
     }
   }
