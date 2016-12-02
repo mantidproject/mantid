@@ -68,13 +68,15 @@ bool MDHWInMemoryLoadingPresenter::canReadFile() const {
 namespace {
 class CellVisibility {
 public:
-  explicit CellVisibility(vtkStructuredGrid *structuredGrid)
+  explicit CellVisibility(const unsigned char *array)
       : MASKED_CELL_VALUE(vtkDataSetAttributes::HIDDENCELL |
                           vtkDataSetAttributes::REFINEDCELL),
-        InputCellGhostArray(
-            structuredGrid->GetCellGhostArray()->GetPointer(0)) {}
+        InputCellGhostArray(array) {}
   bool operator()(vtkIdType id) const {
-    return !(this->InputCellGhostArray[id] & this->MASKED_CELL_VALUE);
+    if (InputCellGhostArray)
+      return !(this->InputCellGhostArray[id] & this->MASKED_CELL_VALUE);
+    else
+      return true;
   }
 
 private:
@@ -83,7 +85,8 @@ private:
 };
 
 void ComputeScalarRange(vtkStructuredGrid *grid, double *cellRange) {
-  CellVisibility isCellVisible(grid);
+  auto cga = grid->GetCellGhostArray();
+  CellVisibility isCellVisible(cga ? cga->GetPointer(0) : nullptr);
   vtkDataArray *cellScalars = grid->GetCellData()->GetScalars();
   double minvalue = VTK_DOUBLE_MAX;
   double maxvalue = VTK_DOUBLE_MIN;
