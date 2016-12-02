@@ -18,8 +18,7 @@ class Pearl(AbstractInst):
 
     _focus_tof_binning = "1500,-0.0006,19900"
 
-    _create_van_first_tof_binning = "100,-0.0006,19990"
-    _create_van_second_tof_binning = "150,-0.0006,19900"
+    _create_van_tof_binning = "1500,-0.0006,19900"
 
     def __init__(self, user_name, tt_mode="TT88", calibration_dir=None, output_dir=None, **kwargs):
 
@@ -159,14 +158,7 @@ class Pearl(AbstractInst):
                                                            perform_attenuation=attenuate)
 
     def pearl_van_calibration_tof_rebinning(self, vanadium_ws, tof_rebin_pass, return_units):
-        if tof_rebin_pass == 1:
-            tof_rebin_param = self._create_van_first_tof_binning
-        elif tof_rebin_pass == 2:
-            tof_rebin_param = self._create_van_second_tof_binning
-        else:
-            raise ValueError("Got a value that didn't match the expected number of passes")
-
-        out_ws = pearl_algs.apply_tof_rebinning(ws_to_rebin=vanadium_ws, tof_params=tof_rebin_param,
+        out_ws = pearl_algs.apply_tof_rebinning(ws_to_rebin=vanadium_ws, tof_params=self._create_van_tof_binning,
                                                 return_units=return_units)
 
         return out_ws
