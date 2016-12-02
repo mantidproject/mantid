@@ -114,7 +114,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   visualDataSet->SetDimensions(nBinsX + 1, nBinsY + 1, nBinsZ + 1);
 
   // Array with true where the voxel should be shown
-  double progressFactor = 0.5 / double(imageSize);
+  double progressFactor = 0.5 / static_cast<double>(imageSize);
 
   std::size_t offset = 0;
   if (nDims == 4) {
@@ -131,8 +131,11 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   signal->InitializeArray(std::move(iterator), offset, imageSize);
   visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
 
+  // update progress after a 1% change
+  vtkIdType progressIncrement = imageSize / 50;
   for (vtkIdType index = 0; index < imageSize; ++index) {
-    progressUpdate.eventRaised(double(index) * progressFactor);
+    if (index % progressIncrement == 0)
+      progressUpdate.eventRaised(static_cast<double>(index) * progressFactor);
     double signalScalar = signal->GetValue(index);
     bool maskValue = (!std::isfinite(signalScalar) ||
                       !m_thresholdRange->inRange(signalScalar));
@@ -168,7 +171,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   }
   float *it = pointsarray->WritePointer(0, nPointsX * nPointsY * nPointsZ * 3);
   // Array with the point IDs (only set where needed)
-  progressFactor = 0.5 / static_cast<double>(nPointsZ);
+  progressFactor = 0.25 / static_cast<double>(nPointsZ);
   double progressOffset = 0.5;
   for (int z = 0; z < nPointsZ; z++) {
     // Report progress updates for the last 50%
