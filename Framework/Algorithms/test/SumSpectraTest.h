@@ -40,8 +40,10 @@ public:
   }
 
   void testExecWithLimits() {
-    if (!alg.isInitialized())
+    if (!alg.isInitialized()) {
       alg.initialize();
+      alg.setRethrows(true);
+    }
 
     // Set the properties
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputSpace));
@@ -237,6 +239,7 @@ public:
     alg3.setPropertyValue("InputWorkspace", inName);
     alg3.setPropertyValue("OutputWorkspace", outName);
     alg3.setProperty("IncludeMonitors", false);
+    alg3.setProperty("RemoveSpecialValues", true);
     alg3.execute();
     TS_ASSERT(alg3.isExecuted());
 
@@ -248,12 +251,12 @@ public:
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(output->blocksize(), 6);
     // Row with full acceptance
-    TS_ASSERT_EQUALS(output->mutableY(0)[1], 1.);
-    TS_ASSERT_DELTA(output->mutableE(0)[1], 0.40824829046386296, 1.e-5);
+    TS_ASSERT_EQUALS(output->y(0)[1], 1.);
+    TS_ASSERT_DELTA(output->e(0)[1], 0.40824829046386296, 1.e-5);
     TS_ASSERT_EQUALS(output->dataF(0)[1], 6.);
     // Row with limited, but non-zero acceptance, shouldn't have nans!
-    TS_ASSERT_DELTA(output->mutableY(0)[5], 0.66666, 1.e-5);
-    TS_ASSERT_DELTA(output->mutableE(0)[5], 0.47140452079103173, 1.e-5);
+    TS_ASSERT_DELTA(output->y(0)[5], 0.66666, 1.e-5);
+    TS_ASSERT_DELTA(output->e(0)[5], 0.47140452079103173, 1.e-5);
     TS_ASSERT_EQUALS(output->dataF(0)[5], 3.);
 
     TS_ASSERT(output->run().hasProperty("NumAllSpectra"))
@@ -424,7 +427,7 @@ public:
     AnalysisDataService::Instance().remove(outName);
   }
 
-  void testSpecialValues() {
+  void testRemoveSpecialValuesOn() {
     constexpr size_t numOfHistos = 2;
     auto inWs =
         WorkspaceCreationHelper::Create2DWorkspace123(numOfHistos, 3, true);
@@ -435,10 +438,13 @@ public:
 
     Mantid::Algorithms::SumSpectra sumSpectraAlg;
     sumSpectraAlg.initialize();
+    sumSpectraAlg.setRethrows(true);
+
     sumSpectraAlg.setProperty("InputWorkspace", inWs);
     const std::string outWsName = "testSpecialVals";
     sumSpectraAlg.setPropertyValue("OutputWorkspace", outWsName);
-    sumSpectraAlg.setRethrows(true);
+    sumSpectraAlg.setProperty("RemoveSpecialValues", true);
+
     TS_ASSERT_THROWS_NOTHING(sumSpectraAlg.execute());
     TS_ASSERT(sumSpectraAlg.isExecuted());
 
@@ -457,6 +463,44 @@ public:
 
     AnalysisDataService::Instance().remove(outWsName);
   }
+
+  void testRemoveSpecialValuesOff() {
+	  constexpr size_t numOfHistos = 2;
+	  auto inWs =
+		  WorkspaceCreationHelper::Create2DWorkspace123(numOfHistos, 3, true);
+	  auto &yVals = inWs->mutableY(1);
+
+	  yVals[0] = std::numeric_limits<double>::infinity();
+	  yVals[1] = NAN;
+
+	  Mantid::Algorithms::SumSpectra sumSpectraAlg;
+	  sumSpectraAlg.initialize();
+	  sumSpectraAlg.setRethrows(true);
+
+	  sumSpectraAlg.setProperty("InputWorkspace", inWs);
+	  const std::string outWsName = "testSpecialVals";
+	  sumSpectraAlg.setPropertyValue("OutputWorkspace", outWsName);
+	  sumSpectraAlg.setProperty("RemoveSpecialValues", false);
+
+	  TS_ASSERT_THROWS_NOTHING(sumSpectraAlg.execute());
+	  TS_ASSERT(sumSpectraAlg.isExecuted());
+
+	  Workspace_sptr output;
+	  TS_ASSERT_THROWS_NOTHING(
+		  output = AnalysisDataService::Instance().retrieve(outWsName));
+	  Workspace2D_const_sptr output2D =
+		  boost::dynamic_pointer_cast<const Workspace2D>(output);
+
+	  auto outYVals = output2D->y(0);
+	  // We expect a NaN and an Inf to propagate here
+	  TS_ASSERT_EQUALS(std::isnormal(outYVals[0]), false);
+	  TS_ASSERT_EQUALS(std::isnormal(outYVals[1]), false);
+	  // Should get the correct amount now
+	  TS_ASSERT_EQUALS(outYVals[2], 4.);
+
+	  AnalysisDataService::Instance().remove(outWsName);
+  }
+
 
 private:
   int nTestHist;

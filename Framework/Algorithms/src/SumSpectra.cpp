@@ -21,7 +21,7 @@ using namespace DataObjects;
 SumSpectra::SumSpectra()
     : API::Algorithm(), m_outSpecNum(0), m_minWsInd(0), m_maxWsInd(0),
       m_keepMonitors(false), m_numberOfSpectra(0), m_yLength(0), m_indices(),
-      m_calculateWeightedSum(false) {}
+      m_calculateWeightedSum(false), m_replaceSpecialValues(false) {}
 
 /** Initialisation method.
  *
@@ -68,6 +68,10 @@ void SumSpectra::init() {
                   "values with zero error are dropped from the summation. To "
                   "estimate the number of dropped values see the "
                   "description. ");
+
+  declareProperty("RemoveSpecialValues", false,
+                  "If enabled floating point special values such as NaN or Inf"
+                  " are removed before the spectra are summed.");
 }
 
 /** Executes the algorithm
@@ -80,6 +84,7 @@ void SumSpectra::exec() {
   const std::vector<int> indices_list = getProperty("ListOfWorkspaceIndices");
 
   m_keepMonitors = getProperty("IncludeMonitors");
+  m_replaceSpecialValues = getProperty("RemoveSpecialValues");
 
   // Get the input workspace
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
@@ -218,6 +223,11 @@ SumSpectra::getOutputSpecNo(MatrixWorkspace_const_sptr localworkspace) {
   */
 API::MatrixWorkspace_sptr
 SumSpectra::replaceSpecialValues(API::MatrixWorkspace_sptr inputWs) {
+  if (!m_replaceSpecialValues) {
+    // Skip any additional processing
+    return inputWs;
+  }
+
   IAlgorithm_sptr alg = this->createChildAlgorithm("ReplaceSpecialValues");
   alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWs);
   std::string outName = "_" + inputWs->getName() + "_clean";
@@ -287,10 +297,10 @@ void SumSpectra::doWorkspace2D(ISpectrum &outSpec, Progress &progress,
 
     // Retrieve the spectrum into a vector
 
-    for (size_t i = 0; i < YValues.size(); ++i) {
+    for (size_t i = 0; i < m_yLength; ++i) {
       if (m_calculateWeightedSum) {
         if (std::isnormal(YErrors[i])) {
-          double errsq = YErrors[i] * YErrors[i];
+          const double errsq = YErrors[i] * YErrors[i];
           OutputYError[i] += errsq;
           Weight[i] += 1. / errsq;
           OutputYSum[i] += YValues[i] / errsq;

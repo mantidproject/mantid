@@ -101,6 +101,8 @@ private:
   int m_maxWsInd;
   /// Set true to keep monitors
   bool m_keepMonitors;
+  /// Set true to remove special values before processing
+  bool m_replaceSpecialValues;
   /// numberOfSpectra in the input
   int m_numberOfSpectra;
   /// Blocksize of the input workspace
