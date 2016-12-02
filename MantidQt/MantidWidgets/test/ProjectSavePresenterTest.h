@@ -6,7 +6,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <QList>
+#include <QDir>
+#include <QFileInfo>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtMantidWidgets/ProjectSavePresenter.h"
@@ -276,6 +277,54 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     tearDownWorkspaces(workspaces);
+  }
+
+  void testPrepareProjectFolder_withFile() {
+    std::vector<std::string> empty;
+    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    QString filePath = "/tmp/mantidprojecttest/mantidprojecttest.mantid";
+
+    ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
+    ON_CALL(m_view, getProjectPath()).WillByDefault(Return(filePath));
+
+    EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
+    EXPECT_CALL(m_view, updateWorkspacesList(empty)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateIncludedWindowsList(empty)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateExcludedWindowsList(empty)).Times(Exactly(0));
+
+    EXPECT_CALL(m_view, getProjectPath()).Times(Exactly(1));
+    EXPECT_CALL(m_view, setProjectPath(filePath)).Times(Exactly(1));
+
+    ProjectSavePresenter presenter(&m_view);
+    presenter.notify(ProjectSavePresenter::Notification::PrepareProjectFolder);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+  }
+
+  void testPrepareProjectFolder_withFolder() {
+    std::vector<std::string> empty;
+    std::vector<MantidQt::API::IProjectSerialisable*> windows;
+    QString filePath = "/tmp/mantidprojecttest";
+
+    ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
+    ON_CALL(m_view, getProjectPath()).WillByDefault(Return(filePath));
+
+    EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
+    EXPECT_CALL(m_view, updateWorkspacesList(empty)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateIncludedWindowsList(empty)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateExcludedWindowsList(empty)).Times(Exactly(0));
+
+    EXPECT_CALL(m_view, getProjectPath()).Times(Exactly(1));
+    EXPECT_CALL(m_view, setProjectPath(filePath + "/mantidprojecttest.mantid")).Times(Exactly(1));
+
+    ProjectSavePresenter presenter(&m_view);
+    presenter.notify(ProjectSavePresenter::Notification::PrepareProjectFolder);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+
+    // clean up
+    QFileInfo fi(filePath);
+    fi.absoluteDir().rmdir(filePath);
   }
 
   //============================================================================

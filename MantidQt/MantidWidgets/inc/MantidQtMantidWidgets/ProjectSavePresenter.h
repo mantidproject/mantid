@@ -44,6 +44,7 @@ public:
   enum class Notification {
     UncheckWorkspace,
     CheckWorkspace,
+    PrepareProjectFolder
   };
 
   ProjectSavePresenter(IProjectSaveView* view);
@@ -52,6 +53,7 @@ public:
 private:
   void includeWindowsForCheckedWorkspace();
   void excludeWindowsForUncheckedWorkspace();
+  void prepareProjectFolder();
 
   /// Handle to the view for this presenter
   IProjectSaveView *m_view;

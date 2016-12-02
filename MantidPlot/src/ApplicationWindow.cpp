@@ -6051,8 +6051,43 @@ void ApplicationWindow::prepareSaveProject()
   }
 
   ProjectSerialiser serialiser(this, currentFolder());
-  m_projectSaveView = new MantidQt::MantidWidgets::ProjectSaveView(serialiser, windows, this);
+  m_projectSaveView = new MantidQt::MantidWidgets::ProjectSaveView(projectname, serialiser, windows, this);
+  connect(m_projectSaveView, SIGNAL(projectSaved()), this, SLOT(postSaveProject()));
   m_projectSaveView->show();
+}
+
+/**
+ * The project was just saved. Update the main window.
+ */
+void ApplicationWindow::postSaveProject()
+{
+  setWindowTitle("MantidPlot - " + projectname);
+  savedProject();
+
+  if (autoSave) {
+    if (savingTimerId)
+      killTimer(savingTimerId);
+    savingTimerId = startTimer(autoSaveTime * 60000);
+  } else
+    savingTimerId = 0;
+
+  // Back-up file to be removed because file has successfully saved.
+  QFile::remove(projectname + "~");
+
+  QApplication::restoreOverrideCursor();
+
+  recentProjects.removeAll(projectname);
+  recentProjects.push_front(projectname);
+  updateRecentProjectsList();
+
+  QFileInfo fi(projectname);
+  QString baseName = fi.baseName();
+  FolderListItem *item =
+      dynamic_cast<FolderListItem *>(folders->firstChild());
+  if (item) {
+    item->setText(0, baseName);
+    item->folder()->setObjectName(baseName);
+  }
 }
 
 void ApplicationWindow::savetoNexusFile() {
@@ -11578,7 +11613,7 @@ void ApplicationWindow::createActions() {
   actionSaveProjectAs = new QAction(QIcon(":/SaveProject16x16.png"),
                                     tr("Save Project &As..."), this);
   connect(actionSaveProjectAs, SIGNAL(triggered()), this,
-          SLOT(saveProjectAs()));
+          SLOT(prepareSaveProject()));
   actionSaveProjectAs->setEnabled(false);
 
   actionSaveNote = new QAction(tr("Save Note As..."), this);
@@ -13919,7 +13954,7 @@ void ApplicationWindow::showFolderPopupMenu(QTreeWidgetItem *it,
   if (fli->folder()->parent())
     cm.addAction(tr("Save &As Project..."), this, SLOT(saveAsProject()));
   else
-    cm.addAction(tr("Save Project &As..."), this, SLOT(saveProjectAs()));
+    cm.addAction(tr("Save Project &As..."), this, SLOT(prepareSaveProject()));
   cm.addSeparator();
 
   if (fromFolders && show_windows_policy != HideAll) {

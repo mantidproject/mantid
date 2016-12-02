@@ -270,7 +270,10 @@ public slots:
   void saveProjectAs(const QString &fileName = QString(),
                      bool compress = false);
   bool saveProject(bool compress = false);
+  /// Show the project saver dialog
   void prepareSaveProject();
+  /// Update application window post save
+  void postSaveProject();
 
   //! Set the project status to modifed
   void modifiedProject();

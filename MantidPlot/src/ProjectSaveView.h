@@ -47,13 +47,16 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class ProjectSaveView : public QDialog, IProjectSaveView {
   Q_OBJECT
 public:
-  ProjectSaveView(MantidQt::API::ProjectSerialiser &serialiser,
+  ProjectSaveView(const QString& projectName,
+                  MantidQt::API::ProjectSerialiser &serialiser,
                   const std::vector<MantidQt::API::IProjectSerialisable*> &windows,
                   QWidget *parent = nullptr);
 
   std::vector<MantidQt::API::IProjectSerialisable*> getWindows() override;
   std::vector<std::string> getCheckedWorkspaceNames() override;
   std::vector<std::string> getUncheckedWorkspaceNames() override;
+  QString getProjectPath() override;
+  void setProjectPath(const QString& path) override;
 
   void updateWorkspacesList(const std::vector<std::string>& workspaces) override;
   void updateIncludedWindowsList(const std::vector<std::string>& windows) override;
@@ -66,8 +69,8 @@ signals:
 
 private slots:
   void findFilePath();
-  QString prepareProjectFolder(const QString &path);
   void save(bool checked);
+  void saveAll(bool checked);
   void workspaceItemChanged(QTreeWidgetItem* item, int column);
 
 private:
@@ -76,6 +79,7 @@ private:
     void removeItem(QTreeWidget* widget, const std::string &name);
     void addWindowItem(QTreeWidget* widget, const std::string &name);
     void addWorkspaceItem(const std::string &name);
+    bool checkIfNewProject(const QString& projectName) const;
 
     std::vector<MantidQt::API::IProjectSerialisable*> m_serialisableWindows;
     std::unique_ptr<ProjectSavePresenter> m_presenter;

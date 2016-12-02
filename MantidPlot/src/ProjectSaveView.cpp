@@ -8,11 +8,18 @@ using namespace MantidQt::API;
 namespace MantidQt {
 namespace MantidWidgets {
 
-ProjectSaveView::ProjectSaveView(ProjectSerialiser &serialiser, const std::vector<IProjectSerialisable*> &windows, QWidget *parent)
+ProjectSaveView::ProjectSaveView(const QString& projectName,
+                                 ProjectSerialiser &serialiser,
+                                 const std::vector<IProjectSerialisable*> &windows,
+                                 QWidget *parent)
   : QDialog(parent), m_serialisableWindows(windows.cbegin(), windows.cend()),
     m_serialiser(serialiser) {
+
   m_ui.setupUi(this);
   m_presenter.reset(new ProjectSavePresenter(this));
+
+  if(!checkIfNewProject(projectName))
+    m_ui.projectPath->setText(projectName);
 
   //Connect signal to listen for when workspaces are changed (checked/unchecked)
   connect(m_ui.workspaceList,
@@ -22,7 +29,6 @@ ProjectSaveView::ProjectSaveView(ProjectSerialiser &serialiser, const std::vecto
   connect(m_ui.btnBrowseFilePath, SIGNAL(clicked(bool)), this, SLOT(findFilePath()));
   //Connect signals to listen for when the save/saveAll button is clicked
   connect(m_ui.btnSave, SIGNAL(clicked(bool)), this, SLOT(save(bool)));
-  connect(m_ui.btnSaveAll, SIGNAL(clicked(bool)), this, SLOT(save(bool)));
   connect(m_ui.btnCancel, SIGNAL(clicked(bool)), this, SLOT(close()));
 }
 
@@ -42,6 +48,16 @@ std::vector<std::string> ProjectSaveView::getCheckedWorkspaceNames()
 std::vector<std::string> ProjectSaveView::getUncheckedWorkspaceNames()
 {
   return getItemsWithCheckState(Qt::CheckState::Unchecked);
+}
+
+QString ProjectSaveView::getProjectPath()
+{
+  return m_ui.projectPath->text();
+}
+
+void ProjectSaveView::setProjectPath(const QString &path)
+{
+ m_ui.projectPath->setText(path);
 }
 
 void ProjectSaveView::updateWorkspacesList(const std::vector<std::string> &workspaces)
@@ -111,14 +127,15 @@ std::vector<std::string> ProjectSaveView::getItemsWithCheckState(const Qt::Check
 void ProjectSaveView::save(bool checked)
 {
   UNUSED_ARG(checked);
+  m_presenter->notify(ProjectSavePresenter::Notification::PrepareProjectFolder);
   auto wsNames = getCheckedWorkspaceNames();
   auto windowNames = getIncludedWindowNames();
-  auto filePath = prepareProjectFolder(m_ui.projectPath->text());
+  auto filePath = m_ui.projectPath->text();
   auto compress = filePath.endsWith(".gz");
+
   m_serialiser.save(filePath, wsNames, windowNames, compress);
   close();
 }
-
 
 void ProjectSaveView::findFilePath()
 {
@@ -131,28 +148,6 @@ void ProjectSaveView::findFilePath()
         this, tr("Save Project As"), "", filter, &selectedFilter);
 
   m_ui.projectPath->setText(fileName);
-}
-
-QString ProjectSaveView::prepareProjectFolder(const QString &path)
-{
-  QFileInfo fileInfo(path);
-  bool isFile = fileInfo.path().endsWith(".mantid") ||
-      fileInfo.path().endsWith(".mantid.gz");
-
-  if (!isFile) {
-    QDir directory(path);
-    if (!directory.exists()) {
-      // Make the directory
-      directory.mkdir(path);
-    }
-
-    QString projectFileName = directory.dirName();
-    projectFileName.append(".mantid");
-    return directory.absoluteFilePath(projectFileName);
-
-  } else {
-    return fileInfo.absoluteFilePath();
-  }
 }
 
 // Private helper methods
@@ -193,6 +188,15 @@ void ProjectSaveView::addWorkspaceItem(const std::string &name)
   QTreeWidgetItem *item = new QTreeWidgetItem(lst);
   item->setCheckState(0, Qt::CheckState::Checked);
   m_ui.workspaceList->addTopLevelItem(item);
+}
+
+bool ProjectSaveView::checkIfNewProject(const QString &projectName) const
+{
+   return (projectName == "untitled" ||
+      projectName.endsWith(".opj", Qt::CaseInsensitive) ||
+      projectName.endsWith(".ogm", Qt::CaseInsensitive) ||
+      projectName.endsWith(".ogw", Qt::CaseInsensitive) ||
+      projectName.endsWith(".ogg", Qt::CaseInsensitive));
 }
 
 }

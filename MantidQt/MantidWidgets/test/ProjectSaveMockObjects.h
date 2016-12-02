@@ -17,6 +17,8 @@ public:
   MOCK_METHOD0(getWindows, std::vector<IProjectSerialisable*>());
   MOCK_METHOD0(getCheckedWorkspaceNames, std::vector<std::string>());
   MOCK_METHOD0(getUncheckedWorkspaceNames, std::vector<std::string>());
+  MOCK_METHOD0(getProjectPath, QString());
+  MOCK_METHOD1(setProjectPath, void(const QString &));
   MOCK_METHOD1(updateWorkspacesList, void(const std::vector<std::string> &));
   MOCK_METHOD1(updateIncludedWindowsList, void(const std::vector<std::string> &));
   MOCK_METHOD1(updateExcludedWindowsList, void(const std::vector<std::string> &));
