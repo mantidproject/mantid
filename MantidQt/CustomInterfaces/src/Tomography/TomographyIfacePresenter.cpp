@@ -584,7 +584,7 @@ void TomographyIfacePresenter::processRunRecon() {
 
 bool TomographyIfacePresenter::userConfirmationToCancelRecon() {
   if (m_reconRunning) {
-    const auto result = m_view->userConfirmation(
+    const bool result = m_view->userConfirmation(
         "Reconstruction is RUNNING",
         "Are you sure you want to<br>cancel the running reconstruction?");
 
@@ -594,8 +594,8 @@ bool TomographyIfacePresenter::userConfirmationToCancelRecon() {
       return false;
     }
     m_reconRunning = false;
-    return true;
   }
+  return true;
 }
 
 void TomographyIfacePresenter::setupAndRunLocalReconstruction(

@@ -561,10 +561,10 @@ void TomographyIfaceModel::refreshLocalJobsInfo() {
 
 void TomographyIfaceModel::updateProcessInJobList(const qint64 pid,
                                                   const int exitCode) {
-  // cast down from qint64
+  // cast to string from qint64 so we can compare
   const std::string processPID = std::to_string(static_cast<int>(pid));
   for (auto &job : m_jobsStatusLocal) {
-    if (job.id == static_cast<int>(pid)) {
+    if (job.id == processPID) {
       if (exitCode == 1) {
         job.status = "Exit";
       }
