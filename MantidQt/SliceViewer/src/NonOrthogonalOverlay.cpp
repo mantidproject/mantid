@@ -43,8 +43,6 @@ namespace SliceViewer {
   m_fromOrthogonalToHkl[7] = 0.0;
   m_fromOrthogonalToHkl[8] = 1.0;
 
-  m_showLine = false;
-
 }
 
 //----------------------------------------------------------------------------------------------

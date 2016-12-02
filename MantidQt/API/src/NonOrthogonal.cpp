@@ -371,7 +371,10 @@ void transformFromDoubleToCoordT(Mantid::Kernel::DblMatrix &skewMatrix,
     }
   }
 }
+/**
+Explanation of index mapping
 
+*/
 void transformLookpointToWorkspaceCoord(Mantid::coord_t *lookPoint,
                                         const Mantid::coord_t skewMatrix[9],
                                         const size_t &dimX,

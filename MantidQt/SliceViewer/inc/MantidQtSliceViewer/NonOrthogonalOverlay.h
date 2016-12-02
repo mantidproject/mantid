@@ -51,9 +51,7 @@ public:
   NonOrthogonalOverlay(QwtPlot *plot, QWidget *parent);
   ~NonOrthogonalOverlay() override;
 
-  bool m_showLine;
-
-  void calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws, size_t dimX,
+ void calculateAxesSkew(Mantid::API::IMDWorkspace_sptr *ws, size_t dimX,
 	  size_t dimY, Mantid::Kernel::VMD slicePoint);
 
   void setSlicePoint(Mantid::Kernel::VMD slicePoint);
@@ -77,7 +75,6 @@ private:
 	void drawXLines(QPainter &painter, QPen& numberPen, QPen& gridPen, int widthScreen, int heightScreen,
 		int numberOfGridLines, double angle);
 
-	void setAxesPoints();
 	void setSkewMatrix();
 
 	QPointF skewMatrixApply(double x, double y);
