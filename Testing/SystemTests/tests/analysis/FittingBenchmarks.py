@@ -38,22 +38,6 @@ class FittingBenchmarkTests(unittest.TestCase):
         input_data_dir = msapi.config['datasearch.directories'].split(';')[0]
         self.base_problem_files_dir = os.path.join(input_data_dir, 'FittingTestProblems')
 
-    def run_all_with_or_without_errors(self, use_errors):
-        """
-        Runs benchmark on all the available tes problems.
-
-        @param use_errors : whether to use errors as weights in the cost funtion
-                            (weighted least squares)
-        """
-        # Create the path for the specific fitting test files location
-        input_data_dir = msapi.config['datasearch.directories'].split(';')[0]
-        base_problem_files_dir = os.path.join(input_data_dir, 'FittingTestProblems')
-
-        # run fit minimizer benchmarking tests
-        fitbk.run_all_with_or_without_errors(base_problem_files_dir, use_errors, self.minimizers,
-                                             self.group_names, self.group_suffix_names, self.color_scale,
-                                             self.save_to_file)
-
     def test_all_nist_problem(self):
         """
         Runs benchmark on all NIST problems on about half of the available Mantid minimizers
