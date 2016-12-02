@@ -33,7 +33,7 @@ class TomographyThread : public QThread {
   Q_OBJECT
 public:
   TomographyThread(QObject *parent, TomographyProcess *worker)
-      : QThread(parent) {
+      : QThread(parent), m_worker(worker) {
     // interactions between the thread and the worker are defined here
     connect(this, SIGNAL(started()), worker, SLOT(startWorker()));
 
@@ -44,19 +44,17 @@ public:
 
     connect(worker, SIGNAL(finished(int)), this, SLOT(workerFinished(int)));
 
-    // make sure we know who the worker is
     connect(this, SIGNAL(finished()), this, SLOT(deleteLater()),
             Qt::DirectConnection);
 
-    // TODO test if terminates process
-    connect(this, SIGNAL(terminated()), worker, SLOT(terminate()));
-
-    worker->moveToThread(this);
-    m_worker = worker;
+    m_worker->moveToThread(this);
   }
 
   ~TomographyThread() override {
-	  emit terminated(); // TODO try this tomorrow!
+    // this will terminate the process if another reconstruction is started,
+    // thus not allowing to have multiple reconstructions running at the same
+    // time
+    emit terminated();
   }
 
 public slots:
@@ -65,6 +63,8 @@ public slots:
     // queue up object deletion
     m_worker->deleteLater();
     emit workerFinished();
+    // DEBUG :: this segfaults
+    this->deleteLater();
   }
 
   void readWorkerStdOut() const {
@@ -88,7 +88,7 @@ signals:
   void stdErrReady(const QString &s) const;
 
 private:
-  TomographyProcess *m_worker;
+  TomographyProcess *const m_worker;
 };
 } // CustomInterfaces
 } // MantidQt

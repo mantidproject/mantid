@@ -612,8 +612,8 @@ void TomographyIfacePresenter::setupAndRunLocalReconstruction(
           SLOT(readWorkerStdErr(QString)));
 
   // remove the user confirmation for running recon, if the recon has finished
-  connect(m_workerThread.get(), SIGNAL(workerFinished()), this,
-          SLOT(workerFinished()));
+  connect(m_workerThread.get(), SIGNAL(workerFinished(int)), this,
+          SLOT(workerFinished(int)));
 
   connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
 
@@ -624,7 +624,10 @@ void TomographyIfacePresenter::setupAndRunLocalReconstruction(
 
 /** Simply reset the switch that tracks if a recon is running
 */
-void TomographyIfacePresenter::workerFinished() { m_reconRunning = false; }
+void TomographyIfacePresenter::workerFinished(int exitCode) {
+  m_reconRunning = false;
+  m_model->updateProcessInJobList(m_runningProcessPID, exitCode);
+}
 
 void TomographyIfacePresenter::reconProcessFailedToStart() {
   m_view->userError("Reconstruction failed to start",
@@ -638,12 +641,13 @@ void TomographyIfacePresenter::addProcessToJobList() {
   auto runnable = worker->getRunnable();
   auto args = worker->getArgs();
 
+  m_runningProcessPID = pid;
+
   m_model->addJobToStatus(pid, runnable, args);
   processRefreshJobs();
 }
 
 void TomographyIfacePresenter::readWorkerStdOut(const QString &s) {
-  // TODO test if works
   m_model->logMsg(s.toStdString());
 }
 

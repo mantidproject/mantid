@@ -106,7 +106,7 @@ protected slots:
   void readWorkerStdErr(const QString &s);
   void addProcessToJobList();
   void reconProcessFailedToStart();
-  void workerFinished();
+  void workerFinished(int exitCode);
 
 private:
   void setupAndRunLocalReconstruction(const std::string &runnable,
@@ -155,6 +155,8 @@ private:
   QThread *m_keepAliveThread;
 
   std::unique_ptr<TomographyThread> m_workerThread;
+  /// Holder for the current running process' PID
+  qint64 m_runningProcessPID;
 
   std::unique_ptr<TomoToolConfigDialogBase> m_configDialog;
 
