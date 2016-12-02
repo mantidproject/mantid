@@ -36,7 +36,12 @@ def _open_yaml_file(file_path):
 def _find_dictionary_key(dict_to_search, run_number):
 
     for key in dict_to_search:
-        # if _key_is_unbounded(key):  # Have an unbounded run don't generate numbers
+        if _key_is_unbounded(key):  # Have an unbounded run don't generate numbers
+            split_key = str(key).split('-')
+            lower_key_bound = int(split_key[-2])
+            if run_number > lower_key_bound:
+                return key
+
         generated_runs = isis_powder.routines.common.generate_run_numbers(run_number_string=key)
         if run_number in generated_runs:
             return key
