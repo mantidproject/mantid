@@ -1,10 +1,11 @@
-#ifndef MANTID_CURVEFITTING_LINEARBACKGROUND_H_
-#define MANTID_CURVEFITTING_LINEARBACKGROUND_H_
+#ifndef MANTID_CURVEFITTING_LINEAR_H_
+#define MANTID_CURVEFITTING_LINEAR_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
+#include <boost/scoped_array.hpp>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -13,7 +14,7 @@ namespace Functions {
 Provide linear function interface to IFunction.
 I.e. the function: A0+A1*x.
 
-LinearBackground parameters:
+Linear parameters:
 <UL>
 <LI> A0 - coefficient for constant term (default 0.0)</LI>
 <LI> A1 - coefficient for linear term (default 0.0)</LI>
@@ -43,27 +44,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LinearBackground : public BackgroundFunction {
+class DLLExport Linear : public BackgroundFunction {
 public:
-  /// overwrite IFunction base class methods
-  std::string name() const override { return "LinearBackground"; }
+  /// overwrite IFunction1D base class methods
+  std::string name() const override { return "Linear"; }
+
   void function1D(double *out, const double *xValues,
                   const size_t nData) const override;
-  void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData) override;
+  void derivative1D(double *out, const double *xValues,
+                    const size_t nData,
+                    const size_t order = 1) const override;
 
-  void fit(const std::vector<double> &X, const std::vector<double> &Y) override;
+  /// Set a value to attribute attName
+  void setAttribute(const std::string &attName, const Attribute &) override;
 
 protected:
-  /// overwrite IFunction base class method, which declare function parameters
+  /// overwrite IFunction base class method, which declares function parameters
   void init() override;
-  /// Calculate histogram data.
-  void histogram1D(double *out, double left, const double *right,
-                   const size_t nBins) const override;
-  /// Devivatives of the histogram.
-  void histogramDerivative1D(API::Jacobian *jacobian, double left,
-                             const double *right,
-                             const size_t nBins) const override;
 };
 
 } // namespace Functions
