@@ -42,6 +42,13 @@ New
 Improved
 ########
 
+- The `Peak Radius` global setting for 1D peaks that limits the interval on which they are calculated is replaced with `PeakRadius` property of the :ref:`Fit <algm-Fit>` algorithm (see algorithm's description for the details).
+
+.. figure:: ../../images/NoPeakRadius_3.9.png
+   :class: screenshot
+   :width: 550px
+
+
 Python
 ------
 
