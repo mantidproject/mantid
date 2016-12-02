@@ -1985,6 +1985,47 @@ public:
     TS_ASSERT_DELTA(out->getParameter("A2"), 1.0, 0.0001);
   }
 
+  void test_PeakRadius() {
+    size_t nbins = 100;
+    auto ws =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, nbins, nbins);
+    FunctionDomain1DVector x(-10, 10, nbins);
+    ws->dataX(0) = x.toVector();
+    {
+      Fit fit;
+      fit.initialize();
+      fit.setProperty("Function", "name=Lorentzian,Amplitude=5,FWHM=1");
+      fit.setProperty("InputWorkspace", ws);
+      fit.setProperty("MaxIterations", 0);
+      fit.setProperty("Output", "out");
+      fit.execute();
+      auto res = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out_Workspace");
+      auto y = res->y(1);
+      TS_ASSERT_DIFFERS(y.front(), 0.0);
+      TS_ASSERT_DIFFERS(y.back(), 0.0);
+    }
+    {
+      Fit fit;
+      fit.initialize();
+      fit.setProperty("Function", "name=Lorentzian,Amplitude=5,FWHM=1");
+      fit.setProperty("InputWorkspace", ws);
+      fit.setProperty("PeakRadius", 5);
+      fit.setProperty("MaxIterations", 0);
+      fit.setProperty("Output", "out");
+      fit.execute();
+      auto res = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out_Workspace");
+      auto y = res->y(1);
+      for(size_t i = 0; i < 25; ++i) {
+        TS_ASSERT_EQUALS(y[i], 0.0);
+        TS_ASSERT_EQUALS(y[nbins-i-1], 0.0);
+      }
+      TS_ASSERT_DIFFERS(y[26], 0.0);
+      TS_ASSERT_DIFFERS(y[26], 0.0);
+    }
+
+    AnalysisDataService::Instance().clear();
+  }
+
 private:
   /// build test input workspaces for the Pawley function Fit tests
   MatrixWorkspace_sptr getWorkspacePawley(const std::string &functionString,
