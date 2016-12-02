@@ -43,7 +43,8 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
                              const API::FunctionValues &centresAndIntensities,
                              const std::vector<double> &xVec,
                              const std::vector<double> &yVec,
-                             double fwhmVariation, double defaultFWHM);
+                             double fwhmVariation, double defaultFWHM,
+                             size_t nRequiredPeaks, bool fixAllPeaks);
 size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
                               const API::FunctionValues &centresAndIntensities,
                               size_t nOriginalPeaks, size_t iFirst,
@@ -51,6 +52,7 @@ size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
                               const std::vector<double> &yVec,
                               double fwhmVariation);
 size_t calculateNPeaks(const API::FunctionValues &centresAndIntensities);
+size_t calculateMaxNPeaks(size_t nPeaks);
 
 } // namespace CrystalFieldUtils
 } // namespace Functions
