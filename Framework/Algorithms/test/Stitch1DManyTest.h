@@ -51,12 +51,12 @@ private:
 
     MatrixWorkspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 2, nbins + 1, nbins);
-    ws->dataX(0) = xData1;
-    ws->dataX(1) = xData2;
-    ws->dataY(0) = yData1;
-    ws->dataY(1) = yData2;
-    ws->dataE(0) = eData1;
-    ws->dataE(1) = eData2;
+    ws->mutableX(0) = xData1;
+    ws->mutableX(1) = xData2;
+    ws->mutableY(0) = yData1;
+    ws->mutableY(1) = yData2;
+    ws->mutableE(0) = eData1;
+    ws->mutableE(1) = eData2;
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
 
     return ws;
@@ -187,18 +187,18 @@ public:
     auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
-    TS_ASSERT_DELTA(stitched->readY(0)[0], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[9], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[16], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[0], 2, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[9], 2, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[16], 2, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[0], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[9], 0.77919, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[16], 1.24316, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[0], 1.41421, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[9], 1.10982, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[16], 1.79063, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[0], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[9], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[16], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[0], 2, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[9], 2, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[16], 2, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[0], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[9], 0.77919, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[16], 1.24316, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[0], 1.41421, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[9], 1.10982, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[16], 1.79063, 0.00001);
 
     // Test out sclae factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
@@ -221,8 +221,8 @@ public:
     alg2.execute();
     MatrixWorkspace_sptr stitched2 = alg2.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(stitched->readX(0), stitched2->readX(0));
-    TS_ASSERT_EQUALS(stitched->readY(0), stitched2->readY(0));
-    TS_ASSERT_EQUALS(stitched->readE(0), stitched2->readE(0));
+    TS_ASSERT_EQUALS(stitched->y(0).rawData(), stitched2->y(0).rawData());
+    TS_ASSERT_EQUALS(stitched->e(0).rawData(), stitched2->e(0).rawData());
 
     // Remove workspaces from ADS
     AnalysisDataService::Instance().remove("ws1");
@@ -256,25 +256,25 @@ public:
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values
-    TS_ASSERT_DELTA(stitched->readY(0)[0], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[9], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[16], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[24], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[0], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[9], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[16], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[24], 1, 0.00001);
     // Second spectrum, Y values
-    TS_ASSERT_DELTA(stitched->readY(1)[0], 2, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[9], 2, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[16], 2, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[24], 2, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[0], 2, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[9], 2, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[16], 2, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[24], 2, 0.00001);
     // First spectrum, E values
-    TS_ASSERT_DELTA(stitched->readE(0)[0], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[9], 0.77919, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[16], 0.90865, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[24], 1.33144, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[0], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[9], 0.77919, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[16], 0.90865, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[24], 1.33144, 0.00001);
     // Second spectrum, E values
-    TS_ASSERT_DELTA(stitched->readE(1)[0], 1.41421, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[9], 1.10982, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[16], 1.33430, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[24], 2.00079, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[0], 1.41421, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[9], 1.10982, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[16], 1.33430, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[24], 2.00079, 0.00001);
 
     // Test out sclae factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
@@ -336,21 +336,21 @@ public:
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values
-    TS_ASSERT_DELTA(stitched->readY(0)[0], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[10], 0.55000, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[18], 0.75000, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[0], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[10], 0.55000, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[18], 0.75000, 0.00001);
     // Second spectrum, Y values
-    TS_ASSERT_DELTA(stitched->readY(1)[0], 2, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[10], 1.05000, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[18], 1.25000, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[0], 2, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[10], 1.05000, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[18], 1.25000, 0.00001);
     // First spectrum, E values
-    TS_ASSERT_DELTA(stitched->readE(0)[0], 1.00000, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[10], 0.52440, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[18], 0.61237, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[0], 1.00000, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[10], 0.52440, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[18], 0.61237, 0.00001);
     // Second spectrum, E values
-    TS_ASSERT_DELTA(stitched->readE(1)[0], 1.41421, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[10], 0.72457, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[18], 0.79057, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[0], 1.41421, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[10], 0.72457, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[18], 0.79057, 0.00001);
 
     // Test out sclae factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
@@ -432,25 +432,25 @@ public:
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values
-    TS_ASSERT_DELTA(stitched->readY(0)[0], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[9], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[16], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[24], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[0], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[9], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[16], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[24], 1, 0.00001);
     // Second spectrum, Y values
-    TS_ASSERT_DELTA(stitched->readY(1)[0], 2, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[9], 2, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[16], 2, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[24], 2, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[0], 2, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[9], 2, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[16], 2, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[24], 2, 0.00001);
     // First spectrum, E values
-    TS_ASSERT_DELTA(stitched->readE(0)[0], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[9], 0.77919, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[16], 0.90865, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[24], 1.33144, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[0], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[9], 0.77919, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[16], 0.90865, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[24], 1.33144, 0.00001);
     // Second spectrum, E values
-    TS_ASSERT_DELTA(stitched->readE(1)[0], 1.41421, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[9], 1.10982, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[16], 1.33430, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[24], 2.00079, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[0], 1.41421, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[9], 1.10982, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[16], 1.33430, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[24], 2.00079, 0.00001);
 
     // Test out sclae factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
@@ -507,42 +507,42 @@ public:
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
     // First spectrum, Y values
-    TS_ASSERT_DELTA(stitched->readY(0)[0], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[9], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[16], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[0], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[9], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[16], 1, 0.00001);
     // Second spectrum, Y values
-    TS_ASSERT_DELTA(stitched->readY(1)[0], 2, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[9], 2, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[16], 2, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[0], 2, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[9], 2, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[16], 2, 0.00001);
     // First spectrum, E values
-    TS_ASSERT_DELTA(stitched->readE(0)[0], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[9], 0.77919, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[16], 1.24316, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[0], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[9], 0.77919, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[16], 1.24316, 0.00001);
     // Second spectrum, E values
-    TS_ASSERT_DELTA(stitched->readE(1)[0], 1.41421, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[9], 1.10982, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[16], 1.79063, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[0], 1.41421, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[9], 1.10982, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[16], 1.79063, 0.00001);
 
     // Second item in the output group
     stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
     // First spectrum, Y values
-    TS_ASSERT_DELTA(stitched->readY(0)[0], 1.5, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[9], 1.5, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[16], 1.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[0], 1.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[9], 1.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[16], 1.5, 0.00001);
     // Second spectrum, Y values
-    TS_ASSERT_DELTA(stitched->readY(1)[0], 2.5, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[9], 2.5, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[16], 2.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[0], 2.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[9], 2.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[16], 2.5, 0.00001);
     // First spectrum, E values
-    TS_ASSERT_DELTA(stitched->readE(0)[0], 1.22474, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[9], 0.95883, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[16], 1.54110, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[0], 1.22474, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[9], 0.95883, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[16], 1.54110, 0.00001);
     // Second spectrum, E values
-    TS_ASSERT_DELTA(stitched->readE(1)[0], 1.58114, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[9], 1.24263, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[16], 2.00959, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[0], 1.58114, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[9], 1.24263, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[16], 2.00959, 0.00001);
 
     // Test out sclae factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
@@ -605,42 +605,42 @@ public:
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
     // First spectrum, Y values
-    TS_ASSERT_DELTA(stitched->readY(0)[0], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[9], 0.64705, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[16], 0.55000, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[0], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[9], 0.64705, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[16], 0.55000, 0.00001);
     // Second spectrum, Y values
-    TS_ASSERT_DELTA(stitched->readY(1)[0], 2, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[9], 1.24752, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[16], 1.05000, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[0], 2, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[9], 1.24752, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[16], 1.05000, 0.00001);
     // First spectrum, E values
-    TS_ASSERT_DELTA(stitched->readE(0)[0], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[9], 0.46442, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[16], 0.52440, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[0], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[9], 0.46442, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[16], 0.52440, 0.00001);
     // Second spectrum, E values
-    TS_ASSERT_DELTA(stitched->readE(1)[0], 1.41421, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[9], 0.64485, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[16], 0.72456, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[0], 1.41421, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[9], 0.64485, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[16], 0.72456, 0.00001);
 
     // Second item in the output group
     stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 17);
     // First spectrum, Y values
-    TS_ASSERT_DELTA(stitched->readY(0)[0], 1.5, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[9], 0.94736, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[16], 0.8, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[0], 1.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[9], 0.94736, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[16], 0.8, 0.00001);
     // Second spectrum, Y values
-    TS_ASSERT_DELTA(stitched->readY(1)[0], 2.5, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[9], 1.54762, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[16], 1.3, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[0], 2.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[9], 1.54762, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[16], 1.3, 0.00001);
     // First spectrum, E values
-    TS_ASSERT_DELTA(stitched->readE(0)[0], 1.22474, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[9], 0.56195, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(0)[16], 0.63245, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[0], 1.22474, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[9], 0.56195, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[16], 0.63245, 0.00001);
     // Second spectrum, E values
-    TS_ASSERT_DELTA(stitched->readE(1)[0], 1.58114, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[9], 0.71824, 0.00001);
-    TS_ASSERT_DELTA(stitched->readE(1)[16], 0.80622, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[0], 1.58114, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[9], 0.71824, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[16], 0.80622, 0.00001);
 
     // Test out sclae factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
@@ -678,13 +678,13 @@ public:
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values
-    TS_ASSERT_DELTA(stitched->readY(0)[0], 1.5, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[10], 1.5, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(0)[18], 1.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[0], 1.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[10], 1.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[18], 1.5, 0.00001);
     // Second spectrum, Y values
-    TS_ASSERT_DELTA(stitched->readY(1)[0], 2.5, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[10], 2.5, 0.00001);
-    TS_ASSERT_DELTA(stitched->readY(1)[18], 2.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[0], 2.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[10], 2.5, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[18], 2.5, 0.00001);
 
     // Test out sclae factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
