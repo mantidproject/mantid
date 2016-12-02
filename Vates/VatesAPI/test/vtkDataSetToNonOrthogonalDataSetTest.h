@@ -17,7 +17,6 @@
 #include "MantidKernel/MDUnit.h"
 
 #include "MantidVatesAPI/vtkRectilinearGrid_Silent.h"
-#include "MockObjects.h"
 #include <vtkDataArray.h>
 #include <vtkFieldData.h>
 #include <vtkFloatArray.h>
@@ -34,7 +33,6 @@ using namespace Mantid::VATES;
 
 class vtkDataSetToNonOrthogonalDataSetTest : public CxxTest::TestSuite {
 private:
-  MockProgressAction progress;
   std::string
   createMantidWorkspace(bool nonUnityTransform, bool wrongCoords = false,
                         bool forgetUB = false, bool forgetWmat = false,

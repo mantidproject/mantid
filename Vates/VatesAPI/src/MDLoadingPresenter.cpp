@@ -38,6 +38,7 @@ void MDLoadingPresenter::setDefaultCOBandBoundaries(vtkDataSet *visualDataSet) {
  * @param visualDataSet: the vtk visual data set to which the transformation
  * will be applied
  * @param workspaceProvider: the provider of the underlying workspace
+ * @param optional progress reporting.
  */
 void MDLoadingPresenter::makeNonOrthogonal(
     vtkDataSet *visualDataSet,
