@@ -9,28 +9,19 @@
 Description
 -----------
 
-This algorithm takes a list of spectra and for each spectrum 
-calculates an average count rate in a region, usually a region when 
-there are only background neutrons. This count rate is then 
-subtracted from the counts in all the spectrum's bins. However, no 
-bin will take a negative value as bins with count rates less than 
-the background are set to zero (and their error is set to the 
-backgound value).
+This algorithm calculates the backgrounds for the histograms in a workspace. The backgrounds can be returned as-is, or directly subtracted from the input workspace depending on *OutputMode*.
 
-The average background count rate is estimated in one of three ways. 
-When *Mode* is set to "Mean" it is the sum of the values in the bins 
-in the background region divided by the width of the X range. 
-Selecting "Linear Fit" sets the background value to the height in 
-the centre of the background region of a line of best fit through 
-that region. The "Averaging Window" *Mode* in turn calculates a 
-moving window average over each spectrum and takes the minimum as 
-the background. The values of the bins half-*AveragingWindowWidth* 
-from the beginning and end of a spectrum are taken as-is.
+There are three modes of operation: **Linear Fit** fits a line to the range specified by *StartX* and *EndX* and uses the mid-point as the background. **Mean** calculates the mean in same range. Finally, **Moving Average** calculates a rolling average with cyclic boundary conditions over the histograms of the input workspace. Width of the averaging window can be specified by *AveragingWindowWidth*.
 
-The error on the background value is only calculated when "Mean" is
-used. It is the errors in all the bins in the background region summed
-in quadrature divided by the number of bins. This background error value
-is added in quadrature to the errors in each bin.
+The error of the background is only calculated when **Mean** or **Moving Average** is used. It is the errors in all the bins in the background region or averaging window, summed in quadrature and divided by the number of bins. This background error value is added in quadrature to the errors in each bin of the input workspace if **Subtract Background** is specified, otherwise returned in the background workspace.
+
+If *NullifyNegativeValues* is true, the background is set to the corresponding y value for the bins/points which would become negative when the background is subtracted. In these cases, the errors are set to either the background value or to the original error, whichever is greater.
+
+.. note::
+   Generally, using **Subtract Background** directly or subtracting the returned background manually later produces the same end result. This is not true, however, for the errors if *NullifyNegativeValues* is set. In this case **Subtract Background** will set the errors for the otherwise negative y values either to the background value or to the original error, whereas manual subtraction will add the background errors to the original ones in quadrature.
+
+.. note::
+   Care should be taken when subtracting the returned background from other workspaces than the input workspace if *NullifyNegativeValues* is set. For backgrounds corresponding to the y value which would be zeroed, this algorithm returns the original y values instead of the actual background.
 
 Usage
 -----
@@ -75,13 +66,20 @@ Output:
                                     Mode='Mean',
                                     OutputMode='Return Background')
 
+   # Note how some bins in the output workspace will be different from
+   # 3 (even negative!). By default, NullifyNegativeValues will be set
+   # to true, and subtracting the output from the input workspace will
+   # set these bins to zero.
    print 'Calculated Mean background:', np.around(output.readY(0))
+   subtracted = input - output
+   print 'Background subtracted:', np.around(subtracted.readY(0))
 
 Output:
 
 .. testoutput:: ExReturnMean
 
-   Calculated Mean background: [ 3.  3.  3.  3.  3.]
+   Calculated Mean background: [ 3.  3.  2.  3. -3.]
+   Background subtracted: [ 0.  1.  0.  0.  0.]
 
 **Example - Returning background using Moving Average (using a histogram):**
 
